@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.251 2004/04/14 14:16:52 jz Exp $
+// $Id: spooler_task.cxx,v 1.252 2004/05/20 16:10:33 jz Exp $
 /*
     Hier sind implementiert
 
@@ -397,9 +397,7 @@ void Task::cmd_end( bool kill_immediately )
 
 void Task::cmd_nice_end( Job* for_job )
 {
-    //if( for_job )  
-        _log.debug( "Task wird dem Job " + for_job->name() + " zugunsten beendet" );
-    //         else  _log.debug( "Task wird einem anderen Job zugunsten beendet" );
+    _log.debug( "Task wird dem Job " + for_job->name() + " zugunsten beendet" );
 
     cmd_end();
 }

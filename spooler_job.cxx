@@ -1,4 +1,4 @@
-// $Id: spooler_job.cxx,v 1.77 2004/05/12 10:31:03 jz Exp $
+// $Id: spooler_job.cxx,v 1.78 2004/05/20 16:10:33 jz Exp $
 // §851: Weitere Log-Ausgaben zum Scheduler-Start eingebaut
 /*
     Hier sind implementiert
@@ -1209,6 +1209,7 @@ Sos_ptr<Task> Job::task_to_start()
         {
             bool notify = _waiting_for_process_try_again;                           // Sind wir mit notify_a_process_is_idle() benachrichtigt worden?
             remove_waiting_job_from_process_list();
+            //test 18.5.04 calculate_next_time( now );
             if( notify )  _module._process_class->notify_a_process_is_idle();       // Dieser Job braucht den Prozess nicht mehr. Also nächsten Job benachrichtigen!
         }
     }
