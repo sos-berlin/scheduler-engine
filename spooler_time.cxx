@@ -1,4 +1,4 @@
-// $Id: spooler_time.cxx,v 1.16 2002/06/18 07:35:46 jz Exp $
+// $Id: spooler_time.cxx,v 1.17 2002/06/21 09:03:29 jz Exp $
 /*
     Hier sind implementiert
 
@@ -403,7 +403,6 @@ void Day_set::set_xml( const xml::Element_ptr& element, const Day* default_day, 
 
 void Run_time::set_default()
 {
-
 }
 
 //-----------------------------------------------------------------------Run_time::set_default_days
@@ -493,7 +492,7 @@ void Run_time::set_xml( const xml::Element_ptr& element )
         }
     }
 
-    if( !a_day_set )  set_default_days();
+    if( !a_day_set )  for( int i = 0; i < 7; i++ )  _weekday_set._days[i] = default_day;
 }
 
 //---------------------------------------------------------------------------Run_time::first_period

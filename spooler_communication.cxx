@@ -1,4 +1,4 @@
-// $Id: spooler_communication.cxx,v 1.29 2002/04/11 05:46:48 jz Exp $
+// $Id: spooler_communication.cxx,v 1.30 2002/06/21 09:03:29 jz Exp $
 /*
     Hier sind implementiert
 
@@ -10,6 +10,7 @@
 
 #include "../kram/sos.h"
 #include "spooler.h"
+#include "../kram/sossock.h"
 
 #ifdef SYSTEM_WIN
     const int ENOTSOCK = 10038;
@@ -32,6 +33,18 @@ int get_errno()
 #    else
         return errno;
 #   endif
+}
+
+//---------------------------------------------------------------------------------------set_linger
+
+void set_linger( SOCKET socket )
+{
+    struct linger l; 
+    
+    l.l_onoff  = 0; 
+    l.l_linger = 0;
+
+    setsockopt( socket, SOL_SOCKET, SO_LINGER, (const char*)&l, sizeof l );
 }
 
 //-------------------------------------------------------------------------------------is_ip_number
@@ -246,11 +259,11 @@ bool Communication::Channel::do_accept( SOCKET listen_socket )
         _socket = accept( listen_socket, (struct sockaddr*)&peer_addr, &peer_addr_len );
         if( _socket == SOCKET_ERROR )  throw_sos_socket_error( "accept" );
 
+        set_linger( _socket );
+
         _host = peer_addr.sin_addr;
         _log.set_prefix( "TCP-Verbindung mit " + _host.as_string() );
 
-        struct linger l; l.l_onoff=0; l.l_linger=0;
-        setsockopt( _socket, SOL_SOCKET, SO_LINGER, (const char*)&l, sizeof l );
 
         if( _spooler->security_level( _host ) <= Security::seclev_signal )
         {
@@ -328,7 +341,7 @@ bool Communication::Channel::do_send()
     {
         if( _send_is_complete )  _send_progress = 0, _send_is_complete = false;     // Am Anfang
 
-        int len = send( _socket, _text.c_str() + _send_progress, _text.length() - _send_progress, 0 );
+        int len = ::send( _socket, _text.c_str() + _send_progress, _text.length() - _send_progress, 0 );
         if( len < 0 ) {
             if( get_errno() == EAGAIN )  return true;
             throw_sos_socket_error( "send" );
@@ -384,6 +397,7 @@ void Communication::close( double wait_time )
 
         _channel_list.clear();
         closesocket( _listen_socket );
+        closesocket( _udp_socket );
 
         _terminate = true;
     }
@@ -418,6 +432,7 @@ void Communication::bind()
         _udp_socket = socket( AF_INET, SOCK_DGRAM, 0 );
         if( _udp_socket == SOCKET_ERROR )  throw_sos_socket_error( "socket" );
 
+        set_linger( _udp_socket );
       //setsockopt( _udp_socket, SOL_SOCKET, SO_REUSEADDR, (const char*)&true_, sizeof true_ );
 
         sa.sin_port        = htons( _spooler->udp_port() );
@@ -454,6 +469,7 @@ void Communication::bind()
         _listen_socket = socket( AF_INET, SOCK_STREAM, 0 );
         if( _listen_socket == SOCKET_ERROR )  throw_sos_socket_error( "socket" );
 
+        set_linger( _listen_socket );
       //setsockopt( _listen_socket, SOL_SOCKET, SO_REUSEADDR, (const char*)&true_, sizeof true_ );
 
         sa.sin_port        = htons( _spooler->tcp_port() );

@@ -1,4 +1,4 @@
-// $Id: spooler_service.cxx,v 1.23 2002/06/16 14:22:13 jz Exp $
+// $Id: spooler_service.cxx,v 1.24 2002/06/21 09:03:29 jz Exp $
 /*
     Hier sind implementiert
 
@@ -430,7 +430,7 @@ static uint __stdcall service_thread( void* param )
         {
             set_service_status( 0, SERVICE_PAUSED );     // Das schaltet die Diensteknöpfe frei, falls der Spooler beim eMail-Versand hängt.
             event_log( x.what(), p->_argc, p->_argv );
-            set_service_status( 2 );
+          //set_service_status( 2 );
             spooler._log.error( x.what() );
             spooler_ptr = NULL;
             ret = 99;
