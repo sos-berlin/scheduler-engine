@@ -1,4 +1,4 @@
-// $Id: spooler.h,v 1.178 2004/03/26 18:09:08 jz Exp $
+// $Id: spooler.h,v 1.179 2004/03/29 02:13:49 jz Exp $
 
 #ifndef __SPOOLER_H
 #define __SPOOLER_H
@@ -110,7 +110,14 @@ namespace spooler {
 
 extern const char*              temporary_process_class_name;
 
-static const int                max_processes = 1024;       // Wird zurzeit nur von register_process_handle() gebraucht und ist nicht kritisch
+
+#ifdef Z_WINDOWS
+    const int                   max_processes               = 50;       // Summe aller Handles darf MAXIMUM_WAIT_OBJECTS-1=63 nicht überschreiten
+    const int                   max_communication_channels  = 5;        // Summe aller Handles darf MAXIMUM_WAIT_OBJECTS-1=63 nicht überschreiten
+#else
+    const int                   max_processes               = 1000;     // kein Limit (HP-UX erlaubt 64 aktive fork())
+    const int                   max_communication_channels  = 1000;     // kein Limit 
+#endif
 
 //-------------------------------------------------------------------------------------------------
 
@@ -385,6 +392,7 @@ struct Spooler
     ptr<object_server::Connection_manager>  _connection_manager;
 
     bool                       _executing_command;          // true: spooler_history wartet nicht auf Datenbank (damit Scheduler nicht blockiert)
+    int                        _process_count;
     Process_handle             _process_handles[ max_processes ];   // Für abort_immediately(), mutex-frei alle abhängigen Prozesse
     int                        _pids[ max_processes ];              // Für abort_immediately(), mutex-frei alle Task.add_pid(), Subprozesse der Tasks
   private:
@@ -424,7 +432,7 @@ struct Spooler
 
     Process_class_list         _process_class_list;
     Process_list               _process_list;
-    int                        _process_count_max;
+  //int                        _process_count_max;
 
 
     Job*                       _next_job;

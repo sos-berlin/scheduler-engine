@@ -1,4 +1,4 @@
-// $Id: spooler_thread.h,v 1.53 2003/12/30 13:53:30 jz Exp $
+// $Id: spooler_thread.h,v 1.54 2004/03/29 02:13:50 jz Exp $
 
 #ifndef __SPOOLER_THREAD_H
 #define __SPOOLER_THREAD_H
@@ -69,7 +69,7 @@ struct Spooler_thread : zschimmer::Thread
 
 
 
-    Wait_handles               _wait_handles;
+  //Wait_handles               _wait_handles;
     Task*                      _current_task;               // Task, die gerade einen Schritt tut
     bool                       _free_threading;
 

@@ -1,4 +1,4 @@
-// $Id: spooler_thread.cxx,v 1.112 2004/03/23 11:26:54 jz Exp $
+// $Id: spooler_thread.cxx,v 1.113 2004/03/29 02:13:50 jz Exp $
 /*
     Hier sind implementiert
 
@@ -22,7 +22,7 @@ Spooler_thread::Spooler_thread( Spooler* spooler )
     _zero_(this+1),
     _spooler(spooler),
     _log(spooler),
-    _wait_handles(spooler,&_log),
+  //_wait_handles(spooler,&_log),
     _lock( "Spooler_thread" )
   //_module(spooler,&_log)
 {
@@ -46,7 +46,7 @@ Spooler_thread::~Spooler_thread()
     catch(const exception& x ) { _log.error( x.what() ); }
     
     _my_event.close();
-    _wait_handles.close();
+  //_wait_handles.close();
     _task_list.clear();
 }
 
@@ -271,7 +271,7 @@ Task* Spooler_thread::get_next_task()
 }
 
 //-----------------------------------------------------------------------------Spooler_thread::wait
-
+/*
 void Spooler_thread::wait()
 {
     string msg;
@@ -304,7 +304,7 @@ void Spooler_thread::wait()
 
     _next_time = 0;
 }
-
+*/
 //------------------------------------------------------------------Spooler_thread::any_tasks_there
 /*
 bool Spooler_thread::any_tasks_there()
@@ -599,10 +599,12 @@ bool Spooler_thread::process()
 }
 
 //----------------------------------------------------------------------Spooler_thread::thread_main
-
 int Spooler_thread::thread_main()
 {
     int             ret = 1;
+
+/*
+
     Ole_initialize  ole;
 
     _my_event.set_name( "Thread " + _name );
@@ -659,6 +661,7 @@ int Spooler_thread::thread_main()
     
     _terminated = true;
     _spooler->signal( "Thread " + _name + " beendet sich" );
+*/
 
     return ret;
 }

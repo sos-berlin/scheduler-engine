@@ -1,4 +1,4 @@
-// $Id: spooler_wait.h,v 1.48 2004/02/19 17:17:33 jz Exp $
+// $Id: spooler_wait.h,v 1.49 2004/03/29 02:13:50 jz Exp $
 
 #ifndef __SPOOLER_WAIT_H
 #define __SPOOLER_WAIT_H
@@ -63,7 +63,7 @@ struct Wait_handles : Non_cloneable
     void                        remove                      ( System_event* );
 
 #ifdef Z_WINDOWS
-    void                        add_handle                  ( HANDLE );
+    void                        add_handle                  ( HANDLE ); //, System_event* = NULL );
   //void                        remove_handle               ( HANDLE, zschimmer::Event* for_internal_use_only = NULL );
     HANDLE                      operator []                 ( int index )                           { return _handles[index]; }
 #endif

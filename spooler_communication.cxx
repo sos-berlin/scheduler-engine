@@ -1,4 +1,4 @@
-// $Id: spooler_communication.cxx,v 1.79 2004/01/28 15:23:09 jz Exp $
+// $Id: spooler_communication.cxx,v 1.80 2004/03/29 02:13:50 jz Exp $
 /*
     Hier sind implementiert
 
@@ -258,10 +258,18 @@ bool Communication::Listen_socket::async_continue_( bool wait )
         bool ok = new_channel->do_accept( _read_socket );
         if( ok )
         {
-            _communication->_channel_list.push_back( new_channel );
+            if( _communication->_channel_list.size() >= max_communication_channels )
+            {
+                LOG( "Mehr als " << max_communication_channels << " Kommunikationskanäle. Verbindung abgelehnt.\n" );
+            }
+            else
+            {
+                _communication->_channel_list.push_back( new_channel );
 
-            new_channel->add_to_socket_manager( _spooler->_connection_manager );
-            new_channel->socket_expect_signals( Socket_operation::sig_read | Socket_operation::sig_write | Socket_operation::sig_except );
+                new_channel->add_to_socket_manager( _spooler->_connection_manager );
+                new_channel->socket_expect_signals( Socket_operation::sig_read | Socket_operation::sig_write | Socket_operation::sig_except );
+            }
+
             something_done = true;
         }
     }
@@ -491,13 +499,13 @@ bool Communication::Channel::do_send()
 
       //do
       //{
-            LOG2( "socket.send", "send/write(" << _write_socket << "," << c << " bytes)\n" );
             int len = _write_socket == STDOUT_FILENO? write ( _write_socket, _text.c_str() + _send_progress, c )
                                                     : ::send( _write_socket, _text.c_str() + _send_progress, c, 0 );
+            err = len < 0? get_errno() : 0;
+            LOG2( "socket.send", "send/write(" << _write_socket << "," << c << " bytes) ==> " << len << "  errno=" << err << "\n" );
             if( len == 0 )  break;   // Vorsichtshalber
             if( len < 0 ) 
             {
-                err = get_errno();
                 if( err == EWOULDBLOCK )  break;
               //{
               //    _socket_manager->set_fd( Socket_manager::write_fd, _write_socket );

@@ -1,4 +1,4 @@
-// $Id: spooler_job.cxx,v 1.67 2004/03/25 10:46:11 jz Exp $
+// $Id: spooler_job.cxx,v 1.68 2004/03/29 02:13:50 jz Exp $
 /*
     Hier sind implementiert
 
@@ -1271,7 +1271,7 @@ bool Job::do_something()
 
                 if( _next_time <= now )
                 {
-                    LOG( obj_name() << ".do_something()  Nichts getan. state=" << state_name() << ", _next_time= " << _next_time << ", wird verzögert\n" );
+                    LOG( obj_name() << ".do_something()  Nichts getan. state=" << state_name() << ", _next_time=" << _next_time << ", wird verzögert\n" );
                     _next_time = Time::now() + 1;
                 }
                 else

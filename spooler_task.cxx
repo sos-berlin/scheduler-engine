@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.243 2004/03/26 18:09:08 jz Exp $
+// $Id: spooler_task.cxx,v 1.244 2004/03/29 02:13:50 jz Exp $
 /*
     Hier sind implementiert
 
@@ -1001,7 +1001,6 @@ bool Task::do_something()
                                 if( _begin_called )
                                 {
                                     _operation = do_end__start();
-                                    //set_state( s_ending );
                                 }
                                 else
                                 {
@@ -1176,7 +1175,7 @@ bool Task::do_something()
 
         if( _next_time <= now )
         {
-            LOG( obj_name() << ".do_something()  Nichts getan. state=" << state_name() << ", _next_time= " << _next_time << ", wird verzögert\n" );
+            LOG( obj_name() << ".do_something()  Nichts getan. state=" << state_name() << ", _next_time=" << _next_time << ", wird verzögert\n" );
             _next_time = Time::now() + 0.1;
         }
         else
@@ -1747,14 +1746,6 @@ Process_task::Process_task( Job* job )
 
 Process_task::~Process_task()
 { 
-    if( _job )
-    {
-#       ifdef Z_WINDOWS
-            _job->_spooler->unregister_process_handle( _process_handle ); 
-#        else
-            _job->_spooler->unregister_process_handle( _process_handle._pid ); 
-#       endif
-    }
 }
 
 //----------------------------------------------------------------------Process_task::do_close__end
@@ -1764,7 +1755,16 @@ void Process_task::do_close__end()
 #ifdef Z_WINDOWS
     if( _process_handle )
 #endif
-      do_kill();
+        do_kill();
+
+    if( _job )
+    {
+#       ifdef Z_WINDOWS
+            _job->_spooler->unregister_process_handle( _process_handle ); 
+#        else
+            _job->_spooler->unregister_process_handle( _process_handle._pid ); 
+#       endif
+    }
 
     _process_handle.close();
 }
@@ -1774,6 +1774,8 @@ void Process_task::do_close__end()
 
 bool Process_task::do_begin__end()
 {
+    if( _spooler->_process_count == max_processes )  throw_xc( "SCHEDULER-210" );
+
     PROCESS_INFORMATION process_info; 
     STARTUPINFO         startup_info; 
     BOOL                ok;
@@ -1824,7 +1826,10 @@ bool Process_task::do_begin__end()
     _process_id = process_info.dwProcessId;
     _process_handle.set_handle( process_info.hProcess );
     _process_handle.set_name( "Process " + _job->_process_filename );
-    _process_handle.add_to( &_thread->_wait_handles );
+  //_process_handle.add_to( &_thread->_wait_handles );
+    _process_handle.add_to( &_spooler->_wait_handles );
+
+    _job->_spooler->register_process_handle( _process_handle ); 
 
     set_state( s_running_process );
 
@@ -1987,6 +1992,8 @@ bool Process_event::wait( double seconds )
 
 bool Process_task::do_begin__end()
 {
+    if( _spooler->_process_count == max_processes )  throw_xc( "SCHEDULER-210" );
+
     vector<string> string_args;
 
     string_args.push_back( _job->_process_filename );   // argv[0]
@@ -2045,6 +2052,8 @@ bool Process_task::do_begin__end()
 
     _process_handle.set_name( "Process " + _job->_process_filename );
     _process_handle.add_to( &_thread->_wait_handles );
+
+    _job->_spooler->register_process_handle( _process_handle._pid ); 
 
     _operation = &dummy_sync_operation;
 

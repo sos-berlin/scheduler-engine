@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.326 2004/03/26 09:06:44 jz Exp $
+// $Id: spooler.cxx,v 1.327 2004/03/29 02:13:49 jz Exp $
 /*
     Hier sind implementiert
 
@@ -640,6 +640,15 @@ bool Spooler::try_to_free_process( Job* for_job, Process_class* process_class, c
 
 void Spooler::register_process_handle( Process_handle p )
 {
+#   ifdef _DEBUG
+        for( int i = 0; i < NO_OF( _process_handles ); i++ )
+        {
+            if( _process_handles[i] == p )  throw_xc( "register_process_handle" );              // Bereits registriert
+        }
+#   endif
+
+    _process_count++;
+
     for( int i = 0; i < NO_OF( _process_handles ); i++ )
     {
         if( _process_handles[i] == 0 )  { _process_handles[i] = p;  return; }
@@ -650,10 +659,19 @@ void Spooler::register_process_handle( Process_handle p )
 
 void Spooler::unregister_process_handle( Process_handle p )
 {
-    for( int i = 0; i < NO_OF( _process_handles ); i++ )
+    if( p )
     {
-        if( _process_handles[i] == p )  { _process_handles[i] = 0;  return; }
+        _process_count--;
+
+        for( int i = 0; i < NO_OF( _process_handles ); i++ )
+        {
+            if( _process_handles[i] == p )  { _process_handles[i] = 0;  return; }
+        }
     }
+
+#   ifdef _DEBUG
+        throw_xc( "unregister_process_handle" );
+#   endif
 }
 
 //-------------------------------------------------------------------------------Task::register_pid
@@ -1786,6 +1804,7 @@ void Spooler::run()
             // spooler_communication.cxx:
             _connection_manager->async_continue();
 
+/*
 #           ifdef Z_DEBUG
                 Time earliest = Time::now(); // + 0.1;
                 if( _next_time < earliest ) 
@@ -1797,7 +1816,7 @@ void Spooler::run()
                     _next_time = earliest;
                 }
 #           endif
-
+*/
             //LOG( "spooler.cxx: something_done=" << something_done << "    process_list \n" );
         }
 
@@ -1882,7 +1901,8 @@ void Spooler::run()
         }
 */
 
-        if( !something_done  &&  _next_time > 0  &&  _state_cmd == sc_none  &&  _next_time > Time::now() )
+      //if( !something_done  &&  _next_time > 0  &&  _state_cmd == sc_none  &&  _next_time > Time::now() )   Immer wait() rufen, damit Event.signaled() gesetzt wird!
+        if(true)
         {
             //_next_time = min( _next_time, now + 10.0 );      // Wartezeit vorsichtshalber begrenzen
 
@@ -1890,7 +1910,7 @@ void Spooler::run()
             
             if( _state != Spooler::s_paused )
             {
-                if( _single_thread )  wait_handles += _single_thread->_wait_handles;
+              //if( _single_thread )  wait_handles += _single_thread->_wait_handles;
 
 #               ifdef SYSTEM_WIN
                     FOR_EACH( Process_class_list, _process_class_list, pc )
@@ -1901,10 +1921,9 @@ void Spooler::run()
                             if( server  &&  server->_process_handle )  wait_handles.add_handle( server->_process_handle );        // Signalisiert Prozessende
                         }
                     }
-
 #               endif
             }
-
+                                                                                            
 #           ifdef SYSTEM_WIN
                 // Events für spooler_communication.cxx
                 vector<z::Event*> events;

@@ -1,4 +1,4 @@
-// $Id: spooler_time.cxx,v 1.54 2004/01/29 21:06:25 jz Exp $
+// $Id: spooler_time.cxx,v 1.55 2004/03/29 02:13:50 jz Exp $
 /*
     Hier sind implementiert
 
@@ -97,21 +97,21 @@ string Time::as_string( With_ms with ) const
         return last_day_name;
     }
     else
+    if( _time == 0 )
+    {
+        return "0";
+    }
+    else
     {
         char        buff [30];
-
-        //char* old_locale = setlocale( LC_NUMERIC, "C" );
-
         const char* bruch = with == with_ms? buff + sprintf( buff, "%0.3lf", _time ) - 4
-                                        : "";
-
-        //setlocale( LC_NUMERIC, old_locale );
+                                           : "";
 
         if( _time < 100*(24*60*60) )
         {
             char hhmmss [30];
-            sprintf( hhmmss, "%02d:%02d:%02d", (int)(_time/(60*60)), (int)(_time/60) % 60, (int)_time % 60 );
-            return sos::as_string(hhmmss) + bruch;
+            sprintf( hhmmss, "%02d:%02d:%02d%s", (int)(_time/(60*60)), (int)(_time/60) % 60, (int)_time % 60, bruch );
+            return hhmmss;
         }
         else
         {

@@ -1,4 +1,4 @@
-// $Id: spooler_process.cxx,v 1.26 2003/12/09 20:44:45 jz Exp $
+// $Id: spooler_process.cxx,v 1.27 2004/03/29 02:13:50 jz Exp $
 
 #include "spooler.h"
 
@@ -12,7 +12,7 @@ using namespace object_server;
 
 Process::~Process()
 {
-    if( _connection )  _spooler->unregister_process_handle( _connection->process_handle() );
+    if( _process_handle_copy )  _spooler->unregister_process_handle( _process_handle_copy );
 }
 
 //---------------------------------------------------------------------Process::add_module_instance
@@ -81,7 +81,8 @@ void Process::start()
 
         _connection = _spooler->_connection_manager->start_process( parameters );
 
-        _spooler->register_process_handle( _connection->process_handle() );
+        _process_handle_copy = _connection->process_handle();
+        _spooler->register_process_handle( _process_handle_copy );
     }
     else
     {
@@ -261,14 +262,15 @@ Process* Process_class::select_process_if_available()
             {
                 _spooler->_log.warn( "Prozess pid=" + as_string( process->pid() ) + " wird nach Fehler entfernt" );
 
-                process->_connection->kill_process();
+                process->kill();
                 remove_process( process );
                 process = NULL;
             }
         }
 
-        if( !process  &&  _process_list.size() < _max_processes )  return new_process();
-
+        if( !process  
+         && _process_list.size()      < _max_processes  
+         && _spooler->_process_count  < max_processes  )  return new_process();
     }
 
     return process;
@@ -278,7 +280,8 @@ Process* Process_class::select_process_if_available()
 
 bool Process_class::process_available( Job* for_job )
 { 
-    if( _process_list.size() >= _max_processes )  return false;
+    if( _process_list.size()     >= _max_processes )  return false;
+    if( _spooler->_process_count >= max_processes )  return false;
 
     if( _waiting_jobs.empty() )  return true;
 

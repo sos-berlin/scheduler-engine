@@ -1,4 +1,4 @@
-// $Id: spooler_wait.cxx,v 1.97 2004/03/23 11:26:55 jz Exp $
+// $Id: spooler_wait.cxx,v 1.98 2004/03/29 02:13:50 jz Exp $
 /*
     Hier sind implementiert
 
@@ -200,12 +200,15 @@ void Wait_handles::add( System_event* event )
 //--------------------------------------------------------------------------Wait_handles::add_handle
 #ifdef Z_WINDOWS
 
-void Wait_handles::add_handle( HANDLE handle )
+void Wait_handles::add_handle( HANDLE handle ) //, System_event* event )
 {
     THREAD_LOCK( _lock )
     {
+        // Nützt nicht viel, denn spooler.exe fügt mehrere Wait_handles zusammen (mit operator +=).
+        if( _handles.size() >= MAXIMUM_WAIT_OBJECTS-1 )  throw_xc( "SCHEDULER-209", MAXIMUM_WAIT_OBJECTS-1 );   // Grenze für MsgWaitForMultipleObjects() ist 64
+
         _handles.push_back( handle );
-        _events.push_back( NULL );
+        _events.push_back( NULL );  //event );
     }
 }
 
