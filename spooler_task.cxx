@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.70 2002/03/20 11:07:48 jz Exp $
+// $Id: spooler_task.cxx,v 1.71 2002/03/21 11:50:32 jz Exp $
 /*
     Hier sind implementiert
 
@@ -1451,7 +1451,7 @@ bool Task::start()
             _job->_delay_until = 0;
 
             _job->_thread->_task_count++;
-            _job->_step_count = 0;
+          //_job->_step_count = 0;
             _job->_process_ok = false;
             _running_since = Time::now();
         }
