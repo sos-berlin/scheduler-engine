@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.268 2003/10/02 21:39:59 jz Exp $
+// $Id: spooler.cxx,v 1.269 2003/10/03 11:22:06 jz Exp $
 /*
     Hier sind implementiert
 
@@ -1806,6 +1806,7 @@ int Spooler::launch( int argc, char** argv, const string& parameter_line )
     //spooler_is_running = true;
 
     _event.set_name( "Spooler" );
+    _event.set_waiting_thread_id( current_thread_id() );
     _event.create();
     _event.add_to( &_wait_handles );
 
