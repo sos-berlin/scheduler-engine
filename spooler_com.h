@@ -1,4 +1,4 @@
-// $Id: spooler_com.h,v 1.92 2004/02/23 07:52:07 jz Exp $
+// $Id: spooler_com.h,v 1.93 2004/02/29 00:20:15 jz Exp $
 
 #ifndef __SPOOLER_COM_H
 #define __SPOOLER_COM_H
@@ -6,7 +6,7 @@
 #include <map>
 
 #include "../zschimmer/com.h"
-#include "../zschimmer/z_com_server.h"
+#include "../zschimmer/com_server.h"
 #include "../kram/com_simple_standards.h"
 #include "../kram/sysxcept.h"
 #include "../kram/sosscrpt.h"

@@ -1,4 +1,4 @@
-// $Id: spooler_com.cxx,v 1.140 2004/02/22 18:16:04 jz Exp $
+// $Id: spooler_com.cxx,v 1.141 2004/02/29 00:20:15 jz Exp $
 /*
     Hier sind implementiert
 
@@ -12,7 +12,7 @@
 #include "spooler.h"
 //#include "../hostole/hostole.h"
 #include "../zschimmer/z_com.h"
-#include "../zschimmer/z_com_server.h"
+#include "../zschimmer/com_server.h"
 
 
 using namespace zschimmer::com;
@@ -107,7 +107,7 @@ Com_error::Com_error( const Xc_copy& x )
 
 STDMETHODIMP Com_error::QueryInterface( const IID& iid, void** result )
 {
-    Z_IMPLEMENT_QUERY_INTERFACE( iid, Ihas_java_class_name, result );
+    Z_IMPLEMENT_QUERY_INTERFACE( this, iid, Ihas_java_class_name, result );
 
     return Sos_ole_object::QueryInterface( iid, result );
 }
@@ -205,7 +205,7 @@ Com_variable::Com_variable( const BSTR name, const VARIANT& value )
 
 STDMETHODIMP Com_variable::QueryInterface( const IID& iid, void** result )
 {
-    Z_IMPLEMENT_QUERY_INTERFACE( iid, Ihas_java_class_name, result );
+    Z_IMPLEMENT_QUERY_INTERFACE( this, iid, Ihas_java_class_name, result );
 
     return Sos_ole_object::QueryInterface( iid, result );
 }
@@ -283,7 +283,7 @@ Com_variable_set::Com_variable_set( const Com_variable_set& o )
 
 STDMETHODIMP Com_variable_set::QueryInterface( const IID& iid, void** result )
 {
-    Z_IMPLEMENT_QUERY_INTERFACE( iid, Ihas_java_class_name, result );
+    Z_IMPLEMENT_QUERY_INTERFACE( this, iid, Ihas_java_class_name, result );
 
     return Sos_ole_object::QueryInterface( iid, result );
 }
@@ -678,8 +678,8 @@ Com_variable_set_enumerator::Com_variable_set_enumerator()
 
 STDMETHODIMP Com_variable_set_enumerator::QueryInterface( REFIID iid, void** result )
 {                                                                    
-    Z_IMPLEMENT_QUERY_INTERFACE( iid, IEnumVARIANT            , result );
-    Z_IMPLEMENT_QUERY_INTERFACE( iid, Ivariable_set_enumerator, result );
+    Z_IMPLEMENT_QUERY_INTERFACE( this, iid, IEnumVARIANT            , result );
+    Z_IMPLEMENT_QUERY_INTERFACE( this, iid, Ivariable_set_enumerator, result );
 
 /*
     if( iid == IID_IEnumVARIANT )
@@ -815,8 +815,8 @@ Com_log::Com_log( Prefix_log* log )
 
 STDMETHODIMP Com_log::QueryInterface( const IID& iid, void** result )
 {
-    Z_IMPLEMENT_QUERY_INTERFACE( iid, Ihas_java_class_name          , result );
-    Z_IMPLEMENT_QUERY_INTERFACE( iid, Ihas_reference_with_properties, result );
+    Z_IMPLEMENT_QUERY_INTERFACE( this, iid, Ihas_java_class_name          , result );
+    Z_IMPLEMENT_QUERY_INTERFACE( this, iid, Ihas_reference_with_properties, result );
 
     return Sos_ole_object::QueryInterface( iid, result );
 }
@@ -1791,7 +1791,7 @@ Com_task::Com_task( Task* task )
 
 STDMETHODIMP Com_task::QueryInterface( const IID& iid, void** result )
 {
-    Z_IMPLEMENT_QUERY_INTERFACE( iid, Ihas_java_class_name, result );
+    Z_IMPLEMENT_QUERY_INTERFACE( this, iid, Ihas_java_class_name, result );
 
     return Sos_ole_object::QueryInterface( iid, result );
 }
@@ -2141,7 +2141,7 @@ Com_thread::Com_thread( Spooler_thread* thread )
 
 STDMETHODIMP Com_thread::QueryInterface( const IID& iid, void** result )
 {
-    Z_IMPLEMENT_QUERY_INTERFACE( iid, Ihas_java_class_name, result );
+    Z_IMPLEMENT_QUERY_INTERFACE( this, iid, Ihas_java_class_name, result );
 
     return Sos_ole_object::QueryInterface( iid, result );
 }
@@ -2256,7 +2256,7 @@ Com_spooler::Com_spooler( Spooler* spooler )
 
 STDMETHODIMP Com_spooler::QueryInterface( const IID& iid, void** result )
 {
-    Z_IMPLEMENT_QUERY_INTERFACE( iid, Ihas_java_class_name, result );
+    Z_IMPLEMENT_QUERY_INTERFACE( this, iid, Ihas_java_class_name, result );
 
     return Sos_ole_object::QueryInterface( iid, result );
 }
@@ -2683,7 +2683,7 @@ Com_job_chain::Com_job_chain( Job_chain* job_chain )
 
 STDMETHODIMP Com_job_chain::QueryInterface( const IID& iid, void** result )
 {
-    Z_IMPLEMENT_QUERY_INTERFACE( iid, Ihas_java_class_name, result );
+    Z_IMPLEMENT_QUERY_INTERFACE( this, iid, Ihas_java_class_name, result );
 
     return Sos_ole_object::QueryInterface( iid, result );
 }
@@ -2944,7 +2944,7 @@ Com_job_chain_node::Com_job_chain_node()
 
 STDMETHODIMP Com_job_chain_node::QueryInterface( const IID& iid, void** result )
 {
-    Z_IMPLEMENT_QUERY_INTERFACE( iid, Ihas_java_class_name, result );
+    Z_IMPLEMENT_QUERY_INTERFACE( this, iid, Ihas_java_class_name, result );
 
     return Sos_ole_object::QueryInterface( iid, result );
 }
@@ -3043,7 +3043,7 @@ Com_order::Com_order( Order* order )
 
 STDMETHODIMP Com_order::QueryInterface( const IID& iid, void** result )
 {
-    Z_IMPLEMENT_QUERY_INTERFACE( iid, Ihas_java_class_name, result );
+    Z_IMPLEMENT_QUERY_INTERFACE( this, iid, Ihas_java_class_name, result );
 
     return Sos_ole_object::QueryInterface( iid, result );
 }
@@ -3539,7 +3539,7 @@ Com_order_queue::Com_order_queue()
 
 STDMETHODIMP Com_order_queue::QueryInterface( const IID& iid, void** result )
 {
-    Z_IMPLEMENT_QUERY_INTERFACE( iid, Ihas_java_class_name, result );
+    Z_IMPLEMENT_QUERY_INTERFACE( this, iid, Ihas_java_class_name, result );
 
     return Sos_ole_object::QueryInterface( iid, result );
 }
