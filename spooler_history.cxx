@@ -1,4 +1,4 @@
-// $Id: spooler_history.cxx,v 1.88 2004/02/01 20:48:09 jz Exp $
+// $Id: spooler_history.cxx,v 1.89 2004/02/02 10:03:48 jz Exp $
 
 #include "spooler.h"
 #include "../zschimmer/z_com.h"
@@ -1247,7 +1247,7 @@ xml::Element_ptr Job_history::read_tail( const xml::Document_ptr& doc, int id, i
                     int id = type->field_descr_ptr("id")->as_int( rec.byte_ptr() );
 
 
-//#ifndef SPOOLER_USE_LIBXML2     // libxml2 stürzt in Dump() ab:
+#ifndef SPOOLER_USE_LIBXML2     // libxml2 stürzt in Dump() ab:
                     if( _use_db ) 
                         param_xml = file_as_string( _spooler->_db->_db_name + "-table=" + _spooler->_job_history_tablename + " -clob=parameters where id=" + as_string(id), "" );
 
@@ -1263,7 +1263,7 @@ xml::Element_ptr Job_history::read_tail( const xml::Document_ptr& doc, int id, i
                         catch( const exception&  x ) { _spooler->_log.warn( string("Historie: ") + x.what() ); }
                         catch( const _com_error& x ) { _spooler->_log.warn( string("Historie: ") + w_as_string(x.Description() )) ; }
                     }
-//#endif
+#endif
                     if( with_log )
                     {
                         try

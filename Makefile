@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.26 2003/10/08 12:17:00 jz Exp $
+# $Id: Makefile,v 1.27 2004/02/02 10:05:35 jz Exp $
 
 ifndef PROD_DIR
 prod_dir = ..
@@ -73,7 +73,7 @@ include $(PROD_DIR)/make/standard.makefile
 #	$(AR) $(ARFLAGS) $@ $(objects)
 
 $(BIN_DIR)/sos.spooler.jar: $(java_classes)
-	jar cf $@  $(java_classes)
+	jar cfm $@ ../java_manifest sos/spooler/*.class
 
 
 $(objects): $(patsubst %, sos/spooler/%.h, Idispatch)

@@ -43,8 +43,8 @@
 			<Tool
 				Name="VCCustomBuildTool"
 				Description="sos.spooler.jar erstellen"
-				CommandLine="echo jar cf &quot;$(TargetDir)sos.spooler.jar&quot; sos/spooler/*.class
-cd &quot;$(OutDir)&quot; &amp;&amp; jar cf &quot;$(TargetDir)sos.spooler.jar&quot; sos/spooler/*.class
+				CommandLine="echo jar cfm &quot;$(TargetDir)sos.spooler.jar&quot; ../java_manifest sos/spooler/*.class
+cd &quot;$(OutDir)&quot; &amp;&amp; jar cfm &quot;$(TargetDir)sos.spooler.jar&quot; ../java_manifest sos/spooler/*.class
 "
 				Outputs="$(TargetDir)sos.spooler.jar"/>
 			<Tool
@@ -115,8 +115,8 @@ cd &quot;$(OutDir)&quot; &amp;&amp; jar cf &quot;$(TargetDir)sos.spooler.jar&quo
 			<Tool
 				Name="VCCustomBuildTool"
 				Description="sos.spooler.jar erstellen"
-				CommandLine="echo jar cf &quot;$(TargetDir)sos.spooler.jar&quot; sos/spooler/*.class
-cd &quot;$(OutDir)&quot; &amp;&amp; jar cf &quot;$(TargetDir)sos.spooler.jar&quot; sos/spooler/*.class
+				CommandLine="echo jar cfm &quot;$(TargetDir)sos.spooler.jar&quot; ../java_manifest sos/spooler/*.class
+cd &quot;$(OutDir)&quot; &amp;&amp; jar cfm &quot;$(TargetDir)sos.spooler.jar&quot; ../java_manifest sos/spooler/*.class
 "
 				Outputs="$(TargetDir)sos.spooler.jar"/>
 			<Tool
