@@ -1,4 +1,4 @@
-// $Id: spooler_thread.cxx,v 1.103 2003/09/22 09:12:10 jz Exp $
+// $Id: spooler_thread.cxx,v 1.104 2003/10/07 08:36:01 jz Exp $
 /*
     Hier sind implementiert
 
@@ -277,7 +277,7 @@ void Spooler_thread::wait()
     {
         if( _spooler->_debug )  
         {
-            if( _wait_handles.wait(0) == -1 )  _log.debug( msg ), _wait_handles.wait_until( _next_time );     // Debug-Ausgabe der Wartezeit nur, wenn kein Ergebnis vorliegt
+            if( !_wait_handles.wait(0) )  _log.debug( msg ), _wait_handles.wait_until( _next_time );     // Debug-Ausgabe der Wartezeit nur, wenn kein Ergebnis vorliegt
         }
         else
         {

@@ -1,4 +1,4 @@
-// $Id: spooler_com.cxx,v 1.111 2003/10/02 21:40:00 jz Exp $
+// $Id: spooler_com.cxx,v 1.112 2003/10/07 08:36:01 jz Exp $
 /*
     Hier sind implementiert
 
@@ -195,6 +195,8 @@ Com_variable::Com_variable( const BSTR name, const VARIANT& value )
 :
     Sos_ole_object( variable_class_ptr, (Ivariable*)this )
 {
+    if( SysStringLen( name ) == 0 )  throw_xc( "SPOOLER-198" );
+
     THREAD_LOCK( _lock )
     {
         _name = name;

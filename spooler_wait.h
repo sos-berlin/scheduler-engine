@@ -1,4 +1,4 @@
-// $Id: spooler_wait.h,v 1.44 2003/10/04 17:02:12 jz Exp $
+// $Id: spooler_wait.h,v 1.45 2003/10/07 08:36:01 jz Exp $
 
 #ifndef __SPOOLER_WAIT_H
 #define __SPOOLER_WAIT_H
@@ -68,9 +68,9 @@ struct Wait_handles : Non_cloneable
     HANDLE                      operator []                 ( int index )                           { return _handles[index]; }
 #endif
 
-    int                         wait_until                  ( Time );                               // Berücksichtigt Sommerzeitumstellung
-    int                         wait_until_2                ( Time );
-    int                         wait                        ( double time );
+    bool                        wait_until                  ( Time );                               // Berücksichtigt Sommerzeitumstellung
+    bool                        wait_until_2                ( Time );
+    bool                        wait                        ( double time );
 
     bool                        signaled                    ();
     int                         length                      ()                                      { return _events.size(); }

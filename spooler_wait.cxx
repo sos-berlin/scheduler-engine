@@ -1,4 +1,4 @@
-// $Id: spooler_wait.cxx,v 1.81 2003/10/06 13:35:02 jz Exp $
+// $Id: spooler_wait.cxx,v 1.82 2003/10/07 08:36:01 jz Exp $
 /*
     Hier sind implementiert
 
@@ -261,14 +261,14 @@ void Wait_handles::remove( System_event* event )
 
 //-------------------------------------------------------------------------------Wait_handles::wait
 
-int Wait_handles::wait( double wait_time )
+bool Wait_handles::wait( double wait_time )
 {
     return wait_until( Time::now() + wait_time );
 }
 
 //-------------------------------------------------------------------------Wait_handles::wait_until
 
-int Wait_handles::wait_until( Time until )
+bool Wait_handles::wait_until( Time until )
 {
     time_t t;
     tm     tm1, tm2;
@@ -280,16 +280,16 @@ int Wait_handles::wait_until( Time until )
     while(1)
     {
         Time now       = Time::now();
-        int  ret       = -1;
+        bool signaled  = false;
 
         if( tm1.tm_isdst )  // Wir haben Sommerzeit?
         {
             Time today3    = now.midnight() + 3*3600;            // Heute 3:00 Uhr (für Winterzeitbeginn: Uhr springt von 3 Uhr auf 2 Uhr)
             Time tomorrow3 = now.midnight() + 3*3600 + 24*3600;  // Morgen 3:00
 
-            if( now < today3  &&  until >= today3 )    ret = wait_until_2( today3 + 0.01 );
+            if( now < today3  &&  until >= today3 )    signaled = wait_until_2( today3 + 0.01 );
             else 
-            if( until >= tomorrow3 )                   ret = wait_until_2( tomorrow3 + 0.01 );
+            if( until >= tomorrow3 )                   signaled = wait_until_2( tomorrow3 + 0.01 );
             else
                 break;
         }
@@ -298,14 +298,14 @@ int Wait_handles::wait_until( Time until )
             Time today2    = now.midnight() + 2*3600;            // Heute 2:00 Uhr (für Sommerzeitbeginn: Uhr springt von 2 Uhr auf 3 Uhr)
             Time tomorrow2 = now.midnight() + 2*3600 + 24*3600;  // Morgen 3:00
 
-            if( now < today2  &&  until >= today2 )    ret = wait_until_2( today2 + 0.01 );
+            if( now < today2  &&  until >= today2 )    signaled = wait_until_2( today2 + 0.01 );
             else 
-            if( until >= tomorrow2 )                   ret = wait_until_2( tomorrow2 + 0.01 );
+            if( until >= tomorrow2 )                   signaled = wait_until_2( tomorrow2 + 0.01 );
             else
                 break;
         }
 
-        if( ret != -1 )  return ret;
+        if( signaled )  return signaled;
 
         //ftime( &tm2 );
         t = ::time(NULL);
@@ -320,7 +320,7 @@ int Wait_handles::wait_until( Time until )
 //-----------------------------------------------------------------------Wait_handles::wait_until_2
 // Liefert Nummer des Events (0..n-1) oder -1 bei Zeitablauf
 
-int Wait_handles::wait_until_2( Time until )
+bool Wait_handles::wait_until_2( Time until )
 {
 #ifdef Z_WINDOWS
 
@@ -337,7 +337,7 @@ int Wait_handles::wait_until_2( Time until )
                              else  t = 0;  //break;
         
         if( again ) {
-            if( t > 1800 )  return -1;  // Um mehr als eine halbe Stunde verrechnet? Das muss an der Sommerzeitumstellung liegen
+            if( t > 1800 )  return false;  // Um mehr als eine halbe Stunde verrechnet? Das muss an der Sommerzeitumstellung liegen
             _log->info( "Noch " + sos::as_string(wait_time) + "s warten ..." );
         }
 
@@ -373,13 +373,9 @@ int Wait_handles::wait_until_2( Time until )
                 int            index = ret - WAIT_OBJECT_0;
                 z::Event_base* event = _events[ index ];
             
-                if( event )
-                {
-                    event->set_signaled();
-                  //Z_DEBUG_ONLY( if( _spooler->_debug )  _log->debug9( event->as_text() ); )
-                }
+                if( event )  event->set_signaled();
 
-                return index;
+                return true; //index;
             }
         }
         else
@@ -389,12 +385,14 @@ int Wait_handles::wait_until_2( Time until )
         }
         else
         if( ret == WAIT_TIMEOUT )  
+        {
             again = true;
+        }
         else
             throw_mswin_error( "MsgWaitForMultipleObjects" );
     }
 
-    return -1;
+    return false;
 
 #else
 
@@ -411,7 +409,7 @@ int Wait_handles::wait_until_2( Time until )
         }
 
         int ret = wait->wait( (double)( until - Time::now() ) );
-        return ret == 0? -1 : 1;
+        return ret > 0;
       //return wait->wait( min( directory_watcher_interval, (double)( until - Time::now() ) ) );
 
 
