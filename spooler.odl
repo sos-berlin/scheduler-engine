@@ -496,6 +496,8 @@ library Spooler
 
         [propget,helpstring("Option -ini= (Pfadname der factory.ini)")]
         HRESULT                 Ini_path                ( [out,retval] BSTR* );
+
+        HRESULT                 Execute_xml             ( [in] BSTR, [out,retval] BSTR* );
     }
 
     [

@@ -466,6 +466,17 @@ xml::Element_ptr Command_processor::execute_add_jobs( const xml::Element_ptr& ad
     return _answer.createElement( "ok" );
 }
 
+//--------------------------------------------------------------Command_processor::execute_add_jobs
+
+xml::Element_ptr Command_processor::execute_job( const xml::Element_ptr& job_element )
+{
+    if( _security_level < Security::seclev_all )  throw_xc( "SCHEDULER-121" );
+
+    _spooler->cmd_job( job_element );
+
+    return _answer.createElement( "ok" );
+}
+
 //-------------------------------------------------------Command_processor::execute_show_job_chains
 
 xml::Element_ptr Command_processor::execute_show_job_chains( const xml::Element_ptr&, const Show_what& show_ )
@@ -681,6 +692,8 @@ xml::Element_ptr Command_processor::execute_command( const xml::Element_ptr& ele
     if( element.nodeName_is( "kill_task"        ) )  return execute_kill_task( element );
     else
     if( element.nodeName_is( "add_jobs"         ) )  return execute_add_jobs( element );
+    else
+    if( element.nodeName_is( "job"              ) )  return execute_job( element );
     else
     if( element.nodeName_is( "signal_object"    ) )  return execute_signal_object( element );
     else

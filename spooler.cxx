@@ -453,26 +453,33 @@ void Spooler::load_jobs_from_xml( const xml::Element_ptr& element, const Time& x
     {
         if( e.nodeName_is( "job" ) )
         {
-            string spooler_id = e.getAttribute( "spooler_id" );
+            load_job_from_xml( e, xml_mod_time, init );
+        }
+    }
+}
 
-            if( _manual? e.getAttribute("name") == _job_name 
-                       : spooler_id.empty() || spooler_id == id() )
-            {
-                string job_name = e.getAttribute("name");
-                Sos_ptr<Job> job = get_job_or_null( job_name );
-                if( job )
-                {
-                    job->set_dom( e, xml_mod_time );
-                    if( init )  job->init0(),  job->init();
-                }
-                else
-                {
-                    job = SOS_NEW( Job( this ) );
-                    job->set_dom( e, xml_mod_time );
-                    if( init )  job->init0(),  job->init();
-                    add_job( job );
-                }
-            }
+//----------------------------------------------------------------------Spooler::load_jobs_from_xml
+
+void Spooler::load_job_from_xml( const xml::Element_ptr& e, const Time& xml_mod_time, bool init )
+{
+    string spooler_id = e.getAttribute( "spooler_id" );
+
+    if( _manual? e.getAttribute("name") == _job_name 
+               : spooler_id.empty() || spooler_id == id() )
+    {
+        string job_name = e.getAttribute("name");
+        Sos_ptr<Job> job = get_job_or_null( job_name );
+        if( job )
+        {
+            job->set_dom( e, xml_mod_time );
+            if( init )  job->init0(),  job->init();
+        }
+        else
+        {
+            job = SOS_NEW( Job( this ) );
+            job->set_dom( e, xml_mod_time );
+            if( init )  job->init0(),  job->init();
+            add_job( job );
         }
     }
 }
@@ -482,9 +489,18 @@ void Spooler::load_jobs_from_xml( const xml::Element_ptr& element, const Time& x
 
 void Spooler::cmd_add_jobs( const xml::Element_ptr& element )
 {
-    load_jobs_from_xml( element, true );
+    load_jobs_from_xml( element, Time::now(), true );
 
     signal( "add_jobs" );
+}
+
+//---------------------------------------------------------------------------------Spooler::cmd_job
+
+void Spooler::cmd_job( const xml::Element_ptr& element )
+{
+    load_job_from_xml( element, Time::now(), true );
+
+    signal( "add_job" );
 }
 
 //-------------------------------------------------------------------Spooler::remove_temporary_jobs
@@ -1624,7 +1640,7 @@ void Spooler::start()
         _module_instance->load();
         _module_instance->start();
 
-        bool ok = check_result( _module_instance->call_if_exists( "spooler_init()Z" ) );
+        bool ok = check_result( _module_instance->call_if_exists( spooler_init_name ) );
         if( !ok )  throw_xc( "SCHEDULER-183" );
 
         LOG( "Startskript ist gelaufen\n" );
@@ -1686,7 +1702,20 @@ void Spooler::stop()
     _job_list.clear();
     _process_class_list.clear();
 
-    if( _module_instance )  _module_instance->close();
+    if( _module_instance )
+    {
+        Z_LOG( "Startskript wird beendet ...\n" );
+
+        try
+        {
+            _module_instance->call_if_exists( spooler_exit_name );
+        }
+        catch( exception& x )  { _log.warn( string( "Scheduler-Skript spooler_exit(): " ) + x.what() ); }
+
+        _module_instance->close();
+
+        Z_LOG( "Startskript ist beendet.\n" );
+    }
 
     //_java_vm.close();  Erneutes _java.init() stürzt ab, deshalb lassen wird Java stehen und schließen es erst am Schluss
 

@@ -2482,6 +2482,7 @@ const Com_method Com_spooler::_methods[] =
     { DISPATCH_PROPERTYGET, 27, "Db_history_table_name"     , (Com_method_ptr)&Com_spooler::get_Db_history_table_name  , VT_BSTR      },
     { DISPATCH_PROPERTYGET, 28, "Db_order_history_table_name", (Com_method_ptr)&Com_spooler::get_Db_order_history_table_name, VT_BSTR      },
     { DISPATCH_PROPERTYGET, 29, "Ini_path"                  , (Com_method_ptr)&Com_spooler::get_Ini_path         , VT_BSTR      },
+    { DISPATCH_METHOD     , 30, "Execute_xml"               , (Com_method_ptr)&Com_spooler::Execute_xml          , VT_BSTR      },
     {}
 };
 
@@ -2922,6 +2923,26 @@ STDMETHODIMP Com_spooler::get_Ini_path( BSTR* result )
 { 
     if( !_spooler )  return E_POINTER;
     return String_to_bstr( _spooler->_factory_ini, result ); 
+}
+
+//-------------------------------------------------------------------------Com_spooler::Execute_xml
+
+STDMETHODIMP Com_spooler::Execute_xml( BSTR xml, BSTR* result )                    
+{ 
+    HRESULT hr = S_OK;
+
+    if( !_spooler )  return E_POINTER;
+
+    try
+    {
+        Command_processor cp ( _spooler );
+        cp.set_host( NULL );
+        hr = String_to_bstr( cp.execute( string_from_bstr( xml ), Time::now() ), result );
+    }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
+
+    return hr;
 }
 
 //----------------------------------------------------------------------------Com_context::_methods
