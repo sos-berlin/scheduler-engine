@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.215 2003/06/02 11:18:07 jz Exp $
+// $Id: spooler.cxx,v 1.216 2003/06/02 11:22:28 jz Exp $
 /*
     Hier sind implementiert
 
@@ -983,6 +983,7 @@ void Spooler::start()
         {
             _java_vm->set_log( &_log );
             _java_vm->prepend_class_path( _config_java_class_path );        // Nicht so gut hier. Bei jedem Reload wird der Pfad verlängert. Aber Reload lässt Java sowieso nicht neu starten.
+            _java_vm->set_options( _config_java_options );
             Java_module_instance::init_java_vm( _java_vm );
         }
         catch( const exception& x )
