@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.177 2003/08/30 15:39:11 jz Exp $
+// $Id: spooler_task.cxx,v 1.178 2003/08/30 18:53:19 jz Exp $
 /*
     Hier sind implementiert
 
@@ -482,14 +482,6 @@ bool Task::do_something()
         if( !_operation->async_finished() )  return false;
 
     bool something_done = false;
-
-/*
-    if( _processing )
-    {
-        _module_instance->process();
-        if( !_module_instance
-    }
-*/
 
 
     try
