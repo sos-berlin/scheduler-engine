@@ -1,9 +1,11 @@
-// $Id: spooler_job.cxx,v 1.72 2004/05/05 12:02:58 jz Exp $
+// $Id: spooler_job.cxx,v 1.73 2004/05/07 14:20:51 jz Exp $
+// §851: Weitere Log-Ausgaben zum Scheduler-Start eingebaut
 /*
     Hier sind implementiert
 
     Job
 */
+
 
 
 #include "spooler.h"

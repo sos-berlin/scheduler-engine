@@ -1,4 +1,4 @@
-// $Id: spooler_history.cxx,v 1.94 2004/03/25 10:46:11 jz Exp $
+// $Id: spooler_history.cxx,v 1.95 2004/05/07 14:20:50 jz Exp $
 
 #include "spooler.h"
 #include "../zschimmer/z_com.h"
@@ -697,8 +697,8 @@ void Spooler_db::delete_order( Order* order, Transaction* transaction )
 
     del.set_table_name( _spooler->_orders_tablename );
 
-    del.add_where_cond( "job_chain", order->job_chain()->name() );
-    del.add_where_cond( "id"       , order->id().as_string() );
+    del.and_where_condition( "job_chain", order->job_chain()->name() );
+    del.and_where_condition( "id"       , order->id().as_string() );
 
     execute( del );
 }
@@ -739,8 +739,8 @@ void Spooler_db::update_order( Order* order )
 
                         update.set_datetime( "mod_time", Time::now().as_string(Time::without_ms) );
 
-                        update.add_where_cond( "job_chain", order->job_chain()->name() );
-                        update.add_where_cond( "id"       , order->id().as_string()    );
+                        update.and_where_condition( "job_chain", order->job_chain()->name() );
+                        update.and_where_condition( "id"       , order->id().as_string()    );
 
                         execute( update );
                     }
