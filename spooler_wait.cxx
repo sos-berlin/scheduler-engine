@@ -1,4 +1,4 @@
-// $Id: spooler_wait.cxx,v 1.65 2002/12/11 08:50:38 jz Exp $
+// $Id: spooler_wait.cxx,v 1.66 2002/12/11 10:18:06 jz Exp $
 /*
     Hier sind implementiert
 
@@ -11,6 +11,7 @@
 
 #include <sys/types.h>
 #include <sys/timeb.h>
+#include <sys/time.h>
 
 #ifdef Z_WINDOWS
 #   include <io.h>         // findfirst()
@@ -269,8 +270,14 @@ int Wait_handles::wait( double wait_time )
 
 int Wait_handles::wait_until( Time until )
 {
-    timeb tm1, tm2;
-    ftime( &tm1 );
+    //timeb tm1, tm2;
+    //ftime( &tm1 );
+    time_t t;
+    tm     tm1, tm2;
+
+    t = ::time(NULL);
+    localtime_r( &t, &tm1 );
+        
 
     while(1)
     {
@@ -290,9 +297,11 @@ int Wait_handles::wait_until( Time until )
 
         if( ret != -1 )  return ret;
 
-        ftime( &tm2 );
-        if( tm1.dstflag != tm2.dstflag )  _log->info( tm2.dstflag? "Sommerzeit" : "Winterzeit" );
-                                    else  Z_DEBUG_ONLY( _log->debug9( "Keine Sommerzeitumschaltung" ) );
+        //ftime( &tm2 );
+        t = ::time(NULL);
+        localtime_r( &t, &tm2 );
+        if( tm1.tm_isdst != tm2.tm_isdst )  _log->info( tm2.tm_isdst? "Sommerzeit" : "Winterzeit" );
+                                      else  Z_DEBUG_ONLY( _log->debug9( "Keine Sommerzeitumschaltung" ) );
     }
 
     return wait_until_2(  until );

@@ -1,4 +1,4 @@
-// $Id: spooler_time.cxx,v 1.29 2002/12/09 23:12:13 jz Exp $
+// $Id: spooler_time.cxx,v 1.30 2002/12/11 10:18:06 jz Exp $
 /*
     Hier sind implementiert
 
@@ -17,6 +17,7 @@
 
 #include <sys/types.h>
 #include <sys/timeb.h>
+#include <sys/time.h>
 
 
 namespace sos {
@@ -72,21 +73,22 @@ string Time::as_string( With_ms with ) const
 
 Time Time::now() 
 {
-#   if 1 //defined SYSTEM_WIN
+#   if SYSTEM_WIN
 
         timeb  tm;
         ftime( &tm );
         return (double)tm.time + (double)tm.millitm / (double)1e3 - timezone - ( tm.dstflag? _dstbias : 0 );
 
-#   elif define SYSTEM_LINUX
-
-        //struct timeval tm;
-        //gettimeofday( &tm, NULL );
-        //return (double)tm.tv_sec + (double)tm.tv_usec / (double)1e6 - _timezone - ( tm.dstflag? _dstbias : 0 );
+        // Linux füllt nicht dstflag
 
 #   else
 
-        //return time(NULL) - _timezone - _dstbias;
+        timeval  tv;
+        tm       local_tm;
+
+        gettimeofday( &tv, NULL );
+        localtime_r( &tv.tv_sec, &local_tm );
+        return timegm( &local_tm ) + (double)tv.tv_usec / 1e6;
 
 #   endif
 }
