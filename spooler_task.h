@@ -1,4 +1,4 @@
-// $Id: spooler_task.h,v 1.144 2004/12/07 09:57:56 jz Exp $
+// $Id: spooler_task.h,v 1.145 2004/12/13 09:46:56 jz Exp $
 
 #ifndef __SPOOLER_TASK_H
 #define __SPOOLER_TASK_H
@@ -407,6 +407,7 @@ struct Process_task : Task      // Job ist irgendein Prozess (z.B. durch ein She
         Event                  _process_handle;
 #    else
         Process_event          _process_handle;
+        int                    _pid_to_unregister;
 #   endif
 };
 

@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.269 2004/12/07 14:31:18 jz Exp $
+// $Id: spooler_task.cxx,v 1.270 2004/12/13 09:46:55 jz Exp $
 /*
     Hier sind implementiert
 
@@ -1761,14 +1761,21 @@ Process_task::~Process_task()
 
 void Process_task::close_handle()
 {
+#   ifndef Z_WINDOWS
+        if( _pid_to_unregister )
+        {
+            _job->_spooler->unregister_process_handle( _pid_to_unregister );
+            _pid_to_unregister = 0;
+        }
+#   endif
+
+
     if( _process_handle )
     {
         if( _job )
         {
 #           ifdef Z_WINDOWS
                 _job->_spooler->unregister_process_handle( _process_handle ); 
-#            else
-                _job->_spooler->unregister_process_handle( _process_handle._pid ); 
 #           endif
         }
 
@@ -2118,6 +2125,7 @@ bool Process_task::do_begin__end()
     _process_handle.add_to( &_spooler->_wait_handles );
 
     _job->_spooler->register_process_handle( _process_handle._pid ); 
+    _pid_to_unregister = _process_handle._pid;
 
     _operation = &dummy_sync_operation;
 
