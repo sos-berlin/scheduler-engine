@@ -1,4 +1,4 @@
-// $Id: spooler_task.h,v 1.120 2003/09/30 11:26:21 jz Exp $
+// $Id: spooler_task.h,v 1.121 2003/09/30 12:58:35 jz Exp $
 
 #ifndef __SPOOLER_TASK_H
 #define __SPOOLER_TASK_H
@@ -334,6 +334,7 @@ struct Process_task : Task      // Job ist irgendein Prozess (z.B. durch ein She
 #   ifdef Z_WINDOWS
         Process_id             _process_id;
         Event                  _process_handle;
+        DWORD                  _exit_code;
 #    else
         Process_event          _process_handle;
 #   endif

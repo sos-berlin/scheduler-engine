@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.199 2003/09/30 11:26:21 jz Exp $
+// $Id: spooler_task.cxx,v 1.200 2003/09/30 12:58:35 jz Exp $
 /*
     Hier sind implementiert
 
@@ -605,49 +605,43 @@ bool Task::do_something()
                     load();
 
                 case s_waiting_for_process:
-                    bool ok = _module_instance->try_to_get_process();
+                    bool ok = !_module_instance || _module_instance->try_to_get_process();
                     if( ok )  something_done = true, set_state( s_starting ), loop = true;
                         else  set_state( s_waiting_for_process );
                     break;
                 }
 
 
-              //case s_start_task:
                 case s_starting:
                 {
                     _begin_called = true;
-/*
-                    _operation = begin__start();
 
-                  //if( has_error() )  break;
-
-                    set_state( s_starting );
-*/
-
-                    if( !_operation )  _operation = begin__start();
-                                 else  ok = operation__end(), set_state( ok? s_running : s_ending ), loop = true;
+                    if( !_operation )
+                    {
+                        _operation = begin__start();
+                    }
+                    else
+                    {
+                        ok = operation__end(); 
+                        if( _state != s_running_process )  set_state( ok? s_running : s_ending );
+                        loop = true;
+                    }
 
                     something_done = true;
 
                     break;
                 }
 
-/*
-                case s_starting:
-                {
-                    ok = operation__end();
-
-                    if( !ok || has_error() )  break;
-
-                    set_state( s_running ), loop = true;
-                    something_done = true;
-
-                    break;
-                }
-*/
 
                 case s_running_process:
-                    if( !((Process_task*)+this)->signaled() )  break;
+                    if( ((Process_task*)this)->signaled() )
+                    {
+                        _log( "signaled!" );
+                        set_state( s_ending );
+                        loop = true;
+                    }
+                    break;
+
                 case s_running:
                 {
                     if( !_operation )
@@ -1419,7 +1413,7 @@ Process_task::Process_task( Job* job )
 
 void Process_task::do_close()
 {
-    do_kill();
+    if( _process_handle )  do_kill();
     _process_handle.close();
 }
 
@@ -1493,8 +1487,8 @@ bool Process_task::do_kill()
 
     _log.warn( "Prozess wird abgebrochen" );
 
-    LOG( "TerminateProcess(" <<  _process_handle << ",999)\n" );
-    BOOL ok = TerminateProcess( _process_handle, 999 );
+    LOG( "TerminateProcess(" <<  _process_handle << ",255)\n" );
+    BOOL ok = TerminateProcess( _process_handle, 255 );
     if( !ok )  throw_mswin_error( "TerminateProcess" );
 
     return true;
@@ -1509,19 +1503,23 @@ void Process_task::do_end__end()
     BOOL ok = GetExitCodeProcess( _process_handle, &exit_code );
     if( !ok )  throw_mswin_error( "GetExitCodeProcess" );
 
+    if( exit_code == STILL_ACTIVE )  throw_xc( "STILL_ACTIVE", obj_name() );
+
     _process_handle.close();
     _result = (int)exit_code;
 
     _log.log_file( _job->_process_log_filename ); 
 
-    if( _job->_process_ingore_error  &&  exit_code )  throw_xc( "SPOOLER-126", exit_code );
+    if( !_job->_process_ingore_error  &&  exit_code )  throw_xc( "SPOOLER-126", exit_code );
 }
 
 //---------------------------------------------------------------------------Process_task::signaled
 
 bool Process_task::signaled()
 {
-    return !_process_handle.signaled();
+    bool signaled = _process_handle.signaled();
+    _log.debug3( "signaled=" + as_string( signaled ) );
+    return signaled;
 }
 
 #endif
@@ -1529,6 +1527,17 @@ bool Process_task::signaled()
 
 bool Process_task::do_step__end()
 {
+/*
+    DWORD exit_code;
+
+    BOOL ok = GetExitCodeProcess( _process_handle, &exit_code );
+    if( !ok )  throw_mswin_error( "GetExitCodeProcess" );
+
+    if( exit_code == STILL_ACTIVE )  return true;
+
+    _exit_code = exit_code;
+    _result    = exit_code;
+*/
     return !signaled();
 }
 
@@ -1685,6 +1694,8 @@ bool Process_task::do_begin__end()
     _process_handle.set_name( "Process " + _job->_process_filename );
     _process_handle.add_to( &_thread->_wait_handles );
 
+    _operation = &dummy_sync_operation;
+
     return true;
 }
 
@@ -1726,7 +1737,7 @@ void Process_task::do_end__end()
 
     _log.log_file( _job->_process_log_filename ); 
 
-    if( _job->_process_ingore_error  &&  _process_handle._process_exit_code )  throw_xc( "SPOOLER-126", _process_handle._process_exit_code );
+    if( !_job->_process_ingore_error  &&  _process_handle._process_exit_code )  throw_xc( "SPOOLER-126", _process_handle._process_exit_code );
 }
 
 //---------------------------------------------------------------------------Process_task::signaled
