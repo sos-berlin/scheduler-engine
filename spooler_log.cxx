@@ -1,4 +1,4 @@
-// $Id: spooler_log.cxx,v 1.57 2003/03/18 10:44:19 jz Exp $
+// $Id: spooler_log.cxx,v 1.58 2003/03/19 11:59:57 jz Exp $
 
 #include "spooler.h"
 #include "spooler_mail.h"
@@ -9,6 +9,7 @@
 #include "../kram/com_server.h"
 #include "../kram/sosprof.h"
 #include "../file/anyfile.h"
+#include "../zschimmer/olechar.h"
 
 #include <stdio.h>
 #include <sys/stat.h>               // S_IREAD, stat()
@@ -513,7 +514,6 @@ void Prefix_log::send( int reason )
     if( _file == -1 )       // Nur senden, wenn die Log-Datei beschrieben worden ist
     {
         _first_send = 0;
-
         _mail = NULL;
     }
     else

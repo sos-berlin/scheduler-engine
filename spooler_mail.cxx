@@ -1,4 +1,4 @@
-// $Id: spooler_mail.cxx,v 1.13 2003/03/18 10:44:19 jz Exp $
+// $Id: spooler_mail.cxx,v 1.14 2003/03/19 11:59:57 jz Exp $
 
 
 #include "spooler.h"
@@ -16,6 +16,36 @@ extern Typelib_descr spooler_typelib;
 
 DESCRIBE_CLASS( &spooler_typelib, Com_mail, mail, CLSID_mail, "Spooler.Mail", "1.0" )
 
+//-------------------------------------------------------------------------------Com_mail::_methods
+#ifdef Z_COM
+
+const Com_method Com_mail::_methods[] =
+{ 
+   // _flags              , _name                , _method                                     , _result_type, _types        , _default_arg_count
+    { DISPATCH_PROPERTYPUT, 1, "to"              , (Com_method_ptr)&Com_mail::put_to           , VT_EMPTY    , { VT_BSTR } },
+    { DISPATCH_PROPERTYGET, 1, "to"              , (Com_method_ptr)&Com_mail::get_to           , VT_BSTR     },
+    { DISPATCH_PROPERTYPUT, 2, "from"            , (Com_method_ptr)&Com_mail::put_from         , VT_EMPTY    , { VT_BSTR } },
+    { DISPATCH_PROPERTYGET, 2, "from"            , (Com_method_ptr)&Com_mail::get_from         , VT_BSTR     },
+    { DISPATCH_PROPERTYPUT, 3, "cc"              , (Com_method_ptr)&Com_mail::put_cc           , VT_EMPTY    , { VT_BSTR } },
+    { DISPATCH_PROPERTYGET, 3, "cc"              , (Com_method_ptr)&Com_mail::get_cc           , VT_BSTR     },
+    { DISPATCH_PROPERTYPUT, 4, "bcc"             , (Com_method_ptr)&Com_mail::put_cc           , VT_EMPTY    , { VT_BSTR } },
+    { DISPATCH_PROPERTYGET, 4, "bcc"             , (Com_method_ptr)&Com_mail::get_cc           , VT_BSTR     },
+    { DISPATCH_PROPERTYPUT, 5, "subject"         , (Com_method_ptr)&Com_mail::put_subject      , VT_EMPTY    , { VT_BSTR } },
+    { DISPATCH_PROPERTYGET, 5, "subject"         , (Com_method_ptr)&Com_mail::get_subject      , VT_BSTR     },
+    { DISPATCH_PROPERTYPUT, 6, "body"            , (Com_method_ptr)&Com_mail::put_body         , VT_EMPTY    , { VT_BSTR } },
+    { DISPATCH_PROPERTYGET, 6, "body"            , (Com_method_ptr)&Com_mail::get_body         , VT_BSTR     },
+    { DISPATCH_METHOD     , 7, "add_file"        , (Com_method_ptr)&Com_mail::add_file         , VT_EMPTY    , { VT_BSTR, VT_BSTR, VT_BSTR, VT_BSTR }, 3 },
+    { DISPATCH_PROPERTYPUT, 8, "smtp"            , (Com_method_ptr)&Com_mail::put_smtp         , VT_EMPTY    , { VT_BSTR } },
+    { DISPATCH_PROPERTYGET, 8, "smtp"            , (Com_method_ptr)&Com_mail::get_smtp         , VT_BSTR     },
+    { DISPATCH_PROPERTYPUT, 9, "queue_dir"       , (Com_method_ptr)&Com_mail::put_queue_dir    , VT_EMPTY    , { VT_BSTR } },
+    { DISPATCH_PROPERTYGET, 9, "queue_dir"       , (Com_method_ptr)&Com_mail::get_queue_dir    , VT_BSTR     },
+    { DISPATCH_METHOD     ,10, "add_header_field", (Com_method_ptr)&Com_mail::add_header_field , VT_EMPTY    , { VT_BSTR, VT_BSTR } },
+    { DISPATCH_METHOD     ,11, "dequeue"         , (Com_method_ptr)&Com_mail::dequeue          , VT_EMPTY    },
+    { DISPATCH_PROPERTYGET,12, "dequeue_log"     , (Com_method_ptr)&Com_mail::get_dequeue_log  , VT_BSTR     },
+    {}
+};
+
+#endif
 //-------------------------------------------------------------------------------Com_mail::Com_mail
 
 Com_mail::Com_mail( Spooler* spooler )

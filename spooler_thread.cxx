@@ -1,4 +1,4 @@
-// $Id: spooler_thread.cxx,v 1.76 2003/03/17 18:40:19 jz Exp $
+// $Id: spooler_thread.cxx,v 1.77 2003/03/19 11:59:57 jz Exp $
 /*
     Hier sind implementiert
 
@@ -419,7 +419,7 @@ Job* Spooler_thread::get_next_job_to_start()
 {
     _next_job = NULL;
     
-    _next_start_time = latter_day;
+    Time next_start_time = latter_day;      // Für HP_UX, gcc 3.1, eine lokale Variable. _next_start_time setzt der Compiler jedes zweite Mal auf 0. jz 7.3.03
 
     THREAD_LOCK( _lock )
     {
@@ -431,16 +431,17 @@ Job* Spooler_thread::get_next_job_to_start()
              || job->_state == Job::s_running_delayed 
              || job->_state == Job::s_running_waiting_for_order ) 
             {
-                if( _next_start_time > (*it)->_next_time ) 
+                if( next_start_time > (*it)->_next_time ) 
                 {
                     _next_job = *it; 
-                    _next_start_time = _next_job->_next_time;
-                    if( _next_start_time == 0 )  break;
+                    next_start_time = _next_job->_next_time;
+                    if( next_start_time == 0 )  break;
                 }
             }
         }
     }
 
+    _next_start_time = next_start_time;
     return _next_job;
 }
 

@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.179 2003/03/18 10:44:18 jz Exp $
+// $Id: spooler.cxx,v 1.180 2003/03/19 11:59:56 jz Exp $
 /*
     Hier sind implementiert
 
@@ -93,8 +93,7 @@ void send_error_email( const string& error_text, int argc, char** argv )
 
         Sos_ptr<mail::Message> msg = mail::create_message( spooler_ptr->_java_vm );
         //msg->init();
-        msg->set_from( from );
-
+        if( from != "" )  msg->set_from( from );
         if( to   != "" )  msg->set_to  ( to   );
         if( cc   != "" )  msg->set_cc  ( cc   );
         if( bcc  != "" )  msg->set_bcc ( bcc  );

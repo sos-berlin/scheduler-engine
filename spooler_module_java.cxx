@@ -1,4 +1,4 @@
-// $Id: spooler_module_java.cxx,v 1.44 2003/03/18 12:18:40 jz Exp $
+// $Id: spooler_module_java.cxx,v 1.45 2003/03/19 11:59:57 jz Exp $
 /*
     Hier sind implementiert
 
@@ -24,11 +24,6 @@
 #   include <sys/utime.h>
 #else
 #   include <utime.h>
-#   include <dlfcn.h>
-#endif
-
-#ifdef Z_HPUX
-#   include <dl.h>
 #endif
 
 #ifndef JNI_VERSION_1_2
@@ -253,10 +248,10 @@ void Spooler::init_java_vm()
 
     //_idispatch_jclass = e->FindClass( JAVA_IDISPATCH_CLASS );
     Class idispatch_class ( _java_vm, JAVA_IDISPATCH_CLASS );
-    if( e->ExceptionCheck() )  e.throw_java( 0, "FindClass " JAVA_IDISPATCH_CLASS );
+    if( e->ExceptionCheck() )  e.throw_java( "FindClass " JAVA_IDISPATCH_CLASS );
 
     int ret = e->RegisterNatives( idispatch_class, native_methods, NO_OF( native_methods ) );
-    if( ret < 0 )  e.throw_java( ret, "RegisterNatives" );
+    if( ret < 0 )  throw_java_ret( ret, "RegisterNatives" );
 }
 
 //---------------------------------------------------------------------Java_thread_data::add_object
@@ -284,7 +279,7 @@ Java_idispatch::Java_idispatch( Vm* vm, IDispatch* idispatch, const string& subc
     jmethodID constructor_id = e.get_method_id( subclass, "<init>", "(J)V" );
 
     jobject jo = e->NewObject( subclass, constructor_id, (jlong)(size_t)idispatch );
-    if( !jo )  e.throw_java( 0, "NewObject", _class_name );
+    if( !jo )  e.throw_java( "NewObject", _class_name );
 
     assign( jo );
     e->DeleteLocalRef( subclass );
@@ -298,7 +293,7 @@ Java_idispatch::~Java_idispatch()
     {
         try
         {
-            Env& e = env();
+            Env e = env();
         
             jclass object_class = e.get_object_class( _jobject );
 
@@ -307,7 +302,7 @@ Java_idispatch::~Java_idispatch()
             e->DeleteLocalRef( object_class ), object_class = NULL;
 
             e->CallVoidMethod( _jobject, method_id );
-            if( e->ExceptionCheck() )  e.throw_java( 0, _class_name, "CallVoidMethod com_clear()" );
+            if( e->ExceptionCheck() )  e.throw_java( _class_name, "CallVoidMethod com_clear()" );
 
             assign( NULL );
             _idispatch = NULL;
@@ -386,8 +381,8 @@ bool Module::make_java_class( bool force )
         c.set_throw( false );
         c.execute( cmd );
 
-        if( c.stderr_text() != "" )  _log->warn( c.stderr_text() ),  _log->warn( "" );
-        if( c.stdout_text() != "" )  _log->warn( c.stdout_text() ),  _log->warn( "" );
+        if( c.stderr_text() != "" )  _log->info( c.stderr_text() ),  _log->info( "" );
+        if( c.stdout_text() != "" )  _log->info( c.stdout_text() ),  _log->info( "" );
 
         if( c.xc() )  throw *c.xc();
 
@@ -452,7 +447,7 @@ Java_idispatch::Java_idispatch( Spooler* sp, IDispatch* idispatch, const string&
     jmethodID constructor_id = jenv.get_method_id( subclass, "<init>", "(J)V" );
 
     jobject jo = jenv->NewObject( subclass, constructor_id, (jlong)(size_t)idispatch );
-    if( !jo )  _spooler->_java_vm.throw_java( 0, "NewObject", _class_name );
+    if( !jo )  _spooler->_java_vm.throw_java( "NewObject", _class_name );
 
     assign( jo );
     jenv->DeleteLocalRef( subclass );
@@ -475,7 +470,7 @@ Java_idispatch::~Java_idispatch()
             jenv->DeleteLocalRef( object_class ), object_class = NULL;
 
             jenv->CallVoidMethod( _jobject, method_id );
-            if( jenv->ExceptionCheck() )  _spooler->_java_vm.throw_java( 0, _class_name, "CallVoidMethod com_clear()" );
+            if( jenv->ExceptionCheck() )  _spooler->_java_vm.throw_java( _class_name, "CallVoidMethod com_clear()" );
 
             assign( NULL );
             _idispatch = NULL;
@@ -545,7 +540,7 @@ void Java_module_instance::init()
     
     assert( _jobject == NULL );
     _jobject = e->NewObject( _module->_java_class, method_id );
-    if( !_jobject )  e.throw_java( 0, _module->_java_class_name + " Konstruktor" );
+    if( !_jobject )  e.throw_java( _module->_java_class_name + " Konstruktor" );
 }
 
 //--------------------------------------------------------------------Java_module_instance::add_obj
@@ -559,14 +554,14 @@ void Java_module_instance::add_obj( const ptr<IDispatch>& object, const string& 
     //LOGI( "Java_module_instance::add_obj " << java_class_name << "\n" );
 
     jclass cls = e->GetObjectClass( _jobject );
-    if( !cls )  e.throw_java( 0, "GetMethodID" );
+    if( !cls )  e.throw_java( "GetMethodID" );
 
     string signature = "L" + java_class_name + ";";
 
     jfieldID field_id = e->GetFieldID( cls, name.c_str(), signature.c_str() );
     e->DeleteLocalRef( cls );
 
-    if( !field_id )  e.throw_java( 0, "GetFieldID", name );
+    if( !field_id )  e.throw_java( "GetFieldID", name );
 
     ptr<Java_idispatch> java_idispatch = Z_NEW( Java_idispatch( vm(), object, java_class_name ) );
     //java_idispatch->set_global();
@@ -574,7 +569,7 @@ void Java_module_instance::add_obj( const ptr<IDispatch>& object, const string& 
     _added_jobjects.push_back( java_idispatch );
                          
     e->SetObjectField( _jobject, field_id, *java_idispatch );
-    if( e->ExceptionCheck() )  e.throw_java( 0, "SetObjectField", name );
+    if( e->ExceptionCheck() )  e.throw_java( "SetObjectField", name );
 
     //Com_module_instance_base::add_obj( object, name );
 }
@@ -607,7 +602,7 @@ Variant Java_module_instance::call( const string& name )
         e->CallVoidMethod( _jobject, method_id );
     }
 
-    if( e->ExceptionCheck() )  e.throw_java( 0, name );
+    if( e->ExceptionCheck() )  e.throw_java( name );
 
     return result;
 }
@@ -624,7 +619,7 @@ Variant Java_module_instance::call( const string& name, int param )
 
     bool result = e->CallBooleanMethod( _jobject, method_id, param ) != 0;
 
-    if( e->ExceptionCheck() )  e.throw_java( 0, name );
+    if( e->ExceptionCheck() )  e.throw_java( name );
 
     return result;
 }

@@ -1,4 +1,4 @@
-// $Id: spooler_command.cxx,v 1.80 2003/03/15 18:06:37 jz Exp $
+// $Id: spooler_command.cxx,v 1.81 2003/03/19 11:59:56 jz Exp $
 /*
     Hier ist implementiert
 
@@ -169,9 +169,7 @@ void Command_processor::abort_immediately( int exit_code )
         TerminateProcess( GetCurrentProcess(), exit_code );  // _exit() lässt noch Delphi-Code ausführen.
 
 #    else
-
         //kill( 0, SIGKILL );   // Das killt auch den neuen Spooler.  signal is sent to every process in the process group of the current process.
-
         kill( _spooler->_pid, SIGKILL );
         _exit( exit_code );
 

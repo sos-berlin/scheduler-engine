@@ -1,4 +1,4 @@
-// $Id: spooler_log.h,v 1.29 2003/03/18 10:44:19 jz Exp $
+// $Id: spooler_log.h,v 1.30 2003/03/19 11:59:57 jz Exp $
 
 #ifndef __SPOOLER_LOG_H
 #define __SPOOLER_LOG_H
@@ -91,7 +91,7 @@ struct Prefix_log : Has_log
     void                        info                        ( const string& line )              { log( log_info  , line ); }
     void                        warn                        ( const string& line )              { log( log_warn  , line ); }
     void                        error                       ( const string& line )              { log( log_error , line ); }
-    void                        log                         ( Log_level level, const string& line )  { Has_log::log( level, "", line ); }
+    void                        log                         ( Log_level level, const string& line )  { Has_log::log( level, line ); }
     void                        log2                        ( Log_level, const string& prefix, const string& line, Has_log* );
 
     void                        log_file                    ( const string& filename );
