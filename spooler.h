@@ -1,4 +1,4 @@
-// $Id: spooler.h,v 1.9 2001/01/06 11:09:44 jz Exp $
+// $Id: spooler.h,v 1.10 2001/01/06 22:50:21 jz Exp $
 
 #ifndef __SPOOLER_H
 
@@ -260,6 +260,8 @@ struct Task : Sos_self_deleting
     int                        _step_count;
 
     Xc_copy                    _error;
+    bool                       _stopped;
+    bool                       _stop;
 
     Sos_ptr<Object_set>        _object_set;
     Time                       _next_start_time;            // Zeitpunkt des nächsten Startversuchs, nachdem Objektemenge leer war
@@ -299,6 +301,8 @@ struct Command_processor
     xml::Element_ptr            execute_command             ( xml::Element_ptr );
     xml::Element_ptr            execute_show_state          ();
     xml::Element_ptr            execute_show_tasks          ();
+    xml::Element_ptr            execute_show_task           ( Task* );
+    xml::Element_ptr            execute_modify_job          ( xml::Element_ptr );
 
     Spooler*                   _spooler;
     xml::Document_ptr          _answer;
@@ -332,6 +336,7 @@ struct Spooler
     Command_processor          _command_processor;
     Time                       _spooler_start_time;
     Thread_semaphore           _semaphore;
+    bool                       _sleep;                      // Besser: sleep mit Signal unterbrechen
 };
 
 

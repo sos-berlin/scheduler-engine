@@ -1,4 +1,4 @@
-// $Id: spooler_command.cxx,v 1.3 2001/01/06 11:09:44 jz Exp $
+// $Id: spooler_command.cxx,v 1.4 2001/01/06 22:50:21 jz Exp $
 
 #include "../kram/sos.h"
 #include "../kram/sleep.h"
@@ -53,28 +53,35 @@ void append_error_element( xml::Element* element, const Xc_copy& x )
 
 //------------------------------------------------------------Command_processor::execute_show_tasks
 
+xml::Element_ptr Command_processor::execute_show_task( Task* task )
+{
+    xml::Element_ptr task_element = _answer->createElement( "task" );
+
+    task_element->setAttribute( "job", as_dom_string( task->_job->_name ) );
+    task_element->setAttribute( "running", task->_running? "yes" : "no" );
+
+    if( task->_running )
+        task_element->setAttribute( "running_since", as_dom_string( Sos_optional_date_time( task->_running_since ).as_string() ) );
+
+    if( !task->_stopped )
+        task_element->setAttribute( "next_start_time", as_dom_string( Sos_optional_date_time( task->_next_start_time ).as_string() ) );
+
+    task_element->setAttribute( "steps", as_dom_string( as_string( task->_step_count ) ) );
+
+    if( task->_error )  append_error_element( task_element, task->_error );
+
+    return task_element;
+}
+
+//------------------------------------------------------------Command_processor::execute_show_tasks
+
 xml::Element_ptr Command_processor::execute_show_tasks()
 {
     xml::Element_ptr tasks = _answer->createElement( "tasks" );
 
     FOR_EACH( Task_list, _spooler->_task_list, it )
     {
-        Task*            task         = *it;
-        xml::Element_ptr task_element = _answer->createElement( "task" );
-
-        task_element->setAttribute( "job", as_dom_string( task->_job->_name ) );
-
-        task_element->setAttribute( "running", task->_running? "yes" : "no" );
-
-        if( task->_running_since )
-            task_element->setAttribute( "running_since", as_dom_string( Sos_optional_date_time( task->_running_since ).as_string() ) );
-
-        task_element->setAttribute( "next_start_time", as_dom_string( Sos_optional_date_time( task->_next_start_time ).as_string() ) );
-        task_element->setAttribute( "steps", as_dom_string( as_string( task->_step_count ) ) );
-
-        if( task->_error )  append_error_element( task_element, task->_error );
-
-        tasks->appendChild( task_element );
+        tasks->appendChild( execute_show_task( *it ) );
     }
 
     return tasks;
@@ -94,18 +101,50 @@ xml::Element_ptr Command_processor::execute_show_state()
     return state_element;
 }
 
+//-------------------------------------------------------------Command_processor::execute_start_job
+
+xml::Element_ptr Command_processor::execute_modify_job( xml::Element_ptr element )
+{
+    string job_name = as_string( element->getAttribute( "job" ) );
+    string action   = as_string( element->getAttribute( "action" ) );
+    xml::Element_ptr tasks_element = _answer->createElement( "tasks" );
+
+    FOR_EACH( Task_list, _spooler->_task_list, it )
+    {
+        Task* task = *it;
+        if( task->_job->_name == job_name ) 
+        {
+            if( action == "start" )
+            {
+                if( !task->_running ) 
+                {
+                    task->_stopped = false;
+                    task->_error = NULL;
+                    _spooler->_sleep = false;
+                }
+            }
+            else
+            if( action == "stop" )
+            {
+                if( task->_running )  task->_stop = true;
+            }
+
+            tasks_element->appendChild( execute_show_task( *it ) );
+        }
+    }
+    
+    return tasks_element;
+}
+
 //---------------------------------------------------------------Command_processor::execute_command
 
 xml::Element_ptr Command_processor::execute_command( xml::Element_ptr element )
 {
-    if( element->tagName == "show_state" )  
-    {
-        return execute_show_state();
-    }
+    if( element->tagName == "show_state" )  return execute_show_state();
     else
-    {
+    if( element->tagName == "modify_job" )  return execute_modify_job( element );
+    else
         throw_xc( "SOS-1425", as_string( element->tagName ) ); return NULL;
-    }
 }
 
 //------------------------------------------------------------------------Command_processor::execute
@@ -118,7 +157,7 @@ string Command_processor::execute( const string& xml_text )
 
     _answer->appendChild( _answer->createProcessingInstruction( "xml", "version=\"1.0\" encoding=\"iso-8859-1\"" ) );
 
-    xml::Element_ptr spooler_answer = _answer->appendChild( _answer->createElement( "spooler.answer" ) );
+    xml::Element_ptr spooler_answer = _answer->appendChild( _answer->createElement( "spooler_answer" ) );
 
     try 
     {
@@ -145,7 +184,7 @@ string Command_processor::execute( const string& xml_text )
 
             xml::Element_ptr e = command_doc->documentElement;
 
-            if( e->tagName == "spooler.command" )
+            if( e->tagName == "spooler_command" )
             {
                 xml::NodeList_ptr node_list = e->childNodes;
 

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 
-<!-- $Id: spooler_config.xml,v 1.9 2001/01/06 11:09:44 jz Exp $   (C) 2000 SOS GmbH Berlin -->
+<!-- $Id: spooler_config.xml,v 1.10 2001/01/06 22:50:21 jz Exp $   (C) 2000 SOS GmbH Berlin -->
 
 <!DOCTYPE spooler_config SYSTEM "spooler_config.dtd">
 
@@ -119,7 +119,7 @@ end function
 
         <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
-        <object_set_class name="Test">
+        <object_set_class name="Perl">
 
             <level_decls>
                 <level_decl level="1" name="Stufe 1"/>
@@ -223,7 +223,7 @@ package main;
         return Object_set_class->construct();
     }
 
-    $object_set = spooler_make_object_set();
+    #$object_set = spooler_make_object_set();
 
 
             ]]></script>

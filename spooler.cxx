@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.10 2001/01/06 11:09:44 jz Exp $
+// $Id: spooler.cxx,v 1.11 2001/01/06 22:50:21 jz Exp $
 
 
 
@@ -60,11 +60,11 @@ void Object_set::open()
 
     CComVariant object_set_vt;
 
-    if( stricmp( _script_site->_engine_name.c_str(), "PerlScript" ) == 0 )
-    {
-        object_set_vt = _script_site->invoke( "main::object_set" );
-    }
-    else
+    //if( stricmp( _script_site->_engine_name.c_str(), "PerlScript" ) == 0 )
+    //{
+    //    object_set_vt = _script_site->invoke( "object_set" );
+    //}
+    //else
     {
         object_set_vt = _script_site->invoke( "spooler_make_object_set()" );
     }
@@ -244,6 +244,8 @@ void Task::error( const Xc& x)
     _error = x;
 
     _running = false;
+    _stopped = true;        // Nicht wieder starten
+
     _object_set = NULL;
 }
 
@@ -272,6 +274,8 @@ void Task::step_error( const Xc& x )
 
 bool Task::start()
 {
+    cerr << "Job " << _job->_name << " start\n";
+
     _running_since = now();
     _object_set = SOS_NEW( Object_set( &_job->_object_set_descr ) );
 
@@ -286,7 +290,6 @@ bool Task::start()
         if( now() >= _job->_run_time._next_end_time )  set_new_start_time();
     }
     catch( const Xc& x        ) { start_error( x ); return false; }
-  //catch( const exception& x ) { start_error( x.what() ); return false; }
 
     return true;
 }
@@ -295,13 +298,13 @@ bool Task::start()
 
 void Task::end()
 {
+    cerr << "Job " << _job->_name << " end\n";
 
     try
     {
         _object_set->close();
     }
     catch( const Xc& x        ) { end_error( x ); }
-  //catch( const exception& x ) { end_error( x.what() ); }
 
     _spooler->_running_jobs_count--;
     _running = false;
@@ -311,6 +314,8 @@ void Task::end()
 
 bool Task::step()
 {
+    cerr << "Task " << _job->_name << " step\n";
+
     Spooler_object object;
 
     try 
@@ -324,7 +329,6 @@ bool Task::step()
         _step_count++;
     }
     catch( const Xc& x        ) { step_error( x ); return false; }
-  //catch( const exception& x ) { step_error( x.what() ); return false; }
 
     return true;
 }
@@ -341,15 +345,24 @@ void Spooler::step()
 
         if( !task->_running )
         {
-            if( !task->_error  &&  now() >= task->_next_start_time )
+            if( !task->_stopped  &&  now() >= task->_next_start_time )
             {
                 task->start();
             }
         }
         else
         {
-            bool ok = task->step();
-            if( !ok )   task->end();
+            if( task->_stop )
+            {
+                task->end();
+                task->_stop = false;
+                task->_stopped = true;
+            }
+            else
+            {
+                bool ok = task->step();
+                if( !ok )  task->end();
+            }
         }
     }
 }
@@ -402,15 +415,29 @@ void Spooler::wait()
             next_start_time = latter_day;
             FOR_EACH( Task_list, _task_list, it ) 
             {
-                if( next_start_time > (*it)->_next_start_time )  next_task = *it, next_start_time = next_task->_next_start_time;
+                Task* task = *it;
+                if( !task->_running & !task->_stopped ) 
+                {
+                    if( next_start_time > (*it)->_next_start_time )  next_task = *it, next_start_time = next_task->_next_start_time;
+                }
             }
+
+            _sleep = true;
         }
 
-        Time diff = next_start_time - now();
-        if( diff > 0 ) 
+        Time wait_time = next_start_time - now();
+        if( wait_time > 0 ) 
         {
             cerr << "Nächster Start: " << Sos_optional_date_time( next_start_time ) << ", Job " << next_task->_job->_name << '\n';
-            sos_sleep( diff );
+
+            while( _sleep  &&  wait_time > 0 )
+            {
+                double sleep_time = 1.0;
+                sos_sleep( min( sleep_time, wait_time ) );
+                wait_time -= sleep_time;
+            }
+
+            _sleep = false;
         }
 
         tzset();
