@@ -12,7 +12,7 @@ pre             { font-family: Lucida Console, monospace; font-size: 9pt; margin
 col             { padding-bottom: 1pt; padding-right: 2pt }
 caption         { font-size: 10pt; padding-bottom: 5pt; padding-left: 3pt; padding-right: 2pt; padding-top: 2pt }
 
-dt              { margin-top: 4ex; }
+dt              { margin-top: 2ex; }
 dd              { margin-left: 4ex }
 
 p.first         { margin-top: 1ex; }

@@ -1,31 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="../scheduler.xslt" type="text/xsl"?>
 
-<!--$Id: day.xml,v 1.1 2004/08/23 11:15:32 jz Exp $-->
+<!--$Id: day.xml,v 1.2 2004/08/23 16:28:30 jz Exp $-->
 
-<xml_element name     = "weekdays" 
+<xml_element name     = "day" 
              title    = "Laufzeit für bestimmte Wochentage"
              base_dir = ".."
              author   = "$Author: jz $"
-             date     = "$Date: 2004/08/23 11:15:32 $">
+             date     = "$Date: 2004/08/23 16:28:30 $">
 
     <xml_parent_elements>
-        <xml_parent_element name="run_time">
+        <xml_parent_element name="weekdays">
+        </xml_parent_element>        
+        <xml_parent_element name="monthdays">
+        </xml_parent_element>        
+        <xml_parent_element name="ultimos">
         </xml_parent_element>        
     </xml_parent_elements>
 
 
-    <xml_child_elements>
-        <xml_child_element name="day" multiple="yes">
-            <description>
-                <p>
-                    Bestimmt den Wochentag. 
-                </p>
-            </description>
-        </xml_child_element>        
-    </xml_child_elements>
-    
-    
     <xml_attributes>
         <xml_attribute name="day" value="zahl">
             <description>
@@ -62,15 +55,11 @@ Das Attribut <code>day</code> gibt den Tag von 0 für Sonntag bis 6 für Samstag
     
     <description>
         <p>
-            setzt die Perioden für einen bestimmten Tag fest.
+            Setzt die Perioden für einen bestimmten Tag fest.
         </p>
     </description>
     
-    <description for_element="base">
-        <p>
-            Ersetzt ein &lt;date> mit gleichem Datum aus der Basiskonfiguration.
-        </p>
-    </description>
+    <behavior_with_xml_element element="base" replace_attribute="day"/>
     
     <example>
         <pre>

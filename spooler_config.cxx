@@ -1,4 +1,4 @@
-// $Id: spooler_config.cxx,v 1.70 2004/08/02 14:14:58 jz Exp $
+// $Id: spooler_config.cxx,v 1.71 2004/08/23 16:28:30 jz Exp $
 
 //#include <precomp.h>
 
@@ -344,7 +344,7 @@ void Spooler::load_config( const xml::Element_ptr& config_element, const Time& x
         if( _max_threads < 1 )  _max_threads = 1;
 
         _config_java_class_path = subst_env( config_element.getAttribute( "java_class_path" ) );
-        _config_java_options    = subst_env( config_element.getAttribute( "java_options" ) );
+        _config_java_options    = subst_env( config_element.getAttribute( "java_options"    ) );
 
         string log_dir =   config_element.getAttribute( "log_dir" );
 

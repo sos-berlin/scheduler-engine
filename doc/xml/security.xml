@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="../scheduler.xslt" type="text/xsl"?>
 
-<!--$Id: security.xml,v 1.3 2004/08/22 20:09:24 jz Exp $-->
+<!--$Id: security.xml,v 1.4 2004/08/23 16:28:30 jz Exp $-->
 
 <xml_element name     = "security" 
              title    = "Zugriffsschutz"
              base_dir = ".."
              author   = "$Author: jz $"
-             date     = "$Date: 2004/08/22 20:09:24 $">
+             date     = "$Date: 2004/08/23 16:28:30 $">
 
     <xml_parent_elements>
         <xml_parent_element name="config">
@@ -19,7 +19,11 @@
             <description>
                 <p>
                     Mit <code>ignore_unknown_hosts="yes"</code> ignoriert der Scheduler unbekannte oder nicht auflösbare Hostnamen in
-                    <code>allowed_host</code>. 
+                    <code>&lt;allowed_host></code>. 
+                </p>
+                <p>
+                    Das Attribut wirkt nur auf die hier angegebenen <code>&lt;allowed_host></code>, 
+                    nicht auf die Basiskonfiguration.
                 </p>
             </description>
         </xml_attribute>   
@@ -29,6 +33,8 @@
         <xml_child_element name="allowed_host">
         </xml_child_element>        
     </xml_child_elements>
+
+    <behavior_with_xml_element element="base" complete="yes"/>
 
     <description>
         <p>

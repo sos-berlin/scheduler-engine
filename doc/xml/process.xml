@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <?xml-stylesheet href="../scheduler.xslt" type="text/xsl"?>
-<!--$Id: process.xml,v 1.1 2004/08/22 11:40:05 jz Exp $-->
+<!--$Id: process.xml,v 1.2 2004/08/23 16:28:30 jz Exp $-->
 
 <xml_element  name     = "process" 
               title    = "Externes Programm" 
               base_dir = ".."
               author   = "$Author: jz $" 
-              date     = "$Date: 2004/08/22 11:40:05 $">
+              date     = "$Date: 2004/08/23 16:28:30 $">
               
     <xml_parent_elements>
         <xml_parent_element name="job">
@@ -41,6 +41,6 @@
             Der exit code ist das Ergebnis der Task und steht in <code>task.result</code> bereit.
         </p>
     </description>
+
+    <behavior_with_xml_element element="base" allowed="no"/>
 </xml_element>    
-
-

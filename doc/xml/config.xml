@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="../scheduler.xslt" type="text/xsl"?>
 
-<!--$Id: config.xml,v 1.3 2004/08/22 20:09:24 jz Exp $-->
+<!--$Id: config.xml,v 1.4 2004/08/23 16:28:30 jz Exp $-->
 
 <xml_element name     = "config" 
              title    = "Konfiguration"
              base_dir = ".."
              author   = "$Author: jz $"
-             date     = "$Date: 2004/08/22 20:09:24 $">
+             date     = "$Date: 2004/08/23 16:28:30 $">
 
     <xml_parent_elements>
         <xml_parent_element name="spooler">
@@ -19,14 +19,15 @@
 
     <xml_attributes>
         <xml_attribute name="spooler_id" value="spooler_id">
+            <!-- Diese Beschreibung wird auch von anderen Elementen verwendet. Also allgemein halten! -->
             <description>
-                Dieses <code>&lt;config&gt;</code>-Element ist nur wirksam, wenn dieses Attribut gleich dem
+                Das Element ist nur wirksam, wenn dieses Attribut gleich dem
                 Parameter <code>-id=</code> vom Scheduler-Start ist,
                 oder wenn beim Scheduler-Start der Parameter <code>-id=</code> nicht angegeben worden ist.
             </description>
         </xml_attribute>
         
-        <xml_attribute name="tcp_port" value="zahl" initial="4444" title="Für Kommandos per TCP- und HTTP-Steuerung">
+        <xml_attribute name="tcp_port" value="zahl" initial="4444" title="Für Kommandos per TCP und HTTP">
             <description>
                 <p>
                     Der Scheduler kann auf einem TCP-Port während des Betriebs Kommandos entgegennehmen. Hier kann ein 
@@ -200,6 +201,8 @@
         
     </xml_child_elements>
 
+    <behavior_with_xml_element element="base" complete_attribute="spooler_id"/>
+
     <description>
         <p>
             <code>&lt;config></code> enthält die Konfiguration des Schedulers, vor allem die Jobs.
@@ -209,4 +212,5 @@
             Attribut <code>spooler_id</code> wirksam.
         </p>
     </description>
+
 </xml_element>

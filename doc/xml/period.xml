@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="../scheduler.xslt" type="text/xsl"?>
 
-<!--$Id: period.xml,v 1.1 2004/08/23 11:15:58 jz Exp $-->
+<!--$Id: period.xml,v 1.2 2004/08/23 16:28:30 jz Exp $-->
 
 <xml_element name     = "period" 
              title    = "Laufzeit"
              base_dir = ".."
              author   = "$Author: jz $"
-             date     = "$Date: 2004/08/23 11:15:58 $">
+             date     = "$Date: 2004/08/23 16:28:30 $">
 
     <xml_parent_elements>
         <xml_parent_element name="run_time">
@@ -36,7 +36,7 @@
                     Der Job soll zu der angegebenen Uhrzeit starten.
                 </p>
                 <p>
-                    Schließt die Attribute <code>begin</code> und <code>end</code> aus.
+                    Nicht zusammen mit den Attributen <code>begin=</code>, <code>end=</code> und <code>repeat=</code> zu verwenden.
                 </p>
             </description>
         </xml_attribute>
@@ -64,9 +64,12 @@
                 <p>
                     Der Job wird, wenn er nicht schon läuft, zu Beginn der Periode gestartet.
                     Nach Jobende soll der Scheduler den Job nach ablauf der angegebenen Zeit erneut starten, 
-                    soweit die <code>&lt;run_time</code> das zulässt.
-                    Die Wiederholung kann im Format hh:mm oder hh:mm:ss oder in Sekunden angegeben werden.
+                    soweit die <code>&lt;run_time></code> das zulässt.
+                    Die Wiederholung kann im Format <i>hh:mm</i> oder <i>hh:mm:ss</i> oder in Sekunden angegeben werden.
                 </p>
+
+                <p>Kann nicht mit dem Attribut <code>single_start=</code> kombiniert werden.</p>
+
                 <p>
                     Bei <code>repeat="0"</code> wird der Job nicht wiederholt (default).
                 </p>

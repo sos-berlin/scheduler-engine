@@ -20,7 +20,7 @@
             <body>
                 <h1>Scheduler - XML-Element&#160; &lt;<xsl:value-of select="@name"/>></h1>
                 
-                <h2>Schema</h2>
+                <!--<h2>Schema</h2>-->
 
                 <code>&lt;<xsl:value-of select="@name"/></code>
                 
@@ -121,19 +121,56 @@
                 
                 <p>&#160;</p>
                 
-                <xsl:apply-templates select="description [ not( @for_element ) ]"/>
+                <xsl:apply-templates select="description"/>
                 
-                <xsl:if test="description [ @for_element ]">
+                <xsl:for-each select="behavior_with_xml_element">
                     <p class="example">
                         Verhalten mit 
-                            <xsl:call-template name="scheduler_element">
-                                <xsl:with-param name="name" select="'base'"/>
-                            </xsl:call-template>
+                        <xsl:call-template name="scheduler_element">
+                            <xsl:with-param name="name" select="@element"/>
+                        </xsl:call-template>
                     </p>
+
                     <div class="indent">
-                        <xsl:apply-templates select="description [ @for_element ]"/>
+                        <!--xsl:if test="@allowed='yes' and /xml_element/xml_attributes/xml_attribute">
+                            Attribute werden überschrieben.
+                            <p/>
+                        </xsl:if-->
+                        <xsl:if test="@replace_attribute">
+                            Ersetzt ein Element <code>&lt;<xsl:value-of select="parent::*/@name"/>></code>
+                            an der entsprechenden Stelle
+                            mit gleichem Attribut <code><xsl:value-of select="@replace_attribute"/>=</code>
+                            aus der Basiskonfiguration.
+                        </xsl:if>
+
+                        <xsl:if test="@replace='yes'">
+                            Ersetzt ein Element <code>&lt;<xsl:value-of select="parent::*/@name"/>></code>
+                            an der entsprechenden Stelle
+                            aus der Basiskonfiguration.
+                        </xsl:if>
+
+                        <xsl:if test="@complete_attribute">
+                            Ergänzt ein Element <code>&lt;<xsl:value-of select="parent::*/@name"/>></code>
+                            an der entsprechenden Stelle
+                            mit gleichem Attribut <code><xsl:value-of select="@complete_attribute"/>=</code>
+                            aus der Basiskonfiguration.
+                            <!--Hier angegebene Attribute überschreiben die aus der Basiskonfiguration.-->
+                        </xsl:if>
+                        
+                        <xsl:if test="@complete='yes'">
+                            Ergänzt ein Element <code>&lt;<xsl:value-of select="parent::*/@name"/>></code>
+                            an der entsprechenden Stelle
+                            aus der Basiskonfiguration.
+                            <!--Hier angegebene Attribute überschreiben die aus der Basiskonfiguration.-->
+                        </xsl:if>
+                        
+                        <xsl:if test="@allowed='no'">
+                            Das Element darf nicht angegeben werden, wenn es bereits in der Basiskonfiguration steht.
+                        </xsl:if>
+                        
+                        <xsl:apply-templates select="description"/>
                     </div>
-                </xsl:if>
+                </xsl:for-each>
                 
                 <xsl:apply-templates select="example"/>
                 <xsl:apply-templates select="xml_parent_elements"/>
@@ -218,9 +255,9 @@
         </xsl:element>
         
         <p class="list">
-            <span class="mono">
-            <b><xsl:value-of select="@name"/></b>
-            </span>="<i><xsl:value-of select="@value"/></i>"
+            <code><b><xsl:value-of select="@name"/></b>="</code>
+            <i><xsl:value-of select="@value"/></i>
+            <code>"</code>
             
             <xsl:if test="@initial">
                 &#160;(Initialwert: <xsl:value-of select="@initial"/>)

@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet href="../scheduler.xslt" type="text/xsl"?>
+
+<!--$Id: process_class.xml,v 1.1 2004/08/23 16:28:30 jz Exp $-->
+
+<xml_element name     = "process_class" 
+             title    = "Prozessklasse"
+             base_dir = ".."
+             author   = "$Author: jz $"
+             date     = "$Date: 2004/08/23 16:28:30 $">
+
+    <xml_parent_elements>
+        <xml_parent_element name="process_classes">
+        </xml_parent_element>        
+    </xml_parent_elements>
+
+    <xml_attributes>
+        <xml_attribute name="spooler_id" same_as_element="config"/>
+        
+        <xml_attribute name="name" value="name">
+            <description>
+                <p>
+                    Name der Prozessklasse. Wenn das Attribut fehlt oder leer (<code>""</code>) ist,
+                    dann wird die Default-Prozessklasse geändert.
+                </p>
+            </description>
+        </xml_attribute>   
+
+        <xml_attribute name="max_processes" value="zahl" initial="10">
+            <description>
+                <p>
+                    Begrenzt die Zahl der Prozesse.
+                </p>
+                <p>
+                    Manche Betriebsysteme limitieren die Zahl der Prozesse, die der Scheduler starten darf.
+                    Es sollten nicht mehr Prozesse konfiguriert werden als das Betriebssystem erlaubt.
+                </p>
+            </description>
+        </xml_attribute>   
+
+    </xml_attributes>    
+
+        
+    <behavior_with_xml_element element="base" complete="yes"/>
+</xml_element>

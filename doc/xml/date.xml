@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="../scheduler.xslt" type="text/xsl"?>
 
-<!--$Id: date.xml,v 1.1 2004/08/23 11:15:32 jz Exp $-->
+<!--$Id: date.xml,v 1.2 2004/08/23 16:28:30 jz Exp $-->
 
 <xml_element name     = "date" 
              title    = "Laufzeit für ein bestimmtes Datum"
              base_dir = ".."
              author   = "$Author: jz $"
-             date     = "$Date: 2004/08/23 11:15:32 $">
+             date     = "$Date: 2004/08/23 16:28:30 $">
 
     <xml_parent_elements>
         <xml_parent_element name="run_time">
@@ -46,11 +46,7 @@
         </p>
     </description>
     
-    <description for_element="base">
-        <p>
-            Ersetzt ein &lt;date> mit gleichem Datum aus der Basiskonfiguration.
-        </p>
-    </description>
+    <behavior_with_xml_element for_element="base" replace_attribute="date"/>
     
     <example>
         <pre>
