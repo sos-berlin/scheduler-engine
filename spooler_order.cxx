@@ -1393,7 +1393,7 @@ void Order::set_at( const Time& time )
         if( _job_chain  )  throw_xc( "SCHEDULER-186", obj_name(), _job_chain->name() );
         
 
-        _setback = time > Time::now()? time : 0;
+        _setback = time > Time::now()? time : Time(0);
 
         if( job() )
         {
