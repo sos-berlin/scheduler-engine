@@ -1,4 +1,4 @@
-// $Id: spooler_com.cxx,v 1.89 2003/02/24 18:57:35 jz Exp $
+// $Id: spooler_com.cxx,v 1.90 2003/03/01 11:20:30 jz Exp $
 /*
     Hier sind implementiert
 
@@ -247,7 +247,7 @@ const Com_method Com_variable_set::_methods[] =
     { DISPATCH_PROPERTYGET, 2, "count"              , (Com_method_ptr)&Com_variable_set::get_count      , VT_I4         },
     { DISPATCH_PROPERTYGET, 3, "dom"                , (Com_method_ptr)&Com_variable_set::get_dom        , VT_DISPATCH   },
     { DISPATCH_PROPERTYGET, 4, "Clone"              , (Com_method_ptr)&Com_variable_set::Clone          , VT_DISPATCH   },
-    { DISPATCH_PROPERTYGET, 5, "merge"              , (Com_method_ptr)&Com_variable_set::Clone          , VT_EMPTY      , { VT_DISPATCH } },
+    { DISPATCH_PROPERTYGET, 5, "merge"              , (Com_method_ptr)&Com_variable_set::merge          , VT_EMPTY      , { VT_DISPATCH } },
     { DISPATCH_PROPERTYGET, DISPID_NEWENUM, "_NewEnum", (Com_method_ptr)&Com_variable_set::get__NewEnum , VT_DISPATCH   },
     {}
 };
@@ -623,7 +623,7 @@ const Com_method Com_log::_methods[] =
     { DISPATCH_PROPERTYPUT, 17, "mail_on_success"      , (Com_method_ptr)&Com_log::put_mail_on_success     , VT_EMPTY      , { VT_BOOL } },
     { DISPATCH_PROPERTYGET, 17, "mail_on_success"      , (Com_method_ptr)&Com_log::get_mail_on_success     , VT_BOOL       },
     { DISPATCH_PROPERTYPUT, 18, "mail_on_process"      , (Com_method_ptr)&Com_log::put_mail_on_process     , VT_EMPTY      , { VT_I4 } },
-    { DISPATCH_PROPERTYGET, 18, "mail_on_success"      , (Com_method_ptr)&Com_log::get_mail_on_success     , VT_I4         },
+    { DISPATCH_PROPERTYGET, 18, "mail_on_process"      , (Com_method_ptr)&Com_log::get_mail_on_process     , VT_I4         },
     { DISPATCH_PROPERTYPUT, 19, "level"                , (Com_method_ptr)&Com_log::put_level               , VT_EMPTY      , { VT_I4 } },
     { DISPATCH_PROPERTYGET, 19, "level"                , (Com_method_ptr)&Com_log::get_level               , VT_I4         },
     { DISPATCH_PROPERTYGET, 20, "filename"             , (Com_method_ptr)&Com_log::get_filename            , VT_BSTR       },
@@ -1826,9 +1826,9 @@ const Com_method Com_spooler::_methods[] =
     { DISPATCH_PROPERTYGET, 10, "variables"                 , (Com_method_ptr)&Com_spooler::get_variables       , VT_DISPATCH  },
     { DISPATCH_PROPERTYPUT, 11, "var"                       , (Com_method_ptr)&Com_spooler::put_var             , VT_EMPTY     , { VT_BYREF|VT_VARIANT } },
     { DISPATCH_PROPERTYGET, 11, "var"                       , (Com_method_ptr)&Com_spooler::get_var             , VT_DISPATCH  , { VT_BSTR } },
-    { DISPATCH_PROPERTYGET, 12, "db_name"                   , (Com_method_ptr)&Com_spooler::get_variables       , VT_BSTR      },
+    { DISPATCH_PROPERTYGET, 12, "db_name"                   , (Com_method_ptr)&Com_spooler::get_db_name         , VT_BSTR      },
     { DISPATCH_METHOD     , 13, "create_job_chain"          , (Com_method_ptr)&Com_spooler::create_job_chain    , VT_DISPATCH  },
-    { DISPATCH_METHOD     , 14, "add_job_chain"             , (Com_method_ptr)&Com_spooler::create_job_chain    , VT_EMPTY     , { VT_DISPATCH } },
+    { DISPATCH_METHOD     , 14, "add_job_chain"             , (Com_method_ptr)&Com_spooler::add_job_chain       , VT_EMPTY     , { VT_DISPATCH } },
     { DISPATCH_PROPERTYGET, 15, "job_chain"                 , (Com_method_ptr)&Com_spooler::get_job_chain       , VT_DISPATCH  , { VT_BSTR } },
     { DISPATCH_METHOD     , 16, "create_order"              , (Com_method_ptr)&Com_spooler::create_order        , VT_DISPATCH  },
     { DISPATCH_PROPERTYGET, 17, "is_service"                , (Com_method_ptr)&Com_spooler::get_is_service      , VT_BOOL      },
