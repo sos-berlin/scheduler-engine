@@ -1,4 +1,4 @@
-// $Id: spooler_wait.cxx,v 1.29 2002/03/18 10:11:40 jz Exp $
+// $Id: spooler_wait.cxx,v 1.30 2002/03/20 08:49:03 jz Exp $
 /*
     Hier sind implementiert
 
@@ -11,6 +11,8 @@
 #include "spooler.h"
 
 #include <io.h>         // findfirst()
+#include <sys/types.h>
+#include <sys/timeb.h>
 #include "../kram/sleep.h"
 #include "../kram/log.h"
 
@@ -251,15 +253,14 @@ void Wait_handles::remove_handle( HANDLE handle, Event* event )
     _handles.erase( it );
 }
 
-//--------------------------------------------------------------------------Wait_handles::wait_until
+//-------------------------------------------------------------------------------Wait_handles::wait
 
 int Wait_handles::wait( double wait_time )
 {
     return wait_until( Time::now() + wait_time );
 }
 
-//--------------------------------------------------------------------------------Wait_handles::wait
-#ifdef SYSTEM_WIN
+//-------------------------------------------------------------------------Wait_handles::wait_until
 
 int Wait_handles::wait_until( Time until )
 {
@@ -272,18 +273,21 @@ int Wait_handles::wait_until( Time until )
         int    t = ceil( min( (double)sleep_time_ms, wait_time * 1000.0 ) );
 
         if( t <= 0 )  break;
-        if( again )  _log->info( "Noch " + sos::as_string(wait_time) + "s warten ..." );
+        if( again ) {
+            if( t > 1800 )  return -1;  // Um eine halbe Stunde verrechnet? Das muss an der Sommerzeitumstellung liegen
+            _log->info( "Noch " + sos::as_string(wait_time) + "s warten ..." );
+        }
 
-#       ifdef DEBUGxxx
+#       ifdef DEBUG
         {
-            string msg = "WaitForMultipleObjects " + sos::as_string(t/1000.0) + "ms  ";
+            string msg = "WaitForMultipleObjects " + sos::as_string(t/1000.0) + "s  ";
             for( int i = 0; i < _handles.size(); i++ )
             {
                 if( i > 0 )  msg += ", ";
                 msg += _events[i]->as_string();
-                msg += " handle=" + as_hex_string( (int)_handles[i] );
+                msg += " (0x" + as_hex_string( (int)_handles[i] ) + ")";
             }
-            _log->msg( msg );
+            _log->debug9( msg );
         }
 #       endif
 
@@ -310,15 +314,14 @@ int Wait_handles::wait_until( Time until )
             windows_message_step();
         }
         else
-        if( ret != WAIT_TIMEOUT )  throw_mswin_error( "MsgWaitForMultipleObjects" );
-        else
+        if( ret == WAIT_TIMEOUT )  
             again = true;
+        else
+            throw_mswin_error( "MsgWaitForMultipleObjects" );
     }
 
     return -1;
 }
-
-#endif
 
 //--------------------------------------------------------------------------Wait_handles::as_string
 

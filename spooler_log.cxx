@@ -1,4 +1,4 @@
-// $Id: spooler_log.cxx,v 1.30 2002/03/19 18:56:27 jz Exp $
+// $Id: spooler_log.cxx,v 1.31 2002/03/20 08:49:02 jz Exp $
 
 #include "../kram/sos.h"
 #include "spooler.h"
@@ -9,6 +9,7 @@
 #include "../kram/com.h"
 #include "../kram/com_server.h"
 #include "../kram/sosprof.h"
+#include "../file/anyfile.h"
 
 #include <stdio.h>
 #include <sys/stat.h>               // S_IREAD, stat()
@@ -327,9 +328,10 @@ void Prefix_log::close2()
 
         if( !_new_filename.empty() )
         {
-            log( log_info, "Protokolldatei wird umbenannt in " + _new_filename );
-            int ret = rename( _filename.c_str(), _new_filename.c_str() );
-            if( ret == -1 )  throw_errno( errno, "rename", _new_filename.c_str() );
+            log( log_info, "Protokolldatei wird kopiert in " + _new_filename );
+            copy_file( _filename, _new_filename );
+            //int ret = rename( _filename.c_str(), _new_filename.c_str() );
+            //if( ret == -1 )  throw_errno( errno, "rename", _new_filename.c_str() );
             _new_filename = "";
         }
     }

@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.67 2002/03/19 18:56:28 jz Exp $
+// $Id: spooler_task.cxx,v 1.68 2002/03/20 08:49:02 jz Exp $
 /*
     Hier sind implementiert
 
@@ -374,9 +374,14 @@ void Job::select_period( Time now )
     if( now >= _period.end() )       // Periode abgelaufen?
     {
         _period = _run_time.next_period(now);  
-        
-        string rep; if( _period._repeat != latter_day )  rep = _period._repeat.as_string();
-        _log.debug( "Nächste Periode ist <period begin=\"" + _period.begin().as_string() + "\" end=\"" + _period.end().as_string() + "\" repeat=\"" + rep + "\">" );
+
+        if( _period.begin() != latter_day )
+        {
+            string rep; if( _period._repeat != latter_day )  rep = _period._repeat.as_string();
+            _log.debug( "Nächste Periode ist <period begin=\"" + _period.begin().as_string() + "\" end=\"" + _period.end().as_string() + "\" repeat=\"" + rep + "\">" );
+        }
+        else 
+            _log.debug( "Keine weitere Periode" );
 
         if( _period.has_start() )
         {
@@ -887,7 +892,8 @@ bool Job::task_to_start()
         else
             select_period(now);
 
-        if( dequeued || ok || is_in_period(now) )
+        if( ok                      // Auf weitere Anlässe prüfen und diese protokollieren
+         || is_in_period(now) )
         {
             THREAD_LOCK( _lock )
             {
@@ -924,6 +930,10 @@ bool Job::task_to_start()
 
 bool Job::do_something()
 {
+#   ifdef DEBUG
+        _log.debug9( "do_something() state=" + state_name() );
+#   endif
+
     if( !_state )  return false;
 
     bool something_done = false;

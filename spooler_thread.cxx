@@ -1,4 +1,4 @@
-// $Id: spooler_thread.cxx,v 1.27 2002/03/18 10:11:40 jz Exp $
+// $Id: spooler_thread.cxx,v 1.28 2002/03/20 08:49:03 jz Exp $
 /*
     Hier sind implementiert
 
@@ -7,6 +7,7 @@
 
 
 #include "../kram/sos.h"
+#include <sys/timeb.h>
 #include "spooler.h"
 #include "../kram/sleep.h"
 
@@ -276,8 +277,6 @@ void Thread::wait()
                 if( job->_state == Job::s_pending ) 
                 {
                     if( _next_start_time > (*it)->_next_time )  next_job = *it, _next_start_time = next_job->_next_time;
-                  //if( _next_start_time > (*it)->_next_start_time )  next_job = *it, _next_start_time = next_job->_next_start_time;
-                  //if( _next_start_time > (*it)->_next_start_at   )  next_job = *it, _next_start_time = next_job->_next_start_at;
                 }
             }
 
@@ -292,12 +291,13 @@ void Thread::wait()
 
 #   ifdef SYSTEM_WIN
  
-        _wait_handles.wait_until( _next_start_time );
+        //_wait_handles.wait_until( _next_start_time );
+        wait_until( _next_start_time );
 
 #    else
 
         wait_time = _next_start_time - Time::now();
-        while( !_wake  &&  wait_time > 0 )
+        while( !_wake  &&  wait_time > 0 )               
         {
             double sleep_time = 1.0;
             sos_sleep( min( sleep_time, wait_time ) );
@@ -308,6 +308,44 @@ void Thread::wait()
 
     { THREAD_LOCK( _lock )  _next_start_time = 0; }
     //tzset();
+}
+
+//-------------------------------------------------------------------------------Thread::wait_until
+
+int Thread::wait_until( Time until )
+{
+    _timeb tm1, tm2;
+    _ftime( &tm1 );
+
+    while(1)
+    {
+        Time now       = Time::now();
+        Time today2    = now.midnight() + 2*3600;           // Heute 2:00 Uhr (für Sommerzeitbeginn: Uhr springt von 2 Uhr auf 3 Uhr)
+        Time tomorrow2 = now.midnight() + 2*3600 + 24*3600;
+        Time today3    = now.midnight() + 3*3600;           // Heute 3:00 Uhr (für Winterzeitbeginn: Uhr springt von 3 Uhr auf 2 Uhr)
+        int  ret       = -1;
+
+        if( now < today2  &&  until >= today2 )     ret = _wait_handles.wait_until( today2 + 0.01 );
+        else
+        if( now < today3  &&  until >= today3 )     ret = _wait_handles.wait_until( today3 + 0.01 );
+        else 
+        if( until >= tomorrow2 )                    ret = _wait_handles.wait_until( tomorrow2 + 0.01 );
+        else
+            break;
+
+        if( ret != -1 )  return ret;
+
+        _ftime( &tm2 );
+        if( tm1.dstflag != tm2.dstflag )  
+            _log.info( tm2.dstflag? "Sommerzeit" : "Winterzeit" );
+        else {
+#           ifdef _DEBUG
+                _log.debug9( "Keine Sommerzeitumschaltung" );
+#           endif
+        }
+    }
+
+    return _wait_handles.wait_until(  until );
 }
 
 //------------------------------------------------------------------------------Thread::do_add_jobs
