@@ -1,4 +1,4 @@
-// $Id: spooler_command.h,v 1.13 2002/10/02 05:47:29 jz Exp $
+// $Id: spooler_command.h,v 1.14 2002/10/02 12:54:38 jz Exp $
 
 #ifndef __SPOOLER_COMMAND_H
 #define __SPOOLER_COMMAND_H
@@ -12,12 +12,13 @@ enum Show_what
 {
     show_standard       = 0,
     
-    show_task_queue     = 0x01,
-    show_order_queue    = 0x02,
+    show_task_queue     = 0x01,     // Task Queue zeigen
+    show_orders         = 0x02,     // Jede Order in der Order_queue zeigen
     show_description    = 0x04,
     show_log            = 0x08,
 
-    show_all            = 0xFF
+    show_all_           = 0x80,
+    show_all            = 0xFF      // Alle Flags und show_all_ (Bei <show_state> ist z.B. show_orders nicht in show_all enthalten)
 };
 
 //-------------------------------------------------------------------------------------------------
@@ -37,17 +38,22 @@ struct Command_processor
     void                        execute_2                   ( const string& xml_text );
     xml::Element_ptr            execute_command             ( const xml::Element_ptr& );
     xml::Element_ptr            execute_config              ( const xml::Element_ptr& );
-    xml::Element_ptr            execute_add_jobs            ( const xml::Element_ptr& );
-    xml::Element_ptr            execute_add_order           ( const xml::Element_ptr& );
-    xml::Element_ptr            execute_show_state          ( const xml::Element_ptr& );
-    xml::Element_ptr            execute_show_history        ( const xml::Element_ptr& );
+
+    xml::Element_ptr            execute_show_state          ( const xml::Element_ptr&, Show_what );
+    xml::Element_ptr            execute_show_history        ( const xml::Element_ptr&, Show_what );
     xml::Element_ptr            execute_show_threads        ( Show_what );
-    xml::Element_ptr            execute_show_job            ( Job* );
+    xml::Element_ptr            execute_add_jobs            ( const xml::Element_ptr& );
+    xml::Element_ptr            execute_show_job            ( const xml::Element_ptr&, Show_what );
+  //xml::Element_ptr            execute_show_job            ( Job* );
     xml::Element_ptr            execute_modify_job          ( const xml::Element_ptr& );
     xml::Element_ptr            execute_start_job           ( const xml::Element_ptr& );
     xml::Element_ptr            execute_kill_task           ( const xml::Element_ptr& );
     xml::Element_ptr            execute_modify_spooler      ( const xml::Element_ptr& );
     xml::Element_ptr            execute_signal_object       ( const xml::Element_ptr& );
+    xml::Element_ptr            execute_show_job_chains     ( const xml::Element_ptr&, Show_what );
+    xml::Element_ptr            execute_show_order          ( const xml::Element_ptr&, Show_what );
+    xml::Element_ptr            execute_add_order           ( const xml::Element_ptr& );
+    xml::Element_ptr            execute_modify_order        ( const xml::Element_ptr& );
 
     void                        set_host                    ( Host* host )                          { _host = host; }
 

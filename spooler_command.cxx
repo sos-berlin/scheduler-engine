@@ -1,4 +1,4 @@
-// $Id: spooler_command.cxx,v 1.60 2002/10/02 05:47:29 jz Exp $
+// $Id: spooler_command.cxx,v 1.61 2002/10/02 12:54:38 jz Exp $
 /*
     Hier ist implementiert
 
@@ -85,6 +85,24 @@ void append_error_element( const xml::Element_ptr& element, const Xc_copy& x )
     element->appendChild( create_error_element( element->ownerDocument, x ) );
 }
 
+//----------------------------------------------------------------Command_processor::execute_config
+
+xml::Element_ptr Command_processor::execute_config( const xml::Element_ptr& config_element )
+{
+    if( _security_level < Security::seclev_all )  throw_xc( "SPOOLER-121" );
+
+    if( config_element->tagName != "config" )  throw_xc( "SPOOLER-113", as_string( config_element->tagName ) );
+
+    string spooler_id = as_string( config_element->getAttribute( "spooler_id" ) );
+    if( spooler_id.empty()  ||  spooler_id == _spooler->id()  ||  _spooler->_manual )
+    {
+        if( _load_config_immediately )  _spooler->load_config( config_element, _source_filename );
+                                  else  _spooler->cmd_load_config( config_element, _source_filename );
+    }
+
+    return _answer->createElement( "ok" );
+}
+
 //----------------------------------------------------------Command_processor::execute_show_threads
 
 xml::Element_ptr Command_processor::execute_show_threads( Show_what show )
@@ -96,16 +114,11 @@ xml::Element_ptr Command_processor::execute_show_threads( Show_what show )
 
 //------------------------------------------------------------Command_processor::execute_show_state
 
-xml::Element_ptr Command_processor::execute_show_state( const xml::Element_ptr& element )
+xml::Element_ptr Command_processor::execute_show_state( const xml::Element_ptr& element, Show_what show )
 {
     if( _security_level < Security::seclev_info )  throw_xc( "SPOOLER-121" );
 
-    string what = as_string( element->getAttribute( "what" ) );
-    Show_what show = what == "all"         ? show_all         :
-                     what == "description" ? show_description :
-                     what == "task_queue"  ? show_task_queue  :
-                     what == "order_queue" ? show_order_queue 
-                                           : show_standard;
+    if( show & show_all_ )  show = Show_what( show | show_task_queue | show_description );
 
     xml::Element_ptr state_element = _answer->createElement( "state" );
  
@@ -128,9 +141,11 @@ xml::Element_ptr Command_processor::execute_show_state( const xml::Element_ptr& 
 
 //----------------------------------------------------------Command_processor::execute_show_history
 
-xml::Element_ptr Command_processor::execute_show_history( const xml::Element_ptr& element )
+xml::Element_ptr Command_processor::execute_show_history( const xml::Element_ptr& element, Show_what show )
 {
     if( _security_level < Security::seclev_info )  throw_xc( "SPOOLER-121" );
+
+    if( show & show_all_ )  show = Show_what( show | show_log );
 
     string job_name = as_string( element->getAttribute( "job" ) );
     
@@ -144,11 +159,6 @@ xml::Element_ptr Command_processor::execute_show_history( const xml::Element_ptr
     
     string next_str = as_string( element->getAttribute( "next" ) );
     if( next_str != "" )  next = as_uint(next_str);
-
-    string what = as_string( element->getAttribute( "what" ) );
-    Show_what show = what == "all"? show_all :
-                     what == "log"? show_log  
-                                  : show_standard;
 
     Sos_ptr<Job> job = _spooler->get_job( job_name );
 
@@ -188,6 +198,17 @@ xml::Element_ptr Command_processor::execute_modify_spooler( const xml::Element_p
     }
     
     return _answer->createElement( "ok" );
+}
+
+//--------------------------------------------------------------Command_processor::execute_show_job
+
+xml::Element_ptr Command_processor::execute_show_job( const xml::Element_ptr& element, Show_what show )
+{
+    if( _security_level < Security::seclev_info )  throw_xc( "SPOOLER-121" );
+
+    if( show & show_all_ )  show = Show_what( show | show_description | show_task_queue | show_orders );
+
+    return _spooler->get_job( as_string( element->getAttribute( "job" ) ) ) -> xml( _answer, show );
 }
 
 //------------------------------------------------------------Command_processor::execute_modify_job
@@ -272,24 +293,6 @@ xml::Element_ptr Command_processor::execute_signal_object( const xml::Element_pt
     return _answer->createElement( "ok" );
 }
 
-//----------------------------------------------------------------Command_processor::execute_config
-
-xml::Element_ptr Command_processor::execute_config( const xml::Element_ptr& config_element )
-{
-    if( _security_level < Security::seclev_all )  throw_xc( "SPOOLER-121" );
-
-    if( config_element->tagName != "config" )  throw_xc( "SPOOLER-113", as_string( config_element->tagName ) );
-
-    string spooler_id = as_string( config_element->getAttribute( "spooler_id" ) );
-    if( spooler_id.empty()  ||  spooler_id == _spooler->id()  ||  _spooler->_manual )
-    {
-        if( _load_config_immediately )  _spooler->load_config( config_element, _source_filename );
-                                  else  _spooler->cmd_load_config( config_element, _source_filename );
-    }
-
-    return _answer->createElement( "ok" );
-}
-
 //--------------------------------------------------------------Command_processor::execute_add_jobs
 
 xml::Element_ptr Command_processor::execute_add_jobs( const xml::Element_ptr& add_jobs_element )
@@ -302,25 +305,53 @@ xml::Element_ptr Command_processor::execute_add_jobs( const xml::Element_ptr& ad
     return _answer->createElement( "ok" );
 }
 
+//-------------------------------------------------------Command_processor::execute_show_job_chains
+
+xml::Element_ptr Command_processor::execute_show_job_chains( const xml::Element_ptr& element, Show_what show )
+{
+    if( _security_level < Security::seclev_info )  throw_xc( "SPOOLER-121" );
+
+    if( show & show_all_ )  show = Show_what( show | show_description | show_orders );
+
+    return _spooler->xml_from_job_chains( _answer, show );
+}
+
+//------------------------------------------------------------Command_processor::execute_show_order
+
+xml::Element_ptr Command_processor::execute_show_order( const xml::Element_ptr& show_order_element, Show_what show )
+{
+    if( _security_level < Security::seclev_info )  throw_xc( "SPOOLER-121" );
+
+    if( show == show_all_ )  show = Show_what( show_standard );
+
+    string    job_chain_name = as_string( show_order_element->getAttribute( "job_chain" ) );
+    Order::Id id             =            show_order_element->getAttribute( "id"        );
+
+    ptr<Job_chain> job_chain = _spooler->job_chain( job_chain_name );
+    ptr<Order>     order     = job_chain->order( id );
+
+    return order->xml( _answer, show );
+}
+
 //-------------------------------------------------------------Command_processor::execute_add_order
 
 xml::Element_ptr Command_processor::execute_add_order( const xml::Element_ptr& add_order_element )
 {
     if( _security_level < Security::seclev_all )  throw_xc( "SPOOLER-121" );
 
-    string         priority       = as_string( add_order_element->getAttribute( "priority"  ) );
-    string         id             = as_string( add_order_element->getAttribute( "id"        ) );
-    string         title          = as_string( add_order_element->getAttribute( "title"     ) );
-    string         job_name       = as_string( add_order_element->getAttribute( "job"       ) );
-    string         job_chain_name = as_string( add_order_element->getAttribute( "job_chain" ) );
-    string         state_name     = as_string( add_order_element->getAttribute( "state"     ) );
+    string priority       = as_string( add_order_element->getAttribute( "priority"  ) );
+    string id             = as_string( add_order_element->getAttribute( "id"        ) );
+    string title          = as_string( add_order_element->getAttribute( "title"     ) );
+    string job_name       = as_string( add_order_element->getAttribute( "job"       ) );
+    string job_chain_name = as_string( add_order_element->getAttribute( "job_chain" ) );
+    string state_name     = as_string( add_order_element->getAttribute( "state"     ) );
 
     ptr<Order> order = new Order( _spooler );
 
-    if( priority != ""   )  order->set_priority( as_int(priority) );
-    if( id != ""         )  order->set_id( id.c_str() );
-                            order->set_title( title );
-    if( state_name != "" )  order->set_state( state_name.c_str() );
+    if( priority   != "" )  order->set_priority( as_int(priority) );
+    if( id         != "" )  order->set_id      ( id.c_str() );
+                            order->set_title   ( title );
+    if( state_name != "" )  order->set_state   ( state_name.c_str() );
 
 
     DOM_FOR_ALL_ELEMENTS( add_order_element, e )  
@@ -341,29 +372,81 @@ xml::Element_ptr Command_processor::execute_add_order( const xml::Element_ptr& a
     return _answer->createElement( "ok" );
 }
 
+//-----------------------------------------xml::Element_ptr Command_processor::execute_modify_order
+
+xml::Element_ptr Command_processor::execute_modify_order( const xml::Element_ptr& modify_order_element )
+{
+    if( _security_level < Security::seclev_all )  throw_xc( "SPOOLER-121" );
+
+    string    job_chain_name = as_string( modify_order_element->getAttribute( "job_chain" ) );
+    Order::Id id             =            modify_order_element->getAttribute( "id"        );
+    string    priority       = as_string( modify_order_element->getAttribute( "priority"  ) );
+
+    ptr<Job_chain> job_chain = _spooler->job_chain( job_chain_name );
+    ptr<Order>     order     = job_chain->order( id );
+
+    if( priority != "" )  order->set_priority( as_int( priority ) );
+
+    return _answer->createElement( "ok" );
+}
+
 //---------------------------------------------------------------Command_processor::execute_command
 
 xml::Element_ptr Command_processor::execute_command( const xml::Element_ptr& element )
 {
-    if( element->tagName == "show_state"        )  return execute_show_state( element );
+    string what = as_string( element->getAttribute( "what" ) );
+
+    Show_what show = (Show_what)0;
+    
+    const char* p = what.c_str();  // Bsp: "all"  "orders,description"  "task_queue,orders,description,"
+    while( *p )
+    {
+        if( string_equals_prefix_then_skip( &p, "all"         ) )  show = (Show_what)( show | show_all_ );
+        else
+        if( string_equals_prefix_then_skip( &p, "task_queue"  ) )  show = (Show_what)( show | show_task_queue );
+        else
+        if( string_equals_prefix_then_skip( &p, "orders"      ) )  show = (Show_what)( show | show_orders );
+        else
+        if( string_equals_prefix_then_skip( &p, "description" ) )  show = (Show_what)( show | show_description );
+        else
+        if( string_equals_prefix_then_skip( &p, "log"         ) )  show = (Show_what)( show | show_log );
+        else
+        if( string_equals_prefix_then_skip( &p, "standard"    ) )  ;
+        else
+            throw_xc( "SPOOLER-164", what );
+
+        if( *p == 0 )  break;
+        if( *p != ',' )  throw_xc( "SPOOLER-164", what );
+        p++;
+    }
+
+    if( element->tagName == "show_state"        )  return execute_show_state( element, show );
     else
-    if( element->tagName == "show_history"      )  return execute_show_history( element );
+    if( element->tagName == "show_history"      )  return execute_show_history( element, show );
     else
     if( element->tagName == "modify_spooler"    )  return execute_modify_spooler( element );
     else
     if( element->tagName == "modify_job"        )  return execute_modify_job( element );
     else
+    if( element->tagName == "show_job"          )  return execute_show_job( element, show );
+    else
     if( element->tagName == "start_job"         )  return execute_start_job( element );
     else
     if( element->tagName == "kill_task"         )  return execute_kill_task( element );
+    else
+    if( element->tagName == "add_jobs"          )  return execute_add_jobs( element );
     else
     if( element->tagName == "signal_object"     )  return execute_signal_object( element );
     else
     if( element->tagName == "config"            )  return execute_config( element );
     else
-    if( element->tagName == "add_jobs"          )  return execute_add_jobs( element );
+    if( element->tagName == "show_job_chains"   )  return execute_show_job_chains( element, show );
+    else
+    if( element->tagName == "show_order"        )  return execute_show_order( element, show );
     else
     if( element->tagName == "add_order"         )  return execute_add_order( element );     // in spooler_order.cxx
+    else
+    if( element->tagName == "modify_order"      )  return execute_modify_order( element );
     else
     {
         throw_xc( "SPOOLER-105", as_string( element->tagName ) ); return NULL;
@@ -392,7 +475,7 @@ string xml_as_string( const xml::Document_ptr& document )
         result = file_as_string( tmp_filename );
         unlink( tmp_filename );
     }
-    catch( const Xc&         ) { unlink( tmp_filename ); result = "<?xml version=\"1.0\"?><ERROR/>"; }
+    catch( const exception&  ) { unlink( tmp_filename ); result = "<?xml version=\"1.0\"?><ERROR/>"; }
     catch( const _com_error& ) { unlink( tmp_filename ); result = "<?xml version=\"1.0\"?><ERROR/>"; }
 
     return result;
@@ -408,6 +491,11 @@ string Command_processor::execute( const string& xml_text )
         execute_2( xml_text );
     }
     catch( const Xc& x )
+    {
+        _error = x;
+        append_error_element( _answer->documentElement->firstChild, x );
+    }
+    catch( const exception& x )
     {
         _error = x;
         append_error_element( _answer->documentElement->firstChild, x );

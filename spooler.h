@@ -1,4 +1,4 @@
-// $Id: spooler.h,v 1.92 2002/10/02 05:47:29 jz Exp $
+// $Id: spooler.h,v 1.93 2002/10/02 12:54:37 jz Exp $
 
 #ifndef __SPOOLER_H
 #define __SPOOLER_H
@@ -200,6 +200,7 @@ struct Spooler
     long                        get_free_order_id           ()                                  { return InterlockedIncrement( &_next_free_order_id ); }
     void                        add_job_chain               ( Job_chain* );
     Job_chain*                  job_chain                   ( const string& name );
+    xml::Element_ptr            xml_from_job_chains         ( xml::Document_ptr, Show_what );
 
     friend struct               Com_spooler;
 

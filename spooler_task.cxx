@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.110 2002/10/02 05:47:30 jz Exp $
+// $Id: spooler_task.cxx,v 1.111 2002/10/02 12:54:38 jz Exp $
 /*
     Hier sind implementiert
 
@@ -1495,9 +1495,6 @@ xml::Element_ptr Job::xml( xml::Document_ptr document, Show_what show )
             job_element->setAttribute( "id"           , as_dom_string( as_string( _task->_id) ) );
         }
 
-        if( _order_queue )  job_element->setAttribute( "order_queue_length", as_dom_string( as_string( _order_queue->length() ) ) );
-        
-
         if( show & show_description )  dom_append_text_element( job_element, "description", _description );
 
         if( (show & show_task_queue)  &&  !_task_queue.empty() )
@@ -1521,7 +1518,7 @@ xml::Element_ptr Job::xml( xml::Document_ptr document, Show_what show )
             job_element->appendChild( queue_element );
         }
 
-        if( (show & show_order_queue)  &&  _order_queue  &&  !_order_queue->empty() )  
+        if( _order_queue )  
         {
             dom_append_nl( job_element );
             job_element->appendChild( _order_queue->xml( document, show ) );

@@ -1,4 +1,4 @@
-// $Id: spooler_order.h,v 1.9 2002/10/02 05:47:30 jz Exp $
+// $Id: spooler_order.h,v 1.10 2002/10/02 12:54:38 jz Exp $
 
 #ifndef __SPOOLER_ORDER_H
 #define __SPOOLER_ORDER_H
@@ -40,6 +40,7 @@ struct Order : Com_order
     Priority                    priority                ()                                          { return _priority; }
 
     Job_chain*                  job_chain               ()                                          { return _job_chain; }
+    Order_queue*                order_queue             ();
 
     void                    set_job                     ( Job* );
     void                    set_job                     ( spooler_com::Ijob* );
@@ -89,8 +90,6 @@ struct Order : Com_order
     wstring                    _state_text;
     string                     _title;
     Payload                    _payload;
-  //bool                       _error;
-
     Job_chain*                 _job_chain;              
     Job_chain_node*            _job_chain_node;         // Nächster Stelle, falls in einer Jobkette
     bool                       _in_job_queue;           // Auftrag ist in _job_chain_node->_job->order_queue() eingehängt
@@ -104,6 +103,9 @@ struct Order : Com_order
 struct Job_chain_node : Object
 {
                                 Job_chain_node          ()                                          : _zero_(this+1) {}
+
+    xml::Element_ptr            xml                     ( xml::Document_ptr, Show_what );
+
 
 
     Fill_zero                  _zero_;
@@ -142,6 +144,7 @@ struct Job_chain : Com_job_chain
     Job_chain_node*             node_from_job           ( Job* );
 
     Order*                      add_order               ( VARIANT* order_or_payload, VARIANT* job_or_state );
+    ptr<Order>                  order                   ( const Order::Id& id );
 
     int                         order_count             ();
 
@@ -190,6 +193,7 @@ struct Order_queue : Com_order_queue
     int                         length                  () const                                    { return _queue.size(); }
     bool                        empty                   () const                                    { return _queue.empty(); }
     ptr<Order>                  get_order_for_processing();
+    ptr<Order>                  order_or_null           ( const Order::Id& );
     Job*                        job                     () const                                    { return _job; }
     xml::Element_ptr            xml                     ( xml::Document_ptr, Show_what );
 

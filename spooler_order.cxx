@@ -1,4 +1,4 @@
-// $Id: spooler_order.cxx,v 1.11 2002/10/02 05:47:30 jz Exp $
+// $Id: spooler_order.cxx,v 1.12 2002/10/02 12:54:38 jz Exp $
 /*
     Hier sind implementiert
 
@@ -52,6 +52,52 @@ Job_chain* Spooler::job_chain( const string& name )
     return result;
 }
 
+//----------------------------------------------------xml::Element_ptr Spooler::xml_from_job_chains
+
+xml::Element_ptr Spooler::xml_from_job_chains( xml::Document_ptr document, Show_what show )
+{
+    xml::Element_ptr job_chains_element = document->createElement( "job_chains" );
+
+        dom_append_nl( job_chains_element );
+
+        THREAD_LOCK( _job_chain_lock )
+        {
+            FOR_EACH( Job_chain_map, _job_chain_map, it )
+            {
+                Job_chain* job_chain = it->second;
+                job_chains_element->appendChild( job_chain->xml( document, show ) );
+                dom_append_nl( job_chains_element );            
+            }
+        }
+
+    return job_chains_element;
+}
+
+//-------------------------------------------------------------xml::Element_ptr Job_chain_node::xml
+
+xml::Element_ptr Job_chain_node::xml( xml::Document_ptr document, Show_what show )
+{
+    xml::Element_ptr element = document->createElement( "job_chain_node" );
+
+                                           element->setAttribute( "state"      , _state       );
+        if( _next_state.vt  != VT_ERROR )  element->setAttribute( "next_state" , _next_state  );
+        if( _error_state.vt != VT_ERROR )  element->setAttribute( "error_state", _error_state );
+   
+        if( _job )
+        {
+            element->setAttribute( "job", _job->name().c_str() );
+
+            //if( show & show_orders )  
+            {
+                dom_append_nl( element );
+                element->appendChild( _job->xml( document, show ) );
+                dom_append_nl( element );
+            }
+        }
+
+    return element;
+}
+
 //-----------------------------------------------------------------------------Job_chain::Job_chain
 
 Job_chain::Job_chain( Spooler* spooler )
@@ -68,9 +114,37 @@ Job_chain::~Job_chain()
 {
 }
 
+//------------------------------------------------------------------xml::Element_ptr Job_chain::xml
+
+xml::Element_ptr Job_chain::xml( xml::Document_ptr document, Show_what show )
+{
+    xml::Element_ptr element = document->createElement( "job_chain" );
+
+        THREAD_LOCK( _lock )
+        {
+            element->setAttribute( "name", _name.c_str() );
+    
+            if( _finished )
+            {
+                dom_append_nl( element );
+
+                FOR_EACH( Chain, _chain, it )
+                {
+                    Job_chain_node* node = *it;
+                    element->appendChild( node->xml( document, show ) );
+                    dom_append_nl( element );
+                }
+            }
+        }
+
+        dom_append_nl( element );
+
+    return element;
+}
+
 //-------------------------------------------------------------------------------Job_chain::add_job
 
-void Job_chain::add_job( Job* job, const Variant& state, const Variant& next_state, const Variant& error_state )
+void Job_chain::add_job( Job* job, const Order::State& state, const Order::State& next_state, const Order::State& error_state )
 {
     if( job  &&  !job->order_queue() )  throw_xc( "SPOOLER-147", job->name() );
 
@@ -166,6 +240,28 @@ Job_chain_node* Job_chain::node_from_state_or_null( const State& state )
     return NULL;
 }
 
+//---------------------------------------------------------------------------------Job_chain::order
+
+ptr<Order> Job_chain::order( const Order::Id& id )
+{
+    THREAD_LOCK( _lock )
+    {
+        for( Chain::iterator it = _chain.begin(); it != _chain.end(); it++ )
+        {
+            Job* job = (*it)->_job;
+            if( job )
+            {
+                ptr<Order> result = job->order_queue()->order_or_null( id );
+                if( result )  return result;
+            }
+        }
+
+        throw_xc( "SPOOLER-162", error_string_from_variant(id), _name );
+    }
+
+    return NULL;
+}
+
 //---------------------------------------------------------------------------Job_chain::order_count
 
 int Job_chain::order_count()
@@ -210,14 +306,19 @@ xml::Element_ptr Order_queue::xml( xml::Document_ptr document, Show_what show )
 
     THREAD_LOCK( _lock )
     {
-        FOR_EACH( Queue, _queue, it )
+        element->setAttribute( "length", as_dom_string( length() ) );
+
+        if( show & show_orders )
         {
+            FOR_EACH( Queue, _queue, it )
+            {
+                dom_append_nl( element );
+                element->appendChild( (*it)->xml( document, show ) );
+            }
+
             dom_append_nl( element );
-            element->appendChild( (*it)->xml( document, show ) );
         }
     }
-
-    dom_append_nl( element );
 
     return element;
 }
@@ -298,6 +399,18 @@ void Order_queue::remove_order( Order* order )
     }
 }
 
+//-----------------------------------------------------------------------Order_queue::order_or_null
+
+ptr<Order> Order_queue::order_or_null( const Order::Id& id )
+{
+    THREAD_LOCK( _lock )
+    {
+        FOR_EACH( Queue, _queue, it )  if( (*it)->_id == id )  return *it;
+    }
+
+    return NULL;
+}
+
 //------------------------------------------------------------Order_queue::get_order_for_processing
 
 ptr<Order> Order_queue::get_order_for_processing()
@@ -368,6 +481,17 @@ xml::Element_ptr Order::xml( xml::Document_ptr document, Show_what show )
     return element;
 }
 
+//-------------------------------------------------------------------------------Order::order_queue
+
+Order_queue* Order::order_queue()
+{
+    Job* job = this->job();
+
+    if( !job )  throw_xc( "SPOOLER-163" );
+
+    return job->order_queue();
+}
+
 //---------------------------------------------------------------------------Order::set_job_by_name
 
 void Order::set_job_by_name( const string& jobname )
@@ -377,7 +501,7 @@ void Order::set_job_by_name( const string& jobname )
 
 //------------------------------------------------------------------------------------Order::set_id
 
-void Order::set_id( const Variant& id )
+void Order::set_id( const Order::Id& id )
 { 
     THREAD_LOCK(_lock)
     {
@@ -447,8 +571,17 @@ void Order::set_priority( Priority priority )
 { 
     THREAD_LOCK( _lock )
     {
-        if( _in_job_queue )  throw_xc( "SPOOLER-159" );
-        _priority = priority; 
+        if( _priority != priority )
+        {
+            _priority = priority; 
+
+            if( _in_job_queue  &&  !_in_process )  
+            {
+                ptr<Order> hold_me = this;
+                order_queue()->remove_order( this );
+                order_queue()->add_order( this );
+            }
+        }
     }
 }
 
@@ -531,8 +664,9 @@ void Order::add_to_job_chain( Job_chain* job_chain )
 
         if( !job_chain->_chain.empty() )
         {
-            Job_chain_node* node = _state.vt == VT_EMPTY? *job_chain->_chain.begin()
-                                                        : job_chain->node_from_state( _state );
+            if( _state.vt == VT_EMPTY )  _state = (*job_chain->_chain.begin())->_state;     // Auftrag bekommt Zustand des ersten Jobs der Jobkette
+
+            Job_chain_node* node = job_chain->node_from_state( _state );
 
             node->_job->order_queue()->add_order( this );
 
@@ -555,7 +689,7 @@ void Order::move_to_node( Job_chain_node* node )
 
         if( _job_chain_node && _in_job_queue )  _job_chain_node->_job->order_queue()->remove_order( this );
 
-        _state = node? node->_state : Variant();
+        _state = node? node->_state : Order::State();
         _job_chain_node = node;
 
         if( node && node->_job )  node->_job->order_queue()->add_order( this );
