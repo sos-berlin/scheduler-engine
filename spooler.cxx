@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.318 2004/01/12 09:35:23 jz Exp $
+// $Id: spooler.cxx,v 1.319 2004/01/13 12:41:07 jz Exp $
 /*
     Hier sind implementiert
 
@@ -122,7 +122,7 @@ static void set_ctrl_c_handler( bool on );
 
 //---------------------------------------------------------------------------------send_error_email
 
-static void send_error_email( const string& subject, const string& body )
+static void send_error_email( const string& subject, const string& text )
 {
     try
     {
@@ -136,9 +136,11 @@ static void send_error_email( const string& subject, const string& body )
         if( error_settings._bcc  != "" )  msg->set_bcc ( error_settings._bcc  );
         if( error_settings._smtp != "" )  msg->set_smtp( error_settings._smtp );
 
+        string body = remove_password( text );
+
         msg->add_header_field( "X-SOS-Spooler", "" );
-        msg->set_subject( subject );
-        msg->set_body( body );
+        msg->set_subject( remove_password( subject ) );
+        msg->set_body( remove_password( text ) );
         msg->send(); 
     }
     catch( const exception& ) {}
@@ -2086,7 +2088,7 @@ int Spooler::launch( int argc, char** argv, const string& parameter_line )
 
 //------------------------------------------------------------------------Spooler::send_error_email
 
-void Spooler::send_error_email( const string& subject, const string& body )
+void Spooler::send_error_email( const string& subject, const string& text )
 {
     try
     {
@@ -2098,8 +2100,12 @@ void Spooler::send_error_email( const string& subject, const string& body )
         if( _log_mail_bcc  != ""  &&  _log_mail_bcc  != "-" )  msg->set_bcc ( _log_mail_bcc  );
         if( _smtp_server   != ""  &&  _smtp_server   != "-" )  msg->set_smtp( _smtp_server   );
 
+        body = remove_password( text );
+        body += "\n\n";
+        body += "Host=" + spooler->_hostname + "  Scheduler-Id=" + spooler->id();
+
         msg->add_header_field( "X-SOS-Spooler", "" );
-        msg->set_subject( subject );
+        msg->set_subject( remove_password( subject ) );
         msg->set_body( body );
         msg->send(); 
     }
