@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.165 2003/08/02 20:23:36 jz Exp $
+// $Id: spooler_task.cxx,v 1.166 2003/08/09 20:35:52 jz Exp $
 /*
     Hier sind implementiert
 
@@ -2392,7 +2392,7 @@ void Job_module_task::do_end()
 }
 
 //-------------------------------------------------------------------------Job_module_task::do_step
-
+/*
 bool Job_module_task::do_step()
 {
     //if( !_module_instance->_has_spooler_process )  return false;
@@ -2403,7 +2403,7 @@ bool Job_module_task::do_step()
     in_call.set_result( ok );
     return ok;
 }
-
+*/
 //-------------------------------------------------------------------------Job_module_task::do_step
 
 bool Job_module_task::do_step()
@@ -2416,11 +2416,11 @@ bool Job_module_task::do_step()
     switch( _call_state )
     {
         case c_none:            
-            _module_instance->call_async( spooler_process_name );
+            _module_instance->step__start();
             break;
 
-        case c_spooler_process: 
-            ok = check_result( _module_instance->call_wait() );
+        case c_step: 
+            ok = check_result( _module_instance->step__end() );
             break;
 
         default:
@@ -2428,9 +2428,9 @@ bool Job_module_task::do_step()
     }
 
   //Module_instance::In_call in_call ( this, spooler_process_name, _order? "Auftrag " + _order->obj_name() : "" );
-    bool ok = check_result( _module_instance->call( spooler_process_name ) );
-    in_call.set_result( ok );
-    return ok;
+  //bool ok = check_result( _module_instance->call( spooler_process_name ) );
+  //in_call.set_result( ok );
+  //return ok;
 }
 
 //-----------------------------------------------------------------------Process_task::Process_task

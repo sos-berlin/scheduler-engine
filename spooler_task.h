@@ -1,4 +1,4 @@
-// $Id: spooler_task.h,v 1.100 2003/08/02 20:23:36 jz Exp $
+// $Id: spooler_task.h,v 1.101 2003/08/09 20:35:52 jz Exp $
 
 #ifndef __SPOOLER_TASK_H
 #define __SPOOLER_TASK_H
@@ -392,17 +392,10 @@ struct Task : Sos_self_deleting
 
     enum Call_state
     {
-        c_null,
-        c_create_instance,
-        c_release,
-        c_construct,
-        c_spooler_init,
-        c_spooler_exit,
-        c_spooler_open,
-        c_spooler_close,
-        c_spooler_process,
-        c_spooler_on_success,
-        c_spooler_on_error
+        c_none,
+        c_begin,
+        c_step,
+        c_end,
     };
 
 

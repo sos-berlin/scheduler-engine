@@ -1,4 +1,4 @@
-// $Id: spooler_module.h,v 1.28 2003/08/02 20:23:36 jz Exp $
+// $Id: spooler_module.h,v 1.29 2003/08/09 20:35:52 jz Exp $
 
 #ifndef __SPOOLER_MODULE_H
 #define __SPOOLER_MODULE_H
@@ -199,6 +199,7 @@ struct Module_instance : Object
     virtual bool                step_wait                   ();
 
     virtual bool                operation_finished          ()                                      { return true; }
+    virtual void                process                     ( bool wait = false )                   {}
 
     Fill_zero                  _zero_;
     Delegated_log              _log;
