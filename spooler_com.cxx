@@ -1,4 +1,4 @@
-// $Id: spooler_com.cxx,v 1.160 2004/10/10 19:37:42 jz Exp $
+// $Id: spooler_com.cxx,v 1.161 2004/10/19 16:08:47 jz Exp $
 /*
     Hier sind implementiert
 
@@ -365,7 +365,7 @@ STDMETHODIMP Com_variable_set::put_Var( BSTR name, VARIANT* value )
         {
             Bstr lname = name;
 
-            bstr_to_lower( &lname );
+            bstr_to_lower( &lname._bstr );
 
             Map::iterator it = _map.find( lname );
             if( it != _map.end()  &&  it->second )
@@ -398,7 +398,7 @@ STDMETHODIMP Com_variable_set::get_Var( BSTR name, VARIANT* value )
             VariantInit( value );
 
             Bstr lname = name;
-            bstr_to_lower( &lname );
+            bstr_to_lower( &lname._bstr );
 
             Map::iterator it = _map.find( lname );
             if( it != _map.end()  &&  it->second )
@@ -475,7 +475,7 @@ xml::Element_ptr Com_variable_set::dom_element( const xml::Document_ptr& doc, co
                 Bstr    name;
                 Variant value;
 
-                v->get_Name( &name );
+                v->get_Name( &name._bstr );
                 v->get_Value( &value );
 
                 xml::Element_ptr var = doc.createElement( subelement_name );

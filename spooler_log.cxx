@@ -1,4 +1,4 @@
-// $Id: spooler_log.cxx,v 1.94 2004/07/26 12:09:58 jz Exp $
+// $Id: spooler_log.cxx,v 1.95 2004/10/19 16:08:47 jz Exp $
 
 #include "spooler.h"
 #include "spooler_mail.h"
@@ -575,13 +575,13 @@ void Prefix_log::set_mail_from_name( const string& from_name, bool overwrite )
         if( !overwrite )
         {
             Bstr from_bstr;
-            hr = _mail->get_From( &from_bstr );     if( FAILED(hr) ) throw_ole( hr, "spooler::Mail::from" );
+            hr = _mail->get_From( &from_bstr._bstr );     if( FAILED(hr) ) throw_ole( hr, "spooler::Mail::from" );
 
             if( SysStringLen(from_bstr) > 0 )  return;
         }
 
         Bstr old_from;
-        hr = _mail->get_From( &old_from );                              if( FAILED(hr) ) throw_ole( hr, "spooler::Mail::from" );
+        hr = _mail->get_From( &old_from._bstr );                        if( FAILED(hr) ) throw_ole( hr, "spooler::Mail::from" );
         if( !wcschr( old_from, '<' )  &&  wcschr( old_from, '@' ) )
         {
             string from = from_name + " <" + bstr_as_string(old_from) + ">";
@@ -607,7 +607,7 @@ void Prefix_log::set_mail_subject( const string& subject, bool overwrite )
         if( !overwrite )
         {
             Bstr subject_bstr;
-            hr = _mail->get_Subject( &subject_bstr );     if( FAILED(hr) ) throw_ole( hr, "spooler::Mail::subject" );
+            hr = _mail->get_Subject( &subject_bstr._bstr );  if( FAILED(hr) ) throw_ole( hr, "spooler::Mail::subject" );
 
             if( SysStringLen(subject_bstr) > 0 )  return;
         }
@@ -632,12 +632,12 @@ void Prefix_log::set_mail_body( const string& body, bool overwrite )
         if( !overwrite )
         {
             Bstr body_bstr;
-            hr = _mail->get_Body( &body_bstr );     if( FAILED(hr) ) throw_ole( hr, "spooler::Mail::body" );
+            hr = _mail->get_Body( &body_bstr._bstr );   if( FAILED(hr) ) throw_ole( hr, "spooler::Mail::body" );
 
             if( SysStringLen(body_bstr) > 0 )  return;
         }
 
-        hr = _mail->put_Body( Bstr(body) );     if( FAILED(hr) ) throw_ole( hr, "spooler::Mail::body", body.c_str() );
+        hr = _mail->put_Body( Bstr(body) );             if( FAILED(hr) ) throw_ole( hr, "spooler::Mail::body", body.c_str() );
     }
     else
     {

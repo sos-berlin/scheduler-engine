@@ -1,13 +1,8 @@
-// $Id: spooler_task.h,v 1.141 2004/09/06 07:53:27 jz Exp $
+// $Id: spooler_task.h,v 1.142 2004/10/19 16:08:47 jz Exp $
 
 #ifndef __SPOOLER_TASK_H
 #define __SPOOLER_TASK_H
 
-#ifdef __GNUC__
-#   include <ext/hash_set>
-#else
-#   include <hash_set>
-#endif
 
 namespace sos {
 namespace spooler {
