@@ -382,7 +382,7 @@ library Spooler
         HRESULT                 Stdout_text                 ( [out,retval] BSTR* Result );
 
         [id(20)]
-        HRESULT                 Create_subprocess           ( [in] VARIANT* program_and_parameters, [out,retval] Isubprocess** );
+        HRESULT                 Create_subprocess           ( [in,optional] VARIANT* program_and_parameters, [out,retval] Isubprocess** );
 
         HRESULT                 Add_subprocess              ( [in] int Pid, [in] double timeout, [in] VARIANT_BOOL Ignore_error, [in] VARIANT_BOOL Ignore_signal, [in,defaultvalue("")] BSTR Title );
     }
@@ -408,7 +408,7 @@ library Spooler
         // Ids sollten mit Itask übereinstimmen!
 
         [id(20)]
-        HRESULT                 Create_subprocess       ( [in] VARIANT* program_and_parameters, [out,retval] Isubprocess** );
+        HRESULT                 Create_subprocess       ( [in,optional] VARIANT* program_and_parameters, [out,retval] Isubprocess** );
     }
 
     [
@@ -1121,13 +1121,19 @@ library Spooler
 
         HRESULT                 Close                   ();
 
-      //HRESULT                 Start                   ( [in] VARIANT* command_line );         // BSTR oder Array
+        HRESULT                 Start                   ( [in] VARIANT* command_line );         // BSTR oder Array
 
       //[propput]
       //HRESULT                 Priority                ( [in] VARIANT* );
 
       //[propget]
       //HRESULT                 Priority                ( [out,retval] VARIANT* );
+
+        [propput]
+        HRESULT                 Priority_class          ( [in] VARIANT* );
+
+        [propget]
+        HRESULT                 Priority_class          ( [out,retval] BSTR* );
 
       //HRESULT                 Raise_priority          ( [in] int, [out,retval] VARIANT_BOOL* );
 

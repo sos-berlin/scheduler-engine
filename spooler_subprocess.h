@@ -36,8 +36,17 @@ struct Subprocess : idispatch_implementation< Subprocess, spooler_com::Isubproce
     // interface Isubprocess
     STDMETHODIMP                Close                       ()                                      { Z_COM_IMPLEMENT( close() ); }
     STDMETHODIMP                Start                       ( VARIANT* command_line );              // BSTR oder Array
-    STDMETHODIMP            put_Priority                    ( VARIANT* priority )                   { return _process.put_Priority( priority ); }
-    STDMETHODIMP            get_Priority                    ( VARIANT* result )                     { return _process.get_Priority( result ); }
+    STDMETHODIMP            put_Priority                    ( int priority )                        { return _process.put_Priority( priority ); }
+    STDMETHODIMP            get_Priority                    ( int* result )                         { return _process.get_Priority( result ); }
+
+#ifdef Z_WINDOWS
+    STDMETHODIMP            put_Priority_class              ( VARIANT* priority )                   { return _process.put_Priority_class( priority ); }
+    STDMETHODIMP            get_Priority_class              ( BSTR* result )                        { return _process.get_Priority_class( result ); }
+# else
+    STDMETHODIMP            put_Priority_class              ( VARIANT* priority )                   { return E_NOTIMPL; }
+    STDMETHODIMP            get_Priority_class              ( BSTR* result )                        { return E_NOTIMPL; }
+#endif
+
   //STDMETHODIMP                Raise_priority              ( int diff, VARIANT_BOOL* result )      { Z_COM_IMPLEMENT( *result = _process.raise_priority( diff )? VARIANT_TRUE : VARIANT_FALSE ); }
   //STDMETHODIMP                Lower_priority              ( int diff, VARIANT_BOOL* result )      { return Raise_priority( -diff, result ); }
 

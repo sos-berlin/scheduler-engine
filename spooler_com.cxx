@@ -2413,7 +2413,7 @@ STDMETHODIMP Com_task::Add_subprocess( int pid, double timeout, VARIANT_BOOL ign
 
 const Com_method Com_task_proxy::_methods[] =
 { 
-    COM_METHOD( Com_task_proxy, 20, Create_subprocess     , VT_DISPATCH , 0, { VT_BYREF|VT_VARIANT } ),
+    COM_METHOD( Com_task_proxy, 20, Create_subprocess     , VT_DISPATCH , 1, { VT_BYREF|VT_VARIANT } ),
   //COM_METHOD( DISPATCH_METHOD, 21, "Wait_for_subprocesses" , Com_task_proxy::Wait_for_subprocesses, VT_EMTPY    , 0, {} ),
     {}
 };
