@@ -1,4 +1,4 @@
-// $Id: spooler_wait.cxx,v 1.92 2004/01/12 09:35:23 jz Exp $
+// $Id: spooler_wait.cxx,v 1.93 2004/02/04 18:42:40 jz Exp $
 /*
     Hier sind implementiert
 
@@ -705,7 +705,7 @@ bool Directory_watcher::match()
     {
         if( filename != "."  &&  filename != ".." )
         {
-            if( _filename_regex.match( filename ) )  return true;
+            if( _filename_regex.match( filename ) )  { LOG2( "joacim", "Directory_watcher.match()  " << filename << " matches\n" ); return true; }
         }
 
         filename = dir.next();
