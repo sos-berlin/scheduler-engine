@@ -1,4 +1,4 @@
-// $Id: spooler_command.cxx,v 1.112 2004/07/12 17:59:48 jz Exp $
+// $Id: spooler_command.cxx,v 1.113 2004/07/15 09:20:25 jz Exp $
 /*
     Hier ist implementiert
 
@@ -675,7 +675,71 @@ string xml_as_string( const xml::Document_ptr& document, bool indent )
 
 string Command_processor::execute_http( const string& http_request )
 {
-    string xml_response = execute( "<show_state what=\"all,orders\"/>", Time::now(), true );
+    string http_cmd;
+    string response_body;
+    string path;
+
+    try
+    {
+        const char* p = http_request.c_str();
+
+        while( (Byte)p[0] > (Byte)' ' )  http_cmd += *p++;
+        while( p[0] == ' ' )  p++;
+
+        if( http_cmd == "GET" )
+        {
+            while( (Byte)p[0] > (Byte)' ' )
+            {
+                if( p[0] == '%'  &&  p[1] != '\0'  &&  p[2] != '\0' )
+                {
+                    path += (char)hex_as_int32( string( p+1, 2 ) );
+                    p += 3;
+                }
+                else
+                    path += *p++;
+            }
+            while( p[0] == ' ' )  p++;
+            while( p[0] != '\0'  &&  p[0] != '\n' )  p++;
+            if( p[0] == '\n' )  p++;
+
+            if( path == "/" )  path = "index.html";
+
+            if( path.find( "." ) != string::npos )
+            {
+                //response_body = file_as_string( directory_of_path( _spooler->_config_filename ) ) + "/html/index.html";
+                if( _spooler->_html_directory.empty() )  throw_xc( "SCHEDULER-212" );
+                response_body = file_as_string( _spooler->_html_directory + "/index.html" );
+            }
+            else
+            if( path.length() > 0 )
+            {
+                if( path[0] == '/' )  path.erase( 0, 1 );
+                if( path != "" )
+                {
+                    string xml = path;
+                    if( xml[0] != '<' )  xml = '<' + path + "/>";
+                    response_body = execute( xml, Time::now(), true );
+                }
+            }
+        }
+        else
+        if( http_cmd == "POST" )
+        {
+            int a=7;
+        }
+
+
+
+
+
+        if( response_body.empty() )   response_body = execute( "<show_state what=\"all,orders\"/>", Time::now(), true );
+
+    }
+    catch( const exception& x )
+    {
+        _spooler->log().error( "Fehler beim HTTP-Aufruf " + http_cmd + " " + path + ": " + x.what() );
+        response_body = "<html><head><title>Scheduler</title></head><body>Die Seite kann nicht bereitgestellt werden. Siehe Scheduler-Protokoll</body></html>";
+    }
 
     time_t      t;
     char        time_text[26+1];
@@ -690,8 +754,7 @@ string Command_processor::execute_http( const string& http_request )
         asctime_r( gmtime_r( &t, &tm ), &time_text );
 #   endif
     
-    memcpy( time_text+25, "\r\n", 2 );
-    
+    memcpy( time_text+24, "\r\n", 3 );
 
     string response = "HTTP/1.1 200 OK\r\n"
                       "Content-Type: text/plain\r\n"
@@ -700,8 +763,8 @@ string Command_processor::execute_http( const string& http_request )
                       "Server: Scheduler " + string(VER_PRODUCTVERSION_STR) + "\r\n"
                       "\r\n";
 
-    response += as_hex_string( (int)xml_response.length() ) + "\r\n";
-    return response + xml_response + "\r\n0\r\n\r\n";
+    response += as_hex_string( (int)response_body.length() ) + "\r\n";
+    return response + response_body + "\r\n0\r\n\r\n";
 }
 
 //------------------------------------------------------------------------Command_processor::execute

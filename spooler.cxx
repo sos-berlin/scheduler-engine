@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.339 2004/07/01 12:17:47 jz Exp $
+// $Id: spooler.cxx,v 1.340 2004/07/15 09:20:24 jz Exp $
 // §851: Weitere Log-Ausgaben zum Scheduler-Start eingebaut
 // §1479
 
@@ -1313,6 +1313,7 @@ void Spooler::load_arg()
 
     _spooler_id                 =            read_profile_string    ( _factory_ini, "spooler", "id"                 );
     _config_filename            =            read_profile_string    ( _factory_ini, "spooler", "config"             );
+    _html_directory             =            read_profile_string    ( _factory_ini, "spooler", "html_dir"           );
     _log_directory              =            read_profile_string    ( _factory_ini, "spooler", "log-dir"            );  // veraltet
     _log_directory              = subst_env( read_profile_string    ( _factory_ini, "spooler", "log_dir"            , _log_directory ) );  _log_directory_as_option_set = !_log_directory.empty();
     _include_path               =            read_profile_string    ( _factory_ini, "spooler", "include-path"       );  // veraltet

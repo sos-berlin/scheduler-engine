@@ -1,4 +1,4 @@
-// $Id: Mail.java,v 1.5 2004/07/13 16:12:44 jz Exp $
+// $Id: Mail.java,v 1.6 2004/07/15 09:20:25 jz Exp $
 
 package sos.spooler;
 
@@ -212,7 +212,6 @@ public class Mail extends Idispatch
      *     spooler_log.debug( "body=" + spooler_log.mail.body );                                                  
      * </pre>
      * 
-     * @return
      */
     public String       body                ()                                              { return (String)   com_call( "<body"                   ); }
 

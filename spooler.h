@@ -1,4 +1,4 @@
-// $Id: spooler.h,v 1.180 2004/05/12 07:51:17 jz Exp $
+// $Id: spooler.h,v 1.181 2004/07/15 09:20:25 jz Exp $
 // §1172
 
 #ifndef __SPOOLER_H
@@ -392,12 +392,13 @@ struct Spooler
 
     ptr<object_server::Connection_manager>  _connection_manager;
 
+    string                     _config_filename;            // -config=
+    string                     _html_directory;
     bool                       _executing_command;          // true: spooler_history wartet nicht auf Datenbank (damit Scheduler nicht blockiert)
     int                        _process_count;
     Process_handle             _process_handles[ max_processes ];   // Für abort_immediately(), mutex-frei alle abhängigen Prozesse
     int                        _pids[ max_processes ];              // Für abort_immediately(), mutex-frei alle Task.add_pid(), Subprozesse der Tasks
   private:
-    string                     _config_filename;            // -config=
     string                     _spooler_id;                 // -id=
     string                     _log_directory;              // -log-dir=
     bool                       _log_directory_as_option_set;// -log-dir= als Option gesetzt, überschreibt Angabe in spooler.xml
