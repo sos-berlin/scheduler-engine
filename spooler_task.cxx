@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.190 2003/09/02 16:28:29 jz Exp $
+// $Id: spooler_task.cxx,v 1.191 2003/09/21 07:19:08 jz Exp $
 /*
     Hier sind implementiert
 
@@ -228,7 +228,11 @@ void Task::close()
     }
     catch( const exception& x ) { _log.warn( x.what() ); }
 */
-    do_close();
+    try
+    {
+        do_close();
+    }
+    catch( const exception& x ) { _log.error( string("close: ") + x.what() ); }
 /*
     THREAD_LOCK( _job->_lock )  
         if( _job->_com_task )  
@@ -239,7 +243,7 @@ void Task::close()
     // Alle, die mit wait_until_terminated() auf diese Task warten, wecken:
     THREAD_LOCK( _terminated_events_lock )  
     {
-        FOR_EACH( vector<Event*>, _terminated_events, it )  (*it)->signal( "close task" );
+        FOR_EACH( vector<Event*>, _terminated_events, it )  (*it)->signal( "task closed" );
         _terminated_events.clear();
     }
 
@@ -535,8 +539,9 @@ bool Task::do_something()
 
         Time now = Time::now();
 
-        // Periode prüfen
-        if( _state == s_running 
+        // Periode endet?
+        if( !_operation
+         || _state == s_running 
          || _state == s_running_process 
          || _state == s_running_delayed  
          || _state == s_running_waiting_for_order )      
@@ -546,7 +551,7 @@ bool Task::do_something()
             if( !let_run ) 
             {
                 _log( "Laufzeitperiode ist abgelaufen, Task wird beendet" );
-                if( !_operation )   set_state( s_end );
+                set_state( s_end );
             }
         }
 
@@ -558,14 +563,15 @@ bool Task::do_something()
             bool ok = true;
 
             // HISTORIE und _end
-            if( _state == s_start_task 
+            if( !_operation
+             || _state == s_start_task 
              || _state == s_running 
              || _state == s_running_delayed 
              || _state == s_running_waiting_for_order 
              || _state == s_running_process           )
             {
                 if( _step_count == _job->_history.min_steps() )  _history.start();
-                if( _end && !_operation )  set_state( s_end );
+                if( _end )  set_state( s_end );
             }
 
 
@@ -592,9 +598,8 @@ bool Task::do_something()
 
                     if( !ok || has_error() )  break;
 
-                    set_state( s_running );
+                    set_state( s_running ), loop = true;
                     something_done = true;
-                    loop = true;
 
                     break;
                 }
@@ -614,8 +619,13 @@ bool Task::do_something()
                         {
                             if( _job->order_queue() )
                             {
-                                if( !_order )  _order = _job->order_queue()->get_order_for_processing( Time::now(), this );
-                                if( !_order )  break;
+                                if( !_order )  _order = _job->order_queue()->get_order_for_processing( now, this );
+
+                                if( !_order )
+                                {
+                                    set_state( s_running_waiting_for_order, _job->order_queue()->next_time() );
+                                    break;
+                                }
 
                                 _log.set_order_log( &_order->_log );
                             }
@@ -632,7 +642,7 @@ bool Task::do_something()
                         ok = step__end();
                         _operation = NULL;
 
-                        if( !ok || has_error() )  set_state( s_end );
+                        if( !ok || has_error() )  set_state( s_end ), loop = true;
                         something_done = true;
                     }
 
@@ -654,8 +664,7 @@ bool Task::do_something()
                     if( now >= _next_spooler_process )
                     {
                         _next_spooler_process = 0;
-                        set_state( s_running );
-                        loop = true;
+                        set_state( s_running ), loop = true;
                     }
                  
                     break;
@@ -701,7 +710,7 @@ bool Task::do_something()
                 case s_on_success:
                 {
                     if( !_operation )  _operation = do_call__start( spooler_on_success_name );
-                                 else  operation__end(), set_state( s_exit );
+                                 else  operation__end(), set_state( s_exit ), loop = true;
 
                     something_done = true;
                     break;
@@ -711,7 +720,7 @@ bool Task::do_something()
                 case s_on_error:
                 {
                     if( !_operation )  _operation = do_call__start( spooler_on_error_name );
-                                 else  operation__end(), set_state( s_exit );
+                                 else  operation__end(), set_state( s_exit ), loop = true;
 
                     something_done = true;
                     break;
@@ -770,41 +779,36 @@ bool Task::do_something()
             }
 
 
-            if( !ok || has_error() )  
+            if( !_operation )
             {
-                //_success = false;
-
-                if( !_operation  &&  _state < s_end )  set_state( s_end );
-            }
+                if( !ok || has_error() )  
+                {
+                    if( _state < s_end )  set_state( s_end ), loop = true;
+                }
 
             
-            if( !_operation  &&  _killed  &&  _state < s_ended )  set_state( s_ended );
+                if( _killed  &&  _state < s_ended )  set_state( s_ended );
+            }
 
-
+/*
             switch( _state )
             {
-                case s_end: 
-                    loop = true;
-                    break;
-
                 case s_running:
-                        if( _next_spooler_process )                     set_state( s_running_delayed          , _next_spooler_process );
+                    if( _next_spooler_process )                     set_state( s_running_delayed, _next_spooler_process );
 
-                        if( !_order  
-                         && _job->order_queue()  
-                         && !_job->order_queue()->has_order( now ) )    set_state( s_running_waiting_for_order, _job->order_queue()->next_time() );  
+                    if( !_order  
+                     && _job->order_queue()  
+                     && !_job->order_queue()->has_order( now ) )    set_state( s_running_waiting_for_order, _job->order_queue()->next_time() );
                     break;
 
                 default: ;
             }
+*/
         }
 
-        if( _operation && !had_operation )  _last_operation_time = now;
+        if( _operation && !had_operation )  _last_operation_time = now;    // Für _timeout
 
-        THREAD_LOCK( _lock )
-        {
-            if( _next_time && !_let_run )  set_next_time( min( _next_time, _job->_period.end() ) );                      // Am Ende der Run_time wecken, damit die Task beendet werden kann
-        }
+        if( _next_time && !_let_run )  set_next_time( min( _next_time, _job->_period.end() ) );                      // Am Ende der Run_time wecken, damit die Task beendet werden kann
 
 
   //ENDE:
