@@ -1,4 +1,4 @@
-// $Id: spooler_mail.cxx,v 1.15 2003/03/19 12:40:26 jz Exp $
+// $Id: spooler_mail.cxx,v 1.16 2003/03/19 21:19:04 jz Exp $
 
 
 #include "spooler.h"
@@ -50,7 +50,7 @@ const Com_method Com_mail::_methods[] =
 
 Com_mail::Com_mail( Spooler* spooler )
 : 
-    Sos_ole_object( mail_class_ptr, this ),
+    Sos_ole_object( mail_class_ptr, (Imail*)this ),
     _zero_(this+1),
     _spooler(spooler)
 {
@@ -63,6 +63,20 @@ Com_mail::~Com_mail()
     _msg = NULL;
 }
 
+//-------------------------------------------------------------------------Com_mail::QueryInterface
+
+STDMETHODIMP Com_mail::QueryInterface( const IID& iid, void** result )
+{
+    if( iid == IID_Ihas_java_class_name )  
+    { 
+        AddRef();
+        *result = (Ihas_java_class_name*)this;  
+        return S_OK; 
+    }
+
+    return Sos_ole_object::QueryInterface( iid, result );
+}
+
 //-----------------------------------------------------------------------------------Com_mail::init
 
 void Com_mail::init()
@@ -70,7 +84,6 @@ void Com_mail::init()
     if( _msg == NULL )
     {
         _msg = mail::create_message( _spooler->_java_vm );
-        //_msg->init();
     }
 }
 

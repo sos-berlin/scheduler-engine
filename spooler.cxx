@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.180 2003/03/19 11:59:56 jz Exp $
+// $Id: spooler.cxx,v 1.181 2003/03/19 21:19:04 jz Exp $
 /*
     Hier sind implementiert
 
@@ -92,7 +92,7 @@ void send_error_email( const string& error_text, int argc, char** argv )
         string smtp = read_profile_string( default_factory_ini, "spooler", "smtp"            );
 
         Sos_ptr<mail::Message> msg = mail::create_message( spooler_ptr->_java_vm );
-        //msg->init();
+
         if( from != "" )  msg->set_from( from );
         if( to   != "" )  msg->set_to  ( to   );
         if( cc   != "" )  msg->set_cc  ( cc   );
@@ -113,11 +113,11 @@ void send_error_email( const string& error_text, int argc, char** argv )
         body += "\n\n\n"
                 "Fehlermeldung:\n";
         body += error_text;
-        msg->set_body( body );
 
+        msg->set_body( body );
         msg->send(); 
     }
-    catch( const Xc& ) {}
+    catch( const exception& ) {}
 }
 
 //---------------------------------------------------------------------read_profile_mail_on_process

@@ -1,4 +1,4 @@
-// $Id: spooler_mail.h,v 1.12 2003/03/15 18:06:38 jz Exp $
+// $Id: spooler_mail.h,v 1.13 2003/03/19 21:19:04 jz Exp $
 
 #ifndef __SPOOLER_MAIL_H
 #define __SPOOLER_MAIL_H
@@ -20,7 +20,9 @@ namespace spooler {
 
 //-----------------------------------------------------------------------------------------Com_mail
 
-struct Com_mail : spooler_com::Imail, Sos_ole_object               
+struct Com_mail : spooler_com::Imail, 
+                  spooler_com::Ihas_java_class_name, 
+                  Sos_ole_object               
 {
     void*                       operator new                ( uint size )                           { return sos_alloc( size, "spooler.Mail" ); }
     void                        operator delete             ( void* ptr )                           { sos_free( ptr ); }
@@ -32,7 +34,11 @@ struct Com_mail : spooler_com::Imail, Sos_ole_object
                                 
     void                        init                        ();
 
-    USE_SOS_OLE_OBJECT
+    STDMETHODIMP                QueryInterface              ( REFIID, void** );
+
+    USE_SOS_OLE_OBJECT_WITHOUT_QI
+
+    STDMETHODIMP            get_java_class_name             ( BSTR* result )                        { return string_to_bstr( "sos.spooler.Mail", result ); }
 
     STDMETHODIMP            put_to                          ( BSTR );
     STDMETHODIMP            get_to                          ( BSTR* to )                            { *to = _to;  return NOERROR; }
