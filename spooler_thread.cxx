@@ -1,4 +1,4 @@
-// $Id: spooler_thread.cxx,v 1.1 2001/02/04 17:13:18 jz Exp $
+// $Id: spooler_thread.cxx,v 1.2 2001/02/06 09:22:26 jz Exp $
 /*
     Hier sind implementiert
 
@@ -20,7 +20,7 @@ Thread::Thread( Spooler* spooler )
     _zero_(this+1),
     _spooler(spooler),
     _log(&spooler->_log),
-    _wait_handles(spooler),
+    _wait_handles(&_log),
     _script_instance(spooler)
 {
 }
@@ -155,27 +155,23 @@ void Thread::wait()
     if( next_job )  next_job->_log.msg( "Nächster Start " + _next_start_time.as_string() );
               else  _log.msg( "Kein Job zu starten" );
 
-    wait_time = _next_start_time - Time::now();
 
 
-    if( wait_time > 0 ) 
-    {
+#   ifdef SYSTEM_WIN
+ 
+        _wait_handles.wait_until( _next_start_time );
 
-#       ifdef SYSTEM_WIN
+#    else
 
-            _wait_handles.wait( wait_time );
+        wait_time = _next_start_time - Time::now();
+        while( !_wake  &&  wait_time > 0 )
+        {
+            double sleep_time = 1.0;
+            sos_sleep( min( sleep_time, wait_time ) );
+            wait_time -= sleep_time;
+        }
 
-#        else
-
-            while( !_wake  &&  wait_time > 0 )
-            {
-                double sleep_time = 1.0;
-                sos_sleep( min( sleep_time, wait_time ) );
-                wait_time -= sleep_time;
-            }
-
-#       endif
-    }
+#   endif
 
     _next_start_time = 0;
     //tzset();

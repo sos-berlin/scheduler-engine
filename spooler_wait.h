@@ -1,4 +1,4 @@
-// $Id: spooler_wait.h,v 1.8 2001/02/04 17:12:44 jz Exp $
+// $Id: spooler_wait.h,v 1.9 2001/02/06 09:22:26 jz Exp $
 
 #ifndef __SPOOLER_WAIT_H
 #define __SPOOLER_WAIT_H
@@ -55,13 +55,14 @@ struct Event : Handle
 
 struct Wait_handles
 {
-                                Wait_handles                ( Spooler* spooler )            : _spooler(spooler) {}
+                                Wait_handles                ( Prefix_log* log )             : _log(log) {}
 
 
     void                        clear                       ()                              { _handles.clear(); _events.clear(); }
     void                        add                         ( Event* );
     void                        remove                      ( Event* );
-    void                        wait                        ( double time = latter_day );
+    void                        wait_until                  ( Time );
+    void                        wait                        ( double time );
 
 
   protected:
@@ -69,7 +70,7 @@ struct Wait_handles
     void                        operator =                  ( const Wait_handles& );        // Nicht implementiert
 
 
-    Spooler*                   _spooler;
+    Prefix_log*                _log;
     vector<HANDLE>             _handles;
     vector<Event*>             _events;
 

@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.19 2001/02/04 22:51:37 jz Exp $
+// $Id: spooler_task.cxx,v 1.20 2001/02/06 09:22:26 jz Exp $
 /*
     Hier sind implementiert
 
@@ -163,7 +163,6 @@ Job::Job( Thread* thread )
     _spooler(thread->_spooler),
     _directory_watcher(this),
     _script_instance(thread->_spooler),
-    _wait_handles(thread->_spooler),
     _log( &thread->_spooler->_log )
 {
 }
@@ -172,7 +171,6 @@ Job::Job( Thread* thread )
 
 Job::~Job()
 {
-    _log.msg( "~Job" );
     close();
 }
 
@@ -217,7 +215,7 @@ void Job::close_task()
         if( _state != s_stopped )  _state = s_ended;
     }
 
-    if( _script_ptr->_reuse == Script::reuse_task )  close_engine();
+    if( _script_ptr  &&  _script_ptr->_reuse == Script::reuse_task )  close_engine();
 }
 
 //----------------------------------------------------------------------------------------Job::init
@@ -231,8 +229,8 @@ void Job::init()
     _script_ptr = _object_set_descr? &_object_set_descr->_class->_script
                                    : &_script;
 
-    _event.set_name( "Job " + _name );
-    _event.add_to( &_wait_handles );
+    //_event.set_name( "Job " + _name );
+    //_event.add_to( &_wait_handles );
 
     _period          = _run_time.next_period( Time::now() );
     _next_start_time = _period.begin();
@@ -246,36 +244,34 @@ void Job::init()
 
 void Job::create_task()
 {
-    THREAD_SEMA( _task_lock ) 
-    {
-        if( _task ) 
-        {
-            //if( !( _task->_state & (Task::s_pending|Task::s_stopped) ) )  
-                throw_xc( "SPOOLER-118", _name, state_name() );
-        }
+    if( _task )  throw_xc( "SPOOLER-118", _name, state_name() );
 
-        _error = NULL;
-        _repeat = 0;
-        _state = s_task_created;
-        if( !_params )  _params = new Com_variable_set;
+    _error = NULL;
+    _repeat = 0;
+    _state = s_task_created;
+    if( !_params )  _params = new Com_variable_set;
 
-        _task = SOS_NEW( Task( _spooler, this ) );
-        _com_task->set_task( _task );
-    }
+    _task = SOS_NEW( Task( _spooler, this ) );
+    _com_task->set_task( _task );
 }
 
 //---------------------------------------------------------------------------------------Job::start
 
 void Job::start( const CComPtr<spooler_com::Ivariable_set>& params )
 {
-    THREAD_SEMA( _task_lock )
-    {
-        if( _task )  throw_xc( "SPOOLER-118", _name, state_name() );
+    THREAD_SEMA( _task_lock )  start_without_lock( params );
+}
 
-        _params = params;
+//---------------------------------------------------------------------------------------Job::start
 
-        set_state_cmd( sc_start );
-    }
+void Job::start_without_lock( const CComPtr<spooler_com::Ivariable_set>& params )
+{
+    _params = params;
+    create_task();
+
+    //set_state_cmd( sc_start );
+    _task->_let_run = true;
+    _thread->signal();
 }
 
 //----------------------------------------------------------------Job::start_when_directory_changed
@@ -318,14 +314,28 @@ void Job::load()
     _state = s_loaded;
 }
 
+//------------------------------------------------------------------------------------------Job::end
+
+void Job::end()
+{
+    if( _state == s_suspended )  _thread->_running_tasks_count++, _state = s_running;
+    if( _state != s_running   )  return;
+
+    if( _task )  _task->end();
+    
+    close_task();
+
+    _state = s_ended;
+    _thread->_running_tasks_count--;
+}
+
 //-----------------------------------------------------------------------------------------Job::stop
 
 void Job::stop()
 {
     _log.msg( "stop" );
 
-    if( _task )  _task->end();
-    close_task();
+    end();
     close_engine();
 
     _state = s_stopped;
@@ -357,83 +367,84 @@ void Job::set_next_start_time( Time now )
 
 bool Job::do_something()
 {
-    bool something_done = false;
-    bool ok;
-
-    THREAD_SEMA( _task_lock )
+    //THREAD_SEMA( _task_lock )
     {
-        switch( _state_cmd.read_and_reset() )
+        if( _state_cmd )
         {
-            case sc_stop:       stop(); 
-                                break;
+            switch( _state_cmd.read_and_reset() )
+            {
+                case sc_stop:       stop(); 
+                                    break;
 
-            case sc_unstop:     if( _state == s_pending )  _state = s_pending;     // Sollte nicht durchlaufen werden.
-                                break;
+                case sc_unstop:     if( _state == s_stopped )  _state = s_pending;
+                                    break;
 
-            case sc_start:      create_task();
-                                _task->_let_run = true;
-                                _task->start();
-                                break;
+                case sc_start:      break;
 
-            case sc_suspend:    _state = s_suspended;
-                                _thread->_running_tasks_count--;
-                                break;
+                case sc_suspend:    _state = s_suspended;
+                                    _thread->_running_tasks_count--;
+                                    break;
 
-            case sc_continue:   _state = s_running;
-                                _thread->_running_tasks_count++;
-                                break;
-            default: ;
+                case sc_continue:   _state = s_running;
+                                    _thread->_running_tasks_count++;
+                                    break;
+                default: ;
+            }
         }
 
+
+        if( _state == s_stopped   )  return false;
+        if( _state == s_suspended )  return false;
+
+        if( _state == s_pending )
+        {
+            if( !_directory_watcher._signaled  &&  Time::now() < _next_start_time )  return false;
+
+            if( _directory_watcher._signaled )  _directory_watcher.watch_again();
+            THREAD_SEMA( _task_lock )  create_task();
+        }
+
+        bool do_a_step = false;
+
+        if( _state == s_task_created )
+        {
+            _task->start();
+            do_a_step = true;
+        }
 
         if( !_error )
         {
-            bool do_a_step = false;
-            Time now = Time::now();
-
-            if( _state == s_pending  &&  ( _directory_watcher._signaled || Time::now() >= _next_start_time ) )
-            {
-                if( _directory_watcher._signaled )  _directory_watcher.watch_again();
-
-                create_task();
-                _task->start();
-            }
-
             if( _state == s_running )
             {
-                ok = do_a_step | _task->_let_run || _period.is_in_time(now);
-                if( !ok )  set_next_start_time(now),  ok = _task->_let_run || _period.is_in_time(now);
+                Time now;
+                bool ok = do_a_step | _task->_let_run;
+                if( !ok )  now = Time::now(), ok = _period.is_in_time( now );
+                if( !ok )   // Period abgelaufen?
+                {
+                    set_next_start_time(now);  
+                    ok = _task->_let_run || _period.is_in_time(now);  // Gilt schon die nächste Periode?
+                }
 
                 if( ok )   ok = _task->step();
-                if( !ok )  _task->end();
-
-                something_done = true;
-            }
-
-            if( _state == s_ended ) 
-            {
-                close_task();
-                set_next_start_time();
-                _state = s_pending;
+                if( !ok )  end();
             }
         }
 
-        if( _error  &&  _state != s_stopped )  
+        if( _error ) // &&  _state != s_stopped )  
         {
-            if( _repeat > 0 ) 
-            {
-                _error = NULL;  
-                if( _task )  _task->end();
-                close_task();
-                _state = s_pending;
-                set_next_start_time();
-            }
-            else  
-                stop();
+            end();
+            if( _repeat == 0 )  stop();     // Job nur stoppen, wenn spooler_task.repeat nicht gesetzt
+        }
+
+        if( _state == s_ended ) 
+        {
+            close_task();
+            set_next_start_time();
+            _state = _next_start_time == latter_day? s_stopped : s_pending;
         }
     }
 
-    return something_done;
+    return true;
 }
 
 //---------------------------------------------------------------------------------------Job::error
@@ -455,7 +466,7 @@ void Job::error( const exception& x )
 }
 
 //-----------------------------------------------------------------------------------Job::set_state
-
+/*
 void Job::set_state( State new_state )
 { 
     switch( new_state )
@@ -476,7 +487,7 @@ void Job::set_state( State new_state )
         default: ;
     }
 }
-
+*/
 //-------------------------------------------------------------------------------Job::set_state_cmd
 
 void Job::set_state_cmd( State_cmd cmd )
@@ -490,8 +501,7 @@ void Job::set_state_cmd( State_cmd cmd )
         case sc_unstop:     ok = _state == s_stopped;   if(!ok) break;
                             break;
 
-        case sc_start:      ok = ( _state & (s_pending|s_stopped) ) != 0;   if(!ok) break;
-                            _params = NULL;
+        case sc_start:      start(NULL);
                             break;
 
         case sc_end:        ok = _state == s_running;   break;
@@ -594,8 +604,6 @@ Task::Task( Spooler* spooler, const Sos_ptr<Job>& job )
 
 Task::~Task()    
 {
-    _job->_log.msg( "~Task" );
-
     try{ close(); } catch(const Xc&) {}
 }
 
@@ -604,6 +612,8 @@ Task::~Task()
 void Task::close()
 {
     //_params = NULL;
+
+    _job->_com_task->set_task( NULL );
 
     // COM-Objekte entkoppeln, falls noch jemand eine Referenz darauf hat:
     if( _com_object_set  )  _com_object_set->close();
@@ -620,6 +630,7 @@ void Task::start()
 {
     _job->_log.msg( "start" );
 
+    _job->_error = NULL;
     _job->_thread->_task_count++;
     _running_since = Time::now();
 
@@ -682,11 +693,7 @@ void Task::on_error_on_success()
 
 void Task::end()
 {
-    if( _job->_state == Job::s_ending    )  return;   // end() schon einmal gerufen und dabei abgebrochen?
-    if( _job->_state == Job::s_ended     )  return;
-    if( _job->_state == Job::s_suspended )  _job->_state = Job::s_running;
-    if( _job->_state != Job::s_running   )  return;
-    if( !_opened                         )  return;
+    if( !_opened )  return;
 
     _job->_state = Job::s_ending;
 
@@ -698,14 +705,12 @@ void Task::end()
     catch( const Xc& x        ) { _job->error(x); }
     catch( const exception& x ) { _job->error(x); }
 
-    on_error_on_success();
-
     _object_set = NULL;
     _opened = false;
-    _step_count = 0;
 
-    _job->_state = Job::s_ended;
-    _job->_thread->_running_tasks_count--;
+    on_error_on_success();
+
+    close();
 }
 
 //----------------------------------------------------------------------------------------Task::step

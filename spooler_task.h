@@ -1,4 +1,4 @@
-// $Id: spooler_task.h,v 1.7 2001/02/04 17:12:43 jz Exp $
+// $Id: spooler_task.h,v 1.8 2001/02/06 09:22:26 jz Exp $
 
 #ifndef __SPOOLER_TASK_H
 #define __SPOOLER_TASK_H
@@ -144,8 +144,10 @@ struct Job : Sos_self_deleting
     void                        create_task                 ();
     void                        close_task                  ();
     void                        start                       ( const CComPtr<spooler_com::Ivariable_set>& params = NULL );
+    void                        start_without_lock          ( const CComPtr<spooler_com::Ivariable_set>& params = NULL );
     void                        start_when_directory_changed( const string& directory_name );
     void                        load                        ();
+    void                        end                         ();
     void                        stop                        ();
     void                        set_next_start_time         ( Time now = Time::now() );
     bool                        do_something                ();
@@ -166,7 +168,7 @@ struct Job : Sos_self_deleting
     static string               state_cmd_name              ( State_cmd );
     static State_cmd            as_state_cmd                ( const string& );
 
-    void                        signal                      ()                          { _event.signal(); }
+  //void                        signal                      ()                          { _event.signal(); }
 
 
     Fill_zero                  _zero_;
@@ -186,13 +188,13 @@ struct Job : Sos_self_deleting
     Script_instance            _script_instance;            // Für use_engine="job"
     bool                       _has_spooler_process;
     Directory_watcher          _directory_watcher;
-    Wait_handles               _wait_handles; 
+  //Wait_handles               _wait_handles; 
 
     State                      _state;
     Mutex<State_cmd>           _state_cmd;
     CComPtr<spooler_com::Ivariable_set> _params;
     Time                       _next_start_time;
-    Event                      _event;
+  //Event                      _event;
     CComPtr<Com_job>           _com_job;
     Period                     _period;                     // Derzeitige oder nächste Period
     Time                       _repeat;                     // spooler_task.repeat
@@ -240,6 +242,7 @@ struct Task : Sos_self_deleting
 
     Sos_ptr<Object_set>        _object_set;
     CComPtr<Com_object_set>    _com_object_set;
+    CComVariant                _result;
 
     Thread_semaphore           _terminated_events_lock;
     vector<Event*>             _terminated_events;

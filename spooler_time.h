@@ -1,7 +1,9 @@
-// $Id: spooler_time.h,v 1.2 2001/02/04 17:12:43 jz Exp $
+// $Id: spooler_time.h,v 1.3 2001/02/06 09:22:26 jz Exp $
 
 #ifndef __SPOOLER_TIME_H
 #define __SPOOLER_TIME_H
+
+#include <math.h>
 
 namespace sos {
 namespace spooler {
@@ -11,17 +13,19 @@ namespace time {
 
 struct Time
 {
-                                Time                        ( double t = 0.0 )              : _time(t) {}
-                                Time                        ( int t )                       : _time(t) {}
-                                Time                        ( uint t )                      : _time(t) {}
+                                Time                        ( double t = 0.0 )              { set(t); }
+                                Time                        ( int t )                       { set(t); }
+                                Time                        ( uint t )                      { set(t); }
                                 Time                        ( const Sos_optional_date_time& dt ) { *this = dt; }
 
-    void                        operator =                  ( double t )                    { _time = t; }
-    void                        operator =                  ( int t )                       { _time = t; }
+    void                        operator =                  ( double t )                    { set(t); }
+    void                        operator =                  ( int t )                       { set(t); }
     void                        operator =                  ( const Sos_optional_date_time& );
 
-    void                        operator +=                 ( double t )                    { _time += t; }
-    void                        operator -=                 ( double t )                    { _time -= t; }
+    void                        operator +=                 ( double t )                    { set( _time + t ); }
+    void                        operator -=                 ( double t )                    { set( _time - t ); }
+
+    Time                        operator -                  ( const Time& t )               { return Time( _time - t ); }
 
     bool                        operator <                  ( const Time& t ) const         { return _time <  t._time; }
     bool                        operator <=                 ( const Time& t ) const         { return _time <= t._time; }
@@ -30,22 +34,24 @@ struct Time
     bool                        operator >=                 ( const Time& t ) const         { return _time >= t._time; }
     bool                        operator >                  ( const Time& t ) const         { return _time >  t._time; }
 
-    bool                        operator <                  ( double t ) const              { return _time <  t; }
-    bool                        operator <=                 ( double t ) const              { return _time <= t; }
-    bool                        operator ==                 ( double t ) const              { return _time == t; }
-    bool                        operator !=                 ( double t ) const              { return _time != t; }
-    bool                        operator >=                 ( double t ) const              { return _time >= t; }
-    bool                        operator >                  ( double t ) const              { return _time >  t; }
+    bool                        operator <                  ( double t ) const              { return _time <  round(t); }
+    bool                        operator <=                 ( double t ) const              { return _time <= round(t); }
+    bool                        operator ==                 ( double t ) const              { return _time == round(t); }
+    bool                        operator !=                 ( double t ) const              { return _time != round(t); }
+    bool                        operator >=                 ( double t ) const              { return _time >= round(t); }
+    bool                        operator >                  ( double t ) const              { return _time >  round(t); }
 
-    bool                        operator <                  ( int t ) const                 { return _time <  t; }
-    bool                        operator <=                 ( int t ) const                 { return _time <= t; }
-    bool                        operator ==                 ( int t ) const                 { return _time == t; }
-    bool                        operator !=                 ( int t ) const                 { return _time != t; }
-    bool                        operator >=                 ( int t ) const                 { return _time >= t; }
-    bool                        operator >                  ( int t ) const                 { return _time >  t; }
+    bool                        operator <                  ( int t ) const                 { return _time <  round(t); }
+    bool                        operator <=                 ( int t ) const                 { return _time <= round(t); }
+    bool                        operator ==                 ( int t ) const                 { return _time == round(t); }
+    bool                        operator !=                 ( int t ) const                 { return _time != round(t); }
+    bool                        operator >=                 ( int t ) const                 { return _time >= round(t); }
+    bool                        operator >                  ( int t ) const                 { return _time >  round(t); }
 
                                 operator double             () const                        { return _time; }
 
+    static double               round                       ( double t )                    { return floor( t * 1000.0 + 0.5 ) / 1000.0; }
+    void                        set                         ( double t )                    { _time = round(t); }
     Time                        time_of_day                 () const                        { return _time - midnight(); }
     Time                        midnight                    () const                        { return day_nr() * 24*60*60; }
     int                         day_nr                      () const                        { return uint(_time) / (24*60*60); }

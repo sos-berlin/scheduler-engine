@@ -1,4 +1,4 @@
-// $Id: spooler_common.h,v 1.3 2001/02/04 17:12:43 jz Exp $
+// $Id: spooler_common.h,v 1.4 2001/02/06 09:22:26 jz Exp $
 
 #ifndef __SPOOLER_COMMON_H
 #define __SPOOLER_COMMON_H
@@ -50,8 +50,8 @@ struct Mutex
 
     Mutex&                      operator =                  ( const T& t )          { Guard g = &_semaphore; _value = t; return *this; }
                                 operator T                  ()                      { return _value; }  // Nicht gesichert
-    T                           read_and_reset              ()                      { Guard g = &_semaphore; T v = _value; _value = T(); return v; }
-    T                           read_and_set                ( const T& t )          { Guard g = &_semaphore; T v = _value; _value = t; return v; }
+    T                           read_and_reset              ()                      { return read_and_set(T()); }
+    T                           read_and_set                ( const T& t )          { if( _value == t )  return _value;  Guard g = &_semaphore; T v = _value; _value = t; return v; }
 
     sos::Thread_semaphore      _semaphore;
     volatile T                 _value;

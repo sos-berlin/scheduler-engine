@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.47 2001/02/04 22:51:36 jz Exp $
+// $Id: spooler.cxx,v 1.48 2001/02/06 09:22:25 jz Exp $
 /*
     Hier sind implementiert
 
@@ -47,9 +47,9 @@ Spooler::Spooler()
     _zero_(this+1), 
     _security(this),
     _communication(this), 
-    _wait_handles(this),
-    _log(this),
-    _prefix_log(&_log)
+    _prefix_log(&_log),
+    _wait_handles(&_prefix_log),
+    _log(this)
 {
     _com_log     = new Com_log( &_prefix_log );
     _com_spooler = new Com_spooler( this );
@@ -184,6 +184,7 @@ void Spooler::stop()
     FOR_EACH( Thread_list, _thread_list, it )  (*it)->stop_thread();
 
     _object_set_class_list.clear();
+    _thread_list.clear();
     
     set_state( s_stopped );
 }
@@ -206,8 +207,8 @@ void Spooler::run()
         if( _state_cmd == sc_terminate_and_restart )  break;
         _state_cmd = sc_none;
 
-        if( _state == s_paused )  THREAD_SEMA( _pause_lock )  _wait_handles.wait();
-                            else  _wait_handles.wait();
+        if( _state == s_paused )  THREAD_SEMA( _pause_lock )  _wait_handles.wait_until( latter_day );
+                            else  _wait_handles.wait_until( latter_day );
     }
 }
 

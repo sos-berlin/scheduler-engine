@@ -1,4 +1,4 @@
-// $Id: spooler_wait.cxx,v 1.9 2001/02/04 17:12:44 jz Exp $
+// $Id: spooler_wait.cxx,v 1.10 2001/02/06 09:22:26 jz Exp $
 /*
     Hier sind implementiert
 
@@ -188,38 +188,50 @@ void Wait_handles::remove( Event* event )
     _events.erase( _events.begin() + ( it - _handles.begin() ) );
 }
 
-//--------------------------------------------------------------------------------Wait_handles::wait
-#ifdef SYSTEM_WIN
+//--------------------------------------------------------------------------Wait_handles::wait_until
 
 void Wait_handles::wait( double wait_time )
 {
+    wait_until( Time::now() + wait_time );
+}
+
+//--------------------------------------------------------------------------------Wait_handles::wait
+#ifdef SYSTEM_WIN
+
+void Wait_handles::wait_until( Time until )
+{
     THREAD_SEMA( _lock )
     {
-        FOR_EACH( vector<Event*>, _events, it)  if( (*it)->signaled() )  return;
+        FOR_EACH( vector<Event*>, _events, it)  if( (*it)->signaled() ) return;
         _waiting = true;
     }
 
-    while( wait_time > 0 )
-    {
-        int sleep_time_ms = INT_MAX;
-    
-        int t = min( (double)sleep_time_ms, wait_time * 1000.0 );
+    bool again = false;
 
+    while(1)
+    {
+        double wait_time = until - Time::now();
+        int    sleep_time_ms = INT_MAX;
+        int    t = ceil( min( (double)sleep_time_ms, wait_time * 1000.0 ) );
+
+        if( t <= 0 )  break;
+        if( again )  _log->msg( "Noch " + as_string(wait_time) + "s warten ..." );
+        again = true;
+
+        //_log->msg( "WaitForMultipleObjects " + as_string(t) + "ms" );
         DWORD ret = WaitForMultipleObjects( _handles.size(), &_handles[0], FALSE, t ); 
 
         if( ret == WAIT_FAILED )  throw_mswin_error( "WaitForMultipleObjects" );
 
         if( ret >= WAIT_OBJECT_0  &&  ret < WAIT_OBJECT_0 + _handles.size() )
         {
-            int index = ret - WAIT_OBJECT_0;
-            //_events[ index ]->signal();
-            _spooler->_log.msg( "Ereignis " + _events[index]->name() );
+            Event* event = _events[ ret - WAIT_OBJECT_0 ];
+            event->set_signal();
+            _log->msg( "Ereignis " + event->name() );
             return;
         }
 
         if( ret != WAIT_TIMEOUT )  throw_mswin_error( "WaitForMultipleObjects" );
-
-        wait_time -= sleep_time_ms / 1000;
     }
 
     _waiting = false;

@@ -1,4 +1,4 @@
-// $Id: spooler_com.h,v 1.8 2001/02/04 17:12:43 jz Exp $
+// $Id: spooler_com.h,v 1.9 2001/02/06 09:22:26 jz Exp $
 
 #ifndef __SPOOLER_COM_H
 #define __SPOOLER_COM_H
@@ -135,14 +135,14 @@ struct Com_task : spooler_com::Itask, Sos_ole_object
     STDMETHODIMP                get_job                     ( spooler_com::Ijob** );
     STDMETHODIMP                get_params                  ( spooler_com::Ivariable_set** );
     STDMETHODIMP                wait_until_terminated       ( double wait_time, VARIANT_BOOL* ok );
-    STDMETHODIMP                put_result                  ( VARIANT* value )              { return _result.Copy(value); }
-    STDMETHODIMP                get_result                  ( VARIANT* value )              { VariantInit(value); return VariantCopy(value,&_result); }
+    STDMETHODIMP                put_result                  ( VARIANT* value );             //{ return _result.Copy(value); }
+    STDMETHODIMP                get_result                  ( VARIANT* value );             //{ VariantInit(value); return VariantCopy(value,&_result); }
     STDMETHODIMP                put_repeat                  ( double seconds );
 
   private:
     Sos_ptr<Task>              _task;
   //Xc_copy                    _error;                      // Nur gültig, wenn _task == NULL
-    CComVariant                _result;                     // Das Ergebnis ist noch nach ~Task zugreifbar
+  //CComVariant                _result;                     // Das Ergebnis ist noch nach ~Task zugreifbar
     Thread_semaphore           _lock;
 };
 

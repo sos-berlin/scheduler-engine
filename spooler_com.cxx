@@ -1,4 +1,4 @@
-// $Id: spooler_com.cxx,v 1.7 2001/02/04 17:12:43 jz Exp $
+// $Id: spooler_com.cxx,v 1.8 2001/02/06 09:22:26 jz Exp $
 /*
     Hier sind implementiert
 
@@ -221,9 +221,12 @@ STDMETHODIMP Com_job::start( VARIANT* params, Itask** itask )
             if( FAILED(hr) )  return hr;
         }
 
-        _job->start( pars );
+        THREAD_SEMA( _job->_task_lock )
+        {
+            _job->start_without_lock( pars );
+            *itask = new Com_task( _job->_task ); //_job->_com_task;
+        }
 
-        *itask = _job->_com_task;
         (*itask)->AddRef();
     }
     catch( const Xc&   x )  { hr = _set_excepinfo(x); }
@@ -376,6 +379,49 @@ STDMETHODIMP Com_task::wait_until_terminated( double wait_time, VARIANT_BOOL* ok
         {
             if( _task )  *ok = _task->wait_until_terminated( wait_time );
                    else  *ok = true;
+        }
+    }
+    catch( const Xc&   x )  { hr = _set_excepinfo(x); }
+    catch( const xmsg& x )  { hr = _set_excepinfo(x); }
+
+    return hr;
+}
+
+//-----------------------------------------------------------------------------Com_task::put_result
+
+STDMETHODIMP Com_task::put_result( VARIANT* value )
+{
+    HRESULT hr = NOERROR;
+
+    try
+    {
+        THREAD_SEMA( _lock )
+        {
+            if( !_task )  throw_xc( "SPOOLER-122" );
+
+            hr = _task->_result.Copy( value );
+        }
+    }
+    catch( const Xc&   x )  { hr = _set_excepinfo(x); }
+    catch( const xmsg& x )  { hr = _set_excepinfo(x); }
+
+    return hr;
+}
+
+//-----------------------------------------------------------------------------Com_task::get_result
+
+STDMETHODIMP Com_task::get_result( VARIANT* value )
+{
+    HRESULT hr = NOERROR;
+
+    try
+    {
+        THREAD_SEMA( _lock )
+        {
+            if( !_task )  throw_xc( "SPOOLER-122" );
+
+            VariantInit( value ); 
+            hr = VariantCopy( value, &_task->_result);
         }
     }
     catch( const Xc&   x )  { hr = _set_excepinfo(x); }

@@ -1,4 +1,4 @@
-// $Id: spooler_command.cxx,v 1.24 2001/02/04 17:12:43 jz Exp $
+// $Id: spooler_command.cxx,v 1.25 2001/02/06 09:22:26 jz Exp $
 /*
     Hier ist implementiert
 
@@ -224,13 +224,13 @@ xml::Element_ptr Command_processor::execute_modify_job( const xml::Element_ptr& 
 
     string job_name   = as_string( element->getAttribute( "job" ) );
     string cmd_name   = as_string( element->getAttribute( "cmd" ) );
-    string state_name = as_string( element->getAttribute( "state" ) );
+  //string state_name = as_string( element->getAttribute( "state" ) );
 
     Job::State_cmd cmd = cmd_name.empty()? Job::sc_none 
                                          : Job::as_state_cmd( cmd_name );
 
-    Job::State state = state_name.empty()? Job::s_none 
-                                         : Job::as_state( state_name );
+  //Job::State state = state_name.empty()? Job::s_none 
+  //                                     : Job::as_state( state_name );
 
     xml::Element_ptr jobs_element = _answer->createElement( "jobs" );
     bool found = false;
@@ -238,8 +238,8 @@ xml::Element_ptr Command_processor::execute_modify_job( const xml::Element_ptr& 
     Job* job = _spooler->get_job( job_name );
 
     if( cmd )  job->set_state_cmd( cmd );
-    else
-    if( state )  job->set_state( state );      // experimentell
+  //else
+  //if( state )  job->set_state( state );      // experimentell
     
     return jobs_element;
 }

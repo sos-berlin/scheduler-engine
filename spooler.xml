@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 
-<!-- $Id: spooler.xml,v 1.25 2001/02/04 22:51:37 jz Exp $   (C) 2001 SOS GmbH Berlin -->
+<!-- $Id: spooler.xml,v 1.26 2001/02/06 09:22:26 jz Exp $   (C) 2001 SOS GmbH Berlin -->
 
 <!DOCTYPE spooler SYSTEM "spooler.dtd">
 
@@ -289,7 +289,7 @@ spooler_log.msg "Spooler-Skript geladen."
                 <job name           = "Aufbereiten" 
                      priority       = "2" 
                      output_level   = "200" 
-                     spooler_id     = "1">
+                     spooler_id     = "">
 
                     <object_set class="Dokumente">
                         <levels low="100" high="200"/>
@@ -356,7 +356,7 @@ end function
                         <period single_start="19:51:50" end="20:00" let_run="no"/>
                         <period begin="19:52:10" end="19:59:59" repeat="7"/>
 
-                        <date date="4.2.2001"> <period begin="0:00" end="24:00" repeat="0.1"/> </date>
+                        <date date="6.2.2001"> <period begin="0:00" end="24:00" repeat="0.1"/> </date>
 
                         <weekdays>
                             <day day="1"/>
@@ -380,7 +380,7 @@ end function
                         <levels low="1" high="3"/>
                     </object_set>
 
-                    <run_time repeat="0.5"/>
+                    <run_time repeat="0.1"/>
 
                 </job>
 

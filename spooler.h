@@ -1,4 +1,4 @@
-// $Id: spooler.h,v 1.44 2001/02/04 22:51:36 jz Exp $
+// $Id: spooler.h,v 1.45 2001/02/06 09:22:25 jz Exp $
 
 #ifndef __SPOOLER_H
 #define __SPOOLER_H
@@ -154,6 +154,8 @@ struct Spooler
     string                     _log_directory;              // -log-dir=
     string                     _log_filename;
 
+    Log                        _log;
+    Prefix_log                 _prefix_log;
     State_changed_handler      _state_changed_handler;      // Callback für NT-Dienst SetServiceStatus()
 
     Event                      _event;                      
@@ -161,8 +163,6 @@ struct Spooler
     xml::Document_ptr          _config_document;            // Das Dokument zu _config_element
     xml::Element_ptr           _config_element;             // Für cmd_load_config()
 
-    Log                        _log;
-    Prefix_log                 _prefix_log;
     bool                       _is_service;                 // NT-Dienst
 
     Security                   _security;                   // <security>
