@@ -1,9 +1,8 @@
-// $Id: spooler_thread.cxx,v 1.64 2002/11/29 20:48:09 jz Exp $
+// $Id: spooler_thread.cxx,v 1.65 2002/12/01 08:57:46 jz Exp $
 /*
     Hier sind implementiert
 
 */
-
 
 
 #include "spooler.h"
@@ -81,7 +80,7 @@ xml::Element_ptr Spooler_thread::dom( const xml::Document_ptr& document, Show_wh
         thread_element.setAttribute( "free_threading" , _free_threading? "yes" : "no" );
 
 #       ifdef Z_WINDOWS
-            thread_element.setAttribute( "priority"   , GetThreadPriority( _thread_handle ) );
+            thread_element.setAttribute( "priority"   , GetThreadPriority( thread_handle() ) );
 #       endif
 
         dom_append_nl( thread_element );
@@ -606,7 +605,8 @@ bool Spooler_thread::process()
 
 int Spooler_thread::run_thread()
 {
-    int ret = 1;
+    int             ret = 1;
+    Ole_initialize  ole;
 
     start();
 
@@ -755,7 +755,7 @@ void Spooler_thread::signal_object( const string& object_set_class_name, const L
 }
 
 //-------------------------------------------------------------------------------------------thread
-#ifdef Z_WINDOWS
+/*#ifdef Z_WINDOWS
 
 static uint __stdcall thread( void* param )
 {
@@ -788,7 +788,7 @@ void Spooler_thread::start_thread()
 
 #   endif
 }
-
+*/
 //----------------------------------------------------------------------Spooler_thread::stop_thread
 /*
 void Spooler_thread::stop_thread()

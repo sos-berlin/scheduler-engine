@@ -1,4 +1,4 @@
-// $Id: spooler_config.cxx,v 1.51 2002/11/24 15:32:59 jz Exp $
+// $Id: spooler_config.cxx,v 1.52 2002/12/01 08:57:46 jz Exp $
 
 //#include <precomp.h>
 
@@ -282,10 +282,10 @@ void Spooler::load_threads_from_xml( const xml::Element_ptr& element, const Time
             if( _manual  ||  spooler_id.empty()  ||  spooler_id == _spooler_id )
             {
                 string thread_name = e.getAttribute( "name" );
-                Sos_ptr<Spooler_thread> thread = get_thread_or_null( thread_name );
+                ptr<Spooler_thread> thread = get_thread_or_null( thread_name );
                 if( !thread )  
                 {
-                    thread = SOS_NEW( Spooler_thread( this ) );
+                    thread = Z_NEW( Spooler_thread( this ) );
                     _thread_list.push_back( thread );
                 }
 

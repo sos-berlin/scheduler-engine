@@ -1,9 +1,9 @@
-// $Id: spooler_version.h,v 1.85 2002/11/27 09:39:13 jz Exp $
+// $Id: spooler_version.h,v 1.86 2002/12/01 08:57:47 jz Exp $
 
 #define VER_FILEDESC_STR        "Spooler\0"
 
-#define VER_PRODUCTVERSION       1,2,41
-#define VER_PRODUCTVERSION_STR  "1.2.41, 2002-11-27 (Linux-Portierung)\0"
+#define VER_PRODUCTVERSION       1,2,42
+#define VER_PRODUCTVERSION_STR  "1.2.42, 2002-12-01 (Linux-Portierung)\0"
 
 #define VER_NAME_STR            "Spooler\0"
 #define VER_FILENAME_STR        "spooler.exe\0"

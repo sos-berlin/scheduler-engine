@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.148 2002/11/29 17:23:44 jz Exp $
+// $Id: spooler.cxx,v 1.149 2002/12/01 08:57:44 jz Exp $
 /*
     Hier sind implementiert
 
@@ -213,7 +213,7 @@ With_log_switch read_profile_with_log( const string& profile, const string& sect
         {
             ctrl_c_pressed = true;
             fprintf( stderr, "Spooler wird wegen Ctrl-C beendet ...\n" );
-            spooler->signal( "Ctrl+C" );
+            spooler->async_signal( "Ctrl+C" );
             return true;
         }
         else
@@ -230,7 +230,13 @@ With_log_switch read_profile_with_log( const string& profile, const string& sect
         //{
             ctrl_c_pressed = true;
             fprintf( stderr, "Spooler wird wegen Ctrl-C beendet ...\n" );
-            spooler->signal( "Ctrl+C" );
+
+            // pthread_mutex_lock:
+            // The  mutex  functions  are  not  async-signal  safe.  What  this  means  is  that  they
+            // should  not  be  called from  a signal handler. In particular, calling pthread_mutex_lock 
+            // or pthread_mutex_unlock from a signal handler may deadlock the calling thread.
+
+            spooler->async_signal( "Ctrl+C" );
         //}
     }
 
@@ -357,7 +363,6 @@ xml::Element_ptr Spooler::threads_as_xml( const xml::Document_ptr& document, Sho
 
 void Spooler::wait_until_threads_stopped( Time until )
 {
-#ifdef SPOOLER_USE_THREADS
     assert( current_thread_id() == _thread_id );
 
     Wait_handles wait_handles ( this, &_prefix_log );
@@ -366,7 +371,7 @@ void Spooler::wait_until_threads_stopped( Time until )
     while( it != _thread_list.end() )
     {
         Spooler_thread* thread = *it;
-        if( thread->_free_threading && !thread->_terminated  &&  thread->_thread_handle.handle() )  wait_handles.add_handle( (*it)->_thread_handle.handle() );
+        if( thread->_free_threading && !thread->_terminated  &&  thread->thread_handle().handle() )  wait_handles.add_handle( (*it)->_thread_handle.handle() );
         it++;
     }
 
@@ -383,7 +388,7 @@ void Spooler::wait_until_threads_stopped( Time until )
             FOR_EACH( Thread_list, _thread_list, it )  
             {
                 Spooler_thread* thread = *it;
-                if( thread->_thread_handle.handle() == h ) 
+                if( thread->thread_handle().handle() == h ) 
                 {
                     _log.info( "Thread " + thread->name() + " beendet" );
                     wait_handles.remove_handle( h );
@@ -404,7 +409,7 @@ void Spooler::wait_until_threads_stopped( Time until )
 
                 if( !thread->_terminated )
                 {
-                    string msg = "Warten auf Thread " + thread->name() + " [" + thread_info_text( thread->_thread_handle.handle() ) + "]";
+                    string msg = "Warten auf Thread " + thread->name() + " [" + thread_info_text( thread->thread_handle().handle() ) + "]";
                     Job* job = thread->_current_job;
                     if( job )  msg += ", Job " + job->name() + " " + job->job_state();
                     _log.info( msg );
@@ -412,8 +417,7 @@ void Spooler::wait_until_threads_stopped( Time until )
             }
         }
     }
-#endif
-}
+s}
 
 //--------------------------------------------------------------------------Spooler::signal_threads
 

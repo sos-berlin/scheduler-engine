@@ -1,4 +1,4 @@
-// $Id: spooler_thread.h,v 1.33 2002/11/29 20:48:09 jz Exp $
+// $Id: spooler_thread.h,v 1.34 2002/12/01 08:57:46 jz Exp $
 
 #ifndef __SPOOLER_THREAD_H
 #define __SPOOLER_THREAD_H
@@ -8,7 +8,7 @@ namespace spooler {
 
 //-----------------------------------------------------------------------------------Spooler_thread
 
-struct Spooler_thread : Sos_self_deleting
+struct Spooler_thread : zschimmer::Thread
 {
                                 Spooler_thread              ( Spooler* );
                                ~Spooler_thread              ();
@@ -31,6 +31,7 @@ struct Spooler_thread : Sos_self_deleting
     void                        close                       ();                             // Wird vom Spooler gerufen
     void                        start_thread                ();
 
+    virtual int                 main                        ()                              { return run_thread(); }
     int                         run_thread                  ();
   //bool                        running                     ()                              { DWORD rc; return GetExitCodeThread(_thread_handle,&rc)? rc == STILL_ACTIVE : false; }
     bool                        process                     ();                             // Einen Schritt im (Pseudo-)Thread ausführen
@@ -70,8 +71,8 @@ struct Spooler_thread : Sos_self_deleting
     string                     _include_path;
     bool                       _free_threading;             // Dieser Thread soll frei, ohne _serialize_lock laufen.
 
-    Handle                     _thread_handle;
-    Thread_id                  _thread_id;
+  //Handle                     _thread_handle;
+  //Thread_id                  _thread_id;
     int                        _thread_priority;
 
     Event                      _event;
@@ -106,7 +107,7 @@ struct Spooler_thread : Sos_self_deleting
 
 };
 
-typedef list< Sos_ptr<Spooler_thread> >  Thread_list;
+typedef list< ptr<Spooler_thread> >  Thread_list;
 
 /*
     Threads und Thread::_job_list:

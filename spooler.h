@@ -1,4 +1,4 @@
-// $Id: spooler.h,v 1.114 2002/11/28 11:18:21 jz Exp $
+// $Id: spooler.h,v 1.115 2002/12/01 08:57:45 jz Exp $
 
 #ifndef __SPOOLER_H
 #define __SPOOLER_H
@@ -33,7 +33,6 @@
 #include <stdio.h>
 
 #ifdef Z_WINDOWS
-#   include <process.h>    // _beginthreadex()
 #   include "../zschimmer/z_windows.h"
 #endif
         
@@ -219,6 +218,7 @@ struct Spooler
     void                        wait                        ();
 
     void                        signal                      ( const string& signal_name = "" )  { _log.info( "Signal \"" + signal_name + "\"" ); _event.signal( signal_name ); }
+    void                        async_signa                 ( const string& signal_name = "" )  { _event.async_signal( signal_name ); }
     bool                        signaled                    ()                                  { return _event.signaled(); }
 
     Spooler_thread*             thread_by_thread_id         ( Thread_id );

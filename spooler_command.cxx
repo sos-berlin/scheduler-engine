@@ -1,4 +1,4 @@
-// $Id: spooler_command.cxx,v 1.73 2002/11/29 16:10:55 jz Exp $
+// $Id: spooler_command.cxx,v 1.74 2002/12/01 08:57:45 jz Exp $
 /*
     Hier ist implementiert
 
@@ -308,7 +308,7 @@ xml::Element_ptr Command_processor::execute_add_jobs( const xml::Element_ptr& ad
 {
     if( _security_level < Security::seclev_all )  throw_xc( "SPOOLER-121" );
 
-    Sos_ptr<Spooler_thread> thread = _spooler->get_thread( add_jobs_element.getAttribute( "thread" ) );
+    ptr<Spooler_thread> thread = _spooler->get_thread( add_jobs_element.getAttribute( "thread" ) );
     thread->cmd_add_jobs( add_jobs_element );
 
     return _answer.createElement( "ok" );

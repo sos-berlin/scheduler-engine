@@ -1,4 +1,4 @@
-// $Id: spooler_wait.cxx,v 1.51 2002/11/29 20:48:10 jz Exp $
+// $Id: spooler_wait.cxx,v 1.52 2002/12/01 08:57:47 jz Exp $
 /*
     Hier sind implementiert
 
@@ -159,6 +159,25 @@ void Event::signal( const string& name )
             SetEvent( _handle );  
 #       endif
     }
+}
+
+//------------------------------------------------------------------------------------Event::signal
+
+void Event::async_signal( const string& name )
+{
+#   ifdef Z_WINDOWS
+
+        signal( name );
+
+#   else
+
+        // pthread_mutex_lock:
+        // The  mutex  functions  are  not  async-signal  safe.  What  this  means  is  that  they
+        // should  not  be  called from  a signal handler. In particular, calling pthread_mutex_lock 
+        // or pthread_mutex_unlock from a signal handler may deadlock the calling thread.
+        _signaled = true;
+
+#   endif
 }
 
 //--------------------------------------------------------------------------------Event::set_signal
