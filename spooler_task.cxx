@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.265 2004/12/02 21:12:10 jz Exp $
+// $Id: spooler_task.cxx,v 1.266 2004/12/05 13:25:31 jz Exp $
 /*
     Hier sind implementiert
 
@@ -1745,11 +1745,8 @@ void Job_module_task::do_release__end()
 Process_task::Process_task( Job* job ) 
 : 
     Task(job),
-    _zero_(this+1)
-
-#   ifdef Z_WINDOWS
-        ,_process_handle( "process_handle" ) 
-#   endif
+    _zero_(this+1),
+    _process_handle( "process_handle" ) 
 {
 }
 
@@ -1903,6 +1900,7 @@ void Process_task::do_end__end()
     }
 }
 */
+#endif
 //---------------------------------------------------------------------------Process_task::signaled
 
 bool Process_task::signaled()
@@ -1912,7 +1910,6 @@ bool Process_task::signaled()
     return signaled;
 }
 
-#endif
 //--------------------------------------------------------------------------Process_task::end_start
 
 bool Process_task::do_step__end()
@@ -1940,6 +1937,15 @@ void Process_event::close()
 
         _pid = 0;
     }
+}
+
+//---------------------------------------------------------------------------Process_task::signaled
+
+bool Process_event::signaled()
+{
+    LOG2( "joacim", "Process_event::signaled()   _signaled=" << _signaled << "\n" );
+    if( _signaled )  return true;
+    return wait( 0 );
 }
 
 //------------------------------------------------------------------------------Process_event::wait
@@ -2066,6 +2072,7 @@ bool Process_task::do_begin__end()
         default:
             LOG( "pid=" << pid << "\n" );
             _process_handle._pid = pid;
+            _process_handle.set_name( S() << "process_handle(pid=" << pid << ")" );
             break;
     }
 
@@ -2166,15 +2173,17 @@ void Process_task::do_end__end()
 }
 
 //---------------------------------------------------------------------------Process_task::signaled
+/*
 #ifndef Z_WINDOWS
 
 bool Process_task::signaled()
 {
-    _process_handle.wait( 0 );
+    //_process_handle.wait( 0 );
     return _process_handle.signaled();
 }
 
 #endif
+*/
 //-------------------------------------------------------------------------------------------------
 
 } //namespace spoooler
