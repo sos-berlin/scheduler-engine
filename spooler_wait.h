@@ -1,4 +1,4 @@
-// $Id: spooler_wait.h,v 1.15 2001/07/26 14:28:33 jz Exp $
+// $Id: spooler_wait.h,v 1.16 2001/09/14 12:39:41 jz Exp $
 
 #ifndef __SPOOLER_WAIT_H
 #define __SPOOLER_WAIT_H
@@ -85,7 +85,8 @@ struct Wait_handles
     Spooler*                   _spooler;
     Prefix_log*                _log;
     vector<HANDLE>             _handles;
-    vector<Event*>             _events;
+    typedef vector<Event*>      Event_vector;
+    Event_vector               _events;
 
   public:
     Thread_semaphore           _lock;

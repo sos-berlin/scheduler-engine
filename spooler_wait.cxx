@@ -1,4 +1,4 @@
-// $Id: spooler_wait.cxx,v 1.21 2001/07/16 08:51:33 jz Exp $
+// $Id: spooler_wait.cxx,v 1.22 2001/09/14 12:39:41 jz Exp $
 /*
     Hier sind implementiert
 
@@ -290,7 +290,19 @@ int Wait_handles::wait_until( Time until )
         if( t <= 0 )  break;
         if( again )  _log->msg( "Noch " + sos::as_string(wait_time) + "s warten ..." );
 
-        //_log->msg( "WaitForMultipleObjects " + as_string(t) + "ms" );
+#       ifdef DEBUG
+        {
+            string msg = "WaitForMultipleObjects " + sos::as_string(t/1000.0) + "ms  ";
+            for( int i = 0; i < _handles.size(); i++ )
+            {
+                if( i > 0 )  msg += ", ";
+                msg += _events[i]->as_string();
+                msg += " handle=" + as_hex_string( (int)_handles[i] );
+            }
+            _log->msg( msg );
+        }
+#       endif
+
         DWORD ret = MsgWaitForMultipleObjects( _handles.size(), &_handles[0], FALSE, t, QS_ALLINPUT ); 
 
         if( ret == WAIT_FAILED )  throw_mswin_error( "WaitForMultipleObjects" );
