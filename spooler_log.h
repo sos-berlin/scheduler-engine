@@ -1,4 +1,4 @@
-// $Id: spooler_log.h,v 1.39 2003/10/30 13:19:12 jz Exp $
+// $Id: spooler_log.h,v 1.40 2004/01/12 09:35:23 jz Exp $
 
 #ifndef __SPOOLER_LOG_H
 #define __SPOOLER_LOG_H
@@ -121,7 +121,7 @@ struct Prefix_log : Has_log
     Com_mail*                   imail                       ();
 
     // Defaults setzen, ohne eMail-Objekt anzulegen:
-    void                    set_mail_from_name              ( const string& );
+    void                    set_mail_from_name              ( const string&, bool overwrite = false );
     void                    set_mail_subject                ( const string&, bool overwrite = false );
     void                    set_mail_body                   ( const string&, bool overwrite = false );
 

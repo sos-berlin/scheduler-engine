@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.317 2004/01/08 08:55:02 jz Exp $
+// $Id: spooler.cxx,v 1.318 2004/01/12 09:35:23 jz Exp $
 /*
     Hier sind implementiert
 
@@ -1862,16 +1862,18 @@ void Spooler::run()
 
 
             wait_handles += _wait_handles;
-
-            _wait_counter++;
-
-            if( log_wait )  
+            if( !wait_handles.signaled() )
             {
-                if( !wait_handles.wait(0) )  { LOG( msg << "\n" ); wait_handles.wait_until( _next_time ); }    // Debug-Ausgabe der Wartezeit nur, wenn kein Ergebnis vorliegt
-            }
-            else
-            {
-                wait_handles.wait_until( _next_time );
+                _wait_counter++;
+
+                if( log_wait )  
+                {
+                    if( !wait_handles.wait(0) )  { LOG( msg << "\n" ); wait_handles.wait_until( _next_time ); }    // Debug-Ausgabe der Wartezeit nur, wenn kein Ergebnis vorliegt
+                }
+                else
+                {
+                    wait_handles.wait_until( _next_time );
+                }
             }
 
             wait_handles.clear();

@@ -1,4 +1,4 @@
-// $Id: spooler_log.cxx,v 1.85 2003/12/08 10:32:05 jz Exp $
+// $Id: spooler_log.cxx,v 1.86 2004/01/12 09:35:23 jz Exp $
 
 #include "spooler.h"
 #include "spooler_mail.h"
@@ -561,12 +561,20 @@ void Prefix_log::set_mail_header()
 
 //-------------------------------------------------------------------Prefix_log::set_mail_from_name
 
-void Prefix_log::set_mail_from_name( const string& from_name )
+void Prefix_log::set_mail_from_name( const string& from_name, bool overwrite )
 {
     HRESULT hr;
 
     if( _mail )
     {
+        if( !overwrite )
+        {
+            Bstr from_bstr;
+            hr = _mail->get_from( &from_bstr );     if( FAILED(hr) ) throw_ole( hr, "spooler::Mail::from" );
+
+            if( SysStringLen(from_bstr) > 0 )  return;
+        }
+
         Bstr old_from;
         hr = _mail->get_from( &old_from );                              if( FAILED(hr) ) throw_ole( hr, "spooler::Mail::from" );
         if( !wcschr( old_from, '<' )  &&  wcschr( old_from, '@' ) )
@@ -578,6 +586,7 @@ void Prefix_log::set_mail_from_name( const string& from_name )
     }
     else
     {
+        if( !_from_name.empty()  &&  !overwrite )  return;
         _from_name = from_name;
     }
 }

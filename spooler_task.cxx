@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.231 2004/01/04 07:23:21 jz Exp $
+// $Id: spooler_task.cxx,v 1.232 2004/01/12 09:35:23 jz Exp $
 /*
     Hier sind implementiert
 
@@ -607,15 +607,15 @@ bool Task::do_something()
 
     _signaled = false;
 
-    if( _operation &&  !_operation->async_finished() )  
-    {
-        return check_timeout();
-    }
-
     if( _kill_immediately  &&  !_kill_tried ) 
     {
         _log.error( "Task wird nach Anforderung abgebrochen" );
         return try_kill();
+    }
+
+    if( _operation &&  !_operation->async_finished() )  
+    {
+        return check_timeout();
     }
 
     bool had_operation      = _operation != NULL;
@@ -835,7 +835,7 @@ bool Task::do_something()
 
                             set_state( loaded()? has_error()? s_on_error 
                                                             : s_on_success 
-                                            : s_release );
+                                               : s_release );
 
                             set_mail_defaults();
 
@@ -1191,7 +1191,12 @@ void Task::finish()
 
     try
     {
-        if( !_spooler->_manual )  _log.send( has_error()? -1 : _step_count );
+        if( !_spooler->_manual )
+        {
+            set_mail_defaults();
+            _log.send( has_error()? -1 : _step_count );
+        }
+
         clear_mail();
     }
     catch( const exception& x  ) { _log.warn( x.what() ); }
@@ -1263,7 +1268,7 @@ void Task::set_mail_defaults()
 
 void Task::clear_mail()
 {
-    _log.set_mail_from_name( "" );
+    _log.set_mail_from_name( "", true );
     _log.set_mail_subject  ( "", true );
     _log.set_mail_body     ( "", true );
 }

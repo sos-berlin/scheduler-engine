@@ -1,4 +1,4 @@
-// $Id: spooler_wait.cxx,v 1.91 2004/01/06 12:04:24 jz Exp $
+// $Id: spooler_wait.cxx,v 1.92 2004/01/12 09:35:23 jz Exp $
 /*
     Hier sind implementiert
 
@@ -335,6 +335,8 @@ bool Wait_handles::wait_until( Time until )
 
 bool Wait_handles::wait_until_2( Time until )
 {
+    if( signaled() )  return true;
+
 #ifdef Z_WINDOWS
 
     bool    again   = false;

@@ -1,4 +1,4 @@
-// $Id: spooler_time.cxx,v 1.52 2003/10/19 09:44:50 jz Exp $
+// $Id: spooler_time.cxx,v 1.53 2004/01/12 09:35:23 jz Exp $
 /*
     Hier sind implementiert
 
@@ -524,6 +524,7 @@ void Run_time::set_dom( const xml::Element_ptr& element )
         {
             a_day_set = true;
             dt.assign( e.getAttribute( "date" ) );
+            if( !dt.time_is_zero() )  throw_xc( "SCHEDULER-208", e.getAttribute( "date" ) );
             Date date;
             date._day_nr = dt.as_time_t() / (24*60*60);
             date._day.set_dom( e, &default_day, &default_period );
