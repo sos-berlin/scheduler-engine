@@ -1,4 +1,4 @@
-// $Id: spooler_thread.h,v 1.12 2001/07/16 16:39:36 jz Exp $
+// $Id: spooler_thread.h,v 1.13 2001/07/17 12:46:56 jz Exp $
 
 #ifndef __SPOOLER_THREAD_H
 #define __SPOOLER_THREAD_H
@@ -72,6 +72,7 @@ struct Thread : Sos_self_deleting
     bool                       _free_threading;             // Dieser Thread soll frei, ohne _serialize_lock laufen.
     Handle                     _thread_handle;
     Thread_id                  _thread_id;
+    int                        _thread_priority;
     CComPtr<Com_log>           _com_log;                    // COM-Objekt spooler.log
     CComPtr<Com_thread>        _com_thread;                 // COM-Objekt
 

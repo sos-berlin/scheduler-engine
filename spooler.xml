@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 
-<!-- $Id: spooler.xml,v 1.46 2001/07/16 16:39:35 jz Exp $   (C) 2001 SOS GmbH Berlin -->
+<!-- $Id: spooler.xml,v 1.47 2001/07/17 12:46:55 jz Exp $   (C) 2001 SOS GmbH Berlin -->
 
 <!DOCTYPE spooler SYSTEM "s:\prod\spooler\spooler.dtd">
 
@@ -440,7 +440,7 @@ sub spooler_exit()
 
         </thread>
 
-        <thread name="dauer" spooler_id="" free_threading="">
+        <thread name="dauer" spooler_id="" free_threading="" priority="idle">
             <jobs>
                 <job name="dauer" spooler_id="">
                     <script language="PerlScript" use_engine="task"><![CDATA[
@@ -491,7 +491,7 @@ sub spooler_close()
         </thread>
 
 
-        <thread name="job control" spooler_id="">
+        <thread name="job control" spooler_id="" priority="+1">
             <jobs>
                 <job name="steuerung">
                     <script language="JScript">

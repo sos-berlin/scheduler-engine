@@ -1,4 +1,4 @@
-// $Id: spooler_config.cxx,v 1.19 2001/07/16 08:51:32 jz Exp $
+// $Id: spooler_config.cxx,v 1.20 2001/07/17 12:46:55 jz Exp $
 
 //#include <precomp.h>
 
@@ -385,10 +385,25 @@ void Spooler::load_object_set_classes_from_xml( Object_set_class_list* liste, co
 
 void Thread::set_xml( const xml::Element_ptr& element )
 {
+    string str;
+
     _name = as_string( element->getAttribute( "name" ) );
 
-    string str = as_string( element->getAttribute( "free_threading" ) );
+    str = as_string( element->getAttribute( "free_threading" ) );
     _free_threading = str.empty()? _spooler->free_threading_default() : as_bool( str );
+
+    str = as_string( element->getAttribute( "priority" ) );
+    if( !str.empty() )
+    {
+        if( str == "idle" )  _thread_priority = THREAD_PRIORITY_IDLE;
+        else
+        {
+            _thread_priority = as_int( str );
+
+            if( _thread_priority < -15 )  _thread_priority = -15; 
+            if( _thread_priority >  +2 )  _thread_priority =  +2;   // In Windows sollte die Priorität nicht zu hoch werden
+        }
+    }
 
     if( element->getAttributeNode( "include_path" ) )  _include_path = as_string( element->getAttribute( "include_path" ) );
                                                  else  _include_path = _spooler->include_path();

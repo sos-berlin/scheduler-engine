@@ -1,4 +1,4 @@
-// $Id: spooler_thread.cxx,v 1.17 2001/07/16 08:51:32 jz Exp $
+// $Id: spooler_thread.cxx,v 1.18 2001/07/17 12:46:56 jz Exp $
 /*
     Hier sind implementiert
 
@@ -25,7 +25,8 @@ Thread::Thread( Spooler* spooler )
     _log(&spooler->_log),
     _wait_handles(_spooler,&_log),
     _script(spooler),
-    _script_instance(&_log)
+    _script_instance(&_log),
+    _thread_priority( THREAD_PRIORITY_NORMAL )   // Windows
 {
     _com_thread = new Com_thread( this );
 }
@@ -68,6 +69,7 @@ xml::Element_ptr Thread::xml( xml::Document_ptr document )
         thread_element->setAttribute( "steps"          , as_dom_string( _step_count ) );
         thread_element->setAttribute( "started_tasks"  , as_dom_string( _task_count ) );
         thread_element->setAttribute( "os_thread_id"   , as_dom_string( as_hex_string( (int)_thread_id ) ) );
+        thread_element->setAttribute( "priority"       , as_dom_string( GetThreadPriority( _thread_handle ) ) );
         thread_element->setAttribute( "free_threading" , as_dom_string( _free_threading? "yes" : "no" ) );
 
         dom_append_nl( thread_element );
@@ -336,6 +338,8 @@ int Thread::run_thread()
     int ret = 1;
     int nothing_done_count = 0;
     int nothing_done_max   = _job_list.size() * 2 + 3;
+
+    SetThreadPriority( GetCurrentThread(), _thread_priority );
 
     THREAD_LOCK( _spooler->_thread_id_map_lock )
     {
