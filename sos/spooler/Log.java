@@ -78,6 +78,19 @@ public class Log extends Idispatch
 
     
     
+    /** Stellt ein, ob das Protokoll nach einer Warnung versendet werden soll.
+     * 
+     * @see #mail_on_warning()
+     */
+    public void             set_mail_on_warning         ( boolean value )                           {                   com_call( ">mail_on_warning", value ); }
+
+    
+    
+    /** Liefert die Angabe von {@link #set_mail_on_warning(boolean)}. */
+    public boolean              mail_on_warning         ()                                          { return    boolean_com_call( "<mail_on_warning"        ); }
+
+    
+    
     /** Stellt ein, ob das Protokoll nach einem Fehler versendet werden soll.
      * 
      * @see #mail_on_error()
@@ -190,4 +203,18 @@ public class Log extends Idispatch
     /** Liefert die zuletzt mit Gewicht 2 (error) ausgegebene Zeile. 
      * Oder einen Leerstring. */
     public String               last_error_line         ()                                          { return (String)   com_call( "<last_error_line"        ); }
+
+    /** Liefert die Letzte Ausgabe des angegebenen Levels.
+     * Oder einen Leerstring.
+     *
+     * @param level "error", "warn", "info", "debug1" bis "debug9"
+     */
+    public String               last                    ( String level )                            { return (String)   com_call( "<last", level            ); }
+
+    /** Liefert die Letzte Ausgabe des angegebenen Levels.
+     * Oder einen Leerstring.
+     *
+     * @param level 2 für error bis -9 für debug9
+     */
+    public String               last                    ( int level )                               { return (String)   com_call( "<last", level            ); }
 }

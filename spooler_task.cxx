@@ -1019,7 +1019,7 @@ bool Task::do_something()
                                                                 : s_on_success 
                                                    : s_release );
 
-                                set_mail_defaults();
+                                //set_mail_defaults();
 
                                 loop = true;
                             }
@@ -1443,7 +1443,19 @@ void Task::set_mail_defaults()
 
     if( !is_error )
     {
-        _log->set_mail_subject( obj_name() + " gelungen" );
+        string subject = obj_name();
+
+        if( _log->highest_level() == log_warn )
+        {
+            subject += " mit Warnung gelungen";
+            body += _log->highest_msg() + "\n\n";
+        }
+        else
+        {
+            subject += " gelungen";
+        }
+
+        _log->set_mail_subject( subject );
     }
     else
     {

@@ -72,3 +72,5 @@ HTML-Bedienung (http://localhost:4444/jz) überarbeitet:
 Wenn im rechten Frame ein Job gezeigt wird, kann zwischen Task-Warteschlange, Task-Historie 
 und Auftragswarteschlange gewählt werden.
 
+Neue Einstellung in der factory.ini: mail_on_warning=yes
+Neue Eigenschaft Log.mail_on_warning
