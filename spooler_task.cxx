@@ -344,14 +344,23 @@ xml::Element_ptr Task::dom( const xml::Document_ptr& document, const Show_what& 
                     xml::Element_ptr subprocess_element = document.createElement( "subprocess" );
                     subprocess_element.setAttribute( "pid", p->_pid );
 
-                    if( p->_timeout != latter_day )
-                    subprocess_element.setAttribute( "timeout_at", p->_timeout.as_string() );
+                    if( p->_timeout_at != latter_day )
+                    subprocess_element.setAttribute( "timeout_at", p->_timeout_at.as_string() );
 
                     if( p->_title != "" )
                     subprocess_element.setAttribute( "title", p->_title );
 
                     if( p->_killed )
                     subprocess_element.setAttribute( "killed", "yes" );
+
+                    if( p->_ignore_error )
+                    subprocess_element.setAttribute( "ignore_error", "yes" );
+
+                    if( p->_ignore_signal )
+                    subprocess_element.setAttribute( "ignore_signal", "yes" );
+
+                    if( p->_wait )
+                    subprocess_element.setAttribute( "wait", "yes" );
 
                     subprocesses_element.appendChild( subprocess_element );
                 }
@@ -718,12 +727,12 @@ bool Task::shall_wait_for_registered_pid()
 
 //-------------------------------------------------------------Task::Registered_pid::Registered_pid
 
-Task::Registered_pid::Registered_pid( Task* task, int pid, const Time& timeout, bool wait, bool ignore_error, bool ignore_signal, const string& title )
+Task::Registered_pid::Registered_pid( Task* task, int pid, const Time& timeout_at, bool wait, bool ignore_error, bool ignore_signal, const string& title )
 : 
     _spooler(task->_spooler),
     _task(task),
     _pid(pid), 
-    _timeout(timeout), 
+    _timeout_at(timeout_at), 
     _wait(wait),
     _ignore_error(ignore_error),
     _ignore_signal(ignore_signal),
@@ -755,7 +764,7 @@ void Task::Registered_pid::try_kill()
         _task->_log->warn( S() << "Subprozess " << _pid << ( ok? " abgebrochen" : " lässt sich nicht abbrechen" ) );
 
         _killed = true; 
-        _timeout = latter_day; 
+        _timeout_at = latter_day; 
 
         close();
     }
@@ -766,7 +775,7 @@ void Task::Registered_pid::try_kill()
 void Task::set_subprocess_timeout()
 {
     _subprocess_timeout = latter_day;
-    FOR_EACH( Registered_pids, _registered_pids, p )  if( _subprocess_timeout > p->second->_timeout )  _subprocess_timeout = p->second->_timeout;
+    FOR_EACH( Registered_pids, _registered_pids, p )  if( _subprocess_timeout > p->second->_timeout_at )  _subprocess_timeout = p->second->_timeout_at;
 
     //if( _subprocess_timeout > _next_time )  set_next_time( _subprocess_timeout );
 }
@@ -781,7 +790,7 @@ bool Task::check_subprocess_timeout( const Time& now )
     {
         FOR_EACH( Registered_pids, _registered_pids, p )  
         {
-            if( p->second->_timeout < now )  p->second->try_kill(),  something_done = true;
+            if( p->second->_timeout_at < now )  p->second->try_kill(),  something_done = true;
         }
 
         set_subprocess_timeout();

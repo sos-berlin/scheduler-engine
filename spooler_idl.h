@@ -561,10 +561,10 @@ struct Isubprocess : IDispatch
     virtual HRESULT     get_Java_class_name         ( BSTR* )                                       = 0;
     virtual HRESULT         Close                   ()                                              = 0;
     virtual HRESULT         Start                   ( VARIANT* command_line )                       = 0;
-    virtual HRESULT     put_Priority                ( int )                                         = 0;
-    virtual HRESULT     get_Priority                ( int* )                                        = 0;
-    virtual HRESULT         Raise_priority          ( int, VARIANT_BOOL* )                          = 0;
-    virtual HRESULT         Lower_priority          ( int, VARIANT_BOOL* )                          = 0;
+    virtual HRESULT     put_Priority                ( VARIANT* )                                    = 0;
+    virtual HRESULT     get_Priority                ( VARIANT* )                                    = 0;
+  //virtual HRESULT         Raise_priority          ( int, VARIANT_BOOL* )                          = 0;
+  //virtual HRESULT         Lower_priority          ( int, VARIANT_BOOL* )                          = 0;
     virtual HRESULT     get_Pid                     ( int* )                                        = 0;
     virtual HRESULT     get_Terminated              ( VARIANT_BOOL* )                               = 0;
     virtual HRESULT     get_Exit_code               ( int* )                                        = 0;

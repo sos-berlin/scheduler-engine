@@ -1124,14 +1124,14 @@ library Spooler
         HRESULT                 Start                   ( [in] VARIANT* command_line );         // BSTR oder Array
 
         [propput]
-        HRESULT                 Priority                ( [in] int );
+        HRESULT                 Priority                ( [in] VARIANT* );
 
         [propget]
-        HRESULT                 Priority                ( [out,retval] int* );
+        HRESULT                 Priority                ( [out,retval] VARIANT* );
 
-        HRESULT                 Raise_priority          ( [in] int, [out,retval] VARIANT_BOOL* );
+      //HRESULT                 Raise_priority          ( [in] int, [out,retval] VARIANT_BOOL* );
 
-        HRESULT                 Lower_priority          ( [in] int, [out,retval] VARIANT_BOOL* );
+      //HRESULT                 Lower_priority          ( [in] int, [out,retval] VARIANT_BOOL* );
 
         [propget]
         HRESULT                 Pid                     ( [out,retval] int* );

@@ -36,14 +36,14 @@ struct Subprocess : idispatch_implementation< Subprocess, spooler_com::Isubproce
     // interface Isubprocess
     STDMETHODIMP                Close                       ()                                      { Z_COM_IMPLEMENT( close() ); }
     STDMETHODIMP                Start                       ( VARIANT* command_line );              // BSTR oder Array
-    STDMETHODIMP            put_Priority                    ( int )                                 { return E_NOTIMPL; }
-    STDMETHODIMP            get_Priority                    ( int* )                                { return E_NOTIMPL; }
-    STDMETHODIMP                Raise_priority              ( int, VARIANT_BOOL* )                  { return E_NOTIMPL; }
-    STDMETHODIMP                Lower_priority              ( int, VARIANT_BOOL* )                  { return E_NOTIMPL; }
+    STDMETHODIMP            put_Priority                    ( VARIANT* priority )                   { return _process.put_Priority( priority ); }
+    STDMETHODIMP            get_Priority                    ( VARIANT* result )                     { return _process.get_Priority( result ); }
+  //STDMETHODIMP                Raise_priority              ( int diff, VARIANT_BOOL* result )      { Z_COM_IMPLEMENT( *result = _process.raise_priority( diff )? VARIANT_TRUE : VARIANT_FALSE ); }
+  //STDMETHODIMP                Lower_priority              ( int diff, VARIANT_BOOL* result )      { return Raise_priority( -diff, result ); }
 
-    STDMETHODIMP            get_Pid                         ( int* result )                         { *result = _process.pid();         return S_OK; }
-    STDMETHODIMP            get_Terminated                  ( VARIANT_BOOL* result )                { *result = _process.terminated();  return S_OK; }
-    STDMETHODIMP            get_Exit_code                   ( int* result )                         { *result = _process.exit_code();   return S_OK; }
+    STDMETHODIMP            get_Pid                         ( int* result )                         { return _process.get_Pid( result ); }
+    STDMETHODIMP            get_Terminated                  ( VARIANT_BOOL* result )                { return _process.get_Terminated( result ); }
+    STDMETHODIMP            get_Exit_code                   ( int* result )                         { return _process.get_Exit_code( result ); }
     STDMETHODIMP            get_Stdout_path                 ( BSTR* )                               { return E_NOTIMPL; }
     STDMETHODIMP            get_Stderr_path                 ( BSTR* )                               { return E_NOTIMPL; }
     STDMETHODIMP            put_Ignore_error                ( VARIANT_BOOL b )                      { _ignore_error = b != 0;  return S_OK; } 
@@ -51,7 +51,7 @@ struct Subprocess : idispatch_implementation< Subprocess, spooler_com::Isubproce
     STDMETHODIMP            put_Ignore_signal               ( VARIANT_BOOL b )                      { _ignore_signal= b != 0;  return S_OK; }
     STDMETHODIMP            get_Ignore_signal               ( VARIANT_BOOL* result )                { *result = _ignore_signal? VARIANT_TRUE: VARIANT_FALSE;  return S_OK; }
     STDMETHODIMP                Wait                        ( VARIANT* seconds, VARIANT_BOOL* );
-    STDMETHODIMP                Kill                        ( int signal )                          { Z_COM_IMPLEMENT( _process.kill( signal ) ); }
+    STDMETHODIMP                Kill                        ( int signal )                          { return _process.Kill( signal ); }
 
 
     void                        close                       ();

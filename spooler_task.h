@@ -79,7 +79,7 @@ struct Task : Sos_self_deleting
         Spooler*               _spooler;
         Task* const            _task;
         int                    _pid;
-        Time                   _timeout;
+        Time                   _timeout_at;
         bool                   _wait;                       // Auf Ende der Task warten und Exitcode und Signal auswerten (-> Task-Error)
         bool                   _ignore_error;
         bool                   _ignore_signal;
