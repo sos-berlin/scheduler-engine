@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.290 2003/11/17 09:21:59 jz Exp $
+// $Id: spooler.cxx,v 1.291 2003/11/25 12:07:51 jz Exp $
 /*
     Hier sind implementiert
 
@@ -1192,6 +1192,7 @@ void Spooler::load_arg()
     _order_history_tablename    =            read_profile_string    ( _factory_ini, "spooler", "db_order_history_table", "SCHEDULER_ORDER_HISTORY" );
     _orders_tablename           =            read_profile_string    ( _factory_ini, "spooler", "db_orders_table"    , "SCHEDULER_ORDERS"    );
     _variables_tablename        =            read_profile_string    ( _factory_ini, "spooler", "db_variables_table" , "SCHEDULER_VARIABLES" );
+  //_interactive                = true;     // Kann ohne weiteres true gesetzt werden (aber _is_service setzt es wieder false)
 
 
     _mail_on_error   =            read_profile_bool           ( _factory_ini, "spooler", "mail_on_error"  , _mail_on_error );
@@ -1222,6 +1223,8 @@ void Spooler::load_arg()
     {
         for( Sos_option_iterator opt ( _argc, _argv, _parameter_line ); !opt.end(); opt.next() )
         {
+            if( opt.with_value( "sos.ini"          ) )  ;   // wurde in Hostware-main() bearbeitet
+            else
             if( opt.flag      ( "V"                ) )  ;   // wurde in sos_main() bearbeitet
             else
             if( opt.flag      ( "service"          ) )  ;   // wurde in sos_main() bearbeitet
@@ -1229,6 +1232,8 @@ void Spooler::load_arg()
             if( opt.with_value( "service"          ) )  ;   // wurde in sos_main() bearbeitet
             else
             if( opt.with_value( "log"              ) )  ;   // wurde in sos_main() bearbeitet
+            else
+            if( opt.flag      ( "i"                ) )  _interactive = opt.set();   // Nur für Joacim
             else
             if( opt.with_value( "pid-file"         ) )  _pid_filename = opt.value();
             else
@@ -1259,6 +1264,8 @@ void Spooler::load_arg()
             else
                 throw_sos_option_error( opt );
         }
+
+        if( _is_service )  _interactive = false;
 
         if( _directory.empty() )    // Nur beim ersten Mal setzen!
         {

@@ -1,4 +1,4 @@
-// $Id: spooler_order.cxx,v 1.49 2003/11/23 21:38:21 jz Exp $
+// $Id: spooler_order.cxx,v 1.50 2003/11/25 12:07:51 jz Exp $
 /*
     Hier sind implementiert
 
@@ -388,7 +388,6 @@ void Job_chain::unregister_order( Order* order )
         string id_string = string_from_variant( order->id() );
         Order_map::iterator it = _order_map.find( id_string );
         if( it != _order_map.end() )  _order_map.erase( it );
-        //?_order_map[ id_string ] = order;
     }
 }
 

@@ -1,4 +1,4 @@
-// $Id: spooler.h,v 1.166 2003/10/20 21:46:53 jz Exp $
+// $Id: spooler.h,v 1.167 2003/11/25 12:07:51 jz Exp $
 
 #ifndef __SPOOLER_H
 #define __SPOOLER_H
@@ -349,6 +349,7 @@ struct Spooler
     string                     _config_java_class_path;     // <config java_class_path="">
     string                     _config_java_options;        // <config java_config="">
 
+    bool                       _interactive;                // Kommandos über stdin zulassen
     bool                       _manual;
     string                     _job_name;                   // Bei manuellem Betrieb
 

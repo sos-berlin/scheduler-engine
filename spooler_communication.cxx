@@ -1,4 +1,4 @@
-// $Id: spooler_communication.cxx,v 1.67 2003/10/27 09:57:02 jz Exp $
+// $Id: spooler_communication.cxx,v 1.68 2003/11/25 12:07:51 jz Exp $
 /*
     Hier sind implementiert
 
@@ -24,8 +24,9 @@ const int wait_for_port_available = 60;   // Soviele Sekunden warten, bis TCP- o
 #   include <io.h>
     const int ENOTSOCK   = 10038;
     const int EADDRINUSE = WSAEADDRINUSE;
-    const int STDIN_FILENO  = 0;
-    const int STDOUT_FILENO = 1;
+    const int STDIN_FILENO  = (int)GetStdHandle( STD_INPUT_HANDLE );//0;
+    const int STDOUT_FILENO = (int)GetStdHandle( STD_OUTPUT_HANDLE );//1;
+#   define ioctl    ioctlsocket
 #   define isatty   _isatty
 #else
 #   include <unistd.h>
@@ -580,9 +581,9 @@ void Communication::bind()
 
 #           ifndef Z_WINDOWS
             {
-                if( !_spooler->_is_service )
+                if( _spooler->_interactive )
                 {
-                    ret = ioctl( STDIN_FILENO, FIONBIO, &on );
+                    ret = ioctl( STDIN_FILENO, FIONBIO, &on );   // In Windows nicht möglich
                     if( ret == 0 )
                     {
                         Sos_ptr<Channel> new_channel = SOS_NEW( Channel( _spooler ) );

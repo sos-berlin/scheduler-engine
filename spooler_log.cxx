@@ -1,4 +1,4 @@
-// $Id: spooler_log.cxx,v 1.81 2003/11/23 21:38:21 jz Exp $
+// $Id: spooler_log.cxx,v 1.82 2003/11/25 12:07:51 jz Exp $
 
 #include "spooler.h"
 #include "spooler_mail.h"
@@ -177,11 +177,14 @@ void Log::log( Log_level level, const string& prefix, const string& line )
 
 //----------------------------------------------------------------------------------------Log::log2
 
-void Log::log2( Log_level level, const string& prefix, const string& line, Prefix_log* extra_log, Prefix_log* order_log )
+void Log::log2( Log_level level, const string& prefix, const string& line_, Prefix_log* extra_log, Prefix_log* order_log )
 {
     if( this == NULL )  return;
 
     if( _file == -1 )  return;
+
+    string line = line_;
+    for( int i = line.find( '\r' ); i != string::npos; i = line.find( '\r', i+1 ) )  line[i] = ' ';     // Windows scheint sonst doppelte Zeilenwechsel zu schreiben. jz 25.11.03
 
     THREAD_LOCK( _semaphore )
     {

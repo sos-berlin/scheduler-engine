@@ -1,4 +1,4 @@
-// $Id: spooler_order.h,v 1.27 2003/11/10 16:07:31 jz Exp $
+// $Id: spooler_order.h,v 1.28 2003/11/25 12:07:51 jz Exp $
 
 #ifndef __SPOOLER_ORDER_H
 #define __SPOOLER_ORDER_H
@@ -190,7 +190,7 @@ struct Job_chain : Com_job_chain
     Order*                      add_order               ( VARIANT* order_or_payload, VARIANT* job_or_state );
     ptr<Order>                  order                   ( const Order::Id& id );
 
-    void                        register_order          ( Order* );                                 // Um doppelte Auftragskennungen zu entdecken: Fehler SPOOLER-186
+    void                        register_order          ( Order* );                                 // Um doppelte Auftragskennungen zu entdecken: Fehler SCHEDULER-186
     void                        unregister_order        ( Order* );
 
     int                         order_count             ();
