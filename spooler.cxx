@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.191 2003/03/31 17:12:54 jz Exp $
+// $Id: spooler.cxx,v 1.192 2003/04/01 13:37:12 jz Exp $
 /*
     Hier sind implementiert
 
@@ -811,10 +811,9 @@ void Spooler::load_arg()
     _history_tablename  = read_profile_string    ( _factory_ini, "spooler", "db_history_table"   , "spooler_history"   );
     _variables_tablename= read_profile_string    ( _factory_ini, "spooler", "db_variables_table" , "spooler_variables" );
 
-    _java_vm->set_filename      ( read_profile_string( _factory_ini, "java"   , "vm"         , _java_vm->filename()       ) );
-    _java_vm->prepend_class_path( read_profile_string( _factory_ini, "java"   , "class_path" ) );
-  //_java_vm->prepend_class_path( read_profile_string( ""          , "java"   , "class_path" ) );
-    _java_vm->set_javac_filename( read_profile_string( _factory_ini, "java"   , "javac"      , _java_vm->javac_filename() ) );
+    _java_vm->set_filename      ( subst_env( read_profile_string( _factory_ini, "java"   , "vm"         , _java_vm->filename()       ) ) );
+    _java_vm->prepend_class_path( subst_env( read_profile_string( _factory_ini, "java"   , "class_path" ) ) );
+    _java_vm->set_javac_filename( subst_env( read_profile_string( _factory_ini, "java"   , "javac"      , _java_vm->javac_filename() ) ) );
 
 
     try
