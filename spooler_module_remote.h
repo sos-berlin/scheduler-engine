@@ -1,4 +1,4 @@
-// $Id: spooler_module_remote.h,v 1.18 2003/09/02 16:28:29 jz Exp $
+// $Id: spooler_module_remote.h,v 1.19 2003/09/02 16:38:27 jz Exp $
 
 #ifndef __SPOOLER_MODULE_REMOTE_H
 #define __SPOOLER_MODULE_REMOTE_H
@@ -57,7 +57,7 @@ struct Remote_module_instance_proxy : Com_module_instance_base
 
 
 
-                                Remote_module_instance_proxy( Module* module, string process_class_name )   : Com_module_instance_base(module), _zero_(_end_) /*, _process_class_name(process_class_name)*/ {}
+                                Remote_module_instance_proxy( Module* module )                      : Com_module_instance_base(module), _zero_(_end_) {}
                                ~Remote_module_instance_proxy();
 
     void                        init                        ();
