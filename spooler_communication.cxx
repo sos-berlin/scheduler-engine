@@ -1,4 +1,4 @@
-// $Id: spooler_communication.cxx,v 1.52 2003/03/01 10:38:44 jz Exp $
+// $Id: spooler_communication.cxx,v 1.53 2003/03/04 09:50:35 jz Exp $
 /*
     Hier sind implementiert
 
@@ -417,6 +417,7 @@ void Communication::close( double wait_time )
 }
 
 //----------------------------------------------------------------Communication::main_thread_exists
+#ifndef Z_WINDOWS
 
 bool Communication::main_thread_exists()
 {
@@ -432,6 +433,7 @@ bool Communication::main_thread_exists()
     return true;
 }
 
+#endif
 //-----------------------------------------------------------------------Communication::bind_socket
 
 int Communication::bind_socket( SOCKET socket, struct sockaddr_in* sa )
