@@ -1,12 +1,13 @@
-// $Id: Log.java,v 1.9 2004/07/25 11:25:57 jz Exp $
+// $Id: Log.java,v 1.10 2004/11/14 10:30:34 jz Exp $
 
 package sos.spooler;
 
 /** Zum Schreiben eines Protokolls.
  *
  * @see Job_impl#spooler_log
+ * @see Spooler#log()
  * @author Joacim Zschimmer
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
 
 public class Log extends Idispatch

@@ -1,5 +1,5 @@
 #! /usr/bin/perl -W
-# $Id: scheduler_keyword_to_xml.pl,v 1.5 2004/11/08 18:07:37 jz Exp $
+# $Id: scheduler_keyword_to_xml.pl,v 1.6 2004/11/14 10:30:34 jz Exp $
 
 
 my $script_name     = "scheduler_keyword_to_xml.pl";
@@ -31,12 +31,17 @@ while( my $filename = shift )
 
 
 my @keys = sort { lc($a) cmp lc($b) } keys %keyword_references;
-foreach my $keyword ( @keys )
+foreach my $k ( @keys )
 {
+    $k =~ /^(.*)\t(.*)$/;
+    my $keyword = $1;
+    my $keyword_display = $2;
     print OUTPUT "<register_keyword keyword='$keyword'>\n";
+    print OUTPUT "    <register_keyword_display>$keyword_display</register_keyword_display>\n"    if $keyword_display;
+    
     my $last_xml_line = "";
     
-    foreach my $xml_line ( sort @{$keyword_references{$keyword}} )
+    foreach my $xml_line ( sort @{$keyword_references{$k}} )
     {
         print OUTPUT "    $xml_line"  unless $xml_line eq $last_xml_line;
         $last_xml_line = $xml_line;
@@ -77,23 +82,25 @@ sub read_file
 
     if( $root_element eq "xml_element" )
     { 
+        #if( $category )  { $file_title = $category; }
+        #           else  { $file_title = "&lt;$name&gt;"; }
         $file_title = "&lt;$name&gt;";
         $file_title .= " ($category)"  if $category;
 
         my $keyword = $name;
-        my $xml_line = "<register_entry register_file='$filename' register_title='$file_title'  register_keyword='$keyword' type='definition'/>\n";
-        add_keyword_reference( $keyword, $xml_line );
+        my $xml_line = "<register_entry register_file='$filename#' register_title='$file_title'  register_keyword='$keyword' type='definition'/>\n";
+        add_keyword_reference( $keyword, "<code>&lt;$keyword&gt;</code>", $xml_line );
     }
     #if( $root_element eq "xml_element" )  { $file_title = "XML-Element $file_title" }
         
-    
+
     while( <FILE> )
     {
         if( /\<scheduler_keyword +keyword=("([^"]+)"|'([^']+)')/ )
         {
             my $keyword = $2? $2 : $3;
             my $xml_line = "<register_entry register_file='$filename' register_title='$file_title'  register_keyword='$keyword'/>\n";
-            add_keyword_reference( $keyword, $xml_line );
+            add_keyword_reference( $keyword, "", $xml_line );
         }
 
         if( my $element = get_element( "scheduler_ini_entry" ) )
@@ -102,22 +109,34 @@ sub read_file
             my $a_section = get_attribute( $element, "section" );
             my $a_entry   = get_attribute( $element, "entry" );
             my $xml_line  = "<register_ini_entry register_file='$filename' register_title='$file_title' file='$a_file' section='$a_section' entry='$a_entry'/>\n";
-            add_keyword_reference( $a_entry, $xml_line );
+            add_keyword_reference( $a_entry, "<code>$a_entry=</code>", $xml_line );
         }
 
         if( my $element = get_element( "scheduler_option" ) )
         {
             my $a_name    = get_attribute( $element, "name" );
-            my $xml_line  = "<register_option register_file='$filename' register_title='$file_title' name='$a_name'/>\n";
-            add_keyword_reference( $a_name, $xml_line );
+            my $xml_line = "<register_entry register_file='$filename#use_option__$a_name' register_title='$file_title'  register_keyword='$a_name'/>\n";
+            #my $xml_line  = "<register_option register_file='$filename' register_title='$file_title' name='$a_name'/>\n";
+            add_keyword_reference( $a_name, "<code>-$a_name=</code>", $xml_line );
         }
 
         if( my $element = get_element( "scheduler_element" ) )
         {
             my $a_name    = get_attribute( $element, "name" );
             #my $a_directory = get_attribute( $element, "directory" );
-            my $xml_line  = "<register_element register_file='$filename' register_title='$file_title' name='$a_name'/>\n";  # directory='$directory
-            add_keyword_reference( $a_name, $xml_line );
+            my $xml_line = "<register_entry register_file='$filename#use_element__$a_name' register_title='$file_title'  register_keyword='$a_name'/>\n";
+            #my $xml_line  = "<register_element register_file='$filename' register_title='$file_title' name='$a_name'/>\n";  # directory='$directory
+            add_keyword_reference( $a_name, "<code>&lt;$a_name&gt;</code>", $xml_line );
+        }
+
+        if( $root_element eq "command_line" )
+        {
+            if( my $element = get_element( "command_option" ) )
+            { 
+                my $a_name   = get_attribute( $element, "name" );
+                my $xml_line = "<register_entry register_file='$filename#option_$a_name' register_title='$file_title'  register_keyword='$a_name' type='definition'/>\n";
+                add_keyword_reference( $a_name, "<code>-$a_name=</code>", $xml_line );
+            }
         }
     }
     
@@ -127,10 +146,11 @@ sub read_file
 
 sub add_keyword_reference
 {
-    my $keyword  = shift;
-    my $xml_line = shift;
+    my $keyword         = shift;
+    my $keyword_display = shift;
+    my $xml_line        = shift;
     
-    push( @{$keyword_references{$keyword}}, $xml_line );  # s. Perl Cookbook Seite 140 (5.7)
+    push( @{$keyword_references{"$keyword\t$keyword_display"}}, $xml_line );  # s. Perl Cookbook Seite 140 (5.7)
 }
 
 
@@ -138,7 +158,7 @@ sub get_element
 {
     my $element_name = shift;
     
-    return /\<$element_name[^>]*\>/? $& : "";
+    return /\<$element_name [^>]*\>/? $& : "";
 }
 
 

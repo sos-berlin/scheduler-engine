@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="scheduler.xslt" type="text/xsl"?>
 
-<!--$Id: settings.xml,v 1.18 2004/11/12 11:20:06 jz Exp $-->
+<!--$Id: settings.xml,v 1.19 2004/11/14 10:30:34 jz Exp $-->
 
 <!-- Einige Einstellungen können an mehreren Stellen vorgenommen werden:
      - Konfigurationsdatei
@@ -16,7 +16,7 @@
     base_dir    = ""
     title       = "Einstellungen"
     author      = "$Author: jz $"
-    date        = "$Date: 2004/11/12 11:20:06 $"
+    date        = "$Date: 2004/11/14 10:30:34 $"
 >
 
     <setting setting        = "scheduler_log" 
@@ -147,8 +147,9 @@ log = scheduler.wait com_server.* >scheduler.log
                 Jede Protokollzeile ist auf einer der folgenden Stufen:
                 <code>error</code>, <code>warn</code>, <code>info</code>, <code>debug1</code> bis <code>debug9</code> 
                 (<code>debug1</code> ist dasselbe wie <code>debug</code>).
-                
-                <!--file:///S:/prod/spooler/doc/javadoc/sos/spooler/Log.html#set_level(int)-->
+            </p>
+            <p>
+                Siehe auch <scheduler_method class="Log" method="level"/>.
             </p>
         </description>
     </setting>
@@ -679,6 +680,7 @@ db  = jdbc -wait=15 -class=com.mysql.jdbc.Driver jdbc:mysql://localhost/factory:
 -->
 
     <description>
+        <scheduler_keyword keyword="Einstellungen"/>
         <p>
             Hier sind Einstellungen aufgeführt, die an mehreren Stellen vorgenommen werden können.
         </p>

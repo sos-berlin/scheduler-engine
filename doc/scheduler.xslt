@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding="utf-8"?>
-<!-- $Id: scheduler.xslt,v 1.42 2004/11/08 18:07:37 jz Exp $ -->
+<!-- $Id: scheduler.xslt,v 1.43 2004/11/14 10:30:34 jz Exp $ -->
 
 <!--
     Änderungswünsche:
@@ -276,6 +276,7 @@
         
         <table cellspacing="0" cellpadding="0">
             <col valign="baseline"/>
+            <col valign="baseline"/>
             <tr>
                 <xsl:element name="td">
                     <xsl:if test="count( ../* ) &gt; 1  and  not( ../*/description )">
@@ -293,12 +294,14 @@
                         </b>
                     </p>
                 </xsl:element>
-                <td valign="baseline">
+                <td>
+                    <p>
                     &#160;
                     –
                     <span class="title">
                         <xsl:value-of select="@title | $element/@title"/>
                     </span>
+                    </p>
                 </td>
             </tr>
         </table>
@@ -753,7 +756,7 @@
                 <col valign="baseline"/>
                 <col valign="baseline" style="padding-top: 2pt; padding-left: 2ex"/>
 
-                <xsl:for-each select="*">
+                <xsl:for-each select="register_keyword">
                     <!--xsl:sort select="@keyword"/   Nicht hier sortieren, sonst funktioniert preceding-sibling:self nicht. -->
 
                     <xsl:variable name="first_letter" select="translate( substring( @keyword, 1, 1 ), 'abcdefghijklmnopqrstuvwxyz', 'ABCDEFGHIJKLMNOPQRSTUVWXYZ' )"/>
@@ -772,11 +775,18 @@
                     
                     <tr>
                         <td nowrap="true">
-                            <xsl:value-of select="@keyword"/>
+                            <xsl:choose>
+                                <xsl:when test="register_keyword_display">
+                                    <xsl:apply-templates select="register_keyword_display" mode="description"/>
+                                </xsl:when>
+                                <xsl:otherwise>
+                                    <xsl:value-of select="@keyword"/>
+                                </xsl:otherwise>
+                            </xsl:choose>
                             <!--xsl:apply-templates select="*[ name(.) = $children_name ][ position() = 1]/.." mode="keyword"/-->
                         </td>
                         <td>
-                            <xsl:for-each select="*">
+                            <xsl:for-each select="register_entry | register_ini_entry">
                                 <xsl:sort select="@type" order="descending"/>
                                 <xsl:sort select="@register_title"/>
 
@@ -843,7 +853,15 @@
     <xsl:template match="register_entry">
 
         <xsl:element name="a">
-            <xsl:attribute name="href"><xsl:value-of select="concat( @register_file, '#keyword__', @register_keyword )"/></xsl:attribute>
+            <xsl:choose>
+                <xsl:when test="contains( @register_file, '#' )">
+                    <xsl:attribute name="href"><xsl:value-of select="@register_file"/></xsl:attribute>
+                </xsl:when>
+                <xsl:otherwise>
+                    <xsl:attribute name="href"><xsl:value-of select="concat( @register_file, '#keyword__', @register_keyword )"/></xsl:attribute>
+                </xsl:otherwise>
+            </xsl:choose>
+            
             <xsl:apply-templates select="." mode="register_title"/>
         </xsl:element>
 
@@ -874,7 +892,7 @@
     </xsl:template>
     -->
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~register_option-->
-    
+    <!--
     <xsl:template match="register_option">
         
         Option:
@@ -884,18 +902,18 @@
         </xsl:element>
         
     </xsl:template>
-
+    -->
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~register_element-->
-    
+    <!--    
     <xsl:template match="register_element">
 
         <xsl:element name="a">
-            <xsl:attribute name="href"><xsl:value-of select="concat( @register_file, '#use_option__', @name )"/></xsl:attribute>
+            <xsl:attribute name="href"><xsl:value-of select="concat( @register_file, '#use_element__', @name )"/></xsl:attribute>
             <xsl:apply-templates select="." mode="register_title"/>
         </xsl:element>
         
     </xsl:template>
-
+    -->
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~register_title-->
     
     <xsl:template match="*" mode="register_title">

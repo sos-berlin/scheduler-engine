@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="scheduler.xslt" type="text/xsl"?>
 
-<!--$Id: command_line.xml,v 1.14 2004/09/10 09:29:35 jz Exp $-->
+<!--$Id: command_line.xml,v 1.15 2004/11/14 10:30:34 jz Exp $-->
 
 <command_line program  = "scheduler"
               title    = "Kommandozeile"
               base_dir = ""
               author   = "$Author: jz $"
-              date     = "$Date: 2004/09/10 09:29:35 $">
+              date     = "$Date: 2004/11/14 10:30:34 $">
 
     <command_options>
         <command_option name="config" setting="config">
@@ -35,6 +35,8 @@
 
         <command_option name="cd" type="verzeichnis" title="Arbeitsverzeichnis">
             <description>
+                <scheduler_keyword keyword="Arbeitsverzeichnis"/>
+                <scheduler_keyword keyword="Verzeichnis"/>
                 <p>
                     Ändert das Arbeitsverzeichnis.
                 </p>
@@ -204,10 +206,11 @@
             </description>
         </command_option>
 
-
     </command_options>
     
     <description>
+        <scheduler_keyword keyword="Kommandozeile"/>
+        <scheduler_keyword keyword="Optionen"/>
         <p>
             Der Programmdateiname <code>scheduler</code> muss absolut und vollständig angegeben werden. 
             In Windows mit der Endung "<code>.exe</code>"
