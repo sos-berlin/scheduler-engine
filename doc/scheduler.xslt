@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding="utf-8"?>
-<!-- $Id: scheduler.xslt,v 1.40 2004/10/15 13:08:18 jz Exp $ -->
+<!-- $Id: scheduler.xslt,v 1.41 2004/10/21 21:13:56 jz Exp $ -->
 
 <!--
     Änderungswünsche:
@@ -392,6 +392,131 @@
             <br/>
             <code>&lt;/spooler></code>
         </p>
+        
+    </xsl:template>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~log_categories-->
+
+    <xsl:template match="log_categories">
+    
+        <xsl:variable name="title" select="@title"/>
+
+        <html>
+            <xsl:call-template name="html_head">
+                <xsl:with-param name="title" select="$title"/>
+            </xsl:call-template>
+
+            
+            <body>
+                <xsl:call-template name="body_start">
+                    <xsl:with-param name="title"       select="$title"/>
+                    <xsl:with-param name="parent_page" select="@parent_page"/>
+                </xsl:call-template>
+                
+                <xsl:apply-templates select="description"/>
+                
+                <p>
+                    <table cellspacing="0" cellpadding="0">
+                        <col valign="baseline"/>
+                        <col valign="baseline" style="padding-left: 2ex"/>
+                        <col valign="baseline" style="padding-left: 2ex"/>
+                        
+                        <thead>
+                            <tr>
+                                <td>
+                                    Kategorie
+                                </td>
+                                <td>
+                                    Default¹
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="3">
+                                    <hr size="1"/>
+                                </td>
+                            </tr>
+                        </thead>
+                        
+                        <tbody>
+                            <xsl:apply-templates select="log_category">
+                                <xsl:sort select="@name"/>
+                            </xsl:apply-templates>
+                        </tbody>
+                    </table>                
+                </p>
+                
+                <p class="small">
+                    ¹) "default" bedeutet, dass diese Kategorie voreingestellt ist.
+                    <br/>
+                    "implizit" bedeutet, dass diese Kategorie ausgewählt wird, wenn Sie die Mutterkategorie angeben.
+                    <br/>
+                    "nur explizit" bedeutet, dass die Kategorie explizt angegeben werden muss.
+                    <code>all</code> oder die Mutterkategorie mit oder ohne "<code>.*</code>" schalten dieses Kategorie nicht ein.
+                </p>
+                
+                <xsl:call-template name="bottom">
+                    <xsl:with-param name="parent_page" select="@parent_page"/>
+                </xsl:call-template>
+            </body>
+        </html>
+        
+    </xsl:template>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~log_category-->
+
+    <xsl:template match="log_category">
+        
+        <xsl:param name="indent"/>
+
+        <tr>
+            <td>    
+                <code>
+                    <xsl:if test="parent::*/@name">
+                        <xsl:value-of select="parent::*/@name"/>
+                        <xsl:text>.</xsl:text>
+                    </xsl:if>
+                    
+                    <xsl:element name="span">
+                        <xsl:if test="not( parent::log_category )">
+                            <xsl:attribute name="style">font-weight: bold</xsl:attribute>
+                        </xsl:if>
+                        <xsl:value-of select="@name"/>
+                    </xsl:element>
+                </code>
+            </td>
+            
+            <td>
+                <xsl:if test="@global_default='off'">
+                </xsl:if>
+                <xsl:if test="@global_default='on'">
+                    <xsl:text>default</xsl:text>
+                </xsl:if>
+                <xsl:if test="@local_default='off'">
+                    <xsl:text>nur explizit</xsl:text>
+                </xsl:if>
+                <xsl:if test="@local_default='on'">
+                    <xsl:text>implizit an</xsl:text>
+                </xsl:if>
+            </td>
+
+            <td>
+                <xsl:value-of select="@title"/>
+                <xsl:apply-templates select="description"/>
+            </td>
+        </tr>
+
+        <xsl:apply-templates select="log_category">
+            <xsl:with-param name="indent" select="concat( $indent, '&#160;&#160;&#160;&#160;' )"/>
+            <xsl:sort select="@name"/>
+        </xsl:apply-templates>
+
+        <xsl:if test="not( parent::log_category )">
+            <tr>
+                <td>
+                    &#160;
+                </td>
+            </tr>
+        </xsl:if>
         
     </xsl:template>
 

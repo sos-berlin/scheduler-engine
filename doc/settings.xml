@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="scheduler.xslt" type="text/xsl"?>
 
-<!--$Id: settings.xml,v 1.14 2004/10/15 13:08:18 jz Exp $-->
+<!--$Id: settings.xml,v 1.15 2004/10/21 21:13:56 jz Exp $-->
 
 <!-- Einige Einstellungen können an mehreren Stellen vorgenommen werden:
      - Konfigurationsdatei
@@ -16,7 +16,7 @@
     base_dir    = ""
     title       = "Einstellungen"
     author      = "$Author: jz $"
-    date        = "$Date: 2004/10/15 13:08:18 $"
+    date        = "$Date: 2004/10/21 21:13:56 $"
 >
 
     <setting setting        = "scheduler_log" 
@@ -29,7 +29,27 @@
                 schreibt der Scheduler ein detailliertes Protokoll zur Fehlerdiagnose in die Datei.
                 Geben Sie den Dateinamen absolut an (als vollständigen Pfad).
             </p>
+            <p>
+                Ein Plus (+) direkt vor dem Dateinamen lässt ein vorhandenenes Protokoll fortsetzen.
+                Sonst wird es überschrieben.
+            </p>
+            <h3>Kategorien</h3>
+            <p>
+                Sie können das Log mit Kategorien erweitern oder einschränken. 
+                Schreiben Sie die Namen der Kategorien mit Zwischenräumen getrennt vor den Dateinamen, 
+                den Sie mit einem Größerzeichen (>) einleiten.
+            </p>
+            <p>
+                Hier ist eine <a href="log_categories.xml">Liste der Kategorien</a>.
+            </p>
         </description>
+
+        <example><pre>
+log = c:/tmp/scheduler.log
+log = scheduler.wait >scheduler.log
+log = scheduler.wait com_server.* >scheduler.log
+        </pre></example>
+        
     </setting>
 
 

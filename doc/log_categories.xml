@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet href="scheduler.xslt" type="text/xsl"?>
+
+<!--$Id: log_categories.xml,v 1.1 2004/10/21 21:13:56 jz Exp $-->
+
+<log_categories 
+    title    = "Log-Kategorien" 
+    base_dir = ""
+    author   = "$Author: jz $"
+    date     = "$Date: 2004/10/21 21:13:56 $"
+>
+
+    <scheduler_keyword keyword="Log-Kategorien"/>
+    <scheduler_keyword keyword="Kategorien fürs Log"/>
+    
+    <log_category name="all"            title="Alle Kategorien (außer nur explizite)">
+    </log_category>
+
+<!--
+    <log_category name="async"          title="Asynchrone Aufrufe (für den nebenläufigen Betrieb der Scheduler-Tasks)">
+        <log_category name="continue"       title="Fortsetzen einer asynchronen Operation"/>
+    </log_category>
+-->
+
+    <log_category name="com"            title="COM-Operationen">
+        <log_category name="invoke"         title="Aufruf einer Methode eines COM-Objekts"/>
+    </log_category>
+
+    <log_category name="exception"      title="Bestimmte Fehlercodes">
+        <log_category name="*"              global_default="on" title="Alle Fehlercodes"/>
+        <log_category name="D310"           local_default="off" title="Dateiende"/>
+        <log_category name="D311"           local_default="off" title="Satz nicht gefunden"/>
+    </log_category>
+
+    <log_category name="factory">
+        <description>
+            <p>
+                DocumentFactory (documentfactory.dll)
+            </p>
+        </description>
+    </log_category>
+
+    <log_category name="hostole"        title="Hostole">
+    </log_category>
+
+    <log_category name="ini">
+        <description>
+            <p>
+                .ini-Datei lesen: <code>GetPrivateProfile()</code>.
+            </p>
+        </description>
+    </log_category>
+
+    <log_category name="java"           title="Java">
+    </log_category>
+
+    <log_category name="jdbc"           title="JDBC-Aufrufe">
+    </log_category>
+
+    <log_category name="mutex"          local_default="off" title="Mutual exclusion locks, Sperren zur Serialisierung von Threads">
+    </log_category>
+
+    <log_category name="object_server"  title="Schnittstelle des Schedulers zu den in eigenen Prozessen laufenden Tasks">
+        <log_category name="call"           title="Aufruf einer Methode"/>
+        <log_category name="push"           title="Stack-Operation bei verschachteltem Aufruf einer Methode"/>
+        <log_category name="Invoke"         title="COM-Operation"/>
+        <log_category name="QueryInterface" title="COM-Operation"/>
+    </log_category>
+
+    <log_category name="odbc"           title="ODBC-Aufrufe">
+    </log_category>
+
+    <log_category name="rtf"            title="RTF-Prozessor">
+        <log_category name="map_next_line"  title="Zuordnung der Stellen im RTF-Dokument den Zeilennummern des extrahierten Vorlagenskripts"/>
+    </log_category>
+
+    <log_category name="scheduler"      title="Scheduler">
+        <log_category name="call"           default="on"  title="Beginn und Ende des Aufrufs einer Jobmethode, z.B. spooler_process()"/>
+        <log_category name="http"           title="HTTP-Server"/>
+        <log_category name="log"            title="Zugriffe auf die Protokolldateien"/>
+        <log_category name="order"          title="Operation auf Aufträge (zurzeit Setzen der Payload)"/>
+        <log_category name="wait"           title="Wenn der Scheduler in den Wartezustand geht"/>
+        <log_category name="xml"            title="XML/DOM-Operationen"/>
+        <log_category name="nothing_done"   title="Wenn ein Job im Leerlauf ist"/>
+    </log_category>
+
+    <log_category name="socket"         title="Socket-Operationen (Netzwerk)">
+        <log_category name="accept"     title="Systemaufruf accept(): TCP-Verbindung annehmen"/>
+        <log_category name="close"      title="Systemaufruf close(): Socket schließen"/>
+        <log_category name="connect"    title="Systemaufruf connect(): TCP-Verbindung aufbauen"/>
+        <log_category name="listen"     title="Systemaufruf listen(): TCP-Verbindungsaufforderung erwarten"/>
+        <log_category name="send"       title="Systemaufruf send(): Daten senden"/>
+        <log_category name="recv"       title="Systemaufruf send(): Daten empfangen"/>
+        <log_category name="select"     title="Systemaufruf select(): TCP-Ereignis abwarten"/>
+    </log_category>
+
+    <log_category name="spidermonkey"   title="JavaScript-Implementierung Spidermonkey">
+        <log_category name="callback"       title="Rückrufe von Spidermonkey"/>
+        <log_category name="idispatch"      title="Verwaltung der COM-Objekte"/>
+    </log_category>
+    
+    
+    <description>
+        <p>
+            Manche Log-Ausgaben (seit 2004) sind einer Kategorie zugeordnet. 
+            Diese Log-Ausgaben können Sie an- oder ausgeschalten.
+        </p>
+        <p>
+            Die Log-Kategorien geben Sie vor dem Dateinamen an, wobei dem Dateinamen ein Größerzeichen (>) vorangestellt sein muss.
+            Mehrere Kategorien trennen Sie mit einem Zwischenraum. Beispiel (in einer .ini-Datei):
+            <code>log = scheduler.* socket.* >c:/tmp/scheduler.log</code>.
+        </p>
+        <p>
+            Die besondere Kategorie <code>all</code> wählt alle Kategorien aus, außer die, die explizit angegeben werden müssen.
+        </p>
+        <p>
+            Die Kategorien sind hierarchich organisiert.
+            Sie können eine Kategorie mit all deren Unterkategorien auswählen, indem Sie dem Namen ein "<code>.*</code>" anhängen. 
+            Beispiel: <code>scheduler.*</code>.
+        </p>
+        <p>
+            &#160;  
+        </p>
+    </description>
+
+</log_categories>

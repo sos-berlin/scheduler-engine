@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="scheduler.xslt" type="text/xsl"?>
 
-<!--$Id: protokolle.xml,v 1.6 2004/09/11 18:31:06 jz Exp $-->
+<!--$Id: protokolle.xml,v 1.7 2004/10/21 21:13:56 jz Exp $-->
 
 <description 
     title    = "Protokolle" 
     base_dir = ""
     author   = "$Author: jz $"
-    date     = "$Date: 2004/09/11 18:31:06 $"
+    date     = "$Date: 2004/10/21 21:13:56 $"
 >
 
 <scheduler_keyword keyword="Protokoll"/>
@@ -16,7 +16,10 @@
     Ins mit der Option <scheduler_option name="log-dir"/> eingestellten Verzeichnis schreibt der Scheduler seine Protokolle.
 </p>
 
+
+
 <scheduler_keyword keyword="Hauptprotokoll" type="definition"/>
+
 <h3>Hauptprotokoll</h3>
 <p>
     Das Hauptprotokoll fast alle Protokolle zusammen.
@@ -24,12 +27,20 @@
     <code>scheduler-2004-08-24-104111.log</code>.
 </p>
     
+
+
+<scheduler_keyword keyword="Jobprotokoll"/>
+
 <h3>Jobprotokolle</h3>
 <p>
     Für jeden Job erstellt der Scheduler ein Jobprotokoll
     mit den Starts der Tasks und eingetroffenen Aufträgen.
     Beispiel: <code>job.mein_job.log</code>
 </p>
+
+
+
+<scheduler_keyword keyword="Taskprotokoll"/>
 
 <h3>Taskprotokolle</h3>
 <p>
@@ -39,6 +50,10 @@
     Taskprotokolle mit Task-Id werden nach Ende der Task gelöscht.
 </p>
     
+
+
+<scheduler_keyword keyword="Auftragsprotokoll"/>
+
 <h3>Auftragsprotokolle</h3>
 <p>
     Für jeden Auftrag erstellt der Scheduler ein Auftragsprotokoll
@@ -48,14 +63,24 @@
     Das Auftragsprotokoll wird nach Ende des Auftrags gelöscht.
 </p>
 
+
+
+<scheduler_keyword keyword="Log-Datei"/>
+<scheduler_keyword keyword="scheduler.log"/>
+
 <h3>scheduler.log</h3>
 <p>
     Zur Fehlerdiagnose kann der Scheduler das <code>scheduler.log</code> schreiben. 
     In <scheduler_ini_entry file="factory.ini" section="spooler" entry="log"/> stellen sie den Dateinamen ein.
     In dieser Dokumentation steht <code>factory.ini</code> für den hier eingestellten Dateinamen.
 </p>
+<p>
+    Hier die <a href="log_categories.xml">Liste der Log-Kategorien</a>.
+</p>
 
 
+
+<scheduler_keyword keyword="Datenbank"/>
 
 <h2>Ablage in den Datenbank</h2>
 
@@ -83,11 +108,16 @@
 </ul>
 
 
+
+<scheduler_keyword keyword="eMail-Versand"/>
+<scheduler_keyword keyword="Mail-Versand"/>
+
 <h2>eMail-Versand</h2>    
 
 <p>
     Der Scheduler kann das Task-Protokoll per eMail verschicken. Lesen Sie weiter im Kapitel <a href="email.xml">eMail</a>.
 </p>
+
 
 
 
