@@ -1,4 +1,4 @@
-// $Id: spooler_wait.cxx,v 1.36 2002/09/11 10:05:16 jz Exp $
+// $Id: spooler_wait.cxx,v 1.37 2002/09/14 16:23:08 jz Exp $
 /*
     Hier sind implementiert
 
@@ -179,8 +179,7 @@ bool Event::signaled_then_reset()
     THREAD_LOCK( _lock )
     {
         signaled = _signaled;
-        _signaled = false;
-        if( signaled )  ResetEvent( _handle );
+        reset();
     }
 
     return signaled;

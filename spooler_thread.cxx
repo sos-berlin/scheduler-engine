@@ -1,4 +1,4 @@
-// $Id: spooler_thread.cxx,v 1.40 2002/09/11 18:24:50 jz Exp $
+// $Id: spooler_thread.cxx,v 1.41 2002/09/14 16:23:08 jz Exp $
 /*
     Hier sind implementiert
 
@@ -54,6 +54,8 @@ void Thread::init()
 
     _event.set_name( "Thread " + _name );
     _event.add_to( &_wait_handles );
+
+    FOR_EACH_JOB( job )  (*job)->init0();
 }
 
 //--------------------------------------------------------------------------------------Thread::xml
@@ -120,13 +122,13 @@ void Thread::load_jobs_from_xml( const xml::Element_ptr& element, bool init )
                 if( job )
                 {
                     job->set_xml( e );
-                    if( init )  job->init();
+                    if( init )  job->init0(),  job->init();
                 }
                 else
                 {
                     job = SOS_NEW( Job( this ) );
                     job->set_xml( e );
-                    if( init )  job->init();
+                    if( init )  job->init0(),  job->init();
                     add_job( job );
                 }
             }
@@ -284,7 +286,8 @@ void Thread::wait()
             {
                 Job* job = *it;
                 if( job->_state == Job::s_pending
-                 || job->_state == Job::s_running_delayed ) 
+                 || job->_state == Job::s_running_delayed 
+                 || job->_state == Job::s_running_waiting_for_order ) 
                 {
                     if( _next_start_time > (*it)->_next_time )  next_job = *it, _next_start_time = next_job->_next_time;
                 }
@@ -404,10 +407,10 @@ bool Thread::any_tasks_there()
     {
         FOR_EACH( Job_list, _job_list, it )  
         {
-            if( (*it)->state() == Job::s_suspended              )  return true;    // Zählt nicht in _running_tasks_count
-            if( (*it)->state() == Job::s_running_delayed        )  return true;    // Zählt nicht in _running_tasks_count
-            if( (*it)->state() == Job::s_running_wait_for_order )  return true;    // Zählt nicht in _running_tasks_count
-            if( (*it)->state() == Job::s_running_process        )  return true;    // Zählt nicht in _running_tasks_count
+            if( (*it)->state() == Job::s_suspended                 )  return true;    // Zählt nicht in _running_tasks_count
+            if( (*it)->state() == Job::s_running_delayed           )  return true;    // Zählt nicht in _running_tasks_count
+            if( (*it)->state() == Job::s_running_waiting_for_order )  return true;    // Zählt nicht in _running_tasks_count
+            if( (*it)->state() == Job::s_running_process           )  return true;    // Zählt nicht in _running_tasks_count
             if( (*it)->queue_filled() )  return true;
         }
     }
@@ -540,8 +543,6 @@ static uint __stdcall thread( void* param )
 
 void Thread::start_thread()
 {
-    init();
-
    _thread_handle = _beginthreadex( NULL, 0, thread, this, 0, &_thread_id );
    if( !_thread_handle )  throw_mswin_error( "CreateThread" );
 

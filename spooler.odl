@@ -1,4 +1,4 @@
-// $Id: spooler.odl,v 1.43 2002/09/13 10:52:24 jz Exp $
+// $Id: spooler.odl,v 1.44 2002/09/14 16:23:07 jz Exp $
 
 // Anweisung: midl /nologo /error all /out $(OutDir) $(InputPath)
 
@@ -207,6 +207,9 @@ library spooler
 
         [propput]
         HRESULT                 delay_after_error           ( [in] int error_steps, [in] VARIANT* time );
+
+        [propget]
+        HRESULT                 order_queue                 ( [out,retval] Iorder_queue** result );
     }
 
     [
@@ -629,9 +632,10 @@ library spooler
 
         HRESULT                 add_end_state           ( [in] VARIANT* state );
 
-      //HRESULT                 finish                  ();
+        HRESULT                 add_order               ( [in] VARIANT* order_or_payload, [out,retval] Iorder** order );
 
-        HRESULT                 add_order               ( [in] VARIANT* order_or_payload, [in,optional] VARIANT* job_or_state, [out,retval] Iorder** order );
+        [propget]
+        HRESULT                 order_queue             ( [in] VARIANT* state, [out,retval] Iorder_queue** result );
     }
 
     [
@@ -654,7 +658,7 @@ library spooler
         [propget]
         HRESULT                 length                  ( [out,retval] int* result );
 
-      //HRESULT                 add_order               ( [in] VARIANT* order_or_payload );
+        HRESULT                 add_order               ( [in] VARIANT* order_or_payload, [out,retval] Iorder** );
     }
 
     [
@@ -740,8 +744,6 @@ library spooler
         HRESULT                 risses_fruits           ( [out,retval] VARIANT* result );
 
         HRESULT                 risses_fruits_is_type   ( [in] BSTR typenam, [out,retval] VARIANT_BOOL* result );
-
-        HRESULT                 add_to_job_chain        ( [in] Ijob_chain* );
     }
 
     [

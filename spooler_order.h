@@ -1,4 +1,4 @@
-// $Id: spooler_order.h,v 1.2 2002/09/13 10:52:25 jz Exp $
+// $Id: spooler_order.h,v 1.3 2002/09/14 16:23:08 jz Exp $
 
 #ifndef __SPOOLER_ORDER_H
 #define __SPOOLER_ORDER_H
@@ -34,7 +34,7 @@ struct Order : Com_order
     string&                     title                   ()                                          { THREAD_LOCK_RETURN( _lock, string, _title ); }
     string                      obj_name                ()                                          { THREAD_LOCK_RETURN( _lock, string, string_from_variant(_id) + rtrim( "  " + _title ) ); }
                                                             
-    void                    set_priority                ( Priority priority )                       { _priority = priority; }
+    void                    set_priority                ( Priority );
     Priority                    priority                ()                                          { return _priority; }
 
     Job_chain*                  job_chain               ()                                          { return _job_chain; }
@@ -57,11 +57,15 @@ struct Order : Com_order
     Com_job*                    com_job                 ();
   //CComPtr<spooler_com::Ijob_chain> com_job_chain      ();
 
+
+    void                        add_to_order_queue      ( Order_queue* );
+
+    // Auftrag in einer Jobkette:
     void                        add_to_job_chain        ( Job_chain* );
     void                        remove_from_job_chain   ();
     void                        move_to_node            ( Job_chain_node* );
-  //void                        move_to_job             ( Job* );
     void                        postprocessing          ( bool success, Prefix_log* );              // Verarbeitung nach spooler_process()
+
 
 
   private:
@@ -71,12 +75,10 @@ struct Order : Com_order
     Thread_semaphore           _lock;
     Spooler*                   _spooler;
 
-  //CComPtr<Com_order>         _com_order;
-
     Id                         _id;
     Priority                   _priority;
     State                      _state;
-    CComBSTR                   _state_text;
+    wstring                    _state_text;
     string                     _title;
     Payload                    _payload;
     bool                       _error;
@@ -85,7 +87,7 @@ struct Order : Com_order
     Job_chain_node*            _job_chain_node;         // Nächster Stelle, falls in einer Jobkette
     bool                       _in_job_queue;           // Auftrag ist in _job_chain_node->_job->order_queue() eingehängt
     bool                       _moved;                  // true, wenn Job state oder job geändert hat. Dann nicht automatisch in Jobkette weitersetzen
-  //Job*                       _job;                    // Nächster Job (zusätzlich zu _job_chain_node), auch wenn nicht in einer Jobkette
+    Order_queue*               _order_queue;            // Auftrag ist in einer Auftragsliste, aber nicht in einer Jobkette. _job_chain == NULL, _job_chain_node == NULL!
 };
 
 //-----------------------------------------------------------------------------------Job_chain_node
@@ -169,7 +171,7 @@ struct Internal_priority
 */
 //--------------------------------------------------------------------------------------Order_queue
 
-struct Order_queue : Object
+struct Order_queue : Com_order_queue
 {
                                 Order_queue             ( Job*, Prefix_log* );
                                ~Order_queue             ();
@@ -180,12 +182,14 @@ struct Order_queue : Object
     int                         length                  () const                                    { return _queue.size(); }
     bool                        empty                   () const                                    { return _queue.empty(); }
     ptr<Order>                  pop                     ();
+    Job*                        job                     () const                                    { return _job; }
 
-  private:
-    Thread_semaphore           _lock;
 
     Fill_zero                  _zero_;
     Spooler*                   _spooler;
+
+  private:
+    Thread_semaphore           _lock;
     Job*                       _job;
     Prefix_log*                _log;
     CComPtr<Com_order_queue>   _com_order_queue;

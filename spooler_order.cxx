@@ -1,4 +1,4 @@
-// $Id: spooler_order.cxx,v 1.3 2002/09/13 12:23:40 jz Exp $
+// $Id: spooler_order.cxx,v 1.4 2002/09/14 16:23:07 jz Exp $
 /*
     Hier sind implementiert
 
@@ -223,7 +223,6 @@ Order_queue::Order_queue( Job* job, Prefix_log* log )
 : 
     _zero_(this+1),
     _spooler(job->_spooler), 
-    _com_order_queue( new Com_order_queue(this) ),
     _job(job),
     _log(log)
 {
@@ -233,7 +232,6 @@ Order_queue::Order_queue( Job* job, Prefix_log* log )
 
 Order_queue::~Order_queue()
 {
-    if( _com_order_queue )  _com_order_queue->close();
 }
 
 //---------------------------------------------------------------------------Order_queue::add_order
@@ -400,6 +398,8 @@ Job* Order::job()
     THREAD_LOCK( _lock )
     {
         if( _job_chain_node )  result = _job_chain_node->_job;
+        else
+        if( _order_queue    )  result = _order_queue->job();
     }
 
     return result;
@@ -421,6 +421,17 @@ void Order::set_state( const State& state )
 Order::State Order::state()
 {
     THREAD_LOCK_RETURN( _lock, State, _state );
+}
+
+//------------------------------------------------------------------------------Order::set_priority
+
+void Order::set_priority( Priority priority )
+{ 
+    THREAD_LOCK( _lock )
+    {
+        if( _in_job_queue )  throw_xc( "SPOOLER-159" );
+        _priority = priority; 
+    }
 }
 
 //-------------------------------------------------------------------------------Job_chain::com_job
@@ -445,6 +456,22 @@ CComPtr<Com_job_chain> Order::com_job_chain()
     THREAD_LOCK_RETURN( _lock, CComPtr<Com_job_chain>, _job_chain? _job_chain->com_job_chain() : NULL ); 
 }
 */
+
+//------------------------------------------------------------------------Order::add_to_order_queue
+
+void Order::add_to_order_queue( Order_queue* order_queue )
+{
+    THREAD_LOCK( _lock )
+    {
+        _moved = true;
+
+        if( _job_chain )  remove_from_job_chain();
+
+        order_queue->add_order( this );
+        _order_queue = order_queue;
+    }
+}
+
 //---------------------------------------------------------------------Order::remove_from_job_chain
 
 void Order::remove_from_job_chain()
@@ -507,14 +534,14 @@ void Order::move_to_node( Job_chain_node* node )
     {
         if( !_job_chain )  throw_xc( "SPOOLER-157", error_string_from_variant(_id) );
 
+        _moved = true;
+
         if( _job_chain_node && _in_job_queue )  _job_chain_node->_job->order_queue()->remove_order( this );
 
         _state = node->_state;
         _job_chain_node = node;
 
         if( node->_job )  node->_job->order_queue()->add_order( this );
-
-        _moved = true;
     }
 }
 

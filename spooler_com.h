@@ -1,4 +1,4 @@
-// $Id: spooler_com.h,v 1.42 2002/09/13 10:52:25 jz Exp $
+// $Id: spooler_com.h,v 1.43 2002/09/14 16:23:07 jz Exp $
 
 #ifndef __SPOOLER_COM_H
 #define __SPOOLER_COM_H
@@ -100,7 +100,7 @@ struct Com_variable_set: spooler_com::Ivariable_set, Sos_ole_object
     USE_SOS_OLE_OBJECT
 
     void                        set_xml                     ( const xml::Element_ptr& );
-    STDMETHODIMP                set_var                     ( BSTR name, VARIANT* value)            { return put_var( name, value ); }
+    STDMETHODIMP                set_var                     ( BSTR name, VARIANT* value )       { return put_var( name, value ); }
     STDMETHODIMP                put_var                     ( BSTR, VARIANT* );
     STDMETHODIMP                get_var                     ( BSTR, VARIANT* );
     STDMETHODIMP                get_count                   ( int* );
@@ -243,6 +243,7 @@ struct Com_job : spooler_com::Ijob, Sos_ole_object
     STDMETHODIMP                put_state_text              ( BSTR );
     STDMETHODIMP                get_title                   ( BSTR* );
     STDMETHODIMP                put_delay_after_error       ( int error_steps, VARIANT* time );
+    STDMETHODIMP                get_order_queue             ( spooler_com::Iorder_queue** );
 
   private:
     Thread_semaphore           _lock;
@@ -385,7 +386,8 @@ struct Com_job_chain : spooler_com::Ijob_chain, Sos_ole_object
     STDMETHODIMP                add_end_state           ( VARIANT* );
   //STDMETHODIMP                finish                  ();
 
-    STDMETHODIMP                add_order               ( VARIANT* order_or_payload, VARIANT*, spooler_com::Iorder** );
+    STDMETHODIMP                add_order               ( VARIANT* order_or_payload, spooler_com::Iorder** );
+    STDMETHODIMP            get_order_queue             ( VARIANT* state, spooler_com::Iorder_queue** );
 
 
     Thread_semaphore           _lock;
@@ -439,8 +441,6 @@ struct Com_order : spooler_com::Iorder, Sos_ole_object
     
     STDMETHODIMP                risses_fruits_is_type   ( BSTR typname, VARIANT_BOOL* result )      { return payload_is_type(typname,result); }
 
-    STDMETHODIMP                add_to_job_chain        ( spooler_com::Ijob_chain* );
-
 
   private:
     Fill_zero                  _zero_;
@@ -452,20 +452,18 @@ struct Com_order : spooler_com::Iorder, Sos_ole_object
 
 struct Com_order_queue : spooler_com::Iorder_queue, Sos_ole_object               
 {
-                                Com_order_queue         ( Order_queue* );
-
-    void                        close                   ()                                          { THREAD_LOCK( _lock )  _order_queue = NULL; }
+                                Com_order_queue         ();
 
 
     USE_SOS_OLE_OBJECT
 
     STDMETHODIMP            get_length                  ( int* );
+    STDMETHODIMP                add_order               ( VARIANT*, spooler_com::Iorder** );
 
 
   private:
     Fill_zero                  _zero_;
     Thread_semaphore           _lock;
-    Order_queue*               _order_queue;
 };
 
 //-------------------------------------------------------------------------------------------------

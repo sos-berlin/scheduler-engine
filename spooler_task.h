@@ -1,4 +1,4 @@
-// $Id: spooler_task.h,v 1.61 2002/09/13 09:53:24 jz Exp $
+// $Id: spooler_task.h,v 1.62 2002/09/14 16:23:08 jz Exp $
 
 #ifndef __SPOOLER_TASK_H
 #define __SPOOLER_TASK_H
@@ -132,7 +132,7 @@ struct Job : Sos_self_deleting
         s_loaded,               // Skript geladen (mit spooler_init), aber nicht gestartet (spooler_open)
         s_running,              // Läuft
         s_running_delayed,      // spooler_task.delay_spooler_process gesetzt
-        s_running_wait_for_order,
+        s_running_waiting_for_order,
         s_running_process,      // Läuft in einem externen Prozess, auf dessen Ende nur gewartet wird
         s_suspended,            // Angehalten
         s_ending,               // end(), also in spooler_close()
@@ -181,8 +181,9 @@ struct Job : Sos_self_deleting
     void                        set_xml                     ( const xml::Element_ptr& );
     xml::Element_ptr            xml                         ( xml::Document_ptr, bool show_all );
 
-    void                        init                        ();
-    void                        init2                       ();
+    void                        init0                       ();                         // Wird vor Spooler-Skript gerufen
+    void                        init                        ();                         // Wird nach Spooler-Skript gerufen, ruft auch init2()
+    void                        init2                       ();                         // Wird nach reread() gerufen
 
     const string&               name                        () const                    { return _name; }
     State_cmd                   state_cmd                   () const                    { return _state_cmd; }

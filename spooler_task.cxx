@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.105 2002/09/13 10:52:25 jz Exp $
+// $Id: spooler_task.cxx,v 1.106 2002/09/14 16:23:08 jz Exp $
 /*
     Hier sind implementiert
 
@@ -281,7 +281,7 @@ void Job::set_xml( const xml::Element_ptr& element )
         if( order )
         {
             if( _temporary )  throw_xc( "SPOOLER-155" );
-            _order_queue = Z_NEW( Order_queue( this, &_log ) );
+            _order_queue = new Order_queue( this, &_log );
         }
 
         string text;
@@ -328,10 +328,10 @@ void Job::set_xml( const xml::Element_ptr& element )
     }
 }
 
-//----------------------------------------------------------------------------------------Job::init
+//---------------------------------------------------------------------------------------Job::init0
 // Bei <add_jobs> von einem anderen Thread gerufen.
 
-void Job::init()
+void Job::init0()
 {
     _state = s_none;
 
@@ -346,9 +346,15 @@ void Job::init()
     _com_log  = new Com_log( &_log );
     _com_task = new Com_task();
 
-    _history.open();
-
     set_state( s_pending );
+}
+
+//----------------------------------------------------------------------------------------Job::init
+// Bei <add_jobs> von einem anderen Thread gerufen.
+
+void Job::init()
+{
+    _history.open();
 
     if( _script_xml_element )  read_script();
 
@@ -649,7 +655,7 @@ void Job::end()
 
     if( _state == s_suspended  
      || _state == s_running_delayed 
-     || _state == s_running_wait_for_order )  set_state( s_running );
+     || _state == s_running_waiting_for_order )  set_state( s_running );
     
     if( _state == s_start_task
      || _state == s_starting
@@ -757,13 +763,13 @@ bool Job::execute_state_cmd()
 
                 case sc_end:        if( _state == s_running 
                                      || _state == s_running_delayed 
-                                     || _state == s_running_wait_for_order
+                                     || _state == s_running_waiting_for_order
                                      || _state == s_running_process )  end(), finish(),        something_done = true;
                                     break;
 
                 case sc_suspend:    if( _state == s_running 
                                      || _state == s_running_delayed
-                                     || _state == s_running_wait_for_order )  set_state( s_suspended ), something_done = true;
+                                     || _state == s_running_waiting_for_order )  set_state( s_suspended ), something_done = true;
                                     break;
 
                 case sc_continue:   if( _state == s_suspended  
@@ -1033,7 +1039,7 @@ bool Job::do_something()
     if( _state == s_read_error )  goto ENDE;
 
 
-    if( _state == s_start_task || _state == s_running || _state == s_running_delayed || _state == s_running_wait_for_order || _state == s_running_process )          // HISTORIE
+    if( _state == s_start_task || _state == s_running || _state == s_running_delayed || _state == s_running_waiting_for_order || _state == s_running_process )          // HISTORIE
     {
         if( _task->_step_count == _history.min_steps() )  _history.start();
     }
@@ -1061,7 +1067,11 @@ bool Job::do_something()
         set_state( s_running );
     }
 
-    if( _state == s_running_wait_for_order  &&  !_order_queue->empty() )  set_state( s_running );
+    if( _state == s_running_waiting_for_order )
+    {
+        if( !_order_queue->empty() )  set_state( s_running );                       // Auftrag da? Dann Task weiterlaufen lassen (Ende der Run_time wird noch geprüft)
+                                else  ok &= _period.is_in_time( Time::now() );      // Run_time abgelaufen? Dann Task beenden
+    }
 
     if( ( _state == s_running || _state == s_running_process )  &&  ok  &&  !has_error() )      // SPOOLER_PROCESS
     {
@@ -1094,7 +1104,7 @@ bool Job::do_something()
          || _state == s_starting        // Bei Fehler in spooler_init()
          || _state == s_running 
          || _state == s_running_delayed
-         || _state == s_running_wait_for_order
+         || _state == s_running_waiting_for_order
          || _state == s_running_process )  end(), something_done = true;
 
         if( _state != s_stopped  &&  has_error()  &&  _repeat == 0  &&  _delay_after_error.empty() )  stop(), something_done = true;
@@ -1107,6 +1117,13 @@ bool Job::do_something()
     {
         _next_time = _task->_next_spooler_process;
         set_state( s_running_delayed );
+    }
+
+
+    if( _state == s_running  &&  _order_queue  &&  _order_queue->empty() )
+    {
+        set_state( Job::s_running_waiting_for_order );  
+        _next_time = _period.end();     // Thread am Ende der Run_time wecken, damit Task beendet werden kann
     }
 
 
@@ -1130,7 +1147,7 @@ bool Job::do_something()
 ENDE:
     if( _state != s_running  
      && _state != s_running_delayed
-     && _state != s_running_wait_for_order
+     && _state != s_running_waiting_for_order
      && _state != s_running_process  
      && _state != s_suspended        )  send_collected_log();
 
@@ -1294,11 +1311,11 @@ void Job::set_state_cmd( State_cmd cmd )
                                 _thread->signal( state_cmd_name(cmd) );
                                 break;
 
-            case sc_end:        ok = _state == s_running || _state == s_running_delayed || _state == s_running_wait_for_order || _state == s_suspended;  if( !ok )  return;
+            case sc_end:        ok = _state == s_running || _state == s_running_delayed || _state == s_running_waiting_for_order || _state == s_suspended;  if( !ok )  return;
                                 _state_cmd = cmd;
                                 break;
 
-            case sc_suspend:    ok = _state == s_running || _state == s_running_delayed || _state == s_running_wait_for_order;   if( !ok )  return;
+            case sc_suspend:    ok = _state == s_running || _state == s_running_delayed || _state == s_running_waiting_for_order;   if( !ok )  return;
                                 _state_cmd = cmd;
                                 break;
 
@@ -1368,7 +1385,7 @@ string Job::state_name( State state )
         case s_starting:        return "starting";
         case s_running:         return "running";
         case s_running_delayed: return "running_delayed";
-        case s_running_wait_for_order: return "running_wait_for_order";
+        case s_running_waiting_for_order: return "running_waiting_for_order";
         case s_running_process: return "running_process";
         case s_suspended:       return "suspended";
         case s_ending:          return "ending";
@@ -1743,7 +1760,7 @@ bool Task::step()
         if( _job->_order_queue )
         {
             _order = _job->_order_queue->pop();
-            if( !_order )  { _job->set_state( Job::s_running_wait_for_order );  return true; }
+            if( !_order )  return true;
         }
 
 

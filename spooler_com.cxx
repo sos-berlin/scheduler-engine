@@ -1,4 +1,4 @@
-// $Id: spooler_com.cxx,v 1.52 2002/09/13 10:52:25 jz Exp $
+// $Id: spooler_com.cxx,v 1.53 2002/09/14 16:23:07 jz Exp $
 /*
     Hier sind implementiert
 
@@ -38,7 +38,7 @@ DESCRIBE_CLASS( &spooler_typelib, Com_spooler     , spooler     , CLSID_spooler 
 DESCRIBE_CLASS( &spooler_typelib, Com_context     , context     , CLSID_Context     , "Spooler.Context"     , "1.0" )
 DESCRIBE_CLASS( &spooler_typelib, Com_job_chain   , job_chain   , CLSID_job_chain   , "Spooler.Job_chain"   , "1.0" )
 DESCRIBE_CLASS( &spooler_typelib, Com_order       , order       , CLSID_order       , "Spooler.Order"       , "1.0" )
-DESCRIBE_CLASS( &spooler_typelib, Com_order_queue , order_queue , CLSID_Order_queue , "Spooler.Order_queue" , "1.0" )
+DESCRIBE_CLASS( &spooler_typelib, Com_order_queue , order_queue , CLSID_order_queue , "Spooler.Order_queue" , "1.0" )
 
 //-----------------------------------------------------------------------------IID_Ihostware_dynobj
 
@@ -58,6 +58,23 @@ Time time_from_variant( const VARIANT& vt )
     }
     else
         return as_double( str );
+}
+
+//----------------------------------------------------------------------order_from_order_or_payload
+
+static CComPtr<spooler_com::Iorder> order_from_order_or_payload( Spooler* spooler, const VARIANT& order_or_payload )
+{
+    CComPtr<spooler_com::Iorder> iorder;
+
+    if( order_or_payload.vt == VT_DISPATCH  ||  order_or_payload.vt == VT_UNKNOWN )
+    {
+        HRESULT hr = V_UNKNOWN(&order_or_payload)->QueryInterface( spooler_com::IID_Iorder, (void**)&iorder );
+        if( FAILED(hr) )  iorder = NULL;
+    }
+
+    if( !iorder )  iorder = new Order( spooler, order_or_payload );
+
+    return iorder;
 }
 
 //-----------------------------------------------------------------------------Com_error::Com_error
@@ -1062,7 +1079,25 @@ STDMETHODIMP Com_job::put_delay_after_error( int error_steps, VARIANT* time )
     return hr;
 }
 
+//-------------------------------------------------------------------------Com_job::get_order_queue
 
+STDMETHODIMP Com_job::get_order_queue( Iorder_queue** result )
+{
+    HRESULT hr = NOERROR;
+
+    THREAD_LOCK( _lock )
+    try
+    {
+        if( !_job )  throw_xc( "SPOOLER-122" );
+
+        *result = _job->order_queue();
+        if( *result )  (*result)->AddRef();
+    }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Job.title" ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Job.title" ); }
+
+    return hr;
+}
 
 //-------------------------------------------------------------------------------Com_task::Com_task
 
@@ -1876,7 +1911,7 @@ STDMETHODIMP Com_job_chain::finish()
 */
 //-------------------------------------------------------------------------Com_job_chain::add_order
 
-STDMETHODIMP Com_job_chain::add_order( VARIANT* order_or_payload, VARIANT* job_or_state, spooler_com::Iorder** result )
+STDMETHODIMP Com_job_chain::add_order( VARIANT* order_or_payload, spooler_com::Iorder** result )
 {
     HRESULT hr = NOERROR;
 
@@ -1884,34 +1919,39 @@ STDMETHODIMP Com_job_chain::add_order( VARIANT* order_or_payload, VARIANT* job_o
     try
     {
         if( !_job_chain )  return E_POINTER;
-
         if( !_job_chain->finished() )  throw_xc( "SPOOLER-151" );
 
-        CComPtr<spooler_com::Iorder> iorder;
-
-        if( order_or_payload->vt == VT_DISPATCH  ||  order_or_payload->vt == VT_UNKNOWN )
-        {
-            hr = V_UNKNOWN(order_or_payload)->QueryInterface( spooler_com::IID_Iorder, (void**)&iorder );
-            if( FAILED(hr) )  iorder = NULL;
-        }
-
-        if( !iorder )  iorder = new Order( _job_chain->_spooler, *order_or_payload );
+        CComPtr<spooler_com::Iorder> iorder = order_from_order_or_payload( _job_chain->_spooler, *order_or_payload );
 
         // Einstieg nur über Order, damit Semaphoren stets in derselben Reihenfolge gesperrt werden.
-        hr = dynamic_cast<Com_order*>( &*iorder )->add_to_job_chain( this );  //, job_or_state );
-        if( FAILED(hr) )  return hr;
-
+        dynamic_cast<Order*>( &*iorder )->add_to_job_chain( dynamic_cast<Job_chain*>( this ) );  
 
         *result = iorder;
         (*result)->AddRef();
-
-
-        //ptr<Order> order = _job_chain->add_order( order_or_payload, job_or_state );
-        //*result = order->com_order();
-        //if( *result )  (*result)->AddRef();
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Job_chain.add_order" ); }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Job_chain.add_order" ); }
+
+    return hr;
+}
+
+//-----------------------------------------------------------------------Com_job_chain::order_queue
+
+STDMETHODIMP Com_job_chain::get_order_queue( VARIANT* state, Iorder_queue** result )
+{
+    HRESULT hr = NOERROR;
+
+    THREAD_LOCK( _lock )
+    try
+    {
+        if( !_job_chain )  return E_POINTER;
+        if( !_job_chain->finished() )  throw_xc( "SPOOLER-151" );
+
+        *result = _job_chain->node_from_state( *state )->_job->order_queue();
+        if( *result )  (*result)->AddRef();
+    }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Job_chain.order_queue" ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Job_chain.order_queue" ); }
 
     return hr;
 }
@@ -2297,12 +2337,13 @@ STDMETHODIMP Com_order::payload_is_type( BSTR typname_bstr, VARIANT_BOOL* result
             case VT_UNKNOWN:
             case VT_DISPATCH:
             {
-                IUnknown* iunknown = NULL;
+                CComPtr<IUnknown> iunknown;
 
                 if( typname == "spooler.variable_set" )
                 {
                     hr = V_UNKNOWN(&payload)->QueryInterface( IID_Ivariable_set, (void**)&iunknown );
                     if( SUCCEEDED(hr)  )  { *result = true;  return hr; }
+                    iunknown = NULL;
                 }
 
                 if( typname == "hostware.dyn_obj" 
@@ -2311,7 +2352,8 @@ STDMETHODIMP Com_order::payload_is_type( BSTR typname_bstr, VARIANT_BOOL* result
                     hr = V_UNKNOWN(&payload)->QueryInterface( IID_Ihostware_dynobj, (void**)&iunknown );
                     if( SUCCEEDED(hr) )  { *result = true;  return hr; }
                 }
-                
+
+                hr = S_FALSE;
                 break;
             }
             
@@ -2325,7 +2367,7 @@ STDMETHODIMP Com_order::payload_is_type( BSTR typname_bstr, VARIANT_BOOL* result
 }
 
 //----------------------------------------------------------------------Com_order::add_to_job_chain
-
+/*
 STDMETHODIMP Com_order::add_to_job_chain( Ijob_chain* ijob_chain )
 {
     HRESULT hr = NOERROR;
@@ -2343,14 +2385,13 @@ STDMETHODIMP Com_order::add_to_job_chain( Ijob_chain* ijob_chain )
 
     return hr;
 }
-
+*/
 //-----------------------------------------------------------------Com_order_queue::Com_order_queue
 
-Com_order_queue::Com_order_queue( Order_queue* order_queue )
+Com_order_queue::Com_order_queue()
 :
     Sos_ole_object( order_queue_class_ptr, this ),
-    _zero_(this+1),
-    _order_queue(order_queue)
+    _zero_(this+1)
 {
 }
 
@@ -2360,10 +2401,33 @@ STDMETHODIMP Com_order_queue::get_length( int* result )
 {
     THREAD_LOCK( _lock )
     {
-        *result = _order_queue->length();
+        *result = dynamic_cast<Order_queue*>(this)->length();
     }
 
     return S_OK;
+}
+
+//-----------------------------------------------------------------------Com_order_queue::add_order
+
+STDMETHODIMP Com_order_queue::add_order( VARIANT* order_or_payload, Iorder** result )
+{
+    HRESULT hr = NOERROR;
+
+    THREAD_LOCK( _lock )
+    try
+    {
+        CComPtr<spooler_com::Iorder> iorder = order_from_order_or_payload( dynamic_cast<Order_queue*>(this)->_spooler, *order_or_payload );
+
+        // Einstieg nur über Order, damit Semaphoren stets in derselben Reihenfolge gesperrt werden.
+        dynamic_cast<Order*>( &*iorder )->add_to_order_queue( dynamic_cast<Order_queue*>( this ) );
+
+        *result = iorder;
+        (*result)->AddRef();
+    }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Order_queue.add_order" ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Order_queue.add_order" ); }
+
+    return hr;
 }
 
 //-------------------------------------------------------------------------------------------------

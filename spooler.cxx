@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.113 2002/09/11 10:05:13 jz Exp $
+// $Id: spooler.cxx,v 1.114 2002/09/14 16:23:07 jz Exp $
 /*
     Hier sind implementiert
 
@@ -431,8 +431,7 @@ Object_set_class* Spooler::get_object_set_class_or_null( const string& name )
 Job* Spooler::get_job( const string& job_name )
 {
     Job* job = get_job_or_null( job_name );
-    //if( !job  ||  !job->state() )  throw_xc( "SPOOLER-108", job_name );
-    if( !job  )  throw_xc( "SPOOLER-108", job_name );
+    if( !job  ||  !job->state() )  throw_xc( "SPOOLER-108", job_name );
     return job;
 }
 
@@ -651,6 +650,9 @@ void Spooler::start()
     if( !_manual )  _communication.start_or_rebind();
 
     _spooler_start_time = Time::now();
+
+    {FOR_EACH( Thread_list, _thread_list, it )  if( !(*it)->empty() )  (*it)->init();}
+
 
     if( _script.set() )
     {
