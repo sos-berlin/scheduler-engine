@@ -1,4 +1,4 @@
-// $Id: spooler_com.cxx,v 1.92 2003/03/27 11:51:05 jz Exp $
+// $Id: spooler_com.cxx,v 1.93 2003/03/31 11:32:52 jz Exp $
 /*
     Hier sind implementiert
 
@@ -249,6 +249,8 @@ const Com_method Com_variable_set::_methods[] =
     { DISPATCH_PROPERTYGET, 4, "Clone"              , (Com_method_ptr)&Com_variable_set::Clone          , VT_DISPATCH   },
     { DISPATCH_PROPERTYGET, 5, "merge"              , (Com_method_ptr)&Com_variable_set::merge          , VT_EMPTY      , { VT_DISPATCH } },
     { DISPATCH_PROPERTYGET, DISPID_NEWENUM, "_NewEnum", (Com_method_ptr)&Com_variable_set::get__NewEnum , VT_DISPATCH   },
+    { DISPATCH_PROPERTYPUT, 6, "xml"                , (Com_method_ptr)&Com_variable_set::put_xml        , VT_EMPTY      , { VT_BSTR } },
+    { DISPATCH_PROPERTYGET, 6, "xml"                , (Com_method_ptr)&Com_variable_set::get_xml        , VT_BSTR       },
     {}
 };
 
@@ -497,6 +499,53 @@ STDMETHODIMP Com_variable_set::get__NewEnum( IUnknown** iunknown )
     *iunknown = e;
     (*iunknown)->AddRef();
     return NOERROR;
+}
+
+//------------------------------------------------------------------------Com_variable_set::put_xml
+
+STDMETHODIMP Com_variable_set::put_xml( BSTR xml_text )  
+{ 
+    HRESULT hr = NOERROR;
+
+    try
+    {
+        xml::Document_ptr doc = dom();
+        doc.load_xml( string_from_bstr( xml_text ) );
+
+        DOM_FOR_EACH_ELEMENT( doc.documentElement(), e )
+        {
+            if( e.nodeName() == "variable" )
+            {
+                Bstr    name  = e.getAttribute( "name" );
+                Variant value = e.getAttribute( "value" );
+                hr = put_var( name, &value );
+                if( FAILED( hr ) )  break;
+            }
+            else
+                throw_xc( "SPOOLER-182" );
+        }
+
+    }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Variable_set::dom" ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Variable_set::dom" ); }
+
+    return hr;
+}
+
+//------------------------------------------------------------------------Com_variable_set::get_xml
+
+STDMETHODIMP Com_variable_set::get_xml( BSTR* xml_doc  )  
+{ 
+    HRESULT hr = NOERROR;
+
+    try
+    {
+        hr = string_to_bstr( dom().xml(), xml_doc );
+    }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Variable_set::dom" ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Variable_set::dom" ); }
+
+    return hr;
 }
 
 //------------------------------------------------------------Com_variable_set_enumerator::_methods

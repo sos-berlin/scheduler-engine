@@ -1,4 +1,4 @@
-// $Id: spooler_com.h,v 1.68 2003/03/15 18:06:37 jz Exp $
+// $Id: spooler_com.h,v 1.69 2003/03/31 11:32:53 jz Exp $
 
 #ifndef __SPOOLER_COM_H
 #define __SPOOLER_COM_H
@@ -137,6 +137,8 @@ struct Com_variable_set: spooler_com::Ivariable_set,
     STDMETHODIMP                Clone                       ( spooler_com::Ivariable_set** );
     STDMETHODIMP                merge                       ( spooler_com::Ivariable_set* );
     STDMETHODIMP                get__NewEnum                ( IUnknown** );    
+    STDMETHODIMP                put_xml                     ( BSTR xml_text );
+    STDMETHODIMP                get_xml                     ( BSTR* xml_text );
 
 
   private:

@@ -1,4 +1,4 @@
-// $Id: spooler_module_java.cxx,v 1.47 2003/03/26 14:03:31 jz Exp $
+// $Id: spooler_module_java.cxx,v 1.48 2003/03/31 11:32:54 jz Exp $
 /*
     Hier sind implementiert
 
@@ -143,7 +143,7 @@ JNIEXPORT jobject JNICALL Java_sos_spooler_Idispatch_com_1call( JNIEnv* jenv, jc
                             else  context |= DISPATCH_METHOD;
 
         hr = idispatch->GetIDsOfNames( IID_NULL, &name_ptr, 1, (LCID)0, &dispid );
-        if( FAILED(hr) )  throw_com( hr, "GetIDsOfNames", string_from_bstr(name_ptr).c_str() );
+        if( FAILED(hr) )  throw_com( hr, "GetIDsOfNames", string_from_ole(name_ptr).c_str() );
 
 
         // Invoke

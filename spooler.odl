@@ -1,4 +1,4 @@
-// $Id: spooler.odl,v 1.56 2003/03/15 18:06:36 jz Exp $
+// $Id: spooler.odl,v 1.57 2003/03/31 11:32:52 jz Exp $
 
 // Anweisung: midl /nologo /error all /out $(OutDir) $(InputPath)
 
@@ -144,6 +144,12 @@ library spooler
 
         [id(DISPID_NEWENUM),propget,restricted]
         HRESULT                 _NewEnum                    ( [out,retval] IUnknown** enumerator );    
+
+        [propput]
+        HRESULT                 xml                         ( [in] BSTR xml_text );
+
+        [propget]
+        HRESULT                 xml                         ( [out,retval] BSTR* xml_text );
     }
 
     [

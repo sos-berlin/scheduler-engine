@@ -1,4 +1,4 @@
-// $Id: Variable_set.java,v 1.3 2002/11/14 12:34:50 jz Exp $
+// $Id: Variable_set.java,v 1.4 2003/03/31 11:32:54 jz Exp $
 
 package sos.spooler;
 
@@ -6,7 +6,7 @@ package sos.spooler;
  * Variablenmenge.
  *
  * @author Joacim Zschimmer, Zschimmer GmbH
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 
 public class Variable_set extends Idispatch
@@ -24,4 +24,7 @@ public class Variable_set extends Idispatch
   //public Variable_set     clone               ()                                  { return (Variable_set) com_call( "clone"                   ); }
     
     public void             merge               ( Variable_set vars )               {                       com_call( "merge", vars             ); }
+
+    public void         set_xml                 ( String xml_text )                 {                       com_call( ">xml", xml_text          ); }
+    public String           xml                 ()                                  { return (String)       com_call( "<xml"                    ); }
 }

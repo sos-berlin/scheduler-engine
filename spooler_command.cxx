@@ -1,4 +1,4 @@
-// $Id: spooler_command.cxx,v 1.81 2003/03/19 11:59:56 jz Exp $
+// $Id: spooler_command.cxx,v 1.82 2003/03/31 11:32:53 jz Exp $
 /*
     Hier ist implementiert
 
@@ -530,26 +530,11 @@ void Command_processor::execute_2( const string& xml_text, const Time& xml_mod_t
         xml::Document_ptr command_doc;
         command_doc.create();
 
-        int ok = command_doc.load_xml( xml_text );
+        int ok = command_doc.try_load_xml( xml_text );
         if( !ok )
         {
-            string text;
-
-#           ifdef SPOOLER_USE_MSXML
-                msxml::IXMLDOMParseErrorPtr error = command_doc._ptr->parseError;
-
-                text = w_as_string( error->reason );
-                if( text[ text.length()-1 ] == '\n' )  text = as_string( text.c_str(), text.length() - 1 );
-                if( text[ text.length()-1 ] == '\r' )  text = as_string( text.c_str(), text.length() - 1 );
-
-                text += ", code="   + as_hex_string( error->errorCode );
-                text += ", line="   + as_string( error->line );
-                text += ", column=" + as_string( error->linepos );
-#            else
-                text = command_doc.error_text();
-                _spooler->_log.error( text );       // Log ist möglicherweise noch nicht geöffnet
-#           endif
-
+            string text = command_doc.error_text();
+            _spooler->_log.error( text );       // Log ist möglicherweise noch nicht geöffnet
             throw_xc( "XML-ERROR", text );
         }
 /*

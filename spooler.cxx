@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.188 2003/03/27 11:09:29 jz Exp $
+// $Id: spooler.cxx,v 1.189 2003/03/31 11:32:51 jz Exp $
 /*
     Hier sind implementiert
 
@@ -711,26 +711,11 @@ bool Spooler::run_threads()
 void Spooler::send_cmd()
 {
     xml::Document_ptr xml_doc;
-    int ok = xml_doc.load_xml( _send_cmd );      // Haben wir ein gültiges XML-Dokument?
+    int ok = xml_doc.try_load_xml( _send_cmd );      // Haben wir ein gültiges XML-Dokument?
     if( !ok )
     {
-        string text;
-
-#       ifdef SPOOLER_USE_MSXML
-            msxml::IXMLDOMParseErrorPtr error = xml_doc._ptr->parseError;
-
-            text = w_as_string( error->reason );
-            if( text[ text.length()-1 ] == '\n' )  text = as_string( text.c_str(), text.length() - 1 );
-            if( text[ text.length()-1 ] == '\r' )  text = as_string( text.c_str(), text.length() - 1 );
-
-            text += ", code="   + as_hex_string( error->errorCode );
-            text += ", line="   + as_string( error->line );
-            text += ", column=" + as_string( error->linepos );
-#        else
-            text = xml_doc.error_text();
-            _log.error( text );       // Log ist möglicherweise noch nicht geöffnet
-#       endif
-
+        string text = xml_doc.error_text();
+        _log.error( text );       // Log ist möglicherweise noch nicht geöffnet
         throw_xc( "XML-ERROR", text );
     }
 
