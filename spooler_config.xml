@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 
-<!-- $Id: spooler_config.xml,v 1.23 2001/01/13 18:41:19 jz Exp $   (C) 2000 SOS GmbH Berlin -->
+<!-- $Id: spooler_config.xml,v 1.24 2001/01/13 22:26:18 jz Exp $   (C) 2000 SOS GmbH Berlin -->
 
 <!DOCTYPE spooler_config SYSTEM "spooler_config.dtd">
 
@@ -54,6 +54,7 @@ class Testobjekt
 
     sub process( new_level )
         spooler_log.msg "process " & level & " ==> " & new_level 
+        spooler_log.msg "file(" & file.path & ").move " & dir_name & "\" & new_level & "\" & file.name
         file.move dir_name & "\" & new_level & "\" & file.name
         level = new_level
     end sub
@@ -73,9 +74,7 @@ class Object_set_class
         dim file
         dim i
         
-        spooler_log.msg "spooler.param=" & spooler.param
-        spooler_log.msg "spooler_task.object_set.low_level=" & spooler_task.object_set.low_level
-        spooler_log.msg "spooler_task.object_set.high_level=" & spooler_task.object_set.high_level
+        spooler_log.msg "spooler_open: [" & spooler_task.object_set.low_level & "," & spooler_task.object_set.high_level & "], spooler.param=" & spooler.param
 
         set files=fso.getFolder(dir_name).Files
         
@@ -149,7 +148,7 @@ end function
 use diagnostics;
 use Win32::OLE;
 
-$spooler_log->msg( "*Job Perl" );
+#$spooler_log->msg( "*Job Perl" );
 
 
 {
@@ -158,7 +157,7 @@ $spooler_log->msg( "*Job Perl" );
 
     sub construct
     {
-        $main::spooler_log->msg( "Testobjekt::construct" );
+        #$main::spooler_log->msg( "Testobjekt::construct" );
         my $self = {};
         bless( $self );
         $self->{name} = shift;
@@ -171,7 +170,7 @@ $spooler_log->msg( "*Job Perl" );
     {
         my $self = shift;
         my $new_level = shift;  # Wie holt man den Parameter? Joacim
-        $main::spooler_log->msg( "process " . $self->{name} . ", " . $self->{level} . " ==> $new_level" );
+        #$main::spooler_log->msg( "process " . $self->{name} . ", " . $self->{level} . " ==> $new_level" );
         $self->{level} = $new_level;
     }
 }
@@ -346,7 +345,7 @@ sub spooler_process()
 
             <script language="VBScript" use_engine="job"><![CDATA[
 
-spooler_log.msg "*Job einfach"
+'spooler_log.msg "*Job einfach"
 
 index = 1
 
@@ -354,8 +353,7 @@ sub spooler_init()
 end sub
 
 function step()
-    spooler_log.msg "*Job einfach: step " & index
-    spooler_log.msg "*Job einfach: step " & spooler.script.global.method()
+    spooler_log.msg "*Job einfach: step " & index & ", param=" & spooler.script.global.method()
     index = index + 1
     if index > 3 then step=false: exit function
     step = true

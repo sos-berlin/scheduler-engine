@@ -1,4 +1,4 @@
-// $Id: spooler_command.cxx,v 1.12 2001/01/12 12:20:55 jz Exp $
+// $Id: spooler_command.cxx,v 1.13 2001/01/13 22:26:18 jz Exp $
 
 #include "../kram/sos.h"
 #include "../kram/sleep.h"
@@ -45,7 +45,7 @@ xml::Element_ptr create_error_element( xml::Document* document, const Xc_copy& x
 
 //-----------------------------------------------------------------------------append_error_element
 
-void append_error_element( xml::Element* element, const Xc_copy& x )
+void append_error_element( const xml::Element_ptr& element, const Xc_copy& x )
 {
     element->appendChild( create_error_element( element->ownerDocument, x ) );
 }
@@ -200,29 +200,34 @@ xml::Element_ptr Command_processor::execute_signal_object( const xml::Element_pt
     return tasks_element;
 }
 
+//----------------------------------------------------------------Command_processor::execute_config
+
+xml::Element_ptr Command_processor::execute_config( const xml::Element_ptr& config_element )
+{
+    if( config_element->tagName != "config" )  throw_xc( "SPOOLER-113", as_string( config_element->tagName ) );
+
+    string spooler_id = as_string( config_element->getAttribute( "spooler_id" ) );
+    if( spooler_id.empty()  ||  spooler_id == _spooler->_spooler_id )
+    {
+        _spooler->cmd_load_config( config_element );
+    }
+
+    return _answer->createElement( "ok" );
+}
+
 //---------------------------------------------------------------Command_processor::execute_command
 
 xml::Element_ptr Command_processor::execute_command( const xml::Element_ptr& element )
 {
     if( element->tagName == "show_state"        )  return execute_show_state();
     else
-/*
-    if( element->tagName == "pause_spooler"     )  { _spooler->cmd_pause();     return _answer->createElement( "ok" ); }
-    else
-    if( element->tagName == "continue_spooler"  )  { _spooler->cmd_continue();  return _answer->createElement( "ok" ); }
-    else
-    if( element->tagName == "stop_spooler"      )  { _spooler->cmd_stop();      return _answer->createElement( "ok" ); }
-    else
-    if( element->tagName == "terminate_spooler" )  { _spooler->cmd_terminate(); return _answer->createElement( "ok" ); }
-    else
-    if( element->tagName == "restart_spooler"   )  { _spooler->cmd_restart();   return _answer->createElement( "ok" ); }
-    else
-*/
     if( element->tagName == "modify_spooler"    )  return execute_modify_spooler( element );
     else
     if( element->tagName == "modify_job"        )  return execute_modify_job( element );
     else
     if( element->tagName == "signal_object"     )  return execute_signal_object( element );
+    else
+    if( element->tagName == "config"            )  return execute_config( element );
     else
     {
         throw_xc( "SPOOLER-105", as_string( element->tagName ) ); return NULL;
@@ -233,40 +238,62 @@ xml::Element_ptr Command_processor::execute_command( const xml::Element_ptr& ele
 
 string Command_processor::execute( const string& xml_text )
 {
-    Thread_semaphore::Guard guard = &_spooler->_semaphore;
+    try 
+    {
+        execute_2( xml_text );
+    }
+    catch( const Xc& x )
+    {
+        append_error_element( _answer->documentElement->firstChild, x );
+    }
 
+    return _answer->xml;
+
+/*  Bei save wird die encoding belassen. Eigenschaft xml verwendet stets unicode, was wir nicht wollen.
+    _answer->save( "c:/tmp/~spooler.xml" );
+    _answer = NULL;
+    return file_as_string( "c:/tmp/~spooler.xml" );
+*/
+}
+
+//----------------------------------------------------------------------Command_processor::execute_2
+
+void Command_processor::execute_2( const string& xml_text )
+{
     _answer = xml::Document_ptr( __uuidof(xml::DOMDocument30), NULL );
-
     _answer->appendChild( _answer->createProcessingInstruction( "xml", "version=\"1.0\" encoding=\"iso-8859-1\"" ) );
+    _answer->appendChild( _answer->createElement( "spooler" ) );
 
-    xml::Element_ptr spooler_answer = _answer->appendChild( _answer->createElement( "spooler_answer" ) );
+    xml::Element_ptr answer_element = _answer->documentElement->appendChild( _answer->createElement( "answer" ) );
 
     try 
     {
-        try 
+        xml::Document_ptr command_doc ( __uuidof(xml::DOMDocument30), NULL );
+
+        int ok = command_doc->loadXML( as_dom_string( xml_text ) );
+        if( !ok ) // DOPPELT DOPPELT DOPPELT DOPPELT
         {
-            xml::Document_ptr command_doc ( __uuidof(xml::DOMDocument30), NULL );
+            xml::IXMLDOMParseErrorPtr error = command_doc->GetparseError();
 
-            int ok = command_doc->loadXML( as_dom_string( xml_text ) );
-            if( !ok ) // DOPPELT DOPPELT DOPPELT DOPPELT
-            {
-                xml::IXMLDOMParseErrorPtr error = command_doc->GetparseError();
+            string text = w_as_string( error->reason );
+            if( text[ text.length()-1 ] == '\n' )  text = as_string( text.c_str(), text.length() - 1 );
+            if( text[ text.length()-1 ] == '\r' )  text = as_string( text.c_str(), text.length() - 1 );
 
-                string text = w_as_string( error->reason );
-                if( text[ text.length()-1 ] == '\n' )  text = as_string( text.c_str(), text.length() - 1 );
-                if( text[ text.length()-1 ] == '\r' )  text = as_string( text.c_str(), text.length() - 1 );
+            text += ", code="   + as_hex_string( error->errorCode );
+            text += ", line="   + as_string( error->line );
+            text += ", column=" + as_string( error->linepos );
 
-                text += ", code="   + as_hex_string( error->errorCode );
-                text += ", line="   + as_string( error->line );
-                text += ", column=" + as_string( error->linepos );
-
-                throw_xc( "XML-ERROR", text );
-            }
+            throw_xc( "XML-ERROR", text );
+        }
 
 
-            xml::Element_ptr e = command_doc->documentElement;
+        xml::Element_ptr e = command_doc->documentElement;
 
-            if( e->tagName == "spooler_command" )
+        if( e->tagName == "spooler" )  e = e->firstChild;
+
+        if( e )
+        {
+            if( e->tagName == "command" )
             {
                 xml::NodeList_ptr node_list = e->childNodes;
 
@@ -274,30 +301,16 @@ string Command_processor::execute( const string& xml_text )
                 {
                     xml::Node_ptr node = node_list->Getitem(i);
 
-                    spooler_answer->appendChild( execute_command( node ) );
+                    answer_element->appendChild( execute_command( node ) );
                 }
             }
             else
             {
-                spooler_answer->appendChild( execute_command( e ) );
+                answer_element->appendChild( execute_command( e ) );
             }
         }
-        catch( const _com_error& com_error ) { throw_com_error(com_error); return NULL; }
     }
-    catch( const Xc& x )
-    {
-        append_error_element( spooler_answer, x );
-    }
-
-    string result = _answer->xml;
-    _answer = NULL;
-    return result;
-
-/*  Bei save wird die encoding belassen. Eigenschaft xml verwendet stets unicode, was wir nicht wollen.
-    _answer->save( "c:/tmp/~spooler.xml" );
-    _answer = NULL;
-    return file_as_string( "c:/tmp/~spooler.xml" );
-*/
+    catch( const _com_error& com_error ) { throw_com_error(com_error);  }
 }
 
 //-------------------------------------------------------------------------------------------------

@@ -204,6 +204,14 @@ SOURCE=.\spooler.rc
 # PROP Default_Filter ""
 # Begin Source File
 
+SOURCE=.\spooler.dtd
+# End Source File
+# Begin Source File
+
+SOURCE=.\spooler.xml
+# End Source File
+# Begin Source File
+
 SOURCE=.\spooler_answer.dtd
 # End Source File
 # Begin Source File

@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.26 2001/01/13 18:41:18 jz Exp $
+// $Id: spooler.cxx,v 1.27 2001/01/13 22:26:17 jz Exp $
 
 
 /*
@@ -817,7 +817,6 @@ Spooler::Spooler()
     _zero_(this+1), 
     _communication(this), 
     _script_instance(&_script),
-    _command_processor(this), 
     _log(this)
 {
     _com_log     = new Com_log( &_log );
@@ -876,10 +875,13 @@ void Spooler::load()
 
     {
         Thread_semaphore::Guard guard = &_semaphore;
+        Command_processor       cp = this;
 
         tzset();
         load_arg();
-        load_xml();
+
+        cp.execute_2( file_as_string( _config_filename ) );
+      //load_xml();
     }
 }
 
@@ -890,10 +892,10 @@ void Spooler::start()
     _log.set_directory( _log_directory );
     _log.open_new();
 
-    if( _state_cmd == sc_reload )  _communication.rebind();
-                             else  _communication.start_thread();
-    _state_cmd = sc_none;
+    if( _communication.started() )  _communication.rebind();
+                              else  _communication.start_thread();
 
+    _state_cmd = sc_none;
     _state = s_starting;
     _log.msg( "Spooler::start" );
 
@@ -1067,19 +1069,8 @@ void Spooler::run()
 
     while(1)
     {
-        switch( _state_cmd )
-        {
-            case sc_pause                 : _state = s_paused; 
-                                            break;
-            case sc_stop:
-            case sc_terminate:
-            case sc_terminate_and_restart : 
-            case sc_reload                : stop();  
-                                            break;
-
-            default: ;
-        }
-
+        if( _state_cmd == sc_pause                 )  _state = s_paused; 
+        if( _state_cmd == sc_load_config           )  break;
         if( _state_cmd == sc_reload                )  break;
         if( _state_cmd == sc_terminate             )  break;
         if( _state_cmd == sc_terminate_and_restart )  break;
@@ -1155,15 +1146,20 @@ int Spooler::launch( int argc, char** argv )
         _wait_handles.add( _command_arrived_event );
 #   endif
 
+
     do
     {
-        load();
+        if( _state_cmd != sc_load_config )  load();
+        
+        if( _config_element )  load_config( _config_element ), _config_element = NULL;
 
         start();
-
         run();
+        stop();
 
-    } while( _state_cmd == sc_reload );
+    } while( _state_cmd == sc_reload || _state_cmd == sc_load_config );
+
+    _log.msg( "Spooler ordentlich beendet." );
 
     return _state_cmd == sc_terminate_and_restart? 1 : 0;
 }

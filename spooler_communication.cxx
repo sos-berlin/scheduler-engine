@@ -1,4 +1,4 @@
-// $Id: spooler_communication.cxx,v 1.10 2001/01/13 18:41:19 jz Exp $
+// $Id: spooler_communication.cxx,v 1.11 2001/01/13 22:26:18 jz Exp $
 
 //#include <precomp.h>
 
@@ -390,8 +390,10 @@ bool Communication::handle_socket( Channel* channel )
             
             if( channel->_receive_is_complete ) 
             {
+                Command_processor cp = _spooler;;
+
                 channel->_receive_is_complete = false;
-                channel->_text = _spooler->_command_processor.execute( channel->_text );
+                channel->_text = cp.execute( channel->_text );
                 channel->do_send();
             }
 
@@ -452,7 +454,8 @@ int Communication::run()
                 int len = recv( _udp_socket, buffer, sizeof buffer, 0 );
                 if( len > 0 ) 
                 {
-                    _spooler->_command_processor.execute( as_string( buffer, len ) );
+                    Command_processor cp = _spooler;
+                    cp.execute( as_string( buffer, len ) );
                 }
             }
 

@@ -1,4 +1,4 @@
-// $Id: spooler.h,v 1.25 2001/01/13 18:41:18 jz Exp $
+// $Id: spooler.h,v 1.26 2001/01/13 22:26:18 jz Exp $
 
 #ifndef __SPOOLER_H
 #define __SPOOLER_H
@@ -555,6 +555,7 @@ struct Communication
     void                        close                       ();
     void                        rebind                      ()                                      { bind(); }
     int                         go                          ();
+    bool                        started                     ()                                      { return _thread != NULL; }
 
   private:
     int                         run                         ();
@@ -586,7 +587,9 @@ struct Command_processor
                                 Command_processor           ( Spooler* spooler )                    : _spooler(spooler) {}
 
     string                      execute                     ( const string& xml_text );
+    void                        execute_2                   ( const string& xml_text );
     xml::Element_ptr            execute_command             ( const xml::Element_ptr& );
+    xml::Element_ptr            execute_config              ( const xml::Element_ptr& );
     xml::Element_ptr            execute_show_state          ();
     xml::Element_ptr            execute_show_tasks          ();
     xml::Element_ptr            execute_show_task           ( Task* );
@@ -620,6 +623,7 @@ struct Spooler
         sc_start,               // s_paused -> s_running
         sc_terminate,           // s_running | s_paused -> s_stopped, exit()
         sc_terminate_and_restart,
+        sc_load_config,         
         sc_reload,
         sc_pause,               // s_running -> s_paused
         sc_continue,            // s_suspended -> s_running
@@ -633,7 +637,8 @@ struct Spooler
     int                         launch                      ( int argc, char** argv );                                
     void                        load_arg                    ();
     void                        load                        ();
-    void                        load_xml                    ();
+    void                        load_config                 ( const xml::Element_ptr& config );
+  //void                        load_xml                    ();
 
     void                        load_object_set_classes_from_xml( Object_set_class_list*, const xml::Element_ptr& );
     void                        load_jobs_from_xml          ( Job_list*, const xml::Element_ptr& );
@@ -652,6 +657,7 @@ struct Spooler
     void                        cmd_stop                    ();
     void                        cmd_terminate               ();
     void                        cmd_terminate_and_restart   ();
+    void                        cmd_load_config             ( const xml::Element_ptr& config )  { _config_element=config; _state_cmd=sc_load_config; cmd_wake(); }
     void                        cmd_wake                    ();
 
     void                        step                        ();
@@ -675,6 +681,7 @@ struct Spooler
     volatile bool              _sleeping;                   // Besser: sleep mit Signal unterbrechen
     Wait_handles               _wait_handles;               // Vor _task_list!
     Handle                     _command_arrived_event;
+    xml::Element_ptr           _config_element;             // Für cmd_load_config()
 
     Log                        _log;
     Script                     _script;
@@ -684,7 +691,6 @@ struct Spooler
 
     Task_list                  _task_list;
     Communication              _communication;
-    Command_processor          _command_processor;
 
     CComPtr<Com_spooler>       _com_spooler;
     CComPtr<Com_log>           _com_log;

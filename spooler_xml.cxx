@@ -1,4 +1,4 @@
-// $Id: spooler_xml.cxx,v 1.15 2001/01/13 18:41:19 jz Exp $
+// $Id: spooler_xml.cxx,v 1.16 2001/01/13 22:26:18 jz Exp $
 
 //#include <precomp.h>
 
@@ -285,8 +285,41 @@ void Spooler::load_jobs_from_xml( Job_list* liste, const xml::Element_ptr& eleme
     }
 }
 
-//--------------------------------------------------------------------------------Spooler::load_xml
+//-----------------------------------------------------------------------------Spooler::load_config
 
+void Spooler::load_config( const xml::Element_ptr& config_element )
+{
+                                   _tcp_port      = as_int   ( config_element->getAttribute( "tcp_port"      ) );
+                                   _udp_port      = as_int   ( config_element->getAttribute( "udp_port"      ) );
+                                   _priority_max  = as_int   ( config_element->getAttribute( "priority_max"  ) );
+    if( empty( _log_directory ) )  _log_directory = as_string( config_element->getAttribute( "log_dir"       ) );
+    if( empty( _spooler_param ) )  _spooler_param = as_string( config_element->getAttribute( "spooler_param" ) );
+
+
+    xml::Element_ptr e = config_element->firstChild;
+    while( e )
+    {
+        if( e->tagName == "script" )
+        {
+            _script = e;
+        }
+        else
+        if( e->tagName == "object_set_classes" )
+        {
+            load_object_set_classes_from_xml( &_object_set_class_list, e );
+        }
+        else
+        if( e->tagName == "jobs" ) 
+        {
+            load_jobs_from_xml( &_job_list, e );
+        }
+
+        e = e->nextSibling;
+    }
+}
+
+//--------------------------------------------------------------------------------Spooler::load_xml
+/*
 void Spooler::load_xml()
 {
     try 
@@ -309,39 +342,27 @@ void Spooler::load_xml()
             throw_xc( "XML-ERROR", text );
         }
 
-        xml::Element_ptr spooler_config = document->documentElement;
+        xml::Element_ptr spooler_element= document->documentElement;
+        if( spooler_element->tagName != "spooler" )  throw_xc( "SPOOLER-113", as_string( spooler_element->tagName ) );
 
-                                       _tcp_port      = as_int   ( spooler_config->getAttribute( "tcp_port" ) );
-                                       _udp_port      = as_int   ( spooler_config->getAttribute( "udp_port" ) );
-                                       _priority_max  = as_int   ( spooler_config->getAttribute( "priority_max" ) );
-        if( empty( _log_directory ) )  _log_directory = as_string( spooler_config->getAttribute( "log_dir"  ) );
-        if( empty( _spooler_param ) )  _spooler_param = as_string( spooler_config->getAttribute( "spooler_param" ) );
-
-
-        xml::Element_ptr e = spooler_config->firstChild;
-        while( e )
+        xml::Element_ptr config_element = spooler_element->firstChild;
+        while( config_element )
         {
-            if( e->tagName == "script" )
+            if( config_element->tagName != "config" )  throw_xc( "SPOOLER-113", as_string( config_element->tagName ) );
+
+            string spooler_id = as_string( config_element->getAttribute( "spooler_id" ) );
+            if( spooler_id.empty()  ||  spooler_id == _spooler_id )
             {
-                _script = e;
-            }
-            else
-            if( e->tagName == "object_set_classes" )
-            {
-                load_object_set_classes_from_xml( &_object_set_class_list, e );
-            }
-            else
-            if( e->tagName == "jobs" ) 
-            {
-                load_jobs_from_xml( &_job_list, e );
+                load_config( config_element );
+                break;
             }
 
-            e = e->nextSibling;
+            config_element = config_element->nextSibling;
         }
     }
     catch( const _com_error& com_error )  { throw_com_error( com_error ); }
 }
-
+*/
 //-------------------------------------------------------------------------------------------------
 
 } //namespace spooler
