@@ -1,4 +1,4 @@
-// $Id: spooler_module_java.cxx,v 1.48 2003/03/31 11:32:54 jz Exp $
+// $Id: spooler_module_java.cxx,v 1.49 2003/04/01 08:59:51 jz Exp $
 /*
     Hier sind implementiert
 
@@ -240,7 +240,7 @@ void Spooler::init_java_vm()
 {
     _java_vm->set_log( &_prefix_log );
 
-    _java_vm->init();
+    _java_vm->start();
 
     make_path( _java_work_dir );       // Java-VM prüft Vorhandensein der Verzeichnisse in classpath schon beim Start
 
