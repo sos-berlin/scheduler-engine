@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <?xml-stylesheet href="../scheduler.xslt" type="text/xsl"?>
-<!--$Id: process.xml,v 1.6 2004/08/28 14:41:02 jz Exp $-->
+<!--$Id: process.xml,v 1.7 2004/08/31 11:19:42 jz Exp $-->
 
 <xml_element name     = "process" 
              title    = "Externes Programm (alternativ zu &lt;script&gt;)" 
              base_dir = ".."
              parent_page = "../konfiguration.xml"
              author   = "$Author: jz $" 
-             date     = "$Date: 2004/08/28 14:41:02 $">
+             date     = "$Date: 2004/08/31 11:19:42 $">
               
     <xml_parent_elements>
         <xml_parent_element name="job">
@@ -41,6 +41,19 @@
                 </p>
             </description>
         </xml_attribute>
+
+
+        <xml_attribute name="ignore_error" type="yes|no" initial="no">
+            <description>
+                <p>
+                    Bei <code>ingore_error="no"</code> (Voreinstellung) führt ein Exit code ≠ 0 zu einem Jobfehler.
+                    Der Job wird gestoppt.
+                </p>
+                <p>
+                    Bei <code>ingore_error="yes"</code> führt ein Exit code ≠ 0 nicht zu einem Jobfehler.
+                </p>
+            </description>
+        </xml_attribute>
     </xml_attributes>
 
     <description>
@@ -48,7 +61,7 @@
             Beim Start des Jobs, also zu Beginn einer Task, wird ein Prozess eingerichtet. 
             Der Spooler überwacht den Prozess und beendet die Task nachdem der Prozess sich beendet hat. 
             Ein Exit code verschieden von 0 wird als Fehler interpretiert. 
-            Der exit code ist das Ergebnis der Task und steht in <code>task.result</code> bereit.
+            Der Exit code ist das Ergebnis der Task und steht in <code>task.result</code> bereit.
         </p>
     </description>
 

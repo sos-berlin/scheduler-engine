@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="scheduler.xslt" type="text/xsl"?>
 
-<!--$Id: command_line.xml,v 1.8 2004/08/30 10:13:52 jz Exp $-->
+<!--$Id: command_line.xml,v 1.9 2004/08/31 11:19:42 jz Exp $-->
 
 <command_line program  = "scheduler"
               title    = "Kommandozeile"
               base_dir = "."
               author   = "$Author: jz $"
-              date     = "$Date: 2004/08/30 10:13:52 $">
+              date     = "$Date: 2004/08/31 11:19:42 $">
 
     <command_options>
         <command_option name="config" setting="config">
@@ -84,9 +84,9 @@
             <description>
                 <p>
                     Mit dieser Option startet der Scheduler nicht, 
-                    sondern schickt einem anderen Scheduler mit gleichen TCP-Port
+                    sondern schickt einem anderen Scheduler mit gleicher Option <code>-tcp-port=</code>
                     auf demselben Rechner das XML-Kommando.
-                    Das kann z.B. ein <scheduler_element name="terminate"/> sein.
+                    Das kann z.B. ein <scheduler_element name="terminate"/> sein: <code>-send-cmd="&lt;terminate/>"</code>
                 </p>
             </description>
         </command_option>
@@ -127,7 +127,7 @@
             <description>
                 <p>
                     Unter Unix versetzt sich der Scheduler in den Hintergrund und trennt sich vom Terminal.
-                    stdout und stderr sollten umgeleitet werden.
+                    stdout und stderr sollten in eine Datei umgeleitet werden, damit Ausgaben nicht verloren gehen.
                 </p>
             </description>
         </command_option>
@@ -162,7 +162,7 @@
             <description>
                 <p>
                     Nur in Verbindung mit <code>-install-service</code>.
-                    Die Dienstesteuerung von Windows zeigt den hier angegebenen Namen.
+                    Die Dienstesteuerung von Windows zeigt diesen Namen.
                     Er darf Leerzeichen enthalten.
                     Wenn die Option fehlt, erzeugt der Scheduler einen aus dem Dienstnamen (s. <code>-service-name=</code>).
                 </p>

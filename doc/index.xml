@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="scheduler.xslt" type="text/xsl"?>
 
-<!--$Id: index.xml,v 1.5 2004/08/29 09:27:27 jz Exp $-->
+<!--$Id: index.xml,v 1.6 2004/08/31 11:19:42 jz Exp $-->
 
 <description 
     title               = "Startseite" 
     base_dir            = "."
     suppress_browse_bar = "yes"
     author              = "$Author: jz $"
-    date                = "$Date: 2004/08/29 09:27:27 $"
+    date                = "$Date: 2004/08/31 11:19:42 $"
 >
 
 <h3><a href="command_line.xml">Kommandozeile</a></h3>
@@ -41,8 +41,8 @@
     Der Scheduler verfügt über einen HTTP-Server und stellt HTML-Seiten zu seiner Bedienung bereit.
     Sie können den Scheduler über einen Browser (zurzeit nur Microsoft Internet Explorer 6)
     steuern. Geben Sie z.B. die Adresse <code>http://localhost:4444</code> ein.
-    <code>localhost</code> kann auch ein anderer Rechnername sein.
-    <code>4444</code> ist die konfigurierte TCP-Portnummer des Schedulers.
+    <code>localhost</code> kann auch ein anderer Rechnername sein,
+    und <code>4444</code> ist die konfigurierte TCP-Portnummer des Schedulers.
 </p>
 
 

@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding="utf-8"?>
-<!-- $Id: scheduler.xslt,v 1.19 2004/08/30 10:13:52 jz Exp $ -->
+<!-- $Id: scheduler.xslt,v 1.20 2004/08/31 11:19:42 jz Exp $ -->
 
 <!--
     Änderungswünsche:
@@ -318,7 +318,7 @@
                             <xsl:value-of select="$base_dir"/>/ersetzung_von_umgebungsvariablen.xml
                         </xsl:attribute>
                         <xsl:text>hier</xsl:text>
-                    </xsl:element>)
+                    </xsl:element>).
                 </p>
             </xsl:if>
             
@@ -685,7 +685,7 @@
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ini-->
 
     <xsl:template match="ini">
-        <xsl:variable name="title" select="concat( 'Datei ', @file )"/>
+        <xsl:variable name="title" select="concat( 'Datei ', @file, ', ', @title )"/>
 
         <html>
             <xsl:call-template name="html_head">
@@ -697,10 +697,6 @@
                     <xsl:with-param name="title" select="$title"/>
                 </xsl:call-template>
                 
-                <p>
-                    Übersicht über alle Einstellungen.
-                </p>
-
                 <xsl:apply-templates mode="setting_description" select="."/>
 
                 <xsl:for-each select="ini_sections/ini_section">

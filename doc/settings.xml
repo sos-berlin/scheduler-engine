@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="scheduler.xslt" type="text/xsl"?>
 
-<!--$Id: settings.xml,v 1.7 2004/08/30 10:13:52 jz Exp $-->
+<!--$Id: settings.xml,v 1.8 2004/08/31 11:19:42 jz Exp $-->
 
 <!-- Einige Einstellungen können an mehreren Stellen vorgenommen werden:
      - Konfigurationsdatei
@@ -16,7 +16,7 @@
     base_dir    = "."
     title       = "Einstellungen"
     author      = "$Author: jz $"
-    date        = "$Date: 2004/08/30 10:13:52 $"
+    date        = "$Date: 2004/08/31 11:19:42 $"
 >
 
     <setting setting        = "log_dir" 
@@ -28,7 +28,7 @@
                 In dieses Verzeichnis schreibt der Scheduler seine Protokolle.
             </p>
             <p>
-                <scheduler_setting name="log_dir" type="*stderr"/> lässt den Scheduler 
+                <scheduler_setting name="log_dir" value="*stderr"/> lässt den Scheduler 
                 die Protokollausgabe nach stderr (auf den Schirm) schreiben.
             </p>
         </description>
@@ -74,6 +74,9 @@
             <p>
                 Wenn die Scheduler-Id nicht angegeben ist, beachtet der Scheduler das XML-Attribut <code>spooler_id=</code> nicht
                 und wählt alle Elemente der XML-Konfiguration aus.
+            </p>
+            <p>
+                Siehe z.B. <scheduler_element name="config"/>.
             </p>
         </description>
     </setting>
@@ -378,7 +381,7 @@ db  = jdbc -wait=15 -class=com.mysql.jdbc.Driver jdbc:mysql://localhost/factory:
                 werden hier abgelegt.
             </p>
             <p>
-                Um diese eMails dennoch zu verschicken, muss ein Job geschrieben werden, der die 
+                Um diese eMails später zu verschicken, muss ein Job geschrieben werden, der die 
                 Methode spooler_log.mail().dequeue() aufruft.
             </p>
         </description>
