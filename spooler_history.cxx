@@ -1,4 +1,4 @@
-// $Id: spooler_history.cxx,v 1.4 2002/04/06 10:22:51 jz Exp $
+// $Id: spooler_history.cxx,v 1.5 2002/04/06 12:45:50 jz Exp $
 
 #include "../kram/sos.h"
 #include "spooler.h"
@@ -302,7 +302,7 @@ void Job_history::open()
             {
                 _with_log = read_profile_bool( "factory.ini", section.c_str(), "history_with_log", _spooler->_history_with_log );
 
-                set<string> my_columns = set_map( lcase, set_split( ", *", replace_regex( string(history_column_names) + history_column_names_db, ":[^,]+", "" ) ) );
+                set<string> my_columns = set_map( lcase, set_split( ", *", replace_regex( string(history_column_names) + "," + history_column_names_db, ":[^,]+", "" ) ) );
 
                 _spooler->_db.open_history_table();
 
@@ -623,7 +623,8 @@ xml::Element_ptr Job_history::read_tail( xml::Document_ptr doc, int n, bool with
 
             if( _use_file )
             {
-                sel.open( "-in head -" + as_string(n) + " | select * order by id desc | -type=(" + _type_string + ") tab -field-names | " + _filename );
+                sel.open( "-in -type=(" + _type_string + ") tab -field-names | tail -reverse -" + as_string(1+n) + " | " + _filename );
+                //sel.open( "-in head -" + as_string(n) + " | select * order by id desc | -type=(" + _type_string + ") tab -field-names | " + _filename );
             }
             else
             if( _use_db )

@@ -1,4 +1,4 @@
-// $Id: spooler_com.cxx,v 1.34 2002/04/05 22:14:38 jz Exp $
+// $Id: spooler_com.cxx,v 1.35 2002/04/06 12:45:50 jz Exp $
 /*
     Hier sind implementiert
 
@@ -603,48 +603,50 @@ STDMETHODIMP Com_job::clear_when_directory_changed()
 STDMETHODIMP Com_job::start( VARIANT* params, Itask** itask )
 {
     HRESULT hr = NOERROR;
-    if( !_job )  return E_POINTER;
 
     try
     {
-        Sos_ptr<Task>           task;
-        CComPtr<Ivariable_set>  pars;
-        Time                    start_at = 0; 
-
-        if( params  &&  params->vt != VT_EMPTY  &&  params->vt != VT_NULL  &&  params->vt != VT_ERROR )
-        {
-            if( params->vt != VT_DISPATCH && params->vt != VT_UNKNOWN )  return DISP_E_TYPEMISMATCH;
-            hr = params->punkVal->QueryInterface( IID_Ivariable_set, (void**)&pars );
-            if( FAILED(hr) )  return hr;
-        }
-
-        CComVariant task_name_vt;
-        if( pars )  pars->get_var( L"spooler_task_name", &task_name_vt );
-        hr = task_name_vt.ChangeType( VT_BSTR );    if( FAILED(hr) )  throw_ole( hr, "ChangeType", "spooler_task_name" );
-/*
-        CComVariant start_at_vt;
-        if( pars )  pars->get_var( L"spooler_start_at", &start_after_at );
-        if( start_after_vt.vt != VT_EMPTY )
-        {
-            hr = start_at_vt.ChangeType( VT_TIMESTAMP );      if( FAILED(hr) )  throw_ole( hr, "ChangeType", "spooler_start_after" );
-            
-        }
-*/
-        CComVariant start_after_vt;
-        if( pars )  pars->get_var( L"spooler_start_after", &start_after_vt );
-        if( start_after_vt.vt != VT_EMPTY )
-        {
-            hr = start_after_vt.ChangeType( VT_R8 );    if( FAILED(hr) )  throw_ole( hr, "ChangeType", "spooler_start_after" );
-            start_at = Time::now() + start_after_vt.dblVal;
-        }
-
         THREAD_LOCK_LOG( _job->_lock, "Com_job::start" )
         {
-            task = _job->start_without_lock( pars, bstr_as_string( task_name_vt.bstrVal ), start_at );
-        }
+            if( !_job )  return E_POINTER;
 
-        *itask = new Com_task( task );
-        (*itask)->AddRef();
+            Sos_ptr<Task>           task;
+            CComPtr<Ivariable_set>  pars;
+            Time                    start_at = 0; 
+
+            if( params  &&  params->vt != VT_EMPTY  &&  params->vt != VT_NULL  &&  params->vt != VT_ERROR )
+            {
+                if( params->vt != VT_DISPATCH && params->vt != VT_UNKNOWN )  return DISP_E_TYPEMISMATCH;
+                hr = params->punkVal->QueryInterface( IID_Ivariable_set, (void**)&pars );
+                if( FAILED(hr) )  return hr;
+            }
+
+            CComVariant task_name_vt;
+            if( pars )  pars->get_var( L"spooler_task_name", &task_name_vt );
+            hr = task_name_vt.ChangeType( VT_BSTR );    if( FAILED(hr) )  throw_ole( hr, "ChangeType", "spooler_task_name" );
+/*
+            CComVariant start_at_vt;
+            if( pars )  pars->get_var( L"spooler_start_at", &start_after_at );
+            if( start_after_vt.vt != VT_EMPTY )
+            {
+                hr = start_at_vt.ChangeType( VT_TIMESTAMP );      if( FAILED(hr) )  throw_ole( hr, "ChangeType", "spooler_start_after" );
+            
+            }
+*/
+            CComVariant start_after_vt;
+            if( pars )  pars->get_var( L"spooler_start_after", &start_after_vt );
+            if( start_after_vt.vt != VT_EMPTY )
+            {
+                hr = start_after_vt.ChangeType( VT_R8 );    if( FAILED(hr) )  throw_ole( hr, "ChangeType", "spooler_start_after" );
+                start_at = Time::now() + start_after_vt.dblVal;
+            }
+
+                task = _job->start_without_lock( pars, bstr_as_string( task_name_vt.bstrVal ), start_at );
+            }
+
+            *itask = new Com_task( task );
+            (*itask)->AddRef();
+        }
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Job::start" ); }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Job::start" ); }
