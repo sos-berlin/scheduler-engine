@@ -1,4 +1,4 @@
-// $Id: spooler_com.h,v 1.11 2001/03/22 08:56:52 jz Exp $
+// $Id: spooler_com.h,v 1.12 2001/06/20 17:55:15 jz Exp $
 
 #ifndef __SPOOLER_COM_H
 #define __SPOOLER_COM_H
@@ -118,6 +118,7 @@ struct Com_job : spooler_com::Ijob, Sos_ole_object
     STDMETHODIMP                get_thread                  ( spooler_com::Ithread** );
   //STDMETHODIMP                put_include_path            ( BSTR );
     STDMETHODIMP                get_include_path            ( BSTR* );
+    STDMETHODIMP                get_name                    ( BSTR* );
 
     Job*                       _job;                        // Es gibt nur einen Com_job pro Job
 };
@@ -161,6 +162,7 @@ struct Com_thread : spooler_com::Ithread, Sos_ole_object
     STDMETHODIMP                get_script                  ( IDispatch** );
   //STDMETHODIMP                put_include_path            ( BSTR );
     STDMETHODIMP                get_include_path            ( BSTR* );
+    STDMETHODIMP                get_name                    ( BSTR* );
 
   protected:
     Thread*                    _thread;                     // Es gibt nur einen Com_thread pro Thread

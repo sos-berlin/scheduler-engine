@@ -1,4 +1,4 @@
-// $Id: spooler.odl,v 1.13 2001/03/22 08:56:51 jz Exp $
+// $Id: spooler.odl,v 1.14 2001/06/20 17:55:15 jz Exp $
 
 // Anweisung: midl /nologo /error all /out $(OutDir) $(InputPath)
 
@@ -117,6 +117,9 @@ library spooler
 
         [propget]
         HRESULT                 include_path                ( [out,retval] BSTR* include_path );
+
+        [propget]
+        HRESULT                 name                        ( [out,retval] BSTR* name );
     }
 
     [
@@ -194,6 +197,9 @@ library spooler
 
         [propget]
         HRESULT                 include_path            ( [out,retval] BSTR* include_path );
+
+        [propget]
+        HRESULT                 name                        ( [out,retval] BSTR* name );
     }
 
     [

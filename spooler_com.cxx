@@ -1,4 +1,4 @@
-// $Id: spooler_com.cxx,v 1.13 2001/06/18 12:46:50 jz Exp $
+// $Id: spooler_com.cxx,v 1.14 2001/06/20 17:55:15 jz Exp $
 /*
     Hier sind implementiert
 
@@ -271,6 +271,17 @@ STDMETHODIMP Com_job::get_include_path( BSTR* result )
     if( GetCurrentThreadId() != _job->thread()->_thread_id )  return E_ACCESSDENIED;
 
     *result = SysAllocString_string( _job->_thread->_include_path );
+    return NOERROR;
+}
+
+//--------------------------------------------------------------------------------Com_job::get_name
+
+STDMETHODIMP Com_job::get_name( BSTR* result )
+{
+    if( !_job )  return E_POINTER;
+    if( GetCurrentThreadId() != _job->thread()->_thread_id )  return E_ACCESSDENIED;
+
+    *result = SysAllocString_string( _job->_name );
     return NOERROR;
 }
 
@@ -547,6 +558,17 @@ STDMETHODIMP Com_thread::get_include_path( BSTR* result )
     if( GetCurrentThreadId() != _thread->_thread_id )  return E_ACCESSDENIED;
 
     *result = SysAllocString_string( _thread->_include_path );
+    return NOERROR;
+}
+
+//-----------------------------------------------------------------------------Com_thread::get_name
+
+STDMETHODIMP Com_thread::get_name( BSTR* result )
+{
+    if( !_thread )  return E_POINTER;
+    if( GetCurrentThreadId() != _thread->_thread_id )  return E_ACCESSDENIED;
+
+    *result = SysAllocString_string( _thread->_name );
     return NOERROR;
 }
 

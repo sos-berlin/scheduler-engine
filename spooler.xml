@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 
-<!-- $Id: spooler.xml,v 1.39 2001/03/22 08:56:51 jz Exp $   (C) 2001 SOS GmbH Berlin -->
+<!-- $Id: spooler.xml,v 1.40 2001/06/20 17:55:15 jz Exp $   (C) 2001 SOS GmbH Berlin -->
 
 <!DOCTYPE spooler SYSTEM "s:\prod\spooler\spooler.dtd">
 
@@ -481,7 +481,9 @@ sub spooler_close()
 spooler_log.msg( "spooler_job   .include_path=" + spooler_job.include_path );
 spooler_log.msg( "spooler_thread.include_path=" + spooler_thread.include_path );
 spooler_log.msg( "spooler       .include_path=" + spooler.include_path );
-<include file="1.txt"/>
+spooler_log.msg( "spooler_job   .name="         + spooler_job.name );
+*spooler_log.msg( "spooler_thread.name="         + spooler_thread.name );
+<!--include file="1.txt"/-->
 spooler_log.msg( "text 2" );
 <![CDATA[
 
