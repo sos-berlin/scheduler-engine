@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.270 2004/12/13 09:46:55 jz Exp $
+// $Id: spooler_task.cxx,v 1.271 2004/12/13 12:02:11 jz Exp $
 /*
     Hier sind implementiert
 
@@ -1764,7 +1764,7 @@ void Process_task::close_handle()
 #   ifndef Z_WINDOWS
         if( _pid_to_unregister )
         {
-            _job->_spooler->unregister_process_handle( _pid_to_unregister );
+            if( _job )  _job->_spooler->unregister_process_handle( _pid_to_unregister );
             _pid_to_unregister = 0;
         }
 #   endif
