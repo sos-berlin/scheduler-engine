@@ -1,4 +1,4 @@
-// $Id: spooler_history.cxx,v 1.80 2003/12/30 13:53:30 jz Exp $
+// $Id: spooler_history.cxx,v 1.81 2004/01/07 08:57:51 jz Exp $
 
 #include "spooler.h"
 #include "../zschimmer/z_com.h"
@@ -354,6 +354,10 @@ void Spooler_db::try_reopen_after_error( const exception& x )
     string  warn_msg;
 
 
+    // Wenn ein TCP-Kommando ausgeführt wird, müssen wir hier sofort raus, sonst wird das Kommando doppelt oder rekursiv aufgerufen werden async_continue_selected(), s.u.
+    if( _waiting || _spooler->_executing_command )  throw_xc( x );   
+    _waiting = true;
+
     THREAD_LOCK( _error_lock )  _error = x.what();
 
     _spooler->log().error( string("FEHLER BEIM ZUGRIFF AUF DATENBANK: ") + x.what() );
@@ -417,7 +421,8 @@ void Spooler_db::try_reopen_after_error( const exception& x )
                     }
 
                     _spooler->log().warn( "Eine Minute warten bevor Datenbank erneut geöffnet wird ..." );
-                    sos_sleep( 60 );
+                    //sos_sleep( 60 );
+                    _spooler->_connection_manager->async_continue_selected( is_communication_operation, 60 );
                 }
             }
         }
@@ -450,6 +455,8 @@ void Spooler_db::try_reopen_after_error( const exception& x )
         _spooler->log().info( "Historie wird von Datenbank auf Dateien umgeschaltet" );
         open2( "" );     // Umschalten auf dateibasierte Historie
     }
+
+    _waiting = false;
 }
 
 //-------------------------------------------------------------------------------Spooler_db::get_id

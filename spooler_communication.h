@@ -1,4 +1,4 @@
-// $Id: spooler_communication.h,v 1.19 2004/01/06 19:52:42 jz Exp $
+// $Id: spooler_communication.h,v 1.20 2004/01/07 08:57:51 jz Exp $
 
 #ifndef __SPOOLER_COMMUNICATION_H
 #define __SPOOLER_COMMUNICATION_H
@@ -228,6 +228,17 @@ struct Communication //: zschimmer::Thread
     int                        _initialized;
     bool                       _started;
 };
+
+//-------------------------------------------------------------------------------------------------
+
+inline bool is_communication_operation( Socket_operation* op )
+{
+    // Diese Socket_operations werden in spooler_history.cxx fortgesetzt, wenn auf die DB gewartet wird.
+
+    return dynamic_cast<Communication::Listen_socket*>( op ) ||
+           dynamic_cast<Communication::Udp_socket*   >( op ) ||
+           dynamic_cast<Communication::Channel*      >( op );
+}
 
 //-------------------------------------------------------------------------------------------------
 

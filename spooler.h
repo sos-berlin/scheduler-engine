@@ -1,4 +1,4 @@
-// $Id: spooler.h,v 1.173 2003/12/30 13:53:29 jz Exp $
+// $Id: spooler.h,v 1.174 2004/01/07 08:57:51 jz Exp $
 
 #ifndef __SPOOLER_H
 #define __SPOOLER_H
@@ -379,6 +379,8 @@ struct Spooler
     time_t                     _last_time_enter_pressed;    // int wegen Threads (Spooler_communication und Spooler_wait)
 
     ptr<object_server::Connection_manager>  _connection_manager;
+
+    bool                       _executing_command;          // true: spooler_history wartet nicht auf Datenbank (damit Scheduler nicht blockiert)
 
   private:
     string                     _config_filename;            // -config=

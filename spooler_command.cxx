@@ -1,4 +1,4 @@
-// $Id: spooler_command.cxx,v 1.105 2003/12/30 13:53:30 jz Exp $
+// $Id: spooler_command.cxx,v 1.106 2004/01/07 08:57:51 jz Exp $
 /*
     Hier ist implementiert
 
@@ -82,6 +82,24 @@ void append_error_element( const xml::Element_ptr& element, const Xc_copy& x )
     element.appendChild( create_error_element( element.ownerDocument(), x ) );
 }
 
+//-------------------------------------------------------------Command_processor::Command_processor
+
+Command_processor::Command_processor( Spooler* spooler )
+: 
+    _zero_(this+1),
+    _spooler(spooler),
+    _host(NULL) 
+{
+    _spooler->_executing_command = true;
+}
+
+//------------------------------------------------------------Command_processor::~Command_processor
+
+Command_processor::~Command_processor()
+{
+    _spooler->_executing_command = false;
+}
+
 //----------------------------------------------------------------Command_processor::execute_config
 
 xml::Element_ptr Command_processor::execute_config( const xml::Element_ptr& config_element, const Time& xml_mod_time )
@@ -148,6 +166,9 @@ xml::Element_ptr Command_processor::execute_show_state( const xml::Element_ptr& 
         THREAD_LOCK( _spooler->_lock )
         {
             state_element.setAttribute( "db"                   , trim( _spooler->_db->db_name() ) );
+
+            if( _spooler->_db->is_waiting() )
+                state_element.setAttribute( "db_waiting", "yes" );
 
             if( _spooler->_db->error() != "" )
                 state_element.setAttribute( "db_error", trim( _spooler->_db->error() ) );

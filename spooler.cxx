@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.314 2004/01/06 20:01:51 jz Exp $
+// $Id: spooler.cxx,v 1.315 2004/01/07 08:57:50 jz Exp $
 /*
     Hier sind implementiert
 
@@ -1442,6 +1442,10 @@ void Spooler::load()
 
 
     Command_processor cp ( this );
+    _executing_command = false;             // Command_processor() hat es true gesetzt, aber noch läuft der Scheduler nicht. 
+                                            // spooler_history.cxx verweigert das Warten auf die Datenbank, wenn _executing_command gesetzt ist,
+                                            // damit der Scheduler nicht in einem TCP-Kommando blockiert.
+
     cp.execute_file( _config_filename );
 }
 

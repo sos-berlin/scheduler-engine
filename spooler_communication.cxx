@@ -1,4 +1,4 @@
-// $Id: spooler_communication.cxx,v 1.74 2004/01/07 06:09:00 jz Exp $
+// $Id: spooler_communication.cxx,v 1.75 2004/01/07 08:57:51 jz Exp $
 /*
     Hier sind implementiert
 
@@ -350,6 +350,7 @@ bool Communication::Channel::do_accept( SOCKET listen_socket )
         if( _read_socket == SOCKET_ERROR )  
         {
             int err = get_errno();
+            LOG2( "socket.accept","  errno=" << err << "\n" );
             if( err == EWOULDBLOCK )  return false;
             throw_sos_socket_error( err, "accept" );
         }

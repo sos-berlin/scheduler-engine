@@ -1,4 +1,4 @@
-// $Id: spooler_command.h,v 1.24 2003/12/30 13:53:30 jz Exp $
+// $Id: spooler_command.h,v 1.25 2004/01/07 08:57:51 jz Exp $
 
 #ifndef __SPOOLER_COMMAND_H
 #define __SPOOLER_COMMAND_H
@@ -32,7 +32,8 @@ string                          xml_as_string               ( const xml::Documen
 
 struct Command_processor
 {
-                                Command_processor           ( Spooler* spooler )                    : _zero_(this+1),_spooler(spooler),_host(NULL) {}
+                                Command_processor           ( Spooler* );
+                               ~Command_processor           ();
 
     void                        execute_file                ( const string& xml_filename );
     string                      execute                     ( const string& xml_text, const Time& xml_mod_time, bool indent = false );

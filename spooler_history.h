@@ -1,4 +1,4 @@
-// $Id: spooler_history.h,v 1.24 2003/12/30 13:53:30 jz Exp $
+// $Id: spooler_history.h,v 1.25 2004/01/07 08:57:51 jz Exp $
 
 #ifndef __SPOOLER_HISTORY_H
 #define __SPOOLER_HISTORY_H
@@ -46,6 +46,7 @@ struct Spooler_db : Sos_self_deleting
     bool                        opened                  ()                                          { return _db.opened(); }
     string                      db_name                 ()                                          { return _db_name; }
     string                      error                   ()                                          { THREAD_LOCK_RETURN( _error_lock, string, _error ); }
+    bool                        is_waiting              () const                                    { return _waiting; }
 
     void                        spooler_start           ();
     void                        spooler_stop            ();
@@ -98,6 +99,7 @@ struct Spooler_db : Sos_self_deleting
     int                        _id;
     bool                       _email_sent_after_db_error;
     int                        _error_count;
+    bool                       _waiting;
 };
 
 //--------------------------------------------------------------------------------------Transaction
