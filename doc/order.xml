@@ -1,17 +1,124 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="scheduler.xslt" type="text/xsl"?>
 
-<!--$Id: order.xml,v 1.1 2004/09/08 20:34:40 jz Exp $-->
+<!--$Id: order.xml,v 1.2 2004/09/10 07:30:52 jz Exp $-->
 
 <description 
     title               = "Aufträge" 
     base_dir            = ""
     author              = "$Author: jz $"
-    date                = "$Date: 2004/09/08 20:34:40 $"
+    date                = "$Date: 2004/09/10 07:30:52 $"
 >
 
-<pre>
 
-</pre>
+<h2>Was ist ein Auftrag?</h2>
+
+<p>
+    Ein Auftrag ist ein Ding, das in einer Kette von Jobs nacheinander verarbeitet wird.
+    Eine Jobkette ist wie ein Fließband, durch das die Aufträge laufen,
+    die von einzelnen Maschinen, den Jobs, nacheinander verarbeitet werden.
+    Zur Verarbeitung eines Auftrags führt ein Job genau einen Schritt aus.
+    Dabei ändert sich der Zustand des Auftrags, der über die nächste Stelle in der Jobkette entscheidet,
+    bis das Ende der Jobkette erreicht ist.
+</p>
+
+<p>
+    Ein Auftrag ist also einer Jobkette zugeordnet. 
+    Innerhalb der Jobkette hat er eine Kennung, die ihn identifiziert.
+    Er hat einen Zustand, der sich nach jeder Verarbeitung durch einen Job ändert.
+    Und er kann noch eine Nutzlast und einen lesbaren Titel tragen.
+</p>
+<p>    
+    Siehe die Klasse <scheduler_method class="Order"/>.<br/>
+</p>
+
+<h2>Jobketten</h2>    
+<p>
+    Die Jobketten sind bei den Klassen <scheduler_method class="Job_chain"/> und
+    <scheduler_method class="Job_chain_node"/> beschrieben.
+</p>
+<p>
+    Einen auftragsgesteuerten Job definieren Sie mit <scheduler_element name="job" attribute="order" value="yes"/>.
+</p>
+
+
+<h2>Auftragswarteschlange und Tasks</h2>
+<p>
+    Jeder (auftragsgesteuerte) Job hat eine Auftragswarteschlange, 
+    die die Aufträge aufnimmt, die der Job verarbeiten soll.
+    Sobald ein Auftrag in der Warteschlange ist und die <scheduler_element name="run_time"/> dies zulässt,
+    startet der Scheduler eine Task.
+    Wenn mehrere Aufträge in der Warteschlange sind und der Job mehrere Tasks erlaubt
+    (<scheduler_element name="job" attribute="tasks"/>), 
+    dann startet der Scheduler mehrere Tasks.
+</p>
+<p>
+    Der Scheduler übergibt einen Auftrag einer Task, 
+    indem er in <scheduler_method class="Task" property="order"/> den Auftrag ablegt und
+    <scheduler_method class="Job_impl" method="spooler_process"/> aufruft.
+    <code>spooler_process()</code> endet mit <code>true</code> oder <code>false</code>, 
+    was über die nächste Stelle in der Jobkette entscheidet (s. <scheduler_method class="Job_chain"/>).
+</p>
+
+<h2>Priorität</h2>
+<p>
+    Aufträge mit höherer Priorität <scheduler_method class="Order" property="priority"/> 
+    stellt der Scheduler an den Anfang der Warteschlange.
+</p>
+
+
+<h2>Wann enden die Tasks?</h2>
+<p>
+    Wenn kein Auftrag mehr zu verarbeiten ist, lässt der Scheduler die Tasks stehen, 
+    solange die <scheduler_element name="run_time"/> gilt.
+    Sie sind dann im Zustand <code>running_waiting_for_order</code>.
+</p>
+<p>
+    Mit <scheduler_element name="job" attribute="idle_timeout" value="yes"/> können Sie eine Frist bestimmen,
+    nach der der Scheduler eine wartende Task automatisch beendet. 
+    Diese Frist sollte auf z.B. 30 Sekunden eingestellt werden, 
+    um während der Verarbeitungspausen Ressourcen freizugeben.
+</p>
+<p>
+    Wenn der Scheduler für einen anderen Job
+    eine Task starten will, 
+    die Prozessklasse aber erschöpft ist, 
+    dann beendet er automatisch eine Task mit derselben Prozessklasse, 
+    die im Zustand <code>running_waiting_for_order</code> ist.
+</p>
+<p>
+    Sie können eine Task auch mit <scheduler_method class="Task" method="end"/>,
+    <scheduler_element name="kill_task"/> und 
+    <scheduler_element name="modify_job" attribute="cmd" value="end"/>
+    beenden.
+</p>
+
+
+<h2>Beschleunigung des Auftragsdurchlaufs</h2>
+<p>
+    Auftragsgesteuerte Jobs haben eine eigene Priorisierung. 
+    Die Einstellung <scheduler_element name="job" attribute="priority"/> kann hier nicht verwendet werden, sie wirkt nicht.
+</p>
+<p>
+    Aufträge, die in der Jobkette weiter fortgeschritten sind, sollen bevorzugt verarbeitet werden.
+    Damit werden Staus vermieden und die ersten Aufträge werden schneller abgeschlossen.
+    Das erreicht der Scheduler durch Bevorzugung der Jobs, 
+    die weiter am Ende der Jobkette stehen als andere.
+    Die Maschinen am Ende des Fließbands laufen flotter als die am Anfang.
+</p>
+<p>
+    Auftragsgesteuerte Jobs haben Vorrang vor nicht auftragsgesteuerten Jobs.
+    <br/>
+    Ausnahme: Jobs mit höchster Priorität haben absoluten Vorrang,
+    sogar vor auftragsgesteuerten Jobs.
+</p>
+
+
+<h2>Datenbank</h2>
+<p>
+    Zur persistenten Speicherung der Auftragswarteschlangen und zur Auftragshistorie lesen Sie <a href="datenbank.xml">hier</a>.
+</p>
+
+
 
 </description>

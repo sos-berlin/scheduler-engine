@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding="utf-8"?>
-<!-- $Id: scheduler.xslt,v 1.30 2004/09/09 21:45:05 jz Exp $ -->
+<!-- $Id: scheduler.xslt,v 1.31 2004/09/10 07:30:52 jz Exp $ -->
 
 <!--
     Änderungswünsche:
@@ -90,7 +90,7 @@
     
     <xsl:template match="xml_element">
     
-        <xsl:variable name="title">XML-Element &lt;<xsl:value-of select="@name"/>> &#160; – &#160; <xsl:value-of select="@title"/></xsl:variable>
+        <xsl:variable name="title">XML-Element&#160; &lt;<xsl:value-of select="@name"/>><!-- &#160; – &#160; <xsl:value-of select="@title"/>--></xsl:variable>
 
         <html>
             <xsl:call-template name="html_head">
@@ -342,6 +342,7 @@
             <span class="type"><xsl:value-of select="@type | $setting/@type"/></span>
             <code>"</code>
 
+            &#160;
             <xsl:apply-templates select="." mode="setting_header_rest"/>            
         </p>
 
@@ -397,8 +398,6 @@
     <xsl:template match="*" mode="setting_header_rest">
 
         <xsl:variable name="setting" select="document( 'settings.xml' )/settings/setting[ @setting = current()/@setting ]"/>
-        
-        &#160;
         
         <xsl:if test="@initial | $setting/@initial">
             (Initialwert: <code><xsl:value-of select="@initial | $setting/@initial"/></code>)
@@ -528,7 +527,7 @@
 
         <html>
             <xsl:call-template name="html_head">
-                <xsl:with-param name="title" select="@title"/>
+                <xsl:with-param name="title" select="@head_title | @title"/>
             </xsl:call-template>
         
             <body>
@@ -538,6 +537,7 @@
                 </xsl:call-template>
 
                 <xsl:apply-templates select="node()" mode="description"/>
+                
                 <xsl:call-template name="bottom">
                     <xsl:with-param name="parent_page" select="@parent_page"/>
                 </xsl:call-template>
@@ -781,9 +781,12 @@
             <xsl:attribute name="href"><xsl:value-of select="$base_dir"/>javadoc/sos/spooler/<xsl:value-of select="@class"/>.html#<xsl:value-of select="$java_method"/>(<xsl:value-of select="$java_signature"/>)</xsl:attribute>
             <code>
                 <xsl:value-of select="@class"/>
-                <xsl:text>.</xsl:text>
-                <xsl:value-of select="$java_method"/>
-                <xsl:text>()</xsl:text>
+                
+                <xsl:if test="@method | @property">
+                    <xsl:text>.</xsl:text>
+                    <xsl:value-of select="$java_method"/>
+                    <xsl:text>()</xsl:text>
+                </xsl:if>
 <!--                
                 <xsl:if test="@method">
                     <xsl:value-of select="@method"/>()
@@ -893,6 +896,7 @@
                 <span class="type"><xsl:value-of select="@type | $setting/@type"/></span>                    
             </xsl:if>
 
+            &#160;
             <xsl:apply-templates select="." mode="setting_header_rest"/>            
         </p>
 
@@ -1065,7 +1069,7 @@
 
         <xsl:for-each select="ini_entries/ini_entry">
             <!--xsl:sort select="@name | @setting"/-->
-            
+
             <p class="ini_entry">
                 <xsl:variable name="setting" select="document( 'settings.xml' )/settings/setting[ @setting = current()/@setting ]"/>
 
@@ -1085,7 +1089,7 @@
                             <b><code>=</code></b>
                             <span class="type"><xsl:value-of select="@type | $setting/@type"/></span>
                         </td>
-                        <td>
+                        <td style="padding-left: 2ex">
                             <xsl:apply-templates select="." mode="setting_header_rest"/>            
                         </td>
                     </tr>
@@ -1142,6 +1146,7 @@
                 <span class="type"><xsl:value-of select="@type"/></span>                    
             </xsl:if>
 
+            &#160;
             <xsl:apply-templates select="." mode="setting_header_rest"/>            
         </p>
 
@@ -1161,6 +1166,7 @@
             
             <style type="text/css">
                 @import "<xsl:value-of select="$base_dir"/>scheduler.css";
+                <xsl:copy-of select="/*/style/node()"/>
             </style>
         </head>
     </xsl:template>
@@ -1188,9 +1194,11 @@
 
         <hr size="1"/>
         
-        <h1>
-            <xsl:value-of select="$title"/>
-        </h1>
+        <xsl:if test="$title">
+            <h1>
+                <xsl:value-of select="$title"/>
+            </h1>
+        </xsl:if>
     </xsl:template>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~bottom-->
@@ -1198,8 +1206,7 @@
     <xsl:template name="bottom">
         <xsl:param name="parent_page"/>
 
-        <p style="margin-top: 2ex"/>
-        <hr size="1"/>
+        <hr size="1" style="margin-top: 3ex"/>
         <table cellspacing="0" cellpadding="0" width="100%">
             <tr>
                 <td>

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="scheduler.xslt" type="text/xsl"?>
 
-<!--$Id: settings.xml,v 1.11 2004/09/09 21:45:05 jz Exp $-->
+<!--$Id: settings.xml,v 1.12 2004/09/10 07:30:52 jz Exp $-->
 
 <!-- Einige Einstellungen können an mehreren Stellen vorgenommen werden:
      - Konfigurationsdatei
@@ -16,7 +16,7 @@
     base_dir    = ""
     title       = "Einstellungen"
     author      = "$Author: jz $"
-    date        = "$Date: 2004/09/09 21:45:05 $"
+    date        = "$Date: 2004/09/10 07:30:52 $"
 >
 
     <setting setting        = "log_dir" 
@@ -188,9 +188,10 @@
     <setting setting = "db_variables_table" 
              type    = "name"
              initial = "SCHEDULER_VARIABLES"
-             title   = "Name der Datenbanktabelle für die interne Variablen des Schedulers">
+             title   = "Name der Datenbanktabelle für die internen Variablen des Schedulers">
         <description>
             <p>
+                Hier hält der Scheduler z.B. die nächste freie Task-Id.
             </p>
         </description>
     </setting>

@@ -1,19 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="scheduler.xslt" type="text/xsl"?>
 
-<!--$Id: index.xml,v 1.15 2004/09/09 21:45:05 jz Exp $-->
+<!--$Id: index.xml,v 1.16 2004/09/10 07:30:52 jz Exp $-->
 
 <description 
-    title               = "Der Scheduler" 
+    head_title          = "Erste Seite" 
     base_dir            = ""
     suppress_browse_bar = "yes"
     author              = "$Author: jz $"
-    date                = "$Date: 2004/09/09 21:45:05 $"
+    date                = "$Date: 2004/09/10 07:30:52 $"
 >
 
+<style>
+  /*h2 { border-top: 1 solid #e0e0e0; margin-padding-top: 10ex; text-align: center; }*/
+  /*h2 { margin-top: 4ex; border-top: 1 solid #f0f0f0; padding-top: 3ex; text-align: center; }*/
+    h2 { text-align: center; }
+    dt { margin-top: 4ex; font-weight: bold; }
+    dd { color: black }
+</style>
+
+<h1 style="text-align: center; font-size: 18pt; margin-bottom: 2ex">Der Scheduler</h1>
+
 <p>
-    Der Scheduler startet Jobs und überwacht sie.
-    Der Start kann zeitgesteuert, durch Änderung eines Verzeichnisses, durch einen Auftrag oder durch ein Kommando erfolgen.
+    Der <span class="sos_name">Scheduler</span> startet Jobs und überwacht sie.
+    Die Starts können zeitgesteuert, durch Änderung eines Verzeichnisses, durch einen Auftrag oder durch ein Kommando erfolgen.
     Der Scheduler kennt Aufträge, die durch Jobketten geschleust werden.
 </p>
 <p>
@@ -24,127 +34,159 @@
     Hier sind wichtige Teile des Schedulers beschrieben.
 </p>
 
-<p style="margin-top: 2ex">&#160;</p>
+<p style="margin-top: 2ex"/>
+<!--hr size="1" style="color: #e0e0e0"/-->
 
-
-<hr size="1"/>
-<h2 style="margin-top: 2ex">Einstellungen und Datenbank</h2>
+<h2>Einstellungen und Datenbank</h2>
 <dl>
-    <dt><b><a href="command_line.xml">Kommandozeile</a></b></dt>
-    <dd>
-        <p>
-            Die Optionen an der Kommandozeile haben Vorrang vor den Einstellungen 
-            in der Datei <code>factory.ini</code> und der XML-Konfiguration.
-        </p>
-    </dd>
+    <a href="command_line.xml">
+        <dt>Kommandozeile</dt>
+        <dd>
+            <p>
+                Die Optionen an der Kommandozeile haben Vorrang vor den Einstellungen 
+                in der Datei <code>factory.ini</code> und der XML-Konfiguration.
+            </p>
+        </dd>
+    </a>
 
-    <dt><b><a href="sos_ini.xml">Datei sos.ini</a></b></dt>
-    <dd>
-        <p>
-            Hier können einige Einstellungen vorgenommen werden,
-            die auch andere Produkte als den <span class="sos_name">Scheduler</span> betreffen.
-        </p>
-    </dd>
+    <a href="sos_ini.xml">
+        <dt><b>Datei sos.ini</b></dt>
+        <dd>
+            <p>
+                Hier können einige Einstellungen vorgenommen werden,
+                die auch andere Produkte als den <span class="sos_name">Scheduler</span> betreffen.
+            </p>
+        </dd>
+    </a>
 
-    <dt><b><a href="factory_ini.xml">Datei factory.ini</a></b></dt>
-    <dd>
-        <p>
-            Die Einstellungen in der Datei <code>factory.ini</code> haben Vorrang 
-            vor den Einstellungen in der XML-Konfiguration (leere Einträge "<code>eintrag=</code>" gelten als nicht vorhanden).
-        </p>
-    </dd>
+    <a href="factory_ini.xml">
+        <dt>Datei factory.ini</dt>
+        <dd>
+            <p>
+                Die Einstellungen in der Datei <code>factory.ini</code> haben Vorrang 
+                vor den Einstellungen in der XML-Konfiguration (leere Einträge "<code>eintrag=</code>" gelten als nicht vorhanden).
+            </p>
+        </dd>
+    </a>
 
-    <dt><b><a href="konfiguration.xml">XML-Konfiguration</a></b></dt>
-    <dd>
-        <p>
-            Die XML-Konfiguration enthält die Beschreibungen der Jobs, deren Startzeiten usw.
-        </p>
-    </dd>
-
-    <dt><b><a href="datenbank.xml">Datenbank</a></b></dt>
-    <dd>
-        <p>
-            Der Scheduler kann seine Task- und Auftragswarteschlangen in einer Datenbank halten.
-            Und er kann eine Historie in die Datenbank schreiben.
-        </p>
-    </dd>
-</dl>
-
-
-<hr size="1"/>
-<h2 style="margin-top: 2ex">Jobs</h2>    
-<dl>
-    <dt><b><a href="job.xml">Was ist ein Job?</a></b></dt>
-    <dd>
-        Zu einem Job gehören der Programm-Code, die Laufzeit und weitere Dinge.
-    </dd>
-        
-    <dt><b><a href="javadoc/index.html">Java-Schnittstelle</a></b></dt>
-    <dd>
-        Die Dokumentation der Java-Klassen (Package <code>sos.spooler</code>), auf die ein Job Zugriff hat.
-        Sie gilt entsprechend auch für die COM- und Perl-Schnittstellen, 
-        wenn Sie Ihren Job in einer anderen Sprache implementieren.
-    </dd>
-</dl>
-
-
-<hr size="1"/>
-<h2 style="margin-top: 2ex">Auftragssteuerung</h2>
-<dl>
-    <dt><b><a href="order.xml">Aufträge und Jobketten</a></b></dt>
-    <dd>
-        Der Scheduler kann Aufträge durch Jobketten schleusen.
-    </dd>
-</dl>
-
-
-
-
-<hr size="1"/>
-<h2 style="margin-top: 2ex">Bedienung</h2>
-
-<dl>
-    <dt><b>Bedienung über HTTP</b></dt>
-    <dd>
-        Der Scheduler verfügt über einen HTTP-Server und stellt HTML-Seiten zu seiner Bedienung bereit.
-        Sie können den Scheduler über einen Browser (zurzeit nur Microsoft Internet Explorer 6)
-        steuern. Geben Sie z.B. die Adresse <code>http://localhost:4444</code> ein.
-        <code>localhost</code> kann auch ein anderer Rechnername sein,
-        und <code>4444</code> ist die konfigurierte TCP-Portnummer des Schedulers.
-    </dd>
-
-
-    <dt><b>Bedienung über telnet</b></dt>
-    <dd>
-        Die XML-Kommandos können auch über einen telnet-Client eingegeben werden.
-        Aufruf: <code>telnet localhost 4444</code>.
-    </dd>
-
-
-    <dt><b><a href="xml_commands.xml">XML-Kommandos</a></b></dt>
-    <dd>
-        Über TCP und UDP nimmt der Scheduler Kommandos in XML entgegen.
-    </dd>
-</dl>
-
-<hr size="1"/>
-<h2 style="margin-top: 2ex">Protokolle</h2>
-<dl>
-    <dt><b><a href="protokolle.xml">Protokolle</a></b></dt>
-    <dd>
-        Es gibt ein Hauptprotokoll und Job-, Task- und Auftragsprotokolle. Und das <code>scheduler.log</code>.
-    </dd>
+    <a href="konfiguration.xml">
+        <dt>XML-Konfiguration</dt>
+        <dd>
+            <p>
+                Die XML-Konfiguration enthält die Beschreibungen der Jobs, deren Startzeiten usw.
+            </p>
+        </dd>
+    </a>
     
-    <dt><b><a href="email.xml">eMail-Versand</a></b></dt>
-    <dd>
-        Task-Protokolle und besondere Meldungen kann der Scheduler per eMail verschicken.
-    </dd>
+    <a href="datenbank.xml">
+        <dt>Datenbank</dt>
+        <dd>
+            <p>
+                Der Scheduler kann seine Task- und Auftragswarteschlangen in einer Datenbank halten.
+                Und er kann eine Historie in die Datenbank schreiben.
+            </p>
+        </dd>
+    </a>
+</dl>
+
+
+<!--hr size="1" style="color: #e0e0e0"/-->
+<h2>Jobs</h2>    
+<dl>
+    <a href="job.xml">
+        <dt>Was ist ein Job?</dt>
+        <dd>
+            Zu einem Job gehören der Programm-Code, die Laufzeit und weitere Dinge.
+        </dd>
+    </a>
+        
+    <a href="javadoc/index.html">
+        <dt>Java-Schnittstelle</dt>
+        <dd>
+            Die Dokumentation der Java-Klassen (Package <code>sos.spooler</code>), auf die ein Job Zugriff hat.
+            Sie gilt entsprechend auch für die COM- und Perl-Schnittstellen, 
+            wenn Sie Ihren Job in einer anderen Sprache implementieren.
+        </dd>
+    </a>
+</dl>
+
+
+<!--hr size="1" style="color: #e0e0e0"/-->
+<h2>Auftragssteuerung</h2>
+<dl>
+    <a href="order.xml">
+        <dt>Aufträge und Jobketten</dt>
+        <dd>
+            Der Scheduler kann Aufträge durch Jobketten schleusen.
+        </dd>
+    </a>
 </dl>
 
 
 
-<hr size="1"/>
-<h2 style="margin-top: 2ex">Ältere Dokumentation</h2>
+
+<!--hr size="1" style="color: #e0e0e0"/-->
+<h2>Bedienung</h2>
+
+<dl>
+    <dt>HTTP</dt>
+    <dd>
+        <p>
+            Der Scheduler verfügt über einen HTTP-Server und stellt HTML-Seiten zu seiner Bedienung bereit.
+            Sie können den Scheduler über einen Browser (zurzeit nur Microsoft Internet Explorer 6)
+            steuern. Geben Sie z.B. die Adresse <code>http://localhost:4444</code> ein.
+            <code>localhost</code> kann auch ein anderer Rechnername sein,
+            und <code>4444</code> ist die konfigurierte TCP-Portnummer des Schedulers.
+        </p>
+        <p>
+            Siehe <scheduler_element name="config" attribute="tcp_port"/>.<br/>
+            Siehe <scheduler_ini_entry file="factory.ini" section="spooler" entry="html_dir"/>.<br/>
+        </p>
+    </dd>
+
+
+    <dt>telnet</dt>
+    <dd>
+        <p>
+            Die XML-Kommandos können auch über einen telnet-Client eingegeben werden.
+            Aufruf: <code>telnet localhost 4444</code>.
+        </p>
+        <p>
+            Siehe <scheduler_element name="config" attribute="tcp_port"/>.<br/>
+        </p>
+    </dd>
+
+
+    <a href="xml_commands.xml">
+        <dt>XML-Kommandos</dt>
+        <dd>
+            Über TCP und UDP nimmt der Scheduler Kommandos in XML entgegen.
+        </dd>
+    </a>
+</dl>
+
+<!--hr size="1" style="color: #e0e0e0"/-->
+<h2>Protokolle</h2>
+<dl>
+    <a href="protokolle.xml">
+        <dt>Protokolle</dt>
+        <dd>
+            Es gibt ein Hauptprotokoll und Job-, Task- und Auftragsprotokolle. Und das <code>scheduler.log</code>.
+        </dd>
+    </a>
+    
+    <a href="email.xml">
+        <dt>eMail-Versand</dt>
+        <dd>
+            Task-Protokolle und besondere Meldungen kann der Scheduler per eMail verschicken.
+        </dd>
+    </a>
+</dl>
+
+
+
+<!--hr size="1" style="color: #e0e0e0"/-->
+<h2>Ältere Dokumentation</h2>
 
 <table cellspacing="0" cellpadding="0">
     <tr>

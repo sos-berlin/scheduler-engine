@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="scheduler.xslt" type="text/xsl"?>
 
-<!--$Id: command_line.xml,v 1.12 2004/09/08 19:23:23 jz Exp $-->
+<!--$Id: command_line.xml,v 1.13 2004/09/10 07:30:52 jz Exp $-->
 
 <command_line program  = "scheduler"
               title    = "Kommandozeile"
               base_dir = ""
               author   = "$Author: jz $"
-              date     = "$Date: 2004/09/08 19:23:23 $">
+              date     = "$Date: 2004/09/10 07:30:52 $">
 
     <command_options>
         <command_option name="config" setting="config">
@@ -95,7 +95,7 @@
         <command_option name="ini" type="dateiname" title="Anderer Name für Datei factory.ini">
             <description>
                 <p>
-                    Wählt eine andere Datei für die Datei <code>factory.ini</code> aus.
+                    Wählt eine andere Datei für die Datei <a href="factory_ini.xml"><code>factory.ini</code></a> aus.
                 </p>
                 <p>
                     In dieser Dokumentation ist dann mit der Datei <code>factory.ini</code> die hier eingestellte gemeint.
@@ -107,7 +107,7 @@
         <command_option name="sos.ini" type="dateiname" title="Anderer Name für Datei sos.ini">>
             <description>
                 <p>
-                    Wählt eine andere Datei für die Hostware-Konfiguration <code>sos.ini</code>aus.
+                    Wählt eine andere Datei für die Hostware-Konfiguration <a href="sos_ini.xml"><code>sos.ini</code></a> aus.
                     Diese Datei enthält u.a. den Lizenzschlüssel.
                 </p>
             </description>

@@ -1,6 +1,8 @@
 body            { font-size: 10pt; font-family: Arial sans-serif; }
 h1              { font-size: 14pt; font-weight: bold; margin-bottom: 4ex;  }
-h2              { font-size: 12pt; font-weight: bold; margin-top: 6ex;  }
+/*h2              { font-size: 12pt; font-weight: bold; margin-top: 6ex;  }*/
+h2              { font-size: 12pt; font-weight: bold; margin-top: 4ex; border-top: 1 solid #f0f0f0; padding-top: 3ex;  }
+
 h3              { font-size: 10pt; font-weight: bold; margin-top: 4ex;  }
 .zwischentitel  { font-weight: bold; margin-top: 6ex }
 p               { font-size: 10pt; margin-top-: 2ex; margin-bottom: 0  }
@@ -55,7 +57,7 @@ p.xml_attribute     { margin-top: 4ex; }
 p.example           { margin-top: 4ex; font-weight: bold; }
 p.command_option    { margin-top: 4ex; }
 p.ini_section       { margin-top: 4ex; }
-p.ini_entry         { margin-top: 4ex; }
+p.ini_entry         { margin-top: 2ex; border-top: 1 solid #f0f0f0; padding-top: 2ex; }
 .sos_name           { font-variant: small-caps; }
 
 

@@ -2,22 +2,20 @@
 <?xml-stylesheet href="scheduler.xslt" type="text/xsl"?>
 
 
-<!--$Id: konfiguration.xml,v 1.8 2004/09/09 19:02:42 jz Exp $-->
+<!--$Id: konfiguration.xml,v 1.9 2004/09/10 07:30:52 jz Exp $-->
 
 <description 
     title    = "XML-Konfiguration" 
     base_dir = ""
     author   = "$Author: jz $"
-    date     = "$Date: 2004/09/09 19:02:42 $"
+    date     = "$Date: 2004/09/10 07:30:52 $"
 >
 <p>
     Beim Start des Scheduler geben Sie die Datei an,
     die die in XML formulierte Konfiguration enthält.
 </p>
 
-<p class="example">
-    Beispiel
-</p>
+<h2>Beispiel</h2>
 
 <p>
     Eine einfache Konfigurationsdatei mit einem Job in JavaScript (für Windows):

@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="../scheduler.xslt" type="text/xsl"?>
 
-<!--$Id: job.xml,v 1.10 2004/09/07 19:16:49 jz Exp $-->
+<!--$Id: job.xml,v 1.11 2004/09/10 07:30:52 jz Exp $-->
 
 <xml_element name     = "job" 
              title    = "Job"
              base_dir = "../"
              parent_page = "../konfiguration.xml"
              author   = "$Author: jz $"
-             date     = "$Date: 2004/09/07 19:16:49 $">
+             date     = "$Date: 2004/09/10 07:30:52 $">
 
     <xml_parent_elements>
         <xml_parent_element name="jobs">
@@ -41,7 +41,7 @@
             </description>
         </xml_attribute>
         
-        <xml_attribute name="title" type="zahl">
+        <xml_attribute name="title" type="text">
             <description>
                 Eine einzeilige Beschreibung des Jobs.
             </description>
