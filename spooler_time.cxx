@@ -1,4 +1,4 @@
-// $Id: spooler_time.cxx,v 1.39 2003/05/31 15:17:43 jz Exp $
+// $Id: spooler_time.cxx,v 1.40 2003/06/24 15:46:29 jz Exp $
 /*
     Hier sind implementiert
 
@@ -49,6 +49,13 @@ void Time::set( const string& t )
     Sos_optional_date_time dt;
     dt.set_time( t );
     set( dt.time_as_double() );
+}
+
+//------------------------------------------------------------------------------Time::set_datetime
+
+void Time::set_datetime( const string& t )
+{
+    set( Sos_optional_date_time(t).as_double() );
 }
 
 //---------------------------------------------------------------------------------Time::as_string
@@ -352,7 +359,7 @@ Period Ultimo_set::next_period( Time tim, With_single_start single_start )
 {
     Time     time_of_day = tim.time_of_day();
     int      day_nr      = tim.day_nr();
-    Sos_date date        = Sos_optional_date_time( tim );
+    Sos_date date        = Sos_optional_date_time( (time_t)tim );
 
     for( int i = 0; i < 31; i++ )
     {

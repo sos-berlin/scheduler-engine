@@ -1,4 +1,4 @@
-// $Id: spooler_service.cxx,v 1.40 2003/06/08 10:00:50 jz Exp $
+// $Id: spooler_service.cxx,v 1.41 2003/06/24 15:46:29 jz Exp $
 /*
     Hier sind implementiert
 
@@ -362,7 +362,7 @@ static uint __stdcall pending_watchdog_thread( void* )
 {
     LOG( "pending_watchdog_thread (Überwachung des Zustands SERVICE_START_PENDING) startet\n" );
 
-    int wait_until = elapsed_msec() + pending_timeout*1000;
+    int64 wait_until = elapsed_msec() + pending_timeout*1000;
 
     int state = current_state;
 
@@ -370,7 +370,7 @@ static uint __stdcall pending_watchdog_thread( void* )
     {
         while(1)
         {
-            int wait_time = wait_until - elapsed_msec();
+            int wait_time = (int)( wait_until - elapsed_msec() );
             if( wait_time <= 0 )  break;
 
             int ret = WaitForSingleObject( pending_watchdog_signal, wait_time );

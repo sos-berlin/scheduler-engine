@@ -1,4 +1,4 @@
-// $Id: spooler_time.h,v 1.17 2002/11/28 11:18:23 jz Exp $
+// $Id: spooler_time.h,v 1.18 2003/06/24 15:46:29 jz Exp $
 
 #ifndef __SPOOLER_TIME_H
 #define __SPOOLER_TIME_H
@@ -74,6 +74,7 @@ struct Time
     static double               round                       ( double t )                    { return floor( t * 1000.0 + 0.5 ) / 1000.0; }
     void                        set                         ( double t )                    { _time = round(t); }
     void                        set                         ( const string& );
+    void                        set_datetime                ( const string& );
     Time                        time_of_day                 () const                        { return _time - midnight(); }
     Time                        midnight                    () const                        { return day_nr() * 24*60*60; }
     int                         day_nr                      () const                        { return uint(_time) / (24*60*60); }

@@ -1,4 +1,4 @@
-// $Id: spooler_history.h,v 1.16 2003/06/23 15:15:14 jz Exp $
+// $Id: spooler_history.h,v 1.17 2003/06/24 15:46:28 jz Exp $
 
 #ifndef __SPOOLER_HISTORY_H
 #define __SPOOLER_HISTORY_H
@@ -21,6 +21,8 @@ enum Archive_switch
 
 typedef Archive_switch With_log_switch;
 
+struct Transaction;
+
 //---------------------------------------------------------------------------------------Spooler_db
 
 struct Spooler_db : Sos_self_deleting
@@ -31,20 +33,28 @@ struct Spooler_db : Sos_self_deleting
     void                        close                   ();
     void                        open_history_table      ();
     bool                        opened                  ()                                          { return _db.opened(); }
-    int                         get_id                  ();
-    int                         get_id_                 ();
-    void                        execute                 ( const string& stmt );
     void                        commit                  ();
     void                        rollback                ();
+    void                        execute                 ( const string& stmt );
     void                        create_table_when_needed( const string& tablename, const string& fields );
-    string                      db_name                 ()                                          { return _db_name; }
     void                        try_reopen_after_error  ( const exception& );
-
-    void                        insert_order            ( Order* );
-    void                        update_order_state      ( Order* );
+    string                      db_name                 ()                                          { return _db_name; }
 
     void                        spooler_start           ();
     void                        spooler_stop            ();
+
+    int                         get_task_id             ()                                          { return get_id( "spooler_job_id" ); }
+    int                         get_id                  ( const string& variable_name, Transaction* = NULL );
+    int                         get_id_                 ( const string& variable_name, Transaction* );
+
+    int                         get_order_id            ( Transaction* ta = NULL )                  { return get_id( "spooler_order_id", ta ); }
+    int                         get_order_ordering      ( Transaction* ta = NULL )                  { return get_id( "spooler_order_ordering", ta ); }
+    void                        insert_order            ( Order* );
+    void                        delete_order            ( Order*, Transaction* );
+    void                        update_order            ( Order* );
+
+    int                         get_order_history_id    ( Transaction* ta )                         { return get_id( "spooler_order_history_id", ta ); }
+    void                        write_order_history     ( Order*, Transaction* = NULL );
 
 
     Fill_zero                  _zero_;
@@ -58,8 +68,8 @@ struct Spooler_db : Sos_self_deleting
     string                     _db_name;
     Any_file                   _db;
   //Any_file                   _job_id_update;
-    Any_file                   _job_id_select;
-    int                        _next_free_job_id;
+  //Any_file                   _job_id_select;
+    map<string,long>           _id_counters;
     Any_file                   _history_table;
   //Any_file                   _history_update;
     vector<Dyn_obj>            _history_update_params;
@@ -71,7 +81,7 @@ struct Spooler_db : Sos_self_deleting
 
 struct Transaction
 {
-                                Transaction             ( Spooler_db* );
+                                Transaction             ( Spooler_db*, Transaction* outer_transaction = NULL );
                                ~Transaction             ();
 
     void                        commit                  ();
@@ -79,6 +89,7 @@ struct Transaction
 
     Spooler_db*                _db;
     Mutex_guard                _guard;
+    Transaction*               _outer_transaction;
 };
 
 //--------------------------------------------------------------------------------------Job_history

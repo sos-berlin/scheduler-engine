@@ -1,4 +1,4 @@
-// $Id: spooler_module.cxx,v 1.24 2003/06/11 14:39:25 jz Exp $
+// $Id: spooler_module.cxx,v 1.25 2003/06/24 15:46:29 jz Exp $
 /*
     Hier sind implementiert
 
@@ -218,7 +218,10 @@ ptr<Module_instance> Module::create_instance()
 
 #     ifdef Z_WINDOWS
         case kind_com:               
-            return Z_NEW( Com_module_instance( this ) );
+        {
+            ptr<Com_module_instance> p = Z_NEW( Com_module_instance( this ) );
+            return +p;
+        }
 #     endif
 
         case kind_remote:

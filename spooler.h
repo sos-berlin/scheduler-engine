@@ -1,4 +1,4 @@
-// $Id: spooler.h,v 1.138 2003/06/23 15:15:13 jz Exp $
+// $Id: spooler.h,v 1.139 2003/06/24 15:46:28 jz Exp $
 
 #ifndef __SPOOLER_H
 #define __SPOOLER_H
@@ -154,6 +154,7 @@ struct Spooler
 
     // Aufrufe für andere Threads:
     const string&               id                          () const                            { return _spooler_id; }
+    const string                id_for_db                   () const                            { return _spooler_id.empty()? "-" : _spooler_id; }
     const string&               param                       () const                            { return _spooler_param; }
     int                         udp_port                    () const                            { return _udp_port; }
     int                         tcp_port                    () const                            { return _tcp_port; }
@@ -196,7 +197,6 @@ struct Spooler
     void                        cmd_load_config             ( const xml::Element_ptr&, const Time& xml_mod_time, const string& source_filename );
 
     // Order
-    long                        get_free_order_id           ()                                  { return InterlockedIncrement( &_next_free_order_id ); }
     void                        add_job_chain               ( Job_chain* );
     Job_chain*                  job_chain                   ( const string& name );
     xml::Element_ptr            xml_from_job_chains         ( const xml::Document_ptr&, Show_what );
@@ -264,14 +264,20 @@ struct Spooler
     int                        _log_collect_within;
     int                        _log_collect_max;
 
-    string                     _history_columns;
-    bool                       _history_yes;
-    int                        _history_on_process;
-    Archive_switch             _history_archive;
-    With_log_switch            _history_with_log;
-    string                     _history_tablename;
     string                     _variables_tablename;
     string                     _orders_tablename;
+
+    string                     _job_history_tablename;
+    string                     _job_history_columns;
+    bool                       _job_history_yes;
+    int                        _job_history_on_process;
+    Archive_switch             _job_history_archive;
+    With_log_switch            _job_history_with_log;
+
+    string                     _order_history_tablename;
+    bool                       _order_history_yes;
+    With_log_switch            _order_history_with_log;
+
 
     string                     _factory_ini;                // -ini=factory.ini
     string                     _hostname;
@@ -351,7 +357,7 @@ struct Spooler
     Thread_semaphore           _job_chain_lock;
     typedef map< string, ptr<Job_chain> >  Job_chain_map;
     Job_chain_map              _job_chain_map;
-    Time                       _job_chain_time;             // Zeitstempel der letzten Änderung (letzer Aufruf von Spooler::add_job_chain()), 
+    Time                       _job_chain_time;             // Zeitstempel der letzten Änderung (letzter Aufruf von Spooler::add_job_chain()), 
     long                       _next_free_order_id;
 
     Thread_id                  _thread_id;                  // Haupt-Thread

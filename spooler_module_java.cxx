@@ -1,4 +1,4 @@
-// $Id: spooler_module_java.cxx,v 1.55 2003/06/02 10:23:54 jz Exp $
+// $Id: spooler_module_java.cxx,v 1.56 2003/06/24 15:46:29 jz Exp $
 /*
     Hier sind implementiert
 
@@ -143,7 +143,7 @@ JNIEXPORT jobject JNICALL Java_sos_spooler_Idispatch_com_1call( JNIEnv* jenv, jc
         HRESULT     hr;
         IDispatch*  idispatch = (IDispatch*)(size_t)jidispatch;
         Bstr        name_bstr;
-        DWORD       context = 0;
+        WORD        context = 0;
         DISPID      dispid = 0;
         
         if( !idispatch )  throw_xc( "SPOOLER-176" );

@@ -1,4 +1,4 @@
-// $Id: spooler_command.cxx,v 1.84 2003/04/14 09:03:35 jz Exp $
+// $Id: spooler_command.cxx,v 1.85 2003/06/24 15:46:28 jz Exp $
 /*
     Hier ist implementiert
 
@@ -60,7 +60,7 @@ xml::Element_ptr create_error_element( const xml::Document_ptr& document, const 
     //timeb  tm;     // Ob die Sommerzeitverschiebung bei der Fehlerzeit berücksichtigt wird, hängt von der _aktuellen_ Zeit ab.
     //ftime( &tm );  // Nicht schön, aber es funktioniert, weil der Spooler sowieso nicht während der Zeitumstellung laufen soll.
     //e.setAttribute( "time", Sos_optional_date_time( (time_t)x.time() - timezone - ( tm.dstflag? _dstbias : 0 ) ).as_string() );
-    e.setAttribute( "time", Sos_optional_date_time( Time::now() ).as_string() );
+    e.setAttribute( "time", Sos_optional_date_time( (time_t)Time::now() ).as_string() );
 
     if( !empty( x->name() )          )  e.setAttribute( "class" , x->name()          );
 
@@ -120,7 +120,7 @@ xml::Element_ptr Command_processor::execute_show_state( const xml::Element_ptr& 
  
     state_element.setAttribute( "time"                 , Sos_optional_date_time::now().as_string() );
     state_element.setAttribute( "id"                   , _spooler->id() );
-    state_element.setAttribute( "spooler_running_since", Sos_optional_date_time( _spooler->start_time() ).as_string() );
+    state_element.setAttribute( "spooler_running_since", Sos_optional_date_time( (time_t)_spooler->start_time() ).as_string() );
     state_element.setAttribute( "state"                , _spooler->state_name() );
     state_element.setAttribute( "log_file"             , _spooler->_base_log.filename() );
 

@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.218 2003/06/23 15:15:13 jz Exp $
+// $Id: spooler.cxx,v 1.219 2003/06/24 15:46:28 jz Exp $
 /*
     Hier sind implementiert
 
@@ -810,24 +810,27 @@ void Spooler::load_arg()
 
     string log_level = as_string( _log_level );
 
-    _spooler_id         = read_profile_string    ( _factory_ini, "spooler", "id"                 );
-    _config_filename    = read_profile_string    ( _factory_ini, "spooler", "config"             );
-    _log_directory      = read_profile_string    ( _factory_ini, "spooler", "log-dir"            );  // veraltet
-    _log_directory      = read_profile_string    ( _factory_ini, "spooler", "log_dir"            , _log_directory );  _log_directory_as_option_set = !_log_directory.empty();
-    _include_path       = read_profile_string    ( _factory_ini, "spooler", "include-path"       );  // veraltet
-    _include_path       = read_profile_string    ( _factory_ini, "spooler", "include_path"       , _include_path );   _include_path_as_option_set  = !_include_path.empty();
-    _spooler_param      = read_profile_string    ( _factory_ini, "spooler", "param"              );                   _spooler_param_as_option_set = !_spooler_param.empty();
-    log_level           = read_profile_string    ( _factory_ini, "spooler", "log_level"          , log_level );   
-    _history_columns    = read_profile_string    ( _factory_ini, "spooler", "history_columns"    );
-    _history_yes        = read_profile_bool      ( _factory_ini, "spooler", "history"            , true );
-    _history_on_process = read_profile_history_on_process( _factory_ini, "spooler", "history_on_process", 0 );
-    _history_archive    = read_profile_archive   ( _factory_ini, "spooler", "history_archive"    , arc_no );
-    _history_with_log   = read_profile_with_log  ( _factory_ini, "spooler", "history_with_log"   , arc_no );
-    _db_name            = read_profile_string    ( _factory_ini, "spooler", "db"                 );
-    _need_db            = read_profile_bool      ( _factory_ini, "spooler", "need_db"            , true                );
-    _history_tablename  = read_profile_string    ( _factory_ini, "spooler", "db_history_table"   , "SPOOLER_HISTORY"   );
-    _variables_tablename= read_profile_string    ( _factory_ini, "spooler", "db_variables_table" , "SPOOLER_VARIABLES" );
-    _orders_tablename   = read_profile_string    ( _factory_ini, "spooler", "db_orders_table"    , "SPOOLER_ORDERS"    );
+    _spooler_id                 = read_profile_string    ( _factory_ini, "spooler", "id"                 );
+    _config_filename            = read_profile_string    ( _factory_ini, "spooler", "config"             );
+    _log_directory              = read_profile_string    ( _factory_ini, "spooler", "log-dir"            );  // veraltet
+    _log_directory              = read_profile_string    ( _factory_ini, "spooler", "log_dir"            , _log_directory );  _log_directory_as_option_set = !_log_directory.empty();
+    _include_path               = read_profile_string    ( _factory_ini, "spooler", "include-path"       );  // veraltet
+    _include_path               = read_profile_string    ( _factory_ini, "spooler", "include_path"       , _include_path );   _include_path_as_option_set  = !_include_path.empty();
+    _spooler_param              = read_profile_string    ( _factory_ini, "spooler", "param"              );                   _spooler_param_as_option_set = !_spooler_param.empty();
+    log_level                   = read_profile_string    ( _factory_ini, "spooler", "log_level"          , log_level );   
+    _job_history_tablename      = read_profile_string    ( _factory_ini, "spooler", "db_history_table"   , "SPOOLER_HISTORY"   );
+    _job_history_columns        = read_profile_string    ( _factory_ini, "spooler", "history_columns"    );
+    _job_history_yes            = read_profile_bool      ( _factory_ini, "spooler", "history"            , true );
+    _job_history_on_process     = read_profile_history_on_process( _factory_ini, "spooler", "history_on_process", 0 );
+    _job_history_archive        = read_profile_archive   ( _factory_ini, "spooler", "history_archive"    , arc_no );
+    _job_history_with_log       = read_profile_with_log  ( _factory_ini, "spooler", "history_with_log"   , arc_no );
+    _order_history_yes          = read_profile_bool      ( _factory_ini, "spooler", "order_history"      , true );
+    _order_history_with_log     = read_profile_with_log  ( _factory_ini, "spooler", "order_history_with_log", arc_no );
+    _db_name                    = read_profile_string    ( _factory_ini, "spooler", "db"                 );
+    _need_db                    = read_profile_bool      ( _factory_ini, "spooler", "need_db"            , true                );
+    _order_history_tablename    = read_profile_string    ( _factory_ini, "spooler", "db_order_history_table", "SPOOLER_ORDER_HISTORY" );
+    _orders_tablename           = read_profile_string    ( _factory_ini, "spooler", "db_orders_table"    , "SPOOLER_ORDERS"    );
+    _variables_tablename        = read_profile_string    ( _factory_ini, "spooler", "db_variables_table" , "SPOOLER_VARIABLES" );
 
 
 

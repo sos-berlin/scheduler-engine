@@ -1,4 +1,4 @@
-// $Id: spooler_order.h,v 1.19 2003/06/23 15:15:14 jz Exp $
+// $Id: spooler_order.h,v 1.20 2003/06/24 15:46:29 jz Exp $
 
 #ifndef __SPOOLER_ORDER_H
 #define __SPOOLER_ORDER_H
@@ -16,6 +16,8 @@ struct Order;
 
 struct Order : Com_order
 {
+    Fill_zero                  _zero_;    
+
     typedef Variant             Payload;
     typedef int                 Priority;               // Höherer Wert bedeutet höhere Priorität
     typedef Variant             State;
@@ -23,19 +25,23 @@ struct Order : Com_order
 
 
     Z_GNU_ONLY(                 Order                   (); )                                       // Für gcc 3.2. Nicht implementiert
-                                Order                   ( Spooler* spooler )                        : _zero_(this+1), _spooler(spooler), _log(spooler), Com_order(this) {}
+                                Order                   ( Spooler* spooler )                        : _zero_(this+1), _spooler(spooler), _log(spooler), Com_order(this) { init(); }
                                 Order                   ( Spooler* spooler, const VARIANT& );
+                                Order                   ( Spooler* spooler, const Record& );
                                ~Order                   ();
 
-    void                        open                    ();
+    void                        init                    ();
+    void                        open_log                ();
     void                        close                   ();
+
+    Prefix_log&                 log                     ()                                          { return _log; }
     
     void                    set_id                      ( const Variant& );
     Id                          id                      ()                                          { THREAD_LOCK_RETURN( _lock, Variant, _id ); }
     void                    set_default_id              ();
     bool                        id_is_equal             ( const Id& id )                            { if( _id_locked ) return _id == id; else THREAD_LOCK_RETURN( _lock, bool, _id == id ); }
 
-    void                    set_title                   ( const string& title )                     { THREAD_LOCK(_lock)  _title = title; }
+    void                    set_title                   ( const string& title )                     { THREAD_LOCK(_lock)  _title = title,  _title_modified = true; }
     string&                     title                   ()                                          { THREAD_LOCK_RETURN( _lock, string, _title ); }
     string                      obj_name                ()                                          { THREAD_LOCK_RETURN( _lock, string, string_from_variant(_id) + rtrim( "  " + _title ) ); }
                                                             
@@ -58,8 +64,11 @@ struct Order : Com_order
     State                       state                   ()                                          { THREAD_LOCK_RETURN( _lock, State, _state ); }
     bool                        state_is_equal          ( const State& state )                      { THREAD_LOCK_RETURN( _lock, bool, _state == state ); }
 
-    void                    set_state_text              ( const string& state_text )                { THREAD_LOCK( _lock )  _state_text = state_text; }
+    void                    set_state_text              ( const string& state_text )                { THREAD_LOCK( _lock )  _state_text = state_text,  _state_text_modified = true; }
     string                      state_text              ()                                          { THREAD_LOCK_RETURN( _lock, string, _state_text ); }
+
+    Time                        start_time              () const                                    { return _start_time; }
+    Time                        end_time                () const                                    { return _end_time; }
 
     void                    set_payload                 ( const VARIANT& payload )                  { THREAD_LOCK( _lock )  _payload = payload; }
     Payload                     payload                 ()                                          { THREAD_LOCK_RETURN( _lock, Variant, _payload ); }
@@ -71,7 +80,7 @@ struct Order : Com_order
     void                        add_to_job              ( const string& job_name );
 
     // Auftrag in einer Jobkette:
-    void                        add_to_job_chain        ( Job_chain* );
+    void                        add_to_job_chain        ( Job_chain*, bool write_to_database = true );
     void                        remove_from_job_chain   ();
     void                        move_to_node            ( Job_chain_node* );
     void                        postprocessing          ( bool success, Prefix_log* );              // Verarbeitung nach spooler_process()
@@ -79,36 +88,43 @@ struct Order : Com_order
 
     xml::Element_ptr            dom                     ( const xml::Document_ptr&, Show_what );
 
+    Prefix_log                 _log;
+
 
   private:
+    void                        postprocessing2         ();
+
     friend struct               Order_queue;
+    friend void                 Spooler_db::insert_order( Order* );
+    friend void                 Spooler_db::update_order( Order* );
 
 
-
-    Fill_zero                  _zero_;    
     Thread_semaphore           _lock;
     Spooler*                   _spooler;
-    Prefix_log                 _log;
 
     Id                         _id;
     bool                       _id_locked;              // Einmal gesperrt, immer gesperrt
     bool                       _is_users_id;            // Id ist nicht vom Spooler generiert, also nicht sicher eindeutig.
     Priority                   _priority;
+    bool                       _priority_modified;
     State                      _state;
     string                     _state_text;
+    bool                       _state_text_modified;
     string                     _title;
+    bool                       _title_modified;
     Job_chain*                 _job_chain;              
     Job_chain_node*            _job_chain_node;         // Nächster Stelle, falls in einer Jobkette
     Order_queue*               _order_queue;            // Auftrag ist in einer Auftragsliste, aber nicht in einer Jobkette. _job_chain == NULL, _job_chain_node == NULL!
     Payload                    _payload;
 
     Time                       _created;
+    Time                       _start_time;             // Erster Jobschritt
+    Time                       _end_time;
 
     bool                       _in_job_queue;           // Auftrag ist in _job_chain_node->_job->order_queue() eingehängt
   //bool                       _in_process;             // Auftrag wird gerade von spooler_process() verarbeitet 
     Task*                      _task;                   // Auftrag wird gerade von dieser Task in spooler_process() verarbeitet 
     bool                       _moved;                  // true, wenn Job state oder job geändert hat. Dann nicht automatisch in Jobkette weitersetzen
-    bool                       _opened;
 };
 
 //-----------------------------------------------------------------------------------Job_chain_node
@@ -151,6 +167,7 @@ struct Job_chain : Com_job_chain
     string                      name                    ()                                          { THREAD_LOCK_RETURN( _lock, string, _name ); }
 
     bool                        finished                () const                                    { return _finished; }
+    void                        load_orders_from_database();
 
     void                        add_job                 ( Job*, const State& input_state, const State& output_state = error_variant, const State& error_state = error_variant );
     void                        finish                  ();
@@ -161,6 +178,9 @@ struct Job_chain : Com_job_chain
 
     Order*                      add_order               ( VARIANT* order_or_payload, VARIANT* job_or_state );
     ptr<Order>                  order                   ( const Order::Id& id );
+
+    void                        register_order          ( Order* );                                 // Um doppelte Auftragskennungen zu entdecken: Fehler SPOOLER-186
+    void                        unregister_order        ( Order* );
 
     int                         order_count             ();
 
@@ -178,6 +198,9 @@ struct Job_chain : Com_job_chain
 
     typedef list< ptr<Job_chain_node> >  Chain;
     Chain                      _chain;
+
+    typedef map< string, Order* >   Order_map;
+    Order_map                  _order_map;
 };
 
 //--------------------------------------------------------------------------------Internal_priority

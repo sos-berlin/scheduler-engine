@@ -1,4 +1,4 @@
-// $Id: spooler_order.cxx,v 1.26 2003/06/23 15:15:14 jz Exp $
+// $Id: spooler_order.cxx,v 1.27 2003/06/24 15:46:29 jz Exp $
 /*
     Hier sind implementiert
 
@@ -13,6 +13,7 @@
 
 
 #include "spooler.h"
+#include "../zschimmer/z_sql.h"
 
 
 namespace sos {
@@ -31,6 +32,8 @@ void Spooler::add_job_chain( Job_chain* job_chain )
 
         _job_chain_map[lname] = job_chain;
     }
+
+    job_chain->load_orders_from_database();
 
     _job_chain_time = Time::now();
 }
@@ -157,6 +160,33 @@ static Order::State normalized_state( const Order::State& state )
         return state;
     }
 }
+
+//-------------------------------------------------------------Job_chain::load_orders_from_database
+
+// in spooler_history.cxx
+void Job_chain::load_orders_from_database()
+{
+    int count = 0;
+
+    {
+        Transaction ta ( _spooler->_db );
+
+        Any_file sel ( _spooler->_db->db_name() + " select \"ID\", \"PRIORITY\", \"STATE\", \"STATE_TEXT\", \"TITLE\", \"CREATED_TIME\""
+                                                  " from " + sql::quoted_name( _spooler->_orders_tablename ) +
+                                                  " where \"SPOOLER_ID\"=" + sql::quoted(_spooler->id_for_db()) + 
+                                                  " and \"JOB_CHAIN\"=" + sql::quoted(_name) +
+                                                  " order by \"ORDERING\"" );
+        while( !sel.eof() )
+        {
+            ptr<Order> order = new Order( _spooler, sel.get_record() );
+            order->add_to_job_chain( this, false );    // Einstieg nur über Order, damit Semaphoren stets in derselben Reihenfolge gesperrt werden.
+            count++;
+        }
+    }
+
+    _spooler->log().debug( "Jobkette " + _name + ": " + as_string(count) + " Aufträge aus der Datenbank gelesen" );
+}
+
 
 //-------------------------------------------------------------------------------Job_chain::add_job
 
@@ -306,6 +336,32 @@ int Job_chain::order_count()
     }
 
     return result;
+}
+
+//------------------------------------------------------------------------Job_chain::register_order
+
+void Job_chain::register_order( Order* order )
+{
+    THREAD_LOCK( _lock )
+    {
+        string id_string = string_from_variant( order->id() );
+        Order_map::iterator it = _order_map.find( id_string );
+        if( it != _order_map.end() )  throw_xc( "SPOOLER-186", id_string, _name );
+        _order_map[ id_string ] = order;
+    }
+}
+
+//----------------------------------------------------------------------Job_chain::unregister_order
+
+void Job_chain::unregister_order( Order* order )
+{
+    THREAD_LOCK( _lock )
+    {
+        string id_string = string_from_variant( order->id() );
+        Order_map::iterator it = _order_map.find( id_string );
+        if( it != _order_map.end() )  _order_map.erase( it );
+        _order_map[ id_string ] = order;
+    }
 }
 
 //-------------------------------------------------------------------------Order_queue::Order_queue
@@ -473,22 +529,28 @@ ptr<Order> Order_queue::get_order_for_processing( Task* task )
     // Die Order_queue gehört genau einem Job. Der Job kann zur selben Zeit nur einen Schritt ausführen.
     // Deshalb kann nur der erste Auftrag in Verarbeitung sein.
 
-    ptr<Order> result;
+    ptr<Order> order;
 
     THREAD_LOCK( _lock )
     {
         if( !_queue.empty() )
         {
-            result = _queue.front();
+            order = _queue.front();
 
-            if( result->_task )  throw_xc( "Order_queue::get_order_for_processing" );   // Darf nicht passieren
+            if( order->_task )  throw_xc( "Order_queue::get_order_for_processing" );   // Darf nicht passieren
             
-            result->_task = task;
-            result->_moved = false;
+            order->_task = task;
+            order->_moved = false;
+
+            if( !order->_start_time )  
+            {
+                order->_start_time = Time::now();
+                order->open_log();
+            }
         }   
     }
 
-    return result;
+    return order;
 }
 
 //-----------------------------------------------------------------------Order_queue::order_or_null
@@ -513,37 +575,70 @@ Order::Order( Spooler* spooler, const VARIANT& payload )
     _log(spooler),
     _payload(payload)
 {
-    _created = Time::now();
+    init();
+}
+
+//-------------------------------------------------------------------------------------Order::Order
+
+Order::Order( Spooler* spooler, const Record& record )
+: 
+    Com_order(this),
+    _zero_(this+1), 
+    _spooler(spooler),
+    _log(spooler)
+{
+    //init();
+
+    _id         = record.as_string( "id" );
+    _state      = record.as_string( "state" );
+    _state_text = record.as_string( "state_text" );
+    _title      = record.as_string( "title" );
+    _priority   = record.as_int   ( "priority" );
+    _created.set_datetime( record.as_string( "created_time" ) );
 }
 
 //------------------------------------------------------------------------------------Order::~Order
 
 Order::~Order()
 {
+    remove_from_job_chain();
 }
 
-//--------------------------------------------------------------------------------------Order::open
+//--------------------------------------------------------------------------------------Order::init
 
-void Order::open()
+void Order::init()
 {
-    if( _spooler->_log_orders )
+    _created = Time::now();
+}
+
+//----------------------------------------------------------------------------------Order::open_log
+
+void Order::open_log()
+{
+    if( _job_chain && _spooler->_order_history_with_log )
     {
-        _log.set_filename( _spooler->log_directory() + "/order." + _id.as_string() + ".log" );      // Jobprotokoll
+        _log.set_filename( _spooler->log_directory() + "/order." + _job_chain->name() + "." + _id.as_string() + ".log" );      // Jobprotokoll
         _log.open();
     }
-
-    _opened = true;
 }
 
 //-------------------------------------------------------------------------------------Order::close
 
 void Order::close()
 {
-    if( _log.opened() )
+    if( !_log.filename().empty() )
     {
-        _log.close();
-        _spooler->_db.store_order_log( _log.filename() );
+        try
+        {
+            remove_file( _log.filename() );
+        }
+        catch( const exception& x )
+        {
+            _spooler->_log.warn( "FEHLER BEIM LÖSCHEN DER DATEI " + _log.filename() + ": " + x.what() );
+        }
     }
+
+    remove_from_job_chain();
 }
 
 //---------------------------------------------------------------------------------------Order::dom
@@ -615,7 +710,7 @@ void Order::set_default_id()
     {
         if( _id.vt == VT_EMPTY )
         {
-            set_id( _spooler->get_free_order_id() );  
+            set_id( _spooler->_db->get_order_id() );  
             _is_users_id = false;
         }
     }
@@ -672,8 +767,6 @@ void Order::set_state( const State& state )
 void Order::set_state2( const State& state )
 {
     _state = state;
-
-    if( _job_chain )  _spooler->_db->update_order_state( *order );
 }
 
 //------------------------------------------------------------------------------Order::set_priority
@@ -693,6 +786,8 @@ void Order::set_priority( Priority priority )
                 order_queue()->add_order( this );
             }
         }
+
+        _priority_modified = true;
     }
 }
 
@@ -751,17 +846,26 @@ void Order::remove_from_job_chain()
     {
         if( _job_chain_node )
         {
-            _job_chain_node->_job->order_queue()->remove_order( this );
+            if( _in_job_queue )  
+            {
+                Order_queue* order_queue = _job_chain_node->_job->order_queue();        // Kann bei Programmende NULL sein
+                if( order_queue )  order_queue->remove_order( this );       
+            }
 
-            _job_chain      = NULL;
             _job_chain_node = NULL;
+        }
+
+        if( _job_chain )
+        {
+            _job_chain->unregister_order( this );
+            _job_chain = NULL;
         }
     }
 }
 
 //--------------------------------------------------------------------------Order::add_to_job_chain
 
-void Order::add_to_job_chain( Job_chain* job_chain )
+void Order::add_to_job_chain( Job_chain* job_chain, bool write_to_database )
 {
     if( !job_chain->finished() )  throw_xc( "SPOOLER-151" );
 
@@ -770,12 +874,13 @@ void Order::add_to_job_chain( Job_chain* job_chain )
         if( _id.vt == VT_EMPTY )  set_default_id();
         _id_locked = true;
 
-        if( !opened() )  open();
-
         if( _job_chain )  remove_from_job_chain();
 
         if( !job_chain->_chain.empty() )
         {
+            job_chain->register_order( this );
+            _job_chain = job_chain;
+
             if( _state.vt == VT_EMPTY )  set_state2( (*job_chain->_chain.begin())->_state );     // Auftrag bekommt Zustand des ersten Jobs der Jobkette
 
             //Z_DEBUG_ONLY( LOG( "job_chain->node_from_state()\n" ); )
@@ -785,9 +890,10 @@ void Order::add_to_job_chain( Job_chain* job_chain )
             //Z_DEBUG_ONLY( LOG( "node->_job->order_queue()->add_order()\n" ); )
             node->_job->order_queue()->add_order( this );
 
-            _job_chain      = job_chain;
             _job_chain_node = node;
         }
+
+        if( write_to_database )  _spooler->_db->insert_order( this );
     }
 }
 
@@ -802,7 +908,7 @@ void Order::move_to_node( Job_chain_node* node )
         _moved = true;
         _task = NULL;
 
-        if( _job_chain_node && _in_job_queue )  _job_chain_node->_job->order_queue()->remove_order( this );
+        if( _job_chain_node && _in_job_queue )  _job_chain_node->_job->order_queue()->remove_order( this ), _job_chain_node = NULL;
 
         set_state2( node? node->_state : Order::State() );
         _job_chain_node = node;
@@ -848,9 +954,10 @@ void Order::postprocessing( bool success, Prefix_log* log )
                 }
                 else 
                 {
+                    _end_time = Time::now();
                     if( log )  log->debug( "Auftrag " + obj_name() + ": Kein weiterer Job, Auftrag ist fertig" );
-                    close();
                 }
+
             }
             else
             {
@@ -858,6 +965,8 @@ void Order::postprocessing( bool success, Prefix_log* log )
                 _order_queue = NULL;
             }
         }
+
+        postprocessing2();
 
         _moved = false;
     }
@@ -872,8 +981,17 @@ void Order::processing_error()
         _task = NULL;
         _moved = false;
 
-        close();
+        postprocessing2();
     }
+}
+
+//---------------------------------------------------------------------------Order::postprocessing2
+
+void Order::postprocessing2()
+{
+    if( finished() )  _log.close();
+    if( _job_chain )  _spooler->_db->update_order( this );
+    if( finished() )  close();
 }
 
 //-------------------------------------------------------------------------------------------------

@@ -1,4 +1,4 @@
-// $Id: spooler_log.cxx,v 1.64 2003/06/23 15:15:14 jz Exp $
+// $Id: spooler_log.cxx,v 1.65 2003/06/24 15:46:29 jz Exp $
 
 #include "spooler.h"
 #include "spooler_mail.h"
@@ -256,8 +256,8 @@ void Prefix_log::set_profile_section( const string& section )
         _mail_on_process = read_profile_mail_on_process( _spooler->_factory_ini, _section, "mail_on_process"   , _mail_on_process );
         _mail_on_success =         read_profile_bool   ( _spooler->_factory_ini, _section, "mail_on_success"   , _mail_on_success );
         _subject         =         read_profile_string ( _spooler->_factory_ini, _section, "log_mail_subject"  , _subject );
-        _collect_within  = (double)read_profile_uint   ( _spooler->_factory_ini, _section, "log_collect_within", _collect_within );
-        _collect_max     = (double)read_profile_uint   ( _spooler->_factory_ini, _section, "log_collect_max"   , _collect_max );
+        _collect_within  = (double)read_profile_uint   ( _spooler->_factory_ini, _section, "log_collect_within", (uint)_collect_within );
+        _collect_max     = (double)read_profile_uint   ( _spooler->_factory_ini, _section, "log_collect_max"   , (uint)_collect_max );
 
         _smtp_server = read_profile_string( _spooler->_factory_ini, _section, "smtp"          , _spooler->_smtp_server );
         _queue_dir   = read_profile_string( _spooler->_factory_ini, _section, "mail_queue_dir", _spooler->_mail_queue_dir );

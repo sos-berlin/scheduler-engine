@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.155 2003/06/19 06:22:19 jz Exp $
+// $Id: spooler_task.cxx,v 1.156 2003/06/24 15:46:29 jz Exp $
 /*
     Hier sind implementiert
 
@@ -519,7 +519,7 @@ Sos_ptr<Task> Job::create_task( const ptr<spooler_com::Ivariable_set>& params, c
 
     Time now = Time::now();
     task->_enqueue_time = now;
-    task->_id           = _spooler->_db->get_id();
+    task->_id           = _spooler->_db->get_task_id();
 
     _default_params->Clone( (spooler_com::Ivariable_set**)task->_params.pp() );
     if( params )   task->_params->merge( params );
@@ -1844,6 +1844,8 @@ bool Task::step()
         {
             _order = _job->_order_queue->get_order_for_processing( this );
             if( !_order )  return true;
+
+            _job->_log.set_order_log( &_order->_log );
         }
 
         result = do_step();
@@ -1862,6 +1864,7 @@ bool Task::step()
         if( _order )
         {
             _order->postprocessing( result, &_job->_log );
+            _job->_log.set_order_log( NULL );
             _order = NULL;
             result = true;
         }
@@ -1872,6 +1875,7 @@ bool Task::step()
     if( _order )  // Nach Fehler
     {
         _order->processing_error();
+        _job->_log.set_order_log( NULL );
         _order = NULL;
     }
 
