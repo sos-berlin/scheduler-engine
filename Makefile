@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.28 2004/07/20 11:26:46 jz Exp $
+# $Id: Makefile,v 1.29 2004/08/31 14:58:02 jz Exp $
 
 ifndef PROD_DIR
 prod_dir = ..
@@ -15,6 +15,7 @@ objects = \
  spooler_command.o\
  spooler_communication.o\
  spooler_config.o\
+ spooler_dtd.o\
  spooler_history.o\
  spooler_http.o\
  spooler_job.o\
