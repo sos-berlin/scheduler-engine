@@ -1,4 +1,4 @@
-// $Id: spooler_history.cxx,v 1.44 2003/05/12 09:55:06 jz Exp $
+// $Id: spooler_history.cxx,v 1.45 2003/05/12 15:02:08 jz Exp $
 
 #include "spooler.h"
 #include "../zschimmer/z_com.h"
@@ -321,11 +321,9 @@ int Spooler_db::get_id()
                     {
                         _spooler->log().warn( x.what() );
 
-                        if( _spooler->_need_db )
-                        {
-                            sos_sleep( 30 );
-                            continue;
-                        }
+                        if( !_spooler->_need_db )  break;
+
+                        sos_sleep( 30 );
                     }
                 }
 
