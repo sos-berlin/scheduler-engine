@@ -1,4 +1,4 @@
-// $Id: spooler_order.cxx,v 1.47 2003/11/10 16:07:31 jz Exp $
+// $Id: spooler_order.cxx,v 1.48 2003/11/10 17:10:43 jz Exp $
 /*
     Hier sind implementiert
 
@@ -706,10 +706,10 @@ Order::Order( Spooler* spooler, const Record& record )
 
     string payload_string = record.as_string( "payload" );
 
-    LOG( "db payload=" << payload_string << "\n" );
+    //LOG( "db payload=" << payload_string << "\n" );
     if( payload_string.find( "<" + Com_variable_set::xml_element_name() ) != string::npos )
     {
-        LOG( "... payload ist ein Variable_set!\n" );
+        //LOG( "... payload ist ein Variable_set!\n" );
         ptr<Com_variable_set> v = new Com_variable_set;
         v->put_xml( Bstr( payload_string ) );
         _payload = v;

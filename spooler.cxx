@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.286 2003/11/03 18:26:01 jz Exp $
+// $Id: spooler.cxx,v 1.287 2003/11/10 17:10:42 jz Exp $
 /*
     Hier sind implementiert
 
@@ -1628,9 +1628,12 @@ void Spooler::run()
             Time earliest = Time::now() + 0.1;
             if( _next_time < earliest ) 
             {
-                static bool logged = false;
-                if( !logged )  Z_DEBUG_ONLY( LOG( "spooler.cxx: async_next_gmtime() von " << _next_time << " nach " << earliest << " korrigiert\n" ) );
-                logged = true;
+#               ifdef Z_DEBUG
+                    static bool logged = false;
+                    if( !logged )  LOG( "spooler.cxx: async_next_gmtime() von " << _next_time << " nach " << earliest << " korrigiert\n" ); 
+                    logged = true;
+#               endif
+
                 _next_time = earliest;
             }
 
