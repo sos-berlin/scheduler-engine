@@ -1,4 +1,4 @@
-// $Id: spooler_com.h,v 1.93 2004/02/29 00:20:15 jz Exp $
+// $Id: spooler_com.h,v 1.94 2004/03/02 16:12:45 jz Exp $
 
 #ifndef __SPOOLER_COM_H
 #define __SPOOLER_COM_H
@@ -272,7 +272,7 @@ struct Com_log : spooler_com::Ilog,
 
 //------------------------------------------------------------------------------------Com_log_proxy
 
-Z_DEFINE_GUID( CLSID_Com_log_proxy, 0x9c7468ed, 0xccf8, 0x4f4d, 0x88, 0x31, 0x16, 0x4d, 0xdc, 0x81, 0xb9, 0x82 );   // {9C7468ED-CCF8-4f4d-8831-164DDC81B982}
+Z_DEFINE_GUID( CLSID_Com_log_proxy, 0xfeee47a6, 0x6c1b, 0x11d8, 0x81, 0x03, 0x00, 0x04, 0x76, 0xee, 0x8a, 0xfb );   // {feee47a6-6c1b-11d8-8103-000476ee8afb}
 
 
 struct Com_log_proxy: object_server::Proxy 

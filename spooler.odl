@@ -1,9 +1,9 @@
-// $Id: spooler.odl,v 1.73 2004/02/15 15:53:37 jz Exp $
+// $Id: spooler.odl,v 1.74 2004/03/02 16:12:45 jz Exp $
 
 // Anweisung: midl /nologo /error all /out $(OutDir) $(InputPath)
 
 [
-    uuid        ( ED57B226-CD4F-490a-B47E-E7D44A895273 ),
+    uuid        ( feee4780-6c1b-11d8-8103-000476ee8afb ),
     helpstring  ( "SOS GmbH Berlin, www.sos-berlin.com" ),
     lcid        ( 0x0000 ),
     version     ( 1.0 )
@@ -44,23 +44,10 @@ library spooler
       //log_fatal  =  3
     };
 
-    //--------------------------------------------------------------------------Has_java_class_name
-    /*
-    [
-        uuid       ( 748E665E-6252-418e-887A-55B11FD82870 ),
-        odl,
-        dual
-    ]
-    interface Ihas_java_class_name : IUnknown
-    {
-        [id(0),propget]
-        HRESULT                 java_class_name             ( [out,retval] BSTR* result );
-    }
-    */
     //----------------------------------------------------------------------------------------Error
 
     [
-        uuid       ( 5BF4BD80-A437-46df-86AB-05E5E9E1C4E2 ),
+        uuid       ( feee4781-6c1b-11d8-8103-000476ee8afb ),
         odl,
         dual
     ]
@@ -81,7 +68,7 @@ library spooler
     }
 
     [
-        uuid       ( 5B4463E8-4DAE-4198-91C2-160411369DF1 )
+        uuid       ( feee4782-6c1b-11d8-8103-000476ee8afb )
     ]
     coclass Error
     {
@@ -92,7 +79,7 @@ library spooler
     //------------------------------------------------------------------------------------Ivariable
 
     [
-        uuid       ( 2B9F8928-6722-40a3-B6EC-2455F0A253F7 ),
+        uuid       ( feee4783-6c1b-11d8-8103-000476ee8afb ),
         odl,
         dual
     ]
@@ -117,7 +104,7 @@ library spooler
     }
 
     [
-        uuid       ( E5F145CE-7AB6-4204-9306-FECD4BF7A619 )
+        uuid       ( feee4784-6c1b-11d8-8103-000476ee8afb )
     ]
     coclass Variable
     {
@@ -128,7 +115,7 @@ library spooler
     //---------------------------------------------------------------------------------Variable_set
 
     [
-        uuid       ( 5F028EDD-2195-4bcc-B63F-FC88B73A4712 ),
+        uuid       ( feee4785-6c1b-11d8-8103-000476ee8afb ),
         odl,
         dual
     ]
@@ -173,7 +160,7 @@ library spooler
     }
 
     [
-        uuid       ( 818150DA-CD01-4db3-972B-433A9D6237F3 )
+        uuid       ( feee4786-6c1b-11d8-8103-000476ee8afb )
     ]
     coclass Variable_set
     {
@@ -184,7 +171,7 @@ library spooler
     //----------------------------------------------------------------------Variable_set_enumerator
 
     [
-        uuid       ( 4FA28F03-7970-43cf-BAFF-5F2F0AF8B1B6 ),
+        uuid       ( feee4787-6c1b-11d8-8103-000476ee8afb ),
         odl,
         dual
     ]
@@ -197,7 +184,7 @@ library spooler
     }
 
     [
-        uuid       ( EFAC6F36-563F-42a7-86D7-170A1A18D1D5 )
+        uuid       ( feee4788-6c1b-11d8-8103-000476ee8afb )
     ]
     coclass Variable_set_enumerator
     {
@@ -207,7 +194,7 @@ library spooler
     //-----------------------------------------------------------------------------------Object_set
 
     [
-        uuid       ( FB6288E5-3391-4c9d-A10E-04E1CC162900 ),
+        uuid       ( feee4789-6c1b-11d8-8103-000476ee8afb ),
         odl,
         dual
     ]
@@ -221,7 +208,7 @@ library spooler
     }
 
     [
-        uuid       ( 9A38442F-9816-49b9-AB67-6B352CF84F66 )
+        uuid       ( feee47a5-6c1b-11d8-8103-000476ee8afb )
     ]
     coclass Object_set
     {
@@ -231,7 +218,7 @@ library spooler
     //------------------------------------------------------------------------------------------Job
 
     [
-        uuid       ( 4DF2E8E8-52DA-454f-8ADE-3B5D4FE7F73B ),
+        uuid       ( feee478a-6c1b-11d8-8103-000476ee8afb ),
         odl,
         dual
     ]
@@ -287,7 +274,7 @@ library spooler
     }
 
     [
-        uuid       ( 15ECAE84-4142-43e6-A38C-C90A299097B4 )
+        uuid       ( feee478b-6c1b-11d8-8103-000476ee8afb )
     ]
     coclass Job
     {
@@ -298,7 +285,7 @@ library spooler
     //-----------------------------------------------------------------------------------------Task
 
     [
-        uuid       ( 65E311F1-04BF-4e34-A847-BBF0B0AC6DC6 ),
+        uuid       ( feee478c-6c1b-11d8-8103-000476ee8afb ),
         odl,
         dual
     ]
@@ -356,7 +343,7 @@ library spooler
     }
 
     [
-        uuid       ( 00BB25C8-812A-4200-A6F9-1AE8E2650474 )
+        uuid       ( feee478d-6c1b-11d8-8103-000476ee8afb )
     ]
     coclass Task
     {
@@ -367,7 +354,7 @@ library spooler
     //---------------------------------------------------------------------------------------Thread
 /*
     [
-        uuid       ( 0FA3AC14-01EC-4c8f-81D9-7CABF8A76B43 ),
+        uuid       ( feee478e-6c1b-11d8-8103-000476ee8afb ),
         odl,
         dual
     ]
@@ -394,7 +381,7 @@ library spooler
     }
 
     [
-        uuid       ( 4E70F30E-D446-42b1-B4F0-7A53113D87C7 )
+        uuid       ( feee478f-6c1b-11d8-8103-000476ee8afb )
     ]
     coclass Thread
     {
@@ -405,7 +392,7 @@ library spooler
     //--------------------------------------------------------------------------------------Spooler
 
     [
-        uuid       ( 3D8FF20C-5CFD-4b70-9A2D-B51AB3DCB98D ),
+        uuid       ( feee4790-6c1b-11d8-8103-000476ee8afb ),
         odl,
         dual
     ]
@@ -481,7 +468,7 @@ library spooler
     }
 
     [
-        uuid       ( 87605BDB-42C7-43e7-B311-D568F86D78B5 )
+        uuid       ( feee4791-6c1b-11d8-8103-000476ee8afb )
     ]
     coclass Spooler
     {
@@ -492,7 +479,7 @@ library spooler
     //------------------------------------------------------------------------------Spooler_context
 
     [
-        uuid       ( 51905432-B068-4124-B972-260EED6CAD16 ),
+        uuid       ( feee4792-6c1b-11d8-8103-000476ee8afb ),
         odl,
         dual
     ]
@@ -515,7 +502,7 @@ library spooler
     }
 
     [
-        uuid       ( 47399CB4-B7A4-40f9-A9AE-7AE4CBAE90F5 )
+        uuid       ( feee4793-6c1b-11d8-8103-000476ee8afb )
     ]
     coclass Spooler_context
     {
@@ -525,7 +512,7 @@ library spooler
     //-----------------------------------------------------------------------------------------Mail
 
     [
-        uuid       ( 736AD9FC-350B-4ee0-BF82-B5CB2CFA0E3B ),
+        uuid       ( feee4794-6c1b-11d8-8103-000476ee8afb ),
         odl,
         dual
     ]
@@ -603,7 +590,7 @@ library spooler
     }
 
     [
-        uuid       ( D5F4C5B5-4CF7-4ca7-84C0-E1696DA56D1D )
+        uuid       ( feee4795-6c1b-11d8-8103-000476ee8afb )
     ]
     coclass Mail
     {
@@ -614,7 +601,7 @@ library spooler
     //--------------------------------------------------------------------------------Job_chain_node
 
     [
-        uuid       ( 5CC81C2F-F015-4591-B973-B8B4969809C4 ),
+        uuid       ( feee4796-6c1b-11d8-8103-000476ee8afb ),
         odl,
         dual
     ]
@@ -644,7 +631,7 @@ library spooler
     }
 
     [
-        uuid       ( F22B96E3-475A-456e-9CAE-8CB98810B8DB )
+        uuid       ( feee4797-6c1b-11d8-8103-000476ee8afb )
     ]
     coclass Job_chain_node
     {
@@ -655,7 +642,7 @@ library spooler
     //-------------------------------------------------------------------------------------Job_chain
 
     [
-        uuid       ( E76C561D-FFD7-4680-AC4F-9CE1B8EEE4FE ),
+        uuid       ( feee4798-6c1b-11d8-8103-000476ee8afb ),
         odl,
         dual
     ]
@@ -691,7 +678,7 @@ library spooler
     }
 
     [
-        uuid       ( 70EC6128-F7FF-44e6-B352-56CF123F7827 )
+        uuid       ( feee4799-6c1b-11d8-8103-000476ee8afb )
     ]
     coclass Job_chain
     {
@@ -702,7 +689,7 @@ library spooler
     //----------------------------------------------------------------------------------Order_queue
 
     [
-        uuid       ( 497E0166-26FF-4ea6-B846-34F4BB97021D ),
+        uuid       ( feee479a-6c1b-11d8-8103-000476ee8afb ),
         odl,
         dual
     ]
@@ -719,7 +706,7 @@ library spooler
     }
 
     [
-        uuid       ( 65426DA4-5907-4630-85F1-2201B07253BB )
+        uuid       ( feee479b-6c1b-11d8-8103-000476ee8afb )
     ]
     coclass Order_queue
     {
@@ -730,7 +717,7 @@ library spooler
     //----------------------------------------------------------------------------------------Order
 
     [
-        uuid       ( A1B7B832-519C-495b-A1D9-83AAA0165C6D ),
+        uuid       ( feee479c-6c1b-11d8-8103-000476ee8afb ),
         odl,
         dual
     ]
@@ -803,7 +790,7 @@ library spooler
     }
 
     [
-        uuid       ( 8D3FAB02-6DD5-4831-916C-465E15E08F35 )
+        uuid       ( feee479d-6c1b-11d8-8103-000476ee8afb )
     ]
     coclass Order
     {
@@ -814,7 +801,7 @@ library spooler
     //------------------------------------------------------------------------------------------Log
 
     [
-        uuid       ( 3B6C8A62-B511-445d-A2A2-E852BC2E05A0 ),
+        uuid       ( feee479e-6c1b-11d8-8103-000476ee8afb ),
         odl,
         dual
     ]
@@ -903,7 +890,7 @@ library spooler
     }
 
     [
-        uuid       ( 032974D7-8668-41c4-A204-3E893E06846F )
+        uuid       ( feee479f-6c1b-11d8-8103-000476ee8afb )
     ]
     coclass Log
     {
@@ -914,7 +901,7 @@ library spooler
     //------------------------------------------------------------------------------------------Log
 /*
     [
-        uuid       ( 3B6C8A62-B511-445d-A2A2-E852BC2E05A0 ),
+        uuid       ( feee47a0-6c1b-11d8-8103-000476ee8afb ),
         odl,
         dual
     ]
@@ -956,7 +943,7 @@ library spooler
     }
 
     [
-        uuid       ( 032974D7-8668-41c4-A204-3E893E06846F )
+        uuid       ( feee47a1-6c1b-11d8-8103-000476ee8afb )
     ]
     coclass Log
     {
@@ -967,7 +954,7 @@ library spooler
     //----------------------------------------------------------------Remote_module_instance_server
 
     [
-        uuid       ( 3E6BF40F-E23A-457b-BF28-797B3451AED3 ),
+        uuid       ( feee47a2-6c1b-11d8-8103-000476ee8afb ),
         odl,
         dual
     ]
@@ -983,7 +970,7 @@ library spooler
     };
 
     [
-        uuid       ( 0628C299-0AA2-4546-BBE7-38EBC2952834 )
+        uuid       ( feee47a3-6c1b-11d8-8103-000476ee8afb )
     ]
     coclass Remote_module_instance_server
     {
@@ -991,3 +978,35 @@ library spooler
     }
 
 };
+
+//-------------------------------------------------------------------------------------------------
+/*
+Ein paar freie GUIDs:
+
+
+feee47a7-6c1b-11d8-8103-000476ee8afb
+feee47a8-6c1b-11d8-8103-000476ee8afb
+feee47a9-6c1b-11d8-8103-000476ee8afb
+feee47aa-6c1b-11d8-8103-000476ee8afb
+feee47ab-6c1b-11d8-8103-000476ee8afb
+feee47ac-6c1b-11d8-8103-000476ee8afb
+feee47ad-6c1b-11d8-8103-000476ee8afb
+feee47ae-6c1b-11d8-8103-000476ee8afb
+feee47af-6c1b-11d8-8103-000476ee8afb
+feee47b0-6c1b-11d8-8103-000476ee8afb
+feee47b1-6c1b-11d8-8103-000476ee8afb
+feee47b2-6c1b-11d8-8103-000476ee8afb
+feee47b3-6c1b-11d8-8103-000476ee8afb
+feee47b4-6c1b-11d8-8103-000476ee8afb
+feee47b5-6c1b-11d8-8103-000476ee8afb
+feee47b6-6c1b-11d8-8103-000476ee8afb
+feee47b7-6c1b-11d8-8103-000476ee8afb
+feee47b8-6c1b-11d8-8103-000476ee8afb
+feee47b9-6c1b-11d8-8103-000476ee8afb
+feee47ba-6c1b-11d8-8103-000476ee8afb
+feee47bb-6c1b-11d8-8103-000476ee8afb
+feee47bc-6c1b-11d8-8103-000476ee8afb
+feee47bd-6c1b-11d8-8103-000476ee8afb
+feee47be-6c1b-11d8-8103-000476ee8afb
+feee47bf-6c1b-11d8-8103-000476ee8afb
+*/

@@ -630,7 +630,7 @@ cd &quot;$(OutDir)&quot; &amp;&amp; jar cfm &quot;$(TargetDir)sos.spooler.jar&qu
 					Name="Debug|Win32">
 					<Tool
 						Name="VCResourceCompilerTool"
-						PreprocessorDefinitions=""
+						PreprocessorDefinitions="/D_DEBUG"
 						AdditionalIncludeDirectories="$(OUTDIR)"/>
 				</FileConfiguration>
 			</File>
