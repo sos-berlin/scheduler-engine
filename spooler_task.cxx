@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.75 2002/04/05 13:21:17 jz Exp $
+// $Id: spooler_task.cxx,v 1.76 2002/04/05 22:14:39 jz Exp $
 /*
     Hier sind implementiert
 
@@ -718,8 +718,12 @@ void Job::end()
     
     if( _state == s_starting
      || _state == s_running  
-     || _state == s_running_process )  if( _task )  _task->end();
-    
+     || _state == s_running_process )  
+    {
+        if( _task )  _task->end();
+        _history.end();
+    }
+
     close_task();
 
     if( _state != s_stopped )  set_state( s_ended );
@@ -759,8 +763,6 @@ void Job::finish()
 
     try
     {
-        _history.end();
-
         //if( _log.mail_on_success() && !has_error()  
         //||  _log.mail_on_error()   &&  has_error() )  _log.send();
 
@@ -1620,6 +1622,15 @@ xml::Document_ptr Task::parameters_as_dom()
     xml::Document_ptr result;
     _params->get_dom( &result );
     return result;
+}
+
+//--------------------------------------------------------------------------Task::set_history_field
+
+void Task::set_history_field( const string& name, const CComVariant& value )
+{
+    if( !_job->its_current_task(this) )  throw_xc( "SPOOLER-138" );
+
+    _job->_history.set_extra_field( name, value );
 }
 
 //-----------------------------------------------------------------------Script_task::do_on_success

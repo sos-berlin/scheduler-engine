@@ -1,4 +1,4 @@
-// $Id: spooler_com.h,v 1.28 2002/04/05 13:21:17 jz Exp $
+// $Id: spooler_com.h,v 1.29 2002/04/05 22:14:38 jz Exp $
 
 #ifndef __SPOOLER_COM_H
 #define __SPOOLER_COM_H
@@ -231,6 +231,7 @@ struct Com_task : spooler_com::Itask, Sos_ole_object
     STDMETHODIMP                put_result                  ( VARIANT* value );
     STDMETHODIMP                get_result                  ( VARIANT* value );
     STDMETHODIMP                put_repeat                  ( double seconds );
+    STDMETHODIMP                put_history_field           ( BSTR name, VARIANT* value );
 
   private:
     Sos_ptr<Task>              _task;

@@ -1,4 +1,4 @@
-// $Id: spooler.odl,v 1.29 2002/04/05 13:21:16 jz Exp $
+// $Id: spooler.odl,v 1.30 2002/04/05 22:14:38 jz Exp $
 
 // Anweisung: midl /nologo /error all /out $(OutDir) $(InputPath)
 
@@ -191,6 +191,9 @@ library spooler
       //HRESULT                 thread                      ( [out,retval] Ithread** result );
 
         HRESULT                 end                         ();
+
+        [propput]
+        HRESULT                 history_field               ( [in] BSTR name, [in] VARIANT* value );
     }
 
     [

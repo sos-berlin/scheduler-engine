@@ -1,4 +1,4 @@
-// $Id: spooler_command.cxx,v 1.43 2002/04/05 13:21:17 jz Exp $
+// $Id: spooler_command.cxx,v 1.44 2002/04/05 22:14:38 jz Exp $
 /*
     Hier ist implementiert
 
@@ -128,35 +128,14 @@ xml::Element_ptr Command_processor::execute_show_history( const xml::Element_ptr
     if( _security_level < Security::seclev_info )  throw_xc( "SPOOLER-121" );
 
     string job_name = as_string( element->getAttribute( "job" ) );
-    int    tail     = as_int( as_string(element->getAttribute( "tail" ) ), 10 );
+    int    tail     = as_int( as_string( element->getAttribute( "tail" ) ), 10 );
+
+    string what = as_string( element->getAttribute( "what" ) );
+    bool show_all = what == "all";
 
     Sos_ptr<Job> job = _spooler->get_job( job_name );
 
-    xml::Element_ptr history_element = _answer->createElement( "history" );
-    dom_append_nl( history_element );
-
-    Any_file result = job->read_history( tail );
-    if( !result.opened() )  throw_xc( "SPOOLER-136" );
-
-    const Record_type* type = result.spec().field_type_ptr();
-    Dynamic_area rec ( type->field_size() );
-    
-    while( !result.eof() )
-    {
-        result.get( &rec );
-    
-        xml::Element_ptr history_entry = _answer->createElement( "history.entry" );
-        
-        for( int i = 0; i < type->field_count() - 1; i++ )
-        {
-            history_entry->setAttribute( as_dom_string( type->field_descr_ptr(i)->name() ), as_dom_string( type->as_string( i, rec.byte_ptr() ) ) );
-        }
-
-        history_element->appendChild( history_entry );
-        dom_append_nl( history_element );
-    }
-
-    return history_element;
+    return job->read_history( _answer, tail, show_all );
 }
 
 //--------------------------------------------------------Command_processor::execute_modify_spooler
@@ -336,8 +315,8 @@ string xml_as_string( const xml::Document_ptr& document )
         result = file_as_string( tmp_filename );
         unlink( tmp_filename );
     }
-    catch( const Xc&         ) { unlink( tmp_filename ); result = "<spooler/>"; }
-    catch( const _com_error& ) { unlink( tmp_filename ); result = "<spooler/>"; }
+    catch( const Xc&         ) { unlink( tmp_filename ); result = "<?xml version=\"1.0\"?><ERROR/>"; }
+    catch( const _com_error& ) { unlink( tmp_filename ); result = "<?xml version=\"1.0\"?><ERROR/>"; }
 
     return result;
 }

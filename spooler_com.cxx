@@ -1,4 +1,4 @@
-// $Id: spooler_com.cxx,v 1.33 2002/04/05 13:21:17 jz Exp $
+// $Id: spooler_com.cxx,v 1.34 2002/04/05 22:14:38 jz Exp $
 /*
     Hier sind implementiert
 
@@ -164,7 +164,7 @@ STDMETHODIMP Com_variable_set::get_dom( xml::IXMLDOMDocument** result )
         *result = NULL;
 
         xml::Document_ptr doc = xml::Document_ptr( __uuidof(xml::DOMDocument30), NULL );
-        doc->appendChild( doc->createProcessingInstruction( "xml", "version=\"1.0\"" ) );
+        doc->appendChild( doc->createProcessingInstruction( "xml", "version=\"1.0\" encoding=\"iso-8859-1\"" ) );
         
         xml::Element_ptr varset = doc->createElement( "variable_set" );
         doc->appendChild( varset );
@@ -958,6 +958,7 @@ STDMETHODIMP Com_task::put_result( VARIANT* value )
         {
             if( !_task )  throw_xc( "SPOOLER-122" );
             if( GetCurrentThreadId() != _task->_job->thread()->_thread_id )  return E_ACCESSDENIED;
+            if( !_task->_job->its_current_task(_task) )  throw_xc( "SPOOLER-138" );
 
             THREAD_LOCK( _task->_job->_lock )  hr = _task->_result.Copy( value );
         }
@@ -1002,12 +1003,36 @@ STDMETHODIMP Com_task::put_repeat( double seconds )
         {
             if( !_task )  throw_xc( "SPOOLER-122" );
             if( GetCurrentThreadId() != _task->_job->thread()->_thread_id )  return E_ACCESSDENIED;
+            if( !_task->_job->its_current_task(_task) )  throw_xc( "SPOOLER-138" );
 
             _task->_job->set_repeat( seconds );
         }
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Task.repeat" ); }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Task.repeat" ); }
+
+    return hr;
+}
+
+//----------------------------------------------------------------------Com_task::put_history_field
+
+STDMETHODIMP Com_task::put_history_field( BSTR name, VARIANT* value )
+{
+    HRESULT hr = NOERROR;
+
+    try
+    {
+        THREAD_LOCK( _lock )
+        {
+            if( !_task )  throw_xc( "SPOOLER-122" );
+            if( GetCurrentThreadId() != _task->_job->thread()->_thread_id )  return E_ACCESSDENIED;
+            if( !_task->_job->its_current_task(_task) )  throw_xc( "SPOOLER-138" );
+
+            _task->set_history_field( bstr_as_string(name), *value );
+        }
+    }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Task.history_field" ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Task.history_field" ); }
 
     return hr;
 }

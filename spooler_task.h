@@ -1,4 +1,4 @@
-// $Id: spooler_task.h,v 1.42 2002/04/05 13:21:17 jz Exp $
+// $Id: spooler_task.h,v 1.43 2002/04/05 22:14:39 jz Exp $
 
 #ifndef __SPOOLER_TASK_H
 #define __SPOOLER_TASK_H
@@ -196,7 +196,7 @@ struct Job : Sos_self_deleting
     void                        set_in_call                 ( const string& name );
     void                        set_delay_after_error       ( int error_steps, Time delay ) { _delay_after_error[error_steps] = delay; }
 
-    Any_file                    read_history                ( int n )                   { return _history.read_last(n); }
+    xml::Element_ptr            read_history                ( xml::Document_ptr doc, int n, bool with_log ) { return _history.read_tail( doc, n, with_log ); }
 
     void                        close                       ();
     void                        close_engine                ();
@@ -209,6 +209,7 @@ struct Job : Sos_self_deleting
     void                        interrupt_script            ();
     void                        select_period               ( Time = Time::now() );
     bool                        is_in_period                ( Time = Time::now() );
+    bool                        its_current_task            ( Task* task )              { return task == _task; }
 
     Sos_ptr<Task>               create_task                 ( const CComPtr<spooler_com::Ivariable_set>& params, const string& task_name, Time = latter_day );
     bool                        dequeue_task                ( Time now = Time::now() );
@@ -352,6 +353,7 @@ struct Task : Sos_self_deleting
     void                        on_error_on_success         ();
 
     void                        set_cause                   ( Start_cause );
+    void                        set_history_field           ( const string& name, const CComVariant& value );
     bool                        has_parameters              ();
     xml::Document_ptr           parameters_as_dom           ();
 

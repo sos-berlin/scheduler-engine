@@ -1,4 +1,4 @@
-// $Id: spooler_history.h,v 1.2 2002/04/05 16:47:34 jz Exp $
+// $Id: spooler_history.h,v 1.3 2002/04/05 22:14:39 jz Exp $
 
 #ifndef __SPOOLER_HISTORY_H
 #define __SPOOLER_HISTORY_H
@@ -67,30 +67,35 @@ struct Job_history
 
     void                        open                    ();
     void                        close                   ();
-
     void                        start                   ();
     void                        end                     ();
+    void                        set_extra_field         ( const string& name, const CComVariant& value );
+
+    xml::Element_ptr            read_tail               ( xml::Document_ptr, int, bool with_log );
+
+  private:
     void                        append_tabbed           ( int i )                                   { append_tabbed( as_string(i) ); }
     void                        append_tabbed           ( string );
     void                        write                   ( bool start );
-
-    Any_file                    read_last               ( int );
 
 
     Fill_zero                  _zero_;
     Spooler*                   _spooler;
     Job*                       _job;
-    string                     _filename;
-    bool                       _with_log;
     int                        _on_process;
     bool                       _use_db;
     bool                       _use_file;
+    bool                       _error;
+    bool                       _start_called;
+
+    string                     _filename;
+    string                     _columns;
+    bool                       _with_log;
     zschimmer::File            _file;
     int64                      _record_pos;             // Position des Satzes, der zu Beginn des Jobs geschrieben und am Ende überschrieben oder gelöscht wird.
     string                     _tabbed_record;
-    vector<string>             _extra_columns_names;
-    map<string,string>         _extra_fields;
-    bool                       _error;
+    vector<string>             _extra_names;
+    vector<CComVariant>        _extra_values;
 };
 
 //-------------------------------------------------------------------------------------------------
