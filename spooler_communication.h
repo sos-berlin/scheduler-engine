@@ -1,4 +1,4 @@
-// $Id: spooler_communication.h,v 1.9 2002/12/04 19:48:08 jz Exp $
+// $Id: spooler_communication.h,v 1.10 2003/02/12 18:31:12 jz Exp $
 
 #ifndef __SPOOLER_COMMUNICATION_H
 #define __SPOOLER_COMMUNICATION_H
@@ -6,7 +6,11 @@
 #ifdef __GNUC__
 #   include <errno.h>
 #   include <sys/socket.h>
-#   include <sys/select.h>
+
+#   ifndef SYSTEM_HPUX
+#       include <sys/select.h>
+#   endif
+
 #   include <netdb.h>
 #   include <netinet/in.h>   // gethostbyname()
 #   include <arpa/inet.h>    // inet_addr()

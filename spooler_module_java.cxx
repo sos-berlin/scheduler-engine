@@ -1,4 +1,4 @@
-// $Id: spooler_module_java.cxx,v 1.32 2002/12/18 10:04:14 jz Exp $
+// $Id: spooler_module_java.cxx,v 1.33 2003/02/12 18:31:12 jz Exp $
 /*
     Hier sind implementiert
 
@@ -23,6 +23,10 @@
 #else
 #   include <utime.h>
 #   include <dlfcn.h>
+#endif
+
+#ifdef Z_HPUX
+#   include <dl.h>
 #endif
 
 #ifndef JNI_VERSION_1_2
@@ -531,12 +535,6 @@ void Java_vm::init()
 
     int ret;
 
-  //typedef int JNICALL JNI_GetDefaultJavaVMInitArgs_func( JavaVMInitArgs* );
-    typedef int JNICALL JNI_CreateJavaVM_func            ( JavaVM**, JNIEnv**, JavaVMInitArgs* );
-
-  //JNI_GetDefaultJavaVMInitArgs_func*   JNI_GetDefaultJavaVMInitArgs;
-    JNI_CreateJavaVM_func*               JNI_CreateJavaVM;
-
 
     _work_class_dir = _spooler->temp_dir() + Z_DIR_SEPARATOR "java";
     make_path( _work_class_dir );       // Java-VM prüft Vorhandensein der Verzeichnisse in classpath schon beim Start
@@ -546,40 +544,62 @@ void Java_vm::init()
     string module_filename = _filename;
 
 
-#   ifdef SYSTEM_WIN
-    {    
-        // Der Name des VM-Moduls steht vielleicht in der Registrierung unter
-        // HKEY_LOCAL_MACHINE\SOFTWARE\JavaSoft\Java Runtime Environment\1.4:RuntimeLib
-        // HKEY_LOCAL_MACHINE\Software\JavaSoft\Java Runtime Environment:CurrentVersion liefert z.B. "1.4"
+#   ifdef SYSTEM_HPUXxx
 
-        // Microsoft's VM-Modul scheint hier eingetragen zu sein: (ist c:\winnt\system32\msjava.dll).
-        // HKEY_LOCAL_MACHINE\SOFTWARE\Clients\JavaVM\MSJavaVM\InstallInfo:VerifyFile
+        // statisch einbinden, weil dlopen() den Thread Local Storage der libjvm.so nicht laden kann.
 
-        LOG( "LoadLibrary " << _filename << '\n' );
-        HINSTANCE vm_module = LoadLibrary( _filename.c_str() );
-        if( !vm_module )  throw_mswin_error( "LoadLibrary", "Java Virtual Machine " + _filename );
+#   else     
+      //typedef int JNICALL JNI_GetDefaultJavaVMInitArgs_func( JavaVMInitArgs* );
+        typedef int JNICALL JNI_CreateJavaVM_func            ( JavaVM**, JNIEnv**, JavaVMInitArgs* );
 
-        module_filename = filename_of_hinstance( vm_module );
-        LOG( "HINSTANCE=" << (void*)vm_module << "  " << module_filename << "  " << file_version_info( module_filename ) << '\n' );
+      //JNI_GetDefaultJavaVMInitArgs_func*   JNI_GetDefaultJavaVMInitArgs;
+        JNI_CreateJavaVM_func*               JNI_CreateJavaVM;
 
-      //JNI_GetDefaultJavaVMInitArgs = (JNI_GetDefaultJavaVMInitArgs_func*)GetProcAddress( vm_module, "JNI_GetDefaultJavaVMInitArgs" );
-      //if( !JNI_GetDefaultJavaVMInitArgs )  throw_mswin_error( "GetProcAddress", "JNI_GetDefaultJavaVMInitArgs" );
+#       ifdef SYSTEM_WIN
+        {    
+            // Der Name des VM-Moduls steht vielleicht in der Registrierung unter
+            // HKEY_LOCAL_MACHINE\SOFTWARE\JavaSoft\Java Runtime Environment\1.4:RuntimeLib
+            // HKEY_LOCAL_MACHINE\Software\JavaSoft\Java Runtime Environment:CurrentVersion liefert z.B. "1.4"
 
-        JNI_CreateJavaVM = (JNI_CreateJavaVM_func*)GetProcAddress( vm_module, "JNI_CreateJavaVM" );
-        if( !JNI_CreateJavaVM )  throw_mswin_error( "GetProcAddress", "JNI_CreateJavaVM" );
-    }
-#   else
-    {
-        LOG( "dlopen " << _filename << '\n' );
-        void *vm_module = dlopen( _filename.c_str(), RTLD_LAZY );
-        if( !vm_module )  throw_xc( "SPOOLER-171", dlerror(), _filename.c_str() );
+            // Microsoft's VM-Modul scheint hier eingetragen zu sein: (ist c:\winnt\system32\msjava.dll).
+            // HKEY_LOCAL_MACHINE\SOFTWARE\Clients\JavaVM\MSJavaVM\InstallInfo:VerifyFile
 
-      //JNI_GetDefaultJavaVMInitArgs = (JNI_GetDefaultJavaVMInitArgs_func*)dlsym( vm_module, "GetDefaultJavaVMInitArgs" );
-      //if( !JNI_GetDefaultJavaVMInitArgs )  throw_xc( "SPOOLER-171", dlerror(), "GetDefaultJavaVMInitArgs" );
+            LOG( "LoadLibrary " << _filename << '\n' );
+            HINSTANCE vm_module = LoadLibrary( _filename.c_str() );
+            if( !vm_module )  throw_mswin_error( "LoadLibrary", "Java Virtual Machine " + _filename );
 
-        JNI_CreateJavaVM = (JNI_CreateJavaVM_func*)dlsym( vm_module, "JNI_CreateJavaVM" );
-        if( !JNI_CreateJavaVM )  throw_xc( "SPOOLER-171", dlerror(), "JNI_CreateJavaVM" );
-    }
+            module_filename = filename_of_hinstance( vm_module );
+            LOG( "HINSTANCE=" << (void*)vm_module << "  " << module_filename << "  " << file_version_info( module_filename ) << '\n' );
+
+          //JNI_GetDefaultJavaVMInitArgs = (JNI_GetDefaultJavaVMInitArgs_func*)GetProcAddress( vm_module, "JNI_GetDefaultJavaVMInitArgs" );
+          //if( !JNI_GetDefaultJavaVMInitArgs )  throw_mswin_error( "GetProcAddress", "JNI_GetDefaultJavaVMInitArgs" );
+
+            JNI_CreateJavaVM = (JNI_CreateJavaVM_func*)GetProcAddress( vm_module, "JNI_CreateJavaVM" );
+            if( !JNI_CreateJavaVM )  throw_mswin_error( "GetProcAddress", "JNI_CreateJavaVM" );
+        }
+#       elif defined SYSTEM_HPUX
+        {
+            LOG( "shl_load " << _filename << '\n' );
+            shl_t vm_module = shl_load( _filename.c_str(), BIND_IMMEDIATE | BIND_VERBOSE, 0 );
+            if( !vm_module )  throw_xc( "SPOOLER-171", strerror(errno), _filename.c_str() );
+
+            LOG( "shl_findsym JNI_CreateJavaVM\n" );
+            int err = shl_findsym( &vm_module, "JNI_CreateJavaVM", TYPE_PROCEDURE, (void*)&JNI_CreateJavaVM );
+            if( err )  throw_xc( "SPOOLER-171", strerror(errno), "JNI_CreateJavaVM" );
+        }
+#       else
+        {
+            LOG( "dlopen " << _filename << '\n' );
+            void *vm_module = dlopen( _filename.c_str(), RTLD_LAZY );
+            if( !vm_module )  throw_xc( "SPOOLER-171", dlerror(), _filename.c_str() );
+
+          //JNI_GetDefaultJavaVMInitArgs = (JNI_GetDefaultJavaVMInitArgs_func*)dlsym( vm_module, "GetDefaultJavaVMInitArgs" );
+          //if( !JNI_GetDefaultJavaVMInitArgs )  throw_xc( "SPOOLER-171", dlerror(), "GetDefaultJavaVMInitArgs" );
+
+            JNI_CreateJavaVM = (JNI_CreateJavaVM_func*)dlsym( vm_module, "JNI_CreateJavaVM" );
+            if( !JNI_CreateJavaVM )  throw_xc( "SPOOLER-171", dlerror(), "JNI_CreateJavaVM" );
+        }
+#       endif
 #   endif
 
   //if( _vm_args.classpath       )  complete_class_path = string(_vm_args.classpath) + Z_PATH_SEPARATOR;

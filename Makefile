@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.13 2002/12/19 12:05:56 jz Exp $
+# $Id: Makefile,v 1.14 2003/02/12 18:31:11 jz Exp $
 
 ifndef PROD_DIR
 prod_dir = ..
@@ -68,16 +68,23 @@ include $(PROD_DIR)/make/standard.makefile
 #	$(AR) $(ARFLAGS) $@ $(objects)
 
 $(BIN_DIR)/sos.spooler.jar: $(java_classes)
-	jar cf $@  $<
+	jar cf $@  $(java_classes)
 
 
 $(objects): $(patsubst %, sos/spooler/%.h, Idispatch)
 
 
-$(BIN_DIR)/spooler: spooler.o $(objects) ../kram/$(O_DIR)/soswnmai.o ../zschimmer/$(O_DIR)/perl_scripting_engine_module.o $(foreach p,$(DEP_PRODUCTS),$(PROD_DIR)/$(p)/$(O_DIR)/lib$(p).a) $(PERL_DIR)/libperl.a
-	-$(CCPP) $(DEBUG) $(LINK_FLAGS) -Xlinker -Map -Xlinker $(BIN_DIR)/spooler.map  $^ $(LIBPATH) $(SOS_LIBS) $(LIBS) -o $@
-	echo ^G
+ifeq ($(OS),HP-UX)
+#LIBS += /opt/java1.4/jre/lib/PA_RISC2.0/hotspot/libjvm.sl
+#LIBS += /opt/java1.4/jre/lib/PA_RISC2.0/libjava.sl
+# Die folgende Pfad muss bei Programmaufruf gueltig sein, also auf der Produktionsmaschine!
+LIBS += -Wl,+b,/opt/java1.3/jre/lib/PA_RISC2.0:/opt/java1.3/jre/lib/PA_RISC2.0/classic
+endif
 
+
+$(BIN_DIR)/spooler: spooler.o $(objects) ../kram/$(O_DIR)/soswnmai.o ../zschimmer/$(O_DIR)/perl_scripting_engine_module.o $(foreach p,$(DEP_PRODUCTS),$(PROD_DIR)/$(p)/$(O_DIR)/lib$(p).a) $(PERL_DIR)/libperl.a
+	-$(CCPP) $(DEBUG) $(LINK_FLAGS) $^ $(LIBPATH) $(SOS_LIBS) $(LIBS) -o $@
+	echo ^G
 
 
 endif

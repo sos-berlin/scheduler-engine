@@ -1,4 +1,4 @@
-// $Id: spooler_time.cxx,v 1.31 2002/12/11 11:28:46 jz Exp $
+// $Id: spooler_time.cxx,v 1.32 2003/02/12 18:31:13 jz Exp $
 /*
     Hier sind implementiert
 
@@ -14,6 +14,10 @@
 */
 
 #include "spooler.h"
+
+#ifdef SYSTEM_HPUX
+#   include <time.h>
+#endif
 
 #include <sys/types.h>
 #include <sys/timeb.h>
@@ -76,15 +80,9 @@ string Time::as_string( With_ms with ) const
 
 Time Time::now() 
 {
-#   ifdef SYSTEM_WIN
+#   if defined SYSTEM_LINUX
 
-        timeb  tm;
-        ftime( &tm );
-        return (double)tm.time + (double)tm.millitm / (double)1e3 - timezone - ( tm.dstflag? _dstbias : 0 );
-
-        // Linux füllt nicht dstflag
-
-#   else
+        // Linux füllt nicht time_b::dstflag
 
         timeval  tv;
         tm       local_tm;
@@ -92,6 +90,12 @@ Time Time::now()
         gettimeofday( &tv, NULL );
         localtime_r( &tv.tv_sec, &local_tm );
         return timegm( &local_tm ) + (double)tv.tv_usec / 1e6;
+
+#   else
+
+        timeb  tm;
+        ftime( &tm );
+        return (double)tm.time + (double)tm.millitm / (double)1e3 - timezone - ( tm.dstflag? _dstbias : 0 );
 
 #   endif
 }

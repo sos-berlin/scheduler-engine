@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.164 2003/02/04 08:57:29 jz Exp $
+// $Id: spooler.cxx,v 1.165 2003/02/12 18:31:12 jz Exp $
 /*
     Hier sind implementiert
 
@@ -30,7 +30,11 @@
 #   include <direct.h>
 #   define DEFAULT_VM_MODULE "msjava.dll"
 #else
-#   define DEFAULT_VM_MODULE "libjava.so"
+#   ifdef Z_HPUX
+#       define DEFAULT_VM_MODULE "libjvm.sl"
+#    else
+#       define DEFAULT_VM_MODULE "libjvm.so"
+#   endif
 #endif
 
 
@@ -878,7 +882,6 @@ void Spooler::start()
 
         if( !thread->_free_threading )  _spooler_thread_list.push_back( thread );
     }
-
 
     if( _module.set() )
     {
