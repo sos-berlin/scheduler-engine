@@ -1,4 +1,4 @@
-// $Id: spooler_module_com.cxx,v 1.22 2003/10/08 11:45:06 jz Exp $
+// $Id: spooler_module_com.cxx,v 1.23 2003/10/28 22:04:27 jz Exp $
 /*
     Hier sind implementiert
 
@@ -34,18 +34,18 @@ bool check_result( const Variant& vt )
     return V_BOOL(&v) != 0;
 }
 
-//-------------------------------------------------------------------------Com_module_instance_base::init
+//-------------------------------------------------------------------Com_module_instance_base::init
 
 void Com_module_instance_base::init()
 {
     Module_instance::init();
 }
 
-//------------------------------------------------------------------Com_module_instance_base::close
+//-------------------------------------------------------------Com_module_instance_base::close__end
 
-void Com_module_instance_base::close()
+void Com_module_instance_base::close__end()
 {
-    Module_instance::close();
+    //Module_instance::close();
 
     _idispatch = NULL;
 }
@@ -104,7 +104,7 @@ Com_module_instance::Com_module_instance( Module* module )
 Com_module_instance::~Com_module_instance()
 {
     try {
-        close();
+        close__end();   // Synchron
     }
     catch( const Xc& ) {}
 }
@@ -179,11 +179,11 @@ void Com_module_instance::add_obj( const ptr<IDispatch>& object, const string& n
     Com_module_instance_base::add_obj( object, name );
 }
 
-//-----------------------------------------------------------------------Com_module_instance::close
+//------------------------------------------------------------------Com_module_instance::close__end
 
-void Com_module_instance::close()
+void Com_module_instance::close__end()   // synchron
 {
-    Com_module_instance_base::close();
+    Com_module_instance_base::close__end();   // Das ist auch synchron
 
     if( _com_context )  _com_context->close(), _com_context = NULL;
 
@@ -201,7 +201,7 @@ void Com_module_instance::close()
 Scripting_engine_module_instance::~Scripting_engine_module_instance()
 {
     try {
-        close();
+        close__end();  // Synchron
     }
     catch( const Xc& ) {}
 }
@@ -225,11 +225,11 @@ void Scripting_engine_module_instance::init()
     //if( FAILED( hr ) )  throw_ole( hr, "IActiveScript::SetScriptState", "SCRIPTSTATE_INITIALIZED" );
 }
 
-//------------------------------------------------------------------Com_module_instance_base::close
+//-------------------------------------------------------------Com_module_instance_base::close__end
 
-void Scripting_engine_module_instance::close()
+void Scripting_engine_module_instance::close__end()
 {
-    Com_module_instance_base::close();
+    Com_module_instance_base::close__end();   // Synchron
 
     if( _script_site )
     {

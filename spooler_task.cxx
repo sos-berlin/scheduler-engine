@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.211 2003/10/22 23:01:01 jz Exp $
+// $Id: spooler_task.cxx,v 1.212 2003/10/28 22:04:27 jz Exp $
 /*
     Hier sind implementiert
 
@@ -224,7 +224,10 @@ void Task::close()
 
         try
         {
-            do_close();
+            //do_close();
+            Async_operation* op = do_close__start();
+            if( !op->async_finished() )  _log.warn( "Warten auf Schließen der Modulinstanz ..." );
+            do_close__end();
         }
         catch( const exception& x ) { _log.error( string("close: ") + x.what() ); }
 
@@ -239,7 +242,7 @@ void Task::close()
         _closed = true;
     }
 
-    set_state( s_closed );
+    //set_state( s_closed );
 }
 
 //----------------------------------------------------------------------------------------Task::dom
@@ -603,36 +606,48 @@ bool Task::do_something()
     Time next_time_at_begin = _next_time;
 
 
-    try
+    // Periode endet?
+    if( !_operation )
     {
-
-        // Periode endet?
-        if( !_operation )
+        if( _state == s_running 
+         || _state == s_running_process 
+         || _state == s_running_delayed  
+         || _state == s_running_waiting_for_order )      
         {
-            if( _state == s_running 
-             || _state == s_running_process 
-             || _state == s_running_delayed  
-             || _state == s_running_waiting_for_order )      
-            {
-                bool let_run = _let_run  ||  _job->_period.is_in_time( now )  ||  ( _job->select_period(now), _job->is_in_period(now) );
+            bool let_run = _let_run  ||  _job->_period.is_in_time( now )  ||  ( _job->select_period(now), _job->is_in_period(now) );
 
-                if( !let_run ) 
-                {
-                    _log( "Laufzeitperiode ist abgelaufen, Task wird beendet" );
-                    set_state( s_ending );
-                }
+            if( !let_run ) 
+            {
+                _log( "Laufzeitperiode ist abgelaufen, Task wird beendet" );
+                set_state( s_ending );
             }
         }
+    }
 
         
-        bool loop = true;
-        while( loop )
+    bool loop = true;
+    while( loop )
+    {
+        try
         {
             loop = false;
             bool ok = true;
 
             if( !_operation )
             {
+                if( _module_instance && !_module_instance_async_error ) 
+                {
+                    try 
+                    { 
+                        _module_instance->check_connection_error(); 
+                    }  
+                    catch( exception& x )
+                    { 
+                        _module_instance_async_error = true;  
+                        throw_xc( "SCHEDULER-202", x.what() );
+                    }
+                }
+
                 if( _state < s_ending  &&  _end )      // Task beenden?
                 {
                     if( !loaded() )         set_state( s_ended );
@@ -697,6 +712,7 @@ bool Task::do_something()
                         loop = true;
                     }
                     break;
+
 
                 case s_running:
                 {
@@ -783,7 +799,7 @@ bool Task::do_something()
                         if( _begin_called )
                         {
                             _operation = do_end__start();
-                            set_state( s_ending );
+                            //set_state( s_ending );
                         }
                         else
                         {
@@ -860,11 +876,22 @@ bool Task::do_something()
 
                 case s_ended:
                 {
-                    finish();
+                    if( !_operation )  
+                    {
+                        _operation = do_close__start();
+                    }
+                    else
+                    {
+                        operation__end();
+                        finish();
 
-                    // Gesammelte eMail senden, wenn collected_max erreicht:
-                    //Time log_time = _log.collect_end();
-                    //if( log_time > Time::now()  &&  _next_time > log_time )  set_next_time( log_time );
+                        // Gesammelte eMail senden, wenn collected_max erreicht:
+                        //Time log_time = _log.collect_end();
+                        //if( log_time > Time::now()  &&  _next_time > log_time )  set_next_time( log_time );
+
+                        set_state( s_closed );
+                        loop = true;
+                    }
 
                     break;
                 }
@@ -893,27 +920,33 @@ bool Task::do_something()
                 if( _killed  &&  _state < s_ended )  set_state( s_ended ), loop = true;
             }
         }
+        catch( const exception& x )
+        {
+            set_error( x );
 
-        if( _operation && !had_operation )  _last_operation_time = now;    // Für _timeout
+            if( _state < s_ending )
+            {
+                _end = true;
+                loop = true;
+            }
+            else
+                finish();
 
-      //if( _next_time && !_let_run )  set_next_time( min( _next_time, _job->_period.end() ) );                      // Am Ende der Run_time wecken, damit die Task beendet werden kann
+            something_done = true;
+        }
+    }
 
+    if( _operation && !had_operation )  _last_operation_time = now;    // Für _timeout
+
+  //if( _next_time && !_let_run )  set_next_time( min( _next_time, _job->_period.end() ) );                      // Am Ende der Run_time wecken, damit die Task beendet werden kann
 
 /*
-        if( _state != s_running  
-         && _state != s_running_delayed
-         && _state != s_running_waiting_for_order
-         && _state != s_running_process  
-         && _state != s_suspended                 )  send_collected_log();
+    if( _state != s_running  
+     && _state != s_running_delayed
+     && _state != s_running_waiting_for_order
+     && _state != s_running_process  
+     && _state != s_suspended                 )  send_collected_log();
 */
-    }
-    catch( const exception& x )
-    {
-        set_error( x );
-        finish();
-        something_done = true;
-    }
-
 
     if( !something_done  &&  _next_time <= now  &&  !_signaled )    // Obwohl _next_time erreicht, ist nichts getan?
     {
@@ -1019,6 +1052,7 @@ bool Task::operation__end()
             case s_on_success:  result = do_call__end();     break;
             case s_exit:        result = do_call__end();     break;
             case s_release:              do_release__end();  break;
+            case s_ended:                do_close__end();    break;
             default:            throw_xc( "Task::operation__end" );
         }
     }
@@ -1181,16 +1215,25 @@ void Task::clear_mail()
     _log.set_mail_body     ( "", true );
 }
 
-//----------------------------------------------------------------------------Module_task::do_close
+//-----------------------------------------------------------------------Module_task::do_close__end
 
-void Module_task::do_close()
+Async_operation* Module_task::do_close__start()
+{
+    if( !_module_instance )  return &dummy_sync_operation;
+
+    _module_instance->detach_task();
+
+    return _module_instance->close__start();
+}
+
+//-----------------------------------------------------------------------Module_task::do_close__end
+
+void Module_task::do_close__end()
 {
     if( _module_instance )  
     { 
-      //_module_instance->close();
-        _module_instance->detach_task();
-
-        if( _job->_module_ptr->_reuse == Module::reuse_job )  _job->release_module_instance( _module_instance );
+        _module_instance->close__end();
+      //if( _job->_module_ptr->_reuse == Module::reuse_job )  _job->release_module_instance( _module_instance );
 
         _module_instance = NULL;
     }
@@ -1307,7 +1350,8 @@ void Job_module_task::do_load()
 
     if( _job->_module_ptr->_reuse == Module::reuse_job )
     {
-        module_instance = _job->get_free_module_instance( this );
+        //module_instance = _job->get_free_module_instance( this );
+        module_instance = _job->create_module_instance();
     }
     else
     {
@@ -1367,7 +1411,7 @@ bool Job_module_task::do_begin__end()
 
 Async_operation* Job_module_task::do_end__start()
 {
-    if( !_module_instance )  return NULL;
+    if( !_module_instance )  return &dummy_sync_operation;
 
     return _module_instance->end__start( !has_error() );        // Parameter wird nicht benutzt
 }
@@ -1421,7 +1465,7 @@ bool Job_module_task::do_call__end()
 
 Async_operation* Job_module_task::do_release__start()
 {
-    if( !_module_instance )  throw_xc( "SCHEDULER-199" );
+    if( !_module_instance )  return &dummy_sync_operation; //throw_xc( "SCHEDULER-199" );
 
     return _module_instance->release__start();
 }
@@ -1430,7 +1474,7 @@ Async_operation* Job_module_task::do_release__start()
 
 void Job_module_task::do_release__end()
 {
-    if( !_module_instance )  throw_xc( "SCHEDULER-199" );
+    if( !_module_instance )  return;  //throw_xc( "SCHEDULER-199" );
 
     _module_instance->release__end();
 }
@@ -1448,9 +1492,9 @@ Process_task::Process_task( Job* job )
 {
 }
 
-//---------------------------------------------------------------------------Process_task::do_close
+//----------------------------------------------------------------------Process_task::do_close__end
 
-void Process_task::do_close()
+void Process_task::do_close__end()
 {
 #ifdef Z_WINDOWS
     if( _process_handle )

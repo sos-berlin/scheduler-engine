@@ -1,4 +1,4 @@
-// $Id: spooler_module_remote.cxx,v 1.43 2003/10/20 16:17:40 jz Exp $
+// $Id: spooler_module_remote.cxx,v 1.44 2003/10/28 22:04:27 jz Exp $
 /*
     Hier sind implementiert
 
@@ -46,9 +46,9 @@ void Remote_module_instance_proxy::load()
     //_remote_instance->call( "load" );
 }
 
-//--------------------------------------------------------------Remote_module_instance_proxy::close
+//-------------------------------------------------------Remote_module_instance_proxy::close__start
 
-void Remote_module_instance_proxy::close()
+Async_operation* Remote_module_instance_proxy::close__start()
 {
   //if( _session )  _session->close_current_operation();
     
@@ -61,19 +61,33 @@ void Remote_module_instance_proxy::close()
 
     _idispatch = NULL;
 
+    if( _session )
+    {
+        return _session->close__start();
+    }
+
+    return &dummy_sync_operation;
+}
+
+//---------------------------------------------------------Remote_module_instance_proxy::close__end
+
+void Remote_module_instance_proxy::close__end()
+{
+    _session = NULL;
+
     if( _process )
     {
         _process->remove_module_instance( this );
         _process = NULL;
     }
-
+/*
   //if( _session )
     {
   //    _session->close();
         _session = NULL;
     }
-
-    Com_module_instance_base::close();
+*/
+    //Com_module_instance_base::close();
 }
 
 //---------------------------------------------------------------Remote_module_instance_proxy::kill
@@ -291,13 +305,20 @@ void Remote_module_instance_proxy::release__end()
     }
 }
 
-//-----------------------------------------------Remote_module_instance_proxy::Operation::~Operation
+//---------------------------------------------Remote_module_instance_proxy::check_connection_error
+
+void Remote_module_instance_proxy::check_connection_error()
+{
+    if( _remote_instance )  _remote_instance->check_connection_error();
+}
+
+//----------------------------------------------Remote_module_instance_proxy::Operation::~Operation
 
 Remote_module_instance_proxy::Operation::~Operation()
 {
 }
 
-//------------------------------------------------Remote_module_instance_proxy::Operation::Operation
+//-----------------------------------------------Remote_module_instance_proxy::Operation::Operation
 
 Remote_module_instance_proxy::Operation::Operation( Remote_module_instance_proxy* proxy, Call_state first_state )
 :

@@ -1,4 +1,4 @@
-// $Id: spooler_module_com.h,v 1.11 2003/08/30 22:40:27 jz Exp $
+// $Id: spooler_module_com.h,v 1.12 2003/10/28 22:04:27 jz Exp $
 
 #ifndef __SPOOLER_MODULE_COM_H
 #define __SPOOLER_MODULE_COM_H
@@ -20,7 +20,7 @@ struct Com_module_instance_base : Module_instance
     void                        init                        ();
     IDispatch*                  dispatch                    () const                                { return _idispatch; }
                Module_instance::add_obj;
-    void                        close                       ();
+    void                        close__end                  ();
     Variant                     call                        ( const string& name );
     Variant                     call                        ( const string& name, int param );
     bool                        name_exists                 ( const string& name );
@@ -43,7 +43,7 @@ struct Com_module_instance : Com_module_instance_base
     void                        init                        ();
     virtual void                add_obj                     ( const ptr<IDispatch>&, const string& name );
     void                        load                        ();
-    void                        close                       ();
+    void                        close__end                  ();
 
 
     typedef HRESULT (WINAPI *DllGetClassObject_func)(CLSID*,IID*,void**);
@@ -66,7 +66,7 @@ struct Scripting_engine_module_instance : Com_module_instance_base
                                 Scripting_engine_module_instance( Module* script )                  : Com_module_instance_base(script) {}
                                ~Scripting_engine_module_instance();
 
-    void                        close                       ();
+    void                        close__end                  ();
     void                        init                        ();
     void                        load                        ();
     void                        start                       ();

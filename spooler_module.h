@@ -1,4 +1,4 @@
-// $Id: spooler_module.h,v 1.49 2003/10/18 21:23:17 jz Exp $
+// $Id: spooler_module.h,v 1.50 2003/10/28 22:04:27 jz Exp $
 
 #ifndef __SPOOLER_MODULE_H
 #define __SPOOLER_MODULE_H
@@ -189,13 +189,13 @@ struct Module_instance : Object
 
     Z_GNU_ONLY(                 Module_instance             ();  )                                  // Für gcc 3.2. Nicht implementiert.
                                 Module_instance             ( Module* );
-    virtual                    ~Module_instance             ()                                      {}      // Für gcc 3.2
+    virtual                    ~Module_instance             ();
 
     void                    set_job_name                    ( const string& job_name )              { _job_name = job_name; }
     void                    set_task_id                     ( int id )                              { _task_id = id; }
 
     void                        clear                       ()                                      { _object_list.clear(); }
-    virtual void                close                       ()                                      = 0;
+    void                        close                       ();
     virtual void                init                        ();
     virtual bool                kill                        ()                                      { return false; }
     void                    set_log                         ( Prefix_log* log )                     { _log = log; }
@@ -218,6 +218,9 @@ struct Module_instance : Object
 
     virtual bool                try_to_get_process          ()                                      { return true; }
 
+    virtual Async_operation*    close__start                ()                                      { return &dummy_sync_operation; }
+    virtual void                close__end                  ()                                      {}
+
     virtual Async_operation*    begin__start                (); // const Object_list& );
     virtual bool                begin__end                  ();
 
@@ -233,8 +236,7 @@ struct Module_instance : Object
     virtual Async_operation*    release__start              ();
     virtual void                release__end                ();
 
-  //virtual bool                operation_finished          ()                                      { return true; }
-  //virtual void                process                     ( bool wait = false )                   {}
+    virtual void                check_connection_error      ()                                      {}
 
 
     Fill_zero                  _zero_;

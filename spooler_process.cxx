@@ -1,4 +1,4 @@
-// $Id: spooler_process.cxx,v 1.18 2003/10/19 09:44:49 jz Exp $
+// $Id: spooler_process.cxx,v 1.19 2003/10/28 22:04:27 jz Exp $
 
 #include "spooler.h"
 
@@ -8,17 +8,31 @@ namespace spooler {
 
 using namespace object_server;
 
+//---------------------------------------------------------------------Process::add_module_instance
+
+void Process::add_module_instance( Module_instance* module_instance )
+{ 
+    if( _module_instance_count != 0 )  throw_xc( "Process::add_module_instance" );
+
+    InterlockedIncrement( &_module_instance_count ); 
+
+    _module_instance = module_instance;
+}
+
 //------------------------------------------------------------------Process::remove_module_instance
 
 void Process::remove_module_instance( Module_instance* )
 { 
+    _module_instance = NULL;
+
     InterlockedDecrement( &_module_instance_count ); 
 
     if( _temporary  &&  _module_instance_count == 0 )  
     {
         if( _session )
         {
-            _session->close();
+            _session->close__start() -> async_finish();
+            _session->close__end();
             _session = NULL;
         }
 
@@ -81,6 +95,12 @@ void Process::start()
 
 bool Process::async_continue()
 {
+/*
+    if( _connection->last_errno() != 0 )
+    {
+        if( _module_instance )  _module_instance->
+    }
+*/
     return _connection->async_continue();
 }
 

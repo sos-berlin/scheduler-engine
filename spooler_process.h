@@ -1,4 +1,4 @@
-// $Id: spooler_process.h,v 1.13 2003/10/18 21:23:17 jz Exp $
+// $Id: spooler_process.h,v 1.14 2003/10/28 22:04:27 jz Exp $
 
 #ifndef __SPOOLER_PROCESS_H
 #define __SPOOLER_PROCESS_H
@@ -29,7 +29,7 @@ struct Process : zschimmer::Object
     object_server::Session*     session                     ()                                      { return _session; }
   //void                    set_event                       ( Event* e )                            { if( _connection )  _connection->set_event( e ); }
     bool                        async_continue              ();
-    void                        add_module_instance         ( Module_instance* )                    { InterlockedIncrement( &_module_instance_count ); }
+    void                        add_module_instance         ( Module_instance* );
     void                        remove_module_instance      ( Module_instance* );
     int                         module_instance_count       ()                                      { return _module_instance_count; }
     void                    set_temporary                   ( bool t )                              { _temporary = t; }
@@ -56,6 +56,7 @@ struct Process : zschimmer::Object
     Time                       _running_since;
     bool                       _temporary;                  // Löschen, wenn kein Module_instance mehr läuft
     long                       _module_instance_count;
+    Module_instance*           _module_instance;
     Process_class*             _process_class;
 };
 

@@ -1,4 +1,4 @@
-// $Id: spooler_module_remote_server.cxx,v 1.29 2003/10/08 11:45:06 jz Exp $
+// $Id: spooler_module_remote_server.cxx,v 1.30 2003/10/28 22:04:27 jz Exp $
 /*
     Hier sind implementiert
 
@@ -37,18 +37,18 @@ Remote_module_instance_server::~Remote_module_instance_server()
 {
     try
     {
-        close();
+        close__end();  // Synchron
     }
     catch( exception& ) {}
 }
 
-//-------------------------------------------------------------Remote_module_instance_server::close
+//--------------------------------------------------------Remote_module_instance_server::close__end
 
-void Remote_module_instance_server::close()
+void Remote_module_instance_server::close__end()   // synchron
 {
     if( _module_instance )  _module_instance->close(), _module_instance = NULL;;
 
-    Com_module_instance_base::close();
+    Com_module_instance_base::close__end();  // synchron
 }
 
 //---------------------------------------------------Remote_module_instance_server::load_implicitly

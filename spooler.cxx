@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.281 2003/10/24 22:12:56 jz Exp $
+// $Id: spooler.cxx,v 1.282 2003/10/28 22:04:26 jz Exp $
 /*
     Hier sind implementiert
 
@@ -1617,8 +1617,11 @@ void Spooler::run()
         if( _single_thread )
         {
             FOR_EACH( Process_class_list, _process_class_list, pc )
-                FOR_EACH( Process_list, (*pc)->_process_list, p )  
+                FOR_EACH( Process_list, (*pc)->_process_list, p )
+                {
                     something_done |= (*p)->async_continue();
+                  //_next_time = min( _next_time, Time::from_gmtime( (*p)->next_gmtime() ) );
+                }
 
             //LOG( "spooler.cxx: something_done=" << something_done << "    process_list \n" );
         }

@@ -1,4 +1,4 @@
-// $Id: spooler_module_java.cxx,v 1.70 2003/10/15 17:33:30 jz Exp $
+// $Id: spooler_module_java.cxx,v 1.71 2003/10/28 22:04:27 jz Exp $
 /*
     Hier sind implementiert
 
@@ -486,11 +486,11 @@ Java_module_instance::Java_module_instance( Vm* vm, Module* module )
 {
 }
 
-//----------------------------------------------------------------------Java_module_instance::close
+//-----------------------------------------------------------------Java_module_instance::close__end
 
-void Java_module_instance::close()
+void Java_module_instance::close__end()  // Synchron
 {
-    Module_instance::close();
+    Module_instance::close__end();   // Synchron
 
     _added_jobjects.clear();
     _jobject = NULL;

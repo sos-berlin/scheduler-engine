@@ -1,4 +1,4 @@
-// $Id: spooler_module.cxx,v 1.53 2003/10/18 21:23:17 jz Exp $
+// $Id: spooler_module.cxx,v 1.54 2003/10/28 22:04:27 jz Exp $
 /*
     Hier sind implementiert
 
@@ -337,6 +337,14 @@ Module_instance::Module_instance( Module* module )
   //_close_instance_at_end;         // Das verhindert aber use_engine="job". Aber vielleicht braucht das keiner.
 }
 
+//----------------------------------------------------------------Module_instance::~Module_instance
+
+Module_instance::~Module_instance()
+{
+    if( _com_log  )  _com_log ->set_log ( NULL );
+    if( _com_task )  _com_task->set_task( NULL );
+}
+
 //----------------------------------------------------------------------------Module_instance::init
 
 void Module_instance::init()
@@ -400,8 +408,9 @@ Variant Module_instance::call_if_exists( const string& name )
 
 void Module_instance::close()
 {
-    if( _com_log  )  _com_log ->set_log ( NULL );
-    if( _com_task )  _com_task->set_task( NULL );
+    Async_operation* op = close__start();
+    if( !op->async_finished() )  _log.warn( "Warten auf Schlieﬂen der Modulinstanz ..." );
+    close__end();
 }
 
 //--------------------------------------------------------------------Module_instance::begin__start
@@ -509,7 +518,7 @@ Async_operation* Module_instance::release__start()
 
 void Module_instance::release__end()
 {
-    close();
+    //close();
 }
 
 //-------------------------------------------------------------------------------------------------

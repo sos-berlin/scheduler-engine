@@ -1,4 +1,4 @@
-// $Id: spooler_job.cxx,v 1.43 2003/10/24 20:59:03 jz Exp $
+// $Id: spooler_job.cxx,v 1.44 2003/10/28 22:04:27 jz Exp $
 /*
     Hier sind implementiert
 
@@ -1394,7 +1394,7 @@ ptr<Module_instance> Job::create_module_instance()
 }
 
 //--------------------------------------------------------------------Job::get_free_module_instance
-
+/*
 Module_instance* Job::get_free_module_instance( Task* task )
 {
     THREAD_LOCK( _lock )
@@ -1404,13 +1404,13 @@ Module_instance* Job::get_free_module_instance( Task* task )
             if( !*m )  *m = create_module_instance();
 
 
-/* Erstmal auskommentiert, 23.8.03
+/ * Erstmal auskommentiert, 23.8.03
             if( !(*m)->_task ) 
             { 
                 (*m)->_task = task; 
                 return *m;
             }
-*/
+* /
         }
     }
 
@@ -1435,6 +1435,7 @@ void Job::release_module_instance( Module_instance* module_instance )
 
     throw_xc( "release_module_instance" );
 }
+*/
 
 } //namespace spooler
 } //namespace sos

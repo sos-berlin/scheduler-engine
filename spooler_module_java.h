@@ -1,4 +1,4 @@
-// $Id: spooler_module_java.h,v 1.25 2003/09/01 08:28:06 jz Exp $
+// $Id: spooler_module_java.h,v 1.26 2003/10/28 22:04:27 jz Exp $
 
 #ifndef __SPOOLER_MODULE_JAVA_H
 #define __SPOOLER_MODULE_JAVA_H
@@ -92,9 +92,9 @@ struct Java_module_instance : Module_instance, java::Has_vm
 
 
                                 Java_module_instance        ( java::Vm*, Module* );
-                               ~Java_module_instance        ()                                      { close(); }
+                               ~Java_module_instance        ()                                      { close__end(); }
 
-    void                        close                       ();
+    void                        close__end                  ();
     void                        init                        ();
     void                        add_obj                     ( const ptr<IDispatch>& object, const string& name );
     void                        load                        ();
