@@ -1,4 +1,4 @@
-// $Id: spooler_module_remote.h,v 1.20 2003/09/23 14:01:08 jz Exp $
+// $Id: spooler_module_remote.h,v 1.21 2003/09/27 18:21:01 jz Exp $
 
 #ifndef __SPOOLER_MODULE_REMOTE_H
 #define __SPOOLER_MODULE_REMOTE_H
@@ -96,6 +96,9 @@ struct Remote_module_instance_proxy : Com_module_instance_base
     ptr<object_server::Proxy>      _remote_instance;
     ptr<Async_operation>           _operation;
     bool                           _end_success;            // Für end__start()
+
+    string                      _server_hostname;
+    int                         _server_port;
 
     Fill_end                   _end_;
 };

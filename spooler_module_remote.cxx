@@ -1,4 +1,4 @@
-// $Id: spooler_module_remote.cxx,v 1.39 2003/09/27 15:32:10 jz Exp $
+// $Id: spooler_module_remote.cxx,v 1.40 2003/09/27 18:21:01 jz Exp $
 /*
     Hier sind implementiert
 
@@ -27,6 +27,12 @@ Remote_module_instance_proxy::~Remote_module_instance_proxy()
 void Remote_module_instance_proxy::init()
 {
     //HRESULT hr;
+
+    if( getenv( "SPOOLER_SERVER" ) )
+    {
+        _server_hostname = getenv( "SPOOLER_SERVER" );
+        _server_port     = 9000;
+    }
 
     Module_instance::init();
 
@@ -331,11 +337,9 @@ bool Remote_module_instance_proxy::try_to_get_process()
 
     if( !_process->started() )
     {
-        //if( !_server_hostname.empty() )
-        if( getenv( "SPOOLER_SERVER" ) )
+        if( !_server_hostname.empty() )
         {
-            //_process->set_server( _server_hostname, _server_port );
-            _process->set_server( getenv( "SPOOLER_SERVER" ), 9000 );
+            _process->set_server( _server_hostname, _server_port );
         }
 
         _process->set_job_name( _job_name );
@@ -417,8 +421,13 @@ bool Remote_module_instance_proxy::continue_async_operation( Operation* operatio
                 params_array[1] = "com_class="       + _module->_com_class_name;
                 params_array[2] = "filename="        + _module->_filename;
                 params_array[3] = "java_class="      + _module->_java_class_name;
-                params_array[4] = "java_class_path=" + _module->_spooler->_java_vm->class_path();
-                params_array[5] = "java_work_dir="   + _module->_spooler->_java_vm->work_dir();
+
+                if( _server_hostname.empty() )
+                {
+                    params_array[4] = "java_class_path=" + _module->_spooler->_java_vm->class_path();
+                    params_array[5] = "java_work_dir="   + _module->_spooler->_java_vm->work_dir();
+                }
+
                 params_array[6] = "recompile="       + as_string( _module->_recompile && !_module->_compiled );
                 params_array[7] = "script="          + _module->_source.dom_doc().xml();
             }

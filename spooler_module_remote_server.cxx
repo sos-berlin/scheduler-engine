@@ -1,4 +1,4 @@
-// $Id: spooler_module_remote_server.cxx,v 1.26 2003/09/05 14:34:17 jz Exp $
+// $Id: spooler_module_remote_server.cxx,v 1.27 2003/09/27 18:21:01 jz Exp $
 /*
     Hier sind implementiert
 
@@ -159,35 +159,38 @@ STDMETHODIMP Com_remote_module_instance_server::construct( SAFEARRAY* safearray 
 
         for( int i = 0; i < params.count(); i++ )
         {
-            if( params[i].vt != VT_BSTR )  throw_xc( "_spooler_construct" );
+            if( params[i].vt != VT_EMPTY )
+            {
+                if( params[i].vt != VT_BSTR )  throw_xc( "_spooler_construct" );
 
-            const OLECHAR* ole_value = wcschr( V_BSTR( &params[i] ), '=' );
-            if( !ole_value )  throw_xc( "_spooler_construct" );
-            string key_word = string_from_ole( V_BSTR( &params[i] ), ole_value - V_BSTR( &params[i] ) );
-            ole_value++;
-            string value = string_from_ole( ole_value );
+                const OLECHAR* ole_value = wcschr( V_BSTR( &params[i] ), '=' );
+                if( !ole_value )  throw_xc( "_spooler_construct" );
+                string key_word = string_from_ole( V_BSTR( &params[i] ), ole_value - V_BSTR( &params[i] ) );
+                ole_value++;
+                string value = string_from_ole( ole_value );
 
-            if( key_word == "language"        )  _server._module->_language        = value;
-            else                                                                         
-            if( key_word == "com_class"       )  _server._module->_com_class_name  = value;
-            else                                                                         
-            if( key_word == "filename"        )  _server._module->_filename        = value;
-            else
-            if( key_word == "java_class"      )  _server._module->_java_class_name = value;
-            else
-            if( key_word == "recompile"       )  _server._module->_recompile       = value[0] == '1';
-            else
-            if( key_word == "script"          )  _server._module->_source          = xml::Document_ptr( value ).documentElement();
-            else
-            if( key_word == "java_class_path" )  java_class_path                   = value;
-            else
-            if( key_word == "java_work_dir"   )  java_work_dir                     = value;
-            else
-            if( key_word == "javac"           )  javac                             = value;
-            else
-            if( key_word == "java_options"    )  java_options                      = value;
-            else
-                throw_xc( "server::construct" );
+                if( key_word == "language"        )  _server._module->_language        = value;
+                else                                                                         
+                if( key_word == "com_class"       )  _server._module->_com_class_name  = value;
+                else                                                                         
+                if( key_word == "filename"        )  _server._module->_filename        = value;
+                else
+                if( key_word == "java_class"      )  _server._module->_java_class_name = value;
+                else
+                if( key_word == "recompile"       )  _server._module->_recompile       = value[0] == '1';
+                else
+                if( key_word == "script"          )  _server._module->_source          = xml::Document_ptr( value ).documentElement();
+                else
+                if( key_word == "java_class_path" )  java_class_path                   = value;
+                else
+                if( key_word == "java_work_dir"   )  java_work_dir                     = value;
+                else
+                if( key_word == "javac"           )  javac                             = value;
+                else
+                if( key_word == "java_options"    )  java_options                      = value;
+                else
+                    throw_xc( "server::construct" );
+            }
         }
 
         _server._module->init();
