@@ -1,4 +1,4 @@
-// $Id: spooler_module_com.cxx,v 1.13 2003/05/31 10:01:13 jz Exp $
+// $Id: spooler_module_com.cxx,v 1.14 2003/05/31 21:50:51 jz Exp $
 /*
     Hier sind implementiert
 
@@ -278,6 +278,40 @@ void Scripting_engine_module_instance::start()
 
     HRESULT hr = _script_site->_script->SetScriptState( SCRIPTSTATE_STARTED );
     if( FAILED( hr ) )  throw_ole( hr, "IActiveScript::SetScriptState", "SCRIPTSTATE_STARTED" );
+}
+
+//-----------------------------------------------------------Scripting_engine_module_instance::call
+
+Variant Scripting_engine_module_instance::call( const string& name )
+{
+    SOS_DELETE( _script_site->_script_exception );
+
+    try
+    {
+        return com_call( _idispatch, name );
+    }
+    catch( const exception& )
+    {
+        if( _script_site->_script_exception )  throw *_script_site->_script_exception;
+                                         else  throw;
+    }
+}
+
+//-----------------------------------------------------------Scripting_engine_module_instance::call
+
+Variant Scripting_engine_module_instance::call( const string& name, int param )
+{
+    SOS_DELETE( _script_site->_script_exception );
+
+    try
+    {
+        return com_call( _idispatch, name, param );
+    }
+    catch( const exception& )
+    {
+        if( _script_site->_script_exception )  throw *_script_site->_script_exception;
+                                         else  throw;
+    }
 }
 
 //-------------------------------------------------------------------------------------------------

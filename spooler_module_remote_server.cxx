@@ -1,4 +1,4 @@
-// $Id: spooler_module_remote_server.cxx,v 1.7 2003/05/31 17:05:24 jz Exp $
+// $Id: spooler_module_remote_server.cxx,v 1.8 2003/05/31 21:50:51 jz Exp $
 /*
     Hier sind implementiert
 
@@ -40,6 +40,13 @@ Remote_module_instance_server::~Remote_module_instance_server()
     catch( exception& ) {}
 
     _module_instance = NULL;
+}
+
+//-------------------------------------------------------------Remote_module_instance_server::close
+
+void Remote_module_instance_server::close()
+{
+    Com_module_instance_base::close();
 }
 
 //---------------------------------------------------Remote_module_instance_server::load_implicitly
@@ -160,8 +167,10 @@ STDMETHODIMP Com_remote_module_instance_server::construct( SAFEARRAY* safearray 
 
         _server._module->init();
         _server._module->set_source_only( _server._module->_source );
+
         _server._module_instance = _server._module->create_instance();
         _server._module_instance->init();
+        _server._module_instance->_spooler_exit_called = true;            // Der Client wird spooler_exit() explizit aufrufen, um den Fehler zu bekommen.
     }
     catch( const exception& x ) { hr = com_set_error( x, "Remote_module_instance_server::construct" ); }
 

@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.210 2003/05/31 17:05:24 jz Exp $
+// $Id: spooler.cxx,v 1.211 2003/05/31 21:50:51 jz Exp $
 /*
     Hier sind implementiert
 
@@ -150,7 +150,7 @@ int read_profile_mail_on_process( const string& profile, const string& section, 
         if( isdigit( (uint)v[0] ) )  return as_int(v);
                                else  return as_bool(v);
     }
-    catch( const Xc& ) { return deflt; }
+    catch( const exception& ) { return deflt; }
 }
 
 //------------------------------------------------------------------read_profile_history_on_process
@@ -167,7 +167,7 @@ int read_profile_history_on_process( const string& profile, const string& sectio
         if( isdigit( (uint)v[0] ) )  return as_int(v);
                                else  return as_bool(v);
     }
-    catch( const Xc& ) { return deflt; }
+    catch( const exception& ) { return deflt; }
 }
 
 //-----------------------------------------------------------------------------read_profile_archive
@@ -1067,7 +1067,7 @@ void Spooler::stop()
     FOR_EACH( Thread_list, _thread_list, it )
     {
         Job* job = (*it)->current_job();
-        if( job )  try { job->interrupt_script(); } catch(const Xc& x){_log.error(x.what());}
+        if( job )  try { job->interrupt_script(); } catch(const exception& x){_log.error(x.what());}
     }
 
     wait_until_threads_stopped( Time::now() + wait_for_thread_termination_after_interrupt );
@@ -1485,7 +1485,7 @@ static void spooler_renew( const string& service_name, const string& renew_spool
             { 
                 throw_mswin_error( error, "CopyFile" ); 
             }
-            catch( const Xc& x ) { 
+            catch( const exception& x ) { 
                 if( !is_service )  fprintf( stderr, "%s\n", x.what() );
                 LOG( x.what() << '\n' );
             }
@@ -1567,9 +1567,9 @@ int spooler_main( int argc, char** argv )
     {
         ret = my_spooler.launch( argc, argv );
     }
-    catch( const Xc& x )
+    catch( const exception& x )
     {
-        SHOW_ERR( "Fehler " << x );     // Fehlermeldung vor ~Spooler ausgeben
+        SHOW_ERR( "Fehler " << x.what() );     // Fehlermeldung vor ~Spooler ausgeben
         if( my_spooler.is_service() )  send_error_email( x.what(), argc, argv, &my_spooler );
         ret = 1;
     }

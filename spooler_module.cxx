@@ -1,4 +1,4 @@
-// $Id: spooler_module.cxx,v 1.18 2003/05/31 10:01:13 jz Exp $
+// $Id: spooler_module.cxx,v 1.19 2003/05/31 21:50:51 jz Exp $
 /*
     Hier sind implementiert
 
@@ -170,6 +170,7 @@ void Module_instance::init()
 {
     if( !_module->set() )  throw_xc( "SPOOLER-146" );
 
+    _spooler_exit_called = false;
     _com_context = new Com_context;
 }
 
@@ -202,15 +203,16 @@ Variant Module_instance::call_if_exists( const string& name )
 
 void Module_instance::close()
 {
-    if( callable() )
+    if( !_spooler_exit_called  &&  callable() )     // _spooler_exit_called wird auch von Remote_module_instance_server gesetzt.
     {
         try
         {
+            _spooler_exit_called = true;
             call_if_exists( "spooler_exit()V" );
         }
-        catch( const Xc& x ) 
+        catch( const exception& x ) 
         { 
-            if( _log )  _log->error( x.what() ); 
+            _log->error( x.what() ); 
         }
     }
 

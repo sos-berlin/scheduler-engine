@@ -1,4 +1,4 @@
-// $Id: spooler_module_remote_server.h,v 1.5 2003/05/31 16:33:24 jz Exp $
+// $Id: spooler_module_remote_server.h,v 1.6 2003/05/31 21:50:51 jz Exp $
 
 #ifndef __SPOOLER_MODULE_REMOTE_SERVER_H
 #define __SPOOLER_MODULE_REMOTE_SERVER_H
@@ -20,6 +20,8 @@ struct Remote_module_instance_server : Com_module_instance_base
                                 Remote_module_instance_server();
                                ~Remote_module_instance_server();
 
+
+    void                        close                       ();
     void                        load_implicitly             ();
 
 
