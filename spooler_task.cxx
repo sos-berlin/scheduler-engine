@@ -1447,7 +1447,7 @@ void Task::set_mail_defaults()
 
         if( _log->highest_level() == log_warn )
         {
-            subject += " mit Warnung gelungen";
+            subject += " mit Warnung beendet";
             body += _log->highest_msg() + "\n\n";
         }
         else
