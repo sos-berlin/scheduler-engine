@@ -1,4 +1,4 @@
-// $Id: spooler_module.h,v 1.15 2002/12/02 17:19:32 jz Exp $
+// $Id: spooler_module.h,v 1.16 2003/05/18 11:26:35 jz Exp $
 
 #ifndef __SPOOLER_MODULE_H
 #define __SPOOLER_MODULE_H
@@ -144,6 +144,13 @@ struct Module_instance : Object
     map<string,bool>           _names;
 };
 
+//------------------------------------------------------------------------------Com_module_instance
+/*
+struct Com_job_instance_factory : IDispatch
+{
+
+};
+*/
 //-------------------------------------------------------------------------------------------------
 
 } //namespace spooler

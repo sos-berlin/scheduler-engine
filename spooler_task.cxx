@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.146 2003/04/13 18:13:09 jz Exp $
+// $Id: spooler_task.cxx,v 1.147 2003/05/18 11:27:30 jz Exp $
 /*
     Hier sind implementiert
 
@@ -14,6 +14,7 @@
 #ifdef Z_WINDOWS
 #   include <crtdbg.h>
 #else
+#   include <signal.h>
 #   include <sys/signal.h>
 #   include <sys/wait.h>
 #endif

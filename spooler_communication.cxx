@@ -1,4 +1,4 @@
-// $Id: spooler_communication.cxx,v 1.54 2003/03/04 09:56:30 jz Exp $
+// $Id: spooler_communication.cxx,v 1.55 2003/05/18 11:27:30 jz Exp $
 /*
     Hier sind implementiert
 
@@ -11,6 +11,7 @@
 #include "spooler.h"
 #include "../kram/sossock1.h"
 #include "../kram/sleep.h"
+#include "../kram/sos_java.h"
 
 
 using namespace std;
@@ -29,6 +30,10 @@ const int wait_for_port_available = 60;   // Soviele Sekunden warten, bis TCP- o
 #   include <unistd.h>
 #   include <sys/types.h>
 #   include <signal.h>
+#endif
+
+#ifndef INADDR_NONE
+#   define INADDR_NONE (-1)
 #endif
 
 //---------------------------------------------------------------------------------------get_errno
@@ -628,6 +633,8 @@ int Communication::run()
 {
     bool ok;
 
+    if( get_java_vm(false)->running() )  get_java_vm(false)->attach_thread( thread_name() );
+
     while(1) 
     {
         _nfds = 0;
@@ -732,6 +739,10 @@ int Communication::run()
         }
     }
 
+    if( current_thread_id() == thread_id() 
+     && current_thread_id() != _spooler->thread_id()  
+     && java_is_running()                            )  get_java_vm(false)->detach_thread();
+      
     return 0;
 }
 

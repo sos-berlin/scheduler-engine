@@ -1,8 +1,9 @@
-// $Id: spooler_history.cxx,v 1.45 2003/05/12 15:02:08 jz Exp $
+// $Id: spooler_history.cxx,v 1.46 2003/05/18 11:27:30 jz Exp $
 
 #include "spooler.h"
 #include "../zschimmer/z_com.h"
 #include "../kram/sleep.h"
+#include "../kram/sos_java.h"
 
 using namespace zschimmer;
 
@@ -345,6 +346,9 @@ int Spooler_db::get_id()
 int Spooler_db::get_id_()
 {
     int id;
+
+    if( get_java_vm(false)->running() )  get_java_vm(false)->attach_thread( "" );
+
 
     Transaction ta = this;
     {

@@ -1,4 +1,4 @@
-// $Id: spooler_thread.cxx,v 1.81 2003/05/12 09:50:39 jz Exp $
+// $Id: spooler_thread.cxx,v 1.82 2003/05/18 11:27:30 jz Exp $
 /*
     Hier sind implementiert
 
@@ -9,6 +9,7 @@
 #include <algorithm>
 #include <sys/timeb.h>
 #include "../kram/sleep.h"
+#include "../kram/sos_java.h"
 
 namespace sos {
 namespace spooler {
@@ -175,7 +176,11 @@ void Spooler_thread::close1()
         }
 
 
-        if( current_thread_id() != _spooler->thread_id()  &&  _spooler->_java_vm )  _spooler->_java_vm->detach_thread();
+        //if( current_thread_id() != _spooler->thread_id()  &&  _spooler->_java_vm )  _spooler->_java_vm->detach_thread();
+        if( current_thread_id() == thread_id() 
+         && current_thread_id() != _spooler->thread_id()  
+         && get_java_vm(false)->running()  )  get_java_vm(false)->detach_thread();
+
     }
     catch( const exception&  x ) { _log.error( x.what() ); }
     catch( const _com_error& x ) { _log.error( as_string( x.Description() ) ); }
