@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.57 2001/02/21 10:57:35 jz Exp $
+// $Id: spooler.cxx,v 1.58 2001/02/21 15:16:21 jz Exp $
 /*
     Hier sind implementiert
 
@@ -37,7 +37,8 @@ namespace spooler {
 const string new_suffix          = "~new";  // Suffix für den neuen Spooler, der den bisherigen beim Neustart ersetzen soll
 const double renew_wait_interval = 0.1;
 const double renew_wait_time     = 30;      // Wartezeit für Brückenspooler, bis der alte Spooler beendet ist und der neue gestartet werden kann.
-const double wait_for_thread_termination                 = latter_day; //2.0;
+const double wait_for_thread_termination                 = latter_day;  // Haltbarkeit des Geduldfadens
+const double wait_step_for_thread_termination            = 5.0;         // Nörgelabstand
 //const double wait_for_thread_termination_after_interrupt = 1.0;
 
 /*
@@ -128,11 +129,9 @@ void Spooler::wait_until_threads_stopped( Time until )
 
     FOR_EACH( Thread_list, _thread_list, it )  wait_handles.add_handle( (*it)->_thread_handle.handle() );
 
-    Time wait_time = 1.0;
-
     while( _thread_list.size() > 0 )
     {
-        Time until_step = Time::now() + wait_time;
+        Time until_step = Time::now() + wait_step_for_thread_termination;
         if( until_step > until )  until_step = until;
 
         int index = wait_handles.wait_until( until_step );

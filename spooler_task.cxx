@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.32 2001/02/21 10:57:36 jz Exp $
+// $Id: spooler_task.cxx,v 1.33 2001/02/21 15:16:22 jz Exp $
 /*
     Hier sind implementiert
 
@@ -383,6 +383,16 @@ void Job::stop()
 {
     _log.msg( "stop" );
 
+    if( _state != s_stopped  &&  _task )
+    {
+        try 
+        {
+            _task->do_stop();
+        }
+        catch( const Xc& x        )  { set_error(x); }
+        catch( const exception& x )  { set_error(x); }
+    }
+
     end();
     close_engine();
 
@@ -530,7 +540,10 @@ bool Job::do_something()
 
 void Job::set_error( const Xc& x )
 {
-    _log.error( _in_call + "(): " + x.what() );
+    string msg; 
+    if( !_in_call.empty() )  msg = "In " + _in_call + "():";
+    
+    _log.error( msg + x.what() );
 
     THREAD_LOCK( _lock )
     {
@@ -1071,6 +1084,19 @@ bool Process_task::do_start()
 
     _job->set_state( Job::s_running_process );
     return true;
+}
+
+//----------------------------------------------------------------------------Process_task::do_stop
+
+void Process_task::do_stop()
+{
+    if( _process_handle )
+    {
+        _job->_log.warn( "Prozess wird abgebrochen" );
+
+        BOOL ok = TerminateProcess( _process_handle, 999 );
+        if( !ok )  throw_mswin_error( "TerminateProcess" );
+    }
 }
 
 //-----------------------------------------------------------------------------Process_task::do_end

@@ -1,4 +1,4 @@
-// $Id: spooler_task.h,v 1.13 2001/02/21 10:21:59 jz Exp $
+// $Id: spooler_task.h,v 1.14 2001/02/21 15:16:23 jz Exp $
 
 #ifndef __SPOOLER_TASK_H
 #define __SPOOLER_TASK_H
@@ -274,6 +274,7 @@ struct Task : Sos_self_deleting
   protected:
     virtual void                do_close                    ()                              {}
     virtual bool                do_start                    () = 0;
+    virtual void                do_stop                     ()                              {}
     virtual void                do_end                      () = 0;
     virtual bool                do_step                     () = 0;
     virtual void                do_on_success               () = 0;
@@ -352,6 +353,7 @@ struct Process_task : Task
                                 Process_task                ( Spooler* sp, const Sos_ptr<Job>& j ) : Task(sp,j) {}
         
     bool                        do_start                    ();
+    void                        do_stop                     ();
     void                        do_end                      ();
     bool                        do_step                     ();
     void                        do_on_success               ()                                  {}
