@@ -1,4 +1,4 @@
-// $Id: spooler_order.cxx,v 1.54 2003/11/30 20:52:03 jz Exp $
+// $Id: spooler_order.cxx,v 1.55 2003/12/25 07:20:49 jz Exp $
 /*
     Hier sind implementiert
 
@@ -1155,7 +1155,7 @@ void Order::postprocessing( bool success )
                 }
                 else 
                 {
-                    _end_time = Time::now();
+                    //_end_time = Time::now();
                     _log.debug( "Kein weiterer Job in der Jobkette, der Auftrag ist erledigt" );
                 }
             }
@@ -1189,8 +1189,14 @@ void Order::processing_error()
 
 void Order::postprocessing2()
 {
-    if( finished() )  _log.close();
+    if( finished() ) 
+    {
+        _end_time = Time::now();
+        _log.close();
+    }
+
     if( _job_chain  &&  _is_in_database )  _spooler->_db->update_order( this );
+    
     if( finished() )  close();
 }
 
