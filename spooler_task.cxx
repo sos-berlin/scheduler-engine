@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.136 2002/12/08 18:24:48 jz Exp $
+// $Id: spooler_task.cxx,v 1.137 2002/12/08 20:21:58 jz Exp $
 /*
     Hier sind implementiert
 
@@ -2071,6 +2071,13 @@ Process_task::Process_task( Spooler* sp, const Sos_ptr<Job>& j )
 {
 }
 
+//---------------------------------------------------------------------------Process_task::do_close
+
+void Process_task::do_close()
+{
+     _process_handle.close();
+}
+
 //----------------------------------------------------------------------------Process_task::do_start
 #ifdef Z_WINDOWS
 
@@ -2278,15 +2285,15 @@ bool Process_task::do_start()
 
         default:
             LOG( "pid=" << pid << "\n" );
-            _process_event._pid = pid;
+            _process_handle._pid = pid;
             break;
     }
 
 
     _job->set_state( Job::s_running_process );
 
-    _process_event.set_name( "Process " + _job->_process_filename );
-    _process_event.add_to( &_job->_thread->_wait_handles );
+    _process_handle.set_name( "Process " + _job->_process_filename );
+    _process_handle.add_to( &_job->_thread->_wait_handles );
 
     return true;
 }
@@ -2295,11 +2302,11 @@ bool Process_task::do_start()
 
 void Process_task::do_stop()
 {
-    if( _process_event._pid )
+    if( _process_handle._pid )
     {
         _job->_log.warn( "Prozess wird abgebrochen" );
 
-        int err = kill( _process_event._pid, SIGTERM );
+        int err = kill( _process_handle._pid, SIGTERM );
         if( err )  throw_errno( errno, "killpid" );
     }
 }
@@ -2308,32 +2315,32 @@ void Process_task::do_stop()
 
 void Process_task::do_end()
 {
-    if( _process_event._pid )
+    if( _process_handle._pid )
     {
         do_step();      // waitpid() sollte schon gerufen sein. 
 
-        if( _process_event._pid )   throw_xc( "SPOOLER-179", _process_event._pid );       // Sollte nicht passieren (ein Zombie wird stehen bleiben)
+        if( _process_handle._pid )   throw_xc( "SPOOLER-179", _process_handle._pid );       // Sollte nicht passieren (ein Zombie wird stehen bleiben)
     }
 
-    _process_event.close();
+    _process_handle.close();
 
-    if( _process_event._process_signaled )  throw_xc( "SPOOLER-181", _process_event._process_signaled );
+    if( _process_handle._process_signaled )  throw_xc( "SPOOLER-181", _process_handle._process_signaled );
 
-    _result = (int)_process_event._process_exit_code;
+    _result = (int)_process_handle._process_exit_code;
 
     _job->_log.log_file( _job->_process_log_filename ); 
 
-    if( _process_event._process_exit_code )  throw_xc( "SPOOLER-126", _process_event._process_exit_code );
+    if( _process_handle._process_exit_code )  throw_xc( "SPOOLER-126", _process_handle._process_exit_code );
 }
 
 //----------------------------------------------------------------------------Process_task::do_step
 
 bool Process_task::do_step()
 {
-    _process_event.wait( 0 );
+    _process_handle.wait( 0 );
 
-    //LOG( "Process_task::do_step() signaled=" << _process_event.signaled() << "\n" );
-    return !_process_event.signaled();
+    //LOG( "Process_task::do_step() signaled=" << _process_handle.signaled() << "\n" );
+    return !_process_handle.signaled();
 }
 
 #endif

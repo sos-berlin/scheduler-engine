@@ -1,4 +1,4 @@
-// $Id: spooler_thread.cxx,v 1.68 2002/12/03 12:54:45 jz Exp $
+// $Id: spooler_thread.cxx,v 1.69 2002/12/08 20:21:59 jz Exp $
 /*
     Hier sind implementiert
 
@@ -37,7 +37,11 @@ Spooler_thread::Spooler_thread( Spooler* spooler )
 
 Spooler_thread::~Spooler_thread() 
 {
-    try { close(); } catch(const Xc& x ) { _log.error( x.what() ); }
+    try 
+    { 
+        close(); 
+    } 
+    catch(const exception& x ) { _log.error( x.what() ); }
     
     _my_event.close();
     _wait_handles.close();
@@ -146,7 +150,15 @@ void Spooler_thread::close1()
     {
         THREAD_LOCK( _lock )
         {
-            FOR_EACH( Job_list, _job_list, it )  (*it)->close();
+            FOR_EACH( Job_list, _job_list, it )
+            {
+                try
+                {
+                    (*it)->close();
+                }
+                catch( const exception&  x ) { _log.error( x.what() ); }
+                catch( const _com_error& x ) { _log.error( as_string( x.Description() ) ); }
+            }
 
             // Jobs erst bei Spooler-Ende freigeben, s. close()
             // Beim Beenden des Spooler noch laufende Threads können auf Jobs von bereits beendeten Threads zugreifen.
@@ -162,7 +174,6 @@ void Spooler_thread::close1()
 
         if( current_thread_id() != _spooler->thread_id() )  _spooler->_java_vm.detach_thread();
     }
-    catch( const Xc&         x ) { _log.error( x.what() ); }
     catch( const exception&  x ) { _log.error( x.what() ); }
     catch( const _com_error& x ) { _log.error( as_string( x.Description() ) ); }
 }

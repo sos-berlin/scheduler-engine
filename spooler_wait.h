@@ -1,4 +1,4 @@
-// $Id: spooler_wait.h,v 1.37 2002/12/08 12:05:51 jz Exp $
+// $Id: spooler_wait.h,v 1.38 2002/12/08 20:22:00 jz Exp $
 
 #ifndef __SPOOLER_WAIT_H
 #define __SPOOLER_WAIT_H
@@ -27,6 +27,7 @@ struct Event : z::Event
 
 
                                 Event                       ( const string& name = "" )             : Base_class( dont_create, name ), _zero_(this+1) {}
+                               ~Event                       ()                                      { close(); }
 
     virtual void                close                       ();
     void                        add_to                      ( Wait_handles* );

@@ -1,4 +1,4 @@
-// $Id: spooler_task.h,v 1.81 2002/12/08 18:24:49 jz Exp $
+// $Id: spooler_task.h,v 1.82 2002/12/08 20:21:59 jz Exp $
 
 #ifndef __SPOOLER_TASK_H
 #define __SPOOLER_TASK_H
@@ -529,19 +529,20 @@ struct Process_task : Task
         
   //virtual bool                loaded                      ();
   //virtual bool                do_load                     ();
+    void                        do_close                    ();
     bool                        do_start                    ();
     void                        do_stop                     ();
     void                        do_end                      ();
     bool                        do_step                     ();
-    void                        do_on_success               ()                                  {}
-    void                        do_on_error                 ()                                  {}
-    virtual bool                has_step_count              ()                                  { return false; }
+    void                        do_on_success               ()                                      {}
+    void                        do_on_error                 ()                                      {}
+    virtual bool                has_step_count              ()                                      { return false; }
 
 #   ifdef Z_WINDOWS
         Process_id             _process_id;
         Event                  _process_handle;
 #    else
-        Process_event          _process_event;
+        Process_event          _process_handle;
 #   endif
 };
 

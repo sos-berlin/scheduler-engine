@@ -1,4 +1,4 @@
-// $Id: spooler_wait.cxx,v 1.61 2002/12/08 18:24:50 jz Exp $
+// $Id: spooler_wait.cxx,v 1.62 2002/12/08 20:21:59 jz Exp $
 /*
     Hier sind implementiert
 
@@ -27,7 +27,7 @@ namespace spooler {
 //--------------------------------------------------------------------------------------------const
 
 #ifndef Z_WINDOWS
-    const double directory_watcher_interval = 0.1;      // Wartezeit in Sekunden zwischen zwei Verzeichnisüberprüfungen
+    const double directory_watcher_interval = 0.5;      // Wartezeit in Sekunden zwischen zwei Verzeichnisüberprüfungen
 #endif
 
 //-----------------------------------------------------------------------------windows_message_step
@@ -381,11 +381,16 @@ int Wait_handles::wait_until_2( Time until )
 
     if( _events.size() == 1 )
     {
+        // Gut, wir warten nur auf ein Ereignis.
+
         bool signaled = _events[0]->wait( until - Time::now() );
         return signaled? 0 : -1;
     }
     else
     {
+        // Weniger gut. Wir warten auf mehrere Ereignisse und müssen diese ständig reihrum abfragen.
+        Rotating_bar rotating_bar = _log->log_level() <= log_debug9;
+
         while(1)
         {
             for( int i = _events.size() - 1; i >= 0; i-- )
@@ -402,6 +407,8 @@ int Wait_handles::wait_until_2( Time until )
                     if( signaled )  return i;  // Leider auch bei EINTR
                 }
             }
+
+            rotating_bar();
 
             if( Time::now() >= until )  return -1;
         }
