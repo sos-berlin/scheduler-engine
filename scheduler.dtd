@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- $Id: spooler.dtd,v 1.49 2003/08/25 20:41:26 jz Exp $   Joacim Zschimmer,  (C) 2000 SOS GmbH Berlin  -->
+<!-- $Id: scheduler.dtd,v 1.1 2004/08/25 22:21:12 jz Exp $   Joacim Zschimmer,  (C) 2000 SOS GmbH Berlin  -->
 
 
 <!ELEMENT spooler               ( config+ | command | answer )>
@@ -8,15 +8,16 @@
 
 <!-- KONFIGURATION DES SPOOLERS - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
-<!ELEMENT config                ( base*, security?, script?, object_set_classes?, ( holidays | holiday* ), threads? )>
+<!ELEMENT config              ( base*, security?, process_classes?, script?, object_set_classes?, ( holidays | holiday*), jobs? )>
 <!ATTLIST config                spooler_id          CDATA ''>           <!-- Diese Konfiguration ist nur für einen Spooler mit dieser Kennung -->
-<!ATTLIST config                log_dir             CDATA #IMPLIED>
 <!ATTLIST config                tcp_port            CDATA #IMPLIED>     <!-- Für TCP-Kommandoschnittstelle -->
 <!ATTLIST config                udp_port            CDATA #IMPLIED>     <!-- Für UDP-Kommandoschnittstelle -->
-<!ATTLIST config                priority_max        CDATA #IMPLIED>     <!-- Höchste Priorität. Gibt absoluten Vorrang -->
 <!ATTLIST config                param               CDATA #IMPLIED>     <!-- Wird der Eigenschaft spooler.param jedem Skript übergeben -->
+<!ATTLIST config                log_dir             CDATA #IMPLIED>
+<!ATTLIST config                priority_max        CDATA #IMPLIED>     <!-- Höchste Priorität. Gibt absoluten Vorrang -->
 <!ATTLIST config                include_path        CDATA #IMPLIED>     <!-- Pfad für <include> -->
 <!ATTLIST config                java_class_path     CDATA #IMPLIED>     <!-- Für Java -->
+<!ATTLIST config                java_options        CDATA #IMPLIED>     <!-- Für Java -->
 
 <!ELEMENT base                  EMPTY>
 <!ATTLIST base                  file                CDATA #REQUIRED>
@@ -32,6 +33,13 @@
                                                                         <!-- level="info"     <show_state> zugelassen -->
                                                                         <!-- level="all"      Alles zugelassen -->
 
+<!ELEMENT process_classes       ( process_class* )>
+
+<!ELEMENT process_class         EMPTY>
+<!ATTLIST process_class         name                CDATA #IMPLIED>
+<!ATTLIST process_class         max_processes       CDATA #IMPLIED>
+
+
 <!ELEMENT object_set_classes    ( object_set_class+ )>
 
 <!ELEMENT object_set_class      ( level_decls?, script? )>
@@ -43,6 +51,7 @@
 <!ELEMENT level_decl            EMPTY>
 <!ATTLIST level_decl            level               CDATA #REQUIRED>    <!-- Stufennummer, in der Objektemengeklasse eindeutig -->
 <!ATTLIST level_decl            name                CDATA #REQUIRED>    <!-- Name der Stufe, in der Objektemengeklasse eindeutig -->
+
 
 <!ELEMENT script                ( #PCDATA | include )*>
 <!ATTLIST script                language            CDATA #IMPLIED>     <!-- Z.B. "VBScript", "JavaScript", "PerlScript" -->
@@ -58,15 +67,17 @@
 <!ELEMENT include               EMPTY>
 <!ATTLIST include               file                CDATA #REQUIRED>
 
+<!--
 <!ELEMENT threads               ( thread+ )>
 
 <!ELEMENT thread                ( script?, jobs? )>
 <!ATTLIST thread                name                CDATA #REQUIRED>
-<!ATTLIST thread                spooler_id          CDATA #IMPLIED>     <!-- "": Thread läuft auf jedem Spooler, sonst nur Spooler mit derselben Spooler-Id -->
-<!ATTLIST thread                include_path        CDATA #IMPLIED>     <!-- Pfad für <include> -->
-<!ATTLIST thread                free_threading      CDATA #IMPLIED>     <!-- free_threading="yes": Dieser Thread soll frei laufen (nebenläufig) 
-                                                                             Default ist <config free_threading=...> -->
-<!ATTLIST thread                priority            CDATA #IMPLIED>     <!-- Windows Thread-Priorität, relativ zur Prozessprioritätsklasse, "idle" oder "-15" bis "+2" -->
+<!ATTLIST thread                spooler_id          CDATA #IMPLIED>     <!- - "": Thread läuft auf jedem Spooler, sonst nur Spooler mit derselben Spooler-Id - ->
+<!ATTLIST thread                include_path        CDATA #IMPLIED>     <!- - Pfad für <include> - ->
+<!ATTLIST thread                free_threading      CDATA #IMPLIED>     <!- - free_threading="yes": Dieser Thread soll frei laufen (nebenläufig) 
+                                                                              Default ist <config free_threading=...> - ->
+<!ATTLIST thread                priority            CDATA #IMPLIED>     <!- - Windows Thread-Priorität, relativ zur Prozessprioritätsklasse, "idle" oder "-15" bis "+2" - ->
+-->
 
 <!ELEMENT jobs                  ( job+ )>
 
@@ -80,6 +91,10 @@
 <!ATTLIST job                   log_append          (yes|no) #IMPLIED>  <!-- Jobprotokoll fortschreiben, nicht überschreiben -->
 <!ATTLIST job                   order               (yes|no) 'no'>      <!-- Job nimmt Aufträge an -->
 <!ATTLIST job                   separate_process    (yes|no) 'no'>      <!-- Job-Instanzen (Tasks) sollen in getrennten, eigenen Prozessen laufen -->
+<!ATTLIST job                   tasks               CDATA #IMPLIED>     <!-- Anzahl Tasks für diesen Job -->
+<!ATTLIST job                   timeout             CDATA #IMPLIED>     <!--  -->
+<!ATTLIST job                   idle_timeout        CDATA #IMPLIED>     <!--  -->
+
 
 <!ELEMENT description           ( #PCDATA | include )*>                 <!-- Beschreibung des Jobs -->
 
@@ -101,7 +116,7 @@
 <!ATTLIST process               file                CDATA #REQUIRED>
 -->
 
-<!ELEMENT run_time              ( period*, date*, weekdays?, monthdays?, ultimos?, holiday* )>
+<!ELEMENT run_time              ( period*, date*, weekdays?, monthdays?, ultimos?, ( holidays | holiday* ) )>
 <!ATTLIST run_time              single_start        CDATA #IMPLIED>     <!-- Statt begin: Task wird nur einmal um diese Zeit gestartet --> 
 <!ATTLIST run_time              begin               CDATA #IMPLIED>     <!-- HH:MM:SS, Tageszeit, ab der der Job laufen soll -->
 <!ATTLIST run_time              end                 CDATA #IMPLIED>     <!-- HH:MM:SS, Tageszeit, bis zu der der Job laufen soll -->
@@ -139,6 +154,7 @@
 
 
 <!-- KOMMANDOS  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+<!-- veraltet -->
 
 <!ELEMENT command               ( show_state | show_history | modify_spooler | modify_job | kill_task | add_jobs | start_job | signal_object )+ >
 
@@ -213,6 +229,7 @@
 
 
 <!-- ANTWORTEN AUF DIE KOMMANDOS  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+<!-- veraltet -->
 
 <!ELEMENT answer                ( state | task | ERROR )>
 
