@@ -1,11 +1,11 @@
 // $Id$
 
-#include "../module_version.h"
+#include "../revision.h"
 
 #define VER_FILEDESC_STR        "Scheduler"
 
-#define VER_PRODUCTVERSION       2,0,103
-#define VER_PRODUCTVERSION_STR  "2.0.103  2004-12-13  " Z_MODULE_VERSION_STR VER_PRODUCTVERSION_DEBUG 
+#define VER_PRODUCTVERSION       2,0,103,VER_REVISION
+#define VER_PRODUCTVERSION_STR  "2.0.103." VER_PRODUCTVERSION_TAIL
 
 #define VER_NAME_STR            "Scheduler"
 #define VER_FILENAME_STR        "scheduler.exe"
