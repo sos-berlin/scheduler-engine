@@ -1,10 +1,11 @@
-// $Id: spooler_module_java.h,v 1.29 2004/02/15 15:53:37 jz Exp $
+// $Id: spooler_module_java.h,v 1.30 2004/02/16 11:56:10 jz Exp $
 
 #ifndef __SPOOLER_MODULE_JAVA_H
 #define __SPOOLER_MODULE_JAVA_H
 
 #include "../kram/thread_data.h"
 #include "../zschimmer/java.h"
+#include "../zschimmer/java_com.h"
 
 #define JAVA_IDISPATCH_CLASS "sos/spooler/Idispatch"
 

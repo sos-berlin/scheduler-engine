@@ -1,11 +1,11 @@
-// $Id: Idispatch.java,v 1.4 2003/10/19 11:41:01 jz Exp $
+// $Id: Idispatch.java,v 1.5 2004/02/16 11:56:10 jz Exp $
 
 package sos.spooler;
 
 /**
  * Interne Klasse des Spoolers.
  * @author Joacim Zschimmer, Zschimmer GmbH
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 
 public class Idispatch
@@ -37,8 +37,7 @@ public class Idispatch
 
         public Variant call()
         {
-            Variant[] values = new Variant[0];
-            return com_call( _idispatch, id, context.value, values );
+            return com_call( _idispatch, id, context.value, null );
         }
 
         public Variant call( Variant value )
@@ -68,15 +67,13 @@ public class Idispatch
 
     Object com_call( String name )
     {
-        Object[] params = new Object[0];
-        return com_call( _idispatch, name, params );
+        return com_call( _idispatch, name, null );
     }
 
 
     boolean boolean_com_call( String name )
     {
-        Object[] params = new Object[0];
-        return ( (Boolean)com_call( _idispatch, name, params ) ).booleanValue();
+        return ( (Boolean)com_call( _idispatch, name, null ) ).booleanValue();
     }
 
 
