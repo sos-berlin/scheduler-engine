@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.119 2002/10/18 12:55:59 jz Exp $
+// $Id: spooler.cxx,v 1.120 2002/10/21 11:50:14 jz Exp $
 /*
     Hier sind implementiert
 
@@ -328,8 +328,8 @@ void Spooler::wait_until_threads_stopped( Time until )
     while( it != _thread_list.end() )
     {
         Thread* thread = *it;
-        if( !thread->_terminated  &&  thread->_thread_handle.handle() )  wait_handles.add_handle( (*it)->_thread_handle.handle() ),  it++;
-                           //18.10.2002 else  THREAD_LOCK( _lock )  it = _thread_list.erase( it );
+        if( !thread->_terminated  &&  thread->_thread_handle.handle() )  wait_handles.add_handle( (*it)->_thread_handle.handle() );
+        it++;
     }
 
     int c = 0;
@@ -657,7 +657,7 @@ void Spooler::start()
 
     _log.set_directory( _log_directory );
     _log.open_new();
-    _log.info( "Spooler (" VER_PRODUCTVERSION_STR ") startet mit " + _config_filename );
+    _log.info( string( "Spooler (" VER_PRODUCTVERSION_STR ) + ") startet mit " + _config_filename );
 
 
     _db.open( _db_name, _need_db );
@@ -740,7 +740,7 @@ void Spooler::run()
         // Threads ohne Jobs und nach Fehler gestorbene Threads entfernen:
         //FOR_EACH( Thread_list, _thread_list, it )  if( (*it)->empty() )  THREAD_LOCK( _lock )  it = _thread_list.erase(it);
         bool valid_thread = false;
-        FOR_EACH( Thread_list, _thread_list, it )  valid_thread |= !(*it)->empty();
+        FOR_EACH( Thread_list, _thread_list, it )  valid_thread |= !(*it)->_terminated;
         if( !valid_thread )  { _log.error( "Kein Thread vorhanden. Spooler wird beendet." ); break; }
 
         if( _state_cmd == sc_pause                 )  if( _state == s_running )  set_state( s_paused  ), signal_threads( "pause" );

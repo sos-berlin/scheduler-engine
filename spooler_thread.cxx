@@ -1,4 +1,4 @@
-// $Id: spooler_thread.cxx,v 1.46 2002/10/18 12:55:59 jz Exp $
+// $Id: spooler_thread.cxx,v 1.47 2002/10/21 11:50:15 jz Exp $
 /*
     Hier sind implementiert
 
@@ -557,7 +557,6 @@ int Thread::run_thread()
         stop_jobs();
         close1();
     
-        _spooler->signal( "Thread " + _name + " beendet sich" );
 
         ret = 0;
     }
@@ -575,10 +574,10 @@ int Thread::run_thread()
     {
         _log.error( "Thread wird wegen des Fehlers beendet" );
         close1();
-        _spooler->signal( "thread error" );
     }
     
     _terminated = true;
+    _spooler->signal( "Thread " + _name + " beendet sich" );
 
     return ret;
 }
