@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.264 2004/10/22 09:33:23 jz Exp $
+// $Id: spooler_task.cxx,v 1.265 2004/12/02 21:12:10 jz Exp $
 /*
     Hier sind implementiert
 
@@ -1967,19 +1967,19 @@ bool Process_event::wait( double seconds )
 
         if( ret == _pid )
         {
-            if( WIFEXITED( status ) )
+            if( WIFSIGNALED( status ) )
             {
-                _process_exit_code = WEXITSTATUS( status );
-              //LOG( "exit_code=" << _process_exit_code << "\n" );
+                _process_signaled = WTERMSIG( status );
+              //LOG( "signal=" << _process_exit_code << "\n" );
                 _pid = 0;
                 set_signaled();
                 return true;
             }
 
-            if( WIFSIGNALED( status ) )
+            if( WIFEXITED( status ) )
             {
-                _process_signaled = WTERMSIG( status );
-              //LOG( "signal=" << _process_exit_code << "\n" );
+                _process_exit_code = WEXITSTATUS( status );
+              //LOG( "exit_code=" << _process_exit_code << "\n" );
                 _pid = 0;
                 set_signaled();
                 return true;
@@ -2130,7 +2130,18 @@ void Process_task::do_end__end()
 
         close_handle();
 
-        if( _process_handle._process_signaled )  throw_xc( "SCHEDULER-181", _process_handle._process_signaled );
+        if( _process_handle._process_signaled )
+        {
+            try
+            {
+                throw_xc( "SCHEDULER-181", _process_handle._process_signaled );
+            }
+            catch( const exception& x )
+            {
+                if( !_job->_process_ignore_signal )  throw;
+                _log->warn( x.what() );
+            }
+        }
 
         int exit_code = _process_handle._process_exit_code;
 

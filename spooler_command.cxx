@@ -1,4 +1,4 @@
-// $Id: spooler_command.cxx,v 1.144 2004/12/02 13:38:17 jz Exp $
+// $Id: spooler_command.cxx,v 1.145 2004/12/02 21:12:10 jz Exp $
 /*
     Hier ist implementiert
 
@@ -774,7 +774,7 @@ ptr<Http_response> Command_processor::execute_http( Http_request* http_request )
     }
     catch( const exception& x )
     {
-        _spooler->log().error( "Fehler beim HTTP-Aufruf " + http_request->_http_cmd + " " + path + ": " + x.what() );
+        _spooler->log().warn( "Fehler beim HTTP-Aufruf " + http_request->_http_cmd + " " + path + ": " + x.what() );
 
         http_status_code = 404;
         error_text = x.what();
