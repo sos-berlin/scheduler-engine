@@ -1,4 +1,4 @@
-// $Id: spooler_task.h,v 1.139 2004/07/26 08:24:40 jz Exp $
+// $Id: spooler_task.h,v 1.140 2004/07/26 13:57:29 jz Exp $
 
 #ifndef __SPOOLER_TASK_H
 #define __SPOOLER_TASK_H
@@ -363,6 +363,7 @@ struct Process_event : Event
 {
     virtual void                close                       ();
     virtual bool                wait                        ( double seconds );
+                                operator bool               ()                                      { return _pid != 0; }
 
     int                        _pid;
     int                        _process_signaled;

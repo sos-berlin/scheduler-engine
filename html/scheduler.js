@@ -1,4 +1,4 @@
-// $Id: scheduler.js,v 1.12 2004/07/26 12:09:59 jz Exp $
+// $Id: scheduler.js,v 1.13 2004/07/26 13:54:36 jz Exp $
 
 //----------------------------------------------------------------------------------------Scheduler
 // public
@@ -347,7 +347,7 @@ function job_menu__onclick( job_name )
     popup_builder.add_entry   ( "Show description", "parent.show_job_description()", is_active );
     
     popup_builder.add_bar();
-    popup_builder.add_command ( "Start task now", "parent.task_menu__start_task_now__onclick('" + job_name + "')" );
+    popup_builder.add_command ( "Start task now", "<start_job job='" + job_name + "'/>" );
     popup_builder.add_command ( "Stop"          , "<modify_job job='" + job_name + "' cmd='stop'    />", state != "stopped"  &&  state != "stopping" );
     popup_builder.add_command ( "Unstop"        , "<modify_job job='" + job_name + "' cmd='unstop'  />", state == "stopped"  ||  state == "stopping" );
     popup_builder.add_command ( "Wake"          , "<modify_job job='" + job_name + "' cmd='wake'    />" );
