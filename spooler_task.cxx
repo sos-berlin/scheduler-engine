@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.198 2003/09/27 15:01:58 jz Exp $
+// $Id: spooler_task.cxx,v 1.199 2003/09/30 11:26:21 jz Exp $
 /*
     Hier sind implementiert
 
@@ -413,8 +413,8 @@ void Task::set_state( State new_state )
       //if( new_state == _state  &&  next_time == _next_time )  return;
         if( new_state == _state )  return;
 
-        if( new_state == s_running  ||  new_state == s_start_task )  _job->increment_running_tasks(),  _thread->increment_running_tasks();
-        if( _state    == s_running  ||  _state    == s_start_task )  _job->decrement_running_tasks(),  _thread->decrement_running_tasks();
+        if( new_state == s_running  ||  new_state == s_starting )  _job->increment_running_tasks(),  _thread->increment_running_tasks();
+        if( _state    == s_running  ||  _state    == s_starting )  _job->decrement_running_tasks(),  _thread->decrement_running_tasks();
 
         if( new_state != s_running_delayed )  _next_spooler_process = 0;
 
@@ -422,13 +422,13 @@ void Task::set_state( State new_state )
       //_next_time = next_time;
 
 
-        Log_level log_level = new_state == s_start_task? log_info : log_debug_spooler;
+        Log_level log_level = new_state == s_starting || new_state == s_closed? log_info : log_debug9;
         if( log_level >= log_info || _spooler->_debug )
         {
             string msg = "state=" + state_name();
             if( _next_time )  msg += " (" + _next_time.as_string() + ")";
-            if( new_state == s_start_task  &&  _start_at )  msg += " (at=" + _start_at.as_string() + ")";
-            if( new_state == s_start_task  &&  _thread->_free_threading )  msg += ", dem Thread " + _thread->name() + " zugeordnet";
+            if( new_state == s_starting  &&  _start_at )  msg += " (at=" + _start_at.as_string() + ")";
+            if( new_state == s_starting  &&  _thread->_free_threading )  msg += ", dem Thread " + _thread->name() + " zugeordnet";
             if( new_state == s_running && _module_instance && _module_instance->pid() )  msg += ", pid=" + as_string( _module_instance->pid() );
 
             _log.log( log_level, msg );
@@ -445,14 +445,14 @@ string Task::state_name( State state )
         case s_none:                        return "none";
         case s_loading:                     return "loading";
         case s_waiting_for_process:         return "waiting_for_process";
-        case s_start_task:                  return "start_task";
+      //case s_start_task:                  return "start_task";
         case s_starting:                    return "starting";
         case s_running:                     return "running";
         case s_running_delayed:             return "running_delayed";
         case s_running_waiting_for_order:   return "running_waiting_for_order";
         case s_running_process:             return "running_process";
         case s_suspended:                   return "suspended";
-        case s_end:                         return "end";
+      //case s_end:                         return "end";
         case s_ending:                      return "ending";
         case s_on_success:                  return "on_success";
         case s_on_error:                    return "on_error";
@@ -572,7 +572,7 @@ bool Task::do_something()
                 if( !let_run ) 
                 {
                     _log( "Laufzeitperiode ist abgelaufen, Task wird beendet" );
-                    set_state( s_end );
+                    set_state( s_ending );
                 }
             }
         }
@@ -587,14 +587,14 @@ bool Task::do_something()
             // HISTORIE und _end
             if( !_operation )
             {
-                if( _state == s_start_task 
+                if( _state == s_starting 
                  || _state == s_running 
                  || _state == s_running_delayed 
                  || _state == s_running_waiting_for_order 
                  || _state == s_running_process           )
                 {
                     if( _step_count == _job->_history.min_steps() )  _history.start();
-                    if( _end )  set_state( s_end );
+                    if( _end )  set_state( s_ending );
                 }
             }
 
@@ -606,27 +606,33 @@ bool Task::do_something()
 
                 case s_waiting_for_process:
                     bool ok = _module_instance->try_to_get_process();
-                    if( ok )  something_done = true, set_state( s_start_task ), loop = true;
+                    if( ok )  something_done = true, set_state( s_starting ), loop = true;
                         else  set_state( s_waiting_for_process );
                     break;
                 }
 
 
-                case s_start_task:
+              //case s_start_task:
+                case s_starting:
                 {
                     _begin_called = true;
-
+/*
                     _operation = begin__start();
 
                   //if( has_error() )  break;
 
                     set_state( s_starting );
+*/
+
+                    if( !_operation )  _operation = begin__start();
+                                 else  ok = operation__end(), set_state( ok? s_running : s_ending ), loop = true;
+
                     something_done = true;
 
                     break;
                 }
 
-
+/*
                 case s_starting:
                 {
                     ok = operation__end();
@@ -638,7 +644,7 @@ bool Task::do_something()
 
                     break;
                 }
-
+*/
 
                 case s_running_process:
                     if( !((Process_task*)+this)->signaled() )  break;
@@ -677,7 +683,7 @@ bool Task::do_something()
                         ok = step__end();
                         _operation = NULL;
 
-                        if( !ok || has_error() )  set_state( s_end ), loop = true;
+                        if( !ok || has_error() )  set_state( s_ending ), loop = true;
                         something_done = true;
                     }
 
@@ -706,19 +712,31 @@ bool Task::do_something()
                 }
 
 
-                case s_end:
+                case s_ending:
                 {
-                    if( has_error() )  _history.start(); //,  _success = false;
-
-                    if( _begin_called )
+                    if( !_operation )
                     {
-                        _operation = do_end__start();
+                        if( has_error() )  _history.start(); //,  _success = false;
 
-                        set_state( s_ending );
+                        if( _begin_called )
+                        {
+                            _operation = do_end__start();
+                            set_state( s_ending );
+                        }
+                        else
+                        {
+                            set_state( s_exit );
+                            loop = true;
+                        }
                     }
                     else
                     {
-                        set_state( s_exit );
+                        operation__end();
+
+                        set_state( loaded()? has_error()? s_on_error 
+                                                        : s_on_success 
+                                           : s_release );
+
                         loop = true;
                     }
 
@@ -727,7 +745,7 @@ bool Task::do_something()
                     break;
                 }
 
-                
+/*                
                 case s_ending:
                 {
                     operation__end();
@@ -740,7 +758,7 @@ bool Task::do_something()
                     something_done = true;
                     break;
                 }
-
+*/
 
                 case s_on_success:
                 {
@@ -818,7 +836,7 @@ bool Task::do_something()
             {
                 if( !ok || has_error() )  
                 {
-                    if( _state < s_end )  set_state( s_end ), loop = true;
+                    if( _state < s_ending )  set_state( s_ending ), loop = true;
                 }
 
             

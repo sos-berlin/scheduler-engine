@@ -1,4 +1,4 @@
-// $Id: spooler_job.cxx,v 1.30 2003/09/27 15:01:57 jz Exp $
+// $Id: spooler_job.cxx,v 1.31 2003/09/30 11:26:21 jz Exp $
 /*
     Hier sind implementiert
 
@@ -165,6 +165,8 @@ void Job::init0()
     _com_job  = new Com_job( this );
   //_com_log  = new Com_log( &_log );
 
+    _next_start_time = latter_day;
+
     set_state( s_pending );
 }
 
@@ -201,8 +203,10 @@ void Job::init2()
     _period._end   = 0;
     _next_single_start = latter_day;
 
-    select_period();
-    set_next_start_time( Time::now() );
+    Time now = Time::now();
+
+    //select_period( now );
+    set_next_start_time( now );
 }
 
 //---------------------------------------------------------------------------------------Job::close
@@ -666,8 +670,12 @@ bool Job::is_in_period( Time now )
 
 void Job::set_next_start_time( Time now, bool repeat )
 {
-    Time   next_start_time = _next_start_time;
+    select_period();
+
+    Time   next_start_time = latter_day;  //_next_start_time;
     string msg;
+
+    _next_single_start = latter_day;
 
     if( order_controlled() ) 
     {
@@ -682,16 +690,24 @@ void Job::set_next_start_time( Time now, bool repeat )
     else
     if( _state == s_pending )
     {
-        if( !_repeat )
+        if( !_period.is_in_time( _next_start_time ) )
         {
-            _next_single_start = _run_time.next_single_start( now );
-            if( _spooler->_debug && _next_single_start < next_start_time )  msg = "Nächster single_start " + _next_single_start.as_string();
-        }
+            if( !_repeat )  _next_single_start = _run_time.next_single_start( now );
 
-        if( !_period.is_in_time( next_start_time ) )
-        {
-            next_start_time = latter_day;
-
+            if( _start_once  ||  !repeat && _period._repeat )
+            {
+            //select_period();
+                if( _period.begin() > now )
+                {
+                    next_start_time = _period.begin();
+                    if( _spooler->_debug )  msg = "Erster Start zu Beginn der Periode " + next_start_time.as_string();
+                }
+                else
+                {
+                    next_start_time = now;
+                }
+            }
+            else
             if( repeat )
             {
                 if( _repeat > 0 )       // spooler_task.repeat
@@ -705,15 +721,33 @@ void Job::set_next_start_time( Time now, bool repeat )
                 {
                     next_start_time = now + _period.repeat();
 
+                    if( _spooler->_debug && next_start_time != latter_day )  msg = "Nächste Wiederholung wegen <period repeat=\"" + as_string((double)_period._repeat) + "\">: " + next_start_time.as_string();
+
                     if( next_start_time >= _period.end() )
                     {
                         Period next_period = _run_time.next_period( _period.end() );
-                        if( _period.end() != next_period.begin()  ||  _period.repeat() != next_period.repeat() )   next_start_time = latter_day;
+                        if( _period.end() == next_period.begin()  &&  _period.repeat() == next_period.repeat() )
+                        {
+                            if( _spooler->_debug )  msg += " (in der anschließenden Periode)";
+                        }
+                        else
+                        {
+                            next_start_time = latter_day;
+                            if( _spooler->_debug )  msg = "Nächste Startzeit wird bestimmt zu Beginn der nächsten Periode " + next_period.begin().as_string();
+                        }
                     }
-
-                    if( _spooler->_debug && next_start_time != latter_day )  msg = "Nächste Wiederholung wegen <period repeat=\"" + as_string((double)_period._repeat) + "\">: " + next_start_time.as_string();
                 }
             }
+        }
+/*
+        else
+        {
+        }
+
+        if( !_period.is_in_time( next_start_time ) )
+        {
+            next_start_time = latter_day;
+
 
 
             // Liegt die Startzeit hinter der aktuellen Periode?
@@ -731,7 +765,7 @@ void Job::set_next_start_time( Time now, bool repeat )
                     next_start_time = _period.begin();
                     if( _spooler->_debug )  msg = "Nächster Start zu Beginn der Periode: " + next_start_time.as_string();
                 }
-/*
+/ *
                 else  
                 if( now >= _period.end() )
                 {
@@ -745,17 +779,22 @@ void Job::set_next_start_time( Time now, bool repeat )
                     else
                         next_start_time = latter_day;
                 }
-*/
             }
 
-            if( !msg.empty() )  _log.debug( msg );
         }
+*/
+
     }
     else
     {
         next_start_time = latter_day;
     }
 
+    if( _spooler->_debug )
+    {
+        if( !msg.empty() )  _log.debug( msg );
+        if( _next_single_start < next_start_time )  msg = "Nächster single_start " + _next_single_start.as_string();
+    }
 
     THREAD_LOCK( _lock )
     {
@@ -804,6 +843,8 @@ void Job::calculate_next_time( Time now )
             }
         }
 
+        if( next_time > _period.end() )  next_time = _period.end();          // Das ist, wenn die Periode weder repeat noch single_start hat, also keinen automatischen Start
+
         _next_time = next_time;
     }
 }
@@ -833,9 +874,9 @@ Sos_ptr<Task> Job::task_to_start()
             if( _state == s_pending )
             {
                 if( _start_once )              cause = cause_period_once,  _start_once = false,     _log.debug( "Task startet wegen <run_time once=\"yes\">" );
-                                                                        
+                else
                 if( now >= _next_start_time )  cause = cause_period_repeat,                         _log.debug( "Task startet, weil Job-Startzeit erreicht: " + _next_start_time.as_string() );
-
+                                                                        
                 Directory_watcher_list::iterator it = _directory_watcher_list.begin();
                 while( it != _directory_watcher_list.end() )
                 {
@@ -893,7 +934,11 @@ bool Job::do_something()
 
         if( _reread )  _reread = false,  reread(),  something_done = true;
 
-        if( now > _period.end() )  select_period(), set_next_start_time( now );
+        if( now > _period.end() )
+        {
+            select_period();
+            if( !_period.is_in_time( _next_start_time ) )  set_next_start_time( now );
+        }
 
         if( _state == s_pending 
          || _state == s_running  &&  _running_tasks.size() < _max_tasks )

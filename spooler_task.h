@@ -1,4 +1,4 @@
-// $Id: spooler_task.h,v 1.119 2003/09/26 10:46:41 jz Exp $
+// $Id: spooler_task.h,v 1.120 2003/09/30 11:26:21 jz Exp $
 
 #ifndef __SPOOLER_TASK_H
 #define __SPOOLER_TASK_H
@@ -16,15 +16,15 @@ struct Task : Sos_self_deleting
         s_none,
         s_loading,
         s_waiting_for_process,  // Prozess aus Prozessklasse wählen, evtl. warten, bis ein Prozess verfügbar ist.
-        s_start_task,           // Task aus der Warteschlange genommen, muss noch gestartet werden. 
-        s_starting,             // In begin__start() (end__start() muss noch gerufen werden)
+      //s_start_task,           // Task aus der Warteschlange genommen, muss noch gestartet werden. 
+        s_starting,             // load, spooler_init, spooler_open
         s_running,              // Läuft (wenn _in_step, dann in step__start() und step__end() muss gerufen werden)
         s_running_delayed,      // spooler_task.delay_spooler_process gesetzt
         s_running_waiting_for_order,
         s_running_process,      // Läuft in einem externen Prozess, auf dessen Ende nur gewartet wird
         s_suspended,            // Angehalten
-        s_end,                  // Task soll beendet werden
-        s_ending,               // end__start() gerufen, also in spooler_close()
+      //s_end,                  // Task soll beendet werden
+        s_ending,               // spooler_close
         s_on_success,           // spooler_on_success
         s_on_error,             // spooler_on_error
         s_exit,                 // spooler_exit
