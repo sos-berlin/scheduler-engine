@@ -1,4 +1,4 @@
-// $Id: spooler_job.h,v 1.31 2004/12/07 09:57:55 jz Exp $
+// $Id: spooler_job.h,v 1.32 2004/12/09 20:59:32 jz Exp $
 
 #ifndef __SPOOLER_JOB_H
 #define __SPOOLER_JOB_H
@@ -320,12 +320,12 @@ struct Job : Sos_self_deleting
     ptr<Prefix_log>            _log;
     bool                       _waiting_for_process;        // Task kann nicht gestartet werden, weil kein Prozess in der Prozessklasse verfügbar ist
     bool                       _waiting_for_process_try_again;  
+    string                     _description;                // <description>
 
   protected:
     friend struct               Job_history;
 
     string                     _title;                      // <job title="">
-    string                     _description;                // <description>
     string                     _state_text;                 // spooler_job.state_text = "..."
 
     string                     _process_filename;           // Job ist ein externes Programm

@@ -1,6 +1,6 @@
 SCHEDULER
 
-$Id: RELEASE.TXT,v 1.4 2004/11/14 11:37:49 jz Exp $
+$Id: RELEASE.TXT,v 1.5 2004/12/09 20:59:31 jz Exp $
 
 
 ------------------------------------------------
@@ -32,3 +32,14 @@ Nur -9 (debug9) bis 2 (error) sind zulässig.
 VERSION 2.0.95  2004-11-14
 
 <process>: Attribute ignore_error fehlte in der DTD.
+
+
+------------------------------------------------
+VERSION 2.0.101  2004-12-09
+
+<process ignore_signal="yes">
+
+<environment>
+
+Änderungen im HTTP-Server und den HTML-Seiten (jetzt in scheduler/html/jz/, abrufbar mit http://localhost:4444/jz)
+für Firefox.

@@ -1,4 +1,4 @@
-// $Id: spooler_command.cxx,v 1.148 2004/12/09 11:15:57 jz Exp $
+// $Id: spooler_command.cxx,v 1.149 2004/12/09 20:59:31 jz Exp $
 /*
     Hier ist implementiert
 
@@ -689,12 +689,12 @@ string xml_as_string( const xml::Document_ptr& document, bool indent )
 
 ptr<Http_response> Command_processor::execute_http( Http_request* http_request )
 {
-    string  path                    = http_request->_path;
-    string  response_body;
-    string  response_content_type;
-    int     http_status_code        = 0;
-    string  error_text;
-    string  show_log_request        = "/show_log?";
+    string        path                    = http_request->_path;
+    string        response_body;
+    string        response_content_type;
+    int           http_status_code        = 0;
+    string        error_text;
+    string const  show_log_request        = "/show_log?";
 
     try
     {
@@ -732,6 +732,27 @@ ptr<Http_response> Command_processor::execute_http( Http_request* http_request )
 
                 ptr<Http_response> response = Z_NEW( Http_response( http_request, Z_NEW( Html_chunk_reader( Z_NEW( Log_chunk_reader( log ) ), log->title() ) ), "text/html" ) );
                 return +response;
+            }
+            else
+            if( string_ends_with( path, "/job_description?" ) )
+            {
+                Job* job = _spooler->get_job( http_request->parameter( "job" ) );;
+                
+                if( job->_description == "" ) 
+                {
+                    http_status_code = 404;
+                    error_text = "Der Job hat keine Beschreibung";
+                }
+                else
+                {
+                    response_body = "<html><head><title>Scheduler-Job " + job->name() + "</title>";
+                    response_body += "<style type='text/css'> @import 'scheduler.css'; @import 'custom.css';</style>";
+                    response_body += "<body id='job_description'>";
+                    response_body += job->_description;
+                    response_body += "</body></html>";
+
+                    response_content_type = "text/html";
+                }
             }
             else
             {

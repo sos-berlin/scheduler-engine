@@ -1,4 +1,4 @@
-// $Id: scheduler.js,v 1.7 2004/12/09 11:15:58 jz Exp $
+// $Id: scheduler.js,v 1.8 2004/12/09 20:59:32 jz Exp $
 
 //----------------------------------------------------------------------------------------------var
 
@@ -96,9 +96,9 @@ function check_browser()
 
 function Scheduler()
 {
-    this._url           = "http://" + document.location.host + "/";
-    this._xml_http      = window.XMLHttpRequest? new XMLHttpRequest() : new ActiveXObject( "Msxml2.XMLHTTP" );
-    this._log_window    = undefined;
+    this._url               = "http://" + document.location.host + "/";
+    this._xml_http          = window.XMLHttpRequest? new XMLHttpRequest() : new ActiveXObject( "Msxml2.XMLHTTP" );
+    this._dependend_windows = new Object();
     //this._configuration = new Scheduler_html_configuration( this._url + "config.xml" );
 }
 
@@ -110,7 +110,11 @@ Scheduler.prototype.close = function()
     //this._configuration = null;
     this._xml_http = null;
 
-    if( this._log_window )  this._log_window.close(),  this._log_window = undefined;
+    
+    var dependend_windows = this._dependend_windows;
+    this._depended_windows = new Object();
+
+    for( var window_name in dependend_windows )  this._dependend_windows[ window_name ].close();
 }
 
 //--------------------------------------------------------------------------------Scheduler.execute
@@ -537,15 +541,17 @@ function popup_menu__show_log__onclick( show_log_command, window_name )
     window_name = "show_log";  // Nur ein Fenster. ie6 will nicht mehrere Logs gleichzeitig lesen, nur nacheinander
 
     var features = "menubar=no, toolbar=no, location=no, directories=no, scrollbars=yes, resizable=yes, status=no";
-    features +=   " width="  + ( window.screen.availWidth - 11 ) +
-                 ", height=" + ( Math.floor( window.screen.availHeight * 0.2 ) - 32 ) +
-                 ", left=0"  +
-                 ", top="    +  Math.floor( window.screen.availHeight * 0.8 );
+    features +=  ", width="       + ( window.screen.availWidth - 11 ) +
+                 ", innerwidth="  + ( window.screen.availWidth - 11 ) +                             // Für Firefox
+                 ", height="      + ( Math.floor( window.screen.availHeight * 0.2 ) - 32 ) +
+                 ", innerheight=" + ( Math.floor( window.screen.availHeight * 0.2 ) - 32 ) +        // Für Firefox
+                 ", left=0"       +
+                 ", top="         +  Math.floor( window.screen.availHeight * 0.8 );
 
     var log_window = window.open( document.location.href.replace( /\/[^\/]*$/, "/" ) + show_log_command, window_name, features, true );
     log_window.focus();
 
-    if( _scheduler )  _scheduler._log_window = log_window;
+    if( _scheduler )  _scheduler._dependend_windows[ window_name ] = log_window;
 
     _popup_menu.close();
 }
@@ -591,8 +597,9 @@ function job_menu__onclick( job_name, x, y )
 
     popup_builder.add_show_log( "Show log"        , "show_log?job=" + job_name, "show_log_job_" + job_name );
 
-    var description_element = job_element.selectSingleNode( "description" );
-    var is_active = description_element? description_element.text != "" : false;
+    //var description_element = job_element.selectSingleNode( "description" );
+    //var is_active = description_element? description_element.text != "" : false;
+    var is_active = job_element.getAttribute( "has_description" ) == "yes";
     popup_builder.add_entry   ( "Show description", "show_job_description()", is_active );
 
     popup_builder.add_bar();
@@ -634,6 +641,18 @@ function order_menu__onclick( job_chain_name, order_id, x, y )
                                                             "&order=" + order_id, "show_log_order_" + job_chain_name + "__" + order_id );
 
     _popup_menu = popup_builder.show_popup_menu( x, y );
+}
+
+//-----------------------------------------------------------------------------------------open_url
+
+function open_url( url, window_name )
+{
+    var features = "menubar=no, toolbar=no, location=no, directories=no, scrollbars=yes, resizable=yes, status=no";
+
+    var my_window = window.open( url, window_name, features, true );
+    my_window.focus();
+
+    if( window_name  &&  _scheduler )  _scheduler._dependend_windows[ window_name ] = my_window;
 }
 
 //-------------------------------------------------------------------------------string_from_object

@@ -1,4 +1,4 @@
-<!-- $Id: details_frame.html,v 1.1 2004/12/02 13:36:08 jz Exp $ -->
+<!-- $Id: details_frame.html,v 1.2 2004/12/09 20:59:32 jz Exp $ -->
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <html>
 
@@ -180,11 +180,18 @@ function show_job_chain_details( job_chain_element )
 
 function show_job_description()
 {
-    var job_element = //document.all._job_element != undefined?
-                        _job_element  // _job_element in task_frame.html (detail_frame)                                                                                  // Rechter Rahmen
-                      //: _response.selectSingleNode( "spooler/answer/state/jobs/job [ @job = '" + job_name + "' ]" );  // Linker Rahmen
+    var job_element =  _job_element;
                       
-    //var log_window = window.open( "http://" + document.location.host + "/" + show_log_command, window_name, features, true );
+    var url         = document.location.href.replace( /\/[^\/]*$/, "/" ) + "job_description?job=" + job_element.getAttribute( "job" );
+    var features    = "menubar=no, toolbar=no, location=no, directories=no, scrollbars=yes, resizable=yes, status=no";
+    var window_name = "scheduler_job_description";
+    
+    var description_window = window.open( url, window_name, features, true );
+    description_window.focus();
+    
+    if( _scheduler )  _scheduler._dependend_windows[ window_name ] = description_window;
+
+    /* Nur ie: Text als Popup im rechten Frame zeigen (scheduler.css wirkt hier leider nicht)
     if( _description_popup )  _description_popup.hide();
     
     _description_popup = window.createPopup();
@@ -196,6 +203,7 @@ function show_job_description()
     _description_popup.hide();
     _description_popup.document.body.className = "job";
     _description_popup.show( this.document.body.offsetLeft, this.document.body.offsetTop, width, height, this.document.body );
+    */
 }
 
 //-------------------------------------------------------------------------------------------update
@@ -220,7 +228,7 @@ function update( force )
     else
     if( _job_name != undefined )
     {
-        var response = _scheduler.execute( "<show_job job='" + _job_name + "' what='all,orders'/>" );
+        var response = _scheduler.execute( "<show_job job='" + _job_name + "' what='task_queue,orders'/>" );
         window.parent.left_frame.modify_response( response );
         
         _job_element = response.selectSingleNode( "spooler/answer/job" );

@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding="utf-8"?>
-<!-- $Id: scheduler.xslt,v 1.9 2004/12/09 11:15:58 jz Exp $ -->
+<!-- $Id: scheduler.xslt,v 1.10 2004/12/09 20:59:32 jz Exp $ -->
 <xsl:stylesheet xmlns:xsl   = "http://www.w3.org/1999/XSL/Transform" 
                 xmlns:msxsl = "urn:schemas-microsoft-com:xslt"
                 version     = "1.0">
@@ -160,7 +160,11 @@
                 </td>
 
                 <td valign="top" align="right">
-                    <a href="/doc/index.xml" target="documentation" class="small">Doku</a>&#160;
+                    <!--span onclick = "open_url( '/doc/index.xml', 'scheduler_documentation' )"
+                          class   = "small"
+                          style   = "cursor: pointer; text-decoration: underline;">
+                    </span-->
+                    <a href="javascript:void(0)" onclick="open_url( '/doc/index.xml', 'scheduler_documentation' )" target="scheduler_documentation" class="small">Doku</a>&#160;
                     
                     <xsl:call-template name="command_menu">
                         <xsl:with-param name="onclick" select="'scheduler_menu__onclick( mouse_x() - 100, mouse_y() - 1 )'"/>

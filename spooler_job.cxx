@@ -1,4 +1,4 @@
-// $Id: spooler_job.cxx,v 1.98 2004/12/07 14:31:18 jz Exp $
+// $Id: spooler_job.cxx,v 1.99 2004/12/09 20:59:32 jz Exp $
 // §851: Weitere Log-Ausgaben zum Scheduler-Start eingebaut
 /*
     Hier sind implementiert
@@ -1570,8 +1570,9 @@ xml::Element_ptr Job::dom( const xml::Document_ptr& document, const Show_what& s
         job_element.setAttribute( "log_file"  , _log->filename()         );
         job_element.setAttribute( "order"     , _order_queue? "yes" : "no" );
         job_element.setAttribute( "tasks"     , _max_tasks              );
-        
-        if( _state_cmd        )  job_element.setAttribute( "cmd"    , state_cmd_name()  );
+        if( _description != "" )  job_element.setAttribute( "has_description", "yes" );
+
+        if( _state_cmd         )  job_element.setAttribute( "cmd"    , state_cmd_name()  );
 
         //if( _next_start_time < latter_day )
         //job_element.setAttribute( "next_start_time", _next_start_time.as_string() );
