@@ -1,4 +1,4 @@
-// $Id: spooler_module_java.h,v 1.30 2004/02/16 11:56:10 jz Exp $
+// $Id: spooler_module_java.h,v 1.31 2004/02/22 19:55:38 jz Exp $
 
 #ifndef __SPOOLER_MODULE_JAVA_H
 #define __SPOOLER_MODULE_JAVA_H
@@ -15,7 +15,7 @@ namespace spooler {
 //struct Java_vm;
 struct Java_thread_data;
 
-extern zschimmer::Thread_data<Java_thread_data> thread_data;
+//extern zschimmer::Thread_data<Java_thread_data> thread_data;
 
 //---------------------------------------------------------------------------------Java_thread_data
 

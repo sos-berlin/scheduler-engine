@@ -1,4 +1,4 @@
-// $Id: spooler_mail.cxx,v 1.18 2003/09/30 21:54:35 jz Exp $
+// $Id: spooler_mail.cxx,v 1.19 2004/02/22 19:55:38 jz Exp $
 
 
 #include "spooler.h"
@@ -68,12 +68,7 @@ Com_mail::~Com_mail()
 
 STDMETHODIMP Com_mail::QueryInterface( const IID& iid, void** result )
 {
-    if( iid == IID_Ihas_java_class_name )  
-    { 
-        AddRef();
-        *result = (Ihas_java_class_name*)this;  
-        return S_OK; 
-    }
+    Z_IMPLEMENT_QUERY_INTERFACE( iid, odl::Ihas_java_class_name, result );
 
     return Sos_ole_object::QueryInterface( iid, result );
 }

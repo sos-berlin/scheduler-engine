@@ -1,4 +1,4 @@
-// $Id: spooler_com.h,v 1.90 2004/02/15 15:53:37 jz Exp $
+// $Id: spooler_com.h,v 1.91 2004/02/22 19:55:38 jz Exp $
 
 #ifndef __SPOOLER_COM_H
 #define __SPOOLER_COM_H
@@ -7,6 +7,7 @@
 
 #include "../zschimmer/com.h"
 #include "../zschimmer/z_com_server.h"
+#include "../zschimmer/java_odl.h"
 #include "../kram/com_simple_standards.h"
 #include "../kram/sysxcept.h"
 #include "../kram/sosscrpt.h"
@@ -62,7 +63,7 @@ struct Spooler;
 //----------------------------------------------------------------------------------------Com_error
 
 struct Com_error: spooler_com::Ierror, 
-                  spooler_com::Ihas_java_class_name, 
+                  odl::Ihas_java_class_name, 
                   Sos_ole_object
 {
                                 Com_error                   ( const Xc_copy& );
@@ -91,7 +92,7 @@ struct Com_error: spooler_com::Ierror,
 //-------------------------------------------------------------------------------------Com_variable
 
 struct Com_variable: spooler_com::Ivariable, 
-                     spooler_com::Ihas_java_class_name, 
+                     odl::Ihas_java_class_name, 
                      Sos_ole_object
 {
     Z_GNU_ONLY(                 Com_variable                ();  )                                  // Für gcc 3.2. Nicht implementiert.
@@ -120,7 +121,7 @@ struct Com_variable: spooler_com::Ivariable,
 //----------------------------------------------------------------------------------Com_variable_set
 
 struct Com_variable_set: spooler_com::Ivariable_set, 
-                         spooler_com::Ihas_java_class_name, 
+                         odl::Ihas_java_class_name, 
                          Sos_ole_object
 {
                                 Com_variable_set            ();
@@ -194,7 +195,7 @@ struct Com_variable_set_enumerator : spooler_com::Ivariable_set_enumerator, Sos_
 //------------------------------------------------------------------------------------------Com_log
 
 struct Com_log : spooler_com::Ilog, 
-                 spooler_com::Ihas_java_class_name, 
+                 odl::Ihas_java_class_name, 
                  z::com::object_server::Ihas_reference_with_properties,
                  Sos_ole_object               
 {
@@ -321,7 +322,7 @@ struct Com_log_proxy: object_server::Proxy
 //----------------------------------------------------------------------------------Com_object_set
 
 struct Com_object_set : spooler_com::Iobject_set, 
-                      //spooler_com::Ihas_java_class_name, 
+                      //odl::Ihas_java_class_name, 
                         Sos_ole_object               
 {
     Z_GNU_ONLY(                 Com_object_set              ();  )                                  // Für gcc 3.2. Nicht implementiert.
@@ -345,7 +346,7 @@ struct Com_object_set : spooler_com::Iobject_set,
 //------------------------------------------------------------------------------------------Com_job
 
 struct Com_job : spooler_com::Ijob, 
-                 spooler_com::Ihas_java_class_name, 
+                 odl::Ihas_java_class_name, 
                  Sos_ole_object               
 {
     Z_GNU_ONLY(                 Com_job                     ();  )                                  // Für gcc 3.2. Nicht implementiert.
@@ -385,7 +386,7 @@ struct Com_job : spooler_com::Ijob,
 //-----------------------------------------------------------------------------------------Com_task
 
 struct Com_task : spooler_com::Itask, 
-                  spooler_com::Ihas_java_class_name, 
+                  odl::Ihas_java_class_name, 
                   Sos_ole_object               
 {
                                 Com_task                    ( Task* = NULL );
@@ -425,7 +426,7 @@ struct Com_task : spooler_com::Itask,
 //---------------------------------------------------------------------------------------Com_thread
 /*
 struct Com_thread : spooler_com::Ithread, 
-                    spooler_com::Ihas_java_class_name, 
+                    odl::Ihas_java_class_name, 
                     Sos_ole_object               
 {
                                 Com_thread                  ( Spooler_thread* );
@@ -452,7 +453,7 @@ struct Com_thread : spooler_com::Ithread,
 //--------------------------------------------------------------------------------------Com_spooler
 
 struct Com_spooler : spooler_com::Ispooler, 
-                     spooler_com::Ihas_java_class_name, 
+                     odl::Ihas_java_class_name, 
                      Sos_ole_object               
 {
                                 Com_spooler                 ();                                     // Für gcc 3.2. Nicht implementiert.
@@ -534,7 +535,7 @@ struct Com_context : spooler_com::Ispooler_context, Sos_ole_object
 //------------------------------------------------------------------------------------Com_job_chain
 
 struct Com_job_chain : spooler_com::Ijob_chain, 
-                       spooler_com::Ihas_java_class_name, 
+                       odl::Ihas_java_class_name, 
                        Sos_ole_object               
 {
                                 Com_job_chain           ( Job_chain* );
@@ -570,7 +571,7 @@ struct Com_job_chain : spooler_com::Ijob_chain,
 //-------------------------------------------------------------------------------Com_job_chain_node
 
 struct Com_job_chain_node : spooler_com::Ijob_chain_node, 
-                            spooler_com::Ihas_java_class_name, 
+                            odl::Ihas_java_class_name, 
                             Sos_ole_object               
 {
                                 Com_job_chain_node      ();
@@ -593,7 +594,7 @@ struct Com_job_chain_node : spooler_com::Ijob_chain_node,
 //----------------------------------------------------------------------------------------Com_order
 
 struct Com_order : spooler_com::Iorder, 
-                   spooler_com::Ihas_java_class_name, 
+                   odl::Ihas_java_class_name, 
                    Sos_ole_object
 {
                                 Com_order               ( Order* );
@@ -650,7 +651,7 @@ struct Com_order : spooler_com::Iorder,
 //----------------------------------------------------------------------------------Com_order_queue
 
 struct Com_order_queue : spooler_com::Iorder_queue, 
-                         spooler_com::Ihas_java_class_name, 
+                         odl::Ihas_java_class_name, 
                          Sos_ole_object               
 {
                                 Com_order_queue         ();
