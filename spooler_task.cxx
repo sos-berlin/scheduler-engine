@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.186 2003/09/01 15:15:37 jz Exp $
+// $Id: spooler_task.cxx,v 1.187 2003/09/01 15:16:18 jz Exp $
 /*
     Hier sind implementiert
 
@@ -221,13 +221,13 @@ void Task::close()
     if( _order )  remove_order_after_error();
 
     _history.end();
-
+/*
     try
     {
         do_kill();
     }
     catch( const exception& x ) { _log.warn( x.what() ); }
-
+*/
     do_close();
 /*
     THREAD_LOCK( _job->_lock )  
@@ -1353,6 +1353,7 @@ Process_task::Process_task( Job* job )
 
 void Process_task::do_close()
 {
+    do_kill();
     _process_handle.close();
 }
 
