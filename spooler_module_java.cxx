@@ -1,4 +1,4 @@
-// $Id: spooler_module_java.cxx,v 1.9 2002/11/09 09:13:17 jz Exp $
+// $Id: spooler_module_java.cxx,v 1.10 2002/11/09 15:05:25 jz Exp $
 /*
     Hier sind implementiert
 
@@ -64,6 +64,15 @@ static void set_java_exception( JNIEnv* jenv, const _com_error& x )
 {
     string what = string_from_ole( x.Description() );
     set_java_exception( jenv, what.c_str() );
+}
+
+//------------------------------------------------------------------------------string_from_jstring
+
+static string string_from_jstring( JNIEnv* jenv, const jstring& jstr )
+{
+    const OLECHAR* str_w = jenv->GetStringChars( jstr, 0 );
+    
+    return string_from_ole( str_w );
 }
 
 //----------------------------------------------------------------------------------jstring_to_bstr
@@ -424,7 +433,6 @@ JNIEXPORT jobject JNICALL Java_sos_spooler_Idispatch_com_1call( JNIEnv* jenv, jc
 
         hr = idispatch->Invoke( dispid, IID_NULL, (LCID)0, context, &dispparams, &result, &excepinfo, &arg_nr );
         if( FAILED(hr) )  throw_ole_excepinfo( hr, &excepinfo, "Invoke", string_from_bstr(name_bstr).c_str() );
-        //if( FAILED(hr) )  throw_com( hr, "Invoke", string_from_bstr(name_bstr).c_str() );
 
         return jobject_from_variant( jenv, result );
     }
@@ -673,14 +681,29 @@ Java_env& Java_vm::env()
 void Java_vm::throw_java( int return_value, const string& text1, const string& text2 )
 {
     string ret_text;
+    string java_text = "(java)";
 
     JNIEnv* env = _thread_data->_env;
     if( env )
     {
-        if( env->ExceptionOccurred() )
+        jthrowable x = env->ExceptionOccurred();
+        if( x )
         {
-            env->ExceptionDescribe();
             env->ExceptionClear();
+            //bool text_gotten = false;
+
+            jclass c = env->GetObjectClass(x);
+            if( c ) 
+            {
+                jmethodID get_message_id = env->GetMethodID( c, "getMessage", "()Ljava/lang/String;" );
+                if( get_message_id )
+                {
+                    java_text = string_from_jstring( env, (jstring)env->CallObjectMethod( x, get_message_id ) );
+                    //text_gotten = true;
+                }
+            }
+    
+            //if( !text_gotten )  env->ExceptionDescribe();
         }
     }
 
@@ -697,6 +720,7 @@ void Java_vm::throw_java( int return_value, const string& text1, const string& t
     }
 
     Xc x ( "SPOOLER-175" );
+    x.insert( java_text );
     x.insert( text1 );
     x.insert( text2 );
     x.insert( ret_text );

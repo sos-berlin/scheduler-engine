@@ -323,7 +323,7 @@ SOURCE=.\spooler.dtd
 SOURCE=.\spooler.xml
 # End Source File
 # End Group
-# Begin Group "Java~"
+# Begin Group "Java"
 
 # PROP Default_Filter "*.java"
 # Begin Source File
@@ -332,7 +332,7 @@ SOURCE=.\sos\spooler\Error.java
 
 !IF  "$(CFG)" == "spooler - Win32 Release"
 
-# Begin Custom Build
+# Begin Custom Build -
 OutDir=.\Release
 InputPath=.\sos\spooler\Error.java
 InputName=Error
@@ -353,7 +353,7 @@ BuildCmds= \
 
 !ELSEIF  "$(CFG)" == "spooler - Win32 Debug"
 
-# Begin Custom Build
+# Begin Custom Build -
 OutDir=.\Debug
 InputPath=.\sos\spooler\Error.java
 InputName=Error
@@ -381,7 +381,7 @@ SOURCE=.\sos\spooler\Idispatch.java
 
 !IF  "$(CFG)" == "spooler - Win32 Release"
 
-# Begin Custom Build
+# Begin Custom Build -
 OutDir=.\Release
 InputPath=.\sos\spooler\Idispatch.java
 InputName=Idispatch
@@ -402,7 +402,7 @@ BuildCmds= \
 
 !ELSEIF  "$(CFG)" == "spooler - Win32 Debug"
 
-# Begin Custom Build
+# Begin Custom Build -
 OutDir=.\Debug
 InputPath=.\sos\spooler\Idispatch.java
 InputName=Idispatch
@@ -430,7 +430,7 @@ SOURCE=.\sos\spooler\Job.java
 
 !IF  "$(CFG)" == "spooler - Win32 Release"
 
-# Begin Custom Build
+# Begin Custom Build -
 OutDir=.\Release
 InputPath=.\sos\spooler\Job.java
 InputName=Job
@@ -451,7 +451,7 @@ BuildCmds= \
 
 !ELSEIF  "$(CFG)" == "spooler - Win32 Debug"
 
-# Begin Custom Build
+# Begin Custom Build -
 OutDir=.\Debug
 InputPath=.\sos\spooler\Job.java
 InputName=Job
@@ -479,7 +479,7 @@ SOURCE=.\sos\spooler\Job_chain.java
 
 !IF  "$(CFG)" == "spooler - Win32 Release"
 
-# Begin Custom Build
+# Begin Custom Build -
 OutDir=.\Release
 InputPath=.\sos\spooler\Job_chain.java
 InputName=Job_chain
@@ -500,7 +500,7 @@ BuildCmds= \
 
 !ELSEIF  "$(CFG)" == "spooler - Win32 Debug"
 
-# Begin Custom Build
+# Begin Custom Build -
 OutDir=.\Debug
 InputPath=.\sos\spooler\Job_chain.java
 InputName=Job_chain
@@ -528,7 +528,7 @@ SOURCE=.\sos\spooler\Job_chain_node.java
 
 !IF  "$(CFG)" == "spooler - Win32 Release"
 
-# Begin Custom Build
+# Begin Custom Build -
 OutDir=.\Release
 InputPath=.\sos\spooler\Job_chain_node.java
 InputName=Job_chain_node
@@ -549,7 +549,7 @@ BuildCmds= \
 
 !ELSEIF  "$(CFG)" == "spooler - Win32 Debug"
 
-# Begin Custom Build
+# Begin Custom Build -
 OutDir=.\Debug
 InputPath=.\sos\spooler\Job_chain_node.java
 InputName=Job_chain_node
@@ -577,7 +577,7 @@ SOURCE=.\sos\spooler\Job_impl.java
 
 !IF  "$(CFG)" == "spooler - Win32 Release"
 
-# Begin Custom Build
+# Begin Custom Build -
 OutDir=.\Release
 InputPath=.\sos\spooler\Job_impl.java
 InputName=Job_impl
@@ -598,7 +598,7 @@ BuildCmds= \
 
 !ELSEIF  "$(CFG)" == "spooler - Win32 Debug"
 
-# Begin Custom Build
+# Begin Custom Build -
 OutDir=.\Debug
 InputPath=.\sos\spooler\Job_impl.java
 InputName=Job_impl
@@ -626,7 +626,7 @@ SOURCE=.\sos\spooler\Log.java
 
 !IF  "$(CFG)" == "spooler - Win32 Release"
 
-# Begin Custom Build
+# Begin Custom Build -
 OutDir=.\Release
 InputPath=.\sos\spooler\Log.java
 InputName=Log
@@ -647,7 +647,7 @@ BuildCmds= \
 
 !ELSEIF  "$(CFG)" == "spooler - Win32 Debug"
 
-# Begin Custom Build
+# Begin Custom Build -
 OutDir=.\Debug
 InputPath=.\sos\spooler\Log.java
 InputName=Log
@@ -675,7 +675,7 @@ SOURCE=.\sos\spooler\Mail.java
 
 !IF  "$(CFG)" == "spooler - Win32 Release"
 
-# Begin Custom Build
+# Begin Custom Build -
 OutDir=.\Release
 InputPath=.\sos\spooler\Mail.java
 InputName=Mail
@@ -696,7 +696,7 @@ BuildCmds= \
 
 !ELSEIF  "$(CFG)" == "spooler - Win32 Debug"
 
-# Begin Custom Build
+# Begin Custom Build -
 OutDir=.\Debug
 InputPath=.\sos\spooler\Mail.java
 InputName=Mail
@@ -724,7 +724,7 @@ SOURCE=.\sos\spooler\Order.java
 
 !IF  "$(CFG)" == "spooler - Win32 Release"
 
-# Begin Custom Build
+# Begin Custom Build -
 OutDir=.\Release
 InputPath=.\sos\spooler\Order.java
 InputName=Order
@@ -745,7 +745,7 @@ BuildCmds= \
 
 !ELSEIF  "$(CFG)" == "spooler - Win32 Debug"
 
-# Begin Custom Build
+# Begin Custom Build -
 OutDir=.\Debug
 InputPath=.\sos\spooler\Order.java
 InputName=Order
@@ -773,7 +773,7 @@ SOURCE=.\sos\spooler\Order_queue.java
 
 !IF  "$(CFG)" == "spooler - Win32 Release"
 
-# Begin Custom Build
+# Begin Custom Build -
 OutDir=.\Release
 InputPath=.\sos\spooler\Order_queue.java
 InputName=Order_queue
@@ -794,7 +794,7 @@ BuildCmds= \
 
 !ELSEIF  "$(CFG)" == "spooler - Win32 Debug"
 
-# Begin Custom Build
+# Begin Custom Build -
 OutDir=.\Debug
 InputPath=.\sos\spooler\Order_queue.java
 InputName=Order_queue
@@ -822,7 +822,7 @@ SOURCE=.\sos\spooler\Spooler.java
 
 !IF  "$(CFG)" == "spooler - Win32 Release"
 
-# Begin Custom Build
+# Begin Custom Build -
 OutDir=.\Release
 InputPath=.\sos\spooler\Spooler.java
 InputName=Spooler
@@ -843,7 +843,7 @@ BuildCmds= \
 
 !ELSEIF  "$(CFG)" == "spooler - Win32 Debug"
 
-# Begin Custom Build
+# Begin Custom Build -
 OutDir=.\Debug
 InputPath=.\sos\spooler\Spooler.java
 InputName=Spooler
@@ -871,7 +871,7 @@ SOURCE=.\sos\spooler\Task.java
 
 !IF  "$(CFG)" == "spooler - Win32 Release"
 
-# Begin Custom Build
+# Begin Custom Build -
 OutDir=.\Release
 InputPath=.\sos\spooler\Task.java
 InputName=Task
@@ -892,7 +892,7 @@ BuildCmds= \
 
 !ELSEIF  "$(CFG)" == "spooler - Win32 Debug"
 
-# Begin Custom Build
+# Begin Custom Build -
 OutDir=.\Debug
 InputPath=.\sos\spooler\Task.java
 InputName=Task
@@ -920,7 +920,7 @@ SOURCE=.\sos\spooler\Thread.java
 
 !IF  "$(CFG)" == "spooler - Win32 Release"
 
-# Begin Custom Build
+# Begin Custom Build -
 OutDir=.\Release
 InputPath=.\sos\spooler\Thread.java
 InputName=Thread
@@ -941,7 +941,7 @@ BuildCmds= \
 
 !ELSEIF  "$(CFG)" == "spooler - Win32 Debug"
 
-# Begin Custom Build
+# Begin Custom Build -
 OutDir=.\Debug
 InputPath=.\sos\spooler\Thread.java
 InputName=Thread
@@ -969,7 +969,7 @@ SOURCE=.\sos\spooler\Variable_set.java
 
 !IF  "$(CFG)" == "spooler - Win32 Release"
 
-# Begin Custom Build
+# Begin Custom Build -
 OutDir=.\Release
 InputPath=.\sos\spooler\Variable_set.java
 InputName=Variable_set
@@ -990,7 +990,7 @@ BuildCmds= \
 
 !ELSEIF  "$(CFG)" == "spooler - Win32 Debug"
 
-# Begin Custom Build
+# Begin Custom Build -
 OutDir=.\Debug
 InputPath=.\sos\spooler\Variable_set.java
 InputName=Variable_set
@@ -1018,7 +1018,7 @@ SOURCE=.\sos\spooler\Variant.java
 
 !IF  "$(CFG)" == "spooler - Win32 Release"
 
-# Begin Custom Build
+# Begin Custom Build -
 OutDir=.\Release
 InputPath=.\sos\spooler\Variant.java
 InputName=Variant
@@ -1039,700 +1039,10 @@ BuildCmds= \
 
 !ELSEIF  "$(CFG)" == "spooler - Win32 Debug"
 
-# Begin Custom Build
+# Begin Custom Build -
 OutDir=.\Debug
 InputPath=.\sos\spooler\Variant.java
 InputName=Variant
-
-BuildCmds= \
-	echo javac -d $(OutDir) -sourcepath . -classpath $(OutDir) $(InputPath) \
-	javac -d $(OutDir) -sourcepath . -classpath $(OutDir) $(InputPath) \
-	echo javah -force -o $(OutDir)/$(InputName).h -classpath $(OutDir) sos.spooler.$(InputName) \
-	javah -force -o $(OutDir)/$(InputName).h -classpath $(OutDir) sos.spooler.$(InputName) \
-	
-
-"$(OutDir)/sos/spooler/$(InputName).class" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-   $(BuildCmds)
-
-"$(OutDir)/$(InputName).h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-   $(BuildCmds)
-# End Custom Build
-
-!ENDIF 
-
-# End Source File
-# End Group
-# Begin Group "Java"
-
-# PROP Default_Filter "*.java"
-# Begin Source File
-
-SOURCE=.\Error.java
-
-!IF  "$(CFG)" == "spooler - Win32 Release"
-
-# Begin Custom Build
-OutDir=.\Release
-InputPath=.\Error.java
-InputName=Error
-
-BuildCmds= \
-	echo javac -d $(OutDir) -sourcepath . -classpath $(OutDir) $(InputPath) \
-	javac -d $(OutDir) -sourcepath . -classpath $(OutDir) $(InputPath) \
-	echo javah -force -o $(OutDir)/$(InputName).h -classpath $(OutDir) sos.spooler.$(InputName) \
-	javah -force -o $(OutDir)/$(InputName).h -classpath $(OutDir) sos.spooler.$(InputName) \
-	
-
-"$(OutDir)/sos/spooler/$(InputName).class" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-   $(BuildCmds)
-
-"$(OutDir)/$(InputName).h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-   $(BuildCmds)
-# End Custom Build
-
-!ELSEIF  "$(CFG)" == "spooler - Win32 Debug"
-
-# Begin Custom Build
-OutDir=.\Debug
-InputPath=.\Error.java
-InputName=Error
-
-BuildCmds= \
-	echo javac -d $(OutDir) -sourcepath . -classpath $(OutDir) $(InputPath) \
-	javac -d $(OutDir) -sourcepath . -classpath $(OutDir) $(InputPath) \
-	echo javah -force -o $(OutDir)/$(InputName).h -classpath $(OutDir) sos.spooler.$(InputName) \
-	javah -force -o $(OutDir)/$(InputName).h -classpath $(OutDir) sos.spooler.$(InputName) \
-	
-
-"$(OutDir)/sos/spooler/$(InputName).class" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-   $(BuildCmds)
-
-"$(OutDir)/$(InputName).h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-   $(BuildCmds)
-# End Custom Build
-
-!ENDIF 
-
-# End Source File
-# Begin Source File
-
-SOURCE=.\Idispatch.java
-
-!IF  "$(CFG)" == "spooler - Win32 Release"
-
-# Begin Custom Build
-OutDir=.\Release
-InputPath=.\Idispatch.java
-InputName=Idispatch
-
-BuildCmds= \
-	echo javac -d $(OutDir) -sourcepath . -classpath $(OutDir) $(InputPath) \
-	javac -d $(OutDir) -sourcepath . -classpath $(OutDir) $(InputPath) \
-	echo javah -force -o $(OutDir)/$(InputName).h -classpath $(OutDir) sos.spooler.$(InputName) \
-	javah -force -o $(OutDir)/$(InputName).h -classpath $(OutDir) sos.spooler.$(InputName) \
-	
-
-"$(OutDir)/sos/spooler/$(InputName).class" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-   $(BuildCmds)
-
-"$(OutDir)/$(InputName).h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-   $(BuildCmds)
-# End Custom Build
-
-!ELSEIF  "$(CFG)" == "spooler - Win32 Debug"
-
-# Begin Custom Build
-OutDir=.\Debug
-InputPath=.\Idispatch.java
-InputName=Idispatch
-
-BuildCmds= \
-	echo javac -d $(OutDir) -sourcepath . -classpath $(OutDir) $(InputPath) \
-	javac -d $(OutDir) -sourcepath . -classpath $(OutDir) $(InputPath) \
-	echo javah -force -o $(OutDir)/$(InputName).h -classpath $(OutDir) sos.spooler.$(InputName) \
-	javah -force -o $(OutDir)/$(InputName).h -classpath $(OutDir) sos.spooler.$(InputName) \
-	
-
-"$(OutDir)/sos/spooler/$(InputName).class" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-   $(BuildCmds)
-
-"$(OutDir)/$(InputName).h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-   $(BuildCmds)
-# End Custom Build
-
-!ENDIF 
-
-# End Source File
-# Begin Source File
-
-SOURCE=.\Job.java
-
-!IF  "$(CFG)" == "spooler - Win32 Release"
-
-# Begin Custom Build
-OutDir=.\Release
-InputPath=.\Job.java
-InputName=Job
-
-BuildCmds= \
-	echo javac -d $(OutDir) -sourcepath . -classpath $(OutDir) $(InputPath) \
-	javac -d $(OutDir) -sourcepath . -classpath $(OutDir) $(InputPath) \
-	echo javah -force -o $(OutDir)/$(InputName).h -classpath $(OutDir) sos.spooler.$(InputName) \
-	javah -force -o $(OutDir)/$(InputName).h -classpath $(OutDir) sos.spooler.$(InputName) \
-	
-
-"$(OutDir)/sos/spooler/$(InputName).class" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-   $(BuildCmds)
-
-"$(OutDir)/$(InputName).h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-   $(BuildCmds)
-# End Custom Build
-
-!ELSEIF  "$(CFG)" == "spooler - Win32 Debug"
-
-# Begin Custom Build
-OutDir=.\Debug
-InputPath=.\Job.java
-InputName=Job
-
-BuildCmds= \
-	echo javac -d $(OutDir) -sourcepath . -classpath $(OutDir) $(InputPath) \
-	javac -d $(OutDir) -sourcepath . -classpath $(OutDir) $(InputPath) \
-	echo javah -force -o $(OutDir)/$(InputName).h -classpath $(OutDir) sos.spooler.$(InputName) \
-	javah -force -o $(OutDir)/$(InputName).h -classpath $(OutDir) sos.spooler.$(InputName) \
-	
-
-"$(OutDir)/sos/spooler/$(InputName).class" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-   $(BuildCmds)
-
-"$(OutDir)/$(InputName).h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-   $(BuildCmds)
-# End Custom Build
-
-!ENDIF 
-
-# End Source File
-# Begin Source File
-
-SOURCE=.\Job_chain.java
-
-!IF  "$(CFG)" == "spooler - Win32 Release"
-
-# Begin Custom Build
-OutDir=.\Release
-InputPath=.\Job_chain.java
-InputName=Job_chain
-
-BuildCmds= \
-	echo javac -d $(OutDir) -sourcepath . -classpath $(OutDir) $(InputPath) \
-	javac -d $(OutDir) -sourcepath . -classpath $(OutDir) $(InputPath) \
-	echo javah -force -o $(OutDir)/$(InputName).h -classpath $(OutDir) sos.spooler.$(InputName) \
-	javah -force -o $(OutDir)/$(InputName).h -classpath $(OutDir) sos.spooler.$(InputName) \
-	
-
-"$(OutDir)/sos/spooler/$(InputName).class" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-   $(BuildCmds)
-
-"$(OutDir)/$(InputName).h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-   $(BuildCmds)
-# End Custom Build
-
-!ELSEIF  "$(CFG)" == "spooler - Win32 Debug"
-
-# Begin Custom Build
-OutDir=.\Debug
-InputPath=.\Job_chain.java
-InputName=Job_chain
-
-BuildCmds= \
-	echo javac -d $(OutDir) -sourcepath . -classpath $(OutDir) $(InputPath) \
-	javac -d $(OutDir) -sourcepath . -classpath $(OutDir) $(InputPath) \
-	echo javah -force -o $(OutDir)/$(InputName).h -classpath $(OutDir) sos.spooler.$(InputName) \
-	javah -force -o $(OutDir)/$(InputName).h -classpath $(OutDir) sos.spooler.$(InputName) \
-	
-
-"$(OutDir)/sos/spooler/$(InputName).class" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-   $(BuildCmds)
-
-"$(OutDir)/$(InputName).h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-   $(BuildCmds)
-# End Custom Build
-
-!ENDIF 
-
-# End Source File
-# Begin Source File
-
-SOURCE=.\Job_chain_node.java
-
-!IF  "$(CFG)" == "spooler - Win32 Release"
-
-# Begin Custom Build
-OutDir=.\Release
-InputPath=.\Job_chain_node.java
-InputName=Job_chain_node
-
-BuildCmds= \
-	echo javac -d $(OutDir) -sourcepath . -classpath $(OutDir) $(InputPath) \
-	javac -d $(OutDir) -sourcepath . -classpath $(OutDir) $(InputPath) \
-	echo javah -force -o $(OutDir)/$(InputName).h -classpath $(OutDir) sos.spooler.$(InputName) \
-	javah -force -o $(OutDir)/$(InputName).h -classpath $(OutDir) sos.spooler.$(InputName) \
-	
-
-"$(OutDir)/sos/spooler/$(InputName).class" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-   $(BuildCmds)
-
-"$(OutDir)/$(InputName).h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-   $(BuildCmds)
-# End Custom Build
-
-!ELSEIF  "$(CFG)" == "spooler - Win32 Debug"
-
-# Begin Custom Build
-OutDir=.\Debug
-InputPath=.\Job_chain_node.java
-InputName=Job_chain_node
-
-BuildCmds= \
-	echo javac -d $(OutDir) -sourcepath . -classpath $(OutDir) $(InputPath) \
-	javac -d $(OutDir) -sourcepath . -classpath $(OutDir) $(InputPath) \
-	echo javah -force -o $(OutDir)/$(InputName).h -classpath $(OutDir) sos.spooler.$(InputName) \
-	javah -force -o $(OutDir)/$(InputName).h -classpath $(OutDir) sos.spooler.$(InputName) \
-	
-
-"$(OutDir)/sos/spooler/$(InputName).class" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-   $(BuildCmds)
-
-"$(OutDir)/$(InputName).h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-   $(BuildCmds)
-# End Custom Build
-
-!ENDIF 
-
-# End Source File
-# Begin Source File
-
-SOURCE=.\Job_impl.java
-
-!IF  "$(CFG)" == "spooler - Win32 Release"
-
-# Begin Custom Build
-OutDir=.\Release
-InputPath=.\Job_impl.java
-InputName=Job_impl
-
-BuildCmds= \
-	echo javac -d $(OutDir) -sourcepath . -classpath $(OutDir) $(InputPath) \
-	javac -d $(OutDir) -sourcepath . -classpath $(OutDir) $(InputPath) \
-	echo javah -force -o $(OutDir)/$(InputName).h -classpath $(OutDir) sos.spooler.$(InputName) \
-	javah -force -o $(OutDir)/$(InputName).h -classpath $(OutDir) sos.spooler.$(InputName) \
-	
-
-"$(OutDir)/sos/spooler/$(InputName).class" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-   $(BuildCmds)
-
-"$(OutDir)/$(InputName).h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-   $(BuildCmds)
-# End Custom Build
-
-!ELSEIF  "$(CFG)" == "spooler - Win32 Debug"
-
-# Begin Custom Build
-OutDir=.\Debug
-InputPath=.\Job_impl.java
-InputName=Job_impl
-
-BuildCmds= \
-	echo javac -d $(OutDir) -sourcepath . -classpath $(OutDir) $(InputPath) \
-	javac -d $(OutDir) -sourcepath . -classpath $(OutDir) $(InputPath) \
-	echo javah -force -o $(OutDir)/$(InputName).h -classpath $(OutDir) sos.spooler.$(InputName) \
-	javah -force -o $(OutDir)/$(InputName).h -classpath $(OutDir) sos.spooler.$(InputName) \
-	
-
-"$(OutDir)/sos/spooler/$(InputName).class" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-   $(BuildCmds)
-
-"$(OutDir)/$(InputName).h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-   $(BuildCmds)
-# End Custom Build
-
-!ENDIF 
-
-# End Source File
-# Begin Source File
-
-SOURCE=.\Log.java
-
-!IF  "$(CFG)" == "spooler - Win32 Release"
-
-# Begin Custom Build
-OutDir=.\Release
-InputPath=.\Log.java
-InputName=Log
-
-BuildCmds= \
-	echo javac -d $(OutDir) -sourcepath . -classpath $(OutDir) $(InputPath) \
-	javac -d $(OutDir) -sourcepath . -classpath $(OutDir) $(InputPath) \
-	echo javah -force -o $(OutDir)/$(InputName).h -classpath $(OutDir) sos.spooler.$(InputName) \
-	javah -force -o $(OutDir)/$(InputName).h -classpath $(OutDir) sos.spooler.$(InputName) \
-	
-
-"$(OutDir)/sos/spooler/$(InputName).class" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-   $(BuildCmds)
-
-"$(OutDir)/$(InputName).h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-   $(BuildCmds)
-# End Custom Build
-
-!ELSEIF  "$(CFG)" == "spooler - Win32 Debug"
-
-# Begin Custom Build
-OutDir=.\Debug
-InputPath=.\Log.java
-InputName=Log
-
-BuildCmds= \
-	echo javac -d $(OutDir) -sourcepath . -classpath $(OutDir) $(InputPath) \
-	javac -d $(OutDir) -sourcepath . -classpath $(OutDir) $(InputPath) \
-	echo javah -force -o $(OutDir)/$(InputName).h -classpath $(OutDir) sos.spooler.$(InputName) \
-	javah -force -o $(OutDir)/$(InputName).h -classpath $(OutDir) sos.spooler.$(InputName) \
-	
-
-"$(OutDir)/sos/spooler/$(InputName).class" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-   $(BuildCmds)
-
-"$(OutDir)/$(InputName).h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-   $(BuildCmds)
-# End Custom Build
-
-!ENDIF 
-
-# End Source File
-# Begin Source File
-
-SOURCE=.\Mail.java
-
-!IF  "$(CFG)" == "spooler - Win32 Release"
-
-# Begin Custom Build
-OutDir=.\Release
-InputPath=.\Mail.java
-InputName=Mail
-
-BuildCmds= \
-	echo javac -d $(OutDir) -sourcepath . -classpath $(OutDir) $(InputPath) \
-	javac -d $(OutDir) -sourcepath . -classpath $(OutDir) $(InputPath) \
-	echo javah -force -o $(OutDir)/$(InputName).h -classpath $(OutDir) sos.spooler.$(InputName) \
-	javah -force -o $(OutDir)/$(InputName).h -classpath $(OutDir) sos.spooler.$(InputName) \
-	
-
-"$(OutDir)/sos/spooler/$(InputName).class" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-   $(BuildCmds)
-
-"$(OutDir)/$(InputName).h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-   $(BuildCmds)
-# End Custom Build
-
-!ELSEIF  "$(CFG)" == "spooler - Win32 Debug"
-
-# Begin Custom Build
-OutDir=.\Debug
-InputPath=.\Mail.java
-InputName=Mail
-
-BuildCmds= \
-	echo javac -d $(OutDir) -sourcepath . -classpath $(OutDir) $(InputPath) \
-	javac -d $(OutDir) -sourcepath . -classpath $(OutDir) $(InputPath) \
-	echo javah -force -o $(OutDir)/$(InputName).h -classpath $(OutDir) sos.spooler.$(InputName) \
-	javah -force -o $(OutDir)/$(InputName).h -classpath $(OutDir) sos.spooler.$(InputName) \
-	
-
-"$(OutDir)/sos/spooler/$(InputName).class" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-   $(BuildCmds)
-
-"$(OutDir)/$(InputName).h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-   $(BuildCmds)
-# End Custom Build
-
-!ENDIF 
-
-# End Source File
-# Begin Source File
-
-SOURCE=.\Order.java
-
-!IF  "$(CFG)" == "spooler - Win32 Release"
-
-# Begin Custom Build
-OutDir=.\Release
-InputPath=.\Order.java
-InputName=Order
-
-BuildCmds= \
-	echo javac -d $(OutDir) -sourcepath . -classpath $(OutDir) $(InputPath) \
-	javac -d $(OutDir) -sourcepath . -classpath $(OutDir) $(InputPath) \
-	echo javah -force -o $(OutDir)/$(InputName).h -classpath $(OutDir) sos.spooler.$(InputName) \
-	javah -force -o $(OutDir)/$(InputName).h -classpath $(OutDir) sos.spooler.$(InputName) \
-	
-
-"$(OutDir)/sos/spooler/$(InputName).class" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-   $(BuildCmds)
-
-"$(OutDir)/$(InputName).h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-   $(BuildCmds)
-# End Custom Build
-
-!ELSEIF  "$(CFG)" == "spooler - Win32 Debug"
-
-# Begin Custom Build
-OutDir=.\Debug
-InputPath=.\Order.java
-InputName=Order
-
-BuildCmds= \
-	echo javac -d $(OutDir) -sourcepath . -classpath $(OutDir) $(InputPath) \
-	javac -d $(OutDir) -sourcepath . -classpath $(OutDir) $(InputPath) \
-	echo javah -force -o $(OutDir)/$(InputName).h -classpath $(OutDir) sos.spooler.$(InputName) \
-	javah -force -o $(OutDir)/$(InputName).h -classpath $(OutDir) sos.spooler.$(InputName) \
-	
-
-"$(OutDir)/sos/spooler/$(InputName).class" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-   $(BuildCmds)
-
-"$(OutDir)/$(InputName).h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-   $(BuildCmds)
-# End Custom Build
-
-!ENDIF 
-
-# End Source File
-# Begin Source File
-
-SOURCE=.\Order_queue.java
-
-!IF  "$(CFG)" == "spooler - Win32 Release"
-
-# Begin Custom Build
-OutDir=.\Release
-InputPath=.\Order_queue.java
-InputName=Order_queue
-
-BuildCmds= \
-	echo javac -d $(OutDir) -sourcepath . -classpath $(OutDir) $(InputPath) \
-	javac -d $(OutDir) -sourcepath . -classpath $(OutDir) $(InputPath) \
-	echo javah -force -o $(OutDir)/$(InputName).h -classpath $(OutDir) sos.spooler.$(InputName) \
-	javah -force -o $(OutDir)/$(InputName).h -classpath $(OutDir) sos.spooler.$(InputName) \
-	
-
-"$(OutDir)/sos/spooler/$(InputName).class" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-   $(BuildCmds)
-
-"$(OutDir)/$(InputName).h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-   $(BuildCmds)
-# End Custom Build
-
-!ELSEIF  "$(CFG)" == "spooler - Win32 Debug"
-
-# Begin Custom Build
-OutDir=.\Debug
-InputPath=.\Order_queue.java
-InputName=Order_queue
-
-BuildCmds= \
-	echo javac -d $(OutDir) -sourcepath . -classpath $(OutDir) $(InputPath) \
-	javac -d $(OutDir) -sourcepath . -classpath $(OutDir) $(InputPath) \
-	echo javah -force -o $(OutDir)/$(InputName).h -classpath $(OutDir) sos.spooler.$(InputName) \
-	javah -force -o $(OutDir)/$(InputName).h -classpath $(OutDir) sos.spooler.$(InputName) \
-	
-
-"$(OutDir)/sos/spooler/$(InputName).class" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-   $(BuildCmds)
-
-"$(OutDir)/$(InputName).h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-   $(BuildCmds)
-# End Custom Build
-
-!ENDIF 
-
-# End Source File
-# Begin Source File
-
-SOURCE=.\Spooler.java
-
-!IF  "$(CFG)" == "spooler - Win32 Release"
-
-# Begin Custom Build
-OutDir=.\Release
-InputPath=.\Spooler.java
-InputName=Spooler
-
-BuildCmds= \
-	echo javac -d $(OutDir) -sourcepath . -classpath $(OutDir) $(InputPath) \
-	javac -d $(OutDir) -sourcepath . -classpath $(OutDir) $(InputPath) \
-	echo javah -force -o $(OutDir)/$(InputName).h -classpath $(OutDir) sos.spooler.$(InputName) \
-	javah -force -o $(OutDir)/$(InputName).h -classpath $(OutDir) sos.spooler.$(InputName) \
-	
-
-"$(OutDir)/sos/spooler/$(InputName).class" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-   $(BuildCmds)
-
-"$(OutDir)/$(InputName).h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-   $(BuildCmds)
-# End Custom Build
-
-!ELSEIF  "$(CFG)" == "spooler - Win32 Debug"
-
-# Begin Custom Build
-OutDir=.\Debug
-InputPath=.\Spooler.java
-InputName=Spooler
-
-BuildCmds= \
-	echo javac -d $(OutDir) -sourcepath . -classpath $(OutDir) $(InputPath) \
-	javac -d $(OutDir) -sourcepath . -classpath $(OutDir) $(InputPath) \
-	echo javah -force -o $(OutDir)/$(InputName).h -classpath $(OutDir) sos.spooler.$(InputName) \
-	javah -force -o $(OutDir)/$(InputName).h -classpath $(OutDir) sos.spooler.$(InputName) \
-	
-
-"$(OutDir)/sos/spooler/$(InputName).class" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-   $(BuildCmds)
-
-"$(OutDir)/$(InputName).h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-   $(BuildCmds)
-# End Custom Build
-
-!ENDIF 
-
-# End Source File
-# Begin Source File
-
-SOURCE=.\Task.java
-
-!IF  "$(CFG)" == "spooler - Win32 Release"
-
-# Begin Custom Build
-OutDir=.\Release
-InputPath=.\Task.java
-InputName=Task
-
-BuildCmds= \
-	echo javac -d $(OutDir) -sourcepath . -classpath $(OutDir) $(InputPath) \
-	javac -d $(OutDir) -sourcepath . -classpath $(OutDir) $(InputPath) \
-	echo javah -force -o $(OutDir)/$(InputName).h -classpath $(OutDir) sos.spooler.$(InputName) \
-	javah -force -o $(OutDir)/$(InputName).h -classpath $(OutDir) sos.spooler.$(InputName) \
-	
-
-"$(OutDir)/sos/spooler/$(InputName).class" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-   $(BuildCmds)
-
-"$(OutDir)/$(InputName).h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-   $(BuildCmds)
-# End Custom Build
-
-!ELSEIF  "$(CFG)" == "spooler - Win32 Debug"
-
-# Begin Custom Build
-OutDir=.\Debug
-InputPath=.\Task.java
-InputName=Task
-
-BuildCmds= \
-	echo javac -d $(OutDir) -sourcepath . -classpath $(OutDir) $(InputPath) \
-	javac -d $(OutDir) -sourcepath . -classpath $(OutDir) $(InputPath) \
-	echo javah -force -o $(OutDir)/$(InputName).h -classpath $(OutDir) sos.spooler.$(InputName) \
-	javah -force -o $(OutDir)/$(InputName).h -classpath $(OutDir) sos.spooler.$(InputName) \
-	
-
-"$(OutDir)/sos/spooler/$(InputName).class" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-   $(BuildCmds)
-
-"$(OutDir)/$(InputName).h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-   $(BuildCmds)
-# End Custom Build
-
-!ENDIF 
-
-# End Source File
-# Begin Source File
-
-SOURCE=.\Thread.java
-
-!IF  "$(CFG)" == "spooler - Win32 Release"
-
-# Begin Custom Build
-OutDir=.\Release
-InputPath=.\Thread.java
-InputName=Thread
-
-BuildCmds= \
-	echo javac -d $(OutDir) -sourcepath . -classpath $(OutDir) $(InputPath) \
-	javac -d $(OutDir) -sourcepath . -classpath $(OutDir) $(InputPath) \
-	echo javah -force -o $(OutDir)/$(InputName).h -classpath $(OutDir) sos.spooler.$(InputName) \
-	javah -force -o $(OutDir)/$(InputName).h -classpath $(OutDir) sos.spooler.$(InputName) \
-	
-
-"$(OutDir)/sos/spooler/$(InputName).class" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-   $(BuildCmds)
-
-"$(OutDir)/$(InputName).h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-   $(BuildCmds)
-# End Custom Build
-
-!ELSEIF  "$(CFG)" == "spooler - Win32 Debug"
-
-# Begin Custom Build
-OutDir=.\Debug
-InputPath=.\Thread.java
-InputName=Thread
-
-BuildCmds= \
-	echo javac -d $(OutDir) -sourcepath . -classpath $(OutDir) $(InputPath) \
-	javac -d $(OutDir) -sourcepath . -classpath $(OutDir) $(InputPath) \
-	echo javah -force -o $(OutDir)/$(InputName).h -classpath $(OutDir) sos.spooler.$(InputName) \
-	javah -force -o $(OutDir)/$(InputName).h -classpath $(OutDir) sos.spooler.$(InputName) \
-	
-
-"$(OutDir)/sos/spooler/$(InputName).class" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-   $(BuildCmds)
-
-"$(OutDir)/$(InputName).h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-   $(BuildCmds)
-# End Custom Build
-
-!ENDIF 
-
-# End Source File
-# Begin Source File
-
-SOURCE=.\Variable_set.java
-
-!IF  "$(CFG)" == "spooler - Win32 Release"
-
-# Begin Custom Build
-OutDir=.\Release
-InputPath=.\Variable_set.java
-InputName=Variable_set
-
-BuildCmds= \
-	echo javac -d $(OutDir) -sourcepath . -classpath $(OutDir) $(InputPath) \
-	javac -d $(OutDir) -sourcepath . -classpath $(OutDir) $(InputPath) \
-	echo javah -force -o $(OutDir)/$(InputName).h -classpath $(OutDir) sos.spooler.$(InputName) \
-	javah -force -o $(OutDir)/$(InputName).h -classpath $(OutDir) sos.spooler.$(InputName) \
-	
-
-"$(OutDir)/sos/spooler/$(InputName).class" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-   $(BuildCmds)
-
-"$(OutDir)/$(InputName).h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-   $(BuildCmds)
-# End Custom Build
-
-!ELSEIF  "$(CFG)" == "spooler - Win32 Debug"
-
-# Begin Custom Build
-OutDir=.\Debug
-InputPath=.\Variable_set.java
-InputName=Variable_set
 
 BuildCmds= \
 	echo javac -d $(OutDir) -sourcepath . -classpath $(OutDir) $(InputPath) \
