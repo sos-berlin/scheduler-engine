@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.245 2004/03/30 06:00:29 jz Exp $
+// $Id: spooler_task.cxx,v 1.246 2004/04/01 09:42:17 jz Exp $
 /*
     Hier sind implementiert
 
@@ -1200,8 +1200,14 @@ void Task::load()
 {
     if( !_spooler->log_directory().empty()  &&  _spooler->log_directory()[0] != '*' )
     {
-        _log.set_filename( _spooler->log_directory() + "/task." + _job->jobname_as_filename() + "." + as_string(_id) + ".log" );      // Task-Protokoll
-        _log.set_remove_after_close( true );
+        bool   remove_after_close = false;
+        string filename           = _spooler->log_directory() + "/task." + _job->jobname_as_filename();
+
+        if( _job->_max_tasks > 1 )  filename += "." + as_string(_id),  remove_after_close = true;
+        filename += ".log";
+
+        _log.set_filename( filename );      // Task-Protokoll
+        _log.set_remove_after_close( remove_after_close );
         _log.open();                // Jobprotokoll. Nur wirksam, wenn set_filename() gerufen
     }
 
