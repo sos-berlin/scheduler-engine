@@ -1,4 +1,4 @@
-// $Id: spooler_script.h,v 1.4 2001/02/12 09:46:11 jz Exp $
+// $Id: spooler_script.h,v 1.5 2001/03/17 18:57:23 jz Exp $
 
 #ifndef __SPOOLER_SCRIPT_H
 #define __SPOOLER_SCRIPT_H
@@ -18,14 +18,16 @@ struct Script
         reuse_job,
         reuse_global
     };
-                                Script                      ()                              {}
-    explicit                    Script                      ( const xml::Element_ptr& e )   { set_xml(e); }
+
+                                Script                      ( Spooler* sp )                 : _spooler(sp) {}
+    explicit                    Script                      ( Spooler* sp, const xml::Element_ptr& e )  : _spooler(sp) { set_xml(e); }
 
     void                        set_xml                     ( const xml::Element_ptr& );
 
     bool                        empty                       () const                        { return _text.empty(); }
     void                        clear                       ()                              { _language="", _text=""; }
 
+    Spooler*                   _spooler;
     string                     _language;
     string                     _text;
     Reuse                      _reuse;

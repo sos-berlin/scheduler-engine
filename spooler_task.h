@@ -1,4 +1,4 @@
-// $Id: spooler_task.h,v 1.14 2001/02/21 15:16:23 jz Exp $
+// $Id: spooler_task.h,v 1.15 2001/03/17 18:57:23 jz Exp $
 
 #ifndef __SPOOLER_TASK_H
 #define __SPOOLER_TASK_H
@@ -28,8 +28,8 @@ struct Level_interval
 
 struct Object_set_class : Sos_self_deleting
 {
-                                Object_set_class            ()                              {}
-    explicit                    Object_set_class            ( const xml::Element_ptr& e )   { set_xml( e ); }
+                                Object_set_class            ( Spooler* sp )                              : _script(sp) {}
+    explicit                    Object_set_class            ( Spooler* sp,  const xml::Element_ptr& e )  : _script(sp) { set_xml( e ); }
 
     void                        set_xml                     ( const xml::Element_ptr& );
 

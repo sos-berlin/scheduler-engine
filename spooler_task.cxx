@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.34 2001/03/05 11:31:55 jz Exp $
+// $Id: spooler_task.cxx,v 1.35 2001/03/17 18:57:23 jz Exp $
 /*
     Hier sind implementiert
 
@@ -198,6 +198,7 @@ Job::Job( Thread* thread )
     _thread(thread),
     _spooler(thread->_spooler),
     _log( &thread->_spooler->_log ),
+    _script(thread->_spooler),
     _script_instance(&_log)
 {
     _params = new Com_variable_set;

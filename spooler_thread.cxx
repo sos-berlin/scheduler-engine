@@ -1,4 +1,4 @@
-// $Id: spooler_thread.cxx,v 1.13 2001/03/05 11:31:55 jz Exp $
+// $Id: spooler_thread.cxx,v 1.14 2001/03/17 18:57:23 jz Exp $
 /*
     Hier sind implementiert
 
@@ -24,6 +24,7 @@ Thread::Thread( Spooler* spooler )
     _spooler(spooler),
     _log(&spooler->_log),
     _wait_handles(_spooler,&_log),
+    _script(spooler),
     _script_instance(&_log)
 {
     _com_thread = new Com_thread( this );

@@ -1,4 +1,4 @@
-// $Id: spooler_config.cxx,v 1.16 2001/03/15 16:59:19 jz Exp $
+// $Id: spooler_config.cxx,v 1.17 2001/03/17 18:57:23 jz Exp $
 
 //#include <precomp.h>
 
@@ -252,10 +252,20 @@ void Script::set_xml( const xml::Element_ptr& element )
                 break;
             }
 
-            case xml::NODE_ELEMENT:
+            case xml::NODE_ELEMENT:     // <include file="..."/>
             {
                 xml::Element_ptr e = n;
-                _text += file_as_string( as_string( e->getAttribute( "file" ) ) );
+                string filename = as_string( e->getAttribute( "file" ) );
+
+                if( filename.length() >= 1 ) 
+                {
+                    if( filename[0] == '\\' 
+                     || filename[0] == '/' 
+                     || filename.length() >= 2 && filename[1] == ':' )  ; //ok
+                                                                  else  filename = _spooler->include_path() + filename;
+                }
+                     
+                _text += file_as_string( filename );
                 break;
             }
 
@@ -361,7 +371,7 @@ void Spooler::load_object_set_classes_from_xml( Object_set_class_list* liste, co
 {
     for( xml::Element_ptr e = element->firstChild; e; e = e->nextSibling )
     {
-        if( e->tagName == "object_set_class" )  liste->push_back( SOS_NEW( Object_set_class( e ) ) );
+        if( e->tagName == "object_set_class" )  liste->push_back( SOS_NEW( Object_set_class( this, e ) ) );
     }
 }
 

@@ -1,4 +1,4 @@
-// $Id: spooler_wait.cxx,v 1.16 2001/03/05 11:31:55 jz Exp $
+// $Id: spooler_wait.cxx,v 1.17 2001/03/17 18:57:23 jz Exp $
 /*
     Hier sind implementiert
 
@@ -307,7 +307,7 @@ int Wait_handles::wait_until( Time until )
             windows_message_step();
         }
         else
-        if( ret != WAIT_TIMEOUT )  throw_mswin_error( "WaitForMultipleObjects" );
+        if( ret != WAIT_TIMEOUT )  throw_mswin_error( "MsgWaitForMultipleObjects" );
         else
             again = true;
     }

@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.63 2001/03/15 16:59:18 jz Exp $
+// $Id: spooler.cxx,v 1.64 2001/03/17 18:57:22 jz Exp $
 /*
     Hier sind implementiert
 
@@ -128,7 +128,12 @@ void Spooler::wait_until_threads_stopped( Time until )
 {
     Wait_handles wait_handles ( this, &_prefix_log );
 
-    FOR_EACH( Thread_list, _thread_list, it )  wait_handles.add_handle( (*it)->_thread_handle.handle() );
+    Thread_list::iterator it = _thread_list.begin();
+    while( it != _thread_list.end() )
+    {
+        if( (*it)->_thread_handle.handle() )  wait_handles.add_handle( (*it)->_thread_handle.handle() ),  it++;
+                   else THREAD_LOCK( _lock )  it = _thread_list.erase( it );
+    }
 
     while( _thread_list.size() > 0 )
     {
@@ -274,9 +279,12 @@ string Spooler::state_name( State state )
 
 void Spooler::load_arg()
 {
+    _include_path = ".";
+
     _spooler_id       = read_profile_string( "factory.ini", "spooler", "id" );
     _config_filename  = read_profile_string( "factory.ini", "spooler", "config" );
     _log_directory    = read_profile_string( "factory.ini", "spooler", "log-dir" );
+    _include_path     = read_profile_string( "factory.ini", "spooler", "include-path" );
     _spooler_param    = read_profile_string( "factory.ini", "spooler", "param" );
     _debug            = read_profile_bool  ( "factory.ini", "spooler", "debug", _debug );
 
@@ -292,6 +300,8 @@ void Spooler::load_arg()
             else
             if( opt.with_value( "log-dir"          ) )  _log_directory = opt.value();
             else
+            if( opt.with_value( "include-path"     ) )  _include_path = opt.value();
+            else
             if( opt.with_value( "id"               ) )  _spooler_id = opt.value();
             else
             if( opt.with_value( "param"            ) )  _spooler_param = opt.value();
@@ -302,6 +312,12 @@ void Spooler::load_arg()
         }
 
         if( _config_filename.empty() )  throw_xc( "SPOOLER-115" );
+
+        if( _include_path.length() >= 1 )
+        {
+            char c = _include_path[ _include_path.length() - 1 ];
+            if( c != '/'  &&  c != '\\' )  _include_path += "/";
+        }
     }
     catch( const Sos_option_error& )
     {
@@ -785,6 +801,4 @@ int sos_main( int argc, char** argv )
 }
 
 } //namespace sos
-
-
 

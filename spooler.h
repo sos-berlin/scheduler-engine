@@ -1,4 +1,4 @@
-// $Id: spooler.h,v 1.56 2001/03/15 16:59:18 jz Exp $
+// $Id: spooler.h,v 1.57 2001/03/17 18:57:22 jz Exp $
 
 #ifndef __SPOOLER_H
 #define __SPOOLER_H
@@ -118,6 +118,7 @@ struct Spooler
     const string&               param                       () const                            { return _spooler_param; }
     int                         udp_port                    () const                            { return _udp_port; }
     int                         tcp_port                    () const                            { return _tcp_port; }
+    string                      include_path                () const                            { return _include_path; }
     int                         priority_max                () const                            { return _priority_max; }
     State                       state                       () const                            { return _state; }
     string                      state_name                  () const                            { return state_name( _state ); }
@@ -190,6 +191,7 @@ struct Spooler
     string                     _config_filename;            // -config=
     string                     _log_directory;              // -log-dir=
     string                     _log_filename;
+    string                     _include_path;
     int                        _priority_max;               // <config priority_max=...>
     int                        _tcp_port;                   // <config tcp=...>
     int                        _udp_port;                   // <config udp=...>

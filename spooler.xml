@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 
-<!-- $Id: spooler.xml,v 1.37 2001/03/15 16:59:19 jz Exp $   (C) 2001 SOS GmbH Berlin -->
+<!-- $Id: spooler.xml,v 1.38 2001/03/17 18:57:22 jz Exp $   (C) 2001 SOS GmbH Berlin -->
 
 <!DOCTYPE spooler SYSTEM "s:\prod\spooler\spooler.dtd">
 
@@ -478,7 +478,7 @@ sub spooler_close()
                 <job name="steuerung">
                     <script language="JScript">
 spooler_log.msg( "text 1" );
-<include file="c:\tmp\1.txt"/>
+<include file="1.txt"/>
 spooler_log.msg( "text 2" );
 <![CDATA[
 
