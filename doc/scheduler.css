@@ -8,6 +8,7 @@ td              { font-size: 10pt }
 div             { font-size: 10pt }
 /*p:first-child   { font-size: 10pt; margin-top: 0; margin-bottom: 0 }   Wirkt in ie6 nicht */
 li              { font-size: 10pt }
+ul              { margin-left: 13pt }
 pre             { font-family: Lucida Console, monospace; font-size: 9pt; margin-left: 4ex; margin-top: 2pt; margin-bottom: 0; line-height: 1.2em;  }
 col             { padding-bottom: 1pt; padding-right: 2pt }
 caption         { font-size: 10pt; padding-bottom: 5pt; padding-left: 3pt; padding-right: 2pt; padding-top: 2pt }

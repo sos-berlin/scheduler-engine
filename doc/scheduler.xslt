@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding="utf-8"?>
-<!-- $Id: scheduler.xslt,v 1.25 2004/09/08 11:17:36 jz Exp $ -->
+<!-- $Id: scheduler.xslt,v 1.26 2004/09/08 19:23:23 jz Exp $ -->
 
 <!--
     Änderungswünsche:
@@ -387,63 +387,18 @@
         
     </xsl:template>
 
-    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~xml_answer-->
-    <!--
-    <xsl:template name="xml_answer">
-    
-        <xsl:variable name="command_element" select="document('xml_commands.xml')//scheduler_command[ @name = current()/@name ]" />
-    
-        <h2>
-            Antwort
-        </h2>
-
-        <p>
-            <code>
-                <xsl:call-template name="scheduler_element">
-                    <xsl:with-param name="directory" select="'xml/answer/'"/>
-                    <xsl:with-param name="name"      select="'spooler'"/>
-                </xsl:call-template>
-            </code>
-            <br/>
-            <code>&#160; &#160;</code>
-
-            <code>
-                <xsl:call-template name="scheduler_element">
-                    <xsl:with-param name="directory" select="'xml/answer/'"/>
-                    <xsl:with-param name="name"      select="'answer'"/>
-                </xsl:call-template>
-            </code>        
-            <br/>
-            <code>&#160; &#160; &#160; &#160;</code>
-
-            <code>
-                <xsl:call-template name="scheduler_element">
-                    <xsl:with-param name="directory" select="'xml/answer/'"/>
-                    <xsl:with-param name="name"      select="$command_element/@answer"/>
-                    <xsl:with-param name="parameter" select="'…'"/>
-                </xsl:call-template>
-            </code>        
-            <br/>
-            <code>&#160; &#160;</code>
-            
-            <code>&lt;answer</code>
-            <br/>
-            <code>&lt;spooler></code>
-        </p>
-
-    </xsl:template>
-    -->
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~setting_header_rest-->
 
     <xsl:template match="*" mode="setting_header_rest">
 
         <xsl:variable name="setting" select="document( 'settings.xml' )/settings/setting[ @setting = current()/@setting ]"/>
         
+        &#160;
+        
         <xsl:if test="@initial | $setting/@initial">
-            &#160;(Initialwert: <code><xsl:value-of select="@initial | $setting/@initial"/></code>)
+            (Initialwert: <code><xsl:value-of select="@initial | $setting/@initial"/></code>)
+            &#160; &#160;
         </xsl:if>
-
-        &#160; &#160;
 
         <span class="title">
             <xsl:value-of select="@title | $setting/@title"/>
@@ -517,7 +472,7 @@
                     <xsl:call-template name="scheduler_ini_entry">
                         <xsl:with-param name="file"    select="'factory.ini'"/>
                         <xsl:with-param name="section" select="ancestor::ini_section/@name"/>
-                        <xsl:with-param name="entry"   select="@name"/>
+                        <xsl:with-param name="entry"   select="@setting"/>
                     </xsl:call-template>
 
                     <xsl:choose>
@@ -652,7 +607,7 @@
         <xsl:param name="name"/>
         <xsl:param name="directory"/>
         <xsl:param name="attribute"/>
-        <xsl:param name="value"     select="'&quot;…&quot;'"/>
+        <xsl:param name="value"     select="'…'"/>
         <xsl:param name="parameter"/>
         
         <xsl:element name="a">
@@ -702,7 +657,7 @@
                 <code>-<xsl:value-of select="@name"/>=</code>
             </xsl:when>
             <xsl:otherwise>
-                <code><xsl:value-of select="@name"/>=</code>
+                <code><xsl:value-of select="@name | @setting"/>=</code>
             </xsl:otherwise>
         </xsl:choose>
 
@@ -744,7 +699,9 @@
             <code>[<xsl:value-of select="$section"/>]</code>,
             
             Eintrag
-            <code><xsl:value-of select="$entry"/>=…</code>)
+            <code><xsl:value-of select="$entry"/>=…</code>
+            
+            <xsl:text>)</xsl:text>
         </xsl:element>
     </xsl:template>
 
@@ -833,6 +790,12 @@
         
     </xsl:template>
 
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~scheduler_error-->
+
+    <xsl:template match="scheduler_error" mode="description">
+        <code><xsl:value-of select="@code"/></code>
+    </xsl:template>
+    
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~command_line-->
     
     <xsl:template match="command_line">
@@ -1099,12 +1062,19 @@
                     <xsl:attribute name="name">entry_<xsl:value-of select="@name | @setting"/></xsl:attribute>
                 </xsl:element>
                 
-                <b><code><xsl:value-of select="@name | @setting"/></code></b>
-                
-                <b><code> = </code></b>
-                <span class="type"><xsl:value-of select="$setting/@type"/></span>
-                
-                <xsl:apply-templates select="." mode="setting_header_rest"/>            
+                <table cellspacing="0" cellpadding="0">
+                    <tr>
+                        <td width="250">
+                            <b><code><xsl:value-of select="@name | @setting"/></code></b>
+                            
+                            <b><code>=</code></b>
+                            <span class="type"><xsl:value-of select="$setting/@type"/></span>
+                        </td>
+                        <td>
+                            <xsl:apply-templates select="." mode="setting_header_rest"/>            
+                        </td>
+                    </tr>
+                </table>
             </p>
             
             <xsl:apply-templates mode="setting_description" select="."/>

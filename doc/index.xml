@@ -1,21 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="scheduler.xslt" type="text/xsl"?>
 
-<!--$Id: index.xml,v 1.11 2004/09/08 11:17:36 jz Exp $-->
+<!--$Id: index.xml,v 1.12 2004/09/08 19:23:23 jz Exp $-->
 
 <description 
     title               = "Startseite" 
     base_dir            = ""
     suppress_browse_bar = "yes"
     author              = "$Author: jz $"
-    date                = "$Date: 2004/09/08 11:17:36 $"
+    date                = "$Date: 2004/09/08 19:23:23 $"
 >
 
 <h3><a href="job.xml">Was ist ein Job?</a></h3>
     
 <h3><a href="command_line.xml">Kommandozeile</a></h3>
 <p>
-    Die Optionen an der Kommandozeile haben Vorrang.
+    Die Optionen an der Kommandozeile haben Vorrang vor den Einstellungen 
+    in der Datei <code>factory.ini</code> und der XML-Konfiguration.
 </p>
 
 

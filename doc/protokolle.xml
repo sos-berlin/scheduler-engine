@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="scheduler.xslt" type="text/xsl"?>
 
-<!--$Id: protokolle.xml,v 1.3 2004/09/08 11:17:36 jz Exp $-->
+<!--$Id: protokolle.xml,v 1.4 2004/09/08 19:23:23 jz Exp $-->
 
 <description 
     title    = "Protokolle" 
     base_dir = ""
     parent_page = "index.xml"
     author   = "$Author: jz $"
-    date     = "$Date: 2004/09/08 11:17:36 $"
+    date     = "$Date: 2004/09/08 19:23:23 $"
 >
 
 <p>
-    Im mit <scheduler_option name="log-dir"/> eingestellten Verzeichnis schreibt der Scheduler seine Protokolle.
+    Ins mit der Option <scheduler_option name="log-dir"/> eingestellten Verzeichnis schreibt der Scheduler seine Protokolle.
 </p>
 
 <h3>Hauptprotokoll</h3>

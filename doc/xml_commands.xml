@@ -2,18 +2,18 @@
 <?xml-stylesheet href="scheduler.xslt" type="text/xsl"?>
 
 
-<!--$Id: xml_commands.xml,v 1.4 2004/09/06 10:03:10 jz Exp $-->
+<!--$Id: xml_commands.xml,v 1.5 2004/09/08 19:23:23 jz Exp $-->
 
 <xml_commands
     title    = "XML-Kommandos" 
     base_dir = ""
     author   = "$Author: jz $"
-    date     = "$Date: 2004/09/06 10:03:10 $"
+    date     = "$Date: 2004/09/08 19:23:23 $"
 >    
     <description>
         <p>
             Die Kommandos können über TCP (z.B. telnet), über HTTP 
-            und über die Kommandozeilenoptionen <scheduler_option name="cmd"/> und <scheduler_option name="send_cmd"/>
+            und über die Kommandozeilenoptionen <scheduler_option name="cmd"/> und <scheduler_option name="send-cmd"/>
             gegeben werden.
         </p>
 

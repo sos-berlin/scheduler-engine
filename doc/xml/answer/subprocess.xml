@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="../../scheduler.xslt" type="text/xsl"?>
 
-<!--$Id: subprocess.xml,v 1.3 2004/09/07 06:25:37 jz Exp $-->
+<!--$Id: subprocess.xml,v 1.4 2004/09/08 19:23:23 jz Exp $-->
 
 <xml_element name          = "subprocess" 
              title         = "Subprozess (abhängiger Prozess)"
@@ -9,7 +9,7 @@
              base_dir      = "../../"
              parent_page   = "../../xml_commands.xml"
              author        = "$Author: jz $"
-             date          = "$Date: 2004/09/07 06:25:37 $">
+             date          = "$Date: 2004/09/08 19:23:23 $">
 
     <xml_parent_elements>
         <xml_parent_element name="subprocesses"/>
@@ -17,7 +17,17 @@
     
     <xml_attributes>
         <xml_attribute name="pid" type="zahl" title="Prozess-Id vom Betriebssystems"/>
-        <xml_attribute name="timeout_at" type="yyyy-mm-dd hh:mm:ss.mmm" title="Frist des Prozesses"/>
+        
+        <xml_attribute name="timeout_at" type="yyyy-mm-dd hh:mm:ss.mmm" title="Frist des Prozesses">
+            <description>
+                <p>
+                    Wenn der Prozess mit 
+                    <scheduler_method class="Task" method="add_pid" java_signature="int, double"/> 
+                    eine Frist bekommen hat.
+                </p>
+            </description>
+        </xml_attribute>
+        
         <xml_attribute name="killed" type="yes|no" initial="no" title="Wenn die Task gerade abgebrochen wird"/>
     </xml_attributes>
 

@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="scheduler.xslt" type="text/xsl"?>
 
-<!--$Id: command_line.xml,v 1.11 2004/09/06 10:03:10 jz Exp $-->
+<!--$Id: command_line.xml,v 1.12 2004/09/08 19:23:23 jz Exp $-->
 
 <command_line program  = "scheduler"
               title    = "Kommandozeile"
               base_dir = ""
               author   = "$Author: jz $"
-              date     = "$Date: 2004/09/06 10:03:10 $">
+              date     = "$Date: 2004/09/08 19:23:23 $">
 
     <command_options>
         <command_option name="config" setting="config">
@@ -96,7 +96,9 @@
             <description>
                 <p>
                     Wählt eine andere Datei für die Datei <code>factory.ini</code> aus.
-                    Diese Datei enthält u.a. den Lizenzschlüssel.
+                </p>
+                <p>
+                    In dieser Dokumentation ist dann mit der Datei <code>factory.ini</code> die hier eingestellte gemeint.
                 </p>
             </description>
         </command_option>

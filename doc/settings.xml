@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="scheduler.xslt" type="text/xsl"?>
 
-<!--$Id: settings.xml,v 1.9 2004/09/06 10:03:10 jz Exp $-->
+<!--$Id: settings.xml,v 1.10 2004/09/08 19:23:23 jz Exp $-->
 
 <!-- Einige Einstellungen können an mehreren Stellen vorgenommen werden:
      - Konfigurationsdatei
@@ -16,7 +16,7 @@
     base_dir    = ""
     title       = "Einstellungen"
     author      = "$Author: jz $"
-    date        = "$Date: 2004/09/06 10:03:10 $"
+    date        = "$Date: 2004/09/08 19:23:23 $"
 >
 
     <setting setting        = "log_dir" 
@@ -323,8 +323,60 @@ db  = jdbc -wait=15 -class=com.mysql.jdbc.Driver jdbc:mysql://localhost/factory:
              initial = "no"
              title   = "Ist die Datenbank notwendig?">
         <description>
-            <p>
-            </p>
+            <dl>
+                <dt><code>need_db=no</code></dt>
+                <dd>
+                    <p>
+                        Wenn die Einstellung <scheduler_setting setting="db"/> fehlt, 
+                        gibt der Scheduler eine Warnung aus und arbeitet ohne Datenbank.
+                    </p>
+                    <p>
+                        Wenn das Öffnen der Datenbank oder das automatische Anlegen der Tabellen fehlschlägt,
+                        gibt der Scheduler eine Warnung aus und arbeitet ohne Datenbank.
+                    </p>
+                    <p>
+                        Bei einem Datenbankfehler während des Betriebs schließt der Scheduler die Datenbank und
+                        öffnet sie erneut.
+                        Wenn das fehlschlägt, arbeitet der Scheduler ohne Datenbank weiter.
+                    </p>
+                </dd>
+
+                <dt><code>need_db=yes</code></dt>
+                <dd>
+                    <p>
+                        Wenn die Einstellung <scheduler_setting setting="db"/> fehlt, 
+                        startet der Scheduler nicht und gibt die Meldung 
+                        <scheduler_error code="SCHEDULER-205"/> aus.
+                    </p>
+                    <p>
+                        Wenn das Öffnen der Datenbank oder das automatische Anlegen der Tabellen fehlschlägt,
+                        startet der Scheduler nicht.
+                    </p>
+                    <p>
+                        Bei einem Datenbankfehler während des Betriebs schließt der Scheduler die Datenbank und
+                        öffnet sie erneut.
+                        Wenn das fehlschlägt, versucht der Scheduler endlos im Abstand von einer Minute
+                        die Datenbank erneut zu öffnen.
+                        Die Tasks werden währenddessen nicht bedient.
+                    </p>
+                    <p>
+                        Wenn sich die Datenbank nicht erneut öffnen lässt,
+                        schickt er eine <a href="email.xml">eMail</a>.
+                    </p>
+                </dd>
+
+                <dt><code>need_db=strict</code></dt>
+                <dd>
+                    <p>
+                        Wie <code>need_db=yes</code> mit folgender Ausnahme.
+                    </p>
+                    <p>
+                        Bei einem Datenbankfehler während des Betriebs schließt der Scheduler die Datenbank und
+                        öffnet sie erneut.
+                        Wenn das fehlschlägt, beendet sich der Scheduler.
+                    </p>
+                </dd>
+            </dl>
         </description>
     </setting>
 
@@ -335,6 +387,9 @@ db  = jdbc -wait=15 -class=com.mysql.jdbc.Driver jdbc:mysql://localhost/factory:
              title   = "Anzahl Datenbank-Fehler, bevor Scheduler aufgibt">
         <description>
             <p>
+                Der Scheduler toleriert diese Anzahl Datenbankfehler.
+                Wird sie überschritten, dann setzt er bei <code>need_db=no</code> ohne Datenbank fort,
+                anderfalls beendet er sich sofort.
             </p>
         </description>
     </setting>
