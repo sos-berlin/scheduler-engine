@@ -1,52 +1,21 @@
-// $Id: spooler_module_java.h,v 1.19 2003/03/15 18:06:38 jz Exp $
+// $Id: spooler_module_java.h,v 1.20 2003/03/17 18:40:19 jz Exp $
 
 #ifndef __SPOOLER_MODULE_JAVA_H
 #define __SPOOLER_MODULE_JAVA_H
 
 #include "../kram/thread_data.h"
+#include "../zschimmer/java.h"
 
 #define JAVA_IDISPATCH_CLASS "sos/spooler/Idispatch"
 
 namespace sos {
 namespace spooler {
 
-struct Java_vm;
+//struct Java_vm;
 struct Java_idispatch;
+struct Java_thread_data;
 
-//-----------------------------------------------------------------------------------------Java_env
-/*
-struct Java_env : Non_cloneable
-{
-                              //Java_env                    ( Java_vm* vm, JNIEnv* jenv )           : _java_vm(vm), _jenv( jenv ) {}
-
-                                operator JNIEnv*            ()                                      { return _jenv; }
-    JNIEnv*                     operator ->                 ()                                      { return _jenv; }
-    JNIEnv*                     env                         ()                                      { return _jenv; }
-
-    void                        add_object                  ( Java_idispatch* );
-    void                        release_objects             ()                                      { _java_idispatch_list.clear(); }
-
-    // Einige Java-Methoden mit Fehlerprüfung:
-    jclass                      find_class                  ( const string& name );
-    jmethodID                   get_method_id               ( jclass, const string& name, const string& signature );
-    jclass                      get_object_class            ( jobject );
-
-
-    Java_vm*                   _java_vm;
-    JNIEnv*                    _jenv;
-    list< ptr<Java_idispatch> >_java_idispatch_list;     // Hält alle in einer native Methode erzeugten IDispatchs, bis release_objects()
-};
-
-//--------------------------------------------------------------------------------Java_object_stack
-// Der Destruktur gibt alle von nativen Methoden erzeugten Java_idispatchs wieder frei
-
-struct Java_idispatch_stack_frame
-{
-                                Java_idispatch_stack_frame  ( Java_env* e )                         : _java_env(e) {}
-                               ~Java_idispatch_stack_frame  ()                                      { _java_env->release_objects(); }
-
-    Java_env*                  _java_env;
-};
+extern zschimmer::Thread_data<Java_thread_data> thread_data;
 
 //---------------------------------------------------------------------------------Java_thread_data
 
@@ -54,10 +23,35 @@ struct Java_thread_data
 {
                                 Java_thread_data            ()                                      : _zero_(this+1) {}
 
+    void                        add_object                  ( Java_idispatch* );
+    void                        release_objects             ()                                      { _java_idispatch_list.clear(); }
+
     Fill_zero                  _zero_;
-    Java_env                   _env;
+
+    list<ptr<Java_idispatch> > _java_idispatch_list;        // Hält alle in einer nativen Methode erzeugten IDispatchs, bis release_objects()
 };
-*/
+
+//-----------------------------------------------------------------------Java_idispatch_stack_frame
+// Der Destruktur gibt alle von nativen Methoden erzeugten Java_idispatchs wieder frei
+
+struct Java_idispatch_stack_frame
+{
+                                Java_idispatch_stack_frame  ()                                      {}
+                               ~Java_idispatch_stack_frame  ()                                      { thread_data->release_objects(); }
+};
+
+//------------------------------------------------------------------------------------Java_idispatch
+
+struct Java_idispatch : java::Jobject, Object
+{
+    Z_GNU_ONLY(                 Java_idispatch              ();  )                                  // Für gcc 3.2. Nicht implementiert.
+                                Java_idispatch              ( java::Vm* vm, IDispatch*, const string& subclass );
+                               ~Java_idispatch              ();
+
+    ptr<IDispatch>             _idispatch;
+    string                     _class_name;
+};
+
 //------------------------------------------------------------------------------------------Java_vm
 /*
 struct Java_vm                  // Java virtual machine
@@ -168,9 +162,9 @@ struct Java_idispatch : Java_object
 //-----------------------------------------------------------------------------Java_module_instance
 // Für Java-Objekte
 
-struct Java_module_instance : Module_instance
+struct Java_module_instance : Module_instance, java::Has_vm
 {
-                                Java_module_instance        ( Module* module )                      : Module_instance(module), _zero_(this+1), _jobject(_module->_spooler) {}
+                                Java_module_instance        ( java::Vm*, Module* );
                                ~Java_module_instance        ()                                      { close(); }
 
     void                        close                       ();
@@ -187,9 +181,7 @@ struct Java_module_instance : Module_instance
 
 
     Fill_zero                  _zero_;
-    java::Vm*                  _java_vm;
-    Java_env*                  _env;
-    Java_global_object         _jobject;
+    java::Global_jobject       _jobject;
 
     typedef list< ptr<Java_idispatch> >  Added_objects;
     Added_objects              _added_jobjects;

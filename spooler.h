@@ -1,4 +1,4 @@
-// $Id: spooler.h,v 1.125 2003/03/01 09:46:14 jz Exp $
+// $Id: spooler.h,v 1.126 2003/03/17 18:40:18 jz Exp $
 
 #ifndef __SPOOLER_H
 #define __SPOOLER_H
@@ -101,6 +101,7 @@ namespace spooler {
 //-------------------------------------------------------------------------------------------------
 
 extern volatile int             ctrl_c_pressed;
+extern Spooler*                 spooler_ptr;
 
 //-------------------------------------------------------------------------------------------------
 
@@ -285,11 +286,11 @@ struct Spooler
     bool                       _need_db;
 
     bool                       _has_java;                   // Es gibt ein Java-Skript
+    ptr<java::Vm>              _java_vm;
+    string                     _java_work_dir;              // Zum Compilieren, für .class
 
     bool                       _manual;
     string                     _job_name;                   // Bei manuellem Betrieb
-
-    Java_vm                    _java_vm;
 
   private:
     string                     _config_filename;            // -config=

@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.177 2003/03/15 18:06:36 jz Exp $
+// $Id: spooler.cxx,v 1.178 2003/03/17 18:40:18 jz Exp $
 /*
     Hier sind implementiert
 
@@ -17,6 +17,10 @@
 #include <sys/stat.h>
 #include <sys/timeb.h>
 
+#ifdef Z_WINDOWS
+#   include <process.h>
+#endif
+
 #include "../kram/sosprof.h"
 #include "../kram/sosopt.h"
 #include "../kram/sleep.h"
@@ -25,6 +29,7 @@
 #include "../kram/licence.h"
 #include "../kram/sos_mail.h"
 
+/*
 #ifdef Z_WINDOWS
 #   include <process.h>
 #   include <direct.h>
@@ -36,7 +41,7 @@
 #       define DEFAULT_VM_MODULE "libjvm.so"
 #   endif
 #endif
-
+*/
 
 
 namespace sos {
@@ -59,7 +64,7 @@ static bool                     is_daemon               = false;
 //static int                      daemon_starter_pid;
 //bool                          spooler_is_running      = false;
 volatile int                    ctrl_c_pressed          = 0;
-static Spooler*                 spooler                 = NULL;
+Spooler*                        spooler_ptr             = NULL;
 
 
 /*
@@ -178,7 +183,7 @@ With_log_switch read_profile_with_log( const string& profile, const string& sect
             ctrl_c_pressed++;
             //Kein Systemaufruf hier! (Aber bei Ctrl-C riskieren wir einen Absturz. Ich will diese Meldung sehen.)
             fprintf( stderr, "Spooler wird wegen Ctrl-C beendet ...\n" );
-            spooler->async_signal( "Ctrl+C" );
+            spooler_ptr->async_signal( "Ctrl+C" );
             return true;
         }
         else
@@ -202,7 +207,7 @@ With_log_switch read_profile_with_log( const string& profile, const string& sect
             // should  not  be  called from  a signal handler. In particular, calling pthread_mutex_lock 
             // or pthread_mutex_unlock from a signal handler may deadlock the calling thread.
 
-            if( !is_daemon )  spooler->async_signal( "Ctrl+C" );
+            if( !is_daemon )  spooler_ptr->async_signal( "Ctrl+C" );
         //}
     }
 
@@ -254,7 +259,6 @@ Spooler::Spooler()
     _zero_(this+1), 
     _security(this),
     _communication(this), 
-    _java_vm(this),
     _prefix_log(1),
     _wait_handles(this,&_prefix_log),
     _log(this),
@@ -269,6 +273,9 @@ Spooler::Spooler()
     _log_mail_bcc  ("-"),
     _mail_queue_dir("-")
 {
+    if( spooler_ptr )  throw_xc( "spooler_ptr" );
+    spooler_ptr = this;
+
     Z_GNU_ONLY( time::empty_period = Period() );
 
     _pid = getpid();
@@ -299,14 +306,13 @@ Spooler::Spooler()
 
 
     set_ctrl_c_handler( true );
-    spooler = this;
 }
 
 //--------------------------------------------------------------------------------Spooler::~Spooler
 
 Spooler::~Spooler() 
 {
-    spooler = NULL;
+    spooler_ptr = NULL;
     set_ctrl_c_handler( false );
 
     if( !_thread_list.empty() )  
@@ -331,6 +337,7 @@ Spooler::~Spooler()
     // COM-Objekte entkoppeln, falls noch jemand eine Referenz darauf hat:
     if( _com_spooler )  _com_spooler->close();
     if( _com_log     )  _com_log->close();
+
 }
 
 //--------------------------------------------------------------------------Spooler::security_level
@@ -727,10 +734,10 @@ void Spooler::load_arg()
     _need_db            = read_profile_bool      ( _factory_ini, "spooler", "need_db"            , true                );
     _history_tablename  = read_profile_string    ( _factory_ini, "spooler", "db_history_table"   , "spooler_history"   );
     _variables_tablename= read_profile_string    ( _factory_ini, "spooler", "db_variables_table" , "spooler_variables" );
-    _java_vm._filename  = read_profile_string    ( _factory_ini, "java"   , "vm"                 , DEFAULT_VM_MODULE   );
-  //_java_vm._ini_options= read_profile_string   ( _factory_ini, "java"   , "options" );
-    _java_vm._ini_class_path= read_profile_string( _factory_ini, "java"   , "class_path" );
-    _java_vm._javac     = read_profile_string    ( _factory_ini, "java"   , "javac"              , "javac"             );
+
+    _java_vm->set_filename      ( read_profile_string( _factory_ini, "java"   , "vm"         , _java_vm->filename()       ) );
+    _java_vm->append_class_path ( read_profile_string( _factory_ini, "java"   , "class_path" ) );
+    _java_vm->set_javac_filename( read_profile_string( _factory_ini, "java"   , "javac"      , _java_vm->javac_filename() ) );
 
 
     try
@@ -865,7 +872,7 @@ void Spooler::start()
     {
         try
         {
-            _java_vm.init();
+            _java_vm->init();
         }
         catch( const exception& x )
         {
@@ -1170,7 +1177,7 @@ int Spooler::launch( int argc, char** argv )
     } while( _state_cmd == sc_reload || _state_cmd == sc_load_config );
 
 
-    _java_vm.close();
+    _java_vm->close();
 
     _log.info( "Spooler ordentlich beendet." );
 
@@ -1404,11 +1411,11 @@ int spooler_main( int argc, char** argv )
     try
     {
 
-        spooler = &my_spooler;
+        //spooler = &my_spooler;
 
         ret = my_spooler.launch( argc, argv );
 
-        spooler = NULL;
+        //spooler = NULL;
     }
     catch( const Xc& x )
     {

@@ -1,4 +1,4 @@
-// $Id: spooler_thread.cxx,v 1.75 2003/02/24 13:48:29 jz Exp $
+// $Id: spooler_thread.cxx,v 1.76 2003/03/17 18:40:19 jz Exp $
 /*
     Hier sind implementiert
 
@@ -174,7 +174,7 @@ void Spooler_thread::close1()
         }
 
 
-        if( current_thread_id() != _spooler->thread_id() )  _spooler->_java_vm.detach_thread();
+        if( current_thread_id() != _spooler->thread_id() )  _spooler->_java_vm->detach_thread();
     }
     catch( const exception&  x ) { _log.error( x.what() ); }
     catch( const _com_error& x ) { _log.error( as_string( x.Description() ) ); }
@@ -215,7 +215,7 @@ void Spooler_thread::start( Event* event_destination )
     {
         if( has_java()  &&  current_thread_id() != _spooler->thread_id() )  
         {
-            _spooler->_java_vm.attach_thread( _name );
+            _spooler->_java_vm->attach_thread( _name );
         }
 
         if( _module.set() )

@@ -1,4 +1,4 @@
-// $Id: spooler_module.cxx,v 1.14 2002/12/02 17:19:32 jz Exp $
+// $Id: spooler_module.cxx,v 1.15 2003/03/17 18:40:19 jz Exp $
 /*
     Hier sind implementiert
 
@@ -112,7 +112,9 @@ ptr<Module_instance> Module::create_instance()
     {
         case kind_java:              
         {
-            ptr<Java_module_instance> p = Z_NEW( Java_module_instance( this ) );
+            if( !_spooler->_java_vm->running() )  throw_xc( "SPOOLER-177" );
+
+            ptr<Java_module_instance> p = Z_NEW( Java_module_instance( _spooler->_java_vm, this ) );
             return +p;
         }
 

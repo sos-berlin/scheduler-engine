@@ -1,4 +1,4 @@
-// $Id: spooler_service.cxx,v 1.35 2002/12/03 23:07:17 jz Exp $
+// $Id: spooler_service.cxx,v 1.36 2003/03/17 18:40:19 jz Exp $
 /*
     Hier sind implementiert
 
@@ -61,7 +61,6 @@ static bool                     terminate_immediately       = false;
 static bool                     service_stop                = false;                        // STOP-Kommando von der Dienstesteuerung (und nicht von TCP-Schnittstelle)
 static Thread_id                self_destruction_thread_id;
 
-static Spooler*                 spooler_ptr;                // Wird auch beim Zwangsbeenden auf NULL gesetzt
 SERVICE_STATUS_HANDLE           service_status_handle;
 Handle                          thread_handle;
 string                          spooler_service_name;
@@ -557,7 +556,6 @@ static uint __stdcall service_thread( void* param )
 
     {
         Spooler spooler;
-        spooler_ptr = &spooler;
 
         spooler._is_service = true;
         spooler.set_state_changed_handler( spooler_state_changed );
@@ -580,8 +578,6 @@ static uint __stdcall service_thread( void* param )
             spooler_ptr = NULL;
             ret = 99;
         }
-
-        spooler_ptr = NULL;
     }
 
     set_service_status( 0 );       // Das beendet den Prozess wegen spooler_ptr == NULL  ==>  SERVICE_STOPPED
