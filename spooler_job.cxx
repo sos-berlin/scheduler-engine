@@ -1,4 +1,4 @@
-// $Id: spooler_job.cxx,v 1.56 2004/01/29 21:06:25 jz Exp $
+// $Id: spooler_job.cxx,v 1.57 2004/01/30 13:37:49 jz Exp $
 /*
     Hier sind implementiert
 
@@ -7,6 +7,7 @@
 
 
 #include "spooler.h"
+#include "../zschimmer/z_sql.h"
 #include "../kram/sleep.h"
 
 #ifndef Z_WINDOWS
@@ -18,6 +19,8 @@
 
 namespace sos {
 namespace spooler {
+
+using namespace zschimmer::sql;
 
 
 const int    max_task_time_out             = 365*24*3600;
@@ -208,7 +211,7 @@ void Job::init2()
 
     Time now = Time::now();
 
-    load_tasks_from_db();
+    if( _spooler->_db->opened() )  load_tasks_from_db();
 
     //select_period( now );
     set_next_start_time( now );
@@ -379,18 +382,17 @@ void Job::load_tasks_from_db()
     Transaction ta ( _spooler->_db );
 
     Any_file sel ( "-in " + _spooler->_db->db_name() + 
-                    "select \"ID\", \"ENQUEUE_TIME\", \"START_AT_TIME\"" //, length(\"PARAMETERS\") parlen " +
-                    "  from " + quoted_string( ucase( _spooler->_job_history_tablename ), '"', '"' ) +
-                    "  where \"IN_QUEUE\"=1"
-                     " and \"SPOOLER_ID\"=" + quoted_string( _spooler->id_for_db(), '\'', '\'' ) +
-                     " and \"JOB_NAME\"=" + quoted_string( _name, '\'', '\'' ) +
-                    "  order by \"ID\"" );
+                    "select \"TASK_ID\", \"ENQUEUE_TIME\", \"START_AT_TIME\"" //, length(\"PARAMETERS\") parlen " +
+                    "  from " + quoted_string( ucase( _spooler->_tasks_tablename ), '"', '"' ) +
+                    "  where \"SPOOLER_ID\"=" + quoted_string( _spooler->id_for_db(), '\'', '\'' ) +
+                       " and \"JOB_NAME\"=" + quoted_string( _name, '\'', '\'' ) +
+                    "  order by \"TASK_ID\"" );
     
     while( !sel.eof() )
     {
         Record record = sel.get_record();
 
-        int                     task_id    = record.as_int   ( "id" );
+        int                     task_id    = record.as_int   ( "task_id" );
         Time                    start_at;
         ptr<Com_variable_set>   parameters = new Com_variable_set;
 
@@ -398,10 +400,12 @@ void Job::load_tasks_from_db()
 
         //if( !record.null( "parlen" )  &&  record.as_int( "parlen" ) > 0 )
         {
-            string parameters_xml = file_as_string( _spooler->_db->db_name() + " -table=" + _spooler->_job_history_tablename + " -blob='parameters'"
-                                                                               " where \"ID\"=" + as_string( task_id ) );
+            string parameters_xml = file_as_string( _spooler->_db->db_name() + " -table=" + _spooler->_tasks_tablename + " -blob='parameters'"
+                                                                               " where \"TASK_ID\"=" + as_string( task_id ) );
             if( !parameters_xml.empty() )  parameters->set_xml( parameters_xml );
         }
+
+        _log.info( "Zu startende Task aus Datenbank geladen: id=" + as_string(task_id) + " start_at=" + start_at.as_string() );
 
 
         Sos_ptr<Task> task = create_task( +parameters, "", start_at, task_id );
@@ -425,9 +429,45 @@ void Job::Task_queue::enqueue_task( const Sos_ptr<Task>& task )
 {
     if( !task->_enqueue_time )  task->_enqueue_time = Time::now();
 
-    if( !task->_is_in_db  &&  _job->_spooler->_db->opened() )
+    while(1)
     {
-        task->_history.enqueue();
+        try
+        {
+            if( !task->_is_in_db  &&  _spooler->_db->opened() )
+            {
+                Transaction ta ( _spooler->_db );
+                //task->_history.enqueue();
+
+                Insert_stmt insert;
+                insert.set_table_name( _spooler->_tasks_tablename );
+
+                insert             [ "TASK_ID"       ] = task->_id;
+                insert             [ "JOB_NAME"      ] = task->_job->_name;
+                insert             [ "SPOOLER_ID"    ] = _spooler->id_for_db();
+                insert.set_datetime( "ENQUEUE_TIME"  ,   task->_enqueue_time.as_string( Time::without_ms ) );
+                insert.set_datetime( "START_AT_TIME" ,   task->_start_at.as_string( Time::without_ms ) );
+
+                _spooler->_db->execute( insert );
+
+                if( task->has_parameters() )
+                {
+                    Any_file blob;
+                    blob.open( "-out " + _spooler->_db->db_name() + " -table=" + _spooler->_tasks_tablename + " -blob='parameters'"
+                            " where \"TASK_ID\"=" + as_string( task->_id ) );
+                    blob.put( xml_as_string( task->parameters_as_dom() ) );
+                    blob.close();
+                }
+
+                ta.commit();
+
+                task->_is_in_db = true;
+            }
+            break;
+        }
+        catch( const exception& x )
+        {
+            _spooler->_db->try_reopen_after_error( x );
+        }
     }
 
 
@@ -438,16 +478,47 @@ void Job::Task_queue::enqueue_task( const Sos_ptr<Task>& task )
 
 //---------------------------------------------------------------------Job::Task_queue::remove_task
 
+void Job::Task_queue::remove_task_from_db( Task* task )
+{
+    while(1)
+    {
+        try
+        {
+            if( task->_is_in_db  &&  _spooler->_db->opened() )
+            {
+                Transaction ta ( _spooler->_db );
+
+                _spooler->_db->execute( "DELETE from " + quoted_name( _spooler->_tasks_tablename ) +
+                                            "  where \"TASK_ID\"=" + as_string( task->id() ) );
+                ta.commit();
+
+                task->_is_in_db = false;
+            }
+
+            break;
+        }
+        catch( const exception& x )
+        {
+            _spooler->_db->try_reopen_after_error( x );
+        }
+    }
+}
+
+//---------------------------------------------------------------------Job::Task_queue::remove_task
+
 bool Job::Task_queue::remove_task( int task_id, Why_remove )
 {
     bool result = false;
 
     for( Queue::iterator it = _queue.begin(); it != _queue.end(); it++ )
     {
-        if( (*it)->_id == task_id )  
+        Task* task = *it;
+        if( task->_id == task_id )  
         {
-          //_job->_log.log( log_level, task->obj_name() + " wird aus der Warteschlange entfernt" );
             _queue.erase( it );
+
+            remove_task_from_db( task );
+
             result = true;
             break;
         }

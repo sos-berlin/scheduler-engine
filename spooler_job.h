@@ -1,4 +1,4 @@
-// $Id: spooler_job.h,v 1.19 2004/01/29 21:06:25 jz Exp $
+// $Id: spooler_job.h,v 1.20 2004/01/30 13:37:49 jz Exp $
 
 #ifndef __SPOOLER_JOB_H
 #define __SPOOLER_JOB_H
@@ -158,7 +158,7 @@ struct Job : Sos_self_deleting
         };
 
         
-                                Task_queue                  ( Job* job )                            : _job(job) {}
+                                Task_queue                  ( Job* job )                            : _job(job), _spooler(job->_spooler) {}
 
       //void                    load_from_db                ();
         void                    clear                       ()                                      { _queue.clear(); }
@@ -169,10 +169,12 @@ struct Job : Sos_self_deleting
 
         void                    enqueue_task                ( const Sos_ptr<Task>& );
         bool                    remove_task                 ( int task_id, Why_remove );
+        void                    remove_task_from_db         ( Task* );
         
 
       private:
         Job* const             _job;
+        Spooler* const         _spooler;
         Queue                  _queue;
     };
 

@@ -1,4 +1,4 @@
-// $Id: spooler_history.h,v 1.26 2004/01/29 21:06:25 jz Exp $
+// $Id: spooler_history.h,v 1.27 2004/01/30 13:37:49 jz Exp $
 
 #ifndef __SPOOLER_HISTORY_H
 #define __SPOOLER_HISTORY_H
@@ -47,14 +47,13 @@ struct Spooler_db : Sos_self_deleting
     string                      db_name                 ()                                          { return _db_name; }
     string                      error                   ()                                          { THREAD_LOCK_RETURN( _error_lock, string, _error ); }
     bool                        is_waiting              () const                                    { return _waiting; }
-    void                        check_table_columns     ( int free_id );
 
     void                        spooler_start           ();
     void                        spooler_stop            ();
 
-    int                         get_task_id             ( Transaction* ta = NULL )                  { return get_id( "spooler_job_id"          , ta ); }
-    int                         get_order_id            ( Transaction* ta = NULL )                  { return get_id( "spooler_order_id"        , ta ); }
-    int                         get_order_ordering      ( Transaction* ta = NULL )                  { return get_id( "spooler_order_ordering"  , ta ); }
+    int                         get_task_id             ()                                          { return get_id( "spooler_job_id" ); }
+    int                         get_order_id            ( Transaction* ta = NULL )                  { return get_id( "spooler_order_id", ta ); }
+    int                         get_order_ordering      ( Transaction* ta = NULL )                  { return get_id( "spooler_order_ordering", ta ); }
     int                         get_order_history_id    ( Transaction* ta )                         { return get_id( "spooler_order_history_id", ta ); }
 
     xml::Element_ptr            read_task               ( const xml::Document_ptr&, int task_id, Show_what );
@@ -64,6 +63,10 @@ struct Spooler_db : Sos_self_deleting
 
     void                        write_order_history     ( Order*, Transaction* = NULL );
 
+    void                        execute                 ( const string& stmt );
+    void                        commit                  ();
+    void                        rollback                ();
+    void                        try_reopen_after_error  ( const exception& );
 
     Fill_zero                  _zero_;
     Thread_semaphore           _lock;
@@ -79,11 +82,7 @@ struct Spooler_db : Sos_self_deleting
 
     void                        open2                   ( const string& db_name );
     void                        open_history_table      ();
-    void                        commit                  ();
-    void                        rollback                ();
-    void                        execute                 ( const string& stmt );
     void                        create_table_when_needed( const string& tablename, const string& fields );
-    void                        try_reopen_after_error  ( const exception& );
     int                         get_id                  ( const string& variable_name, Transaction* = NULL );
     int                         get_id_                 ( const string& variable_name, Transaction* );
     void                        delete_order            ( Order*, Transaction* );
@@ -165,9 +164,6 @@ struct Task_history
                                 Task_history            ( Job_history*, Task* );
                                ~Task_history            ();
 
-    void                        init_record             ();
-    void                        remove_record           ();
-    void                        enqueue                 ();
     void                        start                   ();
     void                        end                     ();
     void                        set_extra_field         ( const string& name, const Variant& value );
@@ -185,7 +181,6 @@ struct Task_history
     Job_history*               _job_history;
     Task*                      _task;
     bool                       _start_called;
-    bool                       _initialized;
 
     int64                      _record_pos;             // Position des Satzes, der zu Beginn des Jobs geschrieben und am Ende überschrieben oder gelöscht wird.
     string                     _tabbed_record;

@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.320 2004/01/14 19:19:32 jz Exp $
+// $Id: spooler.cxx,v 1.321 2004/01/30 13:37:49 jz Exp $
 /*
     Hier sind implementiert
 
@@ -1250,7 +1250,8 @@ void Spooler::load_arg()
     _include_path               = subst_env( read_profile_string    ( _factory_ini, "spooler", "include_path"       , _include_path ) );   _include_path_as_option_set  = !_include_path.empty();
     _spooler_param              =            read_profile_string    ( _factory_ini, "spooler", "param"              );                   _spooler_param_as_option_set = !_spooler_param.empty();
     log_level                   =            read_profile_string    ( _factory_ini, "spooler", "log_level"          , log_level );   
-    _job_history_tablename      =            read_profile_string    ( _factory_ini, "spooler", "db_history_table"   , "SCHEDULER_HISTORY"   );
+    _tasks_tablename            =            read_profile_string    ( _factory_ini, "spooler", "db_tasks_table"     , "SCHEDULER_TASKS"   );
+    _job_history_tablename      =            read_profile_string    ( _factory_ini, "spooler", "db_history_table"   , "SCHEDULER_HISTORY" );
     _job_history_columns        =            read_profile_string    ( _factory_ini, "spooler", "history_columns"    );
     _job_history_yes            =            read_profile_bool      ( _factory_ini, "spooler", "history"            , true );
     _job_history_on_process     =            read_profile_history_on_process( _factory_ini, "spooler", "history_on_process", 0 );

@@ -1,4 +1,4 @@
-// $Id: spooler.h,v 1.174 2004/01/07 08:57:51 jz Exp $
+// $Id: spooler.h,v 1.175 2004/01/30 13:37:49 jz Exp $
 
 #ifndef __SPOOLER_H
 #define __SPOOLER_H
@@ -323,6 +323,7 @@ struct Spooler
     string                     _variables_tablename;
     string                     _orders_tablename;
 
+    string                     _tasks_tablename;
     string                     _job_history_tablename;
     string                     _job_history_columns;
     bool                       _job_history_yes;

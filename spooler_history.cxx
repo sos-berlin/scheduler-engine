@@ -1,4 +1,4 @@
-// $Id: spooler_history.cxx,v 1.85 2004/01/29 21:06:25 jz Exp $
+// $Id: spooler_history.cxx,v 1.86 2004/01/30 13:37:49 jz Exp $
 
 #include "spooler.h"
 #include "../zschimmer/z_com.h"
@@ -215,21 +215,18 @@ void Spooler_db::open2( const string& db_name )
                 for( int i = 0; i < create_extra.size(); i++ )  create_extra[i] += " char(250),";
 
                 create_table_when_needed( _spooler->_job_history_tablename, 
-                                          "\"ID\"            integer not null,"
-                                          "\"SPOOLER_ID\"    char(100),"
-                                          "\"JOB_NAME\"      char(100) not null,"
-                                          "\"IN_QUEUE\"      bit,"                      // 27.1.04 neu, indizieren!
-                                          "\"ENQUEUE_TIME\"  datetime,"                 // 27.1.04 neu
-                                          "\"START_AT_TIME\" datetime,"                 // 27.1.04 neu
-                                          "\"START_TIME\"    datetime,"                 // 27.1.04 geändert, nicht mehr not null
-                                          "\"END_TIME\"      datetime,"
-                                          "\"CAUSE\"         char(50),"
-                                          "\"STEPS\"         integer,"
-                                          "\"ERROR\"         bit,"
-                                          "\"ERROR_CODE\"    char(50),"
-                                          "\"ERROR_TEXT\"    char(250),"
-                                          "\"PARAMETERS\"    clob,"
-                                          "\"LOG\"           blob," 
+                                          "\"ID\"          integer not null,"
+                                          "\"SPOOLER_ID\"  char(100),"
+                                          "\"JOB_NAME\"    char(100) not null,"
+                                          "\"START_TIME\"  datetime not null,"
+                                          "\"END_TIME\"    datetime,"
+                                          "\"CAUSE\"       char(50),"
+                                          "\"STEPS\"       integer,"
+                                          "\"ERROR\"       bit,"
+                                          "\"ERROR_CODE\"  char(50),"
+                                          "\"ERROR_TEXT\"  char(250),"
+                                          "\"PARAMETERS\"  clob,"
+                                          "\"LOG\"         blob," 
                                           + join( "", create_extra ) 
                                           + "primary key( \"ID\" )" );
 
@@ -259,6 +256,15 @@ void Spooler_db::open2( const string& db_name )
                                           "\"END_TIME\"    datetime not null,"
                                           "\"LOG\"         blob," 
                                           "primary key( \"HISTORY_ID\" )" );
+
+                create_table_when_needed( _spooler->_tasks_tablename, 
+                                          "\"TASK_ID\"        integer not null,"           // Primärschlüssel
+                                          "\"SPOOLER_ID\"     char(100),"
+                                          "\"JOB_NAME\"       char(100) not null,"
+                                          "\"ENQUEUE_TIME\"   datetime,"
+                                          "\"START_AT_TIME\"  datetime,"
+                                          "\"PARAMETERS\"     clob,"
+                                          "primary key( \"TASK_ID\" )" );
 
               //stmt = "UPDATE " + uquoted(_spooler->_variables_tablename) + " set \"WERT\" = \"WERT\"+1 where \"NAME\"='spooler_job_id'";
               //_job_id_update.prepare( _db_name + stmt );
@@ -578,54 +584,6 @@ void Spooler_db::rollback()
     }
 }   
 
-//------------------------------------------------------------------Spooler_db::check_table_columns
-
-void Spooler_db::check_table_columns( int id )
-{
-    Transaction ta ( this );
-
-
-    // Neue Spalten enqueue_time, start_at_time und in_queue bekannt?
-
-    try
-    {
-        Any_file( "-in " + _db_name + " SELECT \"ENQUEUE_TIME\", \"START_AT_TIME\",\"IN_QUEUE\" from " + uquoted(_spooler->_job_history_tablename) + " where id=0" );
-    }
-    catch( const exception& x )
-    {
-        _spooler->_log.warn( x.what() );
-        _spooler->_log.warn( "Anscheinend fehlen der Tabelle " + _spooler->_job_history_tablename + " die neuen Felder enqueue_time, start_at_time und in_queue. Die Tabelle wird erweitert ..." );
-
-        execute( "ALTER TABLE " + uquoted(_spooler->_job_history_tablename) + 
-                 " add ( \"ENQUEUE_TIME\" datetime,"
-                       " \"START_AT_TIME\" datetime,"
-                       " \"IN_QUEUE\" bit )" );
-    }
-
-
-    // Spalte start_time nimmt null an?
-    
-    try
-    {
-        execute( "INSERT into " + uquoted(_spooler->_job_history_tablename) + 
-                 " (\"ID\",\"SPOOLER_ID\", \"JOB_NAME\",\"START_TIME\")"
-                 " values (" + as_string(id) + "," + sql_quoted(_spooler->id_for_db()) + ",'(Test start_time)',null)" );
-
-        // Hat geklappt, wir können den Satz wieder löschen:
-        execute( "DELETE from " + uquoted(_spooler->_job_history_tablename) + " where id=" + as_string(id) );
-    }
-    catch( const exception& x )
-    {
-        _spooler->_log.warn( x.what() );
-        _spooler->_log.warn( "Anscheinend nimmt die Spalte start_time keinen Null-Wert an. Die Tabelle " + _spooler->_job_history_tablename + " wird geändert ..." );
-
-        execute( "ALTER TABLE " + uquoted(_spooler->_job_history_tablename) + 
-                    " %alter_column \"START_TIME\" datetime null" );    // darf null sein
-    }
-
-    ta.commit();
-}
-
 //------------------------------------------------------------------------Spooler_db::spooler_start
 
 void Spooler_db::spooler_start()
@@ -634,20 +592,14 @@ void Spooler_db::spooler_start()
     {
         //try   Fehler beim Spooler-Start führen zum Abbruch
         {
-            _id = get_task_id();    // Der Spooler-Satz hat auch eine Id
+            _id = get_task_id();     // Der Spooler-Satz hat auch eine Id
 
-            if( _db.opened() )      // get_id() kann die DB schließen (nach Fehler)
+            if( _db.opened() )   // get_id() kann die DB schließen (nach Fehler)
             {
-                check_table_columns( _id );
-
                 Transaction ta ( this );
                 {
-                    string now = "{ts'" + Time::now().as_string(Time::without_ms) + "'}";
-                    string insert = "INSERT into " + uquoted(_spooler->_job_history_tablename) + 
-                                    " (\"ID\",\"SPOOLER_ID\",\"JOB_NAME\",\"START_TIME\")"
-                                    " values (" + as_string(_id) + "," + sql_quoted(_spooler->id_for_db()) + ",'(Spooler)'," + now + ")";
-                    execute( insert );
-
+                    execute( "INSERT into " + uquoted(_spooler->_job_history_tablename) + " (\"ID\",\"SPOOLER_ID\",\"JOB_NAME\",\"START_TIME\") "
+                             "values (" + as_string(_id) + "," + sql_quoted(_spooler->id_for_db()) + ",'(Spooler)',{ts'" + Time::now().as_string(Time::without_ms) + "'})" );
                     ta.commit();
                 }
             }
@@ -997,7 +949,7 @@ xml::Element_ptr Spooler_db::read_task( const xml::Document_ptr& doc, int task_i
         Transaction ta ( this );
         {
             Any_file sel ( "-in " + _spooler->_db->db_name() + 
-                            "select \"SPOOLER_ID\", \"JOB_NAME\", \"ENQUEUE_TIME\", \"START_AT_TIME\", \"START_TIME\", \"END_TIME\", \"CAUSE\", \"STEPS\", \"ERROR\", \"ERROR_CODE\", \"ERROR_TEXT\" " +
+                            "select \"SPOOLER_ID\", \"JOB_NAME\", \"START_TIME\", \"END_TIME\", \"CAUSE\", \"STEPS\", \"ERROR\", \"ERROR_CODE\", \"ERROR_TEXT\" " +
                             "  from " + quoted_string( ucase( _spooler->_job_history_tablename ), '\"', '\"' ) +
                             "  where \"ID\"=" + as_string(task_id) );
             if( sel.eof() )  throw_xc( "SCHEDULER-207", task_id );
@@ -1016,10 +968,8 @@ xml::Element_ptr Spooler_db::read_task( const xml::Document_ptr& doc, int task_i
 
             //if( _running_since )
             //task_element.setAttribute( "running_since"   , _running_since.as_string() );
-            task_element.setAttribute( "enqueued"        , record.as_string( "ENQUEUE_TIME" ) );
-            task_element.setAttribute( "start_at"        , record.as_string( "START_AT"   ) );      // Gibt es nicht in Task::dom()
             task_element.setAttribute( "start_time"      , record.as_string( "START_TIME" ) );      // Gibt es nicht in Task::dom()
-            task_element.setAttribute( "end_time"        , record.as_string( "END_TIME"   ) );      // Gibt es nicht in Task::dom()
+            task_element.setAttribute( "end_time"        , record.as_string( "END_TIME" ) );        // Gibt es nicht in Task::dom()
 
             //if( _idle_since )
             //task_element.setAttribute( "idle_since"      , _idle_since.as_string() );
@@ -1230,7 +1180,7 @@ xml::Element_ptr Job_history::read_tail( const xml::Document_ptr& doc, int id, i
 
         try
         {
-            if( _use_db  &&  !_spooler->_db->opened() )  throw_xc( "SCHEDULER-184" );     // Wenn die DB vorübergehend (wegen Nichterreichbarkeit) geschlossen ist, s. get_task_id()
+            if( _use_db  &&  !_spooler->_db->opened() )  throw_xc( "SCHEDULER-184" );     // Wenn die DB verübergegehen (wegen Nichterreichbarkeit) geschlossen ist, s. get_task_id()
 
             Transaction ta ( +_spooler->_db );
             {
@@ -1388,10 +1338,8 @@ void Task_history::write( bool start )
     if( start | _job_history->_use_file )  parameters = _task->has_parameters()? xml_as_string( _task->parameters_as_dom() )
                                                                                : "";
 
-    string start_time = _task->_running_since? _task->_running_since.as_string(Time::without_ms)
-                                             : "";
-  //string start_time = !start || _task->_running_since? _task->_running_since.as_string(Time::without_ms)
-  //                                                   : Time::now().as_string(Time::without_ms);
+    string start_time = !start || _task->_running_since? _task->_running_since.as_string(Time::without_ms)
+                                                       : Time::now().as_string(Time::without_ms);
 
     if( _job_history->_use_db )
     {
@@ -1412,13 +1360,8 @@ void Task_history::write( bool start )
     {
         while(1)
         {
-            if( !_spooler->_db->opened() )  break;
-            if( !_spooler->_db->_history_table.opened() )  break;
-
             try
             {
-                bool task_is_in_db = _task->_is_in_db;
-
                 Transaction ta ( +_spooler->_db );
                 {
                     if( start )
@@ -1426,43 +1369,21 @@ void Task_history::write( bool start )
                         Record record = _spooler->_db->_history_table.create_record();
 
                         record.set_field( "id"             , _task->_id );
-
-                        if( _task->_enqueue_time )
-                        record.set_field( "enqueue_time"   , _task->_enqueue_time.as_string(Time::without_ms) );
-
-                        if( _task->_start_at )
-                        record.set_field( "start_at_time"  , _task->_start_at.as_string(Time::without_ms) );
-
-                        if( start_time != "" )
+                        record.set_field( "spooler_id"     , _spooler->id_for_db() );
+                        record.set_field( "job_name"       , _task->job()->name() );
                         record.set_field( "start_time"     , start_time );
-
-                        if( _task->_cause )
                         record.set_field( "cause"          , start_cause_name( _task->_cause ) );
 
-                        if( _task->_cause )  record.set_field_null( "in_queue" );
-                                       else  record.set_field     ( "in_queue", "1" );
+                        if( !parameters.empty()  &&  parameters.length() < blob_field_size )  record.set_field( "parameters", parameters ), parameters = "";
 
+                        _spooler->_db->_history_table.insert( record );
 
-                        if( _task->_is_in_db ) 
+                        if( !parameters.empty() )
                         {
-                            _spooler->_db->_history_table.update( record );
-                        }
-                        else
-                        {
-                            record.set_field( "spooler_id"     , _spooler->id_for_db() );
-                            record.set_field( "job_name"       , _task->job()->name() );
-                            if( !parameters.empty()  &&  parameters.length() < blob_field_size )  record.set_field( "parameters", parameters ), parameters = "";
-
-                            _spooler->_db->_history_table.insert( record );
-                            task_is_in_db = true;
-
-                            if( !parameters.empty() )
-                            {
-                                Any_file blob;
-                                blob.open( "-out " + _spooler->_db->db_name() + " -table=" + _spooler->_job_history_tablename + " -blob='parameters' where \"ID\"=" + as_string( _task->_id ) );
-                                blob.put( parameters );
-                                blob.close();
-                            }
+                            Any_file blob;
+                            blob.open( "-out " + _spooler->_db->db_name() + " -table=" + _spooler->_job_history_tablename + " -blob='parameters' where \"ID\"=" + as_string( _task->_id ) );
+                            blob.put( parameters );
+                            blob.close();
                         }
                     }
                     else
@@ -1479,7 +1400,6 @@ void Task_history::write( bool start )
                         string stmt = "UPDATE " + uquoted(_spooler->_job_history_tablename) + " set ";
                         stmt +=   "\"START_TIME\"={ts'" + start_time + "'}";
                         stmt += ", \"END_TIME\"={ts'" + Time::now().as_string(Time::without_ms) + "'}";
-                        stmt += ", \"IN_QUEUE\"=null";
                         stmt += ", \"STEPS\"=" + as_string( _task->_step_count );
                         stmt += ", \"ERROR\"=" + as_string( _task->has_error() );
                         if( !_task->_error.code().empty() ) stmt += ", \"ERROR_CODE\"=" + sql_quoted( _task->_error.code() );
@@ -1515,7 +1435,6 @@ void Task_history::write( bool start )
                 }
 
                 ta.commit();
-                _task->_is_in_db = task_is_in_db;
                 break;
             }
             catch( const exception& x )
@@ -1553,73 +1472,20 @@ void Task_history::write( bool start )
     }
 }
 
-//--------------------------------------------------------------------Task_history::remove_record()
-
-void Task_history::remove_record()
-{
-    while(1)
-    {
-        if( _spooler->_db->opened() )
-        {
-            try
-            {
-                Transaction ta ( +_spooler->_db );
-
-                _spooler->_db->execute( "DELETE FROM " + uquoted(_spooler->_job_history_tablename) + " where id=" + as_string(_task_id) );
-                ta.commit();
-
-                _task->_is_in_db = false;
-                break;
-            }
-            catch( const exception& x )
-            {
-                _spooler->_db->try_reopen_after_error( x );
-            }
-        }
-    }
-}
-
-//----------------------------------------------------------------------Task_history::init_record()
-
-void Task_history::init_record()
-{
-    if( !_initialized )
-    {
-        _task_id = _task->id();
-
-        _extra_record.construct( _job_history->_extra_type );
-
-        _initialized = true;
-    }
-}
-
-//----------------------------------------------------------------------------Task_history::enqueue
-
-void Task_history::enqueue()
-{
-    if( _job_history->_use_db  &&  _spooler->_db->opened() )
-    {
-        init_record();
-        write( true );
-    }
-}
-
 //------------------------------------------------------------------------------Task_history::start
 
 void Task_history::start()
 {
-    if( !_job_history->_history_yes )  
-    {
-        if( _task->_is_in_db )  remove_record();
-        return;
-    }
+    if( !_job_history->_history_yes )  return;
 
-    if( _start_called )  return;
+    if( _task_id == _task->id() )  return;        // start() bereits gerufen
+    _task_id = _task->id();
+
     if( _job_history->_error )  return;
 
     _start_called = true;
 
-    init_record();
+    _extra_record.construct( _job_history->_extra_type );
 
 
     try
@@ -1639,18 +1505,13 @@ void Task_history::start()
 
 void Task_history::end()
 {
-    if( !_task )  return;     // Vorsichtshalber
+    if( !_job_history->_history_yes )  return;
 
-    if( !_job_history->_history_yes )  
-    {
-        if( _task->_is_in_db )  remove_record();
-        return;
-    }
-
-    if( !_start_called  &&  !_task->_is_in_db )  return;
+    if( !_start_called )  return;
     _start_called = false;
 
     if( _job_history->_error )  return;
+    if( !_task )  return;     // Vorsichtshalber
 
     try
     {

@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.234 2004/01/29 21:06:25 jz Exp $
+// $Id: spooler_task.cxx,v 1.235 2004/01/30 13:37:49 jz Exp $
 /*
     Hier sind implementiert
 
@@ -243,8 +243,6 @@ void Task::close()
 
         if( _order )  _order->close();//remove_order_after_error();
 
-        _history.end();
-
         try
         {
             //do_close();
@@ -263,6 +261,8 @@ void Task::close()
         }
 
         _closed = true;
+
+        _history.end();    // DB-Operation, kann Exception auslösen
     }
 
     set_state( s_closed );
