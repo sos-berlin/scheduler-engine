@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.106 2002/06/18 14:45:30 jz Exp $
+// $Id: spooler.cxx,v 1.107 2002/06/21 19:27:52 jz Exp $
 /*
     Hier sind implementiert
 
@@ -717,8 +717,8 @@ void Spooler::run()
         FOR_EACH( Thread_list, _thread_list, it )  valid_thread |= !(*it)->empty();
         if( !valid_thread )  { _log.error( "Kein Thread vorhanden. Spooler wird beendet." ); break; }
 
-        if( _state_cmd == sc_pause                 )  set_state( s_paused  ), signal_threads( "pause" );
-        if( _state_cmd == sc_continue              )  set_state( s_running ), signal_threads( "continue" );
+        if( _state_cmd == sc_pause                 )  if( _state == s_running )  set_state( s_paused  ), signal_threads( "pause" );
+        if( _state_cmd == sc_continue              )  if( _state == s_paused  )  set_state( s_running ), signal_threads( "continue" );
         if( _state_cmd == sc_load_config           )  break;
         if( _state_cmd == sc_reload                )  break;
         if( _state_cmd == sc_terminate             )  break;
