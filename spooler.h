@@ -1,4 +1,4 @@
-// $Id: spooler.h,v 1.127 2003/03/26 13:32:49 jz Exp $
+// $Id: spooler.h,v 1.128 2003/03/26 14:03:30 jz Exp $
 
 #ifndef __SPOOLER_H
 #define __SPOOLER_H
@@ -235,8 +235,6 @@ struct Spooler
 
     void                        send_cmd                    ();
 
-    string                     _send_cmd;
-
 
   private:
     Fill_zero                  _zero_;
@@ -295,6 +293,10 @@ struct Spooler
 
     bool                       _manual;
     string                     _job_name;                   // Bei manuellem Betrieb
+
+    string                     _send_cmd;
+    string                     _pid_filename;
+
 
   private:
     string                     _config_filename;            // -config=

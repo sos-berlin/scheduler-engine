@@ -1,4 +1,4 @@
-// $Id: spooler_module_java.cxx,v 1.46 2003/03/26 13:32:49 jz Exp $
+// $Id: spooler_module_java.cxx,v 1.47 2003/03/26 14:03:31 jz Exp $
 /*
     Hier sind implementiert
 
@@ -289,7 +289,7 @@ Java_idispatch::Java_idispatch( Vm* vm, IDispatch* idispatch, const string& subc
 
 Java_idispatch::~Java_idispatch()
 {
-    if( _jobject )
+    if( get_jobject() )
     {
         try
         {

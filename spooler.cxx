@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.183 2003/03/26 13:32:48 jz Exp $
+// $Id: spooler.cxx,v 1.184 2003/03/26 14:03:30 jz Exp $
 /*
     Hier sind implementiert
 
@@ -823,6 +823,8 @@ void Spooler::load_arg()
             else
             if( opt.with_value( "log"              ) )  ;   // wurde in sos_main() bearbeitet
             else
+            if( opt.with_value( "pid-file"         ) )  _pid_filename = opt.value();
+            else
             if( opt.with_value( "ini"              ) )  ;   //
             else
             if( opt.with_value( "config"           )
@@ -899,6 +901,14 @@ void Spooler::load()
     _java_vm = get_java_vm( false );  //Z_NEW( java::Vm( false ) );
 
     load_arg();
+
+    if( _pid_filename != "" )
+    {
+        File f ( _pid_filename, "w" );
+        f.print( as_string( getpid() ) );
+        f.print( "\n" );
+        f.close();
+    }
 
     _prefix_log.init( this );
 
@@ -1262,6 +1272,9 @@ int Spooler::launch( int argc, char** argv )
 
     _log.info( "Spooler ordentlich beendet." );
 
+    if( _pid_filename != "" )  unlink( _pid_filename.c_str() );
+
+
     rc = 0;
 
     //spooler_is_running = false;
@@ -1537,7 +1550,7 @@ int sos_main( int argc, char** argv )
       //else
         if( opt.with_value( "renew-spooler"    ) )  renew_spooler = opt.value();
         else
-        if( opt.flag      ( "renew-service"    ) )  renew_service = opt.set();
+        if( opt.with_value( "renew-spooler"    ) )  renew_spooler = opt.value();
         else
         if( opt.flag      ( "V"                ) )  fprintf( stderr, "Spooler %s\n", VER_PRODUCTVERSION_STR );
         else
@@ -1632,38 +1645,6 @@ int sos_main( int argc, char** argv )
 
             LOG( "Spooler wird Daemon. Pid wechselt \n");
             spooler::be_daemon();
-                         
-/*
-            spooler::daemon_starter_pid = getpid();
-
-            switch( int pid = fork() )
-            {
-                case  0: 
-                {
-                    !chdir( "/tmp" )  ||  chdir( "/" );
-                    umask( 0 );
-                    break;
-                }
-
-                case -1: 
-                    throw_errno( errno, "execv", _argv[0] );
-
-                default: 
-                {
-                    int status = 0;
-                    
-                    int ret = sleep( INT_MAX );
-                    if( ret 
-                    int p = waitpid( getpid(), &status, 0 );
-                    if( p == -1 )
-                    {
-                        
-                    //
-                    //if( WIFSIGNALED(status) && WIFEXITED(status) )  _exit( WEXITSTATUS(status) );
-                    _exit(0);
-                }
-            }
-*/
         }
 
         ret = spooler::spooler_main( argc, argv );
