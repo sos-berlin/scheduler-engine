@@ -98,17 +98,7 @@ LINK32=link.exe
 # Begin Source File
 
 SOURCE=..\kram\sosmain.cxx
-
-!IF  "$(CFG)" == "spooler - Win32 Release"
-
 # SUBTRACT CPP /YX
-
-!ELSEIF  "$(CFG)" == "spooler - Win32 Debug"
-
-# SUBTRACT CPP /YX
-
-!ENDIF 
-
 # End Source File
 # Begin Source File
 
@@ -174,23 +164,23 @@ SOURCE=.\spooler.odl
 
 !IF  "$(CFG)" == "spooler - Win32 Release"
 
-# Begin Custom Build - mktyplib /nologo $(InputPath) /tlb $(OutDir)/spooler.tlb
+# Begin Custom Build - midl /nologo /error all /out $(OutDir) $(InputPath)
 OutDir=.\Release
 InputPath=.\spooler.odl
 
 "$(OutDir)/spooler.tlb" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	mktyplib /nologo $(InputPath) /tlb $(OutDir)/spooler.tlb
+	midl /nologo /error all /out $(OutDir) $(InputPath)
 
 # End Custom Build
 
 !ELSEIF  "$(CFG)" == "spooler - Win32 Debug"
 
-# Begin Custom Build - mktyplib /nologo $(InputPath) /tlb $(OutDir)/spooler.tlb
+# Begin Custom Build - midl /nologo /error all /out $(OutDir) $(InputPath)
 OutDir=.\Debug
 InputPath=.\spooler.odl
 
 "$(OutDir)/spooler.tlb" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	mktyplib /nologo $(InputPath) /tlb $(OutDir)/spooler.tlb
+	midl /nologo /error all /out $(OutDir) $(InputPath)
 
 # End Custom Build
 

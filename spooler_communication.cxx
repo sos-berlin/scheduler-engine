@@ -1,4 +1,4 @@
-// $Id: spooler_communication.cxx,v 1.16 2001/01/22 11:04:12 jz Exp $
+// $Id: spooler_communication.cxx,v 1.17 2001/01/23 14:35:53 jz Exp $
 /*
     Hier sind implementiert
 
@@ -114,14 +114,14 @@ bool Xml_end_finder::is_complete( const char* p, int len )
                     if( _in_end_tag ) 
                     {
                         _open_elements--;
-                        if( _open_elements == 0 )  _xml_is_complete = true;
+                        if( _open_elements == 0 )  { _xml_is_complete = true; break; }
                     }
                     else
                     if( !_in_special_tag )
                     {
                         if( _last_char != '/' )  _open_elements++;
                         else 
-                        if( _open_elements == 0 )  _xml_is_complete = true;      // Das Dokument ist nur ein leeres XML-Element
+                        if( _open_elements == 0 )  { _xml_is_complete = true; break; }     // Das Dokument ist nur ein leeres XML-Element
                     }
                     
                     _in_special_tag = false;
@@ -136,6 +136,8 @@ bool Xml_end_finder::is_complete( const char* p, int len )
                 if( in_something )  _at_start_tag = false, _in_tag = false, _in_special_tag = false;
                 else
                 if( *p == '<' )  _in_tag = true, _at_start_tag = true;
+                else
+                if( _open_elements == 0  &&  !isspace( (Byte)*p ) )  { _xml_is_complete = true; break; }  // Das ist ein Fehler
             }
         }
 

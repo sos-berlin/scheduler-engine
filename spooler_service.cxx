@@ -1,4 +1,4 @@
-// $Id: spooler_service.cxx,v 1.5 2001/01/20 23:39:16 jz Exp $
+// $Id: spooler_service.cxx,v 1.6 2001/01/23 14:35:53 jz Exp $
 /*
     Hier sind implementiert
 
@@ -183,19 +183,49 @@ bool service_is_started()
     return is_started;
 }
 
+//----------------------------------------------------------------------------------restart_service
+/*
+static void restart_service( DWORD argc, char** argv )
+{
+    SC_HANDLE manager_handle = 0;
+    SC_HANDLE service_handle = 0;
+    BOOL ok;
+
+    manager_handle = OpenSCManager( NULL, SERVICES_ACTIVE_DATABASE, SC_MANAGER_CREATE_SERVICE );
+    if( !manager_handle )  goto ENDE;
+
+    service_handle = OpenService(manager_handle, service_name, SERVICE_QUERY_STATUS );
+    if( !service_handle )  goto ENDE;
+
+    ok = StartService( service_handle, argc, (const char**)argv );
+
+    Kann nicht gestartet werden, solange der Dienst noch läuft. Müsste verzögert gestartet werden, vielleicht von einem anderen Prozess.
+
+  ENDE:
+    CloseServiceHandle( service_handle ); 
+    CloseServiceHandle( manager_handle );
+}
+*/
 //----------------------------------------------------------------------------------service_handler
 
 static void set_service_status( int spooler_error = 0 )
 {
     if( !service_status_handle )  return;
     if( !spooler_ptr && spooler_error == 0 )  spooler_error = 1;
-
+/*
+    if( spooler_ptr  
+     && spooler_ptr->_state == Spooler::s_stopped 
+     && spooler_ptr->_state_cmd == Spooler::sc_terminate_and_restart )
+    {
+        restart_service( spooler_ptr->_argc, spooler_ptr->_argv );
+    }
+*/
     SERVICE_STATUS service_status;
 
     service_status.dwServiceType                = SERVICE_WIN32_OWN_PROCESS;
 
-    service_status.dwCurrentState               = !spooler_ptr? SERVICE_STOPPED
-                                                : spooler_ptr->_state == Spooler::s_stopped ? SERVICE_STOPPED
+    service_status.dwCurrentState               = !spooler_ptr? SERVICE_STOPPED //SetServiceStatus() ruft exit()!
+                                                : spooler_ptr->_state == Spooler::s_stopped ? SERVICE_STOPPED //SetServiceStatus() ruft exit()!
                                                 : spooler_ptr->_state == Spooler::s_starting? SERVICE_START_PENDING
                                                 : spooler_ptr->_state == Spooler::s_stopping? SERVICE_STOP_PENDING
                                                 : spooler_ptr->_state == Spooler::s_running ? SERVICE_RUNNING
@@ -292,7 +322,9 @@ static ulong __stdcall service_thread( void* param )
         try
         {
             LOG( "Spooler launch\n" );
-            spooler_ptr->launch( p->_argc, p->_argv );
+            ret = spooler_ptr->launch( p->_argc, p->_argv );
+
+            // Soweit kommt's nicht, denn SetServiceStatus(STOPPED) beendet den Prozess mit exit()
         }
         catch( const Xc& x )
         {
@@ -300,7 +332,7 @@ static ulong __stdcall service_thread( void* param )
             set_service_status(2);
             spooler._log.error( x.what() );
             spooler_ptr = NULL;
-            ret = 1;
+            ret = 99;
           //throw;
         }
 
@@ -321,6 +353,7 @@ static void __stdcall ServiceMain( DWORD argc, char** argv )
     try
     {
         DWORD                   thread_id;
+        DWORD                   exit_code = 0;
         Service_thread_param    param;
         int                     ret;
 
@@ -342,7 +375,15 @@ static void __stdcall ServiceMain( DWORD argc, char** argv )
 
         do ret = WaitForSingleObject( thread_handle, INT_MAX );  while( ret != WAIT_TIMEOUT );
 
-        TerminateThread( thread_handle, 99 );   // Sollte nicht nötig sein. Nützt auch nicht, weil Destruktoren nicht gerufen werden und Komnunikations-Thread vielleicht noch läuft.
+        // Soweit kommt's nicht, denn SetServiceStatus(STOPPED) beendet den Prozess mit exit()
+
+        TerminateThread( thread_handle, 999 );   // Sollte nicht nötig sein. Nützt auch nicht, weil Destruktoren nicht gerufen werden und Komnunikations-Thread vielleicht noch läuft.
+        
+        //GetExitCodeThread( thread_handle, &exit_code );
+        //if( exit_code == 1 )
+        //{
+        //    restart_service( argc, argv );
+        //}
     }
     catch( const Xc& x        ) { event_log( x.what() ); }
     catch( const exception& x ) { event_log( x.what() ); }

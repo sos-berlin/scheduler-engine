@@ -1,10 +1,10 @@
-// $Id: spooler_com.h,v 1.3 2001/01/21 11:26:06 jz Exp $
+// $Id: spooler_com.h,v 1.4 2001/01/23 14:35:53 jz Exp $
 
 #ifndef __SPOOLER_COM_H
 #define __SPOOLER_COM_H
 #ifdef SYSTEM_WIN
 
-
+#include <map>
 #include "../kram/olestd.h"
 #include "../kram/sysxcept.h"
 
@@ -30,6 +30,38 @@ struct Object_set;
 struct Job;
 struct Task;
 struct Spooler;
+
+//----------------------------------------------------------------------------------------Com_error
+
+struct Com_error: spooler_com::Ierror, Sos_ole_object
+{
+                                Com_error                   ( const Xc_copy& );
+
+    USE_SOS_OLE_OBJECT
+
+    STDMETHODIMP                get_is_error                ( VARIANT_BOOL* );
+    STDMETHODIMP                get_code                    ( BSTR* );
+    STDMETHODIMP                get_text                    ( BSTR* );
+
+    void                        close                       ()                              { _xc = NULL; }
+
+    Xc_copy                    _xc;
+};
+
+//------------------------------------------------------------------------------------Com_variables
+
+struct Com_variables: spooler_com::Ivariables, Sos_ole_object
+{
+                                Com_variables               ();
+
+    USE_SOS_OLE_OBJECT
+
+    STDMETHODIMP                put_var                     ( BSTR, VARIANT* );
+    STDMETHODIMP                get_var                     ( BSTR, VARIANT* );
+    STDMETHODIMP                get_count                   ( int* );
+
+    std::map<CComBSTR,CComVariant>  _map;
+};
 
 //------------------------------------------------------------------------------------------Com_log
 
@@ -81,7 +113,7 @@ struct Com_job : spooler_com::Ijob, Sos_ole_object
     void                        close                       ()                              { _job = NULL; }
 
     STDMETHODIMP                start_when_directory_changed( BSTR directory_name );
-    STDMETHODIMP                start                       ();
+    STDMETHODIMP                start                       ( VARIANT* );
 
     Job*                       _job;
 };
@@ -98,8 +130,10 @@ struct Com_task : spooler_com::Itask, Sos_ole_object
 
     STDMETHODIMP                get_Object_set              ( spooler_com::Iobject_set** );
   //STDMETHODIMP                wake_when_directory_changed ( BSTR directory_name );
-    STDMETHODIMP                error                       ( BSTR error_text );
+    STDMETHODIMP                put_error                   ( VARIANT* error_text );
+    STDMETHODIMP                get_error                   ( spooler_com::Ierror** );
     STDMETHODIMP                get_Job                     ( spooler_com::Ijob** );
+    STDMETHODIMP                get_params                  ( spooler_com::Ivariables** );
 
     Task*                      _task;
 };
@@ -114,11 +148,12 @@ struct Com_spooler : spooler_com::Ispooler, Sos_ole_object
 
     void                        close                       ()                              { _spooler = NULL; }
 
-    STDMETHODIMP                get_Log                     ( spooler_com::Ilog** );
+    STDMETHODIMP                get_log                     ( spooler_com::Ilog** );
     STDMETHODIMP                get_param                   ( BSTR* );
     STDMETHODIMP                get_id                      ( BSTR* );
     STDMETHODIMP                get_script                  ( IDispatch** );
     STDMETHODIMP                get_Job                     ( BSTR job_name, spooler_com::Ijob** );
+    STDMETHODIMP                create_variables            ( spooler_com::Ivariables** );
 
   protected:
     Spooler*                   _spooler;

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- $Id: spooler.dtd,v 1.6 2001/01/22 11:04:12 jz Exp $   Joacim Zschimmer,  (C) 2000 SOS GmbH Berlin  -->
+<!-- $Id: spooler.dtd,v 1.7 2001/01/23 14:35:53 jz Exp $   Joacim Zschimmer,  (C) 2000 SOS GmbH Berlin  -->
 
 
 <!ELEMENT spooler               ( config+ | command | answer )>
@@ -91,8 +91,8 @@
                                                                         <!-- Antwort: <state> -->
 
 <!ELEMENT modify_spooler        EMPTY>
-<!ATTLIST modify_spooler        cmd                 ( reload
-                                                    | stop
+<!ATTLIST modify_spooler        cmd                 ( stop
+                                                    | reload
                                                     | terminate
                                                     | terminate_and_restart
                                                     | abort_immediately     ) #IMPLIED>

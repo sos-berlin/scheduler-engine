@@ -1,4 +1,4 @@
-// $Id: spooler.h,v 1.34 2001/01/22 11:04:12 jz Exp $
+// $Id: spooler.h,v 1.35 2001/01/23 14:35:53 jz Exp $
 
 #ifndef __SPOOLER_H
 #define __SPOOLER_H
@@ -321,12 +321,13 @@ struct Script_instance
     IDispatch*                  dispatch                    () const                        { return _script_site? _script_site->dispatch() : NULL; }
     void                        add_obj                     ( const CComPtr<IDispatch>&, const string& name );
     void                        close                       ();
+    CComVariant                 call_if_exists              ( const char* name );
     CComVariant                 call                        ( const char* name );
     CComVariant                 call                        ( const char* name, int param );
     CComVariant                 property_get                ( const char* name );
     void                        property_put                ( const char* name, const CComVariant& v ) { _script_site->property_put( name, v ); } 
     void                        optional_property_put       ( const char* name, const CComVariant& v );
-    bool                        name_exists                 ( const string& name )          { return _script_site->name_exists(name); }
+    bool                        name_exists                 ( const char* name )            { return _script_site->name_exists(name); }
     bool                        loaded                      ()                              { return _loaded; }
 
     CComPtr<Script_site>       _script_site;
@@ -438,7 +439,7 @@ struct Job : Sos_self_deleting
 
     void                        set_current_task            ( Task* task )                      { _com_current_task->_task = task; }
 
-    void                        start                       ();
+    void                        start                       ( const CComPtr<spooler_com::Ivariables>& params );
     void                        start_when_directory_changed( const string& directory_name );
   //void                        stop_all_tasks              ()                                  { if( _task )  _task->stop(); }
 
@@ -471,6 +472,7 @@ struct Task : Sos_self_deleting
     {
         s_none,
         s_stopped,              // Gestoppt (z.B. wegen Fehler)
+        s_loaded,               // Skript geladen (mit spooler_init), aber nicht gestartet (spooler_open)
         s_pending,              // Warten auf Start
         s_running,              // Läuft
         s_suspended,            // Angehalten
@@ -499,6 +501,8 @@ struct Task : Sos_self_deleting
     void                        stop                        ();
     bool                        step                        ();
 
+    void                        on_error_on_success         ();
+
     bool                        do_something                ();
 
   //void                        wake                        ()                          { _wake = true; }   // Ein neues Objekt ist da, vielleicht.
@@ -524,6 +528,7 @@ struct Task : Sos_self_deleting
     Fill_zero                  _zero_;
     Spooler*                   _spooler;
     Sos_ptr<Job>               _job;
+    CComPtr<spooler_com::Ivariables> _params;
     Script_instance            _script_instance;            // Für use_engine="task"
     Script_instance*           _script_instance_ptr;        // &_script_instance oder &_job->_script_instance
     bool                       _use_task_engine;            // use_engine="task"
@@ -557,6 +562,7 @@ typedef list< Sos_ptr<Task> >   Task_list;
 const int xml_end_finder_token_count = 2;
 
 struct Xml_end_finder
+// Findet das Ende eines XML-Dokuments
 {
     enum Tok { cdata_tok, comment_tok };
 

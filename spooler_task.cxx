@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.7 2001/01/22 13:42:08 jz Exp $
+// $Id: spooler_task.cxx,v 1.8 2001/01/23 14:35:54 jz Exp $
 /*
     Hier sind implementiert
 
@@ -26,6 +26,8 @@ static const char spooler_close_name[]   = "spooler_close";
 static const char spooler_get_name[]     = "spooler_get";
 static const char spooler_process_name[] = "spooler_process";
 static const char spooler_level_name[]   = "spooler_level";
+static const char spooler_on_error_name[]   = "spooler_on_error";
+static const char spooler_on_success_name[] = "spooler_on_success";
 
 //---------------------------------------------------------------------check_spooler_process_result
 
@@ -175,11 +177,12 @@ Job::~Job()
 
 //---------------------------------------------------------------------------------------Job::start
 
-void Job::start()
+void Job::start( const CComPtr<spooler_com::Ivariables>& params )
 {
     if( !( _task->_state & (Task::s_pending|Task::s_stopped) ) )  throw_xc( "SPOOLER-118", _name, _task->state_name() );
 
     _task->set_state_cmd( Task::sc_start );
+    _task->_params = params;
 }
 
 //----------------------------------------------------------------Job::start_when_directory_changed
@@ -236,6 +239,8 @@ Task::~Task()
     if( _com_task        )  _com_task->close();
     if( _com_log         )  _com_log->close();
 
+    _params = NULL;
+
     if( _directory_watcher )  _spooler->_wait_handles.remove( _directory_watcher._handle );
 
     _job->_task = NULL;
@@ -287,6 +292,7 @@ bool Task::start()
     _log.msg( "start" );
 
     _error = NULL;
+    if( !_params )  _params = new Com_variables;
 
     _spooler->_task_count++;
     _running_since = Time::now();
@@ -324,16 +330,14 @@ bool Task::start()
             _script_instance_ptr->load( *script );
             if( _error )  return false;
 
-            if( _script_instance_ptr->name_exists( spooler_init_name ) ) 
-            {
-                _script_instance_ptr->call( spooler_init_name );
-                if( _error )  return false;
-            }
+            _script_instance_ptr->call_if_exists( spooler_init_name );
+            if( _error )  return false;
+
+            _state = s_loaded;
         }
 
         if( _job->_object_set_descr )  _object_set->open();
-        else
-        if( _script_instance_ptr->name_exists( spooler_open_name ) )  _script_instance_ptr->call( spooler_open_name );
+                                 else  _script_instance_ptr->call_if_exists( spooler_open_name );
 
         _opened = true;
     }
@@ -347,6 +351,30 @@ bool Task::start()
     return true;
 }
 
+//-------------------------------------------------------------------------Task::on_error_on_success
+
+void Task::on_error_on_success()
+{
+    if( _error )
+    {
+        try
+        {
+            _script_instance_ptr->call_if_exists( spooler_on_error_name );
+        }
+        catch( const Xc& x        ) { _log.error( string(spooler_on_error_name) + ": " + x.what() ); }
+        catch( const exception& x ) { _log.error( string(spooler_on_error_name) + ": " + x.what() ); }
+    }
+    else
+    {
+        try
+        {
+            _script_instance_ptr->call_if_exists( spooler_on_success_name );
+        }
+        catch( const Xc& x        ) { error(x); }
+        catch( const exception& x ) { error(x); }
+    }
+}
+
 //-----------------------------------------------------------------------------------------Task::end
 
 void Task::end()
@@ -357,22 +385,34 @@ void Task::end()
 
     _state = s_ending;
 
+
+
     try
     {
         if( _object_set )  _object_set->close();
-        else
-        if( _script_instance_ptr->name_exists( spooler_close_name ) )  _script_instance_ptr->call( spooler_close_name );
-
-        if( _use_task_engine )
-        {
-            _script_instance.close();
-            _object_set = NULL;
-        }
+                     else  _script_instance_ptr->call_if_exists( spooler_close_name );
     }
     catch( const Xc& x        ) { end_error(x); }
     catch( const exception& x ) { error(x); }
 
+
+    on_error_on_success();
+
+
+    if( _use_task_engine )
+    {
+        try
+        {
+            _script_instance.close();
+            _object_set = NULL;
+        }
+        catch( const Xc& x        ) { end_error(x); }
+        catch( const exception& x ) { error(x); }
+    }
+
+
     _opened = false;
+    _params = NULL;
 
     _next_start_time = _job->_run_time.next_try();
 
@@ -385,26 +425,28 @@ void Task::end()
 
 void Task::stop()
 {
-    if( _state == s_stopped )  return;
-
-    _log.msg( "stop" );
-
-    if( _opened )  end();
-
-    try 
+    if( _state != s_stopped ) 
     {
-        if( _script_instance_ptr )   _script_instance_ptr->close();      // Bei use_engine="job" wird die Engine des Jobs geschlossen.
-        _script_instance.close();
-    }
-    catch( const Xc& x        ) { end_error(x); }
-    catch( const exception& x ) { error(x); }
+        _log.msg( "stop" );
 
-    if( _directory_watcher ) {
-        _spooler->_wait_handles.remove( _directory_watcher._handle );
-        _directory_watcher.close();
+        if( _opened )  end();
+
+        try 
+        {
+            if( _script_instance_ptr )   _script_instance_ptr->close();      // Bei use_engine="job" wird die Engine des Jobs geschlossen.
+            _script_instance.close();
+        }
+        catch( const Xc& x        ) { end_error(x); }
+        catch( const exception& x ) { error(x); }
+
+        if( _directory_watcher ) {
+            _spooler->_wait_handles.remove( _directory_watcher._handle );
+            _directory_watcher.close();
+        }
+
+        _state = s_stopped;
     }
 
-    _state = s_stopped;
     _object_set = NULL;
     _script_instance_ptr = NULL;
     _step_count = 0;
@@ -470,43 +512,46 @@ bool Task::do_something()
     }
 
 
-    switch( _state )
+    if( !_error )
     {
-        case s_stopped:     break;
+        switch( _state )
+        {
+            case s_stopped:     break;
 
-        case s_pending:     if( _directory_watcher._signaled || Time::now() >= _next_start_time )
-                            {
-                                if( _directory_watcher._signaled )  _directory_watcher.watch_again();
+            case s_pending:     if( _directory_watcher._signaled || Time::now() >= _next_start_time )
+                                {
+                                    if( _directory_watcher._signaled )  _directory_watcher.watch_again();
 
-                                ok = start();  if(!ok) break;
+                                    ok = start();  if(!ok) break;
 
-                                ok = step();
-                                if( !ok )  { end(); break; }
+                                    ok = step();
+                                    if( !ok )  { end(); break; }
 
-                                something_done = true;
-                            }
-                            break;
+                                    something_done = true;
+                                }
+                                break;
 
-        case s_running:     if( _let_run 
-                              | _job->_run_time.should_run_now() )
-                            {
-                                ok = step();
-                                if( !ok )  { end(); break; }
+            case s_running:     if( _let_run 
+                                  | _job->_run_time.should_run_now() )
+                                {
+                                    ok = step();
+                                    if( !ok )  { end(); break; }
 
-                                something_done = true;
-                            }
-                            else
-                            {
-                                end();
-                            }
-                            break;
+                                    something_done = true;
+                                }
+                                else
+                                {
+                                    end();
+                                }
+                                break;
 
-        case s_suspended:   break;
+            case s_suspended:   break;
 
-        default:            ;
+            default:            ;
+        }
     }
 
-    if( _error  &&  _state != s_stopped )  stop();
+    if( _error )  stop();
 
 
     return something_done;
@@ -549,7 +594,8 @@ void Task::set_state_cmd( State_cmd cmd )
                             break;
 
         case sc_start:      ok = ( _state & (s_pending|s_stopped) ) != 0;   if(!ok) break;
-                            _next_start_time = Time::now();  
+                            _params = NULL;
+                            //_next_start_time = Time::now();  
                             break;
 
         case sc_end:        ok = _state == s_running;   break;
@@ -576,6 +622,7 @@ string Task::state_name( State state )
     switch( state )
     {
         case s_stopped:     return "stopped";
+        case s_loaded:      return "loaded";
         case s_pending:     return "pending";
         case s_running:     return "running";
         case s_suspended:   return "suspended";

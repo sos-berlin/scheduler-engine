@@ -1,4 +1,4 @@
-// $Id: spooler_com.cxx,v 1.3 2001/01/20 23:39:16 jz Exp $
+// $Id: spooler_com.cxx,v 1.4 2001/01/23 14:35:53 jz Exp $
 /*
     Hier sind implementiert
 
@@ -24,11 +24,95 @@ using namespace spooler_com;
 
 Typelib_descr spooler_typelib ( spooler_com::LIBID_spooler_com, "Spooler", "1.0" );
 
-DESCRIBE_CLASS( &spooler_typelib, Com_log       , log       , spooler_com::CLSID_Log       , "Spooler.Log"       , "1.0" )
+DESCRIBE_CLASS( &spooler_typelib, Com_error     , error     , spooler_com::CLSID_error     , "Spooler.Error"     , "1.0" )
+DESCRIBE_CLASS( &spooler_typelib, Com_variables , variables , spooler_com::CLSID_Variables , "Spooler.Variables" , "1.0" )
+DESCRIBE_CLASS( &spooler_typelib, Com_log       , log       , spooler_com::CLSID_log       , "Spooler.Log"       , "1.0" )
 DESCRIBE_CLASS( &spooler_typelib, Com_job       , job       , spooler_com::CLSID_Job       , "Spooler.Job"       , "1.0" )
 DESCRIBE_CLASS( &spooler_typelib, Com_task      , task      , spooler_com::CLSID_Task      , "Spooler.Task"      , "1.0" )
 DESCRIBE_CLASS( &spooler_typelib, Com_object_set, object_set, spooler_com::CLSID_Object_set, "Spooler.Object_set", "1.0" )
 DESCRIBE_CLASS( &spooler_typelib, Com_spooler   , spooler   , spooler_com::CLSID_spooler   , "Spooler.Spooler"   , "1.0" )
+
+//-----------------------------------------------------------------------------Com_error::Com_error
+
+Com_error::Com_error( const Xc_copy& x )
+: 
+    Sos_ole_object( error_class_ptr, this ),
+    _xc(x) 
+{
+}
+
+//------------------------------------------------------------------------------Com_error::is_error
+
+STDMETHODIMP Com_error::get_is_error( VARIANT_BOOL* result )
+{
+    *result = _xc != NULL;
+    return NOERROR;
+}
+
+//----------------------------------------------------------------------------------Com_error::code
+
+STDMETHODIMP Com_error::get_code( BSTR* code_bstr )
+{
+    HRESULT hr = NOERROR;
+
+    try
+    {
+        if( !_xc )  *code_bstr = NULL;
+              else  *code_bstr = SysAllocStringLen_char( _xc->code(), strlen( _xc->code() ) );
+    }
+    catch( const Xc&   x )  { hr = _set_excepinfo(x); }
+    catch( const xmsg& x )  { hr = _set_excepinfo(x); }
+
+    return hr;
+}
+
+//----------------------------------------------------------------------------------Com_error::text
+
+STDMETHODIMP Com_error::get_text( BSTR* text_bstr )
+{
+    HRESULT hr = NOERROR;
+
+    try
+    {
+        if( !_xc )  *text_bstr = NULL;
+              else  *text_bstr = SysAllocString_string( _xc->what() );
+    }
+    catch( const Xc&   x )  { hr = _set_excepinfo(x); }
+    catch( const xmsg& x )  { hr = _set_excepinfo(x); }
+
+    return hr;
+}
+
+//---------------------------------------------------------------------Com_variables::Com_variables
+
+Com_variables::Com_variables()
+:
+    Sos_ole_object( variables_class_ptr, this )
+{
+}
+
+//---------------------------------------------------------------------------Com_variables::put_var
+
+STDMETHODIMP Com_variables::put_var( BSTR name, VARIANT* value )
+{
+    _map[name] = *value;
+    return NOERROR;
+}
+
+//---------------------------------------------------------------------------Com_variables::get_var
+
+STDMETHODIMP Com_variables::get_var( BSTR name, VARIANT* value )
+{
+    return VariantCopy( value, &_map[name] );
+}
+
+//-------------------------------------------------------------------------Com_variables::get_count
+
+STDMETHODIMP Com_variables::get_count( int* result )
+{
+    *result = _map.size();
+    return NOERROR;
+}
 
 //---------------------------------------------------------------------------------Com_log::Com_log
 
@@ -128,24 +212,33 @@ STDMETHODIMP Com_job::start_when_directory_changed( BSTR directory_name )
     catch( const Xc&   x )  { hr = _set_excepinfo(x); }
     catch( const xmsg& x )  { hr = _set_excepinfo(x); }
 
-    return NOERROR;
+    return hr;
 }
 
 //-----------------------------------------------------------------------------------Com_job::start
 
-STDMETHODIMP Com_job::start()
+STDMETHODIMP Com_job::start( VARIANT* params )
 {
     HRESULT hr = NOERROR;
     if( !_job )  return E_POINTER;
 
     try
     {
-        _job->start();
+        CComPtr<Ivariables> pars;
+
+        if( params  &&  params->vt != VT_EMPTY  &&  params->vt != VT_NULL  &&  params->vt != VT_ERROR )
+        {
+            if( params->vt != VT_DISPATCH && params->vt != VT_UNKNOWN )  return DISP_E_TYPEMISMATCH;
+            hr = params->punkVal->QueryInterface( IID_Ivariables, (void**)&pars );
+            if( FAILED(hr) )  return hr;
+        }
+
+        _job->start( pars );
     }
     catch( const Xc&   x )  { hr = _set_excepinfo(x); }
     catch( const xmsg& x )  { hr = _set_excepinfo(x); }
 
-    return NOERROR;
+    return hr;
 }
 
 //-------------------------------------------------------------------------------Com_task::Com_task
@@ -170,23 +263,44 @@ STDMETHODIMP Com_task::get_Object_set( Iobject_set** result )
 
 //----------------------------------------------------------------------------------Com_task::error
 
-STDMETHODIMP Com_task::error( BSTR error_text_bstr )
+STDMETHODIMP Com_task::put_error( VARIANT* error_par )
 {
     HRESULT hr = NOERROR;
     if( !_task )  return E_POINTER;
 
     try
     {
-        string error_text = bstr_as_string( error_text_bstr );
+        CComVariant error_vt = *error_par;
+        hr = error_vt.ChangeType( VT_BSTR );        if( FAILED(hr) )  return hr;
+
+        string error_text = bstr_as_string( error_vt.bstrVal );
         _task->error( Xc( "SPOOLER-120", error_text.c_str() ) );
     }
     catch( const Xc&   x )  { hr = _set_excepinfo(x); }
     catch( const xmsg& x )  { hr = _set_excepinfo(x); }
 
-    return NOERROR;
+    return hr;
 }
 
-//-----------------------------------------------------------------------------...Com_task::get_job
+//----------------------------------------------------------------------------------Com_task::error
+
+STDMETHODIMP Com_task::get_error( Ierror** result )
+{
+    HRESULT hr = NOERROR;
+    if( !_task )  return E_POINTER;
+
+    try
+    {
+        *result = new Com_error( _task->_error );
+        (*result)->AddRef();
+    }
+    catch( const Xc&   x )  { hr = _set_excepinfo(x); }
+    catch( const xmsg& x )  { hr = _set_excepinfo(x); }
+
+    return hr;
+}
+
+//--------------------------------------------------------------------------------Com_task::get_job
 
 STDMETHODIMP Com_task::get_Job( Ijob** com_job )
 {
@@ -202,6 +316,17 @@ STDMETHODIMP Com_task::get_Job( Ijob** com_job )
     catch( const Xc&   x )  { hr = _set_excepinfo(x); }
     catch( const xmsg& x )  { hr = _set_excepinfo(x); }
 
+    return hr;
+}
+
+//-----------------------------------------------------------------------------Com_task::get_params
+
+STDMETHODIMP Com_task::get_params( Ivariables** result )
+{
+    if( !_task )  return E_POINTER;
+
+    *result = _task->_params;
+    (*result)->AddRef();
     return NOERROR;
 }
 
@@ -226,7 +351,7 @@ STDMETHODIMP Com_spooler::get_current_task( spooler_com::Itask* com_task )
 */
 //-----------------------------------------------------------------------------Com_spooler::get_Log
 
-STDMETHODIMP Com_spooler::get_Log( spooler_com::Ilog** com_log )
+STDMETHODIMP Com_spooler::get_log( spooler_com::Ilog** com_log )
 {
     if( !_spooler )  return E_POINTER;
 
@@ -282,6 +407,15 @@ STDMETHODIMP Com_spooler::get_Job( BSTR job_name, Ijob** com_job )
     catch( const Xc&   x )  { hr = _set_excepinfo(x); }
     catch( const xmsg& x )  { hr = _set_excepinfo(x); }
 
+    return hr;
+}
+
+//--------------------------------------------------------------------Com_spooler::create_variables
+
+STDMETHODIMP Com_spooler::create_variables( Ivariables** result )
+{
+    *result = new Com_variables;
+    (*result)->AddRef();
     return NOERROR;
 }
 

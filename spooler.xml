@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 
-<!-- $Id: spooler.xml,v 1.13 2001/01/22 13:42:08 jz Exp $   (C) 2000 SOS GmbH Berlin -->
+<!-- $Id: spooler.xml,v 1.14 2001/01/23 14:35:53 jz Exp $   (C) 2000 SOS GmbH Berlin -->
 
 <!DOCTYPE spooler SYSTEM "spooler.dtd">
 
@@ -43,12 +43,16 @@ spooler_log.msg "Spooler-Skript geladen."
 
             <script use_engine="job"><![CDATA[
 
+spooler_log.msg "param1=" & spooler_task.params.var("param1")
+
 dir_name = "c:\tmp\spooler"
 
 spooler_job.start_when_directory_changed dir_name
 
 set fso = createobject( "Scripting.FileSystemObject" )
 script_index = 0
+
+
 
 class Testobjekt
 
@@ -257,7 +261,7 @@ sub spooler_process()
 {
     my $new_level = shift;
     $object = $object_set_class->spooler_get();
-    if( !ref($object) ) { return 0; }  #{ $spooler_task->error( "Fehler aus Perl" ); exit(); }
+    if( !ref($object) ) { $spooler_task->{error} = "Fehler aus Perl"; exit(); }  #{ return 0; }  
     $object->spooler_process( $new_level );
     return 1;
 }
@@ -355,7 +359,26 @@ end function
             <script language="VBScript" use_engine="task"><![CDATA[
 
 spooler_log.msg "*Job single"
-spooler.job("Aufbereiten").start
+
+set params = spooler.create_variables()
+params.var("param1")="heinz"
+
+spooler.job("Aufbereiten").start( params )
+
+
+
+function spooler_process()
+    fehler=1/1
+    spooler_process=false
+end function
+
+sub spooler_on_error()
+    spooler_log.msg "spooler_on_error: error=" & spooler_task.error & " code=" & spooler_task.error.code & " text=" & spooler_task.error.text
+end sub
+
+sub spooler_on_success()
+    spooler_log.msg "spooler_on_success: error=" & spooler_task.error & " code=" & spooler_task.error.code & " text=" & spooler_task.error.text
+end sub
 
             ]]></script>
 
@@ -364,7 +387,7 @@ spooler.job("Aufbereiten").start
         </job>
 
 
-        <job name="perl">
+        <job name="perl" spooler_id="perl">
             <script language="PerlScript" use_engine="task"><![CDATA[
 
 $spooler_log->msg( "*Job perl" );

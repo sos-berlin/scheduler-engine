@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.37 2001/01/22 11:04:11 jz Exp $
+// $Id: spooler.cxx,v 1.38 2001/01/23 14:35:53 jz Exp $
 /*
     Hier sind implementiert
 
@@ -82,6 +82,14 @@ void Script_instance::close()
     }
 
     _loaded = false;
+}
+
+//------------------------------------------------------------------Script_instance::call_if_exists
+
+CComVariant Script_instance::call_if_exists( const char* name )
+{
+    if( name_exists( name ) )  return call( name );
+                         else  return CComVariant();
 }
 
 //----------------------------------------------------------------------------Script_instance::call
@@ -260,7 +268,7 @@ void Spooler::start()
 
         _script_instance.load( _script );
 
-        if( _script_instance.name_exists( "spooler_init" ) )  _script_instance.call( "spooler_init" );
+        _script_instance.call_if_exists( "spooler_init" );
     }
     
 
@@ -493,7 +501,7 @@ void Spooler::cmd_terminate_and_restart()
 {
     _log.msg( "Spooler::cmd_terminate_and_restart" );
 
-    if( _is_service )  throw_xc( "SPOOLER-114" );
+    //if( _is_service )  throw_xc( "SPOOLER-114" );
 
     _state_cmd = sc_terminate_and_restart;
     cmd_wake();

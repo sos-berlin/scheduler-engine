@@ -1,4 +1,4 @@
-// $Id: spooler.odl,v 1.3 2001/01/20 23:39:15 jz Exp $
+// $Id: spooler.odl,v 1.4 2001/01/23 14:35:53 jz Exp $
 
 // Änderungen werden nicht automatisch in die spooler.tlb übernommen.
 // Also mit rechter Maustaske "Kompilieren von spooler.odl" klicken.
@@ -16,6 +16,60 @@ library spooler
     importlib("STDOLE32.TLB");
 
     interface Ilog;
+
+    //----------------------------------------------------------------------------Error
+
+    [
+        uuid       ( 5BF4BD80-A437-46df-86AB-05E5E9E1C4E2 ),
+        odl,
+        dual
+    ]
+    interface Ierror : IDispatch
+    {
+        [id(0),propget]
+        HRESULT                 is_error                    ( [out,retval] VARIANT_BOOL* result );
+
+        [propget]
+        HRESULT                 code                        ( [out,retval] BSTR* code );
+
+        [propget]
+        HRESULT                 text                        ( [out,retval] BSTR* text );
+    }
+
+    [
+        uuid       ( 5B4463E8-4DAE-4198-91C2-160411369DF1 )
+    ]
+    coclass Error
+    {
+        interface Ierror;
+    }
+
+    //------------------------------------------------------------------------Variables
+
+    [
+        uuid       ( 5F028EDD-2195-4bcc-B63F-FC88B73A4712 ),
+        odl,
+        dual
+    ]
+    interface Ivariables : IDispatch
+    {
+        [propput]
+        HRESULT                 var                         ( [in] BSTR name, [in] VARIANT* value );
+
+        [propget]
+        HRESULT                 var                         ( [in] BSTR name, [out,retval] VARIANT* value );
+
+        [propget]
+        HRESULT                 count                       ( [out,retval] int* value );
+    }
+
+    [
+        uuid       ( 818150DA-CD01-4db3-972B-433A9D6237F3 )
+    ]
+    coclass Variables
+    {
+        interface Ivariables;
+    }
 
     //-----------------------------------------------------------------------Object_set
 
@@ -52,8 +106,7 @@ library spooler
     {
         HRESULT                 start_when_directory_changed( [in] BSTR directory_name );
 
-        HRESULT                 start                       ();
-
+        HRESULT                 start                       ( [in,optional] VARIANT* variables );
     }
 
     [
@@ -76,12 +129,17 @@ library spooler
         [propget]
         HRESULT                 object_set                  ( [out,retval] Iobject_set** result );
 
-      //HRESULT                 wake_when_directory_changed ( [in] BSTR directory_name );
+        [propput]
+        HRESULT                 error                       ( [in] VARIANT* error_text );       // Für PerlScript, das einen Fehlertext nicht durchreicht
 
-        HRESULT                 error                       ( [in] BSTR error_text );       // Für PerlScript, das einen Fehlertext nicht durchreicht
+        [propget]
+        HRESULT                 error                       ( [out,retval] Ierror** result );
 
         [propget]
         HRESULT                 job                         ( [out,retval] Ijob** job );
+
+        [propget]
+        HRESULT                 params                      ( [out,retval] Ivariables** parameters );
     }
 
     [
@@ -115,6 +173,8 @@ library spooler
 
         [propget]
         HRESULT                 job                     ( [in] BSTR job_name, [out,retval] Ijob** job );
+
+        HRESULT                 create_variables        ( [out,retval] Ivariables** result );
     }
 
     [
