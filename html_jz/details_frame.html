@@ -1,0 +1,252 @@
+<!-- $Id: details_frame.html,v 1.1 2004/11/30 21:48:19 jz Exp $ -->
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+
+<head>
+    <meta name="vs_targetSchema"    content="http://schemas.microsoft.com/intellisense/ie5"/>
+    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1"/>
+
+
+    <style type="text/css">
+        @import "scheduler.css";
+        @import "custom.css";
+    </style>
+
+    <title>Scheduler</title>
+
+</head>
+
+<body>
+
+<table cellspacing="0" cellpadding="0" width="100%" style="margin-bottom: 1ex">
+    <tr>
+        <td align="right" class="small" >
+            <span 
+                  style="cursor: hand; text-decoration: underline" 
+                  onmouseover="this.className='hover'"
+                  onmouseout="this.className=''"
+                  onclick="hide__onclick()">
+                Hide
+            </span>
+        </td>
+    </tr>
+</table>
+
+<!--p>
+    <b>
+        <span id="job_name"></span>
+        &#160;
+        <span id="job_title"></span>
+    </b>
+<p>&#160;</p>
+</p-->
+
+
+<span id="stylesheet_output"></span>
+
+<script defer="true" type="text/javascript" src="scheduler.js"></script>
+<script defer="true" type="text/javascript" src="popup_menu.js"></script>
+
+<!-- script type="text/javascript" for="window" event="onload"> do_onload(); </script-->
+
+<script defer="true" language="javascript"><!--
+//-------------------------------------------------------------------------------------------------
+
+var _scheduler;
+var _stylesheet;
+var _timer;
+var _job_element;
+var _job_name;
+var _task_id;
+var _job_chain_element;
+var _description_popup;
+var _hidden;
+var _saved_frameset_cols;
+
+//---------------------------------------------------------------------------------------------init
+
+function init()
+{
+    _job_element       = undefined;
+    _job_name          = undefined;
+    _task_id           = undefined;
+    _job_chain_element = undefined;
+
+    if( !_scheduler )
+    {
+        _scheduler = window.parent.left_frame._scheduler;
+        _stylesheet = new Stylesheet( "scheduler.xslt" );
+        
+        scheduler_init();
+    }
+}
+
+//---------------------------------------------------------------------------------------------hide
+
+function hide__onclick()
+{
+    hide();
+}
+
+//--------------------------------------------------------------------------------------------clear
+
+function clear()
+{
+    init();
+    
+    _job_element = undefined;
+    _job_name    = undefined;
+    _task_id     = undefined;
+}
+
+//---------------------------------------------------------------------------------------------hide
+
+function hide()
+{
+    if( !_hidden )
+    {
+        _hidden = true;
+        
+        _saved_frameset_cols = window.parent.left_and_right_frameset.cols; 
+        window.parent.left_and_right_frameset.cols = "100%, 0%";
+    }
+}
+
+//---------------------------------------------------------------------------------------------show
+
+function show()
+{
+    var ok = update( true );
+
+    if( ok )
+    {
+        if( _hidden )
+        {
+            window.parent.left_and_right_frameset.cols = _saved_frameset_cols;
+            _saved_frameset_cols = undefined;
+            _hidden = false;
+        }
+    }
+    else
+        hide();
+}
+
+//--------------------------------------------------------------------------------show_task_details
+
+function show_task_details( job_element, task_element )
+{
+    init();
+    
+    var job_title = job_element.getAttribute( "title" );
+    
+    _job_element = job_element;
+    _job_name    = job_element.getAttribute( "job" )
+    _task_id     = task_element.getAttribute( "id" );
+
+    //document.all.job_name.innerText = "Job " + _job_name;
+    //document.all.job_title.innerText = job_title? job_title : "";
+
+    document.getElementById( "stylesheet_output" ).innerHTML = _stylesheet.xml_transform( task_element );
+    show();
+}
+
+//---------------------------------------------------------------------------------show_job_details
+
+function show_job_details( job_element )
+{
+    init();
+ 
+    _job_element = job_element;   
+    _job_name    = job_element.getAttribute( "job" )
+
+    document.getElementById( "stylesheet_output" ).innerHTML = _stylesheet.xml_transform( job_element );
+    show();
+}
+
+//---------------------------------------------------------------------------show_job_chain_details
+
+function show_job_chain_details( job_chain_element )
+{
+    init();
+ 
+    _job_chain_element = job_chain_element
+    
+    document.getElementById( "stylesheet_output" ).innerHTML = _stylesheet.xml_transform( job_chain_element );
+    show();
+}
+
+//-----------------------------------------------------------------------------show_job_description
+
+function show_job_description()
+{
+    var job_element = //document.all._job_element != undefined?
+                        _job_element  // _job_element in task_frame.html (detail_frame)                                                                                  // Rechter Rahmen
+                      //: _response.selectSingleNode( "spooler/answer/state/jobs/job [ @job = '" + job_name + "' ]" );  // Linker Rahmen
+                      
+    //var log_window = window.open( "http://" + document.location.host + "/" + show_log_command, window_name, features, true );
+    if( _description_popup )  _description_popup.hide();
+    
+    _description_popup = window.createPopup();
+    _description_popup.document.body.innerHTML = job_element.selectSingleNode( "description" ).text;
+
+    //_description_popup.show( 0, 0, 0, 0 );
+    var width  = document.body.clientWidth;
+    var height = document.body.clientHeight;
+    _description_popup.hide();
+    _description_popup.document.body.className = "job";
+    _description_popup.show( this.document.body.offsetLeft, this.document.body.offsetTop, width, height, this.document.body );
+}
+
+//-------------------------------------------------------------------------------------------update
+
+function update( force )
+{
+    if( force == undefined )  force = false;
+    if( ( _hidden || _description_popup ) &&  !force )  return false;
+
+    var ok = false;
+    
+    
+    if( _task_id != undefined )
+    {
+        var response = _scheduler.execute( "<show_task id='" + _task_id + "' what='all'/>" );
+        
+        var task_element = response.selectSingleNode( "spooler/answer/task" );
+        document.getElementById( "stylesheet_output" ).innerHTML = task_element? _stylesheet.xml_transform( task_element ) : "";
+
+        ok = true;
+    }
+    else
+    if( _job_name != undefined )
+    {
+        var response = _scheduler.execute( "<show_job job='" + _job_name + "' what='all,orders'/>" );
+        window.parent.left_frame.modify_response( response );
+        
+        _job_element = response.selectSingleNode( "spooler/answer/job" );
+        document.getElementById( "stylesheet_output" ).innerHTML = _job_element? _stylesheet.xml_transform( _job_element ) : "";
+
+        ok = true;
+    }
+    else
+    if( _job_chain_element != undefined )
+    {
+        //var response = _scheduler.execute( "<show_job job='" + _job_name + "' what='all,orders'/>" );
+        //window.parent.left_frame.modify_response( response );
+        var response = window.parent.left_frame._response;
+        
+        var job_chain_name = _job_chain_element.getAttribute( "name" );
+        _job_chain_element = response.selectSingleNode( "//job_chain[ @name='" + job_chain_name + "' ]" );
+        document.getElementById( "stylesheet_output" ).innerHTML = _job_chain_element? _stylesheet.xml_transform( _job_chain_element ) : "";
+
+        ok = true;
+    }
+    
+    return ok;
+}
+
+//-------------------------------------------------------------------------------------------------
+--></script>
+
+</body>
+
+</html>

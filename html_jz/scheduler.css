@@ -1,0 +1,65 @@
+/*  $Id: scheduler.css,v 1.1 2004/11/30 21:48:19 jz Exp $ 
+
+    STYLESHEET FÜR DEN SCHEDULER
+
+
+    In der custom.css (im selben Verzeichnis) können Sie eigene Einstellungen vornehmen.
+*/
+
+
+body                    { font-family: Sans-Serif; font-size: 10pt; margin-top: 5pt; }
+th                      { font-size: 10pt; }
+td                      { font-size: 10pt; }
+p                       { font-size: 10pt; margin-top: 2ex; margin-bottom: 0; padding-left: 3pt; }
+label                   { font-size: 10pt; }
+col                     { padding-bottom: 1pt; padding-left: 3pt; padding-right: 2pt }
+caption                 { font-size: 10pt; padding-bottom: 5pt; padding-left: 3pt; padding-right: 2pt; padding-top: 2pt }
+
+
+.small                  { font-size: 8pt }
+.label                  { font-size: 8pt; white-space: nowrap }
+
+/* Job-Description */
+div.description         {}
+
+th.head1, td.head1      { border-bottom: 1 solid black; }
+th.head , td.head       { border-bottom: 1 solid black; border-left: 1 solid black; }
+
+td.after_head_space     { margin-top: 0; margin-bottom: 0pt; line-height: 4pt; }
+
+
+/* Allgemeiner Scheduler-Zustand */
+.scheduler              { background-color: #F0F0F0 }
+
+.job                    { font-size: 10pt; background-color: #00c8ff } /*#fff000*/
+.job_error              { color: darkred }
+
+.task                   { font-size: 10pt; background-color: #90EE90 }  /*#FFFFA0*/
+.task_hover             { font-size: 10pt; background-color: #90EE90; text-decoration: underline }
+                      
+.order                  { font-size: 10pt; background-color: #ffffe0 }  /*#f0ffff*/
+                        
+.job_chain              { font-size: 10pt; background-color: powderblue }
+
+.process_class          { background-color: #F0F0F0 }
+
+/* Anklickbar */
+.hover                  { text-decoration: underline }
+
+
+/* Fürs Protokoll */
+body.log                { margin-left: 0; padding-left: 0 }
+pre.log                 { font-family: Lucida Console, monospace; font-size: 9pt; line-height: 1.1em; margin-left: 2px; padding-left: 0 }
+
+.log_error              { color: Red; }
+.log_warn               { color: tomato; }
+.log_info               { color: black; }
+.log_debug              { color: darkgreen; }
+.log_debug2             { color: #408040; }
+.log_debug3             { color: #808080; }
+.log_debug4             { color: #8080FF; }
+.log_debug5             { color: #8080FF; }
+.log_debug6             { color: #8080FF; }
+.log_debug7             { color: #8080FF; }
+.log_debug8             { color: #8080FF; }
+.log_debug9             { color: #a0a0a0; }
