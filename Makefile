@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.29 2004/08/31 14:58:02 jz Exp $
+# $Id: Makefile,v 1.30 2004/09/07 07:39:27 jz Exp $
 
 ifndef PROD_DIR
 prod_dir = ..
@@ -49,7 +49,6 @@ java_classes=\
  sos/spooler/Spooler.class\
  sos/spooler/Spooler_program.class\
  sos/spooler/Task.class\
- sos/spooler/Thread.class\
  sos/spooler/Variable_set.class
 
 java_headers=$(patsubst %.class, %.h, $(java_classes) )
