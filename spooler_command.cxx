@@ -1,4 +1,4 @@
-// $Id: spooler_command.cxx,v 1.72 2002/11/26 11:40:19 jz Exp $
+// $Id: spooler_command.cxx,v 1.73 2002/11/29 16:10:55 jz Exp $
 /*
     Hier ist implementiert
 
@@ -514,6 +514,8 @@ void Command_processor::execute_2( const string& xml_text, const Time& xml_mod_t
 {
     try 
     {
+        LOGI( "XML-Dokument wird gelesen ...\n" );
+
         //_answer = msxml::Document_ptr( __uuidof(msxml::DOMDocument30), NULL );
         _answer.create();
         _answer.appendChild( _answer.createProcessingInstruction( "xml", "version=\"1.0\" encoding=\"iso-8859-1\"" ) );
@@ -579,6 +581,9 @@ void Command_processor::execute_2( const string& xml_text, const Time& xml_mod_t
                 answer_element.appendChild( execute_command( e, xml_mod_time ) );
             }
         }
+
+        LOG( "XML-Dokument ist eingelesen\n" );
+
     }
     catch( const _com_error& com_error ) { throw_com_error( com_error, "DOM/XML" ); }
 }
