@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.37 2001/07/02 11:13:44 jz Exp $
+// $Id: spooler_task.cxx,v 1.38 2001/07/02 12:50:10 jz Exp $
 /*
     Hier sind implementiert
 
@@ -628,8 +628,9 @@ void Job::set_state_cmd( State_cmd cmd )
         case sc_unstop:     ok = _state == s_stopped;   if(!ok) break;
                             break;
 
-        case sc_start:      start(NULL);
-                            break;
+        case sc_start:      start(NULL);                break;
+
+        case sc_wake:       wake();                     break;
 
         case sc_end:        ok = _state == s_running;   break;
 
@@ -744,6 +745,7 @@ string Job::state_cmd_name( Job::State_cmd cmd )
         case Job::sc_stop:     return "stop";
         case Job::sc_unstop:   return "unstop";
         case Job::sc_start:    return "start";
+        case Job::sc_wake:     return "wake";
         case Job::sc_end:      return "end";
         case Job::sc_suspend:  return "suspend";
         case Job::sc_continue: return "continue";

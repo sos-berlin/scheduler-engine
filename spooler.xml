@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 
-<!-- $Id: spooler.xml,v 1.40 2001/06/20 17:55:15 jz Exp $   (C) 2001 SOS GmbH Berlin -->
+<!-- $Id: spooler.xml,v 1.41 2001/07/02 12:50:10 jz Exp $   (C) 2001 SOS GmbH Berlin -->
 
 <!DOCTYPE spooler SYSTEM "s:\prod\spooler\spooler.dtd">
 
@@ -300,7 +300,7 @@ spooler_log.msg "Spooler-Skript geladen."
                         <levels low="100" high="200"/>
                     </object_set>
 
-                    <run_time repeat = "60"/>
+                    <run_time repeat = "60000"/>
 
                 </job>
 
@@ -327,12 +327,12 @@ end function
                     ]]></script>
 
 
-                    <run_time begin="12:12" end="12:48" repeat="4">
+                    <run_time begin="12:12" end="12:48" repeat="4000">
 
                         <period single_start="19:51:50" end="20:00" let_run="no"/>
-                        <period begin="19:52:10" end="19:59:59" repeat="7"/>
+                        <period begin="19:52:10" end="19:59:59" repeat="7000"/>
 
-                        <date date="8.2.2001"> <period begin="0:00" end="24:00" repeat="0.1"/> </date>
+                        <date date="8.2.2001"> <period begin="0:00" end="24:00" repeat="1110.1"/> </date>
 
                         <weekdays>
                             <day day="1"/>
@@ -356,7 +356,7 @@ end function
                         <levels low="1" high="3"/>
                     </object_set>
 
-                    <run_time repeat="0.1"/>
+                    <run_time repeat="1110.1"/>
 
                 </job>
 
@@ -404,7 +404,7 @@ sub spooler_exit()
 
                     ]]></script>
             
-                    <run_time repeat="7"/>
+                    <run_time repeat="7000"/>
 
                 </job>
 
@@ -422,7 +422,7 @@ sub spooler_exit()
                         spooler_log.msg("programmstart fertig");
                     ]]></script>
 
-                    <run_time repeat="60"/>
+                    <run_time repeat="60000"/>
                 </job>
 
                 <job name="umlaute">
@@ -448,16 +448,17 @@ sub spooler_process()
 {
     #$i = $spooler_task->params("zahl");
     #if( undef($i) ) { $i = 10; }
-    $i = 20;
+    $i = 3;
     $spooler_log->msg( "zahl=$i" );
     
     while( $i-- > 0 )
     {
         $spooler_log->msg( "spooler_process sleep" );
-        #$hostware->sleep(1);
         sleep(1);
     }
     
+    #$spooler_job->wake();
+
     $spooler_task->{result} = "Das Ergebnis";
     return 0;
 }
@@ -469,6 +470,7 @@ sub spooler_close()
 }
 
                     ]]></script>
+                    <run_time repeat="3600"/>
                 </job> 
             </jobs>
         </thread>
@@ -482,7 +484,7 @@ spooler_log.msg( "spooler_job   .include_path=" + spooler_job.include_path );
 spooler_log.msg( "spooler_thread.include_path=" + spooler_thread.include_path );
 spooler_log.msg( "spooler       .include_path=" + spooler.include_path );
 spooler_log.msg( "spooler_job   .name="         + spooler_job.name );
-*spooler_log.msg( "spooler_thread.name="         + spooler_thread.name );
+spooler_log.msg( "spooler_thread.name="         + spooler_thread.name );
 <!--include file="1.txt"/-->
 spooler_log.msg( "text 2" );
 <![CDATA[
@@ -508,7 +510,7 @@ function spooler_close()
 
                     ]]></script>
 
-                    <run_time repeat="15" let_run="yes"/>
+                    <run_time repeat="15000" let_run="yes"/>
                 </job>
             </jobs>
         </thread>

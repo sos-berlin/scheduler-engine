@@ -1,4 +1,4 @@
-// $Id: spooler_task.h,v 1.17 2001/07/02 11:13:44 jz Exp $
+// $Id: spooler_task.h,v 1.18 2001/07/02 12:50:10 jz Exp $
 
 #ifndef __SPOOLER_TASK_H
 #define __SPOOLER_TASK_H
@@ -120,12 +120,13 @@ struct Job : Sos_self_deleting
     enum State_cmd
     {
         sc_none,
-        sc_stop,                // s_running | s_suspended -> s_stopped
-        sc_unstop,              // s_stopped -> s_pending
-        sc_start,               // s_pending -> s_running
-        sc_end,                 // s_running -> s_pending
-        sc_suspend,             // s_running -> s_suspended
-        sc_continue,            // s_suspended -> s_running
+        sc_stop,                // s_running | s_suspended  -> s_stopped
+        sc_unstop,              // s_stopped                -> s_pending
+        sc_start,               // s_pending                -> s_running
+        sc_wake,                // s_pending | s_running    -> s_running
+        sc_end,                 // s_running                -> s_pending
+        sc_suspend,             // s_running                -> s_suspended
+        sc_continue,            // s_suspended              -> s_running
         sc__max
     };
 
@@ -165,7 +166,7 @@ struct Job : Sos_self_deleting
     void                        start                       ( const CComPtr<spooler_com::Ivariable_set>& params = NULL );
     void                        start_without_lock          ( const CComPtr<spooler_com::Ivariable_set>& params = NULL );
     void                        start_when_directory_changed( const string& directory_name );
-    void                        wake                        ()                          { _event.signal(); }
+    void                        wake                        ()                          { _event.signal( "wake" ); }
     void                        interrupt_script            ();
 
     void                        create_task                 ();
@@ -354,7 +355,7 @@ struct Job_script_task : Script_task
 
 struct Process_task : Task
 {
-                                Process_task                ( Spooler* sp, const Sos_ptr<Job>& j ) : Task(sp,j) {}
+                                Process_task                ( Spooler* sp, const Sos_ptr<Job>& j ) : Task(sp,j), _process_handle("process_handle",(HANDLE)NULL) {}
         
     bool                        do_start                    ();
     void                        do_stop                     ();
