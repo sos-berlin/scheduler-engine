@@ -1,4 +1,4 @@
-// $Id: spooler_module_java.cxx,v 1.77 2004/02/22 20:10:29 jz Exp $
+// $Id: spooler_module_java.cxx,v 1.78 2004/02/23 07:52:07 jz Exp $
 /*
     Hier sind implementiert
 
@@ -52,40 +52,6 @@ static zschimmer::Thread_data<Java_thread_data> thread_data;
 
 static jobject jobject_from_variant( JNIEnv* jenv, const VARIANT& v, Java_idispatch_container* java_idispatch_container )
 {
-/*
-    if( v.vt == VT_DISPATCH )
-    {
-        string java_class_name;
-
-        IDispatch* idispatch = V_DISPATCH( &v );
-        if( !idispatch )  return NULL;
-
-        ptr<spooler_com::Ihas_java_class_name> j;
-        HRESULT hr = idispatch->QueryInterface( spooler_com::IID_Ihas_java_class_name, (void**)&j );
-        
-        if( !FAILED( hr ) )
-        {
-            Bstr java_class_name_bstr;
-            hr = j->get_java_class_name( &java_class_name_bstr );
-            if( FAILED(hr) )  throw_ole( hr, "get_java_class_name" );
-
-            java_class_name = string_from_bstr( java_class_name_bstr );
-        }
-        else
-        {
-            // Vielleicht gibt's die Eigenschaft java_class_name per IDispatch (so bei einem Proxy des Objektservers)
-
-            java_class_name = string_from_variant( com_property_get( idispatch, "java_class_name" ) );
-        }
-
-        java_class_name = replace_regex( java_class_name, "\\.", "/" ) ;
-        ptr<Java_idispatch> java_idispatch = Z_NEW( Java_idispatch( get_java_vm(), idispatch, java_class_name ) );
-
-        thread_data->add_object( java_idispatch );        // Lebensdauer nur bis Ende des Aufrufs der Java-Methode, s. Java_module_instance::call()
-
-        return *java_idispatch;
-    }
-*/
     if( v.vt == VT_EMPTY )
     {
         return jenv->NewString( NULL, 0 );       // Für Job_chain_node.next_state, .error_state ("" wird zu VT_EMPTY)

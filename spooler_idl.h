@@ -1,4 +1,4 @@
-// $Id: spooler_idl.h,v 1.29 2004/02/22 19:55:38 jz Exp $
+// $Id: spooler_idl.h,v 1.30 2004/02/23 07:52:07 jz Exp $
 
 
 /*  Ersatz für spooler.odl für Systeme ohne COM. 
@@ -9,7 +9,11 @@
 #ifndef __SPOOLER_IDL_H
 #define __SPOOLER_IDL_H
 
+#include "../zschimmer/java_odl.h"
+
 namespace spooler_com {
+
+using odl::Ihas_java_class_name; 
 
 //-------------------------------------------------------------------------------------------------
 

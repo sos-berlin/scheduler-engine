@@ -1,4 +1,4 @@
-// $Id: spooler_mail.h,v 1.17 2004/02/22 19:55:38 jz Exp $
+// $Id: spooler_mail.h,v 1.18 2004/02/23 07:52:07 jz Exp $
 
 #ifndef __SPOOLER_MAIL_H
 #define __SPOOLER_MAIL_H
@@ -7,7 +7,6 @@
 
 //#include "../kram/olestd.h"
 #include "../zschimmer/com.h"
-#include "../zschimmer/java_odl.h"
 #include "../kram/sysxcept.h"
 #include "../kram/sosscrpt.h"
 #include "../kram/com.h"
@@ -22,7 +21,7 @@ namespace spooler {
 //-----------------------------------------------------------------------------------------Com_mail
 
 struct Com_mail : spooler_com::Imail, 
-                  odl::Ihas_java_class_name, 
+                  spooler_com::Ihas_java_class_name, 
                   Sos_ole_object               
 {
     void*                       operator new                ( size_t size )                         { return sos_alloc( size, "spooler.Mail" ); }
