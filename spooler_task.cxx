@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.13 2001/01/29 10:45:01 jz Exp $
+// $Id: spooler_task.cxx,v 1.14 2001/01/29 11:54:00 jz Exp $
 /*
     Hier sind implementiert
 
@@ -174,14 +174,33 @@ Job::~Job()
     if( _com_job )  _com_job->close();
 }
 
+//---------------------------------------------------------------------------------Job::create_task
+
+Task* Job::create_task( const CComPtr<spooler_com::Ivariable_set>& params )
+{
+    if( _task ) 
+    {
+        //if( !( _task->_state & (Task::s_pending|Task::s_stopped) ) )  
+            throw_xc( "SPOOLER-118", _name, _task->state_name() );
+    }
+
+    Sos_ptr<Task> task = SOS_NEW( Task( _spooler, this ) );
+
+    _task = task;
+    _spooler->_task_list.push_back( task );
+
+    if( _spooler->_use_threads )  task->start_thread();
+
+    return task;
+}
+
 //---------------------------------------------------------------------------------------Job::start
 
-void Job::start( const CComPtr<spooler_com::Ivariable_set>& params )
+Task* Job::start( const CComPtr<spooler_com::Ivariable_set>& params )
 {
-    if( !( _task->_state & (Task::s_pending|Task::s_stopped) ) )  throw_xc( "SPOOLER-118", _name, _task->state_name() );
-
-    _task->set_state_cmd( Task::sc_start );
-    _task->_params = params;
+    Task* task = create_task( params );
+    task->set_state_cmd( Task::sc_start );
+    return task;
 }
 
 //----------------------------------------------------------------Job::start_when_directory_changed
@@ -225,7 +244,7 @@ Task::Task( Spooler* spooler, const Sos_ptr<Job>& job )
 
     _job->_task = this;
 
-    _task_event = CreateEvent( NULL, FALSE, FALSE, NULL );
+  //_task_event = CreateEvent( NULL, FALSE, FALSE, NULL );
     _wake_event = CreateEvent( NULL, FALSE, FALSE, NULL );
     _wait_handles.add( _wake_event, "spooler_event", this );
 }
@@ -235,8 +254,6 @@ Task::Task( Spooler* spooler, const Sos_ptr<Job>& job )
 Task::~Task()    
 {
     if( _thread )  TerminateThread( _thread, 999 );
-
-    close();
 
     // COM-Objekte entkoppeln, falls noch jemand eine Referenz darauf hat:
     if( _com_object_set  )  _com_object_set->close();
@@ -253,6 +270,9 @@ void Task::close()
     _script_instance.close();
     _params = NULL;
     _directory_watcher.close();
+    _job->_task = NULL;
+
+  //FOR_EACH( Task_list, _spooler->_task_list, it )  if( +*it == this )  { _spooler->_task_list.erase( it );  break; }
 }
 
 //----------------------------------------------------------------------------------Task::set_state
@@ -640,12 +660,20 @@ bool Task::step()
 
 void Task::wait_until_stopped()
 {
+    if( _thread )
+    {
+        int ret;
+        do ret = WaitForSingleObject( _thread, INT_MAX ); while( ret == WAIT_TIMEOUT );
+        if( ret != WAIT_OBJECT_0 )  throw_mswin_error( "WaitForSingleObject" );
+    }
+/*
     while( _state != s_stopped )
     {
         int ret;
-        do ret = WaitForSingleObject( _task_event, INT_MAX ); while( ret != WAIT_TIMEOUT );
+        do ret = WaitForSingleObject( _task_event, INT_MAX ); while( ret == WAIT_TIMEOUT );
         if( ret != WAIT_OBJECT_0 )  throw_mswin_error( "WaitForSingleObject" );
     }
+*/
 }
 
 //---------------------------------------------------------------------------------------Task::step
@@ -755,6 +783,7 @@ int Task::run_thread()
             while( _spooler->_state == Spooler::s_paused )  _wait_handles.wait();
 
             do_something();
+            if( _state == s_stopped )  break;
 
             if( _state != s_running )
             {
@@ -776,6 +805,8 @@ int Task::run_thread()
     catch( const Xc& x ) { error(x); result = 1; }
 
     close();
+    SetEvent( _spooler->_command_arrived_event );
+    
     return result;
 }
 

@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.41 2001/01/29 10:45:01 jz Exp $
+// $Id: spooler.cxx,v 1.42 2001/01/29 11:53:59 jz Exp $
 /*
     Hier sind implementiert
 
@@ -191,7 +191,8 @@ void Spooler::start()
 
     FOR_EACH( Job_list, _job_list, it )
     {
-        _task_list.push_back( SOS_NEW( Task( this, *it ) ) );
+        //_task_list.push_back( SOS_NEW( Task( this, *it ) ) );
+        (*it)->create_task( NULL );
     }
 
     _spooler_start_time = Time::now();
@@ -220,8 +221,6 @@ void Spooler::stop()
 
     _script_instance.close();
     
-  //_thread_list.clear();
-
     set_state( s_stopped );
 }
 
@@ -368,16 +367,27 @@ void Spooler::run()
     }
 }
 */
+
+//--------------------------------------------------------------------Spooler::remove_stopped_tasks
+
+void Spooler::remove_stopped_tasks()
+{
+    FOR_EACH( Task_list, _task_list, it ) 
+    {
+        Task* task = *it;
+        if( task->_state == Task::s_stopped ) 
+        {
+            task->wait_until_stopped();
+            it = _task_list.erase( it );
+        }
+    }
+}
+
 //-------------------------------------------------------------------------------------Spooler::run
 
 void Spooler::run()
 {
     set_state( s_running );
-
-    if( _use_threads )
-    {
-        FOR_EACH( Task_list, _task_list, it )  (*it)->start_thread();
-    }
 
     while(1)
     {
@@ -399,6 +409,8 @@ void Spooler::run()
         if( !_use_threads  &&  _state == s_running )  single_thread_step();
 
         wait();
+
+        remove_stopped_tasks();
     }
 }
 

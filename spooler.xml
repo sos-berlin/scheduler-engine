@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 
-<!-- $Id: spooler.xml,v 1.19 2001/01/29 10:45:01 jz Exp $   (C) 2001 SOS GmbH Berlin -->
+<!-- $Id: spooler.xml,v 1.20 2001/01/29 11:54:00 jz Exp $   (C) 2001 SOS GmbH Berlin -->
 
 <!DOCTYPE spooler SYSTEM "spooler.dtd">
 
@@ -8,7 +8,7 @@
 <config tcp_port    = "4444" 
         udp_port    = "4444" 
         log_dir     = "c:\tmp" 
-        use_threads = "no">
+        use_threads = "yes">
 
     <security>
         <allowed_host host="192.168.100.0" level="all"/>

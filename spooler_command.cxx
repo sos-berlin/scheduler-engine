@@ -1,4 +1,4 @@
-// $Id: spooler_command.cxx,v 1.21 2001/01/29 10:45:01 jz Exp $
+// $Id: spooler_command.cxx,v 1.22 2001/01/29 11:54:00 jz Exp $
 /*
     Hier ist implementiert
 
@@ -187,12 +187,12 @@ xml::Element_ptr Command_processor::execute_modify_job( const xml::Element_ptr& 
 {
     if( _security_level < Security::seclev_all )  throw_xc( "SPOOLER-121" );
 
-    string job_name     = as_string( element->getAttribute( "job" ) );
-    string action_name  = as_string( element->getAttribute( "cmd" ) );
-    string state_name   = as_string( element->getAttribute( "state" ) );
+    string job_name   = as_string( element->getAttribute( "job" ) );
+    string cmd_name   = as_string( element->getAttribute( "cmd" ) );
+    string state_name = as_string( element->getAttribute( "state" ) );
 
-    Task::State_cmd cmd = action_name.empty()? Task::sc_none 
-                                             : Task::as_state_cmd( action_name );
+    Task::State_cmd cmd = cmd_name.empty()? Task::sc_none 
+                                             : Task::as_state_cmd( cmd_name );
 
     Task::State state = state_name.empty()? Task::s_none 
                                           : Task::as_state( state_name );
@@ -200,18 +200,27 @@ xml::Element_ptr Command_processor::execute_modify_job( const xml::Element_ptr& 
     xml::Element_ptr tasks_element = _answer->createElement( "tasks" );
     bool found = false;
 
-    FOR_EACH( Task_list, _spooler->_task_list, it )
+    FOR_EACH( Job_list, _spooler->_job_list, it )
     {
-        Task* task = *it;
-        if( task->_job->_name == job_name ) 
+        Job* job = *it;
+        if( job->_name == job_name ) 
         {
             found = true;
+            Task* task = NULL;
 
-            if( cmd )  task->set_state_cmd( cmd );
+            if( job->_task )
+            {
+                task = job->_task;
+                if( cmd )  task->set_state_cmd( cmd );
+                else
+                if( state )  task->set_state( state );      // experimentell
+            }
             else
-            if( state )  task->set_state( state );      // experimental
+            if( cmd == Task::sc_unstop )  task = job->create_task(NULL);
+            else
+            if( cmd == Task::sc_start )   task = job->start(NULL);
 
-            tasks_element->appendChild( execute_show_task( *it ) );
+            if( task )  tasks_element->appendChild( execute_show_task( task ) );
         }
     }
     

@@ -1,4 +1,4 @@
-// $Id: spooler.h,v 1.39 2001/01/29 10:45:01 jz Exp $
+// $Id: spooler.h,v 1.40 2001/01/29 11:53:59 jz Exp $
 
 #ifndef __SPOOLER_H
 #define __SPOOLER_H
@@ -125,6 +125,7 @@ struct Spooler
 
     void                        single_thread_step          ();
     void                        wait                        ();
+    void                        remove_stopped_tasks        ();
 
 
     void                        cmd_reload                  ();

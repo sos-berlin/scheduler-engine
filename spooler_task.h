@@ -1,4 +1,4 @@
-// $Id: spooler_task.h,v 1.3 2001/01/29 10:45:01 jz Exp $
+// $Id: spooler_task.h,v 1.4 2001/01/29 11:54:00 jz Exp $
 
 #ifndef __SPOOLER_TASK_H
 #define __SPOOLER_TASK_H
@@ -113,7 +113,8 @@ struct Job : Sos_self_deleting
 
     void                        set_current_task            ( Task* task )                      { _com_current_task->_task = task; }
 
-    void                        start                       ( const CComPtr<spooler_com::Ivariable_set>& params );
+    Task*                       create_task                 ( const CComPtr<spooler_com::Ivariable_set>& params );
+    Task*                       start                       ( const CComPtr<spooler_com::Ivariable_set>& params );
     void                        start_when_directory_changed( const string& directory_name );
   //void                        stop_all_tasks              ()                                  { if( _task )  _task->stop(); }
 
