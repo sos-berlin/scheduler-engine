@@ -82,7 +82,7 @@ public class Job_impl
 
     /** Führt einen Jobschritt aus.
       * Gegenstück ist {@link #spooler_exit()}.
-      * Die Default-Implementierung gibt false zurück.
+      * Die Default-Implementierung gibt false zurück (versetzt aber einen Auftrag in den Folgezustand).
       * 
       * @return bei &lt;job order="no">: false beendet den Joblauf.
       * Bei &lt;job order="true">: false versetzt den Auftrag in den Fehlerzustand (s. {@link Job_chain_node}).

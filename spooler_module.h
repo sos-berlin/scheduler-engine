@@ -229,10 +229,10 @@ struct Module_instance : Object
     virtual void                end__end                    ();
 
     virtual Async_operation*    step__start                 ();
-    virtual bool                step__end                   ();
+    virtual Variant             step__end                   ();
 
     virtual Async_operation*    call__start                 ( const string& method );
-    virtual bool                call__end                   ();
+    virtual Variant             call__end                   ();
 
     virtual Async_operation*    release__start              ();
     virtual void                release__end                ();

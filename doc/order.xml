@@ -102,6 +102,10 @@
     <scheduler_element name="modify_job" attribute="cmd" value="end"/>
     beenden.
 </p>
+<p>
+    Die Task endet, wenn <scheduler_method class="Job_impl" method="spooler_process"/>
+    nicht implementiert ist. Der Auftrag wird dennoch in den Folgezustand (nicht Fehlerzustand) versetzt.
+</p>
 
 
 <h2>Beschleunigung des Auftragsdurchlaufs</h2>

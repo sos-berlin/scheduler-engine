@@ -1242,11 +1242,23 @@ Async_operation* Task::begin__start()
 
 bool Task::step__end()
 {
-    bool result;
+    bool continue_task;
 
     try 
     {
-        result = do_step__end();
+        bool    result;
+        Variant spooler_process_result = do_step__end();
+        
+        if( spooler_process_result.vt == VT_ERROR  &&  V_ERROR( &spooler_process_result ) == DISP_E_UNKNOWNNAME )
+        {
+            result = true;
+            continue_task = false;
+        }
+        else
+        {
+            continue_task = result = check_result( spooler_process_result );
+            if( _job->order_queue() )  continue_task = true;           // Auftragsgesteuerte Task immer fortsetzen ( _order kann wieder null sein wegen set_state(), §1495 )
+        }
 
         if( has_step_count()  ||  _step_count == 0 )        // Bei Process_task nur einen Schritt zählen
         {
@@ -1255,16 +1267,15 @@ bool Task::step__end()
             _step_count++;
         }
 
-        postprocess_order( result );
-        if( _job->order_queue() )  result = true;           // Auftragsgesteuerte Task immer fortsetzen ( _order kann wieder null sein wegen set_state(), §1495 )
-        if( _next_spooler_process )  result = true;
+        if( _order )  postprocess_order( result );
+        if( _next_spooler_process )  continue_task = true;
     }
-    catch( const exception& x ) { set_error(x); result = false; }
+    catch( const exception& x ) { set_error(x); continue_task = false; }
 
 
     if( _order )  remove_order_after_error();
 
-    return result;
+    return continue_task;
 }
 
 //-----------------------------------------------------------------------------Task::operation__end
@@ -1717,7 +1728,7 @@ Async_operation* Job_module_task::do_step__start()
 
 //--------------------------------------------------------------------Job_module_task::do_step__end
 
-bool Job_module_task::do_step__end()
+Variant Job_module_task::do_step__end()
 {
     if( !_module_instance )  throw_xc( "SCHEDULER-199" );
 
@@ -1739,7 +1750,7 @@ bool Job_module_task::do_call__end()
 {
     if( !_module_instance )  throw_xc( "SCHEDULER-199" );
 
-    return _module_instance->call__end();
+    return check_result( _module_instance->call__end() );
 }
 
 //---------------------------------------------------------------Job_module_task::do_release__start
@@ -1951,7 +1962,7 @@ bool Process_task::signaled()
 
 //-----------------------------------------------------------------------Process_task::do_step__end
 
-bool Process_task::do_step__end()
+Variant Process_task::do_step__end()
 {
     return !signaled();
 }

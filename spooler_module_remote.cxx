@@ -316,7 +316,7 @@ Async_operation* Remote_module_instance_proxy::step__start()
 
 //----------------------------------------------------------Remote_module_instance_proxy::step__end
 
-bool Remote_module_instance_proxy::step__end()
+Variant Remote_module_instance_proxy::step__end()
 {
     if( !_remote_instance )  throw_xc( "SCHEDULER-200", "step__end" );
 
@@ -324,7 +324,7 @@ bool Remote_module_instance_proxy::step__end()
     if( !_operation->async_finished() )  throw_xc( "SCHEDULER-191", "step__end", _operation->async_state_text() );
 
     _operation = NULL;
-    return check_result( _remote_instance->call__end() );
+    return _remote_instance->call__end();
 }
 
 //--------------------------------------------------------Remote_module_instance_proxy::call__start
@@ -340,7 +340,7 @@ Async_operation* Remote_module_instance_proxy::call__start( const string& method
 
 //----------------------------------------------------------Remote_module_instance_proxy::call__end
 
-bool Remote_module_instance_proxy::call__end()
+Variant Remote_module_instance_proxy::call__end()
 {
     if( !_remote_instance )  throw_xc( "SCHEDULER-200", "call__end" );
 
@@ -348,7 +348,7 @@ bool Remote_module_instance_proxy::call__end()
     if( !_operation->async_finished() )  throw_xc( "SCHEDULER-191", "call__end", _operation->async_state_text() );
 
     _operation = NULL;
-    return check_result( _remote_instance->call__end() );
+    return _remote_instance->call__end();
 }
 
 //-----------------------------------------------------Remote_module_instance_proxy::release__start

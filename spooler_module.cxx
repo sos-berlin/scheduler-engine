@@ -389,7 +389,7 @@ void Module_instance::add_obj( IDispatch*, const string& )
 Variant Module_instance::call_if_exists( const string& name )
 {
     if( name_exists(name) )  return call( name );
-                       else  return Variant();
+                       else  return Variant( Variant::vt_error, DISP_E_UNKNOWNNAME );
 }
 
 //---------------------------------------------------------------------------Module_instance::close
@@ -460,11 +460,9 @@ Async_operation* Module_instance::step__start()
 
 //-----------------------------------------------------------------------Module_instance::step__end
 
-bool Module_instance::step__end()
+Variant Module_instance::step__end()
 {
-    if( !name_exists( spooler_process_name ) )  return false;
-
-    return check_result( call( spooler_process_name ) );
+    return call_if_exists( spooler_process_name );
 }
 
 //---------------------------------------------------------------------Module_instance::call__start
@@ -475,9 +473,9 @@ Async_operation* Module_instance::call__start( const string& method )
     return &dummy_sync_operation;
 }
 
-//-----------------------------------------------------------------------Module_instance::step__end
+//-----------------------------------------------------------------------Module_instance::call__end
 
-bool Module_instance::call__end()
+Variant Module_instance::call__end()
 {
     if( _call_method == spooler_exit_name  &&  !loaded() )  return true;
 
@@ -493,8 +491,7 @@ bool Module_instance::call__end()
         _spooler_exit_called = true;
     }
 
-
-    return check_result( call_if_exists( _call_method ) );
+    return call_if_exists( _call_method );
 }
 
 //------------------------------------------------------------------Module_instance::release__start

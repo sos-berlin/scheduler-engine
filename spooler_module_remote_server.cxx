@@ -308,8 +308,9 @@ STDMETHODIMP Com_remote_module_instance_server::Call( BSTR name, VARIANT* result
 
         _server._module_instance->call__start( string_from_bstr(name) ) -> async_finish();
 
-        result->vt = VT_BOOL;
-        V_BOOL( result ) = _server._module_instance->call__end();
+        _server._module_instance->call__end().move_to( result );
+        //result->vt = VT_BOOL;
+        //V_BOOL( result ) = _server._module_instance->call__end();
     }
     catch( const exception& x ) { hr = Com_set_error( x, "Remote_module_instance_server::call" ); }
 
@@ -351,6 +352,8 @@ STDMETHODIMP Com_remote_module_instance_server::Begin( SAFEARRAY* objects_safear
 STDMETHODIMP Com_remote_module_instance_server::End( VARIANT_BOOL succeeded, VARIANT* result )
 {
     HRESULT hr = NOERROR;
+    
+    if( result )  result->vt = VT_EMPTY;
 
     try
     {
@@ -377,8 +380,9 @@ STDMETHODIMP Com_remote_module_instance_server::Step( VARIANT* result )
 
         _server._module_instance->step__start() -> async_finish();
 
-        result->vt = VT_BOOL;
-        V_BOOL( result ) = _server._module_instance->step__end();
+        _server._module_instance->step__end().move_to( result );
+        //result->vt = VT_BOOL;
+        //V_BOOL( result ) = _server._module_instance->step__end();
     }
     catch( const exception& x ) { hr = Com_set_error( x, "Remote_module_instance_server::step" ); }
 

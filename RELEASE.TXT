@@ -95,3 +95,11 @@ spooler.execute_xml()
 
 <job> als XML-Kommando übergebbar.
 
+
+------------------------------------------------
+VERSION 2.0.111  2005-03-18
+
+Fehlendes spooler_process() in einem auftragsgesteuertem Job versetzt den Auftrag in den 
+Folgezustand (nicht Fehlerzustand) und beendet dann die Task.
+
+<process>-Jobs können auftragsgesteuert sein. Der Job wird für jeden Auftrag gestartet.

@@ -197,7 +197,7 @@ struct Task : Sos_self_deleting
     virtual Async_operation*    do_end__start               ()                                      { return &dummy_sync_operation; }
     virtual void                do_end__end                 () = 0;
     virtual Async_operation*    do_step__start              ()                                      { return &dummy_sync_operation; }
-    virtual bool                do_step__end                () = 0;
+    virtual Variant             do_step__end                () = 0;
     virtual Async_operation*    do_call__start              ( const string& )                       { return &dummy_sync_operation; }
     virtual bool                do_call__end                ()                                      { return true; }           // Default: Nicht implementiert
     virtual Async_operation*    do_release__start           ()                                      { return &dummy_sync_operation; }
@@ -337,7 +337,7 @@ struct Job_module_task : Module_task
     virtual Async_operation*    do_end__start               ();
     virtual void                do_end__end                 ();
     virtual Async_operation*    do_step__start              ();
-    virtual bool                do_step__end                ();
+    virtual Variant             do_step__end                ();
     virtual Async_operation*    do_call__start              ( const string& method );
     virtual bool                do_call__end                ();
     virtual Async_operation*    do_release__start           ();
@@ -389,7 +389,7 @@ struct Process_task : Task      // Job ist irgendein Prozess (z.B. durch ein She
   //virtual void                do_end__start               ();
     virtual void                do_end__end                 ();
   //virtual void                do_step__start              ();
-    virtual bool                do_step__end                ();
+    virtual Variant             do_step__end                ();
 /*        
   //virtual bool                loaded                      ();
     bool                        do_start                    ();
