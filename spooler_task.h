@@ -1,4 +1,4 @@
-// $Id: spooler_task.h,v 1.74 2002/11/24 15:33:02 jz Exp $
+// $Id: spooler_task.h,v 1.75 2002/11/26 09:23:54 jz Exp $
 
 #ifndef __SPOOLER_TASK_H
 #define __SPOOLER_TASK_H
@@ -291,10 +291,10 @@ struct Job : Sos_self_deleting
     Spooler*                   _spooler;
 
   protected:
-    friend struct Job_history;
+    friend struct               Job_history;
 
     string                     _name;
-    Spooler_thread*                    _thread;
+    Spooler_thread*            _thread;
 
 
     Prefix_log                 _log;

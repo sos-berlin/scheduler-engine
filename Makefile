@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.4 2002/11/25 23:36:19 jz Exp $
+# $Id: Makefile,v 1.5 2002/11/26 09:23:53 jz Exp $
 
 ifndef PROD_DIR
 prod_dir = ..
@@ -56,12 +56,12 @@ clean:
 include $(PROD_DIR)/make/standard.makefile
 
 %.class: %.java
-	mkdir -p $(dir $@)
+	@mkdir -p $(dir $@)
 	javac -d . -classpath .. $<
 
 %.h: %.class
-	mkdir -p $(dir $@)
-	javah -o $@ -classpath . $(subst /,.,$(patsubst %.class, %, $<))
+	@mkdir -p $(dir $@)
+	javah -force -o $@ -classpath . $(subst /,.,$(patsubst %.class, %, $<))
 
 
 libspooler.a: $(java_headers) $(objects)

@@ -1,4 +1,4 @@
-// $Id: spooler.h,v 1.107 2002/11/25 10:04:24 jz Exp $
+// $Id: spooler.h,v 1.108 2002/11/26 09:23:53 jz Exp $
 
 #ifndef __SPOOLER_H
 #define __SPOOLER_H
@@ -217,14 +217,19 @@ struct Spooler
 
     void                        signal                      ( const string& signal_name = "" )  { _log.info( "Signal \"" + signal_name + "\"" ); _event.signal( signal_name ); }
 
-    Spooler_thread*                     thread_by_thread_id         ( Thread_id );
+    Spooler_thread*             thread_by_thread_id         ( Thread_id );
 
+
+  private:
     Fill_zero                  _zero_;
-
+    Thread_semaphore           _lock;
     bool                       _is_service;                 // NT-Dienst
     int                        _argc;
     char**                     _argv;
 
+  public:
+    Log                        _log;
+    Prefix_log                 _prefix_log;
     bool                       _debug;
     int                        _log_level;
     bool                       _mail_on_error;              // Für Job-Protokolle
@@ -251,9 +256,6 @@ struct Spooler
 
     string                     _factory_ini;                // -ini=factory.ini
     string                     _hostname;
-
-    Log                        _log;
-    Prefix_log                 _prefix_log;
 
     ptr<Com_spooler>           _com_spooler;                // COM-Objekt spooler
     ptr<Com_log>               _com_log;                    // COM-Objekt spooler.log
@@ -289,46 +291,42 @@ struct Spooler
     int                        _priority_max;               // <config priority_max=...>
     int                        _tcp_port;                   // <config tcp=...>
     int                        _udp_port;                   // <config udp=...>
+    bool                       _free_threading_default;
     time::Holiday_set          _holiday_set;                // Feiertage für alle Jobs
+
     State_changed_handler      _state_changed_handler;      // Callback für NT-Dienst SetServiceStatus()
 
-    xml::Element_ptr           _config_element_to_load;     // Für cmd_load_config()
+    Event                      _event;                      // Vor _wait_handles!
+    Wait_handles               _wait_handles;
+
     xml::Document_ptr          _config_document_to_load;    // Für cmd_load_config(), das Dokument zu _config_element_to_load
+    xml::Element_ptr           _config_element_to_load;     // Für cmd_load_config()
     Time                       _config_element_mod_time;    // Modification time
     string                     _config_source_filename;     // Für cmd_load_config(), der Dateiname der Quelle
 
-    xml::Element_ptr           _config_element;             // Die gerade geladene Konfiguration (und Job hat einen Verweis auf <job>)
     xml::Document_ptr          _config_document;            // Das Dokument zu _config_element
+    xml::Element_ptr           _config_element;             // Die gerade geladene Konfiguration (und Job hat einen Verweis auf <job>)
 
+    ptr<Com_variable_set>      _variables;
     Security                   _security;                   // <security>
     Object_set_class_list      _object_set_class_list;      // <object_set_classes>
     Communication              _communication;              // TCP und UDP (ein Thread)
 
-    ptr<Com_variable_set>      _variables;
     Module                     _module;                     // <script>
     ptr<Module_instance>       _module_instance;
 
-
     Thread_list                _thread_list;
+
+    Thread_semaphore           _job_chain_lock;
+    typedef map< string, ptr<Job_chain> >  Job_chain_map;
+    Job_chain_map              _job_chain_map;
+    Time                       _job_chain_time;             // Zeitstempel der letzten Änderung (letzer Aufruf von Spooler::add_job_chain()), 
+    long                       _next_free_order_id;
 
     Thread_id                  _thread_id;                  // Haupt-Thread
     Time                       _spooler_start_time;
     State                      _state;
     State_cmd                  _state_cmd;
-
-    long                       _next_free_order_id;
-
-    Wait_handles               _wait_handles;
-    Event                      _event;                      
-
-    Thread_semaphore           _lock;
-    bool                       _free_threading_default;
-
-    typedef map< string, ptr<Job_chain> >  Job_chain_map;
-    Job_chain_map              _job_chain_map;
-    Time                       _job_chain_time;             // Zeitstempel der letzten Änderung (letzer Aufruf von Spooler::add_job_chain()), 
-
-    Thread_semaphore           _job_chain_lock;
 };
 
 //-------------------------------------------------------------------------------------------------
