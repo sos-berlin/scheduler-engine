@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.200 2003/09/30 12:58:35 jz Exp $
+// $Id: spooler_task.cxx,v 1.201 2003/09/30 13:13:44 jz Exp $
 /*
     Hier sind implementiert
 
@@ -1413,7 +1413,11 @@ Process_task::Process_task( Job* job )
 
 void Process_task::do_close()
 {
-    if( _process_handle )  do_kill();
+#ifdef Z_WINDOWS
+    if( _process_handle )
+#endif
+      do_kill();
+
     _process_handle.close();
 }
 
