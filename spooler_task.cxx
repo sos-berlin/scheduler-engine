@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.128 2002/11/27 09:39:11 jz Exp $
+// $Id: spooler_task.cxx,v 1.129 2002/11/29 15:59:46 jz Exp $
 /*
     Hier sind implementiert
 
@@ -935,13 +935,13 @@ void Job::set_next_start_time( Time now )
 
     if( _delay_until )
     {
-        _next_start_time = _delay_until;
+        _next_start_time = _period.next_try( _delay_until );
         if( _spooler->_debug )  msg = "Wiederholung wegen delay_after_error: " + _next_start_time.as_string();
     }
     else
     if( _repeat > 0 )       // spooler_task.repeat
     {
-        _next_start_time = now + _repeat;
+        _next_start_time = _period.next_try( now + _repeat );
         if( _spooler->_debug )  msg = "Wiederholung wegen spooler_job.repeat=" + as_string(_repeat) + ": " + _next_start_time.as_string();
         _repeat = 0;
     }
