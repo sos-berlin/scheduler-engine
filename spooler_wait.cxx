@@ -1,4 +1,4 @@
-// $Id: spooler_wait.cxx,v 1.17 2001/03/17 18:57:23 jz Exp $
+// $Id: spooler_wait.cxx,v 1.18 2001/06/23 14:19:46 jz Exp $
 /*
     Hier sind implementiert
 
@@ -148,11 +148,14 @@ void Event::signal( const string& name )
 
 void Event::set_signal()
 {
+    LOGI( "Event(" << _name << "," << _signal_name << ").set_signal()\n" );
+
     THREAD_LOCK( _lock )
     {
         _signaled = true;
     }
 
+    LOG( "Event().set_signal() ok\n" );
     //if( signaled )  signal_event();
 }
 
