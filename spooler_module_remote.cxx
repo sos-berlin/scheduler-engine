@@ -1,4 +1,4 @@
-// $Id: spooler_module_remote.cxx,v 1.33 2003/09/02 06:09:22 jz Exp $
+// $Id: spooler_module_remote.cxx,v 1.34 2003/09/02 16:28:29 jz Exp $
 /*
     Hier sind implementiert
 
@@ -350,14 +350,14 @@ bool Remote_module_instance_proxy::continue_async_operation( Operation* operatio
             if( !_process )
             {
                 if( _module->_separate_process 
-                    || _process_class_name.empty()  && !_spooler->process_class_or_null("") )   // Namenlose Prozessklasse nicht bekannt? Dann temporäre Prozessklasse verwenden
+                    || _module->_process_class_name.empty()  && !_spooler->process_class_or_null("") )   // Namenlose Prozessklasse nicht bekannt? Dann temporäre Prozessklasse verwenden
                 {
                     _process = _spooler->new_temporary_process();
                 }
                 else
                 {
                     //_process = Z_NEW( Process( _spooler ) );        
-                    _process = _spooler->process_class( _process_class_name ) -> select_process_if_available();
+                    _process = _spooler->process_class( _module->_process_class_name ) -> select_process_if_available();
                     if( !_process )  break;
 
                     // Erstmal immer nur eine Task pro Prozess. 

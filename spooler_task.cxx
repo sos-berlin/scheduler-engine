@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.189 2003/09/02 11:11:12 jz Exp $
+// $Id: spooler_task.cxx,v 1.190 2003/09/02 16:28:29 jz Exp $
 /*
     Hier sind implementiert
 
@@ -833,7 +833,8 @@ Async_operation* Task::begin__start()
     {
         if( !_spooler->log_directory().empty()  &&  _spooler->log_directory()[0] != '*' )
         {
-            _log.set_filename( _spooler->log_directory() + "/task." + _job->jobname_as_filename() + ". " + as_string(_id) + ".log" );      // Task-Protokoll
+            _log.set_filename( _spooler->log_directory() + "/task." + _job->jobname_as_filename() + "." + as_string(_id) + ".log" );      // Task-Protokoll
+            _log.open();                // Jobprotokoll. Nur wirksam, wenn set_filename() gerufen
         }
 
 

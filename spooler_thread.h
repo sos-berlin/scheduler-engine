@@ -1,4 +1,4 @@
-// $Id: spooler_thread.h,v 1.50 2003/08/31 19:51:29 jz Exp $
+// $Id: spooler_thread.h,v 1.51 2003/09/02 16:28:30 jz Exp $
 
 #ifndef __SPOOLER_THREAD_H
 #define __SPOOLER_THREAD_H
@@ -57,8 +57,8 @@ struct Spooler_thread : zschimmer::Thread
     // Für andere Threads:
     bool                        is_ready_for_termination    ();
     void                        signal_object               ( const string& object_set_class_name, const Level& );
-  //void                        signal                      ( const string& signal_name = "" )      { THREAD_LOCK( _lock )  if(_event) _event->signal(signal_name), _next_time = 0; }
-    void                        signal                      ( const string& signal_name = "" )      { THREAD_LOCK( _lock )  if(_event) _event->signal(signal_name); }
+  //void                        signal                      ( const string& signal_name )           { THREAD_LOCK( _lock )  if(_event) _event->signal(signal_name), _next_time = 0; }
+    void                        signal                      ( const string& signal_name )           { THREAD_LOCK( _lock )  if(_event) _event->signal(signal_name); }
   //Job*                        get_job_or_null             ( const string& job_name );
   //void                        interrupt_scripts           ();
     void                        nichts_getan                ();

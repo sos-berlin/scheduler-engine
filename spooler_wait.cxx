@@ -1,4 +1,4 @@
-// $Id: spooler_wait.cxx,v 1.71 2003/08/31 19:51:29 jz Exp $
+// $Id: spooler_wait.cxx,v 1.72 2003/09/02 16:28:30 jz Exp $
 /*
     Hier sind implementiert
 
@@ -378,7 +378,7 @@ int Wait_handles::wait_until_2( Time until )
                 if( event )
                 {
                     event->set_signal();
-                    if( _spooler->_debug )  _log->debug9( event->as_text() );
+                  //if( _spooler->_debug )  _log->debug9( event->as_text() );
                 }
 
                 return index;

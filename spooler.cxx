@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.245 2003/09/02 15:47:13 jz Exp $
+// $Id: spooler.cxx,v 1.246 2003/09/02 16:28:29 jz Exp $
 /*
     Hier sind implementiert
 
@@ -426,7 +426,7 @@ void Spooler::cmd_add_jobs( const xml::Element_ptr& element )
 {
     load_jobs_from_xml( element, true );
 
-    signal();
+    signal( "add_jobs" );
 }
 
 //-------------------------------------------------------------------Spooler::remove_temporary_jobs

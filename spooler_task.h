@@ -1,4 +1,4 @@
-// $Id: spooler_task.h,v 1.116 2003/09/01 15:15:38 jz Exp $
+// $Id: spooler_task.h,v 1.117 2003/09/02 16:28:30 jz Exp $
 
 #ifndef __SPOOLER_TASK_H
 #define __SPOOLER_TASK_H
@@ -70,7 +70,7 @@ struct Task : Sos_self_deleting
 
     Time                        last_process_start_time     ()                                      { THREAD_LOCK_RETURN( _lock, Time, _last_process_start_time ); }
 
-    void                        signal                      ( const string& signal_name = "" );
+    void                        signal                      ( const string& signal_name );
     bool                        has_error                   ()                                      { return _error != NULL; }
     void                    set_error_xc_only               ( const Xc& );
 

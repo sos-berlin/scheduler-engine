@@ -1,4 +1,4 @@
-// $Id: spooler.h,v 1.153 2003/09/02 13:04:29 jz Exp $
+// $Id: spooler.h,v 1.154 2003/09/02 16:28:29 jz Exp $
 
 #ifndef __SPOOLER_H
 #define __SPOOLER_H
@@ -238,8 +238,8 @@ struct Spooler
   //void                        single_thread_step          ();
     void                        wait                        ();
 
-    void                        signal                      ( const string& signal_name = "" )  { _log.debug9( "Signal \"" + signal_name + "\"" ); _event.signal( signal_name ); }
-  //void                        signal                      ( const string& signal_name = "" )  { THREAD_LOCK( _lock )  ..., if(_event) _event->signal(signal_name), _next_start_time = 0, _next_job = NULL; }
+    void                        signal                      ( const string& signal_name )       { _log.debug9( "Signal \"" + signal_name + "\"" ); _event.signal( signal_name ); }
+  //void                        signal                      ( const string& signal_name  )      { THREAD_LOCK( _lock )  ..., if(_event) _event->signal(signal_name), _next_start_time = 0, _next_job = NULL; }
     void                        async_signal                ( const char* signal_name = "" )    { _event.async_signal( signal_name ); }
     bool                        signaled                    ()                                  { return _event.signaled(); }
 

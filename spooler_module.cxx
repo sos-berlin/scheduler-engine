@@ -1,4 +1,4 @@
-// $Id: spooler_module.cxx,v 1.41 2003/09/02 15:46:26 jz Exp $
+// $Id: spooler_module.cxx,v 1.42 2003/09/02 16:28:29 jz Exp $
 /*
     Hier sind implementiert
 
@@ -247,7 +247,7 @@ ptr<Module_instance> Module::create_instance()
 
         case kind_remote:
         {
-            ptr<Remote_module_instance_proxy> p = Z_NEW( Remote_module_instance_proxy( this, _process_class_name ) );
+            ptr<Remote_module_instance_proxy> p = Z_NEW( Remote_module_instance_proxy( this ) );
             return +p;
         }
 
