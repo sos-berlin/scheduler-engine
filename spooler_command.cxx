@@ -1,4 +1,4 @@
-// $Id: spooler_command.cxx,v 1.68 2002/11/24 15:32:58 jz Exp $
+// $Id: spooler_command.cxx,v 1.69 2002/11/24 16:06:33 jz Exp $
 /*
     Hier ist implementiert
 
@@ -61,7 +61,6 @@ xml::Element_ptr create_error_element( const xml::Document_ptr& document, const 
     timeb  tm;     // Ob die Sommerzeitverschiebung bei der Fehlerzeit berücksichtigt wird, hängt von der _aktuellen_ Zeit ab.
     ftime( &tm );  // Nicht schön, aber es funktioniert, weil der Spooler sowieso nicht während der Zeitumstellung laufen soll.
     e.setAttribute( "time", Sos_optional_date_time( (time_t)x.time() - timezone - ( tm.dstflag? _dstbias : 0 ) ).as_string() );
-
 
     if( !empty( x->name() )          )  e.setAttribute( "class" , x->name()          );
 
@@ -163,15 +162,15 @@ xml::Element_ptr Command_processor::execute_show_history( const xml::Element_ptr
 
 //--------------------------------------------------------------------------------abort_immediately
 
-static void abort_immediately( int exit_code = 1 )
+static void abort_immediately()
 {
 #   ifdef Z_WINDOWS
 
-        TerminateProcess( GetCurrentProcess(), exit_code );  // _exit() lässt noch Delphi-Code ausführen.
+        TerminateProcess( GetCurrentProcess(), 1 );  // _exit() lässt noch Delphi-Code ausführen.
 
 #    else
 
-        _exit( exit_code );
+        _exit();
 
 #   endif
 }
@@ -201,7 +200,7 @@ xml::Element_ptr Command_processor::execute_modify_spooler( const xml::Element_p
         else
         if( cmd == "abort_immediately"     )  abort_immediately();
         else
-        if( cmd == "abort_immediately_and_restart" )  { try{ spooler_restart( NULL, _spooler->is_service() ); }catch(...){}; abort_immediately(); }
+            if( cmd == "abort_immediately_and_restart" )  { try{ spooler_restart( NULL, _spooler->is_service() ); } catch(...) {}; abort_immediately(); }
         else
       //if( cmd == "new_log"               )  _spooler->cmd_new_log();
       //else
@@ -210,7 +209,6 @@ xml::Element_ptr Command_processor::execute_modify_spooler( const xml::Element_p
     
     return _answer.createElement( "ok" );
 }
-
 //--------------------------------------------------------------Command_processor::execute_show_job
 
 xml::Element_ptr Command_processor::execute_show_job( const xml::Element_ptr& element, Show_what show )

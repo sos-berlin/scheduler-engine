@@ -1,4 +1,4 @@
-// $Id: spooler_time.cxx,v 1.23 2002/11/24 15:33:04 jz Exp $
+// $Id: spooler_time.cxx,v 1.24 2002/11/24 16:06:34 jz Exp $
 /*
     Hier sind implementiert
 
@@ -245,7 +245,7 @@ bool Day::has_time( Time time_of_day )
 
 const Period& Day::next_period_( Time time_of_day, With_single_start single_start ) const
 {
-    FOR_EACH( Period_set, _period_set, it )
+    FOR_EACH_CONST( Period_set, _period_set, it )
     {
         if( it->is_comming( time_of_day, single_start ) )  return *it;
     }

@@ -1,4 +1,4 @@
-// $Id: spooler_module_java.cxx,v 1.20 2002/11/24 15:33:01 jz Exp $
+// $Id: spooler_module_java.cxx,v 1.21 2002/11/24 16:06:34 jz Exp $
 /*
     Hier sind implementiert
 
@@ -23,6 +23,7 @@
 #else
 #   include <utime.h>
 #   include <dlfcn.h>
+#   define vsnprintf    _vsnprintf
 #endif
 
 using namespace std;
@@ -115,7 +116,7 @@ static jint JNICALL java_vfprintf( FILE *fp, const char *format, va_list args )
 {
     char buf[1024];
 
-    int ret = vsnprintf( buf, sizeof(buf), format, args );
+    int ret = _vsnprintf( buf, sizeof(buf), format, args );
 
     java_vm->_log( buf );
 

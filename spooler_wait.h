@@ -1,4 +1,4 @@
-// $Id: spooler_wait.h,v 1.26 2002/11/24 15:33:05 jz Exp $
+// $Id: spooler_wait.h,v 1.27 2002/11/24 16:06:35 jz Exp $
 
 #ifndef __SPOOLER_WAIT_H
 #define __SPOOLER_WAIT_H
@@ -26,7 +26,7 @@ struct Event : Handle
                                ~Event                       ();
 
 
-#   ifdef Z_WINNDOWS
+#   ifdef Z_WINDOWS
                                 Event                       ( const string& name, HANDLE h ) : Handle(h), _zero_(this+1), _name(name) {}
         void                    operator =                  ( const HANDLE& h )                 { set_handle(h); }
 #   endif

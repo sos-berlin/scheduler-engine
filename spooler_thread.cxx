@@ -1,4 +1,4 @@
-// $Id: spooler_thread.cxx,v 1.56 2002/11/24 15:33:03 jz Exp $
+// $Id: spooler_thread.cxx,v 1.57 2002/11/24 16:06:34 jz Exp $
 /*
     Hier sind implementiert
 
@@ -480,7 +480,7 @@ int Spooler_thread::wait_until( Time until )
 
         if( ret != -1 )  return ret;
 
-        _ftime( &tm2 );
+        ftime( &tm2 );
         if( tm1.dstflag != tm2.dstflag )  
             _log.info( tm2.dstflag? "Sommerzeit" : "Winterzeit" );
         else {

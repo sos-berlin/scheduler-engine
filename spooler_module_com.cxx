@@ -1,4 +1,4 @@
-// $Id: spooler_module_com.cxx,v 1.4 2002/11/24 15:33:00 jz Exp $
+// $Id: spooler_module_com.cxx,v 1.5 2002/11/24 16:06:34 jz Exp $
 /*
     Hier sind implementiert
 
@@ -69,7 +69,7 @@ void Com_module_instance::load()
     if( name_exists( "spooler_set_context" ) )
     {
         Variant com_context_vt = _com_context;
-        com_call( _idispatch, "spooler_set_context", &_com_context_vt );
+        com_call( _idispatch, "spooler_set_context", &com_context_vt );
     }
 
     _loaded = true;
