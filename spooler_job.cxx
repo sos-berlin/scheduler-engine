@@ -1,4 +1,4 @@
-// $Id: spooler_job.cxx,v 1.31 2003/09/30 11:26:21 jz Exp $
+// $Id: spooler_job.cxx,v 1.32 2003/09/30 13:03:49 jz Exp $
 /*
     Hier sind implementiert
 
@@ -694,7 +694,7 @@ void Job::set_next_start_time( Time now, bool repeat )
         {
             if( !_repeat )  _next_single_start = _run_time.next_single_start( now );
 
-            if( _start_once  ||  !repeat && _period._repeat )
+            if( _start_once  ||  !repeat && _period._repeat < latter_day )
             {
             //select_period();
                 if( _period.begin() > now )
