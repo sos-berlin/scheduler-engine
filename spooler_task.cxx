@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.29 2001/02/20 10:37:24 jz Exp $
+// $Id: spooler_task.cxx,v 1.30 2001/02/20 10:52:48 jz Exp $
 /*
     Hier sind implementiert
 
@@ -462,8 +462,18 @@ bool Job::do_something()
     if( _state == s_ended ) 
     {
         close_task();
-        if( _temporary && _repeat == 0 )  set_state( s_stopped ); // _temporary && s_stopped ==> spooler_thread.cxx entfernt den Job
-                                    else  set_next_start_time(), set_state( _next_start_time == latter_day? s_stopped : s_pending );
+
+        if( _temporary && _repeat == 0 )  
+        {
+            stop();   // _temporary && s_stopped ==> spooler_thread.cxx entfernt den Job
+        }
+        else
+        {
+            set_next_start_time();
+            if( _next_start_time == latter_day )  stop();
+                                            else  set_state( s_pending );
+        }
+
         something_done = true;
     }
 
