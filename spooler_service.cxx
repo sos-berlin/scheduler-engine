@@ -1,4 +1,4 @@
-// $Id: spooler_service.cxx,v 1.16 2002/04/06 20:07:40 jz Exp $
+// $Id: spooler_service.cxx,v 1.17 2002/04/17 18:55:51 jz Exp $
 /*
     Hier sind implementiert
 
@@ -480,7 +480,7 @@ static void __stdcall ServiceMain( DWORD argc, char** argv )
                 break;
         }
 
-        if( terminate_immediately )  { LOG( "_exit(1);\n" ); _exit(0); }
+        if( terminate_immediately )  { LOG( "TerminateProcess()\n" ); TerminateProcess(GetCurrentProcess(),1); }
 
         TerminateThread( thread_handle, 999 );   // Sollte nicht nötig sein. Nützt auch nicht, weil Destruktoren nicht gerufen werden und Komnunikations-Thread vielleicht noch läuft.
         
