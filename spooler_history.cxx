@@ -1,4 +1,4 @@
-// $Id: spooler_history.cxx,v 1.15 2002/04/10 20:47:29 jz Exp $
+// $Id: spooler_history.cxx,v 1.16 2002/04/11 05:46:48 jz Exp $
 
 #include "../kram/sos.h"
 #include "spooler.h"
@@ -120,25 +120,30 @@ Spooler_db::Spooler_db( Spooler* spooler )
 
 void Spooler_db::open( const string& db_name )
 {
-    _db_name = db_name;
+    string my_db_name = db_name;
 
+    _db_name = db_name;
+    
     if( _db_name != "" )
     {
         if( _db_name.find(' ') == string::npos )
         {
             if( !is_absolute_filename( _db_name  )  &&  (_spooler->log_directory() + " ")[0] == '*' )  return;
-            _db_name = "odbc -create " + make_absolute_filename( _spooler->log_directory(), _db_name );
+
+              _db_name = "odbc "         + make_absolute_filename( _spooler->log_directory(),   _db_name );
+            my_db_name = "odbc -create " + make_absolute_filename( _spooler->log_directory(), my_db_name );
         }
 
-        if( _db_name.substr(0,5) == "odbc " )  _db_name = "odbc -id=spooler " + _db_name.substr(5);
+        if( _db_name.substr(0,5) == "odbc " )  _db_name = "odbc -id=spooler " +   _db_name.substr(5),
+                                             my_db_name = "odbc -id=spooler " + my_db_name.substr(5);
 
         try
         {
             string stmt;
 
-            _spooler->_log.info( "Datenbank wird geöffnet: " + _db_name );
+            _spooler->_log.info( "Datenbank wird geöffnet: " + my_db_name );
 
-            _db.open( "-in -out " + _db_name );   // -create
+            _db.open( "-in -out " + my_db_name );   // -create
 
             _db_name += " ";
 
@@ -545,7 +550,7 @@ void Job_history::write( bool start )
                 if( !parameters.empty() )
                 {
                     Any_file blob;
-                    blob.open( "-out " + _spooler->_db.dbname() + " -table=" + _spooler->_history_tablename + " -blob='parameters' where \"id\"=" + as_string( _job->_task->_id ) );
+                    blob.open( "-out " + _spooler->_db.db_name() + " -table=" + _spooler->_history_tablename + " -blob='parameters' where \"id\"=" + as_string( _job->_task->_id ) );
                     blob.put( parameters );
                     blob.close();
                 }
@@ -601,7 +606,7 @@ void Job_history::write( bool start )
                 if( _with_log  &&  !log_filename.empty()  &&  log_filename[0] != '*' )
                 {
                     try {
-                        string blob_filename = _spooler->_db.dbname() + " -table=" + _spooler->_history_tablename + " -blob='log' where \"id\"=" + as_string( _job->_task->_id );
+                        string blob_filename = _spooler->_db.db_name() + " -table=" + _spooler->_history_tablename + " -blob='log' where \"id\"=" + as_string( _job->_task->_id );
                         if( _with_log == arc_gzip )  blob_filename = "gzip | " + blob_filename;
                         copy_file( "file -b " + log_filename, blob_filename );
                     }
@@ -734,14 +739,14 @@ void Job_history::set_extra_field( const string& name, const CComVariant& value 
 
 //---------------------------------------------------------------------------Job_history::read_tail
 
-xml::Element_ptr Job_history::read_tail( xml::Document_ptr doc, int n, bool with_log )
+xml::Element_ptr Job_history::read_tail( xml::Document_ptr doc, int id, int next, bool with_log )
 {
     xml::Element_ptr history_element;
 
     if( !_error )  
     {
         const int max_n = 1000;
-        if( n > max_n )  n = max_n,  _spooler->_log.warn( "Max. " + as_string(max_n) + " Historiensätze werden gelesen" );
+        if( abs(next) > max_n )  next = sgn(next) * max_n,  _spooler->_log.warn( "Max. " + as_string(max_n) + " Historiensätze werden gelesen" );
     
         with_log &= _use_db;
 
@@ -753,15 +758,29 @@ xml::Element_ptr Job_history::read_tail( xml::Document_ptr doc, int n, bool with
 
                 if( _use_file )
                 {
-                    sel.open( "-in -seq tab -field-names | tail -head=1 -reverse -" + as_string(n) + " | " + _filename );
+                    if( id != -1  ||  next >= 0 )  throw_xc( "SPOOLER-139" );
+                    sel.open( "-in -seq tab -field-names | tail -head=1 -reverse -" + as_string(-next) + " | " + _filename );
                 }
                 else
                 if( _use_db )
                 {
-                    sel.open( "-in head -" + as_string(n) + " | " + _spooler->_db._db_name + 
+                    string clause = " where \"job_name\"=" + sql_quoted(_job->name());
+                    
+                    if( id != -1 )
+                    {
+                        clause += " and \"id\"";
+                        clause += next<0? "<" : next>0? ">" : "=";
+                        clause += as_string(id);
+                    }
+
+                    clause += " order by \"id\"";
+                    if( next < 0 )  clause += " desc";
+                    
+                    sel.open( "-in head -" + as_string(max(1,abs(next))) + " | " + _spooler->_db._db_name + 
                               "select \"ID\", \"SPOOLER_ID\", \"job_name\", \"start_time\", \"end_time\", \"cause\", \"steps\", \"error\", \"error_code\", \"error_text\" " +
                               join( "", vector_map( prepend_comma, _extra_names ) ) +
-                              " from " + _spooler->_history_tablename + " where \"job_name\"=" + sql_quoted(_job->name()) + " order by \"id\" desc" );
+                              " from " + _spooler->_history_tablename + 
+                              clause );
                 }
                 else
                     throw_xc( "SPOOLER-136" );
@@ -786,7 +805,7 @@ xml::Element_ptr Job_history::read_tail( xml::Document_ptr doc, int n, bool with
                         {
                             string name = type->field_descr_ptr(i)->name();
                             if( name == "parameters" )  param_xml = value;
-                                                  else  history_entry->setAttribute( as_dom_string( name ), as_dom_string(value) );
+                                                  else  history_entry->setAttribute( as_dom_string( lcase(name) ), as_dom_string(value) );
                         }
                     }
 

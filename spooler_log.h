@@ -1,4 +1,4 @@
-// $Id: spooler_log.h,v 1.17 2002/04/07 11:47:23 jz Exp $
+// $Id: spooler_log.h,v 1.18 2002/04/11 05:46:48 jz Exp $
 
 #ifndef __SPOOLER_LOG_H
 #define __SPOOLER_LOG_H
@@ -52,6 +52,7 @@ struct Log
     int                        _file;
   //FILE*                      _file;
     Thread_semaphore           _semaphore;
+    string                     _log_line;
 };
 
 //---------------------------------------------------------------------------------------Prefix_log

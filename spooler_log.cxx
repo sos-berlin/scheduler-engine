@@ -1,4 +1,4 @@
-// $Id: spooler_log.cxx,v 1.40 2002/04/10 17:15:12 jz Exp $
+// $Id: spooler_log.cxx,v 1.41 2002/04/11 05:46:48 jz Exp $
 
 #include "../kram/sos.h"
 #include "spooler.h"
@@ -99,7 +99,7 @@ void Log::write( Prefix_log* extra_log, const char* text, int len, bool log )
 
     if( len > 0 )
     {
-        if( log && log_ptr )  log_ptr->write( text, len );
+        if( log && log_ptr )  _log_line.append( text, len );
 
         int ret = ::write( _file, text, len );
         if( ret != len )  throw_errno( errno, "write", _filename.c_str() );
@@ -159,44 +159,48 @@ void Log::log2( Log_level level, const string& prefix, const string& line, Prefi
 {
     if( _file == -1 )  return;
 
-    Thread_semaphore::Guard guard = &_semaphore;
-    char buffer1[50];
-    char buffer2[50];
-
-    string now = Time::now().as_string();
-    strcpy( buffer1, now.c_str() );
-
-    switch( level )
+    THREAD_LOCK( _semaphore )
     {
-      //case log_fatal: strcpy ( buffer2, " [FATAL]  " );  break;
-        case log_error: strcpy ( buffer2, " [ERROR]  " );  break;
-        case log_warn : strcpy ( buffer2, " [WARN]   " );  break;
-        case log_info : strcpy ( buffer2, " [info]   " );  break;
-        case log_debug: strcpy ( buffer2, " [debug]  " );  break;
-        default:        sprintf( buffer2, " [debug%d] ", (int)-level );
-    }
+        char buffer1[50];
+        char buffer2[50];
 
-    int begin = 0;
-    while( begin < line.length() )
-    {
-        int next = line.find( '\n', begin );  
-        if( next == string::npos )  next = line.length(); 
-                              else  next++;
+        string now = Time::now().as_string();
+        strcpy( buffer1, now.c_str() );
 
-        write( extra_log, buffer1, strlen(buffer1), false );           // Zeit
+        switch( level )
+        {
+          //case log_fatal: strcpy ( buffer2, " [FATAL]  " );  break;
+            case log_error: strcpy ( buffer2, " [ERROR]  " );  break;
+            case log_warn : strcpy ( buffer2, " [WARN]   " );  break;
+            case log_info : strcpy ( buffer2, " [info]   " );  break;
+            case log_debug: strcpy ( buffer2, " [debug]  " );  break;
+            default:        sprintf( buffer2, " [debug%d] ", (int)-level );
+        }
+
+        int begin = 0;
+        while( begin < line.length() )
+        {
+            int next = line.find( '\n', begin );  
+            if( next == string::npos )  next = line.length(); 
+                                  else  next++;
+
+            write( extra_log, buffer1, strlen(buffer1), false );           // Zeit
         
-        write( extra_log, buffer2, strlen(buffer2) );                  // [info]
+            write( extra_log, buffer2, strlen(buffer2) );                  // [info]
 
-        if( !prefix.empty() )  write( NULL, "(" + prefix + ") " );     // (Job ...)
+            if( !prefix.empty() )  write( NULL, "(" + prefix + ") " );     // (Job ...)
 
-        int len = next - begin;
-        while( len > 1  &&  line.c_str()[begin+len-1] == '\r' )  len--;
-        write( extra_log, line.c_str() + begin, len );                 // Text
+            int len = next - begin;
+            while( len > 1  &&  line.c_str()[begin+len-1] == '\r' )  len--;
+            write( extra_log, line.c_str() + begin, len );                 // Text
 
-        begin = next;
+            begin = next;
+        }
+
+        if( line.length() == 0 || line[line.length()-1] != '\n' )  write( extra_log, "\n", 1 );
+
+        LOG( _log_line );  _log_line = "";
     }
-
-    if( line.length() == 0 || line[line.length()-1] != '\n' )  write( extra_log, "\n", 1 );
 }
 
 //----------------------------------------------------------------------------------Prefix_log::log
