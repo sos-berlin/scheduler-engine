@@ -1,4 +1,4 @@
-// $Id: spooler_command.cxx,v 1.150 2004/12/10 15:19:42 jz Exp $
+// $Id: spooler_command.cxx,v 1.151 2004/12/10 15:49:19 jz Exp $
 /*
     Hier ist implementiert
 
@@ -499,7 +499,7 @@ xml::Element_ptr Command_processor::execute_show_order( const xml::Element_ptr& 
 
         {
             Any_file sel ( "-in " + _spooler->_db->db_name() + 
-                           " select max(\"HISTORY_ID\") as history_id "
+                           " select max(\"HISTORY_ID\") as history_id_max "
                            " from " + sql::uquoted_name( _spooler->_order_history_tablename ) +
                            " where \"SPOOLER_ID\"=" + sql::quoted( _spooler->id_for_db() ) + 
                             " and \"JOB_CHAIN\"="   + sql::quoted( job_chain_name ) +
@@ -507,7 +507,7 @@ xml::Element_ptr Command_processor::execute_show_order( const xml::Element_ptr& 
 
             if( sel.eof() )  goto NO_ORDER;
 
-            history_id = sel.get_record().as_string( "HISTORY_ID" );
+            history_id = sel.get_record().as_string( "history_id_max" );
             if( history_id == "" )  goto NO_ORDER;
         }
 
@@ -724,6 +724,11 @@ ptr<Http_response> Command_processor::execute_http( Http_request* http_request )
                 {
                     ptr<Prefix_log> log;
 
+                    if( http_request->has_parameter( "job"   ) )
+                    {
+                        log = _spooler->get_job( http_request->parameter( "job" ) )->_log;
+                    }
+                    else
                     if( http_request->has_parameter( "task"  ) )
                     {
                         int           task_id = as_int( http_request->parameter( "task" ) );
@@ -747,11 +752,44 @@ ptr<Http_response> Command_processor::execute_http( Http_request* http_request )
                         }
                     }
                     else
-                    if( http_request->has_parameter( "job"   ) )  log = _spooler->get_job( http_request->parameter( "job" ) )->_log;
+                    if( http_request->has_parameter( "order" ) )
+                    {
+                        string     job_chain_name = http_request->parameter( "job_chain" );
+                        string     order_id       = http_request->parameter( "order" );
+                        ptr<Order> order          = _spooler->job_chain( job_chain_name )->order_or_null( order_id );
+
+                        if( order )
+                        {
+                            log = order->_log;
+                        }
+                        else
+                        {
+                            Any_file sel ( "-in " + _spooler->_db->db_name() + 
+                                           " select max(\"HISTORY_ID\") as history_id_max "
+                                           " from " + sql::uquoted_name( _spooler->_order_history_tablename ) +
+                                           " where \"SPOOLER_ID\"=" + sql::quoted( _spooler->id_for_db() ) + 
+                                             " and \"JOB_CHAIN\"="  + sql::quoted( job_chain_name ) +
+                                             " and \"ORDER_ID\"="   + sql::quoted( order_id ) );
+
+                            if( !sel.eof() )
+                            {
+                                string history_id = sel.get_record().as_string( "history_id_max" );
+                                if( history_id != "" )
+                                {
+                                    string log_text = file_as_string( GZIP_AUTO + _spooler->_db->db_name() + " -table=" + sql::uquoted_name( _spooler->_order_history_tablename ) + " -blob=\"LOG\"" 
+                                                                    " where \"HISTORY_ID\"=" + history_id );
+                                    string title = "Auftrag " + order_id;
+                                    //TODO Log wird im Speicher gehalten! Besser: In Datei schreiben, vielleicht sogar Order und Log anlegen
+                                    ptr<Http_response> response = Z_NEW( Http_response( http_request, Z_NEW( Html_chunk_reader( Z_NEW( String_chunk_reader( log_text ) ), title ) ), "text/html" ) );
+                                    return +response;
+                                }
+                            }
+                        }
+                    }
                     else
-                    if( http_request->has_parameter( "order" ) )  log = _spooler->job_chain( http_request->parameter( "job_chain" ) )->order( http_request->parameter( "order" ) )->_log;
-                    else
-                                                                  log = &_spooler->_log;
+                    {
+                        log = &_spooler->_log;  // Hauptprotokoll
+                    }
 
                     if( log )
                     {
