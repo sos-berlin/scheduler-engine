@@ -1,4 +1,4 @@
-// $Id: spooler_module.cxx,v 1.29 2003/08/11 19:33:11 jz Exp $
+// $Id: spooler_module.cxx,v 1.30 2003/08/12 14:59:45 jz Exp $
 /*
     Hier sind implementiert
 
@@ -271,7 +271,7 @@ Module_instance::In_call::In_call( Task* task, const string& name, const string&
     int pos = name.find( '(' );
     string my_name = pos == string::npos? name : name.substr( 0, pos );
 
-    set_in_call( my_name, extra ); 
+    task->set_in_call( my_name, extra ); 
     LOG( *task << '.' << my_name << "() begin\n" );
 
     Z_WINDOWS_ONLY( _ASSERTE( _CrtCheckMemory() ); )
@@ -281,7 +281,7 @@ Module_instance::In_call::In_call( Task* task, const string& name, const string&
 
 Module_instance::In_call::~In_call()
 { 
-    set_in_call( "" ); 
+    _task->set_in_call( "" ); 
 
     {
         Log_ptr log;
@@ -308,21 +308,6 @@ void Module_instance::init()
     _com_task    = new Com_task;
     _com_log     = new Com_log;
     _com_context = new Com_context;
-}
-
-//---------------------------------------------------------------------Module_instance::set_in_call
-
-void Module_instance::set_in_call( const string& name, const string& extra )
-{
-    THREAD_LOCK( _lock )
-    {
-        _in_call = name;
-
-        if( _spooler->_debug  &&  !name.empty() )  
-        {
-            _log.debug( name + "()  " + extra );
-        }
-    }
 }
 
 //-------------------------------------------------------------------------Module_instance::add_obj

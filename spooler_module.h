@@ -1,4 +1,4 @@
-// $Id: spooler_module.h,v 1.30 2003/08/11 19:33:11 jz Exp $
+// $Id: spooler_module.h,v 1.31 2003/08/12 14:59:45 jz Exp $
 
 #ifndef __SPOOLER_MODULE_H
 #define __SPOOLER_MODULE_H
@@ -182,7 +182,6 @@ struct Module_instance : Object
     virtual                    ~Module_instance             ()                                      {}      // Für gcc 3.2
 
     void                    set_title                       ( const string& title )                 { _title = title; }
-    void                    set_in_call                     ( const string& name, const string& extra = "" );
 
     virtual void                close                       ()                                      = 0;
     virtual void                init                        ();

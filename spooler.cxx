@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.221 2003/08/11 19:33:10 jz Exp $
+// $Id: spooler.cxx,v 1.222 2003/08/12 14:59:45 jz Exp $
 /*
     Hier sind implementiert
 
@@ -447,6 +447,22 @@ void Spooler::remove_temporary_jobs()
             it++;
         }
     }
+}
+
+//---------------------------------------------------------------------------Spooler::has_any_order
+
+bool Spooler::has_any_order()
+{
+    THREAD_LOCK( _lock )
+    {
+        FOR_EACH_JOB( j )
+        {
+            Job* job = *j;
+            if( job->order_queue()  &&  !job->order_queue()->empty() )  return true;
+        }
+    }
+
+    return false;
 }
 
 //--------------------------------------------------------------------------Spooler::threads_as_xml
@@ -1419,7 +1435,7 @@ void Spooler::run()
 
 
                 Job* job = get_next_job_to_start();
-                _next_time = job? job->_next_start_time : latter_day;
+                _next_time = job? job->next_time() : latter_day;
             
                 _wait_handles.wait_until( _next_time );
             }

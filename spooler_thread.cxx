@@ -1,4 +1,4 @@
-// $Id: spooler_thread.cxx,v 1.90 2003/08/11 19:33:11 jz Exp $
+// $Id: spooler_thread.cxx,v 1.91 2003/08/12 14:59:46 jz Exp $
 /*
     Hier sind implementiert
 
@@ -629,7 +629,7 @@ int Spooler_thread::thread_main()
                         if( _task_list.size() == 0 )
                         {
                             if( _spooler->_manual )  break;
-                            if( _spooler->state() == Spooler::s_stopping_let_run  &&  keine_orders_mehr_da )  break;
+                            if( _spooler->state() == Spooler::s_stopping_let_run  &&  _spooler->has_any_order() )  break;
                         }
 
                         wait();

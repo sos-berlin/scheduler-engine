@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.167 2003/08/11 19:33:11 jz Exp $
+// $Id: spooler_task.cxx,v 1.168 2003/08/12 14:59:45 jz Exp $
 /*
     Hier sind implementiert
 
@@ -284,13 +284,28 @@ void Task::leave_thread()
     _thread = NULL; 
 }
 
-//--------------------------------------------------------------------------Task::attach_to_a_thread
+//-------------------------------------------------------------------------Task::attach_to_a_thread
 
 void Task::attach_to_a_thread()
 {
     assert( current_thread_id() == _spooler->thread_id() );
 
     enter_thread( _spooler->select_thread_for_task( this ) );
+}
+
+//--------------------------------------------------------------------------------Task::set_in_call
+
+void Task::set_in_call( const string& name, const string& extra )
+{
+    THREAD_LOCK( _lock )
+    {
+        _in_call = name;
+
+        if( _spooler->_debug  &&  !name.empty() )  
+        {
+            _log.debug( name + "()  " + extra );
+        }
+    }
 }
 
 //--------------------------------------------------------------------------Task::set_error_xc_only

@@ -1,4 +1,4 @@
-// $Id: spooler.h,v 1.142 2003/08/11 19:33:10 jz Exp $
+// $Id: spooler.h,v 1.143 2003/08/12 14:59:45 jz Exp $
 
 #ifndef __SPOOLER_H
 #define __SPOOLER_H
@@ -193,6 +193,8 @@ struct Spooler
 
     Object_set_class*           get_object_set_class        ( const string& name );
     Object_set_class*           get_object_set_class_or_null( const string& name );
+
+    bool                        has_any_order               ();
 
     void                        signal_object               ( const string& object_set_class_name, const Level& );
     void                        cmd_reload                  ();
