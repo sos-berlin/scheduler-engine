@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.231 2003/08/30 17:16:49 jz Exp $
+// $Id: spooler.cxx,v 1.232 2003/08/30 22:40:26 jz Exp $
 /*
     Hier sind implementiert
 
@@ -355,7 +355,7 @@ Spooler::~Spooler()
 
     // COM-Objekte entkoppeln, falls noch jemand eine Referenz darauf hat:
     if( _com_spooler )  _com_spooler->close();
-    if( _com_log     )  _com_log->close();
+    if( _com_log     )  _com_log->set_log( NULL );
 }
 
 //--------------------------------------------------------------------------Spooler::security_level
@@ -1369,7 +1369,7 @@ void Spooler::start()
     if( _module.set() )
     {
         _module_instance = _module.create_instance();
-        _module_instance->set_title( "Spooler-script" );
+        _module_instance->_title = "Spooler-script";
         _module_instance->init();
 
         _module_instance->add_obj( (IDispatch*)_com_spooler, "spooler"     );

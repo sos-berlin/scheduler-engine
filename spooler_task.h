@@ -1,4 +1,4 @@
-// $Id: spooler_task.h,v 1.110 2003/08/30 15:39:11 jz Exp $
+// $Id: spooler_task.h,v 1.111 2003/08/30 22:40:27 jz Exp $
 
 #ifndef __SPOOLER_TASK_H
 #define __SPOOLER_TASK_H
@@ -24,7 +24,10 @@ struct Task : Sos_self_deleting
         s_suspended,            // Angehalten
         s_end,                  // Task soll beendet werden
         s_ending,               // end__start() gerufen, also in spooler_close()
-        s_ended,                // Task wird gelöscht
+        s_on_success,           // spooler_on_success
+        s_on_error,             // spooler_on_error
+        s_exit,                 // spooler_exit
+        s_ended,                // spooler_close() abgeschlossen
         s_closed,               // close() gerufen, Object Task ist nicht mehr zu gebrauchen
         s__max
     };
@@ -130,6 +133,8 @@ struct Task : Sos_self_deleting
     virtual void                do_end__end                 () = 0;
     virtual Async_operation*    do_step__start              ()                                      { return NULL; }
     virtual bool                do_step__end                () = 0;
+    virtual Async_operation*    do_call__start              ( const string& method )                { return NULL; }
+    virtual bool                do_call__end                ()                                      { return true; }           // Default: Nicht implementiert
 /*
     virtual bool                loaded                      ()                                      { return true; }
     virtual void                do_close                    ()                                      {}
@@ -160,9 +165,8 @@ struct Task : Sos_self_deleting
     int                        _step_count;
 
     bool                       _let_run;                    // Task zuende laufen lassen, nicht bei _job._period.end() beenden
-    bool                       _opened;
+    bool                       _begin_called;
     bool                       _end;
-    bool                       _on_error_called;
     bool                       _closed;
 
 
@@ -181,7 +185,6 @@ struct Task : Sos_self_deleting
   //bool                       _close_engine;               // Nach Task-Ende Scripting Engine schließen (für use_engine="job")
     ptr<Order>                 _order;
     State                      _state;
-    bool                       _in_step;                    // Für s_running: step() wird gerade ausgeführt, step__end() muss noch gerufen werden
     bool                       _processing;                 // In asynchroner Ausführung (zwischen xxx__begin() und xxx__end())
     Call_state                 _call_state;
     Xc_copy                    _error;
@@ -256,6 +259,8 @@ struct Job_module_task : Module_task
     virtual void                do_end__end                 ();
     virtual Async_operation*    do_step__start              ();
     virtual bool                do_step__end                ();
+    virtual Async_operation*    do_call__start              ( const string& method );
+    virtual bool                do_call__end                ();
 /*
   //virtual bool                loaded                      ();
     bool                        do_start                    ();

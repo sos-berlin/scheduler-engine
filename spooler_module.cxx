@@ -1,4 +1,4 @@
-// $Id: spooler_module.cxx,v 1.36 2003/08/29 20:44:25 jz Exp $
+// $Id: spooler_module.cxx,v 1.37 2003/08/30 22:40:27 jz Exp $
 /*
     Hier sind implementiert
 
@@ -324,9 +324,10 @@ Module_instance::Module_instance( Module* module )
 {
     _com_task    = new Com_task;
     _com_log     = new Com_log;
-    _com_context = new Com_context;
 
     _spooler_exit_called = false;
+
+    _close_instance_at_end;         // Das verhindert aber use_engine="job". Aber vielleicht braucht das keiner.
 }
 
 //----------------------------------------------------------------------------Module_instance::init
@@ -353,53 +354,39 @@ void Module_instance::set_in_call( In_call* in_call, const string& extra )
     }
 }
 
+//---------------------------------------------------------------------Module_instance::attach_task
+
+void Module_instance::attach_task( Task* task, Prefix_log* log )
+{
+  //_task = task;
+
+    _com_task->set_task( task );
+    _com_log ->set_log ( log );
+
+    _title = task->obj_name();          // Titel für Prozess
+}
+
+//---------------------------------------------------------------------Module_instance::detach_task
+
+void Module_instance::detach_task()
+{
+    _com_task->set_task( NULL );
+    _com_log ->set_log ( NULL );
+    
+    _title = "";
+}
+
 //-------------------------------------------------------------------------Module_instance::add_obj
 
 void Module_instance::add_obj( const ptr<IDispatch>& object, const string& name )
 {
-    if( name == "spooler_log"    )  _com_context->_log     = (qi_ptr<spooler_com::Ilog>)    object;
-    else
-    if( name == "spooler"        )  _com_context->_spooler = (qi_ptr<spooler_com::Ispooler>)object;
-    else
-  //if( name == "spooler_thread" )  _com_context->_thread  = (qi_ptr<spooler_com::Ithread>) object;
-  //else
-    if( name == "spooler_job"    )  _com_context->_job     = (qi_ptr<spooler_com::Ijob>)    object;
-    else
-    if( name == "spooler_task"   )  _com_context->_task    = (qi_ptr<spooler_com::Itask>)   object;
-    else
-        throw_xc( "Module_instance::add_obj", name.c_str() );
-}
-
-//----------------------------------------------------------------------------Module_instance::call
 /*
-Variant Module_instance::call( const string& name )
-{
-    if( _in_call.empty() )
-    {
-        In_call in_call ( this, name );
-        call( name );
-    }
+    if( name == "spooler_task" )  _com_task->set_task( object );
     else
-    {
-        call( name );
-    }
-}
-
-//----------------------------------------------------------------------------Module_instance::call
-
-Variant Module_instance::call( const string& name, int param )
-{
-    if( _in_call.empty() )
-    {
-        In_call in_call ( this, name );
-        call( name, param );
-    }
-    else
-    {
-        call( name, param );
-    }
-}
+    if( name == "spooler_log"  )  _com_log ->set_log ( object );
 */
+}
+
 //------------------------------------------------------------------Module_instance::call_if_exists
 
 Variant Module_instance::call_if_exists( const string& name )
@@ -425,15 +412,13 @@ void Module_instance::close()
         }
     }
 
-  //if( _com_log )  _com_log->close();
-  //if( _com_task )  _com_task->close();
-
-    if( _com_context )  _com_context->close(), _com_context = NULL;
+    if( _com_log  )  _com_log ->set_log ( NULL );
+    if( _com_task )  _com_task->set_task( NULL );
 }
 
 //--------------------------------------------------------------------Module_instance::begin__start
 
-Async_operation* Module_instance::begin__start()  // const Object_list& object_list )
+Async_operation* Module_instance::begin__start()
 {
     return NULL;
 }
@@ -468,50 +453,49 @@ Async_operation* Module_instance::end__start( bool success )
 
 void Module_instance::end__end()
 {
-    call_if_exists( spooler_close_name );
-
-    // Exception abfangen und spooler_on_error rufen // _com_task->set_error( x )?
-/*
-    if( _task )
+    //try
     {
-        if( loaded() && success )
-        {
-            // spooler_on_success() wird nicht gerufen, wenn spooler_init() false lieferte
+        call_if_exists( spooler_close_name );
+    }
+/*
+    catch( const exception x )
+    {
+        success = false;
 
-            try 
-            {
-                if( loaded()  &&  name_exists( spooler_on_success_name ) )
-                {
-                    In_call in_call ( _task, spooler_on_success_name );
-                    call( spooler_on_success_name );
-                }
-            }
-            catch( const exception& x ) { _task->log().error( string(spooler_on_error_name) + ": " + x.what() ); }
-        }
+        if( _task )  _task->set_error( x );
         else
-        if( !success )
+        if( _task_idispatch )  com_call( _idispatch, "set_error", ... );
+    }
+
+
+    if( success )
+    {
+        // spooler_on_success() wird nicht gerufen, wenn spooler_init() false lieferte
+
+        try 
         {
-            try 
-            {
-                if( loaded()  &&  name_exists( spooler_on_error_name ) )
-                {
-                    In_call in_call ( _task, spooler_on_error_name );
-                    call( spooler_on_error_name );
-                }
-            }
-            catch( const exception& x ) { _task->set_error( x ); }
+            call_if_exists( spooler_on_success_name );
         }
+        catch( const exception& x ) { _com_task->log_error( string(spooler_on_error_name) + ": " + x.what() ); }
+    }
+    else
+    {
+        try 
+        {
+            call_if_exists( spooler_on_success_name );
+        }
+        catch( const exception& x ) { _com_task->log_error( string(spooler_on_error_name) + ": " + x.what() ); }
     }
 */
 
-    if( _spooler_init_called  &&  !_spooler_exit_called )
+    if( _close_instance_at_end )        // Z.Z. immer true
     {
-        _spooler_exit_called = true;
-        call_if_exists( spooler_exit_name );
-    }
+        if( _spooler_init_called  &&  !_spooler_exit_called )
+        {
+            _spooler_exit_called = true;
+            call_if_exists( spooler_exit_name );
+        }
 
-    if( _close_instance_at_end )
-    {
         close();
         _com_task = new Com_task();
     }
@@ -531,6 +515,23 @@ bool Module_instance::step__end()
     if( !name_exists( spooler_process_name ) )  return false;
 
     return check_result( call( spooler_process_name ) );
+}
+
+//---------------------------------------------------------------------Module_instance::call__start
+
+Async_operation* Module_instance::call__start( const string& method )
+{
+    _call_method = method;
+    return NULL;
+}
+
+//-----------------------------------------------------------------------Module_instance::step__end
+
+bool Module_instance::call__end()
+{
+    if( _call_method == spooler_exit_name )  _spooler_exit_called = true;
+
+    return check_result( call_if_exists( _call_method ) );
 }
 
 //-------------------------------------------------------------------------------------------------

@@ -1,4 +1,4 @@
-// $Id: spooler_module_remote.cxx,v 1.27 2003/08/30 17:16:49 jz Exp $
+// $Id: spooler_module_remote.cxx,v 1.28 2003/08/30 22:40:27 jz Exp $
 /*
     Hier sind implementiert
 
@@ -236,6 +236,26 @@ bool Remote_module_instance_proxy::step__end()
 {
   //if( _call_state != c_finished )  throw_xc( "SPOOLER-191", "step__end", (int)_call_state );
     if( !_operation->async_finished() )  throw_xc( "SPOOLER-191", "step__end", _operation->async_state_text() );
+
+    _operation = NULL;
+    return check_result( _remote_instance->call__end() );
+}
+
+//--------------------------------------------------------Remote_module_instance_proxy::call__start
+
+Async_operation* Remote_module_instance_proxy::call__start( const string& method )
+{
+    _operation = _remote_instance->call__start( method );
+
+    return _operation;
+}
+
+//----------------------------------------------------------Remote_module_instance_proxy::call__end
+
+bool Remote_module_instance_proxy::call__end()
+{
+  //if( _call_state != c_finished )  throw_xc( "SPOOLER-191", "step__end", (int)_call_state );
+    if( !_operation->async_finished() )  throw_xc( "SPOOLER-191", "call__end", _operation->async_state_text() );
 
     _operation = NULL;
     return check_result( _remote_instance->call__end() );

@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.178 2003/08/30 18:53:19 jz Exp $
+// $Id: spooler_task.cxx,v 1.179 2003/08/30 22:40:27 jz Exp $
 /*
     Hier sind implementiert
 
@@ -416,6 +416,7 @@ string Task::state_name( State state )
 {
     switch( state )
     {
+        case s_none:                        return "none";
         case s_start_task:                  return "start_task";
         case s_starting:                    return "starting";
         case s_running:                     return "running";
@@ -531,6 +532,8 @@ bool Task::do_something()
             {
                 case s_start_task:
                 {
+                    _begin_called = true;
+
                     _operation = begin__start();
 
                   //if( has_error() )  break;
@@ -549,7 +552,6 @@ bool Task::do_something()
 
                     if( !ok || has_error() )  break;
 
-                    _opened = true;
                     set_state( s_running );
                     something_done = true;
                     loop = true;
@@ -562,7 +564,7 @@ bool Task::do_something()
                     if( !((Process_task*)+this)->signaled() )  break;
                 case s_running:
                 {
-                    if( !_in_step )
+                    if( !_operation )
                     {
                         if( _next_spooler_process )
                         {
@@ -582,7 +584,6 @@ bool Task::do_something()
 
                             _operation = do_step__start();
 
-                            _in_step = true;
                             something_done = true;
                         }
                     }
@@ -591,7 +592,6 @@ bool Task::do_something()
                         ok = step__end();
                         _operation = NULL;
 
-                        _in_step = false;
                         if( !ok || has_error() )  set_state( s_end );
                         something_done = true;
                     }
@@ -626,14 +626,14 @@ bool Task::do_something()
                 {
                     if( has_error() )  _history.start(),  _success = false;
 
-                  //if( _opened )
+                    if( !_begin_called )
                     {
                         _operation = do_end__start();
 
                         set_state( s_ending );
                     }
-                  //else
-                  //    set_state( s_ended ),  loop = true;
+                    else
+                        set_state( s_exit ),  loop = true;
 
                     something_done = true;
 
@@ -646,8 +646,47 @@ bool Task::do_something()
                     end__end();
                     _operation = NULL;
 
-                    set_state( s_ended );
+                    set_state( _success? s_on_success : s_on_error );
+
                     loop = true;
+                    something_done = true;
+                    break;
+                }
+
+
+                case s_on_success:
+                {
+                    if( !_operation )  _operation = do_call__start( spooler_on_success_name );
+                                 else  do_call__end(), _operation = NULL, set_state( s_exit );
+
+                    something_done = true;
+                    break;
+                }
+
+
+                case s_on_error:
+                {
+                    if( !_operation )  _operation = do_call__start( spooler_on_error_name );
+                                 else  do_call__end(), _operation = NULL, set_state( s_exit );
+
+                    something_done = true;
+                    break;
+                }
+
+
+                case s_exit:
+                {
+                    if( _job->_module._reuse == Module::reuse_task )
+                    {
+                        if( !_operation )  _operation = do_call__start( spooler_exit_name );
+                                     else  do_call__end(), _operation = NULL, set_state( s_ended ), loop = true;
+                    }
+                    else
+                    {
+                        set_state( s_ended );
+                        loop = true;
+                    }
+
                     something_done = true;
                     break;
                 }
@@ -665,6 +704,7 @@ bool Task::do_something()
                     break;
                 }
 
+
                 case s_suspended:
                     break;
 
@@ -681,10 +721,7 @@ bool Task::do_something()
             {
                 _success = false;
 
-                if( _state != s_ending 
-                 && _state != s_ended 
-                 && _state != s_closed 
-                 && !_operation         ) set_state( s_end );
+                if( !_operation  &&  _state < s_end )  set_state( s_end );
             }
 
 
@@ -974,8 +1011,8 @@ void Task::set_mail_defaults()
 void Task::clear_mail()
 {
     _log.set_mail_from_name( "" );
-    _log.set_mail_subject( "", true );
-    _log.set_mail_body( "", true );
+    _log.set_mail_subject  ( "", true );
+    _log.set_mail_body     ( "", true );
 }
 
 //----------------------------------------------------------------------------Module_task::do_close
@@ -984,24 +1021,10 @@ void Module_task::do_close()
 {
     if( _module_instance )  
     { 
-        //if( _close_engine ) 
-        {
-            //close_engine();
-            //_close_engine = false;
-    
-            if( _job->_module_ptr->_reuse == Module::reuse_job )
-            {
-                _job->release_module_instance( _module_instance );
-            }
-        }
+      //_module_instance->close();
+        _module_instance->detach_task();
 
-        _module_instance->close();
-
-        _module_instance->_com_task->set_task( NULL );
-        _module_instance->_com_log->set_log( NULL );
-      //if( _module_instance->_com_log  )  _module_instance->_com_log->close(), _module_instance->_com_log  = NULL;
-
-      //_module_instance->clear();
+        if( _job->_module_ptr->_reuse == Module::reuse_job )  _job->release_module_instance( _module_instance );
 
         _module_instance = NULL;
     }
@@ -1118,9 +1141,9 @@ void Job_module_task::do_load()
         module_instance->set_close_instance_at_end( true );  //_close_engine = true;
     }
 
-    module_instance->set_title( obj_name() );
-    module_instance->_com_task->set_task( this );
-    module_instance->_com_log->set_log( &_log );
+  //module_instance->set_title( obj_name() );
+  //module_instance->_com_task->set_task( this );
+  //module_instance->_com_log->set_log( &_log );
 
     if( !module_instance->loaded() )
     {
@@ -1135,6 +1158,8 @@ void Job_module_task::do_load()
     }
 
     _module_instance = module_instance;
+
+    _module_instance->attach_task( this, &_log );
 }
 
 //------------------------------------------------------------------Job_module_task::do_begin_start
@@ -1187,8 +1212,21 @@ Async_operation* Job_module_task::do_step__start()
 
 bool Job_module_task::do_step__end()
 {
-    bool ok = _module_instance->step__end();
-    return ok;
+    return _module_instance->step__end();
+}
+
+//------------------------------------------------------------------Job_module_task::do_call__start
+
+Async_operation* Job_module_task::do_call__start( const string& method )
+{
+    return _module_instance->call__start( method );
+}
+
+//--------------------------------------------------------------------Job_module_task::do_call__end
+
+bool Job_module_task::do_call__end()
+{
+    return _module_instance->step__end();
 }
 
 //-----------------------------------------------------------------------Process_task::Process_task

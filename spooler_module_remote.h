@@ -1,4 +1,4 @@
-// $Id: spooler_module_remote.h,v 1.13 2003/08/30 15:39:11 jz Exp $
+// $Id: spooler_module_remote.h,v 1.14 2003/08/30 22:40:27 jz Exp $
 
 #ifndef __SPOOLER_MODULE_REMOTE_H
 #define __SPOOLER_MODULE_REMOTE_H
@@ -78,6 +78,9 @@ struct Remote_module_instance_proxy : Com_module_instance_base
 
     virtual Async_operation*    step__start                 ();
     virtual bool                step__end                   ();
+
+    virtual Async_operation*    call__start                 ( const string& method );
+    virtual bool                call__end                   ();
 
 
     Fill_zero                  _zero_;

@@ -1,4 +1,4 @@
-// $Id: spooler_module.h,v 1.37 2003/08/29 20:44:25 jz Exp $
+// $Id: spooler_module.h,v 1.38 2003/08/30 22:40:27 jz Exp $
 
 #ifndef __SPOOLER_MODULE_H
 #define __SPOOLER_MODULE_H
@@ -17,6 +17,7 @@ namespace spooler {
 //--------------------------------------------------------------------------------------------const
 
 extern const string spooler_init_name;
+extern const string spooler_exit_name;
 extern const string spooler_open_name;
 extern const string spooler_close_name;
 extern const string spooler_process_name;
@@ -82,7 +83,7 @@ struct Module : Object
     {
         reuse_task,
         reuse_job,
-        reuse_global
+      //reuse_global
     };
 
     enum Kind
@@ -187,7 +188,7 @@ struct Module_instance : Object
                                 Module_instance             ( Module* );
     virtual                    ~Module_instance             ()                                      {}      // Für gcc 3.2
 
-    void                    set_title                       ( const string& title )                 { _title = title; }
+  //void                    set_title                       ( const string& title )                 { _title = title; }
 
     void                        clear                       ()                                      { _object_list.clear(); }
     virtual void                close                       ()                                      = 0;
@@ -196,6 +197,8 @@ struct Module_instance : Object
     void                    set_in_call                     ( In_call* in_call, const string& extra = "" );
     void                    set_close_instance_at_end       ( bool b )                              { _close_instance_at_end = b; }   // Nach spooler_close() Instanz schließen
 
+    void                        attach_task                 ( Task*, Prefix_log* );
+    void                        detach_task                 ();
     virtual void                add_obj                     ( const ptr<IDispatch>&, const string& name );
     virtual void                load                        ()                                      {}
     virtual void                start                       ()                                      {}
@@ -217,8 +220,11 @@ struct Module_instance : Object
     virtual Async_operation*    step__start                 ();
     virtual bool                step__end                   ();
 
-    virtual bool                operation_finished          ()                                      { return true; }
-    virtual void                process                     ( bool wait = false )                   {}
+    virtual Async_operation*    call__start                 ( const string& method );
+    virtual bool                call__end                   ();
+
+  //virtual bool                operation_finished          ()                                      { return true; }
+  //virtual void                process                     ( bool wait = false )                   {}
 
 
     Fill_zero                  _zero_;
@@ -231,7 +237,6 @@ struct Module_instance : Object
 
   //Task*                      _task;
     Object_list                _object_list;
-    ptr<Com_context>           _com_context;
     ptr<IDispatch>             _idispatch;
     map<string,bool>           _names;
     bool                       _spooler_init_called;
@@ -239,6 +244,8 @@ struct Module_instance : Object
     bool                       _spooler_open_called;
     bool                       _close_instance_at_end;
     In_call*                   _in_call;
+    string                     _call_method;                // Für Module_instance::call__start()
+
     ptr<Com_task>              _com_task;                   // spooler_task
     ptr<Com_log>               _com_log;                    // spooler_log
 

@@ -1,4 +1,4 @@
-// $Id: spooler_module_com.cxx,v 1.19 2003/08/25 20:41:26 jz Exp $
+// $Id: spooler_module_com.cxx,v 1.20 2003/08/30 22:40:27 jz Exp $
 /*
     Hier sind implementiert
 
@@ -88,8 +88,18 @@ Variant Com_module_instance_base::property_get( const string& name )
     return com_property_get( _idispatch, name );
 }
 */
-//--------------------------------------------------------Com_module_instance::~Com_module_instance
+//---------------------------------------------------------Com_module_instance::Com_module_instance
 #ifdef Z_WINDOWS
+
+Com_module_instance::Com_module_instance( Module* module )
+: 
+    Com_module_instance_base(module), 
+    _zero_(_end_) 
+{
+    _com_context = new Com_context;
+}
+
+//--------------------------------------------------------Com_module_instance::~Com_module_instance
 
 Com_module_instance::~Com_module_instance()
 {
@@ -150,11 +160,32 @@ void Com_module_instance::load()
     }
 }
 
+//---------------------------------------------------------------------Com_module_instance::add_obj
+
+void Com_module_instance::add_obj( const ptr<IDispatch>& object, const string& name )
+{
+    if( name == "spooler_log"    )  _com_context->_log     = (qi_ptr<spooler_com::Ilog>)    object;
+    else
+    if( name == "spooler"        )  _com_context->_spooler = (qi_ptr<spooler_com::Ispooler>)object;
+    else
+  //if( name == "spooler_thread" )  _com_context->_thread  = (qi_ptr<spooler_com::Ithread>) object;
+  //else
+    if( name == "spooler_job"    )  _com_context->_job     = (qi_ptr<spooler_com::Ijob>)    object;
+    else
+    if( name == "spooler_task"   )  _com_context->_task    = (qi_ptr<spooler_com::Itask>)   object;
+    else
+        throw_xc( "Module_instance::add_obj", name.c_str() );
+
+    Com_module_instance_base::add_obj( object, name );
+}
+
 //-----------------------------------------------------------------------Com_module_instance::close
 
 void Com_module_instance::close()
 {
     Com_module_instance_base::close();
+
+    if( _com_context )  _com_context->close(), _com_context = NULL;
 
     if( _com_module ) 
     {
@@ -255,11 +286,13 @@ void Scripting_engine_module_instance::load()
 {
     if( _script_site->_engine_name != _module->_language )  throw_xc( "SPOOLER-117" );
 
+/*
     if( _com_context->_log     )  _script_site->add_obj( _com_context->_log    , Bstr("spooler_log"    ) );
     if( _com_context->_spooler )  _script_site->add_obj( _com_context->_spooler, Bstr("spooler"        ) );
   //if( _com_context->_thread  )  _script_site->add_obj( _com_context->_thread , Bstr("spooler_thread" ) );
     if( _com_context->_job     )  _script_site->add_obj( _com_context->_job    , Bstr("spooler_job"    ) );
     if( _com_context->_task    )  _script_site->add_obj( _com_context->_task   , Bstr("spooler_task"   ) );
+*/
 
     HRESULT hr = _script_site->_script->SetScriptState( SCRIPTSTATE_INITIALIZED );
     if( FAILED( hr ) )  throw_ole( hr, "IActiveScript::SetScriptState", "SCRIPTSTATE_INITIALIZED" );

@@ -1,4 +1,4 @@
-// $Id: spooler_com.h,v 1.74 2003/08/11 19:33:11 jz Exp $
+// $Id: spooler_com.h,v 1.75 2003/08/30 22:40:26 jz Exp $
 
 #ifndef __SPOOLER_COM_H
 #define __SPOOLER_COM_H
@@ -188,7 +188,6 @@ struct Com_log : spooler_com::Ilog,
 
     STDMETHODIMP            get_java_class_name             ( BSTR* result )                        { return string_to_bstr( "sos.spooler.Log", result ); }
 
-    void                        close                       ()                                      { THREAD_LOCK(_lock)  _log = NULL; }        
     void                    set_log                         ( Prefix_log* );
 
     STDMETHODIMP                debug9                      ( BSTR );
