@@ -1,4 +1,4 @@
-// $Id: spooler_history.cxx,v 1.60 2003/11/27 18:59:50 jz Exp $
+// $Id: spooler_history.cxx,v 1.61 2003/11/27 19:03:49 jz Exp $
 
 #include "spooler.h"
 #include "../zschimmer/z_com.h"
@@ -340,6 +340,8 @@ void Spooler_db::try_reopen_after_error( const exception& x )
         //}
         //catch( const xception& x ) { _log->warn(" FEHLER BEIM SCHLIESSEN DER DATENBANK: " + x.what() ); }
 
+        sos_sleep( 10 );    // Bremse, falls der Fehler nicht an einer unterbrochenen Verbindung liegt. Denn für jeden Fehler gibt es eine eMail!
+
         while(1)
         {
             try
@@ -354,7 +356,7 @@ void Spooler_db::try_reopen_after_error( const exception& x )
 
                 if( !_spooler->_need_db )  break;
 
-                sos_sleep( 30 );
+                sos_sleep( 60 );
             }
         }
 
