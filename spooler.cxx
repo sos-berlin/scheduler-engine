@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.72 2002/02/25 06:36:55 jz Exp $
+// $Id: spooler.cxx,v 1.73 2002/02/26 09:11:22 jz Exp $
 /*
     Hier sind implementiert
 
@@ -80,8 +80,6 @@ static string thread_info_text( HANDLE h )
     if( ok )  if( exit_code == STILL_ACTIVE )  result += "active";
                                          else  result = "terminated with exit code " + as_string(exit_code);
          else result = "Unbekannter Thread " + as_hex_string((int)h);
-
-    result += " ";
 
     ok = GetThreadTimes( h, &creation_time, &exit_time, &kernel_time, &user_time );
     if( ok )

@@ -1,4 +1,4 @@
-// $Id: spooler_config.cxx,v 1.20 2001/07/17 12:46:55 jz Exp $
+// $Id: spooler_config.cxx,v 1.21 2002/02/26 09:11:22 jz Exp $
 
 //#include <precomp.h>
 
@@ -345,6 +345,8 @@ void Object_set_descr::set_xml( const xml::Element_ptr& element )
 
 void Job::set_xml( const xml::Element_ptr& element )
 {
+    bool run_time_set = false;
+
     _name             = as_string( element->getAttribute( "name" ) );
   //_rerun            = as_bool( element->getAttribute( "rerun" ) ) ),
   //_stop_after_error = as_bool( element->getAttribute( "stop_after_errorn ) );
@@ -365,8 +367,10 @@ void Job::set_xml( const xml::Element_ptr& element )
         if( e->tagName == "process"    )  _process_filename = as_string( e->getAttribute( "file" ) ),
                                           _process_param    = as_string( e->getAttribute( "param" ) );
         else
-        if( e->tagName == "run_time"   )  _run_time.set_xml( e );
+        if( e->tagName == "run_time"   )  _run_time.set_xml( e ),  run_time_set = true;
     }
+
+    if( !run_time_set )  _run_time.set_xml( element->ownerDocument->createElement( L"run_time" ) );
 
     if( _object_set_descr )  _object_set_descr->_class = _spooler->get_object_set_class( _object_set_descr->_class_name );
 }

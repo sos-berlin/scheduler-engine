@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.48 2002/03/08 15:27:22 jz Exp $
+// $Id: spooler_task.cxx,v 1.49 2002/02/26 09:11:23 jz Exp $
 /*
     Hier sind implementiert
 
@@ -180,6 +180,8 @@ Job::In_call::In_call( Job* job, const string& name )
 { 
     _job->set_in_call(name); 
     LOG( *job << '.' << name << "() begin\n" );
+
+    _ASSERTE( _CrtCheckMemory( ) );
 }
 
 //----------------------------------------------------------------------------Job::In_call::In_call
@@ -192,6 +194,8 @@ Job::In_call::In_call( Task* task, const string& name )
 { 
     _job->set_in_call(name); 
     LOG( *task->job() << '.' << name << "() begin\n" );
+
+    _ASSERTE( _CrtCheckMemory( ) );
 }
 
 //---------------------------------------------------------------------------Job::In_call::~In_call
@@ -206,6 +210,8 @@ Job::In_call::~In_call()
         if( _result_set )  *log_ptr << "  result=" << ( _result? "true" : "false" );
         *log_ptr << '\n';
     }
+
+    _ASSERTE( _CrtCheckMemory( ) );
 }
 
 //-----------------------------------------------------------------------------------------Job::Job
@@ -662,13 +668,16 @@ bool Job::do_something()
                 something_done = true;
             }
             else
-                _log.msg( "Laufzeit ist abgelaufen, Task wird beendet." );
+            {
+                ok = false;
+                _log.msg( "Laufzeitperiode ist abgelaufen, Task wird beendet." );
+            }
         }
     }
 
     if( !ok || has_error() )
     {
-        if( _spooler->_debug )  LOG( "spooler_process() lieferte " << ok << ", Fehler=" << _error << '\n' );      // Problem bei Uwe, 20.2.02
+        //if( _spooler->_debug )  LOG( "spooler_process() lieferte " << ok << ", Fehler=" << _error << '\n' );      // Problem bei Uwe, 20.2.02
 
         if( _state == s_starting        // Bei Fehler in spooler_init()
          || _state == s_running 
