@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 
-<!-- $Id: spooler.xml,v 1.6 2001/01/16 06:23:17 jz Exp $   (C) 2000 SOS GmbH Berlin -->
+<!-- $Id: spooler.xml,v 1.7 2001/01/16 16:40:36 jz Exp $   (C) 2000 SOS GmbH Berlin -->
 
 <!DOCTYPE spooler SYSTEM "spooler.dtd">
 
@@ -54,19 +54,19 @@ class Testobjekt
         set file = file_par
         lev = mid( file.name, instr( file.name & "-", "-" ) + 1 )
         lev = left( lev, instr( lev & ".", "." ) - 1 )
-        level = lev
+        spooler_level = lev
     end sub
 
 
-    sub process( new_level )
-        spooler_log.msg "process " & level & " ==> " & new_level 
+    sub spooler_process( new_level )
+        spooler_log.msg "spooler_process " & spooler_level & " ==> " & new_level 
         spooler_log.msg "file(" & file.path & ").move " & dir_name & "\" & new_level & "\" & file.name
         file.move dir_name & "\" & new_level & "\" & file.name
-        level = new_level
+        spooler_level = new_level
     end sub
 
 
-    public  level
+    public  spooler_level
     private file
 
 end class
@@ -108,7 +108,7 @@ class Object_set_class
         dim object
         set object = new Testobjekt
         object.construct file_array(index)
-        spooler_log.msg "index=" & index & ", level=" & object.level & ", script_index=" & script_index
+        spooler_log.msg "index=" & index & ", spooler_level=" & object.spooler_level & ", script_index=" & script_index
         index = index + 1
         script_index = script_index + 1
 
@@ -167,17 +167,17 @@ use Win32::OLE;
         my $self = {};
         bless( $self );
         $self->{name} = shift;
-        $self->{level} = 100;
+        $self->{spooler_level} = 100;
         return $self;
     }
 
 
-    sub process
+    sub spooler_process
     {
         my $self = shift;
         my $new_level = shift;  # Wie holt man den Parameter? Joacim
-        #$main::spooler_log->msg( "process " . $self->{name} . ", " . $self->{level} . " ==> $new_level" );
-        $self->{level} = $new_level;
+        #$main::spooler_log->msg( "spooler_process " . $self->{name} . ", " . $self->{spooler_level} . " ==> $new_level" );
+        $self->{spooler_level} = $new_level;
     }
 }
 
@@ -219,7 +219,7 @@ use Win32::OLE;
         if( $self->spooler_eof() )  { return; }
 
         my $object = Testobjekt::construct( $self->{index} );
-        $main::spooler_log->msg( "index=" . $self->{index} . ", level=" . $object->{level} );
+        $main::spooler_log->msg( "index=" . $self->{index} . ", spooler_level=" . $object->{spooler_level} );
         $self->{index}++;
 
         return $object;
@@ -288,7 +288,7 @@ sub spooler_eof()
 sub spooler_process()
 {
     my $new_level = shift;
-    $object->process( $new_level );
+    $object->spooler_process( $new_level );
     return; 
 }
 
@@ -357,12 +357,11 @@ index = 1
 sub spooler_init()
 end sub
 
-function step()
-    step=true
-    'spooler_log.msg "*Job einfach: step " & index & ", param=" & spooler.script.global.method()
-    'index = index + 1
-    'if index > 3 then step=false: exit function
-    'step = true
+function spooler_process()
+    spooler_log.msg "*Job einfach: step " & index & ", param=" & spooler.script.global.method()
+    index = index + 1
+    if index > 3 then spooler_process=false: exit function
+    spooler_process=true
 end function
 
             ]]></script>

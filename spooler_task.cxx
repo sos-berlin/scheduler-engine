@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.1 2001/01/16 06:23:18 jz Exp $
+// $Id: spooler_task.cxx,v 1.2 2001/01/16 16:40:36 jz Exp $
 /*
     Hier sind implementiert
 
@@ -22,7 +22,7 @@ namespace spooler {
 
 Level Spooler_object::level()
 {
-    CComVariant level = com_property_get( _dispatch, "level" );
+    CComVariant level = com_property_get( _dispatch, "spooler_level" );
     level.ChangeType( VT_INT );
 
     return level.intVal;
@@ -32,7 +32,7 @@ Level Spooler_object::level()
 
 void Spooler_object::process( Level output_level )
 {
-    com_call( _dispatch, "process", output_level );
+    com_call( _dispatch, "spooler_process", output_level );
 }
 
 //---------------------------------------------------------------------------Object_set::Object_set
@@ -255,10 +255,17 @@ void Task::prepare_script()
 
         _script_instance->add_obj( (IDispatch*)_com_log              , "spooler_log"  );
         _script_instance->add_obj( (IDispatch*)_spooler->_com_spooler, "spooler"      );
-        _script_instance->add_obj( (IDispatch*)_com_task             , "spooler_task" );
 
         _script_instance->load();
+
+        // Bei reuse_job soll spooler_task erst nach spooler_init() bekannt sein,
+        // denn spooler_task kann mit jeder Task wechseln (nicht in dieser Version).
+        // Das geht aber nicht, weil spooler_task.wake_on_directory_change() benötigt wird.
+        // wake_on_directory_change() sollte eine Methode von spooler_job sein. Und das gibt es nicht.
+        _script_instance->add_obj( (IDispatch*)_com_task, "spooler_task" );
+
         if( _script_instance->name_exists( "spooler_init" ) )  _script_instance->call( "spooler_init" );
+
     }
 }
 
@@ -361,7 +368,7 @@ bool Task::step()
     {
         if( !_job->_script.empty() ) 
         {
-            CComVariant result_vt = _job_script_instance.call( "step" );
+            CComVariant result_vt = _job_script_instance.call( "spooler_process" );
             HRESULT hr = result_vt.ChangeType( VT_BOOL );
             if( FAILED(hr) )  throw_ole( hr, "VariantChangeType", _job->_name.c_str() );
             result = V_BOOL( &result_vt ) != 0;

@@ -1,4 +1,4 @@
-// $Id: spooler_service.cxx,v 1.3 2001/01/16 06:23:18 jz Exp $
+// $Id: spooler_service.cxx,v 1.4 2001/01/16 16:40:36 jz Exp $
 /*
     Hier sind implementiert
 
@@ -282,7 +282,8 @@ static ulong __stdcall service_thread( void* param )
     {
         Spooler spooler;
         spooler_ptr = &spooler;
-        
+
+        spooler._is_service = true;
         spooler.set_state_changed_handler( spooler_state_changed );
         set_service_status();
 

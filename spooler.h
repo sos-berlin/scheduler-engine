@@ -1,4 +1,4 @@
-// $Id: spooler.h,v 1.29 2001/01/16 06:23:17 jz Exp $
+// $Id: spooler.h,v 1.30 2001/01/16 16:40:36 jz Exp $
 
 #ifndef __SPOOLER_H
 #define __SPOOLER_H
@@ -699,6 +699,7 @@ struct Spooler
     xml::Element_ptr           _config_element;             // Für cmd_load_config()
 
     Log                        _log;
+    bool                       _is_service;                 // NT-Dienst
     Script                     _script;
     Script_instance            _script_instance;
     Object_set_class_list      _object_set_class_list;

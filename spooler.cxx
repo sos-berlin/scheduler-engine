@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.31 2001/01/16 06:23:17 jz Exp $
+// $Id: spooler.cxx,v 1.32 2001/01/16 16:40:35 jz Exp $
 /*
     Hier sind implementiert
 
@@ -416,6 +416,8 @@ void Spooler::cmd_terminate()
 void Spooler::cmd_terminate_and_restart()
 {
     _log.msg( "Spooler::cmd_terminate_and_restart" );
+
+    if( _is_service )  throw_xc( "SPOOLER-114" );
 
     _state_cmd = sc_terminate_and_restart;
     cmd_wake();
