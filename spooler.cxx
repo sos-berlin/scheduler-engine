@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.277 2003/10/10 22:49:06 jz Exp $
+// $Id: spooler.cxx,v 1.278 2003/10/14 12:08:40 jz Exp $
 /*
     Hier sind implementiert
 
@@ -1315,12 +1315,14 @@ void Spooler::load()
 
     load_arg();
 
-    if( _pid_filename != "" )
+    if( _pid_filename != ""  &&  !_pid_file.opened() )
     {
-        File f ( _pid_filename, "w" );
-        f.print( as_string( getpid() ) );
-        f.print( "\n" );
-        f.close();
+        _pid_file.open( _pid_filename, "w" );
+        _pid_file.unlink_later();
+        _pid_file.print( as_string( getpid() ) );
+        _pid_file.print( "\n" );
+        _pid_file.flush();
+        //f.close();
     }
 
     _log.init( this );
@@ -1858,7 +1860,7 @@ int Spooler::launch( int argc, char** argv, const string& parameter_line )
 
     _log.info( "Scheduler ordentlich beendet." );
 
-    if( _pid_filename != "" )  unlink( _pid_filename.c_str() );
+    //if( _pid_filename != "" )  unlink( _pid_filename.c_str() );
 
 
     rc = 0;
