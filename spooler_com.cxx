@@ -1,4 +1,4 @@
-// $Id: spooler_com.cxx,v 1.37 2002/04/06 20:07:39 jz Exp $
+// $Id: spooler_com.cxx,v 1.38 2002/04/07 11:47:22 jz Exp $
 /*
     Hier sind implementiert
 
@@ -354,7 +354,7 @@ STDMETHODIMP Com_log::get_mail_on_success( VARIANT_BOOL* b )
 
 //----------------------------------------------------------------------Com_log::put_mail_on_process
 
-STDMETHODIMP Com_log::put_mail_on_process( VARIANT_BOOL b )
+STDMETHODIMP Com_log::put_mail_on_process( int level )
 {
     HRESULT hr = NOERROR;
 
@@ -363,7 +363,7 @@ STDMETHODIMP Com_log::put_mail_on_process( VARIANT_BOOL b )
     {
         if( !_log )  return E_POINTER;
 
-        _log->set_mail_on_process( b != 0 );
+        _log->set_mail_on_process( level == -1? 1 : level );        // True (-1) -> 1
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Log::mail_on_process" ); }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Log::mail_on_process" ); }
@@ -373,7 +373,7 @@ STDMETHODIMP Com_log::put_mail_on_process( VARIANT_BOOL b )
 
 //---------------------------------------------------------------------Com_log::get_mail_on_process
 
-STDMETHODIMP Com_log::get_mail_on_process( VARIANT_BOOL* b )
+STDMETHODIMP Com_log::get_mail_on_process( int* result )
 {
     HRESULT hr = NOERROR;
 
@@ -382,7 +382,7 @@ STDMETHODIMP Com_log::get_mail_on_process( VARIANT_BOOL* b )
     {
         if( !_log )  return E_POINTER;
 
-        *b = _log->mail_on_process();
+        *result = _log->mail_on_process();
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Log::mail_on_process" ); }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Log::mail_on_process" ); }

@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.78 2002/04/06 20:07:40 jz Exp $
+// $Id: spooler_task.cxx,v 1.79 2002/04/07 11:47:23 jz Exp $
 /*
     Hier sind implementiert
 
@@ -736,7 +736,8 @@ void Job::end()
 
     if( _state == s_suspended )  set_state( s_running );
     
-    if( _state == s_starting
+    if( _state == s_start_task
+     || _state == s_starting
      || _state == s_running  
      || _state == s_running_process )  
     {
@@ -786,7 +787,7 @@ void Job::finish()
         //if( _log.mail_on_success() && !has_error()  
         //||  _log.mail_on_error()   &&  has_error() )  _log.send();
 
-        _log.send( has_error()? -1 : _process_ok? +1 : 0 );
+        _log.send( has_error()? -1 : _last_task_step_count );
 
         //_log.close();
     }
@@ -985,7 +986,8 @@ bool Job::do_something()
     {
         //if( _spooler->_debug )  LOG( "spooler_process() lieferte " << ok << ", Fehler=" << _error << '\n' );      // Problem bei Uwe, 20.2.02
 
-        if( _state == s_starting        // Bei Fehler in spooler_init()
+        if( _state == s_start_task
+         || _state == s_starting        // Bei Fehler in spooler_init()
          || _state == s_running 
          || _state == s_running_process )  end(), something_done = true;
 
@@ -995,7 +997,7 @@ bool Job::do_something()
     }
 
 
-    if( _state == s_ended ) 
+    if( _state == s_ended )         // Task beendet
     {
         if( _temporary && _repeat == 0 )  
         {
@@ -1004,13 +1006,8 @@ bool Job::do_something()
         }
         else
         {
-            //bool dequeued = dequeue_task();
-
-            //if( !dequeued )
-            {
-                set_next_start_time();
-                set_state( s_pending );
-            }
+            set_next_start_time();
+            set_state( s_pending );
         }
 
         something_done = true;
@@ -1029,7 +1026,7 @@ void Job::send_collected_log()
 {
     try
     {
-        _log.send( +2 );
+        _log.send( -2 );
     }
     catch( const Xc& x         ) { _spooler->_log.error(x.what()); }
     catch( const exception&  x ) { _spooler->_log.error(x.what()); }
@@ -1464,8 +1461,9 @@ bool Task::start()
             _job->_delay_until = 0;
 
             _job->_thread->_task_count++;
+            _job->_last_task_step_count = 0;
           //_job->_step_count = 0;
-            _job->_process_ok = false;
+          //_job->_process_ok = false;
             _running_since = Time::now();
 
             _job->_history.start();
@@ -1573,13 +1571,14 @@ bool Task::step()
     {
         result = do_step();
 
-        _job->_process_ok |= result;
+        //_job->_process_ok |= result;
 
         if( _step_count == 0  ||  has_step_count() )        // Bei Process_task nur einen Schritt zählen
         {
             _job->_thread->_step_count++;
             _job->_step_count++;
             _step_count++;
+            _job->_last_task_step_count = _step_count;
         }
     }
     catch( const Xc& x        ) { _job->set_error(x); return false; }
@@ -1681,7 +1680,7 @@ void Script_task::do_on_success()
 
 void Script_task::do_on_error()
 {
-    //if( _job->_script_instance.loaded() )
+    if( _job->_script_instance.loaded() )
     {
         Job::In_call in_call ( this, spooler_on_error_name );
         _job->_script_instance.call_if_exists( spooler_on_error_name );

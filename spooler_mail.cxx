@@ -1,4 +1,4 @@
-// $Id: spooler_mail.cxx,v 1.3 2002/03/22 18:57:43 jz Exp $
+// $Id: spooler_mail.cxx,v 1.4 2002/04/07 11:47:23 jz Exp $
 
 
 #include "../kram/sos.h"
@@ -208,7 +208,7 @@ STDMETHODIMP Com_mail::get_body( BSTR* result )
 
 //-------------------------------------------------------------------------------Com_mail::add_file
 
-STDMETHODIMP Com_mail::add_file( BSTR filename, BSTR content_type )
+STDMETHODIMP Com_mail::add_file( BSTR filename, BSTR content_type, BSTR encoding )
 {
     HRESULT hr = NOERROR;
 
@@ -216,7 +216,7 @@ STDMETHODIMP Com_mail::add_file( BSTR filename, BSTR content_type )
 
     try
     {
-        _msg->add_file( bstr_as_string( filename ), bstr_as_string( content_type ) );
+        _msg->add_file( bstr_as_string(filename), bstr_as_string(content_type), bstr_as_string(encoding) );
     }
     catch( const Xc& x )  { hr = _set_excepinfo( x, "Spooler.Mail.add_file" ); }
 

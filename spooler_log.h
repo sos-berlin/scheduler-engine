@@ -1,4 +1,4 @@
-// $Id: spooler_log.h,v 1.16 2002/04/06 20:07:39 jz Exp $
+// $Id: spooler_log.h,v 1.17 2002/04/07 11:47:23 jz Exp $
 
 #ifndef __SPOOLER_LOG_H
 #define __SPOOLER_LOG_H
@@ -110,8 +110,8 @@ struct Prefix_log
     void                    set_mail_on_success             ( bool b )                          { _mail_on_success = b; }
     bool                        mail_on_success             ()                                  { return _mail_on_success; }
 
-    void                    set_mail_on_process             ( bool b )                          { _mail_on_process = b; }
-    bool                        mail_on_process             ()                                  { return _mail_on_process; }
+    void                    set_mail_on_process             ( int level )                       { _mail_on_process = level; }
+    int                         mail_on_process             ()                                  { return _mail_on_process; }
 
     spooler_com::Imail*         mail                        ();
 
@@ -148,7 +148,7 @@ struct Prefix_log
 
     bool                       _mail_on_error;
     bool                       _mail_on_success;
-    bool                       _mail_on_process;
+    int                        _mail_on_process;
     CComPtr<spooler_com::Imail> _mail;
     string                     _mail_section;               // Name des Abschnitts in factory.ini für eMail-Einstellungen
 

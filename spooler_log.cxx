@@ -1,4 +1,4 @@
-// $Id: spooler_log.cxx,v 1.36 2002/04/06 20:07:39 jz Exp $
+// $Id: spooler_log.cxx,v 1.37 2002/04/07 11:47:22 jz Exp $
 
 #include "../kram/sos.h"
 #include "spooler.h"
@@ -285,7 +285,7 @@ void Prefix_log::open()
 
 
         LOG( "\nopen " << _filename << '\n' );
-        _file = ::open( _filename.c_str(), O_CREAT | O_APPEND | ( _append? 0 : O_TRUNC ) | O_WRONLY, 0666 );
+        _file = ::open( _filename.c_str(), O_CREAT | ( _append? O_APPEND : O_TRUNC ) | O_WRONLY, 0666 );
         if( _file == -1 )  throw_errno( errno, _filename.c_str(), "Protokolldatei" );
 
         if( !_log_buffer.empty() )
@@ -525,10 +525,9 @@ void Prefix_log::set_mail_body( const string& body, bool overwrite )
 
 void Prefix_log::send( int reason )
 {
+    // reason == -2  =>  Gelegentlicher Aufruf, um Fristen zu prüfen und ggfs. eMail zu versenden
     // reason == -1  =>  Job mit Fehler beendet
-    // reason ==  0  =>  Job ohne Fehler mit erstem spooler_process() return false beendet
-    // reason == +1  =>  Job ohne Fehler mit ersten spooler_process() return true beendet,
-    // reason == +2  =>  Gelegentlicher Aufruf, um Fristen zu prüfen und ggfs. eMail zu versenden
+    // reason >=  0  =>  Anzahl spooler_process()
 
     if( _file == -1 )       // Nur senden, wenn die Log-Datei beschrieben worden ist
     {
@@ -539,7 +538,7 @@ void Prefix_log::send( int reason )
     {
         bool mail_it =  reason == -1  &&  _mail_on_error
                      || reason ==  0  &&  _mail_on_success
-                     || reason == +1  &&  ( _mail_on_success | _mail_on_process );
+                     || reason  >  0  &&  ( _mail_on_success || reason >= _mail_on_process );
 
         Time now = Time::now();
 
@@ -579,7 +578,8 @@ void Prefix_log::send_really()
     HRESULT hr;
     int ok;
 
-    mail()->add_file( CComBSTR( _filename.c_str() ), CComBSTR("plain/text") );
+    mail()->add_file( CComBSTR(_filename.c_str()), CComBSTR("plain/text"), CComBSTR(_spooler->_mail_encoding.c_str()) );
+
     ok = mail()->send();
 
     if( ok )

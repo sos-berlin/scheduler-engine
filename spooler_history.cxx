@@ -1,4 +1,4 @@
-// $Id: spooler_history.cxx,v 1.7 2002/04/06 20:07:39 jz Exp $
+// $Id: spooler_history.cxx,v 1.8 2002/04/07 11:47:22 jz Exp $
 
 #include "../kram/sos.h"
 #include "spooler.h"
@@ -105,6 +105,9 @@ void Spooler_db::open( const string& db_name )
         try
         {
             string stmt;
+
+            _spooler->_log.info( "Datenbank wird geöffnet: " + _db_name );
+
             _db.open( "-in -out " + _db_name );   // -create
 
             _db_name += " ";
@@ -119,7 +122,7 @@ void Spooler_db::open( const string& db_name )
                                       "\"job_name\"    char(100) not null,"
                                       "\"start\"       date not null,"
                                       "\"end\"         date,"
-                                      "\"cause\"       integer,"
+                                      "\"cause\"       char(50),"
                                       "\"steps\"       integer,"
                                       "\"error\"       bit,"
                                       "\"error_code\"  char(50),"
@@ -190,6 +193,7 @@ void Spooler_db::create_table_when_needed( const string& tablename, const string
     }
     catch( const exception& )
     {
+        _spooler->_log.info( "Tabelle " + tablename + " wird eingerichtet" );
         _db.put( "CREATE TABLE " + tablename + " (" + fields + ") " );
     }
 
@@ -329,7 +333,7 @@ void Job_history::open()
 
                 if( _filename == "" )
                 {
-                    _filename = "/history";
+                    _filename = "history";
                     if( !_spooler->id().empty() )  _filename += "." + _spooler->id();
                     _filename += ".job." + _job->name() + ".txt";
                 }
@@ -342,6 +346,7 @@ void Job_history::open()
 
                 _file.print( replace_regex( _type_string, "(:[^,]+)?,", "\t" ) + SYSTEM_NL );
 
+                _job->_log.debug( "Neue Historiendatei eröffnet: " +  _filename );
                 _use_file = true;
             }
 
@@ -354,6 +359,7 @@ void Job_history::open()
     catch( const exception& x )  
     { 
         _job->_log.warn( string("FEHLER BEIM ÖFFNEN DER HISTORIE: ") + x.what() ); 
+        _error = true;
     }
 }
 
@@ -375,7 +381,7 @@ void Job_history::close()
 
 void Job_history::archive( Archive_switch arc, const string& filename )
 {
-    if( GetFileAttributes( filename.c_str() ) != 0 ) 
+    if( GetFileAttributes( filename.c_str() ) != -1 ) 
     {
         string ext   = extension_of_path( filename );
         string rumpf = filename;
@@ -387,12 +393,15 @@ void Job_history::archive( Archive_switch arc, const string& filename )
 
         if( arc == arc_gzip )
         {
-            copy_file( "file -b " + filename, "gzip | " + arc_filename + ".gz" );
+            arc_filename += ".gz";
+            copy_file( "file -b " + filename, "gzip | " + arc_filename );
         }
         else
         {
             rename_file( filename, arc_filename );
         }
+
+        _job->_log.info( "Bisherige Historie ist archiviert worden unter " + arc_filename );
     }
 }
 
@@ -573,7 +582,7 @@ void Job_history::end()
     {
         if( _use_file )  _file.seek( _record_pos );
 
-        if( _job->_task->_step_count >= _on_process )  
+        if( _job->has_error()  ||  _job->_task->_step_count >= _on_process )  
         {
             write( false );
         }

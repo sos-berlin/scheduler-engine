@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.87 2002/04/06 20:07:38 jz Exp $
+// $Id: spooler.cxx,v 1.88 2002/04/07 11:47:21 jz Exp $
 /*
     Hier sind implementiert
 
@@ -473,11 +473,12 @@ void Spooler::start()
 {
     assert( GetCurrentThreadId() == _thread_id );
 
-    _mail_on_error   = read_profile_bool  ( "factory.ini", "spooler", "mail_on_error"  , _mail_on_error );
-    _mail_on_process = read_profile_bool  ( "factory.ini", "spooler", "mail_on_success", _mail_on_process );
-    _mail_on_success = read_profile_bool  ( "factory.ini", "spooler", "mail_on_success", _mail_on_success );
-    _mail_queue_dir  = read_profile_string( "factory.ini", "spooler", "mail_queue_dir" , _mail_queue_dir );
-    _smtp_server     = read_profile_string( "factory.ini", "spooler", "smtp"           , _smtp_server );
+    _mail_on_error   = read_profile_bool      ( "factory.ini", "spooler", "mail_on_error"  , _mail_on_error );
+    _mail_on_process = read_profile_on_process( "factory.ini", "spooler", "mail_on_success", _mail_on_process );
+    _mail_on_success = read_profile_bool      ( "factory.ini", "spooler", "mail_on_success", _mail_on_success );
+    _mail_queue_dir  = read_profile_string    ( "factory.ini", "spooler", "mail_queue_dir" , _mail_queue_dir );
+    _mail_encoding   = read_profile_string    ( "factory.ini", "spooler", "mail_encoding"  , "quoted-printable" );
+    _smtp_server     = read_profile_string    ( "factory.ini", "spooler", "smtp"           , _smtp_server );
 
     _log_mail_from      = read_profile_string( "factory.ini", "spooler", "log_mail_from"   );
     _log_mail_to        = read_profile_string( "factory.ini", "spooler", "log_mail_to"     );

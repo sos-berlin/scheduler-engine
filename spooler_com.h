@@ -1,4 +1,4 @@
-// $Id: spooler_com.h,v 1.31 2002/04/06 20:07:39 jz Exp $
+// $Id: spooler_com.h,v 1.32 2002/04/07 11:47:22 jz Exp $
 
 #ifndef __SPOOLER_COM_H
 #define __SPOOLER_COM_H
@@ -127,8 +127,8 @@ struct Com_log : spooler_com::Ilog, Sos_ole_object
     STDMETHODIMP            put_mail_on_success             ( VARIANT_BOOL );
     STDMETHODIMP            get_mail_on_success             ( VARIANT_BOOL* );
 
-    STDMETHODIMP            put_mail_on_process             ( VARIANT_BOOL );
-    STDMETHODIMP            get_mail_on_process             ( VARIANT_BOOL* );
+    STDMETHODIMP            put_mail_on_process             ( int );
+    STDMETHODIMP            get_mail_on_process             ( int* );
 
     STDMETHODIMP            put_level                       ( int );
     STDMETHODIMP            get_level                       ( int* );

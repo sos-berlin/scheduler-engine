@@ -1,4 +1,4 @@
-// $Id: spooler_command.cxx,v 1.45 2002/04/06 20:07:39 jz Exp $
+// $Id: spooler_command.cxx,v 1.46 2002/04/07 11:47:22 jz Exp $
 /*
     Hier ist implementiert
 
@@ -128,7 +128,10 @@ xml::Element_ptr Command_processor::execute_show_history( const xml::Element_ptr
     if( _security_level < Security::seclev_info )  throw_xc( "SPOOLER-121" );
 
     string job_name = as_string( element->getAttribute( "job" ) );
-    int    tail     = as_int( as_string( element->getAttribute( "tail" ) ), 10 );
+    string tail_str = as_string( element->getAttribute( "tail" ) );
+    int    tail     = tail_str == ""   ? 10 :
+                      tail_str == "all"? INT_MAX 
+                                       : as_int(tail_str);
 
     string what = as_string( element->getAttribute( "what" ) );
     bool show_all = what == "all";
