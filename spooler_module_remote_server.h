@@ -1,4 +1,4 @@
-// $Id: spooler_module_remote_server.h,v 1.6 2003/05/31 21:50:51 jz Exp $
+// $Id: spooler_module_remote_server.h,v 1.7 2003/06/04 10:02:08 jz Exp $
 
 #ifndef __SPOOLER_MODULE_REMOTE_SERVER_H
 #define __SPOOLER_MODULE_REMOTE_SERVER_H
@@ -28,6 +28,7 @@ struct Remote_module_instance_server : Com_module_instance_base
     Fill_zero                  _zero_;
     ptr<Module_instance>       _module_instance;
     bool                       _loaded_and_started;
+    bool                       _load_error;
 };
 
 //----------------------------------------------------------------Com_remote_module_instance_server
