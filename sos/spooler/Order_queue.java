@@ -1,4 +1,4 @@
-// $Id: Order_queue.java,v 1.5 2004/07/25 11:25:57 jz Exp $
+// $Id: Order_queue.java,v 1.6 2004/09/11 19:27:01 jz Exp $
 
 package sos.spooler;
 
@@ -19,7 +19,7 @@ package sos.spooler;
  * @see Task#order() 
  * 
  * @author Joacim Zschimmer
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 
 public class Order_queue extends Idispatch
@@ -38,6 +38,7 @@ public class Order_queue extends Idispatch
      * <p>
      * Die Priorität des Auftrags ({@link Order#set_priority(int)}) wird dabei berücksichtigt.
      * <p>
+     * Wenn die Auftragswarteschlange bereits einen Auftrag mit gleicher Id enthält, wird dieser ersetzt.
      * 
      * @param order Der Auftrag
      * @see Job_chain#add_order(Order)

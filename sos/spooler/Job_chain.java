@@ -51,7 +51,7 @@ package sos.spooler;
  * @see Spooler#create_job_chain()
  * @see Spooler#job_chain(String)
  * @author Joacim Zschimmer
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 
 
@@ -125,6 +125,8 @@ public class Job_chain extends Idispatch
      * gemäß seiner Priorität eingeordnet.
      * <p>
      * add_order() kann erst benutzt werden, wenn die Jobkette mit {@link Spooler#add_job_chain(Job_chain)} dem Scheduler übergeben worden ist.
+     * <p>
+     * Wenn die Jobkette bereits einen Auftrag mit gleicher Id enthält, wird dieser ersetzt.
      * 
      * @see Spooler#create_order()
      */ 

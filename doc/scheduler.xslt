@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding="utf-8"?>
-<!-- $Id: scheduler.xslt,v 1.34 2004/09/11 18:31:06 jz Exp $ -->
+<!-- $Id: scheduler.xslt,v 1.35 2004/09/11 19:27:01 jz Exp $ -->
 
 <!--
     Änderungswünsche:
@@ -1401,6 +1401,10 @@
                 </td>
                 <td align="right">
                     <p style="font-size: 8pt; margin-top: 0">
+                        <xsl:call-template name="browse_bar_register">
+                            <xsl:with-param name="parent_page" select="$parent_page"/>
+                        </xsl:call-template>
+
                         Software- und Organisations-Service GmbH
                     </p>
                 </td>
@@ -1431,6 +1435,10 @@
                 </td>
                 <td align="right">
                     <p style="font-size: 8pt; margin-top: 0">
+                        <xsl:call-template name="browse_bar_register">
+                            <xsl:with-param name="parent_page" select="$parent_page"/>
+                        </xsl:call-template>
+
                         Zuletzt geändert von
                         <xsl:variable name="name" select="substring-before( substring-after( /*/@author, 'Author: ' ), ' $' )"/>
                         <xsl:choose>
@@ -1452,7 +1460,7 @@
         <xsl:param name="parent_page"/>
 
         <p style="font-size: 8pt; margin-top: 0">
-            Scheduler&#160;
+            Scheduler &#160; &#160; &#160; 
             <xsl:if test="not( /*/@suppress_browse_bar='yes' )">
                 <xsl:element name="a">
                     <xsl:attribute name="class">silent</xsl:attribute>
@@ -1471,14 +1479,19 @@
                 </xsl:if>
                 
             </xsl:if>
-
-            <xsl:text> &#160;  &#160;–</xsl:text>
-            <xsl:element name="a">
-                <xsl:attribute name="href"><xsl:value-of select="$base_dir"/>register.xml</xsl:attribute>
-                <xsl:text>Register</xsl:text>
-            </xsl:element>
-            <xsl:text>–</xsl:text>
         </p>
+    </xsl:template>    
+    
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~browse_bar_register-->
+
+    <xsl:template name="browse_bar_register">
+
+        <xsl:element name="a">
+            <xsl:attribute name="href"><xsl:value-of select="$base_dir"/>register.xml</xsl:attribute>
+            <xsl:text>Register</xsl:text>
+        </xsl:element>
+        &#160; &#160; &#160; 
+        
     </xsl:template>    
     
 </xsl:stylesheet>
