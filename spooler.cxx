@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.258 2003/09/24 19:45:11 jz Exp $
+// $Id: spooler.cxx,v 1.259 2003/09/25 13:32:39 jz Exp $
 /*
     Hier sind implementiert
 
@@ -325,6 +325,10 @@ Spooler::Spooler()
 */
 #   endif
 
+#   ifndef Z_WINDOWS
+        ::signal( SIGPIPE, SIG_IGN );    // Fuer Linux eigentlich nicht erforderlich, weil com_remote.cxx() SIGPIPE selbst unterdrueckt
+#   endif
+    
 
     set_ctrl_c_handler( true );
 
