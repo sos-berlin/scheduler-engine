@@ -1,4 +1,4 @@
-// $Id: spooler_history.cxx,v 1.92 2004/02/19 17:17:32 jz Exp $
+// $Id: spooler_history.cxx,v 1.93 2004/03/15 21:43:45 jz Exp $
 
 #include "spooler.h"
 #include "../zschimmer/z_com.h"
@@ -137,6 +137,8 @@ Spooler_db::Spooler_db( Spooler* spooler )
     _spooler(spooler),
     _lock("Spooler_db")
 {
+    _db_params._uppercase_names = true;
+    _db_params._quote_names     = true;
 }
 
 //---------------------------------------------------------------------------------Spooler_db::open
@@ -652,7 +654,7 @@ void Spooler_db::insert_order( Order* order )
                 {
                     delete_order( order, &ta );
 
-                    sql::Insert_stmt insert;
+                    sql::Insert_stmt insert ( &_db_params );
                     
                     insert.set_table_name( _spooler->_orders_tablename );
                     
@@ -692,7 +694,7 @@ void Spooler_db::insert_order( Order* order )
 
 void Spooler_db::delete_order( Order* order, Transaction* transaction )
 {
-    sql::Delete_stmt del;
+    sql::Delete_stmt del ( &_db_params );
 
     del.set_table_name( _spooler->_orders_tablename );
 
@@ -725,7 +727,7 @@ void Spooler_db::update_order( Order* order )
                     }
                     else
                     {
-                        sql::Update_stmt update;
+                        sql::Update_stmt update ( &_db_params );
 
                         update.set_table_name( _spooler->_orders_tablename );
 
@@ -782,7 +784,7 @@ void Spooler_db::write_order_history( Order* order, Transaction* outer_transacti
                 int history_id = get_order_history_id( &ta );
 
                 {
-                    sql::Insert_stmt insert;
+                    sql::Insert_stmt insert ( &_db_params );
                     
                     insert.set_table_name( _spooler->_order_history_tablename );
                     
@@ -996,7 +998,7 @@ xml::Element_ptr Spooler_db::read_task( const xml::Document_ptr& doc, int task_i
             {
                 try
                 {
-                    string log = file_as_string( GZIP_AUTO + _spooler->_db->db_name() + " -table=" + sql::quoted_name( _spooler->_job_history_tablename ) + " -blob=\"LOG\"" 
+                    string log = file_as_string( GZIP_AUTO + _spooler->_db->db_name() + " -table=" + sql::uquoted_name( _spooler->_job_history_tablename ) + " -blob=\"LOG\"" 
                                                 " where \"ID\"=" + as_string(task_id) );
                     dom_append_text_element( task_element, "log", log );
                 }

@@ -1,4 +1,4 @@
-// $Id: spooler_job.cxx,v 1.62 2004/02/19 17:17:33 jz Exp $
+// $Id: spooler_job.cxx,v 1.63 2004/03/15 21:43:45 jz Exp $
 /*
     Hier sind implementiert
 
@@ -439,7 +439,7 @@ void Job::Task_queue::enqueue_task( const Sos_ptr<Task>& task )
                 Transaction ta ( _spooler->_db );
                 //task->_history.enqueue();
 
-                Insert_stmt insert;
+                Insert_stmt insert ( &_spooler->_db->_db_params );
                 insert.set_table_name( _spooler->_tasks_tablename );
 
                 insert             [ "TASK_ID"       ] = task->_id;
@@ -491,8 +491,8 @@ void Job::Task_queue::remove_task_from_db( int task_id )
             {
                 Transaction ta ( _spooler->_db );
 
-                _spooler->_db->execute( "DELETE from " + quoted_name( _spooler->_tasks_tablename ) +
-                                            "  where \"TASK_ID\"=" + as_string( task_id ) );
+                _spooler->_db->execute( "DELETE from " + uquoted_name( _spooler->_tasks_tablename ) +
+                                        "  where \"TASK_ID\"=" + as_string( task_id ) );
                 ta.commit();
             }
 

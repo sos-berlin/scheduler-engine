@@ -1,4 +1,4 @@
-// $Id: spooler_order.cxx,v 1.56 2004/02/19 17:17:33 jz Exp $
+// $Id: spooler_order.cxx,v 1.57 2004/03/15 21:43:45 jz Exp $
 /*
     Hier sind implementiert
 
@@ -200,7 +200,7 @@ void Job_chain::load_orders_from_database()
 
         Any_file sel ( "-in " + _spooler->_db->db_name() + "-max-length=32K "
                        " select \"ID\", \"PRIORITY\", \"STATE\", \"STATE_TEXT\", \"TITLE\", \"CREATED_TIME\", \"PAYLOAD\""
-                       " from " + sql::quoted_name( _spooler->_orders_tablename ) +
+                       " from " + sql::uquoted_name( _spooler->_orders_tablename ) +
                        " where \"SPOOLER_ID\"=" + sql::quoted(_spooler->id_for_db()) + 
                        " and \"JOB_CHAIN\"=" + sql::quoted(_name) +
                        " order by \"ORDERING\"" );

@@ -1,4 +1,4 @@
-// $Id: spooler_command.cxx,v 1.107 2004/02/11 10:18:52 jz Exp $
+// $Id: spooler_command.cxx,v 1.108 2004/03/15 21:43:45 jz Exp $
 /*
     Hier ist implementiert
 
@@ -475,7 +475,7 @@ xml::Element_ptr Command_processor::execute_show_order( const xml::Element_ptr& 
         {
             Any_file sel ( "-in " + _spooler->_db->db_name() + 
                            " select max(\"HISTORY_ID\") as history_id "
-                           " from " + sql::quoted_name( _spooler->_order_history_tablename ) +
+                           " from " + sql::uquoted_name( _spooler->_order_history_tablename ) +
                            " where \"SPOOLER_ID\"=" + sql::quoted( _spooler->id_for_db() ) + 
                             " and \"JOB_CHAIN\"="   + sql::quoted( job_chain_name ) +
                             " and \"ORDER_ID\"="    + sql::quoted( id_string ) );
@@ -489,7 +489,7 @@ xml::Element_ptr Command_processor::execute_show_order( const xml::Element_ptr& 
         {
             Any_file sel ( "-in " + _spooler->_db->db_name() + "-max-length=32K "
                            "select \"ORDER_ID\" as \"ID\", \"START_TIME\", \"TITLE\", \"STATE\", \"STATE_TEXT\""
-                           " from " + sql::quoted_name( _spooler->_order_history_tablename ) +
+                           " from " + sql::uquoted_name( _spooler->_order_history_tablename ) +
                            " where \"HISTORY_ID\"=" + history_id );
 
             Record record = sel.get_record();
@@ -503,7 +503,7 @@ xml::Element_ptr Command_processor::execute_show_order( const xml::Element_ptr& 
           //order->set_priority  ( record.as_int   ( "priority"   ) );
         }
 
-        string log = file_as_string( GZIP_AUTO + _spooler->_db->db_name() + " -table=" + sql::quoted_name( _spooler->_order_history_tablename ) + " -blob=\"LOG\"" 
+        string log = file_as_string( GZIP_AUTO + _spooler->_db->db_name() + " -table=" + sql::uquoted_name( _spooler->_order_history_tablename ) + " -blob=\"LOG\"" 
                                      " where \"HISTORY_ID\"=" + history_id );
 
         return order->dom( _answer, show, &log );

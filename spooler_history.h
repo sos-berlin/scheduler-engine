@@ -1,4 +1,4 @@
-// $Id: spooler_history.h,v 1.27 2004/01/30 13:37:49 jz Exp $
+// $Id: spooler_history.h,v 1.28 2004/03/15 21:43:45 jz Exp $
 
 #ifndef __SPOOLER_HISTORY_H
 #define __SPOOLER_HISTORY_H
@@ -72,8 +72,7 @@ struct Spooler_db : Sos_self_deleting
     Thread_semaphore           _lock;
     Thread_semaphore           _error_lock;
     Spooler*                   _spooler;
-
-
+    z::sql::Database_parameters _db_params;
   private:
     friend struct Spooler;
     friend struct Job_history;
