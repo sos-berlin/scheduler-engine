@@ -13,7 +13,7 @@
 //#include "../hostole/hostole.h"
 #include "../zschimmer/z_com.h"
 #include "../zschimmer/com_server.h"
-
+#include <process.h>                    // getpid()
 
 using namespace zschimmer::com;
 
@@ -1913,6 +1913,8 @@ const Com_method Com_task::_methods[] =
     { DISPATCH_PROPERTYGET, 19, "stdout_text"               , (Com_method_ptr)&Com_task::get_Stdout_text        , VT_BSTR       },
     { DISPATCH_METHOD     , 20, "Create_subprocess"         , (Com_method_ptr)&Com_task::Create_subprocess      , VT_DISPATCH   , { VT_BYREF|VT_VARIANT }, 1 },
     { DISPATCH_METHOD     , 21, "Add_subprocess"            , (Com_method_ptr)&Com_task::Add_subprocess         , VT_EMPTY      , { VT_INT, VT_R8, VT_BOOL, VT_BOOL, VT_BSTR }, 1 },
+    { DISPATCH_PROPERTYPUT, 22, "Priority_class"            , (Com_method_ptr)&Com_task::put_Priority_class     , VT_EMPTY      , { VT_BYREF|VT_VARIANT } },
+    { DISPATCH_PROPERTYGET, 22, "Priority_class"            , (Com_method_ptr)&Com_task::get_Priority_class     , VT_BSTR       },
     {}
 };
 
@@ -2408,13 +2410,21 @@ STDMETHODIMP Com_task::Add_subprocess( int pid, double timeout, VARIANT_BOOL ign
     return hr;
 }
 
+//---------------------------------------------------------------------Com_task::get_Priority_class
+
+STDMETHODIMP Com_task::get_Priority_class( BSTR* result )
+{
+    Z_COM_IMPLEMENT( hr = zschimmer::Process( getpid() ).get_Priority_class( result ) );
+}
+
 //-------------------------------------------------------------------------Com_task_proxy::_methods
 // Dispid wie bei Com_task!
 
 const Com_method Com_task_proxy::_methods[] =
 { 
-    COM_METHOD( Com_task_proxy, 20, Create_subprocess     , VT_DISPATCH , 1, { VT_BYREF|VT_VARIANT } ),
-  //COM_METHOD( DISPATCH_METHOD, 21, "Wait_for_subprocesses" , Com_task_proxy::Wait_for_subprocesses, VT_EMTPY    , 0, {} ),
+    COM_METHOD      ( Com_task_proxy, 20, Create_subprocess     , VT_DISPATCH , 1, { VT_BYREF|VT_VARIANT } ),
+    COM_PROPERTY_PUT( Com_task_proxy, 22, Priority_class        ,               0, { VT_BYREF|VT_VARIANT } ),
+    COM_PROPERTY_GET( Com_task_proxy, 22, Priority_class        , VT_BSTR     , 0, {} ),
     {}
 };
 
@@ -2425,7 +2435,7 @@ HRESULT Com_task_proxy::Create_instance( const IID& iid, ptr<IUnknown>* result )
     if( iid == object_server::IID_Iproxy )
     {
         ptr<Com_task_proxy> instance = Z_NEW( Com_task_proxy );
-        *result = static_cast<IDispatch*>( static_cast<Proxy*>( instance.take() ) );
+        *result = static_cast<IDispatch*>( static_cast<Proxy*>( +instance ) );
         return S_OK;
     }
 
@@ -2437,27 +2447,29 @@ HRESULT Com_task_proxy::Create_instance( const IID& iid, ptr<IUnknown>* result )
 Com_task_proxy::Com_task_proxy()
 : 
     Proxy_with_local_methods( &class_descriptor ),
-  //object_server::Proxy( &class_descriptor, static_cast<Itask_proxy*>( this ) ),
-  //_proxy( Z_NEW( object_server::Proxy( &class_descriptor, static_cast<Itask_proxy*>( this ) ) ) ),
     _subprocess_register( Z_NEW( Subprocess_register ) )
 {
 }
 
-//-------------------------------------------------------------------Com_task_proxy::QueryInterface
-/*
-STDMETHODIMP Com_task_proxy::QueryInterface( const IID& iid, void** result )
-{
-    HRESULT hr = Idispatch_implementation::QueryInterface( iid, result );
-    if( SUCCEEDED( hr ) )  return hr;
-
-    return object_server::Proxy::QueryInterface( iid, result );
-}
-*/
 //----------------------------------------------------------------Com_task_proxy::Create_subprocess
 
 STDMETHODIMP Com_task_proxy::Create_subprocess( VARIANT* program_and_parameters, Isubprocess** result )
 {
     return _subprocess_register->Create_subprocess( program_and_parameters, result, static_cast<Idispatch_implementation*>( this ) );
+}
+
+//---------------------------------------------------------------Com_task_proxy::put_Priority_class
+
+STDMETHODIMP Com_task_proxy::put_Priority_class( VARIANT* priority )
+{
+    Z_COM_IMPLEMENT( hr = zschimmer::Process( getpid() ).put_Priority_class( priority ) );
+}
+
+//---------------------------------------------------------------Com_task_proxy::get_Priority_class
+
+STDMETHODIMP Com_task_proxy::get_Priority_class( BSTR* result )
+{
+    Z_COM_IMPLEMENT( hr = zschimmer::Process( getpid() ).get_Priority_class( result ) );
 }
 
 //------------------------------------------------------------Com_task_proxy::wait_for_subprocesses

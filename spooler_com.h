@@ -454,6 +454,8 @@ struct Com_task : spooler_com::Itask,
     STDMETHODIMP            get_Stderr_or_stdout_text       ( BSTR*, bool get_stderr );
     STDMETHODIMP                Create_subprocess           ( VARIANT*, spooler_com::Isubprocess** );
     STDMETHODIMP                Add_subprocess              ( int, double, VARIANT_BOOL, VARIANT_BOOL, BSTR );
+    STDMETHODIMP            put_Priority_class              ( VARIANT* )                            { return FALSE; }
+    STDMETHODIMP            get_Priority_class              ( BSTR* );
 
   private:
     Thread_semaphore           _lock;
@@ -477,6 +479,8 @@ struct Com_task_proxy : object_server::proxy_with_local_methods< Com_task_proxy,
 
 
     STDMETHODIMP                Create_subprocess           ( VARIANT* program_and_parameters, spooler_com::Isubprocess** result );
+    STDMETHODIMP            put_Priority_class              ( VARIANT* );
+    STDMETHODIMP            get_Priority_class              ( BSTR* );
 
     void                        wait_for_subprocesses       ();
 

@@ -77,7 +77,6 @@ struct Subprocess : idispatch_implementation< Subprocess, spooler_com::Isubproce
     zschimmer::Process         _process;
     Subprocess_register*       _subprocess_register;
     bool                       _registered;
-  //ptr<Com_task_proxy>        _task_proxy;                 
     ptr<IDispatch>             _task;
     bool                       _ignore_error;
     bool                       _ignore_signal;
@@ -101,8 +100,8 @@ struct Subprocess_register : Object
 
     Fill_zero                  _zero_;
 
-    typedef map< int, ptr<Subprocess> >  Subprocess_map;
-    Subprocess_map                      _subprocess_map;
+    typedef map< int, Subprocess* >  Subprocess_map;
+    Subprocess_map                  _subprocess_map;
 };
 
 //-------------------------------------------------------------------------------------------------

@@ -384,7 +384,15 @@ library Spooler
         [id(20)]
         HRESULT                 Create_subprocess           ( [in,optional] VARIANT* program_and_parameters, [out,retval] Isubprocess** );
 
+        // Nur für Itask_proxy
+        [id(21)]
         HRESULT                 Add_subprocess              ( [in] int Pid, [in] double timeout, [in] VARIANT_BOOL Ignore_error, [in] VARIANT_BOOL Ignore_signal, [in,defaultvalue("")] BSTR Title );
+
+        [id(22),propput]
+        HRESULT                 Priority_class              ( [in] VARIANT* );                                  // Für Joacim 2005-04-02
+
+        [id(22),propget]
+        HRESULT                 Priority_class              ( [out,retval] BSTR* );                             // Für Joacim 2005-04-02
     }
 
     [
@@ -408,7 +416,13 @@ library Spooler
         // Ids sollten mit Itask übereinstimmen!
 
         [id(20)]
-        HRESULT                 Create_subprocess       ( [in,optional] VARIANT* program_and_parameters, [out,retval] Isubprocess** );
+        HRESULT                 Create_subprocess           ( [in,optional] VARIANT* program_and_parameters, [out,retval] Isubprocess** );
+
+        [id(22),propput]
+        HRESULT                 Priority_class              ( [in] VARIANT* );                                  // Für Joacim 2005-04-02
+
+        [id(22),propget]
+        HRESULT                 Priority_class              ( [out,retval] BSTR* );                             // Für Joacim 2005-04-02
     }
 
     [
@@ -1130,10 +1144,10 @@ library Spooler
       //HRESULT                 Priority                ( [out,retval] VARIANT* );
 
         [propput]
-        HRESULT                 Priority_class          ( [in] VARIANT* );
+        HRESULT                 Priority_class          ( [in] VARIANT* );                      // Für Joacim, 2005-04-02
 
         [propget]
-        HRESULT                 Priority_class          ( [out,retval] BSTR* );
+        HRESULT                 Priority_class          ( [out,retval] BSTR* );                 // Für Joacim, 2005-04-02
 
       //HRESULT                 Raise_priority          ( [in] int, [out,retval] VARIANT_BOOL* );
 

@@ -73,6 +73,8 @@ Subprocess::Subprocess( Subprocess_register* subprocess_register, IDispatch* tas
 
 Subprocess::~Subprocess() 
 {
+    //Z_LOG2( "joacim", "~Subprocess()\n" );
+
     try
     {
         close();
@@ -96,6 +98,17 @@ STDMETHODIMP Subprocess::Start( VARIANT* program_and_parameters )
 
     HRESULT hr = S_OK;
     
+#   ifdef Z_WINDOWS
+        UINT previous_error_mode = 0;
+        if( _ignore_error ) 
+        {
+            // Das System soll sich Messageboxen verkneifen
+            Z_LOG( "SetErrorMode( SEM_FAILCRITICALERRORS | SEM_NOOPENFILEERRORBOX | SEM_NOGPFAULTERRORBOX )\n" );
+            previous_error_mode = SetErrorMode( SEM_FAILCRITICALERRORS | SEM_NOOPENFILEERRORBOX | SEM_NOGPFAULTERRORBOX );    
+        }
+#   endif
+
+
     try
     {
         if( program_and_parameters->vt == VT_BSTR )
@@ -120,7 +133,17 @@ STDMETHODIMP Subprocess::Start( VARIANT* program_and_parameters )
         hr = Update_register_entry();
     }
     catch( const exception&  x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
-    
+
+
+#   ifdef Z_WINDOWS
+        if( _ignore_error )
+        {
+            Z_LOG( "SetErrorMode(" << previous_error_mode << ")\n" );
+            SetErrorMode( previous_error_mode );
+        }
+#   endif
+
+
     return hr;
 }
 
@@ -247,7 +270,7 @@ STDMETHODIMP Subprocess_register::Create_subprocess( VARIANT* program_and_parame
 
 void Subprocess_register::add( Subprocess* subprocess )
 {
-    ptr<Subprocess>& entry = _subprocess_map[ subprocess->_process.pid() ];
+    Subprocess*& entry = _subprocess_map[ subprocess->_process.pid() ];
 
     if( entry )
     {
@@ -266,7 +289,12 @@ void Subprocess_register::remove( Subprocess* subprocess )
     if( subprocess->_registered )
     {
         subprocess->_registered = false;
-        _subprocess_map.erase( subprocess->_process.pid() );
+        
+        for( Subprocess_map::iterator s = _subprocess_map.begin(); s != _subprocess_map.end(); )
+        {
+            if( s->second == subprocess )  s = _subprocess_map.erase( s );
+                                     else  s++;
+        }
     }
 }
 
