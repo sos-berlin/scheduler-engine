@@ -25,6 +25,7 @@ objects = \
  spooler_process.o\
  spooler_security.o\
  spooler_service.o\
+ spooler_subprocess.o\
  spooler_task.o\
  spooler_thread.o\
  spooler_time.o\

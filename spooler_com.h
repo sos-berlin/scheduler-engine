@@ -475,7 +475,7 @@ struct Com_task_proxy : //com::object_server::proxy_with_local_methods< spooler_
                                 Com_task_proxy              ();
 
 #ifndef SYSTEM_HAS_COM
-    Z_DEFINE_GETIDSOFNAMES_AND_INVOKE
+    //Z_DEFINE_GETIDSOFNAMES_AND_INVOKE
 #endif
 
     STDMETHODIMP                Start_subprocess            ( VARIANT* program_and_parameters, spooler_com::Isubprocess** result );
