@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.239 2003/09/02 06:09:22 jz Exp $
+// $Id: spooler.cxx,v 1.240 2003/09/02 07:42:06 jz Exp $
 /*
     Hier sind implementiert
 
@@ -1595,7 +1595,17 @@ void Spooler::run()
             {
                 bool something_done = false;
 
-                do
+                if( single_thread )
+                {
+                    FOR_EACH( Process_class_list, _process_class_list, pc )  
+                        FOR_EACH( Process_list, (*pc)->_process_list, p )  
+                            something_done |= (*p)->async_continue();
+
+                    LOG( "spooler.cxx: something_done=" << something_done << "    process_list \n" );
+                }
+
+
+              //do
                 {
                     FOR_EACH_JOB( j )
                     {
@@ -1608,21 +1618,16 @@ void Spooler::run()
                     if( something_done )  nothing_done_count = 1;
                                     else  nothing_done_count++;
                 }
-                while( something_done );
+              //while( something_done );
 
 
                 string       msg = "Kein Job und keine Task aktiv";
                 Wait_handles wait_handles ( this, &_log );
                 _next_time = latter_day;
 
+
                 if( single_thread )
                 {
-                    FOR_EACH( Process_class_list, _process_class_list, pc )  
-                        FOR_EACH( Process_list, (*pc)->_process_list, p )  
-                            something_done |= (*p)->async_continue();
-
-                    LOG( "spooler.cxx: something_done=" << something_done << "    process_list \n" );
-
                     something_done |= single_thread->process();
 
                     LOG( "spooler.cxx: something_done=" << something_done << "   single_thread->process()\n" );
@@ -1665,15 +1670,11 @@ void Spooler::run()
                 }
 
 
+sos_sleep(0.1); //_next_time = max( _next_time, Time::now() + 0.1 );   // Bremse
 
                 if( _next_time > 0 )
                 {
-/*
-LOG( "Spooler _next_time       =" << _next_time.as_string() << "\n" );
-Time n5 = Time::now() + 0.5;
-_next_time = max( _next_time, n5 );      // Solange wie select nicht weckt
-LOG( "Spooler _next_time + 0.5 =" << _next_time.as_string() << "  n5=" << n5.as_string() << "\n" );
-*/
+_next_time = min( _next_time, Time::now() + 1.0 );      // Wartezeit vorsichtshalber begrenzen
                     if( _debug )  
                     {
                         if( wait_handles.wait(0) == -1 )  _log.debug( msg ), wait_handles.wait_until( _next_time );     // Debug-Ausgabe der Wartezeit nur, wenn kein Ergebnis vorliegt
