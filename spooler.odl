@@ -23,6 +23,7 @@ library Spooler
     interface Ijob_chain;
     interface Iorder_queue;
     interface Iorder;
+    interface Isubprocess;
 
     //------------------------------------------------------------------------------------Log_level
 
@@ -411,39 +412,43 @@ library Spooler
     ]
     interface Ispooler : IDispatch
     {
-        [propget]
+        // Ids sollten mit Ispooler_proxy übereinstimmen!
+
+        [id(1),propget]
         HRESULT                 Java_class_name             ( [out,retval] BSTR* Result );          // Damit java_class_name über IDispatch, statt über Ihas_java_class_name gerufen werden kann
                                                                                                     // Für den Objectserver
 
-        [propget]
+        [id(2),propget]
         HRESULT                 Log                     ( [out,retval] Ilog** Log );
 
-        [propget]
+        [id(3),propget]
         HRESULT                 Id                      ( [out,retval] BSTR* spooler_id );
 
-        [propget]
+        [id(4),propget]
         HRESULT                 Param                   ( [out,retval] BSTR* spooler_param );
 
-        [propget]
+        [id(5),propget]
         HRESULT                 Script                  ( [out,retval] IDispatch** script_object );
 
-        [propget]
+        [id(6),propget]
         HRESULT                 Job                     ( [in] BSTR job_name, [out,retval] Ijob** Job );
 
+        [id(7)]
         HRESULT                 Create_variable_set     ( [out,retval] Ivariable_set** Result );
 
       //[propput]
       //HRESULT                 Include_path            ( [in] BSTR include_path );
 
-        [propget]
+        [id(8),propget]
         HRESULT                 Include_path            ( [out,retval] BSTR* include_path );
 
-        [propget]
+        [id(9),propget]
         HRESULT                 Log_dir                 ( [out,retval] BSTR* Directory );
 
+        [id(10)]
         HRESULT                 Let_run_terminate_and_restart();
 
-        [propget]
+        [id(11),propget]
         HRESULT                 Variables               ( [out,retval] Ivariable_set** );
 
         [id(0),propput]
@@ -452,11 +457,13 @@ library Spooler
         [id(0),propget]
         HRESULT                 Var                     ( [in] BSTR Name, [out,retval] VARIANT* Value );
 
-        [propget]
+        [id(12),propget]
         HRESULT                 Db_name                 ( [out,retval] BSTR* Filename );
 
+        [id(13)]
         HRESULT                 Create_job_chain        ( [out,retval] Ijob_chain** Result );
 
+        [id(14)]
         HRESULT                 Add_job_chain           ( [in] Ijob_chain* job_chain );
 
         [propget]
@@ -498,6 +505,9 @@ library Spooler
         HRESULT                 Ini_path                ( [out,retval] BSTR* );
 
         HRESULT                 Execute_xml             ( [in] BSTR, [out,retval] BSTR* );
+
+        [id(15)]
+        HRESULT                 Start_subprocess        ( [in] VARIANT* program_and_parameters, [out,retval] Isubprocess** );
     }
 
     [
@@ -518,7 +528,18 @@ library Spooler
     ]
     interface Ispooler_proxy : IDispatch
     {
-        HRESULT                 Start_subprocess        ( [in] VARIANT* program_and_parameters, [out,retval] IDispatch* );
+        // Ids sollten mit Ispooler übereinstimmen!
+
+        [id(15)]
+        HRESULT                 Start_subprocess        ( [in] VARIANT* program_and_parameters, [out,retval] Isubprocess** );
+    }
+
+    [
+        uuid       ( feee47aa-6c1b-11d8-8103-000476ee8afb )
+    ]
+    coclass Spooler_proxy
+    {
+        interface Ispooler_proxy;
     }
 
     //------------------------------------------------------------------------------Spooler_context
@@ -848,7 +869,7 @@ library Spooler
         HRESULT                 Setback                 ();
 
         [propput]
-I        HRESULT                 At                      ( [in] VARIANT* date_time );                // Für Joacim, 2005-02-27 (was fehlt: Speichern in Datenbank, aufrufbar im Taskschritt?)
+        HRESULT                 At                      ( [in] VARIANT* date_time );                // Für Joacim, 2005-02-27 (was fehlt: Speichern in Datenbank, aufrufbar im Taskschritt?)
 
         [propget]
         HRESULT                 At                      ( [out,retval] DATE* Result );              // Für Joacim, 2005-02-27
@@ -1051,16 +1072,68 @@ I        HRESULT                 At                      ( [in] VARIANT* date_ti
         interface IRemote_module_instance_server;
     }
 
+    //----------------------------------------------------------------------------------Isubprocess
+
+    [
+        uuid       ( feee47a8-6c1b-11d8-8103-000476ee8afb ),
+        odl,
+        dual
+    ]
+    interface Isubprocess : IDispatch
+    {
+        [propget]
+        HRESULT                 Java_class_name         ( [out,retval] BSTR* Result );          // Damit java_class_name über IDispatch, statt über Ihas_java_class_name gerufen werden kann
+                                                                                                // Für den Objectserver
+
+        HRESULT                 Close                   ();
+
+        [propget]
+        HRESULT                 Pid                     ( [out,retval] int* );
+
+        [propget]
+        HRESULT                 Terminated              ( [out,retval] VARIANT_BOOL* );
+
+        [propget]
+        HRESULT                 Exit_code               ( [out,retval] int* );
+
+        [propget]
+        HRESULT                 Stdout_path             ( [out,retval] BSTR* );
+
+        [propget]
+        HRESULT                 Stderr_path             ( [out,retval] BSTR* );
+
+        [propput]
+        HRESULT                 Ignore_error            ( [in] VARIANT_BOOL );
+
+        [propget]
+        HRESULT                 Ignore_error            ( [out,retval] VARIANT_BOOL* );
+
+        [propput]
+        HRESULT                 Ignore_signal           ( [in] VARIANT_BOOL );
+
+        [propget]
+        HRESULT                 Ignore_signal           ( [out,retval] VARIANT_BOOL* );
+
+        HRESULT                 Wait                    ( [in,defaultvalue(999999999)] double seconds );
+
+        HRESULT                 Kill                    ( [in,defaultvalue(9)] int signal );
+    };
+
+    [
+        uuid       ( feee47a9-6c1b-11d8-8103-000476ee8afb )
+    ]
+    coclass Subprocess
+    {
+        interface Isubprocess;
+        interface Ihas_java_class_name;
+    }
+
 };
 
 //-------------------------------------------------------------------------------------------------
 /*
 Ein paar freie GUIDs:
 
-
-feee47a8-6c1b-11d8-8103-000476ee8afb
-feee47a9-6c1b-11d8-8103-000476ee8afb
-feee47aa-6c1b-11d8-8103-000476ee8afb
 feee47ab-6c1b-11d8-8103-000476ee8afb
 feee47ac-6c1b-11d8-8103-000476ee8afb
 feee47ad-6c1b-11d8-8103-000476ee8afb

@@ -3,6 +3,8 @@
 #ifndef __SPOOLER_SUBPROCESS_H
 #define __SPOOLER_SUBPROCESS_H
 
+#include "../zschimmer/z_process.h"
+
 
 namespace sos {
 namespace spooler {
@@ -66,9 +68,9 @@ struct Subprocess : zschimmer::Process
     Process_class*             _process_class;
 };
 
-//-------------------------------------------------------------------------------------Process_list
+//----------------------------------------------------------------------------------Subprocess_list
 
-typedef list< ptr<Subprocess> >    Process_list;
+//typedef list< ptr<Subprocess> >    Subprocess_list;
 
 //-------------------------------------------------------------------------------------------------
 

@@ -12,13 +12,14 @@ namespace sos
 
 //------------------------------------------------------------------------------------------DllMain
 
-extern "C" BOOL WINAPI DllMain( HANDLE hInst, DWORD ul_reason_being_called, LPVOID )
+extern "C" BOOL WINAPI DllMain( HANDLE hinstance, DWORD ul_reason_being_called, LPVOID )
 {
     switch( ul_reason_being_called )
 	{
 		case DLL_PROCESS_ATTACH: 
-            sos::_hinstance = (::HINSTANCE)hInst; 
+            sos::_hinstance = (::HINSTANCE)hinstance; 
             sos::application.init();
+            sos::spooler::typelib.set_hinstance( (HINSTANCE)hinstance );
             break;
 
 		case DLL_THREAD_ATTACH:     

@@ -24,7 +24,7 @@ namespace spooler {
 using namespace std;
 using namespace spooler_com;
 
-//------------------------------------------------------------------------------------Typbibliothek
+//-------------------------------------------------------------------------Typbibliothek (hostware)
 
 Typelib_descr spooler_typelib ( LIBID_spooler_com, "Spooler", "1.0" );
 
@@ -43,6 +43,12 @@ DESCRIBE_CLASS( &spooler_typelib, Com_job_chain     , job_chain     , CLSID_Job_
 DESCRIBE_CLASS( &spooler_typelib, Com_job_chain_node, job_chain_node, CLSID_Job_chain_node, "Spooler.Job_chain_node", "1.0" )
 DESCRIBE_CLASS( &spooler_typelib, Com_order         , order         , CLSID_Order         , "Spooler.Order"         , "1.0" )
 DESCRIBE_CLASS( &spooler_typelib, Com_order_queue   , order_queue   , CLSID_Order_queue   , "Spooler.Order_queue"   , "1.0" )
+
+//------------------------------------------------------------------------------------Typbibliothek
+
+Typelib_ref                             typelib;  
+
+Com_spooler_proxy::Class_descriptor     Com_spooler_proxy::class_descriptor ( &typelib, "Spooler.Spooler_proxy" );
 
 //-----------------------------------------------------------------------------IID_Ihostware_dynobj
 
@@ -2500,7 +2506,8 @@ Com_spooler::Com_spooler( Spooler* spooler )
 
 STDMETHODIMP Com_spooler::QueryInterface( const IID& iid, void** result )
 {
-    Z_IMPLEMENT_QUERY_INTERFACE( this, iid, Ihas_java_class_name, result );
+    Z_IMPLEMENT_QUERY_INTERFACE( this, iid, Ihas_java_class_name          , result );
+    Z_IMPLEMENT_QUERY_INTERFACE( this, iid, Ihas_reference_with_properties, result );
 
     return Sos_ole_object::QueryInterface( iid, result );
 }
@@ -2513,9 +2520,9 @@ ptr<object_server::Reference_with_properties> Com_spooler::get_reference_with_pr
 
     THREAD_LOCK( _lock )
     {
-        if( !_log )  throw_com( E_POINTER, "Com_log::get_reference_with_properties" );
+        if( !_spooler )  throw_com( E_POINTER, "Com_spooler::get_reference_with_properties" );
 
-        result = Z_NEW( object_server::Reference_with_properties( CLSID_Com_spooler_proxy, static_cast<Ispooler*>( this ) ) );
+        result = Z_NEW( object_server::Reference_with_properties( CLSID_Spooler_proxy, static_cast<Ispooler*>( this ) ) );
     }
 
     return result;
@@ -2961,6 +2968,14 @@ STDMETHODIMP Com_spooler::Execute_xml( BSTR xml, BSTR* result )
     return hr;
 }
 
+//--------------------------------------------------------------------Com_spooler::Start_subprocess
+
+STDMETHODIMP Com_spooler::Start_subprocess( VARIANT* program_and_parameters, Isubprocess** result )
+{
+    Z_LOG( "Com_spooler::Start_subprocess()\n" );
+    return E_NOTIMPL;
+}
+
 //----------------------------------------------------------------------Com_spooler_proxy::_methods
 #ifdef Z_COM
 
@@ -2979,7 +2994,7 @@ HRESULT Com_spooler_proxy::Create_instance( const IID& iid, ptr<IUnknown>* resul
     if( iid == object_server::IID_Iproxy )
     {
         ptr<Com_spooler_proxy> instance = Z_NEW( Com_spooler_proxy );
-        *result = instance.take();
+        *result = static_cast<Proxy*>( instance.take() );
         return S_OK;
     }
 
@@ -3029,8 +3044,9 @@ STDMETHODIMP Com_spooler_proxy::Invoke( DISPID dispid, const IID& iid, LCID lcid
 */
 //--------------------------------------------------------------Com_spooler_proxy::Start_subprocess
 
-STDMETHODIMP Com_spooler_proxy::Start_subprocess( VARIANT* program_and_parameters, IDispatch* result )
+STDMETHODIMP Com_spooler_proxy::Start_subprocess( VARIANT* program_and_parameters, Isubprocess** result )
 {
+    Z_LOG( "Com_spooler_proxy::Start_subprocess()\n" );
     return E_NOTIMPL;
 }
 

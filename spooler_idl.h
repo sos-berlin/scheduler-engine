@@ -61,7 +61,7 @@ struct Ihas_java_class_name : IUnknown
 {
     DEFINE_UUIDOF( Ihas_java_class_name )
 
-    virtual HRESULT     get_java_class_name             ( BSTR* result ) = 0;
+    virtual HRESULT     get_java_class_name             ( BSTR* result )                        = 0;
 };
 */
 //----------------------------------------------------------------------------------------Error
@@ -73,10 +73,10 @@ struct Ierror : IDispatch
 {
     DEFINE_UUIDOF( Ierror )
 
-  //virtual HRESULT     get_java_class_name             ( BSTR* result ) = 0;
-    virtual HRESULT     get_Is_error                    ( VARIANT_BOOL* result ) = 0;
-    virtual HRESULT     get_Code                        ( BSTR* code ) = 0;
-    virtual HRESULT     get_Text                        ( BSTR* text ) = 0;
+  //virtual HRESULT     get_java_class_name             ( BSTR* result )                        = 0;
+    virtual HRESULT     get_Is_error                    ( VARIANT_BOOL* result )                = 0;
+    virtual HRESULT     get_Code                        ( BSTR* code )                          = 0;
+    virtual HRESULT     get_Text                        ( BSTR* text )                          = 0;
 };
 
 //------------------------------------------------------------------------------------Ivariable
@@ -88,12 +88,12 @@ struct Ivariable : IDispatch
 {
     DEFINE_UUIDOF( Ivariable )
 
-  //virtual HRESULT     get_Java_class_name             ( BSTR* result ) = 0;
-    virtual HRESULT     put_Value                       ( VARIANT* value ) = 0;
-    virtual HRESULT     get_Value                       ( VARIANT* value ) = 0;
-  //virtual HRESULT         Dim                         ( int size ) = 0;
-    virtual HRESULT     get_Name                        ( BSTR* name ) = 0;
-    virtual HRESULT         Clone                       ( Ivariable** ) = 0;
+  //virtual HRESULT     get_Java_class_name             ( BSTR* result )                        = 0;
+    virtual HRESULT     put_Value                       ( VARIANT* value )                      = 0;
+    virtual HRESULT     get_Value                       ( VARIANT* value )                      = 0;
+  //virtual HRESULT         Dim                         ( int size )                            = 0;
+    virtual HRESULT     get_Name                        ( BSTR* name )                          = 0;
+    virtual HRESULT         Clone                       ( Ivariable** )                         = 0;
 };
 
 //---------------------------------------------------------------------------------Variable_set
@@ -105,24 +105,24 @@ struct Ivariable_set : IDispatch
 {
     DEFINE_UUIDOF( Ivariable_set )
 
-  //virtual HRESULT     get_Java_class_name             ( BSTR* result ) = 0;
-    virtual HRESULT         Set_var                     ( BSTR name, VARIANT* value ) = 0;
+  //virtual HRESULT     get_Java_class_name             ( BSTR* result )                        = 0;
+    virtual HRESULT         Set_var                     ( BSTR name, VARIANT* value )           = 0;
 
-    virtual HRESULT     put_Value                       ( VARIANT* name, VARIANT* value ) = 0;
-    virtual HRESULT     get_Value                       ( VARIANT* name, VARIANT* value ) = 0;
+    virtual HRESULT     put_Value                       ( VARIANT* name, VARIANT* value )       = 0;
+    virtual HRESULT     get_Value                       ( VARIANT* name, VARIANT* value )       = 0;
 
-    virtual HRESULT     put_Var                         ( BSTR name, VARIANT* value ) = 0;
-    virtual HRESULT     get_Var                         ( BSTR name, VARIANT* value ) = 0;
+    virtual HRESULT     put_Var                         ( BSTR name, VARIANT* value )           = 0;
+    virtual HRESULT     get_Var                         ( BSTR name, VARIANT* value )           = 0;
 
-    virtual HRESULT     get_Count                       ( int* value ) = 0;
+    virtual HRESULT     get_Count                       ( int* value )                          = 0;
 
 #ifdef Z_WINDOWS
-    virtual HRESULT     get_Dom                         ( IXMLDOMDocument** xml_document ) = 0;
+    virtual HRESULT     get_Dom                         ( IXMLDOMDocument** xml_document )      = 0;
 #endif
 
-    virtual HRESULT         Clone                       ( Ivariable_set** result ) = 0;
-    virtual HRESULT         Merge                       ( Ivariable_set* other) = 0;
-    virtual HRESULT     get__NewEnum                    ( IUnknown** enumerator ) = 0;    
+    virtual HRESULT         Clone                       ( Ivariable_set** result )              = 0;
+    virtual HRESULT         Merge                       ( Ivariable_set* other)                 = 0;
+    virtual HRESULT     get__NewEnum                    ( IUnknown** enumerator )               = 0;              
 };
 
 //----------------------------------------------------------------------Variable_set_enumerator
@@ -135,9 +135,9 @@ struct Ivariable_set_enumerator : IEnumVARIANT
     DEFINE_UUIDOF( Ivariable_set_enumerator )
 
     virtual HRESULT         Next                    ( unsigned long celt, VARIANT* rgvar, unsigned long* pceltFetched ) = 0;
-    virtual HRESULT         Skip                    ( unsigned long celt ) = 0;
-    virtual HRESULT         Reset                   () = 0;
-    virtual HRESULT         Clone                   ( IEnumVARIANT** ppenum ) = 0;
+    virtual HRESULT         Skip                    ( unsigned long celt )                      = 0;
+    virtual HRESULT         Reset                   ()                                          = 0;
+    virtual HRESULT         Clone                   ( IEnumVARIANT** ppenum )                   = 0;
 };
 
 //-----------------------------------------------------------------------------------Object_set
@@ -149,8 +149,8 @@ struct Iobject_set : IDispatch
 {
     DEFINE_UUIDOF( Iobject_set )
 
-    virtual HRESULT     get_Low_level                   ( int* level ) = 0;
-    virtual HRESULT     get_High_level                  ( int* level ) = 0;
+    virtual HRESULT     get_Low_level                   ( int* level )                          = 0;
+    virtual HRESULT     get_High_level                  ( int* level )                          = 0;
 };
 
 //------------------------------------------------------------------------------------------Job
@@ -162,24 +162,24 @@ struct Ijob : IDispatch
 {
     DEFINE_UUIDOF( Ijob )
 
-  //virtual HRESULT     get_Java_class_name             ( BSTR* result ) = 0;
-    virtual HRESULT         Start_when_directory_changed( BSTR name, BSTR filename_pattern ) = 0;
-    virtual HRESULT         Clear_when_directory_changed() = 0;
-  //HRESULT                 Start_on_signal             () = 0;
-  //HRESULT                 Start_after_timeout         ( Itask** ) = 0;
-    virtual HRESULT         Start                       ( VARIANT*, spooler_com::Itask** ) = 0;
-  //virtual HRESULT     get_Thread                      ( Ithread** result ) = 0;
-  //HRESULT             put_Include_path                ( BSTR include_path ) = 0;
-    virtual HRESULT     get_Include_path                ( BSTR* include_path ) = 0;
-    virtual HRESULT     get_Name                        ( BSTR* name ) = 0;
-    virtual HRESULT         Wake                        () = 0;
-    virtual HRESULT     put_State_text                  ( BSTR state_text ) = 0;
-    virtual HRESULT     get_Title                       ( BSTR* title ) = 0;
-    virtual HRESULT     put_Delay_after_error           ( int error_steps, VARIANT* time ) = 0;
-    virtual HRESULT     get_Order_queue                 ( Iorder_queue** result ) = 0;
-    virtual HRESULT     put_Delay_order_after_setback   ( int, VARIANT* time ) = 0;
-    virtual HRESULT     put_Max_order_setbacks          ( int ) = 0; 
-    virtual HRESULT         Clear_delay_after_error     () = 0;
+  //virtual HRESULT     get_Java_class_name             ( BSTR* result )                        = 0;
+    virtual HRESULT         Start_when_directory_changed( BSTR name, BSTR filename_pattern )    = 0;
+    virtual HRESULT         Clear_when_directory_changed()                                      = 0;
+  //HRESULT                 Start_on_signal             ()                                      = 0;
+  //HRESULT                 Start_after_timeout         ( Itask** )                             = 0;
+    virtual HRESULT         Start                       ( VARIANT*, spooler_com::Itask** )      = 0;
+  //virtual HRESULT     get_Thread                      ( Ithread** result )                    = 0;
+  //HRESULT             put_Include_path                ( BSTR include_path )                   = 0;
+    virtual HRESULT     get_Include_path                ( BSTR* include_path )                  = 0;
+    virtual HRESULT     get_Name                        ( BSTR* name )                          = 0;
+    virtual HRESULT         Wake                        ()                                      = 0;
+    virtual HRESULT     put_State_text                  ( BSTR state_text )                     = 0;
+    virtual HRESULT     get_Title                       ( BSTR* title )                         = 0;
+    virtual HRESULT     put_Delay_after_error           ( int error_steps, VARIANT* time )      = 0;
+    virtual HRESULT     get_Order_queue                 ( Iorder_queue** result )               = 0;
+    virtual HRESULT     put_Delay_order_after_setback   ( int, VARIANT* time )                  = 0;
+    virtual HRESULT     put_Max_order_setbacks          ( int )                                 = 0; 
+    virtual HRESULT         Clear_delay_after_error     ()                                      = 0;
 };
 
 //-----------------------------------------------------------------------------------------Task
@@ -191,25 +191,25 @@ struct Itask : IDispatch
 {
     DEFINE_UUIDOF( Itask )
 
-  //virtual HRESULT     get_Java_class_name             ( BSTR* result ) = 0;
-    virtual HRESULT     get_Object_set                  ( Iobject_set** result ) = 0;
-    virtual HRESULT     put_Error                       ( VARIANT* error_text ) = 0;       // Für PerlScript, das einen Fehlertext nicht durchreicht
-    virtual HRESULT     get_Error                       ( Ierror** result ) = 0;
-    virtual HRESULT     get_Job                         ( Ijob** job ) = 0;
-    virtual HRESULT     get_Params                      ( Ivariable_set** parameters ) = 0;
-    virtual HRESULT     put_Result                      ( VARIANT* value ) = 0;
-    virtual HRESULT     get_Result                      ( VARIANT* value ) = 0;
-    virtual HRESULT         Wait_until_terminated       ( double wait_time, VARIANT_BOOL* ok ) = 0;
-    virtual HRESULT     put_Repeat                      ( double seconds ) = 0;
- //?virtual HRESULT     get_Thread                      ( Ithread** result ) = 0;
-    virtual HRESULT         End                         () = 0;
-    virtual HRESULT     put_History_field               ( BSTR name, VARIANT* value ) = 0;
-    virtual HRESULT     get_Id                          ( int* result ) = 0;
-    virtual HRESULT     put_Delay_spooler_process       ( VARIANT* seconds ) = 0;
-    virtual HRESULT     put_Close_engine                ( VARIANT_BOOL close_after_task ) = 0;
-    virtual HRESULT     get_Order                       ( Iorder** result ) = 0;
-    virtual HRESULT     get_Stderr_text                 ( BSTR* ) = 0;
-    virtual HRESULT     get_Stdout_text                 ( BSTR* ) = 0;
+  //virtual HRESULT     get_Java_class_name             ( BSTR* result )                        = 0;
+    virtual HRESULT     get_Object_set                  ( Iobject_set** result )                = 0;
+    virtual HRESULT     put_Error                       ( VARIANT* error_text )                 = 0;       // Für PerlScript, das einen Fehlertext nicht durchreicht
+    virtual HRESULT     get_Error                       ( Ierror** result )                     = 0;
+    virtual HRESULT     get_Job                         ( Ijob** job )                          = 0;
+    virtual HRESULT     get_Params                      ( Ivariable_set** parameters )          = 0;
+    virtual HRESULT     put_Result                      ( VARIANT* value )                      = 0;
+    virtual HRESULT     get_Result                      ( VARIANT* value )                      = 0;
+    virtual HRESULT         Wait_until_terminated       ( double wait_time, VARIANT_BOOL* ok )  = 0;
+    virtual HRESULT     put_Repeat                      ( double seconds )                      = 0;
+ //?virtual HRESULT     get_Thread                      ( Ithread** result )                    = 0;
+    virtual HRESULT         End                         ()                                      = 0;
+    virtual HRESULT     put_History_field               ( BSTR name, VARIANT* value )           = 0;
+    virtual HRESULT     get_Id                          ( int* result )                         = 0;
+    virtual HRESULT     put_Delay_spooler_process       ( VARIANT* seconds )                    = 0;
+    virtual HRESULT     put_Close_engine                ( VARIANT_BOOL close_after_task )       = 0;
+    virtual HRESULT     get_Order                       ( Iorder** result )                     = 0;
+    virtual HRESULT     get_Stderr_text                 ( BSTR* )                               = 0;
+    virtual HRESULT     get_Stdout_text                 ( BSTR* )                               = 0;
 };
 
 //---------------------------------------------------------------------------------------Thread
@@ -221,12 +221,12 @@ struct Ithread : IDispatch
 {
     DEFINE_UUIDOF( Ithread )
 
-  //virtual HRESULT     get_Java_class_name             ( BSTR* result ) = 0;
-    virtual HRESULT     get_Log                     ( Ilog** log ) = 0;
-    virtual HRESULT     get_Script                  ( IDispatch** script_object ) = 0;
-  //HRESULT             put_Include_path            ( BSTR include_path ) = 0;
-    virtual HRESULT     get_Include_path            ( BSTR* include_path ) = 0;
-    virtual HRESULT     get_Name                    ( BSTR* name ) = 0;
+  //virtual HRESULT     get_Java_class_name             ( BSTR* result )                        = 0;
+    virtual HRESULT     get_Log                     ( Ilog** log )                              = 0;
+    virtual HRESULT     get_Script                  ( IDispatch** script_object )               = 0;
+  //HRESULT             put_Include_path            ( BSTR include_path )                       = 0;
+    virtual HRESULT     get_Include_path            ( BSTR* include_path )                      = 0;
+    virtual HRESULT     get_Name                    ( BSTR* name )                              = 0;
 };
 */
 //--------------------------------------------------------------------------------------Spooler
@@ -238,36 +238,40 @@ struct Ispooler : IDispatch
 {
     DEFINE_UUIDOF( Ispooler )
 
-  //virtual HRESULT     get_Java_class_name         ( BSTR* result ) = 0;
-    virtual HRESULT     get_Log                     ( Ilog** log ) = 0;
-    virtual HRESULT     get_Id                      ( BSTR* spooler_id ) = 0;
-    virtual HRESULT     get_Param                   ( BSTR* spooler_param ) = 0;
-    virtual HRESULT     get_Script                  ( IDispatch** script_object ) = 0;
-    virtual HRESULT     get_Job                     ( BSTR name, Ijob** job ) = 0;
-    virtual HRESULT         Create_variable_set     ( Ivariable_set** result ) = 0;
-  //HRESULT             put_Include_path            ( BSTR include_path ) = 0;
-    virtual HRESULT     get_Include_path            ( BSTR* include_path ) = 0;
-    virtual HRESULT     get_Log_dir                 ( BSTR* directory ) = 0;
-    virtual HRESULT         Let_run_terminate_and_restart() = 0;
-    virtual HRESULT     get_Variables               ( Ivariable_set** ) = 0;
-    virtual HRESULT     put_Var                     ( BSTR name, VARIANT* value ) = 0;
-    virtual HRESULT     get_Var                     ( BSTR name, VARIANT* value ) = 0;
-    virtual HRESULT     get_Db_name                 ( BSTR* filename ) = 0;
-    virtual HRESULT         Create_job_chain        ( Ijob_chain** result ) = 0;
-    virtual HRESULT         Add_job_chain           ( Ijob_chain* job_chain ) = 0;
-    virtual HRESULT     get_Job_chain               ( BSTR name, Ijob_chain** result ) = 0;
-    virtual HRESULT         Create_order            ( Iorder** result ) = 0;
-    virtual HRESULT     get_Is_service              ( VARIANT_BOOL* result ) = 0;
-    virtual HRESULT     get_Directory               ( BSTR* ) = 0;
-    virtual HRESULT         Job_chain_exists        ( BSTR name, VARIANT_BOOL* result ) = 0;
-    virtual HRESULT     get_Hostname                ( BSTR* ) = 0;
-    virtual HRESULT         Abort_immediately       () = 0;
-    virtual HRESULT         Abort_immediately_and_restart() = 0;
-    virtual HRESULT         get_Db_variables_table_name     ( BSTR* ) = 0;
-    virtual HRESULT         get_Db_tasks_table_name         ( BSTR* ) = 0;
-    virtual HRESULT         get_Db_orders_table_name        ( BSTR* ) = 0;
-    virtual HRESULT         get_Db_history_table_name       ( BSTR* ) = 0;
-    virtual HRESULT         get_Db_order_history_table_name ( BSTR* ) = 0;
+  //virtual HRESULT     get_Java_class_name         ( BSTR* result )                            = 0;
+    virtual HRESULT     get_Log                     ( Ilog** log )                              = 0;
+    virtual HRESULT     get_Id                      ( BSTR* spooler_id )                        = 0;
+    virtual HRESULT     get_Param                   ( BSTR* spooler_param )                     = 0;
+    virtual HRESULT     get_Script                  ( IDispatch** script_object )               = 0;
+    virtual HRESULT     get_Job                     ( BSTR name, Ijob** job )                   = 0;
+    virtual HRESULT         Create_variable_set     ( Ivariable_set** result )                  = 0;
+  //HRESULT             put_Include_path            ( BSTR include_path )                       = 0;
+    virtual HRESULT     get_Include_path            ( BSTR* include_path )                      = 0;
+    virtual HRESULT     get_Log_dir                 ( BSTR* directory )                         = 0;
+    virtual HRESULT         Let_run_terminate_and_restart()                                     = 0;
+    virtual HRESULT     get_Variables               ( Ivariable_set** )                         = 0;
+    virtual HRESULT     put_Var                     ( BSTR name, VARIANT* value )               = 0;
+    virtual HRESULT     get_Var                     ( BSTR name, VARIANT* value )               = 0;
+    virtual HRESULT     get_Db_name                 ( BSTR* filename )                          = 0;
+    virtual HRESULT         Create_job_chain        ( Ijob_chain** result )                     = 0;
+    virtual HRESULT         Add_job_chain           ( Ijob_chain* job_chain )                   = 0;
+    virtual HRESULT     get_Job_chain               ( BSTR name, Ijob_chain** result )          = 0;
+    virtual HRESULT         Create_order            ( Iorder** result )                         = 0;
+    virtual HRESULT     get_Is_service              ( VARIANT_BOOL* result )                    = 0;
+    virtual HRESULT     get_Directory               ( BSTR* )                                   = 0;
+    virtual HRESULT         Job_chain_exists        ( BSTR name, VARIANT_BOOL* result )         = 0;
+    virtual HRESULT     get_Hostname                ( BSTR* )                                   = 0;
+    virtual HRESULT         Abort_immediately       ()                                          = 0;
+    virtual HRESULT         Abort_immediately_and_restart()                                     = 0;
+    virtual HRESULT     get_Db_variables_table_name     ( BSTR* )                               = 0;
+    virtual HRESULT     get_Db_tasks_table_name         ( BSTR* )                               = 0;
+    virtual HRESULT     get_Db_orders_table_name        ( BSTR* )                               = 0;
+    virtual HRESULT     get_Db_history_table_name       ( BSTR* )                               = 0;
+    virtual HRESULT     get_Db_order_history_table_name ( BSTR* )                               = 0;
+    virtual HRESULT     get_Ini_path                    ( BSTR* )                               = 0;
+    virtual HRESULT         Execute_xml                 ( BSTR, BSTR* )                         = 0;
+    virtual HRESULT         Start_subprocess            ( VARIANT*, spooler_com::Isubprocess** ) = 0;
+
 };
 
 //------------------------------------------------------------------------------------------Log
@@ -415,7 +419,7 @@ struct Ijob_chain_node : IDispatch
 
     virtual HRESULT     get_Error_node              ( Ijob_chain_node** result ) = 0;
 
-    virtual HRESULT     get_Job                     ( Ijob** result ) = 0;
+    virtual HRESULT     get_Job                     ( Ijob** result )                               = 0;
 };
 
 //-------------------------------------------------------------------------------------Job_chain
@@ -428,26 +432,26 @@ struct Ijob_chain : IDispatch
     DEFINE_UUIDOF( Ijob_chain )
 
     
-  //virtual HRESULT     get_Java_class_name         ( BSTR* result ) = 0;
+  //virtual HRESULT     get_Java_class_name         ( BSTR* result )                                = 0;
 
-    virtual HRESULT     put_Name                    ( BSTR name ) = 0;
+    virtual HRESULT     put_Name                    ( BSTR name )                                   = 0;
 
-    virtual HRESULT     get_Name                    ( BSTR* result ) = 0;
+    virtual HRESULT     get_Name                    ( BSTR* result )                                = 0;
 
-    virtual HRESULT     get_Order_count             ( int* result ) = 0;
+    virtual HRESULT     get_Order_count             ( int* result )                                 = 0;
 
     virtual HRESULT         Add_job                 ( VARIANT* jobname, 
                                                       VARIANT* input_state,
                                                       VARIANT* output_state,
-                                                      VARIANT* error_state ) = 0;
+                                                      VARIANT* error_state )                        = 0;
 
-    virtual HRESULT         Add_end_state           ( VARIANT* state ) = 0;
+    virtual HRESULT         Add_end_state           ( VARIANT* state )                              = 0;
 
-    virtual HRESULT         Add_order               ( VARIANT* order_or_payload, Iorder** result ) = 0;
+    virtual HRESULT         Add_order               ( VARIANT* order_or_payload, Iorder** result )  = 0;
 
-    virtual HRESULT     get_Node                    ( VARIANT* state, Ijob_chain_node** result ) = 0;
+    virtual HRESULT     get_Node                    ( VARIANT* state, Ijob_chain_node** result )    = 0;
 
-    virtual HRESULT     get_Order_queue             ( VARIANT* state, Iorder_queue** result ) = 0;
+    virtual HRESULT     get_Order_queue             ( VARIANT* state, Iorder_queue** result )       = 0;
 };
 
 //----------------------------------------------------------------------------------Order_queue
@@ -461,9 +465,9 @@ struct Iorder_queue : IDispatch
 
   //virtual HRESULT     get_Java_class_name         ( BSTR* result ) = 0;
 
-    virtual HRESULT     get_Length                  ( int* result ) = 0;
+    virtual HRESULT     get_Length                  ( int* result )                                 = 0;
 
-    virtual HRESULT         Add_order               ( VARIANT* order_or_payload, Iorder** ) = 0;
+    virtual HRESULT         Add_order               ( VARIANT* order_or_payload, Iorder** )         = 0;
 };
 
 //----------------------------------------------------------------------------------------Order
@@ -475,40 +479,40 @@ struct Iorder : IDispatch
 {
     DEFINE_UUIDOF( Iorder )
 
-  //virtual HRESULT     get_Java_class_name         ( BSTR* result ) = 0;
+  //virtual HRESULT     get_Java_class_name         ( BSTR* result )                                = 0;
 
-    virtual HRESULT     put_Id                      ( VARIANT* value ) = 0;
-    virtual HRESULT     get_Id                      ( VARIANT* result ) = 0;
+    virtual HRESULT     put_Id                      ( VARIANT* value )                              = 0;
+    virtual HRESULT     get_Id                      ( VARIANT* result )                             = 0;
 
-    virtual HRESULT     put_Title                   ( BSTR value ) = 0;
-    virtual HRESULT     get_Title                   ( BSTR* result ) = 0;
+    virtual HRESULT     put_Title                   ( BSTR value )                                  = 0;
+    virtual HRESULT     get_Title                   ( BSTR* result )                                = 0;
 
-    virtual HRESULT     put_Priority                ( int value ) = 0;
-    virtual HRESULT     get_Priority                ( int* result ) = 0;
+    virtual HRESULT     put_Priority                ( int value )                                   = 0;
+    virtual HRESULT     get_Priority                ( int* result )                                 = 0;
 
-    virtual HRESULT     get_Job_chain               ( Ijob_chain** result ) = 0;
+    virtual HRESULT     get_Job_chain               ( Ijob_chain** result )                         = 0;
 
-    virtual HRESULT     get_Job_chain_node          ( Ijob_chain_node** result ) = 0;
+    virtual HRESULT     get_Job_chain_node          ( Ijob_chain_node** result )                    = 0;
 
-    virtual HRESULT     put_Job                     ( VARIANT* job_or_jobname ) = 0;
-    virtual HRESULT  putref_Job                     ( Ijob* job ) = 0;
-    virtual HRESULT     get_Job                     ( Ijob** result ) = 0;
+    virtual HRESULT     put_Job                     ( VARIANT* job_or_jobname )                     = 0;
+    virtual HRESULT  putref_Job                     ( Ijob* job )                                   = 0;
+    virtual HRESULT     get_Job                     ( Ijob** result )                               = 0;
 
-    virtual HRESULT     put_State                   ( VARIANT* value ) = 0;
-    virtual HRESULT     get_State                   ( VARIANT* result ) = 0;
+    virtual HRESULT     put_State                   ( VARIANT* value )                              = 0;
+    virtual HRESULT     get_State                   ( VARIANT* result )                             = 0;
 
-    virtual HRESULT     put_State_text              ( BSTR value ) = 0;
-    virtual HRESULT     get_State_text              ( BSTR* result ) = 0;
+    virtual HRESULT     put_State_text              ( BSTR value )                                  = 0;
+    virtual HRESULT     get_State_text              ( BSTR* result )                                = 0;
 
-    virtual HRESULT     get_Error                   ( Ierror** result ) = 0;
+    virtual HRESULT     get_Error                   ( Ierror** result )                             = 0;
 
-    virtual HRESULT     put_Payload                 ( VARIANT* value ) = 0;
-    virtual HRESULT  putref_Payload                 ( IUnknown* value ) = 0;
-    virtual HRESULT     get_Payload                 ( VARIANT* result ) = 0;
+    virtual HRESULT     put_Payload                 ( VARIANT* value )                              = 0;
+    virtual HRESULT  putref_Payload                 ( IUnknown* value )                             = 0;
+    virtual HRESULT     get_Payload                 ( VARIANT* result )                             = 0;
 
-    virtual HRESULT         Payload_is_type         ( BSTR name, VARIANT_BOOL* result ) = 0;
+    virtual HRESULT         Payload_is_type         ( BSTR name, VARIANT_BOOL* result )             = 0;
 
-    virtual HRESULT         Setback                 () = 0;
+    virtual HRESULT         Setback                 ()                                              = 0;
 };
 
 //--------------------------------------------------------------------Remote_module_instance_server
@@ -520,16 +524,37 @@ struct Iremote_module_instance_server : IDispatch
 {
     DEFINE_UUIDOF( Iremote_module_instance_server )
 
-    virtual HRESULT     Construct                   ( SAFEARRAY* parameters ) = 0;
-    virtual HRESULT     Add_obj                     ( IDispatch*, BSTR name ) = 0;
-    virtual HRESULT     Name_exists                 ( BSTR name, VARIANT_BOOL* result ) = 0;
-    virtual HRESULT     Call                        ( BSTR name, VARIANT* result ) = 0;
+    virtual HRESULT     Construct                   ( SAFEARRAY* parameters )                       = 0;
+    virtual HRESULT     Add_obj                     ( IDispatch*, BSTR name )                       = 0;
+    virtual HRESULT     Name_exists                 ( BSTR name, VARIANT_BOOL* result )             = 0;
+    virtual HRESULT     Call                        ( BSTR name, VARIANT* result )                  = 0;
 };
+
+
+//---------------------------------------------------------------------------------------Subprocess
+
+DEFINE_GUID( CLSID_Remote_module_instance_server , 0xfeee47a9, 0x6c1b, 0x11d8, 0x81, 0x03, 0x00, 0x04, 0x76, 0xee, 0x8a, 0xfb );   // {feee47a9-6c1b-11d8-8103-000476ee8afb}
+DEFINE_GUID(   IID_Iremote_module_instance_server, 0xfeee47a8, 0x6c1b, 0x11d8, 0x81, 0x03, 0x00, 0x04, 0x76, 0xee, 0x8a, 0xfb );   // {feee47a8-6c1b-11d8-8103-000476ee8afb}
+
+struct Iremote_module_instance_server : IDispatch
+{
+    DEFINE_UUIDOF( Iremote_module_instance_server )
+
+    STDMETHODIMP                Close                   ();
+    STDMETHODIMP            get_Pid                     ( int* )                                    = 0;
+    STDMETHODIMP            get_Terminated              ( VARIANT_BOOL* )                           = 0;
+    STDMETHODIMP            get_Exit_code               ( int* )                                    = 0;
+    STDMETHODIMP            get_Stdout_path             ( BSTR* )                                   = 0;
+    STDMETHODIMP            get_Stderr_path             ( BSTR* )                                   = 0;
+    STDMETHODIMP            put_Ignore_error            ( VARIANT_BOOL )                            = 0;
+    STDMETHODIMP            get_Ignore_error            ( VARIANT_BOOL* )                           = 0;
+    STDMETHODIMP            put_Ignore_signal           ( VARIANT_BOOL )                            = 0;
+    STDMETHODIMP            get_Ignore_signal           ( VARIANT_BOOL* )                           = 0;
+    STDMETHODIMP                Wait                    ( double seconds )                          = 0;
+    STDMETHODIMP                Kill                    ( int signal )                              = 0;
 
 //-------------------------------------------------------------------------------------------------
 
 } //namespace spooler_com
 
 #endif
-
-

@@ -5,6 +5,7 @@
 
 #include "../zschimmer/com.h"
 #include "../zschimmer/com_server.h"
+#include "../zschimmer/z_com_server.h"
 #include "../kram/com_simple_standards.h"
 #include "../kram/sysxcept.h"
 #include "../kram/sosscrpt.h"
@@ -56,6 +57,10 @@ struct Spooler;
 #ifndef Z_WINDOWS
     struct IXMLDOMDocument;    // Dummy
 #endif
+
+//-------------------------------------------------------------------------------------------------
+
+extern Typelib_ref              typelib;
 
 //----------------------------------------------------------------------------------------Com_error
 
@@ -523,10 +528,29 @@ struct Com_spooler : spooler_com::Ispooler,
     STDMETHODIMP            get_Db_order_history_table_name ( BSTR* );
     STDMETHODIMP            get_Ini_path                    ( BSTR* );
     STDMETHODIMP                Execute_xml                 ( BSTR, BSTR* );
+    STDMETHODIMP                Start_subprocess            ( VARIANT*, spooler_com::Isubprocess** );
 
   protected:
     Thread_semaphore           _lock;
     Spooler*                   _spooler;                    // Es gibt nur einen Com_spooler
+};
+
+//--------------------------------------------------------------------------------Com_spooler_proxy
+                                    
+//Z_DEFINE_GUID( CLSID_Com_spooler_proxy, 0xfeee47aa, 0x6c1b, 0x11d8, 0x81, 0x03, 0x00, 0x04, 0x76, 0xee, 0x8a, 0xfb );   // {feee47aa-6c1b-11d8-8103-000476ee8afb}
+
+struct Com_spooler_proxy: com::object_server::proxy_with_local_methods< spooler_com::Ispooler_proxy >
+{
+    static Class_descriptor     class_descriptor;
+
+    static HRESULT              Create_instance             ( const IID& iid, ptr<IUnknown>* result );
+
+
+                                Com_spooler_proxy           ()                                      : Proxy_with_local_methods( &class_descriptor ) {}
+
+    STDMETHODIMP                Start_subprocess            ( VARIANT* program_and_parameters, spooler_com::Isubprocess** result );
+
+  private:
 };
 
 //--------------------------------------------------------------------------------------Com_context
@@ -711,6 +735,41 @@ struct Com_order_queue : spooler_com::Iorder_queue,
   private:
     Fill_zero                  _zero_;
     Thread_semaphore           _lock;
+};
+
+//-----------------------------------------------------------------------------------Com_subprocess
+
+struct Com_subprocess : spooler_com::Isubprocess, 
+                        spooler_com::Ihas_java_class_name, 
+                        Sos_ole_object               
+{
+                                Com_subprocess          ();
+
+
+    STDMETHODIMP                QueryInterface          ( REFIID, void** );
+
+    USE_SOS_OLE_OBJECT_WITHOUT_QI
+
+    STDMETHODIMP            get_Java_class_name         ( BSTR* result )                            { return String_to_bstr( const_java_class_name(), result ); }
+    STDMETHODIMP_(char*)  const_java_class_name         ()                                          { return (char*)"sos.spooler.Subprocess"; }
+
+    STDMETHODIMP                Close                   ();
+    STDMETHODIMP            get_Pid                     ( int* );
+    STDMETHODIMP            get_Terminated              ( VARIANT_BOOL* );
+    STDMETHODIMP            get_Exit_code               ( int* );
+    STDMETHODIMP            get_Stdout_path             ( BSTR* );
+    STDMETHODIMP            get_Stderr_path             ( BSTR* );
+    STDMETHODIMP            put_Ignore_error            ( VARIANT_BOOL );
+    STDMETHODIMP            get_Ignore_error            ( VARIANT_BOOL* );
+    STDMETHODIMP            put_Ignore_signal           ( VARIANT_BOOL );
+    STDMETHODIMP            get_Ignore_signal           ( VARIANT_BOOL* );
+    STDMETHODIMP                Wait                    ( double seconds );
+    STDMETHODIMP                Kill                    ( int signal );
+
+  private:
+    Fill_zero                  _zero_;
+    Thread_semaphore           _lock;
+    ptr<Subprocess>            _subprocess;
 };
 
 //-------------------------------------------------------------------------------------------------
