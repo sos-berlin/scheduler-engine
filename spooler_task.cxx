@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.201 2003/09/30 13:13:44 jz Exp $
+// $Id: spooler_task.cxx,v 1.202 2003/09/30 14:08:13 jz Exp $
 /*
     Hier sind implementiert
 
@@ -1499,7 +1499,7 @@ bool Process_task::do_kill()
 }
 
 //------------------------------------------------------------------------Process_task::do_end__end
-
+/*
 void Process_task::do_end__end()
 {
     DWORD exit_code;
@@ -1514,9 +1514,20 @@ void Process_task::do_end__end()
 
     _log.log_file( _job->_process_log_filename ); 
 
-    if( !_job->_process_ingore_error  &&  exit_code )  throw_xc( "SPOOLER-126", exit_code );
+    if( exit_code )
+    {
+        try
+        {
+            throw_xc( "SPOOLER-126", exit_code );
+        }
+        catch( const exception& x )
+        {
+            if( !_job->_process_ingore_error  )  throw;
+            _log.warn( x.what() );
+        }
+    }
 }
-
+*/
 //---------------------------------------------------------------------------Process_task::signaled
 
 bool Process_task::signaled()
@@ -1531,17 +1542,6 @@ bool Process_task::signaled()
 
 bool Process_task::do_step__end()
 {
-/*
-    DWORD exit_code;
-
-    BOOL ok = GetExitCodeProcess( _process_handle, &exit_code );
-    if( !ok )  throw_mswin_error( "GetExitCodeProcess" );
-
-    if( exit_code == STILL_ACTIVE )  return true;
-
-    _exit_code = exit_code;
-    _result    = exit_code;
-*/
     return !signaled();
 }
 
@@ -1722,29 +1722,58 @@ bool Process_task::do_kill()
     return false;
 }
 
+#endif
 //------------------------------------------------------------------------Process_task::do_end__end
 
 void Process_task::do_end__end()
 {
-    if( _process_handle._pid )
-    {
-        do_step__end();      // waitpid() sollte schon gerufen sein. 
+#   ifdef Z_WINDOWS
 
-        if( _process_handle._pid )   throw_xc( "SPOOLER-179", _process_handle._pid );       // Sollte nicht passieren (ein Zombie wird stehen bleiben)
-    }
+        DWORD exit_code;
 
-    _process_handle.close();
+        BOOL ok = GetExitCodeProcess( _process_handle, &exit_code );
+        if( !ok )  throw_mswin_error( "GetExitCodeProcess" );
 
-    if( _process_handle._process_signaled )  throw_xc( "SPOOLER-181", _process_handle._process_signaled );
+        if( exit_code == STILL_ACTIVE )  throw_xc( "STILL_ACTIVE", obj_name() );
 
-    _result = (int)_process_handle._process_exit_code;
+        _process_handle.close();
+
+#    else
+
+        if( _process_handle._pid )
+        {
+            do_step__end();      // waitpid() sollte schon gerufen sein. 
+            if( _process_handle._pid )   throw_xc( "SPOOLER-179", _process_handle._pid );       // Sollte nicht passieren (ein Zombie wird stehen bleiben)
+        }
+
+        _process_handle.close();
+
+        if( _process_handle._process_signaled )  throw_xc( "SPOOLER-181", _process_handle._process_signaled );
+
+        int exit_code = _process_handle._process_exit_code;
+
+#   endif
+
+    _result = (int)exit_code;
 
     _log.log_file( _job->_process_log_filename ); 
 
-    if( !_job->_process_ingore_error  &&  _process_handle._process_exit_code )  throw_xc( "SPOOLER-126", _process_handle._process_exit_code );
+    if( exit_code )
+    {
+        try
+        {
+            throw_xc( "SPOOLER-126", exit_code );
+        }
+        catch( const exception& x )
+        {
+            if( !_job->_process_ingore_error )  throw;
+            _log.warn( x.what() );
+        }
+    }
 }
 
 //---------------------------------------------------------------------------Process_task::signaled
+#ifndef Z_WINDOWS
 
 bool Process_task::signaled()
 {
