@@ -1,4 +1,4 @@
-// $Id: spooler_task.h,v 1.107 2003/08/27 17:44:49 jz Exp $
+// $Id: spooler_task.h,v 1.108 2003/08/28 20:48:25 jz Exp $
 
 #ifndef __SPOOLER_TASK_H
 #define __SPOOLER_TASK_H
@@ -44,7 +44,7 @@ struct Task : Sos_self_deleting
 
     int                         id                          ()                                      { return _id; }
 
-    void                        cmd_end                     ()                                      { _end = true; }
+    void                        cmd_end                     ()                                      { _end = true; signal( "end" ); }
 
     void                        close                       ();
     xml::Element_ptr            dom                         ( const xml::Document_ptr&, Show_what );

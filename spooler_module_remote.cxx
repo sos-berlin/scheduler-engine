@@ -1,4 +1,4 @@
-// $Id: spooler_module_remote.cxx,v 1.21 2003/08/27 20:40:32 jz Exp $
+// $Id: spooler_module_remote.cxx,v 1.22 2003/08/28 20:48:25 jz Exp $
 /*
     Hier sind implementiert
 
@@ -86,6 +86,12 @@ void Remote_module_instance_proxy::close()
         _process = NULL;
     }
 
+    if( _session )
+    {
+        _session->close();
+        _session = NULL;
+    }
+
     Com_module_instance_base::close();
 }
 
@@ -93,7 +99,6 @@ void Remote_module_instance_proxy::close()
 
 void Remote_module_instance_proxy::add_obj( const ptr<IDispatch>& object, const string& name )
 {
-    //_remote_instance->call( "add_obj", +object, name );
     _object_list.push_back( Object_list_entry( object, name ) );
 }
 
@@ -101,6 +106,8 @@ void Remote_module_instance_proxy::add_obj( const ptr<IDispatch>& object, const 
 
 bool Remote_module_instance_proxy::name_exists( const string& name )
 {
+    if( !_remote_instance )  return false;
+
     return int_from_variant( _remote_instance->call( "name_exists", name ) ) != 0;
 }
 
@@ -146,6 +153,8 @@ bool Remote_module_instance_proxy::begin__end()
 {
     //if( _error )  throw *_error;
     //if( _call_state != c_begin )  
+
+    _operation->async_check_error();
     if( !_operation->async_finished() )  throw_xc( "SPOOLER-191", "begin__end", "not-finished" );
     _operation = NULL;
 
@@ -156,6 +165,8 @@ bool Remote_module_instance_proxy::begin__end()
 
 Async_operation* Remote_module_instance_proxy::end__start( bool success )
 {
+    if( !_remote_instance )  return NULL;
+
     //_error = NULL;
     _operation = _remote_instance->call__start( "end", success );
     
@@ -167,6 +178,7 @@ Async_operation* Remote_module_instance_proxy::end__start( bool success )
 void Remote_module_instance_proxy::end__end()
 {
   //if( _call_state != c_finished )  throw_xc( "SPOOLER-191", "end__end", (int)_call_state );
+    if( !_remote_instance )  return;
 
     _operation = NULL;
     _remote_instance->call__end();
@@ -199,13 +211,10 @@ Remote_module_instance_proxy::Operation::Operation( Remote_module_instance_proxy
     _zero_(this+1),
     _proxy(proxy)
 {
-    _multi_qi.allocate( 1 );
-    _multi_qi.set_iid( 0, spooler_com::IID_Iremote_module_instance_server );
-    
-    _operation = _proxy->_session->create_instance__start( spooler_com::CLSID_Remote_module_instance_server, NULL, 0, NULL, 1, _multi_qi );
+    _operation = _proxy->_session->connect_server__start();
     _operation->set_async_parent( this );
 
-    _call_state = c_create_instance;
+    _call_state = c_connect;
 }
 
 //----------------------------------------------Remote_module_instance_proxy::Operation::begin__end
@@ -218,14 +227,16 @@ bool Remote_module_instance_proxy::Operation::begin__end()
     return check_result( _remote_instance->call__end() );
 }
 */
-//------------------------------------------Remote_module_instance_proxy::Operation::async_continue
+//-----------------------------------------Remote_module_instance_proxy::Operation::async_continue_
 
-void Remote_module_instance_proxy::Operation::async_continue( bool wait )
+void Remote_module_instance_proxy::Operation::async_continue_( bool wait )
 { 
     bool loop = true;
     while( loop )
     {
         loop = false;
+
+        _operation->async_continue( wait );
 
         if( wait )  _operation->async_finish();
         else  
@@ -235,10 +246,30 @@ void Remote_module_instance_proxy::Operation::async_continue( bool wait )
 
         switch( _call_state )
         {
+            case c_connect:
+            {
+                _operation = NULL;
+                _proxy->_session->connect_server__end();
+            }
+            
+            // Nächste Operation
+
+            {
+                _multi_qi.allocate( 1 );
+                _multi_qi.set_iid( 0, spooler_com::IID_Iremote_module_instance_server );
+                
+                _operation = _proxy->_session->create_instance__start( spooler_com::CLSID_Remote_module_instance_server, NULL, 0, NULL, 1, _multi_qi );
+                _operation->set_async_parent( this );
+
+                _call_state = c_create_instance;
+                break;
+            }
+
+
             case c_create_instance:
             {
-                HRESULT hr = _proxy->_session->create_instance__end( 1, _multi_qi );
                 _operation = NULL;
+                HRESULT hr = _proxy->_session->create_instance__end( 1, _multi_qi );
                 if( FAILED(hr) )  throw_com( hr, "create_instance" );
 
                 _proxy->_remote_instance = dynamic_cast<object_server::Proxy*>( _multi_qi[0].pItf );
@@ -276,8 +307,8 @@ void Remote_module_instance_proxy::Operation::async_continue( bool wait )
 
             case c_construct:
             {
-                _proxy->_remote_instance->call__end();
                 _operation = NULL;
+                _proxy->_remote_instance->call__end();
             }
              
             // Nächste Operation
@@ -322,16 +353,16 @@ void Remote_module_instance_proxy::Operation::async_continue( bool wait )
     }
 }
 
-//------------------------------------------Remote_module_instance_proxy::Operation::async_finished
+//-----------------------------------------Remote_module_instance_proxy::Operation::async_finished_
 
-bool Remote_module_instance_proxy::Operation::async_finished()
+bool Remote_module_instance_proxy::Operation::async_finished_()
 { 
     return _call_state == c_finished  ||  _operation->async_has_error();
 }
 
-//----------------------------------------Remote_module_instance_proxy::Operation::async_state_text
+//---------------------------------------Remote_module_instance_proxy::Operation::async_state_text_
 
-string Remote_module_instance_proxy::Operation::async_state_text()
+string Remote_module_instance_proxy::Operation::async_state_text_()
 { 
     string text = "Remote_module_instance_proxy(state=" + state_name();
     if( _operation )  text += "," + _operation->async_state_text();
@@ -347,6 +378,7 @@ string Remote_module_instance_proxy::Operation::state_name()
     switch( _call_state )
     {
         case c_none           : return "none";
+        case c_connect        : return "connect";
         case c_create_instance: return "create_instance";
         case c_construct      : return "construct";
         case c_begin          : return "begin";

@@ -1,4 +1,4 @@
-// $Id: spooler.h,v 1.147 2003/08/27 20:40:32 jz Exp $
+// $Id: spooler.h,v 1.148 2003/08/28 20:48:25 jz Exp $
 
 #ifndef __SPOOLER_H
 #define __SPOOLER_H
@@ -181,6 +181,7 @@ struct Spooler
     void                        load_jobs_from_xml          ( const xml::Element_ptr&, const Time& xml_mod_time, bool init = false );
     xml::Element_ptr            jobs_as_xml                 ( const xml::Document_ptr&, Show_what );
     xml::Element_ptr            threads_as_xml              ( const xml::Document_ptr&, Show_what );
+    xml::Element_ptr            processes_as_dom            ( const xml::Document_ptr&, Show_what );
 
     int                         launch                      ( int argc, char** argv );                                
     void                        set_state_changed_handler   ( State_changed_handler h )         { _state_changed_handler = h; }

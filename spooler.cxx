@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.227 2003/08/27 20:40:32 jz Exp $
+// $Id: spooler.cxx,v 1.228 2003/08/28 20:48:24 jz Exp $
 /*
     Hier sind implementiert
 
@@ -485,6 +485,21 @@ xml::Element_ptr Spooler::threads_as_xml( const xml::Document_ptr& document, Sho
     }
 
     return threads;
+}
+
+//------------------------------------------------------------------------Spooler::processes_as_dom
+// Anderer Thread
+
+xml::Element_ptr Spooler::processes_as_dom( const xml::Document_ptr& document, Show_what show )
+{
+    xml::Element_ptr processes = document.createElement( "processes" );
+
+    THREAD_LOCK( _lock )
+    {
+        FOR_EACH( Process_list, _process_list, it )  processes.appendChild( (*it)->dom( document, show ) );
+    }
+
+    return processes;
 }
 
 //--------------------------------------------------------------Spooler::wait_until_threads_stopped
@@ -2145,7 +2160,7 @@ int sos_main( int argc, char** argv )
     }
     catch( const exception& x )
     {
-        LOG( x.what() );
+        LOG( x.what() << "\n" );
         if( is_service )  spooler::send_error_email( x.what(), argc, argv );
         ret = 1;
     }

@@ -1,4 +1,4 @@
-// $Id: spooler_command.h,v 1.20 2003/08/15 19:13:33 jz Exp $
+// $Id: spooler_command.h,v 1.21 2003/08/28 20:48:25 jz Exp $
 
 #ifndef __SPOOLER_COMMAND_H
 #define __SPOOLER_COMMAND_H
@@ -44,6 +44,7 @@ struct Command_processor
     xml::Element_ptr            execute_show_history        ( const xml::Element_ptr&, Show_what );
     xml::Element_ptr            execute_show_jobs           ( Show_what );
     xml::Element_ptr            execute_show_threads        ( Show_what );
+    xml::Element_ptr            execute_show_processes      ( Show_what );
     xml::Element_ptr            execute_add_jobs            ( const xml::Element_ptr& );
     xml::Element_ptr            execute_show_job            ( const xml::Element_ptr&, Show_what );
   //xml::Element_ptr            execute_show_job            ( Job* );

@@ -1,4 +1,4 @@
-// $Id: spooler_module_remote.h,v 1.9 2003/08/27 19:26:37 jz Exp $
+// $Id: spooler_module_remote.h,v 1.10 2003/08/28 20:48:25 jz Exp $
 
 #ifndef __SPOOLER_MODULE_REMOTE_H
 #define __SPOOLER_MODULE_REMOTE_H
@@ -19,6 +19,7 @@ struct Remote_module_instance_proxy : Com_module_instance_base
         enum Call_state
         {
             c_none,
+            c_connect,
             c_create_instance,
             c_construct,
             c_begin,
@@ -31,11 +32,11 @@ struct Remote_module_instance_proxy : Com_module_instance_base
         Async_operation*        begin__start                ();
         bool                    begin__end                  ();
 
-        virtual bool            async_finished              ();
-        virtual void            async_continue              ( bool wait = false );
-        virtual bool            async_has_error             ()                                      { return _operation? _operation->async_has_error() : false; }
-        virtual void            async_check_error           ()                                      { if( _operation )  _operation->async_check_error(); }
-        virtual string          async_state_text            ();
+        virtual bool            async_finished_             ();
+        virtual void            async_continue_             ( bool wait = false );
+        virtual bool            async_has_error_            ()                                      { return _operation? _operation->async_has_error() : false; }
+        virtual void            async_check_error_          ()                                      { if( _operation )  _operation->async_check_error(); }
+        virtual string          async_state_text_           ();
 
         string                  state_name                  ();
 

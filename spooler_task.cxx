@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.174 2003/08/27 17:44:48 jz Exp $
+// $Id: spooler_task.cxx,v 1.175 2003/08/28 20:48:25 jz Exp $
 /*
     Hier sind implementiert
 
@@ -509,7 +509,7 @@ bool Task::do_something()
             if( !let_run ) 
             {
                 _log( "Laufzeitperiode ist abgelaufen, Task wird beendet" );
-                set_state( s_end );
+                if( !_operation )   set_state( s_end );
             }
         }
 
@@ -528,7 +528,7 @@ bool Task::do_something()
              || _state == s_running_process           )
             {
                 if( _step_count == _job->_history.min_steps() )  _history.start();
-                if( _end )  set_state( s_end );
+                if( _end && !_operation )  set_state( s_end );
             }
 
 
@@ -685,9 +685,11 @@ bool Task::do_something()
             if( !ok || has_error() )  
             {
                 _success = false;
+
                 if( _state != s_ending 
                  && _state != s_ended 
-                 && _state != s_closed ) set_state( s_end );
+                 && _state != s_closed 
+                 && !_operation         ) set_state( s_end );
             }
 
 
@@ -795,7 +797,6 @@ bool Task::begin__end()
     try 
     {
         result = do_begin__end();
-
     }
     catch( const exception& x ) { set_error(x);  result = false; }
 
@@ -1164,6 +1165,8 @@ bool Job_module_task::do_begin__end()
 
 Async_operation* Job_module_task::do_end__start()
 {
+    if( !_module_instance )  return NULL;
+
     return _module_instance->end__start( _success );
 }
 
@@ -1171,6 +1174,8 @@ Async_operation* Job_module_task::do_end__start()
 
 void Job_module_task::do_end__end()
 {
+    if( !_module_instance )  return;
+
     _module_instance->end__end();
 }
 

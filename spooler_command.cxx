@@ -1,4 +1,4 @@
-// $Id: spooler_command.cxx,v 1.89 2003/08/25 20:41:26 jz Exp $
+// $Id: spooler_command.cxx,v 1.90 2003/08/28 20:48:25 jz Exp $
 /*
     Hier ist implementiert
 
@@ -117,6 +117,15 @@ xml::Element_ptr Command_processor::execute_show_threads( Show_what show )
     return _spooler->threads_as_xml( _answer, show );
 }
 
+//---------------------------------------------------------Command_processor::execute_show_processes
+
+xml::Element_ptr Command_processor::execute_show_processes( Show_what show )
+{
+    if( _security_level < Security::seclev_info )  throw_xc( "SPOOLER-121" );
+
+    return _spooler->processes_as_dom( _answer, show );
+}
+
 //------------------------------------------------------------Command_processor::execute_show_state
 
 xml::Element_ptr Command_processor::execute_show_state( const xml::Element_ptr& element, Show_what show )
@@ -143,6 +152,7 @@ xml::Element_ptr Command_processor::execute_show_state( const xml::Element_ptr& 
 
     state_element.appendChild( execute_show_jobs( show ) );
     state_element.appendChild( execute_show_threads( show ) );
+    state_element.appendChild( execute_show_processes( show ) );
 
     return state_element;
 }
