@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.90 2002/05/16 20:01:43 jz Exp $
+// $Id: spooler_task.cxx,v 1.91 2002/05/19 09:59:24 jz Exp $
 /*
     Hier sind implementiert
 
@@ -260,6 +260,58 @@ Job::~Job()
     close();
 }
 
+//----------------------------------------------------------------------------------------Job::init
+// Bei <add_jobs> von einem anderen Thread gerufen.
+
+void Job::init()
+{
+    _state = s_none;
+
+    _log.set_prefix( obj_name() );
+    _log.set_profile_section( profile_section() );
+    _log.set_job( this );
+
+    _event.set_name( obj_name() );
+    _event.add_to( &_thread->_wait_handles );
+
+    _com_job  = new Com_job( this );
+    _com_log  = new Com_log( &_log );
+    _com_task = new Com_task();
+
+    _history.open();
+
+    set_state( s_pending );
+
+    if( _script_xml_element )  read_script();
+
+    _script_ptr = _object_set_descr? &_object_set_descr->_class->_script
+                                   : &_script;
+
+
+    if( !_spooler->log_directory().empty()  &&  _spooler->log_directory()[0] != '*' )
+    {
+        _log.set_append( _log_append );
+        _log.set_filename( _spooler->log_directory() + "/job." + jobname_as_filename() + ".log" );      // Jobprotokoll
+    }
+
+    init2();
+}
+
+//----------------------------------------------------------------------------------------Job::init
+// Bei <add_jobs> von einem anderen Thread gerufen.
+
+void Job::init2()
+{
+    _start_once    = _run_time.once();
+    _delay_until   = 0;
+    _period._begin = 0;
+    _period._end   = 0;
+    _next_single_start = latter_day;
+
+    set_next_start_time();
+    //select_period();
+}
+
 //---------------------------------------------------------------------------------------Job::close
 
 void Job::close()
@@ -312,158 +364,6 @@ void Job::close_task()
         close_engine();
         _close_engine = false;
     }
-}
-
-//----------------------------------------------------------------------------------------Job::init
-// Bei <add_jobs> von einem anderen Thread gerufen.
-
-void Job::init()
-{
-    _state = s_none;
-
-    _log.set_prefix( obj_name() );
-    _log.set_profile_section( profile_section() );
-    _log.set_job( this );
-
-    _event.set_name( obj_name() );
-    _event.add_to( &_thread->_wait_handles );
-
-    _com_job  = new Com_job( this );
-    _com_log  = new Com_log( &_log );
-    _com_task = new Com_task();
-
-    _history.open();
-
-    set_state( s_pending );
-
-    if( _script_xml_element )  read_script();
-
-    _script_ptr = _object_set_descr? &_object_set_descr->_class->_script
-                                   : &_script;
-
-
-    if( !_spooler->log_directory().empty()  &&  _spooler->log_directory()[0] != '*' )
-    {
-        _log.set_append( _log_append );
-        _log.set_filename( _spooler->log_directory() + "/job." + jobname_as_filename() + ".log" );      // Jobprotokoll
-    }
-
-    init2();
-}
-
-//----------------------------------------------------------------------------------------Job::init
-// Bei <add_jobs> von einem anderen Thread gerufen.
-
-void Job::init2()
-{
-    _start_once = _run_time.once();
-    _delay_until = 0;
-    _period._begin = 0;
-    _period._end = 0;
-
-    select_period();
-}
-
-//-------------------------------------------------------------------------------Job::select_period
-
-void Job::select_period( Time now )
-{
-    if( now >= _period.end() )       // Periode abgelaufen?
-    {
-        _period = _run_time.next_period(now);  
-
-        if( _period.begin() != latter_day )
-        {
-            string rep; if( _period._repeat != latter_day )  rep = _period._repeat.as_string();
-            _log.debug( "Nächste Periode ist <period begin=\"" + _period.begin().as_string() + "\" end=\"" + _period.end().as_string() + "\" repeat=\"" + rep + "\">" );
-        }
-        else 
-            _log.debug( "Keine weitere Periode" );
-
-        if( _period.has_start() )
-        {
-            _next_start_time = max( now, _period.begin() );
-            //_log.debug( "Nächster Start " + _next_start_time.as_string() );
-        }
-        else
-            _next_start_time = latter_day;
-    }
-
-    set_next_time( now );
-}
-
-//--------------------------------------------------------------------------------Job::is_in_period
-
-bool Job::is_in_period( Time now )
-{
-    //select_period( now );
-    return now >= _delay_until  &&  now >= _period.begin()  &&  now < _period.end();
-}
-
-//-------------------------------------------------------------------------------Job::set_next_time
-// Für Spooler_thread
-
-void Job::set_next_time( Time now )
-{
-    _next_time = latter_day;
-
-    // Minimum von _start_at für _next_time berücksichtigen
-    Task_queue::iterator it = _task_queue.begin();  
-    while( it != _task_queue.end()  &&  !(*it)->_start_at )  it++;
-    if( it != _task_queue.end()  &&  _next_time > (*it)->_start_at )  _next_time = (*it)->_start_at;
-
-    if( _spooler->state() != Spooler::s_stopping_let_run )
-    {
-        _next_time = min( _next_time, _next_start_time );
-
-        if( _next_time == latter_day )  // Das ist, wenn die Periode weder repeat noch single_start hat, also keinen automatischen Start
-        {
-            _next_time = _period.end();
-        }
-    }
-
-    // Gesammelte eMail senden, wenn collected_max erreicht:
-    Time log_time = _log.collect_end();
-    if( log_time > now  &&  _next_time > log_time )  _next_time = log_time;
-}
-
-//-------------------------------------------------------------------------Job::set_next_start_time
-
-void Job::set_next_start_time( Time now )
-{
-    if( _delay_until )
-    {
-        _next_start_time = _delay_until;
-        _log.debug( "Wiederholung wegen delay_after_error: " + _next_start_time.as_string() );
-    }
-    else
-    if( _repeat > 0 )       // spooler_task.repeat
-    {
-        _next_start_time = now + _repeat;
-        _log.debug( "Wiederholung wegen spooler_job.repeat=" + as_string(_repeat) + ": " + _next_start_time.as_string() );
-        _repeat = 0;
-    }
-    else
-    {
-        _next_start_time = _period.next_try( now );
-        if( _next_start_time != latter_day )  _log.debug( "Nächste Wiederholung wegen <period repeat=\"" + as_string((double)_period._repeat) + "\">: " + _next_start_time.as_string() );
-    }
-
-    if( _next_start_time > _period.end()  ||  _next_start_time == latter_day ) 
-    {
-        if( now < _period.begin() )     // Nächste Periode hat noch nicht begonnen?
-        {
-            _next_start_time = _period.begin();
-            _log.debug( "Nächster Start zu Beginn der Periode: " + _next_start_time.as_string() );
-        }
-        else  
-        if( now >= _period.end() )
-        {
-            select_period( now );
-        }
-    }
-
-    set_next_time( now );
 }
 
 //-------------------------------------------------------------------------Job::jobname_as_filename
@@ -590,67 +490,18 @@ Sos_ptr<Task> Job::start_without_lock( const CComPtr<spooler_com::Ivariable_set>
     switch( _state )
     {
         case s_read_error:  throw_xc( "SPOOLER-132", name(), _error? _error->what() : "" );
-     
-      //case s_load_error:
         case s_stopped:     set_state( s_pending );
-        
         default: ;
     }
 
+    if( !start_at  &&  !_run_time.period_follows( Time::now() ) )   throw_xc( "SPOOLER-143" );
+
     Sos_ptr<Task> task = create_task( params, task_name, start_at );
-    
     task->_let_run = true;
 
     if( GetCurrentThreadId() != thread()->_thread_id )  _thread->signal( "start job" );
 
     return task;
-}
-
-//----------------------------------------------------------------Job::start_when_directory_changed
-
-void Job::start_when_directory_changed( const string& directory_name, const string& filename_pattern )
-{
-    THREAD_LOCK( _lock )
-    {
-        _log.debug( "start_when_directory_changed \"" + directory_name + "\", \"" + filename_pattern + "\"" );
-
-#       ifdef SYSTEM_WIN
-
-            for( Directory_watcher_list::iterator it = _directory_watcher_list.begin(); it != _directory_watcher_list.end(); it++ )
-            {
-                if( (*it)->directory()        == directory_name 
-                 && (*it)->filename_pattern() == filename_pattern )  it = _directory_watcher_list.erase( it );   // Überwachung erneuern
-                // Wenn das Verzeichnis bereits überwacht war, aber inzwischen gelöscht, und das noch nicht bemerkt worden ist
-                // (weil Spooler_thread::wait vor lauter Jobaktivität nicht gerufen wurde), dann ist es besser, die Überwachung 
-                // hier zu erneuern. Besonders, wenn das Verzeichnis wieder angelegt ist.
-            }
-
-
-            Sos_ptr<Directory_watcher> dw = SOS_NEW( Directory_watcher( &_log ) );
-
-            dw->watch_directory( directory_name, filename_pattern );
-            dw->set_name( "job(\"" + _name + "\").start_when_directory_changed(\"" + directory_name + "\")" );
-            _directory_watcher_list.push_back( dw );
-            dw->add_to( &_thread->_wait_handles );
-
-#        else
-
-            throw_xc( "SPOOLER-112", "Job::start_when_directory_changed" );
-
-#       endif
-    }
-}
-
-//----------------------------------------------------------------Job::clear_when_directory_changed
-
-void Job::clear_when_directory_changed()
-{
-    THREAD_LOCK( _lock )
-    {
-        if( !_directory_watcher_list.empty() )  _log.debug( "clear_when_directory_changed" );
-
-        _directory_watcher_list.clear();
-    }
 }
 
 //---------------------------------------------------------------------------------Job::read_script
@@ -836,6 +687,158 @@ bool Job::execute_state_cmd()
     return something_done;
 }
 
+//----------------------------------------------------------------Job::start_when_directory_changed
+
+void Job::start_when_directory_changed( const string& directory_name, const string& filename_pattern )
+{
+    THREAD_LOCK( _lock )
+    {
+        _log.debug( "start_when_directory_changed \"" + directory_name + "\", \"" + filename_pattern + "\"" );
+
+#       ifdef SYSTEM_WIN
+
+            for( Directory_watcher_list::iterator it = _directory_watcher_list.begin(); it != _directory_watcher_list.end(); it++ )
+            {
+                if( (*it)->directory()        == directory_name 
+                 && (*it)->filename_pattern() == filename_pattern )  it = _directory_watcher_list.erase( it );   // Überwachung erneuern
+                // Wenn das Verzeichnis bereits überwacht war, aber inzwischen gelöscht, und das noch nicht bemerkt worden ist
+                // (weil Spooler_thread::wait vor lauter Jobaktivität nicht gerufen wurde), dann ist es besser, die Überwachung 
+                // hier zu erneuern. Besonders, wenn das Verzeichnis wieder angelegt ist.
+            }
+
+
+            Sos_ptr<Directory_watcher> dw = SOS_NEW( Directory_watcher( &_log ) );
+
+            dw->watch_directory( directory_name, filename_pattern );
+            dw->set_name( "job(\"" + _name + "\").start_when_directory_changed(\"" + directory_name + "\")" );
+            _directory_watcher_list.push_back( dw );
+            dw->add_to( &_thread->_wait_handles );
+
+#        else
+
+            throw_xc( "SPOOLER-112", "Job::start_when_directory_changed" );
+
+#       endif
+    }
+}
+
+//----------------------------------------------------------------Job::clear_when_directory_changed
+
+void Job::clear_when_directory_changed()
+{
+    THREAD_LOCK( _lock )
+    {
+        if( !_directory_watcher_list.empty() )  _log.debug( "clear_when_directory_changed" );
+
+        _directory_watcher_list.clear();
+    }
+}
+
+//-------------------------------------------------------------------------------Job::set_next_time
+// Für Spooler_thread
+
+void Job::set_next_time( Time now )
+{
+    _next_time = latter_day;
+
+    // Minimum von _start_at für _next_time berücksichtigen
+    Task_queue::iterator it = _task_queue.begin();  
+    while( it != _task_queue.end()  &&  !(*it)->_start_at )  it++;
+    if( it != _task_queue.end()  &&  _next_time > (*it)->_start_at )  _next_time = (*it)->_start_at;
+
+    if( _spooler->state() != Spooler::s_stopping_let_run )
+    {
+        if( _next_time > _next_start_time   )  _next_time = _next_start_time;
+        if( _next_time > _period.end()      )  _next_time = _period.end();          // Das ist, wenn die Periode weder repeat noch single_start hat, also keinen automatischen Start
+        if( _next_time > _next_single_start )  _next_time = _next_single_start;
+    }
+
+    // Gesammelte eMail senden, wenn collected_max erreicht:
+    Time log_time = _log.collect_end();
+    if( log_time > now  &&  _next_time > log_time )  _next_time = log_time;
+}
+
+//-------------------------------------------------------------------------------Job::select_period
+
+void Job::select_period( Time now )
+{
+    if( now >= _period.end() )       // Periode abgelaufen?
+    {
+        _period = _run_time.next_period(now);  
+
+        if( _period.begin() != latter_day )
+        {
+            string rep; if( _period._repeat != latter_day )  rep = _period._repeat.as_string();
+            _log.debug( "Nächste Periode ist <period begin=\"" + _period.begin().as_string() + "\" end=\"" + _period.end().as_string() + "\" repeat=\"" + rep + "\">" );
+        }
+        else 
+            _log.debug( "Keine weitere Periode" );
+
+        if( _period.has_start() )
+        {
+            _next_start_time = max( now, _period.begin() );
+            //_log.debug( "Nächster Start " + _next_start_time.as_string() );
+        }
+        else
+            _next_start_time = latter_day;
+    }
+
+    set_next_time( now );
+}
+
+//--------------------------------------------------------------------------------Job::is_in_period
+
+bool Job::is_in_period( Time now )
+{
+    return now >= _delay_until  &&  now >= _period.begin()  &&  now < _period.end();
+}
+
+//-------------------------------------------------------------------------Job::set_next_start_time
+
+void Job::set_next_start_time( Time now )
+{
+    string msg;
+
+    if( _delay_until )
+    {
+        _next_start_time = _delay_until;
+        if( _spooler->_debug )  msg = "Wiederholung wegen delay_after_error: " + _next_start_time.as_string();
+    }
+    else
+    if( _repeat > 0 )       // spooler_task.repeat
+    {
+        _next_start_time = now + _repeat;
+        if( _spooler->_debug )  msg = "Wiederholung wegen spooler_job.repeat=" + as_string(_repeat) + ": " + _next_start_time.as_string();
+        _repeat = 0;
+    }
+    else
+    {
+        _next_start_time = _period.next_try( now );
+        if( _spooler->_debug && _next_start_time != latter_day )  msg = "Nächste Wiederholung wegen <period repeat=\"" + as_string((double)_period._repeat) + "\">: " + _next_start_time.as_string();
+
+        _next_single_start = _run_time.next_single_start( now );
+        if( _spooler->_debug && _next_single_start < _next_start_time )  msg = "Nächster single_start " + _next_single_start.as_string();
+    }
+
+    if( _next_start_time > _period.end()  ||  _next_start_time == latter_day ) 
+    {
+        if( now < _period.begin() )     // Nächste Periode hat noch nicht begonnen?
+        {
+            _next_start_time = _period.begin();
+            if( _spooler->_debug )  msg = "Nächster Start zu Beginn der Periode: " + _next_start_time.as_string();
+        }
+        else  
+        if( now >= _period.end() )
+        {
+            select_period( now );
+        }
+    }
+
+    if( !msg.empty() )  _log.debug( msg );
+
+    set_next_time( now );
+}
+
 //-------------------------------------------------------------------------------Job::task_to_start
 
 void Job::task_to_start()
@@ -852,7 +855,8 @@ void Job::task_to_start()
 
         if( _spooler->state() != Spooler::s_stopping_let_run )  
         {
-            if( _period._single_start  &&  now >= _next_start_time )  
+            //if( _period._single_start  &&  now >= _next_start_time )  
+            if( now >= _next_single_start )
             {
                 cause = cause_period_single;     
                 //_log.debug( "Task startet wegen single_start=" + _period.begin().as_string() );
@@ -887,6 +891,7 @@ void Job::task_to_start()
                         create_task( NULL, "", now );
                         dequeue_task( now );
                         _task->_cause = cause;
+                        _task->_let_run |= ( cause == cause_period_single );
                     }
                 }
             }
@@ -1334,7 +1339,7 @@ xml::Element_ptr Job::xml( xml::Document_ptr document, bool show_all )
             int    i    = 100;      // Anzahl Perioden, die wir probieren
             Time   next;
             if( _next_start_time != latter_day )  next = _next_start_time;
-                                            else  p = _run_time.next_period( p.end() ),  next = p.begin();
+                                            else  p = _run_time.next_period( p.end(), time::wss_next_period_or_single_start ),  next = p.begin();
             while( i-- ) {          
                 if( p.has_start() )  break;
                 p = _run_time.next_period( p.end() );

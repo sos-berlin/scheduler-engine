@@ -1,4 +1,4 @@
-// $Id: spooler_time.cxx,v 1.13 2002/04/04 17:18:38 jz Exp $
+// $Id: spooler_time.cxx,v 1.14 2002/05/19 09:59:25 jz Exp $
 /*
     Hier sind implementiert
 
@@ -93,11 +93,18 @@ void Period::check() const
 
 //-------------------------------------------------------------------------------Period::is_comming
 
-bool Period::is_comming( Time time_of_day )
+bool Period::is_comming( Time time_of_day, With_single_start single_start )
 {
-    if( time_of_day < _begin
-     || time_of_day < _end   && !_single_start )  return true;
-                 // ^-- Falls time_of_day == previous_period.end(), sonst Schleife!
+    if( single_start & wss_next_period )
+    {
+        if( !_single_start  &&  time_of_day < _end )  return true;
+                                         // ^-- Falls time_of_day == previous_period.end(), sonst Schleife!
+    }
+
+    if( single_start & wss_next_single_start )
+    {
+        if( _single_start  &&  time_of_day < _begin )  return true;
+    }
 
     return false;
 }
@@ -117,13 +124,6 @@ Time Period::next_try( Time t )
     return result;
 }
 
-//----------------------------------------------------------------------Period::set_next_start_time
-/*
-void Period::set_next_start_time( const Time& time )
-{
-    if( time > _end )  _begin = time;
-}
-*/
 //------------------------------------------------------------------------------------Period::print
 
 void Period::print( ostream& s ) const
@@ -149,11 +149,11 @@ bool Day::has_time( Time time_of_day )
 
 //--------------------------------------------------------------------------------Day::next_period_
 
-const Period& Day::next_period_( Time time_of_day )
+const Period& Day::next_period_( Time time_of_day, With_single_start single_start )
 {
     FOR_EACH( Period_set, _period_set, it )
     {
-        if( it->is_comming( time_of_day ) )  return *it;
+        if( it->is_comming( time_of_day, single_start ) )  return *it;
     }
 
     return empty_period;
@@ -183,7 +183,7 @@ void Day_set::print( ostream& s ) const
 
 //--------------------------------------------------------------------------------Weekday_set::next
 
-Period Weekday_set::next_period( Time tim ) 
+Period Weekday_set::next_period( Time tim, With_single_start single_start ) 
 {
     Time time_of_day = tim.time_of_day();
     int  day_nr      = tim.day_nr();
@@ -191,7 +191,7 @@ Period Weekday_set::next_period( Time tim )
     
     for( int i = weekday; i < weekday+7; i++ )
     {
-        const Period& period = _days[ i % 7 ].next_period( time_of_day );
+        const Period& period = _days[ i % 7 ].next_period( time_of_day, single_start );
         if( !period.empty() )  return day_nr*(24*60*60) + period;
         day_nr++;
         time_of_day = 0;
@@ -202,7 +202,7 @@ Period Weekday_set::next_period( Time tim )
 
 //------------------------------------------------------------------------Monthday_set::next_period
 
-Period Monthday_set::next_period( Time tim )
+Period Monthday_set::next_period( Time tim, With_single_start single_start )
 {
     Time                    time_of_day = tim.time_of_day();
     int                     day_nr      = tim.day_nr();
@@ -210,7 +210,7 @@ Period Monthday_set::next_period( Time tim )
 
     for( int i = 0; i < 31; i++ )
     {
-        const Period& period = _days[ date.day() ].next_period( time_of_day );
+        const Period& period = _days[ date.day() ].next_period( time_of_day, single_start );
         if( !period.empty() )  return day_nr*(24*60*60) + period;
         day_nr++;
         date.add_days(1);
@@ -222,7 +222,7 @@ Period Monthday_set::next_period( Time tim )
 
 //--------------------------------------------------------------------------Ultimo_set::next_period
 
-Period Ultimo_set::next_period( Time tim )
+Period Ultimo_set::next_period( Time tim, With_single_start single_start )
 {
     Time     time_of_day = tim.time_of_day();
     int      day_nr      = tim.day_nr();
@@ -230,7 +230,7 @@ Period Ultimo_set::next_period( Time tim )
 
     for( int i = 0; i < 31; i++ )
     {
-        const Period& period = _days[ last_day_of_month( date ) - date.day() ].next_period( time_of_day );
+        const Period& period = _days[ last_day_of_month( date ) - date.day() ].next_period( time_of_day, single_start );
         if( !period.empty() )  return day_nr*(24*60*60) + period;
         day_nr++;
         date.add_days(1);
@@ -252,7 +252,7 @@ void Date::print( ostream& s ) const
 
 //----------------------------------------------------------------------------Date_set::next_period
 
-Period Date_set::next_period( Time tim )
+Period Date_set::next_period( Time tim, With_single_start single_start )
 {
     Time     time_of_day = tim.time_of_day();
     int      day_nr      = tim.day_nr();
@@ -263,7 +263,7 @@ Period Date_set::next_period( Time tim )
         
         if( date._day_nr >= day_nr )
         {
-            const Period& period = date._day.next_period( date._day_nr == day_nr? time_of_day : 0 );
+            const Period& period = date._day.next_period( date._day_nr == day_nr? time_of_day : 0, single_start );
             if( !period.empty() )  return date._day_nr*(24*60*60) + period;
         }
     }
@@ -294,18 +294,8 @@ Period Run_time::first_period( Time tim_par )
 
 //----------------------------------------------------------------------------Run_time::next_period
 
-Period Run_time::next_period( Time tim_par )
+Period Run_time::next_period( Time tim_par, With_single_start single_start )
 {
-    //if( _single_start )  return latter_day;
-    return next_period_( tim_par );
-}
-
-//---------------------------------------------------------------------------Run_time::next_period_
-
-Period Run_time::next_period_( Time tim_par )
-{
-    // Bei der Umschaltung von Winter- auf Sommerzeit fehlt eine Stunde!
-
     Time tim = tim_par;
     Period next;
  
@@ -313,17 +303,15 @@ Period Run_time::next_period_( Time tim_par )
     {
         next = empty_period;
 
-        next = min( next, _date_set    .next_period( tim ) );
-        next = min( next, _weekday_set .next_period( tim ) );
-        next = min( next, _monthday_set.next_period( tim ) );
-        next = min( next, _ultimo_set  .next_period( tim ) );
+        next = min( next, _date_set    .next_period( tim, single_start ) );
+        next = min( next, _weekday_set .next_period( tim, single_start ) );
+        next = min( next, _monthday_set.next_period( tim, single_start ) );
+        next = min( next, _ultimo_set  .next_period( tim, single_start ) );
 
         if( _holiday_set.find( next.begin().midnight() ) == _holiday_set.end() )  break;
 
         tim = next.begin().midnight() + 24*60*60;   // Feiertag? Dann nächsten Tag probieren
     }
-
-    //if( _next.begin() < tim_par )  _next_start_time = tim_par;
 
     return next;
 }
@@ -334,9 +322,9 @@ void Run_time::print( ostream& s ) const
 {
     s << "Run_time(\n"
          "    date_set     =" << _date_set     << "\n"
-         "    weekday_set  =" << _weekday_set << "\n"
-         "    monthday_set =" << _monthday_set     << "\n"
-         "    ultimo_set   =" << _ultimo_set     << "\n"
+         "    weekday_set  =" << _weekday_set  << "\n"
+         "    monthday_set =" << _monthday_set << "\n"
+         "    ultimo_set   =" << _ultimo_set   << "\n"
          ")\n";
 }
 
