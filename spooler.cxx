@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.284 2003/10/30 11:58:07 jz Exp $
+// $Id: spooler.cxx,v 1.285 2003/11/01 20:59:50 jz Exp $
 /*
     Hier sind implementiert
 
@@ -1628,7 +1628,9 @@ void Spooler::run()
             Time earliest = Time::now() + 0.1;
             if( _next_time < earliest ) 
             {
-                Z_DEBUG_ONLY( LOG( "spooler.cxx: async_next_gmtime() von " << _next_time << " nach " << earliest << " korrigiert\n" ) );
+                static bool logged = false;
+                if( !logged )  Z_DEBUG_ONLY( LOG( "spooler.cxx: async_next_gmtime() von " << _next_time << " nach " << earliest << " korrigiert\n" ) );
+                logged = true;
                 _next_time = earliest;
             }
 
@@ -2338,6 +2340,9 @@ int spooler_main( int argc, char** argv, const string& parameter_line )
         cerr << what << "\n";
         ret = 1;
     }
+
+
+    get_java_vm()->set_destroy_vm( false );   //  Nicht DestroyJavaVM() rufen, denn das hängt manchmal
 
     LOG( "Programm wird beendet\n" );
 

@@ -1,4 +1,4 @@
-// $Id: spooler_module_remote_server.cxx,v 1.30 2003/10/28 22:04:27 jz Exp $
+// $Id: spooler_module_remote_server.cxx,v 1.31 2003/11/01 20:59:51 jz Exp $
 /*
     Hier sind implementiert
 
@@ -228,7 +228,6 @@ STDMETHODIMP Com_remote_module_instance_server::construct( SAFEARRAY* safearray 
     }
     catch( const exception& x ) { hr = com_set_error( x, "Remote_module_instance_server::construct" ); }
 
-LOG( "Com_remote_module_instance_server::construct OK\n" );
     return hr;
 }
 

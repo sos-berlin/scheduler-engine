@@ -1,4 +1,4 @@
-// $Id: spooler_module_java.cxx,v 1.71 2003/10/28 22:04:27 jz Exp $
+// $Id: spooler_module_java.cxx,v 1.72 2003/11/01 20:59:51 jz Exp $
 /*
     Hier sind implementiert
 
@@ -239,7 +239,7 @@ Java_idispatch::Java_idispatch( Vm* vm, IDispatch* idispatch, const string& subc
 
     jmethodID constructor_id = e.get_method_id( subclass, "<init>", "(J)V" );
 
-    LOG( "new Java_idispatch(" << subclass_name << ")\n" );
+    //LOG( "new Java_idispatch(" << subclass_name << ")\n" );
     jobject jo = e->NewObject( subclass, constructor_id, (jlong)(size_t)idispatch );
     if( !jo )  e.throw_java( "NewObject", _class_name );
 

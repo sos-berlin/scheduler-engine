@@ -1,4 +1,4 @@
-// $Id: spooler_log.cxx,v 1.79 2003/10/30 13:19:12 jz Exp $
+// $Id: spooler_log.cxx,v 1.80 2003/11/01 20:59:50 jz Exp $
 
 #include "spooler.h"
 #include "spooler_mail.h"
@@ -126,7 +126,7 @@ void Log::open_new()
             filename += ".log";
 
             LOG( "\nopen(\"" << filename << "\")\n" );
-            _file = open( filename.c_str(), O_CREAT | O_TRUNC | O_WRONLY, 0666 );
+            _file = open( filename.c_str(), O_CREAT | O_TRUNC | O_WRONLY | O_NOINHERIT, 0666 );
             if( _file == -1 )  throw_errno( errno, filename.c_str() );
             LOG( "open() => " << _file << "\n" );
 
@@ -407,7 +407,7 @@ void Prefix_log::open()
     if( !_filename.empty() )
     {
         LOG( "\nopen " << _filename << '\n' );
-        _file = ::open( _filename.c_str(), O_CREAT | ( _append? O_APPEND : O_TRUNC ) | O_WRONLY, 0666 );
+        _file = ::open( _filename.c_str(), O_CREAT | ( _append? O_APPEND : O_TRUNC ) | O_WRONLY | O_NOINHERIT, 0666 );
         if( _file == -1 )  throw_errno( errno, _filename.c_str(), "Protokolldatei" );
 
         if( !_log_buffer.empty() )

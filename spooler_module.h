@@ -1,4 +1,4 @@
-// $Id: spooler_module.h,v 1.51 2003/10/30 11:58:07 jz Exp $
+// $Id: spooler_module.h,v 1.52 2003/11/01 20:59:51 jz Exp $
 
 #ifndef __SPOOLER_MODULE_H
 #define __SPOOLER_MODULE_H
@@ -240,6 +240,8 @@ struct Module_instance : Object
     virtual int                 exit_code                   ()                                      { return 0; }
     virtual string              stdout_filename             ()                                      { return ""; }
     virtual string              stderr_filename             ()                                      { return ""; }
+
+    virtual string              obj_name                    ()                                      { return "Module_instance"; }
 
 
     Fill_zero                  _zero_;

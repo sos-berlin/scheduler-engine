@@ -1,4 +1,4 @@
-// $Id: spooler_module_java.h,v 1.26 2003/10/28 22:04:27 jz Exp $
+// $Id: spooler_module_java.h,v 1.27 2003/11/01 20:59:51 jz Exp $
 
 #ifndef __SPOOLER_MODULE_JAVA_H
 #define __SPOOLER_MODULE_JAVA_H
@@ -105,6 +105,8 @@ struct Java_module_instance : Module_instance, java::Has_vm
     bool                        callable                    ()                                      { return _jobject != NULL; }
 
     void                        make_class                  ();
+
+    virtual string              obj_name                    ()                                      { return "Java_module_instance"; }
 
 
     Fill_zero                  _zero_;
