@@ -1,4 +1,4 @@
-<!-- $Id: jobs_frame.html,v 1.20 2004/07/23 10:09:47 jz Exp $ -->
+<!-- $Id: jobs_frame.html,v 1.21 2004/07/23 17:53:39 jz Exp $ -->
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <html>
 
@@ -67,30 +67,6 @@ function update_periodically_checkbox__onclick()
 {
     reset_error();
     repeat_update( document.all.update_periodically_checkbox.checked, document.all.update_periodically_checkbox.checked );
-}
-
-//---------------------------------------------------------------------show_tasks_checkbox__onclick
-
-function show_tasks_checkbox__onclick()
-{
-    reset_error();
-    update();
-}
-
-//--------------------------------------------------------------------show_orders_checkbox__onclick
-
-function show_orders_checkbox__onclick()
-{
-    reset_error();
-    update();
-}
-
-//----------------------------------------------------------------------------------update__onclick
-
-function update__onclick()
-{
-    reset_error();
-    update();
 }
 
 //--------------------------------------------------------------------------------------reset_error
@@ -238,6 +214,16 @@ function show_job_details( job_name )
 
     update_jobs_frame();
     window.parent.details_frame.show_job_details( job_element );
+}
+
+//---------------------------------------------------------------------------show_job_chain_details
+
+function show_job_chain_details( job_chain_name )
+{
+    var job_chain_element = _response.selectSingleNode( ".//job_chain[@name='" + job_chain_name + "']" );
+
+    update_jobs_frame();
+    window.parent.details_frame.show_job_chain_details( job_chain_element );
 }
 
 //-------------------------------------------------------------------------------------------------

@@ -1,4 +1,4 @@
-// $Id: scheduler.js,v 1.8 2004/07/23 10:09:47 jz Exp $
+// $Id: scheduler.js,v 1.9 2004/07/23 17:53:39 jz Exp $
 
 //----------------------------------------------------------------------------------------Scheduler
 // public
@@ -199,6 +199,30 @@ function Scheduler_html_configuration( url )
     if( !ok )  throw new Error( "Fehler in der Konfiguration " + url + ": " + this._dom.parseError.reason );
 }
 */
+//---------------------------------------------------------------------show_tasks_checkbox__onclick
+
+function show_tasks_checkbox__onclick()
+{
+    window.parent.jobs_frame.reset_error();
+    update();
+}
+
+//--------------------------------------------------------------------show_orders_checkbox__onclick
+
+function show_orders_checkbox__onclick()
+{
+    window.parent.jobs_frame.reset_error();
+    update();
+}
+
+//----------------------------------------------------------------------------------update__onclick
+
+function update__onclick()
+{
+    window.parent.jobs_frame.reset_error();
+    update();
+}
+
 //------------------------------------------------------------------------Popup_menu_builder.add_command
 // Erweiterung von Popup_menu_builder, s. popup_builder.js
 

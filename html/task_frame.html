@@ -1,4 +1,4 @@
-<!-- $Id: task_frame.html,v 1.15 2004/07/23 10:09:47 jz Exp $ -->
+<!-- $Id: task_frame.html,v 1.16 2004/07/23 17:53:39 jz Exp $ -->
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <html>
 
@@ -43,12 +43,18 @@ var _timer;
 var _job_element;
 var _job_name;
 var _task_id;
+var _job_chain_element;
 var _popup;
 
 //---------------------------------------------------------------------------------------------init
 
 function init()
 {
+    _job_element = undefined;
+    _job_name    = undefined;
+    _task_id     = undefined;
+    _job_chain_element = undefined;
+
     if( !_scheduler )
     {
         _scheduler = window.parent.jobs_frame._scheduler;
@@ -88,9 +94,20 @@ function show_job_details( job_element )
  
     _job_element = job_element;   
     _job_name    = job_element.getAttribute( "job" )
-    _task_id     = undefined;
 
     document.all.stylesheet.innerHTML = job_element.transformNode( _stylesheet );
+    update();
+}
+
+//---------------------------------------------------------------------------show_job_chain_details
+
+function show_job_chain_details( job_chain_element )
+{
+    init();
+ 
+    _job_chain_element = job_chain_element
+    
+    document.all.stylesheet.innerHTML = job_chain_element.transformNode( _stylesheet );
     update();
 }
 

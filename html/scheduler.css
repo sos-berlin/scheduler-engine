@@ -1,4 +1,4 @@
-/* $Id: scheduler.css,v 1.9 2004/07/22 20:42:09 jz Exp $ */
+/* $Id: scheduler.css,v 1.10 2004/07/23 17:53:39 jz Exp $ */
 
 body         { font-size: 10pt; }
 th           { font-size: 10pt; }
@@ -32,7 +32,7 @@ pre          { font-family: Lucida Console, monospace; font-size: 9pt; line-heig
                       
 .order                  { font-family: Sans-Serif; font-size: 10pt; background-color: #ffffe0 }  /*#f0ffff*/
                         
-.job_chain              { font-family: Sans-Serif; font-size: 10pt; background-color: moccasin }
+.job_chain              { font-family: Sans-Serif; font-size: 10pt; background-color: powderblue }
 
 /* Anklickbar */
 .hover                  { text-decoration: underline }

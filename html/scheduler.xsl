@@ -53,6 +53,7 @@
         
         <p>&#160;</p>
         <xsl:apply-templates select="state/job_chains"/>
+        
     </xsl:template>
     
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Jobs-->
@@ -307,9 +308,26 @@
         </xsl:for-each>
     </xsl:template>
         
-    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Job_chains-->
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Job_chains-->
 
     <xsl:template match="job_chains">
+        <xsl:call-template name="job_chains">
+            <xsl:with-param name="job_chain_select" select="job_chain"/>
+        </xsl:call-template>
+    </xsl:template>
+    
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Job_chain-->
+
+    <xsl:template match="job_chain">
+        <xsl:call-template name="job_chains">
+            <xsl:with-param name="job_chain_select" select="."/>
+        </xsl:call-template>
+    </xsl:template>
+    
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Job_chains-->
+
+    <xsl:template name="job_chains">
+        <xsl:param    name="job_chain_select"/> 
         <xsl:variable name="now" select="string( /spooler/answer/@time )"/>
 
         <table cellpadding="0" cellspacing="0">
@@ -337,7 +355,7 @@
             <col class="column"  valign="baseline"  width="40" align="right"/>
             
             <thead class="job_chain">
-                <tr style="">
+                <tr>
                     <td style="border-bottom: 1 solid black">
                         <span style="margin-left: 2ex">
                             State
@@ -361,9 +379,21 @@
             </thead>
             
             <tbody class="job_chain">
-                <xsl:for-each select="job_chain">
-                    <tr>
-                        <td style="padding-top: 1ex">
+                <xsl:for-each select="$job_chain_select">
+                    <xsl:element name="tr">
+                        <xsl:attribute name="style">
+                            cursor: hand;
+                            padding-top: 1ex
+                        </xsl:attribute>
+                        <xsl:attribute name="onmouseover">
+                            this.className = "hover"
+                        </xsl:attribute>
+                        <xsl:attribute name="onmouseout" >
+                            this.className = "job_chain"
+                        </xsl:attribute>
+                        <xsl:attribute name="onclick">show_job_chain_details( '<xsl:value-of select="@name"/>' )</xsl:attribute>
+                            
+                        <td>
                             <b><xsl:value-of select="@name"/></b>
                         </td>
                         <td></td>
@@ -371,7 +401,7 @@
                         <td>
                             <xsl:value-of select="@orders"/>
                         </td>
-                    </tr>
+                    </xsl:element>
                 
                     <xsl:for-each select="job_chain_node[ @job ]">
                         <xsl:element name="tr">
