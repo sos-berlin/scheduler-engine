@@ -1,4 +1,4 @@
-// $Id: spooler.h,v 1.159 2003/09/27 08:45:17 jz Exp $
+// $Id: spooler.h,v 1.160 2003/10/02 21:39:59 jz Exp $
 
 #ifndef __SPOOLER_H
 #define __SPOOLER_H
@@ -47,9 +47,9 @@
 #include <list>
 #include <time.h>
 
+#include "../kram/sossock1.h"
 #include "../kram/sosdate.h"
 #include "../kram/sosprof.h"
-#include "../kram/sossock1.h"
 #include "../kram/thread_semaphore.h"
 #include "../kram/com_simple_standards.h"
 #include "../kram/log.h"
@@ -357,6 +357,8 @@ struct Spooler
 
     int                        _loop_counter;               // Zähler der Schleifendurchläufe in spooler.cxx
     int                        _wait_counter;               // Zähler der Aufrufe von wait_until()
+
+    ptr<object_server::Connection_manager>  _connection_manager;
 
   private:
     string                     _config_filename;            // -config=

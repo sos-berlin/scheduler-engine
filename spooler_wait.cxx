@@ -1,4 +1,4 @@
-// $Id: spooler_wait.cxx,v 1.76 2003/09/24 14:06:10 jz Exp $
+// $Id: spooler_wait.cxx,v 1.77 2003/10/02 21:40:00 jz Exp $
 /*
     Hier sind implementiert
 
@@ -184,7 +184,7 @@ Wait_handles& Wait_handles::operator += ( Wait_handles& o )
 
 //--------------------------------------------------------------------------------Wait_handles::add
 
-void Wait_handles::add( z::Event* event )
+void Wait_handles::add( z::Event_base* event )
 {
     THREAD_LOCK( _lock )
     {
@@ -199,7 +199,7 @@ void Wait_handles::add( z::Event* event )
 //-----------------------------------------------------------------------Wait_handles::remove_handle
 #ifdef Z_WINDOWS
 /*
-void Wait_handles::remove_handle( HANDLE handle, z::Event* event )
+void Wait_handles::remove_handle( HANDLE handle, z::Event_base* event )
 {
     THREAD_LOCK( _lock )
     {
@@ -225,7 +225,7 @@ void Wait_handles::remove_handle( HANDLE handle, z::Event* event )
 #endif
 //-----------------------------------------------------------------------------Wait_handles::remove
 
-void Wait_handles::remove( z::Event* event )
+void Wait_handles::remove( z::Event_base* event )
 {
     if( !event )  return;
 
@@ -370,8 +370,8 @@ int Wait_handles::wait_until_2( Time until )
         {
             THREAD_LOCK( _lock )
             {
-                int       index = ret - WAIT_OBJECT_0;
-                z::Event* event = _events[ index ];
+                int            index = ret - WAIT_OBJECT_0;
+                z::Event_base* event = _events[ index ];
             
                 if( event )
                 {
@@ -398,20 +398,28 @@ int Wait_handles::wait_until_2( Time until )
 
 #else
 
-  //if( _events.size() == 1 )
-  //{
-  //    // Gut, wir warten nur auf ein Ereignis. 
-  //    // Sehr schlecht: EINTR kommt hier nicht durch (pthread_cond_timedwait liefert das nicht). Damit fährt SIGINT nicht ordentlich herunter.
-  //
-  //    bool signaled = _events[0]->wait( until - Time::now() );
-  //    return signaled? 0 : -1;
-  //}
-  //else
     {
+        if( _log->log_level() <= log_debug9  &&  until > Time::now() )   LOG( "wait_until " << until.as_string() << " " << as_string() << "\n" );
+
+        ptr<Wait> wait = _spooler->_connection_manager->create_wait();
+
+        for( int i = _events.size() - 1; i >= 0; i-- )  
+        {
+            Event* e = dynamic_cast<Event*>( _events[i] );
+            if( e )
+            {
+                wait->add( e );
+            }
+        }
+
+      //return wait->wait( min( directory_watcher_interval, (double)( until - Time::now() ) ) );
+        return wait->wait( (double)( until - Time::now() ) );
+
+
+/*
+
         // Weniger gut. Wir warten auf mehrere Ereignisse und müssen diese ständig reihum abfragen.
         //Rotating_bar rotating_bar = _log->log_level() <= log_debug9;
-
-        if( _log->log_level() <= log_debug9  &&  until > Time::now() )  LOG( "wait_until " << until.as_string() << " " << as_string() << "\n" );
 
         while(1)
         {
@@ -434,6 +442,7 @@ int Wait_handles::wait_until_2( Time until )
 
             if( Time::now() >= until )  return -1;
         }
+*/
     }
 
 #endif

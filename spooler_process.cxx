@@ -1,4 +1,4 @@
-// $Id: spooler_process.cxx,v 1.15 2003/09/28 09:30:49 jz Exp $
+// $Id: spooler_process.cxx,v 1.16 2003/10/02 21:40:00 jz Exp $
 
 #include "spooler.h"
 
@@ -55,17 +55,20 @@ void Process::start()
         parameters.push_back( Parameter( "program", _spooler->_my_program_filename ) );
 
 
-        _connection = start_process( parameters );
+        _connection = _spooler->_connection_manager->start_process( parameters );
     }
     else
     {
-        _connection = Z_NEW( Connection );
+        _connection = Z_NEW( Connection( _spooler->_connection_manager ) );
         _connection->connect( _server_hostname, _server_port );
         _connection->set_async();
     }
 
 
-    _connection->set_event( &_spooler->_event );
+#   ifdef Z_WINDOWS
+        _connection->set_event( &_spooler->_event );
+#   endif
+
     _session  = Z_NEW( Session( _connection ) );
     _session->set_connection_has_only_this_session();
 

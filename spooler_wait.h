@@ -1,4 +1,4 @@
-// $Id: spooler_wait.h,v 1.40 2003/09/21 18:11:31 jz Exp $
+// $Id: spooler_wait.h,v 1.41 2003/10/02 21:40:00 jz Exp $
 
 #ifndef __SPOOLER_WAIT_H
 #define __SPOOLER_WAIT_H
@@ -19,11 +19,17 @@ namespace spooler {
 
 struct Wait_handles;
 
+#ifdef Z_WINDOWS
+    typedef z::Event            System_event;
+#else
+    typedef z::Simple_event     System_event;
+#endif
+
 //--------------------------------------------------------------------------------------------Event
 
-struct Event : z::Event
+struct Event : System_event
 {
-    typedef z::Event            Base_class;
+    typedef System_event        Base_class;
 
 
                                 Event                       ( const string& name = "" )             : Base_class( dont_create, name ), _zero_(this+1) {}
@@ -53,8 +59,8 @@ struct Wait_handles : Non_cloneable
     void                        close                       ();
   //void                        clear                       ()                                      { _handles.clear(); _events.clear(); }
 
-    void                        add                         ( zschimmer::Event* );
-    void                        remove                      ( zschimmer::Event* );
+    void                        add                         ( zschimmer::Event_base* );
+    void                        remove                      ( zschimmer::Event_base* );
 
 #ifdef Z_WINDOWS
     void                        add_handle                  ( HANDLE );
@@ -82,7 +88,7 @@ struct Wait_handles : Non_cloneable
     vector<HANDLE>             _handles;
 #endif
 
-    typedef vector<z::Event*>   Event_vector;
+    typedef vector<z::Event_base*>   Event_vector;
     Event_vector               _events;
 
   public:
@@ -111,6 +117,7 @@ struct Directory_watcher : Event
 
     void                        set_signaled                ();
     void                        reset                       ();
+    virtual bool                signaled_after_check        ()                                      { return signaled() || has_changed(); }
 
     string                      directory                   () const                                { return _directory; }
     string                      filename_pattern            () const                                { return _filename_pattern; }

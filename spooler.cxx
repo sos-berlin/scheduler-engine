@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.267 2003/09/30 21:54:34 jz Exp $
+// $Id: spooler.cxx,v 1.268 2003/10/02 21:39:59 jz Exp $
 /*
     Hier sind implementiert
 
@@ -334,6 +334,8 @@ Spooler::Spooler()
     set_ctrl_c_handler( true );
 
     _module._dont_remote = true;
+
+    _connection_manager = Z_NEW( object_server::Connection_manager );
 }
 
 //--------------------------------------------------------------------------------Spooler::~Spooler

@@ -1,4 +1,4 @@
-// $Id: spooler_communication.cxx,v 1.60 2003/09/30 21:54:35 jz Exp $
+// $Id: spooler_communication.cxx,v 1.61 2003/10/02 21:40:00 jz Exp $
 /*
     Hier sind implementiert
 
@@ -9,7 +9,6 @@
 
 
 #include "spooler.h"
-#include "../kram/sossock1.h"
 #include "../kram/sleep.h"
 #include "../kram/sos_java.h"
 

@@ -1,4 +1,4 @@
-// $Id: spooler_com.cxx,v 1.110 2003/10/01 11:18:08 jz Exp $
+// $Id: spooler_com.cxx,v 1.111 2003/10/02 21:40:00 jz Exp $
 /*
     Hier sind implementiert
 
@@ -222,7 +222,6 @@ STDMETHODIMP Com_variable::Clone( Ivariable** result )
 { 
     HRESULT hr = NOERROR; 
     
-    fprintf( stderr, "Com_variable::Clone %s=%s\n", string_from_bstr(_name).c_str(), debug_string_from_variant(_value).c_str());
     THREAD_LOCK(_lock)
     {
         *result = new Com_variable(_name,_value); 
@@ -278,7 +277,6 @@ Com_variable_set::Com_variable_set( const Com_variable_set& o )
             {
                 ptr<Com_variable> clone;
 
-fprintf(stderr,"Com_variable_set first=%s\n", string_from_bstr(it->first).c_str() );
                 v->Clone( (Ivariable**)&clone );
                 _map[ it->first ] = clone;
             }
@@ -312,12 +310,10 @@ void Com_variable_set::set_dom( const xml::Element_ptr& params )
         {
             if( e.nodeName_is( "param" ) ) 
             {
-                Variant name  = e.getAttribute( "name" );
-                hr = name.ChangeType( VT_BSTR );                    if( FAILED(hr) )  throw_ole( hr, "ChangeType" );
-
+                Bstr    name  = e.getAttribute( "name" );
                 Variant value = e.getAttribute( "value" );
 
-                hr = put_var( name.bstrVal, &value );               if( FAILED(hr) )  throw_ole( hr, "Ivariable_set::put_var" );
+                hr = put_var( name, &value );                       if( FAILED(hr) )  throw_ole( hr, "Ivariable_set::put_var" );
             }
         }
     }
@@ -366,7 +362,6 @@ STDMETHODIMP Com_variable_set::get_value( VARIANT* name, VARIANT* value )
 
 STDMETHODIMP Com_variable_set::put_var( BSTR name, VARIANT* value )
 {
-    fprintf( stderr, "Com_variable_set::put_var %s=%s\n", string_from_bstr(name).c_str(), debug_string_from_variant(*value).c_str() );
     THREAD_LOCK( _lock )  
     {
         Bstr lname = name;

@@ -1,8 +1,10 @@
-// $Id: spooler_communication.h,v 1.15 2003/09/24 19:45:11 jz Exp $
+// $Id: spooler_communication.h,v 1.16 2003/10/02 21:40:00 jz Exp $
 
 #ifndef __SPOOLER_COMMUNICATION_H
 #define __SPOOLER_COMMUNICATION_H
 
+#include "../zschimmer/z_sockets.h"
+/*
 #ifdef __GNUC__
 #   include <errno.h>
 #   include <sys/socket.h>
@@ -19,6 +21,7 @@
     typedef int SOCKET;
     const SOCKET SOCKET_ERROR = (SOCKET)-1;
 #endif
+*/
 
 namespace sos {
 namespace spooler {
