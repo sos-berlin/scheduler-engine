@@ -1,4 +1,4 @@
-// $Id: spooler_module_java.cxx,v 1.38 2003/03/01 09:46:14 jz Exp $
+// $Id: spooler_module_java.cxx,v 1.39 2003/03/01 10:04:44 jz Exp $
 /*
     Hier sind implementiert
 
@@ -60,6 +60,7 @@ static void set_java_exception( JNIEnv* jenv, const char* what )
     {
         int err = jenv->ThrowNew( exception_class, what ); 
         jenv->DeleteLocalRef( exception_class );
+
         if( err == 0 )  return;
     }
 
@@ -167,6 +168,8 @@ static jobject jobject_from_variant( JNIEnv* jenv, const VARIANT& v )
 
             result = jenv->NewObject( cls, constructor_id, (jshort)V_I2(&v) );
 
+
+
             jenv->DeleteLocalRef( cls );
             break;
         }
@@ -181,6 +184,7 @@ static jobject jobject_from_variant( JNIEnv* jenv, const VARIANT& v )
 
             result = jenv->NewObject( cls, constructor_id, (jint)V_I4(&v) );
             jenv->DeleteLocalRef( cls );
+
             break;
         }
 
@@ -194,6 +198,7 @@ static jobject jobject_from_variant( JNIEnv* jenv, const VARIANT& v )
 
             result = jenv->NewObject( cls, constructor_id, (jfloat)V_R4(&v) );
             jenv->DeleteLocalRef( cls );
+
             break;
         }
 
@@ -207,6 +212,7 @@ static jobject jobject_from_variant( JNIEnv* jenv, const VARIANT& v )
 
             result = jenv->NewObject( cls, constructor_id, (jdouble)V_R8(&v) );
             jenv->DeleteLocalRef( cls );
+
             break;
         }
 
@@ -223,6 +229,7 @@ static jobject jobject_from_variant( JNIEnv* jenv, const VARIANT& v )
 
             result = jenv->NewObject( cls, constructor_id, (jboolean)V_BOOL(&v)? 1 : 0 );
             jenv->DeleteLocalRef( cls );
+
             break;
         }
 
@@ -236,6 +243,7 @@ static jobject jobject_from_variant( JNIEnv* jenv, const VARIANT& v )
 
             result = jenv->NewObject( cls, constructor_id, (jbyte)V_I1(&v) );
             jenv->DeleteLocalRef( cls );
+
             break;
         }
 
@@ -249,6 +257,7 @@ static jobject jobject_from_variant( JNIEnv* jenv, const VARIANT& v )
 
             result = jenv->NewObject( cls, constructor_id, (jshort)V_UI1(&v) );
             jenv->DeleteLocalRef( cls );
+
             break;
         }
 
@@ -262,6 +271,7 @@ static jobject jobject_from_variant( JNIEnv* jenv, const VARIANT& v )
 
             result = jenv->NewObject( cls, constructor_id, (jint)V_UI2(&v) );
             jenv->DeleteLocalRef( cls );
+
             break;
         }
 
@@ -275,6 +285,7 @@ static jobject jobject_from_variant( JNIEnv* jenv, const VARIANT& v )
 
             result = jenv->NewObject( cls, constructor_id, (jlong)V_UI4(&v) );
             jenv->DeleteLocalRef( cls );
+
             break;
         }
 
@@ -288,6 +299,7 @@ static jobject jobject_from_variant( JNIEnv* jenv, const VARIANT& v )
 
             result = jenv->NewObject( cls, constructor_id, (jlong)V_I8(&v) );
             jenv->DeleteLocalRef( cls );
+
             break;
         }
 
@@ -302,6 +314,7 @@ static jobject jobject_from_variant( JNIEnv* jenv, const VARIANT& v )
 
             result = jenv->NewObject( cls, constructor_id, (jint)V_INT(&v) );
             jenv->DeleteLocalRef( cls );
+
             break;
         }
 
@@ -315,6 +328,7 @@ static jobject jobject_from_variant( JNIEnv* jenv, const VARIANT& v )
 
             result = jenv->NewObject( cls, constructor_id, (jlong)V_UINT(&v) );
             jenv->DeleteLocalRef( cls );
+
             break;
         }
 
@@ -479,7 +493,10 @@ JNIEXPORT jobject JNICALL Java_sos_spooler_Idispatch_com_1call( JNIEnv* jenv, jc
                 dispparams[i] = o;
             }
 
+
+
             jenv->DeleteLocalRef( cls );
+
             jenv->DeleteLocalRef( jparam );
         }
 
@@ -551,14 +568,11 @@ void Java_vm::init()
 
     int ret;
 
-
     _work_class_dir = _spooler->temp_dir() + Z_DIR_SEPARATOR "java";
     make_path( _work_class_dir );       // Java-VM prüft Vorhandensein der Verzeichnisse in classpath schon beim Start
-
         
     if( _filename == "" )  throw_xc( "SPOOLER-170" );
     string module_filename = _filename;
-
 
   //typedef int JNICALL JNI_GetDefaultJavaVMInitArgs_func( JavaVMInitArgs* );
     typedef int JNICALL JNI_CreateJavaVM_func            ( JavaVM**, JNIEnv**, JavaVMInitArgs* );
@@ -788,7 +802,7 @@ void Java_vm::throw_java( int return_value, const string& text1, const string& t
                 {
                     java_text = string_from_jstring( env, (jstring)env->CallObjectMethod( x, get_message_id ) );
                 }
-                
+
                 env->DeleteLocalRef( c );
             }
         }
@@ -970,6 +984,7 @@ Java_object::Java_object( Spooler* spooler, jobject jo )
 :
     _spooler( spooler ),
     _jobject( NULL ),
+
     _is_global( false )
 {
     assign( jo );
@@ -1002,9 +1017,9 @@ void Java_object::assign( jobject jo )
 {
     JNIEnv* jenv = _spooler->_java_vm.env();
 
-    if( _is_global )  
+    if( _is_global && _jobject )  
     {
-        LOG( "Java_object::assign DeleteGlobalRef " << as_hex_string((int)(void*)_jobject) << "\n" );
+        //LOG( "Java_object::assign DeleteGlobalRef " << as_hex_string((int)(void*)_jobject) << "\n" );
         jenv->DeleteGlobalRef( _jobject );
 
         _jobject = jo;
@@ -1023,7 +1038,8 @@ void Java_object::set_global()
 {
     if( _jobject )
     {
-        LOG( "Java_object::set_global NewGlobalRef " << as_hex_string((int)(void*)_jobject) << "\n" );
+
+        //LOG( "Java_object::set_global NewGlobalRef " << as_hex_string((int)(void*)_jobject) << "\n" );
         _jobject = _spooler->_java_vm.env()->NewGlobalRef( _jobject );
         if( !_jobject )  _spooler->_java_vm.throw_java( 0, "NewGlobalRef" );
 
@@ -1032,7 +1048,7 @@ void Java_object::set_global()
 }
 
 //------------------------------------------------------------------------Java_local_object::assign
-
+/*
 void Java_local_object::assign( jobject jo )
 {
     if( _jobject )  
@@ -1043,7 +1059,7 @@ void Java_local_object::assign( jobject jo )
     
     _jobject = jo;
 }
-
+*/
 //-------------------------------------------------------------------Java_idispatch::Java_idispatch
 
 Java_idispatch::Java_idispatch( Spooler* sp, IDispatch* idispatch, const string& subclass_name ) 
@@ -1078,7 +1094,7 @@ Java_idispatch::~Java_idispatch()
             jclass object_class = jenv.get_object_class( _jobject );
 
             jmethodID method_id = jenv.get_method_id( object_class, "com_clear", "()V" );
-            
+
             jenv->DeleteLocalRef( object_class ), object_class = NULL;
 
             jenv->CallVoidMethod( _jobject, method_id );
@@ -1086,6 +1102,7 @@ Java_idispatch::~Java_idispatch()
 
             assign( NULL );
             _idispatch = NULL;
+
         }
         catch( const exception& x )  { _spooler->_log.error( _class_name + "::~Java_idispatch: " + x.what() ); }
     }
@@ -1153,14 +1170,16 @@ void Java_module_instance::add_obj( const ptr<IDispatch>& object, const string& 
 {
     string java_class_name = "sos/spooler/" + replace_regex_ext( name, "^(spooler_)?(.*)$", "\\u\\2" );    // "spooler_task" -> "sos.spooler.Task"
 
-    LOGI( "Java_module_instance::add_obj " << java_class_name << "\n" );
+    //LOGI( "Java_module_instance::add_obj " << java_class_name << "\n" );
 
     jclass cls = _env->env()->GetObjectClass( _jobject );
     if( !cls )  _module->_spooler->_java_vm.throw_java( 0, "GetMethodID" );
 
     string signature = "L" + java_class_name + ";";
+
     jfieldID field_id = _env->env()->GetFieldID( cls, name.c_str(), signature.c_str() );
     _env->env()->DeleteLocalRef( cls );
+
     if( !field_id )  _module->_spooler->_java_vm.throw_java( 0, "GetFieldID", name );
 
     ptr<Java_idispatch> java_idispatch = Z_NEW( Java_idispatch( _module->_spooler, object, java_class_name ) );

@@ -1,4 +1,4 @@
-// $Id: spooler_module_java.h,v 1.17 2003/03/01 09:46:14 jz Exp $
+// $Id: spooler_module_java.h,v 1.18 2003/03/01 10:04:44 jz Exp $
 
 #ifndef __SPOOLER_MODULE_JAVA_H
 #define __SPOOLER_MODULE_JAVA_H
@@ -143,7 +143,7 @@ struct Java_global_object : Java_object
 };
 
 //--------------------------------------------------------------------------------Java_local_object
-
+/*
 struct Java_local_object : Java_object
 {
                                 Java_local_object           ( Spooler* sp, jobject jo = NULL )      : Java_object( sp, NULL )  { assign( jo ); }
@@ -152,7 +152,7 @@ struct Java_local_object : Java_object
     void                        operator =                  ( jobject jo )                          { assign( jo ); }
     void                        assign                      ( jobject );
 };
-
+*/
 //-------------------------------------------------------------------------------------------------
 
 struct Java_idispatch : Java_object
