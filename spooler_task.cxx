@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.93 2002/05/28 09:11:59 jz Exp $
+// $Id: spooler_task.cxx,v 1.94 2002/06/03 08:49:11 jz Exp $
 /*
     Hier sind implementiert
 
@@ -485,8 +485,10 @@ void Job::start( const CComPtr<spooler_com::Ivariable_set>& params, const string
 
 //---------------------------------------------------------------------------------------Job::start
 
-Sos_ptr<Task> Job::start_without_lock( const CComPtr<spooler_com::Ivariable_set>& params, const string& task_name, Time start_at )
+Sos_ptr<Task> Job::start_without_lock( const CComPtr<spooler_com::Ivariable_set>& params, const string& task_name, Time start_at, bool log )
 {
+    if( log && _spooler->_debug )  _log.debug( "start(at=" + start_at.as_string() + ( task_name == ""? "" : ",name=\"" + task_name + '"' ) + ")" );
+
     switch( _state )
     {
         case s_read_error:  throw_xc( "SPOOLER-132", name(), _error? _error->what() : "" );
@@ -744,9 +746,17 @@ void Job::set_next_time( Time now )
 {
     _next_time = latter_day;
 
+    bool in_period = is_in_period(now);
+
     // Minimum von _start_at für _next_time berücksichtigen
     Task_queue::iterator it = _task_queue.begin();  
-    while( it != _task_queue.end()  &&  !(*it)->_start_at )  it++;
+    while( it != _task_queue.end() )
+    {
+        if( (*it)->_start_at )  break;   // Startzeit angegeben?
+        if( in_period        )  break;   // Ohne Startzeit und Periode ist aktiv?
+        it++;
+    }
+
     if( it != _task_queue.end()  &&  _next_time > (*it)->_start_at )  _next_time = (*it)->_start_at;
 
     if( _spooler->state() != Spooler::s_stopping_let_run )
@@ -1179,7 +1189,7 @@ void Job::set_state_cmd( State_cmd cmd )
                                 break;
 
             case sc_start:      {
-                                    THREAD_LOCK_LOG( _lock, "Job::set_state_cmd" )  start_without_lock( NULL, "", Time::now() );
+                                    THREAD_LOCK_LOG( _lock, "Job::set_state_cmd" )  start_without_lock( NULL, "", Time::now(), true );
                                     break;
                                 }
 

@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.101 2002/05/30 11:56:56 jz Exp $
+// $Id: spooler.cxx,v 1.102 2002/06/03 08:49:10 jz Exp $
 /*
     Hier sind implementiert
 
@@ -41,7 +41,7 @@ namespace spooler {
 
 const char* default_factory_ini  = "factory.ini";
 const string new_suffix          = "~new";  // Suffix für den neuen Spooler, der den bisherigen beim Neustart ersetzen soll
-const double renew_wait_interval = 0.1;
+const double renew_wait_interval = 0.25;
 const double renew_wait_time     = 30;      // Wartezeit für Brückenspooler, bis der alte Spooler beendet ist und der neue gestartet werden kann.
 const double wait_for_thread_termination                 = latter_day;  // Haltbarkeit des Geduldfadens
 const double wait_step_for_thread_termination            = 5.0;         // 1. Nörgelabstand
@@ -675,7 +675,7 @@ void Spooler::stop()
     _script_instance.close();
 
     if( _state_cmd == sc_terminate_and_restart 
-     || _state_cmd == sc_let_run_terminate_and_restart )  spooler_restart( _is_service );
+     || _state_cmd == sc_let_run_terminate_and_restart )  spooler_restart( &_log, _is_service );
 
     _db.spooler_stop();
     _db.close();
@@ -886,7 +886,7 @@ static string make_new_spooler_path( const string& this_spooler )
 
 //----------------------------------------------------------------------------------spooler_restart
 
-void spooler_restart( bool is_service )
+void spooler_restart( Log* log, bool is_service )
 {
     string this_spooler = program_filename();
     string command_line = GetCommandLine();
@@ -898,7 +898,7 @@ void spooler_restart( bool is_service )
         int pos;
         if( command_line.length() == 0 )  throw_xc( "SPOOLER-COMMANDLINE" );
         if( command_line[0] == '"' ) {
-            pos = command_line.find( 1, '"' );  if( pos == string::npos )  throw_xc( "SPOOLER-COMMANDLINE" );
+            pos = command_line.find( '"', 1 );  if( pos == string::npos )  throw_xc( "SPOOLER-COMMANDLINE" );
             pos++;                
         } else {
             pos = command_line.find( ' ' );  if( pos == string::npos )  throw_xc( "SPOOLER-COMMANDLINE" );
@@ -914,7 +914,9 @@ void spooler_restart( bool is_service )
 
     if( is_service )  command_line += " -renew-service";
 
-    start_process( command_line + " -renew-spooler=" + quoted_string(this_spooler,'"','"') );
+    command_line += " -renew-spooler=" + quoted_string(this_spooler,'"','"');
+    if( log )  log->info( "Restart Spooler  " + command_line );
+    start_process( command_line );
 }
 
 //------------------------------------------------------------------------------------spooler_renew
@@ -943,16 +945,28 @@ static void spooler_renew( const string& service_name, const string& renew_spool
     {
         for( t; t > 0; t -= renew_wait_interval )  
         {
-            LOG( "CopyFile " << this_spooler << ", " << renew_spooler << '\n' );
+            string msg = "CopyFile " + this_spooler + ", " + renew_spooler + '\n';
+            if( !is_service )  fprintf( stderr, "%s", msg.c_str() );  // stderr, weil wir kein Log haben.
+            LOG( msg );
 
             copy_ok = CopyFile( this_spooler.c_str(), renew_spooler.c_str(), FALSE );
             if( copy_ok )  break;
 
-            LOG( "CopyFile error=" << GetLastError() << '\n' );
+            int error = GetLastError();
+            try 
+            { 
+                throw_mswin_error( error, "CopyFile" ); 
+            }
+            catch( const Xc& x ) { 
+                if( !is_service )  fprintf( stderr, "%s\n", x.what() );
+                LOG( x.what() << '\n' );
+            }
 
-            if( GetLastError() != ERROR_SHARING_VIOLATION )  return;
+            if( error != ERROR_SHARING_VIOLATION )  return;
             sos_sleep( renew_wait_interval );
         }
+
+        if( !is_service )  fprintf( stderr, "Der Spooler ist ausgetauscht und wird neu gestartet\n\n" );
     }
 
     if( is_service )  spooler::service_start( service_name );
@@ -991,11 +1005,17 @@ void __cdecl delete_new_spooler( void* )
     {
         for( double t = renew_wait_time; t > 0; t -= renew_wait_interval )  
         {
-            LOG( "unlink " << copied_spooler << '\n' );
+            string msg = "remove " + copied_spooler + '\n';
+            fprintf( stderr, "%s", msg.c_str() );
+            LOG( msg );
 
             int ret = _unlink( copied_spooler.c_str() );
             if( ret == 0  || errno != EACCES ) break;
-            LOG( "errno=" << errno << ' ' << strerror(errno) << '\n' );
+
+            msg = "errno=" + as_string(errno) + ' ' + strerror(errno) + '\n';
+            fprintf( stderr, "%s", msg.c_str() );
+            LOG( msg.c_str() );
+            
             sos_sleep( renew_wait_interval );
         }
     }

@@ -1,4 +1,4 @@
-// $Id: spooler_command.cxx,v 1.53 2002/05/28 09:11:58 jz Exp $
+// $Id: spooler_command.cxx,v 1.54 2002/06/03 08:49:11 jz Exp $
 /*
     Hier ist implementiert
 
@@ -175,7 +175,7 @@ xml::Element_ptr Command_processor::execute_modify_spooler( const xml::Element_p
         else
         if( cmd == "abort_immediately"     )  TerminateProcess(GetCurrentProcess(),1);  // _exit() lässt noch Delphi-Code ausführen.
         else
-        if( cmd == "abort_immediately_and_restart" )  { try{ spooler_restart( _spooler->is_service() ); }catch(...){}; TerminateProcess(GetCurrentProcess(),1); }
+        if( cmd == "abort_immediately_and_restart" )  { try{ spooler_restart( NULL, _spooler->is_service() ); }catch(...){}; TerminateProcess(GetCurrentProcess(),1); }
         else
       //if( cmd == "new_log"               )  _spooler->cmd_new_log();
       //else
@@ -246,7 +246,7 @@ xml::Element_ptr Command_processor::execute_start_job( const xml::Element_ptr& e
         if( e->tagName == "params" )  { pars->set_xml( e );  break; }
     }
 
-    Sos_ptr<Task> task = _spooler->get_job( job_name )->start_without_lock( CComPtr<spooler_com::Ivariable_set>(pars), task_name, start_at );
+    Sos_ptr<Task> task = _spooler->get_job( job_name )->start_without_lock( CComPtr<spooler_com::Ivariable_set>(pars), task_name, start_at, true );
 
     return _answer->createElement( "ok" );
 }

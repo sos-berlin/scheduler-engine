@@ -1,4 +1,4 @@
-// $Id: spooler.h,v 1.84 2002/05/28 09:11:58 jz Exp $
+// $Id: spooler.h,v 1.85 2002/06/03 08:49:11 jz Exp $
 
 #ifndef __SPOOLER_H
 #define __SPOOLER_H
@@ -310,7 +310,7 @@ struct Spooler
 
 //-------------------------------------------------------------------------------------------------
 
-void                            spooler_restart             ( bool is_service );
+void                            spooler_restart             ( Log* log, bool is_service );
 void                            send_error_email            ( const string& error_text, int argc, char** argv );
 
 extern bool                     spooler_is_running;
