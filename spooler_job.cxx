@@ -1,4 +1,4 @@
-// $Id: spooler_job.cxx,v 1.97 2004/12/07 09:57:55 jz Exp $
+// $Id: spooler_job.cxx,v 1.98 2004/12/07 14:31:18 jz Exp $
 // §851: Weitere Log-Ausgaben zum Scheduler-Start eingebaut
 /*
     Hier sind implementiert
@@ -55,6 +55,12 @@ Job::Job( Spooler* spooler )
     _task_timeout   = latter_day;
     _idle_timeout   = latter_day;
     _max_tasks      = 1;
+
+    _process_environment = new Com_variable_set();
+
+#ifndef Z_WINDOWS
+        _process_environment->_ignore_case = false;
+#endif
 }
 
 //----------------------------------------------------------------------------------------Job::~Job
@@ -145,22 +151,17 @@ void Job::set_dom( const xml::Element_ptr& element, const Time& xml_mod_time )
             {
                 _module_xml_document  = NULL;
                 _module_xml_element   = NULL;
-                _process_filename     = e.     getAttribute( "file" );
-                _process_param        = e.     getAttribute( "param" );
-                _process_log_filename = e.     getAttribute( "log_file" );
-                _process_ignore_error = e.bool_getAttribute( "ignore_error" );
-                _process_ignore_signal= e.bool_getAttribute( "ignore_signal" );
+
+                _process_filename     = e.     getAttribute( "file"         , _process_filename      );
+                _process_param        = e.     getAttribute( "param"        , _process_param         );
+                _process_log_filename = e.     getAttribute( "log_file"     , _process_log_filename  );
+                _process_ignore_error = e.bool_getAttribute( "ignore_error" , _process_ignore_error  );
+                _process_ignore_signal= e.bool_getAttribute( "ignore_signal", _process_ignore_signal );
 
                 DOM_FOR_EACH_ELEMENT( e, ee )
                 {
                     if( ee.nodeName_is( "environment" ) )
                     {
-                        _process_environment = new Com_variable_set();
-
-#ifndef Z_WINDOWS
-                        _process_environment->_ignore_case = false;
-#endif
-
                         DOM_FOR_EACH_ELEMENT( ee, eee )
                         {
                             if( eee.nodeName_is( "variable" ) ) 

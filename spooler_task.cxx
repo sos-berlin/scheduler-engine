@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.268 2004/12/07 14:02:39 jz Exp $
+// $Id: spooler_task.cxx,v 1.269 2004/12/07 14:31:18 jz Exp $
 /*
     Hier sind implementiert
 
@@ -1844,7 +1844,7 @@ bool Process_task::do_begin__end()
 
     // Environment
 
-    ptr<Com_variable_set> v   = variable_set_from_environment();
+    ptr<Com_variable_set> v = variable_set_from_environment();
     v->merge( _job->_process_environment );
     S env;
     Z_FOR_EACH( Com_variable_set::Map, v->_map, m )
