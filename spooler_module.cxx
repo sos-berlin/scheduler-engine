@@ -1,4 +1,4 @@
-// $Id: spooler_module.cxx,v 1.51 2003/10/10 09:59:51 jz Exp $
+// $Id: spooler_module.cxx,v 1.52 2003/10/10 12:45:39 jz Exp $
 /*
     Hier sind implementiert
 
@@ -157,14 +157,14 @@ void Module::set_source_only( const Source_with_parts& source )
     _compiled = false;
     _source = source;
 
+    if( _real_kind == kind_java  &&  !_source.empty()  &&  _spooler )  _spooler->_has_java_source = true;       // work_dir zum Compilieren bereitstellen
+
     switch( _kind )
     {
         case kind_remote:
             break;
 
         case kind_java:
-            if( !_source.empty()  &&  _spooler )  _spooler->_has_java_source = true;
-            //if( !_source.empty() )  throw_xc( "SCHEDULER-167" );
             break;
 
         case kind_scripting_engine:
@@ -201,40 +201,40 @@ void Module::init()
     if( _use_process_class )  _spooler->process_class( _process_class_name );     // Fehler, wenn der Name nicht bekannt ist.
 
 
+# ifdef Z_WINDOWS
+    if( _com_class_name != "" )
+    {
+        _kind = kind_com;
+    
+        if( _language        != "" )  throw_xc( "SCHEDULER-145" );
+        if( _java_class_name != "" )  throw_xc( "SCHEDULER-168" );
+    }
+    else
+# endif
+    if( _java_class_name != ""  ||  lcase(_language) == "java" )
+    {
+        _kind = kind_java;
+    
+        if( _language == "" )  _language = "Java";
+
+        if( lcase(_language) != "java" )  throw_xc( "SCHEDULER-166" );
+        if( _com_class_name  != ""     )  throw_xc( "SCHEDULER-168" );
+    }
+    else
+    {
+        _kind = kind_scripting_engine;
+        if( _language == "" )  _language = SPOOLER_DEFAULT_LANGUAGE;
+    }
+
+
+    _real_kind = _kind;
+
     if( _separate_process  ||  _use_process_class ) 
     {
         _kind = kind_remote;
     }
-    else
-    {
-#     ifdef Z_WINDOWS
-        if( _com_class_name != "" )
-        {
-            _kind = kind_com;
-        
-            if( _language        != "" )  throw_xc( "SCHEDULER-145" );
-            if( _java_class_name != "" )  throw_xc( "SCHEDULER-168" );
-        }
-        else
-#     endif
 
-        if( _java_class_name != ""  ||  lcase(_language) == "java" )
-        {
-            _kind = kind_java;
-     
-            if( _language == "" )  _language = "Java";
-
-            if( lcase(_language) != "java" )  throw_xc( "SCHEDULER-166" );
-            if( _com_class_name  != ""     )  throw_xc( "SCHEDULER-168" );
-
-            if( _spooler )  _spooler->_has_java = true;
-        }
-        else
-        {
-            _kind = kind_scripting_engine;
-             if( _language == "" )  _language = SPOOLER_DEFAULT_LANGUAGE;
-        }
-    }
+    if( _kind == kind_java  &&  _spooler )  _spooler->_has_java = true;
 }
 
 //--------------------------------------------------------------------------Module::create_instance

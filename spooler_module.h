@@ -1,4 +1,4 @@
-// $Id: spooler_module.h,v 1.47 2003/10/10 09:59:51 jz Exp $
+// $Id: spooler_module.h,v 1.48 2003/10/10 12:45:39 jz Exp $
 
 #ifndef __SPOOLER_MODULE_H
 #define __SPOOLER_MODULE_H
@@ -126,6 +126,7 @@ struct Module : Object
     string                     _process_class_name;
     bool                       _use_process_class;
     Kind                       _kind;
+    Kind                       _real_kind;                  // Falls _kind == kind_remote
 
 
     // Scripting Engine

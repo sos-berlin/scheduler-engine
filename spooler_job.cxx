@@ -1,4 +1,4 @@
-// $Id: spooler_job.cxx,v 1.36 2003/10/08 11:45:05 jz Exp $
+// $Id: spooler_job.cxx,v 1.37 2003/10/10 12:45:39 jz Exp $
 /*
     Hier sind implementiert
 
@@ -168,6 +168,8 @@ void Job::init0()
     _next_start_time = latter_day;
 
     set_state( s_pending );
+
+    if( _module_xml_element )  read_script();
 }
 
 //----------------------------------------------------------------------------------------Job::init
@@ -176,8 +178,6 @@ void Job::init0()
 void Job::init()
 {
     _history.open();
-
-    if( _module_xml_element )  read_script();
 
     _module_ptr = _object_set_descr? &_object_set_descr->_class->_module
                                    : &_module;

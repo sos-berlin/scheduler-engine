@@ -1,4 +1,4 @@
-// $Id: spooler_module_java.cxx,v 1.67 2003/10/10 09:59:51 jz Exp $
+// $Id: spooler_module_java.cxx,v 1.68 2003/10/10 12:45:39 jz Exp $
 /*
     Hier sind implementiert
 
@@ -321,6 +321,8 @@ void Module::clear_java()
 
 bool Module::make_java_class( bool force )
 {
+    if( _java_vm->work_dir().empty() )  throw_xc( "SCHEDULER-201" );    // Vorsichtshalber, sollte nicht passieren.
+
     string filename = _java_vm->work_dir() + Z_DIR_SEPARATOR + replace_regex( _java_class_name, "\\.", "/" );
     string java_filename  = filename + ".java";
     string class_filename = filename + ".class";

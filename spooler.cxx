@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.275 2003/10/10 11:19:06 jz Exp $
+// $Id: spooler.cxx,v 1.276 2003/10/10 12:45:39 jz Exp $
 /*
     Hier sind implementiert
 
@@ -1351,31 +1351,33 @@ void Spooler::start()
     _base_log.open_new();
     
     _log.info( string( "Scheduler (" VER_PRODUCTVERSION_STR ) + ") startet mit " + _config_filename );
+    _spooler_start_time = Time::now();
 
+    FOR_EACH_JOB( job )  (*job)->init0();
 
-    if( _has_java ) 
+    try
     {
-        try
+        if( _has_java_source )
+        {
+            string java_work_dir = temp_dir() + Z_DIR_SEPARATOR "java";
+            _java_vm->set_work_dir( java_work_dir );
+            _java_vm->prepend_class_path( java_work_dir );
+        }
+
+        if( _has_java )     // Nur True, wenn Java-Job nicht in eigenem Prozess ausgeführt wird.
         {
             _java_vm->set_log( &_log );
-
-            if( _has_java_source )
-            {
-                string java_work_dir = temp_dir() + Z_DIR_SEPARATOR "java";
-                _java_vm->set_work_dir( java_work_dir );
-                _java_vm->prepend_class_path( java_work_dir );
-            }
 
             _java_vm->prepend_class_path( _config_java_class_path );        // Nicht so gut hier. Bei jedem Reload wird der Pfad verlängert. Aber Reload lässt Java sowieso nicht neu starten.
             _java_vm->set_options( _config_java_options );
 
             Java_module_instance::init_java_vm( _java_vm );
         }
-        catch( const exception& x )
-        {
-            _log.error( x.what() );
-            _log.error( "Java kann nicht gestartet werden. Scheduler startet ohne Java." );
-        }
+    }
+    catch( const exception& x )
+    {
+        _log.error( x.what() );
+        _log.error( "Java kann nicht gestartet werden. Scheduler startet ohne Java." );
     }
 
 
@@ -1391,10 +1393,6 @@ void Spooler::start()
     set_ctrl_c_handler( false );
     set_ctrl_c_handler( true );       // Falls Java (über Dateityp jdbc) gestartet worden ist und den Signal-Handler verändert hat
 
-
-    _spooler_start_time = Time::now();
-
-    FOR_EACH_JOB( job )  (*job)->init0();
 
 
   //_spooler_thread_list.clear();
