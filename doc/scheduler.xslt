@@ -22,12 +22,7 @@
                 
                 <h2>Schema</h2>
 
-                <p>
-                    <code>&lt;<xsl:value-of select="@name"/></code>
-                    <xsl:if test="not( xml_attributes/xml_attribute )">
-                        <code>></code>
-                    </xsl:if>
-                </p>
+                <code>&lt;<xsl:value-of select="@name"/></code>
                 
                 <xsl:if test="xml_attributes/xml_attribute">
                     <div class="indent">
@@ -53,8 +48,6 @@
                             </xsl:for-each>
                         </table>
                     </div>
-                    
-                    <code>></code>
                 </xsl:if>
 
                 <!--
@@ -93,6 +86,8 @@
                     
                     <xsl:choose>
                         <xsl:when test="xml_child_elements/xml_child_element">
+                    
+                    <code>></code>
                             
                             <div class="indent">
                                 <table cellspacing="0" cellpadding="0">

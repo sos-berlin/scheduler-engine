@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet href="../scheduler.xslt" type="text/xsl"?>
+
+<!--$Id: script.xml,v 1.2 2004/08/22 20:09:24 jz Exp $-->
+
+<xml_element name     = "script" 
+             title    = "Programm-Code"
+             base_dir = ".."
+             author   = "$Author: jz $"
+             date     = "$Date: 2004/08/22 20:09:24 $">
+
+    <xml_parent_elements>
+        <xml_parent_element name="config">
+            <description>
+                Für das Startskript.
+            </description>
+        </xml_parent_element>        
+        <xml_parent_element name="job">
+            <description>
+                Das Skript (der Programm-Code) eines Jobs.
+            </description>
+        </xml_parent_element>        
+    </xml_parent_elements>
+    
+
+    <xml_attributes>
+        <xml_attribute name="language" value="language">
+            <description>
+                <p>
+                    Sprache des Programm-Codes. 
+                    Möglich sind <code>"java"</code>, <code>"perl"</code> 
+                    und die Sprachen der Microsoft Scripting Engines <code>"VBScript"</code> und <code>"JavaScript"</code>.
+                    Die Großschreibung spielt keine Rolle.
+                </p>
+            </description>
+        </xml_attribute>
+        
+        <xml_attribute name="com_class" value="com_class_name">
+            <description>
+                <p>
+                    Name einer COM-Klasse (nur Windows).
+                    Die COM-Klasse kann die Methoden spooler_open(), spooler_process() etc. bereitstellen.
+                </p>
+            </description>
+        </xml_attribute>
+
+        <xml_attribute name="filename" value="filename">
+            <description>
+                <p>
+                    Zusammen mit dem Attribut <code>com_class</code> können Sie hier den Namen der DLL angeben,
+                    die die COM-Klasse implementiert, falls diese nicht registriert ist.
+                </p>
+            </description>
+        </xml_attribute>
+        
+        <xml_attribute name="java_class" value="java_class_name">
+            <description>
+                <p>
+                    Wenn der Job als Java-Klasse realisiert ist, dann geben Sie mit diesem Attribut deren Namen an.
+                </p>
+            </description>
+        </xml_attribute>
+
+<!--        
+        <xml_attribute name="recompile" value="yes_no" initial="yes">
+            <description>
+                <p>
+                    Wenn die Java-Klasse als Quell-Code im Element <code>&lt;script</code> enthalten ist, kann mit recompile="
+                </p>
+            </description>
+        </xml_attribute>
+-->
+<!--        
+        <xml_attribute name="process_class" value="prozessklasse">
+            <description>
+                Gibt den Namen der Prozessklasse an, in der der Programm-Code laufen soll. Siehe <scheduler_element name="process_classes"/>.
+            </description>
+        </xml_attribute>
+-->
+<!--
+        <xml_attribute name="separate_process" value="yes_no">
+            <description>
+                <p>
+                </p>
+            </description>
+        </xml_attribute>
+-->
+
+        <xml_attribute name="use_engine" value="scope" initial="task">
+            <description>
+                <p>
+                    Nur <code>&lt;use_engine="task"></code> ist möglich.
+                </p>
+            </description>
+        </xml_attribute>
+        
+    </xml_attributes>
+
+
+    <xml_child_elements>
+        <xml_child_element name="include">
+            <description>
+                <p>
+                    Dieses Element kann in den Text gestreut werden 
+                    (aber außerhalb von <code>&lt;[CDATA[</code>&#160; und&#160; <code>]]&gt;</code>),
+                    um Quell-Code, der in anderen Dateien steht, einzuziehen.
+                </p>
+            </description>
+        </xml_child_element>        
+    </xml_child_elements>
+    
+    
+    <description>
+        <p>
+            Hier wird der auszuführende Programm-Code angegeben, entweder direkt als Text oder indirekt als Verweis auf Binär-Code. 
+        </p>
+            <p>
+                <code>&lt;script></code> kann den Quell-Code als Text enthalten. Er kann in <code>&lt;[CDATA[</code>&#160; und&#160; <code>]]&gt;</code> 
+                eingeschlossen sein.
+            </p>
+    </description>
+    
+</xml_element>

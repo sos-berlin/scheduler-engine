@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet href="../scheduler.xslt" type="text/xsl"?>
+
+<!--$Id: run_time.xml,v 1.2 2004/08/22 20:09:24 jz Exp $-->
+
+<xml_element name     = "run_time" 
+             title    = "Laufzeit"
+             base_dir = ".."
+             author   = "$Author: jz $"
+             date     = "$Date: 2004/08/22 20:09:24 $">
+
+    <xml_parent_elements>
+        <xml_parent_element name="job">
+        </xml_parent_element>        
+    </xml_parent_elements>
+    
+
+    <xml_attributes>
+        <xml_attribute name="once" value="yes_no" initial="no">
+            <description>
+                <p>
+                    Bei <code>once="yes"</code> startet der <span class="sos_name">Schedulers</span>
+                    den Job einmal nach Start des <span class="sos_name">Schedulers</span>,
+                    sobald die <code>&lt;run_time</code> dies zulässt.
+                </p>
+            </description>
+        </xml_attribute>
+        
+        <xml_attribute name="let_run" value="yes_no">
+            <description>
+                <p>
+                    Voreinstellung für <scheduler_element name="period"/>
+                </p>
+            </description>
+        </xml_attribute>
+
+        <xml_attribute name="single_start" value="hh:mm[:ss]">
+            <description>
+                <p>
+                    Voreinstellung für in <code>&lt;run_time></code> enthaltene <scheduler_element name="period"/>.
+                </p>
+            </description>
+        </xml_attribute>
+        
+        <xml_attribute name="begin" value="hh:mm[:ss]" initial="00:00">
+            <description>
+                <p>
+                    Voreinstellung für in <code>&lt;run_time></code> enthaltene <scheduler_element name="period"/>.
+                </p>
+            </description>
+        </xml_attribute>
+
+        <xml_attribute name="end" value="hh:mm[:ss]" initial="04:00">
+            <description>
+                <p>
+                    Voreinstellung für in <code>&lt;run_time></code> enthaltene <scheduler_element name="period"/>.
+                </p>
+            </description>
+        </xml_attribute>
+
+    </xml_attributes>
+
+
+    <xml_child_elements>
+        <xml_child_element name="period" multiple="yes">
+            <description>
+                <p>
+                </p>
+            </description>
+        </xml_child_element>        
+
+        <xml_child_element name="date" multiple="yes">
+            <description>
+                <p>
+                </p>
+            </description>
+        </xml_child_element>        
+
+        <xml_child_element name="weekdays" multiple="yes">
+            <description>
+                <p>
+                </p>
+            </description>
+        </xml_child_element>        
+
+        <xml_child_element name="monthdays" multiple="yes">
+            <description>
+                <p>
+                </p>
+            </description>
+        </xml_child_element>        
+
+        <xml_child_element name="ultimos" multiple="yes">
+            <description>
+                <p>
+                </p>
+            </description>
+        </xml_child_element>        
+
+        <xml_child_element name="holidays">
+            <description>
+                <p>
+                </p>
+            </description>
+        </xml_child_element>        
+    </xml_child_elements>
+    
+    
+    <description>
+        <p>
+            <code>&lt;run_time></code> gibt an, zu welchen Zeiten der Scheduler Tasks dieses Jobs laufen lässt.
+            Das wird realisiert durch Perioden (s. <scheduler_element name="period"/>).
+            Der Scheduler wählt die erste Periode aus, die zu einer Zeit gilt (deren Ende noch nicht abgelaufen ist).
+            Diese Periode gilt bis zu ihrem Ende.
+        </p>
+        <p>
+            Eine Periode mit <code>single_start</code> gilt nur für einen Zeitpunkt.
+        </p>
+    </description>
+    
+</xml_element>

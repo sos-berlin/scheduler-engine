@@ -1,13 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"-->
 <?xml-stylesheet href="../scheduler.xslt" type="text/xsl"?>
-<!--$Id: allowed_host.xml,v 1.1 2004/08/21 10:27:01 jz Exp $-->
+
+<!--$Id: allowed_host.xml,v 1.2 2004/08/22 20:09:24 jz Exp $-->
 
 <xml_element name     = "allowed_host" 
              title    = "Rechner, der Verbindung aufnehmen darf"
              base_dir = ".."
              author   = "$Author: jz $"
-             date     = "$Date: 2004/08/21 10:27:01 $">
+             date     = "$Date: 2004/08/22 20:09:24 $">
 
     <xml_parent_elements>
         <xml_parent_element name="security">

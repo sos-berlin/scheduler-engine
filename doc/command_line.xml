@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="../scheduler.xslt" type="text/xsl"?>
-<!--$Id: command_line.xml,v 1.1 2004/08/21 10:27:01 jz Exp $-->
+
+<!--$Id: command_line.xml,v 1.2 2004/08/22 20:09:24 jz Exp $-->
 
 <command_line program  = "scheduler"
               base_dir = "."
               author   = "$Author: jz $"
-              date     = "$Date: 2004/08/21 10:27:01 $">
+              date     = "$Date: 2004/08/22 20:09:24 $">
 
     <options>
         <option name="-log-dir" value="verzeichnis">
