@@ -1,4 +1,4 @@
-// $Id: scheduler.js,v 1.8 2004/12/09 20:59:32 jz Exp $
+// $Id: scheduler.js,v 1.9 2004/12/10 11:20:40 jz Exp $
 
 //----------------------------------------------------------------------------------------------var
 
@@ -519,9 +519,9 @@ function popup_menu__execute( xml_command )
 {
     _popup_menu.close();
 
-    var error = _scheduler.execute( xml_command );
+    _scheduler.execute( xml_command );
 
-    if( !error )  window.parent.left_frame.update();
+    window.parent.left_frame.update();
 }
 
 //------------------------------------------------------------------Popup_menu_builder.add_show_log

@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-<?xml-stylesheet href="scheduler.xslt" type="text/xsl"?>
+<?xml-stylesheet href="scheduler.xsl" type="text/xsl"?>
 
-<!--$Id: http.xml,v 1.3 2004/12/09 21:06:34 jz Exp $-->
+<!--$Id: http.xml,v 1.4 2004/12/10 11:20:38 jz Exp $-->
 
 <description 
     title    = "HTTP-Server" 
     base_dir = ""
     author   = "$Author: jz $"
-    date     = "$Date: 2004/12/09 21:06:34 $"
+    date     = "$Date: 2004/12/10 11:20:38 $"
 >
 
 <scheduler_keyword keyword="HTTP-Server"/>
@@ -99,7 +99,7 @@
 
 <h2>Job-Beschreibung</h2>
 <p>
-    Die Job-Beschreibung aus &lt;description> kann mit diesem URL abgerufen werden:
+    Die Job-Beschreibung aus <scheduler_element name="description"/> kann mit diesem URL abgerufen werden:
 </p>
 <p>
     <code>http://<i>localhost:4444</i>/job_description?job=<i>job</i></code>

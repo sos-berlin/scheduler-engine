@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-<?xml-stylesheet href="scheduler.xslt" type="text/xsl"?>
+<?xml-stylesheet href="scheduler.xsl" type="text/xsl"?>
 
-<!--$Id: protokolle.xml,v 1.7 2004/10/21 21:13:56 jz Exp $-->
+<!--$Id: protokolle.xml,v 1.8 2004/12/10 11:20:38 jz Exp $-->
 
 <description 
     title    = "Protokolle" 
     base_dir = ""
     author   = "$Author: jz $"
-    date     = "$Date: 2004/10/21 21:13:56 $"
+    date     = "$Date: 2004/12/10 11:20:38 $"
 >
 
 <scheduler_keyword keyword="Protokoll"/>

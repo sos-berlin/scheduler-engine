@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-<?xml-stylesheet href="scheduler.xslt" type="text/xsl"?>
+<?xml-stylesheet href="scheduler.xsl" type="text/xsl"?>
 
-<!--$Id: command_line.xml,v 1.15 2004/11/14 10:30:34 jz Exp $-->
+<!--$Id: command_line.xml,v 1.16 2004/12/10 11:20:37 jz Exp $-->
 
 <command_line program  = "scheduler"
               title    = "Kommandozeile"
               base_dir = ""
               author   = "$Author: jz $"
-              date     = "$Date: 2004/11/14 10:30:34 $">
+              date     = "$Date: 2004/12/10 11:20:37 $">
 
     <command_options>
         <command_option name="config" setting="config">

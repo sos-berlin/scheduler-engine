@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<?xml-stylesheet href="../../scheduler.xslt" type="text/xsl"?>
+<?xml-stylesheet href="../../scheduler.xsl" type="text/xsl"?>
 
-<!--$Id: param.xml,v 1.3 2004/11/08 18:07:38 jz Exp $-->
+<!--$Id: param.xml,v 1.4 2004/12/10 11:20:39 jz Exp $-->
 
 <xml_element name          = "param" 
              title         = "Parameter"
@@ -10,7 +10,7 @@
              base_dir      = "../../"
              parent_page   = "../../xml_commands.xml"
              author        = "$Author: jz $"
-             date          = "$Date: 2004/11/08 18:07:38 $">
+             date          = "$Date: 2004/12/10 11:20:39 $">
 
     <xml_parent_elements>
         <xml_parent_element name="params"/>

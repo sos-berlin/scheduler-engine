@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<?xml-stylesheet href="../scheduler.xslt" type="text/xsl"?>
+<?xml-stylesheet href="../scheduler.xsl" type="text/xsl"?>
 
-<!--$Id: variable.xml,v 1.4 2004/12/07 14:50:08 jz Exp $-->
+<!--$Id: variable.xml,v 1.5 2004/12/10 11:20:39 jz Exp $-->
 
 <xml_element name     = "variable" 
              title    = "Eine Variable"
@@ -9,7 +9,7 @@
              base_dir = "../"
              parent_page = "../konfiguration.xml"
              author   = "$Author: jz $"
-             date     = "$Date: 2004/12/07 14:50:08 $">
+             date     = "$Date: 2004/12/10 11:20:39 $">
 
     <xml_parent_elements>
         <xml_parent_element name="environment">

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<?xml-stylesheet href="../scheduler.xslt" type="text/xsl"?>
+<?xml-stylesheet href="../scheduler.xsl" type="text/xsl"?>
 
-<!--$Id: holidays.xml,v 1.6 2004/11/08 18:07:37 jz Exp $-->
+<!--$Id: holidays.xml,v 1.7 2004/12/10 11:20:39 jz Exp $-->
 
 <xml_element name     = "holidays" 
              title    = "Feiertage"
@@ -9,7 +9,7 @@
              base_dir = "../"
              parent_page = "../konfiguration.xml"
              author   = "$Author: jz $"
-             date     = "$Date: 2004/11/08 18:07:37 $">
+             date     = "$Date: 2004/12/10 11:20:39 $">
 
     <xml_parent_elements>
         <xml_parent_element name="config">
