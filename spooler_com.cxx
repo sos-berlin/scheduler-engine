@@ -1,4 +1,4 @@
-// $Id: spooler_com.cxx,v 1.27 2002/03/27 21:33:49 jz Exp $
+// $Id: spooler_com.cxx,v 1.28 2002/03/11 06:55:52 jz Exp $
 /*
     Hier sind implementiert
 
@@ -533,6 +533,24 @@ STDMETHODIMP Com_job::put_state_text( BSTR text )
         if( GetCurrentThreadId() != _job->thread()->_thread_id )  return E_ACCESSDENIED;
 
         _job->set_state_text( bstr_as_string( text ) );
+    }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Job.state_text" ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Job.state_text" ); }
+
+    return hr;
+}
+
+//-------------------------------------------------------------------------------Com_job::get_title
+
+STDMETHODIMP Com_job::get_title( BSTR* title )
+{
+    HRESULT hr = NOERROR;
+
+    try
+    {
+        if( !_job )  throw_xc( "SPOOLER-122" );
+
+        *title = SysAllocString_string( _job->title() );
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Job.state_text" ); }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Job.state_text" ); }

@@ -1,4 +1,4 @@
-// $Id: spooler_log.cxx,v 1.25 2002/03/05 17:10:00 jz Exp $
+// $Id: spooler_log.cxx,v 1.26 2002/03/11 06:55:53 jz Exp $
 
 #include "../kram/sos.h"
 #include "spooler.h"
@@ -321,10 +321,10 @@ spooler_com::Imail* Prefix_log::mail()
         _mail = mail;   // Nur bei fehlerfreiem init() speichern
 
         if( !_smtp_server_read ) {
-            _smtp_server = read_profile_string( "factory.ini", _section.c_str(), "smtp_server", _spooler->_smtp_server );
+            _smtp_server = read_profile_string( "factory.ini", _section.c_str(), "smtp", _spooler->_smtp_server );
             _smtp_server_read = true;
         }
-        hr = _mail->put_smtp_server( SysAllocString_string(_smtp_server) );     if( FAILED(hr) ) throw_ole( hr, "spooler::Mail::smtp_server", _smtp_server.c_str() );
+        hr = _mail->put_smtp( SysAllocString_string(_smtp_server) );     if( FAILED(hr) ) throw_ole( hr, "spooler::Mail::smtp_server", _smtp_server.c_str() );
 
         set_mail_header();
 

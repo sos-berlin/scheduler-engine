@@ -1,4 +1,4 @@
-// $Id: spooler_command.cxx,v 1.39 2002/03/02 19:22:55 jz Exp $
+// $Id: spooler_command.cxx,v 1.40 2002/03/11 06:55:52 jz Exp $
 /*
     Hier ist implementiert
 
@@ -181,16 +181,18 @@ xml::Element_ptr Command_processor::execute_start_job( const xml::Element_ptr& e
 {
     if( _security_level < Security::seclev_all )  throw_xc( "SPOOLER-121" );
 
-    string job_name     = as_string( element->getAttribute( "job"   ) );
-    string task_name    = as_string( element->getAttribute( "name"  ) );
-    string after_str    = as_string( element->getAttribute( "after" ) );
-    string at_str       = as_string( element->getAttribute( "at"    ) );
+    string job_name        = as_string( element->getAttribute( "job"   ) );
+    string task_name       = as_string( element->getAttribute( "name"  ) );
+    string after_str       = as_string( element->getAttribute( "after" ) );
+    string at_str          = as_string( element->getAttribute( "at"    ) );
 
     Time start_at;
 
     if( !after_str.empty() )  start_at = Time::now() + as_int( after_str );
-    
-    if( !at_str.empty()    )  start_at = (Sos_optional_date_time) at_str;
+
+    if( at_str == ""       )  at_str = "now";
+    if( at_str == "period" )  start_at = 0;                                     // start="period" => start_at = 0 (sobald eine Periode es zulässt)
+                        else  start_at = (Sos_optional_date_time) at_str;       // 
 
     CComPtr<Com_variable_set> pars = new Com_variable_set;
 

@@ -1,4 +1,4 @@
-// $Id: spooler_config.cxx,v 1.29 2002/03/05 20:49:37 jz Exp $
+// $Id: spooler_config.cxx,v 1.30 2002/03/11 06:55:52 jz Exp $
 
 //#include <precomp.h>
 
@@ -348,47 +348,50 @@ void Object_set_descr::set_xml( const xml::Element_ptr& element )
 
 void Job::set_xml( const xml::Element_ptr& element )
 {
-    bool run_time_set = false;
-
-    _name             = as_string( element->getAttribute( L"name" ) );
-  //_rerun            = as_bool  ( element->getAttribute( L"rerun" ) ) ),
-  //_stop_after_error = as_bool  ( element->getAttribute( L"stop_after_errorn ) );
-    _temporary        = as_bool  ( element->getAttribute( L"temporary" ) );
-    _priority         = as_int   ( element->getAttribute( L"priority" ) );
-    _title            = as_string( element->getAttribute( L"title" ) );
-    _log_append       = as_bool  ( element->getAttribute( L"log_append" ) );
-
-    string text;
-
-    text = as_string( element->getAttribute( L"output_level" ) );
-    if( !text.empty() )  _output_level = as_int( text );
-
-    //for( time::Holiday_set::iterator it = _spooler->_run_time._holidays.begin(); it != _spooler->_run_time._holidays.end(); it++ )
-    //    _run_time._holidays.insert( *it );
-    _run_time.set_holidays( _spooler->holidays() );
-
-    for( xml::Element_ptr e = element->firstChild; e; e = e->nextSibling )
+    THREAD_LOCK( _lock )
     {
-        if( e->tagName == "description" )  
+        bool run_time_set = false;
+
+        _name             = as_string( element->getAttribute( L"name" ) );
+      //_rerun            = as_bool  ( element->getAttribute( L"rerun" ) ) ),
+      //_stop_after_error = as_bool  ( element->getAttribute( L"stop_after_errorn ) );
+        _temporary        = as_bool  ( element->getAttribute( L"temporary" ) );
+        _priority         = as_int   ( element->getAttribute( L"priority" ) );
+        _title            = as_string( element->getAttribute( L"title" ) );
+        _log_append       = as_bool  ( element->getAttribute( L"log_append" ) );
+
+        string text;
+
+        text = as_string( element->getAttribute( L"output_level" ) );
+        if( !text.empty() )  _output_level = as_int( text );
+
+        //for( time::Holiday_set::iterator it = _spooler->_run_time._holidays.begin(); it != _spooler->_run_time._holidays.end(); it++ )
+        //    _run_time._holidays.insert( *it );
+        _run_time.set_holidays( _spooler->holidays() );
+
+        for( xml::Element_ptr e = element->firstChild; e; e = e->nextSibling )
         {
-            try { _description = text_from_xml_with_include( e, _spooler->include_path() ); }
-            catch( const Xc& x         ) { _spooler->_log.error( x.what() );  _description = x.what(); }
-            catch( const _com_error& x ) { string d = bstr_as_string(x.Description()); _spooler->_log.error(d);  _description = d; }
+            if( e->tagName == "description" )  
+            {
+                try { _description = text_from_xml_with_include( e, _spooler->include_path() ); }
+                catch( const Xc& x         ) { _spooler->_log.error( x.what() );  _description = x.what(); }
+                catch( const _com_error& x ) { string d = bstr_as_string(x.Description()); _spooler->_log.error(d);  _description = d; }
+            }
+            else
+            if( e->tagName == "object_set"  )  _object_set_descr = SOS_NEW( Object_set_descr( e ) );
+            else
+            if( e->tagName == "script"      )  _script_xml_element = e;
+            else
+            if( e->tagName == "process"     )  _process_filename = as_string( e->getAttribute( L"file" ) ),
+                                               _process_param    = as_string( e->getAttribute( L"param" ) );
+            else
+            if( e->tagName == "run_time"    )  _run_time.set_xml( e ),  run_time_set = true;
         }
-        else
-        if( e->tagName == "object_set"  )  _object_set_descr = SOS_NEW( Object_set_descr( e ) );
-        else
-        if( e->tagName == "script"      )  _script_xml_element = e;
-        else
-        if( e->tagName == "process"     )  _process_filename = as_string( e->getAttribute( L"file" ) ),
-                                           _process_param    = as_string( e->getAttribute( L"param" ) );
-        else
-        if( e->tagName == "run_time"    )  _run_time.set_xml( e ),  run_time_set = true;
+
+        if( !run_time_set )  _run_time.set_xml( element->ownerDocument->createElement( L"run_time" ) );
+
+        if( _object_set_descr )  _object_set_descr->_class = _spooler->get_object_set_class( _object_set_descr->_class_name );
     }
-
-    if( !run_time_set )  _run_time.set_xml( element->ownerDocument->createElement( L"run_time" ) );
-
-    if( _object_set_descr )  _object_set_descr->_class = _spooler->get_object_set_class( _object_set_descr->_class_name );
 }
 
 //--------------------------------------------------------Spooler::load_object_set_classes_from_xml

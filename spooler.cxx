@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.81 2002/03/05 17:09:59 jz Exp $
+// $Id: spooler.cxx,v 1.82 2002/03/11 06:55:52 jz Exp $
 /*
     Hier sind implementiert
 
@@ -114,7 +114,7 @@ Spooler::Spooler()
 
     _mail_on_error   = read_profile_bool  ( "factory.ini", "spooler", "mail_on_error"  , _mail_on_error );
     _mail_on_success = read_profile_bool  ( "factory.ini", "spooler", "mail_on_success", _mail_on_success );
-    _smtp_server     = read_profile_string( "factory.ini", "spooler", "smtp_server"    , _smtp_server );
+    _smtp_server     = read_profile_string( "factory.ini", "spooler", "smtp"           , _smtp_server );
 
     _log_mail_from    = read_profile_string( "factory.ini", "spooler", "log_mail_from"   );
     _log_mail_to      = read_profile_string( "factory.ini", "spooler", "log_mail_to"     );

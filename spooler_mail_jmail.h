@@ -1,4 +1,4 @@
-// $Id: spooler_mail_jmail.h,v 1.2 2002/03/05 17:10:01 jz Exp $
+// $Id: spooler_mail_jmail.h,v 1.3 2002/03/11 06:55:53 jz Exp $
 
 #ifndef __SPOOLER_MAIL_JMAIL_H
 #define __SPOOLER_MAIL_JMAIL_H
@@ -57,8 +57,8 @@ struct Com_mail : spooler_com::Imail, Sos_ole_object
     STDMETHODIMP                add_file                    ( BSTR filename, BSTR content_type );                      
   //STDMETHODIMP                add_attachment              ( BSTR filename, BSTR data );
 
-    STDMETHODIMP            put_smtp_server                 ( BSTR smtp )                           { _smtp_server = smtp; return NOERROR; }
-    STDMETHODIMP            get_smtp_server                 ( BSTR* smtp )                          { *smtp = _smtp_server; return NOERROR; }
+    STDMETHODIMP            put_smtp                        ( BSTR smtp )                           { _smtp_server = smtp; return NOERROR; }
+    STDMETHODIMP            get_smtp                        ( BSTR* smtp )                          { *smtp = _smtp_server; return NOERROR; }
 
     STDMETHODIMP                add_header_field            ( BSTR field_name, BSTR value );
 

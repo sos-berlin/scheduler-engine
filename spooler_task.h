@@ -1,4 +1,4 @@
-// $Id: spooler_task.h,v 1.33 2002/03/27 21:33:50 jz Exp $
+// $Id: spooler_task.h,v 1.34 2002/03/11 06:55:53 jz Exp $
 
 #ifndef __SPOOLER_TASK_H
 #define __SPOOLER_TASK_H
@@ -174,6 +174,7 @@ struct Job : Sos_self_deleting
     Thread*                     thread                      () const                    { return _thread; }
     string                      job_state                   ();
     string                      include_path                () const;
+    string                      title                       ()                          { string title; THREAD_LOCK( _lock )  title = _title;  return title; }
     string                      jobname_as_filename         ();
     void                        set_in_call                 ( const string& name );
 
@@ -207,7 +208,7 @@ struct Job : Sos_self_deleting
     bool                        should_removed              ()                          { return _temporary && _state == s_stopped; }
     void                        set_mail_defaults           ();
 
-    void                        set_repeat                  ( double seconds )          { _repeat = seconds; }
+    void                        set_repeat                  ( double seconds )          { _log.debug( "repeat=" + as_string(seconds) );  _repeat = seconds; }
 
     void                        set_error_xc                ( const Xc& );
     void                        set_error                   ( const Xc& x )             { set_error_xc( x ); }
@@ -227,7 +228,7 @@ struct Job : Sos_self_deleting
     static string               state_cmd_name              ( State_cmd );
     static State_cmd            as_state_cmd                ( const string& );
 
-    void                        set_state_text              ( const string& text )      { _state_text = text; }
+    void                        set_state_text              ( const string& text )      { _state_text = text; _log.debug( "state_text = " + text ); }
 
     CComPtr<Com_job>&           com_job                     ()                          { return _com_job; }
     void                        signal_object               ( const string& object_set_class_name, const Level& );

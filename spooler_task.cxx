@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.61 2002/03/27 21:33:50 jz Exp $
+// $Id: spooler_task.cxx,v 1.62 2002/03/11 06:55:53 jz Exp $
 /*
     Hier sind implementiert
 
@@ -392,6 +392,12 @@ void Job::set_next_start_time( Time now )
     }
 
     if( _next_start_time != latter_day )  _log.debug( "Nächste Wiederholung: " + _next_start_time.as_string() );
+
+
+    // Minimum von _start_at für _next_time berücksichtigen
+    Task_queue::iterator it = _task_queue.begin();  
+    while( it != _task_queue.end()  &&  !(*it)->_start_at )  it++;
+    if( it != _task_queue.end()  &&  _next_time > (*it)->_start_at )  _next_time = (*it)->_start_at;
 }
 
 //-------------------------------------------------------------------------Job::jobname_as_filename
@@ -443,9 +449,15 @@ bool Job::dequeue_task( Time now )
 
     THREAD_LOCK( _lock )
     {
-        Task_queue::iterator it = _task_queue.begin();
-        if( !is_in_period(now) )  
-            for( ; it != _task_queue.end(); it++ )  if( (*it)->_start_at  &&  (*it)->_start_at <= now )  break;
+        bool                 in_period = is_in_period(now);
+        Task_queue::iterator it        = _task_queue.begin();
+        
+        for( ; it != _task_queue.end(); it++ )
+        {
+            Task* t = *it;
+            if(  t->_start_at  &&  t->_start_at <= now )  break;        // Task mit Startzeitpunkt
+            if( !t->_start_at  &&  in_period           )  break;        // Task ohne Startzeitpunkt
+        }
 
         if( it == _task_queue.end() )  return false;
 
@@ -672,6 +684,8 @@ void Job::finish()
     {
         if( _log.mail_on_success() && !has_error()  
         ||  _log.mail_on_error()   &&  has_error() )  _log.send();
+
+        _log.close();
     }
     catch( const Xc& x         ) { set_error(x); }
     catch( const exception& x  ) { set_error(x); }
@@ -716,7 +730,7 @@ bool Job::execute_state_cmd()
             switch( _state_cmd )
             {
                 case sc_stop:       if( _state != s_stopped  
-                                     && _state != s_read_error )  stop(),                      something_done = true;
+                                     && _state != s_read_error )  stop(), finish(),            something_done = true;
                                     break;
 
                 case sc_unstop:     if( _state == s_stopped    )  set_state( s_pending ),      something_done = true;
@@ -805,7 +819,6 @@ bool Job::do_something()
     if( _state == s_start_task )    // SPOOLER_INIT, SPOOLER_OPEN
     {
         _event.reset();
-        _log.open();           // Jobprotokoll, nur wirksam, wenn set_filename() gerufen, s. Job::init().
 
         ok = _task->start();
         if( ok )  do_a_step = true;
@@ -860,6 +873,7 @@ bool Job::do_something()
         if( _temporary && _repeat == 0 )  
         {
             stop();   // _temporary && s_stopped ==> spooler_thread.cxx entfernt den Job
+            finish();
         }
         else
         {
@@ -1271,25 +1285,28 @@ void Task::set_start_at( Time time )
 { 
     _start_at = time; 
     
-    if( time < _job->_next_time )  _job->_next_time = time;
+    if( _start_at < _job->_next_time )  _job->_next_time = time;
 }
 
 //--------------------------------------------------------------------------------------Task::start
 
 bool Task::start()
 {
-    THREAD_LOCK( _job->_lock )
-    {
-        _job->set_state( Job::s_starting );
-
-        _error = _job->_error = NULL;
-        _job->_thread->_task_count++;
-        _job->_step_count = 0;
-        _running_since = Time::now();
-    }
-
     try 
     {
+        _job->_log.close();
+        _job->_log.open();           // Jobprotokoll, nur wirksam, wenn set_filename() gerufen, s. Job::init().
+
+        THREAD_LOCK( _job->_lock )
+        {
+            _job->set_state( Job::s_starting );
+
+            _error = _job->_error = NULL;
+            _job->_thread->_task_count++;
+            _job->_step_count = 0;
+            _running_since = Time::now();
+        }
+
         if( !loaded() )  
         {
             bool ok = do_load();
