@@ -1,4 +1,4 @@
-// $Id: spooler_com.h,v 1.76 2003/09/05 11:16:19 jz Exp $
+// $Id: spooler_com.h,v 1.77 2003/09/24 11:15:48 jz Exp $
 
 #ifndef __SPOOLER_COM_H
 #define __SPOOLER_COM_H
@@ -130,15 +130,23 @@ struct Com_variable_set: spooler_com::Ivariable_set,
 
     xml::Document_ptr           dom                         ();
 
-    STDMETHODIMP                set_var                     ( BSTR name, VARIANT* value )           { return put_var( name, value ); }
-    STDMETHODIMP                put_var                     ( BSTR, VARIANT* );
-    STDMETHODIMP                get_var                     ( BSTR, VARIANT* );
-    STDMETHODIMP                get_count                   ( int* );
+    STDMETHODIMP            set_var                         ( BSTR name, VARIANT* value )           { return put_var( name, value ); }
+
+    STDMETHODIMP            put_value                       ( VARIANT*, VARIANT* );
+    STDMETHODIMP            get_value                       ( VARIANT*, VARIANT* );
+
+    STDMETHODIMP            put_var                         ( BSTR, VARIANT* );
+    STDMETHODIMP            get_var                         ( BSTR, VARIANT* );
+
+    STDMETHODIMP            get_count                       ( int* );
+
     STDMETHODIMP                Clone                       ( spooler_com::Ivariable_set** );
     STDMETHODIMP                merge                       ( spooler_com::Ivariable_set* );
     STDMETHODIMP                get__NewEnum                ( IUnknown** );    
-    STDMETHODIMP                put_xml                     ( BSTR xml_text );
-    STDMETHODIMP                get_xml                     ( BSTR* xml_text );
+    STDMETHODIMP            put_xml                         ( BSTR xml_text );
+    STDMETHODIMP            get_xml                         ( BSTR* xml_text );
+
+    static const string         xml_element_name            ()                                      { return "sos.spooler.variable_set"; }
 
 
   private:

@@ -1,5 +1,4 @@
-
-// $Id: spooler_order.cxx,v 1.36 2003/09/23 15:57:16 jz Exp $
+// $Id: spooler_order.cxx,v 1.37 2003/09/24 11:15:48 jz Exp $
 /*
     Hier sind implementiert
 
@@ -180,7 +179,6 @@ static Order::State normalized_state( const Order::State& state )
 
 //-------------------------------------------------------------Job_chain::load_orders_from_database
 
-// in spooler_history.cxx
 void Job_chain::load_orders_from_database()
 {
     int count = 0;
@@ -703,7 +701,20 @@ Order::Order( Spooler* spooler, const Record& record )
     _state_text = record.as_string( "state_text" );
     _title      = record.as_string( "title"      );
     _priority   = record.as_int   ( "priority"   );
-    _payload    = record.as_string( "payload"    );
+
+    string payload_string = record.as_string( "payload"    );
+
+    if( payload_string.find( "<" + Com_variable_set::xml_element_name() ) != string::npos )
+    {
+        ptr<Com_variable_set> v = new Com_variable_set;
+        v->put_xml( Bstr( payload_string ) );
+        _payload = v;
+    }
+    else
+    {
+        _payload = payload_string;
+    }
+
     _created.set_datetime( record.as_string( "created_time" ) );
 }
 

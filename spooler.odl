@@ -1,4 +1,4 @@
-// $Id: spooler.odl,v 1.65 2003/09/23 14:01:08 jz Exp $
+// $Id: spooler.odl,v 1.66 2003/09/24 11:15:47 jz Exp $
 
 // Anweisung: midl /nologo /error all /out $(OutDir) $(InputPath)
 
@@ -139,10 +139,16 @@ library spooler
         HRESULT                 set_var                     ( [in] BSTR name, [in] VARIANT* value );
 
         [id(0),propput]
-        HRESULT                 var                         ( [in,defaultvalue(NULL)] BSTR name, [in] VARIANT* value );
+        HRESULT                 value                       ( [in,optional] VARIANT* name, [in] VARIANT* value );
 
         [id(0),propget]
-        HRESULT                 var                         ( [in,defaultvalue(NULL)] BSTR name, [out,retval] VARIANT* value );
+        HRESULT                 value                       ( [in,optional] VARIANT* name, [out,retval] VARIANT* value );
+
+        [propput]
+        HRESULT                 var                         ( [in] BSTR name, [in] VARIANT* value );
+
+        [propget]
+        HRESULT                 var                         ( [in] BSTR name, [out,retval] VARIANT* value );
 
         [propget]
         HRESULT                 count                       ( [out,retval] int* value );

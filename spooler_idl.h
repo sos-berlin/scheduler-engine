@@ -1,4 +1,4 @@
-// $Id: spooler_idl.h,v 1.21 2003/09/21 18:11:30 jz Exp $
+// $Id: spooler_idl.h,v 1.22 2003/09/24 11:15:48 jz Exp $
 
 
 /*  Ersatz für spooler.odl für Systeme ohne COM. 
@@ -103,8 +103,13 @@ struct Ivariable_set : IDispatch
 
     virtual HRESULT     get_java_class_name             ( BSTR* result ) = 0;
     virtual HRESULT         set_var                     ( BSTR name, VARIANT* value ) = 0;
+
+    virtual HRESULT     put_value                       ( VARIANT* name, VARIANT* value ) = 0;
+    virtual HRESULT     get_value                       ( VARIANT* name, VARIANT* value ) = 0;
+
     virtual HRESULT     put_var                         ( BSTR name, VARIANT* value ) = 0;
     virtual HRESULT     get_var                         ( BSTR name, VARIANT* value ) = 0;
+
     virtual HRESULT     get_count                       ( int* value ) = 0;
 
 #ifdef Z_WINDOWS

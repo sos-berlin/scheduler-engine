@@ -1,4 +1,4 @@
-// $Id: spooler_com.cxx,v 1.106 2003/09/23 14:01:08 jz Exp $
+// $Id: spooler_com.cxx,v 1.107 2003/09/24 11:15:47 jz Exp $
 /*
     Hier sind implementiert
 
@@ -238,8 +238,10 @@ const Com_method Com_variable_set::_methods[] =
 { 
    // _flags         , dispid, _name                , _method                                           , _result_type  , _types        , _default_arg_count
     { DISPATCH_METHOD     , 1, "set_var"            , (Com_method_ptr)&Com_variable_set::set_var        , VT_EMPTY      , { VT_BSTR, VT_BYREF|VT_VARIANT } },
-    { DISPATCH_PROPERTYPUT, 0, "var"                , (Com_method_ptr)&Com_variable_set::put_var        , VT_EMPTY      , { VT_BSTR, VT_BYREF|VT_VARIANT } },
-    { DISPATCH_PROPERTYGET, 0, "var"                , (Com_method_ptr)&Com_variable_set::get_var        , VT_VARIANT    , { VT_BSTR } },
+    { DISPATCH_PROPERTYPUT, 0, "value"              , (Com_method_ptr)&Com_variable_set::put_var        , VT_EMPTY      , { VT_BYREF|VT_VARIANT, VT_BYREF|VT_VARIANT }, 1 },
+    { DISPATCH_PROPERTYGET, 0, "value"              , (Com_method_ptr)&Com_variable_set::get_var        , VT_VARIANT    , { VT_BYREF|VT_VARIANT                      }, 1 },
+    { DISPATCH_PROPERTYPUT, 8, "var"                , (Com_method_ptr)&Com_variable_set::put_var        , VT_EMPTY      , { VT_BSTR, VT_BYREF|VT_VARIANT } },
+    { DISPATCH_PROPERTYGET, 8, "var"                , (Com_method_ptr)&Com_variable_set::get_var        , VT_VARIANT    , { VT_BSTR } },
     { DISPATCH_PROPERTYGET, 2, "count"              , (Com_method_ptr)&Com_variable_set::get_count      , VT_I4         },
     { DISPATCH_PROPERTYGET, 3, "dom"                , (Com_method_ptr)&Com_variable_set::get_dom        , VT_DISPATCH   },
     { DISPATCH_PROPERTYGET, 4, "Clone"              , (Com_method_ptr)&Com_variable_set::Clone          , VT_DISPATCH   },
@@ -319,38 +321,68 @@ void Com_variable_set::set_dom( const xml::Element_ptr& params )
     }
 }
 
-//------------------------------------------------------------------------Com_variable_set::put_var
+//----------------------------------------------------------------------Com_variable_set::put_value
 
-STDMETHODIMP Com_variable_set::put_var( BSTR name, VARIANT* value )
+STDMETHODIMP Com_variable_set::put_value( VARIANT* name, VARIANT* value )
 {
-    if( name == NULL )
+    if( name->vt == VT_BSTR )
+    {
+        return put_var( V_BSTR(name), value );
+    }
+    else
+    if( name->vt == VT_ERROR )
     {
         if( value->vt != VT_BSTR )  return DISP_E_TYPEMISMATCH;
         
         return put_xml( V_BSTR(value) );
     }
-    else
+    else 
+        return DISP_E_TYPEMISMATCH;
+}
+
+//----------------------------------------------------------------------Com_variable_set::get_value
+
+STDMETHODIMP Com_variable_set::get_value( VARIANT* name, VARIANT* value )
+{
+    if( name->vt == VT_BSTR )
     {
-        THREAD_LOCK( _lock )  
-        {
-            Bstr lname = name;
-
-            bstr_to_lower( &lname );
-
-            Map::iterator it = _map.find( lname );
-            if( it != _map.end()  &&  it->second )
-            {
-                it->second->put_value( value );
-            }
-            else
-            {
-                ptr<Com_variable> v = new Com_variable( name, *value );
-                _map[lname] = v;
-            }
-        }
-
-        return NOERROR;
+        return get_var( V_BSTR(name), value );
     }
+    else
+    if( name->vt == VT_ERROR )
+    {
+        value->vt      = VT_BSTR;
+        value->bstrVal = NULL;
+
+        return get_xml( &V_BSTR(value) );
+    }
+    else 
+        return DISP_E_TYPEMISMATCH;
+}
+
+//------------------------------------------------------------------------Com_variable_set::put_var
+
+STDMETHODIMP Com_variable_set::put_var( BSTR name, VARIANT* value )
+{
+    THREAD_LOCK( _lock )  
+    {
+        Bstr lname = name;
+
+        bstr_to_lower( &lname );
+
+        Map::iterator it = _map.find( lname );
+        if( it != _map.end()  &&  it->second )
+        {
+            it->second->put_value( value );
+        }
+        else
+        {
+            ptr<Com_variable> v = new Com_variable( name, *value );
+            _map[lname] = v;
+        }
+    }
+
+    return NOERROR;
 }
 
 //------------------------------------------------------------------------Com_variable_set::get_var
@@ -420,7 +452,7 @@ xml::Document_ptr Com_variable_set::dom()
         doc.create();
         doc.appendChild( doc.createProcessingInstruction( "xml", "version=\"1.0\" encoding=\"iso-8859-1\"" ) );
 
-        xml::Element_ptr varset = doc.createElement( "variable_set" );
+        xml::Element_ptr varset = doc.createElement( xml_element_name() );
         doc.appendChild( varset );
 
         for( Map::iterator it = _map.begin(); it != _map.end(); it++ )
@@ -436,7 +468,51 @@ xml::Document_ptr Com_variable_set::dom()
 
                 xml::Element_ptr var = doc.createElement( "variable" );
                 var.setAttribute( "name" , string_from_bstr(name) );
+
+                VARTYPE vt = -1;
+
+                if( value.vt == VT_EMPTY
+                 || value.vt == VT_NULL
+                 || value.vt == VT_I2
+                 || value.vt == VT_I4
+                 || value.vt == VT_R4       
+                 || value.vt == VT_R8       
+                 || value.vt == VT_CY       
+                 || value.vt == VT_DATE     
+              // || value.vt == VT_BSTR          // VT_BSTR müssen wir nicht besonders kennzeichnen. Das ist Default.
+              // || value.vt == VT_DISPATCH 
+                 || value.vt == VT_ERROR    
+                 || value.vt == VT_BOOL     
+              // || value.vt == VT_VARIANT  
+              // || value.vt == VT_UNKNOWN  
+                 || value.vt == VT_DECIMAL  
+                 || value.vt == VT_I1       
+                 || value.vt == VT_UI1      
+                 || value.vt == VT_UI2      
+                 || value.vt == VT_UI4      
+                 || value.vt == VT_I8       
+                 || value.vt == VT_UI8      
+                 || value.vt == VT_INT      
+                 || value.vt == VT_UINT     
+              // || value.vt == VT_VOID     
+                 || value.vt == VT_HRESULT )
+                {
+                    vt = value.vt; 
+                }
+/*
+                else
+                if( value.vt == VT_DISPATCH )
+                {
+                    ptr<Variable_set> v;
+                    if( V_DISPATCH(value)
+                     && SUCCEEDED( V_DISPATCH(value)->QueryInterface( IID_Ivariable_set, v.pp() ) ) )  vt = value.vt;
+                }
+*/
+                if( vt != -1 )  var.setAttribute( "vt", vt );
+                          else  {} // Andere Typen sind nicht rückkonvertierbar. Die werden dann zum String.  
+
                 var.setAttribute( "value", string_from_variant( value ) );
+
                 varset.appendChild( var );
             }
         }
@@ -524,6 +600,9 @@ STDMETHODIMP Com_variable_set::put_xml( BSTR xml_text )
             {
                 Bstr    name  = e.getAttribute( "name" );
                 Variant value = e.getAttribute( "value" );
+                VARTYPE vt    = e.int_getAttribute( "vt", VT_BSTR );
+                value.change_type( vt );
+
                 hr = put_var( name, &value );
                 if( FAILED( hr ) )  break;
             }
@@ -532,8 +611,8 @@ STDMETHODIMP Com_variable_set::put_xml( BSTR xml_text )
         }
 
     }
-    catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Variable_set::dom" ); }
-    catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Variable_set::dom" ); }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Variable_set::xml" ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Variable_set::xml" ); }
 
     return hr;
 }
@@ -548,8 +627,8 @@ STDMETHODIMP Com_variable_set::get_xml( BSTR* xml_doc  )
     {
         hr = string_to_bstr( dom().xml(), xml_doc );
     }
-    catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Variable_set::dom" ); }
-    catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Variable_set::dom" ); }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Variable_set::xml" ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Variable_set::xml" ); }
 
     return hr;
 }

@@ -1,4 +1,4 @@
-// $Id: spooler_module.cxx,v 1.45 2003/09/23 14:01:08 jz Exp $
+// $Id: spooler_module.cxx,v 1.46 2003/09/24 11:15:48 jz Exp $
 /*
     Hier sind implementiert
 
@@ -102,7 +102,7 @@ void Module::set_dom_without_source( const xml::Element_ptr& element )
     _com_class_name     = element.getAttribute     ( "com_class" );
     _filename           = element.getAttribute     ( "filename"  );
     _java_class_name    = element.getAttribute     ( "java_class" );
-    _recompile          = element.bool_getAttribute( "recompile" );
+    _recompile          = element.bool_getAttribute( "recompile", true );
     _process_class_name = element.     getAttribute( "process_class" );
 
     bool separate_process_default = false;
