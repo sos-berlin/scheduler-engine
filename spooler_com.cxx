@@ -1,4 +1,4 @@
-// $Id: spooler_com.cxx,v 1.15 2001/07/02 11:13:44 jz Exp $
+// $Id: spooler_com.cxx,v 1.16 2001/07/03 14:01:49 jz Exp $
 /*
     Hier sind implementiert
 
@@ -227,8 +227,10 @@ STDMETHODIMP Com_job::start( VARIANT* params, Itask** itask )
 
         THREAD_LOCK( _job->_lock )
         {
-            _job->start_without_lock( pars );
-            *itask = new Com_task( _job->_task ); //_job->_com_task;
+            CComVariant task_name_vt;
+            if( pars )  pars->get_var( L"spooler_task_name", &task_name_vt );
+            task_name_vt.ChangeType( VT_BSTR );
+            *itask = new Com_task( _job->start_without_lock( pars, bstr_as_string( task_name_vt.bstrVal ) ) );
         }
 
         (*itask)->AddRef();

@@ -1,10 +1,14 @@
-// $Id: spooler_task.h,v 1.18 2001/07/02 12:50:10 jz Exp $
+// $Id: spooler_task.h,v 1.19 2001/07/03 14:01:49 jz Exp $
 
 #ifndef __SPOOLER_TASK_H
 #define __SPOOLER_TASK_H
 
+//#include <queue>
+//using std::queue;
+
 namespace sos {
 namespace spooler {
+
 
 typedef int                     Level;
 struct                          Task;
@@ -105,7 +109,7 @@ struct Job : Sos_self_deleting
         s_none,
         s_stopped,              // Gestoppt (z.B. wegen Fehler)
         s_pending,              // Warten auf Start
-        s_task_created,         // Task eingerichtet, vielleicht von einem anderen Thread via job.start
+        s_start_task,           // Task aus der Warteschlange genommen, muss noch gestartet werden. 
         s_starting,             //
         s_loaded,               // Skript geladen (mit spooler_init), aber nicht gestartet (spooler_open)
         s_running,              // Läuft
@@ -163,13 +167,14 @@ struct Job : Sos_self_deleting
     void                        close                       ();
     void                        close_engine                ();
 
-    void                        start                       ( const CComPtr<spooler_com::Ivariable_set>& params = NULL );
-    void                        start_without_lock          ( const CComPtr<spooler_com::Ivariable_set>& params = NULL );
+    void                        start                       ( const CComPtr<spooler_com::Ivariable_set>& params, const string& task_name );
+    Sos_ptr<Task>               start_without_lock          ( const CComPtr<spooler_com::Ivariable_set>& params, const string& task_name );
     void                        start_when_directory_changed( const string& directory_name );
     void                        wake                        ()                          { _event.signal( "wake" ); }
     void                        interrupt_script            ();
 
-    void                        create_task                 ();
+    Sos_ptr<Task>               create_task                 ( const CComPtr<spooler_com::Ivariable_set>& params, const string& task_name );
+    bool                        dequeue_task                ();
     void                        close_task                  ();
     bool                        load                        ();
     void                        end                         ();
@@ -236,7 +241,7 @@ struct Job : Sos_self_deleting
     State                      _state;
     State_cmd                  _state_cmd;
     string                     _in_call;                    // "spooler_process" etc.
-    CComPtr<spooler_com::Ivariable_set> _params;
+  //CComPtr<spooler_com::Ivariable_set> _params;
     Time                       _next_start_time;
     Period                     _period;                     // Derzeitige oder nächste Period
     Time                       _repeat;                     // spooler_task.repeat
@@ -247,6 +252,7 @@ struct Job : Sos_self_deleting
     Xc_copy                    _error;
     bool                       _load_error;                 // Fehler beim Laden oder spooler_init()
     Sos_ptr<Task>              _task;                       // Es kann nur eine Task geben. Zirkel: _task->_job == this
+    list< Sos_ptr<Task> >      _task_queue;                 // Warteschlange der nächsten zu startenden Tasks
 };
 
 //------------------------------------------------------------------------------------------Job_list
@@ -296,10 +302,12 @@ struct Task : Sos_self_deleting
     bool                       _let_run;                    // Task zuende laufen lassen, nicht bei _job._period.end() beenden
     bool                       _opened;
 
+    Time                       _enqueue_time;
     Time                       _running_since;
 
     CComPtr<spooler_com::Ivariable_set> _params;
     CComVariant                _result;
+    string                     _name;
     Xc_copy                    _error;
 
     Thread_semaphore           _terminated_events_lock;

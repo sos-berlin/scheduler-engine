@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 
-<!-- $Id: spooler.xml,v 1.41 2001/07/02 12:50:10 jz Exp $   (C) 2001 SOS GmbH Berlin -->
+<!-- $Id: spooler.xml,v 1.42 2001/07/03 14:01:49 jz Exp $   (C) 2001 SOS GmbH Berlin -->
 
 <!DOCTYPE spooler SYSTEM "s:\prod\spooler\spooler.dtd">
 
@@ -496,6 +496,7 @@ function spooler_process()
     spooler_log.msg( "1" );
     params("zahl") = 3;
     spooler_log.msg( "start" );
+    params("spooler_task_name")="Gestartet von Steuerung";
     task = spooler.job("dauer").start(params);
     spooler_log.msg( "***** wait_until_terminated()" );
     ok = task.wait_until_terminated(11);

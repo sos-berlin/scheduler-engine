@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.38 2001/07/02 12:50:10 jz Exp $
+// $Id: spooler_task.cxx,v 1.39 2001/07/03 14:01:49 jz Exp $
 /*
     Hier sind implementiert
 
@@ -201,7 +201,7 @@ Job::Job( Thread* thread )
     _script(thread->_spooler),
     _script_instance(&_log)
 {
-    _params = new Com_variable_set;
+    //_params = new Com_variable_set;
 }
 
 //----------------------------------------------------------------------------------------Job::~Job
@@ -250,7 +250,7 @@ void Job::close_task()
     {
         if( _task )  _task->close();
         _task = NULL; 
-        _params = new Com_variable_set; 
+      //_params = new Com_variable_set; 
       //if( _state != s_stopped )  set_state( s_ended );
     }
 
@@ -283,41 +283,64 @@ void Job::init()
 
 //---------------------------------------------------------------------------------Job::create_task
 
-void Job::create_task()
+Sos_ptr<Task> Job::create_task( const CComPtr<spooler_com::Ivariable_set>& params, const string& name )
 {
-    if( _task )  throw_xc( "SPOOLER-118", _name, state_name() );
+    Sos_ptr<Task> task;
 
-    _error = NULL;
-    _load_error = false;
-    _repeat = 0;
-
-    if( !_process_filename.empty() )   _task = SOS_NEW( Process_task( _spooler, this ) );
+    if( !_process_filename.empty() )   task = SOS_NEW( Process_task( _spooler, this ) );
     else
-    if( _object_set_descr          )   _task = SOS_NEW( Object_set_task( _spooler, this ) );
+    if( _object_set_descr          )   task = SOS_NEW( Object_set_task( _spooler, this ) );
     else                             
-                                       _task = SOS_NEW( Job_script_task( _spooler, this ) );
+                                       task = SOS_NEW( Job_script_task( _spooler, this ) );
 
-    _com_task->set_task( _task );
+    task->_enqueue_time = Time::now();
+    task->_params       = params? params : new Com_variable_set;
+    task->_name         = name;
 
-    set_state( s_task_created );
+    _task_queue.push_back( task );
+
+    return task;
+}
+
+//---------------------------------------------------------------------------------Job::dequeue_task
+
+bool Job::dequeue_task()
+{
+    THREAD_LOCK( _lock )
+    {
+        if( _task_queue.empty() )  return false;
+
+        _task = _task_queue.front();  _task_queue.erase( _task_queue.begin() );
+
+        _error = NULL;
+        _load_error = false;
+        _repeat = 0;
+
+        _com_task->set_task( _task );
+        set_state( s_start_task );
+    }
+
+    return true;
 }
 
 //---------------------------------------------------------------------------------------Job::start
 
-void Job::start( const CComPtr<spooler_com::Ivariable_set>& params )
+void Job::start( const CComPtr<spooler_com::Ivariable_set>& params, const string& task_name )
 {
-    THREAD_LOCK( _lock )  start_without_lock( params );
+    THREAD_LOCK( _lock )  start_without_lock( params, task_name );
 }
 
 //---------------------------------------------------------------------------------------Job::start
 
-void Job::start_without_lock( const CComPtr<spooler_com::Ivariable_set>& params )
+Sos_ptr<Task> Job::start_without_lock( const CComPtr<spooler_com::Ivariable_set>& params, const string& task_name )
 {
-    _params = params? params : new Com_variable_set;
-    create_task();
+    Sos_ptr<Task> task = create_task( params, task_name );
+    
+    task->_let_run = true;
 
-    _task->_let_run = true;
     _thread->signal( "start job" );
+
+    return task;
 }
 
 //----------------------------------------------------------------Job::start_when_directory_changed
@@ -421,7 +444,8 @@ void Job::interrupt_script()
 
 void Job::set_next_start_time( Time now )
 {
-    if( _repeat > 0 ) {
+    if( _repeat > 0 ) 
+    {
         _next_start_time = now + _repeat;
         _repeat = 0;
         if( !_period.let_run()  &&  _next_start_time > _period.end() )  _next_start_time = latter_day;
@@ -479,20 +503,28 @@ bool Job::do_something()
 
     if( _state == s_pending )
     {
-        if( !_event.signaled()  
-         && !_directory_watcher.signaled()  
-         &&  Time::now() < _next_start_time )  return false;
+        bool dequeued = dequeue_task();
+        
+        if( !dequeued )
+        {
+            if( !_event.signaled()  
+             && !_directory_watcher.signaled()  
+             && Time::now() < _next_start_time )  return false;
 
-        if( _directory_watcher.signaled() )  _directory_watcher.watch_again();
+            if( _directory_watcher.signaled() )  _directory_watcher.watch_again();
 
-        THREAD_LOCK( _lock )  create_task();
+            THREAD_LOCK( _lock )  create_task( NULL, "" );
+        }
+
         something_done = true;
     }
 
     bool do_a_step = false;
 
-    if( _state == s_task_created )
+    if( _state == s_start_task )
     {
+        _event.reset();
+
         ok = _task->start();
         if( ok )  do_a_step = true;
         something_done = true;
@@ -513,8 +545,6 @@ bool Job::do_something()
 
             if( call_step ) 
             {
-                _event.reset();
-
                 ok = _task->step(); 
 
                 something_done = true;
@@ -531,7 +561,7 @@ bool Job::do_something()
 
     if( _state == s_ended ) 
     {
-        close_task();
+        //?jz 7.7.01 schon erledigt.  close_task();
 
         if( _temporary && _repeat == 0 )  
         {
@@ -539,9 +569,14 @@ bool Job::do_something()
         }
         else
         {
-            set_next_start_time();
-            if( _next_start_time == latter_day )  stop();
-                                            else  set_state( s_pending );
+            bool dequeued = dequeue_task();
+
+            if( !dequeued )
+            {
+                set_next_start_time();
+                /*if( _next_start_time == latter_day )  stop();
+                                                else*/  set_state( s_pending );
+            }
         }
 
         something_done = true;
@@ -582,8 +617,8 @@ void Job::set_state( State new_state )
 { 
     if( new_state == _state )  return;
 
-    if( new_state == s_running )  _thread->_running_tasks_count++;
-    if( _state    == s_running )  _thread->_running_tasks_count--;
+    if( new_state == s_running  ||  new_state == s_start_task )  _thread->_running_tasks_count++;
+    if( _state    == s_running  ||  _state    == s_start_task )  _thread->_running_tasks_count--;
 
     _state = new_state;
 
@@ -628,7 +663,7 @@ void Job::set_state_cmd( State_cmd cmd )
         case sc_unstop:     ok = _state == s_stopped;   if(!ok) break;
                             break;
 
-        case sc_start:      start(NULL);                break;
+        case sc_start:      start( NULL, "" );          break;
 
         case sc_wake:       wake();                     break;
 
@@ -693,7 +728,7 @@ string Job::state_name( State state )
         case s_stopped:         return "stopped";
         case s_loaded:          return "loaded";
         case s_pending:         return "pending";
-        case s_task_created:    return "task_created";
+        case s_start_task:      return "start_task";
         case s_starting:        return "starting";
         case s_running:         return "running";
         case s_running_process: return "running_process";
@@ -779,6 +814,21 @@ xml::Element_ptr Job::xml( xml::Document_ptr document )
             job_element->setAttribute( "steps"        , as_dom_string( as_string( _task->_step_count ) ) );
         }
 
+        if( !_task_queue.empty() )
+        {
+            xml::Element_ptr queue_element = document->createElement( "queued_tasks" );
+
+            FOR_EACH( list< Sos_ptr<Task> >, _task_queue, it )
+            {
+                xml::Element_ptr queued_task_element = document->createElement( "queued_task" );
+                queued_task_element->setAttribute( "enqueued", as_dom_string( (*it)->_enqueue_time.as_string() ) );
+                queued_task_element->setAttribute( "name", as_dom_string( (*it)->_name ) );
+                queue_element->appendChild( queued_task_element );
+            }
+
+            job_element->appendChild( queue_element );
+        }
+
         if( _error )  append_error_element( job_element, _error );
     }
 
@@ -797,7 +847,7 @@ void Job::signal_object( const string& object_set_class_name, const Level& level
          && _object_set_descr->_class->_name == object_set_class_name 
          && _object_set_descr->_level_interval.is_in_interval( level ) )
         {
-            start_without_lock();
+            start_without_lock( NULL, object_set_class_name );
         }
     }
 }
@@ -811,7 +861,6 @@ Task::Task( Spooler* spooler, const Sos_ptr<Job>& job )
     _job(job)
 {
     _let_run = _job->_period.let_run();
-    _params  = _job->_params;
 }
 
 //---------------------------------------------------------------------------------------Task::Task

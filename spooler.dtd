@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- $Id: spooler.dtd,v 1.23 2001/03/22 08:56:51 jz Exp $   Joacim Zschimmer,  (C) 2000 SOS GmbH Berlin  -->
+<!-- $Id: spooler.dtd,v 1.24 2001/07/03 14:01:49 jz Exp $   Joacim Zschimmer,  (C) 2000 SOS GmbH Berlin  -->
 
 
 <!ELEMENT spooler               ( config+ | command | answer )>
@@ -173,7 +173,7 @@
 
 <!ELEMENT tasks                 ( task+ )>
 
-<!ELEMENT task                  ( ERROR? )>
+<!ELEMENT task                  ( queued_tasks? | ERROR? )>
 <!ATTLIST task                  job                 CDATA #REQUIRED>    <!-- Jobname -->
 <!ATTLIST task                  state               (stopped|pending|running|suspended) #REQUIRED>
                                                                         <!-- state="stopped"  : Keine Task wird mehr gestartet -->
@@ -184,6 +184,13 @@
 <!ATTLIST task                  steps               CDATA #IMPLIED>     <!-- Anzahl der bisher ausgeführten Jobschritte -->
 <!ATTLIST task                  running_since       CDATA #IMPLIED>     <!-- yyyy-mm-dd HH:MM:SS -->
 <!ATTLIST task                  next_start_time     CDATA #IMPLIED>     <!-- yyyy-mm-dd HH:MM:SS -->
+
+<!ELEMENT queued_tasks          ( queued_task* )>
+
+<!ELEMENT queued_task           EMPTY>
+<!ATTLIST queued_task           enqueued            CDATA #REQUIRED>    <!-- yyyy-mm-dd HH:MM:SS -->
+<!ATTLIST queued_task           name                CDATA #IMPLIED>     <!-- Wert der Variablen spooler_task_name -->
+
 
 <!ELEMENT ok                    EMPTY>
 
