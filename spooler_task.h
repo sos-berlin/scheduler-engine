@@ -1,4 +1,4 @@
-// $Id: spooler_task.h,v 1.62 2002/09/14 16:23:08 jz Exp $
+// $Id: spooler_task.h,v 1.63 2002/09/29 16:17:25 jz Exp $
 
 #ifndef __SPOOLER_TASK_H
 #define __SPOOLER_TASK_H
@@ -70,22 +70,22 @@ string                          start_cause_name            ( Start_cause );
 
 struct Spooler_object
 {
-                                Spooler_object              ( const CComPtr<IDispatch>& dispatch = NULL ) : _idispatch(dispatch) {}
+                                Spooler_object              ( const ptr<IDispatch>& dispatch = NULL ) : _idispatch(dispatch) {}
 
-    Spooler_object&             operator =                  ( const CComPtr<IDispatch>& dispatch ) { _idispatch = dispatch; return *this; }
+    Spooler_object&             operator =                  ( const ptr<IDispatch>& dispatch )      { _idispatch = dispatch; return *this; }
     Level                       level                       ();
     void                        process                     ( Level output_level );
-    bool                        is_null                     ()                              { return _idispatch == NULL; }
+    bool                        is_null                     ()                                      { return _idispatch == NULL; }
 
-    CComPtr<IDispatch>         _idispatch;
+    ptr<IDispatch>             _idispatch;
 };
 
 //---------------------------------------------------------------------------------Object_set_descr
 
 struct Object_set_descr : Sos_self_deleting
 {
-                                Object_set_descr            ()                              {}
-    explicit                    Object_set_descr            ( const xml::Element_ptr& e )   { set_xml( e ); }
+                                Object_set_descr            ()                                      {}
+    explicit                    Object_set_descr            ( const xml::Element_ptr& e )           { set_xml( e ); }
 
     void                        set_xml                     ( const xml::Element_ptr& );
 
@@ -114,7 +114,7 @@ struct Object_set : Sos_self_deleting
     Task*                      _task;
     Sos_ptr<Object_set_descr>  _object_set_descr;
     Object_set_class*          _class;
-    CComPtr<IDispatch>         _idispatch;                  // Zeiger auf ein Object_set des Skripts
+    ptr<IDispatch>             _idispatch;                  // Zeiger auf ein Object_set des Skripts
 };
 
 //----------------------------------------------------------------------------------------------Job
@@ -206,8 +206,8 @@ struct Job : Sos_self_deleting
     void                        close_engine                ();
     void                        close_engine2               ();
 
-    void                        start                       ( const CComPtr<spooler_com::Ivariable_set>& params, const string& task_name, Time = 0 );
-    Sos_ptr<Task>               start_without_lock          ( const CComPtr<spooler_com::Ivariable_set>& params, const string& task_name, Time = 0, bool log = false );
+    void                        start                       ( const ptr<spooler_com::Ivariable_set>& params, const string& task_name, Time = 0 );
+    Sos_ptr<Task>               start_without_lock          ( const ptr<spooler_com::Ivariable_set>& params, const string& task_name, Time = 0, bool log = false );
     void                        start_when_directory_changed( const string& directory_name, const string& filename_pattern );
     void                        clear_when_directory_changed();
     void                        signal                      ( const string& signal_name = "" )  { _event.signal(signal_name); }
@@ -219,7 +219,7 @@ struct Job : Sos_self_deleting
     Task*                       current_task                ()                          { return _task; }
     bool                        queue_filled                ()                          { return !_task_queue.empty(); }
 
-    Sos_ptr<Task>               create_task                 ( const CComPtr<spooler_com::Ivariable_set>& params, const string& task_name, Time = latter_day );
+    Sos_ptr<Task>               create_task                 ( const ptr<spooler_com::Ivariable_set>& params, const string& task_name, Time = latter_day );
     bool                        dequeue_task                ( Time now = Time::now() );
     void                        remove_from_task_queue      ( Task* );
     void                        close_task                  ();
@@ -265,7 +265,7 @@ struct Job : Sos_self_deleting
 
     void                        set_state_text              ( const string& text )      { _state_text = text; _log.debug9( "state_text = " + text ); }
 
-    CComPtr<Com_job>&           com_job                     ()                          { return _com_job; }
+    ptr<Com_job>&               com_job                     ()                          { return _com_job; }
     void                        signal_object               ( const string& object_set_class_name, const Level& );
 
     Order_queue*                order_queue                 () const                    { return _order_queue; }
@@ -317,7 +317,7 @@ struct Job : Sos_self_deleting
     string                     _description;                // <description>
     string                     _state_text;                 // spooler_job.state_text = "..."
 
-    CComPtr<Com_variable_set>  _default_params;
+    ptr<Com_variable_set>      _default_params;
 
     xml::Element_ptr           _script_xml_element;         // <script> aus <config>
     Script*                    _script_ptr;
@@ -340,9 +340,9 @@ struct Job : Sos_self_deleting
     Time                       _next_single_start;
     Time                       _repeat;                     // spooler_task.repeat
 
-    CComPtr<Com_job>           _com_job;
-    CComPtr<Com_log>           _com_log;
-    CComPtr<Com_task>          _com_task;                   // Objekt bleibt, Inhalt wechselt über die Tasks hinweg (für use_engine="job"), weil Objekt spooler_task bei use_engine="job" in der Scripting Engine bleibt (kann nicht ausgetauscht werden)
+    ptr<Com_job>               _com_job;
+    ptr<Com_log>               _com_log;
+    ptr<Com_task>              _com_task;                   // Objekt bleibt, Inhalt wechselt über die Tasks hinweg (für use_engine="job"), weil Objekt spooler_task bei use_engine="job" in der Scripting Engine bleibt (kann nicht ausgetauscht werden)
     Xc_copy                    _error;
     bool                       _close_engine;               // Bei einem Fehler in spooler_init()
     Sos_ptr<Task>              _task;                       // Es kann nur eine Task geben. Zirkel: _task->_job == this
@@ -376,7 +376,7 @@ struct Task : Sos_self_deleting
     void                        on_error_on_success         ();
 
     void                        set_cause                   ( Start_cause );
-    void                        set_history_field           ( const string& name, const CComVariant& value );
+    void                        set_history_field           ( const string& name, const Variant& value );
     void                        set_close_engine            ( bool b )                      { _close_engine = b; }
     bool                        has_parameters              ();
     xml::Document_ptr           parameters_as_dom           ();
@@ -427,8 +427,8 @@ struct Task : Sos_self_deleting
     Time                       _start_at;                   // Zu diesem Zeitpunkt (oder danach) starten
     Time                       _running_since;
 
-    CComPtr<spooler_com::Ivariable_set> _params;
-    CComVariant                _result;
+    ptr<spooler_com::Ivariable_set> _params;
+    Variant                    _result;
     string                     _name;
     Time                       _next_spooler_process;
     bool                       _close_engine;               // Nach Task-Ende Scripting Engine schließen (für use_engine="job")
@@ -472,7 +472,7 @@ struct Object_set_task : Script_task
   //void                        do_on_error                 ();
 
     Sos_ptr<Object_set>        _object_set;
-    CComPtr<Com_object_set>    _com_object_set;
+    ptr<Com_object_set>        _com_object_set;
 };
 
 //----------------------------------------------------------------------------------Job_script_task

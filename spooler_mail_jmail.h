@@ -1,4 +1,4 @@
-// $Id: spooler_mail_jmail.h,v 1.8 2002/04/09 08:55:45 jz Exp $
+// $Id: spooler_mail_jmail.h,v 1.9 2002/09/29 16:17:25 jz Exp $
 
 #ifndef __SPOOLER_MAIL_JMAIL_H
 #define __SPOOLER_MAIL_JMAIL_H
@@ -10,8 +10,6 @@
 #include "../kram/sosscrpt.h"
 #include "../kram/com.h"
 #include "../kram/com_server.h"
-
-#include <atlbase.h>
 
 //#import "../misc/lib/jmail.tlb"     // eMail-Komponente von Dimac AB, www.dimac.se
 #import "../misc/lib/jmail.dll"     // eMail-Komponente von Dimac AB, www.dimac.se
@@ -71,16 +69,16 @@ struct Com_mail : spooler_com::Imail, Sos_ole_object
 
   private:
     void                        add_to_recipients           ( BSTR recipients, char recipient_type );
-    void                        get_recipients              ( CComBSTR& result_bstr );
+    void                        get_recipients              ( Bstr& result_bstr );
 
     Fill_zero                  _zero_;
     Spooler*                   _spooler;
-    CComBSTR                   _to;
-    CComBSTR                   _cc;
-    CComBSTR                   _bcc;
-    CComBSTR                   _from;
+    Bstr                       _to;
+    Bstr                       _cc;
+    Bstr                       _bcc;
+    Bstr                       _from;
     string                     _subject;
-    CComBSTR                   _body;
+    Bstr                       _body;
     _bstr_t                    _smtp_server;
 
     jmail::IMessagePtr         _msg;

@@ -1,4 +1,4 @@
-// $Id: spooler_script.h,v 1.11 2002/06/29 17:26:42 jz Exp $
+// $Id: spooler_script.h,v 1.12 2002/09/29 16:17:25 jz Exp $
 
 #ifndef __SPOOLER_SCRIPT_H
 #define __SPOOLER_SCRIPT_H
@@ -6,7 +6,7 @@
 namespace sos {
 namespace spooler {
 
-bool                            check_result                ( const CComVariant& vt );
+bool                            check_result                ( const Variant& vt );
 
 //--------------------------------------------------------------------------------------Source_part
 
@@ -78,14 +78,14 @@ struct Script_instance
     void                        start                       ();
   //IDispatch*                  dispatch                    () const                        { return _script_site? _script_site->dispatch() : NULL; }
     IDispatch*                  dispatch                    () const                        { return _idispatch; }
-    void                        add_obj                     ( const CComPtr<IDispatch>&, const string& name );
+    void                        add_obj                     ( const ptr<IDispatch>&, const string& name );
     void                        close                       ();
-    CComVariant                 call_if_exists              ( const char* name );
-    CComVariant                 call                        ( const char* name );
-    CComVariant                 call                        ( const char* name, int param );
-    CComVariant                 property_get                ( const char* name );
-    void                        property_put                ( const char* name, const CComVariant& v ) { _script_site->property_put( name, v ); } 
-    void                        optional_property_put       ( const char* name, const CComVariant& v );
+    Variant                     call_if_exists              ( const char* name );
+    Variant                     call                        ( const char* name );
+    Variant                     call                        ( const char* name, int param );
+    Variant                     property_get                ( const char* name );
+    void                        property_put                ( const char* name, const Variant& v ) { _script_site->property_put( name, v ); } 
+    void                        optional_property_put       ( const char* name, const Variant& v );
     bool                        name_exists                 ( const string& name );
     bool                        loaded                      ()                              { return _loaded; }
   //void                        interrupt                   ();
@@ -99,36 +99,18 @@ struct Script_instance
     Prefix_log*                _log;
     Script*                    _script;
 
-    CComPtr<Com_context>       _com_context;
+    ptr<Com_context>           _com_context;
 
-    CComPtr<Script_site>       _script_site;
+    ptr<Script_site>           _script_site;
     
     HMODULE                    _module;                     // Für _script->_filename != ""
     DllGetClassObject_func     _DllGetClassObject;          // Für _script->_filename != ""
 
-    CComPtr<IDispatch>         _idispatch;
+    ptr<IDispatch>             _idispatch;
     bool                       _loaded;
     map<string,bool>           _names;
 };
 
-//-----------------------------------------------------------------------------------Script_context
-/*
-struct Script_context
-{
-
-    CComPtr<Spooler_com>       _spooler;
-    CComPtr<Spooler_task>      _task;
-};
-
-//------------------------------------------------------------------------------------Script_object
-
-struct Script_object
-{
-
-    CComPtr
-    CComPtr<IDispatch>         _idispatch;
-};
-*/
 //-------------------------------------------------------------------------------------------------
 
 } //namespace spooler

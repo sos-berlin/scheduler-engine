@@ -1,4 +1,4 @@
-// $Id: spooler_mail_jmail.cxx,v 1.6 2002/04/17 21:37:18 jz Exp $
+// $Id: spooler_mail_jmail.cxx,v 1.7 2002/09/29 16:17:25 jz Exp $
 
 
 #include "../kram/sos.h"
@@ -165,7 +165,7 @@ void Com_mail::add_to_recipients( BSTR recipients, char recipient_type )
 
 //-------------------------------------------------------------------------Com_mail::get_recipients
 
-void Com_mail::get_recipients( CComBSTR& result_bstr )
+void Com_mail::get_recipients( Bstr& result_bstr )
 {
     string result;
 

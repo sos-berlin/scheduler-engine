@@ -1,4 +1,4 @@
-// $Id: spooler_command.cxx,v 1.58 2002/09/19 10:15:58 jz Exp $
+// $Id: spooler_command.cxx,v 1.59 2002/09/29 16:17:24 jz Exp $
 /*
     Hier ist implementiert
 
@@ -238,14 +238,14 @@ xml::Element_ptr Command_processor::execute_start_job( const xml::Element_ptr& e
     if( at_str == "period" )  start_at = 0;                                     // start="period" => start_at = 0 (sobald eine Periode es zulässt)
                         else  start_at = (Sos_optional_date_time) at_str;       // 
 
-    CComPtr<Com_variable_set> pars = new Com_variable_set;
+    ptr<Com_variable_set> pars = new Com_variable_set;
 
     DOM_FOR_ALL_ELEMENTS( element, e )
     {
         if( e->tagName == "params" )  { pars->set_xml( e );  break; }
     }
 
-    Sos_ptr<Task> task = _spooler->get_job( job_name )->start_without_lock( CComPtr<spooler_com::Ivariable_set>(pars), task_name, start_at, true );
+    Sos_ptr<Task> task = _spooler->get_job( job_name )->start_without_lock( ptr<spooler_com::Ivariable_set>(pars), task_name, start_at, true );
 
     return _answer->createElement( "ok" );
 }
@@ -321,9 +321,9 @@ xml::Element_ptr Command_processor::execute_add_order( const xml::Element_ptr& a
     {
         if( e->tagName == "params" )  
         { 
-            CComPtr<Com_variable_set> pars = new Com_variable_set;
+            ptr<Com_variable_set> pars = new Com_variable_set;
             pars->set_xml( e );  
-            order->set_payload( CComVariant( (IDispatch*)pars ) );
+            order->set_payload( Variant( (IDispatch*)pars ) );
             break; 
         }
     }

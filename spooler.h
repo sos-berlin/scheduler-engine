@@ -1,4 +1,4 @@
-// $Id: spooler.h,v 1.90 2002/09/11 10:05:13 jz Exp $
+// $Id: spooler.h,v 1.91 2002/09/29 16:17:23 jz Exp $
 
 #ifndef __SPOOLER_H
 #define __SPOOLER_H
@@ -262,8 +262,8 @@ struct Spooler
     Log                        _log;
     Prefix_log                 _prefix_log;
 
-    CComPtr<Com_spooler>       _com_spooler;                // COM-Objekt spooler
-    CComPtr<Com_log>           _com_log;                    // COM-Objekt spooler.log
+    ptr<Com_spooler>           _com_spooler;                // COM-Objekt spooler
+    ptr<Com_log>               _com_log;                    // COM-Objekt spooler.log
 
     Thread_id_map              _thread_id_map;              // Thread_id -> Thread
     Thread_semaphore           _thread_id_map_lock;
@@ -305,7 +305,7 @@ struct Spooler
     Object_set_class_list      _object_set_class_list;      // <object_set_classes>
     Communication              _communication;              // TCP und UDP (ein Thread)
 
-    CComPtr<Com_variable_set>  _variables;
+    ptr<Com_variable_set>      _variables;
     Script                     _script;                     // <script>
     Script_instance            _script_instance;
 

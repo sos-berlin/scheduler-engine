@@ -1,4 +1,4 @@
-// $Id: spooler_com.h,v 1.45 2002/09/27 10:48:56 jz Exp $
+// $Id: spooler_com.h,v 1.46 2002/09/29 16:17:24 jz Exp $
 
 #ifndef __SPOOLER_COM_H
 #define __SPOOLER_COM_H
@@ -10,8 +10,6 @@
 #include "../kram/sosscrpt.h"
 #include "../kram/com.h"
 #include "../kram/com_server.h"
-
-#include <atlbase.h>
 
 #if defined _DEBUG
 #    import "debug/spooler.tlb"   rename_namespace("spooler_com") raw_interfaces_only named_guids
@@ -80,14 +78,14 @@ struct Com_variable: spooler_com::Ivariable, Sos_ole_object
 
     STDMETHODIMP                put_value                   ( VARIANT* v )                      { HRESULT hr = NOERROR; THREAD_LOCK(_lock) _value = *v; return hr; }
     STDMETHODIMP                get_value                   ( VARIANT* result )                 { HRESULT hr = NOERROR; THREAD_LOCK(_lock) hr = VariantCopy( result, &_value ); return hr; }
-    STDMETHODIMP                get_name                    ( BSTR* result )                    { return _name.CopyTo(result); }     
+    STDMETHODIMP                get_name                    ( BSTR* result )                    { return _name.CopyTo(result); }
     STDMETHODIMP                Clone                       ( spooler_com::Ivariable** );
 
   private:
 
     Thread_semaphore           _lock;
-    CComBSTR                   _name;
-    CComVariant                _value;
+    Bstr                       _name;
+    Variant                    _value;
 };
 
 //----------------------------------------------------------------------------------Com_variable_set
@@ -113,7 +111,7 @@ struct Com_variable_set: spooler_com::Ivariable_set, Sos_ole_object
   private:
     friend struct               Com_variable_set_enumerator;
 
-    typedef std::map< CComBSTR, CComPtr<Com_variable> >  Map;
+    typedef std::map< Bstr, ptr<Com_variable> >  Map;
 
     void                        operator =                  ( const Com_variable_set& );
 
@@ -140,7 +138,7 @@ struct Com_variable_set_enumerator : spooler_com::Ivariable_set_enumerator, Sos_
 
     void                        initialize              ( Com_variable_set* );
 
-    CComPtr<Com_variable_set>       _variable_set;
+    ptr<Com_variable_set>           _variable_set;
     Com_variable_set::Map::iterator _iterator;
 };
 
@@ -362,11 +360,11 @@ struct Com_context : spooler_com::Icontext, Sos_ole_object
 
     Thread_semaphore           _lock;
 
-    CComPtr<spooler_com::Ilog>      _log;
-    CComPtr<spooler_com::Ispooler>  _spooler;
-    CComPtr<spooler_com::Ithread>   _thread;
-    CComPtr<spooler_com::Ijob>      _job;
-    CComPtr<spooler_com::Itask>     _task;
+    ptr<spooler_com::Ilog>     _log;
+    ptr<spooler_com::Ispooler> _spooler;
+    ptr<spooler_com::Ithread>  _thread;
+    ptr<spooler_com::Ijob>     _job;
+    ptr<spooler_com::Itask>    _task;
 };
 
 //------------------------------------------------------------------------------------Com_job_chain

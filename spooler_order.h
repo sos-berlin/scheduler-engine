@@ -1,4 +1,4 @@
-// $Id: spooler_order.h,v 1.7 2002/09/27 10:48:56 jz Exp $
+// $Id: spooler_order.h,v 1.8 2002/09/29 16:17:25 jz Exp $
 
 #ifndef __SPOOLER_ORDER_H
 #define __SPOOLER_ORDER_H
@@ -197,7 +197,7 @@ struct Order_queue : Com_order_queue
     Thread_semaphore           _lock;
     Job*                       _job;
     Prefix_log*                _log;
-    CComPtr<Com_order_queue>   _com_order_queue;
+    ptr<Com_order_queue>       _com_order_queue;
     
     typedef list< ptr<Order> >  Queue;
     Queue                      _queue;

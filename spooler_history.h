@@ -1,4 +1,4 @@
-// $Id: spooler_history.h,v 1.9 2002/05/16 20:01:42 jz Exp $
+// $Id: spooler_history.h,v 1.10 2002/09/29 16:17:24 jz Exp $
 
 #ifndef __SPOOLER_HISTORY_H
 #define __SPOOLER_HISTORY_H
@@ -86,7 +86,7 @@ struct Job_history
     void                        close                   ();
     void                        start                   ();
     void                        end                     ();
-    void                        set_extra_field         ( const string& name, const CComVariant& value );
+    void                        set_extra_field         ( const string& name, const Variant& value );
     int                         min_steps               ()                                          { return _history_yes? _on_process : INT_MAX; }
 
     xml::Element_ptr            read_tail               ( xml::Document_ptr, int id, int next, bool with_log );

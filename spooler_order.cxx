@@ -1,4 +1,4 @@
-// $Id: spooler_order.cxx,v 1.9 2002/09/27 10:48:56 jz Exp $
+// $Id: spooler_order.cxx,v 1.10 2002/09/29 16:17:25 jz Exp $
 /*
     Hier sind implementiert
 
@@ -81,7 +81,7 @@ void Job_chain::add_job( Job* job, const Variant& state, const Variant& next_sta
     node->_job   = job;
     node->_state = state;
 
-    if( node->_state.vt == VT_ERROR )  node->_state = combstr_from_string( job->name() );
+    if( node->_state.vt == VT_ERROR )  node->_state = job->name();
 
     node->_next_state  = next_state;
     node->_error_state = error_state;

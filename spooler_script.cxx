@@ -1,4 +1,4 @@
-// $Id: spooler_script.cxx,v 1.14 2002/09/11 10:05:15 jz Exp $
+// $Id: spooler_script.cxx,v 1.15 2002/09/29 16:17:25 jz Exp $
 /*
     Hier sind implementiert
 
@@ -17,14 +17,14 @@ namespace spooler {
 
 //-------------------------------------------------------------------------------------check_result
 
-bool check_result( const CComVariant& vt )
+bool check_result( const Variant& vt )
 {
     if( vt.vt == VT_EMPTY    )  return true;                       // Keine Rückgabe? True, also weiter machen
     if( vt.vt == VT_NULL     )  return false;                      // NULL? False
     if( vt.vt == VT_DISPATCH )  return vt.pdispVal != NULL;        // Nothing => False, also Ende
     if( vt.vt == VT_BOOL     )  return vt.bVal != NULL;            // Nothing => False, also Ende
 
-    CComVariant v = vt;
+    Variant v = vt;
 
     HRESULT hr = v.ChangeType( VT_BOOL );
     if( FAILED(hr) )  throw_ole( hr, "VariantChangeType" );
@@ -106,12 +106,12 @@ void Script_instance::init( Script* script )
             if( !_DllGetClassObject )  throw_mswin_error( "GetProcAddress DllGetClassObject", _script->_filename.c_str() );
 
 
-            CComPtr<IClassFactory> class_factory;
+            ptr<IClassFactory> class_factory;
 
-            hr = _DllGetClassObject( &clsid, (IID*)&IID_IClassFactory, (void**)&class_factory );
+            hr = _DllGetClassObject( &clsid, (IID*)&IID_IClassFactory, class_factory.void_pp() );
             if( FAILED(hr) )  throw_ole( hr, (_script->_filename + "::DllGetClassObject").c_str(), _script->_com_class_name.c_str() );
 
-            hr = class_factory->CreateInstance( NULL, IID_IDispatch, (void**)&_idispatch );
+            hr = class_factory->CreateInstance( NULL, IID_IDispatch, _idispatch.void_pp() );
             if( FAILED(hr) )  throw_ole( hr, "CreateInstance", _script->_com_class_name.c_str() );
         }
         else
@@ -129,26 +129,23 @@ void Script_instance::init( Script* script )
 
 //-------------------------------------------------------------------------Script_instance::add_obj
 
-void Script_instance::add_obj( const CComPtr<IDispatch>& object, const string& name )
+void Script_instance::add_obj( const ptr<IDispatch>& object, const string& name )
 {
     if( _script_site )
     {
-        CComBSTR name_bstr;
-        name_bstr.Attach( SysAllocString_string( name ) );
-
-        _script_site->add_obj( object, name_bstr );
+        _script_site->add_obj( object, Bstr(name) );
     }
     else
     {
-        if( name == "spooler_log"    )  _com_context->_log     = (CComQIPtr<spooler_com::Ilog>)    object;
+        if( name == "spooler_log"    )  _com_context->_log     = (qi_ptr<spooler_com::Ilog>)    object;
         else
-        if( name == "spooler"        )  _com_context->_spooler = (CComQIPtr<spooler_com::Ispooler>)object;
+        if( name == "spooler"        )  _com_context->_spooler = (qi_ptr<spooler_com::Ispooler>)object;
         else
-        if( name == "spooler_thread" )  _com_context->_thread  = (CComQIPtr<spooler_com::Ithread>) object;
+        if( name == "spooler_thread" )  _com_context->_thread  = (qi_ptr<spooler_com::Ithread>) object;
         else
-        if( name == "spooler_job"    )  _com_context->_job     = (CComQIPtr<spooler_com::Ijob>)    object;
+        if( name == "spooler_job"    )  _com_context->_job     = (qi_ptr<spooler_com::Ijob>)    object;
         else
-        if( name == "spooler_task"   )  _com_context->_task    = (CComQIPtr<spooler_com::Itask>)   object;
+        if( name == "spooler_task"   )  _com_context->_task    = (qi_ptr<spooler_com::Itask>)   object;
         else
             throw_xc( "Script_instance::add_obj", name.c_str() );
     }
@@ -180,7 +177,7 @@ void Script_instance::load()
 
     if( name_exists( "spooler_set_context" ) )
     {
-        com_call( _idispatch, "spooler_set_context", &CComVariant(_com_context) );
+        com_call( _idispatch, "spooler_set_context", &Variant(_com_context) );
     }
 
     _loaded = true;
@@ -245,15 +242,15 @@ bool Script_instance::name_exists( const string& name )
 
 //------------------------------------------------------------------Script_instance::call_if_exists
 
-CComVariant Script_instance::call_if_exists( const char* name )
+Variant Script_instance::call_if_exists( const char* name )
 {
     if( name_exists(name) )  return call( name );
-                       else  return CComVariant();
+                       else  return Variant();
 }
 
 //----------------------------------------------------------------------------Script_instance::call
 
-CComVariant Script_instance::call( const char* name )
+Variant Script_instance::call( const char* name )
 {
     //return _script_site->call( name );
     return com_call( _idispatch, name );
@@ -261,7 +258,7 @@ CComVariant Script_instance::call( const char* name )
 
 //----------------------------------------------------------------------------Script_instance::call
 
-CComVariant Script_instance::call( const char* name, int param )
+Variant Script_instance::call( const char* name, int param )
 {
     //return _script_site->call( name, param );
     return com_call( _idispatch, name, param );
@@ -269,7 +266,7 @@ CComVariant Script_instance::call( const char* name, int param )
 
 //--------------------------------------------------------------------Script_instance::property_get
 
-CComVariant Script_instance::property_get( const char* name )
+Variant Script_instance::property_get( const char* name )
 {
     //return _script_site->property_get( name );
     return com_property_get( _idispatch, name );
@@ -277,7 +274,7 @@ CComVariant Script_instance::property_get( const char* name )
 
 //-----------------------------------------------------------Script_instance::optional_property_put
 
-void Script_instance::optional_property_put( const char* name, const CComVariant& v )
+void Script_instance::optional_property_put( const char* name, const Variant& v )
 {
     try 
     {

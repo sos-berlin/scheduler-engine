@@ -1,4 +1,4 @@
-// $Id: spooler_history.cxx,v 1.25 2002/09/11 10:05:14 jz Exp $
+// $Id: spooler_history.cxx,v 1.26 2002/09/29 16:17:24 jz Exp $
 
 #include "spooler.h"
 #include "../zschimmer/z_com.h"
@@ -721,7 +721,7 @@ void Job_history::end()
 
 //---------------------------------------------------------------------Job_history::set_extra_field
     
-void Job_history::set_extra_field( const string& name, const CComVariant& value )
+void Job_history::set_extra_field( const string& name, const Variant& value )
 {
     if( !_history_yes )  return;
 

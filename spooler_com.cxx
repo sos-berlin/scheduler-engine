@@ -1,4 +1,4 @@
-// $Id: spooler_com.cxx,v 1.56 2002/09/27 10:48:56 jz Exp $
+// $Id: spooler_com.cxx,v 1.57 2002/09/29 16:17:23 jz Exp $
 /*
     Hier sind implementiert
 
@@ -62,13 +62,13 @@ Time time_from_variant( const VARIANT& vt )
 
 //----------------------------------------------------------------------order_from_order_or_payload
 
-static CComPtr<spooler_com::Iorder> order_from_order_or_payload( Spooler* spooler, const VARIANT& order_or_payload )
+static ptr<spooler_com::Iorder> order_from_order_or_payload( Spooler* spooler, const VARIANT& order_or_payload )
 {
-    CComPtr<spooler_com::Iorder> iorder;
+    ptr<spooler_com::Iorder> iorder;
 
     if( order_or_payload.vt == VT_DISPATCH  ||  order_or_payload.vt == VT_UNKNOWN )
     {
-        HRESULT hr = V_UNKNOWN(&order_or_payload)->QueryInterface( spooler_com::IID_Iorder, (void**)&iorder );
+        HRESULT hr = V_UNKNOWN(&order_or_payload)->QueryInterface( spooler_com::IID_Iorder, iorder.void_pp() );
         if( FAILED(hr) )  iorder = NULL;
     }
 
@@ -193,7 +193,7 @@ Com_variable_set::Com_variable_set( const Com_variable_set& o )
             Com_variable* v = it->second;
             if( v )
             {
-                CComPtr<Com_variable> clone;
+                ptr<Com_variable> clone;
 
                 v->Clone( (Ivariable**)&clone );
                 _map[ it->first ] = clone;
@@ -214,10 +214,10 @@ void Com_variable_set::set_xml( const xml::Element_ptr& params )
         {
             if( e->tagName == "param" ) 
             {
-                CComVariant name  = e->getAttribute( "name" );
+                Variant name  = e->getAttribute( "name" );
                 hr = name.ChangeType( VT_BSTR );                    if( FAILED(hr) )  throw_ole( hr, "ChangeType" );
 
-                CComVariant value = e->getAttribute( "value" );
+                Variant value = e->getAttribute( "value" );
 
                 hr = put_var( name.bstrVal, &value );               if( FAILED(hr) )  throw_ole( hr, "Ivariable_set::put_var" );
             }
@@ -231,7 +231,7 @@ STDMETHODIMP Com_variable_set::put_var( BSTR name, VARIANT* value )
 {
     THREAD_LOCK( _lock )  
     {
-        CComBSTR lname = name;
+        Bstr lname = name;
 
         bstr_to_lower( &lname );
 
@@ -242,7 +242,7 @@ STDMETHODIMP Com_variable_set::put_var( BSTR name, VARIANT* value )
         }
         else
         {
-            CComPtr<Com_variable> v = new Com_variable( name, *value );
+            ptr<Com_variable> v = new Com_variable( name, *value );
             _map[lname] = v;
         }
     }
@@ -260,7 +260,7 @@ STDMETHODIMP Com_variable_set::get_var( BSTR name, VARIANT* value )
     {
         VariantInit( value );
 
-        CComBSTR lname = name;
+        Bstr lname = name;
         bstr_to_lower( &lname );
 
         Map::iterator it = _map.find( lname );
@@ -304,14 +304,14 @@ STDMETHODIMP Com_variable_set::get_dom( xml::IXMLDOMDocument** result )
             Com_variable* v = it->second;
             if( v )
             {
-                CComBSTR    name;
-                CComVariant value;
+                Bstr    name;
+                Variant value;
 
                 v->get_name( &name );
                 v->get_value( &value );
 
                 xml::Element_ptr var = doc->createElement( "variable" );
-                var->setAttribute( "name" , &CComVariant(name) );
+                var->setAttribute( "name" , &Variant(name) );
                 var->setAttribute( "value", value );
                 varset->appendChild( var );
             }
@@ -337,7 +337,7 @@ STDMETHODIMP Com_variable_set::Clone( Ivariable_set** result )
     {
         *result = NULL;
 
-        CComPtr<Com_variable_set> clone = new Com_variable_set( *this );
+        ptr<Com_variable_set> clone = new Com_variable_set( *this );
 
         *result = clone;
         (*result)->AddRef();
@@ -364,7 +364,7 @@ STDMETHODIMP Com_variable_set::merge( Ivariable_set* other )
         {
             if( it->second )
             {
-                CComPtr<Com_variable> v;
+                ptr<Com_variable> v;
                 hr = it->second->Clone( (Ivariable**)&v );
                 _map[ it->first ] = v;
             }
@@ -380,7 +380,7 @@ STDMETHODIMP Com_variable_set::merge( Ivariable_set* other )
 
 STDMETHODIMP Com_variable_set::get__NewEnum( IUnknown** iunknown )
 {
-    CComPtr<Com_variable_set_enumerator> e = new Com_variable_set_enumerator;
+    ptr<Com_variable_set_enumerator> e = new Com_variable_set_enumerator;
     e->initialize( this );
 
     *iunknown = e;
@@ -432,7 +432,7 @@ STDMETHODIMP Com_variable_set_enumerator::Next( unsigned long celt, VARIANT* res
         if( _iterator->second )
         {
             Com_variable* v = NULL;
-            _iterator->second.CopyTo( &v );
+            _iterator->second.copy_to( &v );
             result->vt = VT_DISPATCH;
             result->pdispVal = v;
         }
@@ -917,23 +917,23 @@ STDMETHODIMP Com_job::start( VARIANT* params, Itask** itask )
     {
         if( !_job )  return E_POINTER;
 
-        Sos_ptr<Task>           task;
+        Sos_ptr<Task>       task;
 
-        CComPtr<Ivariable_set>  pars;
-        Time                    start_at = 0; 
+        ptr<Ivariable_set>  pars;
+        Time                start_at = 0; 
 
         if( params  &&  params->vt != VT_EMPTY  &&  params->vt != VT_NULL  &&  params->vt != VT_ERROR )
         {
             if( params->vt != VT_DISPATCH && params->vt != VT_UNKNOWN )  return DISP_E_TYPEMISMATCH;
-            hr = params->punkVal->QueryInterface( IID_Ivariable_set, (void**)&pars );
+            hr = params->punkVal->QueryInterface( IID_Ivariable_set, pars.void_pp() );
             if( FAILED(hr) )  return hr;
         }
 
-        CComVariant task_name_vt;
+        Variant task_name_vt;
         if( pars )  pars->get_var( L"spooler_task_name", &task_name_vt );
         hr = task_name_vt.ChangeType( VT_BSTR );    if( FAILED(hr) )  throw_ole( hr, "ChangeType", "spooler_task_name" );
 
-        CComVariant start_after_vt;
+        Variant start_after_vt;
         if( pars )  pars->get_var( L"spooler_start_after", &start_after_vt );
         if( start_after_vt.vt != VT_EMPTY )
         {
@@ -1152,7 +1152,7 @@ STDMETHODIMP Com_task::put_error( VARIANT* error_par )
         if( !_task )  throw_xc( "SPOOLER-122" );
         if( GetCurrentThreadId() != _task->_job->thread()->_thread_id )  return E_ACCESSDENIED;
 
-        CComVariant error_vt = *error_par;
+        Variant error_vt = *error_par;
         hr = error_vt.ChangeType( VT_BSTR );        if( FAILED(hr) )  return hr;
 
         string error_text = bstr_as_string( error_vt.bstrVal );
@@ -1652,9 +1652,9 @@ STDMETHODIMP Com_spooler::get_variables( Ivariable_set** result )
 STDMETHODIMP Com_spooler::put_var( BSTR name, VARIANT* value )
 {
     HRESULT hr;
-    CComPtr<Ivariable_set> variables;
+    ptr<Ivariable_set> variables;
 
-    hr = get_variables( &variables );  if( FAILED(hr) )  return hr;
+    hr = get_variables( variables.pp() );  if( FAILED(hr) )  return hr;
 
     return variables->put_var( name, value );
 }
@@ -1664,9 +1664,9 @@ STDMETHODIMP Com_spooler::put_var( BSTR name, VARIANT* value )
 STDMETHODIMP Com_spooler::get_var( BSTR name, VARIANT* value )
 {
     HRESULT hr;
-    CComPtr<Ivariable_set> variables;
+    ptr<Ivariable_set> variables;
 
-    hr = get_variables( &variables );  if( FAILED(hr) )  return hr;
+    hr = get_variables( variables.pp() );  if( FAILED(hr) )  return hr;
 
     return variables->get_var( name, value );
 }
@@ -1941,7 +1941,7 @@ STDMETHODIMP Com_job_chain::add_order( VARIANT* order_or_payload, spooler_com::I
         if( !_job_chain )  return E_POINTER;
         if( !_job_chain->finished() )  throw_xc( "SPOOLER-151" );
 
-        CComPtr<spooler_com::Iorder> iorder = order_from_order_or_payload( _job_chain->_spooler, *order_or_payload );
+        ptr<spooler_com::Iorder> iorder = order_from_order_or_payload( _job_chain->_spooler, *order_or_payload );
 
         // Einstieg nur über Order, damit Semaphoren stets in derselben Reihenfolge gesperrt werden.
         dynamic_cast<Order*>( &*iorder )->add_to_job_chain( dynamic_cast<Job_chain*>( this ) );  
@@ -2114,7 +2114,7 @@ STDMETHODIMP Com_order::get_job_chain( Ijob_chain** result )
         Job_chain* job_chain = _order->job_chain();
         if( job_chain )  
         {
-            CComPtr<Ijob_chain> ijob_chain = job_chain; //->com_job_chain();
+            ptr<Ijob_chain> ijob_chain = job_chain; //->com_job_chain();
             ijob_chain.CopyTo( result );
         }
     }
@@ -2144,8 +2144,8 @@ STDMETHODIMP Com_order::put_job( VARIANT* job_or_jobname )
             case VT_DISPATCH:
             case VT_UNKNOWN:    
             {
-                CComPtr<Ijob> ijob;
-                hr = V_UNKNOWN(job_or_jobname)->QueryInterface( IID_Ijob, (void**)&ijob );
+                ptr<Ijob> ijob;
+                hr = V_UNKNOWN(job_or_jobname)->QueryInterface( IID_Ijob, ijob.void_pp() );
                 if( FAILED(hr) )  return hr;
 
                 Job* job = ijob? dynamic_cast<Com_job*>( &*ijob )->_job : NULL;
@@ -2308,12 +2308,12 @@ STDMETHODIMP Com_order::putref_payload( IUnknown* payload )
     {
         if( !_order )  return E_POINTER;
 
-        CComVariant payload_vt = payload;
+        Variant payload_vt = payload;
 
         if( payload )
         {
-            CComPtr<IDispatch> idispatch;
-            hr = payload->QueryInterface( IID_IDispatch, (void**)&idispatch );
+            ptr<IDispatch> idispatch;
+            hr = payload->QueryInterface( IID_IDispatch, idispatch.void_pp() );
             if( SUCCEEDED(hr) )  payload_vt = idispatch;
         }
 
@@ -2366,11 +2366,11 @@ STDMETHODIMP Com_order::payload_is_type( BSTR typname_bstr, VARIANT_BOOL* result
             case VT_UNKNOWN:
             case VT_DISPATCH:
             {
-                CComPtr<IUnknown> iunknown;
+                ptr<IUnknown> iunknown;
 
                 if( typname == "spooler.variable_set" )
                 {
-                    hr = V_UNKNOWN(&payload)->QueryInterface( IID_Ivariable_set, (void**)&iunknown );
+                    hr = V_UNKNOWN(&payload)->QueryInterface( IID_Ivariable_set, iunknown.void_pp() );
                     if( SUCCEEDED(hr)  )  { *result = true;  return hr; }
                     iunknown = NULL;
                 }
@@ -2378,7 +2378,7 @@ STDMETHODIMP Com_order::payload_is_type( BSTR typname_bstr, VARIANT_BOOL* result
                 if( typname == "hostware.dyn_obj" 
                  || typname == "hostware.record" )
                 {
-                    hr = V_UNKNOWN(&payload)->QueryInterface( IID_Ihostware_dynobj, (void**)&iunknown );
+                    hr = V_UNKNOWN(&payload)->QueryInterface( IID_Ihostware_dynobj, iunknown.void_pp() );
                     if( SUCCEEDED(hr) )  { *result = true;  return hr; }
                 }
 
@@ -2445,7 +2445,7 @@ STDMETHODIMP Com_order_queue::add_order( VARIANT* order_or_payload, Iorder** res
     THREAD_LOCK( _lock )
     try
     {
-        CComPtr<spooler_com::Iorder> iorder = order_from_order_or_payload( dynamic_cast<Order_queue*>(this)->_spooler, *order_or_payload );
+        ptr<spooler_com::Iorder> iorder = order_from_order_or_payload( dynamic_cast<Order_queue*>(this)->_spooler, *order_or_payload );
 
         // Einstieg nur über Order, damit Semaphoren stets in derselben Reihenfolge gesperrt werden.
         dynamic_cast<Order*>( &*iorder )->add_to_order_queue( dynamic_cast<Order_queue*>( this ) );

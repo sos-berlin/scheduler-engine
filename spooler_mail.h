@@ -1,4 +1,4 @@
-// $Id: spooler_mail.h,v 1.4 2002/04/09 08:55:45 jz Exp $
+// $Id: spooler_mail.h,v 1.5 2002/09/29 16:17:25 jz Exp $
 
 #ifndef __SPOOLER_MAIL_H
 #define __SPOOLER_MAIL_H
@@ -70,11 +70,11 @@ struct Com_mail : spooler_com::Imail, Sos_ole_object
     Spooler*                   _spooler;
     Sos_ptr<Jmail_message>     _msg;
 
-    CComBSTR                   _subject;
-    CComBSTR                   _from;
-    CComBSTR                   _to;
-    CComBSTR                   _cc;
-    CComBSTR                   _bcc;
+    Bstr                       _subject;
+    Bstr                       _from;
+    Bstr                       _to;
+    Bstr                       _cc;
+    Bstr                       _bcc;
 };
 
 } //namespace spooler

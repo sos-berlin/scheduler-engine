@@ -1,4 +1,4 @@
-// $Id: spooler_log.h,v 1.20 2002/04/17 10:21:38 jz Exp $
+// $Id: spooler_log.h,v 1.21 2002/09/29 16:17:24 jz Exp $
 
 #ifndef __SPOOLER_LOG_H
 #define __SPOOLER_LOG_H
@@ -151,7 +151,7 @@ struct Prefix_log
     bool                       _mail_on_error;
     bool                       _mail_on_success;
     int                        _mail_on_process;
-    CComPtr<spooler_com::Imail> _mail;
+    ptr<spooler_com::Imail>    _mail;
     string                     _mail_section;               // Name des Abschnitts in factory.ini für eMail-Einstellungen
 
     Time                       _collect_within;             // eMails innerhalb dieser Frist sammeln, solange Job keinen Fehler macht

@@ -1,4 +1,4 @@
-// $Id: spooler_thread.h,v 1.18 2002/04/30 08:59:19 jz Exp $
+// $Id: spooler_thread.h,v 1.19 2002/09/29 16:17:26 jz Exp $
 
 #ifndef __SPOOLER_THREAD_H
 #define __SPOOLER_THREAD_H
@@ -77,8 +77,8 @@ struct Thread : Sos_self_deleting
     Handle                     _thread_handle;
     Thread_id                  _thread_id;
     int                        _thread_priority;
-    CComPtr<Com_log>           _com_log;                    // COM-Objekt spooler.log
-    CComPtr<Com_thread>        _com_thread;                 // COM-Objekt
+    ptr<Com_log>               _com_log;                    // COM-Objekt spooler.log
+    ptr<Com_thread>            _com_thread;                 // COM-Objekt
 
   private:
                                 Thread                      ( const Thread& );      // Nicht implementiert

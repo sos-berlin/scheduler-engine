@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.108 2002/09/27 10:48:56 jz Exp $
+// $Id: spooler_task.cxx,v 1.109 2002/09/29 16:17:25 jz Exp $
 /*
     Hier sind implementiert
 
@@ -10,7 +10,7 @@
 
 
 #include "spooler.h"
-
+#include <crtdbg.h>
 
 namespace sos {
 namespace spooler {
@@ -50,7 +50,7 @@ string start_cause_name( Start_cause cause )
 
 Level Spooler_object::level()
 {
-    CComVariant level = com_property_get( _idispatch, spooler_level_name );
+    Variant level = com_property_get( _idispatch, spooler_level_name );
     level.ChangeType( VT_INT );
 
     return level.intVal;
@@ -87,7 +87,7 @@ Object_set::~Object_set()
 bool Object_set::open()
 {
     bool        ok;
-    CComVariant object_set_vt;
+    Variant object_set_vt;
 
     if( _class->_object_interface )
     {
@@ -138,7 +138,7 @@ Spooler_object Object_set::get()
     while(1)
     {
         Job::In_call in_call ( _task, spooler_get_name );
-        CComVariant obj = com_call( _idispatch, spooler_get_name );
+        Variant obj = com_call( _idispatch, spooler_get_name );
 
         if( obj.vt == VT_EMPTY    )  return Spooler_object(NULL);
         if( obj.vt != VT_DISPATCH
@@ -474,7 +474,7 @@ string Job::profile_section()
 
 //---------------------------------------------------------------------------------Job::create_task
 
-Sos_ptr<Task> Job::create_task( const CComPtr<spooler_com::Ivariable_set>& params, const string& name, Time start_at )
+Sos_ptr<Task> Job::create_task( const ptr<spooler_com::Ivariable_set>& params, const string& name, Time start_at )
 {
     Sos_ptr<Task> task;
 
@@ -490,7 +490,7 @@ Sos_ptr<Task> Job::create_task( const CComPtr<spooler_com::Ivariable_set>& param
     task->_enqueue_time = now;
     task->_id           = _spooler->_db.get_id();
 
-    _default_params->Clone( &task->_params );
+    _default_params->Clone( task->_params.pp() );
     if( params )   task->_params->merge( params );
 
     task->_name         = name;
@@ -568,14 +568,14 @@ void Job::remove_from_task_queue( Task* task )
 
 //---------------------------------------------------------------------------------------Job::start
 
-void Job::start( const CComPtr<spooler_com::Ivariable_set>& params, const string& task_name, Time start_at )
+void Job::start( const ptr<spooler_com::Ivariable_set>& params, const string& task_name, Time start_at )
 {
     THREAD_LOCK_LOG( _lock, "Job::start" )  start_without_lock( params, task_name, start_at );
 }
 
 //---------------------------------------------------------------------------------------Job::start
 
-Sos_ptr<Task> Job::start_without_lock( const CComPtr<spooler_com::Ivariable_set>& params, const string& task_name, Time start_at, bool log )
+Sos_ptr<Task> Job::start_without_lock( const ptr<spooler_com::Ivariable_set>& params, const string& task_name, Time start_at, bool log )
 {
     if( log && _spooler->_debug )  _log.debug( "start(at=" + start_at.as_string() + ( task_name == ""? "" : ",name=\"" + task_name + '"' ) + ")" );
 
@@ -1867,7 +1867,7 @@ xml::Document_ptr Task::parameters_as_dom()
 
 //--------------------------------------------------------------------------Task::set_history_field
 
-void Task::set_history_field( const string& name, const CComVariant& value )
+void Task::set_history_field( const string& name, const Variant& value )
 {
     if( !_job->its_current_task(this) )  throw_xc( "SPOOLER-138" );
 
@@ -2020,20 +2020,17 @@ bool Process_task::do_start()
 
     for( int i = 1;; i++ )
     {
-        string      nr_str  = as_string( i );
-        CComBSTR    nr_bstr;
-        CComVariant vt;
-        HRESULT     hr;
+        string nr = as_string(i);
+        Variant vt;
+        HRESULT hr;
 
-        nr_bstr.Attach( SysAllocString_string( nr_str ) );
-
-        hr = _params->get_var( nr_bstr, &vt );
-        if( FAILED(hr) )  throw_ole( hr, "Variable_set.var", nr_str.c_str() );
+        hr = _params->get_var( Bstr(nr), &vt );
+        if( FAILED(hr) )  throw_ole( hr, "Variable_set.var", nr.c_str() );
 
         if( vt.vt == VT_EMPTY )  break;
 
         hr = vt.ChangeType( VT_BSTR );
-        if( FAILED(hr) )  throw_ole( hr, "VariantChangeType", nr_str.c_str() );
+        if( FAILED(hr) )  throw_ole( hr, "VariantChangeType", nr.c_str() );
 
         string param = bstr_as_string( vt.bstrVal );
         if( param.find_first_of(' ') != string::npos )  param = quoted_string( param, '"', '"' );  // Ist Verdoppeln richtig?
