@@ -1,4 +1,4 @@
-// $Id: spooler_thread.cxx,v 1.73 2003/02/18 21:38:10 jz Exp $
+// $Id: spooler_thread.cxx,v 1.74 2003/02/24 07:30:44 jz Exp $
 /*
     Hier sind implementiert
 
@@ -347,7 +347,7 @@ bool Spooler_thread::step()
 
                 if( _my_event.signaled_then_reset() )  return true;
                 if( _event->signaled() )  return true;      // Das ist _event oder _spooler->_event
-                if( _spooler->signaled() )  return true;
+                //jz 23.2.2003 if( _spooler->signaled() )  return true;
                 stepped = do_something( job );
                 something_done |= stepped;
                 if( stepped )  break;
@@ -371,7 +371,7 @@ bool Spooler_thread::step()
                 {
                     if( _my_event.signaled_then_reset() )  return true;
                     if( _event->signaled() )  return true;      // Das ist _my_event oder _spooler->_event
-                    if( _spooler->signaled() )  return true;
+                    //jz 23.2.2003 if( _spooler->signaled() )  return true;
                     something_done |= do_something( job );
                     if( !something_done )  break;
                 }
@@ -393,7 +393,7 @@ bool Spooler_thread::step()
             {
                 if( _my_event.signaled_then_reset() )  return true;
                 if( _event->signaled() )  return true;      // Das ist _my_event oder _spooler->_event
-                if( _spooler->signaled() )  return true;
+                //jz 23.2.2003 if( _spooler->signaled() )  return true;
                 if( job->priority() == 0 )  do_something( job );
             }
         }

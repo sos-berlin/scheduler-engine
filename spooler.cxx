@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.170 2003/02/23 20:47:24 jz Exp $
+// $Id: spooler.cxx,v 1.171 2003/02/24 07:30:44 jz Exp $
 /*
     Hier sind implementiert
 
@@ -187,7 +187,7 @@ With_log_switch read_profile_with_log( const string& profile, const string& sect
             ctrl_c_pressed = true;
             //Kein Systemaufruf hier! (Aber bei Ctrl-C riskieren wir einen Absturz. Ich will diese Meldung sehen.)
             fprintf( stderr, "Spooler wird wegen Ctrl-C beendet ...\n" );
-            if( !is_daemon )  spooler->async_signal( "Ctrl+C" );
+            spooler->async_signal( "Ctrl+C" );
             return true;
         }
         else
@@ -211,7 +211,7 @@ With_log_switch read_profile_with_log( const string& profile, const string& sect
             // should  not  be  called from  a signal handler. In particular, calling pthread_mutex_lock 
             // or pthread_mutex_unlock from a signal handler may deadlock the calling thread.
 
-            spooler->async_signal( "Ctrl+C" );
+            if( !is_daemon )  spooler->async_signal( "Ctrl+C" );
         //}
     }
 
@@ -393,7 +393,7 @@ void Spooler::wait_until_threads_stopped( Time until )
         while( it != _thread_list.end() )
         {
             Spooler_thread* thread = *it;
-            if( thread->_free_threading && !thread->_terminated  &&  thread->_thread_handle.valid() )  wait_handles.add( &(*it)->_thread_handle );
+            if( thread->_free_threading  &&  !thread->_terminated  &&  thread->_thread_handle.valid() )  wait_handles.add( &(*it)->_thread_handle );
             it++;
         }
 
@@ -404,6 +404,10 @@ void Spooler::wait_until_threads_stopped( Time until )
             if( until_step > until )  until_step = until;
 
             int index = wait_handles.wait_until( until_step );
+
+            if( ctrl_c_pressed )  set_state( s_stopping ),  signal_threads( "ctrl_c" );
+            _event.reset();
+
             if( index >= 0 ) 
             {
                 HANDLE h = wait_handles[index];
@@ -437,6 +441,7 @@ void Spooler::wait_until_threads_stopped( Time until )
             }
 
             if( wait_handles.length() > 0 )  sos_sleep( 0.01 );  // Zur Verkürzung des Protokolls: Nächsten Threads Zeit lassen, sich zu beenden
+
         }
 
 #   else
@@ -451,7 +456,14 @@ void Spooler::wait_until_threads_stopped( Time until )
             Time until_step = Time::now() + (++c < 10? wait_step_for_thread_termination : wait_step_for_thread_termination2 );
             if( until_step > until )  until_step = until;
 
-            _event.wait( until_step - Time::now() );
+            while(1)
+            {
+                Time now = Time::now();
+                if( now > until_step )  break;
+                _event.wait( min( 1.0, until_step - now ) );
+                if( ctrl_c_pressed )  set_state( s_stopping ),  signal_threads( "ctrl_c" );
+                _event.reset();
+            }
 
             FOR_EACH( Thread_list, threads, it )  
             {
@@ -483,6 +495,7 @@ void Spooler::wait_until_threads_stopped( Time until )
                     }
                 }
             }
+
         }
 
 #   endif
@@ -743,7 +756,8 @@ void Spooler::load_arg()
             else
             if( opt.with_value( "ini"              ) )  ;   //
             else
-            if( opt.with_value( "config"           ) )  _config_filename = opt.value();
+            if( opt.with_value( "config"           )
+             || opt.param(1)                         )  _config_filename = opt.value();
             else
             if( opt.with_value( "cd"               ) )  { string dir = opt.value(); if( chdir( dir.c_str() ) )  throw_errno( errno, "chdir", dir.c_str() ); }
             else

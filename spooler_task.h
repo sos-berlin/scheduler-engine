@@ -1,4 +1,4 @@
-// $Id: spooler_task.h,v 1.86 2003/02/18 21:38:10 jz Exp $
+// $Id: spooler_task.h,v 1.87 2003/02/24 07:30:44 jz Exp $
 
 #ifndef __SPOOLER_TASK_H
 #define __SPOOLER_TASK_H
@@ -210,7 +210,7 @@ struct Job : Sos_self_deleting
     Sos_ptr<Task>               start_without_lock          ( const ptr<spooler_com::Ivariable_set>& params, const string& task_name, Time = 0, bool log = false );
     void                        start_when_directory_changed( const string& directory_name, const string& filename_pattern );
     void                        clear_when_directory_changed();
-    void                        signal                      ( const string& signal_name = "" )  { _event->signal( signal_name ); }
+    void                        signal                      ( const string& signal_name = "" )  { if( _event )  _event->signal( signal_name ); }
   //void                        wake                        ()                                  { set_state_cmd( sc_wake ); }
     void                        interrupt_script            ();
     void                        select_period               ( Time = Time::now() );
