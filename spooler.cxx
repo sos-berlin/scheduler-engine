@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.325 2004/03/26 08:59:40 jz Exp $
+// $Id: spooler.cxx,v 1.326 2004/03/26 09:06:44 jz Exp $
 /*
     Hier sind implementiert
 
@@ -1501,7 +1501,7 @@ void Spooler::start()
     _base_log.set_directory( _log_directory );
     _base_log.open_new();
     
-    _log.info( string( "Scheduler (" VER_PRODUCTVERSION_STR ) + ") startet mit " + _config_filename );
+    _log.info( string( "Scheduler (" VER_PRODUCTVERSION_STR ) + ") startet mit " + _config_filename + ", pid=" + as_string( getpid() ) );
     _spooler_start_time = Time::now();
 
     FOR_EACH_JOB( job )  (*job)->init0();
