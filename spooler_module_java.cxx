@@ -1,4 +1,4 @@
-// $Id: spooler_module_java.cxx,v 1.36 2003/02/18 21:38:10 jz Exp $
+// $Id: spooler_module_java.cxx,v 1.37 2003/02/26 08:12:48 jz Exp $
 /*
     Hier sind implementiert
 
@@ -610,6 +610,7 @@ void Java_vm::init()
 
 
     _vm_args.version = JNI_VERSION_1_2;
+    _vm_args.ignoreUnrecognized = true;
 
   //get_options( _ini_options );        // Aus factory.ini
   //get_options( _config_options );     // Aus <config>
@@ -622,8 +623,9 @@ void Java_vm::init()
     // conformance to the class-file format specification.  Developers are encouraged to use this flag when developing new code because the stricter checks will become
     // the default in future releases of the Java application launcher.
     
-    //_options.push_back( "-Xdebug" );    // Starts with the debugger enabled.
-    //_options.push_back( "-Xnocatch" );    // disable the catch all signal handler
+
+  //_options.push_back( Option( "-Xdebug" ) );      // Starts with the debugger enabled.
+    _options.push_back( Option( "-Xnocatch" ) );    // disable the catch all signal handler
 
     Z_DEBUG_ONLY( _options.push_back( Option( "-verbose:class,gc,jni" ) ) );
 
