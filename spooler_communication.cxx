@@ -1,4 +1,4 @@
-// $Id: spooler_communication.cxx,v 1.49 2002/12/09 22:53:25 jz Exp $
+// $Id: spooler_communication.cxx,v 1.50 2002/12/18 08:14:19 jz Exp $
 /*
     Hier sind implementiert
 
@@ -622,20 +622,15 @@ int Communication::run()
 #       ifdef Z_WINDOWS
             n = ::select( _nfds, &_read_fds, &_write_fds, NULL, NULL );
 #        else
-            while(1)
+            timeval tv;
+            tv.tv_sec = 1, tv.tv_usec = 0;
+
+            n = ::select( _nfds, &_read_fds, &_write_fds, NULL, &tv );
+            
+            if( kill( _spooler->_pid, 0 ) == -1  &&  errno == ESRCH )
             {
-                timeval tv;
-                tv.tv_sec = 1, tv.tv_usec = 0;
-
-                n = ::select( _nfds, &_read_fds, &_write_fds, NULL, &tv );
-                
-                if( kill( _spooler->_pid, 0 ) == -1  &&  errno == ESRCH )
-                {
-                    _spooler->_log.error( "Kommunikations-Thread wird beendet, weil der Hauptthread (pid=" + as_string(_spooler->_pid) + ") verschwunden ist" );
-                    return 0;  //?  Thread bleibt sonst hängen, wenn Java sich bei Ctrl-C sofort verabschiedet. Java lässt SIGINT zu, dieser Thread aber nicht.
-                }
-
-                if( n == 0 )  continue;
+                _spooler->_log.error( "Kommunikations-Thread wird beendet, weil der Hauptthread (pid=" + as_string(_spooler->_pid) + ") verschwunden ist" );
+                return 0;  //?  Thread bleibt sonst hängen, wenn Java sich bei Ctrl-C sofort verabschiedet. Java lässt SIGINT zu, dieser Thread aber nicht.
             }
 #       endif
 
@@ -651,54 +646,57 @@ int Communication::run()
                 throw_sos_socket_error( get_errno(), "select" );
             }
 
-            
-            // UDP
-            if( _udp_socket != SOCKET_ERROR  &&  FD_ISSET( _udp_socket, &_read_fds ) )
-            {
-                char buffer [4096];
-                sockaddr_in addr;     
-                socklen_t   addr_len = sizeof addr;
 
-                addr.sin_addr.s_addr = 0;
-                int len = recvfrom( _udp_socket, buffer, sizeof buffer, 0, (sockaddr*)&addr, &addr_len );
-                if( len > 0 ) 
+            if( n > 0 )
+            {
+                // UDP
+                if( _udp_socket != SOCKET_ERROR  &&  FD_ISSET( _udp_socket, &_read_fds ) )
                 {
-                    Named_host host = addr.sin_addr;
-                    if( _spooler->security_level( host ) < Security::seclev_signal )
+                    char buffer [4096];
+                    sockaddr_in addr;     
+                    socklen_t   addr_len = sizeof addr;
+
+                    addr.sin_addr.s_addr = 0;
+                    int len = recvfrom( _udp_socket, buffer, sizeof buffer, 0, (sockaddr*)&addr, &addr_len );
+                    if( len > 0 ) 
                     {
-                        _spooler->log().error( "UDP-Nachricht von " + host.as_string() + " nicht zugelassen." );
-                    }
-                    else
-                    {
-                        Command_processor cp = _spooler;
-                        cp.set_host( &host );
-                        string cmd ( buffer, len );
-                        _spooler->log().info( "UDP-Nachricht von " + host.as_string() + ": " + cmd );
-                        cp.execute( cmd, Time::now() );
+                        Named_host host = addr.sin_addr;
+                        if( _spooler->security_level( host ) < Security::seclev_signal )
+                        {
+                            _spooler->log().error( "UDP-Nachricht von " + host.as_string() + " nicht zugelassen." );
+                        }
+                        else
+                        {
+                            Command_processor cp = _spooler;
+                            cp.set_host( &host );
+                            string cmd ( buffer, len );
+                            _spooler->log().info( "UDP-Nachricht von " + host.as_string() + ": " + cmd );
+                            cp.execute( cmd, Time::now() );
+                        }
                     }
                 }
-            }
 
-            // Neue TCP-Verbindung
-            if( _listen_socket != SOCKET_ERROR  &&  FD_ISSET( _listen_socket, &_read_fds ) )
-            {
-                Sos_ptr<Channel> new_channel = SOS_NEW( Channel( _spooler ) );
-            
-                ok = new_channel->do_accept( _listen_socket );
-                if( ok )
+                // Neue TCP-Verbindung
+                if( _listen_socket != SOCKET_ERROR  &&  FD_ISSET( _listen_socket, &_read_fds ) )
                 {
-                    _channel_list.push_back( new_channel );
+                    Sos_ptr<Channel> new_channel = SOS_NEW( Channel( _spooler ) );
+            
+                    ok = new_channel->do_accept( _listen_socket );
+                    if( ok )
+                    {
+                        _channel_list.push_back( new_channel );
+                    }
                 }
-            }
 
 
-            // TCP-Nachricht
-            FOR_EACH( Channel_list, _channel_list, it )
-            {
-                Channel* channel = *it;
+                // TCP-Nachricht
+                FOR_EACH( Channel_list, _channel_list, it )
+                {
+                    Channel* channel = *it;
 
-                ok = handle_socket( channel );
-                if( !ok ) { channel->do_close(); it = _channel_list.erase( it ); }
+                    ok = handle_socket( channel );
+                    if( !ok ) { channel->do_close(); it = _channel_list.erase( it ); }
+                }
             }
         }
     }
