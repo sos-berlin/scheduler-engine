@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="../scheduler.xslt" type="text/xsl"?>
 
-<!--$Id: jobs.xml,v 1.4 2004/08/23 16:28:30 jz Exp $-->
+<!--$Id: jobs.xml,v 1.5 2004/08/24 07:43:44 jz Exp $-->
 
 <xml_element name     = "jobs" 
              title    = "Jobs"
              base_dir = ".."
              author   = "$Author: jz $"
-             date     = "$Date: 2004/08/23 16:28:30 $">
+             date     = "$Date: 2004/08/24 07:43:44 $">
 
     <xml_parent_elements>
         <xml_parent_element name="config">
@@ -19,9 +19,6 @@
             <description>
                 <p>
                     Jeder Job ist mit einem eigenen Namen anzugeben.
-                </p>
-                <p>
-                    Ein Job mit demselben Namen aus einer Basiskonfiguration wird ergänzt, nicht ersetzt.
                 </p>
             </description>
         </xml_child_element>        

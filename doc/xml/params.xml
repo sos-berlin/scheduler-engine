@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet href="../scheduler.xslt" type="text/xsl"?>
+
+<!--$Id: params.xml,v 1.1 2004/08/24 07:43:44 jz Exp $-->
+
+<xml_element name     = "params" 
+             title    = "Parameter"
+             base_dir = ".."
+             author   = "$Author: jz $"
+             date     = "$Date: 2004/08/24 07:43:44 $">
+
+    <xml_parent_elements>
+        <xml_parent_element name="job">
+        </xml_parent_element>        
+    </xml_parent_elements>
+
+        
+    <xml_child_elements>
+        <xml_child_element name="param"/>
+    </xml_child_elements>
+
+    
+    <behavior_with_xml_element element="base" complete="yes"/>
+
+    <description>
+        <p>
+            Bestimmt Parameter für einen Job.
+            Die Parameter können zur Laufzeit überschrieben und erweitert werden.
+        </p>
+    </description>
+        
+</xml_element>

@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="../scheduler.xslt" type="text/xsl"?>
 
-<!--$Id: include.xml,v 1.2 2004/08/23 11:15:32 jz Exp $-->
+<!--$Id: include.xml,v 1.3 2004/08/24 07:43:44 jz Exp $-->
 
 <xml_element name     = "include" 
-             title    = "Text aus einer Datei einfügen"
+             title    = "Fügt Text aus einer Datei ein"
              base_dir = ".."
              author   = "$Author: jz $"
-             date     = "$Date: 2004/08/23 11:15:32 $">
+             date     = "$Date: 2004/08/24 07:43:44 $">
 
     <xml_parent_elements>
         <xml_parent_element name="script">
@@ -30,7 +30,9 @@
     
     <description>
         <p>
-            <code>&lt;include></code> kann in den Text der Eltern-Elemente gemischt werden.
+            Dieses Element kann in den Text gestreut werden 
+            (aber außerhalb von <code>&lt;[CDATA[</code>&#160; und&#160; <code>]]&gt;</code>),
+            um Quell-Code, der in anderen Dateien steht, einzuziehen.
         </p>
     </description>
         

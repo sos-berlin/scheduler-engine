@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="../scheduler.xslt" type="text/xsl"?>
 
-<!--$Id: run_time.xml,v 1.3 2004/08/23 11:15:32 jz Exp $-->
+<!--$Id: run_time.xml,v 1.4 2004/08/24 07:43:44 jz Exp $-->
 
 <xml_element name     = "run_time" 
-             title    = "Laufzeit"
+             title    = "Laufzeiten des Jobs"
              base_dir = ".."
              author   = "$Author: jz $"
-             date     = "$Date: 2004/08/23 11:15:32 $">
+             date     = "$Date: 2004/08/24 07:43:44 $">
 
     <xml_parent_elements>
         <xml_parent_element name="job">
@@ -29,10 +29,22 @@
         <!-- Die Beschreibungen für let_run, single_start, begin und end werden auch für andere Elemente (date, weekday etc.) verwendet.
              Also den Text neutral halten! -->
         
-        <xml_attribute name="let_run" value="yes_no">
+        <xml_attribute name="begin" value="hh:mm[:ss]" initial="00:00">
             <description>
                 <p>
-                    Voreinstellung für <scheduler_element name="period"/>
+                    Wenn das Element leer ist (also kein <code>&lt;period></code> enthält),
+                    generiert der Scheduler eine Periode mit dieser Einstellung, 
+                    anderfalls ist es die Voreinstellung für die Kind-Elemente.
+                </p>
+            </description>
+        </xml_attribute>
+
+        <xml_attribute name="end" value="hh:mm[:ss]" initial="24:00">
+            <description>
+                <p>
+                    Wenn das Element leer ist (also kein <code>&lt;period></code> enthält),
+                    generiert der Scheduler eine Periode mit dieser Einstellung, 
+                    anderfalls ist es die Voreinstellung für die Kind-Elemente.
                 </p>
             </description>
         </xml_attribute>
@@ -46,22 +58,10 @@
             </description>
         </xml_attribute>
         
-        <xml_attribute name="begin" value="hh:mm[:ss]" initial="00:00">
+        <xml_attribute name="let_run" value="yes_no">
             <description>
                 <p>
-                    Wenn das Element leer ist (also kein <code>&lt;period></code> enthält),
-                    generiert der Scheduler eine Periode mit dieser Einstellung, 
-                    anderfalls ist es die Voreinstellung für in diesem Element enthaltene <scheduler_element name="period"/>.
-                </p>
-            </description>
-        </xml_attribute>
-
-        <xml_attribute name="end" value="hh:mm[:ss]" initial="24:00">
-            <description>
-                <p>
-                    Wenn das Element leer ist (also kein <code>&lt;period></code> enthält),
-                    generiert der Scheduler eine Periode mit dieser Einstellung, 
-                    anderfalls ist es die Voreinstellung für in diesem Element enthaltene <scheduler_element name="period"/>.
+                    Voreinstellung für <scheduler_element name="period"/>
                 </p>
             </description>
         </xml_attribute>
@@ -73,6 +73,13 @@
         <xml_child_element name="period" multiple="yes">
             <description>
                 <p>
+                    Voreinstellung der Perioden für die Elemente
+                    <code>&lt;date></code>,
+                    <code>&lt;weekdays></code>,
+                    <code>&lt;monthdays></code> und
+                    <code>&lt;ultimos></code>.
+                    Diese Elemente können weitere Perioden hinzufügen.
+                    Wenn keines dieser Elemente angegeben ist, gelten die Perioden für jeden Tag.
                 </p>
             </description>
         </xml_child_element>        
@@ -125,5 +132,23 @@
             Eine Periode mit <code>single_start</code> gilt nur für einen Zeitpunkt.
         </p>
     </description>
+    
+    <example>
+        <pre>
+&lt;run_time/>       
+        </pre>
+            ist, wegen der Voreinstellungen für <code>begin=</code> und <code>end=</code>, dasselbe wie        
+        <pre>
+&lt;run_time begin="00:00" end="24:00"/>        
+        </pre>
+            ist, weil <code>&lt;run_time></code> leer ist, dasselbe wie        
+        <pre>
+&lt;run_time>
+    &lt;period begin="00:00" end="24:00"/>
+&lt;/run_time>    
+        </pre>
+            also eine Periode für jeden Tag rund um die Uhr.
+            Der Job kann immer laufen.
+    </example>
     
 </xml_element>

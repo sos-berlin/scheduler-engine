@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="../scheduler.xslt" type="text/xsl"?>
 
-<!--$Id: period.xml,v 1.2 2004/08/23 16:28:30 jz Exp $-->
+<!--$Id: period.xml,v 1.3 2004/08/24 07:43:44 jz Exp $-->
 
 <xml_element name     = "period" 
-             title    = "Laufzeit"
+             title    = "Periode"
              base_dir = ".."
              author   = "$Author: jz $"
-             date     = "$Date: 2004/08/23 16:28:30 $">
+             date     = "$Date: 2004/08/24 07:43:44 $">
 
     <xml_parent_elements>
         <xml_parent_element name="run_time">
@@ -16,31 +16,6 @@
     
 
     <xml_attributes>
-        <xml_attribute name="let_run" value="yes_no">
-            <description>
-                <p>
-                    <code>let_run="yes"</code> gibt an, dass der Scheduler die Task weiterlaufen lassen soll,
-                    auch wenn die <code>&lt;run_time</code> das eigentlich nicht mehr zulässt.
-                </p>
-                <p>
-                    Bei <code>let_run="no"</code> beendet der Scheduler die Task
-                    (ruft also nicht mehr spooler_process, sondern spooler_close auf), 
-                    sobald die <code>&lt;run_time</code> nicht mehr gilt.
-                </p>
-            </description>
-        </xml_attribute>
-
-        <xml_attribute name="single_start" value="hh:mm[:ss]">
-            <description>
-                <p>
-                    Der Job soll zu der angegebenen Uhrzeit starten.
-                </p>
-                <p>
-                    Nicht zusammen mit den Attributen <code>begin=</code>, <code>end=</code> und <code>repeat=</code> zu verwenden.
-                </p>
-            </description>
-        </xml_attribute>
-        
         <xml_attribute name="begin" value="hh:mm[:ss]" initial="00:00">
             <description>
                 <p>
@@ -75,6 +50,32 @@
                 </p>
             </description>
         </xml_attribute>
+
+        <xml_attribute name="single_start" value="hh:mm[:ss]">
+            <description>
+                <p>
+                    Der Job soll zu der angegebenen Uhrzeit starten.
+                </p>
+                <p>
+                    Nicht zusammen mit den Attributen <code>begin=</code>, <code>end=</code> und <code>repeat=</code> zu verwenden.
+                </p>
+            </description>
+        </xml_attribute>
+        
+        <xml_attribute name="let_run" value="yes_no">
+            <description>
+                <p>
+                    <code>let_run="yes"</code> gibt an, dass der Scheduler die Task weiterlaufen lassen soll,
+                    auch wenn die <code>&lt;run_time</code> das eigentlich nicht mehr zulässt.
+                </p>
+                <p>
+                    Bei <code>let_run="no"</code> beendet der Scheduler die Task
+                    (ruft also nicht mehr spooler_process, sondern spooler_close auf), 
+                    sobald die <code>&lt;run_time</code> nicht mehr gilt.
+                </p>
+            </description>
+        </xml_attribute>
+
     </xml_attributes>
 
 

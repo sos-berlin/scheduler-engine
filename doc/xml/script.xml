@@ -1,25 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="../scheduler.xslt" type="text/xsl"?>
 
-<!--$Id: script.xml,v 1.4 2004/08/23 16:28:30 jz Exp $-->
+<!--$Id: script.xml,v 1.5 2004/08/24 07:43:44 jz Exp $-->
 
 <xml_element name     = "script" 
              title    = "Programm-Code"
              base_dir = ".."
              author   = "$Author: jz $"
-             date     = "$Date: 2004/08/23 16:28:30 $">
+             date     = "$Date: 2004/08/24 07:43:44 $">
 
     <xml_parent_elements>
-        <xml_parent_element name="config">
-            <description>
-                Für das Startskript.
-            </description>
-        </xml_parent_element>        
-        <xml_parent_element name="job">
-            <description>
-                Das Skript (der Programm-Code) eines Jobs.
-            </description>
-        </xml_parent_element>        
+        <xml_parent_element name="config"/>
+        <xml_parent_element name="job"/>
     </xml_parent_elements>
     
 
@@ -117,15 +109,7 @@
 
 
     <xml_child_elements>
-        <xml_child_element name="include">
-            <description>
-                <p>
-                    Dieses Element kann in den Text gestreut werden 
-                    (aber außerhalb von <code>&lt;[CDATA[</code>&#160; und&#160; <code>]]&gt;</code>),
-                    um Quell-Code, der in anderen Dateien steht, einzuziehen.
-                </p>
-            </description>
-        </xml_child_element>        
+        <xml_child_element name="include"/>
     </xml_child_elements>
     
     

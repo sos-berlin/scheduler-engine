@@ -1,0 +1,176 @@
+<html>
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+    <title>Scheduler - Konfiguration</title>
+
+    <style type="text/css">
+        @import "scheduler.css";
+    </style>
+</head>
+
+<body>
+
+<h2>Konfiguration</h2>
+
+<p>
+    Beim Start des Scheduler geben Sie die Datei an,
+    die die in XML formulierte Konfiguration enthält.
+</p>
+
+<p>Beispiel für eine einfache Konfigurationsdatei mit einem Job in JavaScript (für Windows):</p>
+
+<pre>
+
+&lt;?xml version="1.0" encoding="iso-8859-1"?>
+&lt;spooler>
+    &lt;config>
+        &lt;process_classes/>
+        &lt;jobs>
+            &lt;job name="test_job">
+                &lt;script language="JavaScript">&lt;![CDATA[
+
+                    function spooler_process()
+                    {
+                        spooler_log.info( "Hallo Welt!" );
+                        return false;
+                    }
+                    
+                ]]>&lt;/script>
+
+                &lt;run_time repeat="10"/>
+            &lt;/job>
+        &lt;/jobs>
+    &lt;/config>
+&lt;/spooler></p>
+</pre>
+
+<p>
+    Konfiguriert ist hier der Job test_job, den der Scheduler alle 10 Sekunden wiederholen wird. Wenn diese Konfiguration 
+    in der Datei <code>hallo_welt.xml</code> abgelegt ist, können sie den Scheduler so starten:
+</p>
+
+<pre>
+
+scheduler hallo_welt.xml
+</pre>
+
+<p>
+    Sie können den Scheduler mit Ctrl-C abbbrechen.
+</p>
+
+
+<h2>Schema</h2>
+
+
+<pre>
+&lt;spooler>
+    &lt;<a href="xml/config.xml">config</a> spooler_id      = ""
+            tcp_port        = "4444"
+            udp_port        = "4444"
+            priority_max    = "1000"
+            java_class_path = ""
+            java_options    = ""    >
+
+        &lt;<a href="xml/base.xml">base</a> file="&hellip;"/>
+
+        &lt;<a href="xml/holidays.xml">holidays</a>>
+            &lt;<a href="xml/holiday.xml">holiday</a> day="&hellip;"/>
+            &hellip;
+        &lt;/holiday>
+
+        &lt;<a href="xml/process_classes.xml">process_classes></a>
+            &lt;<a href="xml/process_class.xml">process_class</a> name="&hellip;" max_processes="&hellip;"/>
+            &hellip;
+        &lt;/process_classes>
+
+        &lt;<a href="xml/security.xml">security</a>>
+            &lt;<a href="xml/allowed_host.xml">allowed_host</a> name="&hellip;" level="&hellip;"/>
+            &hellip;
+        &lt;/security>
+
+        &lt;<a href="xml/script.xml">script</a> language="&hellip;">&lt;![CDATA[ &hellip; ]]>&lt;/script>
+
+        &lt;<a href="xml/jobs.xml">jobs</a>
+            &lt;<a href="xml/job.xml">job</a> name          = "&hellip;"
+                 title         = ""
+                 log_append    = "no"
+                 order         = "no"
+                 process_class = ""
+                 tasks         = "1"
+                 timeout       = "" 
+                 idle_timeout  = "" 
+                 priority      = "1"   >
+
+                 &lt;<a href="xml/description.xml">description</a>> &hellip; &lt;/description>
+
+                 &lt;<a href="xml/params.xml">params</a>>
+                     &lt;<a href="xml/param.xml">param</a> name="&hellip;" value="&hellip;"/>
+                     &hellip;
+                 &lt;/params>
+
+                 &lt;<a href="xml/script.xml">script</a> language   = "&hellip;"
+                         java_class = "&hellip;"
+                         com_class  = "&hellip;"
+                         filename   = "&hellip;" >
+                     &lt;<a href="xml/include.xml">include</a> file="&hellip;"/>
+                     &lt;![CDATA[
+                         <i>programm-code</i>&hellip; 
+                     ]]>
+                 &lt;/script>
+               <i>oder</i>
+                 &lt;<a href="xml/process.xml">process</a> file         = "&hellip;"
+                          param        = ""
+                          log_file     = ""
+                          ignore_error = "no" />
+
+                 &lt;<a href="xml/run_time.xml">run_time</a> let_run="no">
+                     &lt;<a href="xml/period.xml">period</a> let_run      = "&hellip;"
+                             begin        = "00:00"
+                             end          = "24:00"
+                             single_start = ""     
+                             repeat       = ""     >
+                     &lt;/period>
+
+                     &lt;<a href="xml/date.xml">date</a> date="yyyy-mm-dd"/>
+                     &hellip;
+
+                     &lt;<a href="xml/weekdays.xml">weekdays</a>>
+                         &lt;<a href="xml/day.xml">day</a> day="&hellip;">
+                             &lt;<a href="xml/period.xml">period></a>&hellip;&lt;/period>
+                             &hellip;
+                         &lt;/day>
+                         &hellip;
+                     &lt;/weekdays>
+
+                     &lt;<a href="xml/monthdays.xml">monthdays</a>>
+                         &lt;<a href="xml/day.xml">day</a> day="&hellip;">
+                             &lt;<a href="xml/period.xml">period></a>&hellip;&lt;/period>
+                             &hellip;
+                         &lt;/day>
+                         &hellip;
+                     &lt;/monthdays>
+
+                     &lt;<a href="xml/ultimos.xml">ultimos</a>>
+                         &lt;<a href="xml/day.xml">day</a> day="&hellip;">
+                             &lt;<a href="xml/period.xml">period></a>&hellip;&lt;/period>
+                             &hellip;
+                         &lt;/day>
+                         &hellip;
+                     &lt;/ultimos>
+
+                     &lt;<a href="xml/holidays.xml">holidays</a>>
+                         &lt;<a href="xml/holiday.xml">holiday</a> date="yyyy-mm-dd"/>
+                         &hellip;
+                     &lt;/holidays>
+                 &lt;/runtime>
+             &lt;/job>
+             &hellip;
+        &lt;/jobs>
+    &lt;/config>
+&lt;/spooler>
+</pre>
+
+</body>
+
+</html>

@@ -1,4 +1,4 @@
-<?xml version='1.0'?>
+<?xml version='1.0' encoding="utf-8"?>
 <!-- $Id -->
 
 <xsl:stylesheet xmlns:xsl = "http://www.w3.org/1999/XSL/Transform" 
@@ -7,10 +7,14 @@
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~xml_element-->
     
     <xsl:template match="xml_element">
+    
+        <xsl:variable name="title">Scheduler&#160; –&#160; XML-Element &lt;<xsl:value-of select="@name"/>>&#160;  <xsl:value-of select="@title"/></xsl:variable>
 
         <html>
             <head>
-                <title>Scheduler - XML-Element&#160; &lt;<xsl:value-of select="@name"/>></title>
+                <title>
+                    <xsl:value-of select="$title"/>
+                </title>
                 
                 <style type="text/css">
                     @import "../scheduler.css";
@@ -18,7 +22,9 @@
             </head>
 
             <body>
-                <h1>Scheduler - XML-Element&#160; &lt;<xsl:value-of select="@name"/>></h1>
+                <h1>
+                    <xsl:value-of select="$title"/>
+                </h1>
                 
                 <!--<h2>Schema</h2>-->
 
@@ -42,7 +48,9 @@
                                         <code>= "</code><i><xsl:value-of select="@value"/></i><code>"</code>
                                     </td>
                                     <td valign="baseline">
-                                        <xsl:value-of select="@title"/>
+                                        <span class="title">
+                                            <xsl:value-of select="@title"/>
+                                        </span>
                                     </td>
                                 </tr>
                             </xsl:for-each>
@@ -103,7 +111,9 @@
                                                 </xsl:element>
                                             </td>
                                             <td valign="baseline">
-                                                <xsl:value-of select="@title"/>
+                                                <span class="title">
+                                                    <xsl:value-of select="document( concat( 'xml/', @name, '.xml' ) )/xml_element[ @name=current()/@name ]/@title"/>
+                                                </span>
                                             </td>
                                         </tr>
                                     </xsl:for-each>
@@ -196,6 +206,13 @@
         <xsl:apply-templates select="xml_parent_element"/>
     </xsl:template>
 
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~xml_child_elements-->
+
+    <xsl:template match="xml_child_elements">
+        <h2>Kind-Elemente</h2>
+        <xsl:apply-templates select="xml_child_element"/>
+    </xsl:template>
+
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~xml_parent_element | xml_child_element-->
         
     <xsl:template match="xml_parent_element | xml_child_element">
@@ -206,14 +223,34 @@
             </xsl:element>
         </xsl:if>
         
-        <p class="list">
-            <span class="mono">
-                <xsl:element name="a">
-                    <xsl:attribute name="href"><xsl:value-of select="@name"/>.xml</xsl:attribute>
-                    &lt;<xsl:value-of select="@name"/>>
+        <table cellspacing="0" cellpadding="0">
+            <col valign="baseline"/>
+            <tr>
+                <xsl:element name="td">
+                    <xsl:if test="count( ../* ) &gt; 1  and  not( ../*/description )">
+                        <xsl:attribute name="width">150</xsl:attribute>
+                    </xsl:if>
+                    <p class="element">
+                        <b>
+                            <code>
+                                <xsl:element name="a">
+                                    <xsl:attribute name="href"><xsl:value-of select="@name"/>.xml</xsl:attribute>
+                                    &lt;<xsl:value-of select="@name"/>>
+                                </xsl:element>
+                            </code>
+                        </b>
+                    </p>
                 </xsl:element>
-            </span>
-        </p>
+                <td valign="baseline">
+                    &#160;
+                    –
+                    <span class="title">
+                        <xsl:value-of select="document( concat( 'xml/', @name, '.xml' ) )/xml_element[ @name=current()/@name ]/@title"/>
+                    </span>
+                </td>
+            </tr>
+        </table>
+            
         
         <div class="indent">
             <xsl:apply-templates select="description"/>
@@ -222,15 +259,9 @@
                 <p>
                     <code>&lt;<xsl:value-of select="@name"/>></code> kann wiederholt werden.
                 </p>
+                <br/>
             </xsl:if>
         </div>
-    </xsl:template>
-
-    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~xml_child_elements-->
-
-    <xsl:template match="xml_child_elements">
-        <h2>Kind-Elemente</h2>
-        <xsl:apply-templates select="xml_child_element"/>
     </xsl:template>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~xml_attributes-->

@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="../scheduler.xslt" type="text/xsl"?>
 
-<!--$Id: holiday.xml,v 1.2 2004/08/23 16:28:30 jz Exp $-->
+<!--$Id: holiday.xml,v 1.3 2004/08/24 07:43:44 jz Exp $-->
 
 <xml_element name     = "holiday" 
-             title    = "Feiertag"
+             title    = "Feiertag, an dem ein Job nicht laufen soll"
              base_dir = ".."
              author   = "$Author: jz $"
-             date     = "$Date: 2004/08/23 16:28:30 $">
+             date     = "$Date: 2004/08/24 07:43:44 $">
 
     <xml_parent_elements>
         <xml_parent_element name="holidays">
@@ -24,7 +24,7 @@
     
     <description>
         <p>
-            setzt einen Feiertag fest, an dem der Scheduler einen Job nicht laufen lassen soll.
+            Setzt einen Feiertag fest, an dem der Scheduler einen Job nicht laufen lassen soll.
         </p>
     </description>
     

@@ -1,20 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="../scheduler.xslt" type="text/xsl"?>
 
-<!--$Id: config.xml,v 1.4 2004/08/23 16:28:30 jz Exp $-->
+<!--$Id: config.xml,v 1.5 2004/08/24 07:43:43 jz Exp $-->
 
 <xml_element name     = "config" 
              title    = "Konfiguration"
              base_dir = ".."
              author   = "$Author: jz $"
-             date     = "$Date: 2004/08/23 16:28:30 $">
+             date     = "$Date: 2004/08/24 07:43:43 $">
 
     <xml_parent_elements>
-        <xml_parent_element name="spooler">
-            <description>
-                <code>&lt;spooler></code> ist das Wurzelelement des XML-Dokuments.
-            </description>
-        </xml_parent_element>        
+        <xml_parent_element name="spooler"/>
     </xml_parent_elements>
 
     <xml_attributes>
