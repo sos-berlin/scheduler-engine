@@ -1,4 +1,4 @@
-// $Id: spooler_communication.cxx,v 1.69 2003/12/13 17:37:04 jz Exp $
+// $Id: spooler_communication.cxx,v 1.70 2003/12/30 10:42:55 jz Exp $
 /*
     Hier sind implementiert
 
@@ -430,7 +430,7 @@ Communication::~Communication()
 
 void Communication::close( double wait_time )
 {
-    Z_MUTEX( _semaphore )
+    THREAD_LOCK( _semaphore )
     {
         _channel_list.clear();
 
@@ -524,7 +524,7 @@ void Communication::bind()
 
     if( _udp_port != _spooler->udp_port() )
     {
-        Z_MUTEX( _semaphore )
+        THREAD_LOCK( _semaphore )
         {
             if( _udp_socket != SOCKET_ERROR )  closesocket( _udp_socket );
             _udp_port = 0;
@@ -691,8 +691,8 @@ int Communication::run()
     {
         _nfds = 0;
 
+        Z_MUTEX( _semaphore );
         {
-            Mutex_guard guard = &_semaphore;
 
             FD_ZERO( &_read_fds );      
             FD_ZERO( &_write_fds );
@@ -724,9 +724,8 @@ int Communication::run()
             if( !main_thread_exists() )  return 0;  //?  Thread bleibt sonst hängen, wenn Java sich bei Ctrl-C sofort verabschiedet. Java lässt SIGINT zu, dieser Thread aber nicht.
 #       endif
 
+        THREAD_LOCK( _semaphore )
         {
-            Mutex_guard guard = &_semaphore;
-
             if( _terminate )  break;
             if( _rebound )  { _rebound = false; continue; }
 

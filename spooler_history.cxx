@@ -1,4 +1,4 @@
-// $Id: spooler_history.cxx,v 1.78 2003/12/23 11:27:43 jz Exp $
+// $Id: spooler_history.cxx,v 1.79 2003/12/30 10:42:55 jz Exp $
 
 #include "spooler.h"
 #include "../zschimmer/z_com.h"
@@ -326,7 +326,7 @@ void Spooler_db::open_history_table()
 
 void Spooler_db::create_table_when_needed( const string& tablename, const string& fields )
 {
-    Transaction ta = this;
+    Transaction ta ( this );
 
     try
     {
@@ -580,7 +580,7 @@ void Spooler_db::spooler_start()
 
             if( _db.opened() )   // get_id() kann die DB schließen (nach Fehler)
             {
-                Transaction ta = this;
+                Transaction ta ( this );
                 {
                     execute( "INSERT into " + uquoted(_spooler->_job_history_tablename) + " (\"ID\",\"SPOOLER_ID\",\"JOB_NAME\",\"START_TIME\") "
                              "values (" + as_string(_id) + "," + sql_quoted(_spooler->id_for_db()) + ",'(Spooler)',{ts'" + Time::now().as_string(Time::without_ms) + "'})" );
@@ -603,7 +603,7 @@ void Spooler_db::spooler_stop()
     {
         try
         {
-            Transaction ta = this;
+            Transaction ta ( this );
             {
                 execute( "UPDATE " + uquoted(_spooler->_job_history_tablename) + " set end_time={ts'" + Time::now().as_string(Time::without_ms) + "'} "
                          "where id=" + as_string(_id) );
@@ -631,7 +631,7 @@ void Spooler_db::insert_order( Order* order )
         {
             try
             {
-                Transaction ta = this;
+                Transaction ta ( this );
                 {
                     delete_order( order, &ta );
 
@@ -700,7 +700,7 @@ void Spooler_db::update_order( Order* order )
 
             try
             {
-                Transaction ta = this;
+                Transaction ta ( this );
                 {
                     if( order->finished() )
                     {
@@ -833,7 +833,7 @@ xml::Element_ptr Job_chain::read_history( const xml::Document_ptr& doc, int id, 
     {
         if( !_spooler->_db->opened() )  throw_xc( "SCHEDULER-184" );     // Wenn die DB verübergegehen (wegen Nichterreichbarkeit) geschlossen ist, s. get_task_id()
 
-        Transaction ta = +_spooler->_db;
+        Transaction ta ( +_spooler->_db );
         {
             Any_file sel;
 /*
@@ -958,7 +958,7 @@ void Job_history::open()
 
         if( _spooler->_db->opened()  &&  _filename == "" )
         {
-            Transaction ta = +_spooler->_db;
+            Transaction ta ( +_spooler->_db );
             {
                 _with_log = read_profile_with_log( _spooler->_factory_ini, section, "history_with_log", _spooler->_job_history_with_log );
 
@@ -1093,7 +1093,7 @@ xml::Element_ptr Job_history::read_tail( const xml::Document_ptr& doc, int id, i
         {
             if( _use_db  &&  !_spooler->_db->opened() )  throw_xc( "SCHEDULER-184" );     // Wenn die DB verübergegehen (wegen Nichterreichbarkeit) geschlossen ist, s. get_task_id()
 
-            Transaction ta = +_spooler->_db;
+            Transaction ta ( +_spooler->_db );
             {
                 Any_file sel;
 
@@ -1267,7 +1267,7 @@ void Task_history::write( bool start )
 
     if( _job_history->_use_db )
     {
-        Transaction ta = +_spooler->_db;
+        Transaction ta ( +_spooler->_db );
         {
             if( start )
             {
@@ -1427,7 +1427,7 @@ void Task_history::end()
 
             if( _use_db )
             {
-                Transaction ta = &_spooler->_db;
+                Transaction ta ( &_spooler->_db );
                 _spooler->_db->execute( "DELETE from " + _spooler->_job_history_tablename + " where \"id\"=" + as_string(_task->_id) );
                 ta.commit();
             }
