@@ -513,6 +513,7 @@ function modify_response( response )
     var spooler_element = response.selectSingleNode( "spooler" );
     if( spooler_element )
     {    
+        restore_checkbox_state( response, "update_periodically_checkbox"   );
         restore_checkbox_state( response, "show_order_jobs_checkbox"       );
         restore_checkbox_state( response, "show_tasks_checkbox"            );
         restore_checkbox_state( response, "show_job_chain_jobs_checkbox"   );

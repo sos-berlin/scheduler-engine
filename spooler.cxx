@@ -593,7 +593,10 @@ xml::Element_ptr Spooler::process_classes_as_dom( const xml::Document_ptr& docum
 {
     xml::Element_ptr element = document.createElement( "process_classes" );
 
-    FOR_EACH( Process_class_list, _process_class_list, it )  element.appendChild( (*it)->dom( document, show ) );
+    FOR_EACH( Process_class_list, _process_class_list, it )
+    {
+        if( (*it)->_module_use_count > 0 )  element.appendChild( (*it)->dom( document, show ) );
+    }
 
     return element;
 }

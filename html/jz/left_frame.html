@@ -85,6 +85,7 @@ function do_onunload()
 
 function update_periodically_checkbox__onclick()
 {
+    save_checkbox_state( "update_periodically_checkbox" );
     reset_error();
     repeat_update( document.getElementById( "update_periodically_checkbox" ).checked, 
                    document.getElementById( "update_periodically_checkbox" ).checked );
@@ -102,7 +103,7 @@ function repeat_update( repeat, call_update )
         if( call_update )
         {
             if( document.getElementById( "update_periodically_checkbox" ) )
-                document.getElementById( "update_periodically_checkbox" ).checked = false;     
+                document.getElementById( "update_periodically_checkbox" ).checked = false;
             update();
         }
     }
@@ -120,7 +121,7 @@ function repeat_update( repeat, call_update )
     }    
 
     var checkbox = document.getElementById( "update_periodically_checkbox" )
-    if( checkbox )  checkbox.checked = repeat;  // Im Fehlerfall ausschalten
+    if( checkbox )  checkbox.checked = repeat? true : false;  // Im Fehlerfall ausschalten
 
     if( repeat )  set_update_timer();
 }

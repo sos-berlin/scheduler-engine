@@ -270,6 +270,7 @@ int Job_chain::remove_all_pending_orders()
         if( !order->_task )
         {
             order->remove_from_job_chain();
+            order = NULL;
             result++;
         }
         else
@@ -746,7 +747,8 @@ ptr<Order> Order_queue::order_or_null( const Order::Id& id )
 {
     THREAD_LOCK( _lock )
     {
-        FOR_EACH( Queue, _queue, it )  if( (*it)->_id == id )  return *it;
+        FOR_EACH( Queue, _queue        , it )  if( (*it)->_id == id )  return *it;
+        FOR_EACH( Queue, _setback_queue, it )  if( (*it)->_id == id )  return *it;
     }
 
     return NULL;
@@ -1098,6 +1100,8 @@ void Order::add_to_order_queue( Order_queue* order_queue )
 {
     if( !order_queue )  throw_xc( "SCHEDULER-147", "?" );
 
+    ptr<Order> me = this;   // Halten
+
     THREAD_LOCK( _lock )
     {
         if( _task )  _moved = true;
@@ -1116,10 +1120,10 @@ void Order::add_to_order_queue( Order_queue* order_queue )
 
 void Order::remove_from_job_chain()
 {
+    ptr<Order> me = this;   // Halten
+
     THREAD_LOCK( _lock )
     {
-        ptr<Order> me = this;   // Halten
-
         if( _job_chain_node )
         {
             if( _in_job_queue )  
@@ -1145,6 +1149,8 @@ void Order::add_to_job_chain( Job_chain* job_chain )
 {
     if( !job_chain->finished() )  throw_xc( "SCHEDULER-151" );
 
+    ptr<Order> me = this;   // Halten
+
     THREAD_LOCK( _lock )
     {
         if( _id.vt == VT_EMPTY )  set_default_id();
@@ -1154,14 +1160,15 @@ void Order::add_to_job_chain( Job_chain* job_chain )
 
         if( !job_chain->_chain.empty() )
         {
-            job_chain->register_order( this );
-
             if( _state.vt == VT_EMPTY )  set_state2( (*job_chain->_chain.begin())->_state );     // Auftrag bekommt Zustand des ersten Jobs der Jobkette
 
             //Z_DEBUG_ONLY( LOG( "job_chain->node_from_state()\n" ); )
             Job_chain_node* node = job_chain->node_from_state( _state );
 
             if( !node->_job  || !node->_job->order_queue() )  throw_xc( "SCHEDULER-149", job_chain->name(), debug_string_from_variant(_state) );
+
+            job_chain->register_order( this );
+
             //Z_DEBUG_ONLY( LOG( "node->_job->order_queue()->add_order()\n" ); )
             node->_job->order_queue()->add_order( this );
 
@@ -1352,11 +1359,13 @@ void Order::set_at( const Time& time )
         if( _job_chain  )  throw_xc( "SCHEDULER-186", obj_name(), _job_chain->name() );
         
 
-        if( job() && order_queue() )  order_queue()->remove_order( this );
-
         _setback = time;
 
-        if( job() && order_queue() )  order_queue()->add_order( this );
+        if( job() )
+        {
+            order_queue()->remove_order( this );
+            order_queue()->add_order( this );
+        }
     }
 }
 

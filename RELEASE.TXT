@@ -77,7 +77,7 @@ Neue Eigenschaft Log.mail_on_warning
 
 
 ------------------------------------------------
-VERSION 2.0.109  2005-02-26
+VERSION 2.0.109  2005-03-04
 
 Korrektur: Order.setback() weckt Scheduler, wenn Setback-Zeit erreicht ist (Job::next_time()).
 
@@ -85,4 +85,5 @@ Fehlermeldungen in Skriptteilen, die in <script> enthalten sind, werden jetzt
 mit Zeilennummer der XML-Datei ausgegeben (manchmal aber +1).
 Nächste Startzeit von auftragsgesteuerten Jobs mit zurückgestelltem Auftrag (setback) wird gezeigt.
 
+Absturz nach Scheduler-Beendigung behoben (in Hostware)
 

@@ -170,7 +170,11 @@ void Module::init()
         //_process_class_name = temporary_process_class_name;
     }
 
-    if( _use_process_class )  _process_class = _spooler->process_class( _process_class_name );     // Fehler, wenn der Name nicht bekannt ist.
+    if( _use_process_class )  
+    {
+        _process_class = _spooler->process_class( _process_class_name );     // Fehler, wenn der Name nicht bekannt ist.
+        _process_class->_module_use_count++;
+    }
 
 
 # ifdef Z_WINDOWS

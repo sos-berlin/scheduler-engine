@@ -105,6 +105,7 @@ struct Process_class : zschimmer::Object
     int                        _max_processes;
     Spooler*                   _spooler;
     Process_list               _process_list;
+    int                        _module_use_count;
     Job_list                   _waiting_jobs;
 };
 

@@ -216,7 +216,16 @@
         <p style="margin-top: 0px; padding-left: 0px; white-space: nowrap">
             <input id="update_button" type="button" value="Update" onclick="call_error_checked( update__onclick )" NAME="update_button"/>
             <br/>
-            <input id="update_periodically_checkbox" type="checkbox" onclick="call_error_checked( update_periodically_checkbox__onclick )" NAME="update_periodically_checkbox"/>
+            
+            <xsl:element name="input">
+                <xsl:attribute name="id"     >update_periodically_checkbox</xsl:attribute>
+                <xsl:attribute name="type"   >checkbox</xsl:attribute>
+                <xsl:attribute name="onclick">call_error_checked( update_periodically_checkbox__onclick )</xsl:attribute>
+                <xsl:if test="/spooler/@update_periodically_checkbox">
+                    <xsl:attribute name="checked">checked</xsl:attribute>
+                </xsl:if>
+            </xsl:element>
+
             <label for="update_periodically_checkbox"><span class="translate">every </span><xsl:value-of select="/*/@my_update_seconds"/>s</label>
         </p>
     </xsl:template>
@@ -282,15 +291,17 @@
                         <xsl:attribute name="style"      >cursor: default; padding-top: 5pt</xsl:attribute>
                         <xsl:attribute name="onmouseover">
                             this.className =
-                            document.getElementById( "scheduler_tr_job_<xsl:value-of select="@job"/>__2" ).className = "job_hover"
+                            document.getElementById( "scheduler_tr_job_<xsl:value-of select="@job"/>__2" ).className = "job_hover";
+                            this.style.cursor = "hand";
                         </xsl:attribute>
                         <xsl:attribute name="onmouseout" >
                             this.className =
                             document.getElementById( "scheduler_tr_job_<xsl:value-of select="@job"/>__2" ).className = "job"
+                            this.style.cursor = "default";
                         </xsl:attribute>
                         <xsl:attribute name="onclick">call_error_checked( show_job_details, '<xsl:value-of select="@job"/>' )</xsl:attribute>
 
-                        <td colspan="99">
+                        <td colspan="4">
                             <b><xsl:value-of select="@job"/></b>
                             &#160;
                             <xsl:value-of select="@title"/>
@@ -315,11 +326,13 @@
                         <xsl:attribute name="style">cursor: default</xsl:attribute>
                         <xsl:attribute name="onmouseover">
                             this.className =
-                            document.getElementById( "scheduler_tr_job_<xsl:value-of select="@job"/>" ).className = "job_hover"
+                            document.getElementById( "scheduler_tr_job_<xsl:value-of select="@job"/>" ).className = "job_hover";
+                            this.style.cursor = "hand";
                         </xsl:attribute>
                         <xsl:attribute name="onmouseout" >
                             this.className =
                             document.getElementById( "scheduler_tr_job_<xsl:value-of select="@job"/>" ).className = "job"
+                            this.style.cursor = "default";
                         </xsl:attribute>
                         <xsl:attribute name="onclick">call_error_checked( show_job_details, '<xsl:value-of select="@job"/>' )</xsl:attribute>
 
@@ -415,8 +428,8 @@
                     </xsl:when>
                     <xsl:otherwise>
                         <xsl:attribute name="style"      >cursor: default</xsl:attribute>
-                        <xsl:attribute name="onmouseover">this.className='task_hover'</xsl:attribute>
-                        <xsl:attribute name="onmouseout" >this.className='task'</xsl:attribute>
+                        <xsl:attribute name="onmouseover">this.className='task_hover'; this.cursor = "hand";</xsl:attribute>
+                        <xsl:attribute name="onmouseout" >this.className='task'      ; this.cursor = "default";</xsl:attribute>
                         <xsl:attribute name="onclick">call_error_checked( show_task_details, '<xsl:value-of select="../../@job"/>', <xsl:value-of select="@id"/> )</xsl:attribute>
 
                         <td>
@@ -633,10 +646,12 @@
 -->
                             </xsl:attribute>
                             <xsl:attribute name="onmouseover">
-                                this.className = "job_chain_hover"
+                                this.className = "job_chain_hover";
+                                this.style.cursor = "hand";
                             </xsl:attribute>
                             <xsl:attribute name="onmouseout" >
-                                this.className = "job_chain"
+                                this.className = "job_chain";
+                                this.style.cursor = "default"
                             </xsl:attribute>
                             <xsl:attribute name="onclick">call_error_checked( show_job_chain_details, '<xsl:value-of select="@name"/>' )</xsl:attribute>
 
@@ -674,10 +689,12 @@
                                         <xsl:value-of select="$tr_style"/>
                                     </xsl:attribute>
                                     <xsl:attribute name="onmouseover">
-                                        this.className = "job"
+                                        this.className = "job";
+                                        this.style.cursor = "hand";
                                     </xsl:attribute>
                                     <xsl:attribute name="onmouseout" >
-                                        this.className = "job_chain"
+                                        this.className = "job_chain";
+                                        this.style.cursor = "default";
                                     </xsl:attribute>
                                     <xsl:attribute name="onclick">call_error_checked( show_job_details, '<xsl:value-of select="@job"/>' )</xsl:attribute>
                                 </xsl:if>
@@ -1393,10 +1410,10 @@
             <!--xsl:if test="order"-->
                 <col valign="baseline"  width=" 30"/>
                 <!--col valign="top"  width=" 15"  style="padding-right: 2ex"/-->
-                <col valign="baseline"  width=" 50"/>
+                <!--col valign="baseline"  width=" 55"/-->
                 
                 <xsl:if test="order/@setback">
-                    <col valign="baseline"  width="100"/>
+                    <col valign="baseline"  width="140"/>
                 </xsl:if>
                 
                 <col valign="baseline"  width=" 30"/>
@@ -1427,22 +1444,21 @@
                     <tr>
                         <td class="head1">Id</td>
                         <!--td class="order">Pri</td-->
-                        
-                        <td class="head">Created</td>
+                        <!--td class="head">Created</td-->
                         
                         <xsl:if test="order/@setback">
                             <td class="head">Setback</td>
                         </xsl:if>
                         
-                        <xsl:if test="order/@state_text">
-                            <td class="head">State</td>
-                        </xsl:if>
+                        <td class="head">State</td>
                         
-                        <xsl:if test="order/@title">
+                        <xsl:if test="order/@state_text">
                             <td class="head">State text</td>
                         </xsl:if>
                         
-                        <td class="head" colspan="2">Title</td>
+                        <xsl:if test="order/@title">
+                            <td class="head" colspan="2">Title</td>
+                        </xsl:if>
                     </tr>
                     <tr>
                         <td colspan="99" class="after_head_space">&#160;</td>
@@ -1458,10 +1474,10 @@
 
                             <td valign="baseline"><xsl:value-of select="@id"/></td>
                             <!--td class="order"><xsl:value-of select="@priority"/></td-->
-                            <td valign="baseline" class="small"><xsl:value-of select="@created__xslt_date_or_time"        disable-output-escaping="yes"/></td>
+                            <!--td valign="baseline" class="small"><xsl:value-of select="@created__xslt_date_or_time"        disable-output-escaping="yes"/></td-->
 
                             <xsl:if test="../order/@setback">
-                                <td valign="baseline" class="small" nowrap="nowrap"><xsl:value-of select="@setback__xslt_date_or_time_with_diff"  disable-output-escaping="yes"/></td>
+                                <td valign="baseline" class="small" nowrap="nowrap"><xsl:value-of select="@setback__xslt_datetime_with_diff"  disable-output-escaping="yes"/></td>
                             </xsl:if>
                             
                             <td valign="baseline"><xsl:value-of select="@state"/></td>
