@@ -1,4 +1,4 @@
-// $Id: spooler_idl.h,v 1.3 2002/11/20 11:03:10 jz Exp $
+// $Id: spooler_idl.h,v 1.4 2002/11/22 08:34:11 jz Exp $
 
 
 /*  Ersatz für spooler.odl für Systeme ohne COM. 
@@ -287,7 +287,7 @@ DEFINE_GUID( CLSID_Mail, 0xD5F4C5B5, 0x4CF7, 0x4ca7, 0x84, 0xC0, 0xE1, 0x69, 0x6
 
 struct Imail : IDispatch
 {
-    void                    init                    ();
+  //void                    init                    ();
 
     HRESULT             put_to                      ( BSTR receipient );
     HRESULT             get_to                      ( BSTR* receipient );

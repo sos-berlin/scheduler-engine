@@ -1,4 +1,4 @@
-// $Id: spooler_module_com.h,v 1.2 2002/11/06 06:30:48 jz Exp $
+// $Id: spooler_module_com.h,v 1.3 2002/11/22 08:34:12 jz Exp $
 
 #ifndef __SPOOLER_MODULE_COM_H
 #define __SPOOLER_MODULE_COM_H
@@ -47,8 +47,11 @@ struct Com_module_instance : Com_module_instance_base
     typedef HRESULT (WINAPI *DllGetClassObject_func)(CLSID*,IID*,void**);
 
     Fill_zero                  _zero_;
-    HMODULE                    _com_module;                 // Für _module->_filename != ""
-    DllGetClassObject_func     _DllGetClassObject;          // Für _module->_filename != ""
+
+#   ifdef Z_WINDOWS
+        HMODULE                _com_module;                 // Für _module->_filename != ""
+        DllGetClassObject_func _DllGetClassObject;          // Für _module->_filename != ""
+#   endif
 };
 
 //-----------------------------------------------------------------Scripting_engine_module_instance

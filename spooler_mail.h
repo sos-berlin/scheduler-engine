@@ -1,16 +1,17 @@
-// $Id: spooler_mail.h,v 1.6 2002/11/20 11:03:11 jz Exp $
+// $Id: spooler_mail.h,v 1.7 2002/11/22 08:34:11 jz Exp $
 
 #ifndef __SPOOLER_MAIL_H
 #define __SPOOLER_MAIL_H
-#ifdef SYSTEM_WIN
 
 #include <map>
-#include "../kram/olestd.h"
+
+//#include "../kram/olestd.h"
+#include "../zschimmer/com.h"
 #include "../kram/sysxcept.h"
 #include "../kram/sosscrpt.h"
 #include "../kram/com.h"
 #include "../kram/com_server.h"
-#include "../kram/sos_mail_jmail.h"
+#include "../kram/sos_mail.h"
 
 
 namespace sos {
@@ -28,7 +29,7 @@ struct Com_mail : spooler_com::Imail, Sos_ole_object
                                 Com_mail                    ( Spooler* );
                                ~Com_mail                    ();
                                 
-    void  __stdcall             init                        ();
+    void                        init                        ();
 
     USE_SOS_OLE_OBJECT
 
@@ -72,7 +73,7 @@ struct Com_mail : spooler_com::Imail, Sos_ole_object
   private:
     Fill_zero                  _zero_;
     Spooler*                   _spooler;
-    Sos_ptr<Jmail_message>     _msg;
+    Sos_ptr<Mail_message>      _msg;
 
     Bstr                       _subject;
     Bstr                       _from;
@@ -85,5 +86,4 @@ struct Com_mail : spooler_com::Imail, Sos_ole_object
 } //namespace sos
 
 
-#endif
 #endif

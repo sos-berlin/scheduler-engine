@@ -1,4 +1,4 @@
-// $Id: spooler_communication.h,v 1.4 2002/11/14 11:10:35 jz Exp $
+// $Id: spooler_communication.h,v 1.5 2002/11/22 08:34:11 jz Exp $
 
 #ifndef __SPOOLER_COMMUNICATION_H
 #define __SPOOLER_COMMUNICATION_H
@@ -59,7 +59,7 @@ struct Named_host : Host
                                 Named_host                  ()                              {}
                                 Named_host                  ( const in_addr& ip )           { set_ip(ip.s_addr); }
                                 Named_host                  ( uint32 ip )                   { set_ip(ip); }
-                               ~Named_host                  ()                              {}                      // gcc 3.2 zuliebe
+    virtual                    ~Named_host                  ()                              {}                      // gcc 3.2 zuliebe
 
     void                        operator =                  ( const in_addr& ip )           { set_ip(ip.s_addr); }
 

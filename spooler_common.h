@@ -1,4 +1,4 @@
-// $Id: spooler_common.h,v 1.10 2001/08/20 08:32:57 jz Exp $
+// $Id: spooler_common.h,v 1.11 2002/11/22 08:34:11 jz Exp $
 
 #ifndef __SPOOLER_COMMON_H
 #define __SPOOLER_COMMON_H
@@ -47,11 +47,12 @@ struct Handle : Sos_self_deleting
         void                    close                       ()                              { if(_handle) { CloseHandle(_handle); _handle=0; } }
 
         HANDLE                 _handle;
-#   endif
 
   private:
                                 Handle                      ( const Handle& );              // Nicht implementiert
     void                        operator =                  ( const Handle& );              // Nicht implementiert
+
+#   endif
 };
 
 static HANDLE null_handle = NULL;

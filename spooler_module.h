@@ -1,4 +1,4 @@
-// $Id: spooler_module.h,v 1.4 2002/11/11 23:10:33 jz Exp $
+// $Id: spooler_module.h,v 1.5 2002/11/22 08:34:11 jz Exp $
 
 #ifndef __SPOOLER_MODULE_H
 #define __SPOOLER_MODULE_H
@@ -113,6 +113,7 @@ struct Module
 struct Module_instance : Object 
 {
                                 Module_instance             ( Module* script )                      : _zero_(this+1), _module(script), _log(script->_log) {}
+    virtual                    ~Module_instance             ()                                      {}      // Für gcc 3.2
 
     virtual void                init                        ();
     virtual void                load                        ()                                      {}

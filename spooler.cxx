@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.131 2002/11/15 09:47:36 jz Exp $
+// $Id: spooler.cxx,v 1.132 2002/11/22 08:34:10 jz Exp $
 /*
     Hier sind implementiert
 
@@ -78,7 +78,7 @@ void send_error_email( const string& error_text, int argc, char** argv )
         string bcc  = read_profile_string( default_factory_ini, "spooler", "log_mail_bcc"    );
         string smtp = read_profile_string( default_factory_ini, "spooler", "smtp"            );
 
-        Jmail_message msg;
+        Mail_message msg;
         msg.init();
         msg.set_from( from );
 
