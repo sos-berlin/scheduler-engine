@@ -1,4 +1,4 @@
-// $Id: spooler_com.cxx,v 1.65 2002/11/13 12:53:58 jz Exp $
+// $Id: spooler_com.cxx,v 1.66 2002/11/13 13:12:49 jz Exp $
 /*
     Hier sind implementiert
 
@@ -331,7 +331,7 @@ STDMETHODIMP Com_variable_set::get_count( int* result )
 //------------------------------------------------------------------------Com_variable_set::get_dom
 #ifdef Z_WINDOWS
 
-STDMETHODIMP Com_variable_set::get_dom( spooler_com::IXMLDOMDocument** doc )  
+STDMETHODIMP Com_variable_set::get_dom( msxml::IXMLDOMDocument** doc )  
 { 
 #   ifdef SPOOLER_HAS_MSXML
         
