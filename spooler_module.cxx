@@ -1,4 +1,4 @@
-// $Id: spooler_module.cxx,v 1.21 2003/06/05 12:48:54 jz Exp $
+// $Id: spooler_module.cxx,v 1.22 2003/06/11 14:35:40 jz Exp $
 /*
     Hier sind implementiert
 
@@ -94,7 +94,8 @@ void Module::set_dom_without_source( const xml::Element_ptr& element )
     _filename         = element.getAttribute     ( "filename"  );
     _java_class_name  = element.getAttribute     ( "java_class" );
     _recompile        = element.bool_getAttribute( "recompile" );
-    _separate_process = element.bool_getAttribute( "separate_process" );
+    _separate_process = element.bool_getAttribute( "separate_process", string_begins_with( lcase(_language), "perl" ) );   // Bei Perl automatisch separate_process="yes" 
+                                                                                                                           // Weil Perl sonst beim zweiten Aufruf abstürzt
 
     string use_engine = element.getAttribute     ( "use_engine" );
     
