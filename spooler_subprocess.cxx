@@ -292,8 +292,13 @@ void Subprocess_register::remove( Subprocess* subprocess )
         
         for( Subprocess_map::iterator s = _subprocess_map.begin(); s != _subprocess_map.end(); )
         {
-            if( s->second == subprocess )  s = _subprocess_map.erase( s );
-                                     else  s++;
+            if( s->second == subprocess )  
+            {
+                _subprocess_map.erase( s );
+                break;
+            }
+            else  
+                s++;
         }
     }
 }

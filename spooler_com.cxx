@@ -13,7 +13,10 @@
 //#include "../hostole/hostole.h"
 #include "../zschimmer/z_com.h"
 #include "../zschimmer/com_server.h"
-#include <process.h>                    // getpid()
+
+#ifdef Z_WINDOWS
+#   include <process.h>                    // getpid()
+#endif
 
 using namespace zschimmer::com;
 
