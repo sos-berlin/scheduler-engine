@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.171 2003/02/24 07:30:44 jz Exp $
+// $Id: spooler.cxx,v 1.172 2003/02/24 13:48:27 jz Exp $
 /*
     Hier sind implementiert
 
@@ -1401,11 +1401,11 @@ int spooler_main( int argc, char** argv )
 {
     int ret;
 
+    Ole_initialize ole;
     Spooler my_spooler;
 
     try
     {
-        Ole_initialize ole;
 
         spooler = &my_spooler;
 

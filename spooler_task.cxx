@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.139 2002/12/11 08:50:36 jz Exp $
+// $Id: spooler_task.cxx,v 1.140 2003/02/24 13:48:27 jz Exp $
 /*
     Hier sind implementiert
 
@@ -324,6 +324,7 @@ void Job::set_dom( const xml::Element_ptr& element, const Time& xml_mod_time )
             if( e.nodeName_is( "script"     ) )  
             {
                 _module.set_dom_without_source( e );
+                _module_xml_document  = e.ownerDocument();
                 _module_xml_element   = e;
                 _module_xml_mod_time  = xml_mod_time;
                 _process_filename     = "";
@@ -331,7 +332,8 @@ void Job::set_dom( const xml::Element_ptr& element, const Time& xml_mod_time )
                 _process_log_filename = "";
             }
             else
-            if( e.nodeName_is( "process"    ) )  _module_xml_element   = NULL,
+            if( e.nodeName_is( "process"    ) )  _module_xml_document  = NULL,
+                                                 _module_xml_element   = NULL,
                                                  _process_filename     = e.getAttribute( "file" ),
                                                  _process_param        = e.getAttribute( "param" ),
                                                  _process_log_filename = e.getAttribute( "log_file" );

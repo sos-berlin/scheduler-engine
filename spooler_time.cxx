@@ -1,4 +1,4 @@
-// $Id: spooler_time.cxx,v 1.33 2003/02/18 21:38:11 jz Exp $
+// $Id: spooler_time.cxx,v 1.34 2003/02/24 13:48:29 jz Exp $
 /*
     Hier sind implementiert
 
@@ -78,7 +78,7 @@ string Time::as_string( With_ms with ) const
 
 //---------------------------------------------------------------------------------------Time::now
 
-Time Time::now() 
+Time Time::now()
 {
 #   if defined SYSTEM_LINUX
 
@@ -90,6 +90,14 @@ Time Time::now()
         gettimeofday( &tv, NULL );
         localtime_r( &tv.tv_sec, &local_tm );
         return timegm( &local_tm ) + (double)tv.tv_usec / 1e6;
+
+#   elif defined SYSTEM_HPUX
+        timeval  tv;
+        struct timezone tz;
+
+        gettimeofday( &tv, &tz );
+        return (double)tv.tv_sec + (double)tv.tv_usec / (double)1e9 - timezone - ( daylight? _dstbias : 0 );  // dsttime ist im Winter gesetzt? Das ist doch falsch.   - ( tz.tz_dsttime? _d
+stbias : 0 );
 
 #   else
 

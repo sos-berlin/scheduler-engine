@@ -1,4 +1,4 @@
-// $Id: spooler_thread.cxx,v 1.74 2003/02/24 07:30:44 jz Exp $
+// $Id: spooler_thread.cxx,v 1.75 2003/02/24 13:48:29 jz Exp $
 /*
     Hier sind implementiert
 
@@ -365,7 +365,7 @@ bool Spooler_thread::step()
         {
             Job* job = *it;
 
-            if( !job->order_controlled() )
+            if( !job->order_controlled() ) // ||  job->queue_filled() )     // queue_filled() bei Order-Job, falls der (unsinnigerweise?) explizit gestartet worden ist.
             {
                 for( int i = 0; i < job->priority(); i++ )
                 {
@@ -389,7 +389,7 @@ bool Spooler_thread::step()
         {
             Job* job = *it;
 
-            if( !job->order_controlled() )
+            if( !job->order_controlled() ) // ||  job->queue_filled() )     // queue_filled() bei Order-Job, falls der (unsinnigerweise?) explizit gestartet worden ist.
             {
                 if( _my_event.signaled_then_reset() )  return true;
                 if( _event->signaled() )  return true;      // Das ist _my_event oder _spooler->_event

@@ -1,4 +1,4 @@
-// $Id: spooler_task.h,v 1.87 2003/02/24 07:30:44 jz Exp $
+// $Id: spooler_task.h,v 1.88 2003/02/24 13:48:29 jz Exp $
 
 #ifndef __SPOOLER_TASK_H
 #define __SPOOLER_TASK_H
@@ -349,6 +349,7 @@ struct Job : Sos_self_deleting
     Module                     _module;                     // Job hat ein eigenes Skript
     xml::Element_ptr           _script_element;             // <script> (mit <include>) für <modify_job cmd="reload"/>
 
+    xml::Document_ptr          _module_xml_document;
     xml::Element_ptr           _module_xml_element;         // <script> aus <config>
     Time                       _module_xml_mod_time;
     Module*                    _module_ptr;
