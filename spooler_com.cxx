@@ -1,4 +1,4 @@
-// $Id: spooler_com.cxx,v 1.21 2002/02/28 16:46:06 jz Exp $
+// $Id: spooler_com.cxx,v 1.22 2002/03/02 19:22:55 jz Exp $
 /*
     Hier sind implementiert
 
@@ -148,13 +148,24 @@ Com_log::Com_log( Prefix_log* log )
 
 //----------------------------------------------------------------------------------------Com_log::
     
-STDMETHODIMP Com_log::msg  ( BSTR line )                       { return log( log_msg, line ); }
-STDMETHODIMP Com_log::warn ( BSTR line )                       { return log( log_warn, line ); }
-STDMETHODIMP Com_log::error( BSTR line )                       { return log( log_error, line ); }
+STDMETHODIMP Com_log::debug9( BSTR line )                       { return log( log_debug9, line ); }
+STDMETHODIMP Com_log::debug8( BSTR line )                       { return log( log_debug8, line ); }
+STDMETHODIMP Com_log::debug7( BSTR line )                       { return log( log_debug7, line ); }
+STDMETHODIMP Com_log::debug6( BSTR line )                       { return log( log_debug6, line ); }
+STDMETHODIMP Com_log::debug5( BSTR line )                       { return log( log_debug5, line ); }
+STDMETHODIMP Com_log::debug4( BSTR line )                       { return log( log_debug4, line ); }
+STDMETHODIMP Com_log::debug3( BSTR line )                       { return log( log_debug3, line ); }
+STDMETHODIMP Com_log::debug2( BSTR line )                       { return log( log_debug2, line ); }
+STDMETHODIMP Com_log::debug1( BSTR line )                       { return log( log_debug1, line ); }
+STDMETHODIMP Com_log::debug ( BSTR line )                       { return log( log_debug1, line ); }
+STDMETHODIMP Com_log::msg   ( BSTR line )                       { return log( log_info  , line ); }
+STDMETHODIMP Com_log::info  ( BSTR line )                       { return log( log_info  , line ); }
+STDMETHODIMP Com_log::warn  ( BSTR line )                       { return log( log_warn  , line ); }
+STDMETHODIMP Com_log::error ( BSTR line )                       { return log( log_error , line ); }
 
 //-------------------------------------------------------------------------------------Com_log::log
 
-STDMETHODIMP Com_log::log( Log_kind kind, BSTR line )
+STDMETHODIMP Com_log::log( Log_level level, BSTR line )
 { 
     HRESULT hr = NOERROR;
 
@@ -162,7 +173,7 @@ STDMETHODIMP Com_log::log( Log_kind kind, BSTR line )
     {
         if( !_log )  return E_POINTER;
 
-        if( _log )  _log->log( kind, bstr_as_string( line ) ); 
+        if( _log )  _log->log( level, bstr_as_string( line ) ); 
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Log::log" ); }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Log::log" ); }

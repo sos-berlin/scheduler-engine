@@ -1,4 +1,4 @@
-// $Id: spooler_com.h,v 1.17 2001/10/19 17:46:26 jz Exp $
+// $Id: spooler_com.h,v 1.18 2002/03/02 19:22:55 jz Exp $
 
 #ifndef __SPOOLER_COM_H
 #define __SPOOLER_COM_H
@@ -25,7 +25,14 @@
 namespace sos {
 namespace spooler {
 
-enum   Log_kind;
+using spooler_com::Log_level; //enum   Log_level;
+using spooler_com::log_debug;
+using spooler_com::log_info;
+using spooler_com::log_warn;
+using spooler_com::log_error;
+
+const Log_level log_debug_spooler = spooler_com::log_debug3;
+
 struct Prefix_log;
 struct Log;
 struct Object_set;
@@ -91,10 +98,22 @@ struct Com_log : spooler_com::Ilog, Sos_ole_object
 
     void                        close                       ()                                      { _log = NULL; }        
 
+    STDMETHODIMP                debug9                      ( BSTR );
+    STDMETHODIMP                debug8                      ( BSTR );
+    STDMETHODIMP                debug7                      ( BSTR );
+    STDMETHODIMP                debug6                      ( BSTR );
+    STDMETHODIMP                debug5                      ( BSTR );
+    STDMETHODIMP                debug4                      ( BSTR );
+    STDMETHODIMP                debug3                      ( BSTR );
+    STDMETHODIMP                debug2                      ( BSTR );
+    STDMETHODIMP                debug1                      ( BSTR );
+    STDMETHODIMP                debug                       ( BSTR );
+    STDMETHODIMP                info                        ( BSTR );
     STDMETHODIMP                msg                         ( BSTR );
     STDMETHODIMP                warn                        ( BSTR );
     STDMETHODIMP                error                       ( BSTR );
-    STDMETHODIMP                log                         ( Log_kind kind, BSTR line );
+  //STDMETHODIMP                fatal                       ( BSTR );
+    STDMETHODIMP                log                         ( spooler_com::Log_level, BSTR line );
 
 
     Fill_zero                  _zero_;

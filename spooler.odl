@@ -1,4 +1,4 @@
-// $Id: spooler.odl,v 1.18 2001/08/20 13:46:54 jz Exp $
+// $Id: spooler.odl,v 1.19 2002/03/02 19:22:55 jz Exp $
 
 // Anweisung: midl /nologo /error all /out $(OutDir) $(InputPath)
 
@@ -261,6 +261,26 @@ library spooler
         interface Ispooler;
     }
 
+    //------------------------------------------------------------------------------------Log_level
+
+    enum Log_level
+    {
+        log_debug9 = -9,
+        log_debug8 = -8,
+        log_debug7 = -7,
+        log_debug6 = -6,
+        log_debug5 = -5,
+        log_debug4 = -4,
+        log_debug3 = -3,
+        log_debug2 = -2,
+        log_debug1 = -1,
+        log_debug  = -1,
+        log_info   =  0, 
+        log_warn   =  1, 
+        log_error  =  2,
+      //log_fatal  =  3
+    };
+
     //------------------------------------------------------------------------------------------Log
 
     [
@@ -270,10 +290,28 @@ library spooler
     ]
     interface Ilog : IDispatch
     {
+        HRESULT                 debug9                  ( [in] BSTR line );
+        HRESULT                 debug8                  ( [in] BSTR line );
+        HRESULT                 debug7                  ( [in] BSTR line );
+        HRESULT                 debug6                  ( [in] BSTR line );
+        HRESULT                 debug5                  ( [in] BSTR line );
+        HRESULT                 debug4                  ( [in] BSTR line );
+        HRESULT                 debug3                  ( [in] BSTR line );
+        HRESULT                 debug2                  ( [in] BSTR line );
+        HRESULT                 debug1                  ( [in] BSTR line );
+        
+        HRESULT                 debug                   ( [in] BSTR line );
+        
         [id(0)]
-        HRESULT                 msg                     ( [in] BSTR name );
-        HRESULT                 warn                    ( [in] BSTR name );
-        HRESULT                 error                   ( [in] BSTR name );
+        HRESULT                 info                    ( [in] BSTR line );
+        
+        HRESULT                 msg                     ( [in] BSTR line );     // Zur Kompatibilität, wie info()
+        
+        HRESULT                 warn                    ( [in] BSTR line );
+        
+        HRESULT                 error                   ( [in] BSTR line );
+
+        HRESULT                 log                     ( [in] enum Log_level, [in] BSTR line );
     }
 
     [

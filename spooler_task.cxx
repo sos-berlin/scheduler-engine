@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.52 2002/03/02 15:22:44 jz Exp $
+// $Id: spooler_task.cxx,v 1.53 2002/03/02 19:22:55 jz Exp $
 /*
     Hier sind implementiert
 
@@ -130,7 +130,7 @@ Spooler_object Object_set::get()
         if( obj.pdispVal == NULL )  break;  // EOF
         if( _object_set_descr->_level_interval.is_in_interval( object.level() ) )  break;
 
-        //_log.msg( "Objekt-Level " + as_string( object.level() ) + " ist nicht im Intervall" );
+        //_log.info( "Objekt-Level " + as_string( object.level() ) + " ist nicht im Intervall" );
     }
 
     return object;
@@ -379,7 +379,7 @@ void Job::remove_from_task_queue( Task* task )
     {
         if( +*it == task )  
         {
-            _log.msg( task->obj_name() + " aus der Warteschlange entfernt" );
+            _log( task->obj_name() + " aus der Warteschlange entfernt" );
             it = _task_queue.erase( it );
         }
         else
@@ -404,8 +404,8 @@ Sos_ptr<Task> Job::start_without_lock( const CComPtr<spooler_com::Ivariable_set>
     {
         case s_read_error:  throw_xc( "SPOOLER-132", name(), _error->what() );
      
-        case s_stopped:
-        case s_load_error:  set_state( s_pending );
+      //case s_load_error:
+        case s_stopped:     set_state( s_pending );
         
         default: ;
     }
@@ -425,7 +425,7 @@ void Job::start_when_directory_changed( const string& directory_name )
 {
     THREAD_LOCK( _lock )
     {
-        if( _spooler->_debug )  _log.msg( "start_when_directory_changed \"" + directory_name + "\"" );
+        _log.debug( "start_when_directory_changed \"" + directory_name + "\"" );
 
 #       ifdef SYSTEM_WIN
 
@@ -459,7 +459,7 @@ void Job::clear_when_directory_changed()
 {
     THREAD_LOCK( _lock )
     {
-        if( _spooler->_debug  &&  !_directory_watcher_list.empty() )  _log.msg( "clear_when_directory_changed" );
+        if( !_directory_watcher_list.empty() )  _log.debug( "clear_when_directory_changed" );
 
         _directory_watcher_list.clear();
     }
@@ -497,16 +497,17 @@ bool Job::load()
     _script_instance.add_obj( (IDispatch*)_com_log              , "spooler_log"    );
     _script_instance.add_obj( (IDispatch*)_com_job              , "spooler_job"    );
     _script_instance.add_obj( (IDispatch*)_com_task             , "spooler_task"   );
-
+/*
     try
     {
         _script_instance.load( *_script_ptr );
     }
     catch( const Xc& x        ) { set_error(x);  _close_engine = true;  set_state( s_load_error );  return false; }
     catch( const exception& x ) { set_error(x);  _close_engine = true;  set_state( s_load_error );  return false; }
-
+*/
     try
     {
+        _script_instance.load( *_script_ptr );
         _script_instance.start();
     }
     catch( const Xc& x        ) { set_error(x);  _close_engine = true;  return false; }
@@ -646,7 +647,7 @@ bool Job::do_something()
         close_task();
         close_engine();
 
-        _log.msg( "Skript wird erneut gelesen (<include> wird erneut ausgeführt)" );
+        _log( "Skript wird erneut gelesen (<include> wird erneut ausgeführt)" );
         read_script();
 
         set_state( s_pending );
@@ -681,7 +682,7 @@ bool Job::do_something()
                       //}
                       //catch( const Xc& x ) { _log.error( "Überwachung des Verzeichnisses " + (*it)->directory() + ": " + x.what() ); }
 
-                        if( _spooler->_debug )  _log.msg( "Task startet wegen eines Ereignisses für Verzeichnis " + (*it)->directory() );
+                        if( _spooler->_debug )  _log.debug( "Task startet wegen eines Ereignisses für Verzeichnis " + (*it)->directory() );
 
                         if( !(*it)->handle() )  it = _directory_watcher_list.erase( it );  // Folge eines Fehlers, s. Directory_watcher::set_signal
                     }
@@ -690,20 +691,20 @@ bool Job::do_something()
                 if( _event.signaled() )
                 {
                     ok = true;
-                    if( _spooler->_debug )  _log.msg( "Task startet, weil " + _event.as_string() );
+                    if( _spooler->_debug )  _log.debug( "Task startet, weil " + _event.as_string() );
                 }
 
                 Time now = Time::now();
                 if( now >= _next_start_time ) 
                 {
                     ok = true;
-                    if( _spooler->_debug )  _log.msg( "Task startet, weil Job-Startzeit erreicht: " + _next_start_time.as_string() );
+                    if( _spooler->_debug )  _log.debug( "Task startet, weil Job-Startzeit erreicht: " + _next_start_time.as_string() );
                 }
 
                 if( now >= _next_start_at ) 
                 {
                     ok = true;
-                   if( _spooler->_debug )  _log.msg( "Task startet, weil Task-Startzeit erreicht: " + _next_start_at.as_string() );
+                   if( _spooler->_debug )  _log.debug( "Task startet, weil Task-Startzeit erreicht: " + _next_start_at.as_string() );
                 }
 
                 if( !ok )  return false;
@@ -725,7 +726,7 @@ bool Job::do_something()
         if( ok )  do_a_step = true;
         something_done = true;
         
-        if( _state == s_read_error || _state == s_load_error )  
+        if( _state == s_read_error )  //|| _state == s_load_error )  
         {
             close_task();
             return something_done;
@@ -753,7 +754,7 @@ bool Job::do_something()
             else
             {
                 ok = false;
-                _log.msg( "Laufzeitperiode ist abgelaufen, Task wird beendet" );
+                _log( "Laufzeitperiode ist abgelaufen, Task wird beendet" );
             }
         }
     }
@@ -837,7 +838,7 @@ void Job::set_state( State new_state )
 
         if( _spooler->_debug 
          || new_state == s_starting
-         || new_state == s_ended    ) _log.msg( state_name() ); 
+         || new_state == s_ended    ) _log.debug( state_name() ); 
     }
 }
 
@@ -943,7 +944,7 @@ void Job::set_in_call( const string& name )
     THREAD_LOCK( _lock )
     {
         _in_call = name;
-        if( _spooler->_debug  &&  !name.empty() )  _log.msg( name + "()" );
+        if( _spooler->_debug  &&  !name.empty() )  _log.debug( name + "()" );
     }
 }
 
@@ -955,7 +956,7 @@ string Job::state_name( State state )
     {
         case s_stopped:         return "stopped";
         case s_read_error:      return "read_error";
-        case s_load_error:      return "load_error";
+      //case s_load_error:      return "load_error";
         case s_loaded:          return "loaded";
         case s_pending:         return "pending";
         case s_start_task:      return "start_task";

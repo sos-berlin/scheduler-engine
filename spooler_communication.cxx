@@ -1,4 +1,4 @@
-// $Id: spooler_communication.cxx,v 1.26 2001/07/02 21:38:26 jz Exp $
+// $Id: spooler_communication.cxx,v 1.27 2002/03/02 19:22:55 jz Exp $
 /*
     Hier sind implementiert
 
@@ -254,12 +254,12 @@ bool Communication::Channel::do_accept( SOCKET listen_socket )
 
         if( _spooler->security_level( _host ) <= Security::seclev_signal )
         {
-            _log.msg( "TCP-Verbindung nicht zugelassen" );
+            _log.info( "TCP-Verbindung nicht zugelassen" );
             do_close();
             return false;
         }
 
-        _log.msg( "TCP-Verbindung angenommen" );
+        _log.info( "TCP-Verbindung angenommen" );
 
     }
     catch( const Xc& x ) { _log.error(x.what()); return false; }
@@ -436,7 +436,7 @@ void Communication::bind()
         _udp_port = _spooler->udp_port();
         _rebound = true;
 
-        _spooler->log().msg( "Spooler erwartet Kommandos über UDP-Port " + as_string(_udp_port) );
+        _spooler->log().info( "Spooler erwartet Kommandos über UDP-Port " + as_string(_udp_port) );
     }
 
 
@@ -475,7 +475,7 @@ void Communication::bind()
         _tcp_port = _spooler->tcp_port();
         _rebound = true;
 
-        _spooler->log().msg( "Spooler erwartet Kommandos über TCP-Port " + as_string(_tcp_port) );
+        _spooler->log().info( "Spooler erwartet Kommandos über TCP-Port " + as_string(_tcp_port) );
     }
 }
 
@@ -517,7 +517,7 @@ bool Communication::handle_socket( Channel* channel )
             cp.set_host( &channel->_host );
             string cmd = channel->_text;
             channel->recv_clear();
-            channel->_log.msg( "Kommando " + cmd );
+            channel->_log.info( "Kommando " + cmd );
             channel->_text = cp.execute( cmd );
             if( cp._error )  channel->_log.error( cp._error->what() );
             ok = channel->do_send();
@@ -602,7 +602,7 @@ int Communication::run()
                         Command_processor cp = _spooler;
                         cp.set_host( &host );
                         string cmd ( buffer, len );
-                        _spooler->log().msg( "UDP-Nachricht von " + host.as_string() + ": " + cmd );
+                        _spooler->log().info( "UDP-Nachricht von " + host.as_string() + ": " + cmd );
                         cp.execute( cmd );
                     }
                 }

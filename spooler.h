@@ -1,4 +1,4 @@
-// $Id: spooler.h,v 1.63 2002/03/01 20:48:00 jz Exp $
+// $Id: spooler.h,v 1.64 2002/03/02 19:22:54 jz Exp $
 
 #ifndef __SPOOLER_H
 #define __SPOOLER_H
@@ -174,7 +174,7 @@ struct Spooler
   //void                        single_thread_step          ();
     void                        wait                        ();
 
-    void                        signal                      ( const string& signal_name = "" )  { _log.msg( "Signal " + signal_name ); _event.signal( signal_name ); }
+    void                        signal                      ( const string& signal_name = "" )  { _log.info( "Signal " + signal_name ); _event.signal( signal_name ); }
 
     Thread*                     thread_by_thread_id         ( Thread_id );
 
@@ -187,6 +187,7 @@ struct Spooler
     Log                        _log;
     Prefix_log                 _prefix_log;
     bool                       _debug;
+    int                        _log_level;
 
     CComPtr<Com_spooler>       _com_spooler;                // COM-Objekt spooler
     CComPtr<Com_log>           _com_log;                    // COM-Objekt spooler.log

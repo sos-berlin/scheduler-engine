@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- $Id: spooler.dtd,v 1.29 2002/03/01 20:48:00 jz Exp $   Joacim Zschimmer,  (C) 2000 SOS GmbH Berlin  -->
+<!-- $Id: spooler.dtd,v 1.30 2002/03/02 19:22:54 jz Exp $   Joacim Zschimmer,  (C) 2000 SOS GmbH Berlin  -->
 
 
 <!ELEMENT spooler               ( config+ | command | answer )>
@@ -62,14 +62,15 @@
 
 <!ELEMENT jobs                  ( job* )>
 
-<!ELEMENT job                   ( ( object_set | script | process ), run_time? )>
+<!ELEMENT job                   ( description?, ( object_set | script | process ), run_time? )>
 <!ATTLIST job                   name                CDATA #REQUIRED>    <!-- Über alle Threads eindeutiger Name -->
 <!ATTLIST job                   priority            CDATA '1'>          <!-- Höhere Zahl ist höhere Priorität -->
 <!ATTLIST job                   temporary           (yes|no) 'no'>      <!-- Der Job wird nach einem Lauf entfernt -->
 <!ATTLIST job                   output_level        CDATA #IMPLIED>     <!-- Stufennummer. Auf diese Stufe werden die Objekte der Objektemenge gesetzt -->
 <!ATTLIST job                   spooler_id          CDATA ''>           <!-- "": Job läuft auf jedem Spooler, sonst nur Spooler mit derselben Spooler-Id -->
 <!ATTLIST job                   title               CDATA ''>           <!-- Bezeichnung des Jobs -->
-<!ATTLIST job                   description         CDATA ''>           <!-- Beschreibung des Jobs -->
+
+<!ELEMENT description           ( #PCDATA )>                            <!-- Beschreibung des Jobs -->
 
 
 <!ELEMENT object_set            ( levels? )>
@@ -127,7 +128,7 @@
 <!ELEMENT command               ( show_state | modify_spooler | modify_job | add_jobs | signal_object )+ >
 
 <!ELEMENT show_state            EMPTY>                                  <!-- Liefert den Zustand des Spoolers -->
-<!ATTLIST show_state            all                 (yes|no) 'no'>
+<!ATTLIST show_state            what                (standard|all) 'standard'>     <!-- what="" ist wie what="standard", what="all" liefert <description> -->
                                                                         <!-- Antwort: <state> -->
 
 <!ELEMENT modify_spooler        EMPTY>

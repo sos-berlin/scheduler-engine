@@ -1,4 +1,4 @@
-// $Id: spooler_wait.cxx,v 1.26 2002/03/01 20:16:46 jz Exp $
+// $Id: spooler_wait.cxx,v 1.27 2002/03/02 19:22:56 jz Exp $
 /*
     Hier sind implementiert
 
@@ -295,7 +295,7 @@ int Wait_handles::wait_until( Time until )
         int    t = ceil( min( (double)sleep_time_ms, wait_time * 1000.0 ) );
 
         if( t <= 0 )  break;
-        if( again )  _log->msg( "Noch " + sos::as_string(wait_time) + "s warten ..." );
+        if( again )  _log->info( "Noch " + sos::as_string(wait_time) + "s warten ..." );
 
 #       ifdef DEBUGxxx
         {
@@ -322,7 +322,7 @@ int Wait_handles::wait_until( Time until )
             if( event )
             {
                 event->set_signal();
-                if( _spooler->_debug )  _log->msg( event->as_string() );
+                if( _spooler->_debug )  _log->debug( event->as_string() );
             }
 
             return index;

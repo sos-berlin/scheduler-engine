@@ -1,4 +1,4 @@
-// $Id: spooler_command.cxx,v 1.38 2002/03/01 14:38:09 jz Exp $
+// $Id: spooler_command.cxx,v 1.39 2002/03/02 19:22:55 jz Exp $
 /*
     Hier ist implementiert
 
@@ -101,8 +101,8 @@ xml::Element_ptr Command_processor::execute_show_state( const xml::Element_ptr& 
 {
     if( _security_level < Security::seclev_info )  throw_xc( "SPOOLER-121" );
 
-    string show_all_str = as_string( element->getAttribute( "all" ) );
-    bool show_all = show_all_str.empty()? false : as_bool( show_all_str );
+    string what = as_string( element->getAttribute( "what" ) );
+    bool show_all = what == "all";
 
     xml::Element_ptr state_element = _answer->createElement( "state" );
  

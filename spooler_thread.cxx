@@ -1,4 +1,4 @@
-// $Id: spooler_thread.cxx,v 1.21 2002/03/02 15:22:45 jz Exp $
+// $Id: spooler_thread.cxx,v 1.22 2002/03/02 19:22:56 jz Exp $
 /*
     Hier sind implementiert
 
@@ -276,7 +276,7 @@ void Thread::wait()
     }
 
     //if( !_wait_handles.empty() )  msg += " oder " + _wait_handles.as_string();
-    if( _spooler->_debug )  _log.msg( msg );
+    if( _spooler->_debug )  _log.debug( msg );
 
 
 #   ifdef SYSTEM_WIN
@@ -324,7 +324,7 @@ void Thread::remove_temporary_jobs()
         {
             if( (*it)->should_removed() )    
             {
-                if( _spooler->_debug )  (*it)->_log.msg( "Temporärer Job wird entfernt" );
+                if( _spooler->_debug )  (*it)->_log.debug( "Temporärer Job wird entfernt" );
                 (*it)->close(); 
                 it = _job_list.erase( it );
             }
@@ -436,7 +436,7 @@ void Thread::start_thread()
    _thread_handle = _beginthreadex( NULL, 0, thread, this, 0, &_thread_id );
    if( !_thread_handle )  throw_mswin_error( "CreateThread" );
 
-   _log.msg( "thread_id=0x" + as_hex_string( (int)_thread_id ) );
+   _log( "thread_id=0x" + as_hex_string( (int)_thread_id ) );
 }
 
 //------------------------------------------------------------------------------Thread::stop_thread

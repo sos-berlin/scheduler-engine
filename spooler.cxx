@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.76 2002/03/02 15:22:44 jz Exp $
+// $Id: spooler.cxx,v 1.77 2002/03/02 19:22:54 jz Exp $
 /*
     Hier sind implementiert
 
@@ -106,7 +106,8 @@ Spooler::Spooler()
     _wait_handles(this,&_prefix_log),
     _log(this),
     _script(this),
-    _script_instance(&_prefix_log)
+    _script_instance(&_prefix_log),
+    _log_level( log_info )
 {
     _com_log     = new Com_log( &_prefix_log );
     _com_spooler = new Com_spooler( this );
@@ -192,7 +193,7 @@ void Spooler::wait_until_threads_stopped( Time until )
         {
             Thread_list::iterator thread = _thread_list.begin();
             while( index-- > 0 )  thread++;
-            _log.msg( "Thread " + (*thread)->name() + " beendet" );
+            _log.info( "Thread " + (*thread)->name() + " beendet" );
 
             wait_handles.remove_handle( (*thread)->_thread_handle.handle() );
             THREAD_LOCK( _lock )  _thread_list.erase( thread );
@@ -207,7 +208,7 @@ void Spooler::wait_until_threads_stopped( Time until )
                 string msg = "Warten auf Thread " + (*it)->name() + " [" + thread_info_text( (*it)->_thread_handle.handle() ) + "]";
                 Job* job = (*it)->_current_job;
                 if( job )  msg += ", Job " + job->name() + " " + job->job_state();
-                _log.msg( msg );
+                _log.info( msg );
             }
         }
     }
@@ -316,7 +317,7 @@ void Spooler::set_state( State state )
 
     if( _state == state )  return;
 
-    _log.msg( state_name() );
+    _log.info( state_name() );
 
     _state = state;
     if( _state_changed_handler )  (*_state_changed_handler)( this, NULL );
@@ -343,12 +344,16 @@ void Spooler::load_arg()
 {
     assert( GetCurrentThreadId() == _thread_id );
 
+    string log_level = as_string( _log_level );
+
     _spooler_id       = read_profile_string( "factory.ini", "spooler", "id" );
     _config_filename  = read_profile_string( "factory.ini", "spooler", "config" );
     _log_directory    = read_profile_string( "factory.ini", "spooler", "log-dir" );        _log_directory_as_option_set = !_log_directory.empty();
     _include_path     = read_profile_string( "factory.ini", "spooler", "include-path" );   _include_path_as_option_set = !_include_path.empty();
     _spooler_param    = read_profile_string( "factory.ini", "spooler", "param" );          _spooler_param_as_option_set = !_spooler_param.empty();
-    _debug            = read_profile_bool  ( "factory.ini", "spooler", "debug", _debug );  
+    _debug            = read_profile_bool  ( "factory.ini", "spooler", "debug", _debug );  if( _debug )  log_level = "debug9";
+    log_level         = read_profile_string( "factory.ini", "spooler", "log-level", log_level );   
+
 
     try
     {
@@ -370,11 +375,36 @@ void Spooler::load_arg()
             else
             if( opt.with_value( "param"            ) )  _spooler_param = opt.value(),  _spooler_param_as_option_set = true;
             else
-            if( opt.flag      ( "debug"            ) )  _debug = opt.set();
+            if( opt.with_value( "log-level"        ) )  log_level = opt.value();
             else
                 throw_sos_option_error( opt );
         }
 
+        if( log_level == "error" )  _log_level = log_error;
+        else
+        if( log_level == "warn"  )  _log_level = log_warn;
+        else                     
+        if( log_level == "info"  )  _log_level = log_info;
+        else
+        if( log_level == "debug" )  _log_level = log_debug;
+        else
+        if( strncmp(log_level.c_str(),"debug",5) == 0 )
+        {
+            try {
+                _log_level = -as_uint( log_level.c_str() + 5 );
+            }
+            catch( const Xc& ) { throw_xc( "SPOOLER-133", log_level ); }
+        }
+        else
+        {
+            try {
+                _log_level = as_uint( log_level );
+            }
+            catch( const Xc& ) { throw_xc( "SPOOLER-133", log_level ); }
+        }
+
+        if( _log_level > log_error )  _log_level = log_error;
+        if( _log_level <= log_debug_spooler )  _debug = true;
         if( _config_filename.empty() )  throw_xc( "SPOOLER-115" );
     }
     catch( const Sos_option_error& )
@@ -382,12 +412,15 @@ void Spooler::load_arg()
         if( !_is_service )
         {
             cerr << "usage: " << _argv[0] << "\n"
+                    "       -cd=PATH\n"
                     "       -config=XMLFILE\n"
                     "       -service-\n"
                     "       -log=HOSTWARELOGFILENAME\n"
                     "       -log-dir=DIRECTORY|*stderr\n"
                     "       -id=ID\n"
-                    "       -param=PARAM\n";
+                    "       -param=PARAM\n"
+                    "       -include-path=PATH\n"
+                    "       -log-level=error|warn|info|debug|debug1|...|debug9\n";
         }
 
         throw;
@@ -401,7 +434,7 @@ void Spooler::load()
     assert( GetCurrentThreadId() == _thread_id );
 
     set_state( s_starting );
-    _log.msg( "Spooler::load " + _config_filename );
+    _log.info( "Spooler::load " + _config_filename );
 
     Command_processor cp = this;
 
@@ -618,7 +651,7 @@ int Spooler::launch( int argc, char** argv )
 
         } while( _state_cmd == sc_reload || _state_cmd == sc_load_config );
 
-        _log.msg( "Spooler ordentlich beendet." );
+        _log.info( "Spooler ordentlich beendet." );
 
         rc = 0;
     }

@@ -1,4 +1,4 @@
-// $Id: spooler_log.cxx,v 1.17 2002/03/08 15:27:22 jz Exp $
+// $Id: spooler_log.cxx,v 1.18 2002/03/02 19:22:55 jz Exp $
 
 #include "../kram/sos.h"
 #include "spooler.h"
@@ -38,7 +38,6 @@ Log::~Log()
 {
     Thread_semaphore::Guard guard = &_semaphore;
 
-    //if( _file  &&  _file != stderr )  fclose( _file ),  _file = NULL;
     if( _file != -1  &&  _file != fileno(stderr) )  close( _file ),  _file = -1;
 }
 
@@ -55,18 +54,16 @@ void Log::set_directory( const string& directory )
 
 //---------------------------------------------------------------------------------------Log::write
 
-void Log::write( const string& text )
+void Log::write( const char* text, int len, bool log )
 {
-    if( _file == -1 )  return;
+    if( len > 0  &&  text[len-1] == '\r' )  len--;
 
-    if( text.length() > 0 )
+    if( len > 0 )
     {
-        //int ret = fwrite( text.c_str(), text.length(), 1, _file );
-        //if( ret != 1 )  throw_errno( errno, "write" );
-        int ret = ::write( _file, text.c_str(), text.length() );
-        if( ret != text.length() )  throw_errno( errno, "write", _filename.c_str() );
+        int ret = ::write( _file, text, len );
+        if( ret != len )  throw_errno( errno, "write", _filename.c_str() );
 
-        LOG( text );
+        if( log && log_ptr )  log_ptr->write( text, len );
     }
 }
 
@@ -76,7 +73,6 @@ void Log::open_new( )
 {
     Thread_semaphore::Guard guard = &_semaphore;
 
-    //if( _file  &&  _file != stderr )  fclose( _file ),  _file = NULL;
     if( _file != -1  &&  _file != fileno(stderr) )  close( _file ),  _file = -1;
     _filename = "";
 
@@ -101,7 +97,6 @@ void Log::open_new( )
         filename += ".log";
 
         LOG( "\nopen " << filename << '\n' );
-        //_file = fopen( filename.c_str(), "w" );
         _file = open( filename.c_str(), O_CREAT | O_TRUNC | O_WRONLY  );
         if( _file == -1 )  throw_errno( errno, filename.c_str() );
 
@@ -111,29 +106,42 @@ void Log::open_new( )
 
 //-----------------------------------------------------------------------------------------Log::log
 
-void Log::log( Log_kind kind, const string& prefix, const string& line )
+void Log::log( Log_level level, const string& prefix, const string& line )
 {
+    if( level < _spooler->_log_level )  return;
+    if( _file == -1 )  return;
+
     Thread_semaphore::Guard guard = &_semaphore;
-    char buffer[100];
+    char buffer1[50];
+    char buffer2[50];
 
     string now = Time::now().as_string();
-    strcpy( buffer, now.c_str() );
+    strcpy( buffer1, now.c_str() );
 
-    switch( kind )
+    switch( level )
     {
-        case log_msg  : strcat( buffer, " msg   " );  break;
-        case log_warn : strcat( buffer, " WARN  " );  break;
-        case log_error: strcat( buffer, " ERROR " );  break;
-        default: ;
+      //case log_fatal: strcpy ( buffer, " [FATAL]  " );  break;
+        case log_error: strcpy ( buffer2, " [ERROR]  " );  break;
+        case log_warn : strcpy ( buffer2, " [WARN]   " );  break;
+        case log_info : strcpy ( buffer2, " [info]   " );  break;
+        case log_debug: strcpy ( buffer2, " [debug]  " );  break;
+        default:        sprintf( buffer2, " [debug%d] ", (int)-level );
     }
 
-    write( buffer );
-    if( !prefix.empty() )  write( "(" + prefix + ") " );
-    write( line );
-    if( line.length() == 0 || line[line.length()-1] != '\n' )  write( "\n" );
-    //fflush( _file );
+    int begin = 0;
+    while( begin < line.length() )
+    {
+        int nl = line.find( '\n', begin );  if( nl == string::npos )  nl = line.length();
 
-    //LOG( '\n' );
+        write( buffer1, strlen(buffer1), false );
+        write( buffer2, strlen(buffer2) );
+        if( !prefix.empty() )  write( "(" + prefix + ") " );
+
+        write( line.c_str() + begin, nl - begin );
+        begin = nl + 1;
+    }
+
+    if( line.length() == 0 || line[line.length()-1] != '\n' )  write( "\n" );
 }
 
 //----------------------------------------------------------------------------------Prefix_log::log
@@ -147,9 +155,9 @@ Prefix_log::Prefix_log( Log* log, const string& prefix )
 
 //----------------------------------------------------------------------------------Prefix_log::log
 
-void Prefix_log::log( Log_kind kind, const string& line )
+void Prefix_log::log( Log_level level, const string& line )
 {
-    _log->log( kind, _prefix, line );
+    _log->log( level, _prefix, line );
 }
 
 //----------------------------------------------------------------------------------Stdout_collector
