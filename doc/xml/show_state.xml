@@ -66,6 +66,12 @@
                         (<scheduler_element name="log" directory="xml/answer/"/>).
                     </dd>
                     
+                    <dt><code>task_history</code></dt>
+                    <dd>
+                        Liefert auch die Task-Historie
+                        (<scheduler_element name="task_history" directory="xml/answer/"/>).
+                    </dd>
+                    
                     <dt><code>standard</code></dt>
                     <dd>
                         Wie <code>what=""</code> (keine Auswahl).
@@ -85,6 +91,15 @@
             <description>
                 <p>
                     Begrenzt die Anzahl der Aufträge, die zurückgeliefert werden.
+                </p>
+            </description>
+        </xml_attribute>
+        
+        <xml_attribute name="max_task_history" type="zahl">
+            <!-- Text wird von anderen XML-Dokumenten mitbenutzt. Also allgemein halten! -->
+            <description>
+                <p>
+                    Begrenzt die Anzahl der Einträge in <scheduler_element name="history" directory="xml/answer/"/>.
                 </p>
             </description>
         </xml_attribute>

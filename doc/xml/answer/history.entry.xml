@@ -52,10 +52,33 @@
         
         <xml_attribute name="steps" type="zahl" title="Zahl der Jobschritte"/>
         <xml_attribute name="error" type="0|1" title="&quot;1&quot; bei einem Jobfehler"/>
-        <xml_attribute name="error_code" type="text" title="Fehlercode"/>
-        <xml_attribute name="error_text" type="text" title="Fehlercode mit Fehlertext"/>
+        
+        <xml_attribute name="error_code" type="text" title="Fehlercode">
+            <description>
+                <p>
+                    Innerhalb von <scheduler_element name="job" directory="xml/answer/"/> 
+                    wird anstelle dieses Attributs das Element 
+                    <scheduler_element name="ERROR" directory="xml/answer/"/> ausgegeben.
+                </p>
+            </description>
+        </xml_attribute>
+        
+        <xml_attribute name="error_text" type="text" title="Fehlercode mit Fehlertext">
+            <description>
+                <p>
+                    Innerhalb von <scheduler_element name="job" directory="xml/answer/"/> 
+                    wird anstelle dieses Attributs das Element 
+                    <scheduler_element name="ERROR" directory="xml/answer/"/> ausgegeben.
+                </p>
+            </description>
+        </xml_attribute>
+        
     </xml_attributes>
     
+    <xml_child_elements>
+        <xml_child_element name="ERROR"/>
+    </xml_child_elements>
+
     <description>
         <p>
             Die Histore wird aus der Datenbank gelesen.

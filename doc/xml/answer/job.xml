@@ -81,6 +81,7 @@
         <xml_child_element name="tasks"/>
         <xml_child_element name="description"/>
         <xml_child_element name="queued_tasks"/>
+        <xml_child_element name="history"/>
         <xml_child_element name="order_queue"/>
         <xml_child_element name="ERROR"/>
     </xml_child_elements>

@@ -1087,7 +1087,7 @@
         </xsl:if>        
         
         <xsl:if test="@my_show_card='task_history'">
-            <xsl:apply-templates select="task_history" mode="list"/>
+            <xsl:apply-templates select="history" mode="list"/>
         </xsl:if>            
         
         <xsl:if test="@my_show_card='order_queue'">
@@ -1283,9 +1283,9 @@
         
     </xsl:template>
         
-    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~task_history-->
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~history-->
 
-    <xsl:template match="task_history" mode="list">
+    <xsl:template match="history" mode="list">
         
         <table valign="top" cellpadding="0" cellspacing="0" width="100%" class="task">
 
@@ -1312,7 +1312,7 @@
             </thead>
             
 
-            <xsl:for-each select="task">
+            <xsl:for-each select="history.entry">
                 <tr>
                     <td><xsl:value-of select="@task"/></td>
                     <td><xsl:value-of select="@cause"/></td>

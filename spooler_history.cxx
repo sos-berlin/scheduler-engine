@@ -1216,7 +1216,7 @@ xml::Element_ptr Job_history::read_tail( const xml::Document_ptr& doc, int id, i
                 else
                     throw_xc( "SCHEDULER-136" );
 
-                history_element = doc.createElement( use_task_schema? "task_history" : "history" );
+                history_element = doc.createElement( "history" );
                 dom_append_nl( history_element );
 
                 const Record_type* type = sel.spec().field_type_ptr();
@@ -1227,7 +1227,7 @@ xml::Element_ptr Job_history::read_tail( const xml::Document_ptr& doc, int id, i
                     string           param_xml;
                     string           error_code;
                     string           error_text;
-                    xml::Element_ptr history_entry = doc.createElement( use_task_schema? "task" : "history.entry" );
+                    xml::Element_ptr history_entry = doc.createElement( "history.entry" );
 
                     sel.get( &rec );
         
