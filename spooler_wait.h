@@ -1,4 +1,4 @@
-// $Id: spooler_wait.h,v 1.33 2002/12/03 11:42:35 jz Exp $
+// $Id: spooler_wait.h,v 1.34 2002/12/03 12:54:46 jz Exp $
 
 #ifndef __SPOOLER_WAIT_H
 #define __SPOOLER_WAIT_H
