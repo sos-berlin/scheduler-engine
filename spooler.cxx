@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.242 2003/09/02 12:17:04 jz Exp $
+// $Id: spooler.cxx,v 1.243 2003/09/02 13:04:29 jz Exp $
 /*
     Hier sind implementiert
 
@@ -1674,10 +1674,15 @@ void Spooler::run()
                     //LOG( "Spooler _next_time nach 'nichts getan' = " << _next_time.as_string() << "\n" );
                 }
 
-                int AUF_1000_DURCHGAENGE_PRO_SEKUNDE_GEDROSSELT;
-                if( ++throttle_loop_count > 1000  &&  Time::now() < throttle_time + 1 )
+
+                int ___SPOOLER_IST_GEDROSSELT______SPOOLER_IST_GEDROSSELT______SPOOLER_IST_GEDROSSELT___;
+                if( ++throttle_loop_count > 100 )
                 {
-                    sos_sleep(1);
+                    if( Time::now() < throttle_time + 0.1 )
+                    {
+                        LOG( "Spooler wird gedrosselt ...\n" );
+                        sos_sleep(1);
+                    }
                     throttle_loop_count = 0;
                     throttle_time = Time::now();
                 }
@@ -1688,7 +1693,7 @@ void Spooler::run()
 //_next_time = min( _next_time, Time::now() + 1.0 );      // Wartezeit vorsichtshalber begrenzen
                     if( _debug )  
                     {
-                        if( wait_handles.wait(0) == -1 )  /*_log.debug( msg ),*/ wait_handles.wait_until( _next_time );     // Debug-Ausgabe der Wartezeit nur, wenn kein Ergebnis vorliegt
+                        if( wait_handles.wait(0) == -1 )  _log.debug9( msg ), wait_handles.wait_until( _next_time );     // Debug-Ausgabe der Wartezeit nur, wenn kein Ergebnis vorliegt
                     }
                     else
                     {

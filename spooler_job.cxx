@@ -1,4 +1,4 @@
-// $Id: spooler_job.cxx,v 1.18 2003/09/02 11:11:12 jz Exp $
+// $Id: spooler_job.cxx,v 1.19 2003/09/02 13:04:29 jz Exp $
 /*
     Hier sind implementiert
 
@@ -990,6 +990,8 @@ bool Job::do_something()
             set_next_start_time();
 
             task->attach_to_a_thread();
+
+            something_done = true;
         }
     }
 
