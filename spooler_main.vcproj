@@ -4,6 +4,7 @@
 	Version="7.10"
 	Name="spooler_main"
 	ProjectGUID="{779BB019-D71E-49F7-A9EE-3CFDB91158CA}"
+	RootNamespace="spooler_main"
 	Keyword="Win32Proj">
 	<Platforms>
 		<Platform
@@ -63,7 +64,7 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory="Release"
+			OutputDirectory="../bin"
 			IntermediateDirectory="Release"
 			ConfigurationType="1"
 			CharacterSet="2">
@@ -87,12 +88,12 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile="$(OutDir)/spooler_main.exe"
+				OutputFile="$(IntDir)/$(ProjectName).exe"
 				LinkIncremental="1"
 				GenerateDebugInformation="TRUE"
-				ProgramDatabaseFile="$(OutDir)/pdb/$(TargetName).map"
+				ProgramDatabaseFile="$(OutDir)/pdb/$(TargetName).pdb"
 				GenerateMapFile="TRUE"
-				MapFileName="$(IntDir)/$(TargetName).map"
+				MapFileName="$(OutDir)/pdb/$(TargetName).map"
 				SubSystem="1"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"

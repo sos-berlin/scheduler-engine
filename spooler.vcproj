@@ -14,7 +14,7 @@
 		<Configuration
 			Name="Release|Win32"
 			OutputDirectory="../bin"
-			IntermediateDirectory="./Release"
+			IntermediateDirectory="Release"
 			ConfigurationType="1"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="FALSE"
@@ -51,16 +51,17 @@ cd &quot;$(IntDir)&quot; &amp;&amp; jar cfm &quot;$(TargetDir)sos.spooler.jar&qu
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="../misc/lib/libctleasy.lib delayimp.lib ws2_32.lib version.lib odbc32.lib odbccp32.lib"
-				OutputFile="$(OutDir)\scheduler.exe"
+				OutputFile="$(OutDir)/scheduler.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
 				DelayLoadDLLs="winspool.drv,ws2_32.dll,ole32.dll,oleaut32.dll,advapi32.dll,odbc32.dll,libctleasy.dll"
-				ProgramDatabaseFile="$(OutDir)/pdb/$(TargetName).map"
+				ProgramDatabaseFile="$(OutDir)/pdb/$(TargetName).pdb"
 				GenerateMapFile="TRUE"
-				MapFileName="$(IntDir)/$(TargetName).map"
+				MapFileName="$(OutDir)/pdb/$(TargetName).map"
 				SubSystem="1"
 				OptimizeReferences="2"
 				OptimizeForWindows98="1"
+				ImportLibrary="$(IntDir)/$(TargetName).lib"
 				TargetMachine="1"/>
 			<Tool
 				Name="VCMIDLTool"
