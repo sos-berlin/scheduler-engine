@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.267 2004/12/07 09:57:55 jz Exp $
+// $Id: spooler_task.cxx,v 1.268 2004/12/07 14:02:39 jz Exp $
 /*
     Hier sind implementiert
 
@@ -1784,7 +1784,7 @@ ptr<Com_variable_set> Process_task::variable_set_from_environment()
     for( char** e = environ; *e; e++ )
     {
         const char* equal = strchr( *e, '=' );
-        if( equal )  result->set_var( string( *e, equal ), equal + 1 );
+        if( equal )  result->set_var( string( *e, equal - *e ), equal + 1 );
     }
 
     return result;
@@ -2089,25 +2089,14 @@ bool Process_task::do_begin__end()
 
             // Environment
 
-            ptr<Com_variable_set> v   = variable_set_from_environment();
-            char**                env = new char* [ v->_map.size() + 1 ];
-            i = 0;
-
-            Z_FOR_EACH( Com_variable_set::Map, v->_map, m )
+            Z_FOR_EACH( Com_variable_set::Map, _job->_process_environment->_map, m )
             {
-                string name  = string_from_bstr ( m->first );
-                string value = string_from_value( m->second );
-                char* env_string = new char[ name.length() + 1 + value.length() ];
-                strcpy( env_string, name.c_str() );
-                strcat( env_string, "=" );
-                strcat( env_string, value.c_str() );
-                env[ i++ ] = env_string;
+                setenv( string_from_bstr ( m->first ).c_str(), m->second->_value.as_string().c_str(), true );
             }
-            env[i] = NULL;
 
 
             Z_LOG( "execvp(\"" << _job->_process_filename << "\")\n" );
-            execve( _job->_process_filename.c_str(), args, env );
+            execvp( _job->_process_filename.c_str(), args );
 
             int e = errno;
             Z_LOG( "execvp()  errno-" << e << "  " << strerror(e) << "\n" );
