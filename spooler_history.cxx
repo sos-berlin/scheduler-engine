@@ -1,4 +1,4 @@
-// $Id: spooler_history.cxx,v 1.54 2003/09/24 14:41:00 jz Exp $
+// $Id: spooler_history.cxx,v 1.55 2003/09/24 15:39:57 jz Exp $
 
 #include "spooler.h"
 #include "../zschimmer/z_com.h"
@@ -977,18 +977,20 @@ xml::Element_ptr Job_history::read_tail( const xml::Document_ptr& doc, int id, i
                 else
                 if( _use_db )
                 {
-                    string prefix = ( next < 0? "-in -seq head -" : "-in -seq tail -reverse -" ) + as_string(max(1,abs(next))) + " | ";
+                  //string prefix = ( next < 0? "-in -seq head -" : "-in -seq tail -reverse -" ) + as_string(max(1,abs(next))) + " | ";
+                    string prefix = "-in -seq head -" + as_string(max(1,abs(next))) + " | ";
                     string clause = " where \"JOB_NAME\"=" + sql_quoted(_job_name);
                     
                     if( id != -1 )
                     {
                         clause += " and \"ID\"";
-                        clause += next<0? "<" : next>0? ">" : "=";
+                        clause += next < 0? "<" : 
+                                  next > 0? ">" 
+                                          : "=";
                         clause += as_string(id);
                     }
 
-                    clause += " order by \"ID\" ";
-                    if( next < 0 )  clause += " desc";
+                    clause += " order by \"ID\" ";  if( next < 0 )  clause += " desc";
                     
                     sel.open( prefix + _spooler->_db->_db_name + 
                               "select \"ID\", \"SPOOLER_ID\", \"JOB_NAME\", \"START_TIME\", \"END_TIME\", \"CAUSE\", \"STEPS\", \"ERROR\", \"ERROR_CODE\", \"ERROR_TEXT\" " +
