@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.123 2002/11/02 12:23:25 jz Exp $
+// $Id: spooler.cxx,v 1.124 2002/11/09 15:56:58 jz Exp $
 /*
     Hier sind implementiert
 
@@ -672,7 +672,16 @@ void Spooler::start()
 
     if( _has_java  ) 
     {
-        _java_vm.init();
+        try
+        {
+            _java_vm.init();
+        }
+        catch( const exception& x )
+        {
+            _log.error( x.what() );
+            _log.error( "Java kann nicht gestartet werden. Spooler startet ohne Java." );
+        }
+
         SetConsoleCtrlHandler( ctrl_c_handler, false );     // Ctrl-C-Handler von Java überschreiben (Suns Java beendet bei Ctrl-C den Prozess sofort)
         SetConsoleCtrlHandler( ctrl_c_handler, true );
     }

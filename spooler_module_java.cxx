@@ -1,4 +1,4 @@
-// $Id: spooler_module_java.cxx,v 1.10 2002/11/09 15:05:25 jz Exp $
+// $Id: spooler_module_java.cxx,v 1.11 2002/11/09 15:56:59 jz Exp $
 /*
     Hier sind implementiert
 
@@ -489,9 +489,9 @@ void Java_vm::get_options( const string& options )
 
 void Java_vm::init()
 {
-    if( _vm )  return;
-
     java_vm = this;
+
+    if( _vm )  return;
 
     _log.set_prefix( "Java" );
 
@@ -506,6 +506,8 @@ void Java_vm::init()
     
     if( _filename == "" )  throw_xc( "SPOOLER-170" );
 
+    string module_filename = _filename;
+
 #   ifdef SYSTEM_WIN
     {    
         // Der Name des VM-Moduls steht vielleicht in der Registrierung unter
@@ -518,6 +520,9 @@ void Java_vm::init()
         LOG( "LoadLibrary " << _filename << '\n' );
         HINSTANCE vm_module = LoadLibrary( _filename.c_str() );
         if( !vm_module )  throw_mswin_error( "LoadLibrary", "Java Virtual Machine " + _filename );
+
+        module_filename = filename_of_hinstance( vm_module );
+        LOG( "HINSTANCE=" << (void*)vm_module << "  " << module_filename << "  " << file_version_info( module_filename ) << '\n' );
 
         JNI_GetDefaultJavaVMInitArgs = (JNI_GetDefaultJavaVMInitArgs_func*)GetProcAddress( vm_module, "JNI_GetDefaultJavaVMInitArgs" );
         if( !JNI_GetDefaultJavaVMInitArgs )  throw_mswin_error( "GetProcAddress", "JNI_GetDefaultJavaVMInitArgs" );
@@ -601,40 +606,46 @@ void Java_vm::init()
 */
     _thread_data->_env._java_vm = this;
 
+    _thread_data->_env._jenv = NULL;
+
     ret = JNI_CreateJavaVM( &_vm, &_thread_data->_env._jenv, &_vm_args );
-    if( ret < 0 )  throw_java( ret, "JNI_CreateJavaVM" );
+    if( ret < 0 )  throw_java( ret, "JNI_CreateJavaVM", module_filename );
 
     JNIEnv* jenv = env();
 
     int version = jenv->GetVersion();
-    LOG( "Java JNI " << ( version >> 16 ) << "." << ( version & 0xFFFF ) << " geladen\n" );
+    _log( "JNI " + as_string( version >> 16 ) + "." + as_string( version & 0xFFFF ) + " " + module_filename + " geladen" );
 
     _idispatch_jclass = jenv->FindClass( JAVA_IDISPATCH_CLASS );
-    if( jenv->ExceptionOccurred() )  throw_java( 0, "FindClass", JAVA_IDISPATCH_CLASS );
+    if( jenv->ExceptionOccurred() )  throw_java( 0, "FindClass " JAVA_IDISPATCH_CLASS, module_filename );
 
     ret = env()->RegisterNatives( _idispatch_jclass, native_methods, NO_OF( native_methods ) );
-    if( ret < 0 )  throw_java( ret, "RegisterNatives" );
+    if( ret < 0 )  throw_java( ret, "RegisterNatives", module_filename );
 }
 
 //-----------------------------------------------------------------------------------Java_vm::close
 
 void Java_vm::close()
 {
-    java_vm = NULL;
+    if( _vm )  
+    {
+        LOG( "DestroyJavaVM()\n" );
 
+        int ret = _vm->DestroyJavaVM();
+        if( ret < 0 )  _log.error( "DestroyJavaVM() liefert " + as_string(ret) + ". Java lässt sich nicht entladen" );
+                 else  _vm = NULL;
+    }
+
+    _options.clear();
     delete _vm_args.options;  _vm_args.options = NULL;
-
-    if( !_vm )  return;
-
-    int ret = _vm->DestroyJavaVM();
-    if( ret < 0 )  _log.error( "DestroyJavaVM() liefert " + as_string(ret) + ". Java lässt sich nicht entladen" );
-    _vm = NULL;
 }
 
 //---------------------------------------------------------------------------Java_vm::attach_thread
 
 void Java_vm::attach_thread( const string& thread_name )
 {
+    if( !_vm )  return;
+
     string           java_thread_name = "Spooler " + thread_name;
     JavaVMAttachArgs args;
 
@@ -643,6 +654,8 @@ void Java_vm::attach_thread( const string& thread_name )
     args.name    = (char*)java_thread_name.c_str();
 
     _thread_data->_env._java_vm = this;
+
+    _thread_data->_env._jenv = NULL;
 
     int ret = _vm->AttachCurrentThread( (void**)&_thread_data->_env._jenv, &args ); 
     if( ret < 0 )  throw_java( ret, "AttachCurrentThread" );
@@ -681,7 +694,7 @@ Java_env& Java_vm::env()
 void Java_vm::throw_java( int return_value, const string& text1, const string& text2 )
 {
     string ret_text;
-    string java_text = "(java)";
+    string java_text = "java";
 
     JNIEnv* env = _thread_data->_env;
     if( env )
@@ -690,7 +703,6 @@ void Java_vm::throw_java( int return_value, const string& text1, const string& t
         if( x )
         {
             env->ExceptionClear();
-            //bool text_gotten = false;
 
             jclass c = env->GetObjectClass(x);
             if( c ) 
@@ -699,11 +711,8 @@ void Java_vm::throw_java( int return_value, const string& text1, const string& t
                 if( get_message_id )
                 {
                     java_text = string_from_jstring( env, (jstring)env->CallObjectMethod( x, get_message_id ) );
-                    //text_gotten = true;
                 }
             }
-    
-            //if( !text_gotten )  env->ExceptionDescribe();
         }
     }
 
@@ -899,7 +908,11 @@ void Java_module_instance::init()
     Module_instance::init();
 
     _java_vm = &_module->_spooler->_java_vm;
-    _env     = &_java_vm->env();
+
+    if( !_java_vm->_vm )  throw_xc( "SPOOLER-177" );
+
+
+    _env = &_java_vm->env();
 
     if( !_module->_java_class )
     {
