@@ -1,4 +1,4 @@
-// $Id: scheduler.js,v 1.15 2004/08/02 14:14:59 jz Exp $
+// $Id: scheduler.js,v 1.16 2004/08/12 08:48:50 jz Exp $
 
 //----------------------------------------------------------------------------------------------var
 
@@ -206,6 +206,15 @@ function Scheduler_html_configuration( url )
     if( !ok )  throw new Error( "Fehler in der Konfiguration " + url + ": " + this._dom.parseError.reason );
 }
 */
+//----------------------------------------------------------------show_order_jobs_checkbox__onclick
+
+function show_order_jobs_checkbox__onclick()
+{
+    save_checkbox_state( event.srcElement.id );
+    window.parent.left_frame.reset_error();
+    update();
+}
+
 //---------------------------------------------------------------------show_tasks_checkbox__onclick
 
 function show_tasks_checkbox__onclick()

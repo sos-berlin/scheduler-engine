@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding="utf-8"?>
-<!-- $Id: scheduler.xslt,v 1.1 2004/08/02 14:14:59 jz Exp $ -->
+<!-- $Id: scheduler.xslt,v 1.2 2004/08/12 08:48:50 jz Exp $ -->
 <xsl:stylesheet xmlns:xsl   = "http://www.w3.org/1999/XSL/Transform" 
                 xmlns:msxsl = "urn:schemas-microsoft-com:xslt"
                 xmlns:my    = "http://sos-berlin.com/scheduler/mynamespace"
@@ -68,7 +68,7 @@
         <xsl:param name="class"/>
 
         <xsl:element name="span">
-            <xsl:attribute name="style"       >cursor: hand                                   </xsl:attribute>
+            <xsl:attribute name="style"       >cursor: hand; text-decoration: underline       </xsl:attribute>
             <xsl:attribute name="onmouseover" >this.className='hover'                         </xsl:attribute>
             <xsl:attribute name="onmouseout"  >this.className=''                              </xsl:attribute>
             <xsl:attribute name="onclick"     >show_card( '<xsl:value-of select="$name"/>' )  </xsl:attribute>
@@ -169,6 +169,18 @@
                 <!--b>Jobs</b>
                 &#160;-->
 
+                <!-- Checkbox für Show order jobs -->                    
+                <xsl:element name="input">
+                    <xsl:attribute name="id"     >show_order_jobs_checkbox</xsl:attribute>
+                    <xsl:attribute name="type"   >checkbox</xsl:attribute>
+                    <xsl:attribute name="onclick">show_order_jobs_checkbox__onclick()</xsl:attribute>
+                    <xsl:if test="/spooler/@show_order_jobs_checkbox">
+                        <xsl:attribute name="checked">checked</xsl:attribute>
+                    </xsl:if>
+                </xsl:element>
+                <label for="show_order_jobs_checkbox">Show order jobs</label>
+                &#160;
+                
                 <!-- Checkbox für Show tasks -->                    
                 <xsl:element name="input">
                     <xsl:attribute name="id"     >show_tasks_checkbox</xsl:attribute>
@@ -200,7 +212,7 @@
             </thead>
             
             <tbody>
-                <xsl:for-each select="job">
+                <xsl:for-each select="job [ /spooler/@show_order_jobs_checkbox or @order='yes' ]">  
                 
                     <xsl:element name="tr">
                         <xsl:attribute name="id"         >scheduler_tr_job_<xsl:value-of select="@job"/></xsl:attribute>
