@@ -1,6 +1,8 @@
-// $Id: spooler.h,v 1.5 2001/01/03 11:28:21 jz Exp $
+// $Id: spooler.h,v 1.6 2001/01/03 22:15:31 jz Exp $
 
 #ifndef __SPOOLER_H
+
+#include "../kram/olestd.h"
 
 #ifdef SYSTEM_WIN
 #   import <msxml3.dll> rename_namespace("xml")
@@ -27,10 +29,20 @@
 #include <time.h>
 
 #include "../kram/sosdate.h"
+#include "../kram/sossock1.h"
 
 #define FOR_EACH( TYPE, CONTAINER, ITERATOR )  for( TYPE::iterator ITERATOR = CONTAINER.begin(); ITERATOR != CONTAINER.end(); ITERATOR++ )
 
 namespace sos {
+
+
+
+typedef _bstr_t Dom_string;
+
+inline Dom_string               as_dom_string           ( const string& str )                       { return as_bstr_t( str ); }
+inline Dom_string               as_dom_string           ( const char* str )                         { return as_bstr_t( str ); }
+
+
 namespace spooler {
 
 using namespace std;
@@ -186,12 +198,12 @@ struct Start_time
     Time                       _next_start_time;
 };
 
-//----------------------------------------------------------------------------------------Job_descr
+//---------------------------------------------------------------------------------------------Job
 
-struct Job_descr : Sos_self_deleting
+struct Job : Sos_self_deleting
 {
-                                Job_descr                   ()                     : _zero_(this+1) {}
-                                Job_descr                   ( xml::Element_ptr );
+                                Job                         ()                     : _zero_(this+1) {}
+                                Job                         ( xml::Element_ptr );
 
 
     Fill_zero                  _zero_;
@@ -207,13 +219,13 @@ struct Job_descr : Sos_self_deleting
     int                        _priority;
 };
 
-typedef list< Sos_ptr<Job_descr> >    Job_descr_list;
+typedef list< Sos_ptr<Job> >    Job_list;
 
-//----------------------------------------------------------------------------------------------Job
+//----------------------------------------------------------------------------------------------Task
 
-struct Job : Sos_self_deleting
+struct Task : Sos_self_deleting
 {
-                                Job                         ( Spooler* spooler, const Sos_ptr<Job_descr>& descr );
+                                Task                        ( Spooler*, const Sos_ptr<Job>& );
 
     void                        start                       ();
     void                        end                         ();
@@ -224,35 +236,67 @@ struct Job : Sos_self_deleting
 
     Fill_zero                  _zero_;
     Spooler*                   _spooler;
-    Sos_ptr<Job_descr>         _job_descr;
+    Sos_ptr<Job>               _job;
     bool                       _running;
     Time                       _running_since;
     int                        _running_priority;
+    int                        _step_count;
 
     Sos_ptr<Object_set>        _object_set;
     Time                       _next_start_time;            // Zeitpunkt des nächsten Startversuchs, nachdem Objektemenge leer war
     Time                       _next_end_time;              // + _start_time._duration
 };
 
-typedef list< Sos_ptr<Job> >    Job_list;
+typedef list< Sos_ptr<Task> >   Task_list;
 
-//------------------------------------------------------------------------------------Communication
+//----------------------------------------------------------------------------Communication_channel
 
-struct Communication
+struct Communication_channel
 {
+                                Communication_channel       ( Spooler* );
+                               ~Communication_channel       ();
+
+    void                        start_thread                ();
+
+    int                         run                         ();
+    void                        wait_for_connection         ();
+    string                      recv_xml                    ();
+    void                        send_text                   ( const string& );
+
+
+    Fill_zero                  _zero_;
+    Spooler*                   _spooler;
+    SOCKET                     _listen_socket;
+    SOCKET                     _socket;
+    HANDLE                     _thread;
+};
+
+//--------------------------------------------------------------------------------Command_processor
+
+struct Command_processor
+{
+                                Command_processor           ( Spooler* spooler )                    : _spooler(spooler) {}
+
+    string                      execute                     ( const string& xml_text );
+    xml::Element_ptr            execute_command             ( xml::Element_ptr );
+    xml::Element_ptr            execute_show_state          ();
+    xml::Element_ptr            execute_show_tasks          ();
+
+    Spooler*                   _spooler;
+    xml::Document_ptr          _answer;
 };
 
 //------------------------------------------------------------------------------------------Spooler
 
 struct Spooler
 {
-                                Spooler                     () : _zero_(this+1) {}
+                                Spooler                     () : _zero_(this+1), _comm_channel(this), _command_processor(this) {}
 
     void                        load                        ();
     void                        load_xml                    ();
 
     void                        load_object_set_classes_from_xml( Object_set_class_list*, xml::Element_ptr );
-    void                        load_jobs_from_xml          ( Job_descr_list*, xml::Element_ptr );
+    void                        load_jobs_from_xml          ( Job_list*, xml::Element_ptr );
 
     void                        start                       ();       
     void                        run                         ();
@@ -263,10 +307,13 @@ struct Spooler
 
     Fill_zero                  _zero_;
     Object_set_class_list      _object_set_class_list;
-    Job_descr_list             _job_descr_list;
     Job_list                   _job_list;
+    Task_list                  _task_list;
     Time                       _try_start_job_period;
     int                        _running_jobs_count;
+    Communication_channel      _comm_channel;
+    Command_processor          _command_processor;
+    Time                       _spooler_start_time;
 };
 
 

@@ -1,12 +1,14 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- $Id: spooler_config.dtd,v 1.4 2001/01/03 11:28:21 jz Exp $   (C) 2000 SOS GmbH Berlin 
+<!-- $Id: spooler_config.dtd,v 1.5 2001/01/03 22:15:31 jz Exp $   (C) 2000 SOS GmbH Berlin 
 
      Konfiguration für den Spooler. 
      
 -->
 
 
-<!ELEMENT spooler_config        ( try_start_job_period?, object_set_classes, jobs? ) >
+<!-- KONFIGURATION DES SPOOLERS -->
+
+<!ELEMENT spooler.config        ( try_start_job_period?, object_set_classes, jobs? ) >
 
 
 <!ELEMENT try_start_job_period  ( #PCDATA ) >   <!-- Sekunden -->
@@ -33,24 +35,30 @@
 
 <!ELEMENT jobs                  ( job+ ) >
 
-<!ELEMENT job                   ( object_set, output_level, priority?, start_time?, stop_after_error?, rerun?, start_after_spooler? ) >
+<!ELEMENT job                   ( object_set, 
+                                  job.output_level, 
+                                  job.priority?, 
+                                  job.start_time?, 
+                                  job.stop_after_error?, 
+                                  job.rerun?, 
+                                  job.start_after_spooler? ) >
 <!ATTLIST job                   name CDATA #REQUIRED >
 
-<!ELEMENT object_set            ( object_set_class.name, levels? ) >
+<!ELEMENT object_set            ( object_set_class.name, job.levels? ) >
 
 <!ELEMENT object_set_class.name ( #PCDATA ) >
 
-<!ELEMENT output_level          ( level ) >
+<!ELEMENT job.output_level      ( level ) >
 
-<!ELEMENT levels                ( low_level, high_level ) >     <!-- low_level <= level < high_level -->
+<!ELEMENT job.levels            ( low_level, high_level ) >     <!-- low_level <= level < high_level -->
 
 <!ELEMENT low_level             ( level ) >
 
 <!ELEMENT high_level            ( level ) >  
 
-<!ELEMENT priority              ( #PCDATA ) >
+<!ELEMENT job.priority          ( #PCDATA ) >
 
-<!ELEMENT start_time            ( time, date*, weekdays?, monthdays?, ultimos?, holiday*, duration?, period? ) >
+<!ELEMENT job.start_time        ( time, date*, weekdays?, monthdays?, ultimos?, holiday*, duration?, period? ) >
 
 <!ELEMENT time                  ( #PCDATA ) >   <!-- HH:MM:SS -->
 
@@ -72,3 +80,45 @@
                                   
 <!ELEMENT start_after_spooler   EMPTY >         <!-- Den Job auch nach verspäteten Start des Spoolers starten -->
 
+
+
+
+<!-- KOMMANDOS -->
+
+<!ELEMENT spooler.command       ( show_state ) >
+
+<!ELEMENT show_state            EMPTY >
+
+
+
+
+<!-- ANTWORTEN AUF DIE KOMMANDOS -->
+
+<!ELEMENT spooler.answer        ( state | COMMAND_ERROR ) >
+
+<!ELEMENT state                 ( state_time, spooler_start_time, spooler_log_filename, tasks ) >
+
+<!ELEMENT state_time            ( #PCDATA ) >   <!-- yyyy-mm-dd HH:MM:SS -->
+
+<!ELEMENT spooler_start_time    ( #PCDATA ) >   <!-- yyyy-mm-dd HH:MM:SS -->
+
+<!ELEMENT spooler_log_filename  ( #PCDATA ) >
+
+<!ELEMENT tasks                 ( task+ ) >
+
+<!ELEMENT task                  ( job, 
+                                  job.name, 
+                                  task.running_since, 
+                                  task_next_start_time,
+                                  task.steps ) >
+
+<!ELEMENT job.name              ( #PCDATA ) >
+
+<!ELEMENT task.steps            ( #PCDATA ) >   <!-- Anzahl der bisher ausgeführten Jobschritte -->
+
+<!ELEMENT task.running_since    ( #PCDATA ) >   <!-- yyyy-mm-dd HH:MM:SS -->
+
+<!ELEMENT task.next_start_time  ( #PCDATA ) >   <!-- yyyy-mm-dd HH:MM:SS -->
+
+
+<!ELEMENT COMMAND_ERROR         ( #PCDATA ) >

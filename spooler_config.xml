@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 
-<!-- $Id: spooler_config.xml,v 1.4 2001/01/03 11:28:21 jz Exp $   (C) 2000 SOS GmbH Berlin -->
+<!-- $Id: spooler_config.xml,v 1.5 2001/01/03 22:15:31 jz Exp $   (C) 2000 SOS GmbH Berlin -->
 
-<!DOCTYPE spooler_config SYSTEM "spooler_config.dtd">
+<!DOCTYPE spooler.config SYSTEM "spooler_config.dtd">
 
-<spooler_config>
+<spooler.config>
 
     <try_start_job_period>5</try_start_job_period>
 
@@ -129,13 +129,13 @@ end function
         <job name="Aufbereiten">
             <object_set>
                 <object_set_class.name>Dokumente</object_set_class.name>
-                <levels>
+                <job.levels>
                     <low_level><level>100</level></low_level>
                     <high_level><level>200</level></high_level>
-                </levels>
+                </job.levels>
             </object_set>
-            <output_level><level>200</level></output_level>
-            <start_time>
+            <job.output_level><level>200</level></job.output_level>
+            <job.start_time>
                 <time>14:56:55</time>
                 <date>2001-01-02</date>
                 <date>2001-01-09</date>
@@ -155,8 +155,8 @@ end function
                 <holiday>2001-01-03</holiday>
                 <duration>3600</duration>
                 <period>86400</period>
-            </start_time>
+            </job.start_time>
         </job>
     </jobs>
 
-</spooler_config>
+</spooler.config>

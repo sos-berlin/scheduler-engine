@@ -1,9 +1,18 @@
-// $Id: spooler.cxx,v 1.5 2001/01/03 11:28:21 jz Exp $
+// $Id: spooler.cxx,v 1.6 2001/01/03 22:15:30 jz Exp $
 
-//#include <precomp.h>
+
+
+
+/*
+    WAS FEHLT?
+
+    Listen etc. sperren bei execute()
+
+*/
 
 #include "../kram/sos.h"
 #include "../kram/sleep.h"
+#include "../file/anyfile.h"
 #include "spooler.h"
 
 
@@ -193,30 +202,32 @@ Time Start_time::next( Time tim_par )
     return _next_start_time;
 }
 
-//-----------------------------------------------------------------------------------------Job::Job
+//-----------------------------------------------------------------------------------------Task::Task
 
-Job::Job( Spooler* spooler, const Sos_ptr<Job_descr>& descr )    
+Task::Task( Spooler* spooler, const Sos_ptr<Job>& descr )    
 : 
     _zero_(this+1), 
     _spooler(spooler), 
-    _job_descr(descr) 
+    _job(descr) 
 {
     set_new_start_time();
 }
 
-//--------------------------------------------------------------------------Job::set_new_start_time
+//--------------------------------------------------------------------------Task::set_new_start_time
 
-void Job::set_new_start_time()
+void Task::set_new_start_time()
 {
-    _next_start_time = _job_descr->_start_time.next();
-    _next_end_time   = _next_start_time + _job_descr->_start_time._duration;
+    _next_start_time = _job->_start_time.next();
+    _next_end_time   = _next_start_time + _job->_start_time._duration;
 }
 
-//---------------------------------------------------------------------------------------Job::start
+//---------------------------------------------------------------------------------------Task::start
 
-void Job::start()
+void Task::start()
 {
-    _object_set = SOS_NEW( Object_set( &_job_descr->_object_set_descr ) );
+    _running_since = now();
+
+    _object_set = SOS_NEW( Object_set( &_job->_object_set_descr ) );
     _object_set->open();
 
     _next_start_time = max( _next_start_time + _spooler->_try_start_job_period, now() );
@@ -225,24 +236,26 @@ void Job::start()
     _running = true;
 }
 
-//-----------------------------------------------------------------------------------------Job::end
+//-----------------------------------------------------------------------------------------Task::end
 
-void Job::end()
+void Task::end()
 {
     _object_set->close();
 
     _running = false;
 }
 
-//----------------------------------------------------------------------------------------Job::step
+//----------------------------------------------------------------------------------------Task::step
 
-bool Job::step()
+bool Task::step()
 {
     Spooler_object object = _object_set->get();
 
     if( object.is_null() )  return false;
     
-    object.process( _job_descr->_output_level );
+    object.process( _job->_output_level );
+
+    _step_count++;
 
     return true;
 }
@@ -253,15 +266,15 @@ bool Spooler::step()
 {
     bool something_done = false;
 
-    FOR_EACH( Job_list, _job_list, it )
+    FOR_EACH( Task_list, _task_list, it )
     {
-        Job* job = *it;
+        Task* task = *it;
 
-        if( !job->_running )
+        if( !task->_running )
         {
-            if( now() >= job->_next_start_time )
+            if( now() >= task->_next_start_time )
             {
-                job->start();
+                task->start();
 
                 _running_jobs_count++;
                 something_done = true;
@@ -269,14 +282,14 @@ bool Spooler::step()
         }
         else
         {
-            bool ok = job->step();
+            bool ok = task->step();
             if( ok ) 
             {
                 something_done = true;
             }
             else
             {
-                job->end();
+                task->end();
                 _running_jobs_count--;
             }
         }
@@ -300,12 +313,16 @@ void Spooler::load()
 
 void Spooler::start()
 {
-    FOR_EACH( Job_descr_list, _job_descr_list, it )
+    FOR_EACH( Job_list, _job_list, it )
     {
-        Sos_ptr<Job> job = SOS_NEW( Job( this, *it ) );
+        Sos_ptr<Task> task = SOS_NEW( Task( this, *it ) );
 
-        _job_list.push_back( job );
+        _task_list.push_back( task );
     }
+
+    _spooler_start_time = now();
+
+    _comm_channel.start_thread();
 }
 
 //------------------------------------------------------------------------------------Spooler::wait
@@ -317,7 +334,7 @@ void Spooler::wait()
     if( _running_jobs_count == 0 )
     {
         Time next_start_time = latter_day;
-        FOR_EACH( Job_list, _job_list, it )  if( next_start_time > (*it)->_next_start_time )  next_start_time = (*it)->_next_start_time;
+        FOR_EACH( Task_list, _task_list, it )  if( next_start_time > (*it)->_next_start_time )  next_start_time = (*it)->_next_start_time;
 
         Time diff = next_start_time - now();
         if( diff > 0 ) 
@@ -339,6 +356,136 @@ void Spooler::run()
         step();
         wait();
     }
+}
+
+//--------------------------------------------------------------------------dom_append_text_element
+
+void dom_append_text_element( xml::Element_ptr element, const char* element_name, const string& text )
+{
+    xml::Document_ptr doc       = element->ownerDocument;
+    xml::Node_ptr     text_node = doc->createTextNode( as_dom_string( text ) );
+    xml::Element_ptr  e         = element->appendChild( doc->createElement( element_name ) );
+
+    e->appendChild( text_node );
+}
+
+//------------------------------------------------------------Command_processor::execute_show_tasks
+
+xml::Element_ptr Command_processor::execute_show_tasks()
+{
+    xml::Element_ptr tasks = _answer->createElement( "tasks" );
+
+    FOR_EACH( Task_list, _spooler->_task_list, it )
+    {
+        Task* task = *it;
+        xml::Element_ptr task_element = _answer->createElement( "task" );
+
+        dom_append_text_element( task_element, "job.name", task->_job->_name );
+
+        if( task->_running_since )
+            dom_append_text_element( task_element, "task.running_since", Sos_optional_date_time( task->_running_since ).as_string() );
+
+        dom_append_text_element( task_element, "task.next_start_time", Sos_optional_date_time( task->_next_start_time ).as_string() );
+        dom_append_text_element( task_element, "task.steps", as_string( task->_step_count ) );
+        tasks->appendChild( task_element );
+    }
+
+    return tasks;
+}
+
+//------------------------------------------------------------Command_processor::execute_show_state
+
+xml::Element_ptr Command_processor::execute_show_state()
+{
+    xml::Element_ptr state = _answer->createElement( "state" );
+ 
+    dom_append_text_element( state, "state_time", Sos_optional_date_time::now().as_string() );
+    dom_append_text_element( state, "spooler_start_time", Sos_optional_date_time( _spooler->_spooler_start_time ).as_string() );
+    
+    state->appendChild( execute_show_tasks() );
+
+    return state;
+}
+
+//---------------------------------------------------------------Command_processor::execute_command
+
+xml::Element_ptr Command_processor::execute_command( xml::Element_ptr element )
+{
+    if( element->tagName == "show_state" )  
+    {
+        return execute_show_state();
+    }
+    else
+    {
+        throw_xc( "SOS-1425", as_string( element->tagName ) ); return NULL;
+    }
+}
+
+//------------------------------------------------------------------------Command_processor::execute
+
+string Command_processor::execute( const string& xml_text )
+{
+    _answer = xml::Document_ptr( __uuidof(xml::DOMDocument30), NULL );
+
+    _answer->appendChild( _answer->createProcessingInstruction( "xml", "version=\"1.0\" encoding=\"iso-8859-1\"" ) );
+
+    xml::Element_ptr spooler_answer = _answer->appendChild( _answer->createElement( "spooler.answer" ) );
+
+    try 
+    {
+        try 
+        {
+
+            xml::Document_ptr command_doc ( __uuidof(xml::DOMDocument30), NULL );
+
+
+            int ok = command_doc->loadXML( as_dom_string( xml_text ) );
+            if( !ok ) // DOPPELT DOPPELT DOPPELT DOPPELT
+            {
+                xml::IXMLDOMParseErrorPtr error = command_doc->GetparseError();
+
+                string text = w_as_string( error->reason );
+                if( text[ text.length()-1 ] == '\n' )  text = as_string( text.c_str(), text.length() - 1 );
+                if( text[ text.length()-1 ] == '\r' )  text = as_string( text.c_str(), text.length() - 1 );
+
+                text += ", code="   + as_hex_string( error->errorCode );
+                text += ", line="   + as_string( error->line );
+                text += ", column=" + as_string( error->linepos );
+
+                throw_xc( "XML-ERROR", text );
+            }
+
+
+            xml::Element_ptr e = command_doc->documentElement;
+
+            if( e->tagName == "spooler.command" )
+            {
+                xml::NodeList_ptr node_list = e->childNodes;
+
+                for( int i = 0; i < node_list->length; i++ )
+                {
+                    xml::Node_ptr node = node_list->Getitem(i);
+
+                    spooler_answer->appendChild( execute_command( node ) );
+                }
+            }
+            else
+            {
+                spooler_answer->appendChild( execute_command( e ) );
+            }
+        }
+        catch( const _com_error& com_error ) { throw_com_error(com_error); return NULL; }
+    }
+    catch( const Xc& x )
+    {
+        xml::Element_ptr e = _answer->createElement( "COMMAND_ERROR" );
+        e->appendChild( _answer->createTextNode( as_dom_string( x.what() ) ) );
+        spooler_answer->appendChild( e );
+    }
+
+    _answer->save( "c:/tmp/~spooler.xml" );
+    _answer = NULL;
+    return file_as_string( "c:/tmp/~spooler.xml" );
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -365,4 +512,7 @@ int sos_main( int argc, char** argv )
 }
 
 
-}// namespace sos
+} //namespace sos
+
+
+// <?xml version="1.0"?><spooler.command><show_state/></spooler.command>

@@ -1,4 +1,4 @@
-// $Id: spooler_xml.cxx,v 1.5 2001/01/03 11:28:21 jz Exp $
+// $Id: spooler_xml.cxx,v 1.6 2001/01/03 22:15:31 jz Exp $
 
 //#include <precomp.h>
 
@@ -13,14 +13,7 @@ namespace sos {
 namespace spooler {
 
 
-//-------------------------------------------------------------------------------------------------
-
-typedef _bstr_t Dom_string;
-
-inline Dom_string               as_dom_string           ( const string& str )                       { return as_bstr_t( str ); }
-inline Dom_string               as_dom_string           ( const char* str )                         { return as_bstr_t( str ); }
-
-//----------------------------------------------------------------------------------single_element
+//-----------------------------------------------------------------------------------single_element
 
 xml::Element_ptr optional_single_element( xml::Element_ptr element, const string& name )
 {
@@ -33,7 +26,7 @@ xml::Element_ptr optional_single_element( xml::Element_ptr element, const string
     return list->Getitem(0);
 }
 
-//----------------------------------------------------------------------------------single_element
+//-----------------------------------------------------------------------------------single_element
 
 xml::Element_ptr single_element( xml::Element_ptr element, const string& name )
 {
@@ -43,7 +36,7 @@ xml::Element_ptr single_element( xml::Element_ptr element, const string& name )
     return result;
 }
 
-//----------------------------------------------------------------------------------single_element
+//-----------------------------------------------------------------------------------single_element
 
 string optional_single_element_as_text( xml::Element_ptr element, const string& name )
 {
@@ -93,16 +86,16 @@ Level_interval::Level_interval( xml::Element_ptr element )
 {
 }
 
-//----------------------------------------------------------------Object_set_descr::Object_set_descr
+//---------------------------------------------------------------Object_set_descr::Object_set_descr
 
 Object_set_descr::Object_set_descr( xml::Element_ptr element )
 : 
     _class_name( as_string( single_element( element, "object_set_class.name" )->firstChild->nodeValue ) ),
-    _level_interval( single_element( element, "levels" ) )
+    _level_interval( single_element( element, "job.levels" ) )
 {
 }
 
-//----------------------------------------------------------------------------------Day_set::Day_set
+//---------------------------------------------------------------------------------Day_set::Day_set
 
 Day_set::Day_set( xml::Element_ptr element )
 {
@@ -122,7 +115,7 @@ Day_set::Day_set( xml::Element_ptr element )
     }
 }
 
-//----------------------------------------------------------------------------Start_time::Start_time
+//---------------------------------------------------------------------------Start_time::Start_time
 
 Start_time::Start_time( xml::Element_ptr element )
 : 
@@ -152,14 +145,15 @@ Start_time::Start_time( xml::Element_ptr element )
     if( period_element )  _period = as_int( period_element->firstChild->nodeValue );
 }
 
-//------------------------------------------------------------------------------Job_descr::Job_descr
+//-----------------------------------------------------------------------------------------Job::Job
 
-Job_descr::Job_descr( xml::Element_ptr element )
+Job::Job( xml::Element_ptr element )
 : 
     _zero_(this+1),
+    _name               ( as_string( element->getAttribute( "name" ) ) ),
     _object_set_descr   ( single_element( element, "object_set" ) ),
-    _output_level       ( as_int( single_element( element, "output_level" )->firstChild->firstChild->nodeValue ) ),
-    _start_time         ( single_element( element, "start_time" ) )
+    _output_level       ( as_int( single_element( element, "job.output_level" )->firstChild->firstChild->nodeValue ) ),
+    _start_time         ( single_element( element, "job.start_time" ) )
 {
 }
 
@@ -179,7 +173,7 @@ void Spooler::load_object_set_classes_from_xml( Object_set_class_list* list, xml
 
 //----------------------------------------------------------------------Spooler::load_jobs_from_xml
 
-void Spooler::load_jobs_from_xml( Job_descr_list* list, xml::Element_ptr element )
+void Spooler::load_jobs_from_xml( Job_list* list, xml::Element_ptr element )
 {
     xml::NodeList_ptr node_list = element->childNodes;
 
@@ -189,17 +183,17 @@ void Spooler::load_jobs_from_xml( Job_descr_list* list, xml::Element_ptr element
 
         if( n->nodeName == "job" ) 
         {
-            Sos_ptr<Job_descr> job_descr = SOS_NEW( Job_descr( n ) );
+            Sos_ptr<Job> job = SOS_NEW( Job( n ) );
 
             for( Object_set_class_list::iterator it = _object_set_class_list.begin(); it != _object_set_class_list.end(); it++ )
             {
-                if( (*it)->_name == job_descr->_object_set_descr._class_name )  break;
+                if( (*it)->_name == job->_object_set_descr._class_name )  break;
             }
-            if( it == _object_set_class_list.end() )  throw_xc( "SPOOLER-101", job_descr->_object_set_descr._class_name );
+            if( it == _object_set_class_list.end() )  throw_xc( "SPOOLER-101", job->_object_set_descr._class_name );
 
-            job_descr->_object_set_descr._class = *it;
+            job->_object_set_descr._class = *it;
 
-            list->push_back( job_descr );
+            list->push_back( job );
         }
     }
 }
@@ -247,7 +241,7 @@ void Spooler::load_xml()
             else
             if( node->nodeName == "jobs" ) 
             {
-                load_jobs_from_xml( &_job_descr_list, node );
+                load_jobs_from_xml( &_job_list, node );
             }
         }
     }
