@@ -1,4 +1,4 @@
-// $Id: spooler_com.cxx,v 1.124 2003/12/09 19:37:51 jz Exp $
+// $Id: spooler_com.cxx,v 1.125 2003/12/09 21:01:12 jz Exp $
 /*
     Hier sind implementiert
 
@@ -2251,6 +2251,8 @@ const Com_method Com_spooler::_methods[] =
     { DISPATCH_PROPERTYGET, 19, "directory"                 , (Com_method_ptr)&Com_spooler::get_directory       , VT_BSTR      },
     { DISPATCH_METHOD     , 20, "job_chain_exists"          , (Com_method_ptr)&Com_spooler::job_chain_exists    , VT_BOOL       , { VT_BSTR } },
     { DISPATCH_PROPERTYGET, 21, "hostname"                  , (Com_method_ptr)&Com_spooler::get_hostname        , VT_BSTR      },
+    STDMETHODIMP            abort_immediately               ();
+    STDMETHODIMP            abort_immediately_and_restart   ();
     {}
 };
 
@@ -2514,44 +2516,6 @@ STDMETHODIMP Com_spooler::get_job_chain( BSTR name, spooler_com::Ijob_chain** re
     return hr;
 }
 
-//--------------------------------------------------------------------Com_spooler::job_chain_exists
-
-STDMETHODIMP Com_spooler::job_chain_exists( BSTR name, VARIANT_BOOL* result )
-{
-    HRESULT hr = NOERROR;
-
-    THREAD_LOCK( _lock )
-    try
-    {
-        if( !_spooler )  return E_POINTER;
-
-        *result = _spooler->job_chain_or_null( string_from_bstr(name) ) != NULL;
-    }
-    catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.job_chain_exists" ); }
-    catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.job_chain_exists" ); }
-
-    return hr;
-}
-
-//--------------------------------------------------------------------Com_spooler::job_chain_exists
-
-STDMETHODIMP Com_spooler::get_hostname( BSTR* result )
-{
-    HRESULT hr = NOERROR;
-
-    THREAD_LOCK( _lock )
-    try
-    {
-        if( !_spooler )  return E_POINTER;
-
-        hr = string_to_bstr( _spooler->_hostname, result );
-    }
-    catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.get_hostname" ); }
-    catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.get_hostname" ); }
-
-    return hr;
-}
-
 //----------------------------------------------------------------------------Spooler::create_order
 
 STDMETHODIMP Com_spooler::create_order( Iorder** result )
@@ -2602,6 +2566,60 @@ STDMETHODIMP Com_spooler::get_directory( BSTR* result )
     }
 
     return hr;
+}
+
+//-----------------------------------------------------------------------Com_spooler::get_hostname
+
+STDMETHODIMP Com_spooler::get_hostname( BSTR* result )
+{
+    HRESULT hr = NOERROR;
+
+    THREAD_LOCK( _lock )
+    try
+    {
+        if( !_spooler )  return E_POINTER;
+
+        hr = string_to_bstr( _spooler->_hostname, result );
+    }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.get_hostname" ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.get_hostname" ); }
+
+    return hr;
+}
+
+//--------------------------------------------------------------------Com_spooler::job_chain_exists
+
+STDMETHODIMP Com_spooler::job_chain_exists( BSTR name, VARIANT_BOOL* result )
+{
+    HRESULT hr = NOERROR;
+
+    THREAD_LOCK( _lock )
+    try
+    {
+        if( !_spooler )  return E_POINTER;
+
+        *result = _spooler->job_chain_or_null( string_from_bstr(name) ) != NULL;
+    }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.job_chain_exists" ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.job_chain_exists" ); }
+
+    return hr;
+}
+
+//-------------------------------------------------------------------Com_spooler::abort_immediately
+
+STDMETHODIMP Com_spooler::abort_immediately()
+{
+    _spooler->abort_immediately();
+    return S_OK;
+}
+
+//-------------------------------------------------------Com_spooler::abort_immediately_and_restart
+
+STDMETHODIMP Com_spooler::abort_immediately_and_restart()
+{
+    _spooler->abort_immediately( true );
+    return S_OK;
 }
 
 //----------------------------------------------------------------------------Com_context::_methods

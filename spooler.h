@@ -1,4 +1,4 @@
-// $Id: spooler.h,v 1.170 2003/12/09 20:44:45 jz Exp $
+// $Id: spooler.h,v 1.171 2003/12/09 21:01:12 jz Exp $
 
 #ifndef __SPOOLER_H
 #define __SPOOLER_H
@@ -210,8 +210,10 @@ struct Spooler
     void                        cmd_stop                    ();
     void                        cmd_terminate               ();
     void                        cmd_terminate_and_restart   ();
-    void                        cmd_abort_immediately       ( bool restart = false );
     void                        cmd_let_run_terminate_and_restart();
+
+    void                        abort_immediately           ( bool restart = false );
+
     void                        cmd_load_config             ( const xml::Element_ptr&, const Time& xml_mod_time, const string& source_filename );
     bool                        execute_state_cmd           ();
 
@@ -284,7 +286,7 @@ struct Spooler
     bool                        has_process_classes         ()                                  { return _process_class_list.size() > 1; }   // Die erste ist nur für temporäre Prozesse
     bool                        try_to_free_process         ( Job* for_job, Process_class*, const Time& now );
 
-    void                        register_process_handle     ( Process_handle );                 // Für cmd_abort_immediately()
+    void                        register_process_handle     ( Process_handle );                 // Für abort_immediately()
     void                        unregister_process_handle   ( Process_handle ); 
 
 
@@ -444,7 +446,7 @@ struct Spooler
     string                     _directory;
     File                       _pid_file;
 
-    Process_handle             _process_handles[ max_processes ];    // Für cmd_abort_immediately(), mutex-frei alle abhängigen Prozesse
+    Process_handle             _process_handles[ max_processes ];    // Für abort_immediately(), mutex-frei alle abhängigen Prozesse
 };
 
 //-------------------------------------------------------------------------------------------------

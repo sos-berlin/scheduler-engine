@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.303 2003/12/09 20:44:45 jz Exp $
+// $Id: spooler.cxx,v 1.304 2003/12/09 21:01:12 jz Exp $
 /*
     Hier sind implementiert
 
@@ -1917,17 +1917,20 @@ void Spooler::cmd_let_run_terminate_and_restart()
     signal( "let_run_terminate_and_restart" );
 }
 
-//----------------------------------------------------------------------------cmd_abort_immediately
+//--------------------------------------------------------------------------------abort_immediately
 
-void Spooler::cmd_abort_immediately( bool restart )
+void Spooler::abort_immediately( bool restart )
 {
+    int exit_code = 99;
+
+
     for( int i = 0; i < NO_OF( _process_handles ); i++ )
     {
         if( _process_handles[i] )
         {
 #           ifdef Z_WINDOWS
-                LOG( "TerminateProcess(" << as_hex_string( (int)_process_handles[i] ) << ",99)\n" );
-                TerminateProcess( _process_handles[i], 99 );
+                LOG( "TerminateProcess(" << as_hex_string( (int)_process_handles[i] ) << ",exit_code)\n" );
+                TerminateProcess( _process_handles[i], exit_code );
 #            else
                 LOG( "kill(" << _process_handles[i] << ",SIGKILL)\n" );
                 kill( _process_handle[i], SIGKILL );
@@ -1935,15 +1938,22 @@ void Spooler::cmd_abort_immediately( bool restart )
         }
     }
 
+    if( restart )
+    {
+        try{ spooler_restart( NULL, is_service() ); } catch(...) {}
+    }
+
 
     // Point of no return
 
 #   ifdef Z_WINDOWS
-        LOG( "TerminateProcess( GetCurrentProcess(), 99 );\n" );
-        TerminateProcess( GetCurrentProcess(), 99 );
+        LOG( "TerminateProcess( GetCurrentProcess() );\n" );
+        TerminateProcess( GetCurrentProcess(), exit_code );
+        _exit( exit_code );
 #    else
         LOG( "kill( _spooler->_pid, SIGKILL );\n" );
         kill( _spooler->_pid, SIGKILL );
+        _exit( exit_code );
 #   endif
 }
 

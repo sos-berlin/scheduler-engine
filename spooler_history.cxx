@@ -1,4 +1,4 @@
-// $Id: spooler_history.cxx,v 1.67 2003/12/09 20:44:45 jz Exp $
+// $Id: spooler_history.cxx,v 1.68 2003/12/09 21:01:12 jz Exp $
 
 #include "spooler.h"
 #include "../zschimmer/z_com.h"
@@ -348,7 +348,7 @@ void Spooler_db::try_reopen_after_error( const exception& x )
             string body = "db=" + _spooler->_db_name + "\r\n\r\n" + x.what() + "\r\n\r\n" + max_warn_msg;
             _spooler->send_error_email( msg, body );
             
-            _spooler->cmd_abort_immediately();
+            _spooler->abort_immediately();
             throw exception( x.what() );  // Wird nicht ausgeführt
         }
         else

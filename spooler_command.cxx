@@ -1,4 +1,4 @@
-// $Id: spooler_command.cxx,v 1.101 2003/12/08 10:32:05 jz Exp $
+// $Id: spooler_command.cxx,v 1.102 2003/12/09 21:01:12 jz Exp $
 /*
     Hier ist implementiert
 
@@ -227,7 +227,7 @@ xml::Element_ptr Command_processor::execute_show_order_history( const xml::Eleme
 }
 */
 //-------------------------------------------------------------Command_processor::abort_immediately
-
+/*
 void Command_processor::abort_immediately( int exit_code )
 {
 #   ifdef Z_WINDOWS
@@ -241,7 +241,7 @@ void Command_processor::abort_immediately( int exit_code )
 
 #   endif
 }
-
+*/
 //--------------------------------------------------------Command_processor::execute_modify_spooler
 
 xml::Element_ptr Command_processor::execute_modify_spooler( const xml::Element_ptr& element )
@@ -265,9 +265,9 @@ xml::Element_ptr Command_processor::execute_modify_spooler( const xml::Element_p
         else
         if( cmd == "let_run_terminate_and_restart" )  _spooler->cmd_let_run_terminate_and_restart();
         else
-        if( cmd == "abort_immediately"     )  abort_immediately();
+        if( cmd == "abort_immediately"     )  _spooler->abort_immediately();  //abort_immediately();
         else
-            if( cmd == "abort_immediately_and_restart" )  { try{ spooler_restart( NULL, _spooler->is_service() ); } catch(...) {}; abort_immediately(); }
+        if( cmd == "abort_immediately_and_restart" )  _spooler->abort_immediately( true ); //){ try{ spooler_restart( NULL, _spooler->is_service() ); } catch(...) {}; abort_immediately(); }
         else
       //if( cmd == "new_log"               )  _spooler->cmd_new_log();
       //else

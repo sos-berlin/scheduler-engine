@@ -1,10 +1,10 @@
-// $Id: Spooler.java,v 1.6 2003/10/19 11:41:01 jz Exp $
+// $Id: Spooler.java,v 1.7 2003/12/09 21:01:12 jz Exp $
 
 package sos.spooler;
 
 /**
  * @author Joacim Zschimmer, Zschimmer GmbH
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 
 public class Spooler extends Idispatch
@@ -32,4 +32,6 @@ public class Spooler extends Idispatch
     public String           directory           ()                                  { return (String)       com_call( "<directory"                      ); }
     public boolean          job_chain_exists    ( String job_chain )                { return        boolean_com_call( "job_chain_exists", job_chain     ); }
     public String           hostname            ()                                  { return (String)       com_call( "<hostname"                       ); }
+    public void             abort_immediately   ()                                  {                       com_call( "abort_immediately"               ); }
+    public void             abort_immediately_and_restart()                         {                       com_call( "abort_immediately_and_restart"   ); }
 }

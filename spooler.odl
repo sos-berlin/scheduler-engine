@@ -1,4 +1,4 @@
-// $Id: spooler.odl,v 1.70 2003/12/09 19:37:51 jz Exp $
+// $Id: spooler.odl,v 1.71 2003/12/09 21:01:12 jz Exp $
 
 // Anweisung: midl /nologo /error all /out $(OutDir) $(InputPath)
 
@@ -470,6 +470,10 @@ library spooler
 
         [propget]
         HRESULT                 hostname                ( [out,retval] BSTR* result );
+
+        HRESULT                 abort_immediately       ();
+
+        HRESULT                 abort_immediately_and_restart();
     }
 
     [
