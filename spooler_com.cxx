@@ -1,4 +1,4 @@
-// $Id: spooler_com.cxx,v 1.86 2002/12/10 12:38:21 jz Exp $
+// $Id: spooler_com.cxx,v 1.87 2003/02/04 08:57:30 jz Exp $
 /*
     Hier sind implementiert
 
@@ -1832,6 +1832,7 @@ const Com_method Com_spooler::_methods[] =
     { DISPATCH_PROPERTYGET, 15, "job_chain"                 , (Com_method_ptr)&Com_spooler::get_job_chain       , VT_DISPATCH  , { VT_BSTR } },
     { DISPATCH_METHOD     , 16, "create_order"              , (Com_method_ptr)&Com_spooler::create_order        , VT_DISPATCH  },
     { DISPATCH_PROPERTYGET, 17, "is_service"                , (Com_method_ptr)&Com_spooler::get_is_service      , VT_BOOL      },
+    { DISPATCH_METHOD     , 18, "terminate_and_restart"     , (Com_method_ptr)&Com_spooler::terminate_and_restart },
 };
 
 #endif
@@ -2128,6 +2129,20 @@ STDMETHODIMP Com_spooler::get_is_service( VARIANT_BOOL* result )
     }
 
     return hr;
+}
+
+//---------------------------------------------------------------Com_spooler::terminate_and_restart
+
+STDMETHODIMP Com_spooler::terminate_and_restart()
+{
+    THREAD_LOCK( _lock )
+    {
+        if( !_spooler )  return E_POINTER;
+
+        _spooler->cmd_terminate_and_restart();
+    }
+
+    return NOERROR;
 }
 
 //----------------------------------------------------------------------------Com_context::_methods

@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.163 2003/01/24 11:44:22 jz Exp $
+// $Id: spooler.cxx,v 1.164 2003/02/04 08:57:29 jz Exp $
 /*
     Hier sind implementiert
 
@@ -385,6 +385,8 @@ void Spooler::wait_until_threads_stopped( Time until )
 
         Wait_handles wait_handles ( this, &_prefix_log );
 
+        wait_handles.add( &_event );
+
         Thread_list::iterator it = _thread_list.begin();
         while( it != _thread_list.end() )
         {
@@ -394,7 +396,7 @@ void Spooler::wait_until_threads_stopped( Time until )
         }
 
         int c = 0;
-        while( wait_handles.length() > 0 )
+        while( wait_handles.length() > 1 )
         {
             Time until_step = Time::now() + (++c < 10? wait_step_for_thread_termination : wait_step_for_thread_termination2 );
             if( until_step > until )  until_step = until;
@@ -422,7 +424,7 @@ void Spooler::wait_until_threads_stopped( Time until )
                 {
                     Spooler_thread* thread = *it;
 
-                    if( !thread->_terminated )
+                    if( thread->_free_threading  &&  !thread->_terminated )
                     {
                         string msg = "Warten auf Thread " + thread->name() + " [" + thread->thread_as_text() + "]";
                         Job* job = thread->_current_job;
@@ -432,8 +434,10 @@ void Spooler::wait_until_threads_stopped( Time until )
                 }
             }
 
-            if( wait_handles.length() > 0 )  sos_sleep( 0.01 );  // Zur Verkürzung des Protokolls: Nächsten Threads Zeit lassen, sich zu beenden
+            if( wait_handles.length() > 1 )  sos_sleep( 0.01 );  // Zur Verkürzung des Protokolls: Nächsten Threads Zeit lassen, sich zu beenden
         }
+
+        wait_handles.clear();
 
 #   else
 
@@ -464,7 +468,7 @@ void Spooler::wait_until_threads_stopped( Time until )
 
             if( Time::now() >= until_step )
             {
-                sos_sleep( 0.01 );  // Zur Verkürzung des Protokolls: Nächsten Threads Zeit lassen, sich zu beenden
+                sos_sleep( 0.01 );  // Zur Verkürzung des Protokolls: Nächsten Thread Zeit lassen, sich zu beenden
 
                 FOR_EACH( Thread_list, threads, it )  
                 {
@@ -650,13 +654,11 @@ void Spooler::close_threads()
     signal_threads( "stop" );
     wait_until_threads_stopped( Time::now() + wait_for_thread_termination );
 
-    FOR_EACH( Thread_list, _thread_list, it )  
+    FOR_EACH( Spooler_thread_list, _spooler_thread_list, it )  
     {
         Spooler_thread* thread = *it;
-        if( !thread->_free_threading ) 
-        {
-            thread->close1();
-        }
+        thread->stop_jobs();
+        thread->close1();
     }
 }
 
@@ -921,8 +923,6 @@ void Spooler::stop()
 {
     assert( current_thread_id() == _thread_id );
 
-    set_state( _state_cmd == sc_let_run_terminate_and_restart? s_stopping_let_run : s_stopping );
-
     //_log.msg( "Spooler::stop" );
 
     close_threads();
@@ -971,19 +971,25 @@ void Spooler::run()
         //FOR_EACH( Thread_list, _thread_list, it )  if( (*it)->empty() )  THREAD_LOCK( _lock )  it = _thread_list.erase(it);
         bool valid_thread = false;
         FOR_EACH( Thread_list, _thread_list, it )  valid_thread |= !(*it)->_terminated;
-        if( !valid_thread )  { _log.info( "Kein Thread vorhanden. Spooler wird beendet." ); break; }
+        if( !valid_thread )  { _log.info( "Kein Thread läuft. Spooler wird beendet." ); break; }
 
-        if( _state_cmd == sc_pause                 )  if( _state == s_running )  set_state( s_paused  ), signal_threads( "pause" );
-        if( _state_cmd == sc_continue              )  if( _state == s_paused  )  set_state( s_running ), signal_threads( "continue" );
-        if( _state_cmd == sc_load_config           )  break;
-        if( _state_cmd == sc_reload                )  break;
-        if( _state_cmd == sc_terminate             )  break;
-        if( _state_cmd == sc_terminate_and_restart )  break;
-        if( _state_cmd == sc_let_run_terminate_and_restart )  break;
-        _state_cmd = sc_none;
+        if( _state_cmd )
+        {
+            if( _state_cmd == sc_pause                         )  { if( _state == s_running )  set_state( s_paused  ), signal_threads( "pause"    );  _state_cmd = sc_none; }
+            if( _state_cmd == sc_continue                      )  { if( _state == s_paused  )  set_state( s_running ), signal_threads( "continue" );  _state_cmd = sc_none; }
+            if( _state_cmd == sc_load_config                   )  set_state( s_stopping );
+            if( _state_cmd == sc_reload                        )  set_state( s_stopping ); 
+            if( _state_cmd == sc_terminate                     )  set_state( s_stopping ); 
+            if( _state_cmd == sc_terminate_and_restart         )  set_state( s_stopping ); 
+            if( _state_cmd == sc_let_run_terminate_and_restart )  set_state( s_stopping_let_run );
 
+            _active_state_cmd = _state_cmd;
+            _state_cmd = sc_none;
 
-        if( _state == Spooler::s_paused )
+            if( _state == s_stopping )  break;
+        }
+        
+        if( _state == s_paused )
         {
             //_wait_handles.wait_until( latter_day );
             _event.wait();
@@ -993,11 +999,11 @@ void Spooler::run()
         _next_job  = NULL;
 
 
-        while( _state_cmd == sc_none  &&  !ctrl_c_pressed )    // Solange Jobs laufen, keine Umstände machen. 
-        {
-            bool something_done = run_threads();
-            if( !something_done )  break;
-        }
+        //while( _state_cmd == sc_none  &&  !ctrl_c_pressed )    // Solange Jobs laufen, keine Umstände machen. 
+        //{
+              bool something_done = run_threads();
+        //    if( !something_done )  break;
+        //}
 
         int running_tasks_count = 0;
         FOR_EACH( Spooler_thread_list, _spooler_thread_list, it2 )  running_tasks_count += (*it2)->_running_tasks_count;
@@ -1005,6 +1011,7 @@ void Spooler::run()
         //LOG( "spooler: running_tasks_count=" << running_tasks_count  << " _state_cmd=" << (int)_state_cmd << " ctrl_c_pressed=" << ctrl_c_pressed << " _next_time=" << _next_time << "\n" );
         if( running_tasks_count == 0  &&  _state_cmd == sc_none  &&  !ctrl_c_pressed )
         {
+            bool all_spooler_threads_finished = false;
 
             FOR_EACH( Spooler_thread_list, _spooler_thread_list, it )  
             {
@@ -1012,11 +1019,11 @@ void Spooler::run()
                 thread->get_next_job_to_start();
                 //thread->_log.debug9( "_next_start_time=" + thread->_next_start_time.as_string() );
                 if( thread->_next_job  &&  _next_time > thread->_next_start_time )  _next_time = thread->_next_start_time, _next_job = thread->_next_job;
+                all_spooler_threads_finished |= thread->finished();
             }
+            if( all_spooler_threads_finished )   break;
 
-            Time now = Time::now();
-
-            if( _next_time > now )
+            if( _next_time > Time::now() )
             {
                 string msg;
                 
@@ -1027,8 +1034,7 @@ void Spooler::run()
                 {
                     msg = _next_job? "Warten bis " + _next_time.as_string() + " für Job " + _next_job->name() 
                                    : "Kein Job zu starten";
-
-                    //msg += " und " + wait_handles.as_string();
+                  //msg += " und " + wait_handles.as_string();
 
                     if( wait_handles.wait(0) == -1 )  _log.debug( msg ), wait_handles.wait_until( _next_time );
                 }
@@ -1042,6 +1048,8 @@ void Spooler::run()
 
         if( ctrl_c_pressed )  _state_cmd = sc_terminate;
     }
+
+    _state_cmd = _active_state_cmd;
 }
 
 //-------------------------------------------------------------------------Spooler::cmd_load_config
