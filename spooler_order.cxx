@@ -1,4 +1,4 @@
-// $Id: spooler_order.cxx,v 1.44 2003/10/13 23:04:55 jz Exp $
+// $Id: spooler_order.cxx,v 1.45 2003/10/16 09:44:25 jz Exp $
 /*
     Hier sind implementiert
 
@@ -52,9 +52,9 @@ void Spooler::add_job_chain( Job_chain* job_chain )
     _job_chain_time = Time::now();
 }
 
-//-------------------------------------------------------------------------------Spooler::job_chain
+//------------------------------------------------------------------------Spooler::job_chain_or_null
 
-Job_chain* Spooler::job_chain( const string& name )
+Job_chain* Spooler::job_chain_or_null( const string& name )
 {
     Job_chain* result = NULL;
 
@@ -63,10 +63,19 @@ Job_chain* Spooler::job_chain( const string& name )
         string lname = lcase( name );
     
         Job_chain_map::iterator it = _job_chain_map.find( lname );
-        if( it == _job_chain_map.end() )  throw_xc( "SCHEDULER-161", lname );
-
-        result = it->second;
+        if( it == _job_chain_map.end() )  result = NULL;
+                                    else  result = it->second;
     }
+
+    return result;
+}
+
+//-------------------------------------------------------------------------------Spooler::job_chain
+
+Job_chain* Spooler::job_chain( const string& name )
+{
+    Job_chain* result = job_chain_or_null( name );
+    if( !result )  throw_xc( "SCHEDULER-161", name );
 
     return result;
 }

@@ -1,4 +1,4 @@
-// $Id: spooler_com.cxx,v 1.116 2003/10/14 09:15:18 jz Exp $
+// $Id: spooler_com.cxx,v 1.117 2003/10/16 09:44:25 jz Exp $
 /*
     Hier sind implementiert
 
@@ -2025,6 +2025,7 @@ const Com_method Com_spooler::_methods[] =
     { DISPATCH_PROPERTYGET, 17, "is_service"                , (Com_method_ptr)&Com_spooler::get_is_service      , VT_BOOL      },
     { DISPATCH_PROPERTYGET, 18, "java_class_name"           , (Com_method_ptr)&Com_spooler::get_java_class_name , VT_BSTR      },
     { DISPATCH_PROPERTYGET, 19, "directory"                 , (Com_method_ptr)&Com_spooler::get_directory       , VT_BSTR      },
+    { DISPATCH_METHOD     , 20, "job_chain_exists"          , (Com_method_ptr)&Com_spooler::job_chain_exists    , VT_BOOL       , { VT_BSTR } },
     {}
 };
 
@@ -2281,6 +2282,25 @@ STDMETHODIMP Com_spooler::get_job_chain( BSTR name, spooler_com::Ijob_chain** re
 
         *result = _spooler->job_chain( string_from_bstr(name) ); //->com_job_chain();
         (*result)->AddRef();
+    }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.get_job_chain" ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.get_job_chain" ); }
+
+    return hr;
+}
+
+//--------------------------------------------------------------------Com_spooler::job_chain_exists
+
+STDMETHODIMP Com_spooler::job_chain_exists( BSTR name, VARIANT_BOOL* result )
+{
+    HRESULT hr = NOERROR;
+
+    THREAD_LOCK( _lock )
+    try
+    {
+        if( !_spooler )  return E_POINTER;
+
+        *result = _spooler->job_chain_or_null( string_from_bstr(name) ) != NULL;
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.get_job_chain" ); }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.get_job_chain" ); }

@@ -1,4 +1,4 @@
-// $Id: spooler.h,v 1.163 2003/10/14 12:08:40 jz Exp $
+// $Id: spooler.h,v 1.164 2003/10/16 09:44:25 jz Exp $
 
 #ifndef __SPOOLER_H
 #define __SPOOLER_H
@@ -262,6 +262,7 @@ struct Spooler
     xml::Element_ptr            jobs_as_xml                 ( const xml::Document_ptr&, Show_what );
     void                        add_job_chain               ( Job_chain* );
     Job_chain*                  job_chain                   ( const string& name );
+    Job_chain*                  job_chain_or_null           ( const string& name );
     xml::Element_ptr            xml_from_job_chains         ( const xml::Document_ptr&, Show_what );
     void                        set_job_chain_time          ( const Time& t )                   { THREAD_LOCK( _job_chain_lock )  _job_chain_time = t; }
     Time                        job_chain_time              ()                                  { THREAD_LOCK_RETURN( _job_chain_lock, Time, _job_chain_time ); }

@@ -1,4 +1,4 @@
-// $Id: spooler_log.cxx,v 1.76 2003/10/13 18:08:47 jz Exp $
+// $Id: spooler_log.cxx,v 1.77 2003/10/16 09:44:25 jz Exp $
 
 #include "spooler.h"
 #include "spooler_mail.h"
@@ -79,7 +79,7 @@ Log::~Log()
 {
     Z_MUTEX( _semaphore )
     {
-        if( _file != -1  &&  _file != fileno(stderr) )  close( _file ),  _file = -1;
+        if( _file != -1  &&  _file != fileno(stderr) )  ::close( _file ),  _file = -1;
     }
 }
 
@@ -102,7 +102,7 @@ void Log::open_new()
 {
     Z_MUTEX( _semaphore )
     {
-        if( _file != -1  &&  _file != fileno(stderr) )  close( _file ),  _file = -1;
+        if( _file != -1  &&  _file != fileno(stderr) )  ::close( _file ),  _file = -1;
         _filename = "";
 
         if( _directory == "*stderr" )
@@ -120,14 +120,15 @@ void Log::open_new()
             Sos_optional_date_time time = Time::now().as_time_t();
             string filename = _directory;
 
-            filename += "/spooler-";
+            filename += "/scheduler-";
             filename += time.formatted( "yyyy-mm-dd-HHMMSS" );
             if( !_spooler->id().empty() )  filename += "." + _spooler->id();
             filename += ".log";
 
-            LOG( "\nopen " << filename << '\n' );
+            LOG( "\nopen(\"" << filename << "\")\n" );
             _file = open( filename.c_str(), O_CREAT | O_TRUNC | O_WRONLY, 0666 );
             if( _file == -1 )  throw_errno( errno, filename.c_str() );
+            LOG( "open() => " << _file << "\n" );
 
             _filename = filename;
         }
@@ -290,6 +291,8 @@ Prefix_log::~Prefix_log()
 
         try
         {
+            if( _file != -1 ) { LOG( "extra close("<<_file<<")\n" ); ::close( _file ), _file = -1; }    // Manchmal ist Datei bei unlink gesperrt: ERRNO-13. Warum?
+
             LOG( "unlink " << _filename << "\n" );
             int ret = unlink( _filename.c_str() );
             if( ret == -1 )  throw_errno( errno, "unlink", _filename.c_str() );
@@ -436,14 +439,19 @@ void Prefix_log::close2()
 {
     if( _file != -1 )  
     {
-        log( log_info, "Protokoll endet in " + _filename );
+        try {
+            log( log_info, "Protokoll endet in " + _filename );
+        }
+        catch( const exception& ) {}
 
         try
         {
+            LOG( "close(" << _file << ")\n" );
+
             int ret = ::close( _file );
             if( ret == -1 )  throw_errno( errno, "close", _filename.c_str() );
         }
-        catch( const exception& x ) { _spooler->_log.error( string("FEHLER BEIM LÖSCHEN DER PROTOKOLLDATEI ") + x.what() ); }
+        catch( const exception& x ) { _spooler->_log.error( string("FEHLER BEIM SCHLIEßEN DER PROTOKOLLDATEI: ") + x.what() ); }
 
         _file = -1;
 
