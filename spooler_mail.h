@@ -1,4 +1,4 @@
-// $Id: spooler_mail.h,v 1.19 2004/03/20 10:49:01 jz Exp $
+// $Id: spooler_mail.h,v 1.20 2004/04/05 08:49:46 jz Exp $
 
 #ifndef __SPOOLER_MAIL_H
 #define __SPOOLER_MAIL_H
@@ -38,41 +38,41 @@ struct Com_mail : spooler_com::Imail,
 
     USE_SOS_OLE_OBJECT_WITHOUT_QI
 
-    STDMETHODIMP            get_java_class_name             ( BSTR* result )                        { return String_to_bstr( const_java_class_name(), result ); }
+    STDMETHODIMP            get_Java_class_name             ( BSTR* result )                        { return String_to_bstr( const_java_class_name(), result ); }
     STDMETHODIMP_(char*)  const_java_class_name             ()                                      { return (char*)"sos.spooler.Mail"; }
 
-    STDMETHODIMP            put_to                          ( BSTR );
-    STDMETHODIMP            get_to                          ( BSTR* to )                            { return _to.CopyTo( to ); }
+    STDMETHODIMP            put_To                          ( BSTR );
+    STDMETHODIMP            get_To                          ( BSTR* to )                            { return _to.CopyTo( to ); }
 
-    STDMETHODIMP            put_cc                          ( BSTR );
-    STDMETHODIMP            get_cc                          ( BSTR* cc )                            { return _cc.CopyTo( cc ); }
+    STDMETHODIMP            put_Cc                          ( BSTR );
+    STDMETHODIMP            get_Cc                          ( BSTR* cc )                            { return _cc.CopyTo( cc ); }
 
-    STDMETHODIMP            put_bcc                         ( BSTR );
-    STDMETHODIMP            get_bcc                         ( BSTR* bcc )                           { return _bcc.CopyTo( bcc ); }
+    STDMETHODIMP            put_Bcc                         ( BSTR );
+    STDMETHODIMP            get_Bcc                         ( BSTR* bcc )                           { return _bcc.CopyTo( bcc ); }
 
-    STDMETHODIMP            put_from                        ( BSTR );
-    STDMETHODIMP            get_from                        ( BSTR* );
+    STDMETHODIMP            put_From                        ( BSTR );
+    STDMETHODIMP            get_From                        ( BSTR* );
                                                                                                     
-    STDMETHODIMP            put_subject                     ( BSTR );
-    STDMETHODIMP            get_subject                     ( BSTR* );
+    STDMETHODIMP            put_Subject                     ( BSTR );
+    STDMETHODIMP            get_Subject                     ( BSTR* );
 
-    STDMETHODIMP            put_body                        ( BSTR );
-    STDMETHODIMP            get_body                        ( BSTR* );
+    STDMETHODIMP            put_Body                        ( BSTR );
+    STDMETHODIMP            get_Body                        ( BSTR* );
 
-    STDMETHODIMP                add_file                    ( BSTR real_filename, BSTR mail_filename, BSTR content_type, BSTR encoding );
-  //STDMETHODIMP                add_attachment              ( BSTR filename, BSTR data );
+    STDMETHODIMP                Add_file                    ( BSTR real_filename, BSTR mail_filename, BSTR content_type, BSTR encoding );
+  //STDMETHODIMP                Add_attachment              ( BSTR filename, BSTR data );
 
-    STDMETHODIMP            put_smtp                        ( BSTR );
-    STDMETHODIMP            get_smtp                        ( BSTR* );
+    STDMETHODIMP            put_Smtp                        ( BSTR );
+    STDMETHODIMP            get_Smtp                        ( BSTR* );
 
-    STDMETHODIMP            put_queue_dir                   ( BSTR );
-    STDMETHODIMP            get_queue_dir                   ( BSTR* );
+    STDMETHODIMP            put_Queue_dir                   ( BSTR );
+    STDMETHODIMP            get_Queue_dir                   ( BSTR* );
 
-    STDMETHODIMP                add_header_field            ( BSTR field_name, BSTR value );
+    STDMETHODIMP                Add_header_field            ( BSTR field_name, BSTR value );
 
-    STDMETHODIMP                dequeue                     ( int* count );
+    STDMETHODIMP                Dequeue                     ( int* count );
 
-    STDMETHODIMP            get_dequeue_log                 ( BSTR* result )                        { return String_to_bstr( _msg->dequeue_log(), result ); }
+    STDMETHODIMP            get_Dequeue_log                 ( BSTR* result )                        { return String_to_bstr( _msg->dequeue_log(), result ); }
 
     int                         auto_dequeue                ()                                      { return _msg->auto_dequeue(); }
 

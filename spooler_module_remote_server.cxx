@@ -1,4 +1,4 @@
-// $Id: spooler_module_remote_server.cxx,v 1.34 2004/03/20 10:49:01 jz Exp $
+// $Id: spooler_module_remote_server.cxx,v 1.35 2004/04/05 08:49:46 jz Exp $
 /*
     Hier sind implementiert
 
@@ -75,20 +75,20 @@ void Remote_module_instance_server::load_implicitly()
 const Com_method Com_remote_module_instance_server::_methods[] =
 { 
    // _flags              , _name             , _method                                                         , _result_type  , _types        , _default_arg_count
-    { DISPATCH_METHOD     , 1, "construct"    , (Com_method_ptr)&Com_remote_module_instance_server::construct   , VT_EMPTY      , { VT_BYREF|VT_ARRAY|VT_VARIANT } },
-    { DISPATCH_METHOD     , 2, "add_obj"      , (Com_method_ptr)&Com_remote_module_instance_server::add_obj     , VT_EMPTY      , { VT_DISPATCH, VT_BSTR } },
-    { DISPATCH_METHOD     , 3, "name_exists"  , (Com_method_ptr)&Com_remote_module_instance_server::name_exists , VT_BOOL       , { VT_BSTR } },
-    { DISPATCH_METHOD     , 4, "call"         , (Com_method_ptr)&Com_remote_module_instance_server::call        , VT_VARIANT    , { VT_BSTR } },
-    { DISPATCH_METHOD     , 5, "begin"        , (Com_method_ptr)&Com_remote_module_instance_server::begin       , VT_VARIANT    , { VT_BYREF|VT_ARRAY|VT_VARIANT, VT_BYREF|VT_ARRAY|VT_VARIANT } },
-    { DISPATCH_METHOD     , 6, "end"          , (Com_method_ptr)&Com_remote_module_instance_server::end         , VT_VARIANT    , { VT_BOOL } },
-    { DISPATCH_METHOD     , 7, "step"         , (Com_method_ptr)&Com_remote_module_instance_server::step        , VT_VARIANT    },
+    { DISPATCH_METHOD     , 1, "construct"    , (Com_method_ptr)&Com_remote_module_instance_server::Construct   , VT_EMPTY      , { VT_BYREF|VT_ARRAY|VT_VARIANT } },
+    { DISPATCH_METHOD     , 2, "add_obj"      , (Com_method_ptr)&Com_remote_module_instance_server::Add_obj     , VT_EMPTY      , { VT_DISPATCH, VT_BSTR } },
+    { DISPATCH_METHOD     , 3, "name_exists"  , (Com_method_ptr)&Com_remote_module_instance_server::Name_exists , VT_BOOL       , { VT_BSTR } },
+    { DISPATCH_METHOD     , 4, "call"         , (Com_method_ptr)&Com_remote_module_instance_server::Call        , VT_VARIANT    , { VT_BSTR } },
+    { DISPATCH_METHOD     , 5, "begin"        , (Com_method_ptr)&Com_remote_module_instance_server::Begin       , VT_VARIANT    , { VT_BYREF|VT_ARRAY|VT_VARIANT, VT_BYREF|VT_ARRAY|VT_VARIANT } },
+    { DISPATCH_METHOD     , 6, "end"          , (Com_method_ptr)&Com_remote_module_instance_server::End         , VT_VARIANT    , { VT_BOOL } },
+    { DISPATCH_METHOD     , 7, "step"         , (Com_method_ptr)&Com_remote_module_instance_server::Step        , VT_VARIANT    },
     {}
 };
 
 #endif
 //-----------------------------------------------Com_remote_module_instance_server::create_instance
 
-HRESULT Com_remote_module_instance_server::create_instance( const IID& iid, ptr<IUnknown>* result )
+HRESULT Com_remote_module_instance_server::Create_instance( const IID& iid, ptr<IUnknown>* result )
 {
     if( iid == IID_Iremote_module_instance_server )
     {
@@ -145,7 +145,7 @@ STDMETHODIMP Com_remote_module_instance_server::QueryInterface( const IID& iid, 
 
 //-----------------------------------------------------Com_remote_module_instance_server::construct
 
-STDMETHODIMP Com_remote_module_instance_server::construct( SAFEARRAY* safearray )
+STDMETHODIMP Com_remote_module_instance_server::Construct( SAFEARRAY* safearray )
 {
     HRESULT hr = NOERROR;
 
@@ -241,7 +241,7 @@ STDMETHODIMP Com_remote_module_instance_server::construct( SAFEARRAY* safearray 
 
 //-------------------------------------------------------Com_remote_module_instance_server::add_obj
 
-STDMETHODIMP Com_remote_module_instance_server::add_obj( IDispatch* object, BSTR name )
+STDMETHODIMP Com_remote_module_instance_server::Add_obj( IDispatch* object, BSTR name )
 {
     HRESULT hr = NOERROR;
 
@@ -257,7 +257,7 @@ STDMETHODIMP Com_remote_module_instance_server::add_obj( IDispatch* object, BSTR
 
 //---------------------------------------------------Com_remote_module_instance_server::name_exists
 
-STDMETHODIMP Com_remote_module_instance_server::name_exists( BSTR name, VARIANT_BOOL* result )
+STDMETHODIMP Com_remote_module_instance_server::Name_exists( BSTR name, VARIANT_BOOL* result )
 {
     HRESULT hr = NOERROR;
 
@@ -274,7 +274,7 @@ STDMETHODIMP Com_remote_module_instance_server::name_exists( BSTR name, VARIANT_
 
 //----------------------------------------------------------Com_remote_module_instance_server::call
 
-STDMETHODIMP Com_remote_module_instance_server::call( BSTR name, VARIANT* result )
+STDMETHODIMP Com_remote_module_instance_server::Call( BSTR name, VARIANT* result )
 {
     HRESULT hr = NOERROR;
 
@@ -312,7 +312,7 @@ STDMETHODIMP Com_remote_module_instance_server::call( BSTR name, VARIANT* result
 
 //---------------------------------------------------------Com_remote_module_instance_server::begin
 
-STDMETHODIMP Com_remote_module_instance_server::begin( SAFEARRAY* objects_safearray, SAFEARRAY* names_safearray, VARIANT* result )
+STDMETHODIMP Com_remote_module_instance_server::Begin( SAFEARRAY* objects_safearray, SAFEARRAY* names_safearray, VARIANT* result )
 {
     HRESULT hr = NOERROR;
 
@@ -342,7 +342,7 @@ STDMETHODIMP Com_remote_module_instance_server::begin( SAFEARRAY* objects_safear
 
 //-----------------------------------------------------------Com_remote_module_instance_server::end
 
-STDMETHODIMP Com_remote_module_instance_server::end( VARIANT_BOOL succeeded, VARIANT* result )
+STDMETHODIMP Com_remote_module_instance_server::End( VARIANT_BOOL succeeded, VARIANT* result )
 {
     HRESULT hr = NOERROR;
 
@@ -361,7 +361,7 @@ STDMETHODIMP Com_remote_module_instance_server::end( VARIANT_BOOL succeeded, VAR
 
 //----------------------------------------------------------Com_remote_module_instance_server::step
 
-STDMETHODIMP Com_remote_module_instance_server::step( VARIANT* result )
+STDMETHODIMP Com_remote_module_instance_server::Step( VARIANT* result )
 {
     HRESULT hr = NOERROR;
 

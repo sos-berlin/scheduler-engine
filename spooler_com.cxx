@@ -1,4 +1,4 @@
-// $Id: spooler_com.cxx,v 1.148 2004/03/30 06:00:29 jz Exp $
+// $Id: spooler_com.cxx,v 1.149 2004/04/05 08:49:46 jz Exp $
 /*
     Hier sind implementiert
 
@@ -28,21 +28,21 @@ using namespace spooler_com;
 
 Typelib_descr spooler_typelib ( LIBID_spooler_com, "Spooler", "1.0" );
 
-DESCRIBE_CLASS( &spooler_typelib, Com_error         , error         , CLSID_error         , "Spooler.Error"         , "1.0" )
+DESCRIBE_CLASS( &spooler_typelib, Com_error         , error         , CLSID_Error         , "Spooler.Error"         , "1.0" )
 DESCRIBE_CLASS( &spooler_typelib, Com_variable      , variable      , CLSID_Variable      , "Spooler.Variable"      , "1.0" )
 DESCRIBE_CLASS( &spooler_typelib, Com_variable_set  , variable_set  , CLSID_Variable_set  , "Spooler.Variable_set"  , "1.0" )
 DESCRIBE_CLASS( &spooler_typelib, Com_variable_set_enumerator, variable_set_enumerator, CLSID_Variable_set_enumerator, "Spooler.Com_variable_set_enumerator", "1.0" );
-DESCRIBE_CLASS( &spooler_typelib, Com_log           , log           , CLSID_log           , "Spooler.Log"           , "1.0" )
-DESCRIBE_CLASS( &spooler_typelib, Com_job           , job           , CLSID_job           , "Spooler.Job"           , "1.0" )
+DESCRIBE_CLASS( &spooler_typelib, Com_log           , log           , CLSID_Log           , "Spooler.Log"           , "1.0" )
+DESCRIBE_CLASS( &spooler_typelib, Com_job           , job           , CLSID_Job           , "Spooler.Job"           , "1.0" )
 DESCRIBE_CLASS( &spooler_typelib, Com_task          , task          , CLSID_Task          , "Spooler.Task"          , "1.0" )
-DESCRIBE_CLASS( &spooler_typelib, Com_object_set    , object_set    , CLSID_object_set    , "Spooler.Object_set"    , "1.0" )
+DESCRIBE_CLASS( &spooler_typelib, Com_object_set    , object_set    , CLSID_Object_set    , "Spooler.Object_set"    , "1.0" )
 //DESCRIBE_CLASS( &spooler_typelib, Com_thread        , thread        , CLSID_thread        , "Spooler.Thread"        , "1.0" )
-DESCRIBE_CLASS( &spooler_typelib, Com_spooler       , spooler       , CLSID_spooler       , "Spooler.Spooler"       , "1.0" )
+DESCRIBE_CLASS( &spooler_typelib, Com_spooler       , spooler       , CLSID_Spooler       , "Spooler.Spooler"       , "1.0" )
 DESCRIBE_CLASS( &spooler_typelib, Com_spooler_context, spooler_context, CLSID_Spooler_context, "Spooler.Context"       , "1.0" )
-DESCRIBE_CLASS( &spooler_typelib, Com_job_chain     , job_chain     , CLSID_job_chain     , "Spooler.Job_chain"     , "1.0" )
-DESCRIBE_CLASS( &spooler_typelib, Com_job_chain_node, job_chain_node, CLSID_job_chain_node, "Spooler.Job_chain_node", "1.0" )
-DESCRIBE_CLASS( &spooler_typelib, Com_order         , order         , CLSID_order         , "Spooler.Order"         , "1.0" )
-DESCRIBE_CLASS( &spooler_typelib, Com_order_queue   , order_queue   , CLSID_order_queue   , "Spooler.Order_queue"   , "1.0" )
+DESCRIBE_CLASS( &spooler_typelib, Com_job_chain     , job_chain     , CLSID_Job_chain     , "Spooler.Job_chain"     , "1.0" )
+DESCRIBE_CLASS( &spooler_typelib, Com_job_chain_node, job_chain_node, CLSID_Job_chain_node, "Spooler.Job_chain_node", "1.0" )
+DESCRIBE_CLASS( &spooler_typelib, Com_order         , order         , CLSID_Order         , "Spooler.Order"         , "1.0" )
+DESCRIBE_CLASS( &spooler_typelib, Com_order_queue   , order_queue   , CLSID_Order_queue   , "Spooler.Order_queue"   , "1.0" )
 
 //-----------------------------------------------------------------------------IID_Ihostware_dynobj
 
@@ -85,10 +85,10 @@ static ptr<spooler_com::Iorder> order_from_order_or_payload( Spooler* spooler, c
 const Com_method Com_error::_methods[] =
 { 
    // _flags              , _name             , _method                                        , _result_type, _types        , _default_arg_count
-    { DISPATCH_PROPERTYGET, 1, "java_class_name" , (Com_method_ptr)&Com_error::get_java_class_name, VT_BSTR },
-    { DISPATCH_PROPERTYGET, 2, "is_error"        , (Com_method_ptr)&Com_error::get_is_error       , VT_BOOL },
-    { DISPATCH_PROPERTYGET, 3, "code"            , (Com_method_ptr)&Com_error::get_code           , VT_BSTR }, 
-    { DISPATCH_PROPERTYGET, 4, "text"            , (Com_method_ptr)&Com_error::get_text           , VT_BSTR }, 
+    { DISPATCH_PROPERTYGET, 1, "Java_class_name" , (Com_method_ptr)&Com_error::get_Java_class_name, VT_BSTR },
+    { DISPATCH_PROPERTYGET, 2, "Is_error"        , (Com_method_ptr)&Com_error::get_Is_error       , VT_BOOL },
+    { DISPATCH_PROPERTYGET, 3, "Code"            , (Com_method_ptr)&Com_error::get_Code           , VT_BSTR }, 
+    { DISPATCH_PROPERTYGET, 4, "Text"            , (Com_method_ptr)&Com_error::get_Text           , VT_BSTR }, 
     {}
 };
 
@@ -124,7 +124,7 @@ void Com_error::close()
 
 //------------------------------------------------------------------------------Com_error::is_error
 
-STDMETHODIMP Com_error::get_is_error( VARIANT_BOOL* result )
+STDMETHODIMP Com_error::get_Is_error( VARIANT_BOOL* result )
 {
     THREAD_LOCK( _lock )
     {
@@ -136,7 +136,7 @@ STDMETHODIMP Com_error::get_is_error( VARIANT_BOOL* result )
 
 //----------------------------------------------------------------------------------Com_error::code
 
-STDMETHODIMP Com_error::get_code( BSTR* code_bstr )
+STDMETHODIMP Com_error::get_Code( BSTR* code_bstr )
 {
     HRESULT hr = NOERROR;
 
@@ -154,7 +154,7 @@ STDMETHODIMP Com_error::get_code( BSTR* code_bstr )
 
 //----------------------------------------------------------------------------------Com_error::text
 
-STDMETHODIMP Com_error::get_text( BSTR* text_bstr )
+STDMETHODIMP Com_error::get_Text( BSTR* text_bstr )
 {
     HRESULT hr = NOERROR;
 
@@ -176,11 +176,11 @@ STDMETHODIMP Com_error::get_text( BSTR* text_bstr )
 const Com_method Com_variable::_methods[] =
 { 
    // _flags         , dispid, _name                , _method                                           , _result_type  , _types        , _default_arg_count
-    { DISPATCH_PROPERTYPUT, 0, "value"              , (Com_method_ptr)&Com_variable::put_value          , VT_EMPTY      , { VT_BYREF|VT_VARIANT } },
-    { DISPATCH_PROPERTYGET, 0, "value"              , (Com_method_ptr)&Com_variable::get_value          , VT_VARIANT    },
-    { DISPATCH_PROPERTYGET, 1, "name"               , (Com_method_ptr)&Com_variable::get_name           , VT_BSTR       },
+    { DISPATCH_PROPERTYPUT, 0, "value"              , (Com_method_ptr)&Com_variable::put_Value          , VT_EMPTY      , { VT_BYREF|VT_VARIANT } },
+    { DISPATCH_PROPERTYGET, 0, "value"              , (Com_method_ptr)&Com_variable::get_Value          , VT_VARIANT    },
+    { DISPATCH_PROPERTYGET, 1, "name"               , (Com_method_ptr)&Com_variable::get_Name           , VT_BSTR       },
     { DISPATCH_METHOD     , 2, "Clone"              , (Com_method_ptr)&Com_variable::Clone              , VT_DISPATCH   },
-    { DISPATCH_PROPERTYGET, 3, "java_class_name"    , (Com_method_ptr)&Com_variable::get_java_class_name, VT_BSTR },
+    { DISPATCH_PROPERTYGET, 3, "java_class_name"    , (Com_method_ptr)&Com_variable::get_Java_class_name, VT_BSTR },
     {}
 };
 
@@ -303,7 +303,7 @@ void Com_variable_set::set_dom( const xml::Element_ptr& params )
                 Bstr    name  = e.getAttribute( "name" );
                 Variant value = e.getAttribute( "value" );
 
-                hr = put_var( name, &value );                       if( FAILED(hr) )  throw_ole( hr, "Ivariable_set::put_var" );
+                hr = put_Var( name, &value );                       if( FAILED(hr) )  throw_ole( hr, "Ivariable_set::put_var" );
             }
         }
     }
@@ -311,18 +311,18 @@ void Com_variable_set::set_dom( const xml::Element_ptr& params )
 
 //----------------------------------------------------------------------Com_variable_set::put_value
 
-STDMETHODIMP Com_variable_set::put_value( VARIANT* name, VARIANT* value )
+STDMETHODIMP Com_variable_set::put_Value( VARIANT* name, VARIANT* value )
 {
     if( name->vt == VT_BSTR )
     {
-        return put_var( V_BSTR(name), value );
+        return put_Var( V_BSTR(name), value );
     }
     else
     if( name->vt == VT_ERROR )
     {
         if( value->vt != VT_BSTR )  return DISP_E_TYPEMISMATCH;
         
-        return put_xml( V_BSTR(value) );
+        return put_Xml( V_BSTR(value) );
     }
     else 
         return DISP_E_TYPEMISMATCH;
@@ -330,11 +330,11 @@ STDMETHODIMP Com_variable_set::put_value( VARIANT* name, VARIANT* value )
 
 //----------------------------------------------------------------------Com_variable_set::get_value
 
-STDMETHODIMP Com_variable_set::get_value( VARIANT* name, VARIANT* value )
+STDMETHODIMP Com_variable_set::get_Value( VARIANT* name, VARIANT* value )
 {
     if( name->vt == VT_BSTR )
     {
-        return get_var( V_BSTR(name), value );
+        return get_Var( V_BSTR(name), value );
     }
     else
     if( name->vt == VT_ERROR )
@@ -342,7 +342,7 @@ STDMETHODIMP Com_variable_set::get_value( VARIANT* name, VARIANT* value )
         value->vt      = VT_BSTR;
         value->bstrVal = NULL;
 
-        HRESULT hr = get_xml( &V_BSTR(value) );
+        HRESULT hr = get_Xml( &V_BSTR(value) );
         if( !FAILED(hr) )  LOG( "Com_variable_set::get_value => " << string_from_bstr(V_BSTR(value)) << "\n" );
         return hr;
     }
@@ -352,7 +352,7 @@ STDMETHODIMP Com_variable_set::get_value( VARIANT* name, VARIANT* value )
 
 //------------------------------------------------------------------------Com_variable_set::put_var
 
-STDMETHODIMP Com_variable_set::put_var( BSTR name, VARIANT* value )
+STDMETHODIMP Com_variable_set::put_Var( BSTR name, VARIANT* value )
 {
     // Vorsicht mit _map.erase(): Ein Iterator auf das gelöschte Element wird ungültig. 
     // Com_variable_set_enumerator müsste dann ungültig werden. Aber wir benutzen erase() nicht.
@@ -370,7 +370,7 @@ STDMETHODIMP Com_variable_set::put_var( BSTR name, VARIANT* value )
             Map::iterator it = _map.find( lname );
             if( it != _map.end()  &&  it->second )
             {
-                it->second->put_value( value );
+                it->second->put_Value( value );
             }
             else
             {
@@ -387,7 +387,7 @@ STDMETHODIMP Com_variable_set::put_var( BSTR name, VARIANT* value )
 
 //------------------------------------------------------------------------Com_variable_set::get_var
 
-STDMETHODIMP Com_variable_set::get_var( BSTR name, VARIANT* value )
+STDMETHODIMP Com_variable_set::get_Var( BSTR name, VARIANT* value )
 {
     HRESULT hr = NOERROR;
 
@@ -403,7 +403,7 @@ STDMETHODIMP Com_variable_set::get_var( BSTR name, VARIANT* value )
             Map::iterator it = _map.find( lname );
             if( it != _map.end()  &&  it->second )
             {
-                hr = it->second->get_value( value );
+                hr = it->second->get_Value( value );
                 if( !FAILED(hr))  hr = S_OK;
             }
         }
@@ -416,7 +416,7 @@ STDMETHODIMP Com_variable_set::get_var( BSTR name, VARIANT* value )
 
 //----------------------------------------------------------------------Com_variable_set::get_count
 
-STDMETHODIMP Com_variable_set::get_count( int* result )
+STDMETHODIMP Com_variable_set::get_Count( int* result )
 {
     THREAD_LOCK( _lock )  *result = _map.size();
     return NOERROR;
@@ -424,7 +424,7 @@ STDMETHODIMP Com_variable_set::get_count( int* result )
 
 //------------------------------------------------------------------------Com_variable_set::get_dom
 
-STDMETHODIMP Com_variable_set::get_dom( IXMLDOMDocument** doc )  
+STDMETHODIMP Com_variable_set::get_Dom( IXMLDOMDocument** doc )  
 { 
 #   ifdef SPOOLER_HAS_MSXML
         
@@ -474,8 +474,8 @@ xml::Element_ptr Com_variable_set::dom_element( const xml::Document_ptr& doc, co
                 Bstr    name;
                 Variant value;
 
-                v->get_name( &name );
-                v->get_value( &value );
+                v->get_Name( &name );
+                v->get_Value( &value );
 
                 xml::Element_ptr var = doc.createElement( subelement_name );
                 var.setAttribute( "name" , string_from_bstr(name) );
@@ -556,7 +556,7 @@ STDMETHODIMP Com_variable_set::Clone( Ivariable_set** result )
 
 //--------------------------------------------------------------------------Com_variable_set::merge
 
-STDMETHODIMP Com_variable_set::merge( Ivariable_set* other )
+STDMETHODIMP Com_variable_set::Merge( Ivariable_set* other )
 {
     HRESULT hr = NOERROR;
 
@@ -598,13 +598,13 @@ STDMETHODIMP Com_variable_set::get__NewEnum( IUnknown** iunknown )
 
 void Com_variable_set::set_xml( const string& xml_text )  
 { 
-    HRESULT hr = put_xml( Bstr( xml_text ) );
+    HRESULT hr = put_Xml( Bstr( xml_text ) );
     if( FAILED(hr) )  throw_ole( hr, "Variable_set::xml" );
 }
 
 //------------------------------------------------------------------------Com_variable_set::put_xml
 
-STDMETHODIMP Com_variable_set::put_xml( BSTR xml_text )  
+STDMETHODIMP Com_variable_set::put_Xml( BSTR xml_text )  
 { 
     HRESULT hr = NOERROR;
 
@@ -622,7 +622,7 @@ STDMETHODIMP Com_variable_set::put_xml( BSTR xml_text )
                 VARTYPE vt    = e.int_getAttribute( "vt", VT_BSTR );
                 value.change_type( vt );
 
-                hr = put_var( name, &value );
+                hr = put_Var( name, &value );
                 if( FAILED( hr ) )  break;
             }
             else
@@ -638,7 +638,7 @@ STDMETHODIMP Com_variable_set::put_xml( BSTR xml_text )
 
 //------------------------------------------------------------------------Com_variable_set::get_xml
 
-STDMETHODIMP Com_variable_set::get_xml( BSTR* xml_doc  )  
+STDMETHODIMP Com_variable_set::get_Xml( BSTR* xml_doc  )  
 { 
     HRESULT hr = NOERROR;
 
@@ -765,38 +765,38 @@ STDMETHODIMP Com_variable_set_enumerator::Clone( IEnumVARIANT** ppenum )
 const Com_method Com_log::_methods[] =
 { 
    // _flags         , dispid, _name                   , _method                                           , _result_type  , _types        , _default_arg_count
-    { DISPATCH_METHOD     ,  1, "debug9"               , (Com_method_ptr)&Com_log::debug9                  , VT_EMPTY      , { VT_BSTR } },
-    { DISPATCH_METHOD     ,  2, "debug8"               , (Com_method_ptr)&Com_log::debug8                  , VT_EMPTY      , { VT_BSTR } },
-    { DISPATCH_METHOD     ,  3, "debug7"               , (Com_method_ptr)&Com_log::debug7                  , VT_EMPTY      , { VT_BSTR } },
-    { DISPATCH_METHOD     ,  4, "debug6"               , (Com_method_ptr)&Com_log::debug6                  , VT_EMPTY      , { VT_BSTR } },
-    { DISPATCH_METHOD     ,  5, "debug5"               , (Com_method_ptr)&Com_log::debug5                  , VT_EMPTY      , { VT_BSTR } },
-    { DISPATCH_METHOD     ,  6, "debug4"               , (Com_method_ptr)&Com_log::debug4                  , VT_EMPTY      , { VT_BSTR } },
-    { DISPATCH_METHOD     ,  7, "debug3"               , (Com_method_ptr)&Com_log::debug3                  , VT_EMPTY      , { VT_BSTR } },
-    { DISPATCH_METHOD     ,  8, "debug2"               , (Com_method_ptr)&Com_log::debug2                  , VT_EMPTY      , { VT_BSTR } },
-    { DISPATCH_METHOD     ,  9, "debug1"               , (Com_method_ptr)&Com_log::debug1                  , VT_EMPTY      , { VT_BSTR } },
-    { DISPATCH_METHOD     , 10, "debug"                , (Com_method_ptr)&Com_log::debug                   , VT_EMPTY      , { VT_BSTR } },
-    { DISPATCH_METHOD     ,  0, "info"                 , (Com_method_ptr)&Com_log::info                    , VT_EMPTY      , { VT_BSTR } },
-    { DISPATCH_METHOD     , 11, "msg"                  , (Com_method_ptr)&Com_log::msg                     , VT_EMPTY      , { VT_BSTR } },
-    { DISPATCH_METHOD     , 12, "warn"                 , (Com_method_ptr)&Com_log::warn                    , VT_EMPTY      , { VT_BSTR } },
-    { DISPATCH_METHOD     , 13, "error"                , (Com_method_ptr)&Com_log::error                   , VT_EMPTY      , { VT_BSTR } },
-    { DISPATCH_METHOD     , 14, "log"                  , (Com_method_ptr)&Com_log::log                     , VT_EMPTY      , { VT_I4, VT_BSTR } },
-    { DISPATCH_PROPERTYGET, 15, "mail"                 , (Com_method_ptr)&Com_log::get_mail                , VT_DISPATCH  },
-    { DISPATCH_PROPERTYPUT, 16, "mail_on_error"        , (Com_method_ptr)&Com_log::put_mail_on_error       , VT_EMPTY      , { VT_BOOL } },
-    { DISPATCH_PROPERTYGET, 16, "mail_on_error"        , (Com_method_ptr)&Com_log::get_mail_on_error       , VT_BOOL       },
-    { DISPATCH_PROPERTYPUT, 17, "mail_on_success"      , (Com_method_ptr)&Com_log::put_mail_on_success     , VT_EMPTY      , { VT_BOOL } },
-    { DISPATCH_PROPERTYGET, 17, "mail_on_success"      , (Com_method_ptr)&Com_log::get_mail_on_success     , VT_BOOL       },
-    { DISPATCH_PROPERTYPUT, 18, "mail_on_process"      , (Com_method_ptr)&Com_log::put_mail_on_process     , VT_EMPTY      , { VT_I4 } },
-    { DISPATCH_PROPERTYGET, 18, "mail_on_process"      , (Com_method_ptr)&Com_log::get_mail_on_process     , VT_I4         },
-    { DISPATCH_PROPERTYPUT, 19, "level"                , (Com_method_ptr)&Com_log::put_level               , VT_EMPTY      , { VT_I4 } },
-    { DISPATCH_PROPERTYGET, 19, "level"                , (Com_method_ptr)&Com_log::get_level               , VT_I4         },
-    { DISPATCH_PROPERTYGET, 20, "filename"             , (Com_method_ptr)&Com_log::get_filename            , VT_BSTR       },
-    { DISPATCH_PROPERTYPUT, 21, "collect_within"       , (Com_method_ptr)&Com_log::put_collect_within      , VT_EMPTY      , { VT_BYREF|VT_VARIANT } },
-    { DISPATCH_PROPERTYGET, 21, "collect_within"       , (Com_method_ptr)&Com_log::get_collect_within      , VT_R8         },
-    { DISPATCH_PROPERTYPUT, 22, "collect_max"          , (Com_method_ptr)&Com_log::put_collect_max         , VT_EMPTY      , { VT_BYREF|VT_VARIANT } },
-    { DISPATCH_PROPERTYGET, 22, "collect_max"          , (Com_method_ptr)&Com_log::get_collect_max         , VT_R8         },
-    { DISPATCH_PROPERTYPUT, 23, "mail_it"              , (Com_method_ptr)&Com_log::put_mail_it             , VT_EMPTY      , { VT_BOOL } },
-    { DISPATCH_PROPERTYGET, 24, "java_class_name"      , (Com_method_ptr)&Com_log::get_java_class_name     , VT_BSTR },
-    { DISPATCH_PROPERTYGET, 25, "last_error_line"      , (Com_method_ptr)&Com_log::get_last_error_line     , VT_BSTR },
+    { DISPATCH_METHOD     ,  1, "debug9"               , (Com_method_ptr)&Com_log::Debug9                  , VT_EMPTY      , { VT_BSTR } },
+    { DISPATCH_METHOD     ,  2, "debug8"               , (Com_method_ptr)&Com_log::Debug8                  , VT_EMPTY      , { VT_BSTR } },
+    { DISPATCH_METHOD     ,  3, "debug7"               , (Com_method_ptr)&Com_log::Debug7                  , VT_EMPTY      , { VT_BSTR } },
+    { DISPATCH_METHOD     ,  4, "debug6"               , (Com_method_ptr)&Com_log::Debug6                  , VT_EMPTY      , { VT_BSTR } },
+    { DISPATCH_METHOD     ,  5, "debug5"               , (Com_method_ptr)&Com_log::Debug5                  , VT_EMPTY      , { VT_BSTR } },
+    { DISPATCH_METHOD     ,  6, "debug4"               , (Com_method_ptr)&Com_log::Debug4                  , VT_EMPTY      , { VT_BSTR } },
+    { DISPATCH_METHOD     ,  7, "debug3"               , (Com_method_ptr)&Com_log::Debug3                  , VT_EMPTY      , { VT_BSTR } },
+    { DISPATCH_METHOD     ,  8, "debug2"               , (Com_method_ptr)&Com_log::Debug2                  , VT_EMPTY      , { VT_BSTR } },
+    { DISPATCH_METHOD     ,  9, "debug1"               , (Com_method_ptr)&Com_log::Debug1                  , VT_EMPTY      , { VT_BSTR } },
+    { DISPATCH_METHOD     , 10, "debug"                , (Com_method_ptr)&Com_log::Debug                   , VT_EMPTY      , { VT_BSTR } },
+    { DISPATCH_METHOD     ,  0, "info"                 , (Com_method_ptr)&Com_log::Info                    , VT_EMPTY      , { VT_BSTR } },
+    { DISPATCH_METHOD     , 11, "msg"                  , (Com_method_ptr)&Com_log::Msg                     , VT_EMPTY      , { VT_BSTR } },
+    { DISPATCH_METHOD     , 12, "warn"                 , (Com_method_ptr)&Com_log::Warn                    , VT_EMPTY      , { VT_BSTR } },
+    { DISPATCH_METHOD     , 13, "error"                , (Com_method_ptr)&Com_log::Error                   , VT_EMPTY      , { VT_BSTR } },
+    { DISPATCH_METHOD     , 14, "log"                  , (Com_method_ptr)&Com_log::Log                     , VT_EMPTY      , { VT_I4, VT_BSTR } },
+    { DISPATCH_PROPERTYGET, 15, "mail"                 , (Com_method_ptr)&Com_log::get_Mail                , VT_DISPATCH  },
+    { DISPATCH_PROPERTYPUT, 16, "mail_on_error"        , (Com_method_ptr)&Com_log::put_Mail_on_error       , VT_EMPTY      , { VT_BOOL } },
+    { DISPATCH_PROPERTYGET, 16, "mail_on_error"        , (Com_method_ptr)&Com_log::get_Mail_on_error       , VT_BOOL       },
+    { DISPATCH_PROPERTYPUT, 17, "mail_on_success"      , (Com_method_ptr)&Com_log::put_Mail_on_success     , VT_EMPTY      , { VT_BOOL } },
+    { DISPATCH_PROPERTYGET, 17, "mail_on_success"      , (Com_method_ptr)&Com_log::get_Mail_on_success     , VT_BOOL       },
+    { DISPATCH_PROPERTYPUT, 18, "mail_on_process"      , (Com_method_ptr)&Com_log::put_Mail_on_process     , VT_EMPTY      , { VT_I4 } },
+    { DISPATCH_PROPERTYGET, 18, "mail_on_process"      , (Com_method_ptr)&Com_log::get_Mail_on_process     , VT_I4         },
+    { DISPATCH_PROPERTYPUT, 19, "level"                , (Com_method_ptr)&Com_log::put_Level               , VT_EMPTY      , { VT_I4 } },
+    { DISPATCH_PROPERTYGET, 19, "level"                , (Com_method_ptr)&Com_log::get_Level               , VT_I4         },
+    { DISPATCH_PROPERTYGET, 20, "filename"             , (Com_method_ptr)&Com_log::get_Filename            , VT_BSTR       },
+    { DISPATCH_PROPERTYPUT, 21, "collect_within"       , (Com_method_ptr)&Com_log::put_Collect_within      , VT_EMPTY      , { VT_BYREF|VT_VARIANT } },
+    { DISPATCH_PROPERTYGET, 21, "collect_within"       , (Com_method_ptr)&Com_log::get_Collect_within      , VT_R8         },
+    { DISPATCH_PROPERTYPUT, 22, "collect_max"          , (Com_method_ptr)&Com_log::put_Collect_max         , VT_EMPTY      , { VT_BYREF|VT_VARIANT } },
+    { DISPATCH_PROPERTYGET, 22, "collect_max"          , (Com_method_ptr)&Com_log::get_Collect_max         , VT_R8         },
+    { DISPATCH_PROPERTYPUT, 23, "mail_it"              , (Com_method_ptr)&Com_log::put_Mail_it             , VT_EMPTY      , { VT_BOOL } },
+    { DISPATCH_PROPERTYGET, 24, "java_class_name"      , (Com_method_ptr)&Com_log::get_Java_class_name     , VT_BSTR },
+    { DISPATCH_PROPERTYGET, 25, "last_error_line"      , (Com_method_ptr)&Com_log::get_Last_error_line     , VT_BSTR },
     {}
 };
 
@@ -855,24 +855,24 @@ void Com_log::set_log( Prefix_log* log )
 
 //----------------------------------------------------------------------------------------Com_log::
     
-STDMETHODIMP Com_log::debug9( BSTR line )                       { return log( spooler_com::log_debug9, line ); }
-STDMETHODIMP Com_log::debug8( BSTR line )                       { return log( spooler_com::log_debug8, line ); }
-STDMETHODIMP Com_log::debug7( BSTR line )                       { return log( spooler_com::log_debug7, line ); }
-STDMETHODIMP Com_log::debug6( BSTR line )                       { return log( spooler_com::log_debug6, line ); }
-STDMETHODIMP Com_log::debug5( BSTR line )                       { return log( spooler_com::log_debug5, line ); }
-STDMETHODIMP Com_log::debug4( BSTR line )                       { return log( spooler_com::log_debug4, line ); }
-STDMETHODIMP Com_log::debug3( BSTR line )                       { return log( spooler_com::log_debug3, line ); }
-STDMETHODIMP Com_log::debug2( BSTR line )                       { return log( spooler_com::log_debug2, line ); }
-STDMETHODIMP Com_log::debug1( BSTR line )                       { return log( spooler_com::log_debug1, line ); }
-STDMETHODIMP Com_log::debug ( BSTR line )                       { return log( spooler_com::log_debug1, line ); }
-STDMETHODIMP Com_log::msg   ( BSTR line )                       { return log( spooler_com::log_info  , line ); }
-STDMETHODIMP Com_log::info  ( BSTR line )                       { return log( spooler_com::log_info  , line ); }
-STDMETHODIMP Com_log::warn  ( BSTR line )                       { return log( spooler_com::log_warn  , line ); }
-STDMETHODIMP Com_log::error ( BSTR line )                       { return log( spooler_com::log_error , line ); }
+STDMETHODIMP Com_log::Debug9( BSTR line )                       { return Log( spooler_com::log_debug9, line ); }
+STDMETHODIMP Com_log::Debug8( BSTR line )                       { return Log( spooler_com::log_debug8, line ); }
+STDMETHODIMP Com_log::Debug7( BSTR line )                       { return Log( spooler_com::log_debug7, line ); }
+STDMETHODIMP Com_log::Debug6( BSTR line )                       { return Log( spooler_com::log_debug6, line ); }
+STDMETHODIMP Com_log::Debug5( BSTR line )                       { return Log( spooler_com::log_debug5, line ); }
+STDMETHODIMP Com_log::Debug4( BSTR line )                       { return Log( spooler_com::log_debug4, line ); }
+STDMETHODIMP Com_log::Debug3( BSTR line )                       { return Log( spooler_com::log_debug3, line ); }
+STDMETHODIMP Com_log::Debug2( BSTR line )                       { return Log( spooler_com::log_debug2, line ); }
+STDMETHODIMP Com_log::Debug1( BSTR line )                       { return Log( spooler_com::log_debug1, line ); }
+STDMETHODIMP Com_log::Debug ( BSTR line )                       { return Log( spooler_com::log_debug1, line ); }
+STDMETHODIMP Com_log::Msg   ( BSTR line )                       { return Log( spooler_com::log_info  , line ); }
+STDMETHODIMP Com_log::Info  ( BSTR line )                       { return Log( spooler_com::log_info  , line ); }
+STDMETHODIMP Com_log::Warn  ( BSTR line )                       { return Log( spooler_com::log_warn  , line ); }
+STDMETHODIMP Com_log::Error ( BSTR line )                       { return Log( spooler_com::log_error , line ); }
 
 //-------------------------------------------------------------------------------------Com_log::log
 
-STDMETHODIMP Com_log::log( spooler_com::Log_level level, BSTR line )
+STDMETHODIMP Com_log::Log( spooler_com::Log_level level, BSTR line )
 { 
     HRESULT hr = NOERROR;
 
@@ -891,7 +891,7 @@ STDMETHODIMP Com_log::log( spooler_com::Log_level level, BSTR line )
 
 //--------------------------------------------------------------------------------Com_log::get_mail
 
-STDMETHODIMP Com_log::get_mail( Imail** mail )
+STDMETHODIMP Com_log::get_Mail( Imail** mail )
 { 
     HRESULT hr = NOERROR;
 
@@ -911,7 +911,7 @@ STDMETHODIMP Com_log::get_mail( Imail** mail )
 
 //-----------------------------------------------------------------------Com_log::put_mail_on_error
 
-STDMETHODIMP Com_log::put_mail_on_error( VARIANT_BOOL b )
+STDMETHODIMP Com_log::put_Mail_on_error( VARIANT_BOOL b )
 {
     HRESULT hr = NOERROR;
 
@@ -930,7 +930,7 @@ STDMETHODIMP Com_log::put_mail_on_error( VARIANT_BOOL b )
 
 //-----------------------------------------------------------------------Com_log::get_mail_on_error
 
-STDMETHODIMP Com_log::get_mail_on_error( VARIANT_BOOL* b )
+STDMETHODIMP Com_log::get_Mail_on_error( VARIANT_BOOL* b )
 {
     HRESULT hr = NOERROR;
 
@@ -950,7 +950,7 @@ STDMETHODIMP Com_log::get_mail_on_error( VARIANT_BOOL* b )
     
 //----------------------------------------------------------------------Com_log::put_mail_on_success
 
-STDMETHODIMP Com_log::put_mail_on_success( VARIANT_BOOL b )
+STDMETHODIMP Com_log::put_Mail_on_success( VARIANT_BOOL b )
 {
     HRESULT hr = NOERROR;
 
@@ -969,7 +969,7 @@ STDMETHODIMP Com_log::put_mail_on_success( VARIANT_BOOL b )
 
 //---------------------------------------------------------------------Com_log::get_mail_on_success
 
-STDMETHODIMP Com_log::get_mail_on_success( VARIANT_BOOL* b )
+STDMETHODIMP Com_log::get_Mail_on_success( VARIANT_BOOL* b )
 {
     HRESULT hr = NOERROR;
 
@@ -988,7 +988,7 @@ STDMETHODIMP Com_log::get_mail_on_success( VARIANT_BOOL* b )
 
 //----------------------------------------------------------------------Com_log::put_mail_on_process
 
-STDMETHODIMP Com_log::put_mail_on_process( int level )
+STDMETHODIMP Com_log::put_Mail_on_process( int level )
 {
     HRESULT hr = NOERROR;
 
@@ -1007,7 +1007,7 @@ STDMETHODIMP Com_log::put_mail_on_process( int level )
 
 //---------------------------------------------------------------------Com_log::get_mail_on_process
 
-STDMETHODIMP Com_log::get_mail_on_process( int* result )
+STDMETHODIMP Com_log::get_Mail_on_process( int* result )
 {
     HRESULT hr = NOERROR;
 
@@ -1026,7 +1026,7 @@ STDMETHODIMP Com_log::get_mail_on_process( int* result )
 
 //-----------------------------------------------------------------------------------Com_log::level
 
-STDMETHODIMP Com_log::put_level( int level )
+STDMETHODIMP Com_log::put_Level( int level )
 {
     HRESULT hr = NOERROR;
 
@@ -1045,7 +1045,7 @@ STDMETHODIMP Com_log::put_level( int level )
 
 //-----------------------------------------------------------------------------------Com_log::level
 
-STDMETHODIMP Com_log::get_level( int* level )
+STDMETHODIMP Com_log::get_Level( int* level )
 {
     HRESULT hr = NOERROR;
 
@@ -1064,7 +1064,7 @@ STDMETHODIMP Com_log::get_level( int* level )
 
 //--------------------------------------------------------------------------------Com_log::filename
 
-STDMETHODIMP Com_log::get_filename( BSTR* filename_bstr )
+STDMETHODIMP Com_log::get_Filename( BSTR* filename_bstr )
 {
     HRESULT hr = NOERROR;
 
@@ -1083,7 +1083,7 @@ STDMETHODIMP Com_log::get_filename( BSTR* filename_bstr )
 
 //----------------------------------------------------------------------------Com_log::new_filename
 
-STDMETHODIMP Com_log::put_new_filename( BSTR filename_bstr )
+STDMETHODIMP Com_log::put_New_filename( BSTR filename_bstr )
 {
     HRESULT hr = NOERROR;
 
@@ -1101,7 +1101,7 @@ STDMETHODIMP Com_log::put_new_filename( BSTR filename_bstr )
 
 //----------------------------------------------------------------------------Com_log::new_filename
 
-STDMETHODIMP Com_log::get_new_filename( BSTR* filename_bstr )
+STDMETHODIMP Com_log::get_New_filename( BSTR* filename_bstr )
 {
     HRESULT hr = NOERROR;
 
@@ -1120,7 +1120,7 @@ STDMETHODIMP Com_log::get_new_filename( BSTR* filename_bstr )
 
 //--------------------------------------------------------------------------Com_log::collect_within
 
-STDMETHODIMP Com_log::put_collect_within( VARIANT* time )
+STDMETHODIMP Com_log::put_Collect_within( VARIANT* time )
 {
     HRESULT hr = NOERROR;
 
@@ -1139,7 +1139,7 @@ STDMETHODIMP Com_log::put_collect_within( VARIANT* time )
 
 //--------------------------------------------------------------------------Com_log::collect_within
 
-STDMETHODIMP Com_log::get_collect_within( double* result )
+STDMETHODIMP Com_log::get_Collect_within( double* result )
 {
     HRESULT hr = NOERROR;
 
@@ -1158,7 +1158,7 @@ STDMETHODIMP Com_log::get_collect_within( double* result )
 
 //-----------------------------------------------------------------------------Com_log::collect_max
 
-STDMETHODIMP Com_log::put_collect_max( VARIANT* time )
+STDMETHODIMP Com_log::put_Collect_max( VARIANT* time )
 {
     HRESULT hr = NOERROR;
 
@@ -1177,7 +1177,7 @@ STDMETHODIMP Com_log::put_collect_max( VARIANT* time )
 
 //-----------------------------------------------------------------------------Com_log::collect_max
 
-STDMETHODIMP Com_log::get_collect_max( double* result )
+STDMETHODIMP Com_log::get_Collect_max( double* result )
 {
     HRESULT hr = NOERROR;
 
@@ -1196,7 +1196,7 @@ STDMETHODIMP Com_log::get_collect_max( double* result )
 
 //-----------------------------------------------------------------------------Com_log::put_mail_it
 
-STDMETHODIMP Com_log::put_mail_it( VARIANT_BOOL b )
+STDMETHODIMP Com_log::put_Mail_it( VARIANT_BOOL b )
 {
     HRESULT hr = NOERROR;
 
@@ -1215,7 +1215,7 @@ STDMETHODIMP Com_log::put_mail_it( VARIANT_BOOL b )
 
 //---------------------------------------------------------------------Com_log::get_last_error_line
 
-STDMETHODIMP Com_log::get_last_error_line( BSTR* result )
+STDMETHODIMP Com_log::get_Last_error_line( BSTR* result )
 {
     HRESULT hr = NOERROR;
 
@@ -1234,7 +1234,7 @@ STDMETHODIMP Com_log::get_last_error_line( BSTR* result )
 
 //-------------------------------------------------------------------Com_log_proxy::create_instance
 
-HRESULT Com_log_proxy::create_instance( const IID& iid, ptr<IUnknown>* result )
+HRESULT Com_log_proxy::Create_instance( const IID& iid, ptr<IUnknown>* result )
 {
     if( iid == object_server::IID_Iproxy )
     {
@@ -1371,8 +1371,8 @@ STDMETHODIMP Com_log_proxy::log( spooler_com::Log_level level, BSTR line )
 const Com_method Com_object_set::_methods[] =
 { 
    // _flags         , dispid, _name                   , _method                                           , _result_type  , _types        , _default_arg_count
-    { DISPATCH_PROPERTYGET,  1, "low_level"            , (Com_method_ptr)&Com_object_set::get_low_level    , VT_I4         },
-    { DISPATCH_PROPERTYGET,  2, "high_level"           , (Com_method_ptr)&Com_object_set::get_high_level   , VT_I4         },
+    { DISPATCH_PROPERTYGET,  1, "low_level"            , (Com_method_ptr)&Com_object_set::get_Low_level    , VT_I4         },
+    { DISPATCH_PROPERTYGET,  2, "high_level"           , (Com_method_ptr)&Com_object_set::get_High_level   , VT_I4         },
     {}
 };
 
@@ -1388,7 +1388,7 @@ Com_object_set::Com_object_set( Object_set* object_set )
 
 //--------------------------------------------------------------------Com_object_set::get_low_level
 
-STDMETHODIMP Com_object_set::get_low_level( int* result )
+STDMETHODIMP Com_object_set::get_Low_level( int* result )
 {
     THREAD_LOCK( _lock )
     {
@@ -1403,7 +1403,7 @@ STDMETHODIMP Com_object_set::get_low_level( int* result )
 
 //-------------------------------------------------------------------Com_object_set::get_high_level
 
-STDMETHODIMP Com_object_set::get_high_level( int* result )
+STDMETHODIMP Com_object_set::get_High_level( int* result )
 {
     THREAD_LOCK( _lock )
     {
@@ -1421,21 +1421,21 @@ STDMETHODIMP Com_object_set::get_high_level( int* result )
 const Com_method Com_job::_methods[] =
 { 
    // _flags         , dispid, _name                            , _method                                               , _result_type  , _types        , _default_arg_count
-    { DISPATCH_METHOD     ,  1, "start_when_directory_changed"  , (Com_method_ptr)&Com_job::start_when_directory_changed, VT_EMPTY      , { VT_BSTR, VT_BSTR }, 1 },
-    { DISPATCH_METHOD     ,  2, "clear_when_directory_changed"  , (Com_method_ptr)&Com_job::clear_when_directory_changed },
-    { DISPATCH_METHOD     ,  3, "start"                         , (Com_method_ptr)&Com_job::start                       , VT_DISPATCH   , { VT_BYREF|VT_VARIANT }, 1 },
-  //{ DISPATCH_PROPERTYGET,  4, "thread"                        , (Com_method_ptr)&Com_job::get_thread                  , VT_DISPATCH   },
-    { DISPATCH_PROPERTYGET,  5, "include_path"                  , (Com_method_ptr)&Com_job::get_include_path            , VT_BSTR       },
-    { DISPATCH_PROPERTYGET,  6, "name"                          , (Com_method_ptr)&Com_job::get_name                    , VT_BSTR       },
-    { DISPATCH_METHOD     ,  7, "wake"                          , (Com_method_ptr)&Com_job::wake                        },
-    { DISPATCH_PROPERTYPUT,  8, "state_text"                    , (Com_method_ptr)&Com_job::put_state_text              , VT_EMPTY      , { VT_BSTR } },
-    { DISPATCH_PROPERTYGET,  9, "title"                         , (Com_method_ptr)&Com_job::get_title                   , VT_BSTR       },
-    { DISPATCH_PROPERTYPUT, 10, "delay_after_error"             , (Com_method_ptr)&Com_job::put_delay_after_error       , VT_EMPTY      , { VT_I4, VT_BYREF|VT_VARIANT } },
-    { DISPATCH_PROPERTYGET, 11, "order_queue"                   , (Com_method_ptr)&Com_job::get_order_queue             , VT_DISPATCH   },
-    { DISPATCH_PROPERTYGET, 12, "java_class_name"               , (Com_method_ptr)&Com_job::get_java_class_name         , VT_BSTR },
-    { DISPATCH_PROPERTYPUT, 13, "delay_order_after_setback"     , (Com_method_ptr)&Com_job::put_delay_order_after_setback,VT_EMPTY      , { VT_I4, VT_BYREF|VT_VARIANT } },
-    { DISPATCH_PROPERTYPUT, 14, "max_order_setbacks"            , (Com_method_ptr)&Com_job::put_max_order_setbacks      , VT_EMPTY      , { VT_I4 } },
-    { DISPATCH_METHOD     , 15, "clear_delay_after_error"       , (Com_method_ptr)&Com_job::clear_delay_after_error     , VT_EMPTY      },
+    { DISPATCH_METHOD     ,  1, "start_when_directory_changed"  , (Com_method_ptr)&Com_job::Start_when_directory_changed, VT_EMPTY      , { VT_BSTR, VT_BSTR }, 1 },
+    { DISPATCH_METHOD     ,  2, "clear_when_directory_changed"  , (Com_method_ptr)&Com_job::Clear_when_directory_changed },
+    { DISPATCH_METHOD     ,  3, "start"                         , (Com_method_ptr)&Com_job::Start                       , VT_DISPATCH   , { VT_BYREF|VT_VARIANT }, 1 },
+  //{ DISPATCH_PROPERTYGET,  4, "thread"                        , (Com_method_ptr)&Com_job::get_Thread                  , VT_DISPATCH   },
+    { DISPATCH_PROPERTYGET,  5, "include_path"                  , (Com_method_ptr)&Com_job::get_Include_path            , VT_BSTR       },
+    { DISPATCH_PROPERTYGET,  6, "name"                          , (Com_method_ptr)&Com_job::get_Name                    , VT_BSTR       },
+    { DISPATCH_METHOD     ,  7, "wake"                          , (Com_method_ptr)&Com_job::Wake                        },
+    { DISPATCH_PROPERTYPUT,  8, "state_text"                    , (Com_method_ptr)&Com_job::put_State_text              , VT_EMPTY      , { VT_BSTR } },
+    { DISPATCH_PROPERTYGET,  9, "title"                         , (Com_method_ptr)&Com_job::get_Title                   , VT_BSTR       },
+    { DISPATCH_PROPERTYPUT, 10, "delay_after_error"             , (Com_method_ptr)&Com_job::put_Delay_after_error       , VT_EMPTY      , { VT_I4, VT_BYREF|VT_VARIANT } },
+    { DISPATCH_PROPERTYGET, 11, "order_queue"                   , (Com_method_ptr)&Com_job::get_Order_queue             , VT_DISPATCH   },
+    { DISPATCH_PROPERTYGET, 12, "java_class_name"               , (Com_method_ptr)&Com_job::get_Java_class_name         , VT_BSTR },
+    { DISPATCH_PROPERTYPUT, 13, "delay_order_after_setback"     , (Com_method_ptr)&Com_job::put_Delay_order_after_setback,VT_EMPTY      , { VT_I4, VT_BYREF|VT_VARIANT } },
+    { DISPATCH_PROPERTYPUT, 14, "max_order_setbacks"            , (Com_method_ptr)&Com_job::put_Max_order_setbacks      , VT_EMPTY      , { VT_I4 } },
+    { DISPATCH_METHOD     , 15, "clear_delay_after_error"       , (Com_method_ptr)&Com_job::Clear_delay_after_error     , VT_EMPTY      },
     {}
 };
 
@@ -1460,7 +1460,7 @@ STDMETHODIMP Com_job::QueryInterface( const IID& iid, void** result )
 
 //------------------------------------------------------------Com_job::start_when_directory_changed 
 
-STDMETHODIMP Com_job::start_when_directory_changed( BSTR directory_name, BSTR filename_pattern )
+STDMETHODIMP Com_job::Start_when_directory_changed( BSTR directory_name, BSTR filename_pattern )
 {
     HRESULT hr = NOERROR;
 
@@ -1479,7 +1479,7 @@ STDMETHODIMP Com_job::start_when_directory_changed( BSTR directory_name, BSTR fi
 
 //------------------------------------------------------------Com_job::clear_when_directory_changed 
 
-STDMETHODIMP Com_job::clear_when_directory_changed()
+STDMETHODIMP Com_job::Clear_when_directory_changed()
 {
     HRESULT hr = NOERROR;
 
@@ -1497,7 +1497,7 @@ STDMETHODIMP Com_job::clear_when_directory_changed()
 
 //-----------------------------------------------------------------------------------Com_job::start
 
-STDMETHODIMP Com_job::start( VARIANT* params, Itask** itask )
+STDMETHODIMP Com_job::Start( VARIANT* params, Itask** itask )
 {
     HRESULT hr = NOERROR;
 
@@ -1519,11 +1519,11 @@ STDMETHODIMP Com_job::start( VARIANT* params, Itask** itask )
         }
 
         Variant task_name_vt;
-        if( pars )  pars->get_var( Bstr("spooler_task_name"), &task_name_vt );
+        if( pars )  pars->get_Var( Bstr("spooler_task_name"), &task_name_vt );
         hr = task_name_vt.ChangeType( VT_BSTR );    if( FAILED(hr) )  throw_ole( hr, "ChangeType", "spooler_task_name" );
 
         Variant start_after_vt;
-        if( pars )  pars->get_var( Bstr("spooler_start_after"), &start_after_vt );
+        if( pars )  pars->get_Var( Bstr("spooler_start_after"), &start_after_vt );
         if( start_after_vt.vt != VT_EMPTY )
         {
             hr = start_after_vt.ChangeType( VT_R8 );    if( FAILED(hr) )  throw_ole( hr, "ChangeType", "spooler_start_after" );
@@ -1547,7 +1547,7 @@ STDMETHODIMP Com_job::start( VARIANT* params, Itask** itask )
 
 //------------------------------------------------------------------------------------Com_job::wake
 
-STDMETHODIMP Com_job::wake()
+STDMETHODIMP Com_job::Wake()
 {
     HRESULT hr = NOERROR;
 
@@ -1565,7 +1565,7 @@ STDMETHODIMP Com_job::wake()
 
 //------------------------------------------------------------------------------Com_job::get_thread
 /*
-STDMETHODIMP Com_job::get_thread( Ithread** thread )
+STDMETHODIMP Com_job::get_Thread( Ithread** thread )
 {
     HRESULT hr = NOERROR;
 
@@ -1582,7 +1582,7 @@ STDMETHODIMP Com_job::get_thread( Ithread** thread )
 */
 //------------------------------------------------------------------------Com_job::get_include_path
 
-STDMETHODIMP Com_job::get_include_path( BSTR* result )
+STDMETHODIMP Com_job::get_Include_path( BSTR* result )
 {
     THREAD_LOCK( _lock )
     {
@@ -1597,7 +1597,7 @@ STDMETHODIMP Com_job::get_include_path( BSTR* result )
 
 //--------------------------------------------------------------------------------Com_job::get_name
 
-STDMETHODIMP Com_job::get_name( BSTR* result )
+STDMETHODIMP Com_job::get_Name( BSTR* result )
 {
     THREAD_LOCK( _lock )
     {
@@ -1612,7 +1612,7 @@ STDMETHODIMP Com_job::get_name( BSTR* result )
 
 //--------------------------------------------------------------------------Com_job::put_state_text
 
-STDMETHODIMP Com_job::put_state_text( BSTR text )
+STDMETHODIMP Com_job::put_State_text( BSTR text )
 {
     HRESULT hr = NOERROR;
 
@@ -1632,7 +1632,7 @@ STDMETHODIMP Com_job::put_state_text( BSTR text )
 
 //-------------------------------------------------------------------------------Com_job::get_title
 
-STDMETHODIMP Com_job::get_title( BSTR* title )
+STDMETHODIMP Com_job::get_Title( BSTR* title )
 {
     HRESULT hr = NOERROR;
 
@@ -1651,7 +1651,7 @@ STDMETHODIMP Com_job::get_title( BSTR* title )
 
 //-------------------------------------------------------------------Com_job::put_delay_after_error
 
-STDMETHODIMP Com_job::put_delay_after_error( int error_steps, VARIANT* time )
+STDMETHODIMP Com_job::put_Delay_after_error( int error_steps, VARIANT* time )
 {
     HRESULT hr = NOERROR;
 
@@ -1677,7 +1677,7 @@ STDMETHODIMP Com_job::put_delay_after_error( int error_steps, VARIANT* time )
 
 //-----------------------------------------------------------------Com_job::clear_delay_after_error
 
-STDMETHODIMP Com_job::clear_delay_after_error()
+STDMETHODIMP Com_job::Clear_delay_after_error()
 {
     HRESULT hr = NOERROR;
 
@@ -1696,7 +1696,7 @@ STDMETHODIMP Com_job::clear_delay_after_error()
 
 //-------------------------------------------------------------------------Com_job::get_order_queue
 
-STDMETHODIMP Com_job::get_order_queue( Iorder_queue** result )
+STDMETHODIMP Com_job::get_Order_queue( Iorder_queue** result )
 {
     HRESULT hr = NOERROR;
 
@@ -1716,7 +1716,7 @@ STDMETHODIMP Com_job::get_order_queue( Iorder_queue** result )
 
 //-----------------------------------------------------------Com_job::put_delay_order_after_setback
 
-STDMETHODIMP Com_job::put_delay_order_after_setback( int setback_number, VARIANT* time )
+STDMETHODIMP Com_job::put_Delay_order_after_setback( int setback_number, VARIANT* time )
 {
     HRESULT hr = NOERROR;
 
@@ -1735,7 +1735,7 @@ STDMETHODIMP Com_job::put_delay_order_after_setback( int setback_number, VARIANT
 
 //------------------------------------------------------------------Com_job::put_max_order_setbacks
 
-STDMETHODIMP Com_job::put_max_order_setbacks( int count )
+STDMETHODIMP Com_job::put_Max_order_setbacks( int count )
 {
     HRESULT hr = NOERROR;
 
@@ -1758,25 +1758,25 @@ STDMETHODIMP Com_job::put_max_order_setbacks( int count )
 const Com_method Com_task::_methods[] =
 { 
    // _flags         , dispid, _name                        , _method                                           , _result_type  , _types        , _default_arg_count
-    { DISPATCH_PROPERTYGET,  1, "object_set"                , (Com_method_ptr)&Com_task::get_object_set         , VT_DISPATCH  },
-    { DISPATCH_PROPERTYPUT,  2, "error"                     , (Com_method_ptr)&Com_task::put_error              , VT_EMPTY      , { VT_BYREF|VT_VARIANT } },
-    { DISPATCH_PROPERTYGET,  2, "error"                     , (Com_method_ptr)&Com_task::get_error              , VT_DISPATCH  },
-    { DISPATCH_PROPERTYGET,  3, "job"                       , (Com_method_ptr)&Com_task::get_job                , VT_DISPATCH  },
-    { DISPATCH_PROPERTYGET,  4, "params"                    , (Com_method_ptr)&Com_task::get_params             , VT_DISPATCH  },
-    { DISPATCH_PROPERTYPUT,  5, "result"                    , (Com_method_ptr)&Com_task::put_result             , VT_EMPTY      , { VT_BYREF|VT_DISPATCH } },
-    { DISPATCH_PROPERTYGET,  5, "result"                    , (Com_method_ptr)&Com_task::get_result             , VT_DISPATCH  },
-    { DISPATCH_METHOD     ,  6, "wait_until_terminated"     , (Com_method_ptr)&Com_task::wait_until_terminated  , VT_BOOL       , { VT_R8 } },
-    { DISPATCH_PROPERTYPUT,  7, "repeat"                    , (Com_method_ptr)&Com_task::put_repeat             , VT_EMPTY      , { VT_R8 } },
-    { DISPATCH_METHOD     ,  8, "end"                       , (Com_method_ptr)&Com_task::end                    },
-    { DISPATCH_PROPERTYPUT,  9, "history_field"             , (Com_method_ptr)&Com_task::put_history_field      , VT_EMPTY      , { VT_BSTR, VT_BYREF|VT_VARIANT } },
-    { DISPATCH_PROPERTYGET, 10, "id"                        , (Com_method_ptr)&Com_task::get_id                 , VT_I4         },
-    { DISPATCH_PROPERTYPUT, 11, "delay_spooler_process"     , (Com_method_ptr)&Com_task::put_delay_spooler_process, VT_EMPTY    , { VT_BYREF|VT_VARIANT } },
-    { DISPATCH_PROPERTYPUT, 12, "close_engine"              , (Com_method_ptr)&Com_task::put_close_engine       , VT_EMPTY      , { VT_BOOL } },
-    { DISPATCH_PROPERTYGET, 13, "order"                     , (Com_method_ptr)&Com_task::get_order              , VT_DISPATCH   },
-    { DISPATCH_PROPERTYGET, 14, "java_class_name"           , (Com_method_ptr)&Com_task::get_java_class_name    , VT_BSTR },
-    { DISPATCH_PROPERTYGET, 15, "changed_directories"       , (Com_method_ptr)&Com_task::get_changed_directories, VT_BSTR },
-    { DISPATCH_PROPERTYGET, 16, "add_pid"                   , (Com_method_ptr)&Com_task::add_pid                , VT_EMPTY      , { VT_INT, VT_BYREF|VT_DISPATCH }, 1 },
-    { DISPATCH_PROPERTYGET, 17, "remove_pid"                , (Com_method_ptr)&Com_task::remove_pid             , VT_BSTR       , { VT_INT } },
+    { DISPATCH_PROPERTYGET,  1, "object_set"                , (Com_method_ptr)&Com_task::get_Object_set         , VT_DISPATCH  },
+    { DISPATCH_PROPERTYPUT,  2, "error"                     , (Com_method_ptr)&Com_task::put_Error              , VT_EMPTY      , { VT_BYREF|VT_VARIANT } },
+    { DISPATCH_PROPERTYGET,  2, "error"                     , (Com_method_ptr)&Com_task::get_Error              , VT_DISPATCH  },
+    { DISPATCH_PROPERTYGET,  3, "job"                       , (Com_method_ptr)&Com_task::get_Job                , VT_DISPATCH  },
+    { DISPATCH_PROPERTYGET,  4, "params"                    , (Com_method_ptr)&Com_task::get_Params             , VT_DISPATCH  },
+    { DISPATCH_PROPERTYPUT,  5, "result"                    , (Com_method_ptr)&Com_task::put_Result             , VT_EMPTY      , { VT_BYREF|VT_DISPATCH } },
+    { DISPATCH_PROPERTYGET,  5, "result"                    , (Com_method_ptr)&Com_task::get_Result             , VT_DISPATCH  },
+    { DISPATCH_METHOD     ,  6, "wait_until_terminated"     , (Com_method_ptr)&Com_task::Wait_until_terminated  , VT_BOOL       , { VT_R8 } },
+    { DISPATCH_PROPERTYPUT,  7, "repeat"                    , (Com_method_ptr)&Com_task::put_Repeat             , VT_EMPTY      , { VT_R8 } },
+    { DISPATCH_METHOD     ,  8, "end"                       , (Com_method_ptr)&Com_task::End                    },
+    { DISPATCH_PROPERTYPUT,  9, "history_field"             , (Com_method_ptr)&Com_task::put_History_field      , VT_EMPTY      , { VT_BSTR, VT_BYREF|VT_VARIANT } },
+    { DISPATCH_PROPERTYGET, 10, "id"                        , (Com_method_ptr)&Com_task::get_Id                 , VT_I4         },
+    { DISPATCH_PROPERTYPUT, 11, "delay_spooler_process"     , (Com_method_ptr)&Com_task::put_Delay_spooler_process, VT_EMPTY    , { VT_BYREF|VT_VARIANT } },
+    { DISPATCH_PROPERTYPUT, 12, "close_engine"              , (Com_method_ptr)&Com_task::put_Close_engine       , VT_EMPTY      , { VT_BOOL } },
+    { DISPATCH_PROPERTYGET, 13, "order"                     , (Com_method_ptr)&Com_task::get_Order              , VT_DISPATCH   },
+    { DISPATCH_PROPERTYGET, 14, "java_class_name"           , (Com_method_ptr)&Com_task::get_Java_class_name    , VT_BSTR },
+    { DISPATCH_PROPERTYGET, 15, "changed_directories"       , (Com_method_ptr)&Com_task::get_Changed_directories, VT_BSTR },
+    { DISPATCH_PROPERTYGET, 16, "add_pid"                   , (Com_method_ptr)&Com_task::Add_pid                , VT_EMPTY      , { VT_INT, VT_BYREF|VT_DISPATCH }, 1 },
+    { DISPATCH_PROPERTYGET, 17, "remove_pid"                , (Com_method_ptr)&Com_task::Remove_pid             , VT_BSTR       , { VT_INT } },
     {}
 };
 
@@ -1811,7 +1811,7 @@ void Com_task::set_task( Task* task )
 
 //-------------------------------------------------------------------------Com_task::get_object_set
 
-STDMETHODIMP Com_task::get_object_set( Iobject_set** result )
+STDMETHODIMP Com_task::get_Object_set( Iobject_set** result )
 {
     return E_NOTIMPL;
 /*
@@ -1836,7 +1836,7 @@ STDMETHODIMP Com_task::get_object_set( Iobject_set** result )
 
 //----------------------------------------------------------------------------------Com_task::error
 
-STDMETHODIMP Com_task::put_error( VARIANT* error_par )
+STDMETHODIMP Com_task::put_Error( VARIANT* error_par )
 {
     HRESULT hr = NOERROR;
 
@@ -1860,7 +1860,7 @@ STDMETHODIMP Com_task::put_error( VARIANT* error_par )
 
 //----------------------------------------------------------------------------------Com_task::error
 
-STDMETHODIMP Com_task::get_error( Ierror** result )
+STDMETHODIMP Com_task::get_Error( Ierror** result )
 {
     HRESULT hr = NOERROR;
 
@@ -1880,7 +1880,7 @@ STDMETHODIMP Com_task::get_error( Ierror** result )
 
 //--------------------------------------------------------------------------------Com_task::get_job
 
-STDMETHODIMP Com_task::get_job( Ijob** result )
+STDMETHODIMP Com_task::get_Job( Ijob** result )
 {
     HRESULT hr = NOERROR;
 
@@ -1900,7 +1900,7 @@ STDMETHODIMP Com_task::get_job( Ijob** result )
 
 //-----------------------------------------------------------------------------Com_task::get_params
 
-STDMETHODIMP Com_task::get_params( Ivariable_set** result )
+STDMETHODIMP Com_task::get_Params( Ivariable_set** result )
 {
     HRESULT hr = NOERROR;
 
@@ -1920,7 +1920,7 @@ STDMETHODIMP Com_task::get_params( Ivariable_set** result )
 
 //------------------------------------------------------------------Com_task::wait_until_terminated
 
-STDMETHODIMP Com_task::wait_until_terminated( double wait_time, VARIANT_BOOL* ok )
+STDMETHODIMP Com_task::Wait_until_terminated( double wait_time, VARIANT_BOOL* ok )
 {
     HRESULT hr = NOERROR;
 
@@ -1938,7 +1938,7 @@ STDMETHODIMP Com_task::wait_until_terminated( double wait_time, VARIANT_BOOL* ok
 
 //------------------------------------------------------------------------------------Com_task::end
 
-STDMETHODIMP Com_task::end()
+STDMETHODIMP Com_task::End()
 {
     HRESULT hr = NOERROR;
 
@@ -1955,7 +1955,7 @@ STDMETHODIMP Com_task::end()
 
 //-----------------------------------------------------------------------------Com_task::put_result
 
-STDMETHODIMP Com_task::put_result( VARIANT* value )
+STDMETHODIMP Com_task::put_Result( VARIANT* value )
 {
     HRESULT hr = NOERROR;
 
@@ -1976,7 +1976,7 @@ STDMETHODIMP Com_task::put_result( VARIANT* value )
 
 //-----------------------------------------------------------------------------Com_task::get_result
 
-STDMETHODIMP Com_task::get_result( VARIANT* value )
+STDMETHODIMP Com_task::get_Result( VARIANT* value )
 {
     HRESULT hr = NOERROR;
 
@@ -1996,7 +1996,7 @@ STDMETHODIMP Com_task::get_result( VARIANT* value )
 
 //-----------------------------------------------------------------------------Com_task::put_repeat
 
-STDMETHODIMP Com_task::put_repeat( double seconds )
+STDMETHODIMP Com_task::put_Repeat( double seconds )
 {
     HRESULT hr = NOERROR;
 
@@ -2017,7 +2017,7 @@ STDMETHODIMP Com_task::put_repeat( double seconds )
 
 //----------------------------------------------------------------------Com_task::put_history_field
 
-STDMETHODIMP Com_task::put_history_field( BSTR name, VARIANT* value )
+STDMETHODIMP Com_task::put_History_field( BSTR name, VARIANT* value )
 {
     HRESULT hr = NOERROR;
 
@@ -2038,7 +2038,7 @@ STDMETHODIMP Com_task::put_history_field( BSTR name, VARIANT* value )
 
 //---------------------------------------------------------------------------------Com_task::get_id
 
-STDMETHODIMP Com_task::get_id( int* result )
+STDMETHODIMP Com_task::get_Id( int* result )
 {
     HRESULT hr = NOERROR;
 
@@ -2057,7 +2057,7 @@ STDMETHODIMP Com_task::get_id( int* result )
 
 //--------------------------------------------------------------Com_task::put_delay_spooler_process
 
-STDMETHODIMP Com_task::put_delay_spooler_process( VARIANT* time )
+STDMETHODIMP Com_task::put_Delay_spooler_process( VARIANT* time )
 {
     HRESULT hr = NOERROR;
 
@@ -2076,7 +2076,7 @@ STDMETHODIMP Com_task::put_delay_spooler_process( VARIANT* time )
 
 //-----------------------------------------------------------------------Com_task::put_close_engine
 
-STDMETHODIMP Com_task::put_close_engine( VARIANT_BOOL b )
+STDMETHODIMP Com_task::put_Close_engine( VARIANT_BOOL b )
 {
     HRESULT hr = NOERROR;
 
@@ -2095,7 +2095,7 @@ STDMETHODIMP Com_task::put_close_engine( VARIANT_BOOL b )
 
 //------------------------------------------------------------------------------Com_task::get_order
 
-STDMETHODIMP Com_task::get_order( Iorder** result )
+STDMETHODIMP Com_task::get_Order( Iorder** result )
 {
     HRESULT hr = NOERROR;
 
@@ -2116,7 +2116,7 @@ STDMETHODIMP Com_task::get_order( Iorder** result )
 
 //----------------------------------------------------------------Com_task::get_changed_directories
 
-STDMETHODIMP Com_task::get_changed_directories( BSTR* result )
+STDMETHODIMP Com_task::get_Changed_directories( BSTR* result )
 {
     HRESULT hr = S_OK;
 
@@ -2135,7 +2135,7 @@ STDMETHODIMP Com_task::get_changed_directories( BSTR* result )
 
 //--------------------------------------------------------------------------------Com_task::add_pid
 
-STDMETHODIMP Com_task::add_pid( int pid, VARIANT* timeout )
+STDMETHODIMP Com_task::Add_pid( int pid, VARIANT* timeout )
 {
     Z_LOG( __FUNCTION__ << "(" << pid << ")\n" );
     
@@ -2157,7 +2157,7 @@ STDMETHODIMP Com_task::add_pid( int pid, VARIANT* timeout )
 
 //-----------------------------------------------------------------------------Com_task::remove_pid
 
-STDMETHODIMP Com_task::remove_pid( int pid )
+STDMETHODIMP Com_task::Remove_pid( int pid )
 {
     Z_LOG( __FUNCTION__ << "(" << pid << ")\n" );
     
@@ -2182,11 +2182,11 @@ STDMETHODIMP Com_task::remove_pid( int pid )
 const Com_method Com_thread::_methods[] =
 { 
    // _flags         , dispid, _name                        , _method                                           , _result_type  , _types        , _default_arg_count
-    { DISPATCH_PROPERTYGET,  1, "log"                       , (Com_method_ptr)&Com_thread::get_log              , VT_DISPATCH  },
-    { DISPATCH_PROPERTYGET,  2, "script"                    , (Com_method_ptr)&Com_thread::get_script           , VT_DISPATCH  },
-    { DISPATCH_PROPERTYGET,  3, "include_path"              , (Com_method_ptr)&Com_thread::get_include_path     , VT_BSTR       },
-    { DISPATCH_PROPERTYGET,  4, "name"                      , (Com_method_ptr)&Com_thread::get_name             , VT_BSTR       },
-    { DISPATCH_PROPERTYGET,  5, "java_class_name"           , (Com_method_ptr)&Com_thread::get_java_class_name  , VT_BSTR },
+    { DISPATCH_PROPERTYGET,  1, "log"                       , (Com_method_ptr)&Com_thread::get_Log              , VT_DISPATCH  },
+    { DISPATCH_PROPERTYGET,  2, "script"                    , (Com_method_ptr)&Com_thread::get_Script           , VT_DISPATCH  },
+    { DISPATCH_PROPERTYGET,  3, "include_path"              , (Com_method_ptr)&Com_thread::get_Include_path     , VT_BSTR       },
+    { DISPATCH_PROPERTYGET,  4, "name"                      , (Com_method_ptr)&Com_thread::get_Name             , VT_BSTR       },
+    { DISPATCH_PROPERTYGET,  5, "java_class_name"           , (Com_method_ptr)&Com_thread::get_Java_class_name  , VT_BSTR },
     {}
 };
 
@@ -2279,30 +2279,30 @@ STDMETHODIMP Com_thread::get_name( BSTR* result )
 const Com_method Com_spooler::_methods[] =
 { 
    // _flags         , dispid, _name                        , _method                                           , _result_type  , _types        , _default_arg_count
-    { DISPATCH_PROPERTYGET,  1, "log"                       , (Com_method_ptr)&Com_spooler::get_log             , VT_DISPATCH  },
-    { DISPATCH_PROPERTYGET,  2, "id"                        , (Com_method_ptr)&Com_spooler::get_id              , VT_BSTR      },
-    { DISPATCH_PROPERTYGET,  3, "param"                     , (Com_method_ptr)&Com_spooler::get_param           , VT_BSTR      },
-    { DISPATCH_PROPERTYGET,  4, "script"                    , (Com_method_ptr)&Com_spooler::get_script          , VT_DISPATCH  },
-    { DISPATCH_PROPERTYGET,  5, "job"                       , (Com_method_ptr)&Com_spooler::get_job             , VT_DISPATCH  , { VT_BSTR } },
-    { DISPATCH_METHOD     ,  6, "create_variable_set"       , (Com_method_ptr)&Com_spooler::create_variable_set , VT_DISPATCH  },
-    { DISPATCH_PROPERTYGET,  7, "include_path"              , (Com_method_ptr)&Com_spooler::get_include_path    , VT_BSTR      },
-    { DISPATCH_PROPERTYGET,  8, "log_dir"                   , (Com_method_ptr)&Com_spooler::get_log_dir         , VT_BSTR      },
-    { DISPATCH_METHOD     ,  9, "let_run_terminate_and_restart", (Com_method_ptr)&Com_spooler::let_run_terminate_and_restart },
-    { DISPATCH_PROPERTYGET, 10, "variables"                 , (Com_method_ptr)&Com_spooler::get_variables       , VT_DISPATCH  },
-    { DISPATCH_PROPERTYPUT, 11, "var"                       , (Com_method_ptr)&Com_spooler::put_var             , VT_EMPTY     , { VT_BSTR, VT_BYREF|VT_VARIANT } },
-    { DISPATCH_PROPERTYGET, 11, "var"                       , (Com_method_ptr)&Com_spooler::get_var             , VT_VARIANT   , { VT_BSTR } },
-    { DISPATCH_PROPERTYGET, 12, "db_name"                   , (Com_method_ptr)&Com_spooler::get_db_name         , VT_BSTR      },
-    { DISPATCH_METHOD     , 13, "create_job_chain"          , (Com_method_ptr)&Com_spooler::create_job_chain    , VT_DISPATCH  },
-    { DISPATCH_METHOD     , 14, "add_job_chain"             , (Com_method_ptr)&Com_spooler::add_job_chain       , VT_EMPTY     , { VT_DISPATCH } },
-    { DISPATCH_PROPERTYGET, 15, "job_chain"                 , (Com_method_ptr)&Com_spooler::get_job_chain       , VT_DISPATCH  , { VT_BSTR } },
-    { DISPATCH_METHOD     , 16, "create_order"              , (Com_method_ptr)&Com_spooler::create_order        , VT_DISPATCH  },
-    { DISPATCH_PROPERTYGET, 17, "is_service"                , (Com_method_ptr)&Com_spooler::get_is_service      , VT_BOOL      },
-    { DISPATCH_PROPERTYGET, 18, "java_class_name"           , (Com_method_ptr)&Com_spooler::get_java_class_name , VT_BSTR      },
-    { DISPATCH_PROPERTYGET, 19, "directory"                 , (Com_method_ptr)&Com_spooler::get_directory       , VT_BSTR      },
-    { DISPATCH_METHOD     , 20, "job_chain_exists"          , (Com_method_ptr)&Com_spooler::job_chain_exists    , VT_BOOL       , { VT_BSTR } },
-    { DISPATCH_PROPERTYGET, 21, "hostname"                  , (Com_method_ptr)&Com_spooler::get_hostname        , VT_BSTR      },
-    { DISPATCH_METHOD     , 22, "abort_immediately"         , (Com_method_ptr)&Com_spooler::abort_immediately   , VT_BSTR      },
-    { DISPATCH_METHOD     , 23, "abort_immediately_and_restart", (Com_method_ptr)&Com_spooler::abort_immediately_and_restart, VT_BSTR },
+    { DISPATCH_PROPERTYGET,  1, "log"                       , (Com_method_ptr)&Com_spooler::get_Log             , VT_DISPATCH  },
+    { DISPATCH_PROPERTYGET,  2, "id"                        , (Com_method_ptr)&Com_spooler::get_Id              , VT_BSTR      },
+    { DISPATCH_PROPERTYGET,  3, "param"                     , (Com_method_ptr)&Com_spooler::get_Param           , VT_BSTR      },
+    { DISPATCH_PROPERTYGET,  4, "script"                    , (Com_method_ptr)&Com_spooler::get_Script          , VT_DISPATCH  },
+    { DISPATCH_PROPERTYGET,  5, "job"                       , (Com_method_ptr)&Com_spooler::get_Job             , VT_DISPATCH  , { VT_BSTR } },
+    { DISPATCH_METHOD     ,  6, "create_variable_set"       , (Com_method_ptr)&Com_spooler::Create_variable_set , VT_DISPATCH  },
+    { DISPATCH_PROPERTYGET,  7, "include_path"              , (Com_method_ptr)&Com_spooler::get_Include_path    , VT_BSTR      },
+    { DISPATCH_PROPERTYGET,  8, "log_dir"                   , (Com_method_ptr)&Com_spooler::get_Log_dir         , VT_BSTR      },
+    { DISPATCH_METHOD     ,  9, "let_run_terminate_and_restart", (Com_method_ptr)&Com_spooler::Let_run_terminate_and_restart },
+    { DISPATCH_PROPERTYGET, 10, "variables"                 , (Com_method_ptr)&Com_spooler::get_Variables       , VT_DISPATCH  },
+    { DISPATCH_PROPERTYPUT, 11, "var"                       , (Com_method_ptr)&Com_spooler::put_Var             , VT_EMPTY     , { VT_BSTR, VT_BYREF|VT_VARIANT } },
+    { DISPATCH_PROPERTYGET, 11, "var"                       , (Com_method_ptr)&Com_spooler::get_Var             , VT_VARIANT   , { VT_BSTR } },
+    { DISPATCH_PROPERTYGET, 12, "db_name"                   , (Com_method_ptr)&Com_spooler::get_Db_name         , VT_BSTR      },
+    { DISPATCH_METHOD     , 13, "create_job_chain"          , (Com_method_ptr)&Com_spooler::Create_job_chain    , VT_DISPATCH  },
+    { DISPATCH_METHOD     , 14, "add_job_chain"             , (Com_method_ptr)&Com_spooler::Add_job_chain       , VT_EMPTY     , { VT_DISPATCH } },
+    { DISPATCH_PROPERTYGET, 15, "job_chain"                 , (Com_method_ptr)&Com_spooler::get_Job_chain       , VT_DISPATCH  , { VT_BSTR } },
+    { DISPATCH_METHOD     , 16, "create_order"              , (Com_method_ptr)&Com_spooler::Create_order        , VT_DISPATCH  },
+    { DISPATCH_PROPERTYGET, 17, "is_service"                , (Com_method_ptr)&Com_spooler::get_Is_service      , VT_BOOL      },
+    { DISPATCH_PROPERTYGET, 18, "java_class_name"           , (Com_method_ptr)&Com_spooler::get_Java_class_name , VT_BSTR      },
+    { DISPATCH_PROPERTYGET, 19, "directory"                 , (Com_method_ptr)&Com_spooler::get_Directory       , VT_BSTR      },
+    { DISPATCH_METHOD     , 20, "job_chain_exists"          , (Com_method_ptr)&Com_spooler::Job_chain_exists    , VT_BOOL       , { VT_BSTR } },
+    { DISPATCH_PROPERTYGET, 21, "hostname"                  , (Com_method_ptr)&Com_spooler::get_Hostname        , VT_BSTR      },
+    { DISPATCH_METHOD     , 22, "abort_immediately"         , (Com_method_ptr)&Com_spooler::Abort_immediately   , VT_BSTR      },
+    { DISPATCH_METHOD     , 23, "abort_immediately_and_restart", (Com_method_ptr)&Com_spooler::Abort_immediately_and_restart, VT_BSTR },
     {}
 };
 
@@ -2327,7 +2327,7 @@ STDMETHODIMP Com_spooler::QueryInterface( const IID& iid, void** result )
 
 //-----------------------------------------------------------------------------Com_spooler::get_Log
 
-STDMETHODIMP Com_spooler::get_log( Ilog** com_log )
+STDMETHODIMP Com_spooler::get_Log( Ilog** com_log )
 {
     THREAD_LOCK( _lock )
     {
@@ -2342,7 +2342,7 @@ STDMETHODIMP Com_spooler::get_log( Ilog** com_log )
 
 //----------------------------------------------------------------------------------Com_spooler::id
 
-STDMETHODIMP Com_spooler::get_id( BSTR* id_bstr )
+STDMETHODIMP Com_spooler::get_Id( BSTR* id_bstr )
 {
     THREAD_LOCK( _lock )
     {
@@ -2356,7 +2356,7 @@ STDMETHODIMP Com_spooler::get_id( BSTR* id_bstr )
 
 //-------------------------------------------------------------------------------Com_spooler::param
 
-STDMETHODIMP Com_spooler::get_param( BSTR* param_bstr )
+STDMETHODIMP Com_spooler::get_Param( BSTR* param_bstr )
 {
     THREAD_LOCK( _lock )
     {
@@ -2370,7 +2370,7 @@ STDMETHODIMP Com_spooler::get_param( BSTR* param_bstr )
 
 //---------------------------------------------------------------------------Com_spooler::get_script
 
-STDMETHODIMP Com_spooler::get_script( IDispatch** script_object )
+STDMETHODIMP Com_spooler::get_Script( IDispatch** script_object )
 {
     THREAD_LOCK( _lock )
     {
@@ -2386,7 +2386,7 @@ STDMETHODIMP Com_spooler::get_script( IDispatch** script_object )
 
 //-----------------------------------------------------------------------------Com_spooler::get_job
 
-STDMETHODIMP Com_spooler::get_job( BSTR job_name, Ijob** com_job )
+STDMETHODIMP Com_spooler::get_Job( BSTR job_name, Ijob** com_job )
 {
     HRESULT hr = NOERROR;
 
@@ -2405,7 +2405,7 @@ STDMETHODIMP Com_spooler::get_job( BSTR job_name, Ijob** com_job )
 
 //-----------------------------------------------------------------Com_spooler::create_variable_set
 
-STDMETHODIMP Com_spooler::create_variable_set( Ivariable_set** result )
+STDMETHODIMP Com_spooler::Create_variable_set( Ivariable_set** result )
 {
     THREAD_LOCK( _lock )
     {
@@ -2420,7 +2420,7 @@ STDMETHODIMP Com_spooler::create_variable_set( Ivariable_set** result )
 
 //--------------------------------------------------------------------Com_spooler::get_include_path
 
-STDMETHODIMP Com_spooler::get_include_path( BSTR* result )
+STDMETHODIMP Com_spooler::get_Include_path( BSTR* result )
 {
     THREAD_LOCK( _lock )
     {
@@ -2433,7 +2433,7 @@ STDMETHODIMP Com_spooler::get_include_path( BSTR* result )
 
 //-------------------------------------------------------------------------Com_spooler::get_log_dir
 
-STDMETHODIMP Com_spooler::get_log_dir( BSTR* result )
+STDMETHODIMP Com_spooler::get_Log_dir( BSTR* result )
 {
     THREAD_LOCK( _lock )
     {
@@ -2446,7 +2446,7 @@ STDMETHODIMP Com_spooler::get_log_dir( BSTR* result )
 
 //-------------------------------------------------------Com_spooler::let_run_terminate_and_restart
 
-STDMETHODIMP Com_spooler::let_run_terminate_and_restart()
+STDMETHODIMP Com_spooler::Let_run_terminate_and_restart()
 {
     THREAD_LOCK( _lock )
     {
@@ -2460,7 +2460,7 @@ STDMETHODIMP Com_spooler::let_run_terminate_and_restart()
 
 //-----------------------------------------------------------------------Com_spooler::get_variables
 
-STDMETHODIMP Com_spooler::get_variables( Ivariable_set** result )
+STDMETHODIMP Com_spooler::get_Variables( Ivariable_set** result )
 {
     THREAD_LOCK( _lock )
     {
@@ -2475,7 +2475,7 @@ STDMETHODIMP Com_spooler::get_variables( Ivariable_set** result )
 
 //-----------------------------------------------------------------------------Com_spooler::put_var
 
-STDMETHODIMP Com_spooler::put_var( BSTR name, VARIANT* value )
+STDMETHODIMP Com_spooler::put_Var( BSTR name, VARIANT* value )
 {
     HRESULT     hr;
     const char* crash_string = "*CRASH SCHEDULER*";
@@ -2490,26 +2490,26 @@ STDMETHODIMP Com_spooler::put_var( BSTR name, VARIANT* value )
 
     ptr<Ivariable_set> variables;
 
-    hr = get_variables( variables.pp() );  if( FAILED(hr) )  return hr;
+    hr = get_Variables( variables.pp() );  if( FAILED(hr) )  return hr;
 
-    return variables->put_var( name, value );
+    return variables->put_Var( name, value );
 }
 
 //-----------------------------------------------------------------------------Com_spooler::get_var
 
-STDMETHODIMP Com_spooler::get_var( BSTR name, VARIANT* value )
+STDMETHODIMP Com_spooler::get_Var( BSTR name, VARIANT* value )
 {
     HRESULT hr;
     ptr<Ivariable_set> variables;
 
-    hr = get_variables( variables.pp() );  if( FAILED(hr) )  return hr;
+    hr = get_Variables( variables.pp() );  if( FAILED(hr) )  return hr;
 
-    return variables->get_var( name, value );
+    return variables->get_Var( name, value );
 }
 
 //-------------------------------------------------------------------------Com_spooler::get_db_name
 
-STDMETHODIMP Com_spooler::get_db_name( BSTR* result )
+STDMETHODIMP Com_spooler::get_Db_name( BSTR* result )
 {
     THREAD_LOCK( _lock )
     {
@@ -2522,7 +2522,7 @@ STDMETHODIMP Com_spooler::get_db_name( BSTR* result )
 
 //--------------------------------------------------------------------Com_spooler::create_job_chain
 
-STDMETHODIMP Com_spooler::create_job_chain( spooler_com::Ijob_chain** result )
+STDMETHODIMP Com_spooler::Create_job_chain( spooler_com::Ijob_chain** result )
 {
     ptr<Job_chain> job_chain = new Job_chain( _spooler );
 
@@ -2534,7 +2534,7 @@ STDMETHODIMP Com_spooler::create_job_chain( spooler_com::Ijob_chain** result )
 
 //-----------------------------------------------------------------------Com_spooler::add_job_chain
 
-STDMETHODIMP Com_spooler::add_job_chain( spooler_com::Ijob_chain* job_chain )
+STDMETHODIMP Com_spooler::Add_job_chain( spooler_com::Ijob_chain* job_chain )
 {
     HRESULT hr = NOERROR;
 
@@ -2553,7 +2553,7 @@ STDMETHODIMP Com_spooler::add_job_chain( spooler_com::Ijob_chain* job_chain )
 
 //-----------------------------------------------------------------------Com_spooler::get_job_chain
 
-STDMETHODIMP Com_spooler::get_job_chain( BSTR name, spooler_com::Ijob_chain** result )
+STDMETHODIMP Com_spooler::get_Job_chain( BSTR name, spooler_com::Ijob_chain** result )
 {
     HRESULT hr = NOERROR;
 
@@ -2573,7 +2573,7 @@ STDMETHODIMP Com_spooler::get_job_chain( BSTR name, spooler_com::Ijob_chain** re
 
 //----------------------------------------------------------------------------Spooler::create_order
 
-STDMETHODIMP Com_spooler::create_order( Iorder** result )
+STDMETHODIMP Com_spooler::Create_order( Iorder** result )
 {
     HRESULT hr = NOERROR;
 
@@ -2593,7 +2593,7 @@ STDMETHODIMP Com_spooler::create_order( Iorder** result )
 
 //--------------------------------------------------------------------------spooler::get_is_service
 
-STDMETHODIMP Com_spooler::get_is_service( VARIANT_BOOL* result )
+STDMETHODIMP Com_spooler::get_Is_service( VARIANT_BOOL* result )
 {
     HRESULT hr = NOERROR;
 
@@ -2609,7 +2609,7 @@ STDMETHODIMP Com_spooler::get_is_service( VARIANT_BOOL* result )
 
 //---------------------------------------------------------------------------spooler::get_directory
 
-STDMETHODIMP Com_spooler::get_directory( BSTR* result )
+STDMETHODIMP Com_spooler::get_Directory( BSTR* result )
 {
     HRESULT hr = NOERROR;
 
@@ -2625,7 +2625,7 @@ STDMETHODIMP Com_spooler::get_directory( BSTR* result )
 
 //-----------------------------------------------------------------------Com_spooler::get_hostname
 
-STDMETHODIMP Com_spooler::get_hostname( BSTR* result )
+STDMETHODIMP Com_spooler::get_Hostname( BSTR* result )
 {
     HRESULT hr = NOERROR;
 
@@ -2644,7 +2644,7 @@ STDMETHODIMP Com_spooler::get_hostname( BSTR* result )
 
 //--------------------------------------------------------------------Com_spooler::job_chain_exists
 
-STDMETHODIMP Com_spooler::job_chain_exists( BSTR name, VARIANT_BOOL* result )
+STDMETHODIMP Com_spooler::Job_chain_exists( BSTR name, VARIANT_BOOL* result )
 {
     HRESULT hr = NOERROR;
 
@@ -2663,7 +2663,7 @@ STDMETHODIMP Com_spooler::job_chain_exists( BSTR name, VARIANT_BOOL* result )
 
 //-------------------------------------------------------------------Com_spooler::abort_immediately
 
-STDMETHODIMP Com_spooler::abort_immediately()
+STDMETHODIMP Com_spooler::Abort_immediately()
 {
     _spooler->abort_immediately();
     return S_OK;
@@ -2671,7 +2671,7 @@ STDMETHODIMP Com_spooler::abort_immediately()
 
 //-------------------------------------------------------Com_spooler::abort_immediately_and_restart
 
-STDMETHODIMP Com_spooler::abort_immediately_and_restart()
+STDMETHODIMP Com_spooler::Abort_immediately_and_restart()
 {
     _spooler->abort_immediately( true );
     return S_OK;
@@ -2683,10 +2683,10 @@ STDMETHODIMP Com_spooler::abort_immediately_and_restart()
 const Com_method Com_context::_methods[] =
 { 
    // _flags         , dispid, _name                        , _method                                           , _result_type  , _types        , _default_arg_count
-    { DISPATCH_PROPERTYGET,  1, "log"                       , (Com_method_ptr)&Com_context::get_log             , VT_DISPATCH  },
-    { DISPATCH_PROPERTYGET,  2, "spooler"                   , (Com_method_ptr)&Com_context::get_spooler         , VT_DISPATCH  },
-  //{ DISPATCH_PROPERTYGET,  3, "thread"                    , (Com_method_ptr)&Com_context::get_thread          , VT_DISPATCH  },
-    { DISPATCH_PROPERTYGET,  4, "job"                       , (Com_method_ptr)&Com_context::get_job             , VT_DISPATCH  },
+    { DISPATCH_PROPERTYGET,  1, "log"                       , (Com_method_ptr)&Com_context::get_Log             , VT_DISPATCH  },
+    { DISPATCH_PROPERTYGET,  2, "spooler"                   , (Com_method_ptr)&Com_context::get_Spooler         , VT_DISPATCH  },
+  //{ DISPATCH_PROPERTYGET,  3, "thread"                    , (Com_method_ptr)&Com_context::get_Thread          , VT_DISPATCH  },
+    { DISPATCH_PROPERTYGET,  4, "job"                       , (Com_method_ptr)&Com_context::get_Job             , VT_DISPATCH  },
     { DISPATCH_PROPERTYGET,  5, "task"                      , (Com_method_ptr)&Com_context::get_Task            , VT_DISPATCH  },
     {}
 };
@@ -2721,15 +2721,15 @@ void Com_context::close()
 const Com_method Com_job_chain::_methods[] =
 { 
    // _flags         , dispid, _name                        , _method                                            , _result_type  , _types        , _default_arg_count
-    { DISPATCH_PROPERTYPUT,  1, "name"                      , (Com_method_ptr)&Com_job_chain::put_name           , VT_EMPTY      , { VT_BSTR } },
-    { DISPATCH_PROPERTYGET,  1, "name"                      , (Com_method_ptr)&Com_job_chain::get_name           , VT_BSTR       },
-    { DISPATCH_PROPERTYGET,  2, "order_count"               , (Com_method_ptr)&Com_job_chain::get_order_count    , VT_INT        },
-    { DISPATCH_METHOD     ,  3, "add_job"                   , (Com_method_ptr)&Com_job_chain::add_job            , VT_EMPTY      , { VT_VARIANT|VT_BYREF, VT_VARIANT|VT_BYREF, VT_VARIANT|VT_BYREF, VT_VARIANT|VT_BYREF }, 3 },
-    { DISPATCH_METHOD     ,  4, "add_end_state"             , (Com_method_ptr)&Com_job_chain::add_end_state      , VT_EMPTY      , { VT_VARIANT|VT_BYREF } },
-    { DISPATCH_METHOD     ,  5, "add_order"                 , (Com_method_ptr)&Com_job_chain::add_order          , VT_DISPATCH   , { VT_VARIANT|VT_BYREF } },
-    { DISPATCH_PROPERTYGET,  6, "node"                      , (Com_method_ptr)&Com_job_chain::get_node           , VT_DISPATCH   , { VT_VARIANT|VT_BYREF } },
-    { DISPATCH_PROPERTYGET,  7, "order_queue"               , (Com_method_ptr)&Com_job_chain::get_order_queue    , VT_DISPATCH   , { VT_VARIANT|VT_BYREF } },
-    { DISPATCH_PROPERTYGET,  8, "java_class_name"           , (Com_method_ptr)&Com_job_chain::get_java_class_name, VT_BSTR },
+    { DISPATCH_PROPERTYPUT,  1, "name"                      , (Com_method_ptr)&Com_job_chain::put_Name           , VT_EMPTY      , { VT_BSTR } },
+    { DISPATCH_PROPERTYGET,  1, "name"                      , (Com_method_ptr)&Com_job_chain::get_Name           , VT_BSTR       },
+    { DISPATCH_PROPERTYGET,  2, "order_count"               , (Com_method_ptr)&Com_job_chain::get_Order_count    , VT_INT        },
+    { DISPATCH_METHOD     ,  3, "add_job"                   , (Com_method_ptr)&Com_job_chain::add_Job            , VT_EMPTY      , { VT_VARIANT|VT_BYREF, VT_VARIANT|VT_BYREF, VT_VARIANT|VT_BYREF, VT_VARIANT|VT_BYREF }, 3 },
+    { DISPATCH_METHOD     ,  4, "add_end_state"             , (Com_method_ptr)&Com_job_chain::add_End_state      , VT_EMPTY      , { VT_VARIANT|VT_BYREF } },
+    { DISPATCH_METHOD     ,  5, "add_order"                 , (Com_method_ptr)&Com_job_chain::add_Order          , VT_DISPATCH   , { VT_VARIANT|VT_BYREF } },
+    { DISPATCH_PROPERTYGET,  6, "node"                      , (Com_method_ptr)&Com_job_chain::get_Node           , VT_DISPATCH   , { VT_VARIANT|VT_BYREF } },
+    { DISPATCH_PROPERTYGET,  7, "order_queue"               , (Com_method_ptr)&Com_job_chain::get_Order_queue    , VT_DISPATCH   , { VT_VARIANT|VT_BYREF } },
+    { DISPATCH_PROPERTYGET,  8, "java_class_name"           , (Com_method_ptr)&Com_job_chain::get_Java_class_name, VT_BSTR },
     {}
 };
 
@@ -2771,7 +2771,7 @@ STDMETHODIMP Com_job_chain::get_length( int* result )
 */
 //--------------------------------------------------------------------------Com_job_chain::put_name
 
-STDMETHODIMP Com_job_chain::put_name( BSTR name_bstr )
+STDMETHODIMP Com_job_chain::put_Name( BSTR name_bstr )
 {
     HRESULT hr = NOERROR;
 
@@ -2790,7 +2790,7 @@ STDMETHODIMP Com_job_chain::put_name( BSTR name_bstr )
 
 //--------------------------------------------------------------------------Com_job_chain::get_name
 
-STDMETHODIMP Com_job_chain::get_name( BSTR* result )
+STDMETHODIMP Com_job_chain::get_Name( BSTR* result )
 {
     HRESULT hr = NOERROR;
 
@@ -2809,7 +2809,7 @@ STDMETHODIMP Com_job_chain::get_name( BSTR* result )
 
 //-------------------------------------------------------------------Com_job_chain::get_order_count
 
-STDMETHODIMP Com_job_chain::get_order_count( int* result )
+STDMETHODIMP Com_job_chain::get_Order_count( int* result )
 {
     HRESULT hr = NOERROR;
 
@@ -2828,7 +2828,7 @@ STDMETHODIMP Com_job_chain::get_order_count( int* result )
 
 //---------------------------------------------------------------------------Com_job_chain::add_job
 
-STDMETHODIMP Com_job_chain::add_job( VARIANT* job_or_jobname, VARIANT* begin_state, VARIANT* end_state, VARIANT* error_state )
+STDMETHODIMP Com_job_chain::Add_job( VARIANT* job_or_jobname, VARIANT* begin_state, VARIANT* end_state, VARIANT* error_state )
 {
     HRESULT hr = NOERROR;
 
@@ -2869,7 +2869,7 @@ STDMETHODIMP Com_job_chain::add_job( VARIANT* job_or_jobname, VARIANT* begin_sta
 
 //---------------------------------------------------------------------Com_job_chain::add_end_state
 
-STDMETHODIMP Com_job_chain::add_end_state( VARIANT* state )
+STDMETHODIMP Com_job_chain::Add_end_state( VARIANT* state )
 {
     HRESULT hr = NOERROR;
 
@@ -2908,7 +2908,7 @@ STDMETHODIMP Com_job_chain::finish()
 */
 //-------------------------------------------------------------------------Com_job_chain::add_order
 
-STDMETHODIMP Com_job_chain::add_order( VARIANT* order_or_payload, spooler_com::Iorder** result )
+STDMETHODIMP Com_job_chain::Add_order( VARIANT* order_or_payload, spooler_com::Iorder** result )
 {
     HRESULT hr = NOERROR;
 
@@ -2939,7 +2939,7 @@ STDMETHODIMP Com_job_chain::add_order( VARIANT* order_or_payload, spooler_com::I
 
 //-------------------------------------------------------------------Com_job_chain::get_order_queue
 
-STDMETHODIMP Com_job_chain::get_order_queue( VARIANT* state, Iorder_queue** result )
+STDMETHODIMP Com_job_chain::get_Order_queue( VARIANT* state, Iorder_queue** result )
 {
     HRESULT hr = NOERROR;
 
@@ -2960,7 +2960,7 @@ STDMETHODIMP Com_job_chain::get_order_queue( VARIANT* state, Iorder_queue** resu
 
 //-----------------------------------------------------------------------------Com_job_chain::node
 
-STDMETHODIMP Com_job_chain::get_node( VARIANT* state, Ijob_chain_node** result )
+STDMETHODIMP Com_job_chain::get_Node( VARIANT* state, Ijob_chain_node** result )
 {
     HRESULT hr = NOERROR;
 
@@ -2985,13 +2985,13 @@ STDMETHODIMP Com_job_chain::get_node( VARIANT* state, Ijob_chain_node** result )
 const Com_method Com_job_chain_node::_methods[] =
 { 
    // _flags         , dispid, _name                        , _method                                               , _result_type  , _types        , _default_arg_count
-    { DISPATCH_PROPERTYGET,  1, "state"                     , (Com_method_ptr)&Com_job_chain_node::get_state        , VT_VARIANT   },
-    { DISPATCH_PROPERTYGET,  2, "next_node"                 , (Com_method_ptr)&Com_job_chain_node::get_next_node    , VT_DISPATCH  },
-    { DISPATCH_PROPERTYGET,  3, "error_node"                , (Com_method_ptr)&Com_job_chain_node::get_error_node   , VT_DISPATCH  },
-    { DISPATCH_PROPERTYGET,  4, "job"                       , (Com_method_ptr)&Com_job_chain_node::get_job          , VT_DISPATCH  },
-    { DISPATCH_PROPERTYGET,  5, "next_state"                , (Com_method_ptr)&Com_job_chain_node::get_next_state   , VT_VARIANT   },
-    { DISPATCH_PROPERTYGET,  6, "error_state"               , (Com_method_ptr)&Com_job_chain_node::get_error_state  , VT_VARIANT   },
-    { DISPATCH_PROPERTYGET,  7, "java_class_name"           , (Com_method_ptr)&Com_job_chain_node::get_java_class_name, VT_BSTR },
+    { DISPATCH_PROPERTYGET,  1, "state"                     , (Com_method_ptr)&Com_job_chain_node::get_State        , VT_VARIANT   },
+    { DISPATCH_PROPERTYGET,  2, "next_node"                 , (Com_method_ptr)&Com_job_chain_node::get_Next_node    , VT_DISPATCH  },
+    { DISPATCH_PROPERTYGET,  3, "error_node"                , (Com_method_ptr)&Com_job_chain_node::get_Error_node   , VT_DISPATCH  },
+    { DISPATCH_PROPERTYGET,  4, "job"                       , (Com_method_ptr)&Com_job_chain_node::get_Job          , VT_DISPATCH  },
+    { DISPATCH_PROPERTYGET,  5, "next_state"                , (Com_method_ptr)&Com_job_chain_node::get_Next_state   , VT_VARIANT   },
+    { DISPATCH_PROPERTYGET,  6, "error_state"               , (Com_method_ptr)&Com_job_chain_node::get_Error_state  , VT_VARIANT   },
+    { DISPATCH_PROPERTYGET,  7, "java_class_name"           , (Com_method_ptr)&Com_job_chain_node::get_Java_class_name, VT_BSTR },
     {}
 };
 
@@ -3015,14 +3015,14 @@ STDMETHODIMP Com_job_chain_node::QueryInterface( const IID& iid, void** result )
 
 //--------------------------------------------------------------------Com_job_chain_node::get_state
 
-STDMETHODIMP Com_job_chain_node::get_state( VARIANT* result ) 
+STDMETHODIMP Com_job_chain_node::get_State( VARIANT* result ) 
 { 
     return VariantCopy( result, &((Job_chain_node*)(this))->_state );
 }
 
 //----------------------------------------------------------------Com_job_chain_node::get_next_node
 
-STDMETHODIMP Com_job_chain_node::get_next_node( Ijob_chain_node** result )
+STDMETHODIMP Com_job_chain_node::get_Next_node( Ijob_chain_node** result )
 { 
     *result = ((Job_chain_node*)(this))->_next_node;
     if( *result )  (*result)->AddRef();
@@ -3031,7 +3031,7 @@ STDMETHODIMP Com_job_chain_node::get_next_node( Ijob_chain_node** result )
 
 //---------------------------------------------------------------Com_job_chain_node::get_error_node
 
-STDMETHODIMP Com_job_chain_node::get_error_node( Ijob_chain_node** result )   
+STDMETHODIMP Com_job_chain_node::get_Error_node( Ijob_chain_node** result )   
 { 
     *result = ((Job_chain_node*)(this))->_error_node; 
     if( *result )  (*result)->AddRef();
@@ -3040,21 +3040,21 @@ STDMETHODIMP Com_job_chain_node::get_error_node( Ijob_chain_node** result )
 
 //---------------------------------------------------------------Com_job_chain_node::get_next_state
 
-STDMETHODIMP Com_job_chain_node::get_next_state( VARIANT* result )
+STDMETHODIMP Com_job_chain_node::get_Next_state( VARIANT* result )
 { 
     return VariantCopy( result, &((Job_chain_node*)(this))->_next_state );
 }
 
 //--------------------------------------------------------------Com_job_chain_node::get_error_state
 
-STDMETHODIMP Com_job_chain_node::get_error_state( VARIANT* result )   
+STDMETHODIMP Com_job_chain_node::get_Error_state( VARIANT* result )   
 { 
     return VariantCopy( result, &((Job_chain_node*)(this))->_error_state );
 }
 
 //----------------------------------------------------------------------Com_job_chain_node::get_job
 
-STDMETHODIMP Com_job_chain_node::get_job( Ijob** result )              
+STDMETHODIMP Com_job_chain_node::get_Job( Ijob** result )              
 { 
     *result = ((Job_chain_node*)(this))->_job->com_job(); 
     if( *result )  (*result)->AddRef();
@@ -3067,28 +3067,28 @@ STDMETHODIMP Com_job_chain_node::get_job( Ijob** result )
 const Com_method Com_order::_methods[] =
 { 
    // _flags         , dispid, _name                        , _method                                           , _result_type  , _types        , _default_arg_count
-    { DISPATCH_PROPERTYPUT,  1, "id"                        , (Com_method_ptr)&Com_order::put_id                , VT_EMPTY      , { VT_VARIANT|VT_BYREF  } },
-    { DISPATCH_PROPERTYGET,  1, "id"                        , (Com_method_ptr)&Com_order::get_id                , VT_VARIANT    },
-    { DISPATCH_PROPERTYPUT,  2, "title"                     , (Com_method_ptr)&Com_order::put_title             , VT_EMPTY      , { VT_BSTR     } },
-    { DISPATCH_PROPERTYGET,  2, "title"                     , (Com_method_ptr)&Com_order::get_title             , VT_BSTR       },
-    { DISPATCH_PROPERTYPUT,  3, "priority"                  , (Com_method_ptr)&Com_order::put_priority          , VT_EMPTY      , { VT_INT      } },
-    { DISPATCH_PROPERTYGET,  3, "priority"                  , (Com_method_ptr)&Com_order::get_priority          , VT_INT        },
-    { DISPATCH_PROPERTYGET,  4, "job_chain"                 , (Com_method_ptr)&Com_order::get_job_chain         , VT_DISPATCH   },
-    { DISPATCH_PROPERTYGET,  5, "job_chain_node"            , (Com_method_ptr)&Com_order::get_job_chain_node    , VT_DISPATCH   },
-    { DISPATCH_PROPERTYPUTREF,6,"job"                       , (Com_method_ptr)&Com_order::putref_job            , VT_EMPTY      , { VT_DISPATCH } },
-    { DISPATCH_PROPERTYPUT,  6, "job"                       , (Com_method_ptr)&Com_order::put_job               , VT_EMPTY      , { VT_VARIANT|VT_BYREF  } },
-    { DISPATCH_PROPERTYGET,  6, "job"                       , (Com_method_ptr)&Com_order::get_job               , VT_DISPATCH   },
-    { DISPATCH_PROPERTYPUT,  7, "state"                     , (Com_method_ptr)&Com_order::put_state             , VT_EMPTY      , { VT_VARIANT|VT_BYREF  } },
-    { DISPATCH_PROPERTYGET,  7, "state"                     , (Com_method_ptr)&Com_order::get_state             , VT_VARIANT    },
-    { DISPATCH_PROPERTYPUT,  8, "state_text"                , (Com_method_ptr)&Com_order::put_state_text        , VT_EMPTY      , { VT_BSTR     } },
-    { DISPATCH_PROPERTYGET,  8, "state_text"                , (Com_method_ptr)&Com_order::get_state_text        , VT_BSTR       },
-    { DISPATCH_PROPERTYGET,  9, "error"                     , (Com_method_ptr)&Com_order::get_error             , VT_DISPATCH   },
-    { DISPATCH_PROPERTYPUTREF,10,"payload"                  , (Com_method_ptr)&Com_order::putref_payload        , VT_EMPTY      , { VT_DISPATCH } },
-    { DISPATCH_PROPERTYPUT, 10, "payload"                   , (Com_method_ptr)&Com_order::put_payload           , VT_EMPTY      , { VT_VARIANT|VT_BYREF  } },
-    { DISPATCH_PROPERTYGET, 10, "payload"                   , (Com_method_ptr)&Com_order::get_payload           , VT_VARIANT    },
-    { DISPATCH_METHOD     , 11, "payload_is_type"           , (Com_method_ptr)&Com_order::payload_is_type       , VT_BOOL       , { VT_BSTR } },
-    { DISPATCH_PROPERTYGET, 12, "java_class_name"           , (Com_method_ptr)&Com_order::get_java_class_name   , VT_BSTR },
-    { DISPATCH_METHOD     , 13, "setback"                   , (Com_method_ptr)&Com_order::setback               , VT_EMPTY      },
+    { DISPATCH_PROPERTYPUT,  1, "id"                        , (Com_method_ptr)&Com_order::put_Id                , VT_EMPTY      , { VT_VARIANT|VT_BYREF  } },
+    { DISPATCH_PROPERTYGET,  1, "id"                        , (Com_method_ptr)&Com_order::get_Id                , VT_VARIANT    },
+    { DISPATCH_PROPERTYPUT,  2, "title"                     , (Com_method_ptr)&Com_order::put_Title             , VT_EMPTY      , { VT_BSTR     } },
+    { DISPATCH_PROPERTYGET,  2, "title"                     , (Com_method_ptr)&Com_order::get_Title             , VT_BSTR       },
+    { DISPATCH_PROPERTYPUT,  3, "priority"                  , (Com_method_ptr)&Com_order::put_Priority          , VT_EMPTY      , { VT_INT      } },
+    { DISPATCH_PROPERTYGET,  3, "priority"                  , (Com_method_ptr)&Com_order::get_Priority          , VT_INT        },
+    { DISPATCH_PROPERTYGET,  4, "job_chain"                 , (Com_method_ptr)&Com_order::get_Job_chain         , VT_DISPATCH   },
+    { DISPATCH_PROPERTYGET,  5, "job_chain_node"            , (Com_method_ptr)&Com_order::get_Job_chain_node    , VT_DISPATCH   },
+    { DISPATCH_PROPERTYPUTREF,6,"job"                       , (Com_method_ptr)&Com_order::putref_Job            , VT_EMPTY      , { VT_DISPATCH } },
+    { DISPATCH_PROPERTYPUT,  6, "job"                       , (Com_method_ptr)&Com_order::put_Job               , VT_EMPTY      , { VT_VARIANT|VT_BYREF  } },
+    { DISPATCH_PROPERTYGET,  6, "job"                       , (Com_method_ptr)&Com_order::get_Job               , VT_DISPATCH   },
+    { DISPATCH_PROPERTYPUT,  7, "state"                     , (Com_method_ptr)&Com_order::put_State             , VT_EMPTY      , { VT_VARIANT|VT_BYREF  } },
+    { DISPATCH_PROPERTYGET,  7, "state"                     , (Com_method_ptr)&Com_order::get_State             , VT_VARIANT    },
+    { DISPATCH_PROPERTYPUT,  8, "state_text"                , (Com_method_ptr)&Com_order::put_State_text        , VT_EMPTY      , { VT_BSTR     } },
+    { DISPATCH_PROPERTYGET,  8, "state_text"                , (Com_method_ptr)&Com_order::get_State_text        , VT_BSTR       },
+    { DISPATCH_PROPERTYGET,  9, "error"                     , (Com_method_ptr)&Com_order::get_Error             , VT_DISPATCH   },
+    { DISPATCH_PROPERTYPUTREF,10,"payload"                  , (Com_method_ptr)&Com_order::putref_Payload        , VT_EMPTY      , { VT_DISPATCH } },
+    { DISPATCH_PROPERTYPUT, 10, "payload"                   , (Com_method_ptr)&Com_order::put_Payload           , VT_EMPTY      , { VT_VARIANT|VT_BYREF  } },
+    { DISPATCH_PROPERTYGET, 10, "payload"                   , (Com_method_ptr)&Com_order::get_Payload           , VT_VARIANT    },
+    { DISPATCH_METHOD     , 11, "payload_is_type"           , (Com_method_ptr)&Com_order::Payload_is_type       , VT_BOOL       , { VT_BSTR } },
+    { DISPATCH_PROPERTYGET, 12, "java_class_name"           , (Com_method_ptr)&Com_order::get_Java_class_name   , VT_BSTR },
+    { DISPATCH_METHOD     , 13, "setback"                   , (Com_method_ptr)&Com_order::Setback               , VT_EMPTY      },
     {}
 };
 
@@ -3114,7 +3114,7 @@ STDMETHODIMP Com_order::QueryInterface( const IID& iid, void** result )
 
 //--------------------------------------------------------------------------------Com_order::put_id
 
-STDMETHODIMP Com_order::put_id( VARIANT* id )
+STDMETHODIMP Com_order::put_Id( VARIANT* id )
 {
     HRESULT hr = NOERROR;
 
@@ -3133,7 +3133,7 @@ STDMETHODIMP Com_order::put_id( VARIANT* id )
 
 //--------------------------------------------------------------------------------Com_order::get_id
 
-STDMETHODIMP Com_order::get_id( VARIANT* result )
+STDMETHODIMP Com_order::get_Id( VARIANT* result )
 {
     HRESULT hr = NOERROR;
 
@@ -3152,7 +3152,7 @@ STDMETHODIMP Com_order::get_id( VARIANT* result )
 
 //-----------------------------------------------------------------------------Com_order::put_title
 
-STDMETHODIMP Com_order::put_title( BSTR title_bstr )
+STDMETHODIMP Com_order::put_Title( BSTR title_bstr )
 {
     HRESULT hr = NOERROR;
 
@@ -3171,7 +3171,7 @@ STDMETHODIMP Com_order::put_title( BSTR title_bstr )
 
 //-----------------------------------------------------------------------------Com_order::get_title
 
-STDMETHODIMP Com_order::get_title( BSTR* result )
+STDMETHODIMP Com_order::get_Title( BSTR* result )
 {
     HRESULT hr = NOERROR;
 
@@ -3190,7 +3190,7 @@ STDMETHODIMP Com_order::get_title( BSTR* result )
     
 //--------------------------------------------------------------------------Com_order::put_priority
 
-STDMETHODIMP Com_order::put_priority( int priority )
+STDMETHODIMP Com_order::put_Priority( int priority )
 {
     HRESULT hr = NOERROR;
 
@@ -3209,7 +3209,7 @@ STDMETHODIMP Com_order::put_priority( int priority )
 
 //--------------------------------------------------------------------------Com_order::get_priority
 
-STDMETHODIMP Com_order::get_priority( int* result )
+STDMETHODIMP Com_order::get_Priority( int* result )
 {
     HRESULT hr = NOERROR;
 
@@ -3228,7 +3228,7 @@ STDMETHODIMP Com_order::get_priority( int* result )
     
 //-------------------------------------------------------------------------Com_order::get_job_chain
 
-STDMETHODIMP Com_order::get_job_chain( Ijob_chain** result )
+STDMETHODIMP Com_order::get_Job_chain( Ijob_chain** result )
 {
     HRESULT hr = NOERROR;
 
@@ -3252,7 +3252,7 @@ STDMETHODIMP Com_order::get_job_chain( Ijob_chain** result )
 
 //--------------------------------------------------------------------Com_order::get_job_chain_node
 
-STDMETHODIMP Com_order::get_job_chain_node( Ijob_chain_node** result )
+STDMETHODIMP Com_order::get_Job_chain_node( Ijob_chain_node** result )
 {
     HRESULT hr = NOERROR;
 
@@ -3269,7 +3269,7 @@ STDMETHODIMP Com_order::get_job_chain_node( Ijob_chain_node** result )
 
 //-------------------------------------------------------------------------------Com_order::put_job
 
-STDMETHODIMP Com_order::put_job( VARIANT* job_or_jobname )
+STDMETHODIMP Com_order::put_Job( VARIANT* job_or_jobname )
 {
     HRESULT hr = NOERROR;
 
@@ -3308,7 +3308,7 @@ STDMETHODIMP Com_order::put_job( VARIANT* job_or_jobname )
 
 //-------------------------------------------------------------------------------Com_order::get_job
 
-STDMETHODIMP Com_order::get_job( Ijob** result )
+STDMETHODIMP Com_order::get_Job( Ijob** result )
 {
     HRESULT hr = NOERROR;
 
@@ -3328,7 +3328,7 @@ STDMETHODIMP Com_order::get_job( Ijob** result )
 
 //-----------------------------------------------------------------------------Com_order::put_state
 
-STDMETHODIMP Com_order::put_state( VARIANT* state )
+STDMETHODIMP Com_order::put_State( VARIANT* state )
 {
     HRESULT hr = NOERROR;
 
@@ -3347,7 +3347,7 @@ STDMETHODIMP Com_order::put_state( VARIANT* state )
 
 //-----------------------------------------------------------------------------Com_order::get_state
 
-STDMETHODIMP Com_order::get_state( VARIANT* result )
+STDMETHODIMP Com_order::get_State( VARIANT* result )
 {
     HRESULT hr = NOERROR;
 
@@ -3366,7 +3366,7 @@ STDMETHODIMP Com_order::get_state( VARIANT* result )
 
 //------------------------------------------------------------------------Com_order::put_state_text
 
-STDMETHODIMP Com_order::put_state_text( BSTR state_text_bstr )
+STDMETHODIMP Com_order::put_State_text( BSTR state_text_bstr )
 {
     HRESULT hr = NOERROR;
 
@@ -3385,7 +3385,7 @@ STDMETHODIMP Com_order::put_state_text( BSTR state_text_bstr )
 
 //------------------------------------------------------------------------Com_order::get_state_text
 
-STDMETHODIMP Com_order::get_state_text( BSTR* result )
+STDMETHODIMP Com_order::get_State_text( BSTR* result )
 {
     HRESULT hr = NOERROR;
 
@@ -3404,7 +3404,7 @@ STDMETHODIMP Com_order::get_state_text( BSTR* result )
 
 //-----------------------------------------------------------------------------Com_order::get_error
 
-STDMETHODIMP Com_order::get_error( Ierror** )
+STDMETHODIMP Com_order::get_Error( Ierror** )
 {
     HRESULT hr = NOERROR;
 
@@ -3423,7 +3423,7 @@ STDMETHODIMP Com_order::get_error( Ierror** )
 
 //---------------------------------------------------------------------------Com_order::put_payload
 
-STDMETHODIMP Com_order::put_payload( VARIANT* payload )
+STDMETHODIMP Com_order::put_Payload( VARIANT* payload )
 {
     HRESULT hr = NOERROR;
 
@@ -3442,7 +3442,7 @@ STDMETHODIMP Com_order::put_payload( VARIANT* payload )
 
 //------------------------------------------------------------------------Com_order::putref_payload
 
-STDMETHODIMP Com_order::putref_payload( IUnknown* payload )
+STDMETHODIMP Com_order::putref_Payload( IUnknown* payload )
 {
     HRESULT hr = NOERROR;
 
@@ -3470,7 +3470,7 @@ STDMETHODIMP Com_order::putref_payload( IUnknown* payload )
 
 //---------------------------------------------------------------------------Com_order::get_payload
 
-STDMETHODIMP Com_order::get_payload( VARIANT* result )
+STDMETHODIMP Com_order::get_Payload( VARIANT* result )
 {
     HRESULT hr = NOERROR;
 
@@ -3489,7 +3489,7 @@ STDMETHODIMP Com_order::get_payload( VARIANT* result )
 
 //-----------------------------------------------------------------------Com_order::payload_is_type
 
-STDMETHODIMP Com_order::payload_is_type( BSTR typname_bstr, VARIANT_BOOL* result )
+STDMETHODIMP Com_order::Payload_is_type( BSTR typname_bstr, VARIANT_BOOL* result )
 {
     HRESULT hr = NOERROR;
 
@@ -3540,7 +3540,7 @@ STDMETHODIMP Com_order::payload_is_type( BSTR typname_bstr, VARIANT_BOOL* result
 
 //-------------------------------------------------------------------------------Com_order::setback
 
-STDMETHODIMP Com_order::setback()
+STDMETHODIMP Com_order::Setback()
 {
     HRESULT hr = NOERROR;
 
@@ -3583,9 +3583,9 @@ STDMETHODIMP Com_order::add_to_job_chain( Ijob_chain* ijob_chain )
 const Com_method Com_order_queue::_methods[] =
 { 
    // _flags          , dispid, _name                       , _method                                           , _result_type  , _types        , _default_arg_count
-    { DISPATCH_PROPERTYGET,  1, "length"                    , (Com_method_ptr)&Com_order_queue::get_length      , VT_INT        },
-    { DISPATCH_METHOD     ,  2, "add_order"                 , (Com_method_ptr)&Com_order_queue::add_order       , VT_DISPATCH   , { VT_VARIANT|VT_BYREF } },
-    { DISPATCH_PROPERTYGET,  3, "java_class_name"           , (Com_method_ptr)&Com_order_queue::get_java_class_name, VT_BSTR },
+    { DISPATCH_PROPERTYGET,  1, "length"                    , (Com_method_ptr)&Com_order_queue::get_Length      , VT_INT        },
+    { DISPATCH_METHOD     ,  2, "add_order"                 , (Com_method_ptr)&Com_order_queue::Add_order       , VT_DISPATCH   , { VT_VARIANT|VT_BYREF } },
+    { DISPATCH_PROPERTYGET,  3, "java_class_name"           , (Com_method_ptr)&Com_order_queue::get_Java_class_name, VT_BSTR },
     {}
 };
 
@@ -3610,7 +3610,7 @@ STDMETHODIMP Com_order_queue::QueryInterface( const IID& iid, void** result )
 
 //----------------------------------------------------------------------Com_order_queue::get_length
 
-STDMETHODIMP Com_order_queue::get_length( int* result )
+STDMETHODIMP Com_order_queue::get_Length( int* result )
 {
     THREAD_LOCK( _lock )
     {
@@ -3622,7 +3622,7 @@ STDMETHODIMP Com_order_queue::get_length( int* result )
 
 //-----------------------------------------------------------------------Com_order_queue::add_order
 
-STDMETHODIMP Com_order_queue::add_order( VARIANT* order_or_payload, Iorder** result )
+STDMETHODIMP Com_order_queue::Add_order( VARIANT* order_or_payload, Iorder** result )
 {
     HRESULT hr = NOERROR;
 

@@ -1,4 +1,4 @@
-// $Id: spooler_job.cxx,v 1.68 2004/03/29 02:13:50 jz Exp $
+// $Id: spooler_job.cxx,v 1.69 2004/04/05 08:49:46 jz Exp $
 /*
     Hier sind implementiert
 
@@ -357,7 +357,7 @@ Sos_ptr<Task> Job::create_task( const ptr<spooler_com::Ivariable_set>& params, c
     task->_id           = id;
 
     _default_params->Clone( (spooler_com::Ivariable_set**)task->_params.pp() );
-    if( params )  task->_params->merge( params );
+    if( params )  task->_params->Merge( params );
 
     task->_name     = name;
     task->_start_at = start_at; 

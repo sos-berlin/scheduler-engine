@@ -1,4 +1,4 @@
-// $Id: spooler.odl,v 1.77 2004/03/26 16:15:31 jz Exp $
+// $Id: spooler.odl,v 1.78 2004/04/05 08:49:46 jz Exp $
 
 // Anweisung: midl /nologo /error all /out $(OutDir) $(InputPath)
 
@@ -8,7 +8,7 @@
     lcid        ( 0x0000 ),
     version     ( 1.0 )
 ]
-library spooler
+library Spooler
 {
     importlib("STDOLE32.TLB");
     importlib("msxml3.dll");
@@ -54,17 +54,17 @@ library spooler
     interface Ierror : IDispatch
     {
         [propget]
-        HRESULT                 java_class_name             ( [out,retval] BSTR* result );          // Damit java_class_name über IDispatch, statt über Ihas_java_class_name gerufen werden kann
+        HRESULT                 Java_class_name             ( [out,retval] BSTR* Result );          // Damit java_class_name über IDispatch, statt über Ihas_java_class_name gerufen werden kann
                                                                                                     // Für den Objectserver
 
         [id(0),propget]
-        HRESULT                 is_error                    ( [out,retval] VARIANT_BOOL* result );
+        HRESULT                 Is_error                    ( [out,retval] VARIANT_BOOL* Result );
 
         [propget]
-        HRESULT                 code                        ( [out,retval] BSTR* code );
+        HRESULT                 Code                        ( [out,retval] BSTR* Code );
 
         [propget]
-        HRESULT                 text                        ( [out,retval] BSTR* text );
+        HRESULT                 Text                        ( [out,retval] BSTR* Text );
     }
 
     [
@@ -86,19 +86,19 @@ library spooler
     interface Ivariable : IDispatch
     {
         [propget]
-        HRESULT                 java_class_name             ( [out,retval] BSTR* result );          // Damit java_class_name über IDispatch, statt über Ihas_java_class_name gerufen werden kann
+        HRESULT                 Java_class_name             ( [out,retval] BSTR* Result );          // Damit java_class_name über IDispatch, statt über Ihas_java_class_name gerufen werden kann
                                                                                                     // Für den Objectserver
 
         [id(0),propput]
-        HRESULT                 value                       ( [in] VARIANT* value );
+        HRESULT                 Value                       ( [in] VARIANT* Value );
 
         [id(0),propget]
-        HRESULT                 value                       ( [out,retval] VARIANT* value );
+        HRESULT                 Value                       ( [out,retval] VARIANT* Value );
 
-      //HRESULT                 dim                         ( [in] int size );
+      //HRESULT                 Dim                         ( [in] int size );
 
         [propget]
-        HRESULT                 name                        ( [out,retval] BSTR* name );
+        HRESULT                 Name                        ( [out,retval] BSTR* Name );
 
         HRESULT                 Clone                       ( [out,retval] Ivariable** );
     }
@@ -122,41 +122,41 @@ library spooler
     interface Ivariable_set : IDispatch
     {
         [propget]
-        HRESULT                 java_class_name             ( [out,retval] BSTR* result );          // Damit java_class_name über IDispatch, statt über Ihas_java_class_name gerufen werden kann
+        HRESULT                 Java_class_name             ( [out,retval] BSTR* Result );          // Damit java_class_name über IDispatch, statt über Ihas_java_class_name gerufen werden kann
                                                                                                     // Für den Objectserver
 
-        HRESULT                 set_var                     ( [in] BSTR name, [in] VARIANT* value );
+        HRESULT                 Set_var                     ( [in] BSTR Name, [in] VARIANT* Value );
 
         [id(0),propput]
-        HRESULT                 value                       ( [in,optional] VARIANT* name, [in] VARIANT* value );
+        HRESULT                 Value                       ( [in,optional] VARIANT* Name, [in] VARIANT* Value );
 
         [id(0),propget]
-        HRESULT                 value                       ( [in,optional] VARIANT* name, [out,retval] VARIANT* value );
+        HRESULT                 Value                       ( [in,optional] VARIANT* Name, [out,retval] VARIANT* Value );
 
         [propput]
-        HRESULT                 var                         ( [in] BSTR name, [in] VARIANT* value );
+        HRESULT                 Var                         ( [in] BSTR Name, [in] VARIANT* Value );
 
         [propget]
-        HRESULT                 var                         ( [in] BSTR name, [out,retval] VARIANT* value );
+        HRESULT                 Var                         ( [in] BSTR Name, [out,retval] VARIANT* Value );
 
         [propget]
-        HRESULT                 count                       ( [out,retval] int* value );
+        HRESULT                 Count                       ( [out,retval] int* Value );
 
         [propget]
-        HRESULT                 dom                         ( [out,retval] IXMLDOMDocument** xml_document );
+        HRESULT                 Dom                         ( [out,retval] IXMLDOMDocument** xml_document );
 
-        HRESULT                 Clone                       ( [out,retval] Ivariable_set** result );
+        HRESULT                 Clone                       ( [out,retval] Ivariable_set** Result );
 
-        HRESULT                 merge                       ( [in] Ivariable_set* other);
+        HRESULT                 Merge                       ( [in] Ivariable_set* other);
 
         [id(DISPID_NEWENUM),propget,restricted]
         HRESULT                 _NewEnum                    ( [out,retval] IUnknown** enumerator );    
 
         [propput]
-        HRESULT                 xml                         ( [in] BSTR xml_text );
+        HRESULT                 Xml                         ( [in] BSTR xml_text );
 
         [propget]
-        HRESULT                 xml                         ( [out,retval] BSTR* xml_text );
+        HRESULT                 Xml                         ( [out,retval] BSTR* xml_text );
     }
 
     [
@@ -201,10 +201,10 @@ library spooler
     interface Iobject_set : IDispatch
     {
         [propget]
-        HRESULT                 low_level                   ( [out,retval] int* level );
+        HRESULT                 Low_level                   ( [out,retval] int* Level );
 
         [propget]
-        HRESULT                 high_level                  ( [out,retval] int* level );
+        HRESULT                 High_level                  ( [out,retval] int* Level );
     }
 
     [
@@ -225,52 +225,52 @@ library spooler
     interface Ijob : IDispatch
     {
         [propget]
-        HRESULT                 java_class_name             ( [out,retval] BSTR* result );          // Damit java_class_name über IDispatch, statt über Ihas_java_class_name gerufen werden kann
+        HRESULT                 Java_class_name             ( [out,retval] BSTR* Result );          // Damit java_class_name über IDispatch, statt über Ihas_java_class_name gerufen werden kann
                                                                                                     // Für den Objectserver
 
-        HRESULT                 start_when_directory_changed( [in] BSTR directory_name, [in,defaultvalue("")] BSTR filename_pattern );
+        HRESULT                 Start_when_directory_changed( [in] BSTR directory_name, [in,defaultvalue("")] BSTR filename_pattern );
 
-        HRESULT                 clear_when_directory_changed();
+        HRESULT                 Clear_when_directory_changed();
 
-      //HRESULT                 start_on_signal             ();
+      //HRESULT                 Start_on_signal             ();
 
-      //HRESULT                 start_after_timeout         ( [in,optional] VARIANT* variables, [out,retval] Itask** );
+      //HRESULT                 Start_after_timeout         ( [in,optional] VARIANT* Variables, [out,retval] Itask** );
 
-        HRESULT                 start                       ( [in,optional] VARIANT* variables, [out,retval] Itask** );
+        HRESULT                 Start                       ( [in,optional] VARIANT* Variables, [out,retval] Itask** );
 
       //[propget]
-      //HRESULT                 thread                      ( [out,retval] Ithread** result );
+      //HRESULT                 Thread                      ( [out,retval] Ithread** Result );
 
       //[propput]
-      //HRESULT                 include_path                ( [in] BSTR include_path );
+      //HRESULT                 Include_path                ( [in] BSTR include_path );
 
         [propget]
-        HRESULT                 include_path                ( [out,retval] BSTR* include_path );
+        HRESULT                 Include_path                ( [out,retval] BSTR* include_path );
 
         [propget]
-        HRESULT                 name                        ( [out,retval] BSTR* name );
+        HRESULT                 Name                        ( [out,retval] BSTR* Name );
 
-        HRESULT                 wake                        ();
+        HRESULT                 Wake                        ();
 
         [propput]
-        HRESULT                 state_text                  ( [in] BSTR state_text );
+        HRESULT                 State_text                  ( [in] BSTR state_text );
 
         [propget]
-        HRESULT                 title                       ( [out,retval] BSTR* title );
+        HRESULT                 Title                       ( [out,retval] BSTR* title );
 
         [propput]
-        HRESULT                 delay_after_error           ( [in] int error_steps, [in] VARIANT* time );
+        HRESULT                 Delay_after_error           ( [in] int error_steps, [in] VARIANT* time );
 
         [propget]
-        HRESULT                 order_queue                 ( [out,retval] Iorder_queue** result );
+        HRESULT                 Order_queue                 ( [out,retval] Iorder_queue** Result );
 
         [propput]
-        HRESULT                 delay_order_after_setback   ( [in] int setback_count, [in] VARIANT* time );
+        HRESULT                 Delay_order_after_setback   ( [in] int setback_count, [in] VARIANT* time );
 
         [propput]
-        HRESULT                 max_order_setbacks          ( [in] int setback_count );
+        HRESULT                 Max_order_setbacks          ( [in] int setback_count );
 
-        HRESULT                 clear_delay_after_error     ();
+        HRESULT                 Clear_delay_after_error     ();
     }
 
     [
@@ -292,61 +292,61 @@ library spooler
     interface Itask : IDispatch
     {
         [propget]
-        HRESULT                 java_class_name             ( [out,retval] BSTR* result );          // Damit java_class_name über IDispatch, statt über Ihas_java_class_name gerufen werden kann
+        HRESULT                 Java_class_name             ( [out,retval] BSTR* Result );          // Damit java_class_name über IDispatch, statt über Ihas_java_class_name gerufen werden kann
                                                                                                     // Für den Objectserver
 
         [propget]
-        HRESULT                 object_set                  ( [out,retval] Iobject_set** result );
+        HRESULT                 Object_set                  ( [out,retval] Iobject_set** Result );
 
         [propput]
-        HRESULT                 error                       ( [in] VARIANT* error_text );       // Für PerlScript, das einen Fehlertext nicht durchreicht
+        HRESULT                 Error                       ( [in] VARIANT* error_text );       // Für PerlScript, das einen Fehlertext nicht durchreicht
 
         [propget]
-        HRESULT                 error                       ( [out,retval] Ierror** result );
+        HRESULT                 Error                       ( [out,retval] Ierror** Result );
 
         [propget]
-        HRESULT                 job                         ( [out,retval] Ijob** job );
+        HRESULT                 Job                         ( [out,retval] Ijob** Job );
 
         [propget]
-        HRESULT                 params                      ( [out,retval] Ivariable_set** parameters );
+        HRESULT                 Params                      ( [out,retval] Ivariable_set** parameters );
 
         [propput]
-        HRESULT                 result                      ( [in] VARIANT* value );
+        HRESULT                 Result                      ( [in] VARIANT* Value );
 
         [propget]
-        HRESULT                 result                      ( [out,retval] VARIANT* value );
+        HRESULT                 Result                      ( [out,retval] VARIANT* Value );
 
-        HRESULT                 wait_until_terminated       ( [in,defaultvalue(999999999)] double wait_time, [out,retval] VARIANT_BOOL* ok );
+        HRESULT                 Wait_until_terminated       ( [in,defaultvalue(999999999)] double wait_time, [out,retval] VARIANT_BOOL* ok );
 
         [propput,helpstring("Task nach der Anzahl Sekunden erneut starten")]
-        HRESULT                 repeat                      ( [in] double seconds );
+        HRESULT                 Repeat                      ( [in] double seconds );
 
       //[propget]
-      //HRESULT                 thread                      ( [out,retval] Ithread** result );
+      //HRESULT                 Thread                      ( [out,retval] Ithread** Result );
 
-        HRESULT                 end                         ();
-
-        [propput]
-        HRESULT                 history_field               ( [in] BSTR name, [in] VARIANT* value );
-
-        [propget]
-        HRESULT                 id                          ( [out,retval] int* result );
+        HRESULT                 End                         ();
 
         [propput]
-        HRESULT                 delay_spooler_process       ( [in] VARIANT* seconds );
+        HRESULT                 History_field               ( [in] BSTR Name, [in] VARIANT* Value );
+
+        [propget]
+        HRESULT                 Id                          ( [out,retval] int* Result );
 
         [propput]
-        HRESULT                 close_engine                ( [in] VARIANT_BOOL close_after_task );
+        HRESULT                 Delay_spooler_process       ( [in] VARIANT* seconds );
+
+        [propput]
+        HRESULT                 Close_engine                ( [in] VARIANT_BOOL close_after_task );
 
         [propget]
-        HRESULT                 order                       ( [out,retval] Iorder** result );
+        HRESULT                 Order                       ( [out,retval] Iorder** Result );
 
         [propget]
-        HRESULT                 changed_directories         ( [out,retval] BSTR* result );
+        HRESULT                 Changed_directories         ( [out,retval] BSTR* Result );
 
-        HRESULT                 add_pid                     ( [in] int pid, [in,optional]VARIANT* timeout );
+        HRESULT                 Add_pid                     ( [in] int pid, [in,optional]VARIANT* timeout );
 
-        HRESULT                 remove_pid                  ( [in] int pid );
+        HRESULT                 Remove_pid                  ( [in] int pid );
     }
 
     [
@@ -368,23 +368,23 @@ library spooler
     interface Ithread : IDispatch
     {
         [propget]
-        HRESULT                 java_class_name             ( [out,retval] BSTR* result );          // Damit java_class_name über IDispatch, statt über Ihas_java_class_name gerufen werden kann
+        HRESULT                 Java_class_name             ( [out,retval] BSTR* Result );          // Damit java_class_name über IDispatch, statt über Ihas_java_class_name gerufen werden kann
                                                                                                     // Für den Objectserver
 
         [propget]
-        HRESULT                 log                     ( [out,retval] Ilog** log );
+        HRESULT                 Log                     ( [out,retval] Ilog** log );
 
         [propget]
-        HRESULT                 script                  ( [out,retval] IDispatch** script_object );
+        HRESULT                 Script                  ( [out,retval] IDispatch** script_object );
 
       //[propput]
-      //HRESULT                 include_path            ( [in] BSTR include_path );
+      //HRESULT                 Include_path            ( [in] BSTR include_path );
 
         [propget]
-        HRESULT                 include_path            ( [out,retval] BSTR* include_path );
+        HRESULT                 Include_path            ( [out,retval] BSTR* include_path );
 
         [propget]
-        HRESULT                 name                    ( [out,retval] BSTR* name );
+        HRESULT                 Name                    ( [out,retval] BSTR* Name );
     }
 
     [
@@ -406,72 +406,72 @@ library spooler
     interface Ispooler : IDispatch
     {
         [propget]
-        HRESULT                 java_class_name             ( [out,retval] BSTR* result );          // Damit java_class_name über IDispatch, statt über Ihas_java_class_name gerufen werden kann
+        HRESULT                 Java_class_name             ( [out,retval] BSTR* Result );          // Damit java_class_name über IDispatch, statt über Ihas_java_class_name gerufen werden kann
                                                                                                     // Für den Objectserver
 
         [propget]
-        HRESULT                 log                     ( [out,retval] Ilog** log );
+        HRESULT                 Log                     ( [out,retval] Ilog** Log );
 
         [propget]
-        HRESULT                 id                      ( [out,retval] BSTR* spooler_id );
+        HRESULT                 Id                      ( [out,retval] BSTR* spooler_id );
 
         [propget]
-        HRESULT                 param                   ( [out,retval] BSTR* spooler_param );
+        HRESULT                 Param                   ( [out,retval] BSTR* spooler_param );
 
         [propget]
-        HRESULT                 script                  ( [out,retval] IDispatch** script_object );
+        HRESULT                 Script                  ( [out,retval] IDispatch** script_object );
 
         [propget]
-        HRESULT                 job                     ( [in] BSTR job_name, [out,retval] Ijob** job );
+        HRESULT                 Job                     ( [in] BSTR job_name, [out,retval] Ijob** Job );
 
-        HRESULT                 create_variable_set     ( [out,retval] Ivariable_set** result );
+        HRESULT                 Create_variable_set     ( [out,retval] Ivariable_set** Result );
 
       //[propput]
-      //HRESULT                 include_path            ( [in] BSTR include_path );
+      //HRESULT                 Include_path            ( [in] BSTR include_path );
 
         [propget]
-        HRESULT                 include_path            ( [out,retval] BSTR* include_path );
+        HRESULT                 Include_path            ( [out,retval] BSTR* include_path );
 
         [propget]
-        HRESULT                 log_dir                 ( [out,retval] BSTR* directory );
+        HRESULT                 Log_dir                 ( [out,retval] BSTR* Directory );
 
-        HRESULT                 let_run_terminate_and_restart();
+        HRESULT                 Let_run_terminate_and_restart();
 
         [propget]
-        HRESULT                 variables               ( [out,retval] Ivariable_set** );
+        HRESULT                 Variables               ( [out,retval] Ivariable_set** );
 
         [id(0),propput]
-        HRESULT                 var                     ( [in] BSTR name, [in] VARIANT* value );
+        HRESULT                 Var                     ( [in] BSTR Name, [in] VARIANT* Value );
 
         [id(0),propget]
-        HRESULT                 var                     ( [in] BSTR name, [out,retval] VARIANT* value );
+        HRESULT                 Var                     ( [in] BSTR Name, [out,retval] VARIANT* Value );
 
         [propget]
-        HRESULT                 db_name                 ( [out,retval] BSTR* filename );
+        HRESULT                 Db_name                 ( [out,retval] BSTR* Filename );
 
-        HRESULT                 create_job_chain        ( [out,retval] Ijob_chain** result );
+        HRESULT                 Create_job_chain        ( [out,retval] Ijob_chain** Result );
 
-        HRESULT                 add_job_chain           ( [in] Ijob_chain* job_chain );
-
-        [propget]
-        HRESULT                 job_chain               ( [in] BSTR name, [out,retval] Ijob_chain** result );
-
-        HRESULT                 create_order            ( [out,retval] Iorder** result );
+        HRESULT                 Add_job_chain           ( [in] Ijob_chain* job_chain );
 
         [propget]
-        HRESULT                 is_service              ( [out,retval] VARIANT_BOOL* result );
+        HRESULT                 Job_chain               ( [in] BSTR Name, [out,retval] Ijob_chain** Result );
+
+        HRESULT                 Create_order            ( [out,retval] Iorder** Result );
 
         [propget]
-        HRESULT                 directory               ( [out,retval] BSTR* work_directory_name );
-
-        HRESULT                 job_chain_exists        ( [in] BSTR name, [out,retval] VARIANT_BOOL* result );
+        HRESULT                 Is_service              ( [out,retval] VARIANT_BOOL* Result );
 
         [propget]
-        HRESULT                 hostname                ( [out,retval] BSTR* result );
+        HRESULT                 Directory               ( [out,retval] BSTR* work_directory_name );
 
-        HRESULT                 abort_immediately       ();
+        HRESULT                 Job_chain_exists        ( [in] BSTR Name, [out,retval] VARIANT_BOOL* Result );
 
-        HRESULT                 abort_immediately_and_restart();
+        [propget]
+        HRESULT                 Hostname                ( [out,retval] BSTR* Result );
+
+        HRESULT                 Abort_immediately       ();
+
+        HRESULT                 Abort_immediately_and_restart();
     }
 
     [
@@ -493,19 +493,19 @@ library spooler
     interface Ispooler_context : IDispatch
     {
         [propget]
-        HRESULT                 log                     ( [out,retval] Idispatch** log );
+        HRESULT                 Log                     ( [out,retval] Idispatch** Log );
 
         [propget]
-        HRESULT                 spooler                 ( [out,retval] Idispatch** spooler );
+        HRESULT                 Spooler                 ( [out,retval] Idispatch** Spooler );
 
       //[propget]
-      //HRESULT                 thread                  ( [out,retval] Ithread** thread );
+      //HRESULT                 Thread                  ( [out,retval] Ithread** thread );
 
         [propget]
-        HRESULT                 job                     ( [out,retval] Idispatch** job );
+        HRESULT                 Job                     ( [out,retval] Idispatch** Job );
 
         [propget]
-        HRESULT                 task                    ( [out,retval] Idispatch** task );
+        HRESULT                 Task                    ( [out,retval] Idispatch** task );
     }
 
     [
@@ -526,74 +526,74 @@ library spooler
     interface Imail : IDispatch
     {
         [propget]
-        HRESULT                 java_class_name             ( [out,retval] BSTR* result );          // Damit java_class_name über IDispatch, statt über Ihas_java_class_name gerufen werden kann
+        HRESULT                 Java_class_name             ( [out,retval] BSTR* Result );          // Damit java_class_name über IDispatch, statt über Ihas_java_class_name gerufen werden kann
                                                                                                     // Für den Objectserver
 
       //[hidden]
-      //void                    init                    ();
+      //void                    Init                    ();
 
         [propput]
-        HRESULT                 to                      ( [in] BSTR receipient );
+        HRESULT                 To                      ( [in] BSTR receipient );
 
         [propget]
-        HRESULT                 to                      ( [out,retval] BSTR* receipient );
+        HRESULT                 To                      ( [out,retval] BSTR* receipient );
 
         [propput]
-        HRESULT                 from                    ( [in] BSTR from );
+        HRESULT                 From                    ( [in] BSTR from );
 
         [propget]
-        HRESULT                 from                    ( [out,retval] BSTR* from );
+        HRESULT                 From                    ( [out,retval] BSTR* from );
 
       //[propput]
-      //HRESULT                 reply_to                ( [in] BSTR receipient );
+      //HRESULT                 Reply_to                ( [in] BSTR receipient );
 
         [propput]
-        HRESULT                 cc                      ( [in] BSTR receipients );
+        HRESULT                 Cc                      ( [in] BSTR receipients );
 
         [propget]
-        HRESULT                 cc                      ( [out,retval] BSTR* receipients );
+        HRESULT                 Cc                      ( [out,retval] BSTR* receipients );
 
         [propput]
-        HRESULT                 bcc                     ( [in] BSTR receipients );
+        HRESULT                 Bcc                     ( [in] BSTR receipients );
 
         [propget]
-        HRESULT                 bcc                     ( [out,retval] BSTR* receipients );
+        HRESULT                 Bcc                     ( [out,retval] BSTR* receipients );
 
         [propput]
-        HRESULT                 subject                 ( [in] BSTR subject );
+        HRESULT                 Subject                 ( [in] BSTR subject );
 
         [propget]
-        HRESULT                 subject                 ( [out,retval] BSTR* subject );
+        HRESULT                 Subject                 ( [out,retval] BSTR* subject );
 
         [propput]
-        HRESULT                 body                    ( [in] BSTR body );
+        HRESULT                 Body                    ( [in] BSTR body );
 
         [propget]
-        HRESULT                 body                    ( [out,retval] BSTR* body );
+        HRESULT                 Body                    ( [out,retval] BSTR* body );
 
-        HRESULT                 add_file                ( [in] BSTR real_filename, [in,defaultvalue("")] BSTR mail_filename, [in,defaultvalue("")] BSTR content_type, [in,defaultvalue("")] BSTR encoding );
+        HRESULT                 Add_file                ( [in] BSTR real_filename, [in,defaultvalue("")] BSTR mail_filename, [in,defaultvalue("")] BSTR content_type, [in,defaultvalue("")] BSTR encoding );
 
         [propput]
-        HRESULT                 smtp                    ( [in] BSTR hostname );
+        HRESULT                 Smtp                    ( [in] BSTR hostname );
 
         [propget]
-        HRESULT                 smtp                    ( [out,retval] BSTR* host );
+        HRESULT                 Smtp                    ( [out,retval] BSTR* host );
 
         [propput]
-        HRESULT                 queue_dir               ( [in] BSTR directory );
+        HRESULT                 Queue_dir               ( [in] BSTR Directory );
 
         [propget]
-        HRESULT                 queue_dir               ( [out,retval] BSTR* directory );
+        HRESULT                 Queue_dir               ( [out,retval] BSTR* Directory );
 
-        HRESULT                 add_header_field        ( [in] BSTR field_name, [in] BSTR value );
+        HRESULT                 Add_header_field        ( [in] BSTR field_name, [in] BSTR Value );
 
-        HRESULT                 dequeue                 ( [out,retval] int* count );
+        HRESULT                 Dequeue                 ( [out,retval] int* count );
 
       //[hidden]
-      //int                     send                    ();
+      //int                     Send                    ();
 
         [propget]
-        HRESULT                 dequeue_log             ( [out,retval] BSTR* text );
+        HRESULT                 Dequeue_log             ( [out,retval] BSTR* Text );
     }
 
     [
@@ -615,26 +615,26 @@ library spooler
     interface Ijob_chain_node : IDispatch
     {
         [propget]
-        HRESULT                 java_class_name             ( [out,retval] BSTR* result );          // Damit java_class_name über IDispatch, statt über Ihas_java_class_name gerufen werden kann
+        HRESULT                 Java_class_name             ( [out,retval] BSTR* Result );          // Damit java_class_name über IDispatch, statt über Ihas_java_class_name gerufen werden kann
                                                                                                     // Für den Objectserver
 
         [propget]
-        HRESULT                 state                   ( [out,retval] VARIANT* result );
+        HRESULT                 State                   ( [out,retval] VARIANT* Result );
 
         [propget]
-        HRESULT                 next_node               ( [out,retval] Ijob_chain_node** result );
+        HRESULT                 Next_node               ( [out,retval] Ijob_chain_node** Result );
 
         [propget]
-        HRESULT                 error_node              ( [out,retval] Ijob_chain_node** result );
+        HRESULT                 Error_node              ( [out,retval] Ijob_chain_node** Result );
 
         [propget]
-        HRESULT                 job                     ( [out,retval] Ijob** result );
+        HRESULT                 Job                     ( [out,retval] Ijob** Result );
 
         [propget]
-        HRESULT                 next_state              ( [out,retval] VARIANT* result );
+        HRESULT                 Next_state              ( [out,retval] VARIANT* Result );
 
         [propget]
-        HRESULT                 error_state             ( [out,retval] VARIANT* result );
+        HRESULT                 Error_state             ( [out,retval] VARIANT* Result );
     }
 
     [
@@ -656,32 +656,32 @@ library spooler
     interface Ijob_chain : IDispatch
     {
         [propget]
-        HRESULT                 java_class_name             ( [out,retval] BSTR* result );          // Damit java_class_name über IDispatch, statt über Ihas_java_class_name gerufen werden kann
+        HRESULT                 Java_class_name             ( [out,retval] BSTR* Result );          // Damit java_class_name über IDispatch, statt über Ihas_java_class_name gerufen werden kann
                                                                                                     // Für den Objectserver
 
         [propput]
-        HRESULT                 name                    ( [in] BSTR name );
+        HRESULT                 Name                    ( [in] BSTR Name );
 
         [propget]
-        HRESULT                 name                    ( [out,retval] BSTR* result );
+        HRESULT                 Name                    ( [out,retval] BSTR* Result );
 
         [propget]
-        HRESULT                 order_count             ( [out,retval] int* result );
+        HRESULT                 Order_count             ( [out,retval] int* Result );
 
-        HRESULT                 add_job                 ( [in]          VARIANT* jobname, 
+        HRESULT                 Add_job                 ( [in]          VARIANT* jobname, 
                                                           [in,optional] VARIANT* input_state,
                                                           [in,optional] VARIANT* output_state,
-                                                          [in,optional] VARIANT* error_state );
+                                                          [in,optional] VARIANT* Error_state );
 
-        HRESULT                 add_end_state           ( [in] VARIANT* state );
+        HRESULT                 Add_end_state           ( [in] VARIANT* State );
 
-        HRESULT                 add_order               ( [in] VARIANT* order_or_payload, [out,retval] Iorder** order );
-
-        [propget]
-        HRESULT                 node                    ( [in] VARIANT* state, [out,retval] Ijob_chain_node** result );
+        HRESULT                 Add_order               ( [in] VARIANT* order_or_payload, [out,retval] Iorder** Order );
 
         [propget]
-        HRESULT                 order_queue             ( [in] VARIANT* state, [out,retval] Iorder_queue** result );
+        HRESULT                 Node                    ( [in] VARIANT* State, [out,retval] Ijob_chain_node** Result );
+
+        [propget]
+        HRESULT                 Order_queue             ( [in] VARIANT* State, [out,retval] Iorder_queue** Result );
     }
 
     [
@@ -703,13 +703,13 @@ library spooler
     interface Iorder_queue : IDispatch
     {
         [propget]
-        HRESULT                 java_class_name             ( [out,retval] BSTR* result );          // Damit java_class_name über IDispatch, statt über Ihas_java_class_name gerufen werden kann
+        HRESULT                 Java_class_name             ( [out,retval] BSTR* Result );          // Damit java_class_name über IDispatch, statt über Ihas_java_class_name gerufen werden kann
                                                                                                     // Für den Objectserver
 
         [propget]
-        HRESULT                 length                  ( [out,retval] int* result );
+        HRESULT                 Length                  ( [out,retval] int* Result );
 
-        HRESULT                 add_order               ( [in] VARIANT* order_or_payload, [out,retval] Iorder** );
+        HRESULT                 Add_order               ( [in] VARIANT* order_or_payload, [out,retval] Iorder** );
     }
 
     [
@@ -731,69 +731,69 @@ library spooler
     interface Iorder : IDispatch
     {
         [propget]
-        HRESULT                 java_class_name             ( [out,retval] BSTR* result );          // Damit java_class_name über IDispatch, statt über Ihas_java_class_name gerufen werden kann
+        HRESULT                 Java_class_name             ( [out,retval] BSTR* Result );          // Damit java_class_name über IDispatch, statt über Ihas_java_class_name gerufen werden kann
                                                                                                     // Für den Objectserver
 
         [propput]
-        HRESULT                 id                      ( [in] VARIANT* value );
+        HRESULT                 Id                      ( [in] VARIANT* Value );
 
         [propget]
-        HRESULT                 id                      ( [out,retval] VARIANT* result );
+        HRESULT                 Id                      ( [out,retval] VARIANT* Result );
 
         [propput]
-        HRESULT                 title                   ( [in] BSTR value );
+        HRESULT                 Title                   ( [in] BSTR Value );
 
         [propget]
-        HRESULT                 title                   ( [out,retval] BSTR* result );
+        HRESULT                 Title                   ( [out,retval] BSTR* Result );
 
         [propput]
-        HRESULT                 priority                ( [in] int value );
+        HRESULT                 Priority                ( [in] int Value );
 
         [propget]
-        HRESULT                 priority                ( [out,retval] int* result );
+        HRESULT                 Priority                ( [out,retval] int* Result );
 
         [propget]
-        HRESULT                 job_chain               ( [out,retval] Ijob_chain** result );
+        HRESULT                 Job_chain               ( [out,retval] Ijob_chain** Result );
 
         [propget]
-        HRESULT                 job_chain_node          ( [out,retval] Ijob_chain_node** result );
+        HRESULT                 Job_chain_node          ( [out,retval] Ijob_chain_node** Result );
 
         [propput]
-        HRESULT                 job                     ( [in] VARIANT* job_or_jobname );
+        HRESULT                 Job                     ( [in] VARIANT* job_or_jobname );
 
         [propputref]
-        HRESULT                 job                     ( [in] Ijob* job );
+        HRESULT                 Job                     ( [in] Ijob* Job );
 
         [propget]
-        HRESULT                 job                     ( [out,retval] Ijob** result );
+        HRESULT                 Job                     ( [out,retval] Ijob** Result );
 
         [propput]
-        HRESULT                 state                   ( [in] VARIANT* value );
+        HRESULT                 State                   ( [in] VARIANT* Value );
 
         [propget]
-        HRESULT                 state                   ( [out,retval] VARIANT* result );
+        HRESULT                 State                   ( [out,retval] VARIANT* Result );
 
         [propput]
-        HRESULT                 state_text              ( [in] BSTR value );
+        HRESULT                 State_text              ( [in] BSTR Value );
 
         [propget]
-        HRESULT                 state_text              ( [out,retval] BSTR* result );
+        HRESULT                 State_text              ( [out,retval] BSTR* Result );
 
         [propget]
-        HRESULT                 error                   ( [out,retval] Ierror** result );
+        HRESULT                 Error                   ( [out,retval] Ierror** Result );
 
         [propput]
-        HRESULT                 payload                 ( [in] VARIANT* value );
+        HRESULT                 Payload                 ( [in] VARIANT* Value );
 
         [propputref]
-        HRESULT                 payload                 ( [in] IUnknown* value );
+        HRESULT                 Payload                 ( [in] IUnknown* Value );
 
         [propget]
-        HRESULT                 payload                 ( [out,retval] VARIANT* result );
+        HRESULT                 Payload                 ( [out,retval] VARIANT* Result );
 
-        HRESULT                 payload_is_type         ( [in] BSTR typenam, [out,retval] VARIANT_BOOL* result );
+        HRESULT                 Payload_is_type         ( [in] BSTR typenam, [out,retval] VARIANT_BOOL* Result );
 
-        HRESULT                 setback                 ();
+        HRESULT                 Setback                 ();
     }
 
     [
@@ -815,85 +815,85 @@ library spooler
     interface Ilog : IDispatch
     {
         [propget]
-        HRESULT                 java_class_name             ( [out,retval] BSTR* result );          // Damit java_class_name über IDispatch, statt über Ihas_java_class_name gerufen werden kann
+        HRESULT                 Java_class_name             ( [out,retval] BSTR* Result );          // Damit java_class_name über IDispatch, statt über Ihas_java_class_name gerufen werden kann
                                                                                                     // Für den Objectserver
 
-        HRESULT                 debug9                  ( [in] BSTR line );
-        HRESULT                 debug8                  ( [in] BSTR line );
-        HRESULT                 debug7                  ( [in] BSTR line );
-        HRESULT                 debug6                  ( [in] BSTR line );
-        HRESULT                 debug5                  ( [in] BSTR line );
-        HRESULT                 debug4                  ( [in] BSTR line );
-        HRESULT                 debug3                  ( [in] BSTR line );
-        HRESULT                 debug2                  ( [in] BSTR line );
-        HRESULT                 debug1                  ( [in] BSTR line );
+        HRESULT                 Debug9                  ( [in] BSTR line );
+        HRESULT                 Debug8                  ( [in] BSTR line );
+        HRESULT                 Debug7                  ( [in] BSTR line );
+        HRESULT                 Debug6                  ( [in] BSTR line );
+        HRESULT                 Debug5                  ( [in] BSTR line );
+        HRESULT                 Debug4                  ( [in] BSTR line );
+        HRESULT                 Debug3                  ( [in] BSTR line );
+        HRESULT                 Debug2                  ( [in] BSTR line );
+        HRESULT                 Debug1                  ( [in] BSTR line );
         
-        HRESULT                 debug                   ( [in] BSTR line );
+        HRESULT                 Debug                   ( [in] BSTR line );
         
         [id(0)]
-        HRESULT                 info                    ( [in] BSTR line );
+        HRESULT                 Info                    ( [in] BSTR line );
         
-        HRESULT                 msg                     ( [in] BSTR line );     // Zur Kompatibilität, wie info()
+        HRESULT                 Msg                     ( [in] BSTR line );     // Zur Kompatibilität, wie info()
         
-        HRESULT                 warn                    ( [in] BSTR line );
+        HRESULT                 Warn                    ( [in] BSTR line );
         
-        HRESULT                 error                   ( [in] BSTR line );
+        HRESULT                 Error                   ( [in] BSTR line );
 
-        HRESULT                 log                     ( [in] enum Log_level, [in] BSTR line );
+        HRESULT                 Log                     ( [in] enum Log_level, [in] BSTR line );
 
         [propget]
-        HRESULT                 mail                    ( [out,retval] Imail** mail );
+        HRESULT                 Mail                    ( [out,retval] Imail** mail );
 
         [propput]
-        HRESULT                 mail_on_error           ( [in] VARIANT_BOOL mail_on_error );
+        HRESULT                 Mail_on_error           ( [in] VARIANT_BOOL mail_on_error );
 
         [propget]
-        HRESULT                 mail_on_error           ( [out,retval] VARIANT_BOOL* mail_on_error );
+        HRESULT                 Mail_on_error           ( [out,retval] VARIANT_BOOL* mail_on_error );
 
         [propput]
-        HRESULT                 mail_on_success         ( [in] VARIANT_BOOL mail_on_success );
+        HRESULT                 Mail_on_success         ( [in] VARIANT_BOOL mail_on_success );
 
         [propget]
-        HRESULT                 mail_on_success         ( [out,retval] VARIANT_BOOL* mail_on_success );
+        HRESULT                 Mail_on_success         ( [out,retval] VARIANT_BOOL* mail_on_success );
 
         [propput]
-        HRESULT                 mail_on_process         ( [in] int level );
+        HRESULT                 Mail_on_process         ( [in] int Level );
 
         [propget]
-        HRESULT                 mail_on_process         ( [out,retval] int* level );
+        HRESULT                 Mail_on_process         ( [out,retval] int* Level );
 
         [propput]
-        HRESULT                 level                   ( [in] int level );
+        HRESULT                 Level                   ( [in] int Level );
 
         [propget]
-        HRESULT                 level                   ( [out,retval] int* level );
+        HRESULT                 Level                   ( [out,retval] int* Level );
 
         [propget]
-        HRESULT                 filename                ( [out,retval] BSTR* filename );
+        HRESULT                 Filename                ( [out,retval] BSTR* Filename );
 
         [propput]
-        HRESULT                 new_filename            ( [in] BSTR filename );
+        HRESULT                 New_filename            ( [in] BSTR Filename );
 
         [propget]
-        HRESULT                 new_filename            ( [out,retval] BSTR* filename );
+        HRESULT                 New_filename            ( [out,retval] BSTR* Filename );
 
         [propput]
-        HRESULT                 collect_within          ( [in] VARIANT* time );
+        HRESULT                 Collect_within          ( [in] VARIANT* time );
 
         [propget]
-        HRESULT                 collect_within          ( [out,retval] double* time );
+        HRESULT                 Collect_within          ( [out,retval] double* time );
 
         [propput]
-        HRESULT                 collect_max             ( [in] VARIANT* time );
+        HRESULT                 Collect_max             ( [in] VARIANT* time );
 
         [propget]
-        HRESULT                 collect_max             ( [out,retval] double* time );
+        HRESULT                 Collect_max             ( [out,retval] double* time );
 
         [propput]
-        HRESULT                 mail_it                 ( [in] VARIANT_BOOL mail_it );
+        HRESULT                 Mail_it                 ( [in] VARIANT_BOOL mail_it );
 
         [propget]
-        HRESULT                 last_error_line         ( [out,retval] BSTR* line );
+        HRESULT                 Last_error_line         ( [out,retval] BSTR* line );
     }
 
     [
@@ -915,37 +915,37 @@ library spooler
     interface Ilog_proxy : IDispatch
     {
         [propget]
-        HRESULT                 java_class_name         ( [out,retval] BSTR* result );          // Damit java_class_name über IDispatch, statt über Ihas_java_class_name gerufen werden kann
+        HRESULT                 Java_class_name         ( [out,retval] BSTR* Result );          // Damit java_class_name über IDispatch, statt über Ihas_java_class_name gerufen werden kann
                                                                                                 // Für den Objectserver
 
-        HRESULT                 debug9                  ( [in] BSTR line );
-        HRESULT                 debug8                  ( [in] BSTR line );
-        HRESULT                 debug7                  ( [in] BSTR line );
-        HRESULT                 debug6                  ( [in] BSTR line );
-        HRESULT                 debug5                  ( [in] BSTR line );
-        HRESULT                 debug4                  ( [in] BSTR line );
-        HRESULT                 debug3                  ( [in] BSTR line );
-        HRESULT                 debug2                  ( [in] BSTR line );
-        HRESULT                 debug1                  ( [in] BSTR line );
+        HRESULT                 Debug9                  ( [in] BSTR line );
+        HRESULT                 Debug8                  ( [in] BSTR line );
+        HRESULT                 Debug7                  ( [in] BSTR line );
+        HRESULT                 Debug6                  ( [in] BSTR line );
+        HRESULT                 Debug5                  ( [in] BSTR line );
+        HRESULT                 Debug4                  ( [in] BSTR line );
+        HRESULT                 Debug3                  ( [in] BSTR line );
+        HRESULT                 Debug2                  ( [in] BSTR line );
+        HRESULT                 Debug1                  ( [in] BSTR line );
         
-        HRESULT                 debug                   ( [in] BSTR line );
+        HRESULT                 Debug                   ( [in] BSTR line );
         
         [id(0)]
-        HRESULT                 info                    ( [in] BSTR line );
+        HRESULT                 Info                    ( [in] BSTR line );
         
-        HRESULT                 msg                     ( [in] BSTR line );     // Zur Kompatibilität, wie info()
+        HRESULT                 Msg                     ( [in] BSTR line );     // Zur Kompatibilität, wie info()
         
-        HRESULT                 warn                    ( [in] BSTR line );
+        HRESULT                 Warn                    ( [in] BSTR line );
         
-        HRESULT                 error                   ( [in] BSTR line );
+        HRESULT                 Error                   ( [in] BSTR line );
 
-        HRESULT                 log                     ( [in] enum Log_level, [in] BSTR line );
+        HRESULT                 Log                     ( [in] enum Log_level, [in] BSTR line );
 
         [propput]
-        HRESULT                 level                   ( [in] int level );
+        HRESULT                 Level                   ( [in] int Level );
 
         [propget]
-        HRESULT                 level                   ( [out,retval] int* level );
+        HRESULT                 Level                   ( [out,retval] int* Level );
 
     }
 
@@ -967,13 +967,13 @@ library spooler
     ]
     interface Iremote_module_instance_server : IDispatch
     {
-        HRESULT                 construct               ( [in] SAFEARRAY(VARIANT) parameters );
-        HRESULT                 add_obj                 ( [in] IDispatch*, [in] BSTR name );
-        HRESULT                 name_exists             ( [in] BSTR name, [out,retval] VARIANT_BOOL* result );
-        HRESULT                 call                    ( [in] BSTR name, [out,retval] VARIANT* result );
-        HRESULT                 begin                   ( SAFEARRAY(VARIANT) objects, SAFEARRAY(VARIANT) names, [out,retval] VARIANT* result );
-        HRESULT                 end                     ( [in] VARIANT_BOOL succeeded, [out,retval] VARIANT* result );
-        HRESULT                 step                    ( [out,retval] VARIANT* result );
+        HRESULT                 Construct               ( [in] SAFEARRAY(VARIANT) parameters );
+        HRESULT                 Add_obj                 ( [in] IDispatch*, [in] BSTR Name );
+        HRESULT                 Name_exists             ( [in] BSTR Name, [out,retval] VARIANT_BOOL* Result );
+        HRESULT                 Call                    ( [in] BSTR Name, [out,retval] VARIANT* Result );
+        HRESULT                 Begin                   ( SAFEARRAY(VARIANT) objects, SAFEARRAY(VARIANT) names, [out,retval] VARIANT* Result );
+        HRESULT                 End                     ( [in] VARIANT_BOOL succeeded, [out,retval] VARIANT* Result );
+        HRESULT                 Step                    ( [out,retval] VARIANT* Result );
     };
 
     [

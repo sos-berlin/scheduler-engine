@@ -1,4 +1,4 @@
-// $Id: spooler_mail.cxx,v 1.21 2004/02/29 00:20:15 jz Exp $
+// $Id: spooler_mail.cxx,v 1.22 2004/04/05 08:49:46 jz Exp $
 
 
 #include "spooler.h"
@@ -14,7 +14,7 @@ using namespace spooler_com;
 
 extern Typelib_descr spooler_typelib;
 
-DESCRIBE_CLASS( &spooler_typelib, Com_mail, mail, CLSID_mail, "Spooler.Mail", "1.0" )
+DESCRIBE_CLASS( &spooler_typelib, Com_mail, mail, CLSID_Mail, "Spooler.Mail", "1.0" )
 
 //-------------------------------------------------------------------------------Com_mail::_methods
 #ifdef Z_COM
@@ -22,27 +22,27 @@ DESCRIBE_CLASS( &spooler_typelib, Com_mail, mail, CLSID_mail, "Spooler.Mail", "1
 const Com_method Com_mail::_methods[] =
 { 
    // _flags              , _name                , _method                                     , _result_type, _types        , _default_arg_count
-    { DISPATCH_PROPERTYPUT, 1, "to"              , (Com_method_ptr)&Com_mail::put_to           , VT_EMPTY    , { VT_BSTR } },
-    { DISPATCH_PROPERTYGET, 1, "to"              , (Com_method_ptr)&Com_mail::get_to           , VT_BSTR     },
-    { DISPATCH_PROPERTYPUT, 2, "from"            , (Com_method_ptr)&Com_mail::put_from         , VT_EMPTY    , { VT_BSTR } },
-    { DISPATCH_PROPERTYGET, 2, "from"            , (Com_method_ptr)&Com_mail::get_from         , VT_BSTR     },
-    { DISPATCH_PROPERTYPUT, 3, "cc"              , (Com_method_ptr)&Com_mail::put_cc           , VT_EMPTY    , { VT_BSTR } },
-    { DISPATCH_PROPERTYGET, 3, "cc"              , (Com_method_ptr)&Com_mail::get_cc           , VT_BSTR     },
-    { DISPATCH_PROPERTYPUT, 4, "bcc"             , (Com_method_ptr)&Com_mail::put_cc           , VT_EMPTY    , { VT_BSTR } },
-    { DISPATCH_PROPERTYGET, 4, "bcc"             , (Com_method_ptr)&Com_mail::get_cc           , VT_BSTR     },
-    { DISPATCH_PROPERTYPUT, 5, "subject"         , (Com_method_ptr)&Com_mail::put_subject      , VT_EMPTY    , { VT_BSTR } },
-    { DISPATCH_PROPERTYGET, 5, "subject"         , (Com_method_ptr)&Com_mail::get_subject      , VT_BSTR     },
-    { DISPATCH_PROPERTYPUT, 6, "body"            , (Com_method_ptr)&Com_mail::put_body         , VT_EMPTY    , { VT_BSTR } },
-    { DISPATCH_PROPERTYGET, 6, "body"            , (Com_method_ptr)&Com_mail::get_body         , VT_BSTR     },
-    { DISPATCH_METHOD     , 7, "add_file"        , (Com_method_ptr)&Com_mail::add_file         , VT_EMPTY    , { VT_BSTR, VT_BSTR, VT_BSTR, VT_BSTR }, 3 },
-    { DISPATCH_PROPERTYPUT, 8, "smtp"            , (Com_method_ptr)&Com_mail::put_smtp         , VT_EMPTY    , { VT_BSTR } },
-    { DISPATCH_PROPERTYGET, 8, "smtp"            , (Com_method_ptr)&Com_mail::get_smtp         , VT_BSTR     },
-    { DISPATCH_PROPERTYPUT, 9, "queue_dir"       , (Com_method_ptr)&Com_mail::put_queue_dir    , VT_EMPTY    , { VT_BSTR } },
-    { DISPATCH_PROPERTYGET, 9, "queue_dir"       , (Com_method_ptr)&Com_mail::get_queue_dir    , VT_BSTR     },
-    { DISPATCH_METHOD     ,10, "add_header_field", (Com_method_ptr)&Com_mail::add_header_field , VT_EMPTY    , { VT_BSTR, VT_BSTR } },
-    { DISPATCH_METHOD     ,11, "dequeue"         , (Com_method_ptr)&Com_mail::dequeue          , VT_INT      },
-    { DISPATCH_PROPERTYGET,12, "dequeue_log"     , (Com_method_ptr)&Com_mail::get_dequeue_log  , VT_BSTR     },
-    { DISPATCH_PROPERTYGET,13, "java_class_name" , (Com_method_ptr)&Com_mail::get_java_class_name, VT_BSTR },
+    { DISPATCH_PROPERTYPUT, 1, "to"              , (Com_method_ptr)&Com_mail::put_To           , VT_EMPTY    , { VT_BSTR } },
+    { DISPATCH_PROPERTYGET, 1, "to"              , (Com_method_ptr)&Com_mail::get_To           , VT_BSTR     },
+    { DISPATCH_PROPERTYPUT, 2, "from"            , (Com_method_ptr)&Com_mail::put_From         , VT_EMPTY    , { VT_BSTR } },
+    { DISPATCH_PROPERTYGET, 2, "from"            , (Com_method_ptr)&Com_mail::get_From         , VT_BSTR     },
+    { DISPATCH_PROPERTYPUT, 3, "cc"              , (Com_method_ptr)&Com_mail::put_Cc           , VT_EMPTY    , { VT_BSTR } },
+    { DISPATCH_PROPERTYGET, 3, "cc"              , (Com_method_ptr)&Com_mail::get_Cc           , VT_BSTR     },
+    { DISPATCH_PROPERTYPUT, 4, "bcc"             , (Com_method_ptr)&Com_mail::put_Cc           , VT_EMPTY    , { VT_BSTR } },
+    { DISPATCH_PROPERTYGET, 4, "bcc"             , (Com_method_ptr)&Com_mail::get_Cc           , VT_BSTR     },
+    { DISPATCH_PROPERTYPUT, 5, "subject"         , (Com_method_ptr)&Com_mail::put_Subject      , VT_EMPTY    , { VT_BSTR } },
+    { DISPATCH_PROPERTYGET, 5, "subject"         , (Com_method_ptr)&Com_mail::get_Subject      , VT_BSTR     },
+    { DISPATCH_PROPERTYPUT, 6, "body"            , (Com_method_ptr)&Com_mail::put_Body         , VT_EMPTY    , { VT_BSTR } },
+    { DISPATCH_PROPERTYGET, 6, "body"            , (Com_method_ptr)&Com_mail::get_Body         , VT_BSTR     },
+    { DISPATCH_METHOD     , 7, "add_file"        , (Com_method_ptr)&Com_mail::Add_file         , VT_EMPTY    , { VT_BSTR, VT_BSTR, VT_BSTR, VT_BSTR }, 3 },
+    { DISPATCH_PROPERTYPUT, 8, "smtp"            , (Com_method_ptr)&Com_mail::put_Smtp         , VT_EMPTY    , { VT_BSTR } },
+    { DISPATCH_PROPERTYGET, 8, "smtp"            , (Com_method_ptr)&Com_mail::get_Smtp         , VT_BSTR     },
+    { DISPATCH_PROPERTYPUT, 9, "queue_dir"       , (Com_method_ptr)&Com_mail::put_Queue_dir    , VT_EMPTY    , { VT_BSTR } },
+    { DISPATCH_PROPERTYGET, 9, "queue_dir"       , (Com_method_ptr)&Com_mail::get_Queue_dir    , VT_BSTR     },
+    { DISPATCH_METHOD     ,10, "add_header_field", (Com_method_ptr)&Com_mail::Add_header_field , VT_EMPTY    , { VT_BSTR, VT_BSTR } },
+    { DISPATCH_METHOD     ,11, "dequeue"         , (Com_method_ptr)&Com_mail::Dequeue          , VT_INT      },
+    { DISPATCH_PROPERTYGET,12, "dequeue_log"     , (Com_method_ptr)&Com_mail::get_Dequeue_log  , VT_BSTR     },
+    { DISPATCH_PROPERTYGET,13, "Java_class_name" , (Com_method_ptr)&Com_mail::get_Java_class_name, VT_BSTR },
     {}
 };
 
@@ -85,7 +85,7 @@ void Com_mail::init()
 
 //---------------------------------------------------------------------------------Com_mail::put_to
 
-STDMETHODIMP Com_mail::put_to( BSTR to )
+STDMETHODIMP Com_mail::put_To( BSTR to )
 {
     HRESULT hr = NOERROR;
 
@@ -104,7 +104,7 @@ STDMETHODIMP Com_mail::put_to( BSTR to )
 
 //---------------------------------------------------------------------------------Com_mail::put_cc
 
-STDMETHODIMP Com_mail::put_cc( BSTR cc )
+STDMETHODIMP Com_mail::put_Cc( BSTR cc )
 {
     HRESULT hr = NOERROR;
 
@@ -123,7 +123,7 @@ STDMETHODIMP Com_mail::put_cc( BSTR cc )
 
 //--------------------------------------------------------------------------------Com_mail::put_bcc
 
-STDMETHODIMP Com_mail::put_bcc( BSTR bcc )
+STDMETHODIMP Com_mail::put_Bcc( BSTR bcc )
 {
     HRESULT hr = NOERROR;
 
@@ -142,7 +142,7 @@ STDMETHODIMP Com_mail::put_bcc( BSTR bcc )
 
 //-------------------------------------------------------------------------------Com_mail::put_from
 
-STDMETHODIMP Com_mail::put_from( BSTR from )
+STDMETHODIMP Com_mail::put_From( BSTR from )
 {
     HRESULT hr = NOERROR;
 
@@ -161,7 +161,7 @@ STDMETHODIMP Com_mail::put_from( BSTR from )
 
 //-------------------------------------------------------------------------------Com_mail::get_from
 
-STDMETHODIMP Com_mail::get_from( BSTR* result )
+STDMETHODIMP Com_mail::get_From( BSTR* result )
 {
     HRESULT hr = NOERROR;
 
@@ -179,7 +179,7 @@ STDMETHODIMP Com_mail::get_from( BSTR* result )
 
 //----------------------------------------------------------------------------Com_mail::put_subject
 
-STDMETHODIMP Com_mail::put_subject( BSTR subject )
+STDMETHODIMP Com_mail::put_Subject( BSTR subject )
 {
     HRESULT hr = NOERROR;
 
@@ -198,7 +198,7 @@ STDMETHODIMP Com_mail::put_subject( BSTR subject )
 
 //----------------------------------------------------------------------------Com_mail::get_subject
 
-STDMETHODIMP Com_mail::get_subject( BSTR* result )
+STDMETHODIMP Com_mail::get_Subject( BSTR* result )
 {
     HRESULT hr = NOERROR;
 
@@ -216,7 +216,7 @@ STDMETHODIMP Com_mail::get_subject( BSTR* result )
 
 //-------------------------------------------------------------------------------Com_mail::put_body
 
-STDMETHODIMP Com_mail::put_body( BSTR body )
+STDMETHODIMP Com_mail::put_Body( BSTR body )
 {
     HRESULT hr = NOERROR;
 
@@ -234,7 +234,7 @@ STDMETHODIMP Com_mail::put_body( BSTR body )
 
 //-------------------------------------------------------------------------------Com_mail::get_body
 
-STDMETHODIMP Com_mail::get_body( BSTR* result )
+STDMETHODIMP Com_mail::get_Body( BSTR* result )
 {
     HRESULT hr = NOERROR;
 
@@ -252,7 +252,7 @@ STDMETHODIMP Com_mail::get_body( BSTR* result )
 
 //-------------------------------------------------------------------------------Com_mail::add_file
 
-STDMETHODIMP Com_mail::add_file( BSTR real_filename, BSTR mail_filename, BSTR content_type, BSTR encoding )
+STDMETHODIMP Com_mail::Add_file( BSTR real_filename, BSTR mail_filename, BSTR content_type, BSTR encoding )
 {
     HRESULT hr = NOERROR;
 
@@ -270,7 +270,7 @@ STDMETHODIMP Com_mail::add_file( BSTR real_filename, BSTR mail_filename, BSTR co
 
 //-------------------------------------------------------------------------Com_mail::add_attachment
 /*
-STDMETHODIMP Com_mail::add_attachment( BSTR filename, BSTR content_type )
+STDMETHODIMP Com_mail::Add_attachment( BSTR filename, BSTR content_type )
 {
     HRESULT hr = NOERROR;
 
@@ -288,7 +288,7 @@ STDMETHODIMP Com_mail::add_attachment( BSTR filename, BSTR content_type )
 */
 //-------------------------------------------------------------------------------Com_mail::put_smtp
 
-STDMETHODIMP Com_mail::put_smtp( BSTR smtp )
+STDMETHODIMP Com_mail::put_Smtp( BSTR smtp )
 {
     HRESULT hr = NOERROR;
 
@@ -306,7 +306,7 @@ STDMETHODIMP Com_mail::put_smtp( BSTR smtp )
 
 //-------------------------------------------------------------------------------Com_mail::get_smtp
 
-STDMETHODIMP Com_mail::get_smtp( BSTR* smtp )
+STDMETHODIMP Com_mail::get_Smtp( BSTR* smtp )
 {
     HRESULT hr = NOERROR;
 
@@ -324,7 +324,7 @@ STDMETHODIMP Com_mail::get_smtp( BSTR* smtp )
 
 //--------------------------------------------------------------------------Com_mail::put_queue_dir
 
-STDMETHODIMP Com_mail::put_queue_dir( BSTR queue_dir )
+STDMETHODIMP Com_mail::put_Queue_dir( BSTR queue_dir )
 {
     HRESULT hr = NOERROR;
 
@@ -342,7 +342,7 @@ STDMETHODIMP Com_mail::put_queue_dir( BSTR queue_dir )
 
 //--------------------------------------------------------------------------Com_mail::get_queue_dir
 
-STDMETHODIMP Com_mail::get_queue_dir( BSTR* queue_dir )
+STDMETHODIMP Com_mail::get_Queue_dir( BSTR* queue_dir )
 {
     HRESULT hr = NOERROR;
 
@@ -360,7 +360,7 @@ STDMETHODIMP Com_mail::get_queue_dir( BSTR* queue_dir )
 
 //-----------------------------------------------------------------------Com_mail::put_header_field
 
-STDMETHODIMP Com_mail::add_header_field( BSTR field_name, BSTR value )
+STDMETHODIMP Com_mail::Add_header_field( BSTR field_name, BSTR value )
 {
     HRESULT hr = NOERROR;
 
@@ -389,7 +389,7 @@ int Com_mail::send()
 
 //--------------------------------------------------------------------------------Com_mail::dequeue
 
-STDMETHODIMP Com_mail::dequeue( int* result )
+STDMETHODIMP Com_mail::Dequeue( int* result )
 {
     HRESULT hr = NOERROR;
 

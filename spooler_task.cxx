@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.246 2004/04/01 09:42:17 jz Exp $
+// $Id: spooler_task.cxx,v 1.247 2004/04/05 08:49:46 jz Exp $
 /*
     Hier sind implementiert
 
@@ -608,7 +608,7 @@ void Task::set_cause( Start_cause cause )
 bool Task::has_parameters()
 {
     int n = 0;
-    _params->get_count( &n );
+    _params->get_Count( &n );
     return n != 0;
 }
 
@@ -1800,7 +1800,7 @@ bool Process_task::do_begin__end()
         Variant vt;
         HRESULT hr;
 
-        hr = _params->get_var( Bstr(nr), &vt );
+        hr = _params->get_Var( Bstr(nr), &vt );
         if( FAILED(hr) )  throw_ole( hr, "Variable_set.var", nr.c_str() );
 
         if( vt.vt == VT_EMPTY )  break;

@@ -1,4 +1,4 @@
-// $Id: spooler_log.cxx,v 1.91 2004/02/19 17:17:33 jz Exp $
+// $Id: spooler_log.cxx,v 1.92 2004/04/05 08:49:46 jz Exp $
 
 #include "spooler.h"
 #include "spooler_mail.h"
@@ -516,12 +516,12 @@ Com_mail* Prefix_log::imail()
 
         if( _smtp_server != "-" )
         {
-            hr = _mail->put_smtp( Bstr(_smtp_server) );     if( FAILED(hr) ) throw_ole( hr, "spooler::Mail::smtp_server", _smtp_server.c_str() );
+            hr = _mail->put_Smtp( Bstr(_smtp_server) );     if( FAILED(hr) ) throw_ole( hr, "spooler::Mail::smtp_server", _smtp_server.c_str() );
         }
 
         if( _queue_dir != "-" )
         {
-            hr = _mail->put_queue_dir( Bstr(_queue_dir) );     if( FAILED(hr) ) throw_ole( hr, "spooler::Mail::queue_dir", _smtp_server.c_str() );
+            hr = _mail->put_Queue_dir( Bstr(_queue_dir) );     if( FAILED(hr) ) throw_ole( hr, "spooler::Mail::queue_dir", _smtp_server.c_str() );
         }
 
         set_mail_header();
@@ -534,7 +534,7 @@ Com_mail* Prefix_log::imail()
         if( _job )
         {
             Bstr jobname_bstr = _job->name();
-            _mail->add_header_field( Bstr(L"X-SOS-Spooler-Job"), jobname_bstr );
+            _mail->Add_header_field( Bstr(L"X-SOS-Spooler-Job"), jobname_bstr );
         }
     }
 
@@ -547,10 +547,10 @@ void Prefix_log::set_mail_header()
 {
    HRESULT hr = NOERROR;
 
-    if( _from != "-" )  hr = _mail->put_from( Bstr( _from ) );    if( FAILED(hr) ) throw_ole( hr, "spooler::Mail::from", _from.c_str() );
-                        hr = _mail->put_to  ( Bstr( _to   ) );    if( FAILED(hr) ) throw_ole( hr, "spooler::Mail::to"  , _to.c_str() );
-    if( _cc   != "-" )  hr = _mail->put_cc  ( Bstr( _cc   ) );    if( FAILED(hr) ) throw_ole( hr, "spooler::Mail::cc"  , _cc.c_str() );
-    if( _bcc  != "-" )  hr = _mail->put_bcc ( Bstr( _bcc  ) );    if( FAILED(hr) ) throw_ole( hr, "spooler::Mail::bcc" , _bcc.c_str() );
+    if( _from != "-" )  hr = _mail->put_From( Bstr( _from ) );    if( FAILED(hr) ) throw_ole( hr, "spooler::Mail::from", _from.c_str() );
+                        hr = _mail->put_To  ( Bstr( _to   ) );    if( FAILED(hr) ) throw_ole( hr, "spooler::Mail::to"  , _to.c_str() );
+    if( _cc   != "-" )  hr = _mail->put_Cc  ( Bstr( _cc   ) );    if( FAILED(hr) ) throw_ole( hr, "spooler::Mail::cc"  , _cc.c_str() );
+    if( _bcc  != "-" )  hr = _mail->put_Bcc ( Bstr( _bcc  ) );    if( FAILED(hr) ) throw_ole( hr, "spooler::Mail::bcc" , _bcc.c_str() );
 }
 
 //-------------------------------------------------------------------Prefix_log::set_mail_from_name
@@ -564,18 +564,18 @@ void Prefix_log::set_mail_from_name( const string& from_name, bool overwrite )
         if( !overwrite )
         {
             Bstr from_bstr;
-            hr = _mail->get_from( &from_bstr );     if( FAILED(hr) ) throw_ole( hr, "spooler::Mail::from" );
+            hr = _mail->get_From( &from_bstr );     if( FAILED(hr) ) throw_ole( hr, "spooler::Mail::from" );
 
             if( SysStringLen(from_bstr) > 0 )  return;
         }
 
         Bstr old_from;
-        hr = _mail->get_from( &old_from );                              if( FAILED(hr) ) throw_ole( hr, "spooler::Mail::from" );
+        hr = _mail->get_From( &old_from );                              if( FAILED(hr) ) throw_ole( hr, "spooler::Mail::from" );
         if( !wcschr( old_from, '<' )  &&  wcschr( old_from, '@' ) )
         {
             string from = from_name + " <" + bstr_as_string(old_from) + ">";
             Bstr from_bstr = from;
-            hr = _mail->put_from( from_bstr );                          if( FAILED(hr) ) throw_ole( hr, "spooler::Mail::from", from.c_str() );
+            hr = _mail->put_From( from_bstr );                          if( FAILED(hr) ) throw_ole( hr, "spooler::Mail::from", from.c_str() );
         }
     }
     else
@@ -596,12 +596,12 @@ void Prefix_log::set_mail_subject( const string& subject, bool overwrite )
         if( !overwrite )
         {
             Bstr subject_bstr;
-            hr = _mail->get_subject( &subject_bstr );     if( FAILED(hr) ) throw_ole( hr, "spooler::Mail::subject" );
+            hr = _mail->get_Subject( &subject_bstr );     if( FAILED(hr) ) throw_ole( hr, "spooler::Mail::subject" );
 
             if( SysStringLen(subject_bstr) > 0 )  return;
         }
 
-        hr = _mail->put_subject( Bstr(subject) );     if( FAILED(hr) ) throw_ole( hr, "spooler::Mail::subject", subject.c_str() );
+        hr = _mail->put_Subject( Bstr(subject) );     if( FAILED(hr) ) throw_ole( hr, "spooler::Mail::subject", subject.c_str() );
     }
     else
     {
@@ -621,12 +621,12 @@ void Prefix_log::set_mail_body( const string& body, bool overwrite )
         if( !overwrite )
         {
             Bstr body_bstr;
-            hr = _mail->get_body( &body_bstr );     if( FAILED(hr) ) throw_ole( hr, "spooler::Mail::body" );
+            hr = _mail->get_Body( &body_bstr );     if( FAILED(hr) ) throw_ole( hr, "spooler::Mail::body" );
 
             if( SysStringLen(body_bstr) > 0 )  return;
         }
 
-        hr = _mail->put_body( Bstr(body) );     if( FAILED(hr) ) throw_ole( hr, "spooler::Mail::body", body.c_str() );
+        hr = _mail->put_Body( Bstr(body) );     if( FAILED(hr) ) throw_ole( hr, "spooler::Mail::body", body.c_str() );
     }
     else
     {
@@ -701,7 +701,7 @@ void Prefix_log::send_really()
 {
     int ok;
 
-    imail()->add_file( Bstr(_filename), NULL, Bstr(L"text/plain"), Bstr(_spooler->_mail_encoding) );
+    imail()->Add_file( Bstr(_filename), NULL, Bstr(L"text/plain"), Bstr(_spooler->_mail_encoding) );
 
     ok = imail()->send();
 

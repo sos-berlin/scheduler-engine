@@ -1,4 +1,4 @@
-// $Id: spooler_com.h,v 1.98 2004/03/26 16:15:32 jz Exp $
+// $Id: spooler_com.h,v 1.99 2004/04/05 08:49:46 jz Exp $
 
 #ifndef __SPOOLER_COM_H
 #define __SPOOLER_COM_H
@@ -71,12 +71,12 @@ struct Com_error: spooler_com::Ierror,
 
     USE_SOS_OLE_OBJECT_WITHOUT_QI
 
-    STDMETHODIMP            get_java_class_name             ( BSTR* result )                            { return String_to_bstr( const_java_class_name(), result ); }
+    STDMETHODIMP            get_Java_class_name             ( BSTR* result )                            { return String_to_bstr( const_java_class_name(), result ); }
     STDMETHODIMP_(char*)  const_java_class_name             ()                                          { return (char*)"sos.spooler.Error"; }
 
-    STDMETHODIMP                get_is_error                ( VARIANT_BOOL* );
-    STDMETHODIMP                get_code                    ( BSTR* );
-    STDMETHODIMP                get_text                    ( BSTR* );
+    STDMETHODIMP            get_Is_error                    ( VARIANT_BOOL* );
+    STDMETHODIMP            get_Code                        ( BSTR* );
+    STDMETHODIMP            get_Text                        ( BSTR* );
 
     void                        close                       ();
 
@@ -102,12 +102,12 @@ struct Com_variable: spooler_com::Ivariable,
 
     USE_SOS_OLE_OBJECT_WITHOUT_QI
 
-    STDMETHODIMP            get_java_class_name             ( BSTR* result )                        { return String_to_bstr( const_java_class_name(), result ); }
+    STDMETHODIMP            get_Java_class_name             ( BSTR* result )                        { return String_to_bstr( const_java_class_name(), result ); }
     STDMETHODIMP_(char*)  const_java_class_name             ()                                      { return (char*)"sos.spooler.Variable"; }
 
-    STDMETHODIMP                put_value                   ( VARIANT* v )                          { HRESULT hr = NOERROR; THREAD_LOCK(_lock) _value = *v; return hr; }
-    STDMETHODIMP                get_value                   ( VARIANT* result )                     { HRESULT hr = NOERROR; THREAD_LOCK(_lock) hr = VariantCopy( result, &_value ); return hr; }
-    STDMETHODIMP                get_name                    ( BSTR* result )                        { return _name.CopyTo(result); }
+    STDMETHODIMP            put_Value                       ( VARIANT* v )                          { HRESULT hr = NOERROR; THREAD_LOCK(_lock) _value = *v; return hr; }
+    STDMETHODIMP            get_Value                       ( VARIANT* result )                     { HRESULT hr = NOERROR; THREAD_LOCK(_lock) hr = VariantCopy( result, &_value ); return hr; }
+    STDMETHODIMP            get_Name                        ( BSTR* result )                        { return _name.CopyTo(result); }
     STDMETHODIMP                Clone                       ( spooler_com::Ivariable** );
 
   private:
@@ -130,30 +130,30 @@ struct Com_variable_set: spooler_com::Ivariable_set,
 
     USE_SOS_OLE_OBJECT_WITHOUT_QI
 
-    STDMETHODIMP            get_java_class_name             ( BSTR* result )                        { return String_to_bstr( const_java_class_name(), result ); }
+    STDMETHODIMP            get_Java_class_name             ( BSTR* result )                        { return String_to_bstr( const_java_class_name(), result ); }
     STDMETHODIMP_(char*)  const_java_class_name             ()                                      { return (char*)"sos.spooler.Variable_set"; }
 
-    STDMETHODIMP            get_dom                         ( IXMLDOMDocument** );
+    STDMETHODIMP            get_Dom                         ( IXMLDOMDocument** );
     void                    set_dom                         ( const xml::Element_ptr& );
 
     xml::Document_ptr           dom                         ();
     xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const string& element_name, const string& subelement_name );
 
-    STDMETHODIMP            set_var                         ( BSTR name, VARIANT* value )           { return put_var( name, value ); }
+    STDMETHODIMP                Set_var                     ( BSTR name, VARIANT* value )           { return put_Var( name, value ); }
 
-    STDMETHODIMP            put_value                       ( VARIANT*, VARIANT* );
-    STDMETHODIMP            get_value                       ( VARIANT*, VARIANT* );
+    STDMETHODIMP            put_Value                       ( VARIANT*, VARIANT* );
+    STDMETHODIMP            get_Value                       ( VARIANT*, VARIANT* );
 
-    STDMETHODIMP            put_var                         ( BSTR, VARIANT* );
-    STDMETHODIMP            get_var                         ( BSTR, VARIANT* );
+    STDMETHODIMP            put_Var                         ( BSTR, VARIANT* );
+    STDMETHODIMP            get_Var                         ( BSTR, VARIANT* );
 
-    STDMETHODIMP            get_count                       ( int* );
+    STDMETHODIMP            get_Count                       ( int* );
 
     STDMETHODIMP                Clone                       ( spooler_com::Ivariable_set** );
-    STDMETHODIMP                merge                       ( spooler_com::Ivariable_set* );
-    STDMETHODIMP                get__NewEnum                ( IUnknown** );    
-    STDMETHODIMP            put_xml                         ( BSTR xml_text );
-    STDMETHODIMP            get_xml                         ( BSTR* xml_text );
+    STDMETHODIMP                Merge                       ( spooler_com::Ivariable_set* );
+    STDMETHODIMP            get__NewEnum                    ( IUnknown** );    
+    STDMETHODIMP            put_Xml                         ( BSTR xml_text );
+    STDMETHODIMP            get_Xml                         ( BSTR* xml_text );
     void                    set_xml                         ( const string& xml_text );
 
     static const string         xml_element_name            ()                                      { return "sos.spooler.variable_set"; }
@@ -207,7 +207,7 @@ struct Com_log : spooler_com::Ilog,
 
 
     // interface Ihas_java_class_name
-    STDMETHODIMP            get_java_class_name             ( BSTR* result )                        { return String_to_bstr( const_java_class_name(), result ); }
+    STDMETHODIMP            get_Java_class_name             ( BSTR* result )                        { return String_to_bstr( const_java_class_name(), result ); }
     STDMETHODIMP_(char*)  const_java_class_name             ()                                      { return (char*)"sos.spooler.Log"; }
 
 
@@ -218,51 +218,51 @@ struct Com_log : spooler_com::Ilog,
     // interface Ilog
     void                    set_log                         ( Prefix_log* );
 
-    STDMETHODIMP                debug9                      ( BSTR );
-    STDMETHODIMP                debug8                      ( BSTR );
-    STDMETHODIMP                debug7                      ( BSTR );
-    STDMETHODIMP                debug6                      ( BSTR );
-    STDMETHODIMP                debug5                      ( BSTR );
-    STDMETHODIMP                debug4                      ( BSTR );
-    STDMETHODIMP                debug3                      ( BSTR );
-    STDMETHODIMP                debug2                      ( BSTR );
-    STDMETHODIMP                debug1                      ( BSTR );
-    STDMETHODIMP                debug                       ( BSTR );
-    STDMETHODIMP                info                        ( BSTR );
-    STDMETHODIMP                msg                         ( BSTR );
-    STDMETHODIMP                warn                        ( BSTR );
-    STDMETHODIMP                error                       ( BSTR );
-  //STDMETHODIMP                fatal                       ( BSTR );
-    STDMETHODIMP                log                         ( spooler_com::Log_level, BSTR line );
+    STDMETHODIMP                Debug9                      ( BSTR );
+    STDMETHODIMP                Debug8                      ( BSTR );
+    STDMETHODIMP                Debug7                      ( BSTR );
+    STDMETHODIMP                Debug6                      ( BSTR );
+    STDMETHODIMP                Debug5                      ( BSTR );
+    STDMETHODIMP                Debug4                      ( BSTR );
+    STDMETHODIMP                Debug3                      ( BSTR );
+    STDMETHODIMP                Debug2                      ( BSTR );
+    STDMETHODIMP                Debug1                      ( BSTR );
+    STDMETHODIMP                Debug                       ( BSTR );
+    STDMETHODIMP                Info                        ( BSTR );
+    STDMETHODIMP                Msg                         ( BSTR );
+    STDMETHODIMP                Warn                        ( BSTR );
+    STDMETHODIMP                Error                       ( BSTR );
+  //STDMETHODIMP                Fatal                       ( BSTR );
+    STDMETHODIMP                Log                         ( spooler_com::Log_level, BSTR line );
 
-    STDMETHODIMP            get_mail                        ( spooler_com::Imail** );
+    STDMETHODIMP            get_Mail                        ( spooler_com::Imail** );
 
-    STDMETHODIMP            put_mail_on_error               ( VARIANT_BOOL );
-    STDMETHODIMP            get_mail_on_error               ( VARIANT_BOOL* );
+    STDMETHODIMP            put_Mail_on_error               ( VARIANT_BOOL );
+    STDMETHODIMP            get_Mail_on_error               ( VARIANT_BOOL* );
     
-    STDMETHODIMP            put_mail_on_success             ( VARIANT_BOOL );
-    STDMETHODIMP            get_mail_on_success             ( VARIANT_BOOL* );
+    STDMETHODIMP            put_Mail_on_success             ( VARIANT_BOOL );
+    STDMETHODIMP            get_Mail_on_success             ( VARIANT_BOOL* );
 
-    STDMETHODIMP            put_mail_on_process             ( int );
-    STDMETHODIMP            get_mail_on_process             ( int* );
+    STDMETHODIMP            put_Mail_on_process             ( int );
+    STDMETHODIMP            get_Mail_on_process             ( int* );
 
-    STDMETHODIMP            put_level                       ( int );
-    STDMETHODIMP            get_level                       ( int* );
+    STDMETHODIMP            put_Level                       ( int );
+    STDMETHODIMP            get_Level                       ( int* );
 
-    STDMETHODIMP            get_filename                    ( BSTR* );
+    STDMETHODIMP            get_Filename                    ( BSTR* );
 
-    STDMETHODIMP            put_new_filename                ( BSTR );
-    STDMETHODIMP            get_new_filename                ( BSTR* );
+    STDMETHODIMP            put_New_filename                ( BSTR );
+    STDMETHODIMP            get_New_filename                ( BSTR* );
 
-    STDMETHODIMP            put_collect_within              ( VARIANT* );
-    STDMETHODIMP            get_collect_within              ( double* );
+    STDMETHODIMP            put_Collect_within              ( VARIANT* );
+    STDMETHODIMP            get_Collect_within              ( double* );
 
-    STDMETHODIMP            put_collect_max                 ( VARIANT* );
-    STDMETHODIMP            get_collect_max                 ( double* );
+    STDMETHODIMP            put_Collect_max                 ( VARIANT* );
+    STDMETHODIMP            get_Collect_max                 ( double* );
 
-    STDMETHODIMP            put_mail_it                     ( VARIANT_BOOL );
+    STDMETHODIMP            put_Mail_it                     ( VARIANT_BOOL );
 
-    STDMETHODIMP            get_last_error_line             ( BSTR* );
+    STDMETHODIMP            get_Last_error_line             ( BSTR* );
 
   private:
     Fill_zero                  _zero_;
@@ -279,7 +279,7 @@ struct Com_log_proxy: object_server::Proxy
 {
                               //Com_log                     ();
 
-    static HRESULT              create_instance             ( const IID& iid, ptr<IUnknown>* result );
+    static HRESULT              Create_instance             ( const IID& iid, ptr<IUnknown>* result );
 
 
     void                    set_property                    ( const string& name, const Variant& value );
@@ -291,25 +291,25 @@ struct Com_log_proxy: object_server::Proxy
     STDMETHODIMP                Invoke                      ( DISPID, const IID&, LCID, unsigned short wFlags, DISPPARAMS*,
                                                               VARIANT* pVarResult, EXCEPINFO*, UINT* puArgErr );
 /*
-    STDMETHODIMP                debug9                      ( BSTR line )                           { log( log_debug9, line ); }
-    STDMETHODIMP                debug8                      ( BSTR line )                           { log( log_debug8, line ); }
-    STDMETHODIMP                debug7                      ( BSTR line )                           { log( log_debug7, line ); }
-    STDMETHODIMP                debug6                      ( BSTR line )                           { log( log_debug6, line ); }
-    STDMETHODIMP                debug5                      ( BSTR line )                           { log( log_debug5, line ); }
-    STDMETHODIMP                debug4                      ( BSTR line )                           { log( log_debug4, line ); }
-    STDMETHODIMP                debug3                      ( BSTR line )                           { log( log_debug3, line ); }
-    STDMETHODIMP                debug2                      ( BSTR line )                           { log( log_debug2, line ); }
-    STDMETHODIMP                debug1                      ( BSTR line )                           { log( log_debug1, line ); }
-    STDMETHODIMP                debug                       ( BSTR line )                           { log( log_debug , line ); }
-    STDMETHODIMP                info                        ( BSTR line )                           { log( log_info  , line ); }
-    STDMETHODIMP                msg                         ( BSTR line )                           { log( log_info  , line ); }
-    STDMETHODIMP                warn                        ( BSTR line )                           { log( log_warn  , line ); }
-    STDMETHODIMP                error                       ( BSTR line )                           { log( log_error , line ); }
-  //STDMETHODIMP                fatal                       ( BSTR );
-    STDMETHODIMP                log                         ( spooler_com::Log_level, BSTR line );
+    STDMETHODIMP                Debug9                      ( BSTR line )                           { log( log_debug9, line ); }
+    STDMETHODIMP                Debug8                      ( BSTR line )                           { log( log_debug8, line ); }
+    STDMETHODIMP                Debug7                      ( BSTR line )                           { log( log_debug7, line ); }
+    STDMETHODIMP                Debug6                      ( BSTR line )                           { log( log_debug6, line ); }
+    STDMETHODIMP                Debug5                      ( BSTR line )                           { log( log_debug5, line ); }
+    STDMETHODIMP                Debug4                      ( BSTR line )                           { log( log_debug4, line ); }
+    STDMETHODIMP                Debug3                      ( BSTR line )                           { log( log_debug3, line ); }
+    STDMETHODIMP                Debug2                      ( BSTR line )                           { log( log_debug2, line ); }
+    STDMETHODIMP                Debug1                      ( BSTR line )                           { log( log_debug1, line ); }
+    STDMETHODIMP                Debug                       ( BSTR line )                           { log( log_debug , line ); }
+    STDMETHODIMP                Info                        ( BSTR line )                           { log( log_info  , line ); }
+    STDMETHODIMP                Msg                         ( BSTR line )                           { log( log_info  , line ); }
+    STDMETHODIMP                Warn                        ( BSTR line )                           { log( log_warn  , line ); }
+    STDMETHODIMP                Error                       ( BSTR line )                           { log( log_error , line ); }
+  //STDMETHODIMP                Fatal                       ( BSTR );
+    STDMETHODIMP                Log                         ( spooler_com::Log_level, BSTR line );
 
-    STDMETHODIMP            put_level                       ( int );
-    STDMETHODIMP            get_level                       ( int* );
+    STDMETHODIMP            put_Level                       ( int );
+    STDMETHODIMP            get_Level                       ( int* );
 */
 
   private:
@@ -329,12 +329,12 @@ struct Com_object_set : spooler_com::Iobject_set,
 
     USE_SOS_OLE_OBJECT
 
-  //STDMETHODIMP            get_java_class_name         ( BSTR* result );
+  //STDMETHODIMP            get_java_class_name             ( BSTR* result );
 
     void                        clear                       ()                                      { THREAD_LOCK(_lock)  _object_set = NULL; }
 
-    STDMETHODIMP                get_low_level               ( int* );
-    STDMETHODIMP                get_high_level              ( int* );
+    STDMETHODIMP            get_Low_level                   ( int* );
+    STDMETHODIMP            get_High_level                  ( int* );
 
 
   private:
@@ -355,26 +355,26 @@ struct Com_job : spooler_com::Ijob,
 
     USE_SOS_OLE_OBJECT_WITHOUT_QI
 
-    STDMETHODIMP            get_java_class_name             ( BSTR* result )                        { return String_to_bstr( const_java_class_name(), result ); }
+    STDMETHODIMP            get_Java_class_name             ( BSTR* result )                        { return String_to_bstr( const_java_class_name(), result ); }
     STDMETHODIMP_(char*)  const_java_class_name             ()                                      { return (char*)"sos.spooler.Job"; }
 
     void                        close                       ()                                      { THREAD_LOCK(_lock)  _job = NULL; }
 
-    STDMETHODIMP                start_when_directory_changed( BSTR directory_name, BSTR filename_pattern );
-    STDMETHODIMP                clear_when_directory_changed();
-    STDMETHODIMP                start                       ( VARIANT*, spooler_com::Itask** );
-    STDMETHODIMP                wake                        ();
-  //STDMETHODIMP                get_thread                  ( spooler_com::Ithread** );
-  //STDMETHODIMP                put_include_path            ( BSTR );
-    STDMETHODIMP                get_include_path            ( BSTR* );
-    STDMETHODIMP                get_name                    ( BSTR* );
-    STDMETHODIMP                put_state_text              ( BSTR );
-    STDMETHODIMP                get_title                   ( BSTR* );
-    STDMETHODIMP                put_delay_after_error       ( int error_steps, VARIANT* time );
-    STDMETHODIMP                get_order_queue             ( spooler_com::Iorder_queue** );
-    STDMETHODIMP                put_delay_order_after_setback( int setback_number, VARIANT* time );
-    STDMETHODIMP                put_max_order_setbacks      ( int );
-    STDMETHODIMP                clear_delay_after_error     ();
+    STDMETHODIMP                Start_when_directory_changed( BSTR directory_name, BSTR filename_pattern );
+    STDMETHODIMP                Clear_when_directory_changed();
+    STDMETHODIMP                Start                       ( VARIANT*, spooler_com::Itask** );
+    STDMETHODIMP                Wake                        ();
+  //STDMETHODIMP            get_Thread                      ( spooler_com::Ithread** );
+  //STDMETHODIMP            put_Include_path                ( BSTR );
+    STDMETHODIMP            get_Include_path                ( BSTR* );
+    STDMETHODIMP            get_Name                        ( BSTR* );
+    STDMETHODIMP            put_State_text                  ( BSTR );
+    STDMETHODIMP            get_Title                       ( BSTR* );
+    STDMETHODIMP            put_Delay_after_error           ( int error_steps, VARIANT* time );
+    STDMETHODIMP            get_Order_queue                 ( spooler_com::Iorder_queue** );
+    STDMETHODIMP            put_Delay_order_after_setback   ( int setback_number, VARIANT* time );
+    STDMETHODIMP            put_Max_order_setbacks          ( int );
+    STDMETHODIMP                Clear_delay_after_error     ();
 
 
   private:
@@ -395,30 +395,30 @@ struct Com_task : spooler_com::Itask,
 
     USE_SOS_OLE_OBJECT_WITHOUT_QI
 
-    STDMETHODIMP            get_java_class_name             ( BSTR* result )                        { return String_to_bstr( const_java_class_name(), result ); }
+    STDMETHODIMP            get_Java_class_name             ( BSTR* result )                        { return String_to_bstr( const_java_class_name(), result ); }
     STDMETHODIMP_(char*)  const_java_class_name             ()                                      { return (char*)"sos.spooler.Task"; }
 
     void                        set_task                    ( Task* );
     Task*                       task                        ()                                      { return _task; }
 
-    STDMETHODIMP                get_object_set              ( spooler_com::Iobject_set** );
-    STDMETHODIMP                put_error                   ( VARIANT* error_text );
-    STDMETHODIMP                get_error                   ( spooler_com::Ierror** );
-    STDMETHODIMP                get_job                     ( spooler_com::Ijob** );
-    STDMETHODIMP                get_params                  ( spooler_com::Ivariable_set** );
-    STDMETHODIMP                wait_until_terminated       ( double wait_time, VARIANT_BOOL* ok );
-    STDMETHODIMP                end                         ();
-    STDMETHODIMP                put_result                  ( VARIANT* value );
-    STDMETHODIMP                get_result                  ( VARIANT* value );
-    STDMETHODIMP                put_repeat                  ( double seconds );
-    STDMETHODIMP                put_history_field           ( BSTR name, VARIANT* value );
-    STDMETHODIMP                get_id                      ( int* value );
-    STDMETHODIMP                put_delay_spooler_process   ( VARIANT* time );
-    STDMETHODIMP                put_close_engine            ( VARIANT_BOOL );
-    STDMETHODIMP                get_order                   ( spooler_com::Iorder** );
-    STDMETHODIMP                get_changed_directories     ( BSTR* );
-    STDMETHODIMP                add_pid                     ( int, VARIANT* );
-    STDMETHODIMP                remove_pid                  ( int );
+    STDMETHODIMP            get_Object_set                  ( spooler_com::Iobject_set** );
+    STDMETHODIMP            put_Error                       ( VARIANT* error_text );
+    STDMETHODIMP            get_Error                       ( spooler_com::Ierror** );
+    STDMETHODIMP            get_Job                         ( spooler_com::Ijob** );
+    STDMETHODIMP            get_Params                      ( spooler_com::Ivariable_set** );
+    STDMETHODIMP                Wait_until_terminated       ( double wait_time, VARIANT_BOOL* ok );
+    STDMETHODIMP                End                         ();
+    STDMETHODIMP            put_Result                      ( VARIANT* value );
+    STDMETHODIMP            get_Result                      ( VARIANT* value );
+    STDMETHODIMP            put_Repeat                      ( double seconds );
+    STDMETHODIMP            put_History_field               ( BSTR name, VARIANT* value );
+    STDMETHODIMP            get_Id                          ( int* value );
+    STDMETHODIMP            put_Delay_spooler_process       ( VARIANT* time );
+    STDMETHODIMP            put_Close_engine                ( VARIANT_BOOL );
+    STDMETHODIMP            get_Order                       ( spooler_com::Iorder** );
+    STDMETHODIMP            get_Changed_directories         ( BSTR* );
+    STDMETHODIMP                Add_pid                     ( int, VARIANT* );
+    STDMETHODIMP                Remove_pid                  ( int );
 
   private:
     Thread_semaphore           _lock;
@@ -441,11 +441,11 @@ struct Com_thread : spooler_com::Ithread,
 
     void                        close                       ()                                      { THREAD_LOCK(_lock)  _thread = NULL; }
 
-    STDMETHODIMP                get_log                     ( spooler_com::Ilog** );
-    STDMETHODIMP                get_script                  ( IDispatch** );
-  //STDMETHODIMP                put_include_path            ( BSTR );
-    STDMETHODIMP                get_include_path            ( BSTR* );
-    STDMETHODIMP                get_name                    ( BSTR* );
+    STDMETHODIMP                get_Log                     ( spooler_com::Ilog** );
+    STDMETHODIMP                get_Script                  ( IDispatch** );
+  //STDMETHODIMP                put_Include_path            ( BSTR );
+    STDMETHODIMP                get_Include_path            ( BSTR* );
+    STDMETHODIMP                get_Name                    ( BSTR* );
 
   protected:
     Thread_semaphore           _lock;
@@ -465,35 +465,35 @@ struct Com_spooler : spooler_com::Ispooler,
 
     USE_SOS_OLE_OBJECT_WITHOUT_QI
 
-    STDMETHODIMP            get_java_class_name             ( BSTR* result )                        { return String_to_bstr( const_java_class_name(), result ); }
+    STDMETHODIMP            get_Java_class_name             ( BSTR* result )                        { return String_to_bstr( const_java_class_name(), result ); }
     STDMETHODIMP_(char*)  const_java_class_name             ()                                      { return (char*)"sos.spooler.Spooler"; }
 
     void                        close                       ()                                      { THREAD_LOCK(_lock)  _spooler = NULL; }
 
-    STDMETHODIMP            get_log                         ( spooler_com::Ilog** );
-    STDMETHODIMP            get_param                       ( BSTR* );
-    STDMETHODIMP            get_id                          ( BSTR* );
-    STDMETHODIMP            get_script                      ( IDispatch** );
-    STDMETHODIMP            get_job                         ( BSTR job_name, spooler_com::Ijob** );
-    STDMETHODIMP                create_variable_set         ( spooler_com::Ivariable_set** );
-  //STDMETHODIMP            put_include_path                ( BSTR );
-    STDMETHODIMP            get_include_path                ( BSTR* );
-    STDMETHODIMP            get_log_dir                     ( BSTR* );
-    STDMETHODIMP                let_run_terminate_and_restart();
-    STDMETHODIMP            get_variables                   ( spooler_com::Ivariable_set** );
-    STDMETHODIMP            put_var                         ( BSTR name, VARIANT* value );
-    STDMETHODIMP            get_var                         ( BSTR name, VARIANT* value );
-    STDMETHODIMP            get_db_name                     ( BSTR* );
-    STDMETHODIMP                create_job_chain            ( spooler_com::Ijob_chain** );
-    STDMETHODIMP                add_job_chain               ( spooler_com::Ijob_chain* );
-    STDMETHODIMP            get_job_chain                   ( BSTR, spooler_com::Ijob_chain** );
-    STDMETHODIMP                create_order                ( spooler_com::Iorder** );
-    STDMETHODIMP            get_is_service                  ( VARIANT_BOOL* );
-    STDMETHODIMP            get_directory                   ( BSTR* );
-    STDMETHODIMP                job_chain_exists            ( BSTR name, VARIANT_BOOL* );
-    STDMETHODIMP            get_hostname                    ( BSTR* );
-    STDMETHODIMP            abort_immediately               ();
-    STDMETHODIMP            abort_immediately_and_restart   ();
+    STDMETHODIMP            get_Log                         ( spooler_com::Ilog** );
+    STDMETHODIMP            get_Param                       ( BSTR* );
+    STDMETHODIMP            get_Id                          ( BSTR* );
+    STDMETHODIMP            get_Script                      ( IDispatch** );
+    STDMETHODIMP            get_Job                         ( BSTR job_name, spooler_com::Ijob** );
+    STDMETHODIMP                Create_variable_set         ( spooler_com::Ivariable_set** );
+  //STDMETHODIMP            put_Include_path                ( BSTR );
+    STDMETHODIMP            get_Include_path                ( BSTR* );
+    STDMETHODIMP            get_Log_dir                     ( BSTR* );
+    STDMETHODIMP                Let_run_terminate_and_restart();
+    STDMETHODIMP            get_Variables                   ( spooler_com::Ivariable_set** );
+    STDMETHODIMP            put_Var                         ( BSTR name, VARIANT* value );
+    STDMETHODIMP            get_Var                         ( BSTR name, VARIANT* value );
+    STDMETHODIMP            get_Db_name                     ( BSTR* );
+    STDMETHODIMP                Create_job_chain            ( spooler_com::Ijob_chain** );
+    STDMETHODIMP                Add_job_chain               ( spooler_com::Ijob_chain* );
+    STDMETHODIMP            get_Job_chain                   ( BSTR, spooler_com::Ijob_chain** );
+    STDMETHODIMP                Create_order                ( spooler_com::Iorder** );
+    STDMETHODIMP            get_Is_service                  ( VARIANT_BOOL* );
+    STDMETHODIMP            get_Directory                   ( BSTR* );
+    STDMETHODIMP                Job_chain_exists            ( BSTR name, VARIANT_BOOL* );
+    STDMETHODIMP            get_Hostname                    ( BSTR* );
+    STDMETHODIMP                Abort_immediately           ();
+    STDMETHODIMP                Abort_immediately_and_restart();
 
   protected:
     Thread_semaphore           _lock;
@@ -511,11 +511,11 @@ struct Com_context : spooler_com::Ispooler_context, Sos_ole_object
 
     USE_SOS_OLE_OBJECT
 
-    STDMETHODIMP                get_log                     ( IDispatch** o )        { return _log    .CopyTo(o); }
-    STDMETHODIMP                get_spooler                 ( IDispatch** o )        { return _spooler.CopyTo(o); }
-  //STDMETHODIMP                get_thread                  ( IDispatch** o )        { return _thread .CopyTo(o); }
-    STDMETHODIMP                get_job                     ( IDispatch** o )        { return _job    .CopyTo(o); }
-    STDMETHODIMP                get_Task                    ( IDispatch** o )        { return _task   .CopyTo(o); }
+    STDMETHODIMP            get_Log                         ( IDispatch** o )        { return _log    .CopyTo(o); }
+    STDMETHODIMP            get_Spooler                     ( IDispatch** o )        { return _spooler.CopyTo(o); }
+  //STDMETHODIMP            get_Thread                      ( IDispatch** o )        { return _thread .CopyTo(o); }
+    STDMETHODIMP            get_Job                         ( IDispatch** o )        { return _job    .CopyTo(o); }
+    STDMETHODIMP            get_Task                        ( IDispatch** o )        { return _task   .CopyTo(o); }
 
 
     Thread_semaphore           _lock;
@@ -548,22 +548,22 @@ struct Com_job_chain : spooler_com::Ijob_chain,
 
     void                        close                   ()                                          { THREAD_LOCK( _lock )  _job_chain = NULL; }
 
-    STDMETHODIMP            get_java_class_name         ( BSTR* result )                            { return String_to_bstr( const_java_class_name(), result ); }
+    STDMETHODIMP            get_Java_class_name         ( BSTR* result )                            { return String_to_bstr( const_java_class_name(), result ); }
     STDMETHODIMP_(char*)  const_java_class_name         ()                                          { return (char*)"sos.spooler.Job_chain"; }
 
-    STDMETHODIMP            put_name                    ( BSTR );
-    STDMETHODIMP            get_name                    ( BSTR* );
+    STDMETHODIMP            put_Name                    ( BSTR );
+    STDMETHODIMP            get_Name                    ( BSTR* );
 
-    STDMETHODIMP            get_order_count             ( int* );
+    STDMETHODIMP            get_Order_count             ( int* );
     
-    STDMETHODIMP            get_order_queue             ( VARIANT* state, spooler_com::Iorder_queue** );
+    STDMETHODIMP            get_Order_queue             ( VARIANT* state, spooler_com::Iorder_queue** );
     
-    STDMETHODIMP            get_node                    ( VARIANT* state, spooler_com::Ijob_chain_node** );
+    STDMETHODIMP            get_Node                    ( VARIANT* state, spooler_com::Ijob_chain_node** );
 
-    STDMETHODIMP                add_job                 ( VARIANT*, VARIANT*, VARIANT*, VARIANT* );
-    STDMETHODIMP                add_end_state           ( VARIANT* );
+    STDMETHODIMP                Add_job                 ( VARIANT*, VARIANT*, VARIANT*, VARIANT* );
+    STDMETHODIMP                Add_end_state           ( VARIANT* );
 
-    STDMETHODIMP                add_order               ( VARIANT* order_or_payload, spooler_com::Iorder** );
+    STDMETHODIMP                Add_order               ( VARIANT* order_or_payload, spooler_com::Iorder** );
 
 
     Thread_semaphore           _lock;
@@ -582,15 +582,15 @@ struct Com_job_chain_node : spooler_com::Ijob_chain_node,
 
     USE_SOS_OLE_OBJECT_WITHOUT_QI
 
-    STDMETHODIMP            get_java_class_name         ( BSTR* result )                            { return String_to_bstr( const_java_class_name(), result ); }
+    STDMETHODIMP            get_Java_class_name         ( BSTR* result )                            { return String_to_bstr( const_java_class_name(), result ); }
     STDMETHODIMP_(char*)  const_java_class_name         ()                                          { return (char*)"sos.spooler.Job_chain_node"; }
 
-    STDMETHODIMP            get_state                   ( VARIANT* );
-    STDMETHODIMP            get_next_node               ( spooler_com::Ijob_chain_node** );
-    STDMETHODIMP            get_error_node              ( spooler_com::Ijob_chain_node** );
-    STDMETHODIMP            get_job                     ( spooler_com::Ijob** );
-    STDMETHODIMP            get_next_state              ( VARIANT* );
-    STDMETHODIMP            get_error_state             ( VARIANT* );
+    STDMETHODIMP            get_State                   ( VARIANT* );
+    STDMETHODIMP            get_Next_node               ( spooler_com::Ijob_chain_node** );
+    STDMETHODIMP            get_Error_node              ( spooler_com::Ijob_chain_node** );
+    STDMETHODIMP            get_Job                     ( spooler_com::Ijob** );
+    STDMETHODIMP            get_Next_state              ( VARIANT* );
+    STDMETHODIMP            get_Error_state             ( VARIANT* );
 };
 
 //----------------------------------------------------------------------------------------Com_order
@@ -608,41 +608,41 @@ struct Com_order : spooler_com::Iorder,
 
     void                        close                   ()                                          { THREAD_LOCK( _lock )  _order = NULL; }
 
-    STDMETHODIMP            get_java_class_name         ( BSTR* result )                            { return String_to_bstr( const_java_class_name(), result ); }
+    STDMETHODIMP            get_Java_class_name         ( BSTR* result )                            { return String_to_bstr( const_java_class_name(), result ); }
     STDMETHODIMP_(char*)  const_java_class_name         ()                                          { return (char*)"sos.spooler.Order"; }
 
-    STDMETHODIMP            put_id                      ( VARIANT* );
-    STDMETHODIMP            get_id                      ( VARIANT* );
+    STDMETHODIMP            put_Id                      ( VARIANT* );
+    STDMETHODIMP            get_Id                      ( VARIANT* );
 
-    STDMETHODIMP            put_title                   ( BSTR );
-    STDMETHODIMP            get_title                   ( BSTR* );
+    STDMETHODIMP            put_Title                   ( BSTR );
+    STDMETHODIMP            get_Title                   ( BSTR* );
     
-    STDMETHODIMP            put_priority                ( int );
-    STDMETHODIMP            get_priority                ( int* );
+    STDMETHODIMP            put_Priority                ( int );
+    STDMETHODIMP            get_Priority                ( int* );
     
-    STDMETHODIMP            get_job_chain               ( spooler_com::Ijob_chain** );
+    STDMETHODIMP            get_Job_chain               ( spooler_com::Ijob_chain** );
 
-    STDMETHODIMP            get_job_chain_node          ( spooler_com::Ijob_chain_node** );
+    STDMETHODIMP            get_Job_chain_node          ( spooler_com::Ijob_chain_node** );
     
-    STDMETHODIMP            put_job                     ( VARIANT* );
-    STDMETHODIMP         putref_job                     ( spooler_com::Ijob* job )                  { Variant v = job; return put_job( &v ); }
-    STDMETHODIMP            get_job                     ( spooler_com::Ijob** );
+    STDMETHODIMP            put_Job                     ( VARIANT* );
+    STDMETHODIMP         putref_Job                     ( spooler_com::Ijob* job )                  { Variant v = job; return put_Job( &v ); }
+    STDMETHODIMP            get_Job                     ( spooler_com::Ijob** );
     
-    STDMETHODIMP            put_state                   ( VARIANT* );
-    STDMETHODIMP            get_state                   ( VARIANT* );
+    STDMETHODIMP            put_State                   ( VARIANT* );
+    STDMETHODIMP            get_State                   ( VARIANT* );
     
-    STDMETHODIMP            put_state_text              ( BSTR );
-    STDMETHODIMP            get_state_text              ( BSTR* );
+    STDMETHODIMP            put_State_text              ( BSTR );
+    STDMETHODIMP            get_State_text              ( BSTR* );
     
-    STDMETHODIMP            get_error                   ( spooler_com::Ierror** );
+    STDMETHODIMP            get_Error                   ( spooler_com::Ierror** );
     
-    STDMETHODIMP            put_payload                 ( VARIANT* );
-    STDMETHODIMP         putref_payload                 ( IUnknown* );
-    STDMETHODIMP            get_payload                 ( VARIANT* );
+    STDMETHODIMP            put_Payload                 ( VARIANT* );
+    STDMETHODIMP         putref_Payload                 ( IUnknown* );
+    STDMETHODIMP            get_Payload                 ( VARIANT* );
     
-    STDMETHODIMP                payload_is_type         ( BSTR, VARIANT_BOOL* );
+    STDMETHODIMP                Payload_is_type         ( BSTR, VARIANT_BOOL* );
 
-    STDMETHODIMP                setback                 (); 
+    STDMETHODIMP                Setback                 (); 
 
   private:
     Fill_zero                  _zero_;
@@ -663,11 +663,11 @@ struct Com_order_queue : spooler_com::Iorder_queue,
 
     USE_SOS_OLE_OBJECT_WITHOUT_QI
 
-    STDMETHODIMP            get_java_class_name         ( BSTR* result )                            { return String_to_bstr( const_java_class_name(), result ); }
+    STDMETHODIMP            get_Java_class_name         ( BSTR* result )                            { return String_to_bstr( const_java_class_name(), result ); }
     STDMETHODIMP_(char*)  const_java_class_name         ()                                          { return (char*)"sos.spooler.Order_queue"; }
 
-    STDMETHODIMP            get_length                  ( int* );
-    STDMETHODIMP                add_order               ( VARIANT*, spooler_com::Iorder** );
+    STDMETHODIMP            get_Length                  ( int* );
+    STDMETHODIMP                Add_order               ( VARIANT*, spooler_com::Iorder** );
 
 
   private:

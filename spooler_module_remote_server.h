@@ -1,4 +1,4 @@
-// $Id: spooler_module_remote_server.h,v 1.11 2003/10/28 22:04:27 jz Exp $
+// $Id: spooler_module_remote_server.h,v 1.12 2004/04/05 08:49:46 jz Exp $
 
 #ifndef __SPOOLER_MODULE_REMOTE_SERVER_H
 #define __SPOOLER_MODULE_REMOTE_SERVER_H
@@ -41,18 +41,18 @@ struct Com_remote_module_instance_server : spooler_com::Iremote_module_instance_
                                 Com_remote_module_instance_server();
                                ~Com_remote_module_instance_server();
 
-    static HRESULT              create_instance             ( const IID&, ptr<IUnknown>* );
+    static HRESULT              Create_instance             ( const IID&, ptr<IUnknown>* );
 
     STDMETHODIMP                QueryInterface              ( const IID&, void** );
     USE_SOS_OLE_OBJECT_WITHOUT_QI
 
-    STDMETHODIMP                construct                   ( SAFEARRAY* );
-    STDMETHODIMP                add_obj                     ( IDispatch*, BSTR name );
-    STDMETHODIMP                name_exists                 ( BSTR name, VARIANT_BOOL* result );
-    STDMETHODIMP                call                        ( BSTR name, VARIANT* result );
-    STDMETHODIMP                begin                       ( SAFEARRAY* objects, SAFEARRAY* names, VARIANT* result );
-    STDMETHODIMP                end                         ( VARIANT_BOOL, VARIANT* result );
-    STDMETHODIMP                step                        ( VARIANT* result );
+    STDMETHODIMP                Construct                   ( SAFEARRAY* );
+    STDMETHODIMP                Add_obj                     ( IDispatch*, BSTR name );
+    STDMETHODIMP                Name_exists                 ( BSTR name, VARIANT_BOOL* result );
+    STDMETHODIMP                Call                        ( BSTR name, VARIANT* result );
+    STDMETHODIMP                Begin                       ( SAFEARRAY* objects, SAFEARRAY* names, VARIANT* result );
+    STDMETHODIMP                End                         ( VARIANT_BOOL, VARIANT* result );
+    STDMETHODIMP                Step                        ( VARIANT* result );
 
 
 
