@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.287 2003/11/10 17:10:42 jz Exp $
+// $Id: spooler.cxx,v 1.288 2003/11/11 15:14:44 jz Exp $
 /*
     Hier sind implementiert
 
@@ -49,6 +49,9 @@
 
 char** _argv = NULL;
 int    _argc = 0;
+
+
+using namespace std;
 
 
 namespace sos {

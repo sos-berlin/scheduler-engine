@@ -1,4 +1,4 @@
-// $Id: spooler_com.cxx,v 1.119 2003/11/10 17:10:42 jz Exp $
+// $Id: spooler_com.cxx,v 1.120 2003/11/11 15:14:44 jz Exp $
 /*
     Hier sind implementiert
 
@@ -844,7 +844,7 @@ STDMETHODIMP Com_log::log( spooler_com::Log_level level, BSTR line )
     return hr;
 }
 
-//-------------------------------------------------------------------------------------Com_log::log
+//--------------------------------------------------------------------------------Com_log::get_mail
 
 STDMETHODIMP Com_log::get_mail( Imail** mail )
 { 
