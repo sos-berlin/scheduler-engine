@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding="utf-8"?>
-<!-- $Id: scheduler.xslt,v 1.28 2004/09/09 10:14:34 jz Exp $ -->
+<!-- $Id: scheduler.xslt,v 1.29 2004/09/09 19:02:42 jz Exp $ -->
 
 <!--
     Änderungswünsche:
@@ -903,7 +903,8 @@
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ini-->
 
     <xsl:template match="ini">
-        <xsl:variable name="title" select="concat( 'Datei ', @file, ', ', @title )"/>
+        <!--xsl:variable name="title" select="concat( 'Datei ', @file, ', ', @title )"/-->
+        <xsl:variable name="title" select="@title"/>
 
         <html>
             <xsl:call-template name="html_head">
@@ -915,8 +916,16 @@
                     <xsl:with-param name="title" select="$title"/>
                 </xsl:call-template>
                 
-                <xsl:apply-templates mode="setting_description" select="."/>
+                <xsl:apply-templates mode="description" select="."/>
 
+                <p>
+                    Unter Windows wird sollte die Datei dort angelegt werden, wo Windows seine <code>.ini</code>-Dateien erwartet.
+                    Das ist normalerweise im Verzeichnis <code>c:\windows</code>. 
+                    Sonst wird die Datei im Heimverzeichnis des Benutzers erwartet.
+                </p>
+                
+                <h2>Abschnitte</h2>
+                
                 <xsl:for-each select="ini_sections/ini_section">
                     <xsl:variable name="section_filename" select="concat( translate( ancestor::ini/@file, '.', '_' ), '_', @name, '.xml' )"/>
                     <xsl:variable name="section"          select="document( $section_filename )/ini_section"/>
@@ -977,7 +986,7 @@
                 
                 <tr>
                     <td colspan="3">
-                        <xsl:apply-templates mode="setting_description" select="."/>
+                        <xsl:apply-templates mode="description" select="description"/>
                         <p>&#160;</p>
                     </td>
                 </tr>

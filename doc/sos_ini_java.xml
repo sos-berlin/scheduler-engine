@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="scheduler.xslt" type="text/xsl"?>
 
-<!--$Id: sos_ini_java.xml,v 1.1 2004/09/08 20:34:13 jz Exp $-->
+<!--$Id: sos_ini_java.xml,v 1.2 2004/09/09 19:02:42 jz Exp $-->
 
 <ini_section 
     file     = "sos.ini"
@@ -9,10 +9,10 @@
     title    = ""
     base_dir = ""
     author   = "$Author: jz $"
-    date     = "$Date: 2004/09/08 20:34:13 $">
+    date     = "$Date: 2004/09/09 19:02:42 $">
 
     <ini_entries>
-        <ini_entry setting="vm" type="dateiname" title="Dateiname der Java virtual machine">
+        <ini_entry name="vm" type="dateiname" title="Dateiname der Java virtual machine">
             <description>
                 <p>
                     Voreingestellt ist für Windows <code>jvm.dll</code>, für HP-UX <code>jvm.sl</code> und sonst <code>jvm.so</code>.
@@ -24,7 +24,7 @@
             </description>
         </ini_entry>
 
-        <ini_entry setting="class_path" type="verzeichnisse" title="classpath">
+        <ini_entry name="class_path" type="verzeichnisse" title="classpath">
             <description>
                 <p>
                     Das ist der <code>class_path</code> für Java.
@@ -39,9 +39,11 @@ class_path = s:\prod\bind\sos.spooler.jar;s:\prod\bind\sos.hostware.jar;s:\prod\
             </example>
         </ini_entry>
 
-        <ini_entry setting="options" type="dateiname" title="Optionen für Java">
+        <ini_entry name="options" type="text" title="Optionen für Java">
             <description>
                 <p>
+                    Hier können Sie z.B. mit <code>-Djava.library.path=</code> das Verzeichnis angeben,
+                    in dem Hostjava installiert ist.
                 </p>
             </description>
 

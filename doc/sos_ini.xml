@@ -1,15 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="scheduler.xslt" type="text/xsl"?>
 
-<!--$Id: sos_ini.xml,v 1.1 2004/09/08 20:34:13 jz Exp $-->
+<!--$Id: sos_ini.xml,v 1.2 2004/09/09 19:02:42 jz Exp $-->
 
 <ini file     = "sos.ini"
-     title    = "Übersicht"
+     title    = "Datei sos.ini&#160;  (Übersicht)"
      base_dir = ""
      author   = "$Author: jz $"
-     date     = "$Date: 2004/09/08 20:34:13 $">
+     date     = "$Date: 2004/09/09 19:02:42 $">
 
     <ini_sections>
+        <ini_section name="licence"/>
         <ini_section name="java"/>
     </ini_sections>
+    
+    <description>
+        <p>
+            Die Datei gilt für allgemeine Einstellungen, die neben dem Scheduler auch für andere Produkte gelten.
+        </p>
+        <p>
+            Den Pfad dieser Datei können sie mit der Option <scheduler_option name="sos.ini"/> ändern.
+        </p>
+    </description>
 </ini>

@@ -2,13 +2,13 @@
 <?xml-stylesheet href="scheduler.xslt" type="text/xsl"?>
 
 
-<!--$Id: konfiguration.xml,v 1.7 2004/09/06 10:03:10 jz Exp $-->
+<!--$Id: konfiguration.xml,v 1.8 2004/09/09 19:02:42 jz Exp $-->
 
 <description 
     title    = "XML-Konfiguration" 
     base_dir = ""
     author   = "$Author: jz $"
-    date     = "$Date: 2004/09/06 10:03:10 $"
+    date     = "$Date: 2004/09/09 19:02:42 $"
 >
 <p>
     Beim Start des Scheduler geben Sie die Datei an,
@@ -53,8 +53,8 @@
 </pre>
 
 <p>
-    Konfiguriert ist hier der Job test_job, den der Scheduler alle 10 Sekunden wiederholen wird. Wenn diese Konfiguration 
-    in der Datei <code>hallo_welt.xml</code> abgelegt ist, können sie den Scheduler so starten:
+    Konfiguriert ist hier der Job <code>test_job</code>, den der Scheduler alle 10 Sekunden wiederholen wird. Wenn diese Konfiguration 
+    in der Datei <code>hallo_welt.xml</code> abgelegt ist, können Sie den Scheduler so starten:
 </p>
 
 <pre>

@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="scheduler.xslt" type="text/xsl"?>
 
-<!--$Id: directory_watch.xml,v 1.2 2004/09/09 12:05:43 jz Exp $-->
+<!--$Id: directory_watch.xml,v 1.3 2004/09/09 19:02:42 jz Exp $-->
 
 <description 
     title       = "Verzeichnisüberwachung" 
     base_dir    = ""
     parent_page = "job.xml"
     author      = "$Author: jz $"
-    date        = "$Date: 2004/09/09 12:05:43 $"
+    date        = "$Date: 2004/09/09 19:02:42 $"
 >
 
     <p>
@@ -21,7 +21,7 @@
         Sie können den Aufruf für mehrere Verzeichnisse wiederholen.
     </p>
     <p>
-        Der Aufruf kann im Startskript (Element <code>&lt;script></code> in <scheduler_element name="config"/>)
+        Der Aufruf kann im Scheduler-Skript (Element <code>&lt;script></code> in <scheduler_element name="config"/>)
         oder im Job selbst (in <scheduler_method class="Job_impl" method="spooler_init"/>) untergebracht sein.
         Im letzten Fall muss der Job einmal laufen, damit der Aufruf auch ausgeführt wird 
         (s. <scheduler_element name="run_time" attribute="once" value="yes"/>).

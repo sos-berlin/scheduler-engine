@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="scheduler.xslt" type="text/xsl"?>
 
-<!--$Id: factory_ini_spooler.xml,v 1.4 2004/09/06 10:03:10 jz Exp $-->
+<!--$Id: factory_ini_spooler.xml,v 1.5 2004/09/09 19:02:42 jz Exp $-->
 
 <ini_section
     name     = "spooler"
     file     = "factory.ini"
     base_dir = ""
     author   = "$Author: jz $"
-    date     = "$Date: 2004/09/06 10:03:10 $"
+    date     = "$Date: 2004/09/09 19:02:42 $"
 >
 
     <ini_entries>
@@ -48,4 +48,9 @@
         <ini_entry setting="smtp" />
     </ini_entries>
     
+    <description>
+        <p>
+            In diesem Abschnitt werden allgemeine Einstellungen des Schedulers vorgenommen.
+        </p>
+    </description>
 </ini_section>

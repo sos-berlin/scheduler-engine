@@ -1,16 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="scheduler.xslt" type="text/xsl"?>
 
-<!--$Id: factory_ini.xml,v 1.7 2004/09/06 10:03:10 jz Exp $-->
+<!--$Id: factory_ini.xml,v 1.8 2004/09/09 19:02:42 jz Exp $-->
 
 <ini file     = "factory.ini"
-     title    = "Übersicht"
+     title    = "Datei factory.ini&#160;  (Übersicht)"
      base_dir = ""
      author   = "$Author: jz $"
-     date     = "$Date: 2004/09/06 10:03:10 $">
+     date     = "$Date: 2004/09/09 19:02:42 $">
 
     <ini_sections>
         <ini_section name="spooler"/>
         <ini_section name="job"/>
+        <ini_section name="java"/>
     </ini_sections>
+    
+    <description>
+        <p>
+            In dieser Datei können Einstellungen für den Scheduler vorgenommen werden.
+        </p>
+        <p>
+            Den Pfad dieser Datei können sie mit der Option <scheduler_option name="ini"/> ändern.
+        </p>
+    </description>
 </ini>
