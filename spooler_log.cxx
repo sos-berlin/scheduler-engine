@@ -1,4 +1,4 @@
-// $Id: spooler_log.cxx,v 1.18 2002/03/02 19:22:55 jz Exp $
+// $Id: spooler_log.cxx,v 1.19 2002/03/02 20:15:02 jz Exp $
 
 #include "../kram/sos.h"
 #include "spooler.h"
@@ -54,22 +54,28 @@ void Log::set_directory( const string& directory )
 
 //---------------------------------------------------------------------------------------Log::write
 
-void Log::write( const char* text, int len, bool log )
+void Log::write( Prefix_log* extra_log, const char* text, int len, bool log )
 {
     if( len > 0  &&  text[len-1] == '\r' )  len--;
 
     if( len > 0 )
     {
+        if( log && log_ptr )  log_ptr->write( text, len );
+
         int ret = ::write( _file, text, len );
         if( ret != len )  throw_errno( errno, "write", _filename.c_str() );
 
-        if( log && log_ptr )  log_ptr->write( text, len );
+        if( extra_log  &&  extra_log->_file != -1 )
+        {
+            int ret = ::write( extra_log->_file, text, len );
+            if( ret != len )  throw_errno( errno, "write", extra_log->_filename.c_str() );
+        }
     }
 }
 
 //------------------------------------------------------------------------------------Log::open_new
 
-void Log::open_new( )
+void Log::open_new()
 {
     Thread_semaphore::Guard guard = &_semaphore;
 
@@ -97,7 +103,7 @@ void Log::open_new( )
         filename += ".log";
 
         LOG( "\nopen " << filename << '\n' );
-        _file = open( filename.c_str(), O_CREAT | O_TRUNC | O_WRONLY  );
+        _file = open( filename.c_str(), O_CREAT | O_TRUNC | O_WRONLY, 0666 );
         if( _file == -1 )  throw_errno( errno, filename.c_str() );
 
         _filename = filename;
@@ -106,7 +112,7 @@ void Log::open_new( )
 
 //-----------------------------------------------------------------------------------------Log::log
 
-void Log::log( Log_level level, const string& prefix, const string& line )
+void Log::log( Log_level level, const string& prefix, const string& line, Prefix_log* extra_log )
 {
     if( level < _spooler->_log_level )  return;
     if( _file == -1 )  return;
@@ -133,31 +139,73 @@ void Log::log( Log_level level, const string& prefix, const string& line )
     {
         int nl = line.find( '\n', begin );  if( nl == string::npos )  nl = line.length();
 
-        write( buffer1, strlen(buffer1), false );
-        write( buffer2, strlen(buffer2) );
-        if( !prefix.empty() )  write( "(" + prefix + ") " );
+        write( extra_log, buffer1, strlen(buffer1), false );           // Zeit
+        
+        write( extra_log, buffer2, strlen(buffer2) );                  // [info]
 
-        write( line.c_str() + begin, nl - begin );
+        if( !prefix.empty() )  write( NULL, "(" + prefix + ") " );     // (Job ...)
+
+        write( extra_log, line.c_str() + begin, nl - begin );          // Text
         begin = nl + 1;
     }
 
-    if( line.length() == 0 || line[line.length()-1] != '\n' )  write( "\n" );
+    if( line.length() == 0 || line[line.length()-1] != '\n' )  write( extra_log, "\n", 1 );
 }
 
 //----------------------------------------------------------------------------------Prefix_log::log
 
 Prefix_log::Prefix_log( Log* log, const string& prefix )
 :
+    _zero_(this+1),
     _log(log),
-    _prefix(prefix)
+    _prefix(prefix),
+    _file(-1)
 {
+}
+
+//----------------------------------------------------------------------------------Prefix_log::log
+
+Prefix_log::~Prefix_log()
+{
+    close();
+}
+
+//----------------------------------------------------------------------------------Prefix_log::log
+
+void Prefix_log::close()
+{
+    if( _file != -1 )  
+    {
+        log( log_info, "Protokoll endet in " + _filename );
+
+        ::close( _file ),  _file = -1;
+    }
+}
+
+//---------------------------------------------------------------------------------Prefix_log::open
+
+void Prefix_log::open( const string& filename )
+{
+    if( _file != -1 )  throw_xc( "SPOOLER-134", _filename );
+
+    _filename = filename;
+
+    LOG( "\nopen " << _filename << '\n' );
+    _file = ::open( _filename.c_str(), O_CREAT | ( _append? 0 : O_TRUNC ) | O_WRONLY, 0666 );
+    if( _file == -1 )  throw_errno( errno, _filename.c_str() );
+
+    log( log_info, "Protokoll beginnt in " + _filename );
 }
 
 //----------------------------------------------------------------------------------Prefix_log::log
 
 void Prefix_log::log( Log_level level, const string& line )
 {
-    _log->log( level, _prefix, line );
+    //if( _file == -1  &&  !_filename.empty() )
+    //{
+    //}
+
+    _log->log( level, _prefix, line, this );
 }
 
 //----------------------------------------------------------------------------------Stdout_collector

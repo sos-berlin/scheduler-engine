@@ -1,4 +1,4 @@
-// $Id: spooler_log.h,v 1.4 2002/03/02 19:22:55 jz Exp $
+// $Id: spooler_log.h,v 1.5 2002/03/02 20:15:02 jz Exp $
 
 #ifndef __SPOOLER_LOG_H
 #define __SPOOLER_LOG_H
@@ -33,14 +33,14 @@ struct Log
     void                        warn                        ( const string& line )              { log( log_warn  , "", line ); }
     void                        error                       ( const string& line )              { log( log_error , "", line ); }
 
-    void                        log                         ( Log_level, const string& prefix, const string& );
+    void                        log                         ( Log_level, const string& prefix, const string&, Prefix_log* = NULL );
     void                        collect_stderr              ();
     
     string                      filename                    () const                            { return _filename; }
 
   protected:
-    void                        write                       ( const char*, int len, bool log = true );
-    void                        write                       ( const string& line )              { write( line.c_str(), line.length() ); }
+    void                        write                       ( Prefix_log*, const char*, int len, bool log = true );
+    void                        write                       ( Prefix_log* extra, const string& line )              { write( extra, line.c_str(), line.length() ); }
 
     Fill_zero                  _zero_;
     Spooler*                   _spooler;
@@ -56,7 +56,12 @@ struct Log
 struct Prefix_log
 {
                                 Prefix_log                  ( Log*, const string& prefix = empty_string );
+                               ~Prefix_log                  ();
 
+    void                        close                       ();
+
+    void                        open                        ( const string& filename );
+    const string&               filename                    () const                            { return _filename; }
     void                        set_prefix                  ( const string& prefix )            { _prefix = prefix; }
 
     void                        operator()                  ( const string& line )              { info( line ); }
@@ -66,10 +71,16 @@ struct Prefix_log
     void                        error                       ( const string& line )              { log( log_error, line ); }
     void                        log                         ( Log_level, const string& );
 
+    friend struct               Log;
+
   protected:
+    Fill_zero                  _zero_;
     Log*                       _log;
-  //Task*                      _task;
     string                     _prefix;
+
+    string                     _filename;                   // Name einer zusätzlichen Log-Datei (für die Tasks)
+    bool                       _append;                     // Datei zum Fortschreiben öffnen
+    int                        _file;                       // File handle
 };
 
 //-------------------------------------------------------------------------------------------------

@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.53 2002/03/02 19:22:55 jz Exp $
+// $Id: spooler_task.cxx,v 1.54 2002/03/02 20:15:02 jz Exp $
 /*
     Hier sind implementiert
 
@@ -1117,6 +1117,8 @@ void Task::close()
 
     do_close();
 
+    _job->_log.close();
+
     // Alle, die mit wait_until_terminated() auf diese Task warten, wecken:
     THREAD_LOCK( _terminated_events_lock )  FOR_EACH( vector<Event*>, _terminated_events, it )  (*it)->signal( "close task" );
 }
@@ -1145,6 +1147,11 @@ bool Task::start()
 
     try 
     {
+        if( !_spooler->log_directory().empty()  &&  _spooler->log_directory()[0] != '*' )
+        {
+            _job->_log.open( _spooler->log_directory() + "/spooler.job." + _job->_name );
+        }
+
         bool ok = do_start();
         if( !ok || _job->has_error() )  return false;
         _opened = true;
@@ -1272,16 +1279,22 @@ bool Task::wait_until_terminated( double wait_time )
 
 void Script_task::do_on_success()
 {
-    Job::In_call in_call ( this, spooler_on_success_name );
-    _job->_script_instance.call_if_exists( spooler_on_success_name );
+    if( _job->_script_instance.loaded() )
+    {
+        Job::In_call in_call ( this, spooler_on_success_name );
+        _job->_script_instance.call_if_exists( spooler_on_success_name );
+    }
 }
 
 //-----------------------------------------------------------------Script_task::on_error_on_success
 
 void Script_task::do_on_error()
 {
-    Job::In_call in_call ( this, spooler_on_error_name );
-    _job->_script_instance.call_if_exists( spooler_on_error_name );
+    if( _job->_script_instance.loaded() )
+    {
+        Job::In_call in_call ( this, spooler_on_error_name );
+        _job->_script_instance.call_if_exists( spooler_on_error_name );
+    }
 }
 
 //------------------------------------------------------------------------Object_set_task::do_close
@@ -1346,6 +1359,7 @@ bool Job_script_task::do_start()
 
     {
         Job::In_call in_call ( this, spooler_open_name );
+
         ok = check_result( _job->_script_instance.call_if_exists( spooler_open_name ) );
         in_call.set_result( ok );
         if( !ok )  return false;

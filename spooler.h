@@ -1,4 +1,4 @@
-// $Id: spooler.h,v 1.64 2002/03/02 19:22:54 jz Exp $
+// $Id: spooler.h,v 1.65 2002/03/02 20:15:02 jz Exp $
 
 #ifndef __SPOOLER_H
 #define __SPOOLER_H
@@ -126,6 +126,7 @@ struct Spooler
     static string               state_name                  ( State );
     bool                        free_threading_default      () const                            { return _free_threading_default; }
     Log&                        log                         ()                                  { return _log; }
+    const string&               log_directory               () const                            { return _log_directory; }                      
     Time                        start_time                  () const                            { return _spooler_start_time; }
     Security::Level             security_level              ( const Host& );
     const time::Holiday_set&    holidays                    () const                            { return _holiday_set; }
