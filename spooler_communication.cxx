@@ -1,4 +1,4 @@
-// $Id: spooler_communication.cxx,v 1.66 2003/10/20 21:46:53 jz Exp $
+// $Id: spooler_communication.cxx,v 1.67 2003/10/27 09:57:02 jz Exp $
 /*
     Hier sind implementiert
 
@@ -341,7 +341,8 @@ bool Communication::Channel::do_recv()
         if( _receive_at_start ) 
         {
             if( len == 1  &&  buffer[0] == '\x04' )  return false;      // Einzelnes Ctrl-D beendet Sitzung
-            if( len == 1  &&  buffer[0] == '\n'   )  { _spooler->signal( "do_something!" );  _spooler->_last_time_enter_pressed = Time::now().as_time_t(); return true; }
+            if( len == 1  &&  buffer[0] == '\n'   
+             || len == 2  &&  buffer[0] == '\r'  &&  buffer[1] == '\n' )  { _spooler->signal( "do_something!" );  _spooler->_last_time_enter_pressed = Time::now().as_time_t(); return true; }
 
             _receive_at_start = false;
             while( p < buffer+len  &&  isspace( (Byte)*p ) )  p++;      // Blanks am Anfang nicht beachten
@@ -641,6 +642,7 @@ bool Communication::handle_socket( Channel* channel )
             channel->recv_clear();
             channel->_log.info( "Kommando " + cmd );
             channel->_text = cp.execute( cmd, Time::now(), channel->_indent );
+          //if( channel->_indent )  channel->_text = channel->_text.replace( "\n", "\r\n" );
             if( cp._error )  channel->_log.error( cp._error->what() );
             ok = channel->do_send();
             if( !ok )  return false;
