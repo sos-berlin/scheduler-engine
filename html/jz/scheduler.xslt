@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding="utf-8"?>
-<!-- $Id: scheduler.xslt,v 1.10 2004/12/09 20:59:32 jz Exp $ -->
+<!-- $Id: scheduler.xslt,v 1.11 2004/12/15 15:26:10 jz Exp $ -->
 <xsl:stylesheet xmlns:xsl   = "http://www.w3.org/1999/XSL/Transform" 
                 xmlns:msxsl = "urn:schemas-microsoft-com:xslt"
                 version     = "1.0">
@@ -930,6 +930,8 @@
     <xsl:template match="job">
         <table cellpadding="0" cellspacing="0" width="100%" class="job">
             <col valign="baseline" align="left" width="1"/>
+            <col valign="baseline" align="left" width="160"  />  
+            <col valign="baseline" align="left" width="1"/>
             <col valign="baseline" align="left" width="*"  />  
 
             <tr>
@@ -976,9 +978,7 @@
                         <span class="waiting_for_process"> waiting for process!</span>
                     </xsl:if-->
                 </td>
-            </tr>
 
-            <tr>
                 <td><span class="label">state text:</span></td>
                 <td>
                     <xsl:value-of select="@state_text"/>
@@ -989,7 +989,7 @@
                 <td><span class="label">error:</span></td>
                 <xsl:choose>
                     <xsl:when test="ERROR">
-                        <td class="job_error">
+                        <td colspan="3" class="job_error">
                             <xsl:apply-templates select="ERROR"/>
                         </td>
                     </xsl:when>
@@ -1001,7 +1001,7 @@
                 
             <tr>
                 <td><span class="label">next start:</span></td>
-                <td>
+                <td colspan="3">
                     <xsl:value-of select="@next_start_time__xslt_datetime_with_diff_plus"  disable-output-escaping="yes"/>
                 </td>
             </tr>
@@ -1009,6 +1009,8 @@
             <tr>
                 <td><span class="label">steps:</span></td>
                 <td><xsl:value-of select="@all_steps"/></td>
+                <td><span class="label">tasks:</span></td>
+                <td><xsl:value-of select="@all_tasks"/></td>
             </tr>
 
             <xsl:if test="@order='yes'">

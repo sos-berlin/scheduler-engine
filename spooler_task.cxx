@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.271 2004/12/13 12:02:11 jz Exp $
+// $Id: spooler_task.cxx,v 1.272 2004/12/15 15:26:10 jz Exp $
 /*
     Hier sind implementiert
 
@@ -1218,6 +1218,7 @@ void Task::load()
 
     THREAD_LOCK( _lock )
     {
+        _job->count_task();
         _thread->count_task();
         reset_error();
         _running_since = Time::now();

@@ -1,4 +1,4 @@
-// $Id: spooler_job.cxx,v 1.99 2004/12/09 20:59:32 jz Exp $
+// $Id: spooler_job.cxx,v 1.100 2004/12/15 15:26:10 jz Exp $
 // §851: Weitere Log-Ausgaben zum Scheduler-Start eingebaut
 /*
     Hier sind implementiert
@@ -1563,6 +1563,8 @@ xml::Element_ptr Job::dom( const xml::Document_ptr& document, const Show_what& s
         job_element.setAttribute( "title"     , _title                  );
 
         job_element.setAttribute( "all_steps" , _step_count             );
+
+        job_element.setAttribute( "all_tasks" , _tasks_count            );
 
         if( !_state_text.empty() )
         job_element.setAttribute( "state_text", _state_text             );

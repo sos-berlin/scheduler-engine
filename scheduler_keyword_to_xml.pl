@@ -1,5 +1,5 @@
 #! /usr/bin/perl -W
-# $Id: scheduler_keyword_to_xml.pl,v 1.9 2004/12/02 21:56:49 jz Exp $
+# $Id: scheduler_keyword_to_xml.pl,v 1.10 2004/12/15 15:26:10 jz Exp $
 
 
 my $script_name     = "scheduler_keyword_to_xml.pl";
@@ -13,7 +13,7 @@ my ( $year, $month, $mday, $hour, $min, $sec ) = (gmtime)[ 5, 4, 3, 2, 1, 0 ];  
 open( OUTPUT, ">$output_filename" )  or die "$output_filename: $!";
 
 print OUTPUT '<?xml version="1.0" encoding="utf-8"?>' ."\n";
-print OUTPUT '<?xml-stylesheet href="scheduler.xslt" type="text/xsl"?>' ."\n";
+print OUTPUT '<?xml-stylesheet href="scheduler.xsl" type="text/xsl"?>' ."\n";
 print OUTPUT "\n";
 print OUTPUT "<!-- ACHTUNG: NICHT AENDERN! DIESE DATEI IST GENENIERT VON $script_name -->\n";
 print OUTPUT "\n";
