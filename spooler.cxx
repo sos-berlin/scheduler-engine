@@ -1546,7 +1546,7 @@ void Spooler::start()
     _base_log.set_directory( _log_directory );
     _base_log.open_new();
     
-    _log.info( string( "Scheduler (" VER_PRODUCTVERSION_STR ) + ") startet mit " + _config_filename + ", pid=" + as_string( getpid() ) );
+    _log.info( string( "Scheduler " VER_PRODUCTVERSION_STR ) + " startet mit " + _config_filename + ", pid=" + as_string( getpid() ) );
     _spooler_start_time = Time::now();
 
     FOR_EACH_JOB( job )  (*job)->init0();

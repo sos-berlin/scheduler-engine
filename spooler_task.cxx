@@ -1448,12 +1448,12 @@ void Task::set_mail_defaults()
     else
     {
         string errmsg = _error? _error->what() : _log->highest_msg();
-        _log->set_mail_subject( string("FEHLER ") + errmsg, is_error );
+        _log->set_mail_subject( string("FEHLER ") + errmsg );   //, is_error );
     
         body += errmsg + "\n\n";
     }
 
-    _log->set_mail_body( body + "Das Jobprotokoll liegt dieser Nachricht bei.", is_error );
+    _log->set_mail_body( body + "Das Jobprotokoll liegt dieser Nachricht bei." );   //, is_error );
 }
 
 //---------------------------------------------------------------------------------Task::clear_mail
