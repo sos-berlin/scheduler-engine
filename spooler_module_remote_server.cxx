@@ -1,4 +1,4 @@
-// $Id: spooler_module_remote_server.cxx,v 1.32 2003/11/03 18:26:01 jz Exp $
+// $Id: spooler_module_remote_server.cxx,v 1.33 2003/11/30 01:34:07 jz Exp $
 /*
     Hier sind implementiert
 
@@ -155,6 +155,8 @@ STDMETHODIMP Com_remote_module_instance_server::construct( SAFEARRAY* safearray 
         string           java_work_dir;
         string           javac;
         string           java_options;
+        string           job_name;
+        int              task_id = 0;
         Locked_safearray params ( safearray );
 
         for( int i = 0; i < params.count(); i++ )
@@ -188,6 +190,10 @@ STDMETHODIMP Com_remote_module_instance_server::construct( SAFEARRAY* safearray 
                 if( key_word == "javac"           )  javac                             = value;
                 else
                 if( key_word == "java_options"    )  java_options                      = value;
+                else
+                if( key_word == "job"             )  job_name                          = value;
+                else
+                if( key_word == "task_id"         )  task_id                           = as_int( value );
                 else
                     throw_xc( "server::construct" );
             }
@@ -223,6 +229,8 @@ STDMETHODIMP Com_remote_module_instance_server::construct( SAFEARRAY* safearray 
 
 
         _server._module_instance = _server._module->create_instance();
+        _server._module_instance->set_job_name( job_name );             // Nur zur Diagnose
+        _server._module_instance->set_task_id( task_id );               // Nur zur Diagnose
       //_server._module_instance->init();
       //_server._module_instance->_spooler_exit_called = true;            // Der Client wird spooler_exit() explizit aufrufen, um den Fehler zu bekommen.
     }

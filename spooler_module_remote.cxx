@@ -1,4 +1,4 @@
-// $Id: spooler_module_remote.cxx,v 1.50 2003/11/12 22:38:05 jz Exp $
+// $Id: spooler_module_remote.cxx,v 1.51 2003/11/30 01:34:07 jz Exp $
 /*
     Hier sind implementiert
 
@@ -237,7 +237,10 @@ bool Remote_module_instance_proxy::begin__end()
     //  operation->async_check_error();  // Wenn create_instance() fehlgeschlagen ist
 
     bool result = false;
-    
+
+
+    // _remote_instance->call__end() ist nicht gut, wenn _remote_instance->call__start() einen Fehler gemeldet hat. Das sollte anders codiert werden.
+    // Ein Fehler in _remote_instance->call__start() wird durch den Fehler "pop_operation() bei leerem Stack" überdeckt.
     if( _remote_instance )  result = check_result( _remote_instance->call__end() );   // call__end() vor der Fehlerprüfung rufen, sonst werden untere Operationen nicht beendet. 12.11.03
 
     operation->async_check_error();  // Wenn create_instance() fehlgeschlagen ist
@@ -487,7 +490,7 @@ bool Remote_module_instance_proxy::continue_async_operation( Operation* operatio
         // Nächste Operation
 
         {
-            Variant params ( Variant::vt_array, 8 );
+            Variant params ( Variant::vt_array, 10 );
 
             {
                 Locked_safearray params_array = V_ARRAY( &params );
@@ -505,6 +508,8 @@ bool Remote_module_instance_proxy::continue_async_operation( Operation* operatio
 
                 params_array[6] = "recompile="       + as_string( _module->_recompile && !_module->_compiled );
                 params_array[7] = "script="          + _module->_source.dom_doc().xml();
+                params_array[8] = "job="             + _job_name;
+                params_array[9] = "task_id="         + as_string( _task_id );
             }
 
             operation->set_async_child( _remote_instance->call__start( "construct", params ) );

@@ -1,4 +1,4 @@
-// $Id: spooler_module.h,v 1.53 2003/11/11 18:48:04 jz Exp $
+// $Id: spooler_module.h,v 1.54 2003/11/30 01:34:07 jz Exp $
 
 #ifndef __SPOOLER_MODULE_H
 #define __SPOOLER_MODULE_H
@@ -242,7 +242,7 @@ struct Module_instance : Object
     virtual string              stdout_filename             ()                                      { return ""; }
     virtual string              stderr_filename             ()                                      { return ""; }
 
-    virtual string              obj_name                    ()                                      { return "Module_instance"; }
+    virtual string              obj_name                    () const                                { return "Module_instance(" + _job_name + " " + as_string(_task_id) + ")"; }
 
 
     Fill_zero                  _zero_;

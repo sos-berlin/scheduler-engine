@@ -1,4 +1,4 @@
-// $Id: spooler_wait.cxx,v 1.85 2003/11/10 16:07:31 jz Exp $
+// $Id: spooler_wait.cxx,v 1.86 2003/11/30 01:34:07 jz Exp $
 /*
     Hier sind implementiert
 
@@ -343,7 +343,8 @@ bool Wait_handles::wait_until_2( Time until )
 
         THREAD_LOCK( _lock )
         {
-            if( _log->log_level() <= log_debug9 )
+          //if( _log->log_level() <= log_debug9 )
+            if( log_category_is_set( "scheduler.wait" ) )
             {
                 string msg = "MsgWaitForMultipleObjects " + sos::as_string(t/1000.0) + "s (bis " + until.as_string() + ")  ";
                 for( int i = 0; i < _handles.size(); i++ )

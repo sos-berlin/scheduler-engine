@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.292 2003/11/27 19:59:42 jz Exp $
+// $Id: spooler.cxx,v 1.293 2003/11/30 01:34:07 jz Exp $
 /*
     Hier sind implementiert
 
@@ -1592,6 +1592,8 @@ void Spooler::run()
   //Time            throttle_time        = Time::now();
   //int             throttle_loop_count  = 0;
 
+  //bool            log_wait = _log.log_level() <= log_debug9;
+    bool            log_wait = log_category_is_set( "scheduler.wait" );
 
 
     while(1)
@@ -1665,7 +1667,6 @@ void Spooler::run()
 
         string       msg;
         Wait_handles wait_handles ( this, &_log );
-        bool         log_wait = _log.log_level() <= log_debug9;
 
         if( log_wait )  msg = "Warten"; //"Kein Job und keine Task aktiv";
 
@@ -2271,7 +2272,16 @@ int spooler_main( int argc, char** argv, const string& parameter_line )
 
         if( log_filename.empty() )  log_filename = subst_env( read_profile_string( factory_ini, "spooler", "log" ) );
         if( !log_filename.empty() )  log_start( log_filename );
-
+/*
+        if( z::log_categories.is_set( "scheduler.cat" ) )
+        {
+            int n = 1000000;
+            LOG( n << " mal log_category.is_set( \"scheduler.cat\" ) ...\n" );
+            const char* cat = "scheduler.cat";
+            for( int i = 0; i < n; i++ )  z::log_categories.is_set( cat );
+            LOG( "... fertig\n" );
+        }
+*/
 
         if( is_object_server )
         {

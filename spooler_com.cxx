@@ -1,4 +1,4 @@
-// $Id: spooler_com.cxx,v 1.120 2003/11/11 15:14:44 jz Exp $
+// $Id: spooler_com.cxx,v 1.121 2003/11/30 01:34:07 jz Exp $
 /*
     Hier sind implementiert
 
@@ -2640,7 +2640,7 @@ STDMETHODIMP Com_job_chain::add_order( VARIANT* order_or_payload, spooler_com::I
 {
     HRESULT hr = NOERROR;
 
-    LOGI( "Job_chain.add_order\n" );
+    //LOGI( "Job_chain.add_order\n" );
 
     THREAD_LOCK( _lock )
     try
@@ -2660,7 +2660,7 @@ STDMETHODIMP Com_job_chain::add_order( VARIANT* order_or_payload, spooler_com::I
     catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Job_chain.add_order" ); }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Job_chain.add_order" ); }
 
-    LOG( "Job_chain.add_order  hr=" << (void*)hr << "\n" );
+    //LOG( "Job_chain.add_order  hr=" << (void*)hr << "\n" );
 
     return hr;
 }

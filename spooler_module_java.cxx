@@ -1,4 +1,4 @@
-// $Id: spooler_module_java.cxx,v 1.72 2003/11/01 20:59:51 jz Exp $
+// $Id: spooler_module_java.cxx,v 1.73 2003/11/30 01:34:07 jz Exp $
 /*
     Hier sind implementiert
 
@@ -338,7 +338,7 @@ bool Module::make_java_class( bool force )
         //utimbuf.actime = utimbuf.modtime = (time_t)_source._max_modification_time;
         //utime( java_filename.c_str(), &utimbuf );
 
-        string cmd = '"' + _java_vm->javac_filename() + "\" -verbose -O -classpath " + _java_vm->class_path() + ' ' + java_filename;
+        string cmd = '"' + _java_vm->javac_filename() + "\" -O -classpath " + _java_vm->class_path() + ' ' + java_filename;     // + " -verbose"
         _log.info( cmd );
         
         System_command c;
