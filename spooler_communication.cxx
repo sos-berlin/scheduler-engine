@@ -1,4 +1,4 @@
-// $Id: spooler_communication.cxx,v 1.62 2003/10/06 13:35:02 jz Exp $
+// $Id: spooler_communication.cxx,v 1.63 2003/10/08 11:45:05 jz Exp $
 /*
     Hier sind implementiert
 
@@ -532,7 +532,7 @@ void Communication::bind()
                 _udp_port = _spooler->udp_port();
                 _rebound = true;
 
-                _spooler->log().info( "Spooler erwartet Kommandos über UDP-Port " + sos::as_string(_udp_port) );
+                _spooler->log().info( "Scheduler erwartet Kommandos über UDP-Port " + sos::as_string(_udp_port) );
             }
         }
     }
@@ -570,7 +570,7 @@ void Communication::bind()
                 _tcp_port = _spooler->tcp_port();
                 _rebound = true;
 
-                _spooler->log().info( "Spooler erwartet Kommandos über TCP-Port " + sos::as_string(_tcp_port) );
+                _spooler->log().info( "Scheduler erwartet Kommandos über TCP-Port " + sos::as_string(_tcp_port) );
             }
 
 

@@ -1,4 +1,4 @@
-// $Id: spooler_module.h,v 1.45 2003/09/26 11:31:17 jz Exp $
+// $Id: spooler_module.h,v 1.46 2003/10/08 11:45:06 jz Exp $
 
 #ifndef __SPOOLER_MODULE_H
 #define __SPOOLER_MODULE_H
@@ -204,7 +204,7 @@ struct Module_instance : Object
     virtual void                add_obj                     ( const ptr<IDispatch>&, const string& name );
     virtual void                load                        ()                                      {}
     virtual void                start                       ()                                      {}
-    virtual IDispatch*          dispatch                    () const                                { throw_xc( "SPOOLER-172", "dispatch()" ); }
+    virtual IDispatch*          dispatch                    () const                                { throw_xc( "SCHEDULER-172", "dispatch()" ); }
     Variant                     call_if_exists              ( const string& name );
     virtual Variant             call                        ( const string& name )                  = 0;
     virtual Variant             call                        ( const string& name, int param )       = 0;

@@ -1,4 +1,4 @@
-// $Id: spooler_log.cxx,v 1.72 2003/10/08 11:00:16 jz Exp $
+// $Id: spooler_log.cxx,v 1.73 2003/10/08 11:45:05 jz Exp $
 
 #include "spooler.h"
 #include "spooler_mail.h"
@@ -379,7 +379,7 @@ void Prefix_log::open()
     reset_highest_level();
     _highest_msg = "";
     
-    if( _file != -1 )  return; //throw_xc( "SPOOLER-134", _filename );
+    if( _file != -1 )  return; //throw_xc( "SCHEDULER-134", _filename );
 
     if( !_filename.empty() )
     {
@@ -688,7 +688,7 @@ void Prefix_log::log2( Log_level level, const string& prefix, const string& line
 {
     string line = remove_password( line_par );
 
-    if( level == log_error  &&  _task  &&  !_task->has_error() )  _task->set_error_xc_only( Xc( "SPOOLER-140", line.c_str() ) );
+    if( level == log_error  &&  _task  &&  !_task->has_error() )  _task->set_error_xc_only( Xc( "SCHEDULER-140", line.c_str() ) );
 
     if( _highest_level < level )  _highest_level = level, _highest_msg = line;
     if( level < _log_level )  return;

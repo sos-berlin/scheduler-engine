@@ -1,4 +1,4 @@
-// $Id: spooler_time.cxx,v 1.50 2003/10/07 08:25:51 jz Exp $
+// $Id: spooler_time.cxx,v 1.51 2003/10/08 11:45:06 jz Exp $
 /*
     Hier sind implementiert
 
@@ -224,7 +224,7 @@ void Period::check() const
     return;
 
   FEHLER:
-    throw_xc( "SPOOLER-104", _begin.as_string(), _end.as_string() );
+    throw_xc( "SCHEDULER-104", _begin.as_string(), _end.as_string() );
 }
 
 //-------------------------------------------------------------------------------Period::is_comming
@@ -468,7 +468,7 @@ void Day_set::set_dom( const xml::Element_ptr& element, const Day* default_day, 
             Day my_default_day ( e, default_day, default_period );
 
             int day = int_from_variant( e.getAttribute( "day" ) );
-            if( (uint)day >= NO_OF(_days) )  throw_xc( "SPOOLER-INVALID-DAY", day );
+            if( (uint)day >= NO_OF(_days) )  throw_xc( "SCHEDULER-INVALID-DAY", day );
             _days[day].set_dom( e, &my_default_day, default_period );
         }
     }

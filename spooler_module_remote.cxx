@@ -1,4 +1,4 @@
-// $Id: spooler_module_remote.cxx,v 1.40 2003/09/27 18:21:01 jz Exp $
+// $Id: spooler_module_remote.cxx,v 1.41 2003/10/08 11:45:06 jz Exp $
 /*
     Hier sind implementiert
 
@@ -36,7 +36,7 @@ void Remote_module_instance_proxy::init()
 
     Module_instance::init();
 
-    if( _module->_reuse != Module::reuse_task )  throw_xc( "SPOOLER-192" );         // Problem u.a.: synchrones Release(), wenn Job gestoppt wird
+    if( _module->_reuse != Module::reuse_task )  throw_xc( "SCHEDULER-192" );         // Problem u.a.: synchrones Release(), wenn Job gestoppt wird
 }
 
 //---------------------------------------------------------------Remote_module_instance_proxy::load
@@ -171,7 +171,7 @@ bool Remote_module_instance_proxy::begin__end()
     // ***
 
 
-    if( !_operation->async_finished() )  throw_xc( "SPOOLER-191", "begin__end", _operation->async_state_text() );
+    if( !_operation->async_finished() )  throw_xc( "SCHEDULER-191", "begin__end", _operation->async_state_text() );
 
     ptr<Async_operation> operation = _operation;
     _operation = NULL;
@@ -204,8 +204,8 @@ Async_operation* Remote_module_instance_proxy::end__start( bool success )
 void Remote_module_instance_proxy::end__end()
 {
     if( !_remote_instance )  return;
-  //if( _operation->_call_state != Operation::c_finished )  throw_xc( "SPOOLER-191", "end__end", state_name() );
-    if( !_operation->async_finished() )  throw_xc( "SPOOLER-191", "end__end", _operation->async_state_text() );
+  //if( _operation->_call_state != Operation::c_finished )  throw_xc( "SCHEDULER-191", "end__end", state_name() );
+    if( !_operation->async_finished() )  throw_xc( "SCHEDULER-191", "end__end", _operation->async_state_text() );
 
     _operation = NULL;
     _remote_instance->call__end();
@@ -228,8 +228,8 @@ Async_operation* Remote_module_instance_proxy::step__start()
 
 bool Remote_module_instance_proxy::step__end()
 {
-  //if( _call_state != c_finished )  throw_xc( "SPOOLER-191", "step__end", (int)_call_state );
-    if( !_operation->async_finished() )  throw_xc( "SPOOLER-191", "step__end", _operation->async_state_text() );
+  //if( _call_state != c_finished )  throw_xc( "SCHEDULER-191", "step__end", (int)_call_state );
+    if( !_operation->async_finished() )  throw_xc( "SCHEDULER-191", "step__end", _operation->async_state_text() );
 
     _operation = NULL;
     return check_result( _remote_instance->call__end() );
@@ -248,8 +248,8 @@ Async_operation* Remote_module_instance_proxy::call__start( const string& method
 
 bool Remote_module_instance_proxy::call__end()
 {
-  //if( _call_state != c_finished )  throw_xc( "SPOOLER-191", "step__end", (int)_call_state );
-    if( !_operation->async_finished() )  throw_xc( "SPOOLER-191", "call__end", _operation->async_state_text() );
+  //if( _call_state != c_finished )  throw_xc( "SCHEDULER-191", "step__end", (int)_call_state );
+    if( !_operation->async_finished() )  throw_xc( "SCHEDULER-191", "call__end", _operation->async_state_text() );
 
     _operation = NULL;
     return check_result( _remote_instance->call__end() );
@@ -269,7 +269,7 @@ Async_operation* Remote_module_instance_proxy::release__start()
 
 void Remote_module_instance_proxy::release__end()
 {
-    if( !_operation->async_finished() )  throw_xc( "SPOOLER-191", "release__end", _operation->async_state_text() );
+    if( !_operation->async_finished() )  throw_xc( "SCHEDULER-191", "release__end", _operation->async_state_text() );
 
     if( _operation == &dummy_sync_operation )
     {
@@ -304,7 +304,7 @@ Remote_module_instance_proxy::Operation::Operation( Remote_module_instance_proxy
 /*
 bool Remote_module_instance_proxy::Operation::begin__end()
 {
-    if( _call_state != c_begin )  throw_xc( "SPOOLER-191", "begin__end", state_name() );
+    if( _call_state != c_begin )  throw_xc( "SCHEDULER-191", "begin__end", state_name() );
 
     return check_result( _remote_instance->call__end() );
 }

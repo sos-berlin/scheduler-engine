@@ -1,4 +1,4 @@
-// $Id: spooler_job.cxx,v 1.35 2003/10/08 11:00:15 jz Exp $
+// $Id: spooler_job.cxx,v 1.36 2003/10/08 11:45:05 jz Exp $
 /*
     Hier sind implementiert
 
@@ -90,8 +90,8 @@ void Job::set_dom( const xml::Element_ptr& element, const Time& xml_mod_time )
 
         if( order )
         {
-            if( _temporary )  throw_xc( "SPOOLER-155" );
-            if( element.getAttributeNode( "priority" ) )  throw_xc( "SPOOLER-165" );
+            if( _temporary )  throw_xc( "SCHEDULER-155" );
+            if( element.getAttributeNode( "priority" ) )  throw_xc( "SCHEDULER-165" );
             _order_queue = new Order_queue( this, &_log );
         }
 
@@ -457,12 +457,12 @@ Sos_ptr<Task> Job::start_without_lock( const ptr<spooler_com::Ivariable_set>& pa
 
     switch( _state )
     {
-        case s_read_error:  throw_xc( "SPOOLER-132", name(), _error? _error->what() : "" );
+        case s_read_error:  throw_xc( "SCHEDULER-132", name(), _error? _error->what() : "" );
         case s_stopped:     set_state( s_pending );
         default: ;
     }
 
-    if( !start_at  &&  !_run_time.period_follows( Time::now() ) )   throw_xc( "SPOOLER-143" );
+    if( !start_at  &&  !_run_time.period_follows( Time::now() ) )   throw_xc( "SCHEDULER-143" );
 
     Sos_ptr<Task> task = create_task( params, task_name, start_at );
     task->_let_run = true;
@@ -1111,7 +1111,7 @@ Job::State Job::as_state( const string& name )
         state = (State)( state - 1 );
     }
 
-    if( !name.empty() )  throw_xc( "SPOOLER-110", name );
+    if( !name.empty() )  throw_xc( "SCHEDULER-110", name );
     return s_none;
 }
 
@@ -1127,7 +1127,7 @@ Job::State_cmd Job::as_state_cmd( const string& name )
         cmd = (State_cmd)( cmd - 1 );
     }
 
-    if( !name.empty() )  throw_xc( "SPOOLER-106", name );
+    if( !name.empty() )  throw_xc( "SCHEDULER-106", name );
     return sc_none;
 }
 
@@ -1315,7 +1315,7 @@ ptr<Module_instance> Job::create_module_instance()
 
     THREAD_LOCK( _lock )
     {
-        if( _state == s_read_error )  throw_xc( "SPOOLER-190" );
+        if( _state == s_read_error )  throw_xc( "SCHEDULER-190" );
 
         result = _module_ptr->create_instance();
 

@@ -1,4 +1,4 @@
-// $Id: spooler_config.cxx,v 1.67 2003/08/29 20:44:24 jz Exp $
+// $Id: spooler_config.cxx,v 1.68 2003/10/08 11:45:05 jz Exp $
 
 //#include <precomp.h>
 
@@ -243,7 +243,7 @@ void Spooler_thread::set_dom( const xml::Element_ptr& element, const Time& xml_m
     _name = element.getAttribute( "name" );
 
     str = element.getAttribute( "free_threading" );
-    if( !str.empty() )  throw_xc( "SPOOLER-189", "free_threading" );    //_free_threading = as_bool( str );
+    if( !str.empty() )  throw_xc( "SCHEDULER-189", "free_threading" );    //_free_threading = as_bool( str );
 
 #   ifdef Z_WINDOWS
         str = element.getAttribute( "priority" );
@@ -260,11 +260,11 @@ void Spooler_thread::set_dom( const xml::Element_ptr& element, const Time& xml_m
         }
 #   endif
 
-    if( element.getAttributeNode( "include_path" ) )  throw_xc( "SPOOLER-189", "<thread include_path=>" );  //_include_path = element.getAttribute( "include_path" );
+    if( element.getAttributeNode( "include_path" ) )  throw_xc( "SCHEDULER-189", "<thread include_path=>" );  //_include_path = element.getAttribute( "include_path" );
 
     DOM_FOR_EACH_ELEMENT( element, e )
     {
-        if( e.nodeName_is( "script" ) )  throw_xc( "SPOOLER-189", "<script in thread>" );  //_module.set_dom( e, xml_mod_time, include_path() );
+        if( e.nodeName_is( "script" ) )  throw_xc( "SCHEDULER-189", "<script in thread>" );  //_module.set_dom( e, xml_mod_time, include_path() );
         else
         if( e.nodeName_is( "jobs"   ) )  _spooler->load_jobs_from_xml( e, xml_mod_time );   // Zur Kompatibilität
     }
@@ -282,11 +282,11 @@ void Spooler::load_threads_from_xml( const xml::Element_ptr& threads_element, co
             if( _manual  ||  spooler_id.empty()  ||  spooler_id == _spooler_id )
             {
 
-                if( element.getAttributeNode( "include_path" ) )  throw_xc( "SPOOLER-189", "<thread include_path=>" );  //_include_path = element.getAttribute( "include_path" );
+                if( element.getAttributeNode( "include_path" ) )  throw_xc( "SCHEDULER-189", "<thread include_path=>" );  //_include_path = element.getAttribute( "include_path" );
 
                 DOM_FOR_EACH_ELEMENT( element, e )
                 {
-                    if( e.nodeName_is( "script" ) )  throw_xc( "SPOOLER-189", "<script in thread>" );  //_module.set_dom( e, xml_mod_time, include_path() );
+                    if( e.nodeName_is( "script" ) )  throw_xc( "SCHEDULER-189", "<script in thread>" );  //_module.set_dom( e, xml_mod_time, include_path() );
                     else
                     if( e.nodeName_is( "jobs"   ) )  load_jobs_from_xml( e, xml_mod_time );   // Zur Kompatibilität
                 }

@@ -1,4 +1,4 @@
-// $Id: spooler_module.cxx,v 1.49 2003/09/26 11:31:17 jz Exp $
+// $Id: spooler_module.cxx,v 1.50 2003/10/08 11:45:06 jz Exp $
 /*
     Hier sind implementiert
 
@@ -135,7 +135,7 @@ void Module::set_dom_without_source( const xml::Element_ptr& element )
     if( use_engine == ""
      || use_engine == "task" )  _reuse = reuse_task;
     else
-        throw_xc( "SPOOLER-196", use_engine );
+        throw_xc( "SCHEDULER-196", use_engine );
   //if( use_engine == "job"  )  _reuse = reuse_job;
 
     init();
@@ -161,16 +161,16 @@ void Module::set_source_only( const Source_with_parts& source )
             break;
 
         case kind_java:
-            //if( !_source.empty() )  throw_xc( "SPOOLER-167" );
+            //if( !_source.empty() )  throw_xc( "SCHEDULER-167" );
             break;
 
         case kind_scripting_engine:
-            if( _source.empty() )  throw_xc( "SPOOLER-173" );
+            if( _source.empty() )  throw_xc( "SCHEDULER-173" );
             break;
 
 #     ifdef Z_WINDOWS
         case kind_com:
-            if( !_source.empty() )  throw_xc( "SPOOLER-167" );
+            if( !_source.empty() )  throw_xc( "SCHEDULER-167" );
             break;
 #     endif
 
@@ -191,7 +191,7 @@ void Module::init()
 
     if( _separate_process )
     {
-        if( _process_class_name != "" )  throw_xc( "SPOOLER-194" );
+        if( _process_class_name != "" )  throw_xc( "SCHEDULER-194" );
         //_process_class_name = temporary_process_class_name;
     }
 
@@ -209,8 +209,8 @@ void Module::init()
         {
             _kind = kind_com;
         
-            if( _language        != "" )  throw_xc( "SPOOLER-145" );
-            if( _java_class_name != "" )  throw_xc( "SPOOLER-168" );
+            if( _language        != "" )  throw_xc( "SCHEDULER-145" );
+            if( _java_class_name != "" )  throw_xc( "SCHEDULER-168" );
         }
         else
 #     endif
@@ -221,8 +221,8 @@ void Module::init()
      
             if( _language == "" )  _language = "Java";
 
-            if( lcase(_language) != "java" )  throw_xc( "SPOOLER-166" );
-            if( _com_class_name  != ""     )  throw_xc( "SPOOLER-168" );
+            if( lcase(_language) != "java" )  throw_xc( "SCHEDULER-166" );
+            if( _com_class_name  != ""     )  throw_xc( "SCHEDULER-168" );
 
             if( _spooler )  _spooler->_has_java = true;
         }
@@ -242,7 +242,7 @@ ptr<Module_instance> Module::create_instance()
     {
         case kind_java:              
         {
-            //if( !_spooler->_java_vm->running() )  throw_xc( "SPOOLER-177" );
+            //if( !_spooler->_java_vm->running() )  throw_xc( "SCHEDULER-177" );
 
             _java_vm = get_java_vm();
             ptr<Java_module_instance> p = Z_NEW( Java_module_instance( _java_vm, this ) );
@@ -270,7 +270,7 @@ ptr<Module_instance> Module::create_instance()
         }
 
         default:                     
-            throw_xc( "SPOOLER-173" );
+            throw_xc( "SCHEDULER-173" );
     }
 }
 
@@ -357,7 +357,7 @@ void Module_instance::init()
 {
     _spooler = _module->_spooler;
 
-    if( !_module->set() )  throw_xc( "SPOOLER-146" );
+    if( !_module->set() )  throw_xc( "SCHEDULER-146" );
 }
 
 //--------------------------------------------------------------------------------Task::set_in_call

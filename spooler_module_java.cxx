@@ -1,4 +1,4 @@
-// $Id: spooler_module_java.cxx,v 1.65 2003/09/26 13:39:20 jz Exp $
+// $Id: spooler_module_java.cxx,v 1.66 2003/10/08 11:45:06 jz Exp $
 /*
     Hier sind implementiert
 
@@ -28,7 +28,7 @@
 #endif
 
 #ifndef JNI_VERSION_1_2
-#   error "Der Spooler braucht jni.h Version 1.2"
+#   error "Der Scheduler braucht jni.h Version 1.2"
 #endif
 
 using namespace std;
@@ -140,7 +140,7 @@ JNIEXPORT jobject JNICALL Java_sos_spooler_Idispatch_com_1call( JNIEnv* jenv, jc
         WORD        context = 0;
         DISPID      dispid = 0;
         
-        if( !idispatch )  throw_xc( "SPOOLER-176" );
+        if( !idispatch )  throw_xc( "SCHEDULER-176" );
 
         // GetIDsOfNames
 
@@ -228,7 +228,7 @@ JNIEXPORT jobject JNICALL Java_sos_spooler_Idispatch_com_1call( JNIEnv* jenv, jc
             {
                 //ptr<Java_global_object> o = Z_NEW( Java_global_object( spooler_ptr->_java_vm, jparam ) );
                 //dispparams[i] = o;
-                throw_xc( "SPOOLER-178", i );
+                throw_xc( "SCHEDULER-178", i );
             }
 
 
@@ -401,7 +401,7 @@ jmethodID Module::java_method_id( const string& name )
         int pos = name.find( '(' );
         if( pos == string::npos )  pos = name.length();
         
-        if( !_java_class )  throw_xc( "SPOOLER-197", name );
+        if( !_java_class )  throw_xc( "SCHEDULER-197", name );
         method_id = env->GetMethodID( _java_class, name.substr(0,pos).c_str(), name.c_str()+pos );
         if( env->ExceptionCheck() ) env->ExceptionDescribe(), env->ExceptionClear();
 
@@ -623,7 +623,7 @@ Variant Java_module_instance::call( const string& name_par )
     if( !method_id )  
     {
         if( is_optional )  return Variant();
-        throw_xc( "SPOOLER-174", name, _module->_java_class_name.c_str() );
+        throw_xc( "SCHEDULER-174", name, _module->_java_class_name.c_str() );
     }
 
     Variant result;
@@ -652,7 +652,7 @@ Variant Java_module_instance::call( const string& name, int param )
     Java_idispatch_stack_frame stack_frame;
 
     jmethodID method_id = _module->java_method_id( name );
-    if( !method_id )  throw_xc( "SPOOLER-174", name, _module->_java_class_name.c_str() );
+    if( !method_id )  throw_xc( "SCHEDULER-174", name, _module->_java_class_name.c_str() );
 
     bool result;
     

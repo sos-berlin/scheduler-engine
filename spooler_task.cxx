@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.203 2003/10/08 11:00:16 jz Exp $
+// $Id: spooler_task.cxx,v 1.204 2003/10/08 11:45:06 jz Exp $
 /*
     Hier sind implementiert
 
@@ -76,7 +76,7 @@ bool Object_set::open()
         object_set_vt = _task->_module_instance->call( "spooler_make_object_set" );
 
         if( object_set_vt.vt != VT_DISPATCH 
-         || object_set_vt.pdispVal == NULL  )  throw_xc( "SPOOLER-103", _object_set_descr->_class_name );
+         || object_set_vt.pdispVal == NULL  )  throw_xc( "SCHEDULER-103", _object_set_descr->_class_name );
 
         _idispatch = object_set_vt.pdispVal;
     }
@@ -123,7 +123,7 @@ Spooler_object Object_set::get()
 
         if( obj.vt == VT_EMPTY    )  return Spooler_object(NULL);
         if( obj.vt != VT_DISPATCH
-         || obj.pdispVal == NULL  )  throw_xc( "SPOOLER-102", _object_set_descr->_class_name );
+         || obj.pdispVal == NULL  )  throw_xc( "SCHEDULER-102", _object_set_descr->_class_name );
     
         object = obj.pdispVal;
 
@@ -494,7 +494,7 @@ bool Task::has_parameters()
 
 void Task::set_history_field( const string& name, const Variant& value )
 {
-  //if( !_job->its_current_task(this) )  throw_xc( "SPOOLER-138" );
+  //if( !_job->its_current_task(this) )  throw_xc( "SCHEDULER-138" );
 
     _history.set_extra_field( name, value );
 }
@@ -1095,10 +1095,10 @@ void Task::finish()
 bool Task::wait_until_terminated( double wait_time )
 {
     Thread_id my_thread_id = current_thread_id();
-    if( my_thread_id == _thread->thread_id() )  throw_xc( "SPOOLER-125" );     // Deadlock
+    if( my_thread_id == _thread->thread_id() )  throw_xc( "SCHEDULER-125" );     // Deadlock
 
   //Spooler_thread* calling_thread = _spooler->thread_by_thread_id( my_thread_id );
-  //if( calling_thread &&  !calling_thread->_free_threading )  throw_xc( "SPOOLER-131" );
+  //if( calling_thread &&  !calling_thread->_free_threading )  throw_xc( "SCHEDULER-131" );
 
     Event event ( obj_name() + " wait_until_terminated" );
 
@@ -1133,7 +1133,7 @@ void Task::set_mail_defaults()
 
     string body = Sos_optional_date_time::now().as_string() + "\n\nJob " + _job->name() + "  " + _job->title() + "\n";
     body += "Task-Id " + as_string(id()) + ", " + as_string(_step_count) + " Schritte\n";
-    body += "Spooler -id=" + _spooler->id() + "  host=" + _spooler->_hostname + "\n\n";
+    body += "Scheduler -id=" + _spooler->id() + "  host=" + _spooler->_hostname + "\n\n";
 
     if( !is_error )
     {
@@ -1323,6 +1323,8 @@ Async_operation* Job_module_task::do_begin__start()
     //ok = load_module_instance();
     //if( !ok || has_error() )  return false;
 
+    if( !_module_instance )  throw_xc( "SCHEDULER-199" );
+
     return _module_instance->begin__start();
 }
 
@@ -1331,6 +1333,8 @@ Async_operation* Job_module_task::do_begin__start()
 bool Job_module_task::do_begin__end()
 {
     bool ok;
+
+    if( !_module_instance )  throw_xc( "SCHEDULER-199" );
 
     ok = _module_instance->begin__end();
 
@@ -1359,6 +1363,8 @@ void Job_module_task::do_end__end()
 
 Async_operation* Job_module_task::do_step__start()
 {
+    if( !_module_instance )  throw_xc( "SCHEDULER-199" );
+
     return _module_instance->step__start();
 }
 
@@ -1366,6 +1372,8 @@ Async_operation* Job_module_task::do_step__start()
 
 bool Job_module_task::do_step__end()
 {
+    if( !_module_instance )  throw_xc( "SCHEDULER-199" );
+
     return _module_instance->step__end();
 }
 
@@ -1373,6 +1381,8 @@ bool Job_module_task::do_step__end()
 
 Async_operation* Job_module_task::do_call__start( const string& method )
 {
+    if( !_module_instance )  throw_xc( "SCHEDULER-199" );
+
     return _module_instance->call__start( method );
 }
 
@@ -1380,6 +1390,8 @@ Async_operation* Job_module_task::do_call__start( const string& method )
 
 bool Job_module_task::do_call__end()
 {
+    if( !_module_instance )  throw_xc( "SCHEDULER-199" );
+
     return _module_instance->call__end();
 }
 
@@ -1387,6 +1399,8 @@ bool Job_module_task::do_call__end()
 
 Async_operation* Job_module_task::do_release__start()
 {
+    if( !_module_instance )  throw_xc( "SCHEDULER-199" );
+
     return _module_instance->release__start();
 }
 
@@ -1394,6 +1408,8 @@ Async_operation* Job_module_task::do_release__start()
 
 void Job_module_task::do_release__end()
 {
+    if( !_module_instance )  throw_xc( "SCHEDULER-199" );
+
     _module_instance->release__end();
 }
 
@@ -1519,7 +1535,7 @@ void Process_task::do_end__end()
     {
         try
         {
-            throw_xc( "SPOOLER-126", exit_code );
+            throw_xc( "SCHEDULER-126", exit_code );
         }
         catch( const exception& x )
         {
@@ -1744,12 +1760,12 @@ void Process_task::do_end__end()
         if( _process_handle._pid )
         {
             do_step__end();      // waitpid() sollte schon gerufen sein. 
-            if( _process_handle._pid )   throw_xc( "SPOOLER-179", _process_handle._pid );       // Sollte nicht passieren (ein Zombie wird stehen bleiben)
+            if( _process_handle._pid )   throw_xc( "SCHEDULER-179", _process_handle._pid );       // Sollte nicht passieren (ein Zombie wird stehen bleiben)
         }
 
         _process_handle.close();
 
-        if( _process_handle._process_signaled )  throw_xc( "SPOOLER-181", _process_handle._process_signaled );
+        if( _process_handle._process_signaled )  throw_xc( "SCHEDULER-181", _process_handle._process_signaled );
 
         int exit_code = _process_handle._process_exit_code;
 
@@ -1763,7 +1779,7 @@ void Process_task::do_end__end()
     {
         try
         {
-            throw_xc( "SPOOLER-126", exit_code );
+            throw_xc( "SCHEDULER-126", exit_code );
         }
         catch( const exception& x )
         {

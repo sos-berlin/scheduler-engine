@@ -1,4 +1,4 @@
-// $Id: spooler_order.cxx,v 1.41 2003/10/06 13:35:02 jz Exp $
+// $Id: spooler_order.cxx,v 1.42 2003/10/08 11:45:06 jz Exp $
 /*
     Hier sind implementiert
 
@@ -28,7 +28,7 @@ void Spooler::add_job_chain( Job_chain* job_chain )
         job_chain->finish();   // Jobkette prüfen und in Ordnung bringen
 
         string lname = lcase( job_chain->name() );
-        if( _job_chain_map.find( lname ) != _job_chain_map.end() )  throw_xc( "SPOOLER-160", lname );
+        if( _job_chain_map.find( lname ) != _job_chain_map.end() )  throw_xc( "SCHEDULER-160", lname );
 
         _job_chain_map[lname] = job_chain;
     }
@@ -63,7 +63,7 @@ Job_chain* Spooler::job_chain( const string& name )
         string lname = lcase( name );
     
         Job_chain_map::iterator it = _job_chain_map.find( lname );
-        if( it == _job_chain_map.end() )  throw_xc( "SPOOLER-161", lname );
+        if( it == _job_chain_map.end() )  throw_xc( "SCHEDULER-161", lname );
 
         result = it->second;
     }
@@ -210,9 +210,9 @@ void Job_chain::load_orders_from_database()
 
 void Job_chain::add_job( Job* job, const Order::State& state, const Order::State& next_state, const Order::State& error_state )
 {
-    if( job  &&  !job->order_queue() )  throw_xc( "SPOOLER-147", job->name() );
+    if( job  &&  !job->order_queue() )  throw_xc( "SCHEDULER-147", job->name() );
 
-    if( _finished )  throw_xc( "SPOOLER-148" );
+    if( _finished )  throw_xc( "SCHEDULER-148" );
 
     ptr<Job_chain_node> node = new Job_chain_node;
 
@@ -232,7 +232,7 @@ void Job_chain::add_job( Job* job, const Order::State& state, const Order::State
         if( node_from_state_or_null( node->_state ) )  
         {
             if( !job  &&  next_state.is_error()  &&  error_state.is_error() )  return;     // job_chain.add_end_state() darf mehrfach gerufen werden.
-            throw_xc( "SPOOLER-150", debug_string_from_variant(node->_state), name() );
+            throw_xc( "SCHEDULER-150", debug_string_from_variant(node->_state), name() );
         }
 
         _chain.push_back( node );
@@ -286,7 +286,7 @@ Job_chain_node* Job_chain::node_from_job( Job* job )
         }
     }
 
-    throw_xc( "SPOOLER-152", job->name(), name() );
+    throw_xc( "SCHEDULER-152", job->name(), name() );
     return NULL;
 }
 
@@ -295,7 +295,7 @@ Job_chain_node* Job_chain::node_from_job( Job* job )
 Job_chain_node* Job_chain::node_from_state( const State& state )
 {
     Job_chain_node* result = node_from_state_or_null( state );
-    if( !result )  throw_xc( "SPOOLER-149", name(), debug_string_from_variant(state) );
+    if( !result )  throw_xc( "SCHEDULER-149", name(), debug_string_from_variant(state) );
     return result;
 }
 
@@ -331,7 +331,7 @@ ptr<Order> Job_chain::order( const Order::Id& id )
             }
         }
 
-        throw_xc( "SPOOLER-162", debug_string_from_variant(id), _name );
+        throw_xc( "SCHEDULER-162", debug_string_from_variant(id), _name );
     }
 
     return NULL;
@@ -364,7 +364,7 @@ void Job_chain::register_order( Order* order )
     {
         string id_string = string_from_variant( order->id() );
         Order_map::iterator it = _order_map.find( id_string );
-        if( it != _order_map.end() )  throw_xc( "SPOOLER-186", id_string, _name );
+        if( it != _order_map.end() )  throw_xc( "SCHEDULER-186", id_string, _name );
         _order_map[ id_string ] = order;
     }
 }
@@ -548,7 +548,7 @@ void Order_queue::remove_order( Order* order )
             Queue::iterator it;
             for( it = _setback_queue.begin(); it != _setback_queue.end(); it++ )  if( *it == order )  break;
 
-            if( it == _setback_queue.end() )  throw_xc( "SPOOLER-156", order->obj_name(), _job->name() );
+            if( it == _setback_queue.end() )  throw_xc( "SCHEDULER-156", order->obj_name(), _job->name() );
 
             _setback_queue.erase( it );
 
@@ -561,7 +561,7 @@ void Order_queue::remove_order( Order* order )
             Queue::iterator it;
             for( it = _queue.begin(); it != _queue.end(); it++ )  if( *it == order )  break;
 
-            if( it == _queue.end() )  throw_xc( "SPOOLER-156", order->obj_name(), _job->name() );
+            if( it == _queue.end() )  throw_xc( "SCHEDULER-156", order->obj_name(), _job->name() );
 
             _queue.erase( it );
         //_id_map.erase( order->_id );
@@ -819,7 +819,7 @@ Order_queue* Order::order_queue()
 {
     Job* job = this->job();
 
-    if( !job )  throw_xc( "SPOOLER-163" );
+    if( !job )  throw_xc( "SCHEDULER-163" );
 
     return job->order_queue();
 }
@@ -837,7 +837,7 @@ void Order::set_id( const Order::Id& id )
 { 
     THREAD_LOCK(_lock)
     {
-        if( _id_locked )  throw_xc( "SPOOLER-159" );
+        if( _id_locked )  throw_xc( "SCHEDULER-159" );
 
         _id = id; 
         _is_users_id = true;
@@ -866,7 +866,7 @@ void Order::set_job( Job* job )
 {
     THREAD_LOCK( _lock )
     {
-        if( !_job_chain )  throw_xc( "SPOOLER-157", obj_name() );
+        if( !_job_chain )  throw_xc( "SCHEDULER-157", obj_name() );
         
         move_to_node( _job_chain->node_from_job( job ) );       // Fehler, wenn Job nicht in der Jobkette
     }
@@ -901,7 +901,7 @@ void Order::set_state( const State& state )
 {
     THREAD_LOCK( _lock )
     {
-        //if( _setback )  throw_xc( "SPOOLER-188" );
+        //if( _setback )  throw_xc( "SCHEDULER-188" );
         _setback = 0;
         _setback_count = 0;
 
@@ -968,7 +968,7 @@ void Order::add_to_job( const string& job_name )
     THREAD_LOCK( _lock )
     {
         ptr<Order_queue> order_queue = _spooler->get_job( job_name )->order_queue();
-        if( !order_queue )  throw_xc( "SPOOLER-147", job_name );
+        if( !order_queue )  throw_xc( "SCHEDULER-147", job_name );
         add_to_order_queue( order_queue );
     }
 }
@@ -977,7 +977,7 @@ void Order::add_to_job( const string& job_name )
 
 void Order::add_to_order_queue( Order_queue* order_queue )
 {
-    if( !order_queue )  throw_xc( "SPOOLER-147", "?" );
+    if( !order_queue )  throw_xc( "SCHEDULER-147", "?" );
 
     THREAD_LOCK( _lock )
     {
@@ -1022,7 +1022,7 @@ void Order::remove_from_job_chain()
 
 void Order::add_to_job_chain( Job_chain* job_chain )
 {
-    if( !job_chain->finished() )  throw_xc( "SPOOLER-151" );
+    if( !job_chain->finished() )  throw_xc( "SCHEDULER-151" );
 
     THREAD_LOCK( _lock )
     {
@@ -1040,7 +1040,7 @@ void Order::add_to_job_chain( Job_chain* job_chain )
             //Z_DEBUG_ONLY( LOG( "job_chain->node_from_state()\n" ); )
             Job_chain_node* node = job_chain->node_from_state( _state );
 
-            if( !node->_job  || !node->_job->order_queue() )  throw_xc( "SPOOLER-149", job_chain->name(), debug_string_from_variant(_state) );
+            if( !node->_job  || !node->_job->order_queue() )  throw_xc( "SCHEDULER-149", job_chain->name(), debug_string_from_variant(_state) );
             //Z_DEBUG_ONLY( LOG( "node->_job->order_queue()->add_order()\n" ); )
             node->_job->order_queue()->add_order( this );
 
@@ -1058,7 +1058,7 @@ void Order::move_to_node( Job_chain_node* node )
 {
     THREAD_LOCK( _lock )
     {
-        if( !_job_chain )  throw_xc( "SPOOLER-157", obj_name() );
+        if( !_job_chain )  throw_xc( "SCHEDULER-157", obj_name() );
 
         _moved = true;
         _task = NULL;
@@ -1171,9 +1171,9 @@ void Order::setback_()
 {
     THREAD_LOCK( _lock )
     {
-        if( !_task      )  throw_xc( "SPOOLER-187" );
-        if( _moved      )  throw_xc( "SPOOLER-188", obj_name() );
-        if( !_job_chain )  throw_xc( "SPOOLER-157", obj_name() );
+        if( !_task      )  throw_xc( "SCHEDULER-187" );
+        if( _moved      )  throw_xc( "SCHEDULER-188", obj_name() );
+        if( !_job_chain )  throw_xc( "SCHEDULER-157", obj_name() );
 
         order_queue()->remove_order( this );
 

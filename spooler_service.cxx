@@ -1,4 +1,4 @@
-// $Id: spooler_service.cxx,v 1.42 2003/09/04 15:53:08 jz Exp $
+// $Id: spooler_service.cxx,v 1.43 2003/10/08 11:45:06 jz Exp $
 /*
     Hier sind implementiert
 
@@ -107,7 +107,7 @@ string make_service_display( const string& id )
 
 static void event_log( const string& msg_par, int argc, char** argv, Spooler* spooler = NULL )
 {
-    string msg = "***DOCUMENTFACTORY SPOOLER*** " + msg_par;
+    string msg = "*** SOS SCHEDULER *** " + msg_par;
 
     HANDLE h = RegisterEventSource( NULL, "Application" );
     const char* m = msg.c_str();
@@ -424,7 +424,7 @@ static uint __stdcall self_destruction_thread( void* param )
 /*      Lieber kein Log, denn das hat eine Sempahore.
         try 
         { 
-            LOG( "... Selbstzerstörung. Weil der Spooler nicht zum Ende kommt, wird der Prozess jetzt abgebrochen\n" ); 
+            LOG( "... Selbstzerstörung. Weil der Scheduler nicht zum Ende kommt, wird der Prozess jetzt abgebrochen\n" ); 
 
             //BOOL ok = TerminateThread( thread_handle, 999 );
             //if( ok )  sos_sleep( 3 );
@@ -565,7 +565,7 @@ static uint __stdcall service_thread( void* param )
 
         try
         {
-            LOG( "Spooler launch\n" );
+            LOG( "Scheduler launch\n" );
 
             ret = spooler_ptr->launch( p->_argc, p->_argv, "" );
         }

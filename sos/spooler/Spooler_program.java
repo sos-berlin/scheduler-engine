@@ -4,7 +4,7 @@ package sos.spooler;
 
 /**
  * @author Joacim Zschimmer, Zschimmer GmbH
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 
 public class Spooler_program
@@ -16,6 +16,6 @@ public class Spooler_program
 
     static
     {
-        System.loadLibrary( "spooler" );
+        System.loadLibrary( "scheduler" );
     }
 }

@@ -1,4 +1,4 @@
-// $Id: spooler_security.cxx,v 1.2 2002/09/11 10:05:15 jz Exp $
+// $Id: spooler_security.cxx,v 1.3 2003/10/08 11:45:06 jz Exp $
 
 #include "spooler.h"
 
@@ -33,7 +33,7 @@ Security::Level Security::as_level( const string& name )
     if( name == "info"   )  return seclev_info;
     if( name == "all"    )  return seclev_all;
 
-    throw_xc( "SPOOLER-119", name ); return seclev_none;
+    throw_xc( "SCHEDULER-119", name ); return seclev_none;
 }
 
 //-------------------------------------------------------------------------------------------------

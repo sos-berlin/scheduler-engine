@@ -1,4 +1,4 @@
-// $Id: spooler_module_com.cxx,v 1.21 2003/09/05 11:16:19 jz Exp $
+// $Id: spooler_module_com.cxx,v 1.22 2003/10/08 11:45:06 jz Exp $
 /*
     Hier sind implementiert
 
@@ -284,7 +284,7 @@ void Scripting_engine_module_instance::add_obj( const ptr<IDispatch>& object, co
 
 void Scripting_engine_module_instance::load()
 {
-    if( _script_site->_engine_name != _module->_language )  throw_xc( "SPOOLER-117" );
+    if( _script_site->_engine_name != _module->_language )  throw_xc( "SCHEDULER-117" );
 
 /*
     if( _com_context->_log     )  _script_site->add_obj( _com_context->_log    , Bstr("spooler_log"    ) );

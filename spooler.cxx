@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.271 2003/10/08 11:00:15 jz Exp $
+// $Id: spooler.cxx,v 1.272 2003/10/08 11:45:05 jz Exp $
 /*
     Hier sind implementiert
 
@@ -120,7 +120,7 @@ static void send_error_email( const string& subject, const string& body )
 void send_error_email( const string& error_text, int argc, char** argv, const string& parameter_line, Spooler* spooler )
 {
 
-    string body = "Der Spooler konnte nicht gestartet werden.\n"
+    string body = "Der Scheduler konnte nicht gestartet werden.\n"
                   "\n"
                   "\n"
                   "Der Aufruf war:\n"
@@ -133,7 +133,7 @@ void send_error_email( const string& error_text, int argc, char** argv, const st
             "Fehlermeldung:\n";
     body += error_text;
 
-    string subject = "FEHLER BEI SPOOLER-START: " + error_text;
+    string subject = "FEHLER BEI SCHEDULER-START: " + error_text;
 
     if( spooler )  spooler->send_error_email( subject, body );
              else           send_error_email( subject, body );
@@ -200,7 +200,7 @@ With_log_switch read_profile_with_log( const string& profile, const string& sect
         {
             ctrl_c_pressed++;
             //Kein Systemaufruf hier! (Aber bei Ctrl-C riskieren wir einen Absturz. Ich will diese Meldung sehen.)
-            fprintf( stderr, "Spooler wird wegen Ctrl-C beendet ...\n" );
+            fprintf( stderr, "Scheduler wird wegen Ctrl-C beendet ...\n" );
             if( spooler_ptr )  spooler_ptr->async_signal( "Ctrl+C" );
             return true;
         }
@@ -218,7 +218,7 @@ With_log_switch read_profile_with_log( const string& profile, const string& sect
         //{
             ctrl_c_pressed++;
             //Kein Systemaufruf hier! (Aber bei Ctrl-C riskieren wir einen Absturz. Ich will diese Meldung sehen.)
-            if( !is_daemon )  fprintf( stderr, "Spooler wird wegen kill -%d beendet ...\n", sig );
+            if( !is_daemon )  fprintf( stderr, "Scheduler wird wegen kill -%d beendet ...\n", sig );
 
             // pthread_mutex_lock:
             // The  mutex  functions  are  not  async-signal  safe.  What  this  means  is  that  they
@@ -542,7 +542,7 @@ Process_class* Spooler::process_class_or_null( const string& name )
 Process_class* Spooler::process_class( const string& name )
 {
     Process_class* pc = process_class_or_null( name );
-    if( !pc )  throw_xc( "SPOOLER-195", name );
+    if( !pc )  throw_xc( "SCHEDULER-195", name );
     return pc;
 }
 
@@ -727,7 +727,7 @@ void Spooler::signal_threads( const string& signal_name )
 Spooler_thread* Spooler::get_thread( const string& thread_name )
 {
     Spooler_thread* thread = get_thread_or_null( thread_name );
-    if( !thread )  throw_xc( "SPOOLER-128", thread_name );
+    if( !thread )  throw_xc( "SCHEDULER-128", thread_name );
 
     return thread;
 }
@@ -751,7 +751,7 @@ Spooler_thread* Spooler::get_thread_or_null( const string& thread_name )
 Object_set_class* Spooler::get_object_set_class( const string& name )
 {
     Object_set_class* c = get_object_set_class_or_null( name );
-    if( !c )  throw_xc( "SPOOLER-101", name );
+    if( !c )  throw_xc( "SCHEDULER-101", name );
     return c;
 }
 
@@ -778,7 +778,7 @@ void Spooler::add_job( const Sos_ptr<Job>& job )
     THREAD_LOCK( _lock )
     {
         Job* j = get_job_or_null( job->name() );
-        if( j )  throw_xc( "SPOOLER-130", j->name() );
+        if( j )  throw_xc( "SCHEDULER-130", j->name() );
 
         _job_list.push_back( job );
     }
@@ -790,7 +790,7 @@ void Spooler::add_job( const Sos_ptr<Job>& job )
 Job* Spooler::get_job( const string& job_name )
 {
     Job* job = get_job_or_null( job_name );
-    if( !job  ||  !job->state() )  throw_xc( "SPOOLER-108", job_name );
+    if( !job  ||  !job->state() )  throw_xc( "SCHEDULER-108", job_name );
     return job;
 }
 
@@ -1169,7 +1169,7 @@ void Spooler::load_arg()
     _include_path               = subst_env( read_profile_string    ( _factory_ini, "spooler", "include_path"       , _include_path ) );   _include_path_as_option_set  = !_include_path.empty();
     _spooler_param              =            read_profile_string    ( _factory_ini, "spooler", "param"              );                   _spooler_param_as_option_set = !_spooler_param.empty();
     log_level                   =            read_profile_string    ( _factory_ini, "spooler", "log_level"          , log_level );   
-    _job_history_tablename      =            read_profile_string    ( _factory_ini, "spooler", "db_history_table"   , "SPOOLER_HISTORY"   );
+    _job_history_tablename      =            read_profile_string    ( _factory_ini, "spooler", "db_history_table"   , "SCHEDULER_HISTORY"   );
     _job_history_columns        =            read_profile_string    ( _factory_ini, "spooler", "history_columns"    );
     _job_history_yes            =            read_profile_bool      ( _factory_ini, "spooler", "history"            , true );
     _job_history_on_process     =            read_profile_history_on_process( _factory_ini, "spooler", "history_on_process", 0 );
@@ -1179,9 +1179,9 @@ void Spooler::load_arg()
     _order_history_with_log     =            read_profile_with_log  ( _factory_ini, "spooler", "order_history_with_log", arc_no );
     _db_name                    =            read_profile_string    ( _factory_ini, "spooler", "db"                 );
     _need_db                    =            read_profile_bool      ( _factory_ini, "spooler", "need_db"            , true                );
-    _order_history_tablename    =            read_profile_string    ( _factory_ini, "spooler", "db_order_history_table", "SPOOLER_ORDER_HISTORY" );
-    _orders_tablename           =            read_profile_string    ( _factory_ini, "spooler", "db_orders_table"    , "SPOOLER_ORDERS"    );
-    _variables_tablename        =            read_profile_string    ( _factory_ini, "spooler", "db_variables_table" , "SPOOLER_VARIABLES" );
+    _order_history_tablename    =            read_profile_string    ( _factory_ini, "spooler", "db_order_history_table", "SCHEDULER_ORDER_HISTORY" );
+    _orders_tablename           =            read_profile_string    ( _factory_ini, "spooler", "db_orders_table"    , "SCHEDULER_ORDERS"    );
+    _variables_tablename        =            read_profile_string    ( _factory_ini, "spooler", "db_variables_table" , "SCHEDULER_VARIABLES" );
 
 
     _mail_on_error   =            read_profile_bool           ( _factory_ini, "spooler", "mail_on_error"  , _mail_on_error );
@@ -1238,7 +1238,7 @@ void Spooler::load_arg()
             else
             if( opt.with_value( "job"              ) )  _job_name = opt.value();        // Nicht von SOS beauftragt
             else
-            if( opt.with_value( "program-file"     ) )  _my_program_filename = opt.value();        // ...\spooler.exe
+            if( opt.with_value( "program-file"     ) )  _my_program_filename = opt.value();        // .../scheduler.exe
             else
             if( opt.with_value( "send-cmd"         ) )  _send_cmd = opt.value();
             else
@@ -1247,7 +1247,7 @@ void Spooler::load_arg()
                 throw_sos_option_error( opt );
         }
 
-        _temp_dir = subst_env( read_profile_string( _factory_ini, "spooler", "tmp", get_temp_path() + Z_DIR_SEPARATOR "spooler" ) );
+        _temp_dir = subst_env( read_profile_string( _factory_ini, "spooler", "tmp", get_temp_path() + Z_DIR_SEPARATOR "scheduler" ) );
         _temp_dir = replace_regex( _temp_dir, "[\\/]+", Z_DIR_SEPARATOR );
         _temp_dir = replace_regex( _temp_dir, "\\" Z_DIR_SEPARATOR "$", "" );
         if( _spooler_id != "" )  _temp_dir += Z_DIR_SEPARATOR + _spooler_id;
@@ -1258,7 +1258,7 @@ void Spooler::load_arg()
         _log_level = make_log_level( log_level );
 
         if( _log_level <= log_debug_spooler )  _debug = true;
-        if( _config_filename.empty() )  throw_xc( "SPOOLER-115" );
+        if( _config_filename.empty() )  throw_xc( "SCHEDULER-115" );
 
         string java_work_dir = temp_dir() + Z_DIR_SEPARATOR "java";
         _java_vm->set_work_dir( java_work_dir );
@@ -1338,7 +1338,7 @@ void Spooler::start()
     _base_log.set_directory( _log_directory );
     _base_log.open_new();
     
-    _log.info( string( "Spooler (" VER_PRODUCTVERSION_STR ) + ") startet mit " + _config_filename );
+    _log.info( string( "Scheduler (" VER_PRODUCTVERSION_STR ) + ") startet mit " + _config_filename );
 
 
     if( _has_java ) 
@@ -1353,7 +1353,7 @@ void Spooler::start()
         catch( const exception& x )
         {
             _log.error( x.what() );
-            _log.error( "Java kann nicht gestartet werden. Spooler startet ohne Java." );
+            _log.error( "Java kann nicht gestartet werden. Scheduler startet ohne Java." );
         }
     }
 
@@ -1389,7 +1389,7 @@ void Spooler::start()
     if( _module.set() )
     {
         _module_instance = _module.create_instance();
-      //_module_instance->_title = "Spooler-Script";
+      //_module_instance->_title = "Scheduler-Script";
         _module_instance->init();
 
         _module_instance->add_obj( (IDispatch*)_com_spooler, "spooler"     );
@@ -1399,7 +1399,7 @@ void Spooler::start()
         _module_instance->start();
 
         bool ok = check_result( _module_instance->call_if_exists( "spooler_init()Z" ) );
-        if( !ok )  throw_xc( "SPOOLER-183" );
+        if( !ok )  throw_xc( "SCHEDULER-183" );
     }
 
     init_process_classes();
@@ -1565,7 +1565,7 @@ void Spooler::run()
         {
             bool valid_thread = false;
             FOR_EACH( Thread_list, _thread_list, it )  valid_thread |= !(*it)->terminated();
-            if( !valid_thread )  { _log.info( "Kein Thread vorhanden. Spooler wird beendet." ); break; }
+            if( !valid_thread )  { _log.info( "Kein Thread vorhanden. Der Scheduler wird beendet." ); break; }
         }
 
 
@@ -1662,13 +1662,13 @@ void Spooler::run()
         if( ++throttle_loop_count > 1000 )
         {
 #           ifndef Z_WINDOWS
-                LOG( "Spooler wird gedrosselt... something_done=" << something_done << " _next_time=" << _next_time.as_string() << "\n\n" );
+                LOG( "Scheduler wird gedrosselt... something_done=" << something_done << " _next_time=" << _next_time.as_string() << "\n\n" );
                 sos_sleep(0.1);                             // Erstmal alle 20 Durchläufe bremsen!
 #           endif
 
             if( Time::now() < throttle_time + 0.1 )
             {
-                LOG( "Spooler wird gedrosselt... something_done=" << something_done << " _next_time=" << _next_time.as_string() << "\n\n" );
+                LOG( "Scheduler wird gedrosselt... something_done=" << something_done << " _next_time=" << _next_time.as_string() << "\n\n" );
                 sos_sleep(0.1);                         // Bei mehr als 1000 Schritten in 100ms
             }
 
@@ -1701,7 +1701,7 @@ void Spooler::run()
 
         if( ctrl_c_pressed && _state != s_stopping )
         {
-            _log.warn( "Abbruch-Signal (Ctrl-C) empfangen. Der Spooler wird beendet.\n" );
+            _log.warn( "Abbruch-Signal (Ctrl-C) empfangen. Der Scheduler wird beendet.\n" );
             _state_cmd = sc_terminate;
         }
 
@@ -1793,7 +1793,7 @@ int Spooler::launch( int argc, char** argv, const string& parameter_line )
     _parameter_line = parameter_line;
 
 
-    if( !SOS_LICENCE( licence_spooler ) )  throw_xc( "SOS-1000", "Spooler" );
+    if( !SOS_LICENCE( licence_scheduler ) )  throw_xc( "SOS-1000", "Scheduler" );
 
     tzset();
 
@@ -1805,7 +1805,7 @@ int Spooler::launch( int argc, char** argv, const string& parameter_line )
 
     //spooler_is_running = true;
 
-    _event.set_name( "Spooler" );
+    _event.set_name( "Scheduler" );
     _event.set_waiting_thread_id( current_thread_id() );
     _event.create();
     _event.add_to( &_wait_handles );
@@ -1819,7 +1819,7 @@ int Spooler::launch( int argc, char** argv, const string& parameter_line )
 
         THREAD_LOCK( _lock )  
         {
-            if( _config_element_to_load == NULL )  throw_xc( "SPOOLER-116", _spooler_id );
+            if( _config_element_to_load == NULL )  throw_xc( "SCHEDULER-116", _spooler_id );
 
             load_config( _config_element_to_load, _config_element_mod_time, _config_source_filename );
 
@@ -1838,7 +1838,7 @@ int Spooler::launch( int argc, char** argv, const string& parameter_line )
 
     //_java_vm->close();
 
-    _log.info( "Spooler ordentlich beendet." );
+    _log.info( "Scheduler ordentlich beendet." );
 
     if( _pid_filename != "" )  unlink( _pid_filename.c_str() );
 
@@ -1934,12 +1934,12 @@ void spooler_restart( Log* log, bool is_service )
         {
             // Programmdateinamen aus command_line ersetzen
             int pos;
-            if( command_line.length() == 0 )  throw_xc( "SPOOLER-COMMANDLINE" );
+            if( command_line.length() == 0 )  throw_xc( "SCHEDULER-COMMANDLINE" );
             if( command_line[0] == '"' ) {
-                pos = command_line.find( '"', 1 );  if( pos == string::npos )  throw_xc( "SPOOLER-COMMANDLINE" );
+                pos = command_line.find( '"', 1 );  if( pos == string::npos )  throw_xc( "SCHEDULER-COMMANDLINE" );
                 pos++;                
             } else {
-                pos = command_line.find( ' ' );  if( pos == string::npos )  throw_xc( "SPOOLER-COMMANDLINE" );
+                pos = command_line.find( ' ' );  if( pos == string::npos )  throw_xc( "SCHEDULER-COMMANDLINE" );
             }
 
             command_line = new_spooler + command_line.substr(pos);
@@ -1953,7 +1953,7 @@ void spooler_restart( Log* log, bool is_service )
         if( is_service )  command_line += " -renew-service";
 
         command_line += " -renew-spooler=" + quoted_string(this_spooler,'"','"');
-        if( log )  log->info( "Restart Spooler  " + command_line );
+        if( log )  log->info( "Restart Scheduler " + command_line );
         start_process( command_line );
 
 #   else
@@ -2027,7 +2027,7 @@ static void spooler_renew( const string& service_name, const string& renew_spool
             sos_sleep( renew_wait_interval );
         }
 
-        if( !is_service )  fprintf( stderr, "Der Spooler ist ausgetauscht und wird neu gestartet\n\n" );
+        if( !is_service )  fprintf( stderr, "Der Scheduler ist ausgetauscht und wird neu gestartet\n\n" );
     }
 
     if( is_service )  spooler::service_start( service_name );
@@ -2131,7 +2131,7 @@ int object_server( int argc, char** argv )
 
 int spooler_main( int argc, char** argv, const string& parameter_line )
 {
-    LOG( "Spooler " VER_PRODUCTVERSION_STR "\n" );
+    LOG( "Scheduler " VER_PRODUCTVERSION_STR "\n" );
 
     int  ret        = 99;
     bool is_service = false;
@@ -2172,7 +2172,7 @@ int spooler_main( int argc, char** argv, const string& parameter_line )
             else
             if( opt.with_value( "title"            ) )  ;                               // Damit der Aufrufer einen Kommentar für ps übergeben kann (für -object-server)
             else
-            if( opt.flag      ( "V"                ) )  fprintf( stderr, "Spooler %s\n", VER_PRODUCTVERSION_STR );
+            if( opt.flag      ( "V"                ) )  fprintf( stderr, "Scheduler %s\n", VER_PRODUCTVERSION_STR );
             else
             {
                 if( opt.flag      ( "install-service"  ) )  do_install_service = opt.set();
@@ -2276,7 +2276,7 @@ int spooler_main( int argc, char** argv, const string& parameter_line )
             {
                 spooler::is_daemon = true;
 
-                LOG( "Spooler wird Daemon. Pid wechselt\n");
+                LOG( "Scheduler wird Daemon. Pid wechselt\n");
                 spooler::be_daemon();
             }
 
@@ -2321,7 +2321,7 @@ extern "C" BOOL WINAPI _DllMainCRTStartup( HANDLE hDllHandle, DWORD dwReason, LP
 
 extern "C" int __stdcall entry_point( HANDLE hDllHandle, DWORD dwReason, LPVOID lpreserved )
 {
-    MessageBox( NULL, "Hier ist der Spooler!", "Spooler", 0 );
+    MessageBox( NULL, "Hier ist der Scheduler!", "Scheduler", 0 );
 
     //return mainCRTStartup();
     return _DllMainCRTStartup( hDllHandle, dwReason, lpreserved );

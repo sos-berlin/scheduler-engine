@@ -1,4 +1,4 @@
-// $Id: spooler_module_remote_server.cxx,v 1.28 2003/09/27 18:54:11 jz Exp $
+// $Id: spooler_module_remote_server.cxx,v 1.29 2003/10/08 11:45:06 jz Exp $
 /*
     Hier sind implementiert
 
@@ -57,7 +57,7 @@ void Remote_module_instance_server::load_implicitly()
 {
     if( !_loaded_and_started )
     {
-        if( _load_error )  throw_xc( "SPOOLER-185" );
+        if( _load_error )  throw_xc( "SCHEDULER-185" );
 
         _load_error = true;
         

@@ -1,4 +1,4 @@
-// $Id: spooler_thread.cxx,v 1.104 2003/10/07 08:36:01 jz Exp $
+// $Id: spooler_thread.cxx,v 1.105 2003/10/08 11:45:06 jz Exp $
 /*
     Hier sind implementiert
 
@@ -156,7 +156,7 @@ void Spooler_thread::start( Event* event_destination )
             _module_instance->start();
 
             bool ok = check_result( _module_instance->call_if_exists( "spooler_init()Z" ) );
-            if( !ok )  throw_xc( "SPOOLER-127" );
+            if( !ok )  throw_xc( "SCHEDULER-127" );
         }
 */
 
@@ -738,7 +738,7 @@ void Spooler_thread::start_thread()
 
 #   else
 
-       throw_xc( "SPOOLER-180", "free threading" );
+       throw_xc( "SCHEDULER-180", "free threading" );
 
 #   endif
 }

@@ -1,4 +1,4 @@
-// $Id: spooler_com.cxx,v 1.112 2003/10/07 08:36:01 jz Exp $
+// $Id: spooler_com.cxx,v 1.113 2003/10/08 11:45:05 jz Exp $
 /*
     Hier sind implementiert
 
@@ -195,7 +195,7 @@ Com_variable::Com_variable( const BSTR name, const VARIANT& value )
 :
     Sos_ole_object( variable_class_ptr, (Ivariable*)this )
 {
-    if( SysStringLen( name ) == 0 )  throw_xc( "SPOOLER-198" );
+    if( SysStringLen( name ) == 0 )  throw_xc( "SCHEDULER-198" );
 
     THREAD_LOCK( _lock )
     {
@@ -607,7 +607,7 @@ STDMETHODIMP Com_variable_set::put_xml( BSTR xml_text )
                 if( FAILED( hr ) )  break;
             }
             else
-                throw_xc( "SPOOLER-182" );
+                throw_xc( "SCHEDULER-182" );
         }
 
     }
@@ -1423,7 +1423,7 @@ STDMETHODIMP Com_job::put_state_text( BSTR text )
     THREAD_LOCK( _lock )
     try
     {
-        if( !_job )  throw_xc( "SPOOLER-122" );
+        if( !_job )  throw_xc( "SCHEDULER-122" );
       //if( current_thread_id() != _job->thread()->thread_id() )  return E_ACCESSDENIED;
 
         _job->set_state_text( bstr_as_string( text ) );
@@ -1443,7 +1443,7 @@ STDMETHODIMP Com_job::get_title( BSTR* title )
     THREAD_LOCK( _lock )
     try
     {
-        if( !_job )  throw_xc( "SPOOLER-122" );
+        if( !_job )  throw_xc( "SCHEDULER-122" );
 
         *title = SysAllocString_string( _job->title() );
     }
@@ -1462,7 +1462,7 @@ STDMETHODIMP Com_job::put_delay_after_error( int error_steps, VARIANT* time )
     THREAD_LOCK( _lock )
     try
     {
-        if( !_job )  throw_xc( "SPOOLER-122" );
+        if( !_job )  throw_xc( "SCHEDULER-122" );
 
         _job->set_delay_after_error( error_steps, time_from_variant(*time) );
     }
@@ -1481,7 +1481,7 @@ STDMETHODIMP Com_job::get_order_queue( Iorder_queue** result )
     THREAD_LOCK( _lock )
     try
     {
-        if( !_job )  throw_xc( "SPOOLER-122" );
+        if( !_job )  throw_xc( "SCHEDULER-122" );
 
         *result = _job->order_queue();
         if( *result )  (*result)->AddRef();
@@ -1501,7 +1501,7 @@ STDMETHODIMP Com_job::put_delay_order_after_setback( int setback_number, VARIANT
     THREAD_LOCK( _lock )
     try
     {
-        if( !_job )  throw_xc( "SPOOLER-122" );
+        if( !_job )  throw_xc( "SCHEDULER-122" );
 
         _job->set_delay_order_after_setback( setback_number, time_from_variant(*time) );
     }
@@ -1520,7 +1520,7 @@ STDMETHODIMP Com_job::put_max_order_setbacks( int count )
     THREAD_LOCK( _lock )
     try
     {
-        if( !_job )  throw_xc( "SPOOLER-122" );
+        if( !_job )  throw_xc( "SCHEDULER-122" );
 
         _job->set_max_order_setbacks( count );
     }
@@ -1600,7 +1600,7 @@ STDMETHODIMP Com_task::get_object_set( Iobject_set** result )
     THREAD_LOCK( _lock )
     try
     {
-        if( !_task )  throw_xc( "SPOOLER-122" );
+        if( !_task )  throw_xc( "SCHEDULER-122" );
         if( !_task->thread()  ||  current_thread_id() != _task->thread()->thread_id() )  return E_ACCESSDENIED;
 
         if( !_task->_job->object_set_descr() )  return E_ACCESSDENIED;
@@ -1623,14 +1623,14 @@ STDMETHODIMP Com_task::put_error( VARIANT* error_par )
     THREAD_LOCK( _lock )
     try
     {
-        if( !_task )  throw_xc( "SPOOLER-122" );
+        if( !_task )  throw_xc( "SCHEDULER-122" );
         if( !_task->thread()  ||  current_thread_id() != _task->thread()->thread_id() )  return E_ACCESSDENIED;
 
         Variant error_vt = *error_par;
         hr = error_vt.ChangeType( VT_BSTR );        if( FAILED(hr) )  return hr;
 
         string error_text = bstr_as_string( error_vt.bstrVal );
-        _task->set_error( Xc( "SPOOLER-120", error_text.c_str() ) );
+        _task->set_error( Xc( "SCHEDULER-120", error_text.c_str() ) );
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Task::error" ); }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Task::error" ); }
@@ -1647,7 +1647,7 @@ STDMETHODIMP Com_task::get_error( Ierror** result )
     THREAD_LOCK( _lock )
     try
     {
-        if( !_task )  throw_xc( "SPOOLER-122" );
+        if( !_task )  throw_xc( "SCHEDULER-122" );
 
         THREAD_LOCK( _task->_lock )  *result = new Com_error( _task->error() );
         (*result)->AddRef();
@@ -1667,7 +1667,7 @@ STDMETHODIMP Com_task::get_job( Ijob** result )
     THREAD_LOCK( _lock )
     try
     {
-        if( !_task )  throw_xc( "SPOOLER-122" );
+        if( !_task )  throw_xc( "SCHEDULER-122" );
 
         *result = _task->_job->com_job();
         if( *result )  (*result)->AddRef();
@@ -1687,7 +1687,7 @@ STDMETHODIMP Com_task::get_params( Ivariable_set** result )
     THREAD_LOCK( _lock )
     try
     {
-        if( !_task )  throw_xc( "SPOOLER-122" );
+        if( !_task )  throw_xc( "SCHEDULER-122" );
 
         *result = _task->_params;
         if( *result )  (*result)->AddRef();
@@ -1742,9 +1742,9 @@ STDMETHODIMP Com_task::put_result( VARIANT* value )
     THREAD_LOCK( _lock )
     try
     {
-        if( !_task )  throw_xc( "SPOOLER-122" );
+        if( !_task )  throw_xc( "SCHEDULER-122" );
         if( !_task->thread()  ||  current_thread_id() != _task->thread()->thread_id() )  return E_ACCESSDENIED;
-      //if( !_task->_job->its_current_task(_task) )  throw_xc( "SPOOLER-138" );
+      //if( !_task->_job->its_current_task(_task) )  throw_xc( "SCHEDULER-138" );
 
         THREAD_LOCK( _task->_lock )  hr = _task->_result.Copy( value );
     }
@@ -1763,7 +1763,7 @@ STDMETHODIMP Com_task::get_result( VARIANT* value )
     THREAD_LOCK( _lock )
     try
     {
-        if( !_task )  throw_xc( "SPOOLER-122" );
+        if( !_task )  throw_xc( "SCHEDULER-122" );
 
         VariantInit( value ); 
         THREAD_LOCK( _task->_job->_lock )  hr = VariantCopy( value, &_task->_result );
@@ -1783,9 +1783,9 @@ STDMETHODIMP Com_task::put_repeat( double seconds )
     THREAD_LOCK( _lock )
     try
     {
-        if( !_task )  throw_xc( "SPOOLER-122" );
+        if( !_task )  throw_xc( "SCHEDULER-122" );
         if( !_task->thread()  ||  current_thread_id() != _task->thread()->thread_id() )  return E_ACCESSDENIED;
-      //if( !_task->_job->its_current_task(_task) )  throw_xc( "SPOOLER-138" );
+      //if( !_task->_job->its_current_task(_task) )  throw_xc( "SCHEDULER-138" );
 
         _task->_job->set_repeat( seconds );
     }
@@ -1804,9 +1804,9 @@ STDMETHODIMP Com_task::put_history_field( BSTR name, VARIANT* value )
     THREAD_LOCK( _lock )
     try
     {
-        if( !_task )  throw_xc( "SPOOLER-122" );
+        if( !_task )  throw_xc( "SCHEDULER-122" );
         if( !_task->thread()  ||  current_thread_id() != _task->thread()->thread_id() )  return E_ACCESSDENIED;
-      //if( !_task->_job->its_current_task(_task) )  throw_xc( "SPOOLER-138" );
+      //if( !_task->_job->its_current_task(_task) )  throw_xc( "SCHEDULER-138" );
 
         _task->set_history_field( bstr_as_string(name), *value );
     }
@@ -1825,7 +1825,7 @@ STDMETHODIMP Com_task::get_id( int* result )
     THREAD_LOCK( _lock )
     try
     {
-        if( !_task )  throw_xc( "SPOOLER-122" );
+        if( !_task )  throw_xc( "SCHEDULER-122" );
 
         *result = _task->id();
     }
@@ -1844,7 +1844,7 @@ STDMETHODIMP Com_task::put_delay_spooler_process( VARIANT* time )
     THREAD_LOCK( _lock )
     try
     {
-        if( !_task )  throw_xc( "SPOOLER-122" );
+        if( !_task )  throw_xc( "SCHEDULER-122" );
 
         _task->set_delay_spooler_process( time_from_variant( *time ) );
     }
@@ -1863,7 +1863,7 @@ STDMETHODIMP Com_task::put_close_engine( VARIANT_BOOL b )
     THREAD_LOCK( _lock )
     try
     {
-        if( !_task )  throw_xc( "SPOOLER-122" );
+        if( !_task )  throw_xc( "SCHEDULER-122" );
 
         _task->set_close_engine( b != 0 );
     }
@@ -1882,7 +1882,7 @@ STDMETHODIMP Com_task::get_order( Iorder** result )
     THREAD_LOCK( _lock )
     try
     {
-        if( !_task )  throw_xc( "SPOOLER-122" );
+        if( !_task )  throw_xc( "SCHEDULER-122" );
         if( !_task->thread()  ||  current_thread_id() != _task->thread()->thread_id() )  return E_ACCESSDENIED;
 
         *result = _task->order();
@@ -2567,7 +2567,7 @@ STDMETHODIMP Com_job_chain::add_order( VARIANT* order_or_payload, spooler_com::I
     try
     {
         if( !_job_chain )  return E_POINTER;
-        if( !_job_chain->finished() )  throw_xc( "SPOOLER-151" );
+        if( !_job_chain->finished() )  throw_xc( "SCHEDULER-151" );
 
         ptr<spooler_com::Iorder> iorder = order_from_order_or_payload( _job_chain->_spooler, *order_or_payload );
         if( !iorder )  return E_POINTER;
@@ -2596,7 +2596,7 @@ STDMETHODIMP Com_job_chain::get_order_queue( VARIANT* state, Iorder_queue** resu
     try
     {
         if( !_job_chain )  return E_POINTER;
-        if( !_job_chain->finished() )  throw_xc( "SPOOLER-151" );
+        if( !_job_chain->finished() )  throw_xc( "SCHEDULER-151" );
 
         *result = _job_chain->node_from_state( *state )->_job->order_queue();
         if( *result )  (*result)->AddRef();
@@ -2617,7 +2617,7 @@ STDMETHODIMP Com_job_chain::get_node( VARIANT* state, Ijob_chain_node** result )
     try
     {
         if( !_job_chain )  return E_POINTER;
-        if( !_job_chain->finished() )  throw_xc( "SPOOLER-151" );
+        if( !_job_chain->finished() )  throw_xc( "SCHEDULER-151" );
 
         *result = _job_chain->node_from_state( *state );
         if( *result )  (*result)->AddRef();

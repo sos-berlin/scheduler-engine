@@ -1,4 +1,4 @@
-// $Id: spooler_history.cxx,v 1.56 2003/09/26 21:57:14 jz Exp $
+// $Id: spooler_history.cxx,v 1.57 2003/10/08 11:45:05 jz Exp $
 
 #include "spooler.h"
 #include "../zschimmer/z_com.h"
@@ -160,7 +160,7 @@ void Spooler_db::open( const string& db_name )
             {
                 if( !is_absolute_filename( _db_name  )  &&  (_spooler->log_directory() + " ")[0] == '*' ) 
                 {
-                    if( _spooler->_need_db )  throw_xc( "SPOOLER-142", _db_name );
+                    if( _spooler->_need_db )  throw_xc( "SCHEDULER-142", _db_name );
                     return;
                 }
 
@@ -332,8 +332,8 @@ void Spooler_db::try_reopen_after_error( const exception& x )
 
     if( !_email_sent_after_db_error )
     {
-        string body = "db=" + _spooler->_db_name + "\r\n\r\n" + x.what() + "\r\n\r\nDer Spooler versucht, die Datenbank erneut zu oeffnen.";
-        if( !_spooler->_need_db )  body += "\r\nWenn das nicht geht, schreibt der Spooler die Historie in Textdateien.";
+        string body = "db=" + _spooler->_db_name + "\r\n\r\n" + x.what() + "\r\n\r\nDer Scheduler versucht, die Datenbank erneut zu oeffnen.";
+        if( !_spooler->_need_db )  body += "\r\nWenn das nicht geht, schreibt der Scheduler die Historie in Textdateien.";
         _spooler->send_error_email( string("FEHLER BEIM ZUGRIFF AUF DATENBANK: ") + x.what(), body );
         _email_sent_after_db_error = true;
     }
@@ -703,7 +703,7 @@ xml::Element_ptr Job_chain::read_history( const xml::Document_ptr& doc, int id, 
 
     try
     {
-        if( !_spooler->_db->opened() )  throw_xc( "SPOOLER-184" );     // Wenn die DB verübergegehen (wegen Nichterreichbarkeit) geschlossen ist, s. get_task_id()
+        if( !_spooler->_db->opened() )  throw_xc( "SCHEDULER-184" );     // Wenn die DB verübergegehen (wegen Nichterreichbarkeit) geschlossen ist, s. get_task_id()
 
         Transaction ta = +_spooler->_db;
         {
@@ -711,7 +711,7 @@ xml::Element_ptr Job_chain::read_history( const xml::Document_ptr& doc, int id, 
 /*
             if( _use_file )
             {
-                if( id != -1  ||  next >= 0 )  throw_xc( "SPOOLER-139" );
+                if( id != -1  ||  next >= 0 )  throw_xc( "SCHEDULER-139" );
                 sel.open( "-in -seq tab -field-names | tail -head=1 -reverse -" + as_string(-next) + " | " + _filename );
             }
             else
@@ -738,7 +738,7 @@ xml::Element_ptr Job_chain::read_history( const xml::Document_ptr& doc, int id, 
                             clause );
             }
             else
-                throw_xc( "SPOOLER-136" );
+                throw_xc( "SCHEDULER-136" );
 
             history_element = doc.createElement( "history" );
             dom_append_nl( history_element );
@@ -951,7 +951,7 @@ void Job_history::archive( Archive_switch arc, const string& filename )
 
 xml::Element_ptr Job_history::read_tail( const xml::Document_ptr& doc, int id, int next, Show_what show )
 {
-    if( !_history_yes )  throw_xc( "SPOOLER-141", _job_name );
+    if( !_history_yes )  throw_xc( "SCHEDULER-141", _job_name );
 
     bool with_log = ( show & show_log ) != 0;
 
@@ -963,7 +963,7 @@ xml::Element_ptr Job_history::read_tail( const xml::Document_ptr& doc, int id, i
 
         try
         {
-            if( _use_db  &&  !_spooler->_db->opened() )  throw_xc( "SPOOLER-184" );     // Wenn die DB verübergegehen (wegen Nichterreichbarkeit) geschlossen ist, s. get_task_id()
+            if( _use_db  &&  !_spooler->_db->opened() )  throw_xc( "SCHEDULER-184" );     // Wenn die DB verübergegehen (wegen Nichterreichbarkeit) geschlossen ist, s. get_task_id()
 
             Transaction ta = +_spooler->_db;
             {
@@ -971,7 +971,7 @@ xml::Element_ptr Job_history::read_tail( const xml::Document_ptr& doc, int id, i
 
                 if( _use_file )
                 {
-                    if( id != -1  ||  next >= 0 )  throw_xc( "SPOOLER-139" );
+                    if( id != -1  ||  next >= 0 )  throw_xc( "SCHEDULER-139" );
                     sel.open( "-in -seq tab -field-names | tail -head=1 -reverse -" + as_string(-next) + " | " + _filename );
                 }
                 else
@@ -999,7 +999,7 @@ xml::Element_ptr Job_history::read_tail( const xml::Document_ptr& doc, int id, i
                               clause );
                 }
                 else
-                    throw_xc( "SPOOLER-136" );
+                    throw_xc( "SCHEDULER-136" );
 
                 history_element = doc.createElement( "history" );
                 dom_append_nl( history_element );
