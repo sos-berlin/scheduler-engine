@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.323 2004/03/23 20:22:16 jz Exp $
+// $Id: spooler.cxx,v 1.324 2004/03/26 08:30:14 jz Exp $
 /*
     Hier sind implementiert
 
@@ -245,19 +245,34 @@ With_log_switch read_profile_with_log( const string& profile, const string& sect
     {
         set_ctrl_c_handler( false );
 
-        //if( !ctrl_c_pressed )
-        //{
-            ctrl_c_pressed++;
-            //Kein Systemaufruf hier! (Aber bei Ctrl-C riskieren wir einen Absturz. Ich will diese Meldung sehen.)
-            if( !is_daemon )  fprintf( stderr, "Scheduler wird wegen kill -%d beendet ...\n", sig );
+        switch( sig )
+        {
+            case SIGUSR1:
+            {
+                z::log_categories.toggle_all();
+                break;
+            }
 
-            // pthread_mutex_lock:
-            // The  mutex  functions  are  not  async-signal  safe.  What  this  means  is  that  they
-            // should  not  be  called from  a signal handler. In particular, calling pthread_mutex_lock 
-            // or pthread_mutex_unlock from a signal handler may deadlock the calling thread.
+            case SIGINT:        // Ctrl-C
+            case SIGTERM:       // Normales kill
+            {
+                //if( !ctrl_c_pressed )
+                //{
+                    ctrl_c_pressed++;
+                    //Kein Systemaufruf hier! (Aber bei Ctrl-C riskieren wir einen Absturz. Ich will diese Meldung sehen.)
+                    if( !is_daemon )  fprintf( stderr, "Scheduler wird wegen kill -%d beendet ...\n", sig );
 
-            if( !is_daemon && spooler_ptr )  spooler_ptr->async_signal( "Ctrl+C" );
-        //}
+                    // pthread_mutex_lock:
+                    // The  mutex  functions  are  not  async-signal  safe.  What  this  means  is  that  they
+                    // should  not  be  called from  a signal handler. In particular, calling pthread_mutex_lock 
+                    // or pthread_mutex_unlock from a signal handler may deadlock the calling thread.
+
+                    if( !is_daemon && spooler_ptr )  spooler_ptr->async_signal( "Ctrl+C" );
+                //}
+            }
+
+            default: ;
+        }
     }
 
 #endif
