@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 
-<!-- $Id: spooler.xml,v 1.1 2001/01/13 22:35:16 jz Exp $   (C) 2000 SOS GmbH Berlin -->
+<!-- $Id: spooler.xml,v 1.2 2001/01/13 23:08:42 jz Exp $   (C) 2000 SOS GmbH Berlin -->
 
 <!DOCTYPE spooler SYSTEM "spooler.dtd">
 
@@ -316,7 +316,7 @@ sub spooler_process()
                 <weekdays>
                     <day day="1"/>
                     <day day="2"/>
-                    <day day="6"/>
+                    <day day="5"/>
                 </weekdays>
 
                 <monthdays>
