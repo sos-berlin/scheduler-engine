@@ -1,4 +1,4 @@
-// $Id: spooler_config.cxx,v 1.8 2001/01/27 19:26:16 jz Exp $
+// $Id: spooler_config.cxx,v 1.9 2001/01/29 10:45:01 jz Exp $
 
 //#include <precomp.h>
 
@@ -381,11 +381,12 @@ void Spooler::load_jobs_from_xml( Job_list* liste, const xml::Element_ptr& eleme
 
 void Spooler::load_config( const xml::Element_ptr& config_element )
 {
-                                   _tcp_port      = as_int   ( config_element->getAttribute( "tcp_port"      ) );
-                                   _udp_port      = as_int   ( config_element->getAttribute( "udp_port"      ) );
-                                   _priority_max  = as_int   ( config_element->getAttribute( "priority_max"  ) );
-    if( empty( _log_directory ) )  _log_directory = as_string( config_element->getAttribute( "log_dir"       ) );
-    if( empty( _spooler_param ) )  _spooler_param = as_string( config_element->getAttribute( "param"         ) );
+                                   _tcp_port      = as_int   ( config_element->getAttribute( "tcp_port"     ) );
+                                   _udp_port      = as_int   ( config_element->getAttribute( "udp_port"     ) );
+                                   _priority_max  = as_int   ( config_element->getAttribute( "priority_max" ) );
+                                   _use_threads   = as_bool  ( config_element->getAttribute( "use_threads"  ) );
+    if( empty( _log_directory ) )  _log_directory = as_string( config_element->getAttribute( "log_dir"      ) );
+    if( empty( _spooler_param ) )  _spooler_param = as_string( config_element->getAttribute( "param"        ) );
 
 
     xml::Element_ptr e = config_element->firstChild;

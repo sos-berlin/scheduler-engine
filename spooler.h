@@ -1,4 +1,4 @@
-// $Id: spooler.h,v 1.38 2001/01/27 19:26:15 jz Exp $
+// $Id: spooler.h,v 1.39 2001/01/29 10:45:01 jz Exp $
 
 #ifndef __SPOOLER_H
 #define __SPOOLER_H
@@ -124,12 +124,12 @@ struct Spooler
     void                        restart                     ();
 
     void                        single_thread_step          ();
-    void                        single_thread_wait          ();
+    void                        wait                        ();
 
 
     void                        cmd_reload                  ();
     void                        cmd_pause                   ()                                  { _state_cmd = sc_pause; cmd_wake(); }
-    void                        cmd_continue                ()                                  { if( _state == s_paused )  _state_cmd = sc_continue; cmd_wake(); }
+    void                        cmd_continue                ();
     void                        cmd_stop                    ();
     void                        cmd_terminate               ();
     void                        cmd_terminate_and_restart   ();

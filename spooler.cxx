@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.40 2001/01/27 19:26:15 jz Exp $
+// $Id: spooler.cxx,v 1.41 2001/01/29 10:45:01 jz Exp $
 /*
     Hier sind implementiert
 
@@ -205,7 +205,15 @@ void Spooler::stop()
 
     _log.msg( "Spooler::stop" );
 
-    FOR_EACH( Task_list, _task_list, it )  (*it)->stop();
+    if( _use_threads )
+    {
+        { FOR_EACH( Task_list, _task_list, it )  (*it)->set_state_cmd( Task::sc_stop ); }
+        { FOR_EACH( Task_list, _task_list, it )  (*it)->wait_until_stopped(); } 
+    }
+    else
+    {
+        FOR_EACH( Task_list, _task_list, it )  (*it)->stop();
+    }
 
     _object_set_class_list.clear();
     _job_list.clear();
@@ -269,9 +277,9 @@ void Spooler::single_thread_step()
     }
 }
 
-//----------------------------------------------------------------------Spooler::single_thread_wait
+//------------------------------------------------------------------------------------Spooler::wait
 
-void Spooler::single_thread_wait()
+void Spooler::wait()
 {
     if( _running_tasks_count > 0  && _state != s_paused )  return;
 
@@ -281,11 +289,16 @@ void Spooler::single_thread_wait()
         _sleeping = true;
     }
 
-    tzset();
+    //tzset();
 
     _next_start_time = latter_day;
     Task* next_task = NULL;
+    Time  wait_time = latter_day;
 
+    if( _use_threads )
+    {
+    }
+    else
     if( _state == s_paused )
     {
         _log.msg( "Spooler paused" );
@@ -302,14 +315,16 @@ void Spooler::single_thread_wait()
                 if( _next_start_time > (*it)->_next_start_time )  next_task = *it, _next_start_time = next_task->_next_start_time;
             }
         }
+
+        if( next_task )  next_task->_log.msg( "Nächster Start " + _next_start_time.as_string() );
+                   else  _log.msg( "Kein Job zu starten" );
+
+        wait_time = _next_start_time - Time::now();
     }
 
 
-    Time wait_time = _next_start_time - Time::now();
     if( wait_time > 0 ) 
     {
-        if( next_task )  next_task->_log.msg( "Nächster Start " + _next_start_time.as_string() );
-                   else  _log.msg( "Kein Job zu starten" );
 
 #       ifdef SYSTEM_WIN
 
@@ -330,7 +345,7 @@ void Spooler::single_thread_wait()
     _sleeping = false;
 
     _next_start_time = 0;
-    tzset();
+    //tzset();
 }
 
 //--------------------------------------------------------------------------------------Spooler::run
@@ -361,42 +376,38 @@ void Spooler::run()
 
     if( _use_threads )
     {
-        { FOR_EACH( Task_list, _task_list, it )  (*it)->start_thread(); }
-
-//        _wait_handles.wait();
-
-
-        //{ FOR_EACH( list<Task>, _thread_list, it )  (*it)->_wait_for_control = true; }
-
-        // Warten, bis alle Threads gestoppt sind
-/*
-        while(1)
-        {
-            bool all_stopped = true;
-            FOR_EACH( list<Task>, _thread_list, it )  all_stopped &= (*it)->_state == s_stopped;
-            if( all_stopped )  break;
-
-            wait();
-        }
-*/
+        FOR_EACH( Task_list, _task_list, it )  (*it)->start_thread();
     }
-    else
+
+    while(1)
     {
-        while(1)
+        if( _state_cmd == sc_pause                 )  set_state( s_paused ); 
+        
+        if( _state_cmd == sc_continue              ) 
         {
-            if( _state_cmd == sc_pause                 )  set_state( s_paused ); 
-            if( _state_cmd == sc_continue              )  set_state( s_running );
-            if( _state_cmd == sc_load_config           )  break;
-            if( _state_cmd == sc_reload                )  break;
-            if( _state_cmd == sc_terminate             )  break;
-            if( _state_cmd == sc_terminate_and_restart )  break;
-            _state_cmd = sc_none;
-
-            if( _state == s_running )  single_thread_step();
-
-            single_thread_wait();
+            FOR_EACH( Task_list, _task_list, it )  (*it)->wake();
+            set_state( s_running );
         }
+
+        if( _state_cmd == sc_load_config           )  break;
+        if( _state_cmd == sc_reload                )  break;
+        if( _state_cmd == sc_terminate             )  break;
+        if( _state_cmd == sc_terminate_and_restart )  break;
+        _state_cmd = sc_none;
+
+
+        if( !_use_threads  &&  _state == s_running )  single_thread_step();
+
+        wait();
     }
+}
+
+//----------------------------------------------------------------------------Spooler::cmd_continue
+
+void Spooler::cmd_continue()
+{ 
+    if( _state == s_paused )  _state_cmd = sc_continue; 
+    cmd_wake(); 
 }
 
 //--------------------------------------------------------------------------------Spooler::cmd_wake

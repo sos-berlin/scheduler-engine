@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- $Id: spooler.dtd,v 1.10 2001/01/25 20:24:42 jz Exp $   Joacim Zschimmer,  (C) 2000 SOS GmbH Berlin  -->
+<!-- $Id: spooler.dtd,v 1.11 2001/01/29 10:45:01 jz Exp $   Joacim Zschimmer,  (C) 2000 SOS GmbH Berlin  -->
 
 
 <!ELEMENT spooler               ( config+ | command | answer )>
@@ -15,6 +15,7 @@
 <!ATTLIST config                udp_port            CDATA '4444'>       <!-- Für UDP-Kommandoschnittstelle -->
 <!ATTLIST config                priority_max        CDATA '1000'>       <!-- Höchste Priorität. Gibt absoluten Vorrang -->
 <!ATTLIST config                param               CDATA ''>           <!-- Wird der Eigenschaft spooler.param jedem Skript übergeben -->
+<!ATTLIST config                use_threads         (yes|no) 'no'>      <!-- Jede Task soll in einem eigenen Thread laufen? -->
 
 <!ELEMENT security              ( allowed_host* )>
 <!ATTLIST security              ignore_unknown_hosts (yes|no) 'no'>     <!-- Unbekannte Hostnamen bei <allowed_host> ignorieren? -->
@@ -108,7 +109,9 @@
                                                                         <!-- Antwort: <state> -->
 
 <!ELEMENT modify_spooler        EMPTY>
-<!ATTLIST modify_spooler        cmd                 ( stop
+<!ATTLIST modify_spooler        cmd                 ( pause
+                                                    | continue
+                                                    | stop
                                                     | reload
                                                     | terminate
                                                     | terminate_and_restart

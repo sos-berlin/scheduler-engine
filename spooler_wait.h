@@ -1,4 +1,4 @@
-// $Id: spooler_wait.h,v 1.5 2001/01/27 19:26:16 jz Exp $
+// $Id: spooler_wait.h,v 1.6 2001/01/29 10:45:02 jz Exp $
 
 #ifndef __SPOOLER_WAIT_H
 #define __SPOOLER_WAIT_H
@@ -8,35 +8,25 @@
 namespace sos {
 namespace spooler {
 
-//--------------------------------------------------------------------------------Directory_watcher
 
-struct Directory_watcher
+//--------------------------------------------------------------------------------------Wait_handle
+/*
+struct Wait_handle : Handle
 {
-#   ifdef SYSTEM_WIN
+                                Wait_handle                 ( HANDLE h, const string& name )    : Handle(h), _name(name) {}
 
-                                Directory_watcher           ()                              : _handle(0), _signaled(false) {}
-                               ~Directory_watcher           ()                              { close(); }
+    void                        add                         ( Wait_handles* w )                 { _wait_handles_list.push_back(w); }
+    void                        remove                      ( Wait_handles* );
 
-                                operator bool               ()                              { return _handle != NULL; }
-                                operator !                  ()                              { return _handle == NULL; }
+    virtual                     signal                      ()                                  { _signaled = true; }
 
-        void                    watch_directory             ( const string& );
-        void                    watch_again                 ();
-        void                    close                       ();
-        
-        HANDLE                 _handle;
+    string                      as_string                   () const                            { return "Ereignis " + _name; }
 
-#    else
-
-                                operator bool               ()                              { return false; }
-                                operator !                  ()                              { return true; };
-        
-#   endif
-
-
+    const                      _name;
     bool                       _signaled;
+    vector<Wait_handles*>      _wait_handles_list;
 };
-
+*/
 //-------------------------------------------------------------------------------------Wait_handles
 
 struct Wait_handles
@@ -58,7 +48,7 @@ struct Wait_handles
         void                    clear                       ()                              { _handles.clear(); _entries.clear(); }
         void                    add                         ( HANDLE, const string& name, Task* = NULL );
         void                    remove                      ( HANDLE );
-        void                    wait                        ( double time );
+        void                    wait                        ( double time = latter_day );
 
         vector<HANDLE>         _handles;
         vector<Entry>          _entries;
@@ -66,6 +56,36 @@ struct Wait_handles
 #   endif        
 
     Spooler*                   _spooler;
+};
+
+//--------------------------------------------------------------------------------Directory_watcher
+
+struct Directory_watcher
+{
+#   ifdef SYSTEM_WIN
+
+                                Directory_watcher           ( Task* task )                  : _handle(0), _signaled(false), _task(task) {}
+                               ~Directory_watcher           ()                              { close(); }
+
+                                operator bool               ()                              { return _handle != NULL; }
+                                operator !                  ()                              { return _handle == NULL; }
+
+        void                    watch_directory             ( const string& );
+        void                    watch_again                 ();
+        void                    close                       ();
+        
+        HANDLE                 _handle;
+
+#    else
+
+                                operator bool               ()                              { return false; }
+                                operator !                  ()                              { return true; };
+        
+#   endif
+
+
+    Task*                      _task;
+    bool                       _signaled;
 };
 
 //-------------------------------------------------------------------------------------------------

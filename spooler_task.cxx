@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.12 2001/01/27 19:26:16 jz Exp $
+// $Id: spooler_task.cxx,v 1.13 2001/01/29 10:45:01 jz Exp $
 /*
     Hier sind implementiert
 
@@ -192,14 +192,7 @@ void Job::start_when_directory_changed( const string& directory_name )
 
 #   ifdef SYSTEM_WIN
 
-        if( _task->_directory_watcher ) 
-        {
-            _spooler->_wait_handles.remove( _task->_directory_watcher._handle );
-            _task->_directory_watcher.close();
-        }
-
         _task->_directory_watcher.watch_directory( directory_name );
-        _spooler->_wait_handles.add( _task->_directory_watcher._handle, "start_when_directory_changed", _task );
 
 #    else
 
@@ -216,7 +209,9 @@ Task::Task( Spooler* spooler, const Sos_ptr<Job>& job )
     _spooler(spooler), 
     _job(job),
     _log( &spooler->_log, "Job " + job->_name ),
-    _script_instance(spooler)
+    _script_instance(spooler),
+    _wait_handles(spooler),
+    _directory_watcher(this)
 {
     Time now = Time::now();
     _period = _job->_run_time.next_period( now );
@@ -229,24 +224,35 @@ Task::Task( Spooler* spooler, const Sos_ptr<Job>& job )
     _com_task = new Com_task( this );
 
     _job->_task = this;
+
+    _task_event = CreateEvent( NULL, FALSE, FALSE, NULL );
+    _wake_event = CreateEvent( NULL, FALSE, FALSE, NULL );
+    _wait_handles.add( _wake_event, "spooler_event", this );
 }
 
 //---------------------------------------------------------------------------------------Task::Task
 
 Task::~Task()    
 {
-    _script_instance.close();
+    if( _thread )  TerminateThread( _thread, 999 );
+
+    close();
 
     // COM-Objekte entkoppeln, falls noch jemand eine Referenz darauf hat:
     if( _com_object_set  )  _com_object_set->close();
     if( _com_task        )  _com_task->close();
     if( _com_log         )  _com_log->close();
 
-    _params = NULL;
-
-    if( _directory_watcher )  _spooler->_wait_handles.remove( _directory_watcher._handle );
-
     _job->_task = NULL;
+}
+
+//--------------------------------------------------------------------------------------Task::close
+
+void Task::close()
+{
+    _script_instance.close();
+    _params = NULL;
+    _directory_watcher.close();
 }
 
 //----------------------------------------------------------------------------------Task::set_state
@@ -303,7 +309,16 @@ void Task::set_state_cmd( State_cmd cmd )
     if( !ok )  return;    //throw_xc( "SPOOLER-109" );
     
     _state_cmd = cmd;
-    _spooler->cmd_wake();
+
+    if( _spooler->_use_threads )  wake();
+                            else  _spooler->cmd_wake();
+}
+
+//---------------------------------------------------------------------------------------Task::wake
+
+void Task::wake()
+{
+    if( _spooler->_use_threads )  SetEvent( _wake_event );
 }
 
 //---------------------------------------------------------------------------------Task::state_name
@@ -468,10 +483,10 @@ bool Task::start()
             _script_instance_ptr->add_obj( (IDispatch*)_job->_com_current_task, "spooler_task" );
 
             _script_instance_ptr->load( *script );
-            if( _error )  return false;
+            if( _error )  goto FEHLER;
 
             _script_instance_ptr->call_if_exists( spooler_init_name );
-            if( _error )  return false;
+            if( _error )  goto FEHLER;
 
             _state = s_loaded;
         }
@@ -483,14 +498,18 @@ bool Task::start()
 
         _opened = true;
     }
-    catch( const Xc& x        ) { start_error(x); return false; }
-    catch( const exception& x ) { error(x); return false; }
+    catch( const Xc& x        ) { error(x); goto FEHLER; }
+    catch( const exception& x ) { error(x); goto FEHLER; }
 
     _state = s_running;
     //_let_run = _job->_run_time.let_run();
     _spooler->_running_tasks_count++;
 
     return true;
+
+  FEHLER:
+    stop();
+    return false;
 }
 
 //-------------------------------------------------------------------------Task::on_error_on_success
@@ -581,11 +600,7 @@ void Task::stop()
         catch( const Xc& x        ) { end_error(x); }
         catch( const exception& x ) { error(x); }
 
-        if( _directory_watcher ) {
-            _spooler->_wait_handles.remove( _directory_watcher._handle );
-            _directory_watcher.close();
-        }
-
+        _directory_watcher.close();
         _state = s_stopped;
     }
 
@@ -619,6 +634,18 @@ bool Task::step()
     catch( const exception& x ) { error(x); return false; }
 
     return result;
+}
+
+//-------------------------------------------------------------------------Task::wait_until_stopped
+
+void Task::wait_until_stopped()
+{
+    while( _state != s_stopped )
+    {
+        int ret;
+        do ret = WaitForSingleObject( _task_event, INT_MAX ); while( ret != WAIT_TIMEOUT );
+        if( ret != WAIT_OBJECT_0 )  throw_mswin_error( "WaitForSingleObject" );
+    }
 }
 
 //---------------------------------------------------------------------------------------Task::step
@@ -709,32 +736,54 @@ bool Task::do_something()
     return something_done;
 }
 
-//-------------------------------------------------------------------------------Task::run_thread()
+//---------------------------------------------------------------------------------------Task::wait
+/*
+void Task::wait()
+{
+}
+*/
+//---------------------------------------------------------------------------------Task::run_thread
 
 int Task::run_thread()
 {
-/*
-    while(1)
-    {
-        start();
+    int result = 0;
 
+    try 
+    {
         while(1)
         {
-            do_something();
-            if( _state == s_stopped )  break;
-        }
+            while( _spooler->_state == Spooler::s_paused )  _wait_handles.wait();
 
-        stop();
-        wait();
+            do_something();
+
+            if( _state != s_running )
+            {
+                Time wait_time;
+                if( _state == s_pending ) {
+                    if( _next_start_time < latter_day )  _log.msg( "Nächster Start " + _next_start_time.as_string() );
+                                                   else  _log.msg( "Kein Start geplant" );
+                    wait_time = _next_start_time - Time::now();
+                } else {
+                    _log.msg( state_name() );
+                    wait_time = latter_day;
+                }
+
+                // Nur, wenn ein Ereignis angefordert: SetEvent( _task_event );
+                _wait_handles.wait( wait_time );
+            }
+        }
     }
-*/
-    return 0;
+    catch( const Xc& x ) { error(x); result = 1; }
+
+    close();
+    return result;
 }
 
 //-------------------------------------------------------------------------------------------thread
 
 static ulong __stdcall thread( void* param )
 {
+    Ole_initialize ole;
     return ((Task*)param)->run_thread();
 }
 

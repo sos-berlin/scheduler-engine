@@ -1,4 +1,4 @@
-// $Id: spooler_command.cxx,v 1.20 2001/01/25 17:45:45 jz Exp $
+// $Id: spooler_command.cxx,v 1.21 2001/01/29 10:45:01 jz Exp $
 /*
     Hier ist implementiert
 
@@ -159,6 +159,10 @@ xml::Element_ptr Command_processor::execute_modify_spooler( const xml::Element_p
     string cmd = as_string( element->getAttribute( "cmd" ) );
   //if( !cmd.empty() )
     {
+        if( cmd == "pause"                 )  _spooler->cmd_pause();
+        else
+        if( cmd == "continue"              )  _spooler->cmd_continue();
+        else
         if( cmd == "stop"                  )  _spooler->cmd_stop();
         else
         if( cmd == "reload"                )  _spooler->cmd_reload();

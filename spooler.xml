@@ -1,14 +1,17 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 
-<!-- $Id: spooler.xml,v 1.18 2001/01/25 20:24:42 jz Exp $   (C) 2001 SOS GmbH Berlin -->
+<!-- $Id: spooler.xml,v 1.19 2001/01/29 10:45:01 jz Exp $   (C) 2001 SOS GmbH Berlin -->
 
 <!DOCTYPE spooler SYSTEM "spooler.dtd">
 
 <spooler>
-<config tcp_port="4444" udp_port="4444" log_dir="c:\tmp">
+<config tcp_port    = "4444" 
+        udp_port    = "4444" 
+        log_dir     = "c:\tmp" 
+        use_threads = "no">
 
     <security>
-        <allowed_host host="192.168.100.0" level="info"/>
+        <allowed_host host="192.168.100.0" level="all"/>
         <allowed_host host="lillerud"      level="all"/>
     </security>
 
@@ -20,6 +23,8 @@ dim global
 'set errfile = createobject( "hostware.file" )
 'errfile.open "-out file /dev/stderr"
 'errfile.put_line "Spooler-Skript gestartet"
+
+var="Variable des Spooler-Skripts"
 
 class Global_class
     function method()
@@ -283,7 +288,7 @@ sub spooler_process()
         <job name           = "Aufbereiten" 
              priority       = "2" 
              output_level   = "200" 
-             spooler_id     = "aufbereiten">
+             spooler_id     = "">
 
             <object_set class="Dokumente">
                 <levels low="100" high="200"/>
@@ -291,7 +296,7 @@ sub spooler_process()
 
             <run_time begin  = "00:00" 
                       end    = "24:00" 
-                      repeat = "60">
+                      repeat = "10">
 <!--
                 <date date="2001-01-02"/>
                 <date date="2001-01-09"/>
@@ -334,7 +339,7 @@ index = 1
 
 function spooler_process()
     'spooler_process=true
-    spooler_log.msg "*Job einfach: spooler_process index=" & index & ", param=" & spooler.script.global.method()
+    spooler_log.msg "*Job einfach: spooler_process index=" & index      '& ", " & spooler.script.global.method()
     index = index + 1
     if index > 3 then spooler_process=false: exit function
     spooler_process = true
@@ -348,9 +353,7 @@ end function
                 <period single_start="19:51:50" end="20:00" let_run="no"/>
                 <period begin="19:52:10" end="19:59:59" repeat="7"/>
 
-                <date date="25.1.2001"/>
-                <date date="26.1.2001"/>
-                <date date="27.1.2001"> <period begin="4:44" end="5:55"/> </date>
+                <date date="29.1.2001"> <period begin="0:00" end="24:00" repeat="7"/> </date>
 
                 <weekdays>
                     <day day="1"/>
@@ -415,6 +418,11 @@ end sub
 
 $spooler_log->msg( "*Job perl" );
 $spooler->job("Aufbereiten")->start();
+
+sub spooler_exit()
+{
+    $spooler->msg( "spooler_exit()" );
+}
 
             ]]></script>
             

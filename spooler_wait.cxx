@@ -1,4 +1,4 @@
-// $Id: spooler_wait.cxx,v 1.6 2001/01/22 13:42:08 jz Exp $
+// $Id: spooler_wait.cxx,v 1.7 2001/01/29 10:45:02 jz Exp $
 /*
     Hier sind implementiert
 
@@ -17,37 +17,6 @@
 namespace sos {
 namespace spooler {
 
-
-//---------------------------------------------------------------Directory_watcher::watch_directory
-
-void Directory_watcher::watch_directory( const string& directory )
-{
-    if( _handle )  CloseHandle( _handle );
-
-    _handle = FindFirstChangeNotification( directory.c_str(), FALSE, FILE_NOTIFY_CHANGE_FILE_NAME );
-    if( _handle == INVALID_HANDLE_VALUE )  _handle = NULL, throw_mswin_error( "FindFirstChangeNotification" );
-}
-
-//-------------------------------------------------------------------Directory_watcher::watch_again
-
-void Directory_watcher::watch_again()
-{
-    _signaled = false;
-
-    BOOL ok = FindNextChangeNotification( _handle );
-    if( !ok )  throw_mswin_error( "FindNextChangeNotification" );
-}
-
-//--------------------------------------------------------------------------Directory_watcher::close
-
-void Directory_watcher::close()
-{ 
-    if( _handle ) 
-    {
-        CloseHandle( _handle );  
-        _handle = NULL; 
-    }
-}
 
 //--------------------------------------------------------------------------------Wait_handles::add
 
@@ -85,42 +54,97 @@ void Wait_handles::remove( HANDLE handle )
 
 void Wait_handles::wait( double wait_time )
 {
-    while( wait_time > 0 )
+/*
+    if( _handles.size() == 0  &&  wait_time < latter_day ) 
     {
-        int sleep_time_ms = INT_MAX;
-        
-        int t = min( (double)sleep_time_ms, wait_time * 1000.0 );
-
-        DWORD ret = WaitForMultipleObjects( _handles.size(), &_handles[0], FALSE, t ); 
-
-        if( ret == WAIT_FAILED )  throw_mswin_error( "WaitForMultipleObjects" );
-
-        if( ret >= WAIT_OBJECT_0  &&  ret < WAIT_OBJECT_0 + _handles.size() )
+        sos_sleep( wait_time );
+    }
+    else
+*/
+    {
+        while( wait_time > 0 )
         {
-            int    index = ret - WAIT_OBJECT_0;
-            Entry* entry = &_entries[ index ];
-            Task*  task = entry->_task;
-            string msg = "Ereignis " + as_string(index) + " - " + entry->_event_name;
-            
-            if( task ) 
+            int sleep_time_ms = INT_MAX;
+        
+            int t = min( (double)sleep_time_ms, wait_time * 1000.0 );
+
+            DWORD ret = WaitForMultipleObjects( _handles.size(), &_handles[0], FALSE, t ); 
+
+            if( ret == WAIT_FAILED )  throw_mswin_error( "WaitForMultipleObjects" );
+
+            if( ret >= WAIT_OBJECT_0  &&  ret < WAIT_OBJECT_0 + _handles.size() )
             {
-                task->_log.msg( msg );
-                if( _handles[ index ] == task->_directory_watcher._handle )  task->_directory_watcher._signaled = true;
-                                                                       else  throw_xc( "Wait_handles::wait", entry->_event_name );
+                int    index = ret - WAIT_OBJECT_0;
+                Entry* entry = &_entries[ index ];
+                Task*  task = entry->_task;
+                string msg = "Ereignis " + as_string(index) + " - " + entry->_event_name;
+            
+                if( task ) 
+                {
+                    task->_log.msg( msg );
+
+                    // (Besser nicht jedes Ereignis hier abfragen, sondern: struct Directory_watcher : Wait_handle)
+
+                    if( _handles[ index ] == task->_wake_event ) ;//ok
+                    else
+                    if( _handles[ index ] == task->_directory_watcher._handle )  task->_directory_watcher._signaled = true;
+                    else  
+                        throw_xc( "Wait_handles::wait", entry->_event_name );
+                }
+                else
+                    _spooler->_log.msg( msg );
+
+                return;
             }
-            else
-                _spooler->_log.msg( msg );
 
-            return;
+            if( ret != WAIT_TIMEOUT )  throw_mswin_error( "WaitForMultipleObjects" );
+
+            wait_time -= sleep_time_ms / 1000;
         }
-
-        if( ret != WAIT_TIMEOUT )  throw_mswin_error( "WaitForMultipleObjects" );
-
-        wait_time -= sleep_time_ms / 1000;
     }
 }
 
 #endif
+//---------------------------------------------------------------Directory_watcher::watch_directory
+
+void Directory_watcher::watch_directory( const string& directory )
+{
+    close();
+
+    _handle = FindFirstChangeNotification( directory.c_str(), FALSE, FILE_NOTIFY_CHANGE_FILE_NAME );
+    if( _handle == INVALID_HANDLE_VALUE )  _handle = NULL, throw_mswin_error( "FindFirstChangeNotification" );
+
+
+    Wait_handles& wh = _task->_spooler->_use_threads? _task->_wait_handles 
+                                                    : _task->_spooler->_wait_handles;
+    wh.add( _handle, "start_when_directory_changed", _task );
+}
+
+//-------------------------------------------------------------------Directory_watcher::watch_again
+
+void Directory_watcher::watch_again()
+{
+    _signaled = false;
+
+    BOOL ok = FindNextChangeNotification( _handle );
+    if( !ok )  throw_mswin_error( "FindNextChangeNotification" );
+}
+
+//--------------------------------------------------------------------------Directory_watcher::close
+
+void Directory_watcher::close()
+{ 
+    if( _handle ) 
+    {
+        Wait_handles& wh = _task->_spooler->_use_threads? _task->_wait_handles 
+                                                        : _task->_spooler->_wait_handles;
+        wh.remove( _handle );
+
+        CloseHandle( _handle );  
+        _handle = NULL; 
+    }
+}
+
 //-------------------------------------------------------------------------------------------------
 
 } //namespace spooler

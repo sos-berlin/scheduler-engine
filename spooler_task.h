@@ -1,4 +1,4 @@
-// $Id: spooler_task.h,v 1.2 2001/01/27 19:26:16 jz Exp $
+// $Id: spooler_task.h,v 1.3 2001/01/29 10:45:01 jz Exp $
 
 #ifndef __SPOOLER_TASK_H
 #define __SPOOLER_TASK_H
@@ -170,8 +170,12 @@ struct Task : Sos_self_deleting
                                 Task                        ( Spooler*, const Sos_ptr<Job>& );
                                ~Task                        ();
 
+    void                        close                       ();
+
     void                        start_thread                ();
     int                         run_thread                  ();
+    void                        wait_until_stopped          ();
+    void                        wake                        ();
 
     bool                        start                       ();
     void                        end                         ();
@@ -185,6 +189,7 @@ struct Task : Sos_self_deleting
   //void                        wake                        ()                          { _wake = true; }   // Ein neues Objekt ist da, vielleicht.
 
     void                        set_next_start_time         ();
+
     void                        set_state                   ( State );
     void                        set_state_cmd               ( State_cmd );
 
@@ -195,6 +200,7 @@ struct Task : Sos_self_deleting
     string                      state_cmd_name              ()                          { return state_cmd_name( _state_cmd ); }
     static string               state_cmd_name              ( State_cmd );
     static State_cmd            as_state_cmd                ( const string& );
+
 
     void                        start_error                 ( const Xc& );
     void                        end_error                   ( const Xc& );
@@ -234,8 +240,12 @@ struct Task : Sos_self_deleting
     CComPtr<Com_object_set>    _com_object_set;
     CComPtr<Com_task>          _com_task;
 
+    // Threading
     Handle                     _thread;
     ulong                      _thread_id;
+    Wait_handles               _wait_handles; 
+    Handle                     _wake_event;                 // Task wecken
+    Handle                     _task_event;                 // Änderung in der Task, Spooler wecken
 };
 
 typedef list< Sos_ptr<Task> >   Task_list;
