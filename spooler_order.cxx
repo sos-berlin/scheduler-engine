@@ -1,4 +1,4 @@
-// $Id: spooler_order.cxx,v 1.68 2004/07/22 14:15:10 jz Exp $
+// $Id: spooler_order.cxx,v 1.69 2004/07/22 22:45:56 jz Exp $
 /*
     Hier sind implementiert
 
@@ -84,7 +84,7 @@ Job_chain* Spooler::job_chain( const string& name )
 
 //----------------------------------------------------xml::Element_ptr Spooler::xml_from_job_chains
 
-xml::Element_ptr Spooler::xml_from_job_chains( const xml::Document_ptr& document, Show_what show )
+xml::Element_ptr Spooler::xml_from_job_chains( const xml::Document_ptr& document, const Show_what& show )
 {
     xml::Element_ptr job_chains_element = document.createElement( "job_chains" );
 
@@ -105,7 +105,7 @@ xml::Element_ptr Spooler::xml_from_job_chains( const xml::Document_ptr& document
 
 //-------------------------------------------------------------xml::Element_ptr Job_chain_node::xml
 
-xml::Element_ptr Job_chain_node::dom( const xml::Document_ptr& document, Show_what show, Job_chain* job_chain )
+xml::Element_ptr Job_chain_node::dom( const xml::Document_ptr& document, const Show_what& show, Job_chain* job_chain )
 {
     xml::Element_ptr element = document.createElement( "job_chain_node" );
 
@@ -157,7 +157,7 @@ Job_chain::~Job_chain()
 
 //------------------------------------------------------------------xml::Element_ptr Job_chain::dom
 
-xml::Element_ptr Job_chain::dom( const xml::Document_ptr& document, Show_what show )
+xml::Element_ptr Job_chain::dom( const xml::Document_ptr& document, const Show_what& show )
 {
     xml::Element_ptr element = document.createElement( "job_chain" );
 
@@ -430,7 +430,7 @@ Order_queue::~Order_queue()
 
 //---------------------------------------------------------------------------------Order_queue::dom
 
-xml::Element_ptr Order_queue::dom( const xml::Document_ptr& document, Show_what show, Job_chain* which_job_chain )
+xml::Element_ptr Order_queue::dom( const xml::Document_ptr& document, const Show_what& show, Job_chain* which_job_chain )
 {
     xml::Element_ptr element = document.createElement( "order_queue" );
 
@@ -440,9 +440,13 @@ xml::Element_ptr Order_queue::dom( const xml::Document_ptr& document, Show_what 
 
         if( show & show_orders )
         {
+            int limit = show._order_limit;
+
             Queue* queues[] = { &_queue, &_setback_queue };
             for( Queue** q = queues; q < queues + NO_OF(queues); q++ )
             {
+                if( limit <= 0 ) break;
+
                 FOR_EACH( Queue, **q, it )
                 {
                     Order* order = *it;
@@ -450,6 +454,7 @@ xml::Element_ptr Order_queue::dom( const xml::Document_ptr& document, Show_what 
                     {
                         dom_append_nl( element );
                         element.appendChild( order->dom( document, show ) );
+                        if( --limit == 0 )  break;
                     }
                 }
             }
@@ -806,7 +811,7 @@ void Order::close()
 
 //---------------------------------------------------------------------------------------Order::dom
 
-xml::Element_ptr Order::dom( const xml::Document_ptr& document, Show_what show, const string* log )
+xml::Element_ptr Order::dom( const xml::Document_ptr& document, const Show_what& show, const string* log )
 {
     xml::Element_ptr element = document.createElement( "order" );
 

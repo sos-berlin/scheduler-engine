@@ -1,4 +1,4 @@
-// $Id: spooler_command.h,v 1.28 2004/07/21 14:23:44 jz Exp $
+// $Id: spooler_command.h,v 1.29 2004/07/22 22:45:56 jz Exp $
 
 #ifndef __SPOOLER_COMMAND_H
 #define __SPOOLER_COMMAND_H
@@ -6,9 +6,9 @@
 namespace sos {
 namespace spooler {
 
-//----------------------------------------------------------------------------------------Show_what
+//-----------------------------------------------------------------------------------Show_what_enum
 
-enum Show_what
+enum Show_what_enum
 {
     show_standard       = 0,
     
@@ -19,6 +19,24 @@ enum Show_what
 
     show_all_           = 0x80,
     show_all            = 0xFF      // Alle Flags und show_all_ (Bei <show_state> ist z.B. show_orders nicht in show_all enthalten)
+};
+
+inline Show_what_enum operator | ( Show_what_enum a, Show_what_enum b )  { return (Show_what_enum)( (int)a | (int)b ); } 
+
+//----------------------------------------------------------------------------------------Show_what
+
+struct Show_what
+{
+                                Show_what                   ( Show_what_enum what = show_standard ) : _zero_(this+1), _what(what), _order_limit(INT_MAX) {}
+
+                                operator Show_what_enum     () const                                { return _what; }
+    int                         operator &                  ( Show_what_enum w ) const              { return _what & w; }
+    void                        operator |=                 ( Show_what_enum w )                    { _what = _what | w; }
+
+
+    Fill_zero                  _zero_;
+    Show_what_enum             _what;
+    int                        _order_limit;
 };
 
 //-------------------------------------------------------------------------------------------------
@@ -42,23 +60,23 @@ struct Command_processor
     xml::Element_ptr            execute_command             ( const xml::Element_ptr&, const Time& xml_mod_time );
     xml::Element_ptr            execute_config              ( const xml::Element_ptr&, const Time& xml_mod_time );
 
-    xml::Element_ptr            execute_show_state          ( const xml::Element_ptr&, Show_what );
-    xml::Element_ptr            execute_show_history        ( const xml::Element_ptr&, Show_what );
-    xml::Element_ptr            execute_show_jobs           ( Show_what );
-    xml::Element_ptr            execute_show_threads        ( Show_what );
-    xml::Element_ptr            execute_show_process_classes( Show_what );
+    xml::Element_ptr            execute_show_state          ( const xml::Element_ptr&, const Show_what& );
+    xml::Element_ptr            execute_show_history        ( const xml::Element_ptr&, const Show_what& );
+    xml::Element_ptr            execute_show_jobs           ( const Show_what& );
+    xml::Element_ptr            execute_show_threads        ( const Show_what& );
+    xml::Element_ptr            execute_show_process_classes( const Show_what& );
     xml::Element_ptr            execute_add_jobs            ( const xml::Element_ptr& );
-    xml::Element_ptr            execute_show_job            ( const xml::Element_ptr&, Show_what );
+    xml::Element_ptr            execute_show_job            ( const xml::Element_ptr&, const Show_what& );
   //xml::Element_ptr            execute_show_job            ( Job* );
     xml::Element_ptr            execute_modify_job          ( const xml::Element_ptr& );
     xml::Element_ptr            execute_start_job           ( const xml::Element_ptr& );
-    xml::Element_ptr            execute_show_task           ( const xml::Element_ptr&, Show_what );
+    xml::Element_ptr            execute_show_task           ( const xml::Element_ptr&, const Show_what& );
     xml::Element_ptr            execute_kill_task           ( const xml::Element_ptr& );
     xml::Element_ptr            execute_modify_spooler      ( const xml::Element_ptr& );
     xml::Element_ptr            execute_terminate           ( const xml::Element_ptr& );
     xml::Element_ptr            execute_signal_object       ( const xml::Element_ptr& );
-    xml::Element_ptr            execute_show_job_chains     ( const xml::Element_ptr&, Show_what );
-    xml::Element_ptr            execute_show_order          ( const xml::Element_ptr&, Show_what );
+    xml::Element_ptr            execute_show_job_chains     ( const xml::Element_ptr&, const Show_what& );
+    xml::Element_ptr            execute_show_order          ( const xml::Element_ptr&, const Show_what& );
     xml::Element_ptr            execute_add_order           ( const xml::Element_ptr& );
     xml::Element_ptr            execute_modify_order        ( const xml::Element_ptr& );
 

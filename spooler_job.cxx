@@ -1,4 +1,4 @@
-// $Id: spooler_job.cxx,v 1.88 2004/07/22 14:15:10 jz Exp $
+// $Id: spooler_job.cxx,v 1.89 2004/07/22 22:45:56 jz Exp $
 // §851: Weitere Log-Ausgaben zum Scheduler-Start eingebaut
 /*
     Hier sind implementiert
@@ -1520,7 +1520,7 @@ Time Job::get_delay_order_after_setback( int setback_count )
 //-----------------------------------------------------------------------------------------Job::dom
 // Anderer Thread
 
-xml::Element_ptr Job::dom( const xml::Document_ptr& document, Show_what show, Job_chain* which_job_chain )
+xml::Element_ptr Job::dom( const xml::Document_ptr& document, const Show_what& show, Job_chain* which_job_chain )
 {
     xml::Element_ptr job_element = document.createElement( "job" );
 

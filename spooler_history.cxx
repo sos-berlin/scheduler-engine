@@ -1,4 +1,4 @@
-// $Id: spooler_history.cxx,v 1.97 2004/07/21 14:23:44 jz Exp $
+// $Id: spooler_history.cxx,v 1.98 2004/07/22 22:45:56 jz Exp $
 
 #include "spooler.h"
 #include "../zschimmer/z_com.h"
@@ -840,7 +840,7 @@ void Spooler_db::write_order_history( Order* order, Transaction* outer_transacti
 
 //---------------------------------------------------------------------Job_chain::read_order_history
 /*
-xml::Element_ptr Job_chain::read_history( const xml::Document_ptr& doc, int id, int next, Show_what show )
+xml::Element_ptr Job_chain::read_history( const xml::Document_ptr& doc, int id, int next, const Show_what& show )
 {
     bool with_log = ( show & show_log ) != 0;
 
@@ -940,7 +940,7 @@ xml::Element_ptr Job_chain::read_history( const xml::Document_ptr& doc, int id, 
 //----------------------------------------------------------------------------Spooler_db::read_task
 // Die XML-Struktur ist wie Task::dom(), nicht wie Job_history::read_tail()
 
-xml::Element_ptr Spooler_db::read_task( const xml::Document_ptr& doc, int task_id, Show_what show )
+xml::Element_ptr Spooler_db::read_task( const xml::Document_ptr& doc, int task_id, const Show_what& show )
 {
     if( !opened() )  throw_xc( "SCHEDULER-184" );
 
@@ -1168,7 +1168,7 @@ void Job_history::archive( Archive_switch arc, const string& filename )
 // Anderer Thread.
 // Hier nicht auf _job etc. zugreifen!
 
-xml::Element_ptr Job_history::read_tail( const xml::Document_ptr& doc, int id, int next, Show_what show )
+xml::Element_ptr Job_history::read_tail( const xml::Document_ptr& doc, int id, int next, const Show_what& show )
 {
     if( !_history_yes )  throw_xc( "SCHEDULER-141", _job_name );
 

@@ -1,4 +1,4 @@
-// $Id: spooler_history.h,v 1.29 2004/03/25 10:46:11 jz Exp $
+// $Id: spooler_history.h,v 1.30 2004/07/22 22:45:56 jz Exp $
 
 #ifndef __SPOOLER_HISTORY_H
 #define __SPOOLER_HISTORY_H
@@ -56,7 +56,7 @@ struct Spooler_db : Sos_self_deleting
     int                         get_order_ordering      ( Transaction* ta = NULL )                  { return get_id( "spooler_order_ordering", ta ); }
     int                         get_order_history_id    ( Transaction* ta )                         { return get_id( "spooler_order_history_id", ta ); }
 
-    xml::Element_ptr            read_task               ( const xml::Document_ptr&, int task_id, Show_what );
+    xml::Element_ptr            read_task               ( const xml::Document_ptr&, int task_id, const Show_what& );
 
     void                        insert_order            ( Order* );
     void                        update_order            ( Order* );
@@ -127,7 +127,7 @@ struct Job_history
     void                        close                   ();
     int                         min_steps               ()                                          { return _history_yes? _on_process : INT_MAX; }
 
-    xml::Element_ptr            read_tail               ( const xml::Document_ptr&, int id, int next, Show_what );
+    xml::Element_ptr            read_tail               ( const xml::Document_ptr&, int id, int next, const Show_what& );
 
   private:
     friend struct               Task_history;
@@ -167,7 +167,7 @@ struct Task_history
     void                        end                     ();
     void                        set_extra_field         ( const string& name, const Variant& value );
 
-    xml::Element_ptr            read_tail               ( const xml::Document_ptr&, int id, int next, Show_what );
+    xml::Element_ptr            read_tail               ( const xml::Document_ptr&, int id, int next, const Show_what& );
 
   private:
     void                        append_tabbed           ( int i )                                   { append_tabbed( as_string(i) ); }

@@ -1,4 +1,4 @@
-// $Id: spooler_thread.h,v 1.55 2004/03/29 22:03:14 jz Exp $
+// $Id: spooler_thread.h,v 1.56 2004/07/22 22:45:56 jz Exp $
 
 #ifndef __SPOOLER_THREAD_H
 #define __SPOOLER_THREAD_H
@@ -17,7 +17,7 @@ struct Spooler_thread : zschimmer::Thread
                                ~Spooler_thread              ();
 
   //void                        set_dom                     ( const xml::Element_ptr&, const Time& xml_mod_time );
-    xml::Element_ptr            dom                         ( const xml::Document_ptr&, Show_what );
+    xml::Element_ptr            dom                         ( const xml::Document_ptr&, const Show_what& );
     
     const string&               name                        () const                                { return _name; }
     void                    set_name                        ( const string& name )                  { _name = name; set_thread_name( _name ); _log.set_prefix( _obj_name() ); }

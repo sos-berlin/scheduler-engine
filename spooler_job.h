@@ -1,4 +1,4 @@
-// $Id: spooler_job.h,v 1.28 2004/07/21 14:23:45 jz Exp $
+// $Id: spooler_job.h,v 1.29 2004/07/22 22:45:56 jz Exp $
 
 #ifndef __SPOOLER_JOB_H
 #define __SPOOLER_JOB_H
@@ -190,7 +190,7 @@ struct Job : Sos_self_deleting
                                ~Job                         (); 
 
     void                    set_dom                         ( const xml::Element_ptr&, const Time& mod_time );
-    xml::Element_ptr            dom                         ( const xml::Document_ptr&, Show_what, Job_chain* = NULL );
+    xml::Element_ptr            dom                         ( const xml::Document_ptr&, const Show_what&, Job_chain* = NULL );
 
     void                        init0                       ();                                     // Wird vor Spooler-Skript gerufen
     void                        init                        ();                                     // Wird nach Spooler-Skript gerufen, ruft auch init2()
@@ -216,7 +216,7 @@ struct Job : Sos_self_deleting
     void                        set_max_order_setbacks      ( int n )                               { _log->debug9( "max_order_setbacks"+as_string(n) ); _max_order_setbacks = n; }
     int                         max_order_setbacks          () const                                { return _max_order_setbacks; }
     void                        load_tasks_from_db          ();
-    xml::Element_ptr            read_history                ( const xml::Document_ptr& doc, int id, int n, Show_what show ) { return _history.read_tail( doc, id, n, show ); }
+    xml::Element_ptr            read_history                ( const xml::Document_ptr& doc, int id, int n, const Show_what& show ) { return _history.read_tail( doc, id, n, show ); }
 
     void                        close                       ();
 

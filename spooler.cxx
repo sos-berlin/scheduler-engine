@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.343 2004/07/22 12:10:00 jz Exp $
+// $Id: spooler.cxx,v 1.344 2004/07/22 22:45:55 jz Exp $
 // §851: Weitere Log-Ausgaben zum Scheduler-Start eingebaut
 // §1479
 
@@ -436,7 +436,7 @@ Security::Level Spooler::security_level( const Host& host )
 
 //-----------------------------------------------------------------------------Spooler::jobs_as_xml
 
-xml::Element_ptr Spooler::jobs_as_xml( const xml::Document_ptr& document, Show_what show )
+xml::Element_ptr Spooler::jobs_as_xml( const xml::Document_ptr& document, const Show_what& show )
 {
     xml::Element_ptr jobs_element = document.createElement( "jobs" );
     dom_append_nl( jobs_element );
@@ -537,7 +537,7 @@ bool Spooler::has_any_order()
 //--------------------------------------------------------------------------Spooler::threads_as_xml
 // Anderer Thread
 
-xml::Element_ptr Spooler::threads_as_xml( const xml::Document_ptr& document, Show_what show )
+xml::Element_ptr Spooler::threads_as_xml( const xml::Document_ptr& document, const Show_what& show )
 {
     xml::Element_ptr threads = document.createElement( "threads" );
 
@@ -590,7 +590,7 @@ void Spooler::load_process_classes_from_dom( const xml::Element_ptr& element, co
 //------------------------------------------------------------------Spooler::process_classes_as_dom
 // Anderer Thread
 
-xml::Element_ptr Spooler::process_classes_as_dom( const xml::Document_ptr& document, Show_what show )
+xml::Element_ptr Spooler::process_classes_as_dom( const xml::Document_ptr& document, const Show_what& show )
 {
     xml::Element_ptr element = document.createElement( "process_classes" );
 

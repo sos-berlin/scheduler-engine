@@ -1,4 +1,4 @@
-// $Id: spooler_process.cxx,v 1.29 2004/06/05 08:57:49 jz Exp $
+// $Id: spooler_process.cxx,v 1.30 2004/07/22 22:45:56 jz Exp $
 // §1172
 // §1206
 
@@ -158,7 +158,7 @@ string Process::stderr_filename()
 
 //-------------------------------------------------------------------------------------Process::dom
 
-xml::Element_ptr Process::dom( const xml::Document_ptr& document, Show_what )
+xml::Element_ptr Process::dom( const xml::Document_ptr& document, const Show_what& )
 {
     xml::Element_ptr process_element = document.createElement( "process" );
 
@@ -352,7 +352,7 @@ void Process_class::set_dom( const xml::Element_ptr& e )
 //----------------------------------------------------------------------------------Spooler::as_dom
 // Anderer Thread
 
-xml::Element_ptr Process_class::dom( const xml::Document_ptr& document, Show_what show )
+xml::Element_ptr Process_class::dom( const xml::Document_ptr& document, const Show_what& show )
 {
     xml::Element_ptr element = document.createElement( "process_class" );
         

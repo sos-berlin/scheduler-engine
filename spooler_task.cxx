@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.259 2004/07/22 12:10:01 jz Exp $
+// $Id: spooler_task.cxx,v 1.260 2004/07/22 22:45:56 jz Exp $
 /*
     Hier sind implementiert
 
@@ -279,7 +279,7 @@ void Task::close()
 //----------------------------------------------------------------------------------------Task::dom
 // s.a. Spooler_command::execute_show_task() zum Aufbau des XML-Elements <task>
 
-xml::Element_ptr Task::dom( const xml::Document_ptr& document, Show_what show )
+xml::Element_ptr Task::dom( const xml::Document_ptr& document, const Show_what& show )
 {
     xml::Element_ptr task_element = document.createElement( "task" );
 

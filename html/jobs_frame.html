@@ -1,4 +1,4 @@
-<!-- $Id: jobs_frame.html,v 1.18 2004/07/22 20:29:53 jz Exp $ -->
+<!-- $Id: jobs_frame.html,v 1.19 2004/07/22 22:45:56 jz Exp $ -->
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <html>
 
@@ -35,7 +35,11 @@
 <script type="text/javascript" for="window" event="onload"> do_onload(); </script>
 
 <script defer="true" language="javascript"><!--
-//-------------------------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------------------const
+
+var job_chain_orders_limit = 10;
+
+//----------------------------------------------------------------------------------------------var
 
 var _stylesheet;
 var _response;
@@ -50,15 +54,10 @@ function do_onload()
     _stylesheet = document.all.stylesheet.XMLDocument;
     if( _stylesheet.parseError.errorCode )  throw new Error( "Fehler im Stylesheet:\n" + _stylesheet.parseError.reason );
 
-    
     document.all.stylesheet.outerHTML = "<span id='stylesheet'></span>";
     
     _scheduler = new Scheduler();
-    //scheduler.execute_and_fill_html(  "<show_state what='all'/>" );
-
     repeat_update( document.all.update_periodically_checkbox.checked, true );
-    
-    //document.all.update_periodically_checkbox.checked = _update_periodically;
     scheduler_init();
 }
 
@@ -79,13 +78,13 @@ function show_tasks_checkbox__onclick()
 }
 
 //--------------------------------------------------------------------show_orders_checkbox__onclick
-/*
+
 function show_orders_checkbox__onclick()
 {
     reset_error();
     update();
 }
-*/
+
 //----------------------------------------------------------------------------------update__onclick
 
 function update__onclick()
@@ -104,7 +103,6 @@ function scheduler_command__onclick()
     
     var command = function( cmd ) { return "<modify_spooler cmd='" + cmd + "'/>"; }
     
-    //popup_builder.add_entry  ( "Show log"                       , "parent.scheduler_command__show_log__onclick()" );
     popup_builder.add_show_log( "Show log"                       , "show_log", "show_log" );
     popup_builder.add_bar();
   //popup_builder.add_command ( "Stop"                           , command( "stop" ), state != "stopped"  &&  state != "stopping"  &&  state != "stopping_let_run" );
@@ -122,14 +120,6 @@ function scheduler_command__onclick()
     _popup = popup_builder.show_popup();
 }
 
-//-------------------------------------------------------------scheduler_command__show_log__onclick
-/*
-function scheduler_command__show_log__onclick()
-{
-    window.open( "http://" + document.location.host + "/show_log", "show_log", "", true );
-    _popup.hide();
-}
-*/
 //--------------------------------------------------------------------------------------reset_error
 
 function reset_error()
@@ -189,7 +179,13 @@ function set_update_timer()
 
 function update_jobs_frame()
 {
-    _response = _scheduler.execute( "<show_state what=''/>" );
+    var what = "";
+    if( document.all.show_orders_checkbox  &&  document.all.show_orders_checkbox.checked )
+    {
+        what = "orders=" + job_chain_orders_limit;
+    }
+    
+    _response = _scheduler.execute( "<show_state what='" + what + "'/>" );
     modify_response( _response );
     document.all.stylesheet.innerHTML = _response.transformNode( _stylesheet );;
 }
@@ -238,17 +234,15 @@ function modify_response( response )
     var spooler_element = response.selectSingleNode( "spooler" );
     if( spooler_element )
     {    
-        if( document.all.show_tasks_checkbox )
+        if( document.all.show_tasks_checkbox  &&  document.all.show_tasks_checkbox.checked )
         {
-            spooler_element.setAttribute( "my_show_tasks", document.all.show_tasks_checkbox.checked? "yes" : "no" );
+            spooler_element.setAttribute( "my_show_tasks", "yes" );
         }
         
-        /*
-        if( document.all.show_orders_checkbox )
+        if( document.all.show_orders_checkbox  &&  document.all.show_orders_checkbox.checked )
         {
-            spooler_element.setAttribute( "my_show_orders", document.all.show_orders_checkbox.checked? "yes" : "no" );
+            spooler_element.setAttribute( "my_show_orders", job_chain_orders_limit );
         }
-        */
     }
 }
 

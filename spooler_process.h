@@ -1,4 +1,4 @@
-// $Id: spooler_process.h,v 1.23 2004/05/10 12:01:10 jz Exp $
+// $Id: spooler_process.h,v 1.24 2004/07/22 22:45:56 jz Exp $
 
 #ifndef __SPOOLER_PROCESS_H
 #define __SPOOLER_PROCESS_H
@@ -46,7 +46,7 @@ struct Process : zschimmer::Object
     string                      stdout_filename             ();
 
     void                    set_dom                         ( const xml::Element_ptr&, const Time& xml_mod_time );
-    xml::Element_ptr            dom                         ( const xml::Document_ptr&, Show_what );
+    xml::Element_ptr            dom                         ( const xml::Document_ptr&, const Show_what& );
 
     
 //private:
@@ -96,7 +96,7 @@ struct Process_class : zschimmer::Object
   //Job*                        first_waiting_job           ()                                      { return _waiting_jobs.begin(); }
 
     void                    set_dom                         ( const xml::Element_ptr& );
-    xml::Element_ptr            dom                         ( const xml::Document_ptr&, Show_what );
+    xml::Element_ptr            dom                         ( const xml::Document_ptr&, const Show_what& );
 
 
     Fill_zero                  _zero_;

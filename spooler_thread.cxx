@@ -1,4 +1,4 @@
-// $Id: spooler_thread.cxx,v 1.115 2004/06/05 08:57:49 jz Exp $
+// $Id: spooler_thread.cxx,v 1.116 2004/07/22 22:45:56 jz Exp $
 /*
     Hier sind implementiert
 
@@ -64,7 +64,7 @@ void Spooler_thread::init()
 
 //------------------------------------------------------------------------------Spooler_thread::dom
 
-xml::Element_ptr Spooler_thread::dom( const xml::Document_ptr& document, Show_what )
+xml::Element_ptr Spooler_thread::dom( const xml::Document_ptr& document, const Show_what& )
 {
     xml::Element_ptr thread_element = document.createElement( "thread" );
 

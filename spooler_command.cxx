@@ -1,4 +1,4 @@
-// $Id: spooler_command.cxx,v 1.125 2004/07/22 14:15:10 jz Exp $
+// $Id: spooler_command.cxx,v 1.126 2004/07/22 22:45:56 jz Exp $
 /*
     Hier ist implementiert
 
@@ -121,7 +121,7 @@ xml::Element_ptr Command_processor::execute_config( const xml::Element_ptr& conf
 
 //-------------------------------------------------------------Command_processor::execute_show_jobs
 
-xml::Element_ptr Command_processor::execute_show_jobs( Show_what show )
+xml::Element_ptr Command_processor::execute_show_jobs( const Show_what& show )
 {
     if( _security_level < Security::seclev_info )  throw_xc( "SCHEDULER-121" );
 
@@ -130,7 +130,7 @@ xml::Element_ptr Command_processor::execute_show_jobs( Show_what show )
 
 //----------------------------------------------------------Command_processor::execute_show_threads
 
-xml::Element_ptr Command_processor::execute_show_threads( Show_what show )
+xml::Element_ptr Command_processor::execute_show_threads( const Show_what& show )
 {
     if( _security_level < Security::seclev_info )  throw_xc( "SCHEDULER-121" );
 
@@ -139,7 +139,7 @@ xml::Element_ptr Command_processor::execute_show_threads( Show_what show )
 
 //--------------------------------------------------Command_processor::execute_show_process_classes
 
-xml::Element_ptr Command_processor::execute_show_process_classes( Show_what show )
+xml::Element_ptr Command_processor::execute_show_process_classes( const Show_what& show )
 {
     if( _security_level < Security::seclev_info )  throw_xc( "SCHEDULER-121" );
 
@@ -148,11 +148,12 @@ xml::Element_ptr Command_processor::execute_show_process_classes( Show_what show
 
 //------------------------------------------------------------Command_processor::execute_show_state
 
-xml::Element_ptr Command_processor::execute_show_state( const xml::Element_ptr& element, Show_what show )
+xml::Element_ptr Command_processor::execute_show_state( const xml::Element_ptr& element, const Show_what& show_ )
 {
     if( _security_level < Security::seclev_info )  throw_xc( "SCHEDULER-121" );
 
-    if( show & show_all_ )  show = Show_what( show | show_task_queue | show_description );
+    Show_what show = show_;
+    if( show & show_all_ )  show |= Show_what_enum( show_task_queue | show_description );
 
     xml::Element_ptr state_element = _answer.createElement( "state" );
  
@@ -235,11 +236,12 @@ void Command_processor::get_id_and_next( const xml::Element_ptr& element, int* i
 
 //----------------------------------------------------------Command_processor::execute_show_history
 
-xml::Element_ptr Command_processor::execute_show_history( const xml::Element_ptr& element, Show_what show )
+xml::Element_ptr Command_processor::execute_show_history( const xml::Element_ptr& element, const Show_what& show_ )
 {
     if( _security_level < Security::seclev_info )  throw_xc( "SCHEDULER-121" );
 
-    if( show & show_all_ )  show = Show_what( show | show_log );
+    Show_what show = show_;
+    if( show & show_all_ )  show |= show_log;
 
     string job_name = element.getAttribute( "job" );
 
@@ -253,11 +255,11 @@ xml::Element_ptr Command_processor::execute_show_history( const xml::Element_ptr
 
 //----------------------------------------------------Command_processor::execute_show_order_history
 /*
-xml::Element_ptr Command_processor::execute_show_order_history( const xml::Element_ptr& element, Show_what show )
+xml::Element_ptr Command_processor::execute_show_order_history( const xml::Element_ptr& element, const Show_what& show )
 {
     if( _security_level < Security::seclev_info )  throw_xc( "SCHEDULER-121" );
 
-    if( show & show_all_ )  show = Show_what( show | show_log );
+    if( show & show_all_ )  show = Show_what_enum( show | show_log );
 
     int id, next;
     get_id_and_prev( element, &id, &next );
@@ -332,11 +334,12 @@ xml::Element_ptr Command_processor::execute_terminate( const xml::Element_ptr& e
 }
 //--------------------------------------------------------------Command_processor::execute_show_job
 
-xml::Element_ptr Command_processor::execute_show_job( const xml::Element_ptr& element, Show_what show )
+xml::Element_ptr Command_processor::execute_show_job( const xml::Element_ptr& element, const Show_what& show_ )
 {
     if( _security_level < Security::seclev_info )  throw_xc( "SCHEDULER-121" );
 
-    if( show & show_all_ )  show = Show_what( show | show_description | show_task_queue | show_orders );
+    Show_what show = show_;
+    if( show & show_all_ )  show |= show_description | show_task_queue | show_orders;
 
     return _spooler->get_job( element.getAttribute( "job" ) ) -> dom( _answer, show );
 }
@@ -364,7 +367,7 @@ xml::Element_ptr Command_processor::execute_modify_job( const xml::Element_ptr& 
 
 //-------------------------------------------------------------Command_processor::execute_show_task
 
-xml::Element_ptr Command_processor::execute_show_task( const xml::Element_ptr& element, Show_what show )
+xml::Element_ptr Command_processor::execute_show_task( const xml::Element_ptr& element, const Show_what& show )
 {
     if( _security_level < Security::seclev_info )  throw_xc( "SCHEDULER-121" );
 
@@ -458,21 +461,23 @@ xml::Element_ptr Command_processor::execute_add_jobs( const xml::Element_ptr& ad
 
 //-------------------------------------------------------Command_processor::execute_show_job_chains
 
-xml::Element_ptr Command_processor::execute_show_job_chains( const xml::Element_ptr&, Show_what show )
+xml::Element_ptr Command_processor::execute_show_job_chains( const xml::Element_ptr&, const Show_what& show_ )
 {
     if( _security_level < Security::seclev_info )  throw_xc( "SCHEDULER-121" );
 
-    if( show & show_all_ )  show = Show_what( show | show_description | show_orders );
+    Show_what show = show_;
+    if( show & show_all_ )  show |= show | show_description | show_orders;
 
     return _spooler->xml_from_job_chains( _answer, show );
 }
 
 //------------------------------------------------------------Command_processor::execute_show_order
 
-xml::Element_ptr Command_processor::execute_show_order( const xml::Element_ptr& show_order_element, Show_what show )
+xml::Element_ptr Command_processor::execute_show_order( const xml::Element_ptr& show_order_element, const Show_what& show_ )
 {
     if( _security_level < Security::seclev_info )  throw_xc( "SCHEDULER-121" );
 
+    Show_what show = show_;
     if( show == show_all_ )  show = Show_what( show_standard );
 
     string    job_chain_name = show_order_element.getAttribute( "job_chain" );
@@ -597,20 +602,30 @@ xml::Element_ptr Command_processor::execute_command( const xml::Element_ptr& ele
 {
     string what = element.getAttribute( "what" );
 
-    Show_what show = (Show_what)0;
+    Show_what show;
     
     const char* p = what.c_str();  // Bsp: "all"  "orders,description"  "task_queue,orders,description,"
     while( *p )
     {
-        if( string_equals_prefix_then_skip( &p, "all"         ) )  show = (Show_what)( show | show_all_ );
+        if( string_equals_prefix_then_skip( &p, "all"         ) )  show |= show_all_;
         else
-        if( string_equals_prefix_then_skip( &p, "task_queue"  ) )  show = (Show_what)( show | show_task_queue );
+        if( string_equals_prefix_then_skip( &p, "task_queue"  ) )  show |= show_task_queue;
         else
-        if( string_equals_prefix_then_skip( &p, "orders"      ) )  show = (Show_what)( show | show_orders );
+        if( string_equals_prefix_then_skip( &p, "orders"      ) )
+        {
+            show |= show_orders;
+
+            if( p[0] == '=' )
+            {
+                p++;
+                show._order_limit = 0;
+                while( isdigit( (uint)p[0] ) )  show._order_limit *= 10,  show._order_limit += p++[0] - '0';
+            }
+        }
         else
-        if( string_equals_prefix_then_skip( &p, "description" ) )  show = (Show_what)( show | show_description );
+        if( string_equals_prefix_then_skip( &p, "description" ) )  show |= show_description;
         else
-        if( string_equals_prefix_then_skip( &p, "log"         ) )  show = (Show_what)( show | show_log );
+        if( string_equals_prefix_then_skip( &p, "log"         ) )  show |= show_log;
         else
         if( string_equals_prefix_then_skip( &p, "standard"    ) )  ;
         else

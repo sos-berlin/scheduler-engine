@@ -1,4 +1,4 @@
-// $Id: spooler.h,v 1.183 2004/07/21 14:23:44 jz Exp $
+// $Id: spooler.h,v 1.184 2004/07/22 22:45:56 jz Exp $
 // §1172
 
 #ifndef __SPOOLER_H
@@ -196,7 +196,7 @@ struct Spooler
     bool                        is_service                  () const                            { return _is_service; }
     string                      directory                   () const                            { return _directory; }
 
-    xml::Element_ptr            threads_as_xml              ( const xml::Document_ptr&, Show_what );
+    xml::Element_ptr            threads_as_xml              ( const xml::Document_ptr&, const Show_what& );
 
     int                         launch                      ( int argc, char** argv, const string& params );                                
     void                        set_state_changed_handler   ( State_changed_handler h )         { _state_changed_handler = h; }
@@ -278,11 +278,11 @@ struct Spooler
 
     // Order
     void                        load_jobs_from_xml          ( const xml::Element_ptr&, const Time& xml_mod_time, bool init = false );
-    xml::Element_ptr            jobs_as_xml                 ( const xml::Document_ptr&, Show_what );
+    xml::Element_ptr            jobs_as_xml                 ( const xml::Document_ptr&, const Show_what& );
     void                        add_job_chain               ( Job_chain* );
     Job_chain*                  job_chain                   ( const string& name );
     Job_chain*                  job_chain_or_null           ( const string& name );
-    xml::Element_ptr            xml_from_job_chains         ( const xml::Document_ptr&, Show_what );
+    xml::Element_ptr            xml_from_job_chains         ( const xml::Document_ptr&, const Show_what& );
     void                        set_job_chain_time          ( const Time& t )                   { THREAD_LOCK( _job_chain_lock )  _job_chain_time = t; }
     Time                        job_chain_time              ()                                  { THREAD_LOCK_RETURN( _job_chain_lock, Time, _job_chain_time ); }
 
@@ -291,7 +291,7 @@ struct Spooler
     void                        add_process_class           ( Process_class* );
     Process_class*              process_class_or_null       ( const string& name );
     Process_class*              process_class               ( const string& name );
-    xml::Element_ptr            process_classes_as_dom      ( const xml::Document_ptr&, Show_what );
+    xml::Element_ptr            process_classes_as_dom      ( const xml::Document_ptr&, const Show_what& );
     Process*                    new_temporary_process       ();
     void                        init_process_classes        ();
     Process_class*              temporary_process_class     ()                                  { return *_process_class_list.begin(); }
