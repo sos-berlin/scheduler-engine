@@ -1,4 +1,4 @@
-// $Id: spooler_communication.cxx,v 1.78 2004/01/12 07:25:27 jz Exp $
+// $Id: spooler_communication.cxx,v 1.79 2004/01/28 15:23:09 jz Exp $
 /*
     Hier sind implementiert
 
@@ -278,9 +278,9 @@ bool Communication::Udp_socket::async_continue_( bool wait )
 
     //if( socket_read_signaled() )
     {
-        char buffer [4096];
-        sockaddr_in addr;     
-        socklen_t   addr_len = sizeof addr;
+        char           buffer [4096];
+        sockaddr_in    addr;     
+        sockaddrlen_t  addr_len = sizeof addr;
 
         addr.sin_addr.s_addr = 0;
         int len = recvfrom( _read_socket, buffer, sizeof buffer, 0, (sockaddr*)&addr, &addr_len );
@@ -345,7 +345,7 @@ bool Communication::Channel::do_accept( SOCKET listen_socket )
     try
     {
         struct sockaddr_in peer_addr;
-        socklen_t          peer_addr_len = sizeof peer_addr;
+        sockaddrlen_t      peer_addr_len = sizeof peer_addr;
 
         LOG2( "socket.accept", "accept(" << listen_socket << ")\n" );
         _read_socket = accept( listen_socket, (struct sockaddr*)&peer_addr, &peer_addr_len );
@@ -356,7 +356,7 @@ bool Communication::Channel::do_accept( SOCKET listen_socket )
             if( err == EWOULDBLOCK )  return false;
             throw_sos_socket_error( err, "accept" );
         }
-        
+
         _write_socket = _read_socket;
 
         set_linger( _read_socket );
@@ -365,7 +365,7 @@ bool Communication::Channel::do_accept( SOCKET listen_socket )
         int ret = ioctlsocket( _read_socket, FIONBIO, &on );
         if( ret == SOCKET_ERROR )  throw_sos_socket_error( "ioctl(FIONBIO)" );
 
-        socklen_t s = sizeof _socket_send_buffer_size ;
+        sockaddrlen_t s = sizeof _socket_send_buffer_size ;
         ret = getsockopt( _write_socket, SOL_SOCKET, SO_SNDBUF, (char*)&_socket_send_buffer_size , &s );
         if( ret == SOCKET_ERROR  ||  _socket_send_buffer_size <= 0 ) 
         {
