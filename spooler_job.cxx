@@ -1,4 +1,4 @@
-// $Id: spooler_job.cxx,v 1.69 2004/04/05 08:49:46 jz Exp $
+// $Id: spooler_job.cxx,v 1.70 2004/05/04 06:15:27 jz Exp $
 /*
     Hier sind implementiert
 
@@ -199,7 +199,7 @@ void Job::init()
     init2();
 }
 
-//----------------------------------------------------------------------------------------Job::init
+//---------------------------------------------------------------------------------------Job::init2
 // Bei <add_jobs> von einem anderen Thread gerufen.
 
 void Job::init2()

@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.330 2004/04/07 10:16:11 jz Exp $
+// $Id: spooler.cxx,v 1.331 2004/05/04 06:15:27 jz Exp $
 /*
     Hier sind implementiert
 
@@ -1581,6 +1581,7 @@ void Spooler::start()
 
     if( _module.set() )
     {
+        LOG( "Startskript wird gestartet" );
         _module_instance = _module.create_instance();
       //_module_instance->_title = "Scheduler-Script";
         _module_instance->init();
@@ -1597,6 +1598,8 @@ void Spooler::start()
 
     init_process_classes();
   //start_threads();
+
+    LOG( "Jobs werden initialisiert" );
     start_jobs();
 
     
