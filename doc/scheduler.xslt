@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding="utf-8"?>
-<!-- $Id: scheduler.xslt,v 1.35 2004/09/11 19:27:01 jz Exp $ -->
+<!-- $Id: scheduler.xslt,v 1.36 2004/09/12 10:38:53 jz Exp $ -->
 
 <!--
     Änderungswünsche:
@@ -11,6 +11,8 @@
 
 <xsl:stylesheet xmlns:xsl = "http://www.w3.org/1999/XSL/Transform" 
                 version   = "1.0">
+                
+    <xsl:output doctype-public="-//W3C//DTD HTML 4.01//EN" />  <!--"http://www.w3.org/TR/html4/strict.dtd"-->
 
     <xsl:variable name="start_page" select="'index.xml'"/>
     <xsl:variable name="base_dir"   select="/*/@base_dir"/>
@@ -538,13 +540,15 @@
                 </xsl:call-template>
                 
                 <p>
-                    (Das Register ist ein Experiment)
+                    (Das Register ist ein Experiment.)
                 </p>
                 
+                <xsl:call-template name="complete_register"/>
+<!--                
                 <p>
                     <b>Inhalt</b>
                 </p>
-                
+
                 <p>
                     <a href="#stichwörter">Stichwörter</a><br/>
                     <a href="#optionen">Optionen</a><br/>
@@ -554,92 +558,28 @@
 
                 <a name="stichwörter"/>
                 <h2>Stichwörter</h2>
-                <!--
-                <table cellspacing="0" cellpadding="0">
-                    <col valign="baseline"/>
-                    <col valign="baseline" style="padding-top: 5pt; padding-left: 2ex"/>
-                    
-                    <xsl:for-each select="register_keyword[ child::register_entry ]">
-                        <xsl:sort select="@keyword"/>
-                        <tr>
-                            <td>
-                                <xsl:value-of select="@keyword"/>
-                            </td>
-                            <td>
-                                <xsl:for-each select="register_entry">
-                                    <xsl:apply-templates select=".">
-                                        <xsl:sort select="@register_keyword"/>
-                                        <xsl:sort select="@register_title"/>
-                                    </xsl:apply-templates>
-                                            
-                                    <xsl:if test="position() &lt; last()">, </xsl:if>
-                                </xsl:for-each>
-                            </td>
-                        </tr>
-                    </xsl:for-each>
-                </table>
-                -->
-                <table cellspacing="0" cellpadding="0">
-                    <col valign="baseline"/>
-                    <col valign="baseline" style="padding-top: 5pt; padding-left: 2ex"/>
-                    
-                    <xsl:call-template name="register">
-                        <xsl:with-param name="children_name" select="'register_entry'"/>
-                    </xsl:call-template>
-                </table>                
+                <xsl:call-template name="register">
+                    <xsl:with-param name="children_name" select="'register_entry'"/>
+                </xsl:call-template>
                 
                 <a name="optionen"/>
                 <h2>Optionen der Kommandozeile</h2>
-                <table cellspacing="0" cellpadding="0">
-                    <col valign="baseline"/>
-                    <col valign="baseline" style="padding-top: 5pt; padding-left: 2ex"/>
-                    
-                    <xsl:call-template name="register">
-                        <xsl:with-param name="children_name" select="'register_option'"/>
-                    </xsl:call-template>
-                </table>                
+                <xsl:call-template name="register">
+                    <xsl:with-param name="children_name" select="'register_option'"/>
+                </xsl:call-template>
                 
-<!--
-                <table cellspacing="0" cellpadding="0">
-                    <col align="baseline"/>
-                    <col align="baseline" style="padding-left: 2ex"/>
-                    <xsl:apply-templates select="register_option">
-                        <xsl:sort select="@name"/>
-                    </xsl:apply-templates>
-                </table>                
--->                
                 <a name="ini"/>
                 <h2>Einträge in .ini-Dateien</h2>
-                <table cellspacing="0" cellpadding="0">
-                    <col align="baseline"/>
-                    <col align="baseline" style="padding-left: 2ex"/>
-                    <col align="baseline" style="padding-left: 2ex"/>
-                    <xsl:call-template name="register">
-                        <xsl:with-param name="children_name" select="'register_ini_entry'"/>
-                    </xsl:call-template>
-<!--                    
-                    <xsl:apply-templates select="register_ini_entry">
-                        <xsl:sort select="@entry"/>
-                        <xsl:sort select="@file"/>
-                        <xsl:sort select="@title"/>
-                    </xsl:apply-templates>
--->                    
-                </table>                
+                <xsl:call-template name="register">
+                    <xsl:with-param name="children_name" select="'register_ini_entry'"/>
+                </xsl:call-template>
                 
                 <a name="xml_elemente"/>
                 <h2>XML-Elemente</h2>
-                <table cellspacing="0" cellpadding="0">
-                    <col align="baseline"/>
-                    <col align="baseline" style="padding-left: 2ex"/>
-                    <xsl:call-template name="register">
-                        <xsl:with-param name="children_name" select="'register_element'"/>
-                    </xsl:call-template>
-<!--                    
-                    <xsl:apply-templates select="register_element">
-                        <xsl:sort select="@name"/>
-                    </xsl:apply-templates>
--->                    
-                </table>                
+                <xsl:call-template name="register">
+                    <xsl:with-param name="children_name" select="'register_element'"/>
+                </xsl:call-template>
+-->                
                 
                 <xsl:call-template name="bottom"/>
             </body>
@@ -647,40 +587,92 @@
         
     </xsl:template>
 
-    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~register-->
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~complete_register-->
+
+    <xsl:template name="complete_register">
+        
+        <p>
+            <table cellspacing="0" cellpadding="0">
+                <col valign="baseline"/>
+                <col valign="baseline" style="padding-top: 2pt; padding-left: 2ex"/>
+
+                <xsl:for-each select="*">
+                    <xsl:sort select="@keyword"/>
+                    
+                    <tr>
+                        <td nowrap="true">
+                            <xsl:value-of select="@keyword"/>
+                            <!--xsl:apply-templates select="*[ name(.) = $children_name ][ position() = 1]/.." mode="keyword"/-->
+                        </td>
+                        <td>
+                            <xsl:for-each select="*">
+                                <xsl:sort select="@register_title"/>
+
+                                <xsl:apply-templates select=".">
+                                    <xsl:sort select="@register_keyword"/>
+                                    <xsl:sort select="@register_title"/>
+                                </xsl:apply-templates>
+                                            
+                                <xsl:if test="position() &lt; last()">,&#160; </xsl:if>
+                            </xsl:for-each>
+                        </td>
+                    </tr>
+                </xsl:for-each>
+            </table>                
+        </p>
+
+    </xsl:template>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~register-->
 
     <xsl:template name="register">
         <xsl:param name="children_name"/>
         
+        <table cellspacing="0" cellpadding="0">
+            <col valign="baseline"/>
+            <col valign="baseline" style="padding-top: 2pt; padding-left: 2ex"/>
+
             <xsl:for-each select="*[ name(./*) = $children_name ]">
                 <xsl:sort select="@keyword"/>
                 
                 <tr>
-                    <td>
+                    <td nowrap="true">
                         <xsl:value-of select="@keyword"/>
+                        <!--xsl:apply-templates select="*[ name(.) = $children_name ][ position() = 1]/.." mode="keyword"/-->
                     </td>
                     <td>
                         <xsl:for-each select="*[ name(.) = $children_name ]">
+                            <xsl:sort select="@register_title"/>
+                            
                             <xsl:apply-templates select=".">
                                 <xsl:sort select="@register_keyword"/>
                                 <xsl:sort select="@register_title"/>
                             </xsl:apply-templates>
                                         
-                            <xsl:if test="position() &lt; last()">, </xsl:if>
+                            <xsl:if test="position() &lt; last()">,&#160; </xsl:if>
                         </xsl:for-each>
                     </td>
                 </tr>
             </xsl:for-each>
+        </table>                
 
     </xsl:template>
 
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~register_entry-->
+    <!--
+    <xsl:template match="*" mode="keyword">
+
+    **    <xsl:value-of select="@keyword"/>
+
+    </xsl:template>
+    -->
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~register_entry-->
     
     <xsl:template match="register_entry">
 
         <xsl:element name="a">
             <xsl:attribute name="href"><xsl:value-of select="concat( @register_file, '#keyword__', @register_keyword )"/></xsl:attribute>
-            <xsl:value-of select="@register_title"/>
+            <xsl:apply-templates select="." mode="register_title"/>
         </xsl:element>
 
     </xsl:template>
@@ -689,26 +681,34 @@
     
     <xsl:template match="register_ini_entry">
 
-        <code>
-            <xsl:value-of select="@file"/>
-            <xsl:text> [</xsl:text>
-            <xsl:value-of select="@section"/>
-            <xsl:text>]</xsl:text>
-        </code>:
+        <xsl:value-of select="@file"/>
+        <xsl:text> [</xsl:text>
+        <xsl:value-of select="@section"/>
+        <xsl:text>]:&#160;</xsl:text>
+
         <xsl:element name="a">
-            <xsl:attribute name="href"><xsl:value-of select="concat( @register_file, '#use_entry__', '@file', '__', '@section', '__', @entry )"/></xsl:attribute>
-            <xsl:value-of select="@register_title"/>
+            <xsl:attribute name="href"><xsl:value-of select="concat( @register_file, '#use_entry__', @file, '__', @section, '__', @entry )"/></xsl:attribute>
+            <xsl:apply-templates select="." mode="register_title"/>
         </xsl:element>
         
     </xsl:template>
 
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~register_entry-->
+    <!--    
+    <xsl:template match="* [ child::register_option ]" mode="keyword">
+
+        -<xsl:value-of select="@keyword"/>=
+
+    </xsl:template>
+    -->
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~register_option-->
     
     <xsl:template match="register_option">
-
+        
+        Option:
         <xsl:element name="a">
             <xsl:attribute name="href"><xsl:value-of select="concat( @register_file, '#use_option__', @name )"/></xsl:attribute>
-            <xsl:value-of select="@register_title"/>
+            <xsl:apply-templates select="." mode="register_title"/>
         </xsl:element>
         
     </xsl:template>
@@ -719,8 +719,23 @@
 
         <xsl:element name="a">
             <xsl:attribute name="href"><xsl:value-of select="concat( @register_file, '#use_option__', @name )"/></xsl:attribute>
-            <xsl:value-of select="@register_title"/>
+            <xsl:apply-templates select="." mode="register_title"/>
         </xsl:element>
+        
+    </xsl:template>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~register_title-->
+    
+    <xsl:template match="*" mode="register_title">
+
+        <xsl:choose>
+            <xsl:when test="@type='definition'">
+                <span class="register_definition"><xsl:value-of select="@register_title"/></span>
+            </xsl:when>
+            <xsl:otherwise>
+                <xsl:value-of select="@register_title"/>
+            </xsl:otherwise>
+        </xsl:choose>
         
     </xsl:template>
 
@@ -822,6 +837,10 @@
         <xsl:param name="parameter"/>
         
         <xsl:element name="a">
+            <xsl:attribute name="name">use_element__<xsl:value-of select="$name"/></xsl:attribute>
+        </xsl:element>
+
+        <xsl:element name="a">
             <xsl:attribute name="class">silent</xsl:attribute>
             
             <xsl:variable name="href2">
@@ -901,6 +920,10 @@
         <xsl:param name="entry"/>
         
         <xsl:element name="a">
+            <xsl:attribute name="name">use_entry__<xsl:value-of select="$file"/>__<xsl:value-of select="$section"/>__<xsl:value-of select="$entry"/></xsl:attribute>
+        </xsl:element>
+        
+        <xsl:element name="a">
             <xsl:attribute name="class">silent</xsl:attribute>
             <xsl:attribute name="href"><xsl:value-of select="concat( $base_dir, translate( $file, '.', '_' ), '_', $section, '.xml', '#entry_', $entry )"/></xsl:attribute>
             
@@ -935,6 +958,10 @@
 
     <xsl:template name="scheduler_option">
         <xsl:param name="name"/>
+        
+        <xsl:element name="a">
+            <xsl:attribute name="name">use_option__<xsl:value-of select="$name"/></xsl:attribute>
+        </xsl:element>
         
         <xsl:element name="a">
             <xsl:attribute name="class">silent</xsl:attribute>
@@ -1014,7 +1041,7 @@
     
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~scheduler_keyword-->
 
-    <xsl:template match="scheduler_error" mode="description">
+    <xsl:template match="scheduler_keyword" mode="description">
     
         <xsl:element name="a">
             <xsl:attribute name="name">keyword__<xsl:value-of select="@keyword"/></xsl:attribute>

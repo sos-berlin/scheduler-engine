@@ -1,5 +1,5 @@
 #! /usr/bin/perl -W
-# $Id: scheduler_keyword_to_xml.pl,v 1.2 2004/09/11 18:31:06 jz Exp $
+# $Id: scheduler_keyword_to_xml.pl,v 1.3 2004/09/12 10:38:53 jz Exp $
 
 
 my $script_name     = "scheduler_keyword_to_xml.pl";
@@ -52,15 +52,39 @@ print OUTPUT "</register>\n";
 
 sub read_file
 {
-    my $filename = shift;
-    my $file_title = "";
+    my $filename     = shift;
+    my $file_title   = "XXX";
+    my $head_title   = "";
+    my $root_element = "";
+    my $name         = "";
     
     open( FILE, "<$filename" )  or die "$filename: $!";
+
     
     while( <FILE> )
     {
-        if( !$file_title  &&  / title *= *"(.*)"/ )  { $file_title = $1; }
+        if( $root_element eq ""     &&  /\<([^?! \/\>]+)/ )         { $root_element = $1; }
+        if( $name         eq ""     &&  / name *= *"(.*)"/ )        { $name = $1; }
+        if( $file_title   eq "XXX"  &&  / title *= *"(.*)"/ )       { $file_title = $1; }
+        if( $head_title   eq ""     &&  / head_title *= *"(.*)"/ )  { $head_title = $1; }
+        if( $root_element  &&  /[^?-]>/ )  { last; }
+    }
+
+    if( $file_title eq "XXX"  &&  $head_title )  { $file_title = $head_title; }
+
+    if( $root_element eq "xml_element" )
+    { 
+        $file_title = "&lt;$name&gt;";
+
+        my $keyword = $name;
+        my $xml_line = "<register_entry register_file='$filename' register_title='$file_title'  register_keyword='$keyword' type='definition'/>\n";
+        push( @{$keyword_references{$keyword}}, $xml_line );  # s. Perl Cookbook Seite 140 (5.7)
+    }
+    #if( $root_element eq "xml_element" )  { $file_title = "XML-Element $file_title" }
         
+    
+    while( <FILE> )
+    {
         if( /\<scheduler_keyword +keyword=("([^"]+)"|'([^']+)')/ )
         {
             my $keyword = $2? $2 : $3;

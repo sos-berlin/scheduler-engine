@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="scheduler.xslt" type="text/xsl"?>
 
-<!--$Id: sos_ini.xml,v 1.3 2004/09/11 18:31:06 jz Exp $-->
+<!--$Id: sos_ini.xml,v 1.4 2004/09/12 10:38:53 jz Exp $-->
 
 <ini file     = "sos.ini"
-     title    = "Datei sos.ini&#160;, Übersicht"
+     title    = "Datei sos.ini,&#160; Übersicht"
      base_dir = ""
      author   = "$Author: jz $"
-     date     = "$Date: 2004/09/11 18:31:06 $">
+     date     = "$Date: 2004/09/12 10:38:53 $">
 
     <ini_sections>
         <ini_section name="licence"/>

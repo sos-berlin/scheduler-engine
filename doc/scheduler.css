@@ -51,6 +51,8 @@ span.title          { font-style: normal; }
 span.type           { font-style: italic; }
 .small              { font-size: 8pt; }
 
+span.register_definition { color: blue; }
+
 /*p.parent_element    { margin-top: 4ex; font-family: Lucida Console, monospace; font-size: 9pt; }*/
 p.xml_element       { margin-top: 2ex; }
 p.xml_attribute     { margin-top: 4ex; }

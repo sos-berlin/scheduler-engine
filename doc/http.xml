@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet href="scheduler.xslt" type="text/xsl"?>
+
+<!--$Id: http.xml,v 1.1 2004/09/12 10:42:23 jz Exp $-->
+
+<description 
+    title    = "HTTP-Server" 
+    base_dir = ""
+    author   = "$Author: jz $"
+    date     = "$Date: 2004/09/12 10:42:23 $"
+>
+
+<scheduler_keyword keyword="HTTP-Server"/>
+<scheduler_keyword keyword="HTML"/>
+
+<h2>Bedienung über einen WWW-Browser</h2>
+<p>
+    Der Scheduler verfügt über einen HTTP-Server und stellt HTML-Seiten zu seiner Bedienung bereit.
+    Sie können den Scheduler über einen Browser (zurzeit nur Microsoft Internet Explorer 6)
+    steuern. Geben Sie z.B. die Adresse <code>http://localhost:4444</code> ein.
+    <code>localhost</code> kann auch ein anderer Rechnername sein,
+    und <code>4444</code> ist die konfigurierte TCP-Portnummer des Schedulers.
+</p>
+<p>
+    Siehe <scheduler_element name="config" attribute="tcp_port"/>.<br/>
+    Siehe <scheduler_ini_entry file="factory.ini" section="spooler" entry="html_dir"/>.<br/>
+</p>
+
+<!--
+<p>
+    Der Scheduler betreibt einen eingebauten HTTP-Server und der mit 
+    <scheduler_element name="config" attribute="tcp_port"/> angegeben Portnummer.
+    Er stellt eine HTML-Seite mit Informationen über den Scheduler-Betrieb bereit.
+    Diese Seite laufen zurzeit nur mit Microsoft Internet Explorer 6.
+</p>
+<p>
+    Beispiel für einen URL zum Abruf der HTML-Seite: <code>http://localhost:4444</code>
+</p>
+-->
+
+<h2>Zugriffsschutz</h2>
+<p>
+    Der Scheduler lässt nur TCP- und HTTP-Verbindung zu von Rechnern,
+    die <scheduler_element name="allowed_host"/> die Erlaubnis bekommen haben.
+</p>
+
+
+<scheduler_keyword keyword="Protokoll"/>
+
+<h2>Protokolle mit einem WWW-Browser zeigen</h2>
+<p>
+    Während der Scheduler ein Protokoll schreibt, können Sie es sich anzeigen lassen.
+    Sie sehen stets den neuesten Stand.
+    Verwenden Sie folgende URLs dazu:
+</p>
+
+<p>
+    <table cellspacing="0" cellpadding="0">
+        <col valign="baseline"/>
+        <col valign="baseline" style="padding-left: 2ex"/>
+        <tr>
+            <td>
+                Hauptprotokoll
+            </td>
+            <td>
+                <code>http://<i>localhost</i>/show_log</code>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                Jobprotokoll
+            </td>
+            <td>
+                <code>http://<i>localhost</i>/show_log&amp;job=<i>jobname</i></code>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                Taskprotokoll
+            </td>
+            <td>
+                <code>http://<i>localhost</i>/show_log&amp;task=<i>task_id</i></code>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                Auftragsprotokoll
+            </td>
+            <td>
+                <code>http://<i>localhost</i>/show_log&amp;job_chain=<i>jobkette</i>&amp;order=<i>order_id</i></code>
+            </td>
+        </tr>
+        
+    </table>
+</p>
+
+<p>
+    <i>localhost</i> ist <code>localhost</code> oder 127.0.0.1 oder der Name des Rechners, auf dem der Scheduler läuft.
+</p>
+<p>
+    
+</p>
+
+
+
+    
+</description>
