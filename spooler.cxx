@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.296 2003/12/01 09:18:26 jz Exp $
+// $Id: spooler.cxx,v 1.297 2003/12/01 13:17:38 jz Exp $
 /*
     Hier sind implementiert
 
@@ -1706,14 +1706,16 @@ void Spooler::run()
         }
 
 
-        FOR_EACH( Process_class_list, _process_class_list, pc )
-        {
-            FOR_EACH( Process_list, (*pc)->_process_list, p )
+#       ifdef SYSTEM_WIN
+            FOR_EACH( Process_class_list, _process_class_list, pc )
             {
-                object_server::Connection_to_own_server* server = dynamic_cast<object_server::Connection_to_own_server*>( +(*p)->_connection );
-                if( server  &&  server->_process_handle )  wait_handles.add_handle( server->_process_handle );        // Signalisiert Prozessende
+                FOR_EACH( Process_list, (*pc)->_process_list, p )
+                {
+                    object_server::Connection_to_own_server* server = dynamic_cast<object_server::Connection_to_own_server*>( +(*p)->_connection );
+                    if( server  &&  server->_process_handle )  wait_handles.add_handle( server->_process_handle );        // Signalisiert Prozessende
+                }
             }
-        }
+#       endif
 
 
         wait_handles += _wait_handles;
