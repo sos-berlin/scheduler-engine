@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.131 2002/12/02 20:43:33 jz Exp $
+// $Id: spooler_task.cxx,v 1.132 2002/12/03 11:42:33 jz Exp $
 /*
     Hier sind implementiert
 
@@ -594,7 +594,7 @@ void Job::remove_from_task_queue( Task* task )
 
 void Job::start( const ptr<spooler_com::Ivariable_set>& params, const string& task_name, Time start_at )
 {
-    THREAD_LOCK_LOG( _lock, "Job::start" )  start_without_lock( params, task_name, start_at );
+    THREAD_LOCK( _lock )  start_without_lock( params, task_name, start_at );
 }
 
 //---------------------------------------------------------------------------------------Job::start
@@ -1356,7 +1356,7 @@ void Job::set_state_cmd( State_cmd cmd )
                                 break;
 
             case sc_start:      {
-                                    THREAD_LOCK_LOG( _lock, "Job::set_state_cmd" )  start_without_lock( NULL, "", Time::now(), true );
+                                    THREAD_LOCK( _lock )  start_without_lock( NULL, "", Time::now(), true );
                                     break;
                                 }
 
@@ -1619,7 +1619,7 @@ void Job::kill_task( int id )
 
 void Job::signal_object( const string& object_set_class_name, const Level& level )
 {
-    THREAD_LOCK_LOG( _lock, "Job::signal_object" )
+    THREAD_LOCK( _lock )
     {
         if( _state == Job::s_pending
          && _object_set_descr

@@ -1,10 +1,11 @@
-// $Id: spooler_wait.h,v 1.32 2002/12/02 20:43:35 jz Exp $
+// $Id: spooler_wait.h,v 1.33 2002/12/03 11:42:35 jz Exp $
 
 #ifndef __SPOOLER_WAIT_H
 #define __SPOOLER_WAIT_H
 
 #include <vector>
 #include "../zschimmer/regex_class.h"
+#include "../zschimmer/threads.h"
 
 namespace sos {
 namespace spooler {
@@ -58,10 +59,11 @@ struct Wait_handles : Non_cloneable
     void                        add_handle                  ( HANDLE );
   //void                        remove_handle               ( HANDLE, zschimmer::Event* for_internal_use_only = NULL );
     HANDLE                      operator []                 ( int index )                           { return _handles[index]; }
+#endif
+
     int                         wait_until                  ( Time );                               // Berücksichtigt Sommerzeitumstellung
     int                         wait_until_2                ( Time );
     int                         wait                        ( double time );
-#endif
 
     bool                        signaled                    ();
     int                         length                      ()                                      { return _events.size(); }

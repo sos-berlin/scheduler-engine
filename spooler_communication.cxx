@@ -1,4 +1,4 @@
-// $Id: spooler_communication.cxx,v 1.40 2002/12/02 20:43:32 jz Exp $
+// $Id: spooler_communication.cxx,v 1.41 2002/12/03 11:42:32 jz Exp $
 /*
     Hier sind implementiert
 
@@ -400,7 +400,10 @@ void Communication::close( double wait_time )
         _terminate = true;
     }
 
+#ifdef Z_WINDOWS
     thread_wait_for_termination( wait_time );
+#endif
+
     thread_close();
 }
 
@@ -437,7 +440,7 @@ void Communication::bind()
             ret = ::bind( _udp_socket, (struct sockaddr*)&sa, sizeof sa );
             if( ret == SOCKET_ERROR ) {
                 //if( wait++ < wait_for_free_port  &&  get_errno() == EADDRINUSE )  { sos_sleep(1); continue; }
-                throw_sos_socket_error( "udp-bind" );
+                throw_sos_socket_error( "udp-bind ", as_string(_spooler->udp_port()).c_str() );
             }
         //} while(0);
 
@@ -474,7 +477,7 @@ void Communication::bind()
             ret = ::bind( _listen_socket, (struct sockaddr*)&sa, sizeof sa );
             if( ret == SOCKET_ERROR ) {
                 //if( wait++ < wait_for_free_port  &&  get_errno() == EADDRINUSE )  { sos_sleep(1); continue; }
-                throw_sos_socket_error( "tcp-bind" );
+                throw_sos_socket_error( "tcp-bind", as_string(_spooler->tcp_port()).c_str() );
             }
         //} while(0);
 
@@ -590,7 +593,11 @@ int Communication::run()
             if( _terminate )  break;
             if( _rebound )  { _rebound = false; continue; }
 
-            if( n < 0 )  throw_sos_socket_error( get_errno(), "select" );
+            if( n < 0 )  
+            {
+                if( get_errno() == EINTR )  continue;
+                throw_sos_socket_error( get_errno(), "select" );
+            }
 
             
             // UDP
@@ -667,7 +674,7 @@ int Communication::thread_main()
 {
     int result;
 
-    SetThreadPriority( GetCurrentThread(), THREAD_PRIORITY_HIGHEST );
+    Z_WINDOWS_ONLY( SetThreadPriority( GetCurrentThread(), THREAD_PRIORITY_HIGHEST ) );
 
     Ole_initialize ole;
 
@@ -710,7 +717,7 @@ void Communication::start_or_rebind()
         }
         else 
         {
-            if( thread_handle() ) 
+            if( thread_is_running() ) 
             {
                 thread_wait_for_termination();    // Thread sollte beendet sein
                 thread_close();

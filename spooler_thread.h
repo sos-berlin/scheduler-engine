@@ -1,4 +1,4 @@
-// $Id: spooler_thread.h,v 1.36 2002/12/02 20:43:35 jz Exp $
+// $Id: spooler_thread.h,v 1.37 2002/12/03 11:42:34 jz Exp $
 
 #ifndef __SPOOLER_THREAD_H
 #define __SPOOLER_THREAD_H
@@ -10,6 +10,7 @@ namespace spooler {
 
 struct Spooler_thread : zschimmer::Thread
 {
+    Z_GNU_ONLY(                 Spooler_thread              (); )                           // Für gcc 3.2.1
                                 Spooler_thread              ( Spooler* );
                                ~Spooler_thread              ();
 
@@ -40,7 +41,6 @@ struct Spooler_thread : zschimmer::Thread
     bool                        do_something                ( Job* );
     void                        wait                        ();
 
-  //Time                        next_start_time             ();
     Job*                        get_next_job_to_start       ();
 
     bool                        finished                    ();
@@ -52,7 +52,6 @@ struct Spooler_thread : zschimmer::Thread
     void                        signal_object               ( const string& object_set_class_name, const Level& );
     void                        signal                      ( const string& signal_name = "" )  { THREAD_LOCK( _lock )  if(_event) _event->signal(signal_name), _next_start_time = 0, _next_job = NULL; }
     Job*                        get_job_or_null             ( const string& job_name );
-  //void                        wait_until_thread_stopped   ( Time until );
   //void                        interrupt_scripts           ();
     void                        cmd_add_jobs                ( const xml::Element_ptr& );
     void                        nichts_getan                ( double wait_time );
@@ -70,8 +69,6 @@ struct Spooler_thread : zschimmer::Thread
     string                     _include_path;
     bool                       _free_threading;             // Dieser Thread soll frei, ohne _serialize_lock laufen.
 
-  //Handle                     _thread_handle;
-  //Thread_id                  _thread_id;
     int                        _thread_priority;
 
     Event*                     _event;

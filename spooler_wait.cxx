@@ -1,4 +1,4 @@
-// $Id: spooler_wait.cxx,v 1.54 2002/12/02 20:43:35 jz Exp $
+// $Id: spooler_wait.cxx,v 1.55 2002/12/03 11:42:35 jz Exp $
 /*
     Hier sind implementiert
 
@@ -50,8 +50,11 @@ void Event::close()
     FOR_EACH( vector<Wait_handles*>, _wait_handles, it )  (*it)->remove( this );
     _wait_handles.clear();
 
-    //Warum ruft das Event::close()?:  Base_class::close();
-    close_handle();
+#   ifdef Z_WINDOWS
+        close_handle();     //Warum ruft das Event::close()?:  Base_class::close();
+#   else
+        Base_class::close();
+#   endif
 }
 
 //------------------------------------------------------------------------------------Event::add_to
@@ -86,9 +89,9 @@ Wait_handles::Wait_handles( const Wait_handles& o )
 : 
     _spooler ( o._spooler ),
     _log     ( o._log ),
-    _events  ( o._events ),
+    _events  ( o._events )
 #ifdef Z_WINDOWS
-    _handles ( o._handles )
+   ,_handles ( o._handles )
 #endif
 {
 }
@@ -150,7 +153,7 @@ Wait_handles& Wait_handles::operator += ( Wait_handles& o )
     THREAD_LOCK( o._lock )      // Vorsicht, Deadlock-Gefahr!
     {
         Event_vector::iterator   e = o._events.begin();
-        vector<HANDLE>::iterator h = o._handles.begin();
+        Z_WINDOWS_ONLY( vector<HANDLE>::iterator h = o._handles.begin(); )
 
         while( e != o._events.end() )
         {
@@ -248,7 +251,6 @@ void Wait_handles::remove( z::Event* event )
 }
 
 //-------------------------------------------------------------------------------Wait_handles::wait
-#ifdef Z_WINDOWS
 
 int Wait_handles::wait( double wait_time )
 {
@@ -293,6 +295,8 @@ int Wait_handles::wait_until( Time until )
 
 int Wait_handles::wait_until_2( Time until )
 {
+#ifdef Z_WINDOWS
+
     bool    again   = false;
     HANDLE* handles = NULL;
 
@@ -364,9 +368,16 @@ int Wait_handles::wait_until_2( Time until )
     }
 
     return -1;
-}
+
+#else
+
+    if( _events.size() != 1 )  throw_xc( "_events.size() != 1", "Fehler in spooler::Wait_handles" );
+
+    return (*_events.rbegin())->wait( until - Time::now() )? 0 : -1;
 
 #endif
+}
+
 //--------------------------------------------------------------------------Wait_handles::as_string
 
 string Wait_handles::as_string() 

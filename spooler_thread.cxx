@@ -1,4 +1,4 @@
-// $Id: spooler_thread.cxx,v 1.66 2002/12/02 17:19:35 jz Exp $
+// $Id: spooler_thread.cxx,v 1.67 2002/12/03 11:42:33 jz Exp $
 /*
     Hier sind implementiert
 
@@ -432,7 +432,6 @@ Job* Spooler_thread::get_next_job_to_start()
 }
 
 //-----------------------------------------------------------------------------Spooler_thread::wait
-#ifdef Z_WINDOWS
 
 void Spooler_thread::wait()
 {
@@ -459,8 +458,6 @@ void Spooler_thread::wait()
 
     if( _next_start_time > 0 )
     {
-#       ifdef SYSTEM_WIN
- 
             if( _spooler->_debug )  
             {
                 if( _wait_handles.wait(0) == -1 )  _log.debug( msg ), _wait_handles.wait_until( _next_start_time );     // Debug-Ausgabe der Wartezeit nur, wenn kein Ergebnis vorliegt
@@ -469,7 +466,7 @@ void Spooler_thread::wait()
             {
                 _wait_handles.wait_until( _next_start_time );
             }
-
+/*
 #        else
 
             if( _spooler->_debug )  _log.debug( msg );
@@ -484,12 +481,12 @@ void Spooler_thread::wait()
             }
 
 #       endif
+*/
     }
 
     { THREAD_LOCK( _lock )  _next_start_time = 0; }
 }
 
-#endif
 //----------------------------------------------------------------------Spooler_thread::do_add_jobs
 /*
 void Spooler_thread::do_add_jobs()

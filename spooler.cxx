@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.151 2002/12/02 20:43:30 jz Exp $
+// $Id: spooler.cxx,v 1.152 2002/12/03 11:42:30 jz Exp $
 /*
     Hier sind implementiert
 
@@ -179,7 +179,7 @@ With_log_switch read_profile_with_log( const string& profile, const string& sect
         if( dwCtrlType == CTRL_C_EVENT  &&  !ctrl_c_pressed )
         {
             ctrl_c_pressed = true;
-            fprintf( stderr, "Spooler wird wegen Ctrl-C beendet ...\n" );
+            //Kein Systemaufruf hier!  fprintf( stderr, "Spooler wird wegen Ctrl-C beendet ...\n" );
             spooler->async_signal( "Ctrl+C" );
             return true;
         }
@@ -196,7 +196,7 @@ With_log_switch read_profile_with_log( const string& profile, const string& sect
         //if( !ctrl_c_pressed )
         //{
             ctrl_c_pressed = true;
-            fprintf( stderr, "Spooler wird wegen Ctrl-C beendet ...\n" );
+            //Kein Systemaufruf hier!  fprintf( stderr, "Spooler wird wegen Ctrl-C beendet ...\n" );
 
             // pthread_mutex_lock:
             // The  mutex  functions  are  not  async-signal  safe.  What  this  means  is  that  they
@@ -332,57 +332,109 @@ void Spooler::wait_until_threads_stopped( Time until )
 {
     assert( current_thread_id() == _thread_id );
 
-    Wait_handles wait_handles ( this, &_prefix_log );
 
-    Thread_list::iterator it = _thread_list.begin();
-    while( it != _thread_list.end() )
-    {
-        Spooler_thread* thread = *it;
-        if( thread->_free_threading && !thread->_terminated  &&  thread->_thread_handle.valid() )  wait_handles.add( &(*it)->_thread_handle );
-        it++;
-    }
+#   ifdef Z_WINDOWS
 
-    int c = 0;
-    while( wait_handles.length() > 0 )
-    {
-        Time until_step = Time::now() + (++c < 10? wait_step_for_thread_termination : wait_step_for_thread_termination2 );
-        if( until_step > until )  until_step = until;
+        Wait_handles wait_handles ( this, &_prefix_log );
 
-        int index = wait_handles.wait_until( until_step );
-        if( index >= 0 ) 
+        Thread_list::iterator it = _thread_list.begin();
+        while( it != _thread_list.end() )
         {
-            HANDLE h = wait_handles[index];
-            FOR_EACH( Thread_list, _thread_list, it )  
+            Spooler_thread* thread = *it;
+            if( thread->_free_threading && !thread->_terminated  &&  thread->_thread_handle.valid() )  wait_handles.add( &(*it)->_thread_handle );
+            it++;
+        }
+
+        int c = 0;
+        while( wait_handles.length() > 0 )
+        {
+            Time until_step = Time::now() + (++c < 10? wait_step_for_thread_termination : wait_step_for_thread_termination2 );
+            if( until_step > until )  until_step = until;
+
+            int index = wait_handles.wait_until( until_step );
+            if( index >= 0 ) 
+            {
+                HANDLE h = wait_handles[index];
+                FOR_EACH( Thread_list, _thread_list, it )  
+                {
+                    Spooler_thread* thread = *it;
+                    if( thread->thread_handle() == h ) 
+                    {
+                        _log.info( "Thread " + thread->name() + " beendet" );
+                        wait_handles.remove( &thread->_thread_handle );
+                    }
+                }
+            }
+
+            if( Time::now() > until )  break;
+
+            if( index < 0 )
+            {
+                FOR_EACH( Thread_list, _thread_list, it )  
+                {
+                    Spooler_thread* thread = *it;
+
+                    if( !thread->_terminated )
+                    {
+                        string msg = "Warten auf Thread " + thread->name() + " [" + thread->thread_as_text() + "]";
+                        Job* job = thread->_current_job;
+                        if( job )  msg += ", Job " + job->name() + " " + job->job_state();
+                        _log.info( msg );
+                    }
+                }
+            }
+
+            if( wait_handles.length() > 0 )  sos_sleep( 0.01 );  // Zur Verkürzung des Protokolls: Nächsten Threads Zeit lassen, sich zu beenden
+        }
+
+#   else
+
+        Thread_list threads;
+
+        FOR_EACH( Thread_list, _thread_list, it )  threads.push_back( *it );
+
+        int c = 0;
+        while( !threads.empty() )
+        {
+            Time until_step = Time::now() + (++c < 10? wait_step_for_thread_termination : wait_step_for_thread_termination2 );
+            if( until_step > until )  until_step = until;
+
+            _event.wait( until_step - Time::now() );
+
+            FOR_EACH( Thread_list, threads, it )  
             {
                 Spooler_thread* thread = *it;
-                if( thread->thread_handle() == h ) 
+                if( !thread->thread_is_running() ) 
                 {
                     _log.info( "Thread " + thread->name() + " beendet" );
-                    wait_handles.remove( &thread->_thread_handle );
+                    it = threads.erase( it );
                 }
             }
-        }
 
-        if( Time::now() > until )  break;
+            if( threads.size() ==  0 )  break;
+            if( Time::now() > until )  break;
 
-        if( index < 0 )
-        {
-            FOR_EACH( Thread_list, _thread_list, it )  
+            if( Time::now() >= until_step )
             {
-                Spooler_thread* thread = *it;
+                sos_sleep( 0.01 );  // Zur Verkürzung des Protokolls: Nächsten Threads Zeit lassen, sich zu beenden
 
-                if( !thread->_terminated )
+                FOR_EACH( Thread_list, threads, it )  
                 {
-                    string msg = "Warten auf Thread " + thread->name() + " [" + thread->thread_as_text() + "]";
-                    Job* job = thread->_current_job;
-                    if( job )  msg += ", Job " + job->name() + " " + job->job_state();
-                    _log.info( msg );
+                    Spooler_thread* thread = *it;
+
+                    if( !thread->thread_is_running() ) 
+                    {
+                        string msg = "Warten auf Thread " + thread->name() + " [" + thread->thread_as_text() + "]";
+                        Job* job = thread->_current_job;
+                        if( job )  msg += ", Job " + job->name() + " " + job->job_state();
+                        _log.info( msg );
+                    }
                 }
             }
         }
 
-        if( wait_handles.length() > 0 )  sos_sleep( 0.01 );  // Zur Verkürzung des Protokolls: Nächsten Threads Zeit lassen, sich zu beenden
-    }
+#   endif
+
 }
 
 //--------------------------------------------------------------------------Spooler::signal_threads
@@ -530,8 +582,15 @@ void Spooler::start_threads()
 
         if( !thread->empty() ) 
         {
-            if( thread->_free_threading )  thread->thread_start();      // Eigener Thread
-                                     else  thread->start( &_event );    // Unser Thread
+            if( thread->_free_threading )  
+            {
+                thread->thread_start();      // Eigener Thread
+                thread->set_thread_termination_event( &_event );        // Signal zu uns, wenn Thread endet
+            }
+            else
+            {
+                thread->start( &_event );    // Unser Thread
+            }
         }
     }
 }
@@ -866,7 +925,8 @@ void Spooler::run()
 
         if( _state == Spooler::s_paused )
         {
-            _wait_handles.wait_until( latter_day );
+            //_wait_handles.wait_until( latter_day );
+            _event.wait();
         }
 
         _next_time = latter_day;
