@@ -1,4 +1,4 @@
-// $Id: spooler.odl,v 1.55 2003/02/18 21:38:09 jz Exp $
+// $Id: spooler.odl,v 1.56 2003/03/15 18:06:36 jz Exp $
 
 // Anweisung: midl /nologo /error all /out $(OutDir) $(InputPath)
 
@@ -21,6 +21,26 @@ library spooler
     interface Ijob_chain;
     interface Iorder_queue;
     interface Iorder;
+
+    //------------------------------------------------------------------------------------Log_level
+
+    enum Log_level
+    {
+        log_debug9 = -9,
+        log_debug8 = -8,
+        log_debug7 = -7,
+        log_debug6 = -6,
+        log_debug5 = -5,
+        log_debug4 = -4,
+        log_debug3 = -3,
+        log_debug2 = -2,
+        log_debug1 = -1,
+        log_debug  = -1,
+        log_info   =  0, 
+        log_warn   =  1, 
+        log_error  =  2,
+      //log_fatal  =  3
+    };
 
     //--------------------------------------------------------------------------Has_java_class_name
 
@@ -407,119 +427,6 @@ library spooler
         interface Ihas_java_class_name;
     }
 
-    //------------------------------------------------------------------------------------Log_level
-
-    enum Log_level
-    {
-        log_debug9 = -9,
-        log_debug8 = -8,
-        log_debug7 = -7,
-        log_debug6 = -6,
-        log_debug5 = -5,
-        log_debug4 = -4,
-        log_debug3 = -3,
-        log_debug2 = -2,
-        log_debug1 = -1,
-        log_debug  = -1,
-        log_info   =  0, 
-        log_warn   =  1, 
-        log_error  =  2,
-      //log_fatal  =  3
-    };
-
-    //------------------------------------------------------------------------------------------Log
-
-    [
-        uuid       ( 3B6C8A62-B511-445d-A2A2-E852BC2E05A0 ),
-        odl,
-        dual
-    ]
-    interface Ilog : IDispatch
-    {
-        HRESULT                 debug9                  ( [in] BSTR line );
-        HRESULT                 debug8                  ( [in] BSTR line );
-        HRESULT                 debug7                  ( [in] BSTR line );
-        HRESULT                 debug6                  ( [in] BSTR line );
-        HRESULT                 debug5                  ( [in] BSTR line );
-        HRESULT                 debug4                  ( [in] BSTR line );
-        HRESULT                 debug3                  ( [in] BSTR line );
-        HRESULT                 debug2                  ( [in] BSTR line );
-        HRESULT                 debug1                  ( [in] BSTR line );
-        
-        HRESULT                 debug                   ( [in] BSTR line );
-        
-        [id(0)]
-        HRESULT                 info                    ( [in] BSTR line );
-        
-        HRESULT                 msg                     ( [in] BSTR line );     // Zur Kompatibilität, wie info()
-        
-        HRESULT                 warn                    ( [in] BSTR line );
-        
-        HRESULT                 error                   ( [in] BSTR line );
-
-        HRESULT                 log                     ( [in] enum Log_level, [in] BSTR line );
-
-        [propget]
-        HRESULT                 mail                    ( [out,retval] Imail** mail );
-
-        [propput]
-        HRESULT                 mail_on_error           ( [in] VARIANT_BOOL mail_on_error );
-
-        [propget]
-        HRESULT                 mail_on_error           ( [out,retval] VARIANT_BOOL* mail_on_error );
-
-        [propput]
-        HRESULT                 mail_on_success         ( [in] VARIANT_BOOL mail_on_success );
-
-        [propget]
-        HRESULT                 mail_on_success         ( [out,retval] VARIANT_BOOL* mail_on_success );
-
-        [propput]
-        HRESULT                 mail_on_process         ( [in] int level );
-
-        [propget]
-        HRESULT                 mail_on_process         ( [out,retval] int* level );
-
-        [propput]
-        HRESULT                 level                   ( [in] int level );
-
-        [propget]
-        HRESULT                 level                   ( [out,retval] int* level );
-
-        [propget]
-        HRESULT                 filename                ( [out,retval] BSTR* filename );
-
-        [propput]
-        HRESULT                 new_filename            ( [in] BSTR filename );
-
-        [propget]
-        HRESULT                 new_filename            ( [out,retval] BSTR* filename );
-
-        [propput]
-        HRESULT                 collect_within          ( [in] VARIANT* time );
-
-        [propget]
-        HRESULT                 collect_within          ( [out,retval] double* time );
-
-        [propput]
-        HRESULT                 collect_max             ( [in] VARIANT* time );
-
-        [propget]
-        HRESULT                 collect_max             ( [out,retval] double* time );
-
-        [propput]
-        HRESULT                 mail_it                 ( [in] VARIANT_BOOL mail_it );
-    }
-
-    [
-        uuid       ( 032974D7-8668-41c4-A204-3E893E06846F )
-    ]
-    coclass Log
-    {
-        interface Ilog;
-        interface Ihas_java_class_name;
-    }
-
     //--------------------------------------------------------------------------------------Context
 
     [
@@ -817,6 +724,99 @@ library spooler
     coclass Order
     {
         interface Iorder;
+        interface Ihas_java_class_name;
+    }
+
+    //------------------------------------------------------------------------------------------Log
+
+    [
+        uuid       ( 3B6C8A62-B511-445d-A2A2-E852BC2E05A0 ),
+        odl,
+        dual
+    ]
+    interface Ilog : IDispatch
+    {
+        HRESULT                 debug9                  ( [in] BSTR line );
+        HRESULT                 debug8                  ( [in] BSTR line );
+        HRESULT                 debug7                  ( [in] BSTR line );
+        HRESULT                 debug6                  ( [in] BSTR line );
+        HRESULT                 debug5                  ( [in] BSTR line );
+        HRESULT                 debug4                  ( [in] BSTR line );
+        HRESULT                 debug3                  ( [in] BSTR line );
+        HRESULT                 debug2                  ( [in] BSTR line );
+        HRESULT                 debug1                  ( [in] BSTR line );
+        
+        HRESULT                 debug                   ( [in] BSTR line );
+        
+        [id(0)]
+        HRESULT                 info                    ( [in] BSTR line );
+        
+        HRESULT                 msg                     ( [in] BSTR line );     // Zur Kompatibilität, wie info()
+        
+        HRESULT                 warn                    ( [in] BSTR line );
+        
+        HRESULT                 error                   ( [in] BSTR line );
+
+        HRESULT                 log                     ( [in] enum Log_level, [in] BSTR line );
+
+        [propget]
+        HRESULT                 mail                    ( [out,retval] Imail** mail );
+
+        [propput]
+        HRESULT                 mail_on_error           ( [in] VARIANT_BOOL mail_on_error );
+
+        [propget]
+        HRESULT                 mail_on_error           ( [out,retval] VARIANT_BOOL* mail_on_error );
+
+        [propput]
+        HRESULT                 mail_on_success         ( [in] VARIANT_BOOL mail_on_success );
+
+        [propget]
+        HRESULT                 mail_on_success         ( [out,retval] VARIANT_BOOL* mail_on_success );
+
+        [propput]
+        HRESULT                 mail_on_process         ( [in] int level );
+
+        [propget]
+        HRESULT                 mail_on_process         ( [out,retval] int* level );
+
+        [propput]
+        HRESULT                 level                   ( [in] int level );
+
+        [propget]
+        HRESULT                 level                   ( [out,retval] int* level );
+
+        [propget]
+        HRESULT                 filename                ( [out,retval] BSTR* filename );
+
+        [propput]
+        HRESULT                 new_filename            ( [in] BSTR filename );
+
+        [propget]
+        HRESULT                 new_filename            ( [out,retval] BSTR* filename );
+
+        [propput]
+        HRESULT                 collect_within          ( [in] VARIANT* time );
+
+        [propget]
+        HRESULT                 collect_within          ( [out,retval] double* time );
+
+        [propput]
+        HRESULT                 collect_max             ( [in] VARIANT* time );
+
+        [propget]
+        HRESULT                 collect_max             ( [out,retval] double* time );
+
+        [propput]
+        HRESULT                 mail_it                 ( [in] VARIANT_BOOL mail_it );
+    }
+
+    [
+        uuid       ( 032974D7-8668-41c4-A204-3E893E06846F )
+    ]
+    coclass Log
+    {
+        interface Ilog;
         interface Ihas_java_class_name;
     }
 

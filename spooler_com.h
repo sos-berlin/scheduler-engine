@@ -1,4 +1,4 @@
-// $Id: spooler_com.h,v 1.67 2003/02/18 21:38:09 jz Exp $
+// $Id: spooler_com.h,v 1.68 2003/03/15 18:06:37 jz Exp $
 
 #ifndef __SPOOLER_COM_H
 #define __SPOOLER_COM_H
@@ -27,6 +27,8 @@
 namespace sos {
 namespace spooler {
 
+//typedef spooler_com::Log_level Log_level;
+/*
 using spooler_com::Log_level; //enum   Log_level;
 using spooler_com::log_debug9;
 using spooler_com::log_debug8;
@@ -41,8 +43,9 @@ using spooler_com::log_debug;
 using spooler_com::log_info;
 using spooler_com::log_warn;
 using spooler_com::log_error;
+*/
 
-const Log_level log_debug_spooler = spooler_com::log_debug3;
+const Log_level log_debug_spooler = log_debug3;
 
 struct Prefix_log;
 struct Log;
@@ -200,7 +203,7 @@ struct Com_log : spooler_com::Ilog,
     STDMETHODIMP                warn                        ( BSTR );
     STDMETHODIMP                error                       ( BSTR );
   //STDMETHODIMP                fatal                       ( BSTR );
-    STDMETHODIMP                log                         ( spooler_com::Log_level, BSTR line );
+    STDMETHODIMP                log                         ( Log_level, BSTR line );
 
     STDMETHODIMP            get_mail                        ( spooler_com::Imail** );
 

@@ -1,10 +1,8 @@
-// $Id: spooler_mail.cxx,v 1.11 2002/11/25 23:36:21 jz Exp $
+// $Id: spooler_mail.cxx,v 1.12 2003/03/15 18:06:38 jz Exp $
 
 
 #include "spooler.h"
 #include "spooler_mail.h"
-
-#ifdef Z_WINDOWS
 
 namespace sos {
 namespace spooler {
@@ -41,8 +39,8 @@ void Com_mail::init()
 {
     if( _msg == NULL )
     {
-        _msg = SOS_NEW( Mail_message );
-        _msg->init();
+        _msg = mail::create_message();
+        //_msg->init();
     }
 }
 
@@ -372,5 +370,3 @@ STDMETHODIMP Com_mail::dequeue( int* result )
 
 } //namespace spooler
 } //namespace sos
-
-#endif

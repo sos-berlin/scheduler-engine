@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.176 2003/03/01 10:38:44 jz Exp $
+// $Id: spooler.cxx,v 1.177 2003/03/15 18:06:36 jz Exp $
 /*
     Hier sind implementiert
 
@@ -78,7 +78,6 @@ static void set_ctrl_c_handler( bool on );
 
 void send_error_email( const string& error_text, int argc, char** argv )
 {
-#ifdef Z_WINDOWS
     try
     {
         string from = read_profile_string( default_factory_ini, "spooler", "log_mail_from"   );
@@ -87,17 +86,17 @@ void send_error_email( const string& error_text, int argc, char** argv )
         string bcc  = read_profile_string( default_factory_ini, "spooler", "log_mail_bcc"    );
         string smtp = read_profile_string( default_factory_ini, "spooler", "smtp"            );
 
-        Mail_message msg;
-        msg.init();
-        msg.set_from( from );
+        Sos_ptr<mail::Message> msg = mail::create_message();
+        //msg->init();
+        msg->set_from( from );
 
-        if( to   != "" )  msg.set_to  ( to   );
-        if( cc   != "" )  msg.set_cc  ( cc   );
-        if( bcc  != "" )  msg.set_bcc ( bcc  );
-        if( smtp != "" )  msg.set_smtp( smtp );
+        if( to   != "" )  msg->set_to  ( to   );
+        if( cc   != "" )  msg->set_cc  ( cc   );
+        if( bcc  != "" )  msg->set_bcc ( bcc  );
+        if( smtp != "" )  msg->set_smtp( smtp );
 
-        msg.set_subject( "FEHLER BEI SPOOLER-START: " + error_text );
-        msg.add_header_field( "X-SOS-Spooler", "" );
+        msg->set_subject( "FEHLER BEI SPOOLER-START: " + error_text );
+        msg->add_header_field( "X-SOS-Spooler", "" );
 
         string body = "Der Spooler-Dienst konnte nicht gestartet werden.\n"
                       "\n"
@@ -110,19 +109,11 @@ void send_error_email( const string& error_text, int argc, char** argv )
         body += "\n\n\n"
                 "Fehlermeldung:\n";
         body += error_text;
-        msg.set_body( body );
+        msg->set_body( body );
 
-        try
-        {
-            msg.send(); 
-        }
-        catch( const Xc& ) 
-        { 
-            msg.enqueue(); 
-        }
+        msg->send(); 
     }
     catch( const Xc& ) {}
-#endif
 }
 
 //---------------------------------------------------------------------read_profile_mail_on_process

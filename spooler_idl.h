@@ -1,4 +1,4 @@
-// $Id: spooler_idl.h,v 1.11 2003/02/18 21:38:10 jz Exp $
+// $Id: spooler_idl.h,v 1.12 2003/03/15 18:06:37 jz Exp $
 
 
 /*  Ersatz für spooler.odl für Systeme ohne COM. 
@@ -28,6 +28,26 @@ struct Ijob_chain;
 struct Iorder_queue;
 struct Iorder;
 
+//------------------------------------------------------------------------------------Log_level
+/*
+enum Log_level
+{
+    log_debug9 = -9,
+    log_debug8 = -8,
+    log_debug7 = -7,
+    log_debug6 = -6,
+    log_debug5 = -5,
+    log_debug4 = -4,
+    log_debug3 = -3,
+    log_debug2 = -2,
+    log_debug1 = -1,
+    log_debug  = -1,
+    log_info   =  0, 
+    log_warn   =  1, 
+    log_error  =  2,
+  //log_fatal  =  3
+};
+*/
 //--------------------------------------------------------------------------Has_java_class_name
 
 DEFINE_GUID(  IID_Ihas_java_class_name, 0x748E665E, 0x6252, 0x418e, 0x88, 0x7A, 0x55, 0xB1, 0x1F, 0xD8, 0x28, 0x70 );
@@ -217,26 +237,6 @@ struct Ispooler : IDispatch
     virtual HRESULT     get_is_service              ( VARIANT_BOOL* result ) = 0;
 };
 
-//------------------------------------------------------------------------------------Log_level
-
-enum Log_level
-{
-    log_debug9 = -9,
-    log_debug8 = -8,
-    log_debug7 = -7,
-    log_debug6 = -6,
-    log_debug5 = -5,
-    log_debug4 = -4,
-    log_debug3 = -3,
-    log_debug2 = -2,
-    log_debug1 = -1,
-    log_debug  = -1,
-    log_info   =  0, 
-    log_warn   =  1, 
-    log_error  =  2,
-  //log_fatal  =  3
-};
-
 //------------------------------------------------------------------------------------------Log
 
 DEFINE_GUID( IID_Ilog,  0x3B6C8A62, 0xB511, 0x445d, 0xA2, 0xA2, 0xE8, 0x52, 0xBC, 0x2E, 0x05, 0xA0 );
@@ -264,9 +264,7 @@ struct Ilog : IDispatch
     virtual HRESULT         error                   ( BSTR line ) = 0;
     virtual HRESULT         log                     ( Log_level, BSTR line ) = 0;
 
-#ifdef Z_WINDOWS
     virtual HRESULT     get_mail                    ( Imail** mail ) = 0;
-#endif
 
     virtual HRESULT     put_mail_on_error           ( VARIANT_BOOL mail_on_error ) = 0;
     virtual HRESULT     get_mail_on_error           ( VARIANT_BOOL* mail_on_error ) = 0;

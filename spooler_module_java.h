@@ -1,4 +1,4 @@
-// $Id: spooler_module_java.h,v 1.18 2003/03/01 10:04:44 jz Exp $
+// $Id: spooler_module_java.h,v 1.19 2003/03/15 18:06:38 jz Exp $
 
 #ifndef __SPOOLER_MODULE_JAVA_H
 #define __SPOOLER_MODULE_JAVA_H
@@ -14,7 +14,7 @@ struct Java_vm;
 struct Java_idispatch;
 
 //-----------------------------------------------------------------------------------------Java_env
-
+/*
 struct Java_env : Non_cloneable
 {
                               //Java_env                    ( Java_vm* vm, JNIEnv* jenv )           : _java_vm(vm), _jenv( jenv ) {}
@@ -57,9 +57,9 @@ struct Java_thread_data
     Fill_zero                  _zero_;
     Java_env                   _env;
 };
-
+*/
 //------------------------------------------------------------------------------------------Java_vm
-
+/*
 struct Java_vm                  // Java virtual machine
 {
     struct Option
@@ -111,9 +111,9 @@ struct Java_vm                  // Java virtual machine
   //JDK1_1InitArgs             _vm_args;
     jclass                     _idispatch_jclass;
 };
-
+*/
 //--------------------------------------------------------------------------------------Java_object
-
+/*
 struct Java_object : Object, Non_cloneable
 {
     Z_GNU_ONLY(                 Java_object                 ();  )                                  // Für gcc 3.2. Nicht implementiert.
@@ -141,7 +141,7 @@ struct Java_global_object : Java_object
     void                        operator =                  ( jobject jo )                          { assign( jo ); }
     void                        assign                      ( jobject jo )                          { Java_object::assign(jo); set_global(); }
 };
-
+*/
 //--------------------------------------------------------------------------------Java_local_object
 /*
 struct Java_local_object : Java_object
@@ -154,7 +154,7 @@ struct Java_local_object : Java_object
 };
 */
 //-------------------------------------------------------------------------------------------------
-
+/*
 struct Java_idispatch : Java_object
 {
     Z_GNU_ONLY(                 Java_idispatch              ();  )                                  // Für gcc 3.2. Nicht implementiert.
@@ -164,7 +164,7 @@ struct Java_idispatch : Java_object
     ptr<IDispatch>             _idispatch;
     string                     _class_name;
 };
-
+*/
 //-----------------------------------------------------------------------------Java_module_instance
 // Für Java-Objekte
 
@@ -187,7 +187,7 @@ struct Java_module_instance : Module_instance
 
 
     Fill_zero                  _zero_;
-    Java_vm*                   _java_vm;
+    java::Vm*                  _java_vm;
     Java_env*                  _env;
     Java_global_object         _jobject;
 

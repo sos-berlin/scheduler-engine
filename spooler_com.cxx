@@ -1,4 +1,4 @@
-// $Id: spooler_com.cxx,v 1.90 2003/03/01 11:20:30 jz Exp $
+// $Id: spooler_com.cxx,v 1.91 2003/03/15 18:06:37 jz Exp $
 /*
     Hier sind implementiert
 
@@ -662,24 +662,24 @@ STDMETHODIMP Com_log::QueryInterface( const IID& iid, void** result )
 
 //----------------------------------------------------------------------------------------Com_log::
     
-STDMETHODIMP Com_log::debug9( BSTR line )                       { return log( log_debug9, line ); }
-STDMETHODIMP Com_log::debug8( BSTR line )                       { return log( log_debug8, line ); }
-STDMETHODIMP Com_log::debug7( BSTR line )                       { return log( log_debug7, line ); }
-STDMETHODIMP Com_log::debug6( BSTR line )                       { return log( log_debug6, line ); }
-STDMETHODIMP Com_log::debug5( BSTR line )                       { return log( log_debug5, line ); }
-STDMETHODIMP Com_log::debug4( BSTR line )                       { return log( log_debug4, line ); }
-STDMETHODIMP Com_log::debug3( BSTR line )                       { return log( log_debug3, line ); }
-STDMETHODIMP Com_log::debug2( BSTR line )                       { return log( log_debug2, line ); }
-STDMETHODIMP Com_log::debug1( BSTR line )                       { return log( log_debug1, line ); }
-STDMETHODIMP Com_log::debug ( BSTR line )                       { return log( log_debug1, line ); }
-STDMETHODIMP Com_log::msg   ( BSTR line )                       { return log( log_info  , line ); }
-STDMETHODIMP Com_log::info  ( BSTR line )                       { return log( log_info  , line ); }
-STDMETHODIMP Com_log::warn  ( BSTR line )                       { return log( log_warn  , line ); }
-STDMETHODIMP Com_log::error ( BSTR line )                       { return log( log_error , line ); }
+STDMETHODIMP Com_log::debug9( BSTR line )                       { return log( z::log_debug9, line ); }
+STDMETHODIMP Com_log::debug8( BSTR line )                       { return log( z::log_debug8, line ); }
+STDMETHODIMP Com_log::debug7( BSTR line )                       { return log( z::log_debug7, line ); }
+STDMETHODIMP Com_log::debug6( BSTR line )                       { return log( z::log_debug6, line ); }
+STDMETHODIMP Com_log::debug5( BSTR line )                       { return log( z::log_debug5, line ); }
+STDMETHODIMP Com_log::debug4( BSTR line )                       { return log( z::log_debug4, line ); }
+STDMETHODIMP Com_log::debug3( BSTR line )                       { return log( z::log_debug3, line ); }
+STDMETHODIMP Com_log::debug2( BSTR line )                       { return log( z::log_debug2, line ); }
+STDMETHODIMP Com_log::debug1( BSTR line )                       { return log( z::log_debug1, line ); }
+STDMETHODIMP Com_log::debug ( BSTR line )                       { return log( z::log_debug1, line ); }
+STDMETHODIMP Com_log::msg   ( BSTR line )                       { return log( z::log_info  , line ); }
+STDMETHODIMP Com_log::info  ( BSTR line )                       { return log( z::log_info  , line ); }
+STDMETHODIMP Com_log::warn  ( BSTR line )                       { return log( z::log_warn  , line ); }
+STDMETHODIMP Com_log::error ( BSTR line )                       { return log( z::log_error , line ); }
 
 //-------------------------------------------------------------------------------------Com_log::log
 
-STDMETHODIMP Com_log::log( Log_level level, BSTR line )
+STDMETHODIMP Com_log::log( z::Log_level level, BSTR line )
 { 
     HRESULT hr = NOERROR;
 
@@ -700,7 +700,6 @@ STDMETHODIMP Com_log::log( Log_level level, BSTR line )
 
 STDMETHODIMP Com_log::get_mail( Imail** mail )
 { 
-#ifdef Z_WINDOWS
     HRESULT hr = NOERROR;
 
     THREAD_LOCK( _lock )
@@ -715,9 +714,6 @@ STDMETHODIMP Com_log::get_mail( Imail** mail )
     catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Log::mail" ); }
 
     return hr;
-#else
-    return E_FAIL;
-#endif
 }
 
 //-----------------------------------------------------------------------Com_log::put_mail_on_error

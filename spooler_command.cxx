@@ -1,4 +1,4 @@
-// $Id: spooler_command.cxx,v 1.79 2003/03/05 17:15:37 jz Exp $
+// $Id: spooler_command.cxx,v 1.80 2003/03/15 18:06:37 jz Exp $
 /*
     Hier ist implementiert
 
@@ -7,9 +7,7 @@
 
 
 #include "spooler.h"
-
 #include "../file/anyfile.h"
-
 
 // Für temporäre Datei:
 #include <sys/stat.h>               // S_IREAD, stat()
@@ -173,6 +171,7 @@ void Command_processor::abort_immediately( int exit_code )
 #    else
 
         //kill( 0, SIGKILL );   // Das killt auch den neuen Spooler.  signal is sent to every process in the process group of the current process.
+
         kill( _spooler->_pid, SIGKILL );
         _exit( exit_code );
 

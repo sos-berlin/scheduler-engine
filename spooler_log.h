@@ -1,4 +1,4 @@
-// $Id: spooler_log.h,v 1.27 2002/12/08 20:27:26 jz Exp $
+// $Id: spooler_log.h,v 1.28 2003/03/15 18:06:38 jz Exp $
 
 #ifndef __SPOOLER_LOG_H
 #define __SPOOLER_LOG_H
@@ -7,16 +7,6 @@ namespace sos {
 namespace spooler {
 
 //----------------------------------------------------------------------------------------Log_level
-/*
-enum Log_level
-{ 
-    log_debug = -1,     // alle Werte < 0 sind Debug-Ausgaben (debug1, debug2 etc.)
-    log_info  =  0, 
-    log_warn  =  1, 
-    log_error =  2,
-    log_fatal =  3
-};
-*/
 
 Log_level                       make_log_level              ( const string& );
 
@@ -120,9 +110,7 @@ struct Prefix_log
 
     void                    set_mail_it                     ( bool b )                          { _mail_it = b; }
 
-#ifdef Z_WINDOWS
     Com_mail*                   imail                       ();
-#endif
 
     // Defaults setzen, ohne eMail-Objekt anzulegen:
     void                    set_mail_from_name              ( const string& );
@@ -159,9 +147,7 @@ struct Prefix_log
     bool                       _mail_on_success;
     int                        _mail_on_process;
     bool                       _mail_it;
-#ifdef Z_WINDOWS
     ptr<Com_mail>              _mail;
-#endif
     string                     _mail_section;               // Name des Abschnitts in factory.ini für eMail-Einstellungen
 
     Time                       _collect_within;             // eMails innerhalb dieser Frist sammeln, solange Job keinen Fehler macht

@@ -1,4 +1,4 @@
-// $Id: spooler_module_java.cxx,v 1.40 2003/03/04 09:56:30 jz Exp $
+// $Id: spooler_module_java.cxx,v 1.41 2003/03/15 18:06:38 jz Exp $
 /*
     Hier sind implementiert
 
@@ -9,6 +9,9 @@
 
 #include "spooler.h"
 #include "../file/stdfile.h"    // make_path
+
+#include "../zschimmer/java.h"
+using namespace zschimmer::java;
 
 #ifdef _DEBUG
 #   include "Debug/sos/spooler/Idispatch.h"
@@ -86,46 +89,6 @@ static void set_java_exception( JNIEnv* jenv, const _com_error& x )
     set_java_exception( jenv, what.c_str() );
 }
 
-//------------------------------------------------------------------------------string_from_jstring
-
-static string string_from_jstring( JNIEnv* jenv, const jstring& jstr )
-{
-    if( !jstr )  return "";
-
-    const OLECHAR* str_w = jenv->GetStringChars( jstr, 0 );
-   
-    string result = string_from_ole( str_w );
-
-    jenv->ReleaseStringChars( jstr, str_w );
-
-    return result;
-}
-
-//----------------------------------------------------------------------------------jstring_to_bstr
-
-static void jstring_to_bstr( JNIEnv* jenv, const jstring& jstr, BSTR* bstr )
-{
-    const OLECHAR* str_w = jenv->GetStringChars( jstr, 0 );
-    
-    HRESULT hr = string_to_bstr( str_w, bstr );
-    
-    jenv->ReleaseStringChars( jstr, str_w );
-
-    if( FAILED(hr) )  throw_com( hr, "jstring_to_bstr/string_to_bstr" );
-}
-
-//--------------------------------------------------------------------------------jstring_from_bstr
-
-inline jstring jstring_from_bstr( JNIEnv* jenv, const BSTR bstr )
-{
-//#   ifdef HOSTJAVA_OLECHAR_IS_WCHAR
-        return jenv->NewString( bstr, SysStringLen(bstr) );
-//#    else
-//        std::string str = string_from_bstr( bstr );
-//        return jenv->NewString( str.c_str() );
-//#   endif
-}
-
 //------------------------------------------------------------------------------------java_vfprintf
 
 static jint JNICALL java_vfprintf( FILE *fp, const char *format, va_list args )
@@ -143,252 +106,29 @@ static jint JNICALL java_vfprintf( FILE *fp, const char *format, va_list args )
 
 static jobject jobject_from_variant( JNIEnv* jenv, const VARIANT& v )
 {
-    jobject result = NULL;
-
-    switch( v.vt )
+    if( v.vt == VT_DISPATCH )
     {
-        case VT_EMPTY:
-            return jenv->NewString( NULL, 0 );       // Für Job_chain_node.next_state, .error_state ("" wird zu VT_EMPTY)
+        IDispatch* idispatch = V_DISPATCH( &v );
+        if( !idispatch )  goto STANDARD;
 
-        case VT_ERROR:
-            if( v.scode == DISP_E_PARAMNOTFOUND ) return jenv->NewString( NULL, 0 );       // Für Job_chain_node.next_state, .error_state ("" wird zu VT_EMPTY)
+        ptr<spooler_com::Ihas_java_class_name> j;
+        HRESULT hr = idispatch->QueryInterface( spooler_com::IID_Ihas_java_class_name, (void**)&j );
+        if( FAILED( hr ) )  throw_ole( hr, "IID_Ihas_java_class_name" );
 
-            throw_com( v.scode, "Variant VT_ERROR" );
+        Bstr java_class_name_bstr;
+        hr = j->get_java_class_name( &java_class_name_bstr );
+        if( FAILED(hr) )  throw_ole( hr, "get_java_class_name" );
 
-      //case VT_NULL: 
-      //    return NULL;    //?
+        string java_class_name = replace_regex( string_from_bstr( java_class_name_bstr ), "\\.", "/" ) ;
+        ptr<Java_idispatch> java_idispatch = Z_NEW( Java_idispatch( java_vm->_spooler, idispatch, java_class_name) );
 
-        case VT_I2:
-        {
-            jclass cls = jenv->FindClass( "java/lang/Short" );
-            if( !cls )  return NULL;
+        java_vm->env().add_object( java_idispatch );        // Lebensdauer nur bis Ende des Aufrufs der Java-Methode, s. Java_module_instance::call()
 
-            jmethodID constructor_id = jenv->GetMethodID( cls, "<init>", "(S)V" );
-            if( !constructor_id )  return NULL;
-
-            result = jenv->NewObject( cls, constructor_id, (jshort)V_I2(&v) );
-
-
-
-            jenv->DeleteLocalRef( cls );
-            break;
-        }
-
-        case VT_I4:
-        {
-            jclass cls = jenv->FindClass( "java/lang/Integer" );
-            if( !cls )  return NULL;
-
-            jmethodID constructor_id = jenv->GetMethodID( cls, "<init>", "(I)V" );
-            if( !constructor_id )  return NULL;
-
-            result = jenv->NewObject( cls, constructor_id, (jint)V_I4(&v) );
-            jenv->DeleteLocalRef( cls );
-
-            break;
-        }
-
-        case VT_R4:
-        {
-            jclass cls = jenv->FindClass( "java/lang/Float" );
-            if( !cls )  return NULL;
-
-            jmethodID constructor_id = jenv->GetMethodID( cls, "<init>", "(F)V" );
-            if( !constructor_id )  return NULL;
-
-            result = jenv->NewObject( cls, constructor_id, (jfloat)V_R4(&v) );
-            jenv->DeleteLocalRef( cls );
-
-            break;
-        }
-
-        case VT_R8:
-        {
-            jclass cls = jenv->FindClass( "java/lang/Double" );
-            if( !cls )  return NULL;
-
-            jmethodID constructor_id = jenv->GetMethodID( cls, "<init>", "(D)V" );
-            if( !constructor_id )  return NULL;
-
-            result = jenv->NewObject( cls, constructor_id, (jdouble)V_R8(&v) );
-            jenv->DeleteLocalRef( cls );
-
-            break;
-        }
-
-      //case VT_CY: 
-      //case VT_DATE:       
-
-        case VT_BOOL:
-        {
-            jclass cls = jenv->FindClass( "java/lang/Boolean" );
-            if( !cls )  return NULL;
-
-            jmethodID constructor_id = jenv->GetMethodID( cls, "<init>", "(Z)V" );
-            if( !constructor_id )  return NULL;
-
-            result = jenv->NewObject( cls, constructor_id, (jboolean)V_BOOL(&v)? 1 : 0 );
-            jenv->DeleteLocalRef( cls );
-
-            break;
-        }
-
-        case VT_I1:  
-        {
-            jclass cls = jenv->FindClass( "java/lang/Byte" );
-            if( !cls )  return NULL;
-
-            jmethodID constructor_id = jenv->GetMethodID( cls, "<init>", "(B)V" );
-            if( !constructor_id )  return NULL;
-
-            result = jenv->NewObject( cls, constructor_id, (jbyte)V_I1(&v) );
-            jenv->DeleteLocalRef( cls );
-
-            break;
-        }
-
-        case VT_UI1: 
-        {
-            jclass cls = jenv->FindClass( "java/lang/Short" );
-            if( !cls )  return NULL;
-
-            jmethodID constructor_id = jenv->GetMethodID( cls, "<init>", "(S)V" );
-            if( !constructor_id )  return NULL;
-
-            result = jenv->NewObject( cls, constructor_id, (jshort)V_UI1(&v) );
-            jenv->DeleteLocalRef( cls );
-
-            break;
-        }
-
-        case VT_UI2: 
-        {
-            jclass cls = jenv->FindClass( "java/lang/Integer" );
-            if( !cls )  return NULL;
-
-            jmethodID constructor_id = jenv->GetMethodID( cls, "<init>", "(I)V" );
-            if( !constructor_id )  return NULL;
-
-            result = jenv->NewObject( cls, constructor_id, (jint)V_UI2(&v) );
-            jenv->DeleteLocalRef( cls );
-
-            break;
-        }
-
-        case VT_UI4: 
-        {
-            jclass cls = jenv->FindClass( "java/lang/Long" );
-            if( !cls )  return NULL;
-
-            jmethodID constructor_id = jenv->GetMethodID( cls, "<init>", "(J)V" );
-            if( !constructor_id )  return NULL;
-
-            result = jenv->NewObject( cls, constructor_id, (jlong)V_UI4(&v) );
-            jenv->DeleteLocalRef( cls );
-
-            break;
-        }
-
-        case VT_I8:  
-        {
-            jclass cls = jenv->FindClass( "java/lang/Long" );
-            if( !cls )  return NULL;
-
-            jmethodID constructor_id = jenv->GetMethodID( cls, "<init>", "(J)V" );
-            if( !constructor_id )  return NULL;
-
-            result = jenv->NewObject( cls, constructor_id, (jlong)V_I8(&v) );
-            jenv->DeleteLocalRef( cls );
-
-            break;
-        }
-
-      //case VT_UI8: 
-        case VT_INT: 
-        {
-            jclass cls = jenv->FindClass( "java/lang/Integer" );
-            if( !cls )  return NULL;
-
-            jmethodID constructor_id = jenv->GetMethodID( cls, "<init>", "(I)V" );
-            if( !constructor_id )  return NULL;
-
-            result = jenv->NewObject( cls, constructor_id, (jint)V_INT(&v) );
-            jenv->DeleteLocalRef( cls );
-
-            break;
-        }
-
-        case VT_UINT:
-        {
-            jclass cls = jenv->FindClass( "java/lang/Long" );
-            if( !cls )  return NULL;
-
-            jmethodID constructor_id = jenv->GetMethodID( cls, "<init>", "(J)V" );
-            if( !constructor_id )  return NULL;
-
-            result = jenv->NewObject( cls, constructor_id, (jlong)V_UINT(&v) );
-            jenv->DeleteLocalRef( cls );
-
-            break;
-        }
-
-      //case VT_VOID:
-      //case VT_HRESULT:
-      //case VT_PTR:
-      //case VT_FILETIME:
-
-        case VT_BSTR: 
-        {
-            result = jstring_from_bstr( jenv, V_BSTR(&v) );
-            break;
-        }
-
-        case VT_DISPATCH:
-        {
-            IDispatch* idispatch = V_DISPATCH( &v );
-            if( !idispatch )  break;
-
-            ptr<spooler_com::Ihas_java_class_name> j;
-            HRESULT hr = idispatch->QueryInterface( spooler_com::IID_Ihas_java_class_name, (void**)&j );
-            if( FAILED( hr ) )  break;
-
-            Bstr java_class_name_bstr;
-            hr = j->get_java_class_name( &java_class_name_bstr );
-            if( FAILED(hr) )  break;
-
-            string java_class_name = replace_regex( string_from_bstr( java_class_name_bstr ), "\\.", "/" ) ;
-            ptr<Java_idispatch> java_idispatch = Z_NEW( Java_idispatch( java_vm->_spooler, idispatch, java_class_name) );
-
-            java_vm->env().add_object( java_idispatch );        // Lebensdauer nur bis Ende des Aufrufs der Java-Methode, s. Java_module_instance::call()
-
-            result = *java_idispatch;
-
-            break;
-        }
-
-      //case VT_VARIANT:
-      //case VT_UNKNOWN:
-      //case VT_DECIMAL:
-      //case VT_SAFEARRAY:
-      //case VT_CARRAY:
-      //case VT_USERDEFINED:
-      //case VT_LPSTR:
-      //case VT_LPWSTR:
-      //case VT_RECORD:
-      //case VT_BLOB:
-      //case VT_STREAM:
-      //case VT_STORAGE:
-      //case VT_STREAMED_OBJECT:
-      //case VT_STORED_OBJECT:
-      //case VT_BLOB_OBJECT:
-      //case VT_CF:
-      //case VT_CLSID:
-
-        default:  
-            throw_xc( "SPOOLER-178", variant_type_name(v) );
+        return *java_idispatch;
     }
 
-    return result;
+STANDARD:
+    return z::java::jobject_from_variant( jenv, v );
 }
 
 //--------------------------------------------------------------Java sos.spooler.Idispatch.com_call
@@ -505,7 +245,7 @@ JNIEXPORT jobject JNICALL Java_sos_spooler_Idispatch_com_1call( JNIEnv* jenv, jc
         hr = idispatch->Invoke( dispid, IID_NULL, (LCID)0, context, &dispparams, &result, &excepinfo, &arg_nr );
         if( FAILED(hr) )  throw_ole_excepinfo( hr, &excepinfo, "Invoke", string_from_bstr(name_bstr).c_str() );
 
-        return jobject_from_variant( jenv, result );
+        return spooler::jobject_from_variant( jenv, result );
     }
     catch( const exception&  x ) { set_java_exception( jenv, x ); }
     catch( const _com_error& x ) { set_java_exception( jenv, x ); }
@@ -557,7 +297,7 @@ void Java_vm::get_options( const string& options )
 */
 //------------------------------------------------------------------------------------Java_vm::init
 // Im Haupt-Thread zu rufen.
-
+/*
 void Java_vm::init()
 {
     java_vm = this;
@@ -713,9 +453,9 @@ void Java_vm::init()
     ret = env()->RegisterNatives( _idispatch_jclass, native_methods, NO_OF( native_methods ) );
     if( ret < 0 )  throw_java( ret, "RegisterNatives", module_filename );
 }
-
+*/
 //-----------------------------------------------------------------------------------Java_vm::close
-
+/*
 void Java_vm::close()
 {
     if( _vm )  
@@ -730,9 +470,9 @@ void Java_vm::close()
     _options.clear();
     delete _vm_args.options;  _vm_args.options = NULL;
 }
-
+*/
 //---------------------------------------------------------------------------Java_vm::attach_thread
-
+/*
 void Java_vm::attach_thread( const string& thread_name )
 {
     if( !_vm )  return;
@@ -750,9 +490,9 @@ void Java_vm::attach_thread( const string& thread_name )
     int ret = _vm->AttachCurrentThread( (void**)&_thread_data->_env._jenv, &args ); 
     if( ret < 0 )  throw_java( ret, "AttachCurrentThread" );
 }
-
+*/
 //---------------------------------------------------------------------------Java_vm::detach_thread
-
+/*
 void Java_vm::detach_thread()
 {
     if( _vm )
@@ -763,9 +503,9 @@ void Java_vm::detach_thread()
 
     _thread_data.thread_detach();
 }
-
+*/
 //-------------------------------------------------------------------------------------Java_vm::env
-
+/*
 Java_env& Java_vm::env()
 {
     Java_env* env = &_thread_data->_env;
@@ -778,9 +518,9 @@ Java_env& Java_vm::env()
 
     return *env;
 }
-
+*/
 //------------------------------------------------------------------------------Java_vm::throw_java
-
+/*
 void Java_vm::throw_java( int return_value, const string& text1, const string& text2 )
 {
     string ret_text;
@@ -831,9 +571,9 @@ void Java_vm::throw_java( int return_value, const string& text1, const string& t
     x.insert( ret_text );
     throw_xc( x );
 }
-
+*/
 //-----------------------------------------------------------------------------Java_env::add_object
-
+/*
 void Java_env::add_object( Java_idispatch* o )
 { 
     _java_idispatch_list.push_back(NULL); 
@@ -871,7 +611,7 @@ jclass Java_env::get_object_class( jobject o )
 
     return result;
 }
-
+*/
 //-------------------------------------------------------------------------------Module::clear_java
 
 void Module::clear_java()
