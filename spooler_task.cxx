@@ -708,9 +708,10 @@ void Task::remove_pid( int pid )
 
 //------------------------------------------------------------------------------------Task::add_pid
 
-void Task::add_subprocess( int pid, const Time& timeout_at, bool ignore_exitcode, bool ignore_signal, const string& title )
+void Task::add_subprocess( int pid, double timeout, bool ignore_exitcode, bool ignore_signal, const string& title )
 { 
-    Time timeout = latter_day;
+    Time timeout_at = timeout < INT_MAX - 1? Time::now() + timeout
+                                           : latter_day;
     
     _registered_pids[ pid ] = Z_NEW( Registered_pid( this, pid, timeout_at, true, ignore_exitcode, ignore_signal, title ) );  
 
@@ -777,6 +778,7 @@ void Task::set_subprocess_timeout()
     _subprocess_timeout = latter_day;
     FOR_EACH( Registered_pids, _registered_pids, p )  if( _subprocess_timeout > p->second->_timeout_at )  _subprocess_timeout = p->second->_timeout_at;
 
+    if( _subprocess_timeout != latter_day )  signal( "subprocess_timeout" );
     //if( _subprocess_timeout > _next_time )  set_next_time( _subprocess_timeout );
 }
 
@@ -790,7 +792,14 @@ bool Task::check_subprocess_timeout( const Time& now )
     {
         FOR_EACH( Registered_pids, _registered_pids, p )  
         {
-            if( p->second->_timeout_at < now )  p->second->try_kill(),  something_done = true;
+            Registered_pid* subprocess = p->second;
+
+            if( subprocess->_timeout_at < now ) 
+            {
+                _log->warn( S() << "Subprozess " << subprocess->_pid << " wird abgebrochen, weil dessen Frist überschritten ist" );
+                subprocess->try_kill();
+                something_done = true;
+            }
         }
 
         set_subprocess_timeout();

@@ -22,7 +22,7 @@ struct Subprocess : idispatch_implementation< Subprocess, spooler_com::Isubproce
     static const Com_method     _methods[];
 
 
-                                Subprocess                  ( Subprocess_register*, Com_task_proxy* = NULL );
+                                Subprocess                  ( Subprocess_register*, IDispatch* task );
 
     Z_GNU_ONLY(                 Subprocess                  (); )
                                ~Subprocess                  ();
@@ -44,14 +44,17 @@ struct Subprocess : idispatch_implementation< Subprocess, spooler_com::Isubproce
     STDMETHODIMP            get_Pid                         ( int* result )                         { return _process.get_Pid( result ); }
     STDMETHODIMP            get_Terminated                  ( VARIANT_BOOL* result )                { return _process.get_Terminated( result ); }
     STDMETHODIMP            get_Exit_code                   ( int* result )                         { return _process.get_Exit_code( result ); }
-    STDMETHODIMP            get_Stdout_path                 ( BSTR* )                               { return E_NOTIMPL; }
-    STDMETHODIMP            get_Stderr_path                 ( BSTR* )                               { return E_NOTIMPL; }
-    STDMETHODIMP            put_Ignore_error                ( VARIANT_BOOL b )                      { _ignore_error = b != 0;  return S_OK; } 
-    STDMETHODIMP            get_Ignore_error                ( VARIANT_BOOL* result )                { *result = _ignore_error? VARIANT_TRUE: VARIANT_FALSE;  return S_OK; }
-    STDMETHODIMP            put_Ignore_signal               ( VARIANT_BOOL b )                      { _ignore_signal= b != 0;  return S_OK; }
-    STDMETHODIMP            get_Ignore_signal               ( VARIANT_BOOL* result )                { *result = _ignore_signal? VARIANT_TRUE: VARIANT_FALSE;  return S_OK; }
+  //STDMETHODIMP            get_Stdout_path                 ( BSTR* )                               { return E_NOTIMPL; }
+  //STDMETHODIMP            get_Stderr_path                 ( BSTR* )                               { return E_NOTIMPL; }
+    STDMETHODIMP            put_Ignore_error                ( VARIANT_BOOL );
+    STDMETHODIMP            get_Ignore_error                ( VARIANT_BOOL* );
+    STDMETHODIMP            put_Ignore_signal               ( VARIANT_BOOL );
+    STDMETHODIMP            get_Ignore_signal               ( VARIANT_BOOL* );
+    STDMETHODIMP            put_Timeout                     ( double );
     STDMETHODIMP                Wait                        ( VARIANT* seconds, VARIANT_BOOL* );
     STDMETHODIMP                Kill                        ( int signal )                          { return _process.Kill( signal ); }
+
+    HRESULT                     Update_register_entry       ();
 
 
     void                        close                       ();
@@ -65,9 +68,11 @@ struct Subprocess : idispatch_implementation< Subprocess, spooler_com::Isubproce
     zschimmer::Process         _process;
     Subprocess_register*       _subprocess_register;
     bool                       _registered;
-    ptr<Com_task_proxy>        _task_proxy;                 
+  //ptr<Com_task_proxy>        _task_proxy;                 
+    ptr<IDispatch>             _task;
     bool                       _ignore_error;
     bool                       _ignore_signal;
+    double                     _timeout;
 };
 
 //------------------------------------------------------------------------------Subprocess_register
@@ -78,7 +83,7 @@ struct Subprocess_register : Object
                                ~Subprocess_register         ();
 
 
-    STDMETHODIMP                Start_subprocess            ( VARIANT* program_and_parameters, spooler_com::Isubprocess** result, Com_task_proxy* = NULL );
+    STDMETHODIMP                Create_subprocess           ( VARIANT* program_and_parameters, spooler_com::Isubprocess** result, IDispatch* task );
 
     void                        wait                        ();                                     // Exception, wenn ein Prozess einen Fehler lieferte
     void                        add                         ( Subprocess* );

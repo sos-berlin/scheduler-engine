@@ -38,32 +38,34 @@ const Com_method Subprocess::_methods[] =
 { 
     COM_METHOD      ( Subprocess,  1, Close         , VT_EMPTY  , 0, {}          ),
     COM_METHOD      ( Subprocess,  2, Start         , VT_EMPTY  , 0, { VT_BYREF|VT_VARIANT }  ),
-    COM_PROPERTY_PUT( Subprocess,  3, Priority      ,             0, { VT_BYREF|VT_VARIANT }  ),
-    COM_PROPERTY_GET( Subprocess,  3, Priority      , VT_VARIANT, 0, {}          ),
+  //COM_PROPERTY_PUT( Subprocess,  3, Priority      ,             0, { VT_BYREF|VT_VARIANT }  ),
+  //COM_PROPERTY_GET( Subprocess,  3, Priority      , VT_VARIANT, 0, {}          ),
   //COM_METHOD      ( Subprocess,  4, Raise_priority, VT_EMPTY  , 0, { VT_INT  } ),
   //COM_METHOD      ( Subprocess,  5, Lower_priority, VT_EMPTY  , 0, { VT_INT  } ),
     COM_PROPERTY_GET( Subprocess,  6, Pid           , VT_INT    , 0, {}          ),
     COM_PROPERTY_GET( Subprocess,  7, Terminated    , VT_BOOL   , 0, {}          ),
     COM_PROPERTY_GET( Subprocess,  8, Exit_code     , VT_INT    , 0, {}          ),
-    COM_PROPERTY_GET( Subprocess,  9, Stdout_path   , VT_BSTR   , 0, {}          ),
-    COM_PROPERTY_GET( Subprocess, 10, Stderr_path   , VT_BSTR   , 0, {}          ),
+  //COM_PROPERTY_GET( Subprocess,  9, Stdout_path   , VT_BSTR   , 0, {}          ),
+  //COM_PROPERTY_GET( Subprocess, 10, Stderr_path   , VT_BSTR   , 0, {}          ),
     COM_PROPERTY_PUT( Subprocess, 11, Ignore_error  ,             0, { VT_BOOL } ),
     COM_PROPERTY_GET( Subprocess, 11, Ignore_error  , VT_BOOL   , 0, {}          ),
     COM_PROPERTY_PUT( Subprocess, 12, Ignore_signal ,             0, { VT_BSTR } ),
     COM_PROPERTY_GET( Subprocess, 12, Ignore_signal , VT_BOOL   , 0, { VT_BOOL } ),
-    COM_METHOD      ( Subprocess, 13, Wait          , VT_BOOL   , 1, { VT_BYREF|VT_VARIANT } ),
-    COM_METHOD      ( Subprocess, 14, Kill          , VT_EMPTY  , 0, { VT_INT  } ),
+    COM_PROPERTY_PUT( Subprocess, 13, Timeout       ,             0, { VT_R8 } ),
+    COM_METHOD      ( Subprocess, 14, Wait          , VT_BOOL   , 1, { VT_BYREF|VT_VARIANT } ),
+    COM_METHOD      ( Subprocess, 15, Kill          , VT_EMPTY  , 0, { VT_INT  } ),
     {}
 };
 
 //---------------------------------------------------------------------------Subprocess::Subprocess
 
-Subprocess::Subprocess( Subprocess_register* subprocess_register, Com_task_proxy* task_proxy ) 
+Subprocess::Subprocess( Subprocess_register* subprocess_register, IDispatch* task ) 
 : 
     Idispatch_implementation( &class_descriptor ),
     _zero_(this+1),
     _subprocess_register(subprocess_register),
-    _task_proxy(task_proxy)
+    _task(task),                // Itask oder Itask_proxy
+    _timeout( INT_MAX )
 {
 }
 
@@ -111,14 +113,11 @@ STDMETHODIMP Subprocess::Start( VARIANT* program_and_parameters )
             _process.start( args );
         }
         else
-            hr = DISP_E_TYPEMISMATCH;
+            return DISP_E_TYPEMISMATCH;
 
         _subprocess_register->add( this );
 
-        if( _task_proxy )
-        {
-            _task_proxy->call( "Add_subprocess", _process.pid(), "never", ignore_error(), ignore_signal(), _process.command_line() ); //, subprocess->stdout_path(), subprocess->stderr_path() );
-        }
+        hr = Update_register_entry();
     }
     catch( const exception&  x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
     
@@ -149,6 +148,70 @@ STDMETHODIMP Subprocess::Wait( VARIANT* seconds, VARIANT_BOOL* result )
     return hr;
 }
 
+//---------------------------------------------------------------------Subprocess::put_Ignore_error
+
+STDMETHODIMP Subprocess::put_Ignore_error( VARIANT_BOOL b )
+{ 
+    _ignore_error = b != 0;  
+    return Update_register_entry();
+}
+
+//---------------------------------------------------------------------Subprocess::get_Ignore_error
+
+STDMETHODIMP Subprocess::get_Ignore_error( VARIANT_BOOL* result )
+{ 
+    *result = _ignore_error? VARIANT_TRUE: VARIANT_FALSE;  
+    return S_OK;
+}
+
+//--------------------------------------------------------------------Subprocess::put_Ignore_signal
+
+STDMETHODIMP Subprocess::put_Ignore_signal( VARIANT_BOOL b )                      
+{ 
+    _ignore_signal= b != 0;  
+    return S_OK; 
+}
+
+//--------------------------------------------------------------------Subprocess::get_Ignore_signal
+
+STDMETHODIMP Subprocess::get_Ignore_signal( VARIANT_BOOL* result )                
+{ 
+    *result = _ignore_signal? VARIANT_TRUE: VARIANT_FALSE;  
+    return Update_register_entry();
+}
+
+//--------------------------------------------------------------------------Subprocess::put_Timeout
+
+STDMETHODIMP Subprocess::put_Timeout( double timeout )
+{
+    _timeout = timeout;
+    return Update_register_entry();
+}
+
+//----------------------------------------------------------------Subprocess::Update_register_entry
+
+HRESULT Subprocess::Update_register_entry()
+{
+    HRESULT hr = S_OK;
+    
+    try
+    {
+        vector<Variant> variant_array;
+
+        // Rückwärts!
+        variant_array.push_back( _process.command_line() );
+        variant_array.push_back( ignore_signal() );
+        variant_array.push_back( ignore_error() );
+        variant_array.push_back( (int)( _timeout + 0.999 ) );
+        variant_array.push_back( _process.pid() );
+
+        com_invoke( DISPATCH_METHOD, _task, "Add_subprocess", &variant_array );
+    }
+    catch( const exception&  x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
+    
+    return hr;
+}
+
 //--------------------------------------------------------Subprocess_register::~Subprocess_register
 
 Subprocess_register::~Subprocess_register()
@@ -156,17 +219,17 @@ Subprocess_register::~Subprocess_register()
     while( !_subprocess_map.empty() )  remove( _subprocess_map.begin()->second );
 }
 
-//------------------------------------------------------------Subprocess_register::Start_subprocess
+//-----------------------------------------------------------Subprocess_register::Create_subprocess
 
-STDMETHODIMP Subprocess_register::Start_subprocess( VARIANT* program_and_parameters, spooler_com::Isubprocess** result, 
-                                                    Com_task_proxy* task_proxy )
+STDMETHODIMP Subprocess_register::Create_subprocess( VARIANT* program_and_parameters, spooler_com::Isubprocess** result, 
+                                                     IDispatch* task )
 {
-    Z_LOGI( "Subprocess_register::Start_subprocess()\n" );
+    Z_LOGI( "Subprocess_register::Create_subprocess(" << debug_string_from_variant( *program_and_parameters ) << ")\n" );
     HRESULT hr = S_OK;
     
     try
     {
-        ptr<Subprocess> subprocess = Z_NEW( Subprocess( this, task_proxy ) );
+        ptr<Subprocess> subprocess = Z_NEW( Subprocess( this, task ) );
 
         if( !variant_is_missing( *program_and_parameters ) )
         {

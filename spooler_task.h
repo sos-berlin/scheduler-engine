@@ -134,7 +134,7 @@ struct Task : Sos_self_deleting
 
     void                        add_pid                     ( int pid, const Time& timeout = latter_day );
     void                        remove_pid                  ( int pid );
-    void                        add_subprocess              ( int pid, const Time& timeout_at, bool ignore_error, bool ignore_signal, const string& title );
+    void                        add_subprocess              ( int pid, double timeout, bool ignore_error, bool ignore_signal, const string& title );
     void                        set_subprocess_timeout      ();
     bool                        check_subprocess_timeout    ( const Time& now );
     bool                        shall_wait_for_registered_pid();

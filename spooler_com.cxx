@@ -1911,8 +1911,8 @@ const Com_method Com_task::_methods[] =
     { DISPATCH_METHOD     , 17, "remove_pid"                , (Com_method_ptr)&Com_task::Remove_pid             , VT_EMPTY      , { VT_INT } },
     { DISPATCH_PROPERTYGET, 18, "stderr_text"               , (Com_method_ptr)&Com_task::get_Stderr_text        , VT_BSTR       },
     { DISPATCH_PROPERTYGET, 19, "stdout_text"               , (Com_method_ptr)&Com_task::get_Stdout_text        , VT_BSTR       },
-    { DISPATCH_METHOD     , 20, "Start_subprocess"          , (Com_method_ptr)&Com_task::Start_subprocess       , VT_DISPATCH   , { VT_BYREF|VT_VARIANT } },
-    { DISPATCH_METHOD     , 21, "Add_subprocess"            , (Com_method_ptr)&Com_task::Add_subprocess         , VT_EMPTY      , { VT_INT, VT_BSTR, VT_BOOL, VT_BOOL, VT_BSTR }, 1 },
+    { DISPATCH_METHOD     , 20, "Create_subprocess"         , (Com_method_ptr)&Com_task::Start_subprocess       , VT_DISPATCH   , { VT_BYREF|VT_VARIANT } },
+    { DISPATCH_METHOD     , 21, "Add_subprocess"            , (Com_method_ptr)&Com_task::Add_subprocess         , VT_EMPTY      , { VT_INT, VT_R8, VT_BOOL, VT_BOOL, VT_BSTR }, 1 },
     {}
 };
 
@@ -2374,22 +2374,22 @@ STDMETHODIMP Com_task::get_Stdout_text( BSTR* result )
     return get_Stderr_or_stdout_text( result, false );
 }
 
-//-----------------------------------------------------------------------Com_task::Start_subprocess
+//----------------------------------------------------------------------Com_task::Create_subprocess
 
-STDMETHODIMP Com_task::Start_subprocess( VARIANT* program_and_parameters, Isubprocess** result )
+STDMETHODIMP Com_task::Create_subprocess( VARIANT* program_and_parameters, Isubprocess** result )
 {
     Z_LOG( __PRETTY_FUNCTION__ << "(" << debug_string_from_variant( *program_and_parameters ) << "\n" );
     if( !_task )  return E_POINTER;
 
-    return _task->_subprocess_register.Start_subprocess( program_and_parameters, result );
+    return _task->_subprocess_register.Create_subprocess( program_and_parameters, result, this );
 }
 
 //--------------------------------------------------------------------Com_task::Register_subprocess
 // Wird aufgerufen von Com_task_proxy
 
-STDMETHODIMP Com_task::Add_subprocess( int pid, BSTR timeout_at, VARIANT_BOOL ignore_error, VARIANT_BOOL ignore_signal, BSTR title  )
+STDMETHODIMP Com_task::Add_subprocess( int pid, double timeout, VARIANT_BOOL ignore_error, VARIANT_BOOL ignore_signal, BSTR title  )
 {
-    Z_LOG( __PRETTY_FUNCTION__ << "(" << pid << ',' << timeout_at << ',' << ignore_error << ',' << ignore_signal << ',' << title << ")\n" );
+    Z_LOG( __PRETTY_FUNCTION__ << "(" << pid << ',' << timeout << ',' << ignore_error << ',' << ignore_signal << ',' << title << ")\n" );
     HRESULT hr = S_OK;
     
     try
@@ -2397,7 +2397,7 @@ STDMETHODIMP Com_task::Add_subprocess( int pid, BSTR timeout_at, VARIANT_BOOL ig
         if( !_task )  throw_xc( "SCHEDULER-122" );
 
         _task->add_subprocess( pid, 
-                               string_from_bstr( timeout_at ), 
+                               timeout, 
                                ignore_error? true : false, 
                                ignore_signal? true : false, 
                                string_from_bstr( title ) );
@@ -2413,7 +2413,7 @@ STDMETHODIMP Com_task::Add_subprocess( int pid, BSTR timeout_at, VARIANT_BOOL ig
 
 const Com_method Com_task_proxy::_methods[] =
 { 
-    COM_METHOD( Com_task_proxy, 20, Start_subprocess      , VT_DISPATCH , 0, { VT_BYREF|VT_VARIANT } ),
+    COM_METHOD( Com_task_proxy, 20, Create_subprocess     , VT_DISPATCH , 0, { VT_BYREF|VT_VARIANT } ),
   //COM_METHOD( DISPATCH_METHOD, 21, "Wait_for_subprocesses" , Com_task_proxy::Wait_for_subprocesses, VT_EMTPY    , 0, {} ),
     {}
 };
@@ -2436,15 +2436,15 @@ HRESULT Com_task_proxy::Create_instance( const IID& iid, ptr<IUnknown>* result )
 
 Com_task_proxy::Com_task_proxy()
 : 
-    Idispatch_implementation( &class_descriptor ),
-    object_server::Proxy( &class_descriptor, static_cast<Itask_proxy*>( this ) ),
+    Proxy_with_local_methods( &class_descriptor ),
+  //object_server::Proxy( &class_descriptor, static_cast<Itask_proxy*>( this ) ),
   //_proxy( Z_NEW( object_server::Proxy( &class_descriptor, static_cast<Itask_proxy*>( this ) ) ) ),
     _subprocess_register( Z_NEW( Subprocess_register ) )
 {
 }
 
 //-------------------------------------------------------------------Com_task_proxy::QueryInterface
-
+/*
 STDMETHODIMP Com_task_proxy::QueryInterface( const IID& iid, void** result )
 {
     HRESULT hr = Idispatch_implementation::QueryInterface( iid, result );
@@ -2452,36 +2452,12 @@ STDMETHODIMP Com_task_proxy::QueryInterface( const IID& iid, void** result )
 
     return object_server::Proxy::QueryInterface( iid, result );
 }
+*/
+//----------------------------------------------------------------Com_task_proxy::Create_subprocess
 
-STDMETHODIMP Com_task_proxy::GetIDsOfNames( const IID& iid, OLECHAR** names, uint names_count, LCID lcid, DISPID* result )
+STDMETHODIMP Com_task_proxy::Create_subprocess( VARIANT* program_and_parameters, Isubprocess** result )
 {
-    HRESULT hr = Idispatch_implementation::GetIDsOfNames( iid, names, names_count, lcid, result );
-    
-    if( hr == DISP_E_UNKNOWNNAME )
-    {
-        hr = Proxy::GetIDsOfNames( iid, names, names_count, lcid, result );
-    }
-
-    return hr;
-}
-
-
-STDMETHODIMP Com_task_proxy::Invoke( DISPID dispid, const IID& iid, LCID lcid, WORD flags, DISPPARAMS* dispparams, VARIANT* result, EXCEPINFO* excepinfo, UINT* errarg )
-{
-    HRESULT hr = Idispatch_implementation::Invoke( dispid, iid, lcid, flags, dispparams, result, excepinfo, errarg );
-    
-    if( hr == DISP_E_MEMBERNOTFOUND )
-    {
-        hr = Proxy::Invoke( dispid, iid, lcid, flags, dispparams, result, excepinfo, errarg );
-    }
-
-    return hr;
-}
-//-----------------------------------------------------------------Com_task_proxy::Start_subprocess
-
-STDMETHODIMP Com_task_proxy::Start_subprocess( VARIANT* program_and_parameters, Isubprocess** result )
-{
-    return _subprocess_register->Start_subprocess( program_and_parameters, result, this );
+    return _subprocess_register->Create_subprocess( program_and_parameters, result, static_cast<Idispatch_implementation*>( this ) );
 }
 
 //------------------------------------------------------------Com_task_proxy::wait_for_subprocesses

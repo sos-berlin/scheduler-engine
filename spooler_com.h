@@ -452,8 +452,8 @@ struct Com_task : spooler_com::Itask,
     STDMETHODIMP            get_Stderr_text                 ( BSTR* );
     STDMETHODIMP            get_Stdout_text                 ( BSTR* );
     STDMETHODIMP            get_Stderr_or_stdout_text       ( BSTR*, bool get_stderr );
-    STDMETHODIMP                Start_subprocess            ( VARIANT*, spooler_com::Isubprocess** );
-    STDMETHODIMP                Add_subprocess              ( int, BSTR, VARIANT_BOOL, VARIANT_BOOL, BSTR );
+    STDMETHODIMP                Create_subprocess           ( VARIANT*, spooler_com::Isubprocess** );
+    STDMETHODIMP                Add_subprocess              ( int, double, VARIANT_BOOL, VARIANT_BOOL, BSTR );
 
   private:
     Thread_semaphore           _lock;
@@ -464,8 +464,7 @@ struct Com_task : spooler_com::Itask,
                                     
 //Z_DEFINE_GUID( CLSID_Com_spooler_proxy, 0xfeee47aa, 0x6c1b, 0x11d8, 0x81, 0x03, 0x00, 0x04, 0x76, 0xee, 0x8a, 0xfb );   // {feee47aa-6c1b-11d8-8103-000476ee8afb}
 
-struct Com_task_proxy : idispatch_implementation< Com_task_proxy, spooler_com::Itask_proxy >,
-                        com::object_server::Proxy
+struct Com_task_proxy : object_server::proxy_with_local_methods< Com_task_proxy, spooler_com::Itask_proxy >
 {
     static Class_descriptor     class_descriptor;
     static const com::Com_method _methods[];
@@ -476,20 +475,13 @@ struct Com_task_proxy : idispatch_implementation< Com_task_proxy, spooler_com::I
 
                                 Com_task_proxy              ();
 
-    STDMETHODIMP_(ULONG)        AddRef                      ()                                      { return Idispatch_implementation::AddRef(); }
-    STDMETHODIMP_(ULONG)        Release                     ()                                      { return Idispatch_implementation::Release(); }
-    STDMETHODIMP                QueryInterface              ( const IID&, void** );
-    STDMETHODIMP                GetIDsOfNames( const IID& iid, OLECHAR** names, uint names_count, LCID lcid, DISPID* result );
-    STDMETHODIMP                Invoke( DISPID dispid, const IID& iid, LCID lcid, WORD flags, DISPPARAMS* dispparams, VARIANT* result, EXCEPINFO* excepinfo, UINT* errarg );
 
-
-    STDMETHODIMP                Start_subprocess            ( VARIANT* program_and_parameters, spooler_com::Isubprocess** result );
+    STDMETHODIMP                Create_subprocess           ( VARIANT* program_and_parameters, spooler_com::Isubprocess** result );
 
     void                        wait_for_subprocesses       ();
 
 
     ptr<Subprocess_register>   _subprocess_register;
-  //ptr<object_server::Proxy>  _proxy;
 };
 
 //---------------------------------------------------------------------------------------Com_thread
@@ -788,8 +780,8 @@ struct Com_subprocess : spooler_com::Isubprocess,
     STDMETHODIMP            get_Pid                     ( int* );
     STDMETHODIMP            get_Terminated              ( VARIANT_BOOL* );
     STDMETHODIMP            get_Exit_code               ( int* );
-    STDMETHODIMP            get_Stdout_path             ( BSTR* );
-    STDMETHODIMP            get_Stderr_path             ( BSTR* );
+  //STDMETHODIMP            get_Stdout_path             ( BSTR* );
+  //STDMETHODIMP            get_Stderr_path             ( BSTR* );
     STDMETHODIMP            put_Ignore_error            ( VARIANT_BOOL );
     STDMETHODIMP            get_Ignore_error            ( VARIANT_BOOL* );
     STDMETHODIMP            put_Ignore_signal           ( VARIANT_BOOL );

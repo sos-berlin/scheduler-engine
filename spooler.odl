@@ -382,9 +382,9 @@ library Spooler
         HRESULT                 Stdout_text                 ( [out,retval] BSTR* Result );
 
         [id(20)]
-        HRESULT                 Start_subprocess            ( [in] VARIANT* program_and_parameters, [out,retval] Isubprocess** );
+        HRESULT                 Create_subprocess           ( [in] VARIANT* program_and_parameters, [out,retval] Isubprocess** );
 
-        HRESULT                 Add_subprocess              ( [in] int Pid, [in] BSTR timeout_at, [in] VARIANT_BOOL Ignore_error, [in] VARIANT_BOOL Ignore_signal, [in,defaultvalue("")] BSTR Title );
+        HRESULT                 Add_subprocess              ( [in] int Pid, [in] double timeout, [in] VARIANT_BOOL Ignore_error, [in] VARIANT_BOOL Ignore_signal, [in,defaultvalue("")] BSTR Title );
     }
 
     [
@@ -408,7 +408,7 @@ library Spooler
         // Ids sollten mit Itask übereinstimmen!
 
         [id(20)]
-        HRESULT                 Start_subprocess        ( [in] VARIANT* program_and_parameters, [out,retval] Isubprocess** );
+        HRESULT                 Create_subprocess       ( [in] VARIANT* program_and_parameters, [out,retval] Isubprocess** );
     }
 
     [
@@ -1121,13 +1121,13 @@ library Spooler
 
         HRESULT                 Close                   ();
 
-        HRESULT                 Start                   ( [in] VARIANT* command_line );         // BSTR oder Array
+      //HRESULT                 Start                   ( [in] VARIANT* command_line );         // BSTR oder Array
 
-        [propput]
-        HRESULT                 Priority                ( [in] VARIANT* );
+      //[propput]
+      //HRESULT                 Priority                ( [in] VARIANT* );
 
-        [propget]
-        HRESULT                 Priority                ( [out,retval] VARIANT* );
+      //[propget]
+      //HRESULT                 Priority                ( [out,retval] VARIANT* );
 
       //HRESULT                 Raise_priority          ( [in] int, [out,retval] VARIANT_BOOL* );
 
@@ -1142,11 +1142,11 @@ library Spooler
         [propget]
         HRESULT                 Exit_code               ( [out,retval] int* );
 
-        [propget]
-        HRESULT                 Stdout_path             ( [out,retval] BSTR* );
+      //[propget]
+      //HRESULT                 Stdout_path             ( [out,retval] BSTR* );
 
-        [propget]
-        HRESULT                 Stderr_path             ( [out,retval] BSTR* );
+      //[propget]
+      //HRESULT                 Stderr_path             ( [out,retval] BSTR* );
 
         [propput]
         HRESULT                 Ignore_error            ( [in] VARIANT_BOOL );
@@ -1159,6 +1159,9 @@ library Spooler
 
         [propget]
         HRESULT                 Ignore_signal           ( [out,retval] VARIANT_BOOL* );
+
+        [propput]
+        HRESULT                 Timeout                 ( [in] double seconds );
 
         HRESULT                 Wait                    ( [in,optional] VARIANT* seconds, [out,retval] VARIANT_BOOL* );       // seconds: VT_DOUBLE oder VT_INT
 
