@@ -1,4 +1,4 @@
-// $Id: Task.java,v 1.11 2004/08/29 09:27:27 jz Exp $
+// $Id: Task.java,v 1.12 2004/08/30 10:13:53 jz Exp $
 
 package sos.spooler;
 
@@ -10,7 +10,7 @@ package sos.spooler;
  * Implementiert wird eine Task durch {@link Job_impl}.
  * 
  * @author Joacim Zschimmer
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.12 $
  */
 
 public class Task extends Idispatch
@@ -119,7 +119,8 @@ public class Task extends Idispatch
     /** Setzt ein Feld in der Task-Historie.
      * 
      * <p>
-     * Die Datenbanktabelle muss eine Spalte mit dem Namen haben. 
+     * Die Datenbanktabelle muss eine Spalte mit dem Namen haben
+     * und diese Spalte muss in der Datei factory.ini mit history_columns deklariert sein.
      */ 
     public void         set_history_field       ( String name, String value )       {                       com_call( ">history_field", name, value     ); }
     

@@ -1,4 +1,4 @@
-// $Id: spooler_dtd.cxx,v 1.2 2004/08/29 13:51:01 jz Exp $
+// $Id: spooler_dtd.cxx,v 1.3 2004/08/30 10:13:52 jz Exp $
 /*
     Hier ist implementiert
 
@@ -19,7 +19,7 @@ using namespace std;
 const char dtd_string[] = 
 
 "<?xml version='1.0' encoding='iso-8859-1'?>\n"
-"<!-- $Id: spooler_dtd.cxx,v 1.2 2004/08/29 13:51:01 jz Exp $ -->\n"
+"<!-- $Id: spooler_dtd.cxx,v 1.3 2004/08/30 10:13:52 jz Exp $ -->\n"
 "\n"
 "\n"
 "<!ENTITY % command              ' add_jobs\n" 
@@ -94,7 +94,7 @@ const char dtd_string[] =
 "\n"
 "<!ELEMENT script                ( #PCDATA | include )*>\n"
 "<!ATTLIST script                language            CDATA #IMPLIED>     <!-- Z.B. 'VBScript', 'JavaScript', 'PerlScript' -->\n"
-"<!ATTLIST script                use_engine          (task|job) #IMPLIED><!-- use_engine='task'  : Jeder Task eine Scripting Engine -->\n"
+"<!ATTLIST script                use_engine          (task) #IMPLIED>    <!-- use_engine='task'  : Jeder Task eine Scripting Engine -->\n"
 "                                                                        <!-- use_engine='job'   : Allen Tasks dieses Jobs eine Scripting Engine -->\n"
 "<!ATTLIST script                com_class           CDATA #IMPLIED>     <!-- Für eine COM-Klasse -->\n"
 "<!ATTLIST script                filename            CDATA #IMPLIED>     <!-- Falls die COM-Klasse in einer bestimmten DLL liegt -->\n"

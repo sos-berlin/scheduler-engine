@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="../scheduler.xslt" type="text/xsl"?>
 
-<!--$Id: include.xml,v 1.5 2004/08/28 14:41:02 jz Exp $-->
+<!--$Id: include.xml,v 1.6 2004/08/30 10:13:52 jz Exp $-->
 
 <xml_element name     = "include" 
              title    = "Fügt Text aus einer Datei ein"
              base_dir = ".."
              parent_page = "../konfiguration.xml"
              author   = "$Author: jz $"
-             date     = "$Date: 2004/08/28 14:41:02 $">
+             date     = "$Date: 2004/08/30 10:13:52 $">
 
     <xml_parent_elements>
         <xml_parent_element name="script">
@@ -23,6 +23,9 @@
             <description>
                 <p>
                     Der Name der Datei, deren Inhalt eingefügt werden soll.
+                    Wenn der Dateiname nicht absolut ist, 
+                    dann gibt Option <scheduler_option name="include"/> das Verzeichnis an.
+                    
                 </p>
             </description>
         </xml_attribute>

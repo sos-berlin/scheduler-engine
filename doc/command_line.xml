@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="scheduler.xslt" type="text/xsl"?>
 
-<!--$Id: command_line.xml,v 1.7 2004/08/29 13:51:02 jz Exp $-->
+<!--$Id: command_line.xml,v 1.8 2004/08/30 10:13:52 jz Exp $-->
 
 <command_line program  = "scheduler"
               title    = "Kommandozeile"
               base_dir = "."
               author   = "$Author: jz $"
-              date     = "$Date: 2004/08/29 13:51:02 $">
+              date     = "$Date: 2004/08/30 10:13:52 $">
 
     <command_options>
         <command_option name="config" setting="config">
@@ -31,7 +31,7 @@
         </command_option>
 
 
-        <command_option name="id"           setting="spooler_id"/>
+        <command_option name="id" setting="option_id"/>
 
         <command_option name="cd" type="verzeichnis" title="Arbeitsverzeichnis">
             <description>

@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding="utf-8"?>
-<!-- $Id: scheduler.xslt,v 1.18 2004/08/29 13:51:02 jz Exp $ -->
+<!-- $Id: scheduler.xslt,v 1.19 2004/08/30 10:13:52 jz Exp $ -->
 
 <!--
     Änderungswünsche:
@@ -13,6 +13,7 @@
                 version   = "1.0">
 
     <xsl:variable name="start_page" select="'index.xml'"/>
+    <xsl:variable name="base_dir"   select="/*/@base_dir"/>
         
         
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~xml_element-->
@@ -297,25 +298,13 @@
         <xsl:variable name="setting" select="document( 'settings.xml' )/settings/setting[ @setting = current()/@setting ]"/>
         
         <div class="indent">
-            <!--
-            <xsl:if test="@option">
-                Kann mit der Kommandozeilen-Option
-                <xsl:element name="a">
-                    <xsl:attribute name="class">silent</xsl:attribute>
-                    <xsl:attribute name="href">
-                        <xsl:value-of select="/*/@base_dir"/>/command_line.xml#option_<xsl:value-of select="@option"/>
-                    </xsl:attribute>
-                    <code>-<xsl:value-of select="@option"/>=</code>
-                </xsl:element>
-                überschrieben werden.
-                <p/>
-            </xsl:if>
-            -->            
+
             <xsl:if test="$setting/description">
                 <xsl:apply-templates select="$setting/description"/>
                 <p/>
             </xsl:if>
-            <xsl:if test="$setting/description != description">
+
+            <xsl:if test="generate-id( $setting/description ) != generate-id( description )">
                 <xsl:apply-templates select="description"/>
             </xsl:if>
 
@@ -326,7 +315,7 @@
                     <xsl:element name="a">
                         <xsl:attribute name="class">silent</xsl:attribute>
                         <xsl:attribute name="href">
-                            <xsl:value-of select="/*/@base_dir"/>/ersetzung_von_umgebungsvariablen.xml
+                            <xsl:value-of select="$base_dir"/>/ersetzung_von_umgebungsvariablen.xml
                         </xsl:attribute>
                         <xsl:text>hier</xsl:text>
                     </xsl:element>)
@@ -348,10 +337,13 @@
             <xsl:if test="not( self::command_option )">
                 <xsl:variable name="command_option" select="document( 'command_line.xml' )/command_line/command_options/command_option[ @setting = current()/@setting ]"/>
                 <xsl:if test="$command_option">
-                    Die Einstellung
+                    <!--Die Einstellung-->
+                    Die Option
+
                     <xsl:call-template name="scheduler_option">
                         <xsl:with-param name="name" select="$command_option/@name"/>
                     </xsl:call-template>
+
                     hat Vorrang.
                     <br/>
                 </xsl:if>
@@ -362,7 +354,8 @@
                 <xsl:variable name="current_setting" select="."/>
 
                 <xsl:for-each select="$ini_entry">
-                    Die Einstellung
+                    <!--Die Einstellung-->
+
                     <xsl:call-template name="scheduler_ini_entry">
                         <xsl:with-param name="file"    select="'factory.ini'"/>
                         <xsl:with-param name="section" select="ancestor::ini_section/@name"/>
@@ -386,7 +379,7 @@
                 <xsl:variable name="current_setting" select="."/>
 
                 <xsl:if test="$config_attribute">
-                    Die Einstellung
+                    <!--Die Einstellung-->
 
                     <xsl:call-template name="scheduler_element">
                         <xsl:with-param name="name"      select="'config'"/>
@@ -513,7 +506,7 @@
         
         <xsl:element name="a">
             <xsl:attribute name="class">silent</xsl:attribute>
-            <xsl:attribute name="href"><xsl:value-of select="concat( /*/@base_dir, '/xml/', $name, '.xml', '#attribute_', $attribute )"/></xsl:attribute>
+            <xsl:attribute name="href"><xsl:value-of select="concat( $base_dir, '/xml/', $name, '.xml', '#attribute_', $attribute )"/></xsl:attribute>
             <code>
                 &lt;<xsl:value-of select="$name"/>
                 <xsl:if test="$attribute">
@@ -528,6 +521,17 @@
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~scheduler_ini_entry-->
 
+    <xsl:template match="scheduler_ini_entry" mode="description">
+    
+        <xsl:call-template name="scheduler_ini_entry">
+            <xsl:with-param name="file"    select="@file"/>
+            <xsl:with-param name="section" select="@section"/>
+            <xsl:with-param name="entry"   select="@entry"/>
+        </xsl:call-template>
+    </xsl:template>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~scheduler_ini_entry-->
+
     <xsl:template name="scheduler_ini_entry">
         <xsl:param name="file"/>
         <xsl:param name="section"/>
@@ -535,7 +539,7 @@
         
         <xsl:element name="a">
             <xsl:attribute name="class">silent</xsl:attribute>
-            <xsl:attribute name="href"><xsl:value-of select="concat( /*/@base_dir, '/', translate( $file, '.', '_' ), '_', $section, '.xml', '#entry_', $section, '__', $entry )"/></xsl:attribute>
+            <xsl:attribute name="href"><xsl:value-of select="concat( $base_dir, '/', translate( $file, '.', '_' ), '_', $section, '.xml', '#entry_', $entry )"/></xsl:attribute>
             
             <code><xsl:value-of select="$file"/></code>
             
@@ -569,15 +573,16 @@
         
         <xsl:element name="a">
             <xsl:attribute name="class">silent</xsl:attribute>
-            <xsl:attribute name="href"><xsl:value-of select="concat( /*/@base_dir, '/command_line.xml#option_', $name )"/></xsl:attribute>
+            <xsl:attribute name="href"><xsl:value-of select="concat( $base_dir, '/command_line.xml#option_', $name )"/></xsl:attribute>
             <code>-<xsl:value-of select="$name"/></code>
 
-            <!--
+<!--
             <xsl:variable name="command_option" select="document( 'command_line.xml' )/command_line/command_options/command_option[ @name = current()/@name or @setting = current()/@name ]"/>
-            <xsl:if test="$command_option/@type>
-            <code>=…</code>
+
+            <xsl:if test="$command_option/@type">
+                <code>="</code><i><xsl:value-of select="$command_option/@type"/></i><code>"</code>
             </xsl:if>
-            -->
+-->            
         </xsl:element>
     </xsl:template>
 
@@ -691,6 +696,12 @@
                 <xsl:call-template name="body_start">
                     <xsl:with-param name="title" select="$title"/>
                 </xsl:call-template>
+                
+                <p>
+                    Übersicht über alle Einstellungen.
+                </p>
+
+                <xsl:apply-templates mode="setting_description" select="."/>
 
                 <xsl:for-each select="ini_sections/ini_section">
                     <xsl:variable name="section_filename" select="concat( translate( ancestor::ini/@file, '.', '_' ), '_', @name, '.xml' )"/>
@@ -764,7 +775,7 @@
                         <td>
                             <xsl:element name="a">
                                 <xsl:attribute name="class">silent</xsl:attribute>
-                                <xsl:attribute name="href">#setting_<xsl:value-of select="@setting"/></xsl:attribute>
+                                <xsl:attribute name="href"><xsl:value-of select="$href"/>#setting_<xsl:value-of select="@setting"/></xsl:attribute>
                                 <code><xsl:value-of select="@name | @setting"/></code>
                             </xsl:element>
                         </td>
@@ -840,10 +851,12 @@
                 <xsl:element name="a">
                     <xsl:attribute name="name">setting_<xsl:value-of select="@setting"/></xsl:attribute>
                 </xsl:element>
+                
                 <xsl:element name="a">
-                    <xsl:attribute name="name">entry_<xsl:value-of select="parent::*/parent::*/@name"/>__<xsl:value-of select="@name"/></xsl:attribute>
+                    <xsl:attribute name="name">entry_<xsl:value-of select="@name | @setting"/></xsl:attribute>
                 </xsl:element>
-                <b><code><xsl:value-of select="@setting"/></code></b>
+                
+                <b><code><xsl:value-of select="@name | @setting"/></code></b>
                 
                 <b><code> = </code></b>
                 <span class="type"><xsl:value-of select="$setting/@type"/></span>
@@ -919,7 +932,7 @@
             </title>
             
             <style type="text/css">
-                @import "<xsl:value-of select="/*/@base_dir"/>/scheduler.css";
+                @import "<xsl:value-of select="$base_dir"/>/scheduler.css";
             </style>
         </head>
     </xsl:template>
@@ -984,7 +997,7 @@
             <xsl:if test="not( /*/@suppress_browse_bar='yes' )">
                 <xsl:element name="a">
                     <xsl:attribute name="class">silent</xsl:attribute>
-                    <xsl:attribute name="href"><xsl:value-of select="concat( /*/@base_dir, '/', $start_page )"/></xsl:attribute>
+                    <xsl:attribute name="href"><xsl:value-of select="concat( $base_dir, '/', $start_page )"/></xsl:attribute>
                     <xsl:text>Startseite</xsl:text>
                 </xsl:element>
                 
@@ -992,7 +1005,7 @@
                     &#160; – &#160;
                     <xsl:element name="a">
                         <xsl:attribute name="class">silent</xsl:attribute>
-                        <!--xsl:attribute name="href"><xsl:value-of select="concat( /*/@base_dir, '/', $parent_page )"/></xsl:attribute-->
+                        <!--xsl:attribute name="href"><xsl:value-of select="concat( $base_dir, '/', $parent_page )"/></xsl:attribute-->
                         <xsl:attribute name="href"><xsl:value-of select="$parent_page"/></xsl:attribute>
                         <xsl:value-of select="document( $parent_page )/*/@title"/>
                     </xsl:element>

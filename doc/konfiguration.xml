@@ -2,13 +2,13 @@
 <?xml-stylesheet href="scheduler.xslt" type="text/xsl"?>
 
 
-<!--$Id: konfiguration.xml,v 1.5 2004/08/29 13:51:02 jz Exp $-->
+<!--$Id: konfiguration.xml,v 1.6 2004/08/30 10:13:52 jz Exp $-->
 
 <description 
     title    = "XML-Konfiguration" 
     base_dir = "."
     author   = "$Author: jz $"
-    date     = "$Date: 2004/08/29 13:51:02 $"
+    date     = "$Date: 2004/08/30 10:13:52 $"
 >
 <p>
     Beim Start des Scheduler geben Sie die Datei an,
@@ -99,7 +99,9 @@ scheduler hallo_welt.xml
         &lt;/holiday>
 
         &lt;<a class="silent" href="xml/process_classes.xml">process_classes></a>
-            &lt;<a class="silent" href="xml/process_class.xml">process_class</a> name="…" max_processes="…"/>
+            &lt;<a class="silent" href="xml/process_class.xml">process_class</a> name          = "…"
+                           max_processes = "…"
+                           spooler_id    = "…"/>
             …
         &lt;/process_classes>
 
@@ -120,13 +122,14 @@ scheduler hallo_welt.xml
 
         &lt;<a class="silent" href="xml/jobs.xml">jobs</a>
             &lt;<a class="silent" href="xml/job.xml">job</a> name          = "…"
-                 title         = ""
+                 spooler_id    = "…"
+                 title         = "…"
                  log_append    = "no"
                  order         = "no"
-                 process_class = ""
+                 process_class = "…"
                  tasks         = "1"
-                 timeout       = "" 
-                 idle_timeout  = "" 
+                 timeout       = "…" 
+                 idle_timeout  = "…" 
                  priority      = "1"   >
 
                  &lt;<a class="silent" href="xml/description.xml">description</a>> … &lt;/description>

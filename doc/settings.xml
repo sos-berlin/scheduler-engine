@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="scheduler.xslt" type="text/xsl"?>
 
-<!--$Id: settings.xml,v 1.6 2004/08/29 09:27:27 jz Exp $-->
+<!--$Id: settings.xml,v 1.7 2004/08/30 10:13:52 jz Exp $-->
 
 <!-- Einige Einstellungen können an mehreren Stellen vorgenommen werden:
      - Konfigurationsdatei
@@ -16,7 +16,7 @@
     base_dir    = "."
     title       = "Einstellungen"
     author      = "$Author: jz $"
-    date        = "$Date: 2004/08/29 09:27:27 $"
+    date        = "$Date: 2004/08/30 10:13:52 $"
 >
 
     <setting setting        = "log_dir" 
@@ -59,17 +59,40 @@
             </p>
         </description>
     </setting>
-    
+
+
+    <setting setting= "option_id" 
+             type   = "scheduler_id"
+             title  = "Kennung des Schedulers">
+
+        <description>
+            <p>
+                Der Scheduler wählt nur die Elemente der XML-Konfiguration aus,
+                deren Attribut <code>spooler_id=</code> leer ist oder denselben Wert
+                wie in dieser Einstellung enthält.
+            </p>
+            <p>
+                Wenn die Scheduler-Id nicht angegeben ist, beachtet der Scheduler das XML-Attribut <code>spooler_id=</code> nicht
+                und wählt alle Elemente der XML-Konfiguration aus.
+            </p>
+        </description>
+    </setting>
     
     <setting setting= "spooler_id" 
              type   = "scheduler_id">
 
         <description>
             <p>
+                Das Element ist nur wirksam, wenn dieses Attribut leer oder gleich dem
+                Parameter <code>-id=</code> vom Scheduler-Start ist,
+                oder wenn beim Scheduler-Start die Option <scheduler_option name="id"/> nicht angegeben worden ist.
+<!--
                 Gibt die Scheduler-Id an.
                 Der Scheduler wählt aus der Konfigurationsdatei die Einträge mit dem Attribut 
-                <code>spooler_id="</code><i>spooler_id</i><code>"</code>
+                <code>spooler_id="</code><i>spooler_id</i><code>"</code> oder 
+                <code>spooler_id=""</code>
                 aus.
+-->                
             </p>
         </description>
     </setting>
@@ -89,9 +112,10 @@
     </setting>
 
 
-    <setting setting= "include_path" 
-             type   = "verzeichnis"
-             title  = "Für &lt;include&gt;">
+    <setting setting   = "include_path" 
+             type      = "verzeichnis"
+             title     = "Für &lt;include&gt;"
+             subst_env = "yes">
         <description>
             <p>
                 Verzeichnis der Dateien, die mit <scheduler_element name="include"/> eingezogen werden.
@@ -174,12 +198,14 @@
              title   = "Zusätzliche Spalten in der Historie">
         <description>
             <p>
+                Eine Task kann mit der Methode Task.set_history_field() die hier angegebenen Felder der Datenbanktabelle für die Task-Historie setzen.
             </p>
         </description>
     </setting>
 
     <setting setting = "history" 
              type    = "yes|no"
+             initial = "yes"
              title   = "Historie schreiben?">
         <description>
             <p>
@@ -189,7 +215,7 @@
 
 
     <setting setting = "history_file" 
-             type    = ""
+             type    = "dateiname"
              title   = "Dateiname der Historie (für datenbanklosen Betrieb)">
         <description>
             <p>
@@ -200,6 +226,7 @@
 
     <setting setting= "history_on_process" 
              type   = "yes|no|zahl"
+             initial = "0"
              title  = "Nach spooler_process() Historiensatz schreiben?">
         <description>
             <p>
@@ -208,9 +235,10 @@
     </setting>
 
 
-    <setting setting= "history_archive" 
-             type   = "yes|no"
-             title  = "Historiendateien archivieren?">
+    <setting setting = "history_archive" 
+             type    = "yes|no|gzip"
+             initial = "no"
+             title   = "Historiendateien archivieren?">
         <description>
             <p>
             </p>
@@ -218,18 +246,20 @@
     </setting>
 
 
-    <setting setting= "history_with_log" 
-             type   = "yes|no"
-             title  = "Protokoll in die Historie schreiben?">
+    <setting setting = "history_with_log" 
+             type    = "yes|no|gzip"
+             initial = "no"
+             title   = "Protokoll in die Historie schreiben?">
         <description>
             <p>
             </p>
         </description>
     </setting>
 
-    <setting setting= "order_history" 
-             type   = "yes_no"
-             title  = "Aufträge in die Historie schreiben?">
+    <setting setting = "order_history" 
+             type    = "yes_no"
+             initial = "yes"
+             title   = "Aufträge in die Historie schreiben?">
         <description>
             <p>
             </p>
@@ -237,9 +267,10 @@
     </setting>
 
 
-    <setting setting= "order_history_with_log" 
-             type   = "yes|no"
-             title  = "Auftragsprotokolle in die Historie schreiben?">
+    <setting setting = "order_history_with_log" 
+             type    = "yes|no|gzip"
+             initial = "no"
+             title   = "Auftragsprotokolle in die Historie schreiben?">
         <description>
             <p>
             </p>
@@ -252,8 +283,35 @@
              title   = "Hostware-Dateiname der Datenbank">
         <description>
             <p>
+Hostware-Dateiname der Datenbank für die Historienführung.
+Ohne Eintrag werden Dateien im .csv-Format erzeugt, siehe <scheduler_ini_entry file="factory.ini" section="spooler" entry="history_file"/>.
+            </p>
+            <p>
+Unter Windows kann auch ein einfacher Dateiname angegebenen werden, der auf <code>.mdb</code> endet (z.B. <code>scheduler.mdb</code>).
+Der Scheduler verwendet dann eine Access-Datenbank dieses Namens, 
+die im Protokollverzeichnis (s. Option <scheduler_option name="log-dir"/>) liegt.
+Der Scheduler richtet die Datei ein, wenn sie fehlt.
+            </p>
+            <p>
+Der Scheduler richtet die Tabellen selbständig ein.            
             </p>
         </description>
+        
+        <example>
+<pre>
+;db = jdbc -wait=30 -class=com.microsoft.jdbc.sqlserver.SQLServerDriver jdbc:microsoft:sqlserver://localhost:1433;selectMethod=Cursor;databaseName=factory -user=factory -password=factory
+;db = odbc -wait=30 -db=factory_sql -user=factory -password=factory
+ 
+db  = jdbc -wait=15 -class=com.mysql.jdbc.Driver jdbc:mysql://localhost/factory:3307?user=factory&amp;password=factory
+;db = odbc -wait=30 -db=factory_mysql -user=factory -password=factory
+ 
+;db = jdbc -wait=30 -class=oracle.jdbc.driver.OracleDriver jdbc:oracle:thin:@apnb:1521:test -user=factory -password=factory
+;db = odbc -wait=30 -db=factory_oracle -user=factory -password=factory
+
+;db = scheduler.mdb 
+</pre>        
+ 
+        </example>
     </setting>
 
 
@@ -302,6 +360,7 @@
 
     <setting setting = "mail_on_success" 
              type    = "yes|no"
+             initial = "no"
              title   = "Erfolgreich gelaufende Task verschickt eMail">
         <description>
             <p>
@@ -315,6 +374,12 @@
              title   = "Verzeichnis der zeitweilig nicht versendbaren eMails">
         <description>
             <p>
+                eMails, die der Scheduler nicht verschicken kann (weil z.B. der SMTP-Server nicht läuft),
+                werden hier abgelegt.
+            </p>
+            <p>
+                Um diese eMails dennoch zu verschicken, muss ein Job geschrieben werden, der die 
+                Methode spooler_log.mail().dequeue() aufruft.
             </p>
         </description>
     </setting>
@@ -418,6 +483,58 @@
         </description>
     </setting>
 
+<!--
+    <setting setting = "run_time_begin" 
+             type    = "hh:mm[:ss]"
+             initial = "00:00">
+        <description>
+            <p>
+                Wenn das Element leer ist (also kein <code>&lt;period></code> enthält),
+                generiert der Scheduler eine Periode mit dieser Einstellung, 
+                anderfalls ist es die Voreinstellung für die Kind-Elemente.
+            </p>
+        </description>
+    </setting>
+
+
+    <setting setting = "run_time_end" 
+             type    = "hh:mm[:ss]"
+             initial = "24:00"
+             title   = "">
+        <description>
+            <p>
+                Wenn das Element leer ist (also kein <code>&lt;period></code> enthält),
+                generiert der Scheduler eine Periode mit dieser Einstellung, 
+                anderfalls ist es die Voreinstellung für die Kind-Elemente.
+            </p>
+        </description>
+    </setting>
+
+
+    <setting setting = "run_time_single_start" 
+             type    = "hh:mm[:ss]"
+             initial = ""
+             title   = "">
+        <description>
+            <p>
+                Wenn das Element leer ist (also kein <code>&lt;period></code> enthält),
+                generiert der Scheduler eine Periode mit dieser Einstellung.
+            </p>
+        </description>
+    </setting>
+
+
+    <setting setting = "run_time_let_run" 
+             type    = "yes_no"
+             initial = ""
+             title   = "">
+        <description>
+            <p>
+                Voreinstellung für <scheduler_element name="period"/>.
+            </p>
+        </description>
+    </setting>
+-->
 
     <description>
         <p>
