@@ -1,4 +1,4 @@
-// $Id: spooler_com.cxx,v 1.104 2003/08/31 22:32:42 jz Exp $
+// $Id: spooler_com.cxx,v 1.105 2003/09/01 08:28:06 jz Exp $
 /*
     Hier sind implementiert
 
@@ -1807,6 +1807,7 @@ STDMETHODIMP Com_task::get_order( Iorder** result )
 }
 
 //-----------------------------------------------------------------------------Com_thread::_methods
+/*
 #ifdef Z_COM
 
 const Com_method Com_thread::_methods[] =
@@ -1821,6 +1822,7 @@ const Com_method Com_thread::_methods[] =
 };
 
 #endif
+*/
 //---------------------------------------------------------------------------Com_thread::Com_thread
 /*
 Com_thread::Com_thread( Spooler_thread* thread )

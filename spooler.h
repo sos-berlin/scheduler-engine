@@ -1,4 +1,4 @@
-// $Id: spooler.h,v 1.151 2003/08/31 19:51:29 jz Exp $
+// $Id: spooler.h,v 1.152 2003/09/01 08:28:06 jz Exp $
 
 #ifndef __SPOOLER_H
 #define __SPOOLER_H
@@ -59,6 +59,7 @@
 #include "../zschimmer/z_com.h"
 #include "../zschimmer/threads.h"
 #include "../zschimmer/com_remote.h"
+#include "../zschimmer/java.h"
 
 using namespace zschimmer;
 using namespace zschimmer::com;

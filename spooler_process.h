@@ -1,4 +1,4 @@
-// $Id: spooler_process.h,v 1.7 2003/09/01 07:35:20 jz Exp $
+// $Id: spooler_process.h,v 1.8 2003/09/01 08:28:06 jz Exp $
 
 #ifndef __SPOOLER_PROCESS_H
 #define __SPOOLER_PROCESS_H
@@ -20,7 +20,8 @@ struct Process : zschimmer::Object
     //typedef object_server::Session Session;
 
                                 Process                     ( Spooler* sp )                         : _spooler(sp), _zero_(this+1) {}
-
+    Z_GNU_ONLY(                 Process                     (); )
+    
     void                        start                       ();
     object_server::Session*     session                     ()                                      { return _session; }
   //void                    set_event                       ( Event* e )                            { if( _connection )  _connection->set_event( e ); }
@@ -58,6 +59,7 @@ struct Process_class : zschimmer::Object
 {
                                 Process_class               ( Spooler* sp, const string& name )        : _zero_(this+1), _spooler(sp), _name(name) {}
     explicit                    Process_class               ( Spooler* sp, const xml::Element_ptr& e ) : _zero_(this+1), _spooler(sp) { set_dom( e ); }
+    Z_GNU_ONLY(                 Process_class               (); )
 
     
     void                        add_process                 ( Process* );

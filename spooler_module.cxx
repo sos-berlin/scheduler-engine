@@ -1,4 +1,4 @@
-// $Id: spooler_module.cxx,v 1.38 2003/08/31 10:04:32 jz Exp $
+// $Id: spooler_module.cxx,v 1.39 2003/09/01 08:28:06 jz Exp $
 /*
     Hier sind implementiert
 
@@ -327,7 +327,7 @@ Module_instance::Module_instance( Module* module )
 
     _spooler_exit_called = false;
 
-    _close_instance_at_end;         // Das verhindert aber use_engine="job". Aber vielleicht braucht das keiner.
+  //_close_instance_at_end;         // Das verhindert aber use_engine="job". Aber vielleicht braucht das keiner.
 }
 
 //----------------------------------------------------------------------------Module_instance::init

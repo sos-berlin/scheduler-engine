@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.234 2003/09/01 07:35:20 jz Exp $
+// $Id: spooler.cxx,v 1.235 2003/09/01 08:28:06 jz Exp $
 /*
     Hier sind implementiert
 
@@ -571,6 +571,9 @@ void Spooler::wait_until_threads_stopped( Time until )
 {
     assert( current_thread_id() == _thread_id );
 
+    return;
+    
+/* Threads sind nicht implementiert    
 
 #   ifdef Z_WINDOWS
 
@@ -657,7 +660,7 @@ void Spooler::wait_until_threads_stopped( Time until )
             while( it != threads.end() )
             {
                 Spooler_thread* thread = *it;
-                if( thread->_terminated )
+                if( thread->terminated() )
                 {
                     _log.debug( "Thread " + thread->name() + " sollte gleich beendet sein ..." );
                     thread->thread_wait_for_termination();
@@ -697,7 +700,7 @@ void Spooler::wait_until_threads_stopped( Time until )
         }
 
 #   endif
-
+*/
 }
 
 //--------------------------------------------------------------------------Spooler::signal_threads
@@ -1473,7 +1476,7 @@ void Spooler::nichts_getan( Spooler_thread* thread, int anzahl )
         thread->nichts_getan();
     }
 
-    sos_sleep( min( 30, 1 << anzahl ) );
+    //sos_sleep( min( 30, 1 << anzahl ) );
 }
 
 //-------------------------------------------------------------------------------------Spooler::run
@@ -1630,9 +1633,6 @@ void Spooler::run()
                     nothing_done_max += single_thread->task_count() * 3 + 3;    // Statt der Prozesse zählen wir die Tasks einmal mehr
                 }
 
-                if( something_done )  nothing_done_count = 0,  nichts_getan_zaehler = 0;
-                else
-                if( ++nothing_done_count > nothing_done_max )  nichts_getan( single_thread, ++nichts_getan_zaehler );
 
                 wait_handles += _wait_handles;
 
@@ -1643,6 +1643,18 @@ void Spooler::run()
                     _next_time = job->next_time();
                     msg = "Warten bis " + _next_time.as_string() + " für Job " + job->name();
                 }
+
+
+
+                if( something_done )  nothing_done_count = 0,  nichts_getan_zaehler = 0;
+                else
+                if( ++nothing_done_count > nothing_done_max )
+                {
+                    nichts_getan( single_thread, ++nichts_getan_zaehler );
+                    _next_time = max( _next_time, (Time)min( 30.0, double( 1 << nichts_getan_zaehler ) / 4 ) );    // Bremsen, mit 1/4s anfangen
+                }
+
+
 
                 if( _next_time > 0 )
                 {

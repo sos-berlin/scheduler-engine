@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.184 2003/09/01 07:35:20 jz Exp $
+// $Id: spooler_task.cxx,v 1.185 2003/09/01 08:28:06 jz Exp $
 /*
     Hier sind implementiert
 
@@ -337,7 +337,7 @@ void Task::set_error_xc( const Xc& x )
 {
     string msg; 
 
-    Module_task* t = dynamic_cast<Module_task*>( this );
+    //Module_task* t = dynamic_cast<Module_task*>( this );
     //Ist nie in _in_call: if( t  &&  t->_module_instance  &&  t->_module_instance->_in_call )  msg = "In " + t->_module_instance->_in_call->name() + "(): ";
     
     _log.error( msg + x.what() );
@@ -484,7 +484,7 @@ void Task::set_next_time( const Time& next_time )
 Time Task::next_time()
 { 
     return _operation? _timeout == latter_day? latter_day
-                                             : _next_time + _timeout      // _timeout sollte nicht zu groß sein
+                                             : Time( _next_time + _timeout )     // _timeout sollte nicht zu groß sein
                      : _next_time;
 }
 
@@ -1035,7 +1035,7 @@ bool Task::wait_until_terminated( double wait_time )
     Thread_id my_thread_id = current_thread_id();
     if( my_thread_id == _thread->thread_id() )  throw_xc( "SPOOLER-125" );     // Deadlock
 
-    Spooler_thread* calling_thread = _spooler->thread_by_thread_id( my_thread_id );
+  //Spooler_thread* calling_thread = _spooler->thread_by_thread_id( my_thread_id );
   //if( calling_thread &&  !calling_thread->_free_threading )  throw_xc( "SPOOLER-131" );
 
     Event event ( obj_name() + " wait_until_terminated" );
@@ -1579,7 +1579,7 @@ bool Process_task::do_begin__end()
 
 #   ifndef SYSTEM_WINDOWS
         LOG( "signal(SIGCHLD,SIG_DFL)\n" );
-        signal( SIGCHLD, SIG_DFL );                 // Java verändert das Signal-Verhalten, so dass waitpid() ohne diesen Aufruf versagte.
+        ::signal( SIGCHLD, SIG_DFL );                 // Java verändert das Signal-Verhalten, so dass waitpid() ohne diesen Aufruf versagte.
 #   endif
 
     if( log_ptr )  *log_ptr << "fork()  ";
@@ -1632,7 +1632,10 @@ bool Process_task::do_kill()
         if( err )  throw_errno( errno, "killpid" );
 
         //? _process_handle._pid = 0;
+        return true;
     }
+    
+    return false;
 }
 
 //------------------------------------------------------------------------Process_task::do_end__end
@@ -1641,7 +1644,7 @@ void Process_task::do_end__end()
 {
     if( _process_handle._pid )
     {
-        do_step();      // waitpid() sollte schon gerufen sein. 
+        do_step__end();      // waitpid() sollte schon gerufen sein. 
 
         if( _process_handle._pid )   throw_xc( "SPOOLER-179", _process_handle._pid );       // Sollte nicht passieren (ein Zombie wird stehen bleiben)
     }

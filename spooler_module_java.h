@@ -1,4 +1,4 @@
-// $Id: spooler_module_java.h,v 1.24 2003/08/27 10:22:58 jz Exp $
+// $Id: spooler_module_java.h,v 1.25 2003/09/01 08:28:06 jz Exp $
 
 #ifndef __SPOOLER_MODULE_JAVA_H
 #define __SPOOLER_MODULE_JAVA_H
@@ -12,10 +12,21 @@ namespace sos {
 namespace spooler {
 
 //struct Java_vm;
-struct Java_idispatch;
 struct Java_thread_data;
 
 extern zschimmer::Thread_data<Java_thread_data> thread_data;
+
+//------------------------------------------------------------------------------------Java_idispatch
+
+struct Java_idispatch : java::Global_jobject, Object
+{
+    Z_GNU_ONLY(                 Java_idispatch              ();  )                                  // Für gcc 3.2. Nicht implementiert.
+                                Java_idispatch              ( java::Vm* vm, IDispatch*, const string& subclass );
+                               ~Java_idispatch              ();
+
+    ptr<IDispatch>             _idispatch;
+    string                     _class_name;
+};
 
 //---------------------------------------------------------------------------------Java_thread_data
 
@@ -38,18 +49,6 @@ struct Java_idispatch_stack_frame
 {
                                 Java_idispatch_stack_frame  ()                                      {}
                                ~Java_idispatch_stack_frame  ()                                      { thread_data->release_objects(); }
-};
-
-//------------------------------------------------------------------------------------Java_idispatch
-
-struct Java_idispatch : java::Global_jobject, Object
-{
-    Z_GNU_ONLY(                 Java_idispatch              ();  )                                  // Für gcc 3.2. Nicht implementiert.
-                                Java_idispatch              ( java::Vm* vm, IDispatch*, const string& subclass );
-                               ~Java_idispatch              ();
-
-    ptr<IDispatch>             _idispatch;
-    string                     _class_name;
 };
 
 //--------------------------------------------------------------------------------------Java_object
