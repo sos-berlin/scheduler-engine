@@ -1,4 +1,4 @@
-// $Id: spooler_module_java.h,v 1.4 2002/11/07 17:57:24 jz Exp $
+// $Id: spooler_module_java.h,v 1.5 2002/11/08 18:56:35 jz Exp $
 
 #ifndef __SPOOLER_MODULE_JAVA_H
 #define __SPOOLER_MODULE_JAVA_H
@@ -11,22 +11,41 @@ namespace sos {
 namespace spooler {
 
 struct Java_vm;
+struct Java_idispatch;
 
 //-----------------------------------------------------------------------------------------Java_env
 
-struct Java_env
+struct Java_env : Non_cloneable
 {
                               //Java_env                    ( Java_vm* vm, JNIEnv* jenv )           : _java_vm(vm), _jenv( jenv ) {}
 
                                 operator JNIEnv*            ()                                      { return _jenv; }
     JNIEnv*                     operator ->                 ()                                      { return _jenv; }
+    JNIEnv*                     env                         ()                                      { return _jenv; }
 
+    void                        add_object                  ( Java_idispatch* );
+    void                        release_objects             ()                                      { _java_idispatch_list.clear(); }
+
+    // Einige Java-Methoden mit Fehlerprüfung:
     jclass                      find_class                  ( const string& name );
     jmethodID                   get_method_id               ( jclass, const string& name, const string& signature );
     jclass                      get_object_class            ( jobject );
 
+
     Java_vm*                   _java_vm;
     JNIEnv*                    _jenv;
+    list< ptr<Java_idispatch> >_java_idispatch_list;     // Hält alle in einer native Methode erzeugten IDispatchs, bis release_objects()
+};
+
+//--------------------------------------------------------------------------------Java_object_stack
+// Der Destruktur gibt alle von nativen Methoden erzeugten Java_idispatchs wieder frei
+
+struct Java_idispatch_stack_frame
+{
+                                Java_idispatch_stack_frame  ( Java_env* e )                         : _java_env(e) {}
+                               ~Java_idispatch_stack_frame  ()                                      { _java_env->release_objects(); }
+
+    Java_env*                  _java_env;
 };
 
 //---------------------------------------------------------------------------------Java_thread_data
@@ -53,7 +72,7 @@ struct Java_vm                  // Java virtual machine
 
 
 
-                                Java_vm                     ( Spooler* s )                          : _zero_(this+1), _log(s) {}
+                                Java_vm                     ( Spooler* s )                          : _zero_(this+1), _spooler(s), _log(s) {}
                                ~Java_vm                     ()                                      { close(); }
 
     void                        init                        ();
@@ -76,6 +95,7 @@ struct Java_vm                  // Java virtual machine
 
 
     Fill_zero                  _zero_;
+    Spooler*                   _spooler;
     Prefix_log                 _log;
     string                     _filename;
     string                     _ini_class_path;
@@ -89,29 +109,42 @@ struct Java_vm                  // Java virtual machine
     Thread_data<Java_thread_data> _thread_data;
 };
 
-//-------------------------------------------------------------------------------Java_global_object
+//--------------------------------------------------------------------------------------Java_object
 
-struct Java_global_object : Object, Non_cloneable
+struct Java_object : Object, Non_cloneable
 {
-                                Java_global_object          ( Spooler*, jobject = NULL );
-                               ~Java_global_object          ();
+                                Java_object                 ( Spooler*, jobject = NULL );
+                               ~Java_object                 ();
 
     void                        operator =                  ( jobject jo )                          { assign( jo ); }
                                 operator jobject            ()                                      { return _jobject; }
     void                        assign                      ( jobject );
+    void                        set_global                  ();
 
     Spooler*                   _spooler;
     jobject                    _jobject;
+    bool                       _is_global;
+};
+
+//--------------------------------------------------------------------------------Java_global_object
+
+struct Java_global_object : Java_object
+{
+                                Java_global_object          ( Spooler* sp, jobject jo = NULL )      : Java_object( sp, jo ) { if(jo) set_global(); }
+
+    void                        operator =                  ( jobject jo )                          { assign( jo ); }
+    void                        assign                      ( jobject jo )                          { Java_object::assign(jo); set_global(); }
 };
 
 //-------------------------------------------------------------------------------------------------
 
-struct Java_idispatch : Java_global_object
+struct Java_idispatch : Java_object
 {
-                                Java_idispatch              ( Spooler* sp, IDispatch*, const string& subclass = JAVA_IDISPATCH_CLASS );
+                                Java_idispatch              ( Spooler* sp, IDispatch*, const string& subclass );
                                ~Java_idispatch              ();
 
     ptr<IDispatch>             _idispatch;
+    string                     _class_name;
 };
 
 //-----------------------------------------------------------------------------Java_module_instance
@@ -134,7 +167,7 @@ struct Java_module_instance : Module_instance
 
     Fill_zero                  _zero_;
     Java_vm*                   _java_vm;
-    Java_env                   _env;
+    Java_env*                  _env;
     Java_global_object         _jobject;
 
     typedef list< ptr<Java_idispatch> >  Added_objects;

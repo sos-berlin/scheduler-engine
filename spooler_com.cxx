@@ -1,4 +1,4 @@
-// $Id: spooler_com.cxx,v 1.62 2002/11/01 09:27:10 jz Exp $
+// $Id: spooler_com.cxx,v 1.63 2002/11/08 18:56:33 jz Exp $
 /*
     Hier sind implementiert
 
@@ -85,9 +85,23 @@ static ptr<spooler_com::Iorder> order_from_order_or_payload( Spooler* spooler, c
 
 Com_error::Com_error( const Xc_copy& x )
 : 
-    Sos_ole_object( error_class_ptr, this ),
+    Sos_ole_object( error_class_ptr, (Ierror*)this ),
     _xc(x) 
 {
+}
+
+//------------------------------------------------------------------------Com_error::QueryInterface
+
+STDMETHODIMP Com_error::QueryInterface( const IID& iid, void** result )
+{
+    if( iid == IID_Ihas_java_class_name )  
+    { 
+        AddRef();
+        *result = (Ihas_java_class_name*)this;  
+        return S_OK; 
+    }
+
+    return Sos_ole_object::QueryInterface( iid, result );
 }
 
 //---------------------------------------------------------------------------------Com_error::close
@@ -152,13 +166,27 @@ STDMETHODIMP Com_error::get_text( BSTR* text_bstr )
 
 Com_variable::Com_variable( const BSTR name, const VARIANT& value )
 :
-    Sos_ole_object( variable_class_ptr, this )
+    Sos_ole_object( variable_class_ptr, (Ivariable*)this )
 {
     THREAD_LOCK( _lock )
     {
         _name = name;
         _value = value;
     }
+}
+
+//---------------------------------------------------------------------Com_variable::QueryInterface
+
+STDMETHODIMP Com_variable::QueryInterface( const IID& iid, void** result )
+{
+    if( iid == IID_Ihas_java_class_name )  
+    { 
+        AddRef();
+        *result = (Ihas_java_class_name*)this;  
+        return S_OK; 
+    }
+
+    return Sos_ole_object::QueryInterface( iid, result );
 }
 
 //------------------------------------------------------------------------------Com_variable::Clone
@@ -180,7 +208,7 @@ STDMETHODIMP Com_variable::Clone( Ivariable** result )
 
 Com_variable_set::Com_variable_set()
 :
-    Sos_ole_object( variable_set_class_ptr, this )
+    Sos_ole_object( variable_set_class_ptr, (Ivariable_set*)this )
 {
 }
 
@@ -188,7 +216,7 @@ Com_variable_set::Com_variable_set()
 
 Com_variable_set::Com_variable_set( const Com_variable_set& o )
 :
-    Sos_ole_object( variable_set_class_ptr, this )
+    Sos_ole_object( variable_set_class_ptr, (Ivariable_set*)this )
 {
     THREAD_LOCK( _lock )
     {
@@ -204,6 +232,20 @@ Com_variable_set::Com_variable_set( const Com_variable_set& o )
             }
         }
     }
+}
+
+//-----------------------------------------------------------------Com_variable_set::QueryInterface
+
+STDMETHODIMP Com_variable_set::QueryInterface( const IID& iid, void** result )
+{
+    if( iid == IID_Ihas_java_class_name )  
+    { 
+        AddRef();
+        *result = (Ihas_java_class_name*)this;  
+        return S_OK; 
+    }
+
+    return Sos_ole_object::QueryInterface( iid, result );
 }
 
 //------------------------------------------------------------------------Com_variable_set::set_xml
@@ -468,7 +510,7 @@ STDMETHODIMP Com_variable_set_enumerator::Reset()
     return NOERROR;
 }
 
-//-------------------------------------------------------------------Com_variable_set_enumerator::Clone
+//---------------------------------------------------------------Com_variable_set_enumerator::Clone
 
 STDMETHODIMP Com_variable_set_enumerator::Clone( IEnumVARIANT** ppenum )
 {
@@ -479,10 +521,24 @@ STDMETHODIMP Com_variable_set_enumerator::Clone( IEnumVARIANT** ppenum )
 
 Com_log::Com_log( Prefix_log* log )
 :
-    Sos_ole_object( log_class_ptr, this ),
+    Sos_ole_object( log_class_ptr, (Ilog*)this ),
     _zero_(this+1),
     _log(log)
 { 
+}
+
+//--------------------------------------------------------------------------Com_log::QueryInterface
+
+STDMETHODIMP Com_log::QueryInterface( const IID& iid, void** result )
+{
+    if( iid == IID_Ihas_java_class_name )  
+    { 
+        AddRef();
+        *result = (Ihas_java_class_name*)this;  
+        return S_OK; 
+    }
+
+    return Sos_ole_object::QueryInterface( iid, result );
 }
 
 //----------------------------------------------------------------------------------------Com_log::
@@ -868,9 +924,23 @@ STDMETHODIMP Com_object_set::get_high_level( int* result )
 
 Com_job::Com_job( Job* job )
 :
-    Sos_ole_object( job_class_ptr, this ),
+    Sos_ole_object( job_class_ptr, (Ijob*)this ),
     _job(job)
 {
+}
+
+//--------------------------------------------------------------------------Com_job::QueryInterface
+
+STDMETHODIMP Com_job::QueryInterface( const IID& iid, void** result )
+{
+    if( iid == IID_Ihas_java_class_name )  
+    { 
+        AddRef();
+        *result = (Ihas_java_class_name*)this;  
+        return S_OK; 
+    }
+
+    return Sos_ole_object::QueryInterface( iid, result );
 }
 
 //------------------------------------------------------------Com_job::start_when_directory_changed 
@@ -1107,9 +1177,23 @@ STDMETHODIMP Com_job::get_order_queue( Iorder_queue** result )
 
 Com_task::Com_task( Task* task )
 :
-    Sos_ole_object( task_class_ptr, this ),
+    Sos_ole_object( task_class_ptr, (Itask*)this ),
     _task(task)
 {
+}
+
+//-------------------------------------------------------------------------Com_task::QueryInterface
+
+STDMETHODIMP Com_task::QueryInterface( const IID& iid, void** result )
+{
+    if( iid == IID_Ihas_java_class_name )  
+    { 
+        AddRef();
+        *result = (Ihas_java_class_name*)this;  
+        return S_OK; 
+    }
+
+    return Sos_ole_object::QueryInterface( iid, result );
 }
 
 //-------------------------------------------------------------------------------Com_task::set_task
@@ -1348,7 +1432,7 @@ STDMETHODIMP Com_task::put_history_field( BSTR name, VARIANT* value )
 
 //---------------------------------------------------------------------------------Com_task::get_id
 
-HRESULT Com_task::get_id( int* result )
+STDMETHODIMP Com_task::get_id( int* result )
 {
     HRESULT hr = NOERROR;
 
@@ -1367,7 +1451,7 @@ HRESULT Com_task::get_id( int* result )
 
 //--------------------------------------------------------------Com_task::put_delay_spooler_process
 
-HRESULT Com_task::put_delay_spooler_process( VARIANT* time )
+STDMETHODIMP Com_task::put_delay_spooler_process( VARIANT* time )
 {
     HRESULT hr = NOERROR;
 
@@ -1386,7 +1470,7 @@ HRESULT Com_task::put_delay_spooler_process( VARIANT* time )
 
 //-----------------------------------------------------------------------Com_task::put_close_engine
 
-HRESULT Com_task::put_close_engine( VARIANT_BOOL b )
+STDMETHODIMP Com_task::put_close_engine( VARIANT_BOOL b )
 {
     HRESULT hr = NOERROR;
 
@@ -1428,9 +1512,23 @@ STDMETHODIMP Com_task::get_order( Iorder** result )
 
 Com_thread::Com_thread( Thread* thread )
 :
-    Sos_ole_object( thread_class_ptr, this ),
+    Sos_ole_object( thread_class_ptr, (Ithread*)this ),
     _thread(thread)
 {
+}
+
+//-----------------------------------------------------------------------Com_thread::QueryInterface
+
+STDMETHODIMP Com_thread::QueryInterface( const IID& iid, void** result )
+{
+    if( iid == IID_Ihas_java_class_name )  
+    { 
+        AddRef();
+        *result = (Ihas_java_class_name*)this;  
+        return S_OK; 
+    }
+
+    return Sos_ole_object::QueryInterface( iid, result );
 }
 
 //------------------------------------------------------------------------------Com_thread::get_Log
@@ -1500,9 +1598,23 @@ STDMETHODIMP Com_thread::get_name( BSTR* result )
 
 Com_spooler::Com_spooler( Spooler* spooler )
 :
-    Sos_ole_object( spooler_class_ptr, this ),
+    Sos_ole_object( spooler_class_ptr, (Ispooler*)this ),
     _spooler(spooler)
 {
+}
+
+//----------------------------------------------------------------------Com_spooler::QueryInterface
+
+STDMETHODIMP Com_spooler::QueryInterface( const IID& iid, void** result )
+{
+    if( iid == IID_Ihas_java_class_name )  
+    { 
+        AddRef();
+        *result = (Ihas_java_class_name*)this;  
+        return S_OK; 
+    }
+
+    return Sos_ole_object::QueryInterface( iid, result );
 }
 
 //-----------------------------------------------------------------------------Com_spooler::get_Log
@@ -1695,11 +1807,8 @@ STDMETHODIMP Com_spooler::get_db_name( BSTR* result )
 STDMETHODIMP Com_spooler::create_job_chain( spooler_com::Ijob_chain** result )
 {
     ptr<Job_chain> job_chain = new Job_chain( _spooler );
-    //job_chain->set_name( string_from_bstr( name_bstr ) );
 
-    //_spooler->add_job_chain( job_chain );
-
-    *result = job_chain; //->com_job_chain();
+    *result = job_chain;
     (*result)->AddRef();
 
     return S_OK;
@@ -1792,9 +1901,23 @@ Com_context::Com_context()
 
 Com_job_chain::Com_job_chain( Job_chain* job_chain )
 :
-    Sos_ole_object( job_chain_class_ptr, this ),
+    Sos_ole_object( job_chain_class_ptr, (Ijob_chain*)this ),
     _job_chain(job_chain)
 {
+}
+
+//--------------------------------------------------------------------Com_job_chain::QueryInterface
+
+STDMETHODIMP Com_job_chain::QueryInterface( const IID& iid, void** result )
+{
+    if( iid == IID_Ihas_java_class_name )  
+    { 
+        AddRef();
+        *result = (Ihas_java_class_name*)this; 
+        return S_OK; 
+    }
+
+    return Sos_ole_object::QueryInterface( iid, result );
 }
 
 //------------------------------------------------------------------------Com_job_chain::get_length
@@ -2023,8 +2146,22 @@ STDMETHODIMP Com_job_chain::get_node( VARIANT* state, Ijob_chain_node** result )
 
 Com_job_chain_node::Com_job_chain_node()
 :
-    Sos_ole_object( job_chain_node_class_ptr, this )
+    Sos_ole_object( job_chain_node_class_ptr, (Ijob_chain_node*)this )
 {
+}
+
+//---------------------------------------------------------------Com_job_chain_node::QueryInterface
+
+STDMETHODIMP Com_job_chain_node::QueryInterface( const IID& iid, void** result )
+{
+    if( iid == IID_Ihas_java_class_name )  
+    { 
+        AddRef();
+        *result = (Ihas_java_class_name*)this;  
+        return S_OK; 
+    }
+
+    return Sos_ole_object::QueryInterface( iid, result );
 }
 
 //--------------------------------------------------------------------Com_job_chain_node::get_state
@@ -2065,10 +2202,24 @@ STDMETHODIMP Com_job_chain_node::get_job( Ijob** result )
 
 Com_order::Com_order( Order* order )
 :
-    Sos_ole_object( order_class_ptr, this ),
+    Sos_ole_object( order_class_ptr, (Iorder*)this ),
     _zero_(this+1),
     _order(order)
 {
+}
+
+//------------------------------------------------------------------------Com_order::QueryInterface
+
+STDMETHODIMP Com_order::QueryInterface( const IID& iid, void** result )
+{
+    if( iid == IID_Ihas_java_class_name )  
+    { 
+        AddRef();
+        *result = (Ihas_java_class_name*)this;  
+        return S_OK; 
+    }
+
+    return Sos_ole_object::QueryInterface( iid, result );
 }
 
 //--------------------------------------------------------------------------------Com_order::put_id
@@ -2521,9 +2672,23 @@ STDMETHODIMP Com_order::add_to_job_chain( Ijob_chain* ijob_chain )
 
 Com_order_queue::Com_order_queue()
 :
-    Sos_ole_object( order_queue_class_ptr, this ),
+    Sos_ole_object( order_queue_class_ptr, (Iorder_queue*)this ),
     _zero_(this+1)
 {
+}
+
+//------------------------------------------------------------------Com_order_queue::QueryInterface
+
+STDMETHODIMP Com_order_queue::QueryInterface( const IID& iid, void** result )
+{
+    if( iid == IID_Ihas_java_class_name )  
+    { 
+        AddRef();
+        *result = (Ihas_java_class_name*)this;  
+        return S_OK; 
+    }
+
+    return Sos_ole_object::QueryInterface( iid, result );
 }
 
 //----------------------------------------------------------------------Com_order_queue::get_length

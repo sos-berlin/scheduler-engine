@@ -1,4 +1,4 @@
-// $Id: spooler.odl,v 1.48 2002/10/17 19:56:12 jz Exp $
+// $Id: spooler.odl,v 1.49 2002/11/08 18:56:33 jz Exp $
 
 // Anweisung: midl /nologo /error all /out $(OutDir) $(InputPath)
 
@@ -21,6 +21,19 @@ library spooler
     interface Ijob_chain;
     interface Iorder_queue;
     interface Iorder;
+
+    //--------------------------------------------------------------------------Has_java_class_name
+
+    [
+        uuid       ( 748E665E-6252-418e-887A-55B11FD82870 ),
+        odl,
+        dual
+    ]
+    interface Ihas_java_class_name : IUnknown
+    {
+        [id(0),propget]
+        HRESULT                 java_class_name             ( [out,retval] BSTR* result );
+    }
 
     //----------------------------------------------------------------------------------------Error
 
@@ -47,6 +60,7 @@ library spooler
     coclass Error
     {
         interface Ierror;
+        interface Ihas_java_class_name;
     }
 
     //------------------------------------------------------------------------------------Ivariable
@@ -78,6 +92,7 @@ library spooler
     coclass Variable
     {
         interface Ivariable;
+        interface Ihas_java_class_name;
     }
 
     //---------------------------------------------------------------------------------Variable_set
@@ -117,6 +132,7 @@ library spooler
     coclass Variable_set
     {
         interface Ivariable_set;
+        interface Ihas_java_class_name;
     }
 
     //----------------------------------------------------------------------Variable_set_enumerator
@@ -218,6 +234,7 @@ library spooler
     coclass Job
     {
         interface Ijob;
+        interface Ihas_java_class_name;
     }
 
     //-----------------------------------------------------------------------------------------Task
@@ -282,6 +299,7 @@ library spooler
     coclass Task
     {
         interface Itask;
+        interface Ihas_java_class_name;
     }
 
     //---------------------------------------------------------------------------------------Thread
@@ -306,7 +324,7 @@ library spooler
         HRESULT                 include_path            ( [out,retval] BSTR* include_path );
 
         [propget]
-        HRESULT                 name                        ( [out,retval] BSTR* name );
+        HRESULT                 name                    ( [out,retval] BSTR* name );
     }
 
     [
@@ -315,6 +333,7 @@ library spooler
     coclass Thread
     {
         interface Ithread;
+        interface Ihas_java_class_name;
     }
 
     //--------------------------------------------------------------------------------------Spooler
@@ -385,6 +404,7 @@ library spooler
     coclass Spooler
     {
         interface Ispooler;
+        interface Ihas_java_class_name;
     }
 
     //------------------------------------------------------------------------------------Log_level
@@ -494,6 +514,7 @@ library spooler
     coclass Log
     {
         interface Ilog;
+        interface Ihas_java_class_name;
     }
 
     //--------------------------------------------------------------------------------------Context
@@ -608,6 +629,7 @@ library spooler
     coclass Mail
     {
         interface Imail;
+        interface Ihas_java_class_name;
     }
 
     //--------------------------------------------------------------------------------Job_chain_node
@@ -638,6 +660,7 @@ library spooler
     coclass Job_chain_node
     {
         interface Ijob_chain_node;
+        interface Ihas_java_class_name;
     }
 
     //-------------------------------------------------------------------------------------Job_chain
@@ -680,6 +703,7 @@ library spooler
     coclass Job_chain
     {
         interface Ijob_chain;
+        interface Ihas_java_class_name;
     }
 
     //----------------------------------------------------------------------------------Order_queue
@@ -703,6 +727,7 @@ library spooler
     coclass Order_queue
     {
         interface Iorder_queue;
+        interface Ihas_java_class_name;
     }
 
     //----------------------------------------------------------------------------------------Order
@@ -780,6 +805,7 @@ library spooler
     coclass Order
     {
         interface Iorder;
+        interface Ihas_java_class_name;
     }
 
 };

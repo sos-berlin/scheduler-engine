@@ -1,4 +1,4 @@
-// $Id: spooler_com.h,v 1.48 2002/10/17 19:56:12 jz Exp $
+// $Id: spooler_com.h,v 1.49 2002/11/08 18:56:34 jz Exp $
 
 #ifndef __SPOOLER_COM_H
 #define __SPOOLER_COM_H
@@ -47,11 +47,17 @@ struct Spooler;
 
 //----------------------------------------------------------------------------------------Com_error
 
-struct Com_error: spooler_com::Ierror, Sos_ole_object
+struct Com_error: spooler_com::Ierror, 
+                  spooler_com::Ihas_java_class_name, 
+                  Sos_ole_object
 {
                                 Com_error                   ( const Xc_copy& );
 
-    USE_SOS_OLE_OBJECT
+    USE_SOS_OLE_OBJECT_WITHOUT_QI
+
+    STDMETHODIMP                QueryInterface              ( REFIID, void** );
+
+    STDMETHODIMP            get_java_class_name             ( BSTR* result )                            { *result = SysAllocString( L"sos.spooler.Error" ); return S_OK; }
 
     STDMETHODIMP                get_is_error                ( VARIANT_BOOL* );
     STDMETHODIMP                get_code                    ( BSTR* );
@@ -69,12 +75,18 @@ struct Com_error: spooler_com::Ierror, Sos_ole_object
 
 //-------------------------------------------------------------------------------------Com_variable
 
-struct Com_variable: spooler_com::Ivariable, Sos_ole_object
+struct Com_variable: spooler_com::Ivariable, 
+                     spooler_com::Ihas_java_class_name, 
+                     Sos_ole_object
 {
                                 Com_variable                ( const BSTR name, const VARIANT& );
                                 Com_variable                ( const Com_variable& );
 
-    USE_SOS_OLE_OBJECT
+    USE_SOS_OLE_OBJECT_WITHOUT_QI
+
+    STDMETHODIMP                QueryInterface              ( REFIID, void** );
+
+    STDMETHODIMP            get_java_class_name             ( BSTR* result )                    { *result = SysAllocString( L"sos.spooler.Variable" ); return S_OK; }
 
     STDMETHODIMP                put_value                   ( VARIANT* v )                      { HRESULT hr = NOERROR; THREAD_LOCK(_lock) _value = *v; return hr; }
     STDMETHODIMP                get_value                   ( VARIANT* result )                 { HRESULT hr = NOERROR; THREAD_LOCK(_lock) hr = VariantCopy( result, &_value ); return hr; }
@@ -90,15 +102,21 @@ struct Com_variable: spooler_com::Ivariable, Sos_ole_object
 
 //----------------------------------------------------------------------------------Com_variable_set
 
-struct Com_variable_set: spooler_com::Ivariable_set, Sos_ole_object
+struct Com_variable_set: spooler_com::Ivariable_set, 
+                         spooler_com::Ihas_java_class_name, 
+                         Sos_ole_object
 {
                                 Com_variable_set            ();
                                 Com_variable_set            ( const Com_variable_set& );
 
-    USE_SOS_OLE_OBJECT
+    USE_SOS_OLE_OBJECT_WITHOUT_QI
+
+    STDMETHODIMP                QueryInterface              ( REFIID, void** );
+
+    STDMETHODIMP            get_java_class_name             ( BSTR* result )                        { *result = SysAllocString( L"sos.spooler.Variable_set" ); return S_OK; }
 
     void                        set_xml                     ( const xml::Element_ptr& );
-    STDMETHODIMP                set_var                     ( BSTR name, VARIANT* value )       { return put_var( name, value ); }
+    STDMETHODIMP                set_var                     ( BSTR name, VARIANT* value )           { return put_var( name, value ); }
     STDMETHODIMP                put_var                     ( BSTR, VARIANT* );
     STDMETHODIMP                get_var                     ( BSTR, VARIANT* );
     STDMETHODIMP                get_count                   ( int* );
@@ -144,12 +162,18 @@ struct Com_variable_set_enumerator : spooler_com::Ivariable_set_enumerator, Sos_
 
 //------------------------------------------------------------------------------------------Com_log
 
-struct Com_log : spooler_com::Ilog, Sos_ole_object               
+struct Com_log : spooler_com::Ilog, 
+                 spooler_com::Ihas_java_class_name, 
+                 Sos_ole_object               
 {
                                 Com_log                     ( Prefix_log* = NULL );
                              //~Com_log                     ();
 
-    USE_SOS_OLE_OBJECT
+    USE_SOS_OLE_OBJECT_WITHOUT_QI
+
+    STDMETHODIMP                QueryInterface              ( REFIID, void** );
+   
+    STDMETHODIMP            get_java_class_name             ( BSTR* result )                        { *result = SysAllocString( L"sos.spooler.Log" ); return S_OK; }
 
     void                        close                       ()                                      { THREAD_LOCK(_lock)  _log = NULL; }        
 
@@ -203,11 +227,15 @@ struct Com_log : spooler_com::Ilog, Sos_ole_object
 
 //----------------------------------------------------------------------------------Com_object_set
 
-struct Com_object_set : spooler_com::Iobject_set, Sos_ole_object               
+struct Com_object_set : spooler_com::Iobject_set, 
+                      //spooler_com::Ihas_java_class_name, 
+                        Sos_ole_object               
 {
                                 Com_object_set              ( Object_set* );
 
     USE_SOS_OLE_OBJECT
+
+  //STDMETHODIMP            get_java_class_name         ( BSTR* result )                            { *result = SysAllocString( L"sos.spooler.Object_set" ); return S_OK; }
 
     void                        clear                       ()                                      { THREAD_LOCK(_lock)  _object_set = NULL; }
 
@@ -222,11 +250,17 @@ struct Com_object_set : spooler_com::Iobject_set, Sos_ole_object
 
 //------------------------------------------------------------------------------------------Com_job
 
-struct Com_job : spooler_com::Ijob, Sos_ole_object               
+struct Com_job : spooler_com::Ijob, 
+                 spooler_com::Ihas_java_class_name, 
+                 Sos_ole_object               
 {
                                 Com_job                     ( Job* );
 
-    USE_SOS_OLE_OBJECT
+    USE_SOS_OLE_OBJECT_WITHOUT_QI
+
+    STDMETHODIMP                QueryInterface              ( REFIID, void** );
+
+    STDMETHODIMP            get_java_class_name             ( BSTR* result )                        { *result = SysAllocString( L"sos.spooler.Job" ); return S_OK; }
 
     void                        close                       ()                                      { THREAD_LOCK(_lock)  _job = NULL; }
 
@@ -250,12 +284,18 @@ struct Com_job : spooler_com::Ijob, Sos_ole_object
 
 //-----------------------------------------------------------------------------------------Com_task
 
-struct Com_task : spooler_com::Itask, Sos_ole_object               
+struct Com_task : spooler_com::Itask, 
+                  spooler_com::Ihas_java_class_name, 
+                  Sos_ole_object               
 {
                                 Com_task                    ( Task* = NULL );
                                ~Com_task                    ()                                      {}
 
-    USE_SOS_OLE_OBJECT
+    USE_SOS_OLE_OBJECT_WITHOUT_QI
+
+    STDMETHODIMP                QueryInterface              ( REFIID, void** );
+
+    STDMETHODIMP            get_java_class_name             ( BSTR* result )                        { *result = SysAllocString( L"sos.spooler.Task" ); return S_OK; }
 
     void                        set_task                    ( Task* );
     Task*                       task                        ()                                      { return _task; }
@@ -283,11 +323,17 @@ struct Com_task : spooler_com::Itask, Sos_ole_object
 
 //---------------------------------------------------------------------------------------Com_thread
 
-struct Com_thread : spooler_com::Ithread, Sos_ole_object               
+struct Com_thread : spooler_com::Ithread, 
+                    spooler_com::Ihas_java_class_name, 
+                    Sos_ole_object               
 {
                                 Com_thread                  ( Thread* );
 
-    USE_SOS_OLE_OBJECT
+    USE_SOS_OLE_OBJECT_WITHOUT_QI
+
+    STDMETHODIMP                QueryInterface              ( REFIID, void** );
+
+    STDMETHODIMP            get_java_class_name             ( BSTR* result )                        { *result = SysAllocString( L"sos.spooler.Thread" ); return S_OK; }
 
     void                        close                       ()                                      { THREAD_LOCK(_lock)  _thread = NULL; }
 
@@ -304,11 +350,17 @@ struct Com_thread : spooler_com::Ithread, Sos_ole_object
 
 //--------------------------------------------------------------------------------------Com_spooler
 
-struct Com_spooler : spooler_com::Ispooler, Sos_ole_object               
+struct Com_spooler : spooler_com::Ispooler, 
+                     spooler_com::Ihas_java_class_name, 
+                     Sos_ole_object               
 {
                                 Com_spooler                 ( Spooler* ); 
 
-    USE_SOS_OLE_OBJECT
+    USE_SOS_OLE_OBJECT_WITHOUT_QI
+
+    STDMETHODIMP            get_java_class_name             ( BSTR* result )                        { *result = SysAllocString( L"sos.spooler.Spooler" ); return S_OK; }
+
+    STDMETHODIMP                QueryInterface              ( REFIID, void** );
 
     void                        close                       ()                                      { THREAD_LOCK(_lock)  _spooler = NULL; }
 
@@ -370,13 +422,19 @@ struct Com_context : spooler_com::Icontext, Sos_ole_object
 
 //------------------------------------------------------------------------------------Com_job_chain
 
-struct Com_job_chain : spooler_com::Ijob_chain, Sos_ole_object               
+struct Com_job_chain : spooler_com::Ijob_chain, 
+                       spooler_com::Ihas_java_class_name, 
+                       Sos_ole_object               
 {
                                 Com_job_chain           ( Job_chain* );
 
     void                        close                   ()                                          { THREAD_LOCK( _lock )  _job_chain = NULL; }
 
-    USE_SOS_OLE_OBJECT
+    USE_SOS_OLE_OBJECT_WITHOUT_QI
+
+    STDMETHODIMP                QueryInterface          ( REFIID, void** );
+
+    STDMETHODIMP            get_java_class_name         ( BSTR* result )                            { *result = SysAllocString( L"sos.spooler.Job_chain" ); return S_OK; }
 
     STDMETHODIMP            put_name                    ( BSTR );
     STDMETHODIMP            get_name                    ( BSTR* );
@@ -399,11 +457,17 @@ struct Com_job_chain : spooler_com::Ijob_chain, Sos_ole_object
 
 //-------------------------------------------------------------------------------Com_job_chain_node
 
-struct Com_job_chain_node : spooler_com::Ijob_chain_node, Sos_ole_object               
+struct Com_job_chain_node : spooler_com::Ijob_chain_node, 
+                            spooler_com::Ihas_java_class_name, 
+                            Sos_ole_object               
 {
                                 Com_job_chain_node      ();
 
-    USE_SOS_OLE_OBJECT
+    USE_SOS_OLE_OBJECT_WITHOUT_QI
+
+    STDMETHODIMP                QueryInterface          ( REFIID, void** );
+
+    STDMETHODIMP            get_java_class_name         ( BSTR* result )                            { *result = SysAllocString( L"sos.spooler.Job_chain_node" ); return S_OK; }
 
     STDMETHODIMP            get_state                   ( VARIANT* );
     STDMETHODIMP            get_next_node               ( spooler_com::Ijob_chain_node** );
@@ -413,7 +477,9 @@ struct Com_job_chain_node : spooler_com::Ijob_chain_node, Sos_ole_object
 
 //----------------------------------------------------------------------------------------Com_order
 
-struct Com_order : spooler_com::Iorder, Sos_ole_object
+struct Com_order : spooler_com::Iorder, 
+                   spooler_com::Ihas_java_class_name, 
+                   Sos_ole_object
 {
                                 Com_order               ( Order* );
                               //Com_order               ();
@@ -421,7 +487,11 @@ struct Com_order : spooler_com::Iorder, Sos_ole_object
     void                        close                   ()                                          { THREAD_LOCK( _lock )  _order = NULL; }
 
 
-    USE_SOS_OLE_OBJECT
+    USE_SOS_OLE_OBJECT_WITHOUT_QI
+
+    STDMETHODIMP                QueryInterface          ( REFIID, void** );
+
+    STDMETHODIMP            get_java_class_name         ( BSTR* result )                            { *result = SysAllocString( L"sos.spooler.Order" ); return S_OK; }
 
     STDMETHODIMP            put_id                      ( VARIANT* );
     STDMETHODIMP            get_id                      ( VARIANT* );
@@ -462,12 +532,18 @@ struct Com_order : spooler_com::Iorder, Sos_ole_object
 
 //----------------------------------------------------------------------------------Com_order_queue
 
-struct Com_order_queue : spooler_com::Iorder_queue, Sos_ole_object               
+struct Com_order_queue : spooler_com::Iorder_queue, 
+                         spooler_com::Ihas_java_class_name, 
+                         Sos_ole_object               
 {
                                 Com_order_queue         ();
 
 
-    USE_SOS_OLE_OBJECT
+    USE_SOS_OLE_OBJECT_WITHOUT_QI
+
+    STDMETHODIMP            get_java_class_name         ( BSTR* result )                            { *result = SysAllocString( L"sos.spooler.Order_queue" ); return S_OK; }
+
+    STDMETHODIMP                QueryInterface          ( REFIID, void** );
 
     STDMETHODIMP            get_length                  ( int* );
     STDMETHODIMP                add_order               ( VARIANT*, spooler_com::Iorder** );

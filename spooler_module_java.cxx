@@ -1,4 +1,4 @@
-// $Id: spooler_module_java.cxx,v 1.6 2002/11/08 10:14:39 jz Exp $
+// $Id: spooler_module_java.cxx,v 1.7 2002/11/08 18:56:35 jz Exp $
 /*
     Hier sind implementiert
 
@@ -29,7 +29,7 @@ const static JNINativeMethod native_methods[] =
 
 //-------------------------------------------------------------------------------------------static
 
-static Java_vm* java_vm;        // Für java_vfprintf()
+static Java_vm* java_vm;        // Für java_vfprintf() und für native Funktionen
 
 //-------------------------------------------------------------------------------set_java_exception
 
@@ -270,7 +270,29 @@ static jobject jobject_from_variant( JNIEnv* jenv, const VARIANT& v )
             break;
         }
 
-      //case VT_DISPATCH:
+        case VT_DISPATCH:
+        {
+            IDispatch* idispatch = V_DISPATCH( &v );
+            if( !idispatch )  break;
+
+            ptr<spooler_com::Ihas_java_class_name> j;
+            HRESULT hr = idispatch->QueryInterface( spooler_com::IID_Ihas_java_class_name, (void**)&j );
+            if( FAILED( hr ) )  break;
+
+            Bstr java_class_name_bstr;
+            hr = j->get_java_class_name( &java_class_name_bstr );
+            if( FAILED(hr) )  break;
+
+            string java_class_name = replace_regex( string_from_bstr( java_class_name_bstr ), "\\.", "/" ) ;
+            ptr<Java_idispatch> java_idispatch = Z_NEW( Java_idispatch( java_vm->_spooler, idispatch, java_class_name) );
+
+            java_vm->env().add_object( java_idispatch );        // Lebensdauer nur bis Ende des Aufrufs der Java-Methode, s. Java_module_instance::call()
+
+            result = *java_idispatch;
+
+            break;
+        }
+
       //case VT_VARIANT:
       //case VT_UNKNOWN:
       //case VT_DECIMAL:
@@ -379,15 +401,25 @@ JNIEXPORT jobject JNICALL Java_sos_spooler_Idispatch_com_1call( JNIEnv* jenv, jc
                 dispparams[i].attach_bstr( NULL );
                 jstring_to_bstr( jenv, (jstring)jparam, &dispparams[i].bstrVal );
             }
+            if( cls = jenv->FindClass( "sos/spooler/Idispatch" ), !cls )  return NULL;
+            else
+            if( jenv->IsInstanceOf( jparam, cls ) )
+            {
+                jfieldID field_id = jenv->GetFieldID( cls, "_idispatch", "J" );
+                if( field_id )
+                {
+                    dispparams[i] = (IDispatch*)jenv->GetLongField( jparam, field_id );
+                }
+            }
         }
 
         if( jenv->ExceptionOccurred() )  return NULL;
 
         hr = idispatch->Invoke( dispid, IID_NULL, (LCID)0, context, &dispparams, &result, &excepinfo, &arg_nr );
-        if( FAILED(hr) )  throw_com( hr, "Invoke", string_from_bstr(name_bstr).c_str() );
+        if( FAILED(hr) )  throw_ole_excepinfo( hr, &excepinfo, "Invoke", string_from_bstr(name_bstr).c_str() );
+        //if( FAILED(hr) )  throw_com( hr, "Invoke", string_from_bstr(name_bstr).c_str() );
 
         return jobject_from_variant( jenv, result );
-        
     }
     catch( const exception&  x ) { set_java_exception( jenv, x ); }
     catch( const _com_error& x ) { set_java_exception( jenv, x ); }
@@ -505,7 +537,17 @@ void Java_vm::init()
   //get_options( _config_options );     // Aus <config>
 
     _options.push_back( "-Djava.class.path=" + complete_class_path );
+    
+    // _options.push_back( "-Xfuture" );   
+    // Performs strict class-file format checks.  For purposes of backwards compatibility, the default format checks performed by the Java 2 SDK's virtual machine  are
+    // no  stricter  than the checks performed by 1.1.x versions of the JDK software.  The -Xfuture flag turns on stricter class-file format checks that enforce closer
+    // conformance to the class-file format specification.  Developers are encouraged to use this flag when developing new code because the stricter checks will become
+    // the default in future releases of the Java application launcher.
+    
+    //_options.push_back( "-Xdebug" );    // Starts with the debugger enabled.
+
     Z_DEBUG_ONLY( _options.push_back( Option( "-verbose:class,gc,jni" ) ) );
+    
     _options.push_back( Option( "vfprintf", java_vfprintf ) );
 
     _vm_args.nOptions = _options.size();
@@ -654,6 +696,16 @@ void Java_vm::throw_java( int return_value, const string& text1, const string& t
     throw_xc( x );
 }
 
+//-----------------------------------------------------------------------------Java_env::add_object
+
+void Java_env::add_object( Java_idispatch* o )
+{ 
+    _java_idispatch_list.push_back(NULL); 
+    *_java_idispatch_list.rbegin() = o; 
+
+    o->set_global(); 
+}
+
 //-----------------------------------------------------------------------------Java_env::find_class
 
 jclass Java_env::find_class( const string& name )
@@ -710,9 +762,9 @@ jmethodID Module::java_method_id( const string& name )
     return method_id;
 }
 
-//-----------------------------------------------------------Java_global_object::Java_global_object
+//-------------------------------------------------------------------------Java_object::Java_object
 
-Java_global_object::Java_global_object( Spooler* spooler, jobject jo )
+Java_object::Java_object( Spooler* spooler, jobject jo )
 :
     _spooler( spooler ),
     _jobject( NULL )
@@ -720,25 +772,34 @@ Java_global_object::Java_global_object( Spooler* spooler, jobject jo )
     assign( jo );
 }
 
-//----------------------------------------------------------Java_global_object::~Java_global_object
+//------------------------------------------------------------------------Java_object::~Java_object
 
-Java_global_object::~Java_global_object()
+Java_object::~Java_object()
 {
     assign( NULL );
 }
 
-//-----------------------------------------------------------------------Java_global_object::assign
+//------------------------------------------------------------------------------Java_object::assign
 
-void Java_global_object::assign( jobject jo )
+void Java_object::assign( jobject jo )
 {
     JNIEnv* jenv = _spooler->_java_vm.env();
 
-    if( _jobject )  jenv->DeleteGlobalRef( jo ), _jobject = NULL;
+    if( _is_global )  jenv->DeleteGlobalRef( _jobject );
 
-    if( jo )
+    _jobject = jo;
+}
+
+//--------------------------------------------------------------------------Java_object::set_global
+
+void Java_object::set_global()
+{
+    if( _jobject )
     {
-        _jobject = jenv->NewGlobalRef( jo );
+        _jobject = _spooler->_java_vm.env()->NewGlobalRef( _jobject );
         if( !_jobject )  _spooler->_java_vm.throw_java( 0, "NewGlobalRef" );
+
+        _is_global = true;
     }
 }
 
@@ -746,17 +807,18 @@ void Java_global_object::assign( jobject jo )
 
 Java_idispatch::Java_idispatch( Spooler* sp, IDispatch* idispatch, const string& subclass_name ) 
 : 
-    Java_global_object( sp ),
-    _idispatch( idispatch )
+    Java_object( sp ),
+    _idispatch( idispatch ),
+    _class_name( subclass_name )
 {
-    Java_env jenv = _spooler->_java_vm.env();
+    Java_env& jenv = _spooler->_java_vm.env();
 
     jclass subclass = jenv.find_class( subclass_name );
 
     jmethodID constructor_id = jenv.get_method_id( subclass, "<init>", "(J)V" );
 
-    jobject jo = jenv->NewObject( subclass, constructor_id, (long)(IDispatch*)idispatch );
-    if( !jo )  _spooler->_java_vm.throw_java( 0, "NewObject", JAVA_IDISPATCH_CLASS );
+    jobject jo = jenv->NewObject( subclass, constructor_id, (jlong)(IDispatch*)idispatch );
+    if( !jo )  _spooler->_java_vm.throw_java( 0, "NewObject", _class_name );
 
     assign( jo );
 }
@@ -767,18 +829,21 @@ Java_idispatch::~Java_idispatch()
 {
     if( _jobject )
     {
-        Java_env jenv = _spooler->_java_vm.env();
+        try
+        {
+            Java_env& jenv = _spooler->_java_vm.env();
         
-        jclass object_class = jenv.get_object_class( _jobject );
+            jclass object_class = jenv.get_object_class( _jobject );
 
-        jmethodID method_id = jenv.get_method_id( object_class, "com_clear", "()V" );
+            jmethodID method_id = jenv.get_method_id( object_class, "com_clear", "()V" );
 
+            jenv->CallVoidMethod( _jobject, method_id );
+            if( jenv->ExceptionOccurred() )  _spooler->_java_vm.throw_java( 0, _class_name, "CallVoidMethod com_clear()" );
 
-        jenv->CallVoidMethod( _jobject, method_id );
-        if( jenv->ExceptionOccurred() )  _spooler->_java_vm.throw_java( 0, "CallVoidMethod", "com_clear()" );
-
-        assign( NULL );
-        _idispatch = NULL;
+            assign( NULL );
+            _idispatch = NULL;
+        }
+        catch( const exception& x )  { _spooler->_log.error( _class_name + "::~Java_idispatch: " + x.what() ); }
     }
 }
 
@@ -789,22 +854,19 @@ void Java_module_instance::init()
     Module_instance::init();
 
     _java_vm = &_module->_spooler->_java_vm;
-    _env     = _java_vm->env();
+    _env     = &_java_vm->env();
 
     if( !_module->_java_class )
     {
         string class_name = replace_regex( _module->_java_class_name, "\\.", "/" );
-        _module->_java_class = _env->FindClass( class_name.c_str() );
-    
-        if( _env->ExceptionOccurred() )  _java_vm->throw_java( 0, "FindClass()", _module->_java_class_name.c_str() );
-        if( !_module->_java_class )  throw_xc( "Java::FindClass", _module->_java_class_name.c_str() );
+        _module->_java_class = _env->find_class( class_name.c_str() );
     }
 
 
     jmethodID method_id = _module->java_method_id( "<init>()V" );
     
     assert( _jobject == NULL );
-    _jobject = _env->NewObject( _module->_java_class, method_id );
+    _jobject = _env->env()->NewObject( _module->_java_class, method_id );
     if( !_jobject )  _java_vm->throw_java( 0, _module->_java_class_name + " Konstruktor" );
 }
 
@@ -823,17 +885,20 @@ void Java_module_instance::add_obj( const ptr<IDispatch>& object, const string& 
 {
     string java_class_name = "sos/spooler/" + replace_regex_ext( name, "^(spooler_)?(.*)$", "\\u\\2" );    // "spooler_task" -> "sos.spooler.Task"
 
-    jclass cls = _env->GetObjectClass( _jobject );
+    jclass cls = _env->env()->GetObjectClass( _jobject );
     if( !cls )  _module->_spooler->_java_vm.throw_java( 0, "GetMethodID" );
 
     string signature = string( "L" + java_class_name + ";" );
-    jfieldID field_id = _env->GetFieldID( cls, name.c_str(), signature.c_str() );
+    jfieldID field_id = _env->env()->GetFieldID( cls, name.c_str(), signature.c_str() );
     if( !field_id )  _module->_spooler->_java_vm.throw_java( 0, "GetFieldID", name );
 
-    _added_jobjects.push_back( Z_NEW( Java_idispatch( _module->_spooler, object, java_class_name ) ) );
+    ptr<Java_idispatch> java_idispatch = Z_NEW( Java_idispatch( _module->_spooler, object, java_class_name ) );
+    java_idispatch->set_global();
+
+    _added_jobjects.push_back( java_idispatch );
                                                 
-    _env->SetObjectField( _jobject, field_id, **_added_jobjects.rbegin() );
-    if( _env->ExceptionOccurred() )  _module->_spooler->_java_vm.throw_java( 0, "SetObjectField", name );
+    _env->env()->SetObjectField( _jobject, field_id, *java_idispatch );
+    if( _env->env()->ExceptionOccurred() )  _module->_spooler->_java_vm.throw_java( 0, "SetObjectField", name );
 
     //Com_module_instance_base::add_obj( object, name );
 }
@@ -842,7 +907,6 @@ void Java_module_instance::add_obj( const ptr<IDispatch>& object, const string& 
 
 void Java_module_instance::close()
 {
-    _log->warn( "free jobject" );  // jobject freigeben!
     _jobject = NULL;
 
     Module_instance::close();
@@ -852,6 +916,8 @@ void Java_module_instance::close()
 
 Variant Java_module_instance::call( const string& name )
 {
+    Java_idispatch_stack_frame stack_frame ( _env );
+
     jmethodID method_id = _module->java_method_id( name );
     if( !method_id )  throw_xc( "SPOOLER-174", name, _module->_java_class_name.c_str() );
 
@@ -859,14 +925,14 @@ Variant Java_module_instance::call( const string& name )
 
     if( *name.rbegin() == 'Z' )
     {
-        result = _env->CallBooleanMethod( _jobject, method_id ) != 0;
+        result = _env->env()->CallBooleanMethod( _jobject, method_id ) != 0;
     }
     else
     {
-        _env->CallVoidMethod( _jobject, method_id );
+        _env->env()->CallVoidMethod( _jobject, method_id );
     }
 
-    if( _env->ExceptionOccurred() )  _java_vm->throw_java( 0, name );
+    if( _env->env()->ExceptionOccurred() )  _java_vm->throw_java( 0, name );
 
     return result;
 }
@@ -875,12 +941,14 @@ Variant Java_module_instance::call( const string& name )
 
 Variant Java_module_instance::call( const string& name, int param )
 {
+    Java_idispatch_stack_frame stack_frame ( _env );
+
     jmethodID method_id = _module->java_method_id( name );
     if( !method_id )  throw_xc( "SPOOLER-174", name, _module->_java_class_name.c_str() );
 
-    bool result = _env->CallBooleanMethod( _jobject, method_id, param ) != 0;
+    bool result = _env->env()->CallBooleanMethod( _jobject, method_id, param ) != 0;
 
-    if( _env->ExceptionOccurred() )  _java_vm->throw_java( 0, name );
+    if( _env->env()->ExceptionOccurred() )  _java_vm->throw_java( 0, name );
 
     return result;
 }

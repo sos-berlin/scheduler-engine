@@ -1,4 +1,4 @@
-// $Id: spooler_order.cxx,v 1.16 2002/10/14 15:01:27 jz Exp $
+// $Id: spooler_order.cxx,v 1.17 2002/11/08 18:56:35 jz Exp $
 /*
     Hier sind implementiert
 
@@ -144,6 +144,22 @@ xml::Element_ptr Job_chain::xml( xml::Document_ptr document, Show_what show )
     return element;
 }
 
+//---------------------------------------------------------------------------------normalized_state
+
+static Order::State normalized_state( const Order::State& state )
+{
+    if( state.vt == VT_BSTR  &&  ( state.bstrVal == NULL || SysStringLen( state.bstrVal ) == 0 ) )
+    {
+        VARIANT v;
+        v.vt = VT_ERROR;
+        return v;
+    }
+    else
+    {
+        return state;
+    }
+}
+
 //-------------------------------------------------------------------------------Job_chain::add_job
 
 void Job_chain::add_job( Job* job, const Order::State& state, const Order::State& next_state, const Order::State& error_state )
@@ -159,8 +175,8 @@ void Job_chain::add_job( Job* job, const Order::State& state, const Order::State
 
     if( node->_state.vt == VT_ERROR )  node->_state = job->name();
 
-    node->_next_state  = next_state;
-    node->_error_state = error_state;
+    node->_next_state  = normalized_state( next_state );
+    node->_error_state = normalized_state( error_state );
 
     THREAD_LOCK( _lock )
     {
