@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.112 2002/10/03 07:57:07 jz Exp $
+// $Id: spooler_task.cxx,v 1.113 2002/10/04 06:36:13 jz Exp $
 /*
     Hier sind implementiert
 
@@ -271,7 +271,7 @@ void Job::set_xml( const xml::Element_ptr& element )
 
         _name             = as_string       ( element->getAttribute( L"name" ) );
       //_rerun            = as_bool         ( element->getAttribute( L"rerun" ) ) ),
-      //_stop_after_error = as_bool         ( element->getAttribute( L"stop_after_errorn ) );
+      //_stop_after_error = as_bool         ( element->getAttribute( L"stop_after_error" ) );
         _temporary        = as_bool         ( variant_default( element->getAttribute( L"temporary"  ), _temporary  ) );
         _priority         = int_from_variant( variant_default( element->getAttribute( L"priority"   ), _priority   ) );
         _title            = as_string       ( variant_default( element->getAttribute( L"title"      ), _title      ) );

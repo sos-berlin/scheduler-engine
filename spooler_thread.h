@@ -1,4 +1,4 @@
-// $Id: spooler_thread.h,v 1.20 2002/10/02 05:47:31 jz Exp $
+// $Id: spooler_thread.h,v 1.21 2002/10/04 06:36:14 jz Exp $
 
 #ifndef __SPOOLER_THREAD_H
 #define __SPOOLER_THREAD_H
@@ -17,6 +17,7 @@ struct Thread : Sos_self_deleting
     xml::Element_ptr            xml                         ( xml::Document_ptr, Show_what );
     void                        load_jobs_from_xml          ( const xml::Element_ptr&, bool init = false );
     void                        add_job                     ( const Sos_ptr<Job>& );
+    void                        build_prioritized_order_job_array();
     
     bool                        empty                       () const                        { return _job_list.empty(); }
     const string&               name                        () const                        { return _name; }
@@ -83,6 +84,9 @@ struct Thread : Sos_self_deleting
   private:
                                 Thread                      ( const Thread& );      // Nicht implementiert
     Thread&                     operator =                  ( const Thread& );      // Nicht implementiert
+
+    vector<Job*>               _prioritized_order_job_array;
+    Time                       _prioritized_order_job_array_time;
 };
 
 typedef list< Sos_ptr<Thread> >  Thread_list;

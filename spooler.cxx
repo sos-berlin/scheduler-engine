@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.115 2002/10/02 05:47:29 jz Exp $
+// $Id: spooler.cxx,v 1.116 2002/10/04 06:36:12 jz Exp $
 /*
     Hier sind implementiert
 
@@ -242,7 +242,7 @@ Spooler::Spooler()
 
     _tcp_port = 4444;
     _udp_port = 4444;
-    _priority_max = 1000;
+    _priority_max = 1000;       // Ein Wert > 1, denn 1 ist die voreingestelle Priorität der Jobs
             
 
     char hostname[200];
@@ -602,7 +602,7 @@ void Spooler::load()
     assert( GetCurrentThreadId() == _thread_id );
 
     set_state( s_starting );
-    _log.info( "Spooler::load " + _config_filename );
+    //_log ist noch nicht geöffnet   _log.info( "Spooler::load " + _config_filename );
 
 
     tzset();
@@ -643,6 +643,8 @@ void Spooler::start()
 
     _log.set_directory( _log_directory );
     _log.open_new();
+    _log.info( "Spooler startet mit " + _config_filename );
+
 
     _db.open( _db_name, _need_db );
     _db.spooler_start();

@@ -1,4 +1,4 @@
-// $Id: spooler_thread.cxx,v 1.42 2002/10/02 05:47:31 jz Exp $
+// $Id: spooler_thread.cxx,v 1.43 2002/10/04 06:36:14 jz Exp $
 /*
     Hier sind implementiert
 
@@ -7,6 +7,7 @@
 
 
 #include "spooler.h"
+#include <algorithm>
 #include <sys/timeb.h>
 #include "../kram/sleep.h"
 
@@ -189,6 +190,19 @@ void Thread::stop_jobs()
     }
 }
 
+//--------------------------------------------------------Thread::build_prioritized_order_job_array
+
+void Thread::build_prioritized_order_job_array()
+{
+    _prioritized_order_job_array.clear();
+
+    FOR_EACH_JOB( it )  if( (*it)->order_controlled() )  _prioritized_order_job_array.push_back( *it );
+
+    sort( _prioritized_order_job_array.begin(), _prioritized_order_job_array.end(), Job::higher_job_chain_priority );
+
+    //FOR_EACH( vector<Job*>, _prioritized_order_job_array, i )  _log.debug( "build_prioritized_order_job_array: Job " + (*i)->name() );
+}
+
 //-----------------------------------------------------------------------------Thread::do_something
 
 bool Thread::do_something( Job* job )
@@ -209,13 +223,10 @@ bool Thread::do_something( Job* job )
 
 bool Thread::step()
 {
-  //int  pri_sum = 0;
     bool something_done = false;
 
-  //FOR_EACH( Task_list, _task_list, it )  pri_sum += (*it)->task_priority;
-
-
     // Erst die Tasks mit höchster Priorität. Die haben absoluten Vorrang:
+
 
     {
         FOR_EACH_JOB( it )
@@ -231,6 +242,41 @@ bool Thread::step()
     }
 
 
+
+    // Jetzt sehen wir zu, dass die Jobs, die hinten in einer Jobkette stehen, ihre Aufträge los werden.
+    // Damit sollen die fortgeschrittenen Aufträge vorrangig bearbeitet werden, um sie so schnell wie
+    // möglich abzuschließen.
+
+    if( !something_done )
+    {
+        Time t = _spooler->job_chain_time();
+        if( _prioritized_order_job_array_time != t )        // Ist eine neue Jobkette hinzugekommen?
+        {
+            build_prioritized_order_job_array();
+            _prioritized_order_job_array_time = t;
+        }
+
+
+        FOR_EACH( vector<Job*>, _prioritized_order_job_array, it )
+        {
+            Job* job = *it;
+
+            if( !job->order_controlled() )
+            {
+                bool stepped = false;
+
+                do  // Job solange ausführen, bis er nichts mehr tut
+                {
+                    if( _event.signaled_then_reset() )  return true;
+                    stepped = do_something( job );
+                    something_done |= stepped;
+                } 
+                while( stepped  );
+            }
+        }
+    }
+
+
     // Wenn keine Task höchste Priorität hat, dann die Tasks relativ zu ihrer Priorität, außer Priorität 0:
 
     if( !something_done )
@@ -238,14 +284,19 @@ bool Thread::step()
         FOR_EACH_JOB( it )
         {
             Job* job = *it;
-            for( int i = 0; i < job->priority(); i++ )
+
+            if( !job->order_controlled() )
             {
-                if( _event.signaled_then_reset() )  return true;
-                something_done |= do_something( job );
-                if( !something_done )  break;
+                for( int i = 0; i < job->priority(); i++ )
+                {
+                    if( _event.signaled_then_reset() )  return true;
+                    something_done |= do_something( job );
+                    if( !something_done )  break;
+                }
             }
         }
     }
+
 
 
     // Wenn immer noch keine Task ausgeführt worden ist, dann die Tasks mit Priorität 0 nehmen:
@@ -254,9 +305,13 @@ bool Thread::step()
     {
         FOR_EACH_JOB( it )
         {
-            if( _event.signaled_then_reset() )  return true;
             Job* job = *it;
-            if( job->priority() == 0 )  do_something( job );
+
+            if( !job->order_controlled() )
+            {
+                if( _event.signaled_then_reset() )  return true;
+                if( job->priority() == 0 )  do_something( job );
+            }
         }
     }
 

@@ -1,4 +1,4 @@
-// $Id: spooler_order.h,v 1.12 2002/10/03 08:58:21 jz Exp $
+// $Id: spooler_order.h,v 1.13 2002/10/04 06:36:13 jz Exp $
 
 #ifndef __SPOOLER_ORDER_H
 #define __SPOOLER_ORDER_H
@@ -126,6 +126,8 @@ struct Job_chain_node : Com_job_chain_node
     
     Order::State               _error_state;            // Bezeichnung des Fehlerzustands
     Job_chain_node*            _error_node;             // Fehlerknoten
+
+    int                        _priority;               // Das ist die Entfernung zum letzten Knoten + 1, negativ (also -1, -2, -3, ...)
 };
 
 //----------------------------------------------------------------------------------------Job_chain

@@ -1,10 +1,10 @@
-// $Id: spooler_order.cxx,v 1.14 2002/10/03 08:58:21 jz Exp $
+// $Id: spooler_order.cxx,v 1.15 2002/10/04 06:36:13 jz Exp $
 /*
     Hier sind implementiert
 
     Spooler::add_job_chain
     Spooler::job_chain
-    Command_processor::execute_add_order
+    Spooler::xml_from_job_chains
 
     Job_chain
     Order
@@ -31,6 +31,8 @@ void Spooler::add_job_chain( Job_chain* job_chain )
 
         _job_chain_map[lname] = job_chain;
     }
+
+    _job_chain_time = Time::now();
 }
 
 //-------------------------------------------------------------------------------Spooler::job_chain
@@ -165,6 +167,8 @@ void Job_chain::add_job( Job* job, const Order::State& state, const Order::State
         if( node_from_state_or_null( node->_state ) )  throw_xc( "SPOOLER-150", error_string_from_variant(node->_state), name() );
 
         _chain.push_back( node );
+
+        if( job )  job->set_job_chain_priority( _chain.size() );   // Weiter hinten stehende Jobs werden vorrangig ausgeführt
     }
 }
 

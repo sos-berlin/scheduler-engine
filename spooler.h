@@ -1,4 +1,4 @@
-// $Id: spooler.h,v 1.93 2002/10/02 12:54:37 jz Exp $
+// $Id: spooler.h,v 1.94 2002/10/04 06:36:13 jz Exp $
 
 #ifndef __SPOOLER_H
 #define __SPOOLER_H
@@ -201,6 +201,8 @@ struct Spooler
     void                        add_job_chain               ( Job_chain* );
     Job_chain*                  job_chain                   ( const string& name );
     xml::Element_ptr            xml_from_job_chains         ( xml::Document_ptr, Show_what );
+    void                        set_job_chain_time          ( const Time& t )                   { THREAD_LOCK( _job_chain_lock )  _job_chain_time = t; }
+    Time                        job_chain_time              ()                                  { THREAD_LOCK_RETURN( _job_chain_lock, Time, _job_chain_time ); }
 
     friend struct               Com_spooler;
 
@@ -327,6 +329,8 @@ struct Spooler
 
     typedef map< string, ptr<Job_chain> >  Job_chain_map;
     Job_chain_map              _job_chain_map;
+    Time                       _job_chain_time;             // Zeitstempel der letzten Änderung (letzer Aufruf von Spooler::add_job_chain()), 
+
     Thread_semaphore           _job_chain_lock;
 };
 

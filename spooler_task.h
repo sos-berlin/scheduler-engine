@@ -1,4 +1,4 @@
-// $Id: spooler_task.h,v 1.65 2002/10/03 07:57:07 jz Exp $
+// $Id: spooler_task.h,v 1.66 2002/10/04 06:36:14 jz Exp $
 
 #ifndef __SPOOLER_TASK_H
 #define __SPOOLER_TASK_H
@@ -269,6 +269,10 @@ struct Job : Sos_self_deleting
     void                        signal_object               ( const string& object_set_class_name, const Level& );
 
     Order_queue*                order_queue                 () const                    { return _order_queue; }
+    bool                        order_controlled            () const                    { return _order_queue != NULL; }
+
+    void                        set_job_chain_priority      ( int pri )                 { THREAD_LOCK(_lock) if( _job_chain_priority < pri )  _job_chain_priority = pri; }
+    static bool                 higher_job_chain_priority   ( const Job* a, const Job* b )  { return a->_job_chain_priority > b->_job_chain_priority; }
 
     virtual string             _obj_name                    () const                    { return "Job " + _name; }
 
@@ -349,6 +353,7 @@ struct Job : Sos_self_deleting
     Task_queue                 _task_queue;                 // Warteschlange der nächsten zu startenden Tasks
 
     ptr<Order_queue>           _order_queue;
+    int                        _job_chain_priority;         // Maximum der Prioritäten aller Jobkettenknoten mit diesem Job. 
 
     Job_history                _history;
 };
