@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="../scheduler.xslt" type="text/xsl"?>
 
-<!--$Id: job.xml,v 1.7 2004/08/28 14:41:02 jz Exp $-->
+<!--$Id: job.xml,v 1.8 2004/08/30 11:37:16 jz Exp $-->
 
 <xml_element name     = "job" 
              title    = "Job"
              base_dir = ".."
              parent_page = "../konfiguration.xml"
              author   = "$Author: jz $"
-             date     = "$Date: 2004/08/28 14:41:02 $">
+             date     = "$Date: 2004/08/30 11:37:16 $">
 
     <xml_parent_elements>
         <xml_parent_element name="jobs">
@@ -114,7 +114,7 @@
             <description>
                 <p>
                     Bei <code>temporary="yes"</code> ist der Job temporär.
-                    Nur für <scheduler_element name="add_job"/>.
+                    Nur für <scheduler_element name="add_jobs"/>.
                     Nach der Ausführung wird der Job gelöscht und ist dann unbekannt.
                 </p>
             </description>
