@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.255 2003/09/23 15:57:15 jz Exp $
+// $Id: spooler.cxx,v 1.256 2003/09/24 14:06:09 jz Exp $
 /*
     Hier sind implementiert
 
@@ -1586,8 +1586,12 @@ void Spooler::run()
         }
 
 
-        string       msg = "Warten"; //"Kein Job und keine Task aktiv";
+        string       msg;
         Wait_handles wait_handles ( this, &_log );
+        bool         log_wait = _log.log_level() <= log_debug9;
+
+        if( log_wait )  msg = "Warten"; //"Kein Job und keine Task aktiv";
+
         _next_time = latter_day;
 
 
@@ -1604,7 +1608,7 @@ void Spooler::run()
             if( task ) 
             {
                 _next_time = task->next_time();
-                if( _debug )  if( task )  msg = "Warten bis " + _next_time.as_string() + " für Task " + task->name();
+                if( log_wait )  if( task )  msg = "Warten bis " + _next_time.as_string() + " für Task " + task->name();
                                     //else  msg = "Keine Task aktiv";
             }
 
@@ -1619,7 +1623,7 @@ void Spooler::run()
         if( job  &&  _next_time > job->next_time() )  
         {
             _next_time = job->next_time();
-            msg = "Warten bis " + _next_time.as_string() + " für Job " + job->name();
+            if( log_wait )  msg = "Warten bis " + _next_time.as_string() + " für Job " + job->name();
         }
 
 
@@ -1661,9 +1665,9 @@ void Spooler::run()
             if( _next_time > now )
             {
 //_next_time = min( _next_time, now + 10.0 );      // Wartezeit vorsichtshalber begrenzen
-                if( _debug )  
+                if( log_wait )  
                 {
-                    if( wait_handles.wait(0) == -1 )  _log.debug9( msg ), wait_handles.wait_until( _next_time );     // Debug-Ausgabe der Wartezeit nur, wenn kein Ergebnis vorliegt
+                    if( wait_handles.wait(0) == -1 )  { LOG( msg << "\n" ); wait_handles.wait_until( _next_time ); }    // Debug-Ausgabe der Wartezeit nur, wenn kein Ergebnis vorliegt
                 }
                 else
                 {

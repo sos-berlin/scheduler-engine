@@ -1,4 +1,4 @@
-// $Id: spooler_com.cxx,v 1.107 2003/09/24 11:15:47 jz Exp $
+// $Id: spooler_com.cxx,v 1.108 2003/09/24 14:06:10 jz Exp $
 /*
     Hier sind implementiert
 
@@ -469,7 +469,7 @@ xml::Document_ptr Com_variable_set::dom()
                 xml::Element_ptr var = doc.createElement( "variable" );
                 var.setAttribute( "name" , string_from_bstr(name) );
 
-                VARTYPE vt = -1;
+                VARTYPE vt = (VARTYPE)-1;
 
                 if( value.vt == VT_EMPTY
                  || value.vt == VT_NULL
@@ -508,8 +508,8 @@ xml::Document_ptr Com_variable_set::dom()
                      && SUCCEEDED( V_DISPATCH(value)->QueryInterface( IID_Ivariable_set, v.pp() ) ) )  vt = value.vt;
                 }
 */
-                if( vt != -1 )  var.setAttribute( "vt", vt );
-                          else  {} // Andere Typen sind nicht rückkonvertierbar. Die werden dann zum String.  
+                if( vt != (VARTYPE)-1 )  var.setAttribute( "vt", vt );
+                                   else  {} // Andere Typen sind nicht rückkonvertierbar. Die werden dann zum String.  
 
                 var.setAttribute( "value", string_from_variant( value ) );
 

@@ -1,4 +1,4 @@
-// $Id: spooler_module_java.cxx,v 1.62 2003/09/23 20:50:24 jz Exp $
+// $Id: spooler_module_java.cxx,v 1.63 2003/09/24 14:06:10 jz Exp $
 /*
     Hier sind implementiert
 
@@ -109,14 +109,8 @@ static jobject jobject_from_variant( JNIEnv* jenv, const VARIANT& v )
         }
         else
         {
-            //throw_ole( hr, "IID_Ihas_java_class_name" );
             // Vielleicht gibt's die Eigenschaft java_class_name per IDispatch (so bei einem Proxy des Objektservers)
-            //Bstr property_name = "java_class_name";
-            //DISPID dispid;
-            //hr = idispatch->GetIDsOfNames( IID_NULL, &property_name, 1, STANDARD_LCID, &dispid );
-            //if( !hr )  throw_ole( hr, "java_class_name" );
 
-            //hr = idispatch->Invoke( dispid, IID_NULL, STANDARD_LCID, , dispparams, &result, excepinfo, 
             java_class_name = string_from_variant( com_property_get( idispatch, "java_class_name" ) );
         }
 
@@ -148,10 +142,11 @@ JNIEXPORT jobject JNICALL Java_sos_spooler_Idispatch_com_1call( JNIEnv* jenv, jc
         
         if( !idispatch )  throw_xc( "SPOOLER-176" );
 
-        
         // GetIDsOfNames
 
         jstring_to_bstr( jenv, jname, &name_bstr );
+
+//LOGI( "com_call(" << name_bstr << ")\n" );
 
         OLECHAR* name_ptr = name_bstr;
 
@@ -278,6 +273,7 @@ Java_idispatch::Java_idispatch( Vm* vm, IDispatch* idispatch, const string& subc
 
     jmethodID constructor_id = e.get_method_id( subclass, "<init>", "(J)V" );
 
+    LOG( "new Java_idispatch(" << subclass_name << ")\n" );
     jobject jo = e->NewObject( subclass, constructor_id, (jlong)(size_t)idispatch );
     if( !jo )  e.throw_java( "NewObject", _class_name );
 

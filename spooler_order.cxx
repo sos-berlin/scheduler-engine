@@ -1,4 +1,4 @@
-// $Id: spooler_order.cxx,v 1.37 2003/09/24 11:15:48 jz Exp $
+// $Id: spooler_order.cxx,v 1.38 2003/09/24 14:06:10 jz Exp $
 /*
     Hier sind implementiert
 
@@ -706,6 +706,7 @@ Order::Order( Spooler* spooler, const Record& record )
 
     if( payload_string.find( "<" + Com_variable_set::xml_element_name() ) != string::npos )
     {
+        //fprintf( stderr, "Order::Order <sos.spooler.variable_set> erkannt\n" );
         ptr<Com_variable_set> v = new Com_variable_set;
         v->put_xml( Bstr( payload_string ) );
         _payload = v;
