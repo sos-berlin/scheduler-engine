@@ -1,4 +1,8 @@
-// $Id: scheduler.js,v 1.14 2004/07/27 09:06:52 jz Exp $
+// $Id: scheduler.js,v 1.15 2004/08/02 14:14:59 jz Exp $
+
+//----------------------------------------------------------------------------------------------var
+
+var _popup;
 
 //----------------------------------------------------------------------------------------Scheduler
 // public
@@ -237,7 +241,7 @@ function update__onclick()
     update();
 }
 
-//------------------------------------------------------------------------Popup_menu_builder.add_command
+//-------------------------------------------------------------------Popup_menu_builder.add_command
 // Erweiterung von Popup_menu_builder, s. popup_builder.js
 
 function Popup_menu_builder__add_command( html, xml_command, is_active )
@@ -359,26 +363,6 @@ function job_menu__onclick( job_name )
     popup_builder.add_command ( "Continue tasks", "<modify_job job='" + job_name + "' cmd='continue'/>" );
     
     _popup = popup_builder.show_popup();
-}
-
-//-----------------------------------------------------------------------------show_job_description
-
-function show_job_description()
-{
-    var job_element = //document.all._job_element != undefined?
-                        _job_element  // _job_element in task_frame.html (detail_frame)                                                                                  // Rechter Rahmen
-                      //: _response.selectSingleNode( "spooler/answer/state/jobs/job [ @job = '" + job_name + "' ]" );  // Linker Rahmen
-                      
-    //var log_window = window.open( "http://" + document.location.host + "/" + show_log_command, window_name, features, true );
-    var popup = window.createPopup();
-    popup.document.body.innerHTML = job_element.selectSingleNode( "description" ).text;
-
-    //popup.show( 0, 0, 0, 0 );
-    var width  = document.body.clientWidth;
-    var height = document.body.clientHeight;
-    popup.hide();
-    popup.document.body.className = "job";
-    popup.show( this.document.body.offsetLeft, this.document.body.offsetTop, width, height, this.document.body );
 }
 
 //-------------------------------------------------------------------------------task_menu__onclick

@@ -1,4 +1,4 @@
-// $Id: spooler_command.cxx,v 1.133 2004/07/26 17:55:09 jz Exp $
+// $Id: spooler_command.cxx,v 1.134 2004/08/02 14:14:58 jz Exp $
 /*
     Hier ist implementiert
 
@@ -707,6 +707,8 @@ ptr<Http_response> Command_processor::execute_http( const Http_request* http_req
              || extension == "htm"  )  response_content_type = "text/html";
             else
             if( extension == "xsl"  )  response_content_type = "text/xsl";
+            else
+            if( extension == "xslt" )  response_content_type = "text/xslt";
             else
             if( extension == "js"   )  response_content_type = "text/javascript";
             else

@@ -1,4 +1,4 @@
-// $Id: spooler_com.cxx,v 1.153 2004/07/22 14:15:10 jz Exp $
+// $Id: spooler_com.cxx,v 1.154 2004/08/02 14:14:58 jz Exp $
 /*
     Hier sind implementiert
 
@@ -1776,8 +1776,8 @@ const Com_method Com_task::_methods[] =
     { DISPATCH_PROPERTYGET, 13, "order"                     , (Com_method_ptr)&Com_task::get_Order              , VT_DISPATCH   },
     { DISPATCH_PROPERTYGET, 14, "java_class_name"           , (Com_method_ptr)&Com_task::get_Java_class_name    , VT_BSTR },
     { DISPATCH_PROPERTYGET, 15, "changed_directories"       , (Com_method_ptr)&Com_task::get_Changed_directories, VT_BSTR },
-    { DISPATCH_PROPERTYGET, 16, "add_pid"                   , (Com_method_ptr)&Com_task::Add_pid                , VT_EMPTY      , { VT_INT, VT_BYREF|VT_DISPATCH }, 1 },
-    { DISPATCH_PROPERTYGET, 17, "remove_pid"                , (Com_method_ptr)&Com_task::Remove_pid             , VT_BSTR       , { VT_INT } },
+    { DISPATCH_METHOD     , 16, "add_pid"                   , (Com_method_ptr)&Com_task::Add_pid                , VT_EMPTY      , { VT_INT, VT_BYREF|VT_DISPATCH }, 1 },
+    { DISPATCH_METHOD     , 17, "remove_pid"                , (Com_method_ptr)&Com_task::Remove_pid             , VT_BSTR       , { VT_INT } },
     {}
 };
 

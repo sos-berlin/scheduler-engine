@@ -1,4 +1,4 @@
-// $Id: spooler_config.cxx,v 1.69 2004/05/10 12:01:10 jz Exp $
+// $Id: spooler_config.cxx,v 1.70 2004/08/02 14:14:58 jz Exp $
 
 //#include <precomp.h>
 
@@ -338,7 +338,7 @@ void Spooler::load_config( const xml::Element_ptr& config_element, const Time& x
         _priority_max  = config_element.int_getAttribute( "priority_max" , _priority_max );
 
 #     ifdef _DEBUG
-        _max_threads   = config_element.int_getAttribute( "threads"      , _max_threads  );
+      //_max_threads   = config_element.int_getAttribute( "threads"      , _max_threads  );
 #     endif
           
         if( _max_threads < 1 )  _max_threads = 1;

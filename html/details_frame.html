@@ -1,4 +1,4 @@
-<!-- $Id: details_frame.html,v 1.2 2004/07/27 13:52:55 jz Exp $ -->
+<!-- $Id: details_frame.html,v 1.3 2004/08/02 14:14:58 jz Exp $ -->
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <html>
 
@@ -9,6 +9,7 @@
 
     <style type="text/css">
         @import "scheduler.css";
+        @import "custom.css";
     </style>
 
     <title>Scheduler</title>
@@ -41,7 +42,7 @@
 </p-->
 
 
-<xml id="stylesheet" src="scheduler.xsl"></xml>
+<xml id="stylesheet" src="scheduler.xslt"></xml>
 
 <script defer="true" type="text/javascript" src="scheduler.js"></script>
 <script defer="true" type="text/javascript" src="popup_menu.js"></script>
@@ -58,7 +59,7 @@ var _job_element;
 var _job_name;
 var _task_id;
 var _job_chain_element;
-var _popup;
+var _description_popup;
 var _hidden;
 var _saved_frameset_cols;
 
@@ -178,12 +179,34 @@ function show_job_chain_details( job_chain_element )
     show();
 }
 
+//-----------------------------------------------------------------------------show_job_description
+
+function show_job_description()
+{
+    var job_element = //document.all._job_element != undefined?
+                        _job_element  // _job_element in task_frame.html (detail_frame)                                                                                  // Rechter Rahmen
+                      //: _response.selectSingleNode( "spooler/answer/state/jobs/job [ @job = '" + job_name + "' ]" );  // Linker Rahmen
+                      
+    //var log_window = window.open( "http://" + document.location.host + "/" + show_log_command, window_name, features, true );
+    if( _description_popup )  _description_popup.hide();
+    
+    _description_popup = window.createPopup();
+    _description_popup.document.body.innerHTML = job_element.selectSingleNode( "description" ).text;
+
+    //_description_popup.show( 0, 0, 0, 0 );
+    var width  = document.body.clientWidth;
+    var height = document.body.clientHeight;
+    _description_popup.hide();
+    _description_popup.document.body.className = "job";
+    _description_popup.show( this.document.body.offsetLeft, this.document.body.offsetTop, width, height, this.document.body );
+}
+
 //-------------------------------------------------------------------------------------------update
 
 function update( force )
 {
     if( force == undefined )  force = false;
-    if( _hidden  &&  !force )  return false;
+    if( ( _hidden || _description_popup ) &&  !force )  return false;
 
     var ok = false;
     
