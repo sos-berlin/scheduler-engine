@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.173 2003/08/27 10:22:58 jz Exp $
+// $Id: spooler_task.cxx,v 1.174 2003/08/27 17:44:48 jz Exp $
 /*
     Hier sind implementiert
 
@@ -475,7 +475,8 @@ bool Task::do_something()
 {
     //Z_DEBUG_ONLY( _log.debug9( "do_something() state=" + state_name() ); )
 
-    if( _operation  &&  !_operation->async_finished() )  return false;
+    if( _operation )
+        if( !_operation->async_finished() )  return false;
 
     bool something_done = false;
 
@@ -548,7 +549,7 @@ bool Task::do_something()
 
                 case s_starting:
                 {
-                    ok = do_begin__end();
+                    ok = begin__end();
                     _operation = NULL;
 
                     if( !ok || has_error() )  break;
@@ -647,7 +648,7 @@ bool Task::do_something()
                 
                 case s_ending:
                 {
-                    do_end__end();
+                    end__end();
                     _operation = NULL;
 
                     set_state( s_ended );
@@ -785,6 +786,33 @@ void Task::step__start()
   //return result;
 }
 */
+//---------------------------------------------------------------------------------Task::begin__end
+
+bool Task::begin__end()
+{
+    bool result;
+
+    try 
+    {
+        result = do_begin__end();
+
+    }
+    catch( const exception& x ) { set_error(x);  result = false; }
+
+    return result;
+}
+
+//-----------------------------------------------------------------------------------Task::end__end
+
+void Task::end__end()
+{
+    try 
+    {
+        do_end__end();
+    }
+    catch( const exception& x ) { set_error(x); }
+}
+
 //-----------------------------------------------------------------------------------Task::step__end
 
 bool Task::step__end()

@@ -1,4 +1,4 @@
-// $Id: spooler_module_com.h,v 1.9 2003/08/27 10:22:58 jz Exp $
+// $Id: spooler_module_com.h,v 1.10 2003/08/27 17:44:48 jz Exp $
 
 #ifndef __SPOOLER_MODULE_COM_H
 #define __SPOOLER_MODULE_COM_H
@@ -28,7 +28,6 @@ struct Com_module_instance_base : Module_instance
     bool                        callable                    ()                                      { return _idispatch != NULL; }
 
 
-  //Fill_zero                  _zero_;
     ptr<IDispatch>             _idispatch;
 };
 
@@ -74,7 +73,6 @@ struct Scripting_engine_module_instance : Com_module_instance_base
     Variant                     call                        ( const string& name, int param );
 
 
-  //Fill_zero                  _zero_;
     ptr<Script_site>           _script_site;
 };
 

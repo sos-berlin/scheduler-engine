@@ -1,4 +1,4 @@
-// $Id: spooler_thread.h,v 1.47 2003/08/27 10:22:59 jz Exp $
+// $Id: spooler_thread.h,v 1.48 2003/08/27 17:44:49 jz Exp $
 
 #ifndef __SPOOLER_THREAD_H
 #define __SPOOLER_THREAD_H
@@ -10,6 +10,8 @@ namespace spooler {
 
 struct Spooler_thread : zschimmer::Thread
 {
+    Fill_zero                  _zero_;
+
     Z_GNU_ONLY(                 Spooler_thread              (); )                                   // Für gcc 3.2.1
                                 Spooler_thread              ( Spooler* );
                                ~Spooler_thread              ();
@@ -77,7 +79,6 @@ struct Spooler_thread : zschimmer::Thread
 
 
 
-    Fill_zero                  _zero_;
 
     string                     _name;
     Spooler*                   _spooler;

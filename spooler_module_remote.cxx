@@ -1,4 +1,4 @@
-// $Id: spooler_module_remote.cxx,v 1.18 2003/08/27 10:22:58 jz Exp $
+// $Id: spooler_module_remote.cxx,v 1.19 2003/08/27 17:44:48 jz Exp $
 /*
     Hier sind implementiert
 
@@ -109,7 +109,7 @@ Variant Remote_module_instance_proxy::call( const string& name )
 
 Async_operation* Remote_module_instance_proxy::begin__start()
 {
-    _error = NULL;
+    //_error = NULL;
 
     Module_instance::init();
 /*
@@ -142,10 +142,8 @@ Async_operation* Remote_module_instance_proxy::begin__start()
 
 bool Remote_module_instance_proxy::begin__end()
 {
-    if( _error )  throw *_error;
-    _operation->async_check_error();
-
-    if( _call_state != c_begin )  throw_xc( "SPOOLER-191", "begin__end", (int)_call_state );
+    //if( _error )  throw *_error;
+    if( _call_state != c_begin )  throw_xc( "SPOOLER-191", "begin__end", state_name() );
 
     return check_result( _remote_instance->call__end() );
 }
@@ -154,7 +152,7 @@ bool Remote_module_instance_proxy::begin__end()
 
 Async_operation* Remote_module_instance_proxy::end__start( bool success )
 {
-    _error = NULL;
+    //_error = NULL;
     _operation = _remote_instance->call__start( "end", success );
     
     return _operation;
@@ -164,21 +162,16 @@ Async_operation* Remote_module_instance_proxy::end__start( bool success )
 
 void Remote_module_instance_proxy::end__end()
 {
-    if( _error )  throw *_error;
-    _operation->async_check_error();
-
   //if( _call_state != c_finished )  throw_xc( "SPOOLER-191", "end__end", (int)_call_state );
 
     _remote_instance->call__end();
-
-    _operation->async_check_error();
 }
 
 //--------------------------------------------------------Remote_module_instance_proxy::step__start
 
 Async_operation* Remote_module_instance_proxy::step__start()
 {
-    _error = NULL;
+    //_error = NULL;
     _remote_instance->call__start( "step" );
 
     return _operation;
@@ -188,9 +181,6 @@ Async_operation* Remote_module_instance_proxy::step__start()
 
 bool Remote_module_instance_proxy::step__end()
 {
-    if( _error )  throw *_error;
-    _operation->async_check_error();
-
   //if( _call_state != c_finished )  throw_xc( "SPOOLER-191", "step__end", (int)_call_state );
 
     return check_result( _remote_instance->call__end() );
@@ -200,81 +190,137 @@ bool Remote_module_instance_proxy::step__end()
 
 bool Remote_module_instance_proxy::async_finished()
 { 
-    return _call_state == c_finished  ||  _error;
+    return _call_state == c_finished  ||  _operation->async_has_error();
 }
 
 //-------------------------------------------------Remote_module_instance_proxy::async_continue
 
 void Remote_module_instance_proxy::async_continue( bool wait )
 { 
-    if( _error )  return;
-
-  //try
+    bool loop = true;
+    while( loop )
     {
-        bool loop = true;
-        while( loop )
+        loop = false;
+
+        if( wait )  _operation->async_finish();
+        else  
+        if( !_operation->async_finished() )  return;
+
+        if( _operation->async_has_error() )  return;
+
+        switch( _call_state )
         {
-            loop = false;
-
-            if( wait )  _operation->async_finish();
-            else  
-            if( !_operation->async_finished() )  return;
-
-            if( _operation->async_has_error() )  return;
-
-            switch( _call_state )
+            case c_create_instance:
             {
-                case c_create_instance:
+                HRESULT hr = _session->create_instance__end( 1, _multi_qi );
+                _operation = NULL;
+                if( FAILED(hr) )  throw_com( hr, "create_instance" );
+
+                _remote_instance = dynamic_cast<object_server::Proxy*>( _multi_qi[0].pItf );
+                _idispatch = _remote_instance;
+                _multi_qi.clear();
+            }
+
+            // Nächste Operation
+
+            {
+                Variant params ( Variant::vt_array, 8 );
+
                 {
-                    HRESULT hr = _session->create_instance__end( 1, _multi_qi );
-                    if( FAILED(hr) )  throw_com( hr, "create_instance" );
+                    Locked_safearray params_array = V_ARRAY( &params );
 
-                    _remote_instance = dynamic_cast<object_server::Proxy*>( _multi_qi[0].pItf );
-                    _idispatch = _remote_instance;
-                    _multi_qi.clear();
+                    params_array[0] = "language="        + _module->_language;
+                    params_array[1] = "com_class="       + _module->_com_class_name;
+                    params_array[2] = "filename="        + _module->_filename;
+                    params_array[3] = "java_class="      + _module->_java_class_name;
+                    params_array[4] = "java_class_path=" + _module->_spooler->_java_vm->class_path();
+                    params_array[5] = "java_work_dir="   + _module->_spooler->_java_vm->work_dir();
+                    params_array[6] = "recompile="       + as_string(_module->_recompile);
+                    params_array[7] = "script="          + _module->_source.dom_doc().xml();
+                }
+
+                _operation = _remote_instance->call__start( "construct", params );
+                _operation->set_async_parent( this );
+
+                _call_state = c_construct;
+                loop = true;
+                break;
+            }
 
 
-                    Variant objects ( Variant::vt_array, _object_list.size() );
-                    Variant names   ( Variant::vt_array, _object_list.size() );
 
+            case c_construct:
+            {
+                _remote_instance->call__end();
+                _operation = NULL;
+            }
+             
+            // Nächste Operation
+
+            {
+                Variant objects ( Variant::vt_array, _object_list.size() );
+                Variant names   ( Variant::vt_array, _object_list.size() );
+
+                {
+                    Locked_safearray objects_array = V_ARRAY( &objects );
+                    Locked_safearray names_array   = V_ARRAY( &names   );
+
+                    int i = 0;
+                    FOR_EACH_CONST( Object_list, _object_list, o )
                     {
-                        Locked_safearray objects_array = V_ARRAY( &objects );
-                        Locked_safearray names_array   = V_ARRAY( &names   );
-
-                        int i = 0;
-                        FOR_EACH_CONST( Object_list, _object_list, o )
-                        {
-                            objects_array[i] = o->_object;
-                            names_array[i]   = o->_name;
-                            i++;
-                        }
-
-                        _object_list.clear();
+                        objects_array[i] = o->_object;
+                        names_array[i]   = o->_name;
+                        i++;
                     }
 
-                    _operation = _remote_instance->call__start( "begin", objects, names );
-                    _operation->set_async_parent( this );
-
-                    _call_state = c_begin;
-                    loop = true;
-                    break;
+                    _object_list.clear();
                 }
 
-                case c_begin:
-                {
-                    _call_state = c_finished;
-                    break;
-                }
+                _operation = _remote_instance->call__start( "begin", objects, names );
+                _operation->set_async_parent( this );
 
-                default:
-                    throw_xc( "Remote_module_instance_proxy::process" );
+                _call_state = c_begin;
+                break;
             }
+
+
+            case c_begin:
+            {
+                _call_state = c_finished;
+                break;
+            }
+
+
+            default:
+                throw_xc( "Remote_module_instance_proxy::process" );
         }
     }
-  //catch( const exception& x )
-  //{
-  //    _error = x;
-  //}
+}
+
+//---------------------------------------------------Remote_module_instance_proxy::async_state_text
+
+string Remote_module_instance_proxy::async_state_text()
+{ 
+    string text = "Remote_module_instance_proxy(state=" + state_name();
+    if( _operation )  text += "," + _operation->async_state_text();
+    text += ")";
+
+    return text;
+}
+
+//---------------------------------------------------------Remote_module_instance_proxy::state_name
+
+string Remote_module_instance_proxy::state_name()
+{
+    switch( _call_state )
+    {
+        case c_none           : return "none";
+        case c_create_instance: return "create_instance";
+        case c_construct      : return "construct";
+        case c_begin          : return "begin";
+        case c_finished       : return "finished";
+        default: return as_string(_call_state);      // Für Microsoft
+    }
 }
 
 //-------------------------------------------------------------------------------------------------

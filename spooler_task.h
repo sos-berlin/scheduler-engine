@@ -1,4 +1,4 @@
-// $Id: spooler_task.h,v 1.106 2003/08/27 10:22:59 jz Exp $
+// $Id: spooler_task.h,v 1.107 2003/08/27 17:44:49 jz Exp $
 
 #ifndef __SPOOLER_TASK_H
 #define __SPOOLER_TASK_H
@@ -76,9 +76,9 @@ struct Task : Sos_self_deleting
     bool                        prepare                     ();
     void                        finish                      ();
     Async_operation*            begin__start                ();
-  //bool                        begin__end                  ();
+    bool                        begin__end                  ();
   //void                        end__start                  ();
-  //bool                        end__end                    ();
+    void                        end__end                    ();
   //void                        step__start                 ();
     bool                        step__end                   ();
 

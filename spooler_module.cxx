@@ -1,4 +1,4 @@
-// $Id: spooler_module.cxx,v 1.32 2003/08/27 10:22:58 jz Exp $
+// $Id: spooler_module.cxx,v 1.33 2003/08/27 17:44:48 jz Exp $
 /*
     Hier sind implementiert
 
@@ -309,7 +309,7 @@ Module_instance::In_call::~In_call()
 
 Module_instance::Module_instance( Module* module )
 : 
-    _zero_(&_end_), 
+    _zero_(_end_), 
     _module(module),
     _log(module?module->_log:NULL) 
 {

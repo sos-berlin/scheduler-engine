@@ -1,4 +1,4 @@
-// $Id: spooler_thread.cxx,v 1.96 2003/08/27 10:22:59 jz Exp $
+// $Id: spooler_thread.cxx,v 1.97 2003/08/27 17:44:49 jz Exp $
 /*
     Hier sind implementiert
 
@@ -221,7 +221,7 @@ Task* Spooler_thread::get_next_task_to_run()
     {
         FOR_EACH_TASK( t, task )
         {
-            Z_DEBUG_ONLY( _log.debug9( task->name() + ".next_time=" + task->next_time().as_string() ) );
+          //Z_DEBUG_ONLY( _log.debug9( task->name() + ".next_time=" + task->next_time().as_string() ) );
             if( next_time > task->next_time() )  next_time = task->next_time(), next_task = task;
             if( next_time == 0 )  break;
         }

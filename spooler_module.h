@@ -1,4 +1,4 @@
-// $Id: spooler_module.h,v 1.34 2003/08/27 10:22:58 jz Exp $
+// $Id: spooler_module.h,v 1.35 2003/08/27 17:44:48 jz Exp $
 
 #ifndef __SPOOLER_MODULE_H
 #define __SPOOLER_MODULE_H
@@ -149,7 +149,7 @@ struct Module : Object
 //----------------------------------------------------------------------------------Module_instance
 // Oberklasse
 
-struct Module_instance : virtual Object 
+struct Module_instance : Object 
 {
     struct In_call
     {
