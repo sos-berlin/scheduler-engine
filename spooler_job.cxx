@@ -1,4 +1,4 @@
-// $Id: spooler_job.cxx,v 1.51 2003/12/30 13:53:30 jz Exp $
+// $Id: spooler_job.cxx,v 1.52 2003/12/31 11:05:47 jz Exp $
 /*
     Hier sind implementiert
 
@@ -20,7 +20,8 @@ namespace sos {
 namespace spooler {
 
 
-const int max_task_time_out = 365*24*3600;
+const int    max_task_time_out             = 365*24*3600;
+const double directory_watcher_intervall   = 1.0;              // Nur für Unix (Windows gibt ein asynchrones Signal)
 
 //---------------------------------------------------------------------------------start_cause_name
 
@@ -55,6 +56,7 @@ Job::Job( Spooler* spooler )
     _history(this)
 {
     _next_time = latter_day;
+    _directory_watcher_next_time = latter_day;
     _priority  = 1;
     _default_params = new Com_variable_set;
     _task_timeout = latter_day;
@@ -684,7 +686,7 @@ void Job::start_when_directory_changed( const string& directory_name, const stri
         _directory_watcher_list.push_back( dw );
         dw->add_to( &_spooler->_wait_handles );
 
-        _directory_watcher_last_time = 0;
+        _directory_watcher_next_time = 0;
     }
 }
 
@@ -697,6 +699,8 @@ void Job::clear_when_directory_changed()
         if( !_directory_watcher_list.empty() )  _log.debug( "clear_when_directory_changed" );
 
         _directory_watcher_list.clear();
+
+        _directory_watcher_next_time = latter_day;
     }
 }
 
@@ -854,6 +858,10 @@ void Job::calculate_next_time( Time now )
                     if( next_time > _next_single_start )  next_time = _next_single_start;
                 }
             }
+
+#           ifdef Z_UNIX
+                if( next_time > _directory_watcher_next_time )  next_time = _directory_watcher_next_time;
+#           endif
         }
          
         if( next_time > _period.end() )  next_time = _period.end();          // Das ist, wenn die Periode weder repeat noch single_start hat, also keinen automatischen Start
@@ -915,16 +923,16 @@ Sos_ptr<Task> Job::task_to_start()
 
 
 #ifdef Z_UNIX
-                if( now >= _directory_watcher_last_time + 1.0 )
+                if( now >= _directory_watcher_next_time )
 #endif
                 {
-                    LOG2( "joacim", "Job::task_to_start(): Verzeichnisüberwachung _directory_watcher_last_time=" << _directory_watcher_last_time << ", now=" << now << "\n" );
-                    _directory_watcher_last_time = now;
+                    //LOG2( "joacim", "Job::task_to_start(): Verzeichnisüberwachung _directory_watcher_next_time=" << _directory_watcher_next_time << ", now=" << now << "\n" );
+                    _directory_watcher_next_time = now + directory_watcher_intervall;
 
                     Directory_watcher_list::iterator it = _directory_watcher_list.begin();
                     while( it != _directory_watcher_list.end() )
                     {
-                        if( (*it)->signaled_then_reset() )
+                        if( (*it)->has_changed()  ||  (*it)->signaled_then_reset() )        // has_changed() für Unix
                         {
                             cause = cause_directory;
                             log_line += "Task startet wegen eines Ereignisses für Verzeichnis " + (*it)->directory();

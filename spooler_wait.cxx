@@ -1,4 +1,4 @@
-// $Id: spooler_wait.cxx,v 1.89 2003/12/08 10:32:06 jz Exp $
+// $Id: spooler_wait.cxx,v 1.90 2003/12/31 11:05:47 jz Exp $
 /*
     Hier sind implementiert
 
@@ -424,12 +424,7 @@ bool Wait_handles::wait_until_2( Time until )
 
         ptr<Wait> wait = _spooler->_connection_manager->create_wait();
 
-        for( int i = _events.size() - 1; i >= 0; i-- )  
-        {
-            //Event* e = dynamic_cast<Event*>( _events[i] );
-            //if( e )  wait->add( e );
-            if( _events[i] )  wait->add( _events[i] );
-        }
+        for( int i = _events.size() - 1; i >= 0; i-- )   if( _events[i] )  wait->add( _events[i] );
 
         wait->set_polling_interval( now.as_time_t() < _spooler->_last_time_enter_pressed + 10.0? 0.1 
                                                                                                : 1.0 );
@@ -640,7 +635,7 @@ bool Directory_watcher::has_changed_2( bool throw_error )
 #   ifdef Z_WINDOWS
 
         // Nach wait() zu rufen, damit _signaled auch gesetzt ist!
-        return signaled();
+        return Event::signaled();
 
 #   else
 

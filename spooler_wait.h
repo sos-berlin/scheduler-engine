@@ -1,4 +1,4 @@
-// $Id: spooler_wait.h,v 1.46 2003/12/30 13:53:30 jz Exp $
+// $Id: spooler_wait.h,v 1.47 2003/12/31 11:05:47 jz Exp $
 
 #ifndef __SPOOLER_WAIT_H
 #define __SPOOLER_WAIT_H
@@ -97,7 +97,7 @@ struct Wait_handles : Non_cloneable
 
 //--------------------------------------------------------------------------------Directory_watcher
 
-struct Directory_watcher : Event
+struct Directory_watcher : Event  //, Async_operation
 {
     Fill_zero                  _zero_;
 
@@ -117,13 +117,17 @@ struct Directory_watcher : Event
 
     void                        set_signaled                ();
     void                        reset                       ();
-    virtual bool                signaled                    ()                                      { return signaled() || has_changed(); }
+    virtual bool                signaled                    ()                                      { return has_changed(); }
 
     string                      directory                   () const                                { return _directory; }
     string                      filename_pattern            () const                                { return _filename_pattern; }
 
   protected: 
     virtual void                close_handle                ();
+
+  //virtual bool                async_continue_             ( bool wait )                           { return has_changed(); }
+  //virtual bool                async_finished_             ()                                      { return false; }   // Nie fertig
+  //virtual string              async_state_text_           ()                                      { return "Directory_watcher(\"" + _filename_pattern + "\")" };
 
   private:
     Prefix_log*                _log;
