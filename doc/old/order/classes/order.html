@@ -1,0 +1,134 @@
+<html>
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<meta name="ProgId" content="FrontPage.Editor.Document">
+<style type="text/css">
+h1           { font-size: 24pt; font-weight: bold; margin-bottom: 4ex;  }
+h2           { font-size: 12pt; font-weight: bold; margin-top: 10ex; }
+h3           { font-size: 10pt; font-weight: bold; margin-top: 6ex }
+.zwischentitel { font-weight: bold; margin-top: 6ex }
+td           { font-size: 10pt; margin-top: 2ex; margin-bottom: 0  }
+p            { font-size: 10pt; margin-top: 2ex; margin-bottom: 0  }
+li           { font-size: 10pt }
+pre          { font-family: Lucida Console, monospace; font-size: 9pt; margin-left: 5mm; line-height: 1.2em; }
+.indent      { margin-left: 5mm; }
+.mono        { font-family: Lucida Console, monospace; font-size: 9pt }
+</style>
+
+<title>Aufträge im Spooler - Klasse Order</title>
+</head>
+<body>
+
+
+
+<h1>Aufträge im Spooler - Klasse Order</h1>
+
+<p align="right">18. September 2002
+</p>
+
+<h2>Eigenschaften und Methoden
+</h2>
+
+<p><font class="mono"><a href="#id">id</a><br>
+<a href="#title">title</a><br>
+<a href="#priority">priority</a><br>
+<a href="#job_chain">job_chain<br>
+</a></font>
+<font class="mono"><a href="#job_chain_node">job_chain_node</a><br>
+<a href="#job">job</a><br>
+<a href="#state">state</a><br>
+<a href="#state_text">state_text</a><br>
+<a href="#payload">payload</a><br>
+<a href="#payload_is_type">payload_is_type()</a></font>
+</p>
+
+<h2><a name="id"></a>id
+</h2>
+<p>Kennung des Auftrags. Jeder Auftrag im Spooler, der sich in einer
+Auftragsliste befindet, muss eine eindeutige Kennung haben.
+</p>
+<h2><a name="title"></a>title
+</h2>
+<p>Ein String, der vom Spooler ins Log geschrieben wird.
+</p>
+<h2><a name="priority"></a>priority
+</h2>
+<p>Integer, default 0. Ein höhrere Wert lässt den Auftrag vor anderen in
+derselben Auftragsliste erscheinen, so dass er vorrangig ausgeführt wird.
+</p>
+<p>Kann nur vor dem Einfügen in eine Auftragsliste gesetzt werden.
+</p>
+<h2><a name="job_chain"></a>job_chain
+</h2>
+<p>Liefert die <a href="job_chain.html">Jobkette</a>, falls der Auftrag in einer ist.
+</p>
+<h2><a name="job_chain_node"></a>job_chain_node
+</h2>
+<p>Liefert den <a href="job_chain_node.html">Jobkettenknoten</a>, falls der
+Auftrag in einer Jobkette ist, sonst <font class="mono">Nothing</font>.
+</p>
+<h2><a name="job"></a>job
+</h2>
+<p>Liefert den Job, in dessen Auftragsliste der Auftrag sich gerade befindet.
+</p>
+<p>Während der Bearbeitung durch einen Jobschritt ist der Auftrag nicht mehr in
+seiner Auftragliste.
+</p>
+<h2><a name="state"></a>state
+</h2>
+<p>Der Zustand des Auftrags. Ist der Auftrag in einer Jobkette, muss der Zustand
+in der Jobkette definiert sein.
+</p>
+<h2><a name="state_text"></a>state_text
+</h2>
+<p>Irgend ein Text, der den Zustand des Auftrags beschreiben kann.&nbsp;
+</p>
+<p>Ist nicht an <font class="mono">state</font> gekoppelt.
+</p>
+<h2><a name="payload"></a>payload
+</h2>
+<p>Die Nutzlast des Auftrags, z.B. ein <font class="mono">Variable_set</font>
+oder ein Hostware-Datensatz. Irgendwas, ein Variant.</p>
+<pre>wert = order.payload.obj_field(&quot;feld&quot;)    'payload ist hier ein Hostware-Datensatz
+
+wert = order.payload.var(&quot;variable&quot;)      'payload ist hier ein Variable_set</pre>
+<h2><a name="payload_is_type"></a>payload_is_type()
+</h2>
+<p><font class="mono"><i>bool = order</i>.payload_is_type( &quot;<i>typname</i>&quot;
+)</font>
+</p>
+<p>Die Methode stellt fest, ob <font class="mono">payload</font>
+vom gewünschten Typ ist. Weil Perl anscheinend <font class="mono">QueryInterface()</font>
+nicht zugänglich macht, kann mit dieser Methode geprüft werden, ob <font class="mono">payload</font>
+ein <font class="mono">Hostware.Dyn_obj</font> oder ein <font class="mono">Spooler.Variable_set</font>
+ist. So ist es auch schöner. Nur diese beiden Typen werden geprüft.
+Großschreibung des Parameter ist egal.
+</p>
+<pre>f( $order-&gt;payload_is_type( &quot;Hostware.Dyn_obj&quot; ) ) { ... }</pre>
+<p>Das entspricht in C++ etwa
+</p>
+<pre>hr = order-&gt;QueryInterface( IID_Hostware_Dyn_obj, &amp;pointer );
+if( SUCCESS(hr) )  ...</pre>
+<p><i><br>
+typname</i>
+</p>
+<p class="indent">&quot;<font class="mono">Spooler.Variable_set</font>&quot;
+oder &quot;<font class="mono">Hostware.Dyn_obj</font>&quot;. Prüft, ob die
+Eigenschaft <font class="mono">payload</font> von einem dieser beiden Typen ist.
+</p>
+<p class="indent">&nbsp;
+</p>
+
+<p class="indent">&nbsp;
+</p>
+
+<HR SIZE=1>
+<FONT face="Arial" size="2">Dipl.-Inform. Joacim Zschimmer&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+<A href="mailto:j@zsch.de">j@zsch.de</A>
+&nbsp; &nbsp; &nbsp; &nbsp;&nbsp;(030) 3470 2520&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;Zschimmer GmbH</FONT>
+
+</body>
+
+</html>

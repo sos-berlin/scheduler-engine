@@ -2,13 +2,13 @@
 <!--DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"-->
 <?xml-stylesheet href="../scheduler.xslt" type="text/xsl"?>
 
-<!--$Id: show_order.xml,v 1.2 2004/08/24 16:22:38 jz Exp $-->
+<!--$Id: show_order.xml,v 1.3 2004/08/27 17:49:52 jz Exp $-->
 
 <xml_element name     = "show_order" 
              title    = ""
              base_dir = ".."
              author   = "$Author: jz $"
-             date     = "$Date: 2004/08/24 16:22:38 $">
+             date     = "$Date: 2004/08/27 17:49:52 $">
 
 
     <description>
@@ -17,8 +17,6 @@
     </description>
 
     <xml_attributes>
-        <xml_attribute name="what" same_as_element="show_state"/>
-
         <xml_attribute name="job_chain" type="name">
             <description>
                 <p>
@@ -36,6 +34,7 @@
             </description>
         </xml_attribute>
         
+        <xml_attribute name="what" same_as_element="show_state"/>
     </xml_attributes>
 
     

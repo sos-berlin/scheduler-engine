@@ -1,0 +1,133 @@
+<html>
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<meta name="ProgId" content="FrontPage.Editor.Document">
+<style type="text/css">
+h1           { font-size: 24pt; font-weight: bold; margin-bottom: 4ex;  }
+h2           { font-size: 12pt; font-weight: bold; margin-top: 10ex; }
+h3           { font-size: 10pt; font-weight: bold; margin-top: 6ex }
+.zwischentitel { font-weight: bold; margin-top: 6ex }
+td           { font-size: 10pt; margin-top: 2ex; margin-bottom: 0  }
+p            { font-size: 10pt; margin-top: 2ex; margin-bottom: 0  }
+li           { font-size: 10pt }
+pre          { font-family: Lucida Console, monospace; font-size: 9pt; margin-left: 5mm; line-height: 1.2em; }
+.indent      { margin-left: 5mm; }
+.mono        { font-family: Lucida Console, monospace; font-size: 9pt }
+</style>
+
+<title>Aufträge im Spooler - Klasse Job_chain_node</title>
+</head>
+<body>
+
+
+
+<h1>Aufträge im Spooler - Klasse Job_chain_node</h1>
+
+<p align="right">4. Oktober 2002
+</p>
+
+<p>Ein Jobkettenknoten wird mit <font class="mono"><a href="job_chain.html#add_job">job_chain.add_job()</a></font>
+erzeugt. Die dort übergebenen Parameter finden sich hier wieder.
+</p>
+
+<h2>Eigenschaften und Methoden
+</h2>
+
+<p><a href="state">state</a>
+</p>
+
+<p><a href="#next_state">next_state</a>
+</p>
+
+<p><a href="#next_node">next_node</a>
+</p>
+
+<p><a href="#error_state">error_state</a>
+</p>
+
+<p><a href="#error_node">error_node</a>
+</p>
+
+<p><a href="#job">job</a>
+</p>
+
+<p><a href="#beispiel">Beispiel</a>
+</p>
+
+<h2><a name="state"></a>state
+</h2>
+<p>Liefert den Zustand, der diesem Knoten der Jobkette zugeordnet ist.Name der Jobkette.
+Das ist der zweite Parameter von <font class="mono"><a href="job_chain.html#add_job">add_job()</a></font>.
+</p>
+<p>Jede Jobkette im Spooler muss einen eigenen Namen haben.
+</p>
+<p>Ist nach dem Eintrag der Jobkette im Spooler mit <font class="mono"><a href="spooler.html#add_job_chain">spooler.add_job_chain()</a></font>
+nicht mehr änderbar.
+</p>
+<h2><a name="next_state"></a>next_state
+</h2>
+<p>Liefert den nächsten Zustand, den der Auftrag bei erfolgter Ausführung
+erreichen soll. Das ist der dritte Parameter von <font class="mono"><a href="job_chain.html#add_job">add_job()</a></font>.
+</p>
+<p>Der nächste Zustand kann mit <i>job_chain_node</i><font class="mono">.next_node.state</font> ermittelt
+werden.
+</p>
+<p>Wenn es keinen nächsten Knoten gibt (weil's ein Endknoten ist), liefert die
+Eigenschaft <font class="mono">Empty</font>.
+</p>
+
+<h2><a name="next_node"></a>next_node
+</h2>
+<p>Liefert den nächsten Knoten, den der Auftrag bei erfolgter Ausführung
+erreichen soll.
+</p>
+<p>Wenn es keinen nächsten Knoten gibt (weil's ein Endknoten ist), liefert die
+Eigenschaft <font class="mono">Nothing</font>.
+</p>
+
+<h2><a name="error_state"></a>error_state
+</h2>
+<p>Liefert den nächsten Zustand, den der Auftrag bei fehlerhafter Ausführung (<font class="mono">spooler_process()</font>
+liefert <font class="mono">false</font>) erreichen soll. Das ist der vierte
+Parameter von <font class="mono"><a href="job_chain.html#add_job">add_job()</a></font>.
+</p>
+<p>Wenn es keinen nächsten Knoten gibt (weil's der Auftrag im Fehlerfall
+beendet werden soll), liefert die
+Eigenschaft <font class="mono">Empty</font>.
+</p>
+
+<h2><a name="error_node"></a>error_node
+</h2>
+<p>Liefert den nächsten Knoten, den der Auftrag bei fehlerhafter Ausführung (<font class="mono">spooler_process()</font>
+liefert <font class="mono">false</font>) erreichen soll.
+</p>
+<p>Wenn es keinen nächsten Knoten gibt (weil's der Auftrag im Fehlerfall
+beendet werden soll), liefert die
+Eigenschaft <font class="mono">Nothing</font>.
+</p>
+
+<h2><a name="job"></a>job
+</h2>
+
+<p>Liefert den Job, der dem Knoten zugeordnet ist.
+</p>
+
+<h2><a name="beispiel"></a>Beispiel
+</h2>
+
+<pre>spooler_log &quot;Dieser Zustand ist &quot;  &amp; spooler_task.order.job_chain_node.state 
+spooler_log &quot;Nächster Zustand ist &quot;&amp; spooler_task.order.job_chain_node.next_state 
+</pre>
+
+<p class="indent">&nbsp;</p>
+
+<HR SIZE=1>
+<FONT face="Arial" size="2">Dipl.-Inform. Joacim Zschimmer&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+<A href="mailto:j@zsch.de">j@zsch.de</A>
+&nbsp; &nbsp; &nbsp; &nbsp;&nbsp;(030) 3470 2520&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;Zschimmer GmbH</FONT>
+
+</body>
+
+</html>
