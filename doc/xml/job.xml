@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet href="../scheduler.xslt" type="text/xsl"?>
+<!--$Id: job.xml,v 1.1 2004/08/22 11:40:04 jz Exp $-->
+
+<xml_element name     = "job" 
+             title    = "Jobs"
+             base_dir = ".."
+             author   = "$Author: jz $"
+             date     = "$Date: 2004/08/22 11:40:04 $">
+
+    <xml_attributes>
+        <xml_attribute name="name" value="jobname">
+            <description>
+                <p>
+                    Jeder Job hat einen eigenen Namen.
+                </p>
+                <p>
+                    Wenn ein Job mit demselben Namen in einer Basiskonfiguration bereit definiert worden ist,
+                    können hier die Einstellungen des Jobs geändert oder ergänzt werden.
+                </p>
+            </description>
+        </xml_attribute>
+        
+        <xml_attribute name="title" value="zahl">
+            <description>
+                Eine einzeilige Beschreibung des Jobs.
+            </description>
+        </xml_attribute>
+
+        <xml_attribute name="spooler_id" value="spooler_id">
+            <description>
+                <p>
+                    Kennung des <span class="sos_name">Schedulers</span>,
+                    für den der Job bestimmt ist. Der Job wird vom <span class="sos_name">Scheduler</span>
+                    nur berücksichtigt, wenn dieses Attribut nicht leer ist und mit der Option 
+                    <scheduler_option name="spooler-id"/> vom <span class="sos_name">Scheduler</span>-Start übereinstimmt.
+                </p>
+            </description>
+        </xml_attribute>
+
+        
+        <xml_attribute name="priority" value="zahl">
+            <description>
+                <p>
+                    Gibt die Priorität des Jobs an. Eine Zahl zwischen 0 und der Einstellung von <code>&lt;config max_priority="..."></code>.
+                </p>
+                <p>
+                    Eine höhere Zahl bezeichnet eine höhere Priorität.
+                    Die niedrigste und die höchste Priorität haben besondere
+                    Bedeutungen: Priorität 0 lässt eine Task nur ausgeführen, wenn keine Task
+                    mit höherer Priorität läuft, wenn also sonst nichts zu tun ist. Die höchste
+                    Priorität gibt absoluten Vorrang. Tasks mit niedriger Priorität werden solange
+                    angehalten, bis keine Task mit der höchsten Priorität mehr läuft.
+                </p>
+            </description>
+        </xml_attribute>
+        
+        <xml_attribute name="order" value="yes_no">
+            <description>
+                <p>
+                    Bei <code>order="yes"</code> ist der Job auftragsgesteuert. Der Scheduler startet diesen Job nur, wenn ein Auftrag vorliegt.
+                </p>
+            </description>
+        </xml_attribute>
+        
+        <xml_attribute name="process_class" value="prozessklasse">
+            <description>
+                Gibt den Namen der Prozessklasse an, in der Tasks dieses Jobs laufen sollen. Siehe <scheduler_element name="process_classes"/>.
+            </description>
+        </xml_attribute>
+        
+        <xml_attribute name="tasks" value="zahl" initial="1">
+            <description>
+                Von einem Job können mehrere Tasks gleichzeitig laufen. Dieses Attribut begrenzt deren Anzahl.
+            </description>
+        </xml_attribute>
+        
+        <xml_attribute name="timeout" value="dauer">
+            <description>
+                <p>
+                    Begrenzt die Laufzeit einer Task-Opertion (spooler_open, spooler_process etc.). 
+                    Nach Ablauf der Frist bricht der Scheduler die Task ab.
+                </p>
+                <p>
+                    <i>dauer</i> kann als Sekunden oder im Format HH:MM oder HH:MM:SS angegeben werden.
+                </p>
+            </description>
+        </xml_attribute>
+        
+        <xml_attribute name="idle_timeout" value="dauer">
+            <description>
+                <p>
+                    Begrenzt den Leerlauf eines auftragsgesteuerten Jobs (<code>order="yes"</code>).
+                    Wenn eine Task auf den nächsten Auftrag wartet, und in der Frist kein Auftrag
+                    eintrifft, beendet der Scheduler sie.
+                </p>
+                <p>
+                    <i>dauer</i> kann als Sekunden oder im Format HH:MM oder HH:MM:SS angegeben werden.
+                </p>
+            </description>
+        </xml_attribute>
+        
+        
+        <xml_attribute name="temporary" value="yes_no">
+            <description>
+                <p>
+                    Bei <code>temporary="yes"</code> ist der Job temporär. Nur für <scheduler_element name="add_job"/>. Nach der Ausführung wird er gelöscht und ist dann unbekannt.
+                </p>
+            </description>
+        </xml_attribute>
+    </xml_attributes>
+        
+    <xml_child_elements>
+        <xml_child_element name="script" title="Programm-Code">
+            <description>
+                <p>
+                </p>
+            </description>
+        </xml_child_element>        
+
+        <xml_child_element name="process" title="Job ist ein externes Programm">
+            <description>
+                <p>
+                    Eine Alternative zu <code>&lt;script></code>.
+                </p>
+            </description>
+        </xml_child_element>        
+
+        <xml_child_element name="run_time" title="Laufzeit">
+            <description>
+                <p>
+                </p>
+            </description>
+        </xml_child_element>        
+    </xml_child_elements>
+        
+</xml_element>

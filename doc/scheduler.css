@@ -12,6 +12,7 @@ pre             { font-family: Lucida Console, monospace; font-size: 9pt; margin
 col             { padding-bottom: 1pt; padding-right: 2pt }
 caption         { font-size: 10pt; padding-bottom: 5pt; padding-left: 3pt; padding-right: 2pt; padding-top: 2pt }
 
+p.first         { margin-top: 0; }
 p.mono          { font-family: Lucida Console, monospace; font-size: 9pt; margin-left: 4ex }
 .mono           { font-family: Lucida Console, monospace; font-size: 9pt }
 code            { font-family: Lucida Console, monospace; font-size: 9pt;  }
@@ -38,6 +39,7 @@ p.parent_element    { margin-top: 4ex; font-family: Lucida Console, monospace; f
 p.element           { margin-top: 4ex; font-weight: bold; font-family: Lucida Console, monospace; font-size: 9pt; }
 p.attribute         { margin-top: 4ex; }
 p.example           { margin-top: 4ex; font-weight: bold; }
+sos_name            { font-variant: small-caps; }
 
 
 .indent         { margin-left: 4ex; }

@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="../scheduler.xslt" type="text/xsl"?>
-<!--$Id: config.xml,v 1.1 2004/08/21 10:27:01 jz Exp $-->
+<!--$Id: config.xml,v 1.2 2004/08/22 11:40:04 jz Exp $-->
 
 <xml_element name     = "config" 
              title    = "Konfiguration"
              base_dir = ".."
              author   = "$Author: jz $"
-             date     = "$Date: 2004/08/21 10:27:01 $">
+             date     = "$Date: 2004/08/22 11:40:04 $">
 
     <xml_parent_elements>
         <xml_parent_element name="spooler">
@@ -25,41 +25,57 @@
             </description>
         </xml_attribute>
         
-        <xml_attribute name="tcp_port" value="zahl" initial="0">
+        <xml_attribute name="tcp_port" value="zahl" initial="4444" title="Für Kommandos per TCP- und HTTP-Steuerung">
             <description>
-                Der Scheduler kann auf einem TCP-Port während des Betriebs Kommandos entgegennehmen. Hier kann ein 
-                Portnummer eingestellt werden. Die Portnummer ist eine Zahl zwischen mindestens 2048 (betriebssystem-abhängig) und 
-                65535. In dieser Dokumentation verwenden wir 4444.
-                <p/>
-                Bei <code>tcp_port="0"</code> öffnet der Scheduler keinen TCP-Port.
+                <p>
+                    Der Scheduler kann auf einem TCP-Port während des Betriebs Kommandos entgegennehmen. Hier kann ein 
+                    Portnummer eingestellt werden. Die Portnummer ist eine Zahl zwischen mindestens 2048 (betriebssystem-abhängig) und 
+                    65535. In dieser Dokumentation verwenden wir 4444.
+                </p>
+                <p>
+                    Über denselben Port betreibt der Scheduler auch einen HTTP/HTML-Server, sodass er über einen Browswer ansprechbar ist,
+                    z.B.: http://localhost:4444.
+                </p>
+                <p>
+                    Bei <code>tcp_port="0"</code> ist der Scheduler nicht über TCP oder HTTP ansprechbar.
+                    Damit kann die Steuerung des Schedulers per TCP-Kommando, z.B. über eine Web-Seite, unterbunden werden.
+                </p>
             </description>
             <example>
                 <pre>&lt;config tcp_port="4444"></pre>
             </example>
         </xml_attribute>
         
-        <xml_attribute name="udp_port" value="zahl" initial="0">
+        <xml_attribute name="udp_port" value="zahl" initial="4444" title="Für Kommandos per UDP">
             <description>
-                Auch über UDP kann der Scheduler Kommandos entgegennehmen. 
-                Hier wird die Portnummer angegeben. 
-                Ein Kommando muss in eine Nachricht passen. Der Scheduler schickt keine Antwort.
-                <p/>
-                Bei <code>udp_port="0"</code> öffnet der Scheduler keinen UDP-Port.
+                <p>
+                    Auch über UDP kann der Scheduler Kommandos entgegennehmen. 
+                    Hier wird die Portnummer angegeben. 
+                    Ein Kommando muss in eine Nachricht passen. Der Scheduler schickt keine Antwort.
+                </p>
+                <p>
+                    Bei <code>udp_port="0"</code> öffnet der Scheduler keinen UDP-Port.
+                </p>
             </description>
             <example>
                 <pre>&lt;config udp_port="4444"></pre>
             </example>
         </xml_attribute>
         
-        <xml_attribute name="param" value="text" command_line_option="param">
+        <xml_attribute name="param" value="text" command_line_option="param" title="Zur freien Verwendung">
             <description>
-                Setzt spooler.param (Objekt spooler, Eigenschaft param). Zur freien Verwendung.
+                Setzt spooler.param (Objekt spooler, Eigenschaft param). Zur freien Verwendung in den Skripten.
             </description>
         </xml_attribute>
 
-        <xml_attribute name="log_dir" value="verzeichnis" option="log-dir">
+        <xml_attribute name="log_dir" value="verzeichnis" option="log-dir" title="Verzeichnis der Protokolle">
             <description>
-                Gibt das Verzeichnis an, an das der Scheduler die Protokoll schreibt.
+                <p>
+                    Gibt das Verzeichnis an, an das der Scheduler die Protokoll schreibt.
+                </p>
+                <p>
+                    <code>log_dir="*stderr"</code> lässt den Scheduler das Hauptprotokoll nach stderr schreiben.
+                </p>
             </description>
         </xml_attribute>
 
@@ -70,6 +86,12 @@
         </xml_attribute>
 
         <xml_attribute name="priority_max" value="zahl" initial="1000">
+            <description>
+                <p>
+                    Höchste Priorität, die eine Task haben kann.
+                </p>
+            </description>
+
             <example>
                 <pre>&lt;config priority_max="10"></pre>
             </example>
@@ -77,11 +99,14 @@
         
         <xml_attribute name="java_class_path" value="class_path" subst_env="yes">
             <description>
-                Wenn Jobs in Java implementiert sind, kann hier der <code>CLASS_PATH</code> eingestellt werden.
-                Das ist eine Liste von Verzeichnissen, in Windows durch Semikolons (;), in Unix 
-                durch Doppelpunkte getrennt.
-                <p/>
-                Siehe auch <span class="mark">factory.ini [spooler] java_class_path=</span>.
+                <p>
+                    Wenn Jobs in Java implementiert sind, kann hier der <code>CLASS_PATH</code> eingestellt werden.
+                    Das ist eine Liste von Verzeichnissen, in Windows durch Semikolons (;), in Unix 
+                    durch Doppelpunkte getrennt.
+                </p>
+                <p>
+                    Siehe auch <span class="mark">factory.ini [spooler] java_class_path=</span>.
+                </p>
             </description>
             <example>
                 <pre>&lt;config java_class_path="c:/programme/java/lib/mail.jar;c:/development/classes;$CLASS_PATH"></pre>
@@ -101,7 +126,7 @@
     
 
     <xml_child_elements>
-        <xml_child_element name="base" multiple="yes">
+        <xml_child_element name="base" multiple="yes" title="Basiskonfiguration">
             <description>
                 Eine Basiskonfigurationsdatei kann hier angegeben werden, die der Scheduler zuerst auswertet. 
                 Die Einstellungen darin bilden die Voreinstellungen für die Konfigurationsdatei, die das Element
@@ -109,39 +134,42 @@
             </description>
         </xml_child_element>        
 
-        <xml_child_element name="security">
-            <description>
-                Stellt den Zugriffsschutz ein.
-            </description>
+        <xml_child_element name="security" title="Stellt den Zugriffsschutz ein">
         </xml_child_element>        
 
-        <xml_child_element name="holidays">
+        <xml_child_element name="holidays" title="Feiertage">
             <description>
                 Grundsätzliche Einstellung der Feiertage (an denen Jobs nicht laufen sollen).
             </description>
         </xml_child_element>        
 
-        <xml_child_element name="process_classes">
+        <xml_child_element name="process_classes" title="Jobs in eigenen Prozessen">
             <description>
-                Jede Prozessklasse stellt eine Anzahl Prozesse zum Betrieb der Jobs bereit.
-                <p/>
-                Dieses Element sollte angegeben werden, denn sonst laufen die Jobs im Prozess des Schedulers, was nur zum Debuggen 
-                empfehlenswert ist.
+                <p>
+                    Jede Prozessklasse stellt eine Anzahl Prozesse zum Betrieb der Jobs bereit.
+                </p>
+                <p>
+                    Dieses Element sollte angegeben werden, denn sonst laufen die Jobs im Prozess des Schedulers, was nur zum Debuggen 
+                    empfehlenswert ist.
+                </p>
             </description>
             <example>
                 <pre>&lt;process_classes/></pre>
             </example>
         </xml_child_element>        
 
-        <xml_child_element name="script">
+        <xml_child_element name="script" title="Startskript">
             <description>
-                Das hierin enthaltene Skript führt der Scheduler beim Start, vor jedem Job aus.
-                Es eignet sich zum Setzen von Scheduler-Variablen.
-                <p/>
-                Bei einem Fehler bricht der Scheduler ab.
-                <p/>
-                <span class="mark">Welche Methoden ruft der Scheduler?</span>
-                <p/>
+                <p>
+                    Das hierin enthaltene Skript führt der Scheduler beim Start, vor jedem Job aus.
+                    Es eignet sich zum Setzen von Scheduler-Variablen.
+                </p>
+                <p>
+                    Bei einem Fehler bricht der Scheduler ab.
+                </p>
+                <p>
+                    <span class="mark">Welche Methoden ruft der Scheduler?</span>
+                </p>
             </description>
             <example>
                 <pre>
@@ -173,7 +201,8 @@
 
     <description>
         <p>
-            <code>&lt;config></code> kann wiederholt werden, wenn das Attribut <code>spooler_id</code> wechselt.
+            <code>&lt;config></code> enthält die Konfiguration des Schedulers, vor allem die Jobs.
+            Das Element kann wiederholt werden, wenn das Attribut <code>spooler_id</code> wechselt.
             Wenn bei Scheduler-Start der Parameter <code>-id=</code> 
             nicht angegeben worden ist, ist das erste <code>&lt;config></code>, sonst das mit gleichem Wert im 
             Attribut <code>spooler_id</code> wirksam.

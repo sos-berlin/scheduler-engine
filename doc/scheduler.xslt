@@ -18,46 +18,111 @@
             </head>
 
             <body>
-                <h1>XML-Element&#160; &lt;<xsl:value-of select="@name"/>></h1>
+                <h1>Scheduler - XML-Element&#160; &lt;<xsl:value-of select="@name"/>></h1>
                 
                 <h2>Schema</h2>
+
                 <p>
+                    <code>&lt;<xsl:value-of select="@name"/></code>
+                    <xsl:if test="not( xml_attributes/xml_attribute )">
+                        <code>></code>
+                    </xsl:if>
+                </p>
+                
+                <xsl:if test="xml_attributes/xml_attribute">
+                    <div class="indent">
+                        <table cellspacing="0" cellpadding="0">
+                            <col/>
+                            <col/>
+                            <col style="padding-left: 4ex"/>
+                            <xsl:for-each select="xml_attributes/xml_attribute">
+                                <tr>
+                                    <td valign="baseline">
+                                        <xsl:element name="a">
+                                            <xsl:attribute name="href">#attribute_<xsl:value-of select="@name"/></xsl:attribute>
+                                            <code><xsl:value-of select="@name"/></code>&#160;
+                                        </xsl:element>
+                                    </td>
+                                    <td valign="baseline">
+                                        <code>= "</code><i><xsl:value-of select="@value"/></i><code>"</code>
+                                    </td>
+                                    <td valign="baseline">
+                                        <xsl:value-of select="@title"/>
+                                    </td>
+                                </tr>
+                            </xsl:for-each>
+                        </table>
+                    </div>
+                    
+                    <code>></code>
+                </xsl:if>
+
+                <!--
                     <table cellspacing="0" cellpadding="0">
                         <tr>
                             <td valign="top">
                                 <code>&lt;<xsl:value-of select="@name"/></code>
-                                <i style="color: white"> .</i> <!-- Damit die Höhe stimmt -->
+                                <i style="color: white"> .</i> <!~~ Damit die Höhe stimmt ~~>
                             </td>
                             <td valign="baseline">
                                 <table cellspacing="0" cellpadding="0">
+                                    <col/>
+                                    <col/>
+                                    <col style="padding-left: 4ex"/>
                                     <xsl:for-each select="xml_attributes/xml_attribute">
                                         <tr>
                                             <td valign="baseline">
                                                 <xsl:element name="a">
                                                     <xsl:attribute name="href">#attribute_<xsl:value-of select="@name"/></xsl:attribute>
-                                                    <code><xsl:value-of select="@name"/>=</code>
+                                                    <code><xsl:value-of select="@name"/></code>&#160;
                                                 </xsl:element>
                                             </td>
                                             <td valign="baseline">
-                                                <code>"</code><i><xsl:value-of select="@value"/></i><code>"</code>
+                                                <code>= "</code><i><xsl:value-of select="@value"/></i><code>"</code>
+                                            </td>
+                                            <td valign="baseline">
+                                                <xsl:value-of select="@title"/>
                                             </td>
                                         </tr>
                                     </xsl:for-each>
                                 </table>
                             </td>
-                            <td valign="bottom">
-                                <code>></code>
-                            </td>
                         </tr>
                     </table>
-                    <div class="indent">
-                        <xsl:for-each select="xml_child_elements/xml_child_element">
-                            <code>&lt;<xsl:value-of select="@name"/></code> ...<code>></code><br/>
-                        </xsl:for-each>
-                    </div>
+                 -->
                     
-                    <code>&lt;/<xsl:value-of select="@name"/></code>>
-                </p>
+                    <xsl:choose>
+                        <xsl:when test="xml_child_elements/xml_child_element">
+                            
+                            <div class="indent">
+                                <table cellspacing="0" cellpadding="0">
+                                    <col/>
+                                    <col style="padding-left: 4ex"/>
+                                    <xsl:for-each select="xml_child_elements/xml_child_element">
+                                        <tr>
+                                            <td valign="baseline">
+                                                <xsl:element name="a">
+                                                    <!--xsl:attribute name="href">#element_<xsl:value-of select="@name"/></xsl:attribute-->
+                                                    <xsl:attribute name="href"><xsl:value-of select="@name"/>.xml</xsl:attribute>
+                                                    <code>&lt;<xsl:value-of select="@name"/></code> ...<code>></code><br/>
+                                                </xsl:element>
+                                            </td>
+                                            <td valign="baseline">
+                                                <xsl:value-of select="@title"/>
+                                            </td>
+                                        </tr>
+                                    </xsl:for-each>
+                                </table>
+                            </div>
+                            
+                            <br/>
+                            <code>&lt;/<xsl:value-of select="@name"/>></code>
+                        </xsl:when>
+                        <xsl:otherwise>
+                            <code>/></code>
+                        </xsl:otherwise>
+                    </xsl:choose>                                    
+                <!--/p-->
                 
                 <p>&#160;</p>
                 
@@ -89,6 +154,13 @@
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~xml_parent_element | xml_child_element-->
         
     <xsl:template match="xml_parent_element | xml_child_element">
+
+        <xsl:if test="self::xml_child_element">
+            <xsl:element name="a">
+                <xsl:attribute name="name">element_<xsl:value-of select="@name"/></xsl:attribute>
+            </xsl:element>
+        </xsl:if>
+        
         <p class="list">
             <span class="mono">
                 <xsl:element name="a">
@@ -143,13 +215,14 @@
 
         <div class="indent">
             <xsl:if test="@option">
-                Entspricht der Kommandozeilen-Option
+                Kann mit der Kommandozeilen-Option
                 <xsl:element name="a">
                     <xsl:attribute name="href">
                         <xsl:value-of select="/*/@base_dir"/>/command_line.xml#option_<xsl:value-of select="@option"/>
                     </xsl:attribute>
                     <code>-<xsl:value-of select="@option"/>=</code>
-                </xsl:element>.
+                </xsl:element>
+                überschrieben werden.
                 <p/>
             </xsl:if>
             
@@ -199,6 +272,20 @@
         </xsl:copy>
     </xsl:template>
 
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~p-->
+    <!-- Das erste <p> in einem <description> bekommt class="first"
+         Damit fällt die Leerzeile am Anfang weg. -->
+    
+    <xsl:template match="p [ position()=1 and not( @class ) ]" mode="description">
+        <element name="p">
+            <xsl:attribute name="class">first</xsl:attribute>
+            <xsl:for-each select="@*">
+                <xsl:copy><xsl:value-of select="."/></xsl:copy>
+            </xsl:for-each>
+            <xsl:apply-templates mode="description"/>
+        </element>
+    </xsl:template>
+
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~scheduler_element-->
 
     <xsl:template match="scheduler_element" mode="description">
@@ -208,12 +295,12 @@
         </xsl:element>
     </xsl:template>
 
-    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~scheduler_mark-->
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~scheduler_option-->
 
-    <xsl:template match="scheduler_element" mode="description">
+    <xsl:template match="scheduler_option" mode="description">
         <xsl:element name="a">
-            <xsl:attribute name="href"><xsl:value-of select="@name"/>.xml</xsl:attribute>
-            <code>&lt;<xsl:value-of select="@name"/>></code>
+            <xsl:attribute name="href">../command_line.xml#option_<xsl:value-of select="@name"/></xsl:attribute>
+            <code>-<xsl:value-of select="@name"/>=</code>
         </xsl:element>
     </xsl:template>
 

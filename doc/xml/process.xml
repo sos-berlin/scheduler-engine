@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<?xml-stylesheet href="../scheduler.xslt" type="text/xsl"?>
+<!--$Id: process.xml,v 1.1 2004/08/22 11:40:05 jz Exp $-->
+
+<xml_element  name     = "process" 
+              title    = "Externes Programm" 
+              base_dir = ".."
+              author   = "$Author: jz $" 
+              date     = "$Date: 2004/08/22 11:40:05 $">
+              
+    <xml_parent_elements>
+        <xml_parent_element name="job">
+        </xml_parent_element>
+    </xml_parent_elements>
+    
+    <xml_attributes>
+        <xml_attribute name="file" value="filename">
+            <description>
+                <p>
+                    Name der Datei, die das Programm oder das Skript enthält,
+                    mit dem der Prozess gestartet werden soll.
+                    Die Datei muss vom Betriebssystem ausführbar sein.
+                </p>
+            </description>
+        </xml_attribute>
+        
+        <xml_attribute name="param" value="text">
+            <description>
+                <p>
+                    Gibt den Parameterstring an, der dem Prozess übergeben wird.
+                </p>
+            </description>
+        </xml_attribute>
+    </xml_attributes>
+
+    <description>
+        <p>
+            Beim Start des Jobs, also zu Beginn einer Task, wird ein Prozess eingerichtet. 
+            Der Spooler überwacht den Prozess und beendet die Task nachdem der Prozess sich beendet hat. 
+            Ein Exit code verschieden von 0 wird als Fehler interpretiert. 
+            Der exit code ist das Ergebnis der Task und steht in <code>task.result</code> bereit.
+        </p>
+    </description>
+</xml_element>    
+
+
