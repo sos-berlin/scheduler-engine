@@ -1,4 +1,4 @@
-// $Id: spooler_command.cxx,v 1.93 2003/09/25 10:57:06 jz Exp $
+// $Id: spooler_command.cxx,v 1.94 2003/09/26 06:30:27 jz Exp $
 /*
     Hier ist implementiert
 
@@ -260,6 +260,19 @@ xml::Element_ptr Command_processor::execute_modify_spooler( const xml::Element_p
     
     return _answer.createElement( "ok" );
 }
+
+//-------------------------------------------------------------Command_processor::execute_terminate
+
+xml::Element_ptr Command_processor::execute_terminate( const xml::Element_ptr& element )
+{
+    if( _security_level < Security::seclev_all )  throw_xc( "SPOOLER-121" );
+
+    string cmd = element.getAttribute( "cmd" );
+
+    _spooler->cmd_terminate();
+    
+    return _answer.createElement( "ok" );
+}
 //--------------------------------------------------------------Command_processor::execute_show_job
 
 xml::Element_ptr Command_processor::execute_show_job( const xml::Element_ptr& element, Show_what show )
@@ -486,6 +499,8 @@ xml::Element_ptr Command_processor::execute_command( const xml::Element_ptr& ele
     if( element.nodeName_is( "show_history"     ) )  return execute_show_history( element, show );
     else
     if( element.nodeName_is( "modify_spooler"   ) )  return execute_modify_spooler( element );
+    else
+    if( element.nodeName_is( "terminate"        ) )  return execute_terminate( element );
     else
     if( element.nodeName_is( "modify_job"       ) )  return execute_modify_job( element );
     else
