@@ -1,4 +1,4 @@
-// $Id: spooler_command.cxx,v 1.149 2004/12/09 20:59:31 jz Exp $
+// $Id: spooler_command.cxx,v 1.150 2004/12/10 15:19:42 jz Exp $
 /*
     Hier ist implementiert
 
@@ -707,7 +707,7 @@ ptr<Http_response> Command_processor::execute_http( Http_request* http_request )
         {
             if( string_begins_with( path, "/<" ) )   // Direktes XML-Kommando, z.B. <show_state/>, <show_state> oder nur <show_state
             {
-                string xml = path;
+                string xml = path.substr( 1 );
                 if( !string_ends_with( path, "/>" ) )
                 {
                     if( string_ends_with( path, ">" ) )  *xml.rbegin() = '/',  xml += ">";
@@ -718,41 +718,70 @@ ptr<Http_response> Command_processor::execute_http( Http_request* http_request )
                 response_content_type = "text/xml";
             }
             else
-            if( string_ends_with( path, show_log_request ) )
+            if( string_ends_with( path, "?" ) )
             {
-                ptr<Prefix_log> log;
-
-                if( http_request->has_parameter( "task"  ) )  log = _spooler->get_task( as_int( http_request->parameter( "task" ) ) )->log();
-                else
-                if( http_request->has_parameter( "job"   ) )  log = _spooler->get_job( http_request->parameter( "job" ) )->_log;
-                else
-                if( http_request->has_parameter( "order" ) )  log = _spooler->job_chain( http_request->parameter( "job_chain" ) )->order( http_request->parameter( "order" ) )->_log;
-                else
-                                                              log = &_spooler->_log;
-
-                ptr<Http_response> response = Z_NEW( Http_response( http_request, Z_NEW( Html_chunk_reader( Z_NEW( Log_chunk_reader( log ) ), log->title() ) ), "text/html" ) );
-                return +response;
-            }
-            else
-            if( string_ends_with( path, "/job_description?" ) )
-            {
-                Job* job = _spooler->get_job( http_request->parameter( "job" ) );;
-                
-                if( job->_description == "" ) 
+                if( string_ends_with( path, show_log_request ) )
                 {
-                    http_status_code = 404;
-                    error_text = "Der Job hat keine Beschreibung";
+                    ptr<Prefix_log> log;
+
+                    if( http_request->has_parameter( "task"  ) )
+                    {
+                        int           task_id = as_int( http_request->parameter( "task" ) );
+                        Sos_ptr<Task> task    = _spooler->get_task_or_null( task_id );
+
+                        if( task )
+                            log = task->log();
+                        else
+                        {
+                            xml::Element_ptr task_element = _spooler->_db->read_task( _answer, task_id, show_log );
+                            DOM_FOR_EACH_ELEMENT( task_element, e )
+                            {
+                                if( e.nodeName_is( "log" ) )
+                                {
+                                    S title;  title << "Task " << task_id;
+                                    //TODO Log wird im Speicher gehalten! Besser: In Datei schreiben, vielleicht sogar Task und Log anlegen
+                                    ptr<Http_response> response = Z_NEW( Http_response( http_request, Z_NEW( Html_chunk_reader( Z_NEW( String_chunk_reader( e.nodeValue() ) ), title ) ), "text/html" ) );
+                                    return +response;
+                                }
+                            }
+                        }
+                    }
+                    else
+                    if( http_request->has_parameter( "job"   ) )  log = _spooler->get_job( http_request->parameter( "job" ) )->_log;
+                    else
+                    if( http_request->has_parameter( "order" ) )  log = _spooler->job_chain( http_request->parameter( "job_chain" ) )->order( http_request->parameter( "order" ) )->_log;
+                    else
+                                                                  log = &_spooler->_log;
+
+                    if( log )
+                    {
+                        ptr<Http_response> response = Z_NEW( Http_response( http_request, Z_NEW( Html_chunk_reader( Z_NEW( Log_chunk_reader( log ) ), log->title() ) ), "text/html" ) );
+                        return +response;
+                    }
                 }
                 else
+                if( string_ends_with( path, "/job_description?" ) )
                 {
-                    response_body = "<html><head><title>Scheduler-Job " + job->name() + "</title>";
-                    response_body += "<style type='text/css'> @import 'scheduler.css'; @import 'custom.css';</style>";
-                    response_body += "<body id='job_description'>";
-                    response_body += job->_description;
-                    response_body += "</body></html>";
+                    Job* job = _spooler->get_job( http_request->parameter( "job" ) );;
+                    
+                    if( job->_description == "" ) 
+                    {
+                        http_status_code = 404;
+                        error_text = "Der Job hat keine Beschreibung";
+                    }
+                    else
+                    {
+                        response_body = "<html><head><title>Scheduler-Job " + job->name() + "</title>";
+                        response_body += "<style type='text/css'> @import 'scheduler.css'; @import 'custom.css';</style>";
+                        response_body += "<body id='job_description'>";
+                        response_body += job->_description;
+                        response_body += "</body></html>";
 
-                    response_content_type = "text/html";
+                        response_content_type = "text/html";
+                    }
                 }
+                else
+                    throw_xc( "SCHEDULER-216", path );
             }
             else
             {
@@ -761,7 +790,7 @@ ptr<Http_response> Command_processor::execute_http( Http_request* http_request )
 
                 if( filename_of_path( path ).find( '.' ) == string::npos )      // Kein Punkt: Es muss ein Verzeichnis sein!
                 {
-                    if( !string_ends_with( path, "/" ) )
+                    if( !string_ends_with( path, "/" )  &&  isalnum( (uint)*path.rbegin() ) )  // '?' am Ende führt zum erneuten GET mit demselben Pfad
                     {
                         // (Man könnte hier noch prüfen, ob's wirklich ein Verzeichnis ist.)
                         // Der Browser soll dem Verzeichnisnamen einen Schräger anhängen und das als Basisadresse für weitere Anfragen verwenden.

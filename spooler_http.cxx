@@ -1,4 +1,4 @@
-// $Id: spooler_http.cxx,v 1.21 2004/12/09 11:15:57 jz Exp $
+// $Id: spooler_http.cxx,v 1.22 2004/12/10 15:19:42 jz Exp $
 /*
     Hier sind implementiert
 
@@ -513,15 +513,17 @@ bool Html_chunk_reader::next_chunk_is_ready()
 { 
     switch( _state )
     {
-        case reading_prefix:  _chunk = _html_prefix;  return true;
+        case reading_prefix:  _chunk = _html_prefix;    return true;
 
-        case reading_text:    if( !try_fill_chunk() )    return false;
-                              if( _chunk.length() > 0 )  return true;
+        case reading_text:    if( !try_fill_chunk() )   return false;
+                              if( _chunk.length() > 0 ) return true;
                               _state = reading_suffix;
 
-        case reading_suffix:  _chunk = _html_suffix;   return true;
+        case reading_suffix:  _chunk = _html_suffix;    return true;
 
-        default:              return true;
+        case reading_finished: _chunk = "";             return true;
+
+        default:               return true;
     }
 }
 
@@ -548,11 +550,11 @@ bool Html_chunk_reader::try_fill_chunk()
         }
 
         string text = _chunk_reader->read_from_chunk( _available_net_chunk_size );
-        if( text == "" )  return _chunk.length() > 0;
+        if( text == "" )  return true;  // Fertig, bei _chunk_length() == 0: eof        return _chunk.length() > 0;
 
         _available_net_chunk_size -= text.length();
 
-        _chunk.reserve( text.length() * 2 );
+        _chunk.reserve( _chunk.length() + text.length() * 2 );
 
         const char* text_data = text.data();
 
@@ -654,8 +656,8 @@ string Html_chunk_reader::read_from_chunk( int recommended_size )
 { 
     switch( _state )
     {
-        case reading_prefix: _state = reading_text;     break;
-        case reading_suffix: _state = reading_finished; break;
+        case reading_prefix:   _state = reading_text;     break;
+        case reading_suffix:   _state = reading_finished; break;
         default: ;
     }
 
