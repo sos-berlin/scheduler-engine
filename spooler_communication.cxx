@@ -1,4 +1,4 @@
-// $Id: spooler_communication.cxx,v 1.63 2003/10/08 11:45:05 jz Exp $
+// $Id: spooler_communication.cxx,v 1.64 2003/10/14 11:35:04 jz Exp $
 /*
     Hier sind implementiert
 
@@ -301,6 +301,8 @@ bool Communication::Channel::do_accept( SOCKET listen_socket )
 
 void Communication::Channel::do_close()
 {
+    if( _read_socket == STDIN_FILENO  &&  _eof  &&  isatty(STDIN_FILENO) )  _spooler->cmd_terminate();  // Ctrl-D (auch wenn Terminal-Sitzung beendet?)
+
     if( _read_socket != SOCKET_ERROR  &&  _read_socket != STDIN_FILENO )  closesocket( _read_socket );
     
     _read_socket  = SOCKET_ERROR;
