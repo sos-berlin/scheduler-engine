@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.184 2003/03/26 14:03:30 jz Exp $
+// $Id: spooler.cxx,v 1.185 2003/03/26 14:29:37 jz Exp $
 /*
     Hier sind implementiert
 
@@ -1560,6 +1560,8 @@ int sos_main( int argc, char** argv )
             if( opt.with_value( "install-service"  ) )  do_install_service = true, service_name = opt.value();
             else
             if( opt.flag      ( "remove-service"   ) )  do_remove_service = opt.set();
+            else
+            if( opt.flag      ( "renew-service"    ) )  renew_service = opt.set();
             else
             if( opt.with_value( "service-name"     ) )  service_name = opt.value();
             else
