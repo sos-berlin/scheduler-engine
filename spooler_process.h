@@ -1,4 +1,4 @@
-// $Id: spooler_process.h,v 1.3 2003/08/29 08:14:04 jz Exp $
+// $Id: spooler_process.h,v 1.4 2003/08/29 20:44:25 jz Exp $
 
 #ifndef __SPOOLER_PROCESS_H
 #define __SPOOLER_PROCESS_H
@@ -8,6 +8,10 @@
 
 namespace sos {
 namespace spooler {
+
+
+struct Process_class;
+
 
 //------------------------------------------------------------------------------------------Process
 
@@ -25,42 +29,49 @@ struct Process : zschimmer::Object
     int                         module_instance_count       ()                                      { return _module_instance_count; }
     void                    set_temporary                   ( bool t )                              { _temporary = t; }
 
+    void                    set_dom                         ( const xml::Element_ptr&, const Time& xml_mod_time );
     xml::Element_ptr            dom                         ( const xml::Document_ptr&, Show_what );
 
     
-  private:
+//private:
     Fill_zero                  _zero_;
     Spooler*                   _spooler;
     ptr<object_server::Connection> _connection;             // Verbindung zum Prozess
     ptr<object_server::Session>    _session;                // Wir haben immer nur eine Session pro Verbindung
     bool                       _temporary;                  // Löschen, wenn kein Module_instance mehr läuft
     long                       _module_instance_count;
+    int                        _timeout;                    // Max. Dauer einer Operation
+    Process_class*             _process_class;
 };
 
+//-------------------------------------------------------------------------------------Process_list
 
+typedef list< ptr<Process> >    Process_list;
 
-/*
-struct Spooler_process : zschimmer::Object
+//------------------------------------------------------------------------------------Process_class
+
+struct Process_class : zschimmer::Object
 {
-                                Spooler_process             ( Spooler_thread* t )                   : _thread(t), _spooler(t->_spooler), _zero_(this+1) {}
+                                Process_class               ( Spooler* sp, const string& name )     : _zero_(this+1), _spooler(sp), _name(name) {}
 
+    
+    void                        add_process                 ( Process* );
+    void                        remove_process              ( Process* );
 
-  private:
-    bool                        step                        ();
-    bool                        do_something                ( Task* );
-
+    void                    set_dom                         ( const xml::Element_ptr&, const Time& xml_mod_time );
+    xml::Element_ptr            dom                         ( const xml::Document_ptr&, Show_what );
 
 
     Fill_zero                  _zero_;
+    string                     _name;
+    int                        _max_processes;
     Spooler*                   _spooler;
-    Spooler_thread*            _thread;
-
-    Task_list                  _task_list;
-    bool                       _task_closed;
-
-    object_server::Session*    _session;                    // NULL: Kein Prozess (Tasks laufen nicht in einem separaten Prozess)
+    Process_list               _process_list;
 };
-*/
+
+//-------------------------------------------------------------------------------Process_class_list
+
+typedef list< ptr<Process_class> >   Process_class_list;
 
 //-------------------------------------------------------------------------------------------------
 

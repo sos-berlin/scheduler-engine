@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.229 2003/08/29 13:08:09 jz Exp $
+// $Id: spooler.cxx,v 1.230 2003/08/29 20:44:24 jz Exp $
 /*
     Hier sind implementiert
 
@@ -57,21 +57,22 @@ extern const Bool _dll = false;
 
 namespace spooler {
 
-const char* default_factory_ini  = "factory.ini";
-const string new_suffix          = "~new";  // Suffix für den neuen Spooler, der den bisherigen beim Neustart ersetzen soll
-const double renew_wait_interval = 0.25;
-const double renew_wait_time     = 30;      // Wartezeit für Brückenspooler, bis der alte Spooler beendet ist und der neue gestartet werden kann.
-const double wait_for_thread_termination                 = latter_day;  // Haltbarkeit des Geduldfadens
-const double wait_step_for_thread_termination            = 5.0;         // 1. Nörgelabstand
-const double wait_step_for_thread_termination2           = 600.0;       // 2. Nörgelabstand
+
+const char*                     default_factory_ini                 = "factory.ini";
+const string                    new_suffix                          = "~new";  // Suffix für den neuen Spooler, der den bisherigen beim Neustart ersetzen soll
+const double                    renew_wait_interval                 = 0.25;
+const double                    renew_wait_time                     = 30;      // Wartezeit für Brückenspooler, bis der alte Spooler beendet ist und der neue gestartet werden kann.
+const double                    wait_for_thread_termination         = latter_day;  // Haltbarkeit des Geduldfadens
+const double                    wait_step_for_thread_termination    = 5.0;         // 1. Nörgelabstand
+const double                    wait_step_for_thread_termination2   = 600.0;       // 2. Nörgelabstand
 //const double wait_for_thread_termination_after_interrupt = 1.0;
 
-
-static bool                     is_daemon               = false;
-//static int                      daemon_starter_pid;
+const char*                     temporary_process_class_name        = "(temporaries)";
+static bool                     is_daemon                           = false;
+//static t                      daemon_starter_pid;
 //bool                          spooler_is_running      = false;
-volatile int                    ctrl_c_pressed          = 0;
-Spooler*                        spooler_ptr             = NULL;
+volatile int                    ctrl_c_pressed                      = 0;
+Spooler*                        spooler_ptr                         = NULL;
 
 
 /*
@@ -487,19 +488,80 @@ xml::Element_ptr Spooler::threads_as_xml( const xml::Document_ptr& document, Sho
     return threads;
 }
 
-//------------------------------------------------------------------------Spooler::processes_as_dom
+//-----------------------------------------------------------Spooler::load_process_classes_from_dom
+
+void Spooler::load_process_classes_from_dom( const xml::Element_ptr& element, const Time& xml_mod_time )
+{
+    DOM_FOR_EACH_ELEMENT( element, e )
+    {
+        if( e.nodeName_is( "process_class" ) )
+        {
+            string spooler_id = e.getAttribute( "spooler_id" );
+
+            if( spooler_id.empty() || spooler_id == id() )
+            {
+                ptr<Process_class> process_class = Z_NEW( Process_class( this, e.getAttribute( "name" ) ) );
+                add_process_class( process_class );
+            }
+        }
+    }
+}
+
+//------------------------------------------------------------------Spooler::process_classes_as_dom
 // Anderer Thread
 
-xml::Element_ptr Spooler::processes_as_dom( const xml::Document_ptr& document, Show_what show )
+xml::Element_ptr Spooler::process_classes_as_dom( const xml::Document_ptr& document, Show_what show )
 {
-    xml::Element_ptr processes = document.createElement( "processes" );
+    xml::Element_ptr element = document.createElement( "process_classes" );
 
-    THREAD_LOCK( _lock )
-    {
-        FOR_EACH( Process_list, _process_list, it )  processes.appendChild( (*it)->dom( document, show ) );
-    }
+    FOR_EACH( Process_class_list, _process_class_list, it )  element.appendChild( (*it)->dom( document, show ) );
 
-    return processes;
+    return element;
+}
+
+//-------------------------------------------------------------------Spooler::process_class_or_null
+
+Process_class* Spooler::process_class_or_null( const string& name )
+{
+    FOR_EACH( Process_class_list, _process_class_list, pc )  if( (*pc)->_name == name )  return *pc;
+    return NULL;
+}
+
+//-------------------------------------------------------------------Spooler::process_class_or_null
+
+Process_class* Spooler::process_class( const string& name )
+{
+    Process_class* pc = process_class_or_null( name );
+    if( !pc )  throw_xc( "SPOOLER-195", name );
+    return pc;
+}
+
+//-------------------------------------------------------------------Spooler::new_temporary_process
+
+Process* Spooler::new_temporary_process()
+{
+    ptr<Process> process = Z_NEW( Process( this ) );
+
+    process->set_temporary( true );
+
+    temporary_process_class()->add_process( process );
+
+    return process;
+}
+
+//-----------------------------------------------------------------------Spooler::add_process_class
+
+void Spooler::add_process_class( Process_class* process_class )
+{
+    _process_class_list.push_back( process_class );         
+}
+
+//--------------------------------------------------------------------Spooler::init_process_classes
+
+void Spooler::init_process_classes()
+{
+    //while( _process_list.size() < _process_count_max )  new_process();
+
 }
 
 //--------------------------------------------------------------Spooler::wait_until_threads_stopped
@@ -1004,32 +1066,6 @@ bool Spooler::run_single_thread()
 }
 */
 
-//-----------------------------------------------------------------------------Spooler::new_process
-
-Process* Spooler::new_process( bool temporary )
-{
-    ptr<Process> process = Z_NEW( Process( this ) );
-
-    process->set_temporary( temporary );
-    process->start();
-
-    _process_list.push_back( process );
-
-    return process;
-}
-
-//--------------------------------------------------------------------------Spooler::remove_process
-
-void Spooler::remove_process( Process* process )
-{
-    FOR_EACH( Process_list, _process_list, p )
-    {
-        if( *p == process )  { _process_list.erase( p ); return; }
-    }
-
-    throw_xc( "Spooler::remove_process" );
-}
-
 //--------------------------------------------------------------------------------Spooler::send_cmd
 
 void Spooler::send_cmd()
@@ -1246,6 +1282,12 @@ void Spooler::load()
     if( gethostname( hostname, sizeof hostname ) == SOCKET_ERROR )  hostname[0] = '\0',  _log.warn( string("gethostname(): ") + strerror( errno ) );
     _hostname = hostname;
 
+
+    // Die erste Prozessklasse ist für temporäre Prozesse
+    ptr<Process_class> process_class = Z_NEW( Process_class( this, temporary_process_class_name ) );
+    _process_class_list.push_back( process_class );         
+
+
     Command_processor cp ( this );
     cp.execute_file( _config_filename );
 }
@@ -1339,6 +1381,7 @@ void Spooler::start()
         if( !ok )  throw_xc( "SPOOLER-183" );
     }
 
+    init_process_classes();
   //start_threads();
     start_jobs();
 
@@ -1390,8 +1433,8 @@ void Spooler::stop()
     _object_set_class_list.clear();
   //_spooler_thread_list.clear();
     _thread_list.clear();
-    _process_list.clear();
     _job_list.clear();
+    _process_class_list.clear();
 
     if( _module_instance )  _module_instance->close();
 
@@ -1545,7 +1588,8 @@ void Spooler::run()
 
                 if( single_thread )
                 {
-                    FOR_EACH( Process_list, _process_list, p )  (*p)->async_continue();
+                    FOR_EACH( Process_class_list, _process_class_list, pc )  
+                        FOR_EACH( Process_list, (*pc)->_process_list, p )  (*p)->async_continue();
 
                     _event.reset();
 

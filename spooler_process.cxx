@@ -1,4 +1,4 @@
-// $Id: spooler_process.cxx,v 1.3 2003/08/29 08:14:04 jz Exp $
+// $Id: spooler_process.cxx,v 1.4 2003/08/29 20:44:25 jz Exp $
 
 #include "spooler.h"
 
@@ -177,7 +177,10 @@ void Process::remove_module_instance( Module_instance* )
 { 
     InterlockedDecrement( &_module_instance_count ); 
 
-    if( _temporary  &&  _module_instance_count == 0 )  _spooler->remove_process( this );
+    if( _temporary  &&  _module_instance_count == 0 )  
+    {
+        if( _process_class )  _process_class->remove_process( this );
+    }
 }
 
 //-----------------------------------------------------------------------------------Process::start
@@ -203,6 +206,16 @@ void Process::async_continue()
     _connection->async_continue();
 }
 
+//---------------------------------------------------------------------------------Process::set_dom
+/*
+void Process::set_dom( const xml::Element_ptr& process_element, const Time& xml_mod_time )
+{
+    _name    = process_element.     getAttribute( "name"       );
+    _timeout = process_element.uint_getAttribute( "timeout", 0 );
+
+    if( _timeout == 0 )  _timeout = INT_MAX;
+}
+*/
 //-------------------------------------------------------------------------------------Process::dom
 
 xml::Element_ptr Process::dom( const xml::Document_ptr& document, Show_what show )
@@ -221,6 +234,45 @@ xml::Element_ptr Process::dom( const xml::Document_ptr& document, Show_what show
     //process_element.setAttribute( "started_tasks"  , _task_count );
 
     return process_element;
+}
+
+//-----------------------------------------------------------------------Process_class::add_process
+
+void Process_class::add_process( Process* process )
+{
+    process->_process_class = this;
+    _process_list.push_back( process );
+}
+
+//--------------------------------------------------------------------------Spooler::remove_process
+
+void Process_class::remove_process( Process* process )
+{
+    FOR_EACH( Process_list, _process_list, p )
+    {
+        if( *p == process )  { process->_process_class = NULL; _process_list.erase( p ); return; }
+    }
+
+    throw_xc( "Process_class::remove_process" );
+}
+
+//----------------------------------------------------------------------------------Spooler::as_dom
+// Anderer Thread
+
+xml::Element_ptr Process_class::dom( const xml::Document_ptr& document, Show_what show )
+{
+    xml::Element_ptr element = document.createElement( "process_class" );
+    
+    element.setAttribute( "name"         , _name );
+    element.setAttribute( "processes"    , as_string( _process_list.size() ) );
+    element.setAttribute( "max_processes", _max_processes );
+
+    xml::Element_ptr processes_element = document.createElement( "processes" );
+    element.appendChild( processes_element );
+
+    FOR_EACH( Process_list, _process_list, it )  processes_element.appendChild( (*it)->dom( document, show ) );
+
+    return element;
 }
 
 //-------------------------------------------------------------------------------------------------

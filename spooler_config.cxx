@@ -1,4 +1,4 @@
-// $Id: spooler_config.cxx,v 1.66 2003/08/25 20:41:26 jz Exp $
+// $Id: spooler_config.cxx,v 1.67 2003/08/29 20:44:24 jz Exp $
 
 //#include <precomp.h>
 
@@ -198,7 +198,7 @@ void Object_set_class::set_dom( const xml::Element_ptr& element, const Time& xml
             {
                 if( e2.nodeName_is( "level_decl" ) )
                 {
-                    int    level = as_int( e2.getAttribute( "level" ) );
+                    int    level = e2.int_getAttribute( "level", 0 );
                     string name  = e2.getAttribute( "name" );
 
                     _level_map[ level ] = name;
@@ -333,12 +333,12 @@ void Spooler::load_config( const xml::Element_ptr& config_element, const Time& x
         _config_document = config_element.ownerDocument();
         _config_element = config_element;
 
-        _tcp_port      = as_int( config_element.getAttribute( "tcp_port"     , as_string( _tcp_port )     ) );
-        _udp_port      = as_int( config_element.getAttribute( "udp_port"     , as_string( _udp_port )     ) );
-        _priority_max  = as_int( config_element.getAttribute( "priority_max" , as_string( _priority_max ) ) );
+        _tcp_port      = config_element.int_getAttribute( "tcp_port"     , _tcp_port     );
+        _udp_port      = config_element.int_getAttribute( "udp_port"     , _udp_port     );
+        _priority_max  = config_element.int_getAttribute( "priority_max" , _priority_max );
 
 #     ifdef _DEBUG
-        _max_threads   = as_int( config_element.getAttribute( "threads"      , as_string( _max_threads  ) ) );
+        _max_threads   = config_element.int_getAttribute( "threads"      , _max_threads  );
 #     endif
           
         if( _max_threads < 1 )  _max_threads = 1;
@@ -388,6 +388,11 @@ void Spooler::load_config( const xml::Element_ptr& config_element, const Time& x
                 Sos_optional_date_time dt;
                 dt.assign( e.getAttribute( "date" ) );
                 _holiday_set.insert( dt.as_time_t() );
+            }
+            else
+            if( e.nodeName_is( "process_classes" ) )
+            {
+                load_process_classes_from_dom( e, xml_mod_time );
             }
             else
             if( e.nodeName_is( "script" ) )

@@ -1,4 +1,4 @@
-// $Id: spooler_job.cxx,v 1.9 2003/08/29 13:08:10 jz Exp $
+// $Id: spooler_job.cxx,v 1.10 2003/08/29 20:44:24 jz Exp $
 /*
     Hier sind implementiert
 
@@ -113,7 +113,7 @@ void Job::set_dom( const xml::Element_ptr& element, const Time& xml_mod_time )
     {
         bool order;
 
-        _name             = element.     getAttribute( "name" );
+        _name             = element.     getAttribute( "name"       );
         _temporary        = element.bool_getAttribute( "temporary"  , _temporary  );
         _priority         = element. int_getAttribute( "priority"   , _priority   );
         _title            = element.     getAttribute( "title"      , _title      );
@@ -153,10 +153,13 @@ void Job::set_dom( const xml::Element_ptr& element, const Time& xml_mod_time )
             else
             if( e.nodeName_is( "script"     ) )  
             {
+                _module._use_process_class = _spooler->has_process_classes();
+
                 _module.set_dom_without_source( e );
                 _module_xml_document  = e.ownerDocument();
                 _module_xml_element   = e;
                 _module_xml_mod_time  = xml_mod_time;
+
                 _process_filename     = "";
                 _process_param        = "";
                 _process_log_filename = "";
@@ -214,6 +217,7 @@ void Job::init()
         _log.set_append( _log_append );
         _log.set_filename( _spooler->log_directory() + "/job." + jobname_as_filename() + ".log" );      // Jobprotokoll
     }
+
 
     init2();
 }

@@ -1,4 +1,4 @@
-// $Id: spooler_module.cxx,v 1.35 2003/08/29 08:14:04 jz Exp $
+// $Id: spooler_module.cxx,v 1.36 2003/08/29 20:44:25 jz Exp $
 /*
     Hier sind implementiert
 
@@ -170,6 +170,15 @@ void Module::init()
 {
     if( _separate_process )
     {
+        if( _process_class_name != "" )  throw_xc( "SPOOLER-194" );
+        //_process_class_name = temporary_process_class_name;
+    }
+
+    if( _use_process_class )  _spooler->process_class( _process_class_name );     // Fehler, wenn der Name nicht bekannt ist.
+
+
+    if( _separate_process  ||  _use_process_class )
+    {
         _kind = kind_remote;
     }
     else
@@ -235,7 +244,7 @@ ptr<Module_instance> Module::create_instance()
 
         case kind_remote:
         {
-            ptr<Remote_module_instance_proxy> p = Z_NEW( Remote_module_instance_proxy( this ) );
+            ptr<Remote_module_instance_proxy> p = Z_NEW( Remote_module_instance_proxy( this, _process_class_name ) );
             return +p;
         }
 

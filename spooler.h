@@ -1,4 +1,4 @@
-// $Id: spooler.h,v 1.149 2003/08/29 13:08:10 jz Exp $
+// $Id: spooler.h,v 1.150 2003/08/29 20:44:24 jz Exp $
 
 #ifndef __SPOOLER_H
 #define __SPOOLER_H
@@ -104,6 +104,8 @@ namespace sos {
 namespace sos {
 namespace spooler {
 
+extern const char*              temporary_process_class_name;
+
 //-------------------------------------------------------------------------------------------------
 
 extern volatile int             ctrl_c_pressed;
@@ -178,10 +180,7 @@ struct Spooler
     const time::Holiday_set&    holidays                    () const                            { return _holiday_set; }
     bool                        is_service                  () const                            { return _is_service; }
 
-    void                        load_jobs_from_xml          ( const xml::Element_ptr&, const Time& xml_mod_time, bool init = false );
-    xml::Element_ptr            jobs_as_xml                 ( const xml::Document_ptr&, Show_what );
     xml::Element_ptr            threads_as_xml              ( const xml::Document_ptr&, Show_what );
-    xml::Element_ptr            processes_as_dom            ( const xml::Document_ptr&, Show_what );
 
     int                         launch                      ( int argc, char** argv );                                
     void                        set_state_changed_handler   ( State_changed_handler h )         { _state_changed_handler = h; }
@@ -212,13 +211,6 @@ struct Spooler
     Job*                        get_job_or_null             ( const string& job_name );
     Job*                        get_next_job_to_start       ();
 
-    // Order
-    void                        add_job_chain               ( Job_chain* );
-    Job_chain*                  job_chain                   ( const string& name );
-    xml::Element_ptr            xml_from_job_chains         ( const xml::Document_ptr&, Show_what );
-    void                        set_job_chain_time          ( const Time& t )                   { THREAD_LOCK( _job_chain_lock )  _job_chain_time = t; }
-    Time                        job_chain_time              ()                                  { THREAD_LOCK_RETURN( _job_chain_lock, Time, _job_chain_time ); }
-
     friend struct               Com_spooler;
 
     void                        load_arg                    ();
@@ -236,8 +228,6 @@ struct Spooler
     void                        wait_until_threads_stopped  ( Time until );
     void                        reload                      ();
     void                        run                         ();
-    void                        start_jobs                  ();
-    void                        close_jobs                  ();
   //void                        start_threads               ();
     Spooler_thread*             new_thread                  ( bool free_threading = true );
     void                        close_threads               ();
@@ -245,9 +235,6 @@ struct Spooler
 
   //void                        single_thread_step          ();
     void                        wait                        ();
-
-    Process*                    new_process                 ( bool temporary = false );
-    void                        remove_process              ( Process* );
 
     void                        signal                      ( const string& signal_name = "" )  { _log.info( "Signal \"" + signal_name + "\"" ); _event.signal( signal_name ); }
   //void                        signal                      ( const string& signal_name = "" )  { THREAD_LOCK( _lock )  ..., if(_event) _event->signal(signal_name), _next_start_time = 0, _next_job = NULL; }
@@ -259,10 +246,33 @@ struct Spooler
 
     void                        send_cmd                    ();
 
+    // Jobs
     void                        add_job                     ( const Sos_ptr<Job>& );
     void                        cmd_add_jobs                ( const xml::Element_ptr& );
     void                        do_add_jobs                 ();
     void                        remove_temporary_jobs       ();
+    void                        start_jobs                  ();
+    void                        close_jobs                  ();
+
+    // Order
+    void                        load_jobs_from_xml          ( const xml::Element_ptr&, const Time& xml_mod_time, bool init = false );
+    xml::Element_ptr            jobs_as_xml                 ( const xml::Document_ptr&, Show_what );
+    void                        add_job_chain               ( Job_chain* );
+    Job_chain*                  job_chain                   ( const string& name );
+    xml::Element_ptr            xml_from_job_chains         ( const xml::Document_ptr&, Show_what );
+    void                        set_job_chain_time          ( const Time& t )                   { THREAD_LOCK( _job_chain_lock )  _job_chain_time = t; }
+    Time                        job_chain_time              ()                                  { THREAD_LOCK_RETURN( _job_chain_lock, Time, _job_chain_time ); }
+
+    // Prozesse
+    void                        load_process_classes_from_dom( const xml::Element_ptr&, const Time& xml_mod_time );
+    void                        add_process_class           ( Process_class* );
+    Process_class*              process_class_or_null       ( const string& name );
+    Process_class*              process_class               ( const string& name );
+    xml::Element_ptr            process_classes_as_dom      ( const xml::Document_ptr&, Show_what );
+    Process*                    new_temporary_process       ();
+    void                        init_process_classes        ();
+    Process_class*              temporary_process_class     ()                                  { return *_process_class_list.begin(); }
+    bool                        has_process_classes         ()                                  { return _process_class_list.size() > 1; }   // Die erste ist nur für temporäre Prozesse
 
 
   private:
@@ -375,8 +385,9 @@ struct Spooler
     Module                     _module;                     // <script>
     ptr<Module_instance>       _module_instance;
 
-    typedef list< ptr<Process> >  Process_list;
+    Process_class_list         _process_class_list;
     Process_list               _process_list;
+    int                        _process_count_max;
 
     Job*                       _next_job;
     Time                       _next_time;

@@ -1,4 +1,4 @@
-// $Id: spooler_module_remote.h,v 1.11 2003/08/29 08:14:04 jz Exp $
+// $Id: spooler_module_remote.h,v 1.12 2003/08/29 20:44:25 jz Exp $
 
 #ifndef __SPOOLER_MODULE_REMOTE_H
 #define __SPOOLER_MODULE_REMOTE_H
@@ -35,14 +35,15 @@ struct Remote_module_instance_proxy : Com_module_instance_base
 
 
                                 Operation                   ( Remote_module_instance_proxy*, Call_state first_state );
+                               ~Operation                   ();
 
         Async_operation*        begin__start                ();
         bool                    begin__end                  ();
 
         virtual bool            async_finished_             ();
         virtual void            async_continue_             ( bool wait = false );
-        virtual bool            async_has_error_            ()                                      { return _operation? _operation->async_has_error() : false; }
-        virtual void            async_check_error_          ()                                      { if( _operation )  _operation->async_check_error(); }
+      //virtual bool            async_has_error_            ()                                      { return _operation? _operation->async_has_error() : false; }
+      //virtual void            async_check_error_          ()                                      { if( _operation )  _operation->async_check_error(); }
         virtual string          async_state_text_           ();
 
         string                  state_name                  ();
@@ -52,12 +53,12 @@ struct Remote_module_instance_proxy : Com_module_instance_base
         Remote_module_instance_proxy* _proxy;
         Call_state             _call_state;
         Multi_qi               _multi_qi;
-        ptr<Async_operation>   _operation;
+      //ptr<Async_operation>   _operation;
     };
 
 
 
-                                Remote_module_instance_proxy( Module* module )                      : Com_module_instance_base(module), _zero_(_end_) {}
+                                Remote_module_instance_proxy( Module* module, string process_class_name )   : Com_module_instance_base(module), _zero_(_end_), _process_class_name(process_class_name) {}
                                ~Remote_module_instance_proxy();
 
     void                        init                        ();
@@ -80,6 +81,7 @@ struct Remote_module_instance_proxy : Com_module_instance_base
 
     Fill_zero                  _zero_;
 
+    string                         _process_class_name;
     ptr<Process>                   _process;
     ptr<object_server::Session>    _session;
     ptr<object_server::Proxy>      _remote_instance;

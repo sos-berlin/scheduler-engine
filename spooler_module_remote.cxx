@@ -1,4 +1,4 @@
-// $Id: spooler_module_remote.cxx,v 1.24 2003/08/29 13:08:10 jz Exp $
+// $Id: spooler_module_remote.cxx,v 1.25 2003/08/29 20:44:25 jz Exp $
 /*
     Hier sind implementiert
 
@@ -141,8 +141,17 @@ Async_operation* Remote_module_instance_proxy::begin__start()
 */
     if( !_session )
     {
-        //_session  = Z_NEW( Session( start_process( parameters ) ) );
-        _process = _spooler->new_process( true );     // temporary = true: Prozess schließen, wenn er nicht mehr gebraucht wird
+        if( _process_class_name.empty()  ||  _module->_separate_process )
+        {
+            _process = _spooler->new_temporary_process();
+        }
+        else
+        {
+            _process = Z_NEW( Process( _spooler ) );
+            _spooler->process_class( _process_class_name ) -> add_process( _process );
+        }
+
+        _process->start();
         _process->add_module_instance( this );
         _session = _process->session(); 
         _pid = _session->connection()->pid();
@@ -160,7 +169,7 @@ bool Remote_module_instance_proxy::begin__end()
 {
     //if( _call_state != c_begin )  
 
-    _operation->async_check_error();
+    //_operation->async_check_error();   Nicht hier rufen!  call__end() prüft den Fehler und ruft vorher pop_operation().
     if( !_operation->async_finished() )  throw_xc( "SPOOLER-191", "begin__end", _operation->async_state_text() );
     _operation = NULL;
 
@@ -216,6 +225,13 @@ bool Remote_module_instance_proxy::step__end()
     return check_result( _remote_instance->call__end() );
 }
 
+//-----------------------------------------------Remote_module_instance_proxy::Operation::~Operation
+
+Remote_module_instance_proxy::Operation::~Operation()
+{
+    //if( _operation )  _operation->set_async_parent( NULL );
+}
+
 //------------------------------------------------Remote_module_instance_proxy::Operation::Operation
 
 Remote_module_instance_proxy::Operation::Operation( Remote_module_instance_proxy* proxy, Call_state first_state )
@@ -224,8 +240,6 @@ Remote_module_instance_proxy::Operation::Operation( Remote_module_instance_proxy
     _proxy(proxy),
     _call_state(first_state)
 {
-    //_operation = _proxy->_session->connect_server__start();
-    //_operation->set_async_parent( this );
     async_continue();
 }
 
@@ -247,15 +261,15 @@ void Remote_module_instance_proxy::Operation::async_continue_( bool wait )
     {
         loop = false;
 
-        if( _operation )        // _operation == NULL bei _call_state == c_begin oder c_end
+        if( async_child() )        // async_child() == NULL bei _call_state == c_begin oder c_end
         {
-            _operation->async_continue( wait );
+            async_child()->async_continue( wait );
 
-            if( wait )  _operation->async_finish();
+            if( wait )  async_child()->async_finish();
             else  
-            if( !_operation->async_finished() )  return;
+            if( !async_child()->async_finished() )  return;
 
-            if( _operation->async_has_error() )  return;
+            if( async_child()->async_has_error() )  return;
         }
 
         switch( _call_state )
@@ -264,8 +278,7 @@ void Remote_module_instance_proxy::Operation::async_continue_( bool wait )
 
             case c_begin:
             {
-                _operation = _proxy->_session->connect_server__start();
-                _operation->set_async_parent( this );
+                set_async_child( _proxy->_session->connect_server__start() );
                 _call_state = c_connect;
                 break;
             }
@@ -273,7 +286,7 @@ void Remote_module_instance_proxy::Operation::async_continue_( bool wait )
 
             case c_connect:
             {
-                _operation = NULL;
+                set_async_child( NULL );
                 _proxy->_session->connect_server__end();
             }
             
@@ -283,8 +296,7 @@ void Remote_module_instance_proxy::Operation::async_continue_( bool wait )
                 _multi_qi.allocate( 1 );
                 _multi_qi.set_iid( 0, spooler_com::IID_Iremote_module_instance_server );
                 
-                _operation = _proxy->_session->create_instance__start( spooler_com::CLSID_Remote_module_instance_server, NULL, 0, NULL, 1, _multi_qi );
-                _operation->set_async_parent( this );
+                set_async_child( _proxy->_session->create_instance__start( spooler_com::CLSID_Remote_module_instance_server, NULL, 0, NULL, 1, _multi_qi ) );
 
                 _call_state = c_create_instance;
                 break;
@@ -293,7 +305,7 @@ void Remote_module_instance_proxy::Operation::async_continue_( bool wait )
 
             case c_create_instance:
             {
-                _operation = NULL;
+                set_async_child( NULL );
                 HRESULT hr = _proxy->_session->create_instance__end( 1, _multi_qi );
                 if( FAILED(hr) )  throw_com( hr, "create_instance" );
 
@@ -320,8 +332,7 @@ void Remote_module_instance_proxy::Operation::async_continue_( bool wait )
                     params_array[7] = "script="          + _proxy->_module->_source.dom_doc().xml();
                 }
 
-                _operation = _proxy->_remote_instance->call__start( "construct", params );
-                _operation->set_async_parent( this );
+                set_async_child( _proxy->_remote_instance->call__start( "construct", params ) );
 
                 _call_state = c_construct;
                 loop = true;
@@ -332,7 +343,7 @@ void Remote_module_instance_proxy::Operation::async_continue_( bool wait )
 
             case c_construct:
             {
-                _operation = NULL;
+                set_async_child( NULL );
                 _proxy->_remote_instance->call__end();
             }
              
@@ -357,9 +368,8 @@ void Remote_module_instance_proxy::Operation::async_continue_( bool wait )
                     _proxy->_object_list.clear();
                 }
 
-                _operation = _proxy->_remote_instance->call__start( "begin", objects, names );
-                _operation->set_async_parent( this );
-
+                set_async_child( _proxy->_remote_instance->call__start( "begin", objects, names ) );
+                
                 _call_state = c_call_begin;
                 break;
             }
@@ -377,8 +387,7 @@ void Remote_module_instance_proxy::Operation::async_continue_( bool wait )
 
             case c_end:
             {
-                _operation = _proxy->_remote_instance->call__start( "end", _proxy->_end_success );
-                _operation->set_async_parent( this );
+                set_async_child( _proxy->_remote_instance->call__start( "end", _proxy->_end_success ) );
                 _call_state = c_call_end;
                 break;
             }
@@ -386,7 +395,7 @@ void Remote_module_instance_proxy::Operation::async_continue_( bool wait )
 
             case c_call_end:
             {
-                _operation = NULL;
+                set_async_child( NULL );
                 _proxy->_remote_instance->call__end();
             }
 
@@ -395,8 +404,7 @@ void Remote_module_instance_proxy::Operation::async_continue_( bool wait )
             {
                 if( _proxy->_close_instance_at_end )
                 {
-                    _operation = _proxy->_remote_instance->release__start();
-                    _operation->set_async_parent( this );
+                    set_async_child( _proxy->_remote_instance->release__start() );
                     _call_state = c_release;
                 }
                 else
@@ -407,7 +415,7 @@ void Remote_module_instance_proxy::Operation::async_continue_( bool wait )
 
             case c_release:
             {
-                _operation = NULL;
+                set_async_child(  NULL );
                 _proxy->_remote_instance->release__end();
                 _proxy->_remote_instance = NULL;
                 _proxy->_idispatch = NULL;
@@ -426,7 +434,7 @@ void Remote_module_instance_proxy::Operation::async_continue_( bool wait )
 
 bool Remote_module_instance_proxy::Operation::async_finished_()
 { 
-    return _call_state == c_finished  ||  _operation && _operation->async_has_error();
+    return _call_state == c_finished;  //  ||  _operation && _operation->async_has_error();
 }
 
 //---------------------------------------Remote_module_instance_proxy::Operation::async_state_text_
@@ -434,7 +442,7 @@ bool Remote_module_instance_proxy::Operation::async_finished_()
 string Remote_module_instance_proxy::Operation::async_state_text_()
 { 
     string text = "Remote_module_instance_proxy(state=" + state_name();
-    if( _operation )  text += "," + _operation->async_state_text();
+  //if( _operation )  text += "," + _operation->async_state_text();
     text += ")";
 
     return text;

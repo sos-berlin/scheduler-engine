@@ -1,4 +1,4 @@
-// $Id: spooler_module.h,v 1.36 2003/08/29 08:14:04 jz Exp $
+// $Id: spooler_module.h,v 1.37 2003/08/29 20:44:25 jz Exp $
 
 #ifndef __SPOOLER_MODULE_H
 #define __SPOOLER_MODULE_H
@@ -124,6 +124,8 @@ struct Module : Object
     Source_with_parts          _source;
     Reuse                      _reuse;
     bool                       _separate_process;           // Das Skript soll einem getrennten, eigenen Prozess laufen
+    string                     _process_class_name;
+    bool                       _use_process_class;
     Kind                       _kind;
 
 
