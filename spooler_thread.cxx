@@ -1,4 +1,4 @@
-// $Id: spooler_thread.cxx,v 1.31 2002/04/23 07:00:22 jz Exp $
+// $Id: spooler_thread.cxx,v 1.32 2002/04/30 08:59:19 jz Exp $
 /*
     Hier sind implementiert
 
@@ -391,11 +391,30 @@ bool Thread::any_tasks_there()
     {
         FOR_EACH( Job_list, _job_list, it )  
         {
+            if( (*it)->state() == Job::s_suspended       )  return true;    // Zählt nicht in _running_tasks_count
+            if( (*it)->state() == Job::s_running_process )  return true;    // Zählt nicht in _running_tasks_count
             if( (*it)->queue_filled() )  return true;
         }
     }
 
     return false;
+}
+
+//-----------------------------------------------------------------------------Thread::nichts_getan
+
+void Thread::nichts_getan( double wait_time )
+{
+    _log.warn( "Nichts getan, running_tasks_count=" + as_string(_running_tasks_count) + " state=" + _spooler->state_name() + " _wait_handles=" + _wait_handles.as_string() );
+
+    THREAD_LOCK( _lock )
+    {
+        FOR_EACH( Job_list, _job_list, it )  
+        {
+            _log.debug( "Job " + (*it)->name() + " state=" + (*it)->state_name() + " queue_filled=" + ( (*it)->queue_filled()? "ja" : "nein" ) );
+        }
+    }
+
+    sos_sleep( wait_time );  // Warten, um bei Wiederholung zu bremsen
 }
 
 //-------------------------------------------------------------------------------Thread::run_thread
@@ -417,8 +436,8 @@ int Thread::run_thread()
     {
         start();
 
-        while(   _spooler->state() != Spooler::s_stopping  
-           &&    _spooler->state() != Spooler::s_stopped  )
+        while( _spooler->state() != Spooler::s_stopping  
+           &&  _spooler->state() != Spooler::s_stopped  )
         {
             if( _spooler->state() == Spooler::s_paused )
             {
@@ -432,8 +451,7 @@ int Thread::run_thread()
                 else 
                 if( ++nothing_done_count > nothing_done_max )  
                 {
-                    _log.warn( "Nichts getan, running_tasks_count=" + as_string(_running_tasks_count)  );
-                    sos_sleep(1);  // Warten, um bei Wiederholung zu bremsen
+                    nichts_getan( min( 10.0, (double)nothing_done_count / nothing_done_max ) );
                 }
 
                 remove_temporary_jobs();

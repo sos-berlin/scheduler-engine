@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- $Id: spooler.dtd,v 1.37 2002/04/10 20:47:29 jz Exp $   Joacim Zschimmer,  (C) 2000 SOS GmbH Berlin  -->
+<!-- $Id: spooler.dtd,v 1.38 2002/04/30 08:59:19 jz Exp $   Joacim Zschimmer,  (C) 2000 SOS GmbH Berlin  -->
 
 
 <!ELEMENT spooler               ( config+ | command | answer )>
@@ -128,7 +128,7 @@
 
 <!-- KOMMANDOS  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
-<!ELEMENT command               ( show_state | show_history | modify_spooler | modify_job | kill_task | add_jobs | signal_object )+ >
+<!ELEMENT command               ( show_state | show_history | modify_spooler | modify_job | kill_task | add_jobs | start_job | signal_object )+ >
 
 <!ELEMENT show_state            EMPTY>                                             <!-- Liefert den Zustand des Spoolers -->
 <!ATTLIST show_state            what                (standard|all) 'standard'>     <!-- what="" ist wie what="standard", what="all" liefert <description> -->
@@ -187,6 +187,14 @@
 <!ELEMENT add_jobs              ( job+ )>
 <!ATTLIST add_jobs              thread              CDATA #REQUIRED>
                                                                         <!-- Antwort: <ok> -->
+
+<!ELEMENT start_job             EMPTY>
+<!ATTLIST start_job             job                 CDATA #REQUIRED>
+<!ATTLIST start_job             name                CDATA #IMPLIED>     <!-- Name der Task -->
+<!ATTLIST start_job             at                  CDATA #IMPLIED>     <!-- Startzeitpunkt, auch "now" und "today 17:00" -->
+<!ATTLIST start_job             after               CDATA #IMPLIED>     <!-- oder Start nach soviel Sekunden -->
+                                                                        <!-- Antwort: <ok> -->
+
 
 <!ELEMENT signal_object         EMPTY>                                  <!-- Gibt Spooler Bescheid, dass ein neues Objekt da ist -->
 <!ATTLIST signal_object         class               CDATA #REQUIRED>    <!-- Objektemengeklasse des Objekts -->

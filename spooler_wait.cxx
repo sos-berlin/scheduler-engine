@@ -1,4 +1,4 @@
-// $Id: spooler_wait.cxx,v 1.31 2002/03/20 10:30:13 jz Exp $
+// $Id: spooler_wait.cxx,v 1.32 2002/04/30 08:59:19 jz Exp $
 /*
     Hier sind implementiert
 
@@ -299,7 +299,6 @@ int Wait_handles::wait_until( Time until )
 
         THREAD_LOCK( _lock )
         {
-#           ifdef DEBUG
             {
                 string msg = "WaitForMultipleObjects " + sos::as_string(t/1000.0) + "s  ";
                 for( int i = 0; i < _handles.size(); i++ )
@@ -310,7 +309,6 @@ int Wait_handles::wait_until( Time until )
                 }
                 _log->debug9( msg );
             }
-#           endif
 
             handles = new HANDLE [ _handles.size()+1 ];
             for( int i = 0; i < _handles.size(); i++ )  handles[i] = _handles[i];

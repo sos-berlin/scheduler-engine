@@ -1,4 +1,4 @@
-// $Id: spooler_thread.h,v 1.17 2002/04/23 07:00:22 jz Exp $
+// $Id: spooler_thread.h,v 1.18 2002/04/30 08:59:19 jz Exp $
 
 #ifndef __SPOOLER_THREAD_H
 #define __SPOOLER_THREAD_H
@@ -47,6 +47,7 @@ struct Thread : Sos_self_deleting
   //void                        wait_until_thread_stopped   ( Time until );
   //void                        interrupt_scripts           ();
     void                        cmd_add_jobs                ( const xml::Element_ptr& );
+    void                        nichts_getan                ( double wait_time );
 
     virtual string             _obj_name                    () const                        { return "Thread" + _name; }
 
