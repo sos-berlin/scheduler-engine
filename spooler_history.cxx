@@ -1,4 +1,4 @@
-// $Id: spooler_history.cxx,v 1.16 2002/04/11 05:46:48 jz Exp $
+// $Id: spooler_history.cxx,v 1.17 2002/04/11 11:19:13 jz Exp $
 
 #include "../kram/sos.h"
 #include "spooler.h"
@@ -163,7 +163,7 @@ void Spooler_db::open( const string& db_name )
                                       "\"end_time\"    date,"
                                       "\"cause\"       char(50),"
                                       "\"steps\"       integer,"
-                                      "\"error\"       boolean not null,"
+                                      "\"error\"       boolean,"
                                       "\"error_code\"  char(50),"
                                       "\"error_text\"  char(250),"
                                       "\"parameters\"  clob,"
