@@ -1,4 +1,4 @@
-// $Id: spooler_module_java.cxx,v 1.8 2002/11/08 20:11:23 jz Exp $
+// $Id: spooler_module_java.cxx,v 1.9 2002/11/09 09:13:17 jz Exp $
 /*
     Hier sind implementiert
 
@@ -366,6 +366,21 @@ JNIEXPORT jobject JNICALL Java_sos_spooler_Idispatch_com_1call( JNIEnv* jenv, jc
             if( !jparam )  throw_xc( "NULL-Pointer" );
             jclass  cls;
 
+            if( cls = jenv->FindClass( "java/lang/String" ), !cls )  return NULL;
+            else
+            if( jenv->IsInstanceOf( jparam, cls ) )
+            {
+                dispparams[i].attach_bstr( NULL );
+                jstring_to_bstr( jenv, (jstring)jparam, &dispparams[i].bstrVal );
+            }
+            else
+            if( cls = jenv->FindClass( "java/lang/Boolean" ), !cls )  return NULL;
+            else
+            if( jenv->IsInstanceOf( jparam, cls ) )
+            {
+                dispparams[i] = jenv->CallBooleanMethod( jparam, jenv->GetMethodID( cls, "booleanValue", "()Z" ) ) != 0;
+            }
+            else
             if( cls = jenv->FindClass( "java/lang/Integer" ), !cls )  return NULL;
             else
             if( jenv->IsInstanceOf( jparam, cls ) )
@@ -385,21 +400,6 @@ JNIEXPORT jobject JNICALL Java_sos_spooler_Idispatch_com_1call( JNIEnv* jenv, jc
             if( jenv->IsInstanceOf( jparam, cls ) )
             {
                 dispparams[i] = jenv->CallDoubleMethod( jparam, jenv->GetMethodID( cls, "doubleValue", "()D" ) );
-            }
-            else
-            if( cls = jenv->FindClass( "java/lang/Boolean" ), !cls )  return NULL;
-            else
-            if( jenv->IsInstanceOf( jparam, cls ) )
-            {
-                dispparams[i] = jenv->CallBooleanMethod( jparam, jenv->GetMethodID( cls, "booleanValue", "()Z" ) ) != 0;
-            }
-            else
-            if( cls = jenv->FindClass( "java/lang/String" ), !cls )  return NULL;
-            else
-            if( jenv->IsInstanceOf( jparam, cls ) )
-            {
-                dispparams[i].attach_bstr( NULL );
-                jstring_to_bstr( jenv, (jstring)jparam, &dispparams[i].bstrVal );
             }
             else
             if( cls = jenv->FindClass( "sos/spooler/Idispatch" ), !cls )  return NULL;
