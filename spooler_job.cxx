@@ -1,4 +1,4 @@
-// $Id: spooler_job.cxx,v 1.73 2004/05/07 14:20:51 jz Exp $
+// $Id: spooler_job.cxx,v 1.74 2004/05/09 13:07:41 jz Exp $
 // §851: Weitere Log-Ausgaben zum Scheduler-Start eingebaut
 /*
     Hier sind implementiert
@@ -1049,6 +1049,39 @@ void Job::remove_waiting_job_from_process_list()
     _waiting_for_process_try_again = false;
 }
 
+//----------------------------------------------------------------------check_for_changed_directory
+
+void Job::check_for_changed_directory( const Time& now )
+{
+#   ifdef Z_UNIX
+        if( now < _directory_watcher_next_time )  return;
+#   endif
+
+
+    //LOG2( "joacim", "Job::task_to_start(): Verzeichnisüberwachung _directory_watcher_next_time=" << _directory_watcher_next_time << ", now=" << now << "\n" );
+    _directory_watcher_next_time = now + directory_watcher_intervall;
+
+    Directory_watcher_list::iterator it = _directory_watcher_list.begin();
+    while( it != _directory_watcher_list.end() )
+    {
+        (*it)->has_changed();                        // has_changed() für Unix (und seit 22.3.04 für Windows, siehe dort).
+        if( (*it)->signaled_then_reset() )        
+        {
+            _directory_changed = true;
+            if( !_changed_directories.empty() )  _changed_directories += ";";
+            _changed_directories += (*it)->directory();
+            
+            if( !(*it)->valid() )
+            {
+                it = _directory_watcher_list.erase( it );  // Folge eines Fehlers, s. Directory_watcher::set_signal
+                continue;
+            }
+        }
+
+        it++;
+    }
+}
+
 //-------------------------------------------------------------------------------Job::task_to_start
 
 Sos_ptr<Task> Job::task_to_start()
@@ -1084,35 +1117,8 @@ Sos_ptr<Task> Job::task_to_start()
                                           else cause = cause_period_repeat,                         log_line += "Task startet, weil Job-Startzeit erreicht: " + _next_start_time.as_string();
 
 
-#ifdef Z_UNIX
-                if( now >= _directory_watcher_next_time )
-#endif
-                {
-                    //LOG2( "joacim", "Job::task_to_start(): Verzeichnisüberwachung _directory_watcher_next_time=" << _directory_watcher_next_time << ", now=" << now << "\n" );
-                    _directory_watcher_next_time = now + directory_watcher_intervall;
-
-                    Directory_watcher_list::iterator it = _directory_watcher_list.begin();
-                    while( it != _directory_watcher_list.end() )
-                    {
-                        (*it)->has_changed();                        // has_changed() für Unix (und seit 22.3.04 für Windows, siehe dort).
-                        if( (*it)->signaled_then_reset() )        
-                        {
-                            cause = cause_directory;
-                            log_line += "Task startet wegen eines Ereignisses für Verzeichnis " + (*it)->directory();
-                            if( !changed_directories.empty() )  changed_directories += ";";
-                            changed_directories += (*it)->directory();
-                            
-                            if( !(*it)->valid() )
-                            {
-                                it = _directory_watcher_list.erase( it );  // Folge eines Fehlers, s. Directory_watcher::set_signal
-                                continue;
-                            }
-                        }
-
-                        it++;
-                    }
-                }
-
+                //check_for_changed_directory( now );
+                if( _directory_changed  )       cause = cause_directory,                            log_line += "Task startet wegen eines Ereignisses für Verzeichnis " + _changed_directories;
             }
 
             if( !cause  &&  _order_queue )
@@ -1188,7 +1194,9 @@ Sos_ptr<Task> Job::task_to_start()
                 task->_let_run |= ( cause == cause_period_single );
             }
 
-            task->_changed_directories = changed_directories;
+            task->_changed_directories = _changed_directories;
+            _changed_directories = "";
+            _directory_changed = false;
 
             if( now >= _next_single_start )  _next_single_start = latter_day;  // Vorsichtshalber, 26.9.03
         }
@@ -1215,6 +1223,10 @@ bool Job::do_something()
   //Z_DEBUG_ONLY( _log.debug9( "do_something() state=" + state_name() ); )
 
     bool something_done     = false;       
+    Time now                = Time::now();
+
+    check_for_changed_directory( now );         // Hier prüfen, damit Signal zurückgesetzt wird
+
 
     if( _state == s_read_error )  return false;
     if( _state == s_error      )  return false;
@@ -1224,7 +1236,6 @@ bool Job::do_something()
         try
         {
             Time next_time_at_begin = _next_time;
-            Time now                = Time::now();
 
             if( _state )  
             {
@@ -1289,7 +1300,7 @@ bool Job::do_something()
         catch( const _com_error& x )  { throw_com_error( x ); }
     }
   //catch( Stop_scheduler_exception& ) { throw; }
-    catch( const exception&  x ) { set_error( x );  set_job_error( x.what() );  sos_sleep(5); }     // Bremsen, falls sicher der Fehler sofort wiederholt
+    catch( const exception&  x ) { set_error( x );  set_job_error( x.what() );  sos_sleep(5); }     // Bremsen, falls sich der Fehler sofort wiederholt
 
     return something_done;
 }
