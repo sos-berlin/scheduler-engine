@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.244 2003/09/02 15:46:25 jz Exp $
+// $Id: spooler.cxx,v 1.245 2003/09/02 15:47:13 jz Exp $
 /*
     Hier sind implementiert
 
@@ -1683,7 +1683,7 @@ void Spooler::run()
                     if( Time::now() < throttle_time + 0.1 )
                     {
                         LOG( "Spooler wird gedrosselt ...\n" );
-                        sos_sleep(1);
+                        sos_sleep(0.1);
                     }
                     throttle_loop_count = 0;
                     throttle_time = Time::now();
@@ -1692,7 +1692,7 @@ void Spooler::run()
 
                 if( _next_time > 0 )
                 {
-//_next_time = min( _next_time, Time::now() + 1.0 );      // Wartezeit vorsichtshalber begrenzen
+_next_time = min( _next_time, Time::now() + 30.0 );      // Wartezeit vorsichtshalber begrenzen
                     if( _debug )  
                     {
                         if( wait_handles.wait(0) == -1 )  _log.debug9( msg ), wait_handles.wait_until( _next_time );     // Debug-Ausgabe der Wartezeit nur, wenn kein Ergebnis vorliegt
