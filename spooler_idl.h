@@ -162,7 +162,7 @@ DEFINE_GUID(  IID_Irun_time, 0xfeee47ab, 0x6c1b, 0x11d8, 0x81, 0x03, 0x00, 0x04,
 struct Irun_time: IDispatch
 {
     virtual HRESULT     put_Xml                         ( BSTR )                                = 0;
-}
+};
 
 //------------------------------------------------------------------------------------------Job
 
