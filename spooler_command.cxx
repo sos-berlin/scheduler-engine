@@ -1,4 +1,4 @@
-// $Id: spooler_command.cxx,v 1.35 2001/07/16 16:39:35 jz Exp $
+// $Id: spooler_command.cxx,v 1.36 2001/11/13 10:42:11 jz Exp $
 /*
     Hier ist implementiert
 
@@ -27,6 +27,8 @@
 #   include <unistd.h>              // read(), write(), close()
 #endif
 
+#include <sys/types.h>
+#include <sys/timeb.h>
 
 
 namespace sos {
@@ -61,7 +63,9 @@ xml::Element_ptr create_error_element( xml::Document* document, const Xc_copy& x
 {
     xml::Element_ptr e = document->createElement( "ERROR" );
 
-    e->setAttribute( "time", as_dom_string( Sos_optional_date_time( x.time() - _timezone - _dstbias ).as_string() ) );
+    _timeb  tm;     // Ob die Sommerzeitverschiebung bei der Fehlerzeit berücksichtigt wird, hängt von der _aktuellen_ Zeit ab.
+    _ftime( &tm );  // Nicht schön, aber es funktioniert, weil der Spooler sowieso nicht während der Zeitumstellung laufen soll.
+    e->setAttribute( "time", as_dom_string( Sos_optional_date_time( x.time() - _timezone - ( tm.dstflag? _dstbias : 0 ) ).as_string() ) );
 
     if( !empty( x->name() )          )  e->setAttribute( "class" , as_dom_string( x->name()          ) );
 
