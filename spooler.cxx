@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.64 2001/03/17 18:57:22 jz Exp $
+// $Id: spooler.cxx,v 1.65 2001/03/18 18:58:27 jz Exp $
 /*
     Hier sind implementiert
 
@@ -543,12 +543,14 @@ int Spooler::launch( int argc, char** argv )
 
 static void start_process( const string& command_line )
 {
-    LOG( "start process(\"" << command_line << "\")\n" );
+    LOG( "start_process(\"" << command_line << "\")\n" );
 
     PROCESS_INFORMATION process_info; 
     STARTUPINFO         startup_info; 
     BOOL                ok;
-    Sos_limited_text<MAX_PATH> my_command_line = command_line;
+    Dynamic_area        my_command_line;
+    
+    my_command_line.assign( command_line.c_str(), command_line.length() + 1 );
 
     memset( &process_info, 0, sizeof process_info );
 
@@ -556,7 +558,7 @@ static void start_process( const string& command_line )
     startup_info.cb = sizeof startup_info; 
 
     ok = CreateProcess( NULL,                       // application name
-                        (char*)c_str(my_command_line),     // command line 
+                        my_command_line.char_ptr(), // command line 
                         NULL,                       // process security attributes 
                         NULL,                       // primary thread security attributes 
                         FALSE,                      // handles are inherited?
