@@ -1,4 +1,4 @@
-// $Id: spooler.h,v 1.120 2002/12/10 12:38:21 jz Exp $
+// $Id: spooler.h,v 1.121 2002/12/11 08:50:35 jz Exp $
 
 #ifndef __SPOOLER_H
 #define __SPOOLER_H
@@ -329,7 +329,11 @@ struct Spooler
     Module                     _module;                     // <script>
     ptr<Module_instance>       _module_instance;
 
-    Thread_list                _thread_list;
+    Thread_list                _thread_list;                // Alle Threads
+
+    typedef list< Spooler_thread* >  Spooler_thread_list;
+    Spooler_thread_list         _spooler_thread_list;        // Nur Threads mit _free_threading=no, die also keine richtigen Threads sind und im Spooler-Thread laufen
+
     Time                       _next_time;
     Job*                       _next_job;
 

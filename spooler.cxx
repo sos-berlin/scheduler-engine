@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.161 2002/12/09 22:53:24 jz Exp $
+// $Id: spooler.cxx,v 1.162 2002/12/11 08:50:34 jz Exp $
 /*
     Hier sind implementiert
 
@@ -317,9 +317,11 @@ Spooler::~Spooler()
     if( !_thread_list.empty() )  
     {
         close_threads();
-        //wait_until_threads_stopped( latter_day );
         _thread_list.clear();
     }
+
+    _spooler_thread_list.clear();
+
 
     _object_set_class_list.clear();
 
@@ -437,7 +439,7 @@ void Spooler::wait_until_threads_stopped( Time until )
 
         Thread_list threads;
 
-        FOR_EACH( Thread_list, _thread_list, it )  if( (*it)->_free_threading )  threads.push_back( *it );
+        FOR_EACH( Spooler_thread_list, _spooler_thread_list, it )  threads.push_back( *it );
 
         int c = 0;
         while( !threads.empty() )
@@ -665,25 +667,22 @@ bool Spooler::run_threads()
     bool something_done = false;
     Time now            = Time::now();
 
-    FOR_EACH( Thread_list, _thread_list, it )  
+    FOR_EACH( Spooler_thread_list, _spooler_thread_list, it )  
     {
         if( _state_cmd != sc_none )  break;
 
         Spooler_thread* thread = *it;
-        if( !thread->_free_threading )
+        if( thread->_next_start_time <= now  ||  thread->_wait_handles.signaled() )
         {
-            if( thread->_next_start_time <= now  ||  thread->_wait_handles.signaled() )
-            {
-                bool ok = thread->process();
+            bool ok = thread->process();
 
-                something_done |= ok;
+            something_done |= ok;
 
-                if( !ok )  thread->get_next_job_to_start();
-            }
-
-            //thread->_log.debug9( "_next_start_time=" + thread->_next_start_time.as_string() );
-            if( thread->_next_job  &&  _next_time > thread->_next_start_time )  _next_time = thread->_next_start_time, _next_job = thread->_next_job;
+            //if( !ok )  thread->get_next_job_to_start();
         }
+
+        //thread->_log.debug9( "_next_start_time=" + thread->_next_start_time.as_string() );
+        //if( thread->_next_job  &&  _next_time > thread->_next_start_time )  _next_time = thread->_next_start_time, _next_job = thread->_next_job;
     }
 
     return something_done;
@@ -935,6 +934,7 @@ void Spooler::stop()
     wait_until_threads_stopped( Time::now() + wait_for_thread_termination_after_interrupt );
 */
     _object_set_class_list.clear();
+    _spooler_thread_list.clear();
     _thread_list.clear();
 
     if( _module_instance )  _module_instance->close();
@@ -987,27 +987,45 @@ void Spooler::run()
         _next_job  = NULL;
 
 
-        bool something_done = run_threads();
+        while( _state_cmd == sc_none  &&  !ctrl_c_pressed )    // Solange Jobs laufen, keine Umstände machen. 
+        {
+            bool something_done = run_threads();
+            if( !something_done )  break;
+        }
 
         int running_tasks_count = 0;
-        FOR_EACH( Thread_list, _thread_list, it2 )  running_tasks_count += (*it2)->_running_tasks_count;
+        FOR_EACH( Spooler_thread_list, _spooler_thread_list, it2 )  running_tasks_count += (*it2)->_running_tasks_count;
 
         //LOG( "spooler: running_tasks_count=" << running_tasks_count  << " _state_cmd=" << (int)_state_cmd << " ctrl_c_pressed=" << ctrl_c_pressed << " _next_time=" << _next_time << "\n" );
         if( running_tasks_count == 0  &&  _state_cmd == sc_none  &&  !ctrl_c_pressed )
         {
+
+            FOR_EACH( Spooler_thread_list, _spooler_thread_list, it )  
+            {
+                Spooler_thread* thread = *it;
+                thread->get_next_job_to_start();
+                //thread->_log.debug9( "_next_start_time=" + thread->_next_start_time.as_string() );
+                if( thread->_next_job  &&  _next_time > thread->_next_start_time )  _next_time = thread->_next_start_time, _next_job = thread->_next_job;
+            }
+
             Time now = Time::now();
 
             if( _next_time > now )
             {
                 string msg;
                 
-                if( _debug )  msg = _next_job? "Warten bis " + _next_time.as_string() + " für Job " + _next_job->name() 
-                                             : "Kein Job zu starten";
-
                 Wait_handles wait_handles = _wait_handles;
-                FOR_EACH( Thread_list, _thread_list, it )  if( !(*it)->_free_threading )  wait_handles += (*it)->_wait_handles;
+                FOR_EACH( Spooler_thread_list, _spooler_thread_list, it )  wait_handles += (*it)->_wait_handles;
 
-                if( _debug )  if( wait_handles.wait(0) == -1 )  _log.debug( msg ), wait_handles.wait_until( _next_time );
+                if( _debug )  
+                {
+                    msg = _next_job? "Warten bis " + _next_time.as_string() + " für Job " + _next_job->name() 
+                                   : "Kein Job zu starten";
+
+                    //msg += " und " + wait_handles.as_string();
+
+                    if( wait_handles.wait(0) == -1 )  _log.debug( msg ), wait_handles.wait_until( _next_time );
+                }
 
                 wait_handles.clear();
             }

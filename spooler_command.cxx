@@ -1,4 +1,4 @@
-// $Id: spooler_command.cxx,v 1.75 2002/12/10 12:38:23 jz Exp $
+// $Id: spooler_command.cxx,v 1.76 2002/12/11 08:50:35 jz Exp $
 /*
     Hier ist implementiert
 
@@ -58,9 +58,10 @@ xml::Element_ptr create_error_element( const xml::Document_ptr& document, const 
 {
     xml::Element_ptr e = document.createElement( "ERROR" );
 
-    timeb  tm;     // Ob die Sommerzeitverschiebung bei der Fehlerzeit berücksichtigt wird, hängt von der _aktuellen_ Zeit ab.
-    ftime( &tm );  // Nicht schön, aber es funktioniert, weil der Spooler sowieso nicht während der Zeitumstellung laufen soll.
-    e.setAttribute( "time", Sos_optional_date_time( (time_t)x.time() - timezone - ( tm.dstflag? _dstbias : 0 ) ).as_string() );
+    //timeb  tm;     // Ob die Sommerzeitverschiebung bei der Fehlerzeit berücksichtigt wird, hängt von der _aktuellen_ Zeit ab.
+    //ftime( &tm );  // Nicht schön, aber es funktioniert, weil der Spooler sowieso nicht während der Zeitumstellung laufen soll.
+    //e.setAttribute( "time", Sos_optional_date_time( (time_t)x.time() - timezone - ( tm.dstflag? _dstbias : 0 ) ).as_string() );
+    e.setAttribute( "time", Sos_optional_date_time( Time::now() ).as_string() );
 
     if( !empty( x->name() )          )  e.setAttribute( "class" , x->name()          );
 

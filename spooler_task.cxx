@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.138 2002/12/08 20:27:26 jz Exp $
+// $Id: spooler_task.cxx,v 1.139 2002/12/11 08:50:36 jz Exp $
 /*
     Hier sind implementiert
 
@@ -1076,9 +1076,15 @@ bool Job::do_something()
     if( _state == s_suspended  )  goto ENDE;
     if( _state == s_stopped    )  goto ENDE;
     if( _state == s_read_error )  goto ENDE;
+    if( _state == s_running_process  &&  !((Process_task*)+_task)->signaled() )  goto ENDE;
 
 
-    if( _state == s_start_task || _state == s_running || _state == s_running_delayed || _state == s_running_waiting_for_order || _state == s_running_process )          // HISTORIE
+    // HISTORIE
+    if( _state == s_start_task 
+     || _state == s_running 
+     || _state == s_running_delayed 
+     || _state == s_running_waiting_for_order 
+     || _state == s_running_process )          
     {
         if( _task->_step_count == _history.min_steps() )  _history.start();
     }
@@ -1100,6 +1106,7 @@ bool Job::do_something()
     }
 
 
+    // SPOOLER_PROCESS()
     {
         Time now = Time::now();
 
@@ -2147,6 +2154,7 @@ void Process_task::do_stop()
     {
         _job->_log.warn( "Prozess wird abgebrochen" );
 
+        LOG( "TerminateProcess(" <<  _process_handle << ",999)\n" );
         BOOL ok = TerminateProcess( _process_handle, 999 );
         if( !ok )  throw_mswin_error( "TerminateProcess" );
     }
@@ -2169,16 +2177,39 @@ void Process_task::do_end()
     if( exit_code )  throw_xc( "SPOOLER-126", exit_code );
 }
 
-//----------------------------------------------------------------------------Process_task::do_step
+//---------------------------------------------------------------------------Process_task::signaled
 
-bool Process_task::do_step()
+bool Process_task::signaled()
 {
     return !_process_handle.signaled();
 }
 
 #endif
-//------------------------------------------------------------------------------Process_event::wait
+//----------------------------------------------------------------------------Process_task::do_step
+
+bool Process_task::do_step()
+{
+    return !signaled();
+}
+
+//-----------------------------------------------------------------------------Process_event::close
 #ifndef Z_WINDOWS
+
+void Process_event::close()
+{
+    // waitpid() rufen, falls noch nicht geschehen (um Zombie zu schließen)
+
+    int status = 0;
+
+    if( log_ptr )  *log_ptr << "waitpid(" << _pid << ")  ";
+
+    int ret = waitpid( _pid, &status, WNOHANG | WUNTRACED );    // WUNTRACED: "which means to also return for children which are stopped, and whose status has not been reported."
+
+    if( log_ptr )  if( ret == -1 )  *log_ptr << "ERRNO-" << errno << "  " << strerror(errno) << endl;
+             else  *log_ptr << endl;
+}
+
+//------------------------------------------------------------------------------Process_event::wait
 
 bool Process_event::wait( double seconds )
 {
@@ -2306,8 +2337,11 @@ void Process_task::do_stop()
     {
         _job->_log.warn( "Prozess wird abgebrochen" );
 
+        LOG( "kill(" << _process_handle._pid << ",SIGTERM)\n" );
         int err = kill( _process_handle._pid, SIGTERM );
         if( err )  throw_errno( errno, "killpid" );
+
+        //? _process_handle._pid = 0;
     }
 }
 
@@ -2333,14 +2367,12 @@ void Process_task::do_end()
     if( _process_handle._process_exit_code )  throw_xc( "SPOOLER-126", _process_handle._process_exit_code );
 }
 
-//----------------------------------------------------------------------------Process_task::do_step
+//---------------------------------------------------------------------------Process_task::signaled
 
-bool Process_task::do_step()
+bool Process_task::signaled()
 {
     _process_handle.wait( 0 );
-
-    //LOG( "Process_task::do_step() signaled=" << _process_handle.signaled() << "\n" );
-    return !_process_handle.signaled();
+    return _process_handle.signaled();
 }
 
 #endif

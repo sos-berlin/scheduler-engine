@@ -1,4 +1,4 @@
-// $Id: spooler_wait.cxx,v 1.64 2002/12/09 22:53:27 jz Exp $
+// $Id: spooler_wait.cxx,v 1.65 2002/12/11 08:50:38 jz Exp $
 /*
     Hier sind implementiert
 
@@ -391,6 +391,8 @@ int Wait_handles::wait_until_2( Time until )
     {
         // Weniger gut. Wir warten auf mehrere Ereignisse und müssen diese ständig reihum abfragen.
         //Rotating_bar rotating_bar = _log->log_level() <= log_debug9;
+
+        if( _log->log_level() <= log_debug9  &&  until > Time::now() )  _log->debug9( "wait_until " + until.as_string() + " " + as_string() );
 
         while(1)
         {

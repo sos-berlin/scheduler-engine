@@ -1,4 +1,4 @@
-// $Id: spooler_task.h,v 1.83 2002/12/08 20:27:27 jz Exp $
+// $Id: spooler_task.h,v 1.84 2002/12/11 08:50:37 jz Exp $
 
 #ifndef __SPOOLER_TASK_H
 #define __SPOOLER_TASK_H
@@ -511,6 +511,7 @@ struct Job_script_task : Script_task
 
 struct Process_event : Event
 {
+    virtual void                close                       ();
     virtual bool                wait                        ( double seconds );
 
     int                        _pid;
@@ -537,6 +538,7 @@ struct Process_task : Task
     void                        do_on_success               ()                                      {}
     void                        do_on_error                 ()                                      {}
     virtual bool                has_step_count              ()                                      { return false; }
+    bool                        signaled                    ();
 
 #   ifdef Z_WINDOWS
         Process_id             _process_id;
