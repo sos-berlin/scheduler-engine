@@ -1,4 +1,4 @@
-// $Id: spooler_com.cxx,v 1.22 2002/03/02 19:22:55 jz Exp $
+// $Id: spooler_com.cxx,v 1.23 2002/03/02 23:17:06 jz Exp $
 /*
     Hier sind implementiert
 
@@ -11,6 +11,7 @@
 
 #include "../kram/sos.h"
 #include "spooler.h"
+
 
 #ifdef SYSTEM_WIN
 
@@ -762,7 +763,7 @@ STDMETHODIMP Com_spooler::get_job( BSTR job_name, Ijob** com_job )
     return hr;
 }
 
-//------------------------------------------------------------------Com_spooler::create_variable_set
+//-----------------------------------------------------------------Com_spooler::create_variable_set
 
 STDMETHODIMP Com_spooler::create_variable_set( Ivariable_set** result )
 {

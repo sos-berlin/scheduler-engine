@@ -1,4 +1,4 @@
-// $Id: spooler.odl,v 1.19 2002/03/02 19:22:55 jz Exp $
+// $Id: spooler.odl,v 1.20 2002/03/02 23:17:06 jz Exp $
 
 // Anweisung: midl /nologo /error all /out $(OutDir) $(InputPath)
 
@@ -15,6 +15,7 @@ library spooler
     interface Ilog;
     interface Itask;
     interface Ithread;
+    interface Imail;
 
     //----------------------------------------------------------------------------------------Error
 
@@ -312,6 +313,21 @@ library spooler
         HRESULT                 error                   ( [in] BSTR line );
 
         HRESULT                 log                     ( [in] enum Log_level, [in] BSTR line );
+
+        [propget]
+        HRESULT                 mail                    ( [out,retval] Imail** mail );
+
+        [propput]
+        HRESULT                 mail_on_error           ( [in] VARIANT_BOOL mail_on_error );
+
+        [propget]
+        HRESULT                 mail_on_error           ( [out,retval] VARIANT_BOOL* mail_on_error );
+
+        [propput]
+        HRESULT                 mail_on_success         ( [in] VARIANT_BOOL mail_on_success );
+
+        [propget]
+        HRESULT                 mail_on_success         ( [out,retval] VARIANT_BOOL* mail_on_success );
     }
 
     [
@@ -322,5 +338,63 @@ library spooler
         interface Ilog;
     }
 
-};
+    //-----------------------------------------------------------------------------------------Mail
 
+    [
+        uuid       ( 736AD9FC-350B-4ee0-BF82-B5CB2CFA0E3B ),
+        odl,
+        dual
+    ]
+    interface Imail : IDispatch
+    {
+        [propput]
+        HRESULT                 to                      ( [in] BSTR receipient );
+
+        [propget]
+        HRESULT                 to                      ( [out,retval] BSTR* receipient );
+
+        [propput]
+        HRESULT                 from                    ( [in] BSTR from );
+
+        [propget]
+        HRESULT                 from                    ( [out,retval] BSTR* from );
+
+      //[propput]
+      //HRESULT                 reply_to                ( [in] BSTR receipient );
+
+        [propput]
+        HRESULT                 cc                      ( [in] BSTR receipient );
+
+        [propget]
+        HRESULT                 cc                      ( [out,retval] BSTR receipient );
+
+        [propput]
+        HRESULT                 bcc                     ( [in] BSTR receipient );
+
+        [propget]
+        HRESULT                 bcc                     ( [out,retval] BSTR receipient );
+
+        [propput]
+        HRESULT                 subject                 ( [in] BSTR subject );
+
+        [propget]
+        HRESULT                 subject                 ( [out,retval] BSTR subject );
+
+        [propput]
+        HRESULT                 body                    ( [in] BSTR body );
+
+        [propget]
+        HRESULT                 body                    ( [out,retval] BSTR body );
+
+        HRESULT                 add_file                ( [in] BSTR filename );
+    }
+
+    [
+        uuid       ( D5F4C5B5-4CF7-4ca7-84C0-E1696DA56D1D )
+    ]
+    coclass Mail
+    {
+        interface Imail;
+    }
+
+};

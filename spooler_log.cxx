@@ -1,4 +1,4 @@
-// $Id: spooler_log.cxx,v 1.19 2002/03/02 20:15:02 jz Exp $
+// $Id: spooler_log.cxx,v 1.20 2002/03/02 23:17:06 jz Exp $
 
 #include "../kram/sos.h"
 #include "spooler.h"
@@ -126,7 +126,7 @@ void Log::log( Log_level level, const string& prefix, const string& line, Prefix
 
     switch( level )
     {
-      //case log_fatal: strcpy ( buffer, " [FATAL]  " );  break;
+      //case log_fatal: strcpy ( buffer2, " [FATAL]  " );  break;
         case log_error: strcpy ( buffer2, " [ERROR]  " );  break;
         case log_warn : strcpy ( buffer2, " [WARN]   " );  break;
         case log_info : strcpy ( buffer2, " [info]   " );  break;
@@ -207,6 +207,8 @@ void Prefix_log::log( Log_level level, const string& line )
 
     _log->log( level, _prefix, line, this );
 }
+
+//---------------------------------------------------------------------------------------
 
 //----------------------------------------------------------------------------------Stdout_collector
 /*

@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.77 2002/03/02 19:22:54 jz Exp $
+// $Id: spooler.cxx,v 1.78 2002/03/02 23:17:05 jz Exp $
 /*
     Hier sind implementiert
 
@@ -351,7 +351,7 @@ void Spooler::load_arg()
     _log_directory    = read_profile_string( "factory.ini", "spooler", "log-dir" );        _log_directory_as_option_set = !_log_directory.empty();
     _include_path     = read_profile_string( "factory.ini", "spooler", "include-path" );   _include_path_as_option_set = !_include_path.empty();
     _spooler_param    = read_profile_string( "factory.ini", "spooler", "param" );          _spooler_param_as_option_set = !_spooler_param.empty();
-    _debug            = read_profile_bool  ( "factory.ini", "spooler", "debug", _debug );  if( _debug )  log_level = "debug9";
+  //_debug            = read_profile_bool  ( "factory.ini", "spooler", "debug", _debug );  if( _debug )  log_level = "debug9";
     log_level         = read_profile_string( "factory.ini", "spooler", "log-level", log_level );   
 
 
