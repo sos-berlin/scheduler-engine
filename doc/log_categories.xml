@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="scheduler.xslt" type="text/xsl"?>
 
-<!--$Id: log_categories.xml,v 1.2 2004/10/22 09:33:24 jz Exp $-->
+<!--$Id: log_categories.xml,v 1.3 2004/10/27 19:19:37 jz Exp $-->
 
 <log_categories 
     title    = "Log-Kategorien" 
     base_dir = ""
     author   = "$Author: jz $"
-    date     = "$Date: 2004/10/22 09:33:24 $"
+    date     = "$Date: 2004/10/27 19:19:37 $"
 >
 
     <scheduler_keyword keyword="Log-Kategorien"/>
@@ -32,15 +32,11 @@
         <log_category name="D311"           local_default="off" title="Satz nicht gefunden"/>
     </log_category>
 
-    <log_category name="factory">
-        <description>
-            <p>
-                DocumentFactory (documentfactory.dll)
-            </p>
-        </description>
+    <log_category name="factory"        title="DocumentFactory">
+        <log_category name="processor"      title="Factory Processor (hostole.dll)"/>
     </log_category>
 
-    <log_category name="hostole"        title="Hostole">
+    <log_category name="hostole"        title="Hostole-Aufrufe (außer Factory Processor)">
     </log_category>
 
     <log_category name="ini">
