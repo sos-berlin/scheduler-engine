@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.280 2003/10/22 23:01:00 jz Exp $
+// $Id: spooler.cxx,v 1.281 2003/10/24 22:12:56 jz Exp $
 /*
     Hier sind implementiert
 
@@ -1113,7 +1113,7 @@ void Spooler::send_cmd()
     memset( &addr, 0, sizeof addr );
     addr.sin_family = PF_INET;
     int i = inet_addr( "127.0.0.1" );
-    memcpy( &addr.sin_addr, &i, 4 );
+    memcpy( &addr.sin_addr, &i, 4 );                        
     addr.sin_port = htons( _tcp_port );
 
     int ret = connect( sock, (sockaddr*)&addr, sizeof addr );
