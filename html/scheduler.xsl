@@ -89,10 +89,16 @@
             <tr>
                 <td style="padding-right: 3ex">
                     <span style="margin-top: 2px; margin-bottom: 2pt">
+                    
                         <xsl:element name="span">
-                            <xsl:attribute name="title">Version <xsl:value-of select="state/@version"/></xsl:attribute>
+                            <xsl:attribute name="title">
+                                Version <xsl:value-of select="state/@version"/>&#a,
+                                pid=<xsl:value-of select="state/@pid"/>
+                            </xsl:attribute>
+                            
                             <b>Scheduler</b>
                         </xsl:element>
+                        
                         <!--xsl:text>&#160;</xsl:text>
                         <span style="font-size: 8pt; white-space: nowrap">(<xsl:value-of select="state/@version"/>)</span-->
     
