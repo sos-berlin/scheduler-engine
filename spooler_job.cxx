@@ -1,4 +1,4 @@
-// $Id: spooler_job.cxx,v 1.93 2004/09/07 19:16:48 jz Exp $
+// $Id: spooler_job.cxx,v 1.94 2004/09/09 12:05:05 jz Exp $
 // §851: Weitere Log-Ausgaben zum Scheduler-Start eingebaut
 /*
     Hier sind implementiert
@@ -333,7 +333,7 @@ void Job::set_error( const exception& x )
     }
     else
     {
-        Xc xc ( "SOS-2000", x.what(), exception_name(x) );
+        Xc xc ( "SOS-2000", x.what(), exception_name(x).c_str() );
         set_error_xc( xc );
     }
 }

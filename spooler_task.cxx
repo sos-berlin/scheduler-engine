@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.262 2004/09/06 07:53:27 jz Exp $
+// $Id: spooler_task.cxx,v 1.263 2004/09/09 12:05:05 jz Exp $
 /*
     Hier sind implementiert
 
@@ -461,7 +461,7 @@ void Task::set_error( const exception& x )
     }
     else
     {
-        Xc xc ( "SOS-2000", x.what(), exception_name(x) );
+        Xc xc ( "SOS-2000", x.what(), exception_name(x).c_str() );
         set_error_xc( xc );
     }
 }

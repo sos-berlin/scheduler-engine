@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="scheduler.xslt" type="text/xsl"?>
 
-<!--$Id: directory_watch.xml,v 1.1 2004/09/09 10:14:34 jz Exp $-->
+<!--$Id: directory_watch.xml,v 1.2 2004/09/09 12:05:43 jz Exp $-->
 
 <description 
     title       = "Verzeichnisüberwachung" 
     base_dir    = ""
     parent_page = "job.xml"
     author      = "$Author: jz $"
-    date        = "$Date: 2004/09/09 10:14:34 $"
+    date        = "$Date: 2004/09/09 12:05:43 $"
 >
 
     <p>
@@ -67,6 +67,60 @@
             <scheduler_method class="Job" method="start_when_directory_changed" java_signature="java.lang.String"/>
             führt dann zu einem Fehler.
         </p>
+
+
+    <h2>Beispiel</h2>
+        
+        <p>
+            Konfiguration für einen Job, der alle Dateien in einem Verzeichnis verarbeitet und dann löscht
+            (Vorsicht beim Test! Der Job löscht wirklich!)
+        </p>
+    
+        <pre>
+        
+&lt;?xml version="1.0" encoding="iso-8859-1"?>
+&lt;spooler>
+    &lt;config>
+        &lt;process_classes/>
+
+        &lt;jobs>
+            &lt;job name="import">
+
+                &lt;script java_class="spooler_job.Import">&lt;![CDATA[
+
+                    package spooler_job;
+                    import java.io.File;
+
+                    public class Import  extends sos.spooler.Job_impl
+                    {
+                        File      directory = new File( "/tmp/test-import" );   // Vorsicht! Dateien werden gelöscht!
+                        File[]    files;
+                        int       index = 0;
+                                  
+                        public boolean spooler_init()
+                        {
+                            spooler_job.start_when_directory_changed( directory );
+                            files = directory.listFiles();
+                            return files.length > 0;
+                        }
+                            
+                        public boolean spooler_process()
+                        {     
+                            File file = files[ index++ ];
+                            spooler_log.info( "Verarbeite Datei " + file );
+                            file.delete();
+                            return index &lt; files.length;
+                        }
+                    }
+
+                ]]&gt;&lt;/script>
+
+                &lt;run_time once="yes"/>
+            &lt;/job>
+        &lt;/jobs>
+    &lt;/config>
+&lt;/spooler>
+        </pre>
         
                 
 </description>
