@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.119 2002/11/13 12:54:00 jz Exp $
+// $Id: spooler_task.cxx,v 1.120 2002/11/13 21:31:23 jz Exp $
 /*
     Hier sind implementiert
 
@@ -281,7 +281,7 @@ void Job::set_dom( const xml::Element_ptr& element )
         _priority         = element. int_getAttribute( "priority"   , _priority   );
         _title            = element.     getAttribute( "title"      , _title      );
         _log_append       = element.bool_getAttribute( "log_append" , _log_append );
-        order             = element.bool_getAttribute( "order"      , false       );
+        order             = element.bool_getAttribute( "order"      );
 
         if( order )
         {

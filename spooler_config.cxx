@@ -1,4 +1,4 @@
-// $Id: spooler_config.cxx,v 1.47 2002/11/13 12:53:59 jz Exp $
+// $Id: spooler_config.cxx,v 1.48 2002/11/13 21:31:23 jz Exp $
 
 //#include <precomp.h>
 
@@ -183,7 +183,7 @@ void Object_set_class::set_dom( const xml::Element_ptr& element )
 {
     _name = element.getAttribute( "name" );
 
-    string iface = as_string( variant_default( element.getAttribute( "script_interface" ), "oo" ) );
+    string iface = element.getAttribute( "script_interface", "oo" );
     _object_interface = iface == "oo";
 
     DOM_FOR_EACH_ELEMENT( element, e )
@@ -328,10 +328,10 @@ void Spooler::load_config( const xml::Element_ptr& config_element, const string&
         string log_dir =   config_element.getAttribute( "log_dir" );
 
         if( !_log_directory_as_option_set && log_dir != "" )  _log_directory = log_dir;
-        if( !_spooler_param_as_option_set )  _spooler_param = as_string( variant_default( config_element.getAttribute( "param"        ), _spooler_param ) );
-        if( !_include_path_as_option_set  )  _include_path  = as_string( variant_default( config_element.getAttribute( "include_path" ), _include_path  ) );
+        if( !_spooler_param_as_option_set )  _spooler_param = config_element.getAttribute( "param"        , _spooler_param );
+        if( !_include_path_as_option_set  )  _include_path  = config_element.getAttribute( "include_path" , _include_path  );
 
-        _free_threading_default = as_bool( as_string( variant_default( config_element.getAttribute( "free_threading" ), _free_threading_default ) ) );
+        _free_threading_default = config_element.bool_getAttribute( "free_threading", _free_threading_default );
 
         DOM_FOR_EACH_ELEMENT( config_element, e )
         {

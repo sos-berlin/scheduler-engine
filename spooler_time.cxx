@@ -1,4 +1,4 @@
-// $Id: spooler_time.cxx,v 1.20 2002/11/13 12:54:01 jz Exp $
+// $Id: spooler_time.cxx,v 1.21 2002/11/13 21:31:24 jz Exp $
 /*
     Hier sind implementiert
 
@@ -426,7 +426,7 @@ void Run_time::set_dom( const xml::Element_ptr& element )
     
 
     _set = true;
-    _once = as_bool( variant_default( element.getAttribute( "once" ), _once ) );
+    _once = element.bool_getAttribute( "once", _once );
 
     default_period.set_dom( element, NULL );
     default_day = default_period;
