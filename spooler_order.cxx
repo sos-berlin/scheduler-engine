@@ -1,5 +1,5 @@
 
-// $Id: spooler_order.cxx,v 1.35 2003/09/04 15:53:08 jz Exp $
+// $Id: spooler_order.cxx,v 1.36 2003/09/23 15:57:16 jz Exp $
 /*
     Hier sind implementiert
 
@@ -515,7 +515,7 @@ void Order_queue::add_order( Order* order )
                     {
                         _log->debug( "Auftrag mit gleicher Id wird ersetzt: " + order->obj_name() );
                         if( ins == it )  { ins = _queue.erase( it ); break; }
-                                else  it = _queue.erase( it );
+                                   else  it = _queue.erase( it );
                         id_found = true;
                     }
                 }

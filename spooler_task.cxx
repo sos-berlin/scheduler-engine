@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.194 2003/09/23 14:01:08 jz Exp $
+// $Id: spooler_task.cxx,v 1.195 2003/09/23 15:57:16 jz Exp $
 /*
     Hier sind implementiert
 
@@ -542,11 +542,6 @@ bool Task::do_something()
 
     try
     {
-        // Wenn nichts zu tun ist, dann raus. Der Job soll nicht wegen eines alten Fehlers nachträglich gestoppt werden (s.u.)
-        //if( _state == s_suspended  )  goto ENDE;
-        //if( _state == s_running_process  &&  !((Process_task*)+this)->signaled() )  goto ENDE;
-        //if( _state == s_ended      )  goto ENDE;
-
         Time now = Time::now();
 
         // Periode endet?
