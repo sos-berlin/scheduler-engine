@@ -1,4 +1,4 @@
-// $Id: spooler_module_java.cxx,v 1.39 2003/03/01 10:04:44 jz Exp $
+// $Id: spooler_module_java.cxx,v 1.40 2003/03/04 09:56:30 jz Exp $
 /*
     Hier sind implementiert
 
@@ -649,7 +649,7 @@ void Java_vm::init()
     
 
   //_options.push_back( Option( "-Xdebug" ) );      // Starts with the debugger enabled.
-    _options.push_back( Option( "-Xnocatch" ) );    // disable the catch all signal handler
+  //_options.push_back( Option( "-Xnocatch" ) );    // disable the catch all signal handler
 
     Z_DEBUG_ONLY( _options.push_back( Option( "-verbose:class,gc,jni" ) ) );
 

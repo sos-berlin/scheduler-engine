@@ -1,4 +1,4 @@
-// $Id: spooler_communication.cxx,v 1.53 2003/03/04 09:50:35 jz Exp $
+// $Id: spooler_communication.cxx,v 1.54 2003/03/04 09:56:30 jz Exp $
 /*
     Hier sind implementiert
 
@@ -417,23 +417,29 @@ void Communication::close( double wait_time )
 }
 
 //----------------------------------------------------------------Communication::main_thread_exists
-#ifndef Z_WINDOWS
 
 bool Communication::main_thread_exists()
 {
-    if( kill( _spooler->_pid, 0 ) == -1  &&  errno == ESRCH )
-    {
-        //_spooler->_log.error( "Kommunikations-Thread wird beendet, weil der Hauptthread (pid=" + as_string(_spooler->_pid) + ") verschwunden ist" );
-        //_spooler->_log verklemmt sich manchmal nach Ausgabe des Zeitstemples (vor "[ERROR]"). Vielleicht wegen einer Semaphore?
+#   ifdef Z_WINDOWS
 
-        //fprintf( stderr, "Kommunikations-Thread wird beendet, weil der Hauptthread (pid=%d) verschwunden ist\n", _spooler->_pid );
-        return false;  //?  Thread bleibt sonst hängen, wenn Java sich bei Ctrl-C sofort verabschiedet. Java lässt SIGINT zu, dieser Thread aber nicht.
-    }
+        return true;
 
-    return true;
+#    else
+
+        if( kill( _spooler->_pid, 0 ) == -1  &&  errno == ESRCH )
+        {
+            //_spooler->_log.error( "Kommunikations-Thread wird beendet, weil der Hauptthread (pid=" + as_string(_spooler->_pid) + ") verschwunden ist" );
+            //_spooler->_log verklemmt sich manchmal nach Ausgabe des Zeitstemples (vor "[ERROR]"). Vielleicht wegen einer Semaphore?
+
+            //fprintf( stderr, "Kommunikations-Thread wird beendet, weil der Hauptthread (pid=%d) verschwunden ist\n", _spooler->_pid );
+            return false;  //?  Thread bleibt sonst hängen, wenn Java sich bei Ctrl-C sofort verabschiedet. Java lässt SIGINT zu, dieser Thread aber nicht.
+        }
+
+        return true;
+
+#   endif
 }
 
-#endif
 //-----------------------------------------------------------------------Communication::bind_socket
 
 int Communication::bind_socket( SOCKET socket, struct sockaddr_in* sa )
