@@ -207,6 +207,10 @@ SOURCE=.\spooler_wait.cxx
 # PROP Default_Filter "h;hpp;hxx;hm;inl"
 # Begin Source File
 
+SOURCE=..\kram\sosobjba.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\spooler.h
 # End Source File
 # Begin Source File
