@@ -1,4 +1,4 @@
-// $Id: spooler_order.cxx,v 1.23 2002/11/24 15:33:01 jz Exp $
+// $Id: spooler_order.cxx,v 1.24 2003/04/04 12:00:55 jz Exp $
 /*
     Hier sind implementiert
 
@@ -383,6 +383,9 @@ void Order_queue::add_order( Order* order )
         bool            was_empty = _queue.empty();
         bool            id_found  = false;
 
+
+        _log->debug( "add_order " + order->obj_name() );
+
 /*
         Id_map::iterator id_it = _id_map.find( order->_id );
         if( id_it != _id_map.end() )
@@ -434,6 +437,8 @@ void Order_queue::add_order( Order* order )
 void Order_queue::remove_order( Order* order )
 {
     // Wird von Order mit geperrtem order->_lock gerufen.
+
+    _log->debug( "remove_order " + order->obj_name() );
 
     THREAD_LOCK( _lock )
     {
