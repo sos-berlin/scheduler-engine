@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="../../scheduler.xslt" type="text/xsl"?>
 
-<!--$Id: history.xml,v 1.2 2004/09/07 06:25:36 jz Exp $-->
+<!--$Id: history.xml,v 1.3 2004/09/07 19:16:49 jz Exp $-->
 
 <xml_element name          = "history" 
              title         = "Task-Historie"
@@ -9,7 +9,7 @@
              base_dir      = "../../"
              parent_page   = "../../xml_commands.xml"
              author        = "$Author: jz $"
-             date          = "$Date: 2004/09/07 06:25:36 $">
+             date          = "$Date: 2004/09/07 19:16:49 $">
 
     <xml_parent_elements>
         <xml_parent_element name="history"/>
@@ -21,6 +21,7 @@
 
     <description>
         <p>
+            Die Histore wird aus der Datenbank gelesen.
         </p>
     </description>
     

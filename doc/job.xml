@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet href="scheduler.xslt" type="text/xsl"?>
+
+<!--$Id: job.xml,v 1.1 2004/09/07 19:17:14 jz Exp $-->
+
+<description 
+    title    = "Was ist ein Job?" 
+    base_dir = ""
+    author   = "$Author: jz $"
+    date     = "$Date: 2004/09/07 19:17:14 $"
+>
+    Ein Job wird definiert in der XML-Konfiguration mit <scheduler_element name="job"/>.
+    Hier werden der Programmcode, die Laufzeit und andere Dinge angegeben.
+    
+
+    <h2>Zustand eines Jobs</h2>
+
+    <p>
+        Ein Job ist in einem der folgenden Zustände.
+    </p>
+    
+    <table cellspacing="0" cellpadding="0">
+        <col valign="baseline" style="padding-top: 1ex"/>
+        <col valign="baseline" style="padding-top: 1ex; padding-left: 2ex"/>
+        
+        <tr>
+            <td><code>pending</code></td>
+            <td>
+                Keine Task läuft. Das ist der anfängliche Zustand.
+            </td>
+        </tr>
+        <tr>
+            <td><code>running</code></td>
+            <td>
+                Wenigstens eine Task läuft.
+            </td>
+        </tr>
+        <tr>
+            <td><code>stopping</code></td>
+            <td>
+                Der Job stoppt. Der Scheduler startet keine weitere Task und die laufenden Tasks werden beendet.
+                Sobald alle Tasks des Jobs beendet sind, wechselt der Job in den Zustand <code>stopped</code>.
+                Siehe <scheduler_element name="modify_job" attribute="cmd" value="stop"/>.
+            </td>
+        </tr>
+        <tr>
+            <td><code>stopped</code></td>
+            <td>
+                Keine Task läuft und der Scheduler startet keine weitere Task.
+                Siehe <scheduler_element name="modify_job" attribute="cmd" value="stop"/>.
+            </td>
+        </tr>
+        <tr>
+            <td><code>read_error</code></td>
+            <td>
+                Das Kommando <code>reread</code> hat zu einem Fehler geführt,
+                und der Job ist unbrauchbar, weil der Programmcode nicht gelesen werden konnte.
+                Siehe <scheduler_element name="modify_job" attribute="cmd" value="reread"/>.
+            </td>
+        </tr>
+        <tr>
+            <td><code>error</code></td>
+            <td>
+                Der Scheduler startet keine weitere Task.
+                <!--Der Aufruf <scheduler_method class="Job" property="error"/> liefert den Fehler.-->
+            </td>
+        </tr>
+    </table>
+    
+    
+    <h2>Zustand des Jobs ändern</h2>
+    <p>
+        Mit dem Kommando <scheduler_element name="modify_job"/> können Sie den Zustand des Jobs ändern.
+    </p>
+                
+</description>

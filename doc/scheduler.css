@@ -19,7 +19,7 @@ p.first         { margin-top: 1ex; }
 p.mono          { font-family: Lucida Console, monospace; font-size: 9pt; margin-left: 4ex }
 .mono           { font-family: Lucida Console, monospace; font-size: 9pt }
 code            { font-family: Lucida Console, monospace; font-size: 9pt;  }
-.mark           { background-color: #FFFF00 }
+.comment        { background-color: #FFFF00 }
 
 a.silent        { text-decoration: none; color: #0000A0 }
 

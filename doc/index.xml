@@ -1,16 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="scheduler.xslt" type="text/xsl"?>
 
-<!--$Id: index.xml,v 1.9 2004/09/06 10:03:10 jz Exp $-->
+<!--$Id: index.xml,v 1.10 2004/09/07 19:16:48 jz Exp $-->
 
 <description 
     title               = "Startseite" 
     base_dir            = ""
     suppress_browse_bar = "yes"
     author              = "$Author: jz $"
-    date                = "$Date: 2004/09/06 10:03:10 $"
+    date                = "$Date: 2004/09/07 19:16:48 $"
 >
 
+<h3><a href="job.xml">Was ist ein Job?</a></h3>
+    
 <h3><a href="command_line.xml">Kommandozeile</a></h3>
 <p>
     Die Optionen an der Kommandozeile haben Vorrang.
@@ -59,7 +61,7 @@
 </p>
 
 <h3><a href="protokolle.xml">Protokolle</a></h3>
-    
+
 <h2>Ältere Dokumentation</h2>
 <p><a href="old/order/index.html">Aufträge</a>&#160;</p>
 

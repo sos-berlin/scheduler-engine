@@ -1,15 +1,15 @@
-xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!--DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"-->
 <?xml-stylesheet href="../scheduler.xslt" type="text/xsl"?>
 
-<!--$Id: modify_job.xml,v 1.5 2004/09/07 06:25:36 jz Exp $-->
+<!--$Id: modify_job.xml,v 1.6 2004/09/07 19:16:49 jz Exp $-->
 
 <xml_element name     = "modify_job" 
              title    = "Kommando an einen Job"
              base_dir = "../"
              parent_page = "../xml_commands.xml"
              author   = "$Author: jz $"
-             date     = "$Date: 2004/09/07 06:25:36 $">
+             date     = "$Date: 2004/09/07 19:16:49 $">
 
 
     <description>
@@ -32,35 +32,89 @@ xml version="1.0" encoding="utf-8"?>
                     Folgende Subkommandos sind möglich:
                 </p>
                 
-                <dl>
-                    <dt><code>cmd="stop"</code></dt>
-                    <dd>
-                    </dd>
+                <table cellspacing="0" cellpadding="0">
+                    <col valign="baseline" style="padding-top: 1ex"/>
+                    <col valign="baseline" style="padding-top: 1ex; padding-left: 2ex"/>
                     
-                    <dt><code>cmd="unstop"</code></dt>
-                    <dd>
-                    </dd>
-                    
-                    <dt><code>cmd="start"</code></dt>
-                    <dd>
-                    </dd>
-                    
-                    <dt><code>cmd="wake"</code></dt>
-                    <dd>
-                    </dd>
-                    
-                    <dt><code>cmd="end"</code></dt>
-                    <dd>
-                    </dd>
-                    
-                    <dt><code>cmd="suspend"</code></dt>
-                    <dd>
-                    </dd>
-                    
-                    <dt><code>cmd="continue"</code></dt>
-                    <dd>
-                    </dd>
-                </dl>
+                    <tr>
+                        <td><code>cmd="stop"</code></td>
+                        <td>
+                            <p>
+                                Stoppt den Job. Der Scheduler versetzt den Job in den Zustand <code>stopping</code> solange noch eine Task läuft, 
+                                dann in den Zustand <code>stopped</code>.
+                            </p>
+                            <p>
+                                Wirkt in allen Zuständen außer <code>stopping</code>, <code>stopped</code> und <code>read_error</code>.
+                            </p>                        
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><code>cmd="unstop"</code></td>
+                        <td>
+                            <p>
+                                Hebt die Zustände <code>stopping</code> und <code>stopped</code> wieder auf.
+                            </p>
+                            <p>
+                                Wirkt in allen Zuständen außer <code>stopping</code>, <code>stopped</code> und <code>error</code>.
+                            </p>                        
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><code>cmd="reread"</code></td>
+                        <td>
+                            <p>
+                                Wertet die XML-Elemente <scheduler_element name="include"/> in <scheduler_element name="script"/> neu aus.
+                                Der Scheduler liest die Dateien neu ein und lässt die nächste Task mit dem neuen Programmcode starten.
+                            </p>
+                            <p>
+                                Bei einem Fehler (z.B. wenn eine Datei nicht mehr lesbar ist), gelangt der Job in den Zustand <code>read_error</code>.
+                                Laufende Tasks laufen weiter.
+                            </p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><code>cmd="start"</code></td>
+                        <td>
+                            Erzeugt eine neue Task und reiht sie in die Task-Warteschlange ein.
+                            Dasselbe wie <scheduler_element name="start_job" parameter="job=&quot;jobname&quot;"/>.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><code>cmd="wake"</code></td>
+                        <td>
+                            <p>
+                                Wenn der Job im Zustand <code>pending</code> oder <code>stopped</code> ist, 
+                                startet dieses Kommando eine Task.
+                            </p>
+                            <p>
+                                Die <scheduler_element name="run_time"/> wird nicht beachtet.
+                            </p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><code>cmd="end"</code></td>
+                        <td>
+                            Lässt alle Tasks enden. 
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><code>cmd="suspend"</code></td>
+                        <td>
+                            Auf alle laufenden Tasks, die im Zustand <code>running</code>, <code>running_delayed</code> oder 
+                            <code>running_waiting_for_order</code> sind,
+                            wird das Kommando <code>suspend</code> angewendet,
+                            d.h. der Scheduler ruft keine weitere Methode des Jobs auf.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><code>cmd="continue"</code></td>
+                        <td>
+                            Auf alle suspendierten Tasks, die im Zustand <code>suspended</code>, <code>running_delayed</code> oder 
+                            <code>running_waiting_for_order</code> sind,
+                            wird das Kommando <code>continue</code> angewendet.
+                        </td>
+                    </tr>
+                </table>
             </description>
         </xml_attribute>
         

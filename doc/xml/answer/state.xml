@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="../../scheduler.xslt" type="text/xsl"?>
 
-<!--$Id: state.xml,v 1.2 2004/09/07 06:25:37 jz Exp $-->
+<!--$Id: state.xml,v 1.3 2004/09/07 19:16:49 jz Exp $-->
 
 <xml_element name          = "state" 
              title         = "Allgemeiner Zustand des Schedulers"
@@ -9,7 +9,7 @@
              base_dir      = "../../"
              parent_page   = "../../xml_commands.xml"
              author        = "$Author: jz $"
-             date          = "$Date: 2004/09/07 06:25:37 $">
+             date          = "$Date: 2004/09/07 19:16:49 $">
 
     <xml_parent_elements>
         <xml_parent_element name="answer"/>
@@ -50,8 +50,52 @@
 
         <xml_attribute name="state" type="state" title="Zustand des Schedulers">
             <description>
+                <table cellspacing="0" cellpadding="0">
+                    <col valign="baseline" style="padding-top: 1ex"/>
+                    <col valign="baseline" style="padding-top: 1ex; padding-left: 2ex"/>
+                    <tr>
+                        <td><code>state="starting"</code></td>
+                        <td>
+                            Der Scheduler startet.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><code>state="running"</code></td>
+                        <td>
+                            Der Scheduler läuft.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><code>state="paused"</code></td>
+                        <td>
+                            Der Scheduler ist angehalten.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><code>state="stopping"</code></td>
+                        <td>
+                            Der Scheduler ist dabei, sich zu beenden.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><code>state="stopping_let_run"</code></td>
+                        <td>
+                            Der Scheduler ist dabei, sich zu beenden, lässt aber laufende Tasks noch selbst zum Ende kommen.
+                            Zur Beendigung des Schedulers siehe <a href="../../termination.xml">hier</a>.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><code>state="stopped"</code></td>
+                        <td>
+                            Der Scheduler ist gestoppt (gleich beendet er sich).
+                            Zur Beendigung des Schedulers siehe <a href="../../termination.xml">hier</a>.
+                        </td>
+                    </tr>
+                </table>
+                <br/>
+                                
                 <p>
-                    
+                    Der Zustand kann mit dem Kommando <scheduler_element name="modify_spooler" attribute="cmd"/> beeinflusst werden.
                 </p>
             </description>
         </xml_attribute>

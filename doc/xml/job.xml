@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="../scheduler.xslt" type="text/xsl"?>
 
-<!--$Id: job.xml,v 1.9 2004/09/06 07:53:27 jz Exp $-->
+<!--$Id: job.xml,v 1.10 2004/09/07 19:16:49 jz Exp $-->
 
 <xml_element name     = "job" 
              title    = "Job"
              base_dir = "../"
              parent_page = "../konfiguration.xml"
              author   = "$Author: jz $"
-             date     = "$Date: 2004/09/06 07:53:27 $">
+             date     = "$Date: 2004/09/07 19:16:49 $">
 
     <xml_parent_elements>
         <xml_parent_element name="jobs">
@@ -57,7 +57,8 @@
         
         <xml_attribute name="process_class" type="prozessklasse">
             <description>
-                Gibt den Namen der Prozessklasse an, in der Tasks dieses Jobs laufen sollen. Siehe <scheduler_element name="process_classes"/>.
+                Gibt den Namen der Prozessklasse an, in der Tasks dieses Jobs laufen sollen. 
+                Die Prozessklassen werden mit <scheduler_element name="process_classes"/> definiert.
             </description>
         </xml_attribute>
         
@@ -131,6 +132,12 @@
 
     
     <behavior_with_xml_element element="base" complete_attribute="name"/>
+    
+    <description>
+        <p>
+            Definiert einen Job mit Programmcode, Laufzeit usw.
+        </p>
+    </description>
     
         
 </xml_element>

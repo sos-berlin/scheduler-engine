@@ -1,4 +1,4 @@
-// $Id: spooler_job.cxx,v 1.92 2004/09/06 07:53:27 jz Exp $
+// $Id: spooler_job.cxx,v 1.93 2004/09/07 19:16:48 jz Exp $
 // §851: Weitere Log-Ausgaben zum Scheduler-Start eingebaut
 /*
     Hier sind implementiert
@@ -740,7 +740,8 @@ bool Job::execute_state_cmd()
                                      && _state != s_read_error )  stop( true ),                something_done = true;
                                     break;
 
-                case sc_unstop:     if( _state == s_stopped
+                case sc_unstop:     if( _state == s_stopping
+                                     || _state == s_stopped
                                      || _state == s_error      )  set_state( s_pending ),      something_done = true,  set_next_start_time( Time::now() );
                                     break;
 
@@ -1346,7 +1347,7 @@ void Job::set_state( State new_state )
          || _state == s_read_error
          || _state == s_error      )  _next_start_time = _next_time = latter_day;
 
-        if( _spooler->_debug )
+        //if( _spooler->_debug )
         {
             if( new_state == s_stopping
              || new_state == s_stopped

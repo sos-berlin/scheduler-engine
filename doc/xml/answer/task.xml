@@ -1,29 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="../../scheduler.xslt" type="text/xsl"?>
 
-<!--$Id: task.xml,v 1.2 2004/09/07 06:25:37 jz Exp $-->
+<!--$Id: task.xml,v 1.3 2004/09/07 19:16:49 jz Exp $-->
 
 <xml_element name        = "task" 
              title       = "Task"
+             sub_directory = "answer/"
              base_dir    = "../../"
              parent_page = "../../xml_commands.xml"
              author      = "$Author: jz $"
-             date        = "$Date: 2004/09/07 06:25:37 $">
+             date        = "$Date: 2004/09/07 19:16:49 $">
 
     <xml_parent_elements>
         <xml_parent_element name="tasks"/>
     </xml_parent_elements>
     
     <xml_attributes>
-        <xml_attribute name="task" type="zahl">
-            <description>
-                <p>
-                    Die Task-Id.
-                </p>
-            </description>
-        </xml_attribute>
+        <xml_attribute name="task" type="zahl" title="Task-Id"/>
 
-        <xml_attribute name="id" type="zahl">
+        <xml_attribute name="id" type="zahl" title="(veraltet)">
             <description>
                 <p>
                     Die Task-Id.
@@ -34,90 +29,111 @@
             </description>
         </xml_attribute>
 
-        <xml_attribute name="state" type="state">
+        <xml_attribute name="state" type="state" title="Zustand der Task">
             <description>
                 <p>
-                    Der Status der Task:
+                    Folgende Werte werden zurückgegeben:
                 </p>
                 
-                <dl>
-                    <dt><code>state="none"</code></dt>
-                    <dd>
-                        Der anfängliche Status.
-                    </dd>
-                    
-                    <dt><code>state="loading"</code></dt>
-                    <dd>
-                        Der Programmcode der Task wird geladen. 
-                    </dd>
-                    
-                    <dt><code>state="waiting_for_process"</code></dt>
-                    <dd>
-                        Ein Prozess ist gestartet worden und die Task wartet darauf, dass der Prozess bereit ist.
-                    </dd>
-                    
-                    <dt><code>state="starting"</code></dt>
-                    <dd>
-                        Die Task startet. <code>spooler_init()</code> unnd <code>spooler_open()</code> werden aufgerufen.
-                    </dd>
-                    
-                    <dt><code>state="running_process"</code></dt>
-                    <dd>
-                        Nur, wenn der Job mit <scheduler_element name="process"/> definiert ist: Der Prozess läuft.
-                    </dd>
-                    
-                    <dt><code>state="running"</code></dt>
-                    <dd>
-                        Die Task läuft. <code>spooler_process()</code> wird aufgerufen.
-                    </dd>
-                    
-                    <dt><code>state="running_waiting_for_order"</code></dt>
-                    <dd>
-                        Nur bei einem auftragsgesteuerten Job: 
-                        Die Task ist bereit, den nächsten Auftrag auszuführen, aber es liegt kein Auftrag vor.
-                    </dd>
-                    
-                    <dt><code>state="running_delayed"</code></dt>
-                    <dd>
-                        Die Task hat <scheduler_method class="Task" property="delay_spooler_process"/> aufgerufen und wird verzögert.
-                    </dd>
-                    
-                    <dt><code>state="ending"</code></dt>
-                    <dd>
-                        <code>spooler_process()</code> wird nicht mehr aufgerufen.
-                        Der nächste Aufruf ist <code>spooler_close()</code>.
-                    </dd>
-                    
-                    <dt><code>state="on_success"</code></dt>
-                    <dd>
-                        <code>spooler_on_success()</code> wird aufgerufen.
-                    </dd>
-                    
-                    <dt><code>state="on_error"</code></dt>
-                    <dd>
-                        <code>spooler_on_error()</code> wird aufgerufen.
-                    </dd>
-                    
-                    <dt><code>state="exit"</code></dt>
-                    <dd>
-                        <code>spooler_exit()</code> wird aufgerufen.
-                    </dd>
-                    
-                    <dt><code>state="release"</code></dt>
-                    <dd>
-                        Das Task-Objekt wird freigegeben, das Programm wird beendet.
-                    </dd>
-                    
-                    <dt><code>state="ended"</code></dt>
-                    <dd>
-                        Das Task-Objekt ist freigeben.
-                    </dd>
-                    
-                    <dt><code>state="closed"</code></dt>
-                    <dd>
-                        Endzustand.
-                    </dd>
-                </dl>
+                <table cellspacing="0" cellpadding="0">
+                    <col valign="baseline" style="padding-top: 1ex"/>
+                    <col valign="baseline" style="padding-top: 1ex; padding-left: 2ex"/>
+                    <tr>
+                        <td><code>state="none"</code>
+                        </td>
+                        <td>
+                            Der anfängliche Status.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><code>state="loading"</code></td>
+                        <td>
+                            Der Programmcode der Task wird geladen. 
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><code>state="waiting_for_process"</code></td>
+                        <td>
+                            Ein Prozess ist gestartet worden und die Task wartet darauf, dass der Prozess bereit ist.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><code>state="starting"</code></td>
+                        <td>
+                            Die Task startet. <scheduler_method class="Job_impl" method="spooler_init"/> 
+                            und <scheduler_method class="Job_impl" method="spooler_open"/> werden aufgerufen.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><code>state="running_process"</code></td>
+                        <td>
+                            Nur, wenn der Job mit <scheduler_element name="process"/> definiert ist: Der Prozess läuft.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><code>state="running"</code></td>
+                        <td>
+                            Die Task läuft. 
+                            <scheduler_method class="Job_impl" method="spooler_process"/> wird aufgerufen.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><code>state="running_waiting_for_order"</code></td>
+                        <td>
+                            Nur bei einem auftragsgesteuerten Job: 
+                            Die Task ist bereit, den nächsten Auftrag auszuführen, aber es liegt kein Auftrag vor.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><code>state="running_delayed"</code></td>
+                        <td>
+                            Die Task hat <scheduler_method class="Task" property="delay_spooler_process"/> aufgerufen und wird verzögert.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><code>state="ending"</code></td>
+                        <td>
+                            <scheduler_method class="Job_impl" method="spooler_process"/> wird nicht mehr aufgerufen.
+                            Der nächste Aufruf ist <scheduler_method class="Job_impl" method="spooler_close"/>.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><code>state="on_success"</code></td>
+                        <td>
+                            <scheduler_method class="Job_impl" method="spooler_on_success"/> wird aufgerufen.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><code>state="on_error"</code></td>
+                        <td>
+                            <scheduler_method class="Job_impl" method="spooler_on_error"/> wird aufgerufen.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><code>state="exit"</code></td>
+                        <td>
+                            <scheduler_method class="Job_impl" method="spooler_exit"/> wird aufgerufen.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><code>state="release"</code></td>
+                        <td>
+                            Das Task-Objekt wird freigegeben, das Programm wird beendet.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><code>state="ended"</code></td>
+                        <td>
+                            Das Task-Objekt ist freigeben.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><code>state="closed"</code></td>
+                        <td>
+                            Endzustand.
+                        </td>
+                    </tr>
+                </table>
             </description>
         </xml_attribute>
 
@@ -129,7 +145,7 @@
             </description>
         </xml_attribute>
 
-        <xml_attribute name="running_since" type="yyyy-mm-dd hh:mm:ss.mmm">
+        <xml_attribute name="running_since" type="yyyy-mm-td hh:mm:ss.mmm">
             <description>
                 <p>
                     Wenn die Task geladen oder gestartet worden ist: Zeitpunkt des Starts der Task.
@@ -137,7 +153,7 @@
             </description>
         </xml_attribute>
 
-        <xml_attribute name="enqueued" type="yyyy-mm-dd hh:mm:ss.mmm">
+        <xml_attribute name="enqueued" type="yyyy-mm-td hh:mm:ss.mmm">
             <description>
                 <p>
                     Zeitpunkt, wann die Task in die Task-Warteschlange eingereiht worden ist.
@@ -145,7 +161,7 @@
             </description>
         </xml_attribute>
 
-        <xml_attribute name="start_at" type="yyyy-mm-dd hh:mm:ss.mmm">
+        <xml_attribute name="start_at" type="yyyy-mm-td hh:mm:ss.mmm">
             <description>
                 <p>
                     Zeitpunkt, wann die Task gestartet werden soll (s. <scheduler_element name="start_job" attribute="at"/>).
@@ -153,7 +169,7 @@
             </description>
         </xml_attribute>
 
-        <xml_attribute name="idle_since" type="yyyy-mm-dd hh:mm:ss.mmm">
+        <xml_attribute name="idle_since" type="yyyy-mm-td hh:mm:ss.mmm">
             <description>
                 <p>
                     Zeitpunkt, seit dem die Task im Zustand <code>waiting_for_order</code> ist.
@@ -161,7 +177,7 @@
             </description>
         </xml_attribute>
 
-        <xml_attribute name="in_process_since" type="yyyy-mm-dd hh:mm:ss.mmm">
+        <xml_attribute name="in_process_since" type="yyyy-mm-td hh:mm:ss.mmm">
             <description>
                 <p>
                     Zeitpunkt, seit dem <code>spooler_process()</code>, also der gerade aktive Jobschritt ausgeführt wird.
@@ -174,59 +190,72 @@
                 <p>
                     Anlass des Starts.
                 </p>
-                <dl>
-                    <dt><code>cause="none"</code></dt>
-                    <dd>
-                        (Sollte nicht vorkommen.)
-                    </dd>
-                    
-                    <dt><code>cause="period_once"</code></dt>
-                    <dd>
-                        Wegen <scheduler_element name="period" attribute="once" value="yes"/>.
-                    </dd>
-                    
-                    <dt><code>cause="period_single"</code></dt>
-                    <dd>
-                        Wegen <scheduler_element name="period"/>, Attribut <code>single_start</code>.
-                    </dd>
-                    
-                    <dt><code>cause="period_repeat"</code></dt>
-                    <dd>
-                        Wegen <scheduler_element name="period"/>, Attribut <code>repeat</code>.
-                    </dd>
-                    
-                    <dt><code>cause="queue"</code></dt>
-                    <dd>
-                        Die Task war in der Task-Warteschlange, ohne feste Startzeit.
-                    </dd>
-                    
-                    <dt><code>cause="queue_at"</code></dt>
-                    <dd>
-                        Die Task war in der Task-Warteschlange, mit fester Startzeit (s. <scheduler_element name="start_job" attribute="at"/>).
-                    </dd>
-                    
-                    <dt><code>cause="directory"</code></dt>
-                    <dd>
-                        Die Verzeichnisüberwachung (<scheduler_method class="Job" method="start_when_directory_changed"/>) 
-                        hat eine Änderung eines Verzeichnisses festgestellt.
-                    </dd>
-                    
-                    <dt><code>cause="delay_after_error"</code></dt>
-                    <dd>
-                        Der Job geriet in den Fehlerzustand, wurde wegen <scheduler_method class="Job" property="delay_after_error"/>
-                        verzögert und wird jetzt erneut gestartet.
-                    </dd>
-                    
-                    <dt><code>cause="order"</code></dt>
-                    <dd>
-                        Ein Auftrag liegt vor.
-                    </dd>
-                    
-                    <dt><code>cause="wake"</code></dt>
-                    <dd>
-                        Siehe <scheduler_element name="modify_job" attribute="cmd" value="wake"/>.
-                    </dd>
-                </dl>
+                <table cellspacing="0" cellpadding="0">
+                    <col valign="baseline" style="padding-top: 1ex"/>
+                    <col valign="baseline" style="padding-top: 1ex; padding-left: 2ex"/>
+                    <tr>
+                        <td><code>cause="none"</code></td>
+                        <td>
+                            (Sollte nicht vorkommen.)
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><code>cause="period_once"</code></td>
+                        <td>
+                            Wegen <scheduler_element name="period" attribute="once" value="yes"/>.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><code>cause="period_single"</code></td>
+                        <td>
+                            Wegen <scheduler_element name="period"/>, Attribut <code>single_start</code>.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><code>cause="period_repeat"</code></td>
+                        <td>
+                            Wegen <scheduler_element name="period"/>, Attribut <code>repeat</code>.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><code>cause="queue"</code></td>
+                        <td>
+                            Die Task war in der Task-Warteschlange, ohne feste Startzeit.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><code>cause="queue_at"</code></td>
+                        <td>
+                            Die Task war in der Task-Warteschlange, mit fester Startzeit (s. <scheduler_element name="start_job" attribute="at"/>).
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><code>cause="directory"</code></td>
+                        <td>
+                            Die Verzeichnisüberwachung (<scheduler_method class="Job" method="start_when_directory_changed"/>) 
+                            hat eine Änderung eines Verzeichnisses festgestellt.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><code>cause="delay_after_error"</code></td>
+                        <td>
+                            Der Job geriet in den Fehlerzustand, wurde wegen <scheduler_method class="Job" property="delay_after_error"/>
+                            verzögert und wird jetzt erneut gestartet.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><code>cause="order"</code></td>
+                        <td>
+                            Ein Auftrag liegt vor.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><code>cause="wake"</code></td>
+                        <td>
+                            Siehe <scheduler_element name="modify_job" attribute="cmd" value="wake"/>.
+                        </td>
+                    </tr>
+                </table>
             </description>
         </xml_attribute>
 

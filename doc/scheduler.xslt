@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding="utf-8"?>
-<!-- $Id: scheduler.xslt,v 1.23 2004/09/07 06:25:36 jz Exp $ -->
+<!-- $Id: scheduler.xslt,v 1.24 2004/09/07 19:16:49 jz Exp $ -->
 
 <!--
     Änderungswünsche:
@@ -184,18 +184,14 @@
                 <xsl:apply-templates select="description"/>
                 
                 <xsl:for-each select="behavior_with_xml_element">
-                    <p class="example">
-                        Verhalten mit 
+                    <h2>
+                        Verhalten mit&#160;
                         <xsl:call-template name="scheduler_element">
                             <xsl:with-param name="name" select="@element"/>
                         </xsl:call-template>
-                    </p>
+                    </h2>
 
                     <div class="indent">
-                        <!--xsl:if test="@allowed='yes' and /xml_element/xml_attributes/xml_attribute">
-                            Attribute werden überschrieben.
-                            <p/>
-                        </xsl:if-->
                         <xsl:if test="@replace_attribute">
                             Ersetzt ein Element <code>&lt;<xsl:value-of select="parent::*/@name"/>></code>
                             an der entsprechenden Stelle
@@ -620,6 +616,18 @@
         </element>
     </xsl:template>
 
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~scheduler_comment-->
+    <!-- Für Bemerkungen und Anregungen, die nicht für die Anwender gedacht sind -->
+    
+    <xsl:template match="scheduler_comment" mode="description">
+        <span class="comment">
+            <xsl:for-each select="@*">
+                <xsl:copy><xsl:value-of select="."/></xsl:copy>
+            </xsl:for-each>
+            <xsl:apply-templates mode="description"/>
+        </span>
+    </xsl:template>
+
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~scheduler_element-->
 
     <xsl:template match="scheduler_element" mode="description">
@@ -779,10 +787,11 @@
 
     <xsl:template match="scheduler_method" mode="description">
         <xsl:call-template name="scheduler_method">
-            <xsl:with-param name="class"     select="@class"/>
-            <xsl:with-param name="method"    select="@method"/>
-            <xsl:with-param name="property"  select="@property"/>
-            <xsl:with-param name="signature" select="@signature"/>
+            <xsl:with-param name="class"            select="@class"/>
+            <xsl:with-param name="method"           select="@method"/>
+            <xsl:with-param name="property"         select="@property"/>
+            <xsl:with-param name="java_signature"   select="@java_signature"/>
+            <xsl:with-param name="access"           select="@access"/>
         </xsl:call-template>
     </xsl:template>
 
@@ -792,11 +801,35 @@
         <xsl:param name="class"/>
         <xsl:param name="method"/>
         <xsl:param name="property"/>
-        <xsl:param name="signature"/>
+        <xsl:param name="java_signature"/>
+        <xsl:param name="access"/>          <!-- "read" (default), "write" -->
+        
+        <xsl:variable name="java_method">
+            <xsl:choose>
+                <xsl:when test="$access = 'write'"><xsl:value-of select="concat( 'set_', $property )"/></xsl:when>
+                <xsl:otherwise                    ><xsl:value-of select="$method | $property"/></xsl:otherwise>
+            </xsl:choose>
+        </xsl:variable>
         
         <xsl:element name="a">
-            <xsl:attribute name="href"><xsl:value-of select="$base_dir"/>javadoc/sos/spooler/<xsl:value-of select="@class"/>.html#<xsl:value-of select="@method | @property"/>(<xsl:value-of select="@signature"/>)</xsl:attribute>
-            <code><xsl:value-of select="@class"/>.<xsl:value-of select="@method | @property"/>()</code>
+            <xsl:attribute name="class">silent</xsl:attribute>
+            <xsl:attribute name="href"><xsl:value-of select="$base_dir"/>javadoc/sos/spooler/<xsl:value-of select="@class"/>.html#<xsl:value-of select="$java_method"/>(<xsl:value-of select="$java_signature"/>)</xsl:attribute>
+            <code>
+                <xsl:value-of select="@class"/>
+                
+                <xsl:text>.</xsl:text>
+
+                <xsl:value-of select="$java_method"/>()
+<!--                
+                <xsl:if test="@method">
+                    <xsl:value-of select="@method"/>()
+                </xsl:if>
+                
+                <xsl:if test="@property">
+                    <xsl:value-of select="@property"/>
+                </xsl:if>
+-->                
+            </code>
         </xsl:element>
         
     </xsl:template>
