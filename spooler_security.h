@@ -1,4 +1,4 @@
-// $Id: spooler_security.h,v 1.1 2001/01/25 20:28:38 jz Exp $
+// $Id: spooler_security.h,v 1.2 2001/02/12 09:46:11 jz Exp $
 
 #ifndef __SPOOLER_SECURITY_H
 #define __SPOOLER_SECURITY_H
@@ -30,6 +30,7 @@ struct Security
                                 Security                    ( Spooler* spooler ) : _spooler(spooler) {}
 
     void                        set_xml                     ( const xml::Element_ptr& );
+    void                        clear                       ()                                  { _host_map.clear(); }
 
     Level                       level                       ( const in_addr& host );
 

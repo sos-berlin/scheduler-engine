@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 
-<!-- $Id: spooler.xml,v 1.29 2001/02/10 11:38:06 jz Exp $   (C) 2001 SOS GmbH Berlin -->
+<!-- $Id: spooler.xml,v 1.30 2001/02/12 09:46:10 jz Exp $   (C) 2001 SOS GmbH Berlin -->
 
 <!DOCTYPE spooler SYSTEM "spooler.dtd">
 
@@ -26,9 +26,7 @@
 
             <script use_engine="job"><![CDATA[
 
-spooler_log.msg( "hostware ?? ----------------------------------------" )
 set hw = createobject("hostware.global")
-spooler_log.msg( "hostware ok ----------------------------------------" )
 
 spooler_log.msg "param1=" & spooler_task.params.var("param1")
 
@@ -230,6 +228,8 @@ my $object_set_class;
 my $object;
 $script_index = 1;
 
+#sub spooler_init() { $spooler_log->msg( "spooler_init" ); return 0; }
+
 sub spooler_open()
 {
     $spooler_log->msg( "high_level=" . $spooler_task->object_set->high_level );
@@ -400,7 +400,6 @@ params.var("param1")="heinz"
 'spooler.job("Aufbereiten").start( params )
 
 
-
 function spooler_process()
     fehler=1/1
     spooler_process=false
@@ -425,7 +424,7 @@ end sub
                     <script language="PerlScript" use_engine="task"><![CDATA[
 
 $spooler_log->msg( "*Job perl" );
-'$spooler->job("Aufbereiten")->start();
+$spooler->job("Aufbereiten")->start();
 
 sub spooler_exit()
 {

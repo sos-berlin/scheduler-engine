@@ -1,4 +1,4 @@
-// $Id: spooler_script.cxx,v 1.4 2001/02/04 17:12:43 jz Exp $
+// $Id: spooler_script.cxx,v 1.5 2001/02/12 09:46:11 jz Exp $
 /*
     Hier sind implementiert
 
@@ -14,6 +14,21 @@ using namespace std;
 
 namespace sos {
 namespace spooler {
+
+//-------------------------------------------------------------------------------------check_result
+
+bool check_result( const CComVariant& vt )
+{
+    if( vt.vt == VT_EMPTY    )  return true;                       // Keine Rückgabe? True, also weiter machen
+    if( vt.vt == VT_DISPATCH )  return vt.pdispVal != NULL;        // Nothing => False, also Ende
+    if( vt.vt == VT_BOOL     )  return vt.bVal != NULL;            // Nothing => False, also Ende
+
+    CComVariant v = vt;
+
+    HRESULT hr = v.ChangeType( VT_BOOL );
+    if( FAILED(hr) )  throw_ole( hr, "VariantChangeType" );
+    return vt.bVal != 0;
+}
 
 //----------------------------------------------------------------------------Script_instance::init
 
@@ -56,7 +71,7 @@ void Script_instance::close()
         {
             call_if_exists( "spooler_exit" );
         }
-        catch( const Xc& x ) { _spooler->_log.error( x.what() ); }
+        catch( const Xc& x ) { _log->error( x.what() ); }
 
         _script_site->close_engine();
         _script_site = NULL;
@@ -112,6 +127,13 @@ void Script_instance::optional_property_put( const char* name, const CComVariant
     {
         // Ignorieren, wenn das Objekt die Eigenschaft nicht kennt
     }
+}
+
+//-----------------------------------------------------------------------Script_instance::interrupt
+
+void Script_instance::interrupt()
+{
+    if( _script_site )  _script_site->interrupt();
 }
 
 //-------------------------------------------------------------------------------------------------

@@ -1,4 +1,4 @@
-// $Id: spooler_wait.cxx,v 1.11 2001/02/08 11:21:16 jz Exp $
+// $Id: spooler_wait.cxx,v 1.12 2001/02/12 09:46:11 jz Exp $
 /*
     Hier sind implementiert
 
@@ -229,7 +229,7 @@ void Wait_handles::wait_until( Time until )
 {
     THREAD_LOCK( _lock )
     {
-        FOR_EACH( vector<Event*>, _events, it)  if( (*it)->signaled() ) return;
+        FOR_EACH( vector<Event*>, _events, it)  if( (*it)->signaled() ) { _log->msg( "Ereignis " + (*it)->name() ); return; }
         _waiting = true;
     }
 
@@ -251,10 +251,19 @@ void Wait_handles::wait_until( Time until )
 
         if( ret >= WAIT_OBJECT_0  &&  ret < WAIT_OBJECT_0 + _handles.size() )
         {
-            Event* event = _events[ ret - WAIT_OBJECT_0 ];
-            event->set_signal();
-            _log->msg( "Ereignis " + event->name() );
-            return;
+            _waiting = false;
+
+            //while(1)
+            {
+                Event* event = _events[ ret - WAIT_OBJECT_0 ];
+                event->set_signal();
+                _log->msg( "Ereignis " + event->name() );
+              //DWORD ret = WaitForMultipleObjects( _handles.size(), &_handles[0], FALSE, 0 ); 
+              //if( ret == WAIT_TIMEOUT )  break;
+              //if( ret >= WAIT_OBJECT_0  &&  ret < WAIT_OBJECT_0 + _handles.size() )  continue;
+              //throw_mswin_error( "WaitForMultipleObjects" );
+            }
+            break;
         }
         else
         if( ret == WAIT_OBJECT_0 + _handles.size() )
@@ -267,7 +276,6 @@ void Wait_handles::wait_until( Time until )
             again = true;
     }
 
-    _waiting = false;
 }
 
 #endif

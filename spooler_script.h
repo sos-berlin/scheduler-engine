@@ -1,10 +1,12 @@
-// $Id: spooler_script.h,v 1.3 2001/02/04 17:12:43 jz Exp $
+// $Id: spooler_script.h,v 1.4 2001/02/12 09:46:11 jz Exp $
 
 #ifndef __SPOOLER_SCRIPT_H
 #define __SPOOLER_SCRIPT_H
 
 namespace sos {
 namespace spooler {
+
+bool                            check_result                ( const CComVariant& vt );
 
 //-------------------------------------------------------------------------------------------Script
 
@@ -33,7 +35,7 @@ struct Script
 
 struct Script_instance
 {
-                                Script_instance             ( Spooler* spooler )            : _loaded(false), _spooler(spooler) {}
+                                Script_instance             ( Prefix_log* log )            : _loaded(false), _log(log) {}
 
     void                        init                        ( const string& language );
     void                        load                        ( const Script& );
@@ -48,8 +50,11 @@ struct Script_instance
     void                        optional_property_put       ( const char* name, const CComVariant& v );
     bool                        name_exists                 ( const char* name )            { return _script_site->name_exists(name); }
     bool                        loaded                      ()                              { return _loaded; }
+    void                        interrupt                   ();
 
-    Spooler*                   _spooler;
+                                operator bool               () const                        { return _script_site != NULL; }
+
+    Prefix_log*                _log;
     CComPtr<Script_site>       _script_site;
     bool                       _loaded;
     map<string,bool>           _names;

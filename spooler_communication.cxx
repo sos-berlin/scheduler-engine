@@ -1,4 +1,4 @@
-// $Id: spooler_communication.cxx,v 1.23 2001/02/08 11:21:15 jz Exp $
+// $Id: spooler_communication.cxx,v 1.24 2001/02/12 09:46:10 jz Exp $
 /*
     Hier sind implementiert
 
@@ -654,6 +654,8 @@ bool Communication::is_started()
 int Communication::go()
 {
     int result;
+
+    SetThreadPriority( GetCurrentThread(), THREAD_PRIORITY_HIGHEST );
 
     Ole_initialize ole;
 

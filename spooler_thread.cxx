@@ -1,4 +1,4 @@
-// $Id: spooler_thread.cxx,v 1.4 2001/02/08 11:21:16 jz Exp $
+// $Id: spooler_thread.cxx,v 1.5 2001/02/12 09:46:11 jz Exp $
 /*
     Hier sind implementiert
 
@@ -8,7 +8,7 @@
 
 #include "../kram/sos.h"
 #include "spooler.h"
-
+#include "../kram/sleep.h"
 
 namespace sos {
 namespace spooler {
@@ -21,7 +21,7 @@ Thread::Thread( Spooler* spooler )
     _spooler(spooler),
     _log(&spooler->_log),
     _wait_handles(&_log),
-    _script_instance(spooler)
+    _script_instance(&_log)
 {
     _com_thread = new Com_thread( this );
 }
@@ -104,7 +104,8 @@ void Thread::start()
 
         _script_instance.load( _script );
 
-        _script_instance.call_if_exists( "spooler_init" );
+        bool ok = check_result( _script_instance.call_if_exists( "spooler_init" ) );
+        if( !ok )  throw_xc( "SPOOLER-127" );
     }
 
     FOR_EACH( Job_list, _job_list, job )  (*job)->init();
@@ -222,6 +223,8 @@ void Thread::wait()
 int Thread::run_thread()
 {
     int ret = 1;
+    int nothing_done_count = 0;
+    int nothing_done_max   = _job_list.size() * 2 + 3;
 
     try
     {
@@ -236,8 +239,12 @@ int Thread::run_thread()
             if( _spooler->_state == Spooler::s_running ) 
             {
                 if( _stop )  break;
+
                 bool something_done = step();
-                if( !something_done )  _log.warn( "Nichts getan" );
+
+                if( something_done )  nothing_done_count = 0;
+                else 
+                if( ++nothing_done_count > nothing_done_max )  _log.warn( "Nichts getan" ), sos_sleep(1);  // Warten, um bei Wiederholung zu bremsen
             }
         }
 
@@ -302,14 +309,37 @@ void Thread::stop_thread()
     }
 }
 
+//------------------------------------------------------------------------Thread::interrupt_scripts
+
+void Thread::interrupt_scripts()
+{
+    THREAD_LOCK( _lock )
+    {
+        FOR_EACH( Job_list, _job_list, it )  (*it)->interrupt_script();
+    }
+}
+
 //----------------------------------------------------------------Thread::wait_until_thread_stopped
 
-void Thread::wait_until_thread_stopped()
+void Thread::wait_until_thread_stopped( Time until )
 {
     if( _thread_handle )    // Thread überhaupt schon gestartet?
     {
         _log.msg( "waiting ..." );
-        wait_for_event( _thread_handle, latter_day );      // Warten, bis thread terminiert ist
+//      bool ok = wait_for_event( _thread_handle, until );      // Warten, bis thread terminiert ist
+        
+//      if( !ok ) 
+        {
+//          _log.msg( "Skripten werden unterbrochen ..." );
+            
+//          try { 
+                interrupt_scripts(); 
+//          } 
+//          catch( const Xc& x) { _log.error(x.what()); }
+
+            wait_for_event( _thread_handle, latter_day );      // Warten, bis thread terminiert ist
+        }
+
         _log.msg( "... stopped" );
     }
 }

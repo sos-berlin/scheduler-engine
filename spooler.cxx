@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.49 2001/02/08 11:21:14 jz Exp $
+// $Id: spooler.cxx,v 1.50 2001/02/12 09:46:10 jz Exp $
 /*
     Hier sind implementiert
 
@@ -65,6 +65,7 @@ Spooler::~Spooler()
     _object_set_class_list.clear();
 
     _communication.close(0.0);
+    _security.clear();
 
     _event.close();
     _wait_handles.close();
@@ -79,7 +80,10 @@ Spooler::~Spooler()
 void Spooler::stop_threads()
 {
     { FOR_EACH( Thread_list, _thread_list, it )  (*it)->stop_thread(); }
-    { FOR_EACH( Thread_list, _thread_list, it )  (*it)->wait_until_thread_stopped(); }
+
+    Time until = Time::now() + 10;
+
+    { FOR_EACH( Thread_list, _thread_list, it )  (*it)->wait_until_thread_stopped( until ); }
 }
 
 //---------------------------------------------------------------------------------Spooler::get_job
@@ -122,9 +126,9 @@ void Spooler::set_state( State state )
 
 void Spooler::load_arg()
 {
+    _spooler_id       = read_profile_string( "factory.ini", "spooler", "id" );
     _config_filename  = read_profile_string( "factory.ini", "spooler", "config" );
     _log_directory    = read_profile_string( "factory.ini", "spooler", "log-dir" );
-    _spooler_id       = read_profile_string( "factory.ini", "spooler", "id" );
     _spooler_param    = read_profile_string( "factory.ini", "spooler", "param" );
 
     try
@@ -175,6 +179,8 @@ void Spooler::load()
     Command_processor cp = this;
 
     tzset();
+
+    _security.clear();             
     load_arg();
 
     cp.execute_2( file_as_string( _config_filename ) );
@@ -307,6 +313,8 @@ int Spooler::launch( int argc, char** argv )
 {
     _argc = argc;
     _argv = argv;
+
+    SetThreadPriority( GetCurrentThread(), THREAD_PRIORITY_ABOVE_NORMAL );
 
     _event.set_name( "Spooler" );
     _event.add_to( &_wait_handles );

@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.23 2001/02/10 11:38:07 jz Exp $
+// $Id: spooler_task.cxx,v 1.24 2001/02/12 09:46:11 jz Exp $
 /*
     Hier sind implementiert
 
@@ -26,21 +26,6 @@ static const char spooler_process_name   [] = "spooler_process";
 static const char spooler_level_name     [] = "spooler_level";
 static const char spooler_on_error_name  [] = "spooler_on_error";
 static const char spooler_on_success_name[] = "spooler_on_success";
-
-//---------------------------------------------------------------------check_spooler_process_result
-
-bool check_spooler_process_result( const CComVariant& vt )
-{
-    if( vt.vt == VT_EMPTY    )  return true;                       // Keine Rückgabe? True, also weiter machen
-    if( vt.vt == VT_DISPATCH )  return vt.pdispVal != NULL;        // Nothing => False, also Ende
-    if( vt.vt == VT_BOOL     )  return vt.bVal != NULL;            // Nothing => False, also Ende
-
-    CComVariant v = vt;
-
-    HRESULT hr = v.ChangeType( VT_BOOL );
-    if( FAILED(hr) )  throw_ole( hr, "VariantChangeType", spooler_process_name );
-    return vt.bVal != 0;
-}
 
 //----------------------------------------------------------------------------Spooler_object::level
 
@@ -80,8 +65,9 @@ Object_set::~Object_set()
 
 //---------------------------------------------------------------------------------Object_set::open
 
-void Object_set::open()
+bool Object_set::open()
 {
+    bool        ok;
     CComVariant object_set_vt;
 
     if( _class->_object_interface )
@@ -98,7 +84,10 @@ void Object_set::open()
         _idispatch = _task->_job->_script_instance._script_site->dispatch();
     }
 
-    if( com_name_exists( _idispatch, spooler_open_name ) )  com_call( _idispatch, spooler_open_name );
+    if( com_name_exists( _idispatch, spooler_open_name ) )  ok = check_result( com_call( _idispatch, spooler_open_name ) );
+                                                      else  ok = true;
+
+    return ok && !_task->_job->has_error();
 }
 
 //--------------------------------------------------------------------------------Object_set::close
@@ -150,7 +139,7 @@ bool Object_set::step( Level result_level )
     }
     else
     {
-        return check_spooler_process_result( _task->_job->_script_instance.call( spooler_process_name, result_level ) );
+        return check_result( _task->_job->_script_instance.call( spooler_process_name, result_level ) );
     }
 }
 
@@ -168,8 +157,8 @@ Job::Job( Thread* thread )
     _zero_(this+1),
     _thread(thread),
     _spooler(thread->_spooler),
-    _script_instance(thread->_spooler),
-    _log( &thread->_spooler->_log )
+    _log( &thread->_spooler->_log ),
+    _script_instance(&_log)
 {
     _params = new Com_variable_set;
 }
@@ -222,7 +211,8 @@ void Job::close_task()
         if( _state != s_stopped )  set_state( s_ended );
     }
 
-    if( _script_ptr  &&  _script_ptr->_reuse == Script::reuse_task )  close_engine();
+    if( _load_error 
+      || _script_ptr  &&  _script_ptr->_reuse == Script::reuse_task )  close_engine();
 }
 
 //----------------------------------------------------------------------------------------Job::init
@@ -254,6 +244,7 @@ void Job::create_task()
     if( _task )  throw_xc( "SPOOLER-118", _name, state_name() );
 
     _error = NULL;
+    _load_error = false;
     _repeat = 0;
 
     if( !_process_filename.empty() )   _task = SOS_NEW( Process_task( _spooler, this ) );
@@ -305,7 +296,7 @@ void Job::start_when_directory_changed( const string& directory_name )
 
 //----------------------------------------------------------------------------------------Job::load
 
-void Job::load()
+bool Job::load()
 {
     _script_instance.init( _script_ptr->_language );
 
@@ -316,17 +307,18 @@ void Job::load()
     _script_instance.add_obj( (IDispatch*)_com_task             , "spooler_task"   );
 
     _script_instance.load( *_script_ptr );
-    if( has_error() )  return;
+    if( has_error() )  { _load_error = true; return false; }
 
-    _script_instance.call_if_exists( spooler_init_name );
-    if( has_error() )  return;
+    bool ok = check_result( _script_instance.call_if_exists( spooler_init_name ) );
+    if( !ok || has_error() )  { _load_error = true; return false; }
 
     _has_spooler_process = _script_instance.name_exists( spooler_process_name );
 
     set_state( s_loaded );
+    return true;
 }
 
-//------------------------------------------------------------------------------------------Job::end
+//-----------------------------------------------------------------------------------------Job::end
 
 void Job::end()
 {
@@ -337,7 +329,7 @@ void Job::end()
     set_state( s_ended );
 }
 
-//-----------------------------------------------------------------------------------------Job::stop
+//----------------------------------------------------------------------------------------Job::stop
 
 void Job::stop()
 {
@@ -346,10 +338,20 @@ void Job::stop()
     end();
     close_engine();
 
+    // Kein Signal mehr soll kommen, wenn Job gestoppt:
+    _directory_watcher.close();
+
     set_state( s_stopped );
 }
 
-//--------------------------------------------------------------------------Job::set_next_start_time
+//----------------------------------------------------------------------------Job::interrupt_script
+
+void Job::interrupt_script()
+{
+    if( _script_instance )  _script_instance.interrupt();
+}
+
+//-------------------------------------------------------------------------Job::set_next_start_time
 
 void Job::set_next_start_time( Time now )
 {
@@ -375,6 +377,8 @@ void Job::set_next_start_time( Time now )
 
 bool Job::do_something()
 {
+    bool ok = true;
+
     if( _state_cmd )
     {
         switch( _state_cmd )
@@ -414,32 +418,31 @@ bool Job::do_something()
 
     if( _state == s_task_created )
     {
-        _task->start();
-        do_a_step = true;
+        ok = _task->start();
+        if( ok )  do_a_step = true;
     }
 
-    if( !has_error() )
+    if( ok && !has_error() )
     {
         if( _state & ( s_running | s_running_process ) )
         {
             Time now;
-            bool ok = do_a_step | _task->_let_run;
-            if( !ok )  now = Time::now(), ok = _period.is_in_time( now );
-            if( !ok )   // Period abgelaufen?
+            bool call_step = do_a_step | _task->_let_run;
+            if( !call_step )  now = Time::now(), ok = _period.is_in_time( now );
+            if( !call_step )   // Period abgelaufen?
             {
                 set_next_start_time(now);  
-                ok = _task->_let_run || _period.is_in_time(now);  // Gilt schon die nächste Periode?
+                call_step = _task->_let_run || _period.is_in_time(now);  // Gilt schon die nächste Periode?
             }
 
-            if( ok )   ok = _task->step();
-            if( !ok )  end();
+            if( call_step )   ok = _task->step();
         }
     }
 
-    if( has_error() ) // &&  _state != s_stopped )  
+    if( !ok || has_error() )
     {
         end();
-        if( _repeat == 0 )  stop();     // Job nur stoppen, wenn spooler_task.repeat nicht gesetzt
+        if( has_error()  &&  _repeat == 0 )  stop();     // Job nur stoppen, wenn spooler_task.repeat nicht gesetzt
     }
 
     if( _state == s_ended ) 
@@ -689,7 +692,7 @@ void Task::close()
 
 //--------------------------------------------------------------------------------------Task::start
 
-void Task::start()
+bool Task::start()
 {
     _job->_log.msg( "start" );
 
@@ -699,34 +702,35 @@ void Task::start()
 
     try 
     {
-        do_start();
+        bool ok = do_start();
+        if( !ok || _job->has_error() )  return false;
         _opened = true;
     }
-    catch( const Xc& x        ) { _job->set_error(x); return; }
-    catch( const exception& x ) { _job->set_error(x); return; }
+    catch( const Xc& x        ) { _job->set_error(x); }
+    catch( const exception& x ) { _job->set_error(x); }
 
-    if( _job->has_error() )  return;
+    return !_job->has_error();
 }
 
 //-----------------------------------------------------------------------------------------Task::end
 
 void Task::end()
 {
-    if( !_opened )  return;
-
-    _job->set_state( Job::s_ending );
-
-    try
+    if( _opened )  
     {
-        do_end();
-    }
-    catch( const Xc& x        ) { _job->set_error(x); }
-    catch( const exception& x ) { _job->set_error(x); }
+        _job->set_state( Job::s_ending );
 
-    _opened = false;
+        try
+        {
+            do_end();
+        }
+        catch( const Xc& x        ) { _job->set_error(x); }
+        catch( const exception& x ) { _job->set_error(x); }
+
+        _opened = false;
+    }
 
     on_error_on_success();
-
     close();
 }
 
@@ -819,8 +823,10 @@ void Object_set_task::do_close()
 
 //------------------------------------------------------------------------Object_set_task::do_start
 
-void Object_set_task::do_start()
+bool Object_set_task::do_start()
 {
+    bool ok;
+
     if( !_object_set ) 
     {
         _object_set = SOS_NEW( Object_set( _spooler, this, _job->_object_set_descr ) );
@@ -829,13 +835,15 @@ void Object_set_task::do_start()
 
     if( !_job->_script_instance.loaded() )
     {
-        _job->load();
-        if( _job->has_error() )  return;
+        ok = _job->load();
+        if( !ok || _job->has_error() )  return false;
     }
 
-    _object_set->open();
+    ok = _object_set->open();
+    if( !ok )  return false;
 
     _job->set_state( Job::s_running );
+    return true;
 }
 
 //--------------------------------------------------------------------------Object_set_task::do_end
@@ -855,17 +863,21 @@ bool Object_set_task::do_step()
 
 //------------------------------------------------------------------------Job_script_task::do_start
 
-void Job_script_task::do_start()
+bool Job_script_task::do_start()
 {
+    bool ok;
+
     if( !_job->_script_instance.loaded() )
     {
-        _job->load();
-        if( _job->has_error() )  return;
+        ok = _job->load();
+        if( !ok || _job->has_error() )  return false;
     }
 
-    _job->_script_instance.call_if_exists( spooler_open_name );
+    ok = check_result( _job->_script_instance.call_if_exists( spooler_open_name ) );
+    if( !ok )  return false;
 
     _job->set_state( Job::s_running );
+    return true;
 }
 
 //--------------------------------------------------------------------------Job_script_task::do_end
@@ -880,14 +892,14 @@ void Job_script_task::do_end()
 bool Job_script_task::do_step()
 {
     if( _job->_has_spooler_process )  
-        return check_spooler_process_result( _job->_script_instance.call( spooler_process_name ) );
+        return check_result( _job->_script_instance.call( spooler_process_name ) );
     else
         return false;
 }
 
 //----------------------------------------------------------------------------Process_task::do_start
 
-void Process_task::do_start()
+bool Process_task::do_start()
 {
     PROCESS_INFORMATION process_info; 
     STARTUPINFO         startup_info; 
@@ -920,6 +932,7 @@ void Process_task::do_start()
     _process_handle.add_to( &_job->_thread->_wait_handles );
 
     _job->set_state( Job::s_running_process );
+    return true;
 }
 
 //-----------------------------------------------------------------------------Process_task::do_end
@@ -927,13 +940,25 @@ void Process_task::do_start()
 void Process_task::do_end()
 {
     DWORD exit_code;
+
     BOOL ok = GetExitCodeProcess( _process_handle, &exit_code );
     if( !ok )  throw_mswin_error( "GetExitCodeProcess" );
+
     _process_handle.close();
     _result = (int)exit_code;
     if( exit_code )  throw_xc( "SPOOLER-126", exit_code );
 }
 
+//----------------------------------------------------------------------------Process_task::do_stop
+/*
+void Process_task::do_stop()
+{
+    TerminateProcess( _process_handle, 999 );
+    //if( !ok )  throw_mswin_error( "TerminateProcess" );
+
+    _process_handle.close();
+}
+*/
 //----------------------------------------------------------------------------Process_task::do_step
 
 bool Process_task::do_step()

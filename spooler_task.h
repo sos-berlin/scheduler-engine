@@ -1,4 +1,4 @@
-// $Id: spooler_task.h,v 1.10 2001/02/10 11:38:07 jz Exp $
+// $Id: spooler_task.h,v 1.11 2001/02/12 09:46:11 jz Exp $
 
 #ifndef __SPOOLER_TASK_H
 #define __SPOOLER_TASK_H
@@ -78,7 +78,7 @@ struct Object_set : Sos_self_deleting
                                 Object_set                  ( Spooler*, Task*, const Sos_ptr<Object_set_descr>& );
                                ~Object_set                  ();
 
-    void                        open                        ();
+    bool                        open                        ();
     void                        close                       ();
     Spooler_object              get                         ();
     bool                        step                        ( Level result_level );
@@ -143,12 +143,14 @@ struct Job : Sos_self_deleting
     void                        close                       ();
     void                        close_engine                ();
 
-    void                        create_task                 ();
-    void                        close_task                  ();
     void                        start                       ( const CComPtr<spooler_com::Ivariable_set>& params = NULL );
     void                        start_without_lock          ( const CComPtr<spooler_com::Ivariable_set>& params = NULL );
     void                        start_when_directory_changed( const string& directory_name );
-    void                        load                        ();
+    void                        interrupt_script            ();
+
+    void                        create_task                 ();
+    void                        close_task                  ();
+    bool                        load                        ();
     void                        end                         ();
     void                        stop                        ();
     void                        set_next_start_time         ( Time now = Time::now() );
@@ -193,6 +195,7 @@ struct Job : Sos_self_deleting
 
     Thread_semaphore           _lock;
 
+    Prefix_log                 _log;
     Sos_ptr<Object_set_descr>  _object_set_descr;           // Job nutzt eine Objektemengeklasse
     Level                      _output_level;
     Script                     _script;                     // Job hat ein eigenes Skript
@@ -213,11 +216,11 @@ struct Job : Sos_self_deleting
     Period                     _period;                     // Derzeitige oder nächste Period
     Time                       _repeat;                     // spooler_task.repeat
 
-    Prefix_log                 _log;
     CComPtr<Com_job>           _com_job;
     CComPtr<Com_log>           _com_log;
     CComPtr<Com_task>          _com_task;                   // Objekt bleibt, Inhalt wechselt über die Tasks hinweg
     Xc_copy                    _error;
+    bool                       _load_error;                 // Fehler beim Laden oder spooler_init()
     Sos_ptr<Task>              _task;                       // Es kann nur eine Task geben. Zirkel: _task->_job == this
 };
 
@@ -232,7 +235,7 @@ struct Task : Sos_self_deleting
 
     void                        close                       ();
 
-    void                        start                       ();
+    bool                        start                       ();
     void                        end                         ();
     bool                        step                        ();
     void                        on_error_on_success         ();
@@ -248,7 +251,7 @@ struct Task : Sos_self_deleting
 
   protected:
     virtual void                do_close                    ()                              {}
-    virtual void                do_start                    () = 0;
+    virtual bool                do_start                    () = 0;
     virtual void                do_end                      () = 0;
     virtual bool                do_step                     () = 0;
     virtual void                do_on_success               () = 0;
@@ -283,7 +286,7 @@ struct Script_task : Task
 {
                                 Script_task                 ( Spooler* sp, const Sos_ptr<Job>& j ) : Task(sp,j) {}
 
-  //void                        do_start                    ();
+  //bool                        do_start                    ();
   //void                        do_end                      ();
   //bool                        do_step                     ();
     void                        do_on_success               ();
@@ -297,7 +300,7 @@ struct Object_set_task : Script_task
                                 Object_set_task             ( Spooler* sp, const Sos_ptr<Job>& j ) : Script_task(sp,j) {}
 
     void                        do_close                    ();
-    void                        do_start                    ();
+    bool                        do_start                    ();
     void                        do_end                      ();
     bool                        do_step                     ();
   //void                        do_on_success               ();
@@ -313,7 +316,7 @@ struct Job_script_task : Script_task
 {
                                 Job_script_task             ( Spooler* sp, const Sos_ptr<Job>& j ) : Script_task(sp,j) {}
 
-    void                        do_start                    ();
+    bool                        do_start                    ();
     void                        do_end                      ();
     bool                        do_step                     ();
   //void                        do_on_success               ();
@@ -326,7 +329,7 @@ struct Process_task : Task
 {
                                 Process_task                ( Spooler* sp, const Sos_ptr<Job>& j ) : Task(sp,j) {}
         
-    void                        do_start                    ();
+    bool                        do_start                    ();
     void                        do_end                      ();
     bool                        do_step                     ();
     void                        do_on_success               ()                                  {}

@@ -1,4 +1,4 @@
-// $Id: spooler_thread.h,v 1.3 2001/02/08 11:21:16 jz Exp $
+// $Id: spooler_thread.h,v 1.4 2001/02/12 09:46:11 jz Exp $
 
 #ifndef __SPOOLER_THREAD_H
 #define __SPOOLER_THREAD_H
@@ -23,7 +23,8 @@ struct Thread : Sos_self_deleting
     void                        close                       ();
     void                        start_thread                ();
     void                        stop_thread                 ();
-    void                        wait_until_thread_stopped   ();
+    void                        wait_until_thread_stopped   ( Time until );
+    void                        interrupt_scripts           ();
     Job*                        get_job_or_null             ( const string& job_name );
     void                        signal_object               ( const string& object_set_class_name, const Level& );
     void                        signal                      ()                              { _event.signal(); }
