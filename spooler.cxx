@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.315 2004/01/07 08:57:50 jz Exp $
+// $Id: spooler.cxx,v 1.316 2004/01/07 14:44:47 jz Exp $
 /*
     Hier sind implementiert
 
@@ -295,7 +295,7 @@ static void be_daemon()
 
         case -1: throw_errno( errno, "fork" );
 
-        default: sleep(1);  // Falls der Daemon noch was ausgibt, sollte das vor dem Shell-Prompt sein.
+        default: ::sleep(1);  // Falls der Daemon noch was ausgibt, sollte das vor dem Shell-Prompt sein.
                  //fprintf( stderr, "Daemon gestartet. pid=%d\n", pid ); 
                  //fflush( stderr );
                  _exit(0);

@@ -1,4 +1,4 @@
-// $Id: spooler_communication.cxx,v 1.76 2004/01/07 11:19:48 jz Exp $
+// $Id: spooler_communication.cxx,v 1.77 2004/01/07 14:44:47 jz Exp $
 /*
     Hier sind implementiert
 
@@ -364,9 +364,8 @@ bool Communication::Channel::do_accept( SOCKET listen_socket )
         int ret = ioctlsocket( _read_socket, FIONBIO, &on );
         if( ret == SOCKET_ERROR )  throw_sos_socket_error( "ioctl(FIONBIO)" );
 
-
-        int s = sizeof _socket_send_buffer_size;
-        ret = getsockopt( _write_socket, SOL_SOCKET, SO_SNDBUF, (char*)&_socket_send_buffer_size, &s );
+        socklen_t s = sizeof _socket_send_buffer_size ;
+        ret = getsockopt( _write_socket, SOL_SOCKET, SO_SNDBUF, (char*)&_socket_send_buffer_size , &s );
         if( ret == SOCKET_ERROR  ||  _socket_send_buffer_size <= 0 ) 
         {
             LOG( "getsockopt(,,SO_SNDBUF)  errno=" << get_errno() << "\n" );
@@ -472,19 +471,20 @@ bool Communication::Channel::do_send()
 
     if( _send_is_complete )  _send_progress = 0, _send_is_complete = false;     // Am Anfang
 
-    int count = _text.length() - _send_progress;
-    if( count > 0 )
+    while(1)
     {
+        int count = _text.length() - _send_progress; 
+        if( count <= 0 )  break;
+
         int c   = min( _socket_send_buffer_size, count );
         int err = 0;
 
-        while( _send_progress < _text.length() )
-        {
       //do
       //{
             LOG2( "socket.send", "send/write(" << _write_socket << "," << c << " bytes)\n" );
             int len = _write_socket == STDOUT_FILENO? write ( _write_socket, _text.c_str() + _send_progress, c )
                                                     : ::send( _write_socket, _text.c_str() + _send_progress, c, 0 );
+            if( len == 0 )  break;   // Vorsichtshalber
             if( len < 0 ) 
             {
                 err = get_errno();
@@ -505,7 +505,6 @@ bool Communication::Channel::do_send()
                 _send_progress += len;
       //}
       //while( err == ENOBUFS );
-        }
 
         something_done = true;
     }
@@ -800,6 +799,7 @@ void Communication::bind()
                 new_channel->_read_socket  = STDIN_FILENO;
                 new_channel->_write_socket = STDOUT_FILENO;
                 new_channel->_indent = true;
+                new_channel->_socket_send_buffer_size = 1024;
 
                 new_channel->add_to_socket_manager( _spooler->_connection_manager );
                 new_channel->socket_expect_signals( Socket_operation::sig_read );
