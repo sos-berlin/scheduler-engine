@@ -1,4 +1,4 @@
-// $Id: spooler_order.h,v 1.24 2003/08/12 14:59:45 jz Exp $
+// $Id: spooler_order.h,v 1.25 2003/10/13 23:04:55 jz Exp $
 
 #ifndef __SPOOLER_ORDER_H
 #define __SPOOLER_ORDER_H
@@ -72,7 +72,7 @@ struct Order : Com_order
     Time                        start_time              () const                                    { return _start_time; }
     Time                        end_time                () const                                    { return _end_time; }
 
-    void                    set_payload                 ( const VARIANT& payload )                  { THREAD_LOCK( _lock )  _payload = payload,  _payload_modified = true; }
+    void                    set_payload                 ( const VARIANT& );
     Payload                     payload                 ()                                          { THREAD_LOCK_RETURN( _lock, Variant, _payload ); }
 
     Com_job*                    com_job                 ();

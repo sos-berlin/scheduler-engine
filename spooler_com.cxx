@@ -1,4 +1,4 @@
-// $Id: spooler_com.cxx,v 1.114 2003/10/10 09:59:50 jz Exp $
+// $Id: spooler_com.cxx,v 1.115 2003/10/13 23:04:55 jz Exp $
 /*
     Hier sind implementiert
 
@@ -354,7 +354,9 @@ STDMETHODIMP Com_variable_set::get_value( VARIANT* name, VARIANT* value )
         value->vt      = VT_BSTR;
         value->bstrVal = NULL;
 
-        return get_xml( &V_BSTR(value) );
+        HRESULT hr = get_xml( &V_BSTR(value) );
+        if( !FAILED(hr) )  LOG( "Com_variable_set::get_value => " << string_from_bstr(V_BSTR(value)) << "\n" );
+        return hr;
     }
     else 
         return DISP_E_TYPEMISMATCH;

@@ -1,4 +1,4 @@
-// $Id: spooler_order.cxx,v 1.43 2003/10/11 11:40:00 jz Exp $
+// $Id: spooler_order.cxx,v 1.44 2003/10/13 23:04:55 jz Exp $
 /*
     Hier sind implementiert
 
@@ -702,7 +702,7 @@ Order::Order( Spooler* spooler, const Record& record )
     _title      = record.as_string( "title"      );
     _priority   = record.as_int   ( "priority"   );
 
-    string payload_string = record.as_string( "payload"    );
+    string payload_string = record.as_string( "payload" );
 
     LOG( "db payload=" << payload_string << "\n" );
     if( payload_string.find( "<" + Com_variable_set::xml_element_name() ) != string::npos )
@@ -714,7 +714,8 @@ Order::Order( Spooler* spooler, const Record& record )
     }
     else
     {
-        _payload = payload_string;
+        if( payload_string.empty() )  _payload = (IDispatch*)NULL;
+                                else  _payload = payload_string;
     }
 
     _created.set_datetime( record.as_string( "created_time" ) );
@@ -886,6 +887,18 @@ Job* Order::job()
     }
 
     return result;
+}
+
+//-------------------------------------------------------------------------------Order::set_payload
+
+void Order::set_payload( const VARIANT& payload )
+{ 
+    THREAD_LOCK( _lock )  
+    { 
+        LOG( "Order " << obj_name() << ".payload=" << debug_string_from_variant(payload) << "\n" );
+        _payload = payload;  
+        _payload_modified = true; 
+    }
 }
 
 //----------------------------------------------------------------------------------Order::finished
