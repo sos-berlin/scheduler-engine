@@ -1,0 +1,9 @@
+SCHEDULER
+
+$Id: RELEASE.TXT,v 1.1 2004/09/23 08:31:40 jz Exp $
+
+
+------------------------------------------------
+VERSION 2.0.88  2004-09-23
+
+DTD für <add_order> korrigiert.

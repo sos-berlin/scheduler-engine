@@ -1,4 +1,4 @@
-// $Id: spooler_dtd.cxx,v 1.3 2004/08/30 10:13:52 jz Exp $
+// $Id: spooler_dtd.cxx,v 1.4 2004/09/23 08:31:40 jz Exp $
 /*
     Hier ist implementiert
 
@@ -19,7 +19,7 @@ using namespace std;
 const char dtd_string[] = 
 
 "<?xml version='1.0' encoding='iso-8859-1'?>\n"
-"<!-- $Id: spooler_dtd.cxx,v 1.3 2004/08/30 10:13:52 jz Exp $ -->\n"
+"<!-- $Id: spooler_dtd.cxx,v 1.4 2004/09/23 08:31:40 jz Exp $ -->\n"
 "\n"
 "\n"
 "<!ENTITY % command              ' add_jobs\n" 
@@ -203,7 +203,7 @@ const char dtd_string[] =
 "                                                                                   <!-- Antwort: <ok> -->\n"
 "\n"
 "\n"
-"<!ELEMENT add_order             ( job+ )>\n"
+"<!ELEMENT add_order             EMPTY>\n"
 "<!ATTLIST add_order             job_chain           CDATA #REQUIRED>\n"
 "<!ATTLIST add_order             id                  CDATA #REQUIRED>\n"
 "<!ATTLIST add_order             priority            CDATA #IMPLIED>\n"
