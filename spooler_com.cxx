@@ -1912,6 +1912,7 @@ const Com_method Com_task::_methods[] =
     { DISPATCH_PROPERTYGET, 18, "stderr_text"               , (Com_method_ptr)&Com_task::get_Stderr_text        , VT_BSTR       },
     { DISPATCH_PROPERTYGET, 19, "stdout_text"               , (Com_method_ptr)&Com_task::get_Stdout_text        , VT_BSTR       },
     { DISPATCH_METHOD     , 20, "Start_subprocess"          , (Com_method_ptr)&Com_task::Start_subprocess       , VT_DISPATCH   , { VT_BYREF|VT_VARIANT } },
+    { DISPATCH_METHOD     , 21, "Add_subprocess"            , (Com_method_ptr)&Com_task::Add_subprocess         , VT_EMPTY      , { VT_INT, VT_BSTR, VT_BOOL, VT_BOOL, VT_BSTR }, 1 },
     {}
 };
 
@@ -2452,6 +2453,30 @@ STDMETHODIMP Com_task_proxy::QueryInterface( const IID& iid, void** result )
     return object_server::Proxy::QueryInterface( iid, result );
 }
 
+STDMETHODIMP Com_task_proxy::GetIDsOfNames( const IID& iid, OLECHAR** names, uint names_count, LCID lcid, DISPID* result )
+{
+    HRESULT hr = Idispatch_implementation::GetIDsOfNames( iid, names, names_count, lcid, result );
+    
+    if( hr == DISP_E_UNKNOWNNAME )
+    {
+        hr = Proxy::GetIDsOfNames( iid, names, names_count, lcid, result );
+    }
+
+    return hr;
+}
+
+
+STDMETHODIMP Com_task_proxy::Invoke( DISPID dispid, const IID& iid, LCID lcid, WORD flags, DISPPARAMS* dispparams, VARIANT* result, EXCEPINFO* excepinfo, UINT* errarg )
+{
+    HRESULT hr = Idispatch_implementation::Invoke( dispid, iid, lcid, flags, dispparams, result, excepinfo, errarg );
+    
+    if( hr == DISP_E_MEMBERNOTFOUND )
+    {
+        hr = Proxy::Invoke( dispid, iid, lcid, flags, dispparams, result, excepinfo, errarg );
+    }
+
+    return hr;
+}
 //-----------------------------------------------------------------Com_task_proxy::Start_subprocess
 
 STDMETHODIMP Com_task_proxy::Start_subprocess( VARIANT* program_and_parameters, Isubprocess** result )

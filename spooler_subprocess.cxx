@@ -224,8 +224,22 @@ void Subprocess_register::wait()
         if( !subprocess->ignore_signal()  &&  subprocess->_process.termination_signal() )  signal_subprocess = subprocess;
     }
 
-    if( signal_subprocess )  throw_xc( "SCHEDULER-219", as_string( signal_subprocess->_process.pid() ), signal_subprocess->_process.command_line() );
-    if( error_subprocess  )  throw_xc( "SCHEDULER-219", as_string( error_subprocess->_process.pid() ),  error_subprocess->_process.command_line() );
+
+    if( signal_subprocess || error_subprocess )
+    {
+        Subprocess* p = signal_subprocess? signal_subprocess : error_subprocess;
+
+        Xc x ( signal_subprocess? "SCHEDULER-219" : "SCHEDULER-218" );
+        x.insert( signal_subprocess? signal_subprocess->_process.termination_signal()
+                                      : error_subprocess->_process.exit_code()           );
+
+        x.insert( p->_process.pid() );
+        x.insert( p->_process.command_line() );
+        
+        throw_xc( x );
+    }
+    //if( signal_subprocess )  throw_xc( "SCHEDULER-219", "si=" + as_string( signal_subprocess->_process.termination_signal() ) + "  " + signal_subprocess->_process.command_line(), signal_subprocess->_process.pid()  );
+    //if( error_subprocess  )  throw_xc( "SCHEDULER-218", as_string( error_subprocess ->_process.exit_code()          ), as_string( error_subprocess ->_process.pid() ), error_subprocess ->_process.command_line() );
 }
 
 //-------------------------------------------------------------------------------------------------

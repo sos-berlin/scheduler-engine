@@ -479,6 +479,8 @@ struct Com_task_proxy : idispatch_implementation< Com_task_proxy, spooler_com::I
     STDMETHODIMP_(ULONG)        AddRef                      ()                                      { return Idispatch_implementation::AddRef(); }
     STDMETHODIMP_(ULONG)        Release                     ()                                      { return Idispatch_implementation::Release(); }
     STDMETHODIMP                QueryInterface              ( const IID&, void** );
+    STDMETHODIMP                GetIDsOfNames( const IID& iid, OLECHAR** names, uint names_count, LCID lcid, DISPID* result );
+    STDMETHODIMP                Invoke( DISPID dispid, const IID& iid, LCID lcid, WORD flags, DISPPARAMS* dispparams, VARIANT* result, EXCEPINFO* excepinfo, UINT* errarg );
 
 
     STDMETHODIMP                Start_subprocess            ( VARIANT* program_and_parameters, spooler_com::Isubprocess** result );
