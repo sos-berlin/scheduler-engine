@@ -1,4 +1,4 @@
-// $Id: spooler_order.cxx,v 1.57 2004/03/15 21:43:45 jz Exp $
+// $Id: spooler_order.cxx,v 1.58 2004/04/04 11:14:04 jz Exp $
 /*
     Hier sind implementiert
 
@@ -584,7 +584,7 @@ void Order_queue::remove_order( Order* order )
             if( it == _queue.end() )  throw_xc( "SCHEDULER-156", order->obj_name(), _job->name() );
 
             _queue.erase( it );
-        //_id_map.erase( order->_id );
+            //_id_map.erase( order->_id );
             update_priorities();
 
             order->_in_job_queue = false;
