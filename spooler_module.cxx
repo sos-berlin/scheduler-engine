@@ -1,4 +1,4 @@
-// $Id: spooler_module.cxx,v 1.25 2003/06/24 15:46:29 jz Exp $
+// $Id: spooler_module.cxx,v 1.26 2003/07/13 17:52:06 jz Exp $
 /*
     Hier sind implementiert
 
@@ -233,6 +233,60 @@ ptr<Module_instance> Module::create_instance()
         default:                     
             throw_xc( "SPOOLER-173" );
     }
+}
+
+//----------------------------------------------------------------Module_instance::In_call::In_call
+/*
+Module_instance::In_call::In_call( Job* job, const string& name ) 
+: 
+    _job(job),
+    _name(name),
+    _result_set(false)
+{ 
+    int pos = name.find( '(' );
+    string my_name = pos == string::npos? name : name.substr( 0, pos );
+    
+    _job->set_in_call( my_name ); 
+    LOG( *job << '.' << my_name << "() begin\n" );
+
+    Z_WINDOWS_ONLY( _ASSERTE( _CrtCheckMemory( ) ); )
+}
+*/
+//----------------------------------------------------------------Module_instance::In_call::In_call
+
+Module_instance::In_call::In_call( Task* task, const string& name, const string& extra ) 
+: 
+    _task(task),
+    _name(name),
+    _result_set(false)
+{ 
+    int pos = name.find( '(' );
+    string my_name = pos == string::npos? name : name.substr( 0, pos );
+
+    _task->set_in_call( my_name, extra ); 
+    LOG( *task << '.' << my_name << "() begin\n" );
+
+    Z_WINDOWS_ONLY( _ASSERTE( _CrtCheckMemory() ); )
+}
+
+//---------------------------------------------------------------Module_instance::In_call::~In_call
+
+Module_instance::In_call::~In_call()
+{ 
+    _task->set_in_call( "" ); 
+
+    {
+        Log_ptr log;
+
+        if( log )
+        {
+            *log << *_task << '.' << _name << "() end";
+            if( _result_set )  *log << "  result=" << ( _result? "true" : "false" );
+            *log << '\n';
+        }
+    }
+
+    Z_WINDOWS_ONLY( _ASSERTE( _CrtCheckMemory() ); )
 }
 
 //----------------------------------------------------------------------------Module_instance::init

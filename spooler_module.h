@@ -1,4 +1,4 @@
-// $Id: spooler_module.h,v 1.24 2003/06/13 14:45:40 jz Exp $
+// $Id: spooler_module.h,v 1.25 2003/07/13 17:52:06 jz Exp $
 
 #ifndef __SPOOLER_MODULE_H
 #define __SPOOLER_MODULE_H
@@ -139,6 +139,24 @@ struct Module : Object
 
 struct Module_instance : Object 
 {
+    struct In_call
+    {
+                                In_call                     ( Task* task, const string& name, const string& extra = "" );
+                              //In_call                     ( Job* job  , const string& name );
+                               ~In_call                     ();
+
+        void                    set_result                  ( bool result )                         { _result = result; _result_set = true; }
+
+      //Job*                   _job;
+        Task*                  _task;
+        Log_indent             _log_indent;
+        string                 _name;                       // Fürs Log
+        bool                   _result_set;
+        bool                   _result;
+    };
+
+
+
     Z_GNU_ONLY(                 Module_instance             ();  )                                  // Für gcc 3.2. Nicht implementiert.
                                 Module_instance             ( Module* module )                      : _zero_(this+1), _module(module), _log(module?module->_log:NULL) {}
     virtual                    ~Module_instance             ()                                      {}      // Für gcc 3.2
@@ -161,7 +179,6 @@ struct Module_instance : Object
 
 
     Fill_zero                  _zero_;
-  //Prefix_log*                _log;
     Delegated_log              _log;
     ptr<Module>                _module;
     string                     _title;                      // Wird lokalem Objectserver als -title=... übergeben, für die Prozessliste (ps)

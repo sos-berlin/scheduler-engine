@@ -1,4 +1,4 @@
-// $Id: spooler_thread.h,v 1.40 2003/02/18 21:38:10 jz Exp $
+// $Id: spooler_thread.h,v 1.41 2003/07/13 17:52:06 jz Exp $
 
 #ifndef __SPOOLER_THREAD_H
 #define __SPOOLER_THREAD_H
@@ -88,7 +88,7 @@ struct Spooler_thread : zschimmer::Thread
 
     Time                       _next_start_time;
     Job*                       _next_job;
-    int                        _running_tasks_count;        // Wenn 0, dann warten
+    long                       _running_tasks_count;        // Wenn 0, dann warten
                                                             // Statistik
     int                        _step_count;                 // Seit Spooler-Start ausgeführte Schritte
     int                        _task_count;                 // Seit Spooler-Start gestartetet Tasks
