@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.337 2004/06/05 08:57:49 jz Exp $
+// $Id: spooler.cxx,v 1.338 2004/07/01 07:41:20 jz Exp $
 // §851: Weitere Log-Ausgaben zum Scheduler-Start eingebaut
 // §1479
 
@@ -1823,7 +1823,7 @@ void Spooler::run()
             }
 
             // spooler_communication.cxx:
-            _connection_manager->async_continue();
+            something_done |= _connection_manager->async_continue();
 
 /*
 #           ifdef Z_DEBUG
@@ -1966,15 +1966,22 @@ void Spooler::run()
             wait_handles += _wait_handles;
             if( !wait_handles.signaled() )
             {
-                _wait_counter++;
-
-                if( log_wait )  
+                if( something_done )
                 {
-                    if( !wait_handles.wait(0) )  { LOG( msg << "\n" ); wait_handles.wait_until( _next_time ); }    // Debug-Ausgabe der Wartezeit nur, wenn kein Ergebnis vorliegt
+                    wait_handles.wait( 0 );   // Signale checken
                 }
                 else
                 {
-                    wait_handles.wait_until( _next_time );
+                    _wait_counter++;
+
+                    if( log_wait )  
+                    {
+                        if( !wait_handles.wait(0) )  { LOG( msg << "\n" ); wait_handles.wait_until( _next_time ); }    // Debug-Ausgabe der Wartezeit nur, wenn kein Ergebnis vorliegt
+                    }
+                    else
+                    {
+                        wait_handles.wait_until( _next_time );
+                    }
                 }
             }
             else
