@@ -1,4 +1,4 @@
-// $Id: spooler_xml.cxx,v 1.9 2001/01/07 16:35:19 jz Exp $
+// $Id: spooler_xml.cxx,v 1.10 2001/01/10 12:43:24 jz Exp $
 
 //#include <precomp.h>
 
@@ -303,9 +303,9 @@ void Spooler::load_xml()
 
         xml::Element_ptr spooler_config = document->documentElement;
 
-        _tcp_port     = as_int( spooler_config->getAttribute( "tcp_port" ) );
-        _udp_port     = as_int( spooler_config->getAttribute( "udp_port" ) );
-        _log_filename = as_string( spooler_config->getAttribute( "log_file" ) );
+        if( _tcp_port == 0 )           _tcp_port      = as_int   ( spooler_config->getAttribute( "tcp_port" ) );
+        if( _udp_port == 0 )           _udp_port      = as_int   ( spooler_config->getAttribute( "udp_port" ) );
+        if( empty( _log_directory ) )  _log_directory = as_string( spooler_config->getAttribute( "log_dir"  ) );
 
 
         xml::Element_ptr e = spooler_config->firstChild;

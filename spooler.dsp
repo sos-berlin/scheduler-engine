@@ -98,6 +98,15 @@ LINK32=link.exe
 # Begin Source File
 
 SOURCE=..\kram\sosmain.cxx
+
+!IF  "$(CFG)" == "spooler - Win32 Release"
+
+!ELSEIF  "$(CFG)" == "spooler - Win32 Debug"
+
+# ADD CPP /YX
+
+!ENDIF 
+
 # End Source File
 # Begin Source File
 
@@ -110,6 +119,11 @@ SOURCE=.\spooler_command.cxx
 # Begin Source File
 
 SOURCE=.\spooler_communication.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=.\spooler_log.cxx
+# ADD CPP /YX
 # End Source File
 # Begin Source File
 

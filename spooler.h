@@ -1,4 +1,4 @@
-// $Id: spooler.h,v 1.16 2001/01/10 11:00:16 jz Exp $
+// $Id: spooler.h,v 1.17 2001/01/10 12:43:24 jz Exp $
 
 #ifndef __SPOOLER_H
 
@@ -23,6 +23,8 @@
 #   include "../kram/olestd.h"
 #   include "../kram/sosscrpt.h"
 #endif
+
+#include <stdio.h>
         
 #include <set>
 #include <map>
@@ -49,6 +51,8 @@ namespace spooler {
 
 using namespace std;
 
+struct Task;
+
                                               
 typedef int                     Level;
 struct                          Spooler;
@@ -74,6 +78,53 @@ struct Mutex
 
     Thread_semaphore           _semaphore;
     T                          _value;
+};
+
+//----------------------------------------------------------------------------------------------Log
+
+struct Log
+{
+    enum Kind { k_msg, k_warn, k_error };
+
+                                Log                         ( Spooler* );
+                               ~Log                         ();
+
+    void                        set_directory               ( const string& );
+    void                        open_new                    ();
+
+    void                        msg                         ( const string& line )              { log( k_msg, "", line ); }
+    void                        warn                        ( const string& line )              { log( k_warn, "", line ); }
+    void                        error                       ( const string& line )              { log( k_error, "", line ); }
+
+    void                        log                         ( Kind log, const string& prefix, const string& );
+    
+    string                      filename                    () const                            { return _filename; }
+
+  protected:
+    void                        write                       ( const string& );
+
+    Fill_zero                  _zero_;
+    Spooler*                   _spooler;
+    string                     _directory;
+    string                     _filename;
+    FILE*                      _file;
+    Thread_semaphore           _semaphore;
+};
+
+//-----------------------------------------------------------------------------------------Task_log
+
+struct Task_log
+{
+                                Task_log                    ( Log*, Task* );
+
+    void                        msg                         ( const string& line )              { log( Log::k_msg, line ); }
+    void                        warn                        ( const string& line )              { log( Log::k_warn, line ); }
+    void                        error                       ( const string& line )              { log( Log::k_error, line ); }
+    void                        log                         ( Log::Kind log, const string& );
+
+    Log*                       _log;
+    Task*                      _task;
+    string                     _prefix;
 };
 
 //-------------------------------------------------------------------------------------------Script
@@ -360,6 +411,7 @@ struct Task : Sos_self_deleting
 
     Sos_ptr<Object_set>        _object_set;
     Time                       _next_start_time;            // Zeitpunkt des nächsten Startversuchs, nachdem Objektemenge leer war
+    Task_log                   _log;
 };
 
 typedef list< Sos_ptr<Task> >   Task_list;
@@ -488,8 +540,9 @@ struct Command_processor
 
 struct Spooler
 {
-                                Spooler                     () : _zero_(this+1), _communication(this), _command_processor(this) {}
+                                Spooler                     () : _zero_(this+1), _communication(this), _command_processor(this), _log(this) {}
 
+    void                        load_arg                    ( int argc, char** argv );
     void                        load                        ();
     void                        load_xml                    ();
 
@@ -538,6 +591,8 @@ struct Spooler
     string                     _log_filename;
     string                     _spooler_id;
     string                     _object_set_param;
+    string                     _log_directory;
+    Log                        _log;
 };
 
 

@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.17 2001/01/10 11:00:16 jz Exp $
+// $Id: spooler.cxx,v 1.18 2001/01/10 12:43:23 jz Exp $
 
 
 
@@ -18,6 +18,10 @@
 #include "../file/anyfile.h"
 #include "spooler.h"
 
+//#if !defined SYSTEM_MICROSOFT
+#   include <sys/types.h>
+#   include <sys/timeb.h>
+//#endif
 
 namespace sos {
 
@@ -31,7 +35,23 @@ using namespace std;
 
 Time now() 
 {
-    return time(NULL) - _timezone;
+#   if 1 //defined SYSTEM_WIN
+
+        _timeb  tm;
+        _ftime( &tm );
+        return (double)tm.time + (double)tm.millitm / (double)1e3 - _timezone;
+
+#    elif define SYSTEM_LINUX
+
+        struct timeval tm;
+        gettimeofday( &tm, NULL );
+        return (double)tm.tv_sec + (double)tm.tv_usec / (double)1e6 - _timezone;
+
+#   else
+
+        return time(NULL) - _timezone;
+
+#   endif
 }
 
 //----------------------------------------------------------------------------Script_instance::load
@@ -346,7 +366,8 @@ Task::Task( Spooler* spooler, const Sos_ptr<Job>& job )
     _zero_(this+1), 
     _spooler(spooler), 
     _job(job),
-    _script_instance(&job->_script)
+    _script_instance(&job->_script),
+    _log( &spooler->_log, this )
 {
     set_new_start_time();
     _state = s_pending;
@@ -363,7 +384,7 @@ void Task::set_new_start_time()
 
 void Task::error( const Xc& x)
 {
-    cerr << "Job " << _job->_name << ": " << x << '\n';
+    _log.error( x.what() );
 
     _error = x;
     _state_cmd = sc_stop;
@@ -396,7 +417,7 @@ void Task::step_error( const Xc& x )
 
 bool Task::start()
 {
-    cerr << "Job " << _job->_name << " start\n";
+    _log.msg( "start" );
 
     _running_since = now();
 
@@ -434,7 +455,7 @@ void Task::end()
     if( _state == s_suspended )  _state = s_running;
     if( _state != s_running )  return;
 
-    cerr << "Job " << _job->_name << " end\n";
+    _log.msg( "end" );
 
     try
     {
@@ -458,7 +479,7 @@ void Task::end()
 
 bool Task::step()
 {
-    cerr << "Task " << _job->_name << " step\n";
+    _log.msg( "step" );
 
     Spooler_object object;
 
@@ -663,17 +684,28 @@ string Task::state_cmd_name( Task::State_cmd cmd )
     }
 }
 
-//------------------------------------------------------------------------------------Spooler::step
+//--------------------------------------------------------------------------------Spooler::load_arg
 
-void Spooler::step()
+void Spooler::load_arg( int argc, char** argv )
 {
-    Thread_semaphore::Guard guard = &_semaphore;
+    _config_filename  = read_profile_string( "factory.ini", "spooler", "config" );
+    _log_directory    = read_profile_string( "factory.ini", "spooler", "log-dir" );
+    _spooler_id       = read_profile_string( "factory.ini", "spooler", "spooler-id" );
+    _object_set_param = read_profile_string( "factory.ini", "spooler", "object-set-param" );
 
-    FOR_EACH( Task_list, _task_list, it )
+    for( Sos_option_iterator opt ( argc, argv ); !opt.end(); opt.next() )
     {
-        Task* task = *it;
-
-        task->do_something();
+        if( opt.with_value( "log"              ) )  log_start( opt.value() );
+        else
+        if( opt.with_value( "config"           ) )  _config_filename = opt.value();
+        else
+        if( opt.with_value( "log-dir"          ) )  _log_directory = opt.value();
+        else
+        if( opt.with_value( "spooler-id"       ) )  _spooler_id = opt.value();
+        else
+        if( opt.with_value( "object-set-param" ) )  _object_set_param = opt.value();
+        else
+            throw_sos_option_error( opt );
     }
 }
 
@@ -681,7 +713,7 @@ void Spooler::step()
 
 void Spooler::load()
 {
-    cerr << "Spooler::load\n";
+    _log.msg( "Spooler::load" );
 
     tzset();
 
@@ -696,10 +728,10 @@ void Spooler::load()
 
 void Spooler::start()
 {
-    cerr << "Spooler::start\n";
-
-    Thread_semaphore::Guard guard = &_semaphore;
-
+    _log.set_directory( _log_directory );
+    _log.open_new();
+    _log.msg( "Spooler::start" );
+    
     FOR_EACH( Job_list, _job_list, it )
     {
         Sos_ptr<Task> task = SOS_NEW( Task( this, *it ) );
@@ -710,6 +742,20 @@ void Spooler::start()
     _spooler_start_time = now();
 
     _communication.start_thread();
+}
+
+//------------------------------------------------------------------------------------Spooler::step
+
+void Spooler::step()
+{
+    Thread_semaphore::Guard guard = &_semaphore;
+
+    FOR_EACH( Task_list, _task_list, it )
+    {
+        Task* task = *it;
+
+        task->do_something();
+    }
 }
 
 //------------------------------------------------------------------------------------Spooler::wait
@@ -725,7 +771,7 @@ void Spooler::wait()
 
         if( _paused )
         {
-            cerr << "Spooler paused\n";
+            _log.msg( "Spooler paused ");
         }
         else
         {
@@ -747,8 +793,8 @@ void Spooler::wait()
         Time wait_time = _next_start_time - now();
         if( wait_time > 0 ) 
         {
-            if( next_task )  cerr << "Job " << next_task->_job->_name << ": Nächster Start " << Sos_optional_date_time( _next_start_time ) << '\n';
-                       else  cerr << "Kein Job zu starten\n";
+            if( next_task )  next_task->_log.msg( "Nächster Start " + Sos_optional_date_time( _next_start_time ).as_string() );
+                       else  _log.msg( "Kein Job zu starten" );
 
             while( _sleeping  &&  wait_time > 0 )
             {
@@ -769,7 +815,7 @@ void Spooler::wait()
 
 void Spooler::run()
 {
-    cerr << "Spooler::run\n";
+    _log.msg( "Spooler::run" );
 
     while(1)
     {
@@ -790,7 +836,7 @@ void Spooler::run()
 
 void Spooler::stop()
 {
-    cerr << "Spooler::stop\n";
+    _log.msg( "Spooler::stop" );
     _stop = false;
 
     {
@@ -810,7 +856,7 @@ void Spooler::stop()
 
 void Spooler::reload()
 {
-    cerr << "Spooler::reload\n";
+    _log.msg( "Spooler::reload" );
 
     _reload = false;
     stop();
@@ -852,7 +898,7 @@ void Spooler::cmd_stop()
 
 void Spooler::cmd_terminate()
 {
-    cerr << "Spooler::cmd_terminate_and_restart()\n";
+    _log.msg( "Spooler::cmd_terminate_and_restart" );
 
     _terminate = true;
     cmd_stop();
@@ -862,7 +908,7 @@ void Spooler::cmd_terminate()
 
 void Spooler::cmd_terminate_and_restart()
 {
-    cerr << "Spooler::cmd_terminate_and_restart()\n";
+    _log.msg( "Spooler::cmd_terminate_and_restart" );
 
     _terminate_and_restart = true;
     cmd_terminate();
@@ -876,38 +922,14 @@ void Spooler::cmd_terminate_and_restart()
 
 int sos_main( int argc, char** argv )
 {
-    string config_filename  = read_profile_string( "factory.ini", "spooler", "config" );
-    string log_filename     = read_profile_string( "factory.ini", "spooler", "log-file" );
-    string spooler_id       = read_profile_string( "factory.ini", "spooler", "spooler-id" );
-    string object_set_param = read_profile_string( "factory.ini", "spooler", "object-set-param" );
-
-    for( Sos_option_iterator opt ( argc, argv ); !opt.end(); opt.next() )
-    {
-        if( opt.with_value( "log"              ) )  log_start( opt.value() );
-        else
-        if( opt.with_value( "config"           ) )  config_filename = opt.value();
-        else
-        if( opt.with_value( "log-file"         ) )  log_filename = opt.value();
-        else
-        if( opt.with_value( "spooler-id"       ) )  spooler_id = opt.value();
-        else
-        if( opt.with_value( "object-set-param" ) )  object_set_param = opt.value();
-        else
-            throw_sos_option_error( opt );
-    }
-
-
     HRESULT hr = CoInitialize(NULL);
     if( FAILED(hr) )  throw_ole( hr, "CoInitialize" );
 
     {
         spooler::Spooler spooler;
-        
-        spooler._config_filename  = config_filename;
-        spooler._log_filename     = log_filename;
-        spooler._spooler_id       = spooler_id;
-        spooler._object_set_param = object_set_param;
 
+        
+        spooler.load_arg( argc, argv );
         spooler.load();
         spooler.start();
         spooler.run();

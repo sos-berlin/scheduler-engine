@@ -1,4 +1,4 @@
-// $Id: spooler_communication.cxx,v 1.5 2001/01/10 11:00:16 jz Exp $
+// $Id: spooler_communication.cxx,v 1.6 2001/01/10 12:43:24 jz Exp $
 
 //#include <precomp.h>
 
@@ -275,6 +275,7 @@ void Communication::start()
         if( ret )  throw_sos_socket_error( ret, "WSAStartup" );
 #   endif
 
+
     // UDP:
 
     _udp_socket = socket( AF_INET, SOCK_DGRAM, 0 );
@@ -352,7 +353,7 @@ bool Communication::handle_socket( Channel* channel )
     }
     catch( const Xc& x )
     {
-        cerr << "FEHLER bei einer Verbindung: " << x << '\n';
+        _spooler->_log.error( "FEHLER bei einer Verbindung: " + x.what() );
         return false;
     }
 
@@ -404,7 +405,7 @@ int Communication::run()
 
                 _channel_list.push_back( new_channel );
 
-                cerr << "Verbindung angenommen\n";
+                _spooler->_log.msg( "TCP-Verbindung angenommen" );
             }
 
 
@@ -443,7 +444,7 @@ static ulong __stdcall thread( void* param )
     }
     catch( const Xc& x )
     {
-        cerr << "Communication::thread:  " << x << '\n';
+        ((Communication*)param)->_spooler->_log.msg( "Communication::thread:  " + x.what() );
         result = 1;
     }
 
