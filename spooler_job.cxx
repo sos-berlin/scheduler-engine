@@ -1,4 +1,4 @@
-// $Id: spooler_job.cxx,v 1.95 2004/10/22 09:33:23 jz Exp $
+// $Id: spooler_job.cxx,v 1.96 2004/11/17 10:17:34 jz Exp $
 // §851: Weitere Log-Ausgaben zum Scheduler-Start eingebaut
 /*
     Hier sind implementiert
@@ -146,7 +146,8 @@ void Job::set_dom( const xml::Element_ptr& element, const Time& xml_mod_time )
                                                  _process_filename     = e.     getAttribute( "file" ),
                                                  _process_param        = e.     getAttribute( "param" ),
                                                  _process_log_filename = e.     getAttribute( "log_file" ),
-                                                 _process_ignore_error = e.bool_getAttribute( "ignore_error" );
+                                                 _process_ignore_error = e.bool_getAttribute( "ignore_error" ),
+                                                 _process_ignore_signal= e.bool_getAttribute( "ignore_signal" );
             else
             if( e.nodeName_is( "run_time" ) &&  !_spooler->_manual )  _run_time = Run_time(), 
                                                                       _run_time.set_holidays( _spooler->holidays() ), 

@@ -1,4 +1,4 @@
-// $Id: spooler_dtd.cxx,v 1.6 2004/11/14 11:37:49 jz Exp $
+// $Id: spooler_dtd.cxx,v 1.7 2004/11/17 10:17:34 jz Exp $
 /*
     Hier ist implementiert
 
@@ -19,7 +19,7 @@ using namespace std;
 const char dtd_string[] = 
 
 "<?xml version='1.0' encoding='iso-8859-1'?>\n"
-"<!-- $Id: spooler_dtd.cxx,v 1.6 2004/11/14 11:37:49 jz Exp $ -->\n"
+"<!-- $Id: spooler_dtd.cxx,v 1.7 2004/11/17 10:17:34 jz Exp $ -->\n"
 "\n"
 "\n"
 "<!ENTITY % command              ' add_jobs\n" 
@@ -152,6 +152,7 @@ const char dtd_string[] =
 "<!ATTLIST process               param               CDATA #IMPLIED>\n"
 "<!ATTLIST process               log_file            CDATA #IMPLIED>\n"
 "<!ATTLIST process               ignore_error        CDATA #IMPLIED>\n"
+"<!ATTLIST process               ignore_signal       CDATA #IMPLIED>\n"
 "\n"
 "<!-- wenn der DLL-Aufruf implementiert ist:\n"
 "<!ELEMENT module                EMPTY>\n"
