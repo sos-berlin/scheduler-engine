@@ -1,4 +1,4 @@
-// $Id: spooler_com.cxx,v 1.57 2002/09/29 16:17:23 jz Exp $
+// $Id: spooler_com.cxx,v 1.58 2002/09/30 08:31:08 jz Exp $
 /*
     Hier sind implementiert
 
@@ -11,6 +11,9 @@
 
 #include "spooler.h"
 //#include "../hostole/hostole.h"
+#include "../zschimmer/z_com.h"
+
+using namespace zschimmer::com;
 
 
 #ifdef SYSTEM_WIN
