@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- $Id: spooler.dtd,v 1.7 2001/01/23 14:35:53 jz Exp $   Joacim Zschimmer,  (C) 2000 SOS GmbH Berlin  -->
+<!-- $Id: spooler.dtd,v 1.8 2001/01/24 12:35:50 jz Exp $   Joacim Zschimmer,  (C) 2000 SOS GmbH Berlin  -->
 
 
 <!ELEMENT spooler               ( config+ | command | answer )>
@@ -8,7 +8,7 @@
 
 <!-- KONFIGURATION DES SPOOLERS - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
-<!ELEMENT config                ( script?, object_set_classes?, jobs? )>
+<!ELEMENT config                ( security?, script?, object_set_classes?, jobs? )>
 <!ATTLIST config                spooler_id          CDATA ''>           <!-- Diese Konfiguration ist nur für einen Spooler mit dieser Kennung -->
 <!ATTLIST config                log_dir             CDATA #IMPLIED>
 <!ATTLIST config                tcp_port            CDATA '4444'>       <!-- Für TCP-Kommandoschnittstelle -->
@@ -16,6 +16,15 @@
 <!ATTLIST config                priority_max        CDATA '1000'>       <!-- Höchste Priorität. Gibt absoluten Vorrang -->
 <!ATTLIST config                param               CDATA ''>           <!-- Wird der Eigenschaft spooler.param jedem Skript übergeben -->
 
+<!ELEMENT security              ( allowed_host* )>
+
+<!ELEMENT allowed_host          EMPTY>
+<!ATTLIST allowed_host          host                CDATA #REQUIRED>
+<!ATTLIST allowed_host          level               (none|signal|info|all) #REQUIRED>
+                                                                        <!-- level="nonel "   Nichts zugelassen (das ist default) -->
+                                                                        <!-- level="signal"   <signal-object> zugelassen, nur UDP -->
+                                                                        <!-- level="info"     <show_state> zugelassen -->
+                                                                        <!-- level="all"      Alles zugelassen -->
 
 <!ELEMENT object_set_classes    ( object_set_class+ )>
 
@@ -64,7 +73,14 @@
 <!ATTLIST run_time              retry_period        CDATA '5'>          <!-- Periode, nach der ein Job erneut gestartet wird, 
                                                                              um zu prüfen, ob die Objektemenge nicht leer ist -->
 
-<!ELEMENT date                  EMPTY>                                  <!-- Ein bestimmter Tag, an dem der Job laufen soll -->
+<!ELEMENT time_of_day           EMPTY>
+<!ATTLIST time_of_day           single_start        CDATA    #IMPLIED>  <!-- Ersetzt übergeordnetes single_start, begin und end  --> 
+<!ATTLIST time_of_day           begin               CDATA    #IMPLIED>  <!-- Ersetzt übergeordnetes single_start, begin und end  --> 
+<!ATTLIST time_of_day           end                 CDATA    #IMPLIED>  <!-- Ersetzt übergeordnetes single_start, begin und end  --> 
+<!ATTLIST time_of_day           let_run             (yes|no) #IMPLIED>  <!-- Ersetzt übergeordnetes let_run  --> 
+<!ATTLIST time_of_day           retry_period        CDATA    #IMPLIED>  <!-- Ersetzt übergeordnetes retry_period  --> 
+
+<!ELEMENT date                  ( time_of_day* )>                       <!-- Ein bestimmter Tag, an dem der Job laufen soll -->
 <!ATTLIST date                  date                CDATA #IMPLIED>     <!-- yyyy-mm-dd -->
 
 <!ELEMENT weekdays              ( day+ )>                               <!-- 0: Sonntag, 6: Sonnabend -->
@@ -76,7 +92,7 @@
 <!ELEMENT holiday               EMPTY>                              
 <!ATTLIST holiday               date                CDATA #REQUIRED>    <!-- yyyy-mm-dd, an diesem Tag den Job nicht starten -->
 
-<!ELEMENT day                   EMPTY>
+<!ELEMENT day                   ( time_of_day* )>
 <!ATTLIST day                   day                 CDATA #REQUIRED>
 
 

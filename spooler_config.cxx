@@ -1,4 +1,4 @@
-// $Id: spooler_config.cxx,v 1.4 2001/01/22 11:04:12 jz Exp $
+// $Id: spooler_config.cxx,v 1.5 2001/01/24 12:35:51 jz Exp $
 
 //#include <precomp.h>
 
@@ -322,6 +322,11 @@ void Spooler::load_config( const xml::Element_ptr& config_element )
     xml::Element_ptr e = config_element->firstChild;
     while( e )
     {
+        if( e->tagName == "security" )
+        {
+            _security = e;
+        }
+        else
         if( e->tagName == "script" )
         {
             _script = e;

@@ -97,11 +97,6 @@ LINK32=link.exe
 # PROP Default_Filter "cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
 # Begin Source File
 
-SOURCE=..\kram\sosmain.cxx
-# SUBTRACT CPP /YX
-# End Source File
-# Begin Source File
-
 SOURCE=.\spooler.cxx
 # ADD CPP /YX"spooler.h"
 # End Source File
@@ -128,6 +123,16 @@ SOURCE=.\spooler_config.cxx
 # Begin Source File
 
 SOURCE=.\spooler_log.cxx
+# ADD CPP /YX"spooler.h"
+# End Source File
+# Begin Source File
+
+SOURCE=.\spooler_script.cxx
+# ADD CPP /YX"spooler.h"
+# End Source File
+# Begin Source File
+
+SOURCE=.\spooler_security.cxx
 # ADD CPP /YX"spooler.h"
 # End Source File
 # Begin Source File
@@ -193,6 +198,42 @@ SOURCE=.\spooler_com.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\spooler_command.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\spooler_common.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\spooler_communication.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\spooler_log.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\spooler_script.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\spooler_security.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\spooler_service.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\spooler_task.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\spooler_time.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\spooler_version.h
 # End Source File
 # Begin Source File
@@ -220,5 +261,9 @@ SOURCE=.\spooler.dtd
 SOURCE=.\spooler.xml
 # End Source File
 # End Group
+# Begin Source File
+
+SOURCE=..\kram\sosmain.cxx
+# End Source File
 # End Target
 # End Project

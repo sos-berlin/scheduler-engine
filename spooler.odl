@@ -1,4 +1,4 @@
-// $Id: spooler.odl,v 1.4 2001/01/23 14:35:53 jz Exp $
+// $Id: spooler.odl,v 1.5 2001/01/24 12:35:50 jz Exp $
 
 // Änderungen werden nicht automatisch in die spooler.tlb übernommen.
 // Also mit rechter Maustaske "Kompilieren von spooler.odl" klicken.
@@ -51,7 +51,7 @@ library spooler
         odl,
         dual
     ]
-    interface Ivariables : IDispatch
+    interface Ivariable_set : IDispatch
     {
         [propput]
         HRESULT                 var                         ( [in] BSTR name, [in] VARIANT* value );
@@ -66,9 +66,9 @@ library spooler
     [
         uuid       ( 818150DA-CD01-4db3-972B-433A9D6237F3 )
     ]
-    coclass Variables
+    coclass Variable_set
     {
-        interface Ivariables;
+        interface Ivariable_set;
     }
 
     //-----------------------------------------------------------------------Object_set
@@ -139,7 +139,7 @@ library spooler
         HRESULT                 job                         ( [out,retval] Ijob** job );
 
         [propget]
-        HRESULT                 params                      ( [out,retval] Ivariables** parameters );
+        HRESULT                 params                      ( [out,retval] Ivariable_set** parameters );
     }
 
     [
@@ -174,7 +174,7 @@ library spooler
         [propget]
         HRESULT                 job                     ( [in] BSTR job_name, [out,retval] Ijob** job );
 
-        HRESULT                 create_variables        ( [out,retval] Ivariables** result );
+        HRESULT                 create_variable_set     ( [out,retval] Ivariable_set** result );
     }
 
     [

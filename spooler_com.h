@@ -1,4 +1,4 @@
-// $Id: spooler_com.h,v 1.4 2001/01/23 14:35:53 jz Exp $
+// $Id: spooler_com.h,v 1.5 2001/01/24 12:35:50 jz Exp $
 
 #ifndef __SPOOLER_COM_H
 #define __SPOOLER_COM_H
@@ -48,11 +48,11 @@ struct Com_error: spooler_com::Ierror, Sos_ole_object
     Xc_copy                    _xc;
 };
 
-//------------------------------------------------------------------------------------Com_variables
+//----------------------------------------------------------------------------------Com_variable_set
 
-struct Com_variables: spooler_com::Ivariables, Sos_ole_object
+struct Com_variable_set: spooler_com::Ivariable_set, Sos_ole_object
 {
-                                Com_variables               ();
+                                Com_variable_set            ();
 
     USE_SOS_OLE_OBJECT
 
@@ -133,7 +133,7 @@ struct Com_task : spooler_com::Itask, Sos_ole_object
     STDMETHODIMP                put_error                   ( VARIANT* error_text );
     STDMETHODIMP                get_error                   ( spooler_com::Ierror** );
     STDMETHODIMP                get_Job                     ( spooler_com::Ijob** );
-    STDMETHODIMP                get_params                  ( spooler_com::Ivariables** );
+    STDMETHODIMP                get_params                  ( spooler_com::Ivariable_set** );
 
     Task*                      _task;
 };
@@ -153,7 +153,7 @@ struct Com_spooler : spooler_com::Ispooler, Sos_ole_object
     STDMETHODIMP                get_id                      ( BSTR* );
     STDMETHODIMP                get_script                  ( IDispatch** );
     STDMETHODIMP                get_Job                     ( BSTR job_name, spooler_com::Ijob** );
-    STDMETHODIMP                create_variables            ( spooler_com::Ivariables** );
+    STDMETHODIMP                create_variable_set         ( spooler_com::Ivariable_set** );
 
   protected:
     Spooler*                   _spooler;

@@ -1,4 +1,4 @@
-// $Id: spooler_log.cxx,v 1.10 2001/01/21 16:59:06 jz Exp $
+// $Id: spooler_log.cxx,v 1.11 2001/01/24 12:35:51 jz Exp $
 
 #include "../kram/sos.h"
 #include "spooler.h"
@@ -104,23 +104,22 @@ void Log::log( Log_kind kind, const string& prefix, const string& line )
     write( buffer );
     if( !prefix.empty() )  write( "(" + prefix + ") " );
     write( line );
-    write( "\n" );
+    if( line.length() == 0 || line[line.length()-1] != '\n' )  write( "\n" );
     fflush( _file );
 }
 
-//------------------------------------------------------------------------------------Task_log::log
+//----------------------------------------------------------------------------------Prefix_log::log
 
-Task_log::Task_log( Log* log, Task* task )
+Prefix_log::Prefix_log( Log* log, const string& prefix )
 :
     _log(log),
-    _task(task)
+    _prefix(prefix)
 {
-    if( task )  _prefix = "Job " + task->_job->_name;
 }
 
-//------------------------------------------------------------------------------------Task_log::log
+//----------------------------------------------------------------------------------Prefix_log::log
 
-void Task_log::log( Log_kind kind, const string& line )
+void Prefix_log::log( Log_kind kind, const string& line )
 {
     _log->log( kind, _prefix, line );
 }

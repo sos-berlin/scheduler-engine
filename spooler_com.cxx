@@ -1,4 +1,4 @@
-// $Id: spooler_com.cxx,v 1.4 2001/01/23 14:35:53 jz Exp $
+// $Id: spooler_com.cxx,v 1.5 2001/01/24 12:35:50 jz Exp $
 /*
     Hier sind implementiert
 
@@ -24,13 +24,13 @@ using namespace spooler_com;
 
 Typelib_descr spooler_typelib ( spooler_com::LIBID_spooler_com, "Spooler", "1.0" );
 
-DESCRIBE_CLASS( &spooler_typelib, Com_error     , error     , spooler_com::CLSID_error     , "Spooler.Error"     , "1.0" )
-DESCRIBE_CLASS( &spooler_typelib, Com_variables , variables , spooler_com::CLSID_Variables , "Spooler.Variables" , "1.0" )
-DESCRIBE_CLASS( &spooler_typelib, Com_log       , log       , spooler_com::CLSID_log       , "Spooler.Log"       , "1.0" )
-DESCRIBE_CLASS( &spooler_typelib, Com_job       , job       , spooler_com::CLSID_Job       , "Spooler.Job"       , "1.0" )
-DESCRIBE_CLASS( &spooler_typelib, Com_task      , task      , spooler_com::CLSID_Task      , "Spooler.Task"      , "1.0" )
-DESCRIBE_CLASS( &spooler_typelib, Com_object_set, object_set, spooler_com::CLSID_Object_set, "Spooler.Object_set", "1.0" )
-DESCRIBE_CLASS( &spooler_typelib, Com_spooler   , spooler   , spooler_com::CLSID_spooler   , "Spooler.Spooler"   , "1.0" )
+DESCRIBE_CLASS( &spooler_typelib, Com_error       , error       , spooler_com::CLSID_error       , "Spooler.Error"       , "1.0" )
+DESCRIBE_CLASS( &spooler_typelib, Com_variable_set, variable_set, spooler_com::CLSID_Variable_set, "Spooler.Variable_set", "1.0" )
+DESCRIBE_CLASS( &spooler_typelib, Com_log         , log         , spooler_com::CLSID_log         , "Spooler.Log"         , "1.0" )
+DESCRIBE_CLASS( &spooler_typelib, Com_job         , job         , spooler_com::CLSID_Job         , "Spooler.Job"         , "1.0" )
+DESCRIBE_CLASS( &spooler_typelib, Com_task        , task        , spooler_com::CLSID_Task        , "Spooler.Task"        , "1.0" )
+DESCRIBE_CLASS( &spooler_typelib, Com_object_set  , object_set  , spooler_com::CLSID_Object_set  , "Spooler.Object_set"  , "1.0" )
+DESCRIBE_CLASS( &spooler_typelib, Com_spooler     , spooler     , spooler_com::CLSID_spooler     , "Spooler.Spooler"     , "1.0" )
 
 //-----------------------------------------------------------------------------Com_error::Com_error
 
@@ -83,32 +83,32 @@ STDMETHODIMP Com_error::get_text( BSTR* text_bstr )
     return hr;
 }
 
-//---------------------------------------------------------------------Com_variables::Com_variables
+//---------------------------------------------------------------Com_variable_set::Com_variable_set
 
-Com_variables::Com_variables()
+Com_variable_set::Com_variable_set()
 :
-    Sos_ole_object( variables_class_ptr, this )
+    Sos_ole_object( variable_set_class_ptr, this )
 {
 }
 
-//---------------------------------------------------------------------------Com_variables::put_var
+//------------------------------------------------------------------------Com_variable_set::put_var
 
-STDMETHODIMP Com_variables::put_var( BSTR name, VARIANT* value )
+STDMETHODIMP Com_variable_set::put_var( BSTR name, VARIANT* value )
 {
     _map[name] = *value;
     return NOERROR;
 }
 
-//---------------------------------------------------------------------------Com_variables::get_var
+//------------------------------------------------------------------------Com_variable_set::get_var
 
-STDMETHODIMP Com_variables::get_var( BSTR name, VARIANT* value )
+STDMETHODIMP Com_variable_set::get_var( BSTR name, VARIANT* value )
 {
     return VariantCopy( value, &_map[name] );
 }
 
-//-------------------------------------------------------------------------Com_variables::get_count
+//----------------------------------------------------------------------Com_variable_set::get_count
 
-STDMETHODIMP Com_variables::get_count( int* result )
+STDMETHODIMP Com_variable_set::get_count( int* result )
 {
     *result = _map.size();
     return NOERROR;
@@ -224,12 +224,12 @@ STDMETHODIMP Com_job::start( VARIANT* params )
 
     try
     {
-        CComPtr<Ivariables> pars;
+        CComPtr<Ivariable_set> pars;
 
         if( params  &&  params->vt != VT_EMPTY  &&  params->vt != VT_NULL  &&  params->vt != VT_ERROR )
         {
             if( params->vt != VT_DISPATCH && params->vt != VT_UNKNOWN )  return DISP_E_TYPEMISMATCH;
-            hr = params->punkVal->QueryInterface( IID_Ivariables, (void**)&pars );
+            hr = params->punkVal->QueryInterface( IID_Ivariable_set, (void**)&pars );
             if( FAILED(hr) )  return hr;
         }
 
@@ -321,7 +321,7 @@ STDMETHODIMP Com_task::get_Job( Ijob** com_job )
 
 //-----------------------------------------------------------------------------Com_task::get_params
 
-STDMETHODIMP Com_task::get_params( Ivariables** result )
+STDMETHODIMP Com_task::get_params( Ivariable_set** result )
 {
     if( !_task )  return E_POINTER;
 
@@ -410,11 +410,11 @@ STDMETHODIMP Com_spooler::get_Job( BSTR job_name, Ijob** com_job )
     return hr;
 }
 
-//--------------------------------------------------------------------Com_spooler::create_variables
+//------------------------------------------------------------------Com_spooler::create_variable_set
 
-STDMETHODIMP Com_spooler::create_variables( Ivariables** result )
+STDMETHODIMP Com_spooler::create_variable_set( Ivariable_set** result )
 {
-    *result = new Com_variables;
+    *result = new Com_variable_set;
     (*result)->AddRef();
     return NOERROR;
 }

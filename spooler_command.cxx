@@ -1,4 +1,4 @@
-// $Id: spooler_command.cxx,v 1.18 2001/01/22 11:04:12 jz Exp $
+// $Id: spooler_command.cxx,v 1.19 2001/01/24 12:35:50 jz Exp $
 /*
     Hier ist implementiert
 
@@ -71,6 +71,8 @@ void append_error_element( const xml::Element_ptr& element, const Xc_copy& x )
 
 xml::Element_ptr Command_processor::execute_show_task( Task* task )
 {
+    if( _security_level < Security::seclev_info )  throw_xc( "SPOOLER-121" );
+
     xml::Element_ptr task_element = _answer->createElement( "task" );
 
     task_element->setAttribute( "job", as_dom_string( task->_job->_name ) );
@@ -96,6 +98,8 @@ xml::Element_ptr Command_processor::execute_show_task( Task* task )
 
 xml::Element_ptr Command_processor::execute_show_tasks()
 {
+    if( _security_level < Security::seclev_info )  throw_xc( "SPOOLER-121" );
+
     xml::Element_ptr tasks = _answer->createElement( "tasks" );
 
     dom_append_nl( tasks );
@@ -113,6 +117,8 @@ xml::Element_ptr Command_processor::execute_show_tasks()
 
 xml::Element_ptr Command_processor::execute_show_state()
 {
+    if( _security_level < Security::seclev_info )  throw_xc( "SPOOLER-121" );
+
     xml::Element_ptr state_element = _answer->createElement( "state" );
  
     state_element->setAttribute( "time"                 , as_dom_string( Sos_optional_date_time::now().as_string() ) );
@@ -136,6 +142,8 @@ xml::Element_ptr Command_processor::execute_show_state()
 
 xml::Element_ptr Command_processor::execute_modify_spooler( const xml::Element_ptr& element )
 {
+    if( _security_level < Security::seclev_all )  throw_xc( "SPOOLER-121" );
+
     string cmd = as_string( element->getAttribute( "cmd" ) );
   //if( !cmd.empty() )
     {
@@ -161,6 +169,8 @@ xml::Element_ptr Command_processor::execute_modify_spooler( const xml::Element_p
 
 xml::Element_ptr Command_processor::execute_modify_job( const xml::Element_ptr& element )
 {
+    if( _security_level < Security::seclev_all )  throw_xc( "SPOOLER-121" );
+
     string job_name     = as_string( element->getAttribute( "job" ) );
     string action_name  = as_string( element->getAttribute( "cmd" ) );
     string state_name   = as_string( element->getAttribute( "state" ) );
@@ -198,6 +208,8 @@ xml::Element_ptr Command_processor::execute_modify_job( const xml::Element_ptr& 
 
 xml::Element_ptr Command_processor::execute_signal_object( const xml::Element_ptr& element )
 {
+    if( _security_level < Security::seclev_signal )  throw_xc( "SPOOLER-121" );
+
     string class_name = as_string( element->getAttribute( "class" ) );
     Level  level      = as_int( element->getAttribute( "level" ) );
 
@@ -224,6 +236,8 @@ xml::Element_ptr Command_processor::execute_signal_object( const xml::Element_pt
 
 xml::Element_ptr Command_processor::execute_config( const xml::Element_ptr& config_element )
 {
+    if( _security_level < Security::seclev_all )  throw_xc( "SPOOLER-121" );
+
     if( config_element->tagName != "config" )  throw_xc( "SPOOLER-113", as_string( config_element->tagName ) );
 
     string spooler_id = as_string( config_element->getAttribute( "spooler_id" ) );
@@ -287,6 +301,9 @@ void Command_processor::execute_2( const string& xml_text )
         _answer->appendChild( _answer->createElement( "spooler" ) );
 
         xml::Element_ptr answer_element = _answer->documentElement->appendChild( _answer->createElement( "answer" ) );
+
+        _security_level = _host? _spooler->_security.level( *_host ) 
+                               : Security::seclev_all;
 
         xml::Document_ptr command_doc ( __uuidof(xml::DOMDocument30), NULL );
 

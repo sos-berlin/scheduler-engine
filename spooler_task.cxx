@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.8 2001/01/23 14:35:54 jz Exp $
+// $Id: spooler_task.cxx,v 1.9 2001/01/24 12:35:51 jz Exp $
 /*
     Hier sind implementiert
 
@@ -177,7 +177,7 @@ Job::~Job()
 
 //---------------------------------------------------------------------------------------Job::start
 
-void Job::start( const CComPtr<spooler_com::Ivariables>& params )
+void Job::start( const CComPtr<spooler_com::Ivariable_set>& params )
 {
     if( !( _task->_state & (Task::s_pending|Task::s_stopped) ) )  throw_xc( "SPOOLER-118", _name, _task->state_name() );
 
@@ -216,7 +216,7 @@ Task::Task( Spooler* spooler, const Sos_ptr<Job>& job )
     _zero_(this+1), 
     _spooler(spooler), 
     _job(job),
-    _log( &spooler->_log, this )
+    _log( &spooler->_log, "Job " + job->_name )
 {
     _next_start_time = _job->_run_time.first();
     _state = s_pending;
@@ -292,7 +292,7 @@ bool Task::start()
     _log.msg( "start" );
 
     _error = NULL;
-    if( !_params )  _params = new Com_variables;
+    if( !_params )  _params = new Com_variable_set;
 
     _spooler->_task_count++;
     _running_since = Time::now();

@@ -1,11 +1,16 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 
-<!-- $Id: spooler.xml,v 1.14 2001/01/23 14:35:53 jz Exp $   (C) 2000 SOS GmbH Berlin -->
+<!-- $Id: spooler.xml,v 1.15 2001/01/24 12:35:50 jz Exp $   (C) 2000 SOS GmbH Berlin -->
 
 <!DOCTYPE spooler SYSTEM "spooler.dtd">
 
 <spooler>
 <config tcp_port="4444" udp_port="4444" log_dir="c:\tmp">
+
+    <security>
+        <allowed_host host="lillerud" level="signal"/>
+        <allowed_host host="loka"     level="info"/>
+    </security>
 
     <script language="VBScript"><![CDATA[
 
@@ -360,7 +365,7 @@ end function
 
 spooler_log.msg "*Job single"
 
-set params = spooler.create_variables()
+set params = spooler.create_variable_set()
 params.var("param1")="heinz"
 
 spooler.job("Aufbereiten").start( params )

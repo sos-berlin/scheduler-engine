@@ -1,4 +1,4 @@
-// $Id: spooler_communication.cxx,v 1.17 2001/01/23 14:35:53 jz Exp $
+// $Id: spooler_communication.cxx,v 1.18 2001/01/24 12:35:50 jz Exp $
 /*
     Hier sind implementiert
 
@@ -34,6 +34,50 @@ int get_errno()
 #    else
         return errno;
 #   endif
+}
+
+//-------------------------------------------------------------------------------------is_ip_number
+/*
+bool is_ip_number( const string& host_addr )
+{
+    const Byte* p = host_addr.c_str();
+
+    while( isdigit( *p )  ||  *p == '.' )  p++;
+
+    return *p == '\0';
+}
+*/
+//-----------------------------------------------------------------------Host::get_host_set_by_name
+
+set<Host> Host::get_host_set_by_name( const string& name )
+{
+    set<Host> host_set;
+
+    uint32 ip = inet_addr( name.c_str() );
+
+    if( ip != INADDR_NONE )
+    {
+        host_set.insert( ip );
+    }
+    else
+    {
+        hostent* h = gethostbyname( name.c_str() );     // In Unix nicht thread-sicher?
+        if( !h )  throw_sos_socket_error("gethostbyname", name.c_str() );
+        uint32** p = (uint32**)h->h_addr_list;
+        while( *p )  host_set.insert( **p ), p++;
+    }        
+
+    return host_set;
+}
+
+//-----------------------------------------------------------------------------Named_host::set_name
+
+void Named_host::set_name()
+{
+    hostent* h = gethostbyaddr( (char*)&_ip, sizeof _ip, AF_INET );
+    if( !h )  return; //{ string n=as_string(); throw_sos_socket_error("gethostbyaddr", n.c_str() ); }
+
+    _name = h->h_name;
 }
 
 //-------------------------------------------------------------------Xml_end_finder::Xml_end_finder
@@ -150,11 +194,13 @@ bool Xml_end_finder::is_complete( const char* p, int len )
 
 //------------------------------------------------------------------Communication::Channel::Channel
 
-Communication::Channel::Channel()
+Communication::Channel::Channel( Spooler* spooler )
 :
     _zero_(this+1),
+    _spooler(spooler),
     _socket( SOCKET_ERROR ),
-    _send_is_complete( true )
+    _send_is_complete( true ),
+    _log(&spooler->_log)
 {
     recv_clear();
 }
@@ -168,15 +214,35 @@ Communication::Channel::~Channel()
 
 //----------------------------------------------------------------Communication::Channel::do_accept
 
-void Communication::Channel::do_accept( SOCKET listen_socket )
+bool Communication::Channel::do_accept( SOCKET listen_socket )
 {
-    int peer_addr_len = sizeof _peer_addr;
+    try
+    {
+        struct sockaddr_in peer_addr;
+        int peer_addr_len = sizeof peer_addr;
 
-    _socket = accept( listen_socket, (struct sockaddr*)&_peer_addr, &peer_addr_len );
-    if( _socket == SOCKET_ERROR )  throw_sos_socket_error( "accept" );
+        _socket = accept( listen_socket, (struct sockaddr*)&peer_addr, &peer_addr_len );
+        if( _socket == SOCKET_ERROR )  throw_sos_socket_error( "accept" );
 
-    struct linger l; l.l_onoff=0; l.l_linger=0;
-    setsockopt( _socket, SOL_SOCKET, SO_LINGER, (const char*)&l, sizeof l );
+        _host = peer_addr.sin_addr;
+        _log.set_prefix( "TCP-Verbindung mit " + _host.as_string() );
+
+        struct linger l; l.l_onoff=0; l.l_linger=0;
+        setsockopt( _socket, SOL_SOCKET, SO_LINGER, (const char*)&l, sizeof l );
+
+        if( _spooler->_security.level( _host ) <= Security::seclev_signal )
+        {
+            _log.msg( "TCP-Verbindung nicht zugelassen" );
+            do_close();
+            return false;
+        }
+
+        _log.msg( "TCP-Verbindung angenommen" );
+
+    }
+    catch( const Xc& x ) { _log.error(x.what()); return false; }
+
+    return true;
 }
 
 //-----------------------------------------------------------------Communication::Channel::do_close
@@ -199,50 +265,62 @@ void Communication::Channel::recv_clear()
 
 //------------------------------------------------------------------Communication::Channel::do_recv
 
-void Communication::Channel::do_recv()
+bool Communication::Channel::do_recv()
 {
-    char buffer [ 4096 ];
-
-    int len = recv( _socket, buffer, sizeof buffer, 0 );
-    if( len <= 0 ) {
-        if( len == 0 )  { _eof = true;  return; }
-        if( get_errno() == EAGAIN )  return; 
-        throw_sos_socket_error( "recv" ); 
-    }
-
-    const char* p = buffer;
-
-    if( _receive_at_start ) 
+    try
     {
-        _receive_at_start = false;
-        while( p < buffer+len  &&  isspace( (Byte)*p ) )  p++;      // Blanks am Anfang nicht beachten
-        len -= p - buffer;
+        char buffer [ 4096 ];
+
+        int len = recv( _socket, buffer, sizeof buffer, 0 );
+        if( len <= 0 ) {
+            if( len == 0 )  { _eof = true;  return true; }
+            if( get_errno() == EAGAIN )  return true; 
+            throw_sos_socket_error( "recv" ); 
+        }
+
+        const char* p = buffer;
+
+        if( _receive_at_start ) 
+        {
+            _receive_at_start = false;
+            while( p < buffer+len  &&  isspace( (Byte)*p ) )  p++;      // Blanks am Anfang nicht beachten
+            len -= p - buffer;
+        }
+
+        _receive_is_complete = _xml_end_finder.is_complete( p, len );
+
+        _text.append( p, len );
     }
+    catch( const Xc& x ) { _log.error(x.what()); return false; }
 
-    _receive_is_complete = _xml_end_finder.is_complete( p, len );
-
-    _text.append( p, len );
+    return true;
 }
 
 //------------------------------------------------------------------Communication::Channel::do_send
 
-void Communication::Channel::do_send()
+bool Communication::Channel::do_send()
 {
-    if( _send_is_complete )  _send_progress = 0, _send_is_complete = false;     // Am Anfang
-
-    int len = send( _socket, _text.c_str() + _send_progress, _text.length() - _send_progress, 0 );
-    if( len < 0 ) {
-        if( get_errno() == EAGAIN )  return;
-        throw_sos_socket_error( "send" );
-    }
-
-    _send_progress += len;
-
-    if( _send_progress == _text.length() )
+    try
     {
-        _send_is_complete = true;
-        _text = "";
+        if( _send_is_complete )  _send_progress = 0, _send_is_complete = false;     // Am Anfang
+
+        int len = send( _socket, _text.c_str() + _send_progress, _text.length() - _send_progress, 0 );
+        if( len < 0 ) {
+            if( get_errno() == EAGAIN )  return true;
+            throw_sos_socket_error( "send" );
+        }
+
+        _send_progress += len;
+
+        if( _send_progress == _text.length() )
+        {
+            _send_is_complete = true;
+            _text = "";
+        }
     }
+    catch( const Xc& x ) { _log.error(x.what()); return false; }
+
+    return true;
 }
 
 //--------------------------------------------------------------------Communication::Communication
@@ -398,37 +476,32 @@ void Communication::init()
 
 bool Communication::handle_socket( Channel* channel )
 {
-    try
+    bool ok;
+
+    if( FD_ISSET( channel->_socket, &_write_fds ) ) 
     {
-        if( FD_ISSET( channel->_socket, &_write_fds ) ) 
-        {
-            channel->do_send();
-        }
-
-        if( FD_ISSET( channel->_socket, &_read_fds ) )
-        {
-            channel->do_recv();
-            
-            if( channel->_receive_is_complete ) 
-            {
-                Command_processor cp = _spooler;;
-                string text = channel->_text;
-                channel->recv_clear();
-                channel->_text = cp.execute( text );
-                channel->do_send();
-            }
-
-            if( channel->_eof && channel->_send_is_complete )
-            {
-                channel->do_close();
-                return false;
-            }
-        }
+        ok = channel->do_send();
+        if( !ok )  return false;
     }
-    catch( const Xc& x )
+
+    if( FD_ISSET( channel->_socket, &_read_fds ) )
     {
-        _spooler->_log.error( "FEHLER bei einer Verbindung: " + x.what() );
-        return false;
+        ok = channel->do_recv();
+        if( !ok )  return false;
+        
+        if( channel->_receive_is_complete ) 
+        {
+            Command_processor cp = _spooler;;
+            cp.set_host( &channel->_host );
+            string cmd = channel->_text;
+            channel->recv_clear();
+            channel->_log.msg( "Kommando " + cmd );
+            channel->_text = cp.execute( cmd );
+            ok = channel->do_send();
+        if( !ok )  return false;
+        }
+
+        if( channel->_eof && channel->_send_is_complete )  return false;
     }
 
     return true;
@@ -436,11 +509,11 @@ bool Communication::handle_socket( Channel* channel )
 
 //---------------------------------------------------------------------------Communication::_fd_set
 
-void Communication::_fd_set( SOCKET socket, FD_SET* set )
+void Communication::_fd_set( SOCKET socket, FD_SET* fdset )
 {
     if( socket != SOCKET_ERROR )
     {
-        FD_SET( socket, set );
+        FD_SET( socket, fdset );
         if( _nfds <= socket )  _nfds = socket + 1;
     }
 }
@@ -449,6 +522,8 @@ void Communication::_fd_set( SOCKET socket, FD_SET* set )
 
 int Communication::run()
 {
+    bool ok;
+
     while(1) 
     {
         _nfds = 0;
@@ -487,25 +562,39 @@ int Communication::run()
             if( _udp_socket != SOCKET_ERROR  &&  FD_ISSET( _udp_socket, &_read_fds ) )
             {
                 char buffer [4096];
-                int len = recv( _udp_socket, buffer, sizeof buffer, 0 );
+                sockaddr_in addr;     
+                int         addr_len = sizeof addr;
+
+                addr.sin_addr.s_addr = 0;
+                int len = recvfrom( _udp_socket, buffer, sizeof buffer, 0, (sockaddr*)&addr, &addr_len );
                 if( len > 0 ) 
                 {
-                    Command_processor cp = _spooler;
-                    cp.execute( as_string( buffer, len ) );
+                    Named_host host = addr.sin_addr;
+                    if( _spooler->_security.level( host ) < Security::seclev_signal )
+                    {
+                        _spooler->_log.error( "UDP-Nachricht von " + host.as_string() + " nicht zugelassen." );
+                    }
+                    else
+                    {
+                        Command_processor cp = _spooler;
+                        cp.set_host( &host );
+                        string cmd ( buffer, len );
+                        _spooler->_log.msg( "UDP-Nachricht von " + host.as_string() + ": " + cmd );
+                        cp.execute( cmd );
+                    }
                 }
             }
 
             // Neue TCP-Verbindung
             if( _listen_socket != SOCKET_ERROR  &&  FD_ISSET( _listen_socket, &_read_fds ) )
             {
-                Sos_ptr<Channel> new_channel = SOS_NEW( Channel );
+                Sos_ptr<Channel> new_channel = SOS_NEW( Channel( _spooler ) );
             
-                new_channel->do_accept( _listen_socket );
-                if( new_channel->_socket == SOCKET_ERROR )  return true;
-
-                _channel_list.push_back( new_channel );
-
-                _spooler->_log.msg( "TCP-Verbindung angenommen" );
+                ok = new_channel->do_accept( _listen_socket );
+                if( ok )
+                {
+                    _channel_list.push_back( new_channel );
+                }
             }
 
 
@@ -514,9 +603,8 @@ int Communication::run()
             {
                 Channel* channel = *it;
 
-                bool ok = handle_socket( channel );
-
-                if( !ok ) { it = _channel_list.erase( it );  continue; }
+                ok = handle_socket( channel );
+                if( !ok ) { channel->do_close(); it = _channel_list.erase( it ); }
             }
         }
     }
