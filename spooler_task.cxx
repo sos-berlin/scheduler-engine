@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.217 2003/11/11 18:48:04 jz Exp $
+// $Id: spooler_task.cxx,v 1.218 2003/11/12 10:33:26 jz Exp $
 /*
     Hier sind implementiert
 
@@ -226,7 +226,7 @@ void Task::close()
         {
             //do_close();
             Async_operation* op = do_close__start();
-            if( !op->async_finished() )  _log.warn( "Warten auf Schließen der Modulinstanz ..." );
+            if( !op->async_finished() )  _log.warn( "Warten auf Abschluss der Task ..." );
             do_close__end();
         }
         catch( const exception& x ) { _log.error( string("close: ") + x.what() ); }
