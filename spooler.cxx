@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.60 2001/02/21 20:51:44 jz Exp $
+// $Id: spooler.cxx,v 1.61 2001/03/02 16:12:24 jz Exp $
 /*
     Hier sind implementiert
 
@@ -20,6 +20,7 @@
 #include "../kram/sleep.h"
 #include "../kram/log.h"
 #include "../file/anyfile.h"
+#include "../kram/licence.h"
 
 //#if !defined SYSTEM_MICROSOFT
 #   include <sys/types.h>
@@ -470,6 +471,8 @@ void Spooler::cmd_terminate_and_restart()
 
 int Spooler::launch( int argc, char** argv )
 {
+    if( !SOS_LICENCE( licence_spooler ) )  throw_xc( "SOS-1000", "Spooler" );
+
     _argc = argc;
     _argv = argv;
 
