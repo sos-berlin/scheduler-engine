@@ -1,4 +1,4 @@
-// $Id: spooler_wait.cxx,v 1.99 2004/03/29 22:03:14 jz Exp $
+// $Id: spooler_wait.cxx,v 1.100 2004/03/30 06:00:29 jz Exp $
 /*
     Hier sind implementiert
 
@@ -483,8 +483,13 @@ string Wait_handles::as_string()
             for( int i = 0; i < _events.size(); i++ )
             {
                 if( i > 0 )  result += ", ";
-                result += as_hex_string( (int)_handles[i] );
-                if( _events[i] )  result += " " + _events[i]->as_text(); 
+
+#               ifdef Z_WINDOWS
+                    result += as_hex_string( (int)_handles[i] );
+                    result += ' ';
+#               endif
+
+                if( _events[i] )  result += _events[i]->as_text(); 
             }
 
             result += "}";

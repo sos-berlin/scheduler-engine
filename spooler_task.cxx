@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.244 2004/03/29 02:13:50 jz Exp $
+// $Id: spooler_task.cxx,v 1.245 2004/03/30 06:00:29 jz Exp $
 /*
     Hier sind implementiert
 
@@ -2051,7 +2051,7 @@ bool Process_task::do_begin__end()
     set_state( s_running_process );
 
     _process_handle.set_name( "Process " + _job->_process_filename );
-    _process_handle.add_to( &_thread->_wait_handles );
+    _process_handle.add_to( &_spooler->_wait_handles );
 
     _job->_spooler->register_process_handle( _process_handle._pid ); 
 
