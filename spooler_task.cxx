@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.202 2003/09/30 14:08:13 jz Exp $
+// $Id: spooler_task.cxx,v 1.203 2003/10/08 11:00:16 jz Exp $
 /*
     Hier sind implementiert
 
@@ -186,6 +186,7 @@ Task::Task( Job* job )
 
     _log.set_job( _job );
     _log.set_task( this );
+    _log.inherit_settings( _job->_log );
 
     Z_DEBUG_ONLY( _job_name = job->name(); )
 }

@@ -1,4 +1,4 @@
-// $Id: spooler_log.h,v 1.36 2003/09/24 21:51:57 jz Exp $
+// $Id: spooler_log.h,v 1.37 2003/10/08 11:00:16 jz Exp $
 
 #ifndef __SPOOLER_LOG_H
 #define __SPOOLER_LOG_H
@@ -78,6 +78,7 @@ struct Prefix_log : Has_log
     Time                        collect_max                 ()                                  { return _collect_max; }
     Time                        collect_end                 ()                                  { return _first_send? _first_send + _collect_max : Time(0); }
 
+    void                        inherit_settings            ( const Prefix_log& );
     void                    set_job                         ( Job* job )                        { _job = job; }
     void                    set_task                        ( Task* task )                      { _task = task; }
     void                    set_prefix                      ( const string& prefix )            { _prefix = prefix; }

@@ -1,4 +1,4 @@
-// $Id: spooler_log.cxx,v 1.71 2003/09/26 21:57:14 jz Exp $
+// $Id: spooler_log.cxx,v 1.72 2003/10/08 11:00:16 jz Exp $
 
 #include "spooler.h"
 #include "spooler_mail.h"
@@ -293,7 +293,16 @@ void Prefix_log::init( Spooler* spooler, const string& prefix )
     _log     = &spooler->_base_log;
     _prefix  = prefix;
 
-    _log_level = _spooler->_log_level;
+    _log_level       = _spooler->_log_level;
+    _mail_on_error   = _spooler->_mail_on_error;
+    _mail_on_process = _spooler->_mail_on_process;
+    _mail_on_success = _spooler->_mail_on_success;
+    _subject         = _spooler->_log_mail_subject;
+    _collect_within  = _spooler->_log_collect_within;
+    _collect_max     = _spooler->_log_collect_max;
+    _smtp_server     = _spooler->_smtp_server;
+    _queue_dir       = _spooler->_mail_queue_dir;
+    _from            = _spooler->_log_mail_from;
 }
 
 //------------------------------------------------------------------Prefix_log::set_profile_section
@@ -301,13 +310,6 @@ void Prefix_log::init( Spooler* spooler, const string& prefix )
 void Prefix_log::set_profile_section( const string& section )
 { 
     _section = section; 
-
-    _mail_on_error   = _spooler->_mail_on_error;
-    _mail_on_process = _spooler->_mail_on_process;
-    _mail_on_success = _spooler->_mail_on_success;
-    _subject         = _spooler->_log_mail_subject;
-    _collect_within  = _spooler->_log_collect_within;
-    _collect_max     = _spooler->_log_collect_max;
 
     if( !_section.empty() ) 
     {
@@ -318,14 +320,12 @@ void Prefix_log::set_profile_section( const string& section )
         _subject         =         read_profile_string ( _spooler->_factory_ini, _section, "log_mail_subject"  , _subject );
         _collect_within  = (double)read_profile_uint   ( _spooler->_factory_ini, _section, "log_collect_within", (uint)_collect_within );
         _collect_max     = (double)read_profile_uint   ( _spooler->_factory_ini, _section, "log_collect_max"   , (uint)_collect_max );
-
-        _smtp_server = read_profile_string( _spooler->_factory_ini, _section, "smtp"          , _spooler->_smtp_server );
-        _queue_dir   = read_profile_string( _spooler->_factory_ini, _section, "mail_queue_dir", _spooler->_mail_queue_dir );
-
-        _from    = read_profile_string( _spooler->_factory_ini, _section, "log_mail_from"   , _spooler->_log_mail_from );
-        _to      = read_profile_string( _spooler->_factory_ini, _section, "log_mail_to"     );
-        _cc      = read_profile_string( _spooler->_factory_ini, _section, "log_mail_cc"     );
-        _bcc     = read_profile_string( _spooler->_factory_ini, _section, "log_mail_bcc"    );
+        _smtp_server     =         read_profile_string ( _spooler->_factory_ini, _section, "smtp"              , _smtp_server );
+        _queue_dir       =         read_profile_string ( _spooler->_factory_ini, _section, "mail_queue_dir"    , _queue_dir );
+        _from            =         read_profile_string ( _spooler->_factory_ini, _section, "log_mail_from"     , _from );
+        _to              =         read_profile_string ( _spooler->_factory_ini, _section, "log_mail_to"       );
+        _cc              =         read_profile_string ( _spooler->_factory_ini, _section, "log_mail_cc"       );
+        _bcc             =         read_profile_string ( _spooler->_factory_ini, _section, "log_mail_bcc"      );
 
         if( _to.empty() && _cc.empty() && _bcc.empty() )
         {       
@@ -334,6 +334,26 @@ void Prefix_log::set_profile_section( const string& section )
             _bcc = _spooler->_log_mail_bcc;
         }
     }
+}
+
+//---------------------------------------------------------------------Prefix_log::inherit_settings
+
+void Prefix_log::inherit_settings( const Prefix_log& other )
+{
+    _log_level       = other._log_level;
+
+    _mail_on_error   = other._mail_on_error;
+    _mail_on_process = other._mail_on_process;
+    _mail_on_success = other._mail_on_success;
+    _subject         = other._subject;
+    _collect_within  = other._collect_within;
+    _collect_max     = other._collect_max;
+    _smtp_server     = other._smtp_server;
+    _queue_dir       = other._queue_dir;
+    _from            = other._from;
+    _to              = other._to;
+    _cc              = other._cc;
+    _bcc             = other._bcc;
 }
 
 //-------------------------------------------------------------------------Prefix_log::set_filename

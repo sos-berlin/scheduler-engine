@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.270 2003/10/07 09:07:27 jz Exp $
+// $Id: spooler.cxx,v 1.271 2003/10/08 11:00:15 jz Exp $
 /*
     Hier sind implementiert
 
@@ -1184,6 +1184,21 @@ void Spooler::load_arg()
     _variables_tablename        =            read_profile_string    ( _factory_ini, "spooler", "db_variables_table" , "SPOOLER_VARIABLES" );
 
 
+    _mail_on_error   =            read_profile_bool           ( _factory_ini, "spooler", "mail_on_error"  , _mail_on_error );
+    _mail_on_process =            read_profile_mail_on_process( _factory_ini, "spooler", "mail_on_process", _mail_on_process );
+    _mail_on_success =            read_profile_bool           ( _factory_ini, "spooler", "mail_on_success", _mail_on_success );
+    _mail_queue_dir  = subst_env( read_profile_string         ( _factory_ini, "spooler", "mail_queue_dir" , _mail_queue_dir ) );
+    _mail_encoding   =            read_profile_string         ( _factory_ini, "spooler", "mail_encoding"  , "base64"        );      // "quoted-printable": Jmail braucht 1s pro 100KB dafür
+    _smtp_server     =            read_profile_string         ( _factory_ini, "spooler", "smtp"           , _smtp_server );
+
+    _log_mail_from      = read_profile_string( _factory_ini, "spooler", "log_mail_from"   );
+    _log_mail_to        = read_profile_string( _factory_ini, "spooler", "log_mail_to"     );
+    _log_mail_cc        = read_profile_string( _factory_ini, "spooler", "log_mail_cc"     );
+    _log_mail_bcc       = read_profile_string( _factory_ini, "spooler", "log_mail_bcc"    );
+    _log_mail_subject   = read_profile_string( _factory_ini, "spooler", "log_mail_subject");
+    _log_collect_within = read_profile_uint  ( _factory_ini, "spooler", "log_collect_within", 0 );
+    _log_collect_max    = read_profile_uint  ( _factory_ini, "spooler", "log_collect_max"   , 900 );
+
 
   //_java_vm->set_filename      ( subst_env( read_profile_string( _factory_ini, "java"   , "vm"         , _java_vm->filename()       ) ) );
     _java_vm->prepend_class_path( subst_env( read_profile_string( _factory_ini, "java"   , "class_path" ) ) );
@@ -1316,21 +1331,6 @@ void Spooler::load()
 void Spooler::start()
 {
     assert( current_thread_id() == _thread_id );
-
-    _mail_on_error   =            read_profile_bool           ( _factory_ini, "spooler", "mail_on_error"  , _mail_on_error );
-    _mail_on_process =            read_profile_mail_on_process( _factory_ini, "spooler", "mail_on_process", _mail_on_process );
-    _mail_on_success =            read_profile_bool           ( _factory_ini, "spooler", "mail_on_success", _mail_on_success );
-    _mail_queue_dir  = subst_env( read_profile_string         ( _factory_ini, "spooler", "mail_queue_dir" , _mail_queue_dir ) );
-    _mail_encoding   =            read_profile_string         ( _factory_ini, "spooler", "mail_encoding"  , "base64"        );      // "quoted-printable": Jmail braucht 1s pro 100KB dafür
-    _smtp_server     =            read_profile_string         ( _factory_ini, "spooler", "smtp"           , _smtp_server );
-
-    _log_mail_from      = read_profile_string( _factory_ini, "spooler", "log_mail_from"   );
-    _log_mail_to        = read_profile_string( _factory_ini, "spooler", "log_mail_to"     );
-    _log_mail_cc        = read_profile_string( _factory_ini, "spooler", "log_mail_cc"     );
-    _log_mail_bcc       = read_profile_string( _factory_ini, "spooler", "log_mail_bcc"    );
-    _log_mail_subject   = read_profile_string( _factory_ini, "spooler", "log_mail_subject");
-    _log_collect_within = read_profile_uint  ( _factory_ini, "spooler", "log_collect_within", 0 );
-    _log_collect_max    = read_profile_uint  ( _factory_ini, "spooler", "log_collect_max"   , 900 );
 
     _state_cmd = sc_none;
     set_state( s_starting );

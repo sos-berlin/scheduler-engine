@@ -1,4 +1,4 @@
-// $Id: spooler_job.cxx,v 1.34 2003/10/01 11:18:09 jz Exp $
+// $Id: spooler_job.cxx,v 1.35 2003/10/08 11:00:15 jz Exp $
 /*
     Hier sind implementiert
 
@@ -923,10 +923,9 @@ bool Job::do_something()
 {
   //Z_DEBUG_ONLY( _log.debug9( "do_something() state=" + state_name() ); )
 
-    Time next_time_at_begin       = _next_time;
-    Time next_start_time_at_begin = _next_start_time;
-    bool something_done           = false;       
-    Time now                      = Time::now();
+    Time next_time_at_begin = _next_time;
+    bool something_done     = false;       
+    Time now                = Time::now();
 
     if( _state )  
     {
