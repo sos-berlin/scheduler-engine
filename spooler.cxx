@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.265 2003/09/28 09:30:49 jz Exp $
+// $Id: spooler.cxx,v 1.266 2003/09/28 10:05:08 jz Exp $
 /*
     Hier sind implementiert
 
@@ -1697,7 +1697,7 @@ void Spooler::run()
         _next_time = 0;
         wait_handles.clear();
 
-        if( ctrl_c_pressed && _state_cmd != s_stopping )
+        if( ctrl_c_pressed && _state != s_stopping )
         {
             _log.warn( "Abbruch-Signal (Ctrl-C) empfangen. Der Spooler wird beendet.\n" );
             _state_cmd = sc_terminate;
