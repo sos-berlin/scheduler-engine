@@ -35,7 +35,7 @@
 				UsePrecompiledHeader="2"
 				PrecompiledHeaderThrough="spooler.h"
 				PrecompiledHeaderFile=".\Release/spooler.pch"
-				AssemblerOutput="0"
+				AssemblerOutput="2"
 				AssemblerListingLocation=".\Release/"
 				ObjectFile=".\Release/"
 				ProgramDataBaseFileName=".\Release/"

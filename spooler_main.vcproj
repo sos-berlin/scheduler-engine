@@ -79,7 +79,7 @@
 				BufferSecurityCheck="FALSE"
 				RuntimeTypeInfo="TRUE"
 				UsePrecompiledHeader="0"
-				AssemblerOutput="0"
+				AssemblerOutput="2"
 				WarningLevel="3"
 				DebugInformationFormat="2"/>
 			<Tool
