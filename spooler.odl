@@ -1,4 +1,4 @@
-// $Id: spooler.odl,v 1.17 2001/07/04 14:49:46 jz Exp $
+// $Id: spooler.odl,v 1.18 2001/08/20 13:46:54 jz Exp $
 
 // Anweisung: midl /nologo /error all /out $(OutDir) $(InputPath)
 
@@ -106,6 +106,8 @@ library spooler
     interface Ijob : IDispatch
     {
         HRESULT                 start_when_directory_changed( [in] BSTR directory_name );
+
+        HRESULT                 clear_when_directory_changed();
 
       //HRESULT                 start_on_signal             ();
 

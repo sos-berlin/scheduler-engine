@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.45 2001/08/20 08:32:57 jz Exp $
+// $Id: spooler_task.cxx,v 1.46 2001/08/20 13:46:55 jz Exp $
 /*
     Hier sind implementiert
 
@@ -373,6 +373,8 @@ void Job::start( const CComPtr<spooler_com::Ivariable_set>& params, const string
 
 Sos_ptr<Task> Job::start_without_lock( const CComPtr<spooler_com::Ivariable_set>& params, const string& task_name )
 {
+    if( _state == s_stopped )  set_state( s_pending );
+
     Sos_ptr<Task> task = create_task( params, task_name );
     
     task->_let_run = true;
@@ -386,37 +388,37 @@ Sos_ptr<Task> Job::start_without_lock( const CComPtr<spooler_com::Ivariable_set>
 
 void Job::start_when_directory_changed( const string& directory_name )
 {
-    if( _spooler->_debug )  _log.msg( "start_when_directory_changed " + directory_name + "\"" );
+    THREAD_LOCK( _lock )
+    {
+        if( _spooler->_debug )  _log.msg( "start_when_directory_changed " + directory_name + "\"" );
 
-#   ifdef SYSTEM_WIN
+#       ifdef SYSTEM_WIN
 
-        Sos_ptr<Directory_watcher> dw = SOS_NEW( Directory_watcher );
+            Sos_ptr<Directory_watcher> dw = SOS_NEW( Directory_watcher );
 
-        dw->watch_directory( directory_name );
-        dw->set_name( "job(\"" + _name + "\").start_when_directory_changed(\"" + directory_name + "\")" );
-        _directory_watcher_array.push_back( dw );
-        dw->add_to( &_thread->_wait_handles );
+            dw->watch_directory( directory_name );
+            dw->set_name( "job(\"" + _name + "\").start_when_directory_changed(\"" + directory_name + "\")" );
+            _directory_watcher_array.push_back( dw );
+            dw->add_to( &_thread->_wait_handles );
 
-#    else
+#        else
 
-        throw_xc( "SPOOLER-112", "Job::start_when_directory_changed" );
+            throw_xc( "SPOOLER-112", "Job::start_when_directory_changed" );
 
-#   endif
+#       endif
+    }
 }
 
 //----------------------------------------------------------------Job::clear_when_directory_changed
 
 void Job::clear_when_directory_changed()
 {
-    if( _spooler->_debug )  _log.msg( "clear_when_directory_changed" );
-
-    _directory_watcher_array.clear();
-/*
-    for( Directory_watcher_array::iterator it = _directory_watcher_array.begin(); it != _directory_watcher_array.end(); it++ )
+    THREAD_LOCK( _lock )
     {
-        it->clear();
+        if( _spooler->_debug )  _log.msg( "clear_when_directory_changed" );
+
+        _directory_watcher_array.clear();
     }
-*/
 }
 
 //----------------------------------------------------------------------------------------Job::load
@@ -535,7 +537,8 @@ bool Job::do_something()
             case sc_stop:       if( _state != s_stopped )  stop(), something_done = true;
                                 break;
 
-            case sc_unstop:     if( _state == s_stopped )  { if( !dequeue_task())  set_state( s_pending ); something_done = true; }
+          //case sc_unstop:     if( _state == s_stopped )  { if( !dequeue_task() )  set_state( s_pending ); something_done = true; }
+            case sc_unstop:     if( _state == s_stopped )  set_state( s_pending ), something_done = true;
                                 break;
 
             case sc_end:        if( _state == s_running )  end(), something_done = true;
@@ -563,40 +566,43 @@ bool Job::do_something()
         
         if( !dequeued )
         {
-            bool ok = false;
-
-            for( Directory_watcher_array::iterator it = _directory_watcher_array.begin(); it != _directory_watcher_array.end(); it++ )
+            THREAD_LOCK( _lock )
             {
-                if( (*it)->signaled() )
+                bool ok = false;
+
+                for( Directory_watcher_array::iterator it = _directory_watcher_array.begin(); it != _directory_watcher_array.end(); it++ )
+                {
+                    if( (*it)->signaled() )
+                    {
+                        ok = true;
+                        (*it)->watch_again();
+                        if( _spooler->_debug )  _log.msg( "Task startet, weil Verzeichnis geändert: " + (*it)->as_string() );
+                    }
+                }
+
+                if( _event.signaled() )
                 {
                     ok = true;
-                    (*it)->watch_again();
-                    if( _spooler->_debug )  _log.msg( "Task startet, weil Verzeichnis geändert: " + (*it)->as_string() );
+                    if( _spooler->_debug )  _log.msg( "Task startet, weil " + _event.as_string() );
                 }
+
+                Time now = Time::now();
+                if( now >= _next_start_time ) 
+                {
+                    ok = true;
+                   if( _spooler->_debug )  _log.msg( "Task startet, weil Job-Startzeit erreicht: " + _next_start_time.as_string() );
+                }
+
+                if( now >= _next_start_at ) 
+                {
+                    ok = true;
+                   if( _spooler->_debug )  _log.msg( "Task startet, weil Task-Startzeit erreicht: " + _next_start_at.as_string() );
+                }
+
+                if( !ok )  return false;
+
+                create_task( NULL, "" ),  dequeue_task();
             }
-
-            if( _event.signaled() )
-            {
-                ok = true;
-                if( _spooler->_debug )  _log.msg( "Task startet, weil " + _event.as_string() );
-            }
-
-            Time now = Time::now();
-            if( now >= _next_start_time ) 
-            {
-                ok = true;
-               if( _spooler->_debug )  _log.msg( "Task startet, weil Job-Startzeit erreicht: " + _next_start_time.as_string() );
-            }
-
-            if( now >= _next_start_at ) 
-            {
-                ok = true;
-               if( _spooler->_debug )  _log.msg( "Task startet, weil Task-Startzeit erreicht: " + _next_start_at.as_string() );
-            }
-
-            if( !ok )  return false;
-
-            THREAD_LOCK( _lock )  create_task( NULL, "" ),  dequeue_task();
         }
 
         something_done = true;

@@ -1,4 +1,4 @@
-// $Id: spooler_com.h,v 1.15 2001/07/16 16:39:35 jz Exp $
+// $Id: spooler_com.h,v 1.16 2001/08/20 13:46:55 jz Exp $
 
 #ifndef __SPOOLER_COM_H
 #define __SPOOLER_COM_H
@@ -135,6 +135,7 @@ struct Com_job : spooler_com::Ijob, Sos_ole_object
     void                        close                       ()                                      { _job = NULL; }
 
     STDMETHODIMP                start_when_directory_changed( BSTR directory_name );
+    STDMETHODIMP                clear_when_directory_changed();
     STDMETHODIMP                start                       ( VARIANT*, spooler_com::Itask** );
     STDMETHODIMP                wake                        ();
     STDMETHODIMP                get_thread                  ( spooler_com::Ithread** );

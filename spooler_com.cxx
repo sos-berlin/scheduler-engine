@@ -1,4 +1,4 @@
-// $Id: spooler_com.cxx,v 1.19 2001/07/16 16:39:35 jz Exp $
+// $Id: spooler_com.cxx,v 1.20 2001/08/20 13:46:54 jz Exp $
 /*
     Hier sind implementiert
 
@@ -223,6 +223,23 @@ STDMETHODIMP Com_job::start_when_directory_changed( BSTR directory_name )
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Job::start_when_directory_changed" ); }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Job::start_when_directory_changed" ); }
+
+    return hr;
+}
+
+//------------------------------------------------------------Com_job::clear_when_directory_changed 
+
+STDMETHODIMP Com_job::clear_when_directory_changed()
+{
+    HRESULT hr = NOERROR;
+    if( !_job )  return E_POINTER;
+
+    try
+    {
+        _job->clear_when_directory_changed();
+    }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Job::clear_when_directory_changed" ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Job::clear_when_directory_changed" ); }
 
     return hr;
 }
