@@ -1,4 +1,4 @@
-// $Id: spooler_com.cxx,v 1.158 2004/09/30 10:21:30 jz Exp $
+// $Id: spooler_com.cxx,v 1.159 2004/10/10 16:49:20 jz Exp $
 /*
     Hier sind implementiert
 
@@ -1775,10 +1775,12 @@ const Com_method Com_task::_methods[] =
     { DISPATCH_PROPERTYPUT, 11, "delay_spooler_process"     , (Com_method_ptr)&Com_task::put_Delay_spooler_process, VT_EMPTY    , { VT_BYREF|VT_VARIANT } },
     { DISPATCH_PROPERTYPUT, 12, "close_engine"              , (Com_method_ptr)&Com_task::put_Close_engine       , VT_EMPTY      , { VT_BOOL } },
     { DISPATCH_PROPERTYGET, 13, "order"                     , (Com_method_ptr)&Com_task::get_Order              , VT_DISPATCH   },
-    { DISPATCH_PROPERTYGET, 14, "java_class_name"           , (Com_method_ptr)&Com_task::get_Java_class_name    , VT_BSTR },
-    { DISPATCH_PROPERTYGET, 15, "changed_directories"       , (Com_method_ptr)&Com_task::get_Changed_directories, VT_BSTR },
+    { DISPATCH_PROPERTYGET, 14, "java_class_name"           , (Com_method_ptr)&Com_task::get_Java_class_name    , VT_BSTR       },
+    { DISPATCH_PROPERTYGET, 15, "changed_directories"       , (Com_method_ptr)&Com_task::get_Changed_directories, VT_BSTR       },
     { DISPATCH_METHOD     , 16, "add_pid"                   , (Com_method_ptr)&Com_task::Add_pid                , VT_EMPTY      , { VT_INT, VT_BYREF|VT_VARIANT }, 1 },
     { DISPATCH_METHOD     , 17, "remove_pid"                , (Com_method_ptr)&Com_task::Remove_pid             , VT_EMPTY      , { VT_INT } },
+    { DISPATCH_PROPERTYGET, 18, "stderr_text"               , (Com_method_ptr)&Com_task::get_Stderr_text        , VT_BSTR       },
+    { DISPATCH_PROPERTYGET, 19, "stdout_text"               , (Com_method_ptr)&Com_task::get_Stdout_text        , VT_BSTR       },
     {}
 };
 
@@ -2177,6 +2179,55 @@ STDMETHODIMP Com_task::Remove_pid( int pid )
     
     return hr;
 }
+
+//------------------------------------------------------------------------Com_task::get_Stderr_text
+
+STDMETHODIMP Com_task::get_Stderr_text( BSTR* result )
+{
+    Z_LOG( __PRETTY_FUNCTION__ << "()\n" );
+    
+    HRESULT hr = S_OK;
+    
+    try
+    {
+        *result = NULL;
+
+        if( !_task )  throw_xc( "SCHEDULER-122" );
+        if( !_task->thread()  ||  current_thread_id() != _task->thread()->thread_id() )  return E_ACCESSDENIED;
+        if( !_task->_module_instance )  return S_FALSE;
+        
+        return String_to_bstr( string_from_file( _task->_module_instance->stderr_filename() ), result );
+    }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
+    
+    return hr;
+}
+
+//------------------------------------------------------------------------Com_task::get_Stdout_text
+
+STDMETHODIMP Com_task::get_Stdout_text( BSTR* result )
+{
+    Z_LOG( __PRETTY_FUNCTION__ << "()\n" );
+    
+    HRESULT hr = S_OK;
+    
+    try
+    {
+        *result = NULL;
+
+        if( !_task )  throw_xc( "SCHEDULER-122" );
+        if( !_task->thread()  ||  current_thread_id() != _task->thread()->thread_id() )  return E_ACCESSDENIED;
+        if( !_task->_module_instance )  return S_FALSE;
+        
+        return String_to_bstr( string_from_file( _task->_module_instance->stdout_filename() ), result );
+    }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
+    
+    return hr;
+}
+
 //-----------------------------------------------------------------------------Com_thread::_methods
 /*
 #ifdef Z_COM

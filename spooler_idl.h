@@ -1,4 +1,4 @@
-// $Id: spooler_idl.h,v 1.31 2004/04/05 09:14:26 jz Exp $
+// $Id: spooler_idl.h,v 1.32 2004/10/10 16:49:20 jz Exp $
 
 
 /*  Ersatz für spooler.odl für Systeme ohne COM. 
@@ -208,6 +208,8 @@ struct Itask : IDispatch
     virtual HRESULT     put_Delay_spooler_process       ( VARIANT* seconds ) = 0;
     virtual HRESULT     put_Close_engine                ( VARIANT_BOOL close_after_task ) = 0;
     virtual HRESULT     get_Order                       ( Iorder** result ) = 0;
+    virtual HRESULT     get_Stderr_text                 ( BSTR* ) = 0;
+    virtual HRESULT     get_Stdout_text                 ( BSTR* ) = 0;
 };
 
 //---------------------------------------------------------------------------------------Thread
