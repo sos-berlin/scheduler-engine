@@ -1,4 +1,4 @@
-// $Id: spooler_time.cxx,v 1.49 2003/10/04 19:26:43 jz Exp $
+// $Id: spooler_time.cxx,v 1.50 2003/10/07 08:25:51 jz Exp $
 /*
     Hier sind implementiert
 
@@ -135,7 +135,7 @@ Time Time::now()
         localtime_r( &tv.tv_sec, &local_tm );
         return timegm( &local_tm ) + (double)tv.tv_usec / 1e6;
 
-#   elif defined SYSTEM_HPUX
+#   elif defined SYSTEM_HPUX || defined SYSTEM_SOLARIS
 
         timeval  tv;
         tm       local_tm;
