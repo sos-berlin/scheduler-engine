@@ -1,6 +1,6 @@
 # $Id$
 
-PROD_DIR = $(shell cd ../.. && pwd)
+PROD_DIR = $(shell cd ../.. && /bin/pwd)
 
 DEP_PRODUCTS = kram file fs zschimmer libxml2
 
