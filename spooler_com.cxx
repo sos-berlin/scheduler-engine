@@ -1,4 +1,4 @@
-// $Id: spooler_com.cxx,v 1.26 2002/03/05 18:09:51 jz Exp $
+// $Id: spooler_com.cxx,v 1.27 2002/03/27 21:33:49 jz Exp $
 /*
     Hier sind implementiert
 
@@ -370,7 +370,7 @@ Com_job::Com_job( Job* job )
 
 //------------------------------------------------------------Com_job::start_when_directory_changed 
 
-STDMETHODIMP Com_job::start_when_directory_changed( BSTR directory_name )
+STDMETHODIMP Com_job::start_when_directory_changed( BSTR directory_name, BSTR filename_pattern )
 {
     HRESULT hr = NOERROR;
 
@@ -378,7 +378,7 @@ STDMETHODIMP Com_job::start_when_directory_changed( BSTR directory_name )
 
     try
     {
-        _job->start_when_directory_changed( bstr_as_string( directory_name ) );
+        _job->start_when_directory_changed( bstr_as_string( directory_name ), bstr_as_string( filename_pattern ) );
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Job::start_when_directory_changed" ); }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Job::start_when_directory_changed" ); }

@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.60 2002/03/05 20:49:37 jz Exp $
+// $Id: spooler_task.cxx,v 1.61 2002/03/27 21:33:50 jz Exp $
 /*
     Hier sind implementiert
 
@@ -516,17 +516,18 @@ Sos_ptr<Task> Job::start_without_lock( const CComPtr<spooler_com::Ivariable_set>
 
 //----------------------------------------------------------------Job::start_when_directory_changed
 
-void Job::start_when_directory_changed( const string& directory_name )
+void Job::start_when_directory_changed( const string& directory_name, const string& filename_pattern )
 {
     THREAD_LOCK( _lock )
     {
-        _log.debug( "start_when_directory_changed \"" + directory_name + "\"" );
+        _log.debug( "start_when_directory_changed \"" + directory_name + "\", \"" + filename_pattern + "\"" );
 
 #       ifdef SYSTEM_WIN
 
             for( Directory_watcher_list::iterator it = _directory_watcher_list.begin(); it != _directory_watcher_list.end(); it++ )
             {
-                if( (*it)->directory() == directory_name )  it = _directory_watcher_list.erase( it );   // Überwachung erneuern
+                if( (*it)->directory()        == directory_name 
+                 && (*it)->filename_pattern() == filename_pattern )  it = _directory_watcher_list.erase( it );   // Überwachung erneuern
                 // Wenn das Verzeichnis bereits überwacht war, aber inzwischen gelöscht, und das noch nicht bemerkt worden ist
                 // (weil Spooler_thread::wait vor lauter Jobaktivität nicht gerufen wurde), dann ist es besser, die Überwachung 
                 // hier zu erneuern. Besonders, wenn das Verzeichnis wieder angelegt ist.
@@ -535,7 +536,7 @@ void Job::start_when_directory_changed( const string& directory_name )
 
             Sos_ptr<Directory_watcher> dw = SOS_NEW( Directory_watcher( &_log ) );
 
-            dw->watch_directory( directory_name );
+            dw->watch_directory( directory_name, filename_pattern );
             dw->set_name( "job(\"" + _name + "\").start_when_directory_changed(\"" + directory_name + "\")" );
             _directory_watcher_list.push_back( dw );
             dw->add_to( &_thread->_wait_handles );
@@ -592,14 +593,7 @@ bool Job::load()
     _script_instance.add_obj( (IDispatch*)_com_log              , "spooler_log"    );
     _script_instance.add_obj( (IDispatch*)_com_job              , "spooler_job"    );
     _script_instance.add_obj( (IDispatch*)_com_task             , "spooler_task"   );
-/*
-    try
-    {
-        _script_instance.load( *_script_ptr );
-    }
-    catch( const Xc& x        ) { set_error(x);  _close_engine = true;  set_state( s_load_error );  return false; }
-    catch( const exception& x ) { set_error(x);  _close_engine = true;  set_state( s_load_error );  return false; }
-*/
+
     try
     {
         _script_instance.load( *_script_ptr );
