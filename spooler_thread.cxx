@@ -1,4 +1,4 @@
-// $Id: spooler_thread.cxx,v 1.59 2002/11/27 09:39:12 jz Exp $
+// $Id: spooler_thread.cxx,v 1.60 2002/11/27 22:06:34 jz Exp $
 /*
     Hier sind implementiert
 
@@ -267,8 +267,8 @@ void Spooler_thread::build_prioritized_order_job_array()
 
 bool Spooler_thread::do_something( Job* job )
 {
-    Thread_semaphore::Guard serialize_guard;
-    if( !_free_threading )  serialize_guard.enter( &_spooler->_serialize_lock );
+    //Thread_semaphore::Guard serialize_guard;
+    //if( !_free_threading )  serialize_guard.enter( &_spooler->_serialize_lock );
 
     _current_job = job;
 
@@ -297,6 +297,7 @@ bool Spooler_thread::step()
                 if( job->priority() >= _spooler->priority_max() )
                 {
                     if( _event.signaled_then_reset() )  return true;
+                    if( _spooler->signaled() )  return true;
                     something_done |= do_something( job );
                     if( !something_done )  break;
                 }
@@ -328,6 +329,7 @@ bool Spooler_thread::step()
                 Job* job = *it;
 
                 if( _event.signaled_then_reset() )  return true;
+                if( _spooler->signaled() )  return true;
                 stepped = do_something( job );
                 something_done |= stepped;
                 if( stepped )  break;
@@ -350,6 +352,7 @@ bool Spooler_thread::step()
                 for( int i = 0; i < job->priority(); i++ )
                 {
                     if( _event.signaled_then_reset() )  return true;
+                    if( _spooler->signaled() )  return true;
                     something_done |= do_something( job );
                     if( !something_done )  break;
                 }
@@ -370,6 +373,7 @@ bool Spooler_thread::step()
             if( !job->order_controlled() )
             {
                 if( _event.signaled_then_reset() )  return true;
+                if( _spooler->signaled() )  return true;
                 if( job->priority() == 0 )  do_something( job );
             }
         }
@@ -440,22 +444,28 @@ void Spooler_thread::wait()
 
             if( _next_job )  _next_start_time = _next_job->_next_time;
 
-            if( _next_job )  msg = "Warten bis " + _next_start_time.as_string() + " für Job " + _next_job->name();
-                       else  msg = "Kein Job zu starten";
+            if( _spooler->_debug )  if( _next_job )  msg = "Warten bis " + _next_start_time.as_string() + " für Job " + _next_job->name();
+                                               else  msg = "Kein Job zu starten";
         }
     }
-
-
-    if( _spooler->_debug )  _log.debug( msg );
 
 
     if( _next_start_time > 0 )
     {
 #       ifdef SYSTEM_WIN
  
-            wait_until( _next_start_time );
+            if( _spooler->_debug )  
+            {
+                if( _wait_handles.wait(0) == -1 )  _log.debug( msg ), wait_until( _next_start_time );     // Debug-Ausgabe der Wartezeit nur, wenn kein Ergebnis vorliegt
+            }
+            else
+            {
+                wait_until( _next_start_time );
+            }
 
 #        else
+
+            if( _spooler->_debug )  _log.debug( msg );
 
             double wait_time = _next_start_time - Time::now();
 
@@ -573,11 +583,14 @@ void Spooler_thread::nichts_getan( double wait_time )
 {
     _log.warn( "Nichts getan, running_tasks_count=" + as_string(_running_tasks_count) + " state=" + _spooler->state_name() + " _wait_handles=" + _wait_handles.as_string() );
 
-    THREAD_LOCK( _lock )
+    if( _nothing_done_count == _nothing_done_max + 1 )
     {
-        FOR_EACH( Job_list, _job_list, it )  
+        THREAD_LOCK( _lock )
         {
-            _log.warn( "Job " + (*it)->name() + " state=" + (*it)->state_name() + " queue_filled=" + ( (*it)->queue_filled()? "ja" : "nein" ) );
+            FOR_EACH( Job_list, _job_list, it )  
+            {
+                _log.warn( "Job " + (*it)->name() + " state=" + (*it)->state_name() + " queue_filled=" + ( (*it)->queue_filled()? "ja" : "nein" ) );
+            }
         }
     }
 
@@ -611,7 +624,7 @@ bool Spooler_thread::process()
         else 
         if( ++_nothing_done_count > _nothing_done_max )  
         {
-            nichts_getan( min( 60.0, (double)_nothing_done_count / _nothing_done_max ) );
+            nichts_getan( min( 30.0, (double)_nothing_done_count / _nothing_done_max ) );
         }
 
         remove_temporary_jobs();

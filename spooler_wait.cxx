@@ -1,4 +1,4 @@
-// $Id: spooler_wait.cxx,v 1.48 2002/11/27 09:39:13 jz Exp $
+// $Id: spooler_wait.cxx,v 1.49 2002/11/27 22:06:34 jz Exp $
 /*
     Hier sind implementiert
 
@@ -394,6 +394,7 @@ int Wait_handles::wait( double wait_time )
 }
 
 //-------------------------------------------------------------------------Wait_handles::wait_until
+// Liefert Nummer des Events (0..n-1) oder -1 bei Zeitablauf
 
 int Wait_handles::wait_until( Time until )
 {

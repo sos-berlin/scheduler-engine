@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.144 2002/11/27 09:39:09 jz Exp $
+// $Id: spooler.cxx,v 1.145 2002/11/27 22:06:33 jz Exp $
 /*
     Hier sind implementiert
 
@@ -893,14 +893,14 @@ void Spooler::run()
         _state_cmd = sc_none;
 
 
-#       ifdef SPOOLER_USE_THREADS
-            if( _state == Spooler::s_paused )
-            {
+        if( _state == Spooler::s_paused )
+        {
+#           ifdef SPOOLER_USE_THREADS
                 _wait_handles.wait_until( latter_day );
-            }
-#        else
-            _log.error( "Zustand 'paused' ist auf dieser Plattform nicht implementiert" );
-#       endif
+#            else
+                _log.error( "Zustand 'paused' ist auf dieser Plattform nicht implementiert" );
+#           endif
+        }
 
         _next_time = latter_day;
         _next_job  = NULL;
@@ -915,17 +915,27 @@ void Spooler::run()
 
             if( !something_done  &&  _next_time > now )
             {
-                if( _next_job )  _log.debug( "Warten bis " + _next_time.as_string() + " für Job " + _next_job->name() );
-                           else  _log.debug( "Kein Job zu starten" );
+                // CODE ÄHNLICH SPOOLER_THREAD.CXX. SOMMERZEITUMSTELLUNG FEHLT HIER.
+
+                string msg;
+                
+                if( _debug )  msg = _next_job? "Warten bis " + _next_time.as_string() + " für Job " + _next_job->name() 
+                                             : "Kein Job zu starten";
 
 #               ifdef Z_WINDOWS
+
                     Wait_handles wait_handles = _wait_handles;
                     FOR_EACH( Thread_list, _thread_list, it )  if( !(*it)->_free_threading )  wait_handles += (*it)->_wait_handles;
 
-                    wait_handles.wait( _next_time - now );
+                    if( _debug )  if( wait_handles.wait(0) == -1 )  _log.debug( msg ), wait_handles.wait( _next_time );
+
                     wait_handles.clear();
+
 #                else
+
+                    _log.debug( msg );
                     sos_sleep( _next_time - now );
+
 #               endif
             }
         }
