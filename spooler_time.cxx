@@ -1,4 +1,4 @@
-// $Id: spooler_time.cxx,v 1.9 2001/07/16 16:39:36 jz Exp $
+// $Id: spooler_time.cxx,v 1.10 2001/07/16 18:08:13 jz Exp $
 /*
     Hier sind implementiert
 
@@ -31,8 +31,8 @@ Period empty_period;
 
 void Time::operator = ( const Sos_optional_date_time& dt )
 {
-  //_time = dt.hour() * 60*60 + dt.minute() * 60 + dt.second();
-    _time = dt.as_time_t();
+    if( dt.has_date() )  _time = dt.as_time_t();
+                   else  _time = dt.hour() * 60*60 + dt.minute() * 60 + dt.second();
 }
 
 //---------------------------------------------------------------------------------Time::as_string
