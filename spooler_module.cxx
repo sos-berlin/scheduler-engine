@@ -1,4 +1,4 @@
-// $Id: spooler_module.cxx,v 1.23 2003/06/11 14:38:14 jz Exp $
+// $Id: spooler_module.cxx,v 1.24 2003/06/11 14:39:25 jz Exp $
 /*
     Hier sind implementiert
 
@@ -98,7 +98,7 @@ void Module::set_dom_without_source( const xml::Element_ptr& element )
     bool separate_process_default = false;
 #   ifndef Z_WINDOWS
         // Bei Perl automatisch separate_process="yes", weil Perl sonst beim zweiten Aufruf abstürzt
-        separate_process_default = string_begins_with( lcase(_language), "perl" ) );   
+        separate_process_default = string_begins_with( lcase(_language), "perl" );   
 #   endif
 
     _separate_process = element.bool_getAttribute( "separate_process", separate_process_default );
