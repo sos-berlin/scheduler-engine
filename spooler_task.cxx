@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.164 2003/07/30 11:07:34 jz Exp $
+// $Id: spooler_task.cxx,v 1.165 2003/08/02 20:23:36 jz Exp $
 /*
     Hier sind implementiert
 
@@ -645,41 +645,6 @@ bool Job::read_script()
     return true;
 }
 
-//-----------------------------------------------------------------------Task_module_instance::load
-/*
-bool Task_module_instance::load()
-{
-    init();
-
-    add_obj( (IDispatch*)_spooler->_com_spooler      , "spooler"        );
-    add_obj( (IDispatch*)_job->_thread->_com_thread  , "spooler_thread" );
-    add_obj( (IDispatch*)_com_log                    , "spooler_log"    );
-    add_obj( (IDispatch*)_com_job                    , "spooler_job"    );
-    add_obj( (IDispatch*)_com_task                   , "spooler_task"   );
-
-    try
-    {
-        load();
-        start();
-    }
-    catch( const exception& x ) { set_error(x);  _close_engine = true;  return false; }
-
-
-    if( name_exists( spooler_init_name ) )
-    {
-        In_call in_call ( _task, spooler_init_name );
-        bool ok = check_result( call( spooler_init_name ) );
-        in_call.set_result( ok );
-        if( !ok || has_error() )  { _close_engine = true;  return false; }
-    }
-
-    _has_spooler_process = name_exists( spooler_process_name );
-
-  //set_state( s_loaded );
-
-    return true;
-}
-*/
 //-----------------------------------------------------------------------------------------Job::end
 /*
 void Job::end()
@@ -708,7 +673,7 @@ void Job::end()
 */
 //----------------------------------------------------------------------------------------Job::stop
 
-void Job::stop()
+void Job::stop( bool end_all_tasks )
 {
     if( _state != s_stopping  &&  _state != s_stopped )
     {
@@ -721,7 +686,16 @@ void Job::stop()
 */
     }
 
-    
+
+    if( end_all_tasks )
+    {
+        Z_FOR_EACH( Task_list, _running_tasks, t )
+        {
+            Task* task = *t;
+            task->cmd_end();
+        }
+    }
+
     set_state( _running_tasks.size() > 0? s_stopping : s_stopped );
 
   //end();
@@ -751,37 +725,47 @@ void Job::reread()
 bool Job::execute_state_cmd()
 {
     bool something_done = false;
-/*
+
     //THREAD_LOCK( _lock )
     {
         if( _state_cmd )
         {
             switch( _state_cmd )
             {
-                case sc_stop:       if( _state != s_stopped  
-                                     && _state != s_read_error )  stop(), finish(),            something_done = true;
+                case sc_stop:       if( _state != s_stopping
+                                     && _state != s_stopped  
+                                     && _state != s_read_error )  stop( true ),                something_done = true;
                                     break;
 
                 case sc_unstop:     if( _state == s_stopped    )  set_state( s_pending ),      something_done = true,  set_next_start_time();
                                     break;
 
-                case sc_end:        if( _state == s_running 
-                                     || _state == s_running_delayed 
-                                     || _state == s_running_waiting_for_order
-                                     || _state == s_running_process )  end(), finish(),        something_done = true;
+                case sc_end:        if( _state == s_running    )                               something_done = true;
+                                    Z_FOR_EACH( Task_list, _running_tasks, t )  (*t)->cmd_end();
                                     break;
 
-                case sc_suspend:    if( _state == s_running 
-                                     || _state == s_running_delayed
-                                     || _state == s_running_waiting_for_order )  set_state( s_suspended ), something_done = true;
+                case sc_suspend:    Z_FOR_EACH( Task_list, _running_tasks, t ) 
+                                    {
+                                        Task* task = *t;
+                                        if( task->_state == Task::s_running 
+                                         || task->_state == Task::s_running_delayed
+                                         || task->_state == Task::s_running_waiting_for_order )  task->set_state( Task::s_suspended );
+                                    }
+                                    something_done = true;
                                     break;
 
-                case sc_continue:   if( _state == s_suspended  
-                                     || _state == s_running_delayed )  set_state( s_running ), something_done = true;
+                case sc_continue:   Z_FOR_EACH( Task_list, _running_tasks, t ) 
+                                    {
+                                        Task* task = *t;
+                                        if( task->_state == Task::s_suspended 
+                                         || task->_state == Task::s_running_delayed
+                                         || task->_state == Task::s_running_waiting_for_order )  task->set_state( Task::s_running );
+                                    }
+                                    something_done = true;
                                     break;
 
-                case sc_wake:       if( _state == s_suspended  
-                                     || _state == s_running_delayed )  set_state( s_running ), something_done = true;
+                case sc_wake:       //if( _state == s_suspended
+                                    // || _state == s_running_delayed )  set_state( s_running ), something_done = true;
 
                                     if( _state == s_pending
                                      || _state == s_stopped )
@@ -802,7 +786,7 @@ bool Job::execute_state_cmd()
             _state_cmd = sc_none;
         }
     }
-*/
+
     return something_done;
 }
 
@@ -1183,7 +1167,7 @@ void Job::set_state( State new_state )
 void Job::set_state_cmd( State_cmd cmd )
 { 
     bool ok = false;
-/*
+
     THREAD_LOCK( _lock )
     {
         switch( cmd )
@@ -1207,15 +1191,15 @@ void Job::set_state_cmd( State_cmd cmd )
                                 _thread->signal( state_cmd_name(cmd) );
                                 break;
 
-            case sc_end:        ok = _state == s_running || _state == s_running_delayed || _state == s_running_waiting_for_order || _state == s_suspended;  if( !ok )  return;
+            case sc_end:        ok = true; // _state == s_running || _state == s_running_delayed || _state == s_running_waiting_for_order || _state == s_suspended;  if( !ok )  return;
                                 _state_cmd = cmd;
                                 break;
 
-            case sc_suspend:    ok = _state == s_running || _state == s_running_delayed || _state == s_running_waiting_for_order;   if( !ok )  return;
+            case sc_suspend:    ok = true; //_state == s_running || _state == s_running_delayed || _state == s_running_waiting_for_order;   if( !ok )  return;
                                 _state_cmd = cmd;
                                 break;
 
-            case sc_continue:   ok = _state == s_suspended || _state == s_running_delayed;  if( !ok )  return;
+            case sc_continue:   ok = true; //_state == s_suspended || _state == s_running_delayed;  if( !ok )  return;
                                 _state_cmd = cmd;
                                 _thread->signal( state_cmd_name(cmd) );
                                 break;
@@ -1227,7 +1211,6 @@ void Job::set_state_cmd( State_cmd cmd )
             default:            ok = false;
         }
     }
-*/
 }
 
 //-----------------------------------------------------------------------------------Job::job_state
@@ -2028,7 +2011,7 @@ void Task::end()
 
 void Task::stop()
 {
-    _job->stop();
+    _job->stop( false );
 }
 
 //-------------------------------------------------------------------------Task::on_error_on_success
@@ -2339,7 +2322,7 @@ bool Object_set_task::do_load()
     {
         //ok = _module_instance->load();
         //if( !ok || _job->has_error() )  return false;
-        ok = do_load();
+        throw_xc( "Object_set_task::do_load" );  //ok = do_load();
         if( !ok || has_error() )  return false;
     }
 
@@ -2382,13 +2365,7 @@ bool Job_module_task::do_load()
 bool Job_module_task::do_start()
 {
     bool ok;
-/*
-    if( !_module_instance->loaded() )
-    {
-        ok = _module_instance->load();
-        if( !ok || _job->has_error() )  return false;
-    }
-*/
+
     set_state( s_running );
 
     if( _module_instance->name_exists( spooler_open_name ) )
@@ -2422,6 +2399,35 @@ bool Job_module_task::do_step()
     if( !_module_instance->name_exists( spooler_process_name ) )  return false;
 
     Module_instance::In_call in_call ( this, spooler_process_name, _order? "Auftrag " + _order->obj_name() : "" );
+    bool ok = check_result( _module_instance->call( spooler_process_name ) );
+    in_call.set_result( ok );
+    return ok;
+}
+
+//-------------------------------------------------------------------------Job_module_task::do_step
+
+bool Job_module_task::do_step()
+{
+    //if( !_module_instance->_has_spooler_process )  return false;
+    if( !_module_instance->name_exists( spooler_process_name ) )  return false;
+
+    bool ok = false;
+
+    switch( _call_state )
+    {
+        case c_none:            
+            _module_instance->call_async( spooler_process_name );
+            break;
+
+        case c_spooler_process: 
+            ok = check_result( _module_instance->call_wait() );
+            break;
+
+        default:
+            throw_xc( "call_state", _call_state );
+    }
+
+  //Module_instance::In_call in_call ( this, spooler_process_name, _order? "Auftrag " + _order->obj_name() : "" );
     bool ok = check_result( _module_instance->call( spooler_process_name ) );
     in_call.set_result( ok );
     return ok;

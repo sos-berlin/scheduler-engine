@@ -1,4 +1,4 @@
-// $Id: spooler.h,v 1.140 2003/07/29 11:20:48 jz Exp $
+// $Id: spooler.h,v 1.141 2003/08/02 20:23:36 jz Exp $
 
 #ifndef __SPOOLER_H
 #define __SPOOLER_H
@@ -58,6 +58,7 @@
 #include "../zschimmer/file.h"
 #include "../zschimmer/z_com.h"
 #include "../zschimmer/threads.h"
+#include "../zschimmer/com_remote.h"
 
 using namespace zschimmer;
 using namespace zschimmer::com;
@@ -346,6 +347,9 @@ struct Spooler
 
     Module                     _module;                     // <script>
     ptr<Module_instance>       _module_instance;
+
+    typedef list< ptr<object_server::Connection> >  Process_list;
+    Process_list               _process_list;
 
     Thread_list                _thread_list;                // Alle Threads
 

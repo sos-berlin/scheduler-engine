@@ -1,4 +1,4 @@
-// $Id: spooler_module.h,v 1.27 2003/07/29 11:20:48 jz Exp $
+// $Id: spooler_module.h,v 1.28 2003/08/02 20:23:36 jz Exp $
 
 #ifndef __SPOOLER_MODULE_H
 #define __SPOOLER_MODULE_H
@@ -156,6 +156,16 @@ struct Module_instance : Object
     };
 
 
+    struct Object_list_entry
+    {
+        ptr<IDispatch>         _object;
+        string                 _name;
+    };
+
+    typedef list<Object_list_entry>  Object_list;
+
+
+
 
     Z_GNU_ONLY(                 Module_instance             ();  )                                  // Für gcc 3.2. Nicht implementiert.
                                 Module_instance             ( Module* module )                      : _zero_(this+1), _module(module), _log(module?module->_log:NULL) {}
@@ -165,6 +175,7 @@ struct Module_instance : Object
 
     virtual void                close                       ()                                      = 0;
     virtual void                init                        ();
+
     virtual void                add_obj                     ( const ptr<IDispatch>&, const string& name );
     virtual void                load                        ()                                      {}
     virtual void                start                       ()                                      {}
@@ -177,6 +188,17 @@ struct Module_instance : Object
     virtual bool                callable                    ()                                      = 0;
     int                         pid                         ()                                      { return _pid; }        // 0, wenn kein Prozess
 
+
+    virtual void                begin_async                 ( const Object_list& );
+    virtual bool                begin_wait                  ();
+
+    virtual void                end_async                   ();
+    virtual void                end_wait                    ();
+
+    virtual void                step_async                  ();
+    virtual bool                step_wait                   ();
+
+    virtual bool                operation_finished          ()                                      { return true; }
 
     Fill_zero                  _zero_;
     Delegated_log              _log;

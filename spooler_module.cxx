@@ -1,4 +1,4 @@
-// $Id: spooler_module.cxx,v 1.27 2003/07/29 11:20:48 jz Exp $
+// $Id: spooler_module.cxx,v 1.28 2003/08/02 20:23:36 jz Exp $
 /*
     Hier sind implementiert
 
@@ -348,6 +348,60 @@ void Module_instance::close()
   //if( _com_task )  _com_task->close();
 
     if( _com_context )  _com_context->close(), _com_context = NULL;
+}
+
+//---------------------------------------------------------------------Module_instance::begin_async
+
+void Module_instance::begin_async( const Object_list& object_list )
+{
+    if( !loaded() )
+    {
+        init();
+        FOR_EACH( Object_list, object_list, o )  add_obj( o->_object, o->_name );
+        load();
+        start();
+        call( spooler_init_name );
+    }
+}
+
+//----------------------------------------------------------------------Module_instance::begin_wait
+
+bool Module_instance::begin_wait()
+{
+    return check_result( call( spooler_open_name ) );
+}
+
+//-----------------------------------------------------------------------Module_instance::end_async
+
+void Module_instance::end_async()
+{
+    call( spooler_close_name );
+    on_error_success();
+    
+    if( _close_engine )
+    {
+        call( spooler_exit_name );
+        close();
+    }
+}
+
+//------------------------------------------------------------------------Module_instance::end_wait
+
+void Module_instance::end_wait()
+{
+}
+
+//----------------------------------------------------------------------Module_instance::step_async
+
+void Module_instance::step_async()
+{
+}
+
+//-----------------------------------------------------------------------Module_instance::step_wait
+
+bool Module_instance::step_wait()
+{
+    return check_result( call( spooler_process_name ) );
 }
 
 //-------------------------------------------------------------------------------------------------

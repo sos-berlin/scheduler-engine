@@ -1,4 +1,4 @@
-// $Id: spooler_thread.cxx,v 1.88 2003/07/30 11:07:34 jz Exp $
+// $Id: spooler_thread.cxx,v 1.89 2003/08/02 20:23:36 jz Exp $
 /*
     Hier sind implementiert
 
@@ -253,7 +253,6 @@ void Spooler_thread::start( Event* event_destination )
         _nothing_done_count = 0;
         _nothing_done_max   = _job_list.size() * 2 + 3;
     }
-    catch( const Xc&         x ) { _terminated = true; _log.error( x.what() ); }
     catch( const exception&  x ) { _terminated = true; _log.error( x.what() ); }
     catch( const _com_error& x ) { _terminated = true; _log.error( as_string( x.Description() ) ); }
 }
@@ -268,7 +267,7 @@ void Spooler_thread::stop_jobs()
     {
         _current_job = *it;
 
-        if( (*it)->state() != Job::s_stopped )  (*it)->stop();
+        if( (*it)->state() != Job::s_stopped )  (*it)->stop( true );
 
         _current_job = NULL;
     }

@@ -1,4 +1,4 @@
-// $Id: spooler_task.h,v 1.99 2003/07/30 11:07:34 jz Exp $
+// $Id: spooler_task.h,v 1.100 2003/08/02 20:23:36 jz Exp $
 
 #ifndef __SPOOLER_TASK_H
 #define __SPOOLER_TASK_H
@@ -225,7 +225,7 @@ struct Job : Sos_self_deleting
   //void                        close_task                  ();
     bool                        read_script                 ();
   //void                        end                         ();
-    void                        stop                        ();
+    void                        stop                        ( bool end_all_tasks );
     void                        set_next_start_time         ( Time now = Time::now() );
     void                        set_next_time               ( Time );
     void                        calculate_next_time         ( Time now = Time::now() );
@@ -390,6 +390,22 @@ struct Task : Sos_self_deleting
     };
 
 
+    enum Call_state
+    {
+        c_null,
+        c_create_instance,
+        c_release,
+        c_construct,
+        c_spooler_init,
+        c_spooler_exit,
+        c_spooler_open,
+        c_spooler_close,
+        c_spooler_process,
+        c_spooler_on_success,
+        c_spooler_on_error
+    };
+
+
                                 Task                        ( Spooler*, const Sos_ptr<Job>& );
                                ~Task                        ();
 
@@ -503,6 +519,7 @@ struct Task : Sos_self_deleting
     bool                       _close_engine;               // Nach Task-Ende Scripting Engine schließen (für use_engine="job")
     ptr<Order>                 _order;
     State                      _state;
+    Call_state                 _call_state;
     Xc_copy                    _error;
     string                     _in_call;                    // "spooler_process" etc.
 };
