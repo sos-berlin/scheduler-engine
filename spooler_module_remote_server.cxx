@@ -1,4 +1,4 @@
-// $Id: spooler_module_remote_server.cxx,v 1.22 2003/08/31 15:02:15 jz Exp $
+// $Id: spooler_module_remote_server.cxx,v 1.23 2003/09/01 15:15:37 jz Exp $
 /*
     Hier sind implementiert
 
@@ -75,13 +75,13 @@ void Remote_module_instance_server::load_implicitly()
 const Com_method Com_remote_module_instance_server::_methods[] =
 { 
    // _flags              , _name             , _method                                                         , _result_type  , _types        , _default_arg_count
-    { DISPATCH_METHOD     , 1, "construct"    , (Com_method_ptr)&Com_remote_module_instance_server::construct   , VT_EMPTY      , { VT_ARRAY|VT_VARIANT } },
+    { DISPATCH_METHOD     , 1, "construct"    , (Com_method_ptr)&Com_remote_module_instance_server::construct   , VT_EMPTY      , { VT_BYREF|VT_ARRAY|VT_VARIANT } },
     { DISPATCH_METHOD     , 2, "add_obj"      , (Com_method_ptr)&Com_remote_module_instance_server::add_obj     , VT_EMPTY      , { VT_DISPATCH, VT_BSTR } },
     { DISPATCH_METHOD     , 3, "name_exists"  , (Com_method_ptr)&Com_remote_module_instance_server::name_exists , VT_BOOL       , { VT_BSTR } },
     { DISPATCH_METHOD     , 4, "call"         , (Com_method_ptr)&Com_remote_module_instance_server::call        , VT_VARIANT    , { VT_BSTR } },
-    { DISPATCH_METHOD     , 5, "begin"        , (Com_method_ptr)&Com_remote_module_instance_server::begin       , VT_VARIANT    , { VT_BSTR } },
-    { DISPATCH_METHOD     , 6, "end"          , (Com_method_ptr)&Com_remote_module_instance_server::end         , VT_VARIANT    , { VT_BSTR, VT_INT } },
-    { DISPATCH_METHOD     , 7, "step"         , (Com_method_ptr)&Com_remote_module_instance_server::step        , VT_VARIANT    , { VT_BSTR } },
+    { DISPATCH_METHOD     , 5, "begin"        , (Com_method_ptr)&Com_remote_module_instance_server::begin       , VT_VARIANT    , { VT_BYREF|VT_ARRAY|VT_VARIANT, VT_BYREF|VT_ARRAY|VT_VARIANT } },
+    { DISPATCH_METHOD     , 6, "end"          , (Com_method_ptr)&Com_remote_module_instance_server::end         , VT_VARIANT    , { VT_BOOL } },
+    { DISPATCH_METHOD     , 7, "step"         , (Com_method_ptr)&Com_remote_module_instance_server::step        , VT_VARIANT    },
     {}
 };
 
@@ -211,6 +211,7 @@ STDMETHODIMP Com_remote_module_instance_server::construct( SAFEARRAY* safearray 
     }
     catch( const exception& x ) { hr = com_set_error( x, "Remote_module_instance_server::construct" ); }
 
+LOG( "Com_remote_module_instance_server::construct OK\n" );
     return hr;
 }
 

@@ -1,4 +1,4 @@
-// $Id: spooler_time.h,v 1.20 2003/08/31 22:32:42 jz Exp $
+// $Id: spooler_time.h,v 1.21 2003/09/01 15:15:38 jz Exp $
 
 #ifndef __SPOOLER_TIME_H
 #define __SPOOLER_TIME_H
@@ -45,8 +45,12 @@ struct Time
     void                        operator +=                 ( double t )                    { set( _time + t ); }
     void                        operator -=                 ( double t )                    { set( _time - t ); }
 
+    Time                        operator +                  ( const Time& t )               { return Time( _time + t ); }
+    Time                        operator +                  ( double t )                    { return Time( _time + t ); }
+    Time                        operator +                  ( int t )                       { return Time( _time + t ); }
     Time                        operator -                  ( const Time& t )               { return Time( _time - t ); }
-  //Time                        operator +                  ( const Time& t )               { return Time( _time + t ); }
+    Time                        operator -                  ( double t )                    { return Time( _time - t ); }
+    Time                        operator -                  ( int t )                       { return Time( _time - t ); }
 
     bool                        operator <                  ( const Time& t ) const         { return _time <  t._time; }
     bool                        operator <=                 ( const Time& t ) const         { return _time <= t._time; }
@@ -87,7 +91,10 @@ struct Time
     static Time                 now                         ();
 
     double                     _time;                       // wie time_t: Anzahl Sekunden seit 1.1.1970 oder seit Mitternacht
-    Z_DEBUG_ONLY( string       _time_as_string; )
+
+#   if defined Z_DEBUG && defined Z_WINDOWS                 // Time in statischer Variablen führt mit gcc 3.3 zum Absturz in string::string
+        string                 _time_as_string;
+#   endif    
 };      
 
 const int                       latter_day_int              = INT_MAX;

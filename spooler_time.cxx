@@ -1,4 +1,4 @@
-// $Id: spooler_time.cxx,v 1.42 2003/08/31 22:32:42 jz Exp $
+// $Id: spooler_time.cxx,v 1.43 2003/09/01 15:15:38 jz Exp $
 /*
     Hier sind implementiert
 
@@ -70,8 +70,12 @@ void Time::set( const string& t )
 void Time::set( double t )
 { 
     _time = round(t); 
-   
-    Z_DEBUG_ONLY( _time_as_string = _time == latter_day_int? "LATTER_DAY" : as_string(); )
+
+#   if defined Z_DEBUG && defined Z_WINDOWS
+        if( _time == 0 )  _time_as_string.clear();   // Für static empty_period sollte in gcc as_string() nicht gerufen werden! (Sonst Absturz)
+                    else  _time_as_string = _time == latter_day_int? "LATTER_DAY" 
+                                                                   : as_string();
+#   endif                                                           
 }
 
 //-------------------------------------------------------------------------------Time::set_datetime

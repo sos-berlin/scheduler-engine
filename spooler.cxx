@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.235 2003/09/01 08:28:06 jz Exp $
+// $Id: spooler.cxx,v 1.236 2003/09/01 15:15:37 jz Exp $
 /*
     Hier sind implementiert
 
@@ -1651,13 +1651,16 @@ void Spooler::run()
                 if( ++nothing_done_count > nothing_done_max )
                 {
                     nichts_getan( single_thread, ++nichts_getan_zaehler );
-                    _next_time = max( _next_time, (Time)min( 30.0, double( 1 << nichts_getan_zaehler ) / 4 ) );    // Bremsen, mit 1/4s anfangen
+                    _next_time = max( _next_time, Time::now() + min( 30.0, double( 1 << nichts_getan_zaehler ) / 4 ) );    // Bremsen, mit 1/4s anfangen
                 }
 
 
 
                 if( _next_time > 0 )
                 {
+
+_next_time = min( _next_time, Time::now() + 0.5 );      // Solange wie select nicht weckt
+
                     if( _debug )  
                     {
                         if( wait_handles.wait(0) == -1 )  _log.debug( msg ), wait_handles.wait_until( _next_time );     // Debug-Ausgabe der Wartezeit nur, wenn kein Ergebnis vorliegt

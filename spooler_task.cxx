@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.185 2003/09/01 08:28:06 jz Exp $
+// $Id: spooler_task.cxx,v 1.186 2003/09/01 15:15:37 jz Exp $
 /*
     Hier sind implementiert
 
@@ -484,7 +484,7 @@ void Task::set_next_time( const Time& next_time )
 Time Task::next_time()
 { 
     return _operation? _timeout == latter_day? latter_day
-                                             : Time( _next_time + _timeout )     // _timeout sollte nicht zu groß sein
+                                             : Time( _last_operation_time + _timeout )     // _timeout sollte nicht zu groß sein
                      : _next_time;
 }
 
@@ -688,7 +688,9 @@ bool Task::do_something()
                 {
                     operation__end();
 
-                    set_state( has_error()? s_on_error : s_on_success );
+                    set_state( loaded()? has_error()? s_on_error 
+                                                    : s_on_success 
+                                       : s_release );
 
                     loop = true;
                     something_done = true;
@@ -1005,7 +1007,7 @@ void Task::finish()
             Time delay = 0;
             FOR_EACH( Job::Delay_after_error, _job->_delay_after_error, it )  
                 if( _job->_error_steps >= it->first )  delay = it->second;
-            _job->_delay_until = delay? Time::now() + delay : 0;
+            _job->_delay_until = delay? Time::now() + delay : Time(0);
         }
     }
     else

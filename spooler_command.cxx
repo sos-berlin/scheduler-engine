@@ -1,4 +1,4 @@
-// $Id: spooler_command.cxx,v 1.91 2003/08/29 20:44:24 jz Exp $
+// $Id: spooler_command.cxx,v 1.92 2003/09/01 15:15:37 jz Exp $
 /*
     Hier ist implementiert
 
@@ -319,7 +319,7 @@ xml::Element_ptr Command_processor::execute_start_job( const xml::Element_ptr& e
 
     Time start_at;
 
-    if( !after_str.empty() )  start_at = Time::now() + as_int( after_str );
+    if( !after_str.empty() )  start_at = Time::now() + Time( as_int( after_str ) );
 
     if( at_str == ""       )  at_str = "now";
     if( at_str == "period" )  start_at = 0;                                     // start="period" => start_at = 0 (sobald eine Periode es zulässt)
