@@ -1,4 +1,4 @@
-// $Id: spooler_module_com.cxx,v 1.11 2002/12/02 17:19:32 jz Exp $
+// $Id: spooler_module_com.cxx,v 1.12 2003/04/11 14:39:45 jz Exp $
 /*
     Hier sind implementiert
 
@@ -24,14 +24,14 @@ bool check_result( const Variant& vt )
     if( vt.vt == VT_EMPTY    )  return true;                       // Keine Rückgabe? True, also weiter machen
     if( vt.vt == VT_NULL     )  return false;                      // NULL? False
     if( vt.vt == VT_DISPATCH )  return vt.pdispVal != NULL;        // Nothing => False, also Ende
-    if( vt.vt == VT_BOOL     )  return vt.bVal != 0;               // Nothing => False, also Ende
+    if( vt.vt == VT_BOOL     )  return V_BOOL(&vt) != 0;           // Nothing => False, also Ende
 
     Variant v = vt;
 
     HRESULT hr = v.ChangeType( VT_BOOL );
     if( FAILED(hr) )  throw_ole( hr, "VariantChangeType" );
 
-    return v.bVal != 0;
+    return V_BOOL(&v) != 0;
 }
 
 //-------------------------------------------------------------------------Com_module_instance_base::init

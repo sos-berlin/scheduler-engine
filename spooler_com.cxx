@@ -1,4 +1,4 @@
-// $Id: spooler_com.cxx,v 1.93 2003/03/31 11:32:52 jz Exp $
+// $Id: spooler_com.cxx,v 1.94 2003/04/11 14:39:44 jz Exp $
 /*
     Hier sind implementiert
 
@@ -1869,8 +1869,8 @@ const Com_method Com_spooler::_methods[] =
     { DISPATCH_PROPERTYGET,  8, "log_dir"                   , (Com_method_ptr)&Com_spooler::get_log_dir         , VT_BSTR      },
     { DISPATCH_METHOD     ,  9, "let_run_terminate_and_restart", (Com_method_ptr)&Com_spooler::let_run_terminate_and_restart },
     { DISPATCH_PROPERTYGET, 10, "variables"                 , (Com_method_ptr)&Com_spooler::get_variables       , VT_DISPATCH  },
-    { DISPATCH_PROPERTYPUT, 11, "var"                       , (Com_method_ptr)&Com_spooler::put_var             , VT_EMPTY     , { VT_BYREF|VT_VARIANT } },
-    { DISPATCH_PROPERTYGET, 11, "var"                       , (Com_method_ptr)&Com_spooler::get_var             , VT_DISPATCH  , { VT_BSTR } },
+    { DISPATCH_PROPERTYPUT, 11, "var"                       , (Com_method_ptr)&Com_spooler::put_var             , VT_EMPTY     , { VT_BSTR, VT_BYREF|VT_VARIANT } },
+    { DISPATCH_PROPERTYGET, 11, "var"                       , (Com_method_ptr)&Com_spooler::get_var             , VT_VARIANT   , { VT_BSTR } },
     { DISPATCH_PROPERTYGET, 12, "db_name"                   , (Com_method_ptr)&Com_spooler::get_db_name         , VT_BSTR      },
     { DISPATCH_METHOD     , 13, "create_job_chain"          , (Com_method_ptr)&Com_spooler::create_job_chain    , VT_DISPATCH  },
     { DISPATCH_METHOD     , 14, "add_job_chain"             , (Com_method_ptr)&Com_spooler::add_job_chain       , VT_EMPTY     , { VT_DISPATCH } },
