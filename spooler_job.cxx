@@ -1,4 +1,4 @@
-// $Id: spooler_job.cxx,v 1.60 2004/02/09 23:03:48 jz Exp $
+// $Id: spooler_job.cxx,v 1.61 2004/02/11 10:18:52 jz Exp $
 /*
     Hier sind implementiert
 
@@ -478,7 +478,7 @@ void Job::Task_queue::enqueue_task( const Sos_ptr<Task>& task )
     _queue.insert( it, task );
 }
 
-//---------------------------------------------------------------------Job::Task_queue::remove_task
+//-------------------------------------------------------------Job::Task_queue::remove_task_from_db
 
 void Job::Task_queue::remove_task_from_db( int task_id )
 {
@@ -506,14 +506,14 @@ void Job::Task_queue::remove_task_from_db( int task_id )
 
 //---------------------------------------------------------------------Job::Task_queue::remove_task
 
-bool Job::Task_queue::remove_task( int task_id, Why_remove )
+bool Job::Task_queue::remove_task( int task_id, Why_remove why_remove )
 {
     bool result = false;
 
     for( Queue::iterator it = _queue.begin(); it != _queue.end(); it++ )
     {
         Task* task = *it;
-        if( task->_id == task_id )  
+        if( task->_id == task_id )
         {
             bool remove_from_db = task->_is_in_db;
             _queue.erase( it );
@@ -1583,30 +1583,38 @@ xml::Element_ptr Job::dom( const xml::Document_ptr& document, Show_what show, Jo
     return job_element;
 }
 
+//---------------------------------------------------------------------------------kill_queued_task
+
+void Job::kill_queued_task( int task_id )
+{
+    bool ok = _task_queue.remove_task( task_id, Task_queue::w_task_killed );
+
+    if( ok ) 
+    {
+        Time old_next_time = _next_time;
+        calculate_next_time();
+        if( _next_time != old_next_time )  signal( "task killed" );
+    }
+}
+
 //-----------------------------------------------------------------------------------Job::kill_task
 
 void Job::kill_task( int id, bool immediately )
 {
     THREAD_LOCK( _lock )
     {
-        bool ok = false;
+        Task* task = NULL;
 
         Z_FOR_EACH( Task_list, _running_tasks, t )
         {
-            Task* task = *t;
-            if( task->_id == id )  { task->cmd_end( immediately );  ok = true;  break; }
-        }
-
-        if( !ok )
-        {
-            ok = _task_queue.remove_task( id, Task_queue::w_task_killed );
-            if( ok )
-            {
-                Time old_next_time = _next_time;
-                calculate_next_time();
-                if( _next_time != old_next_time )  signal( "task killed" );
+            if( (*t)->_id == id )  
+            { 
+                (*t)->cmd_end( immediately );       // Ruft kill_queued_task()
+                return;
             }
         }
+
+        kill_queued_task( id );
     }
 }
 

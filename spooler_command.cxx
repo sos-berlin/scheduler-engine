@@ -1,4 +1,4 @@
-// $Id: spooler_command.cxx,v 1.106 2004/01/07 08:57:51 jz Exp $
+// $Id: spooler_command.cxx,v 1.107 2004/02/11 10:18:52 jz Exp $
 /*
     Hier ist implementiert
 
@@ -66,7 +66,7 @@ xml::Element_ptr create_error_element( const xml::Document_ptr& document, const 
     if( !empty( x->name() )          )  e.setAttribute( "class" , x->name()          );
 
     e.setAttribute( "code", x->code() );
-    e.setAttribute( "text", x->what() );
+    e.setAttribute( "text", remove_password( x->what() ) );
     
     if( !empty( x->_pos.filename() ) )  e.setAttribute( "source", x->_pos.filename() );
     if( x->_pos._line >= 0           )  e.setAttribute( "line"  , as_string( x->_pos._line + 1 ) );
@@ -165,7 +165,7 @@ xml::Element_ptr Command_processor::execute_show_state( const xml::Element_ptr& 
     {
         THREAD_LOCK( _spooler->_lock )
         {
-            state_element.setAttribute( "db"                   , trim( _spooler->_db->db_name() ) );
+            state_element.setAttribute( "db"                   , trim( remove_password( _spooler->_db->db_name() ) ) );
 
             if( _spooler->_db->is_waiting() )
                 state_element.setAttribute( "db_waiting", "yes" );

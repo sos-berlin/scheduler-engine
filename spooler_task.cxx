@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.236 2004/02/02 09:27:52 jz Exp $
+// $Id: spooler_task.cxx,v 1.237 2004/02/11 10:18:53 jz Exp $
 /*
     Hier sind implementiert
 
@@ -354,6 +354,12 @@ void Task::cmd_end( bool kill_immediately )
         _kill_immediately = kill_immediately;
         if( !_ending_since )  _ending_since = Time::now(); 
         signal( "end" ); 
+
+        if( _state == s_none )
+        {
+            _job->kill_queued_task( _id );
+            // this ist hier möglicherweise ungültig!
+        }
     } 
 }
 
