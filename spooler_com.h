@@ -1,4 +1,4 @@
-// $Id: spooler_com.h,v 1.36 2002/07/03 12:29:50 jz Exp $
+// $Id: spooler_com.h,v 1.37 2002/07/28 20:49:46 jz Exp $
 
 #ifndef __SPOOLER_COM_H
 #define __SPOOLER_COM_H
@@ -275,6 +275,7 @@ struct Com_task : spooler_com::Itask, Sos_ole_object
     STDMETHODIMP                put_history_field           ( BSTR name, VARIANT* value );
     STDMETHODIMP                get_id                      ( int* value );
     STDMETHODIMP                put_delay_spooler_process   ( VARIANT* time );
+    STDMETHODIMP                put_close_engine            ( VARIANT_BOOL );
 
   private:
     Thread_semaphore           _lock;
@@ -325,6 +326,7 @@ struct Com_spooler : spooler_com::Ispooler, Sos_ole_object
     STDMETHODIMP                get_variables               ( spooler_com::Ivariable_set** );
     STDMETHODIMP                put_var                     ( BSTR name, VARIANT* value );
     STDMETHODIMP                get_var                     ( BSTR name, VARIANT* value );
+    STDMETHODIMP                get_db_name                 ( BSTR* );
 
   protected:
     Thread_semaphore           _lock;

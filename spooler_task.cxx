@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.99 2002/07/03 12:29:50 jz Exp $
+// $Id: spooler_task.cxx,v 1.100 2002/07/28 20:49:46 jz Exp $
 /*
     Hier sind implementiert
 
@@ -403,8 +403,16 @@ void Job::close_engine()
 {
     _com_task = new Com_task();
 
+    close_engine2();
+}
+
+//-------------------------------------------------------------------------------Job::close_engine2
+
+void Job::close_engine2()
+{
     try 
     {
+        //_log.debug3( "close scripting engine engine" );
         _script_instance.close();
     }
     catch( const Xc& x        ) { set_error(x); }
@@ -1563,6 +1571,8 @@ void Task::close()
     _job->_history.end();
 
     do_close();
+
+    if( _close_engine )  _job->close_engine();
 
     {
         THREAD_LOCK( _job->_lock )  

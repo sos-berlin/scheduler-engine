@@ -1,4 +1,4 @@
-// $Id: spooler_com.cxx,v 1.45 2002/07/03 12:29:50 jz Exp $
+// $Id: spooler_com.cxx,v 1.46 2002/07/28 20:49:46 jz Exp $
 /*
     Hier sind implementiert
 
@@ -1338,6 +1338,25 @@ HRESULT Com_task::put_delay_spooler_process( VARIANT* time )
     return hr;
 }
 
+//-----------------------------------------------------------------------Com_task::put_close_engine
+
+HRESULT Com_task::put_close_engine( VARIANT_BOOL b )
+{
+    HRESULT hr = NOERROR;
+
+    THREAD_LOCK( _lock )
+    try
+    {
+        if( !_task )  throw_xc( "SPOOLER-122" );
+
+        _task->set_close_engine( b != 0 );
+    }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Task.close_engine" ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Task.close_engine" ); }
+
+    return hr;
+}
+
 //---------------------------------------------------------------------------Com_thread::Com_thread
 
 Com_thread::Com_thread( Thread* thread )
@@ -1587,6 +1606,19 @@ STDMETHODIMP Com_spooler::get_var( BSTR name, VARIANT* value )
     hr = get_variables( &variables );  if( FAILED(hr) )  return hr;
 
     return variables->get_var( name, value );
+}
+
+//-------------------------------------------------------------------------Com_spooler::get_db_name
+
+STDMETHODIMP Com_spooler::get_db_name( BSTR* result )
+{
+    THREAD_LOCK( _lock )
+    {
+        if( !_spooler )  return E_POINTER;
+        THREAD_LOCK( _spooler->_lock )  *result = SysAllocString_string( _spooler->_db_name );
+    }
+
+    return NOERROR;
 }
 
 //-------------------------------------------------------------------------Com_context::Com_context

@@ -1,4 +1,4 @@
-// $Id: spooler.odl,v 1.37 2002/07/03 12:29:50 jz Exp $
+// $Id: spooler.odl,v 1.38 2002/07/28 20:49:46 jz Exp $
 
 // Anweisung: midl /nologo /error all /out $(OutDir) $(InputPath)
 
@@ -262,6 +262,9 @@ library spooler
 
         [propput]
         HRESULT                 delay_spooler_process       ( [in] VARIANT* seconds );
+
+        [propput]
+        HRESULT                 close_engine                ( [in] VARIANT_BOOL close_after_task );
     }
 
     [
@@ -350,6 +353,9 @@ library spooler
 
         [id(0),propget]
         HRESULT                 var                     ( [in] BSTR name, [out,retval] VARIANT* value );
+
+        [propget]
+        HRESULT                 db_name                 ( [out,retval] BSTR* filename );
     }
 
     [

@@ -1,10 +1,8 @@
-// $Id: spooler_task.h,v 1.56 2002/07/03 12:29:50 jz Exp $
+// $Id: spooler_task.h,v 1.57 2002/07/28 20:49:47 jz Exp $
 
 #ifndef __SPOOLER_TASK_H
 #define __SPOOLER_TASK_H
 
-//#include <queue>
-//using std::queue;
 
 namespace sos {
 namespace spooler {
@@ -202,6 +200,7 @@ struct Job : Sos_self_deleting
 
     void                        close                       ();
     void                        close_engine                ();
+    void                        close_engine2               ();
 
     void                        start                       ( const CComPtr<spooler_com::Ivariable_set>& params, const string& task_name, Time = 0 );
     Sos_ptr<Task>               start_without_lock          ( const CComPtr<spooler_com::Ivariable_set>& params, const string& task_name, Time = 0, bool log = false );
@@ -319,7 +318,6 @@ struct Job : Sos_self_deleting
 
     int                        _step_count;                 // Anzahl spooler_process() aller Tasks
     int                        _last_task_step_count;       // Anzahl spooler_process() der letzten Task
-  //bool                       _process_ok;                 // Einmal spooler_process() mit return true gerufen.
     bool                       _has_spooler_process;
     Directory_watcher_list     _directory_watcher_list;
     Event                      _event;                      // Zum Starten des Jobs
@@ -370,6 +368,7 @@ struct Task : Sos_self_deleting
 
     void                        set_cause                   ( Start_cause );
     void                        set_history_field           ( const string& name, const CComVariant& value );
+    void                        set_close_engine            ( bool b )                      { _close_engine = b; }
     bool                        has_parameters              ();
     xml::Document_ptr           parameters_as_dom           ();
 
@@ -422,6 +421,7 @@ struct Task : Sos_self_deleting
     CComVariant                _result;
     string                     _name;
     Time                       _next_spooler_process;
+    bool                       _close_engine;               // Nach Task-Ende Scripting Engine schließen (für use_engine="job")
   //Xc_copy                    _error;
 
     Thread_semaphore           _terminated_events_lock;
