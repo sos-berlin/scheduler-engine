@@ -1,4 +1,4 @@
-// $Id: spooler_module_java.cxx,v 1.4 2002/11/07 17:57:24 jz Exp $
+// $Id: spooler_module_java.cxx,v 1.5 2002/11/08 07:18:05 jz Exp $
 /*
     Hier sind implementiert
 
@@ -116,11 +116,11 @@ JNIEXPORT jobject JNICALL Java_sos_spooler_Idispatch_com_1call( JNIEnv* jenv, jc
 
         if( name_ptr[0] == '<' )  context |= DISPATCH_PROPERTYGET, name_ptr++;
         else
-        if( name_ptr[1] == '>' )  context |= DISPATCH_PROPERTYPUT, name_ptr++;
+        if( name_ptr[0] == '>' )  context |= DISPATCH_PROPERTYPUT, name_ptr++;
                             else  context |= DISPATCH_METHOD;
 
         hr = idispatch->GetIDsOfNames( IID_NULL, &name_ptr, 1, (LCID)0, &dispid );
-        if( FAILED(hr) )  throw_com( hr, "GetIDsOfNames", string_from_bstr(name_bstr).c_str() );
+        if( FAILED(hr) )  throw_com( hr, "GetIDsOfNames", string_from_bstr(name_ptr).c_str() );
 
 
         // Invoke
@@ -165,7 +165,7 @@ JNIEXPORT jobject JNICALL Java_sos_spooler_Idispatch_com_1call( JNIEnv* jenv, jc
         if( jenv->ExceptionOccurred() )  return NULL;
 
         hr = idispatch->Invoke( dispid, IID_NULL, (LCID)0, context, &dispparams, &result, &excepinfo, &arg_nr );
-        if( FAILED(hr) )  throw_com( hr, "Invoke" );
+        if( FAILED(hr) )  throw_com( hr, "Invoke", string_from_bstr(name_bstr).c_str() );
         
     }
     catch( const exception&  x ) { set_java_exception( jenv, x ); }
