@@ -1,4 +1,4 @@
-// $Id: spooler_thread.cxx,v 1.77 2003/03/19 11:59:57 jz Exp $
+// $Id: spooler_thread.cxx,v 1.78 2003/03/31 13:45:37 jz Exp $
 /*
     Hier sind implementiert
 
@@ -156,6 +156,7 @@ void Spooler_thread::close1()
             {
                 try
                 {
+                    //if( !*it )  LOG( "Spooler_thread::close1: Ein Job ist NULL\n" );
                     (*it)->close();
                 }
                 catch( const exception&  x ) { _log.error( x.what() ); }
@@ -174,7 +175,7 @@ void Spooler_thread::close1()
         }
 
 
-        if( current_thread_id() != _spooler->thread_id() )  _spooler->_java_vm->detach_thread();
+        if( current_thread_id() != _spooler->thread_id()  &&  _spooler->_java_vm )  _spooler->_java_vm->detach_thread();
     }
     catch( const exception&  x ) { _log.error( x.what() ); }
     catch( const _com_error& x ) { _log.error( as_string( x.Description() ) ); }
@@ -671,7 +672,7 @@ int Spooler_thread::thread_main()
     if( ret == 1 )
     {
         _log.error( "Thread wird wegen des Fehlers beendet" );
-        close1();
+        //close1();
     }
     
     _terminated = true;

@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.141 2003/03/01 10:38:45 jz Exp $
+// $Id: spooler_task.cxx,v 1.142 2003/03/31 13:45:37 jz Exp $
 /*
     Hier sind implementiert
 
@@ -2201,14 +2201,19 @@ void Process_event::close()
 {
     // waitpid() rufen, falls noch nicht geschehen (um Zombie zu schlieﬂen)
 
-    int status = 0;
+    if( _pid )
+    {
+        int status = 0;
 
-    if( log_ptr )  *log_ptr << "waitpid(" << _pid << ")  ";
+        if( log_ptr )  *log_ptr << "waitpid(" << _pid << ")  ";
 
-    int ret = waitpid( _pid, &status, WNOHANG | WUNTRACED );    // WUNTRACED: "which means to also return for children which are stopped, and whose status has not been reported."
+        int ret = waitpid( _pid, &status, WNOHANG | WUNTRACED );    // WUNTRACED: "which means to also return for children which are stopped, and whose status has not been reported."
 
-    if( log_ptr )  if( ret == -1 )  *log_ptr << "ERRNO-" << errno << "  " << strerror(errno) << endl;
-             else  *log_ptr << endl;
+        if( log_ptr )  if( ret == -1 )  *log_ptr << "ERRNO-" << errno << "  " << strerror(errno) << endl;
+                 else  *log_ptr << endl;
+
+        _pid = 0;
+    }
 }
 
 //------------------------------------------------------------------------------Process_event::wait
@@ -2224,7 +2229,7 @@ bool Process_event::wait( double seconds )
       //if( log_ptr )  *log_ptr << "waitpid(" << _pid << ")  ";
 
         int ret = waitpid( _pid, &status, WNOHANG | WUNTRACED );    // WUNTRACED: "which means to also return for children which are stopped, and whose status has not been reported."
-        if( ret == -1 )  throw_errno( errno, "waitpid" );
+        if( ret == -1 )  { int pid = _pid; _pid = 0; throw_errno( errno, "waitpid", as_string(pid).c_str() ); }
 
         if( ret == _pid )
         {

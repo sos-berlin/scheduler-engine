@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.189 2003/03/31 11:32:51 jz Exp $
+// $Id: spooler.cxx,v 1.190 2003/03/31 13:45:36 jz Exp $
 /*
     Hier sind implementiert
 
@@ -446,27 +446,12 @@ void Spooler::wait_until_threads_stopped( Time until )
 
         Thread_list threads;
 
-        FOR_EACH( Spooler_thread_list, _spooler_thread_list, it )  threads.push_back( *it );
+        FOR_EACH( Thread_list, _thread_list, it )  if( (*it)->_free_threading )  threads.push_back( *it );
 
         int c = 0;
         while( !threads.empty() )
         {
-            FOR_EACH( Thread_list, threads, it )  
-            {
-                Spooler_thread* thread = *it;
-                if( !thread->thread_is_running() ) 
-                {
-                    _log.info( "Thread " + thread->name() + " beendet" );
-                    it = threads.erase( it );
-                }
-                else
-                    LOG( "Thread " << thread->name() << " läuft noch\n" );
-            }
-
-            if( threads.size() ==  0 )  break;
-
-
-            Time until_step = Time::now() + (++c < 10? wait_step_for_thread_termination : wait_step_for_thread_termination2 );
+            Time until_step = Time::now() + ( ++c < 10? wait_step_for_thread_termination : wait_step_for_thread_termination2 );
             if( until_step > until )  until_step = until;
 
             while(1)
@@ -477,7 +462,25 @@ void Spooler::wait_until_threads_stopped( Time until )
                 if( ctrl_c_pressed >= 2 )  set_state( s_stopping ),  signal_threads( "ctrl_c" );
                 _event.reset();
             }
-/*
+
+            FOR_EACH( Thread_list, threads, it )  
+            {
+                Spooler_thread* thread = *it;
+                if( thread->thread_is_running() ) 
+                {
+                    _log.debug( "Thread " + thread->name() + " sollte sich gleich beenden ..." );
+                    thread->thread_wait_for_termination();
+
+                    _log.info( "Thread " + thread->name() + " beendet" );
+                    it = threads.erase( it );
+                }
+                else
+                    LOG( "Thread " << thread->name() << " läuft noch\n" );
+            }
+
+            if( threads.empty() )  break;
+
+
             if( Time::now() >= until_step )
             {
                 sos_sleep( 0.01 );  // Zur Verkürzung des Protokolls: Nächsten Threads Zeit lassen, sich zu beenden
@@ -495,7 +498,7 @@ void Spooler::wait_until_threads_stopped( Time until )
                     }
                 }
             }
-*/
+
             if( Time::now() > until )  break;
         }
 
@@ -666,6 +669,10 @@ void Spooler::start_threads()
 void Spooler::close_threads()
 {
     signal_threads( "stop" );
+
+    wait_until_threads_stopped( latter_day );
+
+/*  Wir müssen warten, bis alle Threads beendet sind, denn sie benutzen _spooler. Also: Kein Timeout!
     wait_until_threads_stopped( Time::now() + wait_for_thread_termination );
 
     FOR_EACH( Thread_list, _thread_list, it )  
@@ -676,6 +683,7 @@ void Spooler::close_threads()
             thread->close1();
         }
     }
+*/
 }
 
 //-----------------------------------------------------------------------------Spooler::run_threads
