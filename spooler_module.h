@@ -1,4 +1,4 @@
-// $Id: spooler_module.h,v 1.14 2002/11/29 16:10:55 jz Exp $
+// $Id: spooler_module.h,v 1.15 2002/12/02 17:19:32 jz Exp $
 
 #ifndef __SPOOLER_MODULE_H
 #define __SPOOLER_MODULE_H
@@ -75,12 +75,14 @@ struct Module
     void                        set_dom_without_source      ( const xml::Element_ptr& );
     void                        set_dom_source_only         ( const xml::Element_ptr&, const Time& xml_mod_time, const string& include_path );
 
+
     ptr<Module_instance>        create_instance             ();
 
     bool                        set                         ()                                      { return _set; }
 
     Kind                        kind                        () const                                { return _kind; }
 
+    void                        clear_java                  ();
     bool                        make_java_class             ( bool force = false );                 // in spooler_module_java.cxx
     jmethodID                   java_method_id              ( const string& name );                 // in spooler_module_java.cxx
 
@@ -129,7 +131,7 @@ struct Module_instance : Object
     virtual Variant             call                        ( const string& name )                  = 0;
     virtual Variant             call                        ( const string& name, int param )       = 0;
     virtual bool                name_exists                 ( const string& name )                  = 0;
-    bool                        loaded                      ()                                      { return _loaded; }
+    virtual bool                loaded                      ()                                      = 0;
     virtual bool                callable                    ()                                      = 0;
 
 
@@ -139,7 +141,6 @@ struct Module_instance : Object
 
     ptr<Com_context>           _com_context;
     ptr<IDispatch>             _idispatch;
-    bool                       _loaded;
     map<string,bool>           _names;
 };
 

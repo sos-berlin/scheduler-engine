@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.149 2002/12/01 08:57:44 jz Exp $
+// $Id: spooler.cxx,v 1.150 2002/12/02 17:19:30 jz Exp $
 /*
     Hier sind implementiert
 
@@ -26,6 +26,7 @@
 #include "../kram/sos_mail.h"
 
 #ifdef Z_WINDOWS
+#   include <process.h>
 #   include <direct.h>
 #   define DEFAULT_VM_MODULE "msjava.dll"
 #else
@@ -118,40 +119,6 @@ void send_error_email( const string& error_text, int argc, char** argv )
 #endif
 }
 
-//---------------------------------------------------------------------------------thread_info_text
-#ifdef Z_WINDOWS
-
-static string thread_info_text( HANDLE h )
-{
-    FILETIME creation_time;
-    FILETIME exit_time;
-    FILETIME kernel_time;
-    FILETIME user_time;
-    DWORD    exit_code;
-    BOOL     ok;
-    char     buffer [200];
-    string   result;
-
-
-    ok = GetExitCodeThread( h, &exit_code );
-    if( ok )  if( exit_code == STILL_ACTIVE )  result += "active";
-                                         else  result = "terminated with exit code " + as_string(exit_code);
-         else result = "Unbekannter Thread " + as_hex_string((int)h);
-
-    ok = GetThreadTimes( h, &creation_time, &exit_time, &kernel_time, &user_time );
-    if( ok )
-    {
-        sprintf( buffer, ", user_time=%-0.10g, kernel_time=%-0.10g", 
-                 (double)windows::int64_from_filetime( user_time   ) / 1E7,
-                 (double)windows::int64_from_filetime( kernel_time ) / 1E7 );
-
-        result += buffer;
-    }
-
-    return result;
-}
-
-#endif
 //---------------------------------------------------------------------read_profile_mail_on_process
 
 int read_profile_mail_on_process( const string& profile, const string& section, const string& entry, int deflt )
@@ -371,7 +338,7 @@ void Spooler::wait_until_threads_stopped( Time until )
     while( it != _thread_list.end() )
     {
         Spooler_thread* thread = *it;
-        if( thread->_free_threading && !thread->_terminated  &&  thread->thread_handle().handle() )  wait_handles.add_handle( (*it)->_thread_handle.handle() );
+        if( thread->_free_threading && !thread->_terminated  &&  thread->_thread_handle.valid() )  wait_handles.add( &(*it)->_thread_handle );
         it++;
     }
 
@@ -388,16 +355,15 @@ void Spooler::wait_until_threads_stopped( Time until )
             FOR_EACH( Thread_list, _thread_list, it )  
             {
                 Spooler_thread* thread = *it;
-                if( thread->thread_handle().handle() == h ) 
+                if( thread->thread_handle() == h ) 
                 {
                     _log.info( "Thread " + thread->name() + " beendet" );
-                    wait_handles.remove_handle( h );
-                    //18.10.2002 THREAD_LOCK( _lock )  _thread_list.erase( thread );
+                    wait_handles.remove( &thread->_thread_handle );
                 }
             }
         }
 
-        if( wait_handles.length() > 0 )  sos_sleep( 0.01 );  // Zur Verschönerung: Nächsten Threads Zeit lassen, sich zu beenden
+        if( wait_handles.length() > 0 )  sos_sleep( 0.01 );  // Zur Verkürzung des Protokolls: Nächsten Threads Zeit lassen, sich zu beenden
 
         if( Time::now() > until )  break;
 
@@ -409,7 +375,7 @@ void Spooler::wait_until_threads_stopped( Time until )
 
                 if( !thread->_terminated )
                 {
-                    string msg = "Warten auf Thread " + thread->name() + " [" + thread_info_text( thread->thread_handle().handle() ) + "]";
+                    string msg = "Warten auf Thread " + thread->name() + " [" + thread->thread_as_text() + "]";
                     Job* job = thread->_current_job;
                     if( job )  msg += ", Job " + job->name() + " " + job->job_state();
                     _log.info( msg );
@@ -417,7 +383,7 @@ void Spooler::wait_until_threads_stopped( Time until )
             }
         }
     }
-s}
+}
 
 //--------------------------------------------------------------------------Spooler::signal_threads
 
@@ -564,8 +530,8 @@ void Spooler::start_threads()
 
         if( !thread->empty() ) 
         {
-            if( thread->_free_threading )  thread->start_thread();      // Eigener Thread
-                                     else  thread->start();             // Unser Thread
+            if( thread->_free_threading )  thread->thread_start();      // Eigener Thread
+                                     else  thread->start( &_event );    // Unser Thread
         }
     }
 }
@@ -900,11 +866,7 @@ void Spooler::run()
 
         if( _state == Spooler::s_paused )
         {
-#           ifdef SPOOLER_USE_THREADS
-                _wait_handles.wait_until( latter_day );
-#            else
-                _log.error( "Zustand 'paused' ist auf dieser Plattform nicht implementiert" );
-#           endif
+            _wait_handles.wait_until( latter_day );
         }
 
         _next_time = latter_day;
@@ -1051,6 +1013,7 @@ int Spooler::launch( int argc, char** argv )
     //spooler_is_running = true;
 
     _event.set_name( "Spooler" );
+    _event.create();
     _event.add_to( &_wait_handles );
 
     _communication.init();  // Für Windows

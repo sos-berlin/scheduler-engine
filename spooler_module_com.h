@@ -1,4 +1,4 @@
-// $Id: spooler_module_com.h,v 1.4 2002/11/22 14:10:13 jz Exp $
+// $Id: spooler_module_com.h,v 1.5 2002/12/02 17:19:32 jz Exp $
 
 #ifndef __SPOOLER_MODULE_COM_H
 #define __SPOOLER_MODULE_COM_H
@@ -24,6 +24,7 @@ struct Com_module_instance_base : Module_instance
     Variant                     call                        ( const string& name );
     Variant                     call                        ( const string& name, int param );
     bool                        name_exists                 ( const string& name );
+    bool                        loaded                      ()                                      { return _idispatch != NULL; }
     bool                        callable                    ()                                      { return _idispatch != NULL; }
 
 

@@ -1,4 +1,4 @@
-// $Id: spooler_wait.cxx,v 1.52 2002/12/01 08:57:47 jz Exp $
+// $Id: spooler_wait.cxx,v 1.53 2002/12/02 17:19:36 jz Exp $
 /*
     Hier sind implementiert
 
@@ -18,7 +18,6 @@
 
 #include "../kram/sleep.h"
 #include "../kram/log.h"
-
 
 namespace sos {
 namespace spooler {
@@ -46,7 +45,7 @@ void windows_message_step()
 #endif
 //-----------------------------------------------------------------------------------wait_for_event
 #ifdef Z_WINDOWS
-
+/*
 bool wait_for_event( HANDLE handle, double wait_time )
 {
     while( wait_time > 0 )
@@ -68,10 +67,10 @@ bool wait_for_event( HANDLE handle, double wait_time )
 
     return false;
 }
-
+*/
 #endif
 //-------------------------------------------------------------------------------------Event::Event
-
+/*
 Event::Event( const string& name )  
 : 
     _zero_(this+1),
@@ -82,14 +81,14 @@ Event::Event( const string& name )
     if( !_handle )  throw_mswin_error( "CreateEvent", name.c_str() );
 #endif
 }
-
+*/
 //------------------------------------------------------------------------------------Event::~Event
-
+/*
 Event::~Event()
 {
     close();
 }
-
+*/
 //-------------------------------------------------------------------------------------Event::close
 
 void Event::close()
@@ -97,23 +96,24 @@ void Event::close()
     FOR_EACH( vector<Wait_handles*>, _wait_handles, it )  (*it)->remove( this );
     _wait_handles.clear();
 
+    //Warum ruft das Event::close()?:  Base_class::close();
     close_handle();
 }
 
 //------------------------------------------------------------------------------Event::close_handle
-
+/*
 void Event::close_handle()
 {
 #ifdef Z_WINDOWS
     if( _handle )  CloseHandle( _handle ), _handle = NULL;
 #endif
 }
-
+*/
 //------------------------------------------------------------------------------------Event::add_to
 
 void Event::add_to( Wait_handles* w )                 
 { 
-    THREAD_LOCK( _lock )
+    Z_LOCK( _mutex )
     {
         _wait_handles.push_back(w); 
         w->add( this );
@@ -124,7 +124,7 @@ void Event::add_to( Wait_handles* w )
 
 void Event::remove_from( Wait_handles* w )
 {
-    THREAD_LOCK( _lock )
+    Z_LOCK( _mutex )
     {
         FOR_EACH( vector<Wait_handles*>, _wait_handles, it ) 
         {
@@ -137,17 +137,17 @@ void Event::remove_from( Wait_handles* w )
 
 //--------------------------------------------------------------------------------------Event::wait
 #ifdef Z_WINDOWS
-
+/*
 bool Event::wait( double wait_time )
 {
     bool result = wait_for_event( handle(), wait_time );
 
     return result;
 }
-
+*/
 #endif
 //------------------------------------------------------------------------------------Event::signal
-
+/*
 void Event::signal( const string& name )
 {
     THREAD_LOCK( _lock )
@@ -160,9 +160,9 @@ void Event::signal( const string& name )
 #       endif
     }
 }
-
+*/
 //------------------------------------------------------------------------------------Event::signal
-
+/*
 void Event::async_signal( const string& name )
 {
 #   ifdef Z_WINDOWS
@@ -179,9 +179,9 @@ void Event::async_signal( const string& name )
 
 #   endif
 }
-
+*/
 //--------------------------------------------------------------------------------Event::set_signal
-
+/*
 void Event::set_signal()
 {
     LOGI( "Event(" << _name << "," << _signal_name << ").set_signal()\n" );
@@ -191,9 +191,9 @@ void Event::set_signal()
         _signaled = true;
     }
 }
-
+*/
 //-------------------------------------------------------------------------------------Event::reset
-
+/*
 void Event::reset()
 {
     THREAD_LOCK( _lock )
@@ -206,9 +206,9 @@ void Event::reset()
 #       endif
     }
 }
-
+*/
 //------------------------------------------------------------------------Event::signaled_then_reset
-
+/*
 bool Event::signaled_then_reset()
 {
     if( !_signaled )  return false;
@@ -223,16 +223,16 @@ bool Event::signaled_then_reset()
 
     return signaled;
 }
-
+*/
 //---------------------------------------------------------------------------------Event::as_string
-
+/*
 string Event::as_string() const
 { 
     string result = "Ereignis " + _name; 
     if( !_signal_name.empty() )  result += " \"" + _signal_name + "\"";
     return result;
 }
-
+*/
 //-----------------------------------------------------------------------Wait_handles::Wait_handles
 
 Wait_handles::Wait_handles( const Wait_handles& o )
@@ -259,9 +259,9 @@ void Wait_handles::close()
 {
     THREAD_LOCK( _lock )
     {
-        FOR_EACH( vector<Event*>, _events, it )  
+        FOR_EACH( Event_vector, _events, it )  
         {
-            if( *it )  _log->warn( "Wait_handles wird vor " + (*it)->as_string() + " geschlossen" );
+            if( *it )  _log->warn( "Wait_handles wird vor " + (*it)->as_text() + " geschlossen" );
         }
     }
 }
@@ -275,7 +275,7 @@ void Wait_handles::clear()
         _events.clear();
 
 #       ifdef Z_WINDOWS
-        _handles.clear();
+            _handles.clear();
 #       endif
     }
 }
@@ -286,7 +286,7 @@ bool Wait_handles::signaled()
 {
     THREAD_LOCK( _lock )
     {
-        FOR_EACH( vector<Event*>, _events, it )  
+        FOR_EACH( Event_vector, _events, it )  
         {
             if( *it  &&  (*it)->signaled() )  return true;
         }
@@ -302,13 +302,24 @@ Wait_handles& Wait_handles::operator += ( Wait_handles& o )
     THREAD_LOCK( _lock )
     THREAD_LOCK( o._lock )      // Vorsicht, Deadlock-Gefahr!
     {
-        _events.reserve( _events.size() + o._events.size() );
+        //_events.reserve( _events.size() + o._events.size() );
         
-        FOR_EACH( Event_vector  , o._events , e )  _events.push_back( *e );
+        Event_vector::iterator   e = o._events.begin();
+        vector<HANDLE>::iterator h = o._handles.begin();
 
-#       ifdef Z_WINDOWS
-        FOR_EACH( vector<HANDLE>, o._handles, h )  _handles.push_back( *h );
-#       endif
+        while( e != o._events.end() )
+        {
+            Event_vector::iterator e2 = _events.begin();
+            while( e2 != _events.end()  &&  *e2 != *e )  e2++;
+            if( e2 == _events.end() )
+            {
+                _events.push_back( *e );                             // Nur verschiedene hinzufügen
+                Z_WINDOWS_ONLY( _handles.push_back( *h ) );
+            }
+
+            e++;
+            Z_WINDOWS_ONLY( h++ );
+        }
     }
 
     return *this;
@@ -316,7 +327,7 @@ Wait_handles& Wait_handles::operator += ( Wait_handles& o )
 
 //--------------------------------------------------------------------------------Wait_handles::add
 
-void Wait_handles::add( Event* event )
+void Wait_handles::add( z::Event* event )
 {
     THREAD_LOCK( _lock )
     {
@@ -330,7 +341,7 @@ void Wait_handles::add( Event* event )
 
 //-------------------------------------------------------------------------Wait_handles::add_handle
 #ifdef Z_WINDOWS
-
+/*
 void Wait_handles::add_handle( HANDLE handle )
 {
     THREAD_LOCK( _lock )
@@ -339,12 +350,12 @@ void Wait_handles::add_handle( HANDLE handle )
         _events.push_back( NULL );
     }
 }
-
+*/
 #endif
 //-----------------------------------------------------------------------Wait_handles::remove_handle
 #ifdef Z_WINDOWS
 
-void Wait_handles::remove_handle( HANDLE handle, Event* event )
+void Wait_handles::remove_handle( HANDLE handle, z::Event* event )
 {
     THREAD_LOCK( _lock )
     {
@@ -357,7 +368,7 @@ void Wait_handles::remove_handle( HANDLE handle, Event* event )
         }
 
         if( it == _handles.end() ) {
-            if( event )  _log->error( "Wait_handles::remove(" + event->as_string() + ") fehlt" );     // Keine Exception. Das wäre nicht gut in einem Destruktor
+            if( event )  _log->error( "Wait_handles::remove(" + event->as_text() + ") fehlt" );     // Keine Exception. Das wäre nicht gut in einem Destruktor
                    else  _log->error( "Wait_handles::remove() fehlt" );
             return;
         }
@@ -370,7 +381,7 @@ void Wait_handles::remove_handle( HANDLE handle, Event* event )
 #endif
 //-----------------------------------------------------------------------------Wait_handles::remove
 
-void Wait_handles::remove( Event* event )
+void Wait_handles::remove( z::Event* event )
 {
     if( !event )  return;
 
@@ -393,7 +404,7 @@ void Wait_handles::remove( Event* event )
             }
 
             if( it == _events.end() ) {
-                _log->error( "Wait_handles::remove(" + event->as_string() + ") fehlt" );     // Keine Exception. Das wäre nicht gut in einem Destruktor
+                _log->error( "Wait_handles::remove(" + event->as_text() + ") fehlt" );     // Keine Exception. Das wäre nicht gut in einem Destruktor
                 return;
             }
 
@@ -427,11 +438,11 @@ int Wait_handles::wait_until( Time until )
         Time today3    = now.midnight() + 3*3600;           // Heute 3:00 Uhr (für Winterzeitbeginn: Uhr springt von 3 Uhr auf 2 Uhr)
         int  ret       = -1;
 
-        if( now < today2  &&  until >= today2 )     ret = wait_until( today2 + 0.01 );
+        if( now < today2  &&  until >= today2 )     ret = wait_until_2( today2 + 0.01 );
         else
-        if( now < today3  &&  until >= today3 )     ret = wait_until( today3 + 0.01 );
+        if( now < today3  &&  until >= today3 )     ret = wait_until_2( today3 + 0.01 );
         else 
-        if( until >= tomorrow2 )                    ret = wait_until( tomorrow2 + 0.01 );
+        if( until >= tomorrow2 )                    ret = wait_until_2( tomorrow2 + 0.01 );
         else
             break;
 
@@ -474,7 +485,7 @@ int Wait_handles::wait_until_2( Time until )
                 for( int i = 0; i < _handles.size(); i++ )
                 {
                     if( i > 0 )  msg += ", ";
-                    if( _events[i] )  msg += _events[i]->as_string() + " (0x" + as_hex_string( (int)_handles[i] ) + ")";
+                    if( _events[i] )  msg += _events[i]->as_text() + " (0x" + as_hex_string( (int)_handles[i] ) + ")";
                                else   msg += "NULL";
                 }
                 _log->debug9( msg );
@@ -495,12 +506,12 @@ int Wait_handles::wait_until_2( Time until )
             THREAD_LOCK( _lock )
             {
                 int    index = ret - WAIT_OBJECT_0;
-                Event* event = _events[ index ];
+                z::Event* event = _events[ index ];
             
                 if( event )
                 {
                     event->set_signal();
-                    if( _spooler->_debug )  _log->debug( event->as_string() );
+                    if( _spooler->_debug )  _log->debug( event->as_text() );
                 }
 
                 return index;
@@ -536,10 +547,10 @@ string Wait_handles::as_string()
         }
         else
         {
-            FOR_EACH_CONST( vector<Event*>, _events, it )  
+            FOR_EACH_CONST( Event_vector, _events, it )  
             {
                 if( !result.empty() )  result += ", ";
-                result += (*it)->as_string();
+                result += (*it)->as_text();
             }
 
             result = "{" + result + "}";

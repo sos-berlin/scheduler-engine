@@ -1,4 +1,4 @@
-// $Id: spooler_task.h,v 1.78 2002/11/26 23:35:47 jz Exp $
+// $Id: spooler_task.h,v 1.79 2002/12/02 17:19:34 jz Exp $
 
 #ifndef __SPOOLER_TASK_H
 #define __SPOOLER_TASK_H
@@ -60,7 +60,8 @@ enum Start_cause
     cause_directory             = 7,    // start_when_directory_changed
     cause_signal                = 8,
     cause_delay_after_error     = 9,
-    cause_order                 = 10
+    cause_order                 = 10,
+    cause_wake                  = 11    // sc_wake
 };
 
 string                          start_cause_name            ( Start_cause );
@@ -171,7 +172,7 @@ struct Job : Sos_self_deleting
 
 
     typedef list< Sos_ptr<Task> >               Task_queue;
-    typedef list< Sos_ptr<Directory_watcher> >  Directory_watcher_list;
+    typedef list< ptr<Directory_watcher> >      Directory_watcher_list;
     typedef map< int, Time >                    Delay_after_error;
 
                                 Job                         ( Spooler_thread* );
@@ -209,8 +210,8 @@ struct Job : Sos_self_deleting
     Sos_ptr<Task>               start_without_lock          ( const ptr<spooler_com::Ivariable_set>& params, const string& task_name, Time = 0, bool log = false );
     void                        start_when_directory_changed( const string& directory_name, const string& filename_pattern );
     void                        clear_when_directory_changed();
-    void                        signal                      ( const string& signal_name = "" )  { _event.signal(signal_name); }
-    void                        wake                        ()                                  { _event.signal( "wake" ); }
+    void                        signal                      ( const string& signal_name = "" )  { _event->signal( signal_name ); }
+  //void                        wake                        ()                                  { set_state_cmd( sc_wake ); }
     void                        interrupt_script            ();
     void                        select_period               ( Time = Time::now() );
     bool                        is_in_period                ( Time = Time::now() );
@@ -246,6 +247,7 @@ struct Job : Sos_self_deleting
     void                        set_error_xc                ( const Xc& );
     void                        set_error_xc_only           ( const Xc& );
     void                        set_error                   ( const Xc& x )             { set_error_xc( x ); }
+    void                        set_error                   ( const z::Xc& x )          { set_error_xc( x ); }
     void                        set_error                   ( const exception& );
     void                        set_error                   ( const _com_error& );
     Xc_copy                     error                       ()                          { Xc_copy result; THREAD_LOCK( _lock )  result = _error;  return result; }
@@ -333,7 +335,8 @@ struct Job : Sos_self_deleting
     Delay_after_error          _delay_after_error;
     int                        _error_steps;                // Zahl aufeinanderfolgender Fehler
 
-    Event                      _event;                      // Zum Starten des Jobs
+    Event*                     _event;
+  //Event                      _event;                      // Zum Starten des Jobs
     Directory_watcher_list     _directory_watcher_list;
     Xc_copy                    _error;
 
@@ -508,7 +511,7 @@ struct Job_script_task : Script_task
 
 struct Process_task : Task
 {
-                                Process_task                ( Spooler* sp, const Sos_ptr<Job>& j ) : Task(sp,j), _process_handle("process_handle",(HANDLE)NULL) {}
+                                Process_task                ( Spooler* sp, const Sos_ptr<Job>& j ) : Task(sp,j), _process_handle( (HANDLE)0, "process_handle" ) {}
         
   //virtual bool                loaded                      ();
   //virtual bool                do_load                     ();

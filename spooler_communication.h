@@ -1,4 +1,4 @@
-// $Id: spooler_communication.h,v 1.5 2002/11/22 08:34:11 jz Exp $
+// $Id: spooler_communication.h,v 1.6 2002/12/02 17:19:32 jz Exp $
 
 #ifndef __SPOOLER_COMMUNICATION_H
 #define __SPOOLER_COMMUNICATION_H
@@ -116,7 +116,7 @@ struct Xml_end_finder
 
 //------------------------------------------------------------------------------------Communication
 
-struct Communication
+struct Communication : zschimmer::Thread
 {                                                 
     struct Channel : Sos_self_deleting
     {
@@ -162,7 +162,7 @@ struct Communication
     void                        start_thread                ();
     void                        close                       ( double wait_time = 0.0 );
     void                        rebind                      ()                                      { bind(); }
-    int                         go                          ();
+    int                         thread_main                 ();
     bool                        started                     ()                                      { return _started; }
 
   private:

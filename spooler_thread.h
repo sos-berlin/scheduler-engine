@@ -1,4 +1,4 @@
-// $Id: spooler_thread.h,v 1.34 2002/12/01 08:57:46 jz Exp $
+// $Id: spooler_thread.h,v 1.35 2002/12/02 17:19:36 jz Exp $
 
 #ifndef __SPOOLER_THREAD_H
 #define __SPOOLER_THREAD_H
@@ -31,11 +31,10 @@ struct Spooler_thread : zschimmer::Thread
     void                        close                       ();                             // Wird vom Spooler gerufen
     void                        start_thread                ();
 
-    virtual int                 main                        ()                              { return run_thread(); }
-    int                         run_thread                  ();
+    virtual int                 thread_main                 ();
   //bool                        running                     ()                              { DWORD rc; return GetExitCodeThread(_thread_handle,&rc)? rc == STILL_ACTIVE : false; }
     bool                        process                     ();                             // Einen Schritt im (Pseudo-)Thread ausführen
-    void                        start                       ();
+    void                        start                       ( Event* destination );
     void                        stop_jobs                   ();
     bool                        step                        ();
     bool                        do_something                ( Job* );
@@ -51,7 +50,7 @@ struct Spooler_thread : zschimmer::Thread
 
     // Für andere Threads:
     void                        signal_object               ( const string& object_set_class_name, const Level& );
-    void                        signal                      ( const string& signal_name = "" )  { THREAD_LOCK( _lock )  _event.signal(signal_name), _next_start_time = 0, _next_job = NULL; }
+    void                        signal                      ( const string& signal_name = "" )  { THREAD_LOCK( _lock )  _event->signal(signal_name), _next_start_time = 0, _next_job = NULL; }
     Job*                        get_job_or_null             ( const string& job_name );
   //void                        wait_until_thread_stopped   ( Time until );
   //void                        interrupt_scripts           ();
@@ -75,7 +74,8 @@ struct Spooler_thread : zschimmer::Thread
   //Thread_id                  _thread_id;
     int                        _thread_priority;
 
-    Event                      _event;
+    Event*                     _event;
+    Event                      _my_event;                   // Für _free_threading
     Wait_handles               _wait_handles;
 
     ptr<Com_log>               _com_log;                    // COM-Objekt spooler.log

@@ -1,4 +1,4 @@
-// $Id: spooler_communication.cxx,v 1.38 2002/11/25 08:59:23 jz Exp $
+// $Id: spooler_communication.cxx,v 1.39 2002/12/02 17:19:31 jz Exp $
 /*
     Hier sind implementiert
 
@@ -457,7 +457,7 @@ void Communication::bind()
         _udp_port = _spooler->udp_port();
         _rebound = true;
 
-        _spooler->log().info( "Spooler erwartet Kommandos über UDP-Port " + as_string(_udp_port) );
+        _spooler->log().info( "Spooler erwartet Kommandos über UDP-Port " + sos::as_string(_udp_port) );
     }
 
 
@@ -497,7 +497,7 @@ void Communication::bind()
         _tcp_port = _spooler->tcp_port();
         _rebound = true;
 
-        _spooler->log().info( "Spooler erwartet Kommandos über TCP-Port " + as_string(_tcp_port) );
+        _spooler->log().info( "Spooler erwartet Kommandos über TCP-Port " + sos::as_string(_tcp_port) );
     }
 }
 
@@ -671,10 +671,9 @@ bool Communication::is_started()
     return exit_code == STILL_ACTIVE;
 }
 */
-//-----------------------------------------------------------------------------------------------go
-#ifdef Z_WINDOWS
+//-----------------------------------------------------------------------Communication::thread_main
 
-int Communication::go()
+int Communication::thread_main()
 {
     int result;
 
@@ -697,35 +696,18 @@ int Communication::go()
     return result;
 }
 
-//-------------------------------------------------------------------------------------------thread
-
-static uint __stdcall thread( void* param )
-{
-    return ((Communication*)param)->go();
-}
-
 //----------------------------------------------------------------------Communication::start_thread
 
 void Communication::start_thread()
 {
-    Thread_id thread_id;
-
     init();
     bind();
 
-    _started = true;
+    thread_start();
 
-    _thread = _beginthreadex( NULL,                        // no security attributes 
-                              0,                           // use default stack size  
-                              thread,                      // thread function 
-                              this,                        // argument to thread function 
-                              0,                           // use default creation flags 
-                              &thread_id );                // returns the thread identifier 
- 
-    if( !_thread )  throw_mswin_error( "CreateThread" );
+    _started = true;
 }
 
-#endif
 //-------------------------------------------------------------------Communication::start_or_rebind
 
 void Communication::start_or_rebind()

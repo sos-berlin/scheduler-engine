@@ -1,4 +1,4 @@
-// $Id: spooler_module_com.cxx,v 1.10 2002/11/27 00:59:44 jz Exp $
+// $Id: spooler_module_com.cxx,v 1.11 2002/12/02 17:19:32 jz Exp $
 /*
     Hier sind implementiert
 
@@ -48,7 +48,6 @@ void Com_module_instance_base::close()
     Module_instance::close();
 
     _idispatch = NULL;
-    _loaded = false;
 }
 
 //------------------------------------------------------------Com_module_instance_base::name_exists
@@ -143,8 +142,6 @@ void Com_module_instance::load()
         Variant com_context_vt = +_com_context;
         com_call( _idispatch, "spooler_set_context", &com_context_vt );
     }
-
-    _loaded = true;
 }
 
 //-----------------------------------------------------------------------Com_module_instance::close
@@ -159,8 +156,6 @@ void Com_module_instance::close()
         FreeLibrary( _com_module );
         _com_module = NULL;
     }
-
-    _loaded = false;
 }
 
 #endif
@@ -189,8 +184,6 @@ void Scripting_engine_module_instance::init()
         // Perl auf Unix will init_engine() erst nachdem die Quelle vollständig geladen ist.
 //#   endif
 
-    _idispatch = _script_site->dispatch();
-
     //HRESULT hr = _script_site->_module->SetScriptState( SCRIPTSTATE_INITIALIZED );
     //if( FAILED( hr ) )  throw_ole( hr, "IActiveScript::SetScriptState", "SCRIPTSTATE_INITIALIZED" );
 }
@@ -206,8 +199,6 @@ void Scripting_engine_module_instance::close()
         _script_site->close_engine();
         _script_site = NULL;
     }
-
-    _loaded = false;
 }
 
 //------------------------------------------------------------------Scripting_engine_module_instance::add_obj
@@ -272,7 +263,7 @@ void Scripting_engine_module_instance::load()
         _script_site->parse( it->_text, it->_linenr );
     }
 
-    _loaded = true;
+    _idispatch = _script_site->dispatch();
 }
 
 //--------------------------------------------------------------------Scripting_engine_module_instance::start

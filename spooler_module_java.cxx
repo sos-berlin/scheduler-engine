@@ -1,4 +1,4 @@
-// $Id: spooler_module_java.cxx,v 1.26 2002/11/29 16:10:55 jz Exp $
+// $Id: spooler_module_java.cxx,v 1.27 2002/12/02 17:19:32 jz Exp $
 /*
     Hier sind implementiert
 
@@ -81,6 +81,8 @@ static void set_java_exception( JNIEnv* jenv, const _com_error& x )
 
 static string string_from_jstring( JNIEnv* jenv, const jstring& jstr )
 {
+    if( !jstr )  return "";
+
     const OLECHAR* str_w = jenv->GetStringChars( jstr, 0 );
     
     return string_from_ole( str_w );
@@ -821,6 +823,14 @@ jclass Java_env::get_object_class( jobject o )
     return result;
 }
 
+//-------------------------------------------------------------------------------Module::clear_java
+
+void Module::clear_java()
+{
+    _java_class = NULL;
+    _method_map.clear();
+}
+
 //--------------------------------------------------------------------------Module::make_java_class
 // Quellcode compilieren
 
@@ -879,9 +889,12 @@ bool Module::make_java_class( bool force )
         _log->info( cmd );
         
         System_command c;
+        c.set_throw( false );
         c.execute( cmd );
 
         if( c.stderr_text() != "" )  _log->debug( c.stderr_text() ),  _log->debug( "" );
+
+        if( c.xc() )  throw *c.xc();
 
         //utime( class_filename.c_str(), &utimbuf );
     }
@@ -1018,9 +1031,9 @@ Java_idispatch::~Java_idispatch()
 
 void Java_module_instance::close()
 {
-    _jobject = NULL;
-
     Module_instance::close();
+
+    _jobject = NULL;
 }
 
 //-----------------------------------------------------------------------Java_module_instance::init
@@ -1098,8 +1111,6 @@ void Java_module_instance::add_obj( const ptr<IDispatch>& object, const string& 
 void Java_module_instance::load()
 {
     Module_instance::load();
-
-    _loaded = true;
 }
 
 //-----------------------------------------------------------------------Java_module_instance::call

@@ -1,4 +1,4 @@
-// $Id: spooler_module_java.h,v 1.13 2002/11/26 11:40:19 jz Exp $
+// $Id: spooler_module_java.h,v 1.14 2002/12/02 17:19:33 jz Exp $
 
 #ifndef __SPOOLER_MODULE_JAVA_H
 #define __SPOOLER_MODULE_JAVA_H
@@ -169,6 +169,7 @@ struct Java_module_instance : Module_instance
     Variant                     call                        ( const string& name );
     Variant                     call                        ( const string& name, int param );
     virtual bool                name_exists                 ( const string& name );
+    bool                        loaded                      ()                                      { return _jobject != NULL; }
     bool                        callable                    ()                                      { return _jobject != NULL; }
 
     void                        make_class                  ();

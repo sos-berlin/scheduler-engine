@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.129 2002/11/29 15:59:46 jz Exp $
+// $Id: spooler_task.cxx,v 1.130 2002/12/02 17:19:33 jz Exp $
 /*
     Hier sind implementiert
 
@@ -45,6 +45,8 @@ string start_cause_name( Start_cause cause )
         case cause_directory          : return "directory";
         case cause_signal             : return "signal";
         case cause_delay_after_error  : return "delay_after_error";
+        case cause_order              : return "order";
+        case cause_wake               : return "wake";
         default                       : return as_string( (int)cause );
     }
 }
@@ -354,8 +356,8 @@ void Job::init0()
     _log.set_profile_section( profile_section() );
     _log.set_job( this );
 
-    _event.set_name( obj_name() );
-    _event.add_to( &_thread->_wait_handles );
+    //_event.set_name( obj_name() );
+    //_event.add_to( &_thread->_wait_handles );
 
     _com_job  = new Com_job( this );
     _com_log  = new Com_log( &_log );
@@ -409,7 +411,7 @@ void Job::close()
 {
     close_task();
 
-    _event.close();
+    //_event.close();
     clear_when_directory_changed();
 
     close_engine();
@@ -800,6 +802,22 @@ bool Job::execute_state_cmd()
                                      || _state == s_running_delayed )  set_state( s_running ), something_done = true;
                                     break;
 
+                case sc_wake:       if( _state == s_suspended  
+                                     || _state == s_running_delayed )  set_state( s_running ), something_done = true;
+
+                                    if( _state == s_pending
+                                     || _state == s_stopped )
+                                    {
+                                        set_state( s_pending );
+
+                                        Time now = Time::now();
+                                        create_task( NULL, "", now );
+                                        dequeue_task( now );
+                                        _task->_cause = cause_wake;
+                                        _task->_let_run = true;
+                                    }
+                                    break;
+
                 default: ;
             }
 
@@ -830,7 +848,7 @@ void Job::start_when_directory_changed( const string& directory_name, const stri
             }
 
 
-            Sos_ptr<Directory_watcher> dw = SOS_NEW( Directory_watcher( &_log ) );
+            ptr<Directory_watcher> dw = Z_NEW( Directory_watcher( &_log ) );
 
             dw->watch_directory( directory_name, filename_pattern );
             dw->set_name( "job(\"" + _name + "\").start_when_directory_changed(\"" + directory_name + "\")" );
@@ -981,20 +999,16 @@ void Job::task_to_start()
     bool dequeued = false;
     Start_cause cause = cause_none;
 
-    if( _state == s_pending  )
+    if( _spooler->state() != Spooler::s_stopping_let_run )  
     {
-        dequeued = dequeue_task(now);
-        if( dequeued )  _task->_cause = _task->_start_at? cause_queue_at : cause_queue;
-
-        if( _spooler->state() != Spooler::s_stopping_let_run )  
+        if( _state == s_pending )
         {
-            //if( _period._single_start  &&  now >= _next_start_time )  
-            if( now >= _next_single_start )
-            {
+            dequeued = dequeue_task(now);
+            if( dequeued )  _task->_cause = _task->_start_at? cause_queue_at : cause_queue;
+             
+            if( now >= _next_single_start )  
                 cause = cause_period_single;     
-                //_log.debug( "Task startet wegen single_start=" + _period.begin().as_string() );
-            }
-            else
+            else 
                 select_period(now);
 
             if( cause                      // Auf weitere Anlässe prüfen und diese protokollieren
@@ -1004,7 +1018,7 @@ void Job::task_to_start()
                 {
                     if( _start_once )              cause = cause_period_once,  _start_once = false,  _log.debug( "Task startet wegen <run_time once=\"yes\">" );
                                                                               
-                    if( _event.signaled() )        cause = cause_signal,                             _log.debug( "Task startet wegen " + _event.as_string() );
+                  //if( _event.signaled() )        cause = cause_signal,                             _log.debug( "Task startet wegen " + _event.as_string() );
                                                                                       
                     if( now >= _next_start_time )  cause = cause_period_repeat,                      _log.debug( "Task startet, weil Job-Startzeit erreicht: " + _next_start_time.as_string() );
 
@@ -1040,7 +1054,7 @@ void Job::task_to_start()
 
 bool Job::do_something()
 {
-#   ifdef DEBUG
+#   ifdef _DEBUG
         _log.debug9( "do_something() state=" + state_name() );
 #   endif
 
@@ -1071,7 +1085,7 @@ bool Job::do_something()
 
     if( _state == s_start_task )                                                                // SPOOLER_INIT, SPOOLER_OPEN
     {
-        _event.reset();
+        //_event.reset();
 
         ok = _task->start();
         if( ok )  do_a_step = true;
@@ -1256,8 +1270,20 @@ void Job::set_error_xc( const Xc& x )
 
 void Job::set_error( const exception& x )
 {
-    Xc xc ( "SOS-2000", x.what(), exception_name(x) );
-    set_error_xc( xc );
+    if( typeid(x) == typeid(zschimmer::Xc) ) 
+    {
+        set_error_xc( *(zschimmer::Xc*)&x );
+    }
+    else
+    if( typeid(x) == typeid(Xc) ) 
+    {
+        set_error_xc( *(Xc*)&x );
+    }
+    else
+    {
+        Xc xc ( "SOS-2000", x.what(), exception_name(x) );
+        set_error_xc( xc );
+    }
 }
 
 //-----------------------------------------------------------------------------------Job::set_error
@@ -1334,8 +1360,7 @@ void Job::set_state_cmd( State_cmd cmd )
                                     break;
                                 }
 
-            case sc_wake:       wake();            
-                                _state_cmd = cmd;
+            case sc_wake:       _state_cmd = cmd;
                                 _thread->signal( state_cmd_name(cmd) );
                                 break;
 
@@ -1602,7 +1627,7 @@ void Job::signal_object( const string& object_set_class_name, const Level& level
          && _object_set_descr->_level_interval.is_in_interval( level ) )
         {
             //start_without_lock( NULL, object_set_class_name );
-            _event.signal( "Object_set " + object_set_class_name );
+            //_event->signal( "Object_set " + object_set_class_name );
             //_thread->signal( obj_name() + ", Object_set " + object_set_class_name );
         }
     }
@@ -1850,34 +1875,27 @@ void Task::cmd_end()
 
 //----------------------------------------------------------------------Task::wait_until_terminated
 // Anderer Thread
-#ifdef SPOOLER_USE_THREADS
 
 bool Task::wait_until_terminated( double wait_time )
 {
     Thread_id my_thread_id = current_thread_id();
-    if( my_thread_id == _job->_thread->_thread_id )  throw_xc( "SPOOLER-125" );     // Deadlock
+    if( my_thread_id == _job->_thread->thread_id() )  throw_xc( "SPOOLER-125" );     // Deadlock
 
     Spooler_thread* calling_thread = _spooler->thread_by_thread_id( my_thread_id );
-    if( calling_thread &&  !calling_thread->_free_threading  &&  !_job->_thread->_free_threading )  throw_xc( "SPOOLER-131" );
+  //if( calling_thread &&  !calling_thread->_free_threading  &&  !_job->_thread->_free_threading )  throw_xc( "SPOOLER-131" );
+    if( calling_thread &&  !calling_thread->_free_threading                                      )  throw_xc( "SPOOLER-131" );
 
     Event event ( obj_name() + " wait_until_terminated" );
-    //int   i = 0;
 
-    THREAD_LOCK( _terminated_events_lock ) 
-    {
-        //i = _terminated_events.size();
-        _terminated_events.push_back( &event );
-    }
+    THREAD_LOCK( _terminated_events_lock )  _terminated_events.push_back( &event );
 
     bool result = event.wait( wait_time );
 
     { THREAD_LOCK( _terminated_events_lock )  _terminated_events.pop_back(); }
-  //{ THREAD_LOCK( _terminated_events_lock )  _terminated_events.erase( &_terminated_events[i] ); }
 
     return result;
 }
 
-#endif
 //----------------------------------------------------------------------------------Task::set_cause
 
 void Task::set_cause( Start_cause cause )

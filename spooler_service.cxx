@@ -1,4 +1,4 @@
-// $Id: spooler_service.cxx,v 1.32 2002/11/25 10:04:25 jz Exp $
+// $Id: spooler_service.cxx,v 1.33 2002/12/02 17:19:33 jz Exp $
 /*
     Hier sind implementiert
 
@@ -18,6 +18,7 @@
 #include "../kram/msec.h"
 
 #include <windows.h>
+#include <process.h>
 
 namespace sos {
 

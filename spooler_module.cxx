@@ -1,4 +1,4 @@
-// $Id: spooler_module.cxx,v 1.13 2002/11/29 16:10:55 jz Exp $
+// $Id: spooler_module.cxx,v 1.14 2002/12/02 17:19:32 jz Exp $
 /*
     Hier sind implementiert
 
@@ -98,6 +98,8 @@ void Module::set_dom_source_only( const xml::Element_ptr& element, const Time& x
         default: 
             throw_xc( "Module::set_dom_source_only" );
     }
+
+    clear_java();
 
     _set = true;
 }

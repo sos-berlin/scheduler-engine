@@ -1,4 +1,4 @@
-// $Id: spooler_thread.cxx,v 1.65 2002/12/01 08:57:46 jz Exp $
+// $Id: spooler_thread.cxx,v 1.66 2002/12/02 17:19:35 jz Exp $
 /*
     Hier sind implementiert
 
@@ -39,7 +39,7 @@ Spooler_thread::~Spooler_thread()
 {
     try { close(); } catch(const Xc& x ) { _log.error( x.what() ); }
     
-    _event.close();
+    _my_event.close();
     _wait_handles.close();
 }
 
@@ -50,9 +50,6 @@ void Spooler_thread::init()
     _log.set_prefix( "Thread " + _name );
 
     _com_log = new Com_log( &_log );
-
-    _event.set_name( "Thread " + _name );
-    _event.add_to( &_wait_handles );
 
     FOR_EACH_JOB( job )  (*job)->init0();
 }
@@ -74,8 +71,8 @@ xml::Element_ptr Spooler_thread::dom( const xml::Document_ptr& document, Show_wh
         thread_element.setAttribute( "steps"          , _step_count );
         thread_element.setAttribute( "started_tasks"  , _task_count );
 
-        if( _thread_id != _spooler->thread_id() )
-        thread_element.setAttribute( "os_thread_id"   , as_hex_string( (int)_thread_id ) );
+        if( thread_id() != _spooler->thread_id() )
+        thread_element.setAttribute( "os_thread_id"   , as_hex_string( (int)thread_id() ) );
 
         thread_element.setAttribute( "free_threading" , _free_threading? "yes" : "no" );
 
@@ -195,9 +192,11 @@ bool Spooler_thread::has_java()
 
 //----------------------------------------------------------------------------Spooler_thread::start
 
-void Spooler_thread::start()
+void Spooler_thread::start( Event* event_destination )
 {
-    if( !_thread_id )  _thread_id = _spooler->thread_id();
+    _event = event_destination;
+
+    if( !thread_id() )  set_thread_id( _spooler->thread_id() );
 
     try
     {
@@ -242,7 +241,7 @@ void Spooler_thread::start()
 
 void Spooler_thread::stop_jobs()
 {
-    assert( current_thread_id() == _thread_id );
+    assert( current_thread_id() == thread_id() );
 
     FOR_EACH_JOB( it ) 
     {
@@ -300,7 +299,8 @@ bool Spooler_thread::step()
             {
                 if( job->priority() >= _spooler->priority_max() )
                 {
-                    if( _event.signaled_then_reset() )  return true;
+                    if( _my_event.signaled_then_reset() )  return true;
+                    if( _event->signaled() )  return true;      // Das ist _event oder _spooler->_event
                     if( _spooler->signaled() )  return true;
                     something_done |= do_something( job );
                     if( !something_done )  break;
@@ -332,7 +332,8 @@ bool Spooler_thread::step()
             {
                 Job* job = *it;
 
-                if( _event.signaled_then_reset() )  return true;
+                if( _my_event.signaled_then_reset() )  return true;
+                if( _event->signaled() )  return true;      // Das ist _event oder _spooler->_event
                 if( _spooler->signaled() )  return true;
                 stepped = do_something( job );
                 something_done |= stepped;
@@ -355,7 +356,8 @@ bool Spooler_thread::step()
             {
                 for( int i = 0; i < job->priority(); i++ )
                 {
-                    if( _event.signaled_then_reset() )  return true;
+                    if( _my_event.signaled_then_reset() )  return true;
+                    if( _event->signaled() )  return true;      // Das ist _my_event oder _spooler->_event
                     if( _spooler->signaled() )  return true;
                     something_done |= do_something( job );
                     if( !something_done )  break;
@@ -376,7 +378,8 @@ bool Spooler_thread::step()
 
             if( !job->order_controlled() )
             {
-                if( _event.signaled_then_reset() )  return true;
+                if( _my_event.signaled_then_reset() )  return true;
+                if( _event->signaled() )  return true;      // Das ist _my_event oder _spooler->_event
                 if( _spooler->signaled() )  return true;
                 if( job->priority() == 0 )  do_something( job );
             }
@@ -600,15 +603,18 @@ bool Spooler_thread::process()
     return something_done;
 }
 
-//-----------------------------------------------------------------------Spooler_thread::run_thread
-#ifdef SPOOLER_USE_THREADS
+//----------------------------------------------------------------------Spooler_thread::thread_main
 
-int Spooler_thread::run_thread()
+int Spooler_thread::thread_main()
 {
     int             ret = 1;
     Ole_initialize  ole;
 
-    start();
+    _my_event.set_name( "Thread " + _name );
+    _my_event.create();
+    _my_event.add_to( &_wait_handles );
+
+    start( &_my_event );
 
     if( !_terminated )  
     {
@@ -633,7 +639,7 @@ int Spooler_thread::run_thread()
                     }
                 }
 
-                _event.reset();
+                _my_event.reset();
             }
 
         }
@@ -663,7 +669,6 @@ int Spooler_thread::run_thread()
     return ret;
 }
 
-#endif
 //-----------------------------------------------------------------------Spooler_thread::run_thread
 /*
 int Spooler_thread::run_thread()
