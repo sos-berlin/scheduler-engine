@@ -1,4 +1,4 @@
-// $Id: spooler_communication.cxx,v 1.12 2001/01/15 14:26:29 jz Exp $
+// $Id: spooler_communication.cxx,v 1.13 2001/01/15 14:30:23 jz Exp $
 
 //#include <precomp.h>
 
@@ -298,7 +298,7 @@ void Communication::bind()
         if( _udp_socket == SOCKET_ERROR )  throw_sos_socket_error( "socket" );
         if( _udp_socket >= _nfds )  _nfds = _udp_socket + 1;
 
-        setsockopt( _udp_socket, SOL_SOCKET, SO_REUSEADDR, (const char*)&true_, sizeof true_ );
+      //setsockopt( _udp_socket, SOL_SOCKET, SO_REUSEADDR, (const char*)&true_, sizeof true_ );
 
         sa.sin_port        = htons( _spooler->_udp_port );
         sa.sin_family      = AF_INET;
