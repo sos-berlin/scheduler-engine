@@ -1,4 +1,4 @@
-// $Id: scheduler.js,v 1.4 2004/07/20 19:43:03 jz Exp $
+// $Id: scheduler.js,v 1.5 2004/07/21 09:41:13 jz Exp $
 
 //----------------------------------------------------------------------------------------Scheduler
 // public
@@ -8,7 +8,7 @@ function Scheduler()
     this._url           = "http://" + document.location.host + "/";
     this._xml_http      = new ActiveXObject( "Msxml2.XMLHTTP" );
     
-    this._configuration = new Scheduler_html_configuration( this._url + "config.xml" );
+    //this._configuration = new Scheduler_html_configuration( this._url + "config.xml" );
 }
 
 //----------------------------------------------------------------------------------Scheduler.close
@@ -16,7 +16,7 @@ function Scheduler()
 
 Scheduler.prototype.close = function()
 {
-    this._configuration = null;
+    //this._configuration = null;
     this._xml_http = null;
 }
 
@@ -43,7 +43,7 @@ Scheduler.prototype.execute = function( xml )
 
 //------------------------------------------------------------------Scheduler.execute_and_fill_html
 // public
-
+/*
 Scheduler.prototype.execute_and_fill_html = function( xml_query )
 {
     var dom_document   = this.execute( xml_query );
@@ -54,28 +54,10 @@ Scheduler.prototype.execute_and_fill_html = function( xml_query )
 
     this.fill_html_state( document.all.scheduler_state, answer_element.selectSingleNode( "state" ) );
     this.fill_html_jobs ( document.all.scheduler_jobs , answer_element.selectSingleNode( "state/jobs" ) );
-    
-/*                                                            
-    var span_elements = document.body.getElementsByTagName( "span" );
-    for( var i = 0; i < span_elements.length; i++ )
-    {
-        var span_element = span_elements[ i ];
-        var text = span_element.innerText;
-        if( text.substring( 0, 1 ) == "=" )
-        {
-            try
-            {
-                var found_element = answer_element.selectSingleNode( text.substring( 1, text.length ) );
-                if( found_element )  span_element.innerText = found_element.text;
-            }
-            catch( x ) { span_element.innerText = x.message; }
-        }
-    }
-*/    
 }
-
+*/
 //------------------------------------------------------------------------Scheduler.fill_html_state
-
+/*
 Scheduler.prototype.fill_html_state = function( html_element, state_response_element )
 {
     if( html_element )
@@ -94,9 +76,9 @@ Scheduler.prototype.fill_html_state = function( html_element, state_response_ele
         html_element.innerHTML = htmls.join( "" );
     }
 }
-
+*/
 //-------------------------------------------------------------------------Scheduler.fill_html_jobs
-
+/*
 Scheduler.prototype.fill_html_jobs = function( html_element, jobs_response_element )
 {
     if( html_element )
@@ -128,9 +110,9 @@ Scheduler.prototype.fill_html_jobs = function( html_element, jobs_response_eleme
         html_element.innerHTML = htmls.join( "" );
     }
 }
-
+*/
 //-------------------------------------------------------------------------Scheduler.fill_html_jobs
-
+/*
 Scheduler.prototype.make_html = function( html_element, response_element, config_element, sub_element_name )
 {
     var result = null;
@@ -163,9 +145,9 @@ Scheduler.prototype.make_html = function( html_element, response_element, config
 
     return result;
 }
-
+*/
 //-----------------------------------------------------------------------------Scheduler.fill_spans
-
+/*
 Scheduler.prototype.fill_spans = function( html_element, xml_element )
 {
     var span_elements = html_element.getElementsByTagName( "span" );
@@ -184,7 +166,7 @@ Scheduler.prototype.fill_spans = function( html_element, xml_element )
         }
     }
 }
-
+*/
 //------------------------------------------------------------------------------Scheduler.call_http
 
 Scheduler.prototype.call_http = function( text, debug_text )
@@ -206,7 +188,7 @@ Scheduler.prototype.call_http = function( text, debug_text )
 }
 
 //---------------------------------------------------------------------Scheduler_html_configuration
-
+/*
 function Scheduler_html_configuration( url )
 {
     this._dom = new ActiveXObject( "MSXML2.DOMDocument" );
@@ -215,6 +197,85 @@ function Scheduler_html_configuration( url )
     this._dom.validateOnParse = false;  // Wegen DOCTYPE in config.xml (aber warum?)
     var ok  = this._dom.load( url );
     if( !ok )  throw new Error( "Fehler in der Konfiguration " + url + ": " + this._dom.parseError.reason );
+}
+*/
+//------------------------------------------------------------------------Popup_builder.add_command
+// Erweiterung von Popup_builder, s. popup_builder.js
+
+function Popup_builder__add_command( html, xml_command, is_active )
+{
+    this.add_entry( html, "parent.command_popup__execute(&quot;" + xml_command + "&quot;)", is_active );
+}
+
+//----------------------------------------------------------------------------command_popup__execute
+
+function command_popup__execute( xml_command )
+{
+    _popup.hide();
+    
+    try
+    {
+        _scheduler.execute( xml_command );
+        window.parent.jobs_frame.update();
+    }
+    catch( x )
+    {
+        if( x.number + 0xFFFFFFFF == 0x800C0007 )
+        {
+            alert( "Scheduler connection closed" );
+        }
+        else
+        {
+            throw x;
+            //alert( "Error 0x" + hex_string( x.number, 8 ) + ": " + x.message );
+        }
+    }
+}
+
+//-------------------------------------------------------------------------------string_from_object
+
+function string_from_object( object )
+{
+    var result = "{";
+    for( var i in object )  result += i + "=" + object[ i ] + " ";
+    return result + "}";
+}
+
+//--------------------------------------------------------------------------------------hex_string
+
+function hex_string( value, min_length )
+{
+    var result = "";
+    var hex    = "0123456789ABCDEF";
+
+    if( min_length == undefined )  min_length = 1
+
+    do
+    {
+        var digit = value % 16;
+        if( digit < 0 )  digit += 15;
+        result = hex.substring( digit, digit + 1 ) + result;
+        value >>>= 4;
+    }
+    while( value != 0  ||  result.length < min_length );
+
+    return result;
+}
+
+//---------------------------------------------------------------------------------------xml_encode
+
+function xml_encode( text )
+{
+    if( text == null )  return "";
+    return text.toString().replace( /&/g, "&amp;" ).replace( /</g, "&lt;" ).replace( />/g, "&gt;" );
+    //TODO Reguläre Ausdrücke vorkompilieren
+}
+
+//-----------------------------------------------------------------------------------scheduler_init
+
+function scheduler_init()
+{
+    Popup_builder.prototype.add_command = Popup_builder__add_command;
 }
 
 //-------------------------------------------------------------------------------------------------

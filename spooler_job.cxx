@@ -1,4 +1,4 @@
-// $Id: spooler_job.cxx,v 1.84 2004/07/21 08:20:36 jz Exp $
+// $Id: spooler_job.cxx,v 1.85 2004/07/21 09:41:13 jz Exp $
 // §851: Weitere Log-Ausgaben zum Scheduler-Start eingebaut
 /*
     Hier sind implementiert
@@ -744,7 +744,8 @@ bool Job::execute_state_cmd()
                                     break;
 
                 case sc_end:        if( _state == s_running 
-                                     || _state == s_suspended  )                               something_done = true;
+                                   //|| _state == s_suspended
+                                                               )                               something_done = true;
                                     set_state( s_running );
                                     THREAD_LOCK( _lock )  Z_FOR_EACH( Task_list, _running_tasks, t )  (*t)->cmd_end();
                                     break;
@@ -763,7 +764,7 @@ bool Job::execute_state_cmd()
                                  || task->_state == Task::s_running_waiting_for_order )  task->set_state( Task::s_suspended );
                             }
 
-                            set_state( s_suspended );
+                            //set_state( s_suspended );
                             something_done = true;
                         }
                     }
@@ -772,7 +773,7 @@ bool Job::execute_state_cmd()
 
                 case sc_continue:   
                 {
-                    if( _state == s_suspended )
+                    //if( _state == s_suspended )
                     {
                         THREAD_LOCK( _lock )
                         {
@@ -1446,7 +1447,7 @@ string Job::state_name( State state )
         case s_error:           return "error";
         case s_pending:         return "pending";
         case s_running:         return "running";
-        case s_suspended:       return "suspended";
+      //case s_suspended:       return "suspended";
         default:                return as_string( (int)state );
     }
 }

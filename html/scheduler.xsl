@@ -36,6 +36,10 @@
                         &#160;
                         (<xsl:value-of select="my:datetime_diff( string( state/@spooler_running_since ), $now )"  disable-output-escaping="yes"/>)
                     </span>
+                    <br/>
+                    <xsl:call-template name="command_menu">
+                        <xsl:with-param name="onclick" select="'scheduler_command__onclick()'"/>
+                    </xsl:call-template>
                 </td>
             </tr>
         </table>
@@ -353,6 +357,10 @@
                             </td>
                             
                             <td align="right">
+                                <xsl:call-template name="command_menu">
+                                    <xsl:with-param name="onclick" select="concat( 'job_command__onclick(&quot;', @job, '&quot;)' )"/>
+                                </xsl:call-template>
+<!--                                
                                 <xsl:element name="span">
                                     <xsl:attribute name="style">
                                         cursor: hand; text-decoration: underline; padding-left: 4pt
@@ -362,6 +370,7 @@
                                     </xsl:attribute>
                                     Command
                                 </xsl:element>
+-->                                
                             </td>
                         </tr>
                     </table>
@@ -506,6 +515,10 @@
 
                             <xsl:if test="@id">
                                 <td align="right">
+                                    <xsl:call-template name="command_menu">
+                                        <xsl:with-param name="onclick" select="concat( 'task_command__onclick(', @id, ')' )"/>
+                                    </xsl:call-template>
+<!--                               
                                     <xsl:element name="span">
                                         <xsl:attribute name="style">
                                             cursor: hand; text-decoration: underline; padding-left: 4pt
@@ -515,6 +528,7 @@
                                         </xsl:attribute>
                                         Command
                                     </xsl:element>
+-->                                    
                                 </td>
                             </xsl:if>
                         </tr>
@@ -709,6 +723,23 @@
         </span>
     </xsl:template>
     
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~command_menu-->
+
+    <xsl:template name="command_menu">
+        <xsl:param name="onclick"/>
+        <xsl:element name="span">
+            <xsl:attribute name="style">
+                cursor: hand; text-decoration: underline; padding-left: 4pt
+            </xsl:attribute>
+            <xsl:attribute name="onclick">
+                <xsl:value-of select="$onclick"/>
+            </xsl:attribute>
+            Command
+        </xsl:element>
+    </xsl:template>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~script-->
+
 
     <msxsl:script language="JavaScript" implements-prefix="my"><![CDATA[
     

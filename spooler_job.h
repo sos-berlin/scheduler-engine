@@ -1,4 +1,4 @@
-// $Id: spooler_job.h,v 1.26 2004/07/21 08:20:36 jz Exp $
+// $Id: spooler_job.h,v 1.27 2004/07/21 09:41:13 jz Exp $
 
 #ifndef __SPOOLER_JOB_H
 #define __SPOOLER_JOB_H
@@ -105,7 +105,7 @@ struct Job : Sos_self_deleting
     enum State
     {
         s_none,
-        s_suspended,            // Alle Tasks sind suspended
+      //s_suspended,            // Alle Tasks sind suspended
         s_stopping,             // Wird gestoppt (Zustand, solange noch Tasks laufen, danach s_stopped)
         s_stopped,              // Gestoppt (z.B. wegen Fehler). Keine Task wird gestartet.
         s_read_error,           // Skript kann nicht aus Datei (include) gelesen werden

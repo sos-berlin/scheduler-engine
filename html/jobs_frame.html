@@ -1,4 +1,4 @@
-<!-- $Id: jobs_frame.html,v 1.10 2004/07/21 08:20:36 jz Exp $ -->
+<!-- $Id: jobs_frame.html,v 1.11 2004/07/21 09:41:13 jz Exp $ -->
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <html>
 
@@ -29,7 +29,9 @@
 
 <xml id="stylesheet" src="scheduler.xsl"></xml>
 
-<script defer="true" type="text/javascript" src="scheduler.js"></script>
+<script defer="true" type="text/javascript" src="scheduler.js"    ></script>
+<script defer="true" type="text/javascript" src="popup_builder.js"></script>
+
 <script type="text/javascript" for="window" event="onload"> do_onload(); </script>
 
 <script defer="true" language="javascript"><!--
@@ -57,6 +59,7 @@ function do_onload()
     repeat_update( document.all.update_periodically_checkbox.checked, true );
     
     //document.all.update_periodically_checkbox.checked = _update_periodically;
+    scheduler_init();
 }
 
 //------------------------------------------------------------update_periodically_checkbox__onclick
@@ -81,6 +84,29 @@ function update__onclick()
 {
     reset_error();
     update();
+}
+
+//-----------------------------------------------------------------------scheduler_command__onclick
+
+function scheduler_command__onclick()
+{
+    var popup_builder = new Popup_builder();
+    
+    var state = _response.selectSingleNode( "spooler/answer/state" ).getAttribute( "state" );
+    
+    var command = function( cmd ) { return "<modify_spooler cmd='" + cmd + "'/>"; }
+    
+    popup_builder.add_command( "stop"                           , command( "stop" ), state != "stopped"  &&  state != "stopping"  &&  state != "stopping_let_run" );
+    popup_builder.add_command( "pause"                          , command( "pause"                         ), state != "paused" );
+    popup_builder.add_command( "continue"                       , command( "continue"                      ), state == "paused" );
+  //popup_builder.add_command( "reload"                         , command( "reload"                        ), state != "stopped"  &&  state != "stopping" );
+    popup_builder.add_command( "terminate"                      , command( "terminate"                     ) );
+    popup_builder.add_command( "terminate and restart"          , command( "terminate_and_restart"         ) );
+    popup_builder.add_command( "let run, terminate and restart" , command( "let_run_terminate_and_restart" ) );
+    popup_builder.add_command( "abort immediately"              , command( "abort_immediately"             ) );
+    popup_builder.add_command( "abort immediately and restart"  , command( "abort_immediately_and_restart" ) );
+    
+    _popup = popup_builder.show_popup();
 }
 
 //--------------------------------------------------------------------------------------reset_error
@@ -211,45 +237,6 @@ function show_job_details( job_name )
 
     update_jobs_frame();
     window.parent.details_frame.show_job_details( job_element );
-}
-
-//-------------------------------------------------------------------------------string_from_object
-
-function string_from_object( object )
-{
-    var result = "{";
-    for( var i in object )  result += i + "=" + object[ i ] + " ";
-    return result + "}";
-}
-
-//--------------------------------------------------------------------------------------hex_string
-
-function hex_string( value, min_length )
-{
-    var result = "";
-    var hex    = "0123456789ABCDEF";
-
-    if( min_length == undefined )  min_length = 1
-
-    do
-    {
-        var digit = value % 16;
-        if( digit < 0 )  digit += 15;
-        result = hex.substring( digit, digit + 1 ) + result;
-        value >>>= 4;
-    }
-    while( value != 0  ||  result.length < min_length );
-
-    return result;
-}
-
-//---------------------------------------------------------------------------------------xml_encode
-
-function xml_encode( text )
-{
-    if( text == null )  return "";
-    return text.toString().replace( /&/g, "&amp;" ).replace( /</g, "&lt;" ).replace( />/g, "&gt;" );
-    //TODO Reguläre Ausdrücke vorkompilieren
 }
 
 //-------------------------------------------------------------------------------------------------

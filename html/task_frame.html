@@ -1,4 +1,4 @@
-<!-- $Id: task_frame.html,v 1.8 2004/07/21 08:20:36 jz Exp $ -->
+<!-- $Id: task_frame.html,v 1.9 2004/07/21 09:41:13 jz Exp $ -->
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <html>
 
@@ -76,15 +76,8 @@ function init()
 
         document.all.stylesheet.outerHTML = "<span id='stylesheet'></span>";
         
-        Popup_builder.prototype.add_command = Popup_builder__add_command;
+        scheduler_init();
     }
-}
-
-//------------------------------------------------------------------------Popup_builder.add_command
-
-function Popup_builder__add_command( html, xml_command, is_active )
-{
-    this.add_entry( html, "parent.popup__execute(&quot;" + xml_command + "&quot;)", is_active );
 }
 
 //-----------------------------------------------------------------------------job_command__onclick
@@ -100,20 +93,12 @@ function job_command__onclick( job_name )
     popup_builder.add_command( "unstop"        , "<modify_job job='" + job_name + "' cmd='unstop'  />", state == "stopped"  ||  state == "stopping" );
     popup_builder.add_command( "wake"          , "<modify_job job='" + job_name + "' cmd='wake'    />" );
     popup_builder.add_command( "start"         , "<modify_job job='" + job_name + "' cmd='start'   />" );
-    popup_builder.add_command( "end"           , "<modify_job job='" + job_name + "' cmd='end'     />" );
-    popup_builder.add_command( "suspend"       , "<modify_job job='" + job_name + "' cmd='suspend' />", state != "suspended" );
-    popup_builder.add_command( "continue"      , "<modify_job job='" + job_name + "' cmd='continue'/>", state == "suspended" );
     popup_builder.add_command( "reread"        , "<modify_job job='" + job_name + "' cmd='reread'  />" );
+    popup_builder.add_command( "end tasks"     , "<modify_job job='" + job_name + "' cmd='end'     />" );
+    popup_builder.add_command( "suspend tasks" , "<modify_job job='" + job_name + "' cmd='suspend' />" );
+    popup_builder.add_command( "continue tasks", "<modify_job job='" + job_name + "' cmd='continue'/>" );
     
     _popup = popup_builder.show_popup();
-}
-
-//-----------------------------------------------------------------------------------popup__execute
-
-function popup__execute( xml_command )
-{
-    _scheduler.execute( xml_command );
-    _popup.hide();
 }
 
 //----------------------------------------------------------------------------task_command__onclick
