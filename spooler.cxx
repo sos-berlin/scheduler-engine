@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.257 2003/09/24 18:50:33 jz Exp $
+// $Id: spooler.cxx,v 1.258 2003/09/24 19:45:11 jz Exp $
 /*
     Hier sind implementiert
 
@@ -1529,7 +1529,7 @@ void Spooler::run()
     if( !_xml_cmd.empty() )
     {
         Command_processor cp ( this );
-        cout << cp.execute( _xml_cmd, Time::now() );                 // Bei einem Fehler Abbruch
+        cout << cp.execute( _xml_cmd, Time::now(), true );                 // Bei einem Fehler Abbruch
         _xml_cmd = "";
     }
 
@@ -2083,6 +2083,8 @@ int spooler_main( int argc, char** argv, const string& parameter_line )
 
     Ole_initialize ole;
     Spooler my_spooler;
+
+    my_spooler._is_service = spooler::is_daemon;
 
     try
     {

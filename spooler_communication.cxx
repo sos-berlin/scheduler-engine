@@ -1,4 +1,4 @@
-// $Id: spooler_communication.cxx,v 1.57 2003/08/15 19:13:33 jz Exp $
+// $Id: spooler_communication.cxx,v 1.58 2003/09/24 19:45:11 jz Exp $
 /*
     Hier sind implementiert
 
@@ -246,7 +246,8 @@ Communication::Channel::Channel( Spooler* spooler )
 :
     _zero_(this+1),
     _spooler(spooler),
-    _socket( SOCKET_ERROR ),
+    _read_socket ( SOCKET_ERROR ),
+    _write_socket( SOCKET_ERROR ),
     _send_is_complete( true ),
     _log(_spooler)
 {
@@ -257,7 +258,7 @@ Communication::Channel::Channel( Spooler* spooler )
 
 Communication::Channel::~Channel()
 {
-    if( _socket != SOCKET_ERROR )  closesocket( _socket );
+    if( _read_socket != SOCKET_ERROR  &&  _read_socket != STDIN_FILENO )  closesocket( _read_socket );
 }
 
 //----------------------------------------------------------------Communication::Channel::do_accept
@@ -269,10 +270,12 @@ bool Communication::Channel::do_accept( SOCKET listen_socket )
         struct sockaddr_in peer_addr;
         socklen_t          peer_addr_len = sizeof peer_addr;
 
-        _socket = accept( listen_socket, (struct sockaddr*)&peer_addr, &peer_addr_len );
-        if( _socket == SOCKET_ERROR )  throw_sos_socket_error( "accept" );
+        _read_socket = accept( listen_socket, (struct sockaddr*)&peer_addr, &peer_addr_len );
+        if( _read_socket == SOCKET_ERROR )  throw_sos_socket_error( "accept" );
+        
+        _write_socket = _read_socket;
 
-        set_linger( _socket );
+        set_linger( _read_socket );
 
         _host = peer_addr.sin_addr;
         _log.set_prefix( "TCP-Verbindung mit " + _host.as_string() );
@@ -297,8 +300,10 @@ bool Communication::Channel::do_accept( SOCKET listen_socket )
 
 void Communication::Channel::do_close()
 {
-    closesocket( _socket );
-    _socket = SOCKET_ERROR;
+    if( _read_socket != SOCKET_ERROR  &&  _read_socket != STDIN_FILENO )  closesocket( _read_socket );
+    
+    _read_socket  = SOCKET_ERROR;
+    _write_socket = SOCKET_ERROR;
 }
 
 //---------------------------------------------------------------Communication::Channel::recv_clear
@@ -319,7 +324,9 @@ bool Communication::Channel::do_recv()
     {
         char buffer [ 4096 ];
 
-        int len = recv( _socket, buffer, sizeof buffer, 0 );
+        int len = _read_socket == STDIN_FILENO? read( _read_socket, buffer, sizeof buffer )
+                                              : recv( _read_socket, buffer, sizeof buffer, 0 );
+
         if( len <= 0 ) {
             if( len == 0 )  { _eof = true;  return true; }
             if( get_errno() == EAGAIN )  return true; 
@@ -356,7 +363,8 @@ bool Communication::Channel::do_send()
     {
         if( _send_is_complete )  _send_progress = 0, _send_is_complete = false;     // Am Anfang
 
-        int len = ::send( _socket, _text.c_str() + _send_progress, _text.length() - _send_progress, 0 );
+        int len = _write_socket == STDOUT_FILENO? write ( _write_socket, _text.c_str() + _send_progress, _text.length() - _send_progress )
+                                                : ::send( _write_socket, _text.c_str() + _send_progress, _text.length() - _send_progress, 0 );
         if( len < 0 ) {
             if( get_errno() == EAGAIN )  return true;
             throw_sos_socket_error( "send" );
@@ -563,6 +571,26 @@ void Communication::bind()
 
                 _spooler->log().info( "Spooler erwartet Kommandos über TCP-Port " + sos::as_string(_tcp_port) );
             }
+
+
+#           ifndef Z_WINDOWS
+            {
+                if( !_spooler->_is_service )
+                {
+                    ret = ioctl( STDIN_FILENO, FIONBIO, &on );
+                    if( ret == 0 )
+                    {
+                        Sos_ptr<Channel> new_channel = SOS_NEW( Channel( _spooler ) );
+                
+                        new_channel->_read_socket  = STDIN_FILENO;
+                        new_channel->_write_socket = STDOUT_FILENO;
+                        new_channel->_indent = true;
+
+                        _channel_list.push_back( new_channel );
+                    }
+                }
+            }
+#           endif
         }
     }
 }
@@ -588,13 +616,13 @@ bool Communication::handle_socket( Channel* channel )
 {
     bool ok;
 
-    if( FD_ISSET( channel->_socket, &_write_fds ) ) 
+    if( FD_ISSET( channel->_write_socket, &_write_fds ) ) 
     {
         ok = channel->do_send();
         if( !ok )  return false;
     }
 
-    if( FD_ISSET( channel->_socket, &_read_fds ) )
+    if( FD_ISSET( channel->_read_socket, &_read_fds ) )
     {
         ok = channel->do_recv();
         if( !ok )  return false;
@@ -602,7 +630,9 @@ bool Communication::handle_socket( Channel* channel )
         if( channel->_receive_is_complete ) 
         {
             Command_processor cp = _spooler;;
-            cp.set_host( &channel->_host );
+            
+            if( channel->_read_socket != STDIN_FILENO )  cp.set_host( &channel->_host );
+
             string cmd = channel->_text;
             channel->recv_clear();
             channel->_log.info( "Kommando " + cmd );
@@ -647,14 +677,14 @@ int Communication::run()
             FD_ZERO( &_read_fds );      
             FD_ZERO( &_write_fds );
 
-            _fd_set( _udp_socket, &_read_fds );
+            _fd_set( _udp_socket   , &_read_fds );
             _fd_set( _listen_socket, &_read_fds );
 
             FOR_EACH( Channel_list, _channel_list, it )
             {
                 Channel* channel = *it;
-                if( channel->_send_is_complete    )  _fd_set( channel->_socket, &_read_fds );
-                if( channel->_receive_is_complete )  _fd_set( channel->_socket, &_write_fds  );
+                if( channel->_send_is_complete    )  _fd_set( channel->_read_socket , &_read_fds );
+                if( channel->_receive_is_complete )  _fd_set( channel->_write_socket, &_write_fds  );
             }
 
             if( _nfds == 0 )  { _started = false; break; }
