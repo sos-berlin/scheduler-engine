@@ -1,4 +1,4 @@
-// $Id: scheduler.js,v 1.7 2004/07/22 14:15:10 jz Exp $
+// $Id: scheduler.js,v 1.8 2004/07/23 10:09:47 jz Exp $
 
 //----------------------------------------------------------------------------------------Scheduler
 // public
@@ -199,18 +199,18 @@ function Scheduler_html_configuration( url )
     if( !ok )  throw new Error( "Fehler in der Konfiguration " + url + ": " + this._dom.parseError.reason );
 }
 */
-//------------------------------------------------------------------------Popup_builder.add_command
-// Erweiterung von Popup_builder, s. popup_builder.js
+//------------------------------------------------------------------------Popup_menu_builder.add_command
+// Erweiterung von Popup_menu_builder, s. popup_builder.js
 
-function Popup_builder__add_command( html, xml_command, is_active )
+function Popup_menu_builder__add_command( html, xml_command, is_active )
 {
-    this.add_entry( html, "parent.command_popup__execute( &quot;" + xml_command + "&quot; )", is_active );
+    this.add_entry( html, "parent.popup_menu__execute( &quot;" + xml_command + "&quot; )", is_active );
 }
 
-//-----------------------------------------------------------------------------command_popup.execute
-// Für Popup_builder.add_command()
+//-------------------------------------------------------------------------------popup_menu.execute
+// Für Popup_menu_builder.add_command()
 
-function command_popup__execute( xml_command )
+function popup_menu__execute( xml_command )
 {
     _popup.hide();
     
@@ -233,24 +233,115 @@ function command_popup__execute( xml_command )
     }
 }
 
-//-----------------------------------------------------------------------Popup_builder.add_show_log
-// Erweiterung von Popup_builder, s. popup_builder.js
+//-----------------------------------------------------------------------Popup_menu_builder.add_show_log
+// Erweiterung von Popup_menu_builder, s. popup_builder.js
 
-function Popup_builder__add_show_log( html, show_log_command, window_name, is_active )
+function Popup_menu_builder__add_show_log( html, show_log_command, window_name, is_active )
 {
-    this.add_entry( html, "parent.command_popup__show_log__onclick( &quot;" + show_log_command + "&quot;, &quot;" + window_name + "&quot; )", is_active );
+    this.add_entry( html, "parent.popup_menu__show_log__onclick( &quot;" + show_log_command + "&quot;, &quot;" + window_name + "&quot; )", is_active );
 }
 
-//-----------------------------------------------------------------command_popup__show_log__onclick
-// Für Popup_builder.add_show_log()
+//--------------------------------------------------------------------popup_menu__show_log__onclick
+// Für Popup_menu_builder.add_show_log()
 
-function command_popup__show_log__onclick( show_log_command, window_name )
+function popup_menu__show_log__onclick( show_log_command, window_name )
 {
     window_name = window_name.replace( /[~a-zA-Z0-9]/g, "_" );
     
     var log_window = window.open( "http://" + document.location.host + "/" + show_log_command, window_name, "menubar=no, toolbar=no, location=no, directories=no, scrollbars=yes, resizable=yes, status=no", true );
     log_window.focus();
     _popup.hide();
+}
+
+//--------------------------------------------------------------------------scheduler_menu__onclick
+
+function scheduler_menu__onclick()
+{
+    var popup_builder = new Popup_menu_builder();
+    
+    var state = _response.selectSingleNode( "spooler/answer/state" ).getAttribute( "state" );
+    
+    var command = function( cmd ) { return "<modify_spooler cmd='" + cmd + "'/>"; }
+    
+    popup_builder.add_show_log( "Show log"                       , "show_log", "show_log" );
+    popup_builder.add_bar();
+  //popup_builder.add_command ( "Stop"                           , command( "stop" ), state != "stopped"  &&  state != "stopping"  &&  state != "stopping_let_run" );
+    popup_builder.add_command ( "Pause"                          , command( "pause"                         ), state != "paused" );
+    popup_builder.add_command ( "Continue"                       , command( "continue"                      ), state == "paused" );
+    popup_builder.add_bar();
+  //popup_builder.add_command ( "Reload"                         , command( "reload"                        ), state != "stopped"  &&  state != "stopping" );
+    popup_builder.add_command ( "Terminate"                      , command( "terminate"                     ) );
+    popup_builder.add_command ( "Terminate and restart"          , command( "terminate_and_restart"         ) );
+    popup_builder.add_command ( "Let run, terminate and restart" , command( "let_run_terminate_and_restart" ) );
+    popup_builder.add_bar();
+    popup_builder.add_command ( "Abort immediately"              , command( "abort_immediately"             ) );
+    popup_builder.add_command ( "Abort immediately and restart"  , command( "abort_immediately_and_restart" ) );
+    
+    _popup = popup_builder.show_popup();
+}
+
+//--------------------------------------------------------------------------------job_menu__onclick
+
+function job_menu__onclick( job_name )
+{
+    var popup_builder = new Popup_menu_builder();
+    
+    var state = _job_element.getAttribute( "state" );
+    
+    popup_builder.add_show_log( "Show log"      , "show_log&job=" + job_name, "show_log_job_" + job_name );
+    popup_builder.add_bar();
+    popup_builder.add_command ( "Start task now", "parent.task_menu__start_task_now__onclick('" + job_name + "')" );
+    popup_builder.add_command ( "Stop"          , "<modify_job job='" + job_name + "' cmd='stop'    />", state != "stopped"  &&  state != "stopping" );
+    popup_builder.add_command ( "Unstop"        , "<modify_job job='" + job_name + "' cmd='unstop'  />", state == "stopped"  ||  state == "stopping" );
+    popup_builder.add_command ( "Wake"          , "<modify_job job='" + job_name + "' cmd='wake'    />" );
+    popup_builder.add_command ( "Start"         , "<modify_job job='" + job_name + "' cmd='start'   />" );
+    popup_builder.add_command ( "Reread"        , "<modify_job job='" + job_name + "' cmd='reread'  />" );
+    popup_builder.add_bar();
+    popup_builder.add_command ( "End tasks"     , "<modify_job job='" + job_name + "' cmd='end'     />" );
+    popup_builder.add_command ( "Suspend tasks" , "<modify_job job='" + job_name + "' cmd='suspend' />" );
+    popup_builder.add_command ( "Continue tasks", "<modify_job job='" + job_name + "' cmd='continue'/>" );
+    
+    _popup = popup_builder.show_popup();
+}
+
+//-------------------------------------------------------------------------------task_menu__onclick
+
+function task_menu__onclick( task_id )
+{
+    var popup_builder = new Popup_menu_builder();
+
+    popup_builder.add_show_log( "Show log"        , "show_log&task=" + task_id, "show_log_task_" + task_id );
+    popup_builder.add_bar();
+    popup_builder.add_command ( "End"             , "<kill_task job='" + _job_name + "' id='" + task_id + "'/>" );
+    popup_builder.add_command ( "Kill immediately", "<kill_task job='" + _job_name + "' id='" + task_id + "' immediately='yes'/>" );
+    
+    _popup = popup_builder.show_popup();
+}
+
+//-------------------------------------------------------------------------------task_menu__onclick
+
+function task_menu__onclick( task_id )
+{
+    var popup_builder = new Popup_menu_builder();
+
+    popup_builder.add_show_log( "Show log"        , "show_log&task=" + task_id, "show_log_task_" + task_id );
+    popup_builder.add_bar();
+    popup_builder.add_command ( "End"             , "<kill_task job='" + _job_name + "' id='" + task_id + "'/>" );
+    popup_builder.add_command ( "Kill immediately", "<kill_task job='" + _job_name + "' id='" + task_id + "' immediately='yes'/>" );
+    
+    _popup = popup_builder.show_popup();
+}
+
+//------------------------------------------------------------------------------order_menu__onclick
+
+function order_menu__onclick( job_chain_name, order_id )
+{
+    var popup_builder = new Popup_menu_builder();
+
+    popup_builder.add_show_log( "Show log"        , "show_log&job_chain=" + job_chain_name + 
+                                                            "&order=" + order_id, "show_log_order_" + job_chain_name + "__" + order_id );
+    
+    _popup = popup_builder.show_popup();
 }
 
 //-------------------------------------------------------------------------------string_from_object
@@ -296,8 +387,8 @@ function xml_encode( text )
 
 function scheduler_init()
 {
-    Popup_builder.prototype.add_command  = Popup_builder__add_command;
-    Popup_builder.prototype.add_show_log = Popup_builder__add_show_log;
+    Popup_menu_builder.prototype.add_command  = Popup_menu_builder__add_command;
+    Popup_menu_builder.prototype.add_show_log = Popup_menu_builder__add_show_log;
 }
 
 //-------------------------------------------------------------------------------------------------

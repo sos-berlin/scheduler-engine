@@ -1,4 +1,4 @@
-// $Id: spooler_command.cxx,v 1.126 2004/07/22 22:45:56 jz Exp $
+// $Id: spooler_command.cxx,v 1.127 2004/07/23 10:09:47 jz Exp $
 /*
     Hier ist implementiert
 
@@ -724,11 +724,13 @@ ptr<Http_response> Command_processor::execute_http( const Http_request& http_req
             {
                 ptr<Prefix_log> log;
 
-                if( http_request.has_parameter( "task" ) )  log = _spooler->get_task( as_int( http_request.parameter( "task" ) ) )->log();
+                if( http_request.has_parameter( "task"  ) )  log = _spooler->get_task( as_int( http_request.parameter( "task" ) ) )->log();
                 else
-                if( http_request.has_parameter( "job"  ) )  log = _spooler->get_job( http_request.parameter( "job" ) )->_log;
+                if( http_request.has_parameter( "job"   ) )  log = _spooler->get_job( http_request.parameter( "job" ) )->_log;
                 else
-                                                            log = &_spooler->_log;
+                if( http_request.has_parameter( "order" ) )  log = _spooler->job_chain( http_request.parameter( "job_chain" ) )->order( http_request.parameter( "order" ) )->_log;
+                else
+                                                             log = &_spooler->_log;
 
                 ptr<Log_http_response> response = Z_NEW( Log_http_response( log, "text/html" ) );
                 return +response;

@@ -1,4 +1,4 @@
-// $Id: spooler_order.cxx,v 1.69 2004/07/22 22:45:56 jz Exp $
+// $Id: spooler_order.cxx,v 1.70 2004/07/23 10:09:47 jz Exp $
 /*
     Hier sind implementiert
 
@@ -761,7 +761,6 @@ void Order::init()
 {
     _log = Z_NEW( Prefix_log( _spooler ) );
     _log->set_prefix( "Order" );
-    _log->set_title( obj_name() );
     _created = Time::now();
 }
 
@@ -888,6 +887,7 @@ void Order::set_id( const Order::Id& id )
         _is_users_id = true;
 
         _log->set_prefix( "Order " + _id.as_string() );
+        _log->set_title ( "Order " + _id.as_string() );
     }
 }
 

@@ -41,7 +41,7 @@
                         </span>
                         <br/>
                         <xsl:call-template name="command_menu">
-                            <xsl:with-param name="onclick" select="'scheduler_command__onclick()'"/>
+                            <xsl:with-param name="onclick" select="'scheduler_menu__onclick()'"/>
                         </xsl:call-template>
                     </p>
                 </td>
@@ -599,7 +599,7 @@
                             
                             <td align="right">
                                 <xsl:call-template name="command_menu">
-                                    <xsl:with-param name="onclick" select="concat( 'job_command__onclick(&quot;', @job, '&quot;)' )"/>
+                                    <xsl:with-param name="onclick" select="concat( 'job_menu__onclick(&quot;', @job, '&quot;)' )"/>
                                 </xsl:call-template>
                             </td>
                         </tr>
@@ -746,7 +746,7 @@
                             <xsl:if test="@id">
                                 <td align="right">
                                     <xsl:call-template name="command_menu">
-                                        <xsl:with-param name="onclick" select="concat( 'task_command__onclick(', @id, ')' )"/>
+                                        <xsl:with-param name="onclick" select="concat( 'task_menu__onclick(', @id, ')' )"/>
                                     </xsl:call-template>
                                 </td>
                             </xsl:if>
@@ -914,6 +914,12 @@
                         <td><xsl:value-of select="@state"/></td>
                         <td><xsl:value-of select="@state_text"/></td>
                         <td><xsl:value-of select="@title"/></td>
+                        
+                        <td style="font-weight: normal">
+                            <xsl:call-template name="command_menu">
+                                <xsl:with-param name="onclick" select="concat( 'order_menu__onclick(&quot;', @job_chain, '&quot;, &quot;', @id, '&quot;)' )"/>
+                            </xsl:call-template>
+                        </td>
                     </xsl:element>
                 </xsl:for-each>
             </tbody>
