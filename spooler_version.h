@@ -1,4 +1,4 @@
-// $Id: spooler_version.h,v 1.233 2004/07/26 17:55:49 jz Exp $
+// $Id: spooler_version.h,v 1.234 2004/07/26 17:56:05 jz Exp $
 
 #define VER_FILEDESC_STR        "Scheduler\0"
 
