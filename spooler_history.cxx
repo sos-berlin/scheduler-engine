@@ -1,4 +1,4 @@
-// $Id: spooler_history.cxx,v 1.93 2004/03/15 21:43:45 jz Exp $
+// $Id: spooler_history.cxx,v 1.94 2004/03/25 10:46:11 jz Exp $
 
 #include "spooler.h"
 #include "../zschimmer/z_com.h"
@@ -135,10 +135,9 @@ Spooler_db::Spooler_db( Spooler* spooler )
 :
     _zero_(this+1),
     _spooler(spooler),
-    _lock("Spooler_db")
+    _lock("Spooler_db"),
+    _db_descr( z::sql::flag_uppercase_names | z::sql::flag_quote_names )
 {
-    _db_params._uppercase_names = true;
-    _db_params._quote_names     = true;
 }
 
 //---------------------------------------------------------------------------------Spooler_db::open
@@ -654,7 +653,7 @@ void Spooler_db::insert_order( Order* order )
                 {
                     delete_order( order, &ta );
 
-                    sql::Insert_stmt insert ( &_db_params );
+                    sql::Insert_stmt insert ( &_db_descr );
                     
                     insert.set_table_name( _spooler->_orders_tablename );
                     
@@ -694,7 +693,7 @@ void Spooler_db::insert_order( Order* order )
 
 void Spooler_db::delete_order( Order* order, Transaction* transaction )
 {
-    sql::Delete_stmt del ( &_db_params );
+    sql::Delete_stmt del ( &_db_descr );
 
     del.set_table_name( _spooler->_orders_tablename );
 
@@ -727,7 +726,7 @@ void Spooler_db::update_order( Order* order )
                     }
                     else
                     {
-                        sql::Update_stmt update ( &_db_params );
+                        sql::Update_stmt update ( &_db_descr );
 
                         update.set_table_name( _spooler->_orders_tablename );
 
@@ -784,7 +783,7 @@ void Spooler_db::write_order_history( Order* order, Transaction* outer_transacti
                 int history_id = get_order_history_id( &ta );
 
                 {
-                    sql::Insert_stmt insert ( &_db_params );
+                    sql::Insert_stmt insert ( &_db_descr );
                     
                     insert.set_table_name( _spooler->_order_history_tablename );
                     

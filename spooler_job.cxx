@@ -1,4 +1,4 @@
-// $Id: spooler_job.cxx,v 1.66 2004/03/23 22:41:41 jz Exp $
+// $Id: spooler_job.cxx,v 1.67 2004/03/25 10:46:11 jz Exp $
 /*
     Hier sind implementiert
 
@@ -439,7 +439,7 @@ void Job::Task_queue::enqueue_task( const Sos_ptr<Task>& task )
                 Transaction ta ( _spooler->_db );
                 //task->_history.enqueue();
 
-                Insert_stmt insert ( &_spooler->_db->_db_params );
+                Insert_stmt insert ( &_spooler->_db->_db_descr );
                 insert.set_table_name( _spooler->_tasks_tablename );
 
                 insert             [ "TASK_ID"       ] = task->_id;
