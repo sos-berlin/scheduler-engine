@@ -1,4 +1,4 @@
-// $Id: spooler_thread.cxx,v 1.98 2003/08/27 20:40:32 jz Exp $
+// $Id: spooler_thread.cxx,v 1.99 2003/08/29 13:08:10 jz Exp $
 /*
     Hier sind implementiert
 
@@ -193,6 +193,17 @@ int Spooler_thread::task_count( Job* job )
     }
 
     return result;
+}
+
+//---------------------------------------------------------------------Spooler_thread::cmd_shutdown
+// Wird von Spooler gerufen
+
+void Spooler_thread::cmd_shutdown()
+{
+    THREAD_LOCK( _lock )
+    {
+        FOR_EACH_TASK( t, task )  task->cmd_end();
+    }
 }
 
 //------------------------------------------------Spooler_thread::build_prioritized_order_job_array
@@ -493,19 +504,28 @@ void Spooler_thread::nichts_getan( double wait_time )
     sos_sleep( wait_time );  // Warten, um bei Wiederholung zu bremsen
 }
 
-//-------------------------------------------------------------------------Spooler_thread::finished
-/* ???
-bool Spooler_thread::finished()
+//---------------------------------------------------------Spooler_thread::is_ready_for_termination
+
+bool Spooler_thread::is_ready_for_termination()
 {
-    if( _running_tasks_count == 0 )
+    THREAD_LOCK( _lock )
     {
-        if( _spooler->state() == Spooler::s_stopping_let_run  &&  !any_tasks_there() )  return true;
-        if( _spooler->_manual )  return true;   // Task ist fertig, also Thread beenden
+        if( _spooler->state() == Spooler::s_stopping_let_run  &&  !_spooler->has_any_order() ) 
+        {
+            if( _task_list.size() == 0 )  return true;
+            FOR_EACH_TASK( t, task )  task->cmd_end(); 
+        }
+
+        if( _task_list.size() == 0 )
+        {
+            if( _spooler->_manual                        )  return true;
+            if( _spooler->state() == Spooler::s_stopping )  return true;
+        }
     }
 
     return false;
 }
-*/
+
 //--------------------------------------------------------------------------Spooler_thread::process
 
 bool Spooler_thread::process()
@@ -559,16 +579,10 @@ int Spooler_thread::thread_main()
                 {
                     process();
 
-                    //? if( finished() )  break;
+                    if( is_ready_for_termination() )  break;
 
                     if( _running_tasks_count == 0 )
                     {
-                        if( _task_list.size() == 0 )
-                        {
-                            if( _spooler->_manual )  break;
-                            if( _spooler->state() == Spooler::s_stopping_let_run  &&  _spooler->has_any_order() )  break;
-                        }
-
                         wait();
                     }
                 }

@@ -1,4 +1,4 @@
-// $Id: spooler.h,v 1.148 2003/08/28 20:48:25 jz Exp $
+// $Id: spooler.h,v 1.149 2003/08/29 13:08:10 jz Exp $
 
 #ifndef __SPOOLER_H
 #define __SPOOLER_H
@@ -400,6 +400,7 @@ struct Spooler
     Time                       _spooler_start_time;
     State                      _state;
     State_cmd                  _state_cmd;
+    State_cmd                  _shutdown_cmd;               // run() beenden, also alle Tasks beenden!
 };
 
 //-------------------------------------------------------------------------------------------------

@@ -1,4 +1,4 @@
-// $Id: spooler_job.cxx,v 1.8 2003/08/27 20:40:32 jz Exp $
+// $Id: spooler_job.cxx,v 1.9 2003/08/29 13:08:10 jz Exp $
 /*
     Hier sind implementiert
 
@@ -873,7 +873,8 @@ void Job::calculate_next_time( Time now )
 
 Sos_ptr<Task> Job::task_to_start()
 {
-    if( _spooler->state() == Spooler::s_stopping_let_run )  return NULL;
+    if( _spooler->state() == Spooler::s_stopping
+     || _spooler->state() == Spooler::s_stopping_let_run )  return NULL;
 
     Time            now   = Time::now();
     Start_cause     cause = cause_none;

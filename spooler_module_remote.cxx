@@ -1,4 +1,4 @@
-// $Id: spooler_module_remote.cxx,v 1.23 2003/08/29 08:14:04 jz Exp $
+// $Id: spooler_module_remote.cxx,v 1.24 2003/08/29 13:08:10 jz Exp $
 /*
     Hier sind implementiert
 
@@ -404,14 +404,17 @@ void Remote_module_instance_proxy::Operation::async_continue_( bool wait )
                 break;
             }
 
+
             case c_release:
             {
                 _operation = NULL;
                 _proxy->_remote_instance->release__end();
                 _proxy->_remote_instance = NULL;
                 _proxy->_idispatch = NULL;
+                _call_state = c_finished;
                 break;
             }
+
 
             default:
                 throw_xc( "Remote_module_instance_proxy::Operation::process" );

@@ -1,4 +1,4 @@
-// $Id: spooler_thread.h,v 1.48 2003/08/27 17:44:49 jz Exp $
+// $Id: spooler_thread.h,v 1.49 2003/08/29 13:08:10 jz Exp $
 
 #ifndef __SPOOLER_THREAD_H
 #define __SPOOLER_THREAD_H
@@ -23,7 +23,7 @@ struct Spooler_thread : zschimmer::Thread
     void                    set_name                        ( const string& name )                  { _name = name; set_thread_name( _name ); _log.set_prefix( _obj_name() ); }
   //Job*                        current_job                 () const                                { return _current_job; }
   //string                      include_path                () const                                { return _include_path; }
-  //bool                        any_tasks_there             ();
+    bool                        has_tasks                   ()                                      { return !_task_list.empty(); }
 
     void                        init                        ();
     void                        close1                      ();                                     // Wird vom Thread beim Beenden selbst gerufen
@@ -37,6 +37,7 @@ struct Spooler_thread : zschimmer::Thread
     void                        start                       ( Event* destination );
   //void                        stop_jobs                   ();
 
+    void                        cmd_shutdown                ();
     void                        add_task                    ( Task* task )                          { _task_list.push_back( task );  signal( task->obj_name() ); }
   //void                        remove_task                 ( Task* this_task )                     { FOR_EACH_TASK( t, task )  if( task == this_task )  { _task_list.erase(t);  break; } }
     int                         task_count                  ( Job* = NULL );
@@ -54,6 +55,7 @@ struct Spooler_thread : zschimmer::Thread
  //?bool                        finished                    ();
 
     // Für andere Threads:
+    bool                        is_ready_for_termination    ();
     void                        signal_object               ( const string& object_set_class_name, const Level& );
   //void                        signal                      ( const string& signal_name = "" )      { THREAD_LOCK( _lock )  if(_event) _event->signal(signal_name), _next_time = 0; }
     void                        signal                      ( const string& signal_name = "" )      { THREAD_LOCK( _lock )  if(_event) _event->signal(signal_name); }

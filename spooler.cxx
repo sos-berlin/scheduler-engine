@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.228 2003/08/28 20:48:24 jz Exp $
+// $Id: spooler.cxx,v 1.229 2003/08/29 13:08:09 jz Exp $
 /*
     Hier sind implementiert
 
@@ -344,7 +344,7 @@ Spooler::~Spooler()
 
     _object_set_class_list.clear();
 
-    _communication.close(0.0);
+    _communication.close( 5 );      // 5 Sekunden aufs Ende warten
     _security.clear();
 
     _event.close();
@@ -965,7 +965,7 @@ void Spooler::close_threads()
 
 /*  Wir müssen warten, bis alle Threads beendet sind, denn sie benutzen _spooler. Also: Kein Timeout!
     wait_until_threads_stopped( Time::now() + wait_for_thread_termination );
-
+*
     FOR_EACH( Thread_list, _thread_list, it )  
     {
         Spooler_thread* thread = *it;
@@ -1368,7 +1368,7 @@ void Spooler::stop()
 {
     assert( current_thread_id() == _thread_id );
 
-    set_state( _state_cmd == sc_let_run_terminate_and_restart? s_stopping_let_run : s_stopping );
+    //set_state( _state_cmd == sc_let_run_terminate_and_restart? s_stopping_let_run : s_stopping );
 
     //_log.msg( "Spooler::stop" );
 
@@ -1431,15 +1431,26 @@ void Spooler::run()
             if( !valid_thread )  { _log.info( "Kein Thread vorhanden. Spooler wird beendet." ); break; }
         }
 
-        if( _state_cmd == sc_pause                 )  if( _state == s_running )  set_state( s_paused  ), signal_threads( "pause" );
-        if( _state_cmd == sc_continue              )  if( _state == s_paused  )  set_state( s_running ), signal_threads( "continue" );
-        if( _state_cmd == sc_load_config           )  break;
-        if( _state_cmd == sc_reload                )  break;
-        if( _state_cmd == sc_terminate             )  break;
-        if( _state_cmd == sc_terminate_and_restart )  break;
-        if( _state_cmd == sc_let_run_terminate_and_restart )  break;
-        _state_cmd = sc_none;
+        if( _state_cmd == sc_pause                         )  if( _state == s_running )  set_state( s_paused  ), signal_threads( "pause" );
+        if( _state_cmd == sc_continue                      )  if( _state == s_paused  )  set_state( s_running ), signal_threads( "continue" );
 
+        if( _state_cmd == sc_load_config  
+         || _state_cmd == sc_reload       
+         || _state_cmd == sc_terminate             
+         || _state_cmd == sc_terminate_and_restart 
+         || _state_cmd == sc_let_run_terminate_and_restart )
+        {
+            if( _state_cmd != _shutdown_cmd )
+            {
+                set_state( _state_cmd == sc_let_run_terminate_and_restart? s_stopping_let_run : s_stopping );
+                if( _state == s_stopping )  FOR_EACH( Thread_list, _thread_list, t )  (*t)->cmd_shutdown();
+                if( !single_thread || !single_thread->has_tasks() )  break;
+            }
+
+            _shutdown_cmd = _state_cmd;
+        }
+
+        _state_cmd = sc_none;
 
         if( _state == Spooler::s_paused )
         {
@@ -1534,13 +1545,13 @@ void Spooler::run()
 
                 if( single_thread )
                 {
-                    FOR_EACH( Process_list, _process_list, p )
-                    {
-                        Process* process = *p;
-                        process->async_continue();
-                    }
+                    FOR_EACH( Process_list, _process_list, p )  (*p)->async_continue();
+
+                    _event.reset();
 
                     single_thread->process();
+
+                    if( single_thread->is_ready_for_termination() )  break;
 
                     wait_handles += single_thread->_wait_handles;
                     Task* task = single_thread->get_next_task();
@@ -1579,7 +1590,7 @@ void Spooler::run()
             }
         }
 
-        _event.reset();
+        //_event.reset();
 
         if( ctrl_c_pressed )  _state_cmd = sc_terminate;
     }
