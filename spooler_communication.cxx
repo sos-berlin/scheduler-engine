@@ -1,4 +1,4 @@
-// $Id: spooler_communication.cxx,v 1.58 2003/09/24 19:45:11 jz Exp $
+// $Id: spooler_communication.cxx,v 1.59 2003/09/24 19:51:08 jz Exp $
 /*
     Hier sind implementiert
 
@@ -23,8 +23,10 @@ const int wait_for_port_available = 60;   // Soviele Sekunden warten, bis TCP- o
 
 #ifdef Z_WINDOWS
 #   include <io.h>
-    const int ENOTSOCK = 10038;
+    const int ENOTSOCK   = 10038;
     const int EADDRINUSE = WSAEADDRINUSE;
+    const int STDIN_FILENO  = 0;
+    const int STDOUT_FILENO = 1;
 #   define isatty   _isatty
 #else
 #   include <unistd.h>
