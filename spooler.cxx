@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.214 2003/06/02 10:23:54 jz Exp $
+// $Id: spooler.cxx,v 1.215 2003/06/02 11:18:07 jz Exp $
 /*
     Hier sind implementiert
 
@@ -976,7 +976,8 @@ void Spooler::start()
 
     if( !_manual )  _communication.start_or_rebind();
 
-    if( _has_java  ) 
+
+    if( _has_java ) 
     {
         try
         {

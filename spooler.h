@@ -1,4 +1,4 @@
-// $Id: spooler.h,v 1.136 2003/06/02 09:21:36 jz Exp $
+// $Id: spooler.h,v 1.137 2003/06/02 11:22:28 jz Exp $
 
 #ifndef __SPOOLER_H
 #define __SPOOLER_H
@@ -291,7 +291,8 @@ struct Spooler
     bool                       _has_java;                   // Es gibt ein Java-Skript
     ptr<java::Vm>              _java_vm;
   //string                     _java_work_dir;              // Zum Compilieren, für .class
-    string                     _config_java_class_path;     // <config java_class_path=>
+    string                     _config_java_class_path;     // <config java_class_path="">
+    string                     _config_java_options;        // <config java_config="">
 
     bool                       _manual;
     string                     _job_name;                   // Bei manuellem Betrieb

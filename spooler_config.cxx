@@ -1,4 +1,4 @@
-// $Id: spooler_config.cxx,v 1.62 2003/06/02 09:21:36 jz Exp $
+// $Id: spooler_config.cxx,v 1.63 2003/06/02 11:22:28 jz Exp $
 
 //#include <precomp.h>
 
@@ -326,6 +326,7 @@ void Spooler::load_config( const xml::Element_ptr& config_element, const Time& x
         _priority_max  = as_int( config_element.getAttribute( "priority_max" , as_string( _priority_max ) ) );
 
         _config_java_class_path = subst_env( config_element.getAttribute( "java_class_path" ) );
+        _config_java_options    = subst_env( config_element.getAttribute( "java_options" ) );
 
         string log_dir =   config_element.getAttribute( "log_dir" );
 
