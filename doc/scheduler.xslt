@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding="utf-8"?>
-<!-- $Id: scheduler.xslt,v 1.31 2004/09/10 07:30:52 jz Exp $ -->
+<!-- $Id: scheduler.xslt,v 1.32 2004/09/10 09:29:35 jz Exp $ -->
 
 <!--
     Änderungswünsche:
@@ -521,6 +521,170 @@
         <xsl:copy-of select="* | text()"/>
     </xsl:template>
     
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~/register-->
+    
+    <xsl:template match="/register">
+
+        <xsl:variable name="title"       select="'Register'"/>
+
+        <html>
+            <xsl:call-template name="html_head">
+                <xsl:with-param name="title" select="$title"/>
+            </xsl:call-template>
+        
+            <body>
+                <xsl:call-template name="body_start">
+                    <xsl:with-param name="title"       select="$title"/>
+                </xsl:call-template>
+                
+                <p>
+                    <b>Inhalt</b>
+                </p>
+                
+                <p>
+                    <a href="#stichwörter">Stichwörter</a><br/>
+                    <a href="#optionen">Optionen</a><br/>
+                    <a href="#ini">Einträge in .ini-Dateien</a><br/>
+                    <a href="#xml_elemente">XML-Elemente</a><br/>
+                </p>
+
+                <a name="stichwörter"/>
+                <h2>Stichwörter</h2>
+                <table cellspacing="0" cellpadding="0">
+                    <col align="baseline"/>
+                    <col align="baseline" style="padding-left: 2ex"/>
+                    <xsl:apply-templates select="register_entry">
+                        <xsl:sort select="@register_keyword"/>
+                        <xsl:sort select="@register_title"/>
+                    </xsl:apply-templates>
+                </table>                
+                
+                <a name="optionen"/>
+                <h2>Optionen der Kommandozeile</h2>
+                <table cellspacing="0" cellpadding="0">
+                    <col align="baseline"/>
+                    <col align="baseline" style="padding-left: 2ex"/>
+                    <xsl:apply-templates select="register_option">
+                        <xsl:sort select="@name"/>
+                    </xsl:apply-templates>
+                </table>                
+                
+                <a name="ini"/>
+                <h2>Einträge in .ini-Dateien</h2>
+                <table cellspacing="0" cellpadding="0">
+                    <col align="baseline"/>
+                    <col align="baseline" style="padding-left: 2ex"/>
+                    <col align="baseline" style="padding-left: 2ex"/>
+                    <xsl:apply-templates select="register_ini_entry">
+                        <xsl:sort select="@entry"/>
+                        <xsl:sort select="@file"/>
+                        <xsl:sort select="@title"/>
+                    </xsl:apply-templates>
+                </table>                
+                
+                <a name="xml_elemente"/>
+                <h2>XML-Elemente</h2>
+                <table cellspacing="0" cellpadding="0">
+                    <col align="baseline"/>
+                    <col align="baseline" style="padding-left: 2ex"/>
+                    <xsl:apply-templates select="register_element">
+                        <xsl:sort select="@name"/>
+                    </xsl:apply-templates>
+                </table>                
+                
+                <xsl:call-template name="bottom"/>
+            </body>
+        </html>
+        
+    </xsl:template>
+
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~register_entry-->
+    
+    <xsl:template match="register_entry">
+
+        <tr>
+            <td>
+                <xsl:value-of select="@register_keyword"/>
+            </td>
+            <td>
+                <xsl:element name="a">
+                    <xsl:attribute name="href"><xsl:value-of select="concat( @register_file, '#keyword__', @register_keyword )"/></xsl:attribute>
+                    <xsl:value-of select="@register_title"/>
+                </xsl:element>
+            </td>
+        </tr>
+        
+    </xsl:template>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~register_ini_entry-->
+    
+    <xsl:template match="register_ini_entry">
+
+        <tr>
+            <td>
+                <code>
+                    <xsl:value-of select="@entry"/>
+                </code>
+            </td>                
+            <td>
+                <code>
+                    <xsl:value-of select="@file"/>
+                    <xsl:text> [</xsl:text>
+                    <xsl:value-of select="@section"/>
+                    <xsl:text>]</xsl:text>
+                </code>
+            </td>
+            <td>
+                <xsl:element name="a">
+                    <xsl:attribute name="href"><xsl:value-of select="concat( @register_file, '#use_entry__', '@file', '__', '@section', '__', @entry )"/></xsl:attribute>
+                    <xsl:value-of select="@register_title | @register_file"/>
+                </xsl:element>
+            </td>
+        </tr>
+        
+    </xsl:template>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~register_option-->
+    
+    <xsl:template match="register_option">
+
+        <tr>
+            <td>
+                <code>
+                    -<xsl:value-of select="@name"/>
+                </code>
+            </td>
+            <td>
+                <xsl:element name="a">
+                    <xsl:attribute name="href"><xsl:value-of select="concat( @register_file, '#use_option__', @name )"/></xsl:attribute>
+                    <xsl:value-of select="@register_title | @register_file"/>
+                </xsl:element>
+            </td>
+        </tr>
+        
+    </xsl:template>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~register_element-->
+    
+    <xsl:template match="register_element">
+
+        <tr>
+            <td>
+                <code>
+                    &lt;<xsl:value-of select="@name"/>>
+                </code>
+            </td>
+            <td>
+                <xsl:element name="a">
+                    <xsl:attribute name="href"><xsl:value-of select="concat( @register_file, '#use_option__', @name )"/></xsl:attribute>
+                    <xsl:value-of select="@register_title | @register_file"/>
+                </xsl:element>
+            </td>
+        </tr>
+        
+    </xsl:template>
+
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~/description-->
     
     <xsl:template match="/description">
@@ -804,7 +968,19 @@
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~scheduler_error-->
 
     <xsl:template match="scheduler_error" mode="description">
+    
         <code><xsl:value-of select="@code"/></code>
+        
+    </xsl:template>
+    
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~scheduler_keyword-->
+
+    <xsl:template match="scheduler_error" mode="description">
+    
+        <xsl:element name="a">
+            <xsl:attribute name="name">keyword__<xsl:value-of select="@keyword"/></xsl:attribute>
+        </xsl:element>
+        
     </xsl:template>
     
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~command_line-->

@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="scheduler.xslt" type="text/xsl"?>
 
-<!--$Id: command_line.xml,v 1.13 2004/09/10 07:30:52 jz Exp $-->
+<!--$Id: command_line.xml,v 1.14 2004/09/10 09:29:35 jz Exp $-->
 
 <command_line program  = "scheduler"
               title    = "Kommandozeile"
               base_dir = ""
               author   = "$Author: jz $"
-              date     = "$Date: 2004/09/10 07:30:52 $">
+              date     = "$Date: 2004/09/10 09:29:35 $">
 
     <command_options>
         <command_option name="config" setting="config">
@@ -137,6 +137,8 @@
 
         <command_option name="install-service" title="Als Windows-Dienst installieren">
             <description>
+                <scheduler_keyword keyword="Service"/>
+                <scheduler_keyword keyword="Dienst"/>
                 <p>
                     Die Option startet nicht den Scheduler, 
                     sondern installiert ihn als Windows-Dienst.

@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="scheduler.xslt" type="text/xsl"?>
 
-<!--$Id: order.xml,v 1.2 2004/09/10 07:30:52 jz Exp $-->
+<!--$Id: order.xml,v 1.3 2004/09/10 09:29:35 jz Exp $-->
 
 <description 
     title               = "Aufträge" 
     base_dir            = ""
     author              = "$Author: jz $"
-    date                = "$Date: 2004/09/10 07:30:52 $"
+    date                = "$Date: 2004/09/10 09:29:35 $"
 >
 
 
@@ -107,6 +107,7 @@
     Die Maschinen am Ende des Fließbands laufen flotter als die am Anfang.
 </p>
 <p>
+    <scheduler_keyword keyword="Priorität"/>
     Auftragsgesteuerte Jobs haben Vorrang vor nicht auftragsgesteuerten Jobs.
     <br/>
     Ausnahme: Jobs mit höchster Priorität haben absoluten Vorrang,

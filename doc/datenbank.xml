@@ -1,14 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="scheduler.xslt" type="text/xsl"?>
 
-<!--$Id: datenbank.xml,v 1.4 2004/09/10 07:30:52 jz Exp $-->
+<!--$Id: datenbank.xml,v 1.5 2004/09/10 09:29:35 jz Exp $-->
 
 <description 
     title               = "Datenbank" 
     base_dir            = ""
     author              = "$Author: jz $"
-    date                = "$Date: 2004/09/10 07:30:52 $"
+    date                = "$Date: 2004/09/10 09:29:35 $"
 >
+
+<scheduler_keyword keyword="Datenbank"/>
+<scheduler_keyword keyword="Historie"/>
 
 <p>
     Der Scheduler kann mit einer Datenbank betrieben werden. Das hat folgende Zwecke:
@@ -53,6 +56,7 @@
         <scheduler_ini_entry file="factory.ini" section="spooler" entry="max_db_errors"/><br/>
     </dd>
         
+    <scheduler_keyword keyword="Tabelle (Datenbank)"/>
     <dt>Die Namen der Tabellen</dt>
     <dd>
         <scheduler_ini_entry file="factory.ini" section="spooler" entry="db_variables_table"/><br/>
@@ -69,6 +73,7 @@
         <scheduler_ini_entry file="factory.ini" section="job" entry="history"/><br/>
     </dd>
     
+    <scheduler_keyword keyword="Protokoll"/>
     <dt>Ob die Protokolle in der Historie aufgenommen werden sollen</dt>
     <dd>
         <scheduler_ini_entry file="factory.ini" section="spooler" entry="history_with_log"/><br/>

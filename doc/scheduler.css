@@ -58,6 +58,7 @@ p.example           { margin-top: 4ex; font-weight: bold; }
 p.command_option    { margin-top: 4ex; }
 p.ini_section       { margin-top: 4ex; }
 p.ini_entry         { margin-top: 2ex; border-top: 1 solid #f0f0f0; padding-top: 2ex; }
+/*p.register_keyword  { margin-top: 0; }*/
 .sos_name           { font-variant: small-caps; }
 
 
