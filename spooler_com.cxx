@@ -1,4 +1,4 @@
-// $Id: spooler_com.cxx,v 1.54 2002/09/14 17:26:27 jz Exp $
+// $Id: spooler_com.cxx,v 1.55 2002/09/19 09:23:59 jz Exp $
 /*
     Hier sind implementiert
 
@@ -2289,7 +2289,16 @@ STDMETHODIMP Com_order::putref_payload( IUnknown* payload )
     {
         if( !_order )  return E_POINTER;
 
-        _order->set_payload( CComVariant(payload) );
+        CComVariant payload_vt = payload;
+
+        if( payload )
+        {
+            CComPtr<IDispatch> idispatch;
+            hr = payload->QueryInterface( IID_IDispatch, (void**)&idispatch );
+            if( SUCCEEDED(hr) )  payload_vt = idispatch;
+        }
+
+        _order->set_payload( payload_vt );
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Order.payload" ); }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Order.payload" ); }
