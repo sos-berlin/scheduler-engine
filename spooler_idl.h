@@ -221,7 +221,7 @@ struct Itask : IDispatch
     virtual HRESULT     get_Order                       ( Iorder** result )                     = 0;
     virtual HRESULT     get_Stderr_text                 ( BSTR* )                               = 0;
     virtual HRESULT     get_Stdout_text                 ( BSTR* )                               = 0;
-    virtual HRESULT         Start_subprocess            ( VARIANT*, Isubprocess** )             = 0;
+    virtual HRESULT         Create_subprocess           ( VARIANT*, Isubprocess** )             = 0;
 };
 
 //--------------------------------------------------------------------------------------Itask_proxy
@@ -231,7 +231,7 @@ DEFINE_GUID( CLSID_Task_proxy, 0xfeee47aa, 0x6c1b, 0x11d8, 0x81, 0x03, 0x00, 0x0
 
 struct Itask_proxy : IDispatch
 {
-    virtual HRESULT         Start_subprocess            ( VARIANT* program_and_parameters, Isubprocess** ) = 0;
+    virtual HRESULT         Create_subprocess           ( VARIANT* program_and_parameters, Isubprocess** ) = 0;
 };
 
 //---------------------------------------------------------------------------------------Thread
