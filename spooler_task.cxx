@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.86 2002/04/16 09:30:50 jz Exp $
+// $Id: spooler_task.cxx,v 1.87 2002/04/17 10:21:38 jz Exp $
 /*
     Hier sind implementiert
 
@@ -1520,10 +1520,12 @@ void Task::end()
         catch( const Xc& x        ) { _job->set_error(x); }
         catch( const exception& x ) { _job->set_error(x); }
 
-        _opened = false;
     }
 
     on_error_on_success();
+
+    _opened = false;
+    
     close();
 
 

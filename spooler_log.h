@@ -1,4 +1,4 @@
-// $Id: spooler_log.h,v 1.19 2002/04/11 13:30:59 jz Exp $
+// $Id: spooler_log.h,v 1.20 2002/04/17 10:21:38 jz Exp $
 
 #ifndef __SPOOLER_LOG_H
 #define __SPOOLER_LOG_H
@@ -44,6 +44,7 @@ struct Log
   protected:
     void                        write                       ( Prefix_log*, const char*, int len, bool log = true );
     void                        write                       ( Prefix_log* extra, const string& line )              { write( extra, line.c_str(), line.length() ); }
+    void                        write                       ( Prefix_log* extra, const char* line )                { write( extra, line, strlen(line) ); }
 
     Fill_zero                  _zero_;
     Spooler*                   _spooler;

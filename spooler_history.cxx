@@ -1,4 +1,4 @@
-// $Id: spooler_history.cxx,v 1.20 2002/04/15 19:08:20 jz Exp $
+// $Id: spooler_history.cxx,v 1.21 2002/04/17 10:21:38 jz Exp $
 
 #include "../kram/sos.h"
 #include "spooler.h"
@@ -167,7 +167,7 @@ void Spooler_db::open( const string& db_name )
                                       "\"error_code\"  char(50),"
                                       "\"error_text\"  char(250),"
                                       "\"parameters\"  clob,"
-                                      "\"log\"         clob" 
+                                      "\"log\"         blob" 
                                       + join( "", create_extra ) );
 
             stmt = "UPDATE " + _spooler->_variables_tablename + " set \"wert\" = \"wert\"+1 where \"name\"='spooler_job_id'";
@@ -214,7 +214,7 @@ void Spooler_db::open_history_table()
         {
             _history_table.open( "-in -out -key=id sql -table=" + _spooler->_history_tablename + 
                                //" -sql-fields=(id,spooler_id,job_name,start_time,cause,parameters) | " +       extra-Felder nicht vergessen!
-                                 " | " + _db_name + " -max-length=" + as_string(blob_field_size) );
+                                 " | " + _db_name + " -ignore=(log) -max-length=" + as_string(blob_field_size) );
         }
     }
 }
