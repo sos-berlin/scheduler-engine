@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.226 2003/12/10 19:25:08 jz Exp $
+// $Id: spooler_task.cxx,v 1.227 2003/12/13 17:37:04 jz Exp $
 /*
     Hier sind implementiert
 
@@ -678,10 +678,10 @@ bool Task::do_something()
 
                     // Historie beginnen?
                     if( _state == s_starting 
-                    || _state == s_running 
-                    || _state == s_running_delayed 
-                    || _state == s_running_waiting_for_order 
-                    || _state == s_running_process           )
+                     || _state == s_running 
+                     || _state == s_running_delayed 
+                     || _state == s_running_waiting_for_order 
+                     || _state == s_running_process           )
                     {
                         if( _step_count == _job->_history.min_steps() )  _history.start();
                     }
@@ -848,7 +848,7 @@ bool Task::do_something()
                     case s_on_success:
                     {
                         if( !_operation )  _operation = do_call__start( spooler_on_success_name );
-                                    else  operation__end(), set_state( s_exit ), loop = true;
+                                     else  operation__end(), set_state( s_exit ), loop = true;
 
                         something_done = true;
                         break;
@@ -858,7 +858,7 @@ bool Task::do_something()
                     case s_on_error:
                     {
                         if( !_operation )  _operation = do_call__start( spooler_on_error_name );
-                                    else  operation__end(), set_state( s_exit ), loop = true;
+                                     else  operation__end(), set_state( s_exit ), loop = true;
 
                         something_done = true;
                         break;
@@ -870,7 +870,7 @@ bool Task::do_something()
                         if( _job->_module._reuse == Module::reuse_task )
                         {
                             if( !_operation )  _operation = do_call__start( spooler_exit_name );
-                                        else  operation__end(), set_state( s_release ), loop = true;
+                                         else  operation__end(), set_state( s_release ), loop = true;
                         }
                         else
                         {
@@ -886,7 +886,7 @@ bool Task::do_something()
                     case s_release:
                     {
                         if( !_operation )  _operation = do_release__start();
-                                    else  operation__end(), set_state( s_ended ), loop = true;
+                                     else  operation__end(), set_state( s_ended ), loop = true;
 
                         something_done = true;
                         break;

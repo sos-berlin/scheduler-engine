@@ -1,4 +1,4 @@
-// $Id: spooler_communication.cxx,v 1.68 2003/11/25 12:07:51 jz Exp $
+// $Id: spooler_communication.cxx,v 1.69 2003/12/13 17:37:04 jz Exp $
 /*
     Hier sind implementiert
 
@@ -260,7 +260,11 @@ Communication::Channel::Channel( Spooler* spooler )
 
 Communication::Channel::~Channel()
 {
-    if( _read_socket != SOCKET_ERROR  &&  _read_socket != STDIN_FILENO )  closesocket( _read_socket );
+    if( _read_socket != SOCKET_ERROR  &&  _read_socket != STDIN_FILENO )
+    {
+        LOG2( "socket.close", "close(" << _read_socket << ")\n" );
+        closesocket( _read_socket );
+    }
 }
 
 //----------------------------------------------------------------Communication::Channel::do_accept
@@ -272,6 +276,7 @@ bool Communication::Channel::do_accept( SOCKET listen_socket )
         struct sockaddr_in peer_addr;
         socklen_t          peer_addr_len = sizeof peer_addr;
 
+        LOG2( "socket.accept", "accept(" << listen_socket << ")\n" );
         _read_socket = accept( listen_socket, (struct sockaddr*)&peer_addr, &peer_addr_len );
         if( _read_socket == SOCKET_ERROR )  throw_sos_socket_error( "accept" );
         
@@ -304,7 +309,11 @@ void Communication::Channel::do_close()
 {
     if( _read_socket == STDIN_FILENO  &&  _eof  &&  isatty(STDIN_FILENO) )  _spooler->cmd_terminate();  // Ctrl-D (auch wenn Terminal-Sitzung beendet?)
 
-    if( _read_socket != SOCKET_ERROR  &&  _read_socket != STDIN_FILENO )  closesocket( _read_socket );
+    if( _read_socket != SOCKET_ERROR  &&  _read_socket != STDIN_FILENO )
+    {
+        LOG2( "socket.close", "close(" << _read_socket << ")\n" );
+        closesocket( _read_socket );
+    }
     
     _read_socket  = SOCKET_ERROR;
     _write_socket = SOCKET_ERROR;
@@ -328,6 +337,7 @@ bool Communication::Channel::do_recv()
     {
         char buffer [ 4096 ];
 
+        LOG2( "socket.recv", "recv/read(" << _read_socket << ")\n" );
         int len = _read_socket == STDIN_FILENO? read( _read_socket, buffer, sizeof buffer )
                                               : recv( _read_socket, buffer, sizeof buffer, 0 );
 
@@ -369,8 +379,10 @@ bool Communication::Channel::do_send()
     {
         if( _send_is_complete )  _send_progress = 0, _send_is_complete = false;     // Am Anfang
 
-        int len = _write_socket == STDOUT_FILENO? write ( _write_socket, _text.c_str() + _send_progress, _text.length() - _send_progress )
-                                                : ::send( _write_socket, _text.c_str() + _send_progress, _text.length() - _send_progress, 0 );
+        int count = _text.length() - _send_progress;
+        LOG2( "socket.send", "send/write(" << _write_socket << "," << count << " bytes)\n" );
+        int len = _write_socket == STDOUT_FILENO? write ( _write_socket, _text.c_str() + _send_progress, count )
+                                                : ::send( _write_socket, _text.c_str() + _send_progress, count, 0 );
         if( len < 0 ) {
             if( get_errno() == EAGAIN )  return true;
             throw_sos_socket_error( "send" );
@@ -566,6 +578,7 @@ void Communication::bind()
                 ret = bind_socket( _listen_socket, &sa );
                 if( ret == SOCKET_ERROR )  throw_sos_socket_error( "tcp-bind", as_string(_spooler->tcp_port()).c_str() );
 
+                LOG2( "socket.listen", "listen()\n" );
                 ret = listen( _listen_socket, 5 );
                 if( ret == SOCKET_ERROR )  throw_errno( get_errno(), "listen" );
 

@@ -1,4 +1,4 @@
-// $Id: spooler_job.cxx,v 1.49 2003/12/11 10:39:59 jz Exp $
+// $Id: spooler_job.cxx,v 1.50 2003/12/13 17:37:04 jz Exp $
 /*
     Hier sind implementiert
 
@@ -1051,7 +1051,7 @@ bool Job::do_something()
                 }
 
                 if( _state == s_pending 
-                || _state == s_running  &&  _running_tasks.size() < _max_tasks )
+                 || _state == s_running  &&  _running_tasks.size() < _max_tasks )
                 {
                     if( !_waiting_for_process  ||  _waiting_for_process_try_again  ||  _module._process_class->process_available( this ) )    // Optimierung
                     {
