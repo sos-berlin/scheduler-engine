@@ -1,4 +1,4 @@
-// $Id: spooler_com.cxx,v 1.41 2002/05/16 20:01:42 jz Exp $
+// $Id: spooler_com.cxx,v 1.42 2002/05/28 09:11:58 jz Exp $
 /*
     Hier sind implementiert
 
@@ -133,7 +133,7 @@ void Com_variable_set::set_xml( const xml::Element_ptr& params )
 
     THREAD_LOCK( _lock )
     {
-        for( xml::Element_ptr e = params->firstChild; e; e = e->nextSibling )
+        DOM_FOR_ALL_ELEMENTS( params, e )
         {
             if( e->tagName == "param" ) 
             {

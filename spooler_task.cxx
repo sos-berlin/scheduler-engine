@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.92 2002/05/21 12:04:44 jz Exp $
+// $Id: spooler_task.cxx,v 1.93 2002/05/28 09:11:59 jz Exp $
 /*
     Hier sind implementiert
 
@@ -1344,16 +1344,24 @@ xml::Element_ptr Job::xml( xml::Document_ptr document, bool show_all )
             // Versuchen, nächste Startzeit herauszubekommen
             Period p    = _period;  
             int    i    = 100;      // Anzahl Perioden, die wir probieren
-            Time   next;
-            if( _next_start_time != latter_day )  next = _next_start_time;
-                                            else  p = _run_time.next_period( p.end(), time::wss_next_period_or_single_start ),  next = p.begin();
-            while( i-- ) {          
-                if( p.has_start() )  break;
+            Time   next = _next_start_time;
+            
+            if( next == latter_day )
+            {
                 p = _run_time.next_period( p.end() );
                 next = p.begin();
+
+                while( i-- ) {          
+                    if( p.has_start() )  break;
+                    p = _run_time.next_period( p.end() );
+                    next = p.begin();
+                }
+                
+                if( i < 0 )  next = latter_day;
             }
 
-            if( i > 0  &&  next != latter_day )  job_element->setAttribute( "next_start_time", as_dom_string( next.as_string() ) );
+            if( next > _next_single_start )  next = _next_single_start;
+            if( next < latter_day )  job_element->setAttribute( "next_start_time", as_dom_string( next.as_string() ) );
         }
 
         if( _task )

@@ -1,4 +1,4 @@
-// $Id: spooler_service.cxx,v 1.20 2002/05/16 20:01:42 jz Exp $
+// $Id: spooler_service.cxx,v 1.21 2002/05/28 09:11:58 jz Exp $
 /*
     Hier sind implementiert
 
@@ -260,12 +260,13 @@ static void set_service_status( int spooler_error, int state = 0 )
 
     SERVICE_STATUS service_status;
 
-    DWORD stop_pending = service_stop? SERVICE_STOP_PENDING     // Nur, wenn Dienstesteuerung den Spooler beendet (nicht, wenn ein TCP-Kdo beendet)
+    DWORD stop_pending = service_stop? SERVICE_PAUSED     // Nur, wenn Dienstesteuerung den Spooler beendet (nicht, wenn ein TCP-Kdo beendet)
                                      : SERVICE_RUNNING;
 
     service_status.dwServiceType                = SERVICE_WIN32_OWN_PROCESS;
 
-    service_status.dwCurrentState               = !spooler_ptr? SERVICE_STOPPED 
+    service_status.dwCurrentState               = state                                              ? state
+                                                : !spooler_ptr                                       ? SERVICE_STOPPED 
                                                 : spooler_ptr->state() == Spooler::s_stopped         ? SERVICE_PAUSED //SetServiceStatus() ruft exit()!
                                                 : spooler_ptr->state() == Spooler::s_starting        ? SERVICE_START_PENDING
                                                 : spooler_ptr->state() == Spooler::s_stopping        ? stop_pending
@@ -348,7 +349,7 @@ static void __stdcall Handler( DWORD dwControl )
             {
                 service_stop = true;
                 spooler_ptr->cmd_terminate();
-                set_service_status( 0, SERVICE_STOP_PENDING );
+                set_service_status( 0, SERVICE_PAUSED );
 
                 Thread_id thread_id;
 

@@ -1,4 +1,4 @@
-// $Id: spooler_command.cxx,v 1.52 2002/04/23 07:00:21 jz Exp $
+// $Id: spooler_command.cxx,v 1.53 2002/05/28 09:11:58 jz Exp $
 /*
     Hier ist implementiert
 
@@ -241,7 +241,7 @@ xml::Element_ptr Command_processor::execute_start_job( const xml::Element_ptr& e
 
     CComPtr<Com_variable_set> pars = new Com_variable_set;
 
-    for( xml::Element_ptr e = element->firstChild; e; e = e->nextSibling )
+    DOM_FOR_ALL_ELEMENTS( element, e )
     {
         if( e->tagName == "params" )  { pars->set_xml( e );  break; }
     }

@@ -1,4 +1,4 @@
-// $Id: spooler.h,v 1.83 2002/05/16 20:01:41 jz Exp $
+// $Id: spooler.h,v 1.84 2002/05/28 09:11:58 jz Exp $
 
 #ifndef __SPOOLER_H
 #define __SPOOLER_H
@@ -70,6 +70,20 @@ namespace sos {
 #include "spooler_thread.h"
 #include "spooler_service.h"
 
+
+//-------------------------------------------------------------------------------------------------
+
+#define DOM_FOR_ALL_ELEMENTS( PARENT, ITERATOR )                                                \
+                                                                                                \
+    for( xml::Node_ptr ITERATOR##_node = PARENT->firstChild;                                    \
+         ITERATOR##_node;                                                                       \
+         ITERATOR##_node = ITERATOR##_node->nextSibling )                                       \
+                                                                                                \
+    if( xml::Element_ptr ITERATOR = ITERATOR##_node )
+
+//-------------------------------------------------------------------------------------------------
+
+
 namespace sos {
 
 
@@ -84,7 +98,6 @@ string                          basename_of_path            ( const string& );
 string                          extension_of_path           ( const string& );
 
 namespace spooler {
-
 
 //-------------------------------------------------------------------------------------------------
 

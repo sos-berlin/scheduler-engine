@@ -1,4 +1,4 @@
-// $Id: spooler_config.cxx,v 1.37 2002/05/19 09:59:24 jz Exp $
+// $Id: spooler_config.cxx,v 1.38 2002/05/28 09:11:58 jz Exp $
 
 //#include <precomp.h>
 
@@ -136,7 +136,7 @@ void Security::set_xml( const xml::Element_ptr& security_element )
 { 
     bool ignore_unknown_hosts = as_bool( security_element->getAttribute( L"ignore_unknown_hosts" ) );
 
-    for( xml::Element_ptr e = security_element->firstChild; e; e = e->nextSibling )
+    DOM_FOR_ALL_ELEMENTS( security_element, e )
     {
         if( e->tagName == "allowed_host" )
         {
@@ -218,7 +218,7 @@ void Day::set_xml( const xml::Element_ptr& element, const Day* default_day, cons
   //Period my_default_period ( element, default_period );
     bool   first = true;
 
-    for( xml::Element_ptr e = element->firstChild; e; e = e->nextSibling )
+    DOM_FOR_ALL_ELEMENTS( element, e )
     {
         if( first )  first = false, _period_set.clear();
         _period_set.insert( Period( e, default_period ) );
@@ -233,7 +233,7 @@ void Day_set::set_xml( const xml::Element_ptr& element, const Day* default_day, 
 {
     //Period my_default_period ( element, default_period );
 
-    for( xml::Element_ptr e = element->firstChild; e; e = e->nextSibling )
+    DOM_FOR_ALL_ELEMENTS( element, e )
     {
         if( e->tagName == "day" )
         {
@@ -262,8 +262,9 @@ void Run_time::set_xml( const xml::Element_ptr& element )
     default_day = default_period;
 
     bool a_day_set = false;
-    
-    for( xml::Element_ptr e = element->firstChild; e; e = e->nextSibling )
+
+
+    DOM_FOR_ALL_ELEMENTS( element, e )
     {
         if( e->tagName == "period" )
         {
@@ -320,7 +321,7 @@ void Object_set_class::set_xml( const xml::Element_ptr& element )
     string iface = as_string( element->getAttribute( L"script_interface" ) );
     _object_interface = iface == "oo";
 
-    for( xml::Element_ptr e = element->firstChild; e; e = e->nextSibling )
+    DOM_FOR_ALL_ELEMENTS( element, e )
     {
         if( e->tagName == "script" )
         {
@@ -329,7 +330,7 @@ void Object_set_class::set_xml( const xml::Element_ptr& element )
         else
         if( e->tagName == "level_decls" )
         {
-            for( xml::Element_ptr e2 = e->firstChild; e2; e2 = e2->nextSibling )
+            DOM_FOR_ALL_ELEMENTS( e, e2 )
             {
                 if( e2->tagName == "level_decl" ) 
                 {
@@ -384,7 +385,7 @@ void Job::set_xml( const xml::Element_ptr& element )
         //    _run_time._holidays.insert( *it );
         _run_time.set_holidays( _spooler->holidays() );
 
-        for( xml::Element_ptr e = element->firstChild; e; e = e->nextSibling )
+        DOM_FOR_ALL_ELEMENTS( element, e )
         {
             if( e->tagName == "description" )  
             {
@@ -418,7 +419,7 @@ void Job::set_xml( const xml::Element_ptr& element )
 
 void Spooler::load_object_set_classes_from_xml( Object_set_class_list* liste, const xml::Element_ptr& element )
 {
-    for( xml::Element_ptr e = element->firstChild; e; e = e->nextSibling )
+    DOM_FOR_ALL_ELEMENTS( element, e )
     {
         if( e->tagName == "object_set_class" )  liste->push_back( SOS_NEW( Object_set_class( this, e ) ) );
     }
@@ -451,7 +452,7 @@ void Thread::set_xml( const xml::Element_ptr& element )
     if( element->getAttributeNode( L"include_path" ) )  _include_path = as_string( element->getAttribute( L"include_path" ) );
                                                   else  _include_path = _spooler->include_path();
 
-    for( xml::Element_ptr e = element->firstChild; e; e = e->nextSibling )
+    DOM_FOR_ALL_ELEMENTS( element, e )
     {
         if( e->tagName == "script" )  _script.set_xml( e, include_path() );
         else
@@ -463,7 +464,7 @@ void Thread::set_xml( const xml::Element_ptr& element )
 
 void Spooler::load_threads_from_xml( Thread_list* liste, const xml::Element_ptr& element )
 {
-    for( xml::Element_ptr e = element->firstChild; e; e = e->nextSibling )
+    DOM_FOR_ALL_ELEMENTS( element, e )
     {
         if( e->tagName == "thread" ) 
         {
@@ -503,7 +504,7 @@ void Spooler::load_config( const xml::Element_ptr& config_element )
 
     try
     {
-        for( xml::Element_ptr e = config_element->firstChild; e; e = e->nextSibling )
+        DOM_FOR_ALL_ELEMENTS( config_element, e )
         {
             if( e->tagName == "security" )
             {

@@ -1,4 +1,4 @@
-// $Id: spooler_history.cxx,v 1.23 2002/05/21 12:04:44 jz Exp $
+// $Id: spooler_history.cxx,v 1.24 2002/05/28 09:11:58 jz Exp $
 
 #include "../kram/sos.h"
 #include "spooler.h"
@@ -760,7 +760,7 @@ xml::Element_ptr Job_history::read_tail( xml::Document_ptr doc, int id, int next
                 else
                 if( _use_db )
                 {
-                    string prefix = ( next < 0? "-in head -" : "-in tail -reverse -" ) + as_string(max(1,abs(next))) + " | ";
+                    string prefix = ( next < 0? "-in -seq head -" : "-in -seq tail -reverse -" ) + as_string(max(1,abs(next))) + " | ";
                     string clause = " where \"job_name\"=" + sql_quoted(_job_name);
                     
                     if( id != -1 )
