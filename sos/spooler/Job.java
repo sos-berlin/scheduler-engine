@@ -1,11 +1,11 @@
-// $Id: Job.java,v 1.6 2004/07/12 17:59:49 jz Exp $
+// $Id: Job.java,v 1.7 2004/07/13 11:28:06 jz Exp $
 
 package sos.spooler;
 
 /**
  * 
  * @author Joacim Zschimmer
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 
 public class Job extends Idispatch
@@ -14,6 +14,14 @@ public class Job extends Idispatch
     
     /**
      * Erzeugt eine neue Task und reiht sie in die Task-Warteschlange ein.
+     * 
+     * <p><br/><b>Beispiel</b>
+     * <pre>
+     *      spooler.job( "job_a" ).start();
+     * </pre>
+     * @see Job_impl#spooler
+     * @see Spooler#job(String)
+     * 
      */
     
     public Task             start               ()                                  { return (Task)       com_call( "start"                         ); }
@@ -30,7 +38,29 @@ public class Job extends Idispatch
      * "spooler_task_name": Gibt der Task einen Namen, der in den Statusanzeigen erscheint.
      * <p>
      * "spooler_start_after": Gibt ein Zeit in Sekunden (reelle Zahl) an, nach dessen Ablauf die Task zu starten ist. 
-     * Dabei wird die Konfiguration von &lt;run_time> außer Kraft gesetzt.
+     * Dabei wird &lt;run_time> nicht beachtet.
+     * 
+     * <p><br/><b>Beispiel</b>
+     * <pre>
+     *      Variable_set parameters = spooler.create_variable_set();
+     *      parameters.set_var( "var1", "wert1" );
+     *      parameters.set_var( "var2", "wert2" );
+     *      spooler.job( "job_a" ).start( parameters );
+     * </pre>
+     * 
+     * <p><br/><b>Beispiel in JavaScript</b>
+     * <pre>
+     *      var parameters = spooler.create_variable_set();
+     *      parameters( "var1" ) = "wert1";
+     *      parameters( "var2" ) = "wert2";
+     *      spooler.job( "job_a" ).start( parameters );
+     * </pre>
+     * 
+     * @see Job_impl#spooler
+     * @see Spooler#job(String)
+     * @see Spooler#create_variable_set()
+     * @see Variable_set#set_var(String,String)
+     * 
      */
     
     public Task             start               ( Variable_set variables )          { return (Task)       com_call( "start", variables              ); }
@@ -38,7 +68,14 @@ public class Job extends Idispatch
     
     
     /**
-     * Startet eine Task des Jobs gemäß &lt;run_time>, wenn nicht schon eine läuft und &lt;run_time> dies zulässt.
+     * Startet eine Task des Jobs, wenn nicht schon eine läuft und &lt;run_time> dies zulässt.
+     * <p><br/><b>Beispiel</b>
+     * <pre>
+     *      spooler.job( "job_a" ).wake();
+     * </pre>
+     * @see Job_impl#spooler
+     * @see Spooler#job(String)
+     * 
      */
     
     
@@ -55,8 +92,17 @@ public class Job extends Idispatch
      * startet der Scheduler innerhalb der &lt;run_time> eine Task.
      * <p>
      * Der Aufruf kann für verschiedene und gleiche Verzeichnisse wiederholt werden.
+     * <p>
+     * Der Aufruf kann im Startskript oder in spooler_init() des Jobs codiert werden.
+     * Wenn er in spooler_init() ist, muss der Job zu Beginn einmal starten, damit er wirksam wird.
+     * Verwenden Sie dazu die Einstellung &lt;run_time once="yes">.
      * 
-     * @param directory_name
+     * <p><br/><b>Beispiel</b>
+     * <pre>
+     *      spooler_job.start_when_directory_changed( "c:/tmp" )
+     * </pre>
+     * @see Job_impl#spooler_job
+     * @see Job_impl#spooler_init()
      */
     
     public void             start_when_directory_changed( String directory_name )                           { com_call( "start_when_directory_changed", directory_name ); }
@@ -64,13 +110,16 @@ public class Job extends Idispatch
     
     /**
      * Lässt eine Task starten, sobald sich ein Verzeichnis ändert, mit Angabe eines Regulären Ausdrucks.
-     * 
+     *
      * <p>
      * Wie {@link #start_when_directory_changed(String)}, mit der Einschränkung, dass nur Dateien beachtet werden, 
-     * deren Name dem angegebenen Regulären Ausdruck entsprechen. 
-     * 
-     * @param directory_name
-     * @param filename_pattern
+     * deren Name dem angegebenen Regulären Ausdruck entspricht. 
+
+     * <p><br/><b>Beispiel</b>
+     * <pre>
+     *      // Nur Dateien beachten, deren Name nicht auf "~" endet.
+     *      spooler_job.start_when_directory_changed( "c:/tmp", "^.*[^~]$" );
+     * </pre>
      */
     
     public void             start_when_directory_changed( String directory_name, String filename_pattern )  { com_call( "start_when_directory_changed", directory_name, filename_pattern ); }
@@ -99,8 +148,20 @@ public class Job extends Idispatch
     
     
     /**
-     * Liefert den Jobnamen. 
+     * Liefert den Jobnamen.
+     *  
+     * <p><br/><b>Beispiel</b>
+     * <pre>
+     *      spooler_log.debug( "Mein Jobname ist " + spooler_job.name() );
+     * </pre>
+     *
+     * <p><br/><b>Beispiel in JavaScript</b>
+     * <pre>
+     *      spooler_log.debug( "Mein Jobname ist " + spooler_job.name );
+     * </pre>
+     * 
      * @return Der Name des Jobs.
+
      */
     
     public String           name                ()                                  { return (String)     com_call( "<name"                         ); }
@@ -109,6 +170,16 @@ public class Job extends Idispatch
     
     /**
      * Setzt für die Status-Anzeige einen Text.
+     * 
+     * <p><br/><b>Beispiel</b>
+     * <pre>
+     *      spooler_job.set_state_text( "Datenblock A wird verarbeitet" );
+     * </pre>
+     *
+     * <p><br/><b>Beispiel in JavaScript</b>
+     * <pre>
+     *      spooler_job.state_text = "Datenblock A wird verarbeitet";
+     * </pre>
      * @param line Eine Textzeile
      */
     
@@ -118,8 +189,19 @@ public class Job extends Idispatch
     
     /**
      * Liefert den in der Konfiguration eingestellten Titel des Jobs.
+     *
      * <p>
      * Aus &lt;job title="...">
+     *
+     * <p><br/><b>Beispiel</b>
+     * <pre>
+     *      spooler_log.debug( "title=" + spooler_job.title() );
+     * </pre>
+     *
+     * <p><br/><b>Beispiel in JavaScript</b>
+     * <pre>
+     *      spooler_log.debug( "title=" + spooler_job.title );
+     * </pre>
      * 
      */
     public String           title               ()                                  { return (String)     com_call( "<title"                        ); }
@@ -127,6 +209,16 @@ public class Job extends Idispatch
     
     /**
      * Liefert die Auftragswarteschlange des Jobs oder null.
+     * 
+     * <p><br/><b>Beispiel</b>
+     * <pre>
+     *      spooler_log.debug( spooler_job.order_queue().length() + " Aufträge sind in der Warteschlange" );
+     * </pre>
+     * 
+     * <p><br/><b>Beispiel in JavaScript</b>
+     * <pre>
+     *      spooler_log.debug( spooler_job.order_queue.length + " Aufträge sind in der Warteschlange" );
+     * </pre>
      * @return Die {@link Order_queue} oder null, wenn der Job nicht auftragsgesteuert ist (&lt;job order="no">).
      */
     
@@ -161,8 +253,8 @@ public class Job extends Idispatch
      * stoppt der Scheduler den Job.
      * <p>
      * Eine gute Stelle für die Aufrufe ist {@link Job_impl#spooler_init()}.
-     * <p>
-     * Beispiel:
+     * 
+     * <p><br/><b>Beispiel</b>
      * <pre>
      *      spooler_job.set_delay_after_error(  2,  10 );
      *      spooler_job.set_delay_after_error(  5, "01:00" );

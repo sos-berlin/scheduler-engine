@@ -1,11 +1,11 @@
-// $Id: Idispatch.java,v 1.5 2004/02/16 11:56:10 jz Exp $
+// $Id: Idispatch.java,v 1.6 2004/07/13 11:28:06 jz Exp $
 
 package sos.spooler;
 
 /**
- * Interne Klasse des Spoolers.
- * @author Joacim Zschimmer, Zschimmer GmbH
- * @version $Revision: 1.5 $
+ * Interne Klasse des Schedulers.
+ * @author Joacim Zschimmer
+ * @version $Revision: 1.6 $
  */
 
 public class Idispatch

@@ -1,20 +1,41 @@
-// $Id: Job_impl.java,v 1.6 2004/07/12 17:59:49 jz Exp $
+// $Id: Job_impl.java,v 1.7 2004/07/13 11:28:06 jz Exp $
 
 package sos.spooler;
 
 /**
- * Oberklasse für die Implementierung eines Jobs.
+ * Oberklasse für die Implementierung eines Startskripts oder eines Jobs.
+ * 
+ * Der Methoden eines Jobs werden in folgender Reihenfolge aufgerufen.
+ * <pre>
+ *     spooler_init()
+ *         spooler_open()
+ *             spooler_process()
+ *             spooler_process()
+ *             ...
+ *         spooler_close()
+ *         spooler_on_success() oder spooler_on_error()
+ *     spooler_exit()
+ * </pre>
+ * 
+ * Keine dieser Methoden muss implementiert werden. In der Regel wird wenigstens spooler_process() implementiert.
  *
  * @author Joacim Zschimmer, Zschimmer GmbH
- * @version $Revision: 1.6 $
+ * @version $Revision: 1.7 $
  */
 
 public class Job_impl
 {
+    protected Job_impl()
+    {
+    }
+    
+    
+    
     /** Der Scheduler ruft diese Methode nach dem Konstruktor und vor {@link #spooler_open()} genau einmal auf. 
       * Gegenstück ist {@link #spooler_exit()}. Die Methode ist geeignet, um die Task zu initialisieren 
       * (z.B. um eine Datenbank-Verbindung aufzubauen).
-      * @return false stoppt den Job.
+      * 
+      * @return false beendet die Task. Der Scheduler setzt mit spooler_exit() fort.
       */
     
     public boolean  spooler_init        ()      throws Exception  { return true; }
@@ -32,7 +53,7 @@ public class Job_impl
     /** Wird zu Beginn einer Task gerufen. 
       * Die Methode wird direkt nach {@link #spooler_init()} gerufen, es gibt derzeit keinen Unterschied.
       * Gegenstück ist {@link #spooler_close()}.
-      * @return false beendet den Joblauf.
+      * @return false beendet die Task. Der Scheduler setzt mit spooler_close() fort.
       */
 
     public boolean  spooler_open        ()      throws Exception  { return true; }
@@ -70,19 +91,70 @@ public class Job_impl
     public void     spooler_on_success  ()      throws Exception  {}
 
 
-    /** Zum Protokollieren */
+    
+    /** Zum Protokollieren.
+     * 
+     * <p><br/><b>Beispiel</b>
+     * <pre>
+     *     spooler_log.debug( "Eine Debug-Ausgabe" );
+     * </pre>
+     * 
+     * @see Log#debug(String)
+     */
     public Log      spooler_log;
 
     
-    /** Objekt zum Joblauf */
+    /** Das Objekt der Task.
+     * 
+     * <p><br/><b>Beispiel</b>
+     * <pre>
+     *     spooler_log.debug( "Meine Task-Id ist " + spooler_task.id() );
+     * </pre>
+     * 
+     * <p><br/><b>Beispiel für JavaScript</b>
+     * <pre>
+     *     spooler_log.debug( "Meine Task-Id ist " + spooler_task.id );
+     * </pre>
+     * 
+     * @see Task#id()
+     */
     public Task     spooler_task;
 
+
     
+    /** Das Objekt des Jobs.
+     * 
+     * <p><br/><b>Beispiel</b>
+     * <pre>
+     *     spooler_log.debug( "Der Jobname ist " + spooler_job.name() );
+     * </pre>
+     * 
+     * <p><br/><b>Beispiel für JavaScript</b>
+     * <pre>
+     *     spooler_log.debug( "Der Jobname ist " + spooler_job.name );
+     * </pre>
+     * 
+     * @see Job#name()
+     */
     public Job      spooler_job;
 
     
     //public Thread   spooler_thread;
 
     
+    /** Das Objekt des Schedulers.
+     * 
+     * <p><br/><b>Beispiel</b>
+     * <pre>
+     *     spooler_log.debug( "Das Startverzeichnis des Schedulers ist " + spooler.directory() );
+     * </pre>
+     * 
+     * <p><br/><b>Beispiel für JavaScript</b>
+     * <pre>
+     *     spooler_log.debug( "Das Startverzeichnis des Schedulers ist " + spooler.directory );
+     * </pre>
+     * 
+     * @see Spooler#directory()
+     */
     public Spooler  spooler;
 }

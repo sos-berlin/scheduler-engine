@@ -1,4 +1,4 @@
-// $Id: spooler_order.cxx,v 1.65 2004/06/01 15:27:49 jz Exp $
+// $Id: spooler_order.cxx,v 1.66 2004/07/13 11:28:06 jz Exp $
 /*
     Hier sind implementiert
 
@@ -1023,7 +1023,7 @@ void Order::add_to_order_queue( Order_queue* order_queue )
 
     THREAD_LOCK( _lock )
     {
-        _moved = true;
+        if( _task )  _moved = true;
 
         if( _id.vt == VT_EMPTY )  set_default_id();
         _id_locked = true;
@@ -1102,7 +1102,7 @@ void Order::move_to_node( Job_chain_node* node )
     {
         if( !_job_chain )  throw_xc( "SCHEDULER-157", obj_name() );
 
-        _moved = true;
+        if( _task )  _moved = true;
         //§1495  _task = NULL;
 
         if( _job_chain_node && _in_job_queue )  _job_chain_node->_job->order_queue()->remove_order( this ), _job_chain_node = NULL;

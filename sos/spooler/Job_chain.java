@@ -9,14 +9,26 @@ package sos.spooler;
  * Sie erzeugen eine Jobkette mit {@link Spooler#create_job_chain()},<br/> 
  * füllen sie mit {@link #add_job(String,String,String,String)} und {@link #add_end_state(String)}<br/>
  * und machen sie schließlich mit {@link Spooler#add_job_chain(Job_chain)} bekannt.
- * <p>
- * Beispiel:
+ * 
+ * <p><br/><b>Beispiel</b>
  * <pre>
  *      Job_chain my_job_chain = spooler.create_job_chain();
- *      my_job_chain.add_job( "job_100", 100,  200, 9999 );
- *      my_job_chain.add_job( "job_200", 200, 1000, 9999 );
+ *      my_job_chain.set_name( "Jobkette" );
+ *      my_job_chain.add_job( "job_100", 100,  200, 999 );
+ *      my_job_chain.add_job( "job_200", 200, 1000, 999 );
+ *      my_job_chain.add_end_state(  999 );
  *      my_job_chain.add_end_state( 1000 );
- *      my_job_chain.add_end_state( 9999 );
+ *      spooler.add_job_chain( my_job_chain );
+ * </pre>
+ *  
+ * <p><br/><b>Beispiel in JavaScript</b>
+ * <pre>
+ *      var my_job_chain = spooler.create_job_chain();
+ *      my_job_chain.name = "Jobkette";
+ *      my_job_chain.add_job( "job_100", 100,  200, 999 );
+ *      my_job_chain.add_job( "job_200", 200, 1000, 999 );
+ *      my_job_chain.add_end_state(  999 );
+ *      my_job_chain.add_end_state( 1000 );
  *      spooler.add_job_chain( my_job_chain );
  * </pre> 
  * 
@@ -24,8 +36,10 @@ package sos.spooler;
  * <p>
  * Für jeden Zustand muss genau einmal add_job() oder add_end_state() aufgerufen werden. 
  *
+ * @see Spooler#create_job_chain()
+ * @see Spooler#job_chain(String)
  * @author Joacim Zschimmer
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 
 
@@ -33,10 +47,40 @@ public class Job_chain extends Idispatch
 {
     private                 Job_chain           ( long idispatch )                  { super(idispatch); }
 
-    /** Setzt den Namen der Jobkette */
+    
+    
+    /** Setzt den Namen der Jobkette.
+     * 
+     * <p><br/><b>Beispiel</b>
+     * <pre>
+     *     Job_chain job_chain = spooler.create_job_chain();                                                  
+     *     job_chain.set_name( "Jobkette" );
+     * </pre>
+     *
+     * <p><br/><b>Beispiel in JavaScript</b>
+     * <pre>
+     *     var job_chain = spooler.create_job_chain();                                                  
+     *     job_chain.name = "Jobkette";
+     * </pre>
+     */
     public void         set_name                ( String value )                    {                           com_call( ">name", value        ); }
     
-    /** @return Der Name der Jobkette */
+    /** Liefert den Namen der Jobkette.
+     * 
+     * <p><br/><b>Beispiel</b>
+     * <pre>
+     *     Job_chain job_chain = spooler.create_job_chain();                                                  
+     *     job_chain.set_name( "Jobkette" );
+     *     spooler_log.debug( "name=" + job_chain.name() );     // "name=Jobkette"
+     * </pre>
+     *
+     * <p><br/><b>Beispiel in JavaScript</b>
+     * <pre>
+     *     var job_chain = spooler.create_job_chain();                                                  
+     *     job_chain.name = "Jobkette";
+     *     spooler_log.debug( "name=" + job_chain.name );       // "name=Jobkette"
+     * </pre>
+     */
     public String           name                ()                                  { return (String)           com_call( "<name"               ); }
     
     /** Fügt der Jobkette einen Knoten hinzu.
@@ -67,6 +111,8 @@ public class Job_chain extends Idispatch
      * <p>
      * Der Auftrag wird in die Auftragswarteschlange des Jobs, der seinem Zustand entspricht, 
      * gemäß seiner Priorität eingeordnet.
+     * <p>
+     * add_order() kann erst benutzt werden, wenn die Jobkette mit {@link Spooler#add_job_chain(Job_chain)} dem Scheduler übergeben worden ist.
      * 
      * @param order
      */ 
