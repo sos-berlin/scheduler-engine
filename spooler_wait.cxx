@@ -1,4 +1,4 @@
-// $Id: spooler_wait.cxx,v 1.68 2002/12/11 11:38:49 jz Exp $
+// $Id: spooler_wait.cxx,v 1.69 2003/06/24 21:10:44 jz Exp $
 /*
     Hier sind implementiert
 
@@ -333,7 +333,7 @@ int Wait_handles::wait_until_2( Time until )
     {
         double wait_time = until - Time::now();
         int    sleep_time_ms = INT_MAX;
-        int    t = ceil( min( (double)sleep_time_ms, wait_time * 1000.0 ) );
+        int    t = (int)ceil( min( (double)sleep_time_ms, wait_time * 1000.0 ) );
 
         if( t <= 0 )  if( again )  break;
                              else  t = 0;  //break;

@@ -1,4 +1,4 @@
-// $Id: spooler_task.h,v 1.91 2003/05/23 06:40:28 jz Exp $
+// $Id: spooler_task.h,v 1.92 2003/06/24 21:10:44 jz Exp $
 
 #ifndef __SPOOLER_TASK_H
 #define __SPOOLER_TASK_H
@@ -174,6 +174,7 @@ struct Job : Sos_self_deleting
     typedef list< Sos_ptr<Task> >               Task_queue;
     typedef list< ptr<Directory_watcher> >      Directory_watcher_list;
     typedef map< int, Time >                    Delay_after_error;
+    typedef map< int, Time >                    Delay_order_after_setback;
 
                                 Job                         ( Spooler_thread* );
                                ~Job                         (); 
@@ -199,7 +200,10 @@ struct Job : Sos_self_deleting
     bool                        temporary                   () const                    { return _temporary; }
     void                        set_in_call                 ( const string& name, const string& extra = "" );
     void                        set_delay_after_error       ( int error_steps, Time delay ) { _delay_after_error[error_steps] = delay; }
-
+    void                        set_delay_order_after_setback( int setbacks, Time delay )   { _delay_order_after_setback[setbacks] = delay; }
+    Time                        get_delay_order_after_setback( int setback_count );
+    void                        set_max_order_setbacks      ( int n )                       { _max_order_setbacks = n; }
+    int                         max_order_setbacks          () const                        { return _max_order_setbacks; }
     xml::Element_ptr            read_history                ( const xml::Document_ptr& doc, int id, int n, Show_what show ) { return _history.read_tail( doc, id, n, show ); }
 
     void                        close                       ();
@@ -365,6 +369,9 @@ struct Job : Sos_self_deleting
 
     ptr<Order_queue>           _order_queue;
     int                        _job_chain_priority;         // Maximum der Prioritäten aller Jobkettenknoten mit diesem Job. 
+
+    Delay_order_after_setback  _delay_order_after_setback;
+    int                        _max_order_setbacks;
 };
 
 //------------------------------------------------------------------------------------------Job_list
@@ -445,6 +452,7 @@ struct Task : Sos_self_deleting
     Time                       _start_at;                   // Zu diesem Zeitpunkt (oder danach) starten
     Time                       _running_since;
     Time                       _last_process_start_time;
+  //Time                       _time;                       // Zeitpunkt dieser Operation (spooler_process etc.)
 
     ptr<Com_variable_set>      _params;
     Variant                    _result;

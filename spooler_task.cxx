@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.156 2003/06/24 15:46:29 jz Exp $
+// $Id: spooler_task.cxx,v 1.157 2003/06/24 21:10:44 jz Exp $
 /*
     Hier sind implementiert
 
@@ -1026,11 +1026,11 @@ void Job::task_to_start()
             {
                 THREAD_LOCK( _lock )
                 {
-                    if( _start_once )              cause = cause_period_once,  _start_once = false,  _log.debug( "Task startet wegen <run_time once=\"yes\">" );
+                    if( _start_once )              cause = cause_period_once,  _start_once = false,     _log.debug( "Task startet wegen <run_time once=\"yes\">" );
                                                                               
-                  //if( _event.signaled() )        cause = cause_signal,                             _log.debug( "Task startet wegen " + _event.as_string() );
+                  //if( _event.signaled() )        cause = cause_signal,                                _log.debug( "Task startet wegen " + _event.as_string() );
                                                                                       
-                    if( now >= _next_start_time )  cause = cause_period_repeat,                      _log.debug( "Task startet, weil Job-Startzeit erreicht: " + _next_start_time.as_string() );
+                    if( now >= _next_start_time )  cause = cause_period_repeat,                         _log.debug( "Task startet, weil Job-Startzeit erreicht: " + _next_start_time.as_string() );
 
                     for( Directory_watcher_list::iterator it = _directory_watcher_list.begin(); it != _directory_watcher_list.end(); it++ )
                     {
@@ -1042,7 +1042,13 @@ void Job::task_to_start()
                         }
                     }
 
-                    if( !cause  &&  _order_queue && !_order_queue->empty() )  cause = cause_order,               _log.debug( "Task startet wegen Auftrags" );
+                    //if( !cause  &&  _order_queue  &&  !_order_queue->empty() )  cause = cause_order,               _log.debug( "Task startet wegen Auftrags" );
+                    ptr<Order> order;
+                    if( !cause  &&  _order_queue )
+                    {
+                        order = _order_queue->get_order_for_processing( now );
+                        if( order )                 cause = cause_order,                                _log.debug( "Task startet wegen Auftrag " + order->obj_name() );
+                    }
                                                                                       
                     if( !dequeued && cause )
                     {
@@ -1050,6 +1056,7 @@ void Job::task_to_start()
                         dequeue_task( now );
                         _task->_cause = cause;
                         _task->_let_run |= ( cause == cause_period_single );
+                        if( order )  _task->_order = order, order->set_task( _task );
                     }
                 }
             }
@@ -1124,8 +1131,15 @@ bool Job::do_something()
 
         if( _state == s_running_waiting_for_order )
         {
-            if( !_order_queue->empty() )  set_state( s_running );            // Auftrag da? Dann Task weiterlaufen lassen (Ende der Run_time wird noch geprüft)
-                                    else  ok &= _period.is_in_time( now );   // Run_time abgelaufen? Dann Task beenden
+            if( !_task->_order )  _task->_order = _order_queue->get_order_for_processing( now );
+
+            if( _task->_order )  
+            {
+                _task->_order->set_task( _task );
+                set_state( s_running );            // Auftrag da? Dann Task weiterlaufen lassen (Ende der Run_time wird noch geprüft)
+            }
+            else  
+                ok &= _period.is_in_time( now );   // Run_time abgelaufen? Dann Task beenden
         }
 
         if( ( _state == s_running || _state == s_running_process )  &&  ok  &&  !has_error() )      // SPOOLER_PROCESS
@@ -1174,13 +1188,13 @@ bool Job::do_something()
             set_state( s_running_delayed );
         }
 
-
+/*
         if( _state == s_running  &&  _order_queue  &&  _order_queue->empty() )
         {
             set_state( Job::s_running_waiting_for_order );  
             _next_time = _period.end();     // Thread am Ende der Run_time wecken, damit Task beendet werden kann
         }
-
+*/
 
         if( _state == s_ended )                                                                     // TASK BEENDET
         {
@@ -1513,6 +1527,20 @@ string Job::state_cmd_name( Job::State_cmd cmd )
     }
 }
 
+//---------------------------------------------------------------Job::get_delay_order_after_setback
+
+Time Job::get_delay_order_after_setback( int setback_count )
+{
+    Time delay = 0;
+
+    FOR_EACH( Delay_order_after_setback, _delay_order_after_setback, it )  
+    {
+        if( setback_count >= it->first )  delay = it->second;
+    }
+
+    return delay;
+}
+
 //-----------------------------------------------------------------------------------------Job::dom
 // Anderer Thread
 
@@ -1842,7 +1870,7 @@ bool Task::step()
     {
         if( _job->_order_queue )
         {
-            _order = _job->_order_queue->get_order_for_processing( this );
+            //_order = _job->_order_queue->get_order_for_processing( this );
             if( !_order )  return true;
 
             _job->_log.set_order_log( &_order->_log );

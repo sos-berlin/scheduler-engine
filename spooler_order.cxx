@@ -1,4 +1,4 @@
-// $Id: spooler_order.cxx,v 1.27 2003/06/24 15:46:29 jz Exp $
+// $Id: spooler_order.cxx,v 1.28 2003/06/24 21:10:44 jz Exp $
 /*
     Hier sind implementiert
 
@@ -524,7 +524,7 @@ void Order_queue::update_priorities()
 
 //------------------------------------------------------------Order_queue::get_order_for_processing
 
-ptr<Order> Order_queue::get_order_for_processing( Task* task )
+ptr<Order> Order_queue::get_order_for_processing( const Time& now )
 {
     // Die Order_queue gehört genau einem Job. Der Job kann zur selben Zeit nur einen Schritt ausführen.
     // Deshalb kann nur der erste Auftrag in Verarbeitung sein.
@@ -535,11 +535,19 @@ ptr<Order> Order_queue::get_order_for_processing( Task* task )
     {
         if( !_queue.empty() )
         {
-            order = _queue.front();
+            //order = _queue.front();
+            
+            Time now = Time::now();
+
+            Z_FOR_EACH( Queue, _queue, o )
+            {
+                if( (*o)->_setback <= now )  { order = *o; break; }
+            }
 
             if( order->_task )  throw_xc( "Order_queue::get_order_for_processing" );   // Darf nicht passieren
             
-            order->_task = task;
+          //order->_task = task;
+            order->_setback = 0;
             order->_moved = false;
 
             if( !order->_start_time )  
@@ -666,6 +674,9 @@ xml::Element_ptr Order::dom( const xml::Document_ptr& document, Show_what show )
         element.setAttribute( "state_text", _state_text );
         element.setAttribute( "priority"  , _priority );
         element.setAttribute( "created"   , _created.as_string() );
+
+        if( _setback )
+        element.setAttribute( "in_process_since", _setback.as_string() );
     }
 
     return element;
@@ -757,6 +768,10 @@ void Order::set_state( const State& state )
 {
     THREAD_LOCK( _lock )
     {
+        //if( _setback )  throw_xc( "SPOOLER-188" );
+        _setback = 0;
+        _setback_count = 0;
+
         if( _job_chain )  move_to_node( _job_chain->node_from_state( state ) );
                     else  set_state2( state );
     }
@@ -791,7 +806,7 @@ void Order::set_priority( Priority priority )
     }
 }
 
-//-------------------------------------------------------------------------------Job_chain::com_job
+//-----------------------------------------------------------------------------------Order::com_job
 
 Com_job* Order::com_job()
 { 
@@ -925,8 +940,21 @@ void Order::postprocessing( bool success, Prefix_log* log )
     {
         _task = NULL;
 
-        if( !_moved )
+        if( _setback )
         {
+            if( _setback == latter_day )
+            {
+                if( log )  log->debug( "Auftrag " + obj_name() + ": " + as_string(_setback_count) + " mal zurückgestellt. Der Auftrag wechselt in den Fehlerzustand" );
+                success = false;
+                _setback = 0;
+                _setback_count = 0;
+            }
+        }
+
+        if( !_setback && !_moved )
+        {
+            _setback_count = 0;
+
             if( _job_chain_node )
             {
                 _job_chain_node->_job->order_queue()->remove_order( this );
@@ -957,7 +985,6 @@ void Order::postprocessing( bool success, Prefix_log* log )
                     _end_time = Time::now();
                     if( log )  log->debug( "Auftrag " + obj_name() + ": Kein weiterer Job, Auftrag ist fertig" );
                 }
-
             }
             else
             {
@@ -976,6 +1003,8 @@ void Order::postprocessing( bool success, Prefix_log* log )
 
 void Order::processing_error()
 {
+    // Was nach einem Jobfehler geschieht, scheint noch nicht ganz zu Ende gedacht zu sein. Joacim 24.6.2003
+
     THREAD_LOCK( _lock )
     {
         _task = NULL;
@@ -992,6 +1021,31 @@ void Order::postprocessing2()
     if( finished() )  _log.close();
     if( _job_chain )  _spooler->_db->update_order( this );
     if( finished() )  close();
+}
+
+//----------------------------------------------------------------------------------Order::setback_
+
+void Order::setback_()
+{
+    THREAD_LOCK( _lock )
+    {
+        if( !_task )  throw_xc( "SPOOLER-187" );
+        if( _moved )  throw_xc( "SPOOLER-188" );
+        if( !_job_chain ) throw_xc( "SPOOLER-157", obj_name() );
+
+        _setback_count++;
+
+        if( _setback_count <= _task->job()->max_order_setbacks() )
+        {
+            _setback = Time::now() + _task->job()->get_delay_order_after_setback( _setback_count );
+        }
+        else
+        {
+            _setback = latter_day;  // Das heißt: Der Auftrag kommt in den Fehlerzustand
+        }
+
+        // Weitere Verarbeitung in postprocessing()
+    }
 }
 
 //-------------------------------------------------------------------------------------------------

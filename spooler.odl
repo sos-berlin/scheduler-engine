@@ -1,4 +1,4 @@
-// $Id: spooler.odl,v 1.60 2003/06/08 10:00:50 jz Exp $
+// $Id: spooler.odl,v 1.61 2003/06/24 21:10:43 jz Exp $
 
 // Anweisung: midl /nologo /error all /out $(OutDir) $(InputPath)
 
@@ -268,6 +268,12 @@ library spooler
 
         [propget]
         HRESULT                 order_queue                 ( [out,retval] Iorder_queue** result );
+
+        [propput]
+        HRESULT                 delay_order_after_setback   ( [in] int setback_count, [in] VARIANT* time );
+
+        [propput]
+        HRESULT                 max_order_setbacks          ( [in] int setback_count );
     }
 
     [
@@ -770,6 +776,8 @@ library spooler
         HRESULT                 payload                 ( [out,retval] VARIANT* result );
 
         HRESULT                 payload_is_type         ( [in] BSTR typenam, [out,retval] VARIANT_BOOL* result );
+
+        HRESULT                 setback                 ();
     }
 
     [

@@ -1,4 +1,4 @@
-// $Id: spooler_com.cxx,v 1.97 2003/06/08 10:00:50 jz Exp $
+// $Id: spooler_com.cxx,v 1.98 2003/06/24 21:10:43 jz Exp $
 /*
     Hier sind implementiert
 
@@ -1144,6 +1144,8 @@ const Com_method Com_job::_methods[] =
     { DISPATCH_PROPERTYPUT, 10, "delay_after_error"             , (Com_method_ptr)&Com_job::put_delay_after_error       , VT_EMPTY      , { VT_I4, VT_BYREF|VT_VARIANT } },
     { DISPATCH_PROPERTYGET, 11, "order_queue"                   , (Com_method_ptr)&Com_job::get_order_queue             , VT_DISPATCH   },
     { DISPATCH_PROPERTYGET, 12, "java_class_name"               , (Com_method_ptr)&Com_job::get_java_class_name         , VT_BSTR },
+    { DISPATCH_PROPERTYPUT, 13, "delay_order_after_setback"     , (Com_method_ptr)&Com_job::put_delay_order_after_setback,VT_EMPTY      , { VT_I4, VT_BYREF|VT_VARIANT } },
+    { DISPATCH_PROPERTYPUT, 14, "max_order_setbacks"            , (Com_method_ptr)&Com_job::put_max_order_setbacks      , VT_EMPTY      , { VT_I4 } },
     {}
 };
 
@@ -1395,8 +1397,46 @@ STDMETHODIMP Com_job::get_order_queue( Iorder_queue** result )
         *result = _job->order_queue();
         if( *result )  (*result)->AddRef();
     }
-    catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Job.title" ); }
-    catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Job.title" ); }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Job.order_queue" ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Job.order_queue" ); }
+
+    return hr;
+}
+
+//-----------------------------------------------------------Com_job::put_delay_order_after_setback
+
+STDMETHODIMP Com_job::put_delay_order_after_setback( int setback_number, VARIANT* time )
+{
+    HRESULT hr = NOERROR;
+
+    THREAD_LOCK( _lock )
+    try
+    {
+        if( !_job )  throw_xc( "SPOOLER-122" );
+
+        _job->set_delay_order_after_setback( setback_number, time_from_variant(*time) );
+    }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Job.delay_order_after_setback" ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Job.delay_order_after_setback" ); }
+
+    return hr;
+}
+
+//------------------------------------------------------------------Com_job::put_max_order_setbacks
+
+STDMETHODIMP Com_job::put_max_order_setbacks( int count )
+{
+    HRESULT hr = NOERROR;
+
+    THREAD_LOCK( _lock )
+    try
+    {
+        if( !_job )  throw_xc( "SPOOLER-122" );
+
+        _job->set_max_order_setbacks( count );
+    }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Job.max_order_setbacks" ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Job.max_order_setbacks" ); }
 
     return hr;
 }
@@ -2595,6 +2635,7 @@ const Com_method Com_order::_methods[] =
     { DISPATCH_PROPERTYGET, 10, "payload"                   , (Com_method_ptr)&Com_order::get_payload           , VT_VARIANT    },
     { DISPATCH_METHOD     , 11, "payload_is_type"           , (Com_method_ptr)&Com_order::payload_is_type       , VT_BOOL       , { VT_BSTR } },
     { DISPATCH_PROPERTYGET, 12, "java_class_name"           , (Com_method_ptr)&Com_order::get_java_class_name   , VT_BSTR },
+    { DISPATCH_METHOD     , 13, "setback"                   , (Com_method_ptr)&Com_order::setback               , VT_EMPTY      },
     {}
 };
 
@@ -3045,6 +3086,25 @@ STDMETHODIMP Com_order::payload_is_type( BSTR typname_bstr, VARIANT_BOOL* result
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Order.payload_is_type" ); }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Order.payload_is_type" ); }
+
+    return hr;
+}
+
+//-------------------------------------------------------------------------------Com_order::setback
+
+STDMETHODIMP Com_order::setback()
+{
+    HRESULT hr = NOERROR;
+
+    THREAD_LOCK( _lock )
+    try
+    {
+        if( !_order )  return E_POINTER;
+
+        _order->setback_();
+    }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Order.setback" ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Order.setback" ); }
 
     return hr;
 }

@@ -1,4 +1,4 @@
-// $Id: spooler_idl.h,v 1.17 2003/06/11 08:20:27 jz Exp $
+// $Id: spooler_idl.h,v 1.18 2003/06/24 21:10:44 jz Exp $
 
 
 /*  Ersatz für spooler.odl für Systeme ohne COM. 
@@ -168,6 +168,8 @@ struct Ijob : IDispatch
     virtual HRESULT     get_title                       ( BSTR* title ) = 0;
     virtual HRESULT     put_delay_after_error           ( int error_steps, VARIANT* time ) = 0;
     virtual HRESULT     get_order_queue                 ( Iorder_queue** result ) = 0;
+    virtual HRESULT     put_delay_order_after_setback   ( int, VARIANT* time ) = 0;
+    virtual HRESULT     put_max_order_setbacks          ( int ) = 0; 
 };
 
 //-----------------------------------------------------------------------------------------Task
@@ -475,6 +477,8 @@ struct Iorder : IDispatch
     virtual HRESULT     get_payload                 ( VARIANT* result ) = 0;
 
     virtual HRESULT         payload_is_type         ( BSTR name, VARIANT_BOOL* result ) = 0;
+
+    virtual HRESULT         setback                 () = 0;
 };
 
 //--------------------------------------------------------------------Remote_module_instance_server

@@ -1,4 +1,4 @@
-// $Id: spooler_order.h,v 1.20 2003/06/24 15:46:29 jz Exp $
+// $Id: spooler_order.h,v 1.21 2003/06/24 21:10:44 jz Exp $
 
 #ifndef __SPOOLER_ORDER_H
 #define __SPOOLER_ORDER_H
@@ -59,6 +59,8 @@ struct Order : Com_order
     void                    set_job_by_name             ( const string& );
     Job*                        job                     ();
 
+    void                    set_task                    ( Task* task )                              { _task = task; }
+
     void                    set_state                   ( const State& );
     void                    set_state2                  ( const State& );
     State                       state                   ()                                          { THREAD_LOCK_RETURN( _lock, State, _state ); }
@@ -78,6 +80,8 @@ struct Order : Com_order
 
     void                        add_to_order_queue      ( Order_queue* );
     void                        add_to_job              ( const string& job_name );
+
+    void                        setback_                ();
 
     // Auftrag in einer Jobkette:
     void                        add_to_job_chain        ( Job_chain*, bool write_to_database = true );
@@ -125,6 +129,8 @@ struct Order : Com_order
   //bool                       _in_process;             // Auftrag wird gerade von spooler_process() verarbeitet 
     Task*                      _task;                   // Auftrag wird gerade von dieser Task in spooler_process() verarbeitet 
     bool                       _moved;                  // true, wenn Job state oder job geändert hat. Dann nicht automatisch in Jobkette weitersetzen
+    Time                       _setback;                // Bis wann der Auftrag zurückgestellt ist
+    int                        _setback_count;
 };
 
 //-----------------------------------------------------------------------------------Job_chain_node
@@ -231,8 +237,9 @@ struct Order_queue : Com_order_queue
   //Order*                      add_order               ( const Order::Payload& );
     void                        remove_order            ( Order* );
     int                         length                  ( Job_chain* = NULL );
-    bool                        empty                   () const                                    { return _queue.empty(); }
-    ptr<Order>                  get_order_for_processing( Task* );
+  //bool                        empty                   () const                                    { return _queue.empty(); }
+    bool                        has_order               ( const Time& );
+    ptr<Order>                  get_order_for_processing( const Time& now );
     void                        update_priorities       ();
     ptr<Order>                  order_or_null           ( const Order::Id& );
     Job*                        job                     () const                                    { return _job; }
