@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 
-<!-- $Id: spooler.xml,v 1.33 2001/02/20 10:37:24 jz Exp $   (C) 2001 SOS GmbH Berlin -->
+<!-- $Id: spooler.xml,v 1.34 2001/02/21 10:21:59 jz Exp $   (C) 2001 SOS GmbH Berlin -->
 
 <!DOCTYPE spooler SYSTEM "s:\prod\spooler\spooler.dtd">
 
@@ -293,7 +293,7 @@ spooler_log.msg "Spooler-Skript geladen."
                 <job name           = "Aufbereiten" 
                      priority       = "2" 
                      output_level   = "200" 
-                     spooler_id     = "">
+                     spooler_id     = "x">
 
                     <object_set class="Dokumente">
                         <levels low="100" high="200"/>
@@ -305,7 +305,7 @@ spooler_log.msg "Spooler-Skript geladen."
 
 
 
-                <job name="einfach" priority="3" spooler_id="">
+                <job name="einfach" priority="3" spooler_id="test">
 
                     <script language="VBScript" use_engine="task"><![CDATA[
 
@@ -439,7 +439,7 @@ sub spooler_process()
 {
     #$i = $spooler_task->params("zahl");
     #if( undef($i) ) { $i = 10; }
-    $i = 2;
+    $i = 10;
     $spooler_log->msg( "zahl=$i" );
     
     while( $i-- > 0 )
@@ -491,7 +491,7 @@ function spooler_close()
 
                     ]]></script>
 
-                    <run_time let_run="yes"/>
+                    <run_time repeat="15" let_run="yes"/>
                 </job>
             </jobs>
         </thread>

@@ -1,4 +1,4 @@
-// $Id: spooler_task.h,v 1.12 2001/02/18 16:14:38 jz Exp $
+// $Id: spooler_task.h,v 1.13 2001/02/21 10:21:59 jz Exp $
 
 #ifndef __SPOOLER_TASK_H
 #define __SPOOLER_TASK_H
@@ -7,6 +7,7 @@ namespace sos {
 namespace spooler {
 
 typedef int                     Level;
+struct                          Task;
 
 //-----------------------------------------------------------------------------------Level_interval
 
@@ -82,6 +83,7 @@ struct Object_set : Sos_self_deleting
     void                        close                       ();
     Spooler_object              get                         ();
     bool                        step                        ( Level result_level );
+    void                        set_in_call                 ( const string& name );
 
     Thread*                     thread                      () const;
 
@@ -102,13 +104,15 @@ struct Job : Sos_self_deleting
         s_none,
         s_stopped,              // Gestoppt (z.B. wegen Fehler)
         s_pending,              // Warten auf Start
-        s_task_created,
+        s_task_created,         // Task eingerichtet, vielleicht von einem anderen Thread via job.start
+        s_starting,             //
         s_loaded,               // Skript geladen (mit spooler_init), aber nicht gestartet (spooler_open)
         s_running,              // Läuft
         s_running_process,      // Läuft in einem externen Prozess, auf dessen Ende nur gewartet wird
         s_suspended,            // Angehalten
-        s_ending,               // end()
+        s_ending,               // end(), also in spooler_close()
         s_ended,
+      //s_closed,               // 
         s__max
     };
 
@@ -125,6 +129,17 @@ struct Job : Sos_self_deleting
     };
 
 
+    struct In_call
+    {
+                                In_call                     ( Task* task, const string& name );
+                                In_call                     ( Job* job  , const string& name );
+                               ~In_call                     ();
+
+        Job*                   _job;
+    };
+
+
+
                                 Job                         ( Thread* );
                                ~Job                         (); 
 
@@ -139,6 +154,8 @@ struct Job : Sos_self_deleting
     Object_set_descr*           object_set_descr            () const                    { return _object_set_descr; }
     int                         priority                    () const                    { return _priority; }
     Thread*                     thread                      () const                    { return _thread; }
+    string                      job_state                   ();
+    void                        set_in_call                 ( const string& name );
 
     void                        close                       ();
     void                        close_engine                ();
@@ -213,6 +230,7 @@ struct Job : Sos_self_deleting
 
     State                      _state;
     State_cmd                  _state_cmd;
+    string                     _in_call;                    // "spooler_process" etc.
     CComPtr<spooler_com::Ivariable_set> _params;
     Time                       _next_start_time;
     Period                     _period;                     // Derzeitige oder nächste Period

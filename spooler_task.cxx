@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.30 2001/02/20 10:52:48 jz Exp $
+// $Id: spooler_task.cxx,v 1.31 2001/02/21 10:21:59 jz Exp $
 /*
     Hier sind implementiert
 
@@ -72,6 +72,7 @@ bool Object_set::open()
 
     if( _class->_object_interface )
     {
+        Job::In_call( _task, "spooler_make_object_set" );
         object_set_vt = _task->_job->_script_instance.call( "spooler_make_object_set" );
 
         if( object_set_vt.vt != VT_DISPATCH 
@@ -84,8 +85,13 @@ bool Object_set::open()
         _idispatch = _task->_job->_script_instance._script_site->dispatch();
     }
 
-    if( com_name_exists( _idispatch, spooler_open_name ) )  ok = check_result( com_call( _idispatch, spooler_open_name ) );
-                                                      else  ok = true;
+    if( com_name_exists( _idispatch, spooler_open_name ) ) 
+    {
+        Job::In_call in_call ( _task, spooler_open_name );
+        ok = check_result( com_call( _idispatch, spooler_open_name ) );
+    }
+    else  
+        ok = true;
 
     return ok && !_task->_job->has_error();
 }
@@ -94,7 +100,12 @@ bool Object_set::open()
 
 void Object_set::close()
 {
-    if( com_name_exists( _idispatch, spooler_close_name ) )  com_call( _idispatch, spooler_close_name );
+    if( com_name_exists( _idispatch, spooler_close_name ) )  
+    {
+        Job::In_call in_call ( _task, spooler_close_name );
+        com_call( _idispatch, spooler_close_name );
+    }
+
     _idispatch = NULL;
 }
 
@@ -106,6 +117,7 @@ Spooler_object Object_set::get()
 
     while(1)
     {
+        Job::In_call in_call ( _task, spooler_get_name );
         CComVariant obj = com_call( _idispatch, spooler_get_name );
 
         if( obj.vt == VT_EMPTY    )  return Spooler_object(NULL);
@@ -134,11 +146,14 @@ bool Object_set::step( Level result_level )
 
         if( _task->_job->has_error() )  return false;       // spooler_task.error() gerufen?
 
+        Job::In_call in_call ( _task, spooler_process_name );
         object.process( result_level );
+
         return true;
     }
     else
     {
+        Job::In_call in_call ( _task, spooler_process_name );
         return check_result( _task->_job->_script_instance.call( spooler_process_name, result_level ) );
     }
 }
@@ -148,6 +163,31 @@ bool Object_set::step( Level result_level )
 Thread* Object_set::thread() const
 { 
     return _task->_job->_thread; 
+}
+
+//-----------------------------------------------------------------------------Job::In_call::In_call
+
+Job::In_call::In_call( Job* job, const string& name ) 
+: 
+    _job(job) 
+{ 
+    _job->set_in_call(name); 
+}
+
+//-----------------------------------------------------------------------------Job::In_call::In_call
+
+Job::In_call::In_call( Task* task, const string& name ) 
+: 
+    _job(task->job()) 
+{ 
+    _job->set_in_call(name); 
+}
+
+//---------------------------------------------------------------------------Job::In_call::~In_call
+
+Job::In_call::~In_call()
+{ 
+    _job->set_in_call( "" ); 
 }
 
 //-----------------------------------------------------------------------------------------Job::Job
@@ -209,11 +249,10 @@ void Job::close_task()
         if( _task )  _task->close();
         _task = NULL; 
         _params = new Com_variable_set; 
-        if( _state != s_stopped )  set_state( s_ended );
+      //if( _state != s_stopped )  set_state( s_ended );
     }
 
-    if( _load_error 
-      || _script_ptr  &&  _script_ptr->_reuse == Script::reuse_task )  close_engine();
+    if( _load_error  ||  _script_ptr  &&  _script_ptr->_reuse == Script::reuse_task )  close_engine();
 }
 
 //----------------------------------------------------------------------------------------Job::init
@@ -221,7 +260,7 @@ void Job::close_task()
 
 void Job::init()
 {
-    set_state( s_none );
+    _state = s_none;
 
     _log.set_prefix( "Job " + _name );
 
@@ -313,8 +352,11 @@ bool Job::load()
     _script_instance.load( *_script_ptr );
     if( has_error() )  { _load_error = true; return false; }
 
-    bool ok = check_result( _script_instance.call_if_exists( spooler_init_name ) );
-    if( !ok || has_error() )  { _load_error = true; return false; }
+    {
+        In_call in_call ( this, spooler_init_name );
+        bool ok = check_result( _script_instance.call_if_exists( spooler_init_name ) );
+        if( !ok || has_error() )  { _load_error = true; return false; }
+    }
 
     _has_spooler_process = _script_instance.name_exists( spooler_process_name );
 
@@ -354,7 +396,11 @@ void Job::stop()
 
 void Job::interrupt_script()
 {
-    if( _script_instance )  _script_instance.interrupt();
+    if( _script_instance )
+    {
+        _log.warn( "Skript wird abgebrochen" );
+        _script_instance.interrupt();
+    }
 }
 
 //-------------------------------------------------------------------------Job::set_next_start_time
@@ -484,7 +530,7 @@ bool Job::do_something()
 
 void Job::set_error( const Xc& x )
 {
-    _log.error( x.what() );
+    _log.error( _in_call + "(): " + x.what() );
 
     THREAD_LOCK( _lock )
     {
@@ -507,10 +553,19 @@ void Job::set_error( const exception& x )
 
 void Job::set_state( State new_state )
 { 
+    if( new_state == _state )  return;
+
     if( new_state == s_running )  _thread->_running_tasks_count++;
     if( _state    == s_running )  _thread->_running_tasks_count--;
 
     _state = new_state;
+
+    switch( new_state )
+    {
+        case s_starting : 
+        case s_ending   : 
+        default: _log.msg( state_name() );  break;
+    }
 }
 
 //-----------------------------------------------------------------------------------Job::set_state
@@ -570,22 +625,50 @@ void Job::set_state_cmd( State_cmd cmd )
     _thread->signal( state_cmd_name(cmd) );
 }
 
+//-----------------------------------------------------------------------------------Job::job_state
+// Anderer Thread
+
+string Job::job_state()
+{
+    string st;
+
+    THREAD_LOCK( _lock )
+    {
+        st = "state=" + state_name();
+        if( !_in_call.empty() )  st += " in " + _in_call + "()";
+    }
+
+    return st;
+}
+
+//----------------------------------------------------------------------------------Job::set_in_call
+
+void Job::set_in_call( const string& name )
+{
+    THREAD_LOCK( _lock )
+    {
+        _in_call = name;
+        if( !name.empty() )  _log.msg( name + "()" );
+    }
+}
+
 //----------------------------------------------------------------------------------Job::state_name
 
 string Job::state_name( State state )
 {
     switch( state )
     {
-        case s_stopped:     return "stopped";
-        case s_loaded:      return "loaded";
-        case s_pending:     return "pending";
-        case s_task_created:return "task_created";
-        case s_running:     return "running";
-        case s_running_process:return "running_process";
-        case s_suspended:   return "suspended";
-        case s_ending:      return "ending";
-        case s_ended:       return "ended";
-        default:            return as_string( (int)state );
+        case s_stopped:         return "stopped";
+        case s_loaded:          return "loaded";
+        case s_pending:         return "pending";
+        case s_task_created:    return "task_created";
+        case s_starting:        return "starting";
+        case s_running:         return "running";
+        case s_running_process: return "running_process";
+        case s_suspended:       return "suspended";
+        case s_ending:          return "ending";
+        case s_ended:           return "ended";
+        default:                return as_string( (int)state );
     }
 }
 
@@ -719,7 +802,7 @@ void Task::close()
 
 bool Task::start()
 {
-    _job->_log.msg( "start" );
+    _job->set_state( Job::s_starting );
 
     _error = _job->_error = NULL;
     _job->_thread->_task_count++;
@@ -828,6 +911,7 @@ bool Task::wait_until_terminated( double wait_time )
 
 void Script_task::do_on_success()
 {
+    Job::In_call in_call ( this, spooler_on_success_name );
     _job->_script_instance.call_if_exists( spooler_on_success_name );
 }
 
@@ -835,6 +919,7 @@ void Script_task::do_on_success()
 
 void Script_task::do_on_error()
 {
+    Job::In_call in_call ( this, spooler_on_error_name );
     _job->_script_instance.call_if_exists( spooler_on_error_name );
 }
 
@@ -864,11 +949,9 @@ bool Object_set_task::do_start()
         if( !ok || _job->has_error() )  return false;
     }
 
-    ok = _object_set->open();
-    if( !ok )  return false;
-
     _job->set_state( Job::s_running );
-    return true;
+
+    return _object_set->open();
 }
 
 //--------------------------------------------------------------------------Object_set_task::do_end
@@ -898,10 +981,14 @@ bool Job_script_task::do_start()
         if( !ok || _job->has_error() )  return false;
     }
 
-    ok = check_result( _job->_script_instance.call_if_exists( spooler_open_name ) );
-    if( !ok )  return false;
-
     _job->set_state( Job::s_running );
+
+    {
+        Job::In_call in_call ( this, spooler_open_name );
+        ok = check_result( _job->_script_instance.call_if_exists( spooler_open_name ) );
+        if( !ok )  return false;
+    }
+
     return true;
 }
 
@@ -909,6 +996,7 @@ bool Job_script_task::do_start()
 
 void Job_script_task::do_end()
 {
+    Job::In_call in_call ( this, spooler_close_name );
     _job->_script_instance.call_if_exists( spooler_close_name );
 }
 
@@ -916,10 +1004,10 @@ void Job_script_task::do_end()
 
 bool Job_script_task::do_step()
 {
-    if( _job->_has_spooler_process )  
-        return check_result( _job->_script_instance.call( spooler_process_name ) );
-    else
-        return false;
+    if( !_job->_has_spooler_process )  return false;
+
+    Job::In_call in_call ( this, spooler_process_name );
+    return check_result( _job->_script_instance.call( spooler_process_name ) );
 }
 
 //----------------------------------------------------------------------------Process_task::do_start

@@ -1,4 +1,4 @@
-// $Id: spooler.h,v 1.51 2001/02/20 10:37:24 jz Exp $
+// $Id: spooler.h,v 1.52 2001/02/21 10:21:58 jz Exp $
 
 #ifndef __SPOOLER_H
 #define __SPOOLER_H
@@ -148,8 +148,8 @@ struct Spooler
 
     void                        start                       ();
     void                        stop                        ();
-    void                        signal_threads              ( const string& signal_name = "" );
-    void                        wait_until_threads_stopped  ();
+    void                        signal_threads              ( const string& signal_name );
+    void                        wait_until_threads_stopped  ( Time until );
     void                        reload                      ();
     void                        run                         ();
 
@@ -193,6 +193,7 @@ struct Spooler
     Time                       _spooler_start_time;
     State                      _state;
     State_cmd                  _state_cmd;
+  //Time                       _wait_for_thread_termination;
 
     Wait_handles               _wait_handles;
     Event                      _event;                      

@@ -1,4 +1,4 @@
-// $Id: spooler_thread.cxx,v 1.10 2001/02/20 10:37:25 jz Exp $
+// $Id: spooler_thread.cxx,v 1.11 2001/02/21 10:22:00 jz Exp $
 /*
     Hier sind implementiert
 
@@ -151,16 +151,31 @@ void Thread::start()
     FOR_EACH_JOB( job )  (*job)->init();
 }
 
-//-------------------------------------------------------------------------------------Thread::stop
+//--------------------------------------------------------------------------------Thread::stop_jobs
 
-void Thread::stop()
+void Thread::stop_jobs()
 {
-    THREAD_LOCK( _lock )
+    FOR_EACH_JOB( it ) 
     {
-        FOR_EACH( Job_list, _job_list, it )  (*it)->close();
-        _job_list.clear();
-        _script_instance.close();
+        _current_job = *it;
+
+        if( (*it)->state() != Job::s_stopped )  (*it)->stop();
+
+        _current_job = NULL;
     }
+}
+
+//-----------------------------------------------------------------------------Thread::do_something
+
+bool Thread::do_something( Job* job )
+{
+    _current_job = job;
+
+    bool ok = job->do_something();
+
+    _current_job = NULL;
+
+    return ok;
 }
 
 //-------------------------------------------------------------------------------------Thread::step
@@ -180,7 +195,7 @@ bool Thread::step()
         {
             if( _event.signaled_then_reset() )  return true;
             Job* job = *it;
-            if( job->priority() >= _spooler->_priority_max )  something_done |= job->do_something();
+            if( job->priority() >= _spooler->_priority_max )  something_done |= do_something( job );
         }
     }
 
@@ -193,7 +208,7 @@ bool Thread::step()
         {
             if( _event.signaled_then_reset() )  return true;
             Job* job = *it;
-            for( int i = 0; i < job->priority(); i++ )  something_done |= job->do_something();
+            for( int i = 0; i < job->priority(); i++ )  something_done |= do_something( job );
         }
     }
 
@@ -206,7 +221,7 @@ bool Thread::step()
         {
             if( _event.signaled_then_reset() )  return true;
             Job* job = *it;
-            if( job->priority() == 0 )  job->do_something();
+            if( job->priority() == 0 )  do_something( job );
         }
     }
 
@@ -337,10 +352,9 @@ int Thread::run_thread()
             }
 
             _event.reset();
-
-          //THREAD_LOCK( _lock )  if( _add_jobs_element )  do_add_jobs();
         }
 
+        stop_jobs();
         close();
     
         _log.msg( "Thread 0x" + as_hex_string( (int)_thread_id ) + " beendet sich" );
@@ -407,7 +421,7 @@ void Thread::stop_thread()
 */
 //------------------------------------------------------------------------Thread::interrupt_scripts
 // Anderer Thread
-
+/*
 void Thread::interrupt_scripts()
 {
     THREAD_LOCK( _lock )
@@ -415,9 +429,9 @@ void Thread::interrupt_scripts()
         FOR_EACH( Job_list, _job_list, it )  (*it)->interrupt_script();
     }
 }
-
+*/
 //----------------------------------------------------------------Thread::wait_until_thread_stopped
-
+/*
 void Thread::wait_until_thread_stopped( Time until )
 {
     if( _thread_handle )    // Thread überhaupt schon gestartet?
@@ -440,7 +454,7 @@ void Thread::wait_until_thread_stopped( Time until )
         _log.msg( "... stopped" );
     }
 }
-
+*/
 //--------------------------------------------------------------------------Thread::get_job_or_null
 
 Job* Thread::get_job_or_null( const string& job_name )
@@ -463,15 +477,6 @@ Job* Thread::get_job_or_null( const string& job_name )
 void Thread::cmd_add_jobs( const xml::Element_ptr& element )
 {
     load_jobs_from_xml( element, true );
-/*
-    THREAD_LOCK( _lock )
-    {
-        if( _add_jobs_element )  throw_xc( "SPOOLER-129", _name );
-
-        _add_jobs_element  = element;
-        _add_jobs_document = element->ownerDocument;
-    }
-*/
 
     signal();
 }

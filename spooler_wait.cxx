@@ -1,4 +1,4 @@
-// $Id: spooler_wait.cxx,v 1.14 2001/02/16 18:23:12 jz Exp $
+// $Id: spooler_wait.cxx,v 1.15 2001/02/21 10:22:00 jz Exp $
 /*
     Hier sind implementiert
 
@@ -178,7 +178,7 @@ bool Event::signaled_then_reset()
 string Event::as_string() const
 { 
     string result = "Ereignis " + _name; 
-    if( !_signal_name.empty() )  result += " (" + _signal_name + ")";
+    if( !_signal_name.empty() )  result += " \"" + _signal_name + "\"";
     return result;
 }
 
@@ -193,7 +193,10 @@ Wait_handles::~Wait_handles()
 
 void Wait_handles::close()
 {
-    FOR_EACH( vector<Event*>, _events, it )  _log->warn( "Wait_handles wird vor " + (*it)->as_string() + " geschlossen" );
+    FOR_EACH( vector<Event*>, _events, it )  
+    {
+        if( *it )  _log->warn( "Wait_handles wird vor " + (*it)->as_string() + " geschlossen" );
+    }
 }
 
 //--------------------------------------------------------------------------------Wait_handles::add
@@ -204,40 +207,56 @@ void Wait_handles::add( Event* event )
     _events.push_back( event );
 }
 
+//-------------------------------------------------------------------------Wait_handles::add_handle
+
+void Wait_handles::add_handle( HANDLE handle )
+{
+    _handles.push_back( handle );
+    _events.push_back( NULL );
+}
+
 //-----------------------------------------------------------------------------Wait_handles::remove
 
 void Wait_handles::remove( Event* event )
 {
     if( !event )  return;
 
-    vector<Event*>::iterator it = _events.begin();
+    remove_handle( event->handle(), event );
+}
 
-    while( it != _events.end() )
+//-----------------------------------------------------------------------Wait_handles::remove_handle
+
+void Wait_handles::remove_handle( HANDLE handle, Event* event )
+{
+    vector<HANDLE>::iterator it = _handles.begin();
+
+    while( it != _handles.end() )
     {
-        if( *it == event )  break;
+        if( *it == handle )  break;
         it++;
     }
 
-    if( it == _events.end() ) {
-        _log->error( "Wait_handles::remove(" + event->as_string() + ") fehlt" );     // Keine Exception. Das wäre nicht gut in einem Destruktor
+    if( it == _handles.end() ) {
+        if( event )  _log->error( "Wait_handles::remove(" + event->as_string() + ") fehlt" );     // Keine Exception. Das wäre nicht gut in einem Destruktor
+               else  _log->error( "Wait_handles::remove() fehlt" );
         return;
     }
 
-    _events.erase( it );
-    _handles.erase( _handles.begin() + ( it - _events.begin() ) );
+    _events.erase( _events.begin() + ( it - _handles.begin() ) );
+    _handles.erase( it );
 }
 
 //--------------------------------------------------------------------------Wait_handles::wait_until
 
-void Wait_handles::wait( double wait_time )
+int Wait_handles::wait( double wait_time )
 {
-    wait_until( Time::now() + wait_time );
+    return wait_until( Time::now() + wait_time );
 }
 
 //--------------------------------------------------------------------------------Wait_handles::wait
 #ifdef SYSTEM_WIN
 
-void Wait_handles::wait_until( Time until )
+int Wait_handles::wait_until( Time until )
 {
 /*
     THREAD_LOCK( _lock )
@@ -264,19 +283,23 @@ void Wait_handles::wait_until( Time until )
 
         if( ret >= WAIT_OBJECT_0  &&  ret < WAIT_OBJECT_0 + _handles.size() )
         {
+            int index = ret - WAIT_OBJECT_0;
             //_waiting = false;
 
             //while(1)
             {
-                Event* event = _events[ ret - WAIT_OBJECT_0 ];
-                event->set_signal();
-                _log->msg( "Ereignis " + event->name() );
+                Event* event = _events[ index ];
+                if( event )
+                {
+                    event->set_signal();
+                    _log->msg( event->as_string() );
+                }
               //DWORD ret = WaitForMultipleObjects( _handles.size(), &_handles[0], FALSE, 0 ); 
               //if( ret == WAIT_TIMEOUT )  break;
               //if( ret >= WAIT_OBJECT_0  &&  ret < WAIT_OBJECT_0 + _handles.size() )  continue;
               //throw_mswin_error( "WaitForMultipleObjects" );
             }
-            break;
+            return index;
         }
         else
         if( ret == WAIT_OBJECT_0 + _handles.size() )
@@ -289,6 +312,7 @@ void Wait_handles::wait_until( Time until )
             again = true;
     }
 
+    return -1;
 }
 
 #endif

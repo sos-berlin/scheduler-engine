@@ -1,4 +1,4 @@
-// $Id: spooler_wait.h,v 1.12 2001/02/12 15:41:39 jz Exp $
+// $Id: spooler_wait.h,v 1.13 2001/02/21 10:22:00 jz Exp $
 
 #ifndef __SPOOLER_WAIT_H
 #define __SPOOLER_WAIT_H
@@ -65,9 +65,11 @@ struct Wait_handles
     void                        close                       ();
   //void                        clear                       ()                              { _handles.clear(); _events.clear(); }
     void                        add                         ( Event* );
+    void                        add_handle                  ( HANDLE );
     void                        remove                      ( Event* );
-    void                        wait_until                  ( Time );
-    void                        wait                        ( double time );
+    void                        remove_handle               ( HANDLE, Event* for_internal_use_only = NULL );
+    int                         wait_until                  ( Time );
+    int                         wait                        ( double time );
     bool                        empty                       () const                        { return _events.empty(); }
 
     string                      as_string                   () const;

@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.55 2001/02/18 16:14:37 jz Exp $
+// $Id: spooler.cxx,v 1.56 2001/02/21 10:21:58 jz Exp $
 /*
     Hier sind implementiert
 
@@ -27,17 +27,18 @@
 //#endif
 
 
-const string new_suffix          = "~new";  // Suffix für den neuen Spooler, der den bisherigen beim Neustart ersetzen soll
-const double renew_wait_interval = 0.1;
-const double renew_wait_time     = 30;      // Wartezeit für Brückenspooler, bis der alte Spooler beendet ist und der neue gestartet werden kann.
-
-
 
 namespace sos {
 
 extern const Bool _dll = false;
 
 namespace spooler {
+
+const string new_suffix          = "~new";  // Suffix für den neuen Spooler, der den bisherigen beim Neustart ersetzen soll
+const double renew_wait_interval = 0.1;
+const double renew_wait_time     = 30;      // Wartezeit für Brückenspooler, bis der alte Spooler beendet ist und der neue gestartet werden kann.
+const double wait_for_thread_termination                 = latter_day; //2.0;
+//const double wait_for_thread_termination_after_interrupt = 1.0;
 
 /*
 struct Set_console_code_page
@@ -68,7 +69,7 @@ Spooler::Spooler()
 
 Spooler::~Spooler() 
 {
-    wait_until_threads_stopped();
+    wait_until_threads_stopped( latter_day );
 
     _thread_list.clear();
     _object_set_class_list.clear();
@@ -86,11 +87,43 @@ Spooler::~Spooler()
 
 //--------------------------------------------------------------Spooler::wait_until_threads_stopped
 
-void Spooler::wait_until_threads_stopped()
+void Spooler::wait_until_threads_stopped( Time until )
 {
-    Time until = Time::now() + 10;
+    Wait_handles wait_handles ( &_prefix_log );
 
-    { FOR_EACH( Thread_list, _thread_list, it )  (*it)->wait_until_thread_stopped( until ); }
+    FOR_EACH( Thread_list, _thread_list, it )  wait_handles.add_handle( (*it)->_thread_handle.handle() );
+
+    Time wait_time = 1.0;
+
+    while( _thread_list.size() > 0 )
+    {
+        Time until_step = Time::now() + wait_time;
+        if( until_step > until )  until_step = until;
+
+        int index = wait_handles.wait_until( until_step );
+        if( index >= 0 ) 
+        {
+            Thread_list::iterator thread = _thread_list.begin();
+            while( index-- > 0 )  thread++;
+            _log.msg( "Thread " + (*thread)->name() + " beendet" );
+
+            wait_handles.remove_handle( (*thread)->_thread_handle.handle() );
+            _thread_list.erase( thread );
+        }
+
+        if( Time::now() > until )  break;
+
+        if( index < 0 )
+        {
+            FOR_EACH( Thread_list, _thread_list, it )  
+            {
+                string msg = "Warten auf Thread " + (*it)->name();
+                Job* job = (*it)->_current_job;
+                if( job )  msg += ", Job " + job->name() + " " + job->job_state();
+                _log.msg( msg );
+            }
+        }
+    }
 }
 
 //--------------------------------------------------------------------------Spooler::signal_threads
@@ -249,9 +282,18 @@ void Spooler::stop()
 
     _log.msg( "Spooler::stop" );
 
-    signal_threads();
-    wait_until_threads_stopped();
+    signal_threads( "stop" );
+    wait_until_threads_stopped( Time::now() + wait_for_thread_termination );
 
+/*  interrupt() lässt PerlScript abstürzen
+    FOR_EACH( Thread_list, _thread_list, it )
+    {
+        Job* job = (*it)->current_job();
+        if( job )  try { job->interrupt_script(); } catch(const Xc& x){_log.error(x.what());}
+    }
+
+    wait_until_threads_stopped( Time::now() + wait_for_thread_termination_after_interrupt );
+*/
     _object_set_class_list.clear();
     _thread_list.clear();
 
@@ -275,8 +317,8 @@ void Spooler::run()
 
         _event.reset();
 
-        if( _state_cmd == sc_pause                 )  set_state( s_paused  ), signal_threads();
-        if( _state_cmd == sc_continue              )  set_state( s_running ), signal_threads();
+        if( _state_cmd == sc_pause                 )  set_state( s_paused  ), signal_threads( "pause" );
+        if( _state_cmd == sc_continue              )  set_state( s_running ), signal_threads( "continue" );
         if( _state_cmd == sc_load_config           )  break;
         if( _state_cmd == sc_reload                )  break;
         if( _state_cmd == sc_terminate             )  break;
