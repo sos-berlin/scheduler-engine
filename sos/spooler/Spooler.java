@@ -114,5 +114,5 @@ public class Spooler extends Idispatch
     public String           ini_path()                                              { return (String)       com_call( "<ini_path" ); }
 
     /** XML-Kommando ausführen */
-    public String           executer_xml( String xml )                              { return (String)       com_call( "execute_xml", xml ); }
+    public String           execute_xml( String xml )                               { return (String)       com_call( "execute_xml", xml ); }
 }
