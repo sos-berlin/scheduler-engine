@@ -1,4 +1,4 @@
-// $Id: spooler_history.cxx,v 1.66 2003/12/09 19:37:52 jz Exp $
+// $Id: spooler_history.cxx,v 1.67 2003/12/09 20:44:45 jz Exp $
 
 #include "spooler.h"
 #include "../zschimmer/z_com.h"
@@ -347,8 +347,9 @@ void Spooler_db::try_reopen_after_error( const exception& x )
             _spooler->_log.error( msg );
             string body = "db=" + _spooler->_db_name + "\r\n\r\n" + x.what() + "\r\n\r\n" + max_warn_msg;
             _spooler->send_error_email( msg, body );
-            _spooler->cmd_terminate();
-            throw exception( x.what() );
+            
+            _spooler->cmd_abort_immediately();
+            throw exception( x.what() );  // Wird nicht ausgeführt
         }
         else
         {
@@ -454,6 +455,7 @@ int Spooler_db::get_id_( const string& variable_name, Transaction* outer_transac
             //id = _job_id_select.get_record().as_int(0);
             //_job_id_select.close( close_cursor );
 
+//Z_DEBUG_ONLY( static int c = 3;  if( --c <= 0 )  throw_xc( "FEHLER" ); )
             execute( "UPDATE " + uquoted(_spooler->_variables_tablename) + " set \"WERT\" = \"WERT\"+1 where \"NAME\"=" + sql::quoted( variable_name ) );
 
             Any_file sel;

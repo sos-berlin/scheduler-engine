@@ -1,4 +1,4 @@
-// $Id: spooler_process.cxx,v 1.25 2003/12/08 10:32:05 jz Exp $
+// $Id: spooler_process.cxx,v 1.26 2003/12/09 20:44:45 jz Exp $
 
 #include "spooler.h"
 
@@ -7,6 +7,13 @@ namespace sos {
 namespace spooler {
 
 using namespace object_server;
+
+//--------------------------------------------------------------------------------Process::~Process
+
+Process::~Process()
+{
+    if( _connection )  _spooler->unregister_process_handle( _connection->process_handle() );
+}
 
 //---------------------------------------------------------------------Process::add_module_instance
 
@@ -73,6 +80,8 @@ void Process::start()
 
 
         _connection = _spooler->_connection_manager->start_process( parameters );
+
+        _spooler->register_process_handle( _connection->process_handle() );
     }
     else
     {

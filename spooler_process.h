@@ -1,4 +1,4 @@
-// $Id: spooler_process.h,v 1.18 2003/12/08 10:32:05 jz Exp $
+// $Id: spooler_process.h,v 1.19 2003/12/09 20:44:45 jz Exp $
 
 #ifndef __SPOOLER_PROCESS_H
 #define __SPOOLER_PROCESS_H
@@ -21,6 +21,7 @@ struct Process : zschimmer::Object
 
                                 Process                     ( Spooler* sp )                         : _spooler(sp), _zero_(this+1) {}
     Z_GNU_ONLY(                 Process                     (); )
+                               ~Process                     ();
 
 
     bool                        started                     ()                                      { return _connection != NULL; }

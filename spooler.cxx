@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.302 2003/12/09 19:37:51 jz Exp $
+// $Id: spooler.cxx,v 1.303 2003/12/09 20:44:45 jz Exp $
 /*
     Hier sind implementiert
 
@@ -615,6 +615,26 @@ void Spooler::init_process_classes()
 bool Spooler::try_to_free_process( Job* for_job, Process_class* process_class, const Time& now )
 {
     return _single_thread->try_to_free_process( for_job, process_class, now );
+}
+
+//-----------------------------------------------------------------Spooler::register_process_handle
+
+void Spooler::register_process_handle( Process_handle p )
+{
+    for( int i = 0; i < NO_OF( _process_handles ); i++ )
+    {
+        if( _process_handles[i] == 0 )  { _process_handles[i] = p;  return; }
+    }
+}
+
+//-----------------------------------------------------------------Spooler::register_process_handle
+
+void Spooler::unregister_process_handle( Process_handle p )
+{
+    for( int i = 0; i < NO_OF( _process_handles ); i++ )
+    {
+        if( _process_handles[i] == p )  { _process_handles[i] = 0;  return; }
+    }
 }
 
 //--------------------------------------------------------------Spooler::wait_until_threads_stopped
@@ -1440,6 +1460,8 @@ void Spooler::start()
 
     THREAD_LOCK( _lock )
     {
+        if( _need_db  && _db_name.empty() )  throw_xc( "SCHEDULER-205" );
+
         _db = SOS_NEW( Spooler_db( this ) );
         _db->open( _db_name );
     }
@@ -1895,6 +1917,36 @@ void Spooler::cmd_let_run_terminate_and_restart()
     signal( "let_run_terminate_and_restart" );
 }
 
+//----------------------------------------------------------------------------cmd_abort_immediately
+
+void Spooler::cmd_abort_immediately( bool restart )
+{
+    for( int i = 0; i < NO_OF( _process_handles ); i++ )
+    {
+        if( _process_handles[i] )
+        {
+#           ifdef Z_WINDOWS
+                LOG( "TerminateProcess(" << as_hex_string( (int)_process_handles[i] ) << ",99)\n" );
+                TerminateProcess( _process_handles[i], 99 );
+#            else
+                LOG( "kill(" << _process_handles[i] << ",SIGKILL)\n" );
+                kill( _process_handle[i], SIGKILL );
+#           endif
+        }
+    }
+
+
+    // Point of no return
+
+#   ifdef Z_WINDOWS
+        LOG( "TerminateProcess( GetCurrentProcess(), 99 );\n" );
+        TerminateProcess( GetCurrentProcess(), 99 );
+#    else
+        LOG( "kill( _spooler->_pid, SIGKILL );\n" );
+        kill( _spooler->_pid, SIGKILL );
+#   endif
+}
+
 //----------------------------------------------------------------------------------Spooler::launch
 
 int Spooler::launch( int argc, char** argv, const string& parameter_line )
@@ -2239,7 +2291,6 @@ int object_server( int argc, char** argv )
 
     server.register_class( spooler_com::CLSID_Remote_module_instance_server, Com_remote_module_instance_server::create_instance );
     server.register_class(              CLSID_Com_log_proxy                , Com_log_proxy                    ::create_instance );
-  //server.register_proxy_class( spooler_com::CLSID_Com_log_proxy          , Com_log_proxy                    ::create_instance );
 
     return server.main( argc, argv, true );
 }
