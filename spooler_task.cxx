@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.151 2003/06/02 09:21:37 jz Exp $
+// $Id: spooler_task.cxx,v 1.152 2003/06/13 08:05:29 jz Exp $
 /*
     Hier sind implementiert
 
@@ -2295,6 +2295,7 @@ bool Process_task::do_start()
 {
     vector<string> string_args;
 
+    string_args.push_back( _job->_process_filename );   // argv[0]
     if( _job->_process_param != "" )  string_args.push_back( _job->_process_param );
 
     for( int i = 1;; i++ )
