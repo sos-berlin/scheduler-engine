@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="scheduler.xsl" type="text/xsl"?>
 
-<!--$Id: job.xml,v 1.7 2004/12/28 11:40:02 jz Exp $-->
+<!--$Id: job.xml,v 1.8 2005/01/03 02:26:19 jz Exp $-->
 
 <description 
     title    = "Was ist ein Job?" 
     base_dir = ""
     author   = "$Author: jz $"
-    date     = "$Date: 2004/12/28 11:40:02 $"
+    date     = "$Date: 2005/01/03 02:26:19 $"
 >
     <scheduler_keyword keyword="Job"/>
     
@@ -163,14 +163,48 @@
     
     
     <h2>Implementierung</h2>
+    
     <p>
-        Ein Job in Java eine Implementierung der abstrakten Oberklasse
-        <a href="javadoc/sos/spooler/Job_impl.html">sos.spooler.Job_impl</a>.
+        Ein Job lässt sich auf verschiedene Weise implementieren.
     </p>
-    <p>
-        Die <a href="javadoc/index.html">Java-Schnittstelle</a> stellt weitere Klassen bereit.
-        Sie gilt entsprechend für die COM- und Perl-Schnittstellen, 
-        wenn Sie Ihren Job in einer anderen Sprache implementieren.
-    </p>
+    
+    <p><b>Java</b></p>
+    <div class="indent">
+        <p>
+            Ein Job in Java ist eine Implementierung der abstrakten Oberklasse
+            <a href="javadoc/sos/spooler/Job_impl.html">sos.spooler.Job_impl</a>.
+        </p>
+        <p>
+            Die <a href="javadoc/index.html">Java-Schnittstelle</a> stellt weitere Klassen bereit.
+            Sie gilt entsprechend für die COM- und Perl-Schnittstellen, 
+            wenn Sie Ihren Job in einer anderen Sprache implementieren.
+        </p>
+        <p>
+            Den Pfad der implementierten Klasse geben Sie in
+            <scheduler_ini_entry file="sos.ini" section="java" entry="class_path"/>
+            an.
+        </p>
+    </div>
+    
+    <p><b>JavaScript, VBScript</b></p>
+    <div class="indent">
+        <p>
+        </p>
+    </div>
+                
+    <p><b>Perl</b></p>
+    <div class="indent">
+        <p>
+        </p>
+    </div>
+                
+    <p><b>COM</b></p>
+    <div class="indent">
+        <p>
+            Sie können auch (unter Windows) einen Job in jeder beliebigen Programmiersprache
+            als COM-Server implementieren. 
+            Weiteres siehe <a href="job_com.xml">hier</a>.
+        </p>
+    </div>
                 
 </description>

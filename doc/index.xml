@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="scheduler.xsl" type="text/xsl"?>
 
-<!--$Id: index.xml,v 1.21 2004/12/10 11:20:38 jz Exp $-->
+<!--$Id: index.xml,v 1.22 2005/01/03 02:26:19 jz Exp $-->
 
 <description 
     head_title          = "Dokumentation" 
     base_dir            = ""
     suppress_browse_bar = "yes"
     author              = "$Author: jz $"
-    date                = "$Date: 2004/12/10 11:20:38 $"
+    date                = "$Date: 2005/01/03 02:26:19 $"
 >
 
 <style>
@@ -76,6 +76,16 @@
             </p>
         </dd>
     </a>
+
+    <a href="service.xml">
+        <dt>Dienst</dt>
+        <dd>
+            <p>
+                Der Scheduler kann unter Windows als Dienst installiert werden.
+            </p>
+        </dd>
+    </a>
+
 
     <a href="datenbank.xml">
         <dt>Datenbank</dt>
@@ -173,29 +183,5 @@
     </a>
 </dl>
 
-
-
-<h2>Ältere Dokumentation</h2>
-
-<table cellspacing="0" cellpadding="0">
-    <tr>
-        <td valign="baseline">
-            <a href="old/order/index.html">Aufträge</a><br/>
-            <a href="old/spooler_1.1.html">Spooler 1.1</a><br/>
-            <a href="old/spooler_history.html">Spooler History</a><br/>
-            <a href="old/spooler_dienst.html">Spooler als Dienst</a><br/>
-            <a href="old/spooler_job_com.html">Spooler-Skripte als COM-Klassen implementieren</a><br/>
-            <a href="old/spooler_java.html">Spooler-Jobs als Java-Klassen</a>
-        </td>
-        <td valign="baseline" style="padding-left: 4em">
-            <p>Vorschläge:</p>
-            <p>
-                <a href="old/spooler_externe_programme.html">Externe Programme im Spooler</a><br/>
-                <a href="old/spooler_verteilt.html">Verteilter Spooler</a><br/>
-                <a href="old/spooler_handbetrieb.html">Spooler im Handbetrieb</a>
-            </p>
-        </td>
-    </tr>
-</table>
 
 </description>

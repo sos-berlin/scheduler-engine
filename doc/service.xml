@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet href="scheduler.xsl" type="text/xsl"?>
+
+<!--$Id: service.xml,v 1.1 2005/01/03 02:26:19 jz Exp $-->
+
+<description 
+    title               = "Der Scheduler als Dienst" 
+    base_dir            = ""
+    author              = "$Author: jz $"
+    date                = "$Date: 2005/01/03 02:26:19 $"
+>
+
+<scheduler_keyword keyword="Dienst"/>
+<scheduler_keyword keyword="Daemon"/>
+
+<table width="100%">
+    <tr>
+        <td align="right">19. Mai 2002</td>
+    </tr>
+</table>
+
+<p class="zwischentitel">Aufruf
+</p>
+<p><font class="mono">spooler&#160; -remove-service</font> &#160; [<font class="mono">-service-name=</font><i>name</i>]&#160;&#160;
+[<font class="mono">-id=</font><i>id</i>]
+</p>
+<p><font class="mono">spooler&#160; </font>[<font class="mono">-remove-service</font>]
+&#160; <font class="mono">-install-service</font><br/>
+<font class="mono">&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; </font>[<font class="mono">-service-name=</font><i>name</i>]&#160;&#160;
+[<font class="mono">-service-display=</font><i>gezeigtername</i>]&#160; &#160; [<font class="mono">-service-descr=</font><i>beschreibung</i>]<br/>
+<font class="mono">&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; </font>[<font class="mono">-need-service=</font><i>name</i>]<br/>
+<font class="mono">&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; </font>[<i>optionen</i>]
+</p>
+<p class="zwischentitel">Parameter
+</p>
+<p><br/>
+<font class="mono">
+-remove-service</font></p>
+
+<p class="indent">Entfernt den Dienst. Der Dienst muss vorhanden sein.</p>
+
+<p><br/>
+<font class="mono">
+-install-service</font></p>
+
+<p class="indent">Installiert den Dienst. Die Optionen <i>optionen</i>, die hier nicht aufgeführt
+sind, werden beim Start des Dienst dem Spooler übergeben (v.a. <font class="mono">-id=</font>,
+<font class="mono">-log-dir=</font>)</p>
+
+<p><br/>
+<font class="mono">-service-name=</font><i>name</i></p>
+
+<p class="indent">Stellt den (internen) Dienstnamen ein für <font class="mono"> -remove-service</font>
+oder <font class="mono">-install-service</font>.</p>
+
+<p class="indent">Voreinstellung ist <font class="mono">DocumentFactory_Spooler</font>. Wenn die Option
+<font class="mono">
+-id=</font> angegeben ist: <font class="mono"> DocumentFactory_Spooler_</font><i>id</i></p>
+
+<p><br/>
+<font class="mono">
+-service-display=</font><i>gezeigtername</i></p>
+
+<p class="indent">Gibt den angezeigten Namen des Dienstes an.</p>
+
+<p class="indent">Voreinstellung bei nicht angegebenen -service-name ist &quot;DocumentFactory Spooler&quot;.
+Wenn die Option <font class="mono"> -id=</font> angegeben ist: &quot;DocumentFactory Spooler -id=<i>id</i>&quot;.
+Wenn <font class="mono"> -service-name=</font> angegeben ist, ist dies als angezeigter Name voreinstellt.</p>
+
+<p><br/>
+<font class="mono">-service-descr=</font><i>beschreibung</i></p>
+
+<p class="indent">Setzt die Beschreibung des Dienstes. Voreinstellung ist &quot;Hintergrund-Jobs der Document Factory&quot;.&#160;</p>
+
+<p class="indent">In Windows NT 4 ignoriert der Spooler diese Option.</p>
+
+<p><br/>
+<font class="mono">-need-service=</font><i>dienst</i></p>
+
+<p class="indent">Gibt einen anderen Dienst an, von dem dieser Dienst abhängig
+ist. Windows startet diesen Dienst erst, wenn der andere Dienst läuft. Die
+Option kann mehrfach angegeben werden. Ein unbekannter Dienstname wird von
+Windows nicht bemängelt.&#160;</p>
+
+<p class="indent">Der Name eines Dienstes wird in der Dialogbox zum Dienst in
+der Dienststeuerung angezeigt.</p>
+
+<p class="zwischentitel">Fehler beim Start
+</p>
+<p class="indent">Die Dienststeuerung in Windows erlaubt es dem Dienst nicht,
+eine Fehlermeldung zurückzugeben, wenn der Dienst nicht starten kann. Deshalb
+schreibt der Dienst einen einfachen Eintrag in die Ereignissteuerung (auch das
+wird von Windows nicht einfach gemacht).
+</p>
+
+<p class="indent">Außerdem wird eine eMail mit der Fehlermeldung verschickt.
+Dazu werden die Einträge aus der Datei <font class="mono">factory.ini</font> <font class="mono">log_mail_from</font>,
+<font class="mono">log_mail_to</font>, <font class="mono">log_mail_cc</font>, <font class="mono">log_mail_bcc</font>
+und <font class="mono">smtp</font> verwendet. Eine mit <font class="mono">-ini=</font>
+eingestellte Konfigurationsdatei wird <i>nicht</i> verwendet. Die Einstellungen
+in der <font class="mono">sos.ini</font>, Abschnitt <font class="mono">[mail]</font>
+werden auch verwendet (s.a. <a href="../dateitypen/dateityp_mail.html">Dateityp <font class="mono">mail</font></a>).
+</p>
+
+<p>&#160;
+</p>
+
+</description>

@@ -1,36 +1,33 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
-<html>
-<head>
-<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
-<meta name="ProgId" content="FrontPage.Editor.Document">
-<style type="text/css">
-h1           { font-size: 24pt; font-weight: bold; margin-bottom: 4ex;  }
-h2           { font-size: 12pt; font-weight: bold; margin-top: 10ex; }
-h3           { font-size: 10pt; font-weight: bold; margin-top: 6ex }
-.zwischentitel { font-weight: bold; margin-top: 6ex }
-p            { font-size: 10pt; margin-top: 2ex; margin-bottom: 0  }
-td           { font-size: 10pt; margin-top: 2ex; margin-bottom: 0  }
-li           { font-size: 10pt }
-pre          { font-family: Lucida Console, monospace; font-size: 9pt; margin-left: 4ex; line-height: 1.2em; }
-.mono        { font-family: Lucida Console, monospace; font-size: 9pt }
-</style>
-<title>Spooler Historie</title>
-</head>
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet href="scheduler.xsl" type="text/xsl"?>
 
-<body>
+<!--$Id: history.xml,v 1.1 2005/01/03 02:26:19 jz Exp $-->
 
-<h1>Spooler Historie</h1>
-<p align="right">19. Mai 2002</p>
-<h2>1.&nbsp; Anforderung</h2>
+<description 
+    title               = "Historie" 
+    base_dir            = ""
+    author              = "$Author: jz $"
+    date                = "$Date: 2005/01/03 02:26:19 $"
+>
+
+<scheduler_keyword keyword="Historie"/>
+
+<table width="100%">
+    <tr>
+        <td align="right">19. Mai 2002</td>
+    </tr>
+</table>
+
+<h2>1.&#160; Anforderung</h2>
 <p>Jeder Joblauf soll verzeichnet werden. Festgehalten werden</p>
 <ul>
-<li>Satzkennung, das ist die Jobnummer, eindeutig für den Spooler-Lauf oder die
+<li>Satzkennung, das ist die Jobnummer, eindeutig fÃ¼r den Spooler-Lauf oder die
 Datenbank</li>
 <li>Spooler-Id</li>
 <li>Jobname</li>
 <li>Startzeit</li>
 <li>Endzeit (falls erreicht)</li>
-<li>Ein Anlass des Starts (es kann mehrere geben. Es wird der möglicherweise
+<li>Ein Anlass des Starts (es kann mehrere geben. Es wird der mÃ¶glicherweise
 wichtigste Anlass genommen)</li>
 <li>Parameter, in XML</li>
 <li>Anzahl Jobschritte (Anzahl der spooler_process-Aufrufe)</li>
@@ -40,17 +37,17 @@ wichtigste Anlass genommen)</li>
 nur auf Anforderung)</li>
 <li>Extra Felder</li>
 </ul>
-<p>An der TCP-Schnittstelle sind Auszüge der Historie lesbar.</p>
+<p>An der TCP-Schnittstelle sind AuszÃ¼ge der Historie lesbar.</p>
 <p class="zwischentitel">Spalten der Historie
 </p>
-<p>&nbsp;
+<p>&#160;
 </p>
 <table border="0" width="100%" cellspacing="0">
 <tr>
 <td width="13%">
 id
 </td>
-<td width="87%">Eindeutige Kennung des Jobs (Tabellenschlüssel)</td>
+<td width="87%">Eindeutige Kennung des Jobs (TabellenschlÃ¼ssel)</td>
 </tr>
 <tr>
 <td width="13%">spooler_id</td>
@@ -97,59 +94,59 @@ id
 <td width="87%">Jobprotokoll (nicht in der tabulierten Datei)</td>
 </tr>
 </table>
-<h2>2.&nbsp; Historiendatei</h2>
+<h2>2.&#160; Historiendatei</h2>
 <p>Die Historie kann in einfache Dateien oder in eine Datenbank geschrieben
 werden.</p>
-<h3>2.1&nbsp; Einfache Dateien (tabulierte Dateien)</h3>
+<h3>2.1&#160; Einfache Dateien (tabulierte Dateien)</h3>
 
-<p>Für jeden Job wird im Verzeichnis der Protokolldateien (Option <font class="mono">-log-dir=</font>)
+<p>FÃ¼r jeden Job wird im Verzeichnis der Protokolldateien (Option <font class="mono">-log-dir=</font>)
 eine Datei fortgeschrieben. Die Datenfelder werden durch Tabulator getrennt.
 Beim Start eines Jobs wird ein Satz geschrieben, der beim Ende mit den
-vollständigen Daten überschrieben wird.</p>
+vollstÃ¤ndigen Daten Ã¼berschrieben wird.</p>
 <p>Dateiname ist <i> log_dir</i><font class="mono">/history.</font><i>spoolerid</i><font class="mono">.job.</font><i>jobname</i><font class="mono">.txt</font></p>
 <p>Die Datei wird beim Spooler-Start neu angelegt. Eine bereits vorhandene Datei
 kann zurvor umbenannt und auch komprimiert werden.</p>
 <p> Der Spooler
 schreibt in die erste Zeile die Spaltennamen.</p>
-<p>Tabulatoren in den Daten (v.a. Fehlermeldung) werden unterdrückt.</p>
-<p>Jedes Feld hat für 1024 Zeichen Platz. Längere Einträge werden
+<p>Tabulatoren in den Daten (v.a. Fehlermeldung) werden unterdrÃ¼ckt.</p>
+<p>Jedes Feld hat fÃ¼r 1024 Zeichen Platz. LÃ¤ngere EintrÃ¤ge werden
 abschnitten.</p>
 <p class="zwischentitel">Archivierung</p>
-<p>Beim Start des Spoolers werden die Historien der Jobs überschrieben. Die
-vorhandenen Historien können aber mit dem Eintrag spooler_history in der
+<p>Beim Start des Spoolers werden die Historien der Jobs Ã¼berschrieben. Die
+vorhandenen Historien kÃ¶nnen aber mit dem Eintrag spooler_history in der
 factory.ini archiviert werden</p>
 <pre>[spooler]
 history_archive = yes|<u>no</u>|gzip
 
 [Job <i>jobname</i>]
 history_archive = yes|no|gzip</pre>
-<p><font class="mono">spooler_history=yes</font>&nbsp; benennt die Datei um.
-Dazu wird der Dateiname um einen Zeitstempel (sekundengenau) ergänzt.</p>
-<p><font class="mono">spooler_history=gzip&nbsp;</font> komprimiert die Datei
+<p><font class="mono">spooler_history=yes</font>&#160; benennt die Datei um.
+Dazu wird der Dateiname um einen Zeitstempel (sekundengenau) ergÃ¤nzt.</p>
+<p><font class="mono">spooler_history=gzip&#160;</font> komprimiert die Datei
 mit zlib (gzip) von Jean-loup Gailly [<a href="http://www.gzip.org/zlib/">http://www.gzip.org/zlib/</a>].
-Der Dateiname wird außer um den Zeitstempel um die Endung <font class="mono">.gz</font>
-ergänzt. Die Datei kann mit gzip dekomprimiert werden. Sie lässt sich auch mit
+Der Dateiname wird auÃŸer um den Zeitstempel um die Endung <font class="mono">.gz</font>
+ergÃ¤nzt. Die Datei kann mit gzip dekomprimiert werden. Sie lÃ¤sst sich auch mit
 der Hostware mit &quot;<font class="mono">nl | gzip | history.gz</font>&quot;
 lesen.</p>
-<h3>2.2&nbsp; Datenbank</h3>
+<h3>2.2&#160; Datenbank</h3>
 
 <p>Alle Daten werden in eine Tabelle geschrieben. Das Jobprotokoll wird in ein
-Blob geschrieben.&nbsp;</p>
+Blob geschrieben.&#160;</p>
 
 <p>
 Die Tabellename ist <font class="mono">spooler_history</font>. Wenn die Datei
 nicht vorhanden ist, wird sie als Datenbank angelegt. Wenn die Tabelle <font class="mono">spooler_history
-</font>nicht vorhanden ist, wird sie angelegt (das gilt nur für
+</font>nicht vorhanden ist, wird sie angelegt (das gilt nur fÃ¼r
 Access-Datenbanken).</p>
 
 <p>In der Tabelle <font class="mono">spooler_variables</font> wird in einem
-Eintrag die nächste freie Jobnummer gehalten.</p>
+Eintrag die nÃ¤chste freie Jobnummer gehalten.</p>
 
 <p>Die Datenbank wird verwendet, wenn die Option history_filename nicht gesetzt,
-aber db gesetzt ist.&nbsp;</p>
+aber db gesetzt ist.&#160;</p>
 
 <pre>[spooler]
-db = spooler.mdb                 <i>(dasselbe wie nächste Zeile)</i>
+db = spooler.mdb                 <i>(dasselbe wie nÃ¤chste Zeile)</i>
 db = odbc -create spooler.mdb</pre>
 
 <pre>[spooler]
@@ -158,8 +155,8 @@ db = odbc -db=spooler</pre>
 <p class="zwischentitel">need_db</p>
 
 <p>Mit dem Eintrag <font class="mono">need_db=no</font> kann eingestellt werden,
-dass der Spooler auch anlaufen soll, wenn die Datenbank sich nicht öffnen
-lässt. Voreingestellt ist <font class="mono">need_db=yes</font>.&nbsp;</p>
+dass der Spooler auch anlaufen soll, wenn die Datenbank sich nicht Ã¶ffnen
+lÃ¤sst. Voreingestellt ist <font class="mono">need_db=yes</font>.&#160;</p>
 
 <pre>[spooler]
 db = odbc -db=spooler
@@ -167,32 +164,32 @@ need_db = no</pre>
 
 <p>Wenn mit <font class="mono">db=</font> nur ein Datenbankdateiname und<font class="mono">
 log_dir=*stderr</font> eingestellt sind, kann die Datenbank mangels Verzeichnis
-nicht geöffnet werden. Bei <font class="mono">need_db=yes</font> startet dann
+nicht geÃ¶ffnet werden. Bei <font class="mono">need_db=yes</font> startet dann
 der Spooler nicht.</p>
 
 <p class="zwischentitel">Access-Datenbank wird automatisch angelegt</p>
 
 <p>Wenn bei <font class="mono">db=</font> nur ein einfacher Dateiname angegeben
-ist, stellt der Spooler ihm&nbsp; &quot;<font class="mono">odbc -create</font>&quot;
-voran.&nbsp;Damit wird eine Access-Datenbank automatisch angelegt (s. Dateityp
+ist, stellt der Spooler ihm&#160; &quot;<font class="mono">odbc -create</font>&quot;
+voran.&#160;Damit wird eine Access-Datenbank automatisch angelegt (s. Dateityp
 ODBC).</p>
 
 <p>In der Datenbank werden die Tabellen <font class="mono">spooler_history</font>
 und <font class="mono">spooler_variables</font> verwendet. Sie werden bei Bedarf
 eingerichtet, wobei die SQL-Syntax von Microsoft Access verwendet wird. Die
-Tabellennamen können in der factory.ini eingestellt werden:</p>
+Tabellennamen kÃ¶nnen in der factory.ini eingestellt werden:</p>
 
 <pre>[spooler]
 db_history_table   = <i>tabellenname</i> | <u>spooler_history</u>
 db_variables_table = <i>tabellenname</i> | <u>spooler_variables</u></pre>
 
-<p class="zwischentitel">Satz für Spooler-Start</p>
+<p class="zwischentitel">Satz fÃ¼r Spooler-Start</p>
 
 <p>Der Spooler schreibt beim Start einen Satz mit einer eigenen Id in die
-Historie. Beim Beenden trägt er in diesen Satz die Zeit ein, so dass ein Satz
-mit Start- und Endezeit des Spoolers vorliegt. Jobname ist &quot;<font class="mono">(Spooler)</font>&quot;.&nbsp;</p>
+Historie. Beim Beenden trÃ¤gt er in diesen Satz die Zeit ein, so dass ein Satz
+mit Start- und Endezeit des Spoolers vorliegt. Jobname ist &quot;<font class="mono">(Spooler)</font>&quot;.&#160;</p>
 
-<h3>2.3&nbsp; Konfiguration in der factory.ini</h3>
+<h3>2.3&#160; Konfiguration in der factory.ini</h3>
 
 <p>In der <font class="mono"> factory.ini</font>  lassen sich einstellen:</p>
 
@@ -217,8 +214,8 @@ history_archive    = no|yes|gzip</pre>
 <p>Die Einstellungen unter <font class="mono">[Job </font><i>jobname</i><font class="mono">]</font>
 haben Vorrang vor <font class="mono">[spooler]</font>.</p>
 
-<p> <font class="mono">history=no</font> unterdrückt die Historie. Wenn eine
-Datenbank angegeben ist, wird dennoch der Satz für den Spooler-Start
+<p> <font class="mono">history=no</font> unterdrÃ¼ckt die Historie. Wenn eine
+Datenbank angegeben ist, wird dennoch der Satz fÃ¼r den Spooler-Start
 geschrieben.</p>
 
 <p> <font class="mono">history_on_process</font> gibt die Anzahl der Aufrufe von <font class="mono">spooler_process()</font>
@@ -226,16 +223,16 @@ an, ab der ein Eintrag in die Historie geschrieben werden soll. Bei 1 wird ein
 Satz nicht geschrieben, wenn <font class="mono">spooler_open</font> false
 liefert.</p>
 
-<p><font class="mono">history_with_log</font> lässt das Jobprotokoll in die
+<p><font class="mono">history_with_log</font> lÃ¤sst das Jobprotokoll in die
 Datenbank mit aufnehmen. Wahlweise komprimiert. <i>In Oracle derzeit nicht
-möglich, weil das Datenbankfeld ein BLOB (statt CLOB) sein muss, was der
+mÃ¶glich, weil das Datenbankfeld ein BLOB (statt CLOB) sein muss, was der
 Dateityp odbc oder der Oracle-ODBC-Treiber nicht erkennt.</i></p>
 
-<h3>2.4&nbsp; Startanlässe (cause)</h3>
+<h3>2.4&#160; StartanlÃ¤sse (cause)</h3>
 
-<p>In der Historie enthält die Spalte cause den Anlass des Joblaufs:</p>
+<p>In der Historie enthÃ¤lt die Spalte cause den Anlass des Joblaufs:</p>
 
-<p>&nbsp;</p>
+<p>&#160;</p>
 
 <table border="0" width="100%" cellpadding="0" cellspacing="0">
 <tr>
@@ -243,70 +240,70 @@ Dateityp odbc oder der Oracle-ODBC-Treiber nicht erkennt.</i></p>
 <td width="82%" style="border-bottom-style: solid">Bedeutung</td>
 </tr>
 <tr>
-<td width="18%"><font class="mono">none</font>&nbsp;&nbsp;</td>
+<td width="18%"><font class="mono">none</font>&#160;&#160;</td>
 <td width="82%">Task ist nicht gestartet (das kommt in der Historie nicht
-vor)&nbsp;</td>
+vor)&#160;</td>
 </tr>
 <tr>
-<td width="18%"><font class="mono">period_once</font>&nbsp;&nbsp;</td>
-<td width="82%"><font class="mono">&lt;run_time once=&quot;yes&quot;&gt;</font>&nbsp;</td>
+<td width="18%"><font class="mono">period_once</font>&#160;&#160;</td>
+<td width="82%"><font class="mono">&lt;run_time once=&quot;yes&quot;&gt;</font>&#160;</td>
 </tr>
 <tr>
-<td width="18%"><font class="mono">period_single</font>&nbsp;&nbsp;</td>
-<td width="82%"><font class="mono">&lt;run_time single_start=&quot;</font>...<font class="mono">&quot;&gt;</font>&nbsp;</td>
+<td width="18%"><font class="mono">period_single</font>&#160;&#160;</td>
+<td width="82%"><font class="mono">&lt;run_time single_start=&quot;</font>...<font class="mono">&quot;&gt;</font>&#160;</td>
 </tr>
 <tr>
-<td width="18%"><font class="mono">period_repeat</font>&nbsp;&nbsp;</td>
-<td width="82%"><font class="mono">&lt;run_time repeat=&quot;</font>...<font class="mono">&quot;&gt;</font>&nbsp;</td>
+<td width="18%"><font class="mono">period_repeat</font>&#160;&#160;</td>
+<td width="82%"><font class="mono">&lt;run_time repeat=&quot;</font>...<font class="mono">&quot;&gt;</font>&#160;</td>
 </tr>
 <tr>
-<td width="18%"><font class="mono">job_repeat</font>&nbsp;&nbsp;</td>
-<td width="82%"><font class="mono">spooler_job.repeat=</font>...&nbsp;</td>
+<td width="18%"><font class="mono">job_repeat</font>&#160;&#160;</td>
+<td width="82%"><font class="mono">spooler_job.repeat=</font>...&#160;</td>
 </tr>
 <tr>
-<td width="18%"><font class="mono">queue</font>&nbsp;&nbsp;</td>
-<td width="82%"><font class="mono">spooler_job.start()</font> oder <font class="mono">&lt;start_job&gt;</font>&nbsp;</td>
+<td width="18%"><font class="mono">queue</font>&#160;&#160;</td>
+<td width="82%"><font class="mono">spooler_job.start()</font> oder <font class="mono">&lt;start_job&gt;</font>&#160;</td>
 </tr>
 <tr>
-<td width="18%"><font class="mono">queue_at</font>&nbsp;&nbsp;</td>
+<td width="18%"><font class="mono">queue_at</font>&#160;&#160;</td>
 <td width="82%">wie <font class="mono">queue</font>, aber mit bestimmter
 Zeitangabe (Option <font class="mono">at</font>)</td>
 </tr>
 <tr>
-<td width="18%"><font class="mono">directory</font>&nbsp;&nbsp;</td>
-<td width="82%">Eine Verzeichnisüberwachung (<font class="mono">start_when_directory_changed</font>)
-lässt den Job starten</td>
+<td width="18%"><font class="mono">directory</font>&#160;&#160;</td>
+<td width="82%">Eine VerzeichnisÃ¼berwachung (<font class="mono">start_when_directory_changed</font>)
+lÃ¤sst den Job starten</td>
 </tr>
 <tr>
-<td width="18%"><font class="mono">signal</font>&nbsp;&nbsp;</td>
-<td width="82%"><font class="mono">&lt;signal_object&gt;</font>&nbsp;</td>
+<td width="18%"><font class="mono">signal</font>&#160;&#160;</td>
+<td width="82%"><font class="mono">&lt;signal_object&gt;</font>&#160;</td>
 </tr>
 <tr>
-<td width="18%"><font class="mono">delay_after_error</font>&nbsp;&nbsp;&nbsp;&nbsp;</td>
-<td width="82%"><font class="mono">spooler_job.delay_after_error</font>&nbsp;&nbsp;</td>
+<td width="18%"><font class="mono">delay_after_error</font>&#160;&#160;&#160;&#160;</td>
+<td width="82%"><font class="mono">spooler_job.delay_after_error</font>&#160;&#160;</td>
 </tr>
 </table>
 
-<h2>3.&nbsp; Jobkennung und extra Felder</h2>
-<p>Jeder Job erhält eine Kennung. Wenn eine Datenbank verwendet wird, ermittelt
+<h2>3.&#160; Jobkennung und extra Felder</h2>
+<p>Jeder Job erhÃ¤lt eine Kennung. Wenn eine Datenbank verwendet wird, ermittelt
 der Spooler sie aus der Tabelle <font class="mono">spooler_variables</font>. Die
-Kennung ist dann für alle Spooler eindeutig, die diese Datenbanktabelle nutzen.
+Kennung ist dann fÃ¼r alle Spooler eindeutig, die diese Datenbanktabelle nutzen.
 Andernfalls wird eine fortlaufende Nummer vergeben. Der erste Job hat die Nummer
 1.</p>
 <p>Die Kennung kann im Skript mit der Eigenschaft id abgefragt werden:</p>
 <pre>meine_id = spooler_task.id</pre>
-<p>Die Historie kann weitere beliebige Felder aufnehmen, die der Job füllen
+<p>Die Historie kann weitere beliebige Felder aufnehmen, die der Job fÃ¼llen
 kann:</p>
 <pre>spooler_task.history_field( &quot;<i>feldname</i>&quot; ) = <i>wert</i></pre>
 <p>Das Feld <i>feldname</i> muss als Spalte in der tabulierten Datei oder in der
-Historientabelle bekannt sein. Die Großschreibung spielt keine Rolle.</p>
-<p>Wenn die Historie in einer Datenbank geführt wird, kann es eine Rolle
+Historientabelle bekannt sein. Die GroÃŸschreibung spielt keine Rolle.</p>
+<p>Wenn die Historie in einer Datenbank gefÃ¼hrt wird, kann es eine Rolle
 spielen, von welchem Typ <i>wert</i> ist, insbesondere ob Zahl oder Zeichenkette
 (bei Access spielt es keine Rolle).</p>
-<h3>3.1&nbsp; Extra Felder in der tabulierten Datei</h3>
+<h3>3.1&#160; Extra Felder in der tabulierten Datei</h3>
 
-<p>Die zusätzlichen Spalten werden in der<font class="mono"> factory.ini</font>
-bekannt gemacht&nbsp;</p>
+<p>Die zusÃ¤tzlichen Spalten werden in der<font class="mono"> factory.ini</font>
+bekannt gemacht&#160;</p>
 
 <pre>[spooler]
 history_columns = <i>spalteniste</i>
@@ -315,24 +312,24 @@ history_columns = <i>spalteniste</i>
 history_columns = <i>spaltenliste</i></pre>
 
 <p>Die <i>spaltenliste</i> ist eine durch Komma getrennte Liste von
-Spaltennamen, die der tabulierten Datei hinzugefügt werden sollen.</p>
+Spaltennamen, die der tabulierten Datei hinzugefÃ¼gt werden sollen.</p>
 
-<h3>3.2&nbsp; Extra Felder in der Datenbank</h3>
+<h3>3.2&#160; Extra Felder in der Datenbank</h3>
 
-<p>Die zusätzlichen Spalten in der Historientabelle werden automatisch erkannt.&nbsp;</p>
+<p>Die zusÃ¤tzlichen Spalten in der Historientabelle werden automatisch erkannt.&#160;</p>
 
 <p>Wenn der Spooler die Tabelle <font class="mono">spooler_history</font>
 anlegt, richtet er auch die extra Spalten ein, die in <font class="mono">history_columns</font>
-aufgeführt sind. Als Typ wird <font class="mono">char(250)</font> verwendet.</p>
+aufgefÃ¼hrt sind. Als Typ wird <font class="mono">char(250)</font> verwendet.</p>
 
-<h2>4.&nbsp; Lesen der Historie über die TCP-Schnittstelle</h2>
+<h2>4.&#160; Lesen der Historie Ã¼ber die TCP-Schnittstelle</h2>
 <pre>&lt;show_history job=&quot;<i>jobname</i>&quot; prev=&quot;<i>anzahl</i>|all &quot;what=&quot;all&quot;/&gt;</pre>
 
-<p>liefert rückwärts geordnet die letzten <i>anzahl</i>&nbsp;Einträge der Historie des angegeben
-Jobs <i>jobname</i>. Voreinstellung für <i>anzahl</i> ist 10. Alle Einträge
+<p>liefert rÃ¼ckwÃ¤rts geordnet die letzten <i>anzahl</i>&#160;EintrÃ¤ge der Historie des angegeben
+Jobs <i>jobname</i>. Voreinstellung fÃ¼r <i>anzahl</i> ist 10. Alle EintrÃ¤ge
 werden mit <font class="mono">tail=&quot;all&quot;</font> gelesen. Die Funktion
 braucht viel Speicherplatz, denn die Historie wird als XML-Dokument mit DOM im
-Speicher aufgebaut. Max. 1000 Einträge werden geliefert.</p>
+Speicher aufgebaut. Max. 1000 EintrÃ¤ge werden geliefert.</p>
 
 <p><font class="mono">what=&quot;all&quot;</font> liefert auch die
 Jobprotokolle.</p>
@@ -340,22 +337,22 @@ Jobprotokolle.</p>
 <p>Mit folgenden Varianten lassen sich Ausschnitte der Historie lesen. Das
 Attribut what kann immer angegeben werden.</p>
 
-<p>Um <i>anzahl</i> Einträge vor der <i>id</i> zu bekommen:</p>
+<p>Um <i>anzahl</i> EintrÃ¤ge vor der <i>id</i> zu bekommen:</p>
 
 <pre>&lt;show_history job=&quot;<i>jobname</i>&quot; id=&quot;<i>id</i>&quot; prev=&quot;<i>anzahl</i>&quot;/&gt;</pre>
 
-<p><br>
-Um <i>anzahl</i> Einträge nach der <i>id</i> zu bekommen:</p>
+<p><br/>
+Um <i>anzahl</i> EintrÃ¤ge nach der <i>id</i> zu bekommen:</p>
 
 <pre>&lt;show_history job=&quot;<i>jobname</i>&quot; id=&quot;<i>id</i>&quot; next=&quot;<i>anzahl</i>&quot;/&gt;</pre>
 
-<p><br>
+<p><br/>
 Um nur den Eintrag der <i>id</i> zu bekommen. Gut, wenn mit <font class="mono">what=&quot;all&quot;</font>
 das Jobprotokoll einer bestimmten Task gelesen werden soll.</p>
 
 <pre>&lt;show_history job=&quot;<i>jobname</i>&quot; id=&quot;<i>id</i>&quot;/&gt;</pre>
 
-<p><br>
+<p><br/>
 Das Ergebnis sind dann so aus:</p>
 
 <pre>&lt;history&gt;
@@ -372,20 +369,8 @@ Das Ergebnis sind dann so aus:</p>
     ...
 &lt;/history&gt;</pre>
 
-<h2>5.&nbsp; Fehlerbehandlung</h2>
+<h2>5.&#160; Fehlerbehandlung</h2>
 
-<p>Fehler beim Öffnen oder Schreiben der Historie werden ins Spooler-Protokoll
+<p>Fehler beim Ã–ffnen oder Schreiben der Historie werden ins Spooler-Protokoll
 geschrieben und ignoriert.</p>
-
-<p>&nbsp;</p>
-
-<p>&nbsp;</p>
-
-<HR SIZE=1>
-<FONT face="Arial" size="2">Dipl.-Inform. Joacim Zschimmer&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
-<A href="mailto:j@zsch.de">j@zsch.de</A>
-&nbsp; &nbsp; &nbsp; &nbsp;&nbsp;(030) 3470 2520&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;Zschimmer GmbH</FONT>
-
-</body>
-
-</html>
+</description>
