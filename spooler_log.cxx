@@ -1,4 +1,4 @@
-// $Id: spooler_log.cxx,v 1.3 2001/01/11 11:16:26 jz Exp $
+// $Id: spooler_log.cxx,v 1.4 2001/01/11 21:39:42 jz Exp $
 
 #include "../kram/sos.h"
 #include "../kram/sosdate.h"
@@ -27,7 +27,7 @@ Log::~Log()
 {
     Thread_semaphore::Guard guard = &_semaphore;
 
-    if( _file )  fclose( _file );
+    if( _file  &&  _file != stderr )  fclose( _file );
 }
 
 //-------------------------------------------------------------------------------Log::set_directory
@@ -37,7 +37,7 @@ void Log::set_directory( const string& directory )
     if( directory.empty() )  _directory = get_temp_path();
                        else  _directory = directory;
 
-    if( _directory.length() > 0  &&  _directory[_directory.length()-1] != '/'  &&  _directory[_directory.length()-1] != '\\' ) 
+    if( _directory.length() > 0  &&  ( _directory[_directory.length()-1] == '/'  ||  _directory[_directory.length()-1] == '\\' ) ) 
         _directory = _directory.substr( 0, _directory.length() - 1 );
 }
 
@@ -57,23 +57,29 @@ void Log::open_new( )
 {
     Thread_semaphore::Guard guard = &_semaphore;
 
-    if( _file )  fclose( _file );
+    if( _file  &&  _file != stderr )  fclose( _file );
     _filename = "";
 
-    Sos_optional_date_time time = now();
-    string filename = _directory;
+    if( _directory == "*stderr" )
+    {
+        _filename = "*stderr";
+        _file = stderr;
+    }
+    else
+    {
+        Sos_optional_date_time time = now();
+        string filename = _directory;
 
-    if( filename.length() > 0  &&  filename[filename.length()-1] != '/'  &&  filename[filename.length()-1] != '\\' )  filename += "/";
-
-    filename += "spooler-";
-    filename += time.formatted( "yyyy-mm-dd-HHMMSS" );
-    if( !_spooler->_spooler_id.empty() )  filename += "." + _spooler->_spooler_id;
-    filename += ".log";
+        filename += "/spooler-";
+        filename += time.formatted( "yyyy-mm-dd-HHMMSS" );
+        if( !_spooler->_spooler_id.empty() )  filename += "." + _spooler->_spooler_id;
+        filename += ".log";
     
-    _file = fopen( filename.c_str(), "w" );
-    if( !_file )  throw_errno( errno, filename.c_str() );
+        _file = fopen( filename.c_str(), "w" );
+        if( !_file )  throw_errno( errno, filename.c_str() );
 
-    _filename = filename;
+        _filename = filename;
+    }
 }
 
 //-----------------------------------------------------------------------------------------Log::log

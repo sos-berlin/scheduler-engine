@@ -1,4 +1,4 @@
-// $Id: spooler_xml.cxx,v 1.10 2001/01/10 12:43:24 jz Exp $
+// $Id: spooler_xml.cxx,v 1.11 2001/01/11 21:39:43 jz Exp $
 
 //#include <precomp.h>
 
@@ -66,6 +66,13 @@ void Script::operator = ( const xml::Element_ptr& element )
 {
     _language = as_string( element->getAttribute( "language" ) );
     _text = as_string( element->text );
+    
+    string use_engine = as_string( element->getAttribute( "use_engine" ) );
+    
+    if( use_engine == "task"   )  _reuse = reuse_task;
+    if( use_engine == "job"    )  _reuse = reuse_job;
+    if( use_engine == "global" )  _reuse = reuse_global;
+
 /*
     xml::Element_ptr text_element = element->firstChild;
     if( text_element == NULL )  throw_xc( "SPOOLER-107" );
@@ -211,9 +218,9 @@ Run_time::Run_time( const xml::Element_ptr& element )
 Job::Job( const xml::Element_ptr& element )
 : 
     _zero_(this+1),
-    _name               ( as_string( element->getAttribute( "name" ) ) ),
-    _run_time           ( default_single_element( element, "run_time" ) ),
-    _rerun              ( as_bool( as_string( element->getAttribute( "rerun" ) ) ) )
+    _name           ( as_string( element->getAttribute( "name" ) ) ),
+    _run_time       ( default_single_element( element, "run_time" ) ),
+    _rerun          ( as_bool( as_string( element->getAttribute( "rerun" ) ) ) )
 {
     string text;
 
@@ -311,6 +318,11 @@ void Spooler::load_xml()
         xml::Element_ptr e = spooler_config->firstChild;
         while( e )
         {
+            if( e->tagName == "script" )
+            {
+                _script = e;
+            }
+            else
             if( e->tagName == "object_set_classes" )
             {
                 load_object_set_classes_from_xml( &_object_set_class_list, e );

@@ -1,4 +1,4 @@
-// $Id: spooler_command.cxx,v 1.10 2001/01/11 12:21:18 jz Exp $
+// $Id: spooler_command.cxx,v 1.11 2001/01/11 21:39:42 jz Exp $
 
 #include "../kram/sos.h"
 #include "../kram/sleep.h"
@@ -141,6 +141,8 @@ xml::Element_ptr Command_processor::execute_modify_spooler( const xml::Element_p
         else
         if( cmd == "abort_immediately"     )  _exit(1);
         else
+      //if( cmd == "new_log"               )  _spooler->cmd_new_log();
+      //else
             throw_xc( "SPOOLER-106", cmd );
     }
     

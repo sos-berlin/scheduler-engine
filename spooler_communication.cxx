@@ -1,4 +1,4 @@
-// $Id: spooler_communication.cxx,v 1.6 2001/01/10 12:43:24 jz Exp $
+// $Id: spooler_communication.cxx,v 1.7 2001/01/11 21:39:42 jz Exp $
 
 //#include <precomp.h>
 
@@ -259,9 +259,9 @@ Communication::~Communication()
     }
 }
 
-//-----------------------------------------------------------------------------Communication::start
+//------------------------------------------------------------------------------Communication::bind
 
-void Communication::start()
+void Communication::bind()
 {
     struct sockaddr_in  sa;
     int                 ret;
@@ -269,53 +269,74 @@ void Communication::start()
     BOOL                true_ = 1;
 
 
-#   ifdef SYSTEM_WIN
-        WSADATA wsa_data;
-        ret = WSAStartup( 0x0101, &wsa_data );
-        if( ret )  throw_sos_socket_error( ret, "WSAStartup" );
-#   endif
-
-
     // UDP:
 
-    _udp_socket = socket( AF_INET, SOCK_DGRAM, 0 );
-    if( _udp_socket == SOCKET_ERROR )  throw_sos_socket_error( "socket" );
-    if( _udp_socket >= _nfds )  _nfds = _udp_socket + 1;
+    if( _udp_port != _spooler->_udp_port )
+    {
+        closesocket( _udp_socket ),  _udp_port = 0;
 
-    setsockopt( _udp_socket, SOL_SOCKET, SO_REUSEADDR, (const char*)&true_, sizeof true_ );
+        _udp_socket = socket( AF_INET, SOCK_DGRAM, 0 );
+        if( _udp_socket == SOCKET_ERROR )  throw_sos_socket_error( "socket" );
+        if( _udp_socket >= _nfds )  _nfds = _udp_socket + 1;
 
-    sa.sin_port        = htons( _spooler->_udp_port );
-    sa.sin_family      = AF_INET;
-    sa.sin_addr.s_addr = 0; // INADDR_ANY
+        setsockopt( _udp_socket, SOL_SOCKET, SO_REUSEADDR, (const char*)&true_, sizeof true_ );
 
-    ret = bind( _udp_socket, (struct sockaddr*)&sa, sizeof sa );
-    if( ret == SOCKET_ERROR )  throw_sos_socket_error( "udp-bind" );
+        sa.sin_port        = htons( _spooler->_udp_port );
+        sa.sin_family      = AF_INET;
+        sa.sin_addr.s_addr = 0; // INADDR_ANY
 
-    ret = ioctlsocket( _udp_socket, FIONBIO, &on );
-    if( ret == SOCKET_ERROR )  throw_sos_socket_error( "ioctl(FIONBIO)" );
+        ret = ::bind( _udp_socket, (struct sockaddr*)&sa, sizeof sa );
+        if( ret == SOCKET_ERROR )  throw_sos_socket_error( "udp-bind" );
+
+        ret = ioctlsocket( _udp_socket, FIONBIO, &on );
+        if( ret == SOCKET_ERROR )  throw_sos_socket_error( "ioctl(FIONBIO)" );
+
+        _udp_port = _spooler->_udp_port;
+    }
 
 
     // TCP: 
 
-    _listen_socket = socket( AF_INET, SOCK_STREAM, 0 );
-    if( _listen_socket == SOCKET_ERROR )  throw_sos_socket_error( "socket" );
-    if( _listen_socket >= _nfds )  _nfds = _listen_socket + 1;
+    if( _tcp_port != _spooler->_tcp_port )
+    {
+        closesocket( _listen_socket ),  _tcp_port = 0;
 
+        if( _listen_socket != SOCKET_ERROR )  closesocket( _listen_socket );
 
-    setsockopt( _listen_socket, SOL_SOCKET, SO_REUSEADDR, (const char*)&true_, sizeof true_ );
+        _listen_socket = socket( AF_INET, SOCK_STREAM, 0 );
+        if( _listen_socket == SOCKET_ERROR )  throw_sos_socket_error( "socket" );
+        if( _listen_socket >= _nfds )  _nfds = _listen_socket + 1;
 
-    sa.sin_port        = htons( _spooler->_tcp_port );
-    sa.sin_family      = AF_INET;
-    sa.sin_addr.s_addr = 0; // INADDR_ANY
+        setsockopt( _listen_socket, SOL_SOCKET, SO_REUSEADDR, (const char*)&true_, sizeof true_ );
 
-    ret = bind( _listen_socket, (struct sockaddr*)&sa, sizeof sa );
-    if( ret == SOCKET_ERROR )  throw_sos_socket_error( "tcp-bind" );
+        sa.sin_port        = htons( _spooler->_tcp_port );
+        sa.sin_family      = AF_INET;
+        sa.sin_addr.s_addr = 0; // INADDR_ANY
 
-    ret = listen( _listen_socket, 5 );
-    if( ret == SOCKET_ERROR )  throw_errno( get_errno(), "listen" );
+        ret = ::bind( _listen_socket, (struct sockaddr*)&sa, sizeof sa );
+        if( ret == SOCKET_ERROR )  throw_sos_socket_error( "tcp-bind" );
 
-    ret = ioctlsocket( _listen_socket, FIONBIO, &on );
-    if( ret == SOCKET_ERROR )  throw_sos_socket_error( "ioctl(FIONBIO)" );
+        ret = listen( _listen_socket, 5 );
+        if( ret == SOCKET_ERROR )  throw_errno( get_errno(), "listen" );
+
+        ret = ioctlsocket( _listen_socket, FIONBIO, &on );
+        if( ret == SOCKET_ERROR )  throw_sos_socket_error( "ioctl(FIONBIO)" );
+
+        _tcp_port = _spooler->_tcp_port;
+    }
+}
+
+//-----------------------------------------------------------------------------Communication::start
+
+void Communication::start()
+{
+#   ifdef SYSTEM_WIN
+        WSADATA wsa_data;
+        int ret = WSAStartup( 0x0101, &wsa_data );
+        if( ret )  throw_sos_socket_error( ret, "WSAStartup" );
+#   endif
+
+    bind();
 }
 
 //---------------------------------------------------------------------Communication::handle_socket
@@ -429,27 +450,35 @@ int Communication::run()
     return 0;
 }
 
-//-------------------------------------------------------------------------------------------thread
+//-----------------------------------------------------------------------------------------------go
 
-static ulong __stdcall thread( void* param )
+int Communication::go()
 {
-    ulong result;
+    int result;
 
     try 
     {
         HRESULT hr = CoInitialize(NULL);
         if( FAILED(hr) )  throw_ole( hr, "CoInitialize" );
 
-        result = ((Communication*)param)->run();
+        result = run();
     }
     catch( const Xc& x )
     {
-        ((Communication*)param)->_spooler->_log.msg( "Communication::thread:  " + x.what() );
+        _spooler->_log.msg( "Communication::thread:  " + x.what() );
         result = 1;
     }
 
     CoUninitialize();
+
     return result;
+}
+
+//-------------------------------------------------------------------------------------------thread
+
+static ulong __stdcall thread( void* param )
+{
+    return ((Communication*)param)->go();
 }
 
 //----------------------------------------------------------------------Communication::start_thread

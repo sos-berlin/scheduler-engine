@@ -1,10 +1,22 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 
-<!-- $Id: spooler_config.xml,v 1.17 2001/01/11 12:21:18 jz Exp $   (C) 2000 SOS GmbH Berlin -->
+<!-- $Id: spooler_config.xml,v 1.18 2001/01/11 21:39:42 jz Exp $   (C) 2000 SOS GmbH Berlin -->
 
 <!DOCTYPE spooler_config SYSTEM "spooler_config.dtd">
 
 <spooler_config tcp_port="4444">
+
+    <script language="VBScript"><![CDATA[
+
+class Global_class
+    function method()
+        method="Ich bin von der globalen Methode"
+    end function
+end class
+
+set global = new Global_class    
+
+    ]]></script>
 
     <object_set_classes>
 
@@ -16,11 +28,11 @@
                 <level_decl level="300" name="Gedruckt"/>
             </level_decls>
 
-            <script><![CDATA[
+            <script use_engine="task"><![CDATA[
 
 dir_name = "c:\tmp\spooler"
 set fso = createobject( "Scripting.FileSystemObject" )
-
+script_index = 0
 
 class Testobjekt
 
@@ -80,8 +92,9 @@ class Object_set_class
         dim object
         set object = new Testobjekt
         object.construct file_array(index)
-        log.msg "index=" & index & ", level=" & object.level
+        log.msg "index=" & index & ", level=" & object.level & ", script_index=" & script_index
         index = index + 1
+        script_index = script_index + 1
 
         set spooler_get = object
     end function
@@ -135,7 +148,7 @@ $log->msg( "*Job Perl" );
 
     sub construct
     {
-        print "Testobjekt::construct\n";
+        $main::log->msg( "Testobjekt::construct\n" );
         my $self = {};
         bless( $self );
         $self->{name} = shift;
@@ -272,7 +285,7 @@ sub spooler_process()
             </object_set>
 
             <run_time begin        = "07:11:55" 
-                      end          = "21:00" 
+                      end          = "24:00" 
                       retry_period = "9">
 
                 <date date="2001-01-02"/>
@@ -281,7 +294,7 @@ sub spooler_process()
                 <weekdays>
                     <day day="1"/>
                     <day day="2"/>
-                    <day day="0"/>
+                    <day day="4"/>
                 </weekdays>
 
                 <monthdays>
@@ -308,16 +321,16 @@ sub spooler_process()
 
         <job name="einfach" spooler_id="vb">
 
-            <script language="VBScript"><![CDATA[
+            <script language="VBScript" use_engine="task"><![CDATA[
 
 log.msg "*Job einfach"
 
 index = 1
 
 function step()
-    if index > 3 then step=false: exit function
-    log.msg "*Job einfach: step " & index
+    log.msg "*Job einfach: step " & index & ",  " & spooler_script.global.method()
     index = index + 1
+    if index > 3 then step=false: exit function
     step = true
 end function
 

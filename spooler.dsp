@@ -124,7 +124,7 @@ TargetName=spooler
 InputPath=.\spooler.odl
 
 "$(TargetName).tlb" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	mktyplib $(InputPath) /tlb $(OutDir)/spooler.tlb
+	mktyplib /nologo $(InputPath) /tlb $(OutDir)/spooler.tlb
 
 # End Custom Build
 
@@ -136,7 +136,7 @@ TargetName=spooler
 InputPath=.\spooler.odl
 
 "$(TargetName).tlb" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	mktyplib $(InputPath) /tlb $(OutDir)/spooler.tlb
+	mktyplib /nologo $(InputPath) /tlb $(OutDir)/spooler.tlb
 
 # End Custom Build
 

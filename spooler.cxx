@@ -1,6 +1,4 @@
-// $Id: spooler.cxx,v 1.21 2001/01/11 12:21:17 jz Exp $
-
-
+// $Id: spooler.cxx,v 1.22 2001/01/11 21:39:42 jz Exp $
 
 
 /*
@@ -23,10 +21,6 @@
 #   include <sys/timeb.h>
 //#endif
 
-#if defined SYSTEM_MICROSOFT
-    //CComModule com_module;
-    //CComModule& _Module = com_module;
-#endif
 
 
 namespace sos {
@@ -152,10 +146,6 @@ Object_set::~Object_set()
 
 void Object_set::open()
 {
-    _script_instance.init();
-    _script_instance.add_obj( new Com_task_log( _task ), "log" );
-    _script_instance.load();
-
     CComVariant object_set_vt;
 
     try
@@ -169,7 +159,7 @@ void Object_set::open()
 
     if( _use_objects )
     {
-         object_set_vt = _script_instance.call( "spooler_make_object_set" );
+        object_set_vt = _script_instance.call( "spooler_make_object_set" );
 
         if( object_set_vt.vt != VT_DISPATCH 
          || object_set_vt.pdispVal == NULL  )  throw_xc( "SPOOLER-103", _object_set_descr->_class_name );
@@ -202,8 +192,6 @@ void Object_set::close()
 {
     com_call( _dispatch, "spooler_close" );
     _dispatch = NULL;
-
-    _script_instance.close();
 }
 
 //----------------------------------------------------------------------------------Object_set::eof
@@ -387,7 +375,7 @@ Task::Task( Spooler* spooler, const Sos_ptr<Job>& job )
     _zero_(this+1), 
     _spooler(spooler), 
     _job(job),
-    _script_instance(&job->_script),
+    _job_script_instance(&job->_script),
     _log( &spooler->_log, this )
 {
     set_new_start_time();
@@ -434,6 +422,31 @@ void Task::step_error( const Xc& x )
     error( x );
 }
 
+//------------------------------------------------------------------------------Task::prepare_script
+
+void Task::prepare_script()
+{
+    Script_instance* s = NULL;
+
+    if( _object_set            )  s = &_object_set->_script_instance;
+    if( !_job->_script.empty() )  s = &_job_script_instance;
+
+    if( !s )  throw_xc( "SPOOLER-111" );
+    
+    if( s->_script->_reuse == Script::reuse_task )  _script_instance = NULL;
+
+    if( !_script_instance )
+    {
+        _script_instance = s;
+        _script_instance->init();
+
+        if( !_spooler->_script_instance._script->empty() )  _script_instance->add_obj( _spooler->_script_instance.dispatch(), "spooler_script" );
+        _script_instance->add_obj( new Com_task_log( this ), "log" );
+    
+        _script_instance->load();
+    }
+}
+
 //---------------------------------------------------------------------------------------Task::start
 
 bool Task::start()
@@ -443,21 +456,19 @@ bool Task::start()
     _spooler->_task_count++;
     _running_since = now();
 
-    if( _job->_object_set_descr )  _object_set = SOS_NEW( Object_set( _spooler, this, _job->_object_set_descr ) );
-
     try 
     {
-        if( _object_set ) 
+        if( _job->_object_set_descr ) 
         {
-            _object_set->open();
+            if( !_object_set  ||  _script_instance->_script->_reuse == Script::reuse_task ) 
+            {
+                _object_set = SOS_NEW( Object_set( _spooler, this, _job->_object_set_descr ) );
+            }
         }
 
-        if( !_job->_script.empty() )
-        {
-            _script_instance.init();
-            _script_instance.add_obj( new Com_task_log( this ), "log" );
-            _script_instance.load();
-        }
+        prepare_script();
+
+        if( _job->_object_set_descr )  _object_set->open();
 
         _step_count = 0;
         _next_start_time = max( _next_start_time + _job->_run_time._retry_period, now() );
@@ -483,20 +494,32 @@ void Task::end()
 
     try
     {
-        if( _object_set )
-        {
-            _object_set->close();
-        }
+        if( _object_set )  _object_set->close();
 
-        if( !_job->_script.empty() ) 
+        if( _script_instance  &&  _script_instance->_script->_reuse == Script::reuse_task )
         {
-            _script_instance.close();
+            _script_instance->close();
         }
     }
     catch( const Xc& x ) { end_error(x); }
 
     _state = s_pending;
     _spooler->_running_jobs_count--;
+}
+
+//----------------------------------------------------------------------------------------Task::stop
+
+void Task::stop()
+{
+    end();
+
+    try 
+    {
+        if( _script_instance )  _script_instance->close();
+    }
+    catch( const Xc& x ) { end_error(x); }
+
+    _state = s_stopped;
 }
 
 //----------------------------------------------------------------------------------------Task::step
@@ -513,7 +536,7 @@ bool Task::step()
     {
         if( !_job->_script.empty() ) 
         {
-            CComVariant result_vt = _script_instance.call( "step" );
+            CComVariant result_vt = _job_script_instance.call( "step" );
             result_vt.ChangeType( VT_BOOL );
             result = V_BOOL( &result_vt ) != 0;
         }
@@ -542,8 +565,7 @@ void Task::do_something()
 
     switch( _state_cmd.read_and_reset() )
     {
-        case sc_stop:       end(); 
-                            _state = s_stopped;
+        case sc_stop:       stop(); 
                             break;
 
         case sc_unstop:     _state = s_pending;
@@ -713,6 +735,18 @@ string Task::state_cmd_name( Task::State_cmd cmd )
     }
 }
 
+//---------------------------------------------------------------------------------Spooler::Spooler
+
+Spooler::Spooler() 
+: 
+    _zero_(this+1), 
+    _communication(this), 
+    _script_instance(&_script),
+    _command_processor(this), 
+    _log(this) 
+{
+}
+
 //-----------------------------------------------------------------------------------Spooler::start
 
 void Spooler::start()
@@ -722,7 +756,15 @@ void Spooler::start()
     _log.set_directory( _log_directory );
     _log.open_new();
     _log.msg( "Spooler::start" );
+
+    if( !_script_instance._script->empty() )
+    {
+        _script_instance.init();
+      //_script_instance.add_obj( new Com_task_log( this ), "log" );
+        _script_instance.load();
+    }
     
+
     FOR_EACH( Job_list, _job_list, it )
     {
         Sos_ptr<Task> task = SOS_NEW( Task( this, *it ) );
@@ -731,6 +773,31 @@ void Spooler::start()
     }
 
     _spooler_start_time = now();
+}
+
+//------------------------------------------------------------------------------------Spooler::stop
+
+void Spooler::stop()
+{
+    _state = s_stopping;
+
+    _log.msg( "Spooler::stop" );
+
+    {
+        FOR_EACH( Task_list, _task_list, it ) 
+        {
+            Task* task = *it;
+            task->stop();
+            it = _task_list.erase( it );
+        }
+    }
+
+    _object_set_class_list.clear();
+    _job_list.clear();
+
+    _script_instance.close();
+
+    _state = s_stopped;
 }
 
 //------------------------------------------------------------------------------------Spooler::step
@@ -766,7 +833,6 @@ void Spooler::wait()
         {
             Thread_semaphore::Guard guard = &_semaphore;
 
-            _next_start_time = latter_day;
             FOR_EACH( Task_list, _task_list, it ) 
             {
                 Task* task = *it;
@@ -814,7 +880,6 @@ void Spooler::run()
         {
             case sc_pause                 : _state = s_paused; 
                                             break;
-
             case sc_stop:
             case sc_terminate:
             case sc_terminate_and_restart : 
@@ -835,40 +900,6 @@ void Spooler::run()
     }
 }
 
-//------------------------------------------------------------------------------------Spooler::stop
-
-void Spooler::stop()
-{
-    _state = s_stopping;
-
-    _log.msg( "Spooler::stop" );
-
-    {
-        FOR_EACH( Task_list, _task_list, it ) 
-        {
-            Task* task = *it;
-            task->end();
-            it = _task_list.erase( it );
-        }
-    }
-
-    _object_set_class_list.clear();
-    _job_list.clear();
-
-    _state = s_stopped;
-}
-
-//----------------------------------------------------------------------------------Spooler::reload
-/*
-void Spooler::reload()
-{
-    _log.msg( "Spooler::reload" );
-
-    stop();
-    load();
-    start();
-}
-*/
 //--------------------------------------------------------------------------------Spooler::load_arg
 
 void Spooler::load_arg()
@@ -975,10 +1006,8 @@ int Spooler::launch( int argc, char** argv )
     {
         load();
 
-        if( _state_cmd != sc_reload )
-        {
-            _communication.start_thread();
-        }
+        if( _state_cmd == sc_reload )  _communication.rebind();
+                                 else  _communication.start_thread();
 
         _state_cmd = sc_none;
 

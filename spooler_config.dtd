@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- $Id: spooler_config.dtd,v 1.15 2001/01/09 22:39:02 jz Exp $   Joacim Zschimmer,  (C) 2000 SOS GmbH Berlin  -->
+<!-- $Id: spooler_config.dtd,v 1.16 2001/01/11 21:39:42 jz Exp $   Joacim Zschimmer,  (C) 2000 SOS GmbH Berlin  -->
 
 <!--     
 
@@ -10,8 +10,8 @@
 
 <!-- KONFIGURATION DES SPOOLERS -->
 
-<!ELEMENT spooler_config        ( object_set_classes, jobs? )>
-<!--ATTLIST spooler_config        log_file            CDATA #IMPLIED-->
+<!ELEMENT spooler_config        ( script?, object_set_classes, jobs? )>
+<!ATTLIST spooler_config        log_dir             CDATA #IMPLIED>
 <!ATTLIST spooler_config        tcp_port            CDATA "4444">       <!-- Für TCP-Kommandoschnittstelle -->
 <!ATTLIST spooler_config        udp_port            CDATA "4444">       <!-- Für UDP-Kommandoschnittstelle -->
 
@@ -29,7 +29,9 @@
 
 <!ELEMENT script                ( #PCDATA )>
 <!ATTLIST script                language            CDATA "VBScript">   <!-- Z.B. "VBScript", "JavaScript", "PerlScript" -->
-
+<!ATTLIST script                use_engine          (task|job) "task">  <!-- use_engine="task"  : Jeder Task eine Scripting Engine -->
+                                                                        <!-- use_engine="job"   : Allen Tasks dieses Jobs eine Scripting Engine -->
+                                                                        <!--[use_engine="global": Globale Scripting Engine des Spoolers verwenden]-->
 
 
 <!ELEMENT jobs                  ( job+ )>

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- $Id: spooler_answer.dtd,v 1.1 2001/01/09 22:39:37 jz Exp $   Joacim Zschimmer,  (C) 2000 SOS GmbH Berlin  -->
+<!-- $Id: spooler_answer.dtd,v 1.2 2001/01/11 21:39:42 jz Exp $   Joacim Zschimmer,  (C) 2000 SOS GmbH Berlin  -->
 
 <!--     
 
@@ -17,6 +17,9 @@
 <!ATTLIST state                 running_since       CDATA #IMPLIED>     <!-- yyyy-mm-dd HH:MM:SS -->
 <!ATTLIST state                 log_file            CDATA #IMPLIED>
 <!ATTLIST state                 sleeping_until      CDATA #REQUIRED>    <!-- yyyy-mm-dd HH:MM:SS -->
+<!ATTLIST state                 tasks               CDATA #IMPLIED>     <!-- Zahl seit Spooler-Start gestarteter Tasks -->
+<!ATTLIST state                 steps               CDATA #IMPLIED>     <!-- Zahl seit Spooler-Start erfolgreich ausgeführter Schritte -->
+<!ATTLIST state                 cpu_time            CDATA #IMPLIED>     <!-- 9.999 -->
 
 <!ELEMENT tasks                 ( task+ )>
 

@@ -1,4 +1,4 @@
-// $Id: spooler.h,v 1.20 2001/01/11 12:21:17 jz Exp $
+// $Id: spooler.h,v 1.21 2001/01/11 21:39:42 jz Exp $
 
 #ifndef __SPOOLER_H
 
@@ -161,15 +161,23 @@ struct Com_task_log : Icom_task_log, Sos_ole_object
 
 struct Script
 {
+    enum Reuse
+    {
+        reuse_task,
+        reuse_job,
+        reuse_global
+    };
                                 Script                      ()                              {}
                                 Script                      ( const xml::Element_ptr& e )   { *this = e; }
 
     void                        operator =                  ( const xml::Element_ptr& );
 
     bool                        empty                       () const                        { return _text.empty(); }
+    void                        clear                       ()                              { _language="", _text=""; }
 
     string                     _language;
     string                     _text;
+    Reuse                      _reuse;
 };
 
 //----------------------------------------------------------------------------------Script_instance
@@ -180,6 +188,7 @@ struct Script_instance
 
     void                        init                        ();
     void                        load                        ();
+    const CComPtr<IDispatch>&   dispatch                    () const                        { return _script_site->dispatch(); }
     void                        add_obj                     ( const CComPtr<IDispatch>&, const string& name );
     void                        close                       ();
     CComVariant                 call                        ( const char* name );
@@ -402,7 +411,9 @@ struct Task : Sos_self_deleting
                                 Task                        ( Spooler*, const Sos_ptr<Job>& );
 
     bool                        start                       ();
+    void                        prepare_script              ();
     void                        end                         ();
+    void                        stop                        ();
     bool                        step                        ();
 
     void                        do_something                ();
@@ -429,7 +440,8 @@ struct Task : Sos_self_deleting
     Fill_zero                  _zero_;
     Spooler*                   _spooler;
     Sos_ptr<Job>               _job;
-    Script_instance            _script_instance;
+    Script_instance            _job_script_instance;
+    Script_instance*           _script_instance;
     
     int                        _running_priority;
     int                        _step_count;
@@ -531,9 +543,13 @@ struct Communication
                                ~Communication               ();
 
     void                        start_thread                ();
+    void                        rebind                      ()                                      { bind(); }
+    int                         go                          ();
 
-    void                        start                       ();
+  private:
     int                         run                         ();
+    void                        bind                        ();
+    void                        start                       ();
     bool                        handle_socket               ( Channel* );
 
     Fill_zero                  _zero_;
@@ -546,6 +562,8 @@ struct Communication
     FD_SET                     _write_fds;
     Thread_semaphore           _semaphore;
     bool                       _terminate;
+    int                        _tcp_port;
+    int                        _udp_port;
 
     HANDLE                     _thread;
 };
@@ -596,7 +614,9 @@ struct Spooler
         sc_continue,            // s_suspended -> s_running
         sc__max
     };
-                                Spooler                     () : _zero_(this+1), _communication(this), _command_processor(this), _log(this) {}
+
+
+                                Spooler                     ();
 
     int                         launch                      ( int argc, char** argv );                                
     void                        load_arg                    ();
@@ -626,6 +646,8 @@ struct Spooler
     void                        start_jobs                  ();
 
     Fill_zero                  _zero_;
+    Script                     _script;
+    Script_instance            _script_instance;
     Object_set_class_list      _object_set_class_list;
     Job_list                   _job_list;
     Task_list                  _task_list;
