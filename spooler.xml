@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 
-<!-- $Id: spooler.xml,v 1.28 2001/02/08 11:21:15 jz Exp $   (C) 2001 SOS GmbH Berlin -->
+<!-- $Id: spooler.xml,v 1.29 2001/02/10 11:38:06 jz Exp $   (C) 2001 SOS GmbH Berlin -->
 
 <!DOCTYPE spooler SYSTEM "spooler.dtd">
 
@@ -436,6 +436,10 @@ sub spooler_exit()
             
                     <run_time repeat="1"/>
 
+                </job>
+
+                <job name="programm">
+                    <process file="c:\tmp\spooler.bat"/>
                 </job>
 
             </jobs>

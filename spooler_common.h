@@ -1,4 +1,4 @@
-// $Id: spooler_common.h,v 1.5 2001/02/08 11:21:15 jz Exp $
+// $Id: spooler_common.h,v 1.6 2001/02/10 11:38:07 jz Exp $
 
 #ifndef __SPOOLER_COMMON_H
 #define __SPOOLER_COMMON_H
@@ -9,6 +9,7 @@ namespace spooler {
 
 
 typedef uint                    Thread_id;                  // _beginthreadex()
+typedef DWORD                   Process_id;
 
 //-------------------------------------------------------------------------------------------Handle
 
@@ -18,12 +19,13 @@ struct Handle
                                 Handle                      ( HANDLE h = NULL )             : _handle(h) {}
                                ~Handle                      ()                              { close(); }
 
-        void                    operator =                  ( HANDLE h )                    { close(); _handle = h; }
-        void                    operator =                  ( ulong h )                     { close(); _handle = (HANDLE)h; }   // für _beginthreadex()
+        void                    operator =                  ( HANDLE h )                    { set_handle( h ); }
+        void                    operator =                  ( ulong h )                     { set_handle( (HANDLE)h ); }   // für _beginthreadex()
                                 operator HANDLE             () const                        { return _handle; }
                                 operator !                  () const                        { return _handle == 0; }
       //HANDLE*                 operator &                  ()                              { return &_handle; }
 
+        void                    set_handle                  ( HANDLE h )                    { close(); _handle = h; }
         HANDLE                  handle                      () const                        { return _handle; }
         void                    close                       ()                              { if(_handle) { CloseHandle(_handle); _handle=0; } }
 

@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.22 2001/02/08 11:21:15 jz Exp $
+// $Id: spooler_task.cxx,v 1.23 2001/02/10 11:38:07 jz Exp $
 /*
     Hier sind implementiert
 
@@ -219,7 +219,7 @@ void Job::close_task()
         if( _task )  _task->close();
         _task = NULL; 
         _params = new Com_variable_set; 
-        if( _state != s_stopped )  _state = s_ended;
+        if( _state != s_stopped )  set_state( s_ended );
     }
 
     if( _script_ptr  &&  _script_ptr->_reuse == Script::reuse_task )  close_engine();
@@ -231,7 +231,7 @@ void Job::init()
 {
     _log.set_prefix( "Job " + _name );
 
-    _state = s_pending;
+    set_state( s_pending );
 
     _script_ptr = _object_set_descr? &_object_set_descr->_class->_script
                                    : &_script;
@@ -255,10 +255,16 @@ void Job::create_task()
 
     _error = NULL;
     _repeat = 0;
-    _state = s_task_created;
 
-    _task = SOS_NEW( Task( _spooler, this ) );
+    if( !_process_filename.empty() )   _task = SOS_NEW( Process_task( _spooler, this ) );
+    else
+    if( _object_set_descr          )   _task = SOS_NEW( Object_set_task( _spooler, this ) );
+    else                             
+                                       _task = SOS_NEW( Job_script_task( _spooler, this ) );
+
     _com_task->set_task( _task );
+
+    set_state( s_task_created );
 }
 
 //---------------------------------------------------------------------------------------Job::start
@@ -317,22 +323,18 @@ void Job::load()
 
     _has_spooler_process = _script_instance.name_exists( spooler_process_name );
 
-    _state = s_loaded;
+    set_state( s_loaded );
 }
 
 //------------------------------------------------------------------------------------------Job::end
 
 void Job::end()
 {
-    if( _state == s_suspended )  _thread->_running_tasks_count++, _state = s_running;
-    if( _state != s_running   )  return;
-
-    if( _task )  _task->end();
+    if( _state == s_suspended )  set_state( s_running );
+    if( _state & ( s_running | s_running_process ) )  if( _task )  _task->end();
     
     close_task();
-
-    _state = s_ended;
-    _thread->_running_tasks_count--;
+    set_state( s_ended );
 }
 
 //-----------------------------------------------------------------------------------------Job::stop
@@ -344,7 +346,7 @@ void Job::stop()
     end();
     close_engine();
 
-    _state = s_stopped;
+    set_state( s_stopped );
 }
 
 //--------------------------------------------------------------------------Job::set_next_start_time
@@ -380,15 +382,15 @@ bool Job::do_something()
             case sc_stop:       stop(); 
                                 break;
 
-            case sc_unstop:     if( _state == s_stopped )  _state = s_pending;
+            case sc_unstop:     if( _state == s_stopped )  set_state( s_pending );
                                 break;
 
             case sc_start:      break;
 
-            case sc_suspend:    if( _state == s_running )  _state = s_suspended, _thread->_running_tasks_count--;
+            case sc_suspend:    if( _state == s_running )  set_state( s_suspended );
                                 break;
 
-            case sc_continue:   if( _state == s_suspended ) _state = s_running, _thread->_running_tasks_count++;
+            case sc_continue:   if( _state == s_suspended ) set_state( s_running );
                                 break;
             default: ;
         }
@@ -418,7 +420,7 @@ bool Job::do_something()
 
     if( !has_error() )
     {
-        if( _state == s_running )
+        if( _state & ( s_running | s_running_process ) )
         {
             Time now;
             bool ok = do_a_step | _task->_let_run;
@@ -444,7 +446,7 @@ bool Job::do_something()
     {
         close_task();
         set_next_start_time();
-        _state = _next_start_time == latter_day? s_stopped : s_pending;
+        set_state( _next_start_time == latter_day? s_stopped : s_pending );
     }
 
     return true;
@@ -471,6 +473,16 @@ void Job::set_error( const exception& x )
 {
     Xc xc ( "SOS-2000", x.what(), exception_name(x) );
     set_error( xc );
+}
+
+//-----------------------------------------------------------------------------------Job::set_state
+
+void Job::set_state( State new_state )
+{ 
+    if( new_state == s_running )  _thread->_running_tasks_count++;
+    if( _state    == s_running )  _thread->_running_tasks_count--;
+
+    _state = new_state;
 }
 
 //-----------------------------------------------------------------------------------Job::set_state
@@ -541,6 +553,7 @@ string Job::state_name( State state )
         case s_pending:     return "pending";
         case s_task_created:return "task_created";
         case s_running:     return "running";
+        case s_running_process:return "running_process";
         case s_suspended:   return "suspended";
         case s_ending:      return "ending";
         case s_ended:       return "ended";
@@ -668,8 +681,7 @@ void Task::close()
 {
     _job->_com_task->set_task( NULL );
 
-    // COM-Objekte entkoppeln, falls noch jemand eine Referenz darauf hat:
-    if( _com_object_set )  _com_object_set->close();
+    do_close();
 
     // Alle, die mit wait_until_terminated() auf diese Task warten, wecken:
     THREAD_LOCK( _terminated_events_lock )  FOR_EACH( vector<Event*>, _terminated_events, it )  (*it)->signal();
@@ -687,33 +699,35 @@ void Task::start()
 
     try 
     {
-        if( _job->_object_set_descr ) 
-        {
-            if( !_object_set ) 
-            {
-                _object_set = SOS_NEW( Object_set( _spooler, this, _job->_object_set_descr ) );
-                _com_object_set = new Com_object_set( _object_set );
-            }
-        }
-
-        if( !_job->_script_instance.loaded() )
-        {
-            _job->load();
-            if( _job->has_error() )  return;
-        }
-
-        if( _job->_object_set_descr )  _object_set->open();
-                                 else  _job->_script_instance.call_if_exists( spooler_open_name );
-
+        do_start();
         _opened = true;
     }
     catch( const Xc& x        ) { _job->set_error(x); return; }
     catch( const exception& x ) { _job->set_error(x); return; }
 
     if( _job->has_error() )  return;
+}
 
-    _job->_state = Job::s_running;
-    _job->_thread->_running_tasks_count++;
+//-----------------------------------------------------------------------------------------Task::end
+
+void Task::end()
+{
+    if( !_opened )  return;
+
+    _job->set_state( Job::s_ending );
+
+    try
+    {
+        do_end();
+    }
+    catch( const Xc& x        ) { _job->set_error(x); }
+    catch( const exception& x ) { _job->set_error(x); }
+
+    _opened = false;
+
+    on_error_on_success();
+
+    close();
 }
 
 //-------------------------------------------------------------------------Task::on_error_on_success
@@ -724,7 +738,7 @@ void Task::on_error_on_success()
     {
         try
         {
-            _job->_script_instance.call_if_exists( spooler_on_error_name );
+            do_on_error();
         }
         catch( const Xc& x        ) { _job->_log.error( string(spooler_on_error_name) + ": " + x.what() ); }
         catch( const exception& x ) { _job->_log.error( string(spooler_on_error_name) + ": " + x.what() ); }
@@ -733,35 +747,11 @@ void Task::on_error_on_success()
     {
         try
         {
-            _job->_script_instance.call_if_exists( spooler_on_success_name );
+            do_on_success();
         }
         catch( const Xc& x        ) { _job->set_error(x); }
         catch( const exception& x ) { _job->set_error(x); }
     }
-}
-
-//-----------------------------------------------------------------------------------------Task::end
-
-void Task::end()
-{
-    if( !_opened )  return;
-
-    _job->_state = Job::s_ending;
-
-    try
-    {
-        if( _object_set )  _object_set->close();
-                     else  _job->_script_instance.call_if_exists( spooler_close_name );
-    }
-    catch( const Xc& x        ) { _job->set_error(x); }
-    catch( const exception& x ) { _job->set_error(x); }
-
-    _object_set = NULL;
-    _opened = false;
-
-    on_error_on_success();
-
-    close();
 }
 
 //----------------------------------------------------------------------------------------Task::step
@@ -772,16 +762,7 @@ bool Task::step()
 
     try 
     {
-        if( _object_set )
-        {
-            result = _object_set->step( _job->_output_level );
-        }
-        else 
-        {
-            if( _job->_has_spooler_process )  result = check_spooler_process_result( _job->_script_instance.call( spooler_process_name ) );
-                                        else  result = false;
-            
-        }
+        result = do_step();
 
         _job->_thread->_step_count++;
         _step_count++;
@@ -812,6 +793,152 @@ bool Task::wait_until_terminated( double wait_time )
     { THREAD_LOCK( _terminated_events_lock )  _terminated_events.erase( &_terminated_events[i] ); }
 
     return result;
+}
+
+//-----------------------------------------------------------------------Script_task::do_on_success
+
+void Script_task::do_on_success()
+{
+    _job->_script_instance.call_if_exists( spooler_on_success_name );
+}
+
+//-----------------------------------------------------------------Script_task::on_error_on_success
+
+void Script_task::do_on_error()
+{
+    _job->_script_instance.call_if_exists( spooler_on_error_name );
+}
+
+//------------------------------------------------------------------------Object_set_task::do_close
+
+void Object_set_task::do_close()
+{
+    // COM-Objekte entkoppeln, falls noch jemand eine Referenz darauf hat:
+    if( _com_object_set )  _com_object_set->close();
+}
+
+//------------------------------------------------------------------------Object_set_task::do_start
+
+void Object_set_task::do_start()
+{
+    if( !_object_set ) 
+    {
+        _object_set = SOS_NEW( Object_set( _spooler, this, _job->_object_set_descr ) );
+        _com_object_set = new Com_object_set( _object_set );
+    }
+
+    if( !_job->_script_instance.loaded() )
+    {
+        _job->load();
+        if( _job->has_error() )  return;
+    }
+
+    _object_set->open();
+
+    _job->set_state( Job::s_running );
+}
+
+//--------------------------------------------------------------------------Object_set_task::do_end
+
+void Object_set_task::do_end()
+{
+    _object_set->close();
+    _object_set = NULL;
+}
+
+//-------------------------------------------------------------------------Object_set_task::do_step
+
+bool Object_set_task::do_step()
+{
+    return _object_set->step( _job->_output_level );
+}
+
+//------------------------------------------------------------------------Job_script_task::do_start
+
+void Job_script_task::do_start()
+{
+    if( !_job->_script_instance.loaded() )
+    {
+        _job->load();
+        if( _job->has_error() )  return;
+    }
+
+    _job->_script_instance.call_if_exists( spooler_open_name );
+
+    _job->set_state( Job::s_running );
+}
+
+//--------------------------------------------------------------------------Job_script_task::do_end
+
+void Job_script_task::do_end()
+{
+    _job->_script_instance.call_if_exists( spooler_close_name );
+}
+
+//-------------------------------------------------------------------------Job_script_task::do_step
+
+bool Job_script_task::do_step()
+{
+    if( _job->_has_spooler_process )  
+        return check_spooler_process_result( _job->_script_instance.call( spooler_process_name ) );
+    else
+        return false;
+}
+
+//----------------------------------------------------------------------------Process_task::do_start
+
+void Process_task::do_start()
+{
+    PROCESS_INFORMATION process_info; 
+    STARTUPINFO         startup_info; 
+    BOOL                ok;
+
+    memset( &process_info, 0, sizeof process_info );
+
+    memset( &startup_info, 0, sizeof startup_info );
+    startup_info.cb = sizeof startup_info; 
+
+    string command_line = _job->_process_filename + " " + _job->_process_param;
+
+    ok = CreateProcess( _job->_process_filename.c_str(),  // application name
+                        (char*)command_line.c_str(),      // command line 
+                        NULL,                       // process security attributes 
+                        NULL,                       // primary thread security attributes 
+                        FALSE,                      // handles are inherited?
+                        0,                          // creation flags 
+                        NULL,                       // use parent's environment 
+                        NULL,                       // use parent's current directory 
+                        &startup_info,              // STARTUPINFO pointer 
+                        &process_info );            // receives PROCESS_INFORMATION 
+    if( !ok )  throw_mswin_error( "CreateProcess", _job->_process_filename.c_str() );
+
+    CloseHandle( process_info.hThread );
+
+    _process_id = process_info.dwProcessId;
+    _process_handle = process_info.hProcess;
+    _process_handle.set_name( "Process " + _job->_process_filename );
+    _process_handle.add_to( &_job->_thread->_wait_handles );
+
+    _job->set_state( Job::s_running_process );
+}
+
+//-----------------------------------------------------------------------------Process_task::do_end
+
+void Process_task::do_end()
+{
+    DWORD exit_code;
+    BOOL ok = GetExitCodeProcess( _process_handle, &exit_code );
+    if( !ok )  throw_mswin_error( "GetExitCodeProcess" );
+    _process_handle.close();
+    _result = (int)exit_code;
+    if( exit_code )  throw_xc( "SPOOLER-126", exit_code );
+}
+
+//----------------------------------------------------------------------------Process_task::do_step
+
+bool Process_task::do_step()
+{
+    return !_process_handle.signaled();
 }
 
 //-------------------------------------------------------------------------------------------------

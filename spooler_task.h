@@ -1,4 +1,4 @@
-// $Id: spooler_task.h,v 1.9 2001/02/08 11:21:16 jz Exp $
+// $Id: spooler_task.h,v 1.10 2001/02/10 11:38:07 jz Exp $
 
 #ifndef __SPOOLER_TASK_H
 #define __SPOOLER_TASK_H
@@ -105,6 +105,7 @@ struct Job : Sos_self_deleting
         s_pending,              // Warten auf Start
         s_task_created,
         s_running,              // Läuft
+        s_running_process,      // Läuft in einem externen Prozess, auf dessen Ende nur gewartet wird
         s_suspended,            // Angehalten
         s_ending,               // end()
         s_ended,
@@ -176,6 +177,10 @@ struct Job : Sos_self_deleting
 
     friend struct               Object_set;
     friend struct               Task;
+    friend struct               Script_task;
+    friend struct               Job_script_task;
+    friend struct               Object_set_task;
+    friend struct               Process_task;
     friend struct               Com_job;
     friend struct               Thread;
 
@@ -188,12 +193,12 @@ struct Job : Sos_self_deleting
 
     Thread_semaphore           _lock;
 
-    Sos_ptr<Object_set_descr>  _object_set_descr;
+    Sos_ptr<Object_set_descr>  _object_set_descr;           // Job nutzt eine Objektemengeklasse
     Level                      _output_level;
-    Script                     _script;
+    Script                     _script;                     // Job hat ein eigenes Skript
+    string                     _process_filename;           // Job ist ein externes Programm
+    string                     _process_param;              // Parameter für das Programm
     Run_time                   _run_time;
-    bool                       _stop_at_end_of_duration;
-    bool                       _continual;
     int                        _priority;
 
     Script*                    _script_ptr;
@@ -211,7 +216,7 @@ struct Job : Sos_self_deleting
     Prefix_log                 _log;
     CComPtr<Com_job>           _com_job;
     CComPtr<Com_log>           _com_log;
-    CComPtr<Com_task>          _com_task;
+    CComPtr<Com_task>          _com_task;                   // Objekt bleibt, Inhalt wechselt über die Tasks hinweg
     Xc_copy                    _error;
     Sos_ptr<Task>              _task;                       // Es kann nur eine Task geben. Zirkel: _task->_job == this
 };
@@ -232,6 +237,7 @@ struct Task : Sos_self_deleting
     bool                        step                        ();
     void                        on_error_on_success         ();
 
+
     bool                        wait_until_terminated       ( double wait_time = latter_day );
 
     Job*                        job                         ()                              { return _job; }
@@ -241,6 +247,13 @@ struct Task : Sos_self_deleting
     friend struct               Com_task;
 
   protected:
+    virtual void                do_close                    ()                              {}
+    virtual void                do_start                    () = 0;
+    virtual void                do_end                      () = 0;
+    virtual bool                do_step                     () = 0;
+    virtual void                do_on_success               () = 0;
+    virtual void                do_on_error                 () = 0;
+
     Fill_zero                  _zero_;
     Spooler*                   _spooler;
     Sos_ptr<Job>               _job;                        // Zirkel!
@@ -254,8 +267,6 @@ struct Task : Sos_self_deleting
 
     Time                       _running_since;
 
-    Sos_ptr<Object_set>        _object_set;
-    CComPtr<Com_object_set>    _com_object_set;
     CComPtr<spooler_com::Ivariable_set> _params;
     CComVariant                _result;
     Xc_copy                    _error;
@@ -265,6 +276,65 @@ struct Task : Sos_self_deleting
 };
 
 typedef list< Sos_ptr<Task> >   Task_list;
+
+//--------------------------------------------------------------------------------------Script_task
+
+struct Script_task : Task
+{
+                                Script_task                 ( Spooler* sp, const Sos_ptr<Job>& j ) : Task(sp,j) {}
+
+  //void                        do_start                    ();
+  //void                        do_end                      ();
+  //bool                        do_step                     ();
+    void                        do_on_success               ();
+    void                        do_on_error                 ();
+};
+
+//----------------------------------------------------------------------------------Object_set_task
+
+struct Object_set_task : Script_task
+{
+                                Object_set_task             ( Spooler* sp, const Sos_ptr<Job>& j ) : Script_task(sp,j) {}
+
+    void                        do_close                    ();
+    void                        do_start                    ();
+    void                        do_end                      ();
+    bool                        do_step                     ();
+  //void                        do_on_success               ();
+  //void                        do_on_error                 ();
+
+    Sos_ptr<Object_set>        _object_set;
+    CComPtr<Com_object_set>    _com_object_set;
+};
+
+//----------------------------------------------------------------------------------Job_script_task
+
+struct Job_script_task : Script_task
+{
+                                Job_script_task             ( Spooler* sp, const Sos_ptr<Job>& j ) : Script_task(sp,j) {}
+
+    void                        do_start                    ();
+    void                        do_end                      ();
+    bool                        do_step                     ();
+  //void                        do_on_success               ();
+  //void                        do_on_error                 ();
+};
+
+//-------------------------------------------------------------------------------------Process_task
+
+struct Process_task : Task
+{
+                                Process_task                ( Spooler* sp, const Sos_ptr<Job>& j ) : Task(sp,j) {}
+        
+    void                        do_start                    ();
+    void                        do_end                      ();
+    bool                        do_step                     ();
+    void                        do_on_success               ()                                  {}
+    void                        do_on_error                 ()                                  {}
+
+    Process_id                 _process_id;
+    Event                      _process_handle;
+};
 
 //-------------------------------------------------------------------------------------------------
 

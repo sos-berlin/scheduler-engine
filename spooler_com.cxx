@@ -1,4 +1,4 @@
-// $Id: spooler_com.cxx,v 1.9 2001/02/08 11:21:15 jz Exp $
+// $Id: spooler_com.cxx,v 1.10 2001/02/10 11:38:06 jz Exp $
 /*
     Hier sind implementiert
 
@@ -284,7 +284,8 @@ STDMETHODIMP Com_task::get_object_set( Iobject_set** result )
             if( !_task )  throw_xc( "SPOOLER-122" );
             if( GetCurrentThreadId() != _task->_job->thread()->_thread_id )  return E_ACCESSDENIED;
 
-            THREAD_LOCK( _task->_lock )  *result = _task->_com_object_set;
+            if( !_task->_job->object_set_descr() )  return E_ACCESSDENIED;
+            THREAD_LOCK( _task->_lock )  *result = (dynamic_cast<Object_set_task*>(+_task))->_com_object_set;
             if( *result )  (*result)->AddRef();
         }
     }
