@@ -1,4 +1,4 @@
-// $Id: spooler_module.h,v 1.44 2003/09/24 14:58:10 jz Exp $
+// $Id: spooler_module.h,v 1.45 2003/09/26 11:31:17 jz Exp $
 
 #ifndef __SPOOLER_MODULE_H
 #define __SPOOLER_MODULE_H
@@ -138,6 +138,7 @@ struct Module : Object
     ptr<java::Vm>              _java_vm;
     string                     _java_class_name;            // <script java_class="...">
     bool                       _recompile;                  // <script recompile="..">    Immer kompilieren
+    bool                       _compiled;
 
     jclass                     _java_class;
     typedef map<string,jmethodID>  Method_map;

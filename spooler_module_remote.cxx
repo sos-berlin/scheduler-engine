@@ -1,4 +1,4 @@
-// $Id: spooler_module_remote.cxx,v 1.37 2003/09/24 14:41:00 jz Exp $
+// $Id: spooler_module_remote.cxx,v 1.38 2003/09/26 11:31:18 jz Exp $
 /*
     Hier sind implementiert
 
@@ -412,7 +412,7 @@ bool Remote_module_instance_proxy::continue_async_operation( Operation* operatio
                 params_array[3] = "java_class="      + _module->_java_class_name;
                 params_array[4] = "java_class_path=" + _module->_spooler->_java_vm->class_path();
                 params_array[5] = "java_work_dir="   + _module->_spooler->_java_vm->work_dir();
-                params_array[6] = "recompile="       + as_string(_module->_recompile);
+                params_array[6] = "recompile="       + as_string( _module->_recompile && !_module->_compiled );
                 params_array[7] = "script="          + _module->_source.dom_doc().xml();
             }
 
@@ -429,6 +429,8 @@ bool Remote_module_instance_proxy::continue_async_operation( Operation* operatio
         {
             operation->set_async_child( NULL );
             _remote_instance->call__end();
+
+            _module->_compiled = true;
           //something_done = true;
         }
             

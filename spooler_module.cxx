@@ -1,4 +1,4 @@
-// $Id: spooler_module.cxx,v 1.48 2003/09/24 14:58:10 jz Exp $
+// $Id: spooler_module.cxx,v 1.49 2003/09/26 11:31:17 jz Exp $
 /*
     Hier sind implementiert
 
@@ -153,6 +153,7 @@ void Module::set_dom_source_only( const xml::Element_ptr& element, const Time& x
 void Module::set_source_only( const Source_with_parts& source )
 {
     _source = source;
+    _compiled = false;
 
     switch( _kind )
     {
