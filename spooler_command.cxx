@@ -1,4 +1,4 @@
-// $Id: spooler_command.cxx,v 1.94 2003/09/26 06:30:27 jz Exp $
+// $Id: spooler_command.cxx,v 1.95 2003/09/27 08:45:17 jz Exp $
 /*
     Hier ist implementiert
 
@@ -149,6 +149,9 @@ xml::Element_ptr Command_processor::execute_show_state( const xml::Element_ptr& 
     char buffer [30];
     sprintf( buffer, "%-.3lf", cpu_time ); 
     state_element.setAttribute( "cpu_time"             , buffer );
+
+    state_element.setAttribute( "loop"                 , _spooler->_loop_counter );
+    state_element.setAttribute( "waits"                , _spooler->_wait_counter );
 
     state_element.appendChild( execute_show_jobs( show ) );
   //state_element.appendChild( execute_show_threads( show ) );

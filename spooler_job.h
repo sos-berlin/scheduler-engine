@@ -1,4 +1,4 @@
-// $Id: spooler_job.h,v 1.7 2003/09/26 10:46:41 jz Exp $
+// $Id: spooler_job.h,v 1.8 2003/09/27 08:45:17 jz Exp $
 
 #ifndef __SPOOLER_JOB_H
 #define __SPOOLER_JOB_H
@@ -233,7 +233,7 @@ struct Job : Sos_self_deleting
     static string               state_cmd_name              ( State_cmd );
     static State_cmd            as_state_cmd                ( const string& );
 
-    void                        set_state_text              ( const string& text )                  { _state_text = text; _log.debug9( "state_text = " + text ); }
+    void                        set_state_text              ( const string& text )                  { THREAD_LOCK( _lock )  _state_text = text, _log.debug9( "state_text = " + text ); }
 
     void                        set_error_xc                ( const Xc& );
     void                        set_error_xc_only           ( const Xc& );

@@ -1,4 +1,4 @@
-// $Id: spooler_job.cxx,v 1.28 2003/09/26 14:11:29 jz Exp $
+// $Id: spooler_job.cxx,v 1.29 2003/09/27 08:45:17 jz Exp $
 /*
     Hier sind implementiert
 
@@ -208,33 +208,36 @@ void Job::init2()
 
 void Job::close()
 {
-    clear_when_directory_changed();
-
-    Z_FOR_EACH( Task_list, _running_tasks, t )
+    THREAD_LOCK( _lock )
     {
-        Task* task = *t;
-        task->close();
-    }
+        clear_when_directory_changed();
 
-    _running_tasks.clear();
-
-    _task_queue.clear();
-
-    Z_FOR_EACH( Module_instance_vector, _module_instances, m )
-    {
-        if( *m ) 
+        Z_FOR_EACH( Task_list, _running_tasks, t )
         {
-            (*m)->close();
-            *m = NULL;
+            Task* task = *t;
+            task->close();
         }
+
+        _running_tasks.clear();
+
+        _task_queue.clear();
+
+        Z_FOR_EACH( Module_instance_vector, _module_instances, m )
+        {
+            if( *m ) 
+            {
+                (*m)->close();
+                *m = NULL;
+            }
+        }
+
+        _log.close();
+        _history.close();
+
+        // COM-Objekte entkoppeln, falls noch jemand eine Referenz darauf hat:
+        if( _com_job  )  _com_job->close(),         _com_job  = NULL;
+      //if( _com_log  )  _com_log->close(),         _com_log  = NULL;
     }
-
-    _log.close();
-    _history.close();
-
-    // COM-Objekte entkoppeln, falls noch jemand eine Referenz darauf hat:
-    if( _com_job  )  _com_job->close(),         _com_job  = NULL;
-  //if( _com_log  )  _com_log->close(),         _com_log  = NULL;
 }
 
 //-------------------------------------------------------------------------Job::jobname_as_filename
@@ -384,30 +387,20 @@ Sos_ptr<Task> Job::dequeue_task( Time now )
     return task;
 }
 
-//------------------------------------------------------------------------------------Job::run_task
-/*
-void Job::run_task( const Sos_ptr<Task>& task )
-{
-    _running_tasks.push_back( task );
-
-    task->attach_to_a_thread();
-
-    reset_error();
-    _repeat = 0;
-}
-*/
 //----------------------------------------------------------------------Job::remove_from_task_queue
 
 void Job::remove_from_task_queue( Task* task )
 {
     THREAD_LOCK( _lock )
-    FOR_EACH( Task_queue, _task_queue, it )  
     {
-        if( +*it == task )  
+        FOR_EACH( Task_queue, _task_queue, it )  
         {
-            _log( task->obj_name() + " aus der Warteschlange entfernt" );
-            _task_queue.erase( it );
-            break;
+            if( +*it == task )  
+            {
+                _log( task->obj_name() + " aus der Warteschlange entfernt" );
+                _task_queue.erase( it );
+                break;
+            }
         }
     }
 }
@@ -497,48 +490,10 @@ bool Job::read_script()
     return true;
 }
 
-//-----------------------------------------------------------------------------------------Job::end
-/*
-void Job::end()
-{
-    if( !_state )  return;
-
-    set_mail_defaults();      // Vor spooler_on_error() bzw. spooler_on_success(); eMail wird in finish() verschickt
-
-
-    if( _state == s_suspended  
-     || _state == s_running_delayed 
-     || _state == s_running_waiting_for_order )  set_state( s_running );
-    
-    if( _state == s_start_task
-     || _state == s_starting
-     || _state == s_running  
-     || _state == s_running_process )  
-    {
-        if( _task )  _task->end();
-    }
-    
-    close_task();
-
-    if( _state != s_stopped )  set_state( s_ended );
-}
-*/
 //----------------------------------------------------------------------------------------Job::stop
 
 void Job::stop( bool end_all_tasks )
 {
-    if( _state != s_stopping  &&  _state != s_stopped )
-    {
-/*
-        try 
-        {
-            if( _task )  _task->do_stop();
-        }
-        catch( const exception& x )  { set_error(x); }
-*/
-    }
-
-
     if( end_all_tasks )
     {
         Z_FOR_EACH( Task_list, _running_tasks, t )
@@ -550,11 +505,6 @@ void Job::stop( bool end_all_tasks )
 
     set_state( _running_tasks.size() > 0? s_stopping : s_stopped );
 
-  //end();
-  //close_engine();
-
-    // Kein Signal mehr soll kommen, wenn Job gestoppt:
-    //_event.close();
     clear_when_directory_changed();
 }
 
@@ -562,14 +512,8 @@ void Job::stop( bool end_all_tasks )
 
 void Job::reread()
 {
-    //_close_engine = true;
-    //close_task();
-
     _log( "Skript wird erneut gelesen (<include> wird erneut ausgeführt)" );
     read_script();
-
-    //set_state( s_pending );
-    //init2();
 }
 
 //---------------------------------------------------------------------------Job::execute_state_cmd
@@ -578,7 +522,7 @@ bool Job::execute_state_cmd()
 {
     bool something_done = false;
 
-    //THREAD_LOCK( _lock )
+    THREAD_LOCK( _lock )
     {
         if( _state_cmd )
         {
@@ -692,23 +636,13 @@ void Job::clear_when_directory_changed()
     }
 }
 
-//-------------------------------------------------------------------------------Job::set_next_time
-/*
-void Job::set_next_time( Time time )
-{
-    THREAD_LOCK( _lock )
-    {
-        _next_time = min( _next_time, time );
-    }
-}
-*/
 //-------------------------------------------------------------------------------Job::select_period
 
 void Job::select_period( Time now )
 {
     if( now >= _period.end() )       // Periode abgelaufen?
     {
-        _period = _run_time.next_period(now);  
+        THREAD_LOCK( _lock )  _period = _run_time.next_period(now);  
 
         if( _period.begin() != latter_day )
         {
@@ -731,17 +665,18 @@ bool Job::is_in_period( Time now )
 
 void Job::set_next_start_time( Time now, bool repeat )
 {
+    Time   next_start_time = _next_start_time;
     string msg;
 
     if( order_controlled() ) 
     {
-        _next_start_time = latter_day;
+        next_start_time = latter_day;
     }
     else
     if( _state == s_stopped && _delay_until )
     {
-        _next_start_time = _period.next_try( _delay_until );
-        if( _spooler->_debug )  msg = "Wiederholung wegen delay_after_error: " + _next_start_time.as_string();
+        next_start_time = _period.next_try( _delay_until );
+        if( _spooler->_debug )  msg = "Wiederholung wegen delay_after_error: " + next_start_time.as_string();
     }
     else
     if( _state == s_pending )
@@ -749,51 +684,51 @@ void Job::set_next_start_time( Time now, bool repeat )
         if( !_repeat )
         {
             _next_single_start = _run_time.next_single_start( now );
-            if( _spooler->_debug && _next_single_start < _next_start_time )  msg = "Nächster single_start " + _next_single_start.as_string();
+            if( _spooler->_debug && _next_single_start < next_start_time )  msg = "Nächster single_start " + _next_single_start.as_string();
         }
 
-        if( !_period.is_in_time( _next_start_time ) )
+        if( !_period.is_in_time( next_start_time ) )
         {
-            _next_start_time = latter_day;
+            next_start_time = latter_day;
 
             if( repeat )
             {
                 if( _repeat > 0 )       // spooler_task.repeat
                 {
-                    _next_start_time = _period.next_try( now + _repeat );
-                    if( _spooler->_debug )  msg = "Wiederholung wegen spooler_job.repeat=" + as_string(_repeat) + ": " + _next_start_time.as_string();
+                    next_start_time = _period.next_try( now + _repeat );
+                    if( _spooler->_debug )  msg = "Wiederholung wegen spooler_job.repeat=" + as_string(_repeat) + ": " + next_start_time.as_string();
                     _repeat = 0;
                 }
                 else
                 if( _period.repeat() < latter_day )
                 {
-                    _next_start_time = now + _period.repeat();
+                    next_start_time = now + _period.repeat();
 
-                    if( _next_start_time >= _period.end() )
+                    if( next_start_time >= _period.end() )
                     {
                         Period next_period = _run_time.next_period( _period.end() );
-                        if( _period.end() != next_period.begin()  ||  _period.repeat() != next_period.repeat() )   _next_start_time = latter_day;
+                        if( _period.end() != next_period.begin()  ||  _period.repeat() != next_period.repeat() )   next_start_time = latter_day;
                     }
 
-                    if( _spooler->_debug && _next_start_time != latter_day )  msg = "Nächste Wiederholung wegen <period repeat=\"" + as_string((double)_period._repeat) + "\">: " + _next_start_time.as_string();
+                    if( _spooler->_debug && next_start_time != latter_day )  msg = "Nächste Wiederholung wegen <period repeat=\"" + as_string((double)_period._repeat) + "\">: " + next_start_time.as_string();
                 }
             }
 
 
             // Liegt die Startzeit hinter der aktuellen Periode?
 
-            //if( _next_start_time >= _period.end() ) 
-            if( _next_start_time == latter_day )
+            //if( next_start_time >= _period.end() ) 
+            if( next_start_time == latter_day )
             {
                 if( _period.is_in_time( now ) ) 
                 {
-                    _next_start_time = now;
+                    next_start_time = now;
                 }
                 else
                 if( now < _period.begin() )     // Nächste Periode hat noch nicht begonnen?
                 {
-                    _next_start_time = _period.begin();
-                    if( _spooler->_debug )  msg = "Nächster Start zu Beginn der Periode: " + _next_start_time.as_string();
+                    next_start_time = _period.begin();
+                    if( _spooler->_debug )  msg = "Nächster Start zu Beginn der Periode: " + next_start_time.as_string();
                 }
 /*
                 else  
@@ -803,11 +738,11 @@ void Job::set_next_start_time( Time now, bool repeat )
 
                     if( _period.has_start() )
                     {
-                        _next_start_time = max( now, _period.begin() );
-                        //_log.debug( "Nächster Start " + _next_start_time.as_string() );
+                        next_start_time = max( now, _period.begin() );
+                        //_log.debug( "Nächster Start " + next_start_time.as_string() );
                     }
                     else
-                        _next_start_time = latter_day;
+                        next_start_time = latter_day;
                 }
 */
             }
@@ -817,11 +752,15 @@ void Job::set_next_start_time( Time now, bool repeat )
     }
     else
     {
-        _next_start_time = latter_day;
+        next_start_time = latter_day;
     }
 
 
-    calculate_next_time( now );
+    THREAD_LOCK( _lock )
+    {
+        _next_start_time = next_start_time;
+        calculate_next_time( now );
+    }
 }
 
 //-------------------------------------------------------------------------Job::calculate_next_time
@@ -961,19 +900,22 @@ bool Job::do_something()
             Sos_ptr<Task> task = task_to_start();
             if( task )
             {
-                _log.open();           // Jobprotokoll, nur wirksam, wenn set_filename() gerufen, s. Job::init().
+                THREAD_LOCK( _lock )
+                {
+                    _log.open();           // Jobprotokoll, nur wirksam, wenn set_filename() gerufen, s. Job::init().
 
-                reset_error();
-                _repeat = 0;
-                _delay_until = 0;
+                    reset_error();
+                    _repeat = 0;
+                    _delay_until = 0;
 
-                _running_tasks.push_back( task );
-                set_state( s_running );
+                    _running_tasks.push_back( task );
+                    set_state( s_running );
 
-                _next_start_time = latter_day;
-                calculate_next_time();
+                    _next_start_time = latter_day;
+                    calculate_next_time();
 
-                task->attach_to_a_thread();
+                    task->attach_to_a_thread();
+                }
 
                 something_done = true;
             }
@@ -1367,12 +1309,15 @@ Module_instance* Job::get_free_module_instance( Task* task )
 
 void Job::release_module_instance( Module_instance* module_instance )
 {
-    Z_FOR_EACH( Module_instance_vector, _module_instances, m )
+    THREAD_LOCK( _lock )
     {
-        if( *m == module_instance )
+        Z_FOR_EACH( Module_instance_vector, _module_instances, m )
         {
-            *m = NULL; 
-            break;
+            if( *m == module_instance )
+            {
+                *m = NULL; 
+                break;
+            }
         }
     }
 

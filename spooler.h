@@ -1,4 +1,4 @@
-// $Id: spooler.h,v 1.158 2003/09/24 18:50:33 jz Exp $
+// $Id: spooler.h,v 1.159 2003/09/27 08:45:17 jz Exp $
 
 #ifndef __SPOOLER_H
 #define __SPOOLER_H
@@ -354,6 +354,9 @@ struct Spooler
     Wait_handles               _wait_handles;
 
     Event                      _event;
+
+    int                        _loop_counter;               // Zähler der Schleifendurchläufe in spooler.cxx
+    int                        _wait_counter;               // Zähler der Aufrufe von wait_until()
 
   private:
     string                     _config_filename;            // -config=

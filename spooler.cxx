@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.262 2003/09/26 13:39:20 jz Exp $
+// $Id: spooler.cxx,v 1.263 2003/09/27 08:45:17 jz Exp $
 /*
     Hier sind implementiert
 
@@ -1680,6 +1680,8 @@ void Spooler::run()
             if( _next_time > now )
             {
 //_next_time = min( _next_time, now + 10.0 );      // Wartezeit vorsichtshalber begrenzen
+                _wait_counter++;
+
                 if( log_wait )  
                 {
                     if( wait_handles.wait(0) == -1 )  { LOG( msg << "\n" ); wait_handles.wait_until( _next_time ); }    // Debug-Ausgabe der Wartezeit nur, wenn kein Ergebnis vorliegt
@@ -1699,6 +1701,8 @@ void Spooler::run()
             if( _state_cmd != sc_terminate )  _log.warn( "Abbruch-Signal (Ctrl-C) empfangen. Der Spooler wird beendet.\n" );
             _state_cmd = sc_terminate;
         }
+
+        _loop_counter++;
     }
 }
 
