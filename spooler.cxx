@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.276 2003/10/10 12:45:39 jz Exp $
+// $Id: spooler.cxx,v 1.277 2003/10/10 22:49:06 jz Exp $
 /*
     Hier sind implementiert
 
@@ -1263,7 +1263,8 @@ void Spooler::load_arg()
             //if( *_directory.rbegin() != '/'  &&  *_directory.rbegin() != '\\' )  _directory += Z_DIR_SEPARATOR;
         }
 
-        _temp_dir = subst_env( read_profile_string( _factory_ini, "spooler", "tmp", z::get_temp_path() + Z_DIR_SEPARATOR "scheduler" ) );
+        _temp_dir = subst_env( read_profile_string( _factory_ini, "spooler", "tmp" ) );
+        if( _temp_dir.empty() )  _temp_dir = z::get_temp_path() + Z_DIR_SEPARATOR "scheduler";
         _temp_dir = replace_regex( _temp_dir, "[\\/]+", Z_DIR_SEPARATOR );
         _temp_dir = replace_regex( _temp_dir, "\\" Z_DIR_SEPARATOR "$", "" );
         if( _spooler_id != "" )  _temp_dir += Z_DIR_SEPARATOR + _spooler_id;

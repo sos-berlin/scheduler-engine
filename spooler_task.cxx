@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.204 2003/10/08 11:45:06 jz Exp $
+// $Id: spooler_task.cxx,v 1.205 2003/10/10 22:49:07 jz Exp $
 /*
     Hier sind implementiert
 
@@ -731,6 +731,8 @@ bool Task::do_something()
                         set_state( loaded()? has_error()? s_on_error 
                                                         : s_on_success 
                                            : s_release );
+
+                        set_mail_defaults();
 
                         loop = true;
                     }
