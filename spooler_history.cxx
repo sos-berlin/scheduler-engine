@@ -1,4 +1,4 @@
-// $Id: spooler_history.cxx,v 1.87 2004/01/31 16:45:25 jz Exp $
+// $Id: spooler_history.cxx,v 1.88 2004/02/01 20:48:09 jz Exp $
 
 #include "spooler.h"
 #include "../zschimmer/z_com.h"
@@ -1297,6 +1297,8 @@ Task_history::Task_history( Job_history* job_history, Task* task )
     _job_history = job_history; 
     _task        = task;
     _spooler     = _job_history->_spooler; 
+
+    if( _job_history->_extra_type )  _extra_record.construct( _job_history->_extra_type );
 }
 
 //-----------------------------------------------------------------------Task_history::Task_history
@@ -1484,8 +1486,6 @@ void Task_history::start()
     if( _job_history->_error )  return;
 
     _start_called = true;
-
-    _extra_record.construct( _job_history->_extra_type );
 
 
     try
