@@ -1911,7 +1911,7 @@ const Com_method Com_task::_methods[] =
     { DISPATCH_METHOD     , 17, "remove_pid"                , (Com_method_ptr)&Com_task::Remove_pid             , VT_EMPTY      , { VT_INT } },
     { DISPATCH_PROPERTYGET, 18, "stderr_text"               , (Com_method_ptr)&Com_task::get_Stderr_text        , VT_BSTR       },
     { DISPATCH_PROPERTYGET, 19, "stdout_text"               , (Com_method_ptr)&Com_task::get_Stdout_text        , VT_BSTR       },
-    { DISPATCH_METHOD     , 20, "Start_subprocess"          , (Com_method_ptr)&Com_task::Start_subprocess       , VT_IDISPATCH  , { VT_BYREF|VT_VARIANT } },
+    { DISPATCH_METHOD     , 20, "Start_subprocess"          , (Com_method_ptr)&Com_task::Start_subprocess       , VT_DISPATCH   , { VT_BYREF|VT_VARIANT } },
     {}
 };
 
@@ -2413,9 +2413,9 @@ STDMETHODIMP Com_task::Add_subprocess( int pid, BSTR timeout_at, VARIANT_BOOL ig
 
 const Com_method Com_task_proxy::_methods[] =
 { 
-    // _flags             , _name                   , _method                                               , _result_type, _types        , _default_arg_count
-    { DISPATCH_METGHOD, 20, "Start_subprocess"      , (Com_method_ptr)&Com_task_proxy::Start_subprocess     , VT_DISPATCH , { VT_BYREF|VT_VARIANT } },
-  //{ DISPATCH_METGHOD, 21, "Wait_for_subprocesses" , (Com_method_ptr)&Com_task_proxy::Wait_for_subprocesses, VT_EMTPY    },
+    // _flags            , _name                   , _method                                               , _result_type, _types        , _default_arg_count
+    { DISPATCH_METHOD, 20, "Start_subprocess"      , (Com_method_ptr)&Com_task_proxy::Start_subprocess     , VT_DISPATCH , { VT_BYREF|VT_VARIANT } },
+  //{ DISPATCH_METHOD, 21, "Wait_for_subprocesses" , (Com_method_ptr)&Com_task_proxy::Wait_for_subprocesses, VT_EMTPY    },
     {}
 };
 

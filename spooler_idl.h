@@ -31,6 +31,7 @@ struct Imail;
 struct Ijob_chain;
 struct Iorder_queue;
 struct Iorder;
+struct Isubprocess;
 
 //------------------------------------------------------------------------------------Log_level
 // S.a. zschimmer/log.h (muss kompatibel sein!)
@@ -182,7 +183,7 @@ struct Ijob : IDispatch
     virtual HRESULT         Clear_delay_after_error     ()                                      = 0;
 };
 
-//-----------------------------------------------------------------------------------------Task
+//--------------------------------------------------------------------------------------------Itask
 
 DEFINE_GUID( IID_Itask,  0x65E311F1, 0x04BF, 0x4e34, 0xA8, 0x47, 0xBB, 0xF0, 0xB0, 0xAC, 0x6D, 0xC6 );
 DEFINE_GUID( CLSID_Task,   0x00BB25C8, 0x812A, 0x4200, 0xA6, 0xF9, 0x1A, 0xE8, 0xE2, 0x65, 0x04, 0x74 );
@@ -210,6 +211,17 @@ struct Itask : IDispatch
     virtual HRESULT     get_Order                       ( Iorder** result )                     = 0;
     virtual HRESULT     get_Stderr_text                 ( BSTR* )                               = 0;
     virtual HRESULT     get_Stdout_text                 ( BSTR* )                               = 0;
+    virtual HRESULT         Start_subprocess            ( VARIANT*, Isubprocess** )             = 0;
+};
+
+//--------------------------------------------------------------------------------------Itask_proxy
+
+DEFINE_GUID( IID_Itask_proxy,  0xfeee47a7, 0x6c1b, 0x11d8, 0x81, 0x03, 0x00, 0x04, 0x76, 0xee, 0x8a, 0xfb );  // {feee47a7-6c1b-11d8-8103-000476ee8afb}
+DEFINE_GUID( CLSID_Task_proxy, 0xfeee47aa, 0x6c1b, 0x11d8, 0x81, 0x03, 0x00, 0x04, 0x76, 0xee, 0x8a, 0xfb );  // {feee47aa-6c1b-11d8-8103-000476ee8afb}
+
+struct Itask_proxy : IDispatch
+{
+    virtual HRESULT         Start_subprocess            ( VARIANT* program_and_parameters, Isubprocess** );
 };
 
 //---------------------------------------------------------------------------------------Thread
@@ -270,8 +282,6 @@ struct Ispooler : IDispatch
     virtual HRESULT     get_Db_order_history_table_name ( BSTR* )                               = 0;
     virtual HRESULT     get_Ini_path                    ( BSTR* )                               = 0;
     virtual HRESULT         Execute_xml                 ( BSTR, BSTR* )                         = 0;
-    virtual HRESULT         Start_subprocess            ( VARIANT*, spooler_com::Isubprocess** ) = 0;
-
 };
 
 //------------------------------------------------------------------------------------------Log
@@ -533,25 +543,30 @@ struct Iremote_module_instance_server : IDispatch
 
 //---------------------------------------------------------------------------------------Subprocess
 
-DEFINE_GUID( CLSID_Remote_module_instance_server , 0xfeee47a9, 0x6c1b, 0x11d8, 0x81, 0x03, 0x00, 0x04, 0x76, 0xee, 0x8a, 0xfb );   // {feee47a9-6c1b-11d8-8103-000476ee8afb}
-DEFINE_GUID(   IID_Iremote_module_instance_server, 0xfeee47a8, 0x6c1b, 0x11d8, 0x81, 0x03, 0x00, 0x04, 0x76, 0xee, 0x8a, 0xfb );   // {feee47a8-6c1b-11d8-8103-000476ee8afb}
+DEFINE_GUID( CLSID_Subprocess , 0xfeee47a9, 0x6c1b, 0x11d8, 0x81, 0x03, 0x00, 0x04, 0x76, 0xee, 0x8a, 0xfb );   // {feee47a9-6c1b-11d8-8103-000476ee8afb}
+DEFINE_GUID(   IID_Isubprocess, 0xfeee47a8, 0x6c1b, 0x11d8, 0x81, 0x03, 0x00, 0x04, 0x76, 0xee, 0x8a, 0xfb );   // {feee47a8-6c1b-11d8-8103-000476ee8afb}
 
-struct Iremote_module_instance_server : IDispatch
+struct Isubprocess : IDispatch
 {
-    DEFINE_UUIDOF( Iremote_module_instance_server )
-
-    STDMETHODIMP                Close                   ();
-    STDMETHODIMP            get_Pid                     ( int* )                                    = 0;
-    STDMETHODIMP            get_Terminated              ( VARIANT_BOOL* )                           = 0;
-    STDMETHODIMP            get_Exit_code               ( int* )                                    = 0;
-    STDMETHODIMP            get_Stdout_path             ( BSTR* )                                   = 0;
-    STDMETHODIMP            get_Stderr_path             ( BSTR* )                                   = 0;
-    STDMETHODIMP            put_Ignore_error            ( VARIANT_BOOL )                            = 0;
-    STDMETHODIMP            get_Ignore_error            ( VARIANT_BOOL* )                           = 0;
-    STDMETHODIMP            put_Ignore_signal           ( VARIANT_BOOL )                            = 0;
-    STDMETHODIMP            get_Ignore_signal           ( VARIANT_BOOL* )                           = 0;
-    STDMETHODIMP                Wait                    ( double seconds )                          = 0;
-    STDMETHODIMP                Kill                    ( int signal )                              = 0;
+    virtual HRESULT     get_Java_class_name         ( BSTR* )                                       = 0;
+    virtual HRESULT         Close                   ()                                              = 0;
+    virtual HRESULT         Start                   ( VARIANT* command_line )                       = 0;
+    virtual HRESULT     put_Priority                ( int )                                         = 0;
+    virtual HRESULT     get_Priority                ( int* )                                        = 0;
+    virtual HRESULT         Raise_priority          ( int, VARIANT_BOOL* )                          = 0;
+    virtual HRESULT         Lower_priority          ( int, VARIANT_BOOL* )                          = 0;
+    virtual HRESULT     get_Pid                     ( int* )                                        = 0;
+    virtual HRESULT     get_Terminated              ( VARIANT_BOOL* )                               = 0;
+    virtual HRESULT     get_Exit_code               ( int* )                                        = 0;
+    virtual HRESULT     get_Stdout_path             ( BSTR* )                                       = 0;
+    virtual HRESULT     get_Stderr_path             ( BSTR* )                                       = 0;
+    virtual HRESULT     put_Ignore_error            ( VARIANT_BOOL )                                = 0;
+    virtual HRESULT     get_Ignore_error            ( VARIANT_BOOL* )                               = 0;
+    virtual HRESULT     put_Ignore_signal           ( VARIANT_BOOL )                                = 0;
+    virtual HRESULT     get_Ignore_signal           ( VARIANT_BOOL* )                               = 0;
+    virtual HRESULT         Wait                    ( double seconds )                              = 0;
+    virtual HRESULT         Kill                    ( int signal )                                  = 0;
+};
 
 //-------------------------------------------------------------------------------------------------
 
