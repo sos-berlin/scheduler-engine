@@ -18,22 +18,21 @@
             <col valign="baseline" align="left"/>
             <col valign="baseline" align="left"/>
             <tr>
-                <td colspan="2" align="left">
-                    <p style="margin-top: 2px; margin-bottom: 2px">
-                        <b>
-                            Scheduler
+                <td colspan="2" align="left" style="padding-right: 0">
+                    <span style="margin-top: 2px; margin-bottom: 2px">
+                        <b>Scheduler</b>&#160;
+                        <span style="font-size: 8pt; white-space: nowrap">(<xsl:value-of select="state/@version"/>)</span>
+                        <xsl:if test="state/@id!=''">id=
                             <xsl:text>&#160; </xsl:text>
-                            <xsl:if test="state/@id!=''">id=
-                                <xsl:value-of select="state/@id"/>
-                            </xsl:if>
-                        </b>
+                            <b><xsl:value-of select="state/@id"/></b>
+                        </xsl:if>
+                        
+                        <xsl:text> &#160;</xsl:text>
                         <xsl:value-of select="state/@state"/>    
-                        <xsl:text>&#160; </xsl:text>
-                        <span style="font-size: 8pt; white-space: nowrap"><xsl:value-of select="state/@version"/></span>
-                    </p>
+                    </span>
                 </td>
-                <td align="right">
-                    <p style="margin-top: 2px; margin-bottom: 2px">
+                <td align="right" style="padding-left: 0">
+                    <span style="margin-top: 2px; margin-bottom: 2px">
                         <xsl:value-of select="my:format_datetime( string( state/@time ) )"  disable-output-escaping="yes"/>
                         <span class="small">
                             &#160;
@@ -43,7 +42,7 @@
                         <xsl:call-template name="command_menu">
                             <xsl:with-param name="onclick" select="'scheduler_menu__onclick()'"/>
                         </xsl:call-template>
-                    </p>
+                    </span>
                 </td>
             </tr>
         </table>
@@ -799,19 +798,21 @@
                 <td><xsl:value-of select="@all_steps"/></td>
             </tr>
 
-            <tr>
-                <td><span class="label">orders:</span></td>
-                <td>
-                    <xsl:choose>
-                        <xsl:when test="@order!='yes'">
-                            (no order job)
-                        </xsl:when>
-                        <xsl:when test="order_queue/@length!=''">
-                            <xsl:value-of select="order_queue/@length"/> orders to process
-                        </xsl:when>
-                    </xsl:choose>
-                </td>
-            </tr>
+            <xsl:if test="@order='yes'">
+                <tr>
+                    <td><span class="label">orders:</span></td>
+                    <td>
+                        <!--xsl:choose>
+                            <xsl:when test="@order!='yes'">
+                                (no order job)
+                            </xsl:when-->
+                            <xsl:if test="order_queue/@length!=''">
+                                <xsl:value-of select="order_queue/@length"/> orders to process
+                            </xsl:if>
+                        <!--/xsl:choose-->
+                    </td>
+                </tr>
+            </xsl:if>
             
         </table>
 
