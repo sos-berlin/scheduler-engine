@@ -1,4 +1,4 @@
-// $Id: spooler_task.h,v 1.67 2002/11/01 09:27:12 jz Exp $
+// $Id: spooler_task.h,v 1.68 2002/11/02 12:23:26 jz Exp $
 
 #ifndef __SPOOLER_TASK_H
 #define __SPOOLER_TASK_H
@@ -322,8 +322,8 @@ struct Job : Sos_self_deleting
 
     ptr<Com_variable_set>      _default_params;
 
-    xml::Element_ptr           _script_xml_element;         // <script> aus <config>
-    Module*                    _script_ptr;
+    xml::Element_ptr           _module_xml_element;         // <script> aus <config>
+    Module*                    _module_ptr;
     ptr<Module_instance>       _module_instance;            // Für use_engine="job"
 
     int                        _step_count;                 // Anzahl spooler_process() aller Tasks

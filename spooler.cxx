@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.122 2002/11/01 09:27:09 jz Exp $
+// $Id: spooler.cxx,v 1.123 2002/11/02 12:23:25 jz Exp $
 /*
     Hier sind implementiert
 
@@ -225,6 +225,7 @@ Spooler::Spooler()
     _zero_(this+1), 
     _security(this),
     _communication(this), 
+    _java_vm(this),
     _prefix_log(1),
     _wait_handles(this,&_prefix_log),
     _log(this),
@@ -541,7 +542,9 @@ void Spooler::load_arg()
     _need_db            = read_profile_bool      ( _factory_ini, "spooler", "need_db"            , true                );
     _history_tablename  = read_profile_string    ( _factory_ini, "spooler", "db_history_table"   , "spooler_history"   );
     _variables_tablename= read_profile_string    ( _factory_ini, "spooler", "db_variables_table" , "spooler_variables" );
-    _java_vm._filename  = read_profile_string    ( _factory_ini, "spooler", "java_vm" );
+    _java_vm._filename  = read_profile_string    ( _factory_ini, "java"   , "vm"                 , "msjava.dll"        );
+  //_java_vm._ini_options= read_profile_string   ( _factory_ini, "java"   , "options" );
+    _java_vm._ini_class_path= read_profile_string( _factory_ini, "java"   , "class_path" );
 
 
     try
@@ -667,7 +670,12 @@ void Spooler::start()
 
     _spooler_start_time = Time::now();
 
-    if( _has_java  )  _java_vm.init();
+    if( _has_java  ) 
+    {
+        _java_vm.init();
+        SetConsoleCtrlHandler( ctrl_c_handler, false );     // Ctrl-C-Handler von Java überschreiben (Suns Java beendet bei Ctrl-C den Prozess sofort)
+        SetConsoleCtrlHandler( ctrl_c_handler, true );
+    }
 
 
     {FOR_EACH( Thread_list, _thread_list, it )  if( !(*it)->empty() )  (*it)->init();}
@@ -684,7 +692,7 @@ void Spooler::start()
         _module_instance->load();
         _module_instance->start();
 
-        bool ok = check_result( _module_instance->call_if_exists( "spooler_init()B" ) );
+        bool ok = check_result( _module_instance->call_if_exists( "spooler_init()Z" ) );
         if( !ok )  throw_xc( "SPOOLER-127" );
     }
 

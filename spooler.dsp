@@ -126,10 +126,6 @@ SOURCE=.\spooler_history.cxx
 # End Source File
 # Begin Source File
 
-SOURCE=.\spooler_java.cxx
-# End Source File
-# Begin Source File
-
 SOURCE=.\spooler_log.cxx
 # ADD CPP /YX"spooler.h"
 # End Source File
@@ -140,12 +136,19 @@ SOURCE=.\spooler_mail.cxx
 # End Source File
 # Begin Source File
 
-SOURCE=.\spooler_order.cxx
-# ADD CPP /YX"spooler.h"
+SOURCE=.\spooler_module.cxx
 # End Source File
 # Begin Source File
 
-SOURCE=.\spooler_script.cxx
+SOURCE=.\spooler_module_com.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=.\spooler_module_java.cxx
+# End Source File
+# Begin Source File
+
+SOURCE=.\spooler_order.cxx
 # ADD CPP /YX"spooler.h"
 # End Source File
 # Begin Source File
@@ -237,10 +240,6 @@ SOURCE=.\spooler_history.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\spooler_java.h
-# End Source File
-# Begin Source File
-
 SOURCE=.\spooler_log.h
 # End Source File
 # Begin Source File
@@ -249,11 +248,19 @@ SOURCE=.\spooler_mail.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\spooler_order.h
+SOURCE=.\spooler_module.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\spooler_script.h
+SOURCE=.\spooler_module_com.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\spooler_module_java.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\spooler_order.h
 # End Source File
 # Begin Source File
 

@@ -1,4 +1,4 @@
-// $Id: spooler_module.cxx,v 1.1 2002/11/01 09:27:11 jz Exp $
+// $Id: spooler_module.cxx,v 1.2 2002/11/02 12:23:26 jz Exp $
 /*
     Hier sind implementiert
 
@@ -17,17 +17,16 @@ namespace spooler {
 
 //----------------------------------------------------------------------------------Module::set_xml
 
-void Module::set_xml( const xml::Element_ptr& element, const string& include_path )
+void Module::set_xml_without_source( const xml::Element_ptr& element )
 {
-    clear();
+    _source.clear();  //clear();
 
     _language       = as_string( element->getAttribute( L"language" ) );
-    _source         = text_from_xml_with_include( element, include_path );
 
     _com_class_name = as_string( element->getAttribute( L"com_class" ) );
     _filename       = as_string( element->getAttribute( L"filename" ) );
 
-    _java_class_name = as_string( element->getAttribute( L"java_class_name" ) );
+    _java_class_name = as_string( element->getAttribute( L"java_class" ) );
 
     if( _com_class_name != "" )
     {
@@ -35,7 +34,6 @@ void Module::set_xml( const xml::Element_ptr& element, const string& include_pat
         
         if( _language        != "" )  throw_xc( "SPOOLER-145" );
         if( _java_class_name != "" )  throw_xc( "SPOOLER-168" );
-        if( !_source.empty()       )  throw_xc( "SPOOLER-167" );
     }
     else
     if( _java_class_name != "" )
@@ -44,7 +42,6 @@ void Module::set_xml( const xml::Element_ptr& element, const string& include_pat
         
         if( _language        != "" )  throw_xc( "SPOOLER-166" );
         if( _com_class_name  != "" )  throw_xc( "SPOOLER-168" );
-        if( _source.empty()        )  throw_xc( "SPOOLER-167" );
 
         _spooler->_has_java = true;
     }
@@ -53,6 +50,7 @@ void Module::set_xml( const xml::Element_ptr& element, const string& include_pat
         _kind = kind_scripting_engine;
 
         if( _language == "" )  _language = SPOOLER_DEFAULT_LANGUAGE;
+
     }
 
     string use_engine = as_string( element->getAttribute( L"use_engine" ) );
@@ -61,6 +59,31 @@ void Module::set_xml( const xml::Element_ptr& element, const string& include_pat
      || use_engine == "task" )  _reuse = reuse_task;
     else
     if( use_engine == "job"  )  _reuse = reuse_job;
+}
+
+//----------------------------------------------------------------------------------Module::set_xml
+
+void Module::set_xml_source_only( const xml::Element_ptr& element, const string& include_path )
+{
+    _source = text_from_xml_with_include( element, include_path );
+
+    switch( _kind )
+    {
+        case kind_scripting_engine:
+            if( _source.empty() )  throw_xc( "SPOOLER-173" );
+            break;
+
+        case kind_com:
+            if( !_source.empty() )  throw_xc( "SPOOLER-167" );
+            break;
+
+        case kind_java:
+            if( !_source.empty() )  throw_xc( "SPOOLER-167" );
+            break;
+
+        default: 
+            throw_xc( "Module::set_xml_source_only" );
+    }
 
     _set = true;
 }
@@ -120,7 +143,7 @@ void Module_instance::close()
     {
         try
         {
-            call_if_exists( "spooler_exit()v" );
+            call_if_exists( "spooler_exit()V" );
         }
         catch( const Xc& x ) 
         { 

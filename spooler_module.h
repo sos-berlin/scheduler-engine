@@ -1,4 +1,4 @@
-// $Id: spooler_module.h,v 1.1 2002/11/01 09:27:11 jz Exp $
+// $Id: spooler_module.h,v 1.2 2002/11/02 12:23:26 jz Exp $
 
 #ifndef __SPOOLER_MODULE_H
 #define __SPOOLER_MODULE_H
@@ -69,12 +69,14 @@ struct Module
     explicit                    Module                      ( Spooler* sp, const xml::Element_ptr& e, const string& include_path )  : _spooler(sp) { set_xml(e,include_path); }
                                ~Module                      ()                                      {}
 
-    void                        set_xml                     ( const xml::Element_ptr&, const string& include_path );
+    void                        set_xml                     ( const xml::Element_ptr& e, const string& include_path )  { set_xml_without_source(e); set_xml_source_only(e,include_path); }
+    void                        set_xml_without_source      ( const xml::Element_ptr& );
+    void                        set_xml_source_only         ( const xml::Element_ptr&, const string& include_path );
 
     ptr<Module_instance>        create_instance             ();
 
     bool                        set                         ()                                      { return _set; }
-    void                        clear                       ()                                      { _language="", _source.clear(); }
+  //void                        clear                       ()                                      { _language="", _source.clear(); }
 
     Kind                        kind                        () const                                { return _kind; }
 

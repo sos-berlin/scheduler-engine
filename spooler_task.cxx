@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.116 2002/11/01 09:27:12 jz Exp $
+// $Id: spooler_task.cxx,v 1.117 2002/11/02 12:23:26 jz Exp $
 /*
     Hier sind implementiert
 
@@ -17,14 +17,14 @@ namespace spooler {
 
 //--------------------------------------------------------------------------------------------const
 
-static const string spooler_init_name       = "spooler_init()B";
-static const string spooler_open_name       = "spooler_open()B";
-static const string spooler_close_name      = "spooler_close()v";
+static const string spooler_init_name       = "spooler_init()Z";
+static const string spooler_open_name       = "spooler_open()Z";
+static const string spooler_close_name      = "spooler_close()V";
 static const string spooler_get_name        = "spooler_get";
-static const string spooler_process_name    = "spooler_process()B";
+static const string spooler_process_name    = "spooler_process()Z";
 static const string spooler_level_name      = "spooler_level";
-static const string spooler_on_error_name   = "spooler_on_error()v";
-static const string spooler_on_success_name = "spooler_on_success()v";
+static const string spooler_on_error_name   = "spooler_on_error()V";
+static const string spooler_on_success_name = "spooler_on_success()V";
 
 //---------------------------------------------------------------------------------start_cause_name
 
@@ -315,12 +315,16 @@ void Job::set_xml( const xml::Element_ptr& element )
             else
             if( e->tagName == "params"      )  _default_params->set_xml( e );  
             else
-            if( e->tagName == "script"      )  _script_xml_element   = e,
-                                               _process_filename     = "",
-                                               _process_param        = "",
-                                               _process_log_filename = "";
+            if( e->tagName == "script"      )  
+            {
+                _module.set_xml_without_source( e );
+                _module_xml_element   = e;
+                _process_filename     = "";
+                _process_param        = "";
+                _process_log_filename = "";
+            }
             else
-            if( e->tagName == "process"     )  _script_xml_element   = NULL,
+            if( e->tagName == "process"     )  _module_xml_element   = NULL,
                                                _process_filename     = as_string( e->getAttribute( L"file" ) ),
                                                _process_param        = as_string( e->getAttribute( L"param" ) ),
                                                _process_log_filename = as_string( e->getAttribute( L"log_file" ) );
@@ -365,12 +369,12 @@ void Job::init()
 {
     _history.open();
 
-    if( _script_xml_element )  read_script();
+    if( _module_xml_element )  read_script();
 
-    _script_ptr = _object_set_descr? &_object_set_descr->_class->_module
+    _module_ptr = _object_set_descr? &_object_set_descr->_class->_module
                                    : &_module;
 
-    _module_instance = _script_ptr->create_instance();
+    _module_instance = _module_ptr->create_instance();
 
 
     if( !_spooler->log_directory().empty()  &&  _spooler->log_directory()[0] != '*' )
@@ -453,7 +457,7 @@ void Job::close_task()
         _task = NULL; 
     }
 
-    if( _close_engine  || _script_ptr  &&  _script_ptr->_reuse == Module::reuse_task ) 
+    if( _close_engine  || _module_ptr  &&  _module_ptr->_reuse == Module::reuse_task ) 
     {
         close_engine();
         _close_engine = false;
@@ -614,7 +618,7 @@ bool Job::read_script()
 {
     try
     {
-        _module.set_xml( _script_xml_element, include_path() );
+        _module.set_xml_source_only( _module_xml_element, include_path() );
     }
     catch( const Xc& x        ) { set_error(x);  _close_engine = true;  set_state( s_read_error );  return false; }
     catch( const exception& x ) { set_error(x);  _close_engine = true;  set_state( s_read_error );  return false; }
@@ -643,9 +647,10 @@ bool Job::load()
     catch( const exception& x ) { set_error(x);  _close_engine = true;  return false; }
 
 
+    if( _module_instance->name_exists( spooler_init_name ) )
     {
         In_call in_call ( this, spooler_init_name );
-        bool ok = check_result( _module_instance->call_if_exists( spooler_init_name ) );
+        bool ok = check_result( _module_instance->call( spooler_init_name ) );
         in_call.set_result( ok );
         if( !ok || has_error() )  { _close_engine = true;  return false; }
     }
@@ -1896,10 +1901,10 @@ void Task::set_history_field( const string& name, const Variant& value )
 
 void Script_task::do_on_success()
 {
-    if( _job->_module_instance->loaded() )
+    if( _job->_module_instance->loaded()  &&  _job->_module_instance->name_exists( spooler_on_success_name ) )
     {
         Job::In_call in_call ( this, spooler_on_success_name );
-        _job->_module_instance->call_if_exists( spooler_on_success_name );
+        _job->_module_instance->call( spooler_on_success_name );
     }
 }
 
@@ -1907,10 +1912,10 @@ void Script_task::do_on_success()
 
 void Script_task::do_on_error()
 {
-    if( _job->_module_instance->loaded() )
+    if( _job->_module_instance->loaded()  &&  _job->_module_instance->name_exists( spooler_on_error_name ) )
     {
         Job::In_call in_call ( this, spooler_on_error_name );
-        _job->_module_instance->call_if_exists( spooler_on_error_name );
+        _job->_module_instance->call( spooler_on_error_name );
     }
 }
 
@@ -1989,13 +1994,16 @@ bool Job_script_task::do_start()
 
     _job->set_state( Job::s_running );
 
+    if( _job->_module_instance->name_exists( spooler_open_name ) )
     {
         Job::In_call in_call ( this, spooler_open_name );
 
-        ok = check_result( _job->_module_instance->call_if_exists( spooler_open_name ) );
+        ok = check_result( _job->_module_instance->call( spooler_open_name ) );
         in_call.set_result( ok );
         if( !ok )  return false;
     }
+    //else 
+    //    _log->debug( "spooler_open() nicht implementiert" );
 
     return true;
 }
@@ -2004,8 +2012,13 @@ bool Job_script_task::do_start()
 
 void Job_script_task::do_end()
 {
-    Job::In_call in_call ( this, spooler_close_name );
-    _job->_module_instance->call_if_exists( spooler_close_name );
+    if( _job->_module_instance->name_exists( spooler_close_name ) )
+    {
+        Job::In_call in_call ( this, spooler_close_name );
+        _job->_module_instance->call( spooler_close_name );
+    }
+    //else
+    //    _log->debug( "spooler_close() nicht implementiert" );
 }
 
 //-------------------------------------------------------------------------Job_script_task::do_step

@@ -1,4 +1,4 @@
-// $Id: spooler_thread.cxx,v 1.48 2002/11/01 09:27:13 jz Exp $
+// $Id: spooler_thread.cxx,v 1.49 2002/11/02 12:23:27 jz Exp $
 /*
     Hier sind implementiert
 
@@ -155,7 +155,7 @@ void Thread::close1()
     }
 
 
-    _spooler->_java_vm.detach_thread();
+    if( GetCurrentThreadId() == _thread_id )  _spooler->_java_vm.detach_thread();
 }
 
 //------------------------------------------------------------------------------------Thread::close
@@ -187,7 +187,7 @@ void Thread::start()
 {
     if( has_java() )  
     {
-        _spooler->_java_vm.attach_thread();
+        _spooler->_java_vm.attach_thread( _name );
     }
 
     if( _module.set() )
@@ -203,7 +203,7 @@ void Thread::start()
         _module_instance->load();
         _module_instance->start();
 
-        bool ok = check_result( _module_instance->call_if_exists( "spooler_init()B" ) );
+        bool ok = check_result( _module_instance->call_if_exists( "spooler_init()Z" ) );
         if( !ok )  throw_xc( "SPOOLER-127" );
     }
 
