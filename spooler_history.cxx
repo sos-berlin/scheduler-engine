@@ -147,7 +147,6 @@ void Spooler_db::open( const string& db_name )
     try
     {
         open2( db_name );
-        break;
     }
     catch( const exception& x )
     {
