@@ -2104,6 +2104,9 @@ bool Process_task::do_begin__end()
     }
 
 
+    _stdout_file.open_temporary( File::open_unlink_later | File::open_inheritable );
+    _stderr_file.open_temporary( File::open_unlink_later | File::open_inheritable );
+
     LOG( "signal(SIGCHLD,SIG_DFL)\n" );
     ::signal( SIGCHLD, SIG_DFL );                 // Java verändert das Signal-Verhalten, so dass waitpid() ohne diesen Aufruf versagte.
 
@@ -2121,7 +2124,7 @@ bool Process_task::do_begin__end()
             dup2( _stderr_file._file, STDERR_FILENO );
 
             int n = sysconf( _SC_OPEN_MAX );
-            for( int i = 3; i < n; i++ )  if( i != socket_pair[1] )  ::close(i);
+            for( int i = 3; i < n; i++ )  ::close(i);
             ::close( STDIN_FILENO );
 
             // Arguments 
