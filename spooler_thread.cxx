@@ -1,4 +1,4 @@
-// $Id: spooler_thread.cxx,v 1.2 2001/02/06 09:22:26 jz Exp $
+// $Id: spooler_thread.cxx,v 1.3 2001/02/06 12:08:44 jz Exp $
 /*
     Hier sind implementiert
 
@@ -29,8 +29,7 @@ Thread::Thread( Spooler* spooler )
 
 Thread::~Thread() 
 {
-    try { close(); } catch(const Xc&) {}
-
+    try { close(); } catch(const Xc& x ) { _log.error( x.what() ); }
 }
 
 //-------------------------------------------------------------------------------------Thread::init
@@ -87,7 +86,7 @@ void Thread::stop()
 
 //-------------------------------------------------------------------------------------Thread::step
 
-void Thread::step()
+bool Thread::step()
 {
   //int  pri_sum = 0;
     bool something_done = false;
@@ -131,6 +130,8 @@ void Thread::step()
             if( job->_priority == 0 )  job->do_something();
         }
     }
+
+    return something_done;
 }
 
 //-------------------------------------------------------------------------------------Thread::wait
@@ -185,11 +186,16 @@ int Thread::run_thread()
 
     while( !_stop )
     {
-        THREAD_SEMA( _spooler->_pause_lock );
-
-        if( _spooler->_state == Spooler::s_running )  step();
-
         if( _running_tasks_count == 0 )  wait();
+
+        THREAD_SEMA( _spooler->_pause_lock );
+        
+        if( _spooler->_state == Spooler::s_running ) 
+        {
+            if( _stop )  break;
+            bool something_done = step();
+            if( !something_done )  _log.warn( "Nichts getan" );
+        }
     }
 
     close();
@@ -226,7 +232,7 @@ void Thread::stop_thread()
 {
     _stop = true;
     signal();
-    wait_for_event( _thread, latter_day ); 
+    wait_for_event( _thread, latter_day );      // Warten, bis thread terminiert ist
 }
 
 //--------------------------------------------------------------------------Thread::get_job_or_null

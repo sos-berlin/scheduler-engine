@@ -1,4 +1,4 @@
-// $Id: spooler_command.cxx,v 1.25 2001/02/06 09:22:26 jz Exp $
+// $Id: spooler_command.cxx,v 1.26 2001/02/06 12:08:44 jz Exp $
 /*
     Hier ist implementiert
 
@@ -125,7 +125,10 @@ xml::Element_ptr Command_processor::execute_show_thread( Thread* thread )
 
     xml::Element_ptr thread_element = _answer->createElement( "thread" );
 
-    thread_element->setAttribute( "name", as_dom_string( thread->_name ) );
+    thread_element->setAttribute( "name"         , as_dom_string( thread->_name ) );
+    thread_element->setAttribute( "running_tasks", as_dom_string( thread->_running_tasks_count ) );
+    thread_element->setAttribute( "steps"        , as_dom_string( thread->_step_count ) );
+    thread_element->setAttribute( "started_tasks", as_dom_string( thread->_task_count ) );
     thread_element->appendChild( execute_show_jobs( thread) );
 
     return thread_element;

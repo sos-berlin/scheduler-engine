@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.20 2001/02/06 09:22:26 jz Exp $
+// $Id: spooler_task.cxx,v 1.21 2001/02/06 12:08:44 jz Exp $
 /*
     Hier sind implementiert
 
@@ -182,7 +182,7 @@ void Job::close()
 
     _directory_watcher.close();
 
-    THREAD_SEMA( _task_lock )  stop();
+    close_engine();
 
     // COM-Objekte entkoppeln, falls noch jemand eine Referenz darauf hat:
     if( _com_job )  _com_job->close();

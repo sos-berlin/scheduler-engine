@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 
-<!-- $Id: spooler.xml,v 1.26 2001/02/06 09:22:26 jz Exp $   (C) 2001 SOS GmbH Berlin -->
+<!-- $Id: spooler.xml,v 1.27 2001/02/06 12:08:44 jz Exp $   (C) 2001 SOS GmbH Berlin -->
 
 <!DOCTYPE spooler SYSTEM "spooler.dtd">
 
@@ -429,7 +429,7 @@ sub spooler_exit()
 
                     ]]></script>
             
-                    <run_time repeat="6"/>
+                    <run_time repeat="1"/>
 
                 </job>
 

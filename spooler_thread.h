@@ -1,4 +1,4 @@
-// $Id: spooler_thread.h,v 1.1 2001/02/04 17:13:19 jz Exp $
+// $Id: spooler_thread.h,v 1.2 2001/02/06 12:08:44 jz Exp $
 
 #ifndef __SPOOLER_THREAD_H
 #define __SPOOLER_THREAD_H
@@ -26,7 +26,7 @@ struct Thread : Sos_self_deleting
     int                         run_thread                  ();
     void                        start                       ();
     void                        stop                        ();
-    void                        step                        ();
+    bool                        step                        ();
     void                        wait                        ();
 
 
