@@ -1,4 +1,4 @@
-// $Id: spooler_com.h,v 1.62 2002/11/25 23:36:20 jz Exp $
+// $Id: spooler_com.h,v 1.63 2002/11/26 23:53:07 jz Exp $
 
 #ifndef __SPOOLER_COM_H
 #define __SPOOLER_COM_H
@@ -59,11 +59,9 @@ struct Com_error: spooler_com::Ierror,
 {
                                 Com_error                   ( const Xc_copy& );
 
-    USE_SOS_OLE_OBJECT_ADDREF_RELEASE
-    USE_SOS_OLE_OBJECT_GETTYPEINFO
-    Z_DEFINE_GETIDSOFNAMES_AND_INVOKE
-
     STDMETHODIMP                QueryInterface              ( REFIID, void** );
+
+    USE_SOS_OLE_OBJECT_WITHOUT_QI
 
     STDMETHODIMP            get_java_class_name             ( BSTR* result )                            { return string_to_bstr( "sos.spooler.Error", result ); }
 
@@ -91,11 +89,9 @@ struct Com_variable: spooler_com::Ivariable,
                                 Com_variable                ( const BSTR name, const VARIANT& );
                                 Com_variable                ( const Com_variable& );
 
-    USE_SOS_OLE_OBJECT_ADDREF_RELEASE
-    USE_SOS_OLE_OBJECT_GETTYPEINFO
-    Z_DEFINE_GETIDSOFNAMES_AND_INVOKE
-
     STDMETHODIMP                QueryInterface              ( REFIID, void** );
+
+    USE_SOS_OLE_OBJECT_WITHOUT_QI
 
     STDMETHODIMP            get_java_class_name             ( BSTR* result )                        { return string_to_bstr( "sos.spooler.Variable", result ); }
 
@@ -120,11 +116,9 @@ struct Com_variable_set: spooler_com::Ivariable_set,
                                 Com_variable_set            ();
                                 Com_variable_set            ( const Com_variable_set& );
 
-    USE_SOS_OLE_OBJECT_ADDREF_RELEASE
-    USE_SOS_OLE_OBJECT_GETTYPEINFO
-    Z_DEFINE_GETIDSOFNAMES_AND_INVOKE
-
     STDMETHODIMP                QueryInterface              ( REFIID, void** );
+
+    USE_SOS_OLE_OBJECT_WITHOUT_QI
 
     STDMETHODIMP            get_java_class_name             ( BSTR* result )                        { return string_to_bstr( "sos.spooler.Variable_set", result ); }
 
@@ -162,9 +156,7 @@ struct Com_variable_set_enumerator : spooler_com::Ivariable_set_enumerator, Sos_
 {
     STDMETHODIMP                QueryInterface          ( REFIID, void** );
     
-    USE_SOS_OLE_OBJECT_ADDREF_RELEASE
-    USE_SOS_OLE_OBJECT_GETTYPEINFO
-    Z_DEFINE_GETIDSOFNAMES_AND_INVOKE
+    USE_SOS_OLE_OBJECT_WITHOUT_QI
 
                                 Com_variable_set_enumerator();
 
@@ -188,12 +180,10 @@ struct Com_log : spooler_com::Ilog,
                                 Com_log                     ( Prefix_log* = NULL );
                              //~Com_log                     ();
 
-    USE_SOS_OLE_OBJECT_ADDREF_RELEASE
-    USE_SOS_OLE_OBJECT_GETTYPEINFO
-    Z_DEFINE_GETIDSOFNAMES_AND_INVOKE
-
     STDMETHODIMP                QueryInterface              ( REFIID, void** );
    
+    USE_SOS_OLE_OBJECT_WITHOUT_QI
+
     STDMETHODIMP            get_java_class_name             ( BSTR* result )                        { return string_to_bstr( "sos.spooler.Log", result ); }
 
     void                        close                       ()                                      { THREAD_LOCK(_lock)  _log = NULL; }        
@@ -255,10 +245,7 @@ struct Com_object_set : spooler_com::Iobject_set,
     Z_GNU_ONLY(                 Com_object_set              ();  )                                  // Für gcc 3.2. Nicht implementiert.
                                 Com_object_set              ( Object_set* );
 
-    USE_SOS_OLE_OBJECT_QUERYINTERFACE   
-    USE_SOS_OLE_OBJECT_ADDREF_RELEASE
-    USE_SOS_OLE_OBJECT_GETTYPEINFO
-    Z_DEFINE_GETIDSOFNAMES_AND_INVOKE
+    USE_SOS_OLE_OBJECT
 
   //STDMETHODIMP            get_java_class_name         ( BSTR* result );
 
@@ -282,11 +269,9 @@ struct Com_job : spooler_com::Ijob,
     Z_GNU_ONLY(                 Com_job                     ();  )                                  // Für gcc 3.2. Nicht implementiert.
                                 Com_job                     ( Job* );
 
-    USE_SOS_OLE_OBJECT_ADDREF_RELEASE
-    USE_SOS_OLE_OBJECT_GETTYPEINFO
-    Z_DEFINE_GETIDSOFNAMES_AND_INVOKE
-
     STDMETHODIMP                QueryInterface              ( REFIID, void** );
+
+    USE_SOS_OLE_OBJECT_WITHOUT_QI
 
     STDMETHODIMP            get_java_class_name             ( BSTR* result )                        { return string_to_bstr( "sos.spooler.Job", result ); }
 
@@ -319,11 +304,9 @@ struct Com_task : spooler_com::Itask,
                                 Com_task                    ( Task* = NULL );
                                ~Com_task                    ()                                      {}
 
-    USE_SOS_OLE_OBJECT_ADDREF_RELEASE
-    USE_SOS_OLE_OBJECT_GETTYPEINFO
-    Z_DEFINE_GETIDSOFNAMES_AND_INVOKE
-
     STDMETHODIMP                QueryInterface              ( REFIID, void** );
+
+    USE_SOS_OLE_OBJECT_WITHOUT_QI
 
     STDMETHODIMP            get_java_class_name             ( BSTR* result )                        { return string_to_bstr( "sos.spooler.Task", result ); }
 
@@ -359,11 +342,9 @@ struct Com_thread : spooler_com::Ithread,
 {
                                 Com_thread                  ( Spooler_thread* );
 
-    USE_SOS_OLE_OBJECT_ADDREF_RELEASE
-    USE_SOS_OLE_OBJECT_GETTYPEINFO
-    Z_DEFINE_GETIDSOFNAMES_AND_INVOKE
-
     STDMETHODIMP                QueryInterface              ( REFIID, void** );
+
+    USE_SOS_OLE_OBJECT_WITHOUT_QI
 
     STDMETHODIMP            get_java_class_name             ( BSTR* result )                        { return string_to_bstr( "sos.spooler.Thread", result ); }
 
@@ -389,13 +370,11 @@ struct Com_spooler : spooler_com::Ispooler,
                                 Com_spooler                 ();                                     // Für gcc 3.2. Nicht implementiert.
                                 Com_spooler                 ( Spooler* ); 
 
-    USE_SOS_OLE_OBJECT_ADDREF_RELEASE
-    USE_SOS_OLE_OBJECT_GETTYPEINFO
-    Z_DEFINE_GETIDSOFNAMES_AND_INVOKE
+    STDMETHODIMP                QueryInterface              ( REFIID, void** );
+
+    USE_SOS_OLE_OBJECT_WITHOUT_QI
 
     STDMETHODIMP            get_java_class_name             ( BSTR* result )                        { return string_to_bstr( "sos.spooler.Spooler", result ); }
-
-    STDMETHODIMP                QueryInterface              ( REFIID, void** );
 
     void                        close                       ()                                      { THREAD_LOCK(_lock)  _spooler = NULL; }
 
@@ -437,10 +416,7 @@ struct Com_context : spooler_com::Icontext, Sos_ole_object
                                                                                                           _job     = NULL, 
                                                                                                           _task    = NULL; }
 
-    USE_SOS_OLE_OBJECT_QUERYINTERFACE   
-    USE_SOS_OLE_OBJECT_ADDREF_RELEASE
-    USE_SOS_OLE_OBJECT_GETTYPEINFO
-    Z_DEFINE_GETIDSOFNAMES_AND_INVOKE
+    USE_SOS_OLE_OBJECT
 
     STDMETHODIMP                get_log                     ( spooler_com::Ilog**     o )        { return _log    .CopyTo(o); }
     STDMETHODIMP                get_spooler                 ( spooler_com::Ispooler** o )        { return _spooler.CopyTo(o); }
@@ -466,13 +442,11 @@ struct Com_job_chain : spooler_com::Ijob_chain,
 {
                                 Com_job_chain           ( Job_chain* );
 
-    void                        close                   ()                                          { THREAD_LOCK( _lock )  _job_chain = NULL; }
-
-    USE_SOS_OLE_OBJECT_ADDREF_RELEASE
-    USE_SOS_OLE_OBJECT_GETTYPEINFO
-    Z_DEFINE_GETIDSOFNAMES_AND_INVOKE
-
     STDMETHODIMP                QueryInterface          ( REFIID, void** );
+
+    USE_SOS_OLE_OBJECT_WITHOUT_QI
+
+    void                        close                   ()                                          { THREAD_LOCK( _lock )  _job_chain = NULL; }
 
     STDMETHODIMP            get_java_class_name         ( BSTR* result )                            { return string_to_bstr( "sos.spooler.Job_chain", result ); }
 
@@ -503,11 +477,9 @@ struct Com_job_chain_node : spooler_com::Ijob_chain_node,
 {
                                 Com_job_chain_node      ();
 
-    USE_SOS_OLE_OBJECT_ADDREF_RELEASE
-    USE_SOS_OLE_OBJECT_GETTYPEINFO
-    Z_DEFINE_GETIDSOFNAMES_AND_INVOKE
-
     STDMETHODIMP                QueryInterface          ( REFIID, void** );
+
+    USE_SOS_OLE_OBJECT_WITHOUT_QI
 
     STDMETHODIMP            get_java_class_name         ( BSTR* result )                            { return string_to_bstr( "sos.spooler.Job_chain_node", result ); }
 
@@ -528,14 +500,11 @@ struct Com_order : spooler_com::Iorder,
                                 Com_order               ( Order* );
                               //Com_order               ();
 
-    void                        close                   ()                                          { THREAD_LOCK( _lock )  _order = NULL; }
-
-
-    USE_SOS_OLE_OBJECT_ADDREF_RELEASE
-    USE_SOS_OLE_OBJECT_GETTYPEINFO
-    Z_DEFINE_GETIDSOFNAMES_AND_INVOKE
-
     STDMETHODIMP                QueryInterface          ( REFIID, void** );
+
+    USE_SOS_OLE_OBJECT_WITHOUT_QI
+
+    void                        close                   ()                                          { THREAD_LOCK( _lock )  _order = NULL; }
 
     STDMETHODIMP            get_java_class_name         ( BSTR* result )                            { return string_to_bstr( "sos.spooler.Order", result ); }
 
@@ -585,13 +554,11 @@ struct Com_order_queue : spooler_com::Iorder_queue,
                                 Com_order_queue         ();
 
 
-    USE_SOS_OLE_OBJECT_ADDREF_RELEASE
-    USE_SOS_OLE_OBJECT_GETTYPEINFO
-    Z_DEFINE_GETIDSOFNAMES_AND_INVOKE
+    STDMETHODIMP                QueryInterface          ( REFIID, void** );
+
+    USE_SOS_OLE_OBJECT_WITHOUT_QI
 
     STDMETHODIMP            get_java_class_name         ( BSTR* result )                            { return string_to_bstr( "sos.spooler.Order_queue", result ); }
-
-    STDMETHODIMP                QueryInterface          ( REFIID, void** );
 
     STDMETHODIMP            get_length                  ( int* );
     STDMETHODIMP                add_order               ( VARIANT*, spooler_com::Iorder** );

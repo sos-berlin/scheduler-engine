@@ -1,4 +1,4 @@
-// $Id: spooler.h,v 1.110 2002/11/26 23:35:45 jz Exp $
+// $Id: spooler.h,v 1.111 2002/11/26 23:53:07 jz Exp $
 
 #ifndef __SPOOLER_H
 #define __SPOOLER_H
@@ -223,13 +223,13 @@ struct Spooler
   private:
     Fill_zero                  _zero_;
     Thread_semaphore           _lock;
-    bool                       _is_service;                 // NT-Dienst
     int                        _argc;
     char**                     _argv;
 
   public:
     Log                        _log;
     Prefix_log                 _prefix_log;
+    bool                       _is_service;                 // NT-Dienst
     bool                       _debug;
     int                        _log_level;
     bool                       _mail_on_error;              // Für Job-Protokolle
