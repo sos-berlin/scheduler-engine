@@ -1,4 +1,4 @@
-// $Id: spooler_module.h,v 1.3 2002/11/06 06:30:48 jz Exp $
+// $Id: spooler_module.h,v 1.4 2002/11/11 23:10:33 jz Exp $
 
 #ifndef __SPOOLER_MODULE_H
 #define __SPOOLER_MODULE_H
@@ -66,12 +66,12 @@ struct Module
     };
 
                                 Module                      ( Spooler* sp, Prefix_log* log )         : _spooler(sp), _log(log) {}
-    explicit                    Module                      ( Spooler* sp, const xml::Element_ptr& e, const string& include_path )  : _spooler(sp) { set_xml(e,include_path); }
+    explicit                    Module                      ( Spooler* sp, const xml::Element_ptr& e, const string& include_path )  : _spooler(sp) { set_dom(e,include_path); }
                                ~Module                      ()                                      {}
 
-    void                        set_xml                     ( const xml::Element_ptr& e, const string& include_path )  { set_xml_without_source(e); set_xml_source_only(e,include_path); }
-    void                        set_xml_without_source      ( const xml::Element_ptr& );
-    void                        set_xml_source_only         ( const xml::Element_ptr&, const string& include_path );
+    void                        set_dom                     ( const xml::Element_ptr& e, const string& include_path )  { set_dom_without_source(e); set_dom_source_only(e,include_path); }
+    void                        set_dom_without_source      ( const xml::Element_ptr& );
+    void                        set_dom_source_only         ( const xml::Element_ptr&, const string& include_path );
 
     ptr<Module_instance>        create_instance             ();
 

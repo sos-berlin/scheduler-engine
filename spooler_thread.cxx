@@ -1,4 +1,4 @@
-// $Id: spooler_thread.cxx,v 1.49 2002/11/02 12:23:27 jz Exp $
+// $Id: spooler_thread.cxx,v 1.50 2002/11/11 23:10:36 jz Exp $
 /*
     Hier sind implementiert
 
@@ -57,34 +57,34 @@ void Thread::init()
     FOR_EACH_JOB( job )  (*job)->init0();
 }
 
-//--------------------------------------------------------------------------------------Thread::xml
+//--------------------------------------------------------------------------------------Thread::dom
 
-xml::Element_ptr Thread::xml( xml::Document_ptr document, Show_what show )
+xml::Element_ptr Thread::dom( const xml::Document_ptr& document, Show_what show )
 {
-    xml::Element_ptr thread_element = document->createElement( "thread" );
+    xml::Element_ptr thread_element = document.createElement( "thread" );
 
     THREAD_LOCK( _lock )
     {
-        thread_element->setAttribute( "name"           , as_dom_string( _name ) );
-        thread_element->setAttribute( "running_tasks"  , as_dom_string( _running_tasks_count ) );
+        thread_element.setAttribute( "name"           , _name );
+        thread_element.setAttribute( "running_tasks"  , _running_tasks_count );
 
         if( _next_start_time != 0  &&  _next_start_time != latter_day )
-        thread_element->setAttribute( "sleeping_until" , as_dom_string( _next_start_time.as_string() ) );
+        thread_element.setAttribute( "sleeping_until" , _next_start_time.as_string() );
 
-        thread_element->setAttribute( "steps"          , as_dom_string( _step_count ) );
-        thread_element->setAttribute( "started_tasks"  , as_dom_string( _task_count ) );
-        thread_element->setAttribute( "os_thread_id"   , as_dom_string( as_hex_string( (int)_thread_id ) ) );
-        thread_element->setAttribute( "priority"       , as_dom_string( GetThreadPriority( _thread_handle ) ) );
-        thread_element->setAttribute( "free_threading" , as_dom_string( _free_threading? "yes" : "no" ) );
+        thread_element.setAttribute( "steps"          , _step_count );
+        thread_element.setAttribute( "started_tasks"  , _task_count );
+        thread_element.setAttribute( "os_thread_id"   , as_hex_string( (int)_thread_id ) );
+        thread_element.setAttribute( "priority"       , GetThreadPriority( _thread_handle ) );
+        thread_element.setAttribute( "free_threading" , _free_threading? "yes" : "no" );
 
         dom_append_nl( thread_element );
 
-        xml::Element_ptr jobs_element = document->createElement( "tasks" );
+        xml::Element_ptr jobs_element = document.createElement( "tasks" );
         dom_append_nl( jobs_element );
 
-        FOR_EACH( Job_list, _job_list, it )  jobs_element->appendChild( (*it)->xml( document, show ) ), dom_append_nl( jobs_element );
+        FOR_EACH( Job_list, _job_list, it )  jobs_element.appendChild( (*it)->dom( document, show ) ), dom_append_nl( jobs_element );
 
-        thread_element->appendChild( jobs_element );
+        thread_element.appendChild( jobs_element );
     }
 
     return thread_element;
@@ -109,24 +109,24 @@ void Thread::load_jobs_from_xml( const xml::Element_ptr& element, bool init )
 {
     DOM_FOR_ALL_ELEMENTS( element, e )
     {
-        if( e->tagName == "job" ) 
+        if( e.nodeName_is( "job" ) )
         {
-            string spooler_id = as_string( e->getAttribute( "spooler_id" ) );
+            string spooler_id = e.getAttribute( "spooler_id" );
 
-            if( _spooler->_manual? as_string(e->getAttribute("name")) == _spooler->_job_name 
+            if( _spooler->_manual? e.getAttribute("name") == _spooler->_job_name 
                                  : spooler_id.empty() || spooler_id == _spooler->id() )
             {
-                string job_name = as_string( e->getAttribute("name") );
+                string job_name = e.getAttribute("name");
                 Sos_ptr<Job> job = get_job_or_null( job_name );
                 if( job )
                 {
-                    job->set_xml( e );
+                    job->set_dom( e );
                     if( init )  job->init0(),  job->init();
                 }
                 else
                 {
                     job = SOS_NEW( Job( this ) );
-                    job->set_xml( e );
+                    job->set_dom( e );
                     if( init )  job->init0(),  job->init();
                     add_job( job );
                 }

@@ -1,4 +1,4 @@
-// $Id: spooler_history.cxx,v 1.27 2002/10/02 05:47:29 jz Exp $
+// $Id: spooler_history.cxx,v 1.28 2002/11/11 23:10:33 jz Exp $
 
 #include "spooler.h"
 #include "../zschimmer/z_com.h"
@@ -732,7 +732,7 @@ void Job_history::set_extra_field( const string& name, const Variant& value )
 // Anderer Thread.
 // Hier nicht auf _job etc. zugreifen!
 
-xml::Element_ptr Job_history::read_tail( xml::Document_ptr doc, int id, int next, Show_what show )
+xml::Element_ptr Job_history::read_tail( const xml::Document_ptr& doc, int id, int next, Show_what show )
 {
     if( !_history_yes )  throw_xc( "SPOOLER-141", _job_name );
 
@@ -783,7 +783,7 @@ xml::Element_ptr Job_history::read_tail( xml::Document_ptr doc, int id, int next
                 else
                     throw_xc( "SPOOLER-136" );
 
-                history_element = doc->createElement( "history" );
+                history_element = doc.createElement( "history" );
                 dom_append_nl( history_element );
 
                 const Record_type* type = sel.spec().field_type_ptr();
@@ -792,7 +792,7 @@ xml::Element_ptr Job_history::read_tail( xml::Document_ptr doc, int id, int next
                 while( !sel.eof() )
                 {
                     string           param_xml;
-                    xml::Element_ptr history_entry = doc->createElement( "history.entry" );
+                    xml::Element_ptr history_entry = doc.createElement( "history.entry" );
 
                     sel.get( &rec );
         
@@ -803,7 +803,7 @@ xml::Element_ptr Job_history::read_tail( xml::Document_ptr doc, int id, int next
                         {
                             string name = type->field_descr_ptr(i)->name();
                             if( name == "parameters" )  param_xml = value;
-                                                  else  history_entry->setAttribute( as_dom_string( lcase(name) ), as_dom_string(value) );
+                                                  else  history_entry.setAttribute( lcase(name), value );
                         }
                     }
 
@@ -816,9 +816,9 @@ xml::Element_ptr Job_history::read_tail( xml::Document_ptr doc, int id, int next
                     {
                         try {
                             dom_append_nl( history_element );
-                            xml::Document_ptr par_doc = xml::Document_ptr( __uuidof(xml::DOMDocument30), NULL );
-                            par_doc->loadXML( as_dom_string( param_xml ) );
-                            history_entry->appendChild( par_doc->documentElement );
+                            xml::Document_ptr par_doc = msxml::Document_ptr( __uuidof(msxml::DOMDocument30), NULL );
+                            par_doc.load_xml( param_xml );
+                            history_entry.appendChild( par_doc.documentElement() );
                         }
                         catch( const exception&  x ) { _spooler->_log.warn( string("Historie: ") + x.what() ); }
                         catch( const _com_error& x ) { _spooler->_log.warn( string("Historie: ") + w_as_string(x.Description() )) ; }
@@ -830,7 +830,7 @@ xml::Element_ptr Job_history::read_tail( xml::Document_ptr doc, int id, int next
                         if( !log.empty() ) dom_append_text_element( history_entry, "log", log );
                     }
 
-                    history_element->appendChild( history_entry );
+                    history_element.appendChild( history_entry );
                     dom_append_nl( history_element );
                 }
 

@@ -1,4 +1,4 @@
-// $Id: spooler.h,v 1.95 2002/11/01 09:27:10 jz Exp $
+// $Id: spooler.h,v 1.96 2002/11/11 23:10:31 jz Exp $
 
 #ifndef __SPOOLER_H
 #define __SPOOLER_H
@@ -6,7 +6,9 @@
 #include "../kram/sos.h"
 #include "../kram/sysxcept.h"
 
+#include "../zschimmer/xml_msxml.h"
 
+/*
 #ifdef SYSTEM_WIN
 
 #   import <msxml3.dll> rename_namespace("xml")
@@ -26,7 +28,17 @@
         typedef IXMLDOMDocumentTypePtr  DocumentType_ptr;
     }
 
+
+#define DOM_FOR_ALL_ELEMENTS( PARENT, ITERATOR )                                                \
+                                                                                                \
+    for( xml::Node_ptr ITERATOR##_node = PARENT->firstChild;                                    \
+         ITERATOR##_node;                                                                       \
+         ITERATOR##_node = ITERATOR##_node->nextSibling )                                       \
+                                                                                                \
+    if( xml::Element_ptr ITERATOR = ITERATOR##_node )
+
 #endif
+*/
 
 #include <stdio.h>
 #include <process.h>    // _beginthreadex()
@@ -80,16 +92,6 @@ namespace sos {
 #include "spooler_thread.h"
 #include "spooler_service.h"
 
-
-//-------------------------------------------------------------------------------------------------
-
-#define DOM_FOR_ALL_ELEMENTS( PARENT, ITERATOR )                                                \
-                                                                                                \
-    for( xml::Node_ptr ITERATOR##_node = PARENT->firstChild;                                    \
-         ITERATOR##_node;                                                                       \
-         ITERATOR##_node = ITERATOR##_node->nextSibling )                                       \
-                                                                                                \
-    if( xml::Element_ptr ITERATOR = ITERATOR##_node )
 
 //-------------------------------------------------------------------------------------------------
 
@@ -173,7 +175,7 @@ struct Spooler
     Security::Level             security_level              ( const Host& );
     const time::Holiday_set&    holidays                    () const                            { return _holiday_set; }
     bool                        is_service                  () const                            { return _is_service; }
-    xml::Element_ptr            threads_as_xml              ( xml::Document_ptr, Show_what );
+    xml::Element_ptr            threads_as_xml              ( const xml::Document_ptr&, Show_what );
 
     int                         launch                      ( int argc, char** argv );                                
     void                        set_state_changed_handler   ( State_changed_handler h )         { _state_changed_handler = h; }
@@ -202,7 +204,7 @@ struct Spooler
     long                        get_free_order_id           ()                                  { return InterlockedIncrement( &_next_free_order_id ); }
     void                        add_job_chain               ( Job_chain* );
     Job_chain*                  job_chain                   ( const string& name );
-    xml::Element_ptr            xml_from_job_chains         ( xml::Document_ptr, Show_what );
+    xml::Element_ptr            xml_from_job_chains         ( const xml::Document_ptr&, Show_what );
     void                        set_job_chain_time          ( const Time& t )                   { THREAD_LOCK( _job_chain_lock )  _job_chain_time = t; }
     Time                        job_chain_time              ()                                  { THREAD_LOCK_RETURN( _job_chain_lock, Time, _job_chain_time ); }
 

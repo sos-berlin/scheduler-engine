@@ -1,4 +1,4 @@
-// $Id: spooler_order.h,v 1.13 2002/10/04 06:36:13 jz Exp $
+// $Id: spooler_order.h,v 1.14 2002/11/11 23:10:34 jz Exp $
 
 #ifndef __SPOOLER_ORDER_H
 #define __SPOOLER_ORDER_H
@@ -54,8 +54,8 @@ struct Order : Com_order
     State                       state                   ()                                          { THREAD_LOCK_RETURN( _lock, State, _state ); }
     bool                        state_is_equal          ( const State& state )                      { THREAD_LOCK_RETURN( _lock, bool, _state == state ); }
 
-    void                    set_state_text              ( const wstring& state_text )               { THREAD_LOCK( _lock )  _state_text = state_text.c_str(); }
-    wstring                     state_text              ()                                          { THREAD_LOCK_RETURN( _lock, wstring, _state_text ); }
+    void                    set_state_text              ( const string& state_text )                { THREAD_LOCK( _lock )  _state_text = state_text; }
+    string                      state_text              ()                                          { THREAD_LOCK_RETURN( _lock, string, _state_text ); }
 
     void                    set_payload                 ( const VARIANT& payload )                  { THREAD_LOCK( _lock )  _payload = payload; }
     Payload                     payload                 ()                                          { THREAD_LOCK_RETURN( _lock, Variant, _payload ); }
@@ -73,7 +73,7 @@ struct Order : Com_order
     void                        postprocessing          ( bool success, Prefix_log* );              // Verarbeitung nach spooler_process()
     void                        processing_error        ();
 
-    xml::Element_ptr            xml                     ( xml::Document_ptr, Show_what );
+    xml::Element_ptr            dom                     ( const xml::Document_ptr&, Show_what );
 
 
   private:
@@ -90,7 +90,7 @@ struct Order : Com_order
     bool                       _is_users_id;            // Id ist nicht vom Spooler generiert, also nicht sicher eindeutig.
     Priority                   _priority;
     State                      _state;
-    wstring                    _state_text;
+    string                     _state_text;
     string                     _title;
     Job_chain*                 _job_chain;              
     Job_chain_node*            _job_chain_node;         // Nächster Stelle, falls in einer Jobkette
@@ -111,7 +111,7 @@ struct Job_chain_node : Com_job_chain_node
 {
                                 Job_chain_node          ()                                          : _zero_(this+1) {}
 
-    xml::Element_ptr            xml                     ( xml::Document_ptr, Show_what );
+    xml::Element_ptr            dom                     ( const xml::Document_ptr&, Show_what );
 
 
 
@@ -157,7 +157,7 @@ struct Job_chain : Com_job_chain
 
     int                         order_count             ();
 
-    xml::Element_ptr            xml                     ( xml::Document_ptr, Show_what );
+    xml::Element_ptr            dom                     ( const xml::Document_ptr&, Show_what );
 
 
     Fill_zero                  _zero_;
@@ -205,7 +205,7 @@ struct Order_queue : Com_order_queue
     void                        update_priorities       ();
     ptr<Order>                  order_or_null           ( const Order::Id& );
     Job*                        job                     () const                                    { return _job; }
-    xml::Element_ptr            xml                     ( xml::Document_ptr, Show_what );
+    xml::Element_ptr            dom                     ( const xml::Document_ptr&, Show_what );
 
 
     Fill_zero                  _zero_;

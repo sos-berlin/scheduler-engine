@@ -1,4 +1,4 @@
-// $Id: spooler_com.cxx,v 1.63 2002/11/08 18:56:33 jz Exp $
+// $Id: spooler_com.cxx,v 1.64 2002/11/11 23:10:31 jz Exp $
 /*
     Hier sind implementiert
 
@@ -248,9 +248,9 @@ STDMETHODIMP Com_variable_set::QueryInterface( const IID& iid, void** result )
     return Sos_ole_object::QueryInterface( iid, result );
 }
 
-//------------------------------------------------------------------------Com_variable_set::set_xml
+//------------------------------------------------------------------------Com_variable_set::set_dom
 
-void Com_variable_set::set_xml( const xml::Element_ptr& params )
+void Com_variable_set::set_dom( const xml::Element_ptr& params )
 {
     HRESULT hr;
 
@@ -258,12 +258,12 @@ void Com_variable_set::set_xml( const xml::Element_ptr& params )
     {
         DOM_FOR_ALL_ELEMENTS( params, e )
         {
-            if( e->tagName == "param" ) 
+            if( e.nodeName_is( "param" ) ) 
             {
-                Variant name  = e->getAttribute( "name" );
+                Variant name  = e.getAttribute( "name" );
                 hr = name.ChangeType( VT_BSTR );                    if( FAILED(hr) )  throw_ole( hr, "ChangeType" );
 
-                Variant value = e->getAttribute( "value" );
+                Variant value = e.getAttribute( "value" );
 
                 hr = put_var( name.bstrVal, &value );               if( FAILED(hr) )  throw_ole( hr, "Ivariable_set::put_var" );
             }
@@ -330,7 +330,7 @@ STDMETHODIMP Com_variable_set::get_count( int* result )
 
 //------------------------------------------------------------------------Com_variable_set::get_dom
 
-STDMETHODIMP Com_variable_set::get_dom( xml::IXMLDOMDocument** result )
+STDMETHODIMP Com_variable_set::get_dom( msxml::IXMLDOMDocument** result )
 {
     HRESULT hr = NOERROR;
 
@@ -339,11 +339,11 @@ STDMETHODIMP Com_variable_set::get_dom( xml::IXMLDOMDocument** result )
     {
         *result = NULL;
 
-        xml::Document_ptr doc = xml::Document_ptr( __uuidof(xml::DOMDocument30), NULL );
-        doc->appendChild( doc->createProcessingInstruction( "xml", "version=\"1.0\" encoding=\"iso-8859-1\"" ) );
+        xml::Document_ptr doc = msxml::Document_ptr( __uuidof(msxml::DOMDocument30), NULL );
+        doc.appendChild( doc.createProcessingInstruction( "xml", "version=\"1.0\" encoding=\"iso-8859-1\"" ) );
     
-        xml::Element_ptr varset = doc->createElement( "variable_set" );
-        doc->appendChild( varset );
+        xml::Element_ptr varset = doc.createElement( "variable_set" );
+        doc.appendChild( varset );
 
         for( Map::iterator it = _map.begin(); it != _map.end(); it++ )
         {
@@ -356,14 +356,14 @@ STDMETHODIMP Com_variable_set::get_dom( xml::IXMLDOMDocument** result )
                 v->get_name( &name );
                 v->get_value( &value );
 
-                xml::Element_ptr var = doc->createElement( "variable" );
-                var->setAttribute( "name" , &Variant(name) );
-                var->setAttribute( "value", value );
-                varset->appendChild( var );
+                xml::Element_ptr var = doc.createElement( "variable" );
+                var.setAttribute( "name" , string_from_bstr(name) );
+                var.setAttribute( "value", string_from_variant( value ) );
+                varset.appendChild( var );
             }
         }
 
-        *result = doc;
+        *result = doc._ptr;
         (*result)->AddRef();
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Variable_set::dom" ); }
@@ -2485,7 +2485,7 @@ STDMETHODIMP Com_order::put_state_text( BSTR state_text_bstr )
     {
         if( !_order )  return E_POINTER;
 
-        _order->set_state_text( wstring_from_bstr(state_text_bstr) );
+        _order->set_state_text( string_from_bstr(state_text_bstr) );
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Order.state_text" ); }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Order.state_text" ); }

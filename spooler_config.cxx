@@ -1,4 +1,4 @@
-// $Id: spooler_config.cxx,v 1.45 2002/11/02 12:23:25 jz Exp $
+// $Id: spooler_config.cxx,v 1.46 2002/11/11 23:10:32 jz Exp $
 
 //#include <precomp.h>
 
@@ -24,14 +24,14 @@ namespace spooler {
 
 xml::Element_ptr optional_single_element( const xml::Element_ptr& element, const string& name )
 {
-    xml::NodeList_ptr list = element->getElementsByTagName( as_dom_string( name ) );
+    xml::NodeList_ptr list = element.getElementsByTagName( name );
 
-    int len = list->length;
+    int len = list.length();
     if( len == 0 )  return xml::Element_ptr();
 
     if( len > 1 )  throw_xc( "SOS-1423", name );
 
-    return list->Getitem(0);
+    return list.item(0);
 }
 
 //---------------------------------------------------------------------------default_single_element
@@ -40,7 +40,7 @@ xml::Element_ptr default_single_element( const xml::Element_ptr& element, const 
 {
     xml::Element_ptr result = optional_single_element( element, name );
     if( result == NULL ) {
-        return element->ownerDocument->createElement( as_dom_string(name) );     // Künstliches Element mit Attributwerten aus der DTD
+        return element.ownerDocument().createElement( name );     // Künstliches Element mit Attributwerten aus der DTD
     }
 
     return result;
@@ -63,10 +63,10 @@ string optional_single_element_as_text( const xml::Element_ptr& element, const s
     xml::Element_ptr result = optional_single_element( element, name );
     if( result == NULL )  return empty_string;
     
-    xml::Element_ptr text_element = result->firstChild;
+    xml::Element_ptr text_element = result.firstChild();
     if( text_element == NULL )  return empty_string;
 
-    return as_string( text_element->nodeValue );
+    return text_element.nodeValue();
 }
 
 //-----------------------------------------------------------------------text_from_xml_with_include
@@ -81,23 +81,23 @@ Source_with_parts text_from_xml_with_include( const xml::Element_ptr& element, c
     if( !inc.empty() )  { char c = inc[inc.length()-1];  if( c != '/'  &&  c != '\\' )  inc += "/"; }
 
 
-    for( xml::Node_ptr n = element->firstChild; n; n = n->nextSibling )
+    for( xml::Node_ptr n = element.firstChild(); n; n = n.nextSibling() )
     {
         string text;
 
-        switch( n->GetnodeType() )
+        switch( n.nodeType() )
         {
-            case xml::NODE_CDATA_SECTION:
+            case xml::CDATA_SECTION_NODE:
             {
-                xml::Cdata_section_ptr c = n;
-                text = as_string( c->data );
+                xml::CDATASection_ptr c = n;
+                text = c.data();
                 goto TEXT;
             }
 
-            case xml::NODE_TEXT:
+            case xml::TEXT_NODE:
             {
                 xml::Text_ptr t = n;
-                text = as_string( t->data );
+                text = t.data();
                 goto TEXT;
 
             }
@@ -107,10 +107,10 @@ Source_with_parts text_from_xml_with_include( const xml::Element_ptr& element, c
                 linenr_base += count_if( text.begin(), text.end(), bind2nd( equal_to<char>(), '\n' ) );
                 break;
 
-            case xml::NODE_ELEMENT:     // <include file="..."/>
+            case xml::ELEMENT_NODE:     // <include file="..."/>
             {
                 xml::Element_ptr e = n;
-                string filename = as_string( e->getAttribute( L"file" ) );
+                string filename = e.getAttribute( "file" );
 
                 if( filename.length() >= 1 ) 
                 {
@@ -134,17 +134,17 @@ Source_with_parts text_from_xml_with_include( const xml::Element_ptr& element, c
     return result;
 }
 
-//--------------------------------------------------------------------------------Security::set_xml
+//--------------------------------------------------------------------------------Security::set_dom
 
-void Security::set_xml( const xml::Element_ptr& security_element ) 
+void Security::set_dom( const xml::Element_ptr& security_element ) 
 { 
-    bool ignore_unknown_hosts = as_bool( security_element->getAttribute( L"ignore_unknown_hosts" ) );
+    bool ignore_unknown_hosts = as_bool( security_element.getAttribute( "ignore_unknown_hosts" ) );
 
     DOM_FOR_ALL_ELEMENTS( security_element, e )
     {
-        if( e->tagName == "allowed_host" )
+        if( e.nodeName_is( "allowed_host" ) )
         {
-            string    hostname = as_string( e->getAttribute( L"host" ) );
+            string    hostname = e.getAttribute( "host" );
             set<Host> host_set;
 
             try {
@@ -158,36 +158,36 @@ void Security::set_xml( const xml::Element_ptr& security_element )
             
             FOR_EACH( set<Host>, host_set, h )
             {
-                _host_map[ *h ] = as_level( as_string( e->getAttribute( L"level" ) ) );
+                _host_map[ *h ] = as_level( e.getAttribute( "level" ) );
             }
         }
     }
 }
 
-//------------------------------------------------------------------------Object_set_class::set_xml
+//------------------------------------------------------------------------Object_set_class::set_dom
 
-void Object_set_class::set_xml( const xml::Element_ptr& element )
+void Object_set_class::set_dom( const xml::Element_ptr& element )
 {
-    _name = as_string( element->getAttribute( L"name" ) );
+    _name = element.getAttribute( "name" );
 
-    string iface = as_string( variant_default( element->getAttribute( L"script_interface" ), "oo" ) );
+    string iface = as_string( variant_default( element.getAttribute( "script_interface" ), "oo" ) );
     _object_interface = iface == "oo";
 
     DOM_FOR_ALL_ELEMENTS( element, e )
     {
-        if( e->tagName == "script" )
+        if( e.nodeName_is( "script" ) )
         {
-            _module.set_xml( e, _spooler->include_path() );
+            _module.set_dom( e, _spooler->include_path() );
         }
         else
-        if( e->tagName == "level_decls" )
+        if( e.nodeName_is( "level_decls" ) )
         {
             DOM_FOR_ALL_ELEMENTS( e, e2 )
             {
-                if( e2->tagName == "level_decl" ) 
+                if( e2.nodeName_is( "level_decl" ) )
                 {
-                    int    level = int_from_variant( e2->getAttribute( L"level" ) );
-                    string name  = as_string( e2->getAttribute( L"name" ) );
+                    int    level = as_int( e2.getAttribute( "level" ) );
+                    string name  = e2.getAttribute( "name" );
 
                     _level_map[ level ] = name;
                 }
@@ -196,20 +196,20 @@ void Object_set_class::set_xml( const xml::Element_ptr& element )
     }
 }
 
-//--------------------------------------------------------------------------Level_interval::set_xml
+//--------------------------------------------------------------------------Level_interval::set_dom
 
-void Level_interval::set_xml( const xml::Element_ptr& element )
+void Level_interval::set_dom( const xml::Element_ptr& element )
 {
-    _low_level  = int_from_variant( element->getAttribute( L"low" ) );
-    _high_level = int_from_variant( element->getAttribute( L"high" ) );
+    _low_level  = as_int( element.getAttribute( "low" ) );
+    _high_level = as_int( element.getAttribute( "high" ) );
 }
 
-//------------------------------------------------------------------------Object_set_descr::set_xml
+//------------------------------------------------------------------------Object_set_descr::set_dom
 
-void Object_set_descr::set_xml( const xml::Element_ptr& element )
+void Object_set_descr::set_dom( const xml::Element_ptr& element )
 { 
-    _class_name     = as_string( element->getAttribute( L"class" ) );
-    _level_interval.set_xml( single_element( element, "levels" ) );
+    _class_name     = element.getAttribute( "class" );
+    _level_interval.set_dom( single_element( element, "levels" ) );
 }
 
 //--------------------------------------------------------Spooler::load_object_set_classes_from_xml
@@ -218,22 +218,22 @@ void Spooler::load_object_set_classes_from_xml( Object_set_class_list* liste, co
 {
     DOM_FOR_ALL_ELEMENTS( element, e )
     {
-        if( e->tagName == "object_set_class" )  liste->push_back( SOS_NEW( Object_set_class( this, &_prefix_log, e ) ) );
+        if( e.nodeName_is( "object_set_class" ) )  liste->push_back( SOS_NEW( Object_set_class( this, &_prefix_log, e ) ) );
     }
 }
 
-//----------------------------------------------------------------------------------Thread::set_xml
+//----------------------------------------------------------------------------------Thread::set_dom
 
-void Thread::set_xml( const xml::Element_ptr& element )
+void Thread::set_dom( const xml::Element_ptr& element )
 {
     string str;
 
-    _name = as_string( element->getAttribute( L"name" ) );
+    _name = element.getAttribute( "name" );
 
-    str = as_string( element->getAttribute( L"free_threading" ) );
+    str = element.getAttribute( "free_threading" );
     if( !str.empty() )  _free_threading = as_bool( str );
 
-    str = as_string( element->getAttribute( L"priority" ) );
+    str = element.getAttribute( "priority" );
     if( !str.empty() )
     {
         if( str == "idle" )  _thread_priority = THREAD_PRIORITY_IDLE;
@@ -246,13 +246,13 @@ void Thread::set_xml( const xml::Element_ptr& element )
         }
     }
 
-    if( element->getAttributeNode( L"include_path" ) )  _include_path = as_string( element->getAttribute( L"include_path" ) );
+    if( element.getAttributeNode( "include_path" ) )  _include_path = element.getAttribute( "include_path" );
 
     DOM_FOR_ALL_ELEMENTS( element, e )
     {
-        if( e->tagName == "script" )  _module.set_xml( e, include_path() );
+        if( e.nodeName_is( "script" ) )  _module.set_dom( e, include_path() );
         else
-        if( e->tagName == "jobs"   )  load_jobs_from_xml( e );
+        if( e.nodeName_is( "jobs"   ) )  load_jobs_from_xml( e );
     }
 }
 
@@ -262,12 +262,12 @@ void Spooler::load_threads_from_xml( const xml::Element_ptr& element )
 {
     DOM_FOR_ALL_ELEMENTS( element, e )
     {
-        if( e->tagName == "thread" ) 
+        if( e.nodeName_is( "thread" ) )
         {
-            string spooler_id = as_string( e->getAttribute( "spooler_id" ) );
+            string spooler_id = e.getAttribute( "spooler_id" );
             if( _manual  ||  spooler_id.empty()  ||  spooler_id == _spooler_id )
             {
-                string thread_name = as_string( e->getAttribute( "name" ) );
+                string thread_name = e.getAttribute( "name" );
                 Sos_ptr<Thread> thread = get_thread_or_null( thread_name );
                 if( !thread )  
                 {
@@ -275,7 +275,7 @@ void Spooler::load_threads_from_xml( const xml::Element_ptr& element )
                     _thread_list.push_back( thread );
                 }
 
-                thread->set_xml( e );
+                thread->set_dom( e );
             }
         }
     }
@@ -292,9 +292,9 @@ void Spooler::load_config( const xml::Element_ptr& config_element, const string&
     {
         {DOM_FOR_ALL_ELEMENTS( config_element, e )
         {
-            if( e->tagName == "base" )
+            if( e.nodeName_is( "base" ) )
             {
-                string config_filename = as_string( e->getAttribute( "file" ) );
+                string config_filename = e.getAttribute( "file" );
                 
                 Command_processor cp ( this );
                 cp._load_config_immediately = true;
@@ -303,65 +303,65 @@ void Spooler::load_config( const xml::Element_ptr& config_element, const string&
             }
         }}
 
-        _config_document = config_element->ownerDocument; 
+        _config_document = config_element.ownerDocument();
         _config_element  = config_element;
 
-        _tcp_port      = int_from_variant( variant_default( config_element->getAttribute( L"tcp_port"     ), _tcp_port     ) );
-        _udp_port      = int_from_variant( variant_default( config_element->getAttribute( L"udp_port"     ), _udp_port     ) );
-        _priority_max  = int_from_variant( variant_default( config_element->getAttribute( L"priority_max" ), _priority_max ) );
+        _tcp_port      = as_int( config_element.getAttribute( "tcp_port"     , as_string( _tcp_port )     ) );
+        _udp_port      = as_int( config_element.getAttribute( "udp_port"     , as_string( _udp_port )     ) );
+        _priority_max  = as_int( config_element.getAttribute( "priority_max" , as_string( _priority_max ) ) );
 
-        _java_vm._config_class_path = as_string( config_element->getAttribute( L"java_class_path" ) );
+        _java_vm._config_class_path = config_element.getAttribute( "java_class_path" );
 
-        string log_dir =   as_string( config_element->getAttribute( L"log_dir"         ) );
+        string log_dir =   config_element.getAttribute( "log_dir" );
 
         if( !_log_directory_as_option_set && log_dir != "" )  _log_directory = log_dir;
-        if( !_spooler_param_as_option_set )  _spooler_param = as_string( variant_default( config_element->getAttribute( L"param"        ), _spooler_param ) );
-        if( !_include_path_as_option_set  )  _include_path  = as_string( variant_default( config_element->getAttribute( L"include_path" ), _include_path  ) );
+        if( !_spooler_param_as_option_set )  _spooler_param = as_string( variant_default( config_element.getAttribute( "param"        ), _spooler_param ) );
+        if( !_include_path_as_option_set  )  _include_path  = as_string( variant_default( config_element.getAttribute( "include_path" ), _include_path  ) );
 
-        _free_threading_default = as_bool( as_string( variant_default( config_element->getAttribute( L"free_threading" ), _free_threading_default ) ) );
+        _free_threading_default = as_bool( as_string( variant_default( config_element.getAttribute( "free_threading" ), _free_threading_default ) ) );
 
         DOM_FOR_ALL_ELEMENTS( config_element, e )
         {
-            if( e->tagName == "security" )
+            if( e.nodeName_is( "security" ) )
             {
                 _security.clear();
-                _security.set_xml( e );
+                _security.set_dom( e );
             }
             else
-            if( e->tagName == "object_set_classes" )
+            if( e.nodeName_is( "object_set_classes" ) )
             {
                 _object_set_class_list.clear();
                 load_object_set_classes_from_xml( &_object_set_class_list, e );
             }
             else
-            if( e->tagName == "holidays" )
+            if( e.nodeName_is( "holidays" ) )
             {
                 _holiday_set.clear();
 
                 DOM_FOR_ALL_ELEMENTS( e, e2 )
                 {
-                    if( e2->tagName == "holiday" )
+                    if( e2.nodeName_is( "holiday" ) )
                     {
                         Sos_optional_date_time dt;
-                        dt.assign( as_string( e2->getAttribute( L"date" ) ) );
+                        dt.assign( e2.getAttribute( "date" ) );
                         _holiday_set.insert( dt.as_time_t() );
                     }
                 }
             }
             else
-            if( e->tagName == "holiday" )
+            if( e.nodeName_is( "holiday" ) )
             {
                 Sos_optional_date_time dt;
-                dt.assign( as_string( e->getAttribute( L"date" ) ) );
+                dt.assign( e.getAttribute( "date" ) );
                 _holiday_set.insert( dt.as_time_t() );
             }
             else
-            if( e->tagName == "script" )
+            if( e.nodeName_is( "script" ) )
             {
-                _module.set_xml( e, include_path() );
+                _module.set_dom( e, include_path() );
             }
             else
-            if( e->tagName == "threads" ) 
+            if( e.nodeName_is( "threads" ) )
             {
                 load_threads_from_xml( e );
             }

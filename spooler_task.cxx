@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.117 2002/11/02 12:23:26 jz Exp $
+// $Id: spooler_task.cxx,v 1.118 2002/11/11 23:10:34 jz Exp $
 /*
     Hier sind implementiert
 
@@ -266,36 +266,34 @@ Job::~Job()
     close();
 }
 
-//-------------------------------------------------------------------------------------Job::set_xml
+//-------------------------------------------------------------------------------------Job::set_dom
 
-void Job::set_xml( const xml::Element_ptr& element )
+void Job::set_dom( const xml::Element_ptr& element )
 {
     THREAD_LOCK( _lock )
     {
         bool order;
 
-        _name             = as_string       ( element->getAttribute( L"name" ) );
-      //_rerun            = as_bool         ( element->getAttribute( L"rerun" ) ) ),
-      //_stop_after_error = as_bool         ( element->getAttribute( L"stop_after_error" ) );
-        _temporary        = as_bool         ( variant_default( element->getAttribute( L"temporary"  ), _temporary  ) );
-        Variant priority  =                                    element->getAttribute( L"priority"   );
-        _title            = as_string       ( variant_default( element->getAttribute( L"title"      ), _title      ) );
-        _log_append       = as_bool         ( variant_default( element->getAttribute( L"log_append" ), _log_append ) );
-        order             = as_bool         ( variant_default( element->getAttribute( L"order"      ), false       ) );
+        _name             = element.getAttribute( "name" );
+      //_rerun            = as_bool         ( element.getAttribute( "rerun" ) ) ),
+      //_stop_after_error = as_bool         ( element.getAttribute( "stop_after_error" ) );
+        _temporary        = element.bool_getAttribute( "temporary"  , _temporary  );
+        _priority         = element. int_getAttribute( "priority"   , _priority   );
+        _title            = element.     getAttribute( "title"      , _title      );
+        _log_append       = element.bool_getAttribute( "log_append" , _log_append );
+        order             = element.bool_getAttribute( "order"      , false       );
 
         if( order )
         {
             if( _temporary )  throw_xc( "SPOOLER-155" );
-            if( priority.vt != VT_NULL )  throw_xc( "SPOOLER-165" );
+            if( element.getAttributeNode( "priority" ) )  throw_xc( "SPOOLER-165" );
             _order_queue = new Order_queue( this, &_log );
         }
-        else
-            _priority = int_from_variant( variant_default( priority, _priority ) );
 
 
         string text;
 
-        text = as_string( element->getAttribute( L"output_level" ) );
+        text = element.getAttribute( "output_level" );
         if( !text.empty() )  _output_level = as_int( text );
 
         //for( time::Holiday_set::iterator it = _spooler->_run_time._holidays.begin(); it != _spooler->_run_time._holidays.end(); it++ )
@@ -304,34 +302,34 @@ void Job::set_xml( const xml::Element_ptr& element )
 
         DOM_FOR_ALL_ELEMENTS( element, e )
         {
-            if( e->tagName == "description" )  
+            if( e.nodeName_is( "description" ) )
             {
                 try { _description = text_from_xml_with_include( e, _spooler->include_path() ); }
                 catch( const Xc& x         ) { _spooler->_log.error( x.what() );  _description = x.what(); }
                 catch( const _com_error& x ) { string d = bstr_as_string(x.Description()); _spooler->_log.error(d);  _description = d; }
             }
             else
-            if( e->tagName == "object_set"  )  _object_set_descr = SOS_NEW( Object_set_descr( e ) );
+            if( e.nodeName_is( "object_set" ) )  _object_set_descr = SOS_NEW( Object_set_descr( e ) );
             else
-            if( e->tagName == "params"      )  _default_params->set_xml( e );  
+            if( e.nodeName_is( "params"     ) )  _default_params->set_dom( e );  
             else
-            if( e->tagName == "script"      )  
+            if( e.nodeName_is( "script"     ) )  
             {
-                _module.set_xml_without_source( e );
+                _module.set_dom_without_source( e );
                 _module_xml_element   = e;
                 _process_filename     = "";
                 _process_param        = "";
                 _process_log_filename = "";
             }
             else
-            if( e->tagName == "process"     )  _module_xml_element   = NULL,
-                                               _process_filename     = as_string( e->getAttribute( L"file" ) ),
-                                               _process_param        = as_string( e->getAttribute( L"param" ) ),
-                                               _process_log_filename = as_string( e->getAttribute( L"log_file" ) );
+            if( e.nodeName_is( "process"    ) )  _module_xml_element   = NULL,
+                                                 _process_filename     = e.getAttribute( "file" ),
+                                                 _process_param        = e.getAttribute( "param" ),
+                                                 _process_log_filename = e.getAttribute( "log_file" );
             else
-            if( e->tagName == "run_time"  &&  !_spooler->_manual )  _run_time = Run_time(), 
-                                                                    _run_time.set_holidays( _spooler->holidays() ), 
-                                                                    _run_time.set_xml( e );
+            if( e.nodeName_is( "run_time" ) &&  !_spooler->_manual )  _run_time = Run_time(), 
+                                                                      _run_time.set_holidays( _spooler->holidays() ), 
+                                                                      _run_time.set_dom( e );
         }
 
         if( !_run_time.set() )   _run_time.set_default();
@@ -618,7 +616,7 @@ bool Job::read_script()
 {
     try
     {
-        _module.set_xml_source_only( _module_xml_element, include_path() );
+        _module.set_dom_source_only( _module_xml_element, include_path() );
     }
     catch( const Xc& x        ) { set_error(x);  _close_engine = true;  set_state( s_read_error );  return false; }
     catch( const exception& x ) { set_error(x);  _close_engine = true;  set_state( s_read_error );  return false; }
@@ -1466,25 +1464,25 @@ string Job::state_cmd_name( Job::State_cmd cmd )
     }
 }
 
-//-----------------------------------------------------------------------------------------Job::xml
+//-----------------------------------------------------------------------------------------Job::dom
 // Anderer Thread
 
-xml::Element_ptr Job::xml( xml::Document_ptr document, Show_what show )
+xml::Element_ptr Job::dom( const xml::Document_ptr& document, Show_what show )
 {
-    xml::Element_ptr job_element = document->createElement( "task" );
+    xml::Element_ptr job_element = document.createElement( "task" );
 
     THREAD_LOCK( _lock )
     {
-        job_element->setAttribute( "job"       , as_dom_string( _name ) );
-        job_element->setAttribute( "state"     , as_dom_string( state_name() ) );
-        job_element->setAttribute( "title"     , as_dom_string( _title ) );
-        job_element->setAttribute( "all_steps" , as_dom_string( _step_count ) );
-        job_element->setAttribute( "state_text", as_dom_string( _state_text ) );
-        job_element->setAttribute( "log_file"  , as_dom_string( _log.filename() ) );
-        job_element->setAttribute( "order"     , as_dom_string( _order_queue? "yes" : "no" ) );
+        job_element.setAttribute( "job"       , _name                   );
+        job_element.setAttribute( "state"     , state_name()            );
+        job_element.setAttribute( "title"     , _title                  );
+        job_element.setAttribute( "all_steps" , _step_count             );
+        job_element.setAttribute( "state_text", _state_text             );
+        job_element.setAttribute( "log_file"  , _log.filename()         );
+        job_element.setAttribute( "order"     , _order_queue? "yes" : "no" );
         
-        if( !_in_call.empty() )  job_element->setAttribute( "calling", as_dom_string( _in_call ) );
-        if( _state_cmd        )  job_element->setAttribute( "cmd", as_dom_string( state_cmd_name() ) );
+        if( !_in_call.empty() )  job_element.setAttribute( "calling", _in_call );
+        if( _state_cmd        )  job_element.setAttribute( "cmd"    , state_cmd_name()  );
 
         if( _state == s_pending )
         {
@@ -1508,45 +1506,45 @@ xml::Element_ptr Job::xml( xml::Document_ptr document, Show_what show )
             }
 
             if( next > _next_single_start )  next = _next_single_start;
-            if( next < latter_day )  job_element->setAttribute( "next_start_time", as_dom_string( next.as_string() ) );
+            if( next < latter_day )  job_element.setAttribute( "next_start_time", next.as_string() );
         }
 
         if( _task )
         {
-            job_element->setAttribute( "running_since"   , as_dom_string( _task->_running_since.as_string() ) );
+            job_element.setAttribute( "running_since"   , _task->_running_since.as_string() );
 
             if( _state == Job::s_running  &&  _task->_last_process_start_time )
-            job_element->setAttribute( "in_process_since", as_dom_string( _task->_last_process_start_time.as_string() ) );
+            job_element.setAttribute( "in_process_since", _task->_last_process_start_time.as_string() );
 
-            job_element->setAttribute( "steps"           , as_dom_string( as_string( _task->_step_count ) ) );
-            job_element->setAttribute( "id"              , as_dom_string( as_string( _task->_id) ) );
+            job_element.setAttribute( "steps"           , _task->_step_count );
+            job_element.setAttribute( "id"              , _task->_id );
         }
 
         if( show & show_description )  dom_append_text_element( job_element, "description", _description );
 
         if( (show & show_task_queue)  &&  !_task_queue.empty() )
         {
-            xml::Element_ptr queue_element = document->createElement( "queued_tasks" );
+            xml::Element_ptr queue_element = document.createElement( "queued_tasks" );
             dom_append_nl( queue_element );
 
             FOR_EACH( Task_queue, _task_queue, it )
             {
-                xml::Element_ptr queued_task_element = document->createElement( "queued_task" );
-                queued_task_element->setAttribute( "id"      , as_dom_string( as_string( (*it)->id() ) ) );
-                queued_task_element->setAttribute( "enqueued", as_dom_string( (*it)->_enqueue_time.as_string() ) );
-                queued_task_element->setAttribute( "name"    , as_dom_string( (*it)->_name ) );
+                xml::Element_ptr queued_task_element = document.createElement( "queued_task" );
+                queued_task_element.setAttribute( "id"      , (*it)->id() );
+                queued_task_element.setAttribute( "enqueued", (*it)->_enqueue_time.as_string() );
+                queued_task_element.setAttribute( "name"    , (*it)->_name );
                 if( (*it)->_start_at )
-                    queued_task_element->setAttribute( "start_at", as_dom_string( (*it)->_start_at.as_string() ) );
+                    queued_task_element.setAttribute( "start_at", (*it)->_start_at.as_string() );
 
-                queue_element->appendChild( queued_task_element );
+                queue_element.appendChild( queued_task_element );
                 dom_append_nl( queue_element );
             }
 
-            job_element->appendChild( queue_element );
+            job_element.appendChild( queue_element );
         }
 
-        if( _task  &&  _task->_order )  dom_append_nl( job_element ),  job_element->appendChild( _task->_order->xml( document, show ) );
-        if( _order_queue             )  dom_append_nl( job_element ),  job_element->appendChild( _order_queue->xml( document, show ) );
+        if( _task  &&  _task->_order )  dom_append_nl( job_element ),  job_element.appendChild( _task->_order->dom( document, show ) );
+        if( _order_queue             )  dom_append_nl( job_element ),  job_element.appendChild( _order_queue->dom( document, show ) );
         if( _error                   )  dom_append_nl( job_element ),  append_error_element( job_element, _error );
     }
 
@@ -1884,7 +1882,7 @@ bool Task::has_parameters()
 xml::Document_ptr Task::parameters_as_dom()
 {
     xml::Document_ptr result;
-    _params->get_dom( &result );
+    _params->get_dom( &result._ptr );
     return result;
 }
 

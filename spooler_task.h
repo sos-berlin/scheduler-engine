@@ -1,4 +1,4 @@
-// $Id: spooler_task.h,v 1.68 2002/11/02 12:23:26 jz Exp $
+// $Id: spooler_task.h,v 1.69 2002/11/11 23:10:34 jz Exp $
 
 #ifndef __SPOOLER_TASK_H
 #define __SPOOLER_TASK_H
@@ -15,9 +15,9 @@ struct                          Task;
 struct Level_interval
 {
                                 Level_interval              ()                                      : _low_level(0), _high_level(0) {}
-    explicit                    Level_interval              ( const xml::Element_ptr& e )           { set_xml( e ); }
+    explicit                    Level_interval              ( const xml::Element_ptr& e )           { set_dom( e ); }
 
-    void                        set_xml                     ( const xml::Element_ptr& );
+    void                        set_dom                     ( const xml::Element_ptr& );
 
     bool                        is_in_interval              ( Level level )                         { return level >= _low_level && level < _high_level; }
 
@@ -30,9 +30,9 @@ struct Level_interval
 struct Object_set_class : Sos_self_deleting
 {
                                 Object_set_class            ( Spooler* sp, Prefix_log* log )        : _spooler(sp), _module(sp,log) {}
-    explicit                    Object_set_class            ( Spooler* sp,  Prefix_log* log, const xml::Element_ptr& e )  : _spooler(sp), _module(sp,log) { set_xml( e ); }
+    explicit                    Object_set_class            ( Spooler* sp,  Prefix_log* log, const xml::Element_ptr& e )  : _spooler(sp), _module(sp,log) { set_dom( e ); }
 
-    void                        set_xml                     ( const xml::Element_ptr& );
+    void                        set_dom                     ( const xml::Element_ptr& );
 
     Spooler*                   _spooler;
     string                     _name;
@@ -84,9 +84,9 @@ struct Spooler_object
 struct Object_set_descr : Sos_self_deleting
 {
                                 Object_set_descr            ()                                      {}
-    explicit                    Object_set_descr            ( const xml::Element_ptr& e )           { set_xml( e ); }
+    explicit                    Object_set_descr            ( const xml::Element_ptr& e )           { set_dom( e ); }
 
-    void                        set_xml                     ( const xml::Element_ptr& );
+    void                        set_dom                     ( const xml::Element_ptr& );
 
     string                     _class_name;
     Sos_ptr<Object_set_class>  _class;
@@ -177,8 +177,8 @@ struct Job : Sos_self_deleting
                                 Job                         ( Thread* );
                                ~Job                         (); 
 
-    void                        set_xml                     ( const xml::Element_ptr& );
-    xml::Element_ptr            xml                         ( xml::Document_ptr, Show_what );
+    void                        set_dom                     ( const xml::Element_ptr& );
+    xml::Element_ptr            dom                         ( const xml::Document_ptr&, Show_what );
 
     void                        init0                       ();                         // Wird vor Spooler-Skript gerufen
     void                        init                        ();                         // Wird nach Spooler-Skript gerufen, ruft auch init2()
@@ -199,7 +199,7 @@ struct Job : Sos_self_deleting
     void                        set_in_call                 ( const string& name, const string& extra = "" );
     void                        set_delay_after_error       ( int error_steps, Time delay ) { _delay_after_error[error_steps] = delay; }
 
-    xml::Element_ptr            read_history                ( xml::Document_ptr doc, int id, int n, Show_what show ) { return _history.read_tail( doc, id, n, show ); }
+    xml::Element_ptr            read_history                ( const xml::Document_ptr& doc, int id, int n, Show_what show ) { return _history.read_tail( doc, id, n, show ); }
 
     void                        close                       ();
     void                        close_engine                ();

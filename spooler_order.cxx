@@ -1,4 +1,4 @@
-// $Id: spooler_order.cxx,v 1.17 2002/11/08 18:56:35 jz Exp $
+// $Id: spooler_order.cxx,v 1.18 2002/11/11 23:10:33 jz Exp $
 /*
     Hier sind implementiert
 
@@ -56,9 +56,9 @@ Job_chain* Spooler::job_chain( const string& name )
 
 //----------------------------------------------------xml::Element_ptr Spooler::xml_from_job_chains
 
-xml::Element_ptr Spooler::xml_from_job_chains( xml::Document_ptr document, Show_what show )
+xml::Element_ptr Spooler::xml_from_job_chains( const xml::Document_ptr& document, Show_what show )
 {
-    xml::Element_ptr job_chains_element = document->createElement( "job_chains" );
+    xml::Element_ptr job_chains_element = document.createElement( "job_chains" );
 
         dom_append_nl( job_chains_element );
 
@@ -67,7 +67,7 @@ xml::Element_ptr Spooler::xml_from_job_chains( xml::Document_ptr document, Show_
             FOR_EACH( Job_chain_map, _job_chain_map, it )
             {
                 Job_chain* job_chain = it->second;
-                job_chains_element->appendChild( job_chain->xml( document, show ) );
+                job_chains_element.appendChild( job_chain->dom( document, show ) );
                 dom_append_nl( job_chains_element );            
             }
         }
@@ -77,22 +77,22 @@ xml::Element_ptr Spooler::xml_from_job_chains( xml::Document_ptr document, Show_
 
 //-------------------------------------------------------------xml::Element_ptr Job_chain_node::xml
 
-xml::Element_ptr Job_chain_node::xml( xml::Document_ptr document, Show_what show )
+xml::Element_ptr Job_chain_node::dom( const xml::Document_ptr& document, Show_what show )
 {
-    xml::Element_ptr element = document->createElement( "job_chain_node" );
+    xml::Element_ptr element = document.createElement( "job_chain_node" );
 
-                                           element->setAttribute( "state"      , _state       );
-        if( _next_state.vt  != VT_ERROR )  element->setAttribute( "next_state" , _next_state  );
-        if( _error_state.vt != VT_ERROR )  element->setAttribute( "error_state", _error_state );
+                                           element.setAttribute( "state"      , string_from_variant( _state       ) );
+        if( _next_state.vt  != VT_ERROR )  element.setAttribute( "next_state" , string_from_variant( _next_state  ) );
+        if( _error_state.vt != VT_ERROR )  element.setAttribute( "error_state", string_from_variant( _error_state ) );
    
         if( _job )
         {
-            element->setAttribute( "job", _job->name().c_str() );
+            element.setAttribute( "job", _job->name() );
 
             //if( show & show_orders )  
             {
                 dom_append_nl( element );
-                element->appendChild( _job->xml( document, show ) );
+                element.appendChild( _job->dom( document, show ) );
                 dom_append_nl( element );
             }
         }
@@ -116,15 +116,15 @@ Job_chain::~Job_chain()
 {
 }
 
-//------------------------------------------------------------------xml::Element_ptr Job_chain::xml
+//------------------------------------------------------------------xml::Element_ptr Job_chain::dom
 
-xml::Element_ptr Job_chain::xml( xml::Document_ptr document, Show_what show )
+xml::Element_ptr Job_chain::dom( const xml::Document_ptr& document, Show_what show )
 {
-    xml::Element_ptr element = document->createElement( "job_chain" );
+    xml::Element_ptr element = document.createElement( "job_chain" );
 
         THREAD_LOCK( _lock )
         {
-            element->setAttribute( "name", _name.c_str() );
+            element.setAttribute( "name", _name );
     
             if( _finished )
             {
@@ -133,7 +133,7 @@ xml::Element_ptr Job_chain::xml( xml::Document_ptr document, Show_what show )
                 FOR_EACH( Chain, _chain, it )
                 {
                     Job_chain_node* node = *it;
-                    element->appendChild( node->xml( document, show ) );
+                    element.appendChild( node->dom( document, show ) );
                     dom_append_nl( element );
                 }
             }
@@ -322,22 +322,22 @@ Order_queue::~Order_queue()
 {
 }
 
-//---------------------------------------------------------------------------------Order_queue::xml
+//---------------------------------------------------------------------------------Order_queue::dom
 
-xml::Element_ptr Order_queue::xml( xml::Document_ptr document, Show_what show )
+xml::Element_ptr Order_queue::dom( const xml::Document_ptr& document, Show_what show )
 {
-    xml::Element_ptr element = document->createElement( "order_queue" );
+    xml::Element_ptr element = document.createElement( "order_queue" );
 
     THREAD_LOCK( _lock )
     {
-        element->setAttribute( "length", as_dom_string( length() ) );
+        element.setAttribute( "length", length() );
 
         if( show & show_orders )
         {
             FOR_EACH( Queue, _queue, it )
             {
                 dom_append_nl( element );
-                element->appendChild( (*it)->xml( document, show ) );
+                element.appendChild( (*it)->dom( document, show ) );
             }
 
             dom_append_nl( element );
@@ -499,31 +499,31 @@ Order::~Order()
 {
 }
 
-//---------------------------------------------------------------------------------------Order::xml
+//---------------------------------------------------------------------------------------Order::dom
 
-xml::Element_ptr Order::xml( xml::Document_ptr document, Show_what show )
+xml::Element_ptr Order::dom( const xml::Document_ptr& document, Show_what show )
 {
-    xml::Element_ptr element = document->createElement( "order" );
+    xml::Element_ptr element = document.createElement( "order" );
 
     THREAD_LOCK( _lock )
     {
-        element->setAttribute( "id"        , _id );
-        element->setAttribute( "title"     , _title.c_str() );
-        element->setAttribute( "state"     , _state );
+        element.setAttribute( "id"        , string_from_variant( _id ) );
+        element.setAttribute( "title"     , _title );
+        element.setAttribute( "state"     , string_from_variant( _state ) );
 
         if( _job_chain )  
-        element->setAttribute( "job_chain" , _job_chain->name().c_str() );
+        element.setAttribute( "job_chain" , _job_chain->name() );
 
         Job* job = this->job();
         if( job )
-        element->setAttribute( "job"       , job->name().c_str() );
+        element.setAttribute( "job"       , job->name() );
 
         if( _task )
-        element->setAttribute( "in_process_since", as_dom_string( _task->last_process_start_time().as_string() ) );
+        element.setAttribute( "in_process_since", _task->last_process_start_time().as_string() );
 
-        element->setAttribute( "state_text", _state_text.c_str() );
-        element->setAttribute( "priority"  , as_dom_string( _priority ) );
-        element->setAttribute( "created"   , as_dom_string( _created.as_string() ) );
+        element.setAttribute( "state_text", _state_text );
+        element.setAttribute( "priority"  , _priority );
+        element.setAttribute( "created"   , _created.as_string() );
     }
 
     return element;

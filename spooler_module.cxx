@@ -1,4 +1,4 @@
-// $Id: spooler_module.cxx,v 1.2 2002/11/02 12:23:26 jz Exp $
+// $Id: spooler_module.cxx,v 1.3 2002/11/11 23:10:33 jz Exp $
 /*
     Hier sind implementiert
 
@@ -15,18 +15,17 @@ using namespace std;
 namespace sos {
 namespace spooler {
 
-//----------------------------------------------------------------------------------Module::set_xml
+//----------------------------------------------------------------------------------Module::set_dom
 
-void Module::set_xml_without_source( const xml::Element_ptr& element )
+void Module::set_dom_without_source( const xml::Element_ptr& element )
 {
     _source.clear();  //clear();
 
-    _language       = as_string( element->getAttribute( L"language" ) );
+    _language       = element.getAttribute( "language"  );
+    _com_class_name = element.getAttribute( "com_class" );
+    _filename       = element.getAttribute( "filename"  );
 
-    _com_class_name = as_string( element->getAttribute( L"com_class" ) );
-    _filename       = as_string( element->getAttribute( L"filename" ) );
-
-    _java_class_name = as_string( element->getAttribute( L"java_class" ) );
+    _java_class_name = element.getAttribute( "java_class" );
 
     if( _com_class_name != "" )
     {
@@ -53,7 +52,7 @@ void Module::set_xml_without_source( const xml::Element_ptr& element )
 
     }
 
-    string use_engine = as_string( element->getAttribute( L"use_engine" ) );
+    string use_engine = element.getAttribute( "use_engine" );
     
     if( use_engine == ""
      || use_engine == "task" )  _reuse = reuse_task;
@@ -61,9 +60,9 @@ void Module::set_xml_without_source( const xml::Element_ptr& element )
     if( use_engine == "job"  )  _reuse = reuse_job;
 }
 
-//----------------------------------------------------------------------------------Module::set_xml
+//----------------------------------------------------------------------------------Module::set_dom
 
-void Module::set_xml_source_only( const xml::Element_ptr& element, const string& include_path )
+void Module::set_dom_source_only( const xml::Element_ptr& element, const string& include_path )
 {
     _source = text_from_xml_with_include( element, include_path );
 
@@ -82,7 +81,7 @@ void Module::set_xml_source_only( const xml::Element_ptr& element, const string&
             break;
 
         default: 
-            throw_xc( "Module::set_xml_source_only" );
+            throw_xc( "Module::set_dom_source_only" );
     }
 
     _set = true;

@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.124 2002/11/09 15:56:58 jz Exp $
+// $Id: spooler.cxx,v 1.125 2002/11/11 23:10:30 jz Exp $
 /*
     Hier sind implementiert
 
@@ -298,9 +298,9 @@ Security::Level Spooler::security_level( const Host& host )
 //--------------------------------------------------------------------------Spooler::threads_as_xml
 // Anderer Thread
 
-xml::Element_ptr Spooler::threads_as_xml( xml::Document_ptr document, Show_what show )
+xml::Element_ptr Spooler::threads_as_xml( const xml::Document_ptr& document, Show_what show )
 {
-    xml::Element_ptr threads = document->createElement( "threads" );
+    xml::Element_ptr threads = document.createElement( "threads" );
 
     dom_append_nl( threads );
 
@@ -308,7 +308,7 @@ xml::Element_ptr Spooler::threads_as_xml( xml::Document_ptr document, Show_what 
     {
         FOR_EACH( Thread_list, _thread_list, it )
         {
-            threads->appendChild( (*it)->xml( document, show ) );
+            threads.appendChild( (*it)->dom( document, show ) );
             dom_append_nl( threads );
         }
     }
@@ -789,7 +789,7 @@ void Spooler::cmd_load_config( const xml::Element_ptr& config, const string& sou
 { 
     THREAD_LOCK( _lock )  
     {
-        _config_document_to_load = config->ownerDocument; 
+        _config_document_to_load = config.ownerDocument(); 
         _config_element_to_load  = config;
         _config_source_filename  = source_filename;
         _state_cmd = sc_load_config; 

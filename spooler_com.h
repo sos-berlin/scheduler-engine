@@ -1,4 +1,4 @@
-// $Id: spooler_com.h,v 1.49 2002/11/08 18:56:34 jz Exp $
+// $Id: spooler_com.h,v 1.50 2002/11/11 23:10:31 jz Exp $
 
 #ifndef __SPOOLER_COM_H
 #define __SPOOLER_COM_H
@@ -115,12 +115,12 @@ struct Com_variable_set: spooler_com::Ivariable_set,
 
     STDMETHODIMP            get_java_class_name             ( BSTR* result )                        { *result = SysAllocString( L"sos.spooler.Variable_set" ); return S_OK; }
 
-    void                        set_xml                     ( const xml::Element_ptr& );
+    void                        set_dom                     ( const xml::Element_ptr& );
     STDMETHODIMP                set_var                     ( BSTR name, VARIANT* value )           { return put_var( name, value ); }
     STDMETHODIMP                put_var                     ( BSTR, VARIANT* );
     STDMETHODIMP                get_var                     ( BSTR, VARIANT* );
     STDMETHODIMP                get_count                   ( int* );
-    STDMETHODIMP                get_dom                     ( xml::IXMLDOMDocument** );
+    STDMETHODIMP                get_dom                     ( msxml::IXMLDOMDocument** );
     STDMETHODIMP                Clone                       ( spooler_com::Ivariable_set** );
     STDMETHODIMP                merge                       ( spooler_com::Ivariable_set* );
     STDMETHODIMP                get__NewEnum                ( IUnknown** );    

@@ -1,4 +1,4 @@
-// $Id: spooler_time.h,v 1.13 2002/06/18 07:35:46 jz Exp $
+// $Id: spooler_time.h,v 1.14 2002/11/11 23:10:37 jz Exp $
 
 #ifndef __SPOOLER_TIME_H
 #define __SPOOLER_TIME_H
@@ -93,7 +93,7 @@ const Time                      latter_day                  = INT_MAX;
 struct Period
 {
                                 Period                      ()                                      : _zero_(this+1) { init(); }
-    explicit                    Period                      ( const xml::Element_ptr& e, const Period* deflt=NULL )  : _zero_(this+1) { init(); set_xml( e, deflt ); }
+    explicit                    Period                      ( const xml::Element_ptr& e, const Period* deflt=NULL )  : _zero_(this+1) { init(); set_dom( e, deflt ); }
     
     void                        init                        ()                                      { _begin=_end=_repeat=latter_day; }
 
@@ -104,7 +104,7 @@ struct Period
     friend Period               operator +                  ( const Time& t, const Period& p )      { return p+t; }
 
     void                        set_default                 ();
-    void                        set_xml                     ( const xml::Element_ptr&, const Period* deflt );
+    void                        set_dom                     ( const xml::Element_ptr&, const Period* deflt );
 
     bool                        operator <                  ( const Period& t ) const               { return _begin < t._begin; }  //für set<>
     bool                        is_in_time                  ( Time t )                              { return t >= _begin && t < _end; }
@@ -143,9 +143,9 @@ struct Day
                                 Day                         ()                                      {}
                                 Day                         ( const Period_set& t )                 { _period_set = t; }
                                 Day                         ( const Period& t )                     { _period_set.insert( t ); }
-                                Day                         ( const xml::Element_ptr& e, const Day* deflt, const Period* p )   { set_xml( e, deflt, p ); }
+                                Day                         ( const xml::Element_ptr& e, const Day* deflt, const Period* p )   { set_dom( e, deflt, p ); }
 
-    void                        set_xml                     ( const xml::Element_ptr&, const Day* deflt, const Period* );
+    void                        set_dom                     ( const xml::Element_ptr&, const Day* deflt, const Period* );
     void                        set_default                 ();
 
                                 operator bool               () const                                { return !_period_set.empty(); }
@@ -167,9 +167,9 @@ struct Day
 struct Day_set
 {
                                 Day_set                     ()                                      {} 
-    explicit                    Day_set                     ( const xml::Element_ptr& e )           { set_xml(e); }
+    explicit                    Day_set                     ( const xml::Element_ptr& e )           { set_dom(e); }
 
-    void                        set_xml                     ( const xml::Element_ptr&, const Day* = NULL, const Period* = NULL );
+    void                        set_dom                     ( const xml::Element_ptr&, const Day* = NULL, const Period* = NULL );
 
     bool                        is_empty                    ();
     char                        operator []                 ( int i )                               { return _days[i]; }
@@ -266,7 +266,7 @@ struct Run_time
 {
                                 Run_time                    ()                                      : _zero_(this+1) {}
 
-    void                        set_xml                     ( const xml::Element_ptr& ) ;
+    void                        set_dom                     ( const xml::Element_ptr& ) ;
 
     void                        check                       ();                              
 
