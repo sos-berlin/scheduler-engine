@@ -1,4 +1,4 @@
-// $Id: spooler_history.cxx,v 1.32 2003/03/26 13:32:49 jz Exp $
+// $Id: spooler_history.cxx,v 1.33 2003/03/27 11:09:29 jz Exp $
 
 #include "spooler.h"
 #include "../zschimmer/z_com.h"
@@ -813,8 +813,10 @@ xml::Element_ptr Job_history::read_tail( const xml::Document_ptr& doc, int id, i
 
                     int id = type->field_descr_ptr("id")->as_int( rec.byte_ptr() );
 
+
+#ifndef SPOOLER_USE_LIBXML2     // libxml2 stürzt in Dump() ab:
                     if( _use_db ) 
-                        param_xml = file_as_string( _spooler->_db._db_name + "-table=" + _spooler->_history_tablename + " -blob=parameters where id=" + as_string(id) );
+                        param_xml = file_as_string( _spooler->_db._db_name + "-table=" + _spooler->_history_tablename + " -blob=parameters where id=" + as_string(id), "" );
 
                     if( !param_xml.empty() )
                     {
@@ -822,16 +824,16 @@ xml::Element_ptr Job_history::read_tail( const xml::Document_ptr& doc, int id, i
                             dom_append_nl( history_element );
                             xml::Document_ptr par_doc; // = msxml::Document_ptr( __uuidof(msxml::DOMDocument30), NULL );
                             par_doc.create();
-                            par_doc.load_xml( param_xml );
-                            if( par_doc.documentElement() )  history_entry.appendChild( par_doc.documentElement() );
+                            bool ok = par_doc.load_xml( param_xml );
+                            if( ok && par_doc.documentElement() )  history_entry.appendChild( par_doc.documentElement() );
                         }
                         catch( const exception&  x ) { _spooler->_log.warn( string("Historie: ") + x.what() ); }
                         catch( const _com_error& x ) { _spooler->_log.warn( string("Historie: ") + w_as_string(x.Description() )) ; }
                     }
-
+#endif
                     if( with_log )
                     {
-                        string log = file_as_string( "gzip -auto | " + _spooler->_db._db_name + "-table=" + _spooler->_history_tablename + " -blob=log where \"id\"=" + as_string(id) );
+                        string log = file_as_string( "gzip -auto | " + _spooler->_db._db_name + "-table=" + _spooler->_history_tablename + " -blob=log where \"id\"=" + as_string(id), "" );
                         if( !log.empty() ) dom_append_text_element( history_entry, "log", log );
                     }
 

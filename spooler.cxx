@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.187 2003/03/26 20:16:41 jz Exp $
+// $Id: spooler.cxx,v 1.188 2003/03/27 11:09:29 jz Exp $
 /*
     Hier sind implementiert
 
@@ -19,6 +19,7 @@
 
 #ifdef Z_WINDOWS
 #   include <process.h>
+#   include <direct.h>
 #endif
 
 #include "../kram/sosprof.h"
@@ -716,7 +717,7 @@ void Spooler::send_cmd()
         string text;
 
 #       ifdef SPOOLER_USE_MSXML
-            msxml::IXMLDOMParseErrorPtr error = command_doc._ptr->parseError;
+            msxml::IXMLDOMParseErrorPtr error = xml_doc._ptr->parseError;
 
             text = w_as_string( error->reason );
             if( text[ text.length()-1 ] == '\n' )  text = as_string( text.c_str(), text.length() - 1 );
