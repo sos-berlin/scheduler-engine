@@ -1,4 +1,4 @@
-// $Id: spooler_service.cxx,v 1.25 2002/06/21 19:27:52 jz Exp $
+// $Id: spooler_service.cxx,v 1.26 2002/06/22 07:25:53 jz Exp $
 /*
     Hier sind implementiert
 
@@ -33,10 +33,7 @@ static const char               std_service_name[]          = "DocumentFactory_S
 static const char               std_service_display_name[]  = "DocumentFactory Spooler";    // Gezeigter Name
 //static const char             service_description[]       = "Hintergrund-Jobs der Document Factory";
 static const int                stop_timeout                = 30;
-static const int                pending_timeout             = 15;
-
-static bool                     terminate_immediately       = false;
-static bool                     service_stop                = false;                        // STOP-Kommando von der Dienstesteuerung (und nicht von TCP-Schnittstelle)
+static const int                pending_timeout             = 60;
 
 //-----------------------------------------------------------------------------------Service_handle
 
@@ -61,6 +58,9 @@ struct Service_handle
 };
 
 //-------------------------------------------------------------------------------------------static
+
+static bool                     terminate_immediately       = false;
+static bool                     service_stop                = false;                        // STOP-Kommando von der Dienstesteuerung (und nicht von TCP-Schnittstelle)
 
 static Spooler*                 spooler_ptr;                // Wird auch beim Zwangsbeenden auf NULL gesetzt
 SERVICE_STATUS_HANDLE           service_status_handle;
@@ -264,18 +264,32 @@ void service_start( const string& service_name )
     ok = StartService( service_handle, 0, NULL );                                                   if( !ok )  throw_mswin_error( "StartService" );
 }
 
+//---------------------------------------------------------------------------------------state_name
+
+static string state_name( int state )
+{
+    switch( state )  
+    {
+        case SERVICE_STOPPED        : return "SERVICE_STOPPED";       
+        case SERVICE_PAUSED         : return "SERVICE_PAUSED";        
+        case SERVICE_START_PENDING  : return "SERVICE_START_PENDING"; 
+        case SERVICE_STOP_PENDING   : return "SERVICE_STOP_PENDING";  
+        case SERVICE_RUNNING        : return "SERVICE_RUNNING";       
+        default                     : return as_string( (int)state );
+    }
+}
+
 //----------------------------------------------------------------------------------service_handler
 
 static void set_service_status( int spooler_error, int state = 0 )
 {
     SERVICE_STATUS  service_status;
-    string          state_name;
+    string          state_nam;
 
     if( !service_status_handle )  return;
 
     THREAD_LOCK( set_service_lock )
     {
-
         DWORD stop_pending = service_stop? SERVICE_STOP_PENDING    // Nur, wenn Dienstesteuerung den Spooler beendet 
                                          : SERVICE_RUNNING;        // Wenn Spooler über TCP beendet wird, soll der Diensteknopt "beenden" frei bleiben. Deshalb paused.
 
@@ -290,8 +304,6 @@ static void set_service_status( int spooler_error, int state = 0 )
                                                     : spooler_ptr->state() == Spooler::s_running         ? SERVICE_RUNNING
                                                     : spooler_ptr->state() == Spooler::s_paused          ? SERVICE_PAUSED
                                                                                                          : SERVICE_START_PENDING; 
-        current_state = service_status.dwCurrentState;
-
         service_status.dwControlsAccepted           = SERVICE_ACCEPT_STOP 
                                                     | SERVICE_ACCEPT_PAUSE_CONTINUE 
                                                     | SERVICE_ACCEPT_SHUTDOWN;
@@ -303,20 +315,9 @@ static void set_service_status( int spooler_error, int state = 0 )
         service_status.dwWaitHint                   = service_status.dwCurrentState == SERVICE_START_PENDING? 10*1000 :         // 10s erlauben für den Start (wenn es ein Startskript mit DB-Verbindung gibt)
                                                       service_status.dwCurrentState == SERVICE_STOP_PENDING ? stop_timeout*1000 
                                                                                                             : 0;
-        switch( service_status.dwCurrentState )  
-        {
-            case SERVICE_STOPPED        : state_name = "SERVICE_STOPPED";       break;
-            case SERVICE_PAUSED         : state_name = "SERVICE_PAUSED";        break;
-            case SERVICE_START_PENDING  : state_name = "SERVICE_START_PENDING"; break;
-            case SERVICE_STOP_PENDING   : state_name = "SERVICE_STOP_PENDING";  break;
-            case SERVICE_RUNNING        : state_name = "SERVICE_RUNNING";       break;
-            default                     : state_name = as_string( (int)service_status.dwCurrentState );
-        }
-
 
         // Nicht zu lange im Zustand xx_PENDING bleiben, weil die Knöpfe in der Diensteverwaltung gesperrt sind:
-        if( service_status.dwCurrentState == SERVICE_START_PENDING
-         || service_status.dwCurrentState == SERVICE_STOP_PENDING )
+        if( service_status.dwCurrentState == SERVICE_START_PENDING )
         {
             if( pending_timed_out )     // Uhr abgelaufen?
             {
@@ -335,24 +336,33 @@ static void set_service_status( int spooler_error, int state = 0 )
             pending_timed_out = false;
             if( pending_watchdog_signal )  SetEvent( pending_watchdog_signal );
         }
+
+
+        current_state = service_status.dwCurrentState;
     }
 
-    LOG( "SetServiceStatus " << state_name << '\n' );
+    LOG( "SetServiceStatus " << state_name(service_status.dwCurrentState)  << '\n' );
     BOOL ok = SetServiceStatus( service_status_handle, &service_status );
     if( !ok )
     {
-        try { throw_mswin_error( "SetServiceStatus", state_name.c_str() ); }
+        try { throw_mswin_error( "SetServiceStatus", state_name(service_status.dwCurrentState).c_str() ); }
         catch( const Xc& x ) { SHOW_MSG(x); }       // Was tun?
     }
-    
-    // Keine Wiederkehr bei SERVICE_STOPPED
+
+    if( service_status.dwCurrentState == SERVICE_STOPPED )
+        service_status_handle = NULL;  // Sonst beim nächsten Mal: Fehler MSWIN-00000006  Das Handle ist ungültig. [SetServiceStatus] [SERVICE_STOPPED]
 }
 
 //--------------------------------------------------------------------------pending_watchdog_thread
 
 static uint __stdcall pending_watchdog_thread( void* )
 {
-    int wait_until = elapsed_msec() + pending_timeout;
+    int wait_until = elapsed_msec() + pending_timeout*1000;
+
+    int state = current_state;
+
+    if( state != SERVICE_START_PENDING )   return 0;
+
 
     while(1)
     {
@@ -365,16 +375,19 @@ static uint __stdcall pending_watchdog_thread( void* )
 
     THREAD_LOCK( set_service_lock )
     {
-        if( current_state == SERVICE_START_PENDING 
-         || current_state == SERVICE_STOP_PENDING  )   
+        if( current_state == state )   
         {
-            LOG( "Weil der Dienst zu lange im Zustand SERVICE_START_PENDING oder SERVICE_STOP_PENDING ist, wird der Dienst-Zustand geändert\n" );
+            LOG( "Weil der Dienst zu lange im Zustand " + state_name(state) + " ist, wird der Dienst-Zustand geändert\n" );
             pending_timed_out = true;
             set_service_status( 0, current_state );
         }
 
         pending_watchdog_signal.close();
     }
+
+#   ifdef _DEBUG
+        LOG( "pending_watchdog_thread endet\n" );
+#   endif
 
     return 0;
 }
@@ -418,6 +431,7 @@ static void __stdcall Handler( DWORD dwControl )
         {
             case SERVICE_CONTROL_STOP:              // Requests the service to stop.  
             {
+                pending_timed_out = false;
                 service_stop = true;
                 spooler_ptr->cmd_terminate();
                 set_service_status( 0, SERVICE_STOP_PENDING );
@@ -430,11 +444,13 @@ static void __stdcall Handler( DWORD dwControl )
             }
 
             case SERVICE_CONTROL_PAUSE:             // Requests the service to pause.  
+                pending_timed_out = false;
                 service_stop = false;
                 spooler_ptr->cmd_pause();
                 break;
 
             case SERVICE_CONTROL_CONTINUE:          // Requests the paused service to resume.  
+                pending_timed_out = false;
                 service_stop = false;
                 spooler_ptr->cmd_continue();
                 break;
@@ -494,9 +510,6 @@ static uint __stdcall service_thread( void* param )
         {
             LOG( "Spooler launch\n" );
 
-#ifdef _DEBUG
-sos_sleep(30);
-#endif
             ret = spooler_ptr->launch( p->_argc, p->_argv );
 
             // Soweit kommt's nicht, denn SetServiceStatus(STOPPED) beendet den Prozess mit exit()

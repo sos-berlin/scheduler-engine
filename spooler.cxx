@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.107 2002/06/21 19:27:52 jz Exp $
+// $Id: spooler.cxx,v 1.108 2002/06/22 07:25:53 jz Exp $
 /*
     Hier sind implementiert
 
@@ -619,6 +619,9 @@ void Spooler::start()
 {
     assert( GetCurrentThreadId() == _thread_id );
 
+    _state_cmd = sc_none;
+    set_state( s_starting );
+
     _mail_on_error   = read_profile_bool           ( _factory_ini, "spooler", "mail_on_error"  , _mail_on_error );
     _mail_on_process = read_profile_mail_on_process( _factory_ini, "spooler", "mail_on_process", _mail_on_process );
     _mail_on_success = read_profile_bool           ( _factory_ini, "spooler", "mail_on_success", _mail_on_success );
@@ -641,9 +644,6 @@ void Spooler::start()
     _db.spooler_start();
 
     if( !_manual )  _communication.start_or_rebind();
-
-    _state_cmd = sc_none;
-    set_state( s_starting );
 
     _spooler_start_time = Time::now();
 
