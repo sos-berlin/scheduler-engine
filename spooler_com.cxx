@@ -1363,14 +1363,14 @@ STDMETHODIMP Com_log::get_Last( VARIANT* level, BSTR* result )
     return hr;
 }
 
-//-------------------------------------------------------------------Com_log_proxy::create_instance
+//-------------------------------------------------------------------Com_log_proxy::Create_instance
 
 HRESULT Com_log_proxy::Create_instance( const IID& iid, ptr<IUnknown>* result )
 {
     if( iid == object_server::IID_Iproxy )
     {
         ptr<Com_log_proxy> instance = Z_NEW( Com_log_proxy );
-        *result = static_cast<Object*>( +instance );
+        *result = static_cast<IDispatch*>( +instance );
         return S_OK;
     }
 

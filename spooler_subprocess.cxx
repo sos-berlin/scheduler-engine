@@ -74,7 +74,7 @@ STDMETHODIMP Subprocess::Close()
 void Subprocess::close()
 {
     if( _registered )  _subprocess_register->remove( this );
-    Process::close();
+    _process.close();
 }
 
 //--------------------------------------------------------------------------------Subprocess::Start
@@ -89,7 +89,7 @@ STDMETHODIMP Subprocess::Start( VARIANT* program_and_parameters )
     {
         if( program_and_parameters->vt == VT_BSTR )
         {
-            Process::start( string_from_variant( *program_and_parameters ) );
+            _process.start( string_from_variant( *program_and_parameters ) );
         }
         else
         if( program_and_parameters->vt == VT_ARRAY )
@@ -99,7 +99,7 @@ STDMETHODIMP Subprocess::Start( VARIANT* program_and_parameters )
 
             for( int i = 0; i < params.count(); i++ )  args[ i ] = string_from_variant( params[ i ] );
                 
-            Process::start( args );
+            _process.start( args );
         }
         else
             hr = DISP_E_TYPEMISMATCH;
@@ -108,7 +108,7 @@ STDMETHODIMP Subprocess::Start( VARIANT* program_and_parameters )
 
         if( _task_proxy )
         {
-            _task_proxy->_proxy->call( "Add_subprocess", pid(), ignore_error(), ignore_signal(), command_line() ); //, subprocess->stdout_path(), subprocess->stderr_path() );
+            _task_proxy->_proxy->call( "Add_subprocess", _process.pid(), ignore_error(), ignore_signal(), _process.command_line() ); //, subprocess->stdout_path(), subprocess->stderr_path() );
         }
     }
     catch( const exception&  x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
@@ -150,15 +150,15 @@ STDMETHODIMP Subprocess_register::Start_subprocess( VARIANT* program_and_paramet
 
 void Subprocess_register::add( Subprocess* subprocess )
 {
-    ptr<Subprocess>& entry = _subprocess_map[ subprocess->pid() ];
+    ptr<Subprocess>& entry = _subprocess_map[ subprocess->_process.pid() ];
 
     if( entry )
     {
-        Z_LOG( "Subprocess_register::add(" << subprocess->pid() << "): Prozess mit gleicher Pid wird entfernt: " << subprocess->obj_name() << "\n" );
+        Z_LOG( "Subprocess_register::add(" << subprocess->_process.pid() << "): Prozess mit gleicher Pid wird entfernt: " << subprocess->_process.obj_name() << "\n" );
         entry->_registered = false;
     }
 
-    _subprocess_map[ subprocess->pid() ] = subprocess;
+    _subprocess_map[ subprocess->_process.pid() ] = subprocess;
     subprocess->_registered = true;
 }
 
@@ -168,7 +168,7 @@ void Subprocess_register::remove( Subprocess* subprocess )
 {
     if( subprocess->_registered )
     {
-        _subprocess_map.erase( subprocess->pid() );
+        _subprocess_map.erase( subprocess->_process.pid() );
         subprocess->_registered = false;
     }
 }
@@ -184,14 +184,14 @@ void Subprocess_register::wait()
     {
         Subprocess* subprocess = s->second;
 
-        subprocess->wait();
+        subprocess->_process.wait();
 
-        if( !subprocess->ignore_error()   &&  subprocess->exit_code()          )  error_subprocess = subprocess;
-        if( !subprocess->ignore_signal()  &&  subprocess->termination_signal() )  signal_subprocess = subprocess;
+        if( !subprocess->ignore_error()   &&  subprocess->_process.exit_code()          )  error_subprocess = subprocess;
+        if( !subprocess->ignore_signal()  &&  subprocess->_process.termination_signal() )  signal_subprocess = subprocess;
     }
 
-    if( signal_subprocess )  throw_xc( "SCHEDULER-219", as_string( signal_subprocess->pid() ), signal_subprocess->command_line() );
-    if( error_subprocess  )  throw_xc( "SCHEDULER-219", as_string( error_subprocess->pid() ),  error_subprocess->command_line() );
+    if( signal_subprocess )  throw_xc( "SCHEDULER-219", as_string( signal_subprocess->_process.pid() ), signal_subprocess->_process.command_line() );
+    if( error_subprocess  )  throw_xc( "SCHEDULER-219", as_string( error_subprocess->_process.pid() ),  error_subprocess->_process.command_line() );
 }
 
 //-------------------------------------------------------------------------------------------------
