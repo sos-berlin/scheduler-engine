@@ -216,6 +216,32 @@ library Spooler
         interface Iobject_set;
     }
 
+    //------------------------------------------------------------------------------------Irun_time
+
+    [
+        uuid       ( feee47ab-6c1b-11d8-8103-000476ee8afb ),
+        odl,
+        dual
+    ]
+    interface Irun_time: IDispatch
+    {
+        [propget]
+        HRESULT                 Java_class_name             ( [out,retval] BSTR* Result );          // Damit java_class_name über IDispatch, statt über Ihas_java_class_name gerufen werden kann
+                                                                                                    // Für den Objectserver
+
+        [propput]
+        HRESULT                 Xml                         ( [in] BSTR );
+    }
+
+    /*
+    [
+        uuid       (  )
+    ]
+    coclass Run_time
+    {
+        interface Irun_time;
+    }
+    */
     //------------------------------------------------------------------------------------------Job
 
     [
@@ -875,6 +901,11 @@ library Spooler
 
         [propget]
         HRESULT                 At                      ( [out,retval] DATE* Result );              // Für Joacim, 2005-02-27
+
+        [propget]
+        HRESULT                 Run_time                ( [out,retval] Irun_time** );
+
+        HRESULT                 Remove_from_job_chain   ();
     }
 
     [
@@ -1149,7 +1180,6 @@ library Spooler
 /*
 Ein paar freie GUIDs:
 
-feee47ab-6c1b-11d8-8103-000476ee8afb
 feee47ac-6c1b-11d8-8103-000476ee8afb
 feee47ad-6c1b-11d8-8103-000476ee8afb
 feee47ae-6c1b-11d8-8103-000476ee8afb

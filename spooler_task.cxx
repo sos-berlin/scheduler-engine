@@ -1189,7 +1189,6 @@ bool Task::do_something()
                 }
                 catch( _com_error& x )  { throw_com_error( x ); }
             }
-        //catch( Stop_scheduler_exception& ) { throw; }
             catch( const exception& x )
             {
                 if( error_count == 0 )  set_error( x );

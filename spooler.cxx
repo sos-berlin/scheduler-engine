@@ -364,6 +364,9 @@ Spooler::Spooler()
     _variables   = new Com_variable_set();
 
 
+    _dtd.read( dtd_string );
+        
+
 #   ifdef __GNUC__
 /*
         sigset_t sigset;

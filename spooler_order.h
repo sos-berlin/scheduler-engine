@@ -14,7 +14,8 @@ struct Order;
 
 //--------------------------------------------------------------------------------------------Order
 
-struct Order : Com_order
+struct Order : Com_order, 
+               Modified_event_handler
 {
     Fill_zero                  _zero_;    
 
@@ -25,9 +26,9 @@ struct Order : Com_order
 
 
     Z_GNU_ONLY(                 Order                   (); )                                       // Für gcc 3.2. Nicht implementiert
-                                Order                   ( Spooler* spooler )                        : _zero_(this+1), _spooler(spooler), Com_order(this), _lock("Order") { init(); }
-                                Order                   ( Spooler* spooler, const VARIANT& );
-                                Order                   ( Spooler* spooler, const Record& );
+                                Order                   ( Spooler* );
+                                Order                   ( Spooler*, const VARIANT& );
+                                Order                   ( Spooler*, const Record& );
                                ~Order                   ();
 
     void                        init                    ();
@@ -60,7 +61,7 @@ struct Order : Com_order
     void                    set_job_by_name             ( const string& );
     Job*                        job                     ();
 
-    void                    set_state                   ( const State& );
+    void                    set_state                   ( const State&, const Time& = Time(0) );
     void                    set_state2                  ( const State&, bool is_error_state = false );
     State                       state                   ()                                          { THREAD_LOCK_RETURN( _lock, State, _state ); }
     bool                        state_is_equal          ( const State& state )                      { THREAD_LOCK_RETURN( _lock, bool, _state == state ); }
@@ -74,6 +75,8 @@ struct Order : Com_order
     void                    set_payload                 ( const VARIANT& );
     Payload                     payload                 ()                                          { THREAD_LOCK_RETURN( _lock, Variant, _payload ); }
 
+    Run_time*                   run_time                ()                                          { return _run_time; }
+
     Com_job*                    com_job                 ();
 
 
@@ -83,6 +86,8 @@ struct Order : Com_order
     void                        setback_                ();
     void                    set_at                      ( const Time& );
     Time                        at                      ()                                          { return _setback; }
+  //void                    set_run_time_xml            ( const string& );
+    Time                        next_start_time         ( bool first_call = false );
 
     // Auftrag in einer Jobkette:
     void                        add_to_job_chain        ( Job_chain* );
@@ -92,12 +97,15 @@ struct Order : Com_order
     void                        processing_error        ();
 
     xml::Element_ptr            dom                     ( const xml::Document_ptr&, const Show_what&, const string* log = NULL );
+    void                    set_run_time                ( const xml::Element_ptr& );
+    void                        modified_event          ();
 
     ptr<Prefix_log>            _log;
 
 
   private:
     void                        postprocessing2         ();
+
 
     friend struct               Order_queue;
     friend struct               Job_chain;
@@ -114,6 +122,8 @@ struct Order : Com_order
     Priority                   _priority;
     bool                       _priority_modified;
     State                      _state;
+    State                      _initial_state;
+    bool                       _initial_state_set;
     string                     _state_text;
     bool                       _state_text_modified;
     string                     _title;
@@ -131,6 +141,8 @@ struct Order : Com_order
     bool                       _in_job_queue;           // Auftrag ist in _job_chain_node->_job->order_queue() eingehängt
     Task*                      _task;                   // Auftrag wird gerade von dieser Task in spooler_process() verarbeitet 
     bool                       _moved;                  // true, wenn Job state oder job geändert hat. Dann nicht automatisch in Jobkette weitersetzen
+    ptr<Run_time>              _run_time;
+    Period                     _period;                 // Bei _run_time.set(): Aktuelle oder nächste Periode
     Time                       _setback;                // Bis wann der Auftrag zurückgestellt ist
     int                        _setback_count;
     bool                       _is_in_database;
@@ -189,7 +201,9 @@ struct Job_chain : Com_job_chain
     Job_chain_node*             node_from_state_or_null ( const State& );
     Job_chain_node*             node_from_job           ( Job* );
 
-    Order*                      add_order               ( VARIANT* order_or_payload, VARIANT* job_or_state );
+  //Order*                      add_order               ( VARIANT* order_or_payload, VARIANT* job_or_state );
+  //void                        remove_order            ( Order* );
+
     ptr<Order>                  order                   ( const Order::Id& id );
     ptr<Order>                  order_or_null           ( const Order::Id& id );
 

@@ -195,6 +195,7 @@ struct Job : Sos_self_deleting
     void                        init0                       ();                                     // Wird vor Spooler-Skript gerufen
     void                        init                        ();                                     // Wird nach Spooler-Skript gerufen, ruft auch init2()
     void                        init2                       ();                                     // Wird nach reread() gerufen
+    void                        init_run_time               ();
 
     const string&               name                        () const                                { return _name; }
     State_cmd                   state_cmd                   () const                                { return _state_cmd; }
@@ -356,7 +357,7 @@ struct Job : Sos_self_deleting
 
     bool                       _log_append;                 // Jobprotokoll fortschreiben <job log_append=(yes|no)>
 
-    Run_time                   _run_time;
+    ptr<Run_time>              _run_time;
     Period                     _period;                     // Derzeitige oder nächste Period
     Delay_after_error          _delay_after_error;
     long                       _error_steps;                // Zahl aufeinanderfolgender Fehler

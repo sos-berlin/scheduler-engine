@@ -154,6 +154,16 @@ struct Iobject_set : IDispatch
     virtual HRESULT     get_High_level                  ( int* level )                          = 0;
 };
 
+//----------------------------------------------------------------------------------------Irun_time
+
+DEFINE_GUID(  IID_Irun_time, 0xfeee47ab, 0x6c1b, 0x11d8, 0x81, 0x03, 0x00, 0x04, 0x76, 0xee, 0x8a, 0xfb );     // {feee47ab-6c1b-11d8-8103-000476ee8afb}
+//DEFINE_GUID( CLSID_Run_time,  );
+
+struct Irun_time: IDispatch
+{
+    virtual HRESULT     put_Xml                         ( BSTR )                                = 0;
+}
+
 //------------------------------------------------------------------------------------------Job
 
 DEFINE_GUID( IID_Ijob,  0x4DF2E8E8, 0x52DA, 0x454f, 0x8A, 0xDE, 0x3B, 0x5D, 0x4F, 0xE7, 0xF7, 0x3B );

@@ -599,7 +599,11 @@ xml::Element_ptr Command_processor::execute_add_order( const xml::Element_ptr& a
             ptr<Com_variable_set> pars = new Com_variable_set;
             pars->set_dom( e );  
             order->set_payload( Variant( (IDispatch*)pars ) );
-            break; 
+        }
+        else
+        if( e.nodeName_is( "run_time" ) )
+        { 
+            order->set_run_time( e );
         }
     }
 
@@ -705,7 +709,7 @@ xml::Element_ptr Command_processor::execute_command( const xml::Element_ptr& ele
     else
     if( element.nodeName_is( "show_order"       ) )  return execute_show_order( element, show );
     else
-    if( element.nodeName_is( "add_order"        ) )  return execute_add_order( element );     // in spooler_order.cxx
+    if( element.nodeName_is( "add_order"        ) )  return execute_add_order( element );
     else
     if( element.nodeName_is( "modify_order"     ) )  return execute_modify_order( element );
   //else
@@ -1100,8 +1104,6 @@ void Command_processor::execute_2( const string& xml_text, const Time& xml_mod_t
             throw_xc( "XML-ERROR", text );
         }
 
-        if( !_spooler->_dtd )  _spooler->_dtd.read( dtd_string );
-        
         command_doc.validate_against_dtd( _spooler->_dtd );
 
 /*

@@ -31,11 +31,15 @@ namespace sos {
 namespace spooler {
 namespace time {
 
+//-------------------------------------------------------------------------------------------------
+
 extern const int                       latter_day_int              = INT_MAX;
 extern const Time                      latter_day                  = latter_day_int;
 static const char                      last_day_name[]             = "never";
 
-//Period empty_period;
+//-------------------------------------------------------------------------------------------------
+
+Run_time::Class_descriptor              Run_time::class_descriptor ( &typelib, "sos.spooler.Run_time", Run_time::_methods );
 
 //---------------------------------------------------------------------------------time_from_string
 
@@ -181,8 +185,8 @@ void Period::set_dom( const xml::Element_ptr& element, const Period* deflt )
 
     if( deflt )  *this = *deflt;
 
-    string let_run = element.getAttribute( "let_run" );
-    if( !let_run.empty() )  _let_run = as_bool( let_run );
+    _let_run = element.bool_getAttribute( "let_run ", _let_run );
+  //if( _application == application_order  &&  _let_run )  throw_xc( "SCHEDULER-220", "let_run='yes'" );
 
     string single_start = element.getAttribute( "single_start" );
     if( !single_start.empty() ) 
@@ -484,6 +488,45 @@ void Day_set::set_dom( const xml::Element_ptr& element, const Day* default_day, 
     }
 }
 
+//-------------------------------------------------------------------------------Run_time::_methods
+
+const Com_method Run_time::_methods[] =
+{ 
+    COM_PROPERTY_PUT( Run_time, 1, Xml, 0, { VT_BSTR } ),
+    {}
+};
+
+//-------------------------------------------------------------------------------Run_time::Run_time
+
+Run_time::Run_time( Spooler* spooler, Application a )
+: 
+    Idispatch_implementation( &class_descriptor ),
+    _zero_(this+1), 
+    _spooler(spooler),
+    _application(a) 
+{
+    if( _application == application_order )
+    {
+        _once = true;
+    }
+}
+
+//-------------------------------------------------------------------------Run_time::QueryInterface
+
+STDMETHODIMP Run_time::QueryInterface( const IID& iid, void** result )
+{
+    Z_IMPLEMENT_QUERY_INTERFACE( this, iid, spooler_com::Ihas_java_class_name, result );
+
+    return Idispatch_implementation::QueryInterface( iid, result );
+}
+
+//--------------------------------------------------------------------------------Run_time::put_Xml
+
+STDMETHODIMP Run_time::put_Xml( BSTR xml )
+{ 
+    Z_COM_IMPLEMENT( set_xml( string_from_bstr( xml ) ) ); 
+}
+
 //----------------------------------------------------------------------------Run_time::set_default
 
 void Run_time::set_default()
@@ -502,6 +545,13 @@ void Run_time::set_default_days()
     for( int i = 0; i < 7; i++ )  _weekday_set._days[i] = default_day;
 }
 
+//--------------------------------------------------------------------------------Run_time::set_xml
+
+void Run_time::set_xml( const string& xml )
+{ 
+    set_dom( _spooler->_dtd.validate_xml( xml ).documentElement() );
+}
+
 //--------------------------------------------------------------------------------Run_time::set_dom
 
 void Run_time::set_dom( const xml::Element_ptr& element )
@@ -513,7 +563,9 @@ void Run_time::set_dom( const xml::Element_ptr& element )
     
 
     _set = true;
+    
     _once = element.bool_getAttribute( "once", _once );
+    if( _application == application_order  &&  !_once )  throw_xc( "SCHEDULER-220", "once='yes'" );
 
     default_period.set_dom( element, NULL );
     default_day = default_period;
@@ -580,6 +632,9 @@ void Run_time::set_dom( const xml::Element_ptr& element )
     }
 
     if( !a_day_set )  for( int i = 0; i < 7; i++ )  _weekday_set._days[i] = default_day;
+
+
+    if( _modified_event_handler )  _modified_event_handler->modified_event();
 }
 
 //---------------------------------------------------------------------------Run_time::first_period

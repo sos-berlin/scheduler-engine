@@ -103,3 +103,12 @@ Fehlendes spooler_process() in einem auftragsgesteuertem Job versetzt den Auftra
 Folgezustand (nicht Fehlerzustand) und beendet dann die Task.
 
 <process>-Jobs können auftragsgesteuert sein. Der Job wird für jeden Auftrag gestartet.
+
+
+------------------------------------------------
+VERSION 2.0.113  2005-03-31
+
+<run_time> für Aufträge:
+
+spooler_task.order.run_time.xml = "<run_time repeat='5'/>";
+spooler_task.order.remove_from_job_chain();

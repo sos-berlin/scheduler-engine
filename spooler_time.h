@@ -275,11 +275,32 @@ struct Date_set
 
 //----------------------------------------------------------------------------------------Run_time
 
-struct Run_time
+struct Run_time : idispatch_implementation< Run_time, spooler_com::Irun_time >, 
+                  spooler_com::Ihas_java_class_name
 {
-                                Run_time                    ()                                      : _zero_(this+1) {}
+    enum Application { application_job, application_order };
 
-    void                        set_dom                     ( const xml::Element_ptr& ) ;
+
+    static Class_descriptor     class_descriptor;
+    static const Com_method    _methods[];
+
+    STDMETHODIMP_(ULONG)        AddRef                      ()                                      { return Idispatch_implementation::AddRef(); }
+    STDMETHODIMP_(ULONG)        Release                     ()                                      { return Idispatch_implementation::Release(); }
+    STDMETHODIMP                QueryInterface              ( const IID&, void** );
+
+    STDMETHODIMP            get_Java_class_name             ( BSTR* result )                        { return String_to_bstr( const_java_class_name(), result ); }
+    STDMETHODIMP_(char*)  const_java_class_name             ()                                      { return (char*)"sos.spooler.Run_time"; }
+
+    STDMETHODIMP            put_Xml                         ( BSTR xml );
+
+
+
+                                Run_time                    ( Spooler*, Application );
+
+    void                    set_modified_event_handler      ( Modified_event_handler* m )           { _modified_event_handler = m; }
+
+    void                    set_xml                         ( const string& );
+    void                    set_dom                         ( const xml::Element_ptr& );
 
     void                        check                       ();                              
 
@@ -312,7 +333,9 @@ struct Run_time
 
 
     Fill_zero                  _zero_;
-
+    Spooler*                   _spooler;
+    Application                _application;
+    Modified_event_handler*    _modified_event_handler;
     bool                       _set;
     bool                       _once;
     Date_set                   _date_set;

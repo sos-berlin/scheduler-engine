@@ -28,21 +28,21 @@ using namespace spooler_com;
 
 Typelib_descr spooler_typelib ( LIBID_spooler_com, "Spooler", "1.0" );
 
-DESCRIBE_CLASS( &spooler_typelib, Com_error         , error         , CLSID_Error         , "Spooler.Error"         , "1.0" )
-DESCRIBE_CLASS( &spooler_typelib, Com_variable      , variable      , CLSID_Variable      , "Spooler.Variable"      , "1.0" )
-DESCRIBE_CLASS( &spooler_typelib, Com_variable_set  , variable_set  , CLSID_Variable_set  , "Spooler.Variable_set"  , "1.0" )
+DESCRIBE_CLASS( &spooler_typelib, Com_error          , error          , CLSID_Error          , "Spooler.Error"         , "1.0" )
+DESCRIBE_CLASS( &spooler_typelib, Com_variable       , variable       , CLSID_Variable       , "Spooler.Variable"      , "1.0" )
+DESCRIBE_CLASS( &spooler_typelib, Com_variable_set   , variable_set   , CLSID_Variable_set   , "Spooler.Variable_set"  , "1.0" )
 DESCRIBE_CLASS( &spooler_typelib, Com_variable_set_enumerator, variable_set_enumerator, CLSID_Variable_set_enumerator, "Spooler.Com_variable_set_enumerator", "1.0" );
-DESCRIBE_CLASS( &spooler_typelib, Com_log           , log           , CLSID_Log           , "Spooler.Log"           , "1.0" )
-DESCRIBE_CLASS( &spooler_typelib, Com_job           , job           , CLSID_Job           , "Spooler.Job"           , "1.0" )
-DESCRIBE_CLASS( &spooler_typelib, Com_task          , task          , CLSID_Task          , "Spooler.Task"          , "1.0" )
-DESCRIBE_CLASS( &spooler_typelib, Com_object_set    , object_set    , CLSID_Object_set    , "Spooler.Object_set"    , "1.0" )
-//DESCRIBE_CLASS( &spooler_typelib, Com_thread        , thread        , CLSID_thread        , "Spooler.Thread"        , "1.0" )
-DESCRIBE_CLASS( &spooler_typelib, Com_spooler       , spooler       , CLSID_Spooler       , "Spooler.Spooler"       , "1.0" )
+DESCRIBE_CLASS( &spooler_typelib, Com_log            , log            , CLSID_Log            , "Spooler.Log"           , "1.0" )
+DESCRIBE_CLASS( &spooler_typelib, Com_job            , job            , CLSID_Job            , "Spooler.Job"           , "1.0" )
+DESCRIBE_CLASS( &spooler_typelib, Com_task           , task           , CLSID_Task           , "Spooler.Task"          , "1.0" )
+DESCRIBE_CLASS( &spooler_typelib, Com_object_set     , object_set     , CLSID_Object_set     , "Spooler.Object_set"    , "1.0" )
+//DESCRIBE_CLASS( &spooler_typelib, Com_thread        , thread        , CLSID_thread         , "Spooler.Thread"        , "1.0" )
+DESCRIBE_CLASS( &spooler_typelib, Com_spooler        , spooler        , CLSID_Spooler        , "Spooler.Spooler"       , "1.0" )
 DESCRIBE_CLASS( &spooler_typelib, Com_spooler_context, spooler_context, CLSID_Spooler_context, "Spooler.Context"       , "1.0" )
-DESCRIBE_CLASS( &spooler_typelib, Com_job_chain     , job_chain     , CLSID_Job_chain     , "Spooler.Job_chain"     , "1.0" )
-DESCRIBE_CLASS( &spooler_typelib, Com_job_chain_node, job_chain_node, CLSID_Job_chain_node, "Spooler.Job_chain_node", "1.0" )
-DESCRIBE_CLASS( &spooler_typelib, Com_order         , order         , CLSID_Order         , "Spooler.Order"         , "1.0" )
-DESCRIBE_CLASS( &spooler_typelib, Com_order_queue   , order_queue   , CLSID_Order_queue   , "Spooler.Order_queue"   , "1.0" )
+DESCRIBE_CLASS( &spooler_typelib, Com_job_chain      , job_chain      , CLSID_Job_chain      , "Spooler.Job_chain"     , "1.0" )
+DESCRIBE_CLASS( &spooler_typelib, Com_job_chain_node , job_chain_node , CLSID_Job_chain_node , "Spooler.Job_chain_node", "1.0" )
+DESCRIBE_CLASS( &spooler_typelib, Com_order          , order          , CLSID_Order          , "Spooler.Order"         , "1.0" )
+DESCRIBE_CLASS( &spooler_typelib, Com_order_queue    , order_queue    , CLSID_Order_queue    , "Spooler.Order_queue"   , "1.0" )
 
 //------------------------------------------------------------------------------------Typbibliothek
 
@@ -2407,19 +2407,16 @@ STDMETHODIMP Com_task::Add_subprocess( int pid, BSTR timeout_at, VARIANT_BOOL ig
 }
 
 //-------------------------------------------------------------------------Com_task_proxy::_methods
-#ifdef Z_COM
-
 // Dispid wie bei Com_task!
 
 const Com_method Com_task_proxy::_methods[] =
 { 
-    // _flags            , _name                   , _method                                               , _result_type, _types        , _default_arg_count
-    { DISPATCH_METHOD, 20, "Start_subprocess"      , (Com_method_ptr)&Com_task_proxy::Start_subprocess     , VT_DISPATCH , { VT_BYREF|VT_VARIANT } },
-  //{ DISPATCH_METHOD, 21, "Wait_for_subprocesses" , (Com_method_ptr)&Com_task_proxy::Wait_for_subprocesses, VT_EMTPY    },
+    //          _flags             , _name                   , _method                                               , _result_type, _types        , _default_arg_count
+    COM_METHOD( Com_task_proxy, 20, Start_subprocess      , VT_DISPATCH , 0, { VT_BYREF|VT_VARIANT } ),
+  //COM_METHOD( DISPATCH_METHOD, 21, "Wait_for_subprocesses" , Com_task_proxy::Wait_for_subprocesses, VT_EMTPY    , 0, {} ),
     {}
 };
 
-#endif
 //------------------------------------------------------------------Com_task_proxy::Create_instance
 
 HRESULT Com_task_proxy::Create_instance( const IID& iid, ptr<IUnknown>* result )
@@ -3538,6 +3535,7 @@ const Com_method Com_order::_methods[] =
     { DISPATCH_METHOD     , 13, "setback"                   , (Com_method_ptr)&Com_order::Setback               , VT_EMPTY      },
     { DISPATCH_PROPERTYPUT, 14, "at"                        , (Com_method_ptr)&Com_order::put_At                , VT_EMPTY      , { VT_VARIANT|VT_BYREF } },
     { DISPATCH_PROPERTYGET, 14, "at"                        , (Com_method_ptr)&Com_order::get_At                , VT_DATE       },
+    { DISPATCH_PROPERTYGET, 15, "Run_time"                  , (Com_method_ptr)&Com_order::get_Run_time          , VT_DISPATCH   },
     {}
 };
 
@@ -4044,6 +4042,44 @@ STDMETHODIMP Com_order::get_At( DATE* result )
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
+
+    return hr;
+}
+
+//--------------------------------------------------------------------------Com_order::get_Run_time
+
+STDMETHODIMP Com_order::get_Run_time( Irun_time** result )
+{
+    HRESULT hr = NOERROR;
+
+    THREAD_LOCK( _lock )
+    try
+    {
+        if( !_order )  return E_POINTER;
+
+        *result = +_order->run_time();
+        if( *result )  (*result)->AddRef();
+    }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
+
+    return hr;
+}
+
+//-----------------------------------------------------------------Com_order::Remove_from_job_chain
+
+STDMETHODIMP Com_order::Remove_from_job_chain()
+{
+    HRESULT hr = NOERROR;
+
+    THREAD_LOCK( _lock )
+    try
+    {
+        if( !_order )  return E_POINTER;
+
+        _order->remove_from_job_chain();  
+    }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
 
     return hr;
 }

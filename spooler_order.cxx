@@ -756,6 +756,18 @@ ptr<Order> Order_queue::order_or_null( const Order::Id& id )
     return NULL;
 }
 
+//--------------------------------------------------------------------------------------rder::Order
+
+Order::Order( Spooler* spooler )
+: 
+    _zero_(this+1), 
+    _spooler(spooler), 
+    Com_order(this),     
+    _lock("Order") 
+{ 
+    init(); 
+}
+
 //-------------------------------------------------------------------------------------Order::Order
 
 Order::Order( Spooler* spooler, const VARIANT& payload )
@@ -819,6 +831,9 @@ void Order::init()
     _log = Z_NEW( Prefix_log( _spooler ) );
     _log->set_prefix( "Order" );
     _created = Time::now();
+
+    set_run_time( NULL );
+    _run_time->set_modified_event_handler( this );
 }
 
 //-------------------------------------------------------------------------------Order::attach_task
@@ -880,6 +895,8 @@ xml::Element_ptr Order::dom( const xml::Document_ptr& document, const Show_what&
         element.setAttribute( "title"     , _title );
 
         element.setAttribute( "state"     , debug_string_from_variant( _state ) );
+
+        element.setAttribute( "initial_state", debug_string_from_variant( _initial_state ) );
 
         if( _job_chain )  
         element.setAttribute( "job_chain" , _job_chain->name() );
@@ -1020,12 +1037,11 @@ bool Order::finished()
 
 //---------------------------------------------------------------------------------Order::set_state
 
-void Order::set_state( const State& state )
+void Order::set_state( const State& state, const Time& start_time )
 {
     THREAD_LOCK( _lock )
     {
-        //if( _setback )  throw_xc( "SCHEDULER-188" );
-        _setback = 0;
+        _setback = start_time;
         _setback_count = 0;
 
         if( _job_chain )  move_to_node( _job_chain->node_from_state( state ) );
@@ -1044,7 +1060,9 @@ void Order::set_state2( const State& state, bool is_error_state )
 
     if( _job_chain )  _log->info( log_line );
 
-    THREAD_LOCK( _lock )  _state = state;
+    _state = state;
+
+    if( !_initial_state_set )  _initial_state = state,  _initial_state_set = true;
 }
 
 //------------------------------------------------------------------------------Order::set_priority
@@ -1142,6 +1160,8 @@ void Order::remove_from_job_chain()
             _job_chain->unregister_order( this );
             _job_chain = NULL;
         }
+
+        _moved = true;
     }
 }
 
@@ -1263,8 +1283,20 @@ void Order::postprocessing( bool success )
                 }
                 else 
                 {
-                    //_end_time = Time::now();
-                    _log->debug( "Kein weiterer Job in der Jobkette, der Auftrag ist erledigt" );
+                    Time next_start = next_start_time();
+                    if( next_start != latter_day )
+                    {
+                        try
+                        {
+                            set_state( _initial_state, next_start );
+                        }
+                        catch( exception& x )
+                        {
+                            _log->error( S() << "Fehler beim Setzen des Initialzustands nach Wiederholung wegen <run_time>:\n" << x );
+                        }
+                    }
+                    
+                    if( finished() )  _log->debug( "Kein weiterer Job in der Jobkette, der Auftrag ist erledigt" );
                 }
             }
             else
@@ -1361,7 +1393,7 @@ void Order::set_at( const Time& time )
         if( _job_chain  )  throw_xc( "SCHEDULER-186", obj_name(), _job_chain->name() );
         
 
-        _setback = time;
+        _setback = time > Time::now()? time : 0;
 
         if( job() )
         {
@@ -1369,6 +1401,63 @@ void Order::set_at( const Time& time )
             order_queue()->add_order( this );
         }
     }
+}
+
+//---------------------------------------------------------------------------Order::next_start_time
+
+Time Order::next_start_time( bool first_call )
+{
+    Time result = latter_day;
+
+    if( _run_time->set() )
+    {
+        Time now = Time::now();
+
+
+        if( first_call  || now >= _period.end() )       // Periode abgelaufen?
+        {
+            _period = _run_time->next_period( now, time::wss_next_period_or_single_start );  
+        }
+        else
+        if( _period.begin() <= now  &&  _period.repeat() < latter_day )
+        {
+            result = now + _period.repeat();
+
+            if( result >= _period.end() )
+            {
+                Period old_period = _period;
+
+                _period = _run_time->next_period( now, time::wss_next_period_or_single_start );  
+
+                if( old_period.end()    != _period.begin()  
+                 || old_period.repeat() != _period.repeat() )
+                {
+                    result = latter_day;       // Perioden sind nicht nahtlos: Wiederholungsintervall neu berechnen
+                }
+            }
+        }
+
+        if( result == latter_day  &&  ( first_call || _period._repeat != latter_day ) )  result = _period.begin();
+
+        if( result < now )  result = 0;
+    }
+
+    return result;
+}
+
+//----------------------------------------------------------------------------Order::modified_event
+
+void Order::modified_event()
+{
+    set_at( next_start_time( true ) );
+}
+
+//------------------------------------------------------------------------------Order::set_run_time
+
+void Order::set_run_time( const xml::Element_ptr& e )
+{
+    _run_time = Z_NEW( Run_time( _spooler, Run_time::application_order ) );
+    if( e )  _run_time->set_dom( e );
 }
 
 //----------------------------------------------------------------------------------Order::obj_name

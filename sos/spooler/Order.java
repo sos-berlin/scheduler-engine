@@ -167,4 +167,13 @@ public class Order extends Idispatch
      * @return true, wenn die Nutzlast vom angegebenen COM-Typ ist. 
      */
     public boolean          payload_is_type     ( String name )                     { return    boolean_com_call( "payload_is_type"     ); }
+    
+    
+    
+    /** Liefert die &lt;run_time> (zur periodischen Wiederholung des Auftrags).
+     * 
+     */
+    public Run_time         run_time            ()                                  { return (Run_time) com_call( "run_time"            ); }
+
+    public void             remove_from_job_chain( Order order )                    {                   com_call( "remove_from_job_chain" ); }
 }

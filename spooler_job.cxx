@@ -49,6 +49,7 @@ Job::Job( Spooler* spooler )
     _history(this),
     _lock( "Job" )
 {
+    init_run_time();
     _log            = Z_NEW( Prefix_log( spooler ) );
     _next_time      = latter_day;
     _directory_watcher_next_time = latter_day;
@@ -120,8 +121,8 @@ void Job::set_dom( const xml::Element_ptr& element, const Time& xml_mod_time )
         text = element.getAttribute( "output_level" );
         if( !text.empty() )  _output_level = as_int( text );
 
-        //for( time::Holiday_set::iterator it = _spooler->_run_time._holidays.begin(); it != _spooler->_run_time._holidays.end(); it++ )
-        //    _run_time._holidays.insert( *it );
+        //for( time::Holiday_set::iterator it = _spooler->_run_time->_holidays.begin(); it != _spooler->_run_time->_holidays.end(); it++ )
+        //    _run_time->_holidays.insert( *it );
         
 
         DOM_FOR_EACH_ELEMENT( element, e )
@@ -176,13 +177,13 @@ void Job::set_dom( const xml::Element_ptr& element, const Time& xml_mod_time )
                 }
             }
             else
-            if( e.nodeName_is( "run_time" ) &&  !_spooler->_manual )  _run_time = Run_time(), 
-                                                                      _run_time.set_holidays( _spooler->holidays() ), 
-                                                                      _run_time.set_dom( e );
+            if( e.nodeName_is( "run_time" ) &&  !_spooler->_manual )  init_run_time(), 
+                                                                      _run_time->set_holidays( _spooler->holidays() ), 
+                                                                      _run_time->set_dom( e );
         }
 
-        if( !_run_time.set() )   _run_time.set_default();
-        if( _spooler->_manual )  _run_time = Run_time(),  _run_time.set_default_days(),  _run_time.set_once();
+        if( !_run_time->set() )   _run_time->set_default();
+        if( _spooler->_manual )  init_run_time(),  _run_time->set_default_days(),  _run_time->set_once();
 
         if( _object_set_descr )  _object_set_descr->_class = _spooler->get_object_set_class( _object_set_descr->_class_name );
     }
@@ -251,7 +252,7 @@ void Job::init()
 
 void Job::init2()
 {
-    _start_once    = _run_time.once();
+    _start_once    = _run_time->once();
     _delay_until   = 0;
     _period._begin = 0;
     _period._end   = 0;
@@ -261,6 +262,13 @@ void Job::init2()
 
     //select_period( now );
     set_next_start_time( now );
+}
+
+//-------------------------------------------------------------------------------Job::init_run_time
+
+void Job::init_run_time()
+{
+    _run_time = Z_NEW( Run_time( _spooler, Run_time::application_job ) );
 }
 
 //---------------------------------------------------------------------------------------Job::close
@@ -459,7 +467,7 @@ void Job::load_tasks_from_db()
         task->_let_run      = true;
         task->_enqueue_time.set_datetime( record.as_string( "enqueue_time" ) );
 
-        if( !start_at  &&  !_run_time.period_follows( now ) ) 
+        if( !start_at  &&  !_run_time->period_follows( now ) ) 
         {
             try{ throw_xc( "SCHEDULER-143" ); } catch( const exception& x ) { _log->warn( x.what() ); }
         }
@@ -695,7 +703,7 @@ Sos_ptr<Task> Job::start( const ptr<spooler_com::Ivariable_set>& params, const s
             default: ;
         }
 
-        if( !start_at  &&  !_run_time.period_follows( now ) )   throw_xc( "SCHEDULER-143" );
+        if( !start_at  &&  !_run_time->period_follows( now ) )   throw_xc( "SCHEDULER-143" );
     }
 
     Sos_ptr<Task> task = create_task( params, task_name, start_at );
@@ -920,7 +928,7 @@ void Job::select_period( Time now )
 {
     if( now >= _period.end() )       // Periode abgelaufen?
     {
-        THREAD_LOCK_DUMMY( _lock )  _period = _run_time.next_period(now);  
+        THREAD_LOCK_DUMMY( _lock )  _period = _run_time->next_period(now);  
 
         if( _period.begin() != latter_day )
         {
@@ -967,7 +975,7 @@ void Job::set_next_start_time( Time now, bool repeat )
         {
             if( !_period.is_in_time( _next_start_time ) )
             {
-                if( !_repeat )  _next_single_start = _run_time.next_single_start( now );
+                if( !_repeat )  _next_single_start = _run_time->next_single_start( now );
 
                 if( _start_once  ||  !repeat && _period._repeat < latter_day )
                 {
@@ -1000,7 +1008,7 @@ void Job::set_next_start_time( Time now, bool repeat )
 
                         if( next_start_time >= _period.end() )
                         {
-                            Period next_period = _run_time.next_period( _period.end() );
+                            Period next_period = _run_time->next_period( _period.end() );
                             if( _period.end() == next_period.begin()  &&  _period.repeat() == next_period.repeat() )
                             {
                                 if( _spooler->_debug )  msg += " (in der anschließenden Periode)";
@@ -1610,13 +1618,13 @@ xml::Element_ptr Job::dom( const xml::Document_ptr& document, const Show_what& s
             
             if( next == latter_day )
             {
-                //p = _run_time.next_period( p.end() );
+                //p = _run_time->next_period( p.end() );
                 next = p.begin();
                 if( p.end() != latter_day )  time = p.end();
 
                 while( i-- ) {          
                     if( p.has_start()  ||  _task_queue.has_task_waiting_for_period() )  break;
-                    p = _run_time.next_period( time, time::wss_next_period_or_single_start );
+                    p = _run_time->next_period( time, time::wss_next_period_or_single_start );
                     next = p.begin();
                     if( next == latter_day        )  break;
                     if( next > next_at_start      )  break;

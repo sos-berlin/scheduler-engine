@@ -468,11 +468,9 @@ struct Com_task_proxy : //com::object_server::proxy_with_local_methods< spooler_
                         idispatch_implementation< Com_task_proxy, spooler_com::Itask_proxy > 
 {
     static Class_descriptor     class_descriptor;
+    static const com::Com_method _methods[];
 
-#   ifndef SYSTEM_HAS_COM
-        static const ::zschimmer::com::Com_method _methods[];
-        //Z_DEFINE_GETIDSOFNAMES_AND_INVOKE
-#   endif
+    //Z_DEFINE_GETIDSOFNAMES_AND_INVOKE
 
 
     static HRESULT              Create_instance             ( const IID& iid, ptr<IUnknown>* result );
@@ -732,6 +730,9 @@ struct Com_order : spooler_com::Iorder,
     STDMETHODIMP            put_At                      ( VARIANT* );
     STDMETHODIMP            get_At                      ( DATE* );
 
+    STDMETHODIMP            get_Run_time                ( spooler_com::Irun_time** );
+
+    STDMETHODIMP                Remove_from_job_chain   ();
 
   private:
     Fill_zero                  _zero_;
