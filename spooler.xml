@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 
-<!-- $Id: spooler.xml,v 1.42 2001/07/03 14:01:49 jz Exp $   (C) 2001 SOS GmbH Berlin -->
+<!-- $Id: spooler.xml,v 1.43 2001/07/04 14:49:46 jz Exp $   (C) 2001 SOS GmbH Berlin -->
 
 <!DOCTYPE spooler SYSTEM "s:\prod\spooler\spooler.dtd">
 
@@ -444,23 +444,35 @@ sub spooler_exit()
 #use Win32::OLE;
 #$hostware = Win32::OLE->new('hostWare.Global');
 
-sub spooler_process()
+sub spooler_open()
 {
     #$i = $spooler_task->params("zahl");
     #if( undef($i) ) { $i = 10; }
-    $i = 3;
+    $i = 9;
     $spooler_log->msg( "zahl=$i" );
+}
+
+sub spooler_process()
+{
+    $spooler_log->msg( "dauer::spooler_process" );
+
+    $params = $spooler->create_variable_set();
+    $params->{spooler_task_name} = "gestartet von dauer";
+    $params->{spooler_start_after} = 7;
+    $task = $spooler->job("single")->start( $params );
     
-    while( $i-- > 0 )
+    while( --$i % 3 > 0 )
     {
         $spooler_log->msg( "spooler_process sleep" );
-        sleep(1);
+        sleep(2);
     }
     
+    $task->end();
+
     #$spooler_job->wake();
 
     $spooler_task->{result} = "Das Ergebnis";
-    return 0;
+    return $i / 3;
 }
 
 sub spooler_close()
@@ -480,6 +492,7 @@ sub spooler_close()
             <jobs>
                 <job name="steuerung">
                     <script language="JScript">
+
 spooler_log.msg( "spooler_job   .include_path=" + spooler_job.include_path );
 spooler_log.msg( "spooler_thread.include_path=" + spooler_thread.include_path );
 spooler_log.msg( "spooler       .include_path=" + spooler.include_path );

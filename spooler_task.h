@@ -1,4 +1,4 @@
-// $Id: spooler_task.h,v 1.19 2001/07/03 14:01:49 jz Exp $
+// $Id: spooler_task.h,v 1.20 2001/07/04 14:49:46 jz Exp $
 
 #ifndef __SPOOLER_TASK_H
 #define __SPOOLER_TASK_H
@@ -145,6 +145,8 @@ struct Job : Sos_self_deleting
     };
 
 
+    typedef list< Sos_ptr<Task> >  Task_queue;
+
 
                                 Job                         ( Thread* );
                                ~Job                         (); 
@@ -175,6 +177,7 @@ struct Job : Sos_self_deleting
 
     Sos_ptr<Task>               create_task                 ( const CComPtr<spooler_com::Ivariable_set>& params, const string& task_name );
     bool                        dequeue_task                ();
+    void                        remove_from_task_queue      ( Task* );
     void                        close_task                  ();
     bool                        load                        ();
     void                        end                         ();
@@ -214,13 +217,14 @@ struct Job : Sos_self_deleting
     friend struct               Thread;
 
 
-  protected:
     Fill_zero                  _zero_;
+    Thread_semaphore           _lock;
+
+  protected:
     string                     _name;
     Spooler*                   _spooler;
     Thread*                    _thread;
 
-    Thread_semaphore           _lock;
 
     Prefix_log                 _log;
     Sos_ptr<Object_set_descr>  _object_set_descr;           // Job nutzt eine Objektemengeklasse
@@ -241,8 +245,8 @@ struct Job : Sos_self_deleting
     State                      _state;
     State_cmd                  _state_cmd;
     string                     _in_call;                    // "spooler_process" etc.
-  //CComPtr<spooler_com::Ivariable_set> _params;
     Time                       _next_start_time;
+    Time                       _next_start_at;
     Period                     _period;                     // Derzeitige oder nächste Period
     Time                       _repeat;                     // spooler_task.repeat
 
@@ -252,7 +256,7 @@ struct Job : Sos_self_deleting
     Xc_copy                    _error;
     bool                       _load_error;                 // Fehler beim Laden oder spooler_init()
     Sos_ptr<Task>              _task;                       // Es kann nur eine Task geben. Zirkel: _task->_job == this
-    list< Sos_ptr<Task> >      _task_queue;                 // Warteschlange der nächsten zu startenden Tasks
+    Task_queue                 _task_queue;                 // Warteschlange der nächsten zu startenden Tasks
 };
 
 //------------------------------------------------------------------------------------------Job_list
@@ -266,6 +270,8 @@ struct Task : Sos_self_deleting
                                 Task                        ( Spooler*, const Sos_ptr<Job>& );
                                ~Task                        ();
 
+    void                        cmd_end                     ();
+
     void                        close                       ();
 
     bool                        start                       ();
@@ -275,6 +281,7 @@ struct Task : Sos_self_deleting
 
 
     bool                        wait_until_terminated       ( double wait_time = latter_day );
+    void                        set_start_at                ( Time );
 
     Job*                        job                         ()                              { return _job; }
   
@@ -294,7 +301,7 @@ struct Task : Sos_self_deleting
     Fill_zero                  _zero_;
     Spooler*                   _spooler;
     Sos_ptr<Job>               _job;                        // Zirkel!
-    Thread_semaphore           _lock;
+  //Thread_semaphore           _lock;
     
     double                     _cpu_time;
     int                        _step_count;
@@ -303,6 +310,7 @@ struct Task : Sos_self_deleting
     bool                       _opened;
 
     Time                       _enqueue_time;
+    Time                       _start_at;                   // Zu diesem Zeitpunkt (oder danach) starten
     Time                       _running_since;
 
     CComPtr<spooler_com::Ivariable_set> _params;

@@ -1,4 +1,4 @@
-// $Id: spooler_com.h,v 1.13 2001/07/02 11:13:44 jz Exp $
+// $Id: spooler_com.h,v 1.14 2001/07/04 14:49:46 jz Exp $
 
 #ifndef __SPOOLER_COM_H
 #define __SPOOLER_COM_H
@@ -164,6 +164,7 @@ struct Com_task : spooler_com::Itask, Sos_ole_object
     STDMETHODIMP                get_job                     ( spooler_com::Ijob** );
     STDMETHODIMP                get_params                  ( spooler_com::Ivariable_set** );
     STDMETHODIMP                wait_until_terminated       ( double wait_time, VARIANT_BOOL* ok );
+    STDMETHODIMP                end                         ();
     STDMETHODIMP                put_result                  ( VARIANT* value );             //{ return _result.Copy(value); }
     STDMETHODIMP                get_result                  ( VARIANT* value );             //{ VariantInit(value); return VariantCopy(value,&_result); }
     STDMETHODIMP                put_repeat                  ( double seconds );

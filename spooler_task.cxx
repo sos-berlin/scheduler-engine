@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.39 2001/07/03 14:01:49 jz Exp $
+// $Id: spooler_task.cxx,v 1.40 2001/07/04 14:49:46 jz Exp $
 /*
     Hier sind implementiert
 
@@ -306,11 +306,25 @@ Sos_ptr<Task> Job::create_task( const CComPtr<spooler_com::Ivariable_set>& param
 
 bool Job::dequeue_task()
 {
+    if( _task_queue.empty() )  return false;
+
     THREAD_LOCK( _lock )
     {
-        if( _task_queue.empty() )  return false;
+        Sos_ptr<Task>   task;
+        Time            now = Time::now();
 
-        _task = _task_queue.front();  _task_queue.erase( _task_queue.begin() );
+        _next_start_at = latter_day;
+
+        FOR_EACH( Task_queue, _task_queue, it )
+        {
+            if( !task  &&  now >= (*it)->_start_at )  task = *it,  it = _task_queue.erase( it );
+            else
+            if( _next_start_at > (*it)->_start_at )  _next_start_at = (*it)->_start_at;
+        }
+
+        if( !task )  return false;
+
+        _task = task;
 
         _error = NULL;
         _load_error = false;
@@ -321,6 +335,26 @@ bool Job::dequeue_task()
     }
 
     return true;
+}
+
+//----------------------------------------------------------------------Job::remove_from_task_queue
+
+void Job::remove_from_task_queue( Task* task )
+{
+    _next_start_at = latter_day;
+
+    FOR_EACH( Task_queue, _task_queue, it )  
+    {
+        if( +*it == task )  
+        {
+            _log.msg( "Task " + (*it)->_name + " aus der Warteschlange entfernt" );
+            it = _task_queue.erase( it );
+        }
+        else
+        {
+            if( _next_start_at > (*it)->_start_at )  _next_start_at = (*it)->_start_at;
+        }
+    }
 }
 
 //---------------------------------------------------------------------------------------Job::start
@@ -507,9 +541,12 @@ bool Job::do_something()
         
         if( !dequeued )
         {
-            if( !_event.signaled()  
-             && !_directory_watcher.signaled()  
-             && Time::now() < _next_start_time )  return false;
+            if( !_event.signaled()  &&  !_directory_watcher.signaled() )
+            {
+                Time now = Time::now();
+                if( now < _next_start_time
+                 && now < _next_start_at   )  return false;
+            }
 
             if( _directory_watcher.signaled() )  _directory_watcher.watch_again();
 
@@ -597,7 +634,8 @@ void Job::set_error( const Xc& x )
     THREAD_LOCK( _lock )
     {
         _error = x;
-        if( _task )  THREAD_LOCK( _task->_lock )  _task->_error = _error;
+        if( _task )  //THREAD_LOCK( _task->_lock )  
+            _task->_error = _error;
     }
 
     _repeat = 0;
@@ -808,7 +846,7 @@ xml::Element_ptr Job::xml( xml::Document_ptr document )
             job_element->setAttribute( "next_start_time", as_dom_string( _next_start_time.as_string() ) );
 
         if( _task )
-        THREAD_LOCK( _task->_lock )
+      //THREAD_LOCK( _task->_lock )
         {
             job_element->setAttribute( "running_since", as_dom_string( _task->_running_since.as_string() ) );
             job_element->setAttribute( "steps"        , as_dom_string( as_string( _task->_step_count ) ) );
@@ -818,11 +856,14 @@ xml::Element_ptr Job::xml( xml::Document_ptr document )
         {
             xml::Element_ptr queue_element = document->createElement( "queued_tasks" );
 
-            FOR_EACH( list< Sos_ptr<Task> >, _task_queue, it )
+            FOR_EACH( Task_queue, _task_queue, it )
             {
                 xml::Element_ptr queued_task_element = document->createElement( "queued_task" );
                 queued_task_element->setAttribute( "enqueued", as_dom_string( (*it)->_enqueue_time.as_string() ) );
                 queued_task_element->setAttribute( "name", as_dom_string( (*it)->_name ) );
+                if( (*it)->_start_at )
+                    queued_task_element->setAttribute( "start_at", as_dom_string( (*it)->_start_at.as_string() ) );
+
                 queue_element->appendChild( queued_task_element );
             }
 
@@ -880,6 +921,15 @@ void Task::close()
 
     // Alle, die mit wait_until_terminated() auf diese Task warten, wecken:
     THREAD_LOCK( _terminated_events_lock )  FOR_EACH( vector<Event*>, _terminated_events, it )  (*it)->signal( "close task" );
+}
+
+//-------------------------------------------------------------------------------Task::set_start_at
+
+void Task::set_start_at( Time time )
+{ 
+    _start_at = time; 
+    
+    if( time < _job->_next_start_at )  _job->_next_start_at = time;
 }
 
 //--------------------------------------------------------------------------------------Task::start
@@ -967,6 +1017,23 @@ bool Task::step()
     catch( const exception& x ) { _job->set_error(x); return false; }
 
     return result;
+}
+
+//------------------------------------------------------------------------------------Task::cmd_end
+// Anderer Thread
+
+void Task::cmd_end()
+{
+    Sos_ptr<Job> job = _job;        // this wird vielleicht gelöscht
+
+    THREAD_LOCK( job->_lock )
+    {
+        //THREAD_LOCK( _lock )
+        {
+            if( +job->_task == this )  job->set_state_cmd( Job::sc_end );
+                                 else  job->remove_from_task_queue( job->_task );
+        }
+    }
 }
 
 //----------------------------------------------------------------------Task::wait_until_terminated

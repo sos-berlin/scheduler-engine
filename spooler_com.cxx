@@ -1,4 +1,4 @@
-// $Id: spooler_com.cxx,v 1.16 2001/07/03 14:01:49 jz Exp $
+// $Id: spooler_com.cxx,v 1.17 2001/07/04 14:49:46 jz Exp $
 /*
     Hier sind implementiert
 
@@ -61,8 +61,8 @@ STDMETHODIMP Com_error::get_code( BSTR* code_bstr )
         if( !_xc )  *code_bstr = NULL;
               else  *code_bstr = SysAllocStringLen_char( _xc->code(), strlen( _xc->code() ) );
     }
-    catch( const Xc&   x )  { hr = _set_excepinfo( x, "Spooler.Error::code" ); }
-    catch( const xmsg& x )  { hr = _set_excepinfo( x, "Spooler.Error::code" ); }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Error::code" ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Error::code" ); }
 
     return hr;
 }
@@ -78,8 +78,8 @@ STDMETHODIMP Com_error::get_text( BSTR* text_bstr )
         if( !_xc )  *text_bstr = NULL;
               else  *text_bstr = SysAllocString_string( _xc->what() );
     }
-    catch( const Xc&   x )  { hr = _set_excepinfo( x, "Spooler.Error::text" ); }
-    catch( const xmsg& x )  { hr = _set_excepinfo( x, "Spooler.Error::text" ); }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Error::text" ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Error::text" ); }
 
     return hr;
 }
@@ -144,8 +144,8 @@ STDMETHODIMP Com_log::log( Log_kind kind, BSTR line )
 
         if( _log )  _log->log( kind, bstr_as_string( line ) ); 
     }
-    catch( const Xc&   x )  { hr = _set_excepinfo( x, "Spooler.Log::log" ); }
-    catch( const xmsg& x )  { hr = _set_excepinfo( x, "Spooler.Log::log" ); }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Log::log" ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Log::log" ); }
 
     return hr;
 }
@@ -201,8 +201,8 @@ STDMETHODIMP Com_job::start_when_directory_changed( BSTR directory_name )
     {
         _job->start_when_directory_changed( bstr_as_string( directory_name ) );
     }
-    catch( const Xc&   x )  { hr = _set_excepinfo( x, "Spooler.Job::start_when_directory_changed" ); }
-    catch( const xmsg& x )  { hr = _set_excepinfo( x, "Spooler.Job::start_when_directory_changed" ); }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Job::start_when_directory_changed" ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Job::start_when_directory_changed" ); }
 
     return hr;
 }
@@ -216,7 +216,9 @@ STDMETHODIMP Com_job::start( VARIANT* params, Itask** itask )
 
     try
     {
-        CComPtr<Ivariable_set> pars;
+        Sos_ptr<Task>           task;
+        CComPtr<Ivariable_set>  pars;
+        Time                    start_at = 0; 
 
         if( params  &&  params->vt != VT_EMPTY  &&  params->vt != VT_NULL  &&  params->vt != VT_ERROR )
         {
@@ -225,18 +227,37 @@ STDMETHODIMP Com_job::start( VARIANT* params, Itask** itask )
             if( FAILED(hr) )  return hr;
         }
 
-        THREAD_LOCK( _job->_lock )
+        CComVariant task_name_vt;
+        if( pars )  pars->get_var( L"spooler_task_name", &task_name_vt );
+        hr = task_name_vt.ChangeType( VT_BSTR );    if( FAILED(hr) )  throw_ole( hr, "ChangeType", "spooler_task_name" );
+/*
+        CComVariant start_at_vt;
+        if( pars )  pars->get_var( L"spooler_start_at", &start_after_at );
+        if( start_after_vt.vt != VT_EMPTY )
         {
-            CComVariant task_name_vt;
-            if( pars )  pars->get_var( L"spooler_task_name", &task_name_vt );
-            task_name_vt.ChangeType( VT_BSTR );
-            *itask = new Com_task( _job->start_without_lock( pars, bstr_as_string( task_name_vt.bstrVal ) ) );
+            hr = start_at_vt.ChangeType( VT_TIMESTAMP );      if( FAILED(hr) )  throw_ole( hr, "ChangeType", "spooler_start_after" );
+            
+        }
+*/
+        CComVariant start_after_vt;
+        if( pars )  pars->get_var( L"spooler_start_after", &start_after_vt );
+        if( start_after_vt.vt != VT_EMPTY )
+        {
+            hr = start_after_vt.ChangeType( VT_R8 );    if( FAILED(hr) )  throw_ole( hr, "ChangeType", "spooler_start_after" );
+            start_at = Time::now() + start_after_vt.dblVal;
         }
 
+        THREAD_LOCK( _job->_lock )
+        {
+            task = _job->start_without_lock( pars, bstr_as_string( task_name_vt.bstrVal ) );
+            task->set_start_at( start_at );
+        }
+
+        *itask = new Com_task( task );
         (*itask)->AddRef();
     }
-    catch( const Xc&   x )  { hr = _set_excepinfo( x, "Spooler.Job::start" ); }
-    catch( const xmsg& x )  { hr = _set_excepinfo( x, "Spooler.Job::start" ); }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Job::start" ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Job::start" ); }
 
     return hr;
 }
@@ -252,8 +273,8 @@ STDMETHODIMP Com_job::wake()
     {
         _job->wake();
     }
-    catch( const Xc&   x )  { hr = _set_excepinfo( x, "Spooler.Job::start_when_directory_changed" ); }
-    catch( const xmsg& x )  { hr = _set_excepinfo( x, "Spooler.Job::start_when_directory_changed" ); }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Job::start_when_directory_changed" ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Job::start_when_directory_changed" ); }
 
     return hr;
 }
@@ -337,12 +358,12 @@ STDMETHODIMP Com_task::get_object_set( Iobject_set** result )
             if( GetCurrentThreadId() != _task->_job->thread()->_thread_id )  return E_ACCESSDENIED;
 
             if( !_task->_job->object_set_descr() )  return E_ACCESSDENIED;
-            THREAD_LOCK( _task->_lock )  *result = (dynamic_cast<Object_set_task*>(+_task))->_com_object_set;
+            THREAD_LOCK( _task->_job->_lock )  *result = (dynamic_cast<Object_set_task*>(+_task))->_com_object_set;
             if( *result )  (*result)->AddRef();
         }
     }
-    catch( const Xc&   x )  { hr = _set_excepinfo( x, "Spooler.Task::object_set" ); }
-    catch( const xmsg& x )  { hr = _set_excepinfo( x, "Spooler.Task::object_set" ); }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Task::object_set" ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Task::object_set" ); }
 
     return hr;
 }
@@ -367,8 +388,8 @@ STDMETHODIMP Com_task::put_error( VARIANT* error_par )
             _task->_job->set_error( Xc( "SPOOLER-120", error_text.c_str() ) );
         }
     }
-    catch( const Xc&   x )  { hr = _set_excepinfo( x, "Spooler.Task::error" ); }
-    catch( const xmsg& x )  { hr = _set_excepinfo( x, "Spooler.Task::error" ); }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Task::error" ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Task::error" ); }
 
     return hr;
 }
@@ -385,12 +406,12 @@ STDMETHODIMP Com_task::get_error( Ierror** result )
         {
             if( !_task )  throw_xc( "SPOOLER-122" );
 
-            THREAD_LOCK( _task->_lock )  *result = new Com_error( _task->_error );
+            THREAD_LOCK( _task->_job->_lock )  *result = new Com_error( _task->_error );
             (*result)->AddRef();
         }
     }
-    catch( const Xc&   x )  { hr = _set_excepinfo( x, "Spooler.Task.Error" ); }
-    catch( const xmsg& x )  { hr = _set_excepinfo( x, "Spooler.Task.Error" ); }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Task.Error" ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Task.Error" ); }
 
     return hr;
 }
@@ -411,8 +432,8 @@ STDMETHODIMP Com_task::get_job( Ijob** com_job )
             (*com_job)->AddRef();
         }
     }
-    catch( const Xc&   x )  { hr = _set_excepinfo( x, "Spooler.Task.job" ); }
-    catch( const xmsg& x )  { hr = _set_excepinfo( x, "Spooler.Task.job" ); }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Task.job" ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Task.job" ); }
 
     return hr;
 }
@@ -433,8 +454,8 @@ STDMETHODIMP Com_task::get_params( Ivariable_set** result )
             (*result)->AddRef();
         }
     }
-    catch( const Xc&   x )  { hr = _set_excepinfo( x, "Spooler.Task.params" ); }
-    catch( const xmsg& x )  { hr = _set_excepinfo( x, "Spooler.Task.params" ); }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Task.params" ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Task.params" ); }
 
     return hr;
 }
@@ -453,8 +474,27 @@ STDMETHODIMP Com_task::wait_until_terminated( double wait_time, VARIANT_BOOL* ok
                    else  *ok = true;
         }
     }
-    catch( const Xc&   x )  { hr = _set_excepinfo( x, "Spooler.Task.wait_until_terminated" ); }
-    catch( const xmsg& x )  { hr = _set_excepinfo( x, "Spooler.Task.wait_until_terminated" ); }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Task.wait_until_terminated" ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Task.wait_until_terminated" ); }
+
+    return hr;
+}
+
+//------------------------------------------------------------------------------------Com_task::end
+
+STDMETHODIMP Com_task::end()
+{
+    HRESULT hr = NOERROR;
+
+    try
+    {
+        THREAD_LOCK( _lock )
+        {
+            if( _task )  _task->cmd_end();
+        }
+    }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Task.end" ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Task.end" ); }
 
     return hr;
 }
@@ -472,11 +512,11 @@ STDMETHODIMP Com_task::put_result( VARIANT* value )
             if( !_task )  throw_xc( "SPOOLER-122" );
             if( GetCurrentThreadId() != _task->_job->thread()->_thread_id )  return E_ACCESSDENIED;
 
-            THREAD_LOCK( _task->_lock )  hr = _task->_result.Copy( value );
+            THREAD_LOCK( _task->_job->_lock )  hr = _task->_result.Copy( value );
         }
     }
-    catch( const Xc&   x )  { hr = _set_excepinfo( x, "Spooler.Task.result" ); }
-    catch( const xmsg& x )  { hr = _set_excepinfo( x, "Spooler.Task.result" ); }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Task.result" ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Task.result" ); }
 
     return hr;
 }
@@ -494,11 +534,11 @@ STDMETHODIMP Com_task::get_result( VARIANT* value )
             if( !_task )  throw_xc( "SPOOLER-122" );
 
             VariantInit( value ); 
-            THREAD_LOCK( _task->_lock )  hr = VariantCopy( value, &_task->_result );
+            THREAD_LOCK( _task->_job->_lock )  hr = VariantCopy( value, &_task->_result );
         }
     }
-    catch( const Xc&   x )  { hr = _set_excepinfo( x, "Spooler.Task.result" ); }
-    catch( const xmsg& x )  { hr = _set_excepinfo( x, "Spooler.Task.result" ); }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Task.result" ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Task.result" ); }
 
     return hr;
 }
@@ -519,8 +559,8 @@ STDMETHODIMP Com_task::put_repeat( double seconds )
             _task->_job->set_repeat( seconds );
         }
     }
-    catch( const Xc&   x )  { hr = _set_excepinfo( x, "Spooler.Task.repeat" ); }
-    catch( const xmsg& x )  { hr = _set_excepinfo( x, "Spooler.Task.repeat" ); }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Task.repeat" ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Task.repeat" ); }
 
     return hr;
 }
@@ -667,8 +707,8 @@ STDMETHODIMP Com_spooler::get_job( BSTR job_name, Ijob** com_job )
         *com_job = _spooler->get_job( bstr_as_string( job_name ) )->com_job();
         (*com_job)->AddRef();
     }
-    catch( const Xc&   x )  { hr = _set_excepinfo( x, "Spooler.Spooler.job" ); }
-    catch( const xmsg& x )  { hr = _set_excepinfo( x, "Spooler.Spooler.job" ); }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Spooler.job" ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Spooler.job" ); }
 
     return hr;
 }
