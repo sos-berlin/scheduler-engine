@@ -1,4 +1,4 @@
-// $Id: spooler_wait.h,v 1.36 2002/12/08 10:45:39 jz Exp $
+// $Id: spooler_wait.h,v 1.37 2002/12/08 12:05:51 jz Exp $
 
 #ifndef __SPOOLER_WAIT_H
 #define __SPOOLER_WAIT_H
@@ -92,21 +92,22 @@ struct Wait_handles : Non_cloneable
 
 struct Directory_watcher : Event
 {
+    Fill_zero                  _zero_;
 
     Z_GNU_ONLY(                 Directory_watcher           (); )
                                 Directory_watcher           ( Prefix_log* log )                     : _zero_(this+1), _log(log) {}
                                ~Directory_watcher           ()                                      { close(); }
 
-#   ifdef SYSTEM_WIN
-//                                operator bool               ()                                    { return _handle != NULL; }
-//                                operator !                  ()                                    { return _handle == NULL; }
-#   endif
-
     void                        watch_directory             ( const string& directory, const string& filename_pattern = "" );
     void                        renew                       ();
     bool                        has_changed                 ();
+    bool                        has_changed_2               ();
     bool                        match                       ();
-        
+
+#ifndef Z_WINDOWS    
+    bool                        valid                       () const                                { return !_directory.empty(); }
+#endif
+
     void                        set_signal                  ();
     void                        reset                       ();
 
@@ -117,7 +118,6 @@ struct Directory_watcher : Event
     virtual void                close_handle                ();
 
   private:
-    Fill_zero                  _zero_;
     Prefix_log*                _log;
     string                     _directory;
     string                     _filename_pattern;

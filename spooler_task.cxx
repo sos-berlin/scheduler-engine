@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.134 2002/12/08 10:45:38 jz Exp $
+// $Id: spooler_task.cxx,v 1.135 2002/12/08 12:05:50 jz Exp $
 /*
     Hier sind implementiert
 
@@ -1030,10 +1030,7 @@ void Job::task_to_start()
                         {
                             cause = cause_directory;
                             _log.debug( "Task startet wegen eines Ereignisses für Verzeichnis " + (*it)->directory() );
-
-#ifdef Z_WINDOWS
-                            if( !(*it)->handle() )  it = _directory_watcher_list.erase( it );  // Folge eines Fehlers, s. Directory_watcher::set_signal
-#endif
+                            if( !(*it)->valid() )  it = _directory_watcher_list.erase( it );  // Folge eines Fehlers, s. Directory_watcher::set_signal
                         }
                     }
 

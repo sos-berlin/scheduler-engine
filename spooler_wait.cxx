@@ -1,4 +1,4 @@
-// $Id: spooler_wait.cxx,v 1.59 2002/12/08 10:45:38 jz Exp $
+// $Id: spooler_wait.cxx,v 1.60 2002/12/08 12:05:51 jz Exp $
 /*
     Hier sind implementiert
 
@@ -549,7 +549,7 @@ void Directory_watcher::watch_directory( const string& directory, const string& 
 
 #    else
 
-        has_changed(); 
+        has_changed_2();    // Verzeichnisinhalt merken
 
 #   endif
 }
@@ -567,6 +567,15 @@ void Directory_watcher::renew()
 
 bool Directory_watcher::has_changed()
 {
+    bool changed = has_changed_2();
+    if( changed )  set_signal();
+    return changed;
+}
+
+//-----------------------------------------------------------------Directory_watcher::has_changed_2
+
+bool Directory_watcher::has_changed_2()
+{
 #   ifdef Z_WINDOWS
 
         // Nach wait() zu rufen, damit _signaled auch gesetzt ist!
@@ -574,38 +583,50 @@ bool Directory_watcher::has_changed()
 
 #   else
 
-        bool                changed = false;
-        Filenames*          new_f   = &_filenames[ 1 - _filenames_idx ];
-        Filenames*          old_f   = &_filenames[ _filenames_idx ];
-        Filenames::iterator o       = old_f->begin();
+        bool changed = false;
 
-        new_f->clear();
-
-        Directory_reader dir;
-        
-        string filename = dir.first( _directory.c_str() );
-        while( filename != "" )
+        try
         {
-            if( filename != "."  &&  filename != ".." )
+            Filenames*          new_f   = &_filenames[ 1 - _filenames_idx ];
+            Filenames*          old_f   = &_filenames[ _filenames_idx ];
+            Filenames::iterator o       = old_f->begin();
+
+            new_f->clear();
+
+            Directory_reader dir;
+        
+            string filename = dir.first( _directory.c_str() );
+            while( filename != "" )
             {
-                if( _filename_pattern.empty()  ||  _filename_regex.match( filename ) )
+                if( filename != "."  &&  filename != ".." )
                 {
-                    new_f->push_back( filename ); 
-                    if( !changed )  if( o == old_f->end()  ||  *o != filename )  changed = true;
-                    if( o != old_f->end() )  o++;
+                    if( _filename_pattern.empty()  ||  _filename_regex.match( filename ) )
+                    {
+                        new_f->push_back( filename ); 
+                        if( !changed )  if( o == old_f->end()  ||  *o != filename )  { changed = true; LOG( "Directory_watcher::has_changed: " << filename << "\n" ); }
+                        if( o != old_f->end() )  o++;
+                    }
                 }
+
+                filename = dir.next();
             }
 
-            filename = dir.next();
+            if( !changed )  if( o != old_f->end() )  { changed = true; LOG( "Directory_watcher::has_changed: " << filename << "\n" ); }
+
+            dir.close();
+
+            _filenames_idx = 1 - _filenames_idx;
         }
+        catch( const exception& x ) 
+        {
+            // S.a. set_signal() für Windows
 
-        if( o != old_f->end() )  changed = true;
-
-        dir.close();
-
-        _filenames_idx = 1 - _filenames_idx;
-
-        if( changed )  set_signal();
+            _log->error( "Überwachung des Verzeichnisses " + _directory + " wird nach Fehler beendet: " + x.what() ); 
+            _directory = "";   // Damit erneutes start_when_directory_changed() diese (tote) Überwachung nicht erkennt.
+            Event::set_signal();
+            close();
+            changed = true;
+        }
 
         return changed;
 
@@ -646,8 +667,10 @@ void Directory_watcher::set_signal()
                 BOOL ok = FindNextChangeNotification( _handle );
                 if( !ok )  throw_mswin_error( "FindNextChangeNotification" );
         }
-        catch( const Xc& x ) 
+        catch( const exception& x ) 
         {
+            // S.a. has_changed() für Unix
+
             _log->error( "Überwachung des Verzeichnisses " + _directory + " wird nach Fehler beendet: " + x.what() ); 
             _directory = "";   // Damit erneutes start_when_directory_changed() diese (tote) Überwachung nicht erkennt.
             Event::set_signal();
