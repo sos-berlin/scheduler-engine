@@ -1,4 +1,4 @@
-// $Id: spooler_http.h,v 1.3 2004/07/21 20:40:09 jz Exp $
+// $Id: spooler_http.h,v 1.4 2004/07/22 12:10:00 jz Exp $
 
 #ifndef __SPOOLER_HTTP_H
 #define __SPOOLER_HTTP_H
@@ -11,14 +11,17 @@ namespace spooler {
 
 struct Http_request : Object
 {
-                                Http_request                 ()                                     : _zero_(this+1){}
+                                Http_request                ()                                     : _zero_(this+1){}
 
+    bool                        has_parameter               ( const string& name ) const            { return _parameters.find( name ) != _parameters.end(); }
+    string                      parameter                   ( const string& name ) const;
 
     Fill_zero                  _zero_;
     string                     _http_cmd;
     string                     _protocol;
     string                     _path;
     map<string,string>         _header;
+    map<string,string>         _parameters;
     string                     _body;
 };
 

@@ -1,4 +1,4 @@
-// $Id: spooler_task.h,v 1.136 2004/07/21 14:23:45 jz Exp $
+// $Id: spooler_task.h,v 1.137 2004/07/22 12:10:02 jz Exp $
 
 #ifndef __SPOOLER_TASK_H
 #define __SPOOLER_TASK_H
@@ -112,7 +112,7 @@ struct Task : Sos_self_deleting
     Time                        next_time                   ();
     Spooler_thread*             thread                      ()                                      { return _thread; }
     string                      name                        () const                                { return _obj_name(); }
-    virtual string             _obj_name                    () const                                { return "Task " + _job->obj_name() + " " + as_string(_id) ; }
+    virtual string             _obj_name                    () const                                { return "Task " + _job->name() + " " + as_string(_id) ; }
 
     string                      state_name                  ()                                      { return state_name( state() ); }
     static string               state_name                  ( State );

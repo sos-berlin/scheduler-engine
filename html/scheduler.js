@@ -1,4 +1,4 @@
-// $Id: scheduler.js,v 1.5 2004/07/21 09:41:13 jz Exp $
+// $Id: scheduler.js,v 1.6 2004/07/22 12:10:02 jz Exp $
 
 //----------------------------------------------------------------------------------------Scheduler
 // public
@@ -204,10 +204,11 @@ function Scheduler_html_configuration( url )
 
 function Popup_builder__add_command( html, xml_command, is_active )
 {
-    this.add_entry( html, "parent.command_popup__execute(&quot;" + xml_command + "&quot;)", is_active );
+    this.add_entry( html, "parent.command_popup__execute( &quot;" + xml_command + "&quot; )", is_active );
 }
 
-//----------------------------------------------------------------------------command_popup__execute
+//-----------------------------------------------------------------------------command_popup.execute
+// Für Popup_builder.add_command()
 
 function command_popup__execute( xml_command )
 {
@@ -230,6 +231,24 @@ function command_popup__execute( xml_command )
             //alert( "Error 0x" + hex_string( x.number, 8 ) + ": " + x.message );
         }
     }
+}
+
+//-----------------------------------------------------------------------Popup_builder.add_show_log
+// Erweiterung von Popup_builder, s. popup_builder.js
+
+function Popup_builder__add_show_log( html, show_log_command, window_name, is_active )
+{
+    this.add_entry( html, "parent.command_popup__show_log__onclick( &quot;" + show_log_command + "&quot;, &quot;" + window_name + "&quot; )", is_active );
+}
+
+//-----------------------------------------------------------------command_popup__show_log__onclick
+// Für Popup_builder.add_show_log()
+
+function command_popup__show_log__onclick( show_log_command, window_name )
+{
+    var log_window = window.open( "http://" + document.location.host + "/" + show_log_command, window_name, "menubar=no, toolbar=no, location=no, directories=no, scrollbars=yes, resizable=yes, status=no", true );
+    log_window.focus();
+    _popup.hide();
 }
 
 //-------------------------------------------------------------------------------string_from_object
@@ -275,7 +294,8 @@ function xml_encode( text )
 
 function scheduler_init()
 {
-    Popup_builder.prototype.add_command = Popup_builder__add_command;
+    Popup_builder.prototype.add_command  = Popup_builder__add_command;
+    Popup_builder.prototype.add_show_log = Popup_builder__add_show_log;
 }
 
 //-------------------------------------------------------------------------------------------------

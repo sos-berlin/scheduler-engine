@@ -1,4 +1,4 @@
-// $Id: spooler_communication.h,v 1.24 2004/07/21 14:23:44 jz Exp $
+// $Id: spooler_communication.h,v 1.25 2004/07/22 12:10:00 jz Exp $
 
 #ifndef __SPOOLER_COMMUNICATION_H
 #define __SPOOLER_COMMUNICATION_H
@@ -131,6 +131,7 @@ struct Communication //: zschimmer::Thread
                                 Channel                     ( Communication* );
                                ~Channel                     ();
 
+        void                    terminate                   ();
 
         bool                    do_accept                   ( SOCKET listen_socket );
         void                    do_close                    ();
@@ -165,6 +166,7 @@ struct Communication //: zschimmer::Thread
         int                    _socket_send_buffer_size;
         bool                   _send_is_complete;
         int                    _send_progress;
+        bool                   _dont_receive;               // Bei terminate() ist Empfang gesperrt
         Prefix_log             _log;
     };
 

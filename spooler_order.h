@@ -1,4 +1,4 @@
-// $Id: spooler_order.h,v 1.32 2004/06/01 14:19:45 jz Exp $
+// $Id: spooler_order.h,v 1.33 2004/07/22 12:10:01 jz Exp $
 
 #ifndef __SPOOLER_ORDER_H
 #define __SPOOLER_ORDER_H
@@ -25,7 +25,7 @@ struct Order : Com_order
 
 
     Z_GNU_ONLY(                 Order                   (); )                                       // Für gcc 3.2. Nicht implementiert
-                                Order                   ( Spooler* spooler )                        : _zero_(this+1), _spooler(spooler), _log(spooler), Com_order(this), _lock("Order") { init(); }
+                                Order                   ( Spooler* spooler )                        : _zero_(this+1), _spooler(spooler), Com_order(this), _lock("Order") { init(); }
                                 Order                   ( Spooler* spooler, const VARIANT& );
                                 Order                   ( Spooler* spooler, const Record& );
                                ~Order                   ();
@@ -35,7 +35,7 @@ struct Order : Com_order
     void                        open_log                ();
     void                        close                   ();
 
-    Prefix_log&                 log                     ()                                          { return _log; }
+    Prefix_log&                 log                     ()                                          { return *_log; }
     
     void                    set_id                      ( const Variant& );
     Id                          id                      ()                                          { THREAD_LOCK_RETURN( _lock, Variant, _id ); }
@@ -91,7 +91,7 @@ struct Order : Com_order
 
     xml::Element_ptr            dom                     ( const xml::Document_ptr&, Show_what, const string* log = NULL );
 
-    Prefix_log                 _log;
+    ptr<Prefix_log>            _log;
 
 
   private:

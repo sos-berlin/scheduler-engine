@@ -1,4 +1,4 @@
-// $Id: spooler_communication.cxx,v 1.87 2004/07/21 20:40:09 jz Exp $
+// $Id: spooler_communication.cxx,v 1.88 2004/07/22 12:10:00 jz Exp $
 /*
     Hier sind implementiert
 
@@ -346,6 +346,14 @@ Communication::Channel::~Channel()
     _write_socket = SOCKET_ERROR;
 }
 
+//-----------------------------------------------------------------ommunication::Channel::terminate
+
+void Communication::Channel::terminate()
+{
+    _dont_receive = true;
+    async_continue( false );  // Wir warten nicht. Was nicht sofort gesendet werden kann, geht verloren (nur bei sehr vollem Puffer)
+}
+
 //----------------------------------------------------------------Communication::Channel::do_accept
 
 bool Communication::Channel::do_accept( SOCKET listen_socket )
@@ -573,7 +581,7 @@ bool Communication::Channel::async_continue_( bool wait )
         //if( socket_read_signaled() )
         if( _send_is_complete )
         {
-            something_done |= do_recv();
+            if( !_dont_receive )  something_done |= do_recv();
 
             if( _receive_is_complete ) 
             {
@@ -604,14 +612,14 @@ bool Communication::Channel::async_continue_( bool wait )
                     if( _indent )  _text = replace_regex( _text, "\n", "\r\n" );      // Für Windows-telnet
 
                     if( cp._error )  _log.error( cp._error->what() );
-                }
 
-                _send_progress = 0;
-                _send_is_complete = false;
-                do_send();
+                    _send_progress = 0;
+                    _send_is_complete = false;
+                    do_send();
+                }
             }
 
-            while( _send_is_complete  &&  _http_response )
+            while( _http_response  &&  _send_is_complete )
             {
                 if( _http_response->eof() )
                 {
@@ -620,7 +628,7 @@ bool Communication::Channel::async_continue_( bool wait )
                 }
 
                 _text = _http_response->read( 32768 );  // Die Größe ist nur eine Empfehlung
-                if( _text.length() == 0 )  break;
+                if( _text.length() == 0 )  break;       // Zurzeit keine Daten da? Dann warten wir auf ein Signal (von spooler_log.cxx)
 
                 _send_progress = 0;
                 _send_is_complete = false;
@@ -672,6 +680,8 @@ void Communication::close( double wait_time )
 {
     //THREAD_LOCK( _semaphore )
     {
+        Z_FOR_EACH( Channel_list, _channel_list, c )  (*c)->terminate();
+
         _channel_list.clear();
 
         _listen_socket.close();

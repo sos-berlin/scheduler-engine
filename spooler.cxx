@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.342 2004/07/21 14:23:44 jz Exp $
+// $Id: spooler.cxx,v 1.343 2004/07/22 12:10:00 jz Exp $
 // §851: Weitere Log-Ausgaben zum Scheduler-Start eingebaut
 // §1479
 
@@ -1513,6 +1513,7 @@ void Spooler::load()
     }
 
     _log.init( this );
+    _log.set_title( "Main log" );
 
     char hostname[200];  // Nach _communication.init() und nach _prefix_log.init()!
     if( gethostname( hostname, sizeof hostname ) == SOCKET_ERROR )  hostname[0] = '\0',  _log.warn( string("gethostname(): ") + strerror( errno ) );
@@ -2193,7 +2194,9 @@ int Spooler::launch( int argc, char** argv, const string& parameter_line )
 
 
     _log.info( "Scheduler ordentlich beendet." );
+    _log.close();
 
+   
     //if( _pid_filename != "" )  unlink( _pid_filename.c_str() );
 
 

@@ -1,4 +1,4 @@
-<!-- $Id: task_frame.html,v 1.11 2004/07/21 21:30:04 jz Exp $ -->
+<!-- $Id: task_frame.html,v 1.12 2004/07/22 12:10:02 jz Exp $ -->
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <html>
 
@@ -89,21 +89,22 @@ function task_command__onclick( task_id )
 {
     var popup_builder = new Popup_builder();
 
-    popup_builder.add_entry  ( "Show log"        , "parent.task_command__show_log__onclick(" + task_id + ")" );
-    popup_builder.add_command( "End"             , "<kill_task job='" + _job_name + "' id='" + task_id + "'/>" );
-    popup_builder.add_command( "Kill immediately", "<kill_task job='" + _job_name + "' id='" + task_id + "' immediately='yes'/>" );
+  //popup_builder.add_entry  ( "Show log"        , "parent.task_command__show_log__onclick(" + task_id + ")" );
+    popup_builder.add_show_log( "Show log"        , "show_log&task=" + task_id, "show_log_task_" + task_id );
+    popup_builder.add_command ( "End"             , "<kill_task job='" + _job_name + "' id='" + task_id + "'/>" );
+    popup_builder.add_command ( "Kill immediately", "<kill_task job='" + _job_name + "' id='" + task_id + "' immediately='yes'/>" );
     
     _popup = popup_builder.show_popup();
 }
 
 //------------------------------------------------------------------task_command__show_log__onclick
-
+/*
 function task_command__show_log__onclick( task_id )
 {
     window.open( "http://" + document.location.host + "/show_log&task=" + task_id, "show_log_task_" + task_id, "", true );
     _popup.hide();
 }
-
+*/
 //--------------------------------------------------------------------------------show_task_details
 
 function show_task_details( job_element, task_element )

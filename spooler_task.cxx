@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.258 2004/07/21 20:40:09 jz Exp $
+// $Id: spooler_task.cxx,v 1.259 2004/07/22 12:10:01 jz Exp $
 /*
     Hier sind implementiert
 
@@ -936,7 +936,7 @@ bool Task::do_something()
                                             break;
                                         }
 
-                                        _log->set_order_log( &_order->_log );
+                                        _log->set_order_log( _order->_log );
                                     }
 
                                     _last_process_start_time = now;
@@ -1210,6 +1210,7 @@ void Task::load()
 
         _log->set_filename( filename );      // Task-Protokoll
         _log->set_remove_after_close( remove_after_close );
+        _log->set_title( obj_name() );
         _log->open();                // Jobprotokoll. Nur wirksam, wenn set_filename() gerufen
     }
 

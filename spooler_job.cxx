@@ -1,4 +1,4 @@
-// $Id: spooler_job.cxx,v 1.86 2004/07/21 14:23:45 jz Exp $
+// $Id: spooler_job.cxx,v 1.87 2004/07/22 12:10:00 jz Exp $
 // §851: Weitere Log-Ausgaben zum Scheduler-Start eingebaut
 /*
     Hier sind implementiert
@@ -172,6 +172,7 @@ void Job::init0()
     _log->set_prefix( "Job  " + _name );       // Zwei Blanks, damit die Länge mit "Task " übereinstimmt
     _log->set_profile_section( profile_section() );
     _log->set_job( this );
+    _log->set_title( obj_name() );
 
     _com_job  = new Com_job( this );
   //_com_log  = new Com_log( &_log );

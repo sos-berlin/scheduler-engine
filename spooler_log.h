@@ -1,4 +1,4 @@
-// $Id: spooler_log.h,v 1.43 2004/07/21 21:19:10 jz Exp $
+// $Id: spooler_log.h,v 1.44 2004/07/22 12:10:01 jz Exp $
 
 #ifndef __SPOOLER_LOG_H
 #define __SPOOLER_LOG_H
@@ -63,7 +63,9 @@ struct Prefix_log : Object, Has_log
 
     void                    set_append                      ( bool b )                          { _append = b; }
     void                    set_filename                    ( const string& );
-    string                      filename                    () const                            { return _log? _log->filename() : _filename; }
+    string                      filename                    () const                            { return _filename == "" && _log? _log->filename() : _filename; }
+    void                    set_title                       ( const string& title )             { _title = title; }
+    string                      title                       ()                                  { return _title; }
     void                    set_remove_after_close          ( bool b )                          { _remove_after_close = b; }
     void                    set_new_filename                ( const string& );
     string                      new_filename                ()                                  { return _new_filename; }
@@ -157,6 +159,7 @@ struct Prefix_log : Object, Has_log
     
     string                     _last_error_line;
 
+    string                     _title;
     string                     _filename;                   // Name einer zusätzlichen Log-Datei (für die Tasks)
     string                     _new_filename;               // nach close() umbenennen
     bool                       _append;                     // Datei zum Fortschreiben öffnen

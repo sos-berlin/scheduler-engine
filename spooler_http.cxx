@@ -1,4 +1,4 @@
-// $Id: spooler_http.cxx,v 1.4 2004/07/21 21:19:10 jz Exp $
+// $Id: spooler_http.cxx,v 1.5 2004/07/22 12:10:00 jz Exp $
 /*
     Hier sind implementiert
 
@@ -15,6 +15,14 @@ using namespace std;
 
 namespace sos {
 namespace spooler {
+
+//--------------------------------------------------------------------------Http_request::parameter
+    
+string Http_request::parameter( const string& name ) const
+{ 
+    map<string,string>::const_iterator it = _parameters.find( name );
+    return it == _parameters.end()? "" : it->second;
+}
 
 //-------------------------------------------------------------------------Http_parser::Http_parser
     
@@ -150,17 +158,38 @@ string Http_parser::eat_path()
 {
     eat_spaces();
 
+    string word;
     string path;
+    string parameter_name;
+    enum State { in_path, in_parameter }  state = in_path;
 
-    while( (Byte)_next_char[0] > (Byte)' ' )
+    while(1)
     {
+        if( _next_char[0] == '&'  ||  (Byte)_next_char[0] <= (Byte)' ' )
+        {
+            if( state == in_path )  path = word;
+                              else  _http_request->_parameters[ parameter_name ] = word;
+            state = in_parameter;
+            if( (Byte)_next_char[0] <= (Byte)' ' )  break;
+            word = "";
+            parameter_name = "";
+            _next_char++;
+        }
+        else
+        if( _next_char[0] == '=' && state == in_parameter )
+        {
+            parameter_name = word;
+            word = "";
+            _next_char++;
+        }
+        else
         if( _next_char[0] == '%'  &&  _next_char[1] != '\0'  &&  _next_char[2] != '\0' )
         {
-            path += (char)hex_as_int32( string( _next_char+1, 2 ) );
+            word += (char)hex_as_int32( string( _next_char+1, 2 ) );
             _next_char += 3;
         }
         else
-            path += *_next_char++;
+            word += *_next_char++;
     }
 
     eat_spaces();
@@ -318,14 +347,23 @@ Log_http_response::Log_http_response( Prefix_log* log, string content_type )
                         "</head>\n" 
                         "<body>\n" 
 
+                            "<script type='text/javascript'><!--\n"   
+                                //"document.write( '<br/><br/>(load error)' );\n"
+                                "var title=" + quoted_string( _log->title() ) + ";\n"
+                            "--></script>\n"
+
+                            "<script type='text/javascript' src='show_log.js'></script>\n"
+/*
                             // Wirkt nicht. Wenn der Scheduler abbricht (abort_immediately), löscht ie6 das Fenster 
                             // und zeigt stattdessen eine unsinnige Fehlermeldung.
                             "<script type='text/javascript' for='window' event='onerror'><!--\n"   
                                 //"document.write( '<br/><br/>(load error)' );\n"
                                 "return true;\n"
                             "--></script>\n"
-
-                            "<pre class='log' onresize='alert(1);event.srcElement.scrollBy(0,999999999)'>\n";
+*/
+                            // onsize wirkt auch nicht. Soll die jeweils letzten Zeilen zeigen.
+                            //"<pre class='log' onresize='alert(1);event.srcElement.scrollBy(0,999999999)'>\n";
+                            "<pre class='log'>\n";
 
     _html_suffix =          "</pre>\n"
                         "</body>\n"
@@ -351,12 +389,6 @@ void Log_http_response::set_event( Event_base* event )
 
 bool Log_http_response::next_chunk_is_ready()
 { 
-    //if( _html_prefix != "" )  return true;
-    
-    //if( _log->closed() )  true;
-    //if( !_log->opened() )  return false;       // Noch nicht begonnen?
-
-
     if( !_file.opened() )
     {
         _file.open( _log->filename(), "rb" );
@@ -371,9 +403,8 @@ bool Log_http_response::next_chunk_is_ready()
         }
         else
             return false;
-    }
+    }                                       
 
-    //if( _html_suffix != "" )  return true;
     return true;
 }
 

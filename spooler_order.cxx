@@ -1,4 +1,4 @@
-// $Id: spooler_order.cxx,v 1.66 2004/07/13 11:28:06 jz Exp $
+// $Id: spooler_order.cxx,v 1.67 2004/07/22 12:10:01 jz Exp $
 /*
     Hier sind implementiert
 
@@ -692,7 +692,6 @@ Order::Order( Spooler* spooler, const VARIANT& payload )
     Com_order(this),
     _zero_(this+1), 
     _spooler(spooler),
-    _log(spooler),
     _lock("Order"),
     _payload(payload)
 {
@@ -706,9 +705,9 @@ Order::Order( Spooler* spooler, const Record& record )
     Com_order(this),
     _zero_(this+1), 
     _spooler(spooler),
-    _lock("Order"),
-    _log(spooler)
+    _lock("Order")
 {
+
     init();
 
     _id         = record.as_string( "id"         );
@@ -746,7 +745,9 @@ Order::~Order()
 
 void Order::init()
 {
-    _log.set_prefix( "Order" );
+    _log = Z_NEW( Prefix_log( _spooler ) );
+    _log->set_prefix( "Order" );
+    _log->set_title( obj_name() );
     _created = Time::now();
 }
 
@@ -757,7 +758,7 @@ void Order::attach_task( Task* task )
     if( _task )  throw_xc( "SCHEDULER-0", obj_name() + " task=" + _task->obj_name() );
 
     _task = task;
-    if( !_log.opened() )  open_log();
+    if( !_log->opened() )  open_log();
 }
 
 //----------------------------------------------------------------------------------Order::open_log
@@ -766,9 +767,9 @@ void Order::open_log()
 {
     if( _job_chain && _spooler->_order_history_with_log && !string_begins_with( _spooler->log_directory(), "*" ) )
     {
-        _log.set_filename( _spooler->log_directory() + "/order." + _job_chain->name() + "." + _id.as_string() + ".log" );      // Jobprotokoll
-        _log.set_remove_after_close( true );
-        _log.open();
+        _log->set_filename( _spooler->log_directory() + "/order." + _job_chain->name() + "." + _id.as_string() + ".log" );      // Jobprotokoll
+        _log->set_remove_after_close( true );
+        _log->open();
     }
 }
 
@@ -777,15 +778,15 @@ void Order::open_log()
 void Order::close()
 {
 /*
-    if( !_log.filename().empty() )
+    if( !_log->filename().empty() )
     {
         try
         {
-            remove_file( _log.filename() );
+            remove_file( _log->filename() );
         }
         catch( const exception& x )
         {
-            _spooler->_log.warn( "FEHLER BEIM LÖSCHEN DER DATEI " + _log.filename() + ": " + x.what() );
+            _spooler->_log->warn( "FEHLER BEIM LÖSCHEN DER DATEI " + _log->filename() + ": " + x.what() );
         }
     }
 */
@@ -823,8 +824,8 @@ xml::Element_ptr Order::dom( const xml::Document_ptr& document, Show_what show, 
         element.setAttribute( "priority"  , _priority );
         element.setAttribute( "created"   , _created.as_string() );
 
-        if( _log.opened() )
-        element.setAttribute( "log_file"  , _log.filename() );
+        if( _log->opened() )
+        element.setAttribute( "log_file"  , _log->filename() );
 
         if( _setback )
         element.setAttribute( "setback"   , _setback.as_string() );
@@ -834,7 +835,7 @@ xml::Element_ptr Order::dom( const xml::Document_ptr& document, Show_what show, 
         {
             try
             {
-                dom_append_text_element( element, "log", log? *log : _log.as_string() );
+                dom_append_text_element( element, "log", log? *log : _log->as_string() );
             }
             catch( const exception& x ) { _spooler->_log.warn( string("<show_order what=\"log\">: ") + x.what() ); }
         }
@@ -872,7 +873,7 @@ void Order::set_id( const Order::Id& id )
         _id = id; 
         _is_users_id = true;
 
-        _log.set_prefix( "Order " + _id.as_string() );
+        _log->set_prefix( "Order " + _id.as_string() );
     }
 }
 
@@ -961,7 +962,7 @@ void Order::set_state2( const State& state, bool is_error_state )
     if( _job_chain_node && _job_chain_node->_job )  log_line += ", " + _job_chain_node->_job->obj_name();
     if( is_error_state                           )  log_line += ", Fehlerzustand";
 
-    if( _job_chain )  _log.info( log_line );
+    if( _job_chain )  _log->info( log_line );
 
     THREAD_LOCK( _lock )  _state = state;
 }
@@ -1129,7 +1130,7 @@ void Order::postprocessing( bool success )
         {
             if( _setback == latter_day )
             {
-                _log.info( as_string(_setback_count) + " mal zurückgestellt. Der Auftrag wechselt in den Fehlerzustand" );
+                _log->info( as_string(_setback_count) + " mal zurückgestellt. Der Auftrag wechselt in den Fehlerzustand" );
                 success = false;
                 force_error_state = true;
             }
@@ -1143,7 +1144,7 @@ void Order::postprocessing( bool success )
             {
                 if( _job_chain_node->_job )  
                 {
-                    if( !_job_chain_node->_job->order_queue() )  _log.warn( "Job " + _job_chain_node->_job->obj_name() + " ohne Auftragswarteschlange (§1495)" );  // Problem §1495  
+                    if( !_job_chain_node->_job->order_queue() )  _log->warn( "Job " + _job_chain_node->_job->obj_name() + " ohne Auftragswarteschlange (§1495)" );  // Problem §1495  
                     else  _job_chain_node->_job->order_queue()->remove_order( this );
                 }
 
@@ -1151,13 +1152,13 @@ void Order::postprocessing( bool success )
 
                 if( success ) 
                 {
-                    //_log.debug( "Neuer Zustand ist " + error_string_from_variant(_job_chain_node->_next_state) );
+                    //_log->debug( "Neuer Zustand ist " + error_string_from_variant(_job_chain_node->_next_state) );
                     new_state = _job_chain_node->_next_state;
                     _job_chain_node = _job_chain_node->_next_node;
                 }
                 else
                 {
-                    //_log.debug( "Neuer Fehler-Zustand ist " + error_string_from_variant(_job_chain_node->_error_state) );
+                    //_log->debug( "Neuer Fehler-Zustand ist " + error_string_from_variant(_job_chain_node->_error_state) );
                     new_state = _job_chain_node->_error_state;
                     _job_chain_node = _job_chain_node->_error_node;
                 }
@@ -1171,7 +1172,7 @@ void Order::postprocessing( bool success )
                 else 
                 {
                     //_end_time = Time::now();
-                    _log.debug( "Kein weiterer Job in der Jobkette, der Auftrag ist erledigt" );
+                    _log->debug( "Kein weiterer Job in der Jobkette, der Auftrag ist erledigt" );
                 }
             }
             else
@@ -1215,7 +1216,7 @@ void Order::postprocessing2()
     if( finished() ) 
     {
         _end_time = Time::now();
-        _log.close();
+        _log->close();
     }
 
     if( _job_chain  &&  _is_in_database )  _spooler->_db->update_order( this );
@@ -1242,12 +1243,12 @@ void Order::setback_()
         if( _setback_count <= maximum )
         {
             _setback = Time::now() + _task->job()->get_delay_order_after_setback( _setback_count );
-            _log.info( "setback(): Auftrag zum " + as_string(_setback_count) + ". Mal zurückgestellt, bis " + _setback.as_string() );
+            _log->info( "setback(): Auftrag zum " + as_string(_setback_count) + ". Mal zurückgestellt, bis " + _setback.as_string() );
         }
         else
         {
             _setback = latter_day;  // Das heißt: Der Auftrag kommt in den Fehlerzustand
-            _log.warn( "setback(): Auftrag zum " + as_string(_setback_count) + ". Mal zurückgestellt, "
+            _log->warn( "setback(): Auftrag zum " + as_string(_setback_count) + ". Mal zurückgestellt, "
                        "das ist über dem Maximum " + as_string(maximum) + " des Jobs" );
         }
 
