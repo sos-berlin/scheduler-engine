@@ -1,4 +1,4 @@
-/* $Id */
+/* $Id: scheduler.css,v 1.4 2004/07/20 10:09:12 jz Exp $ */
 
 h1           { font-size: 24pt; font-weight: bold; margin-bottom: 4ex;  }
 h2           { font-size: 12pt; font-weight: bold; margin-top: 10ex; }
@@ -14,7 +14,17 @@ li           { font-size: 10pt; }
 pre          { font-family: Lucida Console, monospace; font-size: 9pt; margin-left: 5mm; line-height: 1.2em; }
 .indent      { margin-left: 5mm; }
 .mono        { font-family: Lucida Console, monospace; font-size: 9pt }
+
+
 .small       { font-family: Sans-Serif; font-size: 8pt }
+.label       { font-family: Sans-Serif; font-size: 8pt; white-space: nowrap }
+
+/* 1. Spalte */
+.column1             { padding-bottom: 1pt; padding-right: 5pt; padding-left: 3pt}
+
+/* Andere Spalten */
+.column              { padding-bottom: 1pt; padding-right: 5pt; padding-left: 3pt }
+
 
 .job                 { font-family: Sans-Serif; font-size: 10pt; background-color: #00BFFF }
 .job_list            { font-family: Sans-Serif; font-size: 10pt; background-color: #00BFFF }
@@ -25,4 +35,5 @@ pre          { font-family: Lucida Console, monospace; font-size: 9pt; margin-le
 .order               { font-family: Sans-Serif; font-size: 10pt; background-color: #FFFFA0 }
 .order_list          { font-family: Sans-Serif; font-size:  8pt; background-color: #FFFFA0 }
 .milliseconds        { font-family: Sans-Serif; font-size:  8pt }
-.waiting_for_process { font-style: italic }
+/*.waiting_for_process { font-style: italic }*/
+.error               { color: darkred }
