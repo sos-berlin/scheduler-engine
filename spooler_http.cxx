@@ -1,4 +1,4 @@
-// $Id: spooler_http.cxx,v 1.3 2004/07/21 20:40:09 jz Exp $
+// $Id: spooler_http.cxx,v 1.4 2004/07/21 21:19:10 jz Exp $
 /*
     Hier sind implementiert
 
@@ -308,20 +308,28 @@ Log_http_response::Log_http_response( Prefix_log* log, string content_type )
     set_content_type( content_type );
     finish();
 
-    _html_prefix = "<html>" 
-                        "<head>" 
-                            "<style type='text/css'>"
-                                "@import 'scheduler.css';"
-                                "pre { font-family: Lucida Console, monospace; font-size: 10pt }"
-                            "</style>"
-                            "<title>Scheduler log</title>"
-                        "</head>" 
-                        "<body>" 
-                            "<pre class='log'>";
+    _html_prefix = "<html>\n" 
+                        "<head>\n" 
+                            "<style type='text/css'>\n"
+                                "@import 'scheduler.css';\n"
+                                "pre { font-family: Lucida Console, monospace; font-size: 10pt }\n"
+                            "</style>\n"
+                            "<title>Scheduler log</title>\n"
+                        "</head>\n" 
+                        "<body>\n" 
 
-    _html_suffix =          "</pre>"
-                        "</body>"
-                    "</html>";
+                            // Wirkt nicht. Wenn der Scheduler abbricht (abort_immediately), löscht ie6 das Fenster 
+                            // und zeigt stattdessen eine unsinnige Fehlermeldung.
+                            "<script type='text/javascript' for='window' event='onerror'><!--\n"   
+                                //"document.write( '<br/><br/>(load error)' );\n"
+                                "return true;\n"
+                            "--></script>\n"
+
+                            "<pre class='log' onresize='alert(1);event.srcElement.scrollBy(0,999999999)'>\n";
+
+    _html_suffix =          "</pre>\n"
+                        "</body>\n"
+                    "</html>\n";
 }
 
 //------------------------------------------------------------Log_http_response::~Log_http_response
