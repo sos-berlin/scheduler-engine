@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- $Id: spooler_config.dtd,v 1.5 2001/01/03 22:15:31 jz Exp $   (C) 2000 SOS GmbH Berlin 
+<!-- $Id: spooler_config.dtd,v 1.6 2001/01/04 18:17:26 jz Exp $   (C) 2000 SOS GmbH Berlin 
 
      Konfiguration für den Spooler. 
      
@@ -106,10 +106,9 @@
 
 <!ELEMENT tasks                 ( task+ ) >
 
-<!ELEMENT task                  ( job, 
-                                  job.name, 
+<!ELEMENT task                  ( job.name, 
                                   task.running_since, 
-                                  task_next_start_time,
+                                  task.next_start_time,
                                   task.steps ) >
 
 <!ELEMENT job.name              ( #PCDATA ) >

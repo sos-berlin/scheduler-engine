@@ -1,4 +1,4 @@
-// $Id: spooler.h,v 1.6 2001/01/03 22:15:31 jz Exp $
+// $Id: spooler.h,v 1.7 2001/01/04 18:17:26 jz Exp $
 
 #ifndef __SPOOLER_H
 
@@ -30,6 +30,7 @@
 
 #include "../kram/sosdate.h"
 #include "../kram/sossock1.h"
+#include "../kram/thread_semaphore.h"
 
 #define FOR_EACH( TYPE, CONTAINER, ITERATOR )  for( TYPE::iterator ITERATOR = CONTAINER.begin(); ITERATOR != CONTAINER.end(); ITERATOR++ )
 
@@ -39,8 +40,8 @@ namespace sos {
 
 typedef _bstr_t Dom_string;
 
-inline Dom_string               as_dom_string           ( const string& str )                       { return as_bstr_t( str ); }
-inline Dom_string               as_dom_string           ( const char* str )                         { return as_bstr_t( str ); }
+inline Dom_string               as_dom_string               ( const string& str )                   { return as_bstr_t( str ); }
+inline Dom_string               as_dom_string               ( const char* str )                     { return as_bstr_t( str ); }
 
 
 namespace spooler {
@@ -314,6 +315,7 @@ struct Spooler
     Communication_channel      _comm_channel;
     Command_processor          _command_processor;
     Time                       _spooler_start_time;
+    Thread_semaphore           _semaphore;
 };
 
 

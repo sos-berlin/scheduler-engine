@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 
-<!-- $Id: spooler_config.xml,v 1.5 2001/01/03 22:15:31 jz Exp $   (C) 2000 SOS GmbH Berlin -->
+<!-- $Id: spooler_config.xml,v 1.6 2001/01/04 18:17:26 jz Exp $   (C) 2000 SOS GmbH Berlin -->
 
 <!DOCTYPE spooler.config SYSTEM "spooler_config.dtd">
 
@@ -136,7 +136,7 @@ end function
             </object_set>
             <job.output_level><level>200</level></job.output_level>
             <job.start_time>
-                <time>14:56:55</time>
+                <time>17:11:55</time>
                 <date>2001-01-02</date>
                 <date>2001-01-09</date>
                 <weekdays>
@@ -157,6 +157,41 @@ end function
                 <period>86400</period>
             </job.start_time>
         </job>
+<!--
+        <job name="Test">
+            <object_set>
+                <object_set_class.name>Test</object_set_class.name>
+                <job.levels>
+                    <low_level><level>100</level></low_level>
+                    <high_level><level>200</level></high_level>
+                </job.levels>
+            </object_set>
+            <job.output_level><level>200</level></job.output_level>
+            <job.start_time>
+                <time>17:11:55</time>
+                <date>2001-01-02</date>
+                <date>2001-01-09</date>
+                <weekdays>
+                    <day>1</day>
+                    <day>2</day>
+                    <day>3</day>
+                    <day>4</day>
+                    <day>5</day>
+                </weekdays>
+                <monthdays>
+                    <day>2</day>
+                    <day>3</day>
+                </monthdays>
+                <ultimos>
+                    <day>0</day>
+                    <day>1</day>
+                </ultimos>
+                <holiday>2001-01-03</holiday>
+                <duration>86400</duration>
+                <period>86400</period>
+            </job.start_time>
+        </job>
+-->
     </jobs>
 
 </spooler.config>
