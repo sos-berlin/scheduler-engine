@@ -1,4 +1,4 @@
-// $Id: spooler_mail.cxx,v 1.1 2002/03/19 18:56:28 jz Exp $
+// $Id: spooler_mail.cxx,v 1.2 2002/03/21 19:04:31 jz Exp $
 
 
 #include "../kram/sos.h"
@@ -58,7 +58,8 @@ STDMETHODIMP Com_mail::put_to( BSTR to )
     try
     {
         _msg->set_to( bstr_as_string(to) );
-        _to = SysAllocString_string( _msg->to() );
+        _to.Empty();
+        _to.Attach( SysAllocString_string( _msg->to() ) );
     }
     catch( const Xc&         x )  { hr = _set_excepinfo( x, "Spooler.Mail.to" ); }
     catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Mail.to" ); }

@@ -1,4 +1,4 @@
-// $Id: spooler_log.cxx,v 1.32 2002/03/20 10:30:12 jz Exp $
+// $Id: spooler_log.cxx,v 1.33 2002/03/21 19:04:31 jz Exp $
 
 #include "../kram/sos.h"
 #include "spooler.h"
@@ -345,7 +345,10 @@ void Prefix_log::write( const char* text, int len )
 
     if( _file == -1 )
     {
-        _log_buffer.append( text, len );
+        if( !_filename.empty() )                // Datei wird noch geöffnet?
+        {
+            _log_buffer.append( text, len );
+        }
     }
     else
     {
@@ -371,7 +374,10 @@ spooler_com::Imail* Prefix_log::mail()
             if( !_section.empty() )  _smtp_server = read_profile_string( "factory.ini", _section.c_str(), "smtp", _spooler->_smtp_server );
             _smtp_server_read = true;
         }
-        hr = _mail->put_smtp( SysAllocString_string(_smtp_server) );     if( FAILED(hr) ) throw_ole( hr, "spooler::Mail::smtp_server", _smtp_server.c_str() );
+
+        CComBSTR smtp_bstr;
+        smtp_bstr.Attach( SysAllocString_string(_smtp_server) );
+        hr = _mail->put_smtp( smtp_bstr );     if( FAILED(hr) ) throw_ole( hr, "spooler::Mail::smtp_server", _smtp_server.c_str() );
 
         set_mail_header();
 
@@ -409,10 +415,17 @@ void Prefix_log::set_mail_header()
         bcc = _spooler->_log_mail_bcc;
     }
 
-    hr = _mail->put_from( SysAllocString_string(from) );   if( FAILED(hr) ) throw_ole( hr, "spooler::Mail::from", from.c_str() );
-    hr = _mail->put_to  ( SysAllocString_string(to) );     if( FAILED(hr) ) throw_ole( hr, "spooler::Mail::to"  , to.c_str() );
-    hr = _mail->put_cc  ( SysAllocString_string(cc) );     if( FAILED(hr) ) throw_ole( hr, "spooler::Mail::cc"  , cc.c_str() );
-    hr = _mail->put_bcc ( SysAllocString_string(bcc) );    if( FAILED(hr) ) throw_ole( hr, "spooler::Mail::bcc" , bcc.c_str() );
+    CComBSTR from_bstr, to_bstr, cc_bstr, bcc_bstr;
+    from_bstr.Attach( SysAllocString_string(from) );
+    to_bstr  .Attach( SysAllocString_string(to  ) );
+    cc_bstr  .Attach( SysAllocString_string(cc  ) );
+    bcc_bstr .Attach( SysAllocString_string(bcc ) );
+
+
+    hr = _mail->put_from( from_bstr );   if( FAILED(hr) ) throw_ole( hr, "spooler::Mail::from", from.c_str() );
+    hr = _mail->put_to  ( to_bstr   );    if( FAILED(hr) ) throw_ole( hr, "spooler::Mail::to"  , to.c_str() );
+    hr = _mail->put_cc  ( cc_bstr   );    if( FAILED(hr) ) throw_ole( hr, "spooler::Mail::cc"  , cc.c_str() );
+    hr = _mail->put_bcc ( bcc_bstr  );    if( FAILED(hr) ) throw_ole( hr, "spooler::Mail::bcc" , bcc.c_str() );
 }
 
 //-------------------------------------------------------------------Prefix_log::set_mail_from_name
@@ -454,7 +467,9 @@ void Prefix_log::set_mail_subject( const string& subject, bool overwrite )
             if( SysStringLen(subject_bstr) > 0 )  return;
         }
 
-        hr = _mail->put_subject( SysAllocString_string(subject) );     if( FAILED(hr) ) throw_ole( hr, "spooler::Mail::subject", subject.c_str() );
+        CComBSTR subject_bstr; 
+        subject_bstr.Attach( SysAllocString_string(subject) );
+        hr = _mail->put_subject( subject_bstr );     if( FAILED(hr) ) throw_ole( hr, "spooler::Mail::subject", subject.c_str() );
     }
     else
     {
@@ -479,7 +494,9 @@ void Prefix_log::set_mail_body( const string& body, bool overwrite )
             if( SysStringLen(body_bstr) > 0 )  return;
         }
 
-        hr = _mail->put_body( SysAllocString_string(body) );     if( FAILED(hr) ) throw_ole( hr, "spooler::Mail::body", body.c_str() );
+        CComBSTR body_bstr;
+        body_bstr.Attach( SysAllocString_string(body) );
+        hr = _mail->put_body( body_bstr );     if( FAILED(hr) ) throw_ole( hr, "spooler::Mail::body", body.c_str() );
     }
     else
     {

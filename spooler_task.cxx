@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.71 2002/03/21 11:50:32 jz Exp $
+// $Id: spooler_task.cxx,v 1.72 2002/03/21 19:04:31 jz Exp $
 /*
     Hier sind implementiert
 
@@ -689,13 +689,6 @@ void Job::clear_when_directory_changed()
     }
 }
 
-//----------------------------------------------------------------------Job::set_script_xml_element
-/*
-void Job::set_script_xml_element( const xml::Element_ptr& element )
-{
-    _script_xml_element = element;
-}
-*/
 //---------------------------------------------------------------------------------Job::read_script
 
 bool Job::read_script()
@@ -1759,9 +1752,11 @@ bool Process_task::do_start()
     for( int i = 1;; i++ )
     {
         string      nr_str  = as_string( i );
-        CComBSTR    nr_bstr = SysAllocString_string( nr_str );
+        CComBSTR    nr_bstr;
         CComVariant vt;
         HRESULT     hr;
+
+        nr_bstr.Attach( SysAllocString_string( nr_str ) );
 
         hr = _params->get_var( nr_bstr, &vt );
         if( FAILED(hr) )  throw_ole( hr, "Variable_set.var", nr_str.c_str() );
