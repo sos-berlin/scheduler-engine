@@ -1,4 +1,4 @@
-// $Id: spooler_communication.cxx,v 1.91 2004/07/26 16:28:20 jz Exp $
+// $Id: spooler_communication.cxx,v 1.92 2004/07/26 17:55:09 jz Exp $
 /*
     Hier sind implementiert
 
@@ -521,8 +521,8 @@ bool Communication::Channel::do_send()
 
       //do
       //{
-            int len = _write_socket == STDOUT_FILENO? write ( _write_socket, _text.c_str() + _send_progress, c )
-                                                    : ::send( _write_socket, _text.c_str() + _send_progress, c, 0 );
+            int len = _write_socket == STDOUT_FILENO? write ( _write_socket, _text.data() + _send_progress, c )
+                                                    : ::send( _write_socket, _text.data() + _send_progress, c, 0 );
             err = len < 0? get_errno() : 0;
             LOG2( "socket.send", "send/write(" << _write_socket << "," << c << " bytes) ==> " << len << "  errno=" << err << "\n" );
             if( len == 0 )  break;   // Vorsichtshalber
@@ -590,12 +590,12 @@ bool Communication::Channel::async_continue_( bool wait )
                 if( _read_socket != STDIN_FILENO )  cp.set_host( &_host );
 
 
-                if( _is_http  )
+                if( _is_http )
                 {
                     LOG2( "scheduler.http", "HTTP: " << _http_parser->_text << "\n" );
                     recv_clear();
 
-                    _http_response = cp.execute_http( *_http_request );
+                    _http_response = cp.execute_http( _http_request );
                     _http_response->set_event( &_socket_event );
 
                     _http_parser  = NULL;
@@ -615,28 +615,34 @@ bool Communication::Channel::async_continue_( bool wait )
 
                     _send_progress = 0;
                     _send_is_complete = false;
-                    do_send();
+                    something_done |= do_send();
                 }
             }
         }
 
         while( _http_response  &&  _send_is_complete )
         {
-            if( _http_response->eof() )
+            _text = _http_response->read( 32768 );  // Die Größe ist nur eine Empfehlung
+Z_LOG( "read() => " << _text.length() << "\n" );
+
+            if( _text.length() == 0 )               // Zurzeit keine Daten da? Dann warten wir auf ein Signal in _socket_event (von spooler_log.cxx)
             {
-                _http_response = NULL;
+                if( _http_response->eof() )         // Oder ist es eof?
+                {
+Z_LOG( "EOF\n" );
+                    if( _http_response->close_connection_at_eof() )  _eof = true;   // Wir tun so, als ob der Client EOF geliefert hat. Das führt zum Schließen der Verbindung.
+                    _http_response = NULL;
+                }
+
                 break;
             }
 
-            _text = _http_response->read( 32768 );  // Die Größe ist nur eine Empfehlung
-            if( _text.length() == 0 )  break;       // Zurzeit keine Daten da? Dann warten wir auf ein Signal in _socket_event (von spooler_log.cxx)
-
             _send_progress = 0;
             _send_is_complete = false;
-            do_send();
+            something_done |= do_send();
         }
 
-        if( _eof && _send_is_complete )  { _communication->remove_channel( this );  return true; }
+        if( _eof  &&  _send_is_complete  &&  !_http_response )  { Z_LOG( "REMOVE_CHANNEL\n" ); _communication->remove_channel( this );  return true; }
     }
     catch( const Xc& x ) 
     { 

@@ -1,4 +1,4 @@
-// $Id: spooler_http.h,v 1.5 2004/07/26 12:09:58 jz Exp $
+// $Id: spooler_http.h,v 1.6 2004/07/26 17:55:09 jz Exp $
 
 #ifndef __SPOOLER_HTTP_H
 #define __SPOOLER_HTTP_H
@@ -15,6 +15,7 @@ struct Http_request : Object
 
     bool                        has_parameter               ( const string& name ) const            { return _parameters.find( name ) != _parameters.end(); }
     string                      parameter                   ( const string& name ) const;
+    bool                        is_http_1_1                 ();
 
     Fill_zero                  _zero_;
     string                     _http_cmd;
@@ -87,7 +88,10 @@ struct Chunk_reader : Object
 
 struct Http_response : Object
 {
-                                Http_response               ( Chunk_reader*, const string& content_type );
+                                Http_response               ( Http_request*, Chunk_reader*, const string& content_type );
+
+  //bool                        is_http_1_1                 ()                                      { return _http_1_1; }
+    bool                        close_connection_at_eof     ()                                      { return _close_connection_at_eof; }
 
     void                    set_event                       ( Event_base* event )                   { _chunk_reader->set_event( event ); }
 
@@ -104,6 +108,8 @@ struct Http_response : Object
 
 
     Fill_zero                  _zero_;
+    bool                       _chunked;
+    bool                       _close_connection_at_eof;
     ptr<Chunk_reader>          _chunk_reader;
     string                     _content_type;
     string                     _header;

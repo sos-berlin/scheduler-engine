@@ -1,4 +1,4 @@
-// $Id: spooler_http.cxx,v 1.8 2004/07/26 12:09:58 jz Exp $
+// $Id: spooler_http.cxx,v 1.9 2004/07/26 17:55:09 jz Exp $
 /*
     Hier sind implementiert
 
@@ -18,14 +18,6 @@ using namespace std;
 
 namespace sos {
 namespace spooler {
-
-//--------------------------------------------------------------------------Http_request::parameter
-    
-string Http_request::parameter( const string& name ) const
-{ 
-    map<string,string>::const_iterator it = _parameters.find( name );
-    return it == _parameters.end()? "" : it->second;
-}
 
 //-------------------------------------------------------------------------Http_parser::Http_parser
     
@@ -198,12 +190,29 @@ string Http_parser::eat_path()
     return path;
 }
 
+//--------------------------------------------------------------------------Http_request::parameter
+    
+string Http_request::parameter( const string& name ) const
+{ 
+    map<string,string>::const_iterator it = _parameters.find( name );
+    return it == _parameters.end()? "" : it->second;
+}
+
+//--------------------------------------------------------------------Http_request::keep_connection
+
+bool Http_request::is_http_1_1()
+{
+    return _protocol == "HTTP/1.1";
+}
+
 //---------------------------------------------------------------------Http_response::Http_response
 
-Http_response::Http_response( Chunk_reader* chunk_reader, const string& content_type )
+Http_response::Http_response( Http_request* http_request, Chunk_reader* chunk_reader, const string& content_type )
 : 
     _zero_(this+1), 
-    _chunk_reader( chunk_reader ) 
+    _chunk_reader( chunk_reader ),
+    _chunked( http_request->is_http_1_1() ),
+    _close_connection_at_eof( !http_request->is_http_1_1() )
 { 
     set_content_type(content_type); 
     finish();
@@ -228,13 +237,18 @@ void Http_response::finish()
     
     time_text[24] = '\0';
 
-    _header = "HTTP/1.1 200 OK\r\n"
-              "Content-Type: "  + _content_type + "\r\n"
-              "Transfer-Encoding: chunked\r\n"
-              "Date: " + string(time_text) + " GMT\r\n"
-              "Server: Scheduler " + string(VER_PRODUCTVERSION_STR) + "\r\n"
-              "Cache-Control: no-cache\r\n"
-              "\r\n";
+    if( _chunked )  _header = "HTTP/1.1 200 OK\r\n";
+              else  _header = "HTTP/1.0 200 OK\r\n";
+
+    _header += "Content-Type: "  + _content_type + "\r\n"
+               "Date: " + string(time_text) + " GMT\r\n"
+               "Server: Scheduler " + string(VER_PRODUCTVERSION_STR) + "\r\n"
+               "Cache-Control: no-cache\r\n";
+
+    if( _chunked                 )  _header += "Transfer-Encoding: chunked\r\n";
+    if( _close_connection_at_eof )  _header += "Connection: close\r\n";
+
+    _header += "\r\n";
 
     _chunk_size = _header.length();
 }
@@ -250,57 +264,61 @@ bool Http_response::eof()
 
 string Http_response::read( int recommended_size )                           
 {
-    if( _chunk_index == 0 )
+    string result;
+
+    if( _eof )  return result;
+
+    if( _chunk_index == 0  &&  _chunk_offset < _chunk_size )
     {
-        if( _chunk_offset < _chunk_size )
-        {
-            //uint length = min( recommended_size, _header.length() - _chunk_offset );
-            //uint r      = _chunk_offset;
-            //_chunk_offset += length;
-            //return _header.substr( r, length );
-            _chunk_offset = _chunk_size;
-            return _header;
-        }
-
-        return start_new_chunk( recommended_size );
+        //uint length = min( recommended_size, _header.length() - _chunk_offset );
+        //uint r      = _chunk_offset;
+        //_chunk_offset += length;
+        //return _header.substr( r, length );
+        _chunk_offset = _chunk_size;
+        result = _header;
     }
-    else
+
+    if( _chunk_offset == _chunk_size ) 
     {
-        string result;
-
-        if( _chunk_offset < _chunk_size )
-        {
-            result = _chunk_reader->read_chunk( min( recommended_size, (int)( _chunk_size - _chunk_offset ) ) );
-            _chunk_offset += result.length();
-        }
-
-        if( _chunk_offset == _chunk_size  &&  !_chunk_eof ) 
-        {
-            _chunk_eof = true;
-            result.append( "\r\n" );
-        }
-
-        if( _chunk_offset == _chunk_size ) 
-        {
-            result.append( start_new_chunk( recommended_size ) );
-        }
-
-        return result;
+        result += start_new_chunk( recommended_size );
     }
+
+    if( _chunk_offset < _chunk_size )
+    {
+        string data =_chunk_reader->read_chunk( min( recommended_size, (int)( _chunk_size - _chunk_offset ) ) );
+        _chunk_offset += data.length();
+        result += data;
+    }
+
+    if( _chunk_offset == _chunk_size  &&  !_chunk_eof ) 
+    {
+        _chunk_eof = true;
+        if( _chunked )  result.append( "\r\n" );
+    }
+
+    //Z_LOG( __FUNCTION__ << "() ==> " << result << "\n" );
+
+    return result;
 }
 
 //-------------------------------------------------------------------Http_response::start_new_chunk
 
 string Http_response::start_new_chunk( int recommended_size )
 {
+    Z_LOG( __FUNCTION__ << "\n" );
+
     if( !_chunk_reader->next_chunk_is_ready() )  return "";
 
     _chunk_index++;
     _chunk_offset = 0;
     _chunk_size   = _chunk_reader->get_next_chunk_size( recommended_size );
 
-    string result = as_hex_string( (int)_chunk_size ) + "\r\n";
+    string result;
     
+    if( _chunked )  result = as_hex_string( (int)_chunk_size ) + "\r\n";
+    
+    Z_LOG( __FUNCTION__ << "  chunk_size=" << _chunk_size << "\n" );
+
     if( _chunk_size > 0 )
     {
         _chunk_eof = false;
@@ -308,7 +326,7 @@ string Http_response::start_new_chunk( int recommended_size )
     else
     {
         _eof = true;
-        result += "\r\n";    
+        if( _chunked )  result += "\r\n";    
     }
     
     return result;

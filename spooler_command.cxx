@@ -1,4 +1,4 @@
-// $Id: spooler_command.cxx,v 1.132 2004/07/26 12:09:58 jz Exp $
+// $Id: spooler_command.cxx,v 1.133 2004/07/26 17:55:09 jz Exp $
 /*
     Hier ist implementiert
 
@@ -688,9 +688,9 @@ string xml_as_string( const xml::Document_ptr& document, bool indent )
 
 //-------------------------------------------------------------------Command_processor::execute_http
 
-ptr<Http_response> Command_processor::execute_http( const Http_request& http_request )
+ptr<Http_response> Command_processor::execute_http( const Http_request* http_request )
 {
-    string  path                    = http_request._path;
+    string  path                    = http_request->_path;
     string  response_body;
     string  response_content_type;
 
@@ -698,7 +698,7 @@ ptr<Http_response> Command_processor::execute_http( const Http_request& http_req
     {
         if( _security_level < Security::seclev_info )  throw_xc( "SCHEDULER-121" );
 
-        if( http_request._http_cmd == "GET" )
+        if( http_request->_http_cmd == "GET" )
         {
             if( path == "/" )  path = "index.html";
 
@@ -724,15 +724,15 @@ ptr<Http_response> Command_processor::execute_http( const Http_request& http_req
             {
                 ptr<Prefix_log> log;
 
-                if( http_request.has_parameter( "task"  ) )  log = _spooler->get_task( as_int( http_request.parameter( "task" ) ) )->log();
+                if( http_request->has_parameter( "task"  ) )  log = _spooler->get_task( as_int( http_request->parameter( "task" ) ) )->log();
                 else
-                if( http_request.has_parameter( "job"   ) )  log = _spooler->get_job( http_request.parameter( "job" ) )->_log;
+                if( http_request->has_parameter( "job"   ) )  log = _spooler->get_job( http_request->parameter( "job" ) )->_log;
                 else
-                if( http_request.has_parameter( "order" ) )  log = _spooler->job_chain( http_request.parameter( "job_chain" ) )->order( http_request.parameter( "order" ) )->_log;
+                if( http_request->has_parameter( "order" ) )  log = _spooler->job_chain( http_request->parameter( "job_chain" ) )->order( http_request->parameter( "order" ) )->_log;
                 else
-                                                             log = &_spooler->_log;
+                                                              log = &_spooler->_log;
 
-                ptr<Http_response> response = Z_NEW( Http_response( Z_NEW( Html_chunk_reader( Z_NEW( Log_chunk_reader( log ) ), log->title() ) ), "text/html" ) );
+                ptr<Http_response> response = Z_NEW( Http_response( http_request, Z_NEW( Html_chunk_reader( Z_NEW( Log_chunk_reader( log ) ), log->title() ) ), "text/html" ) );
                 return +response;
             }
             else
@@ -749,9 +749,9 @@ ptr<Http_response> Command_processor::execute_http( const Http_request& http_req
             }
         }
         else
-        if( http_request._http_cmd == "POST" )
+        if( http_request->_http_cmd == "POST" )
         {
-            response_body = execute( http_request._body, Time::now(), true );
+            response_body = execute( http_request->_body, Time::now(), true );
             response_content_type = "text/xml";
         }
 
@@ -764,11 +764,11 @@ ptr<Http_response> Command_processor::execute_http( const Http_request& http_req
     }
     catch( const exception& x )
     {
-        _spooler->log().error( "Fehler beim HTTP-Aufruf " + http_request._http_cmd + " " + path + ": " + x.what() );
+        _spooler->log().error( "Fehler beim HTTP-Aufruf " + http_request->_http_cmd + " " + path + ": " + x.what() );
         response_body = "<html><head><title>Scheduler</title></head><body>Die Seite kann nicht bereitgestellt werden. Siehe Scheduler-Protokoll</body></html>";
     }
 
-    ptr<Http_response> response = Z_NEW( Http_response( Z_NEW( String_chunk_reader( response_body ) ), response_content_type ) );
+    ptr<Http_response> response = Z_NEW( Http_response( http_request, Z_NEW( String_chunk_reader( response_body ) ), response_content_type ) );
     return +response;
 /*
     time_t      t;
