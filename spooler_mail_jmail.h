@@ -1,4 +1,4 @@
-// $Id: spooler_mail_jmail.h,v 1.5 2002/03/14 17:26:50 jz Exp $
+// $Id: spooler_mail_jmail.h,v 1.6 2002/03/22 18:57:43 jz Exp $
 
 #ifndef __SPOOLER_MAIL_JMAIL_H
 #define __SPOOLER_MAIL_JMAIL_H
@@ -60,9 +60,14 @@ struct Com_mail : spooler_com::Imail, Sos_ole_object
     STDMETHODIMP            put_smtp                        ( BSTR smtp )                           { _smtp_server = smtp; return NOERROR; }
     STDMETHODIMP            get_smtp                        ( BSTR* smtp )                          { *smtp = _smtp_server; return NOERROR; }
 
+    STDMETHODIMP            put_queue_dir                   ( BSTR );
+    STDMETHODIMP            get_queue_dir                   ( BSTR* );
+
     STDMETHODIMP                add_header_field            ( BSTR field_name, BSTR value );
 
-    void __stdcall              send                        ();
+    STDMETHODIMP                dequeue                     ( int* );
+
+    int __stdcall               send                        ();
 
   private:
     void                        add_to_recipients           ( BSTR recipients, char recipient_type );

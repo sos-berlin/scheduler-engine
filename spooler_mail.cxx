@@ -1,4 +1,4 @@
-// $Id: spooler_mail.cxx,v 1.2 2002/03/21 19:04:31 jz Exp $
+// $Id: spooler_mail.cxx,v 1.3 2002/03/22 18:57:43 jz Exp $
 
 
 #include "../kram/sos.h"
@@ -61,9 +61,7 @@ STDMETHODIMP Com_mail::put_to( BSTR to )
         _to.Empty();
         _to.Attach( SysAllocString_string( _msg->to() ) );
     }
-    catch( const Xc&         x )  { hr = _set_excepinfo( x, "Spooler.Mail.to" ); }
-    catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Mail.to" ); }
-    catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Mail.to" ); }
+    catch( const Xc& x )  { hr = _set_excepinfo( x, "Spooler.Mail.to" ); }
 
     return hr;
 }
@@ -81,9 +79,7 @@ STDMETHODIMP Com_mail::put_cc( BSTR cc )
         _msg->set_cc( bstr_as_string(cc) );
         _cc = _msg->cc().c_str();
     }
-    catch( const Xc&         x )  { hr = _set_excepinfo( x, "Spooler.Mail.cc" ); }
-    catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Mail.cc" ); }
-    catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Mail.cc" ); }
+    catch( const Xc& x )  { hr = _set_excepinfo( x, "Spooler.Mail.cc" ); }
 
     return hr;
 }
@@ -101,9 +97,7 @@ STDMETHODIMP Com_mail::put_bcc( BSTR bcc )
         _msg->set_bcc( bstr_as_string(bcc) );
         _bcc = _msg->bcc().c_str();
     }
-    catch( const Xc&         x )  { hr = _set_excepinfo( x, "Spooler.Mail.bcc" ); }
-    catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Mail.bcc" ); }
-    catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Mail.bcc" ); }
+    catch( const Xc& x )  { hr = _set_excepinfo( x, "Spooler.Mail.bcc" ); }
 
     return hr;
 }
@@ -121,9 +115,7 @@ STDMETHODIMP Com_mail::put_from( BSTR from )
         _msg->set_from( bstr_as_string(from) );
         _from = _msg->from().c_str();
     }
-    catch( const Xc&         x )  { hr = _set_excepinfo( x, "Spooler.Mail.from" ); }
-    catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Mail.from" ); }
-    catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Mail.from" ); }
+    catch( const Xc& x )  { hr = _set_excepinfo( x, "Spooler.Mail.from" ); }
 
     return hr;
 }
@@ -140,9 +132,7 @@ STDMETHODIMP Com_mail::get_from( BSTR* result )
     {
         *result = SysAllocString_string( _msg->from() );
     }
-    catch( const Xc&         x )  { hr = _set_excepinfo( x, "Spooler.Mail.from" ); }
-    catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Mail.from" ); }
-    catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Mail.from" ); }
+    catch( const Xc& x )  { hr = _set_excepinfo( x, "Spooler.Mail.from" ); }
 
     return hr;
 }
@@ -160,9 +150,7 @@ STDMETHODIMP Com_mail::put_subject( BSTR subject )
         _subject = subject;
         _msg->set_subject( bstr_as_string( subject ) );
     }
-    catch( const Xc&         x )  { hr = _set_excepinfo( x, "Spooler.Mail.subject" ); }
-    catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Mail.subject" ); }
-    catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Mail.subject" ); }
+    catch( const Xc& x )  { hr = _set_excepinfo( x, "Spooler.Mail.subject" ); }
 
     return hr;
 }
@@ -179,9 +167,7 @@ STDMETHODIMP Com_mail::get_subject( BSTR* result )
     {
         *result = SysAllocString_string( _msg->subject() );
     }
-    catch( const Xc&         x )  { hr = _set_excepinfo( x, "Spooler.Mail.subject" ); }
-    catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Mail.subject" ); }
-    catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Mail.subject" ); }
+    catch( const Xc& x )  { hr = _set_excepinfo( x, "Spooler.Mail.subject" ); }
 
     return hr;
 }
@@ -198,9 +184,7 @@ STDMETHODIMP Com_mail::put_body( BSTR body )
     {
         _msg->set_body( bstr_as_string( body ) );
     }
-    catch( const Xc&         x )  { hr = _set_excepinfo( x, "Spooler.Mail.body" ); }
-    catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Mail.body" ); }
-    catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Mail.body" ); }
+    catch( const Xc& x )  { hr = _set_excepinfo( x, "Spooler.Mail.body" ); }
 
     return hr;
 }
@@ -217,9 +201,7 @@ STDMETHODIMP Com_mail::get_body( BSTR* result )
     {
         *result = SysAllocString_string( _msg->body() );
     }
-    catch( const Xc&         x )  { hr = _set_excepinfo( x, "Spooler.Mail.body" ); }
-    catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Mail.body" ); }
-    catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Mail.body" ); }
+    catch( const Xc& x )  { hr = _set_excepinfo( x, "Spooler.Mail.body" ); }
 
     return hr;
 }
@@ -236,9 +218,7 @@ STDMETHODIMP Com_mail::add_file( BSTR filename, BSTR content_type )
     {
         _msg->add_file( bstr_as_string( filename ), bstr_as_string( content_type ) );
     }
-    catch( const Xc&         x )  { hr = _set_excepinfo( x, "Spooler.Mail.add_file" ); }
-    catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Mail.add_file" ); }
-    catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Mail.add_file" ); }
+    catch( const Xc& x )  { hr = _set_excepinfo( x, "Spooler.Mail.add_file" ); }
 
     return hr;
 }
@@ -273,9 +253,7 @@ STDMETHODIMP Com_mail::put_smtp( BSTR smtp )
     {
         _msg->set_smtp( bstr_as_string(smtp) );
     }
-    catch( const Xc&         x )  { hr = _set_excepinfo( x, "Spooler.Mail.smtp" ); }
-    catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Mail.smtp" ); }
-    catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Mail.smtp" ); }
+    catch( const Xc& x )  { hr = _set_excepinfo( x, "Spooler.Mail.smtp" ); }
 
     return hr;
 }
@@ -292,9 +270,41 @@ STDMETHODIMP Com_mail::get_smtp( BSTR* smtp )
     {
         *smtp = SysAllocString_string( _msg->smtp() );
     }
-    catch( const Xc&         x )  { hr = _set_excepinfo( x, "Spooler.Mail.smtp" ); }
-    catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Mail.smtp" ); }
-    catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Mail.smtp" ); }
+    catch( const Xc& x )  { hr = _set_excepinfo( x, "Spooler.Mail.smtp" ); }
+
+    return hr;
+}
+
+//--------------------------------------------------------------------------Com_mail::put_queue_dir
+
+STDMETHODIMP Com_mail::put_queue_dir( BSTR queue_dir )
+{
+    HRESULT hr = NOERROR;
+
+    if( _msg == 0 )  return E_POINTER;
+
+    try
+    {
+        _msg->set_queue_dir( bstr_as_string(queue_dir) );
+    }
+    catch( const Xc& x )  { hr = _set_excepinfo( x, "Spooler.Mail.queue_dir" ); }
+
+    return hr;
+}
+
+//--------------------------------------------------------------------------Com_mail::get_queue_dir
+
+STDMETHODIMP Com_mail::get_queue_dir( BSTR* queue_dir )
+{
+    HRESULT hr = NOERROR;
+
+    if( _msg == 0 )  return E_POINTER;
+
+    try
+    {
+        *queue_dir = SysAllocString_string( _msg->queue_dir() );
+    }
+    catch( const Xc& x )  { hr = _set_excepinfo( x, "Spooler.Mail.queue_dir" ); }
 
     return hr;
 }
@@ -311,22 +321,37 @@ STDMETHODIMP Com_mail::add_header_field( BSTR field_name, BSTR value )
     {
         _msg->add_header_field( bstr_as_string(field_name), bstr_as_string(value) );
     }
-    catch( const Xc&         x )  { hr = _set_excepinfo( x, "Spooler.Mail.add_header_field" ); }
-    catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Mail.add_header_field" ); }
-    catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Mail.add_header_field" ); }
+    catch( const Xc& x )  { hr = _set_excepinfo( x, "Spooler.Mail.add_header_field" ); }
 
     return hr;
 }
 
 //-----------------------------------------------------------------------------------Com_mail::send
 
-void Com_mail::send()
+int Com_mail::send()
 {
     if( _msg == 0 )  throw_ole( E_POINTER, "Com_mail::send" );
 
     _spooler->_log.debug( "email " + _msg->to() + ": " + _msg->subject() );
 
-    _msg->send();
+    return _msg->send();
+}
+
+//--------------------------------------------------------------------------------Com_mail::dequeue
+
+STDMETHODIMP Com_mail::dequeue( int* result )
+{
+    HRESULT hr = NOERROR;
+
+    if( _msg == 0 )  return E_POINTER;
+
+    try
+    {
+        *result = _msg->dequeue();
+    }
+    catch( const Xc& x )  { hr = _set_excepinfo( x, "Spooler.Mail.dequeue" ); }
+
+    return hr;
 }
 
 //-------------------------------------------------------------------------------------------------

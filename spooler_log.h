@@ -1,4 +1,4 @@
-// $Id: spooler_log.h,v 1.13 2002/03/19 18:56:28 jz Exp $
+// $Id: spooler_log.h,v 1.14 2002/03/22 18:57:42 jz Exp $
 
 #ifndef __SPOOLER_LOG_H
 #define __SPOOLER_LOG_H
@@ -159,6 +159,7 @@ struct Prefix_log
 
     string                     _smtp_server;                // Aus factory.ini [Job ...]
     bool                       _smtp_server_read;
+    string                     _queue_dir;
     string                     _from_name;
     string                     _subject;
     string                     _body;

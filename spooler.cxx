@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.83 2002/03/19 18:56:26 jz Exp $
+// $Id: spooler.cxx,v 1.84 2002/03/22 18:57:42 jz Exp $
 /*
     Hier sind implementiert
 
@@ -107,24 +107,16 @@ Spooler::Spooler()
     _log(this),
     _script(this),
     _script_instance(&_prefix_log),
-    _log_level( log_info )
+    _log_level( log_info ),
+
+    _smtp_server   ("-"),   // Für spooler_log.cxx: Nicht setzen, damit Default aus sos.ini erhalten bleibt
+    _log_mail_from ("-"),
+    _log_mail_cc   ("-"),
+    _log_mail_bcc  ("-"),
+    _mail_queue_dir("-")
 {
     _com_log     = new Com_log( &_prefix_log );
     _com_spooler = new Com_spooler( this );
-
-    _mail_on_error   = read_profile_bool  ( "factory.ini", "spooler", "mail_on_error"  , _mail_on_error );
-    _mail_on_process = read_profile_bool  ( "factory.ini", "spooler", "mail_on_success", _mail_on_process );
-    _mail_on_success = read_profile_bool  ( "factory.ini", "spooler", "mail_on_success", _mail_on_success );
-    _smtp_server     = read_profile_string( "factory.ini", "spooler", "smtp"           , _smtp_server );
-
-    _log_mail_from      = read_profile_string( "factory.ini", "spooler", "log_mail_from"   );
-    _log_mail_to        = read_profile_string( "factory.ini", "spooler", "log_mail_to"     );
-    _log_mail_cc        = read_profile_string( "factory.ini", "spooler", "log_mail_cc"     );
-    _log_mail_bcc       = read_profile_string( "factory.ini", "spooler", "log_mail_bcc"    );
-    _log_mail_subject   = read_profile_string( "factory.ini", "spooler", "log_mail_subject");
-    _log_collect_within = read_profile_uint  ( "factory.ini", "spooler", "log_collect_within", 0 );
-    _log_collect_max    = read_profile_uint  ( "factory.ini", "spooler", "log_collect_max"   , 900 );
-
 }
 
 //--------------------------------------------------------------------------------Spooler::~Spooler
@@ -447,6 +439,20 @@ void Spooler::load()
 void Spooler::start()
 {
     assert( GetCurrentThreadId() == _thread_id );
+
+    _mail_on_error   = read_profile_bool  ( "factory.ini", "spooler", "mail_on_error"  , _mail_on_error );
+    _mail_on_process = read_profile_bool  ( "factory.ini", "spooler", "mail_on_success", _mail_on_process );
+    _mail_on_success = read_profile_bool  ( "factory.ini", "spooler", "mail_on_success", _mail_on_success );
+    _mail_queue_dir  = read_profile_string( "factory.ini", "spooler", "mail_queue_dir" , _mail_queue_dir );
+    _smtp_server     = read_profile_string( "factory.ini", "spooler", "smtp"           , _smtp_server );
+
+    _log_mail_from      = read_profile_string( "factory.ini", "spooler", "log_mail_from"   );
+    _log_mail_to        = read_profile_string( "factory.ini", "spooler", "log_mail_to"     );
+    _log_mail_cc        = read_profile_string( "factory.ini", "spooler", "log_mail_cc"     );
+    _log_mail_bcc       = read_profile_string( "factory.ini", "spooler", "log_mail_bcc"    );
+    _log_mail_subject   = read_profile_string( "factory.ini", "spooler", "log_mail_subject");
+    _log_collect_within = read_profile_uint  ( "factory.ini", "spooler", "log_collect_within", 0 );
+    _log_collect_max    = read_profile_uint  ( "factory.ini", "spooler", "log_collect_max"   , 900 );
 
     _log.set_directory( _log_directory );
     _log.open_new();

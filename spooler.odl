@@ -1,4 +1,4 @@
-// $Id: spooler.odl,v 1.27 2002/03/18 10:11:39 jz Exp $
+// $Id: spooler.odl,v 1.28 2002/03/22 18:57:42 jz Exp $
 
 // Anweisung: midl /nologo /error all /out $(OutDir) $(InputPath)
 
@@ -442,10 +442,18 @@ library spooler
         [propget]
         HRESULT                 smtp                    ( [out,retval] BSTR* host );
 
-        [hidden]
-        void                    send                    ();
+        [propput]
+        HRESULT                 queue_dir               ( [in] BSTR directory );
+
+        [propget]
+        HRESULT                 queue_dir               ( [out,retval] BSTR* directory );
 
         HRESULT                 add_header_field        ( [in] BSTR field_name, [in] BSTR value );
+
+        HRESULT                 dequeue                 ( [out,retval] int* count );
+
+        [hidden]
+        int                     send                    ();
     }
 
     [

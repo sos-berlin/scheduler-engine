@@ -1,4 +1,4 @@
-// $Id: spooler_log.cxx,v 1.33 2002/03/21 19:04:31 jz Exp $
+// $Id: spooler_log.cxx,v 1.34 2002/03/22 18:57:42 jz Exp $
 
 #include "../kram/sos.h"
 #include "spooler.h"
@@ -371,13 +371,26 @@ spooler_com::Imail* Prefix_log::mail()
         _mail = mail;   // Nur bei fehlerfreiem init() speichern
 
         if( !_smtp_server_read ) {
-            if( !_section.empty() )  _smtp_server = read_profile_string( "factory.ini", _section.c_str(), "smtp", _spooler->_smtp_server );
+            if( !_section.empty() ) {
+                _smtp_server = read_profile_string( "factory.ini", _section.c_str(), "smtp"          , _spooler->_smtp_server );
+                _queue_dir   = read_profile_string( "factory.ini", _section.c_str(), "mail_queue_dir", _spooler->_mail_queue_dir );
+            }
             _smtp_server_read = true;
         }
 
-        CComBSTR smtp_bstr;
-        smtp_bstr.Attach( SysAllocString_string(_smtp_server) );
-        hr = _mail->put_smtp( smtp_bstr );     if( FAILED(hr) ) throw_ole( hr, "spooler::Mail::smtp_server", _smtp_server.c_str() );
+        if( _smtp_server != "-" )
+        {
+            CComBSTR smtp_bstr;
+            smtp_bstr.Attach( SysAllocString_string(_smtp_server) );
+            hr = _mail->put_smtp( smtp_bstr );     if( FAILED(hr) ) throw_ole( hr, "spooler::Mail::smtp_server", _smtp_server.c_str() );
+        }
+
+        if( _queue_dir != "-" )
+        {
+            CComBSTR queue_dir_bstr;
+            queue_dir_bstr.Attach( SysAllocString_string(_queue_dir) );
+            hr = _mail->put_queue_dir( queue_dir_bstr );     if( FAILED(hr) ) throw_ole( hr, "spooler::Mail::queue_dir", _smtp_server.c_str() );
+        }
 
         set_mail_header();
 
@@ -397,15 +410,15 @@ spooler_com::Imail* Prefix_log::mail()
 
 void Prefix_log::set_mail_header()
 {
-    HRESULT hr;
+    HRESULT hr = NOERROR;
     string  from, to, cc, bcc;
 
     if( !_section.empty() )
     {
         from    = read_profile_string( "factory.ini", _section.c_str(), "log_mail_from"   , _spooler->_log_mail_from );
         to      = read_profile_string( "factory.ini", _section.c_str(), "log_mail_to"     );
-        cc      = read_profile_string( "factory.ini", _section.c_str(), "log_mail_cc"     , "" );
-        bcc     = read_profile_string( "factory.ini", _section.c_str(), "log_mail_bcc"    , "" );
+        cc      = read_profile_string( "factory.ini", _section.c_str(), "log_mail_cc"     , _spooler->_log_mail_cc );
+        bcc     = read_profile_string( "factory.ini", _section.c_str(), "log_mail_bcc"    , _spooler->_log_mail_bcc );
     }
 
     if( to.empty() && cc.empty() && bcc.empty() )
@@ -422,10 +435,10 @@ void Prefix_log::set_mail_header()
     bcc_bstr .Attach( SysAllocString_string(bcc ) );
 
 
-    hr = _mail->put_from( from_bstr );   if( FAILED(hr) ) throw_ole( hr, "spooler::Mail::from", from.c_str() );
-    hr = _mail->put_to  ( to_bstr   );    if( FAILED(hr) ) throw_ole( hr, "spooler::Mail::to"  , to.c_str() );
-    hr = _mail->put_cc  ( cc_bstr   );    if( FAILED(hr) ) throw_ole( hr, "spooler::Mail::cc"  , cc.c_str() );
-    hr = _mail->put_bcc ( bcc_bstr  );    if( FAILED(hr) ) throw_ole( hr, "spooler::Mail::bcc" , bcc.c_str() );
+    if( from != "-" )  hr = _mail->put_from( from_bstr );    if( FAILED(hr) ) throw_ole( hr, "spooler::Mail::from", from.c_str() );
+                       hr = _mail->put_to  ( to_bstr   );    if( FAILED(hr) ) throw_ole( hr, "spooler::Mail::to"  , to.c_str() );
+    if( cc   != "-" )  hr = _mail->put_cc  ( cc_bstr   );    if( FAILED(hr) ) throw_ole( hr, "spooler::Mail::cc"  , cc.c_str() );
+    if( bcc  != "-" )  hr = _mail->put_bcc ( bcc_bstr  );    if( FAILED(hr) ) throw_ole( hr, "spooler::Mail::bcc" , bcc.c_str() );
 }
 
 //-------------------------------------------------------------------Prefix_log::set_mail_from_name
@@ -560,8 +573,25 @@ void Prefix_log::send( int reason )
 
 void Prefix_log::send_really()
 {
+    HRESULT hr;
+    int ok;
+
     mail()->add_file( CComBSTR( _filename.c_str() ), CComBSTR("plain/text") );
-    mail()->send();
+    ok = mail()->send();
+
+    if( ok )
+    {
+        try
+        {
+            int result;
+            hr = mail()->dequeue( &result );
+            if( FAILED(hr) )  throw_ole( hr, "mail::dequeue" );
+        }
+        catch( const Xc& x ) { warn( string("eMail versendet, aber Fehler Verarbeiten der eMail-Warteschlange: ") + x.what() ); }
+    }
+    else
+        warn( "eMail konnte nicht versendet werden" );
+
     _mail = NULL;
 }
 

@@ -1,4 +1,4 @@
-// $Id: spooler.h,v 1.70 2002/03/19 18:56:27 jz Exp $
+// $Id: spooler.h,v 1.71 2002/03/22 18:57:42 jz Exp $
 
 #ifndef __SPOOLER_H
 #define __SPOOLER_H
@@ -193,6 +193,7 @@ struct Spooler
     bool                       _mail_on_error;              // Für Job-Protokolle
     bool                       _mail_on_process;            // Für Job-Protokolle
     bool                       _mail_on_success;            // Für Job-Protokolle
+    string                     _mail_queue_dir;
     string                     _smtp_server;                // Für Job-Protokolle
     string                     _log_mail_from;
     string                     _log_mail_to;
