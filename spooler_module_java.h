@@ -1,4 +1,4 @@
-// $Id: spooler_module_java.h,v 1.21 2003/03/18 10:44:19 jz Exp $
+// $Id: spooler_module_java.h,v 1.22 2003/03/18 12:18:40 jz Exp $
 
 #ifndef __SPOOLER_MODULE_JAVA_H
 #define __SPOOLER_MODULE_JAVA_H
@@ -52,60 +52,6 @@ struct Java_idispatch : java::Global_jobject, Object
     string                     _class_name;
 };
 
-//------------------------------------------------------------------------------------------Java_vm
-/*
-struct Java_vm                  // Java virtual machine
-{
-    struct Option
-    {
-                                Option                      ( const string& option, void* extra = NULL ) : _option(option), _extra(extra) {}
-
-        string                 _option;
-        void*                  _extra;
-    };
-
-
-
-                                Java_vm                     ( Spooler* s )                          : _zero_(this+1), _spooler(s), _log(s) {}
-                               ~Java_vm                     ()                                      { close(); }
-
-    void                        init                        ();
-    void                        close                       ();
-    void                        get_options                 ();
-
-    void                        attach_thread               ( const string& thread_name );
-    void                        detach_thread               ();
-
-  //                            operator JavaVM*            ()                                      { return vm(); }
-  //JavaVM*                     operator ->                 ()                                      { return vm(); }
-
-    JavaVM*                     vm                          ();
-    Java_env&                   env                         ();
-
-    Z_NORETURN void             throw_java                  ( int return_value, const string&, const string& = "" );
-    
-
-    void                        check_for_exception         ();
-
-
-    Fill_zero                  _zero_;
-    Spooler*                   _spooler;
-    Prefix_log                 _log;
-    JavaVMInitArgs             _vm_args;
-    vector<Option>             _options;
-    JavaVM*                    _vm;
-    zschimmer::Thread_data<Java_thread_data> _thread_data;
-
-    string                     _filename;                   // Dateiname der Java-VM
-    string                     _work_class_dir;
-    string                     _ini_class_path;
-    string                     _config_class_path;
-    string                     _complete_class_path;
-    string                     _javac;                      // Dateiname das Java-Compilers
-  //JDK1_1InitArgs             _vm_args;
-    jclass                     _idispatch_jclass;
-};
-*/
 //--------------------------------------------------------------------------------------Java_object
 /*
 struct Java_object : Object, Non_cloneable
@@ -124,27 +70,6 @@ struct Java_object : Object, Non_cloneable
     Spooler*                   _spooler;
     jobject                    _jobject;
     bool                       _is_global;
-};
-
-//-------------------------------------------------------------------------------Java_global_object
-
-struct Java_global_object : Java_object
-{
-                                Java_global_object          ( Spooler* sp, jobject jo = NULL )      : Java_object( sp, jo )  { if(jo) set_global(); }
-
-    void                        operator =                  ( jobject jo )                          { assign( jo ); }
-    void                        assign                      ( jobject jo )                          { Java_object::assign(jo); set_global(); }
-};
-*/
-//--------------------------------------------------------------------------------Java_local_object
-/*
-struct Java_local_object : Java_object
-{
-                                Java_local_object           ( Spooler* sp, jobject jo = NULL )      : Java_object( sp, NULL )  { assign( jo ); }
-                               ~Java_local_object           ()                                      { assign( NULL ); }
-
-    void                        operator =                  ( jobject jo )                          { assign( jo ); }
-    void                        assign                      ( jobject );
 };
 */
 //-------------------------------------------------------------------------------------------------
