@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.20 2001/01/11 11:16:26 jz Exp $
+// $Id: spooler.cxx,v 1.21 2001/01/11 12:21:17 jz Exp $
 
 
 
@@ -440,6 +440,7 @@ bool Task::start()
 {
     _log.msg( "start" );
 
+    _spooler->_task_count++;
     _running_since = now();
 
     if( _job->_object_set_descr )  _object_set = SOS_NEW( Object_set( _spooler, this, _job->_object_set_descr ) );
@@ -502,6 +503,8 @@ void Task::end()
 
 bool Task::step()
 {
+    bool result;
+
     _log.msg( "step" );
 
     Spooler_object object;
@@ -510,23 +513,24 @@ bool Task::step()
     {
         if( !_job->_script.empty() ) 
         {
-            CComVariant result = _script_instance.call( "step" );
-            result.ChangeType( VT_BOOL );
-            if( !V_BOOL( &result ) )  return false;
+            CComVariant result_vt = _script_instance.call( "step" );
+            result_vt.ChangeType( VT_BOOL );
+            result = V_BOOL( &result_vt ) != 0;
         }
         else
         if( _object_set )
         {
-            return _object_set->step( _job->_output_level );
+            result = _object_set->step( _job->_output_level );
         }
         else 
             return false; //?
 
+        _spooler->_step_count++;
         _step_count++;
     }
     catch( const Xc& x ) { step_error(x); return false; }
 
-    return true;
+    return result;
 }
 
 //---------------------------------------------------------------------------------------Task::step
@@ -624,12 +628,10 @@ void Task::set_state_cmd( State_cmd cmd )
         case sc_stop:       ok = true;                  break;
 
         case sc_unstop:     ok = _state == s_stopped;   if(!ok) break;
-                            _spooler->cmd_wake();
                             break;
 
         case sc_start:      ok = _state == s_pending;   if(!ok) break;
                             _next_start_time = now();  
-                            _spooler->cmd_wake();
                             break;
 
         case sc_end:        ok = _state == s_running;   break;
@@ -637,15 +639,16 @@ void Task::set_state_cmd( State_cmd cmd )
         case sc_suspend:    ok = _state == s_running;   break;
 
         case sc_continue:   ok = _state == s_suspended; if(!ok) break;
-                            _spooler->cmd_wake();
                             break;
 
 
         default:            ok = false;
     }
 
-    if( ok )  _state_cmd = cmd;
-      //else  throw_xc( "SPOOLER-109" );
+    if( !ok )  return;    //throw_xc( "SPOOLER-109" );
+    
+    _state_cmd = cmd;
+    _spooler->cmd_wake();
 }
 
 //---------------------------------------------------------------------------------Task::state_name

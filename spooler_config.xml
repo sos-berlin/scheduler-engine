@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 
-<!-- $Id: spooler_config.xml,v 1.16 2001/01/11 11:16:26 jz Exp $   (C) 2000 SOS GmbH Berlin -->
+<!-- $Id: spooler_config.xml,v 1.17 2001/01/11 12:21:18 jz Exp $   (C) 2000 SOS GmbH Berlin -->
 
 <!DOCTYPE spooler_config SYSTEM "spooler_config.dtd">
 
@@ -147,8 +147,8 @@ $log->msg( "*Job Perl" );
     sub process
     {
         my $self = shift;
-        my $new_level = shift;
-        #$log->msg( "process " . $self->{name} . ", " . $self->{level} . " ==> $new_level" );
+        my $new_level = shift;  # Wie holt man den Parameter? Joacim
+        $main::log->msg( "process " . $self->{name} . ", " . $self->{level} . " ==> $new_level" );
         $self->{level} = $new_level;
     }
 }
@@ -190,7 +190,7 @@ $log->msg( "*Job Perl" );
         if( $self->spooler_eof() )  { return; }
 
         my $object = Testobjekt::construct( $self->{index} );
-        #$log->msg( "index=" . $self->{index} . ", level=" . $object->{level} );
+        $main::log->msg( "index=" . $self->{index} . ", level=" . $object->{level} );
         $self->{index}++;
 
         return $object;

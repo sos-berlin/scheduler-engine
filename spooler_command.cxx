@@ -1,4 +1,4 @@
-// $Id: spooler_command.cxx,v 1.9 2001/01/09 22:39:02 jz Exp $
+// $Id: spooler_command.cxx,v 1.10 2001/01/11 12:21:18 jz Exp $
 
 #include "../kram/sos.h"
 #include "../kram/sleep.h"
@@ -98,7 +98,27 @@ xml::Element_ptr Command_processor::execute_show_state()
     state_element->setAttribute( "time"                 , as_dom_string( Sos_optional_date_time::now().as_string() ) );
     state_element->setAttribute( "spooler_running_since", as_dom_string( Sos_optional_date_time( _spooler->_spooler_start_time ).as_string() ) );
     state_element->setAttribute( "sleeping_until"       , as_dom_string( Sos_optional_date_time( _spooler->_next_start_time ).as_string() ) );
-    
+    state_element->setAttribute( "tasks"                , as_dom_string( _spooler->_task_count ) );
+    state_element->setAttribute( "steps"                , as_dom_string( _spooler->_step_count ) );
+    state_element->setAttribute( "log_file"             , as_dom_string( _spooler->_log.filename() ) );
+
+#   ifdef SYSTEM_WIN    
+        int64 CreationTime; // process creation time
+        int64 ExitTime;     // process exit time
+        int64 KernelTime;   // process kernel-mode time
+        int64 UserTime;     // process user-mode time
+
+        BOOL ok = GetProcessTimes( GetCurrentProcess(), (LPFILETIME)&CreationTime, (LPFILETIME)&ExitTime, 
+                                                        (LPFILETIME)&KernelTime, (LPFILETIME)&UserTime );
+        if( ok )
+        {
+            double cpu_time = ( KernelTime + UserTime ) / 1e7;
+            char   buffer [30];
+            sprintf( buffer, "%-0.3lf", cpu_time ); 
+            state_element->setAttribute( "cpu_time"     , as_dom_string( buffer ) );
+        }
+#   endif
+
     state_element->appendChild( execute_show_tasks() );
 
     return state_element;

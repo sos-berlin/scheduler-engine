@@ -1,4 +1,4 @@
-// $Id: spooler.h,v 1.19 2001/01/11 11:16:26 jz Exp $
+// $Id: spooler.h,v 1.20 2001/01/11 12:21:17 jz Exp $
 
 #ifndef __SPOOLER_H
 
@@ -638,6 +638,8 @@ struct Spooler
     Time                       _next_start_time;
     State                      _state;
     State_cmd                  _state_cmd;
+    int                        _step_count;
+    int                        _task_count;
     int                        _tcp_port;
     int                        _udp_port;
     string                     _config_filename;
