@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 
-<!-- $Id: spooler.xml,v 1.15 2001/01/24 12:35:50 jz Exp $   (C) 2000 SOS GmbH Berlin -->
+<!-- $Id: spooler.xml,v 1.16 2001/01/24 13:28:54 jz Exp $   (C) 2001 SOS GmbH Berlin -->
 
 <!DOCTYPE spooler SYSTEM "spooler.dtd">
 
@@ -8,8 +8,8 @@
 <config tcp_port="4444" udp_port="4444" log_dir="c:\tmp">
 
     <security>
-        <allowed_host host="lillerud" level="signal"/>
-        <allowed_host host="loka"     level="info"/>
+        <allowed_host host="192.168.100.0" level="info"/>
+        <allowed_host host="lillerud"      level="all"/>
     </security>
 
     <script language="VBScript"><![CDATA[

@@ -1,4 +1,4 @@
-// $Id: spooler_communication.cxx,v 1.18 2001/01/24 12:35:50 jz Exp $
+// $Id: spooler_communication.cxx,v 1.19 2001/01/24 13:28:54 jz Exp $
 /*
     Hier sind implementiert
 
@@ -47,6 +47,30 @@ bool is_ip_number( const string& host_addr )
     return *p == '\0';
 }
 */
+
+//------------------------------------------------------------------------------------Host::netmask
+
+uint32 Host::netmask() const
+{ 
+    uint32 net_nr = ntohl(_ip.s_addr);
+    uint32 netmask_nr;
+    
+    // In Linux macht das inet_netof()
+    if( ( net_nr >> 24 ) >= 192 )  netmask_nr = 0xFFFFFF00;
+    else
+    if( ( net_nr >> 24 ) >= 128 )  netmask_nr = 0xFFFF0000;
+    else                           netmask_nr = 0xFF000000;
+
+    return htonl(netmask_nr);
+}
+
+//----------------------------------------------------------------------------------------Host::net
+
+Host Host::net() const
+{
+    return Host( _ip.s_addr & netmask() );
+}
+
 //-----------------------------------------------------------------------Host::get_host_set_by_name
 
 set<Host> Host::get_host_set_by_name( const string& name )
