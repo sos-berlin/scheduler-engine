@@ -1,4 +1,4 @@
-// $Id: spooler_module_java.cxx,v 1.5 2002/11/08 07:18:05 jz Exp $
+// $Id: spooler_module_java.cxx,v 1.6 2002/11/08 10:14:39 jz Exp $
 /*
     Hier sind implementiert
 
@@ -77,6 +77,18 @@ static void jstring_to_bstr( JNIEnv* jenv, const jstring& jstr, BSTR* bstr )
     jenv->ReleaseStringChars( jstr, str_w );
 }
 
+//--------------------------------------------------------------------------------jstring_from_bstr
+
+inline jstring jstring_from_bstr( JNIEnv* jenv, const BSTR bstr )
+{
+//#   ifdef HOSTJAVA_OLECHAR_IS_WCHAR
+        return jenv->NewString( bstr, SysStringLen(bstr) );
+//#    else
+//        std::string str = string_from_bstr( bstr );
+//        return jenv->NewString( str.c_str() );
+//#   endif
+}
+
 //------------------------------------------------------------------------------------java_vfprintf
 
 static jint JNICALL java_vfprintf( FILE *fp, const char *format, va_list args )
@@ -88,6 +100,198 @@ static jint JNICALL java_vfprintf( FILE *fp, const char *format, va_list args )
     java_vm->_log( buf );
 
     return ret;
+}
+
+//-----------------------------------------------------------------------------jobject_from_variant
+
+static jobject jobject_from_variant( JNIEnv* jenv, const VARIANT& v )
+{
+    jobject result = NULL;
+
+    switch( v.vt )
+    {
+      //case VT_EMPTY:
+      //case VT_NULL: 
+
+        case VT_I2:
+        {
+            jclass cls = jenv->FindClass( "java/lang/Short" );
+            if( !cls )  return NULL;
+
+            jmethodID constructor_id = jenv->GetMethodID( cls, "<init>", "(S)V" );
+            if( !constructor_id )  return NULL;
+
+            result = jenv->NewObject( cls, constructor_id, (jshort)V_I2(&v) );
+            break;
+        }
+
+        case VT_I4:
+        {
+            jclass cls = jenv->FindClass( "java/lang/Integer" );
+            if( !cls )  return NULL;
+
+            jmethodID constructor_id = jenv->GetMethodID( cls, "<init>", "(I)V" );
+            if( !constructor_id )  return NULL;
+
+            result = jenv->NewObject( cls, constructor_id, (jint)V_I4(&v) );
+            break;
+        }
+
+        case VT_R4:
+        {
+            jclass cls = jenv->FindClass( "java/lang/Float" );
+            if( !cls )  return NULL;
+
+            jmethodID constructor_id = jenv->GetMethodID( cls, "<init>", "(F)V" );
+            if( !constructor_id )  return NULL;
+
+            result = jenv->NewObject( cls, constructor_id, (jfloat)V_R4(&v) );
+            break;
+        }
+
+        case VT_R8:
+        {
+            jclass cls = jenv->FindClass( "java/lang/Double" );
+            if( !cls )  return NULL;
+
+            jmethodID constructor_id = jenv->GetMethodID( cls, "<init>", "(D)V" );
+            if( !constructor_id )  return NULL;
+
+            result = jenv->NewObject( cls, constructor_id, (jdouble)V_R8(&v) );
+            break;
+        }
+      //case VT_CY: 
+      //case VT_DATE:       
+      //case VT_ERROR:
+        case VT_BOOL:
+        {
+            jclass cls = jenv->FindClass( "java/lang/Boolean" );
+            if( !cls )  return NULL;
+
+            jmethodID constructor_id = jenv->GetMethodID( cls, "<init>", "(Z)V" );
+            if( !constructor_id )  return NULL;
+
+            result = jenv->NewObject( cls, constructor_id, (jboolean)V_BOOL(&v)? 1 : 0 );
+            break;
+        }
+
+        case VT_I1:  
+        {
+            jclass cls = jenv->FindClass( "java/lang/Byte" );
+            if( !cls )  return NULL;
+
+            jmethodID constructor_id = jenv->GetMethodID( cls, "<init>", "(B)V" );
+            if( !constructor_id )  return NULL;
+
+            result = jenv->NewObject( cls, constructor_id, (jbyte)V_I1(&v) );
+            break;
+        }
+
+        case VT_UI1: 
+        {
+            jclass cls = jenv->FindClass( "java/lang/Short" );
+            if( !cls )  return NULL;
+
+            jmethodID constructor_id = jenv->GetMethodID( cls, "<init>", "(S)V" );
+            if( !constructor_id )  return NULL;
+
+            result = jenv->NewObject( cls, constructor_id, (jshort)V_UI1(&v) );
+            break;
+        }
+
+        case VT_UI2: 
+        {
+            jclass cls = jenv->FindClass( "java/lang/Integer" );
+            if( !cls )  return NULL;
+
+            jmethodID constructor_id = jenv->GetMethodID( cls, "<init>", "(I)V" );
+            if( !constructor_id )  return NULL;
+
+            result = jenv->NewObject( cls, constructor_id, (jint)V_UI2(&v) );
+            break;
+        }
+
+        case VT_UI4: 
+        {
+            jclass cls = jenv->FindClass( "java/lang/Long" );
+            if( !cls )  return NULL;
+
+            jmethodID constructor_id = jenv->GetMethodID( cls, "<init>", "(J)V" );
+            if( !constructor_id )  return NULL;
+
+            result = jenv->NewObject( cls, constructor_id, (jlong)V_UI4(&v) );
+            break;
+        }
+
+        case VT_I8:  
+        {
+            jclass cls = jenv->FindClass( "java/lang/Long" );
+            if( !cls )  return NULL;
+
+            jmethodID constructor_id = jenv->GetMethodID( cls, "<init>", "(J)V" );
+            if( !constructor_id )  return NULL;
+
+            result = jenv->NewObject( cls, constructor_id, (jlong)V_I8(&v) );
+            break;
+        }
+
+      //case VT_UI8: 
+        case VT_INT: 
+        {
+            jclass cls = jenv->FindClass( "java/lang/Integer" );
+            if( !cls )  return NULL;
+
+            jmethodID constructor_id = jenv->GetMethodID( cls, "<init>", "(I)V" );
+            if( !constructor_id )  return NULL;
+
+            result = jenv->NewObject( cls, constructor_id, (jint)V_INT(&v) );
+            break;
+        }
+
+        case VT_UINT:
+        {
+            jclass cls = jenv->FindClass( "java/lang/Long" );
+            if( !cls )  return NULL;
+
+            jmethodID constructor_id = jenv->GetMethodID( cls, "<init>", "(J)V" );
+            if( !constructor_id )  return NULL;
+
+            result = jenv->NewObject( cls, constructor_id, (jlong)V_UINT(&v) );
+            break;
+        }
+
+      //case VT_VOID:
+      //case VT_HRESULT:
+      //case VT_PTR:
+      //case VT_FILETIME:
+        case VT_BSTR: 
+        {
+            result = jstring_from_bstr( jenv, V_BSTR(&v) );
+            break;
+        }
+
+      //case VT_DISPATCH:
+      //case VT_VARIANT:
+      //case VT_UNKNOWN:
+      //case VT_DECIMAL:
+      //case VT_SAFEARRAY:
+      //case VT_CARRAY:
+      //case VT_USERDEFINED:
+      //case VT_LPSTR:
+      //case VT_LPWSTR:
+      //case VT_RECORD:
+      //case VT_BLOB:
+      //case VT_STREAM:
+      //case VT_STORAGE:
+      //case VT_STREAMED_OBJECT:
+      //case VT_STORED_OBJECT:
+      //case VT_BLOB_OBJECT:
+      //case VT_CF:
+      //case VT_CLSID:
+        default:    ;
+    }
+
+    return result;
 }
 
 //--------------------------------------------------------------Java sos.spooler.Idispatch.com_call
@@ -132,6 +336,7 @@ JNIEXPORT jobject JNICALL Java_sos_spooler_Idispatch_com_1call( JNIEnv* jenv, jc
         Dispparams      dispparams;
 
         dispparams.set_arg_count( param_count );
+        if( context & DISPATCH_PROPERTYPUT )  dispparams.set_property_put();
 
         for( int i = 0; i < param_count; i++ )
         {
@@ -144,6 +349,20 @@ JNIEXPORT jobject JNICALL Java_sos_spooler_Idispatch_com_1call( JNIEnv* jenv, jc
             if( jenv->IsInstanceOf( jparam, cls ) )
             {
                 dispparams[i] = jenv->CallIntMethod( jparam, jenv->GetMethodID( cls, "intValue", "()I" ) );
+            }
+            else
+            if( cls = jenv->FindClass( "java/lang/Long" ), !cls )  return NULL;
+            else
+            if( jenv->IsInstanceOf( jparam, cls ) )
+            {
+                dispparams[i] = jenv->CallLongMethod( jparam, jenv->GetMethodID( cls, "longValue", "()J" ) );
+            }
+            else
+            if( cls = jenv->FindClass( "java/lang/Double" ), !cls )  return NULL;
+            else
+            if( jenv->IsInstanceOf( jparam, cls ) )
+            {
+                dispparams[i] = jenv->CallDoubleMethod( jparam, jenv->GetMethodID( cls, "doubleValue", "()D" ) );
             }
             else
             if( cls = jenv->FindClass( "java/lang/Boolean" ), !cls )  return NULL;
@@ -166,6 +385,8 @@ JNIEXPORT jobject JNICALL Java_sos_spooler_Idispatch_com_1call( JNIEnv* jenv, jc
 
         hr = idispatch->Invoke( dispid, IID_NULL, (LCID)0, context, &dispparams, &result, &excepinfo, &arg_nr );
         if( FAILED(hr) )  throw_com( hr, "Invoke", string_from_bstr(name_bstr).c_str() );
+
+        return jobject_from_variant( jenv, result );
         
     }
     catch( const exception&  x ) { set_java_exception( jenv, x ); }
