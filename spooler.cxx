@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.42 2001/01/29 11:53:59 jz Exp $
+// $Id: spooler.cxx,v 1.43 2001/01/29 14:57:38 jz Exp $
 /*
     Hier sind implementiert
 
@@ -280,7 +280,7 @@ void Spooler::single_thread_step()
 
 void Spooler::wait()
 {
-    if( _running_tasks_count > 0  && _state != s_paused )  return;
+    if( !_use_threads  &&  _running_tasks_count > 0  && _state != s_paused )  return;
 
     {
         Thread_semaphore::Guard guard = &_sleep_semaphore;

@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.14 2001/01/29 11:54:00 jz Exp $
+// $Id: spooler_task.cxx,v 1.15 2001/01/29 14:57:39 jz Exp $
 /*
     Hier sind implementiert
 
@@ -198,9 +198,13 @@ Task* Job::create_task( const CComPtr<spooler_com::Ivariable_set>& params )
 
 Task* Job::start( const CComPtr<spooler_com::Ivariable_set>& params )
 {
-    Task* task = create_task( params );
-    task->set_state_cmd( Task::sc_start );
-    return task;
+    if( !_task )
+    {
+        Task* task = create_task( params );
+    }
+
+    _task->set_state_cmd( Task::sc_start );
+    return _task;
 }
 
 //----------------------------------------------------------------Job::start_when_directory_changed

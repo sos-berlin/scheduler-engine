@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 
-<!-- $Id: spooler.xml,v 1.20 2001/01/29 11:54:00 jz Exp $   (C) 2001 SOS GmbH Berlin -->
+<!-- $Id: spooler.xml,v 1.21 2001/01/29 14:57:38 jz Exp $   (C) 2001 SOS GmbH Berlin -->
 
 <!DOCTYPE spooler SYSTEM "spooler.dtd">
 
@@ -429,6 +429,28 @@ sub spooler_exit()
             <run_time/>
 
         </job>
+
+
+        <job name="dauer" spooler_id="perl">
+            <script language="PerlScript" use_engine="task"><![CDATA[
+#use Win32::OLE;
+#$hostware = Win32::OLE->new('hostWare.Global');
+
+sub spooler_process()
+{
+    while(1)
+    {
+        $spooler_log->msg( "spooler_process sleep" );
+        #$hostware->sleep(1);
+        sleep(1);
+    }
+    return 0;
+}
+
+            ]]></script>
+
+            <run_time begin="0:00" let_run="yes"/>
+        </job> 
 
     </jobs>
 
