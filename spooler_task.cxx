@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.240 2004/03/23 20:22:17 jz Exp $
+// $Id: spooler_task.cxx,v 1.241 2004/03/23 20:30:29 jz Exp $
 /*
     Hier sind implementiert
 
@@ -234,6 +234,8 @@ void Task::close()
 {
     if( !_closed ) 
     {
+        FOR_EACH( Pids, _pids, p )  _spooler->unregister_pid( *p );
+
         if( _operation )
         {
             // Was machen wir jetzt?
@@ -260,8 +262,6 @@ void Task::close()
             FOR_EACH( vector<Event*>, _terminated_events, it )  (*it)->signal( "task closed" );
             _terminated_events.clear();
         }
-
-        FOR_EACH( Pids, _pids, p )  _spooler->unregister_pid( *p );
 
         _closed = true;
 
