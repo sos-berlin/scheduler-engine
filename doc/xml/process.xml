@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <?xml-stylesheet href="../scheduler.xslt" type="text/xsl"?>
-<!--$Id: process.xml,v 1.4 2004/08/24 16:22:38 jz Exp $-->
+<!--$Id: process.xml,v 1.5 2004/08/25 22:00:41 jz Exp $-->
 
 <xml_element  name     = "process" 
               title    = "Externes Programm (alternativ zu &lt;script&gt;)" 
               base_dir = ".."
               author   = "$Author: jz $" 
-              date     = "$Date: 2004/08/24 16:22:38 $">
+              date     = "$Date: 2004/08/25 22:00:41 $">
               
     <xml_parent_elements>
         <xml_parent_element name="job">
@@ -28,6 +28,15 @@
             <description>
                 <p>
                     Gibt den Parameterstring an, der dem Prozess übergeben wird.
+                </p>
+            </description>
+        </xml_attribute>
+
+
+        <xml_attribute name="log_file" type="dateiname">
+            <description>
+                <p>
+                    Der Scheduler übernimmt nach Prozessende den Inhalt dieser Datei in sein Protokoll.
                 </p>
             </description>
         </xml_attribute>

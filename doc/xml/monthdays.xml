@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="../scheduler.xslt" type="text/xsl"?>
 
-<!--$Id: monthdays.xml,v 1.3 2004/08/24 07:43:44 jz Exp $-->
+<!--$Id: monthdays.xml,v 1.4 2004/08/25 22:00:41 jz Exp $-->
 
 <xml_element name     = "monthdays" 
              title    = "Perioden für bestimmte Tage des Monats"
              base_dir = ".."
              author   = "$Author: jz $"
-             date     = "$Date: 2004/08/24 07:43:44 $">
+             date     = "$Date: 2004/08/25 22:00:41 $">
 
     <xml_parent_elements>
         <xml_parent_element name="run_time">
@@ -38,7 +38,9 @@
     <example>
         <pre>
 &lt;montdays>
-    &lt;day day="1" begin="10:00" end="12:00"/>
+    &lt;day day="1">
+        &lt;period begin="10:00" end="12:00"/>
+    &lt;/day>
     &lt;day day="2">
         &lt;period begin="08:00" end="12:00"/>
         &lt;period begin="15:00" end="18:00"/>

@@ -2,13 +2,13 @@
 <?xml-stylesheet href="scheduler.xslt" type="text/xsl"?>
 
 
-<!--$Id: konfiguration.xml,v 1.2 2004/08/24 18:34:11 jz Exp $-->
+<!--$Id: konfiguration.xml,v 1.3 2004/08/25 22:00:40 jz Exp $-->
 
 <description 
     title    = "Konfiguration" 
     base_dir = "."
     author   = "$Author: jz $"
-    date     = "$Date: 2004/08/24 18:34:11 $"
+    date     = "$Date: 2004/08/25 22:00:40 $"
 >
 <p>
     Beim Start des Scheduler geben Sie die Datei an,
@@ -71,9 +71,12 @@ Klicken Sie auf ein Element, um dessen Beschreibung zu sehen.
     &lt;<a class="silent" href="xml/config.xml">config</a> spooler_id      = ""
             tcp_port        = "4444"
             udp_port        = "4444"
+            param           = "…"
+            log_dir         = "…"
+            include_path    = "…"
             priority_max    = "1000"
-            java_class_path = ""
-            java_options    = ""    >
+            java_class_path = "…"
+            java_options    = "…"    >
 
         &lt;<a class="silent" href="xml/base.xml">base</a> file="…"/>
 

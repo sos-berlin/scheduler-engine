@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="../scheduler.xslt" type="text/xsl"?>
 
-<!--$Id: process_class.xml,v 1.1 2004/08/23 16:28:30 jz Exp $-->
+<!--$Id: process_class.xml,v 1.2 2004/08/25 22:00:41 jz Exp $-->
 
 <xml_element name     = "process_class" 
              title    = "Prozessklasse"
              base_dir = ".."
              author   = "$Author: jz $"
-             date     = "$Date: 2004/08/23 16:28:30 $">
+             date     = "$Date: 2004/08/25 22:00:41 $">
 
     <xml_parent_elements>
         <xml_parent_element name="process_classes">
@@ -17,7 +17,7 @@
     <xml_attributes>
         <xml_attribute name="spooler_id" same_as_element="config"/>
         
-        <xml_attribute name="name" value="name">
+        <xml_attribute name="name" type="name">
             <description>
                 <p>
                     Name der Prozessklasse. Wenn das Attribut fehlt oder leer (<code>""</code>) ist,
@@ -26,7 +26,7 @@
             </description>
         </xml_attribute>   
 
-        <xml_attribute name="max_processes" value="zahl" initial="10">
+        <xml_attribute name="max_processes" type="zahl" initial="10">
             <description>
                 <p>
                     Begrenzt die Zahl der Prozesse.

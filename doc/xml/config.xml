@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="../scheduler.xslt" type="text/xsl"?>
 
-<!--$Id: config.xml,v 1.7 2004/08/24 18:34:11 jz Exp $-->
+<!--$Id: config.xml,v 1.8 2004/08/25 22:00:40 jz Exp $-->
 
 <xml_element name     = "config" 
              title    = "Konfiguration"
              base_dir = ".."
              author   = "$Author: jz $"
-             date     = "$Date: 2004/08/24 18:34:11 $">
+             date     = "$Date: 2004/08/25 22:00:40 $">
 
     <xml_parent_elements>
         <xml_parent_element name="spooler"/>
@@ -109,12 +109,6 @@
         <xml_child_element name="security" title="Stellt den Zugriffsschutz ein">
         </xml_child_element>        
 
-        <xml_child_element name="holidays" title="Feiertage">
-            <description>
-                Grundsätzliche Einstellung der Feiertage (an denen Jobs nicht laufen sollen).
-            </description>
-        </xml_child_element>        
-
         <xml_child_element name="process_classes" title="Jobs in eigenen Prozessen">
             <description>
                 <p>
@@ -151,6 +145,12 @@
             </example>
         </xml_child_element>        
         
+        <xml_child_element name="holidays" title="Feiertage">
+            <description>
+                Grundsätzliche Einstellung der Feiertage (an denen Jobs nicht laufen sollen).
+            </description>
+        </xml_child_element>        
+
         <xml_child_element name="jobs">
             <description>
                 Enthält die Jobs als Folge von <code>&lt;job></code>-Elementen.

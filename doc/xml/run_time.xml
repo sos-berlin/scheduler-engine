@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="../scheduler.xslt" type="text/xsl"?>
 
-<!--$Id: run_time.xml,v 1.4 2004/08/24 07:43:44 jz Exp $-->
+<!--$Id: run_time.xml,v 1.5 2004/08/25 22:00:41 jz Exp $-->
 
 <xml_element name     = "run_time" 
              title    = "Laufzeiten des Jobs"
              base_dir = ".."
              author   = "$Author: jz $"
-             date     = "$Date: 2004/08/24 07:43:44 $">
+             date     = "$Date: 2004/08/25 22:00:41 $">
 
     <xml_parent_elements>
         <xml_parent_element name="job">
@@ -16,7 +16,7 @@
     
 
     <xml_attributes>
-        <xml_attribute name="once" value="yes_no" initial="no">
+        <xml_attribute name="once" type="yes_no" initial="no">
             <description>
                 <p>
                     Bei <code>once="yes"</code> startet der <span class="sos_name">Schedulers</span>
@@ -29,7 +29,7 @@
         <!-- Die Beschreibungen für let_run, single_start, begin und end werden auch für andere Elemente (date, weekday etc.) verwendet.
              Also den Text neutral halten! -->
         
-        <xml_attribute name="begin" value="hh:mm[:ss]" initial="00:00">
+        <xml_attribute name="begin" type="hh:mm[:ss]" initial="00:00">
             <description>
                 <p>
                     Wenn das Element leer ist (also kein <code>&lt;period></code> enthält),
@@ -39,7 +39,7 @@
             </description>
         </xml_attribute>
 
-        <xml_attribute name="end" value="hh:mm[:ss]" initial="24:00">
+        <xml_attribute name="end" type="hh:mm[:ss]" initial="24:00">
             <description>
                 <p>
                     Wenn das Element leer ist (also kein <code>&lt;period></code> enthält),
@@ -49,7 +49,7 @@
             </description>
         </xml_attribute>
 
-        <xml_attribute name="single_start" value="hh:mm[:ss]">
+        <xml_attribute name="single_start" type="hh:mm[:ss]">
             <description>
                 <p>
                     Wenn das Element leer ist (also kein <code>&lt;period></code> enthält),
@@ -58,7 +58,7 @@
             </description>
         </xml_attribute>
         
-        <xml_attribute name="let_run" value="yes_no">
+        <xml_attribute name="let_run" type="yes_no">
             <description>
                 <p>
                     Voreinstellung für <scheduler_element name="period"/>

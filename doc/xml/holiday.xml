@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="../scheduler.xslt" type="text/xsl"?>
 
-<!--$Id: holiday.xml,v 1.3 2004/08/24 07:43:44 jz Exp $-->
+<!--$Id: holiday.xml,v 1.4 2004/08/25 22:00:41 jz Exp $-->
 
 <xml_element name     = "holiday" 
              title    = "Feiertag, an dem ein Job nicht laufen soll"
              base_dir = ".."
              author   = "$Author: jz $"
-             date     = "$Date: 2004/08/24 07:43:44 $">
+             date     = "$Date: 2004/08/25 22:00:41 $">
 
     <xml_parent_elements>
         <xml_parent_element name="holidays">
@@ -15,7 +15,7 @@
     </xml_parent_elements>
     
     <xml_attributes>
-        <xml_attribute name="date" value="yyyy-mm-dd">
+        <xml_attribute name="date" type="yyyy-mm-dd">
             <description>
                 Das Datum des Feiertags.
             </description>

@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="../scheduler.xslt" type="text/xsl"?>
 
-<!--$Id: period.xml,v 1.3 2004/08/24 07:43:44 jz Exp $-->
+<!--$Id: period.xml,v 1.4 2004/08/25 22:00:41 jz Exp $-->
 
 <xml_element name     = "period" 
              title    = "Periode"
              base_dir = ".."
              author   = "$Author: jz $"
-             date     = "$Date: 2004/08/24 07:43:44 $">
+             date     = "$Date: 2004/08/25 22:00:41 $">
 
     <xml_parent_elements>
         <xml_parent_element name="run_time">
@@ -16,7 +16,7 @@
     
 
     <xml_attributes>
-        <xml_attribute name="begin" value="hh:mm[:ss]" initial="00:00">
+        <xml_attribute name="begin" type="hh:mm[:ss]" initial="00:00">
             <description>
                 <p>
                     Ab dieser Uhrzeit darf der Job laufen.
@@ -24,7 +24,7 @@
             </description>
         </xml_attribute>
 
-        <xml_attribute name="end" value="hh:mm[:ss]" initial="24:00">
+        <xml_attribute name="end" type="hh:mm[:ss]" initial="24:00">
             <description>
                 <p>
                     Um diese Zeit endet die Periode.
@@ -34,7 +34,7 @@
             </description>
         </xml_attribute>
 
-        <xml_attribute name="repeat" value="hh:mm[:ss] oder sekunden">
+        <xml_attribute name="repeat" type="hh:mm[:ss] oder sekunden">
             <description>
                 <p>
                     Der Job wird, wenn er nicht schon läuft, zu Beginn der Periode gestartet.
@@ -51,7 +51,7 @@
             </description>
         </xml_attribute>
 
-        <xml_attribute name="single_start" value="hh:mm[:ss]">
+        <xml_attribute name="single_start" type="hh:mm[:ss]">
             <description>
                 <p>
                     Der Job soll zu der angegebenen Uhrzeit starten.
@@ -62,7 +62,7 @@
             </description>
         </xml_attribute>
         
-        <xml_attribute name="let_run" value="yes_no">
+        <xml_attribute name="let_run" type="yes_no">
             <description>
                 <p>
                     <code>let_run="yes"</code> gibt an, dass der Scheduler die Task weiterlaufen lassen soll,
