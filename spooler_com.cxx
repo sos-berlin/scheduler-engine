@@ -1,4 +1,4 @@
-// $Id: spooler_com.cxx,v 1.134 2004/01/31 16:45:25 jz Exp $
+// $Id: spooler_com.cxx,v 1.135 2004/01/31 18:26:30 jz Exp $
 /*
     Hier sind implementiert
 
@@ -1330,7 +1330,7 @@ STDMETHODIMP Com_log_proxy::GetIDsOfNames( const IID& iid, OLECHAR** rgszNames, 
 STDMETHODIMP Com_log_proxy::Invoke( DISPID dispid, const IID& iid, LCID lcid, unsigned short flags, DISPPARAMS* dispparams, 
                                     VARIANT* result, EXCEPINFO* excepinfo, UINT* arg_nr )
 {
-    const Bstr& name = name_from_dispid( dispid );
+    const Bstr& name = dispid == 0? "info" : name_from_dispid( dispid );
 
     if( name == "debug9" )  { if( _level > spooler_com::log_debug9 )  return S_FALSE; }
     else

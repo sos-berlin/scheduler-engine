@@ -1,4 +1,4 @@
-// $Id: spooler_job.h,v 1.21 2004/01/31 16:45:26 jz Exp $
+// $Id: spooler_job.h,v 1.22 2004/01/31 18:26:30 jz Exp $
 
 #ifndef __SPOOLER_JOB_H
 #define __SPOOLER_JOB_H
@@ -170,7 +170,8 @@ struct Job : Sos_self_deleting
         void                    enqueue_task                ( const Sos_ptr<Task>& );
         bool                    remove_task                 ( int task_id, Why_remove );
         void                    remove_task_from_db         ( int task_id );
-        
+        bool                    has_task_waiting_for_period ();
+        Time                    next_at_start_time          ( Time now );
 
       private:
         Job* const             _job;

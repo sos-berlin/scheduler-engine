@@ -1,4 +1,4 @@
-// $Id: spooler_job.cxx,v 1.58 2004/01/31 16:45:26 jz Exp $
+// $Id: spooler_job.cxx,v 1.59 2004/01/31 18:26:30 jz Exp $
 /*
     Hier sind implementiert
 
@@ -445,6 +445,8 @@ void Job::Task_queue::enqueue_task( const Sos_ptr<Task>& task )
                 insert             [ "JOB_NAME"      ] = task->_job->_name;
                 insert             [ "SPOOLER_ID"    ] = _spooler->id_for_db();
                 insert.set_datetime( "ENQUEUE_TIME"  ,   task->_enqueue_time.as_string( Time::without_ms ) );
+
+                if( task->_start_at )
                 insert.set_datetime( "START_AT_TIME" ,   task->_start_at.as_string( Time::without_ms ) );
 
                 _spooler->_db->execute( insert );
@@ -527,6 +529,32 @@ bool Job::Task_queue::remove_task( int task_id, Why_remove )
     return result;
 }
 
+//-----------------------------------------------------Job::Task_queue::has_task_waiting_for_period
+
+bool Job::Task_queue::has_task_waiting_for_period()
+{
+    for( Task_queue::iterator it = _queue.begin(); it != _queue.end(); it++ )
+    {
+        Task* task = *it;
+        if( !task->_start_at )  return true;
+    }
+
+    return false;
+}
+
+//--------------------------------------------------------------Job::Task_queue::next_at_start_time
+
+Time Job::Task_queue::next_at_start_time( Time now )
+{
+    for( Task_queue::iterator it = _queue.begin(); it != _queue.end(); it++ )
+    {
+        Task* task = *it;
+        if( task->_start_at )  return task->_start_at;
+    }
+
+    return latter_day;
+}
+
 //-------------------------------------------------------------------------Job::get_task_from_queue
 
 Sos_ptr<Task> Job::get_task_from_queue( Time now )
@@ -558,24 +586,6 @@ Sos_ptr<Task> Job::get_task_from_queue( Time now )
     return task;
 }
 
-//----------------------------------------------------------------------Job::remove_from_task_queue
-/*
-void Job::remove_from_task_queue( Task* task, Log_level log_level )
-{
-    THREAD_LOCK( _lock )
-    {
-        FOR_EACH( Task_queue, _task_queue, it )  
-        {
-            if( +*it == task )  
-            {
-                if( log_level > log_none )  _log.log( log_level, task->obj_name() + " aus der Warteschlange entfernt" );
-                _task_queue.erase( it );
-                break;
-            }
-        }
-    }
-}
-*/
 //-------------------------------------------------------------------------Job::remove_running_task
 
 void Job::remove_running_task( Task* task )
@@ -1502,25 +1512,31 @@ xml::Element_ptr Job::dom( const xml::Document_ptr& document, Show_what show, Jo
         if( _state == s_pending )
         {
             // Versuchen, nächste Startzeit herauszubekommen
-            Period p    = _period;  
-            int    i    = 100;      // Anzahl Perioden, die wir probieren
-            Time   next = _next_start_time;
+            Period p             = _period;  
+            int    i             = 100;      // Anzahl Perioden, die wir probieren
+            Time   next          = _next_start_time;
+            Time   now           = Time::now();
+            Time   next_at_start = _task_queue.next_at_start_time( now );
             
             if( next == latter_day )
             {
-                p = _run_time.next_period( p.end() );
+                //p = _run_time.next_period( p.end() );
                 next = p.begin();
 
                 while( i-- ) {          
-                    if( p.has_start() )  break;
+                    if( p.has_start()  ||  _task_queue.has_task_waiting_for_period() )  break;
                     p = _run_time.next_period( p.end() );
                     next = p.begin();
+                    if( next == latter_day        )  break;
+                    if( next > next_at_start      )  break;
+                    if( next > _next_single_start )  break;
                 }
                 
                 if( i < 0 )  next = latter_day;
             }
 
             if( next > _next_single_start )  next = _next_single_start;
+            if( next > next_at_start      )  next = next_at_start;
             if( next < latter_day )  job_element.setAttribute( "next_start_time", next.as_string() );
         }
 
@@ -1553,7 +1569,7 @@ xml::Element_ptr Job::dom( const xml::Document_ptr& document, Show_what show, Jo
                 if( task->_start_at )
                     queued_task_element.setAttribute( "start_at", task->_start_at.as_string() );
                 
-                if( task->has_parameters() )  queued_task_element.appendChild( task->_params->dom_element( document, "parameters", "param" ) );
+                if( task->has_parameters() )  queued_task_element.appendChild( task->_params->dom_element( document, "params", "param" ) );
 
                 queue_element.appendChild( queued_task_element );
                 dom_append_nl( queue_element );
