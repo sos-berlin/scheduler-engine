@@ -47,31 +47,29 @@
 
         <!-- Jobs, Jobketten oder Prozessklassen zeigen? -->
 
-        <xsl:for-each select="/spooler">
-            <table cellpadding="0" cellspacing="0" style="margin-top: 0ex">
-                <tr>
-                    <xsl:call-template name="card_selector">
-                        <xsl:with-param name="name"  select="'jobs'"/>
-                        <xsl:with-param name="title" select="'Jobs'"/>
-                        <xsl:with-param name="class" select="'job'"/>
-                    </xsl:call-template>
+        <table cellpadding="0" cellspacing="0" style="margin-top: 0ex">
+            <tr>
+                <xsl:apply-templates mode="card_selector" select="/spooler">
+                    <xsl:with-param name="name"  select="'jobs'"/>
+                    <xsl:with-param name="title" select="'Jobs'"/>
+                    <xsl:with-param name="class" select="'job'"/>
+                </xsl:apply-templates>
 
-                    <xsl:if test="state/job_chains/job_chain">
-                        <xsl:call-template name="card_selector">
-                            <xsl:with-param name="name"  select="'job_chains'"/>
-                            <xsl:with-param name="title" select="'Job chains'"/>
-                            <xsl:with-param name="class" select="'job_chain'"/>
-                        </xsl:call-template>
-                    </xsl:if>
+                <xsl:if test="state/job_chains/job_chain">
+                    <xsl:apply-templates mode="card_selector" select="/spooler">
+                        <xsl:with-param name="name"  select="'job_chains'"/>
+                        <xsl:with-param name="title" select="'Job chains'"/>
+                        <xsl:with-param name="class" select="'job_chain'"/>
+                    </xsl:apply-templates>
+                </xsl:if>
 
-                    <xsl:call-template name="card_selector">
-                        <xsl:with-param name="name"  select="'process_classes'"/>
-                        <xsl:with-param name="title" select="'Process classes'"/>
-                        <xsl:with-param name="class" select="'process_class'"/>
-                    </xsl:call-template>
-                </tr>
-            </table>
-        </xsl:for-each>
+                <xsl:apply-templates mode="card_selector" select="/spooler">
+                    <xsl:with-param name="name"  select="'process_classes'"/>
+                    <xsl:with-param name="title" select="'Process classes'"/>
+                    <xsl:with-param name="class" select="'process_class'"/>
+                </xsl:apply-templates>
+            </tr>
+        </table>
 
 
         <xsl:if test="/spooler/@my_show_card='jobs'">
@@ -91,7 +89,7 @@
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~card_selector-->
     <!-- Zeigt einen Selektor an, z.B. Jobs, Jobketten, Prozessklassen -->
 
-    <xsl:template name="card_selector">
+    <xsl:template mode="card_selector" match="*">
         <xsl:param name="name" />
         <xsl:param name="title"/>
         <xsl:param name="class"/>
@@ -1066,24 +1064,24 @@
 
         <table cellpadding="0" cellspacing="0" style="margin-top: 0ex">
             <tr>
-                <xsl:call-template name="card_selector">
+                <xsl:apply-templates mode="card_selector" select=".">
                     <xsl:with-param name="name"  select="'task_queue'"/>
                     <xsl:with-param name="title" select="'Task queue'"/>
                     <xsl:with-param name="class" select="'task'"/>
-                </xsl:call-template>
+                </xsl:apply-templates>
 
-                <xsl:call-template name="card_selector">
+                <xsl:apply-templates mode="card_selector" select=".">
                     <xsl:with-param name="name"  select="'task_history'"/>
                     <xsl:with-param name="title" select="'Task history'"/>
                     <xsl:with-param name="class" select="'task'"/>
-                </xsl:call-template>
+                </xsl:apply-templates>
 
                 <xsl:if test="@order='yes'">
-                    <xsl:call-template name="card_selector">
+                    <xsl:apply-templates mode="card_selector" select=".">
                         <xsl:with-param name="name"  select="'order_queue'"/>
                         <xsl:with-param name="title" select="'Order queue'"/>
                         <xsl:with-param name="class" select="'order'"/>
-                    </xsl:call-template>
+                    </xsl:apply-templates>
                 </xsl:if>
             </tr>
         </table>
@@ -1475,13 +1473,13 @@
     <xsl:template mode="string_from_log_attributes" match="log">
     
         <xsl:if test="@level">
-            level: <xsl:value-of select="@level"/>
-            <xsl:text>&#160; </xsl:text>
+            log-level: <xsl:value-of select="@level"/>
+            <xsl:text> &#160; </xsl:text>
         </xsl:if>
         
         <xsl:if test="@highest_level">
             highest level: <xsl:value-of select="@highest_level"/>
-            <xsl:text>&#160; </xsl:text>
+            <xsl:text> &#160; </xsl:text>
         </xsl:if>
         
         <xsl:if test="@last_error">
@@ -1498,49 +1496,53 @@
 
         <xsl:if test="@mail_on_error='yes'">
             mail on error
-            <xsl:text>&#160; </xsl:text>
+            <xsl:text> &#160; </xsl:text>
         </xsl:if>
         
         <xsl:if test="@mail_on_warning='yes'">
             mail on warning
-            <xsl:text>&#160; </xsl:text>
+            <xsl:text> &#160; </xsl:text>
         </xsl:if>
         
         <xsl:if test="@mail_on_success='yes'">
             mail on success 
-            <xsl:text>&#160; </xsl:text>
+            <xsl:text> &#160; </xsl:text>
         </xsl:if>
         
         <xsl:if test="@mail_on_process">
             mail on process: <xsl:value-of select="@mail_on_process"/>
-            <xsl:text>&#160; </xsl:text>
+            <xsl:text> &#160; </xsl:text>
         </xsl:if>
 
-        <xsl:if test="@to">
-            to: <xsl:value-of select="@to"/>
-            <xsl:text>&#160; </xsl:text>
+        <xsl:if test="@mail_to">
+            to: <xsl:value-of select="@mail_to"/>
+            <xsl:text> &#160; </xsl:text>
         </xsl:if>
         
-        <xsl:if test="@cc">
-            cc: <xsl:value-of select="@cc"/>
-            <xsl:text>&#160; </xsl:text>
+        <xsl:if test="@mail_cc">
+            cc: <xsl:value-of select="@mail_cc"/>
+            <xsl:text> &#160; </xsl:text>
         </xsl:if>
         
-        <xsl:if test="@bcc">
-            bcc: <xsl:value-of select="@bcc"/>
-            <xsl:text>&#160; </xsl:text>
+        <xsl:if test="@mail_bcc">
+            bcc: <xsl:value-of select="@mail_bcc"/>
+            <xsl:text> &#160; </xsl:text>
         </xsl:if>
         
-        <xsl:if test="@from">
-            from: <xsl:value-of select="@from"/>
-            <xsl:text>&#160; </xsl:text>
+        <xsl:if test="@mail_from">
+            from: <xsl:value-of select="@mail_from"/>
+            <xsl:text> &#160; </xsl:text>
         </xsl:if>
-        
-        <!--<xsl:if test="@subject"><br/>subject=<xsl:value-of select="@subject"/><br/></xsl:if>-->
         
         <xsl:if test="@smtp">
             smtp: <xsl:value-of select="@smtp"/>
-            <xsl:text>&#160; </xsl:text>
+            <xsl:text> &#160; </xsl:text>
+        </xsl:if>
+        
+        <xsl:if test="@mail_subject">
+            <br/>
+            subject: <xsl:value-of select="@mail_subject"/>
+            <br/>
         </xsl:if>
         
     </xsl:template>
