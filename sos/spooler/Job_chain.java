@@ -1,4 +1,5 @@
-// $Id
+// $Id$
+// $Author$
 
 package sos.spooler;
 
