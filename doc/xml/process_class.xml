@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="../scheduler.xslt" type="text/xsl"?>
 
-<!--$Id: process_class.xml,v 1.4 2004/08/30 10:13:52 jz Exp $-->
+<!--$Id: process_class.xml,v 1.5 2004/08/30 10:47:28 jz Exp $-->
 
 <xml_element name     = "process_class" 
              title    = "Prozessklasse"
              base_dir = ".."
              parent_page = "../konfiguration.xml"
              author   = "$Author: jz $"
-             date     = "$Date: 2004/08/30 10:13:52 $">
+             date     = "$Date: 2004/08/30 10:47:28 $">
 
     <xml_parent_elements>
         <xml_parent_element name="process_classes">
@@ -23,6 +23,9 @@
                 <p>
                     Name der Prozessklasse. Wenn das Attribut fehlt oder leer (<code>""</code>) ist,
                     dann wird die Default-Prozessklasse geändert.
+                </p>
+                <p>
+                    Siehe <scheduler_element name="job"/>, Attribut <code>process_class=</code>.
                 </p>
             </description>
         </xml_attribute>   
