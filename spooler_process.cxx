@@ -1,4 +1,4 @@
-// $Id: spooler_process.cxx,v 1.21 2003/10/30 11:58:07 jz Exp $
+// $Id: spooler_process.cxx,v 1.22 2003/11/11 18:48:04 jz Exp $
 
 #include "spooler.h"
 
@@ -31,7 +31,8 @@ void Process::remove_module_instance( Module_instance* )
     {
         if( _session )
         {
-            if( _session->connection() )  _exit_code = _session->connection()->exit_code();
+            if( _session->connection() )  _exit_code = _session->connection()->exit_code(),  
+                                          _termination_signal = _session->connection()->termination_signal();
 
             _session->close__start() -> async_finish();
             _session->close__end();
@@ -116,11 +117,24 @@ int Process::exit_code()
     return _exit_code;
 }
 
+//-----------------------------------------------------------------------Process::termination_signal
+
+int Process::termination_signal()
+{
+    if( _connection )  _termination_signal = _connection->termination_signal();
+
+    return _termination_signal;
+}
+
+//-------------------------------------------------------------------------Process::stdout_filename
+
 string Process::stdout_filename()
 {
     object_server::Connection_to_own_server* c = dynamic_cast< object_server::Connection_to_own_server* >( +_connection );
     return c? c->stdout_filename() : "";
 }
+
+//-------------------------------------------------------------------------Process::stderr_filename
 
 string Process::stderr_filename()
 {

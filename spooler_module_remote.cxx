@@ -1,4 +1,4 @@
-// $Id: spooler_module_remote.cxx,v 1.47 2003/11/03 18:26:01 jz Exp $
+// $Id: spooler_module_remote.cxx,v 1.48 2003/11/11 18:48:04 jz Exp $
 /*
     Hier sind implementiert
 
@@ -111,7 +111,7 @@ bool Remote_module_instance_proxy::kill()
                            : false;
 }
 
-//----------------------------------------------------------Remote_module_instance_proxy:: 
+//----------------------------------------------------------Remote_module_instance_proxy::exit_code 
 
 int Remote_module_instance_proxy::exit_code()
 {
@@ -119,10 +119,22 @@ int Remote_module_instance_proxy::exit_code()
     return _exit_code;
 }
 
+//-------------------------------------------------Remote_module_instance_proxy::termination_signal
+
+int Remote_module_instance_proxy::termination_signal()
+{
+    if( _process )  _termination_signal = _process->termination_signal();
+    return _termination_signal;
+}
+
+//----------------------------------------------------Remote_module_instance_proxy::stdout_filename
+
 string Remote_module_instance_proxy::stdout_filename()                                      
 { 
     return _process? _process->stdout_filename() : "";
 }
+
+//----------------------------------------------------Remote_module_instance_proxy::stderr_filename
 
 string Remote_module_instance_proxy::stderr_filename()
 { 

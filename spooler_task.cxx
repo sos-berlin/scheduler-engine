@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.216 2003/11/10 16:07:31 jz Exp $
+// $Id: spooler_task.cxx,v 1.217 2003/11/11 18:48:04 jz Exp $
 /*
     Hier sind implementiert
 
@@ -1239,7 +1239,10 @@ void Module_task::do_close__end()
         _module_instance->close__end();
 
         int exit_code = _module_instance->exit_code();
-        if( exit_code != 0 )  _log.warn( "Prozess hat mit Exit code 0x" + printf_string( "%X", exit_code ) + " geendet" );
+        if( exit_code != 0 )  _log.warn( "Prozess hat mit Exit code " + as_string(exit_code) + " (0x" + printf_string( "%X", exit_code ) + ") geendet" );
+
+        int termination_signal = _module_instance->termination_signal();
+        if( termination_signal != 0 )  _log.warn( "Prozess hat mit Signal " + as_string( termination_signal ) + " geendet" );
 
         _log.log_file( _module_instance->stdout_filename(), "stdout:" );
         _log.log_file( _module_instance->stderr_filename(), "stderr:" );

@@ -1,4 +1,4 @@
-// $Id: spooler_process.h,v 1.16 2003/10/30 11:58:07 jz Exp $
+// $Id: spooler_process.h,v 1.17 2003/11/11 18:48:04 jz Exp $
 
 #ifndef __SPOOLER_PROCESS_H
 #define __SPOOLER_PROCESS_H
@@ -40,6 +40,7 @@ struct Process : zschimmer::Object
     int                         pid                         ()                                      { return _connection? _connection->pid() : 0; }
     bool                        kill                        ();
     int                         exit_code                   ();
+    int                         termination_signal          ();
     string                      stderr_filename             ();
     string                      stdout_filename             ();
 
@@ -58,6 +59,7 @@ struct Process : zschimmer::Object
     ptr<object_server::Connection> _connection;             // Verbindung zum Prozess
     ptr<object_server::Session>    _session;                // Wir haben immer nur eine Session pro Verbindung
     int                        _exit_code;
+    int                        _termination_signal;
     Time                       _running_since;
     bool                       _temporary;                  // Löschen, wenn kein Module_instance mehr läuft
     long                       _module_instance_count;
