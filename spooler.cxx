@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.355 2004/09/06 07:53:27 jz Exp $
+// $Id: spooler.cxx,v 1.356 2004/10/09 20:52:54 jz Exp $
 // §851: Weitere Log-Ausgaben zum Scheduler-Start eingebaut
 // §1479
 
@@ -1355,10 +1355,10 @@ void Spooler::load_arg()
         catch( const exception& x ) { throw_xc( "SCHEDULER-206", need_db_str, x.what() ); }
     }
 
-    _max_db_errors              =            read_profile_int       ( _factory_ini, "spooler", "max_db_errors"      , 5 );
+    _max_db_errors              =            read_profile_int       ( _factory_ini, "spooler", "max_db_errors"         , 5 );
     _order_history_tablename    =            read_profile_string    ( _factory_ini, "spooler", "db_order_history_table", "SCHEDULER_ORDER_HISTORY" );
-    _orders_tablename           =            read_profile_string    ( _factory_ini, "spooler", "db_orders_table"    , "SCHEDULER_ORDERS"    );
-    _variables_tablename        =            read_profile_string    ( _factory_ini, "spooler", "db_variables_table" , "SCHEDULER_VARIABLES" );
+    _orders_tablename           =            read_profile_string    ( _factory_ini, "spooler", "db_orders_table"       , "SCHEDULER_ORDERS"    );
+    _variables_tablename        =            read_profile_string    ( _factory_ini, "spooler", "db_variables_table"    , "SCHEDULER_VARIABLES" );
   //_interactive                = true;     // Kann ohne weiteres true gesetzt werden (aber _is_service setzt es wieder false)
 
 
@@ -2619,6 +2619,7 @@ int spooler_main( int argc, char** argv, const string& parameter_line )
                     if( service_display == "" )  service_display = spooler::make_service_display(id);
                 }
 #           endif
+
 
 #           ifdef Z_WINDOWS
 

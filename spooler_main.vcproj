@@ -30,6 +30,7 @@
 				SmallerTypeCheck="FALSE"
 				RuntimeLibrary="1"
 				BufferSecurityCheck="TRUE"
+				ForceConformanceInForLoopScope="TRUE"
 				RuntimeTypeInfo="TRUE"
 				UsePrecompiledHeader="0"
 				AssemblerListingLocation="$(IntDir)/"
@@ -37,7 +38,7 @@
 				ProgramDataBaseFileName="$(IntDir)/vc70.pdb"
 				BrowseInformation="2"
 				WarningLevel="3"
-				DebugInformationFormat="4"/>
+				DebugInformationFormat="3"/>
 			<Tool
 				Name="VCCustomBuildTool"/>
 			<Tool
@@ -89,6 +90,7 @@
 				StringPooling="TRUE"
 				RuntimeLibrary="0"
 				BufferSecurityCheck="TRUE"
+				ForceConformanceInForLoopScope="TRUE"
 				RuntimeTypeInfo="TRUE"
 				UsePrecompiledHeader="0"
 				AssemblerOutput="2"
