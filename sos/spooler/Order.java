@@ -173,7 +173,7 @@ public class Order extends Idispatch
     /** Liefert die &lt;run_time> (zur periodischen Wiederholung des Auftrags).
      * 
      */
-    public Run_time         run_time            ()                                  { return (Run_time) com_call( "run_time"            ); }
+    public Run_time         run_time            ()                                  { return (Run_time) com_call( "<run_time"           ); }
 
-    public void             remove_from_job_chain( Order order )                    {                   com_call( "remove_from_job_chain" ); }
+    public void             remove_from_job_chain()                                 {                   com_call( "remove_from_job_chain" ); }
 }
