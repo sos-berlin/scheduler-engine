@@ -1,4 +1,4 @@
-// $Id: spooler_job.cxx,v 1.17 2003/09/02 07:42:06 jz Exp $
+// $Id: spooler_job.cxx,v 1.18 2003/09/02 11:11:12 jz Exp $
 /*
     Hier sind implementiert
 
@@ -993,7 +993,7 @@ bool Job::do_something()
         }
     }
 
-#ifdef Z_DEBUG
+#if defined Z_DEBUG && defined Z_WINDOWS
     if( !something_done ) // &&  _next_time <= Time::now() )    // Sicherheitsnadel
     {
         LOG( obj_name() << ".do_something()  Nichts getan  _next_time=" << _next_time << "  _next_start_time= " << _next_start_time << "\n" );

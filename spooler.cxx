@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.240 2003/09/02 07:42:06 jz Exp $
+// $Id: spooler.cxx,v 1.241 2003/09/02 11:11:12 jz Exp $
 /*
     Hier sind implementiert
 
@@ -1601,7 +1601,7 @@ void Spooler::run()
                         FOR_EACH( Process_list, (*pc)->_process_list, p )  
                             something_done |= (*p)->async_continue();
 
-                    LOG( "spooler.cxx: something_done=" << something_done << "    process_list \n" );
+                    //LOG( "spooler.cxx: something_done=" << something_done << "    process_list \n" );
                 }
 
 
@@ -1611,8 +1611,8 @@ void Spooler::run()
                     {
                         Job* job = *j;
                         something_done |= job->do_something();
-                        LOG( "spooler.cxx: something_done=" ); 
-                        LOG( something_done << "  " << job->obj_name() << "\n" );
+                        //LOG( "spooler.cxx: something_done=" ); 
+                        //LOG( something_done << "  " << job->obj_name() << "\n" );
                     }
 
                     if( something_done )  nothing_done_count = 1;
@@ -1630,7 +1630,7 @@ void Spooler::run()
                 {
                     something_done |= single_thread->process();
 
-                    LOG( "spooler.cxx: something_done=" << something_done << "   single_thread->process()\n" );
+                    //LOG( "spooler.cxx: something_done=" << something_done << "   single_thread->process()\n" );
 
                     if( single_thread->is_ready_for_termination() )  break;
 
@@ -1666,7 +1666,7 @@ void Spooler::run()
                     nichts_getan( single_thread, ++nichts_getan_zaehler );
                     // geht nicht: _next_time = max( _next_time, Time::now() + min( 30.0, double( 1 << min( 5+2, nichts_getan_zaehler ) ) / 4 ) );    // Bremsen, mit 1/4s anfangen bis 30s
                     _next_time = Time::now() + 0.5;
-                    LOG( "Spooler _next_time nach 'nichts getan' = " << _next_time.as_string() << "\n" );
+                    //LOG( "Spooler _next_time nach 'nichts getan' = " << _next_time.as_string() << "\n" );
                 }
 
 
@@ -1677,7 +1677,7 @@ sos_sleep(0.1); //_next_time = max( _next_time, Time::now() + 0.1 );   // Bremse
 _next_time = min( _next_time, Time::now() + 1.0 );      // Wartezeit vorsichtshalber begrenzen
                     if( _debug )  
                     {
-                        if( wait_handles.wait(0) == -1 )  _log.debug( msg ), wait_handles.wait_until( _next_time );     // Debug-Ausgabe der Wartezeit nur, wenn kein Ergebnis vorliegt
+                        if( wait_handles.wait(0) == -1 )  /*_log.debug( msg ),*/ wait_handles.wait_until( _next_time );     // Debug-Ausgabe der Wartezeit nur, wenn kein Ergebnis vorliegt
                     }
                     else
                     {

@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.188 2003/09/02 06:09:22 jz Exp $
+// $Id: spooler_task.cxx,v 1.189 2003/09/02 11:11:12 jz Exp $
 /*
     Hier sind implementiert
 
@@ -398,7 +398,7 @@ void Task::set_state( State new_state, const Time& next_time )
         _next_time = next_time;
 
         
-        Log_level log_level = new_state == s_start_task? log_info : log_debug;
+        Log_level log_level = new_state == s_start_task? log_info : log_debug_spooler;
         if( log_level >= log_info || _spooler->_debug )
         {
             string msg = "state=" + state_name();
