@@ -1,4 +1,4 @@
-// $Id: Task.java,v 1.13 2004/09/08 11:17:36 jz Exp $
+// $Id: Task.java,v 1.14 2004/10/10 17:43:49 jz Exp $
 
 package sos.spooler;
 
@@ -10,7 +10,7 @@ package sos.spooler;
  * Implementiert wird eine Task durch {@link Job_impl}.
  * 
  * @author Joacim Zschimmer
- * @version $Revision: 1.13 $
+ * @version $Revision: 1.14 $
  */
 
 public class Task extends Idispatch
@@ -202,4 +202,26 @@ public class Task extends Idispatch
      * @see #add_pid(int,double)
      */
     public void             remove_pid          ( int pid )                         {                       com_call( "remove_pid", pid                 ); }
+
+    
+    
+    /** Der bisher nach stdout geschriebene Text.
+     * 
+     * <p>
+     * Nur, wenn die Task in einem separaten Prozess (&lt;process_classes/>) läuft. Sonst "".
+     * 
+     * @see #stderr_text()
+     */
+    public String           stdout_text         ()                                  { return (String)       com_call( "<stdout_text"                    ); }
+
+    
+    
+    /** Der bisher nach stderr geschriebene Text.
+     * 
+     * <p>
+     * Nur, wenn die Task in einem separaten Prozess (&lt;process_classes/>) läuft. Sonst "".
+     * 
+     * @see #stderr_text()
+     */
+    public String          stderr_text          ()                                  { return (String)        com_call( "<stderr_text"                    ); }
 }
