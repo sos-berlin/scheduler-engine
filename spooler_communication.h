@@ -1,4 +1,4 @@
-// $Id: spooler_communication.h,v 1.17 2004/01/06 12:04:24 jz Exp $
+// $Id: spooler_communication.h,v 1.18 2004/01/06 16:39:36 jz Exp $
 
 #ifndef __SPOOLER_COMMUNICATION_H
 #define __SPOOLER_COMMUNICATION_H
@@ -146,8 +146,6 @@ struct Communication //: zschimmer::Thread
 
         Fill_zero              _zero_;
         Spooler*               _spooler;
-        SOCKET                 _read_socket;
-        SOCKET                 _write_socket;
         Named_host             _host;
 
         string                 _text;

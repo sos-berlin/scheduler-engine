@@ -1,4 +1,4 @@
-// $Id: spooler_communication.cxx,v 1.71 2004/01/06 12:04:24 jz Exp $
+// $Id: spooler_communication.cxx,v 1.72 2004/01/06 16:39:36 jz Exp $
 /*
     Hier sind implementiert
 
@@ -246,41 +246,41 @@ bool Xml_end_finder::is_complete( const char* p, int len )
 
 bool Communication::Listen_socket::async_continue_( bool wait )
 {
-    if( socket_read_signaled() )
+    bool something_done = false;
+
+    //if( socket_read_signaled() )
     {
         ptr<Channel> new_channel = Z_NEW( Channel( _spooler ) );
 
-        bool ok = new_channel->do_accept( _socket );
+        bool ok = new_channel->do_accept( _read_socket );
         if( ok )
         {
             _communication->_channel_list.push_back( new_channel );
 
-#           ifdef Z_WINDOWS
-                _new_channel->socket_use_event();
-#           endif
-
-            _spooler->_connection_manager->add_socket_operation( _new_channel );
-            _spooler->_connection_manager->set_read_fd( new_channel->_socket );
+            new_channel->add_to_socket_manager( _spooler->_connection_manager );
+            new_channel->socket_expect_signals( Socket_operation::sig_read | Socket_operation::sig_write );
+            something_done = true;
         }
-
-        return true;
     }
-    else
-        return false;
+
+    async_clear_signaled();
+    return something_done;
 }
 
 //-------------------------------------------------------Communication::Udp_socket::async_continue_
 
 bool Communication::Udp_socket::async_continue_( bool wait )
 {
-    if( socket_read_signaled() )
+    bool something_done = false;
+
+    //if( socket_read_signaled() )
     {
         char buffer [4096];
         sockaddr_in addr;     
         socklen_t   addr_len = sizeof addr;
 
         addr.sin_addr.s_addr = 0;
-        int len = recvfrom( _socket, buffer, sizeof buffer, 0, (sockaddr*)&addr, &addr_len );
+        int len = recvfrom( _read_socket, buffer, sizeof buffer, 0, (sockaddr*)&addr, &addr_len );
         if( len > 0 ) 
         {
             Named_host host = addr.sin_addr;
@@ -296,12 +296,14 @@ bool Communication::Udp_socket::async_continue_( bool wait )
                 _spooler->log().info( "UDP-Nachricht von " + host.as_string() + ": " + cmd );
                 cp.execute( cmd, Time::now() );
             }
+            
+            something_done = true;
         }
 
-        return true;
     }
-    else
-        return false;
+
+    async_clear_signaled();
+    return something_done;
 }
 
 //------------------------------------------------------------------Communication::Channel::Channel
@@ -310,8 +312,6 @@ Communication::Channel::Channel( Spooler* spooler )
 :
     _zero_(this+1),
     _spooler(spooler),
-    _read_socket ( SOCKET_ERROR ),
-    _write_socket( SOCKET_ERROR ),
     _send_is_complete( true ),
     _log(_spooler)
 {
@@ -327,6 +327,9 @@ Communication::Channel::~Channel()
         LOG2( "socket.close", "close(" << _read_socket << ")\n" );
         closesocket( _read_socket );
     }
+
+    _read_socket = SOCKET_ERROR;
+    _write_socket = SOCKET_ERROR;
 }
 
 //----------------------------------------------------------------Communication::Channel::do_accept
@@ -442,6 +445,8 @@ bool Communication::Channel::do_send()
         if( _send_is_complete )  _send_progress = 0, _send_is_complete = false;     // Am Anfang
 
         int count = _text.length() - _send_progress;
+        if( count == 0 )  return true;
+
         LOG2( "socket.send", "send/write(" << _write_socket << "," << count << " bytes)\n" );
         int len = _write_socket == STDOUT_FILENO? write ( _write_socket, _text.c_str() + _send_progress, count )
                                                 : ::send( _write_socket, _text.c_str() + _send_progress, count, 0 );
@@ -467,41 +472,43 @@ bool Communication::Channel::do_send()
 
 bool Communication::Channel::async_continue_( bool wait )
 {
-    bool ok;
+    bool something_done = false;
 
-    if( socket_write_signaled() ) 
+    //if( socket_write_signaled() ) 
     {
-        ok = do_send();
-        if( !ok )  return false;
+        something_done |= do_send();
+        //if( !ok )  return false;
     }
 
-    if( socket_read_signaled() )
+    //if( socket_read_signaled() )
     {
-        ok = do_recv();
-        if( !ok )  return false;
-        
-        if( _receive_is_complete ) 
+        bool ok = do_recv();
+        if( ok )
         {
-            Command_processor cp ( _spooler );
-            
-            if( _read_socket != STDIN_FILENO )  cp.set_host( &_host );
+            something_done = true;
 
-            string cmd = _text;
-            recv_clear();
-            _log.info( "Kommando " + cmd );
-            _text = cp.execute( cmd, Time::now(), _indent );
-          //if( _indent )  channel->_text = _text.replace( "\n", "\r\n" );
-            if( cp._error )  _log.error( cp._error->what() );
-            ok = do_send();
-            if( !ok )  return false;
+            if( _receive_is_complete ) 
+            {
+                Command_processor cp ( _spooler );
+                
+                if( _read_socket != STDIN_FILENO )  cp.set_host( &_host );
+
+                string cmd = _text;
+                recv_clear();
+                _log.info( "Kommando " + cmd );
+                _text = cp.execute( cmd, Time::now(), _indent );
+                //if( _indent )  channel->_text = _text.replace( "\n", "\r\n" );
+                if( cp._error )  _log.error( cp._error->what() );
+                ok = do_send();
+                //if( !ok )  return false;
+            }
+
+            //if( _eof && _send_is_complete )  return false;
         }
-
-        if( _eof && _send_is_complete )  return false;
     }
 
-    clear_socket_signals();
-
-    return true;
+    async_clear_signaled();
+    return something_done;
 }
 
 //--------------------------------------------------------------------Communication::Communication
@@ -636,19 +643,19 @@ void Communication::bind()
 
             if( _spooler->udp_port() != 0 )
             {
-                _udp_socket._socket = socket( AF_INET, SOCK_DGRAM, 0 );
-                if( _udp_socket._socket == SOCKET_ERROR )  throw_sos_socket_error( "socket" );
+                _udp_socket._read_socket = socket( AF_INET, SOCK_DGRAM, 0 );
+                if( _udp_socket._read_socket == SOCKET_ERROR )  throw_sos_socket_error( "socket" );
 
-                set_linger( _udp_socket._socket );
+                set_linger( _udp_socket._read_socket );
                 
                 sa.sin_port        = htons( _spooler->udp_port() );
                 sa.sin_family      = AF_INET;
                 sa.sin_addr.s_addr = 0; // INADDR_ANY
 
-                ret = bind_socket( _udp_socket._socket, &sa );
+                ret = bind_socket( _udp_socket._read_socket, &sa );
                 if( ret == SOCKET_ERROR )  throw_sos_socket_error( "udp-bind ", as_string(_spooler->udp_port()).c_str() );
 
-                ret = ioctlsocket( _udp_socket._socket, FIONBIO, &on );
+                ret = ioctlsocket( _udp_socket._read_socket, FIONBIO, &on );
                 if( ret == SOCKET_ERROR )  throw_sos_socket_error( "ioctl(FIONBIO)" );
 
                 _udp_port = _spooler->udp_port();
@@ -658,12 +665,8 @@ void Communication::bind()
             }
         }
 
-#       ifdef Z_WINDOWS
-            _udp_socket.socket_use_event();
-#       endif
-
-        _spooler->_connection_manager->add_socket_operation( &_udp_socket );
-        _spooler->_connection_manager->set_read_fd( _udp_socket._socket );
+        _udp_socket.add_to_socket_manager( _spooler->_connection_manager );
+        _udp_socket.socket_expect_signals( Socket_operation::sig_read );
     }
 
 
@@ -678,23 +681,23 @@ void Communication::bind()
 
             if( _spooler->tcp_port() != 0 )
             {
-                _listen_socket._socket = socket( AF_INET, SOCK_STREAM, 0 );
-                if( _listen_socket._socket == SOCKET_ERROR )  throw_sos_socket_error( "socket" );
+                _listen_socket._read_socket = socket( AF_INET, SOCK_STREAM, 0 );
+                if( _listen_socket._read_socket == SOCKET_ERROR )  throw_sos_socket_error( "socket" );
 
-                set_linger( _listen_socket._socket );
+                set_linger( _listen_socket._read_socket );
                 
                 sa.sin_port        = htons( _spooler->tcp_port() );
                 sa.sin_family      = AF_INET;
                 sa.sin_addr.s_addr = 0; // INADDR_ANY
 
-                ret = bind_socket( _listen_socket._socket, &sa );
+                ret = bind_socket( _listen_socket._read_socket, &sa );
                 if( ret == SOCKET_ERROR )  throw_sos_socket_error( "tcp-bind", as_string(_spooler->tcp_port()).c_str() );
 
                 LOG2( "socket.listen", "listen()\n" );
-                ret = listen( _listen_socket._socket, 5 );
+                ret = listen( _listen_socket._read_socket, 5 );
                 if( ret == SOCKET_ERROR )  throw_errno( get_errno(), "listen" );
 
-                ret = ioctlsocket( _listen_socket._socket, FIONBIO, &on );
+                ret = ioctlsocket( _listen_socket._read_socket, FIONBIO, &on );
                 if( ret == SOCKET_ERROR )  throw_sos_socket_error( "ioctl(FIONBIO)" );
 
                 _tcp_port = _spooler->tcp_port();
@@ -702,35 +705,32 @@ void Communication::bind()
 
                 _spooler->log().info( "Scheduler erwartet Kommandos über TCP-Port " + sos::as_string(_tcp_port) );
             }
-
-
-#           ifndef Z_WINDOWS
-            {
-                if( _spooler->_interactive )
-                {
-                    ret = ioctl( STDIN_FILENO, FIONBIO, &on );   // In Windows nicht möglich
-                    if( ret == 0 )
-                    {
-                        Sos_ptr<Channel> new_channel = SOS_NEW( Channel( _spooler ) );
-                
-                        new_channel->_read_socket  = STDIN_FILENO;
-                        new_channel->_write_socket = STDOUT_FILENO;
-                        new_channel->_indent = true;
-
-                        _channel_list.push_back( new_channel );
-                    }
-                }
-            }
-#           endif
         }
 
-#       ifdef Z_WINDOWS
-            _listen_socket.socket_use_event();
-#       endif
-
-        _spooler->_connection_manager->add_socket_operation( &_listen_socket );
-        _spooler->_connection_manager->set_read_fd( _listen_socket._socket );
+        _listen_socket.add_to_socket_manager( _spooler->_connection_manager );
+        _listen_socket.socket_expect_signals( Socket_operation::sig_read );
     }
+
+
+#   ifndef Z_WINDOWS
+        if( _spooler->_interactive )
+        {
+            ret = ioctl( STDIN_FILENO, FIONBIO, &on );   // In Windows nicht möglich
+            if( ret == 0 )
+            {
+                Sos_ptr<Channel> new_channel = SOS_NEW( Channel( _spooler ) );
+        
+                new_channel->_read_socket  = STDIN_FILENO;
+                new_channel->_write_socket = STDOUT_FILENO;
+                new_channel->_indent = true;
+
+                _channel_list.push_back( new_channel );
+
+                _udp_socket.add_to_socket_manager( _spooler->_connection_manager );
+                _udp_socket.socket_expect_signals( Socket_operation::sig_read );
+            }
+        }
+#   endif
 }
 
 //-----------------------------------------------------------------------------Communication::init
