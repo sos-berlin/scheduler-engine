@@ -1,4 +1,4 @@
-// $Id: spooler_wait.cxx,v 1.83 2003/10/07 09:07:28 jz Exp $
+// $Id: spooler_wait.cxx,v 1.84 2003/10/20 21:46:53 jz Exp $
 /*
     Hier sind implementiert
 
@@ -397,7 +397,9 @@ bool Wait_handles::wait_until_2( Time until )
 #else
 
     {
-        if( _log->log_level() <= log_debug9  &&  until > Time::now() )   LOG( "wait_until " << until.as_string() << " " << as_string() << "\n" );
+        Time now = Time::now();
+
+        if( _log->log_level() <= log_debug9  &&  until > now )   LOG( "wait_until " << until.as_string() << " " << as_string() << "\n" );
 
         ptr<Wait> wait = _spooler->_connection_manager->create_wait();
 
@@ -408,7 +410,10 @@ bool Wait_handles::wait_until_2( Time until )
             if( _events[i] )  wait->add( _events[i] );
         }
 
-        int ret = wait->wait( (double)( until - Time::now() ) );
+        wait->set_polling_interval( now.as_time_t() < _spooler->_last_time_enter_pressed + 10.0? 0.1 
+                                                                                               : 1.0 );
+
+        int ret = wait->wait( (double)( until - now ) );
         return ret > 0;
       //return wait->wait( min( directory_watcher_interval, (double)( until - Time::now() ) ) );
 

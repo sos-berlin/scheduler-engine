@@ -1,4 +1,4 @@
-// $Id: spooler.h,v 1.165 2003/10/18 21:23:17 jz Exp $
+// $Id: spooler.h,v 1.166 2003/10/20 21:46:53 jz Exp $
 
 #ifndef __SPOOLER_H
 #define __SPOOLER_H
@@ -364,6 +364,7 @@ struct Spooler
 
     int                        _loop_counter;               // Zähler der Schleifendurchläufe in spooler.cxx
     int                        _wait_counter;               // Zähler der Aufrufe von wait_until()
+    time_t                     _last_time_enter_pressed;    // int wegen Threads (Spooler_communication und Spooler_wait)
 
     ptr<object_server::Connection_manager>  _connection_manager;
 
