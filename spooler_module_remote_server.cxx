@@ -1,4 +1,4 @@
-// $Id: spooler_module_remote_server.cxx,v 1.27 2003/09/27 18:21:01 jz Exp $
+// $Id: spooler_module_remote_server.cxx,v 1.28 2003/09/27 18:54:11 jz Exp $
 /*
     Hier sind implementiert
 
@@ -204,8 +204,12 @@ STDMETHODIMP Com_remote_module_instance_server::construct( SAFEARRAY* safearray 
             if( !_server._module->_java_vm->running() )
             {
                 //java_vm->set_log( &_log );
+                if( !java_work_dir.empty() )
                 _server._module->_java_vm->set_work_dir( java_work_dir );
+
+                if( !java_class_path.empty() )
                 _server._module->_java_vm->set_class_path( java_class_path );
+
                 _server._module->_java_vm->set_javac_filename( javac );
                 _server._module->_java_vm->set_options( java_options );
                 Java_module_instance::init_java_vm( _server._module->_java_vm );
