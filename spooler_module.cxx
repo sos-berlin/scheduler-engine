@@ -1,7 +1,9 @@
-// $Id: spooler_module.cxx,v 1.47 2003/09/24 14:41:00 jz Exp $
+// $Id: spooler_module.cxx,v 1.48 2003/09/24 14:58:10 jz Exp $
 /*
     Hier sind implementiert
 
+    Source_part
+    Source_with_parts
     Module
     Com_module_instance
 */
@@ -25,6 +27,20 @@ extern const string spooler_close_name      = "spooler_close()V";
 extern const string spooler_process_name    = "spooler_process()Z";
 extern const string spooler_on_error_name   = "spooler_on_error()V";
 extern const string spooler_on_success_name = "spooler_on_success()V";
+
+//-------------------------------------------------------------------------Source_part::Source_part
+
+Source_part::Source_part( int linenr, const string& text, const Time& mod_time )
+: 
+    _linenr(linenr), 
+    _text(text), 
+    _modification_time(mod_time) 
+{
+    // _text ist leer?
+    int i;
+    for( i = 0; i < _text.length(); i++ )  if( !isspace( (unsigned char)_text[i] ) )  break;
+    if( i == _text.length() )  _text.erase();
+}
 
 //----------------------------------------------------------------xml::Element_ptr Source_part::dom
 

@@ -1,4 +1,4 @@
-// $Id: spooler_module.h,v 1.43 2003/09/23 14:01:08 jz Exp $
+// $Id: spooler_module.h,v 1.44 2003/09/24 14:58:10 jz Exp $
 
 #ifndef __SPOOLER_MODULE_H
 #define __SPOOLER_MODULE_H
@@ -32,7 +32,7 @@ struct Module_instance;
 
 struct Source_part
 {
-                                Source_part                 ( int linenr, const string& text, const Time& mod_time )      : _linenr(linenr), _text(text), _modification_time(mod_time) {}
+    Source_part                 ( int linenr, const string& text, const Time& mod_time );
 
                                 operator string             () const                                { return _text; }
     xml::Element_ptr            dom                         ( const xml::Document_ptr& ) const;
