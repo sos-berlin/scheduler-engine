@@ -1,4 +1,4 @@
-// $Id: spooler_thread.cxx,v 1.6 2001/02/12 15:41:39 jz Exp $
+// $Id: spooler_thread.cxx,v 1.7 2001/02/14 22:06:56 jz Exp $
 /*
     Hier sind implementiert
 
@@ -242,7 +242,7 @@ int Thread::run_thread()
     {
         start();
 
-        while( _spooler->_state != Spooler::s_stopped )
+        while( _spooler->_state != Spooler::s_stopping  &&  _spooler->_state != Spooler::s_stopped )
         {
             if( _spooler->_state == Spooler::s_paused )
             {

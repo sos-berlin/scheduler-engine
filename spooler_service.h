@@ -1,4 +1,4 @@
-// $Id: spooler_service.h,v 1.1 2001/01/25 20:28:38 jz Exp $
+// $Id: spooler_service.h,v 1.2 2001/02/14 22:06:56 jz Exp $
 
 #ifndef __SPOOLER_SERVICE_H
 #define __SPOOLER_SERVICE_H
@@ -6,10 +6,10 @@
 namespace sos {
 namespace spooler {
 
-int                             spooler_service             ( int argc, char** argv );
-void                            install_service             ();
-void                            remove_service              ();
-bool                            service_is_started          ();
+int                             spooler_service             ( const string& id, int argc, char** argv );
+void                            install_service             ( const string& id, int argc, char** argv );
+void                            remove_service              ( const string& id );
+bool                            service_is_started          ( const string& id );
 
 //-------------------------------------------------------------------------------------------------
 

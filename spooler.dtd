@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- $Id: spooler.dtd,v 1.16 2001/02/12 15:41:38 jz Exp $   Joacim Zschimmer,  (C) 2000 SOS GmbH Berlin  -->
+<!-- $Id: spooler.dtd,v 1.17 2001/02/14 22:06:54 jz Exp $   Joacim Zschimmer,  (C) 2000 SOS GmbH Berlin  -->
 
 
 <!ELEMENT spooler               ( config+ | command | answer )>
@@ -69,7 +69,7 @@
 
 <!ELEMENT process               EMPTY>
 <!ATTLIST process               file                CDATA #REQUIRED>
-<!--ATTLIST process               param               CDATA ''-->
+<!ATTLIST process               param               CDATA ''-->
 
 <!-- wenn der DLL-Aufruf implementiert ist:
 <!ELEMENT module                EMPTY>
@@ -124,7 +124,8 @@
                                                     | reload
                                                     | terminate
                                                     | terminate_and_restart
-                                                    | abort_immediately     ) #IMPLIED>
+                                                    | abort_immediately             
+                                                    | abort_immediately_and_restart ) #IMPLIED>
 <!ATTLIST modify_spooler        suspended           (yes|no) #IMPLIED>
                                                                         <!-- Antwort: <ok> -->
 

@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.25 2001/02/12 15:41:38 jz Exp $
+// $Id: spooler_task.cxx,v 1.26 2001/02/14 22:06:56 jz Exp $
 /*
     Hier sind implementiert
 
@@ -432,7 +432,7 @@ bool Job::do_something()
 
     if( ok && !has_error() )
     {
-        if( _state & ( s_running | s_running_process ) )
+        if( _state == s_running || _state == s_running_process )
         {
             Time now;
             bool call_step = do_a_step | _task->_let_run;
@@ -636,7 +636,7 @@ xml::Element_ptr Job::xml( xml::Document_ptr document )
 
         if( _state_cmd )  job_element->setAttribute( "cmd", as_dom_string( state_cmd_name() ) );
 
-        if( _state == s_pending && _next_start_time != latter_day )
+        if( _state == s_pending  &&  _next_start_time != latter_day )
             job_element->setAttribute( "next_start_time", as_dom_string( _next_start_time.as_string() ) );
 
         if( _task )
@@ -920,7 +920,30 @@ bool Process_task::do_start()
     memset( &startup_info, 0, sizeof startup_info );
     startup_info.cb = sizeof startup_info; 
 
-    string command_line = _job->_process_filename + " " + _job->_process_param;
+    string command_line = _job->_process_filename;
+    if( !_job->_process_param.empty() )  command_line += " " + _job->_process_param;
+
+    for( int i = 1;; i++ )
+    {
+        string      nr_str  = as_string( i );
+        CComBSTR    nr_bstr = SysAllocString_string( nr_str );
+        CComVariant vt;
+        HRESULT     hr;
+
+        hr = _params->get_var( nr_bstr, &vt );
+        if( FAILED(hr) )  throw_ole( hr, "Variable_set.var", nr_str.c_str() );
+
+        if( vt.vt == VT_EMPTY )  break;
+
+        hr = vt.ChangeType( VT_BSTR );
+        if( FAILED(hr) )  throw_ole( hr, "VariantChangeType", nr_str.c_str() );
+
+        string param = bstr_as_string( vt.bstrVal );
+        if( param.find_first_of(' ') != string::npos )  param = quoted_string( param, '"', '"' );  // Ist Verdoppeln richtig?
+
+        command_line += " " + param;
+    }
+
 
     ok = CreateProcess( _job->_process_filename.c_str(),  // application name
                         (char*)command_line.c_str(),      // command line 

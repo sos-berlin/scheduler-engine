@@ -1,4 +1,4 @@
-// $Id: spooler_service.cxx,v 1.9 2001/02/08 11:21:15 jz Exp $
+// $Id: spooler_service.cxx,v 1.10 2001/02/14 22:06:56 jz Exp $
 /*
     Hier sind implementiert
 
@@ -27,15 +27,18 @@ namespace spooler {
 
 //--------------------------------------------------------------------------------------------const
 
-static const char               service_name[]          = "DocumentFactory_Spooler";    // Windows 2000 Service
-static const char               service_display_name[]  = "DocumentFactory Spooler";    // Gezeigter Name
-static const char               service_description[]   = "Für die Hintergrund-Jobs der DocumentFactory";
+static const char               std_service_name[]          = "DocumentFactory_Spooler";    // Windows 2000 Service
+static const char               std_service_display_name[]  = "DocumentFactory Spooler";    // Gezeigter Name
+static const char               service_description[]       = "Hintergrund-Jobs der Document Factory";
 
 //-------------------------------------------------------------------------------------------static
 
 static Spooler*                 spooler_ptr;
 SERVICE_STATUS_HANDLE           service_status_handle;
 Handle                          thread_handle;
+string                          spooler_service_name;
+int                             process_argc;
+char**                          process_argv;
 
 //-----------------------------------------------------------------------------Service_thread_param
 
@@ -44,6 +47,14 @@ struct Service_thread_param
     int                        _argc;
     char**                     _argv;
 };
+
+//-------------------------------------------------------------------------------------service_name
+
+static string service_name( const string& id )
+{
+    if( id.empty() )  return std_service_name;
+                else  return std_service_name + ( "_" + id );
+}
 
 //----------------------------------------------------------------------------------------event_log
 
@@ -71,28 +82,50 @@ static void event_log( const string& msg_par )
 
 //----------------------------------------------------------------------------------install_service
 
-void install_service() 
+void install_service( const string& id, int argc, char** argv ) 
 { 
+    string params;
+    string my_service_name         = service_name(id);
+    string my_service_display_name = std_service_display_name;
+
+    if( !id.empty() )  my_service_display_name += " -id=" + id;
+
+
+    for( Sos_option_iterator opt ( argc, argv ); !opt.end(); opt.next() )
+    {
+        if( opt.flag      ( "install-service" ) ) ;
+        else
+        if( opt.flag      ( "remove-service" )  ) ;
+        else
+        if( opt.flag      ( opt.option() )      )  params += (opt.set()? " " : " -")  + (string)opt.option();
+        else
+        if( opt.with_value( opt.option() )      )  params += " -" + (string)opt.option() + "=" + quoted_string( opt.value(), '"', '"' );
+        else
+        if( opt.param     ()                    )  params += " " + quoted_string( opt.value(), '"', '"' );
+    }
+
     SC_HANDLE manager_handle = OpenSCManager( NULL, SERVICES_ACTIVE_DATABASE, SC_MANAGER_CREATE_SERVICE );
     if( !manager_handle )  throw_mswin_error( "OpenSCManager" );
 
 
-    string program_path = module_filename();
+    string command_line = module_filename();
+    if( command_line.find(" ") != string::npos )  command_line = quoted_string( command_line, '"', '"' );
+    if( !params.empty() )  command_line += " " + params;
 
     SC_HANDLE service_handle = CreateService( 
                                     manager_handle,            // SCManager database 
-                                    service_name,              // name of service 
-                                    service_display_name,      // service name to display 
+                                    my_service_name.c_str(),      // name of service 
+                                    my_service_display_name.c_str(),// service name to display 
                                     SERVICE_ALL_ACCESS,        // desired access 
                                     SERVICE_WIN32_OWN_PROCESS, // service type 
                                     SERVICE_DEMAND_START,      // start type   oder SERVICE_AUTO_START
                                     SERVICE_ERROR_NORMAL,      // error control type 
-                                    program_path.c_str(),      // service's binary 
+                                    command_line.c_str(),      // service's binary 
                                     NULL,                      // no load ordering group 
                                     NULL,                      // no tag identifier 
                                     NULL,                      // no dependencies 
                                     NULL,                      // LocalSystem account 
-                                    NULL);                     // no password 
+                                    NULL );                    // no password 
 
     if( !service_handle )  throw_mswin_error( "CreateService" );
 
@@ -101,8 +134,10 @@ void install_service()
     GetVersionEx( &v );
     if( v.dwMajorVersion >= 5 )     // Windows 2000?
     {
+        string descr = service_description;
+        if( !params.empty() )  descr += " " + params;
         SERVICE_DESCRIPTION d;
-        d.lpDescription = (char*)service_description;
+        d.lpDescription = (char*)descr.c_str();
         ChangeServiceConfig2( service_handle, SERVICE_CONFIG_DESCRIPTION, &d );
     }
 
@@ -113,14 +148,15 @@ void install_service()
 
 //-----------------------------------------------------------------------------------remove_service
 
-void remove_service() 
+void remove_service( const string& id ) 
 { 
     BOOL ok;
 
     SC_HANDLE manager_handle = OpenSCManager( NULL, SERVICES_ACTIVE_DATABASE, SC_MANAGER_CREATE_SERVICE );
     if( !manager_handle )  throw_mswin_error( "OpenSCManager" );
 
-    SC_HANDLE service_handle = OpenService( manager_handle, service_name, DELETE );
+    string my_service_name = service_name(id);
+    SC_HANDLE service_handle = OpenService( manager_handle, my_service_name.c_str(), DELETE );
     if( !service_handle )  throw_mswin_error( "OpenService" );
 
     ok = DeleteService( service_handle );
@@ -132,7 +168,7 @@ void remove_service()
 
 //-------------------------------------------------------------------------------service_is_started
 
-bool service_is_started()
+bool service_is_started( const string& id )
 {
     OSVERSIONINFO v;  memset( &v, 0, sizeof v ); v.dwOSVersionInfoSize = sizeof v;
     GetVersionEx( &v );
@@ -145,7 +181,8 @@ bool service_is_started()
 
     try 
     {
-        BOOL ok;
+        BOOL           ok;
+        string         my_service_name = service_name(id);
         SERVICE_STATUS status;  memset( &status, 0, sizeof status );
 
         manager_handle = OpenSCManager( NULL, SERVICES_ACTIVE_DATABASE, SC_MANAGER_CREATE_SERVICE );
@@ -154,7 +191,7 @@ bool service_is_started()
             throw_mswin_error( "OpenSCManager" );
         }
 
-        service_handle = OpenService(manager_handle, service_name, SERVICE_QUERY_STATUS );
+        service_handle = OpenService(manager_handle, my_service_name.c_str(), SERVICE_QUERY_STATUS );
         if( !service_handle ) {
             if( GetLastError() == ERROR_ACCESS_DENIED          )  goto ENDE;
             if( GetLastError() == ERROR_INVALID_NAME           )  goto ENDE;
@@ -194,7 +231,7 @@ static void restart_service( DWORD argc, char** argv )
     manager_handle = OpenSCManager( NULL, SERVICES_ACTIVE_DATABASE, SC_MANAGER_CREATE_SERVICE );
     if( !manager_handle )  goto ENDE;
 
-    service_handle = OpenService(manager_handle, service_name, SERVICE_QUERY_STATUS );
+    service_handle = OpenService(manager_handle, std_service_name, SERVICE_QUERY_STATUS );
     if( !service_handle )  goto ENDE;
 
     ok = StartService( service_handle, argc, (const char**)argv );
@@ -362,11 +399,11 @@ static void __stdcall ServiceMain( DWORD argc, char** argv )
             if( opt.with_value( "log"              ) )  log_start( opt.value() );
         }
 
-        param._argc = argc;
-        param._argv = argv;
+        if( argc > 1 )  param._argc = argc, param._argv = argv;                 // Parameter des Dienstes (die sind wohl nur zum Test)
+                  else  param._argc = process_argc, param._argv = process_argv; // Parameter des Programmaufrufs
 
         LOG( "RegisterServiceCtrlHandler\n" );
-        service_status_handle = RegisterServiceCtrlHandler( service_name, &Handler );
+        service_status_handle = RegisterServiceCtrlHandler( spooler_service_name.c_str(), &Handler );
         if( !service_status_handle )  throw_mswin_error( "RegisterServiceCtrlHandler" );
 
         LOG( "CreateThread\n" );
@@ -391,23 +428,29 @@ static void __stdcall ServiceMain( DWORD argc, char** argv )
 
 //----------------------------------------------------------------------------------spooler_service
 
-int spooler_service( int argc, char** argv )
+int spooler_service( const string& id, int argc, char** argv )
 {
     LOGI( "spooler_service(argc=" << argc << ")\n" );
 
+    process_argc = argc;
+    process_argv = argv;
+
     try 
     {
+        spooler_service_name = service_name(id);
         SERVICE_TABLE_ENTRY ste[2];
 
         memset( ste, 0, sizeof ste );
 
-        ste[0].lpServiceName = (char*)service_name;
+        ste[0].lpServiceName = (char*)spooler_service_name.c_str();
         ste[0].lpServiceProc = ServiceMain;
 
         LOGI( "StartServiceCtrlDispatcher()\n" );
 
         BOOL ok = StartServiceCtrlDispatcher( ste );
         if( !ok )  throw_mswin_error( "StartServiceCtrlDispatcher" );      // Z.B. nach 15s: MSWIN-00000427  Der Dienstprozess konnte keine Verbindung zum Dienstcontroller herstellen.
+
+        spooler_service_name = "";
     }
     catch( const Xc& x )
     {

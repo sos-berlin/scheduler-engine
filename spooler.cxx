@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.51 2001/02/12 15:41:38 jz Exp $
+// $Id: spooler.cxx,v 1.52 2001/02/14 22:06:54 jz Exp $
 /*
     Hier sind implementiert
 
@@ -223,7 +223,8 @@ void Spooler::stop()
     _object_set_class_list.clear();
     _thread_list.clear();
     
-    set_state( s_stopped );
+    set_state( s_stopped );     
+    // Der Dienst ist hier beendet
 }
 
 //-------------------------------------------------------------------------------------Spooler::run
@@ -240,8 +241,8 @@ void Spooler::run()
 
         _event.reset();
 
-        if( _state_cmd == sc_pause                 )  set_state( s_paused ), signal_threads();
-        if( _state_cmd == sc_continue              )  set_state( s_running ),  signal_threads();
+        if( _state_cmd == sc_pause                 )  set_state( s_paused  ), signal_threads();
+        if( _state_cmd == sc_continue              )  set_state( s_running ), signal_threads();
         if( _state_cmd == sc_load_config           )  break;
         if( _state_cmd == sc_reload                )  break;
         if( _state_cmd == sc_terminate             )  break;
@@ -355,7 +356,7 @@ int Spooler::launch( int argc, char** argv )
 
 //----------------------------------------------------------------------------------spooler_restart
 
-static void spooler_restart()
+void spooler_restart()
 {
 #   ifdef SYSTEM_WIN
 
@@ -424,31 +425,43 @@ int sos_main( int argc, char** argv )
     bool    is_service_set = false;
     int     ret;
     string  log_filename = read_profile_string( "factory.ini", "spooler", "log" );
+    bool    do_install_service = false;
+    bool    do_remove_service = false;
+    string  id;
 
     for( Sos_option_iterator opt ( argc, argv ); !opt.end(); opt.next() )
     {
         if( opt.flag      ( "service"          ) )  is_service = opt.set(), is_service_set = true;
         else
-        if( opt.flag      ( "install-service"  ) )  { spooler::install_service();  return 0; }
+        if( opt.flag      ( "install-service"  ) )  do_install_service = opt.set();
         else
-        if( opt.flag      ( "remove-service"   ) )  { spooler::remove_service();  return 0; }
+        if( opt.flag      ( "remove-service"   ) )  do_remove_service = opt.set();
+        else
+        if( opt.with_value( "id"               ) )  id = opt.value();
         else
         if( opt.with_value( "log"              ) )  log_filename = opt.value();
     }
 
     if( !log_filename.empty() )  log_start( log_filename );
 
-
-
-    if( !is_service_set )  is_service = spooler::service_is_started();
-
-    if( is_service )
+    if( do_remove_service | do_install_service )
     {
-        ret = spooler::spooler_service( argc, argv );
+        if( do_remove_service  )  spooler::remove_service( id );
+        if( do_install_service )  spooler::install_service( id, argc, argv );
+        ret = 0;
     }
     else
     {
-        ret = spooler::spooler_main( argc, argv );
+        if( !is_service_set )  is_service = spooler::service_is_started(id);
+
+        if( is_service )
+        {
+            ret = spooler::spooler_service( id, argc, argv );
+        }
+        else
+        {
+            ret = spooler::spooler_main( argc, argv );
+        }
     }
 
     return ret;

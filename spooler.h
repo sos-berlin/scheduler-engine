@@ -1,4 +1,4 @@
-// $Id: spooler.h,v 1.47 2001/02/12 15:41:38 jz Exp $
+// $Id: spooler.h,v 1.48 2001/02/14 22:06:55 jz Exp $
 
 #ifndef __SPOOLER_H
 #define __SPOOLER_H
@@ -196,7 +196,11 @@ struct Spooler
     Thread_semaphore           _lock;
 };
 
+//-------------------------------------------------------------------------------------------------
 
+void                            spooler_restart             ();
+
+//-------------------------------------------------------------------------------------------------
 
 } //namespace spooler
 } //namespace sos
