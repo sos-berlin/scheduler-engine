@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.209 2003/05/31 16:33:24 jz Exp $
+// $Id: spooler.cxx,v 1.210 2003/05/31 17:05:24 jz Exp $
 /*
     Hier sind implementiert
 
@@ -46,6 +46,9 @@
 #   endif
 #endif
 */
+
+char** _argv = NULL;
+int    _argc = 0;
 
 
 namespace sos {
@@ -1597,6 +1600,9 @@ int sos_main( int argc, char** argv )
 
     int  ret        = 99;
     bool is_service = false;
+
+    ::_argc = argc;
+    ::_argv = argv;
 
     try
     {

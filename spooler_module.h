@@ -1,4 +1,4 @@
-// $Id: spooler_module.h,v 1.19 2003/05/31 10:01:13 jz Exp $
+// $Id: spooler_module.h,v 1.20 2003/05/31 17:05:24 jz Exp $
 
 #ifndef __SPOOLER_MODULE_H
 #define __SPOOLER_MODULE_H
@@ -73,6 +73,8 @@ struct Module : Object
         kind_com,
         kind_remote
     };
+
+    Z_GNU_ONLY(                 Module                      (); )
 
                                 Module                      ( Spooler* sp, Prefix_log* log )        : _zero_(this+1), _spooler(sp), _log(log) {}
     explicit                    Module                      ( Spooler* sp, const xml::Element_ptr& e, const Time& xml_mod_time, const string& include_path )  : _zero_(this+1), _spooler(sp) { set_dom(e,xml_mod_time,include_path); }
