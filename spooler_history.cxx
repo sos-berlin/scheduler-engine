@@ -1169,152 +1169,160 @@ void Job_history::archive( Archive_switch arc, const string& filename )
 
 xml::Element_ptr Job_history::read_tail( const xml::Document_ptr& doc, int id, int next, const Show_what& show, bool use_task_schema )
 {
-    if( !_history_yes )  throw_xc( "SCHEDULER-141", _job_name );
-
     bool with_log = ( show & show_log ) != 0;
 
     xml::Element_ptr history_element;
 
     if( !_error )  
     {
+        history_element = doc.createElement( "history" );
+        dom_append_nl( history_element );
+
         with_log &= _use_db;
 
         try
         {
-            if( _use_db  &&  !_spooler->_db->opened() )  throw_xc( "SCHEDULER-184" );     // Wenn die DB verübergegehen (wegen Nichterreichbarkeit) geschlossen ist, s. get_task_id()
-
-            Transaction ta ( +_spooler->_db );
+            try
             {
-                Any_file sel;
+                if( !_history_yes )  throw_xc( "SCHEDULER-141", _job_name );
 
-                if( _use_file )
+                if( _use_db  &&  !_spooler->_db->opened() )  throw_xc( "SCHEDULER-184" );     // Wenn die DB verübergegehen (wegen Nichterreichbarkeit) geschlossen ist, s. get_task_id()
+
+                Transaction ta ( +_spooler->_db );
                 {
-                    if( id != -1  ||  next >= 0 )  throw_xc( "SCHEDULER-139" );
-                    sel.open( "-in -seq tab -field-names | tail -head=1 -reverse -" + as_string(-next) + " | " + _filename );
-                }
-                else
-                if( _use_db )
-                {
-                  //string prefix = ( next < 0? "-in -seq head -" : "-in -seq tail -reverse -" ) + as_string(max(1,abs(next))) + " | ";
-                    string prefix = "-in -seq head -" + as_string(max(1,abs(next))) + " | ";
-                    string clause = " where \"JOB_NAME\"=" + sql_quoted(_job_name);
-                    
-                    if( id != -1 )
+                    Any_file sel;
+
+                    if( _use_file )
                     {
-                        clause += " and \"ID\"";
-                        clause += next < 0? "<" : 
-                                  next > 0? ">" 
-                                          : "=";
-                        clause += as_string(id);
+                        if( id != -1  ||  next >= 0 )  throw_xc( "SCHEDULER-139" );
+                        sel.open( "-in -seq tab -field-names | tail -head=1 -reverse -" + as_string(-next) + " | " + _filename );
                     }
-
-                    clause += " order by \"ID\" ";  if( next < 0 )  clause += " desc";
-                    
-                    sel.open( prefix + _spooler->_db->_db_name + 
-                              " select " + 
-                              ( next == 0? "" : "%limit(" + as_string(abs(next)) + ") " ) +
-                              " \"ID\", \"SPOOLER_ID\", \"JOB_NAME\", \"START_TIME\", \"END_TIME\", \"CAUSE\", \"STEPS\", \"ERROR\", \"ERROR_CODE\", \"ERROR_TEXT\" " +
-                              join( "", vector_map( prepend_comma, _extra_names ) ) +
-                              " from " + uquoted(_spooler->_job_history_tablename) + 
-                              clause );
-                }
-                else
-                    throw_xc( "SCHEDULER-136" );
-
-                history_element = doc.createElement( "history" );
-                dom_append_nl( history_element );
-
-                const Record_type* type = sel.spec().field_type_ptr();
-                Dynamic_area rec ( type->field_size() );
-    
-                while( !sel.eof() )
-                {
-                    string           param_xml;
-                    string           error_code;
-                    string           error_text;
-                    xml::Element_ptr history_entry = doc.createElement( "history.entry" );
-
-                    sel.get( &rec );
-        
-                    for( int i = 0; i < type->field_count(); i++ )
+                    else
+                    if( _use_db )
                     {
-                        string value = type->as_string( i, rec.byte_ptr() );
-                        if( value != "" )
+                    //string prefix = ( next < 0? "-in -seq head -" : "-in -seq tail -reverse -" ) + as_string(max(1,abs(next))) + " | ";
+                        string prefix = "-in -seq head -" + as_string(max(1,abs(next))) + " | ";
+                        string clause = " where \"JOB_NAME\"=" + sql_quoted(_job_name);
+                        
+                        if( id != -1 )
                         {
-                            string name = lcase( type->field_descr_ptr(i)->name() );
+                            clause += " and \"ID\"";
+                            clause += next < 0? "<" : 
+                                    next > 0? ">" 
+                                            : "=";
+                            clause += as_string(id);
+                        }
 
-                            if( name == "parameters" ) 
+                        clause += " order by \"ID\" ";  if( next < 0 )  clause += " desc";
+                        
+                        sel.open( prefix + _spooler->_db->_db_name + 
+                                " select " + 
+                                ( next == 0? "" : "%limit(" + as_string(abs(next)) + ") " ) +
+                                " \"ID\", \"SPOOLER_ID\", \"JOB_NAME\", \"START_TIME\", \"END_TIME\", \"CAUSE\", \"STEPS\", \"ERROR\", \"ERROR_CODE\", \"ERROR_TEXT\" " +
+                                join( "", vector_map( prepend_comma, _extra_names ) ) +
+                                " from " + uquoted(_spooler->_job_history_tablename) + 
+                                clause );
+                    }
+                    else
+                        throw_xc( "SCHEDULER-136" );
+
+                    const Record_type* type = sel.spec().field_type_ptr();
+                    Dynamic_area rec ( type->field_size() );
+        
+                    while( !sel.eof() )
+                    {
+                        string           param_xml;
+                        string           error_code;
+                        string           error_text;
+                        xml::Element_ptr history_entry = doc.createElement( "history.entry" );
+
+                        sel.get( &rec );
+            
+                        for( int i = 0; i < type->field_count(); i++ )
+                        {
+                            string value = type->as_string( i, rec.byte_ptr() );
+                            if( value != "" )
                             {
-                                param_xml = value;
-                            }
-                            else
-                            if( name == "id" )  
-                            {
-                                history_entry.setAttribute( "task", value );
-                                if( !use_task_schema )
-                                    history_entry.setAttribute( "id", value );      // id sollte nicht verwendet werden. jz 6.9.04
-                            }
-                            if( use_task_schema  &&  name == "spooler_id" )  {} // ignorieren
-                            else
-                            if( use_task_schema  &&  name == "error"      )  {} // ignorieren
-                            else
-                            if( use_task_schema  &&  name == "error_code" )  error_code = value;
-                            else
-                            if( use_task_schema  &&  name == "error_text" )  error_text = value;
-                            else
-                            {
-                                history_entry.setAttribute( name, value );
+                                string name = lcase( type->field_descr_ptr(i)->name() );
+
+                                if( name == "parameters" ) 
+                                {
+                                    param_xml = value;
+                                }
+                                else
+                                if( name == "id" )  
+                                {
+                                    history_entry.setAttribute( "task", value );
+                                    if( !use_task_schema )
+                                        history_entry.setAttribute( "id", value );      // id sollte nicht verwendet werden. jz 6.9.04
+                                }
+                                if( use_task_schema  &&  name == "spooler_id" )  {} // ignorieren
+                                else
+                                if( use_task_schema  &&  name == "error"      )  {} // ignorieren
+                                else
+                                if( use_task_schema  &&  name == "error_code" )  error_code = value;
+                                else
+                                if( use_task_schema  &&  name == "error_text" )  error_text = value;
+                                else
+                                {
+                                    history_entry.setAttribute( name, value );
+                                }
                             }
                         }
-                    }
 
-                    if( use_task_schema  &&  error_text != "" )
-                    {
-                        Xc x ( error_code.c_str() );
-                        x.set_what( error_text );
-                        history_entry.appendChild( create_error_element( doc, x ) );
-                    }
+                        if( use_task_schema  &&  error_text != "" )
+                        {
+                            Xc x ( error_code.c_str() );
+                            x.set_what( error_text );
+                            history_entry.appendChild( create_error_element( doc, x ) );
+                        }
 
 
-                    int id = type->field_descr_ptr("id")->as_int( rec.byte_ptr() );
+                        int id = type->field_descr_ptr("id")->as_int( rec.byte_ptr() );
 
 
 #ifndef SPOOLER_USE_LIBXML2     // libxml2 stürzt in Dump() ab:
-                    if( _use_db ) 
-                        param_xml = file_as_string( _spooler->_db->_db_name + "-table=" + _spooler->_job_history_tablename + " -clob=parameters where id=" + as_string(id), "" );
+                        if( _use_db ) 
+                            param_xml = file_as_string( _spooler->_db->_db_name + "-table=" + _spooler->_job_history_tablename + " -clob=parameters where id=" + as_string(id), "" );
 
-                    if( !param_xml.empty() )
-                    {
-                        try {
-                            dom_append_nl( history_element );
-                            xml::Document_ptr par_doc;
-                            par_doc.create();
-                            par_doc.load_xml( param_xml );
-                            if( par_doc.documentElement() )  history_entry.appendChild( par_doc.documentElement() );
-                        }
-                        catch( const exception&  x ) { _spooler->_log.warn( string("Historie: ") + x.what() ); }
-                        catch( const _com_error& x ) { _spooler->_log.warn( string("Historie: ") + w_as_string(x.Description() )) ; }
-                    }
-#endif
-                    if( with_log )
-                    {
-                        try
+                        if( !param_xml.empty() )
                         {
-                            string log = file_as_string( GZIP_AUTO + _spooler->_db->_db_name + "-table=" + _spooler->_job_history_tablename + " -blob=log where \"ID\"=" + as_string(id), "" );
-                            if( !log.empty() ) dom_append_text_element( history_entry, "log", log );
+                            try {
+                                dom_append_nl( history_element );
+                                xml::Document_ptr par_doc;
+                                par_doc.create();
+                                par_doc.load_xml( param_xml );
+                                if( par_doc.documentElement() )  history_entry.appendChild( par_doc.documentElement() );
+                            }
+                            catch( const exception&  x ) { _spooler->_log.warn( string("Historie: ") + x.what() ); }
+                            catch( const _com_error& x ) { _spooler->_log.warn( string("Historie: ") + w_as_string(x.Description() )) ; }
                         }
-                        catch( const exception&  x ) { _spooler->_log.warn( string("Historie: ") + x.what() ); }
+#endif
+                        if( with_log )
+                        {
+                            try
+                            {
+                                string log = file_as_string( GZIP_AUTO + _spooler->_db->_db_name + "-table=" + _spooler->_job_history_tablename + " -blob=log where \"ID\"=" + as_string(id), "" );
+                                if( !log.empty() ) dom_append_text_element( history_entry, "log", log );
+                            }
+                            catch( const exception&  x ) { _spooler->_log.warn( string("Historie: ") + x.what() ); }
+                        }
+
+                        history_element.appendChild( history_entry );
+                        dom_append_nl( history_element );
                     }
 
-                    history_element.appendChild( history_entry );
-                    dom_append_nl( history_element );
+                    sel.close();
                 }
-
-                sel.close();
+                ta.commit();
             }
-            ta.commit();
+            catch( const _com_error& x )  { throw_com_error( x, "Job_history::read_tail" ); }
         }
-        catch( const _com_error& x ) { throw_com_error( x, "Job_history::read_tail" ); }
+        catch( exception& x ) 
+        { 
+            if( !use_task_schema )  throw x;
+            history_element.appendChild( create_error_element( doc, x, 0 ) );
+        }
     }
 
     return history_element;

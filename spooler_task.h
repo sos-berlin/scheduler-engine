@@ -402,6 +402,9 @@ struct Process_task : Task      // Job ist irgendein Prozess (z.B. durch ein She
     virtual bool                has_step_count              ()                                      { return false; }
     bool                        signaled                    ();
 
+    File                       _stdout_file;
+    File                       _stderr_file;
+
 #   ifdef Z_WINDOWS
         Process_id             _process_id;
         Event                  _process_handle;

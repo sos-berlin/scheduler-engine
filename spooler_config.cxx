@@ -325,11 +325,24 @@ void Spooler::load_config( const xml::Element_ptr& config_element, const Time& x
         {
             if( e.nodeName_is( "base" ) )
             {
-                string config_filename = e.getAttribute( "file" );
+                string config_filename = make_absolute_filename( directory_of_path( source_filename ), e.getAttribute( "file" ) ) ;
                 
                 Command_processor cp ( this );
                 cp._load_config_immediately = true;
-                cp.execute_file( make_absolute_filename( directory_of_path( source_filename ), config_filename ) );
+                cp.execute_file( config_filename );
+
+
+                // Für http://.../show_config?:   Das Basisdokument in <base> ablegen, damit wir eine große Konfiguration bekommen. Nur für HTTP.
+                /*
+                try
+                {
+                    xml::Document_ptr d;
+                    d.create();
+                    int ok = d.try_load_xml( string_from_file( config_filename ) );
+                    if( ok )  e.appendChild( d.documentElement().cloneNode( true ) );
+                }
+                catch( exception& ) {}
+                */
             }
         }
 

@@ -36,6 +36,12 @@ namespace spooler {
 
 using namespace std;
 
+//-------------------------------------------------------------------------------------------------
+#ifdef Z_DEBUG
+
+#   include "spooler_http_files.cxx"     // Generiert mit:  cd html && perl ../make/files_to_cxx.pl jz/*.html jz/*.js jz/*.xslt jz/*.css
+
+#endif
 //--------------------------------------------------------------------------dom_append_text_element
 
 void dom_append_text_element( const xml::Element_ptr& element, const char* element_name, const string& text )
@@ -165,6 +171,7 @@ xml::Element_ptr Command_processor::execute_show_state( const xml::Element_ptr& 
     state_element.setAttribute( "log_file"             , _spooler->_base_log.filename() );
     state_element.setAttribute( "version"              , VER_PRODUCTVERSION_STR );
     state_element.setAttribute( "pid"                  , _spooler->_pid );
+    state_element.setAttribute( "config_file"          , _spooler->_config_filename );
 
     if( _spooler->_db )
     {
@@ -828,6 +835,13 @@ ptr<Http_response> Command_processor::execute_http( Http_request* http_request )
                     }
                 }
                 else
+                if( string_ends_with( path, "/show_config?" ) )
+                {
+                    if( _spooler->_config_document )  response_body = _spooler->_config_document.xml();
+
+                    response_content_type = "text/xml";
+                }
+                else
                     throw_xc( "SCHEDULER-216", path );
             }
             else
@@ -878,14 +892,30 @@ ptr<Http_response> Command_processor::execute_http( Http_request* http_request )
                     filename = "/.." + filename;
                 }
 
-                filename = _spooler->_html_directory + filename;
+                string absolute_filename = _spooler->_html_directory + filename;
 /*
                 struct stat st;
                 memset( &st, 0, sizeof st );
                 int err = stat( filename.c_str(), &st );
                 if( !err  &&  stat.st_mode & S_IFDIR )
 */
-                response_body = zschimmer::string_from_file( filename );
+
+                try
+                {
+                    response_body = zschimmer::string_from_file( absolute_filename );
+                }
+                catch( exception& )
+                {                                                        
+#                   ifdef Z_DEBUG
+                        string fn = filename.substr( 1 );    // '/' abschneiden
+                        const Inline_files* f;
+                        for( f = inline_files; f->filename &&  f->filename != fn; f++ );
+                        if( !f->filename )  throw;
+                        response_body.assign( f->content, f->length );
+#                    else
+                        throw;
+#                   endif
+                }
             }
         }
         else

@@ -1478,7 +1478,7 @@ void Task::clear_mail()
     _log->set_mail_body     ( "", true );
 }
 
-//-----------------------------------------------------------------------Module_task::do_close__end
+//---------------------------------------------------------------------Module_task::do_close__start
 
 Async_operation* Module_task::do_close__start()
 {
@@ -1823,6 +1823,12 @@ void Process_task::do_close__end()
         do_kill();
 
     close_handle();
+
+    _stdout_file.close();
+    _stderr_file.close();
+
+    _log->log_file( _stdout_file.filename(), "stdout:" );
+    _log->log_file( _stderr_file.filename(), "stderr:" );
 }
 
 //----------------------------------------------------------------------Process_task::do_begin__end
@@ -1838,8 +1844,17 @@ bool Process_task::do_begin__end()
 
     memset( &process_info, 0, sizeof process_info );
 
+
+    _stdout_file.open_temporary( File::open_unlink_later | File::open_inheritable );
+    _stderr_file.open_temporary( File::open_unlink_later | File::open_inheritable );
+
     memset( &startup_info, 0, sizeof startup_info );
     startup_info.cb = sizeof startup_info; 
+    startup_info.dwFlags    = STARTF_USESTDHANDLES;
+    startup_info.hStdInput  = INVALID_HANDLE_VALUE;
+    startup_info.hStdOutput = _stdout_file.handle();
+    startup_info.hStdError  = _stderr_file.handle();
+
 
     string command_line = _job->_process_filename;
     if( !_job->_process_param.empty() )  command_line += " " + _job->_process_param;
@@ -1874,11 +1889,12 @@ bool Process_task::do_begin__end()
         env << string_from_bstr ( m->first ) << "=" << string_from_variant( m->second->_value ) << '\0';
     env << '\0';
 
+
     ok = CreateProcess( _job->_process_filename.c_str(),  // application name
                         (char*)command_line.c_str(),      // command line 
                         NULL,                       // process security attributes 
                         NULL,                       // primary thread security attributes 
-                        FALSE,                      // handles are inherited?
+                        TRUE,                       // handles are inherited?
                         0,                          // creation flags 
                         (char*)((string)env).c_str(),      // use parent's environment 
                         NULL,                       // use parent's current directory 
@@ -2101,6 +2117,13 @@ bool Process_task::do_begin__end()
         
         case 0:
         {
+            dup2( _stdout_file._file, STDOUT_FILENO );
+            dup2( _stderr_file._file, STDERR_FILENO );
+
+            int n = sysconf( _SC_OPEN_MAX );
+            for( int i = 3; i < n; i++ )  if( i != socket_pair[1] )  ::close(i);
+            ::close( STDIN_FILENO );
+
             // Arguments 
 
             char** args = new char* [ string_args.size() + 1 ];

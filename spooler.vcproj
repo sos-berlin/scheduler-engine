@@ -58,6 +58,7 @@ cd $(IntDir) &amp;&amp; pwd &amp;&amp; jar cvfm &quot;$(TargetDir)sos.spooler.ja
 echo ant -f ../javadoc.xml
 ant -f ../javadoc.xml
 "
+				AdditionalDependencies="html/jz/browser_dependencies.js;html/jz/details_frame.html;html/jz/index.html;html/jz/left_frame.html;html/jz/popup_menu.js;html/jz/scheduler.css;html/jz/scheduler.xslt;html/jz/show_log.js;html/jz/translation.js"
 				Outputs="$(TargetDir)sos.spooler.jar"/>
 			<Tool
 				Name="VCLinkerTool"
@@ -84,7 +85,10 @@ ant -f ../javadoc.xml
 			<Tool
 				Name="VCPostBuildEventTool"/>
 			<Tool
-				Name="VCPreBuildEventTool"/>
+				Name="VCPreBuildEventTool"
+				CommandLine="cd html &amp;&amp; perl ../../make/files_to_c++.pl  -trim jz/*.html jz/*.js jz/*.xslt jz/*.css &gt;../spooler_http_files.cxx
+cd $(ProjectDir)
+"/>
 			<Tool
 				Name="VCPreLinkEventTool"/>
 			<Tool
@@ -148,6 +152,7 @@ cd $(IntDir) &amp;&amp; pwd &amp;&amp; jar cvfm &quot;$(TargetDir)sos.spooler.ja
 echo ant -f ../javadoc.xml
 ant -f ../javadoc.xml
 "
+				AdditionalDependencies="html/jz/browser_dependencies.js;html/jz/details_frame.html;html/jz/index.html;html/jz/left_frame.html;html/jz/popup_menu.js;html/jz/scheduler.css;html/jz/scheduler.xslt;html/jz/show_log.js;html/jz/translation.js"
 				Outputs="$(TargetDir)sos.spooler.jar"/>
 			<Tool
 				Name="VCLinkerTool"
@@ -169,7 +174,10 @@ ant -f ../javadoc.xml
 			<Tool
 				Name="VCPostBuildEventTool"/>
 			<Tool
-				Name="VCPreBuildEventTool"/>
+				Name="VCPreBuildEventTool"
+				CommandLine="cd html &amp;&amp; perl ../../make/files_to_c++.pl  -trim jz/*.html jz/*.js jz/*.xslt jz/*.css &gt;../spooler_http_files.cxx
+cd $(ProjectDir)
+"/>
 			<Tool
 				Name="VCPreLinkEventTool"/>
 			<Tool
@@ -671,6 +679,40 @@ ant -f ../javadoc.xml
 						PreprocessorDefinitions="/D_DEBUG"
 						AdditionalIncludeDirectories="$(OUTDIR)"/>
 				</FileConfiguration>
+			</File>
+		</Filter>
+		<Filter
+			Name="html"
+			Filter="">
+			<File
+				RelativePath=".\html\jz\browser_dependencies.js">
+			</File>
+			<File
+				RelativePath=".\html\jz\details_frame.html">
+			</File>
+			<File
+				RelativePath=".\html\jz\index.html">
+			</File>
+			<File
+				RelativePath=".\html\jz\left_frame.html">
+			</File>
+			<File
+				RelativePath=".\html\jz\popup_menu.js">
+			</File>
+			<File
+				RelativePath=".\html\jz\scheduler.css">
+			</File>
+			<File
+				RelativePath=".\html\jz\scheduler.js">
+			</File>
+			<File
+				RelativePath=".\html\jz\scheduler.xslt">
+			</File>
+			<File
+				RelativePath=".\html\jz\show_log.js">
+			</File>
+			<File
+				RelativePath=".\html\jz\translation_de.js">
 			</File>
 		</Filter>
 		<Filter

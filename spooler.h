@@ -405,7 +405,7 @@ struct Spooler
     int                        _process_count;
     Process_handle             _process_handles[ max_processes ];   // Für abort_immediately(), mutex-frei alle abhängigen Prozesse
     int                        _pids[ max_processes ];              // Für abort_immediately(), mutex-frei alle Task.add_pid(), Subprozesse der Tasks
-  private:
+//private:
     string                     _spooler_id;                 // -id=
     string                     _log_directory;              // -log-dir=
     bool                       _log_directory_as_option_set;// -log-dir= als Option gesetzt, überschreibt Angabe in spooler.xml

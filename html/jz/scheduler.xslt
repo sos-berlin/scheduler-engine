@@ -14,13 +14,10 @@
     <xsl:template match="/spooler/answer">
 
         <table cellspacing="0" cellpadding="0">
-        </table>
-
-        <table cellspacing="0" cellpadding="0">
             <tr>
                 <td style="margin-top: 0px; margin-bottom: 1ex">
                     <xsl:element name="span">
-                        <xsl:attribute name="title">Version  <xsl:value-of select="state/@version"/>&#10;pid=<xsl:value-of select="state/@pid"/></xsl:attribute>
+                        <xsl:attribute name="title">Version  <xsl:value-of select="state/@version"/>&#10;pid=<xsl:value-of select="state/@pid"/>&#10;db=<xsl:value-of select="state/@db"/></xsl:attribute>
                         <b>Scheduler</b>
                     </xsl:element>
 
@@ -168,6 +165,12 @@
                     <xsl:call-template name="command_menu">
                         <xsl:with-param name="onclick" select="'scheduler_menu__onclick( mouse_x() - 100, mouse_y() - 1 )'"/>
                     </xsl:call-template>
+                </td>
+            </tr>
+
+            <tr>
+                <td colspan="99">
+                    <a href="show_config?" target="config_xml"><xsl:value-of select="state/@config_file"/></a>
                 </td>
             </tr>
 
@@ -1038,7 +1041,7 @@
                     </td>
                 </tr>
             </xsl:if>
-            
+
             <xsl:apply-templates mode="trs_from_log_attributes" select="log"/>
         </table>
 
@@ -1339,6 +1342,15 @@
                     </tr>
                 </xsl:if>
             </xsl:for-each>
+
+
+            <xsl:if test="ERROR">
+                <tr>
+                    <td colspan="99" class="task_error">
+                        <xsl:apply-templates select="ERROR"/>
+                    </td>
+                </tr>
+            </xsl:if>
         </table>
 
     </xsl:template>
@@ -1458,15 +1470,15 @@
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~log-->
 
     <xsl:template mode="trs_from_log_attributes" match="log">
-        
+
         <tr>
             <td><span class="label">log:</span></td>
-            
+
             <td colspan="99">
                 <xsl:apply-templates mode="string_from_log_attributes" select="."/>
             </td>
         </tr>
-        
+
         <xsl:if test="@mail_subject">
             <tr>
                 <td>
@@ -1477,7 +1489,7 @@
                 </td>
             </tr>
         </xsl:if>
-        
+
         <xsl:if test="@last_error">
             <tr>
                 <td>
@@ -1488,7 +1500,7 @@
                 </td>
             </tr>
         </xsl:if>
-        
+
         <xsl:if test="@last_warning">
             <tr>
                 <td>
@@ -1499,70 +1511,78 @@
                 </td>
             </tr>
         </xsl:if>
-        
+
     </xsl:template>
-    
+
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~log-->
 
     <xsl:template mode="string_from_log_attributes" match="log">
-    
+
         <xsl:if test="@level">
-            log-level: <xsl:value-of select="@level"/>
+            <span class="label">log-level: </span>
+            <xsl:value-of select="@level"/>
             <xsl:text> &#160; </xsl:text>
         </xsl:if>
-        
+
         <xsl:if test="@highest_level">
-            highest level: <xsl:value-of select="@highest_level"/>
+            <span class="label">highest level: </span>
+            <xsl:value-of select="@highest_level"/>
             <xsl:text> &#160; </xsl:text>
         </xsl:if>
-        
+
         <xsl:if test="@mail_on_error='yes'">
             mail on error
             <xsl:text> &#160; </xsl:text>
         </xsl:if>
-        
+
         <xsl:if test="@mail_on_warning='yes'">
             mail on warning
             <xsl:text> &#160; </xsl:text>
         </xsl:if>
-        
+
         <xsl:if test="@mail_on_success='yes'">
-            mail on success 
+            mail on success
             <xsl:text> &#160; </xsl:text>
         </xsl:if>
-        
+
         <xsl:if test="@mail_on_process">
-            mail on process: <xsl:value-of select="@mail_on_process"/>
+            <span class="label">mail on process: </span>
+            <xsl:value-of select="@mail_on_process"/>
             <xsl:text> &#160; </xsl:text>
         </xsl:if>
 
         <xsl:if test="@mail_to">
-            to: <xsl:value-of select="@mail_to"/>
+            <span class="label">to: </span>
+            <xsl:value-of select="@mail_to"/>
             <xsl:text> &#160; </xsl:text>
         </xsl:if>
-        
+
         <xsl:if test="@mail_cc">
-            cc: <xsl:value-of select="@mail_cc"/>
+            <span class="label">cc: </span>
+            <xsl:value-of select="@mail_cc"/>
             <xsl:text> &#160; </xsl:text>
         </xsl:if>
-        
+
         <xsl:if test="@mail_bcc">
-            bcc: <xsl:value-of select="@mail_bcc"/>
+            <span class="label">bcc: </span>
+            <xsl:value-of select="@mail_bcc"/>
             <xsl:text> &#160; </xsl:text>
         </xsl:if>
-        
+
         <xsl:if test="@mail_from">
-            from: <xsl:value-of select="@mail_from"/>
+            <span class="label">from: </span>
+            <xsl:value-of select="@mail_from"/>
             <xsl:text> &#160; </xsl:text>
         </xsl:if>
-        
+
         <xsl:if test="@smtp">
-            smtp: <xsl:value-of select="@smtp"/>
+            <span class="label">smtp: </span>
+            <xsl:value-of select="@smtp"/>
             <xsl:text> &#160; </xsl:text>
         </xsl:if>
-        
+
     </xsl:template>
-    
+
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~command_menu-->
 
     <xsl:template name="command_menu">

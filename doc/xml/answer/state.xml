@@ -17,10 +17,10 @@
     </xml_parent_elements>
     
     <xml_attributes>
-        <xml_attribute name="time" type="yyyy-mm-dd hh:mm:ss" title="veraltet">
+        <xml_attribute name="config_file" type="filename" title="XML-Konfiguration">
             <description>
                 <p>
-                    Veraltet. Verwenden sie <scheduler_element directory="xml/answer/" name="answer" attribute="time"/>
+                    Name der XML-Konfigurationsdatei.
                 </p>
             </description>
         </xml_attribute>
@@ -156,6 +156,14 @@
                 <p>
                     Der Wert erhöht sich um eins, wenn der Scheduler im Wartezustand ist, 
                     weil gerade nichts zu tun ist.
+                </p>
+            </description>
+        </xml_attribute>
+
+        <xml_attribute name="time" type="yyyy-mm-dd hh:mm:ss" title="veraltet">
+            <description>
+                <p>
+                    Veraltet. Verwenden sie <scheduler_element directory="xml/answer/" name="answer" attribute="time"/>
                 </p>
             </description>
         </xml_attribute>
