@@ -1,4 +1,4 @@
-// $Id: spooler_http.h,v 1.7 2004/07/26 18:08:35 jz Exp $
+// $Id: spooler_http.h,v 1.8 2004/07/26 23:05:40 jz Exp $
 
 #ifndef __SPOOLER_HTTP_H
 #define __SPOOLER_HTTP_H
@@ -188,6 +188,7 @@ struct Html_chunk_reader : Chunk_reader_filter
     bool                        next_chunk_is_ready         ();
     int                         get_next_chunk_size         ( int recommended_size );
     string                      read_chunk                  ( int size );
+    bool                        try_fill_chunk              ( int recommended_size );
 
 
     Fill_zero                  _zero_;
@@ -197,6 +198,11 @@ struct Html_chunk_reader : Chunk_reader_filter
     int                        _available_net_chunk_size;
     string                     _chunk;
     bool                       _chunk_filled;
+
+    // Für <span class="debug9">...[debug9]...</span>
+    bool                       _awaiting_class;             // Wir erwarten [info] und dergleichen
+    bool                       _in_span;                    // Wir müssen am Zeilenende </span> schreiben
+    string                     _line_prefix;                // Zeilenanfang bis "[info"
 };
 
 //-------------------------------------------------------------------------------------------------

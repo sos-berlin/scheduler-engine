@@ -1,4 +1,4 @@
-// $Id: spooler_communication.cxx,v 1.93 2004/07/26 18:08:35 jz Exp $
+// $Id: spooler_communication.cxx,v 1.94 2004/07/26 23:05:40 jz Exp $
 /*
     Hier sind implementiert
 
@@ -40,9 +40,9 @@ const int wait_for_port_available = 60;   // Soviele Sekunden warten, bis TCP- o
 #   define INADDR_NONE (-1)
 #endif
 
-//---------------------------------------------------------------------------------------get_errno
-
-int get_errno() 
+//---------------------------------------------------------------------------------------socket_errno
+/*
+int socket_errno() 
 {
 #   ifdef SYSTEM_WIN
         return WSAGetLastError();
@@ -50,7 +50,7 @@ int get_errno()
         return errno;
 #   endif
 }
-
+*/
 //---------------------------------------------------------------------------------------set_linger
 
 static void set_linger( SOCKET socket )
@@ -360,6 +360,7 @@ bool Communication::Channel::do_accept( SOCKET listen_socket )
 {
     try
     {
+/*
         struct sockaddr_in peer_addr;
         sockaddrlen_t      peer_addr_len = sizeof peer_addr;
 
@@ -367,13 +368,16 @@ bool Communication::Channel::do_accept( SOCKET listen_socket )
         _read_socket = accept( listen_socket, (struct sockaddr*)&peer_addr, &peer_addr_len );
         if( _read_socket == SOCKET_ERROR )  
         {
-            int err = get_errno();
+            int err = socket_errno();
             LOG2( "socket.accept","  errno=" << err << "\n" );
             if( err == EWOULDBLOCK )  return false;
             throw_sos_socket_error( err, "accept" );
         }
 
         _write_socket = _read_socket;
+*/
+        bool ok = this->accept( listen_socket );
+        if( !ok )  return false;        // EWOULDBLOCK
 
         set_linger( _read_socket );
 
@@ -385,12 +389,12 @@ bool Communication::Channel::do_accept( SOCKET listen_socket )
         ret = getsockopt( _write_socket, SOL_SOCKET, SO_SNDBUF, (char*)&_socket_send_buffer_size , &s );
         if( ret == SOCKET_ERROR  ||  _socket_send_buffer_size <= 0 ) 
         {
-            LOG( "getsockopt(,,SO_SNDBUF)  errno=" << get_errno() << "\n" );
+            LOG( "getsockopt(,,SO_SNDBUF)  errno=" << socket_errno() << "\n" );
             _socket_send_buffer_size = 1024;
         }
 
 
-        _host = peer_addr.sin_addr;
+        _host = _peer_addr.sin_addr;
         _log.set_prefix( "TCP-Verbindung mit " + _host.as_string() );
 
 
@@ -401,7 +405,7 @@ bool Communication::Channel::do_accept( SOCKET listen_socket )
             return false;
         }
 
-        set_event_name( S() << "TCP:" << _host.as_string() << "/" << ntohs( peer_addr.sin_port ) );
+        //set_event_name( S() << "TCP:" << _host.as_string() << ":" << ntohs( _peer_addr.sin_port ) );
 
         _log.info( "TCP-Verbindung angenommen" );
 
@@ -454,7 +458,7 @@ bool Communication::Channel::do_recv()
 
     if( len <= 0 ) {
         if( len == 0 )  { _eof = true;  return true; }
-        int err = get_errno();
+        int err = socket_errno();
         if( err == EWOULDBLOCK )  return false; 
         throw_sos_socket_error( err, "recv" ); 
     }
@@ -523,7 +527,7 @@ bool Communication::Channel::do_send()
       //{
             int len = _write_socket == STDOUT_FILENO? write ( _write_socket, _text.data() + _send_progress, c )
                                                     : ::send( _write_socket, _text.data() + _send_progress, c, 0 );
-            err = len < 0? get_errno() : 0;
+            err = len < 0? socket_errno() : 0;
             LOG2( "socket.send", "send/write(" << _write_socket << "," << c << " bytes) ==> " << len << "  errno=" << err << "\n" );
             if( len == 0 )  break;   // Vorsichtshalber
             if( len < 0 ) 
@@ -644,7 +648,9 @@ bool Communication::Channel::async_continue_( bool wait )
     }
     catch( const Xc& x ) 
     { 
-        _log.error( x.what() );  
+        if( strcmp( x.code(), "SOCKET-54" ) == 0 )  _log.warn( x.what() );       // ECONNRESET
+                                              else  _log.error( x.what() );  
+
         _communication->remove_channel( this );  
         return true; 
     }
@@ -768,7 +774,7 @@ int Communication::bind_socket( SOCKET socket, struct sockaddr_in* sa )
 
     ret = ::bind( socket, (struct sockaddr*)sa, sizeof (struct sockaddr_in) );
 
-    if( ret == SOCKET_ERROR  &&  get_errno() == EADDRINUSE )
+    if( ret == SOCKET_ERROR  &&  socket_errno() == EADDRINUSE )
     {
         _spooler->_log.warn( "Port " + as_string( ntohs( sa->sin_port ) ) + " ist blockiert. Wir probieren es " + as_string(wait_for_port_available) + " Sekunden" );
 
@@ -781,7 +787,7 @@ int Communication::bind_socket( SOCKET socket, struct sockaddr_in* sa )
         
             ret = ::bind( socket, (struct sockaddr*)sa, sizeof (struct sockaddr_in) );
             if( ret != SOCKET_ERROR ) break;
-            if( get_errno() != EADDRINUSE )  break;
+            if( socket_errno() != EADDRINUSE )  break;
 
             if( isatty( fileno(stderr) ) && isatty( fileno(stdin) ))  fputc( i % 10 == 0? '0' + i / 10 % 10 : '.', stderr );
         }
@@ -852,6 +858,8 @@ void Communication::bind()
 
             if( _spooler->tcp_port() != 0 )
             {
+                _listen_socket.set_event_name( S() << "TCP listen(" << _spooler->tcp_port() << ")" );
+
                 _listen_socket._read_socket = socket( AF_INET, SOCK_STREAM, 0 );
                 if( _listen_socket._read_socket == SOCKET_ERROR )  throw_sos_socket_error( "socket" );
 
@@ -866,7 +874,7 @@ void Communication::bind()
 
                 LOG2( "socket.listen", "listen()\n" );
                 ret = listen( _listen_socket._read_socket, 5 );
-                if( ret == SOCKET_ERROR )  throw_errno( get_errno(), "listen" );
+                if( ret == SOCKET_ERROR )  throw_errno( socket_errno(), "listen" );
 
                 ret = ioctlsocket( _listen_socket._read_socket, FIONBIO, &on );
                 if( ret == SOCKET_ERROR )  throw_sos_socket_error( "ioctl(FIONBIO)" );
@@ -1024,8 +1032,8 @@ int Communication::run()
 
             if( n < 0 )  
             {
-                if( get_errno() == EINTR )  continue;
-                throw_sos_socket_error( get_errno(), "select" );
+                if( socket_errno() == EINTR )  continue;
+                throw_sos_socket_error( socket_errno(), "select" );
             }
 
 

@@ -1136,51 +1136,53 @@
                 </p>
             </caption>
             
-            <col valign="baseline"  width=" 40"/>
-            <!--col valign="top"  width=" 15"  style="padding-right: 2ex"/-->  
-            <col valign="baseline"  width=" 70"/>  
-            <col valign="baseline"  width=" 40"/>  
-            <col valign="baseline"  width="*"/>  
-            <col valign="baseline"  width="*"/>  
-            <col valign="baseline"  width="  1" align="right"/>  
-            
-            <thead class="order">
-                <tr>
-                    <td class="head1">Id</td>
-                    <!--td class="order">Pri</td-->
-                    <td class="head1">Created</td>
-                    <td class="head1">State</td>
-                    <td class="head1">State text</td>
-                    <td class="head1">Title</td>
-                    <td class="head1">&#160;</td>
-                </tr>
-                <tr>
-                    <td colspan="99" class="after_head_space">&#160;</td>
-                </tr>
-            </thead>
-            
-            <tbody>
-                <xsl:for-each select="order">
-                    <xsl:element name="tr">
-                        <xsl:if test="@task">
-                            <xsl:attribute name="style">font-weight: bold</xsl:attribute>
-                        </xsl:if>                
-                        
-                        <td><xsl:value-of select="@id"/></td>
-                        <!--td class="order"><xsl:value-of select="@priority"/></td-->
-                        <td><xsl:value-of select="my:format_date_or_time( string( @created ) )"  disable-output-escaping="yes"/></td>
-                        <td><xsl:value-of select="@state"/></td>
-                        <td><xsl:value-of select="@state_text"/></td>
-                        <td><xsl:value-of select="@title"/></td>
-                        
-                        <td align="right">
-                            <xsl:call-template name="command_menu">
-                                <xsl:with-param name="onclick" select="concat( 'order_menu__onclick(&quot;', @job_chain, '&quot;, &quot;', @id, '&quot;)' )"/>
-                            </xsl:call-template>
-                        </td>
-                    </xsl:element>
-                </xsl:for-each>
-            </tbody>
+            <xsl:if test="order">
+                <col valign="baseline"  width=" 40"/>
+                <!--col valign="top"  width=" 15"  style="padding-right: 2ex"/-->  
+                <col valign="baseline"  width=" 70"/>  
+                <col valign="baseline"  width=" 40"/>  
+                <col valign="baseline"  width="*"/>  
+                <col valign="baseline"  width="*"/>  
+                <col valign="baseline"  width="  1" align="right"/>  
+                
+                <thead class="order">
+                    <tr>
+                        <td class="head1">Id</td>
+                        <!--td class="order">Pri</td-->
+                        <td class="head1">Created</td>
+                        <td class="head1">State</td>
+                        <td class="head1">State text</td>
+                        <td class="head1">Title</td>
+                        <td class="head1">&#160;</td>
+                    </tr>
+                    <tr>
+                        <td colspan="99" class="after_head_space">&#160;</td>
+                    </tr>
+                </thead>
+                
+                <tbody>
+                    <xsl:for-each select="order">
+                        <xsl:element name="tr">
+                            <xsl:if test="@task">
+                                <xsl:attribute name="style">font-weight: bold</xsl:attribute>
+                            </xsl:if>                
+                            
+                            <td><xsl:value-of select="@id"/></td>
+                            <!--td class="order"><xsl:value-of select="@priority"/></td-->
+                            <td><xsl:value-of select="my:format_date_or_time( string( @created ) )"  disable-output-escaping="yes"/></td>
+                            <td><xsl:value-of select="@state"/></td>
+                            <td><xsl:value-of select="@state_text"/></td>
+                            <td><xsl:value-of select="@title"/></td>
+                            
+                            <td align="right">
+                                <xsl:call-template name="command_menu">
+                                    <xsl:with-param name="onclick" select="concat( 'order_menu__onclick(&quot;', @job_chain, '&quot;, &quot;', @id, '&quot;)' )"/>
+                                </xsl:call-template>
+                            </td>
+                        </xsl:element>
+                    </xsl:for-each>
+                </tbody>
+            </xsl:if>
         </table>
     </xsl:template> 
 

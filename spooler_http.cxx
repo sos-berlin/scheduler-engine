@@ -1,4 +1,4 @@
-// $Id: spooler_http.cxx,v 1.10 2004/07/26 18:08:35 jz Exp $
+// $Id: spooler_http.cxx,v 1.11 2004/07/26 23:05:40 jz Exp $
 /*
     Hier sind implementiert
 
@@ -18,6 +18,10 @@ using namespace std;
 
 namespace sos {
 namespace spooler {
+
+//---------------------------------------------------------------------------------------chunk_size
+
+const int chunk_size = 32768;   // Ungefähr, für Html_chunk_reader
 
 //-------------------------------------------------------------------------Http_parser::Http_parser
     
@@ -416,16 +420,7 @@ int Log_chunk_reader::get_next_chunk_size( int recommended_size )
 
 string Log_chunk_reader::read_chunk( int recommended_size )
 { 
-    //string result;
-
-    //if( _file.opened()  &&  !_file_eof )
-    {
-        return _file.read_string( recommended_size );
-    }
-    //else
-    //    throw_xc( __FUNCTION__ );
-
-    //return result;
+    return _file.read_string( recommended_size );
 }
 
 //-------------------------------------------------------------Html_chunk_reader::Html_chunk_reader
@@ -434,7 +429,8 @@ Html_chunk_reader::Html_chunk_reader( Chunk_reader* chunk_reader, const string& 
 : 
     Chunk_reader_filter(chunk_reader),
     _zero_(this+1), 
-    _state(reading_prefix)
+    _state(reading_prefix),
+    _awaiting_class(true)
 {
     _html_prefix = "<html>\n" 
                         "<head>\n" 
@@ -444,6 +440,7 @@ Html_chunk_reader::Html_chunk_reader( Chunk_reader* chunk_reader, const string& 
                             "</style>\n"
                             "<title>Scheduler log</title>\n"
                         "</head>\n" 
+
                         "<body class='log'>\n" 
 
                             "<script type='text/javascript'><!--\n"   
@@ -461,9 +458,9 @@ Html_chunk_reader::Html_chunk_reader( Chunk_reader* chunk_reader, const string& 
 */
                             // onsize wirkt auch nicht. Soll die jeweils letzten Zeilen zeigen.
                             //"<pre class='log' onresize='alert(1);event.srcElement.scrollBy(0,999999999)'>\n";
-                            "<pre class='log'>\n";
+                            "<pre class='log'>\n\n";
 
-    _html_suffix =          "</pre>\n"
+    _html_suffix =          "\n</pre>\n"
                         "</body>\n"
                     "</html>\n";
 }
@@ -474,79 +471,131 @@ Html_chunk_reader::~Html_chunk_reader()
 {
 }
 
-//---------------------------------------------------Html_chunk_reader::next_chunk_is_ready
+//-----------------------------------------------------------Html_chunk_reader::next_chunk_is_ready
 
 bool Html_chunk_reader::next_chunk_is_ready()
 { 
     switch( _state )
     {
-        case reading_prefix:  return true;
-        case reading_text:    return _chunk_reader->next_chunk_is_ready();
-        case reading_suffix:  return true;
+        case reading_prefix:  _chunk = _html_prefix;  return true;
+
+        case reading_text:    if( !try_fill_chunk( chunk_size ) )    return false;
+                              if( _chunk.length() > 0 )  return true;
+                              _state = reading_suffix;
+
+        case reading_suffix:  _chunk = _html_suffix;   return true;
+
         default:              return true;
     }
 }
 
-//---------------------------------------------------Html_chunk_reader::get_next_chunk_size
+//-----------------------------------------------------------Html_chunk_reader::get_next_chunk_size
 
 int Html_chunk_reader::get_next_chunk_size( int recommended_size )
 {
-    if( _state == reading_prefix )  return _html_prefix.length();
+    return _chunk.length();
+}
 
+//----------------------------------------------------------------Html_chunk_reader::try_fill_chunk
 
-    if( _state == reading_text )
+bool Html_chunk_reader::try_fill_chunk( int recommended_size )
+{
+    _chunk = "";
+
+    while( _chunk.length() < recommended_size )
     {
-        if( !_chunk_filled )
+        if( _available_net_chunk_size == 0 )
         {
-            if( _available_net_chunk_size == 0 )
-            {
-                _available_net_chunk_size = _chunk_reader->get_next_chunk_size( recommended_size );
-            }
+            if( !_chunk_reader->next_chunk_is_ready() )  return _chunk.length() > 0;
 
-            string text = _chunk_reader->read_chunk( _available_net_chunk_size );
-
-            _available_net_chunk_size -= text.length();
-
-            _chunk = "";
-            _chunk.reserve( text.length() * 2 );
-
-            const char* text_data = text.data();
-
-            for( int i = 0; i < text.length(); i++ )
-            {
-                int  begin = i;
-                char c     = text_data[i];
-                while( i < text.length()  &&  c != '<'  &&  c != '>'  &&  c != '&' )  c = text_data[ ++i ];
-                
-                _chunk.append( text.data() + begin, i - begin );
-                if( i == text.length() )  break;
-
-                switch( c )
-                {
-                    case '<': _chunk += "&lt;";   break;
-                    case '>': _chunk += "&gt;";   break;
-                    case '&': _chunk += "&amp;";  break;
-                    default : _chunk += c;
-                }
-            }
-
-            _chunk_filled = true;
+            _available_net_chunk_size = _chunk_reader->get_next_chunk_size( 5 );//recommended_size );
         }
 
-        if( _chunk.length() > 0 )  return _chunk.length();
-                             else  _state = reading_suffix;
+        string text = _chunk_reader->read_chunk( _available_net_chunk_size );
+        if( text == "" )  return _chunk.length() > 0;
+
+        _available_net_chunk_size -= text.length();
+
+        _chunk.reserve( text.length() * 2 );
+
+        const char* text_data = text.data();
+
+        for( int i = 0; i < text.length(); i++ )
+        {
+            int  begin = i;
+            char c     = text_data[i];
+
+            if( _awaiting_class )
+            {
+                while( i < text.length()  &&  c != '<'  &&  c != '>'  &&  c != '&'  &&  c != '\r'  &&  c != '\n'  &&  c != ']' )  c = text_data[ ++i ];
+                
+                _line_prefix.append( text_data + begin, i - begin );
+
+                if( i == text.length() )  break;
+
+                if( c == ']' )
+                {
+                    int pos = _line_prefix.find( '[' );
+                    if( pos != string::npos )
+                    {
+                        _awaiting_class = false;
+                        pos++;
+
+                        _chunk += "<span class='log_";
+                        _chunk += _line_prefix.substr( pos, _line_prefix.length() - pos );
+                        _chunk += "'>";
+                        _chunk += _line_prefix;
+
+                        _line_prefix = "";
+                        _in_span = true;    // </span> nicht vergessen
+                    }
+                }
+                else
+                {
+                    _chunk += _line_prefix;      // War nix. 
+                    _line_prefix = "";
+                }
+            }
+            else
+            {
+                while( i < text.length()  &&  c != '<'  &&  c != '>'  &&  c != '&'  &&  c != '\r'  &&  c != '\n' )  c = text_data[ ++i ];
+                _chunk.append( text_data + begin, i - begin );
+                if( i == text.length() )  break;
+            }
+
+            switch( c )
+            {
+                case '<' : _chunk += "&lt;";   break;
+                case '>' : _chunk += "&gt;";   break;
+                case '&' : _chunk += "&amp;";  break;
+                case '\r': break;
+
+                case '\n': if( _in_span )  _chunk += "</span>", _in_span = false;
+                            _chunk += c;        
+                            _awaiting_class = true;      // Wir erwarten [info] [error] und dergleichen
+                            break;   
+
+                default : _chunk += c;
+            }
+        }
     }
 
-
-    if( _state == reading_suffix )  return _html_suffix.length();
-
-    return 0;  // eof
+    return true;  // eof
 }
 
 //--------------------------------------------------------------------Html_chunk_reader::read_chunk
 
 string Html_chunk_reader::read_chunk( int recommended_size )
 { 
+    switch( _state )
+    {
+        case reading_prefix: _state = reading_text;     break;
+        case reading_suffix: _state = reading_finished; break;
+        default: ;
+    }
+
+    return _chunk;
+/*
     switch( _state )
     {
         case reading_prefix:
@@ -557,8 +606,6 @@ string Html_chunk_reader::read_chunk( int recommended_size )
 
         case reading_text:
         {
-            assert( _chunk_filled );
-            _chunk_filled = false;
             return _chunk;
         }
 
@@ -570,6 +617,7 @@ string Html_chunk_reader::read_chunk( int recommended_size )
 
         default: throw_xc( __FUNCTION__ );
     }
+*/
 }
 
 //-------------------------------------------------------------------------------------------------
