@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.147 2002/11/28 11:21:23 jz Exp $
+// $Id: spooler.cxx,v 1.148 2002/11/29 17:23:44 jz Exp $
 /*
     Hier sind implementiert
 
@@ -928,7 +928,7 @@ void Spooler::run()
                     Wait_handles wait_handles = _wait_handles;
                     FOR_EACH( Thread_list, _thread_list, it )  if( !(*it)->_free_threading )  wait_handles += (*it)->_wait_handles;
 
-                    if( _debug )  if( wait_handles.wait(0) == -1 )  _log.debug( msg ), wait_handles.wait( _next_time );
+                    if( _debug )  if( wait_handles.wait(0) == -1 )  _log.debug( msg ), wait_handles.wait_until( _next_time );
 
                     wait_handles.clear();
 
