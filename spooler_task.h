@@ -1,4 +1,4 @@
-// $Id: spooler_task.h,v 1.75 2002/11/26 09:23:54 jz Exp $
+// $Id: spooler_task.h,v 1.76 2002/11/26 11:38:10 jz Exp $
 
 #ifndef __SPOOLER_TASK_H
 #define __SPOOLER_TASK_H
@@ -293,45 +293,20 @@ struct Job : Sos_self_deleting
   protected:
     friend struct               Job_history;
 
-    string                     _name;
     Spooler_thread*            _thread;
 
-
-    Prefix_log                 _log;
-    bool                       _log_append;                 // Jobprotokoll fortschreiben <job log_append=(yes|no)>
-
-    Sos_ptr<Object_set_descr>  _object_set_descr;           // Job nutzt eine Objektemengeklasse
-    Level                      _output_level;
-    Module                     _module;                     // Job hat ein eigenes Skript
-    xml::Element_ptr           _script_element;             // <script> (mit <include>) für <modify_job cmd="reload"/>
-    
-    string                     _process_filename;           // Job ist ein externes Programm
-    string                     _process_param;              // Parameter für das Programm
-    string                     _process_log_filename;
-
-    Run_time                   _run_time;
-    int                        _priority;
-    bool                       _temporary;                  // Job nach einem Lauf entfernen
-    bool                       _start_once;                 // <run_time start_once="">, wird false nach Start
-    Delay_after_error          _delay_after_error;
-    int                        _error_steps;                // Zahl aufeinanderfolgender Fehler
-
+    string                     _name;
     string                     _title;                      // <job title="">
     string                     _description;                // <description>
     string                     _state_text;                 // spooler_job.state_text = "..."
 
-    ptr<Com_variable_set>      _default_params;
-
-    xml::Element_ptr           _module_xml_element;         // <script> aus <config>
-    Time                       _module_xml_mod_time;
-    Module*                    _module_ptr;
-    ptr<Module_instance>       _module_instance;            // Für use_engine="job"
+    string                     _process_filename;           // Job ist ein externes Programm
+    string                     _process_param;              // Parameter für das Programm
+    string                     _process_log_filename;
 
     int                        _step_count;                 // Anzahl spooler_process() aller Tasks
     int                        _last_task_step_count;       // Anzahl spooler_process() der letzten Task
     bool                       _has_spooler_process;
-    Directory_watcher_list     _directory_watcher_list;
-    Event                      _event;                      // Zum Starten des Jobs
 
     State                      _state;
     State_cmd                  _state_cmd;
@@ -340,22 +315,50 @@ struct Job : Sos_self_deleting
     Time                       _delay_until;                // Nach Fehler verzögern
     Time                       _next_start_time;
     Time                       _next_time;                  // Für Spooler_thread::wait(): Um diese Zeit soll Job::do_something() gerufen werden.
-    Period                     _period;                     // Derzeitige oder nächste Period
     Time                       _next_single_start;
     Time                       _repeat;                     // spooler_task.repeat
+    int                        _priority;
+    bool                       _temporary;                  // Job nach einem Lauf entfernen
+    bool                       _start_once;                 // <run_time start_once="">, wird false nach Start
 
+    bool                       _close_engine;               // Bei einem Fehler in spooler_init()
+
+    Prefix_log                 _log;
+    bool                       _log_append;                 // Jobprotokoll fortschreiben <job log_append=(yes|no)>
+
+    Run_time                   _run_time;
+    Period                     _period;                     // Derzeitige oder nächste Period
+    Delay_after_error          _delay_after_error;
+    int                        _error_steps;                // Zahl aufeinanderfolgender Fehler
+
+    Event                      _event;                      // Zum Starten des Jobs
+    Directory_watcher_list     _directory_watcher_list;
+    Xc_copy                    _error;
+
+    ptr<Com_variable_set>      _default_params;
     ptr<Com_job>               _com_job;
     ptr<Com_log>               _com_log;
     ptr<Com_task>              _com_task;                   // Objekt bleibt, Inhalt wechselt über die Tasks hinweg (für use_engine="job"), weil Objekt spooler_task bei use_engine="job" in der Scripting Engine bleibt (kann nicht ausgetauscht werden)
-    Xc_copy                    _error;
-    bool                       _close_engine;               // Bei einem Fehler in spooler_init()
-    Sos_ptr<Task>              _task;                       // Es kann nur eine Task geben. Zirkel: _task->_job == this
+
+
+    Module                     _module;                     // Job hat ein eigenes Skript
+    xml::Element_ptr           _script_element;             // <script> (mit <include>) für <modify_job cmd="reload"/>
+
+    xml::Element_ptr           _module_xml_element;         // <script> aus <config>
+    Time                       _module_xml_mod_time;
+    Module*                    _module_ptr;
+    ptr<Module_instance>       _module_instance;            // Für use_engine="job"
+
+    Sos_ptr<Object_set_descr>  _object_set_descr;           // Job nutzt eine Objektemengeklasse
+    Level                      _output_level;
+    
     Task_queue                 _task_queue;                 // Warteschlange der nächsten zu startenden Tasks
+    Sos_ptr<Task>              _task;                       // Es kann nur eine Task geben. Zirkel: _task->_job == this
+
+    Job_history                _history;
 
     ptr<Order_queue>           _order_queue;
     int                        _job_chain_priority;         // Maximum der Prioritäten aller Jobkettenknoten mit diesem Job. 
-
-    Job_history                _history;
 };
 
 //------------------------------------------------------------------------------------------Job_list
@@ -419,6 +422,9 @@ struct Task : Sos_self_deleting
     Spooler*                   _spooler;
     Sos_ptr<Job>               _job;                        // Zirkel!
 
+    Thread_semaphore           _terminated_events_lock;
+    vector<Event*>             _terminated_events;
+
     int                        _id;
     Start_cause                _cause;
     double                     _cpu_time;
@@ -442,8 +448,6 @@ struct Task : Sos_self_deleting
   //Xc_copy                    _error;
     ptr<Order>                 _order;
 
-    Thread_semaphore           _terminated_events_lock;
-    vector<Event*>             _terminated_events;
 };
 
 typedef list< Sos_ptr<Task> >   Task_list;

@@ -1,4 +1,4 @@
-// $Id: spooler_thread.h,v 1.29 2002/11/24 15:33:04 jz Exp $
+// $Id: spooler_thread.h,v 1.30 2002/11/26 11:38:10 jz Exp $
 
 #ifndef __SPOOLER_THREAD_H
 #define __SPOOLER_THREAD_H
@@ -65,15 +65,29 @@ struct Spooler_thread : Sos_self_deleting
 
     string                     _name;
     Spooler*                   _spooler;
+    Thread_semaphore           _lock;
+    Prefix_log                 _log;
 
-    Wait_handles               _wait_handles;
+    string                     _include_path;
+    bool                       _free_threading;             // Dieser Thread soll frei, ohne _serialize_lock laufen.
+
+    Handle                     _thread_handle;
+    Thread_id                  _thread_id;
+    int                        _thread_priority;
+
     Event                      _event;
-    Job_list                   _job_list;
-    Job*                       _current_job;                // Job, der gerade einen Schritt tut
+    Wait_handles               _wait_handles;
+
+    ptr<Com_log>               _com_log;                    // COM-Objekt spooler.log
+    ptr<Com_thread>            _com_thread;                 // COM-Objekt
+
     Module                     _module;                     // <script>
     ptr<Module_instance>       _module_instance;
-    Prefix_log                 _log;
-    string                     _include_path;
+
+    Job_list                   _job_list;
+    vector<Job*>               _prioritized_order_job_array;
+    Time                       _prioritized_order_job_array_time;
+    Job*                       _current_job;                // Job, der gerade einen Schritt tut
 
     Time                       _next_start_time;
     int                        _running_tasks_count;        // Wenn 0, dann warten
@@ -84,23 +98,12 @@ struct Spooler_thread : Sos_self_deleting
     int                        _nothing_done_count;
     int                        _nothing_done_max;
 
-
-    Thread_semaphore           _lock;
-    bool                       _free_threading;             // Dieser Thread soll frei, ohne _serialize_lock laufen.
-    Handle                     _thread_handle;
-    Thread_id                  _thread_id;
-    int                        _thread_priority;
-    ptr<Com_log>               _com_log;                    // COM-Objekt spooler.log
-    ptr<Com_thread>            _com_thread;                 // COM-Objekt
-
     bool                       _terminated;
 
   private:
                                 Spooler_thread              ( const Spooler_thread& );      // Nicht implementiert
     Spooler_thread&             operator =                  ( const Spooler_thread& );      // Nicht implementiert
 
-    vector<Job*>               _prioritized_order_job_array;
-    Time                       _prioritized_order_job_array_time;
 };
 
 typedef list< Sos_ptr<Spooler_thread> >  Thread_list;

@@ -1,4 +1,4 @@
-// $Id: spooler_module_java.h,v 1.11 2002/11/24 15:33:01 jz Exp $
+// $Id: spooler_module_java.h,v 1.12 2002/11/26 11:38:09 jz Exp $
 
 #ifndef __SPOOLER_MODULE_JAVA_H
 #define __SPOOLER_MODULE_JAVA_H
@@ -97,6 +97,11 @@ struct Java_vm                  // Java virtual machine
     Fill_zero                  _zero_;
     Spooler*                   _spooler;
     Prefix_log                 _log;
+    JavaVMInitArgs             _vm_args;
+    vector<Option>             _options;
+    JavaVM*                    _vm;
+    Thread_data<Java_thread_data> _thread_data;
+
     string                     _filename;                   // Dateiname der Java-VM
     string                     _work_class_dir;
     string                     _ini_class_path;
@@ -104,12 +109,7 @@ struct Java_vm                  // Java virtual machine
     string                     _complete_class_path;
     string                     _javac;                      // Dateiname das Java-Compilers
   //JDK1_1InitArgs             _vm_args;
-    JavaVMInitArgs             _vm_args;
-    vector<Option>             _options;
-    JavaVM*                    _vm;
     jclass                     _idispatch_jclass;
-
-    Thread_data<Java_thread_data> _thread_data;
 };
 
 //--------------------------------------------------------------------------------------Java_object
