@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="scheduler.xslt" type="text/xsl"?>
 
-<!--$Id: log_categories.xml,v 1.4 2004/10/31 15:30:37 jz Exp $-->
+<!--$Id: log_categories.xml,v 1.5 2004/11/01 15:54:11 jz Exp $-->
 
 <log_categories 
     title    = "Log-Kategorien" 
     base_dir = ""
     author   = "$Author: jz $"
-    date     = "$Date: 2004/10/31 15:30:37 $"
+    date     = "$Date: 2004/11/01 15:54:11 $"
 >
 
     <scheduler_keyword keyword="Log-Kategorien"/>
@@ -69,6 +69,7 @@
     <log_category name="rtf"            title="RTF-Prozessor">
         <log_category name="map_next_line"  title="Zuordnung der Stellen im RTF-Dokument den Zeilennummern des extrahierten Vorlagenskripts"/>
         <log_category name="merge"          title="Mischen verschiedener Vorlagen"/>
+        <log_category name="learn"          title="Hinzugelernte (unbekannte) RTF-Codes"/>
     </log_category>
 
     <log_category name="scheduler"      title="Scheduler">
