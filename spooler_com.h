@@ -1,4 +1,4 @@
-// $Id: spooler_com.h,v 1.27 2002/03/22 09:05:39 jz Exp $
+// $Id: spooler_com.h,v 1.28 2002/04/05 13:21:17 jz Exp $
 
 #ifndef __SPOOLER_COM_H
 #define __SPOOLER_COM_H
@@ -87,9 +87,13 @@ struct Com_variable_set: spooler_com::Ivariable_set, Sos_ole_object
     STDMETHODIMP                put_var                     ( BSTR, VARIANT* );
     STDMETHODIMP                get_var                     ( BSTR, VARIANT* );
     STDMETHODIMP                get_count                   ( int* );
+    STDMETHODIMP                get_dom                     ( xml::IXMLDOMDocument** );
 
-    std::map<CComBSTR,CComVariant>  _map;
-    Thread_semaphore                _lock;
+
+    typedef std::map<CComBSTR,CComVariant>  Map;
+
+    Map                        _map;
+    Thread_semaphore           _lock;
 };
 
 //------------------------------------------------------------------------------------------Com_log

@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.85 2002/04/04 17:18:37 jz Exp $
+// $Id: spooler.cxx,v 1.86 2002/04/05 13:21:16 jz Exp $
 /*
     Hier sind implementiert
 
@@ -26,10 +26,8 @@
 #include "../zschimmer/zschimmer.h"
 using zschimmer::lcase;
 
-//#if !defined SYSTEM_MICROSOFT
-#   include <sys/types.h>
-#   include <sys/timeb.h>
-//#endif
+#include <sys/types.h>
+#include <sys/timeb.h>
 
 
 
@@ -388,13 +386,13 @@ void Spooler::load_arg()
     _include_path       = read_profile_string    ( "factory.ini", "spooler", "include_path"       , _include_path );    _include_path_as_option_set = !_include_path.empty();
     _spooler_param      = read_profile_string    ( "factory.ini", "spooler", "param"              );          _spooler_param_as_option_set = !_spooler_param.empty();
     log_level           = read_profile_string    ( "factory.ini", "spooler", "log_level"          , log_level );   
-    _history_filename   = read_profile_string    ( "factory.ini", "spooler", "history_file"       );
     _history_columns    = read_profile_string    ( "factory.ini", "spooler", "history_columns"    );
     _history_on_process = read_profile_on_process( "factory.ini", "spooler", "history_on_process" , 1 );
     _history_archive    = read_profile_archive   ( "factory.ini", "spooler", "history_archive"    , arc_no );
     _history_with_log   = read_profile_bool      ( "factory.ini", "spooler", "history_with_log"   , false );
-    _history_tablename  = read_profile_string    ( "factory.ini", "spooler", "history_table"      , "spooler_history" );
-    _variables_tablename= read_profile_string    ( "factory.ini", "spooler", "variables_table"    , "spooler_variables" );
+    _db_name            = read_profile_string    ( "factory.ini", "spooler", "db"                 );
+    _history_tablename  = read_profile_string    ( "factory.ini", "spooler", "db_history_table"   , "spooler_history" );
+    _variables_tablename= read_profile_string    ( "factory.ini", "spooler", "db_variables_table" , "spooler_variables" );
 
 
     try
@@ -491,6 +489,8 @@ void Spooler::start()
     _log.set_directory( _log_directory );
     _log.open_new();
 
+    _db.open( _db_name );
+
     _communication.start_or_rebind();
 
     _state_cmd = sc_none;
@@ -543,7 +543,9 @@ void Spooler::stop()
     _script_instance.close();
 
     if( _state_cmd == sc_terminate_and_restart )  spooler_restart( _is_service );
-   
+
+    _db.close();
+
     set_state( s_stopped );     
     // Der Dienst ist hier beendet
 }
@@ -832,7 +834,7 @@ static string full_path( const string& path )
 
 //-------------------------------------------------------------------------------delete_new_spooler
 
-void delete_new_spooler( void* )
+void __cdecl delete_new_spooler( void* )
 {
     string          this_spooler   = program_filename();
     string          basename       = basename_of_path( this_spooler );

@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.74 2002/04/04 17:18:38 jz Exp $
+// $Id: spooler_task.cxx,v 1.75 2002/04/05 13:21:17 jz Exp $
 /*
     Hier sind implementiert
 
@@ -759,6 +759,8 @@ void Job::finish()
 
     try
     {
+        _history.end();
+
         //if( _log.mail_on_success() && !has_error()  
         //||  _log.mail_on_error()   &&  has_error() )  _log.send();
 
@@ -1394,8 +1396,6 @@ void Task::close()
 
     do_close();
 
-    _job->_history.end();
-
     // Alle, die mit wait_until_terminated() auf diese Task warten, wecken:
     THREAD_LOCK( _terminated_events_lock )  
     {
@@ -1602,6 +1602,24 @@ bool Task::wait_until_terminated( double wait_time )
 void Task::set_cause( Start_cause cause )
 {
     if( !_cause )  _cause = cause;
+}
+
+//-----------------------------------------------------------------------------Task::has_parameters
+
+bool Task::has_parameters()
+{
+    int n = 0;
+    _params->get_count( &n );
+    return n != 0;
+}
+
+//--------------------------------------------------------------------------Task::parameters_as_dom
+
+xml::Document_ptr Task::parameters_as_dom()
+{
+    xml::Document_ptr result;
+    _params->get_dom( &result );
+    return result;
 }
 
 //-----------------------------------------------------------------------Script_task::do_on_success

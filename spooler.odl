@@ -1,4 +1,4 @@
-// $Id: spooler.odl,v 1.28 2002/03/22 18:57:42 jz Exp $
+// $Id: spooler.odl,v 1.29 2002/04/05 13:21:16 jz Exp $
 
 // Anweisung: midl /nologo /error all /out $(OutDir) $(InputPath)
 
@@ -11,6 +11,7 @@
 library spooler
 {
     importlib("STDOLE32.TLB");
+    importlib("msxml3.dll");
 
     interface Ilog;
     interface Itask;
@@ -63,6 +64,9 @@ library spooler
 
         [propget]
         HRESULT                 count                       ( [out,retval] int* value );
+
+        [propget]
+        HRESULT                 dom                         ( [out,retval] IXMLDOMDocument** xml_document );
     }
 
     [

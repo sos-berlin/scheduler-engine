@@ -1,4 +1,4 @@
-// $Id: spooler_task.h,v 1.41 2002/04/04 17:18:38 jz Exp $
+// $Id: spooler_task.h,v 1.42 2002/04/05 13:21:17 jz Exp $
 
 #ifndef __SPOOLER_TASK_H
 #define __SPOOLER_TASK_H
@@ -352,6 +352,8 @@ struct Task : Sos_self_deleting
     void                        on_error_on_success         ();
 
     void                        set_cause                   ( Start_cause );
+    bool                        has_parameters              ();
+    xml::Document_ptr           parameters_as_dom           ();
 
 
     bool                        wait_until_terminated       ( double wait_time = latter_day );

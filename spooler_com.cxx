@@ -1,4 +1,4 @@
-// $Id: spooler_com.cxx,v 1.32 2002/03/20 11:07:48 jz Exp $
+// $Id: spooler_com.cxx,v 1.33 2002/04/05 13:21:17 jz Exp $
 /*
     Hier sind implementiert
 
@@ -151,6 +151,42 @@ STDMETHODIMP Com_variable_set::get_count( int* result )
 {
     THREAD_LOCK( _lock )  *result = _map.size();
     return NOERROR;
+}
+
+//------------------------------------------------------------------------Com_variable_set::get_dom
+
+STDMETHODIMP Com_variable_set::get_dom( xml::IXMLDOMDocument** result )
+{
+    HRESULT hr = NOERROR;
+
+    try
+    {
+        *result = NULL;
+
+        xml::Document_ptr doc = xml::Document_ptr( __uuidof(xml::DOMDocument30), NULL );
+        doc->appendChild( doc->createProcessingInstruction( "xml", "version=\"1.0\"" ) );
+        
+        xml::Element_ptr varset = doc->createElement( "variable_set" );
+        doc->appendChild( varset );
+
+        for( Map::iterator it = _map.begin(); it != _map.end(); it++ )
+        {
+            if( it->second.vt != VT_EMPTY )
+            {
+                xml::Element_ptr var = doc->createElement( "variable" );
+                var->setAttribute( "name" , (BSTR)it->first  );
+                var->setAttribute( "value", it->second );
+                varset->appendChild( var );
+            }
+        }
+
+        *result = doc;
+        (*result)->AddRef();
+    }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Variable_set::dom" ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Variable_set::dom" ); }
+
+    return hr;
 }
 
 //---------------------------------------------------------------------------------Com_log::Com_log

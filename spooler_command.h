@@ -1,4 +1,4 @@
-// $Id: spooler_command.h,v 1.7 2002/04/04 17:18:38 jz Exp $
+// $Id: spooler_command.h,v 1.8 2002/04/05 13:21:17 jz Exp $
 
 #ifndef __SPOOLER_COMMAND_H
 #define __SPOOLER_COMMAND_H
@@ -9,6 +9,7 @@ namespace spooler {
 void                            dom_append_text_element     ( const xml::Element_ptr& element, const char* element_name, const string& text );
 void                            append_error_element        ( const xml::Element_ptr&, const Xc_copy& );
 void                            dom_append_nl               ( const xml::Element_ptr& );
+string                          xml_as_string               ( const xml::Document_ptr& );
 
 //--------------------------------------------------------------------------------Command_processor
 
@@ -40,6 +41,7 @@ struct Command_processor
 };
 
 //-------------------------------------------------------------------------------------------------
+
 
 } //namespace spooler
 } //namespace sos

@@ -1,4 +1,4 @@
-// $Id: spooler.h,v 1.72 2002/04/04 17:18:37 jz Exp $
+// $Id: spooler.h,v 1.73 2002/04/05 13:21:16 jz Exp $
 
 #ifndef __SPOOLER_H
 #define __SPOOLER_H
@@ -36,6 +36,7 @@
 #include <time.h>
 
 #include "../kram/sosdate.h"
+#include "../kram/sosprof.h"
 #include "../kram/sossock1.h"
 #include "../kram/thread_semaphore.h"
 #include "../kram/com_simple_standards.h"
@@ -219,7 +220,6 @@ struct Spooler
     int                        _log_collect_within;
     int                        _log_collect_max;
 
-    string                     _history_filename;
     string                     _history_columns;
     int                        _history_on_process;
     Archive_switch             _history_archive;
@@ -240,6 +240,7 @@ struct Spooler
     Thread_semaphore           _job_name_lock;              // Sperre von get_job(name) bis add_job() für eindeutige Jobnamen
     Thread_semaphore           _serialize_lock;             // Wenn die Threads nicht nebenläufig sein sollen
 
+    string                     _db_name;
     Spooler_db                 _db;
 
   private:

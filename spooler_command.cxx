@@ -1,4 +1,4 @@
-// $Id: spooler_command.cxx,v 1.42 2002/04/04 17:18:38 jz Exp $
+// $Id: spooler_command.cxx,v 1.43 2002/04/05 13:21:17 jz Exp $
 /*
     Hier ist implementiert
 
@@ -128,7 +128,7 @@ xml::Element_ptr Command_processor::execute_show_history( const xml::Element_ptr
     if( _security_level < Security::seclev_info )  throw_xc( "SPOOLER-121" );
 
     string job_name = as_string( element->getAttribute( "job" ) );
-    int    tail     = as_int( as_string(element->getAttribute( "tail" ) ) );
+    int    tail     = as_int( as_string(element->getAttribute( "tail" ) ), 10 );
 
     Sos_ptr<Job> job = _spooler->get_job( job_name );
 
@@ -316,7 +316,7 @@ xml::Element_ptr Command_processor::execute_command( const xml::Element_ptr& ele
 
 //------------------------------------------------------------------------------------xml_as_string
 
-static string xml_as_string( const xml::Document_ptr& document )
+string xml_as_string( const xml::Document_ptr& document )
 {
     char   tmp_filename [MAX_PATH];
     int    ret;
