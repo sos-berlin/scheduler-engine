@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding="utf-8"?>
-<!-- $Id: scheduler.xslt,v 1.32 2004/09/10 09:29:35 jz Exp $ -->
+<!-- $Id: scheduler.xslt,v 1.33 2004/09/11 09:28:26 jz Exp $ -->
 
 <!--
     Änderungswünsche:
@@ -536,6 +536,10 @@
                 <xsl:call-template name="body_start">
                     <xsl:with-param name="title"       select="$title"/>
                 </xsl:call-template>
+                
+                <p>
+                    (Das Register ist ein Experiment)
+                </p>
                 
                 <p>
                     <b>Inhalt</b>
@@ -1393,7 +1397,9 @@
                 <td align="right">
                     <p style="font-size: 8pt; margin-top: 0">
                         Zuletzt geändert von
-                        <xsl:value-of select="           substring-before( substring-after( /*/@author, 'Author: ' ), ' $' )"            />,
+                        <!--xsl:value-of select="           substring-before( substring-after( /*/@author, 'Author: ' ), ' $' )"            />,-->
+                        <xsl:variable name="name" select="document('standards.xml')/standards/authors/author[ @author = current()/@author ]/@full_name"/>
+                        <xsl:value-of select="$name | @author"/>,
                         <xsl:value-of select="translate( substring-before( substring-after( /*/@date,   'Date: '   ), ' $' ), '/', '-' )"/> GMT
                     </p>
                 </td>

@@ -1,20 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="scheduler.xslt" type="text/xsl"?>
 
-<!--$Id: protokolle.xml,v 1.4 2004/09/08 19:23:23 jz Exp $-->
+<!--$Id: protokolle.xml,v 1.5 2004/09/11 09:28:26 jz Exp $-->
 
 <description 
     title    = "Protokolle" 
     base_dir = ""
-    parent_page = "index.xml"
     author   = "$Author: jz $"
-    date     = "$Date: 2004/09/08 19:23:23 $"
+    date     = "$Date: 2004/09/11 09:28:26 $"
 >
+
+<scheduler_keyword keyword="Protokoll"/>
 
 <p>
     Ins mit der Option <scheduler_option name="log-dir"/> eingestellten Verzeichnis schreibt der Scheduler seine Protokolle.
 </p>
 
+<scheduler_keyword keyword="Hauptprotokoll" type="definition"/>
 <h3>Hauptprotokoll</h3>
 <p>
     Das Hauptprotokoll fast alle Protokolle zusammen.
@@ -46,6 +48,50 @@
     Das Auftragsprotokoll wird nach Ende des Auftrags gelöscht.
 </p>
 
-<h3><scheduler_comment>Ablage in Datenbank, eMail-Versand, show_state, http:show_log </scheduler_comment></h3>
+
+
+<h2>Ablage in den Datenbank</h2>
+
+<p>
+    Der Scheduler kann die Task- und Auftragsprotokolle mit in die Historie schreiben.
+    Voraussetzung sind
+</p>
+    
+<ul>
+    <li>
+        Betrieb mit einer <a href="datenbank.xml">Datenbank</a>, 
+    </li>
+    <li>
+        die Einstellung <scheduler_ini_entry file="factory.ini" section="spooler" entry="history"/>), um die Historie einzuschalten,
+    </li>
+    <li>
+        die Einstellung <scheduler_ini_entry file="factory.ini" section="spooler" entry="history_with_log"/> fürs Task-Protokoll,
+    </li>
+    <li>
+        die Einstellung <scheduler_ini_entry file="factory.ini" section="job" entry="history_with_log"/> für bestimmte Jobs,
+    </li>
+    <li>
+        die Einstellung <scheduler_ini_entry file="factory.ini" section="spooler" entry="order_history_with_log"/> fürs Auftragsprotokoll.
+    </li>
+</ul>
+
+
+<h2>eMail-Versand</h2>    
+
+<p>
+    Der Scheduler kann das Task-Protokoll per eMail verschicken. Lesen Sie weiter im Kapitel <a href="email.xml">eMail</a>.
+</p>
+
+
+
+<h2>Anzeigen der Protokolle</h2>
+
+<p>
+    Siehe Kommandos <scheduler_element name="show_state"/>, <scheduler_element name="show_task"/> und <scheduler_element name="show_history"/>.
+</p>
+
+
+
+<scheduler_comment>http:show_log </scheduler_comment>
 
 </description>
