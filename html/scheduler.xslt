@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding="utf-8"?>
-<!-- $Id: scheduler.xslt,v 1.2 2004/08/12 08:48:50 jz Exp $ -->
+<!-- $Id: scheduler.xslt,v 1.3 2004/08/12 09:04:45 jz Exp $ -->
 <xsl:stylesheet xmlns:xsl   = "http://www.w3.org/1999/XSL/Transform" 
                 xmlns:msxsl = "urn:schemas-microsoft-com:xslt"
                 xmlns:my    = "http://sos-berlin.com/scheduler/mynamespace"
@@ -212,7 +212,7 @@
             </thead>
             
             <tbody>
-                <xsl:for-each select="job [ /spooler/@show_order_jobs_checkbox or @order='yes' ]">  
+                <xsl:for-each select="job [ /spooler/@show_order_jobs_checkbox or not( @order='yes' ) ]">  
                 
                     <xsl:element name="tr">
                         <xsl:attribute name="id"         >scheduler_tr_job_<xsl:value-of select="@job"/></xsl:attribute>
@@ -982,9 +982,12 @@
         </xsl:for-each>
 
 
-        <p style="margin-top: 5ex; margin-bottom: 3ex"></p>
-        <xsl:apply-templates select="queued_tasks" mode="list"/>
-        
+        <!-- Tasks queue bei order='yes' nur zeigen, wenn sie nicht leer ist (was aber unsinnig wäre) -->
+        <xsl:if test="not( @order='yes' and ( not( queued_tasks ) or queued_tasks/@length='0' ) )">
+            <p style="margin-top: 5ex; margin-bottom: 3ex"></p>
+            <xsl:apply-templates select="queued_tasks" mode="list"/>
+        </xsl:if>
+
         
         <p style="margin-top: 5ex; margin-bottom: 3ex"></p>
         <xsl:apply-templates select="order_queue" mode="list"/>

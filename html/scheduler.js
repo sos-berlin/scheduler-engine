@@ -1,4 +1,4 @@
-// $Id: scheduler.js,v 1.16 2004/08/12 08:48:50 jz Exp $
+// $Id: scheduler.js,v 1.17 2004/08/12 09:04:45 jz Exp $
 
 //----------------------------------------------------------------------------------------------var
 
@@ -12,7 +12,6 @@ function Scheduler()
     this._url           = "http://" + document.location.host + "/";
     this._xml_http      = new ActiveXObject( "Msxml2.XMLHTTP" );
     this._log_window    = undefined;
-    
     //this._configuration = new Scheduler_html_configuration( this._url + "config.xml" );
 }
 

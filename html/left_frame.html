@@ -1,4 +1,4 @@
-<!-- $Id: left_frame.html,v 1.4 2004/08/12 08:48:50 jz Exp $ -->
+<!-- $Id: left_frame.html,v 1.5 2004/08/12 09:04:45 jz Exp $ -->
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <html>
 
@@ -72,6 +72,9 @@ function do_onload()
     if( _stylesheet.parseError.errorCode )  throw new Error( "Fehler im Stylesheet:\n" + _stylesheet.parseError.reason );
 
     document.all.stylesheet.outerHTML = "<span id='stylesheet'></span>";
+
+
+    window.parent.document.title = "Scheduler " + document.location.host;
     
     _scheduler = new Scheduler();
     repeat_update( document.all.update_periodically_checkbox.checked, true );
