@@ -223,6 +223,8 @@ Scheduler.prototype.modify_datetime_for_xslt = function( response )
     this.add_datetime_attributes_for_xslt( response, now, "idle_since"            );
     this.add_datetime_attributes_for_xslt( response, now, "enqueued"              );
     this.add_datetime_attributes_for_xslt( response, now, "created"               );
+    this.add_datetime_attributes_for_xslt( response, now, "start_time"            );
+    this.add_datetime_attributes_for_xslt( response, now, "end_time"              );
 }
 
 //---------------------------------------------------------------------Scheduler.call_error_checked
@@ -627,6 +629,17 @@ function task_menu__onclick( task_id, x, y )
     popup_builder.add_bar();
     popup_builder.add_command ( "End"             , "<kill_task job='" + _job_name + "' id='" + task_id + "'/>" );
     popup_builder.add_command ( "Kill immediately", "<kill_task job='" + _job_name + "' id='" + task_id + "' immediately='yes'/>" );
+
+    _popup_menu = popup_builder.show_popup_menu( x, y );
+}
+
+//-----------------------------------------------------------------------history_task_menu__onclick
+
+function history_task_menu__onclick( task_id, x, y )
+{
+    var popup_builder = new Popup_menu_builder();
+
+    popup_builder.add_show_log( "Show log"        , "show_log?task=" + task_id, "show_log_task_" + task_id );
 
     _popup_menu = popup_builder.show_popup_menu( x, y );
 }

@@ -127,7 +127,7 @@ struct Job_history
     void                        close                   ();
     int                         min_steps               ()                                          { return _history_yes? _on_process : INT_MAX; }
 
-    xml::Element_ptr            read_tail               ( const xml::Document_ptr&, int id, int next, const Show_what& );
+    xml::Element_ptr            read_tail               ( const xml::Document_ptr&, int id, int next, const Show_what&, bool use_task_schema = false );
 
   private:
     friend struct               Task_history;

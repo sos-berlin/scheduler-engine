@@ -63,6 +63,7 @@ var _job_chain_element;
 var _description_popup;
 var _hidden;
 var _saved_frameset_cols;
+var _show_card = "";
 
 //---------------------------------------------------------------------------------------------init
 
@@ -159,7 +160,9 @@ function show_job_details( job_element )
  
     _job_element = job_element;   
     _job_name    = job_element.getAttribute( "job" )
-
+    
+    _show_card = job_element.getAttribute( "order" ) == "yes"? "order_queue" : "task_queue";
+    
     document.getElementById( "stylesheet_output" ).innerHTML = _stylesheet.xml_transform( job_element );
     show();
 }
@@ -229,10 +232,17 @@ function update( force )
     else
     if( _job_name != undefined )
     {
-        var response = _scheduler.execute( "<show_job job='" + _job_name + "' what='task_queue,orders'/>" );
-        window.parent.left_frame.modify_response( response );
+        var what = _show_card == "task_queue"  ? "task_queue"     :
+                   _show_card == "task_history"? "task_history" :
+                   _show_card == "order_queue" ? "orders" 
+                                               : "";
         
+        var response = _scheduler.execute( "<show_job job='" + _job_name + "' what='" + what + "' max_task_history='10'/>" );
         _job_element = response.selectSingleNode( "spooler/answer/job" );
+
+        _job_element.setAttribute( "my_show_card", _show_card );
+        window.parent.left_frame.modify_response( response );
+
         document.getElementById( "stylesheet_output" ).innerHTML = _job_element? _stylesheet.xml_transform( _job_element ) : "";
 
         ok = true;
@@ -252,6 +262,14 @@ function update( force )
     }
     
     return ok;
+}
+
+//----------------------------------------------------------------------------------------show_card
+
+function show_card( what )
+{
+    _show_card = what;
+    update();
 }
 
 //-------------------------------------------------------------------------------------------------

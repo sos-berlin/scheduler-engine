@@ -1162,7 +1162,7 @@ void Job_history::archive( Archive_switch arc, const string& filename )
 // Anderer Thread.
 // Hier nicht auf _job etc. zugreifen!
 
-xml::Element_ptr Job_history::read_tail( const xml::Document_ptr& doc, int id, int next, const Show_what& show )
+xml::Element_ptr Job_history::read_tail( const xml::Document_ptr& doc, int id, int next, const Show_what& show, bool use_task_schema )
 {
     if( !_history_yes )  throw_xc( "SCHEDULER-141", _job_name );
 
@@ -1216,7 +1216,7 @@ xml::Element_ptr Job_history::read_tail( const xml::Document_ptr& doc, int id, i
                 else
                     throw_xc( "SCHEDULER-136" );
 
-                history_element = doc.createElement( "history" );
+                history_element = doc.createElement( use_task_schema? "task_history" : "history" );
                 dom_append_nl( history_element );
 
                 const Record_type* type = sel.spec().field_type_ptr();
@@ -1225,7 +1225,9 @@ xml::Element_ptr Job_history::read_tail( const xml::Document_ptr& doc, int id, i
                 while( !sel.eof() )
                 {
                     string           param_xml;
-                    xml::Element_ptr history_entry = doc.createElement( "history.entry" );
+                    string           error_code;
+                    string           error_text;
+                    xml::Element_ptr history_entry = doc.createElement( use_task_schema? "task" : "history.entry" );
 
                     sel.get( &rec );
         
@@ -1234,12 +1236,40 @@ xml::Element_ptr Job_history::read_tail( const xml::Document_ptr& doc, int id, i
                         string value = type->as_string( i, rec.byte_ptr() );
                         if( value != "" )
                         {
-                            string name = type->field_descr_ptr(i)->name();
-                            if( name == "parameters" )  param_xml = value;
-                                                  else  history_entry.setAttribute( lcase(name), value );
-                            if( lcase(name) == "id" )  history_entry.setAttribute( "task", value );  // id sollte nicht verwendet werden. jz 6.9.04
+                            string name = lcase( type->field_descr_ptr(i)->name() );
+
+                            if( name == "parameters" ) 
+                            {
+                                param_xml = value;
+                            }
+                            else
+                            if( name == "id" )  
+                            {
+                                history_entry.setAttribute( "task", value );
+                                if( !use_task_schema )
+                                    history_entry.setAttribute( "id", value );      // id sollte nicht verwendet werden. jz 6.9.04
+                            }
+                            if( use_task_schema  &&  name == "spooler_id" )  {} // ignorieren
+                            else
+                            if( use_task_schema  &&  name == "error"      )  {} // ignorieren
+                            else
+                            if( use_task_schema  &&  name == "error_code" )  error_code = value;
+                            else
+                            if( use_task_schema  &&  name == "error_text" )  error_text = value;
+                            else
+                            {
+                                history_entry.setAttribute( name, value );
+                            }
                         }
                     }
+
+                    if( use_task_schema  &&  error_text != "" )
+                    {
+                        Xc x ( error_code.c_str() );
+                        x.set_what( error_text );
+                        history_entry.appendChild( create_error_element( doc, x ) );
+                    }
+
 
                     int id = type->field_descr_ptr("id")->as_int( rec.byte_ptr() );
 

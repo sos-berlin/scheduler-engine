@@ -48,29 +48,31 @@
 
         <!-- Jobs, Jobketten oder Prozessklassen zeigen? -->
         
-        <table cellpadding="0" cellspacing="0" style="margin-top: 0ex">
-            <tr>
-                <xsl:call-template name="card_selector">
-                    <xsl:with-param name="name"  select="'jobs'"/>
-                    <xsl:with-param name="title" select="'Jobs'"/>
-                    <xsl:with-param name="class" select="'job'"/>
-                </xsl:call-template>
-
-                <xsl:if test="state/job_chains/job_chain">
+        <xsl:for-each select="/spooler">
+            <table cellpadding="0" cellspacing="0" style="margin-top: 0ex">
+                <tr>
                     <xsl:call-template name="card_selector">
-                        <xsl:with-param name="name"  select="'job_chains'"/>
-                        <xsl:with-param name="title" select="'Job chains'"/>
-                        <xsl:with-param name="class" select="'job_chain'"/>
+                        <xsl:with-param name="name"  select="'jobs'"/>
+                        <xsl:with-param name="title" select="'Jobs'"/>
+                        <xsl:with-param name="class" select="'job'"/>
                     </xsl:call-template>
-                </xsl:if>
 
-                <xsl:call-template name="card_selector">
-                    <xsl:with-param name="name"  select="'process_classes'"/>
-                    <xsl:with-param name="title" select="'Process classes'"/>
-                    <xsl:with-param name="class" select="'process_class'"/>
-                </xsl:call-template>
-            </tr>
-        </table>
+                    <xsl:if test="state/job_chains/job_chain">
+                        <xsl:call-template name="card_selector">
+                            <xsl:with-param name="name"  select="'job_chains'"/>
+                            <xsl:with-param name="title" select="'Job chains'"/>
+                            <xsl:with-param name="class" select="'job_chain'"/>
+                        </xsl:call-template>
+                    </xsl:if>
+
+                    <xsl:call-template name="card_selector">
+                        <xsl:with-param name="name"  select="'process_classes'"/>
+                        <xsl:with-param name="title" select="'Process classes'"/>
+                        <xsl:with-param name="class" select="'process_class'"/>
+                    </xsl:call-template>
+                </tr>
+            </table>
+        </xsl:for-each>
 
 
         <xsl:if test="/spooler/@my_show_card='jobs'">
@@ -104,7 +106,7 @@
                 <xsl:attribute name="style"  >cursor: pointer; padding: 1pt 4pt 2px 4pt</xsl:attribute>
                 <xsl:attribute name="class"><xsl:value-of select="$class"/></xsl:attribute>
                 <xsl:element name="span">
-                    <xsl:if test="/spooler/@my_show_card=$name ">
+                    <xsl:if test="@my_show_card=$name ">
                         <xsl:attribute name="style">font-weight: bold</xsl:attribute>
                     </xsl:if>
                     <span class="translate">
@@ -224,8 +226,8 @@
         <table cellpadding="0" cellspacing="0" width="100%" class="job">
             <col valign="baseline"  width="100"/>
             <!--col  valign="baseline"  width="110"/-->  
-            <col valign="baseline"  width=" 50"  align="right"/>  
-            <col valign="baseline"  width=" 30"  align="right"/>
+            <col valign="baseline"  width="50"  align="right"/>  
+            <col valign="baseline"  width="30"  align="right"/>
             
             <thead>
                 <xsl:call-template name="card_top"/>
@@ -1051,15 +1053,58 @@
         </xsl:for-each>
 
 
-        <!-- Tasks queue bei order='yes' nur zeigen, wenn sie nicht leer ist (was aber unsinnig wäre) -->
+        <!-- Task-Warteschlange, Task-Historie oder Auftragswarteschlange zeigen? -->
+        
+        <p style="margin-top: 5ex; margin-bottom: 3ex"></p>
+        
+        <table cellpadding="0" cellspacing="0" style="margin-top: 0ex">
+            <tr>
+                <xsl:call-template name="card_selector">
+                    <xsl:with-param name="name"  select="'task_queue'"/>
+                    <xsl:with-param name="title" select="'Task queue'"/>
+                    <xsl:with-param name="class" select="'task'"/>
+                </xsl:call-template>
+
+                <xsl:call-template name="card_selector">
+                    <xsl:with-param name="name"  select="'task_history'"/>
+                    <xsl:with-param name="title" select="'Task history'"/>
+                    <xsl:with-param name="class" select="'task'"/>
+                </xsl:call-template>
+
+                <xsl:if test="@order='yes'">
+                    <xsl:call-template name="card_selector">
+                        <xsl:with-param name="name"  select="'order_queue'"/>
+                        <xsl:with-param name="title" select="'Order queue'"/>
+                        <xsl:with-param name="class" select="'order'"/>
+                    </xsl:call-template>
+                </xsl:if>
+            </tr>
+        </table>
+
+
+        <xsl:if test="@my_show_card='task_queue'">
+            <xsl:apply-templates select="queued_tasks" mode="list"/>
+        </xsl:if>        
+        
+        <xsl:if test="@my_show_card='task_history'">
+            <xsl:apply-templates select="task_history" mode="list"/>
+        </xsl:if>            
+        
+        <xsl:if test="@my_show_card='order_queue'">
+            <xsl:apply-templates select="order_queue" mode="list"/>
+        </xsl:if>            
+        
+
+
+        <!-- Tasks queue bei order='yes' nur zeigen, wenn sie nicht leer ist (was aber unsinnig wäre)
         <xsl:if test="not( @order='yes' and ( not( queued_tasks ) or queued_tasks/@length='0' ) )">
             <p style="margin-top: 5ex; margin-bottom: 3ex"></p>
             <xsl:apply-templates select="queued_tasks" mode="list"/>
         </xsl:if>
-
         
         <p style="margin-top: 5ex; margin-bottom: 3ex"></p>
         <xsl:apply-templates select="order_queue" mode="list"/>
+        -->
         
     </xsl:template>
 
@@ -1125,17 +1170,26 @@
                 </td>
             </tr>
             
-            <tr><td><span style="line-height: 6px">&#160;</span>   </td></tr>
+            <tr>
+                <td><span style="line-height: 6px">&#160;</span></td>
+            </tr>
                 
             <xsl:if test="order or ../../@order='yes'">
                 <tr>
                     <td><span class="label">order:</span></td>
                     <td class="order">
-                        <b>
-                            <xsl:value-of select="order/@id"/>
-                            &#160;
-                            <xsl:value-of select="order/@title"/>
-                        </b>
+                        <xsl:choose>
+                            <xsl:when test="order">
+                                <b>
+                                    <xsl:value-of select="order/@id"/>
+                                    &#160;
+                                    <xsl:value-of select="order/@title"/>
+                                </b>
+                            </xsl:when>
+                            <xsl:when test="@state='running_waiting_for_order'">
+                                waiting for order ...
+                            </xsl:when>
+                        </xsl:choose>
                     </td>
                 </tr>
             </xsl:if>
@@ -1186,46 +1240,107 @@
         
         <table valign="top" cellpadding="0" cellspacing="0" width="100%" class="task">
 
-            <xsl:if test="queued_task">
-                <col valign="baseline" align="left" width="40"/>
-                <col valign="baseline" align="left" width="70"/>
-                <col valign="baseline" align="left" width="$datetime_column_width"/>
-                
-                <thead>
-                    <tr>
-                        <td colspan="99" class="task" align="left">
-                            <p style="margin-top: 2px; margin-bottom: 1ex">
-                                <b><xsl:value-of select="@length"/> enqueued tasks</b>
-                            </p>
-                        </td>
-                    </tr>
-                        
-                    <tr>
-                        <td class="head1">Id</td>
-                        <td class="head1">Enqueued</td>
-                        <td class="head1">Start at</td>
-                    </tr>
-                    <tr>
-                        <td colspan="99" class="after_head_space">&#160;</td>
-                    </tr>
-                </thead>
-                
+            <col valign="baseline" align="left" width="40"/>
+            <col valign="baseline" align="left" width="70"/>
+            <col valign="baseline" align="left" width="$datetime_column_width"/>
+            
+            <thead>
+                <xsl:call-template name="card_top"/>
 
-                <xsl:for-each select="queued_task">
-                    <tr>
-                        <td>
-                            <xsl:value-of select="@id"/>
-                            <xsl:if test="@name!=''">
-                                &#160; <xsl:value-of select="@name"/>
-                            </xsl:if>
-                        </td>
+                <tr>
+                    <td colspan="99" class="task" align="left">
+                        <p style="margin-top: 2px; margin-bottom: 1ex">
+                            <b><xsl:value-of select="@length"/> enqueued tasks</b>
+                        </p>
+                    </td>
+                </tr>
+                    
+                <tr>
+                    <td class="head1">Id</td>
+                    <td class="head1">Enqueued</td>
+                    <td class="head1">Start at</td>
+                </tr>
+                <tr>
+                    <td colspan="99" class="after_head_space">&#160;</td>
+                </tr>
+            </thead>
+            
 
-                        <td><xsl:value-of select="@enqueued__xslt_date_or_time"        disable-output-escaping="yes"/></td>
-                        <td><xsl:value-of select="@start_at__xslt_datetime_with_diff"  disable-output-escaping="yes"/></td>
-                    </tr>
-                </xsl:for-each>
-            </xsl:if>
+            <xsl:for-each select="queued_task">
+                <tr>
+                    <td>
+                        <xsl:value-of select="@id"/>
+                        <xsl:if test="@name!=''">
+                            &#160; <xsl:value-of select="@name"/>
+                        </xsl:if>
+                    </td>
+
+                    <td><xsl:value-of select="@enqueued__xslt_date_or_time"        disable-output-escaping="yes"/></td>
+                    <td><xsl:value-of select="@start_at__xslt_datetime_with_diff"  disable-output-escaping="yes"/></td>
+                </tr>
+            </xsl:for-each>
         </table>
+        
+    </xsl:template>
+        
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~task_history-->
+
+    <xsl:template match="task_history" mode="list">
+        
+        <table valign="top" cellpadding="0" cellspacing="0" width="100%" class="task">
+
+            <col valign="baseline" align="left" width="1"/>
+            <col valign="baseline" align="left" width="1"/>
+            <col valign="baseline" align="left" width="$datetime_column_width"/>
+            <col valign="baseline" align="right" width="1"/>
+            <col valign="baseline" align="left" width="$datetime_column_width"/>
+            <col valign="baseline" align="left"/>
+            
+            <thead>
+                <xsl:call-template name="card_top"/>
+
+                <tr>
+                    <td class="head1">Id</td>
+                    <td class="head">Cause</td>
+                    <td class="head">Started</td>
+                    <td class="head">Steps</td>
+                    <td class="head" colspan="2">Ended</td>
+                </tr>
+                <tr>
+                    <td colspan="99" class="after_head_space">&#160;</td>
+                </tr>
+            </thead>
+            
+
+            <xsl:for-each select="task">
+                <tr>
+                    <td><xsl:value-of select="@task"/></td>
+                    <td><xsl:value-of select="@cause"/></td>
+                    <td><xsl:value-of select="@start_time__xslt_datetime"   disable-output-escaping="yes"/></td>
+                    <td><xsl:value-of select="@steps"/></td>
+                    <td><xsl:value-of select="@end_time__xslt_datetime"     disable-output-escaping="yes"/></td>
+                    
+                    <td align="right" valign="top" style="padding-right: 0pt">
+                        <xsl:call-template name="command_menu">
+                            <xsl:with-param name="onclick" select="concat( 'history_task_menu__onclick(  ', @id, ', mouse_x() - 70, mouse_y() - 1 )' )"/>
+                        </xsl:call-template>
+                    </td>
+                </tr>
+                
+                <xsl:if test="ERROR">
+                    <tr>
+                        <td> </td>
+                        <td colspan="99" class="task_error">
+                            <xsl:apply-templates select="ERROR"/>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>&#160;</td>
+                    </tr>
+                </xsl:if>
+            </xsl:for-each>
+        </table>
+        
     </xsl:template>
         
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Order_queue-->
@@ -1233,7 +1348,7 @@
     <xsl:template match="order_queue" mode="list">
         <table class="order" cellpadding="0" cellspacing="0" width="100%">
             
-            <xsl:if test="order">
+            <!--xsl:if test="order"-->
                 <col valign="baseline"  width=" 40"/>
                 <!--col valign="top"  width=" 15"  style="padding-right: 2ex"/-->  
                 <col valign="baseline"  width=" 70"/>  
@@ -1243,6 +1358,8 @@
                 <col valign="baseline"  width="  1" align="right"/>  
                 
                 <thead class="order">
+                    <xsl:call-template name="card_top"/>
+
                     <tr>
                         <td colspan="99" align="left" class="order">
                             <p style="margin-top: 2px; margin-bottom: 1ex">
@@ -1287,30 +1404,35 @@
                         </xsl:element>
                     </xsl:for-each>
                 </tbody>
-            </xsl:if>
+            <!--/xsl:if-->
         </table>
     </xsl:template> 
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ERROR-->
 
     <xsl:template match="ERROR">
-        <span class="job_error">
-            <xsl:value-of select="@time"/><br/>
-            <xsl:value-of select="@text"/>
+        <xsl:if test="@time != ''">
+            <xsl:value-of select="@time"/>
             <br/>
-            <xsl:if test="@source">
-                <xsl:text> </xsl:text>
-                source <xsl:value-of select="@source"/>
-            </xsl:if>
-            <xsl:if test="@line">
-                <xsl:text> </xsl:text>
-                line <xsl:value-of select="@line"/>
-            </xsl:if>
-            <xsl:if test="@col">
-                <xsl:text> </xsl:text>
-                column <xsl:value-of select="@col"/>
-            </xsl:if>
-        </span>
+        </xsl:if>
+        
+        <xsl:value-of select="@text"/>
+        <br/>
+        
+        <xsl:if test="@source">
+            <xsl:text> </xsl:text>
+            source <xsl:value-of select="@source"/>
+        </xsl:if>
+        
+        <xsl:if test="@line">
+            <xsl:text> </xsl:text>
+            line <xsl:value-of select="@line"/>
+        </xsl:if>
+        
+        <xsl:if test="@col">
+            <xsl:text> </xsl:text>
+            column <xsl:value-of select="@col"/>
+        </xsl:if>
     </xsl:template>
     
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~attributes_for_onclick-->

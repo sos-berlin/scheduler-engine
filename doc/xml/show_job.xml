@@ -27,8 +27,9 @@
             </description>
         </xml_attribute>
         
-        <xml_attribute name="what"       same_as_element="show_state"/>
-        <xml_attribute name="max_orders" same_as_element="show_state"/>
+        <xml_attribute name="what"             same_as_element="show_state"/>
+        <xml_attribute name="max_orders"       same_as_element="show_state"/>
+        <xml_attribute name="max_task_history" same_as_element="show_state"/>
     </xml_attributes>
 
     <xml_answer element="job"/>

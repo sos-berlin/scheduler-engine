@@ -1649,6 +1649,11 @@ xml::Element_ptr Job::dom( const xml::Document_ptr& document, const Show_what& s
             }
         }
 
+        if( show & show_task_history )
+        {
+            job_element.appendChild( _history.read_tail( document, -1, -show._max_task_history, show, true ) );
+        }
+
         if( _order_queue )
         {
             Show_what modified_show = show;

@@ -214,13 +214,13 @@ function modify_response( response )
     var spooler_element = response.selectSingleNode( "spooler" );
     if( spooler_element )
     {    
-        restore_checkbox_state( response, "show_order_jobs_checkbox" );
-        restore_checkbox_state( response, "show_tasks_checkbox" );
-        restore_checkbox_state( response, "show_job_chain_jobs_checkbox" );
+        restore_checkbox_state( response, "show_order_jobs_checkbox"       );
+        restore_checkbox_state( response, "show_tasks_checkbox"            );
+        restore_checkbox_state( response, "show_job_chain_jobs_checkbox"   );
         restore_checkbox_state( response, "show_job_chain_orders_checkbox" );
 
-        spooler_element.setAttribute( "my_max_orders", _max_orders );
-        spooler_element.setAttribute( "my_show_card" , _show_card );
+        spooler_element.setAttribute( "my_max_orders"    , _max_orders    );
+        spooler_element.setAttribute( "my_show_card"     , _show_card     );
         spooler_element.setAttribute( "my_update_seconds", update_seconds );
     }
 }

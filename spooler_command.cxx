@@ -55,14 +55,14 @@ void dom_append_nl( const xml::Element_ptr& )
 
 //-----------------------------------------------------------------------------create_error_element
 
-xml::Element_ptr create_error_element( const xml::Document_ptr& document, const Xc_copy& x )
+xml::Element_ptr create_error_element( const xml::Document_ptr& document, const Xc_copy& x, time_t time )
 {
     xml::Element_ptr e = document.createElement( "ERROR" );
 
     //timeb  tm;     // Ob die Sommerzeitverschiebung bei der Fehlerzeit berücksichtigt wird, hängt von der _aktuellen_ Zeit ab.
     //ftime( &tm );  // Nicht schön, aber es funktioniert, weil der Spooler sowieso nicht während der Zeitumstellung laufen soll.
     //e.setAttribute( "time", Sos_optional_date_time( (time_t)x.time() - timezone - ( tm.dstflag? _dstbias : 0 ) ).as_string() );
-    e.setAttribute( "time", Sos_optional_date_time( (time_t)Time::now() ).as_string() );
+    if( time )  e.setAttribute( "time", Sos_optional_date_time( time ).as_string() );
 
     if( !empty( x->name() )          )  e.setAttribute( "class" , x->name()          );
 
@@ -80,7 +80,7 @@ xml::Element_ptr create_error_element( const xml::Document_ptr& document, const 
 
 void append_error_element( const xml::Element_ptr& element, const Xc_copy& x )
 {
-    element.appendChild( create_error_element( element.ownerDocument(), x ) );
+    element.appendChild( create_error_element( element.ownerDocument(), x, (time_t)Time::now() ) );
 }
 
 //-------------------------------------------------------------Command_processor::Command_processor
@@ -605,6 +605,9 @@ xml::Element_ptr Command_processor::execute_command( const xml::Element_ptr& ele
     string max_orders = element.getAttribute( "max_orders" );
     if( max_orders != "" )  show._max_orders = as_int( max_orders );
 
+    string max_task_history = element.getAttribute( "max_task_history" );
+    if( max_task_history != "" )  show._max_task_history = as_int( max_task_history );
+
     string what = element.getAttribute( "what" );
 
     const char* p = what.c_str();  // Bsp: "all"  "orders,description"  "task_queue,orders,description,"
@@ -623,6 +626,8 @@ xml::Element_ptr Command_processor::execute_command( const xml::Element_ptr& ele
         if( string_equals_prefix_then_skip( &p, "description"      ) )  show |= show_description;
         else
         if( string_equals_prefix_then_skip( &p, "log"              ) )  show |= show_log;
+        else
+        if( string_equals_prefix_then_skip( &p, "task_history"     ) )  show |= show_task_history;
         else
         if( string_equals_prefix_then_skip( &p, "standard"         ) )  ;
         else
@@ -739,16 +744,20 @@ ptr<Http_response> Command_processor::execute_http( Http_request* http_request )
                         else
                         {
                             xml::Element_ptr task_element = _spooler->_db->read_task( _answer, task_id, show_log );
+                            S title;  title << "Task " << task_id;
+
                             DOM_FOR_EACH_ELEMENT( task_element, e )
                             {
                                 if( e.nodeName_is( "log" ) )
                                 {
-                                    S title;  title << "Task " << task_id;
                                     //TODO Log wird im Speicher gehalten! Besser: In Datei schreiben, vielleicht sogar Task und Log anlegen
                                     ptr<Http_response> response = Z_NEW( Http_response( http_request, Z_NEW( Html_chunk_reader( Z_NEW( String_chunk_reader( e.nodeValue() ) ), title ) ), "text/html" ) );
                                     return +response;
                                 }
                             }
+
+                            ptr<Http_response> response = Z_NEW( Http_response( http_request, Z_NEW( Html_chunk_reader( Z_NEW( String_chunk_reader( "Das Protokoll ist nicht lesbar." ) ), title ) ), "text/html" ) );
+                            return +response;
                         }
                     }
                     else
