@@ -1,4 +1,4 @@
-// $Id: spooler_job.cxx,v 1.75 2004/05/10 12:01:10 jz Exp $
+// $Id: spooler_job.cxx,v 1.76 2004/05/12 09:26:34 jz Exp $
 // §851: Weitere Log-Ausgaben zum Scheduler-Start eingebaut
 /*
     Hier sind implementiert
@@ -48,13 +48,13 @@ Job::Job( Spooler* spooler )
     _history(this),
     _lock( "Job" )
 {
-    _next_time = latter_day;
+    _next_time      = latter_day;
     _directory_watcher_next_time = latter_day;
-    _priority  = 1;
+    _priority       = 1;
     _default_params = new Com_variable_set;
-    _task_timeout = latter_day;
-    _idle_timeout = latter_day;
-    _max_tasks    = 1;
+    _task_timeout   = latter_day;
+    _idle_timeout   = latter_day;
+    _max_tasks      = 1;
 }
 
 //----------------------------------------------------------------------------------------Job::~Job
@@ -846,6 +846,7 @@ void Job::start_when_directory_changed( const string& directory_name, const stri
         dw->add_to( &_spooler->_wait_handles );
 
         _directory_watcher_next_time = 0;
+        calculate_next_time();
     }
 }
 
@@ -1054,9 +1055,11 @@ void Job::remove_waiting_job_from_process_list()
 
 void Job::check_for_changed_directory( const Time& now )
 {
+    LOG(__FUNCTION__<<"  _directory_watcher_next_time=" << _directory_watcher_next_time << ", now=" << now << "\n" );
 #   ifdef Z_UNIX
         if( now < _directory_watcher_next_time )  return;
 #   endif
+    LOG(__FUNCTION__<<" ok\n");
 
 
     //LOG2( "joacim", "Job::task_to_start(): Verzeichnisüberwachung _directory_watcher_next_time=" << _directory_watcher_next_time << ", now=" << now << "\n" );
@@ -1069,6 +1072,7 @@ void Job::check_for_changed_directory( const Time& now )
         if( (*it)->signaled_then_reset() )        
         {
             _directory_changed = true;
+
             if( !_changed_directories.empty() )  _changed_directories += ";";
             _changed_directories += (*it)->directory();
             
@@ -1117,9 +1121,7 @@ Sos_ptr<Task> Job::task_to_start()
                                                cause = cause_delay_after_error,                     log_line += "Task startet wegen delay_after_error\n";
                                           else cause = cause_period_repeat,                         log_line += "Task startet, weil Job-Startzeit erreicht: " + _next_start_time.as_string();
 
-
-                //check_for_changed_directory( now );
-                if( _directory_changed  )       cause = cause_directory,                            log_line += "Task startet wegen eines Ereignisses für Verzeichnis " + _changed_directories;
+                if( _directory_changed  )      cause = cause_directory,                             log_line += "Task startet wegen eines Ereignisses für Verzeichnis " + _changed_directories;
             }
 
             if( !cause  &&  _order_queue )

@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.334 2004/05/10 12:01:10 jz Exp $
+// $Id: spooler.cxx,v 1.335 2004/05/12 09:26:33 jz Exp $
 // §851: Weitere Log-Ausgaben zum Scheduler-Start eingebaut
 
 /*
@@ -1887,7 +1887,6 @@ void Spooler::run()
 
 
             Job* job = get_next_job_to_start();
-
             if( job  &&  _next_time > job->next_time() )  
             {
                 _next_time = job->next_time();
