@@ -1,4 +1,4 @@
-// $Id: scheduler.js,v 1.9 2004/12/10 11:20:40 jz Exp $
+// $Id: scheduler.js,v 1.10 2004/12/20 08:57:30 jz Exp $
 
 //----------------------------------------------------------------------------------------------var
 
@@ -645,11 +645,13 @@ function order_menu__onclick( job_chain_name, order_id, x, y )
 
 //-----------------------------------------------------------------------------------------open_url
 
-function open_url( url, window_name )
+function open_url( url, window_name, features, replace )
 {
-    var features = "menubar=no, toolbar=no, location=no, directories=no, scrollbars=yes, resizable=yes, status=no";
+    //var features = "menubar=no, toolbar=no, location=no, directories=no, scrollbars=yes, resizable=yes, status=no";
+    if( features == undefined )  features = "";
+    if( replace  == undefined )  replace  = false;
 
-    var my_window = window.open( url, window_name, features, true );
+    var my_window = window.open( url, window_name, features, replace );
     my_window.focus();
 
     if( window_name  &&  _scheduler )  _scheduler._dependend_windows[ window_name ] = my_window;

@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.272 2004/12/15 15:26:10 jz Exp $
+// $Id: spooler_task.cxx,v 1.273 2004/12/20 08:57:29 jz Exp $
 /*
     Hier sind implementiert
 
@@ -2099,7 +2099,12 @@ bool Process_task::do_begin__end()
 
             Z_FOR_EACH( Com_variable_set::Map, _job->_process_environment->_map, m )
             {
-                setenv( string_from_bstr ( m->first ).c_str(), m->second->_value.as_string().c_str(), true );
+#               ifdef Z_HPUX
+                    string e = string_from_bstr ( m->first ) + "=" + m->second->_value.as_string();
+                    putenv( strdup( e.c_str() ) );
+#                else
+                    setenv( string_from_bstr ( m->first ).c_str(), m->second->_value.as_string().c_str(), true );
+#               endif
             }
 
 

@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.30 2004/09/07 07:39:27 jz Exp $
+# $Id: Makefile,v 1.31 2004/12/20 08:58:04 jz Exp $
 
 ifndef PROD_DIR
 prod_dir = ..
@@ -55,6 +55,7 @@ java_headers=$(patsubst %.class, %.h, $(java_classes) )
 
 all:: $(BIN_DIR)/scheduler
 all:: $(BIN_DIR)/sos.spooler.jar
+all:: DOC
 
 clean:
 	rm *.o *.d lib*.a lib*.so *.map `find -name "*.class"`
@@ -96,5 +97,11 @@ endif
 $(BIN_DIR)/scheduler: spooler.o $(objects) ../kram/$(O_DIR)/soswnmai.o $(foreach p,$(DEP_PRODUCTS),$(PROD_DIR)/$(p)/$(O_DIR)/lib$(p).a)
 	-$(CCPP) $(DEBUG) $(LINK_FLAGS) $^ $(LIBPATH) $(SOS_LIBS) $(LIBS) -o $@
 	chmod a+rx $@
+
+
+
+DOC:
+	( cd ../doc  &&  perl ../scheduler_keyword_to_xml.pl *.xml xml/*.xml xml/answer/*.xml )
+	ant -f ../javadoc.xml
 
 endif
