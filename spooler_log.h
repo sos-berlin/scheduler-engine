@@ -1,4 +1,4 @@
-// $Id: spooler_log.h,v 1.1 2001/01/25 20:28:38 jz Exp $
+// $Id: spooler_log.h,v 1.2 2001/07/02 21:38:26 jz Exp $
 
 #ifndef __SPOOLER_LOG_H
 #define __SPOOLER_LOG_H
@@ -30,6 +30,7 @@ struct Log
     void                        error                       ( const string& line )              { log( log_error, "", line ); }
 
     void                        log                         ( Log_kind log, const string& prefix, const string& );
+    void                        collect_stderr              ();
     
     string                      filename                    () const                            { return _filename; }
 

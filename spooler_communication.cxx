@@ -1,4 +1,4 @@
-// $Id: spooler_communication.cxx,v 1.25 2001/02/21 10:57:36 jz Exp $
+// $Id: spooler_communication.cxx,v 1.26 2001/07/02 21:38:26 jz Exp $
 /*
     Hier sind implementiert
 
@@ -665,7 +665,7 @@ int Communication::go()
     }
     catch( const Xc& x )
     {
-        _spooler->log().error( "Communication::thread: " + x.what() );
+        _spooler->log().error( string("Communication::thread: ") + x.what() );
         result = 1;
     }
 
