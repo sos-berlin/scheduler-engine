@@ -21,13 +21,14 @@ namespace spooler {
 
 //--------------------------------------------------------------------------------------------const
 
-extern const string spooler_init_name       = "spooler_init()Z";
-extern const string spooler_exit_name       = "spooler_exit()V";
-extern const string spooler_open_name       = "spooler_open()Z";
-extern const string spooler_close_name      = "spooler_close()V";
-extern const string spooler_process_name    = "spooler_process()Z";
-extern const string spooler_on_error_name   = "spooler_on_error()V";
-extern const string spooler_on_success_name = "spooler_on_success()V";
+extern const string spooler_init_name           = "spooler_init()Z";
+extern const string spooler_exit_name           = "spooler_exit()V";
+extern const string spooler_open_name           = "spooler_open()Z";
+extern const string spooler_close_name          = "spooler_close()V";
+extern const string spooler_process_name        = "spooler_process()Z";
+extern const string spooler_on_error_name       = "spooler_on_error()V";
+extern const string spooler_on_success_name     = "spooler_on_success()V";
+//extern const string wait_for_subprocesses_name  = "wait_for_subprocesses()";         // Interne Funktion, nicht von Job implemeniert
 
 //-------------------------------------------------------------------------Source_part::Source_part
 
@@ -384,6 +385,18 @@ void Module_instance::add_obj( IDispatch*, const string& )
 {
 }
 
+//--------------------------------------------------------------------------Module_instance::object
+
+IDispatch* Module_instance::object( const string& name )
+{
+    Z_FOR_EACH( Object_list, _object_list, o )
+    {
+        if( o->_name == name )  return o->_object;
+    }
+    
+    throw_xc( "Module_instance::object", name );
+}
+
 //------------------------------------------------------------------Module_instance::call_if_exists
 
 Variant Module_instance::call_if_exists( const string& name )
@@ -479,6 +492,11 @@ Variant Module_instance::call__end()
 {
     if( _call_method == spooler_exit_name  &&  !loaded() )  return true;
 
+  //if( _call_method == wait_for_subprocesses_name )        // Keine Methode des Jobs.
+  //{
+  //    return _com_task->_task->wait_for_subprocesses();   // Siehe auch Com_remote_module_instance_server
+  //}
+  //else
     if( _call_method == spooler_on_success_name   
      || _call_method == spooler_on_error_name )
     {

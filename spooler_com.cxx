@@ -48,7 +48,7 @@ DESCRIBE_CLASS( &spooler_typelib, Com_order_queue   , order_queue   , CLSID_Orde
 
 Typelib_ref                             typelib;  
 
-Com_spooler_proxy::Class_descriptor     Com_spooler_proxy::class_descriptor ( &typelib, "Spooler.Spooler_proxy" );
+Com_task_proxy::Class_descriptor     Com_task_proxy::class_descriptor ( &typelib, "Spooler.Spooler_proxy" );
 
 //-----------------------------------------------------------------------------IID_Ihostware_dynobj
 
@@ -1370,7 +1370,7 @@ HRESULT Com_log_proxy::Create_instance( const IID& iid, ptr<IUnknown>* result )
     if( iid == object_server::IID_Iproxy )
     {
         ptr<Com_log_proxy> instance = Z_NEW( Com_log_proxy );
-        *result = +instance;
+        *result = static_cast<Object*>( +instance );
         return S_OK;
     }
 
@@ -1911,6 +1911,7 @@ const Com_method Com_task::_methods[] =
     { DISPATCH_METHOD     , 17, "remove_pid"                , (Com_method_ptr)&Com_task::Remove_pid             , VT_EMPTY      , { VT_INT } },
     { DISPATCH_PROPERTYGET, 18, "stderr_text"               , (Com_method_ptr)&Com_task::get_Stderr_text        , VT_BSTR       },
     { DISPATCH_PROPERTYGET, 19, "stdout_text"               , (Com_method_ptr)&Com_task::get_Stdout_text        , VT_BSTR       },
+    { DISPATCH_METHOD     , 20, "Start_subprocess"          , (Com_method_ptr)&Com_task::Start_subprocess       , VT_IDISPATCH  , { VT_BYREF|VT_VARIANT } },
     {}
 };
 
@@ -1928,9 +1929,26 @@ Com_task::Com_task( Task* task )
 
 STDMETHODIMP Com_task::QueryInterface( const IID& iid, void** result )
 {
-    Z_IMPLEMENT_QUERY_INTERFACE( this, iid, Ihas_java_class_name, result );
+    Z_IMPLEMENT_QUERY_INTERFACE( this, iid, Ihas_java_class_name          , result );
+    Z_IMPLEMENT_QUERY_INTERFACE( this, iid, Ihas_reference_with_properties, result );
 
     return Sos_ole_object::QueryInterface( iid, result );
+}
+
+//----------------------------------------------------------Com_task::get_reference_with_properties
+
+ptr<object_server::Reference_with_properties> Com_task::get_reference_with_properties()
+{
+    ptr<object_server::Reference_with_properties> result;
+
+    THREAD_LOCK( _lock )
+    {
+        if( !_task )  throw_com( E_POINTER, "Com_task::get_reference_with_properties" );
+
+        result = Z_NEW( object_server::Reference_with_properties( CLSID_Task_proxy, static_cast<Itask*>( this ) ) );
+    }
+
+    return result;
 }
 
 //-------------------------------------------------------------------------------Com_task::set_task
@@ -2280,8 +2298,9 @@ STDMETHODIMP Com_task::Add_pid( int pid, VARIANT* timeout )
         if( !_task )  throw_xc( "SCHEDULER-122" );
         if( !_task->thread()  ||  current_thread_id() != _task->thread()->thread_id() )  return E_ACCESSDENIED;
 
-        _task->add_pid( pid, timeout->vt == VT_EMPTY || com::variant_is_missing( *timeout )? latter_day 
-                                                                                           : time_from_variant( *timeout ) );
+        Time t  = timeout->vt == VT_EMPTY || com::variant_is_missing( *timeout )? latter_day 
+                                                                                : time_from_variant( *timeout );
+        _task->add_pid( pid, t );
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
@@ -2352,6 +2371,108 @@ STDMETHODIMP Com_task::get_Stdout_text( BSTR* result )
     Z_LOG( __PRETTY_FUNCTION__ << "()\n" );
     
     return get_Stderr_or_stdout_text( result, false );
+}
+
+//-----------------------------------------------------------------------Com_task::Start_subprocess
+
+STDMETHODIMP Com_task::Start_subprocess( VARIANT* program_and_parameters, Isubprocess** result )
+{
+    if( !_task )  return E_POINTER;
+
+    return _task->_subprocess_register.Start_subprocess( program_and_parameters, result );
+}
+
+//--------------------------------------------------------------------Com_task::Register_subprocess
+// Wird aufgerufen von Com_task_proxy
+
+STDMETHODIMP Com_task::Add_subprocess( int pid, BSTR timeout_at, VARIANT_BOOL ignore_error, VARIANT_BOOL ignore_signal, BSTR title  )
+{
+    Z_LOG( __PRETTY_FUNCTION__ << "(" << pid << ',' << timeout_at << ',' << ignore_error << ',' << ignore_signal << ',' << title << ")\n" );
+    HRESULT hr = S_OK;
+    
+    try
+    {
+        if( !_task )  throw_xc( "SCHEDULER-122" );
+
+        _task->add_subprocess( pid, 
+                               string_from_bstr( timeout_at ), 
+                               ignore_error? true : false, 
+                               ignore_signal? true : false, 
+                               string_from_bstr( title ) );
+    }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
+    
+    return hr;
+}
+
+//-------------------------------------------------------------------------Com_task_proxy::_methods
+#ifdef Z_COM
+
+// Dispid wie bei Com_task!
+
+const Com_method Com_task_proxy::_methods[] =
+{ 
+    // _flags             , _name                   , _method                                               , _result_type, _types        , _default_arg_count
+    { DISPATCH_METGHOD, 20, "Start_subprocess"      , (Com_method_ptr)&Com_task_proxy::Start_subprocess     , VT_DISPATCH , { VT_BYREF|VT_VARIANT } },
+  //{ DISPATCH_METGHOD, 21, "Wait_for_subprocesses" , (Com_method_ptr)&Com_task_proxy::Wait_for_subprocesses, VT_EMTPY    },
+    {}
+};
+
+#endif
+//------------------------------------------------------------------Com_task_proxy::Create_instance
+
+HRESULT Com_task_proxy::Create_instance( const IID& iid, ptr<IUnknown>* result )
+{
+    if( iid == object_server::IID_Iproxy )
+    {
+        ptr<Com_task_proxy> instance = Z_NEW( Com_task_proxy );
+        *result = static_cast<Object*>( instance.take() );
+        return S_OK;
+    }
+
+    return E_NOINTERFACE;
+}
+
+//-------------------------------------------------------------------Com_task_proxy::Com_task_proxy
+
+Com_task_proxy::Com_task_proxy()
+: 
+    Proxy_with_local_methods( &class_descriptor ),
+    _subprocess_register( Z_NEW( Subprocess_register ) )
+{
+}
+
+//-----------------------------------------------------------------Com_task_proxy::Start_subprocess
+
+STDMETHODIMP Com_task_proxy::Start_subprocess( VARIANT* program_and_parameters, Isubprocess** result )
+{
+    return _subprocess_register->Start_subprocess( program_and_parameters, result );
+}
+
+//-------------------------------------------------------------------Com_task_proxy::add_subprocess
+/*
+void Com_task_proxy::add_subprocess( Subprocess* subprocess  )
+{
+    call( "Add_subprocess", subprocess->pid(), subprocess->ignore_error(), subprocess->ignore_signal(), subprocess->command_line() ); //, subprocess->stdout_path(), subprocess->stderr_path() );
+
+    _subprocess_register->add( subprocess );
+}
+
+//----------------------------------------------------------------Com_task_proxy::remove_subprocess
+
+void Com_task_proxy::remove_subprocess( Subprocess* subprocess  )
+{
+    _subprocess_register->remove( subprocess );
+
+    call( "Remove_pid", subprocess->pid() );
+}
+*/
+//------------------------------------------------------------Com_task_proxy::wait_for_subprocesses
+
+void Com_task_proxy::wait_for_subprocesses()
+{
+    _subprocess_register->wait();
 }
 
 //-----------------------------------------------------------------------------Com_thread::_methods
@@ -2507,25 +2628,8 @@ Com_spooler::Com_spooler( Spooler* spooler )
 STDMETHODIMP Com_spooler::QueryInterface( const IID& iid, void** result )
 {
     Z_IMPLEMENT_QUERY_INTERFACE( this, iid, Ihas_java_class_name          , result );
-    Z_IMPLEMENT_QUERY_INTERFACE( this, iid, Ihas_reference_with_properties, result );
 
     return Sos_ole_object::QueryInterface( iid, result );
-}
-
-//-------------------------------------------------------Com_spooler::get_reference_with_properties
-
-ptr<object_server::Reference_with_properties> Com_spooler::get_reference_with_properties()
-{
-    ptr<object_server::Reference_with_properties> result;
-
-    THREAD_LOCK( _lock )
-    {
-        if( !_spooler )  throw_com( E_POINTER, "Com_spooler::get_reference_with_properties" );
-
-        result = Z_NEW( object_server::Reference_with_properties( CLSID_Spooler_proxy, static_cast<Ispooler*>( this ) ) );
-    }
-
-    return result;
 }
 
 //-----------------------------------------------------------------------------Com_spooler::get_Log
@@ -2966,88 +3070,6 @@ STDMETHODIMP Com_spooler::Execute_xml( BSTR xml, BSTR* result )
     catch( const _com_error& x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
 
     return hr;
-}
-
-//--------------------------------------------------------------------Com_spooler::Start_subprocess
-
-STDMETHODIMP Com_spooler::Start_subprocess( VARIANT* program_and_parameters, Isubprocess** result )
-{
-    Z_LOG( "Com_spooler::Start_subprocess()\n" );
-    return E_NOTIMPL;
-}
-
-//----------------------------------------------------------------------Com_spooler_proxy::_methods
-#ifdef Z_COM
-
-const Com_method Com_spooler_proxy::_methods[] =
-{ 
-    // _flags               , _name              , _method                                             , _result_type, _types        , _default_arg_count
-    { DISPATCH_METGHOD, 1001, "Start_subprocess" , (Com_method_ptr)&Com_spooler_proxy::Start_subprocess, VT_DISPATCH , { VT_BYREF|VT_VARIANT } },
-    {}
-};
-
-#endif
-//---------------------------------------------------------------Com_spooler_proxy::Create_instance
-
-HRESULT Com_spooler_proxy::Create_instance( const IID& iid, ptr<IUnknown>* result )
-{
-    if( iid == object_server::IID_Iproxy )
-    {
-        ptr<Com_spooler_proxy> instance = Z_NEW( Com_spooler_proxy );
-        *result = static_cast<Proxy*>( instance.take() );
-        return S_OK;
-    }
-
-    return E_NOINTERFACE;
-}
-
-//------------------------------------------------------------------Com_spooler_proxy::set_property
-/*
-void Com_spooler_proxy::set_property( const string& name, const Variant& value )
-{
-    if( name == "level" )  _level = value.as_int();
-    else  
-        Proxy::set_property( name, value );
-}
-*/
-//-----------------------------------------------------------------Com_spooler_proxy::GetIDsOfNames
-/*
-STDMETHODIMP Com_spooler_proxy::GetIDsOfNames( const IID& iid, OLECHAR** rgszNames, UINT cNames, LCID lcid, DISPID* dispid )
-{
-    HRESULT hr;
-    
-    hr = com_get_dispid( _methods, iid, rszNames, cNames, lcid, dispid );       // Erst lokal versuchen
-
-    if( hr == DISP_E_UNKNOWNNAME )
-    {
-        hr = Proxy::GetIDsOfNames( iid, rgszNames, cNames, lcid, dispid );      // Server aufrufen
-    }
-
-    return hr;
-}
-*/
-//------------------------------------------------------------------------Com_spooler_proxy::Invoke
-/*
-STDMETHODIMP Com_spooler_proxy::Invoke( DISPID dispid, const IID& iid, LCID lcid, unsigned short flags, DISPPARAMS* dispparams, 
-                                        VARIANT* result, EXCEPINFO* excepinfo, UINT* arg_nr )
-{
-    const Bstr& name = name_from_dispid( dispid );
-
-    if( name == "start_process"   )
-    {
-        if( dispparams->cArgs != 2 )  return DISP_E_BADPARAMCOUNT;
-        if( int_from_variant( dispparams->rgvarg[ dispparams->cArgs - 1 ] ) < _level )  return S_FALSE;
-    }
-
-    return Proxy::Invoke( dispid, iid, lcid, flags, dispparams, result, excepinfo, arg_nr );      // Server aufrufen
-}
-*/
-//--------------------------------------------------------------Com_spooler_proxy::Start_subprocess
-
-STDMETHODIMP Com_spooler_proxy::Start_subprocess( VARIANT* program_and_parameters, Isubprocess** result )
-{
-    Z_LOG( "Com_spooler_proxy::Start_subprocess()\n" );
-    return E_NOTIMPL;
 }
 
 //----------------------------------------------------------------------------Com_context::_methods

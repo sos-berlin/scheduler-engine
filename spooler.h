@@ -79,6 +79,7 @@ namespace sos {
         struct Process_class;
         struct Show_what;
         struct Subprocess;
+        struct Subprocess_register;
     }
 }
 
@@ -98,11 +99,11 @@ namespace sos {
 #include "spooler_history.h"
 #include "spooler_order.h"
 #include "spooler_job.h"
+#include "spooler_subprocess.h"
 #include "spooler_task.h"
 #include "spooler_process.h"
 #include "spooler_thread.h"
 #include "spooler_service.h"
-#include "spooler_subprocess.h"
 #include "spooler_module_remote.h"
 #include "spooler_module_remote_server.h"
 

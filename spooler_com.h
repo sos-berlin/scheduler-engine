@@ -402,6 +402,7 @@ struct Com_job : spooler_com::Ijob,
 
 struct Com_task : spooler_com::Itask, 
                   spooler_com::Ihas_java_class_name, 
+                  z::com::object_server::Ihas_reference_with_properties,
                   Sos_ole_object               
 {
                                 Com_task                    ( Task* = NULL );
@@ -411,8 +412,19 @@ struct Com_task : spooler_com::Itask,
 
     USE_SOS_OLE_OBJECT_WITHOUT_QI
 
+
+    // Interface Ihas_java_class_name
+
     STDMETHODIMP            get_Java_class_name             ( BSTR* result )                        { return String_to_bstr( const_java_class_name(), result ); }
     STDMETHODIMP_(char*)  const_java_class_name             ()                                      { return (char*)"sos.spooler.Task"; }
+
+    
+    // Interface Ireference_with_properties
+    
+    ptr<z::com::object_server::Reference_with_properties> get_reference_with_properties();
+
+
+    // Interface Itask
 
     void                        set_task                    ( Task* );
     Task*                       task                        ()                                      { return _task; }
@@ -438,10 +450,35 @@ struct Com_task : spooler_com::Itask,
     STDMETHODIMP            get_Stderr_text                 ( BSTR* );
     STDMETHODIMP            get_Stdout_text                 ( BSTR* );
     STDMETHODIMP            get_Stderr_or_stdout_text       ( BSTR*, bool get_stderr );
+    STDMETHODIMP                Start_subprocess            ( VARIANT*, spooler_com::Isubprocess** );
+    STDMETHODIMP                Add_subprocess              ( int, BSTR, VARIANT_BOOL, VARIANT_BOOL, BSTR );
 
   private:
     Thread_semaphore           _lock;
     Sos_ptr<Task>              _task;
+};
+
+//-----------------------------------------------------------------------------------Com_task_proxy
+                                    
+//Z_DEFINE_GUID( CLSID_Com_spooler_proxy, 0xfeee47aa, 0x6c1b, 0x11d8, 0x81, 0x03, 0x00, 0x04, 0x76, 0xee, 0x8a, 0xfb );   // {feee47aa-6c1b-11d8-8103-000476ee8afb}
+
+struct Com_task_proxy: com::object_server::proxy_with_local_methods< spooler_com::Itask_proxy >
+{
+    static Class_descriptor     class_descriptor;
+
+    static HRESULT              Create_instance             ( const IID& iid, ptr<IUnknown>* result );
+
+
+                                Com_task_proxy              ();
+
+    STDMETHODIMP                Start_subprocess            ( VARIANT* program_and_parameters, spooler_com::Isubprocess** result );
+
+    void                        add_subprocess              ( Subprocess* );
+    void                        remove_subprocess           ( Subprocess* );
+    void                        wait_for_subprocesses       ();
+
+  private:
+    ptr<Subprocess_register>   _subprocess_register;
 };
 
 //---------------------------------------------------------------------------------------Com_thread
@@ -475,7 +512,6 @@ struct Com_thread : spooler_com::Ithread,
 
 struct Com_spooler : spooler_com::Ispooler, 
                      spooler_com::Ihas_java_class_name, 
-                     z::com::object_server::Ihas_reference_with_properties,
                      Sos_ole_object               
 {
                                 Com_spooler                 ();                                     // Für gcc 3.2. Nicht implementiert.
@@ -490,12 +526,6 @@ struct Com_spooler : spooler_com::Ispooler,
     STDMETHODIMP            get_Java_class_name             ( BSTR* result )                        { return String_to_bstr( const_java_class_name(), result ); }
     STDMETHODIMP_(char*)  const_java_class_name             ()                                      { return (char*)"sos.spooler.Spooler"; }
 
-
-    // interface Ireference_with_properties
-    ptr<z::com::object_server::Reference_with_properties> get_reference_with_properties();
-
-
-    void                        close                       ()                                      { THREAD_LOCK(_lock)  _spooler = NULL; }
 
     STDMETHODIMP            get_Log                         ( spooler_com::Ilog** );
     STDMETHODIMP            get_Param                       ( BSTR* );
@@ -528,29 +558,16 @@ struct Com_spooler : spooler_com::Ispooler,
     STDMETHODIMP            get_Db_order_history_table_name ( BSTR* );
     STDMETHODIMP            get_Ini_path                    ( BSTR* );
     STDMETHODIMP                Execute_xml                 ( BSTR, BSTR* );
-    STDMETHODIMP                Start_subprocess            ( VARIANT*, spooler_com::Isubprocess** );
+
+
+    void                        close                       ()                                      { THREAD_LOCK(_lock)  _spooler = NULL; }
+    string                      stdout_path                 ();
+    string                      stderr_path                 ();
+
 
   protected:
     Thread_semaphore           _lock;
     Spooler*                   _spooler;                    // Es gibt nur einen Com_spooler
-};
-
-//--------------------------------------------------------------------------------Com_spooler_proxy
-                                    
-//Z_DEFINE_GUID( CLSID_Com_spooler_proxy, 0xfeee47aa, 0x6c1b, 0x11d8, 0x81, 0x03, 0x00, 0x04, 0x76, 0xee, 0x8a, 0xfb );   // {feee47aa-6c1b-11d8-8103-000476ee8afb}
-
-struct Com_spooler_proxy: com::object_server::proxy_with_local_methods< spooler_com::Ispooler_proxy >
-{
-    static Class_descriptor     class_descriptor;
-
-    static HRESULT              Create_instance             ( const IID& iid, ptr<IUnknown>* result );
-
-
-                                Com_spooler_proxy           ()                                      : Proxy_with_local_methods( &class_descriptor ) {}
-
-    STDMETHODIMP                Start_subprocess            ( VARIANT* program_and_parameters, spooler_com::Isubprocess** result );
-
-  private:
 };
 
 //--------------------------------------------------------------------------------------Com_context

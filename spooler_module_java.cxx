@@ -381,7 +381,8 @@ void Java_module_instance::add_obj( IDispatch* object, const string& name )
     e->SetObjectField( _jobject, field_id, java_idispatch->get_jobject() );
     if( e->ExceptionCheck() )  e.throw_java( "SetObjectField", name );
 
-    //Com_module_instance_base::add_obj( object, name );
+
+    Module_instance::add_obj( object, name );
 }
 
 //-----------------------------------------------------------------------Java_module_instance::load

@@ -11,7 +11,6 @@ namespace spooler {
 //--------------------------------------------------------------------Remote_module_instance_server
 
 struct Remote_module_instance_server : Com_module_instance_base
-
 {
               //Sos_ole_object::operator new;
               //Sos_ole_object::operator delete;
@@ -36,7 +35,6 @@ struct Remote_module_instance_server : Com_module_instance_base
 
 struct Com_remote_module_instance_server : spooler_com::Iremote_module_instance_server,
                                            Sos_ole_object
-
 {
                                 Com_remote_module_instance_server();
                                ~Com_remote_module_instance_server();
@@ -53,6 +51,7 @@ struct Com_remote_module_instance_server : spooler_com::Iremote_module_instance_
     STDMETHODIMP                Begin                       ( SAFEARRAY* objects, SAFEARRAY* names, VARIANT* result );
     STDMETHODIMP                End                         ( VARIANT_BOOL, VARIANT* result );
     STDMETHODIMP                Step                        ( VARIANT* result );
+    STDMETHODIMP                Wait_for_subprocesses       ();
 
 
 

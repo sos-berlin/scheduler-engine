@@ -246,7 +246,6 @@ ptr<object_server::Reference_with_properties> Prefix_log::get_reference_with_pro
     return ref;
 }
 */
-
 //----------------------------------------------------------------------------------Prefix_log::dom
 
 xml::Element_ptr Prefix_log::dom( const xml::Document_ptr& document, const Show_what& show )

@@ -47,6 +47,7 @@ struct Task : Sos_self_deleting
         s_suspended,            // Angehalten
                                 // Ab hier gilt Task::ending() == true
         s_ending,               // spooler_close,  
+        s_ending_waiting_for_subprocesses, // nach spooler_close, Ende der Subprozesse abwarten
         s_on_success,           // spooler_on_success
         s_on_error,             // spooler_on_error
         s_exit,                 // spooler_exit
@@ -66,10 +67,10 @@ struct Task : Sos_self_deleting
     };
 
 
-    struct Subprocess : z::Object, Non_cloneable
+    struct Registered_pid : z::Object, Non_cloneable
     {
-                                Subprocess                  ( Task*, int pid, const Time& timeout );
-                               ~Subprocess                  ()                                      { close(); }
+                                Registered_pid              ( Task*, int pid, const Time& timeout, bool wait, bool ignore_error, bool ignore_signal, const string& title );
+                               ~Registered_pid              ()                                      { close(); }
 
         void                    close                       ();
         void                    try_kill                    ();
@@ -79,11 +80,15 @@ struct Task : Sos_self_deleting
         Task* const            _task;
         int                    _pid;
         Time                   _timeout;
+        bool                   _wait;                       // Auf Ende der Task warten und Exitcode und Signal auswerten (-> Task-Error)
+        bool                   _ignore_error;
+        bool                   _ignore_signal;
+        string                 _title;                      // Kann die Kommandozeile sein
         bool                   _killed;
     };
 
 
-    typedef stdext::hash_map< int, ptr<Subprocess> >  Subprocesses;
+    typedef stdext::hash_map< int, ptr<Registered_pid> >  Registered_pids;
 
 
 
@@ -127,6 +132,13 @@ struct Task : Sos_self_deleting
     Order*                      take_order                  ( const Time& now );
     void                        postprocess_order           ( bool spooler_process_result );
 
+    void                        add_pid                     ( int pid, const Time& timeout = latter_day );
+    void                        remove_pid                  ( int pid );
+    void                        add_subprocess              ( int pid, const Time& timeout_at, bool ignore_error, bool ignore_signal, const string& title );
+    void                        set_subprocess_timeout      ();
+    bool                        check_subprocess_timeout    ( const Time& now );
+    bool                        shall_wait_for_registered_pid();
+    
 
   protected:
     void                        remove_order_after_error    ();
@@ -154,10 +166,7 @@ struct Task : Sos_self_deleting
 
     bool                        check_timeout               ( const Time& now );
     bool                        try_kill                    ();
-    void                        add_pid                     ( int pid, const Time& timeout = latter_day );
-    void                        remove_pid                  ( int pid );
-    void                        set_subprocess_timeout      ();
-    bool                        check_subprocess_timeout    ( const Time& now );
+    
     bool                        wait_until_terminated       ( double wait_time = latter_day );
     void                        set_delay_spooler_process   ( Time t )                              { _log->debug("delay_spooler_process=" + t.as_string() ); _next_spooler_process = Time::now() + t; }
 
@@ -265,7 +274,8 @@ struct Task : Sos_self_deleting
     ptr<Order>                 _order;
     string                     _changed_directories;        // Durch Semikolon getrennt
 
-    Subprocesses               _subprocesses;              // Für add_pid() und remove_pid(). kill_task immediately_yes soll auch diese Prozesse abbrechen.
+    Registered_pids            _registered_pids;            // Für add_pid() und remove_pid(). kill_task immediately_yes soll auch diese Prozesse abbrechen.
+    Subprocess_register        _subprocess_register;        // Fall Task im Scheduler-Prozess läuft
     Call_state                 _call_state;
     Xc_copy                    _error;
 

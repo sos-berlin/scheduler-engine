@@ -63,9 +63,16 @@ void Time::operator = ( const Sos_optional_date_time& dt )
 
 void Time::set( const string& t )
 {
-    Sos_optional_date_time dt;
-    dt.set_time( t );
-    set( dt.time_as_double() );
+    if( t == "never" )
+    {
+        *this = latter_day;
+    }
+    else
+    {
+        Sos_optional_date_time dt;
+        dt.set_time( t );
+        set( dt.time_as_double() );
+    }
 }
 
 //----------------------------------------------------------------------------------------Time::set

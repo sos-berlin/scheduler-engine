@@ -501,6 +501,9 @@ cd $(ProjectDir)
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\spooler_subprocess.cxx">
+			</File>
+			<File
 				RelativePath="spooler_task.cxx">
 				<FileConfiguration
 					Name="Release|Win32">
@@ -643,6 +646,9 @@ cd $(ProjectDir)
 			</File>
 			<File
 				RelativePath="spooler_service.h">
+			</File>
+			<File
+				RelativePath=".\spooler_subprocess.h">
 			</File>
 			<File
 				RelativePath="spooler_task.h">

@@ -179,6 +179,7 @@ void Com_module_instance::add_obj( IDispatch* object, const string& name )
     else
         throw_xc( "Module_instance::add_obj", name.c_str() );
 
+
     Com_module_instance_base::add_obj( object, name );
 }
 
@@ -245,42 +246,10 @@ void Scripting_engine_module_instance::close__end()
 
 void Scripting_engine_module_instance::add_obj( IDispatch* object, const string& name )
 {
-#   if 1  // def Z_WINDOWS
+    _script_site->add_obj( object, Bstr(name) );
 
-        _script_site->add_obj( object, Bstr(name) );
 
-#    else
-/*
-        // Das ist der gleiche Code wie in factory_process.cxx. Zusammenfassen!
-
-        HRESULT     hr;
-        string      stmt;
-        Bstr        name_bstr;
-        Variant     index_vt;
-        Variant     value_vt;
-
-        hr = it->second->get_name( &name_bstr );                if(FAILED(hr)) throw_ole( hr, "Ihostware_variable::name" );
-        hr = it->second->get_value( &index_vt, &value_vt );     if(FAILED(hr)) throw_ole( hr, "Ihostware_variable::value" );
-
-        if( value_vt.vt != VT_EMPTY )
-        {
-            if( _var_prefix )  stmt = _var_prefix;
-            stmt += bstr_as_string(name_bstr);
-            stmt += '=';
-        
-            if( zschimmer::com::variant_is_numeric(value_vt) || value_vt.vt == VT_BOOL )  
-                stmt += variant_as_string(value_vt);
-            else 
-                stmt += quoted_string( variant_as_string(value_vt), _quote_char, _use_backslash? '\\' : _quote_char );
-
-            stmt += ';';
-        
-            _script_site->parse( stmt );
-        }
-*/
-#   endif
-
-    //jz 31.5.03  Com_module_instance_base::add_obj( object, name );
+    Module_instance::add_obj( object, name );
 }
 
 //---------------------------------------------------------------------Scripting_engine_module_instance::load

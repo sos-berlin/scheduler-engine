@@ -74,14 +74,15 @@ void Remote_module_instance_server::load_implicitly()
 
 const Com_method Com_remote_module_instance_server::_methods[] =
 { 
-   // _flags              , _name             , _method                                                         , _result_type  , _types        , _default_arg_count
-    { DISPATCH_METHOD     , 1, "construct"    , (Com_method_ptr)&Com_remote_module_instance_server::Construct   , VT_EMPTY      , { VT_BYREF|VT_ARRAY|VT_VARIANT } },
-    { DISPATCH_METHOD     , 2, "add_obj"      , (Com_method_ptr)&Com_remote_module_instance_server::Add_obj     , VT_EMPTY      , { VT_DISPATCH, VT_BSTR } },
-    { DISPATCH_METHOD     , 3, "name_exists"  , (Com_method_ptr)&Com_remote_module_instance_server::Name_exists , VT_BOOL       , { VT_BSTR } },
-    { DISPATCH_METHOD     , 4, "call"         , (Com_method_ptr)&Com_remote_module_instance_server::Call        , VT_VARIANT    , { VT_BSTR } },
-    { DISPATCH_METHOD     , 5, "begin"        , (Com_method_ptr)&Com_remote_module_instance_server::Begin       , VT_VARIANT    , { VT_BYREF|VT_ARRAY|VT_VARIANT, VT_BYREF|VT_ARRAY|VT_VARIANT } },
-    { DISPATCH_METHOD     , 6, "end"          , (Com_method_ptr)&Com_remote_module_instance_server::End         , VT_VARIANT    , { VT_BOOL } },
-    { DISPATCH_METHOD     , 7, "step"         , (Com_method_ptr)&Com_remote_module_instance_server::Step        , VT_VARIANT    },
+   // _flags              , _name                     , _method                                                                  , _result_type , _types        , _default_arg_count
+    { DISPATCH_METHOD     , 1, "construct"            , (Com_method_ptr)&Com_remote_module_instance_server::Construct            , VT_EMPTY     , { VT_BYREF|VT_ARRAY|VT_VARIANT } },
+    { DISPATCH_METHOD     , 2, "add_obj"              , (Com_method_ptr)&Com_remote_module_instance_server::Add_obj              , VT_EMPTY     , { VT_DISPATCH, VT_BSTR } },
+    { DISPATCH_METHOD     , 3, "name_exists"          , (Com_method_ptr)&Com_remote_module_instance_server::Name_exists          , VT_BOOL      , { VT_BSTR } },
+    { DISPATCH_METHOD     , 4, "call"                 , (Com_method_ptr)&Com_remote_module_instance_server::Call                 , VT_VARIANT   , { VT_BSTR } },
+    { DISPATCH_METHOD     , 5, "begin"                , (Com_method_ptr)&Com_remote_module_instance_server::Begin                , VT_VARIANT   , { VT_BYREF|VT_ARRAY|VT_VARIANT, VT_BYREF|VT_ARRAY|VT_VARIANT } },
+    { DISPATCH_METHOD     , 6, "end"                  , (Com_method_ptr)&Com_remote_module_instance_server::End                  , VT_VARIANT   , { VT_BOOL } },
+    { DISPATCH_METHOD     , 7, "step"                 , (Com_method_ptr)&Com_remote_module_instance_server::Step                 , VT_VARIANT   },
+    { DISPATCH_METHOD     , 8, "Task_proxy.Wait_for_subprocesses", (Com_method_ptr)&Com_remote_module_instance_server::Wait_for_subprocesses, VT_EMPTY     },
     {}
 };
 
@@ -245,7 +246,7 @@ STDMETHODIMP Com_remote_module_instance_server::Construct( SAFEARRAY* safearray 
     return hr;
 }
 
-//-------------------------------------------------------Com_remote_module_instance_server::add_obj
+//-------------------------------------------------------Com_remote_module_instance_server::Add_obj
 
 STDMETHODIMP Com_remote_module_instance_server::Add_obj( IDispatch* object, BSTR name )
 {
@@ -379,10 +380,28 @@ STDMETHODIMP Com_remote_module_instance_server::Step( VARIANT* result )
         if( !_server._module_instance )  throw_xc( "SCHEDULER-203", "step" );
 
         _server._module_instance->step__start() -> async_finish();
-
         _server._module_instance->step__end().move_to( result );
-        //result->vt = VT_BOOL;
-        //V_BOOL( result ) = _server._module_instance->step__end();
+    }
+    catch( const exception& x ) { hr = Com_set_error( x, "Remote_module_instance_server::step" ); }
+
+    return hr;
+}
+
+//-----------------------------------------Com_remote_module_instance_server::Wait_for_subprocesses
+
+STDMETHODIMP Com_remote_module_instance_server::Wait_for_subprocesses()
+{
+    HRESULT hr = NOERROR;
+
+    try
+    {
+        //Com_task_proxy* task_proxy = NULL;
+        //com_query_interface( _server._module_instance->object( "spooler_task" ), &task_proxy );
+        
+        Com_task_proxy* task_proxy = dynamic_cast< Com_task_proxy* >( _server._module_instance->object( "spooler_task" ) );
+        if( !task_proxy )  throw_xc( "Wait_for_subprocesses" );
+
+        task_proxy->wait_for_subprocesses();
     }
     catch( const exception& x ) { hr = Com_set_error( x, "Remote_module_instance_server::step" ); }
 

@@ -16,61 +16,77 @@ struct Process_class;
 //---------------------------------------------------------------------------------------Subprocess
 // Ein vom einem Job gestarteter Prozess (mit irgendeinem fremden Programm).
 
-struct Subprocess : zschimmer::Process
+struct Subprocess : idispatch_implementation< Subprocess, spooler_com::Isubprocess, zschimmer::Process >
 {
-                                Subprocess                  ( Spooler* sp )                         : _spooler(sp), _zero_(this+1) {}
+    static Class_descriptor     class_descriptor;
+
+
+                                Subprocess                  ( Subprocess_register*, Com_task_proxy* = NULL );
+
     Z_GNU_ONLY(                 Subprocess                  (); )
                                ~Subprocess                  ();
 
-
-    bool                        started                     ()                                      { return _connection != NULL; }
-
-    void                        start                       ();
-    object_server::Session*     session                     ()                                      { return _session; }
-  //void                    set_event                       ( Event* e )                            { if( _connection )  _connection->set_event( e ); }
-    bool                        async_continue              ();
-    double                      async_next_gmtime           ()                                      { return _connection? _connection->async_next_gmtime() : (double)latter_day; }
-    void                        add_module_instance         ( Module_instance* );
-    void                        remove_module_instance      ( Module_instance* );
-    int                         module_instance_count       ()                                      { return _module_instance_count; }
-    void                    set_temporary                   ( bool t )                              { _temporary = t; }
-    void                    set_job_name                    ( const string& job_name )              { _job_name = job_name; }
-    void                    set_task_id                     ( int id )                              { _task_id = id; }
-    void                    set_server                      ( const string& hostname, int port )    { _server_hostname = hostname;  _server_port = port; }
-    int                         pid                         ()                                      { return _connection? _connection->pid() : 0; }
-    bool                        kill                        ();
-    int                         exit_code                   ();
-    int                         termination_signal          ();
-    string                      stderr_filename             ();
-    string                      stdout_filename             ();
-
-    void                    set_dom                         ( const xml::Element_ptr&, const Time& xml_mod_time );
-    xml::Element_ptr            dom                         ( const xml::Document_ptr&, const Show_what& );
-
     
-//private:
+    // interface Ihas_java_class_name
+    STDMETHODIMP            get_Java_class_name             ( BSTR* result )                        { return String_to_bstr( const_java_class_name(), result ); }
+    STDMETHODIMP_(char*)  const_java_class_name             ()                                      { return (char*)"sos.spooler.Subprocess"; }
+
+    // interface Isubprocess
+    STDMETHODIMP                Close                       ()                                      { Z_COM_IMPLEMENT( close() ); }
+    STDMETHODIMP                Start                       ( VARIANT* command_line );              // BSTR oder Array
+    STDMETHODIMP            put_Priority                    ( int )                                 { return E_NOTIMPL; }
+    STDMETHODIMP            get_Priority                    ( int* )                                { return E_NOTIMPL; }
+    STDMETHODIMP                Raise_priority              ( int, VARIANT_BOOL* )                  { return E_NOTIMPL; }
+    STDMETHODIMP                Lower_priority              ( int, VARIANT_BOOL* )                  { return E_NOTIMPL; }
+
+    STDMETHODIMP            get_Pid                         ( int* result )                         { *result = pid();  return S_OK; }
+    STDMETHODIMP            get_Terminated                  ( VARIANT_BOOL* result )                { *result = terminated();  return S_OK; }
+    STDMETHODIMP            get_Exit_code                   ( int* result )                         { *result = exit_code();  return S_OK; }
+    STDMETHODIMP            get_Stdout_path                 ( BSTR* )                               { return E_NOTIMPL; }
+    STDMETHODIMP            get_Stderr_path                 ( BSTR* )                               { return E_NOTIMPL; }
+    STDMETHODIMP            put_Ignore_error                ( VARIANT_BOOL b )                      { _ignore_error = b != 0;  return S_OK; } 
+    STDMETHODIMP            get_Ignore_error                ( VARIANT_BOOL* result )                { *result = _ignore_error? VARIANT_TRUE: VARIANT_FALSE;  return S_OK; }
+    STDMETHODIMP            put_Ignore_signal               ( VARIANT_BOOL b )                      { _ignore_signal= b != 0;  return S_OK; }
+    STDMETHODIMP            get_Ignore_signal               ( VARIANT_BOOL* result )                { *result = _ignore_signal? VARIANT_TRUE: VARIANT_FALSE;  return S_OK; }
+    STDMETHODIMP                Wait                        ( double seconds )                      { Z_COM_IMPLEMENT( wait( seconds ) ); }
+    STDMETHODIMP                Kill                        ( int signal )                          { return E_NOTIMPL; }
+
+
+    void                        close                       ();
+    bool                        ignore_error                () const                                { return _ignore_error; }
+    bool                        ignore_signal               () const                                { return _ignore_signal; }
+
+  private:
+    friend struct               Subprocess_register;
+
     Fill_zero                  _zero_;
-    string                     _job_name;
-    int                        _task_id;
-    Thread_semaphore           _lock;
-    Spooler*                   _spooler;
-    string                     _server_hostname;
-    int                        _server_port;
-    ptr<object_server::Connection> _connection;             // Verbindung zum Prozess
-    ptr<object_server::Session>    _session;                // Wir haben immer nur eine Session pro Verbindung
-    Process_handle             _process_handle_copy;
-    int                        _exit_code;
-    int                        _termination_signal;
-    Time                       _running_since;
-    bool                       _temporary;                  // Löschen, wenn kein Module_instance mehr läuft
-    long                       _module_instance_count;
-    Module_instance*           _module_instance;
-    Process_class*             _process_class;
+    Subprocess_register*       _subprocess_register;
+    bool                       _registered;
+    ptr<Com_task_proxy>        _task_proxy;                 
+    bool                       _ignore_error;
+    bool                       _ignore_signal;
 };
 
-//----------------------------------------------------------------------------------Subprocess_list
+//------------------------------------------------------------------------------Subprocess_register
 
-//typedef list< ptr<Subprocess> >    Subprocess_list;
+struct Subprocess_register : Idispatch_base_implementation
+{
+                                Subprocess_register         ()                                      : _zero_(this+1) {}
+                               ~Subprocess_register         ();
+
+
+    STDMETHODIMP                Start_subprocess            ( VARIANT* program_and_parameters, spooler_com::Isubprocess** result );
+
+    void                        wait                        ();                                     // Exception, wenn ein Prozess einen Fehler lieferte
+    void                        add                         ( Subprocess* );
+    void                        remove                      ( Subprocess* );
+
+
+    Fill_zero                  _zero_;
+
+    typedef map< int, ptr<Subprocess> >  Subprocess_map;
+    Subprocess_map                      _subprocess_map;
+};
 
 //-------------------------------------------------------------------------------------------------
 

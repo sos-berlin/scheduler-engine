@@ -345,15 +345,20 @@ library Spooler
         [propget]
         HRESULT                 Changed_directories         ( [out,retval] BSTR* Result );
 
-        HRESULT                 Add_pid                     ( [in] int pid, [in,optional]VARIANT* timeout );
+        HRESULT                 Add_pid                     ( [in] int Pid, [in,optional] VARIANT* Timeout );
 
-        HRESULT                 Remove_pid                  ( [in] int pid );
+        HRESULT                 Remove_pid                  ( [in] int Pid );
 
         [propget]
         HRESULT                 Stderr_text                 ( [out,retval] BSTR* Result );
 
         [propget]
         HRESULT                 Stdout_text                 ( [out,retval] BSTR* Result );
+
+        [id(20)]
+        HRESULT                 Start_subprocess            ( [in] VARIANT* program_and_parameters, [out,retval] Isubprocess** );
+
+        HRESULT                 Add_subprocess              ( [in] int Pid, [in] BSTR timeout_at, [in] VARIANT_BOOL Ignore_error, [in] VARIANT_BOOL Ignore_signal, [in,defaultvalue("")] BSTR Title );
     }
 
     [
@@ -363,6 +368,29 @@ library Spooler
     {
         interface Itask;
         interface Ihas_java_class_name;
+    }
+
+    //----------------------------------------------------------------------------------Itask_proxy
+
+    [
+        uuid       ( feee47a7-6c1b-11d8-8103-000476ee8afb ),
+        odl,
+        dual
+    ]
+    interface Itask_proxy : IDispatch
+    {
+        // Ids sollten mit Itask übereinstimmen!
+
+        [id(20)]
+        HRESULT                 Start_subprocess        ( [in] VARIANT* program_and_parameters, [out,retval] Isubprocess** );
+    }
+
+    [
+        uuid       ( feee47aa-6c1b-11d8-8103-000476ee8afb )
+    ]
+    coclass Task_proxy
+    {
+        interface Itask_proxy;
     }
 
     //---------------------------------------------------------------------------------------Thread
@@ -412,7 +440,7 @@ library Spooler
     ]
     interface Ispooler : IDispatch
     {
-        // Ids sollten mit Ispooler_proxy übereinstimmen!
+        // Ids sollten mit Itask_proxy übereinstimmen!
 
         [id(1),propget]
         HRESULT                 Java_class_name             ( [out,retval] BSTR* Result );          // Damit java_class_name über IDispatch, statt über Ihas_java_class_name gerufen werden kann
@@ -505,9 +533,6 @@ library Spooler
         HRESULT                 Ini_path                ( [out,retval] BSTR* );
 
         HRESULT                 Execute_xml             ( [in] BSTR, [out,retval] BSTR* );
-
-        [id(15)]
-        HRESULT                 Start_subprocess        ( [in] VARIANT* program_and_parameters, [out,retval] Isubprocess** );
     }
 
     [
@@ -517,29 +542,6 @@ library Spooler
     {
         interface Ispooler;
         interface Ihas_java_class_name;
-    }
-
-    //-------------------------------------------------------------------------------Ispooler_proxy
-
-    [
-        uuid       ( feee47a7-6c1b-11d8-8103-000476ee8afb ),
-        odl,
-        dual
-    ]
-    interface Ispooler_proxy : IDispatch
-    {
-        // Ids sollten mit Ispooler übereinstimmen!
-
-        [id(15)]
-        HRESULT                 Start_subprocess        ( [in] VARIANT* program_and_parameters, [out,retval] Isubprocess** );
-    }
-
-    [
-        uuid       ( feee47aa-6c1b-11d8-8103-000476ee8afb )
-    ]
-    coclass Spooler_proxy
-    {
-        interface Ispooler_proxy;
     }
 
     //------------------------------------------------------------------------------Spooler_context
@@ -1062,6 +1064,7 @@ library Spooler
         HRESULT                 Begin                   ( SAFEARRAY(VARIANT) objects, SAFEARRAY(VARIANT) names, [out,retval] VARIANT* Result );
         HRESULT                 End                     ( [in] VARIANT_BOOL succeeded, [out,retval] VARIANT* Result );
         HRESULT                 Step                    ( [out,retval] VARIANT* Result );
+        HRESULT                 Wait_for_subprocesses   ();
     };
 
     [
@@ -1086,6 +1089,18 @@ library Spooler
                                                                                                 // Für den Objectserver
 
         HRESULT                 Close                   ();
+
+        HRESULT                 Start                   ( [in] VARIANT* command_line );         // BSTR oder Array
+
+        [propput]
+        HRESULT                 Priority                ( [in] int );
+
+        [propget]
+        HRESULT                 Priority                ( [out,retval] int* );
+
+        HRESULT                 Raise_priority          ( [in] int, [out,retval] VARIANT_BOOL* );
+
+        HRESULT                 Lower_priority          ( [in] int, [out,retval] VARIANT_BOOL* );
 
         [propget]
         HRESULT                 Pid                     ( [out,retval] int* );

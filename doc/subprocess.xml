@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet href="scheduler.xsl" type="text/xsl"?>
+
+<!--$Id: datenbank.xml 3303 2005-01-11 23:22:22Z jz $-->
+
+<description 
+    title               = "Subprozesse" 
+    base_dir            = ""
+    author              = "$Author: jz $"
+    date                = "$Date: 2005-01-12 00:22:22 +0100 (Mi, 12 Jan 2005) $"
+>
+
+<scheduler_keyword keyword="Subprozess"/>
+<scheduler_keyword keyword="start_process()"/>
+
+<p>
+    Eine Task kann irgendwelche Programme in Subprozessen laufen lassen.
+</p>
+<p>
+    Beispiel (Javascript):
+</p>
+<pre>
+
+var my_process = spooler.start_subprocess( "kommandozeile mit parametern" );
+spooler_log.info( "pid=" + my_process.pid() );
+</pre>
+
+
+
+
+
+
+</description>

@@ -23,6 +23,7 @@ extern const string spooler_close_name;
 extern const string spooler_process_name;
 extern const string spooler_on_error_name;
 extern const string spooler_on_success_name;
+//extern const string wait_for_subprocesses_name;
 
 //-------------------------------------------------------------------------------------------------
 
@@ -184,6 +185,9 @@ struct Module_instance : Object
 
     typedef list<Object_list_entry>  Object_list;
 
+    //typedef map< string, ptr<IDispatch> >  Object_register;
+    //Object_register            _object_register;
+
 
 
 
@@ -206,6 +210,8 @@ struct Module_instance : Object
     void                        detach_task                 ();
     virtual void                add_obj                     ( IDispatch*, const string& name );
   //virtual void                add_log_obj                 ( Com_log* log, const string& name )    { add_obj( log, name ); }
+    IDispatch*                  object                      ( const string& name );
+
     virtual void                load                        ()                                      {}
     virtual void                start                       ()                                      {}
     virtual IDispatch*          dispatch                    () const                                { throw_xc( "SCHEDULER-172", "dispatch()" ); }

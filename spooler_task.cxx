@@ -240,7 +240,7 @@ void Task::close()
 {
     if( !_closed ) 
     {
-        FOR_EACH( Subprocesses, _subprocesses, p )  p->second->close();
+        FOR_EACH( Registered_pids, _registered_pids, p )  p->second->close();
 
         if( _operation )
         {
@@ -332,12 +332,12 @@ xml::Element_ptr Task::dom( const xml::Document_ptr& document, const Show_what& 
         if( _order )  dom_append_nl( task_element ),  task_element.appendChild( _order->dom( document, show ) );
         if( _error )  dom_append_nl( task_element ),  append_error_element( task_element, _error );
         
-        if( !_subprocesses.empty() )
+        if( !_registered_pids.empty() )
         {
             xml::Element_ptr subprocesses_element = document.createElement( "subprocesses" );
-            FOR_EACH_CONST( Subprocesses, _subprocesses, it )  
+            FOR_EACH_CONST( Registered_pids, _registered_pids, it )  
             {
-                const Subprocess* p = it->second;
+                const Registered_pid* p = it->second;
 
                 if( p )
                 {
@@ -346,6 +346,9 @@ xml::Element_ptr Task::dom( const xml::Document_ptr& document, const Show_what& 
 
                     if( p->_timeout != latter_day )
                     subprocess_element.setAttribute( "timeout_at", p->_timeout.as_string() );
+
+                    if( p->_title != "" )
+                    subprocess_element.setAttribute( "title", p->_title );
 
                     if( p->_killed )
                     subprocess_element.setAttribute( "killed", "yes" );
@@ -671,15 +674,15 @@ bool Task::check_timeout( const Time& now )
 
 void Task::add_pid( int pid, const Time& timeout_period )
 { 
-    Time timeout = latter_day;
+    Time timeout_at = latter_day;
     
     if( timeout_period != latter_day )
     {
-        timeout = Time::now() + timeout_period;
-        _log->debug9( S() << "add_pid(" << pid << ")  Frist endet " << timeout );
+        timeout_at = Time::now() + timeout_period;
+        _log->debug9( S() << "add_pid(" << pid << ")  Frist endet " << timeout_at );
     }
 
-    _subprocesses[ pid ] = Z_NEW( Subprocess( this, pid, timeout ) );  
+    _registered_pids[ pid ] = Z_NEW( Registered_pid( this, pid, timeout_at, false, false, false, "" ) );  
 
     set_subprocess_timeout();
 }
@@ -688,27 +691,50 @@ void Task::add_pid( int pid, const Time& timeout_period )
 
 void Task::remove_pid( int pid )
 { 
-    _subprocesses.erase( pid );  
+    _registered_pids.erase( pid );  
 
     set_subprocess_timeout();
 }
 
-//---------------------------------------------------------------------Task::Subprocess::Subprocess
+//------------------------------------------------------------------------------------Task::add_pid
 
-Task::Subprocess::Subprocess( Task* task, int pid, const Time& timeout )
+void Task::add_subprocess( int pid, const Time& timeout_at, bool respect_exitcode, bool respect_signal, const string& title )
+{ 
+    Time timeout = latter_day;
+    
+    _registered_pids[ pid ] = Z_NEW( Registered_pid( this, pid, timeout_at, true, respect_exitcode, respect_signal, title ) );  
+
+    set_subprocess_timeout();
+}
+
+//--------------------------------------------------------------Task::shall_wait_for_registered_pid
+
+bool Task::shall_wait_for_registered_pid()
+{
+    FOR_EACH( Registered_pids, _registered_pids, p )  if( p->second->_wait )  return true;
+    return false;
+}
+
+//-------------------------------------------------------------Task::Registered_pid::Registered_pid
+
+Task::Registered_pid::Registered_pid( Task* task, int pid, const Time& timeout, bool wait, bool ignore_error, bool ignore_signal, const string& title )
 : 
     _spooler(task->_spooler),
     _task(task),
     _pid(pid), 
     _timeout(timeout), 
+    _wait(wait),
+    _ignore_error(ignore_error),
+    _ignore_signal(ignore_signal),
+    _title(title),
     _killed(false) 
 {
     _spooler->register_pid( pid );
 }
 
-//--------------------------------------------------------------------------Task::Subprocess::close
+//----------------------------------------------------------------------Task::Registered_pid::close
 
-void Task::Subprocess::close()
+void Task::Registered_pid::close()
 {
     if( _spooler )  
     {
@@ -717,9 +743,9 @@ void Task::Subprocess::close()
     }
 }
 
-//-----------------------------------------------------------------------Task::Subprocess::try_kill
+//-------------------------------------------------------------------Task::Registered_pid::try_kill
                                 
-void Task::Subprocess::try_kill()
+void Task::Registered_pid::try_kill()
 { 
     if( !_killed )
     {
@@ -739,7 +765,7 @@ void Task::Subprocess::try_kill()
 void Task::set_subprocess_timeout()
 {
     _subprocess_timeout = latter_day;
-    FOR_EACH( Subprocesses, _subprocesses, p )  if( _subprocess_timeout > p->second->_timeout )  _subprocess_timeout = p->second->_timeout;
+    FOR_EACH( Registered_pids, _registered_pids, p )  if( _subprocess_timeout > p->second->_timeout )  _subprocess_timeout = p->second->_timeout;
 
     //if( _subprocess_timeout > _next_time )  set_next_time( _subprocess_timeout );
 }
@@ -752,7 +778,7 @@ bool Task::check_subprocess_timeout( const Time& now )
 
     if( _subprocess_timeout < now )
     {
-        FOR_EACH( Subprocesses, _subprocesses, p )  
+        FOR_EACH( Registered_pids, _registered_pids, p )  
         {
             if( p->second->_timeout < now )  p->second->try_kill(),  something_done = true;
         }
@@ -773,7 +799,7 @@ bool Task::try_kill()
     {
         _killed = do_kill();
 
-        FOR_EACH( Subprocesses, _subprocesses, p )  p->second->try_kill();
+        FOR_EACH( Registered_pids, _registered_pids, p )  p->second->try_kill();
 
         if( !_killed ) _log->warn( "Task konnte nicht abgebrochen werden" );
     }
@@ -1018,17 +1044,50 @@ bool Task::do_something()
                             {
                                 operation__end();
 
-                                set_state( loaded()? has_error()? s_on_error 
-                                                                : s_on_success 
+                                set_state( loaded()? s_ending_waiting_for_subprocesses
                                                    : s_release );
-
-                                //set_mail_defaults();
-
                                 loop = true;
                             }
 
                             something_done = true;
 
+                            break;
+                        }
+
+
+                        case s_ending_waiting_for_subprocesses:
+                        {
+                            if( !_operation )
+                            {
+                                if( shall_wait_for_registered_pid() )
+                                {
+                                    if( dynamic_cast< Remote_module_instance_proxy* >( +_module_instance ) )
+                                    {
+                                        _operation = do_call__start( "Task_proxy.Wait_for_subprocesses" );
+                                    }
+                                    else
+                                    {
+                                        try
+                                        {
+                                            _subprocess_register.wait();
+                                        }
+                                        catch( exception& x ) { set_error( x ); }
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                operation__end();
+                            }
+
+                            if( !_operation )
+                            {
+                                set_state( has_error()? s_on_error 
+                                                      : s_on_success );
+                                loop = true;
+                            }
+
+                            something_done = true;
                             break;
                         }
 
@@ -1288,14 +1347,15 @@ bool Task::operation__end()
     {
         switch( _state )
         {
-            case s_starting:    result = do_begin__end();    break;
-            case s_ending:               do_end__end();      break;
-            case s_on_error:    result = do_call__end();     break;
-            case s_on_success:  result = do_call__end();     break;
-            case s_exit:        result = do_call__end();     break;
-            case s_release:              do_release__end();  break;
-            case s_ended:                do_close__end();    break;
-            default:            throw_xc( "Task::operation__end" );
+            case s_starting:                        result = do_begin__end();    break;
+            case s_ending:                                   do_end__end();      break;
+            case s_ending_waiting_for_subprocesses:          do_call__end();     break;
+            case s_on_error:                        result = do_call__end();     break;
+            case s_on_success:                      result = do_call__end();     break;
+            case s_exit:                            result = do_call__end();     break;
+            case s_release:                                  do_release__end();  break;
+            case s_ended:                                    do_close__end();    break;
+            default:                                throw_xc( "Task::operation__end" );
         }
     }
     catch( const exception& x ) { set_error(x); result = false; }
@@ -1678,9 +1738,6 @@ void Job_module_task::do_load()
 
 Async_operation* Job_module_task::do_begin__start()
 {
-    //ok = load_module_instance();
-    //if( !ok || has_error() )  return false;
-
     if( !_module_instance )  throw_xc( "SCHEDULER-199" );
 
     return _module_instance->begin__start();
