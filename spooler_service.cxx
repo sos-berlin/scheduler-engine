@@ -1,4 +1,4 @@
-// $Id: spooler_service.cxx,v 1.11 2001/02/16 18:23:12 jz Exp $
+// $Id: spooler_service.cxx,v 1.12 2001/02/16 20:19:48 jz Exp $
 /*
     Hier sind implementiert
 
@@ -104,27 +104,12 @@ static void event_log( const string& msg_par )
 
 //----------------------------------------------------------------------------------install_service
 
-void install_service( const string& id, int argc, char** argv ) 
+void install_service( const string& id, const string& params ) 
 { 
-    string params;
     string my_service_name         = service_name(id);
     string my_service_display_name = std_service_display_name;
 
     if( !id.empty() )  my_service_display_name += " -id=" + id;
-
-
-    for( Sos_option_iterator opt ( argc, argv ); !opt.end(); opt.next() )
-    {
-        if( opt.flag      ( "install-service" ) ) ;
-        else
-        if( opt.flag      ( "remove-service" )  ) ;
-        else
-        if( opt.flag      ( opt.option() )      )  params += (opt.set()? " " : " -")  + (string)opt.option();
-        else
-        if( opt.with_value( opt.option() )      )  params += " -" + (string)opt.option() + "=" + quoted_string( opt.value(), '"', '"' );
-        else
-        if( opt.param     ()                    )  params += " " + quoted_string( opt.value(), '"', '"' );
-    }
 
     SC_HANDLE manager_handle = OpenSCManager( NULL, SERVICES_ACTIVE_DATABASE, SC_MANAGER_CREATE_SERVICE );
     if( !manager_handle )  throw_mswin_error( "OpenSCManager" );

@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.53 2001/02/16 18:23:11 jz Exp $
+// $Id: spooler.cxx,v 1.54 2001/02/16 20:19:48 jz Exp $
 /*
     Hier sind implementiert
 
@@ -27,7 +27,7 @@
 //#endif
 
 
-const string new_suffix = "~new";           // Suffix für den neuen Spooler, der den bisherigen beim Neustart ersetzen soll
+const string new_suffix          = "~new";  // Suffix für den neuen Spooler, der den bisherigen beim Neustart ersetzen soll
 const double renew_wait_interval = 0.1;
 const double renew_wait_time     = 30;      // Wartezeit für Brückenspooler, bis der alte Spooler beendet ist und der neue gestartet werden kann.
 
@@ -448,9 +448,12 @@ static void spooler_renew( const string& id, const string& renew_spooler, bool i
 
     if( is_service ) 
     {
-        for( t; t > 0; t -= renew_wait_interval )  
+        // terminate_and_restart: Erst SERVICE_STOP_PENDING, dann SERVICE_STOPPED
+        // abort_immediately_and_restart: SERVICE_RUNNING, vielleicht SERVICE_PAUSED o.a.
+
+        for( t; t > 0; t -= renew_wait_interval )
         {
-            if( spooler::service_state(id) != SERVICE_STOP_PENDING )  break;
+            if( spooler::service_state(id) == SERVICE_STOPPED )  break;    
             sos_sleep( renew_wait_interval );
         }
 
@@ -557,7 +560,7 @@ int sos_main( int argc, char** argv )
     bool    do_remove_service = false;
     string  id;
     string  renew_spooler;
-    string  renew_command_line;
+    string  command_line;
     bool    renew_service = false;
 
     for( Sos_option_iterator opt ( argc, argv ); !opt.end(); opt.next() )
@@ -569,18 +572,20 @@ int sos_main( int argc, char** argv )
         if( opt.flag      ( "renew-service"    ) )  renew_service = opt.set();
         else
         {
-            if( opt.flag      ( "service"          ) )  is_service = opt.set(), is_service_set = true;
-            else
             if( opt.flag      ( "install-service"  ) )  do_install_service = opt.set();
             else
             if( opt.flag      ( "remove-service"   ) )  do_remove_service = opt.set();
             else
-            if( opt.with_value( "id"               ) )  id = opt.value();
-            else
-            if( opt.with_value( "log"              ) )  log_filename = opt.value();
+            {
+                if( opt.flag      ( "service"          ) )  is_service = opt.set(), is_service_set = true;
+                else
+                if( opt.with_value( "id"               ) )  id = opt.value();
+                else
+                if( opt.with_value( "log"              ) )  log_filename = opt.value();
 
-            if( !renew_command_line.empty() )  renew_command_line += " ";
-            renew_command_line += opt.complete_parameter( '"', '"' );
+                if( !command_line.empty() )  command_line += " ";
+                command_line += opt.complete_parameter( '"', '"' );
+            }
         }
     }
 
@@ -588,21 +593,30 @@ int sos_main( int argc, char** argv )
 
     if( !renew_spooler.empty() )  
     { 
-        spooler::spooler_renew( id, renew_spooler, renew_service, renew_command_line ); 
+        spooler::spooler_renew( id, renew_spooler, renew_service, command_line ); 
         ret = 0;
     }
     else
     if( do_remove_service | do_install_service )
     {
         if( do_remove_service  )  spooler::remove_service( id );
-        if( do_install_service )  spooler::install_service( id, argc, argv );
+        if( do_install_service ) 
+        {
+            if( !is_service )  command_line = "-service " + command_line;
+            spooler::install_service( id, command_line );
+        }
         ret = 0;
     }
     else
     {
-        { spooler::Handle h = _beginthread( spooler::delete_new_spooler, 0, NULL ); }
+        { 
+            spooler::Handle h = _beginthread( spooler::delete_new_spooler, 50000, NULL );
+            // Handle nicht sofort verwerfen, sonst kann der Dienst mit Fehler 6 "Invalid Handle" nicht gestartet werden.
+            // Vielleicht dann, wenn der Handle geschlossen wird, bevor der Thread angelaufen ist.
+            SetThreadPriority( h, THREAD_PRIORITY_HIGHEST );  // Thread beginnen, bevor Handle geschlossen wird. 
+        }
 
-        if( !is_service_set )  is_service = spooler::service_is_started(id);
+      //if( !is_service_set )  is_service = spooler::service_is_started(id);
 
         if( is_service )
         {
