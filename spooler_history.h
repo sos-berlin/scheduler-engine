@@ -1,4 +1,4 @@
-// $Id: spooler_history.h,v 1.22 2003/12/08 10:32:05 jz Exp $
+// $Id: spooler_history.h,v 1.23 2003/12/10 11:29:06 jz Exp $
 
 #ifndef __SPOOLER_HISTORY_H
 #define __SPOOLER_HISTORY_H
@@ -73,6 +73,7 @@ struct Spooler_db : Sos_self_deleting
     friend struct Task_history;
     friend struct Transaction;
 
+    void                        open2                   ( const string& db_name );
     void                        open_history_table      ();
     void                        commit                  ();
     void                        rollback                ();

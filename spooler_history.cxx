@@ -1,4 +1,4 @@
-// $Id: spooler_history.cxx,v 1.69 2003/12/10 09:09:07 jz Exp $
+// $Id: spooler_history.cxx,v 1.70 2003/12/10 11:29:06 jz Exp $
 
 #include "spooler.h"
 #include "../zschimmer/z_com.h"
@@ -142,6 +142,35 @@ Spooler_db::Spooler_db( Spooler* spooler )
 
 void Spooler_db::open( const string& db_name )
 {
+    //try
+    {
+        while(1)
+        {
+            try
+            {
+                open2( db_name );
+                break;
+            }
+            catch( const exception& x )
+            {
+                if( !_spooler->_wait_endless_for_db_open )  throw;
+                try_reopen_after_error( x );
+            }
+        }
+    }
+    //catch( const exception& x ) 
+    //{ 
+    //    //_spooler->log().error( string("FEHLER BEIM LESEN DER NÄCHSTEN ID: ") + x.what() ); 
+    //    throw;
+    //}
+}
+
+//--------------------------------------------------------------------------------Spooler_db::open2
+
+void Spooler_db::open2( const string& db_name )
+{
+Z_DEBUG_ONLY( static int c = 1; if( c-- <= 0 )  throw_xc( "OPENERROR" ); )
+
     Z_MUTEX( _lock )
     {
         string my_db_name = db_name;
@@ -321,6 +350,10 @@ void Spooler_db::create_table_when_needed( const string& tablename, const string
 
 void Spooler_db::try_reopen_after_error( const exception& x )
 {
+    bool    too_much_errors = false;
+    string  warn_msg;
+
+
     THREAD_LOCK( _error_lock )  _error = x.what();
 
     _spooler->log().error( string("FEHLER BEIM ZUGRIFF AUF DATENBANK: ") + x.what() );
@@ -333,37 +366,23 @@ void Spooler_db::try_reopen_after_error( const exception& x )
     catch( const exception& x ) { _spooler->_log.warn( string("FEHLER BEIM SCHLIESSEN DER DATENBANK: ") + x.what() ); }
 
 
-    bool too_much_errors = ++_error_count >= _spooler->_max_db_errors;
-    
-    string max_warn_msg = "Nach max_db_errors=" + as_string(_spooler->_max_db_errors) + " Problemen mit der Datenbank wird sie nicht weiter verwendet";
-
-    if( too_much_errors ) 
+    while( !_db.opened()  &&  !too_much_errors )
     {
-        _spooler->log().warn( max_warn_msg );
+        ++_error_count;
         
-        if( _spooler->_need_db ) 
+        warn_msg = "Nach max_db_errors=" + as_string(_spooler->_max_db_errors) + " Problemen mit der Datenbank wird sie nicht weiter verwendet";
+
+        if( _error_count >= _spooler->_max_db_errors )
         {
-            string msg = string("SCHEDULER WIRD BEENDET WEGEN FEHLERS BEIM ZUGRIFF AUF DATENBANK: ") + x.what();
-            _spooler->_log.error( msg );
-            string body = "db=" + _spooler->_db_name + "\r\n\r\n" + x.what() + "\r\n\r\n" + max_warn_msg;
-            _spooler->send_error_email( msg, body );
-            
-            _spooler->abort_immediately();
-            throw exception( x.what() );  // Wird nicht ausgeführt
+            too_much_errors = true;
+            break;
         }
-        else
-        {
-            string body = "db=" + _spooler->_db_name + "\r\n\r\n" + x.what() + "\r\n\r\n" + max_warn_msg;
-            _spooler->send_error_email( string("SCHEDULER ARBEITET NACH FEHLERN OHNE DATENBANK: ") + x.what(), "Wegen need_db=no\n" + body );
-            // Datenbank nicht mehr öffnen und auf Dateihistorie umschalten.
-        }
-    }
-    else
-    {
+
+
         if( !_email_sent_after_db_error )
         {
             string body = "Dies ist das " + as_string(_error_count) + ". Problem mit der Datenbank.";
-            body += "\n(" + max_warn_msg + ")";
+            body += "\n(" + warn_msg + ")";
             body += "\ndb=" + _spooler->_db_name + "\r\n\r\n" + x.what() + "\r\n\r\nDer Scheduler versucht, die Datenbank erneut zu oeffnen.";
             if( !_spooler->_need_db )  body += "\r\nWenn das nicht geht, schreibt der Scheduler die Historie in Textdateien.";
             _spooler->send_error_email( string("FEHLER BEIM ZUGRIFF AUF DATENBANK: ") + x.what(), body );
@@ -378,7 +397,7 @@ void Spooler_db::try_reopen_after_error( const exception& x )
             {
                 try
                 {
-                    open( _spooler->_db_name );
+                    open2( _spooler->_db_name );
                     open_history_table();
                     break;
                 }
@@ -388,17 +407,47 @@ void Spooler_db::try_reopen_after_error( const exception& x )
                     _spooler->log().warn( x.what() );
 
                     if( !_spooler->_need_db )  break;
+                    
+                    if( !_spooler->_wait_endless_for_db_open )
+                    {
+                        too_much_errors = true;
+                        warn_msg = "Datenbank lässt sich nicht öffnen. Wegen need_db=strict wird der Scheduler sofort beendet.";
+                        break;
+                    }
 
+                    _spooler->log().warn( "Eine Minute warten ..." );
                     sos_sleep( 60 );
                 }
             }
         }
     }
 
+    if( too_much_errors )
+    {
+        _spooler->log().warn( warn_msg );
+        
+        if( _spooler->_need_db ) 
+        {
+            string msg = string("SCHEDULER WIRD BEENDET WEGEN FEHLERS BEIM ZUGRIFF AUF DATENBANK: ") + x.what();
+            _spooler->_log.error( msg );
+            string body = "db=" + _spooler->_db_name + "\r\n\r\n" + x.what() + "\r\n\r\n" + warn_msg;
+            _spooler->send_error_email( msg, body );
+            
+            _spooler->abort_immediately();
+            throw exception( x.what() );  // Wird nicht ausgeführt
+        }
+        else
+        {
+            string body = "db=" + _spooler->_db_name + "\r\n\r\n" + x.what() + "\r\n\r\n" + warn_msg;
+            _spooler->send_error_email( string("SCHEDULER ARBEITET NACH FEHLERN OHNE DATENBANK: ") + x.what(), "Wegen need_db=no\n" + body );
+            // Datenbank nicht mehr öffnen und auf Dateihistorie umschalten.
+        }
+    }
+
     if( !_db.opened() )
     {
         _spooler->log().info( "Historie wird von Datenbank auf Dateien umgeschaltet" );
-        open( "" );     // Umschalten auf dateibasierte Historie
+        open2( "" );     // Umschalten auf dateibasierte Historie
     }
 }
 
@@ -455,7 +504,7 @@ int Spooler_db::get_id_( const string& variable_name, Transaction* outer_transac
             //id = _job_id_select.get_record().as_int(0);
             //_job_id_select.close( close_cursor );
 
-//Z_DEBUG_ONLY( static int c = 3;  if( --c <= 0 )  throw_xc( "FEHLER" ); )
+Z_DEBUG_ONLY( static int c = 3;  if( --c <= 0 )  throw_xc( "FEHLER" ); )
             execute( "UPDATE " + uquoted(_spooler->_variables_tablename) + " set \"WERT\" = \"WERT\"+1 where \"NAME\"=" + sql::quoted( variable_name ) );
 
             Any_file sel;

@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.304 2003/12/09 21:01:12 jz Exp $
+// $Id: spooler.cxx,v 1.305 2003/12/10 11:29:06 jz Exp $
 /*
     Hier sind implementiert
 
@@ -1241,7 +1241,21 @@ void Spooler::load_arg()
     _order_history_yes          =            read_profile_bool      ( _factory_ini, "spooler", "order_history"      , true );
     _order_history_with_log     =            read_profile_with_log  ( _factory_ini, "spooler", "order_history_with_log", arc_no );
     _db_name                    =            read_profile_string    ( _factory_ini, "spooler", "db"                 );
-    _need_db                    =            read_profile_bool      ( _factory_ini, "spooler", "need_db"            , true                );
+
+    // need_db=yes|no|strict
+  //_need_db                    =            read_profile_bool      ( _factory_ini, "spooler", "need_db"            , true                );
+    string need_db_str          =            read_profile_string    ( _factory_ini, "spooler", "need_db"            , "yes"                );
+    if( stricmp( need_db_str.c_str(), "strict" ) == 0 )
+    {
+        _need_db = true; 
+        _wait_endless_for_db_open = false;
+    }
+    else
+    {
+        try{ _wait_endless_for_db_open = _need_db = as_bool( need_db_str ); }
+        catch( const exception& x ) { throw_xc( "SCHEDULER-206", need_db_str, x.what() ); }
+    }
+
     _max_db_errors              =            read_profile_int       ( _factory_ini, "spooler", "max_db_errors"      , 5 );
     _order_history_tablename    =            read_profile_string    ( _factory_ini, "spooler", "db_order_history_table", "SCHEDULER_ORDER_HISTORY" );
     _orders_tablename           =            read_profile_string    ( _factory_ini, "spooler", "db_orders_table"    , "SCHEDULER_ORDERS"    );
@@ -1460,7 +1474,7 @@ void Spooler::start()
 
     THREAD_LOCK( _lock )
     {
-        if( _need_db  && _db_name.empty() )  throw_xc( "SCHEDULER-205" );
+        //if( _need_db  && _db_name.empty() )  throw_xc( "SCHEDULER-205" );
 
         _db = SOS_NEW( Spooler_db( this ) );
         _db->open( _db_name );
@@ -1942,6 +1956,8 @@ void Spooler::abort_immediately( bool restart )
     {
         try{ spooler_restart( NULL, is_service() ); } catch(...) {}
     }
+
+    try{ _log.close(); } catch(...){}
 
 
     // Point of no return
