@@ -1,4 +1,4 @@
-<!-- $Id: task_frame.html,v 1.17 2004/07/24 11:36:42 jz Exp $ -->
+<!-- $Id: task_frame.html,v 1.18 2004/07/24 17:13:40 jz Exp $ -->
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <html>
 
@@ -66,6 +66,19 @@ function init()
         
         scheduler_init();
     }
+}
+
+//--------------------------------------------------------------------------------------------clear
+
+function clear()
+{
+    init();
+    
+    _job_element = undefined;
+    _job_name    = undefined;
+    _task_id     = undefined;
+
+    document.all.stylesheet.innerHTML = "";
 }
 
 //--------------------------------------------------------------------------------show_task_details

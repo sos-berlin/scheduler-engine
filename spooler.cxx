@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.346 2004/07/23 10:45:35 jz Exp $
+// $Id: spooler.cxx,v 1.347 2004/07/24 17:13:39 jz Exp $
 // §851: Weitere Log-Ausgaben zum Scheduler-Start eingebaut
 // §1479
 
@@ -82,7 +82,7 @@ const double                    wait_step_for_thread_termination    = 5.0;      
 const double                    wait_step_for_thread_termination2   = 600.0;       // 2. Nörgelabstand
 //const double wait_for_thread_termination_after_interrupt = 1.0;
 
-const char*                     temporary_process_class_name        = "(temporaries)";
+const char*                     default_process_class_name          = "(default)";
 static bool                     is_daemon                           = false;
 //static t                      daemon_starter_pid;
 //bool                          spooler_is_running      = false;
@@ -1521,8 +1521,8 @@ void Spooler::load()
     _hostname = hostname;
 
 
-    // Die erste Prozessklasse ist für temporäre Prozesse
-    ptr<Process_class> process_class = Z_NEW( Process_class( this, temporary_process_class_name ) );
+    // Die erste Prozessklasse ist die Default-Klasse
+    ptr<Process_class> process_class = Z_NEW( Process_class( this, default_process_class_name ) );
     _process_class_list.push_back( process_class );         
 
 

@@ -1,4 +1,4 @@
-<!-- $Id: jobs_frame.html,v 1.23 2004/07/24 11:48:26 jz Exp $ -->
+<!-- $Id: jobs_frame.html,v 1.24 2004/07/24 17:13:40 jz Exp $ -->
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <html>
 
@@ -16,9 +16,6 @@
 <body>
 
 <p style="margin-bottom: 10pt; margin-top: 0; padding-top: 0; padding-bottom: 3pt">
-    <!--input id="show_tasks_checkbox" type="checkbox" onclick="show_tasks_checkbox__onclick()"  NAME="show_tasks_checkbox"/>
-    <label for="show_tasks_checkbox">Show running tasks</label>
-    &#160; &#160;-->
     <input id="update_periodically_checkbox" type="checkbox" onclick="update_periodically_checkbox__onclick()" NAME="update_periodically_checkbox"/>
     <label for="update_periodically_checkbox">Update periodically</label>
     &#160; &#160;
@@ -45,8 +42,12 @@ var _stylesheet;
 var _response;
 var _timer;
 var _scheduler;
-var _show_jobs       = true;
-var _show_job_chains = false;
+var _show_card = "jobs";
+var _saved_frameset_cols;
+//var _show_jobs            = true;
+//var _show_job_chains      = false;
+//var _show_process_classes = false;
+var _checkbox_states = new Object();
 
 //var _update_periodically = false;
 
@@ -134,8 +135,7 @@ function update_jobs_frame()
     var what       = "";
     var max_orders = 0;
     
-    if( document.all.show_job_chain_orders_checkbox  &&  document.all.show_job_chain_orders_checkbox.checked 
-     || window.parent.details_frame._job_chain_element )
+    if( _checkbox_states.show_job_chain_orders_checkbox || window.parent.details_frame._job_chain_element )
     {
         what = "job_chain_orders";
         max_orders = window.parent.details_frame._job_chain_element? 9999 : _max_orders;
@@ -145,6 +145,7 @@ function update_jobs_frame()
     modify_response( _response );
     var scheduler_id = _response.selectSingleNode( "spooler/answer/state" ).getAttribute( "id" );
     document.title = "Scheduler " + ( scheduler_id? " id=" + scheduler_id : "" );
+    
     document.all.stylesheet.innerHTML = _response.transformNode( _stylesheet );;
 }
 
@@ -192,6 +193,10 @@ function modify_response( response )
     var spooler_element = response.selectSingleNode( "spooler" );
     if( spooler_element )
     {    
+        restore_checkbox_state( response, "show_tasks_checkbox" );
+        restore_checkbox_state( response, "show_job_chain_jobs_checkbox" );
+        restore_checkbox_state( response, "show_job_chain_orders_checkbox" );
+/*        
         if( document.all.show_tasks_checkbox  &&  document.all.show_tasks_checkbox.checked )
         {
             spooler_element.setAttribute( "my_show_tasks", "yes" );
@@ -206,30 +211,63 @@ function modify_response( response )
         {
             spooler_element.setAttribute( "my_show_job_chain_jobs", "yes" );
         }
-
+*/
         spooler_element.setAttribute( "my_max_orders", _max_orders );
         
-        if( _show_jobs       ) spooler_element.setAttribute( "my_show_jobs"      , "yes" );
-        if( _show_job_chains ) spooler_element.setAttribute( "my_show_job_chains", "yes" );
+        spooler_element.setAttribute( "my_show_card", _show_card );
     }
 }
 
-//----------------------------------------------------------------------------------------show_jobs
+//------------------------------------------------------------------------------save_checkbox_state
 
-function show_jobs()
+function save_checkbox_state( name )
 {
-    _show_jobs       = true;
-    _show_job_chains = false;
-    
-    update();
+    if( document.all[ name ] )
+    {
+        _checkbox_states[ name ] = document.all[ name ].checked;
+    }
 }
 
-//----------------------------------------------------------------------------------show_job_chains
+//---------------------------------------------------------------------------restore_checkbox_state
 
-function show_job_chains()
+function restore_checkbox_state( response, name )
 {
-    _show_jobs       = false;
-    _show_job_chains = true;
+    var spooler_element = response.selectSingleNode( "spooler" );
+    if( spooler_element )
+    {
+        //if( document.all[ name ]  &&  document.all[ name ].checked )
+        //{
+         //   spooler_element.setAttribute( name, "yes" );
+        //}
+        //else
+        {
+            if( _checkbox_states[ name ] )  spooler_element.setAttribute( name, "yes" );
+        }
+    }
+}
+
+//-------------------------------------------------------------------------show_job_process_classes
+
+function show_card( what )
+{
+    if( what != _show_card )
+    {
+        if( what == "process_classes" )
+        {
+            window.parent.details_frame.clear();
+            
+            _saved_frameset_cols = window.parent.left_and_right_frameset.cols; 
+            window.parent.left_and_right_frameset.cols = "100%, 0%";
+        }
+        else
+        if( _saved_frameset_cols != undefined )
+        {
+            window.parent.left_and_right_frameset.cols = _saved_frameset_cols;
+            _saved_frameset_cols = undefined;
+        }
+    
+        _show_card = what;
+    }
     
     update();
 }
