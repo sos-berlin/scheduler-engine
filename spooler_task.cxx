@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.183 2003/08/31 22:32:42 jz Exp $
+// $Id: spooler_task.cxx,v 1.184 2003/09/01 07:35:20 jz Exp $
 /*
     Hier sind implementiert
 
@@ -179,7 +179,7 @@ Task::Task( Job* job )
     _job(job),
     _log(job->_spooler),
     _history(&job->_history,this),
-    _time_out(job->_task_time_out)
+    _timeout(job->_task_timeout)
   //_success(true)
 {
     _let_run = _job->_period.let_run();
@@ -483,9 +483,32 @@ void Task::set_next_time( const Time& next_time )
 
 Time Task::next_time()
 { 
-    return _operation? _time_out == latter_day? latter_day
-                                             : _next_time + _time_out      // _timeout sollte nicht zu groﬂ sein
+    return _operation? _timeout == latter_day? latter_day
+                                             : _next_time + _timeout      // _timeout sollte nicht zu groﬂ sein
                      : _next_time;
+}
+
+//------------------------------------------------------------------------------Task::check_timeout
+
+bool Task::check_timeout()
+{
+    if( _timeout < latter_day  &&  Time::now() > _last_operation_time + _timeout  &&  !_kill_tried )
+    {
+        _log.error( "Task wird nach nach Zeitablauf abgebrochen" );
+
+        _kill_tried = true;
+        
+        try
+        {
+            _killed = do_kill();
+            if( !_killed ) _log.warn( "Task konnte nicht abgebrochen werden" );
+        }
+        catch( const exception& x ) { _log.warn( x.what() ); }
+
+        return _killed;
+    }
+
+    return false;
 }
 
 //-------------------------------------------------------------------------------Task::do_something
@@ -496,16 +519,7 @@ bool Task::do_something()
 
     if( _operation &&  !_operation->async_finished() )  
     {
-        if( _time_out < latter_day  &&  Time::now() > _last_operation_time + _time_out )
-        {
-            _log.error( "Task wird nach nach Zeitablauf abgebrochen" );
-            bool killed = do_kill();
-            _killed = killed;
-            if( !killed ) _log.warn( "Task konnte nicht abgebrochen werden" );
-            return killed;
-        }
-
-        return false;
+        return check_timeout();
     }
 
     bool had_operation  = _operation != NULL;
@@ -763,7 +777,7 @@ bool Task::do_something()
             }
 
             
-            if( !_operation  &&  _killed )  set_state( s_ended );
+            if( !_operation  &&  _killed  &&  _state < s_ended )  set_state( s_ended );
 
 
             switch( _state )
@@ -1194,9 +1208,9 @@ bool Object_set_task::do_step__end()
 
 bool Job_module_task::do_kill()
 {
-    if( !_module_instance )  return false;
-
-    return _module_instance->kill();
+    return _module_instance? _module_instance->kill() :
+           _operation      ? _operation->async_kill() 
+                           : false;
 }
 
 //-------------------------------------------------------------------------Job_module_task::do_load

@@ -1,4 +1,4 @@
-// $Id: spooler_module_remote.cxx,v 1.31 2003/08/31 22:32:42 jz Exp $
+// $Id: spooler_module_remote.cxx,v 1.32 2003/09/01 07:35:20 jz Exp $
 /*
     Hier sind implementiert
 
@@ -107,9 +107,12 @@ void Remote_module_instance_proxy::close()
 
 bool Remote_module_instance_proxy::kill()
 {
-    if( !_remote_instance )  return false;
+    // Wenn noch andere Modulinstanzen (Tasks) im Prozess laufen sollten, sind die auch weg.
 
-    return _remote_instance->kill_process();        // Wenn noch andere Modulinstanzen (Tasks) im Prozess laufen sollten, sind die auch weg.
+    return _process        ? _process->kill() :
+         //_remote_instance? _remote_instance->kill_process() :
+           _operation      ? _operation->async_kill() 
+                           : false;
 }
 
 //------------------------------------------------------------Remote_module_instance_proxy::add_obj
@@ -196,7 +199,15 @@ bool Remote_module_instance_proxy::begin__end()
 
 
     if( !_operation->async_finished() )  throw_xc( "SPOOLER-191", "begin__end", _operation->async_state_text() );
+
+    ptr<Async_operation> operation = _operation;
     _operation = NULL;
+/*
+    operation->async_check_error();
+    return dynamic_cast<Operation*>( +operation )->_bool_result;
+*/
+
+    if( !_remote_instance )  operation->async_check_error();  // Wenn create_instance() fehlgeschlagen ist
 
     return check_result( _remote_instance->call__end() );
 }
@@ -455,11 +466,13 @@ bool Remote_module_instance_proxy::continue_async_operation( Operation* operatio
 
         case c_call_begin:
         {
+            operation->set_async_child( NULL );
             operation->_call_state = c_finished;
           //something_done = true;
             break;
         }
 
+        //operation->_bool_result = check_result( _remote_instance->call__end() );
 
 
         // end__start() .. end__end()
@@ -502,8 +515,8 @@ bool Remote_module_instance_proxy::continue_async_operation( Operation* operatio
             _idispatch = NULL;
         }
 */
-        operation->_call_state = c_finished;
-        break;
+//      operation->_call_state = c_finished;
+//      break;
 
 
         default:

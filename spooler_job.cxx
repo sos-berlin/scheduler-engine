@@ -1,4 +1,4 @@
-// $Id: spooler_job.cxx,v 1.12 2003/08/31 22:32:42 jz Exp $
+// $Id: spooler_job.cxx,v 1.13 2003/09/01 07:35:20 jz Exp $
 /*
     Hier sind implementiert
 
@@ -99,7 +99,7 @@ Job::Job( Spooler* spooler )
     _next_time = latter_day;
     _priority  = 1;
     _default_params = new Com_variable_set;
-    _task_time_out = latter_day;
+    _task_timeout = latter_day;
 }
 
 //----------------------------------------------------------------------------------------Job::~Job
@@ -126,8 +126,8 @@ void Job::set_dom( const xml::Element_ptr& element, const Time& xml_mod_time )
         string t          = element.     getAttribute( "timeout"    );
         if( t != "" )  
         {
-            _task_time_out = time::time_from_string( t );
-            if( _task_time_out > max_task_time_out )  _task_time_out = max_task_time_out;   // Begrenzen, damit's beim Addieren mit now() keinen Überlauf gibt
+            _task_timeout = time::time_from_string( t );
+            if( _task_timeout > max_task_time_out )  _task_timeout = max_task_time_out;   // Begrenzen, damit's beim Addieren mit now() keinen Überlauf gibt
         }
 
         if( order )
@@ -986,7 +986,7 @@ bool Job::do_something()
         }
     }
 
-    if( !something_done )  
+    if( !something_done  &&  _next_time == 0 )
     {
         LOG( obj_name() << ".do_something()  Nichts getan\n" );
         calculate_next_time();

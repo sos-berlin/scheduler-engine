@@ -1,4 +1,4 @@
-// $Id: spooler_process.h,v 1.6 2003/08/31 19:51:29 jz Exp $
+// $Id: spooler_process.h,v 1.7 2003/09/01 07:35:20 jz Exp $
 
 #ifndef __SPOOLER_PROCESS_H
 #define __SPOOLER_PROCESS_H
@@ -29,6 +29,8 @@ struct Process : zschimmer::Object
     void                        remove_module_instance      ( Module_instance* );
     int                         module_instance_count       ()                                      { return _module_instance_count; }
     void                    set_temporary                   ( bool t )                              { _temporary = t; }
+    int                         pid                         ()                                      { return _connection? _connection->pid() : 0; }
+    bool                        kill                        ();
 
     void                    set_dom                         ( const xml::Element_ptr&, const Time& xml_mod_time );
     xml::Element_ptr            dom                         ( const xml::Document_ptr&, Show_what );

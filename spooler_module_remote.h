@@ -1,4 +1,4 @@
-// $Id: spooler_module_remote.h,v 1.16 2003/08/31 22:32:42 jz Exp $
+// $Id: spooler_module_remote.h,v 1.17 2003/09/01 07:35:20 jz Exp $
 
 #ifndef __SPOOLER_MODULE_REMOTE_H
 #define __SPOOLER_MODULE_REMOTE_H
@@ -52,6 +52,7 @@ struct Remote_module_instance_proxy : Com_module_instance_base
         Remote_module_instance_proxy* _proxy;
         Call_state             _call_state;
         Multi_qi               _multi_qi;
+        bool                   _bool_result;
     };
 
 

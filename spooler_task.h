@@ -1,4 +1,4 @@
-// $Id: spooler_task.h,v 1.114 2003/08/31 22:32:42 jz Exp $
+// $Id: spooler_task.h,v 1.115 2003/09/01 07:35:21 jz Exp $
 
 #ifndef __SPOOLER_TASK_H
 #define __SPOOLER_TASK_H
@@ -98,6 +98,7 @@ struct Task : Sos_self_deleting
     xml::Document_ptr           parameters_as_dom           ()                                      { return _params->dom(); }
 
 
+    bool                        check_timeout               ();
     bool                        wait_until_terminated       ( double wait_time = latter_day );
     void                        set_delay_spooler_process   ( Time t )                              { _log.debug("delay_spooler_process=" + t.as_string() ); _next_spooler_process = Time::now() + t; }
 
@@ -181,8 +182,9 @@ struct Task : Sos_self_deleting
     Time                       _last_operation_time;
     Time                       _next_spooler_process;
     Time                       _next_time;
-    Time                       _time_out;                   // Frist für eine Operation (oder INT_MAX)
+    Time                       _timeout;                   // Frist für eine Operation (oder INT_MAX)
     bool                       _killed;                     // Task abgebrochen (nach do_kill/timeout)
+    bool                       _kill_tried;
 
     ptr<Async_operation>       _operation;
   //bool                       _in_operation;               // .._end() aufrufen, auch wenn _operation == NULL (das ist dann eine synchrone Operation)

@@ -1,4 +1,4 @@
-// $Id: spooler_thread.cxx,v 1.100 2003/08/31 19:51:29 jz Exp $
+// $Id: spooler_thread.cxx,v 1.101 2003/09/01 07:35:21 jz Exp $
 /*
     Hier sind implementiert
 
@@ -134,7 +134,7 @@ void Spooler_thread::start( Event* event_destination )
 
     if( !thread_id() )  set_thread_id( _spooler->thread_id() );
 
-    _log.info( "Thread startet" );
+    //_log.info( "Thread startet" );
 
     try
     {

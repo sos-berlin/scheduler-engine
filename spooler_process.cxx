@@ -1,4 +1,4 @@
-// $Id: spooler_process.cxx,v 1.7 2003/08/31 22:32:42 jz Exp $
+// $Id: spooler_process.cxx,v 1.8 2003/09/01 07:35:20 jz Exp $
 
 #include "spooler.h"
 
@@ -213,6 +213,13 @@ bool Process::async_continue()
     return _connection->async_continue();
 }
 
+//------------------------------------------------------------------------------------Process::kill
+
+bool Process::kill()
+{
+    return _connection->kill_process();
+}
+
 //-------------------------------------------------------------------------------------Process::dom
 
 xml::Element_ptr Process::dom( const xml::Document_ptr& document, Show_what show )
@@ -276,6 +283,8 @@ Process* Process_class::start_process()
 
         process->start();
 
+        _spooler->_log.debug( "Prozess pid=" + as_string( process->pid() ) + " gestartet" );
+
         add_process( process );
     }
 
@@ -292,10 +301,22 @@ Process* Process_class::select_process_if_available()
     {
         FOR_EACH( Process_list, _process_list, p )
         {
-            if( (*p)->_module_instance_count == 0 )  return *p;
+            if( (*p)->_module_instance_count == 0 )  { process = *p; break; }
         }
 
-        if( _process_list.size() < _max_processes )  process = start_process();
+        if( process )
+        {
+            if( process->_connection->has_error() )
+            {
+                _spooler->_log.warn( "Prozess pid=" + as_string( process->pid() ) + " wird nach Fehler entfernt" );
+
+                process->_connection->kill_process();
+                remove_process( process );
+                process = NULL;
+            }
+        }
+
+        if( !process  &&  _process_list.size() < _max_processes )  return start_process();
 
     }
 

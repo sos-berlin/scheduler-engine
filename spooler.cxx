@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.233 2003/08/31 19:51:29 jz Exp $
+// $Id: spooler.cxx,v 1.234 2003/09/01 07:35:20 jz Exp $
 /*
     Hier sind implementiert
 
@@ -1614,7 +1614,7 @@ void Spooler::run()
                         FOR_EACH( Process_list, (*pc)->_process_list, p )  
                             something_done |= (*p)->async_continue();
 
-                    single_thread->process();
+                    something_done |= single_thread->process();
 
                     if( single_thread->is_ready_for_termination() )  break;
 
@@ -1632,7 +1632,7 @@ void Spooler::run()
 
                 if( something_done )  nothing_done_count = 0,  nichts_getan_zaehler = 0;
                 else
-                if( nothing_done_count > nothing_done_max )  nichts_getan( single_thread, ++nichts_getan_zaehler );
+                if( ++nothing_done_count > nothing_done_max )  nichts_getan( single_thread, ++nichts_getan_zaehler );
 
                 wait_handles += _wait_handles;
 
