@@ -1,4 +1,4 @@
-// $Id: spooler_history.cxx,v 1.98 2004/07/22 22:45:56 jz Exp $
+// $Id: spooler_history.cxx,v 1.99 2004/08/06 08:11:42 jz Exp $
 
 #include "spooler.h"
 #include "../zschimmer/z_com.h"
@@ -313,7 +313,12 @@ void Spooler_db::close()
         _history_table.close();
         _history_table.destroy();
 
-        _db.close();
+        try
+        {
+            _db.close();  // odbc.cxx und jdbc.cxx unterdrücken selbst Fehler.
+        }
+        catch( const exception& x ) { _spooler->_log.warn( S() << "FEHLER BEIM SCHLIESSEN DER DATENBANK: " << x ); }
+
         _db.destroy();
     }
 }
