@@ -1,4 +1,4 @@
-// $Id: spooler_task.h,v 1.8 2001/02/06 09:22:26 jz Exp $
+// $Id: spooler_task.h,v 1.9 2001/02/08 11:21:16 jz Exp $
 
 #ifndef __SPOOLER_TASK_H
 #define __SPOOLER_TASK_H
@@ -71,16 +71,6 @@ struct Object_set_descr : Sos_self_deleting
     Level_interval             _level_interval;
 };
 
-//------------------------------------------------------------------------------------Job_interface
-/*
-struct Job_interface
-{
-    void                        spooler_init                () = 0;
-    void                        spooler_open                () = 0;
-    void                        spooler_close               () = 0;
-    void                        spooler_process             () = 0;
-};
-*/
 //---------------------------------------------------------------------------------------Object_set
 
 struct Object_set : Sos_self_deleting
@@ -93,12 +83,13 @@ struct Object_set : Sos_self_deleting
     Spooler_object              get                         ();
     bool                        step                        ( Level result_level );
 
+    Thread*                     thread                      () const;
+
     Fill_zero                  _zero_;
     Spooler*                   _spooler;
     Task*                      _task;
     Sos_ptr<Object_set_descr>  _object_set_descr;
     Object_set_class*          _class;
-  //Script_instance            _script_instance;
     CComPtr<IDispatch>         _idispatch;                  // Zeiger auf ein Object_set des Skripts
 };
 
@@ -137,7 +128,17 @@ struct Job : Sos_self_deleting
                                ~Job                         (); 
 
     void                        set_xml                     ( const xml::Element_ptr& );
+    xml::Element_ptr            xml                         ( xml::Document_ptr );
+
     void                        init                        ();
+
+    const string&               name                        () const                    { return _name; }
+    State_cmd                   state_cmd                   () const                    { return _state_cmd; }
+    State                       state                       () const                    { return _state; }
+    Object_set_descr*           object_set_descr            () const                    { return _object_set_descr; }
+    int                         priority                    () const                    { return _priority; }
+    Thread*                     thread                      () const                    { return _thread; }
+
     void                        close                       ();
     void                        close_engine                ();
 
@@ -154,8 +155,10 @@ struct Job : Sos_self_deleting
 
     void                        set_repeat                  ( double seconds )          { _repeat = seconds; }
 
-    void                        error                       ( const Xc& );
-    void                        error                       ( const exception& );
+    void                        set_error                   ( const Xc& );
+    void                        set_error                   ( const exception& );
+    Xc_copy                     error                       ()                          { THREAD_LOCK( _lock )  return _error; }
+    bool                        has_error                   ()                          { return !!_error; }
 
     void                        set_state                   ( State );
     void                        set_state_cmd               ( State_cmd );
@@ -168,13 +171,22 @@ struct Job : Sos_self_deleting
     static string               state_cmd_name              ( State_cmd );
     static State_cmd            as_state_cmd                ( const string& );
 
-  //void                        signal                      ()                          { _event.signal(); }
+    CComPtr<Com_job>&           com_job                     ()                          { return _com_job; }
+    void                        signal_object               ( const string& object_set_class_name, const Level& );
+
+    friend struct               Object_set;
+    friend struct               Task;
+    friend struct               Com_job;
+    friend struct               Thread;
 
 
+  protected:
     Fill_zero                  _zero_;
     string                     _name;
     Spooler*                   _spooler;
     Thread*                    _thread;
+
+    Thread_semaphore           _lock;
 
     Sos_ptr<Object_set_descr>  _object_set_descr;
     Level                      _output_level;
@@ -188,23 +200,20 @@ struct Job : Sos_self_deleting
     Script_instance            _script_instance;            // Für use_engine="job"
     bool                       _has_spooler_process;
     Directory_watcher          _directory_watcher;
-  //Wait_handles               _wait_handles; 
 
     State                      _state;
-    Mutex<State_cmd>           _state_cmd;
+    State_cmd                  _state_cmd;
     CComPtr<spooler_com::Ivariable_set> _params;
     Time                       _next_start_time;
-  //Event                      _event;
-    CComPtr<Com_job>           _com_job;
     Period                     _period;                     // Derzeitige oder nächste Period
     Time                       _repeat;                     // spooler_task.repeat
 
     Prefix_log                 _log;
+    CComPtr<Com_job>           _com_job;
     CComPtr<Com_log>           _com_log;
     CComPtr<Com_task>          _com_task;
     Xc_copy                    _error;
-    Thread_semaphore           _task_lock;
-    Sos_ptr<Task>              _task;                       // Es kann nur eine Task geben. Zirkel!
+    Sos_ptr<Task>              _task;                       // Es kann nur eine Task geben. Zirkel: _task->_job == this
 };
 
 typedef list< Sos_ptr<Job> >    Job_list;
@@ -218,19 +227,24 @@ struct Task : Sos_self_deleting
 
     void                        close                       ();
 
-    bool                        wait_until_terminated       ( double wait_time = latter_day );
-
     void                        start                       ();
     void                        end                         ();
     bool                        step                        ();
     void                        on_error_on_success         ();
 
+    bool                        wait_until_terminated       ( double wait_time = latter_day );
+
     Job*                        job                         ()                              { return _job; }
   
+    friend struct               Job;
+    friend struct               Object_set;
+    friend struct               Com_task;
 
+  protected:
     Fill_zero                  _zero_;
     Spooler*                   _spooler;
     Sos_ptr<Job>               _job;                        // Zirkel!
+    Thread_semaphore           _lock;
     
     double                     _cpu_time;
     int                        _step_count;
@@ -242,7 +256,9 @@ struct Task : Sos_self_deleting
 
     Sos_ptr<Object_set>        _object_set;
     CComPtr<Com_object_set>    _com_object_set;
+    CComPtr<spooler_com::Ivariable_set> _params;
     CComVariant                _result;
+    Xc_copy                    _error;
 
     Thread_semaphore           _terminated_events_lock;
     vector<Event*>             _terminated_events;

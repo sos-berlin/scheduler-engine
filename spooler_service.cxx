@@ -1,4 +1,4 @@
-// $Id: spooler_service.cxx,v 1.8 2001/01/30 13:32:37 jz Exp $
+// $Id: spooler_service.cxx,v 1.9 2001/02/08 11:21:15 jz Exp $
 /*
     Hier sind implementiert
 
@@ -225,11 +225,11 @@ static void set_service_status( int spooler_error = 0 )
     service_status.dwServiceType                = SERVICE_WIN32_OWN_PROCESS;
 
     service_status.dwCurrentState               = !spooler_ptr? SERVICE_STOPPED //SetServiceStatus() ruft exit()!
-                                                : spooler_ptr->_state == Spooler::s_stopped ? SERVICE_PAUSED //SetServiceStatus() ruft exit()!
-                                                : spooler_ptr->_state == Spooler::s_starting? SERVICE_START_PENDING
-                                                : spooler_ptr->_state == Spooler::s_stopping? SERVICE_STOP_PENDING
-                                                : spooler_ptr->_state == Spooler::s_running ? SERVICE_RUNNING
-                                                : spooler_ptr->_state == Spooler::s_paused  ? SERVICE_PAUSED
+                                                : spooler_ptr->state() == Spooler::s_stopped ? SERVICE_PAUSED //SetServiceStatus() ruft exit()!
+                                                : spooler_ptr->state() == Spooler::s_starting? SERVICE_START_PENDING
+                                                : spooler_ptr->state() == Spooler::s_stopping? SERVICE_STOP_PENDING
+                                                : spooler_ptr->state() == Spooler::s_running ? SERVICE_RUNNING
+                                                : spooler_ptr->state() == Spooler::s_paused  ? SERVICE_PAUSED
                                                                                             : SERVICE_START_PENDING; 
 
     service_status.dwControlsAccepted           = SERVICE_ACCEPT_STOP 

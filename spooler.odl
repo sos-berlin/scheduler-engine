@@ -1,4 +1,4 @@
-// $Id: spooler.odl,v 1.8 2001/02/04 17:12:42 jz Exp $
+// $Id: spooler.odl,v 1.9 2001/02/08 11:21:14 jz Exp $
 
 // Änderungen werden nicht automatisch in die spooler.tlb übernommen.
 // Also mit rechter Maustaske "Kompilieren von spooler.odl" klicken.
@@ -17,6 +17,7 @@ library spooler
 
     interface Ilog;
     interface Itask;
+    interface Ithread;
 
     //----------------------------------------------------------------------------Error
 
@@ -110,6 +111,9 @@ library spooler
         HRESULT                 start_when_directory_changed( [in] BSTR directory_name );
 
         HRESULT                 start                       ( [in,optional] VARIANT* variables, [out,retval] Itask** );
+
+        [propget]
+        HRESULT                 thread                      ( [out,retval] Ithread** result );
     }
 
     [
@@ -154,6 +158,9 @@ library spooler
 
         [propput,helpstring("Task nach der Anzahl Sekunden erneut starten")]
         HRESULT                 repeat                      ( [in] double seconds );
+
+      //[propget]
+      //HRESULT                 thread                      ( [out,retval] Ithread** result );
     }
 
     [
@@ -162,6 +169,30 @@ library spooler
     coclass Task
     {
         interface Itask;
+    }
+
+    //---------------------------------------------------------------------------Thread
+
+    [
+        uuid       ( 0FA3AC14-01EC-4c8f-81D9-7CABF8A76B43 ),
+        odl,
+        dual
+    ]
+    interface Ithread : IDispatch
+    {
+        [propget]
+        HRESULT                 log                     ( [out,retval] Ilog** log );
+
+        [propget]
+        HRESULT                 script                  ( [out,retval] IDispatch** script_object );
+    }
+
+    [
+        uuid       ( 4E70F30E-D446-42b1-B4F0-7A53113D87C7 )
+    ]
+    coclass Thread
+    {
+        interface Ithread;
     }
 
     //--------------------------------------------------------------------------Spooler
@@ -182,8 +213,8 @@ library spooler
         [propget]
         HRESULT                 param                   ( [out,retval] BSTR* spooler_param );
 
-        [propget]
-        HRESULT                 script                  ( [out,retval] IDispatch** script_object );
+      //[propget]
+      //HRESULT                 script                  ( [out,retval] IDispatch** script_object );
 
         [propget]
         HRESULT                 job                     ( [in] BSTR job_name, [out,retval] Ijob** job );

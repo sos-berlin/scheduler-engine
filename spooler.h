@@ -1,4 +1,4 @@
-// $Id: spooler.h,v 1.45 2001/02/06 09:22:25 jz Exp $
+// $Id: spooler.h,v 1.46 2001/02/08 11:21:14 jz Exp $
 
 #ifndef __SPOOLER_H
 #define __SPOOLER_H
@@ -108,7 +108,30 @@ struct Spooler
                                 Spooler                     ();
                                ~Spooler                     ();
 
+    const string&               id                          () const                            { return _spooler_id; }
+    int                         udp_port                    () const                            { return _udp_port; }
+    int                         tcp_port                    () const                            { return _tcp_port; }
+    State                       state                       () const                            { return _state; }
+    Log&                        log                         ()                                  { return _log; }
+    const Security&             security                    () const                            { return _security; }
+
     int                         launch                      ( int argc, char** argv );                                
+    void                        set_state_changed_handler   ( State_changed_handler h )         { _state_changed_handler = h; }
+
+    // Für andere Threads:
+    Job*                        get_job                     ( const string& job_name );
+    void                        signal_object               ( const string& object_set_class_name, const Level& );
+    void                        cmd_reload                  ();
+    void                        cmd_pause                   ()                                  { _state_cmd = sc_pause; signal(); }
+    void                        cmd_continue                ();
+    void                        cmd_stop                    ();
+    void                        cmd_terminate               ();
+    void                        cmd_terminate_and_restart   ();
+    void                        cmd_load_config             ( const xml::Element_ptr& );
+
+
+    friend struct               Com_spooler;
+
     void                        load_arg                    ();
     void                        load                        ();
     void                        load_config                 ( const xml::Element_ptr& config );
@@ -116,33 +139,23 @@ struct Spooler
     void                        load_object_set_classes_from_xml( Object_set_class_list*, const xml::Element_ptr& );
     void                        load_threads_from_xml       ( Thread_list*, const xml::Element_ptr& );
 
+    void                        set_state                   ( State );
+
     void                        start                       ();
     void                        stop                        ();
+    void                        stop_threads                ();
     void                        reload                      ();
     void                        run                         ();
     void                        restart                     ();
 
     void                        single_thread_step          ();
     void                        wait                        ();
-  //void                        remove_ended_tasks          ();
 
-
-    void                        cmd_reload                  ();
-    void                        cmd_pause                   ()                                  { _state_cmd = sc_pause; signal(); }
-    void                        cmd_continue                ();
-    void                        cmd_stop                    ();
-    void                        cmd_terminate               ();
-    void                        cmd_terminate_and_restart   ();
-    void                        cmd_load_config             ( const xml::Element_ptr& config )  { _config_document=config->ownerDocument; _config_element=config; _state_cmd=sc_load_config; signal(); }
     void                        signal                      ()                                  { _event.signal(); }
 
-    void                        set_state                   ( State );
-    void                        set_state_changed_handler   ( State_changed_handler h )         { _state_changed_handler = h; }
-
-    Job*                        get_job                     ( const string& job_name );
 
     Fill_zero                  _zero_;
-    
+
     int                        _argc;
     char**                     _argv;
     string                     _spooler_id;                 // -id=
@@ -158,8 +171,6 @@ struct Spooler
     Prefix_log                 _prefix_log;
     State_changed_handler      _state_changed_handler;      // Callback für NT-Dienst SetServiceStatus()
 
-    Event                      _event;                      
-                                                            // <config> wird vom Haupt-Thread ausgeführt
     xml::Document_ptr          _config_document;            // Das Dokument zu _config_element
     xml::Element_ptr           _config_element;             // Für cmd_load_config()
 
@@ -167,7 +178,6 @@ struct Spooler
 
     Security                   _security;                   // <security>
     Object_set_class_list      _object_set_class_list;      // <object_set_classes>
-    Wait_handles               _wait_handles;
     Communication              _communication;              // TCP und UDP (ein Thread)
 
     CComPtr<Com_spooler>       _com_spooler;                // COM-Objekt spooler
@@ -178,6 +188,11 @@ struct Spooler
     Time                       _spooler_start_time;
     State                      _state;
     State_cmd                  _state_cmd;
+
+    Wait_handles               _wait_handles;
+    Event                      _event;                      
+                                                            // <config> wird vom Haupt-Thread ausgeführt
+    Thread_semaphore           _lock;
     Thread_semaphore           _pause_lock;                 // Wenn _state == s_paused
 };
 

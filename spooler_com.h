@@ -1,4 +1,4 @@
-// $Id: spooler_com.h,v 1.9 2001/02/06 09:22:26 jz Exp $
+// $Id: spooler_com.h,v 1.10 2001/02/08 11:21:15 jz Exp $
 
 #ifndef __SPOOLER_COM_H
 #define __SPOOLER_COM_H
@@ -63,6 +63,7 @@ struct Com_variable_set: spooler_com::Ivariable_set, Sos_ole_object
     STDMETHODIMP                get_count                   ( int* );
 
     std::map<CComBSTR,CComVariant>  _map;
+    Thread_semaphore                _lock;
 };
 
 //------------------------------------------------------------------------------------------Com_log
@@ -114,6 +115,7 @@ struct Com_job : spooler_com::Ijob, Sos_ole_object
 
     STDMETHODIMP                start_when_directory_changed( BSTR directory_name );
     STDMETHODIMP                start                       ( VARIANT*, spooler_com::Itask** );
+    STDMETHODIMP                get_thread                  ( spooler_com::Ithread** );
 
     Job*                       _job;                        // Es gibt nur einen Com_job pro Job
 };
@@ -146,6 +148,23 @@ struct Com_task : spooler_com::Itask, Sos_ole_object
     Thread_semaphore           _lock;
 };
 
+//---------------------------------------------------------------------------------------Com_thread
+
+struct Com_thread : spooler_com::Ithread, Sos_ole_object               
+{
+                                Com_thread                  ( Thread* );
+
+    USE_SOS_OLE_OBJECT
+
+    void                        close                       ()                              { _thread = NULL; }
+
+    STDMETHODIMP                get_log                     ( spooler_com::Ilog** );
+    STDMETHODIMP                get_script                  ( IDispatch** );
+
+  protected:
+    Thread*                    _thread;                     // Es gibt nur einen Com_thread pro Thread
+};
+
 //--------------------------------------------------------------------------------------Com_spooler
 
 struct Com_spooler : spooler_com::Ispooler, Sos_ole_object               
@@ -159,7 +178,7 @@ struct Com_spooler : spooler_com::Ispooler, Sos_ole_object
     STDMETHODIMP                get_log                     ( spooler_com::Ilog** );
     STDMETHODIMP                get_param                   ( BSTR* );
     STDMETHODIMP                get_id                      ( BSTR* );
-    STDMETHODIMP                get_script                  ( IDispatch** );
+  //STDMETHODIMP                get_script                  ( IDispatch** );
     STDMETHODIMP                get_job                     ( BSTR job_name, spooler_com::Ijob** );
     STDMETHODIMP                create_variable_set         ( spooler_com::Ivariable_set** );
 

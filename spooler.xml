@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 
-<!-- $Id: spooler.xml,v 1.27 2001/02/06 12:08:44 jz Exp $   (C) 2001 SOS GmbH Berlin -->
+<!-- $Id: spooler.xml,v 1.28 2001/02/08 11:21:15 jz Exp $   (C) 2001 SOS GmbH Berlin -->
 
 <!DOCTYPE spooler SYSTEM "spooler.dtd">
 
@@ -25,6 +25,10 @@
             </level_decls>
 
             <script use_engine="job"><![CDATA[
+
+spooler_log.msg( "hostware ?? ----------------------------------------" )
+set hw = createobject("hostware.global")
+spooler_log.msg( "hostware ok ----------------------------------------" )
 
 spooler_log.msg "param1=" & spooler_task.params.var("param1")
 
@@ -70,6 +74,7 @@ class Object_set_class
         dim file
         dim i
         
+spooler_job.start_when_directory_changed dir_name
         spooler_log.msg "spooler_open: [" & spooler_task.object_set.low_level & "," & spooler_task.object_set.high_level & "], spooler.param=" & spooler.param
 
         set files=fso.getFolder(dir_name).Files
@@ -297,7 +302,7 @@ spooler_log.msg "Spooler-Skript geladen."
 
                     <run_time begin  = "00:00" 
                               end    = "24:00" 
-                              repeat = "10">
+                              repeat = "60">
 <!--
                         <date date="2001-01-02"/>
                         <date date="2001-01-09"/>
@@ -356,7 +361,7 @@ end function
                         <period single_start="19:51:50" end="20:00" let_run="no"/>
                         <period begin="19:52:10" end="19:59:59" repeat="7"/>
 
-                        <date date="6.2.2001"> <period begin="0:00" end="24:00" repeat="0.1"/> </date>
+                        <date date="8.2.2001"> <period begin="0:00" end="24:00" repeat="0.1"/> </date>
 
                         <weekdays>
                             <day day="1"/>
@@ -392,7 +397,7 @@ spooler_log.msg "*Job single"
 set params = spooler.create_variable_set()
 params.var("param1")="heinz"
 
-spooler.job("Aufbereiten").start( params )
+'spooler.job("Aufbereiten").start( params )
 
 
 
@@ -420,7 +425,7 @@ end sub
                     <script language="PerlScript" use_engine="task"><![CDATA[
 
 $spooler_log->msg( "*Job perl" );
-$spooler->job("Aufbereiten")->start();
+'$spooler->job("Aufbereiten")->start();
 
 sub spooler_exit()
 {
@@ -481,8 +486,11 @@ sub spooler_close()
 
 function spooler_process()
 {
+    spooler_log.msg( "spooler_process" );
     params = spooler.create_variable_set();
+    spooler_log.msg( "1" );
     params("zahl") = 3;
+    spooler_log.msg( "start" );
     task = spooler.job("dauer").start(params);
     spooler_log.msg( "***** wait_until_terminated()" );
     ok = task.wait_until_terminated(11);

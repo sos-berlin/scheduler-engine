@@ -1,4 +1,4 @@
-// $Id: spooler_thread.h,v 1.2 2001/02/06 12:08:44 jz Exp $
+// $Id: spooler_thread.h,v 1.3 2001/02/08 11:21:16 jz Exp $
 
 #ifndef __SPOOLER_THREAD_H
 #define __SPOOLER_THREAD_H
@@ -14,13 +14,18 @@ struct Thread : Sos_self_deleting
                                ~Thread                      ();
 
     void                        set_xml                     ( const xml::Element_ptr& );
+    xml::Element_ptr            xml                         ( xml::Document_ptr );
     void                        load_jobs_from_xml          ( Job_list*, const xml::Element_ptr& );
+    
+    bool                        empty                       () const                        { return _job_list.empty(); }
 
     void                        init                        ();
     void                        close                       ();
     void                        start_thread                ();
     void                        stop_thread                 ();
+    void                        wait_until_thread_stopped   ();
     Job*                        get_job_or_null             ( const string& job_name );
+    void                        signal_object               ( const string& object_set_class_name, const Level& );
     void                        signal                      ()                              { _event.signal(); }
 
     int                         run_thread                  ();
@@ -51,9 +56,11 @@ struct Thread : Sos_self_deleting
     int                        _step_count;                 // Seit Spooler-Start ausgeführte Schritte
     int                        _task_count;                 // Seit Spooler-Start gestartetet Tasks
 
-    Handle                     _thread;
+    Thread_semaphore           _lock;
+    Handle                     _thread_handle;
     Thread_id                  _thread_id;
     CComPtr<Com_log>           _com_log;                    // COM-Objekt spooler.log
+    CComPtr<Com_thread>        _com_thread;                 // COM-Objekt
 };
 
 typedef list< Sos_ptr<Thread> >  Thread_list;

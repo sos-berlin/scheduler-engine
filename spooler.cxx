@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.48 2001/02/06 09:22:25 jz Exp $
+// $Id: spooler.cxx,v 1.49 2001/02/08 11:21:14 jz Exp $
 /*
     Hier sind implementiert
 
@@ -59,28 +59,53 @@ Spooler::Spooler()
 
 Spooler::~Spooler() 
 {
+    stop_threads();
+
     _thread_list.clear();
     _object_set_class_list.clear();
 
     _communication.close(0.0);
+
+    _event.close();
+    _wait_handles.close();
 
     // COM-Objekte entkoppeln, falls noch jemand eine Referenz darauf hat:
     if( _com_spooler )  _com_spooler->close();
     if( _com_log     )  _com_log->close();
 }
 
+//----------------------------------------------------------------------------Spooler::stop_threads
+
+void Spooler::stop_threads()
+{
+    { FOR_EACH( Thread_list, _thread_list, it )  (*it)->stop_thread(); }
+    { FOR_EACH( Thread_list, _thread_list, it )  (*it)->wait_until_thread_stopped(); }
+}
+
 //---------------------------------------------------------------------------------Spooler::get_job
+// Anderer Thread
 
 Job* Spooler::get_job( const string& job_name )
 {
-    FOR_EACH( Thread_list, _thread_list, it )
+    THREAD_LOCK( _lock )
     {
-        Job* job = (*it)->get_job_or_null( job_name );
-        if( job )  return job;
+        FOR_EACH( Thread_list, _thread_list, it )
+        {
+            Job* job = (*it)->get_job_or_null( job_name );
+            if( job )  return job;
+        }
     }
 
     throw_xc( "SPOOLER-108", job_name );
     return NULL;
+}
+
+//---------------------------------------------------------------------------Spooler::signal_object
+// Anderer Thread
+
+void Spooler::signal_object( const string& object_set_class_name, const Level& level )
+{
+    THREAD_LOCK( _lock )  FOR_EACH( Thread_list, _thread_list, t )  (*t)->signal_object( object_set_class_name, level );
 }
 
 //-------------------------------------------------------------------------------Spooler::set_state
@@ -181,7 +206,7 @@ void Spooler::stop()
 
     _log.msg( "Spooler::stop" );
 
-    FOR_EACH( Thread_list, _thread_list, it )  (*it)->stop_thread();
+    stop_threads();
 
     _object_set_class_list.clear();
     _thread_list.clear();
@@ -197,6 +222,10 @@ void Spooler::run()
 
     while(1)
     {
+        // Threads ohne Jobs und nach Fehler gestorbene Threads entfernen:
+        FOR_EACH( Thread_list, _thread_list, it )  if( (*it)->empty() )  THREAD_LOCK( _lock )  it = _thread_list.erase(it);
+        if( _thread_list.empty() )  { _log.error( "Kein Thread vorhanden. Spooler wird beendet." ); break; }
+
         _event.reset();
 
         if( _state_cmd == sc_pause                 )  set_state( s_paused ); 
@@ -207,9 +236,23 @@ void Spooler::run()
         if( _state_cmd == sc_terminate_and_restart )  break;
         _state_cmd = sc_none;
 
-        if( _state == s_paused )  THREAD_SEMA( _pause_lock )  _wait_handles.wait_until( latter_day );
+        if( _state == s_paused )  THREAD_LOCK( _pause_lock )  _wait_handles.wait_until( latter_day );
                             else  _wait_handles.wait_until( latter_day );
     }
+}
+
+//-------------------------------------------------------------------------Spooler::cmd_load_config
+
+void Spooler::cmd_load_config( const xml::Element_ptr& config )  
+{ 
+    THREAD_LOCK( _lock )  
+    {
+        _config_document=config->ownerDocument; 
+        _config_element=config;
+        _state_cmd=sc_load_config; 
+    }
+
+    signal(); 
 }
 
 //----------------------------------------------------------------------------Spooler::cmd_continue
@@ -274,9 +317,15 @@ int Spooler::launch( int argc, char** argv )
     {
         if( _state_cmd != sc_load_config )  load();
         
-        if( _config_element == NULL )  throw_xc( "SPOOLER-116", _spooler_id );
+        THREAD_LOCK( _lock )  
+        {
+            if( _config_element == NULL )  throw_xc( "SPOOLER-116", _spooler_id );
+        
+            load_config( _config_element );
             
-        load_config( _config_element ), _config_element = NULL, _config_document = NULL;
+            _config_element = NULL;
+            _config_document = NULL;
+        }
 
         start();
         run();

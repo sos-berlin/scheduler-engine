@@ -1,4 +1,4 @@
-// $Id: spooler_common.h,v 1.4 2001/02/06 09:22:26 jz Exp $
+// $Id: spooler_common.h,v 1.5 2001/02/08 11:21:15 jz Exp $
 
 #ifndef __SPOOLER_COMMON_H
 #define __SPOOLER_COMMON_H
@@ -37,24 +37,49 @@ struct Handle
 
 static HANDLE null_handle = NULL;
 
-//--------------------------------------------------------------------------------------------Mutex
-// Nur für Typen, die in ein Speicherwort passen, also mit genau einem Maschinenbefehl lesbar sind.
+//-------------------------------------------------------------------------------------------Atomic
 
 template<typename T>
-struct Mutex
+struct Atomic
 {
     typedef sos::Thread_semaphore::Guard Guard;
 
 
-                                Mutex                       ( const T& t = T() )    : _value(t) {}
+                                Atomic                      ( const T& t = T() )    : _value(t) {}
 
-    Mutex&                      operator =                  ( const T& t )          { Guard g = &_semaphore; _value = t; return *this; }
-                                operator T                  ()                      { return _value; }  // Nicht gesichert
-    T                           read_and_reset              ()                      { return read_and_set(T()); }
-    T                           read_and_set                ( const T& t )          { if( _value == t )  return _value;  Guard g = &_semaphore; T v = _value; _value = t; return v; }
+    Atomic&                     operator =                  ( const T& t )          { Guard g = &_lock; ref() = t; return *this; }
+                                operator T                  ()                      { Guard g = &_lock; return ref(); }
+    T                           read_and_reset              ()                      { return read_and_set( T() ); }
+    T                           read_and_set                ( const T& t )          { Guard g = &_lock; T v = _value; _value = t; return v; }
+    T&                          ref                         ()                      { return ref(); }
 
-    sos::Thread_semaphore      _semaphore;
     volatile T                 _value;
+    sos::Thread_semaphore      _lock;
+};
+
+//------------------------------------------------------------------------------------Simple_atomic
+// Für Typen, die atomar lesbar und schreibbar sind.
+// Erforderliche Operationen:
+// T&                           operator =                  ( const T& ) atomic
+//                              operator T                  () atomic
+// bool                         operator ==                 ( const T& ) atomic
+
+template<typename T>
+struct Simple_atomic
+{
+    typedef sos::Thread_semaphore::Guard Guard;
+
+
+                                Simple_atomic               ( const T& t = T() )    : _value(t) {}
+
+    Simple_atomic&              operator =                  ( const T& t )          { _value = t; return *this; }
+                                operator T                  ()                      { return _value; }
+
+    T                           read_and_reset              ()                      { return read_and_set( T() ); }
+    T                           read_and_set                ( const T& t )          { if( _value == t )  return _value;  Guard g = &_lock; T v = _value; _value = t; return v; }
+
+    volatile T                 _value;
+    sos::Thread_semaphore      _lock;
 };
 
 //-------------------------------------------------------------------------------------------------

@@ -1,4 +1,4 @@
-// $Id: spooler_wait.cxx,v 1.10 2001/02/06 09:22:26 jz Exp $
+// $Id: spooler_wait.cxx,v 1.11 2001/02/08 11:21:16 jz Exp $
 /*
     Hier sind implementiert
 
@@ -17,6 +17,13 @@
 namespace sos {
 namespace spooler {
 
+//-----------------------------------------------------------------------------windows_message_step
+
+void windows_message_step()
+{
+    MSG msg;
+    if( GetMessage( &msg, NULL, 0, 0 ) != -1 )   TranslateMessage( &msg ), DispatchMessage( &msg ); 
+}
 
 //-----------------------------------------------------------------------------------wait_for_event
 
@@ -27,9 +34,12 @@ bool wait_for_event( HANDLE handle, double wait_time )
         const double max_t = (double)(INT_MAX-10) / 1000.0;
         int ms = min( max_t, wait_time ) * 1000.0;
 
-        int ret = WaitForSingleObject( handle, ms ); 
+        int ret = MsgWaitForMultipleObjects( 1, &handle, FALSE, ms, QS_ALLINPUT ); 
 
         if( ret == WAIT_OBJECT_0 )  return true;
+        
+        if( ret == WAIT_OBJECT_0 + 1 )  windows_message_step();
+        else
         if( ret != WAIT_TIMEOUT )  throw_mswin_error( "WaitForSingleObject" );
 
         wait_time -= max_t;
@@ -62,6 +72,9 @@ Event::~Event()
 void Event::close()
 {
     FOR_EACH( vector<Wait_handles*>, _wait_handles, it )  (*it)->remove( this );
+    _wait_handles.clear();
+    
+    if( _handle )  CloseHandle( _handle ), _handle = NULL;
 }
 
 //-------------------------------------------------------------------------------------Event::add_to
@@ -88,7 +101,7 @@ void Event::remove_from( Wait_handles* w )
 
 bool Event::wait( double wait_time )
 {
-    THREAD_SEMA( _lock )
+    THREAD_LOCK( _lock )
     {
         bool signaled = _signaled;
         _signaled = false;
@@ -108,7 +121,7 @@ bool Event::wait( double wait_time )
 
 void Event::signal()
 {
-    THREAD_SEMA( _lock )
+    THREAD_LOCK( _lock )
     {
         if( _waiting )  { SetEvent( _handle );  return; }
 
@@ -118,7 +131,7 @@ void Event::signal()
             {
                 Wait_handles* w = *it;
                 
-                THREAD_SEMA( w->_lock )
+                THREAD_LOCK( w->_lock )
                 {
                     _signaled = true;
                     if( w->_waiting )  { SetEvent( _handle );  return; }
@@ -132,7 +145,7 @@ void Event::signal()
 
 void Event::set_signal()
 {
-    THREAD_SEMA( _lock )
+    THREAD_LOCK( _lock )
     {
         _signaled = true;
     }
@@ -148,13 +161,27 @@ bool Event::signaled_then_reset()
     
     bool signaled = false;
 
-    THREAD_SEMA( _lock )
+    THREAD_LOCK( _lock )
     {
         signaled = _signaled;
         _signaled = false;
     }
 
     return signaled;
+}
+
+//----------------------------------------------------------------------Wait_handles::~Wait_handles
+
+Wait_handles::~Wait_handles()
+{
+    close();
+}
+
+//------------------------------------------------------------------------------Wait_handles::close
+
+void Wait_handles::close()
+{
+    FOR_EACH( vector<Event*>, _events, it )  _log->warn( "Wait_handles wird vor " + (*it)->as_string() + " geschlossen" );
 }
 
 //--------------------------------------------------------------------------------Wait_handles::add
@@ -171,21 +198,21 @@ void Wait_handles::remove( Event* event )
 {
     if( !event )  return;
 
-    vector<HANDLE>::iterator it = _handles.begin();
+    vector<Event*>::iterator it = _events.begin();
 
-    while( it != _handles.end() )
+    while( it != _events.end() )
     {
         if( *it == event )  break;
         it++;
     }
 
-    if( it == _handles.end() ) {
-        LOG( "*** Wait_handles::remove " << event << " fehlt\n" );     // Keine Exception. Das wäre nicht gut in einem Destruktor
+    if( it == _events.end() ) {
+        _log->error( "Wait_handles::remove(" + event->as_string() + ") fehlt" );     // Keine Exception. Das wäre nicht gut in einem Destruktor
         return;
     }
 
-    _handles.erase( it );
-    _events.erase( _events.begin() + ( it - _handles.begin() ) );
+    _events.erase( it );
+    _handles.erase( _handles.begin() + ( it - _events.begin() ) );
 }
 
 //--------------------------------------------------------------------------Wait_handles::wait_until
@@ -200,7 +227,7 @@ void Wait_handles::wait( double wait_time )
 
 void Wait_handles::wait_until( Time until )
 {
-    THREAD_SEMA( _lock )
+    THREAD_LOCK( _lock )
     {
         FOR_EACH( vector<Event*>, _events, it)  if( (*it)->signaled() ) return;
         _waiting = true;
@@ -216,10 +243,9 @@ void Wait_handles::wait_until( Time until )
 
         if( t <= 0 )  break;
         if( again )  _log->msg( "Noch " + as_string(wait_time) + "s warten ..." );
-        again = true;
 
         //_log->msg( "WaitForMultipleObjects " + as_string(t) + "ms" );
-        DWORD ret = WaitForMultipleObjects( _handles.size(), &_handles[0], FALSE, t ); 
+        DWORD ret = MsgWaitForMultipleObjects( _handles.size(), &_handles[0], FALSE, t, QS_ALLINPUT ); 
 
         if( ret == WAIT_FAILED )  throw_mswin_error( "WaitForMultipleObjects" );
 
@@ -230,8 +256,15 @@ void Wait_handles::wait_until( Time until )
             _log->msg( "Ereignis " + event->name() );
             return;
         }
-
+        else
+        if( ret == WAIT_OBJECT_0 + _handles.size() )
+        {
+            windows_message_step();
+        }
+        else
         if( ret != WAIT_TIMEOUT )  throw_mswin_error( "WaitForMultipleObjects" );
+        else
+            again = true;
     }
 
     _waiting = false;
@@ -254,7 +287,7 @@ void Directory_watcher::watch_directory( const string& directory )
 
 void Directory_watcher::watch_again()
 {
-    _signaled = false;
+    reset();
 
     BOOL ok = FindNextChangeNotification( _handle );
     if( !ok )  throw_mswin_error( "FindNextChangeNotification" );

@@ -1,4 +1,4 @@
-// $Id: spooler_thread.cxx,v 1.3 2001/02/06 12:08:44 jz Exp $
+// $Id: spooler_thread.cxx,v 1.4 2001/02/08 11:21:16 jz Exp $
 /*
     Hier sind implementiert
 
@@ -23,6 +23,7 @@ Thread::Thread( Spooler* spooler )
     _wait_handles(&_log),
     _script_instance(spooler)
 {
+    _com_thread = new Com_thread( this );
 }
 
 //----------------------------------------------------------------------------------Thread::~Thread
@@ -30,6 +31,9 @@ Thread::Thread( Spooler* spooler )
 Thread::~Thread() 
 {
     try { close(); } catch(const Xc& x ) { _log.error( x.what() ); }
+    
+    _event.close();
+    _wait_handles.close();
 }
 
 //-------------------------------------------------------------------------------------Thread::init
@@ -41,6 +45,37 @@ void Thread::init()
 
     _event.set_name( "Thread " + _name );
     _event.add_to( &_wait_handles );
+}
+
+//-----------------------------------------------------------Command_processor::execute_show_thread
+
+xml::Element_ptr Thread::xml( xml::Document_ptr document )
+{
+    xml::Element_ptr thread_element = document->createElement( "thread" );
+
+    THREAD_LOCK( _lock )
+    {
+        thread_element->setAttribute( "name"         , as_dom_string( _name ) );
+        thread_element->setAttribute( "running_tasks", as_dom_string( _running_tasks_count ) );
+
+        if( _next_start_time != 0  &&  _next_start_time != latter_day )
+        thread_element->setAttribute( "sleeping_until", as_dom_string( _next_start_time.as_string() ) );
+
+        thread_element->setAttribute( "steps"        , as_dom_string( _step_count ) );
+        thread_element->setAttribute( "started_tasks", as_dom_string( _task_count ) );
+
+        dom_append_nl( thread_element );
+
+        xml::Element_ptr jobs_element = document->createElement( "tasks" );
+        dom_append_nl( jobs_element );
+
+        FOR_EACH( Job_list, _job_list, it )  jobs_element->appendChild( (*it)->xml(document) ), dom_append_nl( jobs_element );
+
+        thread_element->appendChild( jobs_element );
+
+    }
+
+    return thread_element;
 }
 
 //------------------------------------------------------------------------------------Thread::close
@@ -63,8 +98,9 @@ void Thread::start()
     {
         _script_instance.init( _script._language );
 
-        _script_instance.add_obj( (IDispatch*)_spooler->_com_spooler, "spooler"     );
-        _script_instance.add_obj( (IDispatch*)_com_log              , "spooler_log" );
+        _script_instance.add_obj( (IDispatch*)_spooler->_com_spooler, "spooler"        );
+        _script_instance.add_obj( (IDispatch*)_com_thread           , "spooler_thread" );
+        _script_instance.add_obj( (IDispatch*)_com_log              , "spooler_log"    );
 
         _script_instance.load( _script );
 
@@ -101,7 +137,7 @@ bool Thread::step()
         {
             if( _event.signaled_then_reset() )  break;
             Job* job = *it;
-            if( job->_priority >= _spooler->_priority_max )  something_done |= job->do_something();
+            if( job->priority() >= _spooler->_priority_max )  something_done |= job->do_something();
         }
     }
 
@@ -114,7 +150,7 @@ bool Thread::step()
         {
             if( _event.signaled_then_reset() )  break;
             Job* job = *it;
-            for( int i = 0; i < job->_priority; i++ )  something_done |= job->do_something();
+            for( int i = 0; i < job->priority(); i++ )  something_done |= job->do_something();
         }
     }
 
@@ -127,7 +163,7 @@ bool Thread::step()
         {
             if( _event.signaled_then_reset() )  break;
             Job* job = *it;
-            if( job->_priority == 0 )  job->do_something();
+            if( job->priority() == 0 )  job->do_something();
         }
     }
 
@@ -139,17 +175,20 @@ bool Thread::step()
 void Thread::wait()
 {
     //tzset();
-
-    _next_start_time = latter_day;
     Job* next_job = NULL;
-    Time wait_time = latter_day;
 
-    FOR_EACH( Job_list, _job_list, it )
+    THREAD_LOCK( _lock )
     {
-        Job* job = *it;
-        if( job->_state == Job::s_pending ) 
+        _next_start_time = latter_day;
+        Time wait_time = latter_day;
+
+        FOR_EACH( Job_list, _job_list, it )
         {
-            if( _next_start_time > (*it)->_next_start_time )  next_job = *it, _next_start_time = next_job->_next_start_time;
+            Job* job = *it;
+            if( job->_state == Job::s_pending ) 
+            {
+                if( _next_start_time > (*it)->_next_start_time )  next_job = *it, _next_start_time = next_job->_next_start_time;
+            }
         }
     }
 
@@ -174,7 +213,7 @@ void Thread::wait()
 
 #   endif
 
-    _next_start_time = 0;
+    { THREAD_LOCK( _lock )  _next_start_time = 0; }
     //tzset();
 }
 
@@ -182,28 +221,53 @@ void Thread::wait()
 
 int Thread::run_thread()
 {
-    start();
+    int ret = 1;
 
-    while( !_stop )
+    try
     {
-        if( _running_tasks_count == 0 )  wait();
+        start();
 
-        THREAD_SEMA( _spooler->_pause_lock );
-        
-        if( _spooler->_state == Spooler::s_running ) 
+        while( !_stop )
         {
-            if( _stop )  break;
-            bool something_done = step();
-            if( !something_done )  _log.warn( "Nichts getan" );
-        }
-    }
+            if( _running_tasks_count == 0 )  wait();
 
-    close();
+            THREAD_LOCK( _spooler->_pause_lock );
+        
+            if( _spooler->_state == Spooler::s_running ) 
+            {
+                if( _stop )  break;
+                bool something_done = step();
+                if( !something_done )  _log.warn( "Nichts getan" );
+            }
+        }
+
+        close();
     
-    _log.msg( "Thread 0x" + as_hex_string( (int)_thread_id ) + " beendet sich" );
-    _spooler->signal();
+        _log.msg( "Thread 0x" + as_hex_string( (int)_thread_id ) + " beendet sich" );
+        _spooler->signal();
+
+        ret = 0;
+    }
+    catch( const Xc&         x ) { _log.error( x.what() ); }
+    catch( const exception&  x ) { _log.error( x.what() ); }
+    catch( const _com_error& x ) { _log.error( as_string( x.Description() ) ); }
+
+    if( ret == 1 )
+    {
+        _log.error( "Thread wird wegen des Fehlers beendet" );
+        close();
+        _spooler->signal();
+    }
     
-    return 0;
+    return ret;
+}
+
+//----------------------------------------------------------------------------Thread::signal_object
+// Anderer Thread
+
+void Thread::signal_object( const string& object_set_class_name, const Level& level )
+{
+    FOR_EACH( Job_list, _job_list, it )  (*it)->signal_object( object_set_class_name, level );
 }
 
 //-------------------------------------------------------------------------------------------thread
@@ -220,8 +284,8 @@ void Thread::start_thread()
 {
     init();
 
-   _thread = _beginthreadex( NULL, 0, thread, this, 0, &_thread_id );
-   if( !_thread )  throw_mswin_error( "CreateThread" );
+   _thread_handle = _beginthreadex( NULL, 0, thread, this, 0, &_thread_id );
+   if( !_thread_handle )  throw_mswin_error( "CreateThread" );
 
    _log.msg( "thread_id=0x" + as_hex_string( (int)_thread_id ) );
 }
@@ -230,19 +294,37 @@ void Thread::start_thread()
 
 void Thread::stop_thread()
 {
-    _stop = true;
-    signal();
-    wait_for_event( _thread, latter_day );      // Warten, bis thread terminiert ist
+    if( _thread_handle )    // Thread überhaupt schon gestartet?
+    {
+        _log.msg( "stop thread" );
+        _stop = true;
+        signal();
+    }
+}
+
+//----------------------------------------------------------------Thread::wait_until_thread_stopped
+
+void Thread::wait_until_thread_stopped()
+{
+    if( _thread_handle )    // Thread überhaupt schon gestartet?
+    {
+        _log.msg( "waiting ..." );
+        wait_for_event( _thread_handle, latter_day );      // Warten, bis thread terminiert ist
+        _log.msg( "... stopped" );
+    }
 }
 
 //--------------------------------------------------------------------------Thread::get_job_or_null
 
 Job* Thread::get_job_or_null( const string& job_name )
 {
-    FOR_EACH( Job_list, _job_list, it )
+    THREAD_LOCK( _lock )
     {
-        Job* job = *it;
-        if( job->_name == job_name )  return job;
+        FOR_EACH( Job_list, _job_list, it )
+        {
+            Job* job = *it;
+            if( job->_name == job_name )  return job;
+        }
     }
 
     return NULL;

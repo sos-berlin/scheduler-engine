@@ -1,4 +1,4 @@
-// $Id: spooler_com.cxx,v 1.8 2001/02/06 09:22:26 jz Exp $
+// $Id: spooler_com.cxx,v 1.9 2001/02/08 11:21:15 jz Exp $
 /*
     Hier sind implementiert
 
@@ -30,6 +30,7 @@ DESCRIBE_CLASS( &spooler_typelib, Com_log         , log         , spooler_com::C
 DESCRIBE_CLASS( &spooler_typelib, Com_job         , job         , spooler_com::CLSID_job         , "Spooler.Job"         , "1.0" )
 DESCRIBE_CLASS( &spooler_typelib, Com_task        , task        , spooler_com::CLSID_Task        , "Spooler.Task"        , "1.0" )
 DESCRIBE_CLASS( &spooler_typelib, Com_object_set  , object_set  , spooler_com::CLSID_object_set  , "Spooler.Object_set"  , "1.0" )
+DESCRIBE_CLASS( &spooler_typelib, Com_thread      , thread      , spooler_com::CLSID_thread      , "Spooler.Thread"      , "1.0" )
 DESCRIBE_CLASS( &spooler_typelib, Com_spooler     , spooler     , spooler_com::CLSID_spooler     , "Spooler.Spooler"     , "1.0" )
 
 //-----------------------------------------------------------------------------Com_error::Com_error
@@ -95,7 +96,7 @@ Com_variable_set::Com_variable_set()
 
 STDMETHODIMP Com_variable_set::put_var( BSTR name, VARIANT* value )
 {
-    _map[name] = *value;
+    THREAD_LOCK( _lock )  _map[name] = *value;
     return NOERROR;
 }
 
@@ -103,14 +104,15 @@ STDMETHODIMP Com_variable_set::put_var( BSTR name, VARIANT* value )
 
 STDMETHODIMP Com_variable_set::get_var( BSTR name, VARIANT* value )
 {
-    return VariantCopy( value, &_map[name] );
+    THREAD_LOCK( _lock )  return VariantCopy( value, &_map[name] );
+    return NOERROR;
 }
 
 //----------------------------------------------------------------------Com_variable_set::get_count
 
 STDMETHODIMP Com_variable_set::get_count( int* result )
 {
-    *result = _map.size();
+    THREAD_LOCK( _lock )  *result = _map.size();
     return NOERROR;
 }
 
@@ -162,6 +164,7 @@ Com_object_set::Com_object_set( Object_set* object_set )
 STDMETHODIMP Com_object_set::get_low_level( int* result )
 {
     if( !_object_set )  return E_POINTER;
+    if( GetCurrentThreadId() != _object_set->thread()->_thread_id )  return E_ACCESSDENIED;
 
     *result = _object_set->_object_set_descr->_level_interval._low_level;
     return NOERROR;
@@ -172,6 +175,7 @@ STDMETHODIMP Com_object_set::get_low_level( int* result )
 STDMETHODIMP Com_object_set::get_high_level( int* result )
 {
     if( !_object_set )  return E_POINTER;
+    if( GetCurrentThreadId() != _object_set->thread()->_thread_id )  return E_ACCESSDENIED;
 
     *result = _object_set->_object_set_descr->_level_interval._high_level;
     return NOERROR;
@@ -221,7 +225,7 @@ STDMETHODIMP Com_job::start( VARIANT* params, Itask** itask )
             if( FAILED(hr) )  return hr;
         }
 
-        THREAD_SEMA( _job->_task_lock )
+        THREAD_LOCK( _job->_lock )
         {
             _job->start_without_lock( pars );
             *itask = new Com_task( _job->_task ); //_job->_com_task;
@@ -231,6 +235,19 @@ STDMETHODIMP Com_job::start( VARIANT* params, Itask** itask )
     }
     catch( const Xc&   x )  { hr = _set_excepinfo(x); }
     catch( const xmsg& x )  { hr = _set_excepinfo(x); }
+
+    return hr;
+}
+
+//------------------------------------------------------------------------------Com_job::get_thread
+
+STDMETHODIMP Com_job::get_thread( spooler_com::Ithread** thread )
+{
+    HRESULT hr = NOERROR;
+    if( !_job )  return E_POINTER;
+
+    *thread = _job->_thread->_com_thread;
+    if( *thread )  (*thread)->AddRef();
 
     return hr;
 }
@@ -248,7 +265,7 @@ Com_task::Com_task( Task* task )
 
 void Com_task::set_task( Task* task )
 { 
-    THREAD_SEMA( _lock )
+    THREAD_LOCK( _lock )
     {
         _task = task; 
     }
@@ -262,11 +279,12 @@ STDMETHODIMP Com_task::get_object_set( Iobject_set** result )
 
     try
     {
-        THREAD_SEMA( _lock )
+        THREAD_LOCK( _lock )
         {
             if( !_task )  throw_xc( "SPOOLER-122" );
+            if( GetCurrentThreadId() != _task->_job->thread()->_thread_id )  return E_ACCESSDENIED;
 
-            *result = _task->_com_object_set;
+            THREAD_LOCK( _task->_lock )  *result = _task->_com_object_set;
             if( *result )  (*result)->AddRef();
         }
     }
@@ -284,15 +302,16 @@ STDMETHODIMP Com_task::put_error( VARIANT* error_par )
 
     try
     {
-        THREAD_SEMA( _lock )
+        THREAD_LOCK( _lock )
         {
             if( !_task )  throw_xc( "SPOOLER-122" );
+            if( GetCurrentThreadId() != _task->_job->thread()->_thread_id )  return E_ACCESSDENIED;
 
             CComVariant error_vt = *error_par;
             hr = error_vt.ChangeType( VT_BSTR );        if( FAILED(hr) )  return hr;
 
             string error_text = bstr_as_string( error_vt.bstrVal );
-            _task->_job->error( Xc( "SPOOLER-120", error_text.c_str() ) );
+            _task->_job->set_error( Xc( "SPOOLER-120", error_text.c_str() ) );
         }
     }
     catch( const Xc&   x )  { hr = _set_excepinfo(x); }
@@ -309,11 +328,11 @@ STDMETHODIMP Com_task::get_error( Ierror** result )
 
     try
     {
-        THREAD_SEMA( _lock )
+        THREAD_LOCK( _lock )
         {
             if( !_task )  throw_xc( "SPOOLER-122" );
 
-            *result = new Com_error( _task->_job->_error );   // _task? _task->_error : _error
+            THREAD_LOCK( _task->_lock )  *result = new Com_error( _task->_error );
             (*result)->AddRef();
         }
     }
@@ -331,11 +350,11 @@ STDMETHODIMP Com_task::get_job( Ijob** com_job )
 
     try
     {
-        THREAD_SEMA( _lock )
+        THREAD_LOCK( _lock )
         {
             if( !_task )  throw_xc( "SPOOLER-122" );
 
-            *com_job = _task->_job->_com_job;
+            *com_job = _task->_job->com_job();
             (*com_job)->AddRef();
         }
     }
@@ -353,11 +372,11 @@ STDMETHODIMP Com_task::get_params( Ivariable_set** result )
 
     try
     {
-        THREAD_SEMA( _lock )
+        THREAD_LOCK( _lock )
         {
             if( !_task )  throw_xc( "SPOOLER-122" );
 
-            *result = _task->_job->_params;
+            *result = _task->_params;
             (*result)->AddRef();
         }
     }
@@ -375,7 +394,7 @@ STDMETHODIMP Com_task::wait_until_terminated( double wait_time, VARIANT_BOOL* ok
 
     try
     {
-        THREAD_SEMA( _lock )
+        THREAD_LOCK( _lock )
         {
             if( _task )  *ok = _task->wait_until_terminated( wait_time );
                    else  *ok = true;
@@ -395,11 +414,12 @@ STDMETHODIMP Com_task::put_result( VARIANT* value )
 
     try
     {
-        THREAD_SEMA( _lock )
+        THREAD_LOCK( _lock )
         {
             if( !_task )  throw_xc( "SPOOLER-122" );
+            if( GetCurrentThreadId() != _task->_job->thread()->_thread_id )  return E_ACCESSDENIED;
 
-            hr = _task->_result.Copy( value );
+            THREAD_LOCK( _task->_lock )  hr = _task->_result.Copy( value );
         }
     }
     catch( const Xc&   x )  { hr = _set_excepinfo(x); }
@@ -416,12 +436,12 @@ STDMETHODIMP Com_task::get_result( VARIANT* value )
 
     try
     {
-        THREAD_SEMA( _lock )
+        THREAD_LOCK( _lock )
         {
             if( !_task )  throw_xc( "SPOOLER-122" );
 
             VariantInit( value ); 
-            hr = VariantCopy( value, &_task->_result);
+            THREAD_LOCK( _task->_lock )  hr = VariantCopy( value, &_task->_result );
         }
     }
     catch( const Xc&   x )  { hr = _set_excepinfo(x); }
@@ -438,9 +458,10 @@ STDMETHODIMP Com_task::put_repeat( double seconds )
 
     try
     {
-        THREAD_SEMA( _lock )
+        THREAD_LOCK( _lock )
         {
             if( !_task )  throw_xc( "SPOOLER-122" );
+            if( GetCurrentThreadId() != _task->_job->thread()->_thread_id )  return E_ACCESSDENIED;
 
             _task->_job->set_repeat( seconds );
         }
@@ -449,6 +470,39 @@ STDMETHODIMP Com_task::put_repeat( double seconds )
     catch( const xmsg& x )  { hr = _set_excepinfo(x); }
 
     return hr;
+}
+
+//---------------------------------------------------------------------------Com_thread::Com_thread
+
+Com_thread::Com_thread( Thread* thread )
+:
+    Sos_ole_object( thread_class_ptr, this ),
+    _thread(thread)
+{
+}
+
+//------------------------------------------------------------------------------Com_thread::get_Log
+
+STDMETHODIMP Com_thread::get_log( spooler_com::Ilog** com_log )
+{
+    if( !_thread )  return E_POINTER;
+    if( GetCurrentThreadId() != _thread->_thread_id )  return E_ACCESSDENIED;
+
+    *com_log = _thread->_com_log;
+    if( *com_log )  (*com_log)->AddRef();
+    return NOERROR;
+}
+
+//---------------------------------------------------------------------------Com_thread::get_script
+
+STDMETHODIMP Com_thread::get_script( IDispatch** script_object )
+{
+    if( !_thread )  return E_POINTER;
+    if( GetCurrentThreadId() != _thread->_thread_id )  return E_ACCESSDENIED;
+
+    *script_object = _thread->_script_instance.dispatch();
+    if( *script_object )  (*script_object)->AddRef();
+    return NOERROR;
 }
 
 //-------------------------------------------------------------------------Com_spooler::Com_spooler
@@ -502,18 +556,18 @@ STDMETHODIMP Com_spooler::get_param( BSTR* param_bstr )
 }
 
 //-----------------------------------------------------------------------------Com_spooler::get_Log
-
+/*
 STDMETHODIMP Com_spooler::get_script( IDispatch** script_object )
 {
     if( !_spooler )  return E_POINTER;
     return E_POINTER;
-/*
+
     *script_object = _spooler->_script_instance.dispatch();
     if( *script_object )  (*script_object)->AddRef();
     return NOERROR;
-*/
-}
 
+}
+*/
 //-----------------------------------------------------------------------------Com_spooler::get_job
 
 STDMETHODIMP Com_spooler::get_job( BSTR job_name, Ijob** com_job )
@@ -524,7 +578,7 @@ STDMETHODIMP Com_spooler::get_job( BSTR job_name, Ijob** com_job )
 
     try
     {
-        *com_job = _spooler->get_job( bstr_as_string( job_name ) )->_com_job;
+        *com_job = _spooler->get_job( bstr_as_string( job_name ) )->com_job();
         (*com_job)->AddRef();
     }
     catch( const Xc&   x )  { hr = _set_excepinfo(x); }
@@ -537,6 +591,8 @@ STDMETHODIMP Com_spooler::get_job( BSTR job_name, Ijob** com_job )
 
 STDMETHODIMP Com_spooler::create_variable_set( Ivariable_set** result )
 {
+    if( !_spooler )  return E_POINTER;
+
     *result = new Com_variable_set;
     (*result)->AddRef();
     return NOERROR;

@@ -1,4 +1,4 @@
-// $Id: spooler_config.cxx,v 1.10 2001/02/04 17:12:43 jz Exp $
+// $Id: spooler_config.cxx,v 1.11 2001/02/08 11:21:15 jz Exp $
 
 //#include <precomp.h>
 
@@ -80,7 +80,7 @@ void Security::set_xml( const xml::Element_ptr& security_element )
             }
             catch( const Xc& x )
             {
-                _spooler->_log.error( "<allowed_host host=\"" + hostname + "\">  " + x.what() );
+                _spooler->log().error( "<allowed_host host=\"" + hostname + "\">  " + x.what() );
                 if( !ignore_unknown_hosts )  throw;
             }
             
@@ -344,18 +344,18 @@ void Thread::load_jobs_from_xml( Job_list* liste, const xml::Element_ptr& elemen
                 Sos_ptr<Job> job = SOS_NEW( Job( this ) );
                 job->set_xml( e );
 
-                if( job->_object_set_descr )        // job->_object_set_descr->_class ermitteln
+                if( job->object_set_descr() )        // job->_object_set_descr->_class ermitteln
                 {
                     FOR_EACH( Object_set_class_list, _spooler->_object_set_class_list, it )
                     {
-                        if( (*it)->_name == job->_object_set_descr->_class_name ) 
+                        if( (*it)->_name == job->object_set_descr()->_class_name ) 
                         {
-                            job->_object_set_descr->_class = *it;
+                            job->object_set_descr()->_class = *it;
                             break;
                         }
                     }
 
-                    if( !job->_object_set_descr->_class )  throw_xc( "SPOOLER-101", job->_object_set_descr->_class_name );
+                    if( !job->object_set_descr()->_class )  throw_xc( "SPOOLER-101", job->object_set_descr()->_class_name );
                 }
 
                 liste->push_back( job );

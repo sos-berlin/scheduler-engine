@@ -1,4 +1,4 @@
-// $Id: spooler_communication.cxx,v 1.22 2001/02/04 17:12:43 jz Exp $
+// $Id: spooler_communication.cxx,v 1.23 2001/02/08 11:21:15 jz Exp $
 /*
     Hier sind implementiert
 
@@ -10,8 +10,6 @@
 
 #include "../kram/sos.h"
 #include "spooler.h"
-
-//#include <ctype.h>
 
 #ifdef SYSTEM_WIN
     const int ENOTSOCK = 10038;
@@ -224,7 +222,7 @@ Communication::Channel::Channel( Spooler* spooler )
     _spooler(spooler),
     _socket( SOCKET_ERROR ),
     _send_is_complete( true ),
-    _log(&spooler->_log)
+    _log(&spooler->log())
 {
     recv_clear();
 }
@@ -408,7 +406,7 @@ void Communication::bind()
 
     // UDP:
 
-    if( _udp_port != _spooler->_udp_port )
+    if( _udp_port != _spooler->udp_port() )
     {
         Thread_semaphore::Guard guard = &_semaphore;
 
@@ -420,7 +418,7 @@ void Communication::bind()
 
       //setsockopt( _udp_socket, SOL_SOCKET, SO_REUSEADDR, (const char*)&true_, sizeof true_ );
 
-        sa.sin_port        = htons( _spooler->_udp_port );
+        sa.sin_port        = htons( _spooler->udp_port() );
         sa.sin_family      = AF_INET;
         sa.sin_addr.s_addr = 0; // INADDR_ANY
 
@@ -435,16 +433,16 @@ void Communication::bind()
         ret = ioctlsocket( _udp_socket, FIONBIO, &on );
         if( ret == SOCKET_ERROR )  throw_sos_socket_error( "ioctl(FIONBIO)" );
 
-        _udp_port = _spooler->_udp_port;
+        _udp_port = _spooler->udp_port();
         _rebound = true;
 
-        _spooler->_log.msg( "Spooler erwartet Kommandos über UDP-Port " + as_string(_udp_port) );
+        _spooler->log().msg( "Spooler erwartet Kommandos über UDP-Port " + as_string(_udp_port) );
     }
 
 
     // TCP: 
 
-    if( _tcp_port != _spooler->_tcp_port )
+    if( _tcp_port != _spooler->tcp_port() )
     {
         Thread_semaphore::Guard guard = &_semaphore;
 
@@ -456,7 +454,7 @@ void Communication::bind()
 
       //setsockopt( _listen_socket, SOL_SOCKET, SO_REUSEADDR, (const char*)&true_, sizeof true_ );
 
-        sa.sin_port        = htons( _spooler->_tcp_port );
+        sa.sin_port        = htons( _spooler->tcp_port() );
         sa.sin_family      = AF_INET;
         sa.sin_addr.s_addr = 0; // INADDR_ANY
 
@@ -474,10 +472,10 @@ void Communication::bind()
         ret = ioctlsocket( _listen_socket, FIONBIO, &on );
         if( ret == SOCKET_ERROR )  throw_sos_socket_error( "ioctl(FIONBIO)" );
 
-        _tcp_port = _spooler->_tcp_port;
+        _tcp_port = _spooler->tcp_port();
         _rebound = true;
 
-        _spooler->_log.msg( "Spooler erwartet Kommandos über TCP-Port " + as_string(_tcp_port) );
+        _spooler->log().msg( "Spooler erwartet Kommandos über TCP-Port " + as_string(_tcp_port) );
     }
 }
 
@@ -597,14 +595,14 @@ int Communication::run()
                     Named_host host = addr.sin_addr;
                     if( _spooler->_security.level( host ) < Security::seclev_signal )
                     {
-                        _spooler->_log.error( "UDP-Nachricht von " + host.as_string() + " nicht zugelassen." );
+                        _spooler->log().error( "UDP-Nachricht von " + host.as_string() + " nicht zugelassen." );
                     }
                     else
                     {
                         Command_processor cp = _spooler;
                         cp.set_host( &host );
                         string cmd ( buffer, len );
-                        _spooler->_log.msg( "UDP-Nachricht von " + host.as_string() + ": " + cmd );
+                        _spooler->log().msg( "UDP-Nachricht von " + host.as_string() + ": " + cmd );
                         cp.execute( cmd );
                     }
                 }
@@ -665,7 +663,7 @@ int Communication::go()
     }
     catch( const Xc& x )
     {
-        _spooler->_log.error( "Communication::thread: " + x.what() );
+        _spooler->log().error( "Communication::thread: " + x.what() );
         result = 1;
     }
 
