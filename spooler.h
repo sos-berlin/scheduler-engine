@@ -1,4 +1,4 @@
-// $Id: spooler.h,v 1.62 2002/02/28 16:46:05 jz Exp $
+// $Id: spooler.h,v 1.63 2002/03/01 20:48:00 jz Exp $
 
 #ifndef __SPOOLER_H
 #define __SPOOLER_H
@@ -128,6 +128,7 @@ struct Spooler
     Log&                        log                         ()                                  { return _log; }
     Time                        start_time                  () const                            { return _spooler_start_time; }
     Security::Level             security_level              ( const Host& );
+    const time::Holiday_set&    holidays                    () const                            { return _holiday_set; }
     bool                        is_service                  () const                            { return _is_service; }
     xml::Element_ptr            threads_as_xml              ( xml::Document_ptr, bool show_all );
 
@@ -209,6 +210,7 @@ struct Spooler
     int                        _priority_max;               // <config priority_max=...>
     int                        _tcp_port;                   // <config tcp=...>
     int                        _udp_port;                   // <config udp=...>
+    time::Holiday_set          _holiday_set;                // Feiertage für alle Jobs
     State_changed_handler      _state_changed_handler;      // Callback für NT-Dienst SetServiceStatus()
 
     xml::Element_ptr           _config_element_to_load;     // Für cmd_load_config()

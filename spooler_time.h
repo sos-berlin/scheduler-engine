@@ -1,4 +1,4 @@
-// $Id: spooler_time.h,v 1.4 2002/02/28 16:46:07 jz Exp $
+// $Id: spooler_time.h,v 1.5 2002/03/01 20:48:00 jz Exp $
 
 #ifndef __SPOOLER_TIME_H
 #define __SPOOLER_TIME_H
@@ -196,6 +196,21 @@ struct Ultimo_set : Day_set
     friend ostream&             operator <<                 ( ostream& s, const Ultimo_set& o )  { o.print(s); return s; }
 };
 
+//-------------------------------------------------------------------------------------Holiday_set
+
+typedef set<uint>               Holiday_set;
+
+/*
+inline Holiday_set& operator += ( Holiday_set& a, const Holiday_set& b )
+{
+    for( Holiday_set::iterator it = b.begin(); it != b.end(); it++ )
+    {
+        a.insert( *it );
+    }
+
+    return a;
+}
+*/
 //--------------------------------------------------------------------------------------------Date
 
 struct Date
@@ -235,6 +250,7 @@ struct Run_time
     Period                      next_period                 ()                      { return next_period( Time::now() ); }
     Period                      next_period                 ( Time );
     Period                      next_period_                ( Time );
+    void                        set_holidays                ( const Holiday_set& h )  { _holiday_set = h; }
 
     void                        print                       ( ostream& ) const;
     friend ostream&             operator <<                 ( ostream& s, const Run_time& o )  { o.print(s); return s; }
@@ -251,7 +267,7 @@ struct Run_time
     Weekday_set                _weekday_set;
     Monthday_set               _monthday_set;
     Ultimo_set                 _ultimo_set;                 // 0: Letzter Tag, -1: Vorletzter Tag
-    set<uint>                  _holiday_set;
+    Holiday_set                _holiday_set;
 };
 
 //-------------------------------------------------------------------------------------------------

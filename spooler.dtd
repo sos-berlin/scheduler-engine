@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- $Id: spooler.dtd,v 1.28 2002/02/28 16:46:05 jz Exp $   Joacim Zschimmer,  (C) 2000 SOS GmbH Berlin  -->
+<!-- $Id: spooler.dtd,v 1.29 2002/03/01 20:48:00 jz Exp $   Joacim Zschimmer,  (C) 2000 SOS GmbH Berlin  -->
 
 
 <!ELEMENT spooler               ( config+ | command | answer )>
@@ -8,7 +8,7 @@
 
 <!-- KONFIGURATION DES SPOOLERS - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
-<!ELEMENT config                ( security?, script?, object_set_classes?, threads? )>
+<!ELEMENT config                ( security?, script?, object_set_classes?, holiday*, threads? )>
 <!ATTLIST config                spooler_id          CDATA ''>           <!-- Diese Konfiguration ist nur für einen Spooler mit dieser Kennung -->
 <!ATTLIST config                log_dir             CDATA #IMPLIED>
 <!ATTLIST config                tcp_port            CDATA '4444'>       <!-- Für TCP-Kommandoschnittstelle -->
