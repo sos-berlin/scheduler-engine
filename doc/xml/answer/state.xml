@@ -1,31 +1,127 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="../../scheduler.xslt" type="text/xsl"?>
 
-<!--$Id: state.xml,v 1.1 2004/09/06 07:53:28 jz Exp $-->
+<!--$Id: state.xml,v 1.2 2004/09/07 06:25:37 jz Exp $-->
 
 <xml_element name          = "state" 
              title         = "Allgemeiner Zustand des Schedulers"
              sub_directory = "answer/"
              base_dir      = "../../"
-             parent_page   = "../../xml_answers.xml"
+             parent_page   = "../../xml_commands.xml"
              author        = "$Author: jz $"
-             date          = "$Date: 2004/09/06 07:53:28 $">
+             date          = "$Date: 2004/09/07 06:25:37 $">
 
     <xml_parent_elements>
-        <xml_parent_element name="holidays">
-        </xml_parent_element>        
+        <xml_parent_element name="answer"/>
     </xml_parent_elements>
     
     <xml_attributes>
-        <xml_attribute name="" type="">
+        <xml_attribute name="time" type="yyyy-mm-dd hh:mm:ss" title="veraltet">
             <description>
+                <p>
+                    Veraltet. Verwenden sie <scheduler_element directory="xml/answer/" name="answer" attribute="time"/>
+                </p>
             </description>
         </xml_attribute>
+
+        <xml_attribute name="spooler_id" type="name" title="Scheduler-Id">
+            <description>
+                <p>
+                    Die Scheduler-Id, siehe Option <scheduler_option name="id"/>.
+                </p>
+            </description>
+        </xml_attribute>
+
+        <xml_attribute name="id" type="name" title="Veraltet">
+            <description>
+                <p>
+                    Veraltet. Verwenden sie das Attribut <code>spooler_id=</code>.
+                </p>
+            </description>
+        </xml_attribute>
+
+        <xml_attribute name="spooler_running_since" type="yyyy-mm-dd hh:mm:ss" title="Zeitpunkt des Anlaufs des Schedulers">
+            <description>
+                <p>
+                    
+                </p>
+            </description>
+        </xml_attribute>
+
+        <xml_attribute name="state" type="state" title="Zustand des Schedulers">
+            <description>
+                <p>
+                    
+                </p>
+            </description>
+        </xml_attribute>
+
+        <xml_attribute name="log_file" type="dateiname" title="Dateiname des Hauptprotokolls">
+            <description>
+                <p>
+                    
+                </p>
+            </description>
+        </xml_attribute>
+
+        <xml_attribute name="version" type="vv.vv.vv  yyyy-mm-dd">
+            <description>
+                <p>
+                    Version des Schedulers
+                </p>
+            </description>
+        </xml_attribute>
+
+        <xml_attribute name="pid" type="zahl" title="Prozess-Id des Schedulers">
+            <description>
+                <p>
+                </p>
+            </description>
+        </xml_attribute>
+
+        <xml_attribute name="db" type="hostware_dateiname" title="Datenbank">
+            <description>
+                <p>
+                    Verwendete Datenbank als Hostware-Dateiname.
+                </p>
+            </description>
+        </xml_attribute>
+
+        <xml_attribute name="db_waiting" type="yes|no" initial="no" title="Scheduler erneuert Datenbankverbindung">
+            <description>
+                <p>
+                    Wenn der Scheduler die Datenbankverbindung verloren hat und versucht, sie wiederherzustellen,
+                    ist <code>db_waiting="yes"</code> gesetzt. 
+                    Der Scheduler führt währenddessen keinen Job aus.
+                </p>
+            </description>
+        </xml_attribute>
+
+        <xml_attribute name="loop" type="zahl" title="Interner Wert: Anzahl der Server-Zyklen">
+            <description>
+                <p>
+                    Der Wert erhöht sich, wenn der Scheduler Opertionen ausführt, 
+                    z.B. ein Jobschritt oder ein Methodenaufruf aus einem Job heraus.
+                </p>
+            </description>
+        </xml_attribute>
+
+        <xml_attribute name="waits" type="zahl" title="Interner Wert: Anzahl der Wartezustände">
+            <description>
+                <p>
+                    Der Wert erhöht sich um eins, wenn der Scheduler im Wartezustand ist, 
+                    weil gerade nichts zu tun ist.
+                </p>
+            </description>
+        </xml_attribute>
+
     </xml_attributes>
     
     <xml_child_elements>
-        <xml_child_element name="" multiple="yes" title="">
-        </xml_child_element>        
+        <xml_child_element name="jobs"/>
+        <xml_child_element name="job_chains"/>
+        <xml_child_element name="process_classes"/>
+        <xml_child_element name="subprocesses"/>
     </xml_child_elements>
 
     <description>
@@ -33,9 +129,4 @@
         </p>
     </description>
     
-    <example>
-        <pre>
-        </pre>
-    </example>
-        
 </xml_element>

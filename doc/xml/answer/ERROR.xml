@@ -1,65 +1,56 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="../../scheduler.xslt" type="text/xsl"?>
 
-<!--$Id: ERROR.xml,v 1.1 2004/09/06 07:53:28 jz Exp $-->
+<!--$Id: ERROR.xml,v 1.2 2004/09/07 06:25:36 jz Exp $-->
 
 <xml_element name          = "ERROR" 
              title         = "Fehlermeldung"
              sub_directory = "answer/"
              base_dir      = "../../"
-             parent_page   = "../../xml_answers.xml"
+             parent_page   = "../../xml_commands.xml"
              author        = "$Author: jz $"
-             date          = "$Date: 2004/09/06 07:53:28 $">
+             date          = "$Date: 2004/09/07 06:25:36 $">
 
     <xml_parent_elements>
         <xml_parent_element name="answer"/>
+        <xml_parent_element name="job"/>
     </xml_parent_elements>
     
     <xml_attributes>
-        <xml_attribute name="class" type="name">
+        <xml_attribute name="time" type="yyyy-mm-dd hh:mm:ss" title="Zeitstempel">
+        </xml_attribute>
+        
+        <xml_attribute name="class" type="name" title="Name der Exception-Klasse (C++)">
+        </xml_attribute>
+        
+        <xml_attribute name="code" type="text" title="Fehlercode">
+        </xml_attribute>
+        
+        <xml_attribute name="text" type="text" title="Fehlercode und Fehlertext">
+        </xml_attribute>
+        
+        <xml_attribute name="source" type="filename" title="Name der Datei, die den Fehler enthält">
             <description>
                 <p>
-                    Name der Exception-Klasse (C++).
+                    Wenn der Fehler einer Datei zugeordnet werden konnte. 
                 </p>
             </description>
         </xml_attribute>
         
-        <xml_attribute name="code" type="text">
-            <description>
-                <p>
-                    Fehlercode
-                </p>
-            </description>
-        </xml_attribute>
-        
-        <xml_attribute name="text" type="text">
-            <description>
-                <p>
-                    Fehlercode und Fehlertext.
-                </p>
-            </description>
-        </xml_attribute>
-        
-        <xml_attribute name="source" type="filename">
-            <description>
-                <p>
-                    Name der Datei, die den Fehler enthält.
-                </p>
-            </description>
-        </xml_attribute>
-        
-        <xml_attribute name="line" type="zahl">
+        <xml_attribute name="line" type="zahl" title="Zeilennummer">
             <description>
                 <p>
                     Nummer der Zeile (ab 1), die den Fehler enthält.
+                    Wenn der Fehler einer Zeile zugeordnet werden konnte. 
                 </p>
             </description>
         </xml_attribute>
         
-        <xml_attribute name="col" type="zahl">
+        <xml_attribute name="col" type="zahl" title="Spaltennummer">
             <description>
                 <p>
-                    Nummer der Spalte (ab 1), die den Fehler enthält.
+                    Nummer der Spalte (ab 1), die den Fehler enthält,
+                    wenn der Fehler einer Spalte zugeordnet werden konnte. 
                 </p>
             </description>
         </xml_attribute>

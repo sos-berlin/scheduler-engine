@@ -2,14 +2,14 @@
 <!--DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"-->
 <?xml-stylesheet href="../scheduler.xslt" type="text/xsl"?>
 
-<!--$Id: show_job_chains.xml,v 1.5 2004/09/06 07:53:28 jz Exp $-->
+<!--$Id: show_job_chains.xml,v 1.6 2004/09/07 06:25:36 jz Exp $-->
 
 <xml_element name     = "show_job_chains" 
              title    = ""
              base_dir = "../"
              parent_page = "../xml_commands.xml"
              author   = "$Author: jz $"
-             date     = "$Date: 2004/09/06 07:53:28 $">
+             date     = "$Date: 2004/09/07 06:25:36 $">
 
 
     <description>
@@ -22,6 +22,8 @@
         <xml_attribute name="max_orders" same_as_element="show_state"/>
     </xml_attributes>
 
+    <xml_answer element="job_chains"/>
+    
     
     <example>
         <pre>

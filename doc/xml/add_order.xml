@@ -2,14 +2,14 @@
 <!--DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"-->
 <?xml-stylesheet href="../scheduler.xslt" type="text/xsl"?>
 
-<!--$Id: add_order.xml,v 1.5 2004/09/06 07:53:27 jz Exp $-->
+<!--$Id: add_order.xml,v 1.6 2004/09/07 06:25:36 jz Exp $-->
 
 <xml_element name     = "add_order" 
              parent_page = "../xml_commands.xml"
              title    = ""
              base_dir = "../"
              author   = "$Author: jz $"
-             date     = "$Date: 2004/09/06 07:53:27 $">
+             date     = "$Date: 2004/09/07 06:25:36 $">
 
 
     <description>
@@ -77,6 +77,7 @@
         <xml_child_element name="params"/>
     </xml_child_elements>
     
+    <xml_answer element="ok"/>
     
     <example>
         <pre>

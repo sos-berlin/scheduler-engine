@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="../../scheduler.xslt" type="text/xsl"?>
 
-<!--$Id: queued_task.xml,v 1.1 2004/09/06 07:53:28 jz Exp $-->
+<!--$Id: queued_task.xml,v 1.2 2004/09/07 06:25:37 jz Exp $-->
 
 <xml_element name          = "queued_task" 
              title         = "Task in der Warteschlange"
              sub_directory = "answer/"
              base_dir      = "../../"
-             parent_page   = "../../xml_answers.xml"
+             parent_page   = "../../xml_commands.xml"
              author        = "$Author: jz $"
-             date          = "$Date: 2004/09/06 07:53:28 $">
+             date          = "$Date: 2004/09/07 06:25:37 $">
 
     <xml_parent_elements>
         <xml_parent_element name="queued_task"/>
