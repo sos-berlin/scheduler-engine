@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.259 2003/09/25 13:32:39 jz Exp $
+// $Id: spooler.cxx,v 1.260 2003/09/26 06:56:28 jz Exp $
 /*
     Hier sind implementiert
 
@@ -1490,7 +1490,7 @@ void Spooler::nichts_getan( Spooler_thread* thread, int anzahl )
         thread->nichts_getan();
     }
 
-    //sos_sleep( min( 30, 1 << anzahl ) );
+    sos_sleep( min( 30, 1 << anzahl ) );
 }
 
 //-----------------------------------------------------------------------Spooler::execute_state_cmd

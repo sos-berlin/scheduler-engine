@@ -1,51 +1,8 @@
-// $Id: spooler_job.cxx,v 1.24 2003/09/25 10:57:06 jz Exp $
+// $Id: spooler_job.cxx,v 1.25 2003/09/26 06:56:29 jz Exp $
 /*
     Hier sind implementiert
 
     Job
-*/
-
-
-/*
-    ÄNDERUNGEN DES VERHALTENS, SEIT MEHRERE TASKS EINES JOBS ERLAUBT SIND
-
-    Job::stop(): Tasks laufen zu Ende, neue Tasks nicht erlaubt. Zustände s_stopping und s_stopped
-
-    Job::reread(): Skript wird neu gelesen, gilt aber erst für neue Tasks. Laufende Tasks werden nicht beendet.
-
-    Task::stop(): Task wird gestoppt, Job::stop() wird gerufen
-
-    Job::reset_error() gestrichen. Wann wird der Fehler in Job zurückgesetzt? Gibt es überhaupt einen Fehler in Job? Nur im Zustand s_stopped?
-
-    <task> -> <job><tasks><task>...
-    
-
-
-
-    OFFEN OFFEN OFFEN OFFEN OFFEN OFFEN OFFEN OFFEN OFFEN OFFEN 
-
-    Starten einer Task
-        Job::do_something() stellt Task bereit (dequeue) und ordnet Task einem Thread (oder Process) zu.
-
-    Job::do_something()
-        Auftrag eingetroffen:
-        Wenn ein neuer Auftrag da ist und eine Task auf einen Auftrag wartet (s_running_waiting_for_order), dann diese Task aktivieren.
-        Oder eine eine neue Task kann für den Auftrag gestartet werden,
-
-    Thread-Sicherheit prüfen
-        TCP-Thread gegen alle anderen prüfen (xxx::dom(), Kommandos)
-
-    Evtl. von Threads auf Asynchrone Remote-Calls umsteigen (Problem bei on_success_on_error()).
-
-    Verhalten am Ende prüfen.
-        Tasks beenden
-        Jobs schließen
-        Threads schließen
-
-    Bei nur einem Thread diesen im Haupt-Thread ausführen. Dann gibt es kein Problem mit der Thread-Sicherheit.
-
-
-    set_in_call() soll für jede Task den gerade ausgeführten Aufruf notieren.
 */
 
 
