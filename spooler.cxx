@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.134 2002/11/23 17:28:53 jz Exp $
+// $Id: spooler.cxx,v 1.135 2002/11/23 17:59:36 jz Exp $
 /*
     Hier sind implementiert
 
@@ -529,7 +529,6 @@ void Spooler::load_arg()
     _log_directory      = read_profile_string    ( _factory_ini, "spooler", "log_dir"            , _log_directory );  _log_directory_as_option_set = !_log_directory.empty();
     _include_path       = read_profile_string    ( _factory_ini, "spooler", "include-path"       );  // veraltet
     _include_path       = read_profile_string    ( _factory_ini, "spooler", "include_path"       , _include_path );   _include_path_as_option_set  = !_include_path.empty();
-    _temp_dir           = read_profile_string    ( _factory_ini, "spooler", "tmp"                , get_temp_path() );
     _spooler_param      = read_profile_string    ( _factory_ini, "spooler", "param"              );                   _spooler_param_as_option_set = !_spooler_param.empty();
     log_level           = read_profile_string    ( _factory_ini, "spooler", "log_level"          , log_level );   
     _history_columns    = read_profile_string    ( _factory_ini, "spooler", "history_columns"    );
@@ -579,6 +578,11 @@ void Spooler::load_arg()
             else
                 throw_sos_option_error( opt );
         }
+
+        _temp_dir = read_profile_string( _factory_ini, "spooler", "tmp", get_temp_path() + "spooler" );
+        _temp_dir = replace_regex( _temp_dir, "[\\/]+", Z_DIR_SEPARATOR );
+        _temp_dir = replace_regex( _temp_dir, "\\" Z_DIR_SEPARATOR "$", "" );
+        if( _spooler_id != "" )  _temp_dir += Z_DIR_SEPARATOR + _spooler_id;
 
         _manual = !_job_name.empty();
         if( _manual  &&  _log_directory.empty() )  _log_directory = "*stderr";

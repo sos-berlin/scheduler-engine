@@ -1,4 +1,4 @@
-// $Id: spooler_module_java.cxx,v 1.17 2002/11/23 17:28:54 jz Exp $
+// $Id: spooler_module_java.cxx,v 1.18 2002/11/23 17:59:36 jz Exp $
 /*
     Hier sind implementiert
 
@@ -519,9 +519,9 @@ void Java_vm::init()
     JNI_CreateJavaVM_func*               JNI_CreateJavaVM;
 
 
-    _work_class_dir = _spooler->temp_dir() + "/spooler";
-    if( _spooler->id() != "" )  _work_class_dir += "/" + _spooler->id();
-    _work_class_dir += "/java";
+    _work_class_dir = _spooler->temp_dir() + Z_DIR_SEPARATOR "java";
+    make_path( _work_class_dir );       // Java-VM prüft Vorhandensein der Verzeichnisse in classpath schon beim Start
+
         
     if( _filename == "" )  throw_xc( "SPOOLER-170" );
     string module_filename = _filename;
@@ -800,7 +800,7 @@ jclass Java_env::get_object_class( jobject o )
 
 bool Module::make_java_class( bool force )
 {
-    string filename = replace_regex( _spooler->_java_vm._work_class_dir + "/" + replace_regex( _java_class_name, "\\.", "/" ), "[\\/]+", Z_DIR_SEPARATOR );
+    string filename = _spooler->_java_vm._work_class_dir + Z_DIR_SEPARATOR + replace_regex( _java_class_name, "\\.", "/" );
     string java_filename  = filename + ".java";
     string class_filename = filename + ".class";
     string source;
