@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.172 2003/02/24 13:48:27 jz Exp $
+// $Id: spooler.cxx,v 1.173 2003/02/24 18:57:34 jz Exp $
 /*
     Hier sind implementiert
 
@@ -460,7 +460,7 @@ void Spooler::wait_until_threads_stopped( Time until )
             {
                 Time now = Time::now();
                 if( now > until_step )  break;
-                _event.wait( min( 1.0, until_step - now ) );
+                _event.wait( min( 1.0, (double)( until_step - now ) ) );
                 if( ctrl_c_pressed )  set_state( s_stopping ),  signal_threads( "ctrl_c" );
                 _event.reset();
             }

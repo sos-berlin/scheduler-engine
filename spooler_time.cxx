@@ -1,4 +1,4 @@
-// $Id: spooler_time.cxx,v 1.34 2003/02/24 13:48:29 jz Exp $
+// $Id: spooler_time.cxx,v 1.35 2003/02/24 18:57:35 jz Exp $
 /*
     Hier sind implementiert
 
@@ -96,8 +96,7 @@ Time Time::now()
         struct timezone tz;
 
         gettimeofday( &tv, &tz );
-        return (double)tv.tv_sec + (double)tv.tv_usec / (double)1e9 - timezone - ( daylight? _dstbias : 0 );  // dsttime ist im Winter gesetzt? Das ist doch falsch.   - ( tz.tz_dsttime? _d
-stbias : 0 );
+        return (double)tv.tv_sec + (double)tv.tv_usec / (double)1e9 - timezone - ( daylight? _dstbias : 0 );  // dsttime ist im Winter gesetzt? Das ist doch falsch.   - ( tz.tz_dsttime? _dstbias : 0 );
 
 #   else
 

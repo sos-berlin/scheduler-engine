@@ -1,4 +1,4 @@
-// $Id: spooler_com.cxx,v 1.88 2003/02/18 21:38:09 jz Exp $
+// $Id: spooler_com.cxx,v 1.89 2003/02/24 18:57:35 jz Exp $
 /*
     Hier sind implementiert
 
@@ -1832,6 +1832,7 @@ const Com_method Com_spooler::_methods[] =
     { DISPATCH_PROPERTYGET, 15, "job_chain"                 , (Com_method_ptr)&Com_spooler::get_job_chain       , VT_DISPATCH  , { VT_BSTR } },
     { DISPATCH_METHOD     , 16, "create_order"              , (Com_method_ptr)&Com_spooler::create_order        , VT_DISPATCH  },
     { DISPATCH_PROPERTYGET, 17, "is_service"                , (Com_method_ptr)&Com_spooler::get_is_service      , VT_BOOL      },
+    {}
 };
 
 #endif
