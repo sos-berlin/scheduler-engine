@@ -1,4 +1,4 @@
-// $Id: spooler_time.cxx,v 1.48 2003/09/26 13:49:01 jz Exp $
+// $Id: spooler_time.cxx,v 1.49 2003/10/04 19:26:43 jz Exp $
 /*
     Hier sind implementiert
 
@@ -478,6 +478,7 @@ void Day_set::set_dom( const xml::Element_ptr& element, const Day* default_day, 
 
 void Run_time::set_default()
 {
+    set_default_days();
 }
 
 //-----------------------------------------------------------------------Run_time::set_default_days
