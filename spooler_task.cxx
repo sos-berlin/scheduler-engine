@@ -915,6 +915,7 @@ bool Task::do_something()
                             if( ((Process_task*)this)->signaled() )
                             {
                                 _log->info( "signaled!" );
+                                postprocess_order( true );
                                 set_state( s_ending );
                                 loop = true;
                             }
@@ -1254,16 +1255,8 @@ bool Task::step__end()
             _step_count++;
         }
 
-
-        if( _order )
-        {
-            _order->postprocessing( result );
-            _log->set_order_log( NULL );
-            THREAD_LOCK_DUMMY( _lock )  _order = NULL;
-        }
-
+        postprocess_order( result );
         if( _job->order_queue() )  result = true;           // Auftragsgesteuerte Task immer fortsetzen ( _order kann wieder null sein wegen set_state(), §1495 )
-
         if( _next_spooler_process )  result = true;
     }
     catch( const exception& x ) { set_error(x); result = false; }
@@ -1318,6 +1311,18 @@ Order* Task::take_order( const Time& now )
     if( !_order )  THREAD_LOCK_DUMMY( _lock )  set_order( _job->order_queue()->get_order_for_processing( now ) );
 
     return _order;
+}
+
+//--------------------------------------------------------------------------Task::postprocess_order
+
+void Task::postprocess_order( bool spooler_process_result )
+{
+    if( _order )
+    {
+        _order->postprocessing( spooler_process_result );
+        _log->set_order_log( NULL );
+        _order = NULL;
+    }
 }
 
 //-------------------------------------------------------------------Task::remove_order_after_error
@@ -1934,36 +1939,6 @@ bool Process_task::do_kill()
     return true;
 }
 
-//------------------------------------------------------------------------Process_task::do_end__end
-/*
-void Process_task::do_end__end()
-{
-    DWORD exit_code;
-
-    BOOL ok = GetExitCodeProcess( _process_handle, &exit_code );
-    if( !ok )  throw_mswin_error( "GetExitCodeProcess" );
-
-    if( exit_code == STILL_ACTIVE )  throw_xc( "STILL_ACTIVE", obj_name() );
-
-    _process_handle.close();
-    _result = (int)exit_code;
-
-    _log->log_file( _job->_process_log_filename ); 
-
-    if( exit_code )
-    {
-        try
-        {
-            throw_xc( "SCHEDULER-126", exit_code );
-        }
-        catch( const exception& x )
-        {
-            if( !_job->_process_ignore_error  )  throw;
-            _log->warn( x.what() );
-        }
-    }
-}
-*/
 #endif
 //---------------------------------------------------------------------------Process_task::signaled
 
@@ -1974,7 +1949,7 @@ bool Process_task::signaled()
     return signaled;
 }
 
-//--------------------------------------------------------------------------Process_task::end_start
+//-----------------------------------------------------------------------Process_task::do_step__end
 
 bool Process_task::do_step__end()
 {

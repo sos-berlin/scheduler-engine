@@ -125,6 +125,7 @@ struct Task : Sos_self_deleting
 
     void                    set_order                       ( Order* );
     Order*                      take_order                  ( const Time& now );
+    void                        postprocess_order           ( bool spooler_process_result );
 
 
   protected:
