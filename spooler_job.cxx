@@ -1,4 +1,4 @@
-// $Id: spooler_job.cxx,v 1.40 2003/10/19 19:59:02 jz Exp $
+// $Id: spooler_job.cxx,v 1.41 2003/10/20 16:17:40 jz Exp $
 /*
     Hier sind implementiert
 
@@ -57,6 +57,7 @@ Job::Job( Spooler* spooler )
     _priority  = 1;
     _default_params = new Com_variable_set;
     _task_timeout = latter_day;
+    _idle_timeout = latter_day;
 }
 
 //----------------------------------------------------------------------------------------Job::~Job
@@ -86,6 +87,13 @@ void Job::set_dom( const xml::Element_ptr& element, const Time& xml_mod_time )
         {
             _task_timeout = time::time_from_string( t );
             if( _task_timeout > max_task_time_out )  _task_timeout = max_task_time_out;   // Begrenzen, damit's beim Addieren mit now() keinen Überlauf gibt
+        }
+
+        t                 = element.     getAttribute( "idle_timeout"    );
+        if( t != "" )  
+        {
+            _idle_timeout = time::time_from_string( t );
+            if( _idle_timeout > max_task_time_out )  _idle_timeout = max_task_time_out;   // Begrenzen, damit's beim Addieren mit now() keinen Überlauf gibt
         }
 
         if( order )

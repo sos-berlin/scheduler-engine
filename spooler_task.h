@@ -1,4 +1,4 @@
-// $Id: spooler_task.h,v 1.123 2003/10/18 21:23:17 jz Exp $
+// $Id: spooler_task.h,v 1.124 2003/10/20 16:17:40 jz Exp $
 
 #ifndef __SPOOLER_TASK_H
 #define __SPOOLER_TASK_H
@@ -198,7 +198,9 @@ struct Task : Sos_self_deleting
     Time                       _last_operation_time;
     Time                       _next_spooler_process;
     Time                       _next_time;
-    Time                       _timeout;                   // Frist für eine Operation (oder INT_MAX)
+    Time                       _timeout;                    // Frist für eine Operation (oder INT_MAX)
+    Time                       _idle_since;
+
     bool                       _killed;                     // Task abgebrochen (nach do_kill/timeout)
     bool                       _kill_tried;
 

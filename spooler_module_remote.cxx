@@ -1,4 +1,4 @@
-// $Id: spooler_module_remote.cxx,v 1.42 2003/10/10 09:59:51 jz Exp $
+// $Id: spooler_module_remote.cxx,v 1.43 2003/10/20 16:17:40 jz Exp $
 /*
     Hier sind implementiert
 
@@ -219,7 +219,7 @@ void Remote_module_instance_proxy::end__end()
 
 Async_operation* Remote_module_instance_proxy::step__start()
 {
-    if( !_remote_instance )  throw_xc( "SCHEDULER-200" );
+    if( !_remote_instance )  throw_xc( "SCHEDULER-200", "step__start" );
 
     _operation = _remote_instance->call__start( "step" );
 
@@ -230,7 +230,7 @@ Async_operation* Remote_module_instance_proxy::step__start()
 
 bool Remote_module_instance_proxy::step__end()
 {
-    if( !_remote_instance )  throw_xc( "SCHEDULER-200" );
+    if( !_remote_instance )  throw_xc( "SCHEDULER-200", "step__end" );
 
   //if( _call_state != c_finished )  throw_xc( "SCHEDULER-191", "step__end", (int)_call_state );
     if( !_operation->async_finished() )  throw_xc( "SCHEDULER-191", "step__end", _operation->async_state_text() );
@@ -243,7 +243,7 @@ bool Remote_module_instance_proxy::step__end()
 
 Async_operation* Remote_module_instance_proxy::call__start( const string& method )
 {
-    if( !_remote_instance )  throw_xc( "SCHEDULER-200" );
+    if( !_remote_instance )  throw_xc( "SCHEDULER-200", "call", method.c_str() );
 
     _operation = _remote_instance->call__start( "call", method );
 
@@ -254,7 +254,7 @@ Async_operation* Remote_module_instance_proxy::call__start( const string& method
 
 bool Remote_module_instance_proxy::call__end()
 {
-    if( !_remote_instance )  throw_xc( "SCHEDULER-200" );
+    if( !_remote_instance )  throw_xc( "SCHEDULER-200", "call__end" );
 
   //if( _call_state != c_finished )  throw_xc( "SCHEDULER-191", "step__end", (int)_call_state );
     if( !_operation->async_finished() )  throw_xc( "SCHEDULER-191", "call__end", _operation->async_state_text() );

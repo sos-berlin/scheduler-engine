@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.208 2003/10/19 19:59:02 jz Exp $
+// $Id: spooler_task.cxx,v 1.209 2003/10/20 16:17:40 jz Exp $
 /*
     Hier sind implementiert
 
@@ -413,11 +413,33 @@ void Task::set_state( State new_state )
     {
         switch( new_state )
         {
-            case s_waiting_for_process:         _next_time = latter_day;                        break;
-            case s_running_process:             _next_time = latter_day;                        break;
-            case s_running_delayed:             _next_time = _next_spooler_process;             break;
-            case s_running_waiting_for_order:   _next_time = _job->order_queue()->next_time();  break;
-            default:                            _next_time = 0;
+            case s_waiting_for_process:         
+                _next_time = latter_day;                        
+                break;
+
+            case s_running_process:             
+                _next_time = latter_day;                        
+                break;
+
+            case s_running_delayed:             
+                _next_time = _next_spooler_process;             
+                break;
+
+            case s_running_waiting_for_order:
+            {
+                _next_time = _job->order_queue()->next_time();
+
+                if( _job->_idle_timeout != latter_day )
+                {
+                    _idle_since = Time::now();
+                    _next_time = min( _next_time, _idle_since + _job->_idle_timeout );
+                }
+
+                break;
+            }
+
+            default:                            
+                _next_time = 0;
         }
 
         if( _next_time && !_let_run )  _next_time = min( _next_time, _job->_period.end() ); // Am Ende der Run_time wecken, damit die Task beendet werden kann
@@ -604,9 +626,18 @@ bool Task::do_something()
             loop = false;
             bool ok = true;
 
-            // HISTORIE und _end
             if( !_operation )
             {
+                if( _state < s_ending  &&  _end )      // Task beenden?
+                {
+                    if( !loaded() )         set_state( s_ended );
+                    else
+                    if( !_begin_called )    set_state( s_release );
+                    else
+                                            set_state( s_ending );
+                }
+
+                // Historie beginnen?
                 if( _state == s_starting 
                  || _state == s_running 
                  || _state == s_running_delayed 
@@ -614,9 +645,9 @@ bool Task::do_something()
                  || _state == s_running_process           )
                 {
                     if( _step_count == _job->_history.min_steps() )  _history.start();
-                    if( _end )  set_state( s_ending );
                 }
             }
+
 
             switch( _state )
             {
@@ -705,8 +736,21 @@ bool Task::do_something()
 
                 case s_running_waiting_for_order:
                 {
-                    if( take_order( now ) )  set_state( s_running ), loop = true;  // Auftrag da? Dann Task weiterlaufen lassen (Ende der Run_time wird noch geprüft)
-                                                                                   // _order wird in step__end() wieder abgeräumt
+                    if( take_order( now ) )
+                    {
+                        set_state( s_running );     // Auftrag da? Dann Task weiterlaufen lassen (Ende der Run_time wird noch geprüft)
+                        loop = true;                // _order wird in step__end() wieder abgeräumt
+                    }
+                    else
+                    if( _job->_idle_timeout != latter_day )
+                    {
+                        if( now > _idle_since + _job->_idle_timeout )  
+                        {
+                            _log.debug9( "idle_timeout ist abgelaufen, Task beendet sich" );
+                            _end = true;
+                            loop = true;
+                        }
+                    }
                     break;
                 }
 
