@@ -1,4 +1,4 @@
-// $Id: spooler_task.h,v 1.73 2002/11/24 15:12:52 jz Exp $
+// $Id: spooler_task.h,v 1.74 2002/11/24 15:33:02 jz Exp $
 
 #ifndef __SPOOLER_TASK_H
 #define __SPOOLER_TASK_H

@@ -1,4 +1,4 @@
-// $Id: spooler_mail_jmail.cxx,v 1.8 2002/11/24 15:12:49 jz Exp $
+// $Id: spooler_mail_jmail.cxx,v 1.9 2002/11/24 15:33:00 jz Exp $
 
 
 #include "../kram/sos.h"

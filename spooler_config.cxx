@@ -1,4 +1,4 @@
-// $Id: spooler_config.cxx,v 1.50 2002/11/24 15:12:48 jz Exp $
+// $Id: spooler_config.cxx,v 1.51 2002/11/24 15:32:59 jz Exp $
 
 //#include <precomp.h>
 
