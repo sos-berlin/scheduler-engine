@@ -1,4 +1,4 @@
-// $Id: spooler_communication.cxx,v 1.88 2004/07/22 12:10:00 jz Exp $
+// $Id: spooler_communication.cxx,v 1.89 2004/07/23 10:45:36 jz Exp $
 /*
     Hier sind implementiert
 
@@ -596,7 +596,10 @@ bool Communication::Channel::async_continue_( bool wait )
                     recv_clear();
 
                     _http_response = cp.execute_http( *_http_request );
-                    _http_response->set_event( &this->_socket_event );
+
+#                   ifdef Z_WINDOWS
+                        _http_response->set_event( &this->_socket_event );
+#                   endif
 
                     _http_parser  = NULL;
                     _http_request = NULL;
