@@ -1,4 +1,4 @@
-// $Id: spooler_module_remote.cxx,v 1.44 2003/10/28 22:04:27 jz Exp $
+// $Id: spooler_module_remote.cxx,v 1.45 2003/10/30 11:58:07 jz Exp $
 /*
     Hier sind implementiert
 
@@ -20,6 +20,12 @@ using namespace zschimmer::com::object_server;
 Remote_module_instance_proxy::~Remote_module_instance_proxy()
 {
     close();
+
+    if( _process )
+    {
+        _process->remove_module_instance( this );
+        _process = NULL;
+    }
 }
 
 //---------------------------------------------------------------Remote_module_instance_proxy::init
@@ -77,8 +83,11 @@ void Remote_module_instance_proxy::close__end()
 
     if( _process )
     {
+/*
         _process->remove_module_instance( this );
+        exit_code();   // Exit code merken
         _process = NULL;
+*/
     }
 /*
   //if( _session )
@@ -100,6 +109,24 @@ bool Remote_module_instance_proxy::kill()
          //_remote_instance? _remote_instance->kill_process() :
            _operation      ? _operation->async_kill() 
                            : false;
+}
+
+//----------------------------------------------------------Remote_module_instance_proxy:: 
+
+int Remote_module_instance_proxy::exit_code()
+{
+    if( _process )  _exit_code = _process->exit_code();
+    return _exit_code;
+}
+
+string Remote_module_instance_proxy::stdout_filename()                                      
+{ 
+    return _process? _process->stdout_filename() : "";
+}
+
+string Remote_module_instance_proxy::stderr_filename()
+{ 
+    return _process? _process->stderr_filename() : "";
 }
 
 //------------------------------------------------------------Remote_module_instance_proxy::add_obj
@@ -178,17 +205,17 @@ bool Remote_module_instance_proxy::begin__end()
 
     //_operation->async_check_error();   Nicht hier rufen!  call__end() prüft den Fehler und ruft vorher pop_operation().
 
+    ptr<Async_operation> operation = _operation;
+    _operation = NULL;
 
     // *** Sonderfall, weil es keine _connection für pop_operation gibt ***
-    Operation* op = dynamic_cast<Operation*>( +_operation );
+    Operation* op = dynamic_cast<Operation*>( +operation );
     if( op  &&  op->_call_state == c_connect )  op->async_check_error();   
     // ***
 
 
-    if( !_operation->async_finished() )  throw_xc( "SCHEDULER-191", "begin__end", _operation->async_state_text() );
+    //if( !_operation->async_finished() )  throw_xc( "SCHEDULER-191", "begin__end", _operation->async_state_text() );
 
-    ptr<Async_operation> operation = _operation;
-    _operation = NULL;
 /*
     operation->async_check_error();
     return dynamic_cast<Operation*>( +operation )->_bool_result;

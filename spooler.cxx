@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.283 2003/10/28 22:51:26 jz Exp $
+// $Id: spooler.cxx,v 1.284 2003/10/30 11:58:07 jz Exp $
 /*
     Hier sind implementiert
 
@@ -1617,11 +1617,20 @@ void Spooler::run()
         if( _single_thread )
         {
             FOR_EACH( Process_class_list, _process_class_list, pc )
+            {
                 FOR_EACH( Process_list, (*pc)->_process_list, p )
                 {
                     something_done |= (*p)->async_continue();
                     _next_time = min( _next_time, Time( localtime_from_gmtime( (*p)->async_next_gmtime() ) ) );
                 }
+            }
+
+            Time earliest = Time::now() + 0.1;
+            if( _next_time < earliest ) 
+            {
+                Z_DEBUG_ONLY( LOG( "spooler.cxx: async_next_gmtime() von " << _next_time << " nach " << earliest << " korrigiert\n" ) );
+                _next_time = earliest;
+            }
 
             //LOG( "spooler.cxx: something_done=" << something_done << "    process_list \n" );
         }
@@ -2318,6 +2327,15 @@ int spooler_main( int argc, char** argv, const string& parameter_line )
     {
         LOG( x.what() << "\n" );
         if( is_service )  spooler::send_error_email( x.what(), argc, argv, parameter_line );
+        cerr << x << "\n";
+        ret = 1;
+    }
+    catch( const _com_error& x )
+    {
+        string what = string_from_ole( x.Description() );
+        LOG( what << "\n" );
+        if( is_service )  spooler::send_error_email( what, argc, argv, parameter_line );
+        cerr << what << "\n";
         ret = 1;
     }
 

@@ -1,4 +1,4 @@
-// $Id: spooler_service.cxx,v 1.44 2003/10/08 18:07:19 jz Exp $
+// $Id: spooler_service.cxx,v 1.45 2003/10/30 11:58:07 jz Exp $
 /*
     Hier sind implementiert
 
@@ -138,7 +138,7 @@ void install_service( const string& service_name, const string& service_display,
     if( !manager_handle )  throw_mswin_error( "OpenSCManager" );
 
 
-    string command_line = module_filename();
+    string command_line = program_filename();
     if( command_line.find(" ") != string::npos )  command_line = quoted_string( command_line, '"', '"' );
     if( !params.empty() )  command_line += " " + params;
 

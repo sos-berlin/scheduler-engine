@@ -1,4 +1,4 @@
-// $Id: spooler_module_remote.h,v 1.22 2003/10/28 22:04:27 jz Exp $
+// $Id: spooler_module_remote.h,v 1.23 2003/10/30 11:58:07 jz Exp $
 
 #ifndef __SPOOLER_MODULE_REMOTE_H
 #define __SPOOLER_MODULE_REMOTE_H
@@ -91,6 +91,9 @@ struct Remote_module_instance_proxy : Com_module_instance_base
 
     bool                        continue_async_operation    ( Operation*, bool wait );
     void                        check_connection_error      ();
+    int                         exit_code                   ();
+    string                      stdout_filename             ();
+    string                      stderr_filename             ();
 
     Fill_zero                  _zero_;
 
@@ -103,6 +106,7 @@ struct Remote_module_instance_proxy : Com_module_instance_base
 
     string                      _server_hostname;
     int                         _server_port;
+    int                         _exit_code;
 
     Fill_end                   _end_;
 };

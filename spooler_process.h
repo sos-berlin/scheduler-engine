@@ -1,4 +1,4 @@
-// $Id: spooler_process.h,v 1.15 2003/10/28 22:51:26 jz Exp $
+// $Id: spooler_process.h,v 1.16 2003/10/30 11:58:07 jz Exp $
 
 #ifndef __SPOOLER_PROCESS_H
 #define __SPOOLER_PROCESS_H
@@ -39,6 +39,9 @@ struct Process : zschimmer::Object
     void                    set_server                      ( const string& hostname, int port )    { _server_hostname = hostname;  _server_port = port; }
     int                         pid                         ()                                      { return _connection? _connection->pid() : 0; }
     bool                        kill                        ();
+    int                         exit_code                   ();
+    string                      stderr_filename             ();
+    string                      stdout_filename             ();
 
     void                    set_dom                         ( const xml::Element_ptr&, const Time& xml_mod_time );
     xml::Element_ptr            dom                         ( const xml::Document_ptr&, Show_what );
@@ -54,6 +57,7 @@ struct Process : zschimmer::Object
     int                        _server_port;
     ptr<object_server::Connection> _connection;             // Verbindung zum Prozess
     ptr<object_server::Session>    _session;                // Wir haben immer nur eine Session pro Verbindung
+    int                        _exit_code;
     Time                       _running_since;
     bool                       _temporary;                  // Löschen, wenn kein Module_instance mehr läuft
     long                       _module_instance_count;
