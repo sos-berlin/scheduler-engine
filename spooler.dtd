@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- $Id: spooler.dtd,v 1.36 2002/04/10 17:15:11 jz Exp $   Joacim Zschimmer,  (C) 2000 SOS GmbH Berlin  -->
+<!-- $Id: spooler.dtd,v 1.37 2002/04/10 20:47:29 jz Exp $   Joacim Zschimmer,  (C) 2000 SOS GmbH Berlin  -->
 
 
 <!ELEMENT spooler               ( config+ | command | answer )>
@@ -138,7 +138,9 @@
 <!ELEMENT show_history          EMPTY>
 <!ATTLIST show_history          job                 CDATA #REQUIRED>
 <!ATTLIST show_history          what                (standard|all) 'standard'>     <!-- what="" ist wie what="standard", what="all" liefert <description> -->
-<!ATTLIST show_history          tail                CDATA #IMPLIED>                <!-- Anzahl der letzten Einträge. Default 10 -->
+<!ATTLIST show_history          id                  CDATA #IMPLIED>
+<!ATTLIST show_history          prev                CDATA #IMPLIED>
+<!ATTLIST show_history          next                CDATA #IMPLIED>
 
 
 <!ELEMENT modify_spooler        EMPTY>

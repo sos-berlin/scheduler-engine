@@ -1,4 +1,4 @@
-// $Id: spooler_history.cxx,v 1.14 2002/04/10 19:46:58 jz Exp $
+// $Id: spooler_history.cxx,v 1.15 2002/04/10 20:47:29 jz Exp $
 
 #include "../kram/sos.h"
 #include "spooler.h"
