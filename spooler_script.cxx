@@ -1,4 +1,4 @@
-// $Id: spooler_script.cxx,v 1.6 2001/02/18 16:14:37 jz Exp $
+// $Id: spooler_script.cxx,v 1.7 2002/03/01 20:16:46 jz Exp $
 /*
     Hier sind implementiert
 
@@ -38,6 +38,9 @@ void Script_instance::init( const string& language )
     _script_site = new Script_site;
     _script_site->_engine_name = language;
     _script_site->init_engine();
+
+    //HRESULT hr = _script_site->_script->SetScriptState( SCRIPTSTATE_INITIALIZED );
+    //if( FAILED( hr ) )  throw_ole( hr, "IActiveScript::SetScriptState", "SCRIPTSTATE_INITIALIZED" );
 }
 
 //----------------------------------------------------------------------------Script_instance::load
@@ -60,8 +63,18 @@ void Script_instance::load( const Script& script )
     _script_site->parse( script._text );
 
     _loaded = true;
+
+    //start();
 }
 
+//---------------------------------------------------------------------------Script_instance::start
+/*
+void Script_instance::start()
+{
+    HRESULT hr = _script_site->_script->SetScriptState( SCRIPTSTATE_STARTED );
+    if( FAILED( hr ) )  throw_ole( hr, "IActiveScript::SetScriptState", "SCRIPTSTATE_STARTED" );
+}
+*/
 //---------------------------------------------------------------------------Script_instance::close
 
 void Script_instance::close()

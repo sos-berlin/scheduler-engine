@@ -1,4 +1,4 @@
-// $Id: spooler_wait.cxx,v 1.25 2002/03/08 15:27:23 jz Exp $
+// $Id: spooler_wait.cxx,v 1.26 2002/03/01 20:16:46 jz Exp $
 /*
     Hier sind implementiert
 
@@ -83,7 +83,14 @@ void Event::close()
 {
     FOR_EACH( vector<Wait_handles*>, _wait_handles, it )  (*it)->remove( this );
     _wait_handles.clear();
-    
+
+    close_handle();
+}
+
+//------------------------------------------------------------------------------Event::close_handle
+
+void Event::close_handle()
+{
     if( _handle )  CloseHandle( _handle ), _handle = NULL;
 }
 
@@ -309,22 +316,15 @@ int Wait_handles::wait_until( Time until )
 
         if( ret >= WAIT_OBJECT_0  &&  ret < WAIT_OBJECT_0 + _handles.size() )
         {
-            int index = ret - WAIT_OBJECT_0;
-            //_waiting = false;
-
-            //while(1)
+            int    index = ret - WAIT_OBJECT_0;
+            Event* event = _events[ index ];
+            
+            if( event )
             {
-                Event* event = _events[ index ];
-                if( event )
-                {
-                    event->set_signal();
-                    if( _spooler->_debug )  _log->msg( event->as_string() );
-                }
-              //DWORD ret = WaitForMultipleObjects( _handles.size(), &_handles[0], FALSE, 0 ); 
-              //if( ret == WAIT_TIMEOUT )  break;
-              //if( ret >= WAIT_OBJECT_0  &&  ret < WAIT_OBJECT_0 + _handles.size() )  continue;
-              //throw_mswin_error( "WaitForMultipleObjects" );
+                event->set_signal();
+                if( _spooler->_debug )  _log->msg( event->as_string() );
             }
+
             return index;
         }
         else
@@ -365,6 +365,17 @@ string Wait_handles::as_string() const
     }
 }
 
+//------------------------------------------------------------------Directory_watcher::close_handle
+
+void Directory_watcher::close_handle()
+{
+    if( _handle )
+    {
+        FindCloseChangeNotification( _handle );
+        _handle = NULL;
+    }
+}
+
 //---------------------------------------------------------------Directory_watcher::watch_directory
 
 void Directory_watcher::watch_directory( const string& directory )
@@ -378,13 +389,36 @@ void Directory_watcher::watch_directory( const string& directory )
 }
 
 //-------------------------------------------------------------------Directory_watcher::watch_again
-
+/*
 void Directory_watcher::watch_again()
 {
     reset();
 
     BOOL ok = FindNextChangeNotification( _handle );
     if( !ok )  throw_mswin_error( "FindNextChangeNotification" );
+}
+*/
+//--------------------------------------------------------------------Directory_watcher::set_signal
+
+void Directory_watcher::set_signal()
+{
+    Event::set_signal();
+
+    BOOL ok = FindNextChangeNotification( _handle );
+    if( !ok )
+    {
+        try
+        {
+            throw_mswin_error( "FindNextChangeNotification" );
+        }
+        catch( const Xc& x ) 
+        {
+            _log->error( "Überwachung des Verzeichnisses " + _directory + " wird nach Fehler beendet: " + x.what() ); 
+            _directory = "";   // Damit erneutes start_when_directory_changed() diese (tote) Überwachung nicht erkennt.
+        }
+
+        close();
+    }
 }
 
 //-------------------------------------------------------------------------------------------------

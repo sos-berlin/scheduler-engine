@@ -1,4 +1,4 @@
-// $Id: spooler_task.h,v 1.25 2002/02/28 16:46:06 jz Exp $
+// $Id: spooler_task.h,v 1.26 2002/03/01 20:16:46 jz Exp $
 
 #ifndef __SPOOLER_TASK_H
 #define __SPOOLER_TASK_H
@@ -151,8 +151,8 @@ struct Job : Sos_self_deleting
     };
 
 
-    typedef list< Sos_ptr<Task> >                   Task_queue;
-    typedef vector< Sos_ptr<Directory_watcher> >    Directory_watcher_array;
+    typedef list< Sos_ptr<Task> >               Task_queue;
+    typedef list< Sos_ptr<Directory_watcher> >  Directory_watcher_list;
 
 
                                 Job                         ( Thread* );
@@ -253,7 +253,7 @@ struct Job : Sos_self_deleting
     Script*                    _script_ptr;
     Script_instance            _script_instance;            // Für use_engine="job"
     bool                       _has_spooler_process;
-    Directory_watcher_array    _directory_watcher_array;
+    Directory_watcher_list     _directory_watcher_list;
     Event                      _event;                      // Zum Starten des Jobs
 
     State                      _state;

@@ -1,4 +1,4 @@
-// $Id: spooler_config.cxx,v 1.23 2002/03/01 14:38:09 jz Exp $
+// $Id: spooler_config.cxx,v 1.24 2002/03/01 20:16:45 jz Exp $
 
 //#include <precomp.h>
 
@@ -120,7 +120,17 @@ void Period::set_xml( const xml::Element_ptr& element, const Period* deflt )
         if( !begin.empty() )  dt.set_time( begin ), _begin = dt;
 
         string repeat = as_string( element->getAttribute( "repeat" ) );
-        if( !repeat.empty() )  _repeat = as_double( repeat );
+        if( !repeat.empty() )
+        {
+            if( repeat.find( ':' ) != string::npos )
+            {
+                Sos_optional_date_time dt;
+                dt.set_time( repeat );
+                _repeat = dt.time_as_double();
+            }
+            else
+                _repeat = as_double( repeat );
+        }
     }
 
     string end = as_string( element->getAttribute( "end" ) );

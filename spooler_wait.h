@@ -1,4 +1,4 @@
-// $Id: spooler_wait.h,v 1.17 2001/11/09 17:08:39 jz Exp $
+// $Id: spooler_wait.h,v 1.18 2002/03/01 20:16:46 jz Exp $
 
 #ifndef __SPOOLER_WAIT_H
 #define __SPOOLER_WAIT_H
@@ -29,7 +29,7 @@ struct Event : Handle
     void                        remove_from                 ( Wait_handles* );
 
     bool                        wait                        ( double wait_time );
-    void                        set_signal                  ();
+    virtual void                set_signal                  ();
     void                        signal                      ( const string& signal_name = "" );
   //virtual                     signal_event                ()                                  {}
     bool                        signaled                    () const                            { return _signaled; }
@@ -44,6 +44,8 @@ struct Event : Handle
   protected:
                                 Event                       ( const Event& );             // Nicht implementiert
     void                        operator =                  ( const Event& );             // Nicht implementiert
+
+    virtual void                close_handle                ();
 
 
     Fill_zero                  _zero_;
@@ -99,14 +101,14 @@ struct Directory_watcher : Event
 {
 #   ifdef SYSTEM_WIN
 
-                                Directory_watcher           ()                              : Event("",NULL) {}
+                                Directory_watcher           ( Prefix_log* log )             : Event("",NULL), _log(log) {}
                                ~Directory_watcher           ()                              { close(); }
 
                                 operator bool               ()                              { return _handle != NULL; }
                                 operator !                  ()                              { return _handle == NULL; }
 
         void                    watch_directory             ( const string& );
-        void                    watch_again                 ();
+      //void                    watch_again                 ();
         
 #    else
 
@@ -115,9 +117,14 @@ struct Directory_watcher : Event
         
 #   endif
 
+    virtual void                set_signal                  ();
     string                      directory                   () const                        { return _directory; }
 
+  protected: 
+    virtual void                close_handle                ();
+
   private:
+    Prefix_log*                _log;
     string                     _directory;
 };
 

@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.50 2002/02/28 16:46:06 jz Exp $
+// $Id: spooler_task.cxx,v 1.51 2002/03/01 20:16:46 jz Exp $
 /*
     Hier sind implementiert
 
@@ -413,21 +413,20 @@ void Job::start_when_directory_changed( const string& directory_name )
 
 #       ifdef SYSTEM_WIN
 
-            for( Directory_watcher_array::iterator it = _directory_watcher_array.begin(); it != _directory_watcher_array.end(); it++ )
+            for( Directory_watcher_list::iterator it = _directory_watcher_list.begin(); it != _directory_watcher_list.end(); it++ )
             {
-                if( (*it)->directory() == directory_name )
-                {
-                    if( _spooler->_debug )  _log.msg( "Verzeichnis wird bereits beobachtet." );
-                    return;
-                }
+                if( (*it)->directory() == directory_name )  it = _directory_watcher_list.erase( it );   // Überwachung erneuern
+                // Wenn das Verzeichnis bereits überwacht war, aber inzwischen gelöscht, und das noch nicht bemerkt worden ist
+                // (weil Spooler_thread::wait vor lauter Jobaktivität nicht gerufen wurde), dann ist es besser, die Überwachung 
+                // hier zu erneuern. Besonders, wenn das Verzeichnis wieder angelegt ist.
             }
 
 
-            Sos_ptr<Directory_watcher> dw = SOS_NEW( Directory_watcher );
+            Sos_ptr<Directory_watcher> dw = SOS_NEW( Directory_watcher( &_log ) );
 
             dw->watch_directory( directory_name );
             dw->set_name( "job(\"" + _name + "\").start_when_directory_changed(\"" + directory_name + "\")" );
-            _directory_watcher_array.push_back( dw );
+            _directory_watcher_list.push_back( dw );
             dw->add_to( &_thread->_wait_handles );
 
 #        else
@@ -446,7 +445,7 @@ void Job::clear_when_directory_changed()
     {
         if( _spooler->_debug )  _log.msg( "clear_when_directory_changed" );
 
-        _directory_watcher_array.clear();
+        _directory_watcher_list.clear();
     }
 }
 
@@ -600,13 +599,21 @@ bool Job::do_something()
             {
                 bool ok = false;
 
-                for( Directory_watcher_array::iterator it = _directory_watcher_array.begin(); it != _directory_watcher_array.end(); it++ )
+                for( Directory_watcher_list::iterator it = _directory_watcher_list.begin(); it != _directory_watcher_list.end(); it++ )
                 {
-                    if( (*it)->signaled() )
+                    if( (*it)->signaled_then_reset() )
+                  //if( (*it)->signaled() )
                     {
                         ok = true;
-                        (*it)->watch_again();
-                        if( _spooler->_debug )  _log.msg( "Task startet, weil Verzeichnis geändert: " + (*it)->as_string() );
+
+                      //try {
+                      //    (*it)->watch_again();
+                      //}
+                      //catch( const Xc& x ) { _log.error( "Überwachung des Verzeichnisses " + (*it)->directory() + ": " + x.what() ); }
+
+                        if( _spooler->_debug )  _log.msg( "Task startet wegen eines Ereignisses für Verzeichnis " + (*it)->directory() );
+
+                        if( !(*it)->handle() )  it = _directory_watcher_list.erase( it );  // Folge eines Fehlers, s. Directory_watcher::set_signal
                     }
                 }
 
@@ -620,7 +627,7 @@ bool Job::do_something()
                 if( now >= _next_start_time ) 
                 {
                     ok = true;
-                   if( _spooler->_debug )  _log.msg( "Task startet, weil Job-Startzeit erreicht: " + _next_start_time.as_string() );
+                    if( _spooler->_debug )  _log.msg( "Task startet, weil Job-Startzeit erreicht: " + _next_start_time.as_string() );
                 }
 
                 if( now >= _next_start_at ) 
@@ -670,7 +677,7 @@ bool Job::do_something()
             else
             {
                 ok = false;
-                _log.msg( "Laufzeitperiode ist abgelaufen, Task wird beendet." );
+                _log.msg( "Laufzeitperiode ist abgelaufen, Task wird beendet" );
             }
         }
     }
