@@ -1,4 +1,4 @@
-// $Id: spooler_com.h,v 1.82 2003/11/11 15:14:44 jz Exp $
+// $Id: spooler_com.h,v 1.83 2003/11/11 16:33:56 jz Exp $
 
 #ifndef __SPOOLER_COM_H
 #define __SPOOLER_COM_H
@@ -55,7 +55,7 @@ struct Task;
 struct Spooler;
 
 
-#ifndef SPOOLER_HAS_MSXML
+#ifndef Z_WINDOWS
     struct IXMLDOMDocument;    // Dummy
 #endif
 
