@@ -1,4 +1,4 @@
-// $Id: spooler_security.cxx,v 1.3 2003/10/08 11:45:06 jz Exp $
+// $Id: spooler_security.cxx,v 1.4 2004/12/03 18:39:00 jz Exp $
 
 #include "spooler.h"
 
@@ -18,6 +18,9 @@ Security::Level Security::level( const in_addr& host )
     if( net != host )
     {
         it = _host_map.find( net );
+        if( it != _host_map.end() )  return it->second;
+
+        it = _host_map.find( Host( 0 ) );                 // host="0.0.0.0" gilt für alle übrigen Hosts
         if( it != _host_map.end() )  return it->second;
     }
     

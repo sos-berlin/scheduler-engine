@@ -1,4 +1,4 @@
-<!-- $Id: left_frame.html,v 1.13 2004/12/02 18:10:45 jz Exp $ -->
+<!-- $Id: left_frame.html,v 1.14 2004/12/03 18:39:00 jz Exp $ -->
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <html>
 
@@ -90,14 +90,6 @@ function update_periodically_checkbox__onclick()
     reset_error();
     repeat_update( parent.top_frame.document.getElementById( "update_periodically_checkbox" ).checked, 
                    parent.top_frame.document.getElementById( "update_periodically_checkbox" ).checked );
-}
-
-//--------------------------------------------------------------------------------------reset_error
-
-function reset_error()
-{
-    document.getElementById( "error_message" ).innerHTML = "";
-    window.status = "";
 }
 
 //------------------------------------------------------------------------------------repeat_update

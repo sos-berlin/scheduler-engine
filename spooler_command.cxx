@@ -1,4 +1,4 @@
-// $Id: spooler_command.cxx,v 1.145 2004/12/02 21:12:10 jz Exp $
+// $Id: spooler_command.cxx,v 1.146 2004/12/03 18:38:59 jz Exp $
 /*
     Hier ist implementiert
 
@@ -704,7 +704,7 @@ ptr<Http_response> Command_processor::execute_http( Http_request* http_request )
             if( string_begins_with( path, "/<" ) )   // Direktes XML-Kommando, z.B. <show_state/>, <show_state> oder nur <show_state
             {
                 string xml = path;
-                if( !string_ends_with( path,  "/>" ) )
+                if( !string_ends_with( path, "/>" ) )
                 {
                     if( string_ends_with( path, ">" ) )  *xml.rbegin() = '/',  xml += ">";
                                                    else  xml += "/>";
@@ -734,10 +734,23 @@ ptr<Http_response> Command_processor::execute_http( Http_request* http_request )
                 if( _spooler->_html_directory.empty() )  throw_xc( "SCHEDULER-212" );
                 if( path.find( ".." ) != string::npos )  throw_xc( "SCHEDULER-214" );
                 if( path.find( ":" )  != string::npos )  throw_xc( "SCHEDULER-214" );
+                if( !string_begins_with( path, "/" ) )  path = "/" + path;
 
                 if( filename_of_path( path ).find( '.' ) == string::npos )      // Kein Punkt: Es muss ein Verzeichnis sein!
                 {
-                    if( !string_ends_with( path, "/" ) )  path += "/";
+                    if( !string_ends_with( path, "/" ) )
+                    {
+                        // (Man könnte hier noch prüfen, ob's wirklich ein Verzeichnis ist.)
+                        // Der Browser soll dem Verzeichnisnamen einen Schräger anhängen und das als Basisadresse für weitere Anfragen verwenden.
+                        // http://localhost:6310/jz ==> http://localhost:6310/jz/, http://localhost:6310/jz/details.html
+                        // Ohne diesen Mechanismus würde http://localhost:6310/details.html, also das Oberverzeichnis gelesen
+
+                        ptr<Http_response> response = Z_NEW( Http_response( http_request, Z_NEW( String_chunk_reader( "" ) ), "" ) );
+                        response->set_status( 301, "Slash appended" );
+                        response->set_header_field( "Location", "http://" + http_request->header_field( "host" ) + path + "/" );
+                        return +response;
+                    }
+
                     path += "index.html";
                 }
 
@@ -745,6 +758,8 @@ ptr<Http_response> Command_processor::execute_http( Http_request* http_request )
              
                 if( extension == "html"  
                  || extension == "htm"  )  response_content_type = "text/html";
+                else
+                if( extension == "xml"  )  response_content_type = "text/xml";
                 else
                 if( extension == "xsl"  )  response_content_type = "text/xsl";
                 else
@@ -754,8 +769,24 @@ ptr<Http_response> Command_processor::execute_http( Http_request* http_request )
                 else
                 if( extension == "css"  )  response_content_type = "text/css";
 
-                if( !string_begins_with( path, "/" ) )  path = "/" + path;
-                response_body = zschimmer::string_from_file( _spooler->_html_directory + path );
+
+                string filename = path;
+
+                if( string_begins_with( filename, "/doc/" )
+                 && !file_exists( _spooler->_html_directory + "/doc" ) )
+               //&&  file_exists( _spooler->_html_directory + "/../doc" ) )  überflüssig
+                {
+                    filename = "/.." + filename;
+                }
+
+                filename = _spooler->_html_directory + filename;
+/*
+                struct stat st;
+                memset( &st, 0, sizeof st );
+                int err = stat( filename.c_str(), &st );
+                if( !err  &&  stat.st_mode & S_IFDIR )
+*/
+                response_body = zschimmer::string_from_file( filename );
             }
         }
         else

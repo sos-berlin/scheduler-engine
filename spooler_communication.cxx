@@ -1,4 +1,4 @@
-// $Id: spooler_communication.cxx,v 1.99 2004/12/01 17:02:13 jz Exp $
+// $Id: spooler_communication.cxx,v 1.100 2004/12/03 18:38:59 jz Exp $
 /*
     Hier sind implementiert
 
@@ -86,7 +86,10 @@ uint32 Host::netmask() const
     if( ( net_nr >> 24 ) >= 192 )  netmask_nr = 0xFFFFFF00;
     else
     if( ( net_nr >> 24 ) >= 128 )  netmask_nr = 0xFFFF0000;
-    else                           netmask_nr = 0xFF000000;
+    else
+    if(   net_nr         >  0   )  netmask_nr = 0xFF000000;
+    else
+                                   netmask_nr = 0x00000000;
 
     return htonl(netmask_nr);
 }
@@ -649,7 +652,8 @@ bool Communication::Channel::async_continue_( bool wait )
     }
     catch( const Xc& x ) 
     { 
-        if( strcmp( x.code(), "SOCKET-54" ) == 0 )  _log.warn( x.what() );       // ECONNRESET
+        if( strcmp( x.code(), "SOCKET-53" ) == 0                                 // ECONNABORT, Firefox trennt sich so
+         || strcmp( x.code(), "SOCKET-54" ) == 0 )  _log.warn( x.what() );       // ECONNRESET, Internet Explorer trennt sich so
                                               else  _log.error( x.what() );  
 
         _communication->remove_channel( this );  

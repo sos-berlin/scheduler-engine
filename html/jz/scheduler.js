@@ -1,8 +1,8 @@
-// $Id: scheduler.js,v 1.3 2004/12/02 19:43:34 jz Exp $
+// $Id: scheduler.js,v 1.4 2004/12/03 18:39:00 jz Exp $
 
 //----------------------------------------------------------------------------------------------var
 
-var _popup;
+var _popup_menu;
 
 // Die Variablen enthalten die Versionnummer (numerisch, z.B. 5.5) des Browsers, oder 0.
 var ie       = 0;   // Microsoft Internet Explorer
@@ -293,14 +293,11 @@ Scheduler.prototype.call_http = function( text, debug_text )
         // || x.number == DE_E_DATA_NOT_AVAILABLE
         // || x.number == DE_E_RESOURCE_NOT_FOUND )
         {
-            throw new Error( x.number, "No connection to Scheduler\n" + 
-                             ( x.number? "0x" + hex_string( x.number, 8 ) + ": " : "" ) + x.message );
+            x.message = "No connection to Scheduler\n" + 
+                        ( x.number? "0x" + hex_string( x.number, 8 ) + ": " : "" ) + x.message;
         }
-        else
-        {
-            throw x;
-            //alert( "Error 0x" + hex_string( x.number, 8 ) + ": " + x.message );
-        }
+        
+        throw x;
     }
     finally
     {
@@ -538,32 +535,51 @@ function call_error_checked( f, arg1, arg2, arg3, arg4, arg5 )
     }
 }
 
-//--------------------------------------------------------------handle_exception
+//---------------------------------------------------------------------------------handle_exception
 
 function handle_exception( x )
 {    
     var msg = "";
-    var error = new Error();
+    var error;
     
     if( typeof x == "object" )
     {
         if( x.number )  msg += "0x" + hex_string( x.number, 8 ) + "  ";
-        msg += xml_encode( x.message );
-        error.number = x.number;
+        msg += x.message;
+        
+        error = x;
     }
     else
+    {
         msg = x;
+        error.message = msg;
+    }
         
     var e = document.getElementById( "error_message" );
     if( e )
     {
         e.innerHTML = xml_encode( msg ).replace( "\n", "<br/>" ).replace( "  ", "\xA0 " ); // + "<p>&#160;</p>";
+        
+        if( typeof x == "object"  &&  x.stack )  e.style.title = x.stack;  // Firefox
     }
     else
         alert( msg );
         
-    error.message = msg;
     return error;            
+}
+
+//--------------------------------------------------------------------------------------reset_error
+
+function reset_error()
+{
+    var e = document.getElementById( "error_message" );
+    if( e ) 
+    {
+        e.innerHTML = "";
+        e.style.title = "";
+    }
+    
+    window.status = "";
 }
 
 //----------------------------------------------------------------------------------update__onclick
@@ -615,7 +631,7 @@ function show_job_chain_orders_checkbox__onclick()
 
 function Popup_menu_builder__add_command( html, xml_command, is_active )
 {
-    this.add_entry( html, "parent.popup_menu__execute( &quot;" + xml_command + "&quot; )", is_active );
+    this.add_entry( html, "popup_menu__execute( &quot;" + xml_command + "&quot; )", is_active );
 }
 
 //-------------------------------------------------------------------------------popup_menu.execute
@@ -623,7 +639,7 @@ function Popup_menu_builder__add_command( html, xml_command, is_active )
 
 function popup_menu__execute( xml_command )
 {
-    _popup.hide();
+    _popup_menu.close();
     
     var error = _scheduler.call_error_checked( "execute", xml_command );
    
@@ -635,7 +651,7 @@ function popup_menu__execute( xml_command )
 
 function Popup_menu_builder__add_show_log( html, show_log_command, window_name, is_active )
 {
-    this.add_entry( html, "parent.popup_menu__show_log__onclick( &quot;" + show_log_command + "&quot;, &quot;" + window_name + "&quot; )", is_active );
+    this.add_entry( html, "popup_menu__show_log__onclick( &quot;" + show_log_command + "&quot;, &quot;" + window_name + "&quot; )", is_active );
 }
 
 //--------------------------------------------------------------------popup_menu__show_log__onclick
@@ -657,7 +673,7 @@ function popup_menu__show_log__onclick( show_log_command, window_name )
     
     if( _scheduler )  _scheduler._log_window = log_window;
     
-    _popup.hide();
+    _popup_menu.close();
 }
 
 //--------------------------------------------------------------------------scheduler_menu__onclick
@@ -684,7 +700,7 @@ function scheduler_menu__onclick()
     popup_builder.add_command ( "Abort immediately"              , command( "abort_immediately"             ) );
     popup_builder.add_command ( "Abort immediately and restart"  , command( "abort_immediately_and_restart" ) );
     
-    _popup = popup_builder.show_popup();
+    _popup_menu = popup_builder.show_popup_menu();
 }
 
 //--------------------------------------------------------------------------------job_menu__onclick
@@ -703,21 +719,21 @@ function job_menu__onclick( job_name )
     
     var description_element = job_element.selectSingleNode( "description" );
     var is_active = description_element? description_element.text != "" : false;
-    popup_builder.add_entry   ( "Show description", "parent.show_job_description()", is_active );
+    popup_builder.add_entry   ( "Show description", "show_job_description()", is_active );
     
     popup_builder.add_bar();
     popup_builder.add_command ( "Start task now", "<start_job job='" + job_name + "'/>" );
     popup_builder.add_command ( "Stop"          , "<modify_job job='" + job_name + "' cmd='stop'    />", state != "stopped"  &&  state != "stopping" );
     popup_builder.add_command ( "Unstop"        , "<modify_job job='" + job_name + "' cmd='unstop'  />", state == "stopped"  ||  state == "stopping" );
-//    popup_builder.add_command ( "Wake"          , "<modify_job job='" + job_name + "' cmd='wake'    />" );
-    popup_builder.add_command ( "Start at runtime"         , "<modify_job job='" + job_name + "' cmd='start'   />" );
+//  popup_builder.add_command ( "Wake"          , "<modify_job job='" + job_name + "' cmd='wake'    />" );
+    popup_builder.add_command ( "Start at &lt;runtime&gt;", "<modify_job job='" + job_name + "' cmd='start'   />" );
     popup_builder.add_command ( "Reread"        , "<modify_job job='" + job_name + "' cmd='reread'  />" );
     popup_builder.add_bar();
     popup_builder.add_command ( "End tasks"     , "<modify_job job='" + job_name + "' cmd='end'     />" );
     popup_builder.add_command ( "Suspend tasks" , "<modify_job job='" + job_name + "' cmd='suspend' />" );
     popup_builder.add_command ( "Continue tasks", "<modify_job job='" + job_name + "' cmd='continue'/>" );
     
-    _popup = popup_builder.show_popup();
+    _popup_menu = popup_builder.show_popup_menu();
 }
 
 //-------------------------------------------------------------------------------task_menu__onclick
@@ -731,7 +747,7 @@ function task_menu__onclick( task_id )
     popup_builder.add_command ( "End"             , "<kill_task job='" + _job_name + "' id='" + task_id + "'/>" );
     popup_builder.add_command ( "Kill immediately", "<kill_task job='" + _job_name + "' id='" + task_id + "' immediately='yes'/>" );
     
-    _popup = popup_builder.show_popup();
+    _popup_menu = popup_builder.show_popup_menu();
 }
 
 //-------------------------------------------------------------------------------task_menu__onclick
@@ -745,7 +761,7 @@ function task_menu__onclick( task_id )
     popup_builder.add_command ( "End"             , "<kill_task job='" + _job_name + "' id='" + task_id + "'/>" );
     popup_builder.add_command ( "Kill immediately", "<kill_task job='" + _job_name + "' id='" + task_id + "' immediately='yes'/>" );
     
-    _popup = popup_builder.show_popup();
+    _popup_menu = popup_builder.show_popup_menu();
 }
 
 //------------------------------------------------------------------------------order_menu__onclick
@@ -757,7 +773,7 @@ function order_menu__onclick( job_chain_name, order_id )
     popup_builder.add_show_log( "Show log"        , "show_log?job_chain=" + job_chain_name + 
                                                             "&order=" + order_id, "show_log_order_" + job_chain_name + "__" + order_id );
     
-    _popup = popup_builder.show_popup();
+    _popup_menu = popup_builder.show_popup_menu();
 }
 
 //-------------------------------------------------------------------------------string_from_object

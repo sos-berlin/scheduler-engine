@@ -1,8 +1,8 @@
-// $Id: scheduler.js,v 1.22 2004/12/02 13:36:08 jz Exp $
+// $Id: scheduler.js,v 1.23 2004/12/03 18:39:00 jz Exp $
 
 //----------------------------------------------------------------------------------------------var
 
-var _popup;
+var _popup_menu;
 
 // Die Variablen enthalten die Versionnummer (numerisch, z.B. 5.5) des Browsers, oder 0.
 var ie       = 0;   // Microsoft Internet Explorer
@@ -13,6 +13,26 @@ var opera    = 0;   // Opera
 //--------------------------------------------------------------------------------------------const
 
 var NODE_ELEMENT = 1;
+
+// Fehlercodes von xmlhttp:
+var DE_E_INVALID_URL               = 0x800C0002 - 0xFFFFFFFF;
+var DE_E_NO_SESSION                = 0x800C0003 - 0xFFFFFFFF;
+var DE_E_CANNOT_CONNECT            = 0x800C0004 - 0xFFFFFFFF;
+var DE_E_RESOURCE_NOT_FOUND        = 0x800C0005 - 0xFFFFFFFF;
+var DE_E_OBJECT_NOT_FOUND          = 0x800C0006 - 0xFFFFFFFF;
+var DE_E_DATA_NOT_AVAILABLE        = 0x800C0007 - 0xFFFFFFFF;
+var DE_E_DOWNLOAD_FAILURE          = 0x800C0008 - 0xFFFFFFFF;
+var DE_E_AUTHENTICATION_REQUIRED   = 0x800C0009 - 0xFFFFFFFF;
+var DE_E_NO_VALID_MEDIA            = 0x800C000A - 0xFFFFFFFF;
+var DE_E_CONNECTION_TIMEOUT        = 0x800C000B - 0xFFFFFFFF;
+var DE_E_INVALID_REQUEST           = 0x800C000C - 0xFFFFFFFF;
+var DE_E_UNKNOWN_PROTOCOL          = 0x800C000D - 0xFFFFFFFF;
+var DE_E_SECURITY_PROBLEM          = 0x800C000E - 0xFFFFFFFF;
+var DE_E_CANNOT_LOAD_DATA          = 0x800C000F - 0xFFFFFFFF;
+var DE_E_CANNOT_INSTANTIATE_OBJECT = 0x800C0010 - 0xFFFFFFFF;
+var DE_E_REDIRECT_FAILED           = 0x800C0014 - 0xFFFFFFFF;
+var DE_E_REDIRECT_TO_DIR           = 0x800C0015 - 0xFFFFFFFF;
+var DE_E_CANNOT_LOCK_REQUEST       = 0x800C0016 - 0xFFFFFFFF;
 
 //------------------------------------------------------------------------------------check_browser
 
@@ -266,6 +286,19 @@ Scheduler.prototype.call_http = function( text, debug_text )
     {
         this._xml_http.send( text );
     }
+    catch( x )
+    {
+        if(1)
+        //if( x.number == DE_E_CANNOT_CONNECT
+        // || x.number == DE_E_DATA_NOT_AVAILABLE
+        // || x.number == DE_E_RESOURCE_NOT_FOUND )
+        {
+            x.message = "No connection to Scheduler\n" + 
+                        ( x.number? "0x" + hex_string( x.number, 8 ) + ": " : "" ) + x.message;
+        }
+        
+        throw x;
+    }
     finally
     {
         window.status = status;
@@ -314,12 +347,25 @@ Scheduler.prototype.modify_datetime_for_xslt = function( response )
     this.add_datetime_attributes_for_xslt( response, now, "created"               );
 }
 
+//--------------------------------------------------------------------Scheduler.call_error_checked 
+
+Scheduler.prototype.call_error_checked = function( method_name, arg1, arg2, arg3, arg4, arg5 )
+{
+    try
+    {
+        this[ method_name ]( arg1, arg2, arg3, arg4, arg5 );
+    }
+    catch( x )
+    {
+        return handle_exception( x );
+    }
+}
+
 //---------------------------------------------------------------------------------------Stylesheet
 
 function Stylesheet( url )
 {
     var xml_http = window.XMLHttpRequest? new XMLHttpRequest() : new ActiveXObject( "Msxml2.XMLHTTP" );
-    
     xml_http.open( "GET", url, false );
     xml_http.send( null );
     
@@ -475,6 +521,67 @@ function Scheduler_html_configuration( url )
     if( !ok )  throw new Error( "Fehler in der Konfiguration " + url + ": " + this._dom.parseError.reason );
 }
 */
+//-------------------------------------------------------------------------------call_error_checked
+
+function call_error_checked( f, arg1, arg2, arg3, arg4, arg5 )
+{
+    try
+    {
+        f( arg1, arg2, arg3, arg4, arg5 );
+    }
+    catch( x )
+    {
+        return handle_exception( x );
+    }
+}
+
+//---------------------------------------------------------------------------------handle_exception
+
+function handle_exception( x )
+{    
+    var msg = "";
+    var error;
+    
+    if( typeof x == "object" )
+    {
+        if( x.number )  msg += "0x" + hex_string( x.number, 8 ) + "  ";
+        msg += x.message;
+        
+        error = x;
+    }
+    else
+    {
+        msg = x;
+        error.message = msg;
+    }
+        
+    var e = document.getElementById( "error_message" );
+    if( e )
+    {
+        e.innerHTML = xml_encode( msg ).replace( "\n", "<br/>" ).replace( "  ", "\xA0 " ); // + "<p>&#160;</p>";
+        
+        if( typeof x == "object"  &&  x.stack )  e.style.title = x.stack;  // Firefox
+    }
+    else
+        alert( msg );
+        
+    return error;            
+}
+
+//--------------------------------------------------------------------------------------reset_error
+
+function reset_error()
+{
+    var e = document.getElementById( "error_message" );
+    if( e ) 
+    {
+        e.innerHTML = "";
+        e.style.title = "";
+    }
+    
+    window.status = "";
+}
+
 //----------------------------------------------------------------------------------update__onclick
 
 function update__onclick()
@@ -524,7 +631,7 @@ function show_job_chain_orders_checkbox__onclick()
 
 function Popup_menu_builder__add_command( html, xml_command, is_active )
 {
-    this.add_entry( html, "parent.popup_menu__execute( &quot;" + xml_command + "&quot; )", is_active );
+    this.add_entry( html, "popup_menu__execute( &quot;" + xml_command + "&quot; )", is_active );
 }
 
 //-------------------------------------------------------------------------------popup_menu.execute
@@ -532,33 +639,19 @@ function Popup_menu_builder__add_command( html, xml_command, is_active )
 
 function popup_menu__execute( xml_command )
 {
-    _popup.hide();
+    _popup_menu.close();
     
-    try
-    {
-        _scheduler.execute( xml_command );
-        window.parent.left_frame.update();
-    }
-    catch( x )
-    {
-        if( x.number + 0xFFFFFFFF == 0x800C0007 )
-        {
-            alert( "Scheduler connection closed" );
-        }
-        else
-        {
-            throw x;
-            //alert( "Error 0x" + hex_string( x.number, 8 ) + ": " + x.message );
-        }
-    }
+    var error = _scheduler.call_error_checked( "execute", xml_command );
+   
+    if( !error )  window.parent.left_frame.update();
 }
 
-//-----------------------------------------------------------------------Popup_menu_builder.add_show_log
+//------------------------------------------------------------------Popup_menu_builder.add_show_log
 // Erweiterung von Popup_menu_builder, s. popup_builder.js
 
 function Popup_menu_builder__add_show_log( html, show_log_command, window_name, is_active )
 {
-    this.add_entry( html, "parent.popup_menu__show_log__onclick( &quot;" + show_log_command + "&quot;, &quot;" + window_name + "&quot; )", is_active );
+    this.add_entry( html, "popup_menu__show_log__onclick( &quot;" + show_log_command + "&quot;, &quot;" + window_name + "&quot; )", is_active );
 }
 
 //--------------------------------------------------------------------popup_menu__show_log__onclick
@@ -580,7 +673,7 @@ function popup_menu__show_log__onclick( show_log_command, window_name )
     
     if( _scheduler )  _scheduler._log_window = log_window;
     
-    _popup.hide();
+    _popup_menu.close();
 }
 
 //--------------------------------------------------------------------------scheduler_menu__onclick
@@ -607,7 +700,7 @@ function scheduler_menu__onclick()
     popup_builder.add_command ( "Abort immediately"              , command( "abort_immediately"             ) );
     popup_builder.add_command ( "Abort immediately and restart"  , command( "abort_immediately_and_restart" ) );
     
-    _popup = popup_builder.show_popup();
+    _popup_menu = popup_builder.show_popup_menu();
 }
 
 //--------------------------------------------------------------------------------job_menu__onclick
@@ -626,21 +719,21 @@ function job_menu__onclick( job_name )
     
     var description_element = job_element.selectSingleNode( "description" );
     var is_active = description_element? description_element.text != "" : false;
-    popup_builder.add_entry   ( "Show description", "parent.show_job_description()", is_active );
+    popup_builder.add_entry   ( "Show description", "show_job_description()", is_active );
     
     popup_builder.add_bar();
     popup_builder.add_command ( "Start task now", "<start_job job='" + job_name + "'/>" );
     popup_builder.add_command ( "Stop"          , "<modify_job job='" + job_name + "' cmd='stop'    />", state != "stopped"  &&  state != "stopping" );
     popup_builder.add_command ( "Unstop"        , "<modify_job job='" + job_name + "' cmd='unstop'  />", state == "stopped"  ||  state == "stopping" );
-//    popup_builder.add_command ( "Wake"          , "<modify_job job='" + job_name + "' cmd='wake'    />" );
-    popup_builder.add_command ( "Start at runtime"         , "<modify_job job='" + job_name + "' cmd='start'   />" );
+//  popup_builder.add_command ( "Wake"          , "<modify_job job='" + job_name + "' cmd='wake'    />" );
+    popup_builder.add_command ( "Start at &lt;runtime&gt;", "<modify_job job='" + job_name + "' cmd='start'   />" );
     popup_builder.add_command ( "Reread"        , "<modify_job job='" + job_name + "' cmd='reread'  />" );
     popup_builder.add_bar();
     popup_builder.add_command ( "End tasks"     , "<modify_job job='" + job_name + "' cmd='end'     />" );
     popup_builder.add_command ( "Suspend tasks" , "<modify_job job='" + job_name + "' cmd='suspend' />" );
     popup_builder.add_command ( "Continue tasks", "<modify_job job='" + job_name + "' cmd='continue'/>" );
     
-    _popup = popup_builder.show_popup();
+    _popup_menu = popup_builder.show_popup_menu();
 }
 
 //-------------------------------------------------------------------------------task_menu__onclick
@@ -654,7 +747,7 @@ function task_menu__onclick( task_id )
     popup_builder.add_command ( "End"             , "<kill_task job='" + _job_name + "' id='" + task_id + "'/>" );
     popup_builder.add_command ( "Kill immediately", "<kill_task job='" + _job_name + "' id='" + task_id + "' immediately='yes'/>" );
     
-    _popup = popup_builder.show_popup();
+    _popup_menu = popup_builder.show_popup_menu();
 }
 
 //-------------------------------------------------------------------------------task_menu__onclick
@@ -668,7 +761,7 @@ function task_menu__onclick( task_id )
     popup_builder.add_command ( "End"             , "<kill_task job='" + _job_name + "' id='" + task_id + "'/>" );
     popup_builder.add_command ( "Kill immediately", "<kill_task job='" + _job_name + "' id='" + task_id + "' immediately='yes'/>" );
     
-    _popup = popup_builder.show_popup();
+    _popup_menu = popup_builder.show_popup_menu();
 }
 
 //------------------------------------------------------------------------------order_menu__onclick
@@ -680,7 +773,7 @@ function order_menu__onclick( job_chain_name, order_id )
     popup_builder.add_show_log( "Show log"        , "show_log?job_chain=" + job_chain_name + 
                                                             "&order=" + order_id, "show_log_order_" + job_chain_name + "__" + order_id );
     
-    _popup = popup_builder.show_popup();
+    _popup_menu = popup_builder.show_popup_menu();
 }
 
 //-------------------------------------------------------------------------------string_from_object
@@ -755,23 +848,3 @@ function string_from_object( object )
 
 //-------------------------------------------------------------------------------------------------
 
-/* Fehlercodes von xmlhttp:
-#define DE_E_INVALID_URL               0x800C0002
-#define DE_E_NO_SESSION                0x800C0003
-#define DE_E_CANNOT_CONNECT            0x800C0004
-#define DE_E_RESOURCE_NOT_FOUND        0x800C0005
-#define DE_E_OBJECT_NOT_FOUND          0x800C0006
-#define DE_E_DATA_NOT_AVAILABLE        0x800C0007
-#define DE_E_DOWNLOAD_FAILURE          0x800C0008
-#define DE_E_AUTHENTICATION_REQUIRED   0x800C0009
-#define DE_E_NO_VALID_MEDIA            0x800C000A
-#define DE_E_CONNECTION_TIMEOUT        0x800C000B
-#define DE_E_INVALID_REQUEST           0x800C000C
-#define DE_E_UNKNOWN_PROTOCOL          0x800C000D
-#define DE_E_SECURITY_PROBLEM          0x800C000E
-#define DE_E_CANNOT_LOAD_DATA          0x800C000F
-#define DE_E_CANNOT_INSTANTIATE_OBJECT 0x800C0010
-#define DE_E_REDIRECT_FAILED           0x800C0014
-#define DE_E_REDIRECT_TO_DIR           0x800C0015
-#define DE_E_CANNOT_LOCK_REQUEST       0x800C0016
-*/

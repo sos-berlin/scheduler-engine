@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding="utf-8"?>
-<!-- $Id: scheduler.xslt,v 1.4 2004/12/02 22:21:45 jz Exp $ -->
+<!-- $Id: scheduler.xslt,v 1.5 2004/12/03 18:39:00 jz Exp $ -->
 <xsl:stylesheet xmlns:xsl   = "http://www.w3.org/1999/XSL/Transform" 
                 xmlns:msxsl = "urn:schemas-microsoft-com:xslt"
                 version     = "1.0">
@@ -14,25 +14,32 @@
 
     <xsl:template match="/spooler/answer">
 
-        <p style="margin-top: 0px; margin-bottom: 1ex">
-            <xsl:element name="span">
-                <xsl:attribute name="title">Version  <xsl:value-of select="state/@version"/>&#10;pid=<xsl:value-of select="state/@pid"/></xsl:attribute>
-                <b>Scheduler</b>
-            </xsl:element>
-            
-            <xsl:if test="state/@id!=''">
-                <xsl:text>&#160;</xsl:text>
-                <b><span style="white-space: nowrap">-id=<xsl:value-of select="state/@id"/></span></b>
-                &#160; 
-            </xsl:if>
-        </p>
+        <table cellspacing="0" cellpadding="0">
+        </table>        
         
         <table cellspacing="0" cellpadding="0">
+            <tr>
+                <td style="margin-top: 0px; margin-bottom: 1ex">
+                    <xsl:element name="span">
+                        <xsl:attribute name="title">Version  <xsl:value-of select="state/@version"/>&#10;pid=<xsl:value-of select="state/@pid"/></xsl:attribute>
+                        <b>Scheduler</b>
+                    </xsl:element>
+                    
+                    <xsl:if test="state/@id!=''">
+                        <xsl:text>&#160;</xsl:text>
+                        <b><span style="white-space: nowrap">-id=<xsl:value-of select="state/@id"/></span></b>
+                        &#160; 
+                    </xsl:if>
+                </td>
+                <td align="right">
+                    <a href="/doc/index.xml" target="documentation" class="small">Doku</a>
+                </td>
+            </tr>
             <tr>
                 <td valign="middle" style="padding-left: 0px">
                     <xsl:call-template name="scheduler_info"/>
                 </td>
-                <td valign="middle">
+                <td valign="middle" align="right">
                     <xsl:call-template name="update_button"/>
                 </td>
             </tr>
@@ -91,7 +98,7 @@
         <xsl:param name="title"/>
         <xsl:param name="class"/>
 
-        <td style="margin-bottom: 0px; padding-bottom: 0px; padding-left: 0px; padding-right: 5pt; cursor: pointer">
+        <td style="margin-bottom: 0px; padding: 0pt 0pt 0pt 5pt; cursor: pointer">
         <!--    onmouseover="this.className='hover'"
             onmouseout ="this.className=''"-->
                     
@@ -189,7 +196,7 @@
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~update_button-->
 
     <xsl:template name="update_button">
-        <p style="margin-top: 0px; white-space: nowrap">
+        <p style="margin-top: 0px; padding-left: 0px; white-space: nowrap">
             <input id="update_button" type="button" value="Update" onclick="call_error_checked( update__onclick )" NAME="update_button"/>
             <br/>
             <input id="update_periodically_checkbox" type="checkbox" onclick="call_error_checked( update_periodically_checkbox__onclick )" NAME="update_periodically_checkbox"/>
@@ -965,10 +972,13 @@
                         <xsl:text>,</xsl:text>
                         <span class="waiting_for_process"> waiting for process!</span>
                     </xsl:if-->
-                    <xsl:if test="@state_text">
-                        <xsl:text> - </xsl:text>
-                        <xsl:value-of select="@state_text"/>
-                    </xsl:if>
+                </td>
+            </tr>
+
+            <tr>
+                <td><span class="label">state text:</span></td>
+                <td>
+                    <xsl:value-of select="@state_text"/>
                 </td>
             </tr>
 

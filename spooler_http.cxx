@@ -1,4 +1,4 @@
-// $Id: spooler_http.cxx,v 1.19 2004/12/02 13:38:17 jz Exp $
+// $Id: spooler_http.cxx,v 1.20 2004/12/03 18:39:00 jz Exp $
 /*
     Hier sind implementiert
 
@@ -169,7 +169,15 @@ string Http_parser::eat_path()
 
     while(1)
     {
-        if( _next_char[0] == '&'  ||  (Byte)_next_char[0] <= (Byte)' ' )
+        if( state == in_path  &&  _next_char[0] == '?' )
+        {
+            path = word + _next_char[0];
+            word = "";
+            _next_char++;
+            state = in_parameter;
+        }
+        else
+        if( state == in_parameter  &&  _next_char[0] == '&'  ||  (Byte)_next_char[0] <= (Byte)' ' )
         {
             if( state == in_path )  path = word;
                               else  _http_request->_parameters[ parameter_name ] = word;
