@@ -1,4 +1,4 @@
-// $Id: spooler_process.cxx 3305 2005-01-12 09:15:50Z jz $
+// $Id$
 
 /*
     Subprocess

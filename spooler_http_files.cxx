@@ -4,7 +4,7 @@
 
 
 const char file_jz_details_frame_html[] = 
-    "<!-- $Id: details_frame.html 3379 2005-02-26 15:30:01Z jz $ -->\n"
+    "<!-- $Id$ -->\n"
     "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\" \"http://www.w3.org/TR/html4/strict.dtd\">\n"
     "<html>\n"
     "\n"
@@ -296,7 +296,7 @@ const char file_jz_details_frame_html[] =
     "";
 
 const char file_jz_index_html[] = 
-    "<!-- $Id: index.html 3303 2005-01-11 23:22:22Z jz $ -->\n"
+    "<!-- $Id$ -->\n"
     "<html>\n"
     "<head>\n"
     "<TITLE>Scheduler</TITLE>\n"
@@ -325,7 +325,7 @@ const char file_jz_index_html[] =
     "";
 
 const char file_jz_left_frame_html[] = 
-    "<!-- $Id: left_frame.html 3383 2005-03-05 23:27:38Z jz $ -->\n"
+    "<!-- $Id$ -->\n"
     "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\" \"http://www.w3.org/TR/html4/strict.dtd\">\n"
     "<html>\n"
     "\n"
@@ -585,7 +585,7 @@ const char file_jz_left_frame_html[] =
     "";
 
 const char file_jz_browser_dependencies_js[] = 
-    "// $Id: browser_dependencies.js 3303 2005-01-11 23:22:22Z jz $\n"
+    "// $Id$\n"
     "\n"
     "// Anpassungen f\xfc" "r DOM und XSL-T\n"
     "\n"
@@ -685,7 +685,7 @@ const char file_jz_browser_dependencies_js[] =
     "";
 
 const char file_jz_popup_menu_js[] = 
-    "// $Id: popup_menu.js 3303 2005-01-11 23:22:22Z jz $\n"
+    "// $Id$\n"
     "\n"
     "// document.onmousemove wird gesetzt!\n"
     "\n"
@@ -912,7 +912,7 @@ const char file_jz_popup_menu_js[] =
     "";
 
 const char file_jz_scheduler_js[] = 
-    "// $Id: scheduler.js 3383 2005-03-05 23:27:38Z jz $\n"
+    "// $Id$\n"
     "\n"
     "//----------------------------------------------------------------------------------------------var\n"
     "\n"
@@ -1754,7 +1754,7 @@ const char file_jz_scheduler_js[] =
     "";
 
 const char file_jz_show_log_js[] = 
-    "// $Id: show_log.js 3303 2005-01-11 23:22:22Z jz $\n"
+    "// $Id$\n"
     "\n"
     "// Javascript-Code f\xfc" "r HTTP Show log des Schedulers.\n"
     "// Der Scheduler liefert \xfc" "ber HTTP die Ausgaben eines Protokolls bis dieses geschlossen wird.\n"
@@ -1885,7 +1885,7 @@ const char file_jz_show_log_js[] =
     "";
 
 const char file_jz_translation_de_js[] = 
-    "// $Id: translation_de.js 3303 2005-01-11 23:22:22Z jz $\n"
+    "// $Id$\n"
     "\n"
     "function init_translation_table( t )\n"
     "{\n"
@@ -1906,7 +1906,7 @@ const char file_jz_translation_de_js[] =
 
 const char file_jz_scheduler_xslt[] = 
     "<?xml version='1.0' encoding=\"utf-8\"?>\n"
-    "<!-- $Id: scheduler.xslt 3383 2005-03-05 23:27:38Z jz $ -->\n"
+    "<!-- $Id$ -->\n"
     "<xsl:stylesheet xmlns:xsl   = \"http://www.w3.org/1999/XSL/Transform\"\n"
     "xmlns:msxsl = \"urn:schemas-microsoft-com:xslt\"\n"
     "version     = \"1.0\">\n"
@@ -3619,7 +3619,7 @@ const char file_jz_scheduler_xslt[] =
     "";
 
 const char file_jz_scheduler_css[] = 
-    "/*  $Id: scheduler.css 3335 2005-01-25 12:27:08Z jz $ \n"
+    "/*  $Id$ \n"
     "\n"
     "STYLESHEET F\xdc" "R DEN SCHEDULER\n"
     "\n"
