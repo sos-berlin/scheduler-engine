@@ -1,4 +1,4 @@
-// $Id: spooler_module.h,v 1.25 2003/07/13 17:52:06 jz Exp $
+// $Id: spooler_module.h,v 1.26 2003/07/23 08:34:22 jz Exp $
 
 #ifndef __SPOOLER_MODULE_H
 #define __SPOOLER_MODULE_H
@@ -184,10 +184,14 @@ struct Module_instance : Object
     string                     _title;                      // Wird lokalem Objectserver als -title=... übergeben, für die Prozessliste (ps)
     int                        _pid;                        // Wird von Remote_module_instance_proxy gesetzt
 
+    Task*                      _task;
     ptr<Com_context>           _com_context;
     ptr<IDispatch>             _idispatch;
     map<string,bool>           _names;
     bool                       _spooler_exit_called;
+
+  //ptr<Com_task>              _com_task;                   // spooler_task
+  //ptr<Com_log>               _com_log;                    // spooler_log
 };
 
 //------------------------------------------------------------------------------Com_module_instance

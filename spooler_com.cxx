@@ -1,4 +1,4 @@
-// $Id: spooler_com.cxx,v 1.98 2003/06/24 21:10:43 jz Exp $
+// $Id: spooler_com.cxx,v 1.99 2003/07/23 08:34:22 jz Exp $
 /*
     Hier sind implementiert
 
@@ -2248,6 +2248,20 @@ Com_context::Com_context()
 : 
     Sos_ole_object( spooler_context_class_ptr, this )
 {
+}
+
+//-------------------------------------------------------------------------------Com_context::close
+
+void Com_context::close()
+{ 
+    THREAD_LOCK(_lock)
+    {
+        if( _log )  _log->close(), _log = NULL;
+        _spooler = NULL; 
+        _thread  = NULL; 
+        _job     = NULL; 
+        if( _task )  _task->set_task(NULL), _task = NULL; 
+    }
 }
 
 //--------------------------------------------------------------------------Com_job_chain::_methods

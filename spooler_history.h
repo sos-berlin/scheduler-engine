@@ -1,4 +1,4 @@
-// $Id: spooler_history.h,v 1.17 2003/06/24 15:46:28 jz Exp $
+// $Id: spooler_history.h,v 1.18 2003/07/23 08:34:22 jz Exp $
 
 #ifndef __SPOOLER_HISTORY_H
 #define __SPOOLER_HISTORY_H
@@ -101,18 +101,12 @@ struct Job_history
 
     void                        open                    ();
     void                        close                   ();
-    void                        start                   ();
-    void                        end                     ();
-    void                        set_extra_field         ( const string& name, const Variant& value );
     int                         min_steps               ()                                          { return _history_yes? _on_process : INT_MAX; }
 
     xml::Element_ptr            read_tail               ( const xml::Document_ptr&, int id, int next, Show_what );
 
   private:
     void                        archive                 ( Archive_switch, const string& filename );
-    void                        append_tabbed           ( int i )                                   { append_tabbed( as_string(i) ); }
-    void                        append_tabbed           ( string );
-    void                        write                   ( bool start );
 
 
     Fill_zero                  _zero_;
@@ -130,6 +124,36 @@ struct Job_history
     string                     _filename;
     string                     _type_string;            // _use_file:  -type=(...) tab ...
     zschimmer::File            _file;
+    int64                      _record_pos;             // Position des Satzes, der zu Beginn des Jobs geschrieben und am Ende überschrieben oder gelöscht wird.
+    string                     _tabbed_record;
+    vector<string>             _extra_names;
+    Record                     _extra_record;
+};
+
+//-------------------------------------------------------------------------------------Task_history
+
+struct Task_history
+{
+                                Task_history            ( Job_history* );
+                               ~Task_history            ();
+
+    void                        start                   ();
+    void                        end                     ();
+    void                        set_extra_field         ( const string& name, const Variant& value );
+
+    xml::Element_ptr            read_tail               ( const xml::Document_ptr&, int id, int next, Show_what );
+
+  private:
+    void                        append_tabbed           ( int i )                                   { append_tabbed( as_string(i) ); }
+    void                        append_tabbed           ( string );
+    void                        write                   ( bool start );
+
+
+    Fill_zero                  _zero_;
+    Spooler*                   _spooler;
+    Job_history*               _job_history;
+    bool                       _start_called;
+
     int64                      _record_pos;             // Position des Satzes, der zu Beginn des Jobs geschrieben und am Ende überschrieben oder gelöscht wird.
     string                     _tabbed_record;
     vector<string>             _extra_names;

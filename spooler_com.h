@@ -1,4 +1,4 @@
-// $Id: spooler_com.h,v 1.71 2003/06/24 21:10:43 jz Exp $
+// $Id: spooler_com.h,v 1.72 2003/07/23 08:34:22 jz Exp $
 
 #ifndef __SPOOLER_COM_H
 #define __SPOOLER_COM_H
@@ -434,6 +434,11 @@ struct Com_context : spooler_com::Ispooler_context, Sos_ole_object
 
     Thread_semaphore           _lock;
 
+  //ptr<Com_log>               _log;
+  //ptr<Com_spooler>           _spooler;
+  //ptr<Com_thread>            _thread;
+  //ptr<Com_job>               _job;
+  //ptr<Com_task>              _task;
     ptr<spooler_com::Ilog>     _log;
     ptr<spooler_com::Ispooler> _spooler;
     ptr<spooler_com::Ithread>  _thread;
