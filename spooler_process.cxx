@@ -1,4 +1,4 @@
-// $Id: spooler_process.cxx,v 1.19 2003/10/28 22:04:27 jz Exp $
+// $Id: spooler_process.cxx,v 1.20 2003/10/28 22:51:26 jz Exp $
 
 #include "spooler.h"
 
@@ -95,12 +95,6 @@ void Process::start()
 
 bool Process::async_continue()
 {
-/*
-    if( _connection->last_errno() != 0 )
-    {
-        if( _module_instance )  _module_instance->
-    }
-*/
     return _connection->async_continue();
 }
 

@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.282 2003/10/28 22:04:26 jz Exp $
+// $Id: spooler.cxx,v 1.283 2003/10/28 22:51:26 jz Exp $
 /*
     Hier sind implementiert
 
@@ -1620,7 +1620,7 @@ void Spooler::run()
                 FOR_EACH( Process_list, (*pc)->_process_list, p )
                 {
                     something_done |= (*p)->async_continue();
-                  //_next_time = min( _next_time, Time::from_gmtime( (*p)->next_gmtime() ) );
+                    _next_time = min( _next_time, Time( localtime_from_gmtime( (*p)->async_next_gmtime() ) ) );
                 }
 
             //LOG( "spooler.cxx: something_done=" << something_done << "    process_list \n" );
@@ -1642,7 +1642,7 @@ void Spooler::run()
 
         if( log_wait )  msg = "Warten"; //"Kein Job und keine Task aktiv";
 
-        _next_time = latter_day;
+        //_next_time = latter_day;
 
 
         if( _single_thread )
@@ -1657,7 +1657,7 @@ void Spooler::run()
             Task* task = _single_thread->get_next_task();
             if( task ) 
             {
-                _next_time = task->next_time();
+                _next_time = min( _next_time, task->next_time() );
                 if( log_wait )  if( task )  msg = "Warten bis " + _next_time.as_string() + " für Task " + task->name();
                                     //else  msg = "Keine Task aktiv";
             }
