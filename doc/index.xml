@@ -1,13 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="scheduler.xslt" type="text/xsl"?>
 
-<!--$Id: index.xml,v 1.3 2004/08/24 18:39:42 jz Exp $-->
+<!--$Id: index.xml,v 1.4 2004/08/28 14:41:02 jz Exp $-->
 
 <description 
     title    = "Startseite" 
     base_dir = "."
+    suppress_browse_bar="yes"
     author   = "$Author: jz $"
-    date     = "$Date: 2004/08/24 18:39:42 $"
+    date     = "$Date: 2004/08/28 14:41:02 $"
 >
 
 <h3><a href="command_line.xml">Kommandozeile</a></h3>
@@ -51,14 +52,47 @@
     Über TCP und UDP nimmt der Scheduler Kommandos in XML entgegen.
 </p>
 
+<p>&#160;</p>
 <h3>Protokolle</h3>
 <p>
     Im mit <code>log_dir</code> eingestellten Verzeichnis schreibt der Scheduler seine Protokolle.
 </p>
 
+<div class="indent">
+
+<h3>Hauptprotokoll</h3>
 <p>
-    <hr size="1"/>
+    Das Hauptprotokoll fast alle Protokolle zusammen.
+    Der Dateiname wird aus Scheduler-Id, Datum und Uhrzeit gebildet, z.B. 
+    <code>scheduler-2004-08-24-104111.log</code>.
 </p>
+    
+<h3>Jobprotokolle</h3>
+<p>
+    Für jeden Job erstellt der Scheduler ein Jobprotokoll
+    mit den Starts der Tasks und eingetroffenen Aufträgen.
+    Beispiel: <code>job.mein_job.log</code>
+</p>
+
+<h3>Taskprotokolle</h3>
+<p>
+    Für jeden Task erstellt der Scheduler ein Taskprotokoll. 
+    Der Dateiname wird aus dem Jobnamen und, wenn mehrere Tasks zugelassen sind, der Task-Id gebildet, 
+    z.B.: <code>task.mein_job.log</code> und <code>task.ein_job.1234.log</code>.
+    Taskprotokolle mit Task-Id werden nach Ende der Task gelöscht.
+</p>
+    
+<h3>Auftragsprotokolle</h3>
+<p>
+    Für jeden Auftrag erstellt der Scheduler ein Auftragsprotokoll
+    mit den Ausgaben aller Tasks, die der Auftrag durchläuft.
+    Der Dateiname wird aus der Jobkette und der Auftrags-Id gebildet,
+    z.B.: <code>order.meine_jobkette.9876.log</code>.
+    Das Auftragsprotokoll wird nach Ende des Auftrags gelöscht.
+</p>
+</div>
+    
+<p>&#160;</p>
 <h3>Ältere Dokumentation</h3>
 <p><a href="old/order/index.html">Aufträge</a>&#160;</p>
 

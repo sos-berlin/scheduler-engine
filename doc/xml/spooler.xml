@@ -1,13 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="../scheduler.xslt" type="text/xsl"?>
 
-<!--$Id: spooler.xml,v 1.1 2004/08/23 11:15:32 jz Exp $-->
+<!--$Id: spooler.xml,v 1.2 2004/08/28 14:41:03 jz Exp $-->
 
 <xml_element name     = "spooler" 
              title    = "Wurzelelement des XML-Dokuments"
              base_dir = ".."
+             parent_page = "../konfiguration.xml"
              author   = "$Author: jz $"
-             date     = "$Date: 2004/08/23 11:15:32 $">
+             date     = "$Date: 2004/08/28 14:41:03 $">
 
     <xml_child_elements>
         <xml_child_element name="config" multiple="yes" title="Konfiguration">

@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding="utf-8"?>
-<!-- $Id: scheduler.xslt,v 1.15 2004/08/28 12:15:54 jz Exp $ -->
+<!-- $Id: scheduler.xslt,v 1.16 2004/08/28 14:41:02 jz Exp $ -->
 
 <!--
     Änderungswünsche:
@@ -12,6 +12,9 @@
 <xsl:stylesheet xmlns:xsl = "http://www.w3.org/1999/XSL/Transform" 
                 version   = "1.0">
 
+    <xsl:variable name="start_page" select="'index.xml'"/>
+        
+        
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~xml_element-->
     
     <xsl:template match="xml_element">
@@ -22,10 +25,12 @@
             <xsl:call-template name="html_head">
                 <xsl:with-param name="title" select="$title"/>
             </xsl:call-template>
+
             
             <body>
                 <xsl:call-template name="body_start">
-                    <xsl:with-param name="title" select="$title"/>
+                    <xsl:with-param name="title"       select="$title"/>
+                    <xsl:with-param name="parent_page" select="@parent_page"/>
                 </xsl:call-template>
                 
                 <!--<h2>Schema</h2>-->
@@ -161,7 +166,9 @@
                 <xsl:apply-templates select="xml_attributes"/>
                 <xsl:apply-templates select="xml_child_elements"/>
                 
-                <xsl:call-template name="bottom"/>
+                <xsl:call-template name="bottom">
+                    <xsl:with-param name="parent_page" select="@parent_page"/>
+                </xsl:call-template>
             </body>
         </html>
     
@@ -778,8 +785,9 @@
     
     <xsl:template match="ini_section">
 
-        <xsl:variable name="title" select="concat( 'Scheduler&#160; –&#160; Datei ', @file, ',&#160; Abschnitt&#160; [', @name, ']' )"/>
-        
+        <xsl:variable name="title"       select="concat( 'Scheduler&#160; –&#160; Datei ', @file, ',&#160; Abschnitt&#160; [', @name, ']' )"/>
+        <xsl:variable name="parent_page" select="concat( translate( @file, '.', '_' ), '.xml' )"/>
+            
         <html>
             <xsl:call-template name="html_head">
                 <xsl:with-param name="title" select="$title"/>
@@ -787,7 +795,8 @@
         
             <body>
                 <xsl:call-template name="body_start">
-                    <xsl:with-param name="title" select="$title"/>
+                    <xsl:with-param name="title"       select="$title"/>
+                    <xsl:with-param name="parent_page" select="$parent_page"/>
                 </xsl:call-template>
 
                 <xsl:apply-templates select="." mode="table"/>
@@ -795,7 +804,10 @@
                 <h2>Einträge</h2>
                 <xsl:apply-templates select="." mode="details"/>
 
-                <xsl:call-template name="bottom"/>
+                <xsl:call-template name="bottom">
+                    <xsl:with-param name="title"       select="$title"/>
+                    <xsl:with-param name="parent_page" select="$parent_page"/>
+                </xsl:call-template>
             </body>
         </html>
     </xsl:template>
@@ -861,6 +873,21 @@
     
     <xsl:template name="body_start">
         <xsl:param name="title"/>
+        <xsl:param name="parent_page"/>
+
+        <table cellspacing="0" cellpadding="0" width="100%">
+            <tr>
+                <td>
+                    <xsl:call-template name="browse_bar">
+                        <xsl:with-param name="parent_page" select="$parent_page"/>
+                    </xsl:call-template>
+                </td>
+                <td align="right">
+                </td>
+            </tr>
+        </table>
+
+        <hr size="1"/>
         
         <h1>
             <xsl:value-of select="$title"/>
@@ -870,14 +897,56 @@
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~bottom-->
 
     <xsl:template name="bottom">
+        <xsl:param name="parent_page"/>
+
         <p style="margin-top: 2ex"/>
         <hr size="1"/>
-        <p align="right" style="font-size: 8pt; margin-top: 0">
-            Zuletzt geändert von
-            <xsl:value-of select="           substring-before( substring-after( /*/@author, 'Author: ' ), ' $' )"            />,
-            <xsl:value-of select="translate( substring-before( substring-after( /*/@date,   'Date: '   ), ' $' ), '/', '-' )"/> GMT
-        </p>
+        <table cellspacing="0" cellpadding="0" width="100%">
+            <tr>
+                <td>
+                    <xsl:call-template name="browse_bar">
+                        <xsl:with-param name="parent_page" select="$parent_page"/>
+                    </xsl:call-template>
+                </td>
+                <td align="right">
+                    <p style="font-size: 8pt; margin-top: 0">
+                        Zuletzt geändert von
+                        <xsl:value-of select="           substring-before( substring-after( /*/@author, 'Author: ' ), ' $' )"            />,
+                        <xsl:value-of select="translate( substring-before( substring-after( /*/@date,   'Date: '   ), ' $' ), '/', '-' )"/> GMT
+                    </p>
+                </td>
+            </tr>
+        </table>
     </xsl:template>
-    
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~browse_bar-->
+
+    <xsl:template name="browse_bar">
+        <xsl:param name="parent_page"/>
+
+        <p style="font-size: 8pt; margin-top: 0">
+            <xsl:if test="not( /*/@suppress_browse_bar='yes' )">
+                <xsl:element name="a">
+                    <xsl:attribute name="class">silent</xsl:attribute>
+                    <xsl:attribute name="href"><xsl:value-of select="concat( /*/@base_dir, '/', $start_page )"/></xsl:attribute>
+                    <xsl:text>Startseite</xsl:text>
+                </xsl:element>
+                
+                <xsl:if test="$parent_page">
+                    &#160; – &#160;
+                    <xsl:element name="a">
+                        <xsl:attribute name="class">silent</xsl:attribute>
+                        <!--xsl:attribute name="href"><xsl:value-of select="concat( /*/@base_dir, '/', $parent_page )"/></xsl:attribute-->
+                        <xsl:attribute name="href"><xsl:value-of select="$parent_page"/></xsl:attribute>
+                        <xsl:value-of select="document( $parent_page )/*/@title"/>
+                    </xsl:element>
+                </xsl:if>
+            </xsl:if>
+            
+            &#160;
+        </p>
+    </xsl:template>    
     
 </xsl:stylesheet>
+
+<!-- Das ist ein Gedankenstrich: – -->
