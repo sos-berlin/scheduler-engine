@@ -1,4 +1,4 @@
-// $Id: spooler_module_java.h,v 1.16 2002/12/03 13:32:20 jz Exp $
+// $Id: spooler_module_java.h,v 1.17 2003/03/01 09:46:14 jz Exp $
 
 #ifndef __SPOOLER_MODULE_JAVA_H
 #define __SPOOLER_MODULE_JAVA_H
@@ -124,7 +124,7 @@ struct Java_object : Object, Non_cloneable
 
     void                        operator =                  ( jobject jo )                          { assign( jo ); }
                                 operator jobject            ()                                      { return _jobject; }
-    void                        assign                      ( jobject );
+    virtual void                assign                      ( jobject );
     void                        set_global                  ();
 
     Spooler*                   _spooler;
@@ -132,14 +132,25 @@ struct Java_object : Object, Non_cloneable
     bool                       _is_global;
 };
 
-//--------------------------------------------------------------------------------Java_global_object
+//-------------------------------------------------------------------------------Java_global_object
 
 struct Java_global_object : Java_object
 {
-                                Java_global_object          ( Spooler* sp, jobject jo = NULL )      : Java_object( sp, jo ) { if(jo) set_global(); }
+                                Java_global_object          ( Spooler* sp, jobject jo = NULL )      : Java_object( sp, jo )  { if(jo) set_global(); }
 
     void                        operator =                  ( jobject jo )                          { assign( jo ); }
     void                        assign                      ( jobject jo )                          { Java_object::assign(jo); set_global(); }
+};
+
+//--------------------------------------------------------------------------------Java_local_object
+
+struct Java_local_object : Java_object
+{
+                                Java_local_object           ( Spooler* sp, jobject jo = NULL )      : Java_object( sp, NULL )  { assign( jo ); }
+                               ~Java_local_object           ()                                      { assign( NULL ); }
+
+    void                        operator =                  ( jobject jo )                          { assign( jo ); }
+    void                        assign                      ( jobject );
 };
 
 //-------------------------------------------------------------------------------------------------

@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.174 2003/02/25 20:33:47 jz Exp $
+// $Id: spooler.cxx,v 1.175 2003/03/01 09:46:13 jz Exp $
 /*
     Hier sind implementiert
 
@@ -58,7 +58,7 @@ const double wait_step_for_thread_termination2           = 600.0;       // 2. Nö
 static bool                     is_daemon               = false;
 //static int                      daemon_starter_pid;
 //bool                          spooler_is_running      = false;
-       int                      ctrl_c_pressed          = 0;
+volatile int                    ctrl_c_pressed          = 0;
 static Spooler*                 spooler                 = NULL;
 
 
@@ -1275,11 +1275,17 @@ void spooler_restart( Log* log, bool is_service )
 
         switch( fork() )
         {
-            case  0: execv( _argv[0], _argv ); 
-                     fprintf( stderr, "Fehler bei execv %s: %s\n", _argv[0], strerror(errno) ); 
-                     _exit(99);
+            case  0:
+            {
+                 int n = sysconf( _SC_OPEN_MAX );
+                 for( int i = 3; i < n; i++ )  close(i);
+                 execv( _argv[0], _argv ); 
+                 fprintf( stderr, "Fehler bei execv %s: %s\n", _argv[0], strerror(errno) ); 
+                 _exit(99);
+            }
 
-            case -1: throw_errno( errno, "execv", _argv[0] );
+            case -1: 
+                throw_errno( errno, "execv", _argv[0] );
 
             default: ;
         }

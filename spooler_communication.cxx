@@ -1,4 +1,4 @@
-// $Id: spooler_communication.cxx,v 1.50 2002/12/18 08:14:19 jz Exp $
+// $Id: spooler_communication.cxx,v 1.51 2003/03/01 09:46:14 jz Exp $
 /*
     Hier sind implementiert
 
@@ -18,7 +18,7 @@ using namespace std;
 namespace sos {
 namespace spooler {
 
-const int wait_for_port_available = 15;   // Soviele Sekunden warten, bis TCP- oder UDP-Port frei wird
+const int wait_for_port_available = 60;   // Soviele Sekunden warten, bis TCP- oder UDP-Port frei wird
 
 #ifdef Z_WINDOWS
 #   include <io.h>
@@ -44,12 +44,12 @@ int get_errno()
 
 //---------------------------------------------------------------------------------------set_linger
 
-void set_linger( SOCKET socket )
+static void set_linger( SOCKET socket )
 {
     struct linger l; 
     
-    l.l_onoff  = 0; 
-    l.l_linger = 0;
+    l.l_onoff  = 1; 
+    l.l_linger = 5;  // Sekunden
 
     setsockopt( socket, SOL_SOCKET, SO_LINGER, (const char*)&l, sizeof l );
 }
@@ -408,31 +408,60 @@ void Communication::close( double wait_time )
     }
 
 #   ifdef Z_WINDOWS
-        thread_wait_for_termination( wait_time );
+       thread_wait_for_termination( wait_time );
+#    else
+       thread_wait_for_termination();
 #   endif
 
     thread_close();
+}
+
+//----------------------------------------------------------------Communication::main_thread_exists
+
+bool Communication::main_thread_exists()
+{
+    if( kill( _spooler->_pid, 0 ) == -1  &&  errno == ESRCH )
+    {
+        //_spooler->_log.error( "Kommunikations-Thread wird beendet, weil der Hauptthread (pid=" + as_string(_spooler->_pid) + ") verschwunden ist" );
+        //_spooler->_log verklemmt sich manchmal nach Ausgabe des Zeitstemples (vor "[ERROR]"). Vielleicht wegen einer Semaphore?
+
+        //fprintf( stderr, "Kommunikations-Thread wird beendet, weil der Hauptthread (pid=%d) verschwunden ist\n", _spooler->_pid );
+        return false;  //?  Thread bleibt sonst hängen, wenn Java sich bei Ctrl-C sofort verabschiedet. Java lässt SIGINT zu, dieser Thread aber nicht.
+    }
+
+    return true;
 }
 
 //-----------------------------------------------------------------------Communication::bind_socket
 
 int Communication::bind_socket( SOCKET socket, struct sockaddr_in* sa )
 {
-    int ret = ::bind( socket, (struct sockaddr*)sa, sizeof (struct sockaddr_in) );
+    int ret;
+    int true_ = 1;
+    
+    LOG( "setsockopt(" << socket << ",SOL_SOCKET,SO_REUSEADDR,1)  " );
+    ret = setsockopt( socket, SOL_SOCKET, SO_REUSEADDR, (const char*)&true_, sizeof true_ );
+    LOG( "ret=" << ret );  if( ret == SOCKET_ERROR )  LOG( "errno=" << errno << "  "  << strerror(errno) );
+    LOG( "\n" );
+
+    ret = ::bind( socket, (struct sockaddr*)sa, sizeof (struct sockaddr_in) );
 
     if( ret == SOCKET_ERROR  &&  get_errno() == EADDRINUSE )
     {
-        _spooler->_log.warn( "Port " + as_string( ntohs( sa->sin_port ) ) + " ist blockiert. Wir warten " + as_string(wait_for_port_available) + " Sekunden" );
+        _spooler->_log.warn( "Port " + as_string( ntohs( sa->sin_port ) ) + " ist blockiert. Wir probieren es " + as_string(wait_for_port_available) + " Sekunden" );
 
-        for( int i = 0; i < wait_for_port_available; i++ )
+        for( int i = 1; i <= wait_for_port_available; i++ )
         {
+            if( ctrl_c_pressed || _spooler->state() == Spooler::s_stopping || _spooler->state() == Spooler::s_stopped )  return EINTR;
+            if( !main_thread_exists() )  return EINTR;  //?  Thread bleibt sonst hängen, wenn Java sich bei Ctrl-C sofort verabschiedet. Java lässt SIGINT zu, dieser Thread aber nicht.
+
             sos_sleep(1);
         
             ret = ::bind( socket, (struct sockaddr*)sa, sizeof (struct sockaddr_in) );
             if( ret != SOCKET_ERROR ) break;
             if( get_errno() != EADDRINUSE )  break;
 
-            if( isatty( fileno(stderr) ) )  fputc( '.', stderr );
+            if( isatty( fileno(stderr) ) )  fputc( i % 10 == 0? '0' + i / 10 % 10 : '.', stderr );
         }
 
         if( isatty( fileno(stderr) ) )  fputc( '\n', stderr );
@@ -465,8 +494,7 @@ void Communication::bind()
                 if( _udp_socket == SOCKET_ERROR )  throw_sos_socket_error( "socket" );
 
                 set_linger( _udp_socket );
-              //setsockopt( _udp_socket, SOL_SOCKET, SO_REUSEADDR, (const char*)&true_, sizeof true_ );
-
+                
                 sa.sin_port        = htons( _spooler->udp_port() );
                 sa.sin_family      = AF_INET;
                 sa.sin_addr.s_addr = 0; // INADDR_ANY
@@ -501,8 +529,7 @@ void Communication::bind()
                 if( _listen_socket == SOCKET_ERROR )  throw_sos_socket_error( "socket" );
 
                 set_linger( _listen_socket );
-              //setsockopt( _listen_socket, SOL_SOCKET, SO_REUSEADDR, (const char*)&true_, sizeof true_ );
-
+                
                 sa.sin_port        = htons( _spooler->tcp_port() );
                 sa.sin_family      = AF_INET;
                 sa.sin_addr.s_addr = 0; // INADDR_ANY
@@ -627,11 +654,7 @@ int Communication::run()
 
             n = ::select( _nfds, &_read_fds, &_write_fds, NULL, &tv );
             
-            if( kill( _spooler->_pid, 0 ) == -1  &&  errno == ESRCH )
-            {
-                _spooler->_log.error( "Kommunikations-Thread wird beendet, weil der Hauptthread (pid=" + as_string(_spooler->_pid) + ") verschwunden ist" );
-                return 0;  //?  Thread bleibt sonst hängen, wenn Java sich bei Ctrl-C sofort verabschiedet. Java lässt SIGINT zu, dieser Thread aber nicht.
-            }
+            if( !main_thread_exists() )  return 0;  //?  Thread bleibt sonst hängen, wenn Java sich bei Ctrl-C sofort verabschiedet. Java lässt SIGINT zu, dieser Thread aber nicht.
 #       endif
 
         {

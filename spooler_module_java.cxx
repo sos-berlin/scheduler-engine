@@ -1,4 +1,4 @@
-// $Id: spooler_module_java.cxx,v 1.37 2003/02/26 08:12:48 jz Exp $
+// $Id: spooler_module_java.cxx,v 1.38 2003/03/01 09:46:14 jz Exp $
 /*
     Hier sind implementiert
 
@@ -59,6 +59,7 @@ static void set_java_exception( JNIEnv* jenv, const char* what )
     if( exception_class )  
     {
         int err = jenv->ThrowNew( exception_class, what ); 
+        jenv->DeleteLocalRef( exception_class );
         if( err == 0 )  return;
     }
 
@@ -165,6 +166,8 @@ static jobject jobject_from_variant( JNIEnv* jenv, const VARIANT& v )
             if( !constructor_id )  return NULL;
 
             result = jenv->NewObject( cls, constructor_id, (jshort)V_I2(&v) );
+
+            jenv->DeleteLocalRef( cls );
             break;
         }
 
@@ -177,6 +180,7 @@ static jobject jobject_from_variant( JNIEnv* jenv, const VARIANT& v )
             if( !constructor_id )  return NULL;
 
             result = jenv->NewObject( cls, constructor_id, (jint)V_I4(&v) );
+            jenv->DeleteLocalRef( cls );
             break;
         }
 
@@ -189,6 +193,7 @@ static jobject jobject_from_variant( JNIEnv* jenv, const VARIANT& v )
             if( !constructor_id )  return NULL;
 
             result = jenv->NewObject( cls, constructor_id, (jfloat)V_R4(&v) );
+            jenv->DeleteLocalRef( cls );
             break;
         }
 
@@ -201,6 +206,7 @@ static jobject jobject_from_variant( JNIEnv* jenv, const VARIANT& v )
             if( !constructor_id )  return NULL;
 
             result = jenv->NewObject( cls, constructor_id, (jdouble)V_R8(&v) );
+            jenv->DeleteLocalRef( cls );
             break;
         }
 
@@ -216,6 +222,7 @@ static jobject jobject_from_variant( JNIEnv* jenv, const VARIANT& v )
             if( !constructor_id )  return NULL;
 
             result = jenv->NewObject( cls, constructor_id, (jboolean)V_BOOL(&v)? 1 : 0 );
+            jenv->DeleteLocalRef( cls );
             break;
         }
 
@@ -228,6 +235,7 @@ static jobject jobject_from_variant( JNIEnv* jenv, const VARIANT& v )
             if( !constructor_id )  return NULL;
 
             result = jenv->NewObject( cls, constructor_id, (jbyte)V_I1(&v) );
+            jenv->DeleteLocalRef( cls );
             break;
         }
 
@@ -240,6 +248,7 @@ static jobject jobject_from_variant( JNIEnv* jenv, const VARIANT& v )
             if( !constructor_id )  return NULL;
 
             result = jenv->NewObject( cls, constructor_id, (jshort)V_UI1(&v) );
+            jenv->DeleteLocalRef( cls );
             break;
         }
 
@@ -252,6 +261,7 @@ static jobject jobject_from_variant( JNIEnv* jenv, const VARIANT& v )
             if( !constructor_id )  return NULL;
 
             result = jenv->NewObject( cls, constructor_id, (jint)V_UI2(&v) );
+            jenv->DeleteLocalRef( cls );
             break;
         }
 
@@ -264,6 +274,7 @@ static jobject jobject_from_variant( JNIEnv* jenv, const VARIANT& v )
             if( !constructor_id )  return NULL;
 
             result = jenv->NewObject( cls, constructor_id, (jlong)V_UI4(&v) );
+            jenv->DeleteLocalRef( cls );
             break;
         }
 
@@ -276,6 +287,7 @@ static jobject jobject_from_variant( JNIEnv* jenv, const VARIANT& v )
             if( !constructor_id )  return NULL;
 
             result = jenv->NewObject( cls, constructor_id, (jlong)V_I8(&v) );
+            jenv->DeleteLocalRef( cls );
             break;
         }
 
@@ -289,6 +301,7 @@ static jobject jobject_from_variant( JNIEnv* jenv, const VARIANT& v )
             if( !constructor_id )  return NULL;
 
             result = jenv->NewObject( cls, constructor_id, (jint)V_INT(&v) );
+            jenv->DeleteLocalRef( cls );
             break;
         }
 
@@ -301,6 +314,7 @@ static jobject jobject_from_variant( JNIEnv* jenv, const VARIANT& v )
             if( !constructor_id )  return NULL;
 
             result = jenv->NewObject( cls, constructor_id, (jlong)V_UINT(&v) );
+            jenv->DeleteLocalRef( cls );
             break;
         }
 
@@ -421,35 +435,35 @@ JNIEXPORT jobject JNICALL Java_sos_spooler_Idispatch_com_1call( JNIEnv* jenv, jc
                 jstring_to_bstr( jenv, (jstring)jparam, &dispparams[i].bstrVal );
             }
             else
-            if( cls = jenv->FindClass( "java/lang/Boolean" ), !cls )  return NULL;
+            if( jenv->DeleteLocalRef( cls ), cls = jenv->FindClass( "java/lang/Boolean" ), !cls )  return NULL;
             else
             if( jenv->IsInstanceOf( jparam, cls ) )
             {
                 dispparams[i] = jenv->CallBooleanMethod( jparam, jenv->GetMethodID( cls, "booleanValue", "()Z" ) ) != 0;
             }
             else
-            if( cls = jenv->FindClass( "java/lang/Integer" ), !cls )  return NULL;
+            if( jenv->DeleteLocalRef( cls ), cls = jenv->FindClass( "java/lang/Integer" ), !cls )  return NULL;
             else
             if( jenv->IsInstanceOf( jparam, cls ) )
             {
                 dispparams[i] = jenv->CallIntMethod( jparam, jenv->GetMethodID( cls, "intValue", "()I" ) );
             }
             else
-            if( cls = jenv->FindClass( "java/lang/Long" ), !cls )  return NULL;
+            if( jenv->DeleteLocalRef( cls ), cls = jenv->FindClass( "java/lang/Long" ), !cls )  return NULL;
             else
             if( jenv->IsInstanceOf( jparam, cls ) )
             {
                 dispparams[i] = jenv->CallLongMethod( jparam, jenv->GetMethodID( cls, "longValue", "()J" ) );
             }
             else
-            if( cls = jenv->FindClass( "java/lang/Double" ), !cls )  return NULL;
+            if( jenv->DeleteLocalRef( cls ), cls = jenv->FindClass( "java/lang/Double" ), !cls )  return NULL;
             else
             if( jenv->IsInstanceOf( jparam, cls ) )
             {
                 dispparams[i] = jenv->CallDoubleMethod( jparam, jenv->GetMethodID( cls, "doubleValue", "()D" ) );
             }
             else
-            if( cls = jenv->FindClass( "sos/spooler/Idispatch" ), !cls )  return NULL;
+            if( jenv->DeleteLocalRef( cls ), cls = jenv->FindClass( "sos/spooler/Idispatch" ), !cls )  return NULL;
             else
             if( jenv->IsInstanceOf( jparam, cls ) )
             {
@@ -461,10 +475,12 @@ JNIEXPORT jobject JNICALL Java_sos_spooler_Idispatch_com_1call( JNIEnv* jenv, jc
             }
             else
             {
-                ptr<Java_object> o = Z_NEW( Java_object( java_vm->_spooler, jparam ) );
-                o->set_global();
+                ptr<Java_global_object> o = Z_NEW( Java_global_object( java_vm->_spooler, jparam ) );
                 dispparams[i] = o;
             }
+
+            jenv->DeleteLocalRef( cls );
+            jenv->DeleteLocalRef( jparam );
         }
 
         if( jenv->ExceptionCheck() )  return NULL;
@@ -544,62 +560,56 @@ void Java_vm::init()
     string module_filename = _filename;
 
 
-#   ifdef SYSTEM_HPUXxx
+  //typedef int JNICALL JNI_GetDefaultJavaVMInitArgs_func( JavaVMInitArgs* );
+    typedef int JNICALL JNI_CreateJavaVM_func            ( JavaVM**, JNIEnv**, JavaVMInitArgs* );
 
-        // statisch einbinden, weil dlopen() den Thread Local Storage der libjvm.so nicht laden kann.
+  //JNI_GetDefaultJavaVMInitArgs_func*   JNI_GetDefaultJavaVMInitArgs;
+    JNI_CreateJavaVM_func*               JNI_CreateJavaVM;
 
-#   else     
-      //typedef int JNICALL JNI_GetDefaultJavaVMInitArgs_func( JavaVMInitArgs* );
-        typedef int JNICALL JNI_CreateJavaVM_func            ( JavaVM**, JNIEnv**, JavaVMInitArgs* );
+#   ifdef SYSTEM_WIN
+    {    
+        // Der Name des VM-Moduls steht vielleicht in der Registrierung unter
+        // HKEY_LOCAL_MACHINE\SOFTWARE\JavaSoft\Java Runtime Environment\1.4:RuntimeLib
+        // HKEY_LOCAL_MACHINE\Software\JavaSoft\Java Runtime Environment:CurrentVersion liefert z.B. "1.4"
 
-      //JNI_GetDefaultJavaVMInitArgs_func*   JNI_GetDefaultJavaVMInitArgs;
-        JNI_CreateJavaVM_func*               JNI_CreateJavaVM;
+        // Microsoft's VM-Modul scheint hier eingetragen zu sein: (ist c:\winnt\system32\msjava.dll).
+        // HKEY_LOCAL_MACHINE\SOFTWARE\Clients\JavaVM\MSJavaVM\InstallInfo:VerifyFile
 
-#       ifdef SYSTEM_WIN
-        {    
-            // Der Name des VM-Moduls steht vielleicht in der Registrierung unter
-            // HKEY_LOCAL_MACHINE\SOFTWARE\JavaSoft\Java Runtime Environment\1.4:RuntimeLib
-            // HKEY_LOCAL_MACHINE\Software\JavaSoft\Java Runtime Environment:CurrentVersion liefert z.B. "1.4"
+        LOG( "LoadLibrary " << _filename << '\n' );
+        HINSTANCE vm_module = LoadLibrary( _filename.c_str() );
+        if( !vm_module )  throw_mswin_error( "LoadLibrary", "Java Virtual Machine " + _filename );
 
-            // Microsoft's VM-Modul scheint hier eingetragen zu sein: (ist c:\winnt\system32\msjava.dll).
-            // HKEY_LOCAL_MACHINE\SOFTWARE\Clients\JavaVM\MSJavaVM\InstallInfo:VerifyFile
+        module_filename = filename_of_hinstance( vm_module );
+        LOG( "HINSTANCE=" << (void*)vm_module << "  " << module_filename << "  " << file_version_info( module_filename ) << '\n' );
 
-            LOG( "LoadLibrary " << _filename << '\n' );
-            HINSTANCE vm_module = LoadLibrary( _filename.c_str() );
-            if( !vm_module )  throw_mswin_error( "LoadLibrary", "Java Virtual Machine " + _filename );
+      //JNI_GetDefaultJavaVMInitArgs = (JNI_GetDefaultJavaVMInitArgs_func*)GetProcAddress( vm_module, "JNI_GetDefaultJavaVMInitArgs" );
+      //if( !JNI_GetDefaultJavaVMInitArgs )  throw_mswin_error( "GetProcAddress", "JNI_GetDefaultJavaVMInitArgs" );
 
-            module_filename = filename_of_hinstance( vm_module );
-            LOG( "HINSTANCE=" << (void*)vm_module << "  " << module_filename << "  " << file_version_info( module_filename ) << '\n' );
+        JNI_CreateJavaVM = (JNI_CreateJavaVM_func*)GetProcAddress( vm_module, "JNI_CreateJavaVM" );
+        if( !JNI_CreateJavaVM )  throw_mswin_error( "GetProcAddress", "JNI_CreateJavaVM" );
+    }
+#   elif defined SYSTEM_HPUX_xxx
+    {
+        LOG( "shl_load " << _filename << '\n' );
+        shl_t vm_module = shl_load( _filename.c_str(), BIND_IMMEDIATE | BIND_VERBOSE, 0 );
+        if( !vm_module )  throw_xc( "SPOOLER-171", strerror(errno), _filename.c_str() );
 
-          //JNI_GetDefaultJavaVMInitArgs = (JNI_GetDefaultJavaVMInitArgs_func*)GetProcAddress( vm_module, "JNI_GetDefaultJavaVMInitArgs" );
-          //if( !JNI_GetDefaultJavaVMInitArgs )  throw_mswin_error( "GetProcAddress", "JNI_GetDefaultJavaVMInitArgs" );
+        LOG( "shl_findsym JNI_CreateJavaVM\n" );
+        int err = shl_findsym( &vm_module, "JNI_CreateJavaVM", TYPE_PROCEDURE, (void*)&JNI_CreateJavaVM );
+        if( err )  throw_xc( "SPOOLER-171", strerror(errno), "JNI_CreateJavaVM" );
+    }
+#   else
+    {
+        LOG( "dlopen " << _filename << '\n' );
+        void *vm_module = dlopen( _filename.c_str(), RTLD_LAZY );
+        if( !vm_module )  throw_xc( "SPOOLER-171", dlerror(), _filename.c_str() );
 
-            JNI_CreateJavaVM = (JNI_CreateJavaVM_func*)GetProcAddress( vm_module, "JNI_CreateJavaVM" );
-            if( !JNI_CreateJavaVM )  throw_mswin_error( "GetProcAddress", "JNI_CreateJavaVM" );
-        }
-#       elif defined SYSTEM_HPUX
-        {
-            LOG( "shl_load " << _filename << '\n' );
-            shl_t vm_module = shl_load( _filename.c_str(), BIND_IMMEDIATE | BIND_VERBOSE, 0 );
-            if( !vm_module )  throw_xc( "SPOOLER-171", strerror(errno), _filename.c_str() );
+      //JNI_GetDefaultJavaVMInitArgs = (JNI_GetDefaultJavaVMInitArgs_func*)dlsym( vm_module, "GetDefaultJavaVMInitArgs" );
+      //if( !JNI_GetDefaultJavaVMInitArgs )  throw_xc( "SPOOLER-171", dlerror(), "GetDefaultJavaVMInitArgs" );
 
-            LOG( "shl_findsym JNI_CreateJavaVM\n" );
-            int err = shl_findsym( &vm_module, "JNI_CreateJavaVM", TYPE_PROCEDURE, (void*)&JNI_CreateJavaVM );
-            if( err )  throw_xc( "SPOOLER-171", strerror(errno), "JNI_CreateJavaVM" );
-        }
-#       else
-        {
-            LOG( "dlopen " << _filename << '\n' );
-            void *vm_module = dlopen( _filename.c_str(), RTLD_LAZY );
-            if( !vm_module )  throw_xc( "SPOOLER-171", dlerror(), _filename.c_str() );
-
-          //JNI_GetDefaultJavaVMInitArgs = (JNI_GetDefaultJavaVMInitArgs_func*)dlsym( vm_module, "GetDefaultJavaVMInitArgs" );
-          //if( !JNI_GetDefaultJavaVMInitArgs )  throw_xc( "SPOOLER-171", dlerror(), "GetDefaultJavaVMInitArgs" );
-
-            JNI_CreateJavaVM = (JNI_CreateJavaVM_func*)dlsym( vm_module, "JNI_CreateJavaVM" );
-            if( !JNI_CreateJavaVM )  throw_xc( "SPOOLER-171", dlerror(), "JNI_CreateJavaVM" );
-        }
-#       endif
+        JNI_CreateJavaVM = (JNI_CreateJavaVM_func*)dlsym( vm_module, "JNI_CreateJavaVM" );
+        if( !JNI_CreateJavaVM )  throw_xc( "SPOOLER-171", dlerror(), "JNI_CreateJavaVM" );
+    }
 #   endif
 
   //if( _vm_args.classpath       )  complete_class_path = string(_vm_args.classpath) + Z_PATH_SEPARATOR;
@@ -721,7 +731,6 @@ void Java_vm::attach_thread( const string& thread_name )
     args.name    = (char*)java_thread_name.c_str();
 
     _thread_data->_env._java_vm = this;
-
     _thread_data->_env._jenv = NULL;
 
     int ret = _vm->AttachCurrentThread( (void**)&_thread_data->_env._jenv, &args ); 
@@ -779,6 +788,8 @@ void Java_vm::throw_java( int return_value, const string& text1, const string& t
                 {
                     java_text = string_from_jstring( env, (jstring)env->CallObjectMethod( x, get_message_id ) );
                 }
+                
+                env->DeleteLocalRef( c );
             }
         }
     }
@@ -916,7 +927,8 @@ bool Module::make_java_class( bool force )
         c.set_throw( false );
         c.execute( cmd );
 
-        if( c.stderr_text() != "" )  _log->debug( c.stderr_text() ),  _log->debug( "" );
+        if( c.stderr_text() != "" )  _log->warn( c.stderr_text() ),  _log->warn( "" );
+        if( c.stdout_text() != "" )  _log->warn( c.stdout_text() ),  _log->warn( "" );
 
         if( c.xc() )  throw *c.xc();
 
@@ -957,7 +969,8 @@ jmethodID Module::java_method_id( const string& name )
 Java_object::Java_object( Spooler* spooler, jobject jo )
 :
     _spooler( spooler ),
-    _jobject( NULL )
+    _jobject( NULL ),
+    _is_global( false )
 {
     assign( jo );
 }
@@ -989,9 +1002,19 @@ void Java_object::assign( jobject jo )
 {
     JNIEnv* jenv = _spooler->_java_vm.env();
 
-    if( _is_global )  jenv->DeleteGlobalRef( _jobject );
+    if( _is_global )  
+    {
+        LOG( "Java_object::assign DeleteGlobalRef " << as_hex_string((int)(void*)_jobject) << "\n" );
+        jenv->DeleteGlobalRef( _jobject );
 
-    _jobject = jo;
+        _jobject = jo;
+        _is_global = false;
+        set_global();
+    }
+    else
+    {
+        _jobject = jo;
+    }
 }
 
 //--------------------------------------------------------------------------Java_object::set_global
@@ -1000,11 +1023,25 @@ void Java_object::set_global()
 {
     if( _jobject )
     {
+        LOG( "Java_object::set_global NewGlobalRef " << as_hex_string((int)(void*)_jobject) << "\n" );
         _jobject = _spooler->_java_vm.env()->NewGlobalRef( _jobject );
         if( !_jobject )  _spooler->_java_vm.throw_java( 0, "NewGlobalRef" );
 
         _is_global = true;
     }
+}
+
+//------------------------------------------------------------------------Java_local_object::assign
+
+void Java_local_object::assign( jobject jo )
+{
+    if( _jobject )  
+    {
+        //LOG( "Java_local_object::assign DeleteLocalRef" << (void*)_jobject << "\n" );
+        _spooler->_java_vm.env()->DeleteLocalRef( _jobject );
+    }
+    
+    _jobject = jo;
 }
 
 //-------------------------------------------------------------------Java_idispatch::Java_idispatch
@@ -1025,6 +1062,7 @@ Java_idispatch::Java_idispatch( Spooler* sp, IDispatch* idispatch, const string&
     if( !jo )  _spooler->_java_vm.throw_java( 0, "NewObject", _class_name );
 
     assign( jo );
+    jenv->DeleteLocalRef( subclass );
 }
 
 //------------------------------------------------------------------Java_idispatch::~Java_idispatch
@@ -1040,6 +1078,8 @@ Java_idispatch::~Java_idispatch()
             jclass object_class = jenv.get_object_class( _jobject );
 
             jmethodID method_id = jenv.get_method_id( object_class, "com_clear", "()V" );
+            
+            jenv->DeleteLocalRef( object_class ), object_class = NULL;
 
             jenv->CallVoidMethod( _jobject, method_id );
             if( jenv->ExceptionCheck() )  _spooler->_java_vm.throw_java( 0, _class_name, "CallVoidMethod com_clear()" );
@@ -1057,6 +1097,7 @@ void Java_module_instance::close()
 {
     Module_instance::close();
 
+    _added_jobjects.clear();
     _jobject = NULL;
 }
 
@@ -1112,18 +1153,21 @@ void Java_module_instance::add_obj( const ptr<IDispatch>& object, const string& 
 {
     string java_class_name = "sos/spooler/" + replace_regex_ext( name, "^(spooler_)?(.*)$", "\\u\\2" );    // "spooler_task" -> "sos.spooler.Task"
 
+    LOGI( "Java_module_instance::add_obj " << java_class_name << "\n" );
+
     jclass cls = _env->env()->GetObjectClass( _jobject );
     if( !cls )  _module->_spooler->_java_vm.throw_java( 0, "GetMethodID" );
 
-    string signature = string( "L" + java_class_name + ";" );
+    string signature = "L" + java_class_name + ";";
     jfieldID field_id = _env->env()->GetFieldID( cls, name.c_str(), signature.c_str() );
+    _env->env()->DeleteLocalRef( cls );
     if( !field_id )  _module->_spooler->_java_vm.throw_java( 0, "GetFieldID", name );
 
     ptr<Java_idispatch> java_idispatch = Z_NEW( Java_idispatch( _module->_spooler, object, java_class_name ) );
     java_idispatch->set_global();
 
     _added_jobjects.push_back( java_idispatch );
-                                                
+                         
     _env->env()->SetObjectField( _jobject, field_id, *java_idispatch );
     if( _env->env()->ExceptionCheck() )  _module->_spooler->_java_vm.throw_java( 0, "SetObjectField", name );
 
