@@ -1,4 +1,4 @@
-// $Id: spooler_history.h,v 1.4 2002/04/06 10:22:51 jz Exp $
+// $Id: spooler_history.h,v 1.5 2002/04/06 20:07:39 jz Exp $
 
 #ifndef __SPOOLER_HISTORY_H
 #define __SPOOLER_HISTORY_H
@@ -7,6 +7,15 @@
 
 namespace sos {
 namespace spooler {
+
+//-----------------------------------------------------------------------------------Archive_switch
+
+enum Archive_switch
+{
+    arc_no = 0,
+    arc_yes,
+    arc_gzip
+};
 
 //---------------------------------------------------------------------------------------Spooler_db
 
@@ -74,7 +83,7 @@ struct Job_history
     xml::Element_ptr            read_tail               ( xml::Document_ptr, int, bool with_log );
 
   private:
-    void                        archive                 ( const string& filename );
+    void                        archive                 ( Archive_switch, const string& filename );
     void                        append_tabbed           ( int i )                                   { append_tabbed( as_string(i) ); }
     void                        append_tabbed           ( string );
     void                        write                   ( bool start );

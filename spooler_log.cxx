@@ -1,4 +1,4 @@
-// $Id: spooler_log.cxx,v 1.35 2002/04/05 22:14:39 jz Exp $
+// $Id: spooler_log.cxx,v 1.36 2002/04/06 20:07:39 jz Exp $
 
 #include "../kram/sos.h"
 #include "spooler.h"
@@ -399,8 +399,11 @@ spooler_com::Imail* Prefix_log::mail()
         if( !_subject  .empty() )  set_mail_subject  ( _subject ),    _subject   = "";
         if( !_body     .empty() )  set_mail_body     ( _body ),       _body      = "";
 
-        CComBSTR jobname_bstr = _jobname.c_str();
-        _mail->add_header_field( CComBSTR("X-SOS-Spooler-Job"), jobname_bstr );
+        if( _job )
+        {
+            CComBSTR jobname_bstr = _job->name().c_str();
+            _mail->add_header_field( CComBSTR("X-SOS-Spooler-Job"), jobname_bstr );
+        }
     }
 
     return _mail;
@@ -603,7 +606,7 @@ void Prefix_log::log( Log_level level, const string& line )
     //{
     //}
 
-    //if( level == log_error  &&  _job  &&  !_job->has_error() )  _job->set_error( Xc( "SPOOLER-120", line.c_str() ) );
+    if( level == log_error  &&  _job  &&  !_job->has_error() )  _job->set_error_xc_only( Xc( "SPOOLER-140", line.c_str() ) );
 
     if( _highest_level < level )  _highest_level = level, _highest_msg = line;
     if( level < _log_level )  return;

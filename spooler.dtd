@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- $Id: spooler.dtd,v 1.33 2002/04/04 17:18:37 jz Exp $   Joacim Zschimmer,  (C) 2000 SOS GmbH Berlin  -->
+<!-- $Id: spooler.dtd,v 1.34 2002/04/06 20:07:38 jz Exp $   Joacim Zschimmer,  (C) 2000 SOS GmbH Berlin  -->
 
 
 <!ELEMENT spooler               ( config+ | command | answer )>
@@ -127,11 +127,18 @@
 
 <!-- KOMMANDOS  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
-<!ELEMENT command               ( show_state | modify_spooler | modify_job | add_jobs | signal_object )+ >
+<!ELEMENT command               ( show_state | show_history | modify_spooler | modify_job | add_jobs | signal_object )+ >
 
-<!ELEMENT show_state            EMPTY>                                  <!-- Liefert den Zustand des Spoolers -->
+<!ELEMENT show_state            EMPTY>                                             <!-- Liefert den Zustand des Spoolers -->
 <!ATTLIST show_state            what                (standard|all) 'standard'>     <!-- what="" ist wie what="standard", what="all" liefert <description> -->
-                                                                        <!-- Antwort: <state> -->
+
+                                                                                   <!-- Antwort: <state> -->
+
+<!ELEMENT show_history          EMPTY>
+<!ATTLIST show_history          job                 CDATA #REQUIRED>
+<!ATTLIST show_history          what                (standard|all) 'standard'>     <!-- what="" ist wie what="standard", what="all" liefert <description> -->
+<!ATTLIST show_history          tail                CDATA #IMPLIED>                <!-- Anzahl der letzten Einträge. Default 10 -->
+
 
 <!ELEMENT modify_spooler        EMPTY>
 <!ATTLIST modify_spooler        cmd                 ( pause
@@ -140,6 +147,7 @@
                                                     | reload
                                                     | terminate
                                                     | terminate_and_restart
+                                                    | let_run_terminate_and_restart
                                                     | abort_immediately             
                                                     | abort_immediately_and_restart ) #IMPLIED>
 <!ATTLIST modify_spooler        suspended           (yes|no) #IMPLIED>

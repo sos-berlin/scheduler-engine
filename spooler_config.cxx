@@ -1,4 +1,4 @@
-// $Id: spooler_config.cxx,v 1.32 2002/04/04 17:18:38 jz Exp $
+// $Id: spooler_config.cxx,v 1.33 2002/04/06 20:07:39 jz Exp $
 
 //#include <precomp.h>
 
@@ -188,6 +188,8 @@ void Period::set_xml( const xml::Element_ptr& element, const Period* deflt )
             else
                 _repeat = as_double( repeat );
         }
+
+        if( _repeat == 0 )  _repeat = latter_day;
     }
 
     string end = as_string( element->getAttribute( L"end" ) );

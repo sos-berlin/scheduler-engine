@@ -1,4 +1,4 @@
-// $Id: spooler_com.cxx,v 1.36 2002/04/06 16:31:51 jz Exp $
+// $Id: spooler_com.cxx,v 1.37 2002/04/06 20:07:39 jz Exp $
 /*
     Hier sind implementiert
 
@@ -1061,6 +1061,25 @@ STDMETHODIMP Com_task::put_history_field( BSTR name, VARIANT* value )
     return hr;
 }
 
+//---------------------------------------------------------------------------------Com_task::get_id
+
+HRESULT Com_task::get_id( int* result )
+{
+    HRESULT hr = NOERROR;
+
+    THREAD_LOCK( _lock )
+    try
+    {
+        if( !_task )  throw_xc( "SPOOLER-122" );
+
+        *result = _task->id();
+    }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Task.id" ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Task.id" ); }
+
+    return hr;
+}
+
 //---------------------------------------------------------------------------Com_thread::Com_thread
 
 Com_thread::Com_thread( Thread* thread )
@@ -1254,6 +1273,20 @@ STDMETHODIMP Com_spooler::get_log_dir( BSTR* result )
     {
         if( !_spooler )  return E_POINTER;
         THREAD_LOCK( _spooler->_lock )  *result = SysAllocString_string( _spooler->_log_directory );
+    }
+
+    return NOERROR;
+}
+
+//-------------------------------------------------------Com_spooler::let_run_terminate_and_restart
+
+STDMETHODIMP Com_spooler::let_run_terminate_and_restart()
+{
+    THREAD_LOCK( _lock )
+    {
+        if( !_spooler )  return E_POINTER;
+
+        _spooler->cmd_let_run_terminate_and_restart();
     }
 
     return NOERROR;

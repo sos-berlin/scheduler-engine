@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.77 2002/04/06 16:31:51 jz Exp $
+// $Id: spooler_task.cxx,v 1.78 2002/04/06 20:07:40 jz Exp $
 /*
     Hier sind implementiert
 
@@ -321,7 +321,7 @@ void Job::init()
 
     _log.set_prefix( obj_name() );
     _log.set_profile_section( profile_section() );
-    _log.set_jobname( _name );
+    _log.set_job( this );
 
     _event.set_name( obj_name() );
     _event.add_to( &_thread->_wait_handles );
@@ -872,42 +872,44 @@ void Job::task_to_start()
         dequeued = dequeue_task(now);
         if( dequeued )  _task->_cause = _task->_start_at? cause_queue_at : cause_queue;
 
-        
-        if( _period._single_start  &&  now >= _next_start_time )  
+        if( _spooler->state() != Spooler::s_stopping_let_run )  
         {
-            cause = cause_period_single;     
-            //_log.debug( "Task startet wegen single_start=" + _period.begin().as_string() );
-        }
-        else
-            select_period(now);
-
-        if( cause                      // Auf weitere Anlässe prüfen und diese protokollieren
-         || is_in_period(now) )
-        {
-            THREAD_LOCK( _lock )
+            if( _period._single_start  &&  now >= _next_start_time )  
             {
-                if( _start_once )              cause = cause_period_once,  _start_once = false,  _log.debug( "Task startet wegen <run_time once=\"yes\">" );
+                cause = cause_period_single;     
+                //_log.debug( "Task startet wegen single_start=" + _period.begin().as_string() );
+            }
+            else
+                select_period(now);
+
+            if( cause                      // Auf weitere Anlässe prüfen und diese protokollieren
+             || is_in_period(now) )
+            {
+                THREAD_LOCK( _lock )
+                {
+                    if( _start_once )              cause = cause_period_once,  _start_once = false,  _log.debug( "Task startet wegen <run_time once=\"yes\">" );
                                                                               
-                if( _event.signaled() )        cause = cause_signal,                             _log.debug( "Task startet wegen " + _event.as_string() );
+                    if( _event.signaled() )        cause = cause_signal,                             _log.debug( "Task startet wegen " + _event.as_string() );
                                                                                       
-                if( now >= _next_start_time )  cause = cause_period_repeat,                      _log.debug( "Task startet, weil Job-Startzeit erreicht: " + _next_start_time.as_string() );
+                    if( now >= _next_start_time )  cause = cause_period_repeat,                      _log.debug( "Task startet, weil Job-Startzeit erreicht: " + _next_start_time.as_string() );
 
-                for( Directory_watcher_list::iterator it = _directory_watcher_list.begin(); it != _directory_watcher_list.end(); it++ )
-                {
-                    if( (*it)->signaled_then_reset() )
+                    for( Directory_watcher_list::iterator it = _directory_watcher_list.begin(); it != _directory_watcher_list.end(); it++ )
                     {
-                        cause = cause_directory;
-                        _log.debug( "Task startet wegen eines Ereignisses für Verzeichnis " + (*it)->directory() );
+                        if( (*it)->signaled_then_reset() )
+                        {
+                            cause = cause_directory;
+                            _log.debug( "Task startet wegen eines Ereignisses für Verzeichnis " + (*it)->directory() );
 
-                        if( !(*it)->handle() )  it = _directory_watcher_list.erase( it );  // Folge eines Fehlers, s. Directory_watcher::set_signal
+                            if( !(*it)->handle() )  it = _directory_watcher_list.erase( it );  // Folge eines Fehlers, s. Directory_watcher::set_signal
+                        }
                     }
-                }
 
-                if( !dequeued && cause )
-                {
-                    create_task( NULL, "", now );
-                    dequeue_task( now );
-                    _task->_cause = cause;
+                    if( !dequeued && cause )
+                    {
+                        create_task( NULL, "", now );
+                        dequeue_task( now );
+                        _task->_cause = cause;
+                    }
                 }
             }
         }
@@ -1062,6 +1064,13 @@ void Job::set_mail_defaults()
     _log.set_mail_body( body + "Das Jobprotokoll liegt dieser Nachricht bei.", is_error );
 }
 
+//---------------------------------------------------------------------------Job::set_error_xc_only
+
+void Job::set_error_xc_only( const Xc& x )
+{
+    THREAD_LOCK( _lock )  _error = x;
+}
+
 //--------------------------------------------------------------------------------Job::set_error_xc
 
 void Job::set_error_xc( const Xc& x )
@@ -1071,7 +1080,7 @@ void Job::set_error_xc( const Xc& x )
     
     _log.error( msg + x.what() );
 
-    THREAD_LOCK( _lock )  _error = x;
+    set_error_xc_only( x );
 
     _repeat = 0;
 }
@@ -1564,10 +1573,14 @@ bool Task::step()
     {
         result = do_step();
 
-        _job->_thread->_step_count++;
-        _job->_step_count++;
-        _step_count++;
         _job->_process_ok |= result;
+
+        if( _step_count == 0  ||  has_step_count() )        // Bei Process_task nur einen Schritt zählen
+        {
+            _job->_thread->_step_count++;
+            _job->_step_count++;
+            _step_count++;
+        }
     }
     catch( const Xc& x        ) { _job->set_error(x); return false; }
     catch( const exception& x ) { _job->set_error(x); return false; }

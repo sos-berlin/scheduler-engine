@@ -1,4 +1,4 @@
-// $Id: spooler_log.h,v 1.15 2002/04/05 22:14:39 jz Exp $
+// $Id: spooler_log.h,v 1.16 2002/04/06 20:07:39 jz Exp $
 
 #ifndef __SPOOLER_LOG_H
 #define __SPOOLER_LOG_H
@@ -84,9 +84,9 @@ struct Prefix_log
     Time                        collect_max                 ()                                  { return _collect_max; }
     Time                        collect_end                 ()                                  { return _first_send? _first_send + _collect_max : 0; }
 
+    void                    set_job                         ( Job* job )                        { _job = job; }
     void                    set_prefix                      ( const string& prefix )            { _prefix = prefix; }
     void                    set_profile_section             ( const string& section )           { _section = section; }
-    void                    set_jobname                     ( const string& jobname )           { _jobname = jobname; }
 
     void                        operator()                  ( const string& line )              { info( line ); }
     void                        debug9                      ( const string& line )              { log( log_debug9, line ); }
@@ -134,9 +134,9 @@ struct Prefix_log
     Fill_zero                  _zero_;
     Spooler*                   _spooler;
     Log*                       _log;
+    Job*                       _job;
     string                     _prefix;
     string                     _section;
-    string                     _jobname;
     int                        _log_level;                  // Ab diesem Level protokollieren, sonst nicht
     int                        _highest_level;
     string                     _highest_msg;

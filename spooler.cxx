@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.86 2002/04/05 13:21:16 jz Exp $
+// $Id: spooler.cxx,v 1.87 2002/04/06 20:07:38 jz Exp $
 /*
     Hier sind implementiert
 
@@ -361,12 +361,13 @@ string Spooler::state_name( State state )
 {
     switch( state )
     {
-        case s_stopped:     return "stopped";
-        case s_starting:    return "starting";
-        case s_running:     return "running";
-        case s_paused:      return "paused";
-        case s_stopping:    return "stopping";
-        default:            return as_string( (int)state );
+        case s_stopped:             return "stopped";
+        case s_starting:            return "starting";
+        case s_running:             return "running";
+        case s_paused:              return "paused";
+        case s_stopping:            return "stopping";
+        case s_stopping_let_run:    return "stopping_let_run";
+        default:                    return as_string( (int)state );
     }
 }
 
@@ -521,7 +522,7 @@ void Spooler::stop()
 {
     assert( GetCurrentThreadId() == _thread_id );
 
-    set_state( s_stopping );
+    set_state( _state_cmd == sc_let_run_terminate_and_restart? s_stopping_let_run : s_stopping );
 
     //_log.msg( "Spooler::stop" );
 
@@ -542,7 +543,8 @@ void Spooler::stop()
 
     _script_instance.close();
 
-    if( _state_cmd == sc_terminate_and_restart )  spooler_restart( _is_service );
+    if( _state_cmd == sc_terminate_and_restart 
+     || _state_cmd == sc_let_run_terminate_and_restart )  spooler_restart( _is_service );
 
     _db.close();
 
@@ -572,6 +574,7 @@ void Spooler::run()
         if( _state_cmd == sc_reload                )  break;
         if( _state_cmd == sc_terminate             )  break;
         if( _state_cmd == sc_terminate_and_restart )  break;
+        if( _state_cmd == sc_let_run_terminate_and_restart )  break;
         _state_cmd = sc_none;
 
         _wait_handles.wait_until( latter_day );
@@ -642,6 +645,15 @@ void Spooler::cmd_terminate_and_restart()
 
     _state_cmd = sc_terminate_and_restart;
     signal( "terminate_and_restart" );
+}
+
+//-------------------------------------------------------Spooler::cmd_let_run_terminate_and_restart
+// Anderer Thread
+
+void Spooler::cmd_let_run_terminate_and_restart()
+{
+    _state_cmd = sc_let_run_terminate_and_restart;
+    signal( "let_run_terminate_and_restart" );
 }
 
 //----------------------------------------------------------------------------------Spooler::launch

@@ -1,4 +1,4 @@
-// $Id: spooler_thread.h,v 1.15 2002/03/20 08:49:03 jz Exp $
+// $Id: spooler_thread.h,v 1.16 2002/04/06 20:07:41 jz Exp $
 
 #ifndef __SPOOLER_THREAD_H
 #define __SPOOLER_THREAD_H
@@ -22,6 +22,7 @@ struct Thread : Sos_self_deleting
     const string&               name                        () const                        { return _name; }
     Job*                        current_job                 () const                        { return _current_job; }
     string                      include_path                () const                        { return _include_path; }
+    bool                        any_tasks_there             ();
 
     void                        init                        ();
     void                        close                       ();

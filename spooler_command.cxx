@@ -1,4 +1,4 @@
-// $Id: spooler_command.cxx,v 1.44 2002/04/05 22:14:38 jz Exp $
+// $Id: spooler_command.cxx,v 1.45 2002/04/06 20:07:39 jz Exp $
 /*
     Hier ist implementiert
 
@@ -108,7 +108,7 @@ xml::Element_ptr Command_processor::execute_show_state( const xml::Element_ptr& 
  
     state_element->setAttribute( "time"                 , as_dom_string( Sos_optional_date_time::now().as_string() ) );
     state_element->setAttribute( "spooler_running_since", as_dom_string( Sos_optional_date_time( _spooler->start_time() ).as_string() ) );
-
+    state_element->setAttribute( "state"                , as_dom_string( _spooler->state_name() ) );
     state_element->setAttribute( "log_file"             , as_dom_string( _spooler->_log.filename() ) );
 
     double cpu_time = get_cpu_time();
@@ -158,6 +158,8 @@ xml::Element_ptr Command_processor::execute_modify_spooler( const xml::Element_p
         if( cmd == "terminate"             )  _spooler->cmd_terminate();
         else
         if( cmd == "terminate_and_restart" )  _spooler->cmd_terminate_and_restart();
+        else
+        if( cmd == "let_run_terminate_and_restart" )  _spooler->cmd_let_run_terminate_and_restart();
         else
         if( cmd == "abort_immediately"     )  TerminateProcess(GetCurrentProcess(),1);  // _exit() lässt noch Delphi-Code ausführen.
         else

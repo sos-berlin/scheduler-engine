@@ -1,4 +1,4 @@
-// $Id: spooler.h,v 1.73 2002/04/05 13:21:16 jz Exp $
+// $Id: spooler.h,v 1.74 2002/04/06 20:07:38 jz Exp $
 
 #ifndef __SPOOLER_H
 #define __SPOOLER_H
@@ -86,13 +86,6 @@ string                          extension_of_path           ( const string& );
 namespace spooler {
 
 
-enum Archive_switch
-{
-    arc_no = 0,
-    arc_yes,
-    arc_gzip
-};
-
 string                          text_from_xml_with_include  ( const xml::Element_ptr&, const string& include_path );
 int                             read_profile_on_process     ( const string& profile, const string& section, const string& entry, int deflt );
 Archive_switch                  read_profile_archive        ( const string& profile, const string& section, const string& entry, Archive_switch deflt );
@@ -115,6 +108,7 @@ struct Spooler
         s_running,
         s_paused,
         s_stopping,
+        s_stopping_let_run,
         s__max
     };
 
@@ -124,6 +118,7 @@ struct Spooler
         sc_stop,                // s_running | s_paused -> s_stopped
         sc_terminate,           // s_running | s_paused -> s_stopped, exit()
         sc_terminate_and_restart,
+        sc_let_run_terminate_and_restart,
         sc_load_config,         
         sc_reload,
         sc_pause,               // s_running -> s_paused
@@ -171,6 +166,7 @@ struct Spooler
     void                        cmd_stop                    ();
     void                        cmd_terminate               ();
     void                        cmd_terminate_and_restart   ();
+    void                        cmd_let_run_terminate_and_restart();
     void                        cmd_load_config             ( const xml::Element_ptr& );
 
 

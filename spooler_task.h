@@ -1,4 +1,4 @@
-// $Id: spooler_task.h,v 1.44 2002/04/06 16:31:51 jz Exp $
+// $Id: spooler_task.h,v 1.45 2002/04/06 20:07:40 jz Exp $
 
 #ifndef __SPOOLER_TASK_H
 #define __SPOOLER_TASK_H
@@ -212,6 +212,7 @@ struct Job : Sos_self_deleting
     void                        select_period               ( Time = Time::now() );
     bool                        is_in_period                ( Time = Time::now() );
     bool                        its_current_task            ( Task* task )              { return task == _task; }
+    bool                        queue_filled                ()                          { return !_task_queue.empty(); }
 
     Sos_ptr<Task>               create_task                 ( const CComPtr<spooler_com::Ivariable_set>& params, const string& task_name, Time = latter_day );
     bool                        dequeue_task                ( Time now = Time::now() );
@@ -236,11 +237,12 @@ struct Job : Sos_self_deleting
     void                        set_repeat                  ( double seconds )          { _log.debug( "repeat=" + as_string(seconds) );  _repeat = seconds; }
 
     void                        set_error_xc                ( const Xc& );
+    void                        set_error_xc_only           ( const Xc& );
     void                        set_error                   ( const Xc& x )             { set_error_xc( x ); }
     void                        set_error                   ( const exception& );
     void                        set_error                   ( const _com_error& );
     Xc_copy                     error                       ()                          { Xc_copy result; THREAD_LOCK( _lock )  result = _error;  return result; }
-    bool                        has_error                   ()                          { return !!_error || _log.highest_level() >= log_error; }
+    bool                        has_error                   ()                          { return !!_error; }  //|| _log.highest_level() >= log_error; }
     void                        reset_error                 ()                          { _error = NULL;  _log.reset_highest_level(); }
 
     void                        set_state                   ( State );
@@ -345,6 +347,8 @@ struct Task : Sos_self_deleting
                                 Task                        ( Spooler*, const Sos_ptr<Job>& );
                                ~Task                        ();
 
+    int                         id                          ()                              { return _id; }
+
     void                        cmd_end                     ();
 
     void                        close                       ();
@@ -383,6 +387,7 @@ struct Task : Sos_self_deleting
     virtual bool                do_step                     () = 0;
     virtual void                do_on_success               () = 0;
     virtual void                do_on_error                 () = 0;
+    virtual bool                has_step_count              ()                              { return true; }
 
     Fill_zero                  _zero_;
     Spooler*                   _spooler;
@@ -476,6 +481,7 @@ struct Process_task : Task
     bool                        do_step                     ();
     void                        do_on_success               ()                                  {}
     void                        do_on_error                 ()                                  {}
+    virtual bool                has_step_count              ()                                  { return false; }
 
     Process_id                 _process_id;
     Event                      _process_handle;

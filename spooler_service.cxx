@@ -1,4 +1,4 @@
-// $Id: spooler_service.cxx,v 1.15 2002/03/18 10:11:39 jz Exp $
+// $Id: spooler_service.cxx,v 1.16 2002/04/06 20:07:40 jz Exp $
 /*
     Hier sind implementiert
 
@@ -34,6 +34,7 @@ static const char               service_description[]       = "Hintergrund-Jobs 
 static const int                stop_timeout                = 30;
 
 static bool                     terminate_immediately       = false;
+static bool                     service_stop                = false;                        // STOP-Kommando von der Dienstesteuerung (und nicht von TCP-Schnittstelle)
 
 //-----------------------------------------------------------------------------------Service_handle
 
@@ -253,16 +254,19 @@ static void set_service_status( int spooler_error, int state = 0 )
 
     SERVICE_STATUS service_status;
 
+    DWORD stop_pending = service_stop? SERVICE_STOP_PENDING     // Nur, wenn Dienstesteuerung den Spooler beendet (nicht, wenn ein TCP-Kdo beendet)
+                                     : SERVICE_RUNNING;
 
     service_status.dwServiceType                = SERVICE_WIN32_OWN_PROCESS;
 
     service_status.dwCurrentState               = !spooler_ptr? SERVICE_STOPPED 
-                                                : spooler_ptr->state() == Spooler::s_stopped ? SERVICE_PAUSED //SetServiceStatus() ruft exit()!
-                                                : spooler_ptr->state() == Spooler::s_starting? SERVICE_START_PENDING
-                                                : spooler_ptr->state() == Spooler::s_stopping? SERVICE_STOP_PENDING
-                                                : spooler_ptr->state() == Spooler::s_running ? SERVICE_RUNNING
-                                                : spooler_ptr->state() == Spooler::s_paused  ? SERVICE_PAUSED
-                                                                                             : SERVICE_START_PENDING; 
+                                                : spooler_ptr->state() == Spooler::s_stopped         ? SERVICE_PAUSED //SetServiceStatus() ruft exit()!
+                                                : spooler_ptr->state() == Spooler::s_starting        ? SERVICE_START_PENDING
+                                                : spooler_ptr->state() == Spooler::s_stopping        ? stop_pending
+                                                : spooler_ptr->state() == Spooler::s_stopping_let_run? stop_pending
+                                                : spooler_ptr->state() == Spooler::s_running         ? SERVICE_RUNNING
+                                                : spooler_ptr->state() == Spooler::s_paused          ? SERVICE_PAUSED
+                                                                                                     : SERVICE_START_PENDING; 
 
     service_status.dwControlsAccepted           = SERVICE_ACCEPT_STOP 
                                                 | SERVICE_ACCEPT_PAUSE_CONTINUE 
@@ -336,6 +340,7 @@ static void __stdcall Handler( DWORD dwControl )
         {
             case SERVICE_CONTROL_STOP:              // Requests the service to stop.  
             {
+                service_stop = true;
                 spooler_ptr->cmd_terminate();
                 set_service_status( 0, SERVICE_STOP_PENDING );
 
@@ -347,10 +352,12 @@ static void __stdcall Handler( DWORD dwControl )
             }
 
             case SERVICE_CONTROL_PAUSE:             // Requests the service to pause.  
+                service_stop = false;
                 spooler_ptr->cmd_pause();
                 break;
 
             case SERVICE_CONTROL_CONTINUE:          // Requests the paused service to resume.  
+                service_stop = false;
                 spooler_ptr->cmd_continue();
                 break;
 

@@ -1,4 +1,4 @@
-// $Id: spooler_history.cxx,v 1.6 2002/04/06 16:31:51 jz Exp $
+// $Id: spooler_history.cxx,v 1.7 2002/04/06 20:07:39 jz Exp $
 
 #include "../kram/sos.h"
 #include "spooler.h"
@@ -336,7 +336,7 @@ void Job_history::open()
                 _filename = make_absolute_filename( _spooler->log_directory(), _filename );
                 if( _filename[0] == '*' )  return;      // log_dir = *stderr
 
-                if( arc )  archive( _filename );  
+                if( arc )  archive( arc, _filename );  
 
                 _file.open( _filename, O_BINARY | O_RDWR | O_CREAT | O_TRUNC, 0600 );
 
@@ -373,25 +373,27 @@ void Job_history::close()
 
 //-----------------------------------------------------------------------------Job_history::archive
 
-void Job_history::archive( const string& filename )
+void Job_history::archive( Archive_switch arc, const string& filename )
 {
-/*
-    if( file_exists( _filename ) ) 
+    if( GetFileAttributes( filename.c_str() ) != 0 ) 
     {
-        string arc_filename = ...
+        string ext   = extension_of_path( filename );
+        string rumpf = filename;
+        if( ext != "" )  rumpf = filename.substr( 0, filename.length() - ext.length() - 1 );
+
+        Sos_optional_date_time time = Time::now();
+        string arc_filename = rumpf + "." + time.formatted( "yyyy-mm-dd-HHMMSS" );
+        if( ext != "" )  arc_filename +=  "." + ext;
+
         if( arc == arc_gzip )
         {
-            if( arc == arc_gzip )  arc_filename = "gzip | " + arc_filename;
-            copy_file( "file -b " + _filename, arc_filename );
+            copy_file( "file -b " + filename, "gzip | " + arc_filename + ".gz" );
         }
         else
         {
-            rename_file( _filename, _arc_filename );
+            rename_file( filename, arc_filename );
         }
     }
-
-    // Was tun im Fehlerfall? Exception in Job::init() abfangen und protokollieren
-*/
 }
 
 //-----------------------------------------------------------------------Job_history::append_tabbed

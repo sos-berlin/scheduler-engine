@@ -1,4 +1,4 @@
-// $Id: spooler_thread.cxx,v 1.28 2002/03/20 08:49:03 jz Exp $
+// $Id: spooler_thread.cxx,v 1.29 2002/04/06 20:07:40 jz Exp $
 /*
     Hier sind implementiert
 
@@ -381,6 +381,23 @@ void Thread::remove_temporary_jobs()
     }
 }
 
+//--------------------------------------------------------------------------Thread::any_tasks_there
+
+bool Thread::any_tasks_there()
+{
+    if( _running_tasks_count > 0 )  return true;
+
+    THREAD_LOCK( _lock )
+    {
+        FOR_EACH( Job_list, _job_list, it )  
+        {
+            if( (*it)->queue_filled() )  return true;
+        }
+    }
+
+    return false;
+}
+
 //-------------------------------------------------------------------------------Thread::run_thread
 
 int Thread::run_thread()
@@ -400,7 +417,8 @@ int Thread::run_thread()
     {
         start();
 
-        while( _spooler->state() != Spooler::s_stopping  &&  _spooler->state() != Spooler::s_stopped )
+        while(   _spooler->state() != Spooler::s_stopping  
+           &&    _spooler->state() != Spooler::s_stopped  )
         {
             if( _spooler->state() == Spooler::s_paused )
             {
@@ -420,7 +438,12 @@ int Thread::run_thread()
 
                 remove_temporary_jobs();
 
-                if( _running_tasks_count == 0 )  wait();
+                if( _running_tasks_count == 0 )
+                {
+                    if( _spooler->state() == Spooler::s_stopping_let_run  &&  !any_tasks_there() )  break;
+
+                    wait();
+                }
             }
 
             _event.reset();
