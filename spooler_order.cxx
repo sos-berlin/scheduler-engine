@@ -1,4 +1,4 @@
-// $Id: spooler_order.cxx,v 1.19 2002/11/14 12:16:40 jz Exp $
+// $Id: spooler_order.cxx,v 1.20 2002/11/15 09:47:40 jz Exp $
 /*
     Hier sind implementiert
 
@@ -81,9 +81,9 @@ xml::Element_ptr Job_chain_node::dom( const xml::Document_ptr& document, Show_wh
 {
     xml::Element_ptr element = document.createElement( "job_chain_node" );
 
-                                           element.setAttribute( "state"      , string_from_variant( _state       ) );
-        if( _next_state.vt  != VT_ERROR )  element.setAttribute( "next_state" , string_from_variant( _next_state  ) );
-        if( _error_state.vt != VT_ERROR )  element.setAttribute( "error_state", string_from_variant( _error_state ) );
+                                        element.setAttribute( "state"      , string_from_variant( _state       ) );
+        if( !_next_state.is_empty()  )  element.setAttribute( "next_state" , string_from_variant( _next_state  ) );
+        if( !_error_state.is_empty() )  element.setAttribute( "error_state", string_from_variant( _error_state ) );
    
         if( _job )
         {
@@ -150,9 +150,7 @@ static Order::State normalized_state( const Order::State& state )
 {
     if( state.vt == VT_BSTR  &&  ( state.bstrVal == NULL || SysStringLen( state.bstrVal ) == 0 ) )
     {
-        VARIANT v;
-        v.vt = VT_ERROR;
-        return v;
+        return Order::State();
     }
     else
     {
@@ -173,16 +171,19 @@ void Job_chain::add_job( Job* job, const Order::State& state, const Order::State
     node->_job   = job;
     node->_state = state;
 
-    if( node->_state.vt == VT_ERROR )  node->_state = job->name();
+    if( node->_state.is_error() )  node->_state = job->name();      // Parameter state nicht angegeben? Default ist der Jobname
 
     node->_next_state  = normalized_state( next_state );
     node->_error_state = normalized_state( error_state );
+
+    // Bis finish() bleibt nicht angegebener Zustand als VT_ERROR/is_error (fehlender Parameter) stehen.
+    // finish() unterscheidet dann die nicht angegebenen Zustände von VT_ERROR und setzt Defaults oder VT_EMPTY.
 
     THREAD_LOCK( _lock )
     {
         if( node_from_state_or_null( node->_state ) )  
         {
-            if( !job  &&  next_state.vt == VT_ERROR  &&  error_state.vt == VT_ERROR )  return;     // job_chain.add_end_state() darf mehrfach gerufen werden.
+            if( !job  &&  next_state.is_error()  &&  error_state.is_error() )  return;     // job_chain.add_end_state() darf mehrfach gerufen werden.
             throw_xc( "SPOOLER-150", error_string_from_variant(node->_state), name() );
         }
 
@@ -203,8 +204,7 @@ void Job_chain::finish()
         if( !_chain.empty() )
         {
             Job_chain_node* n = *_chain.rbegin();
-            VARIANT error; VariantInit( &error );  error.vt = VT_ERROR;
-            if( n->_job  &&  n->_next_state.vt == VT_ERROR )  add_job( NULL, "<END_STATE>", error, error );    // Endzustand fehlt? Dann hinzufügen
+            if( n->_job  &&  n->_next_state.is_error() )  add_job( NULL, "<END_STATE>" );    // Endzustand fehlt? Dann hinzufügen
         }
 
         for( Chain::iterator it = _chain.begin(); it != _chain.end(); it++ )
@@ -212,10 +212,13 @@ void Job_chain::finish()
             Job_chain_node* n = *it;
             Chain::iterator next = it;  next++;
 
-            if( n->_next_state.vt == VT_ERROR  &&  next != _chain.end() )  n->_next_state = (*next)->_state;
+            if( n->_next_state.is_error()  &&  next != _chain.end() )  n->_next_state = (*next)->_state;
 
-            if( n->_next_state.vt  != VT_ERROR )  n->_next_node  = node_from_state( n->_next_state );
-            if( n->_error_state.vt != VT_ERROR )  n->_error_node = node_from_state( n->_error_state );
+            if( !n->_next_state.is_error() )  n->_next_node  = node_from_state( n->_next_state );
+                                        else  n->_next_state = empty_variant;
+
+            if( !n->_error_state.is_error() )  n->_error_node  = node_from_state( n->_error_state );
+                                         else  n->_error_state = empty_variant;
         }
 
         _finished = true;

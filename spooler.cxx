@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.130 2002/11/14 12:16:40 jz Exp $
+// $Id: spooler.cxx,v 1.131 2002/11/15 09:47:36 jz Exp $
 /*
     Hier sind implementiert
 
@@ -25,7 +25,7 @@
 #include "../kram/log.h"
 #include "../file/anyfile.h"
 #include "../kram/licence.h"
-#include "../kram/sos_mail_jmail.h"
+#include "../kram/sos_mail.h"
 
 #include "../zschimmer/zschimmer.h"
 using zschimmer::lcase;

@@ -1,4 +1,4 @@
-// $Id: spooler_com.cxx,v 1.66 2002/11/13 13:12:49 jz Exp $
+// $Id: spooler_com.cxx,v 1.67 2002/11/15 09:47:38 jz Exp $
 /*
     Hier sind implementiert
 
@@ -2207,6 +2207,20 @@ STDMETHODIMP Com_job_chain_node::get_error_node( Ijob_chain_node** result )
     *result = ((Job_chain_node*)(this))->_error_node; 
     if( *result )  (*result)->AddRef();
     return S_OK;
+}
+
+//---------------------------------------------------------------Com_job_chain_node::get_next_state
+
+STDMETHODIMP Com_job_chain_node::get_next_state( VARIANT* result )
+{ 
+    return VariantCopy( result, &((Job_chain_node*)(this))->_next_state );
+}
+
+//--------------------------------------------------------------Com_job_chain_node::get_error_state
+
+STDMETHODIMP Com_job_chain_node::get_error_state( VARIANT* result )   
+{ 
+    return VariantCopy( result, &((Job_chain_node*)(this))->_error_state );
 }
 
 //----------------------------------------------------------------------Com_job_chain_node::get_job

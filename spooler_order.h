@@ -1,4 +1,4 @@
-// $Id: spooler_order.h,v 1.15 2002/11/14 12:16:40 jz Exp $
+// $Id: spooler_order.h,v 1.16 2002/11/15 09:47:40 jz Exp $
 
 #ifndef __SPOOLER_ORDER_H
 #define __SPOOLER_ORDER_H
@@ -145,7 +145,7 @@ struct Job_chain : Com_job_chain
 
     bool                        finished                () const                                    { return _finished; }
 
-    void                        add_job                 ( Job*, const State& input_state, const State& output_state, const State& error_state );
+    void                        add_job                 ( Job*, const State& input_state, const State& output_state = error_variant, const State& error_state = error_variant );
     void                        finish                  ();
 
     Job_chain_node*             node_from_state         ( const State& );
@@ -231,6 +231,8 @@ struct Order_queue : Com_order_queue
 };
 
 //-------------------------------------------------------------------------------------------------
+
+//string                          string_from_state       ( Order::State );
 
 } //namespace spooler
 } //namespace sos

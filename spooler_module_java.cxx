@@ -1,4 +1,4 @@
-// $Id: spooler_module_java.cxx,v 1.11 2002/11/09 15:56:59 jz Exp $
+// $Id: spooler_module_java.cxx,v 1.12 2002/11/15 09:47:39 jz Exp $
 /*
     Hier sind implementiert
 
@@ -119,8 +119,11 @@ static jobject jobject_from_variant( JNIEnv* jenv, const VARIANT& v )
 
     switch( v.vt )
     {
-      //case VT_EMPTY:
+        case VT_EMPTY:
+            return jenv->NewString( L"", 0 );       // Für Job_chain_node.next_state, .error_state ("" wird zu VT_EMPTY)
+
       //case VT_NULL: 
+      //    return NULL;    //?
 
         case VT_I2:
         {
@@ -169,9 +172,13 @@ static jobject jobject_from_variant( JNIEnv* jenv, const VARIANT& v )
             result = jenv->NewObject( cls, constructor_id, (jdouble)V_R8(&v) );
             break;
         }
+
       //case VT_CY: 
       //case VT_DATE:       
-      //case VT_ERROR:
+
+        case VT_ERROR:
+            throw_com( v.scode, "Variant VT_ERROR" );
+
         case VT_BOOL:
         {
             jclass cls = jenv->FindClass( "java/lang/Boolean" );
@@ -273,6 +280,7 @@ static jobject jobject_from_variant( JNIEnv* jenv, const VARIANT& v )
       //case VT_HRESULT:
       //case VT_PTR:
       //case VT_FILETIME:
+
         case VT_BSTR: 
         {
             result = jstring_from_bstr( jenv, V_BSTR(&v) );
@@ -319,7 +327,9 @@ static jobject jobject_from_variant( JNIEnv* jenv, const VARIANT& v )
       //case VT_BLOB_OBJECT:
       //case VT_CF:
       //case VT_CLSID:
-        default:    ;
+
+        default:  
+            throw_xc( "SPOOLER-178", variant_type_name(v) );
     }
 
     return result;

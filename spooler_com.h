@@ -1,4 +1,4 @@
-// $Id: spooler_com.h,v 1.54 2002/11/14 11:10:35 jz Exp $
+// $Id: spooler_com.h,v 1.55 2002/11/15 09:47:38 jz Exp $
 
 #ifndef __SPOOLER_COM_H
 #define __SPOOLER_COM_H
@@ -484,6 +484,8 @@ struct Com_job_chain_node : spooler_com::Ijob_chain_node,
     STDMETHODIMP            get_next_node               ( spooler_com::Ijob_chain_node** );
     STDMETHODIMP            get_error_node              ( spooler_com::Ijob_chain_node** );
     STDMETHODIMP            get_job                     ( spooler_com::Ijob** );
+    STDMETHODIMP            get_next_state              ( VARIANT* );
+    STDMETHODIMP            get_error_state             ( VARIANT* );
 };
 
 //----------------------------------------------------------------------------------------Com_order

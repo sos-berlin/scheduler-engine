@@ -1,4 +1,4 @@
-// $Id: spooler.odl,v 1.49 2002/11/08 18:56:33 jz Exp $
+// $Id: spooler.odl,v 1.50 2002/11/15 09:47:37 jz Exp $
 
 // Anweisung: midl /nologo /error all /out $(OutDir) $(InputPath)
 
@@ -652,6 +652,12 @@ library spooler
 
         [propget]
         HRESULT                 job                     ( [out,retval] Ijob** result );
+
+        [propget]
+        HRESULT                 next_state              ( [out,retval] VARIANT* result );
+
+        [propget]
+        HRESULT                 error_state             ( [out,retval] VARIANT* result );
     }
 
     [
