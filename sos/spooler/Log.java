@@ -1,4 +1,4 @@
-// $Id: Log.java,v 1.7 2004/07/13 11:28:06 jz Exp $
+// $Id: Log.java,v 1.8 2004/07/13 16:12:44 jz Exp $
 
 package sos.spooler;
 
@@ -7,7 +7,7 @@ package sos.spooler;
  *
  * @see Job_impl#spooler_log
  * @author Joacim Zschimmer
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 
 public class Log extends Idispatch
@@ -119,7 +119,7 @@ public class Log extends Idispatch
     /** Mindestgewicht der Log-Ausgaben setzen.
      * 
      * @param level Gewicht, dass eine Log-Ausgabe haben muss, um im Protokoll zu erscheinen.
-     * @see level()
+     * @see #level()
      */
     public void             set_level                   ( int level )                               {                   com_call( ">level", level           ); }
     
@@ -153,7 +153,7 @@ public class Log extends Idispatch
     
     
     /**
-     * Liefert den mit {@link #set_new_filename()} gesetzten Dateiname.
+     * Liefert den mit {@link #set_new_filename(String)} gesetzten Dateiname.
      * 
      * @see #filename()
      */

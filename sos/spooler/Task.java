@@ -1,4 +1,4 @@
-// $Id: Task.java,v 1.7 2004/07/12 17:59:49 jz Exp $
+// $Id: Task.java,v 1.8 2004/07/13 16:12:44 jz Exp $
 
 package sos.spooler;
 
@@ -6,10 +6,12 @@ package sos.spooler;
  * Eine Task.
  * 
  * <p>
- * Eine Task kann wartent in der Task-Warteschlange des Jobs sein oder laufen.
+ * Eine Task kann wartend in der Task-Warteschlange des Jobs sein oder laufen.
+ * <p>
+ * Implementiert wird eine Task durch {@link Job_impl}.
  * 
  * @author Joacim Zschimmer
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 
 public class Task extends Idispatch
@@ -82,8 +84,10 @@ public class Task extends Idispatch
     
     
     
-    /**
-     * Liefert den Fehler der Task als {@link Error}.
+    /** Liefert den Fehler der Task als {@link Error}.
+     * 
+     * <p>
+     * Wenn kein Fehler vorliegt, wird ein Error-Objekt zurückgeliefert, dessen Aufruf is_error false liefert.
      */
     public Error            error               ()                                  { return (Error)        com_call( "<error"                          ); }
 

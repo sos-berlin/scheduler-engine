@@ -1,11 +1,17 @@
-// $Id: Job.java,v 1.7 2004/07/13 11:28:06 jz Exp $
+// $Id: Job.java,v 1.8 2004/07/13 16:12:43 jz Exp $
 
 package sos.spooler;
 
-/**
+/** Ein Job.
+ * 
+ * Ein Objekt dieser Klasse entspricht einem &lt;job> in der Konfiguration. 
+ * Von einem Job können nacheinander oder gleichzeitig Tasks ({@link Task}) laufen.
+ * <p>
+ * Implementiert wird ein Job mit {@link Job_impl}. 
+ * 
  * 
  * @author Joacim Zschimmer
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 
 public class Job extends Idispatch

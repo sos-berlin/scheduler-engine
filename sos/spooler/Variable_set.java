@@ -1,4 +1,4 @@
-// $Id: Variable_set.java,v 1.7 2004/07/13 14:22:21 jz Exp $
+// $Id: Variable_set.java,v 1.8 2004/07/13 16:12:44 jz Exp $
 
 package sos.spooler;
 
@@ -6,22 +6,24 @@ package sos.spooler;
  * Variablenmenge.
  * <p> 
  * Variablenmengen werden gebraucht für die scheduler-weiten Variablen und Task-Parameter.
- * Eine neue Variablenmenge wird mit {@link Spooler.create_variable_set()} angelegt.
+ * Eine neue Variablenmenge wird mit {@link Spooler#create_variable_set()} angelegt.
  * <p>
  * Die Großschreibung der Variablennamen ist relevant.
- * <p>
- * In Java ist ein Variablenwert ein String.
  * <p>
  * In COM (JavaScript, VBScript, Perl) ist ein Variablenwert ein Variant. 
  * Weil die Variablen in der Regel in die Scheduler-Datenbank geschrieben werden, sollten nur
  * nach String konvertierbare Variant-Werte verwendet werden (d.h. es sollten keine Objekte verwendet werden).  
- *  
+ * <p>
+ * In Java ist ein Variablenwert ein String. Wenn die Variable mit COM als Variant gesetzt worden ist, 
+ * wird beim Lesen der nach String konvertierte Wert zurückgegeben. 
+ * Null und Empty werden als null zurückgeliefert.
+ * Wenn ein Variant-Wert nicht konvertierbar ist, wird eine Exception ausgelöst.
  *
  * @see Spooler#variables()
  * @see Task#params()
  * @see Spooler#create_variable_set()
  * @author Joacim Zschimmer
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 
 public class Variable_set extends Idispatch
@@ -33,13 +35,13 @@ public class Variable_set extends Idispatch
      * <p><br/><b>Beispiel</b>
      * <pre>
      *     Variable_set variable_set = spooler.create_variable_set();                                                  
-     *     variable_set.set_var( "nachname", "Müller" );
+     *     variable_set.set_var( "nachname", "Meier" );
      * </pre>
      *
      * <p><br/><b>Beispiel in JavaScript</b>
      * <pre>
      *     var variable_set = spooler.create_variable_set();                                                  
-     *     variable_set( "nachname" ) = "Müller";
+     *     variable_set( "nachname" ) = "Meier";
      * </pre>
      * 
      * 
@@ -115,14 +117,15 @@ public class Variable_set extends Idispatch
      * <p><br/><b>Beispiel</b>
      * <pre>
      *     Variable_set variable_set = spooler.create_variable_set();
-     *     String xml = "&lt;?xml version='1.0'?>&gt;variable                                                  
+     *     String xml = "&lt;?xml version='1.0'?>&lt;variable_set>&lt;variable name='nachname' value='Meier'/>&lt;variable name='vorname' value='Hans'/>&lt;/variable_set>";                                                  
      *     variable_set.set_xml( xml );
      * </pre>
      *
      * <p><br/><b>Beispiel in JavaScript</b>
      * <pre>
      *     var variable_set = spooler.create_variable_set();                                                  
-     *     variable_set( "name" ) = "Müller";
+     *     var xml = "&lt;?xml version='1.0'?>&lt;variable_set>&lt;variable name='nachname' value='Meier'/>&lt;variable name='vorname' value='Hans'/>&lt;/variable_set>";                                                  
+     *     variable_set.xml = xml;
      * </pre>
      */
 
@@ -130,7 +133,17 @@ public class Variable_set extends Idispatch
 
 
     /** Liefert die Variablenmenge als XML-Dokument, wie in {@link #set_xml(String)} beschrieben.
-      * Das XML-Dokument kann {@link #set_xml(String)} übergeben werden.
+     * Das XML-Dokument kann {@link #set_xml(String)} übergeben werden.
+
+     * <p><br/><b>Beispiel</b>
+     * <pre>
+     *     spooler_log.debug( "xml=" + spooler_task.params().xml() );
+     * </pre>
+     *
+     * <p><br/><b>Beispiel in JavaScript</b>
+     * <pre>
+     *     spooler_log.debug( "xml=" + spooler_task.params.xml );
+     * </pre>
       */
 
     public String           xml                 ()                                  { return (String)       com_call( "<xml"                    ); }

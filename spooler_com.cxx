@@ -1,4 +1,4 @@
-// $Id: spooler_com.cxx,v 1.151 2004/06/05 08:57:49 jz Exp $
+// $Id: spooler_com.cxx,v 1.152 2004/07/13 16:12:43 jz Exp $
 /*
     Hier sind implementiert
 
@@ -603,7 +603,7 @@ void Com_variable_set::set_xml( const string& xml_text )
     if( FAILED(hr) )  throw_ole( hr, "Variable_set::xml" );
 }
 
-//------------------------------------------------------------------------Com_variable_set::put_xml
+//------------------------------------------------------------------------Com_variable_set::put_Xml
 
 STDMETHODIMP Com_variable_set::put_Xml( BSTR xml_text )  
 { 
