@@ -1,4 +1,4 @@
-// $Id: scheduler.js,v 1.2 2004/12/02 18:10:45 jz Exp $
+// $Id: scheduler.js,v 1.3 2004/12/02 19:43:34 jz Exp $
 
 //----------------------------------------------------------------------------------------------var
 
@@ -369,7 +369,6 @@ Scheduler.prototype.call_error_checked = function( method_name, arg1, arg2, arg3
 function Stylesheet( url )
 {
     var xml_http = window.XMLHttpRequest? new XMLHttpRequest() : new ActiveXObject( "Msxml2.XMLHTTP" );
-    
     xml_http.open( "GET", url, false );
     xml_http.send( null );
     
