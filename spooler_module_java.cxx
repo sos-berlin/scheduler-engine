@@ -1,4 +1,4 @@
-// $Id: spooler_module_java.cxx,v 1.12 2002/11/15 09:47:39 jz Exp $
+// $Id: spooler_module_java.cxx,v 1.13 2002/11/21 09:17:32 jz Exp $
 /*
     Hier sind implementiert
 
@@ -81,7 +81,8 @@ static void jstring_to_bstr( JNIEnv* jenv, const jstring& jstr, BSTR* bstr )
 {
     const OLECHAR* str_w = jenv->GetStringChars( jstr, 0 );
     
-    *bstr = SysAllocString( str_w );
+    HRESULT hr = string_to_bstr( str_w, bstr );
+    if( FAILED(hr) )  throw_com( hr, "jstring_to_bstr/string_to_bstr" );
     
     jenv->ReleaseStringChars( jstr, str_w );
 }

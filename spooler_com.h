@@ -1,4 +1,4 @@
-// $Id: spooler_com.h,v 1.56 2002/11/20 11:03:10 jz Exp $
+// $Id: spooler_com.h,v 1.57 2002/11/21 09:17:32 jz Exp $
 
 #ifndef __SPOOLER_COM_H
 #define __SPOOLER_COM_H
@@ -504,7 +504,7 @@ struct Com_order : spooler_com::Iorder,
 
     STDMETHODIMP                QueryInterface          ( REFIID, void** );
 
-    STDMETHODIMP            get_java_class_name         ( BSTR* result )                            { *result = SysAllocString( L"sos.spooler.Order" ); return S_OK; }
+    STDMETHODIMP            get_java_class_name         ( BSTR* result )                            { return string_to_bstr( "sos.spooler.Order", result ); }
 
     STDMETHODIMP            put_id                      ( VARIANT* );
     STDMETHODIMP            get_id                      ( VARIANT* );

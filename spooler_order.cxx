@@ -1,4 +1,4 @@
-// $Id: spooler_order.cxx,v 1.20 2002/11/15 09:47:40 jz Exp $
+// $Id: spooler_order.cxx,v 1.21 2002/11/21 09:17:32 jz Exp $
 /*
     Hier sind implementiert
 
@@ -150,7 +150,7 @@ static Order::State normalized_state( const Order::State& state )
 {
     if( state.vt == VT_BSTR  &&  ( state.bstrVal == NULL || SysStringLen( state.bstrVal ) == 0 ) )
     {
-        return Order::State();
+        return Variant( Variant::vt_error, DISP_E_PARAMNOTFOUND );      // Für Java
     }
     else
     {
@@ -247,7 +247,7 @@ Job_chain_node* Job_chain::node_from_job( Job* job )
 Job_chain_node* Job_chain::node_from_state( const State& state )
 {
     Job_chain_node* result = node_from_state_or_null( state );
-    if( !result )  throw_xc( "SPOOLER-149", error_string_from_variant(state), name() );
+    if( !result )  throw_xc( "SPOOLER-149", name(), error_string_from_variant(state) );
     return result;
 }
 

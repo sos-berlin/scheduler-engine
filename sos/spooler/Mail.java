@@ -1,4 +1,4 @@
-// $Id: Mail.java,v 1.3 2002/11/14 12:34:50 jz Exp $
+// $Id: Mail.java,v 1.4 2002/11/21 09:17:33 jz Exp $
 
 package sos.spooler;
 
@@ -51,4 +51,6 @@ public class Mail extends Idispatch
     public void         add_header_field    ( String field_name, String value )             {                   com_call( "add_header_field", field_name, value ); }
 
     public int          dequeue             ()                                              { return        int_com_call( "dequeue"                 ); }
+
+    public String       dequeue_log         ()                                              { return (String)   com_call( "<dequeue_log"            ); }
 }
