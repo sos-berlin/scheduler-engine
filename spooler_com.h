@@ -1,4 +1,4 @@
-// $Id: spooler_com.h,v 1.2 2001/01/20 23:39:16 jz Exp $
+// $Id: spooler_com.h,v 1.3 2001/01/21 11:26:06 jz Exp $
 
 #ifndef __SPOOLER_COM_H
 #define __SPOOLER_COM_H
@@ -90,7 +90,7 @@ struct Com_job : spooler_com::Ijob, Sos_ole_object
 
 struct Com_task : spooler_com::Itask, Sos_ole_object               
 {
-                                Com_task                    ( Task* );
+                                Com_task                    ( Task* = NULL );
 
     USE_SOS_OLE_OBJECT
 

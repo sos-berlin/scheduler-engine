@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.34 2001/01/20 23:39:15 jz Exp $
+// $Id: spooler.cxx,v 1.35 2001/01/21 11:26:06 jz Exp $
 /*
     Hier sind implementiert
 
@@ -42,10 +42,10 @@ struct Set_console_code_page
 
 //----------------------------------------------------------------------------Script_instance::init
 
-void Script_instance::init()
+void Script_instance::init( const string& language )
 {
     _script_site = new Script_site;
-    _script_site->_engine_name = _script->_language;
+    _script_site->_engine_name = language;
     _script_site->init_engine();
 }
 
@@ -61,9 +61,14 @@ void Script_instance::add_obj( const CComPtr<IDispatch>& object, const string& n
 
 //----------------------------------------------------------------------------Script_instance::load
 
-void Script_instance::load()
+void Script_instance::load( const Script& script )
 {
-    _script_site->parse( _script->_text );
+    if( !_script_site )  init( script._language );
+                   else  if( _script_site->_engine_name != script._language )  throw_xc( "SPOOLER-117" );
+
+    _script_site->parse( script._text );
+
+    _loaded = true;
 }
 
 //---------------------------------------------------------------------------Script_instance::close
@@ -75,6 +80,8 @@ void Script_instance::close()
         _script_site->close_engine();
         _script_site = NULL;
     }
+
+    _loaded = false;
 }
 
 //----------------------------------------------------------------------------Script_instance::call
@@ -118,7 +125,6 @@ Spooler::Spooler()
 : 
     _zero_(this+1), 
     _communication(this), 
-    _script_instance(&_script),
     _log(this)
 {
     _com_log     = new Com_log( &_log );
@@ -244,14 +250,14 @@ void Spooler::start()
     set_state( s_starting );
     _log.msg( "Spooler::start" );
 
-    if( !_script_instance._script->empty() )
+    if( !_script.empty() )
     {
-        _script_instance.init();
+        _script_instance.init( _script._language );
 
         _script_instance.add_obj( (IDispatch*)_com_spooler, "spooler"     );
         _script_instance.add_obj( (IDispatch*)_com_log    , "spooler_log" );
 
-        _script_instance.load();
+        _script_instance.load( _script );
 
         if( _script_instance.name_exists( "spooler_init" ) )  _script_instance.call( "spooler_init" );
     }
@@ -259,8 +265,9 @@ void Spooler::start()
 
     FOR_EACH( Job_list, _job_list, it )
     {
-        Sos_ptr<Task> task = SOS_NEW( Task( this, *it ) );
+        Job* job = *it;
 
+        Sos_ptr<Task> task = SOS_NEW( Task( this, job ) );
         _task_list.push_back( task );
     }
 

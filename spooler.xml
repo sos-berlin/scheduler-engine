@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 
-<!-- $Id: spooler.xml,v 1.9 2001/01/20 23:39:15 jz Exp $   (C) 2000 SOS GmbH Berlin -->
+<!-- $Id: spooler.xml,v 1.10 2001/01/21 11:26:06 jz Exp $   (C) 2000 SOS GmbH Berlin -->
 
 <!DOCTYPE spooler SYSTEM "spooler.dtd">
 
@@ -54,7 +54,7 @@ class Testobjekt
         set file = file_par
         lev = mid( file.name, instr( file.name & "-", "-" ) + 1 )
         lev = left( lev, instr( lev & ".", "." ) - 1 )
-        level = lev
+        spooler_level = lev
     end sub
 
 
@@ -62,11 +62,11 @@ class Testobjekt
         spooler_log.msg "process " & spooler_level & " ==> " & new_level 
         spooler_log.msg "file(" & file.path & ").move " & dir_name & "\" & new_level & "\" & file.name
         file.move dir_name & "\" & new_level & "\" & file.name
-        level = new_level
+        spooler_level = new_level
     end sub
 
 
-    public  level
+    public  spooler_level
     private file
 
 end class
@@ -116,14 +116,17 @@ class Object_set_class
 end class
 
 
-sub spooler_init
-    spooler_job.start_when_directory_changed dir_name
-end sub
-
 
 function spooler_make_object_set
     set spooler_make_object_set = new Object_set_class
 end function
+
+
+sub spooler_init
+    spooler_log.msg "spooler_init"
+end sub
+
+spooler_job.start_when_directory_changed dir_name
 
             ]]></script>
 
@@ -156,17 +159,17 @@ use Win32::OLE;
         my $self = {};
         bless( $self );
         $self->{name} = shift;
-        $self->{level} = 100;
+        $self->{spooler_level} = 100;
         return $self;
     }
 
 
-    sub process
+    sub spooler_process
     {
         my $self = shift;
         my $new_level = shift;  # Wie holt man den Parameter? Joacim
-        #$main::spooler_log->msg( "process " . $self->{name} . ", " . $self->{level} . " ==> $new_level" );
-        $self->{level} = $new_level;
+        #$main::spooler_log->msg( "process " . $self->{name} . ", " . $self->{spooler_level} . " ==> $new_level" );
+        $self->{spooler_level} = $new_level;
     }
 }
 
@@ -210,7 +213,8 @@ use Win32::OLE;
         if( $self->{index} > 3 )  { return; }
 
         my $object = Testobjekt::construct( $self->{index} );
-        $main::spooler_log->msg( "index=" . $self->{index} . ", level=" . $object->{spooler_level} );
+        $main::spooler_log->msg( "script_index=" . $main::script_index . " index=" . $self->{index} . ", level=" . $object->{spooler_level} );
+        $main::script_index++;
         $self->{index}++;
 
         return $object;
@@ -231,6 +235,7 @@ sub spooler_make_object_set()
 
 my $object_set_class;
 my $object;
+$script_index = 1;
 
 sub spooler_open()
 {
@@ -250,7 +255,7 @@ sub spooler_process()
 {
     my $new_level = shift;
     $object = $object_set_class->spooler_get();
-    if( !ref($object) ) { $spooler_task->error( "Fehler aus Perl" ); exit(); } #{ return 0; }
+    if( !ref($object) ) { return 0; }  #{ $spooler_task->error( "Fehler aus Perl" ); exit(); }
     $object->spooler_process( $new_level );
     return 1;
 }

@@ -1,4 +1,4 @@
-// $Id: spooler.h,v 1.31 2001/01/20 23:39:15 jz Exp $
+// $Id: spooler.h,v 1.32 2001/01/21 11:26:06 jz Exp $
 
 #ifndef __SPOOLER_H
 #define __SPOOLER_H
@@ -7,6 +7,7 @@
 
 
 #ifdef SYSTEM_WIN
+
 #   import <msxml3.dll> rename_namespace("xml")
 
     namespace xml {
@@ -21,6 +22,7 @@
     }
 
 #   include "spooler_com.h"
+
 #endif
 
 #include <stdio.h>
@@ -41,8 +43,7 @@
 namespace sos {
 
 
-
-typedef _bstr_t Dom_string;
+typedef _bstr_t                 Dom_string;
 
 template<typename T>
 inline Dom_string               as_dom_string               ( const T& t )                          { return as_bstr_t( t ); }
@@ -52,16 +53,59 @@ namespace spooler {
 
 using namespace std;
 
-struct Task;
-
-                                              
 typedef int                     Level;
+
 struct                          Spooler;
-//typedef double                  Time;                       // wie time_t: Anzahl Sekunden seit 1.1.1970
+struct                          Task;
 
 
-enum Log_kind { log_msg, log_warn, log_error };
+//-------------------------------------------------------------------------------------------Handle
 
+struct Handle
+{
+#   ifdef SYSTEM_WIN
+                                Handle                      ( HANDLE h = NULL )             : _handle(h) {}
+                               ~Handle                      ()                              { close(); }
+
+        void                    operator =                  ( HANDLE h )                    { close(); _handle = h; }
+                                operator HANDLE             () const                        { return _handle; }
+                                operator !                  () const                        { return _handle == 0; }
+        HANDLE*                 operator &                  ()                              { return &_handle; }
+
+        void                    close                       ()                              { if(_handle) { CloseHandle(_handle); _handle=0; } }
+
+        HANDLE                 _handle;
+#   endif
+};
+
+//--------------------------------------------------------------------------------------------Mutex
+// Nur für Typen, die in ein Speicherwort passen, also mit genau einem Maschinenbefehl lesbar sind.
+
+template<typename T>
+struct Mutex
+{
+    typedef sos::Thread_semaphore::Guard Guard;
+
+
+                                Mutex                       ( const T& t = T() )    : _value(t) {}
+
+    Mutex&                      operator =                  ( const T& t )          { Guard g = &_semaphore; _value = t; return *this; }
+                                operator T                  ()                      { return _value; }  // Nicht gesichert
+    T                           read_and_reset              ()                      { Guard g = &_semaphore; T v = _value; _value = T(); return v; }
+    T                           read_and_set                ( const T& t )          { Guard g = &_semaphore; T v = _value; _value = t; return v; }
+
+    sos::Thread_semaphore      _semaphore;
+    volatile T                 _value;
+};
+
+//-----------------------------------------------------------------------------------------Log_kind
+
+enum Log_kind 
+{ 
+    log_msg, 
+    log_warn, 
+    log_error 
+};
 
 //---------------------------------------------------------------------------------------------Time
 
@@ -183,45 +227,6 @@ struct Run_time
     Time                       _next_end_time;
 };
 
-//-------------------------------------------------------------------------------------------Handle
-
-struct Handle
-{
-#   ifdef SYSTEM_WIN
-                                Handle                      ( HANDLE h = NULL )             : _handle(h) {}
-                               ~Handle                      ()                              { close(); }
-
-        void                    operator =                  ( HANDLE h )                    { close(); _handle = h; }
-                                operator HANDLE             () const                        { return _handle; }
-                                operator !                  () const                        { return _handle == 0; }
-        HANDLE*                 operator &                  ()                              { return &_handle; }
-
-        void                    close                       ()                              { if(_handle) { CloseHandle(_handle); _handle=0; } }
-
-        HANDLE                 _handle;
-#   endif
-};
-
-//--------------------------------------------------------------------------------------------Mutex
-// Nur für Typen, die in ein Speicherwort passen, also mit genau einem Maschinenbefehl lesbar sind.
-
-template<typename T>
-struct Mutex
-{
-    typedef sos::Thread_semaphore::Guard Guard;
-
-
-                                Mutex                       ( const T& t = T() )    : _value(t) {}
-
-    Mutex&                      operator =                  ( const T& t )          { Guard g = &_semaphore; _value = t; return *this; }
-                                operator T                  ()                      { return _value; }  // Nicht gesichert
-    T                           read_and_reset              ()                      { Guard g = &_semaphore; T v = _value; _value = T(); return v; }
-    T                           read_and_set                ( const T& t )          { Guard g = &_semaphore; T v = _value; _value = t; return v; }
-
-    sos::Thread_semaphore      _semaphore;
-    volatile T                 _value;
-};
-
 //----------------------------------------------------------------------------------------------Log
 
 struct Log
@@ -294,10 +299,10 @@ struct Script
 
 struct Script_instance
 {
-                                Script_instance             ( Script* script )              : _script(script) {}
+                                Script_instance             ()                          : _loaded(false) {}
 
-    void                        init                        ();
-    void                        load                        ();
+    void                        init                        ( const string& language );
+    void                        load                        ( const Script& );
     IDispatch*                  dispatch                    () const                        { return _script_site? _script_site->dispatch() : NULL; }
     void                        add_obj                     ( const CComPtr<IDispatch>&, const string& name );
     void                        close                       ();
@@ -307,9 +312,10 @@ struct Script_instance
     void                        property_put                ( const char* name, const CComVariant& v ) { _script_site->property_put( name, v ); } 
     void                        optional_property_put       ( const char* name, const CComVariant& v );
     bool                        name_exists                 ( const string& name )          { return _script_site->name_exists(name); }
+    bool                        loaded                      ()                              { return _loaded; }
 
-    Script*                    _script;
     CComPtr<Script_site>       _script_site;
+    bool                       _loaded;
 };
 
 //---------------------------------------------------------------------------------Object_set_class
@@ -376,15 +382,15 @@ struct Object_set_descr : Sos_self_deleting
 };
 
 //------------------------------------------------------------------------------------Job_interface
-
+/*
 struct Job_interface
 {
-    void                        spooler_init                ();
-    void                        spooler_open                ();
-    void                        spooler_close               ();
-    void                        spooler_process             ();
+    void                        spooler_init                () = 0;
+    void                        spooler_open                () = 0;
+    void                        spooler_close               () = 0;
+    void                        spooler_process             () = 0;
 };
-
+*/
 //---------------------------------------------------------------------------------------Object_set
 
 struct Object_set : Sos_self_deleting
@@ -394,7 +400,6 @@ struct Object_set : Sos_self_deleting
 
     void                        open                        ();
     void                        close                       ();
-  //bool                        eof                         ();
     Spooler_object              get                         ();
     bool                        step                        ( Level result_level );
 
@@ -403,8 +408,8 @@ struct Object_set : Sos_self_deleting
     Task*                      _task;
     Sos_ptr<Object_set_descr>  _object_set_descr;
     Object_set_class*          _class;
-    Script_instance            _script_instance;
-    CComPtr<IDispatch>         _dispatch;
+  //Script_instance            _script_instance;
+    CComPtr<IDispatch>         _dispatch;                   // Zeiger auf ein Object_set des Skripts
 };
 
 //----------------------------------------------------------------------------------------------Job
@@ -416,8 +421,11 @@ struct Job : Sos_self_deleting
 
     void                        operator =                  ( const xml::Element_ptr& );
 
+    void                        set_current_task            ( Task* task )                      { _com_current_task->_task = task; }
+
     void                        start                       ();
     void                        start_when_directory_changed( const string& directory_name );
+  //void                        stop_all_tasks              ()                                  { if( _task )  _task->stop(); }
 
     Fill_zero                  _zero_;
     Spooler*                   _spooler;
@@ -425,6 +433,7 @@ struct Job : Sos_self_deleting
     Sos_ptr<Object_set_descr>  _object_set_descr;
     Level                      _output_level;
     Script                     _script;
+    Script_instance            _script_instance;            // Für use_engine="job"
     Run_time                   _run_time;
     bool                       _stop_at_end_of_duration;
     bool                       _continual;
@@ -433,6 +442,8 @@ struct Job : Sos_self_deleting
   //bool                       _start_after_spooler;
     int                        _priority;
     CComPtr<Com_job>           _com_job;
+    Task*                      _task;                       // Es kann nur eine Task geben
+    CComPtr<Com_task>          _com_current_task;           // gerade laufende Task 
 };
 
 typedef list< Sos_ptr<Job> >    Job_list;
@@ -469,7 +480,6 @@ struct Task : Sos_self_deleting
                                ~Task                        ();
 
     bool                        start                       ();
-    void                        prepare_script              ();
     void                        end                         ();
     void                        stop                        ();
     bool                        step                        ();
@@ -501,10 +511,12 @@ struct Task : Sos_self_deleting
     Fill_zero                  _zero_;
     Spooler*                   _spooler;
     Sos_ptr<Job>               _job;
-    Script_instance            _job_script_instance;
-    Script_instance*           _script_instance;
+    Script_instance            _script_instance;            // Für use_engine="task"
+    Script_instance*           _script_instance_ptr;        // &_script_instance oder &_job->_script_instance
+    bool                       _use_task_engine;            // use_engine="task"
     CComPtr<IDispatch>         _dispatch;
     
+    Directory_watcher          _directory_watcher;
     int                        _priority;
     double                     _cpu_time;
     int                        _step_count;
@@ -519,7 +531,6 @@ struct Task : Sos_self_deleting
 
     Sos_ptr<Object_set>        _object_set;
     Time                       _next_start_time;            // Zeitpunkt des nächsten Startversuchs, nachdem Objektemenge leer war
-    Directory_watcher          _directory_watcher;
     Task_log                   _log;
     CComPtr<Com_log>           _com_log;
     CComPtr<Com_object_set>    _com_object_set;
