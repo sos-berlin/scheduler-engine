@@ -1,4 +1,4 @@
-// $Id: spooler_job.cxx,v 1.47 2003/12/09 12:42:27 jz Exp $
+// $Id: spooler_job.cxx,v 1.48 2003/12/11 10:24:14 jz Exp $
 /*
     Hier sind implementiert
 
@@ -346,6 +346,8 @@ void Job::signal( const string& signal_name )
 }
 
 //---------------------------------------------------------------------------------Job::create_task
+// Wird auch vom Kommunikations-Thread für <start_job> gerufen!
+// create_task() nicht mit gesperrten _lock rufen, denn get_id() in DB blockieren!
 
 Sos_ptr<Task> Job::create_task( const ptr<spooler_com::Ivariable_set>& params, const string& name, Time start_at )
 {
@@ -468,33 +470,37 @@ void Job::remove_running_task( Task* task )
 }
 
 //---------------------------------------------------------------------------------------Job::start
-
+/*
 Sos_ptr<Task> Job::start( const ptr<spooler_com::Ivariable_set>& params, const string& task_name, Time start_at, bool log )
 {
     Sos_ptr<Task> result;
     THREAD_LOCK( _lock )  result = start_without_lock( params, task_name, start_at, log );
     return result;
 }
-
+*/
 //---------------------------------------------------------------------------------------Job::start
+// start() und create_task() nicht mit gesperrten _lock rufen, denn get_id() in DB blockieren!
 
-Sos_ptr<Task> Job::start_without_lock( const ptr<spooler_com::Ivariable_set>& params, const string& task_name, Time start_at, bool log )
+Sos_ptr<Task> Job::start( const ptr<spooler_com::Ivariable_set>& params, const string& task_name, Time start_at, bool log )
 {
-    if( log && _spooler->_debug )  _log.debug( "start(at=" + start_at.as_string() + ( task_name == ""? "" : ",name=\"" + task_name + '"' ) + ")" );
-
-    switch( _state )
+    THREAD_LOCK( _lock )
     {
-        case s_read_error:  throw_xc( "SCHEDULER-132", name(), _error? _error->what() : "" );
-        
-        case s_error:       throw_xc( "SCHEDULER-204", _name, _error.what() );
+        if( log && _spooler->_debug )  _log.debug( "start(at=" + start_at.as_string() + ( task_name == ""? "" : ",name=\"" + task_name + '"' ) + ")" );
 
-        case s_stopped:     set_state( s_pending );
-                            break;
+        switch( _state )
+        {
+            case s_read_error:  throw_xc( "SCHEDULER-132", name(), _error? _error->what() : "" );
+            
+            case s_error:       throw_xc( "SCHEDULER-204", _name, _error.what() );
 
-        default: ;
+            case s_stopped:     set_state( s_pending );
+                                break;
+
+            default: ;
+        }
+
+        if( !start_at  &&  !_run_time.period_follows( Time::now() ) )   throw_xc( "SCHEDULER-143" );
     }
-
-    if( !start_at  &&  !_run_time.period_follows( Time::now() ) )   throw_xc( "SCHEDULER-143" );
 
     Sos_ptr<Task> task = create_task( params, task_name, start_at );
     task->_let_run = true;
@@ -531,18 +537,21 @@ bool Job::read_script()
 
 void Job::stop( bool end_all_tasks )
 {
-    if( end_all_tasks )
+    THREAD_LOCK( _lock )
     {
-        Z_FOR_EACH( Task_list, _running_tasks, t )
+        if( end_all_tasks )
         {
-            Task* task = *t;
-            task->cmd_end();
+            Z_FOR_EACH( Task_list, _running_tasks, t )
+            {
+                Task* task = *t;
+                task->cmd_end();
+            }
         }
+
+        set_state( _running_tasks.size() > 0? s_stopping : s_stopped );
+
+        clear_when_directory_changed();
     }
-
-    set_state( _running_tasks.size() > 0? s_stopping : s_stopped );
-
-    clear_when_directory_changed();
 }
 
 //--------------------------------------------------------------------------------------Job::reread
@@ -559,7 +568,7 @@ bool Job::execute_state_cmd()
 {
     bool something_done = false;
 
-    THREAD_LOCK( _lock )
+    //THREAD_LOCK( _lock )   // create_task() nicht mit gesperrten _lock rufen, denn get_id() in DB blockieren.
     {
         if( _state_cmd )
         {
@@ -575,45 +584,60 @@ bool Job::execute_state_cmd()
                                     break;
 
                 case sc_end:        if( _state == s_running    )                               something_done = true;
-                                    Z_FOR_EACH( Task_list, _running_tasks, t )  (*t)->cmd_end();
+                                    THREAD_LOCK( _lock )  Z_FOR_EACH( Task_list, _running_tasks, t )  (*t)->cmd_end();
                                     break;
 
-                case sc_suspend:    Z_FOR_EACH( Task_list, _running_tasks, t ) 
-                                    {
-                                        Task* task = *t;
-                                        if( task->_state == Task::s_running 
-                                         || task->_state == Task::s_running_delayed
-                                         || task->_state == Task::s_running_waiting_for_order )  task->set_state( Task::s_suspended );
-                                    }
-                                    something_done = true;
-                                    break;
+                case sc_suspend:    
+                {
+                    THREAD_LOCK( _lock )
+                    {
+                        Z_FOR_EACH( Task_list, _running_tasks, t ) 
+                        {
+                            Task* task = *t;
+                            if( task->_state == Task::s_running 
+                                || task->_state == Task::s_running_delayed
+                                || task->_state == Task::s_running_waiting_for_order )  task->set_state( Task::s_suspended );
+                        }
+                        something_done = true;
+                    }
+                    break;
+                }
 
-                case sc_continue:   Z_FOR_EACH( Task_list, _running_tasks, t ) 
-                                    {
-                                        Task* task = *t;
-                                        if( task->_state == Task::s_suspended 
-                                         || task->_state == Task::s_running_delayed
-                                         || task->_state == Task::s_running_waiting_for_order )  task->set_state( Task::s_running );
-                                    }
-                                    something_done = true;
-                                    break;
+                case sc_continue:   
+                {
+                    THREAD_LOCK( _lock )
+                    {
+                        Z_FOR_EACH( Task_list, _running_tasks, t ) 
+                        {
+                            Task* task = *t;
+                            if( task->_state == Task::s_suspended 
+                             || task->_state == Task::s_running_delayed
+                             || task->_state == Task::s_running_waiting_for_order )  task->set_state( Task::s_running );
+                        }
+                        something_done = true;
+                    }
+                    break;
+                }
 
-                case sc_wake:       //if( _state == s_suspended
-                                    // || _state == s_running_delayed )  set_state( s_running ), something_done = true;
+                case sc_wake:
+                {
+                    //if( _state == s_suspended
+                    // || _state == s_running_delayed )  set_state( s_running ), something_done = true;
 
-                                    if( _state == s_pending
-                                     || _state == s_stopped )
-                                    {
-                                        set_state( s_pending );
+                    if( _state == s_pending
+                     || _state == s_stopped )
+                    {
+                        set_state( s_pending );
 
-                                        Time now = Time::now();
-                                        Sos_ptr<Task> task = create_task( NULL, "", now );
-                                        
-                                        task->_cause = cause_wake;
-                                        task->_let_run = true;
-                                        task->attach_to_a_thread();   // Es gibt zZ nur einen Thread
-                                    }
-                                    break;
+                        Time now = Time::now();
+                        Sos_ptr<Task> task = create_task( NULL, "", now );      // create_task() nicht mit gesperrten _lock rufen, denn get_id() in DB blockieren.
+                        
+                        task->_cause = cause_wake;
+                        task->_let_run = true;
+                        task->attach_to_a_thread();   // Es gibt zZ nur einen Thread
+                    }
+                    break;
+                }
 
                 default: ;
             }
@@ -703,89 +727,89 @@ bool Job::is_in_period( Time now )
 
 void Job::set_next_start_time( Time now, bool repeat )
 {
-    select_period( now );
-
-    Time   next_start_time = latter_day;  //_next_start_time;
-    string msg;
-
-    _next_single_start = latter_day;
-
-    if( _delay_until )
+    THREAD_LOCK( _lock )
     {
-        next_start_time = _period.next_try( _delay_until );
-        if( _spooler->_debug )  msg = "Wiederholung wegen delay_after_error: " + next_start_time.as_string();
-    }
-    else
-    if( order_controlled() ) 
-    {
-        next_start_time = latter_day;
-    }
-    else
-    if( _state == s_pending )
-    {
-        if( !_period.is_in_time( _next_start_time ) )
+        select_period( now );
+
+        Time   next_start_time = latter_day;  //_next_start_time;
+        string msg;
+
+        _next_single_start = latter_day;
+
+        if( _delay_until )
         {
-            if( !_repeat )  _next_single_start = _run_time.next_single_start( now );
-
-            if( _start_once  ||  !repeat && _period._repeat < latter_day )
+            next_start_time = _period.next_try( _delay_until );
+            if( _spooler->_debug )  msg = "Wiederholung wegen delay_after_error: " + next_start_time.as_string();
+        }
+        else
+        if( order_controlled() ) 
+        {
+            next_start_time = latter_day;
+        }
+        else
+        if( _state == s_pending )
+        {
+            if( !_period.is_in_time( _next_start_time ) )
             {
-            //select_period();
-                if( _period.begin() > now )
-                {
-                    next_start_time = _period.begin();
-                    if( _spooler->_debug )  msg = "Erster Start zu Beginn der Periode " + next_start_time.as_string();
-                }
-                else
-                {
-                    next_start_time = now;
-                }
-            }
-            else
-            if( repeat )
-            {
-                if( _repeat > 0 )       // spooler_task.repeat
-                {
-                    next_start_time = _period.next_try( now + _repeat );
-                    if( _spooler->_debug )  msg = "Wiederholung wegen spooler_job.repeat=" + as_string(_repeat) + ": " + next_start_time.as_string();
-                    _repeat = 0;
-                }
-                else
-                if( _period.repeat() < latter_day )
-                {
-                    next_start_time = now + _period.repeat();
+                if( !_repeat )  _next_single_start = _run_time.next_single_start( now );
 
-                    if( _spooler->_debug && next_start_time != latter_day )  msg = "Nächste Wiederholung wegen <period repeat=\"" + as_string((double)_period._repeat) + "\">: " + next_start_time.as_string();
-
-                    if( next_start_time >= _period.end() )
+                if( _start_once  ||  !repeat && _period._repeat < latter_day )
+                {
+                //select_period();
+                    if( _period.begin() > now )
                     {
-                        Period next_period = _run_time.next_period( _period.end() );
-                        if( _period.end() == next_period.begin()  &&  _period.repeat() == next_period.repeat() )
+                        next_start_time = _period.begin();
+                        if( _spooler->_debug )  msg = "Erster Start zu Beginn der Periode " + next_start_time.as_string();
+                    }
+                    else
+                    {
+                        next_start_time = now;
+                    }
+                }
+                else
+                if( repeat )
+                {
+                    if( _repeat > 0 )       // spooler_task.repeat
+                    {
+                        next_start_time = _period.next_try( now + _repeat );
+                        if( _spooler->_debug )  msg = "Wiederholung wegen spooler_job.repeat=" + as_string(_repeat) + ": " + next_start_time.as_string();
+                        _repeat = 0;
+                    }
+                    else
+                    if( _period.repeat() < latter_day )
+                    {
+                        next_start_time = now + _period.repeat();
+
+                        if( _spooler->_debug && next_start_time != latter_day )  msg = "Nächste Wiederholung wegen <period repeat=\"" + as_string((double)_period._repeat) + "\">: " + next_start_time.as_string();
+
+                        if( next_start_time >= _period.end() )
                         {
-                            if( _spooler->_debug )  msg += " (in der anschließenden Periode)";
-                        }
-                        else
-                        {
-                            next_start_time = latter_day;
-                            if( _spooler->_debug )  msg = "Nächste Startzeit wird bestimmt zu Beginn der nächsten Periode " + next_period.begin().as_string();
+                            Period next_period = _run_time.next_period( _period.end() );
+                            if( _period.end() == next_period.begin()  &&  _period.repeat() == next_period.repeat() )
+                            {
+                                if( _spooler->_debug )  msg += " (in der anschließenden Periode)";
+                            }
+                            else
+                            {
+                                next_start_time = latter_day;
+                                if( _spooler->_debug )  msg = "Nächste Startzeit wird bestimmt zu Beginn der nächsten Periode " + next_period.begin().as_string();
+                            }
                         }
                     }
                 }
             }
         }
-    }
-    else
-    {
-        next_start_time = latter_day;
-    }
+        else
+        {
+            next_start_time = latter_day;
+        }
 
-    if( _spooler->_debug )
-    {
-        if( _next_single_start < next_start_time )  msg = "Nächster single_start " + _next_single_start.as_string();
-        if( !msg.empty() )  _log.debug( msg );
-    }
+        if( _spooler->_debug )
+        {
+            if( _next_single_start < next_start_time )  msg = "Nächster single_start " + _next_single_start.as_string();
+            if( !msg.empty() )  _log.debug( msg );
+        }
 
-    THREAD_LOCK( _lock )
-    {
         _next_start_time = next_start_time;
         calculate_next_time( now );
     }
@@ -971,7 +995,7 @@ Sos_ptr<Task> Job::task_to_start()
             }
             else
             {
-                task = create_task( NULL, "", now );
+                task = create_task( NULL, "", now );     // create_task() nicht mit gesperrten _lock rufen, denn get_id() in DB blockieren.
 
                 task->set_order( order );
                 task->_cause = cause;
@@ -1126,13 +1150,13 @@ void Job::set_state( State new_state )
 }
 
 //-------------------------------------------------------------------------------Job::set_state_cmd
-// Anderer Thread
+// Anderer Thread (wird auch vom Kommunikations-Thread gerufen)
 
 void Job::set_state_cmd( State_cmd cmd )
 { 
     bool ok = false;
 
-    THREAD_LOCK( _lock )
+    //THREAD_LOCK( _lock )          start() (create_task(), get_task_id()) nicht mit gesperrtem _lock rufen, weil DB blockieren kann!
     {
         switch( cmd )
         {
@@ -1147,7 +1171,7 @@ void Job::set_state_cmd( State_cmd cmd )
                                 break;
 
             case sc_start:      {
-                                    THREAD_LOCK( _lock )  start_without_lock( NULL, "", Time::now(), true );
+                                    start( NULL, "", Time::now(), true );
                                     break;
                                 }
 

@@ -1,4 +1,4 @@
-// $Id: spooler_job.h,v 1.14 2003/12/08 10:32:05 jz Exp $
+// $Id: spooler_job.h,v 1.15 2003/12/11 10:24:14 jz Exp $
 
 #ifndef __SPOOLER_JOB_H
 #define __SPOOLER_JOB_H
@@ -188,7 +188,7 @@ struct Job : Sos_self_deleting
     void                        close                       ();
 
     Sos_ptr<Task>               start                       ( const ptr<spooler_com::Ivariable_set>& params, const string& task_name, Time = 0, bool log = false );
-    Sos_ptr<Task>               start_without_lock          ( const ptr<spooler_com::Ivariable_set>& params, const string& task_name, Time = 0, bool log = false );
+  //Sos_ptr<Task>               start_without_lock          ( const ptr<spooler_com::Ivariable_set>& params, const string& task_name, Time = 0, bool log = false );
     void                        start_when_directory_changed( const string& directory_name, const string& filename_pattern );
     void                        clear_when_directory_changed();
     void                        interrupt_script            ();

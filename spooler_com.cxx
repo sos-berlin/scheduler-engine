@@ -1,4 +1,4 @@
-// $Id: spooler_com.cxx,v 1.126 2003/12/10 17:26:25 jz Exp $
+// $Id: spooler_com.cxx,v 1.127 2003/12/11 10:24:14 jz Exp $
 /*
     Hier sind implementiert
 
@@ -1560,10 +1560,10 @@ STDMETHODIMP Com_job::start( VARIANT* params, Itask** itask )
             start_at = Time::now() + start_after_vt.dblVal;
         }
 
-        THREAD_LOCK( _job->_lock )
+        //THREAD_LOCK( _job->_lock )
         {
             string name = bstr_as_string( task_name_vt.bstrVal );
-            task = _job->start_without_lock( pars, name, start_at, true );
+            task = _job->start( pars, name, start_at, true );
         }
 
         *itask = new Com_task( task );
