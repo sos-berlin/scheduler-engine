@@ -1,4 +1,4 @@
-// $Id: spooler_log.cxx,v 1.84 2003/12/01 00:29:18 jz Exp $
+// $Id: spooler_log.cxx,v 1.85 2003/12/08 10:32:05 jz Exp $
 
 #include "spooler.h"
 #include "spooler_mail.h"
@@ -228,6 +228,17 @@ void Log::log2( Log_level level, const string& prefix, const string& line_, Pref
     }
 }
 
+//-------------------------------------------------------Prefix_log::get_reference_with_properties
+/*
+ptr<object_server::Reference_with_properties> Prefix_log::get_reference_with_properties()
+{
+    ptr<object_server::Reference_with_properties> ref = Z_NEW( object_server::Reference_with_properties( "Log_proxy", NULL ) );  // IDispatch* wird von Com_log eingesetzt.
+
+    ref->add_property( "log_level", _log->log_level() );
+
+    return ref;
+}
+*/
 //-----------------------------------------------------------------------------Prefix_log::log_file
 
 void Prefix_log::log_file( const string& filename, const string& title )

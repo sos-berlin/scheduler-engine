@@ -1,4 +1,4 @@
-// $Id: spooler_module_remote.cxx,v 1.51 2003/11/30 01:34:07 jz Exp $
+// $Id: spooler_module_remote.cxx,v 1.52 2003/12/08 10:32:05 jz Exp $
 /*
     Hier sind implementiert
 
@@ -146,6 +146,20 @@ string Remote_module_instance_proxy::stderr_filename()
 void Remote_module_instance_proxy::add_obj( const ptr<IDispatch>& object, const string& name )
 {
     _object_list.push_back( Object_list_entry( object, name ) );
+}
+
+//--------------------------------------------------------Remote_module_instance_proxy::add_log_obj
+
+void Remote_module_instance_proxy::add_log_obj( Com_log* log, const string& name )
+{
+    object_server::Reference_with_properties remote_ref ( "sos::spooler::Log", log );
+    
+    int level = 0;
+    log->get_level( &level );
+
+    remote_ref.set_property( "level", level );
+
+    _object_list.push_back( Object_list_entry( log, name ) );
 }
 
 //--------------------------------------------------------Remote_module_instance_proxy::name_exists
@@ -435,8 +449,6 @@ bool Remote_module_instance_proxy::try_to_get_process()
 
 bool Remote_module_instance_proxy::continue_async_operation( Operation* operation, bool wait )
 { 
-  //bool something_done = false;
-
     switch( operation->_call_state )
     {
         // begin__start() ... begin_end()
@@ -516,7 +528,6 @@ bool Remote_module_instance_proxy::continue_async_operation( Operation* operatio
 
             operation->_call_state = c_construct;
 
-          //something_done = true;
             break;
         }
 
@@ -527,7 +538,6 @@ bool Remote_module_instance_proxy::continue_async_operation( Operation* operatio
             _remote_instance->call__end();
 
             _module->_compiled = true;
-          //something_done = true;
         }
             
         // Nächste Operation
@@ -553,7 +563,6 @@ bool Remote_module_instance_proxy::continue_async_operation( Operation* operatio
 
             operation->set_async_child( _remote_instance->call__start( "begin", objects, names ) );
             operation->_call_state = c_call_begin;
-          //something_done = true;
             break;
         }
 
@@ -562,7 +571,6 @@ bool Remote_module_instance_proxy::continue_async_operation( Operation* operatio
         {
             operation->set_async_child( NULL );
             operation->_call_state = c_finished;
-          //something_done = true;
             break;
         }
 
@@ -617,8 +625,7 @@ bool Remote_module_instance_proxy::continue_async_operation( Operation* operatio
             throw_xc( "Remote_module_instance_proxy::Operation::process" );
     }
 
-  //return something_done;
-    return true;    // something_done
+    return true;
 }
 
 //-----------------------------------------Remote_module_instance_proxy::Operation::async_finished_

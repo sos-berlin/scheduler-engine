@@ -1,4 +1,4 @@
-// $Id: spooler_thread.cxx,v 1.108 2003/10/19 19:59:03 jz Exp $
+// $Id: spooler_thread.cxx,v 1.109 2003/12/08 10:32:06 jz Exp $
 /*
     Hier sind implementiert
 
@@ -564,7 +564,7 @@ bool Spooler_thread::process()
 {
     bool something_done = false;
 
-    try
+  //try
     {
         something_done = step();
 /*    
@@ -577,8 +577,8 @@ bool Spooler_thread::process()
 */
         _spooler->remove_temporary_jobs();
     }
-    catch( const exception&  x ) { _log.error( x.what() ); sos_sleep(1); }
-    catch( const _com_error& x ) { _log.error( as_string( x.Description() ) ); sos_sleep(1); }
+  //catch( const exception&  x ) { _log.error( x.what() ); sos_sleep(1); }
+  //catch( const _com_error& x ) { _log.error( as_string( x.Description() ) ); sos_sleep(1); }
 
     return something_done;
 }

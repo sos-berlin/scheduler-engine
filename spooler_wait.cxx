@@ -1,4 +1,4 @@
-// $Id: spooler_wait.cxx,v 1.88 2003/12/01 09:18:26 jz Exp $
+// $Id: spooler_wait.cxx,v 1.89 2003/12/08 10:32:06 jz Exp $
 /*
     Hier sind implementiert
 
@@ -606,7 +606,7 @@ void Directory_watcher::watch_directory( const string& directory, const string& 
 #   ifdef Z_WINDOWS
 
         _handle = FindFirstChangeNotification( directory.c_str(), FALSE, FILE_NOTIFY_CHANGE_FILE_NAME | FILE_NOTIFY_CHANGE_DIR_NAME );
-        if( !_handle  ||  _handle == INVALID_HANDLE_VALUE )  _handle = NULL, throw_mswin_error( "FindFirstChangeNotification" );
+        if( !_handle  ||  _handle == INVALID_HANDLE_VALUE )  _handle = NULL, throw_mswin_error( "FindFirstChangeNotification", directory.c_str() );
 
 #    else
 

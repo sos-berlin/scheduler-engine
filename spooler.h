@@ -1,4 +1,4 @@
-// $Id: spooler.h,v 1.168 2003/12/03 08:52:43 jz Exp $
+// $Id: spooler.h,v 1.169 2003/12/08 10:32:05 jz Exp $
 
 #ifndef __SPOOLER_H
 #define __SPOOLER_H
@@ -284,12 +284,12 @@ struct Spooler
 
   private:
     Fill_zero                  _zero_;
-    Thread_semaphore           _lock;
     int                        _argc;
     char**                     _argv;
     string                     _parameter_line;
 
   public:
+    Thread_semaphore           _lock;                       // Command_processor::execute_show_state() sperrt auch, für Zugriff auf _db.
     Log                        _base_log;
     Prefix_log                 _log;
     int                        _pid;

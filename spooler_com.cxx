@@ -1,4 +1,4 @@
-// $Id: spooler_com.cxx,v 1.122 2003/11/30 10:35:37 jz Exp $
+// $Id: spooler_com.cxx,v 1.123 2003/12/08 10:32:05 jz Exp $
 /*
     Hier sind implementiert
 
@@ -794,8 +794,40 @@ STDMETHODIMP Com_log::QueryInterface( const IID& iid, void** result )
         *result = (Ihas_java_class_name*)this;  
         return S_OK; 
     }
+    else
+    if( iid == z::com::object_server::IID_Ireference_with_properties )
+    {
+        AddRef();
+        *result = (Ireference_with_properties*)this;  
+        return S_OK; 
+    }
 
     return Sos_ole_object::QueryInterface( iid, result );
+}
+
+//-----------------------------------------------------------Com_log::get_reference_with_properties
+
+STDMETHODIMP Com_log::get_reference_with_properties( const IID& iid, ptr<object_server::Reference_with_properties>* result )
+{
+    HRESULT hr = NOERROR;
+
+    if( iid != IID_Ilog )  return E_NOINTERFACE;
+    
+    try
+    {
+        THREAD_LOCK( _lock )
+        {
+            if( !_log )  return E_POINTER;
+            //*result = _log->get_reference_with_properties();
+            *result = Z_NEW( object_server::Reference_with_properties( "Com_log_proxy", (Ilog*)this ) );  // IDispatch* wird von Com_log eingesetzt.
+
+            (*result)->set_property( "level", _log->log_level() );
+        }
+    }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Log::get_reference_with_properties" ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Log::get_reference_with_properties" ); }
+
+    return NOERROR;
 }
 
 //--------------------------------------------------------------------------------Com_log::set_task
@@ -1187,6 +1219,164 @@ STDMETHODIMP Com_log::get_last_error_line( BSTR* result )
     return hr;
 }
 
+//------------------------------------------------------------------------------------Com_log_proxy
+/*
+const Com_method Com_log_proxy::_methods[] =
+{ 
+   // _flags         , dispid, _name                   , _method                                           , _result_type  , _types        , _default_arg_count
+    { DISPATCH_METHOD     ,  1, "debug9"               , (Com_method_ptr)&Com_log_proxy::debug9                  , VT_EMPTY      , { VT_BSTR } },
+    { DISPATCH_METHOD     ,  2, "debug8"               , (Com_method_ptr)&Com_log_proxy::debug8                  , VT_EMPTY      , { VT_BSTR } },
+    { DISPATCH_METHOD     ,  3, "debug7"               , (Com_method_ptr)&Com_log_proxy::debug7                  , VT_EMPTY      , { VT_BSTR } },
+    { DISPATCH_METHOD     ,  4, "debug6"               , (Com_method_ptr)&Com_log_proxy::debug6                  , VT_EMPTY      , { VT_BSTR } },
+    { DISPATCH_METHOD     ,  5, "debug5"               , (Com_method_ptr)&Com_log_proxy::debug5                  , VT_EMPTY      , { VT_BSTR } },
+    { DISPATCH_METHOD     ,  6, "debug4"               , (Com_method_ptr)&Com_log_proxy::debug4                  , VT_EMPTY      , { VT_BSTR } },
+    { DISPATCH_METHOD     ,  7, "debug3"               , (Com_method_ptr)&Com_log_proxy::debug3                  , VT_EMPTY      , { VT_BSTR } },
+    { DISPATCH_METHOD     ,  8, "debug2"               , (Com_method_ptr)&Com_log_proxy::debug2                  , VT_EMPTY      , { VT_BSTR } },
+    { DISPATCH_METHOD     ,  9, "debug1"               , (Com_method_ptr)&Com_log_proxy::debug1                  , VT_EMPTY      , { VT_BSTR } },
+    { DISPATCH_METHOD     , 10, "debug"                , (Com_method_ptr)&Com_log_proxy::debug                   , VT_EMPTY      , { VT_BSTR } },
+    { DISPATCH_METHOD     ,  0, "info"                 , (Com_method_ptr)&Com_log_proxy::info                    , VT_EMPTY      , { VT_BSTR } },
+    { DISPATCH_METHOD     , 11, "msg"                  , (Com_method_ptr)&Com_log_proxy::msg                     , VT_EMPTY      , { VT_BSTR } },
+    { DISPATCH_METHOD     , 12, "warn"                 , (Com_method_ptr)&Com_log_proxy::warn                    , VT_EMPTY      , { VT_BSTR } },
+    { DISPATCH_METHOD     , 13, "error"                , (Com_method_ptr)&Com_log_proxy::error                   , VT_EMPTY      , { VT_BSTR } },
+    { DISPATCH_METHOD     , 14, "log"                  , (Com_method_ptr)&Com_log_proxy::log                     , VT_EMPTY      , { VT_I4, VT_BSTR } },
+  //{ DISPATCH_PROPERTYGET, 15, "mail"                 , (Com_method_ptr)&Com_log_proxy::get_mail                , VT_DISPATCH  },
+  //{ DISPATCH_PROPERTYPUT, 16, "mail_on_error"        , (Com_method_ptr)&Com_log_proxy::put_mail_on_error       , VT_EMPTY      , { VT_BOOL } },
+  //{ DISPATCH_PROPERTYGET, 16, "mail_on_error"        , (Com_method_ptr)&Com_log_proxy::get_mail_on_error       , VT_BOOL       },
+  //{ DISPATCH_PROPERTYPUT, 17, "mail_on_success"      , (Com_method_ptr)&Com_log_proxy::put_mail_on_success     , VT_EMPTY      , { VT_BOOL } },
+  //{ DISPATCH_PROPERTYGET, 17, "mail_on_success"      , (Com_method_ptr)&Com_log_proxy::get_mail_on_success     , VT_BOOL       },
+  //{ DISPATCH_PROPERTYPUT, 18, "mail_on_process"      , (Com_method_ptr)&Com_log_proxy::put_mail_on_process     , VT_EMPTY      , { VT_I4 } },
+  //{ DISPATCH_PROPERTYGET, 18, "mail_on_process"      , (Com_method_ptr)&Com_log_proxy::get_mail_on_process     , VT_I4         },
+    { DISPATCH_PROPERTYPUT, 19, "level"                , (Com_method_ptr)&Com_log_proxy::put_level               , VT_EMPTY      , { VT_I4 } },
+    { DISPATCH_PROPERTYGET, 19, "level"                , (Com_method_ptr)&Com_log_proxy::get_level               , VT_I4         },
+  //{ DISPATCH_PROPERTYGET, 20, "filename"             , (Com_method_ptr)&Com_log_proxy::get_filename            , VT_BSTR       },
+  //{ DISPATCH_PROPERTYPUT, 21, "collect_within"       , (Com_method_ptr)&Com_log_proxy::put_collect_within      , VT_EMPTY      , { VT_BYREF|VT_VARIANT } },
+  //{ DISPATCH_PROPERTYGET, 21, "collect_within"       , (Com_method_ptr)&Com_log_proxy::get_collect_within      , VT_R8         },
+  //{ DISPATCH_PROPERTYPUT, 22, "collect_max"          , (Com_method_ptr)&Com_log_proxy::put_collect_max         , VT_EMPTY      , { VT_BYREF|VT_VARIANT } },
+  //{ DISPATCH_PROPERTYGET, 22, "collect_max"          , (Com_method_ptr)&Com_log_proxy::get_collect_max         , VT_R8         },
+  //{ DISPATCH_PROPERTYPUT, 23, "mail_it"              , (Com_method_ptr)&Com_log_proxy::put_mail_it             , VT_EMPTY      , { VT_BOOL } },
+  //{ DISPATCH_PROPERTYGET, 24, "java_class_name"      , (Com_method_ptr)&Com_log_proxy::get_java_class_name     , VT_BSTR },
+  //{ DISPATCH_PROPERTYGET, 25, "last_error_line"      , (Com_method_ptr)&Com_log_proxy::get_last_error_line     , VT_BSTR },
+    {}
+};
+*/
+
+void Com_log_proxy::set_property( const string& name, const Variant& value )
+{
+    if( name == "level" )  _level = value.as_int();
+    else  
+        throw_xc( "Com_log_proxy::set_property", name );
+}
+
+//---------------------------------------------------------------------Com_log_proxy::GetIDsOfNames
+/*
+STDMETHODIMP Com_log_proxy::GetIDsOfNames( const IID& iid, OLECHAR** rgszNames, UINT cNames, LCID lcid, DISPID* dispid )
+{
+    HRESULT hr;
+    
+    hr = com_get_dispid( _methods, iid, rszNames, cNames, lcid, dispid );       // Erst lokal versuchen
+
+    if( hr == DISP_E_UNKNOWNNAME )
+    {
+        hr = Proxy::GetIDsOfNames( iid, rgszNames, cNames, lcid, dispid );      // Server aufrufen
+    }
+
+    return hr;
+}
+*/
+//----------------------------------------------------------------------------Com_log_proxy::Invoke
+
+STDMETHODIMP Com_log_proxy::Invoke( DISPID dispid, const IID& iid, LCID lcid, unsigned short flags, DISPPARAMS* dispparams, 
+                                    VARIANT* result, EXCEPINFO* excepinfo, UINT* arg_nr )
+{
+    //hr = com_invoke( this, _methods, dispid, iid, lcid, flags, dispparams, arg_nr, result, excepinfo );     // Erst lokale Proxy-Implementierung versuchen
+    
+    //if( hr == DISP_E_MEMBERNOTFOUND )
+
+    const Bstr& name = name_from_dispid( dispid );
+
+    if( name == "debug9" )  { if( _level > spooler_com::log_debug9 )  return S_FALSE; }
+    else
+    if( name == "debug8" )  { if( _level > spooler_com::log_debug8 )  return S_FALSE; }
+    else
+    if( name == "debug7" )  { if( _level > spooler_com::log_debug7 )  return S_FALSE; }
+    else
+    if( name == "debug6" )  { if( _level > spooler_com::log_debug6 )  return S_FALSE; }
+    else
+    if( name == "debug5" )  { if( _level > spooler_com::log_debug5 )  return S_FALSE; }
+    else
+    if( name == "debug4" )  { if( _level > spooler_com::log_debug4 )  return S_FALSE; }
+    else
+    if( name == "debug3" )  { if( _level > spooler_com::log_debug3 )  return S_FALSE; }
+    else
+    if( name == "debug2" )  { if( _level > spooler_com::log_debug2 )  return S_FALSE; }
+    else
+    if( name == "debug1" )  { if( _level > spooler_com::log_debug1 )  return S_FALSE; }
+    else
+    if( name == "debug"  )  { if( _level > spooler_com::log_debug  )  return S_FALSE; }
+    else                                                                              
+    if( name == "info"   )  { if( _level > spooler_com::log_info   )  return S_FALSE; }
+    else
+    if( name == "level" )
+    {
+        if( flags & DISPATCH_PROPERTYPUT )
+        {
+            if( dispparams->cNamedArgs != 1 )  return DISP_E_BADPARAMCOUNT;
+            if( dispparams->rgdispidNamedArgs[0] != DISPID_PROPERTYPUT )   return DISP_E_BADPARAMCOUNT;
+            _level = int_from_variant( dispparams->rgvarg[0] );
+            //return S_OK;
+        }
+        else 
+        {
+            if( dispparams->cNamedArgs != 0 )  return DISP_E_BADPARAMCOUNT;
+            result->vt = VT_I4;
+            V_I4(result) = _level;
+            //return S_OK;
+        }
+    }
+
+
+    return Proxy::Invoke( dispid, iid, lcid, flags, dispparams, result, excepinfo, arg_nr );      // Server aufrufen
+}
+
+//-----------------------------------------------------------------------------Com_log_proxy::level
+/*
+STDMETHODIMP Com_log_proxy::get_level( int* level )
+{
+    HRESULT hr = NOERROR;
+
+    *level = _level;
+
+    return hr;
+}
+*/
+//-----------------------------------------------------------------------------Com_log_proxy::level
+/*
+STDMETHODIMP Com_log_proxy::put_level( int level )
+{
+    HRESULT hr = NOERROR;
+
+    _level = level;
+
+    return hr;
+}
+*/
+//-------------------------------------------------------------------------------Com_log_proxy::log
+/*
+STDMETHODIMP Com_log_proxy::log( spooler_com::Log_level level, BSTR line )
+{ 
+    HRESULT hr = NOERROR;
+
+    if( level < _level )  return hr;
+
+    if( !_dispid_valid )
+    {
+        _object->GetIDsOfName()
+        _disp_id_valid = true;
+    }
+
+    hr = _object->Invoke();
+}
+*/
 //-------------------------------------------------------------------------Com_object_set::_methods
 #ifdef Z_COM
 

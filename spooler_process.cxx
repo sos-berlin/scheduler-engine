@@ -1,4 +1,4 @@
-// $Id: spooler_process.cxx,v 1.24 2003/12/01 00:29:18 jz Exp $
+// $Id: spooler_process.cxx,v 1.25 2003/12/08 10:32:05 jz Exp $
 
 #include "spooler.h"
 
@@ -98,14 +98,16 @@ void Process::start()
 
 bool Process::async_continue()
 {
-    return _connection->async_continue();
+    return _connection? _connection->async_continue() 
+                      : false;
 }
 
 //------------------------------------------------------------------------------------Process::kill
 
 bool Process::kill()
 {
-    return _connection->kill_process();
+    return _connection? _connection->kill_process() 
+                      : false;
 }
 
 //-------------------------------------------------------------------------------Process::exit_code
@@ -246,7 +248,7 @@ Process* Process_class::select_process_if_available()
 
         if( process )
         {
-            if( process->_connection->has_error() )
+            if( process->_connection && process->_connection->has_error() )
             {
                 _spooler->_log.warn( "Prozess pid=" + as_string( process->pid() ) + " wird nach Fehler entfernt" );
 

@@ -1,4 +1,4 @@
-// $Id: spooler_job.h,v 1.13 2003/12/03 08:52:44 jz Exp $
+// $Id: spooler_job.h,v 1.14 2003/12/08 10:32:05 jz Exp $
 
 #ifndef __SPOOLER_JOB_H
 #define __SPOOLER_JOB_H
@@ -128,6 +128,7 @@ struct Job : Sos_self_deleting
         s_stopping,             // Wird gestoppt (Zustand, solange noch Tasks laufen, danach s_stopped)
         s_stopped,              // Gestoppt (z.B. wegen Fehler). Keine Task wird gestartet.
         s_read_error,           // Skript kann nicht aus Datei (include) gelesen werden
+        s_error,                // Ein Fehler ist aufgetreten (nicht vom Skript), der Job ist nicht mehr aufrufbar.
         s_pending,              // Warten auf Start
         s_running,              // Mindestens eine Task läuft (die Tasks können aber ausgesetzt, also gerade nicht aktiv sein: s_suspended etc.)
         s__max
@@ -186,7 +187,7 @@ struct Job : Sos_self_deleting
 
     void                        close                       ();
 
-    void                        start                       ( const ptr<spooler_com::Ivariable_set>& params, const string& task_name, Time = 0 );
+    Sos_ptr<Task>               start                       ( const ptr<spooler_com::Ivariable_set>& params, const string& task_name, Time = 0, bool log = false );
     Sos_ptr<Task>               start_without_lock          ( const ptr<spooler_com::Ivariable_set>& params, const string& task_name, Time = 0, bool log = false );
     void                        start_when_directory_changed( const string& directory_name, const string& filename_pattern );
     void                        clear_when_directory_changed();
@@ -239,6 +240,7 @@ struct Job : Sos_self_deleting
     void                        set_error_xc_only           ( const Xc& );
     void                        set_error                   ( const exception& );
     void                        reset_error                 ()                                      { THREAD_LOCK( _lock )  _error = NULL,  _log.reset_highest_level(); }
+    void                        set_job_error               ( const string& what );
 
     void                        signal                      ( const string& signal_name );
     void                        notify_a_process_is_idle    ();                                     // Vielleicht wird bald ein Prozess frei?

@@ -1,4 +1,4 @@
-// $Id: spooler_com.h,v 1.83 2003/11/11 16:33:56 jz Exp $
+// $Id: spooler_com.h,v 1.84 2003/12/08 10:32:05 jz Exp $
 
 #ifndef __SPOOLER_COM_H
 #define __SPOOLER_COM_H
@@ -190,6 +190,7 @@ struct Com_variable_set_enumerator : spooler_com::Ivariable_set_enumerator, Sos_
 
 struct Com_log : spooler_com::Ilog, 
                  spooler_com::Ihas_java_class_name, 
+                 z::com::object_server::Ireference_with_properties,
                  Sos_ole_object               
 {
                                 Com_log                     ( Prefix_log* = NULL );
@@ -199,8 +200,16 @@ struct Com_log : spooler_com::Ilog,
    
     USE_SOS_OLE_OBJECT_WITHOUT_QI
 
+
+    // interface Ihas_java_class_name
     STDMETHODIMP            get_java_class_name             ( BSTR* result )                        { return string_to_bstr( "sos.spooler.Log", result ); }
 
+
+    // interface Ireference_with_properties
+    STDMETHODIMP            get_reference_with_properties   ( const IID&, ptr<z::com::object_server::Reference_with_properties>* );
+
+
+    // interface Ilog
     void                    set_log                         ( Prefix_log* );
 
     STDMETHODIMP                debug9                      ( BSTR );
@@ -253,6 +262,48 @@ struct Com_log : spooler_com::Ilog,
     Fill_zero                  _zero_;
     Thread_semaphore           _lock;
     Prefix_log*                _log;
+};
+
+//------------------------------------------------------------------------------------Com_log_proxy
+
+struct Com_log_proxy: object_server::Proxy 
+{
+                              //Com_log                     ();
+
+    void                    set_property                    ( const string& name, const Variant& value );
+
+  //STDMETHODIMP                QueryInterface              ( REFIID, void** );
+   
+  //STDMETHODIMP                GetIDsOfNames               ( const IID&, OLECHAR** rgszNames, UINT cNames, LCID, DISPID* );
+
+    STDMETHODIMP                Invoke                      ( DISPID, const IID&, LCID, unsigned short wFlags, DISPPARAMS*,
+                                                              VARIANT* pVarResult, EXCEPINFO*, UINT* puArgErr );
+/*
+    STDMETHODIMP                debug9                      ( BSTR line )                           { log( log_debug9, line ); }
+    STDMETHODIMP                debug8                      ( BSTR line )                           { log( log_debug8, line ); }
+    STDMETHODIMP                debug7                      ( BSTR line )                           { log( log_debug7, line ); }
+    STDMETHODIMP                debug6                      ( BSTR line )                           { log( log_debug6, line ); }
+    STDMETHODIMP                debug5                      ( BSTR line )                           { log( log_debug5, line ); }
+    STDMETHODIMP                debug4                      ( BSTR line )                           { log( log_debug4, line ); }
+    STDMETHODIMP                debug3                      ( BSTR line )                           { log( log_debug3, line ); }
+    STDMETHODIMP                debug2                      ( BSTR line )                           { log( log_debug2, line ); }
+    STDMETHODIMP                debug1                      ( BSTR line )                           { log( log_debug1, line ); }
+    STDMETHODIMP                debug                       ( BSTR line )                           { log( log_debug , line ); }
+    STDMETHODIMP                info                        ( BSTR line )                           { log( log_info  , line ); }
+    STDMETHODIMP                msg                         ( BSTR line )                           { log( log_info  , line ); }
+    STDMETHODIMP                warn                        ( BSTR line )                           { log( log_warn  , line ); }
+    STDMETHODIMP                error                       ( BSTR line )                           { log( log_error , line ); }
+  //STDMETHODIMP                fatal                       ( BSTR );
+    STDMETHODIMP                log                         ( spooler_com::Log_level, BSTR line );
+
+    STDMETHODIMP            put_level                       ( int );
+    STDMETHODIMP            get_level                       ( int* );
+*/
+
+  private:
+  //static const z::com::Com_method    _methods[];
+
+    int                        _level;
 };
 
 //----------------------------------------------------------------------------------Com_object_set

@@ -1,4 +1,4 @@
-// $Id: spooler_command.cxx,v 1.100 2003/12/03 08:52:44 jz Exp $
+// $Id: spooler_command.cxx,v 1.101 2003/12/08 10:32:05 jz Exp $
 /*
     Hier ist implementiert
 
@@ -144,7 +144,15 @@ xml::Element_ptr Command_processor::execute_show_state( const xml::Element_ptr& 
     state_element.setAttribute( "log_file"             , _spooler->_base_log.filename() );
 
     if( _spooler->_db )
-    state_element.setAttribute( "db"                   , trim( _spooler->_db->db_name() ) );
+    {
+        THREAD_LOCK( _spooler->_lock )
+        {
+            state_element.setAttribute( "db"                   , trim( _spooler->_db->db_name() ) );
+
+            if( _spooler->_db->error() != "" )
+                state_element.setAttribute( "db_error", trim( _spooler->_db->error() ) );
+        }
+    }
 
     double cpu_time = get_cpu_time();
     char buffer [30];
@@ -355,7 +363,7 @@ xml::Element_ptr Command_processor::execute_start_job( const xml::Element_ptr& e
         if( e.nodeName_is( "params" ) )  { pars->set_dom( e );  break; }
     }
 
-    Sos_ptr<Task> task = _spooler->get_job( job_name )->start_without_lock( ptr<spooler_com::Ivariable_set>(pars), task_name, start_at, true );
+    Sos_ptr<Task> task = _spooler->get_job( job_name )->start( ptr<spooler_com::Ivariable_set>(pars), task_name, start_at, true );
 
     return _answer.createElement( "ok" );
 }

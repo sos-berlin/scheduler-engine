@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.299 2003/12/03 08:52:43 jz Exp $
+// $Id: spooler.cxx,v 1.300 2003/12/08 10:32:05 jz Exp $
 /*
     Hier sind implementiert
 
@@ -86,6 +86,27 @@ static bool                     is_daemon                           = false;
 volatile int                    ctrl_c_pressed                      = 0;
 Spooler*                        spooler_ptr                         = NULL;
 
+struct Error_settings
+{
+    void read( const string& ini_file )
+    {
+        _from = read_profile_string( ini_file, "spooler", "log_mail_from", _from );
+        _to   = read_profile_string( ini_file, "spooler", "log_mail_to"  , _to   );
+        _cc   = read_profile_string( ini_file, "spooler", "log_mail_cc"  , _cc   );
+        _bcc  = read_profile_string( ini_file, "spooler", "log_mail_bcc" , _bcc  );
+        _smtp = read_profile_string( ini_file, "spooler", "smtp"         , _smtp );
+    }
+
+    string                     _from;
+    string                     _to;
+    string                     _cc;
+    string                     _bcc;
+    string                     _smtp;
+};
+
+static Error_settings           error_settings;
+
+
 
 /*
 struct Set_console_code_page
@@ -105,19 +126,15 @@ static void send_error_email( const string& subject, const string& body )
 {
     try
     {
-        string from = read_profile_string( default_factory_ini, "spooler", "log_mail_from"   );
-        string to   = read_profile_string( default_factory_ini, "spooler", "log_mail_to"     );
-        string cc   = read_profile_string( default_factory_ini, "spooler", "log_mail_cc"     );
-        string bcc  = read_profile_string( default_factory_ini, "spooler", "log_mail_bcc"    );
-        string smtp = read_profile_string( default_factory_ini, "spooler", "smtp"            );
-
         Sos_ptr<mail::Message> msg = mail::create_message();
 
-        if( from != "" )  msg->set_from( from );
-        if( to   != "" )  msg->set_to  ( to   );
-        if( cc   != "" )  msg->set_cc  ( cc   );
-        if( bcc  != "" )  msg->set_bcc ( bcc  );
-        if( smtp != "" )  msg->set_smtp( smtp );
+        error_settings.read( default_factory_ini );
+
+        if( error_settings._from != "" )  msg->set_from( error_settings._from );
+        if( error_settings._to   != "" )  msg->set_to  ( error_settings._to   );
+        if( error_settings._cc   != "" )  msg->set_cc  ( error_settings._cc   );
+        if( error_settings._bcc  != "" )  msg->set_bcc ( error_settings._bcc  );
+        if( error_settings._smtp != "" )  msg->set_smtp( error_settings._smtp );
 
         msg->add_header_field( "X-SOS-Spooler", "" );
         msg->set_subject( subject );
@@ -465,7 +482,13 @@ void Spooler::remove_temporary_jobs()
             if( job->should_removed() )    
             {
                 if( _debug )  job->_log.debug( "Temporärer Job wird entfernt" );
-                job->close(); 
+
+                try
+                {
+                    job->close(); 
+                }
+                catch( exception &x )  { _log.warn( x.what() ); }   // Kann das überhaupt passieren?
+
                 it = _job_list.erase( it );
                 continue;
             }
@@ -1415,10 +1438,13 @@ void Spooler::start()
     }
 
 
-    _db = SOS_NEW( Spooler_db( this ) );
-    _db->open( _db_name );
-    _db->spooler_start();
+    THREAD_LOCK( _lock )
+    {
+        _db = SOS_NEW( Spooler_db( this ) );
+        _db->open( _db_name );
+    }
 
+    _db->spooler_start();
 
     // Thread _communication nach Java starten (auch implizit durch _db). Java muss laufen, wenn der Thread startet! (Damit attach_thread() greift)
     if( !_manual )  _communication.start_or_rebind();
@@ -1518,8 +1544,12 @@ void Spooler::stop()
      || _shutdown_cmd == sc_let_run_terminate_and_restart )  spooler_restart( &_base_log, _is_service );
 
     _db->spooler_stop();
-    _db->close();
-    _db = NULL;
+
+    THREAD_LOCK( _lock )
+    {
+        _db->close();
+        _db = NULL;
+    }
 
     set_state( s_stopped );     
     // Der Dienst ist hier beendet
@@ -1911,7 +1941,17 @@ int Spooler::launch( int argc, char** argv, const string& parameter_line )
         if( _send_cmd != "" )  { send_cmd();  return 0; }
 
         start();
-        run();
+
+        try
+        {
+            run();
+        }
+        catch( exception& )
+        {
+            try { stop(); } catch( exception& x ) { _log.error( x.what() ); }
+            throw;
+        }
+
         stop();
 
     } while( _state_cmd == sc_reload || _state_cmd == sc_load_config );
@@ -2222,6 +2262,7 @@ int spooler_main( int argc, char** argv, const string& parameter_line )
 
     set_log_category_default( "scheduler.call", true );   // Aufrufe von spooler_process() etc. protokollieren (Beginn und Ende)
 
+    spooler::error_settings.read( spooler::default_factory_ini );
 
     try
     {
@@ -2282,7 +2323,7 @@ int spooler_main( int argc, char** argv, const string& parameter_line )
                 {
                     if( opt.with_value( "id"               ) )  id = opt.value();
                     else
-                    if( opt.with_value( "ini"              ) )  factory_ini = opt.value();
+                    if( opt.with_value( "ini"              ) )  factory_ini = opt.value(), spooler::error_settings.read( factory_ini );
                     else
                     if( opt.with_value( "log"              ) )  log_filename = opt.value();
 

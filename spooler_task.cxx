@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.221 2003/12/03 08:52:44 jz Exp $
+// $Id: spooler_task.cxx,v 1.222 2003/12/08 10:32:06 jz Exp $
 /*
     Hier sind implementiert
 
@@ -11,6 +11,7 @@
 
 
 #include "spooler.h"
+#include "../kram/sleep.h"
 
 #ifndef Z_WINDOWS
 #   include <signal.h>
@@ -638,319 +639,334 @@ bool Task::do_something()
         }
     }
 
-        
+
+    int error_count = 0;
+
     bool loop = true;
     while( loop )
     {
         try
         {
-            loop = false;
-            bool ok = true;
-
-            if( !_operation )
+            try
             {
-                if( _module_instance && !_module_instance_async_error ) 
+                loop = false;
+                bool ok = true;
+
+                if( !_operation )
                 {
-                    try 
-                    { 
-                        _module_instance->check_connection_error(); 
-                    }  
-                    catch( exception& x )
-                    { 
-                        _module_instance_async_error = true;  
-                        throw_xc( "SCHEDULER-202", x.what() );
+                    if( _module_instance && !_module_instance_async_error ) 
+                    {
+                        try 
+                        { 
+                            _module_instance->check_connection_error(); 
+                        }  
+                        catch( exception& x )
+                        { 
+                            _module_instance_async_error = true;  
+                            throw_xc( "SCHEDULER-202", x.what() );
+                        }
+                    }
+
+                    if( _state < s_ending  &&  _end )      // Task beenden?
+                    {
+                        if( !loaded() )         set_state( s_ended );
+                        else
+                        if( !_begin_called )    set_state( s_release );
+                        else
+                                                set_state( s_ending );
+                    }
+
+                    // Historie beginnen?
+                    if( _state == s_starting 
+                    || _state == s_running 
+                    || _state == s_running_delayed 
+                    || _state == s_running_waiting_for_order 
+                    || _state == s_running_process           )
+                    {
+                        if( _step_count == _job->_history.min_steps() )  _history.start();
                     }
                 }
 
-                if( _state < s_ending  &&  _end )      // Task beenden?
+
+                switch( _state )
                 {
-                    if( !loaded() )         set_state( s_ended );
-                    else
-                    if( !_begin_called )    set_state( s_release );
-                    else
-                                            set_state( s_ending );
-                }
-
-                // Historie beginnen?
-                if( _state == s_starting 
-                 || _state == s_running 
-                 || _state == s_running_delayed 
-                 || _state == s_running_waiting_for_order 
-                 || _state == s_running_process           )
-                {
-                    if( _step_count == _job->_history.min_steps() )  _history.start();
-                }
-            }
-
-
-            switch( _state )
-            {
-                case s_loading:
-                {
-                    load();
-
-                case s_waiting_for_process:
-                    bool ok = !_module_instance || _module_instance->try_to_get_process();
-                    if( ok )  something_done = true, set_state( s_starting ), loop = true;
-                        else  set_state( s_waiting_for_process );
-                    break;
-                }
-
-
-                case s_starting:
-                {
-                    _begin_called = true;
-
-                    if( !_operation )
+                    case s_loading:
                     {
-                        _operation = begin__start();
-                    }
-                    else
-                    {
-                        ok = operation__end(); 
-                        if( _state != s_running_process )  set_state( ok? s_running : s_ending );
-                        loop = true;
+                        load();
+
+                    case s_waiting_for_process:
+                        bool ok = !_module_instance || _module_instance->try_to_get_process();
+                        if( ok )  something_done = true, set_state( s_starting ), loop = true;
+                            else  set_state( s_waiting_for_process );
+                        break;
                     }
 
-                    something_done = true;
 
-                    break;
-                }
-
-
-                case s_running_process:
-                    if( ((Process_task*)this)->signaled() )
+                    case s_starting:
                     {
-                        _log( "signaled!" );
-                        set_state( s_ending );
-                        loop = true;
-                    }
-                    break;
+                        _begin_called = true;
 
-
-                case s_running:
-                {
-                    if( !_operation )
-                    {
-                        if( _next_spooler_process )
+                        if( !_operation )
                         {
-                            set_state( s_running_delayed );
+                            _operation = begin__start();
                         }
                         else
                         {
-                            if( _job->order_queue() )
+                            ok = operation__end(); 
+                            if( _state != s_running_process )  set_state( ok? s_running : s_ending );
+                            loop = true;
+                        }
+
+                        something_done = true;
+
+                        break;
+                    }
+
+
+                    case s_running_process:
+                        if( ((Process_task*)this)->signaled() )
+                        {
+                            _log( "signaled!" );
+                            set_state( s_ending );
+                            loop = true;
+                        }
+                        break;
+
+
+                    case s_running:
+                    {
+                        if( !_operation )
+                        {
+                            if( _next_spooler_process )
                             {
-                                if( !take_order( now ) )
+                                set_state( s_running_delayed );
+                            }
+                            else
+                            {
+                                if( _job->order_queue() )
                                 {
-                                    set_state( s_running_waiting_for_order );
-                                    break;
+                                    if( !take_order( now ) )
+                                    {
+                                        set_state( s_running_waiting_for_order );
+                                        break;
+                                    }
+
+                                    _log.set_order_log( &_order->_log );
                                 }
 
-                                _log.set_order_log( &_order->_log );
+                                _last_process_start_time = now;
+
+                                _operation = do_step__start();
+
+                                something_done = true;
                             }
-
-                            _last_process_start_time = now;
-
-                            _operation = do_step__start();
-
-                            something_done = true;
-                        }
-                    }
-                    else
-                    {
-                        ok = step__end();
-                        _operation = NULL;
-
-                        if( !ok || has_error() )  set_state( s_ending ), loop = true;
-                        something_done = true;
-                    }
-
-                    break;
-                }
-
-
-                case s_running_waiting_for_order:
-                {
-                    if( take_order( now ) )
-                    {
-                        set_state( s_running );     // Auftrag da? Dann Task weiterlaufen lassen (Ende der Run_time wird noch geprüft)
-                        loop = true;                // _order wird in step__end() wieder abgeräumt
-                    }
-                    else
-                    if( _job->_idle_timeout != latter_day )
-                    {
-                        if( now > _idle_since + _job->_idle_timeout )  
-                        {
-                            _log.debug9( "idle_timeout ist abgelaufen, Task beendet sich" );
-                            _end = true;
-                            loop = true;
-                        }
-                    }
-                    break;
-                }
-
-
-                case s_running_delayed:  
-                {
-                    if( now >= _next_spooler_process )
-                    {
-                        _next_spooler_process = 0;
-                        set_state( s_running ), loop = true;
-                    }
-                 
-                    break;
-                }
-
-
-                case s_ending:
-                {
-                    if( !_operation )
-                    {
-                        THREAD_LOCK( _lock ) { if( !_ending_since )  _ending_since = now; }    // Wird auch von cmd_end() gesetzt
-
-                        if( has_error() )  _history.start();
-
-                        if( _begin_called )
-                        {
-                            _operation = do_end__start();
-                            //set_state( s_ending );
                         }
                         else
                         {
-                            set_state( s_exit );
+                            ok = step__end();
+                            _operation = NULL;
+
+                            if( !ok || has_error() )  set_state( s_ending ), loop = true;
+                            something_done = true;
+                        }
+
+                        break;
+                    }
+
+
+                    case s_running_waiting_for_order:
+                    {
+                        if( take_order( now ) )
+                        {
+                            set_state( s_running );     // Auftrag da? Dann Task weiterlaufen lassen (Ende der Run_time wird noch geprüft)
+                            loop = true;                // _order wird in step__end() wieder abgeräumt
+                        }
+                        else
+                        if( _job->_idle_timeout != latter_day )
+                        {
+                            if( now > _idle_since + _job->_idle_timeout )  
+                            {
+                                _log.debug9( "idle_timeout ist abgelaufen, Task beendet sich" );
+                                _end = true;
+                                loop = true;
+                            }
+                        }
+                        break;
+                    }
+
+
+                    case s_running_delayed:  
+                    {
+                        if( now >= _next_spooler_process )
+                        {
+                            _next_spooler_process = 0;
+                            set_state( s_running ), loop = true;
+                        }
+                     
+                        break;
+                    }
+
+
+                    case s_ending:
+                    {
+                        if( !_operation )
+                        {
+                            THREAD_LOCK( _lock ) { if( !_ending_since )  _ending_since = now; }    // Wird auch von cmd_end() gesetzt
+
+                            if( has_error() )  _history.start();
+
+                            if( _begin_called )
+                            {
+                                _operation = do_end__start();
+                                //set_state( s_ending );
+                            }
+                            else
+                            {
+                                set_state( s_exit );
+                                loop = true;
+                            }
+                        }
+                        else
+                        {
+                            operation__end();
+
+                            set_state( loaded()? has_error()? s_on_error 
+                                                            : s_on_success 
+                                            : s_release );
+
+                            set_mail_defaults();
+
                             loop = true;
                         }
+
+                        something_done = true;
+
+                        break;
                     }
-                    else
+
+
+                    case s_on_success:
                     {
-                        operation__end();
+                        if( !_operation )  _operation = do_call__start( spooler_on_success_name );
+                                    else  operation__end(), set_state( s_exit ), loop = true;
 
-                        set_state( loaded()? has_error()? s_on_error 
-                                                        : s_on_success 
-                                           : s_release );
-
-                        set_mail_defaults();
-
-                        loop = true;
+                        something_done = true;
+                        break;
                     }
 
-                    something_done = true;
 
-                    break;
-                }
-
-
-                case s_on_success:
-                {
-                    if( !_operation )  _operation = do_call__start( spooler_on_success_name );
-                                 else  operation__end(), set_state( s_exit ), loop = true;
-
-                    something_done = true;
-                    break;
-                }
-
-
-                case s_on_error:
-                {
-                    if( !_operation )  _operation = do_call__start( spooler_on_error_name );
-                                 else  operation__end(), set_state( s_exit ), loop = true;
-
-                    something_done = true;
-                    break;
-                }
-
-
-                case s_exit:
-                {
-                    if( _job->_module._reuse == Module::reuse_task )
+                    case s_on_error:
                     {
-                        if( !_operation )  _operation = do_call__start( spooler_exit_name );
-                                     else  operation__end(), set_state( s_release ), loop = true;
-                    }
-                    else
-                    {
-                        set_state( s_release );
-                        loop = true;
+                        if( !_operation )  _operation = do_call__start( spooler_on_error_name );
+                                    else  operation__end(), set_state( s_exit ), loop = true;
+
+                        something_done = true;
+                        break;
                     }
 
-                    something_done = true;
-                    break;
+
+                    case s_exit:
+                    {
+                        if( _job->_module._reuse == Module::reuse_task )
+                        {
+                            if( !_operation )  _operation = do_call__start( spooler_exit_name );
+                                        else  operation__end(), set_state( s_release ), loop = true;
+                        }
+                        else
+                        {
+                            set_state( s_release );
+                            loop = true;
+                        }
+
+                        something_done = true;
+                        break;
+                    }
+
+
+                    case s_release:
+                    {
+                        if( !_operation )  _operation = do_release__start();
+                                    else  operation__end(), set_state( s_ended ), loop = true;
+
+                        something_done = true;
+                        break;
+                    }
+
+
+                    case s_ended:
+                    {
+                        if( !_operation )  
+                        {
+                            _operation = do_close__start();
+                        }
+                        else
+                        {
+                            operation__end();
+                            finish();
+
+                            // Gesammelte eMail senden, wenn collected_max erreicht:
+                            //Time log_time = _log.collect_end();
+                            //if( log_time > Time::now()  &&  _next_time > log_time )  set_next_time( log_time );
+
+                            set_state( s_closed );
+						    something_done = true;
+                            loop = true;
+                        }
+
+                        break;
+                    }
+
+
+                    case s_suspended:
+                        break;
+
+                    case s_closed:
+                        break;
+
+                    case s_none:
+                    case s__max:
+                        throw_xc( "state=none?" );
                 }
 
 
-                case s_release:
+                if( !_operation )
                 {
-                    if( !_operation )  _operation = do_release__start();
-                                 else  operation__end(), set_state( s_ended ), loop = true;
-
-                    something_done = true;
-                    break;
-                }
-
-
-                case s_ended:
-                {
-                    if( !_operation )  
+                    if( !ok || has_error() )  
                     {
-                        _operation = do_close__start();
-                    }
-                    else
-                    {
-                        operation__end();
-                        finish();
-
-                        // Gesammelte eMail senden, wenn collected_max erreicht:
-                        //Time log_time = _log.collect_end();
-                        //if( log_time > Time::now()  &&  _next_time > log_time )  set_next_time( log_time );
-
-                        set_state( s_closed );
-						something_done = true;
-                        loop = true;
+                        if( _state < s_ending )  set_state( s_ending ), loop = true;
                     }
 
-                    break;
+                
+                    if( _killed  &&  _state < s_ended )  set_state( s_ended ), loop = true;
                 }
-
-
-                case s_suspended:
-                    break;
-
-                case s_closed:
-                    break;
-
-                case s_none:
-                case s__max:
-                    throw_xc( "state=none?" );
             }
-
-
-            if( !_operation )
-            {
-                if( !ok || has_error() )  
-                {
-                    if( _state < s_ending )  set_state( s_ending ), loop = true;
-                }
-
-            
-                if( _killed  &&  _state < s_ended )  set_state( s_ended ), loop = true;
-            }
+            catch( _com_error& x )  { throw_com_error( x ); }
         }
         catch( const exception& x )
         {
-            set_error( x );
+            if( error_count == 0 )  set_error( x );
+                              else  _log.error( x.what() );
 
-            if( _state < s_ending )
+            if( error_count == 0  &&  _state < s_ending )
             {
                 _end = true;
                 loop = true;
             }
             else
+            if( error_count <= 1 )
             {
+                loop = false;
                 finish();
                 set_state( s_closed );
             }
+            else
+                throw x;    // Fehlerschleife, Scheduler beenden. Sollte nicht passieren.
+
+            error_count++;
 
             something_done = true;
+
+            sos_sleep( 5 );  // Bremsen, falls sich der Fehler wiederholt
         }
     }
 
@@ -988,6 +1004,12 @@ bool Task::do_something()
     return something_done;
 }
 
+//------------------------------------------------------------------------------------do_something2
+/*
+bool Task::do_something2()
+{
+}
+*/
 //---------------------------------------------------------------------------------------Task::load
 
 void Task::load()

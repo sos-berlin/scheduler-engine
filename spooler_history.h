@@ -1,4 +1,4 @@
-// $Id: spooler_history.h,v 1.21 2003/12/03 08:52:44 jz Exp $
+// $Id: spooler_history.h,v 1.22 2003/12/08 10:32:05 jz Exp $
 
 #ifndef __SPOOLER_HISTORY_H
 #define __SPOOLER_HISTORY_H
@@ -43,43 +43,49 @@ struct Spooler_db : Sos_self_deleting
 
     void                        open                    ( const string& db_name );
     void                        close                   ();
-    void                        open_history_table      ();
     bool                        opened                  ()                                          { return _db.opened(); }
-    void                        commit                  ();
-    void                        rollback                ();
-    void                        execute                 ( const string& stmt );
-    void                        create_table_when_needed( const string& tablename, const string& fields );
-    void                        try_reopen_after_error  ( const exception& );
     string                      db_name                 ()                                          { return _db_name; }
+    string                      error                   ()                                          { THREAD_LOCK_RETURN( _error_lock, string, _error ); }
 
     void                        spooler_start           ();
     void                        spooler_stop            ();
 
     int                         get_task_id             ()                                          { return get_id( "spooler_job_id" ); }
-    int                         get_id                  ( const string& variable_name, Transaction* = NULL );
-    int                         get_id_                 ( const string& variable_name, Transaction* );
-
     int                         get_order_id            ( Transaction* ta = NULL )                  { return get_id( "spooler_order_id", ta ); }
     int                         get_order_ordering      ( Transaction* ta = NULL )                  { return get_id( "spooler_order_ordering", ta ); }
+    int                         get_order_history_id    ( Transaction* ta )                         { return get_id( "spooler_order_history_id", ta ); }
+
     void                        insert_order            ( Order* );
-    void                        delete_order            ( Order*, Transaction* );
     void                        update_order            ( Order* );
 
-    int                         get_order_history_id    ( Transaction* ta )                         { return get_id( "spooler_order_history_id", ta ); }
     void                        write_order_history     ( Order*, Transaction* = NULL );
 
 
     Fill_zero                  _zero_;
     Thread_semaphore           _lock;
+    Thread_semaphore           _error_lock;
     Spooler*                   _spooler;
+
 
   private:
     friend struct Spooler;
     friend struct Job_history;
     friend struct Task_history;
+    friend struct Transaction;
+
+    void                        open_history_table      ();
+    void                        commit                  ();
+    void                        rollback                ();
+    void                        execute                 ( const string& stmt );
+    void                        create_table_when_needed( const string& tablename, const string& fields );
+    void                        try_reopen_after_error  ( const exception& );
+    int                         get_id                  ( const string& variable_name, Transaction* = NULL );
+    int                         get_id_                 ( const string& variable_name, Transaction* );
+    void                        delete_order            ( Order*, Transaction* );
 
     string                     _db_name;
     Any_file                   _db;
+    string                     _error;
   //Any_file                   _job_id_update;
   //Any_file                   _job_id_select;
     map<string,long>           _id_counters;

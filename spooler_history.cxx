@@ -1,4 +1,4 @@
-// $Id: spooler_history.cxx,v 1.63 2003/12/03 09:36:11 jz Exp $
+// $Id: spooler_history.cxx,v 1.64 2003/12/08 10:32:05 jz Exp $
 
 #include "spooler.h"
 #include "../zschimmer/z_com.h"
@@ -29,7 +29,7 @@ const char history_column_names_db[] = "log";    // Spalten zusätzlich in der Da
 
 const int max_field_length = 1024;      // Das ist die Feldgröße von Any_file -type=(...) für tabulierte Datei.
 const int blob_field_size  = 1900;      // Bis zu dieser Größe wird ein Blob im Datensatz geschrieben. ODBC erlaubt nur 2000 Zeichen lange Strings
-const int db_error_retry_max = 5;       // Nach DB-Fehler max. so oft die Datenbank neu eröffnen und Operation wiederholen.
+const int db_error_retry_max = 0;       // Nach DB-Fehler max. so oft die Datenbank neu eröffnen und Operation wiederholen.
 
 //---------------------------------------------------------------------------------------------test
 /*
@@ -321,9 +321,19 @@ void Spooler_db::create_table_when_needed( const string& tablename, const string
 
 void Spooler_db::try_reopen_after_error( const exception& x )
 {
+    THREAD_LOCK( _error_lock )  _error = x.what();
+
     _spooler->log().error( string("FEHLER BEIM ZUGRIFF AUF DATENBANK: ") + x.what() );
 
-    bool too_much_errors = false; //_error_count++ >= _spooler->_max_db_errors;
+    _spooler->log().info( "Datenbank wird geschlossen" );
+    try
+    {
+        close();
+    }
+    catch( const exception& x ) { _spooler->_log.warn( string("FEHLER BEIM SCHLIESSEN DER DATENBANK: ") + x.what() ); }
+
+
+    bool too_much_errors = _error_count++ >= _spooler->_max_db_errors;
     
     if( too_much_errors ) 
     {
@@ -334,52 +344,55 @@ void Spooler_db::try_reopen_after_error( const exception& x )
         {
             string body = "db=" + _spooler->_db_name + "\r\n\r\n" + x.what() + "\r\n\r\n" + warn_msg;
             _spooler->send_error_email( string("SCHEDULER WIRD BEENDET WEGEN FEHLERS BEIM ZUGRIFF AUF DATENBANK: ") + x.what(), body );
-            throw x;
+            throw Stop_scheduler_exception( x );
+        }
+        else
+        {
+            // Datenbank nicht mehr öffnen und auf Dateihistorie umschalten.
+        }
+    }
+    else
+    {
+        if( !_email_sent_after_db_error )
+        {
+            string body = "db=" + _spooler->_db_name + "\r\n\r\n" + x.what() + "\r\n\r\nDer Scheduler versucht, die Datenbank erneut zu oeffnen.";
+            if( !_spooler->_need_db )  body += "\r\nWenn das nicht geht, schreibt der Scheduler die Historie in Textdateien.";
+            _spooler->send_error_email( string("FEHLER BEIM ZUGRIFF AUF DATENBANK: ") + x.what(), body );
+            _email_sent_after_db_error = true;
+        }
+
+        Z_MUTEX( _lock )
+        {
+            //sos_sleep( 10 );    // Bremse, falls der Fehler nicht an einer unterbrochenen Verbindung liegt. Denn für jeden Fehler gibt es eine eMail!
+
+            while(1)
+            {
+                try
+                {
+                    open( _spooler->_db_name );
+                    open_history_table();
+                    break;
+                }
+                catch( const exception& x )
+                {
+                    _spooler->log().warn( x.what() );
+
+                    if( !_spooler->_need_db )  break;
+
+                    sos_sleep( 60 );
+                }
+            }
         }
     }
 
-    if( !_email_sent_after_db_error )
+    if( _db.opened() )
     {
-        string body = "db=" + _spooler->_db_name + "\r\n\r\n" + x.what() + "\r\n\r\nDer Scheduler versucht, die Datenbank erneut zu oeffnen.";
-        if( !_spooler->_need_db )  body += "\r\nWenn das nicht geht, schreibt der Scheduler die Historie in Textdateien.";
-        _spooler->send_error_email( string("FEHLER BEIM ZUGRIFF AUF DATENBANK: ") + x.what(), body );
-        _email_sent_after_db_error = true;
+        THREAD_LOCK( _error_lock )  _error = x.what();
     }
-
-    Z_MUTEX( _lock )
+    else
     {
-        _spooler->log().info( "Datenbank wird geschlossen" );
-        //try
-        //{
-            close();
-        //}
-        //catch( const xception& x ) { _log->warn(" FEHLER BEIM SCHLIESSEN DER DATENBANK: " + x.what() ); }
-
-        //sos_sleep( 10 );    // Bremse, falls der Fehler nicht an einer unterbrochenen Verbindung liegt. Denn für jeden Fehler gibt es eine eMail!
-
-        while(1)
-        {
-            try
-            {
-                open( _spooler->_db_name );
-                open_history_table();
-                break;
-            }
-            catch( const exception& x )
-            {
-                _spooler->log().warn( x.what() );
-
-                if( !_spooler->_need_db )  break;
-
-                sos_sleep( 60 );
-            }
-        }
-
-        if( !_db.opened() )
-        {
-            _spooler->log().info( "Historie wird von Datenbank auf Dateien umgeschaltet" );
-            open( "" );     // Umschalten auf dateibasierte Historie
-        }
+        _spooler->log().info( "Historie wird von Datenbank auf Dateien umgeschaltet" );
+        open( "" );     // Umschalten auf dateibasierte Historie
     }
 }
 
@@ -388,7 +401,7 @@ void Spooler_db::try_reopen_after_error( const exception& x )
 
 int Spooler_db::get_id( const string& variable_name, Transaction* outer_transaction )
 {
-    int  retry_count = db_error_retry_max;
+  //int  retry_count = db_error_retry_max;
     int  id;
 
     while(1)
@@ -400,7 +413,7 @@ int Spooler_db::get_id( const string& variable_name, Transaction* outer_transact
         }
         catch( const exception& x )
         {
-            if( --retry_count <= 0 )  throw;
+          //if( --retry_count < 0 )  throw;
             try_reopen_after_error( x );
         }
     }
@@ -427,6 +440,8 @@ int Spooler_db::get_id_( const string& variable_name, Transaction* outer_transac
             //_job_id_select.execute();
             //id = _job_id_select.get_record().as_int(0);
             //_job_id_select.close( close_cursor );
+
+static int c = 0; if( ++c >= 2 )  throw_xc( "FEHLER" );
 
             execute( "UPDATE " + uquoted(_spooler->_variables_tablename) + " set \"WERT\" = \"WERT\"+1 where \"NAME\"=" + sql::quoted( variable_name ) );
 
@@ -539,45 +554,53 @@ void Spooler_db::spooler_stop()
 
 void Spooler_db::insert_order( Order* order )
 {
-    int  retry_count = db_error_retry_max;
+    if( !_db.opened() )  return;
 
-    while(1)
+    try
     {
-        if( !_db.opened() )  return;
+      //int  retry_count = db_error_retry_max;
 
-        Transaction ta = this;
+        while(1)
         {
-            delete_order( order, &ta );
-
-            sql::Insert_stmt insert;
-            
-            insert.set_table_name( _spooler->_orders_tablename );
-            
-            insert[ "ordering"   ] = get_order_ordering( &ta );
-            insert[ "job_chain"  ] = order->job_chain()->name();
-            insert[ "id"         ] = order->id().as_string();
-            insert[ "spooler_id" ] = _spooler->id_for_db();
-            insert[ "title"      ] = order->title()                     , order->_title_modified      = false;
-            insert[ "state"      ] = order->state().as_string();
-            insert[ "state_text" ] = order->state_text()                , order->_state_text_modified = false;
-            insert[ "priority"   ] = order->priority()                  , order->_priority_modified   = false;
-            insert[ "payload"    ] = order->payload().as_string()       , order->_payload_modified    = false;
-            insert.set_datetime( "created_time", order->_created.as_string(Time::without_ms) );
-            insert.set_datetime( "mod_time", Time::now().as_string(Time::without_ms) );
-
             try
             {
-                execute( insert );
-                ta.commit();
+                Transaction ta = this;
+                {
+                    delete_order( order, &ta );
+
+                    sql::Insert_stmt insert;
+                    
+                    insert.set_table_name( _spooler->_orders_tablename );
+                    
+                    insert[ "ordering"   ] = get_order_ordering( &ta );
+                    insert[ "job_chain"  ] = order->job_chain()->name();
+                    insert[ "id"         ] = order->id().as_string();
+                    insert[ "spooler_id" ] = _spooler->id_for_db();
+                    insert[ "title"      ] = order->title()                     , order->_title_modified      = false;
+                    insert[ "state"      ] = order->state().as_string();
+                    insert[ "state_text" ] = order->state_text()                , order->_state_text_modified = false;
+                    insert[ "priority"   ] = order->priority()                  , order->_priority_modified   = false;
+                    insert[ "payload"    ] = order->payload().as_string()       , order->_payload_modified    = false;
+                    insert.set_datetime( "created_time", order->_created.as_string(Time::without_ms) );
+                    insert.set_datetime( "mod_time", Time::now().as_string(Time::without_ms) );
+
+                    execute( insert );
+                    ta.commit();
+                }
+
+                break;
             }
             catch( const exception& x )  
             { 
-                if( --retry_count <= 0 )  throw;
+              //if( --retry_count < 0 )  throw;
                 try_reopen_after_error( x );
             }
         }
-
-        break;
+    }
+    catch( const exception& x ) 
+    { 
+        _spooler->log().error( "FEHLER BEIM EINFÜGEN IN DIE TABELLE " + _spooler->_orders_tablename + ":\n" + x.what() ); 
+        throw;
     }
 }
 
@@ -599,52 +622,61 @@ void Spooler_db::delete_order( Order* order, Transaction* transaction )
 
 void Spooler_db::update_order( Order* order )
 {
-    int  retry_count = db_error_retry_max;
+    if( !_db.opened() )  return;
 
-    while(1)
+    try
     {
-        if( !_db.opened() )  return;
+      //int  retry_count = db_error_retry_max;
 
-        try
+        while(1)
         {
-            Transaction ta = this;
+
+            try
             {
-                if( order->finished() )
+                Transaction ta = this;
                 {
-                    delete_order( order, &ta );
-                    write_order_history( order, &ta );
+                    if( order->finished() )
+                    {
+                        delete_order( order, &ta );
+                        write_order_history( order, &ta );
+                    }
+                    else
+                    {
+                        sql::Update_stmt update;
+
+                        update.set_table_name( _spooler->_orders_tablename );
+
+                        update[ "state" ] = order->state().as_string();
+                        
+                        if( order->_priority_modified   )  update[ "priority"   ] = order->priority()           ,  order->_state_text_modified = false;
+                        if( order->_title_modified      )  update[ "title"      ] = order->title()              ,  order->_title_modified      = false;
+                        if( order->_state_text_modified )  update[ "state_text" ] = order->state_text()         ,  order->_state_text_modified = false;
+                        if( order->_payload_modified    )  update[ "payload"    ] = order->payload().as_string(),  order->_payload_modified    = false;
+
+                        update.set_datetime( "mod_time", Time::now().as_string(Time::without_ms) );
+
+                        update.add_where_cond( "job_chain", order->job_chain()->name() );
+                        update.add_where_cond( "id"       , order->id().as_string()    );
+
+                        execute( update );
+                    }
+
+                    ta.commit();
                 }
-                else
-                {
-                    sql::Update_stmt update;
 
-                    update.set_table_name( _spooler->_orders_tablename );
-
-                    update[ "state" ] = order->state().as_string();
-                    
-                    if( order->_priority_modified   )  update[ "priority"   ] = order->priority()           ,  order->_state_text_modified = false;
-                    if( order->_title_modified      )  update[ "title"      ] = order->title()              ,  order->_title_modified      = false;
-                    if( order->_state_text_modified )  update[ "state_text" ] = order->state_text()         ,  order->_state_text_modified = false;
-                    if( order->_payload_modified    )  update[ "payload"    ] = order->payload().as_string(),  order->_payload_modified    = false;
-
-                    update.set_datetime( "mod_time", Time::now().as_string(Time::without_ms) );
-
-                    update.add_where_cond( "job_chain", order->job_chain()->name() );
-                    update.add_where_cond( "id"       , order->id().as_string()    );
-
-                    execute( update );
-                }
-
-                ta.commit();
+                break;
             }
-
-            break;
+            catch( const exception& x )  
+            { 
+              //if( --retry_count < 0 )  throw;
+                try_reopen_after_error( x );
+            }
         }
-        catch( const exception& x )  
-        { 
-            if( --retry_count <= 0 )  throw;
-            try_reopen_after_error( x );
-        }
+    }
+    catch( const exception& x ) 
+    { 
+        _spooler->log().error( "FEHLER BEIM UPDATE DER TABELLE " + _spooler->_orders_tablename + ":\n" + x.what() ); 
+        throw;
     }
 }
 
@@ -654,51 +686,66 @@ void Spooler_db::write_order_history( Order* order, Transaction* outer_transacti
 {
     try
     {
-        Transaction ta ( this, outer_transaction );
+      //int  retry_count = db_error_retry_max;
 
-        int history_id = get_order_history_id( &ta );
-
+        while(1)
         {
-            sql::Insert_stmt insert;
-            
-            insert.set_table_name( _spooler->_order_history_tablename );
-            
-            insert[ "history_id" ] = history_id;
-            insert[ "job_chain"  ] = order->job_chain()->name();
-            insert[ "order_id"   ] = order->id().as_string();
-            insert[ "title"      ] = order->title();
-            insert[ "state"      ] = order->state().as_string();
-            insert[ "state_text" ] = order->state_text();
-            insert[ "spooler_id" ] = _spooler->id_for_db();
-            insert.set_datetime( "start_time", order->start_time().as_string(Time::without_ms) );
-            insert.set_datetime( "end_time"  , order->end_time().as_string(Time::without_ms) );
-
-            execute( insert );
-
-
-            // Auftragsprotokoll
-            string log_filename = order->log().filename();
-
-            if( _spooler->_order_history_with_log  &&  !log_filename.empty()  &&  log_filename[0] != '*' )
+            try
             {
-                try 
+                Transaction ta ( this, outer_transaction );
+
+                int history_id = get_order_history_id( &ta );
+
                 {
-                    string blob_filename = db_name() + " -table=" + _spooler->_order_history_tablename + " -blob=log where \"HISTORY_ID\"=" + as_string( history_id );
-                    if( _spooler->_order_history_with_log == arc_gzip )  blob_filename = GZIP + blob_filename;
-                    copy_file( "file -b " + log_filename, blob_filename );
+                    sql::Insert_stmt insert;
+                    
+                    insert.set_table_name( _spooler->_order_history_tablename );
+                    
+                    insert[ "history_id" ] = history_id;
+                    insert[ "job_chain"  ] = order->job_chain()->name();
+                    insert[ "order_id"   ] = order->id().as_string();
+                    insert[ "title"      ] = order->title();
+                    insert[ "state"      ] = order->state().as_string();
+                    insert[ "state_text" ] = order->state_text();
+                    insert[ "spooler_id" ] = _spooler->id_for_db();
+                    insert.set_datetime( "start_time", order->start_time().as_string(Time::without_ms) );
+                    insert.set_datetime( "end_time"  , order->end_time().as_string(Time::without_ms) );
+
+                    execute( insert );
+
+
+                    // Auftragsprotokoll
+                    string log_filename = order->log().filename();
+
+                    if( _spooler->_order_history_with_log  &&  !log_filename.empty()  &&  log_filename[0] != '*' )
+                    {
+                        try 
+                        {
+                            string blob_filename = db_name() + " -table=" + _spooler->_order_history_tablename + " -blob=log where \"HISTORY_ID\"=" + as_string( history_id );
+                            if( _spooler->_order_history_with_log == arc_gzip )  blob_filename = GZIP + blob_filename;
+                            copy_file( "file -b " + log_filename, blob_filename );
+                        }
+                        catch( const exception& x ) 
+                        { 
+                            _spooler->_log.warn( "FEHLER BEIM SCHREIBEN DES LOGS IN DIE TABELLE " + _spooler->_order_history_tablename + ":\n" + x.what() ); 
+                        }
+                    }
                 }
-                catch( const exception& x ) 
-                { 
-                    _spooler->_log.warn( string("FEHLER BEIM SCHREIBEN DES LOGS IN DIE ORDER-HISTORIE: ") + x.what() ); 
-                }
+
+                ta.commit();
+                break;
+            }
+            catch( const exception& x )  
+            { 
+              //if( --retry_count < 0 )  throw;
+                try_reopen_after_error( x );
             }
         }
-
-        ta.commit();
     }
-    catch( const exception& x )  
+    catch( const exception& x ) 
     { 
-        _spooler->log().warn( string("FEHLER BEIM SCHREIBEN DER ORDER-HISTORIE: ") + x.what() ); 
+        _spooler->log().error( string("FEHLER BEIM SCHREIBEN DER ORDER-HISTORIE:\n") + x.what() ); 
+        throw;
     }
 }
 
@@ -1185,7 +1232,7 @@ void Task_history::write( bool start )
                 _spooler->_db->_history_update_params[6] = _task->_id;
                 _spooler->_db->_history_update.execute();
 */
-                string stmt = "*test*UPDATE " + uquoted(_spooler->_job_history_tablename) + " set ";
+                string stmt = "UPDATE " + uquoted(_spooler->_job_history_tablename) + " set ";
                 stmt +=   "\"START_TIME\"={ts'" + start_time + "'}";
                 stmt += ", \"END_TIME\"={ts'" + Time::now().as_string(Time::without_ms) + "'}";
                 stmt += ", \"STEPS\"=" + as_string( _task->_step_count );

@@ -1,4 +1,4 @@
-// $Id: spooler_job.cxx,v 1.45 2003/12/03 08:52:44 jz Exp $
+// $Id: spooler_job.cxx,v 1.46 2003/12/08 10:32:05 jz Exp $
 /*
     Hier sind implementiert
 
@@ -7,6 +7,7 @@
 
 
 #include "spooler.h"
+#include "../kram/sleep.h"
 
 #ifndef Z_WINDOWS
 #   include <signal.h>
@@ -65,7 +66,11 @@ Job::Job( Spooler* spooler )
 
 Job::~Job()
 {
-    close();
+    try
+    {
+        close();
+    }
+    catch( exception& x ) { _log.warn( x.what() ); }
 }
 
 //-------------------------------------------------------------------------------------Job::set_dom
@@ -376,6 +381,7 @@ Sos_ptr<Task> Job::get_task_from_queue( Time now )
     Sos_ptr<Task> task;
 
     if( _state == s_read_error )  return NULL;
+    if( _state == s_error      )  return NULL;
 
     THREAD_LOCK( _lock )
     {
@@ -453,9 +459,11 @@ void Job::remove_running_task( Task* task )
 
 //---------------------------------------------------------------------------------------Job::start
 
-void Job::start( const ptr<spooler_com::Ivariable_set>& params, const string& task_name, Time start_at )
+Sos_ptr<Task> Job::start( const ptr<spooler_com::Ivariable_set>& params, const string& task_name, Time start_at, bool log )
 {
-    THREAD_LOCK( _lock )  start_without_lock( params, task_name, start_at );
+    Sos_ptr<Task> result;
+    THREAD_LOCK( _lock )  result = start_without_lock( params, task_name, start_at, log );
+    return result;
 }
 
 //---------------------------------------------------------------------------------------Job::start
@@ -467,7 +475,12 @@ Sos_ptr<Task> Job::start_without_lock( const ptr<spooler_com::Ivariable_set>& pa
     switch( _state )
     {
         case s_read_error:  throw_xc( "SCHEDULER-132", name(), _error? _error->what() : "" );
+        
+        case s_error:       throw_xc( "SCHEDULER-204", _name, _error.what() );
+
         case s_stopped:     set_state( s_pending );
+                            break;
+
         default: ;
     }
 
@@ -547,7 +560,8 @@ bool Job::execute_state_cmd()
                                      && _state != s_read_error )  stop( true ),                something_done = true;
                                     break;
 
-                case sc_unstop:     if( _state == s_stopped    )  set_state( s_pending ),      something_done = true,  set_next_start_time( Time::now() );
+                case sc_unstop:     if( _state == s_stopped
+                                     || _state == s_error      )  set_state( s_pending ),      something_done = true,  set_next_start_time( Time::now() );
                                     break;
 
                 case sc_end:        if( _state == s_running    )                               something_done = true;
@@ -978,72 +992,94 @@ bool Job::do_something()
 {
   //Z_DEBUG_ONLY( _log.debug9( "do_something() state=" + state_name() ); )
 
-    Time next_time_at_begin = _next_time;
     bool something_done     = false;       
-    Time now                = Time::now();
 
-    if( _state )  
+    if( _state == s_read_error )  return false;
+    if( _state == s_error      )  return false;
+
+    try
     {
-        something_done = execute_state_cmd();
-
-        if( _reread )  _reread = false,  reread(),  something_done = true;
-
-        if( now > _period.end() )
+        try
         {
-            select_period();
-            if( !_period.is_in_time( _next_start_time ) )  set_next_start_time( now );
-        }
+            Time next_time_at_begin = _next_time;
+            Time now                = Time::now();
 
-        if( _state == s_pending 
-         || _state == s_running  &&  _running_tasks.size() < _max_tasks )
-        {
-            if( !_waiting_for_process  ||  _waiting_for_process_try_again  ||  _module._process_class->process_available( this ) )    // Optimierung
+            if( _state )  
             {
-                Sos_ptr<Task> task = task_to_start();
-                if( task )
+                something_done = execute_state_cmd();
+
+                if( _reread )  _reread = false,  reread(),  something_done = true;
+
+                if( now > _period.end() )
                 {
-                    THREAD_LOCK( _lock )
+                    select_period();
+                    if( !_period.is_in_time( _next_start_time ) )  set_next_start_time( now );
+                }
+
+                if( _state == s_pending 
+                || _state == s_running  &&  _running_tasks.size() < _max_tasks )
+                {
+                    if( !_waiting_for_process  ||  _waiting_for_process_try_again  ||  _module._process_class->process_available( this ) )    // Optimierung
                     {
-                        _log.open();           // Jobprotokoll, nur wirksam, wenn set_filename() gerufen, s. Job::init().
+                        Sos_ptr<Task> task = task_to_start();
+                        if( task )
+                        {
+                            THREAD_LOCK( _lock )
+                            {
+                                _log.open();           // Jobprotokoll, nur wirksam, wenn set_filename() gerufen, s. Job::init().
 
-                        reset_error();
-                        _repeat = 0;
-                        _delay_until = 0;
+                                reset_error();
+                                _repeat = 0;
+                                _delay_until = 0;
 
-                        _running_tasks.push_back( task );
-                        set_state( s_running );
+                                _running_tasks.push_back( task );
+                                set_state( s_running );
 
-                        _next_start_time = latter_day;
-                        calculate_next_time();
+                                _next_start_time = latter_day;
+                                calculate_next_time();
 
-                        task->attach_to_a_thread();
-                        task->do_something();           // Damit die Task den Prozess startet und die Prozessklasse davon weiﬂ
+                                task->attach_to_a_thread();
+                                task->do_something();           // Damit die Task den Prozess startet und die Prozessklasse davon weiﬂ
+                            }
+
+                            something_done = true;
+                        }
                     }
+                }
+            }
 
-                    something_done = true;
+
+            if( !something_done  &&  _next_time <= now )    // Obwohl _next_time erreicht, ist nichts getan?
+            {
+                calculate_next_time();
+
+                if( _next_time <= now )
+                {
+                    LOG( obj_name() << ".do_something()  Nichts getan. state=" << state_name() << ", _next_time= " << _next_time << ", wird verzˆgert\n" );
+                    _next_time = Time::now() + 1;
+                }
+                else
+                {
+                    Z_DEBUG_ONLY( LOG( obj_name() << ".do_something()  Nichts getan. state=" << state_name() << ", _next_time war " << next_time_at_begin << "\n" ); )
                 }
             }
         }
+        catch( const _com_error& x )  { throw_com_error( x ); }
     }
-
-
-    if( !something_done  &&  _next_time <= now )    // Obwohl _next_time erreicht, ist nichts getan?
-    {
-        calculate_next_time();
-
-        if( _next_time <= now )
-        {
-            LOG( obj_name() << ".do_something()  Nichts getan. state=" << state_name() << ", _next_time= " << _next_time << ", wird verzˆgert\n" );
-            _next_time = Time::now() + 1;
-        }
-        else
-        {
-            Z_DEBUG_ONLY( LOG( obj_name() << ".do_something()  Nichts getan. state=" << state_name() << ", _next_time war " << next_time_at_begin << "\n" ); )
-        }
-    }
-
+    catch( const exception&  x ) { set_error( x );  set_job_error( x.what() );  sos_sleep(5); }     // Bremsen, falls sicher der Fehler sofort wiederholt
 
     return something_done;
+}
+
+//-------------------------------------------------------------------------------Job::set_job_error
+
+void Job::set_job_error( const string& what )
+{
+    set_state( s_error );
+
+    _spooler->send_error_email( what, "Scheduler: Der Job " + _name + " ist nach dem Fehler\n" +
+                                      what + "\n"
+                                      "in den Fehlerzustand versetzt worden. Keine Task wird mehr gestartet." );
 }
 
 //-----------------------------------------------------------------------------------Job::set_state
@@ -1058,13 +1094,17 @@ void Job::set_state( State new_state )
 
         _state = new_state;
 
-        if( _state == s_stopped )  _next_start_time = _next_time = latter_day;
+        if( _state == s_stopped 
+         || _state == s_read_error
+         || _state == s_error      )  _next_start_time = _next_time = latter_day;
 
         if( _spooler->_debug )
         {
             if( new_state == s_stopping
-             || new_state == s_stopped  )  _log.info( "state=" + state_name() ); 
-                                     else  _log.debug9( "state=" + state_name() );
+             || new_state == s_stopped
+             || new_state == s_read_error
+             || new_state == s_error      )  _log.info  ( "state=" + state_name() ); 
+                                       else  _log.debug9( "state=" + state_name() );
         }
 
         if( _waiting_for_process  &&  ( _state != s_pending  ||  _state != s_running ) )
@@ -1157,6 +1197,7 @@ string Job::state_name( State state )
         case s_stopping:        return "stopping";
         case s_stopped:         return "stopped";
         case s_read_error:      return "read_error";
+        case s_error:           return "error";
         case s_pending:         return "pending";
         case s_running:         return "running";
         default:                return as_string( (int)state );
@@ -1383,6 +1424,7 @@ ptr<Module_instance> Job::create_module_instance()
     THREAD_LOCK( _lock )
     {
         if( _state == s_read_error )  throw_xc( "SCHEDULER-190" );
+        if( _state == s_error      )  throw_xc( "SCHEDULER-204", _name, _error.what() );
 
         result = _module_ptr->create_instance();
 

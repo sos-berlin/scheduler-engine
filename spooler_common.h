@@ -1,4 +1,4 @@
-// $Id: spooler_common.h,v 1.14 2002/12/02 20:43:31 jz Exp $
+// $Id: spooler_common.h,v 1.15 2003/12/08 10:32:05 jz Exp $
 
 #ifndef __SPOOLER_COMMON_H
 #define __SPOOLER_COMMON_H
@@ -27,35 +27,12 @@ typedef DWORD                   Process_id;
 // Damit kann einer Liste durchlaufen werden, der ein anderer Thread Elemente hinzufügt.
 // Der andere Thread muss dieselbe Semaphore LOCK nutzen.
 
-//-------------------------------------------------------------------------------------------Handle
-/*
-struct Handle : Sos_self_deleting
+//-------------------------------------------------------------------------Stop_scheduler_exception
+
+struct Stop_scheduler_exception : Xc
 {
-#   ifdef SYSTEM_WIN
-                                Handle                      ( HANDLE h = NULL )             : _handle(h) {}
-                                Handle                      ( ulong h )                     : _handle((HANDLE)h) {}     // für _beginthread()
-                               ~Handle                      ()                              { close(); }
-
-        void                    operator =                  ( HANDLE h )                    { set_handle( h ); }
-        void                    operator =                  ( ulong h )                     { set_handle( (HANDLE)h ); }   // für _beginthread()
-                                operator HANDLE             () const                        { return _handle; }
-                                operator !                  () const                        { return _handle == 0; }
-      //HANDLE*                 operator &                  ()                              { return &_handle; }
-
-        void                    set_handle                  ( HANDLE h )                    { close(); _handle = h; }
-        HANDLE                  handle                      () const                        { return _handle; }
-        void                    close                       ()                              { if(_handle) { CloseHandle(_handle); _handle=0; } }
-
-        HANDLE                 _handle;
-
-  private:
-                                Handle                      ( const Handle& );              // Nicht implementiert
-    void                        operator =                  ( const Handle& );              // Nicht implementiert
-
-#   endif
+                                Stop_scheduler_exception    ( const Xc& x )                         : Xc(x) {}
 };
-*/
-//static HANDLE null_handle = NULL;
 
 //-------------------------------------------------------------------------------------------Atomic
 /*
