@@ -1,4 +1,4 @@
-// $Id: spooler_mail_jmail.h,v 1.3 2002/03/11 06:55:53 jz Exp $
+// $Id: spooler_mail_jmail.h,v 1.4 2002/03/13 09:25:56 jz Exp $
 
 #ifndef __SPOOLER_MAIL_JMAIL_H
 #define __SPOOLER_MAIL_JMAIL_H
@@ -29,7 +29,7 @@ struct Com_mail : spooler_com::Imail, Sos_ole_object
     void                        operator delete             ( void* ptr )                           { sos_free( ptr ); }
 
 
-                                Com_mail                    ();
+                                Com_mail                    ( Spooler* );
                              //~Com_mail                    ();
                                 
     void  __stdcall             init                        ();
@@ -68,15 +68,16 @@ struct Com_mail : spooler_com::Imail, Sos_ole_object
     void                        add_to_recipients           ( BSTR recipients, char recipient_type );
     void                        get_recipients              ( CComBSTR& result_bstr );
 
+    Fill_zero                  _zero_;
+    Spooler*                   _spooler;
     CComBSTR                   _to;
     CComBSTR                   _cc;
     CComBSTR                   _bcc;
     CComBSTR                   _from;
-    CComBSTR                   _subject;
+    string                     _subject;
     CComBSTR                   _body;
     _bstr_t                    _smtp_server;
 
-    Fill_zero                  _zero_;
     jmail::IMessagePtr         _msg;
 };
 

@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.62 2002/03/11 06:55:53 jz Exp $
+// $Id: spooler_task.cxx,v 1.63 2002/03/13 09:25:56 jz Exp $
 /*
     Hier sind implementiert
 
@@ -423,6 +423,8 @@ Sos_ptr<Task> Job::create_task( const CComPtr<spooler_com::Ivariable_set>& param
 {
     Sos_ptr<Task> task;
 
+    //_log.debug( "create_task" );
+
     if( !_process_filename.empty() )   task = SOS_NEW( Process_task( _spooler, this ) );
     else
     if( _object_set_descr          )   task = SOS_NEW( Object_set_task( _spooler, this ) );
@@ -471,6 +473,8 @@ bool Job::dequeue_task( Time now )
         _com_task->set_task( _task );
         set_state( s_start_task );
     }
+
+    //_log( "dequeue_task " );
 
     return true;
 }
@@ -981,29 +985,6 @@ void Job::set_state( State new_state )
     }
 }
 
-//-----------------------------------------------------------------------------------Job::set_state
-/*
-void Job::set_state( State new_state )
-{ 
-    switch( new_state )
-    {
-        case s_stopped:     if( _state & ( s_running | s_suspended ) )  set_state_cmd( sc_stop );  
-                            break;
-
-        case s_pending:     if( _state & s_stopped )  set_state_cmd( sc_unstop ); 
-                            if( _state & s_running )  set_state_cmd( sc_end );      
-                            break;
-                            
-        case s_running:     if( _state & s_pending   )  set_state_cmd( sc_start );
-                            if( _state & s_suspended )  set_state_cmd( sc_continue );  
-                            break;
-
-        case s_suspended:   if( _state & s_running )  set_state_cmd( sc_suspend );
-                            break;
-        default: ;
-    }
-}
-*/
 //-------------------------------------------------------------------------------Job::set_state_cmd
 // Anderer Thread
 
@@ -1016,6 +997,8 @@ void Job::set_state_cmd( State_cmd cmd )
         switch( cmd )
         {
             case sc_stop:       ok = true; 
+                                _state_cmd = cmd;
+                                _thread->signal( state_cmd_name(cmd) );
                                 break;
 
             case sc_unstop:     ok = _state == s_stopped;       if( !ok )  return;
@@ -1023,8 +1006,14 @@ void Job::set_state_cmd( State_cmd cmd )
                                 _thread->signal( state_cmd_name(cmd) );
                                 break;
 
-            case sc_start:      start( NULL, "" );
-                                break;
+            case sc_start:      {
+                                    THREAD_LOCK_LOG( _lock, "Job::set_state_cmd" )
+                                    {
+                                        Sos_ptr<Task> task = start_without_lock( NULL, "" );
+                                        task->set_start_at( Time::now() );
+                                    }
+                                    break;
+                                }
 
             case sc_wake:       wake();            
                                 _state_cmd = cmd;

@@ -1,4 +1,4 @@
-// $Id: spooler_log.cxx,v 1.26 2002/03/11 06:55:53 jz Exp $
+// $Id: spooler_log.cxx,v 1.27 2002/03/13 09:25:56 jz Exp $
 
 #include "../kram/sos.h"
 #include "spooler.h"
@@ -315,7 +315,7 @@ spooler_com::Imail* Prefix_log::mail()
 
     if( !_mail )
     {
-        CComPtr<Com_mail> mail = new Com_mail;
+        CComPtr<Com_mail> mail = new Com_mail( _spooler );
         mail->init();
 
         _mail = mail;   // Nur bei fehlerfreiem init() speichern

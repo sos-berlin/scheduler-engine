@@ -1,4 +1,4 @@
-// $Id: spooler_mail_jmail.cxx,v 1.2 2002/03/05 17:10:01 jz Exp $
+// $Id: spooler_mail_jmail.cxx,v 1.3 2002/03/13 09:25:56 jz Exp $
 
 
 #include "../kram/sos.h"
@@ -96,10 +96,11 @@ const wchar_t* Email_addr::parse( const wchar_t* t )
 
 //-------------------------------------------------------------------------------Com_mail::Com_mail
 
-Com_mail::Com_mail()
+Com_mail::Com_mail( Spooler* spooler )
 : 
     Sos_ole_object( mail_class_ptr, this ),
-    _zero_(this+1)
+    _zero_(this+1),
+    _spooler(spooler)
 {
 }
 
@@ -271,6 +272,7 @@ STDMETHODIMP Com_mail::get_from( BSTR* result )
 STDMETHODIMP Com_mail::put_subject( BSTR subject )
 {
     if( _msg == 0 )  return E_POINTER;
+    _subject = bstr_as_string( subject );
     return _msg->put_Subject( subject );
 }
 
@@ -334,6 +336,8 @@ STDMETHODIMP Com_mail::add_attachment( BSTR filename, BSTR content_type )
 
 void Com_mail::send()
 {
+    _spooler->_log.debug( "email " + bstr_as_string(_to) + ": " + _subject );
+
     _msg->ClearRecipients();
 
     add_to_recipients( _to , 0 );
