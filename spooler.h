@@ -1,4 +1,4 @@
-// $Id: spooler.h,v 1.186 2004/07/25 08:57:20 jz Exp $
+// $Id: spooler.h,v 1.187 2004/07/26 08:24:40 jz Exp $
 // §1172
 
 #ifndef __SPOOLER_H
@@ -115,7 +115,7 @@ extern const char*              temporary_process_class_name;
 
 #ifdef Z_WINDOWS
     const int                   max_processes               = 50;       // Summe aller Handles darf MAXIMUM_WAIT_OBJECTS-1=63 nicht überschreiten
-    const int                   max_communication_channels  = 5;        // Summe aller Handles darf MAXIMUM_WAIT_OBJECTS-1=63 nicht überschreiten
+    const int                   max_communication_channels  = 8;        // Summe aller Handles darf MAXIMUM_WAIT_OBJECTS-1=63 nicht überschreiten
 #else
     const int                   max_processes               = 1000;     // kein Limit (HP-UX erlaubt 64 aktive fork())
     const int                   max_communication_channels  = 1000;     // kein Limit 

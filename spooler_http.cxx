@@ -1,4 +1,4 @@
-// $Id: spooler_http.cxx,v 1.6 2004/07/22 16:19:37 jz Exp $
+// $Id: spooler_http.cxx,v 1.7 2004/07/26 08:24:40 jz Exp $
 /*
     Hier sind implementiert
 
@@ -347,7 +347,6 @@ Log_http_response::Log_http_response( Prefix_log* log, string content_type )
                         "<body>\n" 
 
                             "<script type='text/javascript'><!--\n"   
-                                //"document.write( '<br/><br/>(load error)' );\n"
                                 "var title=" + quoted_string( _log->title() ) + ";\n"
                             "--></script>\n"
 

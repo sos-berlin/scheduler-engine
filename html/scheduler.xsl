@@ -86,15 +86,13 @@
             <col valign="baseline" align="left"/>
             <col valign="baseline" align="right"/>
             <col valign="baseline" width="10"/>
+
             <tr>
                 <td style="padding-right: 3ex">
                     <span style="margin-top: 2px; margin-bottom: 2pt">
                     
                         <xsl:element name="span">
-                            <xsl:attribute name="title">
-                                Version <xsl:value-of select="state/@version"/>&#a,
-                                pid=<xsl:value-of select="state/@pid"/>
-                            </xsl:attribute>
+                            <xsl:attribute name="title">Version  <xsl:value-of select="state/@version"/>&#10;pid=<xsl:value-of select="state/@pid"/></xsl:attribute>
                             
                             <b>Scheduler</b>
                         </xsl:element>
@@ -111,6 +109,7 @@
                         <xsl:value-of select="state/@state"/>    
                     </span>
                 </td>
+
                 <td style="padding-left: 0">
                     <span style="margin-top: 2px; margin-bottom: 2px">
                         <xsl:value-of select="my:format_datetime( string( state/@time ) )"  disable-output-escaping="yes"/>
@@ -121,12 +120,14 @@
                         <xsl:text> </xsl:text>
                     </span>
                 </td>
+
                 <td>
-                        <xsl:call-template name="command_menu">
-                            <xsl:with-param name="onclick" select="'scheduler_menu__onclick()'"/>
-                        </xsl:call-template>
+                    <xsl:call-template name="command_menu">
+                        <xsl:with-param name="onclick" select="'scheduler_menu__onclick()'"/>
+                    </xsl:call-template>
                 </td>
             </tr>
+
             <tr>
                 <td colspan="3">
                     <xsl:value-of select="count( state/jobs/job [ @state='running' ] )" /> jobs running,

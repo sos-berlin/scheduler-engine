@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.260 2004/07/22 22:45:56 jz Exp $
+// $Id: spooler_task.cxx,v 1.261 2004/07/26 08:24:40 jz Exp $
 /*
     Hier sind implementiert
 
@@ -1756,6 +1756,26 @@ Process_task::Process_task( Job* job )
 
 Process_task::~Process_task()
 { 
+    close_handle();
+}
+
+//-----------------------------------------------------------------------Process_task::close_handle
+
+void Process_task::close_handle()
+{
+    if( _process_handle )
+    {
+        if( _job )
+        {
+#           ifdef Z_WINDOWS
+                _job->_spooler->unregister_process_handle( _process_handle ); 
+#            else
+                _job->_spooler->unregister_process_handle( _process_handle._pid ); 
+#           endif
+        }
+
+        _process_handle.close();
+    }
 }
 
 //----------------------------------------------------------------------Process_task::do_close__end
@@ -1767,16 +1787,7 @@ void Process_task::do_close__end()
 #endif
         do_kill();
 
-    if( _job )
-    {
-#       ifdef Z_WINDOWS
-            _job->_spooler->unregister_process_handle( _process_handle ); 
-#        else
-            _job->_spooler->unregister_process_handle( _process_handle._pid ); 
-#       endif
-    }
-
-    _process_handle.close();
+    close_handle();
 }
 
 //----------------------------------------------------------------------Process_task::do_begin__end
@@ -1784,7 +1795,7 @@ void Process_task::do_close__end()
 
 bool Process_task::do_begin__end()
 {
-    if( _spooler->_process_count == max_processes )  throw_xc( "SCHEDULER-210" );
+    if( _spooler->_process_count == max_processes )  throw_xc( "SCHEDULER-210", max_processes );
 
     PROCESS_INFORMATION process_info; 
     STARTUPINFO         startup_info; 
@@ -2002,7 +2013,7 @@ bool Process_event::wait( double seconds )
 
 bool Process_task::do_begin__end()
 {
-    if( _spooler->_process_count == max_processes )  throw_xc( "SCHEDULER-210" );
+    if( _spooler->_process_count == max_processes )  throw_xc( "SCHEDULER-210", max_processes );
 
     vector<string> string_args;
 
@@ -2096,14 +2107,17 @@ void Process_task::do_end__end()
 {
 #   ifdef Z_WINDOWS
 
-        DWORD exit_code;
+        DWORD exit_code = 0;
 
-        BOOL ok = GetExitCodeProcess( _process_handle, &exit_code );
-        if( !ok )  throw_mswin_error( "GetExitCodeProcess" );
+        if( _process_handle )
+        {
+            BOOL ok = GetExitCodeProcess( _process_handle, &exit_code );
+            if( !ok )  throw_mswin_error( "GetExitCodeProcess" );
 
-        if( exit_code == STILL_ACTIVE )  throw_xc( "STILL_ACTIVE", obj_name() );
+            if( exit_code == STILL_ACTIVE )  throw_xc( "STILL_ACTIVE", obj_name() );
 
-        _process_handle.close();
+            close_handle();
+        }
 
 #    else
 
@@ -2113,7 +2127,7 @@ void Process_task::do_end__end()
             if( _process_handle._pid )   throw_xc( "SCHEDULER-179", _process_handle._pid );       // Sollte nicht passieren (ein Zombie wird stehen bleiben)
         }
 
-        _process_handle.close();
+        close_handle();
 
         if( _process_handle._process_signaled )  throw_xc( "SCHEDULER-181", _process_handle._process_signaled );
 
