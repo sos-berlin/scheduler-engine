@@ -66,7 +66,7 @@ struct Spooler_db : Sos_self_deleting
     void                        execute                 ( const string& stmt );
     void                        commit                  ();
     void                        rollback                ();
-    void                        try_reopen_after_error  ( const exception& );
+    void                        try_reopen_after_error  ( const exception&, bool wait_endless = false );
 
     Fill_zero                  _zero_;
     Thread_semaphore           _lock;

@@ -144,28 +144,15 @@ Spooler_db::Spooler_db( Spooler* spooler )
 
 void Spooler_db::open( const string& db_name )
 {
-    while(1)
+    try
     {
-        try
-        {
-            open2( db_name );
-            break;
-        }
-        catch( const exception& x )
-        {
-            if( !_spooler->_wait_endless_for_db_open )  throw;
-            
-            try
-            {
-                try_reopen_after_error( x );
-                break;
-            }
-            catch( exception& x )
-            {
-                sos_sleep( 10 );   // Vorsichtshalber nochmal warten
-                continue;
-            }
-        }
+        open2( db_name );
+    }
+    catch( const exception& x )
+    {
+        if( !_spooler->_wait_endless_for_db_open )  throw;
+        
+        try_reopen_after_error( x, true );
     }
 }
 
@@ -366,7 +353,7 @@ void Spooler_db::create_table_when_needed( const string& tablename, const string
 
 //---------------------------------------------------------------Spooler_db::try_reopen_after_error
 
-void Spooler_db::try_reopen_after_error( const exception& x )
+void Spooler_db::try_reopen_after_error( const exception& x, bool wait_endless )
 {
     bool    too_much_errors = false;
     string  warn_msg;
@@ -390,11 +377,11 @@ void Spooler_db::try_reopen_after_error( const exception& x )
 
     while( !_db.opened()  &&  !too_much_errors )
     {
-        ++_error_count;
+        if( !wait_endless || _error_count == 0 )  ++_error_count;
         
         warn_msg = "Nach max_db_errors=" + as_string(_spooler->_max_db_errors) + " Problemen mit der Datenbank wird sie nicht weiter verwendet";
 
-        if( _error_count >= _spooler->_max_db_errors )
+        if( !wait_endless  &&  _error_count >= _spooler->_max_db_errors )
         {
             too_much_errors = true;
             break;
