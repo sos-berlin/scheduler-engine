@@ -1,4 +1,4 @@
-// $Id: spooler_history.cxx,v 1.35 2003/03/31 17:12:55 jz Exp $
+// $Id: spooler_history.cxx,v 1.36 2003/04/01 17:56:31 jz Exp $
 
 #include "spooler.h"
 #include "../zschimmer/z_com.h"
@@ -394,7 +394,7 @@ void Job_history::open()
 
     try
     {
-        Transaction ta = _spooler->_db;
+        Transaction ta = +_spooler->_db;
         {
             _filename   = read_profile_string            ( _spooler->_factory_ini, section, "history_file" );
             _history_yes= read_profile_bool              ( _spooler->_factory_ini, section, "history"           , _spooler->_history_yes );
@@ -547,7 +547,7 @@ void Job_history::write( bool start )
 
     if( _use_db )
     {
-        Transaction ta = _spooler->_db;
+        Transaction ta = +_spooler->_db;
         {
             if( start )
             {
@@ -753,7 +753,7 @@ xml::Element_ptr Job_history::read_tail( const xml::Document_ptr& doc, int id, i
 
         try
         {
-            Transaction ta = _spooler->_db;
+            Transaction ta = +_spooler->_db;
             {
                 Any_file sel;
 
