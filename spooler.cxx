@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.220 2003/07/29 11:20:48 jz Exp $
+// $Id: spooler.cxx,v 1.221 2003/08/11 19:33:10 jz Exp $
 /*
     Hier sind implementiert
 
@@ -338,7 +338,7 @@ Spooler::~Spooler()
         _thread_list.clear();
     }
 
-    _spooler_thread_list.clear();
+    //_spooler_thread_list.clear();
 
 
     _object_set_class_list.clear();
@@ -369,6 +369,84 @@ Security::Level Spooler::security_level( const Host& host )
     }
 
     return result;
+}
+
+//-----------------------------------------------------------------------------Spooler::jobs_as_xml
+
+xml::Element_ptr Spooler::jobs_as_xml( const xml::Document_ptr& document, Show_what show )
+{
+    xml::Element_ptr jobs_element = document.createElement( "jobs" );
+    dom_append_nl( jobs_element );
+
+    THREAD_LOCK( _lock )  FOR_EACH( Job_list, _job_list, it )  jobs_element.appendChild( (*it)->dom( document, show ) ), dom_append_nl( jobs_element );
+
+    return jobs_element;
+}
+
+//----------------------------------------------------------------------Spooler::load_jobs_from_xml
+
+void Spooler::load_jobs_from_xml( const xml::Element_ptr& element, const Time& xml_mod_time, bool init )
+{
+    DOM_FOR_EACH_ELEMENT( element, e )
+    {
+        if( e.nodeName_is( "job" ) )
+        {
+            string spooler_id = e.getAttribute( "spooler_id" );
+
+            if( _manual? e.getAttribute("name") == _job_name 
+                       : spooler_id.empty() || spooler_id == id() )
+            {
+                string job_name = e.getAttribute("name");
+                Sos_ptr<Job> job = get_job_or_null( job_name );
+                if( job )
+                {
+                    job->set_dom( e, xml_mod_time );
+                    if( init )  job->init0(),  job->init();
+                }
+                else
+                {
+                    job = SOS_NEW( Job( this ) );
+                    job->set_dom( e, xml_mod_time );
+                    if( init )  job->init0(),  job->init();
+                    add_job( job );
+                }
+            }
+        }
+    }
+}
+
+//----------------------------------------------------------------------------Spooler::cmd_add_jobs
+// Anderer Thread
+
+void Spooler::cmd_add_jobs( const xml::Element_ptr& element )
+{
+    load_jobs_from_xml( element, true );
+
+    signal();
+}
+
+//-------------------------------------------------------------------Spooler::remove_temporary_jobs
+
+void Spooler::remove_temporary_jobs()
+{
+    THREAD_LOCK( _lock )
+    {
+        Job_list::iterator it = _job_list.begin();
+        while( it != _job_list.end() )
+        {
+            Job* job = *it;
+
+            if( job->should_removed() )    
+            {
+                if( _debug )  job->_log.debug( "Temporärer Job wird entfernt" );
+                job->close(); 
+                it = _job_list.erase( it );
+                continue;
+            }
+
+            it++;
+        }
+    }
 }
 
 //--------------------------------------------------------------------------Spooler::threads_as_xml
@@ -407,7 +485,8 @@ void Spooler::wait_until_threads_stopped( Time until )
         while( it != _thread_list.end() )
         {
             Spooler_thread* thread = *it;
-            if( thread->_free_threading  &&  !thread->_terminated  &&  thread->_thread_handle.valid() )  wait_handles.add( &(*it)->_thread_handle );
+          //if( thread->_free_threading  &&  !thread->_terminated  &&  thread->_thread_handle.valid() )  wait_handles.add( &(*it)->_thread_handle );
+            if( !thread->terminated()  &&  thread->_thread_handle.valid() )  wait_handles.add( &(*it)->_thread_handle );
             it++;
         }
 
@@ -444,11 +523,11 @@ void Spooler::wait_until_threads_stopped( Time until )
                 {
                     Spooler_thread* thread = *it;
 
-                    if( !thread->_terminated )
+                    if( !thread->terminated() )
                     {
                         string msg = "Warten auf Thread " + thread->name() + " [" + thread->thread_as_text() + "]";
-                        Job* job = thread->_current_job;
-                        if( job )  msg += ", Job " + job->name() + " " + job->job_state();
+                        Task* task = thread->_current_task;
+                        if( task )  msg += ", Task " + task->name() + " state=" + task->state_name();
                         _log.info( msg );
                     }
                 }
@@ -479,7 +558,8 @@ void Spooler::wait_until_threads_stopped( Time until )
                 _event.reset();
             }
 
-            FOR_EACH( Thread_list, threads, it )  
+            Thread_list::iterator it = threads.begin();
+            while( it != threads.end() )
             {
                 Spooler_thread* thread = *it;
                 if( thread->_terminated )
@@ -489,9 +569,12 @@ void Spooler::wait_until_threads_stopped( Time until )
 
                     _log.info( "Thread " + thread->name() + " beendet" );
                     it = threads.erase( it );
+                    continue;
                 }
                 else
                     LOG( "Thread " << thread->name() << " läuft noch\n" );
+
+                it++;
             }
 
             if( threads.empty() )  break;
@@ -581,6 +664,19 @@ Object_set_class* Spooler::get_object_set_class_or_null( const string& name )
     return NULL;
 }
 
+//---------------------------------------------------------------------------------Spooler::add_job
+
+void Spooler::add_job( const Sos_ptr<Job>& job )
+{
+    THREAD_LOCK( _lock )
+    {
+        Job* j = get_job_or_null( job->name() );
+        if( j )  throw_xc( "SPOOLER-130", j->name() );
+
+        _job_list.push_back( job );
+    }
+}
+
 //---------------------------------------------------------------------------------Spooler::get_job
 // Anderer Thread
 
@@ -598,14 +694,56 @@ Job* Spooler::get_job_or_null( const string& job_name )
 {
     THREAD_LOCK( _lock )
     {
-        FOR_EACH( Thread_list, _thread_list, it )
+        FOR_EACH( Job_list, _job_list, it )
         {
-            Job* job = (*it)->get_job_or_null( job_name );
-            if( job )  return job;
+            Job* job = *it;
+            if( stricmp( job->_name.c_str(), job_name.c_str() ) == 0 )  return job;
         }
     }
 
     return NULL;
+}
+
+//-------------------------------------------------------------------Spooler::get_next_job_to_start
+
+Job* Spooler::get_next_job_to_start()
+{
+    Job* next_job = NULL;
+    
+    Time next_time = latter_day;      // Für HP_UX, gcc 3.1, eine lokale Variable. _next_start_time setzt der Compiler jedes zweite Mal auf 0. jz 7.3.03
+
+    THREAD_LOCK( _lock )
+    {
+        FOR_EACH_JOB( it )
+        {
+            Job* job = *it;
+
+            if( next_time > job->next_time() ) 
+            {
+                next_job = job; 
+                next_time = next_job->next_time();
+                if( next_time == 0 )  break;
+            }
+
+/*
+            if( job->_state == Job::s_pending )
+            {
+                Time now = Time::now();
+
+                if( job->_order_queue  
+                 &&  job->_order_queue->has_order( now ) 
+                 && ( job->_state != Job::s_pending || job->is_in_period(now) ) )
+                {
+                    next_job = job; 
+                    next_time = 0; 
+                    break; 
+                }
+            }
+*/
+        }
+    }
+
+    return next_job;
 }
 
 //---------------------------------------------------------------------Spooler::thread_by_thread_id
@@ -617,6 +755,30 @@ Spooler_thread* Spooler::thread_by_thread_id( Thread_id id )
     THREAD_LOCK( _thread_id_map_lock )  it = _thread_id_map.find(id); 
 
     return it != _thread_id_map.end()? it->second : NULL; 
+}
+
+//----------------------------------------------------------------Spooler::select_thread_for_a_task
+
+Spooler_thread* Spooler::select_thread_for_task( Task* task )
+{
+    assert( current_thread_id() == thread_id() );
+
+    // Kriterien: 
+    // - Ein Thread, in dem die wenigsten Tasks desselben Jobs laufen
+    // - Ein Thread, in dem die wenigsten Tasks laufen
+    // ? Bei einem Java-Job: Ein Thread (Prozess) mit Java Virtual Machine
+    // - Ein Thread der Thread-Klasse (Prozess-Klasse)
+
+    // Ggfs. Thread neu starten, wenn Maximum noch nicht erreicht.
+
+
+    FOR_EACH( Thread_list, _thread_list, t )
+    {
+        Spooler_thread* thread = *t;
+        return thread;
+    }
+
+    throw_xc( "select_thread_for_task" );
 }
 
 //---------------------------------------------------------------------------Spooler::signal_object
@@ -657,6 +819,47 @@ string Spooler::state_name( State state )
     }
 }
 
+//------------------------------------------------------------------------------Spooler::start_jobs
+
+void Spooler::start_jobs()
+{
+    FOR_EACH_JOB( job )  (*job)->init();
+}
+
+//-------------------------------------------------------------------------------Spooler::stop_jobs
+/*
+void Spooler::stop_jobs()
+{
+    FOR_EACH_JOB( it ) 
+    {
+        _current_job = *it;
+
+        if( (*it)->state() != Job::s_stopped )  (*it)->stop( true );
+
+        _current_job = NULL;
+    }
+}
+*/
+//------------------------------------------------------------------------------Spooler::close_jobs
+
+void Spooler::close_jobs()
+{
+    FOR_EACH( Job_list, _job_list, it )
+    {
+        try
+        {
+            //if( !*it )  LOG( "Spooler_thread::close1: Ein Job ist NULL\n" );
+            (*it)->close();
+        }
+        catch( const exception&  x ) { _log.error( x.what() ); }
+        catch( const _com_error& x ) { _log.error( as_string( x.Description() ) ); }
+    }
+
+    // Jobs erst bei Spooler-Ende freigeben, s. close()
+    // Beim Beenden des Spooler noch laufende Threads können auf Jobs von bereits beendeten Threads zugreifen.
+    // Damit's nicht knallt: Jobs schließen, aber Objekte halten.
+}
+
 //---------------------------------------------------------------------------Spooler::start_threads
 
 void Spooler::start_threads()
@@ -665,17 +868,14 @@ void Spooler::start_threads()
     {
         Spooler_thread* thread = *it;
 
-        if( !thread->empty() ) 
+        if( thread->_free_threading )  
         {
-            if( thread->_free_threading )  
-            {
-                thread->thread_start();      // Eigener Thread
-                thread->set_thread_termination_event( &_event );        // Signal zu uns, wenn Thread endet
-            }
-            else
-            {
-                thread->start( &_event );    // Unser Thread
-            }
+            thread->thread_start();      // Eigener Thread
+            thread->set_thread_termination_event( &_event );        // Signal zu uns, wenn Thread endet
+        }
+        else
+        {
+            thread->start( &_event );    // Unser Thread
         }
     }
 }
@@ -702,25 +902,23 @@ void Spooler::close_threads()
 */
 }
 
-//-----------------------------------------------------------------------------Spooler::run_threads
-
-bool Spooler::run_threads()
+//-----------------------------------------------------------------------Spooler::run_single_thread
+/*
+bool Spooler::run_single_thread()
 {
     bool something_done = false;
     Time now            = Time::now();
 
-    FOR_EACH( Spooler_thread_list, _spooler_thread_list, it )  
-    {
-        if( _state_cmd != sc_none )  break;
 
-        Spooler_thread* thread = *it;
+    if( _state_cmd == sc_none ) 
+    {
+        Thread* thread = *_thread_list.begin();
+    
         if( thread->_next_start_time <= now  ||  thread->_wait_handles.signaled() )
         {
             bool ok = thread->process();
 
             something_done |= ok;
-
-            //if( !ok )  thread->get_next_job_to_start();
         }
 
         //thread->_log.debug9( "_next_start_time=" + thread->_next_start_time.as_string() );
@@ -729,7 +927,7 @@ bool Spooler::run_threads()
 
     return something_done;
 }
-
+*/
 //--------------------------------------------------------------------------------Spooler::send_cmd
 
 void Spooler::send_cmd()
@@ -1010,14 +1208,16 @@ void Spooler::start()
 
     _spooler_start_time = Time::now();
 
+    FOR_EACH_JOB( job )  (*job)->init0();
 
-    _spooler_thread_list.clear();
+
+  //_spooler_thread_list.clear();
 
     FOR_EACH( Thread_list, _thread_list, it )
     {
         Spooler_thread* thread = *it;
-        if( !thread->_free_threading )  _spooler_thread_list.push_back( thread );
-        if( !thread->empty() )  thread->init();
+      //if( !thread->_free_threading )  _spooler_thread_list.push_back( thread );
+        thread->init();
     }
 
 
@@ -1038,6 +1238,7 @@ void Spooler::start()
     }
 
     start_threads();
+    start_jobs();
 
     
     if( _is_service || is_daemon )
@@ -1070,8 +1271,9 @@ void Spooler::stop()
     //_log.msg( "Spooler::stop" );
 
     close_threads();
+    close_jobs();
 
-    FOR_EACH( Thread_list, _thread_list, it )  it = _thread_list.erase( it );
+    //FOR_EACH( Thread_list, _thread_list, it )  it = _thread_list.erase( it );
 
 
 /*  interrupt() lässt PerlScript abstürzen
@@ -1084,8 +1286,9 @@ void Spooler::stop()
     wait_until_threads_stopped( Time::now() + wait_for_thread_termination_after_interrupt );
 */
     _object_set_class_list.clear();
-    _spooler_thread_list.clear();
+  //_spooler_thread_list.clear();
     _thread_list.clear();
+    _job_list.clear();
 
     if( _module_instance )  _module_instance->close();
 
@@ -1115,7 +1318,7 @@ void Spooler::run()
         // Threads ohne Jobs und nach Fehler gestorbene Threads entfernen:
         //FOR_EACH( Thread_list, _thread_list, it )  if( (*it)->empty() )  THREAD_LOCK( _lock )  it = _thread_list.erase(it);
         bool valid_thread = false;
-        FOR_EACH( Thread_list, _thread_list, it )  valid_thread |= !(*it)->_terminated;
+        FOR_EACH( Thread_list, _thread_list, it )  valid_thread |= !(*it)->terminated();
         if( !valid_thread )  { _log.info( "Kein Thread vorhanden. Spooler wird beendet." ); break; }
 
         if( _state_cmd == sc_pause                 )  if( _state == s_running )  set_state( s_paused  ), signal_threads( "pause" );
@@ -1132,57 +1335,95 @@ void Spooler::run()
         {
             //_wait_handles.wait_until( latter_day );
             _event.wait();
+            if( _state_cmd != sc_none )  continue;
         }
+
 
         _next_time = latter_day;
         _next_job  = NULL;
 
-
-        //while( _state_cmd == sc_none  &&  !ctrl_c_pressed )    // Solange Jobs laufen, keine Umstände machen. 
+/*
+        if( _thread_list.size() == 1 )
         {
-            bool something_done = run_threads();
-        //    if( !something_done )  break;
-        }
-
-        int running_tasks_count = 0;
-        FOR_EACH( Spooler_thread_list, _spooler_thread_list, it2 )  running_tasks_count += (*it2)->_running_tasks_count;
-
-        //LOG( "spooler: running_tasks_count=" << running_tasks_count  << " _state_cmd=" << (int)_state_cmd << " ctrl_c_pressed=" << ctrl_c_pressed << " _next_time=" << _next_time << "\n" );
-        if( running_tasks_count == 0  &&  _state_cmd == sc_none  &&  !ctrl_c_pressed )
-        {
-            FOR_EACH( Spooler_thread_list, _spooler_thread_list, it )  
+            Spooler_thread* thread = *_thread_list.begin();
+            
+            //if( thread->_next_start_time <= now  ||  thread->_wait_handles.signaled() )
             {
-                Spooler_thread* thread = *it;
+                thread->process();
+            }
+
+            //thread->_log.debug9( "_next_start_time=" + thread->_next_start_time.as_string() );
+            //if( thread->_next_job  &&  _next_time > thread->_next_start_time )  _next_time = thread->_next_start_time, _next_job = thread->_next_job;
+
+
+            //int running_tasks_count = 0;
+            //FOR_EACH( Spooler_thread_list, _spooler_thread_list, it2 )  running_tasks_count += (*it2)->_running_tasks_count;
+
+            //LOG( "spooler: running_tasks_count=" << running_tasks_count  << " _state_cmd=" << (int)_state_cmd << " ctrl_c_pressed=" << ctrl_c_pressed << " _next_time=" << _next_time << "\n" );
+            if( thread->_running_tasks_count == 0  &&  _state_cmd == sc_none  &&  !ctrl_c_pressed )
+            {
                 thread->get_next_job_to_start();
                 //thread->_log.debug9( "_next_start_time=" + thread->_next_start_time.as_string() );
                 if( thread->_next_job  &&  _next_time > thread->_next_start_time )  _next_time = thread->_next_start_time, _next_job = thread->_next_job;
-            }
 
-            Time now = Time::now();
+                Time now = Time::now();
 
-            if( _next_time > now )
-            {
-                string msg;
-                
-                Wait_handles wait_handles = _wait_handles;
-                FOR_EACH( Spooler_thread_list, _spooler_thread_list, it )  wait_handles += (*it)->_wait_handles;
-
-                if( _debug )  
+                if( _next_time > now )
                 {
-                    msg = _next_job? "Warten bis " + _next_time.as_string() + " für Job " + _next_job->name() 
-                                   : "Kein Job zu starten";
+                    string msg;
+                    
+                    Wait_handles wait_handles = _wait_handles;
+                    wait_handles += thread->_wait_handles;
 
-                    //msg += " und " + wait_handles.as_string();
+                    if( _debug )  
+                    {
+                        msg = _next_job? "Warten bis " + _next_time.as_string() + " für Job " + _next_job->name() 
+                                       : "Kein Job zu starten";
 
-                    if( wait_handles.wait(0) == -1 )  _log.debug( msg ), wait_handles.wait_until( _next_time );
+                        if( wait_handles.wait(0) == -1 )  _log.debug( msg ), wait_handles.wait_until( _next_time );
+                    }
+                    else
+                        wait_handles.wait_until( _next_time );
+
+                    wait_handles.clear();
                 }
-                else
-                    wait_handles.wait_until( _next_time );
-
-                wait_handles.clear();
             }
         }
+        else
+*/
+        {
+            int  nothing_done_count = 0;
 
+            while(1)
+            {
+                bool something_done = false;
+
+                do
+                {
+                    FOR_EACH_JOB( j )
+                    {
+                        Job* job = *j;
+                        something_done |= job->do_something();
+                    }
+
+                    if( something_done )  nothing_done_count = 1;
+                                    else  nothing_done_count++;
+                }
+                while( something_done );
+
+                if( nothing_done_count > 3 )  
+                {
+                    _log.warn( "Nichts getan" );
+                    sos_sleep(1);     // Bremse, falls die Koordinierung nicht stimmt
+                }
+
+
+                Job* job = get_next_job_to_start();
+                _next_time = job? job->_next_start_time : latter_day;
+            
+                _wait_handles.wait_until( _next_time );
+            }
+        }
 
         _event.reset();
 
@@ -1753,7 +1994,7 @@ int sos_main( int argc, char** argv )
             {
                 spooler::is_daemon = true;
 
-                LOG( "Spooler wird Daemon. Pid wechselt \n");
+                LOG( "Spooler wird Daemon. Pid wechselt\n");
                 spooler::be_daemon();
             }
 
@@ -1774,4 +2015,3 @@ int sos_main( int argc, char** argv )
 }
 
 } //namespace sos
-

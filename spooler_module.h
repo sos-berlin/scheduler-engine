@@ -1,4 +1,4 @@
-// $Id: spooler_module.h,v 1.29 2003/08/09 20:35:52 jz Exp $
+// $Id: spooler_module.h,v 1.30 2003/08/11 19:33:11 jz Exp $
 
 #ifndef __SPOOLER_MODULE_H
 #define __SPOOLER_MODULE_H
@@ -14,6 +14,16 @@ namespace spooler {
 #   define SPOOLER_DEFAULT_LANGUAGE     "Perl"
 #endif
 
+//--------------------------------------------------------------------------------------------const
+
+const string spooler_init_name;
+const string spooler_open_name;
+const string spooler_close_name;
+const string spooler_process_name;
+const string spooler_on_error_name;
+const string spooler_on_success_name;
+
+//-------------------------------------------------------------------------------------------------
 
 struct Module_instance;
 
@@ -172,6 +182,7 @@ struct Module_instance : Object
     virtual                    ~Module_instance             ()                                      {}      // Für gcc 3.2
 
     void                    set_title                       ( const string& title )                 { _title = title; }
+    void                    set_in_call                     ( const string& name, const string& extra = "" );
 
     virtual void                close                       ()                                      = 0;
     virtual void                init                        ();
@@ -188,18 +199,19 @@ struct Module_instance : Object
     virtual bool                callable                    ()                                      = 0;
     int                         pid                         ()                                      { return _pid; }        // 0, wenn kein Prozess
 
+/*
+    virtual void                begin__start                ( const Object_list& );
+    virtual bool                begin__end                  ();
 
-    virtual void                begin_async                 ( const Object_list& );
-    virtual bool                begin_wait                  ();
+    virtual void                end__start                  ();
+    virtual void                end__end                    ();
 
-    virtual void                end_async                   ();
-    virtual void                end_wait                    ();
-
-    virtual void                step_async                  ();
-    virtual bool                step_wait                   ();
+    virtual void                step__start                 ();
+    virtual bool                step__end                   ();
 
     virtual bool                operation_finished          ()                                      { return true; }
     virtual void                process                     ( bool wait = false )                   {}
+*/
 
     Fill_zero                  _zero_;
     Delegated_log              _log;

@@ -1,4 +1,4 @@
-// $Id: spooler_com.h,v 1.73 2003/07/29 11:20:48 jz Exp $
+// $Id: spooler_com.h,v 1.74 2003/08/11 19:33:11 jz Exp $
 
 #ifndef __SPOOLER_COM_H
 #define __SPOOLER_COM_H
@@ -286,7 +286,7 @@ struct Com_job : spooler_com::Ijob,
     STDMETHODIMP                clear_when_directory_changed();
     STDMETHODIMP                start                       ( VARIANT*, spooler_com::Itask** );
     STDMETHODIMP                wake                        ();
-    STDMETHODIMP                get_thread                  ( spooler_com::Ithread** );
+  //STDMETHODIMP                get_thread                  ( spooler_com::Ithread** );
   //STDMETHODIMP                put_include_path            ( BSTR );
     STDMETHODIMP                get_include_path            ( BSTR* );
     STDMETHODIMP                get_name                    ( BSTR* );
@@ -343,7 +343,7 @@ struct Com_task : spooler_com::Itask,
 };
 
 //---------------------------------------------------------------------------------------Com_thread
-
+/*
 struct Com_thread : spooler_com::Ithread, 
                     spooler_com::Ihas_java_class_name, 
                     Sos_ole_object               
@@ -368,7 +368,7 @@ struct Com_thread : spooler_com::Ithread,
     Thread_semaphore           _lock;
     Spooler_thread*            _thread;                     // Es gibt nur einen Com_thread pro Spooler_thread
 };
-
+*/
 //--------------------------------------------------------------------------------------Com_spooler
 
 struct Com_spooler : spooler_com::Ispooler, 
@@ -424,21 +424,16 @@ struct Com_context : spooler_com::Ispooler_context, Sos_ole_object
 
     STDMETHODIMP                get_log                     ( spooler_com::Ilog**     o )        { return _log    .CopyTo(o); }
     STDMETHODIMP                get_spooler                 ( spooler_com::Ispooler** o )        { return _spooler.CopyTo(o); }
-    STDMETHODIMP                get_thread                  ( spooler_com::Ithread**  o )        { return _thread .CopyTo(o); }
+  //STDMETHODIMP                get_thread                  ( spooler_com::Ithread**  o )        { return _thread .CopyTo(o); }
     STDMETHODIMP                get_job                     ( spooler_com::Ijob**     o )        { return _job    .CopyTo(o); }
     STDMETHODIMP                get_Task                    ( spooler_com::Itask**    o )        { return _task   .CopyTo(o); }
 
 
     Thread_semaphore           _lock;
 
-  //ptr<Com_log>               _log;
-  //ptr<Com_spooler>           _spooler;
-  //ptr<Com_thread>            _thread;
-  //ptr<Com_job>               _job;
-  //ptr<Com_task>              _task;
     ptr<spooler_com::Ilog>     _log;
     ptr<spooler_com::Ispooler> _spooler;
-    ptr<spooler_com::Ithread>  _thread;
+  //ptr<spooler_com::Ithread>  _thread;
     ptr<spooler_com::Ijob>     _job;
     ptr<spooler_com::Itask>    _task;
 };

@@ -280,6 +280,9 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\spooler_job.cxx">
+			</File>
+			<File
 				RelativePath="spooler_log.cxx">
 				<FileConfiguration
 					Name="Release|Win32">
@@ -543,6 +546,9 @@
 			</File>
 			<File
 				RelativePath="spooler_history.h">
+			</File>
+			<File
+				RelativePath=".\spooler_job.h">
 			</File>
 			<File
 				RelativePath="spooler_log.h">

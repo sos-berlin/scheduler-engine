@@ -1,4 +1,4 @@
-// $Id: spooler.h,v 1.141 2003/08/02 20:23:36 jz Exp $
+// $Id: spooler.h,v 1.142 2003/08/11 19:33:10 jz Exp $
 
 #ifndef __SPOOLER_H
 #define __SPOOLER_H
@@ -92,6 +92,7 @@ namespace sos {
 #include "spooler_module_remote_server.h"
 #include "spooler_history.h"
 #include "spooler_order.h"
+#include "spooler_job.h"
 #include "spooler_task.h"
 #include "spooler_thread.h"
 #include "spooler_service.h"
@@ -154,7 +155,9 @@ struct Spooler
                                 Spooler                     ();
                                ~Spooler                     ();
 
+
     // Aufrufe für andere Threads:
+    Thread_id                   thread_id                   () const                            { return _thread_id; }
     const string&               id                          () const                            { return _spooler_id; }
     const string                id_for_db                   () const                            { return _spooler_id.empty()? "-" : _spooler_id; }
     const string&               param                       () const                            { return _spooler_param; }
@@ -166,27 +169,30 @@ struct Spooler
     State                       state                       () const                            { return _state; }
     string                      state_name                  () const                            { return state_name( _state ); }
     static string               state_name                  ( State );
-    bool                        free_threading_default      () const                            { return _free_threading_default; }
+  //bool                        free_threading_default      () const                            { return _free_threading_default; }
     Prefix_log&                 log                         ()                                  { return _log; }
     const string&               log_directory               () const                            { return _log_directory; }                      
     Time                        start_time                  () const                            { return _spooler_start_time; }
     Security::Level             security_level              ( const Host& );
     const time::Holiday_set&    holidays                    () const                            { return _holiday_set; }
     bool                        is_service                  () const                            { return _is_service; }
+
+    void                        load_jobs_from_xml          ( const xml::Element_ptr&, const Time& xml_mod_time, bool init = false );
+    xml::Element_ptr            jobs_as_xml                 ( const xml::Document_ptr&, Show_what );
     xml::Element_ptr            threads_as_xml              ( const xml::Document_ptr&, Show_what );
 
     int                         launch                      ( int argc, char** argv );                                
     void                        set_state_changed_handler   ( State_changed_handler h )         { _state_changed_handler = h; }
 
-    Thread_id                   thread_id                   () const                            { return _thread_id; }
+    Thread_id                   run_single_thread                   () const                            { return _thread_id; }
 
     // Für andere Threads:
     Spooler_thread*             get_thread                  ( const string& thread_name );
     Spooler_thread*             get_thread_or_null          ( const string& thread_name );
+    Spooler_thread*             select_thread_for_task      ( Task* );
+
     Object_set_class*           get_object_set_class        ( const string& name );
     Object_set_class*           get_object_set_class_or_null( const string& name );
-    Job*                        get_job                     ( const string& job_name );
-    Job*                        get_job_or_null             ( const string& job_name );
 
     void                        signal_object               ( const string& object_set_class_name, const Level& );
     void                        cmd_reload                  ();
@@ -197,6 +203,10 @@ struct Spooler
     void                        cmd_terminate_and_restart   ();
     void                        cmd_let_run_terminate_and_restart();
     void                        cmd_load_config             ( const xml::Element_ptr&, const Time& xml_mod_time, const string& source_filename );
+
+    Job*                        get_job                     ( const string& job_name );
+    Job*                        get_job_or_null             ( const string& job_name );
+    Job*                        get_next_job_to_start       ();
 
     // Order
     void                        add_job_chain               ( Job_chain* );
@@ -222,14 +232,17 @@ struct Spooler
     void                        wait_until_threads_stopped  ( Time until );
     void                        reload                      ();
     void                        run                         ();
+    void                        start_jobs                  ();
+    void                        close_jobs                  ();
     void                        start_threads               ();
     void                        close_threads               ();
-    bool                        run_threads                 ();
+  //bool                        run_single_thread           ();
 
   //void                        single_thread_step          ();
     void                        wait                        ();
 
     void                        signal                      ( const string& signal_name = "" )  { _log.info( "Signal \"" + signal_name + "\"" ); _event.signal( signal_name ); }
+  //void                        signal                      ( const string& signal_name = "" )  { THREAD_LOCK( _lock )  ..., if(_event) _event->signal(signal_name), _next_start_time = 0, _next_job = NULL; }
     void                        async_signal                ( const char* signal_name = "" )    { _event.async_signal( signal_name ); }
     bool                        signaled                    ()                                  { return _event.signaled(); }
 
@@ -237,6 +250,11 @@ struct Spooler
     void                        send_error_email            ( const string& subject, const string& body );
 
     void                        send_cmd                    ();
+
+    void                        add_job                     ( const Sos_ptr<Job>& );
+    void                        cmd_add_jobs                ( const xml::Element_ptr& );
+    void                        do_add_jobs                 ();
+    void                        remove_temporary_jobs       ();
 
 
   private:
@@ -309,6 +327,8 @@ struct Spooler
     string                     _send_cmd;
     string                     _pid_filename;
 
+    Job_list                   _job_list;
+    Wait_handles               _wait_handles;
 
   private:
     string                     _config_filename;            // -config=
@@ -324,13 +344,12 @@ struct Spooler
     int                        _priority_max;               // <config priority_max=...>
     int                        _tcp_port;                   // <config tcp=...>
     int                        _udp_port;                   // <config udp=...>
-    bool                       _free_threading_default;
+  //bool                       _free_threading_default;
     time::Holiday_set          _holiday_set;                // Feiertage für alle Jobs
 
     State_changed_handler      _state_changed_handler;      // Callback für NT-Dienst SetServiceStatus()
 
     Event                      _event;
-    Wait_handles               _wait_handles;
 
     xml::Document_ptr          _config_document_to_load;    // Für cmd_load_config(), das Dokument zu _config_element_to_load
     xml::Element_ptr           _config_element_to_load;     // Für cmd_load_config()
@@ -351,13 +370,15 @@ struct Spooler
     typedef list< ptr<object_server::Connection> >  Process_list;
     Process_list               _process_list;
 
+    Job*                       _next_job;
+    Time                       _next_time;
+    Time                       _next_start_time;
+
     Thread_list                _thread_list;                // Alle Threads
 
-    typedef list< Spooler_thread* >  Spooler_thread_list;
-    Spooler_thread_list         _spooler_thread_list;        // Nur Threads mit _free_threading=no, die also keine richtigen Threads sind und im Spooler-Thread laufen
+  //typedef list< Spooler_thread* >  Spooler_thread_list;
+  //Spooler_thread_list         _spooler_thread_list;        // Nur Threads mit _free_threading=no, die also keine richtigen Threads sind und im Spooler-Thread laufen
 
-    Time                       _next_time;
-    Job*                       _next_job;
 
     Thread_semaphore           _job_chain_lock;
     typedef map< string, ptr<Job_chain> >  Job_chain_map;

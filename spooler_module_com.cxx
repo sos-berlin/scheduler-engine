@@ -1,4 +1,4 @@
-// $Id: spooler_module_com.cxx,v 1.17 2003/06/05 12:48:54 jz Exp $
+// $Id: spooler_module_com.cxx,v 1.18 2003/08/11 19:33:11 jz Exp $
 /*
     Hier sind implementiert
 
@@ -253,7 +253,7 @@ void Scripting_engine_module_instance::load()
 
     if( _com_context->_log     )  _script_site->add_obj( _com_context->_log    , Bstr("spooler_log"    ) );
     if( _com_context->_spooler )  _script_site->add_obj( _com_context->_spooler, Bstr("spooler"        ) );
-    if( _com_context->_thread  )  _script_site->add_obj( _com_context->_thread , Bstr("spooler_thread" ) );
+  //if( _com_context->_thread  )  _script_site->add_obj( _com_context->_thread , Bstr("spooler_thread" ) );
     if( _com_context->_job     )  _script_site->add_obj( _com_context->_job    , Bstr("spooler_job"    ) );
     if( _com_context->_task    )  _script_site->add_obj( _com_context->_task   , Bstr("spooler_task"   ) );
 

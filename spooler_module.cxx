@@ -1,4 +1,4 @@
-// $Id: spooler_module.cxx,v 1.28 2003/08/02 20:23:36 jz Exp $
+// $Id: spooler_module.cxx,v 1.29 2003/08/11 19:33:11 jz Exp $
 /*
     Hier sind implementiert
 
@@ -16,6 +16,14 @@ using namespace std;
 namespace sos {
 namespace spooler {
 
+//--------------------------------------------------------------------------------------------const
+
+extern const string spooler_init_name       = "spooler_init()Z";
+extern const string spooler_open_name       = "spooler_open()Z";
+extern const string spooler_close_name      = "spooler_close()V";
+extern const string spooler_process_name    = "spooler_process()Z";
+extern const string spooler_on_error_name   = "spooler_on_error()V";
+extern const string spooler_on_success_name = "spooler_on_success()V";
 
 //----------------------------------------------------------------xml::Element_ptr Source_part::dom
 
@@ -263,7 +271,7 @@ Module_instance::In_call::In_call( Task* task, const string& name, const string&
     int pos = name.find( '(' );
     string my_name = pos == string::npos? name : name.substr( 0, pos );
 
-    _task->set_in_call( my_name, extra ); 
+    set_in_call( my_name, extra ); 
     LOG( *task << '.' << my_name << "() begin\n" );
 
     Z_WINDOWS_ONLY( _ASSERTE( _CrtCheckMemory() ); )
@@ -273,7 +281,7 @@ Module_instance::In_call::In_call( Task* task, const string& name, const string&
 
 Module_instance::In_call::~In_call()
 { 
-    _task->set_in_call( "" ); 
+    set_in_call( "" ); 
 
     {
         Log_ptr log;
@@ -302,6 +310,21 @@ void Module_instance::init()
     _com_context = new Com_context;
 }
 
+//---------------------------------------------------------------------Module_instance::set_in_call
+
+void Module_instance::set_in_call( const string& name, const string& extra )
+{
+    THREAD_LOCK( _lock )
+    {
+        _in_call = name;
+
+        if( _spooler->_debug  &&  !name.empty() )  
+        {
+            _log.debug( name + "()  " + extra );
+        }
+    }
+}
+
 //-------------------------------------------------------------------------Module_instance::add_obj
 
 void Module_instance::add_obj( const ptr<IDispatch>& object, const string& name )
@@ -310,8 +333,8 @@ void Module_instance::add_obj( const ptr<IDispatch>& object, const string& name 
     else
     if( name == "spooler"        )  _com_context->_spooler = (qi_ptr<spooler_com::Ispooler>)object;
     else
-    if( name == "spooler_thread" )  _com_context->_thread  = (qi_ptr<spooler_com::Ithread>) object;
-    else
+  //if( name == "spooler_thread" )  _com_context->_thread  = (qi_ptr<spooler_com::Ithread>) object;
+  //else
     if( name == "spooler_job"    )  _com_context->_job     = (qi_ptr<spooler_com::Ijob>)    object;
     else
     if( name == "spooler_task"   )  _com_context->_task    = (qi_ptr<spooler_com::Itask>)   object;
@@ -350,30 +373,30 @@ void Module_instance::close()
     if( _com_context )  _com_context->close(), _com_context = NULL;
 }
 
-//---------------------------------------------------------------------Module_instance::begin_async
-
-void Module_instance::begin_async( const Object_list& object_list )
+//--------------------------------------------------------------------Module_instance::begin__start
+/*
+void Module_instance::begin__start( const Object_list& object_list )
 {
     if( !loaded() )
     {
         init();
-        FOR_EACH( Object_list, object_list, o )  add_obj( o->_object, o->_name );
+        FOR_EACH_CONST( Object_list, object_list, o )  add_obj( o->_object, o->_name );
         load();
         start();
         call( spooler_init_name );
     }
 }
 
-//----------------------------------------------------------------------Module_instance::begin_wait
+//----------------------------------------------------------------------Module_instance::begin__end
 
-bool Module_instance::begin_wait()
+bool Module_instance::begin__end()
 {
     return check_result( call( spooler_open_name ) );
 }
 
-//-----------------------------------------------------------------------Module_instance::end_async
+//----------------------------------------------------------------------Module_instance::end__start
 
-void Module_instance::end_async()
+void Module_instance::end__start()
 {
     call( spooler_close_name );
     on_error_success();
@@ -385,25 +408,25 @@ void Module_instance::end_async()
     }
 }
 
-//------------------------------------------------------------------------Module_instance::end_wait
+//------------------------------------------------------------------------Module_instance::end__end
 
-void Module_instance::end_wait()
+void Module_instance::end__end()
 {
 }
 
-//----------------------------------------------------------------------Module_instance::step_async
+//---------------------------------------------------------------------Module_instance::step__start
 
-void Module_instance::step_async()
+void Module_instance::step__start()
 {
 }
 
-//-----------------------------------------------------------------------Module_instance::step_wait
+//-----------------------------------------------------------------------Module_instance::step__end
 
-bool Module_instance::step_wait()
+bool Module_instance::step__end()
 {
     return check_result( call( spooler_process_name ) );
 }
-
+*/
 //-------------------------------------------------------------------------------------------------
 
 } //namespace spooler

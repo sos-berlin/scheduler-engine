@@ -1,5 +1,5 @@
 
-// $Id: spooler_order.cxx,v 1.30 2003/06/25 16:03:45 jz Exp $
+// $Id: spooler_order.cxx,v 1.31 2003/08/11 19:33:11 jz Exp $
 /*
     Hier sind implementiert
 
@@ -34,7 +34,21 @@ void Spooler::add_job_chain( Job_chain* job_chain )
         _job_chain_map[lname] = job_chain;
     }
 
+/*
+    THREAD_LOCK( _prioritized_order_job_array )
+    {
+        // In _prioritized_order_job_array stehen Jobs, die am Ende einer Jobkette sind, am Anfang, so dass sie vorrangig ausgeführt werden können.
+        // Ein Aufträg in einer Jobkette soll so schnell wie möglich durchgeschleust werden, bevor andere Aufträge in die Jobkette gelangen.
+        // Damit sind weniger Aufträge gleichzeitig in einer Jobkette.
+
+        _prioritized_order_job_array.clear();
+        FOR_EACH_JOB( it )  if( (*it)->order_controlled() )  _prioritized_order_job_array.push_back( *it );
+        sort( _prioritized_order_job_array.begin(), _prioritized_order_job_array.end(), Job::higher_job_chain_priority );
+    }
+*/
+
     if( _db->opened() )  job_chain->load_orders_from_database();
+
 
     _job_chain_time = Time::now();
 }

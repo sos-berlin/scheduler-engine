@@ -1,4 +1,4 @@
-// $Id: spooler_config.cxx,v 1.63 2003/06/02 11:22:28 jz Exp $
+// $Id: spooler_config.cxx,v 1.64 2003/08/11 19:33:11 jz Exp $
 
 //#include <precomp.h>
 
@@ -243,7 +243,7 @@ void Spooler_thread::set_dom( const xml::Element_ptr& element, const Time& xml_m
     _name = element.getAttribute( "name" );
 
     str = element.getAttribute( "free_threading" );
-    if( !str.empty() )  _free_threading = as_bool( str );
+    if( !str.empty() )  throw_xc( "SPOOLER-189", "free_threading" );    //_free_threading = as_bool( str );
 
 #   ifdef Z_WINDOWS
         str = element.getAttribute( "priority" );
@@ -260,13 +260,13 @@ void Spooler_thread::set_dom( const xml::Element_ptr& element, const Time& xml_m
         }
 #   endif
 
-    if( element.getAttributeNode( "include_path" ) )  _include_path = element.getAttribute( "include_path" );
+    if( element.getAttributeNode( "include_path" ) )  throw_xc( "SPOOLER-189", "<thread include_path=>" );  //_include_path = element.getAttribute( "include_path" );
 
     DOM_FOR_EACH_ELEMENT( element, e )
     {
-        if( e.nodeName_is( "script" ) )  _module.set_dom( e, xml_mod_time, include_path() );
+        if( e.nodeName_is( "script" ) )  throw_xc( "SPOOLER-189", "<script in thread>" );  //_module.set_dom( e, xml_mod_time, include_path() );
         else
-        if( e.nodeName_is( "jobs"   ) )  load_jobs_from_xml( e, xml_mod_time );
+        if( e.nodeName_is( "jobs"   ) )  _spooler->load_jobs_from_xml( e, xml_mod_time );   // Zur Kompatibilität
     }
 }
 
@@ -334,7 +334,7 @@ void Spooler::load_config( const xml::Element_ptr& config_element, const Time& x
         if( !_spooler_param_as_option_set )  _spooler_param = config_element.getAttribute( "param"        , _spooler_param );
         if( !_include_path_as_option_set  )  _include_path  = config_element.getAttribute( "include_path" , _include_path  );
 
-        _free_threading_default = config_element.bool_getAttribute( "free_threading", _free_threading_default );
+      //_free_threading_default = config_element.bool_getAttribute( "free_threading", _free_threading_default );
 
         DOM_FOR_EACH_ELEMENT( config_element, e )
         {

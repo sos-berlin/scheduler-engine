@@ -1,372 +1,11 @@
-// $Id: spooler_task.h,v 1.101 2003/08/09 20:35:52 jz Exp $
+// $Id: spooler_task.h,v 1.102 2003/08/11 19:33:11 jz Exp $
 
 #ifndef __SPOOLER_TASK_H
 #define __SPOOLER_TASK_H
 
+
 namespace sos {
 namespace spooler {
-
-
-typedef int                     Level;
-struct                          Task;
-struct                          Module_task;
-
-
-//-----------------------------------------------------------------------------------Level_interval
-
-struct Level_interval
-{
-                                Level_interval              ()                                      : _low_level(0), _high_level(0) {}
-    explicit                    Level_interval              ( const xml::Element_ptr& e )           { set_dom( e ); }
-
-    void                        set_dom                     ( const xml::Element_ptr& );
-
-    bool                        is_in_interval              ( Level level )                         { return level >= _low_level && level < _high_level; }
-
-    Level                      _low_level;
-    Level                      _high_level;
-};
-
-//---------------------------------------------------------------------------------Object_set_class
-
-struct Object_set_class : Sos_self_deleting
-{
-                                Object_set_class            ( Spooler* sp, Prefix_log* log )        : _spooler(sp), _module(sp,log) {}
-    explicit                    Object_set_class            ( Spooler* sp, Prefix_log* log, const xml::Element_ptr& e, const Time& xml_mod_time )  : _spooler(sp), _module(sp,log) { set_dom( e, xml_mod_time ); }
-
-    void                        set_dom                     ( const xml::Element_ptr&, const Time& xml_mod_time );
-
-    Spooler*                   _spooler;
-    string                     _name;
-    map<Level,string>          _level_map;
-    
-    Module                     _module;
-    bool                       _object_interface;
-
-  //Time                       _process_timeout;
-};
-
-typedef list< Sos_ptr<Object_set_class> >  Object_set_class_list;
-
-//-----------------------------------------------------------------------------------Spooler_object
-
-struct Spooler_object
-{
-                                Spooler_object              ( const ptr<IDispatch>& dispatch = NULL ) : _idispatch(dispatch) {}
-
-    Spooler_object&             operator =                  ( const ptr<IDispatch>& dispatch )      { _idispatch = dispatch; return *this; }
-    Level                       level                       ();
-    void                        process                     ( Level output_level );
-    bool                        is_null                     ()                                      { return _idispatch == NULL; }
-
-    ptr<IDispatch>             _idispatch;
-};
-
-//---------------------------------------------------------------------------------Object_set_descr
-
-struct Object_set_descr : Sos_self_deleting
-{
-                                Object_set_descr            ()                                      {}
-    explicit                    Object_set_descr            ( const xml::Element_ptr& e )           { set_dom( e ); }
-
-    void                        set_dom                     ( const xml::Element_ptr& );
-
-    string                     _class_name;
-    Sos_ptr<Object_set_class>  _class;
-    Level_interval             _level_interval;
-};
-
-//---------------------------------------------------------------------------------------Object_set
-
-struct Object_set : Sos_self_deleting
-{
-                                Object_set                  ( Spooler*, Module_task*, const Sos_ptr<Object_set_descr>& );
-                               ~Object_set                  ();
-
-    bool                        open                        ();
-    void                        close                       ();
-    Spooler_object              get                         ();
-    bool                        step                        ( Level result_level );
-    void                        set_in_call                 ( const string& name );
-
-    Spooler_thread*             thread                      () const;
-
-    Fill_zero                  _zero_;
-    Spooler*                   _spooler;
-    Module_task*               _task;
-    Sos_ptr<Object_set_descr>  _object_set_descr;
-    Object_set_class*          _class;
-    ptr<IDispatch>             _idispatch;                  // Zeiger auf ein Object_set des Skripts
-};
-
-//--------------------------------------------------------------------------------------Start_cause
-
-enum Start_cause
-{
-    cause_none                  = 0,    // Kein Start
-    cause_period_once           = 1,    // <run_time once="yes">
-    cause_period_single         = 2,    // <run_time single_start="yes">
-    cause_period_repeat         = 3,    // <run_time repeat="..">
-    cause_job_repeat            = 4,    // spooler_job.repeat = ..
-    cause_queue                 = 5,    // <start_job at="">
-    cause_queue_at              = 6,    // <start_job at="..">
-    cause_directory             = 7,    // start_when_directory_changed
-    cause_signal                = 8,
-    cause_delay_after_error     = 9,
-    cause_order                 = 10,
-    cause_wake                  = 11    // sc_wake
-};
-
-string                          start_cause_name            ( Start_cause );
-
-//------------------------------------------------------------------------------Job_module_instance
-/*
-struct Job_module_instance : Module_instance
-{
-                                Job_module_instance         ( Spooler* spooler )                    : _spooler(spooler) {}
-
-    Spooler*                   _spooler;
-  //Job*                       _job;
-    Task*                      _task;                       // NULL, wenn nicht verwendet, also von einer nächsten Task verwendbar
-
-    bool                       _has_spooler_process;
-
-    ptr<Com_log>               _com_log;
-  //ptr<Com_task>              _com_task;                   // Nur für _max_tasks=1. Objekt bleibt, Inhalt wechselt über die Tasks hinweg (für use_engine="job"), weil Objekt spooler_task bei use_engine="job" in der Scripting Engine bleibt (kann nicht ausgetauscht werden)
-    ptr<Com_task>              _com_task;                   // Für Tasks (Inhalt von spooler_task wechselt für jede Task bei use_engine="job")
-};
-*/
-//----------------------------------------------------------------------------------------------Job
-
-struct Job : Sos_self_deleting
-{
-    enum State
-    {
-        s_none,
-        s_stopping,             // Wird gestoppt (Zustand, solange noch Tasks laufen, danach s_stopped)
-        s_stopped,              // Gestoppt (z.B. wegen Fehler). Keine Task wird gestartet.
-        s_read_error,           // Skript kann nicht aus Datei (include) gelesen werden
-        s_pending,              // Warten auf Start
-        s_running,              // Mindestens eine Task läuft (die Tasks können aber ausgesetzt, also gerade nicht aktiv sein: s_suspended etc.)
-        s__max
-    };
-
-    enum State_cmd
-    {
-        sc_none,
-        sc_stop,                // s_running || s_suspended  -> s_stopped
-        sc_unstop,              // s_stopped                 -> s_pending
-        sc_start,               // s_pending                 -> s_running
-        sc_wake,                // s_pending || s_running    -> s_running
-        sc_end,                 // s_running                 -> s_pending
-        sc_suspend,             // s_running                 -> s_suspended
-        sc_continue,            // s_suspended               -> s_running
-        sc_reread,              // Job::_reread = true
-        sc__max
-    };
-
-
-
-    typedef list< Sos_ptr<Task> >               Task_queue;
-    typedef list< Sos_ptr<Task> >               Task_list;
-    typedef list< ptr<Directory_watcher> >      Directory_watcher_list;
-    typedef map< int, Time >                    Delay_after_error;
-    typedef map< int, Time >                    Delay_order_after_setback;
-
-                                Job                         ( Spooler_thread* );
-                               ~Job                         (); 
-
-    void                    set_dom                         ( const xml::Element_ptr&, const Time& mod_time );
-    xml::Element_ptr            dom                         ( const xml::Document_ptr&, Show_what, Job_chain* = NULL );
-
-    void                        init0                       ();                                     // Wird vor Spooler-Skript gerufen
-    void                        init                        ();                                     // Wird nach Spooler-Skript gerufen, ruft auch init2()
-    void                        init2                       ();                                     // Wird nach reread() gerufen
-
-  //void                    set_event_destination           ( Event* e )                            { _event = e; }
-
-    const string&               name                        () const                                { return _name; }
-    State_cmd                   state_cmd                   () const                                { return _state_cmd; }
-    State                       state                       () const                                { return _state; }
-    Object_set_descr*           object_set_descr            () const                                { return _object_set_descr; }
-    int                         priority                    () const                                { return _priority; }
-    Spooler_thread*             thread                      () const                                { return _thread; }
-    string                      job_state                   ();
-    string                      include_path                () const;
-    string                      title                       ()                                      { string title; THREAD_LOCK( _lock )  title = _title;  return title; }
-    string                      jobname_as_filename         ();
-    string                      profile_section             ();
-    bool                        temporary                   () const                                { return _temporary; }
-    void                        set_delay_after_error       ( int error_steps, Time delay )         { _delay_after_error[error_steps] = delay; }
-    void                        set_delay_order_after_setback( int setbacks, Time delay )           { _delay_order_after_setback[setbacks] = delay; }
-    Time                        get_delay_order_after_setback( int setback_count );
-    void                        set_max_order_setbacks      ( int n )                               { _max_order_setbacks = n; }
-    int                         max_order_setbacks          () const                                { return _max_order_setbacks; }
-    xml::Element_ptr            read_history                ( const xml::Document_ptr& doc, int id, int n, Show_what show ) { return _history.read_tail( doc, id, n, show ); }
-
-    void                        close                       ();
-
-    void                        start                       ( const ptr<spooler_com::Ivariable_set>& params, const string& task_name, Time = 0 );
-    Sos_ptr<Task>               start_without_lock          ( const ptr<spooler_com::Ivariable_set>& params, const string& task_name, Time = 0, bool log = false );
-    void                        start_when_directory_changed( const string& directory_name, const string& filename_pattern );
-    void                        clear_when_directory_changed();
-  //void                        signal                      ( const string& signal_name = "" )      { _next_time = 0;  if( _event )  _event->signal( signal_name ); }
-    void                        signal                      ( const string& signal_name = "" );
-    void                        interrupt_script            ();
-    void                        select_period               ( Time = Time::now() );
-    bool                        is_in_period                ( Time = Time::now() );
-  //bool                        its_current_task            ( Task* task )                          { return task == _task; }
-  //Task*                       current_task                ()                                      { return _task; }
-    bool                        queue_filled                ()                                      { return !_task_queue.empty(); }
-
-    Sos_ptr<Task>               create_task                 ( const ptr<spooler_com::Ivariable_set>& params, const string& task_name, Time = latter_day );
-    Sos_ptr<Task>               dequeue_task                ( Time now = Time::now() );
-    void                        remove_from_task_queue      ( Task* );
-  //void                        close_task                  ();
-    bool                        read_script                 ();
-  //void                        end                         ();
-    void                        stop                        ( bool end_all_tasks );
-    void                        set_next_start_time         ( Time now = Time::now() );
-    void                        set_next_time               ( Time );
-    void                        calculate_next_time         ( Time now = Time::now() );
-
-    Time                        next_time                   ()                                      { return _next_time; }
-
-    bool                        execute_state_cmd           ();
-    void                        reread                      ();
-    Task*                       task_to_start               ();
-    bool                        do_something                ();
-    bool                        should_removed              ()                                      { return _temporary && _state == s_stopped; }
-
-    void                        set_repeat                  ( double seconds )                      { _log.debug( "repeat=" + as_string(seconds) );  _repeat = seconds; }
-
-    void                        set_state                   ( State );
-    void                        set_state_cmd               ( State_cmd );
-    void                        kill_task                   ( int id );
-
-    string                      state_name                  ()                                      { return state_name( _state ); }
-    static string               state_name                  ( State );
-    static State                as_state                    ( const string& );
-    
-    string                      state_cmd_name              ()                                      { return state_cmd_name( _state_cmd ); }
-    static string               state_cmd_name              ( State_cmd );
-    static State_cmd            as_state_cmd                ( const string& );
-
-    void                        set_state_text              ( const string& text )                  { _state_text = text; _log.debug9( "state_text = " + text ); }
-
-    void                        set_error_xc                ( const Xc& );
-    void                        set_error_xc_only           ( const Xc& );
-  //void                        set_error                   ( const Xc& x )                         { set_error_xc( x ); }
-  //void                        set_error                   ( const z::Xc& x )                      { set_error_xc( x ); }
-    void                        set_error                   ( const exception& );
-  //void                        set_error                   ( const _com_error& );
-    void                        reset_error                 ()                                      { THREAD_LOCK( _lock )  _error = NULL,  _log.reset_highest_level(); }
-
-    ptr<Com_job>&               com_job                     ()                                      { return _com_job; }
-    void                        signal_object               ( const string& object_set_class_name, const Level& );
-
-    Order_queue*                order_queue                 () const                                { return _order_queue; }
-    bool                        order_controlled            () const                                { return _order_queue != NULL; }
-
-    void                        set_job_chain_priority      ( int pri )                             { THREAD_LOCK(_lock) if( _job_chain_priority < pri )  _job_chain_priority = pri; }
-    static bool                 higher_job_chain_priority   ( const Job* a, const Job* b )          { return a->_job_chain_priority > b->_job_chain_priority; }
-
-    Module_instance*            get_free_module_instance    ( Task* );
-    void                        release_module_instance     ( Module_instance* );
-
-    virtual string             _obj_name                    () const                                { return "Job " + _name; }
-
-
-    friend struct               Object_set;
-    friend struct               Task;
-    friend struct               Module_task;
-    friend struct               Job_module_task;
-    friend struct               Object_set_task;
-    friend struct               Process_task;
-    friend struct               Com_job;
-    friend struct               Spooler_thread;
-
-
-    Fill_zero                  _zero_;
-    string                     _name;
-    Thread_semaphore           _lock;
-    Spooler*                   _spooler;
-
-  protected:
-    friend struct               Job_history;
-
-    Spooler_thread*            _thread;
-
-    string                     _title;                      // <job title="">
-    string                     _description;                // <description>
-    string                     _state_text;                 // spooler_job.state_text = "..."
-
-    string                     _process_filename;           // Job ist ein externes Programm
-    string                     _process_param;              // Parameter für das Programm
-    string                     _process_log_filename;
-
-    long                       _step_count;                 // Anzahl spooler_process() aller Tasks
-
-    State                      _state;
-    State_cmd                  _state_cmd;
-    bool                       _reread;                     // <script> neu einlesen, also <include> erneut ausführen
-    Time                       _delay_until;                // Nach Fehler verzögern
-    Time                       _next_start_time;
-    Time                       _next_time;                  // Für Spooler_thread::wait(): Um diese Zeit soll Job::do_something() gerufen werden.
-    Time                       _next_single_start;
-    Time                       _repeat;                     // spooler_task.repeat
-    int                        _priority;
-    bool                       _temporary;                  // Job nach einem Lauf entfernen
-    bool                       _start_once;                 // <run_time start_once="">, wird false nach Start
-
-    Prefix_log                 _log;
-    bool                       _log_append;                 // Jobprotokoll fortschreiben <job log_append=(yes|no)>
-
-    Run_time                   _run_time;
-    Period                     _period;                     // Derzeitige oder nächste Period
-    Delay_after_error          _delay_after_error;
-    long                       _error_steps;                // Zahl aufeinanderfolgender Fehler
-
-  //Event*                     _event;
-    Directory_watcher_list     _directory_watcher_list;
-    Xc_copy                    _error;
-
-    ptr<Com_variable_set>      _default_params;
-
-
-    Module                     _module;                     // Job hat ein eigenes Skript
-    xml::Element_ptr           _script_element;             // <script> (mit <include>) für <modify_job cmd="reload"/>
-
-    xml::Document_ptr          _module_xml_document;
-    xml::Element_ptr           _module_xml_element;         // <script> aus <config>
-    Time                       _module_xml_mod_time;
-    Module*                    _module_ptr;
-  //ptr<Module_instance>       _module_instance;            // Für use_engine="job"
-    typedef vector< ptr<Module_instance> >  Module_instance_vector;
-    Module_instance_vector     _module_instances;
-    ptr<Com_job>               _com_job;
-
-    Sos_ptr<Object_set_descr>  _object_set_descr;           // Job nutzt eine Objektemengeklasse
-    Level                      _output_level;
-    
-    Task_queue                 _task_queue;                 // Warteschlange der nächsten zu startenden Tasks
-  //Sos_ptr<Task>              _task;                       // Es kann nur eine Task geben. Zirkel: _task->_job == this
-    Task_list                  _running_tasks;
-    long                       _running_tasks_count;
-    int                        _max_tasks;                  // Max. Anzahl gleichzeitig laufender Tasks. _running_tasks.size() <= _max_tasks!
-
-    Job_history                _history;
-
-    ptr<Order_queue>           _order_queue;
-    int                        _job_chain_priority;         // Maximum der Prioritäten aller Jobkettenknoten mit diesem Job. 
-
-    Delay_order_after_setback  _delay_order_after_setback;
-    int                        _max_order_setbacks;
-};
-
-//------------------------------------------------------------------------------------------Job_list
-
-typedef list< Sos_ptr<Job> >    Job_list;
 
 //----------------------------------------------------------------------------------------------Task
 
@@ -399,18 +38,38 @@ struct Task : Sos_self_deleting
     };
 
 
-                                Task                        ( Spooler*, const Sos_ptr<Job>& );
+                                Task                        ( Job* );
                                ~Task                        ();
 
-    int                         id                          ()                              { return _id; }
+    int                         id                          ()                                      { return _id; }
 
-    void                        cmd_end                     ()                              { _end = true; }
+    void                        cmd_end                     ()                                      { _end = true; }
 
     void                        close                       ();
     xml::Element_ptr            dom                         ( const xml::Document_ptr&, Show_what );
 
+    State                       state                       () const                                { return _state; }
+    void                        attach_to_a_thread          ();
     bool                        do_something                ();
 
+    Job*                        job                         ()                                      { return _job; }
+    Time                        next_time                   ()                                      { THREAD_LOCK_RETURN( _lock, Time, _next_time ); }
+    Spooler_thread*             thread                      ()                                      { return _thread; }
+    string                      name                        () const                                { return _obj_name(); }
+    virtual string             _obj_name                    () const                                { return "Task \"" + _name + "\" (" + _job->obj_name() + ")"; }
+
+    string                      state_name                  ()                                      { return state_name( state() ); }
+    static string               state_name                  ( State );
+    State                       state                       ()                                      { return _state; }
+  //string                      state                       ();
+
+    Time                        last_process_start_time     ()                                      { THREAD_LOCK_RETURN( _lock, Time, _last_process_start_time ); }
+
+    void                        signal                      ( const string& signal_name = "" );
+    bool                        has_error                   ()                                      { return _error != NULL; }
+    void                        set_error_xc_only           ( const Xc& );
+
+  protected:
     bool                        load                        ();
     bool                        start                       ();
     void                        end                         ();
@@ -425,55 +84,49 @@ struct Task : Sos_self_deleting
 
     void                        set_cause                   ( Start_cause );
     void                        set_history_field           ( const string& name, const Variant& value );
-    void                        set_close_engine            ( bool b )                      { _close_engine = b; }
+    void                        set_close_engine            ( bool b )                              { _close_engine = b; }
     bool                        has_parameters              ();
-    xml::Document_ptr           parameters_as_dom           ()                              { return _params->dom(); } //.detach(); }
-    Time                        last_process_start_time     ()                              { return _last_process_start_time; }
+    xml::Document_ptr           parameters_as_dom           ()                                      { return _params->dom(); }
 
 
     bool                        wait_until_terminated       ( double wait_time = latter_day );
-    void                        set_delay_spooler_process   ( Time t )                      { _job->_log.debug("delay_spooler_process=" + t.as_string() ); _next_spooler_process = Time::now() + t; }
+    void                        set_delay_spooler_process   ( Time t )                              { _job->_log.debug("delay_spooler_process=" + t.as_string() ); _next_spooler_process = Time::now() + t; }
 
-    void                        set_in_call                 ( const string& name, const string& extra = "" );
-
-    void                        set_state                   ( State );
-    string                      state_name                  ()                                      { return state_name( _state ); }
-    static string               state_name                  ( State );
-    string                      task_state                  ();
+    void                        set_state                   ( State, const Time& wait_until = 0 );
 
     void                        set_error_xc                ( const Xc& );
-    void                        set_error_xc_only           ( const Xc& );
-    void                        set_error                   ( const Xc& x )                 { set_error_xc( x ); }
-    void                        set_error                   ( const z::Xc& x )              { set_error_xc( x ); }
+    void                        set_error                   ( const Xc& x )                         { set_error_xc( x ); }
+    void                        set_error                   ( const z::Xc& x )                      { set_error_xc( x ); }
     void                        set_error                   ( const exception& );
     void                        set_error                   ( const _com_error& );
-    Xc_copy                     error                       ()                              { Xc_copy result; THREAD_LOCK( _lock )  result = _error;  return result; }
-    bool                        has_error                   ()                              { return !!_error; }
-    void                        reset_error                 ()                              { THREAD_LOCK( _lock )  _error = NULL,  _log.reset_highest_level(); }
+    Xc_copy                     error                       ()                                      { Xc_copy result; THREAD_LOCK( _lock )  result = _error;  return result; }
+    void                        reset_error                 ()                                      { THREAD_LOCK( _lock )  _error = NULL,  _log.reset_highest_level(); }
+
+    void                    set_next_time                   ( const Time& );
 
 
-    Job*                        job                         ()                              { return _job; }
-    Order*                      order                       ()                              { return _order; }
+    void                        enter_thread                ( Spooler_thread* );
+    void                        leave_thread                ();
 
-    virtual string             _obj_name                    () const                        { return "Task \"" + _name + "\" (" + _job->obj_name() + ")"; }
+    Order*                      order                       ()                                      { return _order; }
+
   
     friend struct               Job;
     friend struct               Object_set;
     friend struct               Com_task;
 
-  protected:
     friend struct               Task_history;
 
-    virtual bool                loaded                      ()                              { return true; }
-    virtual void                do_close                    ()                              {}
-    virtual bool                do_load                     ()                              { return true; }
+    virtual bool                loaded                      ()                                      { return true; }
+    virtual void                do_close                    ()                                      {}
+    virtual bool                do_load                     ()                                      { return true; }
     virtual bool                do_start                    () = 0;
-    virtual void                do_stop                     ()                              {}
+    virtual void                do_stop                     ()                                      {}
     virtual void                do_end                      () = 0;
     virtual bool                do_step                     () = 0;
     virtual void                do_on_success               () = 0;
     virtual void                do_on_error                 () = 0;
-    virtual bool                has_step_count              ()                              { return true; }
+    virtual bool                has_step_count              ()                                      { return true; }
 
 
     Fill_zero                  _zero_;
@@ -481,7 +134,8 @@ struct Task : Sos_self_deleting
     Prefix_log                 _log;
     int                        _id;
     Spooler*                   _spooler;
-    Job*                       _job;                        // Zirkel!
+    Job*                       _job;
+    Spooler_thread*            _thread;
     Task_history               _history;
  
     Thread_semaphore           _terminated_events_lock;
@@ -503,7 +157,7 @@ struct Task : Sos_self_deleting
     Time                       _running_since;
     Time                       _last_process_start_time;
     Time                       _next_spooler_process;
-  //Time                       _next_time;
+    Time                       _next_time;
 
     ptr<Com_variable_set>      _params;
     Variant                    _result;
@@ -517,15 +171,19 @@ struct Task : Sos_self_deleting
     string                     _in_call;                    // "spooler_process" etc.
 };
 
+//----------------------------------------------------------------------------------------Task_list
+
 typedef list< Sos_ptr<Task> >   Task_list;
+
+#define FOR_EACH_TASK( ITERATOR, TASK )  FOR_EACH( Task_list, _task_list, ITERATOR )  if( Task* TASK = *ITERATOR )
 
 //--------------------------------------------------------------------------------------Module_task
 
 struct Module_task : Task       // Oberklasse für Object_set_task und Job_module_task
 {
-                                Module_task                 ( Spooler* sp, const Sos_ptr<Job>& j ) : Task(sp,j) {}
+                                Module_task                 ( Job* j )                              : Task(j) {}
 
-    bool                        loaded                      ()                              { return _module_instance && _module_instance->loaded(); }
+    bool                        loaded                      ()                                      { return _module_instance && _module_instance->loaded(); }
     bool                        do_load                     ();
     void                        do_close                    ();
   //bool                        do_start                    ();
@@ -543,9 +201,9 @@ struct Module_task : Task       // Oberklasse für Object_set_task und Job_module
 
 struct Object_set_task : Module_task
 {
-                                Object_set_task             ( Spooler* sp, const Sos_ptr<Job>& j ) : Module_task(sp,j) {}
+                                Object_set_task             ( Job* j )                              : Module_task(j) {}
 
-    virtual bool                loaded                      ()                              { return _object_set && Module_task::loaded(); }
+    virtual bool                loaded                      ()                                      { return _object_set && Module_task::loaded(); }
     virtual bool                do_load                     ();
     void                        do_close                    ();
     bool                        do_start                    ();
@@ -562,7 +220,7 @@ struct Object_set_task : Module_task
 
 struct Job_module_task : Module_task
 {
-                                Job_module_task             ( Spooler* sp, const Sos_ptr<Job>& j ) : Module_task(sp,j) {}
+                                Job_module_task             ( Job* j )                              : Module_task(j) {}
 
   //virtual bool                loaded                      ();
   //virtual bool                do_load                     ();
@@ -593,7 +251,7 @@ struct Process_task : Task      // Job ist irgendein Prozess (z.B. durch ein She
 {
     Fill_zero _zero_;
 
-                                Process_task                ( Spooler* sp, const Sos_ptr<Job>& j );
+                                Process_task                ( Job* j );
         
   //virtual bool                loaded                      ();
   //virtual bool                do_load                     ();

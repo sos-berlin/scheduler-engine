@@ -1,4 +1,4 @@
-// $Id: spooler_idl.h,v 1.18 2003/06/24 21:10:44 jz Exp $
+// $Id: spooler_idl.h,v 1.19 2003/08/11 19:33:11 jz Exp $
 
 
 /*  Ersatz für spooler.odl für Systeme ohne COM. 
@@ -22,7 +22,7 @@ struct IXMLDOMDocument;
 struct Ivariable_set;
 struct Ilog;
 struct Itask;
-struct Ithread;
+//struct Ithread;
 struct Imail;
 struct Ijob_chain;
 struct Iorder_queue;
@@ -159,7 +159,7 @@ struct Ijob : IDispatch
   //HRESULT                 start_on_signal             () = 0;
   //HRESULT                 start_after_timeout         ( Itask** ) = 0;
     virtual HRESULT         start                       ( VARIANT*, spooler_com::Itask** ) = 0;
-    virtual HRESULT     get_thread                      ( Ithread** result ) = 0;
+  //virtual HRESULT     get_thread                      ( Ithread** result ) = 0;
   //HRESULT             put_include_path                ( BSTR include_path ) = 0;
     virtual HRESULT     get_include_path                ( BSTR* include_path ) = 0;
     virtual HRESULT     get_name                        ( BSTR* name ) = 0;
@@ -201,7 +201,7 @@ struct Itask : IDispatch
 };
 
 //---------------------------------------------------------------------------------------Thread
-
+/*
 DEFINE_GUID( IID_Ithread,  0x0FA3AC14, 0x01EC, 0x4c8f, 0x81, 0xD9, 0x7C, 0xAB, 0xF8, 0xA7, 0x6B, 0x43 );
 DEFINE_GUID( CLSID_thread, 0x4E70F30E, 0xD446, 0x42b1, 0xB4, 0xF0, 0x7A, 0x53, 0x11, 0x3D, 0x87, 0xC7 );
 
@@ -216,6 +216,7 @@ struct Ithread : IDispatch
     virtual HRESULT     get_include_path            ( BSTR* include_path ) = 0;
     virtual HRESULT     get_name                    ( BSTR* name ) = 0;
 };
+*/
 //--------------------------------------------------------------------------------------Spooler
 
 DEFINE_GUID( IID_Ispooler,  0x3D8FF20C, 0x5CFD, 0x4b70, 0x9A, 0x2D, 0xB5, 0x1A, 0xB3, 0xDC, 0xB9, 0x8D );
@@ -314,7 +315,7 @@ struct Ispooler_context : IDispatch
 
     virtual HRESULT     get_spooler                 ( Ispooler** spooler ) = 0;
 
-    virtual HRESULT     get_thread                  ( Ithread** thread ) = 0;
+  //virtual HRESULT     get_thread                  ( Ithread** thread ) = 0;
 
     virtual HRESULT     get_job                     ( Ijob** job ) = 0;
 

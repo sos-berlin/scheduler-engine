@@ -1,4 +1,4 @@
-// $Id: spooler_command.cxx,v 1.86 2003/06/25 16:03:45 jz Exp $
+// $Id: spooler_command.cxx,v 1.87 2003/08/11 19:33:11 jz Exp $
 /*
     Hier ist implementiert
 
@@ -99,6 +99,15 @@ xml::Element_ptr Command_processor::execute_config( const xml::Element_ptr& conf
     return _answer.createElement( "ok" );
 }
 
+//-------------------------------------------------------------Command_processor::execute_show_jobs
+
+xml::Element_ptr Command_processor::execute_show_jobs( Show_what show )
+{
+    if( _security_level < Security::seclev_info )  throw_xc( "SPOOLER-121" );
+
+    return _spooler->jobs_as_xml( _answer, show );
+}
+
 //----------------------------------------------------------Command_processor::execute_show_threads
 
 xml::Element_ptr Command_processor::execute_show_threads( Show_what show )
@@ -132,6 +141,7 @@ xml::Element_ptr Command_processor::execute_show_state( const xml::Element_ptr& 
     sprintf( buffer, "%-.3lf", cpu_time ); 
     state_element.setAttribute( "cpu_time"             , buffer );
 
+    state_element.appendChild( execute_show_jobs( show ) );
     state_element.appendChild( execute_show_threads( show ) );
 
     return state_element;
@@ -339,8 +349,8 @@ xml::Element_ptr Command_processor::execute_add_jobs( const xml::Element_ptr& ad
 {
     if( _security_level < Security::seclev_all )  throw_xc( "SPOOLER-121" );
 
-    ptr<Spooler_thread> thread = _spooler->get_thread( add_jobs_element.getAttribute( "thread" ) );
-    thread->cmd_add_jobs( add_jobs_element );
+    //ptr<Spooler_thread> thread = _spooler->get_thread( add_jobs_element.getAttribute( "thread" ) );
+    _spooler->cmd_add_jobs( add_jobs_element );
 
     return _answer.createElement( "ok" );
 }

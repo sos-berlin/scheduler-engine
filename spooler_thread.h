@@ -1,4 +1,4 @@
-// $Id: spooler_thread.h,v 1.42 2003/07/23 08:34:22 jz Exp $
+// $Id: spooler_thread.h,v 1.43 2003/08/11 19:33:11 jz Exp $
 
 #ifndef __SPOOLER_THREAD_H
 #define __SPOOLER_THREAD_H
@@ -10,53 +10,65 @@ namespace spooler {
 
 struct Spooler_thread : zschimmer::Thread
 {
-    Z_GNU_ONLY(                 Spooler_thread              (); )                           // Für gcc 3.2.1
+    Z_GNU_ONLY(                 Spooler_thread              (); )                                   // Für gcc 3.2.1
                                 Spooler_thread              ( Spooler* );
                                ~Spooler_thread              ();
 
     void                        set_dom                     ( const xml::Element_ptr&, const Time& xml_mod_time );
     xml::Element_ptr            dom                         ( const xml::Document_ptr&, Show_what );
-    void                        load_jobs_from_xml          ( const xml::Element_ptr&, const Time& xml_mod_time, bool init = false );
-    void                        add_job                     ( const Sos_ptr<Job>& );
     void                        build_prioritized_order_job_array();
     
-    bool                        empty                       () const                        { return _job_list.empty(); }
-    const string&               name                        () const                        { return _name; }
-    Job*                        current_job                 () const                        { return _current_job; }
-    string                      include_path                () const                        { return _include_path; }
+    const string&               name                        () const                                { return _name; }
+  //Job*                        current_job                 () const                                { return _current_job; }
+  //string                      include_path                () const                                { return _include_path; }
     bool                        any_tasks_there             ();
     bool                        has_java                    ();
 
     void                        init                        ();
-    void                        close1                      ();                             // Wird vom Thread beim Beenden selbst gerufen
-    void                        close                       ();                             // Wird vom Spooler gerufen
+    void                        close1                      ();                                     // Wird vom Thread beim Beenden selbst gerufen
+    void                        close                       ();                                     // Wird vom Spooler gerufen
     void                        start_thread                ();
+    bool                        terminated                  ()                                      { return _terminated; }
 
     virtual int                 thread_main                 ();
-  //bool                        running                     ()                              { DWORD rc; return GetExitCodeThread(_thread_handle,&rc)? rc == STILL_ACTIVE : false; }
-    bool                        process                     ();                             // Einen Schritt im (Pseudo-)Thread ausführen
+  //bool                        running                     ()                                      { DWORD rc; return GetExitCodeThread(_thread_handle,&rc)? rc == STILL_ACTIVE : false; }
+    bool                        process                     ();                                     // Einen Schritt im (Pseudo-)Thread ausführen
     void                        start                       ( Event* destination );
-    void                        stop_jobs                   ();
+  //void                        stop_jobs                   ();
     bool                        step                        ();
-    bool                        do_something                ( Job* );
+    bool                        do_something                ( Task* );
     void                        wait                        ();
 
-    Job*                        get_next_job_to_start       ();
+    void                        add_task                    ( Task* task )                          { _task_list.push_back( task ); }
+    void                        remove_task                 ( Task* this_task )                     { FOR_EACH_TASK( t, task )  if( task == this_task )  { _task_list.erase(t);  break; } }
 
-    bool                        finished                    ();
+    void                        increment_running_tasks     ()                                      { InterlockedIncrement( &_running_tasks_count ); }
+    void                        decrement_running_tasks     ()                                      { InterlockedDecrement( &_running_tasks_count ); }
 
-    void                        do_add_jobs                 ();
-    void                        remove_temporary_jobs       ();
+    void                        count_task                  ()                                      { InterlockedIncrement( &_task_count ); }
+    void                        count_step                  ()                                      { InterlockedIncrement( &_step_count ); }
+
+ //?bool                        finished                    ();
 
     // Für andere Threads:
     void                        signal_object               ( const string& object_set_class_name, const Level& );
-    void                        signal                      ( const string& signal_name = "" )  { THREAD_LOCK( _lock )  if(_event) _event->signal(signal_name), _next_start_time = 0, _next_job = NULL; }
-    Job*                        get_job_or_null             ( const string& job_name );
+  //void                        signal                      ( const string& signal_name = "" )      { THREAD_LOCK( _lock )  if(_event) _event->signal(signal_name), _next_time = 0; }
+    void                        signal                      ( const string& signal_name = "" )      { THREAD_LOCK( _lock )  if(_event) _event->signal(signal_name); }
+  //Job*                        get_job_or_null             ( const string& job_name );
   //void                        interrupt_scripts           ();
-    void                        cmd_add_jobs                ( const xml::Element_ptr& );
     void                        nichts_getan                ( double wait_time );
 
-    virtual string             _obj_name                    () const                        { return "Thread" + _name; }
+    virtual string             _obj_name                    () const                                { return "Thread" + _name; }
+
+
+
+    Wait_handles               _wait_handles;
+    bool                       _free_threading;             // Dieser Spooler_thread ist ein echter Thread.
+    Task*                      _current_task;               // Task, die gerade einen Schritt tut
+
+  private:
+    Task*                       get_next_task_to_run        ();
+
 
 
     Fill_zero                  _zero_;
@@ -66,28 +78,31 @@ struct Spooler_thread : zschimmer::Thread
     Thread_semaphore           _lock;
     Prefix_log                 _log;
 
-    string                     _include_path;
-    bool                       _free_threading;             // Dieser Thread soll frei, ohne _serialize_lock laufen.
+  //string                     _include_path;
 
     int                        _thread_priority;
 
     Event*                     _event;
     Event                      _my_event;                   // Für _free_threading
-    Wait_handles               _wait_handles;
 
-    ptr<Com_log>               _com_log;                    // COM-Objekt spooler.log
-    ptr<Com_thread>            _com_thread;                 // COM-Objekt
+  //ptr<Com_log>               _com_log;                    // COM-Objekt spooler.log
+  //ptr<Com_thread>            _com_thread;                 // COM-Objekt
 
-    Module                     _module;                     // <script>
-    ptr<Module_instance>       _module_instance;
+  //Module                     _module;                     // <script>
+  //ptr<Module_instance>       _module_instance;
 
-    Job_list                   _job_list;
-    vector<Job*>               _prioritized_order_job_array;
+    ptr<object_server::Session> _object_server_session;
+
+  //Job_list                   _job_list;
+    Task_list                  _task_list;
+    bool                       _task_ended;
+
+    vector<Job*>               _prioritized_order_job_array;        // Jobs am Ende einer Jobkette priorisieren
     Time                       _prioritized_order_job_array_time;
-    Job*                       _current_job;                // Job, der gerade einen Schritt tut
 
-    Time                       _next_start_time;
-    Job*                       _next_job;
+ //?Task*                      _next_task;
+    Time                       _next_time;
+
     long                       _running_tasks_count;        // Wenn 0, dann warten
                                                             // Statistik
     long                       _step_count;                 // Seit Spooler-Start ausgeführte Schritte
@@ -97,11 +112,6 @@ struct Spooler_thread : zschimmer::Thread
     int                        _nothing_done_max;
 
     bool                       _terminated;
-
-  private:
-                                Spooler_thread              ( const Spooler_thread& );      // Nicht implementiert
-    Spooler_thread&             operator =                  ( const Spooler_thread& );      // Nicht implementiert
-
 };
 
 typedef list< ptr<Spooler_thread> >  Thread_list;

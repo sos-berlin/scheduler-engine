@@ -1,4 +1,4 @@
-// $Id: spooler_module_remote.cxx,v 1.14 2003/08/09 20:35:52 jz Exp $
+// $Id: spooler_module_remote.cxx,v 1.15 2003/08/11 19:33:11 jz Exp $
 /*
     Hier sind implementiert
 
@@ -70,8 +70,7 @@ void Remote_module_instance_proxy::load()
 
 void Remote_module_instance_proxy::close()
 {
-    //if( !operation_finished() )  process( true );
-    if( _session )  _session->close_current_operation();
+  //if( _session )  _session->close_current_operation();
     
     if( _remote_instance )  _remote_instance->close(), _remote_instance = NULL;
     _idispatch = NULL;
@@ -100,25 +99,8 @@ Variant Remote_module_instance_proxy::call( const string& name )
     return _remote_instance->call( "call", "?" + name );     // "?": Methode ist optional. Wenn es sie nicht gibt, kommt VT_EMPTY zurück
 }
 
-//---------------------------------------------------------Remote_module_instance_proxy::call_async
-/*
-void Remote_module_instance_proxy::call_async( const string& name )
-{
-    if( _operation )  throw_xc( "Remote_module_instance_proxy::call_async" );
-    _operation = _remote_instance->call_async( "call", "?" + name );     // "?": Methode ist optional. Wenn es sie nicht gibt, kommt VT_EMPTY zurück
-}
-
-//----------------------------------------------------------Remote_module_instance_proxy::call_wait
-
-Variant Remote_module_instance_proxy::call_wait()
-{
-    ptr<Operation> op = _operation;
-    _operation = NULL;
-    return _remote_instance->call_wait( op );
-}
-*/
 //-------------------------------------------------------Remote_module_instance_proxy::begin__start
-
+/*
 void Remote_module_instance_proxy::begin__start( const Object_list& object_list )
 {
     _error = NULL;
@@ -259,7 +241,7 @@ void Remote_module_instance_proxy::process( bool wait )
         _error = x;
     }
 }
-
+*/
 //-------------------------------------------------------------------------------------------------
 
 } //namespace spoooler
