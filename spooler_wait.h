@@ -1,4 +1,4 @@
-// $Id: spooler_wait.h,v 1.2 2001/01/22 11:04:13 jz Exp $
+// $Id: spooler_wait.h,v 1.3 2001/01/22 13:42:08 jz Exp $
 
 #ifndef __SPOOLER_WAIT_H
 #define __SPOOLER_WAIT_H
@@ -17,13 +17,14 @@ struct Directory_watcher
 #   ifdef SYSTEM_WIN
 
                                 Directory_watcher           ()                              : _handle(0), _signaled(false) {}
-                               ~Directory_watcher           ()                              { if( _handle )  CloseHandle( _handle ); }
+                               ~Directory_watcher           ()                              { close(); }
 
-                                operator HANDLE             ()                              { return _handle; }
-                                operator !                  ()                              { return _handle == NULL; };
+                                operator bool               ()                              { return _handle != NULL; }
+                                operator !                  ()                              { return _handle == NULL; }
 
         void                    watch_directory             ( const string& );
         void                    watch_again                 ();
+        void                    close                       ();
         
         HANDLE                 _handle;
 

@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.6 2001/01/22 11:04:12 jz Exp $
+// $Id: spooler_task.cxx,v 1.7 2001/01/22 13:42:08 jz Exp $
 /*
     Hier sind implementiert
 
@@ -186,10 +186,17 @@ void Job::start()
 
 void Job::start_when_directory_changed( const string& directory_name )
 {
+    _task->_log.msg( "start_when_directory_changed " + directory_name + "\"" );
+
 #   ifdef SYSTEM_WIN
 
+        if( _task->_directory_watcher ) 
+        {
+            _spooler->_wait_handles.remove( _task->_directory_watcher._handle );
+            _task->_directory_watcher.close();
+        }
+
         _task->_directory_watcher.watch_directory( directory_name );
-        if( _task->_directory_watcher._handle )  _spooler->_wait_handles.remove( _task->_directory_watcher._handle );
         _spooler->_wait_handles.add( _task->_directory_watcher._handle, "start_when_directory_changed", _task );
 
 #    else
@@ -392,7 +399,10 @@ void Task::stop()
     catch( const Xc& x        ) { end_error(x); }
     catch( const exception& x ) { error(x); }
 
-    if( _directory_watcher )  _spooler->_wait_handles.remove( _directory_watcher._handle );
+    if( _directory_watcher ) {
+        _spooler->_wait_handles.remove( _directory_watcher._handle );
+        _directory_watcher.close();
+    }
 
     _state = s_stopped;
     _object_set = NULL;

@@ -1,4 +1,4 @@
-// $Id: spooler_wait.cxx,v 1.5 2001/01/22 11:04:12 jz Exp $
+// $Id: spooler_wait.cxx,v 1.6 2001/01/22 13:42:08 jz Exp $
 /*
     Hier sind implementiert
 
@@ -22,6 +22,8 @@ namespace spooler {
 
 void Directory_watcher::watch_directory( const string& directory )
 {
+    if( _handle )  CloseHandle( _handle );
+
     _handle = FindFirstChangeNotification( directory.c_str(), FALSE, FILE_NOTIFY_CHANGE_FILE_NAME );
     if( _handle == INVALID_HANDLE_VALUE )  _handle = NULL, throw_mswin_error( "FindFirstChangeNotification" );
 }
@@ -34,6 +36,17 @@ void Directory_watcher::watch_again()
 
     BOOL ok = FindNextChangeNotification( _handle );
     if( !ok )  throw_mswin_error( "FindNextChangeNotification" );
+}
+
+//--------------------------------------------------------------------------Directory_watcher::close
+
+void Directory_watcher::close()
+{ 
+    if( _handle ) 
+    {
+        CloseHandle( _handle );  
+        _handle = NULL; 
+    }
 }
 
 //--------------------------------------------------------------------------------Wait_handles::add
