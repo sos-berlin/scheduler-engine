@@ -1,4 +1,4 @@
-// $Id: spooler_module.cxx,v 1.58 2004/01/07 11:19:48 jz Exp $
+// $Id: spooler_module.cxx,v 1.59 2004/05/10 12:01:10 jz Exp $
 /*
     Hier sind implementiert
 
@@ -121,16 +121,11 @@ void Module::set_dom_without_source( const xml::Element_ptr& element )
     _filename           = element.     getAttribute( "filename"      );
     _java_class_name    = element.     getAttribute( "java_class"    );
     _recompile          = element.bool_getAttribute( "recompile"     , true );
-    _process_class_name = element.     getAttribute( "process_class" );
+    _process_class_name = element.     getAttribute( "process_class" , _process_class_name );
 
     bool separate_process_default = false;
-#   ifndef Z_WINDOWS
-        // Bei Perl automatisch separate_process="yes", weil Perl sonst beim zweiten Aufruf abstürzt
-        //separate_process_default = string_begins_with( lcase(_language), "perl" );   
-#   endif
 
     _separate_process = element.bool_getAttribute( "separate_process", separate_process_default );
-                                                                                                                           
 
     string use_engine = element.getAttribute     ( "use_engine" );
     
@@ -139,8 +134,6 @@ void Module::set_dom_without_source( const xml::Element_ptr& element )
     else
         throw_xc( "SCHEDULER-196", use_engine );
   //if( use_engine == "job"  )  _reuse = reuse_job;
-
-    init();
 }
 
 //----------------------------------------------------------------------Module::set_dom_source_only
@@ -157,30 +150,6 @@ void Module::set_source_only( const Source_with_parts& source )
     _compiled = false;
     _source = source;
 
-    if( _real_kind == kind_java  &&  !_source.empty()  &&  _spooler )  _spooler->_has_java_source = true;       // work_dir zum Compilieren bereitstellen
-
-    switch( _kind )
-    {
-        case kind_remote:
-            break;
-
-        case kind_java:
-            break;
-
-        case kind_scripting_engine:
-            if( _source.empty() )  throw_xc( "SCHEDULER-173" );
-            break;
-
-#     ifdef Z_WINDOWS
-        case kind_com:
-            if( !_source.empty() )  throw_xc( "SCHEDULER-167" );
-            break;
-#     endif
-
-        default: 
-            throw_xc( "Module::set_source_only" );
-    }
-
     clear_java();
 
     _set = true;
@@ -190,6 +159,8 @@ void Module::set_source_only( const Source_with_parts& source )
 
 void Module::init()
 {
+    if( _spooler )  _use_process_class = _spooler->has_process_classes();
+
     if( _dont_remote )  _separate_process = false, _use_process_class = false, _process_class_name = "";
 
     if( _separate_process )
@@ -229,12 +200,27 @@ void Module::init()
 
     _real_kind = _kind;
 
-    if( _separate_process  ||  _use_process_class ) 
-    {
-        _kind = kind_remote;
-    }
+    if( _real_kind == kind_java  &&  !_source.empty()  &&  _spooler )  _spooler->_has_java_source = true;       // work_dir zum Compilieren bereitstellen
+
+    if( _separate_process  ||  _use_process_class )   _kind = kind_remote;
 
     if( _kind == kind_java  &&  _spooler )  _spooler->_has_java = true;
+
+
+    switch( _kind )
+    {
+        case kind_remote:               break;
+        case kind_java:                 break;
+        case kind_scripting_engine:     if( _source.empty() )  throw_xc( "SCHEDULER-173" );
+                                        break;
+
+#       ifdef Z_WINDOWS
+            case kind_com:              if( !_source.empty() )  throw_xc( "SCHEDULER-167" );
+                                        break;
+#       endif
+
+        default:                        throw_xc( __FUNCTION__ );
+    }
 }
 
 //--------------------------------------------------------------------------Module::create_instance

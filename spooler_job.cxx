@@ -1,4 +1,4 @@
-// $Id: spooler_job.cxx,v 1.74 2004/05/09 13:07:41 jz Exp $
+// $Id: spooler_job.cxx,v 1.75 2004/05/10 12:01:10 jz Exp $
 // §851: Weitere Log-Ausgaben zum Scheduler-Start eingebaut
 /*
     Hier sind implementiert
@@ -76,21 +76,23 @@ void Job::set_dom( const xml::Element_ptr& element, const Time& xml_mod_time )
     {
         bool order;
 
-        _name             = element.     getAttribute( "name"       );
-        _temporary        = element.bool_getAttribute( "temporary"  , _temporary  );
-        _priority         = element. int_getAttribute( "priority"   , _priority   );
-        _title            = element.     getAttribute( "title"      , _title      );
-        _log_append       = element.bool_getAttribute( "log_append" , _log_append );
-        order             = element.bool_getAttribute( "order"      );
-        _max_tasks        = element.uint_getAttribute( "tasks"      , _max_tasks );
-        string t          = element.     getAttribute( "timeout"    );
+        _name       = element.     getAttribute( "name"         );
+        _temporary  = element.bool_getAttribute( "temporary"    , _temporary  );
+        _priority   = element. int_getAttribute( "priority"     , _priority   );
+        _title      = element.     getAttribute( "title"        , _title      );
+        _log_append = element.bool_getAttribute( "log_append"   , _log_append );
+        order       = element.bool_getAttribute( "order"        );
+        _module._process_class_name 
+                    = element.     getAttribute( "process_class", _module._process_class_name );
+        _max_tasks  = element.uint_getAttribute( "tasks"        , _max_tasks );
+        string t    = element.     getAttribute( "timeout"      );
         if( t != "" )  
         {
             _task_timeout = time::time_from_string( t );
             if( _task_timeout > max_task_time_out )  _task_timeout = max_task_time_out;   // Begrenzen, damit's beim Addieren mit now() keinen Überlauf gibt
         }
 
-        t                 = element.     getAttribute( "idle_timeout"    );
+        t                   = element.     getAttribute( "idle_timeout"    );
         if( t != "" )  
         {
             _idle_timeout = time::time_from_string( t );
@@ -129,8 +131,6 @@ void Job::set_dom( const xml::Element_ptr& element, const Time& xml_mod_time )
             else
             if( e.nodeName_is( "script"     ) )  
             {
-                _module._use_process_class = _spooler->has_process_classes();
-
                 _module.set_dom_without_source( e );
                 _module_xml_document  = e.ownerDocument();
                 _module_xml_element   = e;
@@ -176,11 +176,12 @@ void Job::init0()
     _com_job  = new Com_job( this );
   //_com_log  = new Com_log( &_log );
 
+    if( _module_xml_element )  read_script();
+    if( _module.set() )  _module.init();
+
     _next_start_time = latter_day;
 
     set_state( s_pending );
-
-    if( _module_xml_element )  read_script();
 }
 
 //----------------------------------------------------------------------------------------Job::init

@@ -1,4 +1,4 @@
-// $Id: spooler_config.cxx,v 1.68 2003/10/08 11:45:05 jz Exp $
+// $Id: spooler_config.cxx,v 1.69 2004/05/10 12:01:10 jz Exp $
 
 //#include <precomp.h>
 
@@ -318,7 +318,7 @@ void Spooler::load_config( const xml::Element_ptr& config_element, const Time& x
 
     try
     {
-        {DOM_FOR_EACH_ELEMENT( config_element, e )
+        DOM_FOR_EACH_ELEMENT( config_element, e )
         {
             if( e.nodeName_is( "base" ) )
             {
@@ -328,7 +328,7 @@ void Spooler::load_config( const xml::Element_ptr& config_element, const Time& x
                 cp._load_config_immediately = true;
                 cp.execute_file( make_absolute_filename( directory_of_path( source_filename ), config_filename ) );
             }
-        }}
+        }
 
         _config_document = config_element.ownerDocument();
         _config_element = config_element;

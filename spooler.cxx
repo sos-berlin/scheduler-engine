@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.333 2004/05/05 12:02:58 jz Exp $
+// $Id: spooler.cxx,v 1.334 2004/05/10 12:01:10 jz Exp $
 // §851: Weitere Log-Ausgaben zum Scheduler-Start eingebaut
 
 /*
@@ -384,8 +384,6 @@ Spooler::Spooler()
 
     set_ctrl_c_handler( true );
 
-    _module._dont_remote = true;
-
     _connection_manager = Z_NEW( object_server::Connection_manager );
 }
 
@@ -560,6 +558,11 @@ xml::Element_ptr Spooler::threads_as_xml( const xml::Document_ptr& document, Sho
 
 void Spooler::load_process_classes_from_dom( const xml::Element_ptr& element, const Time& xml_mod_time )
 {
+    if( !process_class_or_null( "" ) )
+    {
+        add_process_class( Z_NEW( Process_class( this, "" ) ) );
+    }
+
     DOM_FOR_EACH_ELEMENT( element, e )
     {
         if( e.nodeName_is( "process_class" ) )
@@ -568,7 +571,16 @@ void Spooler::load_process_classes_from_dom( const xml::Element_ptr& element, co
 
             if( spooler_id.empty() || spooler_id == id() )
             {
-                add_process_class( Z_NEW( Process_class( this, e ) ) );
+                string process_class_name = e.getAttribute( "name" );
+                ptr<Process_class> process_class = process_class_or_null( process_class_name );
+                if( process_class )
+                {
+                    process_class->set_dom( e );
+                }
+                else
+                {
+                    add_process_class( Z_NEW( Process_class( this, e ) ) );
+                }
             }
         }
     }
@@ -2131,6 +2143,12 @@ int Spooler::launch( int argc, char** argv, const string& parameter_line )
             _config_element_to_load = NULL;
             _config_document_to_load = NULL;
         }
+
+
+        _module._dont_remote = true;
+        if( _module.set() )  _module.init();
+
+
 
         if( _send_cmd != "" )  { send_cmd();  return 0; }
 

@@ -1,4 +1,6 @@
-// $Id: spooler_process.cxx,v 1.27 2004/03/29 02:13:50 jz Exp $
+// $Id: spooler_process.cxx,v 1.28 2004/05/10 12:01:10 jz Exp $
+// §1172
+// §1206
 
 #include "spooler.h"
 
@@ -38,7 +40,7 @@ void Process::remove_module_instance( Module_instance* )
     {
         if( _session )
         {
-            if( _session->connection() )  _exit_code = _session->connection()->exit_code(),  
+            if( _session->connection() )  _exit_code          = _session->connection()->exit_code(),  
                                           _termination_signal = _session->connection()->termination_signal();
 
             _session->close__start() -> async_finish();
@@ -193,6 +195,13 @@ xml::Element_ptr Process::dom( const xml::Document_ptr& document, Show_what show
     return process_element;
 }
 
+//------------------------------------------------------------------------------Process_class::init
+
+void Process_class::init()
+{
+    _max_processes = 10;
+}
+
 //-----------------------------------------------------------------------Process_class::add_process
 
 void Process_class::add_process( Process* process )
@@ -332,8 +341,12 @@ void Process_class::notify_a_process_is_idle()
 
 void Process_class::set_dom( const xml::Element_ptr& e )
 {
-    _name          =      e.     getAttribute( "name" );
-    _max_processes = (int)e.uint_getAttribute( "max_processes", 1 );
+    if( _name.empty() )     // neu?
+    {
+        _name = e.getAttribute( "name" );
+    }
+
+    _max_processes = (int)e.uint_getAttribute( "max_processes", _max_processes );
 }
 
 //----------------------------------------------------------------------------------Spooler::as_dom
