@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.59 2001/02/21 18:49:48 jz Exp $
+// $Id: spooler.cxx,v 1.60 2001/02/21 20:51:44 jz Exp $
 /*
     Hier sind implementiert
 
@@ -252,6 +252,21 @@ void Spooler::set_state( State state )
 
     _state = state;
     if( _state_changed_handler )  (*_state_changed_handler)( this, NULL );
+}
+
+//------------------------------------------------------------------------------Spooler::state_name
+
+string Spooler::state_name( State state )
+{
+    switch( state )
+    {
+        case s_stopped:     return "stopped";
+        case s_starting:    return "starting";
+        case s_running:     return "running";
+        case s_paused:      return "paused";
+        case s_stopping:    return "stopping";
+        default:            return as_string( (int)state );
+    }
 }
 
 //--------------------------------------------------------------------------------Spooler::load_arg

@@ -1,4 +1,4 @@
-// $Id: spooler.h,v 1.53 2001/02/21 10:57:35 jz Exp $
+// $Id: spooler.h,v 1.54 2001/02/21 20:51:44 jz Exp $
 
 #ifndef __SPOOLER_H
 #define __SPOOLER_H
@@ -118,6 +118,8 @@ struct Spooler
     int                         tcp_port                    () const                            { return _tcp_port; }
     int                         priority_max                () const                            { return _priority_max; }
     State                       state                       () const                            { return _state; }
+    string                      state_name                  () const                            { return state_name( _state ); }
+    static string               state_name                  ( State );
     Log&                        log                         ()                                  { return _log; }
     Time                        start_time                  () const                            { return _spooler_start_time; }
     Security::Level             security_level              ( const Host& );
