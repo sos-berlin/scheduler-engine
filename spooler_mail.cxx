@@ -1,4 +1,4 @@
-// $Id: spooler_mail.cxx,v 1.12 2003/03/15 18:06:38 jz Exp $
+// $Id: spooler_mail.cxx,v 1.13 2003/03/18 10:44:19 jz Exp $
 
 
 #include "spooler.h"
@@ -39,7 +39,7 @@ void Com_mail::init()
 {
     if( _msg == NULL )
     {
-        _msg = mail::create_message();
+        _msg = mail::create_message( _spooler->_java_vm );
         //_msg->init();
     }
 }

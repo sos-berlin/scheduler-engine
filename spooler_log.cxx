@@ -1,4 +1,4 @@
-// $Id: spooler_log.cxx,v 1.56 2003/03/15 18:06:38 jz Exp $
+// $Id: spooler_log.cxx,v 1.57 2003/03/18 10:44:19 jz Exp $
 
 #include "spooler.h"
 #include "spooler_mail.h"
@@ -27,39 +27,6 @@
 
 namespace sos {
 namespace spooler {
-
-//-----------------------------------------------------------------------------------make_log_level
-
-Log_level make_log_level( const string& name )
-{
-    Log_level log_level = log_debug9;
-
-    if( name == "error" )  log_level = log_error;
-    else
-    if( name == "warn"  )  log_level = log_warn;
-    else                     
-    if( name == "info"  )  log_level = log_info;
-    else
-    if( name == "debug" )  log_level = log_debug;
-    else
-    if( strncmp(name.c_str(),"debug",5) == 0 )
-    {
-        try {
-            log_level = (Log_level)-as_uint( name.c_str() + 5 );
-        }
-        catch( const Xc& ) { throw_xc( "SPOOLER-133", name ); }
-    }
-    else
-    {
-        try {
-            log_level = (Log_level)as_int( name );
-            if( log_level > log_error )  log_level = log_error;
-        }
-        catch( const Xc& ) { throw_xc( "SPOOLER-133", name ); }
-    }
-
-    return log_level;
-}
 
 //-----------------------------------------------------------------------------------------Log::Log
 
@@ -593,7 +560,7 @@ void Prefix_log::send_really()
 {
     int ok;
 
-    imail()->add_file( Bstr(_filename), NULL, Bstr(L"plain/text"), Bstr(_spooler->_mail_encoding) );
+    imail()->add_file( Bstr(_filename), NULL, Bstr(L"text/plain"), Bstr(_spooler->_mail_encoding) );
 
     ok = imail()->send();
 
@@ -612,7 +579,7 @@ void Prefix_log::send_really()
 }
 
 //----------------------------------------------------------------------------------Prefix_log::log
-
+/*
 void Prefix_log::log( Log_level level, const string& line )
 {
     //if( _file == -1  &&  !_filename.empty() )
@@ -626,6 +593,19 @@ void Prefix_log::log( Log_level level, const string& line )
 
 
     string prefix = _prefix;
+    _log->log2( level, _job && _job->current_task()? "Task " + as_string(_job->current_task()->id()) + " " + _job->name() : _prefix, line, this );
+}
+*/
+//---------------------------------------------------------------------------------Prefix_log::log2
+
+void Prefix_log::log2( Log_level level, const string& prefix, const string& line, Has_log* log )
+{
+    if( level == log_error  &&  _job  &&  !_job->has_error() )  _job->set_error_xc_only( Xc( "SPOOLER-140", line.c_str() ) );
+
+    if( _highest_level < level )  _highest_level = level, _highest_msg = line;
+    if( level < _log_level )  return;
+
+
     _log->log2( level, _job && _job->current_task()? "Task " + as_string(_job->current_task()->id()) + " " + _job->name() : _prefix, line, this );
 }
 

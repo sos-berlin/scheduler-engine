@@ -1,4 +1,4 @@
-// $Id: spooler_module_java.cxx,v 1.42 2003/03/17 18:40:19 jz Exp $
+// $Id: spooler_module_java.cxx,v 1.43 2003/03/18 10:44:19 jz Exp $
 /*
     Hier sind implementiert
 
@@ -281,6 +281,26 @@ void Java_vm::get_options( const string& options )
     }
 }
 */
+//----------------------------------------------------------------------------Spooler::init_java_vm
+
+void Spooler::init_java_vm()
+{
+    _java_vm->set_log( &_prefix_log );
+
+    _java_vm->init();
+
+    make_path( _java_work_dir );       // Java-VM prüft Vorhandensein der Verzeichnisse in classpath schon beim Start
+
+    Env e = _java_vm->env();
+
+    //_idispatch_jclass = e->FindClass( JAVA_IDISPATCH_CLASS );
+    Class idispatch_class ( _java_vm, JAVA_IDISPATCH_CLASS );
+    if( e->ExceptionCheck() )  e.throw_java( 0, "FindClass " JAVA_IDISPATCH_CLASS );
+
+    int ret = e->RegisterNatives( idispatch_class, native_methods, NO_OF( native_methods ) );
+    if( ret < 0 )  e.throw_java( ret, "RegisterNatives" );
+}
+
 //------------------------------------------------------------------------------------Java_vm::init
 // Im Haupt-Thread zu rufen.
 /*
@@ -565,14 +585,14 @@ void Java_thread_data::add_object( Java_idispatch* o )
     _java_idispatch_list.push_back(NULL); 
     *_java_idispatch_list.rbegin() = o; 
 
-    o->set_global(); 
+    //o->set_global(); 
 }
 
 //-------------------------------------------------------------------Java_idispatch::Java_idispatch
 
 Java_idispatch::Java_idispatch( Vm* vm, IDispatch* idispatch, const string& subclass_name ) 
 : 
-    Jobject( vm ),
+    Global_jobject( vm ),
     _idispatch( idispatch ),
     _class_name( subclass_name )
 {
@@ -881,7 +901,7 @@ void Java_module_instance::add_obj( const ptr<IDispatch>& object, const string& 
     if( !field_id )  e.throw_java( 0, "GetFieldID", name );
 
     ptr<Java_idispatch> java_idispatch = Z_NEW( Java_idispatch( vm(), object, java_class_name ) );
-    java_idispatch->set_global();
+    //java_idispatch->set_global();
 
     _added_jobjects.push_back( java_idispatch );
                          

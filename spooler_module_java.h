@@ -1,4 +1,4 @@
-// $Id: spooler_module_java.h,v 1.20 2003/03/17 18:40:19 jz Exp $
+// $Id: spooler_module_java.h,v 1.21 2003/03/18 10:44:19 jz Exp $
 
 #ifndef __SPOOLER_MODULE_JAVA_H
 #define __SPOOLER_MODULE_JAVA_H
@@ -42,7 +42,7 @@ struct Java_idispatch_stack_frame
 
 //------------------------------------------------------------------------------------Java_idispatch
 
-struct Java_idispatch : java::Jobject, Object
+struct Java_idispatch : java::Global_jobject, Object
 {
     Z_GNU_ONLY(                 Java_idispatch              ();  )                                  // Für gcc 3.2. Nicht implementiert.
                                 Java_idispatch              ( java::Vm* vm, IDispatch*, const string& subclass );

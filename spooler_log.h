@@ -1,4 +1,4 @@
-// $Id: spooler_log.h,v 1.28 2003/03/15 18:06:38 jz Exp $
+// $Id: spooler_log.h,v 1.29 2003/03/18 10:44:19 jz Exp $
 
 #ifndef __SPOOLER_LOG_H
 #define __SPOOLER_LOG_H
@@ -6,13 +6,9 @@
 namespace sos {
 namespace spooler {
 
-//----------------------------------------------------------------------------------------Log_level
-
-Log_level                       make_log_level              ( const string& );
-
 //----------------------------------------------------------------------------------------------Log
 
-struct Log
+struct Log 
 {
                                 Log                         ( Spooler* );
                                ~Log                         ();
@@ -25,8 +21,8 @@ struct Log
     void                        warn                        ( const string& line )              { log( log_warn  , "", line ); }
     void                        error                       ( const string& line )              { log( log_error , "", line ); }
 
-    void                        log                         ( Log_level, const string& prefix, const string& );
-    void                        log2                        ( Log_level, const string& prefix, const string&, Prefix_log* = NULL );
+    void                        log                         ( Log_level, const string& prefix, const string& line );
+    void                        log2                        ( Log_level, const string& prefix, const string& line, Prefix_log* = NULL );
     void                        collect_stderr              ();
     
     string                      filename                    () const                            { return _filename; }
@@ -49,7 +45,7 @@ struct Log
 
 //---------------------------------------------------------------------------------------Prefix_log
 
-struct Prefix_log
+struct Prefix_log : Has_log
 {
                                 Prefix_log                  ( int );                            // Für Spooler
                                 Prefix_log                  ( Spooler*, const string& prefix = empty_string );
@@ -95,7 +91,8 @@ struct Prefix_log
     void                        info                        ( const string& line )              { log( log_info  , line ); }
     void                        warn                        ( const string& line )              { log( log_warn  , line ); }
     void                        error                       ( const string& line )              { log( log_error , line ); }
-    void                        log                         ( Log_level, const string& );
+    void                        log                         ( Log_level level, const string& line )  { Has_log::log( level, "", line ); }
+    void                        log2                        ( Log_level, const string& prefix, const string& line, Has_log* );
 
     void                        log_file                    ( const string& filename );
 

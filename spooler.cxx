@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.178 2003/03/17 18:40:18 jz Exp $
+// $Id: spooler.cxx,v 1.179 2003/03/18 10:44:18 jz Exp $
 /*
     Hier sind implementiert
 
@@ -91,7 +91,7 @@ void send_error_email( const string& error_text, int argc, char** argv )
         string bcc  = read_profile_string( default_factory_ini, "spooler", "log_mail_bcc"    );
         string smtp = read_profile_string( default_factory_ini, "spooler", "smtp"            );
 
-        Sos_ptr<mail::Message> msg = mail::create_message();
+        Sos_ptr<mail::Message> msg = mail::create_message( spooler_ptr->_java_vm );
         //msg->init();
         msg->set_from( from );
 
@@ -337,7 +337,6 @@ Spooler::~Spooler()
     // COM-Objekte entkoppeln, falls noch jemand eine Referenz darauf hat:
     if( _com_spooler )  _com_spooler->close();
     if( _com_log     )  _com_log->close();
-
 }
 
 //--------------------------------------------------------------------------Spooler::security_level
@@ -736,7 +735,8 @@ void Spooler::load_arg()
     _variables_tablename= read_profile_string    ( _factory_ini, "spooler", "db_variables_table" , "spooler_variables" );
 
     _java_vm->set_filename      ( read_profile_string( _factory_ini, "java"   , "vm"         , _java_vm->filename()       ) );
-    _java_vm->append_class_path ( read_profile_string( _factory_ini, "java"   , "class_path" ) );
+    _java_vm->prepend_class_path( read_profile_string( _factory_ini, "java"   , "class_path" ) );
+    _java_vm->prepend_class_path( read_profile_string( ""          , "java"   , "class_path" ) );
     _java_vm->set_javac_filename( read_profile_string( _factory_ini, "java"   , "javac"      , _java_vm->javac_filename() ) );
 
 
@@ -786,6 +786,9 @@ void Spooler::load_arg()
 
         if( _log_level <= log_debug_spooler )  _debug = true;
         if( _config_filename.empty() )  throw_xc( "SPOOLER-115" );
+
+        _java_work_dir = temp_dir() + Z_DIR_SEPARATOR "java";
+        _java_vm->prepend_class_path( _java_work_dir );
     }
     catch( const Sos_option_error& )
     {
@@ -820,6 +823,8 @@ void Spooler::load()
     tzset();
 
     _security.clear();             
+    _java_vm = Z_NEW( java::Vm( false ) );
+
     load_arg();
 
     _prefix_log.init( this );
@@ -865,14 +870,13 @@ void Spooler::start()
 
     if( !_manual )  _communication.start_or_rebind();
 
-
     _spooler_start_time = Time::now();
 
     if( _has_java  ) 
     {
         try
         {
-            _java_vm->init();
+            init_java_vm();    // In spooler_module_java.cxx
         }
         catch( const exception& x )
         {
