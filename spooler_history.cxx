@@ -1,4 +1,4 @@
-// $Id: spooler_history.cxx,v 1.58 2003/10/14 09:15:18 jz Exp $
+// $Id: spooler_history.cxx,v 1.59 2003/11/03 18:26:01 jz Exp $
 
 #include "spooler.h"
 #include "../zschimmer/z_com.h"
@@ -228,7 +228,7 @@ void Spooler_db::open( const string& db_name )
                                           "\"SPOOLER_ID\"  char(100),"
                                           "\"TITLE\"       char(200),"
                                           "\"STATE\"       varchar(100) not null,"
-                                          "\"STATE_TEXT\"  varchar(100) not null,"
+                                          "\"STATE_TEXT\"  varchar(100),"
                                           "\"START_TIME\"  datetime not null,"
                                           "\"END_TIME\"    datetime not null,"
                                           "\"LOG\"         blob," 

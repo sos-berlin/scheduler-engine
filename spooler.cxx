@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.285 2003/11/01 20:59:50 jz Exp $
+// $Id: spooler.cxx,v 1.286 2003/11/03 18:26:01 jz Exp $
 /*
     Hier sind implementiert
 
@@ -2342,7 +2342,7 @@ int spooler_main( int argc, char** argv, const string& parameter_line )
     }
 
 
-    get_java_vm()->set_destroy_vm( false );   //  Nicht DestroyJavaVM() rufen, denn das hängt manchmal
+    get_java_vm(false)->set_destroy_vm( false );   //  Nicht DestroyJavaVM() rufen, denn das hängt manchmal
 
     LOG( "Programm wird beendet\n" );
 

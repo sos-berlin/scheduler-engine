@@ -1,4 +1,4 @@
-// $Id: spooler_module_remote.cxx,v 1.46 2003/10/30 13:19:12 jz Exp $
+// $Id: spooler_module_remote.cxx,v 1.47 2003/11/03 18:26:01 jz Exp $
 /*
     Hier sind implementiert
 
@@ -221,7 +221,8 @@ bool Remote_module_instance_proxy::begin__end()
     return dynamic_cast<Operation*>( +operation )->_bool_result;
 */
 
-    if( !_remote_instance )  operation->async_check_error();  // Wenn create_instance() fehlgeschlagen ist
+    //?if( !_remote_instance )
+        operation->async_check_error();  // Wenn create_instance() fehlgeschlagen ist
 
     return check_result( _remote_instance->call__end() );
 }

@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.214 2003/10/30 13:19:12 jz Exp $
+// $Id: spooler_task.cxx,v 1.215 2003/11/03 18:26:01 jz Exp $
 /*
     Hier sind implementiert
 
@@ -242,7 +242,7 @@ void Task::close()
         _closed = true;
     }
 
-    //set_state( s_closed );
+    set_state( s_closed );
 }
 
 //----------------------------------------------------------------------------------------Task::dom
@@ -930,7 +930,10 @@ bool Task::do_something()
                 loop = true;
             }
             else
+            {
                 finish();
+                set_state( s_closed );
+            }
 
             something_done = true;
         }
@@ -1235,7 +1238,7 @@ void Module_task::do_close__end()
         _module_instance->close__end();
 
         int exit_code = _module_instance->exit_code();
-        if( exit_code != 0 )  _log.warn( "Exit code = 0x" + printf_string( "%X", exit_code ) );
+        if( exit_code != 0 )  _log.warn( "Prozess hat mit Exit code 0x" + printf_string( "%X", exit_code ) + " geendet" );
 
         _log.log_file( _module_instance->stdout_filename(), "stdout:" );
         _log.log_file( _module_instance->stderr_filename(), "stderr:" );

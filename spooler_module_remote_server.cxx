@@ -1,4 +1,4 @@
-// $Id: spooler_module_remote_server.cxx,v 1.31 2003/11/01 20:59:51 jz Exp $
+// $Id: spooler_module_remote_server.cxx,v 1.32 2003/11/03 18:26:01 jz Exp $
 /*
     Hier sind implementiert
 
@@ -239,6 +239,7 @@ STDMETHODIMP Com_remote_module_instance_server::add_obj( IDispatch* object, BSTR
 
     try
     {
+        if( !_server._module_instance )  throw_xc( "SCHEDULER-203", "add_obj", string_from_bstr(name) );
         _server._module_instance->add_obj( object, string_from_bstr(name) );
     }
     catch( const exception& x ) { hr = com_set_error( x, "Remote_module_instance_server::add_obj" ); }
@@ -254,6 +255,7 @@ STDMETHODIMP Com_remote_module_instance_server::name_exists( BSTR name, VARIANT_
 
     try
     {
+        if( !_server._module_instance )  throw_xc( "SCHEDULER-203", "name_exists", string_from_bstr(name) );
       //_server.load_implicitly();
         *result = _server._module_instance->name_exists( string_from_bstr(name) );
     }
@@ -275,6 +277,21 @@ STDMETHODIMP Com_remote_module_instance_server::call( BSTR name, VARIANT* result
       //_server.load_implicitly();
       //_server._module_instance->call( string_from_bstr(name) ).CopyTo( result );
 
+        if( !_server._module_instance )  
+        {
+            string nam = string_from_bstr( name );
+
+            if( nam == spooler_close_name
+             || nam == spooler_on_error_name
+             || nam == spooler_exit_name     ) 
+            {
+                result->vt = VT_EMPTY;
+                return hr;
+            }
+
+            throw_xc( "SCHEDULER-203", "call", string_from_bstr(name) );
+        }
+
         _server._module_instance->call__start( string_from_bstr(name) ) -> async_finish();
 
         result->vt = VT_BOOL;
@@ -293,6 +310,8 @@ STDMETHODIMP Com_remote_module_instance_server::begin( SAFEARRAY* objects_safear
 
     try
     {
+        if( !_server._module_instance )  throw_xc( "SCHEDULER-203", "begin" );
+
         Locked_safearray objects ( objects_safearray );
         Locked_safearray names   ( names_safearray );
 
@@ -321,8 +340,11 @@ STDMETHODIMP Com_remote_module_instance_server::end( VARIANT_BOOL succeeded, VAR
 
     try
     {
-        _server._module_instance->end__start( succeeded != 0 ) -> async_finish();
-        _server._module_instance->end__end();
+        if( _server._module_instance )
+        {
+            _server._module_instance->end__start( succeeded != 0 ) -> async_finish();
+            _server._module_instance->end__end();
+        }
     }
     catch( const exception& x ) { hr = com_set_error( x, "Remote_module_instance_server::end" ); }
 
@@ -337,6 +359,8 @@ STDMETHODIMP Com_remote_module_instance_server::step( VARIANT* result )
 
     try
     {
+        if( !_server._module_instance )  throw_xc( "SCHEDULER-203", "step" );
+
         _server._module_instance->step__start() -> async_finish();
 
         result->vt = VT_BOOL;
