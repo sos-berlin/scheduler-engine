@@ -1,4 +1,4 @@
-// $Id: spooler_communication.h,v 1.16 2003/10/02 21:40:00 jz Exp $
+// $Id: spooler_communication.h,v 1.17 2004/01/06 12:04:24 jz Exp $
 
 #ifndef __SPOOLER_COMMUNICATION_H
 #define __SPOOLER_COMMUNICATION_H
@@ -124,11 +124,10 @@ struct Xml_end_finder
 
 //------------------------------------------------------------------------------------Communication
 
-struct Communication : zschimmer::Thread
+struct Communication //: zschimmer::Thread
 {                                                 
-    struct Channel : Sos_self_deleting
+    struct Channel : zschimmer::Socket_operation
     {
-
                                 Channel                     ( Spooler* );
                                ~Channel                     ();
 
@@ -139,6 +138,10 @@ struct Communication : zschimmer::Thread
         bool                    do_send                     ();
 
         void                    recv_clear                  ();
+
+        virtual bool            async_continue_             ( bool wait );
+        virtual bool            async_finished_             ()                                      { return false; }
+        virtual string          async_state_text_           ()                                      { return "Spooler::Communication::Channel()"; }  // \"" + _named_host + "\"
 
 
         Fill_zero              _zero_;
@@ -161,7 +164,33 @@ struct Communication : zschimmer::Thread
         Prefix_log             _log;
     };
 
-    typedef list< Sos_ptr<Channel> >  Channel_list;
+
+    struct Listen_socket : Socket_operation
+    {
+                                Listen_socket               ( Communication* c )                    : _communication(c), _spooler(c->_spooler) {}
+
+        virtual bool            async_continue_             ( bool wait );
+        virtual bool            async_finished_             ()                                      { return false; }
+        virtual string          async_state_text_           ()                                      { return "Spooler::Communication::Listen_socket()"; }
+
+        Spooler*               _spooler;
+        Communication*         _communication;
+    };
+
+
+    struct Udp_socket : Socket_operation
+    {
+                                Udp_socket                  ( Communication* c )                    : _communication(c), _spooler(c->_spooler) {}
+
+        virtual bool            async_continue_             ( bool wait );
+        virtual bool            async_finished_             ()                                      { return false; }
+        virtual string          async_state_text_           ()                                      { return "Spooler::Communication::Udp_socket()"; }
+
+        Spooler*               _spooler;
+        Communication*         _communication;
+    };
+
+    typedef list< ptr<Channel> >  Channel_list;
 
 
                                 Communication               ( Spooler* );
@@ -169,29 +198,30 @@ struct Communication : zschimmer::Thread
 
     void                        init                        ();
     void                        start_or_rebind             ();
-    void                        start_thread                ();
+  //void                        start_thread                ();
     void                        close                       ( double wait_time = 0.0 );
     void                        bind                        ();
     void                        rebind                      ()                                      { bind(); }
-    int                         thread_main                 ();
+  //int                         thread_main                 ();
     bool                        started                     ()                                      { return _started; }
-    bool                        main_thread_exists          ();
+  //bool                        main_thread_exists          ();
+
 
   private:
     int                         run                         ();
     bool                        handle_socket               ( Channel* );
     int                         bind_socket                 ( SOCKET, struct sockaddr_in* );
-    void                       _fd_set                      ( SOCKET, fd_set* );
+  //void                       _fd_set                      ( SOCKET, fd_set* );
 
     Fill_zero                  _zero_;
     Spooler*                   _spooler;
-    SOCKET                     _listen_socket;
+    Listen_socket              _listen_socket;
+    Udp_socket                 _udp_socket;
     Channel_list               _channel_list;
-    SOCKET                     _udp_socket;
-    int                        _nfds;
-    fd_set                     _read_fds;
-    fd_set                     _write_fds;
-    Thread_semaphore           _semaphore;
+  //int                        _nfds;
+  //fd_set                     _read_fds;
+  //fd_set                     _write_fds;
+  //Thread_semaphore           _semaphore;
     bool                       _terminate;
     int                        _tcp_port;
     int                        _udp_port;

@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.311 2004/01/05 14:51:33 jz Exp $
+// $Id: spooler.cxx,v 1.312 2004/01/06 12:04:24 jz Exp $
 /*
     Hier sind implementiert
 
@@ -1732,6 +1732,8 @@ void Spooler::run()
                     _next_time = min( _next_time, Time( localtime_from_gmtime( (*p)->async_next_gmtime() ) ) );
                 }
             }
+
+            _connection_manager->async_continue();
 
 #           ifdef Z_DEBUG
                 Time earliest = Time::now(); // + 0.1;
