@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.64 2002/03/14 17:26:50 jz Exp $
+// $Id: spooler_task.cxx,v 1.65 2002/03/15 13:50:29 jz Exp $
 /*
     Hier sind implementiert
 
@@ -359,14 +359,18 @@ void Job::select_period( Time now )
     }
     else
     if( _next_time == latter_day 
-     || _next_time < now         )  _next_time = min( _next_start_time, _run_time.next_period(_period.end()).begin() );
+     || _next_time < now         )  
+    {
+        _next_time = _next_time < _next_start_time? _next_time = _next_start_time
+                                                  : _run_time.next_period(_period.end()).begin();
+    }
 }
 
 //--------------------------------------------------------------------------------Job::is_in_period
 
 bool Job::is_in_period( Time now )
 {
-    select_period();
+    select_period( now );
     return now >= _period.begin()  &&  now < _period.end();
 }
 
@@ -426,7 +430,7 @@ string Job::jobname_as_filename()
 
 //---------------------------------------------------------------------------------Job::create_task
 
-Sos_ptr<Task> Job::create_task( const CComPtr<spooler_com::Ivariable_set>& params, const string& name )
+Sos_ptr<Task> Job::create_task( const CComPtr<spooler_com::Ivariable_set>& params, const string& name, Time start_at )
 {
     Sos_ptr<Task> task;
 
@@ -441,6 +445,9 @@ Sos_ptr<Task> Job::create_task( const CComPtr<spooler_com::Ivariable_set>& param
     task->_enqueue_time = Time::now();
     task->_params       = params? params : new Com_variable_set;
     task->_name         = name;
+    task->_start_at     = start_at; 
+    
+    if( task->_start_at < _next_time )  _next_time = start_at;
 
     Task_queue::iterator it = _task_queue.begin();  // _task_queue nach _start_at geordnet halten
     while( it != _task_queue.end()  &&  (*it)->_start_at <= task->_start_at )  it++;
@@ -509,14 +516,14 @@ void Job::remove_from_task_queue( Task* task )
 
 //---------------------------------------------------------------------------------------Job::start
 
-void Job::start( const CComPtr<spooler_com::Ivariable_set>& params, const string& task_name )
+void Job::start( const CComPtr<spooler_com::Ivariable_set>& params, const string& task_name, Time start_at )
 {
-    THREAD_LOCK_LOG( _lock, "Job::start" )  start_without_lock( params, task_name );
+    THREAD_LOCK_LOG( _lock, "Job::start" )  start_without_lock( params, task_name, start_at );
 }
 
 //---------------------------------------------------------------------------------------Job::start
 
-Sos_ptr<Task> Job::start_without_lock( const CComPtr<spooler_com::Ivariable_set>& params, const string& task_name )
+Sos_ptr<Task> Job::start_without_lock( const CComPtr<spooler_com::Ivariable_set>& params, const string& task_name, Time start_at )
 {
     switch( _state )
     {
@@ -528,7 +535,7 @@ Sos_ptr<Task> Job::start_without_lock( const CComPtr<spooler_com::Ivariable_set>
         default: ;
     }
 
-    Sos_ptr<Task> task = create_task( params, task_name );
+    Sos_ptr<Task> task = create_task( params, task_name, start_at );
     
     task->_let_run = true;
 
@@ -772,28 +779,37 @@ bool Job::task_to_start( Time now )
 {
     bool ok = false;
 
-    if( _state == s_pending  &&  is_in_period(now) )
+    if( _state == s_pending  )
     {
-        THREAD_LOCK( _lock )
+        if( _period._single_start || is_in_period(now) )
         {
-            for( Directory_watcher_list::iterator it = _directory_watcher_list.begin(); it != _directory_watcher_list.end(); it++ )
+            THREAD_LOCK( _lock )
             {
-                if( (*it)->signaled_then_reset() )
+                for( Directory_watcher_list::iterator it = _directory_watcher_list.begin(); it != _directory_watcher_list.end(); it++ )
                 {
-                    ok = true;
-                    _log.debug( "Task startet wegen eines Ereignisses für Verzeichnis " + (*it)->directory() );
+                    if( (*it)->signaled_then_reset() )
+                    {
+                        ok = true;
+                        _log.debug( "Task startet wegen eines Ereignisses für Verzeichnis " + (*it)->directory() );
 
-                    if( !(*it)->handle() )  it = _directory_watcher_list.erase( it );  // Folge eines Fehlers, s. Directory_watcher::set_signal
+                        if( !(*it)->handle() )  it = _directory_watcher_list.erase( it );  // Folge eines Fehlers, s. Directory_watcher::set_signal
+                    }
+                }
+
+                if( _event.signaled() )        ok = true,  _log.debug( "Task startet wegen " + _event.as_string() );
+
+              //if( now >= _next_start_at )    ok = true,  _log.debug( "Task startet, weil Task-Startzeit erreicht: " + _next_start_at.as_string() );
+
+                if( now >= _next_start_time )  ok = true,  _log.debug( "Task startet, weil Job-Startzeit erreicht: " + _next_start_time.as_string() );
+
+                if( _start_once )              ok = true,  _start_once = false,  _log.debug( "Task startet wegen <run_time once=\"yes\">" );
+
+                if( ok )
+                {
+                    create_task( NULL, "", now );
+                    dequeue_task( now );
                 }
             }
-
-            if( _event.signaled() )        ok = true,  _log.debug( "Task startet wegen " + _event.as_string() );
-
-          //if( now >= _next_start_at )    ok = true,  _log.debug( "Task startet, weil Task-Startzeit erreicht: " + _next_start_at.as_string() );
-
-            if( now >= _next_start_time )  ok = true,  _log.debug( "Task startet, weil Job-Startzeit erreicht: " + _next_start_time.as_string() );
-
-            if( _start_once )              ok = true,  _start_once = false,  _log.debug( "Task startet wegen <run_time once=\"yes\">" );
         }
     }
 
@@ -818,7 +834,8 @@ bool Job::do_something()
     {
         Time now = Time::now();
         bool dequeued = dequeue_task(now);
-        if( !dequeued  &&  task_to_start(now) )  create_task( NULL, "" ),  dequeue_task(now);
+        //if( !dequeued  &&  task_to_start(now) )  create_task( NULL, "" ),  dequeue_task(now);
+        if( !dequeued )  task_to_start(now);
     }
 
     // Wenn nichts zu tun ist, dann raus. Der Job soll nicht wegen eines alten Fehlers nachträglich gestoppt werden (s.u.)
@@ -1012,11 +1029,7 @@ void Job::set_state_cmd( State_cmd cmd )
                                 break;
 
             case sc_start:      {
-                                    THREAD_LOCK_LOG( _lock, "Job::set_state_cmd" )
-                                    {
-                                        Sos_ptr<Task> task = start_without_lock( NULL, "" );
-                                        task->set_start_at( Time::now() );
-                                    }
+                                    THREAD_LOCK_LOG( _lock, "Job::set_state_cmd" )  start_without_lock( NULL, "", Time::now() );
                                     break;
                                 }
 
@@ -1238,7 +1251,9 @@ void Job::signal_object( const string& object_set_class_name, const Level& level
          && _object_set_descr->_class->_name == object_set_class_name 
          && _object_set_descr->_level_interval.is_in_interval( level ) )
         {
-            start_without_lock( NULL, object_set_class_name );
+            //start_without_lock( NULL, object_set_class_name );
+            _event.signal( "Object_set " + object_set_class_name );
+            //_thread->signal( obj_name() + ", Object_set " + object_set_class_name );
         }
     }
 }
@@ -1274,14 +1289,14 @@ void Task::close()
 }
 
 //-------------------------------------------------------------------------------Task::set_start_at
-
+/*
 void Task::set_start_at( Time time )
 { 
     _start_at = time; 
     
     if( _start_at < _job->_next_time )  _job->_next_time = time;
 }
-
+*/
 //--------------------------------------------------------------------------------------Task::start
 
 bool Task::start()

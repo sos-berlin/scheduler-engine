@@ -1,4 +1,4 @@
-// $Id: spooler_config.cxx,v 1.30 2002/03/11 06:55:52 jz Exp $
+// $Id: spooler_config.cxx,v 1.31 2002/03/15 13:50:29 jz Exp $
 
 //#include <precomp.h>
 
@@ -167,7 +167,9 @@ void Period::set_xml( const xml::Element_ptr& element, const Period* deflt )
         _begin = dt;
         _repeat = latter_day;
         _single_start = true;
-        if( _let_run )  _end = _begin;
+        //if( _let_run )  _end = _begin;
+        _let_run = true;
+        _end = _begin;
     }
     else
     {

@@ -1,4 +1,4 @@
-// $Id: spooler_thread.cxx,v 1.25 2002/03/14 17:26:51 jz Exp $
+// $Id: spooler_thread.cxx,v 1.26 2002/03/15 13:50:29 jz Exp $
 /*
     Hier sind implementiert
 
@@ -208,7 +208,11 @@ bool Thread::step()
         {
             if( _event.signaled_then_reset() )  return true;
             Job* job = *it;
-            if( job->priority() >= _spooler->priority_max() )  something_done |= do_something( job );
+            if( job->priority() >= _spooler->priority_max() )
+            {
+                something_done |= do_something( job );
+                if( !something_done )  break;
+            }
         }
     }
 
@@ -221,7 +225,11 @@ bool Thread::step()
         {
             if( _event.signaled_then_reset() )  return true;
             Job* job = *it;
-            for( int i = 0; i < job->priority(); i++ )  something_done |= do_something( job );
+            for( int i = 0; i < job->priority(); i++ )
+            {
+                something_done |= do_something( job );
+                if( !something_done )  break;
+            }
         }
     }
 

@@ -1,4 +1,4 @@
-// $Id: spooler_command.cxx,v 1.40 2002/03/11 06:55:52 jz Exp $
+// $Id: spooler_command.cxx,v 1.41 2002/03/15 13:50:29 jz Exp $
 /*
     Hier ist implementiert
 
@@ -201,8 +201,7 @@ xml::Element_ptr Command_processor::execute_start_job( const xml::Element_ptr& e
         if( e->tagName == "params" )  { pars->set_xml( e );  break; }
     }
 
-    Sos_ptr<Task> task = _spooler->get_job( job_name )->start_without_lock( CComPtr<spooler_com::Ivariable_set>(pars), task_name );
-    task->set_start_at( start_at );
+    Sos_ptr<Task> task = _spooler->get_job( job_name )->start_without_lock( CComPtr<spooler_com::Ivariable_set>(pars), task_name, start_at );
 
     return _answer->createElement( "ok" );
 }

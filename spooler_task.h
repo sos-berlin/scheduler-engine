@@ -1,4 +1,4 @@
-// $Id: spooler_task.h,v 1.35 2002/03/14 17:26:51 jz Exp $
+// $Id: spooler_task.h,v 1.36 2002/03/15 13:50:29 jz Exp $
 
 #ifndef __SPOOLER_TASK_H
 #define __SPOOLER_TASK_H
@@ -181,8 +181,8 @@ struct Job : Sos_self_deleting
     void                        close                       ();
     void                        close_engine                ();
 
-    void                        start                       ( const CComPtr<spooler_com::Ivariable_set>& params, const string& task_name );
-    Sos_ptr<Task>               start_without_lock          ( const CComPtr<spooler_com::Ivariable_set>& params, const string& task_name );
+    void                        start                       ( const CComPtr<spooler_com::Ivariable_set>& params, const string& task_name, Time = 0 );
+    Sos_ptr<Task>               start_without_lock          ( const CComPtr<spooler_com::Ivariable_set>& params, const string& task_name, Time = 0 );
     void                        start_when_directory_changed( const string& directory_name, const string& filename_pattern );
     void                        clear_when_directory_changed();
     void                        wake                        ()                          { _event.signal( "wake" ); }
@@ -190,7 +190,7 @@ struct Job : Sos_self_deleting
     void                        select_period               ( Time = Time::now() );
     bool                        is_in_period                ( Time = Time::now() );
 
-    Sos_ptr<Task>               create_task                 ( const CComPtr<spooler_com::Ivariable_set>& params, const string& task_name );
+    Sos_ptr<Task>               create_task                 ( const CComPtr<spooler_com::Ivariable_set>& params, const string& task_name, Time = latter_day );
     bool                        dequeue_task                ( Time now = Time::now() );
     void                        remove_from_task_queue      ( Task* );
     void                        close_task                  ();
@@ -323,7 +323,7 @@ struct Task : Sos_self_deleting
 
 
     bool                        wait_until_terminated       ( double wait_time = latter_day );
-    void                        set_start_at                ( Time );
+  //void                        set_start_at                ( Time );
 
     Job*                        job                         ()                              { return _job; }
 
