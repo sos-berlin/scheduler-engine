@@ -1,4 +1,4 @@
-// $Id: spooler_log.cxx,v 1.65 2003/06/24 15:46:29 jz Exp $
+// $Id: spooler_log.cxx,v 1.66 2003/06/25 16:03:45 jz Exp $
 
 #include "spooler.h"
 #include "spooler_mail.h"
@@ -10,6 +10,7 @@
 #include "../kram/sosprof.h"
 #include "../file/anyfile.h"
 #include "../zschimmer/olechar.h"
+#include "../zschimmer/file.h"
 
 #include <stdio.h>
 #include <sys/stat.h>               // S_IREAD, stat()
@@ -196,6 +197,20 @@ void Prefix_log::log_file( const string& filename )
     }
 }
 
+//----------------------------------------------------------------------------Prefix_log::as_string
+
+string Prefix_log::as_string()
+{
+    if( opened() )
+    {
+        return Mapped_file( filename(), "r" ).as_string();
+    }
+    else
+    {
+        return _log_buffer;
+    }
+}
+
 //---------------------------------------------------------------------------Prefix_log::Prefix_log
 
 Prefix_log::Prefix_log( int )
@@ -251,7 +266,7 @@ void Prefix_log::set_profile_section( const string& section )
 
     if( !_section.empty() ) 
     {
-        _log_level       = make_log_level( read_profile_string( _spooler->_factory_ini, _section, "log_level", as_string(_log_level) ) );
+        _log_level       = make_log_level( read_profile_string( _spooler->_factory_ini, _section, "log_level", sos::as_string(_log_level) ) );
         _mail_on_error   = read_profile_bool           ( _spooler->_factory_ini, _section, "mail_on_error"     , _mail_on_error );
         _mail_on_process = read_profile_mail_on_process( _spooler->_factory_ini, _section, "mail_on_process"   , _mail_on_process );
         _mail_on_success =         read_profile_bool   ( _spooler->_factory_ini, _section, "mail_on_success"   , _mail_on_success );
@@ -594,7 +609,7 @@ void Prefix_log::log2( Log_level level, const string& prefix, const string& line
     if( _highest_level < level )  _highest_level = level, _highest_msg = line;
     if( level < _log_level )  return;
 
-    _log->log2( level, _job && _job->current_task()? "Task " + as_string(_job->current_task()->id()) + " " + _job->name() : _prefix, line, this, _order_log );
+    _log->log2( level, _job && _job->current_task()? "Task " + sos::as_string(_job->current_task()->id()) + " " + _job->name() : _prefix, line, this, _order_log );
 }
 
 //----------------------------------------------------------------------------------Stdout_collector

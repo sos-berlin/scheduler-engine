@@ -1,5 +1,5 @@
 
-// $Id: spooler_order.cxx,v 1.29 2003/06/25 12:27:48 jz Exp $
+// $Id: spooler_order.cxx,v 1.30 2003/06/25 16:03:45 jz Exp $
 /*
     Hier sind implementiert
 
@@ -174,11 +174,14 @@ void Job_chain::load_orders_from_database()
     {
         Transaction ta ( _spooler->_db );
 
-        Any_file sel ( _spooler->_db->db_name() + " select \"ID\", \"PRIORITY\", \"STATE\", \"STATE_TEXT\", \"TITLE\", \"CREATED_TIME\", \"PAYLOAD\""
-                                                  " from " + sql::quoted_name( _spooler->_orders_tablename ) +
-                                                  " where \"SPOOLER_ID\"=" + sql::quoted(_spooler->id_for_db()) + 
-                                                  " and \"JOB_CHAIN\"=" + sql::quoted(_name) +
-                                                  " order by \"ORDERING\"" );
+        Any_file sel ( _spooler->_db->db_name() + 
+                       "-max-length=32K "
+                       " select \"ID\", \"PRIORITY\", \"STATE\", \"STATE_TEXT\", \"TITLE\", \"CREATED_TIME\", \"PAYLOAD\""
+                       " from " + sql::quoted_name( _spooler->_orders_tablename ) +
+                       " where \"SPOOLER_ID\"=" + sql::quoted(_spooler->id_for_db()) + 
+                       " and \"JOB_CHAIN\"=" + sql::quoted(_name) +
+                       " order by \"ORDERING\"" );
+
         while( !sel.eof() )
         {
             ptr<Order> order = new Order( _spooler, sel.get_record() );
@@ -397,13 +400,17 @@ xml::Element_ptr Order_queue::dom( const xml::Document_ptr& document, Show_what 
 
         if( show & show_orders )
         {
-            FOR_EACH( Queue, _queue, it )
+            Queue* queues[] = { &_queue, &_setback_queue };
+            for( Queue** q = queues; q < queues + NO_OF(queues); q++ )
             {
-                Order* order = *it;
-                if( !which_job_chain  ||  order->job_chain() == which_job_chain )
+                FOR_EACH( Queue, **q, it )
                 {
-                    dom_append_nl( element );
-                    element.appendChild( order->dom( document, show ) );
+                    Order* order = *it;
+                    if( !which_job_chain  ||  order->job_chain() == which_job_chain )
+                    {
+                        dom_append_nl( element );
+                        element.appendChild( order->dom( document, show ) );
+                    }
                 }
             }
 
@@ -421,12 +428,18 @@ int Order_queue::length( Job_chain* which_job_chain )
     if( which_job_chain )
     {
         int count = 0;
-        THREAD_LOCK( _lock )  FOR_EACH( Queue, _queue, it )  if( (*it)->_job_chain == which_job_chain )  count++;
+        
+        THREAD_LOCK( _lock ) 
+        {
+            FOR_EACH( Queue, _queue        , it )  if( (*it)->_job_chain == which_job_chain )  count++;
+            FOR_EACH( Queue, _setback_queue, it )  if( (*it)->_job_chain == which_job_chain )  count++;
+        }
+
         return count;
     }
     else
     {
-        return _queue.size(); 
+        return _queue.size() + _setback_queue.size(); 
     }
 }
 
@@ -519,7 +532,7 @@ void Order_queue::remove_order( Order* order )
     {
         if( order->_setback )
         {
-            _log->debug( "remove_order (setback) " + order->obj_name() );
+            _log->debug9( "remove_order (setback) " + order->obj_name() );
 
             Queue::iterator it;
             for( it = _setback_queue.begin(); it != _setback_queue.end(); it++ )  if( *it == order )  break;
@@ -532,7 +545,7 @@ void Order_queue::remove_order( Order* order )
         }
         else
         {
-            _log->debug( "remove_order " + order->obj_name() );
+            _log->debug9( "remove_order " + order->obj_name() );
 
             Queue::iterator it;
             for( it = _queue.begin(); it != _queue.end(); it++ )  if( *it == order )  break;
@@ -572,7 +585,7 @@ Order* Order_queue::first_order( const Time& now )
         while( !_setback_queue.empty() )
         {
             ptr<Order> o = *_setback_queue.begin();
-            if( o->_setback > now  )  break;
+            if( o->_setback > now )  break;
             
             remove_order( o );
             o->_setback = 0;
@@ -630,7 +643,6 @@ Time Order_queue::next_time()
         if( !_queue.empty() )  return 0;
 
         if( !_setback_queue.empty() )  return (*_setback_queue.begin())->_setback;
-
     }
 
     return latter_day;
@@ -751,8 +763,21 @@ xml::Element_ptr Order::dom( const xml::Document_ptr& document, Show_what show )
         element.setAttribute( "priority"  , _priority );
         element.setAttribute( "created"   , _created.as_string() );
 
+        if( _log.opened() )
+        element.setAttribute( "log_file", _log.filename() );
+
         if( _setback )
-        element.setAttribute( "in_process_since", _setback.as_string() );
+        element.setAttribute( "setback", _setback.as_string() );
+
+
+        if( show & show_log )
+        {
+            try
+            {
+                dom_append_text_element( element, "log", _log.as_string() );
+            }
+            catch( const exception& x ) { _spooler->_log.warn( string("<show_order what=\"log\">: ") + x.what() ); }
+        }
     }
 
     return element;
@@ -1020,7 +1045,7 @@ void Order::move_to_node( Job_chain_node* node )
 
 //----------------------------------------------------------------------------Order::postprocessing
 
-void Order::postprocessing( bool success, Prefix_log* log )
+void Order::postprocessing( bool success )
 {
     THREAD_LOCK( _lock )
     {

@@ -1,10 +1,18 @@
-// $Id: spooler_history.cxx,v 1.50 2003/06/25 12:27:48 jz Exp $
+// $Id: spooler_history.cxx,v 1.51 2003/06/25 16:03:45 jz Exp $
 
 #include "spooler.h"
 #include "../zschimmer/z_com.h"
 #include "../zschimmer/z_sql.h"
 #include "../kram/sleep.h"
 #include "../kram/sos_java.h"
+
+
+#ifdef Z_HPUX
+#   define GZIP_AUTO ""   // gzip -auto liefert ZLIB_STREAM_ERROR mit gcc 3.1, jz 7.5.2003
+#else
+#   define GZIP_AUTO "gzip -auto | "
+#endif
+
 
 using namespace zschimmer;
 
@@ -686,6 +694,106 @@ void Spooler_db::write_order_history( Order* order, Transaction* outer_transacti
     }
 }
 
+//---------------------------------------------------------------------Job_chain::read_order_history
+#if 0
+xml::Element_ptr Job_chain::read_history( const xml::Document_ptr& doc, int id, int next, Show_what show )
+{
+    bool with_log = ( show & show_log ) != 0;
+
+    xml::Element_ptr history_element;
+
+    with_log &= _use_db;
+
+    try
+    {
+        if( !_spooler->_db->opened() )  throw_xc( "SPOOLER-184" );     // Wenn die DB verübergegehen (wegen Nichterreichbarkeit) geschlossen ist, s. get_task_id()
+
+        Transaction ta = +_spooler->_db;
+        {
+            Any_file sel;
+/*
+            if( _use_file )
+            {
+                if( id != -1  ||  next >= 0 )  throw_xc( "SPOOLER-139" );
+                sel.open( "-in -seq tab -field-names | tail -head=1 -reverse -" + as_string(-next) + " | " + _filename );
+            }
+            else
+            if( _use_db )
+*/
+            {
+                string prefix = ( next < 0? "-in -seq head -" : "-in -seq tail -reverse -" ) + as_string(max(1,abs(next))) + " | ";
+                string clause = " where \"JOB_CHAIN\"=" + sql_quoted(_job_name);
+                
+                if( id != -1 )
+                {
+                    clause += " and \"ID\"";
+                    clause += next<0? "<" : next>0? ">" : "=";
+                    clause += as_string(id);
+                }
+
+                clause += " order by \"ID\" ";
+                if( next < 0 )  clause += " desc";
+                
+                sel.open( prefix + _spooler->_db->_db_name + 
+                            "select \"ID\", \"SPOOLER_ID\", \"JOB_NAME\", \"START_TIME\", \"END_TIME\", \"CAUSE\", \"STEPS\", \"ERROR\", \"ERROR_CODE\", \"ERROR_TEXT\" " +
+                            join( "", vector_map( prepend_comma, _extra_names ) ) +
+                            " from " + uquoted(_spooler->_job_history_tablename) + 
+                            clause );
+            }
+            else
+                throw_xc( "SPOOLER-136" );
+
+            history_element = doc.createElement( "history" );
+            dom_append_nl( history_element );
+
+            const Record_type* type = sel.spec().field_type_ptr();
+            Dynamic_area rec ( type->field_size() );
+
+            while( !sel.eof() )
+            {
+                string           param_xml;
+                xml::Element_ptr history_entry = doc.createElement( "history.entry" );
+
+                sel.get( &rec );
+    
+                for( int i = 0; i < type->field_count(); i++ )
+                {
+                    string value = type->as_string( i, rec.byte_ptr() );
+                    if( value != "" )
+                    {
+                        string name = type->field_descr_ptr(i)->name();
+                        if( name == "parameters" )  param_xml = value;
+                                                else  history_entry.setAttribute( lcase(name), value );
+                    }
+                }
+
+                int id = type->field_descr_ptr("id")->as_int( rec.byte_ptr() );
+
+
+                if( with_log )
+                {
+                    try
+                    {
+                        string log = file_as_string( GZIP_AUTO + _spooler->_db->_db_name + "-table=" + _spooler->_job_history_tablename + " -blob=log where \"ID\"=" + as_string(id), "" );
+                        if( !log.empty() ) dom_append_text_element( history_entry, "log", log );
+                    }
+                    catch( const exception&  x ) { _spooler->_log.warn( string("Historie: ") + x.what() ); }
+                }
+
+                history_element.appendChild( history_entry );
+                dom_append_nl( history_element );
+            }
+
+            sel.close();
+        }
+        ta.commit();
+    }
+    catch( const _com_error& x ) { throw_com_error( x, "Job_history::read_tail" ); }
+
+    return history_element;
+}
+
+#endif
 //-------------------------------------------------------------------------Job_history::Job_history
 
 Job_history::Job_history( Job* job )
@@ -1088,9 +1196,6 @@ xml::Element_ptr Job_history::read_tail( const xml::Document_ptr& doc, int id, i
 
     if( !_error )  
     {
-        const int max_n = 1000;
-        if( abs(next) > max_n )  next = sgn(next) * max_n,  _spooler->_log.warn( "Max. " + as_string(max_n) + " Historiensätze werden gelesen" );
-    
         with_log &= _use_db;
 
         try
@@ -1179,11 +1284,6 @@ xml::Element_ptr Job_history::read_tail( const xml::Document_ptr& doc, int id, i
                     {
                         try
                         {
-#ifdef Z_HPUX
-#   define GZIP_AUTO ""   // gzip -auto liefert ZLIB_STREAM_ERROR mit gcc 3.1, jz 7.5.2003
-#else
-#   define GZIP_AUTO "gzip -auto | "
-#endif
                             string log = file_as_string( GZIP_AUTO + _spooler->_db->_db_name + "-table=" + _spooler->_job_history_tablename + " -blob=log where \"ID\"=" + as_string(id), "" );
                             if( !log.empty() ) dom_append_text_element( history_entry, "log", log );
                         }

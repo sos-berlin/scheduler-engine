@@ -1,4 +1,4 @@
-// $Id: spooler_command.cxx,v 1.85 2003/06/24 15:46:28 jz Exp $
+// $Id: spooler_command.cxx,v 1.86 2003/06/25 16:03:45 jz Exp $
 /*
     Hier ist implementiert
 
@@ -137,6 +137,25 @@ xml::Element_ptr Command_processor::execute_show_state( const xml::Element_ptr& 
     return state_element;
 }
 
+//---------------------------------------------------------------Command_processor::get_id_and_prev
+
+void Command_processor::get_id_and_next( const xml::Element_ptr& element, int* id, int* next )
+{
+    *id = element.uint_getAttribute( "id", -1 );
+
+    string prev_str = element.getAttribute( "prev" );
+
+    *next = prev_str == ""   ? ( *id == -1? -10 : 0 ) :
+            prev_str == "all"? -INT_MAX 
+                             : -as_int(prev_str);
+
+    string next_str = element.getAttribute( "next" );
+    if( next_str != "" )  *next = as_uint(next_str);
+
+    const int max_n = 1000;
+    if( abs(*next) > max_n )  *next = sgn(*next) * max_n,  _spooler->_log.warn( "Max. " + as_string(max_n) + " Historiensätze werden gelesen" );
+}
+
 //----------------------------------------------------------Command_processor::execute_show_history
 
 xml::Element_ptr Command_processor::execute_show_history( const xml::Element_ptr& element, Show_what show )
@@ -146,22 +165,31 @@ xml::Element_ptr Command_processor::execute_show_history( const xml::Element_ptr
     if( show & show_all_ )  show = Show_what( show | show_log );
 
     string job_name = element.getAttribute( "job" );
-    
-    int id = element.uint_getAttribute( "id", -1 );
 
-    string prev_str = element.getAttribute( "prev" );
-    int    next     = prev_str == ""   ? ( id == -1? -10 : 0 ) :
-                      prev_str == "all"? -INT_MAX 
-                                       : -as_int(prev_str);
+    int id, next;
+    get_id_and_next( element, &id, &next );
     
-    string next_str = element.getAttribute( "next" );
-    if( next_str != "" )  next = as_uint(next_str);
-
     Sos_ptr<Job> job = _spooler->get_job( job_name );
 
     return job->read_history( _answer, id, next, show );
 }
 
+//----------------------------------------------------Command_processor::execute_show_order_history
+/*
+xml::Element_ptr Command_processor::execute_show_order_history( const xml::Element_ptr& element, Show_what show )
+{
+    if( _security_level < Security::seclev_info )  throw_xc( "SPOOLER-121" );
+
+    if( show & show_all_ )  show = Show_what( show | show_log );
+
+    int id, next;
+    get_id_and_prev( element, &id, &next );
+    
+    Sos_ptr<Job_chain> job_chain = _spooler->job_chain( element.getAttribute( "job_chain" ) );
+
+    return job_chain->read_order_history( _answer, id, next, show );
+}
+*/
 //-------------------------------------------------------------Command_processor::abort_immediately
 
 void Command_processor::abort_immediately( int exit_code )
@@ -459,6 +487,8 @@ xml::Element_ptr Command_processor::execute_command( const xml::Element_ptr& ele
     if( element.nodeName_is( "add_order"        ) )  return execute_add_order( element );     // in spooler_order.cxx
     else
     if( element.nodeName_is( "modify_order"     ) )  return execute_modify_order( element );
+  //else
+  //if( element.nodeName_is( "show_order_history" ) )  return execute_show_order_history( element, show );
     else
     {
         throw_xc( "SPOOLER-105", element.nodeName() ); return xml::Element_ptr();

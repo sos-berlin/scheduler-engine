@@ -1,4 +1,4 @@
-// $Id: spooler_order.h,v 1.22 2003/06/25 12:27:48 jz Exp $
+// $Id: spooler_order.h,v 1.23 2003/06/25 16:03:45 jz Exp $
 
 #ifndef __SPOOLER_ORDER_H
 #define __SPOOLER_ORDER_H
@@ -87,7 +87,7 @@ struct Order : Com_order
     void                        add_to_job_chain        ( Job_chain* );
     void                        remove_from_job_chain   ();
     void                        move_to_node            ( Job_chain_node* );
-    void                        postprocessing          ( bool success, Prefix_log* );              // Verarbeitung nach spooler_process()
+    void                        postprocessing          ( bool success );                           // Verarbeitung nach spooler_process()
     void                        processing_error        ();
 
     xml::Element_ptr            dom                     ( const xml::Document_ptr&, Show_what );

@@ -1,4 +1,4 @@
-// $Id: spooler_command.h,v 1.17 2003/03/04 09:08:34 jz Exp $
+// $Id: spooler_command.h,v 1.18 2003/06/25 16:03:45 jz Exp $
 
 #ifndef __SPOOLER_COMMAND_H
 #define __SPOOLER_COMMAND_H
@@ -55,6 +55,8 @@ struct Command_processor
     xml::Element_ptr            execute_show_order          ( const xml::Element_ptr&, Show_what );
     xml::Element_ptr            execute_add_order           ( const xml::Element_ptr& );
     xml::Element_ptr            execute_modify_order        ( const xml::Element_ptr& );
+
+    void                        get_id_and_next             ( const xml::Element_ptr& element, int* id, int* next );
 
     void                        set_host                    ( Host* host )                          { _host = host; }
     void                        abort_immediately           ( int exit_code = 1 );

@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.158 2003/06/25 12:27:49 jz Exp $
+// $Id: spooler_task.cxx,v 1.159 2003/06/25 16:03:45 jz Exp $
 /*
     Hier sind implementiert
 
@@ -1883,7 +1883,7 @@ bool Task::step()
 
         if( _order )
         {
-            _order->postprocessing( result, &_job->_log );
+            _order->postprocessing( result );
             _job->_log.set_order_log( NULL );
             _order = NULL;
             result = true;
