@@ -1,4 +1,4 @@
-// $Id: spooler_order.cxx,v 1.67 2004/07/22 12:10:01 jz Exp $
+// $Id: spooler_order.cxx,v 1.68 2004/07/22 14:15:10 jz Exp $
 /*
     Hier sind implementiert
 
@@ -112,6 +112,7 @@ xml::Element_ptr Job_chain_node::dom( const xml::Document_ptr& document, Show_wh
                                         element.setAttribute( "state"      , debug_string_from_variant( _state       ) );
         if( !_next_state.is_empty()  )  element.setAttribute( "next_state" , debug_string_from_variant( _next_state  ) );
         if( !_error_state.is_empty() )  element.setAttribute( "error_state", debug_string_from_variant( _error_state ) );
+        if( _job )                      element.setAttribute( "orders"     , order_count( job_chain ) );
    
         if( _job )
         {
@@ -126,6 +127,13 @@ xml::Element_ptr Job_chain_node::dom( const xml::Document_ptr& document, Show_wh
         }
 
     return element;
+}
+
+//----------------------------------------------------------------------Job_chain_node::order_count
+
+int Job_chain_node::order_count( Job_chain* job_chain )
+{ 
+    return _job? _job->order_queue()->order_count( job_chain ) : 0; 
 }
 
 //-----------------------------------------------------------------------------Job_chain::Job_chain
@@ -155,7 +163,8 @@ xml::Element_ptr Job_chain::dom( const xml::Document_ptr& document, Show_what sh
 
         THREAD_LOCK( _lock )
         {
-            element.setAttribute( "name", _name );
+            element.setAttribute( "name"  , _name );
+            element.setAttribute( "orders", order_count() );
     
             if( _finished )
             {
@@ -369,7 +378,7 @@ int Job_chain::order_count()
         for( Chain::iterator it = _chain.begin(); it != _chain.end(); it++ )
         {
             Job* job = (*it)->_job;
-            if( job  &&  !set_includes( jobs, job ) )  jobs.insert( job ),  result += job->order_queue()->length();
+            if( job  &&  !set_includes( jobs, job ) )  jobs.insert( job ),  result += job->order_queue()->order_count( this );
         }
     }
 
@@ -427,7 +436,7 @@ xml::Element_ptr Order_queue::dom( const xml::Document_ptr& document, Show_what 
 
     THREAD_LOCK( _lock )
     {
-        element.setAttribute( "length", length(which_job_chain) );
+        element.setAttribute( "length", order_count( which_job_chain ) );
 
         if( show & show_orders )
         {
@@ -452,9 +461,9 @@ xml::Element_ptr Order_queue::dom( const xml::Document_ptr& document, Show_what 
     return element;
 }
 
-//------------------------------------------------------------------------------Order_queue::length
+//-------------------------------------------------------------------------Order_queue::order_count
 
-int Order_queue::length( Job_chain* which_job_chain )
+int Order_queue::order_count( Job_chain* which_job_chain )
 { 
     if( which_job_chain )
     {

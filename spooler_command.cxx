@@ -1,4 +1,4 @@
-// $Id: spooler_command.cxx,v 1.124 2004/07/22 12:10:00 jz Exp $
+// $Id: spooler_command.cxx,v 1.125 2004/07/22 14:15:10 jz Exp $
 /*
     Hier ist implementiert
 
@@ -148,7 +148,7 @@ xml::Element_ptr Command_processor::execute_show_process_classes( Show_what show
 
 //------------------------------------------------------------Command_processor::execute_show_state
 
-xml::Element_ptr Command_processor::execute_show_state( const xml::Element_ptr&, Show_what show )
+xml::Element_ptr Command_processor::execute_show_state( const xml::Element_ptr& element, Show_what show )
 {
     if( _security_level < Security::seclev_info )  throw_xc( "SCHEDULER-121" );
 
@@ -192,6 +192,7 @@ xml::Element_ptr Command_processor::execute_show_state( const xml::Element_ptr&,
     state_element.appendChild( execute_show_jobs( show ) );
   //state_element.appendChild( execute_show_threads( show ) );
     state_element.appendChild( execute_show_process_classes( show ) );
+    state_element.appendChild( execute_show_job_chains( element, show ) );
 
     {
         xml::Element_ptr subprocesses_element = _answer.createElement( "subprocesses" );

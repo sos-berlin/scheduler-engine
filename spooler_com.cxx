@@ -1,4 +1,4 @@
-// $Id: spooler_com.cxx,v 1.152 2004/07/13 16:12:43 jz Exp $
+// $Id: spooler_com.cxx,v 1.153 2004/07/22 14:15:10 jz Exp $
 /*
     Hier sind implementiert
 
@@ -3615,7 +3615,7 @@ STDMETHODIMP Com_order_queue::get_Length( int* result )
 {
     THREAD_LOCK( _lock )
     {
-        *result = dynamic_cast<Order_queue*>(this)->length();
+        *result = dynamic_cast<Order_queue*>(this)->order_count();
     }
 
     return S_OK;

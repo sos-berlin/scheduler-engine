@@ -1,4 +1,4 @@
-<!-- $Id: jobs_frame.html,v 1.15 2004/07/22 12:10:02 jz Exp $ -->
+<!-- $Id: jobs_frame.html,v 1.16 2004/07/22 14:15:10 jz Exp $ -->
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <html>
 
@@ -16,9 +16,9 @@
 <body>
 
 <p style="background-color: #F0F0F0; margin-bottom: 10px; padding-top: 3px; padding-bottom: 3px">
-    <input id="show_tasks_checkbox" type="checkbox" onclick="show_tasks_checkbox__onclick()" checked="true" NAME="show_tasks_checkbox"/>
+    <!--input id="show_tasks_checkbox" type="checkbox" onclick="show_tasks_checkbox__onclick()"  NAME="show_tasks_checkbox"/>
     <label for="show_tasks_checkbox">Show running tasks</label>
-    &#160; &#160;
+    &#160; &#160;-->
     <input id="update_periodically_checkbox" type="checkbox" onclick="update_periodically_checkbox__onclick()" NAME="update_periodically_checkbox"/>
     <label for="update_periodically_checkbox">Update periodically</label>
     &#160; &#160;
@@ -78,6 +78,14 @@ function show_tasks_checkbox__onclick()
     update();
 }
 
+//--------------------------------------------------------------------show_orders_checkbox__onclick
+/*
+function show_orders_checkbox__onclick()
+{
+    reset_error();
+    update();
+}
+*/
 //----------------------------------------------------------------------------------update__onclick
 
 function update__onclick()
@@ -98,7 +106,7 @@ function scheduler_command__onclick()
     
     //popup_builder.add_entry  ( "Show log"                       , "parent.scheduler_command__show_log__onclick()" );
     popup_builder.add_show_log( "Show log"                       , "show_log", "show_log" );
-    popup_builder.add_command ( "Stop"                           , command( "stop" ), state != "stopped"  &&  state != "stopping"  &&  state != "stopping_let_run" );
+  //popup_builder.add_command ( "Stop"                           , command( "stop" ), state != "stopped"  &&  state != "stopping"  &&  state != "stopping_let_run" );
     popup_builder.add_command ( "Pause"                          , command( "pause"                         ), state != "paused" );
     popup_builder.add_command ( "Continue"                       , command( "continue"                      ), state == "paused" );
   //popup_builder.add_command ( "Reload"                         , command( "reload"                        ), state != "stopped"  &&  state != "stopping" );
@@ -178,7 +186,7 @@ function set_update_timer()
 
 function update_jobs_frame()
 {
-    _response = _scheduler.execute( "<show_state what='all'/>" );
+    _response = _scheduler.execute( "<show_state what=''/>" );
     modify_response( _response );
     document.all.stylesheet.innerHTML = _response.transformNode( _stylesheet );;
 }
@@ -221,11 +229,24 @@ function modify_response( response )
         } 
     }
     
-    
-    // my_show_task einfügen
+
+    // Werte der Checkboxen show_tasks_checkbox und show_my_orders ins XML-Dokument übernehmen (für XSL)
     
     var spooler_element = response.selectSingleNode( "spooler" );
-    if( spooler_element )  spooler_element.setAttribute( "my_show_tasks", document.all.show_tasks_checkbox.checked? "yes" : "no" );
+    if( spooler_element )
+    {    
+        if( document.all.show_tasks_checkbox )
+        {
+            spooler_element.setAttribute( "my_show_tasks", document.all.show_tasks_checkbox.checked? "yes" : "no" );
+        }
+        
+        /*
+        if( document.all.show_orders_checkbox )
+        {
+            spooler_element.setAttribute( "my_show_orders", document.all.show_orders_checkbox.checked? "yes" : "no" );
+        }
+        */
+    }
 }
 
 //--------------------------------------------------------------------------------show_task_details

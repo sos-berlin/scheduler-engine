@@ -1,4 +1,4 @@
-// $Id: scheduler.js,v 1.6 2004/07/22 12:10:02 jz Exp $
+// $Id: scheduler.js,v 1.7 2004/07/22 14:15:10 jz Exp $
 
 //----------------------------------------------------------------------------------------Scheduler
 // public
@@ -246,6 +246,8 @@ function Popup_builder__add_show_log( html, show_log_command, window_name, is_ac
 
 function command_popup__show_log__onclick( show_log_command, window_name )
 {
+    window_name = window_name.replace( /[~a-zA-Z0-9]/g, "_" );
+    
     var log_window = window.open( "http://" + document.location.host + "/" + show_log_command, window_name, "menubar=no, toolbar=no, location=no, directories=no, scrollbars=yes, resizable=yes, status=no", true );
     log_window.focus();
     _popup.hide();

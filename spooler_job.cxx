@@ -1,4 +1,4 @@
-// $Id: spooler_job.cxx,v 1.87 2004/07/22 12:10:00 jz Exp $
+// $Id: spooler_job.cxx,v 1.88 2004/07/22 14:15:10 jz Exp $
 // §851: Weitere Log-Ausgaben zum Scheduler-Start eingebaut
 /*
     Hier sind implementiert
@@ -1584,6 +1584,7 @@ xml::Element_ptr Job::dom( const xml::Document_ptr& document, Show_what show, Jo
 
         dom_append_nl( job_element );
         xml::Element_ptr tasks_element = document.createElement( "tasks" );
+        tasks_element.setAttribute( "count", (int)_running_tasks.size() );
         Z_FOR_EACH( Task_list, _running_tasks, t )  tasks_element.appendChild( (*t)->dom( document, show ) ), dom_append_nl( tasks_element );
         job_element.appendChild( tasks_element );
       //dom_append_nl( job_element );
