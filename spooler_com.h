@@ -222,7 +222,7 @@ struct Com_log : spooler_com::Ilog,
     // interface Ihas_java_class_name
     STDMETHODIMP            get_Java_class_name             ( BSTR* result )                        { return String_to_bstr( const_java_class_name(), result ); }
     STDMETHODIMP_(char*)  const_java_class_name             ()                                      { return (char*)"sos.spooler.Log"; }
-
+  //STDMETHODIMP            get_Java_object_is_owner        ( BSTR* result )                        { *result = VARIANT_FALSE;  return S_OK; }
 
     // interface Ireference_with_properties
     ptr<z::com::object_server::Reference_with_properties> get_reference_with_properties();
