@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.24 2001/01/12 23:16:59 jz Exp $
+// $Id: spooler.cxx,v 1.25 2001/01/13 10:45:51 jz Exp $
 
 
 /*
@@ -396,6 +396,16 @@ Task::Task( Spooler* spooler, const Sos_ptr<Job>& job )
     _priority = _job->_priority;
 }
 
+//-----------------------------------------------------------------------------------------Task::Task
+
+Task::~Task()    
+{
+    _log.msg( "~Task " );
+
+    if( _script_instance )  _script_instance->close();
+    if( _com_log )  _com_log->close();
+}
+
 //--------------------------------------------------------------------------Task::set_new_start_time
 
 void Task::set_new_start_time()
@@ -410,10 +420,7 @@ void Task::error( const Xc& x )
     _log.error( x.what() );
 
     _error = x;
-    //_state_cmd = sc_stop;
     stop();
-
-    //_object_set = NULL;
 }
 
 //---------------------------------------------------------------------------------------Task::error
@@ -463,8 +470,11 @@ void Task::prepare_script()
         _script_instance = s;
         _script_instance->init();
 
-        if( !_spooler->_script_instance._script->empty() )  _script_instance->add_obj( _spooler->_script_instance.dispatch(), "spooler_script" );
-        _script_instance->add_obj( new Com_task_log( this ), "log" );
+        if( !_spooler->_script_instance._script->empty() )  
+            _script_instance->add_obj( _spooler->_script_instance.dispatch(), "spooler_script" );
+
+        if( !_com_log )  _com_log = new Com_log( this );
+        _script_instance->add_obj( (IDispatch*)_com_log, "spooler_log" );
     
         _script_instance->load();
     }
@@ -536,6 +546,8 @@ void Task::end()
 
 void Task::stop()
 {
+    _log.msg( "stop" );
+
     end();
 
     try 
@@ -777,8 +789,58 @@ Spooler::Spooler()
     _communication(this), 
     _script_instance(&_script),
     _command_processor(this), 
-    _log(this) 
+    _log(this)
 {
+}
+
+//--------------------------------------------------------------------------------Spooler::~Spooler
+
+Spooler::~Spooler() 
+{
+    if( _com_log )  _com_log->close();
+}
+
+//--------------------------------------------------------------------------------Spooler::load_arg
+
+void Spooler::load_arg()
+{
+    _config_filename  = read_profile_string( "factory.ini", "spooler", "config" );
+    _log_directory    = read_profile_string( "factory.ini", "spooler", "log-dir" );
+    _spooler_id       = read_profile_string( "factory.ini", "spooler", "spooler-id" );
+    _spooler_param    = read_profile_string( "factory.ini", "spooler", "spooler-param" );
+
+    for( Sos_option_iterator opt ( _argc, _argv ); !opt.end(); opt.next() )
+    {
+        if( opt.flag      ( "service"          ) )  ;   // wurde in sos_main() bearbeitet
+        else
+        if( opt.with_value( "log"              ) )  ;   // wurde in sos_main() bearbeitet
+        else
+        if( opt.with_value( "config"           ) )  _config_filename = opt.value();
+        else
+        if( opt.with_value( "log-dir"          ) )  _log_directory = opt.value();
+        else
+        if( opt.with_value( "spooler-id"       ) )  _spooler_id = opt.value();
+        else
+        if( opt.with_value( "spooler-param"    ) )  _spooler_param = opt.value();
+        else
+            throw_sos_option_error( opt );
+    }
+}
+
+//------------------------------------------------------------------------------------Spooler::load
+
+void Spooler::load()
+{
+    _state = s_starting;
+    _log.msg( "Spooler::load" );
+
+    {
+        Thread_semaphore::Guard guard = &_semaphore;
+
+        tzset();
+        load_arg();
+        load_xml();
+    }
 }
 
 //-----------------------------------------------------------------------------------Spooler::start
@@ -794,7 +856,10 @@ void Spooler::start()
     if( !_script_instance._script->empty() )
     {
         _script_instance.init();
-      //_script_instance.add_obj( new Com_task_log( this ), "log" );
+
+        if( !_com_log )  _com_log = new Com_log( &_log );
+        _script_instance.add_obj( (IDispatch*)_com_log, "spooler_log" );
+
         _script_instance.optional_property_put( "spooler_param", _spooler_param.c_str() );
         _script_instance.load();
     }
@@ -823,7 +888,7 @@ void Spooler::stop()
         {
             Task* task = *it;
             task->stop();
-            it = _task_list.erase( it );
+            it = _task_list.erase( it );  it--;
         }
     }
 
@@ -973,66 +1038,6 @@ void Spooler::run()
     }
 }
 
-//--------------------------------------------------------------------------------Spooler::load_arg
-
-void Spooler::load_arg()
-{
-    _config_filename  = read_profile_string( "factory.ini", "spooler", "config" );
-    _log_directory    = read_profile_string( "factory.ini", "spooler", "log-dir" );
-    _spooler_id       = read_profile_string( "factory.ini", "spooler", "spooler-id" );
-    _spooler_param    = read_profile_string( "factory.ini", "spooler", "spooler-param" );
-
-    for( Sos_option_iterator opt ( _argc, _argv ); !opt.end(); opt.next() )
-    {
-        if( opt.flag      ( "service"          ) )  ;   // wurde in sos_main() bearbeitet
-        else
-        if( opt.with_value( "log"              ) )  ;   // wurde in sos_main() bearbeitet
-        else
-        if( opt.with_value( "config"           ) )  _config_filename = opt.value();
-        else
-        if( opt.with_value( "log-dir"          ) )  _log_directory = opt.value();
-        else
-        if( opt.with_value( "spooler-id"       ) )  _spooler_id = opt.value();
-        else
-        if( opt.with_value( "spooler-param"    ) )  _spooler_param = opt.value();
-        else
-            throw_sos_option_error( opt );
-    }
-}
-
-//------------------------------------------------------------------------------------Spooler::load
-
-void Spooler::load()
-{
-    _state = s_starting;
-    _log.msg( "Spooler::load" );
-
-    load_arg();
-
-    tzset();
-
-    {
-        Thread_semaphore::Guard guard = &_semaphore;
-
-        load_xml();
-    }
-}
-
-//---------------------------------------------------------------------------------Spooler::restart
-
-void Spooler::restart()
-{
-    // Neuen Spooler-Prozess starten. Der wartet, bis dieser sich beendet hat. (pid übergeben und waitpid()? Sonst: TCP)
-
-    // spawn( ... -restart -old-tcp-port=... )
-    // exit()
-
-
-    // Neuer Prozess (-restart):
-    // Warten, bis -old-tcp-port frei wird, max. 30s.
-
-}
-
 //------------------------------------------------------------------------------Spooler::cmd_reload
 
 void Spooler::cmd_reload()
@@ -1126,7 +1131,7 @@ int spooler_main( int argc, char** argv )
                                 GetCommandLine(),           // command line 
                                 NULL,                       // process security attributes 
                                 NULL,                       // primary thread security attributes 
-                                TRUE,                       // handles are inherited 
+                                FALSE,                      // handles are inherited?
                                 0,                          // creation flags 
                                 NULL,                       // use parent's environment 
                                 NULL,                       // use parent's current directory 
@@ -1154,17 +1159,17 @@ int spooler_main( int argc, char** argv )
 
 int sos_main( int argc, char** argv )
 {
-    bool service = false;
+    bool is_service = false;
     int  ret;
 
     for( Sos_option_iterator opt ( argc, argv ); !opt.end(); opt.next() )
     {
-        if( opt.flag      ( "service"          ) )  service = opt.set();
+        if( opt.flag      ( "service"          ) )  is_service = opt.set();
         else
         if( opt.with_value( "log"              ) )  log_start( opt.value() );
     }
 
-    if( argc >= 2 && strcmp( argv[1], "-service" ) == 0 )
+    if( is_service )
     {
         ret = spooler::spooler_service( argc, argv );
     }

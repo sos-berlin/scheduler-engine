@@ -1,4 +1,4 @@
-// $Id: spooler.h,v 1.23 2001/01/12 23:17:00 jz Exp $
+// $Id: spooler.h,v 1.24 2001/01/13 10:45:51 jz Exp $
 
 #ifndef __SPOOLER_H
 
@@ -125,7 +125,7 @@ struct Log
 
 struct Task_log
 {
-                                Task_log                    ( Log*, Task* );
+                                Task_log                    ( Log*, Task* = NULL );
 
     void                        msg                         ( const string& line )              { log( Log::k_msg, line ); }
     void                        warn                        ( const string& line )              { log( Log::k_warn, line ); }
@@ -137,22 +137,28 @@ struct Task_log
     string                     _prefix;
 };
 
-//-------------------------------------------------------------------------------------Com_task_log
+//------------------------------------------------------------------------------------------Com_log
 #ifdef SYSTEM_WIN
 
-struct Com_task_log : Icom_task_log, Sos_ole_object
+struct Com_log : Ispooler_log, Sos_ole_object               
 {
-                                Com_task_log            ( Task* );
+                                Com_log                     ( Log* = NULL );             
+                                Com_log                     ( Task* );             
+                             //~Com_log                     ();
 
     USE_SOS_OLE_OBJECT
 
-    STDMETHODIMP                msg                     ( BSTR line )                           { return log( Log::k_msg, line ); }
-    STDMETHODIMP                warn                    ( BSTR line )                           { return log( Log::k_msg, line ); }
-    STDMETHODIMP                error                   ( BSTR line )                           { return log( Log::k_msg, line ); }
-    STDMETHODIMP                log                     ( Log::Kind kind, BSTR line );
+    void                        close                       ()                                  { _log = NULL; _task = NULL; }        
+
+    STDMETHODIMP                msg                         ( BSTR line )                       { return log( Log::k_msg, line ); }
+    STDMETHODIMP                warn                        ( BSTR line )                       { return log( Log::k_msg, line ); }
+    STDMETHODIMP                error                       ( BSTR line )                       { return log( Log::k_msg, line ); }
+    STDMETHODIMP                log                         ( Log::Kind kind, BSTR line );
 
 
+  protected:
     Fill_zero                  _zero_;
+    Log*                       _log;
     Task*                      _task;
 };
 
@@ -412,6 +418,7 @@ struct Task : Sos_self_deleting
 
 
                                 Task                        ( Spooler*, const Sos_ptr<Job>& );
+                               ~Task                        ();
 
     bool                        start                       ();
     void                        prepare_script              ();
@@ -462,6 +469,7 @@ struct Task : Sos_self_deleting
     Sos_ptr<Object_set>        _object_set;
     Time                       _next_start_time;            // Zeitpunkt des nächsten Startversuchs, nachdem Objektemenge leer war
     Task_log                   _log;
+    CComPtr<Com_log>           _com_log;
 };
 
 typedef list< Sos_ptr<Task> >   Task_list;
@@ -569,6 +577,7 @@ struct Communication
     bool                       _terminate;
     int                        _tcp_port;
     int                        _udp_port;
+    bool                       _rebound;
 
     HANDLE                     _thread;
 };
@@ -622,6 +631,7 @@ struct Spooler
 
 
                                 Spooler                     ();
+                               ~Spooler                     ();
 
     int                         launch                      ( int argc, char** argv );                                
     void                        load_arg                    ();
@@ -678,6 +688,7 @@ struct Spooler
     string                     _spooler_param;              // Parameter für Skripten
     int                        _argc;
     char**                     _argv;
+    CComPtr<Com_log>           _com_log;
 };
 
 

@@ -53,7 +53,7 @@ LINK32=link.exe
 # ADD LINK32 delayimp.lib ../misc/lib/libctleasy.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:console /map:"../bin/spooler.map" /machine:I386 /out:"../bin/spooler.exe" /delayload:winspool.drv /delayload:wsock32.dll /delayload:ole32.dll /delayload:oleaut32.dll /delayload:libctleasy.dll
 # SUBTRACT LINK32 /pdb:none
 # Begin Custom Build - gzip
-InputPath=\prod\bin\spooler.exe
+InputPath=\sos\prod\bin\spooler.exe
 SOURCE="$(InputPath)"
 
 "$(InputPath).gz" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
@@ -118,27 +118,11 @@ SOURCE=.\spooler.odl
 
 !IF  "$(CFG)" == "spooler - Win32 Release"
 
-# Begin Custom Build - mktyplib $(InputPath) /tlb $(OutDir)/spooler.tlb
-OutDir=.\Release
-TargetName=spooler
-InputPath=.\spooler.odl
-
-"$(TargetName).tlb" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	mktyplib /nologo $(InputPath) /tlb $(OutDir)/spooler.tlb
-
-# End Custom Build
+# PROP Exclude_From_Build 1
 
 !ELSEIF  "$(CFG)" == "spooler - Win32 Debug"
 
-# Begin Custom Build - mktyplib $(InputPath) /tlb $(OutDir)/spooler.tlb
-OutDir=.\Debug
-TargetName=spooler
-InputPath=.\spooler.odl
-
-"$(TargetName).tlb" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	mktyplib /nologo $(InputPath) /tlb $(OutDir)/spooler.tlb
-
-# End Custom Build
+# PROP Exclude_From_Build 1
 
 !ENDIF 
 

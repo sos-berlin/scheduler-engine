@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 
-<!-- $Id: spooler_config.xml,v 1.21 2001/01/12 23:17:01 jz Exp $   (C) 2000 SOS GmbH Berlin -->
+<!-- $Id: spooler_config.xml,v 1.22 2001/01/13 10:45:52 jz Exp $   (C) 2000 SOS GmbH Berlin -->
 
 <!DOCTYPE spooler_config SYSTEM "spooler_config.dtd">
 
@@ -16,7 +16,9 @@ class Global_class
     end function
 end class
 
-set global = new Global_class    
+set global = new Global_class 
+
+spooler_log.msg "Spooler-Skript geladen."   
 
     ]]></script>
 
@@ -49,7 +51,7 @@ class Testobjekt
 
 
     sub process( new_level )
-        log.msg "process " & level & " ==> " & new_level 
+        spooler_log.msg "process " & level & " ==> " & new_level 
         file.move dir_name & "\" & new_level & "\" & file.name
         level = new_level
     end sub
@@ -69,7 +71,7 @@ class Object_set_class
         dim file
         dim i
         
-        log.msg "spooler_param=" & spooler_param
+        spooler_log.msg "spooler_param=" & spooler_param
 
         set files=fso.getFolder(dir_name).Files
         
@@ -97,7 +99,7 @@ class Object_set_class
         dim object
         set object = new Testobjekt
         object.construct file_array(index)
-        log.msg "index=" & index & ", level=" & object.level & ", script_index=" & script_index
+        spooler_log.msg "index=" & index & ", level=" & object.level & ", script_index=" & script_index
         index = index + 1
         script_index = script_index + 1
 
@@ -144,7 +146,7 @@ end function
 use diagnostics;
 use Win32::OLE;
 
-$log->msg( "*Job Perl" );
+$spooler_log->msg( "*Job Perl" );
 
 
 {
@@ -153,7 +155,7 @@ $log->msg( "*Job Perl" );
 
     sub construct
     {
-        $main::log->msg( "Testobjekt::construct" );
+        $main::spooler_log->msg( "Testobjekt::construct" );
         my $self = {};
         bless( $self );
         $self->{name} = shift;
@@ -166,7 +168,7 @@ $log->msg( "*Job Perl" );
     {
         my $self = shift;
         my $new_level = shift;  # Wie holt man den Parameter? Joacim
-        $main::log->msg( "process " . $self->{name} . ", " . $self->{level} . " ==> $new_level" );
+        $main::spooler_log->msg( "process " . $self->{name} . ", " . $self->{level} . " ==> $new_level" );
         $self->{level} = $new_level;
     }
 }
@@ -208,7 +210,7 @@ $log->msg( "*Job Perl" );
         if( $self->spooler_eof() )  { return; }
 
         my $object = Testobjekt::construct( $self->{index} );
-        $main::log->msg( "index=" . $self->{index} . ", level=" . $object->{level} );
+        $main::spooler_log->msg( "index=" . $self->{index} . ", level=" . $object->{level} );
         $self->{index}++;
 
         return $object;
@@ -337,12 +339,13 @@ sub spooler_process()
 
             <script language="VBScript" use_engine="job"><![CDATA[
 
-log.msg "*Job einfach"
+spooler_log.msg "*Job einfach"
 
 index = 1
 
 function step()
-    log.msg "*Job einfach: step " & index & ",  " & spooler_script.global.method()
+    spooler_log.msg "*Job einfach: step " & index
+    spooler_log.msg "*Job einfach: step " & spooler_script.global.method()
     index = index + 1
     if index > 3 then step=false: exit function
     step = true

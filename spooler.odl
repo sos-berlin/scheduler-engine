@@ -1,0 +1,39 @@
+// $Id: spooler.odl,v 1.1 2001/01/13 10:45:52 jz Exp $
+
+// Änderungen werden nicht automatisch in die spooler.tlb übernommen.
+// Also mit rechter Maustaske "Kompilieren von spooler.odl" klicken.
+
+[
+    uuid        ( ED57B226-CD4F-490a-B47E-E7D44A895273 ),
+    helpstring  ( "Spooler, SOS GmbH Berlin" ),
+    lcid        ( 0x0000 ),
+    version     ( 1.0 )
+]
+library spooler
+{
+    importlib("STDOLE32.TLB");
+
+    //--------------------------------------------------------------------------Com_task_log
+
+    [
+        uuid       ( 3B6C8A62-B511-445d-A2A2-E852BC2E05A0 ),
+        odl,
+        dual
+    ]
+    interface Ispooler_log : IDispatch
+    {
+        HRESULT                 msg                     ( [in] BSTR name );
+        HRESULT                 warn                    ( [in] BSTR name );
+        HRESULT                 error                   ( [in] BSTR name );
+    }
+
+    [
+        uuid       ( 032974D7-8668-41c4-A204-3E893E06846F )
+    ]
+    coclass Spooler_log
+    {
+        interface Ispooler_log;
+    }
+
+};
+

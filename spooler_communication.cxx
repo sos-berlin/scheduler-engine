@@ -1,4 +1,4 @@
-// $Id: spooler_communication.cxx,v 1.8 2001/01/12 23:17:00 jz Exp $
+// $Id: spooler_communication.cxx,v 1.9 2001/01/13 10:45:52 jz Exp $
 
 //#include <precomp.h>
 
@@ -6,6 +6,10 @@
 #include "../kram/sos.h"
 #include "../kram/sleep.h"
 #include "spooler.h"
+
+#ifdef SYSTEM_WIN
+    const int ENOTSOCK = 10038;
+#endif
 
 
 using namespace std;
@@ -276,7 +280,10 @@ void Communication::bind()
 
     if( _udp_port != _spooler->_udp_port )
     {
-        closesocket( _udp_socket ),  _udp_port = 0;
+        Thread_semaphore::Guard guard = &_semaphore;
+
+        if( _udp_socket != SOCKET_ERROR )  closesocket( _udp_socket );
+        _udp_port = 0;
 
         _udp_socket = socket( AF_INET, SOCK_DGRAM, 0 );
         if( _udp_socket == SOCKET_ERROR )  throw_sos_socket_error( "socket" );
@@ -300,6 +307,9 @@ void Communication::bind()
         if( ret == SOCKET_ERROR )  throw_sos_socket_error( "ioctl(FIONBIO)" );
 
         _udp_port = _spooler->_udp_port;
+        _rebound = true;
+
+        _spooler->_log.msg( "Spooler erwartet Kommandos über UDP-Port " + as_string(_udp_port) );
     }
 
 
@@ -307,9 +317,10 @@ void Communication::bind()
 
     if( _tcp_port != _spooler->_tcp_port )
     {
-        closesocket( _listen_socket ),  _tcp_port = 0;
+        Thread_semaphore::Guard guard = &_semaphore;
 
         if( _listen_socket != SOCKET_ERROR )  closesocket( _listen_socket );
+        _tcp_port = 0;
 
         _listen_socket = socket( AF_INET, SOCK_STREAM, 0 );
         if( _listen_socket == SOCKET_ERROR )  throw_sos_socket_error( "socket" );
@@ -336,6 +347,9 @@ void Communication::bind()
         if( ret == SOCKET_ERROR )  throw_sos_socket_error( "ioctl(FIONBIO)" );
 
         _tcp_port = _spooler->_tcp_port;
+        _rebound = true;
+
+        _spooler->_log.msg( "Spooler erwartet Kommandos über TCP-Port " + as_string(_tcp_port) );
     }
 }
 
@@ -360,15 +374,11 @@ bool Communication::handle_socket( Channel* channel )
     {
         if( FD_ISSET( channel->_socket, &_write_fds ) ) 
         {
-            FD_CLR( channel->_socket, &_write_fds );
-
             channel->do_send();
         }
 
         if( FD_ISSET( channel->_socket, &_read_fds ) )
         {
-            FD_CLR( channel->_socket, &_read_fds );
-
             channel->do_recv();
             
             if( channel->_receive_is_complete ) 
@@ -400,23 +410,36 @@ int Communication::run()
 {
     start();
 
-    FD_ZERO( &_read_fds );      
-    FD_ZERO( &_write_fds );
-
-
     while(1) 
     {
-        FD_SET( _udp_socket, &_read_fds );
-        FD_SET( _listen_socket, &_read_fds );
+        {
+            Thread_semaphore::Guard guard = &_semaphore;
+
+            FD_ZERO( &_read_fds );      
+            FD_ZERO( &_write_fds );
+
+            if( _udp_socket    != SOCKET_ERROR )  FD_SET( _udp_socket, &_read_fds );
+            if( _listen_socket != SOCKET_ERROR )  FD_SET( _listen_socket, &_read_fds );
+
+            FOR_EACH( Channel_list, _channel_list, it )
+            {
+                Channel* channel = *it;
+                if( channel->_send_is_complete    )  FD_SET( channel->_socket, &_read_fds );
+                if( channel->_receive_is_complete )  FD_SET( channel->_socket, &_write_fds  );
+            }
+        }
 
         int n = ::select( _nfds, &_read_fds, &_write_fds, NULL, NULL );
-        if( n < 0 )  throw_sos_socket_error( get_errno(), "select" );
 
         {
             Thread_semaphore::Guard guard = &_semaphore;
 
             if( _terminate )  break;
+            if( _rebound )  { _rebound = false; continue; }
 
+            if( n < 0 )  throw_sos_socket_error( get_errno(), "select" );
+
+            
             // UDP
             if( FD_ISSET( _udp_socket, &_read_fds ) )
             {
@@ -451,9 +474,6 @@ int Communication::run()
                 bool ok = handle_socket( channel );
 
                 if( !ok ) { it = _channel_list.erase( it );  continue; }
-
-                if( channel->_send_is_complete    )  FD_SET( channel->_socket, &_read_fds );
-                if( channel->_receive_is_complete )  FD_SET( channel->_socket, &_write_fds  );
             }
         }
     }
@@ -478,7 +498,7 @@ int Communication::go()
     }
     catch( const Xc& x )
     {
-        _spooler->_log.msg( "Communication::thread:  " + x.what() );
+        _spooler->_log.error( "Communication::thread:  " + x.what() );
         result = 1;
     }
 
