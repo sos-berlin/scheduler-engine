@@ -1,24 +1,86 @@
-// $Id: Variable_set.java,v 1.6 2004/06/11 11:13:56 jz Exp $
+// $Id: Variable_set.java,v 1.7 2004/07/13 14:22:21 jz Exp $
 
 package sos.spooler;
 
 /**
  * Variablenmenge.
+ * <p> 
+ * Variablenmengen werden gebraucht für die scheduler-weiten Variablen und Task-Parameter.
+ * Eine neue Variablenmenge wird mit {@link Spooler.create_variable_set()} angelegt.
+ * <p>
+ * Die Großschreibung der Variablennamen ist relevant.
+ * <p>
+ * In Java ist ein Variablenwert ein String.
+ * <p>
+ * In COM (JavaScript, VBScript, Perl) ist ein Variablenwert ein Variant. 
+ * Weil die Variablen in der Regel in die Scheduler-Datenbank geschrieben werden, sollten nur
+ * nach String konvertierbare Variant-Werte verwendet werden (d.h. es sollten keine Objekte verwendet werden).  
+ *  
  *
- * @author Joacim Zschimmer, Zschimmer GmbH
- * @version $Revision: 1.6 $
+ * @see Spooler#variables()
+ * @see Task#params()
+ * @see Spooler#create_variable_set()
+ * @author Joacim Zschimmer
+ * @version $Revision: 1.7 $
  */
 
 public class Variable_set extends Idispatch
 {
     private                 Variable_set        ( long idispatch )                  { super(idispatch); }
 
+    /** Setzt eine Variable.
+     * 
+     * <p><br/><b>Beispiel</b>
+     * <pre>
+     *     Variable_set variable_set = spooler.create_variable_set();                                                  
+     *     variable_set.set_var( "nachname", "Müller" );
+     * </pre>
+     *
+     * <p><br/><b>Beispiel in JavaScript</b>
+     * <pre>
+     *     var variable_set = spooler.create_variable_set();                                                  
+     *     variable_set( "nachname" ) = "Müller";
+     * </pre>
+     * 
+     * 
+     */ 
     public void         set_var                 ( String name, String value )       {                       com_call( ">var", name, value       ); }
+    
+
+    
+    /** Liefert den Wert einer Variablen.
+     * 
+     * <p><br/><b>Beispiel</b>
+     * <pre>
+     *     spooler_log.debug( "nachname=" + spooler_task.params().var( "nachname" ) );                                                  
+     * </pre>
+     *
+     * <p><br/><b>Beispiel in JavaScript</b>
+     * <pre>
+     *     spooler_log.debug( "nachname=" + spooler_task.params( "nachname" ) );                                                  
+     * </pre>
+     * 
+     * @param name
+     * @return Wenn die Variable nicht bekannt ist, wird "" (bei COM: ein Empty) zurückgegeben.
+     */
     public String           var                 ( String name )                     { return (String)       com_call( "<var", name              ); }
 
 
-    /** @return Liefert die Anzahl der Variablen.
-      */
+    /** Liefert die Anzahl der Variablen.
+     * <p>
+     * Es gibt keine Möglichkeit, über Variablen über einen Index anzusprechen oder über sie zu iterieren. 
+     * Dieser Aufruf ist also nicht so nützlich. 
+     * 
+     * <p><br/><b>Beispiel</b>
+     * <pre>
+     *     spooler_log.debug( "count=" + spooler_task.params().count() );                                                  
+     * </pre>
+     *
+     * <p><br/><b>Beispiel in JavaScript</b>
+     * <pre>
+     *     spooler_log.debug( "count=" + spooler_task.params.count );                                                  
+     * </pre>
+     */
 
     public int              count               ()                                  { return            int_com_call( "<count"                  ); }
   
@@ -27,18 +89,42 @@ public class Variable_set extends Idispatch
   
   //public Variable_set     clone               ()                                  { return (Variable_set) com_call( "clone"                   ); }
     
+    
+    /** Mischt die Variablen aus einer anderen Variablenmenge ein.
+     * 
+     * Bereits vorhandene Variablen werden bei gleichen Namen überschrieben.
+     * 
+     */
+    
     public void             merge               ( Variable_set vars )               {                       com_call( "merge", vars             ); }
 
 
-    /** Parameter ist ein XML-Dokument folgender DTD:
-      * <!ELEMENT variable_set ( variable* )>
-      * <!ELEMENT variable EMPTY>
-      * <!ATTLIST variable name CDATA #REQUIRED>
-      * <!ATTLIST variable value CDATA #REQUIRED>
-      *
-      * Die Variablen im XML-Dokument werden dem Variable_set hinzugefügt. 
-      * Vorhandene Variablen werden überschrieben.
-      */
+    /** Übernimmt ein die Variablenmenge aus einem XML-Dokument.
+     * Mit folgender DTD:
+     * <p>
+     * <pre>
+     *     &lt;!ELEMENT variable_set ( variable* )>
+     *     &lt;!ELEMENT variable EMPTY>
+     *     &lt;!ATTLIST variable name CDATA #REQUIRED>
+     *     &lt;!ATTLIST variable value CDATA #REQUIRED>
+     * </pre>
+     *
+     * Die Variablen im XML-Dokument werden dem Variable_set hinzugefügt. 
+     * Vorhandene Variablen gleichen Namens werden überschrieben.
+     * 
+     * <p><br/><b>Beispiel</b>
+     * <pre>
+     *     Variable_set variable_set = spooler.create_variable_set();
+     *     String xml = "&lt;?xml version='1.0'?>&gt;variable                                                  
+     *     variable_set.set_xml( xml );
+     * </pre>
+     *
+     * <p><br/><b>Beispiel in JavaScript</b>
+     * <pre>
+     *     var variable_set = spooler.create_variable_set();                                                  
+     *     variable_set( "name" ) = "Müller";
+     * </pre>
+     */
 
     public void         set_xml                 ( String xml_text )                 {                       com_call( ">xml", xml_text          ); }
 
