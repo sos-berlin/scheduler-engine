@@ -98,7 +98,7 @@ STDMETHODIMP Subprocess::Start( VARIANT* program_and_parameters )
 
     HRESULT hr = S_OK;
     
-#   ifdef Z_WINDOWS
+#   ifdef Z_WINDOWSxxx // Test
         UINT previous_error_mode = 0;
         if( _ignore_error ) 
         {
@@ -135,7 +135,7 @@ STDMETHODIMP Subprocess::Start( VARIANT* program_and_parameters )
     catch( const exception&  x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
 
 
-#   ifdef Z_WINDOWS
+#   ifdef Z_WINDOWSxxx // Test
         if( _ignore_error )
         {
             Z_LOG( "SetErrorMode(" << previous_error_mode << ")\n" );
