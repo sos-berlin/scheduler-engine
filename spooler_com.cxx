@@ -1,4 +1,4 @@
-// $Id: spooler_com.cxx,v 1.128 2003/12/12 11:06:42 jz Exp $
+// $Id: spooler_com.cxx,v 1.129 2003/12/23 11:13:38 jz Exp $
 /*
     Hier sind implementiert
 
@@ -224,7 +224,7 @@ STDMETHODIMP Com_variable::Clone( Ivariable** result )
 { 
     HRESULT hr = NOERROR; 
     
-    THREAD_LOCK(_lock)
+    THREAD_LOCK( _lock )
     {
         *result = new Com_variable(_name,_value); 
         (*result)->AddRef();

@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.307 2003/12/10 17:26:24 jz Exp $
+// $Id: spooler.cxx,v 1.308 2003/12/23 11:13:37 jz Exp $
 /*
     Hier sind implementiert
 
@@ -933,6 +933,12 @@ Spooler_thread* Spooler::select_thread_for_task( Task* task )
 {
     assert( current_thread_id() == thread_id() );
 
+    if( _single_thread )  return _single_thread;
+
+    throw_xc( "Spooler::select_thread_for_task" );
+
+/*  Mutex _lock wird gesperrt. Nach Task::_lock. Wenn gleichzeitig ein TCP-Kommando kommt, dass in umgekehrter Reihenfolge sperrt, hängt das TCP-Kommando.
+
     // Kriterien: 
     // - Ein Thread, in dem die wenigsten Tasks desselben Jobs laufen
     // - Ein Thread, in dem die wenigsten Tasks laufen
@@ -964,6 +970,7 @@ Spooler_thread* Spooler::select_thread_for_task( Task* task )
 
     if( !result )  throw_xc( "select_thread_for_task" );
     return result;
+*/
 }
 
 //---------------------------------------------------------------------------Spooler::signal_object
