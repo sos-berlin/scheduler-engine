@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding="utf-8"?>
-<!-- $Id: scheduler.xslt,v 1.17 2004/08/29 09:27:27 jz Exp $ -->
+<!-- $Id: scheduler.xslt,v 1.18 2004/08/29 13:51:02 jz Exp $ -->
 
 <!--
     Änderungswünsche:
@@ -570,7 +570,14 @@
         <xsl:element name="a">
             <xsl:attribute name="class">silent</xsl:attribute>
             <xsl:attribute name="href"><xsl:value-of select="concat( /*/@base_dir, '/command_line.xml#option_', $name )"/></xsl:attribute>
-            <code>-<xsl:value-of select="$name"/>=…</code>
+            <code>-<xsl:value-of select="$name"/></code>
+
+            <!--
+            <xsl:variable name="command_option" select="document( 'command_line.xml' )/command_line/command_options/command_option[ @name = current()/@name or @setting = current()/@name ]"/>
+            <xsl:if test="$command_option/@type>
+            <code>=…</code>
+            </xsl:if>
+            -->
         </xsl:element>
     </xsl:template>
 

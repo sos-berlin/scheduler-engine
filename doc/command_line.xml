@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="scheduler.xslt" type="text/xsl"?>
 
-<!--$Id: command_line.xml,v 1.6 2004/08/28 09:21:47 jz Exp $-->
+<!--$Id: command_line.xml,v 1.7 2004/08/29 13:51:02 jz Exp $-->
 
 <command_line program  = "scheduler"
               title    = "Kommandozeile"
               base_dir = "."
               author   = "$Author: jz $"
-              date     = "$Date: 2004/08/28 09:21:47 $">
+              date     = "$Date: 2004/08/29 13:51:02 $">
 
     <command_options>
         <command_option name="config" setting="config">
@@ -64,6 +64,9 @@
                     der die XML-Kommandos und die XML-Konfiguration entsprechen müssen.
                 </p>
             </description>
+            <example>
+                <code>scheduler meine_konfiguration.xml -show-dtd | less</code>
+            </example>
         </command_option>
 
 

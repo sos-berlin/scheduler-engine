@@ -2,13 +2,13 @@
 <?xml-stylesheet href="scheduler.xslt" type="text/xsl"?>
 
 
-<!--$Id: konfiguration.xml,v 1.4 2004/08/29 09:27:27 jz Exp $-->
+<!--$Id: konfiguration.xml,v 1.5 2004/08/29 13:51:02 jz Exp $-->
 
 <description 
     title    = "XML-Konfiguration" 
     base_dir = "."
     author   = "$Author: jz $"
-    date     = "$Date: 2004/08/29 09:27:27 $"
+    date     = "$Date: 2004/08/29 13:51:02 $"
 >
 <p>
     Beim Start des Scheduler geben Sie die Datei an,
@@ -69,10 +69,16 @@ scheduler hallo_welt.xml
 
 <h2>Schema der Konfiguration</h2>
 
-Klicken Sie auf ein Element, um dessen Beschreibung zu sehen.
+<p>
+    Der Scheduler prüft die XML-Konfiguration gegen eine DTD.
+    Die DTD können Sie sich mit der Kommandozeilenoption <scheduler_option name="show-dtd"/> ausgeben lassen.
+</p>
+
+<p>
+    Klicken Sie auf ein Element des Schemas, um dessen Beschreibung zu sehen.
+</p>
 
 <pre>
-
 
 &lt;<a class="silent" href="xml/spooler.xml">spooler</a>>
     &lt;<a class="silent" href="xml/config.xml">config</a> spooler_id      = ""

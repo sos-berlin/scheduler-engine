@@ -1,4 +1,4 @@
-// $Id: spooler_dtd.cxx,v 1.1 2004/08/29 11:23:26 jz Exp $
+// $Id: spooler_dtd.cxx,v 1.2 2004/08/29 13:51:01 jz Exp $
 /*
     Hier ist implementiert
 
@@ -17,8 +17,9 @@ using namespace std;
 //-------------------------------------------------------------------------------------------------
 
 const char dtd_string[] = 
+
 "<?xml version='1.0' encoding='iso-8859-1'?>\n"
-"<!-- $Id: spooler_dtd.cxx,v 1.1 2004/08/29 11:23:26 jz Exp $ -->\n"
+"<!-- $Id: spooler_dtd.cxx,v 1.2 2004/08/29 13:51:01 jz Exp $ -->\n"
 "\n"
 "\n"
 "<!ENTITY % command              ' add_jobs\n" 
@@ -39,6 +40,7 @@ const char dtd_string[] =
 "                                | signal_object\n"
 "                                | terminate          '>\n"
 "\n"
+
 "<!ELEMENT spooler               ( config+ | command | answer | %command; )>\n"
 "\n"
 "\n"
@@ -318,6 +320,7 @@ const char dtd_string[] =
 "\n"
 "\n"
 "\n"
+/*
 "<!-- ANTWORTEN AUF DIE KOMMANDOS  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->\n"
 "<!-- veraltet -->\n"
 "\n"
@@ -364,6 +367,7 @@ const char dtd_string[] =
 "<!ATTLIST ERROR                 source              CDATA #IMPLIED>     <!-- Dateiname -->\n"
 "<!ATTLIST ERROR                 line                CDATA #IMPLIED>     <!-- Zeilennummer, beginned mit 1 -->\n"
 "<!ATTLIST ERROR                 col                 CDATA #IMPLIED>     <!-- Spaltennummer, beginned mit 1 -->\n"
+*/
 ;
 
 //-------------------------------------------------------------------------------------------------
