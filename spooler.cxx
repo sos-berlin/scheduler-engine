@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.297 2003/12/01 13:17:38 jz Exp $
+// $Id: spooler.cxx,v 1.298 2003/12/01 18:33:46 jz Exp $
 /*
     Hier sind implementiert
 
@@ -287,6 +287,7 @@ static void be_daemon()
 
 #endif
 //---------------------------------------------------------------------------------Spooler::Spooler
+// Die Objektserver-Prozesse haben kein Spooler-Objekt.
 
 Spooler::Spooler() 
 : 
@@ -306,14 +307,10 @@ Spooler::Spooler()
     _log_mail_bcc  ("-"),
     _mail_queue_dir("-")
 {
-    set_log_category_default( "scheduler.call", true );   // Aufrufe von spooler_process() etc. protokollieren (Beginn und Ende)
-
     if( spooler_ptr )  throw_xc( "spooler_ptr" );
     spooler_ptr = this;
 
     if( !SOS_LICENCE( licence_scheduler ) )  throw_xc( "SOS-1000", "Scheduler" );       // Früh prüfen, damit der Fehler auch auftritt, wenn die sos.ini fehlt.
-
-  //Z_GNU_ONLY( time::empty_period = Period() );
 
     _pid = getpid();
 
@@ -2220,6 +2217,9 @@ int spooler_main( int argc, char** argv, const string& parameter_line )
 #   ifdef Z_WINDOWS
         SetErrorMode( SEM_FAILCRITICALERRORS | SEM_NOOPENFILEERRORBOX );    // Das System soll sich Messageboxen verkneifen (außer beim Absturz)
 #   endif
+
+    set_log_category_default( "scheduler.call", true );   // Aufrufe von spooler_process() etc. protokollieren (Beginn und Ende)
+
 
     try
     {
