@@ -1,4 +1,4 @@
-// $Id: spooler_log.cxx,v 1.80 2003/11/01 20:59:50 jz Exp $
+// $Id: spooler_log.cxx,v 1.81 2003/11/23 21:38:21 jz Exp $
 
 #include "spooler.h"
 #include "spooler_mail.h"
@@ -383,7 +383,7 @@ void Prefix_log::inherit_settings( const Prefix_log& other )
 
 void Prefix_log::set_filename( const string& filename )
 {
-    if( _file != -1 )  throw_xc( "spooler_log::filename" );
+    if( _file != -1 )  throw_xc( "spooler_log::filename", filename, _filename );
     _filename = filename;
     _new_filename = "";
 }

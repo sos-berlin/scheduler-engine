@@ -1,4 +1,4 @@
-// $Id: spooler_order.cxx,v 1.48 2003/11/10 17:10:43 jz Exp $
+// $Id: spooler_order.cxx,v 1.49 2003/11/23 21:38:21 jz Exp $
 /*
     Hier sind implementiert
 
@@ -742,7 +742,7 @@ void Order::init()
 void Order::attach_task( Task* task )
 {
     _task = task;
-    open_log();
+    if( !_log.opened() )  open_log();
 }
 
 //----------------------------------------------------------------------------------Order::open_log
