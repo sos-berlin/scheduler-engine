@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.353 2004/09/01 19:18:12 jz Exp $
+// $Id: spooler.cxx,v 1.354 2004/09/02 09:33:29 jz Exp $
 // §851: Weitere Log-Ausgaben zum Scheduler-Start eingebaut
 // §1479
 
@@ -1391,7 +1391,7 @@ void Spooler::load_arg()
     {
         for( Sos_option_iterator opt ( _argc, _argv, _parameter_line ); !opt.end(); opt.next() )
         {
-            if( opt.with_value( "sos.ini"          ) )  ;   // wurde in Hostware-main() bearbeitet
+            if( opt.with_value( "sos.ini"          ) )  _sos_ini = opt.value();   // wurde in Hostware-main() bearbeitet
             else
             if( opt.flag      ( "V"                ) )  ;   // wurde in sos_main() bearbeitet
             else

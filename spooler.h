@@ -1,4 +1,4 @@
-// $Id: spooler.h,v 1.189 2004/08/29 11:20:58 jz Exp $
+// $Id: spooler.h,v 1.190 2004/09/02 09:33:29 jz Exp $
 // §1172
 
 #ifndef __SPOOLER_H
@@ -351,6 +351,7 @@ struct Spooler
 
 
     string                     _factory_ini;                // -ini=factory.ini
+    string                     _sos_ini;                    // -sos.ini=sos.ini
     string                     _hostname;
 
     ptr<Com_spooler>           _com_spooler;                // COM-Objekt spooler

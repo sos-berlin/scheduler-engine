@@ -1,4 +1,4 @@
-// $Id: spooler_process.cxx,v 1.30 2004/07/22 22:45:56 jz Exp $
+// $Id: spooler_process.cxx,v 1.31 2004/09/02 09:33:30 jz Exp $
 // §1172
 // §1206
 
@@ -66,6 +66,12 @@ void Process::start()
     if( _server_hostname.empty() )
     {
         Parameters parameters;
+
+        if( !_spooler->_sos_ini.empty() )
+        parameters.push_back( Parameter( "param", "-sos.ini=" + _spooler->_sos_ini ) );   // Muss der erste Parameter sein! (für sos_main0()).
+
+        if( !_spooler->_factory_ini.empty() )
+        parameters.push_back( Parameter( "param", "-ini=" + _spooler->_factory_ini ) );
 
         parameters.push_back( Parameter( "param", "-O" ) );
 
