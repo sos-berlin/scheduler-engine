@@ -252,7 +252,6 @@ struct Http_processor : Communication::Processor
 
 
     Fill_zero                  _zero_;
-  //Channel*                   _channel;
     ptr<Http_request>          _http_request;
     ptr<Http_parser>           _http_parser;
     ptr<Http_response>         _http_response;
