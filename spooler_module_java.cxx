@@ -1,4 +1,4 @@
-// $Id: spooler_module_java.cxx,v 1.54 2003/06/02 09:21:37 jz Exp $
+// $Id: spooler_module_java.cxx,v 1.55 2003/06/02 10:23:54 jz Exp $
 /*
     Hier sind implementiert
 
@@ -484,6 +484,9 @@ Java_idispatch::~Java_idispatch()
 
 void Java_module_instance::init_java_vm( java::Vm* java_vm )
 {
+    string work_dir = java_vm->work_dir();
+    if( !work_dir.empty() )  make_path( work_dir );  // Verzeichnis muss beim Start von Java vorhanden sein, damit Java es in classpath berücksichtigt.
+
     java_vm->start();
 
   //make_path( _java_vm->work_dir() );       // Java-VM prüft Vorhandensein der Verzeichnisse in classpath schon beim Start

@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.213 2003/06/02 09:21:36 jz Exp $
+// $Id: spooler.cxx,v 1.214 2003/06/02 10:23:54 jz Exp $
 /*
     Hier sind implementiert
 
@@ -829,7 +829,7 @@ void Spooler::load_arg()
     _variables_tablename= read_profile_string    ( _factory_ini, "spooler", "db_variables_table" , "SPOOLER_VARIABLES" );
 
   //_java_vm->set_filename      ( subst_env( read_profile_string( _factory_ini, "java"   , "vm"         , _java_vm->filename()       ) ) );
-  //_java_vm->prepend_class_path( subst_env( read_profile_string( _factory_ini, "java"   , "class_path" ) ) );
+    _java_vm->prepend_class_path( subst_env( read_profile_string( _factory_ini, "java"   , "class_path" ) ) );
   //_java_vm->set_javac_filename( subst_env( read_profile_string( _factory_ini, "java"   , "javac"      , _java_vm->javac_filename() ) ) );
 
 
@@ -885,7 +885,6 @@ void Spooler::load_arg()
         if( _config_filename.empty() )  throw_xc( "SPOOLER-115" );
 
         string java_work_dir = temp_dir() + Z_DIR_SEPARATOR "java";
-        make_path( java_work_dir );  // Verzeichnis muss beim Start von Java vorhanden sein, damit Java es in classpath berücksichtigt.
         _java_vm->set_work_dir( java_work_dir );
         _java_vm->prepend_class_path( java_work_dir );
 

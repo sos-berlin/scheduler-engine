@@ -1,4 +1,4 @@
-// $Id: spooler_module_remote_server.cxx,v 1.10 2003/06/02 09:21:37 jz Exp $
+// $Id: spooler_module_remote_server.cxx,v 1.11 2003/06/02 10:23:54 jz Exp $
 /*
     Hier sind implementiert
 
@@ -144,6 +144,7 @@ STDMETHODIMP Com_remote_module_instance_server::construct( SAFEARRAY* safearray 
     try
     {
         string           java_class_path;
+        string           java_work_dir;
         Locked_safearray params ( safearray );
 
         for( int i = 0; i < params.count(); i++ )
@@ -170,8 +171,8 @@ STDMETHODIMP Com_remote_module_instance_server::construct( SAFEARRAY* safearray 
             else
             if( key_word == "java_class_path" )  java_class_path                   = value;
             else
-          //if( key_word == "java_work_dir"   )  java_work_dir                     = value;
-          //else
+            if( key_word == "java_work_dir"   )  java_work_dir                     = value;
+            else
                 throw_xc( "server::construct" );
         }
 
