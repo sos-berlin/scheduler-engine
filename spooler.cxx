@@ -1,4 +1,6 @@
-// $Id: spooler.cxx,v 1.332 2004/05/04 08:53:28 jz Exp $
+// $Id: spooler.cxx,v 1.333 2004/05/05 12:02:58 jz Exp $
+// §851: Weitere Log-Ausgaben zum Scheduler-Start eingebaut
+
 /*
     Hier sind implementiert
 
@@ -1080,8 +1082,6 @@ string Spooler::state_name( State state )
 
 void Spooler::start_jobs()
 {
-    LOGI( "Jobs werden initialisiert\n" );
-
     FOR_EACH_JOB( job )  (*job)->init();
 }
 
@@ -1582,7 +1582,7 @@ void Spooler::start()
 
     if( _module.set() )
     {
-        LOG( "Startskript wird gestartet\n" );
+        LOGI( "Startskript wird geladen und gestartet\n" );
     
         _module_instance = _module.create_instance();
       //_module_instance->_title = "Scheduler-Script";
@@ -1596,6 +1596,8 @@ void Spooler::start()
 
         bool ok = check_result( _module_instance->call_if_exists( "spooler_init()Z" ) );
         if( !ok )  throw_xc( "SCHEDULER-183" );
+
+        LOG( "Startskript ist gelaufen\n" );
     }
 
   //init_process_classes();

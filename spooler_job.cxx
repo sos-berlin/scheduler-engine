@@ -1,4 +1,4 @@
-// $Id: spooler_job.cxx,v 1.71 2004/05/04 08:53:28 jz Exp $
+// $Id: spooler_job.cxx,v 1.72 2004/05/05 12:02:58 jz Exp $
 /*
     Hier sind implementiert
 
@@ -163,6 +163,8 @@ void Job::set_dom( const xml::Element_ptr& element, const Time& xml_mod_time )
 
 void Job::init0()
 {
+    LOGI( obj_name() << ".init0()\n" );
+
     _state = s_none;
 
     _log.set_prefix( "Job  " + _name );       // Zwei Blanks, damit die Länge mit "Task " übereinstimmt
@@ -184,7 +186,7 @@ void Job::init0()
 
 void Job::init()
 {
-    LOGI( "Job " << _name << " wird initialisiert\n" );
+    LOGI( obj_name() << ".init()\n" );
 
     _history.open();
 
