@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.28 2001/01/14 10:26:55 jz Exp $
+// $Id: spooler.cxx,v 1.29 2001/01/14 16:13:12 jz Exp $
 
 
 /*
@@ -579,14 +579,13 @@ bool Task::step()
 
     _log.msg( "step" );
 
-    Spooler_object object;
-
     try 
     {
         if( !_job->_script.empty() ) 
         {
             CComVariant result_vt = _job_script_instance.call( "step" );
-            result_vt.ChangeType( VT_BOOL );
+            HRESULT hr = result_vt.ChangeType( VT_BOOL );
+            if( FAILED(hr) )  throw_ole( hr, "VariantChangeType", _job->_name.c_str() );
             result = V_BOOL( &result_vt ) != 0;
         }
         else
@@ -600,8 +599,8 @@ bool Task::step()
         _spooler->_step_count++;
         _step_count++;
     }
-    catch( const Xc& x ) { step_error(x); return false; }
-    catch( const exception& x ) { error(x); }
+    catch( const Xc& x        ) { step_error(x); return false; }
+    catch( const exception& x ) { error(x); return false; }
 
     return result;
 }
