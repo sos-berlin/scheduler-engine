@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.154 2002/12/03 23:07:15 jz Exp $
+// $Id: spooler.cxx,v 1.155 2002/12/04 16:47:11 jz Exp $
 /*
     Hier sind implementiert
 
@@ -51,8 +51,10 @@ const double wait_step_for_thread_termination2           = 600.0;       // 2. Nö
 //const double wait_for_thread_termination_after_interrupt = 1.0;
 
 
-//bool                            spooler_is_running      = false;
-bool                            ctrl_c_pressed          = false;
+static bool                     is_daemon               = false;
+//static int                      daemon_starter_pid;
+//bool                          spooler_is_running      = false;
+static bool                     ctrl_c_pressed          = false;
 static Spooler*                 spooler                 = NULL;
 
 
@@ -181,7 +183,7 @@ With_log_switch read_profile_with_log( const string& profile, const string& sect
             ctrl_c_pressed = true;
             //Kein Systemaufruf hier! (Aber bei Ctrl-C riskieren wir einen Absturz. Ich will diese Meldung sehen.)
             fprintf( stderr, "Spooler wird wegen Ctrl-C beendet ...\n" );
-            spooler->async_signal( "Ctrl+C" );
+            if( !is_daemon )  spooler->async_signal( "Ctrl+C" );
             return true;
         }
         else
@@ -198,7 +200,7 @@ With_log_switch read_profile_with_log( const string& profile, const string& sect
         //{
             ctrl_c_pressed = true;
             //Kein Systemaufruf hier! (Aber bei Ctrl-C riskieren wir einen Absturz. Ich will diese Meldung sehen.)
-            fprintf( stderr, "Spooler wird wegen Ctrl-C beendet ...\n" );
+            if( !is_daemon )  fprintf( stderr, "Spooler wird wegen Ctrl-C beendet ...\n" );
 
             // pthread_mutex_lock:
             // The  mutex  functions  are  not  async-signal  safe.  What  this  means  is  that  they
@@ -226,6 +228,30 @@ static void set_ctrl_c_handler( bool on )
 #   endif
 }
 
+//----------------------------------------------------------------------------------------be_daemon
+#ifdef Z_UNIX
+
+static void be_daemon()
+{
+    LOG( "fork()\n" );
+
+    switch( fork() )
+    {
+        case  0: LOG( "pid=" << getpid() << "\n" );
+                 LOG( "setsid()\n" );
+                 setsid(); 
+                 break;
+
+        case -1: throw_errno( errno, "fork" );
+
+        default: sleep(1);  // Falls der Daemon noch was ausgibt, sollte das vor dem Shell-Prompt sein.
+                 //fprintf( stderr, "Daemon gestartet. pid=%d\n", pid ); 
+                 //fflush( stderr );
+                 _exit(0);
+    }
+}
+
+#endif
 //---------------------------------------------------------------------------------Spooler::Spooler
 
 Spooler::Spooler() 
@@ -812,11 +838,11 @@ void Spooler::start()
     _log.open_new();
     _log.info( string( "Spooler (" VER_PRODUCTVERSION_STR ) + ") startet mit " + _config_filename );
 
-
     _db.open( _db_name, _need_db );
     _db.spooler_start();
 
     if( !_manual )  _communication.start_or_rebind();
+
 
     _spooler_start_time = Time::now();
 
@@ -856,6 +882,26 @@ void Spooler::start()
     }
 
     start_threads();
+
+    
+    if( _is_service || is_daemon )
+    {
+        fclose( stdin );
+/*
+        if( _log.fd() > 2 )   // Nicht -1, stdin, stdout, stderr?
+        {
+            FILE* new_stderr = fdopen( _log.fd(), "w" );
+            if( !new_stderr )  throw_errno( errno, "fdopen stderr" );
+            {
+                _log.info( "stdout und stderr werden in diese Protokolldatei geleitet" ); 
+                fclose( stderr ); stderr = new_stderr;
+                fclose( stdout ); stdout = fdopen( _log.fd(), "w" );
+            }
+            //else  
+            //    _log.error( string("stderr = fdopen(log): ") + strerror(errno) );
+        }
+*/
+    }
 }
 
 //------------------------------------------------------------------------------------Spooler::stop
@@ -1027,10 +1073,6 @@ void Spooler::cmd_terminate()
 
 void Spooler::cmd_terminate_and_restart()
 {
-    //_log.msg( "Spooler::cmd_terminate_and_restart" );
-
-    //if( _is_service )  throw_xc( "SPOOLER-114" );
-
     _state_cmd = sc_terminate_and_restart;
     signal( "terminate_and_restart" );
 }
@@ -1070,6 +1112,7 @@ int Spooler::launch( int argc, char** argv )
     _event.add_to( &_wait_handles );
 
     _communication.init();  // Für Windows
+    _communication.bind();  // Falls der Port belegt ist, gibt's hier einen Abbruch
 
     do
     {
@@ -1152,37 +1195,52 @@ static string make_new_spooler_path( const string& this_spooler )
 
 void spooler_restart( Log* log, bool is_service )
 {
-#ifdef Z_WINDOWS
-    string this_spooler = program_filename();
-    string command_line = GetCommandLine();
-    string new_spooler  = make_new_spooler_path( this_spooler );
+#   ifdef Z_WINDOWS
+    
+        string this_spooler = program_filename();
+        string command_line = GetCommandLine();
+        string new_spooler  = make_new_spooler_path( this_spooler );
 
-    if( GetFileAttributes( new_spooler.c_str() ) != -1 )      // spooler~new.exe vorhanden?
-    {
-        // Programmdateinamen aus command_line ersetzen
-        int pos;
-        if( command_line.length() == 0 )  throw_xc( "SPOOLER-COMMANDLINE" );
-        if( command_line[0] == '"' ) {
-            pos = command_line.find( '"', 1 );  if( pos == string::npos )  throw_xc( "SPOOLER-COMMANDLINE" );
-            pos++;                
-        } else {
-            pos = command_line.find( ' ' );  if( pos == string::npos )  throw_xc( "SPOOLER-COMMANDLINE" );
+        if( GetFileAttributes( new_spooler.c_str() ) != -1 )      // spooler~new.exe vorhanden?
+        {
+            // Programmdateinamen aus command_line ersetzen
+            int pos;
+            if( command_line.length() == 0 )  throw_xc( "SPOOLER-COMMANDLINE" );
+            if( command_line[0] == '"' ) {
+                pos = command_line.find( '"', 1 );  if( pos == string::npos )  throw_xc( "SPOOLER-COMMANDLINE" );
+                pos++;                
+            } else {
+                pos = command_line.find( ' ' );  if( pos == string::npos )  throw_xc( "SPOOLER-COMMANDLINE" );
+            }
+
+            command_line = new_spooler + command_line.substr(pos);
+                         //+ " -renew-spooler=" + quoted_string(this_spooler);
+        }
+        else
+        {
+            //command_line += " -renew-spooler";
         }
 
-        command_line = new_spooler + command_line.substr(pos);
-                     //+ " -renew-spooler=" + quoted_string(this_spooler);
-    }
-    else
-    {
-        //command_line += " -renew-spooler";
-    }
+        if( is_service )  command_line += " -renew-service";
 
-    if( is_service )  command_line += " -renew-service";
+        command_line += " -renew-spooler=" + quoted_string(this_spooler,'"','"');
+        if( log )  log->info( "Restart Spooler  " + command_line );
+        start_process( command_line );
 
-    command_line += " -renew-spooler=" + quoted_string(this_spooler,'"','"');
-    if( log )  log->info( "Restart Spooler  " + command_line );
-    start_process( command_line );
-#endif
+#   else
+
+        switch( fork() )
+        {
+            case  0: execv( _argv[0], _argv ); 
+                     fprintf( stderr, "Fehler bei execv %s: %s\n", _argv[0], strerror(errno) ); 
+                     _exit(99);
+
+            case -1: throw_errno( errno, "execv", _argv[0] );
+
+            default: ;
+        }
+
+#   endif
 }
 
 //------------------------------------------------------------------------------------spooler_renew
@@ -1438,6 +1496,46 @@ int sos_main( int argc, char** argv )
         }
 
 #    else
+
+        if( is_service )
+        {
+            spooler::is_daemon = true;
+
+            LOG( "Spooler wird Daemon. Pid wechselt \n");
+            spooler::be_daemon();
+                         
+/*
+            spooler::daemon_starter_pid = getpid();
+
+            switch( int pid = fork() )
+            {
+                case  0: 
+                {
+                    !chdir( "/tmp" )  ||  chdir( "/" );
+                    umask( 0 );
+                    break;
+                }
+
+                case -1: 
+                    throw_errno( errno, "execv", _argv[0] );
+
+                default: 
+                {
+                    int status = 0;
+                    
+                    int ret = sleep( INT_MAX );
+                    if( ret 
+                    int p = waitpid( getpid(), &status, 0 );
+                    if( p == -1 )
+                    {
+                        
+                    //
+                    //if( WIFSIGNALED(status) && WIFEXITED(status) )  _exit( WEXITSTATUS(status) );
+                    _exit(0);
+                }
+            }
+*/
+        }
 
         ret = spooler::spooler_main( argc, argv );
 

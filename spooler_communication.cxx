@@ -1,4 +1,4 @@
-// $Id: spooler_communication.cxx,v 1.43 2002/12/03 23:07:16 jz Exp $
+// $Id: spooler_communication.cxx,v 1.44 2002/12/04 16:47:12 jz Exp $
 /*
     Hier sind implementiert
 
@@ -15,7 +15,6 @@
 #ifdef SYSTEM_WIN
     const int ENOTSOCK = 10038;
 #endif
-
 
 using namespace std;
 

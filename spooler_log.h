@@ -1,4 +1,4 @@
-// $Id: spooler_log.h,v 1.24 2002/11/30 15:58:31 jz Exp $
+// $Id: spooler_log.h,v 1.25 2002/12/04 16:47:12 jz Exp $
 
 #ifndef __SPOOLER_LOG_H
 #define __SPOOLER_LOG_H
@@ -40,6 +40,7 @@ struct Log
     void                        collect_stderr              ();
     
     string                      filename                    () const                            { return _filename; }
+    int                         fd                          ()                                  { return _file; }
 
   protected:
     void                        write                       ( Prefix_log*, const char*, int len, bool log = true );

@@ -1,4 +1,4 @@
-// $Id: spooler_communication.h,v 1.7 2002/12/02 20:43:32 jz Exp $
+// $Id: spooler_communication.h,v 1.8 2002/12/04 16:47:12 jz Exp $
 
 #ifndef __SPOOLER_COMMUNICATION_H
 #define __SPOOLER_COMMUNICATION_H
@@ -13,6 +13,7 @@
 #   include <unistd.h>       // close()
 
     typedef int SOCKET;
+    const SOCKET SOCKET_ERROR = (SOCKET)-1;
 #endif
 
 namespace sos {
@@ -161,13 +162,13 @@ struct Communication : zschimmer::Thread
     void                        start_or_rebind             ();
     void                        start_thread                ();
     void                        close                       ( double wait_time = 0.0 );
+    void                        bind                        ();
     void                        rebind                      ()                                      { bind(); }
     int                         thread_main                 ();
     bool                        started                     ()                                      { return _started; }
 
   private:
     int                         run                         ();
-    void                        bind                        ();
     bool                        handle_socket               ( Channel* );
     void                       _fd_set                      ( SOCKET, fd_set* );
 
