@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.197 2003/09/26 10:46:41 jz Exp $
+// $Id: spooler_task.cxx,v 1.198 2003/09/27 15:01:58 jz Exp $
 /*
     Hier sind implementiert
 
@@ -1496,7 +1496,7 @@ void Process_task::do_end__end()
 
     _log.log_file( _job->_process_log_filename ); 
 
-    if( exit_code )  throw_xc( "SPOOLER-126", exit_code );
+    if( _job->_process_ingore_error  &&  exit_code )  throw_xc( "SPOOLER-126", exit_code );
 }
 
 //---------------------------------------------------------------------------Process_task::signaled
@@ -1708,7 +1708,7 @@ void Process_task::do_end__end()
 
     _log.log_file( _job->_process_log_filename ); 
 
-    if( _process_handle._process_exit_code )  throw_xc( "SPOOLER-126", _process_handle._process_exit_code );
+    if( _job->_process_ingore_error  &&  _process_handle._process_exit_code )  throw_xc( "SPOOLER-126", _process_handle._process_exit_code );
 }
 
 //---------------------------------------------------------------------------Process_task::signaled

@@ -1,4 +1,4 @@
-// $Id: spooler_job.cxx,v 1.29 2003/09/27 08:45:17 jz Exp $
+// $Id: spooler_job.cxx,v 1.30 2003/09/27 15:01:57 jz Exp $
 /*
     Hier sind implementiert
 
@@ -134,9 +134,10 @@ void Job::set_dom( const xml::Element_ptr& element, const Time& xml_mod_time )
             else
             if( e.nodeName_is( "process"    ) )  _module_xml_document  = NULL,
                                                  _module_xml_element   = NULL,
-                                                 _process_filename     = e.getAttribute( "file" ),
-                                                 _process_param        = e.getAttribute( "param" ),
-                                                 _process_log_filename = e.getAttribute( "log_file" );
+                                                 _process_filename     = e.     getAttribute( "file" ),
+                                                 _process_param        = e.     getAttribute( "param" ),
+                                                 _process_log_filename = e.     getAttribute( "log_file" ),
+                                                 _process_ingore_error = e.bool_getAttribute( "ignore_error" );
             else
             if( e.nodeName_is( "run_time" ) &&  !_spooler->_manual )  _run_time = Run_time(), 
                                                                       _run_time.set_holidays( _spooler->holidays() ), 

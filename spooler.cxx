@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.263 2003/09/27 08:45:17 jz Exp $
+// $Id: spooler.cxx,v 1.264 2003/09/27 15:01:57 jz Exp $
 /*
     Hier sind implementiert
 
@@ -258,9 +258,10 @@ static void be_daemon()
     switch( fork() )
     {
         case  0: LOG( "pid=" << getpid() << "\n" );
+                 zschimmer::main_pid = getpid();
+
                  LOG( "setsid()\n" );
                  setsid(); 
-                 zschimmer::main_pid = getpid();
                  break;
 
         case -1: throw_errno( errno, "fork" );
