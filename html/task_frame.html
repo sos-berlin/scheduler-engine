@@ -1,0 +1,179 @@
+<!-- $Id: task_frame.html,v 1.1 2004/07/16 22:05:44 jz Exp $ -->
+<html>
+
+<head>
+    <meta name="vs_targetSchema"    content="http://schemas.microsoft.com/intellisense/ie5"/>
+    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1"/>
+
+    <title>Scheduler</title>
+
+    <style type="text/css">
+        h1           { font-size: 24pt; font-weight: bold; margin-bottom: 4ex;  }
+        h2           { font-size: 12pt; font-weight: bold; margin-top: 10ex; }
+        h3           { font-size: 10pt; font-weight: bold; margin-top: 6ex }
+        .zwischentitel { font-weight: bold; margin-top: 6ex }
+        body         { font-size: 10pt; }
+        th           { font-size: 10pt; }
+        td           { font-size: 10pt; }
+        p            { font-size: 10pt; margin-top: 2ex; margin-bottom: 0  }
+        div          { font-size: 10pt; }
+        span         { font-size: 10pt; }
+        li           { font-size: 10pt; }
+        pre          { font-family: Lucida Console, monospace; font-size: 9pt; margin-left: 5mm; line-height: 1.2em; }
+        .indent      { margin-left: 5mm; }
+        .mono        { font-family: Lucida Console, monospace; font-size: 9pt }
+        .small       { font-family: Sans-Serif; font-size: 8pt }
+    </style>
+</head>
+
+<body>
+
+<p>
+    <b>
+        <span id="job_name"></span>
+        &#160;
+        <span id="job_title"></span>
+    </b>
+</p>
+
+<p>&#160;</p>
+
+<xml id="stylesheet">
+    <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0">
+        <xsl:template match="task">
+            <b>Task <xsl:value-of select="@id"/></b>
+            <xsl:if test="@pid">
+                pid=<xsl:value-of select="@pid"/>
+            </xsl:if>
+            
+            <table>
+                <tr>
+                    <td>pid</td>
+                    <td>
+                        <xsl:value-of select="@pid"/>
+                    </td>
+                </tr>
+                    
+                <tr>
+                    <td>enqueued</td>
+                    <td><xsl:value-of select="@enqueued"/></td>
+                </tr>
+
+                <tr>
+                    <td>start at</td>
+                    <td><xsl:value-of select="@start_at"/></td>
+                </tr>
+
+                <tr>
+                    <td>running since</td>
+                    <td><xsl:value-of select="@running_since"/></td>
+                </tr>
+
+                <tr>
+                    <td>cause</td>
+                    <td>
+                        <xsl:value-of select="@cause"/>
+                    </td>
+                </tr>
+                
+                <tr>
+                    <td>in process since</td>
+                    <td><xsl:value-of select="@in_process_since"/></td>
+                </tr>
+
+                <tr>
+                    <td>idle since</td>
+                    <xsl:if test="@idle_since">
+                        <td><xsl:value-of select="@idle_since"/></td>
+                    </xsl:if>
+                </tr>
+
+                <tr>
+                    <td>order</td>
+                    <xsl:if test="order">
+                        <td>
+                            <xsl:value-of select="order/@id"/>
+                            &#160;
+                            <xsl:value-of select="order/@title"/>
+                        </td>
+                    </xsl:if>
+                </tr>
+
+                <tr>
+                    <td>steps</td>
+                    <td><xsl:value-of select="@steps"/></td>
+                </tr>
+                
+                <tr>
+                    <td>calling</td>
+                    <td>
+                        <xsl:value-of select="@calling"/>
+                    </td>
+                </tr>
+                
+            </table>
+        </xsl:template>
+        
+    </xsl:stylesheet>
+</xml>
+
+<script defer="true" type="text/javascript" src="scheduler.js"></script>
+
+<script type="text/javascript" for="window" event="onload"> do_onload(); </script>
+
+<script defer="true" language="javascript"><!--
+//-------------------------------------------------------------------------------------------------
+
+var _stylesheet;
+var _timer;
+var _task_id;
+
+//-------------------------------------------------------------------------------------------onload
+
+function do_onload()
+{
+    _stylesheet = document.all.stylesheet.XMLDocument;
+    if( _stylesheet.parseError.errorCode )  throw new Error( "Fehler im Stylesheet:\n" + _stylesheet.parseError.reason );
+
+    document.all.stylesheet.outerHTML = "<span id='stylesheet'></span>";
+}
+
+//--------------------------------------------------------------------------------show_task_details
+
+function show_task_details( job_element, task_element )
+{
+    var job_title = job_element.getAttribute( "title" );
+    
+    document.all.job_name.innerText = "Job " + job_element.getAttribute( "job" );
+    document.all.job_title.innerText = job_title? job_title : "";
+    
+    _task_id = task_element.getAttribute( "id" );
+    document.all.stylesheet.innerHTML = task_element.transformNode( _stylesheet );
+    
+    repeat_update();
+}
+
+//------------------------------------------------------------------------------------repeat_update
+
+function repeat_update( call_update )
+{
+    if( _timer != undefined )  window.clearTimeout( _timer ),  _timer = undefined;
+    _timer = window.setTimeout( "repeat_update(true)", 1000, "JavaScript" );
+    if( call_update )  update();
+}
+
+//-------------------------------------------------------------------------------------------update
+
+function update()
+{
+    var response = window.parent.jobs_frame.scheduler.execute( "<show_task id='" + _task_id + "' what='all'/>" );
+    var task_element = response.selectSingleNode( "spooler/answer/task" );
+    document.all.stylesheet.innerHTML = task_element? task_element.transformNode( _stylesheet ) : "";
+}
+
+//-------------------------------------------------------------------------------------------------
+--></script>
+
+</body>
+
+</html>

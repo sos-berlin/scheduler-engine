@@ -1055,37 +1055,6 @@ javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quo
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="sos\spooler\Thread.java">
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCustomBuildTool"
-						Description=""
-						CommandLine="echo javac -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;
-javac -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;
-
-echo javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)
-javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)
-"
-						AdditionalDependencies="$(IntDir)/sos/spooler/IDispatch.class"
-						Outputs="$(IntDir)/sos/spooler/$(InputName).class;$(IntDir)/sos/spooler/$(InputName).h"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCustomBuildTool"
-						Description=""
-						CommandLine="echo javac -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;
-javac -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;
-
-echo javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)
-javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)
-"
-						AdditionalDependencies="$(IntDir)/sos/spooler/IDispatch.class"
-						Outputs="$(IntDir)/sos/spooler/$(InputName).class;$(IntDir)/sos/spooler/$(InputName).h"/>
-				</FileConfiguration>
-			</File>
-			<File
 				RelativePath="sos\spooler\Variable_set.java">
 				<FileConfiguration
 					Name="Release|Win32">

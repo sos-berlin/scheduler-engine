@@ -1,4 +1,4 @@
-// $Id: spooler_command.cxx,v 1.115 2004/07/15 17:11:33 jz Exp $
+// $Id: spooler_command.cxx,v 1.116 2004/07/16 22:05:44 jz Exp $
 /*
     Hier ist implementiert
 
@@ -672,72 +672,152 @@ string xml_as_string( const xml::Document_ptr& document, bool indent )
     catch( const _com_error& ) { return "<?xml version=\"1.0\"?><ERROR/>"; }
 }
 
+//---------------------------------------------------------------------------------------Http_parser
+
+struct Http_parser
+{
+                                Http_parser                 ( const char* str )                     : _next_char( str ) {}
+
+    void                        eat_spaces                  ();
+    void                        eat                         ( const char* str );
+    string                      eat_word                    ();
+    string                      eat_until                   ( const char* character_set );
+    string                      eat_path                    ();
+    void                        eat_line_end                ();
+    char                        next_char                   ()                                      { return *_next_char; }
+
+
+    const char*                _next_char;
+};
+
+//--------------------------------------------------------------------------Http_parser::eat_spaces
+
+void Http_parser::eat_spaces()
+{ 
+    while( *_next_char == ' ' )  _next_char++; 
+}
+
+//---------------------------------------------------------------------------------Http_parser::eat
+
+void Http_parser::eat( const char* what )
+{
+    const char* w = what;
+    while( *w  &&  *_next_char == *w )  w++, _next_char++;
+    if( *w != '\0' )  
+    {
+        if( what[0] == '\n' )  throw_xc( "SCHEDULER-213", "Zeilenende" );
+                         else  throw_xc( "SCHEDULER-213", what );
+    }
+
+    eat_spaces();
+}
+
+//------------------------------------------------------------------------Http_parser::eat_line_end
+
+void Http_parser::eat_line_end()
+{
+    eat_spaces();
+
+    if( *_next_char == '\r' )  _next_char++;
+    eat( "\n" );
+}
+
+//----------------------------------------------------------------------------Http_parser::eat_word
+
+string Http_parser::eat_word()
+{
+    string word;
+    while( *_next_char > ' ' )  word += *_next_char++;
+
+    eat_spaces();
+    return word;
+}
+
+//---------------------------------------------------------------------------Http_parser::eat_until
+
+string Http_parser::eat_until( const char* character_set )
+{
+    string word;
+    while( *_next_char >= ' '  &&  strchr( character_set, *_next_char ) == NULL )  word += *_next_char++;
+
+    eat_spaces();
+    return rtrim( word );
+}
+
+//----------------------------------------------------------------------------Http_parser::eat_path
+
+string Http_parser::eat_path()
+{
+    eat_spaces();
+
+    string path;
+
+    while( (Byte)_next_char[0] > (Byte)' ' )
+    {
+        if( _next_char[0] == '%'  &&  _next_char[1] != '\0'  &&  _next_char[2] != '\0' )
+        {
+            path += (char)hex_as_int32( string( _next_char+1, 2 ) );
+            _next_char += 3;
+        }
+        else
+            path += *_next_char++;
+    }
+
+    eat_spaces();
+    return path;
+}
+
 //-------------------------------------------------------------------Command_processor::execute_http
 
 string Command_processor::execute_http( const string& http_request )
 {
-    string http_cmd;
-    string response_body;
-    string response_content_type;
-    string path;
-    string protocol;
-    map<string,string> headers;
+    string              http_cmd;
+    string              response_body;
+    string              response_content_type;
+    string              path;
+    string              protocol;
+    map<string,string>  headers;
 
     try
     {
-        const char* p = http_request.c_str();
+        Http_parser parser ( http_request.c_str() );
 
-        while( (Byte)p[0] > (Byte)' ' )  http_cmd += *p++;
-        while( p[0] == ' ' )  p++;
+        http_cmd = parser.eat_word();
+        path     = parser.eat_path();
+        protocol = parser.eat_word();
+                   parser.eat_line_end();
 
-        while( (Byte)p[0] > (Byte)' ' )
+
+        while( parser.next_char() > ' ' )
         {
-            if( p[0] == '%'  &&  p[1] != '\0'  &&  p[2] != '\0' )
-            {
-                path += (char)hex_as_int32( string( p+1, 2 ) );
-                p += 3;
-            }
-            else
-                path += *p++;
-        }
-        while( p[0] == ' ' )  p++;
-
-        while( (Byte)p[0] > (Byte)' ' )  protocol += *p++;
-        while( p[0]  &&  p[0] != '\n' )  p++;
-        
-        while( p[0] == '\n' )
-        {
-            p++;
-            if( p[0] <= ' ' )  break;
-
-            string name, value;
-            while( (Byte)p[0] > (Byte)' '  &&  p[0] != ':' )  name += *p++;
-            if( p[0] == ':' ) p++;
-            while( p[0] == ' ' )  p++;
-            while( (Byte)p[0] > (Byte)' ' )  value += *p++;
+            string name = parser.eat_until( ":" );
+                          parser.eat( ":" );
+            string value = parser.eat_until( "" );
             headers[ lcase( name ) ] = value;
-            while( p[0]  &&  p[0] != '\n' )  p++;
+            parser.eat_line_end();
         }
 
-        if( p[0] == '\n' )  p++;
-        if( p[0] == '\n' )  p++;
+        parser.eat_line_end();
 
 
         if( http_cmd == "GET" )
         {
             if( path == "/" )  path = "index.html";
 
-            string extension = extension_of_path( path );
-            if( extension != "" )
+            if( !string_ends_with( path, ">" ) )
             {
-                //response_body = file_as_string( directory_of_path( _spooler->_config_filename ) ) + "/html/index.html";
-                if( _spooler->_html_directory.empty() )  throw_xc( "SCHEDULER-212" );
-                response_body = file_as_string( _spooler->_html_directory + "/" + path );
+                string extension = extension_of_path( path );
+                if( extension != "" )
+                {
+                    //response_body = file_as_string( directory_of_path( _spooler->_config_filename ) ) + "/html/index.html";
+                    if( _spooler->_html_directory.empty() )  throw_xc( "SCHEDULER-212" );
+                    response_body = file_as_string( _spooler->_html_directory + "/" + path );
 
-                if( extension == "html"  
-                 || extension == "htm" )  response_content_type = "text/html";
-                else
-                if( extension == "js"  )  response_content_type = "text/javascript";
+                    if( extension == "html"  
+                     || extension == "htm" )  response_content_type = "text/html";
+                    else
+                    if( extension == "js"  )  response_content_type = "text/javascript";
+                }
             }
             else
             if( path.length() > 0 )
@@ -755,7 +835,7 @@ string Command_processor::execute_http( const string& http_request )
         else
         if( http_cmd == "POST" )
         {
-            response_body = execute( p, Time::now(), true );
+            response_body = execute( parser._next_char, Time::now(), true );
             response_content_type = "text/xml";
         }
 
@@ -793,6 +873,7 @@ string Command_processor::execute_http( const string& http_request )
                       "Transfer-Encoding: chunked\r\n"
                       "Date: " + string(time_text) + " GMT\r\n"
                       "Server: Scheduler " + string(VER_PRODUCTVERSION_STR) + "\r\n"
+                      "Cache-Control: no-cache\r\n"
                       "\r\n";
 
     response += as_hex_string( (int)response_body.length() ) + "\r\n";
