@@ -1,4 +1,4 @@
-// $Id: spooler_com.h,v 1.46 2002/09/29 16:17:24 jz Exp $
+// $Id: spooler_com.h,v 1.47 2002/10/03 08:58:21 jz Exp $
 
 #ifndef __SPOOLER_COM_H
 #define __SPOOLER_COM_H
@@ -379,18 +379,35 @@ struct Com_job_chain : spooler_com::Ijob_chain, Sos_ole_object
 
     STDMETHODIMP            put_name                    ( BSTR );
     STDMETHODIMP            get_name                    ( BSTR* );
+
     STDMETHODIMP            get_order_count             ( int* );
+    
     STDMETHODIMP            get_order_queue             ( VARIANT* state, spooler_com::Iorder_queue** );
+    
+    STDMETHODIMP            get_node                    ( VARIANT* state, spooler_com::Ijob_chain_node** );
 
     STDMETHODIMP                add_job                 ( VARIANT*, VARIANT*, VARIANT*, VARIANT* );
     STDMETHODIMP                add_end_state           ( VARIANT* );
-  //STDMETHODIMP                finish                  ();
 
     STDMETHODIMP                add_order               ( VARIANT* order_or_payload, spooler_com::Iorder** );
 
 
     Thread_semaphore           _lock;
     Job_chain*                 _job_chain;
+};
+
+//-------------------------------------------------------------------------------Com_job_chain_node
+
+struct Com_job_chain_node : spooler_com::Ijob_chain_node, Sos_ole_object               
+{
+                                Com_job_chain_node      ();
+
+    USE_SOS_OLE_OBJECT
+
+    STDMETHODIMP            get_state                   ( VARIANT* );
+    STDMETHODIMP            get_next_node               ( spooler_com::Ijob_chain_node** );
+    STDMETHODIMP            get_error_node              ( spooler_com::Ijob_chain_node** );
+    STDMETHODIMP            get_job                     ( spooler_com::Ijob** );
 };
 
 //----------------------------------------------------------------------------------------Com_order
@@ -415,6 +432,8 @@ struct Com_order : spooler_com::Iorder, Sos_ole_object
     STDMETHODIMP            get_priority                ( int* );
     
     STDMETHODIMP            get_job_chain               ( spooler_com::Ijob_chain** );
+
+    STDMETHODIMP            get_job_chain_node          ( spooler_com::Ijob_chain_node** );
     
     STDMETHODIMP            put_job                     ( VARIANT* );
     STDMETHODIMP         putref_job                     ( spooler_com::Ijob* job )                  { return put_job( &Variant(job) ); }

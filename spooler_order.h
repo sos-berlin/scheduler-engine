@@ -1,4 +1,4 @@
-// $Id: spooler_order.h,v 1.11 2002/10/03 07:57:06 jz Exp $
+// $Id: spooler_order.h,v 1.12 2002/10/03 08:58:21 jz Exp $
 
 #ifndef __SPOOLER_ORDER_H
 #define __SPOOLER_ORDER_H
@@ -42,6 +42,7 @@ struct Order : Com_order
     Priority                    priority                ()                                          { return _priority; }
 
     Job_chain*                  job_chain               ()                                          { return _job_chain; }
+    Job_chain_node*             job_chain_node          ()                                          { return _job_chain_node; }
     Order_queue*                order_queue             ();
 
     void                    set_job                     ( Job* );
@@ -106,7 +107,7 @@ struct Order : Com_order
 
 //-----------------------------------------------------------------------------------Job_chain_node
 
-struct Job_chain_node : Object
+struct Job_chain_node : Com_job_chain_node 
 {
                                 Job_chain_node          ()                                          : _zero_(this+1) {}
 

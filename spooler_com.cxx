@@ -1,4 +1,4 @@
-// $Id: spooler_com.cxx,v 1.58 2002/09/30 08:31:08 jz Exp $
+// $Id: spooler_com.cxx,v 1.59 2002/10/03 08:58:21 jz Exp $
 /*
     Hier sind implementiert
 
@@ -28,20 +28,21 @@ using namespace spooler_com;
 
 Typelib_descr spooler_typelib ( LIBID_spooler_com, "Spooler", "1.0" );
 
-DESCRIBE_CLASS( &spooler_typelib, Com_error       , error       , CLSID_error       , "Spooler.Error"       , "1.0" )
-DESCRIBE_CLASS( &spooler_typelib, Com_variable    , variable    , CLSID_Variable    , "Spooler.Variable"    , "1.0" )
-DESCRIBE_CLASS( &spooler_typelib, Com_variable_set, variable_set, CLSID_Variable_set, "Spooler.Variable_set", "1.0" )
+DESCRIBE_CLASS( &spooler_typelib, Com_error         , error         , CLSID_error         , "Spooler.Error"         , "1.0" )
+DESCRIBE_CLASS( &spooler_typelib, Com_variable      , variable      , CLSID_Variable      , "Spooler.Variable"      , "1.0" )
+DESCRIBE_CLASS( &spooler_typelib, Com_variable_set  , variable_set  , CLSID_Variable_set  , "Spooler.Variable_set"  , "1.0" )
 DESCRIBE_CLASS( &spooler_typelib, Com_variable_set_enumerator, variable_set_enumerator, CLSID_Variable_set_enumerator, "Spooler.Com_variable_set_enumerator", "1.0" );
-DESCRIBE_CLASS( &spooler_typelib, Com_log         , log         , CLSID_log         , "Spooler.Log"         , "1.0" )
-DESCRIBE_CLASS( &spooler_typelib, Com_job         , job         , CLSID_job         , "Spooler.Job"         , "1.0" )
-DESCRIBE_CLASS( &spooler_typelib, Com_task        , task        , CLSID_Task        , "Spooler.Task"        , "1.0" )
-DESCRIBE_CLASS( &spooler_typelib, Com_object_set  , object_set  , CLSID_object_set  , "Spooler.Object_set"  , "1.0" )
-DESCRIBE_CLASS( &spooler_typelib, Com_thread      , thread      , CLSID_thread      , "Spooler.Thread"      , "1.0" )
-DESCRIBE_CLASS( &spooler_typelib, Com_spooler     , spooler     , CLSID_spooler     , "Spooler.Spooler"     , "1.0" )
-DESCRIBE_CLASS( &spooler_typelib, Com_context     , context     , CLSID_Context     , "Spooler.Context"     , "1.0" )
-DESCRIBE_CLASS( &spooler_typelib, Com_job_chain   , job_chain   , CLSID_job_chain   , "Spooler.Job_chain"   , "1.0" )
-DESCRIBE_CLASS( &spooler_typelib, Com_order       , order       , CLSID_order       , "Spooler.Order"       , "1.0" )
-DESCRIBE_CLASS( &spooler_typelib, Com_order_queue , order_queue , CLSID_order_queue , "Spooler.Order_queue" , "1.0" )
+DESCRIBE_CLASS( &spooler_typelib, Com_log           , log           , CLSID_log           , "Spooler.Log"           , "1.0" )
+DESCRIBE_CLASS( &spooler_typelib, Com_job           , job           , CLSID_job           , "Spooler.Job"           , "1.0" )
+DESCRIBE_CLASS( &spooler_typelib, Com_task          , task          , CLSID_Task          , "Spooler.Task"          , "1.0" )
+DESCRIBE_CLASS( &spooler_typelib, Com_object_set    , object_set    , CLSID_object_set    , "Spooler.Object_set"    , "1.0" )
+DESCRIBE_CLASS( &spooler_typelib, Com_thread        , thread        , CLSID_thread        , "Spooler.Thread"        , "1.0" )
+DESCRIBE_CLASS( &spooler_typelib, Com_spooler       , spooler       , CLSID_spooler       , "Spooler.Spooler"       , "1.0" )
+DESCRIBE_CLASS( &spooler_typelib, Com_context       , context       , CLSID_Context       , "Spooler.Context"       , "1.0" )
+DESCRIBE_CLASS( &spooler_typelib, Com_job_chain     , job_chain     , CLSID_job_chain     , "Spooler.Job_chain"     , "1.0" )
+DESCRIBE_CLASS( &spooler_typelib, Com_job_chain_node, job_chain_node, CLSID_job_chain_node, "Spooler.Job_chain_node", "1.0" )
+DESCRIBE_CLASS( &spooler_typelib, Com_order         , order         , CLSID_order         , "Spooler.Order"         , "1.0" )
+DESCRIBE_CLASS( &spooler_typelib, Com_order_queue   , order_queue   , CLSID_order_queue   , "Spooler.Order_queue"   , "1.0" )
 
 //-----------------------------------------------------------------------------IID_Ihostware_dynobj
 
@@ -1016,7 +1017,7 @@ STDMETHODIMP Com_job::get_name( BSTR* result )
     THREAD_LOCK( _lock )
     {
         if( !_job )  return E_POINTER;
-        if( GetCurrentThreadId() != _job->thread()->_thread_id )  return E_ACCESSDENIED;
+        //if( GetCurrentThreadId() != _job->thread()->_thread_id )  return E_ACCESSDENIED;
 
         *result = SysAllocString_string( _job->_name );
     }
@@ -1958,7 +1959,7 @@ STDMETHODIMP Com_job_chain::add_order( VARIANT* order_or_payload, spooler_com::I
     return hr;
 }
 
-//-----------------------------------------------------------------------Com_job_chain::order_queue
+//-------------------------------------------------------------------Com_job_chain::get_order_queue
 
 STDMETHODIMP Com_job_chain::get_order_queue( VARIANT* state, Iorder_queue** result )
 {
@@ -1977,6 +1978,69 @@ STDMETHODIMP Com_job_chain::get_order_queue( VARIANT* state, Iorder_queue** resu
     catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Job_chain.order_queue" ); }
 
     return hr;
+}
+
+//-----------------------------------------------------------------------------Com_job_chain::node
+
+STDMETHODIMP Com_job_chain::get_node( VARIANT* state, Ijob_chain_node** result )
+{
+    HRESULT hr = NOERROR;
+
+    THREAD_LOCK( _lock )
+    try
+    {
+        if( !_job_chain )  return E_POINTER;
+        if( !_job_chain->finished() )  throw_xc( "SPOOLER-151" );
+
+        *result = _job_chain->node_from_state( *state );
+        if( *result )  (*result)->AddRef();
+    }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Job_chain.node" ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Job_chain.node" ); }
+
+    return hr;
+}
+
+//-----------------------------------------------------------Com_job_chain_node::Com_job_chain_node
+
+Com_job_chain_node::Com_job_chain_node()
+:
+    Sos_ole_object( job_chain_node_class_ptr, this )
+{
+}
+
+//--------------------------------------------------------------------Com_job_chain_node::get_state
+
+STDMETHODIMP Com_job_chain_node::get_state( VARIANT* result ) 
+{ 
+    return VariantCopy( result, &((Job_chain_node*)(this))->_state );
+}
+
+//----------------------------------------------------------------Com_job_chain_node::get_next_node
+
+STDMETHODIMP Com_job_chain_node::get_next_node( Ijob_chain_node** result )
+{ 
+    *result = ((Job_chain_node*)(this))->_next_node;
+    if( *result )  (*result)->AddRef();
+    return S_OK;
+}
+
+//---------------------------------------------------------------Com_job_chain_node::get_error_node
+
+STDMETHODIMP Com_job_chain_node::get_error_node( Ijob_chain_node** result )   
+{ 
+    *result = ((Job_chain_node*)(this))->_error_node; 
+    if( *result )  (*result)->AddRef();
+    return S_OK;
+}
+
+//----------------------------------------------------------------------Com_job_chain_node::get_job
+
+STDMETHODIMP Com_job_chain_node::get_job( Ijob** result )              
+{ 
+    *result = ((Job_chain_node*)(this))->_job->com_job(); 
+    if( *result )  (*result)->AddRef();
+    return S_OK;
 }
 
 //-----------------------------------------------------------------------------Com_order::Com_order
@@ -2123,6 +2187,23 @@ STDMETHODIMP Com_order::get_job_chain( Ijob_chain** result )
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Order.job_chain" ); }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Order.job_chain" ); }
+
+    return hr;
+}
+
+//--------------------------------------------------------------------Com_order::get_job_chain_node
+
+STDMETHODIMP Com_order::get_job_chain_node( Ijob_chain_node** result )
+{
+    HRESULT hr = NOERROR;
+
+    THREAD_LOCK( _lock )
+    {
+        if( !_order )  return E_POINTER;
+
+        *result = _order->job_chain_node();
+        if( *result )  (*result)->AddRef();
+    }
 
     return hr;
 }

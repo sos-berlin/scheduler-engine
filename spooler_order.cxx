@@ -1,4 +1,4 @@
-// $Id: spooler_order.cxx,v 1.13 2002/10/03 07:57:06 jz Exp $
+// $Id: spooler_order.cxx,v 1.14 2002/10/03 08:58:21 jz Exp $
 /*
     Hier sind implementiert
 
@@ -150,7 +150,7 @@ void Job_chain::add_job( Job* job, const Order::State& state, const Order::State
 
     if( _finished )  throw_xc( "SPOOLER-148" );
 
-    ptr<Job_chain_node> node = Z_NEW( Job_chain_node );
+    ptr<Job_chain_node> node = new Job_chain_node;
 
     node->_job   = job;
     node->_state = state;
