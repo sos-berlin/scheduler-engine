@@ -1,4 +1,4 @@
-// $Id: spooler_communication.cxx,v 1.64 2003/10/14 11:35:04 jz Exp $
+// $Id: spooler_communication.cxx,v 1.65 2003/10/20 17:23:32 jz Exp $
 /*
     Hier sind implementiert
 
@@ -341,6 +341,7 @@ bool Communication::Channel::do_recv()
         if( _receive_at_start ) 
         {
             if( len == 1  &&  buffer[0] == '\x04' )  return false;      // Einzelnes Ctrl-D beendet Sitzung
+            if( len == 1  &&  buffer[0] == '\n'   )  { _spooler->signal( "do_something!" );  return true; }
 
             _receive_at_start = false;
             while( p < buffer+len  &&  isspace( (Byte)*p ) )  p++;      // Blanks am Anfang nicht beachten

@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.209 2003/10/20 16:17:40 jz Exp $
+// $Id: spooler_task.cxx,v 1.210 2003/10/20 17:23:32 jz Exp $
 /*
     Hier sind implementiert
 
@@ -261,6 +261,9 @@ xml::Element_ptr Task::dom( const xml::Document_ptr& document, Show_what show )
         if( _running_since )
         task_element.setAttribute( "running_since"   , _running_since.as_string() );
 
+        if( _idle_since )
+        task_element.setAttribute( "idle_since"      , _idle_since.as_string() );
+
         if( _cause )
         task_element.setAttribute( "cause"           , start_cause_name( _cause ) );
 
@@ -411,6 +414,8 @@ void Task::set_state( State new_state )
 { 
     THREAD_LOCK( _lock )  
     {
+        _idle_since = 0;
+
         switch( new_state )
         {
             case s_waiting_for_process:         
@@ -427,11 +432,11 @@ void Task::set_state( State new_state )
 
             case s_running_waiting_for_order:
             {
-                _next_time = _job->order_queue()->next_time();
+                _next_time  = _job->order_queue()->next_time();
+                _idle_since = Time::now();
 
                 if( _job->_idle_timeout != latter_day )
                 {
-                    _idle_since = Time::now();
                     _next_time = min( _next_time, _idle_since + _job->_idle_timeout );
                 }
 
@@ -912,6 +917,9 @@ bool Task::do_something()
 
     if( !something_done  &&  _next_time <= now  &&  !_signaled )    // Obwohl _next_time erreicht, ist nichts getan?
     {
+        // Das kann bei s_running_waiting_for_order passieren, wenn zunächst ein Auftrag da ist (=> _next_time = 0),
+        // der dann aber von einer anderen Task genommen wird. Dann ist der Auftrag weg und something_done == false.
+
         set_state( state() );  // _next_time neu setzen
 
         if( _next_time <= now )
