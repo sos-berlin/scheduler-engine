@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="scheduler.xslt" type="text/xsl"?>
 
-<!--$Id: index.xml,v 1.7 2004/08/31 18:13:13 jz Exp $-->
+<!--$Id: index.xml,v 1.8 2004/08/31 18:32:38 jz Exp $-->
 
 <description 
     title               = "Startseite" 
     base_dir            = "."
     suppress_browse_bar = "yes"
     author              = "$Author: jz $"
-    date                = "$Date: 2004/08/31 18:13:13 $"
+    date                = "$Date: 2004/08/31 18:32:38 $"
 >
 
 <h3><a href="command_line.xml">Kommandozeile</a></h3>
@@ -30,7 +30,7 @@
 </p>
 
 
-<h3><a href="../javadoc/index.html">Java-Schnittstelle</a></h3>
+<h3><a href="javadoc/index.html">Java-Schnittstelle</a></h3>
 <p>
     Die Dokumentation der Java-Klassen (Package <code>sos.spooler</code>) gilt auch für die COM- und Perl-Schnittstellen.
 </p>

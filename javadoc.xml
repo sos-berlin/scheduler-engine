@@ -5,7 +5,7 @@
             access="public" 
             author="true" 
             classpath="bin" 
-            destdir="javadoc" 
+            destdir="doc/javadoc" 
             nodeprecated="false" 
             nodeprecatedlist="false" 
             noindex="false" 
