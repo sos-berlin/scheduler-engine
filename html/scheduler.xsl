@@ -6,6 +6,7 @@
                 version     = "1.0">
 
     <xsl:variable name="now" select="string( /spooler/answer/@time )"/>
+    <xsl:variable name="datetime_column_width" select="100"/>    <!-- 250 für langes Format, toLocaleDateString() -->
     
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Gesamtsicht-->
 
@@ -768,10 +769,10 @@
                 <b>Process classes</b>
             </caption-->
             
-            <col valign="baseline"  width=" 10"/>
-            <col valign="baseline"  width=" 50"/>  
-            <col valign="baseline"  width=" 10"/>
-            <col valign="baseline"  width="270"/>
+            <col valign="baseline"  width=" 50"/>
+            <col valign="baseline"  width=" 150"/>  
+            <!--col valign="baseline"  width=" 150"/-->
+            <col valign="baseline"  width="$datetime_column_width"/>
             <col valign="baseline"  width=" 10"  align="right"/>
             <col valign="baseline"  width=" 10"  align="right"/>
             <col valign="baseline"  width="*"/>
@@ -779,8 +780,7 @@
             <thead>
                 <tr style="">
                     <td class="head1" style="padding-left: 2ex">Pid </td>
-                    <td class="head">Job</td>
-                    <td class="head">Task </td>
+                    <td class="head">Task</td>
                     <td class="head">Running since</td>
                     <td class="head">Operations</td>
                     <td class="head">Callbacks</td>
@@ -815,9 +815,8 @@
                     <xsl:for-each select="processes/process">
                         <tr>
                             <td style="padding-left: 2ex"><xsl:value-of select="@pid"/></td>
-                            <td><xsl:value-of select="@job"/></td>
-                            <td><xsl:value-of select="@task_id"/></td>
-                            <td><xsl:value-of select="my:format_datetime_with_diff( string( @running_since ), $now, 0 )" disable-output-escaping="yes"/></td>
+                            <td><xsl:value-of select="@job"/><xsl:text>&#160;&#160;</xsl:text><xsl:value-of select="@task_id"/></td>
+                            <td style="white-space: nowrap"><xsl:value-of select="my:format_datetime_with_diff( string( @running_since ), $now, 0 )" disable-output-escaping="yes"/></td>
                             <td class="small"><xsl:value-of select="@operations"/></td>
                             <td class="small"><xsl:value-of select="@callbacks"/></td>
                             <td class="small"><xsl:value-of select="@operation"/></td>
@@ -1086,7 +1085,7 @@
             <xsl:if test="queued_task">
                 <col valign="baseline" align="left" width="40"/>
                 <col valign="baseline" align="left" width="70"/>
-                <col valign="baseline" align="left" width="250"/>
+                <col valign="baseline" align="left" width="$datetime_column_width"/>
                 
                 <thead>
                     <tr>
@@ -1247,13 +1246,16 @@
     
         function format_datetime( datetime ) 
         {
-            var date = typeof datetime == "string"? date_from_datetime( datetime ) : datetime;
             if( !datetime )  return "";
+            return datetime.replace( /\.\d*$/, "" );
+            /*            
+            var date = typeof datetime == "string"? date_from_datetime( datetime ) : datetime;
             
             //var ms = date.getMilliseconds();
 
             return date.toLocaleDateString() + ", " + date.toLocaleTimeString();
                    //+ ( ms? ".<span class='milliseconds'>" + ( ms + "000" ).substring( 0, 3 ) + "</span>" : "" );
+            */                   
         }
 
         //----------------------------------------------------------------------format_date_or_time
@@ -1281,7 +1283,7 @@
         function format_datetime_with_diff( datetime, now, show_plus )
         {
             var date = date_from_datetime( datetime );
-            var result = format_datetime( date );
+            var result = format_datetime( datetime );
             if( result && now )  result += " &#160;(" + datetime_diff( date, now, show_plus ) + ")";
             
             return result;
@@ -1338,7 +1340,7 @@
             
             var date = new Date();
             
-            date.setFullYear    ( 1*datetime.substring( 0, 4 ), 1*datetime.substring( 5, 7 ), 1*datetime.substring( 8, 10 ) );
+            date.setFullYear    ( 1*datetime.substring( 0, 4 ), 1*datetime.substring( 5, 7 ) - 1, 1*datetime.substring( 8, 10 ) );
             date.setHours       ( 1*datetime.substring( 11, 13 ) );
             date.setMinutes     ( 1*datetime.substring( 14, 16 ) );
             date.setSeconds     ( 1*datetime.substring( 17, 19 ) );
