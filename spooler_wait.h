@@ -1,4 +1,4 @@
-// $Id: spooler_wait.h,v 1.47 2003/12/31 11:05:47 jz Exp $
+// $Id: spooler_wait.h,v 1.48 2004/02/19 17:17:33 jz Exp $
 
 #ifndef __SPOOLER_WAIT_H
 #define __SPOOLER_WAIT_H
@@ -48,7 +48,7 @@ struct Event : System_event
 
 struct Wait_handles : Non_cloneable
 {
-                                Wait_handles                ( Spooler* spooler, Prefix_log* log )     : _spooler(spooler),_log(log) {}
+                                Wait_handles                ( Spooler* spooler, Prefix_log* log )     : _spooler(spooler),_log(log),_lock("Wait_handles") {}
                                 Wait_handles                ( const Wait_handles& );
                                ~Wait_handles                ();
 

@@ -1,4 +1,4 @@
-// $Id: spooler_service.cxx,v 1.46 2003/12/10 09:09:07 jz Exp $
+// $Id: spooler_service.cxx,v 1.47 2004/02/19 17:17:33 jz Exp $
 /*
     Hier sind implementiert
 
@@ -68,7 +68,7 @@ int                             process_argc;
 char**                          process_argv;
 
 // Zustände SERVICE_START_PENDING und SERVICE_STOP_PENDING nicht länger als pending_timeout Sekunden:
-Thread_semaphore                set_service_lock;
+Thread_semaphore                set_service_lock            ( "set_service" );
 Thread_semaphore                ServiceMain_lock            ( "ServiceMain" );
 Handle                          pending_watchdog_signal;
 bool                            pending_timed_out;

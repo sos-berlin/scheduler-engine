@@ -1,4 +1,4 @@
-// $Id: spooler_thread.cxx,v 1.110 2003/12/30 13:53:30 jz Exp $
+// $Id: spooler_thread.cxx,v 1.111 2004/02/19 17:17:33 jz Exp $
 /*
     Hier sind implementiert
 
@@ -22,7 +22,8 @@ Spooler_thread::Spooler_thread( Spooler* spooler )
     _zero_(this+1),
     _spooler(spooler),
     _log(spooler),
-    _wait_handles(spooler,&_log)
+    _wait_handles(spooler,&_log),
+    _lock( "Spooler_thread" )
   //_module(spooler,&_log)
 {
     Z_WINDOWS_ONLY( _thread_priority = THREAD_PRIORITY_NORMAL; )

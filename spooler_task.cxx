@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.237 2004/02/11 10:18:53 jz Exp $
+// $Id: spooler_task.cxx,v 1.238 2004/02/19 17:17:33 jz Exp $
 /*
     Hier sind implementiert
 
@@ -202,7 +202,8 @@ Task::Task( Job* job )
     _job(job),
     _log(job->_spooler),
     _history(&job->_history,this),
-    _timeout(job->_task_timeout)
+    _timeout(job->_task_timeout),
+    _lock("Task")
   //_success(true)
 {
     _let_run = _job->_period.let_run();

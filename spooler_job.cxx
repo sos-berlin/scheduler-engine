@@ -1,4 +1,4 @@
-// $Id: spooler_job.cxx,v 1.61 2004/02/11 10:18:52 jz Exp $
+// $Id: spooler_job.cxx,v 1.62 2004/02/19 17:17:33 jz Exp $
 /*
     Hier sind implementiert
 
@@ -43,7 +43,8 @@ Job::Job( Spooler* spooler )
     _log(spooler),
     _module(spooler,&_log),
     _task_queue(this),
-    _history(this)
+    _history(this),
+    _lock( "Job" )
 {
     _next_time = latter_day;
     _directory_watcher_next_time = latter_day;

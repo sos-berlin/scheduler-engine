@@ -1,4 +1,4 @@
-// $Id: spooler_log.cxx,v 1.90 2004/02/09 23:03:48 jz Exp $
+// $Id: spooler_log.cxx,v 1.91 2004/02/19 17:17:33 jz Exp $
 
 #include "spooler.h"
 #include "spooler_mail.h"
@@ -68,7 +68,8 @@ static int my_write( int file, const char* text, int len )
 Log::Log( Spooler* spooler )         
 : 
     _zero_(this+1),
-    _spooler(spooler)
+    _spooler(spooler),
+    _semaphore("Log")
 {
     _file = -1;
 }

@@ -1,4 +1,4 @@
-// $Id: spooler_order.h,v 1.29 2003/11/27 18:59:50 jz Exp $
+// $Id: spooler_order.h,v 1.30 2004/02/19 17:17:33 jz Exp $
 
 #ifndef __SPOOLER_ORDER_H
 #define __SPOOLER_ORDER_H
@@ -25,7 +25,7 @@ struct Order : Com_order
 
 
     Z_GNU_ONLY(                 Order                   (); )                                       // Für gcc 3.2. Nicht implementiert
-                                Order                   ( Spooler* spooler )                        : _zero_(this+1), _spooler(spooler), _log(spooler), Com_order(this) { init(); }
+                                Order                   ( Spooler* spooler )                        : _zero_(this+1), _spooler(spooler), _log(spooler), Com_order(this), _lock("Order") { init(); }
                                 Order                   ( Spooler* spooler, const VARIANT& );
                                 Order                   ( Spooler* spooler, const Record& );
                                ~Order                   ();

@@ -1,4 +1,4 @@
-// $Id: spooler_order.cxx,v 1.55 2003/12/25 07:20:49 jz Exp $
+// $Id: spooler_order.cxx,v 1.56 2004/02/19 17:17:33 jz Exp $
 /*
     Hier sind implementiert
 
@@ -135,7 +135,8 @@ Job_chain::Job_chain( Spooler* spooler )
     Com_job_chain( this ),
     _zero_(this+1),
     _spooler(spooler),
-    _log(_spooler)
+    _log(_spooler),
+    _lock("Job_chain")
 {
     set_name( "" );     // Ruft _log.set_prefix()
 }
@@ -407,7 +408,8 @@ Order_queue::Order_queue( Job* job, Prefix_log* log )
     _zero_(this+1),
     _spooler(job->_spooler), 
     _job(job),
-    _log(log)
+    _log(log),
+    _lock("Order_queue")
 {
 }
 
@@ -690,6 +692,7 @@ Order::Order( Spooler* spooler, const VARIANT& payload )
     _zero_(this+1), 
     _spooler(spooler),
     _log(spooler),
+    _lock("Order"),
     _payload(payload)
 {
     init();
@@ -702,6 +705,7 @@ Order::Order( Spooler* spooler, const Record& record )
     Com_order(this),
     _zero_(this+1), 
     _spooler(spooler),
+    _lock("Order"),
     _log(spooler)
 {
     init();

@@ -1,4 +1,4 @@
-// $Id: spooler_com.cxx,v 1.136 2004/02/03 16:22:17 jz Exp $
+// $Id: spooler_com.cxx,v 1.137 2004/02/19 17:17:32 jz Exp $
 /*
     Hier sind implementiert
 
@@ -98,6 +98,7 @@ const Com_method Com_error::_methods[] =
 Com_error::Com_error( const Xc_copy& x )
 : 
     Sos_ole_object( error_class_ptr, (Ierror*)this ),
+    _lock("lock"),
     _xc(x) 
 {
 }
@@ -193,7 +194,8 @@ const Com_method Com_variable::_methods[] =
 
 Com_variable::Com_variable( const BSTR name, const VARIANT& value )
 :
-    Sos_ole_object( variable_class_ptr, (Ivariable*)this )
+    Sos_ole_object( variable_class_ptr, (Ivariable*)this ),
+    _lock("Com_variable")
 {
     if( SysStringLen( name ) == 0 )  throw_xc( "SCHEDULER-198" );
 
@@ -260,7 +262,8 @@ const Com_method Com_variable_set::_methods[] =
 
 Com_variable_set::Com_variable_set()
 :
-    Sos_ole_object( variable_set_class_ptr, (Ivariable_set*)this )
+    Sos_ole_object( variable_set_class_ptr, (Ivariable_set*)this ),
+    _lock("Com_variable_set")
 {
 }
 

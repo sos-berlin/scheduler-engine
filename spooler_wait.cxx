@@ -1,4 +1,4 @@
-// $Id: spooler_wait.cxx,v 1.95 2004/02/15 15:53:37 jz Exp $
+// $Id: spooler_wait.cxx,v 1.96 2004/02/19 17:17:33 jz Exp $
 /*
     Hier sind implementiert
 
@@ -98,6 +98,7 @@ Wait_handles::Wait_handles( const Wait_handles& o )
 : 
     _spooler ( o._spooler ),
     _log     ( o._log ),
+    _lock    ( "Wait_handles" ),
     _events  ( o._events )
 #ifdef Z_WINDOWS
    ,_handles ( o._handles )

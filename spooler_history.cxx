@@ -1,4 +1,4 @@
-// $Id: spooler_history.cxx,v 1.91 2004/02/09 23:03:48 jz Exp $
+// $Id: spooler_history.cxx,v 1.92 2004/02/19 17:17:32 jz Exp $
 
 #include "spooler.h"
 #include "../zschimmer/z_com.h"
@@ -134,7 +134,8 @@ void Transaction::rollback()
 Spooler_db::Spooler_db( Spooler* spooler )
 :
     _zero_(this+1),
-    _spooler(spooler)
+    _spooler(spooler),
+    _lock("Spooler_db")
 {
 }
 
