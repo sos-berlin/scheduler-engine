@@ -1395,13 +1395,20 @@
                 <!--col valign="top"  width=" 15"  style="padding-right: 2ex"/-->
                 <col valign="baseline"  width=" 50"/>
                 
-                <xsl:if test="self::order_queue">
+                <xsl:if test="order/@setback">
+                    <col valign="baseline"  width="100"/>
+                </xsl:if>
+                
+                <col valign="baseline"  width=" 30"/>
+                
+                <xsl:if test="order/@state_text">
                     <col valign="baseline"  width="*"/>
                 </xsl:if>
                 
-                <col valign="baseline"  width=" 40"/>
-                <col valign="baseline"  width="*"/>
-                <col valign="baseline"  width="*"/>
+                <xsl:if test="order/@title">
+                    <col valign="baseline"  width="*"/>
+                </xsl:if>
+                
                 <col valign="baseline"  width="  1" align="right"/>
 
                 <thead class="order">
@@ -1421,16 +1428,21 @@
                         <td class="head1">Id</td>
                         <!--td class="order">Pri</td-->
                         
-                        <td class="head1">Created</td>
+                        <td class="head">Created</td>
                         
-                        <xsl:if test="self::order_queue">
-                            <td class="head1">Setback</td>
+                        <xsl:if test="order/@setback">
+                            <td class="head">Setback</td>
                         </xsl:if>
                         
-                        <td class="head1">State</td>
-                        <td class="head1">State text</td>
-                        <td class="head1">Title</td>
-                        <td class="head1">&#160;</td>
+                        <xsl:if test="order/@state_text">
+                            <td class="head">State</td>
+                        </xsl:if>
+                        
+                        <xsl:if test="order/@title">
+                            <td class="head">State text</td>
+                        </xsl:if>
+                        
+                        <td class="head" colspan="2">Title</td>
                     </tr>
                     <tr>
                         <td colspan="99" class="after_head_space">&#160;</td>
@@ -1444,19 +1456,25 @@
                                 <xsl:attribute name="style">font-weight: bold</xsl:attribute>
                             </xsl:if>
 
-                            <td><xsl:value-of select="@id"/></td>
+                            <td valign="baseline"><xsl:value-of select="@id"/></td>
                             <!--td class="order"><xsl:value-of select="@priority"/></td-->
-                            <td class="small"><xsl:value-of select="@created__xslt_date_or_time"        disable-output-escaping="yes"/></td>
+                            <td valign="baseline" class="small"><xsl:value-of select="@created__xslt_date_or_time"        disable-output-escaping="yes"/></td>
 
-                            <xsl:if test="parent::order_queue">
-                                <td class="small"><xsl:value-of select="@setback__xslt_datetime_with_diff"  disable-output-escaping="yes"/></td>
+                            <xsl:if test="../order/@setback">
+                                <td valign="baseline" class="small" nowrap="nowrap"><xsl:value-of select="@setback__xslt_date_or_time_with_diff"  disable-output-escaping="yes"/></td>
                             </xsl:if>
                             
-                            <td><xsl:value-of select="@state"/></td>
-                            <td><xsl:value-of select="@state_text"/></td>
-                            <td><xsl:value-of select="@title"/></td>
+                            <td valign="baseline"><xsl:value-of select="@state"/></td>
+                            
+                            <xsl:if test="../order/@state_text">
+                                <td valign="baseline"><xsl:value-of select="@state_text"/></td>
+                            </xsl:if>
+                            
+                            <xsl:if test="../order/@title">
+                                <td valign="baseline"><xsl:value-of select="@title"/></td>
+                            </xsl:if>
 
-                            <td align="right">
+                            <td valign="baseline" align="right">
                                 <xsl:call-template name="command_menu">
                                     <xsl:with-param name="onclick" select="concat( 'order_menu__onclick( &quot;', @job_chain, '&quot;, &quot;', @id, '&quot;, mouse_x() - 70, mouse_y() - 1 )' )"/>
                                 </xsl:call-template>

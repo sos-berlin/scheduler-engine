@@ -2979,6 +2979,7 @@ const Com_method Com_job_chain::_methods[] =
     { DISPATCH_PROPERTYGET,  8, "java_class_name"           , (Com_method_ptr)&Com_job_chain::get_Java_class_name, VT_BSTR },
     { DISPATCH_PROPERTYPUT,  9, "store_orders_in_database"  , (Com_method_ptr)&Com_job_chain::put_Store_orders_in_database, VT_EMPTY, { VT_BOOL } },
     { DISPATCH_PROPERTYGET,  9, "store_orders_in_database"  , (Com_method_ptr)&Com_job_chain::get_Store_orders_in_database, VT_BOOL },
+    { DISPATCH_METHOD     , 10, "remove_all_pending_orders" , (Com_method_ptr)&Com_job_chain::Remove_all_pending_orders   , VT_INT  },
     {}
 };
 
@@ -3255,6 +3256,24 @@ STDMETHODIMP Com_job_chain::get_Store_orders_in_database( VARIANT_BOOL* result )
     *result = _job_chain->_store_orders_in_database? VARIANT_TRUE : VARIANT_FALSE;
 
     return S_OK;
+}
+
+//---------------------------------------------------------Com_job_chain::Remove_all_pending_orders
+
+STDMETHODIMP Com_job_chain::Remove_all_pending_orders( int* result )
+{
+    HRESULT hr = NOERROR;
+
+    try
+    {
+        if( !_job_chain )  return E_POINTER;
+
+        *result = _job_chain->remove_all_pending_orders();
+    }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
+
+    return hr;
 }
 
 //---------------------------------------------------------------------Com_job_chain_node::_methods

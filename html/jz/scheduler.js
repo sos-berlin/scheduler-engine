@@ -199,6 +199,8 @@ Scheduler.prototype.add_datetime_attributes_for_xslt = function( response, now, 
             element.setAttribute( attribute_name + "__xslt_datetime_with_diff"     , xslt_format_datetime_with_diff( value, now, false ) );
             element.setAttribute( attribute_name + "__xslt_datetime_with_diff_plus", xslt_format_datetime_with_diff( value, now, true ) );
             element.setAttribute( attribute_name + "__xslt_date_or_time"           , xslt_format_date_or_time ( value, now ) );
+            element.setAttribute( attribute_name + "__xslt_date_or_time_with_diff" , xslt_format_date_or_time_with_diff( value, now ) );
+
         }
     }
 }
@@ -298,7 +300,7 @@ function xslt_format_datetime( datetime )
     */
 }
 
-//-----------------------------------------------------------------xslt_format_date_or_time
+//-------------------------------------------------------------------------xslt_format_date_or_time
 
 function xslt_format_date_or_time( datetime )
 {
@@ -318,7 +320,7 @@ function xslt_format_date_or_time( datetime )
     }
 }
 
-//-----------------------------------------------------------------xslt_format_date_or_time
+//-------------------------------------------------------------------------xslt_format_date_or_time
 
 function xslt_format_datetime_with_diff( datetime, now, show_plus )
 {
@@ -329,7 +331,18 @@ function xslt_format_datetime_with_diff( datetime, now, show_plus )
     return result;
 }
 
-//----------------------------------------------------------------xslt_format_datetime_diff
+//---------------------------------------------------------------xslt_format_date_or_time_with_diff
+
+function xslt_format_date_or_time_with_diff( datetime, now )
+{
+    var date = date_from_datetime( datetime );
+    var result = xslt_format_date_or_time( datetime );
+    if( result && now )  result += " \xA0(" + xslt_format_datetime_diff( date, now ) + ")";
+
+    return result;
+}
+
+//------------------------------------------------------------------------xslt_format_datetime_diff
 
 function xslt_format_datetime_diff( datetime_earlier, datetime_later, show_plus )
 {

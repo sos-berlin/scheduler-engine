@@ -1850,10 +1850,11 @@ bool Process_task::do_begin__end()
 
     memset( &startup_info, 0, sizeof startup_info );
     startup_info.cb = sizeof startup_info; 
-    startup_info.dwFlags    = STARTF_USESTDHANDLES;
+    startup_info.dwFlags    = STARTF_USESTDHANDLES | STARTF_USESHOWWINDOW;
     startup_info.hStdInput  = INVALID_HANDLE_VALUE;
     startup_info.hStdOutput = _stdout_file.handle();
     startup_info.hStdError  = _stderr_file.handle();
+    startup_info.wShowWindow = SW_MINIMIZE;            // Als Dienst mit Zugriff auf Desktop wird ein leeres Konsol-Fenster gezeigt. Das minimieren wir.
 
 
     string command_line = _job->_process_filename;

@@ -180,6 +180,7 @@ struct Job_chain : Com_job_chain
 
     void                    set_store_orders_in_database( bool b )                                  { _store_orders_in_database = b; }
     void                        load_orders_from_database();
+    int                         remove_all_pending_orders();
 
     void                        add_job                 ( Job*, const State& input_state, const State& output_state = error_variant, const State& error_state = error_variant );
     void                        finish                  ();
@@ -214,7 +215,7 @@ struct Job_chain : Com_job_chain
     typedef list< ptr<Job_chain_node> >  Chain;
     Chain                      _chain;
 
-    typedef map< string, Order* >   Order_map;
+    typedef stdext::hash_map< string, Order* >   Order_map;
     Order_map                  _order_map;
 };
 

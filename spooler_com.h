@@ -588,6 +588,8 @@ struct Com_job_chain : spooler_com::Ijob_chain,
     STDMETHODIMP            put_Store_orders_in_database( VARIANT_BOOL );
     STDMETHODIMP            get_Store_orders_in_database( VARIANT_BOOL* );
 
+    STDMETHODIMP                Remove_all_pending_orders( int* result );
+
 
     Thread_semaphore           _lock;
     Job_chain*                 _job_chain;

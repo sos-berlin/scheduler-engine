@@ -256,6 +256,29 @@ void Job_chain::load_orders_from_database()
     _log.debug( as_string(count) + " Aufträge aus der Datenbank gelesen" );
 }
 
+//-------------------------------------------------------------Job_chain::remove_all_pending_orders
+
+int Job_chain::remove_all_pending_orders()
+{
+    int         result       = 0;
+    Order_map   my_order_map = _order_map;
+
+    Z_FOR_EACH( Order_map, my_order_map, o )
+    {
+        Order* order = o->second;
+
+        if( !order->_task )
+        {
+            order->remove_from_job_chain();
+            result++;
+        }
+        else
+            Z_LOG( __FUNCTION__ ": " << order->obj_name() << " wird nicht entfernt, weil in Verarbeitung durch " << order->_task->obj_name() << "\n" );
+    }
+
+    return result;
+}
+
 //-------------------------------------------------------------------------------Job_chain::add_job
 
 void Job_chain::add_job( Job* job, const Order::State& state, const Order::State& next_state, const Order::State& error_state )
@@ -845,7 +868,10 @@ xml::Element_ptr Order::dom( const xml::Document_ptr& document, const Show_what&
     {
         element.setAttribute( "order"     , debug_string_from_variant( _id ) );
         element.setAttribute( "id"        , debug_string_from_variant( _id ) );     // veraltet
+
+        if( _title != "" )
         element.setAttribute( "title"     , _title );
+
         element.setAttribute( "state"     , debug_string_from_variant( _state ) );
 
         if( _job_chain )  
@@ -862,8 +888,12 @@ xml::Element_ptr Order::dom( const xml::Document_ptr& document, const Show_what&
         element.setAttribute( "in_process_since", _task->last_process_start_time().as_string() );
         }
 
+        if( _state_text != "" )
         element.setAttribute( "state_text", _state_text );
+
         element.setAttribute( "priority"  , _priority );
+
+        if( _created )
         element.setAttribute( "created"   , _created.as_string() );
 
         if( _log->opened() )

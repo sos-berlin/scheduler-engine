@@ -708,10 +708,12 @@ library Spooler
         HRESULT                 Order_queue             ( [in] VARIANT* State, [out,retval] Iorder_queue** Result );
 
         [propput]
-        HRESULT                 Store_orders_in_database( [in] VARIANT_BOOL );
+        HRESULT                 Store_orders_in_database( [in] VARIANT_BOOL );              // Für Joacim, 2005-02-27
 
         [propget]
-        HRESULT                 Store_orders_in_database( [out,retval] VARIANT_BOOL* );
+        HRESULT                 Store_orders_in_database( [out,retval] VARIANT_BOOL* );     // Für Joacim, 2005-02-27
+
+        HRESULT                 Remove_all_pending_orders( [out,retval] int* count );       // Für Joacim, 2005-02-27
     }
 
     [
