@@ -1,4 +1,4 @@
-/* $Id: scheduler.css,v 1.19 2004/09/13 08:52:02 jz Exp $ */
+/* $Id: scheduler.css,v 1.20 2004/09/13 09:46:00 jz Exp $ */
 
 body            { font-size: 10pt; font-family: Arial, sans-serif; }
 h1              { font-size: 14pt; font-weight: bold; margin-bottom: 4ex;  }
@@ -6,13 +6,13 @@ h2              { font-size: 12pt; font-weight: bold; margin-top: 4ex; border-to
 h3              { font-size: 10pt; font-weight: bold; margin-top: 4ex;  }
 .zwischentitel  { font-weight: bold; margin-top: 6ex }
 
-p               { font-size: 10pt; margin-bottom: 0 }
+p               { font-size: 10pt; margin-bottom: 0px }
 td              { font-size: 10pt }
 div             { font-size: 10pt }
-/*p:first-child   { font-size: 10pt; margin-top: 0; margin-bottom: 0 }   Wirkt in ie6 nicht */
+/*p:first-child   { font-size: 10pt; margin-top: 0px; margin-bottom: 0px }   Wirkt in ie6 nicht */
 li              { font-size: 10pt }
 ul              { margin-left: 13pt }
-pre             { font-family: Lucida Console, monospace; font-size: 9pt; margin-left: 4ex; margin-top: 2pt; margin-bottom: 0; line-height: 1.2em;  }
+pre             { font-family: Lucida Console, monospace; font-size: 9pt; margin-left: 4ex; margin-top: 2pt; margin-bottom: 0px; line-height: 1.2em; }
 col             { padding-bottom: 1pt; padding-right: 2pt }
 caption         { font-size: 10pt; padding-bottom: 5pt; padding-left: 3pt; padding-right: 2pt; padding-top: 2pt }
 
@@ -35,13 +35,13 @@ a:visited       { color: #0000A0 }
 a:hover         { background-color: #e0e0FF }
 
 
-/*.list:first-line { margin-left: 0; margin-top: 4ex; margin-bottom: 2pt }*/
+/*.list:first-line { margin-left: 0px; margin-top: 4ex; margin-bottom: 2pt }*/
 .list               { margin-top: 4ex }
 .list_text          { margin-left: 4ex; margin-top: 2pt }
 
 /* geht nicht:
 div.list            { margin-left: 4ex; }
-div.list:first-line { margin-left: 0; margin-top: 9ex; }
+div.list:first-line { margin-left: 0px; margin-top: 9ex; }
 */
 
 span.title          { font-style: normal; }
@@ -55,8 +55,8 @@ p.xml_attribute     { margin-top: 4ex; }
 p.example           { margin-top: 4ex; font-weight: bold; }
 p.command_option    { margin-top: 4ex; }
 p.ini_section       { margin-top: 4ex; }
-p.ini_entry         { margin-top: 2ex; border-top: 1 solid #f0f0f0; padding-top: 2ex; }
-/*p.register_keyword  { margin-top: 0; }*/
+p.ini_entry         { margin-top: 2ex; border-top: 1px solid #f0f0f0; padding-top: 2ex; }
+/*p.register_keyword  { margin-top: 0px; }*/
 .sos_name           { font-variant: small-caps; }
 
 .indent             { margin-left: 4ex; }

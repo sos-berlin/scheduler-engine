@@ -1,4 +1,4 @@
-// $Id: Mail.java,v 1.7 2004/07/25 11:25:57 jz Exp $
+// $Id: Mail.java,v 1.8 2004/09/13 09:46:00 jz Exp $
 
 package sos.spooler;
 
@@ -16,6 +16,10 @@ public class Mail extends Idispatch
     
     
     /** Stellt den Empfänger ein.
+     *
+     * <p>Wenn die Hostware zum eMail-Versand JavaMail verwendet, können Sie mehere Adressen durch Komma getrennt angeben. 
+     *    Siehe <a href="http://java.sun.com/products/javamail/javadocs/javax/mail/internet/InternetAddress.html#parse(java.lang.String)">javax.mail.InternetAddress.parse(String)</a>.
+     * </p>
      * 
      * <p><br/><b>Beispiel</b>
      * <pre>
@@ -86,6 +90,10 @@ public class Mail extends Idispatch
     
     /** Stellt den Empfänger einer Kopie ein.
      * 
+     * <p>Wenn die Hostware zum eMail-Versand JavaMail verwendet, können Sie mehere Adressen durch Komma getrennt angeben. 
+     *    Siehe <a href="http://java.sun.com/products/javamail/javadocs/javax/mail/internet/InternetAddress.html#parse(java.lang.String)">javax.mail.InternetAddress.parse(String)</a>.
+     * </p>
+     * 
      * <p><br/><b>Beispiel</b>
      * <pre>
      *     spooler_log.mail().set_cc( "hans@company.com" );                                                  
@@ -117,6 +125,10 @@ public class Mail extends Idispatch
     
     
     /** Stellt den nicht sichtbaren Empfänger einer Kopie ein.
+     * 
+     * <p>Wenn die Hostware zum eMail-Versand JavaMail verwendet, können Sie mehere Adressen durch Komma getrennt angeben. 
+     *    Siehe <a href="http://java.sun.com/products/javamail/javadocs/javax/mail/internet/InternetAddress.html#parse(java.lang.String)">javax.mail.InternetAddress.parse(String)</a>.
+     * </p>
      * 
      * <p><br/><b>Beispiel</b>
      * <pre>

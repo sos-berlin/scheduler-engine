@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="scheduler.xslt" type="text/xsl"?>
 
-<!--$Id: email.xml,v 1.1 2004/09/08 20:34:40 jz Exp $-->
+<!--$Id: email.xml,v 1.2 2004/09/13 09:46:00 jz Exp $-->
 
 <description 
     title               = "eMail-Versand" 
     base_dir            = ""
     author              = "$Author: jz $"
-    date                = "$Date: 2004/09/08 20:34:40 $"
+    date                = "$Date: 2004/09/13 09:46:00 $"
 >
 
     <h2>Einstellungen zur eMail</h2>
@@ -42,6 +42,19 @@
                 <scheduler_ini_entry file="factory.ini" section="job" entry="log_mail_bcc"/>
             </div>
         </p>
+        <p>
+            Oder an der Programmschnittstelle:
+        </p>
+        <div class="indent">
+            Das Objekt <a href="javadoc/sos/spooler/Job_impl.html#spooler_log"><code>spooler_log</code></a> 
+            stellt mit der Methode <a href="javadoc/sos/spooler/Log.html#mail()"><code>mail()</code></a>
+            das Objekt <a href="javadoc/sos/spooler/Mail.html"><code>Mail</code></a> bereit,
+            über dessen Methoden Sie Absender, Empfänger, Betreff usw. einstellen können.
+            <p class="example">Beispiel</p>
+            <pre>
+spooler_log.mail().set_to( "admin@xxx.com" );
+            </pre>
+        </div>
 
     
     <h2>eMails nach dem Ende einer Task</h2>
@@ -70,9 +83,15 @@
                 <br/>
             </div>
         </p>
-
-
-
+        <p>
+            Oder an der Programmschnittstelle:
+        </p>
+        <div class="indent">
+            Mit dem Aufruf <a href="javadoc/sos/spooler/Log.html#set_mail_it(boolean)"><code>spooler_log.set_mail_it(boolean)</code></a>
+            können Sie einstellen, ob der Scheduler beim Ende der Task das Protokoll sendet.
+        </div>
+        
+        
     <h2>eMails, wenn der Scheduler wegen eines Fehlers sich beendet</h2>
 
         <p>
