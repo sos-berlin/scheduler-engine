@@ -1,4 +1,4 @@
-// $Id: spooler_module_java.cxx,v 1.74 2003/12/09 19:37:52 jz Exp $
+// $Id: spooler_module_java.cxx,v 1.75 2004/02/15 15:53:37 jz Exp $
 /*
     Hier sind implementiert
 
@@ -50,8 +50,9 @@ zschimmer::Thread_data<Java_thread_data> thread_data;
 
 //-----------------------------------------------------------------------------jobject_from_variant
 
-static jobject jobject_from_variant( JNIEnv* jenv, const VARIANT& v )
+static jobject jobject_from_variant( JNIEnv* jenv, const VARIANT& v, Java_idispatch_container* java_idispatch_container )
 {
+/*
     if( v.vt == VT_DISPATCH )
     {
         string java_class_name;
@@ -84,9 +85,19 @@ static jobject jobject_from_variant( JNIEnv* jenv, const VARIANT& v )
 
         return *java_idispatch;
     }
+*/
+    if( v.vt == VT_EMPTY )
+    {
+        return jenv->NewString( NULL, 0 );       // Für Job_chain_node.next_state, .error_state ("" wird zu VT_EMPTY)
+    }
+    else
+    if( v.vt == VT_ERROR  && v.scode == DISP_E_PARAMNOTFOUND ) 
+    {
+        return jenv->NewString( NULL, 0 );       // Für Job_chain_node.next_state, .error_state ("" wird zu VT_EMPTY)
+    }
     else
     {
-        return z::java::jobject_from_variant( jenv, v );
+        return z::java::jobject_from_variant( jenv, v, java_idispatch_container );
     }
 }
 
@@ -97,7 +108,7 @@ JNIEXPORT jobject JNICALL Java_sos_spooler_Idispatch_com_1call( JNIEnv* jenv, jc
 {
     try
     {
-        return spooler::jobject_from_variant( jenv, variant_java_com_call( jenv, cls, jidispatch, jname, jparams ) );
+        return sos::spooler::jobject_from_variant( jenv, variant_java_com_call( jenv, cls, jidispatch, jname, jparams ), &thread_data->_idispatch_container );
 /*
         HRESULT     hr;
         IDispatch*  idispatch = (IDispatch*)(size_t)jidispatch;
@@ -213,65 +224,6 @@ JNIEXPORT jobject JNICALL Java_sos_spooler_Idispatch_com_1call( JNIEnv* jenv, jc
     catch( const _com_error& x ) { set_java_exception( jenv, x ); }
 
     return NULL;
-}
-
-//---------------------------------------------------------------------Java_thread_data::add_object
-
-void Java_thread_data::add_object( Java_idispatch* o )
-{ 
-    _java_idispatch_list.push_back(NULL); 
-    *_java_idispatch_list.rbegin() = o; 
-
-    //o->set_global(); 
-}
-
-//-------------------------------------------------------------------Java_idispatch::Java_idispatch
-
-Java_idispatch::Java_idispatch( Vm* vm, IDispatch* idispatch, const string& subclass_name ) 
-: 
-    Global_jobject( vm ),
-    _idispatch( idispatch ),
-    _class_name( subclass_name )
-{
-    Env e = env();
-
-    jclass subclass = e.find_class( subclass_name );
-
-    jmethodID constructor_id = e.get_method_id( subclass, "<init>", "(J)V" );
-
-    //LOG( "new Java_idispatch(" << subclass_name << ")\n" );
-    jobject jo = e->NewObject( subclass, constructor_id, (jlong)(size_t)idispatch );
-    if( !jo )  e.throw_java( "NewObject", _class_name );
-
-    assign( jo );
-    e->DeleteLocalRef( subclass );
-}
-
-//------------------------------------------------------------------Java_idispatch::~Java_idispatch
-
-Java_idispatch::~Java_idispatch()
-{
-    if( get_jobject() )
-    {
-        try
-        {
-            Env e = env();
-        
-            jclass object_class = e.get_object_class( get_jobject() );
-
-            jmethodID method_id = e.get_method_id( object_class, "com_clear", "()V" );
-
-            e->DeleteLocalRef( object_class ), object_class = NULL;
-
-            e->CallVoidMethod( get_jobject(), method_id );
-            if( e->ExceptionCheck() )  e.throw_java( _class_name, "CallVoidMethod com_clear()" );
-
-            assign( NULL );
-            _idispatch = NULL;
-
-        }
-        catch( const exception& x )  { vm()->_log.error( _class_name + "::~Java_idispatch: " + x.what() ); }
-    }
 }
 
 //-------------------------------------------------------------------------------Module::clear_java
@@ -559,12 +511,11 @@ void Java_module_instance::add_obj( IDispatch* object, const string& name )
 
     if( !field_id )  e.throw_java( "GetFieldID", name );
 
-    ptr<Java_idispatch> java_idispatch = Z_NEW( Java_idispatch( vm(), object, java_class_name ) );
-    //java_idispatch->set_global();
+    ptr<Java_idispatch> java_idispatch = Z_NEW( Java_idispatch( vm(), object, true, java_class_name.c_str() ) );
 
     _added_jobjects.push_back( java_idispatch );
                          
-    e->SetObjectField( _jobject, field_id, *java_idispatch );
+    e->SetObjectField( _jobject, field_id, java_idispatch->get_jobject() );
     if( e->ExceptionCheck() )  e.throw_java( "SetObjectField", name );
 
     //Com_module_instance_base::add_obj( object, name );

@@ -1,4 +1,4 @@
-// $Id: spooler.odl,v 1.72 2004/01/04 07:04:42 jz Exp $
+// $Id: spooler.odl,v 1.73 2004/02/15 15:53:37 jz Exp $
 
 // Anweisung: midl /nologo /error all /out $(OutDir) $(InputPath)
 
@@ -12,6 +12,8 @@ library spooler
 {
     importlib("STDOLE32.TLB");
     importlib("msxml3.dll");
+
+    import "../zschimmer/java.odl";
 
     interface Ivariable_set;
     interface Ilog;
@@ -43,7 +45,7 @@ library spooler
     };
 
     //--------------------------------------------------------------------------Has_java_class_name
-
+    /*
     [
         uuid       ( 748E665E-6252-418e-887A-55B11FD82870 ),
         odl,
@@ -54,7 +56,7 @@ library spooler
         [id(0),propget]
         HRESULT                 java_class_name             ( [out,retval] BSTR* result );
     }
-
+    */
     //----------------------------------------------------------------------------------------Error
 
     [

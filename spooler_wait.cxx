@@ -1,4 +1,4 @@
-// $Id: spooler_wait.cxx,v 1.94 2004/02/05 16:59:09 jz Exp $
+// $Id: spooler_wait.cxx,v 1.95 2004/02/15 15:53:37 jz Exp $
 /*
     Hier sind implementiert
 
@@ -147,7 +147,7 @@ bool Wait_handles::signaled()
     {
         FOR_EACH( Event_vector, _events, it )  
         {
-            if( *it  &&  (*it)->signaled() )  return true;
+            if( *it  &&  (*it)->signaled() )  { LOG2( "scheduler.wait", *it << " signaled!\n" );  return true; }
         }
     }
 

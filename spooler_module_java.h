@@ -1,4 +1,4 @@
-// $Id: spooler_module_java.h,v 1.28 2003/12/09 19:37:52 jz Exp $
+// $Id: spooler_module_java.h,v 1.29 2004/02/15 15:53:37 jz Exp $
 
 #ifndef __SPOOLER_MODULE_JAVA_H
 #define __SPOOLER_MODULE_JAVA_H
@@ -16,30 +16,16 @@ struct Java_thread_data;
 
 extern zschimmer::Thread_data<Java_thread_data> thread_data;
 
-//------------------------------------------------------------------------------------Java_idispatch
-
-struct Java_idispatch : java::Global_jobject, Object
-{
-    Z_GNU_ONLY(                 Java_idispatch              ();  )                                  // Für gcc 3.2. Nicht implementiert.
-                                Java_idispatch              ( java::Vm* vm, IDispatch*, const string& subclass );
-                               ~Java_idispatch              ();
-
-    ptr<IDispatch>             _idispatch;
-    string                     _class_name;
-};
-
 //---------------------------------------------------------------------------------Java_thread_data
 
 struct Java_thread_data
 {
                                 Java_thread_data            ()                                      : _zero_(this+1) {}
 
-    void                        add_object                  ( Java_idispatch* );
-    void                        release_objects             ()                                      { _java_idispatch_list.clear(); }
 
     Fill_zero                  _zero_;
 
-    list<ptr<Java_idispatch> > _java_idispatch_list;        // Hält alle in einer nativen Methode erzeugten IDispatchs, bis release_objects()
+    z::java::Java_idispatch_container   _idispatch_container;        // Hält alle in einer nativen Methode erzeugten IDispatchs, bis release_objects()
 };
 
 //-----------------------------------------------------------------------Java_idispatch_stack_frame
@@ -48,7 +34,7 @@ struct Java_thread_data
 struct Java_idispatch_stack_frame
 {
                                 Java_idispatch_stack_frame  ()                                      {}
-                               ~Java_idispatch_stack_frame  ()                                      { thread_data->release_objects(); }
+                               ~Java_idispatch_stack_frame  ()                                      { thread_data->_idispatch_container.release_objects(); }
 };
 
 //--------------------------------------------------------------------------------------Java_object
@@ -112,7 +98,7 @@ struct Java_module_instance : Module_instance, java::Has_vm
     Fill_zero                  _zero_;
     java::Global_jobject       _jobject;
 
-    typedef list< ptr<Java_idispatch> >  Added_objects;
+    typedef list< ptr<z::java::Java_idispatch> >  Added_objects;
     Added_objects              _added_jobjects;
 
     Fill_end                   _end_;

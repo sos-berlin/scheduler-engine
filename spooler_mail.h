@@ -1,4 +1,4 @@
-// $Id: spooler_mail.h,v 1.15 2003/10/19 19:59:02 jz Exp $
+// $Id: spooler_mail.h,v 1.16 2004/02/15 15:53:37 jz Exp $
 
 #ifndef __SPOOLER_MAIL_H
 #define __SPOOLER_MAIL_H
@@ -38,7 +38,8 @@ struct Com_mail : spooler_com::Imail,
 
     USE_SOS_OLE_OBJECT_WITHOUT_QI
 
-    STDMETHODIMP            get_java_class_name             ( BSTR* result )                        { return string_to_bstr( "sos.spooler.Mail", result ); }
+    STDMETHODIMP            get_java_class_name             ( BSTR* result )                        { return string_to_bstr( const_java_class_name(), result ); }
+    STDMETHODIMP_(char*)  const_java_class_name             ()                                      { return (char*)"sos.spooler.Mail"; }
 
     STDMETHODIMP            put_to                          ( BSTR );
     STDMETHODIMP            get_to                          ( BSTR* to )                            { return _to.CopyTo( to ); }
