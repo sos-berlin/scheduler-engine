@@ -1,7 +1,8 @@
-// $Id: spooler_history.cxx,v 1.47 2003/05/19 08:05:53 jz Exp $
+// $Id: spooler_history.cxx,v 1.48 2003/06/23 15:15:14 jz Exp $
 
 #include "spooler.h"
 #include "../zschimmer/z_com.h"
+#include "../zschimmer/z_sql.h"
 #include "../kram/sleep.h"
 #include "../kram/sos_java.h"
 
@@ -203,6 +204,8 @@ void Spooler_db::open( const string& db_name )
                 //_history_update.prepare( _db_name + stmt );       //            1        2            3             4             5               6
                 //_history_update_params.resize( 1+6 );
                 //for( int i = 1; i <= 6; i++ )  _history_update.bind_parameter( i, &_history_update_params[i] );
+
+                _email_sent_after_db_error = false;
             }
             catch( const exception& x )  
             { 
@@ -274,13 +277,61 @@ void Spooler_db::create_table_when_needed( const string& tablename, const string
     ta.commit();        // Für select und für create table (jedenfalls bei Jet)
 }
 
+//---------------------------------------------------------------Spooler_db::try_reopen_after_error
+
+void Spooler_db::try_reopen_after_error( const exception& x )
+{
+    _spooler->log().error( string("FEHLER BEIM ZUGRIFF AUF DATENBANK: ") + x.what() );
+    _spooler->log().info( "Datenbank wird geschlossen" );
+
+    if( !_email_sent_after_db_error )
+    {
+        string body = "db=" + _spooler->_db_name + "\r\n\r\n" + x.what() + "\r\n\r\nDer Spooler versucht, die Datenbank erneut zu oeffnen.";
+        if( !_spooler->_need_db )  body += "\r\nWenn das nicht geht, schreibt der Spooler die Historie in Textdateien.";
+        _spooler->send_error_email( string("FEHLER BEIM ZUGRIFF AUF DATENBANK: ") + x.what(), body );
+        _email_sent_after_db_error = true;
+    }
+
+    Z_MUTEX( _lock )
+    {
+        //try
+        //{
+            close();
+        //}
+        //catch( const xception& x ) { _log->warn(" FEHLER BEIM SCHLIESSEN DER DATENBANK: " + x.what() ); }
+
+        while(1)
+        {
+            try
+            {
+                open( _spooler->_db_name );
+                open_history_table();
+                break;
+            }
+            catch( const exception& x )
+            {
+                _spooler->log().warn( x.what() );
+
+                if( !_spooler->_need_db )  break;
+
+                sos_sleep( 30 );
+            }
+        }
+
+        if( !_db.opened() )
+        {
+            _spooler->log().info( "Historie wird von Datenbank auf Dateien umgeschaltet" );
+            open( "" );     // Umschalten auf dateibasierte Historie
+        }
+    }
+}
+
 //-------------------------------------------------------------------------------Spooler_db::get_id
 // Wird von den Threads gerufen
 
 int Spooler_db::get_id()
 {
     int  id;
-    bool email_sent = false;
 
     while(1)
     {
@@ -291,49 +342,7 @@ int Spooler_db::get_id()
         }
         catch( const exception& x )
         {
-            _spooler->log().error( string("FEHLER BEIM ZUGRIFF AUF DATENBANK: ") + x.what() );
-            _spooler->log().info( "Datenbank wird geschlossen" );
-
-            if( !email_sent )
-            {
-                string body = "db=" + _spooler->_db_name + "\r\n\r\n" + x.what() + "\r\n\r\nDer Spooler versucht, die Datenbank erneut zu oeffnen.";
-                if( !_spooler->_need_db )  body += "\r\nWenn das nicht geht, schreibt der Spooler die Historie in Textdateien.";
-                _spooler->send_error_email( string("FEHLER BEIM ZUGRIFF AUF DATENBANK: ") + x.what(), body );
-                email_sent = true;
-            }
-
-            Z_MUTEX( _lock )
-            {
-              //try
-              //{
-                    close();
-              //}
-              //catch( const xception& x ) { _log->warn(" FEHLER BEIM SCHLIESSEN DER DATENBANK: " + x.what() ); }
-
-                while(1)
-                {
-                    try
-                    {
-                        open( _spooler->_db_name );
-                        open_history_table();
-                        break;
-                    }
-                    catch( const exception& x )
-                    {
-                        _spooler->log().warn( x.what() );
-
-                        if( !_spooler->_need_db )  break;
-
-                        sos_sleep( 30 );
-                    }
-                }
-
-                if( !_db.opened() )
-                {
-                    _spooler->log().info( "Historie wird von Datenbank auf Dateien umgeschaltet" );
-                    open( "" );     // Umschalten auf dateibasierte Historie
-                }
-            }
+            try_reopen_after_error( x );
         }
     }
 
@@ -453,6 +462,76 @@ void Spooler_db::spooler_stop()
         catch( const exception& x )  
         { 
             _spooler->_log.warn( string("FEHLER BEIM SCHREIBEN DER HISTORIE: ") + x.what() ); 
+        }
+    }
+}
+
+//-------------------------------------------------------------------------Spooler_db::insert_order
+
+void Spooler_db::insert_order( Order* order )
+{
+    while(1)
+    {
+        if( !_db.opened() )  return;
+
+        try
+        {
+            Transaction ta = this;
+            {
+                sql::Insert_stmt insert;
+                
+                insert.set_table_name( _spooler->_orders_tablename );
+               
+                insert[ "job_chain" ] = order->job_chain()->name();
+                insert[ "id"        ] = order->id();
+                insert[ "title"     ] = order->title();
+                insert[ "finished"  ] = order->finished();
+
+                execute( insert );
+                commit();
+            }
+
+            break;
+        }
+        catch( const exception& x )  
+        { 
+            try_reopen_after_error( x );
+        }
+    }
+}
+
+//-------------------------------------------------------------------Spooler_db::update_order_state
+
+void Spooler_db::update_order_state( Order* order )
+{
+    while(1)
+    {
+        if( !_db.opened() )  return;
+
+        try
+        {
+            Transaction ta = this;
+            {
+                sql::Update_stmt update;
+
+                update.set_table_name( _spooler->_orders_tablename );
+
+                update[ "state" ] = order->state();
+                if( order->finished() )  update[ "finished" ] = 1;
+                update[ "title" ] = order->title();
+
+                update.add_where_cond( "job_chain", order->job_chain()->name() );
+                update.add_where_cond( "id"       , order->id()               );
+
+                execute( update );
+                commit();
+            }
+
+            break;
+        }
+        catch( const exception& x )  
+        { 
+            try_reopen_after_error( x );
         }
     }
 }

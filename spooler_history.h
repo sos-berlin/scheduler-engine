@@ -1,4 +1,4 @@
-// $Id: spooler_history.h,v 1.15 2003/05/05 15:39:55 jz Exp $
+// $Id: spooler_history.h,v 1.16 2003/06/23 15:15:14 jz Exp $
 
 #ifndef __SPOOLER_HISTORY_H
 #define __SPOOLER_HISTORY_H
@@ -38,6 +38,10 @@ struct Spooler_db : Sos_self_deleting
     void                        rollback                ();
     void                        create_table_when_needed( const string& tablename, const string& fields );
     string                      db_name                 ()                                          { return _db_name; }
+    void                        try_reopen_after_error  ( const exception& );
+
+    void                        insert_order            ( Order* );
+    void                        update_order_state      ( Order* );
 
     void                        spooler_start           ();
     void                        spooler_stop            ();
@@ -60,6 +64,7 @@ struct Spooler_db : Sos_self_deleting
   //Any_file                   _history_update;
     vector<Dyn_obj>            _history_update_params;
     int                        _id;
+    bool                       _email_sent_after_db_error;
 };
 
 //--------------------------------------------------------------------------------------Transaction

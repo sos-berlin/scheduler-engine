@@ -1,4 +1,4 @@
-// $Id: spooler.h,v 1.137 2003/06/02 11:22:28 jz Exp $
+// $Id: spooler.h,v 1.138 2003/06/23 15:15:13 jz Exp $
 
 #ifndef __SPOOLER_H
 #define __SPOOLER_H
@@ -271,6 +271,7 @@ struct Spooler
     With_log_switch            _history_with_log;
     string                     _history_tablename;
     string                     _variables_tablename;
+    string                     _orders_tablename;
 
     string                     _factory_ini;                // -ini=factory.ini
     string                     _hostname;

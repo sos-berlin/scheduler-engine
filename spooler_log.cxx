@@ -1,4 +1,4 @@
-// $Id: spooler_log.cxx,v 1.63 2003/04/14 09:03:35 jz Exp $
+// $Id: spooler_log.cxx,v 1.64 2003/06/23 15:15:14 jz Exp $
 
 #include "spooler.h"
 #include "spooler_mail.h"
@@ -50,6 +50,7 @@ Log::~Log()
 }
 
 //-------------------------------------------------------------------------------Log::set_directory
+// Für allgemeines Spooler-Protokoll
 
 void Log::set_directory( const string& directory )         
 {
@@ -60,24 +61,8 @@ void Log::set_directory( const string& directory )
         _directory = _directory.substr( 0, _directory.length() - 1 );
 }
 
-//---------------------------------------------------------------------------------------Log::write
-
-void Log::write( Prefix_log* extra_log, const char* text, int len, bool log )
-{
-    if( len > 0  &&  text[len-1] == '\r' )  len--;
-
-    if( len > 0 )
-    {
-        if( log && log_ptr )  _log_line.append( text, len );
-
-        int ret = ::write( _file, text, len );
-        if( ret != len )  throw_errno( errno, "write", _filename.c_str() );
-
-        if( extra_log )  extra_log->write( text, len );
-    }
-}
-
 //------------------------------------------------------------------------------------Log::open_new
+// Für allgemeines Spooler-Protokoll
 
 void Log::open_new()
 {
@@ -115,6 +100,24 @@ void Log::open_new()
     }
 }
 
+//---------------------------------------------------------------------------------------Log::write
+
+void Log::write( Prefix_log* extra_log, Prefix_log* order_log, const char* text, int len, bool log )
+{
+    if( len > 0  &&  text[len-1] == '\r' )  len--;
+
+    if( len > 0 )
+    {
+        if( log && log_ptr )  _log_line.append( text, len );
+
+        int ret = ::write( _file, text, len );
+        if( ret != len )  throw_errno( errno, "write", _filename.c_str() );
+
+        if( extra_log )  extra_log->write( text, len );
+        if( order_log )  order_log->write( text, len );
+    }
+}
+
 //-----------------------------------------------------------------------------------------Log::log
 
 void Log::log( Log_level level, const string& prefix, const string& line )
@@ -127,7 +130,7 @@ void Log::log( Log_level level, const string& prefix, const string& line )
 
 //----------------------------------------------------------------------------------------Log::log2
 
-void Log::log2( Log_level level, const string& prefix, const string& line, Prefix_log* extra_log )
+void Log::log2( Log_level level, const string& prefix, const string& line, Prefix_log* extra_log, Prefix_log* order_log )
 {
     if( this == NULL )  return;
 
@@ -158,20 +161,18 @@ void Log::log2( Log_level level, const string& prefix, const string& line, Prefi
             if( next == string::npos )  next = line.length(); 
                                   else  next++;
 
-            write( extra_log, buffer1, strlen(buffer1), false );           // Zeit
-        
-            write( extra_log, buffer2, strlen(buffer2) );                  // [info]
-
-            if( !prefix.empty() )  write( NULL, "(" + prefix + ") " );     // (Job ...)
+            write( extra_log, order_log, buffer1, strlen(buffer1), false );           // Zeit
+            write( extra_log, order_log, buffer2, strlen(buffer2) );                  // [info]
+            if( !prefix.empty() )  write( NULL, order_log, "(" + prefix + ") " );     // (Job ...)
 
             int len = next - begin;
             while( len > 1  &&  line.c_str()[begin+len-1] == '\r' )  len--;
-            write( extra_log, line.c_str() + begin, len );                 // Text
+            write( extra_log, order_log, line.c_str() + begin, len );                 // Text
 
             begin = next;
         }
 
-        if( line.length() == 0 || line[line.length()-1] != '\n' )  write( extra_log, "\n", 1 );
+        if( line.length() == 0 || line[line.length()-1] != '\n' )  write( extra_log, order_log, "\n", 1 );
 
         LOG( _log_line );  _log_line = "";
     }
@@ -331,7 +332,6 @@ void Prefix_log::close()
                 send_really();
             }
         }
-        catch( const Xc& x         ) { _spooler->_log.error(x.what()); }
         catch( const exception&  x ) { _spooler->_log.error(x.what()); }
         catch( const _com_error& x ) { _spooler->_log.error(bstr_as_string(x.Description())); }
     }
@@ -594,10 +594,8 @@ void Prefix_log::log2( Log_level level, const string& prefix, const string& line
     if( _highest_level < level )  _highest_level = level, _highest_msg = line;
     if( level < _log_level )  return;
 
-    _log->log2( level, _job && _job->current_task()? "Task " + as_string(_job->current_task()->id()) + " " + _job->name() : _prefix, line, this );
+    _log->log2( level, _job && _job->current_task()? "Task " + as_string(_job->current_task()->id()) + " " + _job->name() : _prefix, line, this, _order_log );
 }
-
-//---------------------------------------------------------------------------------------
 
 //----------------------------------------------------------------------------------Stdout_collector
 /*

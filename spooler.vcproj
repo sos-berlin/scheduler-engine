@@ -519,9 +519,6 @@
 			Name="Header-Dateien"
 			Filter="h;hpp;hxx;hm;inl">
 			<File
-				RelativePath="..\kram\sosobjba.h">
-			</File>
-			<File
 				RelativePath="spooler.h">
 			</File>
 			<File

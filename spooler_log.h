@@ -1,4 +1,4 @@
-// $Id: spooler_log.h,v 1.30 2003/03/19 11:59:57 jz Exp $
+// $Id: spooler_log.h,v 1.31 2003/06/23 15:15:14 jz Exp $
 
 #ifndef __SPOOLER_LOG_H
 #define __SPOOLER_LOG_H
@@ -22,16 +22,17 @@ struct Log
     void                        error                       ( const string& line )              { log( log_error , "", line ); }
 
     void                        log                         ( Log_level, const string& prefix, const string& line );
-    void                        log2                        ( Log_level, const string& prefix, const string& line, Prefix_log* = NULL );
+    void                        log2                        ( Log_level, const string& prefix, const string& line, 
+                                                              Prefix_log* extra_log = NULL, Prefix_log* order_log = NULL );
     void                        collect_stderr              ();
     
     string                      filename                    () const                            { return _filename; }
     int                         fd                          ()                                  { return _file; }
 
   protected:
-    void                        write                       ( Prefix_log*, const char*, int len, bool log = true );
-    void                        write                       ( Prefix_log* extra, const string& line )              { write( extra, line.c_str(), line.length() ); }
-    void                        write                       ( Prefix_log* extra, const char* line )                { write( extra, line, strlen(line) ); }
+    void                        write                       ( Prefix_log* extra, Prefix_log* order, const char*, int len, bool log = true );
+    void                        write                       ( Prefix_log* extra, Prefix_log* order, const string& line )              { write( extra, order, line.c_str(), line.length() ); }
+    void                        write                       ( Prefix_log* extra, Prefix_log* order, const char* line )                { write( extra, order, line, strlen(line) ); }
 
     Fill_zero                  _zero_;
     Spooler*                   _spooler;
@@ -55,6 +56,7 @@ struct Prefix_log : Has_log
     void                        open                        ();
     void                        close                       ();
     void                        close2                      ();
+    bool                        opened                      () const                            { return _file != -1; }
 
     void                    set_append                      ( bool b )                          { _append = b; }
     void                    set_filename                    ( const string& );
@@ -76,6 +78,7 @@ struct Prefix_log : Has_log
     void                    set_job                         ( Job* job )                        { _job = job; }
     void                    set_prefix                      ( const string& prefix )            { _prefix = prefix; }
     void                    set_profile_section             ( const string& );
+    void                    set_order_log                   ( Prefix_log* log )                 { _order_log = log; }
 
     void                        operator()                  ( const string& line )              { info( line ); }
     void                        debug9                      ( const string& line )              { log( log_debug9, line ); }
@@ -129,6 +132,7 @@ struct Prefix_log : Has_log
     Spooler*                   _spooler;
     Log*                       _log;
     Job*                       _job;
+    Prefix_log*                _order_log;
     string                     _prefix;
     string                     _section;
     int                        _log_level;                  // Ab diesem Level protokollieren, sonst nicht

@@ -1,4 +1,4 @@
-// $Id: spooler_order.h,v 1.18 2002/11/24 15:33:01 jz Exp $
+// $Id: spooler_order.h,v 1.19 2003/06/23 15:15:14 jz Exp $
 
 #ifndef __SPOOLER_ORDER_H
 #define __SPOOLER_ORDER_H
@@ -23,13 +23,13 @@ struct Order : Com_order
 
 
     Z_GNU_ONLY(                 Order                   (); )                                       // Für gcc 3.2. Nicht implementiert
-                                Order                   ( Spooler* spooler )                        : _zero_(this+1), _spooler(spooler), Com_order(this) { init(); }
+                                Order                   ( Spooler* spooler )                        : _zero_(this+1), _spooler(spooler), _log(spooler), Com_order(this) {}
                                 Order                   ( Spooler* spooler, const VARIANT& );
                                ~Order                   ();
 
-    void                        init                    ();
-
-
+    void                        open                    ();
+    void                        close                   ();
+    
     void                    set_id                      ( const Variant& );
     Id                          id                      ()                                          { THREAD_LOCK_RETURN( _lock, Variant, _id ); }
     void                    set_default_id              ();
@@ -40,11 +40,13 @@ struct Order : Com_order
     string                      obj_name                ()                                          { THREAD_LOCK_RETURN( _lock, string, string_from_variant(_id) + rtrim( "  " + _title ) ); }
                                                             
     void                    set_priority                ( Priority );
-    Priority                    priority                ()                                          { return _priority; }
+    Priority                    priority                () const                                    { return _priority; }
 
-    Job_chain*                  job_chain               ()                                          { return _job_chain; }
-    Job_chain_node*             job_chain_node          ()                                          { return _job_chain_node; }
+    Job_chain*                  job_chain               () const                                    { return _job_chain; }
+    Job_chain_node*             job_chain_node          () const                                    { return _job_chain_node; }
     Order_queue*                order_queue             ();
+
+    bool                        finished                ();
 
     void                    set_job                     ( Job* );
     void                    set_job                     ( spooler_com::Ijob* );
@@ -52,6 +54,7 @@ struct Order : Com_order
     Job*                        job                     ();
 
     void                    set_state                   ( const State& );
+    void                    set_state2                  ( const State& );
     State                       state                   ()                                          { THREAD_LOCK_RETURN( _lock, State, _state ); }
     bool                        state_is_equal          ( const State& state )                      { THREAD_LOCK_RETURN( _lock, bool, _state == state ); }
 
@@ -85,6 +88,7 @@ struct Order : Com_order
     Fill_zero                  _zero_;    
     Thread_semaphore           _lock;
     Spooler*                   _spooler;
+    Prefix_log                 _log;
 
     Id                         _id;
     bool                       _id_locked;              // Einmal gesperrt, immer gesperrt
@@ -104,6 +108,7 @@ struct Order : Com_order
   //bool                       _in_process;             // Auftrag wird gerade von spooler_process() verarbeitet 
     Task*                      _task;                   // Auftrag wird gerade von dieser Task in spooler_process() verarbeitet 
     bool                       _moved;                  // true, wenn Job state oder job geändert hat. Dann nicht automatisch in Jobkette weitersetzen
+    bool                       _opened;
 };
 
 //-----------------------------------------------------------------------------------Job_chain_node

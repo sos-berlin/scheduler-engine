@@ -1,4 +1,4 @@
-// $Id: spooler_order.cxx,v 1.25 2003/05/12 09:50:39 jz Exp $
+// $Id: spooler_order.cxx,v 1.26 2003/06/23 15:15:14 jz Exp $
 /*
     Hier sind implementiert
 
@@ -510,14 +510,8 @@ Order::Order( Spooler* spooler, const VARIANT& payload )
     Com_order(this),
     _zero_(this+1), 
     _spooler(spooler),
+    _log(spooler),
     _payload(payload)
-{
-    init();
-}
-
-//--------------------------------------------------------------------------------------Order::init
-
-void Order::init()
 {
     _created = Time::now();
 }
@@ -526,6 +520,30 @@ void Order::init()
 
 Order::~Order()
 {
+}
+
+//--------------------------------------------------------------------------------------Order::open
+
+void Order::open()
+{
+    if( _spooler->_log_orders )
+    {
+        _log.set_filename( _spooler->log_directory() + "/order." + _id.as_string() + ".log" );      // Jobprotokoll
+        _log.open();
+    }
+
+    _opened = true;
+}
+
+//-------------------------------------------------------------------------------------Order::close
+
+void Order::close()
+{
+    if( _log.opened() )
+    {
+        _log.close();
+        _spooler->_db.store_order_log( _log.filename() );
+    }
 }
 
 //---------------------------------------------------------------------------------------Order::dom
@@ -631,6 +649,13 @@ Job* Order::job()
     return result;
 }
 
+//----------------------------------------------------------------------------------Order::finished
+
+bool Order::finished()
+{ 
+    return !_job_chain_node  ||  !_job_chain_node->_job; 
+}
+
 //---------------------------------------------------------------------------------Order::set_state
 
 void Order::set_state( const State& state )
@@ -638,8 +663,17 @@ void Order::set_state( const State& state )
     THREAD_LOCK( _lock )
     {
         if( _job_chain )  move_to_node( _job_chain->node_from_state( state ) );
-                    else  _state = state;
+                    else  set_state2( state );
     }
+}
+
+//--------------------------------------------------------------------------------Order::set_state2
+
+void Order::set_state2( const State& state )
+{
+    _state = state;
+
+    if( _job_chain )  _spooler->_db->update_order_state( *order );
 }
 
 //------------------------------------------------------------------------------Order::set_priority
@@ -733,15 +767,16 @@ void Order::add_to_job_chain( Job_chain* job_chain )
 
     THREAD_LOCK( _lock )
     {
-        if( _id.vt == VT_EMPTY )  set_default_id(); 
-        
+        if( _id.vt == VT_EMPTY )  set_default_id();
         _id_locked = true;
+
+        if( !opened() )  open();
 
         if( _job_chain )  remove_from_job_chain();
 
         if( !job_chain->_chain.empty() )
         {
-            if( _state.vt == VT_EMPTY )  _state = (*job_chain->_chain.begin())->_state;     // Auftrag bekommt Zustand des ersten Jobs der Jobkette
+            if( _state.vt == VT_EMPTY )  set_state2( (*job_chain->_chain.begin())->_state );     // Auftrag bekommt Zustand des ersten Jobs der Jobkette
 
             //Z_DEBUG_ONLY( LOG( "job_chain->node_from_state()\n" ); )
             Job_chain_node* node = job_chain->node_from_state( _state );
@@ -769,7 +804,7 @@ void Order::move_to_node( Job_chain_node* node )
 
         if( _job_chain_node && _in_job_queue )  _job_chain_node->_job->order_queue()->remove_order( this );
 
-        _state = node? node->_state : Order::State();
+        set_state2( node? node->_state : Order::State() );
         _job_chain_node = node;
 
         if( node && node->_job )  node->_job->order_queue()->add_order( this );
@@ -790,22 +825,32 @@ void Order::postprocessing( bool success, Prefix_log* log )
             {
                 _job_chain_node->_job->order_queue()->remove_order( this );
 
+                State new_state;
+
                 if( success ) 
                 {
                     if( log )  log->debug( "Auftrag " + obj_name() + ": Neuer Zustand ist " + error_string_from_variant(_job_chain_node->_next_state) );
-                    _state = _job_chain_node->_next_state;
+                    new_state = _job_chain_node->_next_state;
                     _job_chain_node = _job_chain_node->_next_node;
                 }
                 else
                 {
                     if( log )  log->debug( "Auftrag " + obj_name() + ": Neuer Fehler-Zustand ist " + error_string_from_variant(_job_chain_node->_error_state) );
-                    _state = _job_chain_node->_error_state;
+                    new_state = _job_chain_node->_error_state;
                     _job_chain_node = _job_chain_node->_error_node;
                 }
 
-                if( _job_chain_node  &&  _job_chain_node->_job )  _job_chain_node->_job->order_queue()->add_order( this );
+                set_state2( new_state );
+
+                if( !finished() )  
+                {
+                    _job_chain_node->_job->order_queue()->add_order( this );
+                }
                 else 
-                if( log )  log->debug( "Auftrag " + obj_name() + ": Kein weiterer Job, Auftrag ist fertig" );
+                {
+                    if( log )  log->debug( "Auftrag " + obj_name() + ": Kein weiterer Job, Auftrag ist fertig" );
+                    close();
+                }
             }
             else
             {
@@ -826,6 +871,8 @@ void Order::processing_error()
     {
         _task = NULL;
         _moved = false;
+
+        close();
     }
 }
 
