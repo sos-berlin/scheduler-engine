@@ -1,4 +1,4 @@
-// $Id: spooler.odl,v 1.40 2002/09/11 18:24:49 jz Exp $
+// $Id: spooler.odl,v 1.41 2002/09/12 19:30:34 jz Exp $
 
 // Anweisung: midl /nologo /error all /out $(OutDir) $(InputPath)
 
@@ -363,9 +363,12 @@ library spooler
         [propget]
         HRESULT                 db_name                 ( [out,retval] BSTR* filename );
 
-        HRESULT                 create_job_chain        ( [in] BSTR name, [out,retval] Ijob_chain** result );
+        HRESULT                 create_job_chain        ( [out,retval] Ijob_chain** result );
 
-      //HRESULT                 add_job_chain           ( [in] Ijob_chain* job_chain );
+        HRESULT                 add_job_chain           ( [in] Ijob_chain* job_chain );
+
+        [propget]
+        HRESULT                 job_chain               ( [in] BSTR name, [out,retval] Ijob_chain** result );
     }
 
     [
@@ -624,7 +627,7 @@ library spooler
 
         HRESULT                 add_end_state           ( [in] VARIANT* state );
 
-        HRESULT                 finish                  ();
+      //HRESULT                 finish                  ();
 
         HRESULT                 add_order               ( [in] VARIANT* order_or_payload, [in,optional] VARIANT* job_or_state, [out,retval] Iorder** order );
     }

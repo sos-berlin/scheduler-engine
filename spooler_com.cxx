@@ -1,4 +1,4 @@
-// $Id: spooler_com.cxx,v 1.49 2002/09/11 18:24:49 jz Exp $
+// $Id: spooler_com.cxx,v 1.50 2002/09/12 19:30:34 jz Exp $
 /*
     Hier sind implementiert
 
@@ -1651,21 +1651,21 @@ STDMETHODIMP Com_spooler::get_db_name( BSTR* result )
 
 //--------------------------------------------------------------------Com_spooler::create_job_chain
 
-STDMETHODIMP Com_spooler::create_job_chain( BSTR name_bstr, spooler_com::Ijob_chain** result )
+STDMETHODIMP Com_spooler::create_job_chain( spooler_com::Ijob_chain** result )
 {
-    ptr<Job_chain> job_chain = Z_NEW( Job_chain( _spooler ) );
-    job_chain->set_name( string_from_bstr( name_bstr ) );
+    ptr<Job_chain> job_chain = new Job_chain( _spooler );
+    //job_chain->set_name( string_from_bstr( name_bstr ) );
 
-    _spooler->add_job_chain( job_chain );
+    //_spooler->add_job_chain( job_chain );
 
-    *result = job_chain->com_job_chain();
+    *result = job_chain; //->com_job_chain();
     (*result)->AddRef();
 
     return S_OK;
 }
 
 //-----------------------------------------------------------------------Com_spooler::add_job_chain
-/*
+
 STDMETHODIMP Com_spooler::add_job_chain( spooler_com::Ijob_chain* job_chain )
 {
     HRESULT hr = NOERROR;
@@ -1675,14 +1675,34 @@ STDMETHODIMP Com_spooler::add_job_chain( spooler_com::Ijob_chain* job_chain )
     {
         if( !_spooler )  return E_POINTER;
 
-        _spooler->add_job_chain( dynamic_cast<Com_job_chain*>( job_chain )->_job_chain );
+        _spooler->add_job_chain( dynamic_cast<Job_chain*>( job_chain ) );
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.add_job_chain" ); }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.add_job_chain" ); }
 
     return hr;
 }
-*/
+
+//-----------------------------------------------------------------------Com_spooler::get_job_chain
+
+STDMETHODIMP Com_spooler::get_job_chain( BSTR name, spooler_com::Ijob_chain** result )
+{
+    HRESULT hr = NOERROR;
+
+    THREAD_LOCK( _lock )
+    try
+    {
+        if( !_spooler )  return E_POINTER;
+
+        *result = _spooler->job_chain( string_from_bstr(name) ); //->com_job_chain();
+        (*result)->AddRef();
+    }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.get_job_chain" ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.get_job_chain" ); }
+
+    return hr;
+}
+
 //-------------------------------------------------------------------------Com_context::Com_context
 
 Com_context::Com_context()
@@ -1816,7 +1836,7 @@ STDMETHODIMP Com_job_chain::add_end_state( VARIANT* state )
 }
 
 //----------------------------------------------------------------------------Com_job_chain::finish
-
+/*
 STDMETHODIMP Com_job_chain::finish()
 {
     HRESULT hr = NOERROR;
@@ -1833,7 +1853,7 @@ STDMETHODIMP Com_job_chain::finish()
 
     return hr;
 }
-
+*/
 //-------------------------------------------------------------------------Com_job_chain::add_order
 
 STDMETHODIMP Com_job_chain::add_order( VARIANT* order_or_payload, VARIANT* job_or_state, spooler_com::Iorder** result )
@@ -2022,7 +2042,7 @@ STDMETHODIMP Com_order::get_job_chain( Ijob_chain** result )
         Job_chain* job_chain = _order->job_chain();
         if( job_chain )  
         {
-            CComPtr<Ijob_chain> ijob_chain = job_chain->com_job_chain();
+            CComPtr<Ijob_chain> ijob_chain = job_chain; //->com_job_chain();
             ijob_chain.CopyTo( result );
         }
     }

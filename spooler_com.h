@@ -1,4 +1,4 @@
-// $Id: spooler_com.h,v 1.39 2002/09/11 18:24:49 jz Exp $
+// $Id: spooler_com.h,v 1.40 2002/09/12 19:30:34 jz Exp $
 
 #ifndef __SPOOLER_COM_H
 #define __SPOOLER_COM_H
@@ -326,8 +326,9 @@ struct Com_spooler : spooler_com::Ispooler, Sos_ole_object
     STDMETHODIMP                put_var                     ( BSTR name, VARIANT* value );
     STDMETHODIMP                get_var                     ( BSTR name, VARIANT* value );
     STDMETHODIMP                get_db_name                 ( BSTR* );
-    STDMETHODIMP                create_job_chain            ( BSTR name, spooler_com::Ijob_chain** );
-  //STDMETHODIMP                add_job_chain               ( spooler_com::Ijob_chain* );
+    STDMETHODIMP                create_job_chain            ( spooler_com::Ijob_chain** );
+    STDMETHODIMP                add_job_chain               ( spooler_com::Ijob_chain* );
+    STDMETHODIMP                get_job_chain               ( BSTR, spooler_com::Ijob_chain** );
 
   protected:
     Thread_semaphore           _lock;
@@ -380,7 +381,7 @@ struct Com_job_chain : spooler_com::Ijob_chain, Sos_ole_object
   //STDMETHODIMP            get_length                  ( int* );
     STDMETHODIMP                add_job                 ( VARIANT*, VARIANT*, VARIANT*, VARIANT* );
     STDMETHODIMP                add_end_state           ( VARIANT* );
-    STDMETHODIMP                finish                  ();
+  //STDMETHODIMP                finish                  ();
 
     STDMETHODIMP                add_order               ( VARIANT* order_or_payload, VARIANT*, spooler_com::Iorder** );
 
