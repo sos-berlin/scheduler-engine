@@ -1,4 +1,4 @@
-// $Id: spooler_module_java.cxx,v 1.31 2002/12/18 08:14:20 jz Exp $
+// $Id: spooler_module_java.cxx,v 1.32 2002/12/18 10:04:14 jz Exp $
 /*
     Hier sind implementiert
 
@@ -25,8 +25,8 @@
 #   include <dlfcn.h>
 #endif
 
-#ifndef JNI_VERSION_1_4
-#   error "Der Spooler braucht jni.h Version 1.4"
+#ifndef JNI_VERSION_1_2
+#   error "Der Spooler braucht jni.h Version 1.2"
 #endif
 
 using namespace std;
