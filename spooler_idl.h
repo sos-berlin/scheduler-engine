@@ -1,4 +1,4 @@
-// $Id: spooler_idl.h,v 1.7 2002/11/25 08:57:26 jz Exp $
+// $Id: spooler_idl.h,v 1.8 2002/11/25 08:59:23 jz Exp $
 
 
 /*  Ersatz für spooler.odl für Systeme ohne COM. 

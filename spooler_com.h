@@ -1,4 +1,4 @@
-// $Id: spooler_com.h,v 1.60 2002/11/25 08:57:24 jz Exp $
+// $Id: spooler_com.h,v 1.61 2002/11/25 08:59:22 jz Exp $
 
 #ifndef __SPOOLER_COM_H
 #define __SPOOLER_COM_H
