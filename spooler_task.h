@@ -1,4 +1,4 @@
-// $Id: spooler_task.h,v 1.48 2002/04/10 17:15:12 jz Exp $
+// $Id: spooler_task.h,v 1.49 2002/04/10 20:34:14 jz Exp $
 
 #ifndef __SPOOLER_TASK_H
 #define __SPOOLER_TASK_H
@@ -198,7 +198,7 @@ struct Job : Sos_self_deleting
     void                        set_in_call                 ( const string& name );
     void                        set_delay_after_error       ( int error_steps, Time delay ) { _delay_after_error[error_steps] = delay; }
 
-    xml::Element_ptr            read_history                ( xml::Document_ptr doc, int n, bool with_log ) { return _history.read_tail( doc, n, with_log ); }
+    xml::Element_ptr            read_history                ( xml::Document_ptr doc, int id, int n, bool with_log ) { return _history.read_tail( doc, id, n, with_log ); }
 
     void                        close                       ();
     void                        close_engine                ();

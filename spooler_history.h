@@ -1,4 +1,4 @@
-// $Id: spooler_history.h,v 1.6 2002/04/10 17:15:12 jz Exp $
+// $Id: spooler_history.h,v 1.7 2002/04/10 20:34:14 jz Exp $
 
 #ifndef __SPOOLER_HISTORY_H
 #define __SPOOLER_HISTORY_H
@@ -36,7 +36,7 @@ struct Spooler_db
     void                        commit                  ();
     void                        rollback                ();
     void                        create_table_when_needed( const string& tablename, const string& fields );
-    string                      dbname                  ()                                          { return _db_name; }
+    string                      db_name                 ()                                          { return _db_name; }
 
     void                        spooler_start           ();
     void                        spooler_stop            ();
@@ -88,7 +88,7 @@ struct Job_history
     void                        end                     ();
     void                        set_extra_field         ( const string& name, const CComVariant& value );
 
-    xml::Element_ptr            read_tail               ( xml::Document_ptr, int, bool with_log );
+    xml::Element_ptr            read_tail               ( xml::Document_ptr, int id, int next, bool with_log );
 
   private:
     void                        archive                 ( Archive_switch, const string& filename );

@@ -1,4 +1,4 @@
-// $Id: spooler_command.cxx,v 1.48 2002/04/09 08:55:44 jz Exp $
+// $Id: spooler_command.cxx,v 1.49 2002/04/10 20:34:14 jz Exp $
 /*
     Hier ist implementiert
 
@@ -110,6 +110,7 @@ xml::Element_ptr Command_processor::execute_show_state( const xml::Element_ptr& 
     state_element->setAttribute( "spooler_running_since", as_dom_string( Sos_optional_date_time( _spooler->start_time() ).as_string() ) );
     state_element->setAttribute( "state"                , as_dom_string( _spooler->state_name() ) );
     state_element->setAttribute( "log_file"             , as_dom_string( _spooler->_log.filename() ) );
+    state_element->setAttribute( "db"                   , as_dom_string( trim( _spooler->_db.db_name() ) ) );
 
     double cpu_time = get_cpu_time();
     char buffer [30];
@@ -128,17 +129,24 @@ xml::Element_ptr Command_processor::execute_show_history( const xml::Element_ptr
     if( _security_level < Security::seclev_info )  throw_xc( "SPOOLER-121" );
 
     string job_name = as_string( element->getAttribute( "job" ) );
-    string tail_str = as_string( element->getAttribute( "tail" ) );
-    int    tail     = tail_str == ""   ? 10 :
-                      tail_str == "all"? INT_MAX 
-                                       : as_int(tail_str);
+    
+    string id_str = as_string( element->getAttribute( "id" ) );
+    int id = id_str != ""? as_uint(id_str) : -1;
+
+    string prev_str = as_string( element->getAttribute( "prev" ) );
+    int    next     = prev_str == ""   ? ( id == -1? -10 : 0 ) :
+                      prev_str == "all"? -INT_MAX 
+                                       : -as_int(prev_str);
+    
+    string next_str = as_string( element->getAttribute( "next" ) );
+    if( next_str != "" )  next = as_uint(next_str);
 
     string what = as_string( element->getAttribute( "what" ) );
     bool show_all = what == "all";
 
     Sos_ptr<Job> job = _spooler->get_job( job_name );
 
-    return job->read_history( _answer, tail, show_all );
+    return job->read_history( _answer, id, next, show_all );
 }
 
 //--------------------------------------------------------Command_processor::execute_modify_spooler
