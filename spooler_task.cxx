@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.153 2003/06/13 14:45:40 jz Exp $
+// $Id: spooler_task.cxx,v 1.154 2003/06/17 07:39:39 jz Exp $
 /*
     Hier sind implementiert
 
@@ -707,13 +707,13 @@ void Job::end()
 
 void Job::stop()
 {
-    //_log.msg( "stop" );
-
-    if( _state != s_stopped  &&  _task )
+    if( _state != s_stopped )
     {
+        _log.msg( "stop" );
+
         try 
         {
-            _task->do_stop();
+            if( _task )  _task->do_stop();
         }
         catch( const Xc& x        )  { set_error(x); }
         catch( const exception& x )  { set_error(x); }
@@ -2343,7 +2343,7 @@ bool Process_task::do_start()
 
             execvp( _job->_process_filename.c_str(), args );
 
-            fprintf( stderr, "ERRNO-%d  %s\nbei execlp(\"%s\")", errno, strerror(errno), _job->_process_filename.c_str() );
+            fprintf( stderr, "ERRNO-%d  %s, bei execlp(\"%s\")\n", errno, strerror(errno), _job->_process_filename.c_str() );
             _exit( errno? errno : 250 );  // Wie melden wir den Fehler an den rufenden Prozess?
         }
 
