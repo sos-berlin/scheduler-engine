@@ -1,4 +1,4 @@
-// $Id: spooler.h,v 1.2 2001/01/02 12:50:24 jz Exp $
+// $Id: spooler.h,v 1.3 2001/01/02 13:51:36 jz Exp $
 
 #ifndef __SPOOLER_H
 
@@ -74,8 +74,25 @@ struct Level_interval
                                 Level_interval              ( xml::Element_ptr );
                                 Level_interval              ()                      : _low_level(0), _high_level(0) {}
 
+    bool                        is_in_interval              ( Level level )         { return level >= _low_level && level < _high_level; }
+
     Level                      _low_level;
     Level                      _high_level;
+};
+
+//-----------------------------------------------------------------------------------Spooler_object
+
+struct Spooler_object
+{
+                              //Spooler_object              ( IDispatch* dispatch = NULL         ) : _dispatch(dispatch) {}
+                                Spooler_object              ( const CComPtr<IDispatch>& dispatch = NULL ) : _dispatch(dispatch) {}
+
+    Spooler_object&             operator =                  ( const CComPtr<IDispatch>& dispatch ) { _dispatch = dispatch; return *this; }
+    Level                       level                       ();
+    void                        process                     ( Level output_level );
+    bool                        is_null                     ()                              { return _dispatch == NULL; }
+
+    CComPtr<IDispatch>         _dispatch;
 };
 
 //---------------------------------------------------------------------------------Object_set_descr
@@ -90,6 +107,21 @@ struct Object_set_descr : Sos_self_deleting
     Level_interval             _level_interval;
 };
 
+//---------------------------------------------------------------------------------------Object_set
+
+struct Object_set : Sos_self_deleting
+{
+                                Object_set                  ( const Sos_ptr<Object_set_descr>& descr ) : _object_set_descr(descr) {}
+
+    void                        open                        ();
+    void                        close                       ();
+    Spooler_object              get                         ();
+
+    CComPtr<Script_site>       _script_site;
+    CComPtr<IDispatch>         _dispatch;
+    Sos_ptr<Object_set_descr>  _object_set_descr;
+};
+
 //-------------------------------------------------------------------------------------------Object
 /*
 struct Object
@@ -100,7 +132,8 @@ struct Object
 
 struct Job_descr : Sos_self_deleting
 {
-                                Job_descr                    ()                     : _zero_(this+1) {}
+                                Job_descr                   ()                     : _zero_(this+1) {}
+                                Job_descr                   ( xml::Element_ptr );
 
 
     Fill_zero                  _zero_;
@@ -112,19 +145,19 @@ struct Job_descr : Sos_self_deleting
   //Repeat_time                _repeat_time;
     bool                       _stop_at_end_of_duration;
     bool                       _continual;
-    time_t                     _next_try;                   // Zeitpunkt des nächsten Startversuchs, nachdem Objektemenge leer war
     bool                       _stop_after_error;
     bool                       _rerun;
     bool                       _start_after_spooler;
     int                        _priority;
 };
 
+typedef list< Sos_ptr<Job_descr> >    Job_descr_list;
+
 //----------------------------------------------------------------------------------------------Job
 
-struct Job : Job_descr
+struct Job : Sos_self_deleting
 {
-                                Job                         ()                      : _zero_(this+1) {}
-                                Job                         ( xml::Element_ptr );
+                                Job                         ( const Sos_ptr<Job_descr>& descr )    : _zero_(this+1), _job_descr(descr) {}
 
     void                        start                       ();
     void                        end                         ();
@@ -132,12 +165,13 @@ struct Job : Job_descr
 
 
     Fill_zero                  _zero_;
+    Sos_ptr<Job_descr>         _job_descr;
     bool                       _running;
     time_t                     _running_since;
     int                        _running_priority;
 
-    CComPtr<Script_site>       _script_site;
-    CComPtr<IDispatch>         _object_set;
+    Sos_ptr<Object_set>        _object_set;
+    time_t                     _next_try;                   // Zeitpunkt des nächsten Startversuchs, nachdem Objektemenge leer war
 };
 
 typedef list< Sos_ptr<Job> >    Job_list;
@@ -171,8 +205,9 @@ struct Spooler
     void                        load_xml                    ();
 
     void                        load_object_set_classes_from_xml( Object_set_class_list*, xml::Element_ptr );
-    void                        load_jobs_from_xml          ( Job_list*, xml::Element_ptr );
+    void                        load_jobs_from_xml          ( Job_descr_list*, xml::Element_ptr );
 
+    void                        start                       ();       
     void                        run                         ();       
 
     bool                        step                        ();
@@ -180,6 +215,7 @@ struct Spooler
 
     Fill_zero                  _zero_;
     Object_set_class_list      _object_set_class_list;
+    Job_descr_list             _job_descr_list;
     Job_list                   _job_list;
     time_t                     _next_try_period;
 };

@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.2 2001/01/02 12:50:24 jz Exp $
+// $Id: spooler.cxx,v 1.3 2001/01/02 13:51:36 jz Exp $
 
 //#include <precomp.h>
 
@@ -14,21 +14,78 @@ extern const Bool _dll = false;
 
 namespace spooler {
 
+//----------------------------------------------------------------------------Spooler_object::level
+
+Level Spooler_object::level()
+{
+    CComVariant level = com_invoke( _dispatch, "level" );
+    level.ChangeType( VT_INT );
+
+    return level.intVal;
+}
+
+//--------------------------------------------------------------------------Spooler_object::process
+
+void Spooler_object::process( Level output_level )
+{
+    com_invoke( _dispatch, "process()", output_level );
+}
+
+//---------------------------------------------------------------------------------Object_set::open
+
+void Object_set::open()
+{
+    _script_site = new Script_site;
+    _script_site->_engine_name = _object_set_descr->_class->_script_language;
+    _script_site->init_engine();
+
+    _script_site->parse( _object_set_descr->_class->_script );
+
+    CComVariant object_set_vt = _script_site->call( "spooler_make_object_set()" );
+    if( object_set_vt.vt != VT_DISPATCH )  throw_xc( "SPOOLER-103", _object_set_descr->_class_name );
+    _dispatch = object_set_vt.pdispVal;
+
+    com_invoke( _dispatch, "spooler_open()" );
+}
+
+//--------------------------------------------------------------------------------Object_set::close
+
+void Object_set::close()
+{
+    com_invoke( _dispatch, "spooler_close()" );
+
+    _script_site->close_engine();
+    _script_site = NULL;
+}
+
+//----------------------------------------------------------------------------------Object_set::get
+
+Spooler_object Object_set::get()
+{
+    Spooler_object object;
+
+    while(1)
+    {
+        CComVariant obj = com_invoke( _dispatch, "spooler_get()" );
+
+        if( obj.vt == VT_EMPTY    )  return Spooler_object(NULL);
+        if( obj.vt != VT_DISPATCH )  throw_xc( "SPOOLER-102", _object_set_descr->_class_name );
+        
+        object = obj.pdispVal;
+
+        if( obj.pdispVal == NULL )  break;  // EOF
+        if( _object_set_descr->_level_interval.is_in_interval( object.level() ) )  break;
+    }
+
+    return object;
+}
+
 //---------------------------------------------------------------------------------------Job::start
 
 void Job::start()
 {
-    _script_site = new Script_site;
-    _script_site->_engine_name = _object_set_descr._class->_script_language;
-    _script_site->init_engine();
-
-    _script_site->parse( _object_set_descr._class->_script );
-
-    CComVariant object_set_vt = _script_site->call( "spooler_make_object_set()" );
-    if( object_set_vt.vt != VT_DISPATCH )  throw_xc( "SPOOLER-103", _object_set_descr._class_name );
-    _object_set = object_set_vt.pdispVal;
-
-    com_invoke( _object_set, "spooler_open()" );
+    _object_set = SOS_NEW( Object_set( &_job_descr->_object_set_descr ) );
+    _object_set->open();
 
     _running = true;
 }
@@ -37,10 +94,8 @@ void Job::start()
 
 void Job::end()
 {
-    com_invoke( _object_set, "spooler_close()" );
+    _object_set->close();
 
-    _script_site->close_engine();
-    _script_site = NULL;
     _running = false;
 }
 
@@ -48,24 +103,11 @@ void Job::end()
 
 bool Job::step()
 {
-    CComVariant object;
+    Spooler_object object = _object_set->get();
 
-    while(1)
-    {
-        object = com_invoke( _object_set, "spooler_get()" );
-
-        if( object.vt == VT_EMPTY )  return false;
-        if( object.vt != VT_DISPATCH )  throw_xc( "SPOOLER-102", _object_set_descr._class_name );
-        if( object.pdispVal == NULL )  return false;
-
-        // Level im gültigen Bereich?
-        CComVariant level = com_invoke( object.pdispVal, "level" );
-        level.ChangeType( VT_INT );
-        if( level.intVal >= _object_set_descr._level_interval._low_level 
-         && level.intVal < _object_set_descr._level_interval._high_level )  break;
-    }
+    if( object.is_null() )  return false;
     
-    com_invoke( object.pdispVal, "process()", _output_level );
+    object.process( _job_descr->_output_level );
 
     return true;
 }
@@ -108,6 +150,16 @@ void Spooler::load()
     load_xml();
 }
 
+//-----------------------------------------------------------------------------------Spooler::start
+
+void Spooler::start()
+{
+    FOR_EACH( Job_descr_list, _job_descr_list, it )
+    {
+        _job_list.push_back( SOS_NEW( Job( *it ) ) );
+    }
+}
+
 //-------------------------------------------------------------------------------------Spooler::run
 
 void Spooler::run()
@@ -133,6 +185,7 @@ int sos_main( int argc, char** argv )
     spooler::Spooler spooler;
 
     spooler.load();
+    spooler.start();
     spooler.run();
 
     CoUninitialize();

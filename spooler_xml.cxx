@@ -1,4 +1,4 @@
-// $Id: spooler_xml.cxx,v 1.2 2001/01/02 12:50:25 jz Exp $
+// $Id: spooler_xml.cxx,v 1.3 2001/01/02 13:51:36 jz Exp $
 
 //#include <precomp.h>
 
@@ -82,9 +82,9 @@ Object_set_descr::Object_set_descr( xml::Element_ptr element )
 {
 }
 
-//-----------------------------------------------------------------------------------------Job::Job
+//------------------------------------------------------------------------------Job_descr::Job_descr
 
-Job::Job( xml::Element_ptr element )
+Job_descr::Job_descr( xml::Element_ptr element )
 : 
     _zero_(this+1)
 {
@@ -108,7 +108,7 @@ void Spooler::load_object_set_classes_from_xml( Object_set_class_list* list, xml
 
 //----------------------------------------------------------------------Spooler::load_jobs_from_xml
 
-void Spooler::load_jobs_from_xml( Job_list* list, xml::Element_ptr element )
+void Spooler::load_jobs_from_xml( Job_descr_list* list, xml::Element_ptr element )
 {
     xml::NodeList_ptr node_list = element->childNodes;
 
@@ -120,17 +120,17 @@ void Spooler::load_jobs_from_xml( Job_list* list, xml::Element_ptr element )
         {
             try
             {
-                Sos_ptr<Job> job = SOS_NEW( Job( n ) );
+                Sos_ptr<Job_descr> job_descr = SOS_NEW( Job_descr( n ) );
 
                 for( Object_set_class_list::iterator it = _object_set_class_list.begin(); it != _object_set_class_list.end(); it++ )
                 {
-                    if( (*it)->_name == job->_object_set_descr._class_name )  break;
+                    if( (*it)->_name == job_descr->_object_set_descr._class_name )  break;
                 }
-                if( it == _object_set_class_list.end() )  throw_xc( "SPOOLER-101", job->_object_set_descr._class_name );
+                if( it == _object_set_class_list.end() )  throw_xc( "SPOOLER-101", job_descr->_object_set_descr._class_name );
 
-                job->_object_set_descr._class = *it;
+                job_descr->_object_set_descr._class = *it;
 
-                list->push_back( job );
+                list->push_back( job_descr );
             }
             catch( const Xc& )
             {
@@ -175,7 +175,7 @@ void Spooler::load_xml()
             else
             if( node->nodeName == "jobs" ) 
             {
-                load_jobs_from_xml( &_job_list, node );
+                load_jobs_from_xml( &_job_descr_list, node );
             }
         }
     }
