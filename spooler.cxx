@@ -1361,7 +1361,8 @@ void Spooler::load_arg()
   //_interactive                = true;     // Kann ohne weiteres true gesetzt werden (aber _is_service setzt es wieder false)
 
 
-    _mail_on_error   =            read_profile_bool           ( _factory_ini, "spooler", "mail_on_error"  , _mail_on_error );
+    _mail_on_warning =            read_profile_bool           ( _factory_ini, "spooler", "mail_on_warning", _mail_on_warning );
+    _mail_on_error   =            read_profile_bool           ( _factory_ini, "spooler", "mail_on_error"  , _mail_on_error | _mail_on_warning );
     _mail_on_process =            read_profile_mail_on_process( _factory_ini, "spooler", "mail_on_process", _mail_on_process );
     _mail_on_success =            read_profile_bool           ( _factory_ini, "spooler", "mail_on_success", _mail_on_success );
     _mail_queue_dir  = subst_env( read_profile_string         ( _factory_ini, "spooler", "mail_queue_dir" , _mail_queue_dir ) );

@@ -270,6 +270,11 @@ struct Com_log : spooler_com::Ilog,
 
     STDMETHODIMP            get_Last_error_line             ( BSTR* );
 
+    STDMETHODIMP            get_Last                        ( VARIANT*, BSTR* );
+
+    STDMETHODIMP            put_Mail_on_warning             ( VARIANT_BOOL );
+    STDMETHODIMP            get_Mail_on_warning             ( VARIANT_BOOL* );
+    
   private:
     Fill_zero                  _zero_;
     Thread_semaphore           _lock;

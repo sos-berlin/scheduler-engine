@@ -320,6 +320,7 @@ struct Spooler
     bool                       _is_service;                 // NT-Dienst
     bool                       _debug;
     int                        _log_level;
+    bool                       _mail_on_warning;            // Für Job-Protokolle
     bool                       _mail_on_error;              // Für Job-Protokolle
     int                        _mail_on_process;            // Für Job-Protokolle
     bool                       _mail_on_success;            // Für Job-Protokolle

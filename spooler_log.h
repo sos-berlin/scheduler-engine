@@ -110,12 +110,16 @@ struct Prefix_log : Object, Has_log
     void                        log2                        ( Log_level, const string& prefix, const string& line, Has_log* );
 
     void                        log_file                    ( const string& filename, const string& title = "" );
-    string                      last_error_line             ()                                  { return _last_error_line; }
+    string                      last_error_line             ()                                  { return _last[ log_error ]; }
+    string                      last                        ( Log_level level )                 { return _last[ level ]; }
 
     string                      as_string                   ();
 
     void                    set_mail_on_error               ( bool b )                          { _mail_on_error = b; }
     bool                        mail_on_error               ()                                  { return _mail_on_error; }
+
+    void                    set_mail_on_warning             ( bool b )                          { _mail_on_warning = b; }
+    bool                        mail_on_warning             ()                                  { return _mail_on_warning; }
 
     void                    set_mail_on_success             ( bool b )                          { _mail_on_success = b; }
     bool                        mail_on_success             ()                                  { return _mail_on_success; }
@@ -157,7 +161,7 @@ struct Prefix_log : Object, Has_log
     int                        _highest_level;
     string                     _highest_msg;
     
-    string                     _last_error_line;
+    stdext::hash_map< Log_level, string >  _last;
 
     string                     _title;
     string                     _filename;                   // Name einer zusätzlichen Log-Datei (für die Tasks)
@@ -167,6 +171,7 @@ struct Prefix_log : Object, Has_log
     bool                       _started;                    // open() gerufen
     bool                       _closed;
 
+    bool                       _mail_on_warning;
     bool                       _mail_on_error;
     bool                       _mail_on_success;
     int                        _mail_on_process;

@@ -63,3 +63,12 @@ Neue Eigenschaft spooler.ini_path liefert die Option -ini=.
 Keine CPU-Last mehr, wenn Browser http://.../show_log? schließt.
 
 Scheduler priorisiert bei Task-Fehler nicht mehr eigenen Subject und Body der eMail-Nachricht.
+
+
+------------------------------------------------
+VERSION 2.0.107
+
+HTML-Bedienung (http://localhost:4444/jz) überarbeitet: 
+Wenn im rechten Frame ein Job gezeigt wird, kann zwischen Task-Warteschlange, Task-Historie 
+und Auftragswarteschlange gewählt werden.
+

@@ -863,6 +863,9 @@ const Com_method Com_log::_methods[] =
     { DISPATCH_PROPERTYPUT, 23, "mail_it"              , (Com_method_ptr)&Com_log::put_Mail_it             , VT_EMPTY      , { VT_BOOL } },
     { DISPATCH_PROPERTYGET, 24, "java_class_name"      , (Com_method_ptr)&Com_log::get_Java_class_name     , VT_BSTR },
     { DISPATCH_PROPERTYGET, 25, "last_error_line"      , (Com_method_ptr)&Com_log::get_Last_error_line     , VT_BSTR },
+    { DISPATCH_PROPERTYGET, 26, "last"                 , (Com_method_ptr)&Com_log::get_Last                , VT_BSTR       , { VT_BYREF|VT_VARIANT } },
+    { DISPATCH_PROPERTYPUT, 27, "mail_on_warning"      , (Com_method_ptr)&Com_log::put_Mail_on_warning     , VT_EMPTY      , { VT_BOOL } },
+    { DISPATCH_PROPERTYGET, 27, "mail_on_warning"      , (Com_method_ptr)&Com_log::get_Mail_on_warning     , VT_BOOL       },
     {}
 };
 
@@ -1013,6 +1016,43 @@ STDMETHODIMP Com_log::get_Mail_on_error( VARIANT_BOOL* b )
     return hr;
 }
 
+//---------------------------------------------------------------------Com_log::put_Mail_on_warning
+
+STDMETHODIMP Com_log::put_Mail_on_warning( VARIANT_BOOL b )
+{
+    HRESULT hr = NOERROR;
+
+    THREAD_LOCK( _lock )
+    try 
+    {
+        if( !_log )  return E_POINTER;
+
+        _log->set_mail_on_warning( b != 0 );
+    }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
+
+    return hr;
+}
+
+//---------------------------------------------------------------------Com_log::get_Mail_on_warning
+
+STDMETHODIMP Com_log::get_Mail_on_warning( VARIANT_BOOL* b )
+{
+    HRESULT hr = NOERROR;
+
+    THREAD_LOCK( _lock )
+    try 
+    {
+        if( !_log )  return E_POINTER;
+
+        *b = _log->mail_on_warning();
+    }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
+
+    return hr;
+}
     
 //----------------------------------------------------------------------Com_log::put_mail_on_success
 
@@ -1291,6 +1331,25 @@ STDMETHODIMP Com_log::get_Last_error_line( BSTR* result )
         if( !_log )  return E_POINTER;
 
         hr = String_to_bstr( _log->last_error_line(), result );
+    }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Log::last_error_line" ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Log::last_error_line" ); }
+
+    return hr;
+}
+
+//--------------------------------------------------------------------------------Com_log::get_Last
+
+STDMETHODIMP Com_log::get_Last( VARIANT* level, BSTR* result )
+{
+    HRESULT hr = NOERROR;
+
+    THREAD_LOCK( _lock )
+    try 
+    {
+        if( !_log )  return E_POINTER;
+
+        hr = String_to_bstr( _log->last( make_log_level( string_from_variant( *level ) ) ), result );
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Log::last_error_line" ); }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Log::last_error_line" ); }

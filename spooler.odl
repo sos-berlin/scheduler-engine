@@ -918,6 +918,15 @@ library Spooler
 
         [propget]
         HRESULT                 Last_error_line         ( [out,retval] BSTR* line );
+
+        [propget]
+        HRESULT                 Last                    ( [in] VARIANT* level, [out,retval] BSTR* );
+
+        [propput]
+        HRESULT                 Mail_on_warning         ( [in] VARIANT_BOOL );
+
+        [propget]
+        HRESULT                 Mail_on_warning         ( [out,retval] VARIANT_BOOL* );
     }
 
     [

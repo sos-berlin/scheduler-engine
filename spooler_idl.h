@@ -324,6 +324,11 @@ struct Ilog : IDispatch
     virtual HRESULT     get_Collect_max             ( double* time ) = 0;
 
     virtual HRESULT     get_Last_error_line         ( BSTR* ) = 0;
+    virtual HRESULT     get_Last                    ( VARIANT*, BSTR* ) = 0;
+
+    virtual HRESULT     put_Mail_on_warning         ( VARIANT_BOOL ) = 0;
+    virtual HRESULT     get_Mail_on_warning         ( VARIANT_BOOL* ) = 0;
+
 };
 
 //----------------------------------------------------------------------------------Spooler_context

@@ -338,6 +338,7 @@ void Prefix_log::init( Spooler* spooler, const string& prefix )
     _prefix  = prefix;
 
     _log_level       = _spooler->_log_level;
+    _mail_on_warning = _spooler->_mail_on_warning;
     _mail_on_error   = _spooler->_mail_on_error;
     _mail_on_process = _spooler->_mail_on_process;
     _mail_on_success = _spooler->_mail_on_success;
@@ -358,6 +359,7 @@ void Prefix_log::set_profile_section( const string& section )
     if( !_section.empty() ) 
     {
         _log_level       = make_log_level( read_profile_string( _spooler->_factory_ini, _section, "log_level", sos::as_string(_log_level) ) );
+        _mail_on_warning = read_profile_bool           ( _spooler->_factory_ini, _section, "mail_on_warning"   , _mail_on_error | _mail_on_error );
         _mail_on_error   = read_profile_bool           ( _spooler->_factory_ini, _section, "mail_on_error"     , _mail_on_error );
         _mail_on_process = read_profile_mail_on_process( _spooler->_factory_ini, _section, "mail_on_process"   , _mail_on_process );
         _mail_on_success =         read_profile_bool   ( _spooler->_factory_ini, _section, "mail_on_success"   , _mail_on_success );
@@ -379,6 +381,7 @@ void Prefix_log::inherit_settings( const Prefix_log& other )
 {
     _log_level       = other._log_level;
 
+    _mail_on_warning = other._mail_on_warning;
     _mail_on_error   = other._mail_on_error;
     _mail_on_process = other._mail_on_process;
     _mail_on_success = other._mail_on_success;
@@ -668,9 +671,9 @@ void Prefix_log::send( int reason )
         bool mail_it =  _mail_it
                      || reason == -1  &&  _mail_on_error
                      || reason ==  0  &&  _mail_on_success
-                     || reason  >  0  &&  ( _mail_on_success || _mail_on_process && reason >= _mail_on_process );
+                     || reason  >  0  &&  ( _mail_on_success || _mail_on_process && reason >= _mail_on_process )
+                     || _mail_on_warning  &&  _last.find( log_warn ) != _last.end();
 
-        //Z_LOG2( "joacim", "Prefix_log::send()  mail_it=" << mail_it << "\n" );
         Time now = Time::now();
 
         if( _first_send == 0  &&  !mail_it )
@@ -743,7 +746,8 @@ void Prefix_log::log2( Log_level level, const string& prefix, const string& line
     if( _highest_level < level )  _highest_level = level, _highest_msg = line;
     if( level < _log_level )  return;
 
-    if( level == log_error )  _last_error_line = line;
+    //if( level == log_error )  _last_error_line = line;
+    _last[ level ] = line;
 
     _log->log2( level, _task? "Task " + _job->name() + " " + sos::as_string(_task->id()) : _prefix, line, this, _order_log );
 }
