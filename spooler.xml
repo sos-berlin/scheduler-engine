@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 
-<!-- $Id: spooler.xml,v 1.35 2001/02/21 10:57:35 jz Exp $   (C) 2001 SOS GmbH Berlin -->
+<!-- $Id: spooler.xml,v 1.36 2001/02/23 09:02:11 jz Exp $   (C) 2001 SOS GmbH Berlin -->
 
 <!DOCTYPE spooler SYSTEM "s:\prod\spooler\spooler.dtd">
 
@@ -422,6 +422,14 @@ sub spooler_exit()
                     ]]></script>
 
                     <run_time repeat="60"/>
+                </job>
+
+                <job name="umlaute">
+                    <script language="JScript"><![CDATA[
+                        function spooler_process() { spooler_task.error = "Fehlermeldung mit Umlauten: ÅÄÖÜåäöüß"; }
+                    ]]></script>
+
+                    <run_time/>
                 </job>
 
             </jobs>

@@ -1,4 +1,4 @@
-// $Id: spooler_command.cxx,v 1.31 2001/02/21 10:57:36 jz Exp $
+// $Id: spooler_command.cxx,v 1.32 2001/02/23 09:02:11 jz Exp $
 /*
     Hier ist implementiert
 
@@ -11,6 +11,22 @@
 
 #include "../kram/sleep.h"
 #include "../file/anyfile.h"
+
+
+// Für temporäre Datei:
+
+#include <sys/stat.h>               // S_IREAD, stat()
+#include <fcntl.h>                  // O_RDONLY
+
+#if defined SYSTEM_WIN
+#   include <io.h>                  // open(), read() etc.
+#   include <share.h>
+#   include <direct.h>              // mkdir
+#   include <windows.h>
+#else
+#   include <stdio.h>               // fileno
+#   include <unistd.h>              // read(), write(), close()
+#endif
 
 
 
@@ -220,6 +236,34 @@ xml::Element_ptr Command_processor::execute_command( const xml::Element_ptr& ele
     }
 }
 
+//------------------------------------------------------------------------------------xml_as_string
+
+static string xml_as_string( const xml::Document_ptr& document )
+{
+    char   tmp_filename [MAX_PATH];
+    int    ret;
+    string result;
+
+    ret = GetTempPath( sizeof tmp_filename, tmp_filename );
+    if( ret == 0 )  throw_mswin_error( "GetTempPath" );
+
+    ret = GetTempFileName( tmp_filename, "sos", 0, tmp_filename );
+    if( ret == 0 )  throw_mswin_error( "GetTempPath" );
+
+    LOG( "Temporäre Datei " << tmp_filename << " für XML-Antwort\n" );
+
+    try 
+    {
+        document->save( tmp_filename );
+        result = file_as_string( tmp_filename );
+        unlink( tmp_filename );
+    }
+    catch( const Xc&         ) { unlink( tmp_filename ); result = "<spooler/>"; }
+    catch( const _com_error& ) { unlink( tmp_filename ); result = "<spooler/>"; }
+
+    return result;
+}
+
 //------------------------------------------------------------------------Command_processor::execute
 
 string Command_processor::execute( const string& xml_text )
@@ -235,13 +279,9 @@ string Command_processor::execute( const string& xml_text )
         append_error_element( _answer->documentElement->firstChild, x );
     }
 
-    return _answer->xml;
-
-/*  Bei save wird die encoding belassen. Eigenschaft xml verwendet stets unicode, was wir nicht wollen.
-    _answer->save( "c:/tmp/~spooler.xml" );
-    _answer = NULL;
-    return file_as_string( "c:/tmp/~spooler.xml" );
-*/
+  //return _answer->xml;  //Bei save wird die encoding belassen. Eigenschaft xml verwendet stets unicode, was wir nicht wollen.
+    
+    return xml_as_string( _answer );
 }
 
 //----------------------------------------------------------------------Command_processor::execute_2
