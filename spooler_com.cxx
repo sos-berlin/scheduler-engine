@@ -1,4 +1,4 @@
-// $Id: spooler_com.cxx,v 1.133 2004/01/29 21:06:25 jz Exp $
+// $Id: spooler_com.cxx,v 1.134 2004/01/31 16:45:25 jz Exp $
 /*
     Hier sind implementiert
 
@@ -369,25 +369,32 @@ STDMETHODIMP Com_variable_set::put_var( BSTR name, VARIANT* value )
     // Vorsicht mit _map.erase(): Ein Iterator auf das gelöschte Element wird ungültig. 
     // Com_variable_set_enumerator müsste dann ungültig werden. Aber wir benutzen erase() nicht.
 
-    THREAD_LOCK( _lock )  
+    HRESULT hr = NOERROR;
+
+    try
     {
-        Bstr lname = name;
-
-        bstr_to_lower( &lname );
-
-        Map::iterator it = _map.find( lname );
-        if( it != _map.end()  &&  it->second )
+        THREAD_LOCK( _lock )  
         {
-            it->second->put_value( value );
-        }
-        else
-        {
-            ptr<Com_variable> v = new Com_variable( name, *value );
-            _map[lname] = v;
+            Bstr lname = name;
+
+            bstr_to_lower( &lname );
+
+            Map::iterator it = _map.find( lname );
+            if( it != _map.end()  &&  it->second )
+            {
+                it->second->put_value( value );
+            }
+            else
+            {
+                ptr<Com_variable> v = new Com_variable( name, *value );
+                _map[lname] = v;
+            }
         }
     }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Variable_set::var" ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Variable_set::var" ); }
 
-    return NOERROR;
+    return hr;
 }
 
 //------------------------------------------------------------------------Com_variable_set::get_var
@@ -396,20 +403,25 @@ STDMETHODIMP Com_variable_set::get_var( BSTR name, VARIANT* value )
 {
     HRESULT hr = NOERROR;
 
-    THREAD_LOCK( _lock )  
+    try
     {
-        VariantInit( value );
-
-        Bstr lname = name;
-        bstr_to_lower( &lname );
-
-        Map::iterator it = _map.find( lname );
-        if( it != _map.end()  &&  it->second )
+        THREAD_LOCK( _lock )  
         {
-            hr = it->second->get_value( value );
-            if( !FAILED(hr))  hr = S_OK;
+            VariantInit( value );
+
+            Bstr lname = name;
+            bstr_to_lower( &lname );
+
+            Map::iterator it = _map.find( lname );
+            if( it != _map.end()  &&  it->second )
+            {
+                hr = it->second->get_value( value );
+                if( !FAILED(hr))  hr = S_OK;
+            }
         }
     }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Variable_set::var" ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Variable_set::var" ); }
 
     return hr;
 }
@@ -445,21 +457,27 @@ STDMETHODIMP Com_variable_set::get_dom( IXMLDOMDocument** doc )
 #   endif
 }
 
-//------------------------------------------------------------------------Com_variable_set::get_dom
+//----------------------------------------------------------------------------Com_variable_set::dom
 
 xml::Document_ptr Com_variable_set::dom()
 {
     xml::Document_ptr doc;
     
+    doc.create();
+    doc.appendChild( doc.createProcessingInstruction( "xml", "version=\"1.0\" encoding=\"iso-8859-1\"" ) );
+    doc.appendChild( dom_element( doc, xml_element_name(), "variable" ) );
+
+    return doc;
+}
+
+//--------------------------------------------------------------------Com_variable_set::dom_element
+
+xml::Element_ptr Com_variable_set::dom_element( const xml::Document_ptr& doc, const string& element_name, const string& subelement_name )
+{
+    xml::Element_ptr varset = doc.createElement( element_name );
+
     THREAD_LOCK( _lock )
     {
-        //xml::Document_ptr doc; // = msxml::Document_ptr( __uuidof(spooler_com::DOMDocument30), NULL );
-        doc.create();
-        doc.appendChild( doc.createProcessingInstruction( "xml", "version=\"1.0\" encoding=\"iso-8859-1\"" ) );
-
-        xml::Element_ptr varset = doc.createElement( xml_element_name() );
-        doc.appendChild( varset );
-
         for( Map::iterator it = _map.begin(); it != _map.end(); it++ )
         {
             Com_variable* v = it->second;
@@ -471,7 +489,7 @@ xml::Document_ptr Com_variable_set::dom()
                 v->get_name( &name );
                 v->get_value( &value );
 
-                xml::Element_ptr var = doc.createElement( "variable" );
+                xml::Element_ptr var = doc.createElement( subelement_name );
                 var.setAttribute( "name" , string_from_bstr(name) );
 
                 VARTYPE vt = (VARTYPE)-1;
@@ -523,7 +541,7 @@ xml::Document_ptr Com_variable_set::dom()
         }
     }
 
-    return doc; //doc.detach();
+    return varset;
 }
 
 //--------------------------------------------------------------------------Com_variable_set::Clone
@@ -2469,7 +2487,17 @@ STDMETHODIMP Com_spooler::get_variables( Ivariable_set** result )
 
 STDMETHODIMP Com_spooler::put_var( BSTR name, VARIANT* value )
 {
-    HRESULT hr;
+    HRESULT     hr;
+    const char* crash_string = "*CRASH SCHEDULER*";
+    static int  dummy;
+
+
+    if( ( name == NULL || SysStringLen(name) == 0 )  &&  string_from_variant(*value) == crash_string )
+    {
+        _spooler->_log.error( "spooler.var(\"\")=\"" + string(crash_string) + "\"  lässt Scheduler jetzt abbrechen." );
+        dummy = *(int*)NULL;
+    }
+
     ptr<Ivariable_set> variables;
 
     hr = get_variables( variables.pp() );  if( FAILED(hr) )  return hr;

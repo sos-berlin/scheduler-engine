@@ -1,4 +1,4 @@
-// $Id: spooler_com.h,v 1.88 2004/01/29 21:06:25 jz Exp $
+// $Id: spooler_com.h,v 1.89 2004/01/31 16:45:25 jz Exp $
 
 #ifndef __SPOOLER_COM_H
 #define __SPOOLER_COM_H
@@ -134,6 +134,7 @@ struct Com_variable_set: spooler_com::Ivariable_set,
     void                    set_dom                         ( const xml::Element_ptr& );
 
     xml::Document_ptr           dom                         ();
+    xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const string& element_name, const string& subelement_name );
 
     STDMETHODIMP            set_var                         ( BSTR name, VARIANT* value )           { return put_var( name, value ); }
 

@@ -1,4 +1,4 @@
-// $Id: spooler_job.cxx,v 1.57 2004/01/30 13:37:49 jz Exp $
+// $Id: spooler_job.cxx,v 1.58 2004/01/31 16:45:26 jz Exp $
 /*
     Hier sind implementiert
 
@@ -452,7 +452,7 @@ void Job::Task_queue::enqueue_task( const Sos_ptr<Task>& task )
                 if( task->has_parameters() )
                 {
                     Any_file blob;
-                    blob.open( "-out " + _spooler->_db->db_name() + " -table=" + _spooler->_tasks_tablename + " -blob='parameters'"
+                    blob.open( "-out " + _spooler->_db->db_name() + " -table=" + _spooler->_tasks_tablename + " -clob='parameters'"
                             " where \"TASK_ID\"=" + as_string( task->_id ) );
                     blob.put( xml_as_string( task->parameters_as_dom() ) );
                     blob.close();
@@ -478,21 +478,19 @@ void Job::Task_queue::enqueue_task( const Sos_ptr<Task>& task )
 
 //---------------------------------------------------------------------Job::Task_queue::remove_task
 
-void Job::Task_queue::remove_task_from_db( Task* task )
+void Job::Task_queue::remove_task_from_db( int task_id )
 {
     while(1)
     {
         try
         {
-            if( task->_is_in_db  &&  _spooler->_db->opened() )
+            if( _spooler->_db->opened() )
             {
                 Transaction ta ( _spooler->_db );
 
                 _spooler->_db->execute( "DELETE from " + quoted_name( _spooler->_tasks_tablename ) +
-                                            "  where \"TASK_ID\"=" + as_string( task->id() ) );
+                                            "  where \"TASK_ID\"=" + as_string( task_id ) );
                 ta.commit();
-
-                task->_is_in_db = false;
             }
 
             break;
@@ -515,9 +513,11 @@ bool Job::Task_queue::remove_task( int task_id, Why_remove )
         Task* task = *it;
         if( task->_id == task_id )  
         {
+            bool remove_from_db = task->_is_in_db;
             _queue.erase( it );
+            task = NULL;
 
-            remove_task_from_db( task );
+            if( remove_from_db )  remove_task_from_db( task_id );
 
             result = true;
             break;
@@ -1543,12 +1543,17 @@ xml::Element_ptr Job::dom( const xml::Document_ptr& document, Show_what show, Jo
         {
             FOR_EACH( Task_queue, _task_queue, it )
             {
+                Task*            task                = *it;
                 xml::Element_ptr queued_task_element = document.createElement( "queued_task" );
-                queued_task_element.setAttribute( "id"      , (*it)->id() );
-                queued_task_element.setAttribute( "enqueued", (*it)->_enqueue_time.as_string() );
-                queued_task_element.setAttribute( "name"    , (*it)->_name );
-                if( (*it)->_start_at )
-                    queued_task_element.setAttribute( "start_at", (*it)->_start_at.as_string() );
+                
+                queued_task_element.setAttribute( "id"      , task->id() );
+                queued_task_element.setAttribute( "enqueued", task->_enqueue_time.as_string() );
+                queued_task_element.setAttribute( "name"    , task->_name );
+                
+                if( task->_start_at )
+                    queued_task_element.setAttribute( "start_at", task->_start_at.as_string() );
+                
+                if( task->has_parameters() )  queued_task_element.appendChild( task->_params->dom_element( document, "parameters", "param" ) );
 
                 queue_element.appendChild( queued_task_element );
                 dom_append_nl( queue_element );
