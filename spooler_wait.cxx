@@ -1,4 +1,4 @@
-// $Id: spooler_wait.cxx,v 1.93 2004/02/04 18:42:40 jz Exp $
+// $Id: spooler_wait.cxx,v 1.94 2004/02/05 16:59:09 jz Exp $
 /*
     Hier sind implementiert
 
@@ -517,6 +517,7 @@ struct Directory_reader
         string pattern = dirname + "/*";
         _finddata_t data;
         _handle = _findfirst( pattern.c_str(), &data ); 
+      //if( data.attrib &  ...dir... )  return data.name + Z_DIR_SEPARATOR;
         if( _handle == -1 )  throw_errno( errno, "_findfirst", dirname.c_str() );  
         return data.name; 
     }
@@ -531,6 +532,7 @@ struct Directory_reader
             throw_errno( errno, "_findnext" ); 
         }
 
+      //if( data.attrib &  ...dir... )  return data.name + Z_DIR_SEPARATOR;
         return data.name; 
     }
 
