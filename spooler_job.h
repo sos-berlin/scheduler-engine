@@ -1,4 +1,4 @@
-// $Id: spooler_job.h,v 1.10 2003/10/18 21:23:17 jz Exp $
+// $Id: spooler_job.h,v 1.11 2003/10/19 19:59:02 jz Exp $
 
 #ifndef __SPOOLER_JOB_H
 #define __SPOOLER_JOB_H
@@ -177,10 +177,10 @@ struct Job : Sos_self_deleting
     string                      jobname_as_filename         ();
     string                      profile_section             ();
     bool                        temporary                   () const                                { return _temporary; }
-    void                        set_delay_after_error       ( int error_steps, Time delay )         { _delay_after_error[error_steps] = delay; }
-    void                        set_delay_order_after_setback( int setbacks, Time delay )           { _delay_order_after_setback[setbacks] = delay; }
+    void                        set_delay_after_error       ( int error_steps, Time delay )         { _log.debug9( "delay_after_error["        +as_string(error_steps)+"]="+delay.as_string() ); _delay_after_error        [error_steps] = delay; }
+    void                        set_delay_order_after_setback( int setbacks, Time delay )           { _log.debug9( "delay_order_after_setback["+as_string(setbacks  )+"]="+delay.as_string() ); _delay_order_after_setback[setbacks   ] = delay; }
     Time                        get_delay_order_after_setback( int setback_count );
-    void                        set_max_order_setbacks      ( int n )                               { _max_order_setbacks = n; }
+    void                        set_max_order_setbacks      ( int n )                               { _log.debug9( "max_order_setbacks"+as_string(n) ); _max_order_setbacks = n; }
     int                         max_order_setbacks          () const                                { return _max_order_setbacks; }
     xml::Element_ptr            read_history                ( const xml::Document_ptr& doc, int id, int n, Show_what show ) { return _history.read_tail( doc, id, n, show ); }
 

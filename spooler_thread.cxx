@@ -1,4 +1,4 @@
-// $Id: spooler_thread.cxx,v 1.107 2003/10/19 09:44:49 jz Exp $
+// $Id: spooler_thread.cxx,v 1.108 2003/10/19 19:59:03 jz Exp $
 /*
     Hier sind implementiert
 
@@ -26,6 +26,8 @@ Spooler_thread::Spooler_thread( Spooler* spooler )
   //_module(spooler,&_log)
 {
     Z_WINDOWS_ONLY( _thread_priority = THREAD_PRIORITY_NORMAL; )
+
+    _prioritized_order_job_array_time = 1;  // Irgendeine Zeit, damit der Vergleich mit der spooler->job_chain_time() verschieden ausfällt
 
   //_com_thread     = new Com_thread( this );
   //_free_threading = _spooler->free_threading_default();

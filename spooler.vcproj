@@ -50,7 +50,7 @@ cd &quot;$(OutDir)&quot; &amp;&amp; jar cf &quot;$(TargetDir)sos.spooler.jar&quo
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="../misc/lib/libctleasy.lib delayimp.lib ws2_32.lib version.lib odbc32.lib odbccp32.lib"
-				OutputFile="../bin/scheduler.exe"
+				OutputFile="..\bin\scheduler.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
 				DelayLoadDLLs="winspool.drv,ws2_32.dll,ole32.dll,oleaut32.dll,advapi32.dll,odbc32.dll,libctleasy.dll"

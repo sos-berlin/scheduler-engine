@@ -1,4 +1,4 @@
-// $Id: spooler_job.cxx,v 1.39 2003/10/19 09:44:49 jz Exp $
+// $Id: spooler_job.cxx,v 1.40 2003/10/19 19:59:02 jz Exp $
 /*
     Hier sind implementiert
 
@@ -677,15 +677,15 @@ void Job::set_next_start_time( Time now, bool repeat )
 
     _next_single_start = latter_day;
 
-    if( order_controlled() ) 
-    {
-        next_start_time = latter_day;
-    }
-    else
-    if( _state == s_stopped && _delay_until )
+    if( _delay_until )
     {
         next_start_time = _period.next_try( _delay_until );
         if( _spooler->_debug )  msg = "Wiederholung wegen delay_after_error: " + next_start_time.as_string();
+    }
+    else
+    if( order_controlled() ) 
+    {
+        next_start_time = latter_day;
     }
     else
     if( _state == s_pending )

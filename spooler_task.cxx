@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.207 2003/10/18 21:23:17 jz Exp $
+// $Id: spooler_task.cxx,v 1.208 2003/10/19 19:59:02 jz Exp $
 /*
     Hier sind implementiert
 
@@ -483,10 +483,14 @@ string Task::state_name( State state )
 
 void Task::signal( const string& signal_name )
 { 
-    _signaled = true;
-    set_next_time( 0 );
+    THREAD_LOCK( _lock )
+    {
+        _signaled = true;
+        set_next_time( 0 );
 
-    _thread->signal( signal_name ); 
+        if( _thread )  _thread->signal( signal_name ); 
+               //else  Task ist noch nicht richtig gestartet. Passiert, wenn end() von anderer Task gerufen wird.
+    }
 }
 
 //----------------------------------------------------------------------------------Task::set_cause
@@ -756,20 +760,6 @@ bool Task::do_something()
                     break;
                 }
 
-/*                
-                case s_ending:
-                {
-                    operation__end();
-
-                    set_state( loaded()? has_error()? s_on_error 
-                                                    : s_on_success 
-                                       : s_release );
-
-                    loop = true;
-                    something_done = true;
-                    break;
-                }
-*/
 
                 case s_on_success:
                 {

@@ -1,4 +1,4 @@
-// $Id: spooler_dll_java.cxx,v 1.2 2003/10/18 21:23:17 jz Exp $
+// $Id: spooler_dll_java.cxx,v 1.3 2003/10/19 19:59:02 jz Exp $
 
 #include "spooler.h"
 #include "../zschimmer/java.h"
@@ -55,7 +55,7 @@ JNIEXPORT void JNICALL Java_sos_spooler_Spooler_1program_construct( JNIEnv* jenv
 
 //--------------------------------------------------------sos.spooler.Spooler_program.construct_argv
 
-JNIEXPORT void JNICALL Java_sos_spooler_Spooler_1program_construct_argv( JNIEnv* jenv, jobject jo, jobjectArray jparams )
+JNIEXPORT void JNICALL Java_sos_spooler_Spooler_1program_construct_1argv( JNIEnv* jenv, jobject jo, jobjectArray jparams )
 {
     char** argv = NULL;
     int    argc = 0;
@@ -72,6 +72,8 @@ JNIEXPORT void JNICALL Java_sos_spooler_Spooler_1program_construct_argv( JNIEnv*
             string arg = string_from_jstring( jenv, (jstring)jparam );
             argv[i] = new char[ arg.length() + 1 ];
             strcpy( argv[i], arg.c_str() );
+          //fprintf(stderr,"%d: %s\n", i, argv[i]);
+            argc++;
         }
 
         int ret = sos::spooler_main( argc, argv, "" );
