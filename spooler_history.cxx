@@ -1,4 +1,4 @@
-// $Id: spooler_history.cxx,v 1.37 2003/04/02 18:03:32 jz Exp $
+// $Id: spooler_history.cxx,v 1.38 2003/04/02 19:36:56 jz Exp $
 
 #include "spooler.h"
 #include "../zschimmer/z_com.h"
@@ -43,6 +43,13 @@ string operator << ( const char* a, const B& b )
     return s.str();
 }
 */
+//------------------------------------------------------------------------------------------uquoted
+
+static string uquoted( const string& value ) 
+{ 
+    return quoted_string( ucase( value ), '\"', '\"' ); 
+}
+
 //---------------------------------------------------------------------------------------sql_quoted
 
 inline string sql_quoted( const string& value ) 
@@ -152,8 +159,8 @@ void Spooler_db::open( const string& db_name, bool need_db )
             _db_name += " ";
 
             create_table_when_needed( _spooler->_variables_tablename, 
-                                      "\"name\" char(100) not null,"
-                                      "\"wert\" char(250),"  
+                                      "\"NAME\" char(100) not null,"
+                                      "\"WERT\" char(250),"  
                                       "primary key ( \"name\" )" );
 
 
@@ -161,22 +168,22 @@ void Spooler_db::open( const string& db_name, bool need_db )
             for( int i = 0; i < create_extra.size(); i++ )  create_extra[i] += " char(250),";
 
             create_table_when_needed( _spooler->_history_tablename, 
-                                      "\"id\"          integer not null,"
-                                      "\"spooler_id\"  char(100),"
-                                      "\"job_name\"    char(100) not null,"
-                                      "\"start_time\"  datetime not null,"
-                                      "\"end_time\"    datetime,"
-                                      "\"cause\"       char(50),"
-                                      "\"steps\"       integer,"
-                                      "\"error\"       bit,"
-                                      "\"error_code\"  char(50),"
-                                      "\"error_text\"  char(250),"
-                                      "\"parameters\"  clob,"
-                                      "\"log\"         blob," 
+                                      "\"ID\"          integer not null,"
+                                      "\"SPOOLER_ID\"  char(100),"
+                                      "\"JOB_NAME\"    char(100) not null,"
+                                      "\"START_TIME\"  datetime not null,"
+                                      "\"END_TIME\"    datetime,"
+                                      "\"CAUSE\"       char(50),"
+                                      "\"STEPS\"       integer,"
+                                      "\"ERROR\"       bit,"
+                                      "\"ERROR_CODE\"  char(50),"
+                                      "\"ERROR_TEXT\"  char(250),"
+                                      "\"PARAMETERS\"  clob,"
+                                      "\"LOG\"         blob," 
                                       + join( "", create_extra ) 
-                                      + "primary key( \"id\" )" );
+                                      + "primary key( \"ID\" )" );
 
-            stmt = "UPDATE " + _spooler->_variables_tablename + " set \"WERT\" = \"WERT\"+1 where \"NAME\"='spooler_job_id'";
+            stmt = "UPDATE " + uquoted(_spooler->_variables_tablename) + " set \"WERT\" = \"WERT\"+1 where \"NAME\"='spooler_job_id'";
             _job_id_update.prepare( _db_name + stmt );
 
 
@@ -184,7 +191,7 @@ void Spooler_db::open( const string& db_name, bool need_db )
             _job_id_select.prepare( "-in " + _db_name + stmt );
 
             _job_id_select.execute();
-            if( _job_id_select.eof() )  execute( "INSERT into " + _spooler->_variables_tablename + " (NAME,WERT) values ('spooler_job_id','0')" );
+            if( _job_id_select.eof() )  execute( "INSERT into " + uquoted(_spooler->_variables_tablename) + " (\"NAME\",\"WERT\") values ('spooler_job_id','0')" );
             _job_id_select.close( close_cursor );
             commit();
 
@@ -269,7 +276,7 @@ int Spooler_db::get_id()
             //id = _job_id_select.get_record().as_int(0);
             //_job_id_select.close( close_cursor );
 
-            execute( "UPDATE " + _spooler->_variables_tablename + " set \"WERT\" = \"WERT\"+1 where \"NAME\"='spooler_job_id'" );
+            execute( "UPDATE " + uquoted(_spooler->_variables_tablename) + " set \"WERT\" = \"WERT\"+1 where \"NAME\"='spooler_job_id'" );
 
             Any_file sel;
             sel.open( "-in " + _db_name + "SELECT \"WERT\" from " + _spooler->_variables_tablename + " where \"NAME\"='spooler_job_id'" );
@@ -330,7 +337,7 @@ void Spooler_db::spooler_start()
      
             Transaction ta = this;
             {
-                execute( "INSERT into " + _spooler->_history_tablename + " (\"ID\",\"SPOOLER_ID\",\"JOB_NAME\",\"START_TIME\") "
+                execute( "INSERT into " + uquoted(_spooler->_history_tablename) + " (\"ID\",\"SPOOLER_ID\",\"JOB_NAME\",\"START_TIME\") "
                          "values (" + as_string(_id) + "," + sql_quoted(_spooler->id()) + ",'(Spooler)',{ts'" + Time::now().as_string(Time::without_ms) + "'})" );
                 ta.commit();
             }
@@ -352,7 +359,7 @@ void Spooler_db::spooler_stop()
         {
             Transaction ta = this;
             {
-                execute( "UPDATE " + _spooler->_history_tablename + " set end_time={ts'" + Time::now().as_string(Time::without_ms) + "'} "
+                execute( "UPDATE " + uquoted(_spooler->_history_tablename) + " set end_time={ts'" + Time::now().as_string(Time::without_ms) + "'} "
                          "where id=" + as_string(_id) );
                 ta.commit();
             }
@@ -583,7 +590,7 @@ void Job_history::write( bool start )
                 _spooler->_db->_history_update_params[6] = _job->_task->_id;
                 _spooler->_db->_history_update.execute();
 */
-                string stmt = "UPDATE " + _spooler->_history_tablename + " set ";
+                string stmt = "UPDATE " + uquoted(_spooler->_history_tablename) + " set ";
                 stmt +=   "\"START_TIME\"={ts'" + start_time + "'}";
                 stmt += ", \"END_TIME\"={ts'" + Time::now().as_string(Time::without_ms) + "'}";
                 stmt += ", \"STEPS\"=" + as_string( _job->_task->_step_count );
