@@ -1,12 +1,33 @@
-// $Id: spooler_module_java.h,v 1.3 2002/11/06 06:30:48 jz Exp $
+// $Id: spooler_module_java.h,v 1.4 2002/11/07 17:57:24 jz Exp $
 
 #ifndef __SPOOLER_MODULE_JAVA_H
 #define __SPOOLER_MODULE_JAVA_H
 
 #include "../kram/thread_data.h"
 
+#define JAVA_IDISPATCH_CLASS "sos/spooler/Idispatch"
+
 namespace sos {
 namespace spooler {
+
+struct Java_vm;
+
+//-----------------------------------------------------------------------------------------Java_env
+
+struct Java_env
+{
+                              //Java_env                    ( Java_vm* vm, JNIEnv* jenv )           : _java_vm(vm), _jenv( jenv ) {}
+
+                                operator JNIEnv*            ()                                      { return _jenv; }
+    JNIEnv*                     operator ->                 ()                                      { return _jenv; }
+
+    jclass                      find_class                  ( const string& name );
+    jmethodID                   get_method_id               ( jclass, const string& name, const string& signature );
+    jclass                      get_object_class            ( jobject );
+
+    Java_vm*                   _java_vm;
+    JNIEnv*                    _jenv;
+};
 
 //---------------------------------------------------------------------------------Java_thread_data
 
@@ -15,7 +36,7 @@ struct Java_thread_data
                                 Java_thread_data            ()                                      : _zero_(this+1) {}
 
     Fill_zero                  _zero_;
-    JNIEnv*                    _env;
+    Java_env                   _env;
 };
 
 //------------------------------------------------------------------------------------------Java_vm
@@ -42,17 +63,14 @@ struct Java_vm                  // Java virtual machine
     void                        attach_thread               ( const string& thread_name );
     void                        detach_thread               ();
 
-                                operator JavaVM*            ()                                      { return vm(); }
-    JavaVM*                     operator ->                 ()                                      { return vm(); }
+  //                            operator JavaVM*            ()                                      { return vm(); }
+  //JavaVM*                     operator ->                 ()                                      { return vm(); }
 
     JavaVM*                     vm                          ();
-    JNIEnv*                     env                         ();
+    Java_env&                   env                         ();
 
     Z_NORETURN void             throw_java                  ( int return_value, const string&, const string& = "" );
     
-  //ptr<Java_class>             class                       ( const string& name );
-
-
 
     void                        check_for_exception         ();
 
@@ -66,17 +84,11 @@ struct Java_vm                  // Java virtual machine
     JavaVMInitArgs             _vm_args;
     vector<Option>             _options;
     JavaVM*                    _vm;
+    jclass                     _idispatch_jclass;
 
     Thread_data<Java_thread_data> _thread_data;
 };
 
-//---------------------------------------------------------------------------------------Java_class
-/*
-struct Java_class : Object
-{
-    void                        call                        ( const string& signature );
-};
-*/
 //-------------------------------------------------------------------------------Java_global_object
 
 struct Java_global_object : Object, Non_cloneable
@@ -96,7 +108,7 @@ struct Java_global_object : Object, Non_cloneable
 
 struct Java_idispatch : Java_global_object
 {
-                                Java_idispatch              ( Spooler* sp, IDispatch* );
+                                Java_idispatch              ( Spooler* sp, IDispatch*, const string& subclass = JAVA_IDISPATCH_CLASS );
                                ~Java_idispatch              ();
 
     ptr<IDispatch>             _idispatch;
@@ -122,7 +134,7 @@ struct Java_module_instance : Module_instance
 
     Fill_zero                  _zero_;
     Java_vm*                   _java_vm;
-    JNIEnv*                    _env;
+    Java_env                   _env;
     Java_global_object         _jobject;
 
     typedef list< ptr<Java_idispatch> >  Added_objects;
