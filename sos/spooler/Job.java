@@ -1,8 +1,8 @@
-// $Id: Job.java,v 1.8 2004/07/13 16:12:43 jz Exp $
+// $Id: Job.java,v 1.9 2004/07/25 11:25:57 jz Exp $
 
 package sos.spooler;
 
-/** Ein Job.
+/** Operationen auf einen Job.
  * 
  * Ein Objekt dieser Klasse entspricht einem &lt;job> in der Konfiguration. 
  * Von einem Job können nacheinander oder gleichzeitig Tasks ({@link Task}) laufen.
@@ -11,7 +11,7 @@ package sos.spooler;
  * 
  * 
  * @author Joacim Zschimmer
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 
 public class Job extends Idispatch
@@ -43,7 +43,7 @@ public class Job extends Idispatch
      * <p>
      * "spooler_task_name": Gibt der Task einen Namen, der in den Statusanzeigen erscheint.
      * <p>
-     * "spooler_start_after": Gibt ein Zeit in Sekunden (reelle Zahl) an, nach dessen Ablauf die Task zu starten ist. 
+     * "spooler_start_after": Gibt eine Zeit in Sekunden (reelle Zahl) an, nach deren Ablauf die Task zu starten ist. 
      * Dabei wird &lt;run_time> nicht beachtet.
      * 
      * <p><br/><b>Beispiel</b>
@@ -97,7 +97,8 @@ public class Job extends Idispatch
      * (eine Datei hinzukommt, umbenannt oder entfernt wird), 
      * startet der Scheduler innerhalb der &lt;run_time> eine Task.
      * <p>
-     * Der Aufruf kann für verschiedene und gleiche Verzeichnisse wiederholt werden.
+     * Um mehrere Verzeichnisse zu überwachen, kann der Aufruf wiederholt werden.
+     * Ein Aufruf mit einem bereits angegebenen Verzeichnis erneuert die Überwachung. 
      * <p>
      * Der Aufruf kann im Startskript oder in spooler_init() des Jobs codiert werden.
      * Wenn er in spooler_init() ist, muss der Job zu Beginn einmal starten, damit er wirksam wird.
@@ -241,7 +242,7 @@ public class Job extends Idispatch
      * <p>
      * Beispiel siehe {@link #set_delay_after_error(int,String)}
      * 
-     * @param error_steps Anzahl der aufeinanderfolgenden Fehler, ab der die Verzögerung gilt
+     * @param error_steps Anzahl der aufeinanderfolgenden Jobfehler, ab der die Verzögerung gilt
      * @param seconds Verzögerung als reele Zahl
      */
     
@@ -263,7 +264,7 @@ public class Job extends Idispatch
      * <p><br/><b>Beispiel</b>
      * <pre>
      *      spooler_job.set_delay_after_error(  2,  10 );
-     *      spooler_job.set_delay_after_error(  5, "01:00" );
+     *      spooler_job.set_delay_after_error(  5, "00:01" );
      *      spooler_job.set_delay_after_error( 10, "24:00" );
      *      spooler_job.set_delay_after_error( 20, "STOP" );
      * </pre>
@@ -273,8 +274,8 @@ public class Job extends Idispatch
      * nach dem zehnten bis zum neunzehnten um 24 Stunden,
      * nach dem zwanzigsten aufeinanderfolgenden Fehler schließlich stoppt der Job.
      *  
-     * @param error_steps
-     * @param hhmm_ss
+     * @param error_steps Anzahl der aufeinanderfolgenden Jobfehler, ab der die Verzögerung gilt
+     * @param hhmm_ss Zeit im Format "HH:MM" oder "HH:MM:SS".
      */
     
     public void         set_delay_after_error   ( int error_steps, String hhmm_ss ) {                     com_call( ">delay_after_error", new Integer(error_steps), hhmm_ss   ); }

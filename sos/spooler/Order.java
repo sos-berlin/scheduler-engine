@@ -1,20 +1,38 @@
-// $Id: Order.java,v 1.4 2004/07/12 17:59:49 jz Exp $
+// $Id: Order.java,v 1.5 2004/07/25 11:25:57 jz Exp $
 
-/**
- * Auftrag
+package sos.spooler;
+
+/** Ein Auftrag zur Verarbeitung durch einen Job.
  * 
  * <p>
  * Ein Auftrag, der in der Auftragswarteschlange eines Jobs steht, veranlasst diesen, einen Jobschritt 
  * (also {@link Job_impl#spooler_process()}) durchzuführen.
- * <p>
- * Ein Auftrag, der in einer Jobkette steht, wird anschließend dem nächsten Job der Jobkette zugestellt.
- * 
+ *
+ * <p><br/><b>Beispiel</b>
+ * <pre>
+ *     Order order = spooler.create_order();
+ *     order.set_id   ( "10001" );
+ *     order.set_title( "Auftrag für Datensatz 10001" );
+ *     order.set_state( "100" );
+ *     spooler.job_chain( "jobkette1" ).add_order( order );
+ * </pre>
+ *
+ * <p><br/><b>Beispiel (Javascript)</b>
+ * <pre>
+ *     var order = spooler.create_order();
+ *     order.id    = "10001";
+ *     order.title = "Auftrag für Datensatz 10001";
+ *     order.state = 100;
+ *     spooler.job_chain( "jobkette1" ).add_order( order );
+ * </pre>
+ *
+ * @see Spooler#create_order()
+ * @see Spooler#job_chain(String)
+ * @see Task#order() 
  *
  * @author Joacim Zschimmer
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
-
-package sos.spooler;
 
 public class Order extends Idispatch
 {
@@ -22,13 +40,14 @@ public class Order extends Idispatch
 
     
     
-    /**
-     * Stellt die Kennung des Auftrags ein.
+    /** Stellt die Kennung des Auftrags ein.
      * 
      * <p>
      * Jeder Auftrag hat eine (innerhalb der Jobkette oder der Auftragswarteschlange des Jobs eindeutige) Kennung.
+     * Diese Kennung sollten den zu verarbeitenden Daten entsprechen.
+     * Überlicherweise wird der Schlüssel eines Datenbanksatzes verwendet.  
      * <p>
-     * Ohne diesen Aufruf vergibt die Methode {@link Job_chain#add_order(Order)} bzw. {@link Order_queue#add_order(Order)} eine Kennung.
+     * Ohne diesen Aufruf vergibt der Aufruf {@link Job_chain#add_order(Order)} bzw. {@link Order_queue#add_order(Order)} eine Kennung.
      *  
      * @param value Die Kennung
      */
@@ -42,12 +61,12 @@ public class Order extends Idispatch
     
     
     
-    /** Der Titel ist ein Klartext für die Protokollierung. */ 
+    /** Der Titel ist ein Klartext, der den Auftrag bezeichnet. */ 
     public void         set_title               ( String value )                    {                   com_call( ">title", value       ); }
 
     
     
-    /** Der Titel ist ein Klartext für die Protokollierung. */
+    /** Der Titel ist ein Klartext, der den Auftrag bezeichnet. */ 
     public String           title               ()                                  { return (String)   com_call( "<title"              ); }
     
     
@@ -114,39 +133,35 @@ public class Order extends Idispatch
 
     
     
-    /**
-     * Stellt einen Text für die Protokollierung ein.
-     */
+    /** Stellt einen Klartext ein, der den Zustand des Auftrags beschreibet. */
     public void         set_state_text          ( String value )                    {                   com_call( ">state_text", value  ); }
     
     
     
-    /**
-     * Liefert den mit set_state_text() eingestellten Text.
-     */
+    /** Liefert den mit set_state_text() eingestellten Text. */
     public String           state_text          ()                                  { return (String)   com_call( "<state_text"         ); }
 
     
     
-    /**
-     * Die Nutzlast, also Parameter des Auftrags.
+    /** Die Nutzlast, also Parameter des Auftrags.
+     * Neben der Auftragskennung (id), die den Auftrag identifiziert, können hier zusätzliche
+     * Angaben gemacht werden. 
      * 
-     * @param payload Ein String, ein {@link Variable_set} oder ein Hostware.Dyn_obj.
+     * @param payload Ein String oder ein {@link Variable_set}.
+     * 
+     * @see #set_id(String)
      * @see Spooler#create_variable_set()
      */
     public void         set_payload             ( Object payload )                  {                   com_call( ">payload", payload   ); }
 
     
     
-    /**
-     * Die Nutzlast, also Parameter des Auftrags.
-     */
+    /** Liefert den mit set_payload() eingestellten Wert. */
     public Object           payload             ()                                  { return            com_call( "<payload"            ); }
     
     
     
-    /** 
-     * Prüft den COM-Typ der Nutzlast.
+    /** Prüft den COM-Typ der Nutzlast.
      * 
      * @param name "Spooler.Variable_set", "Hostware.Dyn_obj" oder "Hostware.Record".  
      * @return true, wenn die Nutzlast vom angegebenen COM-Typ ist. 

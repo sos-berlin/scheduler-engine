@@ -1,9 +1,8 @@
-// $Id: Task.java,v 1.8 2004/07/13 16:12:44 jz Exp $
+// $Id: Task.java,v 1.9 2004/07/25 11:25:57 jz Exp $
 
 package sos.spooler;
 
-/**
- * Eine Task.
+/** Eine Task ist eine laufende Instanz eines Jobs.
  * 
  * <p>
  * Eine Task kann wartend in der Task-Warteschlange des Jobs sein oder laufen.
@@ -11,7 +10,7 @@ package sos.spooler;
  * Implementiert wird eine Task durch {@link Job_impl}.
  * 
  * @author Joacim Zschimmer
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 
 public class Task extends Idispatch

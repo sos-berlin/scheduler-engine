@@ -1,9 +1,8 @@
-// $Id: Mail.java,v 1.6 2004/07/15 09:20:25 jz Exp $
+// $Id: Mail.java,v 1.7 2004/07/25 11:25:57 jz Exp $
 
 package sos.spooler;
 
-/**
- * eMail-Versand eines Protokolls.
+/** eMail-Versand eines Protokolls.
  *
  * @see Log#mail()
  * @author Joacim Zschimmer

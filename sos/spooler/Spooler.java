@@ -1,10 +1,11 @@
-// $Id: Spooler.java,v 1.8 2004/07/12 17:59:49 jz Exp $
+// $Id: Spooler.java,v 1.9 2004/07/25 11:25:57 jz Exp $
 
 package sos.spooler;
 
-/**
+/** Das allgemeine Scheduler-Objekt.
+ * 
  * @author Joacim Zschimmer, Zschimmer GmbH
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 
 public class Spooler extends Idispatch

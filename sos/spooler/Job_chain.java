@@ -3,8 +3,20 @@
 package sos.spooler;
 
 /**
- * Eine Jobkette (Job_chain) beschreibt eine Folge von Jobs (Jobkettenknoten oder Stellen), 
- * die Aufträge ({@link Order}) durchlaufen sollen.
+ * Eine Jobkette (Job_chain) ist eine Kette von Jobs (Jobkettenknoten oder Stellen). 
+ * Diese Kette wird von Aufträgen ({@link Order}) durchlaufen.
+ * <p> 
+ * Jeder Stelle in der Jobkette ist ein Zustand und ein Job zugeordnet.
+ * Wenn ein Auftrag der Jobkette hinzugefügt wird, 
+ * setzt der Scheduler ihn an die seinem Zustand entsprechende Stelle.
+ * Der dieser Stelle zugeordnete Job führt den Auftrag aus.
+ * <p>
+ * Jede Stelle hat außerdem einen Folgezustand und einen Fehlerzustand.
+ * Nach der Verarbeitung eines Auftrags durch einen Jobschritt ändert der Scheduler den Zustand
+ * des Auftrags. Wenn der Jobschritt (spooler_process) true liefert, 
+ * stellt der Scheduler den Folgezustand, sonst den Fehlerzustand ein.
+ * Der Auftrag rutscht damit an eine andere Stelle der Jobkette, die dem neuen Zustand zugeordnet ist.
+ * 
  * <p>
  * Sie erzeugen eine Jobkette mit {@link Spooler#create_job_chain()},<br/> 
  * füllen sie mit {@link #add_job(String,String,String,String)} und {@link #add_end_state(String)}<br/>
@@ -39,7 +51,7 @@ package sos.spooler;
  * @see Spooler#create_job_chain()
  * @see Spooler#job_chain(String)
  * @author Joacim Zschimmer
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 
 
@@ -104,7 +116,7 @@ public class Job_chain extends Idispatch
     public void             add_end_state       ( String state )                    {                           com_call( "add_end_state", state ); }
     
     
-    /** Gibt einen Auftrag in die Jobkette
+    /** Gibt einen Auftrag in die Jobkette.
      * <p>
      * Wenn der Auftrag in einer anderen Jobkette enthalten ist,
      * entfernt der Scheduler ihn daraus.
@@ -114,7 +126,7 @@ public class Job_chain extends Idispatch
      * <p>
      * add_order() kann erst benutzt werden, wenn die Jobkette mit {@link Spooler#add_job_chain(Job_chain)} dem Scheduler übergeben worden ist.
      * 
-     * @param order
+     * @see Spooler#create_order()
      */ 
     
     public void             add_order           ( Order order )                     {                           com_call( "add_order", order    ); }
@@ -126,7 +138,7 @@ public class Job_chain extends Idispatch
     /** @return Der Jobkettenknoten zum angegebenen Zustand */ 
     public Job_chain_node   node                ( String state )                    { return (Job_chain_node)   com_call( "<node", state        ); }
     
-    /** Dasselbe wie node().job().order_queue(). 
+    /** Dasselbe wie node(state).job().order_queue(). 
      * @return Liefert die Auftragswarteschlange des Jobs, der dem angegebenen Zustand zugeordnet ist. */
     public Order_queue      order_queue         ( String state )                    { return (Order_queue)      com_call( "<order_queue", state ); }
 }

@@ -1,9 +1,8 @@
-// $Id: Variable_set.java,v 1.8 2004/07/13 16:12:44 jz Exp $
+// $Id: Variable_set.java,v 1.9 2004/07/25 11:25:57 jz Exp $
 
 package sos.spooler;
 
-/**
- * Variablenmenge.
+/** Variablenmenge zur Übergabe von Parametern.
  * <p> 
  * Variablenmengen werden gebraucht für die scheduler-weiten Variablen und Task-Parameter.
  * Eine neue Variablenmenge wird mit {@link Spooler#create_variable_set()} angelegt.
@@ -23,7 +22,7 @@ package sos.spooler;
  * @see Task#params()
  * @see Spooler#create_variable_set()
  * @author Joacim Zschimmer
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 
 public class Variable_set extends Idispatch

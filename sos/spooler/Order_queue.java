@@ -1,13 +1,12 @@
-// $Id: Order_queue.java,v 1.4 2004/07/12 17:59:49 jz Exp $
+// $Id: Order_queue.java,v 1.5 2004/07/25 11:25:57 jz Exp $
 
 package sos.spooler;
 
-/**
- * Auftragswarteschlange eines auftragsgesteuerten Jobs.
+/** Auftragswarteschlange eines auftragsgesteuerten Jobs.
  * 
  * <p>
- * Ein auftragsgesteuerter Job (&lt;job order="yes"> hat eine Auftragswarteschlange, die die vom Job zu verarbeitenden Jobs
- * aufnimmt.
+ * Ein auftragsgesteuerter Job (&lt;job order="yes">) hat eine Auftragswarteschlange, 
+ * die die vom Job zu verarbeitenden Aufträge aufnimmt.
  * Die Aufträge sind nach Priorität und Zeitpunkt des Eintreffens geordnet.
  * <p>
  * Verarbeiten bedeutet, dass der Scheduler die Methode {@link Job_impl#spooler_process()} einer Task des Jobs aufruft.
@@ -15,10 +14,12 @@ package sos.spooler;
  * Endet spooler_process() ohne Fehler (ohne Exception), entfernt der Scheduler den Auftrag aus der Auftragswarteschlange.
  * Ist der Auftrag in einer Jobkette, dann rückt der rückt der Auftrag an die nächste Position der Jobkette.  
  * 
+ * @see Order
  * @see Job_chain
+ * @see Task#order() 
  * 
  * @author Joacim Zschimmer
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 
 public class Order_queue extends Idispatch
@@ -35,7 +36,7 @@ public class Order_queue extends Idispatch
      * Der Aufruf gilt nur für den Fall, dass der Auftrag nicht in einer Jobkette enthalten ist.
      * 
      * <p>
-     * Die Priorität des Auftrags (@link Order#set_priority(int)}) wird dabei berücksichtigt.
+     * Die Priorität des Auftrags ({@link Order#set_priority(int)}) wird dabei berücksichtigt.
      * <p>
      * 
      * @param order Der Auftrag
