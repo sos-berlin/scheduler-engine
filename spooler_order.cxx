@@ -1,4 +1,4 @@
-// $Id: spooler_order.cxx,v 1.60 2004/05/12 07:51:17 jz Exp $
+// $Id: spooler_order.cxx,v 1.61 2004/05/27 13:12:03 jz Exp $
 /*
     Hier sind implementiert
 
@@ -1123,7 +1123,7 @@ void Order::postprocessing( bool success )
         {
             if( _setback == latter_day )
             {
-                _log.debug( as_string(_setback_count) + " mal zurückgestellt. Der Auftrag wechselt in den Fehlerzustand" );
+                _log.info( as_string(_setback_count) + " mal zurückgestellt. Der Auftrag wechselt in den Fehlerzustand" );
                 success = false;
                 force_error_state = true;
             }
@@ -1135,7 +1135,11 @@ void Order::postprocessing( bool success )
 
             if( _job_chain_node )
             {
-                _job_chain_node->_job->order_queue()->remove_order( this );
+                if( _job_chain_node->_job )  
+                {
+                    if( _job_chain_node->_job->order_queue() )  _log.warn( "Job " + _job_chain_node->_job->obj_name() + " ohne Auftragswarteschlange (§1495)" );  // Problem §1495  
+                    else  _job_chain_node->_job->order_queue()->remove_order( this );
+                }
 
                 State new_state;
 
