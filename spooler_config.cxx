@@ -1,4 +1,4 @@
-// $Id: spooler_config.cxx,v 1.17 2001/03/17 18:57:23 jz Exp $
+// $Id: spooler_config.cxx,v 1.18 2001/03/22 08:56:52 jz Exp $
 
 //#include <precomp.h>
 
@@ -230,8 +230,11 @@ void Run_time::set_xml( const xml::Element_ptr& element )
 
 //----------------------------------------------------------------------------------Script::set_xml
 
-void Script::set_xml( const xml::Element_ptr& element )
+void Script::set_xml( const xml::Element_ptr& element, const string& include_path )
 {
+    string inc = include_path;
+    if( !inc.empty() )  { char c = inc[inc.length()-1];  if( c != '/'  &&  c != '\\' )  inc += "/"; }
+
     _language = as_string( element->getAttribute( "language" ) );
 
     for( xml::Node_ptr n = element->firstChild; n; n = n->nextSibling )
@@ -261,8 +264,11 @@ void Script::set_xml( const xml::Element_ptr& element )
                 {
                     if( filename[0] == '\\' 
                      || filename[0] == '/' 
-                     || filename.length() >= 2 && filename[1] == ':' )  ; //ok
-                                                                  else  filename = _spooler->include_path() + filename;
+                     || filename.length() >= 2 && filename[1] == ':' )  ; // ok, absoluter Dateiname
+                    else  
+                    {
+                        filename = inc + filename;
+                    }
                 }
                      
                 _text += file_as_string( filename );
@@ -300,7 +306,7 @@ void Object_set_class::set_xml( const xml::Element_ptr& element )
     {
         if( e->tagName == "script" )
         {
-            _script.set_xml( e );
+            _script.set_xml( e, _spooler->include_path() );
         }
         else
         if( e->tagName == "level_decls" )
@@ -354,7 +360,7 @@ void Job::set_xml( const xml::Element_ptr& element )
     {
         if( e->tagName == "object_set" )  _object_set_descr = SOS_NEW( Object_set_descr( e ) );
         else
-        if( e->tagName == "script"     )  _script.set_xml( e );
+        if( e->tagName == "script"     )  _script.set_xml( e, include_path() );
         else
         if( e->tagName == "process"    )  _process_filename = as_string( e->getAttribute( "file" ) ),
                                           _process_param    = as_string( e->getAttribute( "param" ) );
@@ -381,9 +387,12 @@ void Thread::set_xml( const xml::Element_ptr& element )
 {
     _name = as_string( element->getAttribute( "name" ) );
 
+    if( element->getAttributeNode( "include_path" ) )  _include_path = as_string( element->getAttribute( "include_path" ) );
+                                                 else  _include_path = _spooler->include_path();
+
     for( xml::Element_ptr e = element->firstChild; e; e = e->nextSibling )
     {
-        if( e->tagName == "script" )  _script.set_xml( e );
+        if( e->tagName == "script" )  _script.set_xml( e, include_path() );
         else
         if( e->tagName == "jobs"   )  load_jobs_from_xml( e );
     }
@@ -412,11 +421,13 @@ void Spooler::load_threads_from_xml( Thread_list* liste, const xml::Element_ptr&
 
 void Spooler::load_config( const xml::Element_ptr& config_element )
 {
-                                   _tcp_port      = as_int   ( config_element->getAttribute( "tcp_port"     ) );
-                                   _udp_port      = as_int   ( config_element->getAttribute( "udp_port"     ) );
-                                   _priority_max  = as_int   ( config_element->getAttribute( "priority_max" ) );
-    if( empty( _log_directory ) )  _log_directory = as_string( config_element->getAttribute( "log_dir"      ) );
-    if( empty( _spooler_param ) )  _spooler_param = as_string( config_element->getAttribute( "param"        ) );
+    _tcp_port      = as_int( config_element->getAttribute( "tcp_port"     ) );
+    _udp_port      = as_int( config_element->getAttribute( "udp_port"     ) );
+    _priority_max  = as_int( config_element->getAttribute( "priority_max" ) );
+
+    if( !_log_directory_as_option_set )  _log_directory = as_string( config_element->getAttribute( "log_dir"      ) );
+    if( !_spooler_param_as_option_set )  _spooler_param = as_string( config_element->getAttribute( "param"        ) );
+    if( !_include_path_as_option_set  )  _include_path  = as_string( config_element->getAttribute( "include_path" ) );
 
 
     try

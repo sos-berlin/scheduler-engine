@@ -1,4 +1,4 @@
-// $Id: spooler_task.h,v 1.15 2001/03/17 18:57:23 jz Exp $
+// $Id: spooler_task.h,v 1.16 2001/03/22 08:56:52 jz Exp $
 
 #ifndef __SPOOLER_TASK_H
 #define __SPOOLER_TASK_H
@@ -28,11 +28,12 @@ struct Level_interval
 
 struct Object_set_class : Sos_self_deleting
 {
-                                Object_set_class            ( Spooler* sp )                              : _script(sp) {}
-    explicit                    Object_set_class            ( Spooler* sp,  const xml::Element_ptr& e )  : _script(sp) { set_xml( e ); }
+                                Object_set_class            ( Spooler* sp )                              : _spooler(sp), _script(sp) {}
+    explicit                    Object_set_class            ( Spooler* sp,  const xml::Element_ptr& e )  : _spooler(sp), _script(sp) { set_xml( e ); }
 
     void                        set_xml                     ( const xml::Element_ptr& );
 
+    Spooler*                   _spooler;
     string                     _name;
     map<Level,string>          _level_map;
     
@@ -155,6 +156,7 @@ struct Job : Sos_self_deleting
     int                         priority                    () const                    { return _priority; }
     Thread*                     thread                      () const                    { return _thread; }
     string                      job_state                   ();
+    string                      include_path                () const;
     void                        set_in_call                 ( const string& name );
 
     void                        close                       ();

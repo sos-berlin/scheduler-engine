@@ -1,4 +1,4 @@
-// $Id: spooler_script.h,v 1.5 2001/03/17 18:57:23 jz Exp $
+// $Id: spooler_script.h,v 1.6 2001/03/22 08:56:52 jz Exp $
 
 #ifndef __SPOOLER_SCRIPT_H
 #define __SPOOLER_SCRIPT_H
@@ -20,9 +20,9 @@ struct Script
     };
 
                                 Script                      ( Spooler* sp )                 : _spooler(sp) {}
-    explicit                    Script                      ( Spooler* sp, const xml::Element_ptr& e )  : _spooler(sp) { set_xml(e); }
+    explicit                    Script                      ( Spooler* sp, const xml::Element_ptr& e, const string& include_path )  : _spooler(sp) { set_xml(e,include_path); }
 
-    void                        set_xml                     ( const xml::Element_ptr& );
+    void                        set_xml                     ( const xml::Element_ptr&, const string& include_path );
 
     bool                        empty                       () const                        { return _text.empty(); }
     void                        clear                       ()                              { _language="", _text=""; }

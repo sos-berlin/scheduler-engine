@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.65 2001/03/18 18:58:27 jz Exp $
+// $Id: spooler.cxx,v 1.66 2001/03/22 08:56:50 jz Exp $
 /*
     Hier sind implementiert
 
@@ -279,14 +279,12 @@ string Spooler::state_name( State state )
 
 void Spooler::load_arg()
 {
-    _include_path = ".";
-
     _spooler_id       = read_profile_string( "factory.ini", "spooler", "id" );
     _config_filename  = read_profile_string( "factory.ini", "spooler", "config" );
-    _log_directory    = read_profile_string( "factory.ini", "spooler", "log-dir" );
-    _include_path     = read_profile_string( "factory.ini", "spooler", "include-path" );
-    _spooler_param    = read_profile_string( "factory.ini", "spooler", "param" );
-    _debug            = read_profile_bool  ( "factory.ini", "spooler", "debug", _debug );
+    _log_directory    = read_profile_string( "factory.ini", "spooler", "log-dir" );        _log_directory_as_option_set = !_log_directory.empty();
+    _include_path     = read_profile_string( "factory.ini", "spooler", "include-path" );   _include_path_as_option_set = !_include_path.empty();
+    _spooler_param    = read_profile_string( "factory.ini", "spooler", "param" );          _spooler_param_as_option_set = !_spooler_param.empty();
+    _debug            = read_profile_bool  ( "factory.ini", "spooler", "debug", _debug );  
 
     try
     {
@@ -298,13 +296,13 @@ void Spooler::load_arg()
             else
             if( opt.with_value( "config"           ) )  _config_filename = opt.value();
             else
-            if( opt.with_value( "log-dir"          ) )  _log_directory = opt.value();
-            else
-            if( opt.with_value( "include-path"     ) )  _include_path = opt.value();
-            else
             if( opt.with_value( "id"               ) )  _spooler_id = opt.value();
             else
-            if( opt.with_value( "param"            ) )  _spooler_param = opt.value();
+            if( opt.with_value( "log-dir"          ) )  _log_directory = opt.value(),  _log_directory_as_option_set = true;
+            else
+            if( opt.with_value( "include-path"     ) )  _include_path = opt.value(),  _include_path_as_option_set = true;
+            else
+            if( opt.with_value( "param"            ) )  _spooler_param = opt.value(),  _spooler_param_as_option_set = true;
             else
             if( opt.flag      ( "debug"            ) )  _debug = opt.set();
             else
@@ -312,12 +310,6 @@ void Spooler::load_arg()
         }
 
         if( _config_filename.empty() )  throw_xc( "SPOOLER-115" );
-
-        if( _include_path.length() >= 1 )
-        {
-            char c = _include_path[ _include_path.length() - 1 ];
-            if( c != '/'  &&  c != '\\' )  _include_path += "/";
-        }
     }
     catch( const Sos_option_error& )
     {

@@ -1,4 +1,4 @@
-// $Id: spooler.odl,v 1.12 2001/03/02 16:12:24 jz Exp $
+// $Id: spooler.odl,v 1.13 2001/03/22 08:56:51 jz Exp $
 
 // Anweisung: midl /nologo /error all /out $(OutDir) $(InputPath)
 
@@ -111,6 +111,12 @@ library spooler
 
         [propget]
         HRESULT                 thread                      ( [out,retval] Ithread** result );
+
+      //[propput]
+      //HRESULT                 include_path                ( [in] BSTR include_path );
+
+        [propget]
+        HRESULT                 include_path                ( [out,retval] BSTR* include_path );
     }
 
     [
@@ -182,6 +188,12 @@ library spooler
 
         [propget]
         HRESULT                 script                  ( [out,retval] IDispatch** script_object );
+
+      //[propput]
+      //HRESULT                 include_path            ( [in] BSTR include_path );
+
+        [propget]
+        HRESULT                 include_path            ( [out,retval] BSTR* include_path );
     }
 
     [
@@ -217,6 +229,12 @@ library spooler
         HRESULT                 job                     ( [in] BSTR job_name, [out,retval] Ijob** job );
 
         HRESULT                 create_variable_set     ( [out,retval] Ivariable_set** result );
+
+      //[propput]
+      //HRESULT                 include_path            ( [in] BSTR include_path );
+
+        [propget]
+        HRESULT                 include_path            ( [out,retval] BSTR* include_path );
     }
 
     [

@@ -1,4 +1,4 @@
-// $Id: spooler_com.h,v 1.10 2001/02/08 11:21:15 jz Exp $
+// $Id: spooler_com.h,v 1.11 2001/03/22 08:56:52 jz Exp $
 
 #ifndef __SPOOLER_COM_H
 #define __SPOOLER_COM_H
@@ -116,6 +116,8 @@ struct Com_job : spooler_com::Ijob, Sos_ole_object
     STDMETHODIMP                start_when_directory_changed( BSTR directory_name );
     STDMETHODIMP                start                       ( VARIANT*, spooler_com::Itask** );
     STDMETHODIMP                get_thread                  ( spooler_com::Ithread** );
+  //STDMETHODIMP                put_include_path            ( BSTR );
+    STDMETHODIMP                get_include_path            ( BSTR* );
 
     Job*                       _job;                        // Es gibt nur einen Com_job pro Job
 };
@@ -131,7 +133,6 @@ struct Com_task : spooler_com::Itask, Sos_ole_object
     void                        set_task                    ( Task* );
 
     STDMETHODIMP                get_object_set              ( spooler_com::Iobject_set** );
-  //STDMETHODIMP                wake_when_directory_changed ( BSTR directory_name );
     STDMETHODIMP                put_error                   ( VARIANT* error_text );
     STDMETHODIMP                get_error                   ( spooler_com::Ierror** );
     STDMETHODIMP                get_job                     ( spooler_com::Ijob** );
@@ -143,8 +144,6 @@ struct Com_task : spooler_com::Itask, Sos_ole_object
 
   private:
     Sos_ptr<Task>              _task;
-  //Xc_copy                    _error;                      // Nur gültig, wenn _task == NULL
-  //CComVariant                _result;                     // Das Ergebnis ist noch nach ~Task zugreifbar
     Thread_semaphore           _lock;
 };
 
@@ -160,6 +159,8 @@ struct Com_thread : spooler_com::Ithread, Sos_ole_object
 
     STDMETHODIMP                get_log                     ( spooler_com::Ilog** );
     STDMETHODIMP                get_script                  ( IDispatch** );
+  //STDMETHODIMP                put_include_path            ( BSTR );
+    STDMETHODIMP                get_include_path            ( BSTR* );
 
   protected:
     Thread*                    _thread;                     // Es gibt nur einen Com_thread pro Thread
@@ -181,6 +182,8 @@ struct Com_spooler : spooler_com::Ispooler, Sos_ole_object
   //STDMETHODIMP                get_script                  ( IDispatch** );
     STDMETHODIMP                get_job                     ( BSTR job_name, spooler_com::Ijob** );
     STDMETHODIMP                create_variable_set         ( spooler_com::Ivariable_set** );
+  //STDMETHODIMP                put_include_path            ( BSTR );
+    STDMETHODIMP                get_include_path            ( BSTR* );
 
   protected:
     Spooler*                   _spooler;                    // Es gibt nur einen Com_spooler

@@ -1,4 +1,4 @@
-// $Id: spooler_com.cxx,v 1.11 2001/02/21 10:57:35 jz Exp $
+// $Id: spooler_com.cxx,v 1.12 2001/03/22 08:56:51 jz Exp $
 /*
     Hier sind implementiert
 
@@ -250,6 +250,28 @@ STDMETHODIMP Com_job::get_thread( spooler_com::Ithread** thread )
     if( *thread )  (*thread)->AddRef();
 
     return hr;
+}
+
+//------------------------------------------------------------------------Com_job::put_include_path
+/*
+STDMETHODIMP Com_job::put_include_path( BSTR include_path_bstr )
+{
+    if( !_job )  return E_POINTER;
+    if( GetCurrentThreadId() != _job->thread()->_thread_id )  return E_ACCESSDENIED;
+
+    _job->_thread->_include_path = bstr_as_string( include_path_bstr );
+    return NOERROR;
+}
+*/
+//------------------------------------------------------------------------Com_job::get_include_path
+
+STDMETHODIMP Com_job::get_include_path( BSTR* result )
+{
+    if( !_job )  return E_POINTER;
+    if( GetCurrentThreadId() != _job->thread()->_thread_id )  return E_ACCESSDENIED;
+
+    *result = SysAllocString_string( _job->_thread->_include_path );
+    return NOERROR;
 }
 
 //-------------------------------------------------------------------------------Com_task::Com_task
@@ -506,6 +528,28 @@ STDMETHODIMP Com_thread::get_script( IDispatch** script_object )
     return NOERROR;
 }
 
+//----------------------------------------------------------------------Com_thread::put_include_path
+/*
+STDMETHODIMP Com_thread::put_include_path( BSTR include_path_bstr )
+{
+    if( !_thread )  return E_POINTER;
+    if( GetCurrentThreadId() != _thread->_thread_id )  return E_ACCESSDENIED;
+
+    _thread->_include_path = bstr_as_string( include_path_bstr );
+    return NOERROR;
+}
+*/
+//---------------------------------------------------------------------Com_thread::get_include_path
+
+STDMETHODIMP Com_thread::get_include_path( BSTR* result )
+{
+    if( !_thread )  return E_POINTER;
+    if( GetCurrentThreadId() != _thread->_thread_id )  return E_ACCESSDENIED;
+
+    *result = SysAllocString_string( _thread->_include_path );
+    return NOERROR;
+}
+
 //-------------------------------------------------------------------------Com_spooler::Com_spooler
 
 Com_spooler::Com_spooler( Spooler* spooler )
@@ -596,6 +640,24 @@ STDMETHODIMP Com_spooler::create_variable_set( Ivariable_set** result )
 
     *result = new Com_variable_set;
     (*result)->AddRef();
+    return NOERROR;
+}
+
+//--------------------------------------------------------------------Com_spooler::put_include_path
+/*
+STDMETHODIMP Com_spooler::put_include_path( BSTR include_path_bstr )
+{
+    if( !_spooler )  return E_POINTER;
+    THREAD_LOCK( _spooler->_lock )  _spooler->_include_path = bstr_as_string( include_path_bstr );
+    return NOERROR;
+}
+*/
+//--------------------------------------------------------------------Com_spooler::get_include_path
+
+STDMETHODIMP Com_spooler::get_include_path( BSTR* result )
+{
+    if( !_spooler )  return E_POINTER;
+    THREAD_LOCK( _spooler->_lock )  *result = SysAllocString_string( _spooler->_include_path );
     return NOERROR;
 }
 

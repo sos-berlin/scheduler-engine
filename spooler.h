@@ -1,4 +1,4 @@
-// $Id: spooler.h,v 1.57 2001/03/17 18:57:22 jz Exp $
+// $Id: spooler.h,v 1.58 2001/03/22 08:56:51 jz Exp $
 
 #ifndef __SPOOLER_H
 #define __SPOOLER_H
@@ -189,14 +189,17 @@ struct Spooler
 
   private:
     string                     _config_filename;            // -config=
+    string                     _spooler_id;                 // -id=
     string                     _log_directory;              // -log-dir=
+    bool                       _log_directory_as_option_set;// -log-dir= als Option gesetzt, überschreibt Angabe in spooler.xml
     string                     _log_filename;
     string                     _include_path;
+    bool                       _include_path_as_option_set; // -include-path= als Option gesetzt, überschreibt Angabe in spooler.xml
+    string                     _spooler_param;              // -param= Parameter für Skripten
+    bool                       _spooler_param_as_option_set;// -param= als Option gesetzt, überschreibt Angabe in spooler.xml
     int                        _priority_max;               // <config priority_max=...>
     int                        _tcp_port;                   // <config tcp=...>
     int                        _udp_port;                   // <config udp=...>
-    string                     _spooler_id;                 // -id=
-    string                     _spooler_param;              // -param= Parameter für Skripten
     State_changed_handler      _state_changed_handler;      // Callback für NT-Dienst SetServiceStatus()
 
     xml::Document_ptr          _config_document;            // Das Dokument zu _config_element

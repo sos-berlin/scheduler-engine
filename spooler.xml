@@ -1,13 +1,14 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 
-<!-- $Id: spooler.xml,v 1.38 2001/03/17 18:57:22 jz Exp $   (C) 2001 SOS GmbH Berlin -->
+<!-- $Id: spooler.xml,v 1.39 2001/03/22 08:56:51 jz Exp $   (C) 2001 SOS GmbH Berlin -->
 
 <!DOCTYPE spooler SYSTEM "s:\prod\spooler\spooler.dtd">
 
 <spooler>
 <config tcp_port    = "4444" 
         udp_port    = "4444" 
-        log_dir     = "c:\tmp">
+        log_dir     = "c:\tmp"
+        include_path= "c:\tmp">
 
     <security>
         <allowed_host host="192.168.100.0" level="all"/>
@@ -261,7 +262,7 @@ sub spooler_process()
 
 
     <threads>
-        <thread name="Eins">
+        <thread name="Eins" >
             <script language="VBScript"><![CDATA[
 
 dim global
@@ -477,7 +478,9 @@ sub spooler_close()
             <jobs>
                 <job name="steuerung">
                     <script language="JScript">
-spooler_log.msg( "text 1" );
+spooler_log.msg( "spooler_job   .include_path=" + spooler_job.include_path );
+spooler_log.msg( "spooler_thread.include_path=" + spooler_thread.include_path );
+spooler_log.msg( "spooler       .include_path=" + spooler.include_path );
 <include file="1.txt"/>
 spooler_log.msg( "text 2" );
 <![CDATA[

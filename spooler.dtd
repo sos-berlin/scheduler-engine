@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- $Id: spooler.dtd,v 1.22 2001/03/15 16:59:18 jz Exp $   Joacim Zschimmer,  (C) 2000 SOS GmbH Berlin  -->
+<!-- $Id: spooler.dtd,v 1.23 2001/03/22 08:56:51 jz Exp $   Joacim Zschimmer,  (C) 2000 SOS GmbH Berlin  -->
 
 
 <!ELEMENT spooler               ( config+ | command | answer )>
@@ -15,6 +15,7 @@
 <!ATTLIST config                udp_port            CDATA '4444'>       <!-- Für UDP-Kommandoschnittstelle -->
 <!ATTLIST config                priority_max        CDATA '1000'>       <!-- Höchste Priorität. Gibt absoluten Vorrang -->
 <!ATTLIST config                param               CDATA ''>           <!-- Wird der Eigenschaft spooler.param jedem Skript übergeben -->
+<!ATTLIST config                include_path        CDATA #IMPLIED>     <!-- Pfad für <include> -->
 
 <!ELEMENT security              ( allowed_host* )>
 <!ATTLIST security              ignore_unknown_hosts (yes|no) 'no'>     <!-- Unbekannte Hostnamen bei <allowed_host> ignorieren? -->
@@ -53,6 +54,7 @@
 <!ELEMENT thread                ( script?, jobs? )>
 <!ATTLIST thread                name                CDATA #REQUIRED>
 <!ATTLIST thread                spooler_id          CDATA ''>           <!-- "": Thread läuft auf jedem Spooler, sonst nur Spooler mit derselben Spooler-Id -->
+<!ATTLIST thread                include_path        CDATA #IMPLIED>     <!-- Pfad für <include> -->
 
 <!ELEMENT jobs                  ( job* )>
 

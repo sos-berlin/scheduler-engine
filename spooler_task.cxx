@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.35 2001/03/17 18:57:23 jz Exp $
+// $Id: spooler_task.cxx,v 1.36 2001/03/22 08:56:52 jz Exp $
 /*
     Hier sind implementiert
 
@@ -650,6 +650,13 @@ string Job::job_state()
     }
 
     return st;
+}
+
+//---------------------------------------------------------------------------------Job::include_path
+
+string Job::include_path() const
+{ 
+    return _thread->include_path(); 
 }
 
 //----------------------------------------------------------------------------------Job::set_in_call
