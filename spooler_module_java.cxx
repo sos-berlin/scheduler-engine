@@ -1,4 +1,4 @@
-// $Id: spooler_module_java.cxx,v 1.51 2003/04/14 09:03:35 jz Exp $
+// $Id: spooler_module_java.cxx,v 1.52 2003/05/29 20:17:21 jz Exp $
 /*
     Hier sind implementiert
 
@@ -10,6 +10,7 @@
 #include "spooler.h"
 #include "../file/stdfile.h"    // make_path
 
+#include "../kram/sos_java.h"
 #include "../zschimmer/java.h"
 
 #ifdef _DEBUG
@@ -243,7 +244,7 @@ void Spooler::init_java_vm()
 
     _java_vm->start();
 
-    make_path( _java_work_dir );       // Java-VM prüft Vorhandensein der Verzeichnisse in classpath schon beim Start
+  //make_path( _java_vm->work_dir() );       // Java-VM prüft Vorhandensein der Verzeichnisse in classpath schon beim Start
 
     Env e = _java_vm->env();
 
@@ -326,7 +327,7 @@ void Module::clear_java()
 
 bool Module::make_java_class( bool force )
 {
-    string filename = _spooler->_java_work_dir + Z_DIR_SEPARATOR + replace_regex( _java_class_name, "\\.", "/" );
+    string filename = _java_vm->work_dir() + Z_DIR_SEPARATOR + replace_regex( _java_class_name, "\\.", "/" );
     string java_filename  = filename + ".java";
     string class_filename = filename + ".class";
     string source;
@@ -375,7 +376,7 @@ bool Module::make_java_class( bool force )
         //utimbuf.actime = utimbuf.modtime = (time_t)_source._max_modification_time;
         //utime( java_filename.c_str(), &utimbuf );
 
-        string cmd = '"' + _spooler->_java_vm->javac_filename() + "\" -verbose -O -classpath " + _spooler->_java_vm->class_path() + ' ' + java_filename;
+        string cmd = '"' + _java_vm->javac_filename() + "\" -verbose -O -classpath " + _spooler->_java_vm->class_path() + ' ' + java_filename;
         _log->info( cmd );
         
         System_command c;
@@ -488,7 +489,8 @@ Java_module_instance::Java_module_instance( Vm* vm, Module* module )
     Module_instance(module),
     Has_vm(vm),
     _zero_(this+1), 
-    _jobject(_module->_spooler->_java_vm) 
+  //_jobject(_module->_spooler->_java_vm) 
+    _jobject( get_java_vm() ) 
 {
 }
 

@@ -1,4 +1,4 @@
-// $Id: spooler_module.cxx,v 1.16 2003/05/23 06:40:28 jz Exp $
+// $Id: spooler_module.cxx,v 1.17 2003/05/29 20:17:21 jz Exp $
 /*
     Hier sind implementiert
 
@@ -9,6 +9,7 @@
 
 #include "spooler.h"
 #include "../file/anyfile.h"
+#include "../kram/sos_java.h"
 
 using namespace std;
 
@@ -123,9 +124,10 @@ ptr<Module_instance> Module::create_instance()
     {
         case kind_java:              
         {
-            if( !_spooler->_java_vm->running() )  throw_xc( "SPOOLER-177" );
+            //if( !_spooler->_java_vm->running() )  throw_xc( "SPOOLER-177" );
 
-            ptr<Java_module_instance> p = Z_NEW( Java_module_instance( _spooler->_java_vm, this ) );
+            _java_vm = get_java_vm();
+            ptr<Java_module_instance> p = Z_NEW( Java_module_instance( _java_vm, this ) );
             return +p;
         }
 

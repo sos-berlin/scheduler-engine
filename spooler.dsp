@@ -164,6 +164,10 @@ SOURCE=.\spooler_module_remote.cxx
 # End Source File
 # Begin Source File
 
+SOURCE=.\spooler_module_remote_server.cxx
+# End Source File
+# Begin Source File
+
 SOURCE=.\spooler_order.cxx
 # ADD CPP /YX"spooler.h"
 # End Source File
@@ -277,6 +281,10 @@ SOURCE=.\spooler_module_java.h
 # Begin Source File
 
 SOURCE=.\spooler_module_remote.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\spooler_module_remote_server.h
 # End Source File
 # Begin Source File
 

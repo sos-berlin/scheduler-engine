@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.205 2003/05/23 06:40:28 jz Exp $
+// $Id: spooler.cxx,v 1.206 2003/05/29 20:17:20 jz Exp $
 /*
     Hier sind implementiert
 
@@ -116,7 +116,7 @@ static void send_error_email( const string& subject, const string& body )
 void send_error_email( const string& error_text, int argc, char** argv, Spooler* spooler )
 {
 
-    string body = "Der Spooler-Dienst konnte nicht gestartet werden.\n"
+    string body = "Der Spooler konnte nicht gestartet werden.\n"
                   "\n"
                   "\n"
                   "Der Aufruf war:\n"
@@ -881,9 +881,10 @@ void Spooler::load_arg()
         if( _log_level <= log_debug_spooler )  _debug = true;
         if( _config_filename.empty() )  throw_xc( "SPOOLER-115" );
 
-        _java_work_dir = temp_dir() + Z_DIR_SEPARATOR "java";
-        _java_vm->prepend_class_path( _java_work_dir );
-        make_path( _java_work_dir );  // Verzeichnis muss beim Start von Java vorhanden sein, damit Java es in classpath berücksichtigt.
+        string java_work_dir = temp_dir() + Z_DIR_SEPARATOR "java";
+        make_path( java_work_dir );  // Verzeichnis muss beim Start von Java vorhanden sein, damit Java es in classpath berücksichtigt.
+        _java_vm->set_work_dir( java_work_dir );
+        _java_vm->prepend_class_path( java_work_dir );
     }
     catch( const Sos_option_error& )
     {
@@ -1577,7 +1578,12 @@ int spooler_main( int argc, char** argv )
 
 int object_server( int argc, char** argv )
 {
+    MessageBox( NULL, "Objectserver", "Objectserver", 0 );
+
     zschimmer::com::object_server::Server server;
+
+    server.register_class( CLSID_Remote_module_instance_server, Remote_module_instance_server::create_instance );
+
     return server.main( argc, argv, true );
 }
 
@@ -1596,10 +1602,10 @@ int sos_main( int argc, char** argv )
 
     try
     {
-        bool    is_service_set = false;
         bool    do_install_service = false;
-        bool    do_remove_service = false;
-        bool    is_object_server = false;
+        bool    do_remove_service  = false;
+        bool    is_object_server   = false;
+        bool    is_service_set     = false;
         string  id;
         string  service_name, service_display;
         string  service_description = "Hintergrund-Jobs der Document Factory";
@@ -1737,7 +1743,7 @@ int sos_main( int argc, char** argv )
     catch( const exception& x )
     {
         LOG( x.what() );
-        spooler::send_error_email( x.what(), argc, argv );
+        if( is_service )  spooler::send_error_email( x.what(), argc, argv );
         ret = 1;
     }
 

@@ -1,4 +1,4 @@
-// $Id: spooler.h,v 1.134 2003/05/23 06:40:28 jz Exp $
+// $Id: spooler.h,v 1.135 2003/05/29 20:17:21 jz Exp $
 
 #ifndef __SPOOLER_H
 #define __SPOOLER_H
@@ -87,6 +87,7 @@ namespace sos {
 #include "spooler_module_com.h"
 #include "spooler_module_java.h"
 #include "spooler_module_remote.h"
+#include "spooler_module_remote_server.h"
 #include "spooler_history.h"
 #include "spooler_order.h"
 #include "spooler_task.h"
@@ -291,7 +292,7 @@ struct Spooler
 
     bool                       _has_java;                   // Es gibt ein Java-Skript
     ptr<java::Vm>              _java_vm;
-    string                     _java_work_dir;              // Zum Compilieren, für .class
+  //string                     _java_work_dir;              // Zum Compilieren, für .class
 
     bool                       _manual;
     string                     _job_name;                   // Bei manuellem Betrieb

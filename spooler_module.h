@@ -1,4 +1,4 @@
-// $Id: spooler_module.h,v 1.17 2003/05/23 06:40:28 jz Exp $
+// $Id: spooler_module.h,v 1.18 2003/05/29 20:17:21 jz Exp $
 
 #ifndef __SPOOLER_MODULE_H
 #define __SPOOLER_MODULE_H
@@ -105,8 +105,10 @@ struct Module
     string                     _filename;                   // <script filename="...">
 
     // Java
+    ptr<java::Vm>              _java_vm;
     string                     _java_class_name;            // <script java_class="...">
   //string                     _java_class_path;            // <script java_class_path="..">
+  //string                     _java_work_dir;
     bool                       _recompile;                  // <script recompile="..">    Immer kompilieren
 
     jclass                     _java_class;
@@ -120,7 +122,7 @@ struct Module
 struct Module_instance : Object 
 {
     Z_GNU_ONLY(                 Module_instance             ();  )                                  // Für gcc 3.2. Nicht implementiert.
-                                Module_instance             ( Module* script )                      : _zero_(this+1), _module(script), _log(script->_log) {}
+                                Module_instance             ( Module* module )                      : _zero_(this+1), _module(module), _log(module->_log) {}
     virtual                    ~Module_instance             ()                                      {}      // Für gcc 3.2
 
     virtual void                close                       ()                                      = 0;

@@ -1,4 +1,4 @@
-// $Id: spooler_module_remote_server.cxx,v 1.1 2003/05/23 06:40:28 jz Exp $
+// $Id: spooler_module_remote_server.cxx,v 1.2 2003/05/29 20:17:21 jz Exp $
 /*
     Hier sind implementiert
 
@@ -9,7 +9,6 @@
 
 #include "spooler.h"
 
-#if 0
 #include "spooler_module_remote_server.h"
 
 namespace sos {
@@ -17,8 +16,19 @@ namespace spooler {
 
 using namespace zschimmer::com::object_server;
 
-//-------------------------------------------------------------------------------------------------
+//------------------------------------Remote_module_instance_server::~Remote_module_instance_server
 
+Remote_module_instance_server::~Remote_module_instance_server()
+{
+}
+
+//---------------------------------------------------Remote_module_instance_server::create_instance
+
+HRESULT Remote_module_instance_server::create_instance( const CLSID& clsid, IUnknown** result )
+{
+    *result = Z_NEW( Remote_module_instance_server );
+    return S_OK;
+}
 
 //------------------------------------------------Remote_module_instance_server::_spooler_construct
 
@@ -37,23 +47,24 @@ STDMETHODIMP Remote_module_instance_server::_spooler_construct( SAFEARRAY* safea
             const OLECHAR* value = wcschr( V_BSTR( &params[i] ), '=' );
             if( !value )  throw_xc( "_spooler_construct" );
             value++;
-
-            if( olestring_begins_with( V_BSTR( &params[i] ), "language="   )  _language       = string_from_ole( value );
+/*
+            if( olestring_begins_with( V_BSTR( &params[i] ), "language="   ) )  _language       = string_from_ole( value );
             else                                                                         
-            if( olestring_begins_with( V_BSTR( &params[i] ), "com_class="  )  _com_class_name = string_from_ole( value );
+            if( olestring_begins_with( V_BSTR( &params[i] ), "com_class="  ) )  _com_class_name = string_from_ole( value );
             else                                                                         
-            if( olestring_begins_with( V_BSTR( &params[i] ), "filename="   )  _filename       = string_from_ole( value );
+            if( olestring_begins_with( V_BSTR( &params[i] ), "filename="   ) )  _filename       = string_from_ole( value );
             else
-            if( olestring_begins_with( V_BSTR( &params[i] ), "java_class=" )  _java_class     = string_from_ole( value );
+            if( olestring_begins_with( V_BSTR( &params[i] ), "java_class=" ) )  _java_class     = string_from_ole( value );
             else
-            if( olestring_begins_with( V_BSTR( &params[i] ), "recompile="  )  _recompile      = value[0] == '1';
+            if( olestring_begins_with( V_BSTR( &params[i] ), "recompile="  ) )  _recompile      = value[0] == '1';
             else
-            if( olestring_begins_with( V_BSTR( &params[i] ), "script="     )  _script         = string_from_ole( value );
+            if( olestring_begins_with( V_BSTR( &params[i] ), "script="     ) )  _script         = string_from_ole( value );
             else
                 throw_xc( "_spooler_construct" );
+*/
         }
     }
-    catch( const exception& x ) { hr = com_set_error( x, "Remote_module_instance_server::_spooler_construct" );
+    catch( const exception& x ) { hr = com_set_error( x, "Remote_module_instance_server::_spooler_construct" ); }
 
     return hr;
 }
@@ -62,10 +73,10 @@ STDMETHODIMP Remote_module_instance_server::_spooler_construct( SAFEARRAY* safea
 
 STDMETHODIMP Remote_module_instance_server::_spooler_add_obj( IDispatch*, BSTR name )
 {
+    return E_FAIL;
 }
 
 //-------------------------------------------------------------------------------------------------
 
 } //namespace spoooler
 } //namespace sos
-#endif

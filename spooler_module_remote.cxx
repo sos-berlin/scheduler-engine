@@ -1,4 +1,4 @@
-// $Id: spooler_module_remote.cxx,v 1.1 2003/05/23 06:40:28 jz Exp $
+// $Id: spooler_module_remote.cxx,v 1.2 2003/05/29 20:17:21 jz Exp $
 /*
     Hier sind implementiert
 
@@ -29,7 +29,7 @@ void Remote_module_instance_proxy::init()
 {
     HRESULT hr;
 
-    hr = com_create_instance_in_separate_process( CLSID_Remote_module_instance, NULL, 0, IID_Remote_module_instance, (void**)&_remote_instance );
+    hr = com_create_instance_in_separate_process( CLSID_Remote_module_instance_server, NULL, 0, IID_Remote_module_instance_server, (void**)&_remote_instance );
     if( FAILED(hr) )  throw_ole( hr, "com_create_instance_in_separate_process" );
 
     _idispatch = _remote_instance;
