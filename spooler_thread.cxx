@@ -1,4 +1,4 @@
-// $Id: spooler_thread.cxx,v 1.39 2002/09/11 10:05:16 jz Exp $
+// $Id: spooler_thread.cxx,v 1.40 2002/09/11 18:24:50 jz Exp $
 /*
     Hier sind implementiert
 
@@ -404,9 +404,10 @@ bool Thread::any_tasks_there()
     {
         FOR_EACH( Job_list, _job_list, it )  
         {
-            if( (*it)->state() == Job::s_suspended       )  return true;    // Zählt nicht in _running_tasks_count
-            if( (*it)->state() == Job::s_running_delayed )  return true;    // Zählt nicht in _running_tasks_count
-            if( (*it)->state() == Job::s_running_process )  return true;    // Zählt nicht in _running_tasks_count
+            if( (*it)->state() == Job::s_suspended              )  return true;    // Zählt nicht in _running_tasks_count
+            if( (*it)->state() == Job::s_running_delayed        )  return true;    // Zählt nicht in _running_tasks_count
+            if( (*it)->state() == Job::s_running_wait_for_order )  return true;    // Zählt nicht in _running_tasks_count
+            if( (*it)->state() == Job::s_running_process        )  return true;    // Zählt nicht in _running_tasks_count
             if( (*it)->queue_filled() )  return true;
         }
     }

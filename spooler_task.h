@@ -1,4 +1,4 @@
-// $Id: spooler_task.h,v 1.58 2002/09/11 10:05:15 jz Exp $
+// $Id: spooler_task.h,v 1.59 2002/09/11 18:24:50 jz Exp $
 
 #ifndef __SPOOLER_TASK_H
 #define __SPOOLER_TASK_H
@@ -61,6 +61,7 @@ enum Start_cause
     cause_directory             = 7,    // start_when_directory_changed
     cause_signal                = 8,
     cause_delay_after_error     = 9,
+    cause_order                 = 10
 };
 
 string                          start_cause_name            ( Start_cause );
@@ -131,6 +132,7 @@ struct Job : Sos_self_deleting
         s_loaded,               // Skript geladen (mit spooler_init), aber nicht gestartet (spooler_open)
         s_running,              // Läuft
         s_running_delayed,      // spooler_task.delay_spooler_process gesetzt
+        s_running_wait_for_order,
         s_running_process,      // Läuft in einem externen Prozess, auf dessen Ende nur gewartet wird
         s_suspended,            // Angehalten
         s_ending,               // end(), also in spooler_close()
@@ -155,7 +157,7 @@ struct Job : Sos_self_deleting
 
     struct In_call
     {
-                                In_call                     ( Task* task, const string& name );
+                                In_call                     ( Task* task, const string& name, const string& extra = "" );
                                 In_call                     ( Job* job  , const string& name );
                                ~In_call                     ();
 
@@ -194,7 +196,7 @@ struct Job : Sos_self_deleting
     string                      jobname_as_filename         ();
     string                      profile_section             ();
     bool                        temporary                   () const                    { return _temporary; }
-    void                        set_in_call                 ( const string& name );
+    void                        set_in_call                 ( const string& name, const string& extra = "" );
     void                        set_delay_after_error       ( int error_steps, Time delay ) { _delay_after_error[error_steps] = delay; }
 
     xml::Element_ptr            read_history                ( xml::Document_ptr doc, int id, int n, bool with_log ) { return _history.read_tail( doc, id, n, with_log ); }
@@ -383,6 +385,7 @@ struct Task : Sos_self_deleting
     void                        set_delay_spooler_process   ( Time t )                      { _job->_log.debug("delay_spooler_process=" + t.as_string() ); _next_spooler_process = Time::now() + t; }
 
     Job*                        job                         ()                              { return _job; }
+    Order*                      order                       ()                              { return _order; }
 
     virtual string             _obj_name                    () const                        { return "Task \"" + _name + "\" (" + _job->obj_name() + ")"; }
   
@@ -428,6 +431,7 @@ struct Task : Sos_self_deleting
     Time                       _next_spooler_process;
     bool                       _close_engine;               // Nach Task-Ende Scripting Engine schließen (für use_engine="job")
   //Xc_copy                    _error;
+    ptr<Order>                 _order;
 
     Thread_semaphore           _terminated_events_lock;
     vector<Event*>             _terminated_events;

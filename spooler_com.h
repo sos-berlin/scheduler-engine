@@ -1,4 +1,4 @@
-// $Id: spooler_com.h,v 1.38 2002/09/11 10:05:14 jz Exp $
+// $Id: spooler_com.h,v 1.39 2002/09/11 18:24:49 jz Exp $
 
 #ifndef __SPOOLER_COM_H
 #define __SPOOLER_COM_H
@@ -274,6 +274,7 @@ struct Com_task : spooler_com::Itask, Sos_ole_object
     STDMETHODIMP                get_id                      ( int* value );
     STDMETHODIMP                put_delay_spooler_process   ( VARIANT* time );
     STDMETHODIMP                put_close_engine            ( VARIANT_BOOL );
+    STDMETHODIMP                get_order                   ( spooler_com::Iorder** );
 
   private:
     Thread_semaphore           _lock;

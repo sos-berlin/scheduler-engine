@@ -1,4 +1,4 @@
-// $Id: spooler.odl,v 1.39 2002/09/11 10:05:13 jz Exp $
+// $Id: spooler.odl,v 1.40 2002/09/11 18:24:49 jz Exp $
 
 // Anweisung: midl /nologo /error all /out $(OutDir) $(InputPath)
 
@@ -268,6 +268,9 @@ library spooler
 
         [propput]
         HRESULT                 close_engine                ( [in] VARIANT_BOOL close_after_task );
+
+        [propget]
+        HRESULT                 order                       ( [out,retval] Iorder** result );
     }
 
     [

@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.102 2002/09/11 10:05:15 jz Exp $
+// $Id: spooler_task.cxx,v 1.103 2002/09/11 18:24:49 jz Exp $
 /*
     Hier sind implementiert
 
@@ -205,13 +205,13 @@ Job::In_call::In_call( Job* job, const string& name )
 
 //----------------------------------------------------------------------------Job::In_call::In_call
 
-Job::In_call::In_call( Task* task, const string& name ) 
+Job::In_call::In_call( Task* task, const string& name, const string& extra ) 
 : 
     _job(task->job()),
     _name(name),
     _result_set(false)
 { 
-    _job->set_in_call(name); 
+    _job->set_in_call( name, extra ); 
     LOG( *task->job() << '.' << name << "() begin\n" );
 
     _ASSERTE( _CrtCheckMemory( ) );
@@ -647,7 +647,9 @@ void Job::end()
     set_mail_defaults();      // Vor spooler_on_error() bzw. spooler_on_success(); eMail wird in finish() verschickt
 
 
-    if( _state == s_suspended  ||  _state == s_running_delayed )  set_state( s_running );
+    if( _state == s_suspended  
+     || _state == s_running_delayed 
+     || _state == s_running_wait_for_order )  set_state( s_running );
     
     if( _state == s_start_task
      || _state == s_starting
@@ -755,11 +757,13 @@ bool Job::execute_state_cmd()
 
                 case sc_end:        if( _state == s_running 
                                      || _state == s_running_delayed 
+                                     || _state == s_running_wait_for_order
                                      || _state == s_running_process )  end(), finish(),        something_done = true;
                                     break;
 
                 case sc_suspend:    if( _state == s_running 
-                                     || _state == s_running_delayed )  set_state( s_suspended ), something_done = true;
+                                     || _state == s_running_delayed
+                                     || _state == s_running_wait_for_order )  set_state( s_suspended ), something_done = true;
                                     break;
 
                 case sc_continue:   if( _state == s_suspended  
@@ -986,6 +990,8 @@ void Job::task_to_start()
                         }
                     }
 
+                    if( _order_queue && !_order_queue->empty() )  cause = cause_order,               _log.debug( "Task startet wegen Auftrags" );
+                                                                                      
                     if( !dequeued && cause )
                     {
                         create_task( NULL, "", now );
@@ -1027,7 +1033,7 @@ bool Job::do_something()
     if( _state == s_read_error )  goto ENDE;
 
 
-    if( _state == s_start_task || _state == s_running || _state == s_running_delayed || _state == s_running_process )          // HISTORIE
+    if( _state == s_start_task || _state == s_running || _state == s_running_delayed || _state == s_running_wait_for_order || _state == s_running_process )          // HISTORIE
     {
         if( _task->_step_count == _history.min_steps() )  _history.start();
     }
@@ -1055,6 +1061,7 @@ bool Job::do_something()
         set_state( s_running );
     }
 
+    if( _state == s_running_wait_for_order  &&  !_order_queue->empty() )  set_state( s_running );
 
     if( ( _state == s_running || _state == s_running_process )  &&  ok  &&  !has_error() )      // SPOOLER_PROCESS
     {
@@ -1087,6 +1094,7 @@ bool Job::do_something()
          || _state == s_starting        // Bei Fehler in spooler_init()
          || _state == s_running 
          || _state == s_running_delayed
+         || _state == s_running_wait_for_order
          || _state == s_running_process )  end(), something_done = true;
 
         if( _state != s_stopped  &&  has_error()  &&  _repeat == 0  &&  _delay_after_error.empty() )  stop(), something_done = true;
@@ -1122,6 +1130,7 @@ bool Job::do_something()
 ENDE:
     if( _state != s_running  
      && _state != s_running_delayed
+     && _state != s_running_wait_for_order
      && _state != s_running_process  
      && _state != s_suspended        )  send_collected_log();
 
@@ -1285,11 +1294,11 @@ void Job::set_state_cmd( State_cmd cmd )
                                 _thread->signal( state_cmd_name(cmd) );
                                 break;
 
-            case sc_end:        ok = _state == s_running || _state == s_running_delayed || _state == s_suspended;  if( !ok )  return;
+            case sc_end:        ok = _state == s_running || _state == s_running_delayed || _state == s_running_wait_for_order || _state == s_suspended;  if( !ok )  return;
                                 _state_cmd = cmd;
                                 break;
 
-            case sc_suspend:    ok = _state == s_running || _state == s_running_delayed;   if( !ok )  return;
+            case sc_suspend:    ok = _state == s_running || _state == s_running_delayed || _state == s_running_wait_for_order;   if( !ok )  return;
                                 _state_cmd = cmd;
                                 break;
 
@@ -1332,12 +1341,15 @@ string Job::include_path() const
 
 //----------------------------------------------------------------------------------Job::set_in_call
 
-void Job::set_in_call( const string& name )
+void Job::set_in_call( const string& name, const string& extra )
 {
     THREAD_LOCK( _lock )
     {
         _in_call = name;
-        if( _spooler->_debug  &&  !name.empty() )  _log.debug( name + "()" );
+        if( _spooler->_debug  &&  !name.empty() )  
+        {
+            _log.debug( name + "()  " + extra );
+        }
     }
 }
 
@@ -1356,6 +1368,7 @@ string Job::state_name( State state )
         case s_starting:        return "starting";
         case s_running:         return "running";
         case s_running_delayed: return "running_delayed";
+        case s_running_wait_for_order: return "running_wait_for_order";
         case s_running_process: return "running_process";
         case s_suspended:       return "suspended";
         case s_ending:          return "ending";
@@ -1724,8 +1737,16 @@ bool Task::step()
 {
     bool result;
 
+
     try 
     {
+        if( _job->_order_queue )
+        {
+            _order = _job->_order_queue->pop();
+            if( !_order )  { _job->set_state( Job::s_running_wait_for_order );  return true; }
+        }
+
+
         result = do_step();
 
         if( _next_spooler_process )  result = true;
@@ -1737,9 +1758,19 @@ bool Task::step()
             _step_count++;
             _job->_last_task_step_count = _step_count;
         }
+
+
+        if( _order )
+        {
+            _order->postprocessing( result, &_job->_log );
+            result = true;
+        }
     }
-    catch( const Xc& x        ) { _job->set_error(x); return false; }
-    catch( const exception& x ) { _job->set_error(x); return false; }
+    catch( const Xc& x        ) { _job->set_error(x); result = false; }
+    catch( const exception& x ) { _job->set_error(x); result = false; }
+
+
+    _order = NULL;
 
     return result;
 }
@@ -1944,7 +1975,7 @@ bool Job_script_task::do_step()
 {
     if( !_job->_has_spooler_process )  return false;
 
-    Job::In_call in_call ( this, spooler_process_name );
+    Job::In_call in_call ( this, spooler_process_name, _order? _order->obj_name() : "" );
     bool ok = check_result( _job->_script_instance.call( spooler_process_name ) );
     in_call.set_result( ok );
     return ok;

@@ -1,4 +1,4 @@
-// $Id: spooler_com.cxx,v 1.48 2002/09/11 11:44:49 jz Exp $
+// $Id: spooler_com.cxx,v 1.49 2002/09/11 18:24:49 jz Exp $
 /*
     Hier sind implementiert
 
@@ -1360,6 +1360,27 @@ HRESULT Com_task::put_close_engine( VARIANT_BOOL b )
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Task.close_engine" ); }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Task.close_engine" ); }
+
+    return hr;
+}
+
+//------------------------------------------------------------------------------Com_task::get_order
+
+STDMETHODIMP Com_task::get_order( Iorder** result )
+{
+    HRESULT hr = NOERROR;
+
+    THREAD_LOCK( _lock )
+    try
+    {
+        if( !_task )  throw_xc( "SPOOLER-122" );
+        if( GetCurrentThreadId() != _task->job()->thread()->_thread_id )  return E_ACCESSDENIED;
+
+        *result = _task->order();
+        if( *result )  (*result)->AddRef();
+    }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Task.result" ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Task.result" ); }
 
     return hr;
 }
