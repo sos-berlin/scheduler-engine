@@ -1,4 +1,4 @@
-// $Id: spooler_module_remote_server.cxx,v 1.4 2003/05/31 14:24:25 jz Exp $
+// $Id: spooler_module_remote_server.cxx,v 1.5 2003/05/31 16:20:51 jz Exp $
 /*
     Hier sind implementiert
 
@@ -91,18 +91,15 @@ STDMETHODIMP Remote_module_instance_server::QueryInterface( const IID& iid, void
 
 const Com_method Remote_module_instance_server::_methods[] =
 { 
-   // _flags              , _name             , _method                                        , _result_type, _types        , _default_arg_count
-/*
-    { DISPATCH_PROPERTYGET, 1, "is_error"        , (Com_method_ptr)&Com_error::get_is_error       , VT_BOOL },
-    { DISPATCH_PROPERTYGET, 2, "code"            , (Com_method_ptr)&Com_error::get_code           , VT_BSTR }, 
-    { DISPATCH_PROPERTYGET, 3, "text"            , (Com_method_ptr)&Com_error::get_text           , VT_BSTR }, 
-*/
+   // _flags              , _name             , _method                                                     , _result_type  , _types        , _default_arg_count
+    { DISPATCH_METHOD     , 1, "construct"    , (Com_method_ptr)&Remote_module_instance_server::construct   , VT_EMPTY      , { VT_ARRAY|VT_VARIANT } },
+    { DISPATCH_METHOD     , 2, "add_obj"      , (Com_method_ptr)&Remote_module_instance_server::add_obj     , VT_EMPTY      , { VT_DISPATCH, VT_BSTR } },
+    { DISPATCH_METHOD     , 3, "name_exists"  , (Com_method_ptr)&Remote_module_instance_server::name_exists , VT_BOOL       , { VT_BSTR } },
+    { DISPATCH_METHOD     , 4, "call"         , (Com_method_ptr)&Remote_module_instance_server::call        , VT_VARIANT    , { VT_BSTR } },
     {}
 };
 
 #endif
-
-
 //---------------------------------------------------------Remote_module_instance_server::construct
 
 STDMETHODIMP Remote_module_instance_server::construct( SAFEARRAY* safearray )
