@@ -1,4 +1,4 @@
-// $Id: spooler_config.cxx,v 1.65 2003/08/22 07:34:14 jz Exp $
+// $Id: spooler_config.cxx,v 1.66 2003/08/25 20:41:26 jz Exp $
 
 //#include <precomp.h>
 
@@ -336,7 +336,11 @@ void Spooler::load_config( const xml::Element_ptr& config_element, const Time& x
         _tcp_port      = as_int( config_element.getAttribute( "tcp_port"     , as_string( _tcp_port )     ) );
         _udp_port      = as_int( config_element.getAttribute( "udp_port"     , as_string( _udp_port )     ) );
         _priority_max  = as_int( config_element.getAttribute( "priority_max" , as_string( _priority_max ) ) );
+
+#     ifdef _DEBUG
         _max_threads   = as_int( config_element.getAttribute( "threads"      , as_string( _max_threads  ) ) );
+#     endif
+          
         if( _max_threads < 1 )  _max_threads = 1;
 
         _config_java_class_path = subst_env( config_element.getAttribute( "java_class_path" ) );

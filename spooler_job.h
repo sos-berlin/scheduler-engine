@@ -1,4 +1,4 @@
-// $Id: spooler_job.h,v 1.3 2003/08/22 07:34:14 jz Exp $
+// $Id: spooler_job.h,v 1.4 2003/08/25 20:41:26 jz Exp $
 
 #ifndef __SPOOLER_JOB_H
 #define __SPOOLER_JOB_H
@@ -165,8 +165,6 @@ struct Job : Sos_self_deleting
     void                        init                        ();                                     // Wird nach Spooler-Skript gerufen, ruft auch init2()
     void                        init2                       ();                                     // Wird nach reread() gerufen
 
-  //void                    set_event_destination           ( Event* e )                            { _event = e; }
-
     const string&               name                        () const                                { return _name; }
     State_cmd                   state_cmd                   () const                                { return _state_cmd; }
     State                       state                       () const                                { return _state; }
@@ -195,8 +193,6 @@ struct Job : Sos_self_deleting
     void                        interrupt_script            ();
     void                        select_period               ( Time = Time::now() );
     bool                        is_in_period                ( Time = Time::now() );
-  //bool                        its_current_task            ( Task* task )                          { return task == _task; }
-  //Task*                       current_task                ()                                      { return _task; }
     bool                        queue_filled                ()                                      { return !_task_queue.empty(); }
 
     Sos_ptr<Task>               create_task                 ( const ptr<spooler_com::Ivariable_set>& params, const string& task_name, Time = latter_day );
@@ -241,10 +237,7 @@ struct Job : Sos_self_deleting
 
     void                        set_error_xc                ( const Xc& );
     void                        set_error_xc_only           ( const Xc& );
-  //void                        set_error                   ( const Xc& x )                         { set_error_xc( x ); }
-  //void                        set_error                   ( const z::Xc& x )                      { set_error_xc( x ); }
     void                        set_error                   ( const exception& );
-  //void                        set_error                   ( const _com_error& );
     void                        reset_error                 ()                                      { THREAD_LOCK( _lock )  _error = NULL,  _log.reset_highest_level(); }
 
     void                        signal                      ( const string& signal_name );
@@ -258,6 +251,7 @@ struct Job : Sos_self_deleting
     void                        set_job_chain_priority      ( int pri )                             { THREAD_LOCK(_lock) if( _job_chain_priority < pri )  _job_chain_priority = pri; }
     static bool                 higher_job_chain_priority   ( const Job* a, const Job* b )          { return a->_job_chain_priority > b->_job_chain_priority; }
 
+    ptr<Module_instance>        create_module_instance      ();
     Module_instance*            get_free_module_instance    ( Task* );
     void                        release_module_instance     ( Module_instance* );
 
@@ -319,7 +313,6 @@ struct Job : Sos_self_deleting
     Delay_after_error          _delay_after_error;
     long                       _error_steps;                // Zahl aufeinanderfolgender Fehler
 
-  //Event*                     _event;
     Directory_watcher_list     _directory_watcher_list;
     Xc_copy                    _error;
 
@@ -333,7 +326,6 @@ struct Job : Sos_self_deleting
     xml::Element_ptr           _module_xml_element;         // <script> aus <config>
     Time                       _module_xml_mod_time;
     Module*                    _module_ptr;
-  //ptr<Module_instance>       _module_instance;            // Für use_engine="job"
     typedef vector< ptr<Module_instance> >  Module_instance_vector;
     Module_instance_vector     _module_instances;
     ptr<Com_job>               _com_job;
@@ -342,7 +334,6 @@ struct Job : Sos_self_deleting
     Level                      _output_level;
     
     Task_queue                 _task_queue;                 // Warteschlange der nächsten zu startenden Tasks
-  //Sos_ptr<Task>              _task;                       // Es kann nur eine Task geben. Zirkel: _task->_job == this
     Task_list                  _running_tasks;              // Alle laufenden Tasks (auch die gestarteten, aber wartenden, z.B. s_running_waiting_for_order)
     long                       _running_tasks_count;        // Anzahl der Tasks, die tatsächlich laufen (und nicht gerade warten)
     int                        _max_tasks;                  // Max. Anzahl gleichzeitig laufender Tasks. _running_tasks.size() <= _max_tasks!

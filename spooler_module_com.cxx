@@ -1,4 +1,4 @@
-// $Id: spooler_module_com.cxx,v 1.18 2003/08/11 19:33:11 jz Exp $
+// $Id: spooler_module_com.cxx,v 1.19 2003/08/25 20:41:26 jz Exp $
 /*
     Hier sind implementiert
 
@@ -63,17 +63,21 @@ bool Com_module_instance_base::name_exists( const string& name )
     return exists;                        
 }
 
-//-------------------------------------------------------------------Com_module_instance_base::call
+//------------------------------------------------------------------Com_module_instance_base::call
 
 Variant Com_module_instance_base::call( const string& name )
 {
+    In_call in_call ( this, name );
+
     return com_call( _idispatch, name );
 }
 
-//-------------------------------------------------------------------Com_module_instance_base::call
+//------------------------------------------------------------------Com_module_instance_base::call
 
 Variant Com_module_instance_base::call( const string& name, int param )
 {
+    In_call in_call ( this, name );
+
     return com_call( _idispatch, name, param );
 }
 
@@ -268,7 +272,7 @@ void Scripting_engine_module_instance::load()
     _idispatch = _script_site->dispatch();
 }
 
-//--------------------------------------------------------------------Scripting_engine_module_instance::start
+//----------------------------------------------------------Scripting_engine_module_instance::start
 
 void Scripting_engine_module_instance::start()
 {
@@ -288,6 +292,8 @@ Variant Scripting_engine_module_instance::call( const string& name )
 {
     SOS_DELETE( _script_site->_script_exception );
 
+    In_call in_call ( this, name );
+
     try
     {
         return com_call( _idispatch, name );
@@ -304,6 +310,8 @@ Variant Scripting_engine_module_instance::call( const string& name )
 Variant Scripting_engine_module_instance::call( const string& name, int param )
 {
     SOS_DELETE( _script_site->_script_exception );
+
+    In_call in_call ( this, name );
 
     try
     {

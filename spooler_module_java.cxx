@@ -1,4 +1,4 @@
-// $Id: spooler_module_java.cxx,v 1.57 2003/08/12 14:59:45 jz Exp $
+// $Id: spooler_module_java.cxx,v 1.58 2003/08/25 20:41:26 jz Exp $
 /*
     Hier sind implementiert
 
@@ -625,10 +625,12 @@ Variant Java_module_instance::call( const string& name_par )
 
     if( *name.rbegin() == 'Z' )
     {
+        In_call in_call ( this, name );  //.substr( 0, name.length() - 1 ) );
         result = e->CallBooleanMethod( _jobject, method_id ) != 0;
     }
     else
     {
+        In_call in_call ( this, name );
         e->CallVoidMethod( _jobject, method_id );
     }
 
@@ -647,7 +649,12 @@ Variant Java_module_instance::call( const string& name, int param )
     jmethodID method_id = _module->java_method_id( name );
     if( !method_id )  throw_xc( "SPOOLER-174", name, _module->_java_class_name.c_str() );
 
-    bool result = e->CallBooleanMethod( _jobject, method_id, param ) != 0;
+    bool result;
+    
+    {
+        In_call in_call ( this, name );  //name.substr( 0, name.length() - 1 ) );      // "Z" abschneiden
+        result = e->CallBooleanMethod( _jobject, method_id, param ) != 0;
+    }
 
     if( e->ExceptionCheck() )  e.throw_java( name );
 

@@ -1,4 +1,4 @@
-// $Id: spooler.h,v 1.144 2003/08/22 07:34:13 jz Exp $
+// $Id: spooler.h,v 1.145 2003/08/25 20:41:26 jz Exp $
 
 #ifndef __SPOOLER_H
 #define __SPOOLER_H
@@ -237,7 +237,7 @@ struct Spooler
     void                        start_jobs                  ();
     void                        close_jobs                  ();
   //void                        start_threads               ();
-    Spooler_thread*             new_thread                  ();
+    Spooler_thread*             new_thread                  ( bool free_threading = true );
     void                        close_threads               ();
   //bool                        run_single_thread           ();
 

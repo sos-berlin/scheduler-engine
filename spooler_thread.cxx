@@ -1,4 +1,4 @@
-// $Id: spooler_thread.cxx,v 1.94 2003/08/22 07:34:14 jz Exp $
+// $Id: spooler_thread.cxx,v 1.95 2003/08/25 20:41:27 jz Exp $
 /*
     Hier sind implementiert
 
@@ -29,7 +29,6 @@ Spooler_thread::Spooler_thread( Spooler* spooler )
 
   //_com_thread     = new Com_thread( this );
   //_free_threading = _spooler->free_threading_default();
-    _free_threading = true;
   //_include_path   = _spooler->include_path();
 }
 
@@ -51,9 +50,9 @@ Spooler_thread::~Spooler_thread()
 
 void Spooler_thread::init()
 {
-    set_thread_name( _name );
+    //set_thread_name( _name );
 
-    _log.set_prefix( "Thread " + _name );
+    //_log.set_prefix( "Thread " + _name );
 
   //_com_log = new Com_log( &_log );
 
@@ -133,6 +132,8 @@ void Spooler_thread::start( Event* event_destination )
     _event = event_destination;
 
     if( !thread_id() )  set_thread_id( _spooler->thread_id() );
+
+    _log.info( "Thread startet" );
 
     try
     {
@@ -220,13 +221,24 @@ Task* Spooler_thread::get_next_task_to_run()
     {
         FOR_EACH_TASK( t, task )
         {
-            _log.debug( task->name() + ".next_time=" + task->next_time().as_string() );
-            if( next_time > task->next_time() )  next_time = task->next_time();
+            Z_DEBUG_ONLY( _log.debug9( task->name() + ".next_time=" + task->next_time().as_string() ) );
+            if( next_time > task->next_time() )  next_time = task->next_time(), next_task = task;
             if( next_time == 0 )  break;
         }
     }
 
     return next_task;
+}
+
+//--------------------------------------------------------------------Spooler_thread::get_next_task
+
+Task* Spooler_thread::get_next_task()
+{
+    Task* task = get_next_task_to_run();
+
+    _next_time = task? task->next_time() : latter_day;
+
+    return task;
 }
 
 //-----------------------------------------------------------------------------Spooler_thread::wait
@@ -242,9 +254,7 @@ void Spooler_thread::wait()
     }
     else
     {
-        Task* task = get_next_task_to_run();
-
-        _next_time = task? task->next_time() : latter_day;
+        Task* task = get_next_task();
 
         if( _spooler->_debug )  if( task )  msg = "Warten bis " + _next_time.as_string() + " für Task " + task->name();
                                       else  msg = "Keine Task aktiv";
@@ -298,7 +308,8 @@ bool Spooler_thread::do_something( Task* task )
 
     bool ok = task->do_something();
     
-    _task_ended |= task->state() == Task::s_ended;
+    _task_ended |=    task->state() == Task::s_ended 
+                   || task->state() == Task::s_closed;
 
     _current_task = NULL;
 
@@ -315,7 +326,8 @@ void Spooler_thread::remove_ended_tasks()
         while( t != _task_list.end() )
         {
             Task* task = *t;
-            if( task->state() == Task::s_ended )
+            if( task->state() == Task::s_ended
+             || task->state() == Task::s_closed )
             {
                 task->job()->remove_running_task( task );
                 t = _task_list.erase( t );

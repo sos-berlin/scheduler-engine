@@ -1,4 +1,4 @@
-// $Id: spooler_module_remote_server.cxx,v 1.17 2003/06/05 12:48:54 jz Exp $
+// $Id: spooler_module_remote_server.cxx,v 1.18 2003/08/25 20:41:27 jz Exp $
 /*
     Hier sind implementiert
 
@@ -80,6 +80,9 @@ const Com_method Com_remote_module_instance_server::_methods[] =
     { DISPATCH_METHOD     , 2, "add_obj"      , (Com_method_ptr)&Com_remote_module_instance_server::add_obj     , VT_EMPTY      , { VT_DISPATCH, VT_BSTR } },
     { DISPATCH_METHOD     , 3, "name_exists"  , (Com_method_ptr)&Com_remote_module_instance_server::name_exists , VT_BOOL       , { VT_BSTR } },
     { DISPATCH_METHOD     , 4, "call"         , (Com_method_ptr)&Com_remote_module_instance_server::call        , VT_VARIANT    , { VT_BSTR } },
+    { DISPATCH_METHOD     , 5, "begin"        , (Com_method_ptr)&Com_remote_module_instance_server::begin       , VT_VARIANT    , { VT_BSTR } },
+    { DISPATCH_METHOD     , 6, "end"          , (Com_method_ptr)&Com_remote_module_instance_server::end         , VT_VARIANT    , { VT_BSTR, VT_INT } },
+    { DISPATCH_METHOD     , 7, "step"         , (Com_method_ptr)&Com_remote_module_instance_server::step        , VT_VARIANT    , { VT_BSTR } },
     {}
 };
 
@@ -252,12 +255,80 @@ STDMETHODIMP Com_remote_module_instance_server::call( BSTR name, VARIANT* result
 {
     HRESULT hr = NOERROR;
 
+  //In_call in_call ( this, name );
+
     try
     {
         _server.load_implicitly();
         _server._module_instance->call( string_from_bstr(name) ).CopyTo( result );
     }
     catch( const exception& x ) { hr = com_set_error( x, "Remote_module_instance_server::call" ); }
+
+    return hr;
+}
+
+//---------------------------------------------------------Com_remote_module_instance_server::begin
+
+STDMETHODIMP Com_remote_module_instance_server::begin( SAFEARRAY* objects_safearray, SAFEARRAY* names_safearray, VARIANT* result )
+{
+    HRESULT hr = NOERROR;
+
+    try
+    {
+        Locked_safearray objects ( objects_safearray );
+        Locked_safearray names   ( names_safearray );
+
+      //Module_instance::Object_list object_list;
+
+        for( int i = 0; i < objects.count(); i++ )  
+        {
+            VARIANT* o = &objects[i];
+            if( o->vt != VT_DISPATCH )  return DISP_E_BADVARTYPE;
+          //object_list.push_back( Module_instance::Object_list_entry( V_DISPATCH(o), string_from_variant( names[i]) ) );
+            _server.add_obj( V_DISPATCH(o), string_from_variant( names[i] ) );
+        }
+
+        _server.begin__start();
+
+        result->vt = VT_BOOL;
+        V_BOOL( result ) = _server.begin__end();
+    }
+    catch( const exception& x ) { hr = com_set_error( x, "Remote_module_instance_server::begin" ); }
+
+    return hr;
+}
+
+//-----------------------------------------------------------Com_remote_module_instance_server::end
+
+STDMETHODIMP Com_remote_module_instance_server::end( VARIANT_BOOL succeeded, VARIANT* result )
+{
+    HRESULT hr = NOERROR;
+
+    try
+    {
+        _server.end__start( succeeded != 0 );
+
+        _server.end__end();
+    }
+    catch( const exception& x ) { hr = com_set_error( x, "Remote_module_instance_server::end" ); }
+
+    return hr;
+}
+
+//----------------------------------------------------------Com_remote_module_instance_server::step
+
+STDMETHODIMP Com_remote_module_instance_server::step( VARIANT* result )
+{
+    HRESULT hr = NOERROR;
+
+    try
+    {
+        _server.step__start();
+
+        result->vt = VT_BOOL;
+        V_BOOL( result ) = _server.step__end();
+    }
+    catch( const exception& x ) { hr = com_set_error( x, "Remote_module_instance_server::step" ); }
 
     return hr;
 }

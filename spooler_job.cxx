@@ -1,4 +1,4 @@
-// $Id: spooler_job.cxx,v 1.4 2003/08/22 07:34:14 jz Exp $
+// $Id: spooler_job.cxx,v 1.5 2003/08/25 20:41:26 jz Exp $
 /*
     Hier sind implementiert
 
@@ -187,7 +187,7 @@ void Job::init0()
 {
     _state = s_none;
 
-    _log.set_prefix( obj_name() );
+    _log.set_prefix( "Job  " + _name );       // Zwei Blanks, damit die Länge mit "Task " übereinstimmt
     _log.set_profile_section( profile_section() );
     _log.set_job( this );
 
@@ -349,8 +349,8 @@ Sos_ptr<Task> Job::create_task( const ptr<spooler_com::Ivariable_set>& params, c
 
     if( !_process_filename.empty() )   task = SOS_NEW( Process_task   ( this ) );
     else
-    if( _object_set_descr          )   task = SOS_NEW( Object_set_task( this ) );
-    else                             
+  //if( _object_set_descr          )   task = SOS_NEW( Object_set_task( this ) );
+  //else                             
                                        task = SOS_NEW( Job_module_task( this ) );
 
     Time now = Time::now();
@@ -455,14 +455,17 @@ void Job::remove_running_task( Task* task )
 
         if( _running_tasks.empty() )
         {
-            if( _state == s_stopping )  
+            if( _state != s_stopped )
             {
-                set_state( s_stopped );
-            }
-            else
-            {
-                set_next_start_time();
-                set_state( s_pending );
+                if( _state == s_stopping )  
+                {
+                    set_state( s_stopped );
+                }
+                else
+                {
+                    set_next_start_time();
+                    set_state( s_pending );
+                }
             }
         }
     }
@@ -503,16 +506,19 @@ Sos_ptr<Task> Job::start_without_lock( const ptr<spooler_com::Ivariable_set>& pa
 
 bool Job::read_script()
 {
-    try
+    THREAD_LOCK( _lock )
     {
-        _module.set_dom_source_only( _module_xml_element, _module_xml_mod_time, include_path() );
-    }
-    catch( const exception& x ) 
-    { 
-        set_error(x);  
-      //_close_engine = true;  
-        set_state( s_read_error );  
-        return false; 
+        try
+        {
+            _module.set_dom_source_only( _module_xml_element, _module_xml_mod_time, include_path() );
+        }
+        catch( const exception& x ) 
+        { 
+            set_error(x);  
+        //_close_engine = true;  
+            set_state( s_read_error );  
+            return false; 
+        }
     }
 
     return true;
@@ -953,17 +959,16 @@ bool Job::do_something()
         Sos_ptr<Task> task = task_to_start();
         if( task )
         {
-            _running_tasks.push_back( task );
-
             _log.open();           // Jobprotokoll, nur wirksam, wenn set_filename() gerufen, s. Job::init().
-
-            task->attach_to_a_thread();
 
             reset_error();
             _repeat = 0;
             _delay_until = 0;
 
+            _running_tasks.push_back( task );
             set_state( s_running );
+
+            task->attach_to_a_thread();
         }
     }
 
@@ -1290,21 +1295,40 @@ void Job::signal_object( const string& object_set_class_name, const Level& level
     }
 }
 
+//----------------------------------------------------------------------Job::create_module_instance
+
+ptr<Module_instance> Job::create_module_instance()
+{
+    ptr<Module_instance>  result;
+
+    THREAD_LOCK( _lock )
+    {
+        if( _state == s_read_error )  throw_xc( "SPOOLER-190" );
+        result = _module_ptr->create_instance();
+        result->set_log( &_log );
+    }
+
+    return result;
+}
+
 //--------------------------------------------------------------------Job::get_free_module_instance
 
 Module_instance* Job::get_free_module_instance( Task* task )
 {
-    Z_FOR_EACH( Module_instance_vector, _module_instances, m )
+    THREAD_LOCK( _lock )
     {
-        if( !*m )
+        Z_FOR_EACH( Module_instance_vector, _module_instances, m )
         {
-            *m = _module_ptr->create_instance();
-        }
+            if( !*m )  *m = create_module_instance();
 
-        if( !(*m)->_task ) 
-        { 
-            (*m)->_task = task; 
-            return *m;
+
+/* Erstmal auskommentiert, 23.8.03
+            if( !(*m)->_task ) 
+            { 
+                (*m)->_task = task; 
+                return *m;
+            }
+*/
         }
     }
 

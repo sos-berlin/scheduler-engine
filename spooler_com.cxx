@@ -1,4 +1,4 @@
-// $Id: spooler_com.cxx,v 1.102 2003/08/22 07:34:13 jz Exp $
+// $Id: spooler_com.cxx,v 1.103 2003/08/25 20:41:26 jz Exp $
 /*
     Hier sind implementiert
 
@@ -1514,6 +1514,8 @@ void Com_task::set_task( Task* task )
 
 STDMETHODIMP Com_task::get_object_set( Iobject_set** result )
 {
+    return E_NOTIMPL;
+/*
     HRESULT hr = NOERROR;
 
     THREAD_LOCK( _lock )
@@ -1530,6 +1532,7 @@ STDMETHODIMP Com_task::get_object_set( Iobject_set** result )
     catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Task::object_set" ); }
 
     return hr;
+*/
 }
 
 //----------------------------------------------------------------------------------Com_task::error

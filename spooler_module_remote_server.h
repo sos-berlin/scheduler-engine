@@ -1,4 +1,4 @@
-// $Id: spooler_module_remote_server.h,v 1.7 2003/06/04 10:02:08 jz Exp $
+// $Id: spooler_module_remote_server.h,v 1.8 2003/08/25 20:41:27 jz Exp $
 
 #ifndef __SPOOLER_MODULE_REMOTE_SERVER_H
 #define __SPOOLER_MODULE_REMOTE_SERVER_H
@@ -49,6 +49,9 @@ struct Com_remote_module_instance_server : spooler_com::Iremote_module_instance_
     STDMETHODIMP                add_obj                     ( IDispatch*, BSTR name );
     STDMETHODIMP                name_exists                 ( BSTR name, VARIANT_BOOL* result );
     STDMETHODIMP                call                        ( BSTR name, VARIANT* result );
+    STDMETHODIMP                begin                       ( SAFEARRAY* objects, SAFEARRAY* names, VARIANT* result );
+    STDMETHODIMP                end                         ( VARIANT_BOOL, VARIANT* result );
+    STDMETHODIMP                step                        ( VARIANT* result );
 
 
 

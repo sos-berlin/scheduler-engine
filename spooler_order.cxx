@@ -1,5 +1,5 @@
 
-// $Id: spooler_order.cxx,v 1.32 2003/08/22 07:34:14 jz Exp $
+// $Id: spooler_order.cxx,v 1.33 2003/08/25 20:41:27 jz Exp $
 /*
     Hier sind implementiert
 
@@ -904,7 +904,7 @@ void Order::set_state2( const State& state, bool is_error_state )
     if( _job_chain_node && _job_chain_node->_job )  log_line += ", " + _job_chain_node->_job->obj_name();
     if( is_error_state                           )  log_line += ", Fehlerzustand";
 
-    _log.info( log_line );
+    if( _job_chain )  _log.info( log_line );
 
     _state = state;
 }

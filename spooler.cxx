@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.224 2003/08/22 07:34:13 jz Exp $
+// $Id: spooler.cxx,v 1.225 2003/08/25 20:41:26 jz Exp $
 /*
     Hier sind implementiert
 
@@ -894,18 +894,20 @@ void Spooler::close_jobs()
 
 //------------------------------------------------------------------------------Spooler::new_thread
 
-Spooler_thread* Spooler::new_thread()
+Spooler_thread* Spooler::new_thread( bool free_threading )
 {
     ptr<Spooler_thread>  thread;
 
     THREAD_LOCK( _lock )
     {
         thread = Z_NEW( Spooler_thread( this ) );
+        thread->set_name( as_string( _thread_list.size() + 1 ) );
 
         _thread_list.push_back( thread );
 
-        if( thread->_free_threading )  
+        if( free_threading )  
         {
+            thread->_free_threading = true;
             thread->thread_start();      // Eigener Thread
             thread->set_thread_termination_event( &_event );        // Signal zu uns, wenn Thread endet
         }
@@ -1371,6 +1373,9 @@ void Spooler::run()
 
     set_state( s_running );
 
+    Spooler_thread* single_thread = _max_threads == 1? new_thread( false ) : NULL;
+
+
     while(1)
     {
         // Threads ohne Jobs und nach Fehler gestorbene Threads entfernen:
@@ -1424,7 +1429,7 @@ void Spooler::run()
             //LOG( "spooler: running_tasks_count=" << running_tasks_count  << " _state_cmd=" << (int)_state_cmd << " ctrl_c_pressed=" << ctrl_c_pressed << " _next_time=" << _next_time << "\n" );
             if( thread->_running_tasks_count == 0  &&  _state_cmd == sc_none  &&  !ctrl_c_pressed )
             {
-                thread->get_next_job_to_start();
+                get_next_job_to_start();
                 //thread->_log.debug9( "_next_start_time=" + thread->_next_start_time.as_string() );
                 if( thread->_next_job  &&  _next_time > thread->_next_start_time )  _next_time = thread->_next_start_time, _next_job = thread->_next_job;
 
@@ -1480,10 +1485,47 @@ void Spooler::run()
                 }
 
 
+                string       msg = "Kein Job und keine Task aktiv";
+                Wait_handles wait_handles ( this, &_log );
+                _next_time = latter_day;
+
+                if( single_thread )
+                {
+                    single_thread->process();
+                    wait_handles += single_thread->_wait_handles;
+                    Task* task = single_thread->get_next_task();
+                    if( task ) 
+                    {
+                        _next_time = task->next_time();
+                        if( _debug )  if( task )  msg = "Warten bis " + _next_time.as_string() + " für Task " + task->name();
+                                            else  msg = "Keine Task aktiv";
+                    }
+                }
+
+                wait_handles += _wait_handles;
+
                 Job* job = get_next_job_to_start();
-                _next_time = job? job->next_time() : latter_day;
-            
-                _wait_handles.wait_until( _next_time );
+
+                if( job  &&  _next_time > job->next_time() )  
+                {
+                    _next_time = job->next_time();
+                    msg = "Warten bis " + _next_time.as_string() + " für Job " + job->name();
+                }
+
+                if( _next_time > 0 )
+                {
+                    if( _debug )  
+                    {
+                        if( wait_handles.wait(0) == -1 )  _log.debug( msg ), wait_handles.wait_until( _next_time );     // Debug-Ausgabe der Wartezeit nur, wenn kein Ergebnis vorliegt
+                    }
+                    else
+                    {
+                        wait_handles.wait_until( _next_time );
+                    }
+                }
+
+                _next_time = 0;
+                wait_handles.clear();
             }
         }
 

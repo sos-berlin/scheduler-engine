@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- $Id: spooler.dtd,v 1.48 2003/05/23 06:40:28 jz Exp $   Joacim Zschimmer,  (C) 2000 SOS GmbH Berlin  -->
+<!-- $Id: spooler.dtd,v 1.49 2003/08/25 20:41:26 jz Exp $   Joacim Zschimmer,  (C) 2000 SOS GmbH Berlin  -->
 
 
 <!ELEMENT spooler               ( config+ | command | answer )>
@@ -16,7 +16,6 @@
 <!ATTLIST config                priority_max        CDATA #IMPLIED>     <!-- Höchste Priorität. Gibt absoluten Vorrang -->
 <!ATTLIST config                param               CDATA #IMPLIED>     <!-- Wird der Eigenschaft spooler.param jedem Skript übergeben -->
 <!ATTLIST config                include_path        CDATA #IMPLIED>     <!-- Pfad für <include> -->
-<!ATTLIST config                free_threading      CDATA #IMPLIED>     <!-- Voreinstellung für <thread free_threading> -->
 <!ATTLIST config                java_class_path     CDATA #IMPLIED>     <!-- Für Java -->
 
 <!ELEMENT base                  EMPTY>

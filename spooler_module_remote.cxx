@@ -1,4 +1,4 @@
-// $Id: spooler_module_remote.cxx,v 1.16 2003/08/14 11:01:14 jz Exp $
+// $Id: spooler_module_remote.cxx,v 1.17 2003/08/25 20:41:26 jz Exp $
 /*
     Hier sind implementiert
 
@@ -82,7 +82,8 @@ void Remote_module_instance_proxy::close()
 
 void Remote_module_instance_proxy::add_obj( const ptr<IDispatch>& object, const string& name )
 {
-    _remote_instance->call( "add_obj", +object, name );
+    //_remote_instance->call( "add_obj", +object, name );
+    _object_list.push_back( Object_list_entry( object, name ) );
 }
 
 //--------------------------------------------------------Remote_module_instance_proxy::name_exists
@@ -103,12 +104,16 @@ Variant Remote_module_instance_proxy::call( const string& name )
 /*
 void Remote_module_instance_proxy::begin__start( const Object_list& object_list )
 {
+    _object_list = object_list;
+}
+*/
+//-------------------------------------------------------Remote_module_instance_proxy::begin__start
+
+void Remote_module_instance_proxy::begin__start()
+{
     _error = NULL;
 
     Module_instance::init();
-
-    _object_list = object_list;
-
 
     Parameters parameters;
     parameters.push_back( Parameter( "param", "-object-server" ) );
@@ -138,10 +143,10 @@ bool Remote_module_instance_proxy::begin__end()
 
 //---------------------------------------------------------Remote_module_instance_proxy::end__start
 
-void Remote_module_instance_proxy::end__start()
+void Remote_module_instance_proxy::end__start( bool success )
 {
     _error = NULL;
-    _remote_instance->call( "end" );
+    _remote_instance->call__start( "end", success );
 }
 
 //-----------------------------------------------------------Remote_module_instance_proxy::end__end
@@ -193,7 +198,7 @@ void Remote_module_instance_proxy::process( bool wait )
         {
             case c_create_instance:
             {
-                HRESULT hr = _session->create_instance__end( _multi_qi );
+                HRESULT hr = _session->create_instance__end( 1, _multi_qi );
                 if( FAILED(hr) )  throw_com( hr, "create_instance" );
 
                 _remote_instance = dynamic_cast<object_server::Proxy*>( _multi_qi[0].pItf );
@@ -227,8 +232,6 @@ void Remote_module_instance_proxy::process( bool wait )
             case c_call_begin:
             {
                 _call_state = c_finished;
-
-            //return check_result( _remote_instance->call__end() );
                 break;
             }
 
@@ -241,7 +244,7 @@ void Remote_module_instance_proxy::process( bool wait )
         _error = x;
     }
 }
-*/
+
 //-------------------------------------------------------------------------------------------------
 
 } //namespace spoooler

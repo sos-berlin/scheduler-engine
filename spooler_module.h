@@ -1,4 +1,4 @@
-// $Id: spooler_module.h,v 1.32 2003/08/14 11:01:14 jz Exp $
+// $Id: spooler_module.h,v 1.33 2003/08/25 20:41:26 jz Exp $
 
 #ifndef __SPOOLER_MODULE_H
 #define __SPOOLER_MODULE_H
@@ -151,14 +151,16 @@ struct Module_instance : Object
 {
     struct In_call
     {
-                                In_call                     ( Task* task, const string& name, const string& extra = "" );
+                                In_call                     ( Module_instance* module_instance, const string& name, const string& extra = "" );
                               //In_call                     ( Job* job  , const string& name );
                                ~In_call                     ();
 
         void                    set_result                  ( bool result )                         { _result = result; _result_set = true; }
+        const string&           name                        ()                                      { return _name; }
 
       //Job*                   _job;
-        Task*                  _task;
+      //Task*                  _task;
+        Module_instance*       _module_instance;
         Log_indent             _log_indent;
         string                 _name;                       // Fürs Log
         bool                   _result_set;
@@ -168,6 +170,9 @@ struct Module_instance : Object
 
     struct Object_list_entry
     {
+                                Object_list_entry           ()                                      {}
+                                Object_list_entry           ( const ptr<IDispatch>& object, const string& name ) : _object(object), _name(name) {}
+
         ptr<IDispatch>         _object;
         string                 _name;
     };
@@ -178,13 +183,16 @@ struct Module_instance : Object
 
 
     Z_GNU_ONLY(                 Module_instance             ();  )                                  // Für gcc 3.2. Nicht implementiert.
-                                Module_instance             ( Module* module )                      : _zero_(this+1), _module(module), _log(module?module->_log:NULL) {}
+                                Module_instance             ( Module* );
     virtual                    ~Module_instance             ()                                      {}      // Für gcc 3.2
 
     void                    set_title                       ( const string& title )                 { _title = title; }
 
+    void                        clear                       ()                                      { _object_list.clear(); }
     virtual void                close                       ()                                      = 0;
     virtual void                init                        ();
+    void                    set_log                         ( Prefix_log* log )                     { _log = log; }
+    void                    set_in_call                     ( In_call* in_call, const string& extra = "" );
 
     virtual void                add_obj                     ( const ptr<IDispatch>&, const string& name );
     virtual void                load                        ()                                      {}
@@ -198,11 +206,10 @@ struct Module_instance : Object
     virtual bool                callable                    ()                                      = 0;
     int                         pid                         ()                                      { return _pid; }        // 0, wenn kein Prozess
 
-/*
-    virtual void                begin__start                ( const Object_list& );
+    virtual void                begin__start                (); // const Object_list& );
     virtual bool                begin__end                  ();
 
-    virtual void                end__start                  ();
+    virtual void                end__start                  ( bool success = true );
     virtual void                end__end                    ();
 
     virtual void                step__start                 ();
@@ -210,19 +217,23 @@ struct Module_instance : Object
 
     virtual bool                operation_finished          ()                                      { return true; }
     virtual void                process                     ( bool wait = false )                   {}
-*/
+
 
     Fill_zero                  _zero_;
+    string                     _title;                      // Wird lokalem Objectserver als -title=... übergeben, für die Prozessliste (ps)
     Delegated_log              _log;
     ptr<Module>                _module;
-    string                     _title;                      // Wird lokalem Objectserver als -title=... übergeben, für die Prozessliste (ps)
     int                        _pid;                        // Wird von Remote_module_instance_proxy gesetzt
 
-    Task*                      _task;
+  //Task*                      _task;
+    Object_list                _object_list;
     ptr<Com_context>           _com_context;
     ptr<IDispatch>             _idispatch;
     map<string,bool>           _names;
+    bool                       _spooler_init_called;
     bool                       _spooler_exit_called;
+    bool                       _spooler_open_called;
+    In_call*                   _in_call;
 
     ptr<Com_task>              _com_task;                   // spooler_task
     ptr<Com_log>               _com_log;                    // spooler_log

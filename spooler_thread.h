@@ -1,4 +1,4 @@
-// $Id: spooler_thread.h,v 1.45 2003/08/22 07:34:14 jz Exp $
+// $Id: spooler_thread.h,v 1.46 2003/08/25 20:41:27 jz Exp $
 
 #ifndef __SPOOLER_THREAD_H
 #define __SPOOLER_THREAD_H
@@ -18,6 +18,7 @@ struct Spooler_thread : zschimmer::Thread
     xml::Element_ptr            dom                         ( const xml::Document_ptr&, Show_what );
     
     const string&               name                        () const                                { return _name; }
+    void                    set_name                        ( const string& name )                  { _name = name; set_thread_name( _name ); _log.set_prefix( _obj_name() ); }
   //Job*                        current_job                 () const                                { return _current_job; }
   //string                      include_path                () const                                { return _include_path; }
   //bool                        any_tasks_there             ();
@@ -38,11 +39,15 @@ struct Spooler_thread : zschimmer::Thread
   //void                        remove_task                 ( Task* this_task )                     { FOR_EACH_TASK( t, task )  if( task == this_task )  { _task_list.erase(t);  break; } }
     int                         task_count                  ( Job* = NULL );
 
+    Task*                       get_next_task               ();
+
     void                        increment_running_tasks     ()                                      { InterlockedIncrement( &_running_tasks_count ); }
     void                        decrement_running_tasks     ()                                      { InterlockedDecrement( &_running_tasks_count ); }
 
     void                        count_task                  ()                                      { InterlockedIncrement( &_task_count ); }
     void                        count_step                  ()                                      { InterlockedIncrement( &_step_count ); }
+
+  //Time                        next_time                   ()                                      { THREAD_LOCK_RETURN( _lock, Time, _next_time ); }
 
  //?bool                        finished                    ();
 
@@ -53,13 +58,13 @@ struct Spooler_thread : zschimmer::Thread
   //Job*                        get_job_or_null             ( const string& job_name );
   //void                        interrupt_scripts           ();
 
-    virtual string             _obj_name                    () const                                { return "Thread" + _name; }
+    virtual string             _obj_name                    () const                                { return "Thread " + _name; }
 
 
 
     Wait_handles               _wait_handles;
-    bool                       _free_threading;             // Dieser Spooler_thread ist ein echter Thread.
     Task*                      _current_task;               // Task, die gerade einen Schritt tut
+    bool                       _free_threading;
 
   private:
     bool                        step                        ();

@@ -1,4 +1,4 @@
-// $Id: spooler_command.cxx,v 1.88 2003/08/15 19:13:33 jz Exp $
+// $Id: spooler_command.cxx,v 1.89 2003/08/25 20:41:26 jz Exp $
 /*
     Hier ist implementiert
 
@@ -470,7 +470,8 @@ xml::Element_ptr Command_processor::execute_command( const xml::Element_ptr& ele
         p++;
     }
 
-    if( element.nodeName_is( "show_state"       ) )  return execute_show_state( element, show );
+    if( element.nodeName_is( "show_state"       ) 
+     || element.nodeName_is( "s"                ) )  return execute_show_state( element, show );
     else
     if( element.nodeName_is( "show_history"     ) )  return execute_show_history( element, show );
     else

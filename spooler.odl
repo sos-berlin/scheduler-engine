@@ -1,4 +1,4 @@
-// $Id: spooler.odl,v 1.62 2003/08/11 19:33:11 jz Exp $
+// $Id: spooler.odl,v 1.63 2003/08/25 20:41:26 jz Exp $
 
 // Anweisung: midl /nologo /error all /out $(OutDir) $(InputPath)
 
@@ -899,6 +899,9 @@ library spooler
         HRESULT                 add_obj                 ( [in] IDispatch*, [in] BSTR name );
         HRESULT                 name_exists             ( [in] BSTR name, [out,retval] VARIANT_BOOL* result );
         HRESULT                 call                    ( [in] BSTR name, [out,retval] VARIANT* result );
+        HRESULT                 begin                   ( SAFEARRAY(VARIANT) objects, SAFEARRAY(VARIANT) names, [out,retval] VARIANT* result );
+        HRESULT                 end                     ( [in] VARIANT_BOOL succeeded, [out,retval] VARIANT* result );
+        HRESULT                 step                    ( [out,retval] VARIANT* result );
     };
 
     [

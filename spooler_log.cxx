@@ -1,4 +1,4 @@
-// $Id: spooler_log.cxx,v 1.67 2003/07/29 11:20:48 jz Exp $
+// $Id: spooler_log.cxx,v 1.68 2003/08/25 20:41:26 jz Exp $
 
 #include "spooler.h"
 #include "spooler_mail.h"
@@ -609,7 +609,7 @@ void Prefix_log::log2( Log_level level, const string& prefix, const string& line
     if( _highest_level < level )  _highest_level = level, _highest_msg = line;
     if( level < _log_level )  return;
 
-    _log->log2( level, _task? "Task " + sos::as_string(_task->id()) + " " + _job->name() : _prefix, line, this, _order_log );
+    _log->log2( level, _task? "Task " + _job->name() + " " + sos::as_string(_task->id()) : _prefix, line, this, _order_log );
 }
 
 //----------------------------------------------------------------------------------Stdout_collector

@@ -1,4 +1,4 @@
-// $Id: spooler_task.h,v 1.103 2003/08/12 14:59:46 jz Exp $
+// $Id: spooler_task.h,v 1.104 2003/08/25 20:41:27 jz Exp $
 
 #ifndef __SPOOLER_TASK_H
 #define __SPOOLER_TASK_H
@@ -16,15 +16,16 @@ struct Task : Sos_self_deleting
         s_none,
       //s_pending,              // Warten auf Start
         s_start_task,           // Task aus der Warteschlange genommen, muss noch gestartet werden. 
-        s_starting,             //
-      //s_loaded,               // Skript geladen (mit spooler_init), aber nicht gestartet (spooler_open)
-        s_running,              // Läuft
+        s_starting,             // In begin__start() (end__start() muss noch gerufen werden)
+        s_running,              // Läuft (wenn _in_step, dann in step__start() und step__end() muss gerufen werden)
         s_running_delayed,      // spooler_task.delay_spooler_process gesetzt
         s_running_waiting_for_order,
         s_running_process,      // Läuft in einem externen Prozess, auf dessen Ende nur gewartet wird
         s_suspended,            // Angehalten
-        s_ending,               // end(), also in spooler_close()
+        s_end,                  // Task soll beendet werden
+        s_ending,               // end__start() gerufen, also in spooler_close()
         s_ended,                // Task wird gelöscht
+        s_closed,               // close() gerufen, Object Task ist nicht mehr zu gebrauchen
         s__max
     };
 
@@ -56,7 +57,7 @@ struct Task : Sos_self_deleting
     Time                        next_time                   ()                                      { THREAD_LOCK_RETURN( _lock, Time, _next_time ); }
     Spooler_thread*             thread                      ()                                      { return _thread; }
     string                      name                        () const                                { return _obj_name(); }
-    virtual string             _obj_name                    () const                                { return "Task \"" + _name + "\" (" + _job->obj_name() + ")"; }
+    virtual string             _obj_name                    () const                                { return "Task " + as_string(_id) + " (" + _job->obj_name() + ")"; }
 
     string                      state_name                  ()                                      { return state_name( state() ); }
     static string               state_name                  ( State );
@@ -66,18 +67,20 @@ struct Task : Sos_self_deleting
     Time                        last_process_start_time     ()                                      { THREAD_LOCK_RETURN( _lock, Time, _last_process_start_time ); }
 
     void                        signal                      ( const string& signal_name = "" );
-    void                    set_in_call                     ( const string& name, const string& extra = "" );
     bool                        has_error                   ()                                      { return _error != NULL; }
     void                    set_error_xc_only               ( const Xc& );
 
   protected:
-    bool                        load                        ();
-    bool                        start                       ();
-    void                        end                         ();
-    void                        stop                        ();
-    bool                        step                        ();
-    void                        on_error_on_success         ();
+    void                        remove_order_after_error    ();
+
+    bool                        prepare                     ();
     void                        finish                      ();
+    void                        begin__start                ();
+  //bool                        begin__end                  ();
+  //void                        end__start                  ();
+  //bool                        end__end                    ();
+  //void                        step__start                 ();
+    bool                        step__end                   ();
 
     void                        set_mail_defaults           ();
     void                        clear_mail                  ();
@@ -91,7 +94,7 @@ struct Task : Sos_self_deleting
 
 
     bool                        wait_until_terminated       ( double wait_time = latter_day );
-    void                        set_delay_spooler_process   ( Time t )                              { _job->_log.debug("delay_spooler_process=" + t.as_string() ); _next_spooler_process = Time::now() + t; }
+    void                        set_delay_spooler_process   ( Time t )                              { _log.debug("delay_spooler_process=" + t.as_string() ); _next_spooler_process = Time::now() + t; }
 
     void                        set_state                   ( State, const Time& wait_until = 0 );
 
@@ -118,17 +121,26 @@ struct Task : Sos_self_deleting
 
     friend struct               Task_history;
 
+    virtual void                do_close                    ()                                      {}
+    virtual void                do_load                     ()                                      {}
+    virtual void                do_kill                     ()                                      {}
+    virtual void                do_begin__start             ()                                      {}
+    virtual bool                do_begin__end               () = 0;
+    virtual void                do_end__start               ()                                      {}
+    virtual void                do_end__end                 () = 0;
+    virtual void                do_step__start              ()                                      {}
+    virtual bool                do_step__end                () = 0;
+/*
     virtual bool                loaded                      ()                                      { return true; }
     virtual void                do_close                    ()                                      {}
-    virtual bool                do_load                     ()                                      { return true; }
     virtual bool                do_start                    () = 0;
-    virtual void                do_stop                     ()                                      {}
+    virtual void                do_kill                     ()                                      {}
     virtual void                do_end                      () = 0;
     virtual bool                do_step                     () = 0;
     virtual void                do_on_success               () = 0;
     virtual void                do_on_error                 () = 0;
+*/
     virtual bool                has_step_count              ()                                      { return true; }
-
 
     Fill_zero                  _zero_;
     Thread_semaphore           _lock;
@@ -167,9 +179,11 @@ struct Task : Sos_self_deleting
     bool                       _close_engine;               // Nach Task-Ende Scripting Engine schließen (für use_engine="job")
     ptr<Order>                 _order;
     State                      _state;
+    bool                       _in_step;                    // Für s_running: step() wird gerade ausgeführt, step__end() muss noch gerufen werden
     Call_state                 _call_state;
     Xc_copy                    _error;
-    string                     _in_call;                    // "spooler_process" etc.
+    bool                       _success;                    // true, wenn spooler_on_success() gerufen werden soll,
+                                                            // false, wenn spooler_on_error() gerufen werden soll
 };
 
 //----------------------------------------------------------------------------------------Task_list
@@ -184,52 +198,67 @@ struct Module_task : Task       // Oberklasse für Object_set_task und Job_module
 {
                                 Module_task                 ( Job* j )                              : Task(j) {}
 
-    bool                        loaded                      ()                                      { return _module_instance && _module_instance->loaded(); }
-    bool                        do_load                     ();
+  //virtual void                do_load                     ();
+    virtual void                do_close                    ();
+  //virtual void                do_kill                     ()                                      {}
+/*
     void                        do_close                    ();
   //bool                        do_start                    ();
   //void                        do_end                      ();
   //bool                        do_step                     ();
     void                        do_on_success               ();
     void                        do_on_error                 ();
-
+*/
+    bool                        loaded                      ()                                      { return _module_instance && _module_instance->loaded(); }
+  //bool                        load_module_instance        ();
     void                        close_engine                ();
 
     ptr<Module_instance>       _module_instance;
 };
 
 //----------------------------------------------------------------------------------Object_set_task
-
+/*
 struct Object_set_task : Module_task
 {
                                 Object_set_task             ( Job* j )                              : Module_task(j) {}
 
-    virtual bool                loaded                      ()                                      { return _object_set && Module_task::loaded(); }
-    virtual bool                do_load                     ();
-    void                        do_close                    ();
-    bool                        do_start                    ();
-    void                        do_end                      ();
-    bool                        do_step                     ();
-  //void                        do_on_success               ();
-  //void                        do_on_error                 ();
+  //virtual void                do_load                     ();
+    virtual void                do_close                    ();
+    virtual void                do_begin__start             ();
+    virtual bool                do_begin__end               ();
+    virtual void                do_end__start               ();
+    virtual void                do_end__end                 ();
+    virtual void                do_step__start              ();
+    virtual bool                do_step__end                ();
+    bool                        loaded                      ()                                      { return _object_set && Module_task::loaded(); }
+
 
     Sos_ptr<Object_set>        _object_set;
     ptr<Com_object_set>        _com_object_set;
 };
-
+*/
 //----------------------------------------------------------------------------------Job_module_task
 
 struct Job_module_task : Module_task
 {
                                 Job_module_task             ( Job* j )                              : Module_task(j) {}
 
+    virtual void                do_load                     ();
+  //virtual void                do_close                    ();
+    virtual void                do_begin__start             ();
+    virtual bool                do_begin__end               ();
+    virtual void                do_end__start               ();
+    virtual void                do_end__end                 ();
+    virtual void                do_step__start              ();
+    virtual bool                do_step__end                ();
+/*
   //virtual bool                loaded                      ();
-  //virtual bool                do_load                     ();
     bool                        do_start                    ();
     void                        do_end                      ();
     bool                        do_step                     ();
   //void                        do_on_success               ();
   //void                        do_on_error                 ();
+*/
 };
 
 //------------------------------------------------------------------------------------Process_event
@@ -253,16 +282,26 @@ struct Process_task : Task      // Job ist irgendein Prozess (z.B. durch ein She
     Fill_zero _zero_;
 
                                 Process_task                ( Job* j );
-        
+
+    virtual void                do_close                    ();
+    virtual void                do_kill                     ();
+  //virtual void                do_begin__start             ();
+    virtual bool                do_begin__end               ();
+  //virtual void                do_end__start               ();
+    virtual void                do_end__end                 ();
+  //virtual void                do_step__start              ();
+    virtual bool                do_step__end                ();
+/*        
   //virtual bool                loaded                      ();
-  //virtual bool                do_load                     ();
     void                        do_close                    ();
     bool                        do_start                    ();
-    void                        do_stop                     ();
+    void                        do_kill                     ();
     void                        do_end                      ();
     bool                        do_step                     ();
     void                        do_on_success               ()                                      {}
     void                        do_on_error                 ()                                      {}
+*/
+
     virtual bool                has_step_count              ()                                      { return false; }
     bool                        signaled                    ();
 

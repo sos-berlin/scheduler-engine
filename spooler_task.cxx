@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.171 2003/08/22 07:34:14 jz Exp $
+// $Id: spooler_task.cxx,v 1.172 2003/08/25 20:41:27 jz Exp $
 /*
     Hier sind implementiert
 
@@ -28,7 +28,7 @@ static const string spooler_get_name        = "spooler_get";
 static const string spooler_level_name      = "spooler_level";
 
 //----------------------------------------------------------------------------Spooler_object::level
-
+/*
 Level Spooler_object::level()
 {
     Variant level = com_property_get( _idispatch, spooler_level_name );
@@ -67,12 +67,12 @@ Object_set::~Object_set()
 
 bool Object_set::open()
 {
-    bool        ok;
+    bool    ok;
     Variant object_set_vt;
 
     if( _class->_object_interface )
     {
-        Module_instance::In_call( _task, "spooler_make_object_set" );
+        Module_instance::In_call( _task->_module_instance, "spooler_make_object_set" );
         object_set_vt = _task->_module_instance->call( "spooler_make_object_set" );
 
         if( object_set_vt.vt != VT_DISPATCH 
@@ -87,7 +87,7 @@ bool Object_set::open()
 
     if( com_name_exists( _idispatch, spooler_open_name ) ) 
     {
-        Module_instance::In_call in_call ( _task, spooler_open_name );
+        Module_instance::In_call in_call ( _task->_module_instance, spooler_open_name );
         ok = check_result( com_call( _idispatch, spooler_open_name ) );
         in_call.set_result( ok );
     }
@@ -103,7 +103,7 @@ void Object_set::close()
 {
     if( com_name_exists( _idispatch, spooler_close_name ) )  
     {
-        Module_instance::In_call in_call ( _task, spooler_close_name );
+        Module_instance::In_call in_call ( _task->_module_instance, spooler_close_name );
         com_call( _idispatch, spooler_close_name );
     }
 
@@ -118,7 +118,7 @@ Spooler_object Object_set::get()
 
     while(1)
     {
-        Module_instance::In_call in_call ( _task, spooler_get_name );
+        Module_instance::In_call in_call ( _task->_module_instance, spooler_get_name );
         Variant obj = com_call( _idispatch, spooler_get_name );
 
         if( obj.vt == VT_EMPTY    )  return Spooler_object(NULL);
@@ -149,20 +149,20 @@ bool Object_set::step( Level result_level )
 
         if( _task->has_error() )  return false;       // spooler_task.error() gerufen?
 
-        Module_instance::In_call in_call ( _task, spooler_process_name );
+        Module_instance::In_call in_call ( _task->_module_instance, spooler_process_name );
         object.process( result_level );
 
         return true;
     }
     else
     {
-        Module_instance::In_call in_call ( _task, spooler_process_name );
+        Module_instance::In_call in_call ( _task->_module_instance, spooler_process_name );
         bool result = check_result( _task->_module_instance->call( spooler_process_name, result_level ) );
         in_call.set_result( result );
         return result;
     }
 }
-
+*/
 //-------------------------------------------------------------------------------Object_set::thread
 /*
 Spooler_thread* Object_set::thread() const
@@ -205,11 +205,13 @@ void Task::close()
 {
     if( _closed )  return;
     
+    if( _order )  remove_order_after_error();
+
     _history.end();
 
     try
     {
-        do_stop();
+        do_kill();
     }
     catch( const exception& x ) { _log.warn( x.what() ); }
 
@@ -228,6 +230,8 @@ void Task::close()
         _terminated_events.clear();
     }
 
+    set_state( s_closed );
+
     _closed = true;
 }
 
@@ -241,6 +245,10 @@ xml::Element_ptr Task::dom( const xml::Document_ptr& document, Show_what show )
     {
         task_element.setAttribute( "id"              , _id );
         task_element.setAttribute( "state"           , state_name() );
+
+        if( _thread )
+        task_element.setAttribute( "thread"          , _thread->name() );
+
         task_element.setAttribute( "name"            , _name );
 
         task_element.setAttribute( "running_since"   , _running_since.as_string() );
@@ -250,15 +258,15 @@ xml::Element_ptr Task::dom( const xml::Document_ptr& document, Show_what show )
 
         task_element.setAttribute( "steps"           , _step_count );
 
-        if( !_in_call.empty() )  
-        task_element.setAttribute( "calling"         , _in_call );
-
         task_element.setAttribute( "log_file"        , _log.filename() );
 
         if( Module_task* t = dynamic_cast<Module_task*>( this ) )
         {
             if( t->_module_instance )  
             {
+                if( t->_module_instance->_in_call )  
+                task_element.setAttribute( "calling"         , t->_module_instance->_in_call->name() );
+
                 int pid = t->_module_instance->pid();
                 if( pid ) task_element.setAttribute( "pid", pid );       // separate_process="yes", Remote_module_instance_proxy
             }
@@ -272,13 +280,16 @@ xml::Element_ptr Task::dom( const xml::Document_ptr& document, Show_what show )
 }
 
 //-------------------------------------------------------------------------------Task::enter_thread
+// Anderer Thread!
 
 void Task::enter_thread( Spooler_thread* thread )
 { 
-    _thread = thread;  
-    thread->add_task( this ); 
-
-    set_state( s_start_task );
+    THREAD_LOCK( _lock )
+    {
+        _thread = thread;  
+        set_state( s_start_task );
+        thread->add_task( this );       // Jetzt kann der Thread die Task schon starten!
+    }
 }
 
 //-------------------------------------------------------------------------------Task::leave_thread
@@ -290,27 +301,13 @@ void Task::leave_thread()
 }
 
 //-------------------------------------------------------------------------Task::attach_to_a_thread
+// Anderer Thread!
 
 void Task::attach_to_a_thread()
 {
     assert( current_thread_id() == _spooler->thread_id() );
 
     enter_thread( _spooler->select_thread_for_task( this ) );
-}
-
-//--------------------------------------------------------------------------------Task::set_in_call
-
-void Task::set_in_call( const string& name, const string& extra )
-{
-    THREAD_LOCK( _lock )
-    {
-        _in_call = name;
-
-        if( _spooler->_debug  &&  !name.empty() )  
-        {
-            _log.debug( name + "()  " + extra );
-        }
-    }
 }
 
 //--------------------------------------------------------------------------Task::set_error_xc_only
@@ -326,7 +323,9 @@ void Task::set_error_xc_only( const Xc& x )
 void Task::set_error_xc( const Xc& x )
 {
     string msg; 
-    if( !_in_call.empty() )  msg = "In " + _in_call + "(): ";
+
+    Module_task* t = dynamic_cast<Module_task*>( this );
+    //Ist nie in _in_call: if( t  &&  t->_module_instance  &&  t->_module_instance->_in_call )  msg = "In " + t->_module_instance->_in_call->name() + "(): ";
     
     _log.error( msg + x.what() );
 
@@ -369,7 +368,6 @@ void Task::set_error( const _com_error& x )
 }
 
 #endif
-
 //----------------------------------------------------------------------------------Task::set_state
 
 void Task::set_state( State new_state, const Time& next_time )
@@ -386,16 +384,17 @@ void Task::set_state( State new_state, const Time& next_time )
         _state = new_state;
         _next_time = next_time;
 
-        if( _spooler->_debug )
+        
+        Log_level log_level = new_state == s_start_task? log_info : log_debug;
+        if( log_level >= log_info || _spooler->_debug )
         {
             string msg = "state=" + state_name();
             if( _next_time )  msg += " (" + _next_time.as_string() + ")";
-            if( new_state == s_starting  &&  _start_at )  msg += " (at=" + _start_at.as_string() + ")";
+            if( new_state == s_start_task  &&  _start_at )  msg += " (at=" + _start_at.as_string() + ")";
+            if( new_state == s_start_task  &&  _thread->_free_threading )  msg += ", dem Thread " + _thread->name() + " zugeordnet";
 
-            if( new_state == s_ended )  _log.debug ( msg ); 
-                                  else  _log.debug9( msg );
+            _log.log( log_level, msg );
         }
-
     }
 }
 
@@ -412,28 +411,14 @@ string Task::state_name( State state )
         case s_running_waiting_for_order:   return "running_waiting_for_order";
         case s_running_process:             return "running_process";
         case s_suspended:                   return "suspended";
+        case s_end:                         return "end";
         case s_ending:                      return "ending";
         case s_ended:                       return "ended";
+        case s_closed:                      return "closed";
         default:                            return as_string( (int)state );
     }
 }
 
-//-------------------------------------------------------------------------------------Task::state
-/* Anderer Thread
-
-string Task::state()
-{
-    string st;
-
-    THREAD_LOCK( _lock )
-    {
-        st = "state=" + state_name();
-        if( !_in_call.empty() )  st += " in " + _in_call + "()";
-    }
-
-    return st;
-}
-*/
 //-------------------------------------------------------------------------------------Task::signal
 
 void Task::signal( const string& signal_name )
@@ -443,19 +428,29 @@ void Task::signal( const string& signal_name )
     _thread->signal( signal_name ); 
 }
 
-//-------------------------------------------------------------------------------------Task::finish
+//----------------------------------------------------------------------------------Task::set_cause
 
-void Task::finish()
+void Task::set_cause( Start_cause cause )
 {
-    // eMail versenden
+    if( !_cause )  _cause = cause;
+}
 
-    try
-    {
-        if( !_spooler->_manual )  _log.send( has_error()? -1 : _step_count );
-        clear_mail();
-    }
-    catch( const exception& x  ) { _log.warn( x.what() ); }
-    catch( const _com_error& x ) { _log.warn( bstr_as_string(x.Description()) ); }  
+//-----------------------------------------------------------------------------Task::has_parameters
+
+bool Task::has_parameters()
+{
+    int n = 0;
+    _params->get_count( &n );
+    return n != 0;
+}
+
+//--------------------------------------------------------------------------Task::set_history_field
+
+void Task::set_history_field( const string& name, const Variant& value )
+{
+  //if( !_job->its_current_task(this) )  throw_xc( "SPOOLER-138" );
+
+    _history.set_extra_field( name, value );
 }
 
 //------------------------------------------------------------------------------Task::set_next_time
@@ -472,160 +467,421 @@ bool Task::do_something()
     Z_DEBUG_ONLY( _log.debug9( "do_something() state=" + state_name() ); )
 
     bool something_done = false;
-    bool ok             = true;
-    bool do_a_step      = false;
 
 
-    // Wenn nichts zu tun ist, dann raus. Der Job soll nicht wegen eines alten Fehlers nachträglich gestoppt werden (s.u.)
-    if( _state == s_suspended  )  goto ENDE;
-    if( _state == s_running_process  &&  !((Process_task*)+this)->signaled() )  goto ENDE;
-    if( _state == s_ended      )  goto ENDE;
-
-
-    // HISTORIE und _end
-    if( _state == s_start_task 
-     || _state == s_running 
-     || _state == s_running_delayed 
-     || _state == s_running_waiting_for_order 
-     || _state == s_running_process )          
+    try
     {
-        if( _step_count == _job->_history.min_steps() )  _history.start();
-        if( _end )  ok = false;
-    }
+        // Wenn nichts zu tun ist, dann raus. Der Job soll nicht wegen eines alten Fehlers nachträglich gestoppt werden (s.u.)
+        //if( _state == s_suspended  )  goto ENDE;
+        //if( _state == s_running_process  &&  !((Process_task*)+this)->signaled() )  goto ENDE;
+        //if( _state == s_ended      )  goto ENDE;
 
 
-    if( _state == s_start_task )                                                                // SPOOLER_INIT, SPOOLER_OPEN
-    {
-        ok = start();
-        if( ok )  do_a_step = true;
-        something_done = true;
-        
-        if( _job->_state == Job::s_read_error )
-        {
-            close();
-            goto ENDE;
-        }
-    }
-
-
-    // SPOOLER_PROCESS()
-    {
         Time now = Time::now();
 
-        if( _state == s_running_delayed  &&  now >= _next_spooler_process )
+        // Periode prüfen
+        if( _state == s_running 
+         || _state == s_running_process 
+         || _state == s_running_delayed  
+         || _state == s_running_waiting_for_order )      
         {
-            _next_spooler_process = 0;
-            set_state( s_running );
-        }
+            bool let_run = _let_run  ||  _job->_period.is_in_time( now )  ||  ( _job->select_period(now), _job->is_in_period(now) );
 
-        if( ( _state == s_running || _state == s_running_process || _state == s_running_waiting_for_order )  &&  ok  &&  !has_error() )      // SPOOLER_PROCESS
-        {
-            bool call_step = do_a_step | _let_run;
-            if( !call_step )  call_step = _job->_period.is_in_time( now );
-            if( !call_step )   // Period abgelaufen?
+            if( !let_run ) 
             {
-                call_step = _let_run  ||  ( _job->select_period(now), _job->is_in_period(now) );
-            }
-
-            if( call_step ) 
-            {
-                if( ok  &&  _state == s_running_waiting_for_order )
-                {
-                    if( !_order )  _order = _job->order_queue()->get_order_for_processing( now, this );
-                    if( _order )  set_state( s_running );                  // Auftrag da? Dann Task weiterlaufen lassen (Ende der Run_time wird noch geprüft)
-                            else  ok = false;
-                    // _order wird in step() wieder abgeräumt
-                }
-
-                if( ok )
-                {
-                    _last_process_start_time = now;
-                    ok = step(); 
-                    something_done = true;
-                }
-            }
-            else
-            {
-                ok = false;
                 _log( "Laufzeitperiode ist abgelaufen, Task wird beendet" );
+                set_state( s_end );
             }
         }
 
+        
+        bool loop = true;
+        while( loop )
+        {
+            loop = false;
+            bool ok = true;
 
-        if( !ok || has_error() )                                                                    // SPOOLER_CLOSE
-        {                                                                                           // SPOOLER_ON_SUCCESS, SPOOLER_ON_ERROR
-            if( has_error() )  _history.start();
-
-            if( _state == s_start_task
-             || _state == s_starting        // Bei Fehler in spooler_init()
+            // HISTORIE und _end
+            if( _state == s_start_task 
              || _state == s_running 
-             || _state == s_running_delayed
-             || _state == s_running_waiting_for_order
+             || _state == s_running_delayed 
+             || _state == s_running_waiting_for_order 
              || _state == s_running_process           )
             {
-                end();
-                something_done = true;
+                if( _step_count == _job->_history.min_steps() )  _history.start();
+                if( _end )  set_state( s_end );
             }
 
-            if( has_error()  &&  _job->repeat() == 0  &&  _job->_delay_after_error.empty() )
+
+            switch( _state )
             {
-                stop(); 
-                something_done = true;
+                case s_start_task:
+                {
+                    begin__start();
+
+                  //if( has_error() )  break;
+
+                    set_state( s_starting );
+                    something_done = true;
+
+                    break;
+                }
+
+
+                case s_starting:
+                {
+                    ok = do_begin__end();
+
+                    if( !ok || has_error() )  break;
+
+                    _opened = true;
+                    set_state( s_running );
+                    something_done = true;
+                    loop = true;
+
+                    break;
+                }
+
+
+                case s_running_process:
+                    if( !((Process_task*)+this)->signaled() )  break;
+                case s_running:
+                {
+                    if( !_in_step )
+                    {
+                        if( _next_spooler_process )
+                        {
+                            set_state( s_running_delayed, _next_spooler_process );
+                        }
+                        else
+                        {
+                            if( _job->order_queue() )
+                            {
+                                if( !_order )  _order = _job->order_queue()->get_order_for_processing( Time::now(), this );
+                                if( !_order )  break;
+
+                                _log.set_order_log( &_order->_log );
+                            }
+
+                            _last_process_start_time = now;
+
+                            do_step__start();
+
+                            _in_step = true;
+                            something_done = true;
+                        }
+                    }
+                    else
+                    {
+                        ok = step__end();
+
+                        _in_step = false;
+                        if( !ok || has_error() )  set_state( s_end );
+                        something_done = true;
+                    }
+
+                    break;
+                }
+
+
+                case s_running_waiting_for_order:
+                {
+                    if( !_order )  _order = _job->order_queue()->get_order_for_processing( now, this );
+                    if( _order )  set_state( s_running ), loop = true;  // Auftrag da? Dann Task weiterlaufen lassen (Ende der Run_time wird noch geprüft)
+                                                                        // _order wird in step__end() wieder abgeräumt
+                    break;
+                }
+
+
+                case s_running_delayed:  
+                {
+                    if( now >= _next_spooler_process )
+                    {
+                        _next_spooler_process = 0;
+                        set_state( s_running );
+                        loop = true;
+                    }
+                 
+                    break;
+                }
+
+
+                case s_end:
+                {
+                    if( has_error() )  _history.start(),  _success = false;
+
+                    if( _opened )
+                    {
+                        do_end__start();
+
+                        set_state( s_ending );
+                    }
+                    else
+                        set_state( s_ended ),  loop = true;
+
+                    something_done = true;
+
+                    break;
+                }
+
+                
+                case s_ending:
+                {
+                    do_end__end();
+
+                    set_state( s_ended );
+                    something_done = true;
+                    break;
+                }
+
+
+                case s_ended:
+                {
+                    finish();
+
+                    // Gesammelte eMail senden, wenn collected_max erreicht:
+                    Time log_time = _log.collect_end();
+                    if( log_time > Time::now()  &&  _next_time > log_time )  set_next_time( log_time );
+
+                    something_done = true;
+                    break;
+                }
+
+                case s_suspended:
+                    break;
+
+                case s_closed:
+                    break;
+
+                case s_none:
+                case s__max:
+                    throw_xc( "state=none?" );
             }
 
-            finish();
-        }
 
-
-        // _next_time wird hier geändert
-
-        if( _state == s_running  &&  _next_spooler_process )
-        {
-            set_state( s_running_delayed, _next_spooler_process );
-        }
-
-        if( _state == s_running  &&  _job->order_queue()  &&  !_job->order_queue()->has_order( now ) )
-        {
-            set_state( s_running_waiting_for_order, latter_day );  
-        }
-
-        if( _state == s_running_waiting_for_order )
-        {
-            set_next_time( _job->order_queue()->next_time() );
-        }
-
-
-        if( _state == s_ended )                                                                     // TASK BEENDET
-        {
-            if( _job->_temporary  &&  _job->repeat() == 0 )  
+            if( !ok || has_error() )  
             {
-                stop();   // _temporary && s_stopped ==> spooler_thread.cxx entfernt den Job
-                finish();
+                _success = false;
+                if( _state != s_ending 
+                 && _state != s_ended 
+                 && _state != s_closed ) set_state( s_end );
             }
 
-            // Gesammelte eMail senden, wenn collected_max erreicht:
-            Time log_time = _log.collect_end();
-            if( log_time > Time::now()  &&  _next_time > log_time )  set_next_time( log_time );
 
-            something_done = true;
+            switch( _state )
+            {
+                case s_end: 
+                    loop = true;
+                    break;
+
+                case s_running:
+                        if( _next_spooler_process )                     set_state( s_running_delayed          , _next_spooler_process );
+
+                        if( !_order  
+                         && _job->order_queue()  
+                         && !_job->order_queue()->has_order( now ) )    set_state( s_running_waiting_for_order, _job->order_queue()->next_time() );  
+                    break;
+
+                default: ;
+            }
         }
+
 
         THREAD_LOCK( _lock )
         {
-            if( _next_time )  set_next_time( min( _next_time, _job->_period.end() ) );                      // Am Ende der Run_time wecken, damit die Task beendet werden kann
+            if( _next_time && !_let_run )  set_next_time( min( _next_time, _job->_period.end() ) );                      // Am Ende der Run_time wecken, damit die Task beendet werden kann
         }
+
+
+  //ENDE:
+        if( _state != s_running  
+         && _state != s_running_delayed
+         && _state != s_running_waiting_for_order
+         && _state != s_running_process  
+         && _state != s_suspended                 )  send_collected_log();
+    }
+    catch( const exception& x )
+    {
+        set_error( x );
+        finish();
+        something_done = true;
     }
 
 
-ENDE:
-    if( _state != s_running  
-     && _state != s_running_delayed
-     && _state != s_running_waiting_for_order
-     && _state != s_running_process  
-     && _state != s_suspended                 )  send_collected_log();
-
-
     return something_done;
+}
+
+//------------------------------------------------------------------------------------Task::prepare
+
+void Task::begin__start()
+{
+  //try 
+    {
+        if( !_spooler->log_directory().empty()  &&  _spooler->log_directory()[0] != '*' )
+        {
+            _log.set_filename( _spooler->log_directory() + "/task." + _job->jobname_as_filename() + ". " + as_string(_id) + ".log" );      // Task-Protokoll
+        }
+
+
+        THREAD_LOCK( _lock )
+        {
+            _thread->count_task();
+            reset_error();
+            _running_since = Time::now();
+        }
+
+        do_load();
+        //if( has_error() )  return false;
+
+        do_begin__start();
+    }
+  //catch( const exception& x ) { set_error( x ); }
+
+    //return ok  &&  !has_error()  ||  _job->_state == Job::s_read_error;
+}
+
+//---------------------------------------------------------------------------------Task::step__start
+/*
+void Task::step__start()
+{
+  //bool result;
+
+  //try 
+    {
+        if( _job->order_queue() )
+        {
+            if( !_order )  _order = _job->order_queue()->get_order_for_processing( Time::now(), this );
+            if( !_order )  return;
+
+            _log.set_order_log( &_order->_log );
+        }
+
+        do_step__start();
+    }
+  //catch( const exception& x ) { set_error(x); result = false; }
+
+  //return result;
+}
+*/
+//-----------------------------------------------------------------------------------Task::step__end
+
+bool Task::step__end()
+{
+    bool result;
+
+    try 
+    {
+        result = do_step__end();
+
+        if( has_step_count()  ||  _step_count == 0 )        // Bei Process_task nur einen Schritt zählen
+        {
+            _thread->count_step();
+            _job->count_step();
+            _step_count++;
+        }
+
+
+        if( _order )
+        {
+            _order->postprocessing( result );
+            _log.set_order_log( NULL );
+            _order = NULL;
+            result = true;
+        }
+
+        if( _next_spooler_process )  result = true;
+    }
+    catch( const exception& x ) { set_error(x); result = false; }
+
+
+    if( _order )  remove_order_after_error();
+
+    return result;
+}
+
+//-------------------------------------------------------------------Task::remove_order_after_error
+
+void Task::remove_order_after_error()
+{
+    if( _order )
+    {
+        _order->processing_error();
+        _log.set_order_log( NULL );
+        _order = NULL;
+    }
+}
+
+//-------------------------------------------------------------------------------------Task::finish
+
+void Task::finish()
+{
+    if( has_error()  &&  _job->repeat() == 0  &&  _job->_delay_after_error.empty() )
+    {
+        _job->stop( false );
+    }
+    else
+    if( _job->_temporary  &&  _job->repeat() == 0 )  
+    {
+        _job->stop( false );   // _temporary && s_stopped ==> spooler_thread.cxx entfernt den Job
+    }
+
+
+    close();
+
+
+    // Bei mehreren aufeinanderfolgenden Fehlern Wiederholung verzögern?
+
+    if( has_error() )
+    {
+        InterlockedIncrement( &_job->_error_steps );
+    
+        if( !_job->repeat() )   // spooler_task.repeat hat Vorrang
+        {
+            Time delay = 0;
+            FOR_EACH( Job::Delay_after_error, _job->_delay_after_error, it )  
+                if( _job->_error_steps >= it->first )  delay = it->second;
+            _job->_delay_until = delay? Time::now() + delay : 0;
+        }
+    }
+    else
+    {
+       _job->_error_steps = 0;
+    }
+
+    leave_thread();
+
+
+    // eMail versenden
+
+    try
+    {
+        if( !_spooler->_manual )  _log.send( has_error()? -1 : _step_count );
+        clear_mail();
+    }
+    catch( const exception& x  ) { _log.warn( x.what() ); }
+    catch( const _com_error& x ) { _log.warn( bstr_as_string(x.Description()) ); }  
+}
+
+//----------------------------------------------------------------------Task::wait_until_terminated
+// Anderer Thread
+
+bool Task::wait_until_terminated( double wait_time )
+{
+    Thread_id my_thread_id = current_thread_id();
+    if( my_thread_id == _thread->thread_id() )  throw_xc( "SPOOLER-125" );     // Deadlock
+
+    Spooler_thread* calling_thread = _spooler->thread_by_thread_id( my_thread_id );
+  //if( calling_thread &&  !calling_thread->_free_threading )  throw_xc( "SPOOLER-131" );
+
+    Event event ( obj_name() + " wait_until_terminated" );
+
+    THREAD_LOCK( _terminated_events_lock )  _terminated_events.push_back( &event );
+
+    bool result = event.wait( wait_time );
+
+    THREAD_LOCK( _terminated_events_lock )  _terminated_events.pop_back();
+
+    return result;
 }
 
 //-------------------------------------------------------------------------Task::send_collected_log
@@ -676,311 +932,6 @@ void Task::clear_mail()
     _log.set_mail_body( "", true );
 }
 
-//--------------------------------------------------------------------------------------Task::start
-
-bool Task::start()
-{
-    try 
-    {
-        if( !_spooler->log_directory().empty()  &&  _spooler->log_directory()[0] != '*' )
-        {
-            _log.set_filename( _spooler->log_directory() + "/task." + _job->jobname_as_filename() + ". " + as_string(_id) + ".log" );      // Task-Protokoll
-        }
-
-
-        THREAD_LOCK( _job->_lock )
-        {
-            set_state( s_starting );
-            _thread->count_task();
-            reset_error();
-        }
-
-        _running_since = Time::now();
-
-        if( !loaded() )  
-        {
-            bool ok = do_load();
-            if( !ok || has_error() )  return false;
-        }
-
-        bool ok = do_start();
-        if( !ok || has_error() )  return false;
-
-        _opened = true;
-    }
-    catch( const exception& x ) { set_error(x); }
-
-    return !has_error();
-}
-
-//-----------------------------------------------------------------------------------------Task::end
-
-void Task::end()
-{
-    set_state( s_ending );
-
-    if( _opened )  
-    {
-        try
-        {
-            do_end();
-        }
-        catch( const exception& x ) { set_error(x); }
-    }
-
-    on_error_on_success();
-
-    _opened = false;
-    
-    close();
-
-
-    // Bei mehreren aufeinanderfolgenden Fehlern Wiederholung verzögern?
-
-    if( has_error() )
-    {
-        InterlockedIncrement( &_job->_error_steps );
-    
-        if( !_job->repeat() )   // spooler_task.repeat hat Vorrang
-        {
-            Time delay = 0;
-            FOR_EACH( Job::Delay_after_error, _job->_delay_after_error, it )  
-                if( _job->_error_steps >= it->first )  delay = it->second;
-            _job->_delay_until = delay? Time::now() + delay : 0;
-        }
-    }
-    else
-    {
-       _job->_error_steps = 0;
-    }
-
-    leave_thread();
-
-    set_state( s_ended );
-}
-
-//----------------------------------------------------------------------------------------Task::stop
-
-void Task::stop()
-{
-    _job->stop( false );
-}
-
-//-------------------------------------------------------------------------Task::on_error_on_success
-
-void Task::on_error_on_success()
-{
-    if( has_error() )
-    {
-        // spooler_on_error() wird auch gerufen, wenn spooler_init() einen Fehler hatte
-
-        if( !_on_error_called )
-        {
-            _on_error_called = true;
-
-            try
-            {
-                do_on_error();
-            }
-            catch( const exception& x ) { _log.error( string(spooler_on_error_name) + ": " + x.what() ); }
-        }
-    }
-    else
-    if( _opened )   
-    {
-        // spooler_on_success() wird nicht gerufen, wenn spooler_init() false lieferte
-
-        try
-        {
-            do_on_success();
-        }
-        catch( const exception& x ) { set_error(x); }
-    }
-}
-
-//----------------------------------------------------------------------------------------Task::step
-
-bool Task::step()
-{
-    bool result;
-
-
-    try 
-    {
-        if( _job->order_queue() )
-        {
-            if( !_order )  _order = _job->order_queue()->get_order_for_processing( Time::now(), this );
-            if( !_order )  return true;
-
-            _log.set_order_log( &_order->_log );
-        }
-
-        result = do_step();
-
-        if( _next_spooler_process )  result = true;
-
-        if( has_step_count()  ||  _step_count == 0 )        // Bei Process_task nur einen Schritt zählen
-        {
-            _thread->count_step();
-            _job->count_step();
-            _step_count++;
-        }
-
-
-        if( _order )
-        {
-            _order->postprocessing( result );
-            _log.set_order_log( NULL );
-            _order = NULL;
-            result = true;
-        }
-    }
-    catch( const exception& x ) 
-    { 
-        _job->set_error(x); 
-        result = false; 
-    }
-
-
-    if( _order )  // Nach Fehler
-    {
-        _order->processing_error();
-        _log.set_order_log( NULL );
-        _order = NULL;
-    }
-
-    return result;
-}
-
-//------------------------------------------------------------------------------------Task::cmd_end
-/*
-// Anderer Thread
-
-void Task::cmd_end()
-{
-    Sos_ptr<Job> job = _job;        // this wird vielleicht gelöscht
-
-    THREAD_LOCK( job->_lock )
-    {
-        //THREAD_LOCK( _lock )
-        {
-            if( +job->_task == this )  job->set_state_cmd( Job::sc_end );
-                                 else  job->remove_from_task_queue( this );
-        }
-    }
-}
-*/
-//----------------------------------------------------------------------Task::wait_until_terminated
-// Anderer Thread
-
-bool Task::wait_until_terminated( double wait_time )
-{
-    Thread_id my_thread_id = current_thread_id();
-    if( my_thread_id == _thread->thread_id() )  throw_xc( "SPOOLER-125" );     // Deadlock
-
-    Spooler_thread* calling_thread = _spooler->thread_by_thread_id( my_thread_id );
-  //if( calling_thread &&  !calling_thread->_free_threading )  throw_xc( "SPOOLER-131" );
-
-    Event event ( obj_name() + " wait_until_terminated" );
-
-    THREAD_LOCK( _terminated_events_lock )  _terminated_events.push_back( &event );
-
-    bool result = event.wait( wait_time );
-
-    THREAD_LOCK( _terminated_events_lock )  _terminated_events.pop_back();
-
-    return result;
-}
-
-//----------------------------------------------------------------------------------Task::set_cause
-
-void Task::set_cause( Start_cause cause )
-{
-    if( !_cause )  _cause = cause;
-}
-
-//-----------------------------------------------------------------------------Task::has_parameters
-
-bool Task::has_parameters()
-{
-    int n = 0;
-    _params->get_count( &n );
-    return n != 0;
-}
-
-//--------------------------------------------------------------------------Task::set_history_field
-
-void Task::set_history_field( const string& name, const Variant& value )
-{
-  //if( !_job->its_current_task(this) )  throw_xc( "SPOOLER-138" );
-
-    _history.set_extra_field( name, value );
-}
-
-//--------------------------------------------------------------------------------Module_task::load
-
-bool Module_task::do_load()
-{
-    ptr<Module_instance> module_instance;
-    bool                 is_new = false;
-
-
-    if( _job->_module_ptr->_reuse == Module::reuse_job )
-    {
-        module_instance = _job->get_free_module_instance( this );
-    }
-    else
-    {
-        module_instance = _job->_module_ptr->create_instance();
-        is_new = true;
-        _close_engine = true;
-    }
-
-
-    if( !module_instance->loaded() )
-    {
-        module_instance->init();
-        module_instance->add_obj( (IDispatch*)_spooler->_com_spooler    , "spooler"        );
-      //module_instance->add_obj( (IDispatch*)_job->_thread->_com_thread, "spooler_thread" );
-        module_instance->add_obj( (IDispatch*)_job->_com_job            , "spooler_job"    );
-        module_instance->add_obj( (IDispatch*)module_instance->_com_task, "spooler_task"   );
-        module_instance->add_obj( (IDispatch*)module_instance->_com_log , "spooler_log"    );
-    }
-
-
-    module_instance->set_title( obj_name() );
-    module_instance->_com_task->set_task( this );
-    module_instance->_com_log->set_log( &_log );
-
-    _module_instance = module_instance;
-
-
-    if( !_module_instance->loaded() )
-    {
-        try
-        {
-            module_instance->load();
-            module_instance->start();
-        }
-        catch( const exception& x ) { set_error(x);  _close_engine = true;  return false; }
-    }
-
-    if( is_new )
-    {
-        if( module_instance->name_exists( spooler_init_name ) )
-        {
-            Module_instance::In_call in_call ( this, spooler_init_name );
-            bool ok = check_result( module_instance->call( spooler_init_name ) );
-            in_call.set_result( ok );
-            if( !ok || has_error() )  { _close_engine = true;  return false; }
-        }
-    }
-
-    //_has_spooler_process = _module_instance->name_exists( spooler_process_name );
-
-    return true;
-}
-
 //----------------------------------------------------------------------------Module_task::do_close
 
 void Module_task::do_close()
@@ -998,12 +949,11 @@ void Module_task::do_close()
             }
         }
 
-      //if( _module_instance )  
-        {
-            _module_instance->_com_task->set_task( NULL );
-            _module_instance->_com_log->set_log( NULL );
-          //if( _module_instance->_com_log  )  _module_instance->_com_log->close(), _module_instance->_com_log  = NULL;
-        }
+        _module_instance->_com_task->set_task( NULL );
+        _module_instance->_com_log->set_log( NULL );
+      //if( _module_instance->_com_log  )  _module_instance->_com_log->close(), _module_instance->_com_log  = NULL;
+
+        _module_instance->clear();
 
         _module_instance = NULL;
     }
@@ -1015,50 +965,25 @@ void Module_task::close_engine()
 {
     try 
     {
-        //_log.debug3( "close scripting engine" );
-        //if( _module_instance )  
-        {
-            _module_instance->close();
-            _module_instance->_com_task = new Com_task();
-            //_module_instance = NULL;
-        }
+      //_log.debug3( "close scripting engine" );
+        _module_instance->close();
+        _module_instance->_com_task = new Com_task();
+      //_module_instance = NULL;
     }
     catch( const exception& x ) { set_error(x); }
 }
 
-//-----------------------------------------------------------------------Module_task::do_on_success
-
-void Module_task::do_on_success()
-{
-    if( _module_instance->loaded()  &&  _module_instance->name_exists( spooler_on_success_name ) )
-    {
-        Module_instance::In_call in_call ( this, spooler_on_success_name );
-        _module_instance->call( spooler_on_success_name );
-    }
-}
-
-//-------------------------------------------------------------------------Module_task::do_on_error
-
-void Module_task::do_on_error()
-{
-    if( _module_instance->loaded()  &&  _module_instance->name_exists( spooler_on_error_name ) )
-    {
-        Module_instance::In_call in_call ( this, spooler_on_error_name );
-        _module_instance->call( spooler_on_error_name );
-    }
-}
-
 //------------------------------------------------------------------------Object_set_task::do_close
 // Kann von anderem Thread gerufen werden, wenn der noch eine COM-Referenz hat
-
+/*
 void Object_set_task::do_close()
 {
     // COM-Objekte entkoppeln, falls noch jemand eine Referenz darauf hat:
     if( _com_object_set )  _com_object_set->clear();
 }
-
-//-------------------------------------------------------------------------Object_set_task::do_load
-
+*/
+//----------------------------------------------------------------------------Object_set_task::load
+/*
 bool Object_set_task::do_load()
 {
     bool ok = true;
@@ -1079,111 +1004,141 @@ bool Object_set_task::do_load()
 
     return ok;
 }
-
-//------------------------------------------------------------------------Object_set_task::do_start
-
-bool Object_set_task::do_start()
+*/
+//-------------------------------------------------------------------Object_set_task::do_begin__end
+/*
+bool Object_set_task::do_begin__end()
 {
+    if( !loaded() )
+    {
+        bool ok = true;
+
+        if( !_object_set ) 
+        {
+            _object_set = SOS_NEW( Object_set( _spooler, this, _job->_object_set_descr ) );
+            _com_object_set = new Com_object_set( _object_set );
+        }
+
+        if( !_module_instance->loaded() )
+        {
+            //ok = _module_instance->load();
+            //if( !ok || _job->has_error() )  return false;
+            throw_xc( "Object_set_task::do_start" );  //ok = do_load();
+            if( !ok || has_error() )  return false;
+        }
+
+        if( !ok )  return false;
+    }
+
+
     set_state( s_running );
 
     return _object_set->open();
 }
 
-//--------------------------------------------------------------------------Object_set_task::do_end
+//---------------------------------------------------------------------Object_set_task::do_end__end
 
-void Object_set_task::do_end()
+void Object_set_task::do_end__end()
 {
     _object_set->close();
     _object_set = NULL;
 }
 
-//-------------------------------------------------------------------------Object_set_task::do_step
+//--------------------------------------------------------------------Object_set_task::do_step__end
 
-bool Object_set_task::do_step()
+bool Object_set_task::do_step__end()
 {
     return _object_set->step( _job->_output_level );
 }
-
-//-------------------------------------------------------------------------Job_module_task::do_load
-/*
-bool Job_module_task::do_load()
-{
-    return _module_instance->load();
-}
 */
-//------------------------------------------------------------------------Job_module_task::do_start
+//-------------------------------------------------------------------------Job_module_task::do_load
 
-bool Job_module_task::do_start()
+void Job_module_task::do_load()
+{
+    ptr<Module_instance> module_instance;
+    bool                 is_new = false;
+
+
+    if( _job->_module_ptr->_reuse == Module::reuse_job )
+    {
+        module_instance = _job->get_free_module_instance( this );
+    }
+    else
+    {
+        module_instance = _job->create_module_instance();
+        is_new = true;
+        _close_engine = true;
+    }
+
+    module_instance->set_title( obj_name() );
+    module_instance->_com_task->set_task( this );
+    module_instance->_com_log->set_log( &_log );
+
+    if( !module_instance->loaded() )
+    {
+        module_instance->init();
+        module_instance->add_obj( (IDispatch*)_spooler->_com_spooler    , "spooler"        );
+      //module_instance->add_obj( (IDispatch*)_job->_thread->_com_thread, "spooler_thread" );
+        module_instance->add_obj( (IDispatch*)_job->_com_job            , "spooler_job"    );
+        module_instance->add_obj( (IDispatch*)module_instance->_com_task, "spooler_task"   );
+        module_instance->add_obj( (IDispatch*)module_instance->_com_log , "spooler_log"    );
+        module_instance->load();
+        module_instance->start();
+    }
+
+    _module_instance = module_instance;
+}
+
+//------------------------------------------------------------------Job_module_task::do_begin_start
+
+void Job_module_task::do_begin__start()
+{
+    //ok = load_module_instance();
+    //if( !ok || has_error() )  return false;
+
+    _module_instance->begin__start();
+}
+
+//-------------------------------------------------------------------Job_module_task::do_begin__end
+
+bool Job_module_task::do_begin__end()
 {
     bool ok;
 
-    set_state( s_running );
+    ok = _module_instance->begin__end();
 
-    if( _module_instance->name_exists( spooler_open_name ) )
-    {
-        Module_instance::In_call in_call ( this, spooler_open_name );
-
-        ok = check_result( _module_instance->call( spooler_open_name ) );
-        in_call.set_result( ok );
-        if( !ok )  return false;
-    }
-
-    return true;
-}
-
-//--------------------------------------------------------------------------Job_module_task::do_end
-
-void Job_module_task::do_end()
-{
-    if( _module_instance->name_exists( spooler_close_name ) )
-    {
-        Module_instance::In_call in_call ( this, spooler_close_name );
-        _module_instance->call( spooler_close_name );
-    }
-}
-
-//-------------------------------------------------------------------------Job_module_task::do_step
-
-bool Job_module_task::do_step()
-{
-    //if( !_module_instance->_has_spooler_process )  return false;
-    if( !_module_instance->name_exists( spooler_process_name ) )  return false;
-
-    Module_instance::In_call in_call ( this, spooler_process_name, _order? "Auftrag " + _order->obj_name() : "" );
-    bool ok = check_result( _module_instance->call( spooler_process_name ) );
-    in_call.set_result( ok );
     return ok;
 }
 
-//-------------------------------------------------------------------------Job_module_task::do_step
-/*
-bool Job_module_task::do_step()
+//-------------------------------------------------------------------Job_module_task::do_end__start
+
+void Job_module_task::do_end__start()
 {
-    //if( !_module_instance->_has_spooler_process )  return false;
-    if( !_module_instance->name_exists( spooler_process_name ) )  return false;
-
-    bool ok = false;
-
-    switch( _call_state )
-    {
-        case c_none:            
-            _module_instance->step__start();
-            break;
-
-        case c_step: 
-            ok = check_result( _module_instance->step__end() );
-            break;
-
-        default:
-            throw_xc( "call_state", _call_state );
-    }
-
-  //Module_instance::In_call in_call ( this, spooler_process_name, _order? "Auftrag " + _order->obj_name() : "" );
-  //bool ok = check_result( _module_instance->call( spooler_process_name ) );
-  //in_call.set_result( ok );
-  //return ok;
+    _module_instance->end__start( _success );
 }
-*/
+
+//---------------------------------------------------------------------Job_module_task::do_end__end
+
+void Job_module_task::do_end__end()
+{
+    _module_instance->end__end();
+}
+
+//------------------------------------------------------------------Job_module_task::do_step__start
+
+void Job_module_task::do_step__start()
+{
+    _module_instance->step__start();
+}
+
+//--------------------------------------------------------------------Job_module_task::do_step__end
+
+bool Job_module_task::do_step__end()
+{
+    bool ok = _module_instance->step__end();
+    return ok;
+}
+
 //-----------------------------------------------------------------------Process_task::Process_task
 
 Process_task::Process_task( Job* job ) 
@@ -1201,13 +1156,13 @@ Process_task::Process_task( Job* job )
 
 void Process_task::do_close()
 {
-     _process_handle.close();
+    _process_handle.close();
 }
 
-//----------------------------------------------------------------------------Process_task::do_start
+//----------------------------------------------------------------------Process_task::do_begin__end
 #ifdef Z_WINDOWS
 
-bool Process_task::do_start()
+bool Process_task::do_begin__end()
 {
     PROCESS_INFORMATION process_info; 
     STARTUPINFO         startup_info; 
@@ -1262,12 +1217,13 @@ bool Process_task::do_start()
     _process_handle.add_to( &_thread->_wait_handles );
 
     set_state( s_running_process );
+
     return true;
 }
 
-//----------------------------------------------------------------------------Process_task::do_stop
+//----------------------------------------------------------------------------Process_task::do_kill
 
-void Process_task::do_stop()
+void Process_task::do_kill()
 {
     if( _process_handle )
     {
@@ -1279,9 +1235,9 @@ void Process_task::do_stop()
     }
 }
 
-//-----------------------------------------------------------------------------Process_task::do_end
+//------------------------------------------------------------------------Process_task::do_end__end
 
-void Process_task::do_end()
+void Process_task::do_end__end()
 {
     DWORD exit_code;
 
@@ -1304,9 +1260,9 @@ bool Process_task::signaled()
 }
 
 #endif
-//----------------------------------------------------------------------------Process_task::do_step
+//--------------------------------------------------------------------------Process_task::end_start
 
-bool Process_task::do_step()
+bool Process_task::do_step__end()
 {
     return !signaled();
 }
@@ -1400,10 +1356,10 @@ bool Process_event::wait( double seconds )
 }
 
 #endif
-//----------------------------------------------------------------------------Process_task::do_start
+//------------------------------------------------------------------Process_task::do_begin__end
 #ifndef Z_WINDOWS
 
-bool Process_task::do_start()
+bool Process_task::do_begin__end()
 {
     vector<string> string_args;
 
@@ -1462,14 +1418,14 @@ bool Process_task::do_start()
     set_state( s_running_process );
 
     _process_handle.set_name( "Process " + _job->_process_filename );
-    _process_handle.add_to( &_job->_thread->_wait_handles );
+    _process_handle.add_to( &_thread->_wait_handles );
 
     return true;
 }
 
-//----------------------------------------------------------------------------Process_task::do_stop
+//----------------------------------------------------------------------------Process_task::do_kill
 
-void Process_task::do_stop()
+void Process_task::do_kill()
 {
     if( _process_handle._pid )
     {
@@ -1483,9 +1439,9 @@ void Process_task::do_stop()
     }
 }
 
-//-----------------------------------------------------------------------------Process_task::do_end
+//---------------------------------------------------------------------------Process_task::do_end__end
 
-void Process_task::do_end()
+void Process_task::do_end__end()
 {
     if( _process_handle._pid )
     {
@@ -1514,7 +1470,6 @@ bool Process_task::signaled()
 }
 
 #endif
-
 //-------------------------------------------------------------------------------------------------
 
 } //namespace spoooler

@@ -3,6 +3,7 @@
 	ProjectType="Visual C++"
 	Version="7.10"
 	Name="spooler"
+	RootNamespace="spooler"
 	SccProjectName=""
 	SccLocalPath="">
 	<Platforms>
@@ -42,7 +43,8 @@
 			<Tool
 				Name="VCCustomBuildTool"
 				Description="sos.spooler.jar erstellen"
-				CommandLine="cd &quot;$(OutDir)&quot; &amp;&amp; jar cf &quot;$(TargetDir)sos.spooler.jar&quot; sos/spooler
+				CommandLine="echo jar cf &quot;$(TargetDir)sos.spooler.jar&quot; sos/spooler
+cd &quot;$(OutDir)&quot; &amp;&amp; jar cf &quot;$(TargetDir)sos.spooler.jar&quot; sos/spooler
 "
 				Outputs="$(TargetDir)sos.spooler.jar"/>
 			<Tool
@@ -113,7 +115,8 @@
 			<Tool
 				Name="VCCustomBuildTool"
 				Description="sos.spooler.jar erstellen"
-				CommandLine="cd &quot;$(OutDir)&quot; &amp;&amp; jar cf &quot;$(TargetDir)sos.spooler.jar&quot; sos/spooler
+				CommandLine="echo jar cf &quot;$(TargetDir)sos.spooler.jar&quot; sos/spooler
+cd &quot;$(OutDir)&quot; &amp;&amp; jar cf &quot;$(TargetDir)sos.spooler.jar&quot; sos/spooler
 "
 				Outputs="$(TargetDir)sos.spooler.jar"/>
 			<Tool

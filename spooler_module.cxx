@@ -1,4 +1,4 @@
-// $Id: spooler_module.cxx,v 1.30 2003/08/12 14:59:45 jz Exp $
+// $Id: spooler_module.cxx,v 1.31 2003/08/25 20:41:26 jz Exp $
 /*
     Hier sind implementiert
 
@@ -19,6 +19,7 @@ namespace spooler {
 //--------------------------------------------------------------------------------------------const
 
 extern const string spooler_init_name       = "spooler_init()Z";
+extern const string spooler_exit_name       = "spooler_exit()V";
 extern const string spooler_open_name       = "spooler_open()Z";
 extern const string spooler_close_name      = "spooler_close()V";
 extern const string spooler_process_name    = "spooler_process()Z";
@@ -262,39 +263,61 @@ Module_instance::In_call::In_call( Job* job, const string& name )
 */
 //----------------------------------------------------------------Module_instance::In_call::In_call
 
-Module_instance::In_call::In_call( Task* task, const string& name, const string& extra ) 
+Module_instance::In_call::In_call( Module_instance* module_instance, const string& name, const string& extra ) 
 : 
-    _task(task),
-    _name(name),
+    _module_instance(NULL),
     _result_set(false)
 { 
-    int pos = name.find( '(' );
-    string my_name = pos == string::npos? name : name.substr( 0, pos );
+    if( !module_instance->_in_call )       // In_call kann doppelt gerufen werden (explizit und implizit). Der zweite Aufruf wirkt nicht.
+    {
+        _module_instance = module_instance;
 
-    task->set_in_call( my_name, extra ); 
-    LOG( *task << '.' << my_name << "() begin\n" );
+        int pos = name.find( '(' );
+        _name = pos == string::npos? name : name.substr( 0, pos );
 
-    Z_WINDOWS_ONLY( _ASSERTE( _CrtCheckMemory() ); )
+        _module_instance->set_in_call( this, extra ); 
+        LOG( *_module_instance << '.' << _name << "() begin\n" );
+
+        Z_WINDOWS_ONLY( _ASSERTE( _CrtCheckMemory() ); )
+    }
 }
 
 //---------------------------------------------------------------Module_instance::In_call::~In_call
 
 Module_instance::In_call::~In_call()
 { 
-    _task->set_in_call( "" ); 
-
+    if( _module_instance )
     {
-        Log_ptr log;
+        _module_instance->set_in_call( NULL ); 
 
-        if( log )
         {
-            *log << *_task << '.' << _name << "() end";
-            if( _result_set )  *log << "  result=" << ( _result? "true" : "false" );
-            *log << '\n';
-        }
-    }
+            Log_ptr log;
 
-    Z_WINDOWS_ONLY( _ASSERTE( _CrtCheckMemory() ); )
+            if( log )
+            {
+                *log << *_module_instance << '.' << _name << "() end";
+                if( _result_set )  *log << "  result=" << ( _result? "true" : "false" );
+                *log << '\n';
+            }
+        }
+
+        Z_WINDOWS_ONLY( _ASSERTE( _CrtCheckMemory() ); )
+    }
+}
+
+//-----------------------------------------------------------------Module_instance::Module_instance
+
+Module_instance::Module_instance( Module* module )
+: 
+    _zero_(this+1), 
+    _module(module),
+    _log(module?module->_log:NULL) 
+{
+    _com_task    = new Com_task;
+    _com_log     = new Com_log;
+    _com_context = new Com_context;
+
+    _spooler_exit_called = false;
 }
 
 //----------------------------------------------------------------------------Module_instance::init
@@ -302,12 +325,21 @@ Module_instance::In_call::~In_call()
 void Module_instance::init()
 {
     if( !_module->set() )  throw_xc( "SPOOLER-146" );
+}
 
-    _spooler_exit_called = false;
+//--------------------------------------------------------------------------------Task::set_in_call
 
-    _com_task    = new Com_task;
-    _com_log     = new Com_log;
-    _com_context = new Com_context;
+void Module_instance::set_in_call( In_call* in_call, const string& extra )
+{
+    //THREAD_LOCK( _lock )
+    {
+        _in_call = in_call;
+
+        if( in_call  &&  _module->_spooler->_debug )  
+        {
+            _log.debug( in_call->_name + "()  " + extra );
+        }
+    }
 }
 
 //-------------------------------------------------------------------------Module_instance::add_obj
@@ -327,6 +359,36 @@ void Module_instance::add_obj( const ptr<IDispatch>& object, const string& name 
         throw_xc( "Module_instance::add_obj", name.c_str() );
 }
 
+//----------------------------------------------------------------------------Module_instance::call
+/*
+Variant Module_instance::call( const string& name )
+{
+    if( _in_call.empty() )
+    {
+        In_call in_call ( this, name );
+        call( name );
+    }
+    else
+    {
+        call( name );
+    }
+}
+
+//----------------------------------------------------------------------------Module_instance::call
+
+Variant Module_instance::call( const string& name, int param )
+{
+    if( _in_call.empty() )
+    {
+        In_call in_call ( this, name );
+        call( name, param );
+    }
+    else
+    {
+        call( name, param );
+    }
+}
+*/
 //------------------------------------------------------------------Module_instance::call_if_exists
 
 Variant Module_instance::call_if_exists( const string& name )
@@ -359,44 +421,83 @@ void Module_instance::close()
 }
 
 //--------------------------------------------------------------------Module_instance::begin__start
-/*
-void Module_instance::begin__start( const Object_list& object_list )
+
+void Module_instance::begin__start()  // const Object_list& object_list )
 {
-    if( !loaded() )
-    {
-        init();
-        FOR_EACH_CONST( Object_list, object_list, o )  add_obj( o->_object, o->_name );
-        load();
-        start();
-        call( spooler_init_name );
-    }
 }
 
 //----------------------------------------------------------------------Module_instance::begin__end
 
 bool Module_instance::begin__end()
 {
-    return check_result( call( spooler_open_name ) );
+    if( !loaded() )
+    {
+        init();
+        FOR_EACH_CONST( Object_list, _object_list, o )  add_obj( o->_object, o->_name );
+        load();
+        start();
+
+        _spooler_init_called = true;
+        bool ok = check_result( call_if_exists( spooler_init_name ) );
+        if( !ok )  return ok;
+    }
+
+    return check_result( call_if_exists( spooler_open_name ) );
 }
 
 //----------------------------------------------------------------------Module_instance::end__start
 
-void Module_instance::end__start()
+void Module_instance::end__start( bool success )
 {
-    call( spooler_close_name );
-    on_error_success();
-    
-    if( _close_engine )
-    {
-        call( spooler_exit_name );
-        close();
-    }
 }
 
 //------------------------------------------------------------------------Module_instance::end__end
 
 void Module_instance::end__end()
 {
+    call( spooler_close_name );
+
+    // Exception abfangen und spooler_on_error rufen // _com_task->set_error( x )?
+/*
+    if( _task )
+    {
+        if( loaded() && success )
+        {
+            // spooler_on_success() wird nicht gerufen, wenn spooler_init() false lieferte
+
+            try 
+            {
+                if( loaded()  &&  name_exists( spooler_on_success_name ) )
+                {
+                    In_call in_call ( _task, spooler_on_success_name );
+                    call( spooler_on_success_name );
+                }
+            }
+            catch( const exception& x ) { _task->log().error( string(spooler_on_error_name) + ": " + x.what() ); }
+        }
+        else
+        if( !success )
+        {
+            try 
+            {
+                if( loaded()  &&  name_exists( spooler_on_error_name ) )
+                {
+                    In_call in_call ( _task, spooler_on_error_name );
+                    call( spooler_on_error_name );
+                }
+            }
+            catch( const exception& x ) { _task->set_error( x ); }
+        }
+    }
+*/
+
+    if( _spooler_init_called  &&  !_spooler_exit_called )
+    {
+        _spooler_exit_called = true;
+        call_if_exists( spooler_exit_name );
+    }
+
+    close();
 }
 
 //---------------------------------------------------------------------Module_instance::step__start
@@ -409,9 +510,11 @@ void Module_instance::step__start()
 
 bool Module_instance::step__end()
 {
+    if( !name_exists( spooler_process_name ) )  return false;
+
     return check_result( call( spooler_process_name ) );
 }
-*/
+
 //-------------------------------------------------------------------------------------------------
 
 } //namespace spooler
