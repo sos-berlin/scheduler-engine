@@ -1,4 +1,4 @@
-// $Id: spooler_history.cxx,v 1.83 2004/01/12 09:35:23 jz Exp $
+// $Id: spooler_history.cxx,v 1.84 2004/01/26 11:26:14 jz Exp $
 
 #include "spooler.h"
 #include "../zschimmer/z_com.h"
@@ -1200,7 +1200,8 @@ xml::Element_ptr Job_history::read_tail( const xml::Document_ptr& doc, int id, i
                     clause += " order by \"ID\" ";  if( next < 0 )  clause += " desc";
                     
                     sel.open( prefix + _spooler->_db->_db_name + 
-                              " select %limit(" + as_string(abs(next)) + ")"
+                              " select " + 
+                              ( next == 0? "" : "%limit(" + as_string(abs(next)) + ") " ) +
                               " \"ID\", \"SPOOLER_ID\", \"JOB_NAME\", \"START_TIME\", \"END_TIME\", \"CAUSE\", \"STEPS\", \"ERROR\", \"ERROR_CODE\", \"ERROR_TEXT\" " +
                               join( "", vector_map( prepend_comma, _extra_names ) ) +
                               " from " + uquoted(_spooler->_job_history_tablename) + 
