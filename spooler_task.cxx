@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.253 2004/05/20 21:40:57 jz Exp $
+// $Id: spooler_task.cxx,v 1.254 2004/05/31 16:16:02 jz Exp $
 /*
     Hier sind implementiert
 
@@ -1252,8 +1252,9 @@ bool Task::step__end()
             _order->postprocessing( result );
             _log.set_order_log( NULL );
             THREAD_LOCK( _lock )  _order = NULL;
-            result = true;
         }
+
+        if( _job->order_queue() )  result = true;           // Auftragsgesteuerte Task immer fortsetzen ( _order kann wieder null sein wegen set_state(), §1495 )
 
         if( _next_spooler_process )  result = true;
     }
@@ -1300,6 +1301,17 @@ void Task::set_order( Order* order )
 
     _order = order;
     if( _order )  _order->attach_task( this );  // Auftrag war schon bereitgestellt
+}
+
+//-------------------------------------------------------------------------------Task::remove_order
+// Wird von Order nach set_state() oder dgl. gerufen. 
+// §1495
+
+void Task::remove_order( Order* order )
+{
+    if( order != _order )  throw_xc( "SCHEDULER-211", order->obj_name(), _order->obj_name() );   // Darf nie geschehen!
+
+    _order = NULL;
 }
 
 //---------------------------------------------------------------------------------Task::take_order
@@ -1880,7 +1892,7 @@ void Process_task::do_end__end()
         }
         catch( const exception& x )
         {
-            if( !_job->_process_ingore_error  )  throw;
+            if( !_job->_process_ignore_error  )  throw;
             _log.warn( x.what() );
         }
     }
@@ -2128,7 +2140,7 @@ void Process_task::do_end__end()
         }
         catch( const exception& x )
         {
-            if( !_job->_process_ingore_error )  throw;
+            if( !_job->_process_ignore_error )  throw;
             _log.warn( x.what() );
         }
     }

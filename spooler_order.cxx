@@ -1,4 +1,4 @@
-// $Id: spooler_order.cxx,v 1.62 2004/05/28 09:50:35 jz Exp $
+// $Id: spooler_order.cxx,v 1.63 2004/05/31 16:16:02 jz Exp $
 /*
     Hier sind implementiert
 
@@ -512,7 +512,7 @@ void Order_queue::add_order( Order* order )
 */
             Queue::iterator ins       = _queue.end();
             bool            ins_set   = false;
-            bool            was_empty = _queue.empty();
+            bool            was_empty = !has_order( Time::now() );  //_queue.empty();
             bool            id_found  = false;
 
             _has_users_id |= order->_is_users_id;
@@ -651,7 +651,7 @@ ptr<Order> Order_queue::get_order_for_processing( const Time& now )
         {
             order->_start_time = now;
             order->_setback = 0;
-            order->_moved = false;
+            //order->_moved = false;
         }   
     }
 
@@ -970,7 +970,7 @@ void Order::set_priority( Priority priority )
         {
             _priority = priority; 
 
-            if( !_setback  &&  _in_job_queue  &&  !_task)   // Nicht gerade in Verarbeitung?
+            if( !_setback  &&  _in_job_queue  &&  !_task )   // Nicht gerade in Verarbeitung?
             {
                 ptr<Order> hold_me = this;
                 order_queue()->remove_order( this );
@@ -1017,7 +1017,8 @@ void Order::add_to_order_queue( Order_queue* order_queue )
 
     THREAD_LOCK( _lock )
     {
-        _moved = true;
+        //_moved = true;
+        if( _task )  _task->remove_order( this ),  _task = NULL;   // §1495
 
         if( _id.vt == VT_EMPTY )  set_default_id();
         _id_locked = true;
@@ -1096,8 +1097,9 @@ void Order::move_to_node( Job_chain_node* node )
     {
         if( !_job_chain )  throw_xc( "SCHEDULER-157", obj_name() );
 
-        _moved = true;
-        _task = NULL;
+        //§1495  _moved = true;
+        //§1495  _task = NULL;
+        if( _task )  _task->remove_order( this ),  _task = NULL;   // §1495
 
         if( _job_chain_node && _in_job_queue )  _job_chain_node->_job->order_queue()->remove_order( this ), _job_chain_node = NULL;
 
@@ -1129,7 +1131,8 @@ void Order::postprocessing( bool success )
             }
         }
 
-        if( !_setback && !_moved  ||  force_error_state )
+        //if( !_setback && !_moved  ||  force_error_state )
+        if( !_setback  ||  force_error_state )
         {
             _setback_count = 0;
 
@@ -1177,7 +1180,7 @@ void Order::postprocessing( bool success )
 
         postprocessing2();
 
-        _moved = false;
+        //_moved = false;
     }
 }
 
@@ -1188,7 +1191,7 @@ void Order::processing_error()
     THREAD_LOCK( _lock )
     {
         _task = NULL;
-        _moved = false;
+        //_moved = false;
 
         postprocessing2();
     }
@@ -1216,8 +1219,9 @@ void Order::setback_()
     THREAD_LOCK( _lock )
     {
         if( !_task      )  throw_xc( "SCHEDULER-187" );
-        if( _moved      )  throw_xc( "SCHEDULER-188", obj_name() );
+      //if( _moved      )  throw_xc( "SCHEDULER-188", obj_name() );
         if( !_job_chain )  throw_xc( "SCHEDULER-157", obj_name() );
+        if( !order_queue() )  throw_xc( "SCHEDULER-163", obj_name() );
 
         order_queue()->remove_order( this );
 

@@ -1,4 +1,4 @@
-// $Id: spooler_order.h,v 1.30 2004/02/19 17:17:33 jz Exp $
+// $Id: spooler_order.h,v 1.31 2004/05/31 16:16:02 jz Exp $
 
 #ifndef __SPOOLER_ORDER_H
 #define __SPOOLER_ORDER_H
@@ -131,7 +131,7 @@ struct Order : Com_order
     bool                       _in_job_queue;           // Auftrag ist in _job_chain_node->_job->order_queue() eingehängt
   //bool                       _in_process;             // Auftrag wird gerade von spooler_process() verarbeitet 
     Task*                      _task;                   // Auftrag wird gerade von dieser Task in spooler_process() verarbeitet 
-    bool                       _moved;                  // true, wenn Job state oder job geändert hat. Dann nicht automatisch in Jobkette weitersetzen
+  //bool                       _moved;                  // true, wenn Job state oder job geändert hat. Dann nicht automatisch in Jobkette weitersetzen
     Time                       _setback;                // Bis wann der Auftrag zurückgestellt ist
     int                        _setback_count;
     bool                       _is_in_database;
