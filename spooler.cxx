@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.310 2003/12/31 11:05:47 jz Exp $
+// $Id: spooler.cxx,v 1.311 2004/01/05 14:51:33 jz Exp $
 /*
     Hier sind implementiert
 
@@ -178,8 +178,8 @@ int read_profile_mail_on_process( const string& profile, const string& section, 
 
     try
     {
-        if( isdigit( (uint)v[0] ) )  return as_int(v);
-                               else  return as_bool(v);
+        if( isdigit( (unsigned char)v[0] ) )  return as_int(v);
+                                        else  return as_bool(v);
     }
     catch( const exception& ) { return deflt; }
 }
@@ -195,8 +195,8 @@ int read_profile_history_on_process( const string& profile, const string& sectio
 
     try
     {
-        if( isdigit( (uint)v[0] ) )  return as_int(v);
-                               else  return as_bool(v);
+        if( isdigit( (unsigned char)v[0] ) )  return as_int(v);
+                                        else  return as_bool(v);
     }
     catch( const exception& ) { return deflt; }
 }
