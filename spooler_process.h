@@ -1,4 +1,4 @@
-// $Id: spooler_process.h,v 1.10 2003/09/27 15:32:11 jz Exp $
+// $Id: spooler_process.h,v 1.11 2003/09/27 15:44:10 jz Exp $
 
 #ifndef __SPOOLER_PROCESS_H
 #define __SPOOLER_PROCESS_H
@@ -48,7 +48,7 @@ struct Process : zschimmer::Object
     Thread_semaphore           _lock;
     Spooler*                   _spooler;
     string                     _server_hostname;
-    string                     _server_port;
+    int                        _server_port;
     ptr<object_server::Connection> _connection;             // Verbindung zum Prozess
     ptr<object_server::Session>    _session;                // Wir haben immer nur eine Session pro Verbindung
     bool                       _temporary;                  // Löschen, wenn kein Module_instance mehr läuft
