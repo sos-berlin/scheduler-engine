@@ -1,17 +1,14 @@
-/* $Id: scheduler.css,v 1.7 2004/07/22 14:15:10 jz Exp $ */
+/* $Id: scheduler.css,v 1.8 2004/07/22 20:29:53 jz Exp $ */
 
-h1           { font-size: 24pt; font-weight: bold; margin-bottom: 4ex;  }
-h2           { font-size: 12pt; font-weight: bold; margin-top: 10ex; }
-h3           { font-size: 10pt; font-weight: bold; margin-top: 6ex }
-.zwischentitel { font-weight: bold; margin-top: 6ex }
 body         { font-size: 10pt; }
 th           { font-size: 10pt; }
 td           { font-size: 10pt; }
 p            { font-size: 10pt; margin-top: 2ex; margin-bottom: 0  }
-div          { font-size: 10pt; }
+/*
 span         { font-size: 10pt; }
+div          { font-size: 10pt; }
 li           { font-size: 10pt; }
-/*pre          { font-family: Lucida Console, monospace; font-size: 9pt; line-height: 1.2em; }*/
+pre          { font-family: Lucida Console, monospace; font-size: 9pt; line-height: 1.2em; }*/
 
 
 .small                  { font-family: Sans-Serif; font-size: 8pt }
@@ -24,20 +21,21 @@ li           { font-size: 10pt; }
 .column                 { padding-bottom: 1pt; padding-left: 3pt; padding-right: 2pt; }
 
 
-.job                    { font-family: Sans-Serif; font-size: 10pt; background-color: #00BFFF }
-.job_list               { font-family: Sans-Serif; font-size: 10pt; background-color: #00BFFF }
-.job_list_hover         { font-family: Sans-Serif; font-size: 10pt; background-color: #00BFFF; text-decoration: underline }
+/* Allgemeiner Scheduler-Zustand */
+.scheduler              { background-color: #F0F0F0 }
+
+.job                    { font-family: Sans-Serif; font-size: 10pt; background-color: #fff000 }
 .job_error              { color: darkred }
 
-.task                   { font-family: Sans-Serif; font-size: 10pt; background-color: #90EE90 }
-.task_list              { font-family: Sans-Serif; font-size: 10pt; background-color: #90EE90 }
-.task_list_hover        { font-family: Sans-Serif; font-size: 10pt; background-color: #90EE90; text-decoration: underline }
+.task                   { font-family: Sans-Serif; font-size: 10pt; background-color: #FFFFA0 } /*#90EE90*/
+.task_hover             { font-family: Sans-Serif; font-size: 10pt; background-color: #FFFFC0; text-decoration: underline }
                       
-.order                  { font-family: Sans-Serif; font-size: 10pt; background-color: #FFFFA0 }
-.order_list             { font-family: Sans-Serif; font-size:  8pt; background-color: #FFFFA0 }
+.order                  { font-family: Sans-Serif; font-size: 10pt; background-color: #f0ffff }  /*#E0FFE0*/
                         
-.job_chain_list         { font-family: Sans-Serif; font-size: 10pt; background-color: mistyrose }
-.job_chain_list_hover   { font-family: Sans-Serif; font-size: 10pt; background-color: mistyrose; text-decoration: underline }
+.job_chain              { font-family: Sans-Serif; font-size: 10pt; background-color: #00c8ff }
+
+/* Anklickbar */
+.hover                  { text-decoration: underline }
 
 /*.milliseconds         { font-family: Sans-Serif; font-size:  8pt }*/
 /*.waiting_for_process  { font-style: italic }*/
