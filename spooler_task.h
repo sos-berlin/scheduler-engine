@@ -1,8 +1,7 @@
-// $Id: spooler_task.h,v 1.66 2002/10/04 06:36:14 jz Exp $
+// $Id: spooler_task.h,v 1.67 2002/11/01 09:27:12 jz Exp $
 
 #ifndef __SPOOLER_TASK_H
 #define __SPOOLER_TASK_H
-
 
 namespace sos {
 namespace spooler {
@@ -15,12 +14,12 @@ struct                          Task;
 
 struct Level_interval
 {
-                                Level_interval              ()                              : _low_level(0), _high_level(0) {}
-    explicit                    Level_interval              ( const xml::Element_ptr& e )   { set_xml( e ); }
+                                Level_interval              ()                                      : _low_level(0), _high_level(0) {}
+    explicit                    Level_interval              ( const xml::Element_ptr& e )           { set_xml( e ); }
 
     void                        set_xml                     ( const xml::Element_ptr& );
 
-    bool                        is_in_interval              ( Level level )                 { return level >= _low_level && level < _high_level; }
+    bool                        is_in_interval              ( Level level )                         { return level >= _low_level && level < _high_level; }
 
     Level                      _low_level;
     Level                      _high_level;
@@ -30,8 +29,8 @@ struct Level_interval
 
 struct Object_set_class : Sos_self_deleting
 {
-                                Object_set_class            ( Spooler* sp )                              : _spooler(sp), _script(sp) {}
-    explicit                    Object_set_class            ( Spooler* sp,  const xml::Element_ptr& e )  : _spooler(sp), _script(sp) { set_xml( e ); }
+                                Object_set_class            ( Spooler* sp, Prefix_log* log )        : _spooler(sp), _module(sp,log) {}
+    explicit                    Object_set_class            ( Spooler* sp,  Prefix_log* log, const xml::Element_ptr& e )  : _spooler(sp), _module(sp,log) { set_xml( e ); }
 
     void                        set_xml                     ( const xml::Element_ptr& );
 
@@ -39,7 +38,7 @@ struct Object_set_class : Sos_self_deleting
     string                     _name;
     map<Level,string>          _level_map;
     
-    Script                     _script;
+    Module                     _module;
     bool                       _object_interface;
 
   //Time                       _process_timeout;
@@ -303,7 +302,7 @@ struct Job : Sos_self_deleting
 
     Sos_ptr<Object_set_descr>  _object_set_descr;           // Job nutzt eine Objektemengeklasse
     Level                      _output_level;
-    Script                     _script;                     // Job hat ein eigenes Skript
+    Module                     _module;                     // Job hat ein eigenes Skript
     xml::Element_ptr           _script_element;             // <script> (mit <include>) für <modify_job cmd="reload"/>
     
     string                     _process_filename;           // Job ist ein externes Programm
@@ -324,8 +323,8 @@ struct Job : Sos_self_deleting
     ptr<Com_variable_set>      _default_params;
 
     xml::Element_ptr           _script_xml_element;         // <script> aus <config>
-    Script*                    _script_ptr;
-    Script_instance            _script_instance;            // Für use_engine="job"
+    Module*                    _script_ptr;
+    ptr<Module_instance>       _module_instance;            // Für use_engine="job"
 
     int                        _step_count;                 // Anzahl spooler_process() aller Tasks
     int                        _last_task_step_count;       // Anzahl spooler_process() der letzten Task
@@ -450,11 +449,11 @@ typedef list< Sos_ptr<Task> >   Task_list;
 
 //--------------------------------------------------------------------------------------Script_task
 
-struct Script_task : Task
+struct Script_task : Task       // Oberklasse für Object_set_task und Job_script_task
 {
                                 Script_task                 ( Spooler* sp, const Sos_ptr<Job>& j ) : Task(sp,j) {}
 
-    virtual bool                loaded                      ()                              { return _job->_script_instance.loaded(); }
+    virtual bool                loaded                      ()                              { return _job->_module_instance->loaded(); }
   //virtual bool                do_load                     ();
   //bool                        do_start                    ();
   //void                        do_end                      ();

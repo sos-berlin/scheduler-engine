@@ -1,4 +1,4 @@
-// $Id: spooler_config.cxx,v 1.43 2002/09/11 10:05:14 jz Exp $
+// $Id: spooler_config.cxx,v 1.44 2002/11/01 09:27:10 jz Exp $
 
 //#include <precomp.h>
 
@@ -177,7 +177,7 @@ void Object_set_class::set_xml( const xml::Element_ptr& element )
     {
         if( e->tagName == "script" )
         {
-            _script.set_xml( e, _spooler->include_path() );
+            _module.set_xml( e, _spooler->include_path() );
         }
         else
         if( e->tagName == "level_decls" )
@@ -218,7 +218,7 @@ void Spooler::load_object_set_classes_from_xml( Object_set_class_list* liste, co
 {
     DOM_FOR_ALL_ELEMENTS( element, e )
     {
-        if( e->tagName == "object_set_class" )  liste->push_back( SOS_NEW( Object_set_class( this, e ) ) );
+        if( e->tagName == "object_set_class" )  liste->push_back( SOS_NEW( Object_set_class( this, &_prefix_log, e ) ) );
     }
 }
 
@@ -250,7 +250,7 @@ void Thread::set_xml( const xml::Element_ptr& element )
 
     DOM_FOR_ALL_ELEMENTS( element, e )
     {
-        if( e->tagName == "script" )  _script.set_xml( e, include_path() );
+        if( e->tagName == "script" )  _module.set_xml( e, include_path() );
         else
         if( e->tagName == "jobs"   )  load_jobs_from_xml( e );
     }
@@ -310,7 +310,9 @@ void Spooler::load_config( const xml::Element_ptr& config_element, const string&
         _udp_port      = int_from_variant( variant_default( config_element->getAttribute( L"udp_port"     ), _udp_port     ) );
         _priority_max  = int_from_variant( variant_default( config_element->getAttribute( L"priority_max" ), _priority_max ) );
 
-        string log_dir =        as_string( config_element->getAttribute( L"log_dir"      ) );
+        _java_vm._class_path = as_string( config_element->getAttribute( L"java_class_path" ) );
+
+        string log_dir =   as_string( config_element->getAttribute( L"log_dir"         ) );
 
         if( !_log_directory_as_option_set && log_dir != "" )  _log_directory = log_dir;
         if( !_spooler_param_as_option_set )  _spooler_param = as_string( variant_default( config_element->getAttribute( L"param"        ), _spooler_param ) );
@@ -356,7 +358,7 @@ void Spooler::load_config( const xml::Element_ptr& config_element, const string&
             else
             if( e->tagName == "script" )
             {
-                _script.set_xml( e, include_path() );
+                _module.set_xml( e, include_path() );
             }
             else
             if( e->tagName == "threads" ) 

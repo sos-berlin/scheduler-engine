@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.121 2002/10/21 14:54:18 jz Exp $
+// $Id: spooler.cxx,v 1.122 2002/11/01 09:27:09 jz Exp $
 /*
     Hier sind implementiert
 
@@ -228,8 +228,7 @@ Spooler::Spooler()
     _prefix_log(1),
     _wait_handles(this,&_prefix_log),
     _log(this),
-    _script(this),
-    _script_instance(&_prefix_log),
+    _module(this,&_prefix_log),
     _log_level( log_info ),
     _db(this),
     _factory_ini( default_factory_ini ),
@@ -527,11 +526,11 @@ void Spooler::load_arg()
 
     _spooler_id         = read_profile_string    ( _factory_ini, "spooler", "id"                 );
     _config_filename    = read_profile_string    ( _factory_ini, "spooler", "config"             );
-    _log_directory      = read_profile_string    ( _factory_ini, "spooler", "log-dir"            );       // veraltet
-    _log_directory      = read_profile_string    ( _factory_ini, "spooler", "log_dir"            , _log_directory );        _log_directory_as_option_set = !_log_directory.empty();
+    _log_directory      = read_profile_string    ( _factory_ini, "spooler", "log-dir"            );  // veraltet
+    _log_directory      = read_profile_string    ( _factory_ini, "spooler", "log_dir"            , _log_directory );  _log_directory_as_option_set = !_log_directory.empty();
     _include_path       = read_profile_string    ( _factory_ini, "spooler", "include-path"       );  // veraltet
-    _include_path       = read_profile_string    ( _factory_ini, "spooler", "include_path"       , _include_path );    _include_path_as_option_set = !_include_path.empty();
-    _spooler_param      = read_profile_string    ( _factory_ini, "spooler", "param"              );          _spooler_param_as_option_set = !_spooler_param.empty();
+    _include_path       = read_profile_string    ( _factory_ini, "spooler", "include_path"       , _include_path );   _include_path_as_option_set  = !_include_path.empty();
+    _spooler_param      = read_profile_string    ( _factory_ini, "spooler", "param"              );                   _spooler_param_as_option_set = !_spooler_param.empty();
     log_level           = read_profile_string    ( _factory_ini, "spooler", "log_level"          , log_level );   
     _history_columns    = read_profile_string    ( _factory_ini, "spooler", "history_columns"    );
     _history_yes        = read_profile_bool      ( _factory_ini, "spooler", "history"            , true );
@@ -542,6 +541,7 @@ void Spooler::load_arg()
     _need_db            = read_profile_bool      ( _factory_ini, "spooler", "need_db"            , true                );
     _history_tablename  = read_profile_string    ( _factory_ini, "spooler", "db_history_table"   , "spooler_history"   );
     _variables_tablename= read_profile_string    ( _factory_ini, "spooler", "db_variables_table" , "spooler_variables" );
+    _java_vm._filename  = read_profile_string    ( _factory_ini, "spooler", "java_vm" );
 
 
     try
@@ -667,20 +667,24 @@ void Spooler::start()
 
     _spooler_start_time = Time::now();
 
+    if( _has_java  )  _java_vm.init();
+
+
     {FOR_EACH( Thread_list, _thread_list, it )  if( !(*it)->empty() )  (*it)->init();}
 
 
-    if( _script.set() )
+    if( _module.set() )
     {
-        _script_instance.init( &_script );
+        _module_instance = _module.create_instance();
+        _module_instance->init();
 
-        _script_instance.add_obj( (IDispatch*)_com_spooler, "spooler"     );
-        _script_instance.add_obj( (IDispatch*)_com_log    , "spooler_log" );
+        _module_instance->add_obj( (IDispatch*)_com_spooler, "spooler"     );
+        _module_instance->add_obj( (IDispatch*)_com_log    , "spooler_log" );
 
-        _script_instance.load();
-        _script_instance.start();
+        _module_instance->load();
+        _module_instance->start();
 
-        bool ok = check_result( _script_instance.call_if_exists( "spooler_init" ) );
+        bool ok = check_result( _module_instance->call_if_exists( "spooler_init()B" ) );
         if( !ok )  throw_xc( "SPOOLER-127" );
     }
 
@@ -715,7 +719,9 @@ void Spooler::stop()
     _object_set_class_list.clear();
     _thread_list.clear();
 
-    _script_instance.close();
+    if( _module_instance )  _module_instance->close();
+
+    _java_vm.close();
 
     if( _state_cmd == sc_terminate_and_restart 
      || _state_cmd == sc_let_run_terminate_and_restart )  spooler_restart( &_log, _is_service );

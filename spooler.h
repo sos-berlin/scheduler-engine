@@ -1,4 +1,4 @@
-// $Id: spooler.h,v 1.94 2002/10/04 06:36:13 jz Exp $
+// $Id: spooler.h,v 1.95 2002/11/01 09:27:10 jz Exp $
 
 #ifndef __SPOOLER_H
 #define __SPOOLER_H
@@ -71,7 +71,9 @@ namespace sos {
 #include "spooler_communication.h"
 #include "spooler_security.h"
 #include "spooler_command.h"
-#include "spooler_script.h"
+#include "spooler_module.h"
+#include "spooler_module_com.h"
+#include "spooler_module_java.h"
 #include "spooler_history.h"
 #include "spooler_order.h"
 #include "spooler_task.h"
@@ -215,6 +217,8 @@ struct Spooler
 
     void                        set_state                   ( State );
 
+    void                        init_java_vm                ();
+
     void                        start                       ();
     void                        stop                        ();
     void                        signal_threads              ( const string& signal_name );
@@ -278,8 +282,12 @@ struct Spooler
     Spooler_db                 _db;
     bool                       _need_db;
 
+    bool                       _has_java;                   // Es gibt ein Java-Skript
+
     bool                       _manual;
     string                     _job_name;                   // Bei manuellem Betrieb
+
+    Java_vm                    _java_vm;
 
   private:
     string                     _config_filename;            // -config=
@@ -309,8 +317,9 @@ struct Spooler
     Communication              _communication;              // TCP und UDP (ein Thread)
 
     ptr<Com_variable_set>      _variables;
-    Script                     _script;                     // <script>
-    Script_instance            _script_instance;
+    Module                     _module;                     // <script>
+    ptr<Module_instance>       _module_instance;
+
 
     Thread_list                _thread_list;
 

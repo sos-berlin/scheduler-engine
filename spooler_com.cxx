@@ -1,4 +1,4 @@
-// $Id: spooler_com.cxx,v 1.61 2002/10/24 09:12:25 jz Exp $
+// $Id: spooler_com.cxx,v 1.62 2002/11/01 09:27:10 jz Exp $
 /*
     Hier sind implementiert
 
@@ -1457,8 +1457,9 @@ STDMETHODIMP Com_thread::get_script( IDispatch** script_object )
     {
         if( !_thread )  return E_POINTER;
         if( GetCurrentThreadId() != _thread->_thread_id )  return E_ACCESSDENIED;
+        if( !_thread->_module_instance )  return E_ACCESSDENIED;
 
-        *script_object = _thread->_script_instance.dispatch();
+        *script_object = _thread->_module_instance->dispatch();
         if( *script_object )  (*script_object)->AddRef();
     }
 
@@ -1554,8 +1555,9 @@ STDMETHODIMP Com_spooler::get_script( IDispatch** script_object )
     THREAD_LOCK( _lock )
     {
         if( !_spooler )  return E_POINTER;
+        if( !_spooler->_module_instance )  return E_ACCESSDENIED;
 
-        *script_object = _spooler->_script_instance.dispatch();
+        *script_object = _spooler->_module_instance->dispatch();
         if( *script_object )  (*script_object)->AddRef();
     }
 

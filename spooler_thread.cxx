@@ -1,4 +1,4 @@
-// $Id: spooler_thread.cxx,v 1.47 2002/10/21 11:50:15 jz Exp $
+// $Id: spooler_thread.cxx,v 1.48 2002/11/01 09:27:13 jz Exp $
 /*
     Hier sind implementiert
 
@@ -25,8 +25,7 @@ Thread::Thread( Spooler* spooler )
     _spooler(spooler),
     _log(spooler),
     _wait_handles(_spooler,&_log),
-    _script(spooler),
-    _script_instance(&_log),
+    _module(spooler,&_log),
     _thread_priority( THREAD_PRIORITY_NORMAL )   // Windows
 {
     _com_thread     = new Com_thread( this );
@@ -49,7 +48,6 @@ Thread::~Thread()
 void Thread::init()
 {
     _log.set_prefix( "Thread " + _name );
-  //_log.set_profile_section( "Thread " + _name );
 
     _com_log = new Com_log( &_log );
 
@@ -149,11 +147,15 @@ void Thread::close1()
         // Beim Beenden des Spooler noch laufende Threads können auf Jobs von bereits beendeten Threads zugreifen.
         // Damit's nicht knallt: Jobs schließen, aber Objekte halten.
 
-        _script_instance.close();
+        if( _module_instance )  _module_instance->close(), _module_instance = NULL;
+
 
         // COM-Objekte entkoppeln, falls noch jemand eine Referenz darauf hat:
         if( _com_log )  _com_log->close();
     }
+
+
+    _spooler->_java_vm.detach_thread();
 }
 
 //------------------------------------------------------------------------------------Thread::close
@@ -168,22 +170,40 @@ void Thread::close()
     }
 }
 
+//---------------------------------------------------------------------------------Thread::has_java
+
+bool Thread::has_java()
+{
+    if( _module.kind() == Module::kind_java )  return true;
+
+    FOR_EACH_JOB( job )  if( (*job)->_module.kind() == Module::kind_java )  return true;
+
+    return false;
+}
+
 //------------------------------------------------------------------------------------Thread::start
 
 void Thread::start()
 {
-    if( _script.set() )
+    if( has_java() )  
     {
-        _script_instance.init( &_script );
+        _spooler->_java_vm.attach_thread();
+    }
 
-        _script_instance.add_obj( (IDispatch*)_spooler->_com_spooler, "spooler"        );
-        _script_instance.add_obj( (IDispatch*)_com_thread           , "spooler_thread" );
-        _script_instance.add_obj( (IDispatch*)_com_log              , "spooler_log"    );
+    if( _module.set() )
+    {
+        _module_instance = _module.create_instance();
 
-        _script_instance.load();
-        _script_instance.start();
+        _module_instance->init();
 
-        bool ok = check_result( _script_instance.call_if_exists( "spooler_init" ) );
+        _module_instance->add_obj( (IDispatch*)_spooler->_com_spooler, "spooler"        );
+        _module_instance->add_obj( (IDispatch*)_com_thread           , "spooler_thread" );
+        _module_instance->add_obj( (IDispatch*)_com_log              , "spooler_log"    );
+
+        _module_instance->load();
+        _module_instance->start();
+
+        bool ok = check_result( _module_instance->call_if_exists( "spooler_init()B" ) );
         if( !ok )  throw_xc( "SPOOLER-127" );
     }
 

@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.115 2002/10/17 19:56:13 jz Exp $
+// $Id: spooler_task.cxx,v 1.116 2002/11/01 09:27:12 jz Exp $
 /*
     Hier sind implementiert
 
@@ -17,14 +17,14 @@ namespace spooler {
 
 //--------------------------------------------------------------------------------------------const
 
-static const char spooler_init_name      [] = "spooler_init";
-static const char spooler_open_name      [] = "spooler_open";
-static const char spooler_close_name     [] = "spooler_close";
-static const char spooler_get_name       [] = "spooler_get";
-static const char spooler_process_name   [] = "spooler_process";
-static const char spooler_level_name     [] = "spooler_level";
-static const char spooler_on_error_name  [] = "spooler_on_error";
-static const char spooler_on_success_name[] = "spooler_on_success";
+static const string spooler_init_name       = "spooler_init()B";
+static const string spooler_open_name       = "spooler_open()B";
+static const string spooler_close_name      = "spooler_close()v";
+static const string spooler_get_name        = "spooler_get";
+static const string spooler_process_name    = "spooler_process()B";
+static const string spooler_level_name      = "spooler_level";
+static const string spooler_on_error_name   = "spooler_on_error()v";
+static const string spooler_on_success_name = "spooler_on_success()v";
 
 //---------------------------------------------------------------------------------start_cause_name
 
@@ -92,7 +92,7 @@ bool Object_set::open()
     if( _class->_object_interface )
     {
         Job::In_call( _task, "spooler_make_object_set" );
-        object_set_vt = _task->_job->_script_instance.call( "spooler_make_object_set" );
+        object_set_vt = _task->_job->_module_instance->call( "spooler_make_object_set" );
 
         if( object_set_vt.vt != VT_DISPATCH 
          || object_set_vt.pdispVal == NULL  )  throw_xc( "SPOOLER-103", _object_set_descr->_class_name );
@@ -101,7 +101,7 @@ bool Object_set::open()
     }
     else
     {
-        _idispatch = _task->_job->_script_instance._script_site->dispatch();
+        _idispatch = _task->_job->_module_instance->dispatch();
     }
 
     if( com_name_exists( _idispatch, spooler_open_name ) ) 
@@ -176,7 +176,7 @@ bool Object_set::step( Level result_level )
     else
     {
         Job::In_call in_call ( _task, spooler_process_name );
-        bool result = check_result( _task->_job->_script_instance.call( spooler_process_name, result_level ) );
+        bool result = check_result( _task->_job->_module_instance->call( spooler_process_name, result_level ) );
         in_call.set_result( result );
         return result;
     }
@@ -197,8 +197,11 @@ Job::In_call::In_call( Job* job, const string& name )
     _name(name),
     _result_set(false)
 { 
-    _job->set_in_call(name); 
-    LOG( *job << '.' << name << "() begin\n" );
+    int pos = name.find( '(' );
+    string my_name = pos == string::npos? name : name.substr( 0, pos );
+    
+    _job->set_in_call( my_name ); 
+    LOG( *job << '.' << my_name << "() begin\n" );
 
     _ASSERTE( _CrtCheckMemory( ) );
 }
@@ -211,8 +214,11 @@ Job::In_call::In_call( Task* task, const string& name, const string& extra )
     _name(name),
     _result_set(false)
 { 
-    _job->set_in_call( name, extra ); 
-    LOG( *task->job() << '.' << name << "() begin\n" );
+    int pos = name.find( '(' );
+    string my_name = pos == string::npos? name : name.substr( 0, pos );
+
+    _job->set_in_call( my_name, extra ); 
+    LOG( *task->job() << '.' << my_name << "() begin\n" );
 
     _ASSERTE( _CrtCheckMemory() );
 }
@@ -245,8 +251,7 @@ Job::Job( Thread* thread )
     _thread(thread),
     _spooler(thread->_spooler),
     _log(thread->_spooler),
-    _script(thread->_spooler),
-    _script_instance(&_log),
+    _module(thread->_spooler,&_log),
     _history(this)
 {
     _next_time = latter_day;
@@ -362,8 +367,10 @@ void Job::init()
 
     if( _script_xml_element )  read_script();
 
-    _script_ptr = _object_set_descr? &_object_set_descr->_class->_script
-                                   : &_script;
+    _script_ptr = _object_set_descr? &_object_set_descr->_class->_module
+                                   : &_module;
+
+    _module_instance = _script_ptr->create_instance();
 
 
     if( !_spooler->log_directory().empty()  &&  _spooler->log_directory()[0] != '*' )
@@ -400,6 +407,7 @@ void Job::close()
     clear_when_directory_changed();
 
     close_engine();
+    _module_instance = NULL;
 
     _log.close();
     _history.close();
@@ -428,7 +436,7 @@ void Job::close_engine2()
     try 
     {
         //_log.debug3( "close scripting engine engine" );
-        _script_instance.close();
+        if( _module_instance )  _module_instance->close();
     }
     catch( const Xc& x        ) { set_error(x); }
     catch( const exception& x ) { set_error(x); }
@@ -445,7 +453,7 @@ void Job::close_task()
         _task = NULL; 
     }
 
-    if( _close_engine  || _script_ptr  &&  _script_ptr->_reuse == Script::reuse_task ) 
+    if( _close_engine  || _script_ptr  &&  _script_ptr->_reuse == Module::reuse_task ) 
     {
         close_engine();
         _close_engine = false;
@@ -606,7 +614,7 @@ bool Job::read_script()
 {
     try
     {
-        _script.set_xml( _script_xml_element, include_path() );
+        _module.set_xml( _script_xml_element, include_path() );
     }
     catch( const Xc& x        ) { set_error(x);  _close_engine = true;  set_state( s_read_error );  return false; }
     catch( const exception& x ) { set_error(x);  _close_engine = true;  set_state( s_read_error );  return false; }
@@ -618,18 +626,18 @@ bool Job::read_script()
 
 bool Job::load()
 {
-    _script_instance.init( _script_ptr );
+    _module_instance->init();
 
-    _script_instance.add_obj( (IDispatch*)_spooler->_com_spooler, "spooler"        );
-    _script_instance.add_obj( (IDispatch*)_thread->_com_thread  , "spooler_thread" );
-    _script_instance.add_obj( (IDispatch*)_com_log              , "spooler_log"    );
-    _script_instance.add_obj( (IDispatch*)_com_job              , "spooler_job"    );
-    _script_instance.add_obj( (IDispatch*)_com_task             , "spooler_task"   );
+    _module_instance->add_obj( (IDispatch*)_spooler->_com_spooler, "spooler"        );
+    _module_instance->add_obj( (IDispatch*)_thread->_com_thread  , "spooler_thread" );
+    _module_instance->add_obj( (IDispatch*)_com_log              , "spooler_log"    );
+    _module_instance->add_obj( (IDispatch*)_com_job              , "spooler_job"    );
+    _module_instance->add_obj( (IDispatch*)_com_task             , "spooler_task"   );
 
     try
     {
-        _script_instance.load();
-        _script_instance.start();
+        _module_instance->load();
+        _module_instance->start();
     }
     catch( const Xc& x        ) { set_error(x);  _close_engine = true;  return false; }
     catch( const exception& x ) { set_error(x);  _close_engine = true;  return false; }
@@ -637,14 +645,15 @@ bool Job::load()
 
     {
         In_call in_call ( this, spooler_init_name );
-        bool ok = check_result( _script_instance.call_if_exists( spooler_init_name ) );
+        bool ok = check_result( _module_instance->call_if_exists( spooler_init_name ) );
         in_call.set_result( ok );
         if( !ok || has_error() )  { _close_engine = true;  return false; }
     }
 
-    _has_spooler_process = _script_instance.name_exists( spooler_process_name );
+    _has_spooler_process = _module_instance->name_exists( spooler_process_name );
 
     set_state( s_loaded );
+
     return true;
 }
 
@@ -725,10 +734,10 @@ void Job::finish()
 /*
 void Job::interrupt_script()
 {
-    if( _script_instance )
+    if( _module_instance )
     {
         _log.warn( "Skript wird abgebrochen" );
-        _script_instance.interrupt();
+        _module_instance.interrupt();
     }
 }
 */
@@ -1887,10 +1896,10 @@ void Task::set_history_field( const string& name, const Variant& value )
 
 void Script_task::do_on_success()
 {
-    if( _job->_script_instance.loaded() )
+    if( _job->_module_instance->loaded() )
     {
         Job::In_call in_call ( this, spooler_on_success_name );
-        _job->_script_instance.call_if_exists( spooler_on_success_name );
+        _job->_module_instance->call_if_exists( spooler_on_success_name );
     }
 }
 
@@ -1898,10 +1907,10 @@ void Script_task::do_on_success()
 
 void Script_task::do_on_error()
 {
-    if( _job->_script_instance.loaded() )
+    if( _job->_module_instance->loaded() )
     {
         Job::In_call in_call ( this, spooler_on_error_name );
-        _job->_script_instance.call_if_exists( spooler_on_error_name );
+        _job->_module_instance->call_if_exists( spooler_on_error_name );
     }
 }
 
@@ -1926,7 +1935,7 @@ bool Object_set_task::do_load()
         _com_object_set = new Com_object_set( _object_set );
     }
 
-    if( !_job->_script_instance.loaded() )
+    if( !_job->_module_instance->loaded() )
     {
         ok = _job->load();
         if( !ok || _job->has_error() )  return false;
@@ -1972,7 +1981,7 @@ bool Job_script_task::do_start()
 {
     bool ok;
 
-    if( !_job->_script_instance.loaded() )
+    if( !_job->_module_instance->loaded() )
     {
         ok = _job->load();
         if( !ok || _job->has_error() )  return false;
@@ -1983,7 +1992,7 @@ bool Job_script_task::do_start()
     {
         Job::In_call in_call ( this, spooler_open_name );
 
-        ok = check_result( _job->_script_instance.call_if_exists( spooler_open_name ) );
+        ok = check_result( _job->_module_instance->call_if_exists( spooler_open_name ) );
         in_call.set_result( ok );
         if( !ok )  return false;
     }
@@ -1996,7 +2005,7 @@ bool Job_script_task::do_start()
 void Job_script_task::do_end()
 {
     Job::In_call in_call ( this, spooler_close_name );
-    _job->_script_instance.call_if_exists( spooler_close_name );
+    _job->_module_instance->call_if_exists( spooler_close_name );
 }
 
 //-------------------------------------------------------------------------Job_script_task::do_step
@@ -2006,7 +2015,7 @@ bool Job_script_task::do_step()
     if( !_job->_has_spooler_process )  return false;
 
     Job::In_call in_call ( this, spooler_process_name, _order? "Auftrag " + _order->obj_name() : "" );
-    bool ok = check_result( _job->_script_instance.call( spooler_process_name ) );
+    bool ok = check_result( _job->_module_instance->call( spooler_process_name ) );
     in_call.set_result( ok );
     return ok;
 }

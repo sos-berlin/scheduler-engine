@@ -1,4 +1,4 @@
-// $Id: spooler_thread.h,v 1.22 2002/10/18 12:55:59 jz Exp $
+// $Id: spooler_thread.h,v 1.23 2002/11/01 09:27:14 jz Exp $
 
 #ifndef __SPOOLER_THREAD_H
 #define __SPOOLER_THREAD_H
@@ -24,6 +24,7 @@ struct Thread : Sos_self_deleting
     Job*                        current_job                 () const                        { return _current_job; }
     string                      include_path                () const                        { return _include_path; }
     bool                        any_tasks_there             ();
+    bool                        has_java                    ();
 
     void                        init                        ();
     void                        close1                      ();                             // Wird vom Thread beim Beenden selbst gerufen
@@ -63,8 +64,8 @@ struct Thread : Sos_self_deleting
     Event                      _event;
     Job_list                   _job_list;
     Job*                       _current_job;                // Job, der gerade einen Schritt tut
-    Script                     _script;                     // <script>
-    Script_instance            _script_instance;
+    Module                     _module;                     // <script>
+    ptr<Module_instance>       _module_instance;
     Prefix_log                 _log;
     string                     _include_path;
 
