@@ -470,8 +470,6 @@ struct Com_task_proxy : idispatch_implementation< Com_task_proxy, spooler_com::I
     static Class_descriptor     class_descriptor;
     static const com::Com_method _methods[];
 
-    //Z_DEFINE_GETIDSOFNAMES_AND_INVOKE
-
 
     static HRESULT              Create_instance             ( const IID& iid, ptr<IUnknown>* result );
 
