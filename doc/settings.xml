@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="scheduler.xslt" type="text/xsl"?>
 
-<!--$Id: settings.xml,v 1.4 2004/08/24 18:34:11 jz Exp $-->
+<!--$Id: settings.xml,v 1.5 2004/08/24 19:53:02 jz Exp $-->
 
 <!-- Einige Einstellungen können an mehreren Stellen vorgenommen werden:
      - Konfigurationsdatei
@@ -15,7 +15,7 @@
 <settings
     base_dir = "."
     author   = "$Author: jz $"
-    date     = "$Date: 2004/08/24 18:34:11 $">
+    date     = "$Date: 2004/08/24 19:53:02 $">
 
     <setting name           = "log_dir" 
              type           = "verzeichnis" 
@@ -219,7 +219,7 @@
 
     <setting name   = "history_with_log" 
              type   = "yes|no"
-             title  = "Protokoll in die Historie shcreiben?">
+             title  = "Protokoll in die Historie schreiben?">
         <description>
             <p>
             </p>

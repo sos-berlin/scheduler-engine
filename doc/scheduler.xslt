@@ -246,12 +246,12 @@
         </xsl:element>
         
         <p class="list">
-            <code><b><xsl:value-of select="(.|$setting)/@name"/></b>="</code>
-            <span class="type"><xsl:value-of select="(.|$setting)/@type"/></span>
+            <code><b><xsl:value-of select="@name | $setting/@name"/></b>="</code>
+            <span class="type"><xsl:value-of select="@type | $setting/@type"/></span>
             <code>"</code>
             
-            <xsl:if test="@initial">
-                &#160;(Initialwert: <xsl:value-of select="(.|$setting)/@initial"/>)
+            <xsl:if test="@initial | $setting/@initial">
+                &#160;(Initialwert: <xsl:value-of select="@initial | $setting/@initial"/>)
             </xsl:if>
         </p>
 
@@ -339,7 +339,7 @@
                                 hat Vorrang.
                             </xsl:when>
                             <xsl:when test="self::command_option">
-                                hat keinen Vorrang.
+                                wird damit überschrieben.
                             </xsl:when>
                         </xsl:choose>
                         <br/>
@@ -356,7 +356,7 @@
                             <xsl:with-param name="attribute" select="$config_attribute/@name | $config_attribute/@setting"/>
                         </xsl:call-template>
 
-                        hat keinen Vorrang.
+                        wird damit überschrieben.
                         <br/>
                     </xsl:if>
                 </xsl:if>
@@ -610,21 +610,23 @@
         <h2>Optionen</h2>
         <xsl:apply-templates select="command_option"/>
     
-    </xsl:template>
+    </xsl:template>     
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~command_option-->
     
     <xsl:template match="command_option">
     
+        <xsl:variable name="setting" select="document( 'settings.xml' )/settings/setting[ @name = current()/@setting ]"/>
+        
         <xsl:element name="a">
             <xsl:attribute name="name">option_<xsl:value-of select="@name"/></xsl:attribute>
         </xsl:element>
         
         <p class="command_option">
             <b><code>-<xsl:value-of select="@name"/></code></b>
-            <xsl:if test="@type">
+            <xsl:if test="@type | $setting/@type">
                 <b><code>=</code></b>
-                <span class="type"><xsl:value-of select="@type"/></span>                    
+                <span class="type"><xsl:value-of select="@type | $setting/@type"/></span>                    
             </xsl:if>
         </p>
 

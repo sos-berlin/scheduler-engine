@@ -1,4 +1,4 @@
-// $Id: Task.java,v 1.9 2004/07/25 11:25:57 jz Exp $
+// $Id: Task.java,v 1.10 2004/08/24 19:53:09 jz Exp $
 
 package sos.spooler;
 
@@ -10,7 +10,7 @@ package sos.spooler;
  * Implementiert wird eine Task durch {@link Job_impl}.
  * 
  * @author Joacim Zschimmer
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
 
 public class Task extends Idispatch
@@ -38,11 +38,13 @@ public class Task extends Idispatch
     
     
     /**
-     * Setzt das Ergebnis der Task.
+     * Hier kann die Task ein Ergebnis speichern, das von einer anderen, solange wartenden Task
+     * abgeholt werden kann.
      * 
      * <p>
      * Das Ergebnis kann mit {@link #result()} abgeholt werden.
      * @param value
+     * @see Job#start(Variable_set)
      */
     public void         set_result              ( String value )                    {                       com_call( ">result", value                  ); }
     

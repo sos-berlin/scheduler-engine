@@ -1,4 +1,4 @@
-// $Id: spooler_command.cxx,v 1.134 2004/08/02 14:14:58 jz Exp $
+// $Id: spooler_command.cxx,v 1.135 2004/08/24 19:53:09 jz Exp $
 /*
     Hier ist implementiert
 
@@ -326,8 +326,6 @@ xml::Element_ptr Command_processor::execute_modify_spooler( const xml::Element_p
 xml::Element_ptr Command_processor::execute_terminate( const xml::Element_ptr& element )
 {
     if( _security_level < Security::seclev_all )  throw_xc( "SCHEDULER-121" );
-
-    string cmd = element.getAttribute( "cmd" );
 
     _spooler->cmd_terminate();
     
