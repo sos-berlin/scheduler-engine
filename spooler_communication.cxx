@@ -648,7 +648,18 @@ bool Communication::Channel::async_continue_( bool wait )
             something_done |= do_send();
         }
 
-        if( _eof  &&  _send_is_complete  &&  !_http_response )  { _communication->remove_channel( this );  return true; }
+      //if( _eof  &&  _send_is_complete  &&  _http_response )  
+        if( _eof )
+        { 
+            // Bei _eof sofort handeln! Nämlich Verbindung schließen. 
+            // Sonst liefert select() immer wieder den Socket, was zur Schleife führt.
+            // Andere Lösung: Socket aus read-Menge des select() herausnehmen.
+
+            // _http_response kann bei einem Log endlos sein. Also kein Kriterium, das Schließen zu verzögern.
+            if( _http_response )  Z_LOG2( "scheduler.http", "Browser schließt Verbindung bevor HTTP-Response fertig gesendet werden konnte\n" );
+            _communication->remove_channel( this );  
+            return true; 
+        }
     }
     catch( const Xc& x ) 
     { 

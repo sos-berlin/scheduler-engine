@@ -7,7 +7,7 @@ include $(prod_dir)/make/base.makefile
 
 else
 
-DEP_PRODUCTS = kram file rapid fs zschimmer libxml2
+DEP_PRODUCTS = kram file fs zschimmer libxml2
 
 objects = \
  spooler.o\

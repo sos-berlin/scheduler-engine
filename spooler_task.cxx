@@ -1976,7 +1976,7 @@ void Process_event::close()
 
 bool Process_event::signaled()
 {
-    LOG2( "joacim", "Process_event::signaled()   _signaled=" << _signaled << "\n" );
+    //LOG2( "joacim", "Process_event::signaled()   _signaled=" << _signaled << "\n" );
     if( _signaled )  return true;
     return wait( 0 );
 }
