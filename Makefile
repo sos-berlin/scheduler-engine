@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.9 2002/12/03 11:42:30 jz Exp $
+# $Id: Makefile,v 1.10 2002/12/04 19:48:08 jz Exp $
 
 ifndef PROD_DIR
 prod_dir = ..
@@ -69,7 +69,8 @@ libspooler.a: $(java_headers) $(objects)
 
 
 $(BIN_DIR)/spooler: spooler.o libspooler.a ../kram/$(O_DIR)/soswnmai.o ../zschimmer/$(O_DIR)/perl_scripting_engine_module.o $(foreach p,$(DEP_PRODUCTS),$(PROD_DIR)/$(p)/$(O_DIR)/lib$(p).a) $(PERL_DIR)/libperl.a
-	-$(CCPP) $(DEBUG) $(LINK_FLAGS) -Xlinker -Map -Xlinker $(BIN_DIR)/spooler.map  $^ $(VERBOSE) $(CFLAGS) $(INCLUDES) $(TEMPLATES) $(LIBPATH) $(SOS_LIBS) $(SOS_LIBS) -lz -lpthread -ldl $(C_LIBS) $(LIBS) $(LIBS) -o $@
+	-$(CCPP) $(DEBUG) $(LINK_FLAGS) -Xlinker -Map -Xlinker $(BIN_DIR)/spooler.map  $^ $(LIBPATH) $(SOS_LIBS) $(LIBS) -o $@
+	#-$(CCPP) $(DEBUG) $(LINK_FLAGS) -Xlinker -Map -Xlinker $(BIN_DIR)/spooler.map  $^ $(VERBOSE) $(CFLAGS) $(INCLUDES) $(TEMPLATES) $(LIBPATH) $(SOS_LIBS) $(SOS_LIBS) -lz -lpthread -ldl $(C_LIBS) $(LIBS) $(LIBS) -o $@
 	#STATISCH: -$(CCPP) $(DEBUG) -static $(LINK_FLAGS) -Xlinker -Map -Xlinker $(BIN_DIR)/spooler.map  $^ $(VERBOSE) $(CFLAGS) $(INCLUDES) $(TEMPLATES) $(LIBPATH) $(SOS_LIBS) $(SOS_LIBS) -lxml2 -lz -ldl $(C_LIBS) $(LIBS) $(LIBS) -o $@
 	echo ^G
 

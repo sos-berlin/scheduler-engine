@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.156 2002/12/04 17:30:20 jz Exp $
+// $Id: spooler.cxx,v 1.157 2002/12/04 19:48:08 jz Exp $
 /*
     Hier sind implementiert
 
@@ -200,7 +200,7 @@ With_log_switch read_profile_with_log( const string& profile, const string& sect
         //{
             ctrl_c_pressed = true;
             //Kein Systemaufruf hier! (Aber bei Ctrl-C riskieren wir einen Absturz. Ich will diese Meldung sehen.)
-            if( !is_daemon )  fprintf( stderr, "Spooler wird wegen Ctrl-C beendet ...\n" );
+            if( !is_daemon )  fprintf( stderr, "Spooler wird wegen kill -%d beendet ...\n", sig );
 
             // pthread_mutex_lock:
             // The  mutex  functions  are  not  async-signal  safe.  What  this  means  is  that  they
@@ -1111,7 +1111,7 @@ int Spooler::launch( int argc, char** argv )
     _event.add_to( &_wait_handles );
 
     _communication.init();  // Für Windows
-    _communication.bind();  // Falls der Port belegt ist, gibt's hier einen Abbruch
+    //_communication.bind();  // Falls der Port belegt ist, gibt's hier einen Abbruch
 
     do
     {
@@ -1356,11 +1356,11 @@ int spooler_main( int argc, char** argv )
 {
     int ret;
 
+    Spooler my_spooler;
+
     try
     {
         Ole_initialize ole;
-
-        Spooler my_spooler;
 
         spooler = &my_spooler;
 
@@ -1370,7 +1370,7 @@ int spooler_main( int argc, char** argv )
     }
     catch( const Xc& x )
     {
-        SHOW_ERR( "Fehler " << x );
+        SHOW_ERR( "Fehler " << x );     // Fehlermeldung vor ~Spooler ausgeben
         ret = 9999;
     }
 

@@ -1,4 +1,4 @@
-// $Id: spooler_communication.h,v 1.8 2002/12/04 16:47:12 jz Exp $
+// $Id: spooler_communication.h,v 1.9 2002/12/04 19:48:08 jz Exp $
 
 #ifndef __SPOOLER_COMMUNICATION_H
 #define __SPOOLER_COMMUNICATION_H
@@ -170,6 +170,7 @@ struct Communication : zschimmer::Thread
   private:
     int                         run                         ();
     bool                        handle_socket               ( Channel* );
+    int                         bind_socket                 ( SOCKET, struct sockaddr_in* );
     void                       _fd_set                      ( SOCKET, fd_set* );
 
     Fill_zero                  _zero_;
