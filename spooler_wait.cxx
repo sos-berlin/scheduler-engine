@@ -1,4 +1,4 @@
-// $Id: spooler_wait.cxx,v 1.69 2003/06/24 21:10:44 jz Exp $
+// $Id: spooler_wait.cxx,v 1.70 2003/08/17 14:26:33 jz Exp $
 /*
     Hier sind implementiert
 
@@ -291,7 +291,7 @@ int Wait_handles::wait_until( Time until )
 
             if( now < today3  &&  until >= today3 )    ret = wait_until_2( today3 + 0.01 );
             else 
-            if( until >= tomorrow3 )                                      ret = wait_until_2( tomorrow3 + 0.01 );
+            if( until >= tomorrow3 )                   ret = wait_until_2( tomorrow3 + 0.01 );
             else
                 break;
         }
@@ -300,9 +300,9 @@ int Wait_handles::wait_until( Time until )
             Time today2    = now.midnight() + 2*3600;            // Heute 2:00 Uhr (für Sommerzeitbeginn: Uhr springt von 2 Uhr auf 3 Uhr)
             Time tomorrow2 = now.midnight() + 2*3600 + 24*3600;  // Morgen 3:00
 
-            if( now < today2  &&  until >= today2 )     ret = wait_until_2( today2 + 0.01 );
+            if( now < today2  &&  until >= today2 )    ret = wait_until_2( today2 + 0.01 );
             else 
-            if( until >= tomorrow2 )                                      ret = wait_until_2( tomorrow2 + 0.01 );
+            if( until >= tomorrow2 )                   ret = wait_until_2( tomorrow2 + 0.01 );
             else
                 break;
         }
