@@ -1,4 +1,4 @@
-// $Id: spooler_com.cxx,v 1.144 2004/03/20 10:49:00 jz Exp $
+// $Id: spooler_com.cxx,v 1.145 2004/03/23 11:26:54 jz Exp $
 /*
     Hier sind implementiert
 
@@ -1774,6 +1774,7 @@ const Com_method Com_task::_methods[] =
     { DISPATCH_PROPERTYPUT, 12, "close_engine"              , (Com_method_ptr)&Com_task::put_close_engine       , VT_EMPTY      , { VT_BOOL } },
     { DISPATCH_PROPERTYGET, 13, "order"                     , (Com_method_ptr)&Com_task::get_order              , VT_DISPATCH   },
     { DISPATCH_PROPERTYGET, 14, "java_class_name"           , (Com_method_ptr)&Com_task::get_java_class_name    , VT_BSTR },
+    { DISPATCH_PROPERTYGET, 15, "changed_directories"       , (Com_method_ptr)&Com_task::get_changed_directories, VT_BSTR },
     {}
 };
 
@@ -2107,6 +2108,25 @@ STDMETHODIMP Com_task::get_order( Iorder** result )
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Task.result" ); }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Task.result" ); }
+
+    return hr;
+}
+
+//----------------------------------------------------------------Com_task::get_changed_directories
+
+STDMETHODIMP Com_task::get_changed_directories( BSTR* result )
+{
+    HRESULT hr = S_OK;
+
+    try
+    {
+        if( !_task )  throw_xc( "SCHEDULER-122" );
+        if( !_task->thread()  ||  current_thread_id() != _task->thread()->thread_id() )  return E_ACCESSDENIED;
+
+        hr = String_to_bstr( _task->_changed_directories, result );
+    }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
 
     return hr;
 }

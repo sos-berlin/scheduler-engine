@@ -1,4 +1,4 @@
-// $Id: spooler.odl,v 1.74 2004/03/02 16:12:45 jz Exp $
+// $Id: spooler.odl,v 1.75 2004/03/23 11:26:54 jz Exp $
 
 // Anweisung: midl /nologo /error all /out $(OutDir) $(InputPath)
 
@@ -340,6 +340,9 @@ library spooler
 
         [propget]
         HRESULT                 order                       ( [out,retval] Iorder** result );
+
+        [propget]
+        HRESULT                 changed_directories         ( [out,retval] BSTR* result );
     }
 
     [

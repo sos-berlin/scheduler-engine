@@ -1,4 +1,4 @@
-// $Id: spooler_job.cxx,v 1.63 2004/03/15 21:43:45 jz Exp $
+// $Id: spooler_job.cxx,v 1.64 2004/03/23 11:26:54 jz Exp $
 /*
     Hier sind implementiert
 
@@ -1054,6 +1054,7 @@ Sos_ptr<Task> Job::task_to_start()
     Start_cause     cause = cause_none;
     Sos_ptr<Task>   task  = NULL;
     ptr<Order>      order;
+    string          changed_directories;
     string          log_line;
 
     task = get_task_from_queue( now );
@@ -1084,13 +1085,17 @@ Sos_ptr<Task> Job::task_to_start()
                     //LOG2( "joacim", "Job::task_to_start(): Verzeichnisüberwachung _directory_watcher_next_time=" << _directory_watcher_next_time << ", now=" << now << "\n" );
                     _directory_watcher_next_time = now + directory_watcher_intervall;
 
+sleep(0.5);
                     Directory_watcher_list::iterator it = _directory_watcher_list.begin();
                     while( it != _directory_watcher_list.end() )
                     {
-                        if( (*it)->has_changed()  ||  (*it)->signaled_then_reset() )        // has_changed() für Unix
+                        (*it)->has_changed();                        // has_changed() für Unix (und seit 22.3.04 für Windows, siehe dort).
+                        if( (*it)->signaled_then_reset() )        
                         {
                             cause = cause_directory;
                             log_line += "Task startet wegen eines Ereignisses für Verzeichnis " + (*it)->directory();
+                            if( !changed_directories.empty() )  changed_directories += ";";
+                            changed_directories += (*it)->directory();
                             
                             if( !(*it)->valid() )
                             {
@@ -1177,6 +1182,8 @@ Sos_ptr<Task> Job::task_to_start()
                 task->_cause = cause;
                 task->_let_run |= ( cause == cause_period_single );
             }
+
+            task->_changed_directories = changed_directories;
 
             if( now >= _next_single_start )  _next_single_start = latter_day;  // Vorsichtshalber, 26.9.03
         }

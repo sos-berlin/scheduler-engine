@@ -1,4 +1,4 @@
-// $Id: spooler_wait.cxx,v 1.96 2004/02/19 17:17:33 jz Exp $
+// $Id: spooler_wait.cxx,v 1.97 2004/03/23 11:26:55 jz Exp $
 /*
     Hier sind implementiert
 
@@ -148,7 +148,7 @@ bool Wait_handles::signaled()
     {
         FOR_EACH( Event_vector, _events, it )  
         {
-            if( *it  &&  (*it)->signaled() )  { LOG2( "scheduler.wait", *it << " signaled!\n" );  return true; }
+            if( *it  &&  (*it)->signaled() )  { LOG2( "scheduler.wait", **it << " signaled!\n" );  return true; }
         }
     }
 
@@ -640,7 +640,17 @@ bool Directory_watcher::has_changed_2( bool throw_error )
 #   ifdef Z_WINDOWS
 
         // Nach wait() zu rufen, damit _signaled auch gesetzt ist!
-        return Event::signaled();
+        if( Event::signaled() )  return true;
+
+
+        // Wenn der Job mehrere Verzeichnisse überwacht, wird nur die Änderung des ersten signalisiert.
+        // WaitForMultipleObjects() nur ein signalisiertes Objekt liefert.
+        // Für diesen Fall fragen wir das Handle, ob es signalisiert worden ist.
+        // Das bremst leider den Scheduler ein wenig.
+
+        int ret = WaitForSingleObject( _handle, 0 );
+        if( ret == WAIT_FAILED )  throw_mswin( "WaitForSingleObject" );
+        return ret == WAIT_OBJECT_0;
 
 #   else
 

@@ -1,4 +1,4 @@
-// $Id: spooler_task.h,v 1.128 2004/01/29 21:06:25 jz Exp $
+// $Id: spooler_task.h,v 1.129 2004/03/23 11:26:54 jz Exp $
 
 #ifndef __SPOOLER_TASK_H
 #define __SPOOLER_TASK_H
@@ -234,6 +234,7 @@ struct Task : Sos_self_deleting
     Variant                    _result;
     string                     _name;
     ptr<Order>                 _order;
+    string                     _changed_directories;        // Durch Semikolon getrennt
     Call_state                 _call_state;
     Xc_copy                    _error;
 

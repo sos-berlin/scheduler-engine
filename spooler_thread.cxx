@@ -1,4 +1,4 @@
-// $Id: spooler_thread.cxx,v 1.111 2004/02/19 17:17:33 jz Exp $
+// $Id: spooler_thread.cxx,v 1.112 2004/03/23 11:26:54 jz Exp $
 /*
     Hier sind implementiert
 
@@ -429,7 +429,7 @@ bool Spooler_thread::step()
         if( !something_done )
         {
             bool stepped;
-            do
+          //do
             {
                 stepped = false;
 
@@ -455,7 +455,7 @@ bool Spooler_thread::step()
                     if( stepped )  break;
                 } 
             }
-            while( stepped );
+          //while( stepped );
         }
     }
 
