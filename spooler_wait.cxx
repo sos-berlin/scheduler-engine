@@ -1,4 +1,4 @@
-// $Id: spooler_wait.cxx,v 1.38 2002/10/24 09:12:25 jz Exp $
+// $Id: spooler_wait.cxx,v 1.39 2002/11/13 18:17:35 jz Exp $
 /*
     Hier sind implementiert
 
@@ -492,7 +492,3 @@ void Directory_watcher::set_signal()
 
 } //namespace spooler
 } //namespace sos
-
-
-
-

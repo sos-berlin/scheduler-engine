@@ -1,4 +1,4 @@
-// $Id: spooler.h,v 1.97 2002/11/13 12:53:58 jz Exp $
+// $Id: spooler.h,v 1.98 2002/11/13 18:17:34 jz Exp $
 
 #ifndef __SPOOLER_H
 #define __SPOOLER_H
@@ -27,7 +27,10 @@
 
 
 #include <stdio.h>
-#include <process.h>    // _beginthreadex()
+
+#ifdef Z_WINDOWS
+#   include <process.h>    // _beginthreadex()
+#endif
         
 #include <set>
 #include <map>

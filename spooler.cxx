@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.126 2002/11/13 12:53:57 jz Exp $
+// $Id: spooler.cxx,v 1.127 2002/11/13 18:17:34 jz Exp $
 /*
     Hier sind implementiert
 
@@ -14,7 +14,10 @@
 #include <time.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <direct.h>
+
+#ifdef Z_WINDOWS
+#   include <direct.h>
+#endif
 
 #include "../kram/sosprof.h"
 #include "../kram/sosopt.h"
