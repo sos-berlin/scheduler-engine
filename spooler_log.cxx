@@ -246,6 +246,38 @@ ptr<object_server::Reference_with_properties> Prefix_log::get_reference_with_pro
     return ref;
 }
 */
+
+//----------------------------------------------------------------------------------Prefix_log::dom
+
+xml::Element_ptr Prefix_log::dom( const xml::Document_ptr& document, const Show_what& show )
+{
+    xml::Element_ptr log_element = document.createElement( "log" );
+
+    if( _log_level     >= log_min   )  log_element.setAttribute( "level"          , name_of_log_level( (Log_level)_log_level ) );
+    if( _highest_level >= log_min   )  log_element.setAttribute( "highest_level"  , name_of_log_level( (Log_level)_highest_level ) );
+    if( last( log_error ) != ""     )  log_element.setAttribute( "last_error"     , last( log_error ) );
+    if( last( log_warn  ) != ""     )  log_element.setAttribute( "last_warning"   , last( log_warn ) );
+
+    if( _mail_on_error              )  log_element.setAttribute( "mail_on_error"  , "yes" );
+    if( _mail_on_warning            )  log_element.setAttribute( "mail_on_warning", "yes" );
+    if( _mail_on_success            )  log_element.setAttribute( "mail_on_success", "yes" );
+    if( _mail_on_process            )  log_element.setAttribute( "mail_on_success", _mail_on_process );
+
+    if( _smtp_server != ""  &&  _smtp_server != "-" )  log_element.setAttribute( "smtp"        , _smtp_server );
+    if( _to          != ""  &&  _to          != "-" )  log_element.setAttribute( "mail_to"     , _to );
+    if( _cc          != ""  &&  _cc          != "-" )  log_element.setAttribute( "mail_cc"     , _cc );
+    if( _bcc         != ""  &&  _bcc         != "-" )  log_element.setAttribute( "mail_bcc"    , _bcc );
+    if( _from        != ""  &&  _from        != "-" )  log_element.setAttribute( "mail_from"   , _from );
+    if( _subject     != ""  &&  _subject     != "-" )  log_element.setAttribute( "mail_subject", _subject );
+
+    if( show & show_log )
+    {
+        log_element.appendChild( document.createTextNode( as_string() ) );
+    }
+
+    return log_element;
+}
+
 //-----------------------------------------------------------------------------Prefix_log::log_file
 
 void Prefix_log::log_file( const string& filename, const string& title )
@@ -359,8 +391,8 @@ void Prefix_log::set_profile_section( const string& section )
     if( !_section.empty() ) 
     {
         _log_level       = make_log_level( read_profile_string( _spooler->_factory_ini, _section, "log_level", sos::as_string(_log_level) ) );
-        _mail_on_warning = read_profile_bool           ( _spooler->_factory_ini, _section, "mail_on_warning"   , _mail_on_error | _mail_on_error );
-        _mail_on_error   = read_profile_bool           ( _spooler->_factory_ini, _section, "mail_on_error"     , _mail_on_error );
+        _mail_on_warning = read_profile_bool           ( _spooler->_factory_ini, _section, "mail_on_warning"   , _mail_on_warning );
+        _mail_on_error   = read_profile_bool           ( _spooler->_factory_ini, _section, "mail_on_error"     , _mail_on_error   );
         _mail_on_process = read_profile_mail_on_process( _spooler->_factory_ini, _section, "mail_on_process"   , _mail_on_process );
         _mail_on_success =         read_profile_bool   ( _spooler->_factory_ini, _section, "mail_on_success"   , _mail_on_success );
         _subject         =         read_profile_string ( _spooler->_factory_ini, _section, "log_mail_subject"  , _subject );
@@ -669,7 +701,7 @@ void Prefix_log::send( int reason )
     else
     {
         bool mail_it =  _mail_it
-                     || reason == -1  &&  _mail_on_error
+                     || reason == -1  &&  ( _mail_on_error | _mail_on_warning )
                      || reason ==  0  &&  _mail_on_success
                      || reason  >  0  &&  ( _mail_on_success || _mail_on_process && reason >= _mail_on_process )
                      || _mail_on_warning  &&  _last.find( log_warn ) != _last.end();

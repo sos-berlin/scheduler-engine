@@ -1572,6 +1572,8 @@ xml::Element_ptr Job::dom( const xml::Document_ptr& document, const Show_what& s
         job_element.setAttribute( "log_file"  , _log->filename()         );
         job_element.setAttribute( "order"     , _order_queue? "yes" : "no" );
         job_element.setAttribute( "tasks"     , _max_tasks              );
+
+
         if( _description != "" )  job_element.setAttribute( "has_description", "yes" );
 
         if( _state_cmd         )  job_element.setAttribute( "cmd"    , state_cmd_name()  );
@@ -1663,6 +1665,8 @@ xml::Element_ptr Job::dom( const xml::Document_ptr& document, const Show_what& s
         }
 
         if( _error       )  append_error_element( job_element, _error );
+
+        job_element.appendChild( _log->dom( document, show_log ) );
     }
 
     return job_element;

@@ -356,7 +356,8 @@ xml::Element_ptr Task::dom( const xml::Document_ptr& document, const Show_what& 
             task_element.appendChild( subprocesses_element );
         }
 
-        if( show & show_log )  dom_append_text_element( task_element, "log", _log->as_string() );
+        //if( show & show_log )  dom_append_text_element( task_element, "log", _log->as_string() );
+        task_element.appendChild( _log->dom( document, show_log ) );
     }
 
     return task_element;

@@ -77,6 +77,7 @@ namespace sos {
         struct Order_queue;
         struct Order;
         struct Process_class;
+        struct Show_what;
     }
 }
 

@@ -148,7 +148,8 @@
                     Dabei werden folgende Optionen aus der Kommandozeile übernommen:
                 </p>
                 <pre class="indent">
-                
+
+-cd=                
 -config=                
 -id=
 -log=                

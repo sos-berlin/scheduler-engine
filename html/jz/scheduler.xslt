@@ -4,10 +4,9 @@
                 xmlns:msxsl = "urn:schemas-microsoft-com:xslt"
                 version     = "1.0">
 
-    <xsl:variable name="now" select="string( /spooler/answer/@time )"/>
-    <xsl:variable name="datetime_column_width" select="100"/>    <!-- 250 für langes Format, toLocaleDateString() -->
-
-    <xsl:variable name="text_Job_chains" select="'Job chains'"/>
+    <xsl:variable name="now"                    select="string( /spooler/answer/@time )"/>
+    <xsl:variable name="datetime_column_width"  select="100"/>    <!-- 250 für langes Format, toLocaleDateString() -->
+    <xsl:variable name="text_Job_chains"        select="'Job chains'"/>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Gesamtsicht-->
     <!-- Für Antwort auf <show_state> -->
@@ -1041,6 +1040,14 @@
                     </td>
                 </tr>
             </xsl:if>
+            
+            <tr>
+                <td><span class="label">log:</span></td>
+                
+                <td colspan="99">
+                    <xsl:apply-templates mode="string_from_log_attributes" select="log"/>
+                </td>
+            </tr>
 
         </table>
 
@@ -1230,6 +1237,14 @@
                     <td><xsl:value-of select="@enqueued__xslt_datetime_with_diff"  disable-output-escaping="yes"/></td>
                 </tr>
             </xsl:if>
+
+            <tr>
+                <td><span class="label">log:</span></td>
+                
+                <td colspan="99">
+                    <xsl:apply-templates mode="string_from_log_attributes" select="log"/>
+                </td>
+            </tr>
 
         </table>
     </xsl:template>
@@ -1455,6 +1470,81 @@
         <xsl:attribute name="onclick"><xsl:value-of select="$onclick"/></xsl:attribute>
     </xsl:template>
     -->
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~log-->
+
+    <xsl:template mode="string_from_log_attributes" match="log">
+    
+        <xsl:if test="@level">
+            level: <xsl:value-of select="@level"/>
+            <xsl:text>&#160; </xsl:text>
+        </xsl:if>
+        
+        <xsl:if test="@highest_level">
+            highest level: <xsl:value-of select="@highest_level"/>
+            <xsl:text>&#160; </xsl:text>
+        </xsl:if>
+        
+        <xsl:if test="@last_error">
+            <br/>
+            last error: <xsl:value-of select="@last_error"/>
+            <br/>
+        </xsl:if>
+        
+        <xsl:if test="@last_warning">
+            <br/>
+            last warning <xsl:value-of select="@last_warning"/>
+            <br/>
+        </xsl:if>
+
+        <xsl:if test="@mail_on_error='yes'">
+            mail on error
+            <xsl:text>&#160; </xsl:text>
+        </xsl:if>
+        
+        <xsl:if test="@mail_on_warning='yes'">
+            mail on warning
+            <xsl:text>&#160; </xsl:text>
+        </xsl:if>
+        
+        <xsl:if test="@mail_on_success='yes'">
+            mail on success 
+            <xsl:text>&#160; </xsl:text>
+        </xsl:if>
+        
+        <xsl:if test="@mail_on_process">
+            mail on process: <xsl:value-of select="@mail_on_process"/>
+            <xsl:text>&#160; </xsl:text>
+        </xsl:if>
+
+        <xsl:if test="@to">
+            to: <xsl:value-of select="@to"/>
+            <xsl:text>&#160; </xsl:text>
+        </xsl:if>
+        
+        <xsl:if test="@cc">
+            cc: <xsl:value-of select="@cc"/>
+            <xsl:text>&#160; </xsl:text>
+        </xsl:if>
+        
+        <xsl:if test="@bcc">
+            bcc: <xsl:value-of select="@bcc"/>
+            <xsl:text>&#160; </xsl:text>
+        </xsl:if>
+        
+        <xsl:if test="@from">
+            from: <xsl:value-of select="@from"/>
+            <xsl:text>&#160; </xsl:text>
+        </xsl:if>
+        
+        <!--<xsl:if test="@subject"><br/>subject=<xsl:value-of select="@subject"/><br/></xsl:if>-->
+        
+        <xsl:if test="@smtp">
+            smtp: <xsl:value-of select="@smtp"/>
+            <xsl:text>&#160; </xsl:text>
+        </xsl:if>
+        
+    </xsl:template>
+    
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~command_menu-->
 
     <xsl:template name="command_menu">
