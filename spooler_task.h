@@ -1,4 +1,4 @@
-// $Id: spooler_task.h,v 1.4 2001/01/29 11:54:00 jz Exp $
+// $Id: spooler_task.h,v 1.5 2001/01/30 12:22:57 jz Exp $
 
 #ifndef __SPOOLER_TASK_H
 #define __SPOOLER_TASK_H
@@ -111,10 +111,10 @@ struct Job : Sos_self_deleting
 
     void                        set_xml                     ( const xml::Element_ptr& );
 
-    void                        set_current_task            ( Task* task )                      { _com_current_task->_task = task; }
+  //void                        set_current_task            ( Task* task )                      { _com_current_task->_task = task; }
 
-    Task*                       create_task                 ( const CComPtr<spooler_com::Ivariable_set>& params );
-    Task*                       start                       ( const CComPtr<spooler_com::Ivariable_set>& params );
+    Task*                       create_task                 ( const CComPtr<spooler_com::Ivariable_set>& params = NULL );
+    Task*                       start                       ( const CComPtr<spooler_com::Ivariable_set>& params = NULL );
     void                        start_when_directory_changed( const string& directory_name );
   //void                        stop_all_tasks              ()                                  { if( _task )  _task->stop(); }
 
@@ -134,7 +134,7 @@ struct Job : Sos_self_deleting
     int                        _priority;
     CComPtr<Com_job>           _com_job;
     Task*                      _task;                       // Es kann nur eine Task geben
-    CComPtr<Com_task>          _com_current_task;           // gerade laufende Task 
+  //CComPtr<Com_task>          _com_current_task;           // gerade laufende Task 
 };
 
 typedef list< Sos_ptr<Job> >    Job_list;
@@ -152,6 +152,7 @@ struct Task : Sos_self_deleting
         s_running,              // Läuft
         s_suspended,            // Angehalten
         s_ending,               // end()
+        s_ended,
         s__max
     };
 
@@ -175,7 +176,8 @@ struct Task : Sos_self_deleting
 
     void                        start_thread                ();
     int                         run_thread                  ();
-    void                        wait_until_stopped          ();
+    bool                        wait_until_thread_terminated( double wait_time = latter_day );
+    bool                        wait_until_terminated       ( double wait_time = latter_day );
     void                        wake                        ();
 
     bool                        start                       ();
@@ -204,8 +206,6 @@ struct Task : Sos_self_deleting
 
 
     void                        start_error                 ( const Xc& );
-    void                        end_error                   ( const Xc& );
-    void                        step_error                  ( const Xc& );
     void                        error                       ( const Xc& );
     void                        error                       ( const exception& );
 
@@ -216,6 +216,7 @@ struct Task : Sos_self_deleting
     CComPtr<spooler_com::Ivariable_set> _params;
     Script_instance            _script_instance;            // Für use_engine="task"
     Script_instance*           _script_instance_ptr;        // &_script_instance oder &_job->_script_instance
+    Script*                    _script_ptr;
     bool                       _use_task_engine;            // use_engine="task"
     CComPtr<IDispatch>         _dispatch;
     
@@ -247,6 +248,7 @@ struct Task : Sos_self_deleting
     Wait_handles               _wait_handles; 
     Handle                     _wake_event;                 // Task wecken
     Handle                     _task_event;                 // Änderung in der Task, Spooler wecken
+    Thread_semaphore           _semaphore;
 };
 
 typedef list< Sos_ptr<Task> >   Task_list;

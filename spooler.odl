@@ -1,4 +1,4 @@
-// $Id: spooler.odl,v 1.6 2001/01/27 19:26:16 jz Exp $
+// $Id: spooler.odl,v 1.7 2001/01/30 12:22:56 jz Exp $
 
 // Änderungen werden nicht automatisch in die spooler.tlb übernommen.
 // Also mit rechter Maustaske "Kompilieren von spooler.odl" klicken.
@@ -16,6 +16,7 @@ library spooler
     importlib("STDOLE32.TLB");
 
     interface Ilog;
+    interface Itask;
 
     //----------------------------------------------------------------------------Error
 
@@ -108,7 +109,7 @@ library spooler
     {
         HRESULT                 start_when_directory_changed( [in] BSTR directory_name );
 
-        HRESULT                 start                       ( [in,optional] VARIANT* variables );
+        HRESULT                 start                       ( [in,optional] VARIANT* variables, [out,retval] Itask** );
     }
 
     [
@@ -142,6 +143,14 @@ library spooler
 
         [propget]
         HRESULT                 params                      ( [out,retval] Ivariable_set** parameters );
+
+        [propput]
+        HRESULT                 result                      ( [in] VARIANT* value );
+
+        [propget]
+        HRESULT                 result                      ( [out,retval] VARIANT* value );
+
+        HRESULT                 wait_until_terminated       ( [in,defaultvalue(999999999)] double wait_time, [out,retval] VARIANT_BOOL* ok );
     }
 
     [

@@ -1,4 +1,4 @@
-// $Id: spooler_com.h,v 1.6 2001/01/27 19:26:16 jz Exp $
+// $Id: spooler_com.h,v 1.7 2001/01/30 12:22:56 jz Exp $
 
 #ifndef __SPOOLER_COM_H
 #define __SPOOLER_COM_H
@@ -114,9 +114,9 @@ struct Com_job : spooler_com::Ijob, Sos_ole_object
     void                        close                       ()                              { _job = NULL; }
 
     STDMETHODIMP                start_when_directory_changed( BSTR directory_name );
-    STDMETHODIMP                start                       ( VARIANT* );
+    STDMETHODIMP                start                       ( VARIANT*, spooler_com::Itask** );
 
-    Job*                       _job;
+    Job*                       _job;                        // Es gibt nur einen Com_job pro Job
 };
 
 //-----------------------------------------------------------------------------------------Com_task
@@ -127,16 +127,23 @@ struct Com_task : spooler_com::Itask, Sos_ole_object
 
     USE_SOS_OLE_OBJECT
 
-    void                        close                       ()                              { _task = NULL; }
+  //void                        close                       ();
 
-    STDMETHODIMP                get_Object_set              ( spooler_com::Iobject_set** );
+    STDMETHODIMP                get_object_set              ( spooler_com::Iobject_set** );
   //STDMETHODIMP                wake_when_directory_changed ( BSTR directory_name );
     STDMETHODIMP                put_error                   ( VARIANT* error_text );
     STDMETHODIMP                get_error                   ( spooler_com::Ierror** );
-    STDMETHODIMP                get_Job                     ( spooler_com::Ijob** );
+    STDMETHODIMP                get_job                     ( spooler_com::Ijob** );
     STDMETHODIMP                get_params                  ( spooler_com::Ivariable_set** );
+    STDMETHODIMP                wait_until_terminated       ( double wait_time, VARIANT_BOOL* ok );
+    STDMETHODIMP                put_result                  ( VARIANT* value )              { return _result.Copy(value); }
+    STDMETHODIMP                get_result                  ( VARIANT* value )              { VariantInit(value); return VariantCopy(value,&_result); }
 
-    Task*                      _task;
+  //Task*                      _task;                       // Es gibt nur einen Com_task pro Task
+    Sos_ptr<Task>              _task;
+  //Xc_copy                    _error;                      // Nur gültig, wenn _task == NULL
+    CComVariant                _result;                     // Das Ergebnis ist noch nach ~Task zugreifbar
+  //Thread_semaphore           _semaphore;
 };
 
 //--------------------------------------------------------------------------------------Com_spooler
@@ -153,11 +160,11 @@ struct Com_spooler : spooler_com::Ispooler, Sos_ole_object
     STDMETHODIMP                get_param                   ( BSTR* );
     STDMETHODIMP                get_id                      ( BSTR* );
     STDMETHODIMP                get_script                  ( IDispatch** );
-    STDMETHODIMP                get_Job                     ( BSTR job_name, spooler_com::Ijob** );
+    STDMETHODIMP                get_job                     ( BSTR job_name, spooler_com::Ijob** );
     STDMETHODIMP                create_variable_set         ( spooler_com::Ivariable_set** );
 
   protected:
-    Spooler*                   _spooler;
+    Spooler*                   _spooler;                    // Es gibt nur einen Com_spooler
 };
 
 

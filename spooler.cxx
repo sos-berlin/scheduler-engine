@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.43 2001/01/29 14:57:38 jz Exp $
+// $Id: spooler.cxx,v 1.44 2001/01/30 12:22:56 jz Exp $
 /*
     Hier sind implementiert
 
@@ -189,11 +189,7 @@ void Spooler::start()
 
     // Zu jedem Job eine Task einrichten:
 
-    FOR_EACH( Job_list, _job_list, it )
-    {
-        //_task_list.push_back( SOS_NEW( Task( this, *it ) ) );
-        (*it)->create_task( NULL );
-    }
+    FOR_EACH( Job_list, _job_list, it )  (*it)->create_task( NULL );
 
     _spooler_start_time = Time::now();
 }
@@ -209,7 +205,7 @@ void Spooler::stop()
     if( _use_threads )
     {
         { FOR_EACH( Task_list, _task_list, it )  (*it)->set_state_cmd( Task::sc_stop ); }
-        { FOR_EACH( Task_list, _task_list, it )  (*it)->wait_until_stopped(); } 
+        { FOR_EACH( Task_list, _task_list, it )  (*it)->wait_until_thread_terminated(); } 
     }
     else
     {
@@ -368,17 +364,25 @@ void Spooler::run()
 }
 */
 
-//--------------------------------------------------------------------Spooler::remove_stopped_tasks
+//----------------------------------------------------------------------Spooler::remove_ended_tasks
 
-void Spooler::remove_stopped_tasks()
+void Spooler::remove_ended_tasks()
 {
     FOR_EACH( Task_list, _task_list, it ) 
     {
         Task* task = *it;
-        if( task->_state == Task::s_stopped ) 
+        if( task->_state == Task::s_stopped 
+         || task->_state == Task::s_ended ) 
         {
-            task->wait_until_stopped();
-            it = _task_list.erase( it );
+            task->wait_until_thread_terminated();
+
+            bool restart = task->_state == Task::s_ended;
+            Job* job     = task->_job;
+
+            THREAD_SEMA( _task_list_lock )  it = _task_list.erase( it );
+            // Task wird erst zerstört, wenn letzes ~Com_task gerufen.
+
+            if( restart )  job->create_task();
         }
     }
 }
@@ -395,8 +399,8 @@ void Spooler::run()
         
         if( _state_cmd == sc_continue              ) 
         {
-            FOR_EACH( Task_list, _task_list, it )  (*it)->wake();
             set_state( s_running );
+            FOR_EACH( Task_list, _task_list, it )  (*it)->wake();
         }
 
         if( _state_cmd == sc_load_config           )  break;
@@ -410,7 +414,7 @@ void Spooler::run()
 
         wait();
 
-        remove_stopped_tasks();
+        remove_ended_tasks();
     }
 }
 

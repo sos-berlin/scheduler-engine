@@ -1,4 +1,4 @@
-// $Id: spooler_wait.cxx,v 1.7 2001/01/29 10:45:02 jz Exp $
+// $Id: spooler_wait.cxx,v 1.8 2001/01/30 12:22:57 jz Exp $
 /*
     Hier sind implementiert
 
@@ -17,6 +17,26 @@
 namespace sos {
 namespace spooler {
 
+
+//-----------------------------------------------------------------------------------wait_for_event
+
+bool wait_for_event( const Handle& handle, double wait_time )
+{
+    while( wait_time > 0 )
+    {
+        const double max_t = (double)(INT_MAX-10) / 1000.0;
+        int ms = min( max_t, wait_time ) * 1000.0;
+
+        int ret = WaitForSingleObject( handle, ms ); 
+
+        if( ret == WAIT_OBJECT_0 )  return true;
+        if( ret != WAIT_TIMEOUT )  throw_mswin_error( "WaitForSingleObject" );
+
+        wait_time -= max_t;
+    }
+
+    return false;
+}
 
 //--------------------------------------------------------------------------------Wait_handles::add
 

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 
-<!-- $Id: spooler.xml,v 1.21 2001/01/29 14:57:38 jz Exp $   (C) 2001 SOS GmbH Berlin -->
+<!-- $Id: spooler.xml,v 1.22 2001/01/30 12:22:56 jz Exp $   (C) 2001 SOS GmbH Berlin -->
 
 <!DOCTYPE spooler SYSTEM "spooler.dtd">
 
@@ -288,7 +288,7 @@ sub spooler_process()
         <job name           = "Aufbereiten" 
              priority       = "2" 
              output_level   = "200" 
-             spooler_id     = "">
+             spooler_id     = "keiner">
 
             <object_set class="Dokumente">
                 <levels low="100" high="200"/>
@@ -431,26 +431,64 @@ sub spooler_exit()
         </job>
 
 
-        <job name="dauer" spooler_id="perl">
+        <job name="dauer" spooler_id="">
             <script language="PerlScript" use_engine="task"><![CDATA[
 #use Win32::OLE;
 #$hostware = Win32::OLE->new('hostWare.Global');
 
 sub spooler_process()
 {
-    while(1)
+    #$i = $spooler_task->params("zahl");
+    #if( undef($i) ) { $i = 10; }
+    $i = 2;
+    $spooler_log->msg( "zahl=$i" );
+    
+    while( $i-- > 0 )
     {
         $spooler_log->msg( "spooler_process sleep" );
         #$hostware->sleep(1);
         sleep(1);
     }
+    
+    $spooler_task->{result} = "Das Ergebnis";
     return 0;
+}
+
+sub spooler_close()
+{
+    $spooler_log->msg( "spooler_close" );
+    #$spooler_task->{error} = "Fehler";
+}
+
+            ]]></script>
+
+            <!-- <run_time begin="0:00" let_run="yes"/> -->
+        </job> 
+
+
+        <job name="steuerung">
+            <script language="JScript"><![CDATA[
+
+function spooler_process()
+{
+    params = spooler.create_variable_set();
+    params("zahl") = 3;
+    task = spooler.job("dauer").start(params);
+    spooler_log.msg( "***** wait_until_terminated()" );
+    ok = task.wait_until_terminated(11);
+    spooler_log.msg( "***** wait_until_terminated() " + ok + "  result=" + task.result + "  error=" + task.error.text );
+    return 0;
+}
+
+function spooler_close()
+{
+    spooler_log.msg("spooler_close");
 }
 
             ]]></script>
 
             <run_time begin="0:00" let_run="yes"/>
-        </job> 
+        </job>
 
     </jobs>
 

@@ -1,4 +1,4 @@
-// $Id: spooler.h,v 1.40 2001/01/29 11:53:59 jz Exp $
+// $Id: spooler.h,v 1.41 2001/01/30 12:22:56 jz Exp $
 
 #ifndef __SPOOLER_H
 #define __SPOOLER_H
@@ -21,8 +21,6 @@
         typedef IXMLDOMDocumentPtr Document_ptr;
     }
 
-#   include "spooler_com.h"
-
 #endif
 
 #include <stdio.h>
@@ -43,6 +41,7 @@ namespace sos {
     }
 }
 
+#include "spooler_com.h"
 #include "spooler_common.h"
 #include "spooler_log.h"
 #include "spooler_time.h"
@@ -125,7 +124,7 @@ struct Spooler
 
     void                        single_thread_step          ();
     void                        wait                        ();
-    void                        remove_stopped_tasks        ();
+    void                        remove_ended_tasks          ();
 
 
     void                        cmd_reload                  ();
@@ -178,7 +177,8 @@ struct Spooler
     Security                   _security;                   // <security>
     Object_set_class_list      _object_set_class_list;      // <object_set_classes>
     Job_list                   _job_list;                   // <jobs>
-    Task_list                  _task_list;
+    Task_list                  _task_list;                  // Nur Spooler-Thread änder
+    Thread_semaphore           _task_list_lock;             // Spooler-Thread ändert, anderer Thread liest
     Wait_handles               _wait_handles;
     Communication              _communication;              // TCP und UDP (ein Thread)
 

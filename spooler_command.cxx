@@ -1,4 +1,4 @@
-// $Id: spooler_command.cxx,v 1.22 2001/01/29 11:54:00 jz Exp $
+// $Id: spooler_command.cxx,v 1.23 2001/01/30 12:22:57 jz Exp $
 /*
     Hier ist implementiert
 
@@ -104,10 +104,13 @@ xml::Element_ptr Command_processor::execute_show_tasks()
 
     dom_append_nl( tasks );
 
-    FOR_EACH( Task_list, _spooler->_task_list, it )
+    THREAD_SEMA( _spooler->_task_list_lock )
     {
-        tasks->appendChild( execute_show_task( *it ) );
-        dom_append_nl( tasks );
+        FOR_EACH( Task_list, _spooler->_task_list, it )
+        {
+            tasks->appendChild( execute_show_task( *it ) );
+            dom_append_nl( tasks );
+        }
     }
 
     return tasks;
@@ -123,7 +126,12 @@ xml::Element_ptr Command_processor::execute_show_state()
  
     state_element->setAttribute( "time"                 , as_dom_string( Sos_optional_date_time::now().as_string() ) );
     state_element->setAttribute( "spooler_running_since", as_dom_string( Sos_optional_date_time( _spooler->_spooler_start_time ).as_string() ) );
+
+    if( _spooler->_next_start_time != latter_day )
     state_element->setAttribute( "sleeping_until"       , as_dom_string( Sos_optional_date_time( _spooler->_next_start_time ).as_string() ) );
+
+    if( _spooler->_use_threads )  state_element->setAttribute( "use_threads", "yes" );
+
     state_element->setAttribute( "tasks"                , as_dom_string( _spooler->_task_count ) );
     state_element->setAttribute( "steps"                , as_dom_string( _spooler->_step_count ) );
     state_element->setAttribute( "log_file"             , as_dom_string( _spooler->_log.filename() ) );
@@ -240,17 +248,20 @@ xml::Element_ptr Command_processor::execute_signal_object( const xml::Element_pt
 
     xml::Element_ptr tasks_element = _answer->createElement( "tasks" );
 
-    FOR_EACH( Task_list, _spooler->_task_list, it )
+    THREAD_SEMA( _spooler->_task_list_lock )
     {
-        Task* task = *it;
-        
-        if( task->_state == Task::s_pending
-         && task->_job->_object_set_descr
-         && task->_job->_object_set_descr->_class->_name == class_name 
-         && task->_job->_object_set_descr->_level_interval.is_in_interval( level ) )
+        FOR_EACH( Task_list, _spooler->_task_list, it )
         {
-            task->set_state_cmd( Task::sc_start );
-            tasks_element->appendChild( execute_show_task( *it ) );
+            Task* task = *it;
+        
+            if( task->_state == Task::s_pending
+             && task->_job->_object_set_descr
+             && task->_job->_object_set_descr->_class->_name == class_name 
+             && task->_job->_object_set_descr->_level_interval.is_in_interval( level ) )
+            {
+                task->set_state_cmd( Task::sc_start );
+                tasks_element->appendChild( execute_show_task( *it ) );
+            }
         }
     }
 

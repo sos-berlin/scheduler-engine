@@ -1,4 +1,4 @@
-// $Id: spooler_wait.h,v 1.6 2001/01/29 10:45:02 jz Exp $
+// $Id: spooler_wait.h,v 1.7 2001/01/30 12:22:57 jz Exp $
 
 #ifndef __SPOOLER_WAIT_H
 #define __SPOOLER_WAIT_H
@@ -8,6 +8,7 @@
 namespace sos {
 namespace spooler {
 
+bool wait_for_event( const Handle& handle, double wait_time );
 
 //--------------------------------------------------------------------------------------Wait_handle
 /*
@@ -56,6 +57,7 @@ struct Wait_handles
 #   endif        
 
     Spooler*                   _spooler;
+    Thread_semaphore           _semaphore;
 };
 
 //--------------------------------------------------------------------------------Directory_watcher
