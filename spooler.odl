@@ -1,4 +1,4 @@
-// $Id: spooler.odl,v 1.14 2001/06/20 17:55:15 jz Exp $
+// $Id: spooler.odl,v 1.15 2001/07/02 21:38:26 jz Exp $
 
 // Anweisung: midl /nologo /error all /out $(OutDir) $(InputPath)
 
@@ -107,6 +107,10 @@ library spooler
     {
         HRESULT                 start_when_directory_changed( [in] BSTR directory_name );
 
+      //HRESULT                 start_on_signal             ();
+
+      //HRESULT                 start_after_timeout         ( [in,optional] VARIANT* variables, [out,retval] Itask** );
+
         HRESULT                 start                       ( [in,optional] VARIANT* variables, [out,retval] Itask** );
 
         [propget]
@@ -167,6 +171,8 @@ library spooler
 
       //[propget]
       //HRESULT                 thread                      ( [out,retval] Ithread** result );
+
+      //HRESULT                 kill                        ();
     }
 
     [
