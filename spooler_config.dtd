@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- $Id: spooler_config.dtd,v 1.12 2001/01/07 16:37:58 jz Exp $   (C) 2000 SOS GmbH Berlin 
+<!-- $Id: spooler_config.dtd,v 1.13 2001/01/08 21:24:30 jz Exp $   (C) 2000 SOS GmbH Berlin 
      Joacim Zschimmer
 
      Konfiguration für den Spooler. 
@@ -83,15 +83,18 @@
                                                                         <!-- Antwort: <state> -->
 
 <!ELEMENT modify_spooler        EMPTY>
-<!ATTLIST modify_spooler        action  (restart|stop|terminate) #IMPLIED>
-<!ATTLIST modify_spooler        paused              (yes|no) #IMPLIED>
+<!ATTLIST modify_spooler        action              (reload|stop|terminate|terminate_and_restart) #IMPLIED>
+<!ATTLIST modify_spooler        suspended           (yes|no) #IMPLIED>
 
 <!ELEMENT modify_job            EMPTY>
 <!ATTLIST modify_job            job                 CDATA #REQUIRED>
-<!ATTLIST modify_job            action  (start|stop) #REQUIRED>         <!-- start: Startet einen gestoppten (z.B. wegen Fehlers) Job.
-                                                                             stop : Stoppt einen Job, d.h. beendet ihn. 
-                                                                                    Job wird nicht mehr gestartet -->
-                                                                        <!-- Antwort: <tasks>, alle betroffenen Tasks (0 oder 1) -->
+<!ATTLIST modify_job            cmd                 (stop|unstop|start|end|suspend|continue) #IMPLIED>
+                                                                        <!-- cmd="stop"     -> state="stopped" -->
+                                                                        <!-- cmd="unstop"   -> state="pending" -->
+                                                                        <!-- cmd="start"    -> state="running" -->
+                                                                        <!-- cmd="end"      -> state="pending" -->
+                                                                        <!-- cmd="suspend"  -> state="suspended" -->
+                                                                        <!-- cmd="continue" -> state="running" -->
 
 
 
@@ -101,14 +104,19 @@
 
 <!ELEMENT state                 ( tasks )>
 <!ATTLIST state                 time                CDATA #REQUIRED>    <!-- yyyy-mm-dd HH:MM:SS -->
-<!ATTLIST state                 running_since       CDATA #REQUIRED>    <!-- yyyy-mm-dd HH:MM:SS -->
+<!ATTLIST state                 running_since       CDATA #IMPLIED>     <!-- yyyy-mm-dd HH:MM:SS -->
 <!ATTLIST state                 log_file            CDATA #IMPLIED>
 
 <!ELEMENT tasks                 ( task+ )>
 
 <!ELEMENT task                  ( ERROR? )>
-<!ATTLIST task                  job                 CDATA #REQUIRED>    <!-- yyyy-mm-dd HH:MM:SS -->
-<!ATTLIST task                  running             (yes|no) #REQUIRED> 
+<!ATTLIST task                  job                 CDATA #REQUIRED>    <!-- Jobname -->
+<!ATTLIST task                  state               (stopped|pending|running|suspended) #REQUIRED>
+                                                                        <!-- state="stopped"  : Keine Task wird mehr gestartet -->
+                                                                        <!-- state="pending"  : Task wartet auf Startzeit -->
+                                                                        <!-- state="running"  : Task läuft -->
+                                                                        <!-- state="suspended": Task vorübergehend angehalten -->
+
 <!ATTLIST task                  steps               CDATA #IMPLIED>     <!-- Anzahl der bisher ausgeführten Jobschritte -->
 <!ATTLIST task                  running_since       CDATA #IMPLIED>     <!-- yyyy-mm-dd HH:MM:SS -->
 <!ATTLIST task                  next_start_time     CDATA #REQUIRED>    <!-- yyyy-mm-dd HH:MM:SS -->

@@ -1,4 +1,4 @@
-// $Id: spooler_communication.cxx,v 1.3 2001/01/07 16:35:19 jz Exp $
+// $Id: spooler_communication.cxx,v 1.4 2001/01/08 21:24:29 jz Exp $
 
 //#include <precomp.h>
 
@@ -109,10 +109,10 @@ string Communication_channel::recv_xml()
     char        last_char       = '\0';
     Tok_entry   tok             [token_count];
     
-    tok[cdata_tok    ]._begin = "<![CDATA[";
-    tok[cdata_tok    ]._end   = "]]>";
-    tok[comment_tok  ]._begin = "<!--";
-    tok[comment_tok  ]._end   = "-->";
+    tok[cdata_tok  ]._begin = "<![CDATA[";
+    tok[cdata_tok  ]._end   = "]]>";
+    tok[comment_tok]._begin = "<!--";
+    tok[comment_tok]._end   = "-->";
 
 
     while( !xml_complete )

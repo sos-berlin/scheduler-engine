@@ -1,4 +1,4 @@
-// $Id: spooler.h,v 1.12 2001/01/07 16:35:18 jz Exp $
+// $Id: spooler.h,v 1.13 2001/01/08 21:24:29 jz Exp $
 
 #ifndef __SPOOLER_H
 
@@ -262,18 +262,68 @@ struct Job : Sos_self_deleting
 
 typedef list< Sos_ptr<Job> >    Job_list;
 
+//--------------------------------------------------------------------------------------------Mutex
+
+template<typename T>
+struct Mutex
+{
+    typedef Thread_semaphore::Guard Guard;
+
+
+                                Mutex                   ( const T& t = T() )    : _value(t) {}
+
+    Mutex&                      operator =              ( const T& t )          { Guard g = &_semaphore; _value = t; return *this; }
+                                operator T              ()                      { Guard g = &_semaphore; T v = _value; return v; }
+    T                           read_and_reset          ()                      { Guard g = &_semaphore; T v = _value; _value = T(); return v; }
+
+    Thread_semaphore           _semaphore;
+    T                          _value;
+};
+
 //----------------------------------------------------------------------------------------------Task
 
 struct Task : Sos_self_deleting
 {
+    enum State
+    {
+        s_none,
+        s_stopped,              // Gestoppt (z.B. wegen Fehler)
+        s_pending,              // Warten auf Start
+        s_running,              // Läuft
+        s_suspended,            // Angehalten
+        s__max
+    };
+
+    enum State_cmd
+    {
+        sc_none,
+        sc_stop,                // s_running | s_suspended -> s_stopped
+        sc_unstop,              // s_stopped -> s_pending
+        sc_start,               // s_pending -> s_running
+        sc_end,                 // s_running -> s_pending
+        sc_suspend,             // s_running -> s_suspended
+        sc_continue,            // s_suspended -> s_running
+        sc__max
+    };
+
+
                                 Task                        ( Spooler*, const Sos_ptr<Job>& );
 
     bool                        start                       ();
     void                        end                         ();
     bool                        step                        ();
 
-    void                        cmd_stop                    ()                                  { if( _running )  _stop = true; }
-    void                        cmd_start                   ();
+    void                        do_something                ();
+
+    void                        set_state                   ( State );
+    void                        set_state_cmd               ( State_cmd );
+
+    string                      state_name                  ()                          { return state_name( _state ); }
+    static string               state_name                  ( State );
+    static State                as_state                    ( const string& );
+    
+    static string               state_cmd_name              ( State_cmd );
+    static State_cmd            as_state_cmd                ( const string& );
 
     void                        start_error                 ( const Xc& );
     void                        end_error                   ( const Xc& );
@@ -287,14 +337,22 @@ struct Task : Sos_self_deleting
     Spooler*                   _spooler;
     Sos_ptr<Job>               _job;
     Script_instance            _script_instance;
-    bool                       _running;
-    Time                       _running_since;
+    
     int                        _running_priority;
     int                        _step_count;
 
-    Xc_copy                    _error;
+    Mutex<State>               _state;
+    Mutex<State_cmd>           _state_cmd;
+
+    Time                       _running_since;
+/*
+    bool                       _running;
+    bool                       _suspended;
+    
     bool                       _stopped;
     bool                       _stop;
+*/
+    Xc_copy                    _error;
 
     Sos_ptr<Object_set>        _object_set;
     Time                       _next_start_time;            // Zeitpunkt des nächsten Startversuchs, nachdem Objektemenge leer war
@@ -356,16 +414,18 @@ struct Spooler
 
     void                        start                       ();
     void                        stop                        ();
-    void                        restart                     ();
+    void                        reload                      ();
     void                        run                         ();
+    void                        restart                     ();
 
     void                        wait                        ();
 
-    void                        cmd_restart                 ();
+    void                        cmd_reload                  ();
     void                        cmd_pause                   ()                                  { _pause = true; cmd_wake(); }
     void                        cmd_continue                ()                                  { _paused = false; cmd_wake(); }
     void                        cmd_stop                    ();
     void                        cmd_terminate               ();
+    void                        cmd_terminate_and_restart   ();
     void                        cmd_wake                    ()                                  { _sleep = false; }
 
     void                        step                        ();
@@ -381,11 +441,12 @@ struct Spooler
     Time                       _spooler_start_time;
     Thread_semaphore           _semaphore;
     bool                       _sleep;                      // Besser: sleep mit Signal unterbrechen
-    bool                       _restart;
+    bool                       _reload;
     bool                       _stop;
     bool                       _pause;
     bool                       _paused;
     bool                       _terminate;
+    bool                       _terminate_and_restart;
     int                        _tcp_port;
     int                        _udp_port;
     string                     _config_filename;

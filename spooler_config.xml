@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 
-<!-- $Id: spooler_config.xml,v 1.12 2001/01/07 16:35:19 jz Exp $   (C) 2000 SOS GmbH Berlin -->
+<!-- $Id: spooler_config.xml,v 1.13 2001/01/08 21:24:30 jz Exp $   (C) 2000 SOS GmbH Berlin -->
 
 <!DOCTYPE spooler_config SYSTEM "spooler_config.dtd">
 
@@ -172,6 +172,7 @@ package Object_set_class;
 
     sub construct
     {
+        $main::log_file->put_line( "Object_set_class::construct\n" );
         my $self = {};
         bless( $self );
 
@@ -221,10 +222,10 @@ package main;
 
     sub spooler_make_object_set()
     {
-        return Object_set_class->construct();
+        $log_file->put_line( "***** Perl: spooler_make_object_set() *****\n" );
+        my $object_set_class = construct Object_set_class;
+        return $object_set_class;
     }
-
-    $object_set = spooler_make_object_set();
 
 
             ]]></script>
@@ -238,7 +239,7 @@ package main;
         <job name           = "Aufbereiten" 
              priority       = "50" 
              output_level   = "200" 
-             spooler_id     = ""
+             spooler_id     = "vb"
              rerun          = "no">
 
             <object_set class="Dokumente">
@@ -280,7 +281,7 @@ package main;
 
 
 
-        <job name="einfach">
+        <job name="einfach" spooler_id="vb">
 
             <script language="VBScript"><![CDATA[
 
@@ -307,7 +308,7 @@ end function
 
         <job name           = "Perlset" 
              output_level   = "200"
-             spooler_id     = "Fritz">
+             spooler_id     = "perl">
 
             <object_set class="Perl">
                 <levels low="1" high="3"/>
