@@ -1,4 +1,4 @@
-// $Id: spooler_history.cxx,v 1.74 2003/12/11 09:55:30 jz Exp $
+// $Id: spooler_history.cxx,v 1.75 2003/12/11 10:39:59 jz Exp $
 
 #include "spooler.h"
 #include "../zschimmer/z_com.h"
@@ -399,6 +399,7 @@ void Spooler_db::try_reopen_after_error( const exception& x )
                 {
                     open2( _spooler->_db_name );
                     open_history_table();
+                    THREAD_LOCK( _error_lock )  _error = "";
                     break;
                 }
                 catch( const exception& x )

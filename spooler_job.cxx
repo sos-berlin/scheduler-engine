@@ -1,4 +1,4 @@
-// $Id: spooler_job.cxx,v 1.48 2003/12/11 10:24:14 jz Exp $
+// $Id: spooler_job.cxx,v 1.49 2003/12/11 10:39:59 jz Exp $
 /*
     Hier sind implementiert
 
@@ -1369,10 +1369,13 @@ xml::Element_ptr Job::dom( const xml::Document_ptr& document, Show_what show, Jo
 
         if( show & show_description )  dom_append_text_element( job_element, "description", _description );
 
+        xml::Element_ptr queue_element = document.createElement( "queued_tasks" );
+        queue_element.setAttribute( "length", as_string( _task_queue.size() ) );
+        dom_append_nl( queue_element );
+        job_element.appendChild( queue_element );
+
         if( (show & show_task_queue)  &&  !_task_queue.empty() )
         {
-            xml::Element_ptr queue_element = document.createElement( "queued_tasks" );
-            dom_append_nl( queue_element );
 
             FOR_EACH( Task_queue, _task_queue, it )
             {
@@ -1387,7 +1390,6 @@ xml::Element_ptr Job::dom( const xml::Document_ptr& document, Show_what show, Jo
                 dom_append_nl( queue_element );
             }
 
-            job_element.appendChild( queue_element );
         }
 
         if( _order_queue             )  dom_append_nl( job_element ),  job_element.appendChild( _order_queue->dom( document, show, which_job_chain ) );
