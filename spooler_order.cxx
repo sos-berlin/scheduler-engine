@@ -1,4 +1,4 @@
-// $Id: spooler_order.cxx,v 1.5 2002/09/14 17:26:28 jz Exp $
+// $Id: spooler_order.cxx,v 1.6 2002/09/18 16:52:38 jz Exp $
 /*
     Hier sind implementiert
 
@@ -87,8 +87,8 @@ void Job_chain::add_job( Job* job, const Variant& state, const Variant& next_sta
 
     ptr<Job_chain_node> node = Z_NEW( Job_chain_node );
 
-    node->_job         = job;
-    node->_state       = state;
+    node->_job   = job;
+    node->_state = state;
 
     //if( node->_state.vt == VT_EMPTY || node->_state.vt == VT_ERROR )  node->_state = combstr_from_string( job->name() );
     if( node->_state.vt == VT_ERROR )  node->_state = combstr_from_string( job->name() );
@@ -96,10 +96,10 @@ void Job_chain::add_job( Job* job, const Variant& state, const Variant& next_sta
     node->_next_state  = next_state;   //if( node->_next_state.vt  == VT_ERROR )  node->_next_state.vt  = VT_EMPTY;
     node->_error_state = error_state;  //if( node->_error_state.vt == VT_ERROR )  node->_error_state.vt = VT_EMPTY;
 
-    if( _map.find( node->_state ) != _map.end() )  throw_xc( "SPOOLER-150", error_string_from_variant(node->_state), name() );
+    if( node_from_state_or_null( node->_state ) )  throw_xc( "SPOOLER-150", error_string_from_variant(node->_state), name() );
 
     _chain.push_back( node );
-    _map[ node->_state ] = node;
+    //_map[ node->_state ] = node;
 }
 
 //--------------------------------------------------------------------------------Job_chain::finish
@@ -108,14 +108,23 @@ void Job_chain::finish()
 {
     if( _finished )  return;
 
+    if( !_chain.empty() )
+    {
+        Job_chain_node* n = *_chain.rbegin();
+        VARIANT error; VariantInit( &error );  error.vt = VT_ERROR;
+        if( n->_job  &&  n->_next_state.vt == VT_ERROR )  add_job( NULL, "<END_STATE>", error, error );    // Endzustand fehlt? Dann hinzufügen
+    }
+
     for( Chain::iterator it = _chain.begin(); it != _chain.end(); it++ )
     {
         Job_chain_node* n = *it;
-        
         Chain::iterator next = it;  next++;
 
         if( n->_next_state.vt == VT_ERROR  &&  next != _chain.end() )  n->_next_state = (*next)->_state;
 
+        if( n->_next_state.vt != VT_ERROR )  n->_next_node  = node_from_state( n->_next_state );
+        if( n->_error_state.vt != VT_ERROR )  n->_error_node = node_from_state( n->_error_state );
+/*
         Map::iterator next_it  = _map.find( n->_next_state  );
         Map::iterator error_it = _map.find( n->_error_state );
 
@@ -128,7 +137,7 @@ void Job_chain::finish()
             n->_error_node = error_it->second;
         else
         if( n->_error_state.vt != VT_ERROR )  throw_xc( "SPOOLER-149", error_string_from_variant(n->_error_state), name() );
-
+*/
     }
 
     _finished = true;
@@ -140,9 +149,9 @@ Job_chain_node* Job_chain::node_from_job( Job* job )
 {
     THREAD_LOCK( _lock )
     {
-        for( Map::iterator it = _map.begin(); it != _map.end(); it++ )
+        for( Chain::iterator it = _chain.begin(); it != _chain.end(); it++ )
         {
-            Job_chain_node* n = it->second;
+            Job_chain_node* n = *it;
             if( n->_job == job )  return n;
         }
 
@@ -156,10 +165,31 @@ Job_chain_node* Job_chain::node_from_job( Job* job )
 
 Job_chain_node* Job_chain::node_from_state( const State& state )
 {
+    Job_chain_node* result = node_from_state_or_null( state );
+    if( !result )  throw_xc( "SPOOLER-149", error_string_from_variant(state), name() );
+    return result;
+}
+
+//---------------------------------------------------------------Job_chain::node_from_state_or_null
+
+Job_chain_node* Job_chain::node_from_state_or_null( const State& state )
+{
+    THREAD_LOCK( _lock )
+    {
+        for( Chain::iterator it = _chain.begin(); it != _chain.end(); it++ )
+        {
+            Job_chain_node* n = *it;
+            if( n->_state == state )  return n;
+        }
+    }
+
+    return NULL;
+/*
     Map::iterator it = _map.find( state );
     if( it == _map.end() )  throw_xc( "SPOOLER-149", error_string_from_variant(state), name() );
 
     return it->second;
+*/
 }
 
 //-----------------------------------------------------------------------------Job_chain::add_order
@@ -285,8 +315,6 @@ void Order_queue::remove_order( Order* order )
 
     THREAD_LOCK( _lock )
     {
-        //Map::iterator it = _map.find( order->_id );
-    
         for( Queue::iterator it = _queue.begin(); it != _queue.end(); it++ )  if( *it == order )  break;
 
         if( it == _queue.end() )  throw_xc( "SPOOLER-156", order->obj_name(), _job->name() );

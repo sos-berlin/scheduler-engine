@@ -1,4 +1,4 @@
-// $Id: spooler_order.h,v 1.3 2002/09/14 16:23:08 jz Exp $
+// $Id: spooler_order.h,v 1.4 2002/09/18 16:52:38 jz Exp $
 
 #ifndef __SPOOLER_ORDER_H
 #define __SPOOLER_ORDER_H
@@ -129,6 +129,7 @@ struct Job_chain : Com_job_chain
     void                        finish                  ();
 
     Job_chain_node*             node_from_state         ( const State& );
+    Job_chain_node*             node_from_state_or_null ( const State& );
     Job_chain_node*             node_from_job           ( Job* );
 
     Order*                      add_order               ( VARIANT* order_or_payload, VARIANT* job_or_state );
@@ -149,8 +150,8 @@ struct Job_chain : Com_job_chain
     typedef list< ptr<Job_chain_node> >  Chain;
     Chain                      _chain;
 
-    typedef map< State, Job_chain_node* >  Map;
-    Map                        _map;
+  //typedef map< State, Job_chain_node* >  Map;
+  //Map                        _map;
 };
 
 //--------------------------------------------------------------------------------Internal_priority

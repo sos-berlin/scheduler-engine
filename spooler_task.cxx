@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.106 2002/09/14 16:23:08 jz Exp $
+// $Id: spooler_task.cxx,v 1.107 2002/09/18 16:52:38 jz Exp $
 /*
     Hier sind implementiert
 
@@ -996,7 +996,7 @@ void Job::task_to_start()
                         }
                     }
 
-                    if( _order_queue && !_order_queue->empty() )  cause = cause_order,               _log.debug( "Task startet wegen Auftrags" );
+                    if( !cause  &&  _order_queue && !_order_queue->empty() )  cause = cause_order,               _log.debug( "Task startet wegen Auftrags" );
                                                                                       
                     if( !dequeued && cause )
                     {
