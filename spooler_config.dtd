@@ -1,10 +1,16 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- $Id: spooler_config.dtd,v 1.3 2001/01/02 19:07:45 jz Exp $   (C) 2000 SOS GmbH Berlin -->
+<!-- $Id: spooler_config.dtd,v 1.4 2001/01/03 11:28:21 jz Exp $   (C) 2000 SOS GmbH Berlin 
+
+     Konfiguration für den Spooler. 
+     
+-->
+
 
 <!ELEMENT spooler_config        ( try_start_job_period?, object_set_classes, jobs? ) >
 
 
-<!ELEMENT try_start_job_period  ( #PCDATA ) >
+<!ELEMENT try_start_job_period  ( #PCDATA ) >   <!-- Sekunden -->
+<!-- Periode, nach der ein Job erneut gestartet wird, um zu prüfen, ob die Objektemenge nicht leer ist -->
 
 
 <!ELEMENT object_set_classes    ( object_set_class+ ) >
@@ -27,7 +33,7 @@
 
 <!ELEMENT jobs                  ( job+ ) >
 
-<!ELEMENT job                   ( object_set, output_level, priority?, start_time?, period?, stop_after_error?, rerun?, start_after_spooler? ) >
+<!ELEMENT job                   ( object_set, output_level, priority?, start_time?, stop_after_error?, rerun?, start_after_spooler? ) >
 <!ATTLIST job                   name CDATA #REQUIRED >
 
 <!ELEMENT object_set            ( object_set_class.name, levels? ) >
@@ -36,43 +42,33 @@
 
 <!ELEMENT output_level          ( level ) >
 
-<!ELEMENT levels                ( low_level, high_level ) >
+<!ELEMENT levels                ( low_level, high_level ) >     <!-- low_level <= level < high_level -->
 
 <!ELEMENT low_level             ( level ) >
 
-<!ELEMENT high_level            ( level ) >
+<!ELEMENT high_level            ( level ) >  
 
 <!ELEMENT priority              ( #PCDATA ) >
 
-<!ELEMENT start_time            ( time, date?, weekdays?, monthdays?, ultimos?, duration? ) >
+<!ELEMENT start_time            ( time, date*, weekdays?, monthdays?, ultimos?, holiday*, duration?, period? ) >
 
 <!ELEMENT time                  ( #PCDATA ) >   <!-- HH:MM:SS -->
 
 <!ELEMENT date                  ( #PCDATA ) >   <!-- yyyy-mm-dd -->
 
-<!--
-<!ELEMENT weekdays              ( monday | tuesday | wednesday | thursday | friday | saturday | sunday )+ >
-<!ELEMENT monday                EMPTY>
-<!ELEMENT tuesday               EMPTY>
-<!ELEMENT wednesday             EMPTY>
-<!ELEMENT thursday              EMPTY>
-<!ELEMENT friday                EMPTY>
-<!ELEMENT saturday              EMPTY>
-<!ELEMENT sunday                EMPTY>
--->
-
-<!ELEMENT weekdays              ( day+ ) >
-<!ELEMENT monthdays             ( day+ ) >
-<!ELEMENT ultimos               ( day+ ) >
+<!ELEMENT weekdays              ( day+ ) >      <!-- 0: Sonntag, 6: Sonnabend -->
+<!ELEMENT monthdays             ( day+ ) >      <!-- 1 bis 31 -->
+<!ELEMENT ultimos               ( day+ ) >      <!-- 0 bis 30 Tage vor Ultimo -->
+<!ELEMENT holiday               ( #PCDATA ) >   <!-- yyyy-mm-dd, an diesem Tag den Job nicht starten -->
 <!ELEMENT day                   ( #PCDATA ) >
 
-<!ELEMENT duration              ( #PCDATA ) >
+<!ELEMENT duration              ( #PCDATA ) >   <!-- Laufzeit des Jobs ab Startzeit -->
 
 <!ELEMENT period                ( #PCDATA ) >
 
-<!ELEMENT stop_after_error      EMPTY >
+<!ELEMENT stop_after_error      EMPTY >         <!-- Nach einem Fehler diesen Job nie wieder starten -->
 
-<!ELEMENT rerun                 EMPTY >
+<!ELEMENT rerun                 EMPTY >         <!-- Nach Abbruch des Spoolers diesen Job ggf. erneut starten -->
                                   
-<!ELEMENT start_after_spooler   EMPTY >
+<!ELEMENT start_after_spooler   EMPTY >         <!-- Den Job auch nach verspäteten Start des Spoolers starten -->
 

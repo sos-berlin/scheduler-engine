@@ -1,4 +1,4 @@
-// $Id: spooler_xml.cxx,v 1.4 2001/01/02 19:07:45 jz Exp $
+// $Id: spooler_xml.cxx,v 1.5 2001/01/03 11:28:21 jz Exp $
 
 //#include <precomp.h>
 
@@ -50,7 +50,7 @@ string optional_single_element_as_text( xml::Element_ptr element, const string& 
     xml::Element_ptr result = optional_single_element( element, name );
     if( result == NULL )  return empty_string;
 
-    return result->text;
+    return as_string( result->firstChild->nodeValue );
 }
 
 //---------------------------------------------------------------Object_set_class::Object_set_class
@@ -61,7 +61,7 @@ Object_set_class::Object_set_class( xml::Element_ptr element )
 
     xml::Element_ptr script_element = single_element( element, "script" );
 
-    _script = script_element->text;
+    _script = as_string( script_element->firstChild->nodeValue );
     _script_language = as_string( script_element->getAttribute( "language" ) );
 
     xml::NodeList_ptr levels_nodelist = element->getElementsByTagName( "level_decls" );
@@ -75,8 +75,8 @@ Object_set_class::Object_set_class( xml::Element_ptr element )
 
             if( n->nodeName == "level_decl" ) 
             {
-                int level = as_int( single_element( n, "level" )->text );
-                string name = single_element( n, "level_description" )->text;
+                int level = as_int( single_element( n, "level" )->firstChild->nodeValue );
+                string name = as_string( single_element( n, "level_description" )->firstChild->nodeValue );
 
                 _level_map[ level ] = name;
             }
@@ -88,8 +88,8 @@ Object_set_class::Object_set_class( xml::Element_ptr element )
 
 Level_interval::Level_interval( xml::Element_ptr element )
 :
-    _low_level ( as_int( single_element( element, "low_level" )->text ) ),
-    _high_level( as_int( single_element( element, "high_level" )->text ) )
+    _low_level ( as_int( single_element( element, "low_level" )->firstChild->firstChild->nodeValue ) ),
+    _high_level( as_int( single_element( element, "high_level" )->firstChild->firstChild->nodeValue ) )
 {
 }
 
@@ -97,7 +97,7 @@ Level_interval::Level_interval( xml::Element_ptr element )
 
 Object_set_descr::Object_set_descr( xml::Element_ptr element )
 : 
-    _class_name( single_element( element, "object_set_class.name" )->text ),
+    _class_name( as_string( single_element( element, "object_set_class.name" )->firstChild->nodeValue ) ),
     _level_interval( single_element( element, "levels" ) )
 {
 }
@@ -114,7 +114,7 @@ Day_set::Day_set( xml::Element_ptr element )
 
     while( e )
     {
-        int day = as_int( e->text );
+        int day = as_int( e->firstChild->nodeValue );
         if( (uint)day >= NO_OF(_days) )  throw_xc( "SPOOLER-INVALID-DAY", day );
         _days[day] = true;
 
@@ -128,19 +128,28 @@ Start_time::Start_time( xml::Element_ptr element )
 : 
     _zero_(this+1)
 {
+    int i;
     Sos_optional_date_time zeit;
     string time_str = optional_single_element_as_text( element, "time" );
     zeit.set_time( time_str.c_str() );
     _time_of_day = zeit.hour() * 60*60 + zeit.minute() * 60 + zeit.second();
 
-    _date = Sos_date( optional_single_element_as_text( element, "date" ) ).as_time_t();
+    //_date = Sos_date( optional_single_element_as_text( element, "date" ) ).as_time_t();
+    xml::NodeList_ptr dates = element->getElementsByTagName( "date" );
+    for( i = 0; i < dates->length; i++ )  _date_set.insert( Sos_date( as_string( dates->Getitem(i)->firstChild->nodeValue ) ).as_time_t() );
 
     _weekday_set  = optional_single_element( element, "weekdays" );
     _monthday_set = optional_single_element( element, "monthdays" );
     _ultimo_set   = optional_single_element( element, "ultimos" );
 
+    xml::NodeList_ptr holidays = element->getElementsByTagName( "holiday" );
+    for( i = 0; i < holidays->length; i++ )  _holiday_set.insert( Sos_date( as_string( holidays->Getitem(i)->firstChild->nodeValue ) ).as_time_t() );
+
     xml::Element_ptr duration_element = optional_single_element( element, "duration" );
-    if( duration_element )  _duration = as_int( duration_element->text );
+    if( duration_element )  _duration = as_int( duration_element->firstChild->nodeValue );
+
+    xml::Element_ptr period_element = optional_single_element( element, "period" );
+    if( period_element )  _period = as_int( period_element->firstChild->nodeValue );
 }
 
 //------------------------------------------------------------------------------Job_descr::Job_descr
@@ -149,7 +158,7 @@ Job_descr::Job_descr( xml::Element_ptr element )
 : 
     _zero_(this+1),
     _object_set_descr   ( single_element( element, "object_set" ) ),
-    _output_level       ( as_int( single_element( element, "output_level" )->text ) ),
+    _output_level       ( as_int( single_element( element, "output_level" )->firstChild->firstChild->nodeValue ) ),
     _start_time         ( single_element( element, "start_time" ) )
 {
 }
@@ -228,7 +237,7 @@ void Spooler::load_xml()
 
             if( node->nodeName == "try_start_job_period" )
             {
-                _try_start_job_period = as_double( xml::Element_ptr(node)->text );
+                _try_start_job_period = as_double( xml::Element_ptr(node)->firstChild->nodeValue );
             }
             else
             if( node->nodeName == "object_set_classes" )

@@ -1,4 +1,4 @@
-// $Id: spooler.h,v 1.4 2001/01/02 19:07:45 jz Exp $
+// $Id: spooler.h,v 1.5 2001/01/03 11:28:21 jz Exp $
 
 #ifndef __SPOOLER_H
 
@@ -36,11 +36,13 @@ namespace spooler {
 using namespace std;
 
                                               
-typedef int Level;
-struct Spooler;
+typedef int                     Level;
+struct                          Spooler;
+typedef double                  Time;                       // wie time_t: Anzahl Sekunden seit 1.1.1970
 
-double now();
-const double latter_day = UINT_MAX;
+Time                            now();
+
+const Time                      latter_day                  = INT_MAX;
 
 //---------------------------------------------------------------------------------Object_set_class
 
@@ -55,7 +57,7 @@ struct Object_set_class : Sos_self_deleting
     string                     _script_language;
     string                     _script;
 
-  //double                     _process_timeout;
+  //Time                       _process_timeout;
 };
 
 typedef list< Sos_ptr<Object_set_class> >  Object_set_class_list;
@@ -135,7 +137,7 @@ struct Weekday_set : Day_set
                                 Weekday_set                 ()                      {}
                                 Weekday_set                 ( xml::Element_ptr e )  : Day_set( e ) {}
 
-    double                      next_date                   ( double );             // Mitternacht des nächsten gesetzten Tages
+    Time                        next_date                   ( Time );             // Mitternacht des nächsten gesetzten Tages
 };
 
 //--------------------------------------------------------------------------------------Monthday_set
@@ -145,7 +147,7 @@ struct Monthday_set : Day_set
                                 Monthday_set                ()                      {}
                                 Monthday_set                ( xml::Element_ptr e )  : Day_set( e ) {}
 
-    double                      next_date                   ( double );             // Mitternacht des nächsten gesetzten Tages
+    Time                        next_date                   ( Time );               // Mitternacht des nächsten gesetzten Tages
 };
 
 //--------------------------------------------------------------------------------------Ultimo_set
@@ -155,7 +157,7 @@ struct Ultimo_set : Day_set
                                 Ultimo_set                  ()                      {}
                                 Ultimo_set                  ( xml::Element_ptr e )  : Day_set( e ) {}
 
-    double                      next_date                   ( double );             // Mitternacht des nächsten gesetzten Tages
+    Time                        next_date                   ( Time );               // Mitternacht des nächsten gesetzten Tages
 };
 
 //---------------------------------------------------------------------------------------Start_time
@@ -165,22 +167,23 @@ struct Start_time
                                 Start_time                  ()                      : _zero_(this+1) {}
                                 Start_time                  ( xml::Element_ptr );
 
-    double                      next                        ()                      { return next( now() ); }
-    double                      next                        ( double );
+    Time                        next                        ()                      { return next( now() ); }
+    Time                        next                        ( Time );
 
 
     Fill_zero                  _zero_;
     int                        _time_of_day;                // Sekunden seit Mitternacht
 
-    double                     _date;
+    set<time_t>                _date_set;
     Weekday_set                _weekday_set;
     Monthday_set               _monthday_set;
     Ultimo_set                 _ultimo_set;                 // 0: Letzter Tag, -1: Vorletzter Tag
+    set<time_t>                _holiday_set;
 
-    double                     _duration;
-    double                     _repeat_time;
+    Time                       _duration;
+    Time                       _period;
 
-    double                     _next_start_time;
+    Time                       _next_start_time;
 };
 
 //----------------------------------------------------------------------------------------Job_descr
@@ -196,7 +199,6 @@ struct Job_descr : Sos_self_deleting
     Object_set_descr           _object_set_descr;
     Level                      _output_level;
     Start_time                 _start_time;
-  //Repeat_time                _repeat_time;
     bool                       _stop_at_end_of_duration;
     bool                       _continual;
     bool                       _stop_after_error;
@@ -224,15 +226,21 @@ struct Job : Sos_self_deleting
     Spooler*                   _spooler;
     Sos_ptr<Job_descr>         _job_descr;
     bool                       _running;
-    double                     _running_since;
+    Time                       _running_since;
     int                        _running_priority;
 
     Sos_ptr<Object_set>        _object_set;
-    double                     _next_start_time;              // Zeitpunkt des nächsten Startversuchs, nachdem Objektemenge leer war
-    double                     _next_end_time;                // + _start_time._duration
+    Time                       _next_start_time;            // Zeitpunkt des nächsten Startversuchs, nachdem Objektemenge leer war
+    Time                       _next_end_time;              // + _start_time._duration
 };
 
 typedef list< Sos_ptr<Job> >    Job_list;
+
+//------------------------------------------------------------------------------------Communication
+
+struct Communication
+{
+};
 
 //------------------------------------------------------------------------------------------Spooler
 
@@ -257,8 +265,7 @@ struct Spooler
     Object_set_class_list      _object_set_class_list;
     Job_descr_list             _job_descr_list;
     Job_list                   _job_list;
-    double                     _try_start_job_period;
-  //double                     _next_start_time;
+    Time                       _try_start_job_period;
     int                        _running_jobs_count;
 };
 

@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.4 2001/01/02 19:07:45 jz Exp $
+// $Id: spooler.cxx,v 1.5 2001/01/03 11:28:21 jz Exp $
 
 //#include <precomp.h>
 
@@ -7,13 +7,7 @@
 #include "spooler.h"
 
 
-/*
-
-  gmtime()  ist nicht thread-sicher!
-  gmtime()  ist nicht thread-sicher!
-
-*/
-
+using namespace std;
 
 namespace sos {
 
@@ -22,7 +16,9 @@ extern const Bool _dll = false;
 namespace spooler {
 
 
-double now() 
+//---------------------------------------------------------------------------------------------now
+
+Time now() 
 {
     return time(NULL) - _timezone;
 }
@@ -95,7 +91,7 @@ Spooler_object Object_set::get()
 
 //---------------------------------------------------------------------------Weekday_set::next_date
 
-double Weekday_set::next_date( double tim )
+Time Weekday_set::next_date( Time tim )
 {
     int day_no = tim / (24*60*60);
 
@@ -112,14 +108,10 @@ double Weekday_set::next_date( double tim )
 
 //--------------------------------------------------------------------------Monthday_set::next_date
 
-double Monthday_set::next_date( double tim )
+Time Monthday_set::next_date( Time tim )
 {
-    int         day_no = tim / (24*60*60);
-    time_t      t = tim;
-    struct tm*  tm = gmtime(&t);
-    Sos_date    date;
-
-    date.assign_date( 1900 + tm->tm_year, 1 + tm->tm_mon, tm->tm_mday );
+    int                     day_no = tim / (24*60*60);
+    Sos_optional_date_time  date   = tim;
 
     for( int i = 0; i < 31; i++ )
     {
@@ -133,7 +125,7 @@ double Monthday_set::next_date( double tim )
 
 //----------------------------------------------------------------------------Ultimo_set::next_date
 
-double Ultimo_set::next_date( double tim )
+Time Ultimo_set::next_date( Time tim )
 {
 /*
     int         day_no = tim / (24*60*60);
@@ -154,29 +146,50 @@ double Ultimo_set::next_date( double tim )
 
 //---------------------------------------------------------------------------------Start_time::next
 
-double Start_time::next( double tim )
+Time Start_time::next( Time tim_par )
 {
     // Bei der Umschaltung von Winter- auf Sommerzeit fehlt eine Stunde!
 
-    time_t     t = tim;
-    struct tm* tm = gmtime( &t );
+    Time tim = tim_par;
 
-    double next;
-    
-    next =            _weekday_set .next_date( tim );
-    next = min( next, _monthday_set.next_date( tim ) );
-    next = min( next, _ultimo_set  .next_date( tim ) );
+    time_t time_only = (time_t)tim % (24*60*60);
+    if( time_only > (time_t)_time_of_day )  tim += 24*60*60 ;
+
+    tim -= time_only;  //( tim + 24*60*60-1 ) / (24*60*60) * 24*60*60;
+
+
+    Time next;
+ 
+    while(1)
+    {
+        next = latter_day;
+
+        FOR_EACH( set<time_t>, _date_set, it )
+        {
+            if( *it < next  &&  *it >= tim )  next = *it;
+        }
+
+        next = min( next, _weekday_set .next_date( tim ) );
+        next = min( next, _monthday_set.next_date( tim ) );
+        next = min( next, _ultimo_set  .next_date( tim ) );
+
+        if( _holiday_set.find( next ) == _holiday_set.end() )  break;
+
+        tim += (24*60*60);
+    }
 
     _next_start_time = next + _time_of_day;
 
-    if( _repeat_time )
+    if( _period )
     {
-        _next_start_time += ( tim - _next_start_time ) / _repeat_time * _repeat_time;
-
-        if( _next_start_time < tim )  tim += _repeat_time;
+        _next_start_time += int( tim - _next_start_time ) / (int)_period * _period;
+        if( _next_start_time < tim )  tim += _period;
+    }
+    else
+    {
+        if( _next_start_time + _duration < tim )  _next_start_time = latter_day;
     }
 
-    if( _next_start_time + _duration < tim )  _next_start_time = latter_day;
     return _next_start_time;
 }
 
@@ -299,13 +312,21 @@ void Spooler::start()
 
 void Spooler::wait()
 {
+    tzset();
+
     if( _running_jobs_count == 0 )
     {
-        double next_start_time = latter_day;
+        Time next_start_time = latter_day;
         FOR_EACH( Job_list, _job_list, it )  if( next_start_time > (*it)->_next_start_time )  next_start_time = (*it)->_next_start_time;
 
-        double diff = next_start_time - now();
-        if( diff > 0 )  sos_sleep( diff );
+        Time diff = next_start_time - now();
+        if( diff > 0 ) 
+        {
+            cerr << "Nächster Start: " << Sos_optional_date_time( next_start_time ) << '\n';
+            sos_sleep( diff );
+        }
+
+        tzset();
     }
 }
 
