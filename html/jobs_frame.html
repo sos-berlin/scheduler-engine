@@ -1,4 +1,4 @@
-<!-- $Id: jobs_frame.html,v 1.27 2004/07/26 12:09:59 jz Exp $ -->
+<!-- $Id: jobs_frame.html,v 1.28 2004/07/26 13:37:09 jz Exp $ -->
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <html>
 
@@ -56,6 +56,16 @@ var _checkbox_states = new Object();
 
 function do_onload()
 {
+    if( window != undefined  
+     && window.clientInformation  
+     && window.clientInformation.appName  
+     && window.clientInformation.appName == "Microsoft Internet Explorer" )
+    {
+        // ok
+    }        
+    else alert( "The page may not work with this browser, which is not Microsoft Internet Explorer" );
+    
+    
     _stylesheet = document.all.stylesheet.XMLDocument;
     if( _stylesheet.parseError.errorCode )  throw new Error( "Fehler im Stylesheet:\n" + _stylesheet.parseError.reason );
 
