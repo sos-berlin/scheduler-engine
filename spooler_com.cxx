@@ -1,4 +1,4 @@
-// $Id: spooler_com.cxx,v 1.141 2004/02/29 00:20:15 jz Exp $
+// $Id: spooler_com.cxx,v 1.142 2004/02/29 00:37:39 jz Exp $
 /*
     Hier sind implementiert
 
@@ -1453,7 +1453,7 @@ Com_job::Com_job( Job* job )
 
 STDMETHODIMP Com_job::QueryInterface( const IID& iid, void** result )
 {
-    Z_IMPLEMENT_QUERY_INTERFACE( iid, Ihas_java_class_name, result );
+    Z_IMPLEMENT_QUERY_INTERFACE( this, iid, Ihas_java_class_name, result );
 
     return Sos_ole_object::QueryInterface( iid, result );
 }
