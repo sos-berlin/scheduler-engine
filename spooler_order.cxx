@@ -1,4 +1,4 @@
-// $Id: spooler_order.cxx,v 1.59 2004/04/05 08:49:46 jz Exp $
+// $Id: spooler_order.cxx,v 1.60 2004/05/12 07:51:17 jz Exp $
 /*
     Hier sind implementiert
 
@@ -787,6 +787,7 @@ void Order::close()
     }
 */
 
+    _task = NULL;
     remove_from_job_chain();
 }
 

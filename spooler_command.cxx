@@ -1,4 +1,4 @@
-// $Id: spooler_command.cxx,v 1.109 2004/03/26 18:09:08 jz Exp $
+// $Id: spooler_command.cxx,v 1.110 2004/05/12 07:51:17 jz Exp $
 /*
     Hier ist implementiert
 
@@ -7,6 +7,7 @@
 
 
 #include "spooler.h"
+#include "spooler_version.h"
 #include "../file/anyfile.h"
 #include "../zschimmer/z_sql.h"
 
@@ -668,6 +669,23 @@ string xml_as_string( const xml::Document_ptr& document, bool indent )
     }
     catch( const exception&  ) { return "<?xml version=\"1.0\"?><ERROR/>"; }
     catch( const _com_error& ) { return "<?xml version=\"1.0\"?><ERROR/>"; }
+}
+
+//-------------------------------------------------------------------Command_processor::execute_http
+
+string Command_processor::execute_http( const string& http_request )
+{
+    string xml_response = execute( "<show_state what=\"all,orders\"/>", Time::now(), true );
+
+    string response = "HTTP/1.1 200 OK\r\n"
+                      "Content-Type: text/plain\r\n"
+                      "Transfer-Encoding: chunked\n"
+                      "Date: Wed, 12 May 2004 06:48:41 GMT\r\n"
+                      "Server: Scheduler " + string(VER_PRODUCTVERSION_STR) + "\r\n"
+                      "\r\n";
+
+    response += as_hex_string( (int)xml_response.length() ) + "\r\n";
+    return response + xml_response + "\r\n0\r\n\r\n";
 }
 
 //------------------------------------------------------------------------Command_processor::execute

@@ -1,4 +1,4 @@
-// $Id: spooler_communication.cxx,v 1.82 2004/03/29 22:03:14 jz Exp $
+// $Id: spooler_communication.cxx,v 1.83 2004/05/12 07:51:17 jz Exp $
 /*
     Hier sind implementiert
 
@@ -571,12 +571,20 @@ bool Communication::Channel::async_continue_( bool wait )
 
                 string cmd = _text;
                 recv_clear();
-                _log.info( "Kommando " + cmd );
-                _text = cp.execute( cmd, Time::now(), _indent );
-                
-                if( _indent )  _text = replace_regex( _text, "\n", "\r\n" );      // Für Windows-telnet
 
-                if( cp._error )  _log.error( cp._error->what() );
+                if( string_begins_with( cmd, "GET /" ) )
+                {
+                    _text = cp.execute_http( cmd );
+                }
+                else
+                {
+                    _log.info( "Kommando " + cmd );
+                    _text = cp.execute( cmd, Time::now(), _indent );
+                    
+                    if( _indent )  _text = replace_regex( _text, "\n", "\r\n" );      // Für Windows-telnet
+
+                    if( cp._error )  _log.error( cp._error->what() );
+                }
 
                 _send_progress = 0;
                 _send_is_complete = false;
