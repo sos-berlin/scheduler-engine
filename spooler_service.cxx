@@ -1,4 +1,4 @@
-// $Id: spooler_service.cxx,v 1.41 2003/06/24 15:46:29 jz Exp $
+// $Id: spooler_service.cxx,v 1.42 2003/09/04 15:53:08 jz Exp $
 /*
     Hier sind implementiert
 
@@ -125,7 +125,7 @@ static void event_log( const string& msg_par, int argc, char** argv, Spooler* sp
 
     DeregisterEventSource( h ); 
 
-    send_error_email( msg_par, argc, argv );
+    send_error_email( msg_par, argc, argv, "" );
 
     fprintf( stderr, "%s\n", msg.c_str() );
 }
@@ -567,7 +567,7 @@ static uint __stdcall service_thread( void* param )
         {
             LOG( "Spooler launch\n" );
 
-            ret = spooler_ptr->launch( p->_argc, p->_argv );
+            ret = spooler_ptr->launch( p->_argc, p->_argv, "" );
         }
         catch( const exception& x )
         {

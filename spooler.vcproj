@@ -43,8 +43,8 @@
 			<Tool
 				Name="VCCustomBuildTool"
 				Description="sos.spooler.jar erstellen"
-				CommandLine="echo jar cf &quot;$(TargetDir)sos.spooler.jar&quot; sos/spooler
-cd &quot;$(OutDir)&quot; &amp;&amp; jar cf &quot;$(TargetDir)sos.spooler.jar&quot; sos/spooler
+				CommandLine="echo jar cf &quot;$(TargetDir)sos.spooler.jar&quot; sos/spooler/*.class
+cd &quot;$(OutDir)&quot; &amp;&amp; jar cf &quot;$(TargetDir)sos.spooler.jar&quot; sos/spooler/*.class
 "
 				Outputs="$(TargetDir)sos.spooler.jar"/>
 			<Tool
@@ -87,7 +87,7 @@ cd &quot;$(OutDir)&quot; &amp;&amp; jar cf &quot;$(TargetDir)sos.spooler.jar&quo
 			Name="Debug|Win32"
 			OutputDirectory=".\Debug"
 			IntermediateDirectory=".\Debug"
-			ConfigurationType="1"
+			ConfigurationType="2"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="FALSE"
 			CharacterSet="2">
@@ -115,20 +115,21 @@ cd &quot;$(OutDir)&quot; &amp;&amp; jar cf &quot;$(TargetDir)sos.spooler.jar&quo
 			<Tool
 				Name="VCCustomBuildTool"
 				Description="sos.spooler.jar erstellen"
-				CommandLine="echo jar cf &quot;$(TargetDir)sos.spooler.jar&quot; sos/spooler
-cd &quot;$(OutDir)&quot; &amp;&amp; jar cf &quot;$(TargetDir)sos.spooler.jar&quot; sos/spooler
+				CommandLine="echo jar cf &quot;$(TargetDir)sos.spooler.jar&quot; sos/spooler/*.class
+cd &quot;$(OutDir)&quot; &amp;&amp; jar cf &quot;$(TargetDir)sos.spooler.jar&quot; sos/spooler/*.class
 "
 				Outputs="$(TargetDir)sos.spooler.jar"/>
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="../misc/lib/libctleasy.lib delayimp.lib ws2_32.lib version.lib odbc32.lib odbccp32.lib"
-				OutputFile="../bind/spooler.exe"
+				OutputFile="../bind/spooler.dll"
 				LinkIncremental="2"
 				SuppressStartupBanner="TRUE"
 				DelayLoadDLLs="winspool.drv,ws2_32.dll,ole32.dll,oleaut32.dll,advapi32.dll,odbc32.dll,libctleasy.dll"
 				GenerateDebugInformation="TRUE"
 				ProgramDatabaseFile="../bind/spooler.pdb"
 				SubSystem="1"
+				ImportLibrary="$(TargetDir)/$(TargetName).lib"
 				TargetMachine="1"/>
 			<Tool
 				Name="VCMIDLTool"
@@ -261,6 +262,12 @@ cd &quot;$(OutDir)&quot; &amp;&amp; jar cf &quot;$(TargetDir)sos.spooler.jar&quo
 						PrecompiledHeaderThrough="spooler.h"
 						BrowseInformation="1"/>
 				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\spooler_dll.cxx">
+			</File>
+			<File
+				RelativePath=".\spooler_dll_java.cxx">
 			</File>
 			<File
 				RelativePath="spooler_history.cxx">
@@ -527,9 +534,6 @@ cd &quot;$(OutDir)&quot; &amp;&amp; jar cf &quot;$(TargetDir)sos.spooler.jar&quo
 						PrecompiledHeaderThrough="spooler.h"
 						BrowseInformation="1"/>
 				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="..\zschimmer\threads_base.cxx">
 			</File>
 		</Filter>
 		<Filter
@@ -928,6 +932,31 @@ javah -force -o &quot;$(OutDir)\sos\spooler\$(InputName).h&quot; -classpath &quo
 					<Tool
 						Name="VCCustomBuildTool"
 						Description="sos.spooler.jar erstellen"
+						CommandLine="echo javac -d &quot;$(OutDir)&quot; -sourcepath . -classpath &quot;$(OutDir)&quot; &quot;$(InputPath)&quot;
+javac -d &quot;$(OutDir)&quot; -sourcepath . -classpath &quot;$(OutDir)&quot; &quot;$(InputPath)&quot;
+echo javah -force -o &quot;$(OutDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(OutDir)&quot; sos.spooler.$(InputName)
+javah -force -o &quot;$(OutDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(OutDir)&quot; sos.spooler.$(InputName)
+"
+						Outputs="$(OutDir)/sos/spooler/$(InputName).class;$(OutDir)/sos/spooler/$(InputName).h"/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\sos\spooler\Spooler_program.java">
+				<FileConfiguration
+					Name="Release|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						CommandLine="echo javac -d &quot;$(OutDir)&quot; -sourcepath . -classpath &quot;$(OutDir)&quot; &quot;$(InputPath)&quot;
+javac -d &quot;$(OutDir)&quot; -sourcepath . -classpath &quot;$(OutDir)&quot; &quot;$(InputPath)&quot;
+echo javah -force -o &quot;$(OutDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(OutDir)&quot; sos.spooler.$(InputName)
+javah -force -o &quot;$(OutDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(OutDir)&quot; sos.spooler.$(InputName)
+"
+						Outputs="$(OutDir)/sos/spooler/$(InputName).class;$(OutDir)/sos/spooler/$(InputName).h"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
 						CommandLine="echo javac -d &quot;$(OutDir)&quot; -sourcepath . -classpath &quot;$(OutDir)&quot; &quot;$(InputPath)&quot;
 javac -d &quot;$(OutDir)&quot; -sourcepath . -classpath &quot;$(OutDir)&quot; &quot;$(InputPath)&quot;
 echo javah -force -o &quot;$(OutDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(OutDir)&quot; sos.spooler.$(InputName)

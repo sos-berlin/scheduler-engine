@@ -1,4 +1,4 @@
-// $Id: spooler_job.cxx,v 1.20 2003/09/02 13:57:14 jz Exp $
+// $Id: spooler_job.cxx,v 1.21 2003/09/04 15:53:08 jz Exp $
 /*
     Hier sind implementiert
 
@@ -965,44 +965,47 @@ bool Job::do_something()
 {
   //Z_DEBUG_ONLY( _log.debug9( "do_something() state=" + state_name() ); )
 
-    if( !_state )  return false;
+    Time next_time_at_begin       = _next_time;
+    Time next_start_time_at_begin = _next_start_time;
+    bool something_done           = false;       
 
-    bool something_done = false;       
-
-    something_done = execute_state_cmd();
-
-    if( _reread )  _reread = false,  reread(),  something_done = true;
-
-    if( _state == s_pending 
-     || _state == s_running  &&  _running_tasks.size() < _max_tasks )
+    if( _state )  
     {
-        Sos_ptr<Task> task = task_to_start();
-        if( task )
+        something_done = execute_state_cmd();
+
+        if( _reread )  _reread = false,  reread(),  something_done = true;
+
+        if( _state == s_pending 
+        || _state == s_running  &&  _running_tasks.size() < _max_tasks )
         {
-            _log.open();           // Jobprotokoll, nur wirksam, wenn set_filename() gerufen, s. Job::init().
+            Sos_ptr<Task> task = task_to_start();
+            if( task )
+            {
+                _log.open();           // Jobprotokoll, nur wirksam, wenn set_filename() gerufen, s. Job::init().
 
-            reset_error();
-            _repeat = 0;
-            _delay_until = 0;
+                reset_error();
+                _repeat = 0;
+                _delay_until = 0;
 
-            _running_tasks.push_back( task );
-            set_state( s_running );
+                _running_tasks.push_back( task );
+                set_state( s_running );
 
-            set_next_start_time();
+                set_next_start_time();
 
-            task->attach_to_a_thread();
+                task->attach_to_a_thread();
 
-            something_done = true;
+                something_done = true;
+            }
         }
     }
 
-#if defined Z_DEBUG && defined Z_WINDOWS
-    if( !something_done ) // &&  _next_time <= Time::now() )    // Sicherheitsnadel
+//#if defined Z_DEBUG && defined Z_WINDOWS
+    if( !something_done  &&  next_time_at_begin <= Time::now() )    // Obwohl _next_time erreicht, ist nichts getan?
     {
-        LOG( obj_name() << ".do_something()  Nichts getan  _next_time=" << _next_time << "  _next_start_time= " << _next_start_time << "\n" );
-        //calculate_next_time();
+        LOG( obj_name() << ".do_something()  Nichts getan  _next_time war " << next_time_at_begin << "  _next_start_time= " << next_start_time_at_begin << "\n" );
+        calculate_next_time();
     }
-#endif
+//#endif
 
     return something_done;
 }

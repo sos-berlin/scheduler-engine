@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.246 2003/09/02 16:28:29 jz Exp $
+// $Id: spooler.cxx,v 1.247 2003/09/04 15:53:08 jz Exp $
 /*
     Hier sind implementiert
 
@@ -117,7 +117,7 @@ static void send_error_email( const string& subject, const string& body )
 
 //---------------------------------------------------------------------------------send_error_email
 
-void send_error_email( const string& error_text, int argc, char** argv, Spooler* spooler )
+void send_error_email( const string& error_text, int argc, char** argv, const string& parameter_line, Spooler* spooler )
 {
 
     string body = "Der Spooler konnte nicht gestartet werden.\n"
@@ -127,6 +127,7 @@ void send_error_email( const string& error_text, int argc, char** argv, Spooler*
                   "\n";
                    
     for( int i = 0; i < argc; i++ )  body += argv[i], body += ' ';
+    body += parameter_line;
 
     body += "\n\n\n"
             "Fehlermeldung:\n";
@@ -1144,9 +1145,11 @@ void Spooler::load_arg()
 {
     assert( current_thread_id() == _thread_id );
 
-    for( Sos_option_iterator opt ( _argc, _argv ); !opt.end(); opt.next() )
+    for( Sos_option_iterator opt ( _argc, _argv, _parameter_line ); !opt.end(); opt.next() )
     {
         if( opt.with_value( "ini" ) )  _factory_ini = opt.value();
+        else
+        if( opt.param() ) {}
     }
 
 
@@ -1183,7 +1186,7 @@ void Spooler::load_arg()
 
     try
     {
-        for( Sos_option_iterator opt ( _argc, _argv ); !opt.end(); opt.next() )
+        for( Sos_option_iterator opt ( _argc, _argv, _parameter_line ); !opt.end(); opt.next() )
         {
             if( opt.flag      ( "V"                ) )  ;   // wurde in sos_main() bearbeitet
             else
@@ -1628,7 +1631,7 @@ void Spooler::run()
               //while( something_done );
 
 
-                string       msg = "Kein Job und keine Task aktiv";
+                string       msg = "Warten"; //"Kein Job und keine Task aktiv";
                 Wait_handles wait_handles ( this, &_log );
                 _next_time = latter_day;
 
@@ -1647,7 +1650,7 @@ void Spooler::run()
                     {
                         _next_time = task->next_time();
                         if( _debug )  if( task )  msg = "Warten bis " + _next_time.as_string() + " für Task " + task->name();
-                                            else  msg = "Keine Task aktiv";
+                                          //else  msg = "Keine Task aktiv";
                     }
 
                     nothing_done_max += single_thread->task_count() * 3 + 3;    // Statt der Prozesse zählen wir die Tasks einmal mehr
@@ -1674,32 +1677,40 @@ void Spooler::run()
                     // geht nicht: _next_time = max( _next_time, Time::now() + min( 30.0, double( 1 << min( 5+2, nichts_getan_zaehler ) ) / 4 ) );    // Bremsen, mit 1/4s anfangen bis 30s
                     _next_time = Time::now() + 0.5;
                     //LOG( "Spooler _next_time nach 'nichts getan' = " << _next_time.as_string() << "\n" );
+                    something_done = false;  // Damit wait_until() gerufen wird.
                 }
 
 
                 int ___SPOOLER_IST_GEDROSSELT______SPOOLER_IST_GEDROSSELT______SPOOLER_IST_GEDROSSELT___;
-                if( ++throttle_loop_count > 100 )
+                if( ++throttle_loop_count > 20 )
                 {
-                    if( Time::now() < throttle_time + 0.1 )
+                    LOG( "Spooler wird gedrosselt... something_done=" << something_done + " _next_time=" + _next_time.as_string() + "\n\n" );
+                    sos_sleep(0.1);                             // Erstmal alle 20 Durchläufe bremsen!
+
+                    if( Time::now() < throttle_time + 0.02 )
                     {
-                        LOG( "Spooler wird gedrosselt ...\n" );
-                        sos_sleep(0.1);
+                        sos_sleep(0.4);                         // Bei mehr als 20 Schritten in 20ms
                     }
+
                     throttle_loop_count = 0;
                     throttle_time = Time::now();
                 }
 
 
-                if( _next_time > 0 )
+                if( !something_done  &&  _next_time > 0 )
                 {
-_next_time = min( _next_time, Time::now() + 30.0 );      // Wartezeit vorsichtshalber begrenzen
-                    if( _debug )  
+                    Time now = Time::now();
+                    if( _next_time > now )
                     {
-                        if( wait_handles.wait(0) == -1 )  _log.debug9( msg ), wait_handles.wait_until( _next_time );     // Debug-Ausgabe der Wartezeit nur, wenn kein Ergebnis vorliegt
-                    }
-                    else
-                    {
-                        wait_handles.wait_until( _next_time );
+_next_time = min( _next_time, now + 10.0 );      // Wartezeit vorsichtshalber begrenzen
+                        if( _debug )  
+                        {
+                            if( wait_handles.wait(0) == -1 )  _log.debug9( msg ), wait_handles.wait_until( _next_time );     // Debug-Ausgabe der Wartezeit nur, wenn kein Ergebnis vorliegt
+                        }
+                        else
+                        {
+                            wait_handles.wait_until( _next_time );
+                        }
                     }
                 }
 
@@ -1710,7 +1721,11 @@ _next_time = min( _next_time, Time::now() + 30.0 );      // Wartezeit vorsichtsh
 
         //_event.reset();
 
-        if( ctrl_c_pressed )  _state_cmd = sc_terminate;
+        if( ctrl_c_pressed )
+        {
+            if( _state_cmd != sc_terminate )  _log.warn( "Abbruch-Signal (Ctrl-C) empfangen. Der Spooler wird beendet.\n" );
+            _state_cmd = sc_terminate;
+        }
     }
 }
 
@@ -1789,14 +1804,16 @@ void Spooler::cmd_let_run_terminate_and_restart()
 
 //----------------------------------------------------------------------------------Spooler::launch
 
-int Spooler::launch( int argc, char** argv )
+int Spooler::launch( int argc, char** argv, const string& parameter_line )
 {
     int rc;
 
-    if( !SOS_LICENCE( licence_spooler ) )  throw_xc( "SOS-1000", "Spooler" );
-
     _argc = argc;
     _argv = argv;
+    _parameter_line = parameter_line;
+
+
+    if( !SOS_LICENCE( licence_spooler ) )  throw_xc( "SOS-1000", "Spooler" );
 
     tzset();
 
@@ -2091,7 +2108,7 @@ void __cdecl delete_new_spooler( void* )
 #endif
 //-------------------------------------------------------------------------------------spooler_main
 
-int spooler_main( int argc, char** argv )
+int spooler_main( int argc, char** argv, const string& parameter_line )
 {
     int ret;
 
@@ -2100,12 +2117,12 @@ int spooler_main( int argc, char** argv )
 
     try
     {
-        ret = my_spooler.launch( argc, argv );
+        ret = my_spooler.launch( argc, argv, parameter_line );
     }
     catch( const exception& x )
     {
         SHOW_ERR( "Fehler " << x.what() );     // Fehlermeldung vor ~Spooler ausgeben
-        if( my_spooler.is_service() )  send_error_email( x.what(), argc, argv, &my_spooler );
+        if( my_spooler.is_service() )  send_error_email( x.what(), argc, argv, parameter_line, &my_spooler );
         ret = 1;
     }
 
@@ -2127,17 +2144,14 @@ int object_server( int argc, char** argv )
 
 } //namespace spooler
 
-//-----------------------------------------------------------------------------------------sos_main
+//-------------------------------------------------------------------------------------spooler_main
 
-int sos_main( int argc, char** argv )
+int spooler_main( int argc, char** argv, const string& parameter_line )
 {
     LOG( "Spooler " VER_PRODUCTVERSION_STR "\n" );
 
     int  ret        = 99;
     bool is_service = false;
-
-    ::_argc = argc;
-    ::_argv = argv;
 
 #   ifdef Z_WINDOWS
         SetErrorMode( SEM_FAILCRITICALERRORS | SEM_NOOPENFILEERRORBOX );    // Das System soll sich Messageboxen verkneifen (außer beim Absturz)
@@ -2160,7 +2174,7 @@ int sos_main( int argc, char** argv )
         string  factory_ini = spooler::default_factory_ini;
         string  dependencies;
 
-        for( Sos_option_iterator opt ( argc, argv ); !opt.end(); opt.next() )
+        for( Sos_option_iterator opt ( argc, argv, parameter_line ); !opt.end(); opt.next() )
         {
           //if( opt.flag      ( "renew-spooler"    ) )  renew_spooler = program_filename();
           //else
@@ -2265,11 +2279,11 @@ int sos_main( int argc, char** argv )
 
                 if( is_service )
                 {
-                    ret = spooler::spooler_service( service_name, argc, argv );
+                    ret = spooler::spooler_service( service_name, argc, argv );   
                 }
                 else
                 {
-                    ret = spooler::spooler_main( argc, argv );
+                    ret = spooler::spooler_main( argc, argv, parameter_line );
                 }
             }
 
@@ -2283,14 +2297,14 @@ int sos_main( int argc, char** argv )
                 spooler::be_daemon();
             }
 
-            ret = spooler::spooler_main( argc, argv );
+            ret = spooler::spooler_main( opt );
 
 #       endif
     }
     catch( const exception& x )
     {
         LOG( x.what() << "\n" );
-        if( is_service )  spooler::send_error_email( x.what(), argc, argv );
+        if( is_service )  spooler::send_error_email( x.what(), argc, argv, parameter_line );
         ret = 1;
     }
 
@@ -2299,4 +2313,37 @@ int sos_main( int argc, char** argv )
     return ret;
 }
 
+//-----------------------------------------------------------------------------------------sos_main
+
+int sos_main( int argc, char** argv )
+{
+    ::_argc = argc;
+    ::_argv = argv;
+
+    return sos::spooler_main( argc, argv, "" );
+}
+
+
 } //namespace sos
+
+//-------------------------------------------------------------------------------------------------
+/*
+#ifdef Z_WINDOWS
+
+//extern "C" BOOL WINAPI DllMain( HANDLE hInst, DWORD ul_reason_being_called, void* )
+
+extern "C" int __cdecl mainCRTStartup();
+extern "C" BOOL WINAPI _DllMainCRTStartup( HANDLE hDllHandle, DWORD dwReason, LPVOID lpreserved );
+
+
+extern "C" int __stdcall entry_point( HANDLE hDllHandle, DWORD dwReason, LPVOID lpreserved )
+{
+    MessageBox( NULL, "Hier ist der Spooler!", "Spooler", 0 );
+
+    //return mainCRTStartup();
+    return _DllMainCRTStartup( hDllHandle, dwReason, lpreserved );
+}
+
+#endif
+*/
+//-------------------------------------------------------------------------------------------------

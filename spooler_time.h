@@ -1,4 +1,4 @@
-// $Id: spooler_time.h,v 1.21 2003/09/01 15:15:38 jz Exp $
+// $Id: spooler_time.h,v 1.22 2003/09/04 15:53:08 jz Exp $
 
 #ifndef __SPOOLER_TIME_H
 #define __SPOOLER_TIME_H
@@ -97,8 +97,8 @@ struct Time
 #   endif    
 };      
 
-const int                       latter_day_int              = INT_MAX;
-const Time                      latter_day                  = latter_day_int;
+extern const int                latter_day_int;
+extern const Time               latter_day;
 
 //-------------------------------------------------------------------------------------------Period
 

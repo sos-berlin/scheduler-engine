@@ -1,5 +1,5 @@
 
-// $Id: spooler_order.cxx,v 1.34 2003/08/29 08:14:04 jz Exp $
+// $Id: spooler_order.cxx,v 1.35 2003/09/04 15:53:08 jz Exp $
 /*
     Hier sind implementiert
 
@@ -188,8 +188,7 @@ void Job_chain::load_orders_from_database()
     {
         Transaction ta ( _spooler->_db );
 
-        Any_file sel ( _spooler->_db->db_name() + 
-                       "-max-length=32K "
+        Any_file sel ( "-in " + _spooler->_db->db_name() + "-max-length=32K "
                        " select \"ID\", \"PRIORITY\", \"STATE\", \"STATE_TEXT\", \"TITLE\", \"CREATED_TIME\", \"PAYLOAD\""
                        " from " + sql::quoted_name( _spooler->_orders_tablename ) +
                        " where \"SPOOLER_ID\"=" + sql::quoted(_spooler->id_for_db()) + 

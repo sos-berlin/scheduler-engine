@@ -1,11 +1,11 @@
-// $Id: spooler.h,v 1.154 2003/09/02 16:28:29 jz Exp $
+// $Id: spooler.h,v 1.155 2003/09/04 15:53:08 jz Exp $
 
 #ifndef __SPOOLER_H
 #define __SPOOLER_H
 
 #include "../kram/sos.h"
 #include "../kram/sysxcept.h"
-
+#include "../kram/sosopt.h"
 
 #ifdef Z_WINDOWS
 #   define SPOOLER_USE_LIBXML2              // Gnomes libxml2
@@ -183,7 +183,7 @@ struct Spooler
 
     xml::Element_ptr            threads_as_xml              ( const xml::Document_ptr&, Show_what );
 
-    int                         launch                      ( int argc, char** argv );                                
+    int                         launch                      ( int argc, char** argv, const string& params );                                
     void                        set_state_changed_handler   ( State_changed_handler h )         { _state_changed_handler = h; }
 
     Thread_id                   run_single_thread                   () const                            { return _thread_id; }
@@ -282,6 +282,7 @@ struct Spooler
     Thread_semaphore           _lock;
     int                        _argc;
     char**                     _argv;
+    string                     _parameter_line;
 
   public:
     Log                        _base_log;
@@ -419,7 +420,7 @@ struct Spooler
 //-------------------------------------------------------------------------------------------------
 
 void                            spooler_restart             ( Log* log, bool is_service );
-void                            send_error_email            ( const string& error_text, int argc, char** argv, Spooler* spooler = NULL );
+void                            send_error_email            ( const string& error_text, int argc, char** argv, const string& parameter_line, Spooler* spooler = NULL );
 //void                          send_error_email            ( const string& subject, const string& body );
 
 //extern bool                     spooler_is_running;
@@ -427,6 +428,13 @@ void                            send_error_email            ( const string& erro
 //-------------------------------------------------------------------------------------------------
 
 } //namespace spooler
+
+int                             spooler_main                ( int argc, char** argv, const string& parameters );
+
 } //namespace sos
+
+#ifdef Z_WINDOWS
+extern "C" int  __declspec(dllexport) spooler_program       ( int argc, char** argv );
+#endif
 
 #endif

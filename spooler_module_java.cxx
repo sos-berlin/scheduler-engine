@@ -1,4 +1,4 @@
-// $Id: spooler_module_java.cxx,v 1.59 2003/08/27 10:22:58 jz Exp $
+// $Id: spooler_module_java.cxx,v 1.60 2003/09/04 15:53:08 jz Exp $
 /*
     Hier sind implementiert
 
@@ -405,6 +405,7 @@ jmethodID Module::java_method_id( const string& name )
         int pos = name.find( '(' );
         if( pos == string::npos )  pos = name.length();
         
+        if( !_java_class )  throw_xc( "SPOOLER-197", name );
         method_id = env->GetMethodID( _java_class, name.substr(0,pos).c_str(), name.c_str()+pos );
         if( env->ExceptionCheck() ) env->ExceptionDescribe(), env->ExceptionClear();
 
