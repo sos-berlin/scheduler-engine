@@ -1,4 +1,4 @@
-// $Id: spooler_communication.h,v 1.18 2004/01/06 16:39:36 jz Exp $
+// $Id: spooler_communication.h,v 1.19 2004/01/06 19:52:42 jz Exp $
 
 #ifndef __SPOOLER_COMMUNICATION_H
 #define __SPOOLER_COMMUNICATION_H
@@ -128,7 +128,7 @@ struct Communication //: zschimmer::Thread
 {                                                 
     struct Channel : zschimmer::Socket_operation
     {
-                                Channel                     ( Spooler* );
+                                Channel                     ( Communication* );
                                ~Channel                     ();
 
 
@@ -146,6 +146,7 @@ struct Communication //: zschimmer::Thread
 
         Fill_zero              _zero_;
         Spooler*               _spooler;
+        Communication*          _communication;
         Named_host             _host;
 
         string                 _text;
@@ -203,11 +204,11 @@ struct Communication //: zschimmer::Thread
   //int                         thread_main                 ();
     bool                        started                     ()                                      { return _started; }
   //bool                        main_thread_exists          ();
-
+    void                        remove_channel              ( Channel* );
 
   private:
-    int                         run                         ();
-    bool                        handle_socket               ( Channel* );
+  //int                         run                         ();
+  //bool                        handle_socket               ( Channel* );
     int                         bind_socket                 ( SOCKET, struct sockaddr_in* );
   //void                       _fd_set                      ( SOCKET, fd_set* );
 

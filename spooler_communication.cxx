@@ -1,4 +1,4 @@
-// $Id: spooler_communication.cxx,v 1.72 2004/01/06 16:39:36 jz Exp $
+// $Id: spooler_communication.cxx,v 1.73 2004/01/06 19:52:42 jz Exp $
 /*
     Hier sind implementiert
 
@@ -22,6 +22,7 @@ const int wait_for_port_available = 60;   // Soviele Sekunden warten, bis TCP- o
 
 #ifdef Z_WINDOWS
 #   include <io.h>
+    const int EWOULDBLOCK = 10035;
     const int ENOTSOCK   = 10038;
     const int EADDRINUSE = WSAEADDRINUSE;
     const int STDIN_FILENO  = (int)GetStdHandle( STD_INPUT_HANDLE );//0;
@@ -250,7 +251,7 @@ bool Communication::Listen_socket::async_continue_( bool wait )
 
     //if( socket_read_signaled() )
     {
-        ptr<Channel> new_channel = Z_NEW( Channel( _spooler ) );
+        ptr<Channel> new_channel = Z_NEW( Channel( _communication ) );
 
         bool ok = new_channel->do_accept( _read_socket );
         if( ok )
@@ -308,10 +309,11 @@ bool Communication::Udp_socket::async_continue_( bool wait )
 
 //------------------------------------------------------------------Communication::Channel::Channel
 
-Communication::Channel::Channel( Spooler* spooler )
+Communication::Channel::Channel( Communication* communication )
 :
     _zero_(this+1),
-    _spooler(spooler),
+    _spooler(communication->_spooler),
+    _communication(communication),
     _send_is_complete( true ),
     _log(_spooler)
 {
@@ -322,6 +324,8 @@ Communication::Channel::Channel( Spooler* spooler )
 
 Communication::Channel::~Channel()
 {
+    remove_from_socket_manager();
+
     if( _read_socket != SOCKET_ERROR  &&  _read_socket != STDIN_FILENO )
     {
         LOG2( "socket.close", "close(" << _read_socket << ")\n" );
@@ -372,6 +376,8 @@ bool Communication::Channel::do_accept( SOCKET listen_socket )
 
 void Communication::Channel::do_close()
 {
+    remove_from_socket_manager();
+
     if( _read_socket == STDIN_FILENO  &&  _eof  &&  isatty(STDIN_FILENO) )  _spooler->cmd_terminate();  // Ctrl-D (auch wenn Terminal-Sitzung beendet?)
 
     if( _read_socket != SOCKET_ERROR  &&  _read_socket != STDIN_FILENO )
@@ -398,74 +404,76 @@ void Communication::Channel::recv_clear()
 
 bool Communication::Channel::do_recv()
 {
-    try
-    {
-        char buffer [ 4096 ];
+    bool something_done = false;
 
-        LOG2( "socket.recv", "recv/read(" << _read_socket << ")\n" );
-        int len = _read_socket == STDIN_FILENO? read( _read_socket, buffer, sizeof buffer )
-                                              : recv( _read_socket, buffer, sizeof buffer, 0 );
+    char buffer [ 4096 ];
 
-        if( len <= 0 ) {
-            if( len == 0 )  { _eof = true;  return true; }
-            if( get_errno() == EAGAIN )  return true; 
-            throw_sos_socket_error( "recv" ); 
-        }
+    LOG2( "socket.recv", "recv/read(" << _read_socket << ")\n" );
+    int len = _read_socket == STDIN_FILENO? read( _read_socket, buffer, sizeof buffer )
+                                          : recv( _read_socket, buffer, sizeof buffer, 0 );
 
-        const char* p = buffer;
-
-        if( _receive_at_start ) 
-        {
-            if( len == 1  &&  buffer[0] == '\x04' )  return false;      // Einzelnes Ctrl-D beendet Sitzung
-            if( len == 1  &&  buffer[0] == '\n'   
-             || len == 2  &&  buffer[0] == '\r'  &&  buffer[1] == '\n' )  { _spooler->signal( "do_something!" );  _spooler->_last_time_enter_pressed = Time::now().as_time_t(); return true; }
-
-            _receive_at_start = false;
-            while( p < buffer+len  &&  isspace( (Byte)*p ) )  p++;      // Blanks am Anfang nicht beachten
-            len -= p - buffer;
-        }
-
-        _receive_is_complete = _xml_end_finder.is_complete( p, len );
-
-        if( len >= 2  &&  buffer[len-2] == '\r' )  _indent = true;      // CR LF am Ende lässt Antwort einrücken. CR LF soll nur bei telnet-Eingabe kommen.
-      //if( len >= 1  &&  buffer[len-1] == '\n' )  _indent = true;      // LF am Ende lässt Antwort einrücken. LF soll nur bei telnet-Eingabe kommen.
-        _text.append( p, len );
+    if( len <= 0 ) {
+        if( len == 0 )  { _eof = true;  return true; }
+        if( get_errno() == EWOULDBLOCK )  return false; 
+        throw_sos_socket_error( "recv" ); 
     }
-    catch( const Xc& x ) { _log.error(x.what()); return false; }
 
-    return true;
+    something_done = true;
+
+    const char* p = buffer;
+
+    if( _receive_at_start ) 
+    {
+        if( len == 1  &&  buffer[0] == '\x04' )  { _eof = true; return true; }      // Einzelnes Ctrl-D beendet Sitzung
+        if( len == 1  &&  buffer[0] == '\n'   
+         || len == 2  &&  buffer[0] == '\r'  &&  buffer[1] == '\n' )  { _spooler->signal( "do_something!" );  _spooler->_last_time_enter_pressed = Time::now().as_time_t(); return true; }
+
+        _receive_at_start = false;
+        while( p < buffer+len  &&  isspace( (Byte)*p ) )  p++;      // Blanks am Anfang nicht beachten
+        len -= p - buffer;
+    }
+
+    _receive_is_complete = _xml_end_finder.is_complete( p, len );
+
+    if( len >= 2  &&  buffer[len-2] == '\r' )  _indent = true;      // CR LF am Ende lässt Antwort einrücken. CR LF soll nur bei telnet-Eingabe kommen.
+  //if( len >= 1  &&  buffer[len-1] == '\n' )  _indent = true;      // LF am Ende lässt Antwort einrücken. LF soll nur bei telnet-Eingabe kommen.
+    _text.append( p, len );
+
+    return something_done;
 }
 
 //------------------------------------------------------------------Communication::Channel::do_send
 
 bool Communication::Channel::do_send()
 {
-    try
+    bool something_done = false;
+    int  len            = 0;
+
+    if( _send_is_complete )  _send_progress = 0, _send_is_complete = false;     // Am Anfang
+
+    int count = _text.length() - _send_progress;
+    if( count > 0 )
     {
-        if( _send_is_complete )  _send_progress = 0, _send_is_complete = false;     // Am Anfang
-
-        int count = _text.length() - _send_progress;
-        if( count == 0 )  return true;
-
         LOG2( "socket.send", "send/write(" << _write_socket << "," << count << " bytes)\n" );
-        int len = _write_socket == STDOUT_FILENO? write ( _write_socket, _text.c_str() + _send_progress, count )
+        len = _write_socket == STDOUT_FILENO? write ( _write_socket, _text.c_str() + _send_progress, count )
                                                 : ::send( _write_socket, _text.c_str() + _send_progress, count, 0 );
         if( len < 0 ) {
-            if( get_errno() == EAGAIN )  return true;
+            if( get_errno() == EWOULDBLOCK )  return false;
             throw_sos_socket_error( "send" );
         }
 
-        _send_progress += len;
-
-        if( _send_progress == _text.length() )
-        {
-            _send_is_complete = true;
-            _text = "";
-        }
+        something_done = true;
     }
-    catch( const Xc& x ) { _log.error(x.what()); return false; }
 
-    return true;
+    _send_progress += len;
+
+    if( _send_progress == _text.length() )
+    {
+        _send_is_complete = true;
+        _text = "";
+    }
+
+    return something_done;
 }
 
 //----------------------------------------------------------Communication::Channel::async_continue_
@@ -474,18 +482,16 @@ bool Communication::Channel::async_continue_( bool wait )
 {
     bool something_done = false;
 
-    //if( socket_write_signaled() ) 
+    try
     {
-        something_done |= do_send();
-        //if( !ok )  return false;
-    }
-
-    //if( socket_read_signaled() )
-    {
-        bool ok = do_recv();
-        if( ok )
+        //if( socket_write_signaled() ) 
         {
-            something_done = true;
+            something_done |= do_send();
+        }
+
+        //if( socket_read_signaled() )
+        {
+            something_done |= do_recv();
 
             if( _receive_is_complete ) 
             {
@@ -499,12 +505,18 @@ bool Communication::Channel::async_continue_( bool wait )
                 _text = cp.execute( cmd, Time::now(), _indent );
                 //if( _indent )  channel->_text = _text.replace( "\n", "\r\n" );
                 if( cp._error )  _log.error( cp._error->what() );
-                ok = do_send();
-                //if( !ok )  return false;
-            }
 
-            //if( _eof && _send_is_complete )  return false;
+                do_send();
+            }
         }
+
+        if( _eof && _send_is_complete )  { _communication->remove_channel( this );  return true; }
+    }
+    catch( const Xc& x ) 
+    { 
+        _log.error( x.what() );  
+        _communication->remove_channel( this );  
+        return true; 
     }
 
     async_clear_signaled();
@@ -559,6 +571,21 @@ void Communication::close( double wait_time )
 
     thread_close();
 */
+}
+
+//--------------------------------------------------------------------Communication::remove_channel
+
+void Communication::remove_channel( Channel* channel )
+{
+    FOR_EACH( Channel_list, _channel_list, it )
+    {
+        if( *it == channel )  
+        {
+            (*it)->do_close(); 
+            _channel_list.erase( it ); 
+            break;
+        }
+    }
 }
 
 //----------------------------------------------------------------Communication::main_thread_exists
