@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.25 2003/09/25 10:57:06 jz Exp $
+# $Id: Makefile,v 1.26 2003/10/08 12:17:00 jz Exp $
 
 ifndef PROD_DIR
 prod_dir = ..
@@ -52,7 +52,7 @@ java_classes=\
 
 java_headers=$(patsubst %.class, %.h, $(java_classes) )
 
-all:: $(BIN_DIR)/spooler
+all:: $(BIN_DIR)/scheduler
 all:: $(BIN_DIR)/sos.spooler.jar
 
 clean:
@@ -85,14 +85,14 @@ LIBS += -Wl,+b,/opt/java1.4/jre/lib/PA_RISC2.0:/opt/java1.4/jre/lib/PA_RISC2.0/s
 endif
 
 
-#$(BIN_DIR)/spooler: spooler.o $(objects) ../kram/$(O_DIR)/soswnmai.o ../zschimmer/$(O_DIR)/perl_scripting_engine_module.o $(foreach p,$(DEP_PRODUCTS),$(PROD_DIR)/$(p)/$(O_DIR)/lib$(p).a) $(PERL_DIR)/libperl.a
+#$(BIN_DIR)/scheduler: spooler.o $(objects) ../kram/$(O_DIR)/soswnmai.o ../zschimmer/$(O_DIR)/perl_scripting_engine_module.o $(foreach p,$(DEP_PRODUCTS),$(PROD_DIR)/$(p)/$(O_DIR)/lib$(p).a) $(PERL_DIR)/libperl.a
 #	-$(CCPP) $(DEBUG) $(LINK_FLAGS) $^ $(LIBPATH) $(SOS_LIBS) $(LIBS) -o $@
 
-#$(BIN_DIR)/spooler: spooler.o $(objects) ../kram/$(O_DIR)/soswnmai.o ../zschimmer/$(O_DIR)/perl_scripting_engine_module.o $(foreach p,$(DEP_PRODUCTS),$(PROD_DIR)/$(p)/$(O_DIR)/lib$(p).a) $(PERL_DIR)/libperl.a
+#$(BIN_DIR)/scheduler: spooler.o $(objects) ../kram/$(O_DIR)/soswnmai.o ../zschimmer/$(O_DIR)/perl_scripting_engine_module.o $(foreach p,$(DEP_PRODUCTS),$(PROD_DIR)/$(p)/$(O_DIR)/lib$(p).a) $(PERL_DIR)/libperl.a
 #	-$(CCPP) $(DEBUG) $(LINK_FLAGS) $^ $(LIBPATH) $(SOS_LIBS) $(LIBS) -o $@
 #	chmod a+rx $@
 
-$(BIN_DIR)/spooler: spooler.o $(objects) ../kram/$(O_DIR)/soswnmai.o $(foreach p,$(DEP_PRODUCTS),$(PROD_DIR)/$(p)/$(O_DIR)/lib$(p).a)
+$(BIN_DIR)/scheduler: spooler.o $(objects) ../kram/$(O_DIR)/soswnmai.o $(foreach p,$(DEP_PRODUCTS),$(PROD_DIR)/$(p)/$(O_DIR)/lib$(p).a)
 	-$(CCPP) $(DEBUG) $(LINK_FLAGS) $^ $(LIBPATH) $(SOS_LIBS) $(LIBS) -o $@
 	chmod a+rx $@
 
