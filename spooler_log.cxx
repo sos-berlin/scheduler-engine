@@ -1,4 +1,4 @@
-// $Id: spooler_log.cxx,v 1.42 2002/04/11 13:30:59 jz Exp $
+// $Id: spooler_log.cxx,v 1.43 2002/04/17 21:37:18 jz Exp $
 
 #include "../kram/sos.h"
 #include "spooler.h"
@@ -259,11 +259,12 @@ void Prefix_log::set_profile_section( const string& section )
     if( !_section.empty() ) 
     {
         _log_level       = make_log_level( read_profile_string( _spooler->_factory_ini, _section, "log_level", as_string(_log_level) ) );
-        _mail_on_error   =         read_profile_bool  ( _spooler->_factory_ini, _section, "mail_on_error"     , _mail_on_error );
-        _mail_on_success =         read_profile_bool  ( _spooler->_factory_ini, _section, "mail_on_success"   , _mail_on_success );
-        _subject         =         read_profile_string( _spooler->_factory_ini, _section, "log_mail_subject"  , _subject );
-        _collect_within  = (double)read_profile_uint  ( _spooler->_factory_ini, _section, "log_collect_within", _collect_within );
-        _collect_max     = (double)read_profile_uint  ( _spooler->_factory_ini, _section, "log_collect_max"   , _collect_max );
+        _mail_on_error   = read_profile_bool           ( _spooler->_factory_ini, _section, "mail_on_error"     , _mail_on_error );
+        _mail_on_process = read_profile_mail_on_process( _spooler->_factory_ini, _section, "mail_on_process"   , _mail_on_process );
+        _mail_on_success =         read_profile_bool   ( _spooler->_factory_ini, _section, "mail_on_success"   , _mail_on_success );
+        _subject         =         read_profile_string ( _spooler->_factory_ini, _section, "log_mail_subject"  , _subject );
+        _collect_within  = (double)read_profile_uint   ( _spooler->_factory_ini, _section, "log_collect_within", _collect_within );
+        _collect_max     = (double)read_profile_uint   ( _spooler->_factory_ini, _section, "log_collect_max"   , _collect_max );
 
         _smtp_server = read_profile_string( _spooler->_factory_ini, _section, "smtp"          , _spooler->_smtp_server );
         _queue_dir   = read_profile_string( _spooler->_factory_ini, _section, "mail_queue_dir", _spooler->_mail_queue_dir );

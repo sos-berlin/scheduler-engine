@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.94 2002/04/12 08:16:44 jz Exp $
+// $Id: spooler.cxx,v 1.95 2002/04/17 21:37:18 jz Exp $
 /*
     Hier sind implementiert
 
@@ -522,7 +522,7 @@ void Spooler::start()
     _mail_on_process = read_profile_mail_on_process( _factory_ini, "spooler", "mail_on_process", _mail_on_process );
     _mail_on_success = read_profile_bool           ( _factory_ini, "spooler", "mail_on_success", _mail_on_success );
     _mail_queue_dir  = read_profile_string         ( _factory_ini, "spooler", "mail_queue_dir" , _mail_queue_dir );
-    _mail_encoding   = read_profile_string         ( _factory_ini, "spooler", "mail_encoding"  , "quoted-printable" );
+    _mail_encoding   = read_profile_string         ( _factory_ini, "spooler", "mail_encoding"  , "base64"        );      // "quoted-printable": Jmail braucht 1s pro 100KB dafür
     _smtp_server     = read_profile_string         ( _factory_ini, "spooler", "smtp"           , _smtp_server );
 
     _log_mail_from      = read_profile_string( _factory_ini, "spooler", "log_mail_from"   );

@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.87 2002/04/17 10:21:38 jz Exp $
+// $Id: spooler_task.cxx,v 1.88 2002/04/17 21:37:18 jz Exp $
 /*
     Hier sind implementiert
 
@@ -250,7 +250,6 @@ Job::Job( Thread* thread )
     _script_instance(&_log),
     _history(this)
 {
-    LOG( "Job::_semaphore=" << hex <<_lock._semaphore.LockSemaphore <<dec << '\n' );
     _next_time = latter_day;
 }
 
@@ -804,7 +803,7 @@ bool Job::execute_state_cmd()
 {
     bool something_done = false;
 
-    THREAD_LOCK( _lock )
+    //THREAD_LOCK( _lock )
     {
         if( _state_cmd )
         {

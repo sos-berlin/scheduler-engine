@@ -1,4 +1,4 @@
-// $Id: spooler_mail_jmail.cxx,v 1.5 2002/03/19 18:56:28 jz Exp $
+// $Id: spooler_mail_jmail.cxx,v 1.6 2002/04/17 21:37:18 jz Exp $
 
 
 #include "../kram/sos.h"
@@ -122,7 +122,7 @@ void Com_mail::init()
         hr = _msg.CreateInstance( __uuidof( jmail::Message ), NULL );
         if( FAILED(hr) )  throw_ole( hr, "CoCreateInstance", "jmail::Message" );
 
-        _msg->Encoding = "quoted-printable";  // Für Anhänge
+        // Jmail braucht 1s pro 100KB dafür        _msg->Encoding = "quoted-printable";  // Für Anhänge
     }
 }
 
