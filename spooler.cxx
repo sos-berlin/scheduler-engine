@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.261 2003/09/26 10:46:41 jz Exp $
+// $Id: spooler.cxx,v 1.262 2003/09/26 13:39:20 jz Exp $
 /*
     Hier sind implementiert
 
@@ -1544,8 +1544,8 @@ void Spooler::run()
     int             nothing_done_max     = _job_list.size() * 2 + 3;
     int             nichts_getan_zaehler = 0;
 
-    Time            throttle_time        = Time::now();
-    int             throttle_loop_count  = 0;
+  //Time            throttle_time        = Time::now();
+  //int             throttle_loop_count  = 0;
 
 
 

@@ -1,4 +1,4 @@
-// $Id: spooler_module_java.cxx,v 1.64 2003/09/26 11:31:17 jz Exp $
+// $Id: spooler_module_java.cxx,v 1.65 2003/09/26 13:39:20 jz Exp $
 /*
     Hier sind implementiert
 
@@ -541,7 +541,7 @@ void Java_module_instance::init()
 
         if( !_module->_source.empty() )
         {
-            bool compiled = _module->make_java_class( _module->_recompile && !_module_compiled );     // Java-Klasse ggfs. übersetzen
+            bool compiled = _module->make_java_class( _module->_recompile & !_module->_compiled );     // Java-Klasse ggfs. übersetzen
             _module->_compiled |= compiled;
 
             if( !compiled )

@@ -1,4 +1,4 @@
-// $Id: spooler_job.cxx,v 1.26 2003/09/26 10:46:41 jz Exp $
+// $Id: spooler_job.cxx,v 1.27 2003/09/26 13:39:20 jz Exp $
 /*
     Hier sind implementiert
 
@@ -733,7 +733,11 @@ void Job::set_next_start_time( Time now, bool repeat )
 {
     string msg;
 
-
+    if( order_controlled() ) 
+    {
+        _next_start_time = latter_day;
+    }
+    else
     if( _state == s_stopped && _delay_until )
     {
         _next_start_time = _period.next_try( _delay_until );
