@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.112 2002/07/29 10:28:35 jz Exp $
+// $Id: spooler.cxx,v 1.113 2002/09/11 10:05:13 jz Exp $
 /*
     Hier sind implementiert
 
@@ -8,7 +8,6 @@
     sos_main()
 */
 
-#include "../kram/sos.h"
 #include "spooler.h"
 #include "spooler_version.h"
 
@@ -279,6 +278,8 @@ Spooler::~Spooler()
     _event.close();
     _wait_handles.close();
 
+    //nicht nötig  Z_FOR_EACH( Job_chain_map, _job_chain_map, it )  it->second->close();
+
     // COM-Objekte entkoppeln, falls noch jemand eine Referenz darauf hat:
     if( _com_spooler )  _com_spooler->close();
     if( _com_log     )  _com_log->close();
@@ -430,7 +431,8 @@ Object_set_class* Spooler::get_object_set_class_or_null( const string& name )
 Job* Spooler::get_job( const string& job_name )
 {
     Job* job = get_job_or_null( job_name );
-    if( !job  ||  !job->state() )  throw_xc( "SPOOLER-108", job_name );
+    //if( !job  ||  !job->state() )  throw_xc( "SPOOLER-108", job_name );
+    if( !job  )  throw_xc( "SPOOLER-108", job_name );
     return job;
 }
 

@@ -1,4 +1,4 @@
-// $Id: spooler_script.cxx,v 1.13 2002/06/29 17:26:42 jz Exp $
+// $Id: spooler_script.cxx,v 1.14 2002/09/11 10:05:15 jz Exp $
 /*
     Hier sind implementiert
 
@@ -7,9 +7,8 @@
 */
 
 
-#include "../kram/sos.h"
-#include "../file/anyfile.h"
 #include "spooler.h"
+#include "../file/anyfile.h"
 
 using namespace std;
 

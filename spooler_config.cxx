@@ -1,4 +1,4 @@
-// $Id: spooler_config.cxx,v 1.42 2002/06/18 14:45:31 jz Exp $
+// $Id: spooler_config.cxx,v 1.43 2002/09/11 10:05:14 jz Exp $
 
 //#include <precomp.h>
 
@@ -6,7 +6,6 @@
     Hier sind die Methoden verschiedenener Klassen implementiert, die die Konfiguration laden.
 */
 
-#include "../kram/sos.h"
 #include "spooler.h"
 #include "../file/anyfile.h"
 

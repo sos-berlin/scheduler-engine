@@ -1,4 +1,4 @@
-// $Id: spooler_time.cxx,v 1.17 2002/06/21 09:03:29 jz Exp $
+// $Id: spooler_time.cxx,v 1.18 2002/09/11 10:05:16 jz Exp $
 /*
     Hier sind implementiert
 
@@ -13,7 +13,6 @@
     XML-Methoden sind in spooler_config.cxx
 */
 
-#include "../kram/sos.h"
 #include "spooler.h"
 
 #include <sys/types.h>

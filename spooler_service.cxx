@@ -1,4 +1,4 @@
-// $Id: spooler_service.cxx,v 1.27 2002/07/29 10:28:36 jz Exp $
+// $Id: spooler_service.cxx,v 1.28 2002/09/11 10:05:15 jz Exp $
 /*
     Hier sind implementiert
 
@@ -9,7 +9,6 @@
 */
 
 
-#include "../kram/sos.h"
 #include "spooler.h"
 
 #include "../kram/log.h"

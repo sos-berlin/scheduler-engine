@@ -1,7 +1,6 @@
-// $Id: spooler_mail.cxx,v 1.5 2002/04/09 08:55:44 jz Exp $
+// $Id: spooler_mail.cxx,v 1.6 2002/09/11 10:05:15 jz Exp $
 
 
-#include "../kram/sos.h"
 #include "spooler.h"
 #include "spooler_mail.h"
 

@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.101 2002/08/28 12:56:58 jz Exp $
+// $Id: spooler_task.cxx,v 1.102 2002/09/11 10:05:15 jz Exp $
 /*
     Hier sind implementiert
 
@@ -9,7 +9,6 @@
 
 
 
-#include "../kram/sos.h"
 #include "spooler.h"
 
 
@@ -268,6 +267,8 @@ void Job::set_xml( const xml::Element_ptr& element )
 {
     THREAD_LOCK( _lock )
     {
+        bool order;
+
         _name             = as_string       ( element->getAttribute( L"name" ) );
       //_rerun            = as_bool         ( element->getAttribute( L"rerun" ) ) ),
       //_stop_after_error = as_bool         ( element->getAttribute( L"stop_after_errorn ) );
@@ -275,6 +276,13 @@ void Job::set_xml( const xml::Element_ptr& element )
         _priority         = int_from_variant( variant_default( element->getAttribute( L"priority"   ), _priority   ) );
         _title            = as_string       ( variant_default( element->getAttribute( L"title"      ), _title      ) );
         _log_append       = as_bool         ( variant_default( element->getAttribute( L"log_append" ), _log_append ) );
+        order             = as_bool         ( variant_default( element->getAttribute( L"order"      ), false       ) );
+
+        if( order )
+        {
+            if( _temporary )  throw_xc( "SPOOLER-155" );
+            _order_queue = Z_NEW( Order_queue(this) );
+        }
 
         string text;
 

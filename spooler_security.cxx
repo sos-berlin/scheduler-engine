@@ -1,6 +1,5 @@
-// $Id: spooler_security.cxx,v 1.1 2001/01/25 20:28:38 jz Exp $
+// $Id: spooler_security.cxx,v 1.2 2002/09/11 10:05:15 jz Exp $
 
-#include "../kram/sos.h"
 #include "spooler.h"
 
 namespace sos {

@@ -1,4 +1,4 @@
-// $Id: spooler_command.cxx,v 1.56 2002/06/18 14:45:30 jz Exp $
+// $Id: spooler_command.cxx,v 1.57 2002/09/11 10:05:14 jz Exp $
 /*
     Hier ist implementiert
 
@@ -6,7 +6,6 @@
 */
 
 
-#include "../kram/sos.h"
 #include "spooler.h"
 
 #include "../file/anyfile.h"

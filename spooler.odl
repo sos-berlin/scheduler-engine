@@ -1,4 +1,4 @@
-// $Id: spooler.odl,v 1.38 2002/07/28 20:49:46 jz Exp $
+// $Id: spooler.odl,v 1.39 2002/09/11 10:05:13 jz Exp $
 
 // Anweisung: midl /nologo /error all /out $(OutDir) $(InputPath)
 
@@ -18,6 +18,9 @@ library spooler
     interface Itask;
     interface Ithread;
     interface Imail;
+    interface Ijob_chain;
+    interface Iorder_queue;
+    interface Iorder;
 
     //----------------------------------------------------------------------------------------Error
 
@@ -356,6 +359,10 @@ library spooler
 
         [propget]
         HRESULT                 db_name                 ( [out,retval] BSTR* filename );
+
+        HRESULT                 create_job_chain        ( [in] BSTR name, [out,retval] Ijob_chain** result );
+
+      //HRESULT                 add_job_chain           ( [in] Ijob_chain* job_chain );
     }
 
     [
@@ -589,5 +596,152 @@ library spooler
         interface Imail;
     }
 
+    //-------------------------------------------------------------------------------------Job_chain
+
+    [
+        uuid       ( E76C561D-FFD7-4680-AC4F-9CE1B8EEE4FE ),
+        odl,
+        dual
+    ]
+    interface Ijob_chain : IDispatch
+    {
+        [propput]
+        HRESULT                 name                    ( [in] BSTR name );
+
+        [propget]
+        HRESULT                 name                    ( [out,retval] BSTR* result );
+
+      //[propget]
+      //HRESULT                 length                  ( [out,retval] int* result );
+
+        HRESULT                 add_job                 ( [in]          VARIANT* jobname, 
+                                                          [in,optional] VARIANT* input_state,
+                                                          [in,optional] VARIANT* output_state,
+                                                          [in,optional] VARIANT* error_state );
+
+        HRESULT                 add_end_state           ( [in] VARIANT* state );
+
+        HRESULT                 finish                  ();
+
+        HRESULT                 add_order               ( [in] VARIANT* order_or_payload, [in,optional] VARIANT* job_or_state, [out,retval] Iorder** order );
+    }
+
+    [
+        uuid       ( 70EC6128-F7FF-44e6-B352-56CF123F7827 )
+    ]
+    coclass Job_chain
+    {
+        interface Ijob_chain;
+    }
+
+    //----------------------------------------------------------------------------------Order_queue
+
+    [
+        uuid       ( 497E0166-26FF-4ea6-B846-34F4BB97021D ),
+        odl,
+        dual
+    ]
+    interface Iorder_queue : IDispatch
+    {
+        [propget]
+        HRESULT                 length                  ( [out,retval] int* result );
+
+      //HRESULT                 add_order               ( [in] VARIANT* order_or_payload );
+    }
+
+    [
+        uuid       ( 65426DA4-5907-4630-85F1-2201B07253BB )
+    ]
+    coclass Order_queue
+    {
+        interface Iorder_queue;
+    }
+
+    //----------------------------------------------------------------------------------------Order
+
+    [
+        uuid       ( A1B7B832-519C-495b-A1D9-83AAA0165C6D ),
+        odl,
+        dual
+    ]
+    interface Iorder : IDispatch
+    {
+        [propput]
+        HRESULT                 id                      ( [in] VARIANT* value );
+
+        [propget]
+        HRESULT                 id                      ( [out,retval] VARIANT* result );
+
+        [propput]
+        HRESULT                 title                   ( [in] BSTR value );
+
+        [propget]
+        HRESULT                 title                   ( [out,retval] BSTR* result );
+
+        [propput]
+        HRESULT                 priority                ( [in] int value );
+
+        [propget]
+        HRESULT                 priority                ( [out,retval] int* result );
+
+        [propget]
+        HRESULT                 job_chain               ( [out,retval] Ijob_chain** result );
+/*
+        [propput]
+        HRESULT                 job                     ( [in] VARIANT* job_or_jobname );
+
+        [propputref]
+        HRESULT                 job                     ( [in] Ijob* job );
+*/
+        [propget]
+        HRESULT                 job                     ( [out,retval] Ijob** result );
+
+        [propput]
+        HRESULT                 state                   ( [in] VARIANT* value );
+
+        [propget]
+        HRESULT                 state                   ( [out,retval] VARIANT* result );
+
+        [propput]
+        HRESULT                 state_text              ( [in] BSTR value );
+
+        [propget]
+        HRESULT                 state_text              ( [out,retval] BSTR* result );
+
+        [propget]
+        HRESULT                 error                   ( [out,retval] Ierror** result );
+
+        [propput]
+        HRESULT                 payload                 ( [in] VARIANT* value );
+
+        [propputref]
+        HRESULT                 payload                 ( [in] IUnknown* value );
+
+        [propget]
+        HRESULT                 payload                 ( [out,retval] VARIANT* result );
+
+        HRESULT                 payload_is_type         ( [in] BSTR typenam, [out,retval] VARIANT_BOOL* result );
+
+        [propput]
+        HRESULT                 risses_fruits           ( [in] VARIANT* value );
+
+        [propputref]
+        HRESULT                 risses_fruits           ( [in] IUnknown* value );
+
+        [propget]
+        HRESULT                 risses_fruits           ( [out,retval] VARIANT* result );
+
+        HRESULT                 risses_fruits_is_type   ( [in] BSTR typenam, [out,retval] VARIANT_BOOL* result );
+
+        HRESULT                 add_to_job_chain        ( [in] Ijob_chain* );
+    }
+
+    [
+        uuid       ( 8D3FAB02-6DD5-4831-916C-465E15E08F35 )
+    ]
+    coclass Order
+    {
+        interface Iorder;
+    }
 
 };

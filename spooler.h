@@ -1,8 +1,9 @@
-// $Id: spooler.h,v 1.89 2002/06/18 14:45:30 jz Exp $
+// $Id: spooler.h,v 1.90 2002/09/11 10:05:13 jz Exp $
 
 #ifndef __SPOOLER_H
 #define __SPOOLER_H
 
+#include "../kram/sos.h"
 #include "../kram/sysxcept.h"
 
 
@@ -46,6 +47,7 @@
 #include "../zschimmer/file.h"
 #include "../zschimmer/z_com.h"
 
+using namespace zschimmer;
 using namespace zschimmer::com;
 
 namespace sos {
@@ -55,6 +57,9 @@ namespace sos {
         struct Thread;
         struct Job;
         struct Task;
+        struct Job_chain;
+        struct Order_queue;
+        struct Order;
     }
 }
 
@@ -68,6 +73,7 @@ namespace sos {
 #include "spooler_command.h"
 #include "spooler_script.h"
 #include "spooler_history.h"
+#include "spooler_order.h"
 #include "spooler_task.h"
 #include "spooler_thread.h"
 #include "spooler_service.h"
@@ -179,6 +185,7 @@ struct Spooler
     Object_set_class*           get_object_set_class_or_null( const string& name );
     Job*                        get_job                     ( const string& job_name );
     Job*                        get_job_or_null             ( const string& job_name );
+
     void                        signal_object               ( const string& object_set_class_name, const Level& );
     void                        cmd_reload                  ();
     void                        cmd_pause                   ()                                  { _state_cmd = sc_pause; signal( "pause" ); }
@@ -189,6 +196,10 @@ struct Spooler
     void                        cmd_let_run_terminate_and_restart();
     void                        cmd_load_config             ( const xml::Element_ptr&, const string& source_filename );
 
+    // Order
+    long                        get_free_order_id           ()                                  { return InterlockedIncrement( &_next_free_order_id ); }
+    void                        add_job_chain               ( Job_chain* );
+    Job_chain*                  job_chain                   ( const string& name );
 
     friend struct               Com_spooler;
 
@@ -305,11 +316,17 @@ struct Spooler
     State                      _state;
     State_cmd                  _state_cmd;
 
+    long                       _next_free_order_id;
+
     Wait_handles               _wait_handles;
     Event                      _event;                      
 
     Thread_semaphore           _lock;
     bool                       _free_threading_default;
+
+    typedef map< string, ptr<Job_chain> >  Job_chain_map;
+    Job_chain_map              _job_chain_map;
+    Thread_semaphore           _job_chain_lock;
 };
 
 //-------------------------------------------------------------------------------------------------

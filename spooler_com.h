@@ -1,4 +1,4 @@
-// $Id: spooler_com.h,v 1.37 2002/07/28 20:49:46 jz Exp $
+// $Id: spooler_com.h,v 1.38 2002/09/11 10:05:14 jz Exp $
 
 #ifndef __SPOOLER_COM_H
 #define __SPOOLER_COM_H
@@ -12,8 +12,6 @@
 #include "../kram/com_server.h"
 
 #include <atlbase.h>
-//    extern CComModule& _Module;
-//#   include <atlcom.h>
 
 #if defined _DEBUG
 #    import "debug/spooler.tlb"   rename_namespace("spooler_com") raw_interfaces_only named_guids
@@ -327,6 +325,8 @@ struct Com_spooler : spooler_com::Ispooler, Sos_ole_object
     STDMETHODIMP                put_var                     ( BSTR name, VARIANT* value );
     STDMETHODIMP                get_var                     ( BSTR name, VARIANT* value );
     STDMETHODIMP                get_db_name                 ( BSTR* );
+    STDMETHODIMP                create_job_chain            ( BSTR name, spooler_com::Ijob_chain** );
+  //STDMETHODIMP                add_job_chain               ( spooler_com::Ijob_chain* );
 
   protected:
     Thread_semaphore           _lock;
@@ -362,6 +362,106 @@ struct Com_context : spooler_com::Icontext, Sos_ole_object
     CComPtr<spooler_com::Ithread>   _thread;
     CComPtr<spooler_com::Ijob>      _job;
     CComPtr<spooler_com::Itask>     _task;
+};
+
+//------------------------------------------------------------------------------------Com_job_chain
+
+struct Com_job_chain : spooler_com::Ijob_chain, Sos_ole_object               
+{
+                                Com_job_chain           ( Job_chain* );
+
+    void                        close                   ()                                          { THREAD_LOCK( _lock )  _job_chain = NULL; }
+
+    USE_SOS_OLE_OBJECT
+
+    STDMETHODIMP            put_name                    ( BSTR );
+    STDMETHODIMP            get_name                    ( BSTR* );
+  //STDMETHODIMP            get_length                  ( int* );
+    STDMETHODIMP                add_job                 ( VARIANT*, VARIANT*, VARIANT*, VARIANT* );
+    STDMETHODIMP                add_end_state           ( VARIANT* );
+    STDMETHODIMP                finish                  ();
+
+    STDMETHODIMP                add_order               ( VARIANT* order_or_payload, VARIANT*, spooler_com::Iorder** );
+
+
+    Thread_semaphore           _lock;
+    Job_chain*                 _job_chain;
+};
+
+//----------------------------------------------------------------------------------------Com_order
+
+struct Com_order : spooler_com::Iorder, Sos_ole_object
+{
+                                Com_order               ( Order* );
+                              //Com_order               ();
+
+    void                        close                   ()                                          { THREAD_LOCK( _lock )  _order = NULL; }
+
+
+    USE_SOS_OLE_OBJECT
+
+    STDMETHODIMP            put_id                      ( VARIANT* );
+    STDMETHODIMP            get_id                      ( VARIANT* );
+
+    STDMETHODIMP            put_title                   ( BSTR );
+    STDMETHODIMP            get_title                   ( BSTR* );
+    
+    STDMETHODIMP            put_priority                ( int );
+    STDMETHODIMP            get_priority                ( int* );
+    
+    STDMETHODIMP            get_job_chain               ( spooler_com::Ijob_chain** );
+    
+    STDMETHODIMP            put_job                     ( VARIANT* );
+    STDMETHODIMP         putref_job                     ( spooler_com::Ijob* job )                  { return put_job( &Variant(job) ); }
+    STDMETHODIMP            get_job                     ( spooler_com::Ijob** );
+    
+    STDMETHODIMP            put_state                   ( VARIANT* );
+    STDMETHODIMP            get_state                   ( VARIANT* );
+    
+    STDMETHODIMP            put_state_text              ( BSTR );
+    STDMETHODIMP            get_state_text              ( BSTR* );
+    
+    STDMETHODIMP            get_error                   ( spooler_com::Ierror** );
+    
+    STDMETHODIMP            put_payload                 ( VARIANT* );
+    STDMETHODIMP         putref_payload                 ( IUnknown* );
+    STDMETHODIMP            get_payload                 ( VARIANT* );
+    
+    STDMETHODIMP                payload_is_type         ( BSTR, VARIANT_BOOL* );
+    
+    STDMETHODIMP            put_risses_fruits           ( VARIANT* value )                          { return put_payload(value); }
+    STDMETHODIMP         putref_risses_fruits           ( IUnknown* value )                         { return putref_payload(value); }
+    STDMETHODIMP            get_risses_fruits           ( VARIANT* result )                         { return get_payload(result); }
+    
+    STDMETHODIMP                risses_fruits_is_type   ( BSTR typname, VARIANT_BOOL* result )      { return payload_is_type(typname,result); }
+
+    STDMETHODIMP                add_to_job_chain        ( spooler_com::Ijob_chain* );
+
+
+  private:
+    Fill_zero                  _zero_;
+    Thread_semaphore           _lock;
+    Order*                     _order;
+};
+
+//----------------------------------------------------------------------------------Com_order_queue
+
+struct Com_order_queue : spooler_com::Iorder_queue, Sos_ole_object               
+{
+                                Com_order_queue         ( Order_queue* );
+
+    void                        close                   ()                                          { THREAD_LOCK( _lock )  _order_queue = NULL; }
+
+
+    USE_SOS_OLE_OBJECT
+
+    STDMETHODIMP            get_length                  ( int* );
+
+
+  private:
+    Fill_zero                  _zero_;
+    Thread_semaphore           _lock;
+    Order_queue*               _order_queue;
 };
 
 //-------------------------------------------------------------------------------------------------

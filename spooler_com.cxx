@@ -1,4 +1,4 @@
-// $Id: spooler_com.cxx,v 1.46 2002/07/28 20:49:46 jz Exp $
+// $Id: spooler_com.cxx,v 1.47 2002/09/11 10:05:13 jz Exp $
 /*
     Hier sind implementiert
 
@@ -9,8 +9,8 @@
 */
 
 
-#include "../kram/sos.h"
 #include "spooler.h"
+//#include "../hostole/hostole.h"
 
 
 #ifdef SYSTEM_WIN
@@ -23,19 +23,26 @@ using namespace spooler_com;
 
 //------------------------------------------------------------------------------------Typbibliothek
 
-Typelib_descr spooler_typelib ( spooler_com::LIBID_spooler_com, "Spooler", "1.0" );
+Typelib_descr spooler_typelib ( LIBID_spooler_com, "Spooler", "1.0" );
 
-DESCRIBE_CLASS( &spooler_typelib, Com_error       , error       , spooler_com::CLSID_error       , "Spooler.Error"       , "1.0" )
-DESCRIBE_CLASS( &spooler_typelib, Com_variable    , variable    , spooler_com::CLSID_Variable    , "Spooler.Variable"    , "1.0" )
-DESCRIBE_CLASS( &spooler_typelib, Com_variable_set, variable_set, spooler_com::CLSID_Variable_set, "Spooler.Variable_set", "1.0" )
+DESCRIBE_CLASS( &spooler_typelib, Com_error       , error       , CLSID_error       , "Spooler.Error"       , "1.0" )
+DESCRIBE_CLASS( &spooler_typelib, Com_variable    , variable    , CLSID_Variable    , "Spooler.Variable"    , "1.0" )
+DESCRIBE_CLASS( &spooler_typelib, Com_variable_set, variable_set, CLSID_Variable_set, "Spooler.Variable_set", "1.0" )
 DESCRIBE_CLASS( &spooler_typelib, Com_variable_set_enumerator, variable_set_enumerator, CLSID_Variable_set_enumerator, "Spooler.Com_variable_set_enumerator", "1.0" );
-DESCRIBE_CLASS( &spooler_typelib, Com_log         , log         , spooler_com::CLSID_log         , "Spooler.Log"         , "1.0" )
-DESCRIBE_CLASS( &spooler_typelib, Com_job         , job         , spooler_com::CLSID_job         , "Spooler.Job"         , "1.0" )
-DESCRIBE_CLASS( &spooler_typelib, Com_task        , task        , spooler_com::CLSID_Task        , "Spooler.Task"        , "1.0" )
-DESCRIBE_CLASS( &spooler_typelib, Com_object_set  , object_set  , spooler_com::CLSID_object_set  , "Spooler.Object_set"  , "1.0" )
-DESCRIBE_CLASS( &spooler_typelib, Com_thread      , thread      , spooler_com::CLSID_thread      , "Spooler.Thread"      , "1.0" )
-DESCRIBE_CLASS( &spooler_typelib, Com_spooler     , spooler     , spooler_com::CLSID_spooler     , "Spooler.Spooler"     , "1.0" )
-DESCRIBE_CLASS( &spooler_typelib, Com_context     , context     , spooler_com::CLSID_Context     , "Spooler.Context"     , "1.0" )
+DESCRIBE_CLASS( &spooler_typelib, Com_log         , log         , CLSID_log         , "Spooler.Log"         , "1.0" )
+DESCRIBE_CLASS( &spooler_typelib, Com_job         , job         , CLSID_job         , "Spooler.Job"         , "1.0" )
+DESCRIBE_CLASS( &spooler_typelib, Com_task        , task        , CLSID_Task        , "Spooler.Task"        , "1.0" )
+DESCRIBE_CLASS( &spooler_typelib, Com_object_set  , object_set  , CLSID_object_set  , "Spooler.Object_set"  , "1.0" )
+DESCRIBE_CLASS( &spooler_typelib, Com_thread      , thread      , CLSID_thread      , "Spooler.Thread"      , "1.0" )
+DESCRIBE_CLASS( &spooler_typelib, Com_spooler     , spooler     , CLSID_spooler     , "Spooler.Spooler"     , "1.0" )
+DESCRIBE_CLASS( &spooler_typelib, Com_context     , context     , CLSID_Context     , "Spooler.Context"     , "1.0" )
+DESCRIBE_CLASS( &spooler_typelib, Com_job_chain   , job_chain   , CLSID_job_chain   , "Spooler.Job_chain"   , "1.0" )
+DESCRIBE_CLASS( &spooler_typelib, Com_order       , order       , CLSID_order       , "Spooler.Order"       , "1.0" )
+DESCRIBE_CLASS( &spooler_typelib, Com_order_queue , order_queue , CLSID_Order_queue , "Spooler.Order_queue" , "1.0" )
+
+//-----------------------------------------------------------------------------IID_Ihostware_dynobj
+
+extern "C" const GUID IID_Ihostware_dynobj = { 0x9F716A02, 0xD1F0, 0x11CF, { 0x86, 0x9D, 0x44, 0x45, 0x53, 0x54, 0x00, 0x00 } };
 
 //--------------------------------------------------------------------------------time_from_variant
 
@@ -135,7 +142,7 @@ Com_variable::Com_variable( const BSTR name, const VARIANT& value )
 
 //------------------------------------------------------------------------------Com_variable::Clone
 
-STDMETHODIMP Com_variable::Clone( spooler_com::Ivariable** result ) 
+STDMETHODIMP Com_variable::Clone( Ivariable** result ) 
 { 
     HRESULT hr = NOERROR; 
     
@@ -495,7 +502,7 @@ STDMETHODIMP Com_log::log( Log_level level, BSTR line )
 
 //-------------------------------------------------------------------------------------Com_log::log
 
-STDMETHODIMP Com_log::get_mail( spooler_com::Imail** mail )
+STDMETHODIMP Com_log::get_mail( Imail** mail )
 { 
     HRESULT hr = NOERROR;
 
@@ -952,7 +959,7 @@ STDMETHODIMP Com_job::wake()
 
 //------------------------------------------------------------------------------Com_job::get_thread
 
-STDMETHODIMP Com_job::get_thread( spooler_com::Ithread** thread )
+STDMETHODIMP Com_job::get_thread( Ithread** thread )
 {
     HRESULT hr = NOERROR;
 
@@ -1368,7 +1375,7 @@ Com_thread::Com_thread( Thread* thread )
 
 //------------------------------------------------------------------------------Com_thread::get_Log
 
-STDMETHODIMP Com_thread::get_log( spooler_com::Ilog** com_log )
+STDMETHODIMP Com_thread::get_log( Ilog** com_log )
 {
     THREAD_LOCK( _lock )
     {
@@ -1439,7 +1446,7 @@ Com_spooler::Com_spooler( Spooler* spooler )
 
 //-----------------------------------------------------------------------------Com_spooler::get_Log
 
-STDMETHODIMP Com_spooler::get_log( spooler_com::Ilog** com_log )
+STDMETHODIMP Com_spooler::get_log( Ilog** com_log )
 {
     THREAD_LOCK( _lock )
     {
@@ -1621,12 +1628,693 @@ STDMETHODIMP Com_spooler::get_db_name( BSTR* result )
     return NOERROR;
 }
 
+//--------------------------------------------------------------------Com_spooler::create_job_chain
+
+STDMETHODIMP Com_spooler::create_job_chain( BSTR name_bstr, spooler_com::Ijob_chain** result )
+{
+    ptr<Job_chain> job_chain = Z_NEW( Job_chain( _spooler ) );
+    job_chain->set_name( string_from_bstr( name_bstr ) );
+
+    _spooler->add_job_chain( job_chain );
+
+    *result = job_chain->com_job_chain();
+    (*result)->AddRef();
+
+    return S_OK;
+}
+
+//-----------------------------------------------------------------------Com_spooler::add_job_chain
+/*
+STDMETHODIMP Com_spooler::add_job_chain( spooler_com::Ijob_chain* job_chain )
+{
+    HRESULT hr = NOERROR;
+
+    THREAD_LOCK( _lock )
+    try
+    {
+        if( !_spooler )  return E_POINTER;
+
+        _spooler->add_job_chain( dynamic_cast<Com_job_chain*>( job_chain )->_job_chain );
+    }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.add_job_chain" ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.add_job_chain" ); }
+
+    return hr;
+}
+*/
 //-------------------------------------------------------------------------Com_context::Com_context
 
 Com_context::Com_context()
 : 
     Sos_ole_object( context_class_ptr, this )
 {
+}
+
+//---------------------------------------------------------------------Com_job_chain::Com_job_chain
+
+Com_job_chain::Com_job_chain( Job_chain* job_chain )
+:
+    Sos_ole_object( job_chain_class_ptr, this ),
+    _job_chain(job_chain)
+{
+}
+
+//------------------------------------------------------------------------Com_job_chain::get_length
+/*
+STDMETHODIMP Com_job_chain::get_length( int* result )
+{ 
+    HRESULT hr = NOERROR;
+
+    THREAD_LOCK( _lock )
+    try
+    {
+        *result = _job_chain->length(); 
+    }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Job_chain.length" ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Job_chain.length" ); }
+
+    return hr;
+}
+*/
+//--------------------------------------------------------------------------Com_job_chain::put_name
+
+STDMETHODIMP Com_job_chain::put_name( BSTR name_bstr )
+{
+    HRESULT hr = NOERROR;
+
+    THREAD_LOCK( _lock )
+    try
+    {
+        if( !_job_chain )  return E_POINTER;
+
+        _job_chain->set_name( string_from_bstr( name_bstr ) );
+    }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Job_chain.name" ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Job_chain.name" ); }
+
+    return hr;
+}
+
+//--------------------------------------------------------------------------Com_job_chain::get_name
+
+STDMETHODIMP Com_job_chain::get_name( BSTR* result )
+{
+    HRESULT hr = NOERROR;
+
+    THREAD_LOCK( _lock )
+    try
+    {
+        if( !_job_chain )  return E_POINTER;
+
+        *result = bstr_from_string( _job_chain->name() );
+    }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Job_chain.name" ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Job_chain.name" ); }
+
+    return hr;
+}
+
+//---------------------------------------------------------------------------Com_job_chain::add_job
+
+STDMETHODIMP Com_job_chain::add_job( VARIANT* job_or_jobname, VARIANT* begin_state, VARIANT* end_state, VARIANT* error_state )
+{
+    HRESULT hr = NOERROR;
+
+    THREAD_LOCK( _lock )
+    try
+    {
+        if( !_job_chain )  return E_POINTER;
+
+        Job* job = NULL;
+
+        switch( job_or_jobname->vt )
+        {
+            case VT_BSTR:
+            {
+                string jobname = string_from_variant(*job_or_jobname);
+                
+                job = stricmp( jobname.c_str(), "*end" ) == 0? NULL
+                                                             : _job_chain->_spooler->get_job( jobname );
+                break;
+            }
+
+          //case VT_UNKNOWN:
+          //case VT_DISPATCH:
+          //{
+          //    break;
+          //}
+
+            default: return DISP_E_TYPEMISMATCH;
+        }
+
+        _job_chain->add_job( job, *begin_state, *end_state, *error_state );
+    }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Job_chain.add_job" ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Job_chain.add_job" ); }
+
+    return hr;
+}
+
+//---------------------------------------------------------------------Com_job_chain::add_end_state
+
+STDMETHODIMP Com_job_chain::add_end_state( VARIANT* state )
+{
+    HRESULT hr = NOERROR;
+
+    THREAD_LOCK( _lock )
+    try
+    {
+        if( !_job_chain )  return E_POINTER;
+
+        _job_chain->add_job( NULL, *state, CComVariant(), CComVariant() );
+    }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Job_chain.add_end_state" ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Job_chain.add_end_state" ); }
+
+    return hr;
+}
+
+//----------------------------------------------------------------------------Com_job_chain::finish
+
+STDMETHODIMP Com_job_chain::finish()
+{
+    HRESULT hr = NOERROR;
+
+    THREAD_LOCK( _lock )
+    try
+    {
+        if( !_job_chain )  return E_POINTER;
+
+        _job_chain->finish();
+    }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Job_chain.finish" ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Job_chain.finish" ); }
+
+    return hr;
+}
+
+//-------------------------------------------------------------------------Com_job_chain::add_order
+
+STDMETHODIMP Com_job_chain::add_order( VARIANT* order_or_payload, VARIANT* job_or_state, spooler_com::Iorder** result )
+{
+    HRESULT hr = NOERROR;
+
+    THREAD_LOCK( _lock )
+    try
+    {
+        if( !_job_chain )  return E_POINTER;
+
+        if( !_job_chain->finished() )  throw_xc( "SPOOLER-151" );
+
+        CComPtr<spooler_com::Iorder> iorder;
+
+    /*
+        if( order_or_payload->vt == VT_DISPATCH  ||  order_or_payload->vt == VT_UNKNOWN )
+        {
+            hr = V_UNKNOWN(order_or_payload)->QueryInterface( spooler_com::IID_Iorder, (void**)&iorder );
+            if( FAILED(hr) )  iorder = NULL;
+        }
+    */
+
+        if( !iorder )
+        {
+            //ptr<Order> order = Z_NEW( Order( _job_chain->_spooler, *order_or_payload ) );
+            CComPtr<Order> order = new Order( _job_chain->_spooler, *order_or_payload );
+            //iorder = order->com_order();
+            iorder = order;
+        }
+
+        hr = dynamic_cast<Com_order*>( &*iorder )->add_to_job_chain( this );  //, job_or_state );
+        if( FAILED(hr) )  return hr;
+
+
+        *result = iorder;
+        (*result)->AddRef();
+
+
+
+
+
+        //ptr<Order> order = _job_chain->add_order( order_or_payload, job_or_state );
+        //*result = order->com_order();
+        //if( *result )  (*result)->AddRef();
+    }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Job_chain.add_order" ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Job_chain.add_order" ); }
+
+    return hr;
+
+    
+    // Einstieg nur über Order, damit Semaphoren stets in derselben Reihenfolge gesperrt werden.
+}
+
+//-----------------------------------------------------------------------------Com_order::Com_order
+
+Com_order::Com_order( Order* order )
+:
+    Sos_ole_object( order_class_ptr, this ),
+    _zero_(this+1),
+    _order(order)
+{
+}
+
+//--------------------------------------------------------------------------------Com_order::put_id
+
+STDMETHODIMP Com_order::put_id( VARIANT* id )
+{
+    HRESULT hr = NOERROR;
+
+    THREAD_LOCK( _lock )
+    try
+    {
+        if( !_order )  return E_POINTER;
+
+        _order->set_id( *id );
+    }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Order.id" ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Order.id" ); }
+
+    return hr;
+}
+
+//--------------------------------------------------------------------------------Com_order::get_id
+
+STDMETHODIMP Com_order::get_id( VARIANT* result )
+{
+    HRESULT hr = NOERROR;
+
+    THREAD_LOCK( _lock )
+    try
+    {
+        if( !_order )  return E_POINTER;
+
+        hr = VariantCopy( result, &_order->id() );
+    }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Order.id" ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Order.id" ); }
+
+    return hr;
+}
+
+//-----------------------------------------------------------------------------Com_order::put_title
+
+STDMETHODIMP Com_order::put_title( BSTR title_bstr )
+{
+    HRESULT hr = NOERROR;
+
+    THREAD_LOCK( _lock )
+    try
+    {
+        if( !_order )  return E_POINTER;
+
+        _order->set_title( string_from_bstr(title_bstr) );
+    }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Order.title" ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Order.title" ); }
+
+    return hr;
+}
+
+//-----------------------------------------------------------------------------Com_order::get_title
+
+STDMETHODIMP Com_order::get_title( BSTR* result )
+{
+    HRESULT hr = NOERROR;
+
+    THREAD_LOCK( _lock )
+    try
+    {
+        if( !_order )  return E_POINTER;
+
+        *result = bstr_from_string( _order->title() );
+    }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Order.title" ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Order.title" ); }
+
+    return hr;
+}
+    
+//--------------------------------------------------------------------------Com_order::put_priority
+
+STDMETHODIMP Com_order::put_priority( int priority )
+{
+    HRESULT hr = NOERROR;
+
+    THREAD_LOCK( _lock )
+    try
+    {
+        if( !_order )  return E_POINTER;
+
+        _order->set_priority( priority );
+    }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Order.priority" ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Order.priority" ); }
+
+    return hr;
+}
+
+//--------------------------------------------------------------------------Com_order::get_priority
+
+STDMETHODIMP Com_order::get_priority( int* result )
+{
+    HRESULT hr = NOERROR;
+
+    THREAD_LOCK( _lock )
+    try
+    {
+        if( !_order )  return E_POINTER;
+
+        *result = _order->priority();
+    }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Order.priority" ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Order.priority" ); }
+
+    return hr;
+}
+    
+//-------------------------------------------------------------------------Com_order::get_job_chain
+
+STDMETHODIMP Com_order::get_job_chain( Ijob_chain** result )
+{
+    HRESULT hr = NOERROR;
+
+    THREAD_LOCK( _lock )
+    try
+    {
+        if( !_order )  return E_POINTER;
+
+        Job_chain* job_chain = _order->job_chain();
+        if( job_chain )  
+        {
+            CComPtr<Ijob_chain> ijob_chain = job_chain->com_job_chain();
+            ijob_chain.CopyTo( result );
+        }
+    }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Order.job_chain" ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Order.job_chain" ); }
+
+    return hr;
+}
+
+//-------------------------------------------------------------------------------Com_order::put_job
+
+STDMETHODIMP Com_order::put_job( VARIANT* job_or_jobname )
+{
+    HRESULT hr = NOERROR;
+
+    THREAD_LOCK( _lock )
+    try
+    {
+        if( !_order )  return E_POINTER;
+
+        switch( job_or_jobname->vt )
+        {
+            case VT_BSTR:       
+                _order->set_job_by_name( string_from_bstr( V_BSTR(job_or_jobname) ) ); 
+                break;
+/*
+            case VT_DISPATCH:
+            case VT_UNKNOWN:    
+            {
+                CComPtr<Ijob> ijob;
+                hr = V_UNKNOWN(job_or_jobname)->QueryInterface( IID_Ijob, (void**)&ijob );
+                if( FAILED(hr) )  return hr;
+
+                Job* job = ijob? dynamic_cast<Com_job*>( &*ijob )->_job : NULL;
+                _order->set_job( job );
+                break;
+            }
+*/
+            default:            
+                return DISP_E_TYPEMISMATCH;
+        }
+    }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Order.job" ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Order.job" ); }
+
+    return hr;
+}
+
+//-------------------------------------------------------------------------------Com_order::get_job
+
+STDMETHODIMP Com_order::get_job( Ijob** result )
+{
+    HRESULT hr = NOERROR;
+
+    THREAD_LOCK( _lock )
+    try
+    {
+        if( !_order )  return E_POINTER;
+
+        *result = _order->com_job();
+    }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Order.job" ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Order.job" ); }
+
+    return hr;
+}
+
+//-----------------------------------------------------------------------------Com_order::put_state
+
+STDMETHODIMP Com_order::put_state( VARIANT* state )
+{
+    HRESULT hr = NOERROR;
+
+    THREAD_LOCK( _lock )
+    try
+    {
+        if( !_order )  return E_POINTER;
+
+        _order->set_state(*state);
+    }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Order.state" ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Order.state" ); }
+
+    return hr;
+}
+
+//-----------------------------------------------------------------------------Com_order::get_state
+
+STDMETHODIMP Com_order::get_state( VARIANT* result )
+{
+    HRESULT hr = NOERROR;
+
+    THREAD_LOCK( _lock )
+    try
+    {
+        if( !_order )  return E_POINTER;
+
+        hr = VariantCopy( result, &_order->state() );
+    }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Order.state" ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Order.state" ); }
+
+    return hr;
+}
+
+//------------------------------------------------------------------------Com_order::put_state_text
+
+STDMETHODIMP Com_order::put_state_text( BSTR state_text_bstr )
+{
+    HRESULT hr = NOERROR;
+
+    THREAD_LOCK( _lock )
+    try
+    {
+        if( !_order )  return E_POINTER;
+
+        _order->set_state_text( wstring_from_bstr(state_text_bstr) );
+    }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Order.state_text" ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Order.state_text" ); }
+
+    return hr;
+}
+
+//------------------------------------------------------------------------Com_order::get_state_text
+
+STDMETHODIMP Com_order::get_state_text( BSTR* result )
+{
+    HRESULT hr = NOERROR;
+
+    THREAD_LOCK( _lock )
+    try
+    {
+        if( !_order )  return E_POINTER;
+
+        *result = bstr_from_string( _order->state_text() );
+    }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Order.state_text" ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Order.state_text" ); }
+
+    return hr;
+}
+
+//-----------------------------------------------------------------------------Com_order::get_error
+
+STDMETHODIMP Com_order::get_error( Ierror** )
+{
+    HRESULT hr = NOERROR;
+
+    THREAD_LOCK( _lock )
+    try
+    {
+        if( !_order )  return E_POINTER;
+
+        return E_FAIL;//...;
+    }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Order.error" ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Order.error" ); }
+
+    return hr;
+}
+
+//---------------------------------------------------------------------------Com_order::put_payload
+
+STDMETHODIMP Com_order::put_payload( VARIANT* payload )
+{
+    HRESULT hr = NOERROR;
+
+    THREAD_LOCK( _lock )
+    try
+    {
+        if( !_order )  return E_POINTER;
+
+        _order->set_payload( *payload );
+    }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Order.payload" ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Order.payload" ); }
+
+    return hr;
+}
+
+//------------------------------------------------------------------------Com_order::putref_payload
+
+STDMETHODIMP Com_order::putref_payload( IUnknown* payload )
+{
+    HRESULT hr = NOERROR;
+
+    THREAD_LOCK( _lock )
+    try
+    {
+        if( !_order )  return E_POINTER;
+
+        _order->set_payload( payload );
+    }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Order.payload" ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Order.payload" ); }
+
+    return hr;
+}
+
+//---------------------------------------------------------------------------Com_order::get_payload
+
+STDMETHODIMP Com_order::get_payload( VARIANT* result )
+{
+    HRESULT hr = NOERROR;
+
+    THREAD_LOCK( _lock )
+    try
+    {
+        if( !_order )  return E_POINTER;
+
+        hr = VariantCopy( result, &_order->payload() );
+    }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Order.payload" ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Order.payload" ); }
+
+    return hr;
+}
+
+//-----------------------------------------------------------------------Com_order::payload_is_type
+
+STDMETHODIMP Com_order::payload_is_type( BSTR typname_bstr, VARIANT_BOOL* result )
+{
+    HRESULT hr = NOERROR;
+
+    *result = false;
+
+    THREAD_LOCK( _lock )
+    try
+    {
+        if( !_order )  return E_POINTER;
+
+        string typname = lcase( string_from_bstr( typname_bstr ) );
+
+        Variant payload = _order->payload();
+        
+        switch( payload.vt )
+        {
+            case VT_UNKNOWN:
+            case VT_DISPATCH:
+            {
+                IUnknown* iunknown = NULL;
+
+                if( typname == "spooler.variable_set" )
+                {
+                    hr = V_UNKNOWN(&payload)->QueryInterface( IID_Ivariable_set, (void**)&iunknown );
+                    if( SUCCEEDED(hr)  )  { *result = true;  return hr; }
+                }
+
+                if( typname == "hostware.dyn_obj" 
+                 || typname == "hostware.record" )
+                {
+                    hr = V_UNKNOWN(&payload)->QueryInterface( IID_Ihostware_dynobj, (void**)&iunknown );
+                    if( SUCCEEDED(hr) )  { *result = true;  return hr; }
+                }
+                
+                break;
+            }
+            
+            default: ;
+        }
+    }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Order.payload_is_type" ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Order.payload_is_type" ); }
+
+    return hr;
+}
+
+//----------------------------------------------------------------------Com_order::add_to_job_chain
+
+STDMETHODIMP Com_order::add_to_job_chain( Ijob_chain* ijob_chain )
+{
+    HRESULT hr = NOERROR;
+
+    THREAD_LOCK( _lock )
+    try
+    {
+        if( !_order )  return E_POINTER;
+        if( !ijob_chain )  return E_POINTER;
+
+        _order->add_to_job_chain( dynamic_cast<Com_job_chain*>( &*ijob_chain )->_job_chain );
+    }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Order.payload_is_type" ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Order.payload_is_type" ); }
+
+    return hr;
+}
+
+//-----------------------------------------------------------------Com_order_queue::Com_order_queue
+
+Com_order_queue::Com_order_queue( Order_queue* order_queue )
+:
+    Sos_ole_object( order_queue_class_ptr, this ),
+    _zero_(this+1),
+    _order_queue(order_queue)
+{
+}
+
+//----------------------------------------------------------------------Com_order_queue::get_length
+
+STDMETHODIMP Com_order_queue::get_length( int* result )
+{
+    THREAD_LOCK( _lock )
+    {
+        *result = _order_queue->length();
+    }
+
+    return S_OK;
 }
 
 //-------------------------------------------------------------------------------------------------

@@ -1,4 +1,4 @@
-// $Id: spooler_wait.cxx,v 1.35 2002/06/29 09:49:38 jz Exp $
+// $Id: spooler_wait.cxx,v 1.36 2002/09/11 10:05:16 jz Exp $
 /*
     Hier sind implementiert
 
@@ -7,7 +7,6 @@
 */
 
 
-#include "../kram/sos.h"
 #include "spooler.h"
 
 #include <io.h>         // findfirst()

@@ -1,4 +1,4 @@
-// $Id: spooler_task.h,v 1.57 2002/07/28 20:49:47 jz Exp $
+// $Id: spooler_task.h,v 1.58 2002/09/11 10:05:15 jz Exp $
 
 #ifndef __SPOOLER_TASK_H
 #define __SPOOLER_TASK_H
@@ -193,6 +193,7 @@ struct Job : Sos_self_deleting
     string                      title                       ()                          { string title; THREAD_LOCK( _lock )  title = _title;  return title; }
     string                      jobname_as_filename         ();
     string                      profile_section             ();
+    bool                        temporary                   () const                    { return _temporary; }
     void                        set_in_call                 ( const string& name );
     void                        set_delay_after_error       ( int error_steps, Time delay ) { _delay_after_error[error_steps] = delay; }
 
@@ -262,6 +263,8 @@ struct Job : Sos_self_deleting
 
     CComPtr<Com_job>&           com_job                     ()                          { return _com_job; }
     void                        signal_object               ( const string& object_set_class_name, const Level& );
+
+    Order_queue*                order_queue                 () const                    { return _order_queue; }
 
     virtual string             _obj_name                    () const                    { return "Job " + _name; }
 
@@ -340,6 +343,8 @@ struct Job : Sos_self_deleting
     bool                       _close_engine;               // Bei einem Fehler in spooler_init()
     Sos_ptr<Task>              _task;                       // Es kann nur eine Task geben. Zirkel: _task->_job == this
     Task_queue                 _task_queue;                 // Warteschlange der nächsten zu startenden Tasks
+
+    ptr<Order_queue>           _order_queue;
 
     Job_history                _history;
 };

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- $Id: spooler.dtd,v 1.43 2002/07/03 12:29:49 jz Exp $   Joacim Zschimmer,  (C) 2000 SOS GmbH Berlin  -->
+<!-- $Id: spooler.dtd,v 1.44 2002/09/11 10:05:13 jz Exp $   Joacim Zschimmer,  (C) 2000 SOS GmbH Berlin  -->
 
 
 <!ELEMENT spooler               ( config+ | command | answer )>
@@ -76,6 +76,7 @@
 <!ATTLIST job                   spooler_id          CDATA #IMPLIED>     <!-- "": Job läuft auf jedem Spooler, sonst nur Spooler mit derselben Spooler-Id -->
 <!ATTLIST job                   title               CDATA #IMPLIED>     <!-- Bezeichnung des Jobs -->
 <!ATTLIST job                   log_append          (yes|no) #IMPLIED>  <!-- Jobprotokoll fortschreiben, nicht überschreiben -->
+<!ATTLIST job                   order               (yes|no) 'no'>      <!-- Job nimmt Aufträge an -->
 
 <!ELEMENT description           ( #PCDATA | include )*>                 <!-- Beschreibung des Jobs -->
 

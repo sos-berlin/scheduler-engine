@@ -1,4 +1,4 @@
-// $Id: spooler_thread.cxx,v 1.38 2002/06/29 17:26:42 jz Exp $
+// $Id: spooler_thread.cxx,v 1.39 2002/09/11 10:05:16 jz Exp $
 /*
     Hier sind implementiert
 
@@ -6,9 +6,8 @@
 
 
 
-#include "../kram/sos.h"
-#include <sys/timeb.h>
 #include "spooler.h"
+#include <sys/timeb.h>
 #include "../kram/sleep.h"
 
 namespace sos {
