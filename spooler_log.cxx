@@ -1,4 +1,4 @@
-// $Id: spooler_log.cxx,v 1.15 2001/08/20 13:46:55 jz Exp $
+// $Id: spooler_log.cxx,v 1.16 2002/03/17 11:09:12 jz Exp $
 
 #include "../kram/sos.h"
 #include "spooler.h"
@@ -43,10 +43,13 @@ void Log::write( const string& text )
 {
     if( !_file )  return;
 
-    int ret = fwrite( text.c_str(), text.length(), 1, _file );
-    if( ret != 1 )  throw_errno( errno, "fwrite" );
+    if( text.length() > 0 )
+    {
+        int ret = fwrite( text.c_str(), text.length(), 1, _file );
+        if( ret != 1 )  throw_errno( errno, "fwrite" );
 
-    LOG( text );
+        LOG( text );
+    }
 }
 
 //------------------------------------------------------------------------------------Log::open_new
