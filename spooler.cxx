@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.105 2002/06/18 07:35:44 jz Exp $
+// $Id: spooler.cxx,v 1.106 2002/06/18 14:45:30 jz Exp $
 /*
     Hier sind implementiert
 
@@ -608,7 +608,9 @@ void Spooler::load()
 
     _prefix_log.init( this );
 
-    Command_processor( this ).execute_2( file_as_string( _config_filename ) );
+    Command_processor cp ( this );
+    cp._source_filename = _config_filename;
+    cp.execute_2( file_as_string( _config_filename ) );
 }
 
 //-----------------------------------------------------------------------------------Spooler::start
@@ -734,12 +736,13 @@ void Spooler::run()
 //-------------------------------------------------------------------------Spooler::cmd_load_config
 // Anderer Thread
 
-void Spooler::cmd_load_config( const xml::Element_ptr& config )  
+void Spooler::cmd_load_config( const xml::Element_ptr& config, const string& source_filename )  
 { 
     THREAD_LOCK( _lock )  
     {
         _config_document_to_load = config->ownerDocument; 
         _config_element_to_load  = config;
+        _config_source_filename  = source_filename;
         _state_cmd = sc_load_config; 
     }
 
@@ -837,7 +840,7 @@ int Spooler::launch( int argc, char** argv )
         {
             if( _config_element_to_load == NULL )  throw_xc( "SPOOLER-116", _spooler_id );
 
-            load_config( _config_element_to_load );
+            load_config( _config_element_to_load, _config_source_filename );
     
             _config_element_to_load = NULL;
             _config_document_to_load = NULL;

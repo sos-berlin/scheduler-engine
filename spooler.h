@@ -1,4 +1,4 @@
-// $Id: spooler.h,v 1.88 2002/06/18 07:35:44 jz Exp $
+// $Id: spooler.h,v 1.89 2002/06/18 14:45:30 jz Exp $
 
 #ifndef __SPOOLER_H
 #define __SPOOLER_H
@@ -187,15 +187,14 @@ struct Spooler
     void                        cmd_terminate               ();
     void                        cmd_terminate_and_restart   ();
     void                        cmd_let_run_terminate_and_restart();
-    void                        cmd_load_config             ( const xml::Element_ptr& );
+    void                        cmd_load_config             ( const xml::Element_ptr&, const string& source_filename );
 
 
     friend struct               Com_spooler;
 
     void                        load_arg                    ();
     void                        load                        ();
-    void                        load_config_from_file       ( const string& filename );
-    void                        load_config                 ( const xml::Element_ptr& config );
+    void                        load_config                 ( const xml::Element_ptr& config, const string& source_filename );
 
     void                        load_object_set_classes_from_xml( Object_set_class_list*, const xml::Element_ptr& );
     void                        load_threads_from_xml       ( const xml::Element_ptr& );
@@ -286,6 +285,7 @@ struct Spooler
 
     xml::Element_ptr           _config_element_to_load;     // Für cmd_load_config()
     xml::Document_ptr          _config_document_to_load;    // Für cmd_load_config(), das Dokument zu _config_element_to_load
+    string                     _config_source_filename;     // Für cmd_load_config(), der Dateiname der Quelle
 
     xml::Element_ptr           _config_element;             // Die gerade geladene Konfiguration (und Job hat einen Verweis auf <job>)
     xml::Document_ptr          _config_document;            // Das Dokument zu _config_element

@@ -1,4 +1,4 @@
-// $Id: spooler_command.h,v 1.10 2002/06/18 07:35:45 jz Exp $
+// $Id: spooler_command.h,v 1.11 2002/06/18 14:45:31 jz Exp $
 
 #ifndef __SPOOLER_COMMAND_H
 #define __SPOOLER_COMMAND_H
@@ -41,6 +41,7 @@ struct Command_processor
     Xc_copy                    _error;
     Host*                      _host;
     Security::Level            _security_level;
+    string                     _source_filename;            // Das Verzeichnis wird für <base file=".."> verwendet
 };
 
 //-------------------------------------------------------------------------------------------------

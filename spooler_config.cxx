@@ -1,4 +1,4 @@
-// $Id: spooler_config.cxx,v 1.41 2002/06/18 07:35:45 jz Exp $
+// $Id: spooler_config.cxx,v 1.42 2002/06/18 14:45:31 jz Exp $
 
 //#include <precomp.h>
 
@@ -284,7 +284,7 @@ void Spooler::load_threads_from_xml( const xml::Element_ptr& element )
 
 //-----------------------------------------------------------------------------Spooler::load_config
 
-void Spooler::load_config( const xml::Element_ptr& config_element )
+void Spooler::load_config( const xml::Element_ptr& config_element, const string& source_filename )
 {
     _config_element  = NULL;
     _config_document = NULL;
@@ -299,7 +299,8 @@ void Spooler::load_config( const xml::Element_ptr& config_element )
                 
                 Command_processor cp ( this );
                 cp._load_config_immediately = true;
-                cp.execute_2( file_as_string( config_filename ) );
+                cp._source_filename = make_absolute_filename( directory_of_path( source_filename ), config_filename );
+                cp.execute_2( file_as_string( cp._source_filename ) );
             }
         }}
 
