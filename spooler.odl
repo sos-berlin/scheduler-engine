@@ -713,7 +713,13 @@ library Spooler
         [propget]
         HRESULT                 Store_orders_in_database( [out,retval] VARIANT_BOOL* );     // Für Joacim, 2005-02-27
 
-        HRESULT                 Remove_all_pending_orders( [out,retval] int* count );       // Für Joacim, 2005-02-27
+        HRESULT                 Remove_all_pending_orders( [out,retval] int* count );       // Für Joacim, 2005-02-27 (was fehlt: Werden alle Aufträge in DB gelöscht? Wird eine Historie geschieben? 
+                                                                                            // Besser mit Store_orders_in_database=false!
+                                                                                            // Vielleicht besser so:
+                                                                                            // Begin_refresh_all_orders()
+                                                                                            //    job_chain.add_order(order): Ersetzt Auftrag (nur wenn er hängt)
+                                                                                            // End_refresh_all_orders() (automatisch bei Jobende)
+                                                                                            // Alle nicht angerührten Aufträge werden entfernt.
     }
 
     [
@@ -828,10 +834,10 @@ library Spooler
         HRESULT                 Setback                 ();
 
         [propput]
-        HRESULT                 At                      ( [in] VARIANT* date_time );
+        HRESULT                 At                      ( [in] VARIANT* date_time );                // Für Joacim, 2005-02-27 (was fehlt: Speichern in Datenbank, aufrufbar im Taskschritt?)
 
         [propget]
-        HRESULT                 At                      ( [out,retval] DATE* Result );
+        HRESULT                 At                      ( [out,retval] DATE* Result );              // Für Joacim, 2005-02-27
     }
 
     [

@@ -614,10 +614,10 @@ void Order_queue::add_order( Order* order )
 
             update_priorities();
 
-            order->_in_job_queue = true;
-
             if( wake_up )  _job->signal( "Order" );
         }
+            
+        order->_in_job_queue = true;
     }
 }
 
@@ -638,9 +638,11 @@ void Order_queue::remove_order( Order* order )
 
             if( it == _setback_queue.end() )  throw_xc( "SCHEDULER-156", order->obj_name(), _job->name() );
 
-            _setback_queue.erase( it );
-
             order->_setback = 0;
+            order->_in_job_queue = false;
+
+            _setback_queue.erase( it );
+            order = NULL;  // order ist jetzt möglicherweise ungültig
         }
         else
         {
@@ -651,11 +653,12 @@ void Order_queue::remove_order( Order* order )
 
             if( it == _queue.end() )  throw_xc( "SCHEDULER-156", order->obj_name(), _job->name() );
 
+            order->_in_job_queue = false;
+
             _queue.erase( it );
+            order = NULL;  // order ist jetzt möglicherweise ungültig
             //_id_map.erase( order->_id );
             update_priorities();
-
-            order->_in_job_queue = false;
         }
     }
 }
@@ -1115,6 +1118,8 @@ void Order::remove_from_job_chain()
 {
     THREAD_LOCK( _lock )
     {
+        ptr<Order> me = this;   // Halten
+
         if( _job_chain_node )
         {
             if( _in_job_queue )  

@@ -1849,11 +1849,11 @@ bool Process_task::do_begin__end()
     _stderr_file.open_temporary( File::open_unlink_later | File::open_inheritable );
 
     memset( &startup_info, 0, sizeof startup_info );
-    startup_info.cb = sizeof startup_info; 
-    startup_info.dwFlags    = STARTF_USESTDHANDLES | STARTF_USESHOWWINDOW;
-    startup_info.hStdInput  = INVALID_HANDLE_VALUE;
-    startup_info.hStdOutput = _stdout_file.handle();
-    startup_info.hStdError  = _stderr_file.handle();
+    startup_info.cb          = sizeof startup_info; 
+    startup_info.dwFlags     = STARTF_USESTDHANDLES | STARTF_USESHOWWINDOW;
+    startup_info.hStdInput   = INVALID_HANDLE_VALUE;
+    startup_info.hStdOutput  = _stdout_file.handle();
+    startup_info.hStdError   = _stderr_file.handle();
     startup_info.wShowWindow = SW_MINIMIZE;            // Als Dienst mit Zugriff auf Desktop wird ein leeres Konsol-Fenster gezeigt. Das minimieren wir.
 
 
