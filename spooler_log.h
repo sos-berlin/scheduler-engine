@@ -1,4 +1,4 @@
-// $Id: spooler_log.h,v 1.2 2001/07/02 21:38:26 jz Exp $
+// $Id: spooler_log.h,v 1.3 2002/03/08 15:27:22 jz Exp $
 
 #ifndef __SPOOLER_LOG_H
 #define __SPOOLER_LOG_H
@@ -41,7 +41,8 @@ struct Log
     Spooler*                   _spooler;
     string                     _directory;
     string                     _filename;
-    FILE*                      _file;
+    int                        _file;
+  //FILE*                      _file;
     Thread_semaphore           _semaphore;
 };
 

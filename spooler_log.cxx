@@ -1,9 +1,23 @@
-// $Id: spooler_log.cxx,v 1.16 2002/03/17 11:09:12 jz Exp $
+// $Id: spooler_log.cxx,v 1.17 2002/03/08 15:27:22 jz Exp $
 
 #include "../kram/sos.h"
 #include "spooler.h"
 
 #include "../kram/sosdate.h"
+
+#include <stdio.h>
+#include <sys/stat.h>               // S_IREAD, stat()
+#include <fcntl.h>                  // O_RDONLY
+
+#if defined _MSC_VER
+#    include <io.h>       // open(), read() etc.
+#    include <direct.h>   // mkdir
+# else
+#    include <stdio.h>    // fileno
+#    include <unistd.h>   // read(), write(), close()
+#endif
+#include <errno.h>
+
 
 namespace sos {
 namespace spooler {
@@ -15,6 +29,7 @@ Log::Log( Spooler* spooler )
     _zero_(this+1),
     _spooler(spooler)
 {
+    _file = -1;
 }
 
 //----------------------------------------------------------------------------------------Log::~Log
@@ -23,7 +38,8 @@ Log::~Log()
 {
     Thread_semaphore::Guard guard = &_semaphore;
 
-    if( _file  &&  _file != stderr )  fclose( _file );
+    //if( _file  &&  _file != stderr )  fclose( _file ),  _file = NULL;
+    if( _file != -1  &&  _file != fileno(stderr) )  close( _file ),  _file = -1;
 }
 
 //-------------------------------------------------------------------------------Log::set_directory
@@ -41,12 +57,14 @@ void Log::set_directory( const string& directory )
 
 void Log::write( const string& text )
 {
-    if( !_file )  return;
+    if( _file == -1 )  return;
 
     if( text.length() > 0 )
     {
-        int ret = fwrite( text.c_str(), text.length(), 1, _file );
-        if( ret != 1 )  throw_errno( errno, "fwrite" );
+        //int ret = fwrite( text.c_str(), text.length(), 1, _file );
+        //if( ret != 1 )  throw_errno( errno, "write" );
+        int ret = ::write( _file, text.c_str(), text.length() );
+        if( ret != text.length() )  throw_errno( errno, "write", _filename.c_str() );
 
         LOG( text );
     }
@@ -58,13 +76,14 @@ void Log::open_new( )
 {
     Thread_semaphore::Guard guard = &_semaphore;
 
-    if( _file  &&  _file != stderr )  fclose( _file ),  _file = NULL;
+    //if( _file  &&  _file != stderr )  fclose( _file ),  _file = NULL;
+    if( _file != -1  &&  _file != fileno(stderr) )  close( _file ),  _file = -1;
     _filename = "";
 
     if( _directory == "*stderr" )
     {
         _filename = "*stderr";
-        _file = stderr;
+        _file = fileno(stderr);
     }
     else
     if( _directory == "*none" )
@@ -80,9 +99,11 @@ void Log::open_new( )
         filename += time.formatted( "yyyy-mm-dd-HHMMSS" );
         if( !_spooler->id().empty() )  filename += "." + _spooler->id();
         filename += ".log";
-    
-        _file = fopen( filename.c_str(), "w" );
-        if( !_file )  throw_errno( errno, filename.c_str() );
+
+        LOG( "\nopen " << filename << '\n' );
+        //_file = fopen( filename.c_str(), "w" );
+        _file = open( filename.c_str(), O_CREAT | O_TRUNC | O_WRONLY  );
+        if( _file == -1 )  throw_errno( errno, filename.c_str() );
 
         _filename = filename;
     }
@@ -110,9 +131,9 @@ void Log::log( Log_kind kind, const string& prefix, const string& line )
     if( !prefix.empty() )  write( "(" + prefix + ") " );
     write( line );
     if( line.length() == 0 || line[line.length()-1] != '\n' )  write( "\n" );
-    fflush( _file );
+    //fflush( _file );
 
-    LOG( '\n' );
+    //LOG( '\n' );
 }
 
 //----------------------------------------------------------------------------------Prefix_log::log
