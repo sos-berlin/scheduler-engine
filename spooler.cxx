@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.321 2004/01/30 13:37:49 jz Exp $
+// $Id: spooler.cxx,v 1.322 2004/02/11 10:41:55 jz Exp $
 /*
     Hier sind implementiert
 
@@ -1721,25 +1721,28 @@ void Spooler::run()
         execute_state_cmd();
         if( _shutdown_cmd )  if( !_single_thread  ||  !_single_thread->has_tasks() )  break;
 
-
+/*
         if( _state == Spooler::s_paused )
         {
             _event.wait();
             if( _state_cmd != sc_none )  continue;
         }
-
+*/
 
         _next_time = latter_day;
         _next_job  = NULL;
 
         if( _single_thread )
         {
-            FOR_EACH( Process_class_list, _process_class_list, pc )
+            if( _state != Spooler::s_paused )
             {
-                FOR_EACH( Process_list, (*pc)->_process_list, p )
+                FOR_EACH( Process_class_list, _process_class_list, pc )
                 {
-                    something_done |= (*p)->async_continue();
-                    _next_time = min( _next_time, Time( localtime_from_gmtime( (*p)->async_next_gmtime() ) ) );
+                    FOR_EACH( Process_list, (*pc)->_process_list, p )
+                    {
+                        something_done |= (*p)->async_continue();
+                        _next_time = min( _next_time, Time( localtime_from_gmtime( (*p)->async_next_gmtime() ) ) );
+                    }
                 }
             }
 
@@ -1778,32 +1781,35 @@ void Spooler::run()
         //_next_time = latter_day;
 
 
-        if( _single_thread )
+        if( _state != Spooler::s_paused )
         {
-            something_done |= _single_thread->process();
-
-            //LOG( "spooler.cxx: something_done=" << something_done << "   _single_thread->process()\n" );
-
-            if( _single_thread->is_ready_for_termination() )  break;
-
-            Task* task = _single_thread->get_next_task();
-            if( task ) 
+            if( _single_thread )
             {
-                _next_time = min( _next_time, task->next_time() );
-                if( log_wait )  if( task )  msg = "Warten bis " + _next_time.as_string() + " für Task " + task->name();
-                                    //else  msg = "Keine Task aktiv";
+                something_done |= _single_thread->process();
+
+                //LOG( "spooler.cxx: something_done=" << something_done << "   _single_thread->process()\n" );
+
+                if( _single_thread->is_ready_for_termination() )  break;
+
+                Task* task = _single_thread->get_next_task();
+                if( task ) 
+                {
+                    _next_time = min( _next_time, task->next_time() );
+                    if( log_wait )  if( task )  msg = "Warten bis " + _next_time.as_string() + " für Task " + task->name();
+                                        //else  msg = "Keine Task aktiv";
+                }
+
+                nothing_done_max += _single_thread->task_count() * 3 + 3;    // Statt der Prozesse zählen wir die Tasks einmal mehr
             }
 
-            nothing_done_max += _single_thread->task_count() * 3 + 3;    // Statt der Prozesse zählen wir die Tasks einmal mehr
-        }
 
+            Job* job = get_next_job_to_start();
 
-        Job* job = get_next_job_to_start();
-
-        if( job  &&  _next_time > job->next_time() )  
-        {
-            _next_time = job->next_time();
-            if( log_wait )  msg = "Warten bis " + _next_time.as_string() + " für Job " + job->name();
+            if( job  &&  _next_time > job->next_time() )  
+            {
+                _next_time = job->next_time();
+                if( log_wait )  msg = "Warten bis " + _next_time.as_string() + " für Job " + job->name();
+            }
         }
 
 
@@ -1845,24 +1851,29 @@ void Spooler::run()
 
             Wait_handles wait_handles ( this, &_log );
             
-            if( _single_thread )  wait_handles += _single_thread->_wait_handles;
+            if( _state != Spooler::s_paused )
+            {
+                if( _single_thread )  wait_handles += _single_thread->_wait_handles;
+
+#               ifdef SYSTEM_WIN
+                    FOR_EACH( Process_class_list, _process_class_list, pc )
+                    {
+                        FOR_EACH( Process_list, (*pc)->_process_list, p )
+                        {
+                            object_server::Connection_to_own_server* server = dynamic_cast<object_server::Connection_to_own_server*>( +(*p)->_connection );
+                            if( server  &&  server->_process_handle )  wait_handles.add_handle( server->_process_handle );        // Signalisiert Prozessende
+                        }
+                    }
+
+#               endif
+            }
 
 #           ifdef SYSTEM_WIN
-                FOR_EACH( Process_class_list, _process_class_list, pc )
-                {
-                    FOR_EACH( Process_list, (*pc)->_process_list, p )
-                    {
-                        object_server::Connection_to_own_server* server = dynamic_cast<object_server::Connection_to_own_server*>( +(*p)->_connection );
-                        if( server  &&  server->_process_handle )  wait_handles.add_handle( server->_process_handle );        // Signalisiert Prozessende
-                    }
-                }
-
                 // Events für spooler_communication.cxx
                 vector<z::Event*> events;
                 _connection_manager->get_events( &events );
                 FOR_EACH( vector<z::Event*>, events, e )  wait_handles.add( *e );
 #           endif
-
 
             wait_handles += _wait_handles;
             if( !wait_handles.signaled() )
