@@ -1,4 +1,4 @@
-// $Id: spooler_wait.cxx,v 1.28 2002/03/27 21:33:50 jz Exp $
+// $Id: spooler_wait.cxx,v 1.29 2002/03/18 10:11:40 jz Exp $
 /*
     Hier sind implementiert
 
@@ -119,19 +119,7 @@ void Event::remove_from( Wait_handles* w )
 
 bool Event::wait( double wait_time )
 {
-/*
-    THREAD_LOCK( _lock )
-    {
-        bool signaled = _signaled;
-        _signaled = false;
-        if( signaled )  return true;
-
-        _waiting = true;
-    }
-*/
     bool result = wait_for_event( handle(), wait_time );
-
-//  _waiting = false;
 
     return result;
 }
@@ -142,6 +130,7 @@ void Event::signal( const string& name )
 {
     THREAD_LOCK( _lock )
     {
+        _signaled = true;
         _signal_name = name;
         SetEvent( _handle );  
     }
@@ -157,9 +146,18 @@ void Event::set_signal()
     {
         _signaled = true;
     }
+}
 
-    //LOG( "Event().set_signal() ok\n" );
-    //if( signaled )  signal_event();
+//-------------------------------------------------------------------------------------Event::reset
+
+void Event::reset()
+{
+    THREAD_LOCK( _lock )
+    {
+        _signaled = false;
+        _signal_name = "";
+        ResetEvent( _handle );
+    }
 }
 
 //------------------------------------------------------------------------Event::signaled_then_reset
@@ -174,6 +172,7 @@ bool Event::signaled_then_reset()
     {
         signaled = _signaled;
         _signaled = false;
+        if( signaled )  ResetEvent( _handle );
     }
 
     return signaled;
@@ -264,13 +263,6 @@ int Wait_handles::wait( double wait_time )
 
 int Wait_handles::wait_until( Time until )
 {
-/*
-    THREAD_LOCK( _lock )
-    {
-        FOR_EACH( vector<Event*>, _events, it)  if( (*it)->signaled() ) { _log->msg( "Ereignis " + (*it)->name() ); return; }
-        _waiting = true;
-    }
-*/
     bool again = false;
 
     while(1)

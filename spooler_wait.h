@@ -1,4 +1,4 @@
-// $Id: spooler_wait.h,v 1.19 2002/03/27 21:33:50 jz Exp $
+// $Id: spooler_wait.h,v 1.20 2002/03/18 10:11:40 jz Exp $
 
 #ifndef __SPOOLER_WAIT_H
 #define __SPOOLER_WAIT_H
@@ -35,7 +35,7 @@ struct Event : Handle
   //virtual                     signal_event                ()                                  {}
     bool                        signaled                    () const                            { return _signaled; }
     bool                        signaled_then_reset         ();
-    void                        reset                       ()                                  { _signaled = false; _signal_name = ""; }
+    void                        reset                       ();
 
     string                      name                        () const                            { return _name; }
     string                      as_string                   () const;
