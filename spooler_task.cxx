@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.91 2002/05/19 09:59:24 jz Exp $
+// $Id: spooler_task.cxx,v 1.92 2002/05/21 12:04:44 jz Exp $
 /*
     Hier sind implementiert
 
@@ -561,7 +561,7 @@ void Job::end()
     set_mail_defaults();      // Vor spooler_on_error() bzw. spooler_on_success(); eMail wird in finish() verschickt
 
 
-    if( _state == s_suspended )  set_state( s_running );
+    if( _state == s_suspended  ||  _state == s_running_delayed )  set_state( s_running );
     
     if( _state == s_start_task
      || _state == s_starting
@@ -664,13 +664,16 @@ bool Job::execute_state_cmd()
                                      && _state != s_read_error )  stop(), finish(),            something_done = true;
                                     break;
 
-                case sc_unstop:     if( _state == s_stopped    )  set_state( s_pending ),      something_done = true;
+                case sc_unstop:     if( _state == s_stopped    )  set_state( s_pending ),      something_done = true,  set_next_start_time();
                                     break;
 
-                case sc_end:        if( _state == s_running    )  end(), finish(),             something_done = true;
+                case sc_end:        if( _state == s_running 
+                                     || _state == s_running_delayed 
+                                     || _state == s_running_process )  end(), finish(),        something_done = true;
                                     break;
 
-                case sc_suspend:    if( _state == s_running    )  set_state( s_suspended ),    something_done = true;
+                case sc_suspend:    if( _state == s_running 
+                                     || _state == s_running_delayed )  set_state( s_suspended ), something_done = true;
                                     break;
 
                 case sc_continue:   if( _state == s_suspended  
@@ -927,7 +930,7 @@ bool Job::do_something()
     if( _state == s_read_error )  goto ENDE;
 
 
-    if( _state == s_start_task || _state == s_running || _state == s_running_process )          // HISTORIE
+    if( _state == s_start_task || _state == s_running || _state == s_running_delayed || _state == s_running_process )          // HISTORIE
     {
         if( _task->_step_count == _history.min_steps() )  _history.start();
     }
@@ -986,6 +989,7 @@ bool Job::do_something()
         if( _state == s_start_task
          || _state == s_starting        // Bei Fehler in spooler_init()
          || _state == s_running 
+         || _state == s_running_delayed
          || _state == s_running_process )  end(), something_done = true;
 
         if( _state != s_stopped  &&  has_error()  &&  _repeat == 0  &&  _delay_after_error.empty() )  stop(), something_done = true;
@@ -1019,7 +1023,10 @@ bool Job::do_something()
 
 
 ENDE:
-    if( _state != s_running  &&  _state != s_running_process  &&  _state != s_suspended )  send_collected_log();
+    if( _state != s_running  
+     && _state != s_running_delayed
+     && _state != s_running_process  
+     && _state != s_suspended        )  send_collected_log();
 
     return something_done;
 }
@@ -1181,15 +1188,15 @@ void Job::set_state_cmd( State_cmd cmd )
                                 _thread->signal( state_cmd_name(cmd) );
                                 break;
 
-            case sc_end:        ok = _state == s_running;       if( !ok )  return;
+            case sc_end:        ok = _state == s_running || _state == s_running_delayed || _state == s_suspended;  if( !ok )  return;
                                 _state_cmd = cmd;
                                 break;
 
-            case sc_suspend:    ok = _state == s_running;       if( !ok )  return;
+            case sc_suspend:    ok = _state == s_running || _state == s_running_delayed;   if( !ok )  return;
                                 _state_cmd = cmd;
                                 break;
 
-            case sc_continue:   ok = _state == s_suspended;     if( !ok )  return;
+            case sc_continue:   ok = _state == s_suspended || _state == s_running_delayed;  if( !ok )  return;
                                 _state_cmd = cmd;
                                 _thread->signal( state_cmd_name(cmd) );
                                 break;

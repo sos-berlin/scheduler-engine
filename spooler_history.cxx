@@ -1,4 +1,4 @@
-// $Id: spooler_history.cxx,v 1.22 2002/05/16 20:01:42 jz Exp $
+// $Id: spooler_history.cxx,v 1.23 2002/05/21 12:04:44 jz Exp $
 
 #include "../kram/sos.h"
 #include "spooler.h"
@@ -760,6 +760,7 @@ xml::Element_ptr Job_history::read_tail( xml::Document_ptr doc, int id, int next
                 else
                 if( _use_db )
                 {
+                    string prefix = ( next < 0? "-in head -" : "-in tail -reverse -" ) + as_string(max(1,abs(next))) + " | ";
                     string clause = " where \"job_name\"=" + sql_quoted(_job_name);
                     
                     if( id != -1 )
@@ -769,10 +770,10 @@ xml::Element_ptr Job_history::read_tail( xml::Document_ptr doc, int id, int next
                         clause += as_string(id);
                     }
 
-                    clause += " order by \"id\" desc";
-                    //if( next < 0 )  clause += " desc";
+                    clause += " order by \"id\" ";
+                    if( next < 0 )  clause += " desc";
                     
-                    sel.open( "-in head -" + as_string(max(1,abs(next))) + " | " + _spooler->_db._db_name + 
+                    sel.open( prefix + _spooler->_db._db_name + 
                               "select \"ID\", \"SPOOLER_ID\", \"job_name\", \"start_time\", \"end_time\", \"cause\", \"steps\", \"error\", \"error_code\", \"error_text\" " +
                               join( "", vector_map( prepend_comma, _extra_names ) ) +
                               " from " + _spooler->_history_tablename + 
