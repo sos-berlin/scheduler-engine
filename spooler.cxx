@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.168 2003/02/18 21:38:08 jz Exp $
+// $Id: spooler.cxx,v 1.169 2003/02/19 23:17:13 jz Exp $
 /*
     Hier sind implementiert
 
@@ -991,10 +991,10 @@ void Spooler::run()
         _next_job  = NULL;
 
 
-        while( _state_cmd == sc_none  &&  !ctrl_c_pressed )    // Solange Jobs laufen, keine Umstände machen. 
+        //while( _state_cmd == sc_none  &&  !ctrl_c_pressed )    // Solange Jobs laufen, keine Umstände machen. 
         {
             bool something_done = run_threads();
-            if( !something_done )  break;
+        //    if( !something_done )  break;
         }
 
         int running_tasks_count = 0;
@@ -1028,9 +1028,10 @@ void Spooler::run()
 
                     //msg += " und " + wait_handles.as_string();
 
-                    if( wait_handles.wait(0) == -1 )  _log.debug( msg ), wait_handles.wait_until( _next_time );
+                    if( wait_handles.wait(0) == -1 )  _log.debug( msg ); //, wait_handles.wait_until( _next_time );
                 }
 
+                wait_handles.wait_until( _next_time );
                 wait_handles.clear();
             }
         }
