@@ -1,10 +1,10 @@
-// $Id: Job.java,v 1.3 2003/06/06 15:30:17 jz Exp $
+// $Id: Job.java,v 1.4 2003/06/08 10:00:51 jz Exp $
 
 package sos.spooler;
 
 /**
  * @author Joacim Zschimmer, Zschimmer GmbH
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 
 public class Job extends Idispatch

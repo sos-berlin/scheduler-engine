@@ -1,4 +1,4 @@
-// $Id: spooler_service.cxx,v 1.39 2003/05/23 06:40:28 jz Exp $
+// $Id: spooler_service.cxx,v 1.40 2003/06/08 10:00:50 jz Exp $
 /*
     Hier sind implementiert
 
@@ -41,7 +41,7 @@ struct Service_handle
                                ~Service_handle              ()                              { close(); }
 
         void                    operator =                  ( SC_HANDLE h )                 { set_handle( h ); }
-                                operator HANDLE             () const                        { return _handle; }
+                                operator SC_HANDLE          () const                        { return _handle; }
                                 operator !                  () const                        { return _handle == 0; }
 
         void                    set_handle                  ( SC_HANDLE h )                 { close(); _handle = h; }

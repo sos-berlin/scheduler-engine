@@ -1,4 +1,4 @@
-// $Id: spooler.odl,v 1.59 2003/06/02 09:21:36 jz Exp $
+// $Id: spooler.odl,v 1.60 2003/06/08 10:00:50 jz Exp $
 
 // Anweisung: midl /nologo /error all /out $(OutDir) $(InputPath)
 
@@ -461,14 +461,14 @@ library spooler
         interface Ihas_java_class_name;
     }
 
-    //--------------------------------------------------------------------------------------Context
+    //------------------------------------------------------------------------------Spooler_context
 
     [
         uuid       ( 51905432-B068-4124-B972-260EED6CAD16 ),
         odl,
         dual
     ]
-    interface Icontext : IDispatch
+    interface Ispooler_context : IDispatch
     {
         [propget]
         HRESULT                 log                     ( [out,retval] Ilog** log );
@@ -489,9 +489,9 @@ library spooler
     [
         uuid       ( 47399CB4-B7A4-40f9-A9AE-7AE4CBAE90F5 )
     ]
-    coclass Context
+    coclass Spooler_context
     {
-        interface Icontext;
+        interface Ispooler_context;
     }
 
     //-----------------------------------------------------------------------------------------Mail

@@ -1,4 +1,4 @@
-// $Id: spooler_com.h,v 1.69 2003/03/31 11:32:53 jz Exp $
+// $Id: spooler_com.h,v 1.70 2003/06/08 10:00:50 jz Exp $
 
 #ifndef __SPOOLER_COM_H
 #define __SPOOLER_COM_H
@@ -205,7 +205,7 @@ struct Com_log : spooler_com::Ilog,
     STDMETHODIMP                warn                        ( BSTR );
     STDMETHODIMP                error                       ( BSTR );
   //STDMETHODIMP                fatal                       ( BSTR );
-    STDMETHODIMP                log                         ( Log_level, BSTR line );
+    STDMETHODIMP                log                         ( spooler_com::Log_level, BSTR line );
 
     STDMETHODIMP            get_mail                        ( spooler_com::Imail** );
 
@@ -409,7 +409,7 @@ struct Com_spooler : spooler_com::Ispooler,
 
 //--------------------------------------------------------------------------------------Com_context
 
-struct Com_context : spooler_com::Icontext, Sos_ole_object               
+struct Com_context : spooler_com::Ispooler_context, Sos_ole_object               
 {
                                 Com_context                 ();
 

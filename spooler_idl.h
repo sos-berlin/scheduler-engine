@@ -1,4 +1,4 @@
-// $Id: spooler_idl.h,v 1.15 2003/06/02 09:21:36 jz Exp $
+// $Id: spooler_idl.h,v 1.16 2003/06/08 10:00:50 jz Exp $
 
 
 /*  Ersatz für spooler.odl für Systeme ohne COM. 
@@ -298,12 +298,12 @@ struct Ilog : IDispatch
     virtual HRESULT     get_collect_max             ( double* time ) = 0;
 };
 
-//--------------------------------------------------------------------------------------Context
+//----------------------------------------------------------------------------------Spooler_context
 
-DEFINE_GUID( IID_Icontext,  0x51905432, 0xB068, 0x4124, 0xB9, 0x72, 0x26, 0x0E, 0xED, 0x6C, 0xAD, 0x16 );
-DEFINE_GUID( CLSID_Context, 0x47399CB4, 0xB7A4, 0x40f9, 0xA9, 0xAE, 0x7A, 0xE4, 0xCB, 0xAE, 0x90, 0xF5 );
+DEFINE_GUID( IID_Ispooler_context,  0x51905432, 0xB068, 0x4124, 0xB9, 0x72, 0x26, 0x0E, 0xED, 0x6C, 0xAD, 0x16 );
+DEFINE_GUID( CLSID_Spooler_context, 0x47399CB4, 0xB7A4, 0x40f9, 0xA9, 0xAE, 0x7A, 0xE4, 0xCB, 0xAE, 0x90, 0xF5 );
 
-struct Icontext : IDispatch
+struct Ispooler_context : IDispatch
 {
     DEFINE_UUIDOF( Icontext )
 

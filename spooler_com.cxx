@@ -1,4 +1,4 @@
-// $Id: spooler_com.cxx,v 1.96 2003/06/02 09:21:36 jz Exp $
+// $Id: spooler_com.cxx,v 1.97 2003/06/08 10:00:50 jz Exp $
 /*
     Hier sind implementiert
 
@@ -38,7 +38,7 @@ DESCRIBE_CLASS( &spooler_typelib, Com_task          , task          , CLSID_Task
 DESCRIBE_CLASS( &spooler_typelib, Com_object_set    , object_set    , CLSID_object_set    , "Spooler.Object_set"    , "1.0" )
 DESCRIBE_CLASS( &spooler_typelib, Com_thread        , thread        , CLSID_thread        , "Spooler.Thread"        , "1.0" )
 DESCRIBE_CLASS( &spooler_typelib, Com_spooler       , spooler       , CLSID_spooler       , "Spooler.Spooler"       , "1.0" )
-DESCRIBE_CLASS( &spooler_typelib, Com_context       , context       , CLSID_Context       , "Spooler.Context"       , "1.0" )
+DESCRIBE_CLASS( &spooler_typelib, Com_spooler_context, spooler_context, CLSID_Spooler_context, "Spooler.Context"       , "1.0" )
 DESCRIBE_CLASS( &spooler_typelib, Com_job_chain     , job_chain     , CLSID_job_chain     , "Spooler.Job_chain"     , "1.0" )
 DESCRIBE_CLASS( &spooler_typelib, Com_job_chain_node, job_chain_node, CLSID_job_chain_node, "Spooler.Job_chain_node", "1.0" )
 DESCRIBE_CLASS( &spooler_typelib, Com_order         , order         , CLSID_order         , "Spooler.Order"         , "1.0" )
@@ -718,24 +718,24 @@ STDMETHODIMP Com_log::QueryInterface( const IID& iid, void** result )
 
 //----------------------------------------------------------------------------------------Com_log::
     
-STDMETHODIMP Com_log::debug9( BSTR line )                       { return log( z::log_debug9, line ); }
-STDMETHODIMP Com_log::debug8( BSTR line )                       { return log( z::log_debug8, line ); }
-STDMETHODIMP Com_log::debug7( BSTR line )                       { return log( z::log_debug7, line ); }
-STDMETHODIMP Com_log::debug6( BSTR line )                       { return log( z::log_debug6, line ); }
-STDMETHODIMP Com_log::debug5( BSTR line )                       { return log( z::log_debug5, line ); }
-STDMETHODIMP Com_log::debug4( BSTR line )                       { return log( z::log_debug4, line ); }
-STDMETHODIMP Com_log::debug3( BSTR line )                       { return log( z::log_debug3, line ); }
-STDMETHODIMP Com_log::debug2( BSTR line )                       { return log( z::log_debug2, line ); }
-STDMETHODIMP Com_log::debug1( BSTR line )                       { return log( z::log_debug1, line ); }
-STDMETHODIMP Com_log::debug ( BSTR line )                       { return log( z::log_debug1, line ); }
-STDMETHODIMP Com_log::msg   ( BSTR line )                       { return log( z::log_info  , line ); }
-STDMETHODIMP Com_log::info  ( BSTR line )                       { return log( z::log_info  , line ); }
-STDMETHODIMP Com_log::warn  ( BSTR line )                       { return log( z::log_warn  , line ); }
-STDMETHODIMP Com_log::error ( BSTR line )                       { return log( z::log_error , line ); }
+STDMETHODIMP Com_log::debug9( BSTR line )                       { return log( spooler_com::log_debug9, line ); }
+STDMETHODIMP Com_log::debug8( BSTR line )                       { return log( spooler_com::log_debug8, line ); }
+STDMETHODIMP Com_log::debug7( BSTR line )                       { return log( spooler_com::log_debug7, line ); }
+STDMETHODIMP Com_log::debug6( BSTR line )                       { return log( spooler_com::log_debug6, line ); }
+STDMETHODIMP Com_log::debug5( BSTR line )                       { return log( spooler_com::log_debug5, line ); }
+STDMETHODIMP Com_log::debug4( BSTR line )                       { return log( spooler_com::log_debug4, line ); }
+STDMETHODIMP Com_log::debug3( BSTR line )                       { return log( spooler_com::log_debug3, line ); }
+STDMETHODIMP Com_log::debug2( BSTR line )                       { return log( spooler_com::log_debug2, line ); }
+STDMETHODIMP Com_log::debug1( BSTR line )                       { return log( spooler_com::log_debug1, line ); }
+STDMETHODIMP Com_log::debug ( BSTR line )                       { return log( spooler_com::log_debug1, line ); }
+STDMETHODIMP Com_log::msg   ( BSTR line )                       { return log( spooler_com::log_info  , line ); }
+STDMETHODIMP Com_log::info  ( BSTR line )                       { return log( spooler_com::log_info  , line ); }
+STDMETHODIMP Com_log::warn  ( BSTR line )                       { return log( spooler_com::log_warn  , line ); }
+STDMETHODIMP Com_log::error ( BSTR line )                       { return log( spooler_com::log_error , line ); }
 
 //-------------------------------------------------------------------------------------Com_log::log
 
-STDMETHODIMP Com_log::log( z::Log_level level, BSTR line )
+STDMETHODIMP Com_log::log( spooler_com::Log_level level, BSTR line )
 { 
     HRESULT hr = NOERROR;
 
@@ -744,7 +744,7 @@ STDMETHODIMP Com_log::log( z::Log_level level, BSTR line )
     {
         if( !_log )  return E_POINTER;
 
-        _log->log( level, bstr_as_string( line ) ); 
+        _log->log( (zschimmer::Log_level)level, bstr_as_string( line ) ); 
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Log::log" ); }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Log::log" ); }
@@ -2206,7 +2206,7 @@ const Com_method Com_context::_methods[] =
 
 Com_context::Com_context()
 : 
-    Sos_ole_object( context_class_ptr, this )
+    Sos_ole_object( spooler_context_class_ptr, this )
 {
 }
 
