@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.216 2003/06/02 11:22:28 jz Exp $
+// $Id: spooler.cxx,v 1.217 2003/06/13 14:45:40 jz Exp $
 /*
     Hier sind implementiert
 
@@ -1018,6 +1018,7 @@ void Spooler::start()
     if( _module.set() )
     {
         _module_instance = _module.create_instance();
+        _module_instance->set_title( "Spooler-script" );
         _module_instance->init();
 
         _module_instance->add_obj( (IDispatch*)_com_spooler, "spooler"     );
@@ -1641,6 +1642,8 @@ int sos_main( int argc, char** argv )
             else
           //if( opt.with_value( "execute-job"      ) )  is_object_server = true;       // Parameter ist nur für den Befehl ps
             if( opt.flag      ( "object-server"    ) )  is_object_server = true;
+            else
+            if( opt.with_value( "title"            ) )  ;                               // Damit der Aufrufer einen Kommentar für ps übergeben kann (für -object-server)
             else
             if( opt.flag      ( "V"                ) )  fprintf( stderr, "Spooler %s\n", VER_PRODUCTVERSION_STR );
             else

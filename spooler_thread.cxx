@@ -1,4 +1,4 @@
-// $Id: spooler_thread.cxx,v 1.82 2003/05/18 11:27:30 jz Exp $
+// $Id: spooler_thread.cxx,v 1.83 2003/06/13 14:45:40 jz Exp $
 /*
     Hier sind implementiert
 
@@ -227,6 +227,7 @@ void Spooler_thread::start( Event* event_destination )
         if( _module.set() )
         {
             _module_instance = _module.create_instance();
+            _module_instance->set_title( "Script for Thread " + _name );
 
             _module_instance->init();
 

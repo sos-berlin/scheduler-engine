@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.152 2003/06/13 08:05:29 jz Exp $
+// $Id: spooler_task.cxx,v 1.153 2003/06/13 14:45:40 jz Exp $
 /*
     Hier sind implementiert
 
@@ -386,6 +386,7 @@ void Job::init()
     if( _process_filename.empty() )
     {
         _module_instance = _module_ptr->create_instance();
+        _module_instance->set_title( "Job " + _name );
     }
 
 
@@ -1566,6 +1567,12 @@ xml::Element_ptr Job::dom( const xml::Document_ptr& document, Show_what show, Jo
 
             job_element.setAttribute( "steps"           , _task->_step_count );
             job_element.setAttribute( "id"              , _task->_id );
+        }
+
+        if( _module_instance )  
+        {
+            int pid = _module_instance->pid();
+            if( pid ) job_element.setAttribute( "pid", pid );       // separate_process="yes", Remote_module_instance_proxy
         }
 
         if( show & show_description )  dom_append_text_element( job_element, "description", _description );

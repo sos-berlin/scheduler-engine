@@ -1,4 +1,4 @@
-// $Id: spooler_module.h,v 1.23 2003/06/05 12:48:54 jz Exp $
+// $Id: spooler_module.h,v 1.24 2003/06/13 14:45:40 jz Exp $
 
 #ifndef __SPOOLER_MODULE_H
 #define __SPOOLER_MODULE_H
@@ -143,6 +143,8 @@ struct Module_instance : Object
                                 Module_instance             ( Module* module )                      : _zero_(this+1), _module(module), _log(module?module->_log:NULL) {}
     virtual                    ~Module_instance             ()                                      {}      // Für gcc 3.2
 
+    void                    set_title                       ( const string& title )                 { _title = title; }
+
     virtual void                close                       ()                                      = 0;
     virtual void                init                        ();
     virtual void                add_obj                     ( const ptr<IDispatch>&, const string& name );
@@ -155,12 +157,15 @@ struct Module_instance : Object
     virtual bool                name_exists                 ( const string& name )                  = 0;
     virtual bool                loaded                      ()                                      = 0;
     virtual bool                callable                    ()                                      = 0;
+    int                         pid                         ()                                      { return _pid; }        // 0, wenn kein Prozess
 
 
     Fill_zero                  _zero_;
   //Prefix_log*                _log;
     Delegated_log              _log;
     ptr<Module>                _module;
+    string                     _title;                      // Wird lokalem Objectserver als -title=... übergeben, für die Prozessliste (ps)
+    int                        _pid;                        // Wird von Remote_module_instance_proxy gesetzt
 
     ptr<Com_context>           _com_context;
     ptr<IDispatch>             _idispatch;

@@ -1,4 +1,4 @@
-// $Id: spooler_module_remote.cxx,v 1.11 2003/06/05 12:48:54 jz Exp $
+// $Id: spooler_module_remote.cxx,v 1.12 2003/06/13 14:45:40 jz Exp $
 /*
     Hier sind implementiert
 
@@ -29,7 +29,13 @@ void Remote_module_instance_proxy::init()
 
     Module_instance::init();
 
-    hr = com_create_instance_in_separate_process( spooler_com::CLSID_Remote_module_instance_server, NULL, 0, spooler_com::IID_Iremote_module_instance_server, (void**)&_remote_instance );
+    Parameters parameters;
+    parameters.push_back( Parameter( "param", "-object-server" ) );
+    parameters.push_back( Parameter( "param", "-title=" + quoted_string( _title ) ) );
+
+    hr = com_create_instance_in_separate_process( spooler_com::CLSID_Remote_module_instance_server, NULL, 0, 
+                                                  spooler_com::IID_Iremote_module_instance_server, (void**)&_remote_instance,
+                                                  &_pid, parameters );
     if( FAILED(hr) )  throw_ole( hr, "com_create_instance_in_separate_process" );
 
     Variant params ( Variant::vt_array, 8 );
