@@ -1,4 +1,4 @@
-// $Id: spooler.h,v 1.101 2002/11/20 11:03:09 jz Exp $
+// $Id: spooler.h,v 1.102 2002/11/21 14:25:06 jz Exp $
 
 #ifndef __SPOOLER_H
 #define __SPOOLER_H
@@ -9,8 +9,10 @@
 
 #ifdef Z_WINDOWS
 #   define SPOOLER_USE_MSXML                // Microsofts msxml3
+#   define SPOOLER_USE_THREADS
 #else
 #   define SPOOLER_USE_LIBXML2              // Gnomes libxml2
+# //define SPOOLER_USE_THREADS
 #endif
 
 
