@@ -331,7 +331,7 @@ string Prefix_log::as_string()
 {
     if( opened() )
     {
-        return Mapped_file( filename(), "r" ).as_string();
+        return string_from_file( filename() );
     }
     else
     {
