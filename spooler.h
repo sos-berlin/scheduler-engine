@@ -1,4 +1,4 @@
-// $Id: spooler.h,v 1.22 2001/01/12 12:20:55 jz Exp $
+// $Id: spooler.h,v 1.23 2001/01/12 23:17:00 jz Exp $
 
 #ifndef __SPOOLER_H
 
@@ -194,6 +194,8 @@ struct Script_instance
     CComVariant                 call                        ( const char* name );
     CComVariant                 call                        ( const char* name, int param );
     CComVariant                 property_get                ( const char* name );
+    void                        property_put                ( const char* name, const CComVariant& v ) { _script_site->property_put( name, v ); } 
+    void                        optional_property_put       ( const char* name, const CComVariant& v );
     bool                        name_exists                 ( const string& name )          { return _script_site->name_exists(name); }
 
     Script*                    _script;
@@ -671,9 +673,9 @@ struct Spooler
     string                     _config_filename;
     string                     _log_filename;
     string                     _spooler_id;
-    string                     _object_set_param;
     string                     _log_directory;
     Log                        _log;
+    string                     _spooler_param;              // Parameter für Skripten
     int                        _argc;
     char**                     _argv;
 };

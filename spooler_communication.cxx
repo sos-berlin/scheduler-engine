@@ -1,4 +1,4 @@
-// $Id: spooler_communication.cxx,v 1.7 2001/01/11 21:39:42 jz Exp $
+// $Id: spooler_communication.cxx,v 1.8 2001/01/12 23:17:00 jz Exp $
 
 //#include <precomp.h>
 
@@ -12,6 +12,8 @@ using namespace std;
 
 namespace sos {
 namespace spooler {
+
+//static const int wait_for_free_port = 15;   // Soviele Sekunden warten, bis TCP- oder UDP-Port frei wird
 
 //---------------------------------------------------------------------------------------get_errno
 
@@ -267,6 +269,7 @@ void Communication::bind()
     int                 ret;
     unsigned long       on = 1;
     BOOL                true_ = 1;
+  //int                 wait = 0;       // Längstens wait_for_free_port Sekunden warten
 
 
     // UDP:
@@ -285,8 +288,13 @@ void Communication::bind()
         sa.sin_family      = AF_INET;
         sa.sin_addr.s_addr = 0; // INADDR_ANY
 
-        ret = ::bind( _udp_socket, (struct sockaddr*)&sa, sizeof sa );
-        if( ret == SOCKET_ERROR )  throw_sos_socket_error( "udp-bind" );
+        //do {
+            ret = ::bind( _udp_socket, (struct sockaddr*)&sa, sizeof sa );
+            if( ret == SOCKET_ERROR ) {
+                //if( wait++ < wait_for_free_port  &&  get_errno() == EADDRINUSE )  { sos_sleep(1); continue; }
+                throw_sos_socket_error( "udp-bind" );
+            }
+        //} while(0);
 
         ret = ioctlsocket( _udp_socket, FIONBIO, &on );
         if( ret == SOCKET_ERROR )  throw_sos_socket_error( "ioctl(FIONBIO)" );
@@ -313,8 +321,13 @@ void Communication::bind()
         sa.sin_family      = AF_INET;
         sa.sin_addr.s_addr = 0; // INADDR_ANY
 
-        ret = ::bind( _listen_socket, (struct sockaddr*)&sa, sizeof sa );
-        if( ret == SOCKET_ERROR )  throw_sos_socket_error( "tcp-bind" );
+        //do {
+            ret = ::bind( _listen_socket, (struct sockaddr*)&sa, sizeof sa );
+            if( ret == SOCKET_ERROR ) {
+                //if( wait++ < wait_for_free_port  &&  get_errno() == EADDRINUSE )  { sos_sleep(1); continue; }
+                throw_sos_socket_error( "tcp-bind" );
+            }
+        //} while(0);
 
         ret = listen( _listen_socket, 5 );
         if( ret == SOCKET_ERROR )  throw_errno( get_errno(), "listen" );

@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.23 2001/01/12 12:20:55 jz Exp $
+// $Id: spooler.cxx,v 1.24 2001/01/12 23:16:59 jz Exp $
 
 
 /*
@@ -109,6 +109,20 @@ CComVariant Script_instance::property_get( const char* name )
     return _script_site->property_get( name );
 }
 
+//-----------------------------------------------------------Script_instance::optional_property_put
+
+void Script_instance::optional_property_put( const char* name, const CComVariant& v )
+{
+    try 
+    {
+        property_put( name, v );
+    }
+    catch( const Xc& )
+    {
+        // Ignorieren, wenn das Objekt die Eigenschaft nicht kennt
+    }
+}
+
 //----------------------------------------------------------------------------Spooler_object::level
 
 Level Spooler_object::level()
@@ -177,13 +191,13 @@ void Object_set::open()
     {
         _script_instance._script_site->parse( "$spooler_low_level="  + as_string( _object_set_descr->_level_interval._low_level ) + ";" );
         _script_instance._script_site->parse( "$spooler_high_level=" + as_string( _object_set_descr->_level_interval._high_level ) + ";" );
-        _script_instance._script_site->parse( "$spooler_param="      + quoted_string( _spooler->_object_set_param, '\'', '\\' ) + ";" );
+        _script_instance._script_site->parse( "$spooler_param="      + quoted_string( _spooler->_spooler_param, '\'', '\\' ) + ";" );
     }
     else
     {
         com_property_put( _dispatch, "spooler_low_level" , _object_set_descr->_level_interval._low_level );
         com_property_put( _dispatch, "spooler_high_level", _object_set_descr->_level_interval._high_level );
-        com_property_put( _dispatch, "spooler_param"     , _spooler->_object_set_param.c_str() );
+        com_property_put( _dispatch, "spooler_param"     , _spooler->_spooler_param.c_str() );
     }
 
     com_call( _dispatch, "spooler_open" );
@@ -781,6 +795,7 @@ void Spooler::start()
     {
         _script_instance.init();
       //_script_instance.add_obj( new Com_task_log( this ), "log" );
+        _script_instance.optional_property_put( "spooler_param", _spooler_param.c_str() );
         _script_instance.load();
     }
     
@@ -965,7 +980,7 @@ void Spooler::load_arg()
     _config_filename  = read_profile_string( "factory.ini", "spooler", "config" );
     _log_directory    = read_profile_string( "factory.ini", "spooler", "log-dir" );
     _spooler_id       = read_profile_string( "factory.ini", "spooler", "spooler-id" );
-    _object_set_param = read_profile_string( "factory.ini", "spooler", "object-set-param" );
+    _spooler_param    = read_profile_string( "factory.ini", "spooler", "spooler-param" );
 
     for( Sos_option_iterator opt ( _argc, _argv ); !opt.end(); opt.next() )
     {
@@ -979,7 +994,7 @@ void Spooler::load_arg()
         else
         if( opt.with_value( "spooler-id"       ) )  _spooler_id = opt.value();
         else
-        if( opt.with_value( "object-set-param" ) )  _object_set_param = opt.value();
+        if( opt.with_value( "spooler-param"    ) )  _spooler_param = opt.value();
         else
             throw_sos_option_error( opt );
     }
@@ -1015,6 +1030,7 @@ void Spooler::restart()
 
     // Neuer Prozess (-restart):
     // Warten, bis -old-tcp-port frei wird, max. 30s.
+
 }
 
 //------------------------------------------------------------------------------Spooler::cmd_reload
@@ -1075,22 +1091,54 @@ int Spooler::launch( int argc, char** argv )
 
     } while( _state_cmd == sc_reload );
 
-    if( _state_cmd == sc_terminate_and_restart )  restart();
-
-    return 0;
+    return _state_cmd == sc_terminate_and_restart? 1 : 0;
 }
 
 //-------------------------------------------------------------------------------------spooler_main
 
 int spooler_main( int argc, char** argv )
 {
+    int ret;
+
     HRESULT hr = CoInitialize(NULL);
     if( FAILED(hr) )  throw_ole( hr, "CoInitialize" );
 
     {
         spooler::Spooler spooler;
 
-        spooler.launch( argc, argv );
+        ret = spooler.launch( argc, argv );
+    }
+
+    if( ret == 1 )
+    {
+#       ifdef SYSTEM_WIN
+
+            PROCESS_INFORMATION process_info; 
+            STARTUPINFO         startup_info; 
+            BOOL                ok;
+
+            memset( &process_info, 0, sizeof process_info );
+
+            memset( &startup_info, 0, sizeof startup_info );
+            startup_info.cb = sizeof startup_info; 
+
+            ok = CreateProcess( NULL,                       // application name
+                                GetCommandLine(),           // command line 
+                                NULL,                       // process security attributes 
+                                NULL,                       // primary thread security attributes 
+                                TRUE,                       // handles are inherited 
+                                0,                          // creation flags 
+                                NULL,                       // use parent's environment 
+                                NULL,                       // use parent's current directory 
+                                &startup_info,              // STARTUPINFO pointer 
+                                &process_info );            // receives PROCESS_INFORMATION 
+
+            if( !ok )  throw_mswin_error("CreateProcess");
+
+            CloseHandle( process_info.hThread );
+            CloseHandle( process_info.hProcess );
+
+#       endif
     }
 
     CoUninitialize();

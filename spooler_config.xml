@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 
-<!-- $Id: spooler_config.xml,v 1.20 2001/01/12 13:28:29 jz Exp $   (C) 2000 SOS GmbH Berlin -->
+<!-- $Id: spooler_config.xml,v 1.21 2001/01/12 23:17:01 jz Exp $   (C) 2000 SOS GmbH Berlin -->
 
 <!DOCTYPE spooler_config SYSTEM "spooler_config.dtd">
 
@@ -8,9 +8,11 @@
 
     <script language="VBScript"><![CDATA[
 
+dim spooler_param
+
 class Global_class
     function method()
-        method="Ich bin von der globalen Methode"
+        method="Ich bin von der globalen Methode" & ", spooler_param=" & spooler_param
     end function
 end class
 
@@ -31,6 +33,7 @@ set global = new Global_class
             <script use_engine="job"><![CDATA[
 
 dir_name = "c:\tmp\spooler"
+dim spooler_param
 set fso = createobject( "Scripting.FileSystemObject" )
 script_index = 0
 
@@ -66,6 +69,8 @@ class Object_set_class
         dim file
         dim i
         
+        log.msg "spooler_param=" & spooler_param
+
         set files=fso.getFolder(dir_name).Files
         
         file_array = Array

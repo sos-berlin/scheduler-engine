@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- $Id: spooler_config.dtd,v 1.17 2001/01/12 12:20:55 jz Exp $   Joacim Zschimmer,  (C) 2000 SOS GmbH Berlin  -->
+<!-- $Id: spooler_config.dtd,v 1.18 2001/01/12 23:17:01 jz Exp $   Joacim Zschimmer,  (C) 2000 SOS GmbH Berlin  -->
 
 <!--     
 
@@ -12,9 +12,10 @@
 
 <!ELEMENT spooler_config        ( script?, object_set_classes, jobs? )>
 <!ATTLIST spooler_config        log_dir             CDATA #IMPLIED>
-<!ATTLIST spooler_config        tcp_port            CDATA "4444">       <!-- Für TCP-Kommandoschnittstelle -->
-<!ATTLIST spooler_config        udp_port            CDATA "4444">       <!-- Für UDP-Kommandoschnittstelle -->
-<!ATTLIST spooler_config        priority_max        CDATA "1000">       <!-- Höchste Priorität. Gibt absoluten Vorrang -->
+<!ATTLIST spooler_config        tcp_port            CDATA '4444'>       <!-- Für TCP-Kommandoschnittstelle -->
+<!ATTLIST spooler_config        udp_port            CDATA '4444'>       <!-- Für UDP-Kommandoschnittstelle -->
+<!ATTLIST spooler_config        priority_max        CDATA '1000'>       <!-- Höchste Priorität. Gibt absoluten Vorrang -->
+<!ATTLIST spooler_config        spooler_param       CDATA ''>           <!-- Wird der Eigenschaft spooler_param jedem Skript übergeben -->
 
 
 <!ELEMENT object_set_classes    ( object_set_class+ )>
@@ -29,8 +30,8 @@
 <!ATTLIST level_decl            name                CDATA #REQUIRED>    <!-- Name der Stufe, in der Objektemengeklasse eindeutig -->
 
 <!ELEMENT script                ( #PCDATA )>
-<!ATTLIST script                language            CDATA "VBScript">   <!-- Z.B. "VBScript", "JavaScript", "PerlScript" -->
-<!ATTLIST script                use_engine          (task|job) "task">  <!-- use_engine="task"  : Jeder Task eine Scripting Engine -->
+<!ATTLIST script                language            CDATA 'VBScript'>   <!-- Z.B. "VBScript", "JavaScript", "PerlScript" -->
+<!ATTLIST script                use_engine          (task|job) 'task'>  <!-- use_engine="task"  : Jeder Task eine Scripting Engine -->
                                                                         <!-- use_engine="job"   : Allen Tasks dieses Jobs eine Scripting Engine -->
                                                                         <!--[use_engine="global": Globale Scripting Engine des Spoolers verwenden]-->
 
@@ -39,12 +40,12 @@
 
 <!ELEMENT job                   ( ( object_set | script ), run_time? )>
 <!ATTLIST job                   name                CDATA #REQUIRED>    <!-- Eindeutiger Name -->
-<!ATTLIST job                   priority            CDATA "1">          <!-- Höhere Zahl ist höhere Priorität -->
+<!ATTLIST job                   priority            CDATA '1'>          <!-- Höhere Zahl ist höhere Priorität -->
 <!ATTLIST job                   output_level        CDATA #IMPLIED>     <!-- Stufennummer. Auf diese Stufe werden die Objekte der Objektemenge gesetzt -->
 <!ATTLIST job                   spooler_id          CDATA ''>           <!-- "": Job läuft auf jedem Spooler, sonst nur Spooler mit derselben Spooler-Id -->
-<!ATTLIST job                   rerun               (yes|no) "no" >     <!-- Laufenden Job bei Abbruch und Neustart des Spoolers erneut starten -->
-<!ATTLIST job                   stop_after_error    (yes|no) "yes">     <!-- Nach einem Fehler diesen Job nie wieder starten -->
-<!ATTLIST job                   start_after_spooler (yes|no) "no" >     <!-- Den Job auch nach verspäteten Start des Spoolers starten -->
+<!ATTLIST job                   rerun               (yes|no) 'no' >     <!-- Laufenden Job bei Abbruch und Neustart des Spoolers erneut starten -->
+<!ATTLIST job                   stop_after_error    (yes|no) 'yes'>     <!-- Nach einem Fehler diesen Job nie wieder starten -->
+<!ATTLIST job                   start_after_spooler (yes|no) 'no' >     <!-- Den Job auch nach verspäteten Start des Spoolers starten -->
 
 
 <!ELEMENT object_set            ( levels? )>
@@ -55,7 +56,7 @@
 <!ATTLIST levels                high                CDATA #REQUIRED>
 
 <!ELEMENT run_time              ( time_of_day?, date*, weekdays?, monthdays?, ultimos?, holiday* )>
-<!ATTLIST run_time              retry_period        CDATA "5">          <!-- Periode, nach der ein Job erneut gestartet wird, 
+<!ATTLIST run_time              retry_period        CDATA '5'>          <!-- Periode, nach der ein Job erneut gestartet wird, 
                                                                              um zu prüfen, ob die Objektemenge nicht leer ist -->
 <!ATTLIST run_time              begin               CDATA '00:00:00'>   <!-- HH:MM:SS, Tageszeit, ab der der Job laufen soll -->
 <!ATTLIST run_time              end                 CDATA '24:00:00'>   <!-- HH:MM:SS, Tageszeit, bis zu der der Job laufen soll -->
