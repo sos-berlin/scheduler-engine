@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet href="scheduler.xslt" type="text/xsl"?>
+
+<!--$Id: factory_ini_job.xml,v 1.1 2004/08/28 09:21:47 jz Exp $-->
+
+<ini_section 
+    name     = "job"  variable_suffix = "jobname"
+    file     = "factory.ini"
+    title    = ""
+    base_dir = "."
+    author   = "$Author: jz $"
+    date     = "$Date: 2004/08/28 09:21:47 $">
+
+    <ini_entries>
+        <ini_entry setting="history_file"/> 
+        <ini_entry setting="history" />
+        <ini_entry setting="history_on_process" />
+        <ini_entry setting="history_with_log" />
+        <ini_entry setting="history_columns" />
+        <ini_entry setting="history_archive" />
+        <ini_entry setting="log_level" />
+        <!--ini_entry setting="log_collect_within" />
+        <ini_entry setting="log_collect_max" /-->
+        <ini_entry setting="mail_on_error" />
+        <ini_entry setting="mail_on_process" />
+        <ini_entry setting="mail_on_success" />
+        <ini_entry setting="mail_queue_dir" />
+        <ini_entry setting="log_mail_subject" />
+        <ini_entry setting="log_mail_from" />
+        <ini_entry setting="log_mail_to" />
+        <ini_entry setting="log_mail_cc" />
+        <ini_entry setting="log_mail_bcc" />
+        <!--ini_entry setting="smtp" /-->
+    </ini_entries>
+    
+    <description>
+        Für jeden Job kann eine Abschnitt in der <code>factory.ini</code> eingerichtet werden.
+        Die Einträge hier haben Vorrang vor den gleichnamigen Einträgen im Abschnitt <code>[spooler]</code>.
+    </description>
+</ini_section>

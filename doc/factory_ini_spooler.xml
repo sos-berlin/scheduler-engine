@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet href="scheduler.xslt" type="text/xsl"?>
+
+<!--$Id: factory_ini_spooler.xml,v 1.1 2004/08/28 09:21:47 jz Exp $-->
+
+<ini_section
+    name     = "spooler"
+    file     = "factory.ini"
+    title    = ""
+    base_dir = "."
+    author   = "$Author: jz $"
+    date     = "$Date: 2004/08/28 09:21:47 $"
+>
+
+    <ini_entries>
+        <ini_entry name="id"            setting="spooler_id"/>
+        <ini_entry name="config"        setting="config"/>
+        <ini_entry name="log_dir"       setting="log_dir"/>
+        <ini_entry name="log_level"     setting="log_level"/>
+        <ini_entry name="param"         setting="param"/>
+        <ini_entry name="include_path"  setting="include_path"/>
+        <ini_entry name="html_dir"      setting="html_dir"/>
+        
+        <ini_entry setting="db_tasks_table"/> 
+        <ini_entry setting="db_history_table"/>
+        <ini_entry setting="db_order_history_table" />
+        <ini_entry setting="db_orders_table" />
+        <ini_entry setting="db_variables_table" />
+        <ini_entry setting="history_columns" />
+        <ini_entry setting="history" />
+        <ini_entry setting="history_on_process" />
+        <ini_entry setting="history_archive" />
+        <ini_entry setting="history_with_log" />
+        <ini_entry setting="order_history" />
+        <ini_entry setting="order_history_with_log" />
+        <ini_entry setting="db" />
+        <ini_entry setting="need_db" />
+        <ini_entry setting="max_db_errors" />
+        <ini_entry setting="mail_on_error" />
+        <ini_entry setting="mail_on_process" />
+        <ini_entry setting="mail_on_success" />
+        <ini_entry setting="mail_queue_dir" />
+        <ini_entry setting="log_mail_subject" />
+        <ini_entry setting="log_mail_from" />
+        <ini_entry setting="log_mail_to" />
+        <ini_entry setting="log_mail_cc" />
+        <ini_entry setting="log_mail_bcc" />
+        <ini_entry setting="smtp" />
+    </ini_entries>
+    
+</ini_section>

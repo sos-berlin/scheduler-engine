@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="scheduler.xslt" type="text/xsl"?>
 
-<!--$Id: command_line.xml,v 1.5 2004/08/24 13:28:14 jz Exp $-->
+<!--$Id: command_line.xml,v 1.6 2004/08/28 09:21:47 jz Exp $-->
 
 <command_line program  = "scheduler"
               title    = "Kommandozeile"
               base_dir = "."
               author   = "$Author: jz $"
-              date     = "$Date: 2004/08/24 13:28:14 $">
+              date     = "$Date: 2004/08/28 09:21:47 $">
 
     <command_options>
         <command_option name="config" setting="config">
@@ -31,6 +31,8 @@
         </command_option>
 
 
+        <command_option name="id"           setting="spooler_id"/>
+
         <command_option name="cd" type="verzeichnis" title="Arbeitsverzeichnis">
             <description>
                 <p>
@@ -40,10 +42,30 @@
         </command_option>
 
 
-        <command_option name="id"           setting="spooler_id"/>
+        <command_option name="pid-file" type="dateiname" title="Dateiname für Prozess-Id">
+            <description>
+                <p>
+                    Für Unix: 
+                    In diese Datei schreibt der Scheduler seine Pid.
+                    Beim Beenden löscht der Scheduler die Datei.
+                </p>
+            </description>
+        </command_option>
+
+
         <command_option name="log-level"    setting="log_level"/>
         <command_option name="param"        setting="param"/>
         <command_option name="include-path" setting="include_path"/>
+
+        <command_option name="show-dtd" title="schreibt die DTD nach stdout">
+            <description>
+                <p>
+                    Der Scheduler hat eine DTD, 
+                    der die XML-Kommandos und die XML-Konfiguration entsprechen müssen.
+                </p>
+            </description>
+        </command_option>
+
 
         <command_option name="cmd" type="xmlkommando" title="Sofort auszuführendes Kommando">
             <description>
@@ -67,15 +89,6 @@
         </command_option>
 
 
-        <command_option name="service" title="Als Daemon starten">
-            <description>
-                <p>
-                    Unter Unix versetzt sich der Scheduler in den Hintergrund und trennt sich vom Terminal.
-                </p>
-            </description>
-        </command_option>
-
-
         <command_option name="ini" type="dateiname" title="Anderer Name für Datei factory.ini">
             <description>
                 <p>
@@ -94,6 +107,88 @@
                 </p>
             </description>
         </command_option>
+
+
+        <command_option name="program-file" type="dateiname" title="Dateiname des Schedulers">
+            <description>
+                <p>
+                    Beim Aufruf des Schedulers aus einer Java-Klasse heraus (zum Debuggen)
+                    geben Sie hier den Programmdateinamen an, 
+                    wenn der Scheduler Jobs in eigenen Prozessen starten können soll.
+                </p>
+            </description>
+        </command_option>
+
+
+        <command_option name="service" title="Als Daemon starten">
+            <description>
+                <p>
+                    Unter Unix versetzt sich der Scheduler in den Hintergrund und trennt sich vom Terminal.
+                    stdout und stderr sollten umgeleitet werden.
+                </p>
+            </description>
+        </command_option>
+
+
+        <command_option name="install-service" title="Als Windows-Dienst installieren">
+            <description>
+                <p>
+                    Die Option startet nicht den Scheduler, 
+                    sondern installiert ihn mit allen aufgeführten Optionen als Windows-Dienst.
+                </p>
+                <p>
+                    <code>-install-service=</code><i>name</i> ist dasselbe wie
+                    <code>-install-service -service-name=</code><i>name</i>.
+                </p>
+            </description>
+        </command_option>
+
+
+        <command_option name="service-name" type="name" initial="sos_scheduler" title="Interner Name des Windows-Dienstes">
+            <description>
+                <p>
+                    Nur in Verbindung mit <code>-install-service</code> oder <code>-remove-service</code>.
+                    Wenn diese Option fehlt und <code>-id=</code> angegeben ist,
+                    verwendet der Scheduler den Namen <code>sos_scheduler_</code><i>scheduler_id</i>.
+                </p>
+            </description>
+        </command_option>
+
+
+        <command_option name="service-display" type="text" title="Angezeigter Name des Windows-Dienstes">
+            <description>
+                <p>
+                    Nur in Verbindung mit <code>-install-service</code>.
+                    Die Dienstesteuerung von Windows zeigt den hier angegebenen Namen.
+                    Er darf Leerzeichen enthalten.
+                    Wenn die Option fehlt, erzeugt der Scheduler einen aus dem Dienstnamen (s. <code>-service-name=</code>).
+                </p>
+            </description>
+        </command_option>
+
+
+        <command_option name="service-descr" type="text" title="Beschreibung des Windows-Dienstes">
+            <description>
+                <p>
+                    Nur in Verbindung mit <code>-install-service</code>.
+                </p>
+            </description>
+        </command_option>
+
+
+        <command_option name="need-service" type="name" title="Vom Scheduler vorausgesetzter Dienst">
+            <description>
+                <p>
+                    In Verbindung mit <code>-install-service</code> können Sie hier einen anderen Dienst angegeben,
+                    der laufen soll, bevor Windows den Scheduler-Dienst startet.
+                    Das kann z.B. ein Datenbank-Server sein.
+                </p>
+                <p>
+                    Diese Option kann wiederholt angegeben werden, wenn der Scheduler mehrere Dienste voraussetzt.
+                </p>
+            </description>
+        </command_option>
+
 
     </command_options>
     

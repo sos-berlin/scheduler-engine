@@ -41,8 +41,8 @@ span.title          { font-style: normal; }
 span.type           { font-style: italic; }
 
 /*p.parent_element    { margin-top: 4ex; font-family: Lucida Console, monospace; font-size: 9pt; }*/
-p.element           { margin-top: 2ex; }
-p.attribute         { margin-top: 4ex; }
+p.xml_element       { margin-top: 2ex; }
+p.xml_attribute     { margin-top: 4ex; }
 p.example           { margin-top: 4ex; font-weight: bold; }
 p.command_option    { margin-top: 4ex; }
 p.ini_section       { margin-top: 4ex; }
