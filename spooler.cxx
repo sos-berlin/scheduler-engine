@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.250 2003/09/21 17:58:20 jz Exp $
+// $Id: spooler.cxx,v 1.251 2003/09/22 07:54:56 jz Exp $
 /*
     Hier sind implementiert
 
@@ -1634,7 +1634,7 @@ void Spooler::run()
             something_done = false;  // Damit wait_until() gerufen wird.
         }
 
-
+/*
         int ___SPOOLER_IST_GEDROSSELT______SPOOLER_IST_GEDROSSELT______SPOOLER_IST_GEDROSSELT___;
         if( ++throttle_loop_count > 1000 )
         {
@@ -1652,6 +1652,7 @@ void Spooler::run()
             throttle_loop_count = 0;
             throttle_time = Time::now();
         }
+*/
 
         if( !something_done  &&  _next_time > 0 )
         {

@@ -1,4 +1,4 @@
-// $Id: spooler_job.cxx,v 1.21 2003/09/04 15:53:08 jz Exp $
+// $Id: spooler_job.cxx,v 1.22 2003/09/22 07:54:56 jz Exp $
 /*
     Hier sind implementiert
 
@@ -1002,7 +1002,7 @@ bool Job::do_something()
 //#if defined Z_DEBUG && defined Z_WINDOWS
     if( !something_done  &&  next_time_at_begin <= Time::now() )    // Obwohl _next_time erreicht, ist nichts getan?
     {
-        LOG( obj_name() << ".do_something()  Nichts getan  _next_time war " << next_time_at_begin << "  _next_start_time= " << next_start_time_at_begin << "\n" );
+        LOG( obj_name() << ".do_something()  Nichts getan  _next_time war " << next_time_at_begin << ", _next_start_time=" << next_start_time_at_begin << "\n" );
         calculate_next_time();
     }
 //#endif

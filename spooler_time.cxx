@@ -1,4 +1,4 @@
-// $Id: spooler_time.cxx,v 1.45 2003/09/21 17:58:20 jz Exp $
+// $Id: spooler_time.cxx,v 1.46 2003/09/22 07:54:56 jz Exp $
 /*
     Hier sind implementiert
 
@@ -33,7 +33,7 @@ namespace time {
 
 extern const int                       latter_day_int              = INT_MAX;
 extern const Time                      latter_day                  = latter_day_int;
-static const char                      last_day_name[]             = "ragnarök";
+static const char                      last_day_name[]             = "never";
 
 Period empty_period;
 
