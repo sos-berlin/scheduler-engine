@@ -1,5 +1,7 @@
 <html>
 
+<!-- $Id: konfiguration.html,v 1.2 2004/08/24 08:50:16 jz Exp $ -->
+
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
     <title>Scheduler - Konfiguration</title>
@@ -60,11 +62,14 @@ scheduler hallo_welt.xml
 </p>
 
 
-<h2>Schema</h2>
+<h2>Schema der Konfiguration</h2>
 
+Klicken Sie auf ein Element, um dessen Beschreibung zu sehen.
 
 <pre>
-&lt;spooler>
+
+
+&lt;<a href="xml/spooler.xml">spooler</a>>
     &lt;<a href="xml/config.xml">config</a> spooler_id      = ""
             tcp_port        = "4444"
             udp_port        = "4444"
@@ -89,7 +94,15 @@ scheduler hallo_welt.xml
             &hellip;
         &lt;/security>
 
-        &lt;<a href="xml/script.xml">script</a> language="&hellip;">&lt;![CDATA[ &hellip; ]]>&lt;/script>
+        &lt;<a href="xml/script.xml">script</a> language   = "&hellip;"
+                java_class = "&hellip;"
+                com_class  = "&hellip;"
+                filename   = "&hellip;" >
+            &lt;<a href="xml/include.xml">include</a> file="&hellip;"/>
+            &lt;![CDATA[
+                <i>programm-code</i>&hellip; 
+            ]]>
+        &lt;/script>
 
         &lt;<a href="xml/jobs.xml">jobs</a>
             &lt;<a href="xml/job.xml">job</a> name          = "&hellip;"
@@ -128,8 +141,8 @@ scheduler hallo_welt.xml
                      &lt;<a href="xml/period.xml">period</a> let_run      = "&hellip;"
                              begin        = "00:00"
                              end          = "24:00"
-                             single_start = ""     
-                             repeat       = ""     >
+                             single_start = "&hellip;"     
+                             repeat       = "&hellip;"     >
                      &lt;/period>
 
                      &lt;<a href="xml/date.xml">date</a> date="yyyy-mm-dd"/>

@@ -11,16 +11,10 @@
         <xsl:variable name="title">Scheduler&#160; –&#160; XML-Element &lt;<xsl:value-of select="@name"/>>&#160;  <xsl:value-of select="@title"/></xsl:variable>
 
         <html>
-            <head>
-                <title>
-                    <xsl:value-of select="$title"/>
-                </title>
-                
-                <style type="text/css">
-                    @import "../scheduler.css";
-                </style>
-            </head>
-
+            <xsl:call-template name="html_head">
+                <xsl:with-param name="title" select="$title"/>
+            </xsl:call-template>
+            
             <body>
                 <h1>
                     <xsl:value-of select="$title"/>
@@ -186,14 +180,8 @@
                 <xsl:apply-templates select="xml_parent_elements"/>
                 <xsl:apply-templates select="xml_attributes"/>
                 <xsl:apply-templates select="xml_child_elements"/>
-
-                <p style="margin-top: 2ex"/>
-                <hr size="1"/>
-                <p align="right" style="font-size: 8pt; margin-top: 0">
-                    Zuletzt geändert von
-                    <xsl:value-of select="           substring-before( substring-after( /xml_element/@author, 'Author: ' ), ' $' )"            />,
-                    <xsl:value-of select="translate( substring-before( substring-after( /xml_element/@date,   'Date: '   ), ' $' ), '/', '-' )"/> GMT
-                </p>
+                
+                <xsl:call-template name="bottom"/>
             </body>
         </html>
     
@@ -410,5 +398,122 @@
         </xsl:element>
     </xsl:template>
 
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~command_line-->
+    
+    <xsl:template match="command_line">
 
+        <xsl:variable name="title">Scheduler&#160; –&#160; <xsl:value-of select="@title"/></xsl:variable>
+
+        <html>
+            <xsl:call-template name="html_head">
+                <xsl:with-param name="title" select="$title"/>
+            </xsl:call-template>
+        
+            <body>
+                <h1>
+                    <xsl:value-of select="$title"/>
+                </h1>
+
+                <xsl:apply-templates select="command_options" mode="table"/>
+                <xsl:apply-templates select="description"/>
+                <xsl:apply-templates select="command_options"/>
+                <xsl:call-template name="bottom"/>
+            </body>
+        </html>
+        
+    </xsl:template>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~command_options-->
+    
+    <xsl:template match="command_options" mode="table">
+    
+        <code><xsl:value-of select="parent::*/@program"/></code>
+        
+        <div class="indent">
+            <table cellspacing="0" cellpadding="0">
+                <col/>
+                <col style="padding-left: 4ex"/>
+                <xsl:for-each select="command_option">
+                    <tr>
+                        <td valign="baseline">
+                            <xsl:element name="a">
+                                <xsl:attribute name="href">#option_<xsl:value-of select="@name"/></xsl:attribute>
+                                <code>-<xsl:value-of select="@name"/></code>
+                            </xsl:element>
+                            
+                            <xsl:if test="@value">
+                                <code>=</code><i><xsl:value-of select="@value"/></i>
+                            </xsl:if>
+                        </td>
+                        <td valign="baseline">
+                            <span class="title">
+                                <xsl:value-of select="@title"/>
+                            </span>
+                        </td>
+                    </tr>
+                </xsl:for-each>
+            </table>
+        </div>
+        <p>&#160;</p>
+    
+    </xsl:template>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~command_options-->
+    
+    <xsl:template match="command_options">
+    
+        <h2>Optionen</h2>
+        <xsl:apply-templates select="command_option"/>
+    
+    </xsl:template>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~command_option-->
+    
+    <xsl:template match="command_option">
+    
+        <xsl:element name="a">
+            <xsl:attribute name="name">option_<xsl:value-of select="@name"/></xsl:attribute>
+        </xsl:element>
+        
+        <p class="command_option">
+            <b><code>-<xsl:value-of select="@name"/></code></b>
+            <xsl:if test="@value">
+                <b><code>=</code></b>
+                <i><xsl:value-of select="@value"/></i>                    
+            </xsl:if>
+        </p>
+    
+        <div class="indent">
+            <xsl:apply-templates select="description"/>
+        </div>        
+    
+    </xsl:template>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~html_head-->
+    
+    <xsl:template name="html_head">
+        <xsl:param name="title"/>
+        
+        <head>
+            <title>
+                <xsl:value-of select="$title"/>
+            </title>
+            
+            <style type="text/css">
+                @import "<xsl:value-of select="/*/@base_dir"/>/scheduler.css";
+            </style>
+        </head>
+    </xsl:template>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~bottom-->
+
+    <xsl:template name="bottom">
+        <p style="margin-top: 2ex"/>
+        <hr size="1"/>
+        <p align="right" style="font-size: 8pt; margin-top: 0">
+            Zuletzt geändert von
+            <xsl:value-of select="           substring-before( substring-after( /*/@author, 'Author: ' ), ' $' )"            />,
+            <xsl:value-of select="translate( substring-before( substring-after( /*/@date,   'Date: '   ), ' $' ), '/', '-' )"/> GMT
+        </p>
+    </xsl:template>
 </xsl:stylesheet>
