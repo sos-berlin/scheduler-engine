@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.230 2003/08/29 20:44:24 jz Exp $
+// $Id: spooler.cxx,v 1.231 2003/08/30 17:16:49 jz Exp $
 /*
     Hier sind implementiert
 
@@ -500,8 +500,7 @@ void Spooler::load_process_classes_from_dom( const xml::Element_ptr& element, co
 
             if( spooler_id.empty() || spooler_id == id() )
             {
-                ptr<Process_class> process_class = Z_NEW( Process_class( this, e.getAttribute( "name" ) ) );
-                add_process_class( process_class );
+                add_process_class( Z_NEW( Process_class( this, e ) ) );
             }
         }
     }
@@ -545,6 +544,8 @@ Process* Spooler::new_temporary_process()
     process->set_temporary( true );
 
     temporary_process_class()->add_process( process );
+
+    process->start();
 
     return process;
 }

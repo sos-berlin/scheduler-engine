@@ -1,4 +1,4 @@
-// $Id: spooler_process.cxx,v 1.4 2003/08/29 20:44:25 jz Exp $
+// $Id: spooler_process.cxx,v 1.5 2003/08/30 17:16:49 jz Exp $
 
 #include "spooler.h"
 
@@ -179,6 +179,12 @@ void Process::remove_module_instance( Module_instance* )
 
     if( _temporary  &&  _module_instance_count == 0 )  
     {
+        if( _session )
+        {
+            _session->close();
+            _session = NULL;
+        }
+
         if( _process_class )  _process_class->remove_process( this );
     }
 }
@@ -222,16 +228,21 @@ xml::Element_ptr Process::dom( const xml::Document_ptr& document, Show_what show
 {
     xml::Element_ptr process_element = document.createElement( "process" );
 
-    //process_element.setAttribute( "name"           , _name );
-    process_element.setAttribute( "pid"              , _session->connection()->pid() );
-    process_element.setAttribute( "module_instances" , _module_instance_count );
+    THREAD_LOCK( _lock )
+    {
+        //process_element.setAttribute( "name"           , _name );
 
-    Async_operation* operation = _connection? _connection->current_super_operation() : NULL;
-    if( operation )
-    process_element.setAttribute( "operation"        , operation->async_state_text() );
+        if( _session && _session->connection() )
+        process_element.setAttribute( "pid"              , _session->connection()->pid() );
+      //process_element.setAttribute( "module_instances" , _module_instance_count );
 
-    //process_element.setAttribute( "steps"          , _step_count );
-    //process_element.setAttribute( "started_tasks"  , _task_count );
+        Async_operation* operation = _connection? _connection->current_super_operation() : NULL;
+        if( operation )
+        process_element.setAttribute( "operation"        , operation->async_state_text() );
+
+        //process_element.setAttribute( "steps"          , _step_count );
+        //process_element.setAttribute( "started_tasks"  , _task_count );
+    }
 
     return process_element;
 }
@@ -240,20 +251,72 @@ xml::Element_ptr Process::dom( const xml::Document_ptr& document, Show_what show
 
 void Process_class::add_process( Process* process )
 {
-    process->_process_class = this;
-    _process_list.push_back( process );
+    THREAD_LOCK( _lock )
+    {
+        process->_process_class = this;
+        _process_list.push_back( process );
+    }
 }
 
 //--------------------------------------------------------------------------Spooler::remove_process
 
 void Process_class::remove_process( Process* process )
 {
-    FOR_EACH( Process_list, _process_list, p )
+    THREAD_LOCK( _lock )
     {
-        if( *p == process )  { process->_process_class = NULL; _process_list.erase( p ); return; }
+        FOR_EACH( Process_list, _process_list, p )
+        {
+            if( *p == process )  { process->_process_class = NULL; _process_list.erase( p ); return; }
+        }
     }
 
     throw_xc( "Process_class::remove_process" );
+}
+
+//---------------------------------------------------------------------Process_class::start_process
+
+Process* Process_class::start_process()
+{
+    ptr<Process> process;
+
+    THREAD_LOCK( _lock )
+    {
+        process = Z_NEW( Process( _spooler ) );        
+
+        process->start();
+
+        add_process( process );
+    }
+
+    return process;
+}
+
+//--------------------------------------------------------Process_class::select_process_if_available
+
+Process* Process_class::select_process_if_available()
+{
+    Process* process = NULL;
+
+    THREAD_LOCK( _lock )
+    {
+        FOR_EACH( Process_list, _process_list, p )
+        {
+            if( (*p)->_module_instance_count == 0 )  return *p;
+        }
+
+        if( _process_list.size() < _max_processes )  process = start_process();
+
+    }
+
+    return process;
+}
+
+//---------------------------------------------------------------------------Process_class::set_dom
+
+void Process_class::set_dom( const xml::Element_ptr& e )
+{
+    _name          =      e.     getAttribute( "name" );
+    _max_processes = (int)e.uint_getAttribute( "max_processes", 1 );
 }
 
 //----------------------------------------------------------------------------------Spooler::as_dom
@@ -262,15 +325,18 @@ void Process_class::remove_process( Process* process )
 xml::Element_ptr Process_class::dom( const xml::Document_ptr& document, Show_what show )
 {
     xml::Element_ptr element = document.createElement( "process_class" );
-    
-    element.setAttribute( "name"         , _name );
-    element.setAttribute( "processes"    , as_string( _process_list.size() ) );
-    element.setAttribute( "max_processes", _max_processes );
+        
+    THREAD_LOCK( _lock )
+    {
+        element.setAttribute( "name"         , _name );
+        element.setAttribute( "processes"    , as_string( _process_list.size() ) );
+        element.setAttribute( "max_processes", _max_processes );
 
-    xml::Element_ptr processes_element = document.createElement( "processes" );
-    element.appendChild( processes_element );
+        xml::Element_ptr processes_element = document.createElement( "processes" );
+        element.appendChild( processes_element );
 
-    FOR_EACH( Process_list, _process_list, it )  processes_element.appendChild( (*it)->dom( document, show ) );
+        FOR_EACH( Process_list, _process_list, it )  processes_element.appendChild( (*it)->dom( document, show ) );
+    }
 
     return element;
 }

@@ -1,4 +1,4 @@
-// $Id: spooler_process.h,v 1.4 2003/08/29 20:44:25 jz Exp $
+// $Id: spooler_process.h,v 1.5 2003/08/30 17:16:50 jz Exp $
 
 #ifndef __SPOOLER_PROCESS_H
 #define __SPOOLER_PROCESS_H
@@ -35,6 +35,7 @@ struct Process : zschimmer::Object
     
 //private:
     Fill_zero                  _zero_;
+    Thread_semaphore           _lock;
     Spooler*                   _spooler;
     ptr<object_server::Connection> _connection;             // Verbindung zum Prozess
     ptr<object_server::Session>    _session;                // Wir haben immer nur eine Session pro Verbindung
@@ -52,17 +53,22 @@ typedef list< ptr<Process> >    Process_list;
 
 struct Process_class : zschimmer::Object
 {
-                                Process_class               ( Spooler* sp, const string& name )     : _zero_(this+1), _spooler(sp), _name(name) {}
+                                Process_class               ( Spooler* sp, const string& name )        : _zero_(this+1), _spooler(sp), _name(name) {}
+    explicit                    Process_class               ( Spooler* sp, const xml::Element_ptr& e ) : _zero_(this+1) { set_dom( e ); }
 
     
     void                        add_process                 ( Process* );
     void                        remove_process              ( Process* );
 
-    void                    set_dom                         ( const xml::Element_ptr&, const Time& xml_mod_time );
+    Process*                    start_process               ();
+    Process*                    select_process_if_available ();                                   // Startet bei Bedarf. Bei _max_processes: return NULL
+
+    void                    set_dom                         ( const xml::Element_ptr& );
     xml::Element_ptr            dom                         ( const xml::Document_ptr&, Show_what );
 
 
     Fill_zero                  _zero_;
+    Thread_semaphore           _lock;
     string                     _name;
     int                        _max_processes;
     Spooler*                   _spooler;

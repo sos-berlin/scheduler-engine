@@ -1,4 +1,4 @@
-// $Id: spooler_module_remote.cxx,v 1.26 2003/08/30 15:39:11 jz Exp $
+// $Id: spooler_module_remote.cxx,v 1.27 2003/08/30 17:16:49 jz Exp $
 /*
     Hier sind implementiert
 
@@ -94,9 +94,9 @@ void Remote_module_instance_proxy::close()
         _process = NULL;
     }
 
-    if( _session )
+  //if( _session )
     {
-        _session->close();
+  //    _session->close();
         _session = NULL;
     }
 
@@ -139,6 +139,8 @@ Async_operation* Remote_module_instance_proxy::begin__start()
     if( !log_filename().empty() )
     parameters.push_back( Parameter( "param", "-log=" + quoted_string( "+" + log_filename() ) ) );
 */
+
+/*
     if( !_process )
     {
         if( _process_class_name.empty()  ||  _module->_separate_process )
@@ -163,7 +165,7 @@ Async_operation* Remote_module_instance_proxy::begin__start()
 
     _session = _process->session(); 
     _pid = _session->connection()->pid();
-
+*/
     _operation = +Z_NEW( Operation( this, Operation::c_begin ) );
 
     return +_operation;
@@ -176,6 +178,14 @@ bool Remote_module_instance_proxy::begin__end()
     //if( _call_state != c_begin )  
 
     //_operation->async_check_error();   Nicht hier rufen!  call__end() prüft den Fehler und ruft vorher pop_operation().
+
+
+    // *** Sonderfall, weil es keine _connection für pop_operation gibt ***
+    Operation* op = dynamic_cast<Operation*>( +_operation );
+    if( op  &&  op->_call_state == Operation::c_connect )  op->async_check_error();   
+    // ***
+
+
     if( !_operation->async_finished() )  throw_xc( "SPOOLER-191", "begin__end", _operation->async_state_text() );
     _operation = NULL;
 
@@ -284,7 +294,34 @@ void Remote_module_instance_proxy::Operation::async_continue_( bool wait )
 
             case c_begin:
             {
+                if( !_proxy->_process )
+                {
+                    if( _proxy->_module->_separate_process 
+                     || _proxy->_process_class_name.empty()  && !_proxy->_spooler->process_class_or_null("") )   // Namenlose Prozessklasse nicht bekannt? Dann temporäre Prozessklasse verwenden
+                    {
+                        _proxy->_process = _proxy->_spooler->new_temporary_process();
+                    }
+                    else
+                    {
+                        //_process = Z_NEW( Process( _spooler ) );        
+                        _proxy->_process = _proxy->_spooler->process_class( _proxy->_process_class_name ) -> select_process_if_available();
+                        if( !_proxy->_process )  break;
+
+                        // Erstmal immer nur eine Task pro Prozess. 
+                        // Mehrere Tasks pro Prozess erst, wenn sichergestellt ist, dass jede Operation die Antwort liest (v.a. im Fehlerfall),
+                        // sodass nicht eine nicht beendete Operation den Prozess blockiert.
+
+                        //_process = _spooler->process_class( _process_class_name ) -> select_process();
+                    }
+
+                    _proxy->_process->add_module_instance( _proxy );
+                }
+
+                _proxy->_session = _proxy->_process->session(); 
+                _proxy->_pid = _proxy->_session->connection()->pid();
+
                 set_async_child( _proxy->_session->connect_server__start() );
+
                 _call_state = c_connect;
                 break;
             }
@@ -440,6 +477,21 @@ void Remote_module_instance_proxy::Operation::async_continue_( bool wait )
 
 bool Remote_module_instance_proxy::Operation::async_finished_()
 { 
+
+    if( _call_state == c_begin  &&  !_proxy->_process ) 
+    {
+        // Ein Sonderfall: async_continue() wird hier (statt oben im Hauptprogramm) gerufen,
+        // weil die Operation nicht über Connection::current_super_operation() erreichbar ist.
+        // Denn diese Operation hat ja noch keine Connection.
+        // Ein zentrales Register alles offenen Operationen wäre gut.
+        // Dann müsste das Hauptprogramm auch nicht die Verbindungen kennen und für jede
+        // async_continue() aufrufen.
+
+        // S.a. begin__end(): async_check_error() bei _state == c_connect
+
+        async_continue();
+    }
+
     return _call_state == c_finished;  //  ||  _operation && _operation->async_has_error();
 }
 
@@ -448,6 +500,7 @@ bool Remote_module_instance_proxy::Operation::async_finished_()
 string Remote_module_instance_proxy::Operation::async_state_text_()
 { 
     string text = "Remote_module_instance_proxy(state=" + state_name();
+    if( _call_state == c_begin  &&  !_proxy->_process )  text += ",Warten auf verfügbaren Prozess der Prozessklasse";
   //if( _operation )  text += "," + _operation->async_state_text();
     text += ")";
 
