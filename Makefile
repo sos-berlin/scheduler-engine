@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.12 2002/12/08 18:24:46 jz Exp $
+# $Id: Makefile,v 1.13 2002/12/19 12:05:56 jz Exp $
 
 ifndef PROD_DIR
 prod_dir = ..
@@ -48,23 +48,30 @@ java_classes=\
 java_headers=$(patsubst %.class, %.h, $(java_classes) )
 
 all:: $(BIN_DIR)/spooler
+all:: $(BIN_DIR)/sos.spooler.jar
 
 clean:
-	rm *.o *.d lib*.a lib*.so *.map
+	rm *.o *.d lib*.a lib*.so *.map `find -name "*.class"`
 
 include $(PROD_DIR)/make/standard.makefile
 
-%.class: %.java
-	@mkdir -p $(dir $@)
-	javac -d . -classpath .. $<
-
-%.h: %.class
-	@mkdir -p $(dir $@)
-	javah -force -o $@ -classpath . $(subst /,.,$(patsubst %.class, %, $<))
-
+#%.class: %.java
+#	@mkdir -p $(dir $@)
+#	javac -d . -classpath .. $<
+#
+#%.h: %.class
+#	@mkdir -p $(dir $@)
+#	javah -force -o $@ -classpath . $(subst /,.,$(patsubst %.class, %, $<))
+#
 
 #libspooler.a: $(java_headers) $(objects)
 #	$(AR) $(ARFLAGS) $@ $(objects)
+
+$(BIN_DIR)/sos.spooler.jar: $(java_classes)
+	jar cf $@  $<
+
+
+$(objects): $(patsubst %, sos/spooler/%.h, Idispatch)
 
 
 $(BIN_DIR)/spooler: spooler.o $(objects) ../kram/$(O_DIR)/soswnmai.o ../zschimmer/$(O_DIR)/perl_scripting_engine_module.o $(foreach p,$(DEP_PRODUCTS),$(PROD_DIR)/$(p)/$(O_DIR)/lib$(p).a) $(PERL_DIR)/libperl.a
