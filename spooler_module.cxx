@@ -1,4 +1,4 @@
-// $Id: spooler_module.cxx,v 1.43 2003/09/05 11:16:19 jz Exp $
+// $Id: spooler_module.cxx,v 1.44 2003/09/05 14:34:17 jz Exp $
 /*
     Hier sind implementiert
 
@@ -446,6 +446,7 @@ bool Module_instance::begin__end()
         if( !ok )  return ok;
     }
 
+    _spooler_open_called = true;
     return check_result( call_if_exists( spooler_open_name ) );
 }
 
@@ -464,7 +465,11 @@ void Module_instance::end__end()
 
     //try
     {
-        call_if_exists( spooler_close_name );
+        if( _spooler_open_called  &&  !_spooler_close_called )
+        {
+            _spooler_close_called = true;
+            call_if_exists( spooler_close_name );
+        }
     }
 /*
     catch( const exception x )
@@ -539,7 +544,18 @@ Async_operation* Module_instance::call__start( const string& method )
 
 bool Module_instance::call__end()
 {
-    if( _call_method == spooler_exit_name )  _spooler_exit_called = true;
+    if( _call_method == spooler_on_success_name   
+     || _call_method == spooler_on_error_name )
+    {
+        if( !_spooler_open_called )  return true;
+    }
+    else
+    if( _call_method == spooler_exit_name )  
+    {
+        if( _spooler_exit_called )  return true;
+        _spooler_exit_called = true;
+    }
+
 
     return check_result( call_if_exists( _call_method ) );
 }

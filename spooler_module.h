@@ -1,4 +1,4 @@
-// $Id: spooler_module.h,v 1.41 2003/09/02 15:46:26 jz Exp $
+// $Id: spooler_module.h,v 1.42 2003/09/05 14:34:17 jz Exp $
 
 #ifndef __SPOOLER_MODULE_H
 #define __SPOOLER_MODULE_H
@@ -248,6 +248,7 @@ struct Module_instance : Object
     bool                       _spooler_init_called;
     bool                       _spooler_exit_called;
     bool                       _spooler_open_called;
+    bool                       _spooler_close_called;
     bool                       _close_instance_at_end;
     In_call*                   _in_call;
     string                     _call_method;                // Für Module_instance::call__start()

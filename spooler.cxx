@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.248 2003/09/05 11:16:18 jz Exp $
+// $Id: spooler.cxx,v 1.249 2003/09/05 14:36:29 jz Exp $
 /*
     Hier sind implementiert
 
@@ -2301,7 +2301,7 @@ int spooler_main( int argc, char** argv, const string& parameter_line )
                 spooler::be_daemon();
             }
 
-            ret = spooler::spooler_main( opt );
+            ret = spooler::spooler_main( argc, argv, command_line );
 
 #       endif
     }

@@ -1,4 +1,4 @@
-// $Id: spooler_module_remote_server.cxx,v 1.25 2003/09/01 17:00:52 jz Exp $
+// $Id: spooler_module_remote_server.cxx,v 1.26 2003/09/05 14:34:17 jz Exp $
 /*
     Hier sind implementiert
 
@@ -267,7 +267,12 @@ STDMETHODIMP Com_remote_module_instance_server::call( BSTR name, VARIANT* result
     try
     {
       //_server.load_implicitly();
-        _server._module_instance->call( string_from_bstr(name) ).CopyTo( result );
+      //_server._module_instance->call( string_from_bstr(name) ).CopyTo( result );
+
+        _server._module_instance->call__start( string_from_bstr(name) ) -> async_finish();
+
+        result->vt = VT_BOOL;
+        V_BOOL( result ) = _server._module_instance->call__end();
     }
     catch( const exception& x ) { hr = com_set_error( x, "Remote_module_instance_server::call" ); }
 
@@ -292,7 +297,7 @@ STDMETHODIMP Com_remote_module_instance_server::begin( SAFEARRAY* objects_safear
             _server._module_instance->_object_list.push_back( Module_instance::Object_list_entry( V_DISPATCH(o), string_from_variant( names[i]) ) );
         }
 
-        _server._module_instance->begin__start();
+        _server._module_instance->begin__start() -> async_finish();
 
         result->vt = VT_BOOL;
         V_BOOL( result ) = _server._module_instance->begin__end();
@@ -310,7 +315,7 @@ STDMETHODIMP Com_remote_module_instance_server::end( VARIANT_BOOL succeeded, VAR
 
     try
     {
-        _server._module_instance->end__start( succeeded != 0 );
+        _server._module_instance->end__start( succeeded != 0 ) -> async_finish();
         _server._module_instance->end__end();
     }
     catch( const exception& x ) { hr = com_set_error( x, "Remote_module_instance_server::end" ); }
@@ -326,7 +331,7 @@ STDMETHODIMP Com_remote_module_instance_server::step( VARIANT* result )
 
     try
     {
-        _server._module_instance->step__start();
+        _server._module_instance->step__start() -> async_finish();
 
         result->vt = VT_BOOL;
         V_BOOL( result ) = _server._module_instance->step__end();
