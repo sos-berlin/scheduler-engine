@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.160 2002/12/08 20:27:25 jz Exp $
+// $Id: spooler.cxx,v 1.161 2002/12/09 22:53:24 jz Exp $
 /*
     Hier sind implementiert
 
@@ -54,7 +54,7 @@ const double wait_step_for_thread_termination2           = 600.0;       // 2. Nö
 static bool                     is_daemon               = false;
 //static int                      daemon_starter_pid;
 //bool                          spooler_is_running      = false;
-static bool                     ctrl_c_pressed          = false;
+       bool                     ctrl_c_pressed          = false;
 static Spooler*                 spooler                 = NULL;
 
 
@@ -276,6 +276,8 @@ Spooler::Spooler()
 {
     Z_GNU_ONLY( time::empty_period = Period() );
 
+    _pid = getpid();
+
     _tcp_port = 4444;
     _udp_port = 4444;
     _priority_max = 1000;       // Ein Wert > 1, denn 1 ist die voreingestelle Priorität der Jobs
@@ -284,6 +286,22 @@ Spooler::Spooler()
     _com_log     = new Com_log( &_prefix_log );
     _com_spooler = new Com_spooler( this );
     _variables   = new Com_variable_set();
+
+
+#   ifdef __GNUC__
+/*
+        sigset_t sigset;
+    
+        sigemptyset( &sigset );
+        sigaddset( &sigset, SIGINT  );
+        sigaddset( &sigset, SIGTERM );
+
+        fprintf( stderr, "pthread_sigmask\n" );
+        int err = pthread_sigmask( SIG_BLOCK, &sigset, NULL );
+        if( err )  throw_errno( err, "pthread_sigmask" );
+*/
+#   endif
+
 
     set_ctrl_c_handler( true );
     spooler = this;
@@ -974,7 +992,7 @@ void Spooler::run()
         int running_tasks_count = 0;
         FOR_EACH( Thread_list, _thread_list, it2 )  running_tasks_count += (*it2)->_running_tasks_count;
 
-LOG( "spooler: running_tasks_count=" << running_tasks_count  << " _state_cmd=" << (int)_state_cmd << " ctrl_c_pressed=" << ctrl_c_pressed << " _next_time=" << _next_time << "\n" );
+        //LOG( "spooler: running_tasks_count=" << running_tasks_count  << " _state_cmd=" << (int)_state_cmd << " ctrl_c_pressed=" << ctrl_c_pressed << " _next_time=" << _next_time << "\n" );
         if( running_tasks_count == 0  &&  _state_cmd == sc_none  &&  !ctrl_c_pressed )
         {
             Time now = Time::now();

@@ -1,4 +1,4 @@
-// $Id: spooler.h,v 1.117 2002/12/03 11:42:30 jz Exp $
+// $Id: spooler.h,v 1.118 2002/12/09 22:53:25 jz Exp $
 
 #ifndef __SPOOLER_H
 #define __SPOOLER_H
@@ -92,6 +92,10 @@ namespace sos {
 
 namespace sos {
 namespace spooler {
+
+//-------------------------------------------------------------------------------------------------
+
+extern bool                     ctrl_c_pressed;
 
 //-------------------------------------------------------------------------------------------------
 
@@ -233,6 +237,7 @@ struct Spooler
   public:
     Log                        _log;
     Prefix_log                 _prefix_log;
+    int                        _pid;
     bool                       _is_service;                 // NT-Dienst
     bool                       _debug;
     int                        _log_level;

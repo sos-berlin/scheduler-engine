@@ -1,4 +1,4 @@
-// $Id: spooler_communication.cxx,v 1.48 2002/12/08 20:34:34 jz Exp $
+// $Id: spooler_communication.cxx,v 1.49 2002/12/09 22:53:25 jz Exp $
 /*
     Hier sind implementiert
 
@@ -27,6 +27,8 @@ const int wait_for_port_available = 15;   // Soviele Sekunden warten, bis TCP- o
 #   define isatty   _isatty
 #else
 #   include <unistd.h>
+#   include <sys/types.h>
+#   include <signal.h>
 #endif
 
 //---------------------------------------------------------------------------------------get_errno
@@ -614,7 +616,28 @@ int Communication::run()
             if( _nfds == 0 )  { _started = false; break; }
         }
 
-        int n = ::select( _nfds, &_read_fds, &_write_fds, NULL, NULL );
+
+        int n;
+
+#       ifdef Z_WINDOWS
+            n = ::select( _nfds, &_read_fds, &_write_fds, NULL, NULL );
+#        else
+            while(1)
+            {
+                timeval tv;
+                tv.tv_sec = 1, tv.tv_usec = 0;
+
+                n = ::select( _nfds, &_read_fds, &_write_fds, NULL, &tv );
+                
+                if( kill( _spooler->_pid, 0 ) == -1  &&  errno == ESRCH )
+                {
+                    _spooler->_log.error( "Kommunikations-Thread wird beendet, weil der Hauptthread (pid=" + as_string(_spooler->_pid) + ") verschwunden ist" );
+                    return 0;  //?  Thread bleibt sonst hängen, wenn Java sich bei Ctrl-C sofort verabschiedet. Java lässt SIGINT zu, dieser Thread aber nicht.
+                }
+
+                if( n == 0 )  continue;
+            }
+#       endif
 
         {
             Mutex_guard guard = &_semaphore;
@@ -728,6 +751,8 @@ void Communication::start_thread()
 {
     init();
     bind();
+
+    set_thread_name( "Communication" );
 
     thread_start();
 

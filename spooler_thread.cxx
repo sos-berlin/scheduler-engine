@@ -1,4 +1,4 @@
-// $Id: spooler_thread.cxx,v 1.70 2002/12/08 20:27:27 jz Exp $
+// $Id: spooler_thread.cxx,v 1.71 2002/12/09 22:53:26 jz Exp $
 /*
     Hier sind implementiert
 
@@ -51,6 +51,8 @@ Spooler_thread::~Spooler_thread()
 
 void Spooler_thread::init()
 {
+    set_thread_name( _name );
+
     _log.set_prefix( "Thread " + _name );
 
     _com_log = new Com_log( &_log );

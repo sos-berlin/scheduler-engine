@@ -1,4 +1,4 @@
-// $Id: spooler_module_java.cxx,v 1.27 2002/12/02 17:19:32 jz Exp $
+// $Id: spooler_module_java.cxx,v 1.28 2002/12/09 22:53:25 jz Exp $
 /*
     Hier sind implementiert
 
@@ -84,8 +84,12 @@ static string string_from_jstring( JNIEnv* jenv, const jstring& jstr )
     if( !jstr )  return "";
 
     const OLECHAR* str_w = jenv->GetStringChars( jstr, 0 );
-    
-    return string_from_ole( str_w );
+   
+    string result = string_from_ole( str_w );
+
+    jenv->ReleaseStringChars( jstr, str_w );
+
+    return result;
 }
 
 //----------------------------------------------------------------------------------jstring_to_bstr
@@ -95,9 +99,10 @@ static void jstring_to_bstr( JNIEnv* jenv, const jstring& jstr, BSTR* bstr )
     const OLECHAR* str_w = jenv->GetStringChars( jstr, 0 );
     
     HRESULT hr = string_to_bstr( str_w, bstr );
-    if( FAILED(hr) )  throw_com( hr, "jstring_to_bstr/string_to_bstr" );
     
     jenv->ReleaseStringChars( jstr, str_w );
+
+    if( FAILED(hr) )  throw_com( hr, "jstring_to_bstr/string_to_bstr" );
 }
 
 //--------------------------------------------------------------------------------jstring_from_bstr
@@ -597,13 +602,13 @@ void Java_vm::init()
     //_options.push_back( "-Xdebug" );    // Starts with the debugger enabled.
 
     Z_DEBUG_ONLY( _options.push_back( Option( "-verbose:class,gc,jni" ) ) );
-    
+
     _options.push_back( Option( "vfprintf", (void*)java_vfprintf ) );
 
     _vm_args.nOptions = _options.size();
     delete _vm_args.options;
     _vm_args.options = new JavaVMOption[ _vm_args.nOptions ];
-    for( int i = 0; i < _options.size(); i++ )
+    for( int i = 0; i < _vm_args.nOptions; i++ )
     {
         _vm_args.options[i].optionString = (char*)_options[i]._option.c_str();
         _vm_args.options[i].extraInfo    =        _options[i]._extra;
@@ -637,18 +642,6 @@ void Java_vm::init()
 */
     _thread_data->_env._java_vm = this;
     _thread_data->_env._jenv = NULL;
-
-#ifdef __GNUC__
-{
-    //_vm_args.version = 0; //TEST
-    LOG( "&_thread_data->_env._jenv=" << (void*)&_thread_data->_env._jenv << ' ' << (void*)_thread_data->_env._jenv << '\n' );
-    LOG( "JNI_CreateJavaVM()  Linux\n" );
-    JavaVM* vm = NULL;
-    JNIEnv* env = NULL;
-    ret = JNI_CreateJavaVM( &vm, &env, &_vm_args );
-    if( ret < 0 )  throw_java( ret, "JNI_CreateJavaVM", module_filename );
-}
-#endif
 
     LOG( "JNI_CreateJavaVM()\n" );
     ret = JNI_CreateJavaVM( &_vm, &_thread_data->_env._jenv, &_vm_args );

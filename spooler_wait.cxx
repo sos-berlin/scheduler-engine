@@ -1,4 +1,4 @@
-// $Id: spooler_wait.cxx,v 1.63 2002/12/08 20:27:27 jz Exp $
+// $Id: spooler_wait.cxx,v 1.64 2002/12/09 22:53:27 jz Exp $
 /*
     Hier sind implementiert
 
@@ -379,17 +379,18 @@ int Wait_handles::wait_until_2( Time until )
 
 #else
 
-    if( _events.size() == 1 )
+  //if( _events.size() == 1 )
+  //{
+  //    // Gut, wir warten nur auf ein Ereignis. 
+  //    // Sehr schlecht: EINTR kommt hier nicht durch (pthread_cond_timedwait liefert das nicht). Damit fährt SIGINT nicht ordentlich herunter.
+  //
+  //    bool signaled = _events[0]->wait( until - Time::now() );
+  //    return signaled? 0 : -1;
+  //}
+  //else
     {
-        // Gut, wir warten nur auf ein Ereignis.
-
-        bool signaled = _events[0]->wait( until - Time::now() );
-        return signaled? 0 : -1;
-    }
-    else
-    {
-        // Weniger gut. Wir warten auf mehrere Ereignisse und müssen diese ständig reihrum abfragen.
-        Rotating_bar rotating_bar = _log->log_level() <= log_debug9;
+        // Weniger gut. Wir warten auf mehrere Ereignisse und müssen diese ständig reihum abfragen.
+        //Rotating_bar rotating_bar = _log->log_level() <= log_debug9;
 
         while(1)
         {
@@ -404,11 +405,11 @@ int Wait_handles::wait_until_2( Time until )
                 else
                 {
                     bool signaled = e->wait( min( directory_watcher_interval, (double)( until - Time::now() ) ) );
-                    if( signaled )  return i;  // Leider auch bei EINTR
+                    if( signaled )  return i;  // Leider auch bei EINTR (EINTR soll ja unterbrechen, aber return i stimmt dann nicht)
                 }
             }
 
-            rotating_bar();
+            //rotating_bar();
 
             if( Time::now() >= until )  return -1;
         }

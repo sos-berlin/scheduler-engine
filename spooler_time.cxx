@@ -1,4 +1,4 @@
-// $Id: spooler_time.cxx,v 1.27 2002/11/28 12:01:12 jz Exp $
+// $Id: spooler_time.cxx,v 1.28 2002/12/09 22:53:26 jz Exp $
 /*
     Hier sind implementiert
 
@@ -48,8 +48,13 @@ void Time::set( const string& t )
 string Time::as_string( With_ms with ) const
 {
     char        buff [30];
+
+    char* old_locale = setlocale( LC_NUMERIC, "C" );
+
     const char* bruch = with == with_ms? buff + sprintf( buff, "%0.3lf", _time ) - 4
                                        : "";
+
+    setlocale( LC_NUMERIC, old_locale );
 
     if( _time < 100*(24*60*60) )
     {
