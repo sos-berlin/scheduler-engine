@@ -1,4 +1,4 @@
-// $Id: spooler_config.cxx,v 1.25 2002/03/01 20:48:00 jz Exp $
+// $Id: spooler_config.cxx,v 1.26 2002/03/02 15:22:44 jz Exp $
 
 //#include <precomp.h>
 
@@ -238,71 +238,6 @@ void Run_time::set_xml( const xml::Element_ptr& element )
 
 } //namespace time
 
-//----------------------------------------------------------------------------------Script::set_xml
-
-void Script::set_xml( const xml::Element_ptr& element, const string& include_path )
-{
-    string inc = include_path;
-    if( !inc.empty() )  { char c = inc[inc.length()-1];  if( c != '/'  &&  c != '\\' )  inc += "/"; }
-
-    _language = as_string( element->getAttribute( L"language" ) );
-
-    for( xml::Node_ptr n = element->firstChild; n; n = n->nextSibling )
-    {
-        switch( n->GetnodeType() )
-        {
-            case xml::NODE_CDATA_SECTION:
-            {
-                xml::Cdata_section_ptr c = n;
-                _text += as_string( c->data );
-                break;
-            }
-
-            case xml::NODE_TEXT:
-            {
-                xml::Text_ptr t = n;
-                _text += as_string( t->data );
-                break;
-            }
-
-            case xml::NODE_ELEMENT:     // <include file="..."/>
-            {
-                xml::Element_ptr e = n;
-                string filename = as_string( e->getAttribute( L"file" ) );
-
-                if( filename.length() >= 1 ) 
-                {
-                    if( filename[0] == '\\' 
-                     || filename[0] == '/' 
-                     || filename.length() >= 2 && filename[1] == ':' )  ; // ok, absoluter Dateiname
-                    else  
-                    {
-                        filename = inc + filename;
-                    }
-                }
-                     
-                _text += file_as_string( filename );
-                break;
-            }
-
-            default: ;
-        }
-    }
-    
-    string use_engine = as_string( element->getAttribute( L"use_engine" ) );
-    
-    if( use_engine == "task"   )  _reuse = reuse_task;
-    if( use_engine == "job"    )  _reuse = reuse_job;
-  //if( use_engine == "global" )  _reuse = reuse_global;
-
-
-/*
-    xml::Element_ptr text_element = element->firstChild;
-    if( text_element == NULL )  throw_xc( "SPOOLER-107" );
-    _text = as_string( text_element->nodeValue );
-*/
-}
-
 //------------------------------------------------------------------------Object_set_class::set_xml
 
 void Object_set_class::set_xml( const xml::Element_ptr& element )
@@ -379,7 +314,7 @@ void Job::set_xml( const xml::Element_ptr& element )
         else
         if( e->tagName == "object_set"  )  _object_set_descr = SOS_NEW( Object_set_descr( e ) );
         else
-        if( e->tagName == "script"      )  _script.set_xml( e, include_path() );
+        if( e->tagName == "script"      )  _script_xml_element = e;
         else
         if( e->tagName == "process"     )  _process_filename = as_string( e->getAttribute( L"file" ) ),
                                            _process_param    = as_string( e->getAttribute( L"param" ) );
@@ -390,8 +325,6 @@ void Job::set_xml( const xml::Element_ptr& element )
     if( !run_time_set )  _run_time.set_xml( element->ownerDocument->createElement( L"run_time" ) );
 
     if( _object_set_descr )  _object_set_descr->_class = _spooler->get_object_set_class( _object_set_descr->_class_name );
-
-    _xml_element = element;
 }
 
 //--------------------------------------------------------Spooler::load_object_set_classes_from_xml

@@ -1,4 +1,4 @@
-// $Id: spooler_task.h,v 1.26 2002/03/01 20:16:46 jz Exp $
+// $Id: spooler_task.h,v 1.27 2002/03/02 15:22:45 jz Exp $
 
 #ifndef __SPOOLER_TASK_H
 #define __SPOOLER_TASK_H
@@ -108,6 +108,8 @@ struct Job : Sos_self_deleting
     {
         s_none,
         s_stopped,              // Gestoppt (z.B. wegen Fehler)
+        s_read_error,           // Skript kann nicht aus Datei (include) gelesen werden
+        s_load_error,           // Skript kann nicht in Scripting Engine geladen werden
         s_pending,              // Warten auf Start
         s_start_task,           // Task aus der Warteschlange genommen, muss noch gestartet werden. 
         s_starting,             //
@@ -117,20 +119,20 @@ struct Job : Sos_self_deleting
         s_suspended,            // Angehalten
         s_ending,               // end(), also in spooler_close()
         s_ended,
-      //s_closed,               // 
         s__max
     };
 
     enum State_cmd
     {
         sc_none,
-        sc_stop,                // s_running | s_suspended  -> s_stopped
-        sc_unstop,              // s_stopped                -> s_pending
-        sc_start,               // s_pending                -> s_running
-        sc_wake,                // s_pending | s_running    -> s_running
-        sc_end,                 // s_running                -> s_pending
-        sc_suspend,             // s_running                -> s_suspended
-        sc_continue,            // s_suspended              -> s_running
+        sc_stop,                // s_running || s_suspended  -> s_stopped
+        sc_unstop,              // s_stopped                 -> s_pending
+        sc_start,               // s_pending                 -> s_running
+        sc_wake,                // s_pending || s_running    -> s_running
+        sc_end,                 // s_running                 -> s_pending
+        sc_suspend,             // s_running                 -> s_suspended
+        sc_continue,            // s_suspended               -> s_running
+        sc_reread,              // Job::_reread = true
         sc__max
     };
 
@@ -187,6 +189,7 @@ struct Job : Sos_self_deleting
     bool                        dequeue_task                ();
     void                        remove_from_task_queue      ( Task* );
     void                        close_task                  ();
+    bool                        read_script                 ();
     bool                        load                        ();
     void                        end                         ();
     void                        stop                        ();
@@ -241,6 +244,7 @@ struct Job : Sos_self_deleting
     Sos_ptr<Object_set_descr>  _object_set_descr;           // Job nutzt eine Objektemengeklasse
     Level                      _output_level;
     Script                     _script;                     // Job hat ein eigenes Skript
+    xml::Element_ptr           _script_element;             // <script> (mit <include>) für <modify_job cmd="reload"/>
     string                     _process_filename;           // Job ist ein externes Programm
     string                     _process_param;              // Parameter für das Programm
     Run_time                   _run_time;
@@ -248,16 +252,18 @@ struct Job : Sos_self_deleting
     bool                       _temporary;                  // Job nach einem Lauf entfernen
     string                     _title;
     string                     _description;
-    xml::Element_ptr           _xml_element;                // <job> aus <config>
 
+    xml::Element_ptr           _script_xml_element;         // <script> aus <config>
     Script*                    _script_ptr;
     Script_instance            _script_instance;            // Für use_engine="job"
+
     bool                       _has_spooler_process;
     Directory_watcher_list     _directory_watcher_list;
     Event                      _event;                      // Zum Starten des Jobs
 
     State                      _state;
     State_cmd                  _state_cmd;
+    bool                       _reread;                     // <script> neu einlesen, also <include> erneut ausführen
     string                     _in_call;                    // "spooler_process" etc.
     Time                       _next_start_time;
     Time                       _next_start_at;
@@ -268,7 +274,7 @@ struct Job : Sos_self_deleting
     CComPtr<Com_log>           _com_log;
     CComPtr<Com_task>          _com_task;                   // Objekt bleibt, Inhalt wechselt über die Tasks hinweg
     Xc_copy                    _error;
-    bool                       _load_error;                 // Fehler beim Laden oder spooler_init()
+    bool                       _close_engine;               // Bei einem Fehler in spooler_init()
     Sos_ptr<Task>              _task;                       // Es kann nur eine Task geben. Zirkel: _task->_job == this
     Task_queue                 _task_queue;                 // Warteschlange der nächsten zu startenden Tasks
 };
@@ -317,13 +323,13 @@ struct Task : Sos_self_deleting
     Fill_zero                  _zero_;
     Spooler*                   _spooler;
     Sos_ptr<Job>               _job;                        // Zirkel!
-  //Thread_semaphore           _lock;
     
     double                     _cpu_time;
     int                        _step_count;
 
     bool                       _let_run;                    // Task zuende laufen lassen, nicht bei _job._period.end() beenden
     bool                       _opened;
+    bool                       _on_error_called;
 
     Time                       _enqueue_time;
     Time                       _start_at;                   // Zu diesem Zeitpunkt (oder danach) starten

@@ -1,4 +1,4 @@
-// $Id: spooler_script.h,v 1.7 2002/03/01 20:16:46 jz Exp $
+// $Id: spooler_script.h,v 1.8 2002/03/02 15:22:44 jz Exp $
 
 #ifndef __SPOOLER_SCRIPT_H
 #define __SPOOLER_SCRIPT_H
@@ -41,7 +41,7 @@ struct Script_instance
 
     void                        init                        ( const string& language );
     void                        load                        ( const Script& );
-  //void                        start                       ();
+    void                        start                       ();
     IDispatch*                  dispatch                    () const                        { return _script_site? _script_site->dispatch() : NULL; }
     void                        add_obj                     ( const CComPtr<IDispatch>&, const string& name );
     void                        close                       ();

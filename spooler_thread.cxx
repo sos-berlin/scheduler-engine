@@ -1,4 +1,4 @@
-// $Id: spooler_thread.cxx,v 1.20 2002/02/28 16:46:06 jz Exp $
+// $Id: spooler_thread.cxx,v 1.21 2002/03/02 15:22:45 jz Exp $
 /*
     Hier sind implementiert
 
@@ -148,6 +148,7 @@ void Thread::start()
         _script_instance.add_obj( (IDispatch*)_com_log              , "spooler_log"    );
 
         _script_instance.load( _script );
+        _script_instance.start();
 
         bool ok = check_result( _script_instance.call_if_exists( "spooler_init" ) );
         if( !ok )  throw_xc( "SPOOLER-127" );

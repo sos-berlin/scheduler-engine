@@ -1,4 +1,4 @@
-// $Id: spooler_script.cxx,v 1.7 2002/03/01 20:16:46 jz Exp $
+// $Id: spooler_script.cxx,v 1.8 2002/03/02 15:22:44 jz Exp $
 /*
     Hier sind implementiert
 
@@ -8,6 +8,7 @@
 
 
 #include "../kram/sos.h"
+#include "../file/anyfile.h"
 #include "spooler.h"
 
 using namespace std;
@@ -29,6 +30,64 @@ bool check_result( const CComVariant& vt )
     HRESULT hr = v.ChangeType( VT_BOOL );
     if( FAILED(hr) )  throw_ole( hr, "VariantChangeType" );
     return vt.bVal != 0;
+}
+
+//----------------------------------------------------------------------------------Script::set_xml
+
+void Script::set_xml( const xml::Element_ptr& element, const string& include_path )
+{
+    string inc = include_path;
+    if( !inc.empty() )  { char c = inc[inc.length()-1];  if( c != '/'  &&  c != '\\' )  inc += "/"; }
+
+    _language = as_string( element->getAttribute( L"language" ) );
+    _text = "";
+
+    for( xml::Node_ptr n = element->firstChild; n; n = n->nextSibling )
+    {
+        switch( n->GetnodeType() )
+        {
+            case xml::NODE_CDATA_SECTION:
+            {
+                xml::Cdata_section_ptr c = n;
+                _text += as_string( c->data );
+                break;
+            }
+
+            case xml::NODE_TEXT:
+            {
+                xml::Text_ptr t = n;
+                _text += as_string( t->data );
+                break;
+            }
+
+            case xml::NODE_ELEMENT:     // <include file="..."/>
+            {
+                xml::Element_ptr e = n;
+                string filename = as_string( e->getAttribute( L"file" ) );
+
+                if( filename.length() >= 1 ) 
+                {
+                    if( filename[0] == '\\' 
+                     || filename[0] == '/' 
+                     || filename.length() >= 2 && filename[1] == ':' )  ; // ok, absoluter Dateiname
+                    else  
+                    {
+                        filename = inc + filename;
+                    }
+                }
+                     
+                _text += file_as_string( filename );
+                break;
+            }
+
+            default: ;
+        }
+    }
+    
+    string use_engine = as_string( element->getAttribute( L"use_engine" ) );
+    
+    if( use_engine == "task"   )  _reuse = reuse_task;
+    if( use_engine == "job"    )  _reuse = reuse_job;
 }
 
 //----------------------------------------------------------------------------Script_instance::init
@@ -60,21 +119,22 @@ void Script_instance::load( const Script& script )
     if( !_script_site )  init( script._language );
                    else  if( _script_site->_engine_name != script._language )  throw_xc( "SPOOLER-117" );
 
+    HRESULT hr = _script_site->_script->SetScriptState( SCRIPTSTATE_INITIALIZED );
+    if( FAILED( hr ) )  throw_ole( hr, "IActiveScript::SetScriptState", "SCRIPTSTATE_INITIALIZED" );
+
     _script_site->parse( script._text );
 
     _loaded = true;
-
-    //start();
 }
 
 //---------------------------------------------------------------------------Script_instance::start
-/*
+
 void Script_instance::start()
 {
     HRESULT hr = _script_site->_script->SetScriptState( SCRIPTSTATE_STARTED );
     if( FAILED( hr ) )  throw_ole( hr, "IActiveScript::SetScriptState", "SCRIPTSTATE_STARTED" );
 }
-*/
+
 //---------------------------------------------------------------------------Script_instance::close
 
 void Script_instance::close()

@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.75 2002/03/01 14:38:09 jz Exp $
+// $Id: spooler.cxx,v 1.76 2002/03/02 15:22:44 jz Exp $
 /*
     Hier sind implementiert
 
@@ -437,6 +437,7 @@ void Spooler::start()
         _script_instance.add_obj( (IDispatch*)_com_log    , "spooler_log" );
 
         _script_instance.load( _script );
+        _script_instance.start();
 
         bool ok = check_result( _script_instance.call_if_exists( "spooler_init" ) );
         if( !ok )  throw_xc( "SPOOLER-127" );

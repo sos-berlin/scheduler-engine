@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.51 2002/03/01 20:16:46 jz Exp $
+// $Id: spooler_task.cxx,v 1.52 2002/03/02 15:22:44 jz Exp $
 /*
     Hier sind implementiert
 
@@ -278,7 +278,12 @@ void Job::close_task()
       //if( _state != s_stopped )  set_state( s_ended );
     }
 
-    if( _load_error  ||  _script_ptr  &&  _script_ptr->_reuse == Script::reuse_task )  close_engine();
+    //if( _load_error  ||  _script_ptr  &&  _script_ptr->_reuse == Script::reuse_task )  close_engine();
+    if( _close_engine  || _script_ptr  &&  _script_ptr->_reuse == Script::reuse_task ) 
+    {
+        close_engine();
+        _close_engine = false;
+    }
 }
 
 //----------------------------------------------------------------------------------------Job::init
@@ -292,9 +297,6 @@ void Job::init()
     _event.set_name( obj_name() );
     _event.add_to( &_thread->_wait_handles );
 
-    _script_ptr = _object_set_descr? &_object_set_descr->_class->_script
-                                   : &_script;
-
     _period          = _run_time.next_period( Time::now() );
     _next_start_time = _period.begin();
 
@@ -303,6 +305,11 @@ void Job::init()
     _com_task = new Com_task();
 
     set_state( s_pending );
+
+    if( _script_xml_element )  read_script();
+
+    _script_ptr = _object_set_descr? &_object_set_descr->_class->_script
+                                   : &_script;
 }
 
 //---------------------------------------------------------------------------------Job::create_task
@@ -330,6 +337,7 @@ Sos_ptr<Task> Job::create_task( const CComPtr<spooler_com::Ivariable_set>& param
 
 bool Job::dequeue_task()
 {
+    if( _state == s_read_error )  return false;
     if( _task_queue.empty() )  return false;
 
     THREAD_LOCK( _lock )
@@ -351,7 +359,7 @@ bool Job::dequeue_task()
         _task = task;
 
         _error = NULL;
-        _load_error = false;
+        _close_engine = false;
         _repeat = 0;
 
         _com_task->set_task( _task );
@@ -392,7 +400,15 @@ void Job::start( const CComPtr<spooler_com::Ivariable_set>& params, const string
 
 Sos_ptr<Task> Job::start_without_lock( const CComPtr<spooler_com::Ivariable_set>& params, const string& task_name )
 {
-    if( _state == s_stopped )  set_state( s_pending );
+    switch( _state )
+    {
+        case s_read_error:  throw_xc( "SPOOLER-132", name(), _error->what() );
+     
+        case s_stopped:
+        case s_load_error:  set_state( s_pending );
+        
+        default: ;
+    }
 
     Sos_ptr<Task> task = create_task( params, task_name );
     
@@ -443,10 +459,31 @@ void Job::clear_when_directory_changed()
 {
     THREAD_LOCK( _lock )
     {
-        if( _spooler->_debug )  _log.msg( "clear_when_directory_changed" );
+        if( _spooler->_debug  &&  !_directory_watcher_list.empty() )  _log.msg( "clear_when_directory_changed" );
 
         _directory_watcher_list.clear();
     }
+}
+
+//----------------------------------------------------------------------Job::set_script_xml_element
+/*
+void Job::set_script_xml_element( const xml::Element_ptr& element )
+{
+    _script_xml_element = element;
+}
+*/
+//---------------------------------------------------------------------------------Job::read_script
+
+bool Job::read_script()
+{
+    try
+    {
+        _script.set_xml( _script_xml_element, include_path() );
+    }
+    catch( const Xc& x        ) { set_error(x);  _close_engine = true;  set_state( s_read_error );  return false; }
+    catch( const exception& x ) { set_error(x);  _close_engine = true;  set_state( s_read_error );  return false; }
+
+    return true;
 }
 
 //----------------------------------------------------------------------------------------Job::load
@@ -461,14 +498,26 @@ bool Job::load()
     _script_instance.add_obj( (IDispatch*)_com_job              , "spooler_job"    );
     _script_instance.add_obj( (IDispatch*)_com_task             , "spooler_task"   );
 
-    _script_instance.load( *_script_ptr );
-    if( has_error() )  { _load_error = true; return false; }
+    try
+    {
+        _script_instance.load( *_script_ptr );
+    }
+    catch( const Xc& x        ) { set_error(x);  _close_engine = true;  set_state( s_load_error );  return false; }
+    catch( const exception& x ) { set_error(x);  _close_engine = true;  set_state( s_load_error );  return false; }
+
+    try
+    {
+        _script_instance.start();
+    }
+    catch( const Xc& x        ) { set_error(x);  _close_engine = true;  return false; }
+    catch( const exception& x ) { set_error(x);  _close_engine = true;  return false; }
+
 
     {
         In_call in_call ( this, spooler_init_name );
         bool ok = check_result( _script_instance.call_if_exists( spooler_init_name ) );
         in_call.set_result( ok );
-        if( !ok || has_error() )  { _load_error = true; return false; }
+        if( !ok || has_error() )  { _close_engine = true;  return false; }
     }
 
     _has_spooler_process = _script_instance.name_exists( spooler_process_name );
@@ -484,17 +533,20 @@ void Job::end()
     if( !_state )  return;
 
     if( _state == s_suspended )  set_state( s_running );
-    if( _state & ( s_running | s_running_process ) )  if( _task )  _task->end();
+    
+    if( _state == s_starting
+     || _state == s_running  
+     || _state == s_running_process )  if( _task )  _task->end();
     
     close_task();
-    set_state( s_ended );
+    if( _state != s_stopped )  set_state( s_ended );
 }
 
 //----------------------------------------------------------------------------------------Job::stop
 
 void Job::stop()
 {
-    _log.msg( "stop" );
+    //_log.msg( "stop" );
 
     if( _state != s_stopped  &&  _task )
     {
@@ -506,14 +558,14 @@ void Job::stop()
         catch( const exception& x )  { set_error(x); }
     }
 
+    set_state( s_stopped );
+
     end();
     close_engine();
 
     // Kein Signal mehr soll kommen, wenn Job gestoppt:
     //_event.close();
     clear_when_directory_changed();
-
-    set_state( s_stopped );
 }
 
 //----------------------------------------------------------------------------Job::interrupt_script
@@ -559,35 +611,53 @@ bool Job::do_something()
     bool something_done = false;
     bool ok = true;
 
-    if( _state_cmd )
+    THREAD_LOCK( _lock )
     {
-        switch( _state_cmd )
+        if( _state_cmd )
         {
-            case sc_stop:       if( _state != s_stopped )  stop(), something_done = true;
-                                break;
+            switch( _state_cmd )
+            {
+                case sc_stop:       if( _state != s_stopped  &&  _state != s_read_error )  stop(), something_done = true;
+                                    break;
 
-          //case sc_unstop:     if( _state == s_stopped )  { if( !dequeue_task() )  set_state( s_pending ); something_done = true; }
-            case sc_unstop:     if( _state == s_stopped )  set_state( s_pending ), something_done = true;
-                                break;
+                case sc_unstop:     if( _state == s_stopped )  set_state( s_pending ), something_done = true;
+                                    break;
 
-            case sc_end:        if( _state == s_running )  end(), something_done = true;
-                                break;
+                case sc_end:        if( _state == s_running )  end(), something_done = true;
+                                    break;
 
-            case sc_suspend:    if( _state == s_running )  set_state( s_suspended ), something_done = true;
-                                break;
+                case sc_suspend:    if( _state == s_running )  set_state( s_suspended ), something_done = true;
+                                    break;
 
-            case sc_continue:   if( _state == s_suspended )  set_state( s_running ), something_done = true;
-                                break;
+                case sc_continue:   if( _state == s_suspended )  set_state( s_running ), something_done = true;
+                                    break;
 
-            default: ;
+                default: ;
+            }
+
+            _state_cmd = sc_none;
         }
+    }
 
-        _state_cmd = sc_none;
+    if( _reread  &&  !_task )
+    {
+        _reread = false;
+
+        close_task();
+        close_engine();
+
+        _log.msg( "Skript wird erneut gelesen (<include> wird erneut ausgeführt)" );
+        read_script();
+
+        set_state( s_pending );
+        
+        something_done = true;
     }
 
 
-    if( _state == s_stopped   )  return something_done;
-    if( _state == s_suspended )  return something_done;
+    if( _state == s_read_error )  return something_done;
+    if( _state == s_stopped    )  return something_done;
+    if( _state == s_suspended  )  return something_done;
 
     if( _state == s_pending )
     {
@@ -654,6 +724,12 @@ bool Job::do_something()
         ok = _task->start();
         if( ok )  do_a_step = true;
         something_done = true;
+        
+        if( _state == s_read_error || _state == s_load_error )  
+        {
+            close_task();
+            return something_done;
+        }
     }
 
     if( ok && !has_error() )
@@ -789,38 +865,52 @@ void Job::set_state( State new_state )
 }
 */
 //-------------------------------------------------------------------------------Job::set_state_cmd
+// Anderer Thread
 
 void Job::set_state_cmd( State_cmd cmd )
 { 
     bool ok = false;
 
-    switch( cmd )
+    THREAD_LOCK( _lock )
     {
-        case sc_stop:       ok = true;                  break;
+        switch( cmd )
+        {
+            case sc_stop:       ok = true; 
+                                break;
 
-        case sc_unstop:     ok = _state == s_stopped;   if(!ok) break;
-                            break;
+            case sc_unstop:     ok = _state == s_stopped;       if( !ok )  return;
+                                _state_cmd = cmd;
+                                _thread->signal( state_cmd_name(cmd) );
+                                break;
 
-        case sc_start:      start( NULL, "" );          break;
+            case sc_start:      start( NULL, "" );
+                                break;
 
-        case sc_wake:       wake();                     break;
+            case sc_wake:       wake();            
+                                _state_cmd = cmd;
+                                _thread->signal( state_cmd_name(cmd) );
+                                break;
 
-        case sc_end:        ok = _state == s_running;   break;
+            case sc_end:        ok = _state == s_running;       if( !ok )  return;
+                                _state_cmd = cmd;
+                                break;
 
-        case sc_suspend:    ok = _state == s_running;   break;
+            case sc_suspend:    ok = _state == s_running;       if( !ok )  return;
+                                _state_cmd = cmd;
+                                break;
 
-        case sc_continue:   ok = _state == s_suspended; if(!ok) break;
-                            break;
+            case sc_continue:   ok = _state == s_suspended;     if( !ok )  return;
+                                _state_cmd = cmd;
+                                _thread->signal( state_cmd_name(cmd) );
+                                break;
 
+            case sc_reread:     _reread = true, ok = true;  
+                                _thread->signal( state_cmd_name(cmd) );
+                                break;
 
-        default:            ok = false;
+            default:            ok = false;
+        }
     }
-
-    if( !ok )  return;    //throw_xc( "SPOOLER-109" );
-    
-    _state_cmd = cmd;
-
-    _thread->signal( state_cmd_name(cmd) );
 }
 
 //-----------------------------------------------------------------------------------Job::job_state
@@ -864,6 +954,8 @@ string Job::state_name( State state )
     switch( state )
     {
         case s_stopped:         return "stopped";
+        case s_read_error:      return "read_error";
+        case s_load_error:      return "load_error";
         case s_loaded:          return "loaded";
         case s_pending:         return "pending";
         case s_start_task:      return "start_task";
@@ -922,6 +1014,7 @@ string Job::state_cmd_name( Job::State_cmd cmd )
         case Job::sc_end:      return "end";
         case Job::sc_suspend:  return "suspend";
         case Job::sc_continue: return "continue";
+        case Job::sc_reread:   return "reread";
         default:               return as_string( (int)cmd );
     }
 }
@@ -1089,12 +1182,16 @@ void Task::on_error_on_success()
 {
     if( _job->has_error() )
     {
-        try
+        if( !_on_error_called )
         {
-            do_on_error();
+            _on_error_called = true;
+            try
+            {
+                do_on_error();
+            }
+            catch( const Xc& x        ) { _job->_log.error( string(spooler_on_error_name) + ": " + x.what() ); }
+            catch( const exception& x ) { _job->_log.error( string(spooler_on_error_name) + ": " + x.what() ); }
         }
-        catch( const Xc& x        ) { _job->_log.error( string(spooler_on_error_name) + ": " + x.what() ); }
-        catch( const exception& x ) { _job->_log.error( string(spooler_on_error_name) + ": " + x.what() ); }
     }
     else
     {
