@@ -1,4 +1,4 @@
-// $Id: spooler_module_java.cxx,v 1.45 2003/03/19 11:59:57 jz Exp $
+// $Id: spooler_module_java.cxx,v 1.46 2003/03/26 13:32:49 jz Exp $
 /*
     Hier sind implementiert
 
@@ -295,13 +295,13 @@ Java_idispatch::~Java_idispatch()
         {
             Env e = env();
         
-            jclass object_class = e.get_object_class( _jobject );
+            jclass object_class = e.get_object_class( get_jobject() );
 
             jmethodID method_id = e.get_method_id( object_class, "com_clear", "()V" );
 
             e->DeleteLocalRef( object_class ), object_class = NULL;
 
-            e->CallVoidMethod( _jobject, method_id );
+            e->CallVoidMethod( get_jobject(), method_id );
             if( e->ExceptionCheck() )  e.throw_java( _class_name, "CallVoidMethod com_clear()" );
 
             assign( NULL );

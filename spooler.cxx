@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.182 2003/03/26 09:14:02 jz Exp $
+// $Id: spooler.cxx,v 1.183 2003/03/26 13:32:48 jz Exp $
 /*
     Hier sind implementiert
 
@@ -28,6 +28,7 @@
 #include "../file/anyfile.h"
 #include "../kram/licence.h"
 #include "../kram/sos_mail.h"
+#include "../kram/sos_java.h"
 
 /*
 #ifdef Z_WINDOWS
@@ -701,6 +702,77 @@ bool Spooler::run_threads()
     return something_done;
 }
 
+//--------------------------------------------------------------------------------Spooler::send_cmd
+
+void Spooler::send_cmd()
+{
+    xml::Document_ptr xml_doc;
+    int ok = xml_doc.load_xml( _send_cmd );      // Haben wir ein gültiges XML-Dokument?
+    if( !ok )
+    {
+        string text;
+
+#       ifdef SPOOLER_USE_MSXML
+            msxml::IXMLDOMParseErrorPtr error = command_doc._ptr->parseError;
+
+            text = w_as_string( error->reason );
+            if( text[ text.length()-1 ] == '\n' )  text = as_string( text.c_str(), text.length() - 1 );
+            if( text[ text.length()-1 ] == '\r' )  text = as_string( text.c_str(), text.length() - 1 );
+
+            text += ", code="   + as_hex_string( error->errorCode );
+            text += ", line="   + as_string( error->line );
+            text += ", column=" + as_string( error->linepos );
+#        else
+            text = xml_doc.error_text();
+            _log.error( text );       // Log ist möglicherweise noch nicht geöffnet
+#       endif
+
+        throw_xc( "XML-ERROR", text );
+    }
+
+
+    SOCKET sock = socket( PF_INET, SOCK_STREAM, 0 );
+    if( sock == SOCKET_ERROR ) throw_sos_socket_error( "socket" );
+
+    sockaddr_in addr;
+
+    memset( &addr, 0, sizeof addr );
+    addr.sin_family = PF_INET;
+    int i = inet_addr( "127.0.0.1" );
+    memcpy( &addr.sin_addr, &i, 4 );
+    addr.sin_port = htons( _tcp_port );
+
+    int ret = connect( sock, (sockaddr*)&addr, sizeof addr );
+    if( ret == -1 )  throw_sos_socket_error( "connect" );
+
+    const char* p     = _send_cmd.data();
+    const char* p_end = p + _send_cmd.length();
+
+    while( p < p_end )
+    {
+        ret = send( sock, p, p_end - p, 0 );
+        if( ret == -1 )  throw_sos_socket_error( "send" );
+
+        p += ret;
+    }
+
+
+    Xml_end_finder xml_end_finder;
+
+    while(1)
+    {
+        char buffer [100];
+
+        int ret = recv( sock, buffer, sizeof buffer, 0 );
+        if( ret == 0 )  break;
+        if( ret < 0 )  throw_sos_socket_error( "recv" );
+        fwrite( buffer, ret, 1, stdout );
+        if( xml_end_finder.is_complete( buffer, ret ) )  break;
+    }
+
+    closesocket( sock );
+}
+
 //--------------------------------------------------------------------------------Spooler::load_arg
 
 void Spooler::load_arg()
@@ -769,6 +841,8 @@ void Spooler::load_arg()
             if( opt.with_value( "log-level"        ) )  log_level = opt.value();
             else
             if( opt.with_value( "job"              ) )  _job_name = opt.value();        // Nicht von SOS beauftragt
+            else
+            if( opt.with_value( "send-cmd"         ) )  _send_cmd = opt.value();
             else
                 throw_sos_option_error( opt );
         }
@@ -1161,7 +1235,11 @@ int Spooler::launch( int argc, char** argv )
 
     do
     {
-        if( _state_cmd != sc_load_config )  load();
+        if( _state_cmd != sc_load_config )  
+        {
+            load();
+            if( _send_cmd != "" )  { send_cmd();  return 0; }
+        }
 
         THREAD_LOCK( _lock )  
         {
@@ -1180,7 +1258,7 @@ int Spooler::launch( int argc, char** argv )
     } while( _state_cmd == sc_reload || _state_cmd == sc_load_config );
 
 
-    _java_vm->close();
+    //_java_vm->close();
 
     _log.info( "Spooler ordentlich beendet." );
 

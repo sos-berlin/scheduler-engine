@@ -1,4 +1,4 @@
-// $Id: spooler.h,v 1.126 2003/03/17 18:40:18 jz Exp $
+// $Id: spooler.h,v 1.127 2003/03/26 13:32:49 jz Exp $
 
 #ifndef __SPOOLER_H
 #define __SPOOLER_H
@@ -232,6 +232,10 @@ struct Spooler
     bool                        signaled                    ()                                  { return _event.signaled(); }
 
     Spooler_thread*             thread_by_thread_id         ( Thread_id );
+
+    void                        send_cmd                    ();
+
+    string                     _send_cmd;
 
 
   private:

@@ -1,4 +1,4 @@
-// $Id: spooler_history.cxx,v 1.31 2002/12/10 12:38:23 jz Exp $
+// $Id: spooler_history.cxx,v 1.32 2003/03/26 13:32:49 jz Exp $
 
 #include "spooler.h"
 #include "../zschimmer/z_com.h"
@@ -125,7 +125,7 @@ void Spooler_db::open( const string& db_name, bool need_db )
     
     if( _db_name != "" )
     {
-        if( _db_name.find(' ') == string::npos )
+        if( _db_name.find(' ') == string::npos  &&  _db_name.find( ':', 1 ) == string::npos )
         {
             if( !is_absolute_filename( _db_name  )  &&  (_spooler->log_directory() + " ")[0] == '*' ) 
             {
@@ -137,8 +137,9 @@ void Spooler_db::open( const string& db_name, bool need_db )
             my_db_name = "odbc -create " + make_absolute_filename( _spooler->log_directory(), my_db_name );
         }
 
-        if( _db_name.substr(0,5) == "odbc " )  _db_name = "odbc -id=spooler " +   _db_name.substr(5),
-                                             my_db_name = "odbc -id=spooler " + my_db_name.substr(5);
+        if( _db_name.substr(0,5) == "odbc " 
+         || _db_name.substr(0,5) == "jdbc ")   _db_name = _db_name.substr(0,5) + " -id=spooler " +   _db_name.substr(5),
+                                             my_db_name = _db_name.substr(0,5) + " -id=spooler " + my_db_name.substr(5);
 
         try
         {
@@ -151,27 +152,29 @@ void Spooler_db::open( const string& db_name, bool need_db )
             _db_name += " ";
 
             create_table_when_needed( _spooler->_variables_tablename, 
-                                      "\"name\" char(100) not null primary key,"
-                                      "\"wert\" char(250)"            );
+                                      "\"name\" char(100) not null,"
+                                      "\"wert\" char(250),"  
+                                      "primary key ( \"name\" )" );
 
 
             vector<string> create_extra = vector_map( sql_quoted_name, vector_split( " *, *", _spooler->_history_columns ) );
-            for( int i = 0; i < create_extra.size(); i++ )  create_extra[i] = "," + create_extra[i] + " text(250)";
+            for( int i = 0; i < create_extra.size(); i++ )  create_extra[i] = create_extra[i] + " text(250),";
 
             create_table_when_needed( _spooler->_history_tablename, 
-                                      "\"id\"          integer not null primary key,"
+                                      "\"id\"          integer not null,"
                                       "\"spooler_id\"  char(100),"
                                       "\"job_name\"    char(100) not null,"
                                       "\"start_time\"  date not null,"
                                       "\"end_time\"    date,"
                                       "\"cause\"       char(50),"
                                       "\"steps\"       integer,"
-                                      "\"error\"       boolean,"
+                                      "\"error\"       bit,"
                                       "\"error_code\"  char(50),"
                                       "\"error_text\"  char(250),"
                                       "\"parameters\"  clob,"
-                                      "\"log\"         blob" 
-                                      + join( "", create_extra ) );
+                                      "\"log\"         blob," 
+                                      + join( "", create_extra ) + 
+                                      "primary key( \"id\" )" );
 
             stmt = "UPDATE " + _spooler->_variables_tablename + " set \"wert\" = \"wert\"+1 where \"name\"='spooler_job_id'";
             _job_id_update.prepare( _db_name + stmt );
@@ -655,11 +658,12 @@ void Job_history::start()
     if( _task_id == _job->_task->id() )  return;        // start() bereits gerufen
     _task_id = _job->_task->id();
 
+    if( _error )  return;
+
     _start_called = true;
 
     _extra_record.construct( _extra_record.type() );
 
-    if( _error )  return;
 
     try
     {
