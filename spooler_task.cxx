@@ -357,7 +357,7 @@ xml::Element_ptr Task::dom( const xml::Document_ptr& document, const Show_what& 
         }
 
         //if( show & show_log )  dom_append_text_element( task_element, "log", _log->as_string() );
-        task_element.appendChild( _log->dom( document, show_log ) );
+        task_element.appendChild( _log->dom( document, show ) );
     }
 
     return task_element;

@@ -1005,7 +1005,11 @@ void Command_processor::execute_file( const string& filename )
 {
     _source_filename = filename;
 
-    execute_2( string_from_file( filename ), modification_time_of_file( filename ) );
+    string content = string_from_file( filename );
+
+    Z_LOGI( __FUNCTION__ << "\n" << filename << ":\n" << content << "\n" );
+
+    execute_2( content, modification_time_of_file( filename ) );
 }
 
 //----------------------------------------------------------------------Command_processor::execute_2

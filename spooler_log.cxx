@@ -487,7 +487,9 @@ void Prefix_log::open()
             _log_buffer = "";
         }
 
-        log( log_info, "\nProtokoll beginnt in " + _filename );
+        string msg = "\n";
+        if( _title != "" )  msg += _title + " - ";
+        log( log_info, msg + "Protokoll beginnt in " + _filename );
     }
 
     _started = true;

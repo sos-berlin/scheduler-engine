@@ -61,7 +61,16 @@ Async_operation* Remote_module_instance_proxy::close__start()
     if( _remote_instance )
     {
         LOGI( "*** Remote_module_instance_proxy::close(): _remote_instance->release()\n" );
-        _remote_instance->release();
+
+        try
+        {
+            _remote_instance->release();
+        }
+        catch( exception& x )
+        {
+            LOG( "Fehler ignoriert: " << x << "\n" );       // Z.B. ERRNO-32 Broken pipe
+        }
+
         _remote_instance = NULL;
     }
 

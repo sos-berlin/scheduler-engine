@@ -1666,7 +1666,7 @@ xml::Element_ptr Job::dom( const xml::Document_ptr& document, const Show_what& s
 
         if( _error       )  append_error_element( job_element, _error );
 
-        job_element.appendChild( _log->dom( document, show_log ) );
+        job_element.appendChild( _log->dom( document, show ) );
     }
 
     return job_element;

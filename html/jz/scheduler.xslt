@@ -291,7 +291,7 @@
                             &#160;
                             <xsl:value-of select="@title"/>
                             <xsl:if test="@state_text!=''">
-                                <xsl:text> &#160; - </xsl:text>
+                                <xsl:text> &#160;–&#160; </xsl:text>
                                 <xsl:value-of select="@state_text"/>
                             </xsl:if>
                         </td>
@@ -981,17 +981,17 @@
 -->
             <tr>
                 <td><span class="label">state:</span></td>
-                <td>
+                <td colspan="99">
                     <xsl:value-of select="@state"/>
                     <!--xsl:if test="@waiting_for_process='yes'">
                         <xsl:text>,</xsl:text>
                         <span class="waiting_for_process"> waiting for process!</span>
                     </xsl:if-->
-                </td>
 
-                <td><span class="label">state text:</span></td>
-                <td>
-                    <xsl:value-of select="@state_text"/>
+                    <xsl:if test="@state_text and @state_text != '' ">
+                        &#160;–&#160;
+                        <xsl:value-of select="@state_text"/>
+                    </xsl:if>
                 </td>
             </tr>
 
@@ -1584,3 +1584,6 @@
     </xsl:template>
 
 </xsl:stylesheet>
+
+<!-- Das ist ein Gedankenstrich: – -->
+<!-- Das ist drei Punkte: … -->
