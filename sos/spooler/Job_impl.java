@@ -1,4 +1,4 @@
-// $Id: Job_impl.java,v 1.4 2002/11/14 12:34:50 jz Exp $
+// $Id: Job_impl.java,v 1.5 2003/04/21 19:20:08 jz Exp $
 
 package sos.spooler;
 
@@ -6,7 +6,7 @@ package sos.spooler;
  * Oberklasse für die Implementierung eines Jobs.
  *
  * @author Joacim Zschimmer, Zschimmer GmbH
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 
 public class Job_impl
@@ -15,11 +15,11 @@ public class Job_impl
       * Gegenstück ist {@link #spooler_exit()}.
       * @return false stoppt den Job.
       */
-    public boolean  spooler_init        ()      { return true; }
+    public boolean  spooler_init        ()      throws Exception  { return true; }
 
 
     /** Wir als allerletzte Methode gerufen, bevor das Java-Objekt verworfen wird. */
-    public void     spooler_exit        ()      {}
+    public void     spooler_exit        ()      throws Exception  {}
 
 
     /** Wird zu Beginn eines Joblaufs gerufen.
@@ -27,14 +27,14 @@ public class Job_impl
       * @return false beendet den Joblauf.
       */
 
-    public boolean  spooler_open        ()      { return true; }
+    public boolean  spooler_open        ()      throws Exception  { return true; }
 
 
     /** Wird am Ende eines Joblaufs gerufen.
       * Gegenstück zu {@link #spooler_open()}.
       */
 
-    public void     spooler_close       ()      {}
+    public void     spooler_close       ()      throws Exception  {}
 
 
     /** Führt einen Jobschritt aus.
@@ -43,17 +43,17 @@ public class Job_impl
       * bei order="true": false versetzt den Auftrag in den Fehlerzustand (s. {@link Job_chain_node}).
       */
 
-    public boolean  spooler_process     ()      { return false; }
+    public boolean  spooler_process     ()      throws Exception  { return false; }
 
 
     /** Wird als letzte Funktion eines fehlerlosen Joblaufs gerufen.
       */
 
-    public void     spooler_on_error    ()      {}
+    public void     spooler_on_error    ()      throws Exception  {}
 
 
     /** Wird als letzte Funktion eines Joblaufs gerufen, wenn ein Fehler aufgetreten ist. */
-    public void     spooler_on_success  ()      {}
+    public void     spooler_on_success  ()      throws Exception  {}
 
 
     /** Zum Protokollieren */
