@@ -1,4 +1,4 @@
-// $Id: spooler_script.cxx,v 1.1 2001/01/25 20:28:48 jz Exp $
+// $Id: spooler_script.cxx,v 1.2 2001/01/27 19:26:16 jz Exp $
 /*
     Hier sind implementiert
 
@@ -52,6 +52,12 @@ void Script_instance::close()
 {
     if( _script_site )
     {
+        try
+        {
+            call_if_exists( "spooler_init" );
+        }
+        catch( const Xc& x ) { _spooler->_log.error( x.what() ); }
+
         _script_site->close_engine();
         _script_site = NULL;
     }

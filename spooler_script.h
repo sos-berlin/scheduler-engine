@@ -1,4 +1,4 @@
-// $Id: spooler_script.h,v 1.1 2001/01/25 20:28:38 jz Exp $
+// $Id: spooler_script.h,v 1.2 2001/01/27 19:26:16 jz Exp $
 
 #ifndef __SPOOLER_SCRIPT_H
 #define __SPOOLER_SCRIPT_H
@@ -33,7 +33,7 @@ struct Script
 
 struct Script_instance
 {
-                                Script_instance             ()                          : _loaded(false) {}
+                                Script_instance             ( Spooler* )                    : _loaded(false) {}
 
     void                        init                        ( const string& language );
     void                        load                        ( const Script& );
@@ -49,6 +49,7 @@ struct Script_instance
     bool                        name_exists                 ( const char* name )            { return _script_site->name_exists(name); }
     bool                        loaded                      ()                              { return _loaded; }
 
+    Spooler*                   _spooler;
     CComPtr<Script_site>       _script_site;
     bool                       _loaded;
 };

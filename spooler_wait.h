@@ -1,4 +1,4 @@
-// $Id: spooler_wait.h,v 1.4 2001/01/25 17:45:46 jz Exp $
+// $Id: spooler_wait.h,v 1.5 2001/01/27 19:26:16 jz Exp $
 
 #ifndef __SPOOLER_WAIT_H
 #define __SPOOLER_WAIT_H
@@ -52,8 +52,10 @@ struct Wait_handles
 
                                 Wait_handles                ( Spooler* spooler )            : _spooler(spooler) {}
 
+
 #   ifdef SYSTEM_WIN
 
+        void                    clear                       ()                              { _handles.clear(); _entries.clear(); }
         void                    add                         ( HANDLE, const string& name, Task* = NULL );
         void                    remove                      ( HANDLE );
         void                    wait                        ( double time );

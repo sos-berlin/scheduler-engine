@@ -1,4 +1,4 @@
-// $Id: spooler_task.h,v 1.1 2001/01/25 20:28:38 jz Exp $
+// $Id: spooler_task.h,v 1.2 2001/01/27 19:26:16 jz Exp $
 
 #ifndef __SPOOLER_TASK_H
 #define __SPOOLER_TASK_H
@@ -170,6 +170,9 @@ struct Task : Sos_self_deleting
                                 Task                        ( Spooler*, const Sos_ptr<Job>& );
                                ~Task                        ();
 
+    void                        start_thread                ();
+    int                         run_thread                  ();
+
     bool                        start                       ();
     void                        end                         ();
     void                        stop                        ();
@@ -218,6 +221,7 @@ struct Task : Sos_self_deleting
     Mutex<State>               _state;
     Mutex<State_cmd>           _state_cmd;
     bool                       _opened;
+    bool                       _has_spooler_process;        // Skript hat spooler_process()
     Xc_copy                    _error;
 
     Time                       _running_since;
@@ -229,6 +233,9 @@ struct Task : Sos_self_deleting
     CComPtr<Com_log>           _com_log;
     CComPtr<Com_object_set>    _com_object_set;
     CComPtr<Com_task>          _com_task;
+
+    Handle                     _thread;
+    ulong                      _thread_id;
 };
 
 typedef list< Sos_ptr<Task> >   Task_list;

@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.11 2001/01/25 20:24:42 jz Exp $
+// $Id: spooler_task.cxx,v 1.12 2001/01/27 19:26:16 jz Exp $
 /*
     Hier sind implementiert
 
@@ -12,21 +12,19 @@
 #include "../kram/sos.h"
 #include "spooler.h"
 
-#include "../kram/log.h"
-
 
 namespace sos {
 namespace spooler {
 
 //--------------------------------------------------------------------------------------------const
 
-static const char spooler_init_name[]    = "spooler_init";
-static const char spooler_open_name[]    = "spooler_open";
-static const char spooler_close_name[]   = "spooler_close";
-static const char spooler_get_name[]     = "spooler_get";
-static const char spooler_process_name[] = "spooler_process";
-static const char spooler_level_name[]   = "spooler_level";
-static const char spooler_on_error_name[]   = "spooler_on_error";
+static const char spooler_init_name      [] = "spooler_init";
+static const char spooler_open_name      [] = "spooler_open";
+static const char spooler_close_name     [] = "spooler_close";
+static const char spooler_get_name       [] = "spooler_get";
+static const char spooler_process_name   [] = "spooler_process";
+static const char spooler_level_name     [] = "spooler_level";
+static const char spooler_on_error_name  [] = "spooler_on_error";
 static const char spooler_on_success_name[] = "spooler_on_success";
 
 //---------------------------------------------------------------------check_spooler_process_result
@@ -161,7 +159,8 @@ bool Object_set::step( Level result_level )
 Job::Job( Spooler* spooler )
 : 
     _zero_(this+1),
-    _spooler(spooler)
+    _spooler(spooler),
+    _script_instance(spooler)
 {
     _com_job = new Com_job( this );
     _com_current_task = new Com_task();
@@ -216,7 +215,8 @@ Task::Task( Spooler* spooler, const Sos_ptr<Job>& job )
     _zero_(this+1), 
     _spooler(spooler), 
     _job(job),
-    _log( &spooler->_log, "Job " + job->_name )
+    _log( &spooler->_log, "Job " + job->_name ),
+    _script_instance(spooler)
 {
     Time now = Time::now();
     _period = _job->_run_time.next_period( now );
@@ -247,6 +247,126 @@ Task::~Task()
     if( _directory_watcher )  _spooler->_wait_handles.remove( _directory_watcher._handle );
 
     _job->_task = NULL;
+}
+
+//----------------------------------------------------------------------------------Task::set_state
+
+void Task::set_state( State new_state )
+{ 
+    switch( new_state )
+    {
+        case s_stopped:     if( _state & ( s_running | s_suspended ) )  set_state_cmd( sc_stop );  
+                            break;
+
+        case s_pending:     if( _state & s_stopped )  set_state_cmd( sc_unstop ); 
+                            if( _state & s_running )  set_state_cmd( sc_end );      
+                            break;
+                            
+        case s_running:     if( _state & s_pending   )  set_state_cmd( sc_start );
+                            if( _state & s_suspended )  set_state_cmd( sc_continue );  
+                            break;
+
+        case s_suspended:   if( _state & s_running )  set_state_cmd( sc_suspend );
+                            break;
+        default: ;
+    }
+}
+
+//------------------------------------------------------------------------------Task::set_state_cmd
+
+void Task::set_state_cmd( State_cmd cmd )
+{ 
+    bool ok = false;
+
+    switch( cmd )
+    {
+        case sc_stop:       ok = true;                  break;
+
+        case sc_unstop:     ok = _state == s_stopped;   if(!ok) break;
+                            break;
+
+        case sc_start:      ok = ( _state & (s_pending|s_stopped) ) != 0;   if(!ok) break;
+                            _params = NULL;
+                            break;
+
+        case sc_end:        ok = _state == s_running;   break;
+
+        case sc_suspend:    ok = _state == s_running;   break;
+
+        case sc_continue:   ok = _state == s_suspended; if(!ok) break;
+                            break;
+
+
+        default:            ok = false;
+    }
+
+    if( !ok )  return;    //throw_xc( "SPOOLER-109" );
+    
+    _state_cmd = cmd;
+    _spooler->cmd_wake();
+}
+
+//---------------------------------------------------------------------------------Task::state_name
+
+string Task::state_name( State state )
+{
+    switch( state )
+    {
+        case s_stopped:     return "stopped";
+        case s_loaded:      return "loaded";
+        case s_pending:     return "pending";
+        case s_running:     return "running";
+        case s_suspended:   return "suspended";
+        default:            return as_string( (int)state );
+    }
+}
+
+//-----------------------------------------------------------------------------------Task::as_state
+
+Task::State Task::as_state( const string& name )
+{
+    State state = (State)( s__max - 1 );
+
+    while( state )
+    {
+        if( state_name(state) == name )  return state;
+        state = (State)( state - 1 );
+    }
+
+    if( !name.empty() )  throw_xc( "SPOOLER-110", name );
+    return s_none;
+}
+
+//-------------------------------------------------------------------------------Task::as_state_cmd
+
+Task::State_cmd Task::as_state_cmd( const string& name )
+{
+    State_cmd cmd = (State_cmd)( sc__max - 1 );
+
+    while( cmd )
+    {
+        if( state_cmd_name(cmd) == name )  return cmd;
+        cmd = (State_cmd)( cmd - 1 );
+    }
+
+    if( !name.empty() )  throw_xc( "SPOOLER-106", name );
+    return sc_none;
+}
+
+//-----------------------------------------------------------------------------Task::state_cmd_name
+
+string Task::state_cmd_name( Task::State_cmd cmd )
+{
+    switch( cmd )
+    {
+        case Task::sc_stop:     return "stop";
+        case Task::sc_unstop:   return "unstop";
+        case Task::sc_start:    return "start";
+        case Task::sc_end:      return "end";
+        case Task::sc_suspend:  return "suspend";
+        case Task::sc_continue: return "continue";
+        default:                return as_string( (int)cmd );
+    }
 }
 
 //--------------------------------------------------------------------------------------Task::error
@@ -358,6 +478,8 @@ bool Task::start()
 
         if( _job->_object_set_descr )  _object_set->open();
                                  else  _script_instance_ptr->call_if_exists( spooler_open_name );
+
+        _has_spooler_process = _script_instance_ptr->name_exists( spooler_process_name );
 
         _opened = true;
     }
@@ -478,8 +600,6 @@ bool Task::step()
 {
     bool result;
 
-  //_log.msg( "step" );
-
     try 
     {
         if( _object_set )
@@ -488,7 +608,7 @@ bool Task::step()
         }
         else 
         {
-            if( !_script_instance_ptr->name_exists( spooler_process_name ) )  return false;
+            if( !_has_spooler_process )  return false;
             return check_spooler_process_result( _script_instance_ptr->call( spooler_process_name ) );
         }
 
@@ -577,9 +697,9 @@ bool Task::do_something()
                 break;
             }
 
-            case s_suspended:   break;
+            case s_suspended: break;
 
-            default:            ;
+            default: ;
         }
     }
 
@@ -589,125 +709,41 @@ bool Task::do_something()
     return something_done;
 }
 
-//----------------------------------------------------------------------------------Task::set_state
+//-------------------------------------------------------------------------------Task::run_thread()
 
-void Task::set_state( State new_state )
-{ 
-    switch( new_state )
-    {
-        case s_stopped:     if( _state & ( s_running | s_suspended ) )  set_state_cmd( sc_stop );  
-                            break;
-
-        case s_pending:     if( _state & s_stopped )  set_state_cmd( sc_unstop ); 
-                            if( _state & s_running )  set_state_cmd( sc_end );      
-                            break;
-                            
-        case s_running:     if( _state & s_pending   )  set_state_cmd( sc_start );
-                            if( _state & s_suspended )  set_state_cmd( sc_continue );  
-                            break;
-
-        case s_suspended:   if( _state & s_running )  set_state_cmd( sc_suspend );
-                            break;
-        default: ;
-    }
-}
-
-//------------------------------------------------------------------------------Task::set_state_cmd
-
-void Task::set_state_cmd( State_cmd cmd )
-{ 
-    bool ok = false;
-
-    switch( cmd )
-    {
-        case sc_stop:       ok = true;                  break;
-
-        case sc_unstop:     ok = _state == s_stopped;   if(!ok) break;
-                            break;
-
-        case sc_start:      ok = ( _state & (s_pending|s_stopped) ) != 0;   if(!ok) break;
-                            _params = NULL;
-                            //_next_start_time = Time::now();  
-                            break;
-
-        case sc_end:        ok = _state == s_running;   break;
-
-        case sc_suspend:    ok = _state == s_running;   break;
-
-        case sc_continue:   ok = _state == s_suspended; if(!ok) break;
-                            break;
-
-
-        default:            ok = false;
-    }
-
-    if( !ok )  return;    //throw_xc( "SPOOLER-109" );
-    
-    _state_cmd = cmd;
-    _spooler->cmd_wake();
-}
-
-//---------------------------------------------------------------------------------Task::state_name
-
-string Task::state_name( State state )
+int Task::run_thread()
 {
-    switch( state )
+/*
+    while(1)
     {
-        case s_stopped:     return "stopped";
-        case s_loaded:      return "loaded";
-        case s_pending:     return "pending";
-        case s_running:     return "running";
-        case s_suspended:   return "suspended";
-        default:            return as_string( (int)state );
+        start();
+
+        while(1)
+        {
+            do_something();
+            if( _state == s_stopped )  break;
+        }
+
+        stop();
+        wait();
     }
+*/
+    return 0;
 }
 
-//-----------------------------------------------------------------------------------Task::as_state
+//-------------------------------------------------------------------------------------------thread
 
-Task::State Task::as_state( const string& name )
+static ulong __stdcall thread( void* param )
 {
-    State state = (State)( s__max - 1 );
-
-    while( state )
-    {
-        if( state_name(state) == name )  return state;
-        state = (State)( state - 1 );
-    }
-
-    if( !name.empty() )  throw_xc( "SPOOLER-110", name );
-    return s_none;
+    return ((Task*)param)->run_thread();
 }
 
-//-------------------------------------------------------------------------------Task::as_state_cmd
+//-------------------------------------------------------------------------------Task::start_thread
 
-Task::State_cmd Task::as_state_cmd( const string& name )
+void Task::start_thread()
 {
-    State_cmd cmd = (State_cmd)( sc__max - 1 );
-
-    while( cmd )
-    {
-        if( state_cmd_name(cmd) == name )  return cmd;
-        cmd = (State_cmd)( cmd - 1 );
-    }
-
-    if( !name.empty() )  throw_xc( "SPOOLER-106", name );
-    return sc_none;
-}
-
-//-----------------------------------------------------------------------------Task::state_cmd_name
-
-string Task::state_cmd_name( Task::State_cmd cmd )
-{
-    switch( cmd )
-    {
-        case Task::sc_stop:     return "stop";
-        case Task::sc_unstop:   return "unstop";
-        case Task::sc_start:    return "start";
-        case Task::sc_end:      return "end";
-        case Task::sc_suspend:  return "suspend";
-        case Task::sc_continue: return "continue";
-        default:                return as_string( (int)cmd );
-    }
+    _thread = CreateThread( NULL, 0, thread, this, 0, &_thread_id );
+   if( !_thread )  throw_mswin_error( "CreateThread" );
 }
 
 //-------------------------------------------------------------------------------------------------

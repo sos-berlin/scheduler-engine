@@ -1,4 +1,4 @@
-// $Id: spooler_service.cxx,v 1.6 2001/01/23 14:35:53 jz Exp $
+// $Id: spooler_service.cxx,v 1.7 2001/01/27 19:26:16 jz Exp $
 /*
     Hier sind implementiert
 
@@ -211,7 +211,7 @@ static void restart_service( DWORD argc, char** argv )
 static void set_service_status( int spooler_error = 0 )
 {
     if( !service_status_handle )  return;
-    if( !spooler_ptr && spooler_error == 0 )  spooler_error = 1;
+  //if( !spooler_ptr && spooler_error == 0 )  spooler_error = 1;
 /*
     if( spooler_ptr  
      && spooler_ptr->_state == Spooler::s_stopped 
@@ -225,7 +225,7 @@ static void set_service_status( int spooler_error = 0 )
     service_status.dwServiceType                = SERVICE_WIN32_OWN_PROCESS;
 
     service_status.dwCurrentState               = !spooler_ptr? SERVICE_STOPPED //SetServiceStatus() ruft exit()!
-                                                : spooler_ptr->_state == Spooler::s_stopped ? SERVICE_STOPPED //SetServiceStatus() ruft exit()!
+                                                : spooler_ptr->_state == Spooler::s_stopped ? SERVICE_PAUSED //SetServiceStatus() ruft exit()!
                                                 : spooler_ptr->_state == Spooler::s_starting? SERVICE_START_PENDING
                                                 : spooler_ptr->_state == Spooler::s_stopping? SERVICE_STOP_PENDING
                                                 : spooler_ptr->_state == Spooler::s_running ? SERVICE_RUNNING
@@ -339,7 +339,7 @@ static ulong __stdcall service_thread( void* param )
         spooler_ptr = NULL;
     }
 
-    set_service_status();
+    set_service_status();       // Das beendet den Prozess wegen spooler_ptr == NULL  ==>  SERVICE_STOPPED
 
     return ret;
 }

@@ -1,4 +1,4 @@
-// $Id: spooler.odl,v 1.5 2001/01/24 12:35:50 jz Exp $
+// $Id: spooler.odl,v 1.6 2001/01/27 19:26:16 jz Exp $
 
 // Änderungen werden nicht automatisch in die spooler.tlb übernommen.
 // Also mit rechter Maustaske "Kompilieren von spooler.odl" klicken.
@@ -53,10 +53,12 @@ library spooler
     ]
     interface Ivariable_set : IDispatch
     {
-        [propput]
+        HRESULT                 set_var                     ( [in] BSTR name, [in] VARIANT* value );
+
+        [id(0),propput]
         HRESULT                 var                         ( [in] BSTR name, [in] VARIANT* value );
 
-        [propget]
+        [id(0),propget]
         HRESULT                 var                         ( [in] BSTR name, [out,retval] VARIANT* value );
 
         [propget]

@@ -1,4 +1,4 @@
-// $Id: spooler_config.cxx,v 1.7 2001/01/25 20:24:42 jz Exp $
+// $Id: spooler_config.cxx,v 1.8 2001/01/27 19:26:16 jz Exp $
 
 //#include <precomp.h>
 
@@ -385,7 +385,7 @@ void Spooler::load_config( const xml::Element_ptr& config_element )
                                    _udp_port      = as_int   ( config_element->getAttribute( "udp_port"      ) );
                                    _priority_max  = as_int   ( config_element->getAttribute( "priority_max"  ) );
     if( empty( _log_directory ) )  _log_directory = as_string( config_element->getAttribute( "log_dir"       ) );
-    if( empty( _spooler_param ) )  _spooler_param = as_string( config_element->getAttribute( "param" ) );
+    if( empty( _spooler_param ) )  _spooler_param = as_string( config_element->getAttribute( "param"         ) );
 
 
     xml::Element_ptr e = config_element->firstChild;

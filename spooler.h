@@ -1,4 +1,4 @@
-// $Id: spooler.h,v 1.37 2001/01/25 17:45:45 jz Exp $
+// $Id: spooler.h,v 1.38 2001/01/27 19:26:15 jz Exp $
 
 #ifndef __SPOOLER_H
 #define __SPOOLER_H
@@ -96,7 +96,6 @@ struct Spooler
     {
         sc_none,
         sc_stop,                // s_running | s_paused -> s_stopped
-      //sc_start,               // s_paused -> s_running
         sc_terminate,           // s_running | s_paused -> s_stopped, exit()
         sc_terminate_and_restart,
         sc_load_config,         
@@ -124,7 +123,9 @@ struct Spooler
     void                        run                         ();
     void                        restart                     ();
 
-    void                        wait                        ();
+    void                        single_thread_step          ();
+    void                        single_thread_wait          ();
+
 
     void                        cmd_reload                  ();
     void                        cmd_pause                   ()                                  { _state_cmd = sc_pause; cmd_wake(); }
@@ -135,8 +136,6 @@ struct Spooler
     void                        cmd_load_config             ( const xml::Element_ptr& config )  { _config_document=config->ownerDocument; _config_element=config; _state_cmd=sc_load_config; cmd_wake(); }
     void                        cmd_wake                    ();
 
-    void                        step                        ();
-
     void                        set_state                   ( State );
     void                        set_state_changed_handler   ( State_changed_handler h )         { _state_changed_handler = h; }
 
@@ -146,42 +145,46 @@ struct Spooler
     
     int                        _argc;
     char**                     _argv;
-    string                     _spooler_id;
-    string                     _spooler_param;              // Parameter für Skripten
-    string                     _config_filename;
-    int                        _tcp_port;
-    int                        _udp_port;
-    int                        _priority_max;
-    string                     _log_directory;
+    string                     _spooler_id;                 // -id=
+    string                     _spooler_param;              // -param= Parameter für Skripten
+    string                     _config_filename;            // -config=
+    int                        _tcp_port;                   // <config tcp=...>
+    int                        _udp_port;                   // <config udp=...>
+    int                        _priority_max;               // <config priority_max=...>
+    string                     _log_directory;              // -log-dir=
     string                     _log_filename;
+    bool                       _use_threads;
 
-
-    State_changed_handler      _state_changed_handler;
+    State_changed_handler      _state_changed_handler;      // Callback für NT-Dienst SetServiceStatus()
 
     Thread_semaphore           _semaphore;
 
     Thread_semaphore           _sleep_semaphore;
     bool                       _sleeping;
     bool                       _wake;
-    Wait_handles               _wait_handles;               // Vor _task_list!
-    Handle                     _command_arrived_event;
-    
+    Handle                     _command_arrived_event;      // Kommando über TCP oder UDP eingetroffen
+
+                                                            // <config> wird vom Haupt-Thread ausgeführt
     xml::Document_ptr          _config_document;            // Das Dokument zu _config_element
     xml::Element_ptr           _config_element;             // Für cmd_load_config()
 
     Log                        _log;
     bool                       _is_service;                 // NT-Dienst
-    Script                     _script;
+
+    Script                     _script;                     // <script>
     Script_instance            _script_instance;
-    Object_set_class_list      _object_set_class_list;
-    Job_list                   _job_list;
 
+    Security                   _security;                   // <security>
+    Object_set_class_list      _object_set_class_list;      // <object_set_classes>
+    Job_list                   _job_list;                   // <jobs>
     Task_list                  _task_list;
-    Security                   _security;
-    Communication              _communication;
+    Wait_handles               _wait_handles;
+    Communication              _communication;              // TCP und UDP (ein Thread)
 
-    CComPtr<Com_spooler>       _com_spooler;
-    CComPtr<Com_log>           _com_log;
+    CComPtr<Com_spooler>       _com_spooler;                // COM-Objekt spooler
+    CComPtr<Com_log>           _com_log;                    // COM-Objekt spooler.log
+
+  //list<Thread>               _thread_list;
 
     Time                       _spooler_start_time;
     Time                       _next_start_time;
@@ -189,6 +192,8 @@ struct Spooler
     State_cmd                  _state_cmd;
 
     int                        _running_tasks_count;        // Wenn 0, dann warten
+
+                                                            // Statistik
     int                        _step_count;                 // Seit Spooler-Start ausgeführte Schritte
     int                        _task_count;                 // Seit Spooler-Start gestartetet Tasks
 };

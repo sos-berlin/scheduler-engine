@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.39 2001/01/24 12:35:49 jz Exp $
+// $Id: spooler.cxx,v 1.40 2001/01/27 19:26:15 jz Exp $
 /*
     Hier sind implementiert
 
@@ -48,6 +48,7 @@ Spooler::Spooler()
     _security(this),
     _communication(this), 
     _wait_handles(this),
+    _script_instance(this),
     _log(this)
 {
     _com_log     = new Com_log( &_log );
@@ -58,7 +59,7 @@ Spooler::Spooler()
 
 Spooler::~Spooler() 
 {
-    _task_list.clear();
+  //_thread_list.clear();
     _job_list.clear();
     _object_set_class_list.clear();
 
@@ -184,14 +185,13 @@ void Spooler::start()
 
         _script_instance.call_if_exists( "spooler_init" );
     }
-    
+
+
+    // Zu jedem Job eine Task einrichten:
 
     FOR_EACH( Job_list, _job_list, it )
     {
-        Job* job = *it;
-
-        Sos_ptr<Task> task = SOS_NEW( Task( this, job ) );
-        _task_list.push_back( task );
+        _task_list.push_back( SOS_NEW( Task( this, *it ) ) );
     }
 
     _spooler_start_time = Time::now();
@@ -205,26 +205,21 @@ void Spooler::stop()
 
     _log.msg( "Spooler::stop" );
 
-    {
-        FOR_EACH( Task_list, _task_list, it ) 
-        {
-            Task* task = *it;
-            task->stop();
-            it = _task_list.erase( it );  it--;
-        }
-    }
+    FOR_EACH( Task_list, _task_list, it )  (*it)->stop();
 
     _object_set_class_list.clear();
     _job_list.clear();
 
     _script_instance.close();
+    
+  //_thread_list.clear();
 
     set_state( s_stopped );
 }
 
-//------------------------------------------------------------------------------------Spooler::step
+//----------------------------------------------------------------------Spooler::single_thread_step
 
-void Spooler::step()
+void Spooler::single_thread_step()
 {
 
   //int  pri_sum = 0;
@@ -274,9 +269,9 @@ void Spooler::step()
     }
 }
 
-//------------------------------------------------------------------------------------Spooler::wait
+//----------------------------------------------------------------------Spooler::single_thread_wait
 
-void Spooler::wait()
+void Spooler::single_thread_wait()
 {
     if( _running_tasks_count > 0  && _state != s_paused )  return;
 
@@ -293,7 +288,7 @@ void Spooler::wait()
 
     if( _state == s_paused )
     {
-        _log.msg( "Spooler paused ");
+        _log.msg( "Spooler paused" );
     }
     else
     {
@@ -338,14 +333,10 @@ void Spooler::wait()
     tzset();
 }
 
-//-------------------------------------------------------------------------------------Spooler::run
-
+//--------------------------------------------------------------------------------------Spooler::run
+/*
 void Spooler::run()
 {
-  //_log.msg( "Spooler::run" );
-    
-    set_state( s_running );
-
     while(1)
     {
         if( _state_cmd == sc_pause                 )  set_state( s_paused ); 
@@ -356,9 +347,55 @@ void Spooler::run()
         if( _state_cmd == sc_terminate_and_restart )  break;
         _state_cmd = sc_none;
 
-        if( _state == s_running )  step();
+        if( _state == s_running )  single_thread_step();
 
-        wait();
+        single_thread_wait();
+    }
+}
+*/
+//-------------------------------------------------------------------------------------Spooler::run
+
+void Spooler::run()
+{
+    set_state( s_running );
+
+    if( _use_threads )
+    {
+        { FOR_EACH( Task_list, _task_list, it )  (*it)->start_thread(); }
+
+//        _wait_handles.wait();
+
+
+        //{ FOR_EACH( list<Task>, _thread_list, it )  (*it)->_wait_for_control = true; }
+
+        // Warten, bis alle Threads gestoppt sind
+/*
+        while(1)
+        {
+            bool all_stopped = true;
+            FOR_EACH( list<Task>, _thread_list, it )  all_stopped &= (*it)->_state == s_stopped;
+            if( all_stopped )  break;
+
+            wait();
+        }
+*/
+    }
+    else
+    {
+        while(1)
+        {
+            if( _state_cmd == sc_pause                 )  set_state( s_paused ); 
+            if( _state_cmd == sc_continue              )  set_state( s_running );
+            if( _state_cmd == sc_load_config           )  break;
+            if( _state_cmd == sc_reload                )  break;
+            if( _state_cmd == sc_terminate             )  break;
+            if( _state_cmd == sc_terminate_and_restart )  break;
+            _state_cmd = sc_none;
+
+            if( _state == s_running )  single_thread_step();
+
+            single_thread_wait();
+        }
     }
 }
 
@@ -373,12 +410,7 @@ void Spooler::cmd_wake()
         _wake = true;
 
 #       ifdef SYSTEM_WIN
-
-            if( _sleeping )
-            {
-                SetEvent( _command_arrived_event );
-            }
-
+            if( _sleeping )  SetEvent( _command_arrived_event );
 #       endif
     }
 }

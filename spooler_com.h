@@ -1,4 +1,4 @@
-// $Id: spooler_com.h,v 1.5 2001/01/24 12:35:50 jz Exp $
+// $Id: spooler_com.h,v 1.6 2001/01/27 19:26:16 jz Exp $
 
 #ifndef __SPOOLER_COM_H
 #define __SPOOLER_COM_H
@@ -56,6 +56,7 @@ struct Com_variable_set: spooler_com::Ivariable_set, Sos_ole_object
 
     USE_SOS_OLE_OBJECT
 
+    STDMETHODIMP                set_var                     ( BSTR name, VARIANT* value)    { return put_var( name, value ); }
     STDMETHODIMP                put_var                     ( BSTR, VARIANT* );
     STDMETHODIMP                get_var                     ( BSTR, VARIANT* );
     STDMETHODIMP                get_count                   ( int* );
