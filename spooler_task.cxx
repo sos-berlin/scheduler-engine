@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.100 2002/07/28 20:49:46 jz Exp $
+// $Id: spooler_task.cxx,v 1.101 2002/08/28 12:56:58 jz Exp $
 /*
     Hier sind implementiert
 
@@ -313,11 +313,8 @@ void Job::set_xml( const xml::Element_ptr& element )
                                                                     _run_time.set_xml( e );
         }
 
-        if( !_run_time.set() )
-        {
-            _run_time.set_default();
-            if( _spooler->_manual )  _run_time.set_once();
-        }
+        if( !_run_time.set() )   _run_time.set_default();
+        if( _spooler->_manual )  _run_time = Run_time(),  _run_time.set_default_days(),  _run_time.set_once();
 
         if( _object_set_descr )  _object_set_descr->_class = _spooler->get_object_set_class( _object_set_descr->_class_name );
     }
