@@ -1,4 +1,4 @@
-// $Id: spooler_wait.cxx,v 1.58 2002/12/08 10:22:06 jz Exp $
+// $Id: spooler_wait.cxx,v 1.59 2002/12/08 10:45:38 jz Exp $
 /*
     Hier sind implementiert
 
@@ -555,25 +555,14 @@ void Directory_watcher::watch_directory( const string& directory, const string& 
 }
 
 //-------------------------------------------------------------------------Directory_watcher::renew
+#ifndef Z_WINDOWS
 
 void Directory_watcher::renew()
 {
-#   ifdef Z_WINDOWS
-
-        close_handle();
-
-        string directory        = _directory;
-        string filename_pattern = _filename_pattern;
-
-        watch_directory( directory, filename_pattern );
-
-#    else
-
-        has_changed();
-
-#   endif
+    has_changed();
 }
 
+#endif
 //-------------------------------------------------------------------Directory_watcher::has_changed
 
 bool Directory_watcher::has_changed()
@@ -670,6 +659,17 @@ void Directory_watcher::set_signal()
         Event::set_signal();
 
 #   endif
+}
+
+//-------------------------------------------------------------------------Directory_watcher::reset
+
+void Directory_watcher::reset()
+{
+    Z_MUTEX( _mutex )
+    {
+        _signaled = false;
+        _signal_name = "";
+    }
 }
 
 //-------------------------------------------------------------------------------------------------

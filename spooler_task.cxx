@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.133 2002/12/08 10:22:05 jz Exp $
+// $Id: spooler_task.cxx,v 1.134 2002/12/08 10:45:38 jz Exp $
 /*
     Hier sind implementiert
 
@@ -836,32 +836,32 @@ void Job::start_when_directory_changed( const string& directory_name, const stri
     {
         _log.debug( "start_when_directory_changed \"" + directory_name + "\", \"" + filename_pattern + "\"" );
 
-        Directory_watcher_list::iterator it;
-
-        for( it = _directory_watcher_list.begin(); it != _directory_watcher_list.end(); it++ )
+        for( Directory_watcher_list::iterator it = _directory_watcher_list.begin(); it != _directory_watcher_list.end(); it++ )
         {
             if( (*it)->directory()        == directory_name 
-             && (*it)->filename_pattern() == filename_pattern )  break;
+             && (*it)->filename_pattern() == filename_pattern )  
+            {
+#               ifdef Z_WINDOWS
+                    // Windows: Überwachung erneuern
+                    // Wenn das Verzeichnis bereits überwacht war, aber inzwischen gelöscht, und das noch nicht bemerkt worden ist
+                    // (weil Spooler_thread::wait vor lauter Jobaktivität nicht gerufen wurde), dann ist es besser, die Überwachung 
+                    // hier zu erneuern. Besonders, wenn das Verzeichnis wieder angelegt ist.
+
+                    _directory_watcher_list.erase( it );
+                    break;
+#               else
+                    (*it)->renew();
+                    return;   // Unix: Alles in Ordnung
+#               endif
+            }
         }
 
-        if( it != _directory_watcher_list.end() )
-        {
-            // Windows: Überwachung erneuern
-            // Wenn das Verzeichnis bereits überwacht war, aber inzwischen gelöscht, und das noch nicht bemerkt worden ist
-            // (weil Spooler_thread::wait vor lauter Jobaktivität nicht gerufen wurde), dann ist es besser, die Überwachung 
-            // hier zu erneuern. Besonders, wenn das Verzeichnis wieder angelegt ist.
+        ptr<Directory_watcher> dw = Z_NEW( Directory_watcher( &_log ) );
 
-            (*it)->renew();
-        }
-        else
-        {
-            ptr<Directory_watcher> dw = Z_NEW( Directory_watcher( &_log ) );
-
-            dw->watch_directory( directory_name, filename_pattern );
-            dw->set_name( "job(\"" + _name + "\").start_when_directory_changed(\"" + directory_name + "\")" );
-            _directory_watcher_list.push_back( dw );
-            dw->add_to( &_thread->_wait_handles );
-        }
+        dw->watch_directory( directory_name, filename_pattern );
+        dw->set_name( "job(\"" + _name + "\").start_when_directory_changed(\"" + directory_name + "\")" );
+        _directory_watcher_list.push_back( dw );
+        dw->add_to( &_thread->_wait_handles );
     }
 }
 

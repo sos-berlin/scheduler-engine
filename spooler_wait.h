@@ -1,4 +1,4 @@
-// $Id: spooler_wait.h,v 1.35 2002/12/08 10:22:07 jz Exp $
+// $Id: spooler_wait.h,v 1.36 2002/12/08 10:45:39 jz Exp $
 
 #ifndef __SPOOLER_WAIT_H
 #define __SPOOLER_WAIT_H
@@ -107,7 +107,9 @@ struct Directory_watcher : Event
     bool                        has_changed                 ();
     bool                        match                       ();
         
-    virtual void                set_signal                  ();
+    void                        set_signal                  ();
+    void                        reset                       ();
+
     string                      directory                   () const                                { return _directory; }
     string                      filename_pattern            () const                                { return _filename_pattern; }
 
