@@ -1,4 +1,4 @@
-// $Id: spooler_http.cxx,v 1.22 2004/12/10 15:19:42 jz Exp $
+// $Id: spooler_http.cxx,v 1.23 2004/12/10 16:21:33 jz Exp $
 /*
     Hier sind implementiert
 
@@ -431,6 +431,8 @@ bool Log_chunk_reader::next_chunk_is_ready()
 { 
     if( !_file.opened() )
     {
+        if( !_log->started() )  return false;       // Wenn Log noch nicht gestartet worden ist (z.B. Order in der Warteschlange), dann gibt's noch keine Datei
+                                                    // Und wenn die Datei schon geschlossen ist? Kann das passieren?
         _file.open( _log->filename(), "rb" );
     }
 

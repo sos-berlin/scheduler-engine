@@ -1,4 +1,4 @@
-// $Id: spooler_log.cxx,v 1.96 2004/10/22 09:33:23 jz Exp $
+// $Id: spooler_log.cxx,v 1.97 2004/12/10 16:21:33 jz Exp $
 
 #include "spooler.h"
 #include "spooler_mail.h"
@@ -432,6 +432,8 @@ void Prefix_log::open()
 
         log( log_info, "\nProtokoll beginnt in " + _filename );
     }
+
+    _started = true;
 }
 
 //--------------------------------------------------------------------------------Prefix_log::close

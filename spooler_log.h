@@ -1,4 +1,4 @@
-// $Id: spooler_log.h,v 1.45 2004/07/26 12:09:59 jz Exp $
+// $Id: spooler_log.h,v 1.46 2004/12/10 16:21:33 jz Exp $
 
 #ifndef __SPOOLER_LOG_H
 #define __SPOOLER_LOG_H
@@ -57,6 +57,7 @@ struct Prefix_log : Object, Has_log
     void                        open                        ();
     void                        close                       ();
     void                        close2                      ();
+    bool                        started                     () const                            { return _started; }        // open() gerufen
     bool                        opened                      () const                            { return _file != -1; }
     bool                        closed                      () const                            { return _closed; }
 
@@ -163,6 +164,7 @@ struct Prefix_log : Object, Has_log
     string                     _new_filename;               // nach close() umbenennen
     bool                       _append;                     // Datei zum Fortschreiben öffnen
     int                        _file;                       // File handle
+    bool                       _started;                    // open() gerufen
     bool                       _closed;
 
     bool                       _mail_on_error;
