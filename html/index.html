@@ -1,4 +1,4 @@
-<!-- $Id: index.html,v 1.2 2004/07/19 16:34:30 jz Exp $ -->
+<!-- $Id: index.html,v 1.3 2004/07/19 23:13:37 jz Exp $ -->
 <html>
 
 <head>
@@ -9,12 +9,18 @@
 
 </head>
 
-<frameset cols="50%,50%">
-    <frame name="jobs_frame" src="jobs_frame.html"/>
-    <frame name="details_frame" src="task_frame.html"/>
-    <noframes>
-        <p>Only a browser supporting frames can show this page.</p>
-    </noframes>
-</frameset>
+<!--frameset rows="50,*">
+    <frame name="head_frame" src="head_frame.html"/-->
+    <frameset cols="50%,50%">
+        <frame name="jobs_frame" src="jobs_frame.html"/>
+        <frame name="details_frame" src="task_frame.html"/>
+        <noframes>
+            <p>Only a browser supporting frames can show this page.</p>
+        </noframes>
+    </frameset>
+<!--/frameset-->
+
+<!--script type="text/javascript" for="window" event="onload"> window.parent.head_frame.start(); </script-->
+
 
 </html>

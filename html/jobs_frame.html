@@ -1,4 +1,4 @@
-<!-- $Id: jobs_frame.html,v 1.6 2004/07/19 16:34:30 jz Exp $ -->
+<!-- $Id: jobs_frame.html,v 1.7 2004/07/19 23:13:37 jz Exp $ -->
 <html>
 
 <head>
@@ -152,6 +152,7 @@ function show_task_details( job_name, task_id )
     var job_element  = _response.selectSingleNode( ".//job[@job='" + job_name + "']" );
     var task_element = _response.selectSingleNode( ".//task[@id=" + task_id + "]" );
 
+    update();
     window.parent.details_frame.show_task_details( job_element, task_element );
 }
 
@@ -161,6 +162,7 @@ function show_job_details( job_name )
 {
     var job_element  = _response.selectSingleNode( ".//job[@job='" + job_name + "']" );
 
+    update();
     window.parent.details_frame.show_job_details( job_element );
 }
 
