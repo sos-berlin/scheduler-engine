@@ -1256,6 +1256,7 @@ xml::Element_ptr Job_history::read_tail( const xml::Document_ptr& doc, int id, i
                                     if( !use_task_schema )
                                         history_entry.setAttribute( "id", value );      // id sollte nicht verwendet werden. jz 6.9.04
                                 }
+                                else
                                 if( use_task_schema  &&  name == "spooler_id" )  {} // ignorieren
                                 else
                                 if( use_task_schema  &&  name == "error"      )  {} // ignorieren

@@ -470,6 +470,7 @@ struct Com_thread : spooler_com::Ithread,
 
 struct Com_spooler : spooler_com::Ispooler, 
                      spooler_com::Ihas_java_class_name, 
+                     z::com::object_server::Ihas_reference_with_properties,
                      Sos_ole_object               
 {
                                 Com_spooler                 ();                                     // Für gcc 3.2. Nicht implementiert.
@@ -479,8 +480,15 @@ struct Com_spooler : spooler_com::Ispooler,
 
     USE_SOS_OLE_OBJECT_WITHOUT_QI
 
+
+    // interface Ihas_java_class_name
     STDMETHODIMP            get_Java_class_name             ( BSTR* result )                        { return String_to_bstr( const_java_class_name(), result ); }
     STDMETHODIMP_(char*)  const_java_class_name             ()                                      { return (char*)"sos.spooler.Spooler"; }
+
+
+    // interface Ireference_with_properties
+    ptr<z::com::object_server::Reference_with_properties> get_reference_with_properties();
+
 
     void                        close                       ()                                      { THREAD_LOCK(_lock)  _spooler = NULL; }
 

@@ -509,6 +509,18 @@ library Spooler
         interface Ihas_java_class_name;
     }
 
+    //-------------------------------------------------------------------------------Ispooler_proxy
+
+    [
+        uuid       ( feee47a7-6c1b-11d8-8103-000476ee8afb ),
+        odl,
+        dual
+    ]
+    interface Ispooler_proxy : IDispatch
+    {
+        HRESULT                 Start_subprocess        ( [in] VARIANT* program_and_parameters, [out,retval] IDispatch* );
+    }
+
     //------------------------------------------------------------------------------Spooler_context
 
     [
@@ -836,7 +848,7 @@ library Spooler
         HRESULT                 Setback                 ();
 
         [propput]
-        HRESULT                 At                      ( [in] VARIANT* date_time );                // Für Joacim, 2005-02-27 (was fehlt: Speichern in Datenbank, aufrufbar im Taskschritt?)
+I        HRESULT                 At                      ( [in] VARIANT* date_time );                // Für Joacim, 2005-02-27 (was fehlt: Speichern in Datenbank, aufrufbar im Taskschritt?)
 
         [propget]
         HRESULT                 At                      ( [out,retval] DATE* Result );              // Für Joacim, 2005-02-27
@@ -1046,7 +1058,6 @@ library Spooler
 Ein paar freie GUIDs:
 
 
-feee47a7-6c1b-11d8-8103-000476ee8afb
 feee47a8-6c1b-11d8-8103-000476ee8afb
 feee47a9-6c1b-11d8-8103-000476ee8afb
 feee47aa-6c1b-11d8-8103-000476ee8afb

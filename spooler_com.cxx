@@ -912,7 +912,7 @@ ptr<object_server::Reference_with_properties> Com_log::get_reference_with_proper
     return result;
 }
 
-//--------------------------------------------------------------------------------Com_log::set_task
+//---------------------------------------------------------------------------------Com_log::set_log
 
 void Com_log::set_log( Prefix_log* log )
 { 
@@ -2505,6 +2505,22 @@ STDMETHODIMP Com_spooler::QueryInterface( const IID& iid, void** result )
     return Sos_ole_object::QueryInterface( iid, result );
 }
 
+//-------------------------------------------------------Com_spooler::get_reference_with_properties
+
+ptr<object_server::Reference_with_properties> Com_spooler::get_reference_with_properties()
+{
+    ptr<object_server::Reference_with_properties> result;
+
+    THREAD_LOCK( _lock )
+    {
+        if( !_log )  throw_com( E_POINTER, "Com_log::get_reference_with_properties" );
+
+        result = Z_NEW( object_server::Reference_with_properties( CLSID_Com_spooler_proxy, static_cast<Ispooler*>( this ) ) );
+    }
+
+    return result;
+}
+
 //-----------------------------------------------------------------------------Com_spooler::get_Log
 
 STDMETHODIMP Com_spooler::get_Log( Ilog** com_log )
@@ -2943,6 +2959,79 @@ STDMETHODIMP Com_spooler::Execute_xml( BSTR xml, BSTR* result )
     catch( const _com_error& x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
 
     return hr;
+}
+
+//----------------------------------------------------------------------Com_spooler_proxy::_methods
+#ifdef Z_COM
+
+const Com_method Com_spooler_proxy::_methods[] =
+{ 
+    // _flags               , _name              , _method                                             , _result_type, _types        , _default_arg_count
+    { DISPATCH_METGHOD, 1001, "Start_subprocess" , (Com_method_ptr)&Com_spooler_proxy::Start_subprocess, VT_DISPATCH , { VT_BYREF|VT_VARIANT } },
+    {}
+};
+
+#endif
+//---------------------------------------------------------------Com_spooler_proxy::Create_instance
+
+HRESULT Com_spooler_proxy::Create_instance( const IID& iid, ptr<IUnknown>* result )
+{
+    if( iid == object_server::IID_Iproxy )
+    {
+        ptr<Com_spooler_proxy> instance = Z_NEW( Com_spooler_proxy );
+        *result = instance.take();
+        return S_OK;
+    }
+
+    return E_NOINTERFACE;
+}
+
+//------------------------------------------------------------------Com_spooler_proxy::set_property
+/*
+void Com_spooler_proxy::set_property( const string& name, const Variant& value )
+{
+    if( name == "level" )  _level = value.as_int();
+    else  
+        Proxy::set_property( name, value );
+}
+*/
+//-----------------------------------------------------------------Com_spooler_proxy::GetIDsOfNames
+/*
+STDMETHODIMP Com_spooler_proxy::GetIDsOfNames( const IID& iid, OLECHAR** rgszNames, UINT cNames, LCID lcid, DISPID* dispid )
+{
+    HRESULT hr;
+    
+    hr = com_get_dispid( _methods, iid, rszNames, cNames, lcid, dispid );       // Erst lokal versuchen
+
+    if( hr == DISP_E_UNKNOWNNAME )
+    {
+        hr = Proxy::GetIDsOfNames( iid, rgszNames, cNames, lcid, dispid );      // Server aufrufen
+    }
+
+    return hr;
+}
+*/
+//------------------------------------------------------------------------Com_spooler_proxy::Invoke
+/*
+STDMETHODIMP Com_spooler_proxy::Invoke( DISPID dispid, const IID& iid, LCID lcid, unsigned short flags, DISPPARAMS* dispparams, 
+                                        VARIANT* result, EXCEPINFO* excepinfo, UINT* arg_nr )
+{
+    const Bstr& name = name_from_dispid( dispid );
+
+    if( name == "start_process"   )
+    {
+        if( dispparams->cArgs != 2 )  return DISP_E_BADPARAMCOUNT;
+        if( int_from_variant( dispparams->rgvarg[ dispparams->cArgs - 1 ] ) < _level )  return S_FALSE;
+    }
+
+    return Proxy::Invoke( dispid, iid, lcid, flags, dispparams, result, excepinfo, arg_nr );      // Server aufrufen
+}
+*/
+//--------------------------------------------------------------Com_spooler_proxy::Start_subprocess
+
+STDMETHODIMP Com_spooler_proxy::Start_subprocess( VARIANT* program_and_parameters, IDispatch* result )
+{
+    return E_NOTIMPL;
 }
 
 //----------------------------------------------------------------------------Com_context::_methods

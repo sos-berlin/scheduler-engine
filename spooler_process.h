@@ -14,6 +14,7 @@ struct Process_class;
 
 
 //------------------------------------------------------------------------------------------Process
+// Ein Prozess, in dem ein Module oder eine Task ablaufen kann.
 
 struct Process : zschimmer::Object
 {
@@ -74,6 +75,7 @@ struct Process : zschimmer::Object
 typedef list< ptr<Process> >    Process_list;
 
 //------------------------------------------------------------------------------------Process_class
+// <process_class>
 
 struct Process_class : zschimmer::Object
 {
