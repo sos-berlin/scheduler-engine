@@ -1,4 +1,4 @@
-// $Id: spooler_service.cxx,v 1.37 2003/04/14 09:46:43 jz Exp $
+// $Id: spooler_service.cxx,v 1.38 2003/05/23 06:26:12 jz Exp $
 /*
     Hier sind implementiert
 
@@ -105,7 +105,7 @@ string make_service_display( const string& id )
 
 //----------------------------------------------------------------------------------------event_log
 
-static void event_log( const string& msg_par, int argc, char** argv )
+static void event_log( const string& msg_par, int argc, char** argv, Spooler* spooler = NULL )
 {
     string msg = "***DOCUMENTFACTORY SPOOLER*** " + msg_par;
 
@@ -242,7 +242,7 @@ DWORD service_state( const string& service_name )
         CloseServiceHandle( service_handle ),  service_handle = 0; 
         CloseServiceHandle( manager_handle ),  manager_handle = 0;
     }
-    catch( const Xc& )
+    catch( const exception& )
     {
         CloseServiceHandle( service_handle ); 
         CloseServiceHandle( manager_handle );
@@ -346,7 +346,7 @@ static void set_service_status( int spooler_error, int state = 0 )
     if( !ok )
     {
         try { throw_mswin_error( "SetServiceStatus", state_name(service_status.dwCurrentState).c_str() ); }
-        catch( const Xc& x ) { SHOW_MSG(x); }       // Was tun?
+        catch( const exception& x ) { SHOW_MSG(x); }       // Was tun?
     }
 
     if( service_status.dwCurrentState == SERVICE_STOPPED )
@@ -569,12 +569,12 @@ static uint __stdcall service_thread( void* param )
 
             ret = spooler_ptr->launch( p->_argc, p->_argv );
         }
-        catch( const Xc& x )
+        catch( const exception& x )
         {
             start_self_destruction();
 
             set_service_status( 0, SERVICE_PAUSED );     // Das schaltet die Diensteknöpfe frei, falls der Spooler beim eMail-Versand hängt.
-            event_log( x.what(), p->_argc, p->_argv );
+            event_log( x.what(), p->_argc, p->_argv, &spooler );
           //set_service_status( 2 );
             spooler._log.error( x.what() );
             spooler_ptr = NULL;
@@ -643,7 +643,6 @@ static void __stdcall ServiceMain( DWORD argc, char** argv )
             //}
             LOG( "ServiceMain ok\n" );
         }
-        catch( const Xc& x        ) { event_log( x.what(), argc, argv ); }
         catch( const exception& x ) { event_log( x.what(), argc, argv ); }
     }
 }
@@ -678,7 +677,7 @@ int spooler_service( const string& service_name, int argc, char** argv )
 
         spooler_service_name = "";
     }
-    catch( const Xc& x )
+    catch( const exception& x )
     {
         event_log( x.what(), argc, argv );
         return 1;                                                                               

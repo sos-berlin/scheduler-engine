@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.203 2003/05/19 08:05:52 jz Exp $
+// $Id: spooler.cxx,v 1.204 2003/05/23 06:26:12 jz Exp $
 /*
     Hier sind implementiert
 
@@ -94,7 +94,7 @@ static void send_error_email( const string& subject, const string& body )
         string bcc  = read_profile_string( default_factory_ini, "spooler", "log_mail_bcc"    );
         string smtp = read_profile_string( default_factory_ini, "spooler", "smtp"            );
 
-        Sos_ptr<mail::Message> msg = mail::create_message( spooler_ptr->_java_vm );
+        Sos_ptr<mail::Message> msg = mail::create_message(); // spooler_ptr->_java_vm );
 
         if( from != "" )  msg->set_from( from );
         if( to   != "" )  msg->set_to  ( to   );
@@ -112,7 +112,7 @@ static void send_error_email( const string& subject, const string& body )
 
 //---------------------------------------------------------------------------------send_error_email
 
-void send_error_email( const string& error_text, int argc, char** argv )
+void send_error_email( const string& error_text, int argc, char** argv, Spooler* spooler )
 {
 
     string body = "Der Spooler-Dienst konnte nicht gestartet werden.\n"
@@ -127,7 +127,10 @@ void send_error_email( const string& error_text, int argc, char** argv )
             "Fehlermeldung:\n";
     body += error_text;
 
-    send_error_email( "FEHLER BEI SPOOLER-START: " + error_text, body );
+    string subject = "FEHLER BEI SPOOLER-START: " + error_text;
+
+    if( spooler )  spooler->send_error_email( subject, body );
+             else           send_error_email( subject, body );
 }
 
 //---------------------------------------------------------------------read_profile_mail_on_process
@@ -192,7 +195,7 @@ With_log_switch read_profile_with_log( const string& profile, const string& sect
             ctrl_c_pressed++;
             //Kein Systemaufruf hier! (Aber bei Ctrl-C riskieren wir einen Absturz. Ich will diese Meldung sehen.)
             fprintf( stderr, "Spooler wird wegen Ctrl-C beendet ...\n" );
-            spooler_ptr->async_signal( "Ctrl+C" );
+            if( spooler_ptr )  spooler_ptr->async_signal( "Ctrl+C" );
             return true;
         }
         else
@@ -216,7 +219,7 @@ With_log_switch read_profile_with_log( const string& profile, const string& sect
             // should  not  be  called from  a signal handler. In particular, calling pthread_mutex_lock 
             // or pthread_mutex_unlock from a signal handler may deadlock the calling thread.
 
-            if( !is_daemon )  spooler_ptr->async_signal( "Ctrl+C" );
+            if( !is_daemon && spooler_ptr )  spooler_ptr->async_signal( "Ctrl+C" );
         //}
     }
 
@@ -942,9 +945,6 @@ void Spooler::start()
 {
     assert( current_thread_id() == _thread_id );
 
-    _state_cmd = sc_none;
-    set_state( s_starting );
-
     _mail_on_error   = read_profile_bool           ( _factory_ini, "spooler", "mail_on_error"  , _mail_on_error );
     _mail_on_process = read_profile_mail_on_process( _factory_ini, "spooler", "mail_on_process", _mail_on_process );
     _mail_on_success = read_profile_bool           ( _factory_ini, "spooler", "mail_on_success", _mail_on_success );
@@ -959,6 +959,9 @@ void Spooler::start()
     _log_mail_subject   = read_profile_string( _factory_ini, "spooler", "log_mail_subject");
     _log_collect_within = read_profile_uint  ( _factory_ini, "spooler", "log_collect_within", 0 );
     _log_collect_max    = read_profile_uint  ( _factory_ini, "spooler", "log_collect_max"   , 900 );
+
+    _state_cmd = sc_none;
+    set_state( s_starting );
 
     _base_log.set_directory( _log_directory );
     _base_log.open_new();
@@ -1314,7 +1317,7 @@ void Spooler::send_error_email( const string& subject, const string& body )
 {
     try
     {
-        Sos_ptr<mail::Message> msg = mail::create_message( spooler_ptr->_java_vm );
+        Sos_ptr<mail::Message> msg = mail::create_message(); // spooler_ptr->_java_vm );
 
         if( _log_mail_from != ""  &&  _log_mail_from != "-" )  msg->set_from( _log_mail_from );
         if( _log_mail_to   != ""  &&  _log_mail_to   != "-" )  msg->set_to  ( _log_mail_to   );
@@ -1327,7 +1330,10 @@ void Spooler::send_error_email( const string& subject, const string& body )
         msg->set_body( body );
         msg->send(); 
     }
-    catch( const exception& ) {}
+    catch( const exception& x ) 
+    {
+        _log.warn( "Fehler beim eMail-Versand: " + string(x.what()) );
+    }
 }
 
 //------------------------------------------------------------------------------------start_process
@@ -1439,6 +1445,7 @@ void spooler_restart( Log* log, bool is_service )
 
 static void spooler_renew( const string& service_name, const string& renew_spooler, bool is_service, const string& command_line )
 {
+
     string this_spooler = program_filename();
     BOOL   copy_ok      = true;
     double t            = renew_wait_time;
@@ -1553,17 +1560,13 @@ int spooler_main( int argc, char** argv )
 
     try
     {
-
-        //spooler = &my_spooler;
-
         ret = my_spooler.launch( argc, argv );
-
-        //spooler = NULL;
     }
     catch( const Xc& x )
     {
         SHOW_ERR( "Fehler " << x );     // Fehlermeldung vor ~Spooler ausgeben
-        ret = 9999;
+        if( my_spooler.is_service() )  send_error_email( x.what(), argc, argv, &my_spooler );
+        ret = 1;
     }
 
     return ret;
@@ -1579,137 +1582,145 @@ int sos_main( int argc, char** argv )
 {
     LOG( "Spooler " VER_PRODUCTVERSION_STR "\n" );
 
+    int  ret        = 99;
+    bool is_service = false;
 
-    int ret = 99;
-
-    bool    is_service = false;
-    bool    is_service_set = false;
-    bool    do_install_service = false;
-    bool    do_remove_service = false;
-    string  id;
-    string  service_name, service_display;
-    string  service_description = "Hintergrund-Jobs der Document Factory";
-    string  renew_spooler;
-    string  command_line;
-    bool    renew_service = false;
-    string  send_cmd;
-    string  log_filename;
-    string  factory_ini = spooler::default_factory_ini;
-    string  dependencies;
-
-    for( Sos_option_iterator opt ( argc, argv ); !opt.end(); opt.next() )
+    try
     {
-      //if( opt.flag      ( "renew-spooler"    ) )  renew_spooler = program_filename();
-      //else
-        if( opt.with_value( "renew-spooler"    ) )  renew_spooler = opt.value();
-        else
-        if( opt.with_value( "renew-spooler"    ) )  renew_spooler = opt.value();
-        else
-        if( opt.with_value( "send-cmd"         ) )  send_cmd = opt.value();
-        else
-        if( opt.flag      ( "V"                ) )  fprintf( stderr, "Spooler %s\n", VER_PRODUCTVERSION_STR );
-        else
+        bool    is_service_set = false;
+        bool    do_install_service = false;
+        bool    do_remove_service = false;
+        string  id;
+        string  service_name, service_display;
+        string  service_description = "Hintergrund-Jobs der Document Factory";
+        string  renew_spooler;
+        string  command_line;
+        bool    renew_service = false;
+        string  send_cmd;
+        string  log_filename;
+        string  factory_ini = spooler::default_factory_ini;
+        string  dependencies;
+
+        for( Sos_option_iterator opt ( argc, argv ); !opt.end(); opt.next() )
         {
-            if( opt.flag      ( "install-service"  ) )  do_install_service = opt.set();
+          //if( opt.flag      ( "renew-spooler"    ) )  renew_spooler = program_filename();
+          //else
+            if( opt.with_value( "renew-spooler"    ) )  renew_spooler = opt.value();
             else
-            if( opt.with_value( "install-service"  ) )  do_install_service = true, service_name = opt.value();
+            if( opt.with_value( "renew-spooler"    ) )  renew_spooler = opt.value();
             else
-            if( opt.flag      ( "remove-service"   ) )  do_remove_service = opt.set();
+            if( opt.with_value( "send-cmd"         ) )  send_cmd = opt.value();
             else
-            if( opt.flag      ( "renew-service"    ) )  renew_service = opt.set();
-            else
-            if( opt.with_value( "service-name"     ) )  service_name = opt.value();
-            else
-            if( opt.with_value( "service-display"  ) )  service_display = opt.value();
-            else
-            if( opt.with_value( "service-descr"    ) )  service_description = opt.value();
-            else
-            if( opt.flag      ( "service"          ) )  is_service = opt.set(), is_service_set = true;
-            else
-            if( opt.with_value( "service"          ) )  is_service = true, is_service_set = true, service_name = opt.value();
-            else
-            if( opt.with_value( "need-service"     ) )  dependencies += opt.value(), dependencies += '\0';
+            if( opt.flag      ( "V"                ) )  fprintf( stderr, "Spooler %s\n", VER_PRODUCTVERSION_STR );
             else
             {
-                if( opt.with_value( "id"               ) )  id = opt.value();
+                if( opt.flag      ( "install-service"  ) )  do_install_service = opt.set();
                 else
-                if( opt.with_value( "ini"              ) )  factory_ini = opt.value();
+                if( opt.with_value( "install-service"  ) )  do_install_service = true, service_name = opt.value();
                 else
-                if( opt.with_value( "log"              ) )  log_filename = opt.value();
+                if( opt.flag      ( "remove-service"   ) )  do_remove_service = opt.set();
+                else
+                if( opt.flag      ( "renew-service"    ) )  renew_service = opt.set();
+                else
+                if( opt.with_value( "service-name"     ) )  service_name = opt.value();
+                else
+                if( opt.with_value( "service-display"  ) )  service_display = opt.value();
+                else
+                if( opt.with_value( "service-descr"    ) )  service_description = opt.value();
+                else
+                if( opt.flag      ( "service"          ) )  is_service = opt.set(), is_service_set = true;
+                else
+                if( opt.with_value( "service"          ) )  is_service = true, is_service_set = true, service_name = opt.value();
+                else
+                if( opt.with_value( "need-service"     ) )  dependencies += opt.value(), dependencies += '\0';
+                else
+                {
+                    if( opt.with_value( "id"               ) )  id = opt.value();
+                    else
+                    if( opt.with_value( "ini"              ) )  factory_ini = opt.value();
+                    else
+                    if( opt.with_value( "log"              ) )  log_filename = opt.value();
 
-                if( !command_line.empty() )  command_line += " ";
-                command_line += opt.complete_parameter( '"', '"' );
+                    if( !command_line.empty() )  command_line += " ";
+                    command_line += opt.complete_parameter( '"', '"' );
+                }
             }
         }
-    }
 
-    if( send_cmd != "" )  is_service = false;
+        if( send_cmd != "" )  is_service = false;
 
 
-#   ifdef Z_WINDOWS
-        if( service_name != "" ) 
-        {
-            if( service_display == "" )  service_display = service_name;
-        }
-        else
-        {
-            service_name = spooler::make_service_name(id);
-            if( service_display == "" )  service_display = spooler::make_service_display(id);
-        }
-#   endif
-
-    if( log_filename.empty() )  log_filename = read_profile_string( factory_ini, "spooler", "log" );
-    if( !log_filename.empty() )  log_start( log_filename );
-
-#   ifdef Z_WINDOWS
-
-        if( !renew_spooler.empty() )  
-        { 
-            spooler::spooler_renew( service_name, renew_spooler, renew_service, command_line ); 
-            ret = 0;
-        }
-        else
-        if( do_remove_service | do_install_service )
-        {
-            if( do_remove_service  )  spooler::remove_service( service_name );
-            if( do_install_service ) 
+#       ifdef Z_WINDOWS
+            if( service_name != "" ) 
             {
-                //if( !is_service )  command_line = "-service " + command_line;
-                command_line = "-service=" + service_name + " " + command_line;
-                dependencies += '\0';
-                spooler::install_service( service_name, service_display, service_description, dependencies, command_line );
+                if( service_display == "" )  service_display = service_name;
             }
-            ret = 0;
-        }
-        else
-        {
-            _beginthread( spooler::delete_new_spooler, 50000, NULL );
+            else
+            {
+                service_name = spooler::make_service_name(id);
+                if( service_display == "" )  service_display = spooler::make_service_display(id);
+            }
+#       endif
 
-          //if( !is_service_set )  is_service = spooler::service_is_started(service_name);
+        if( log_filename.empty() )  log_filename = read_profile_string( factory_ini, "spooler", "log" );
+        if( !log_filename.empty() )  log_start( log_filename );
+
+#       ifdef Z_WINDOWS
+
+            if( !renew_spooler.empty() )  
+            { 
+                spooler::spooler_renew( service_name, renew_spooler, renew_service, command_line ); 
+                ret = 0;
+            }
+            else
+            if( do_remove_service | do_install_service )
+            {
+                if( do_remove_service  )  spooler::remove_service( service_name );
+                if( do_install_service ) 
+                {
+                    //if( !is_service )  command_line = "-service " + command_line;
+                    command_line = "-service=" + service_name + " " + command_line;
+                    dependencies += '\0';
+                    spooler::install_service( service_name, service_display, service_description, dependencies, command_line );
+                }
+                ret = 0;
+            }
+            else
+            {
+                _beginthread( spooler::delete_new_spooler, 50000, NULL );
+
+              //if( !is_service_set )  is_service = spooler::service_is_started(service_name);
+
+                if( is_service )
+                {
+                    ret = spooler::spooler_service( service_name, argc, argv );
+                }
+                else
+                {
+                    ret = spooler::spooler_main( argc, argv );
+                }
+            }
+
+#        else
 
             if( is_service )
             {
-                ret = spooler::spooler_service( service_name, argc, argv );
+                spooler::is_daemon = true;
+
+                LOG( "Spooler wird Daemon. Pid wechselt \n");
+                spooler::be_daemon();
             }
-            else
-            {
-                ret = spooler::spooler_main( argc, argv );
-            }
-        }
 
-#    else
+            ret = spooler::spooler_main( argc, argv );
 
-        if( is_service )
-        {
-            spooler::is_daemon = true;
-
-            LOG( "Spooler wird Daemon. Pid wechselt \n");
-            spooler::be_daemon();
-        }
-
-        ret = spooler::spooler_main( argc, argv );
-
-#   endif
+#       endif
+    }
+    catch( const exception& x )
+    {
+        LOG( x.what() );
+        spooler::send_error_email( x.what(), argc, argv );
+        ret = 1;
+    }
 
     LOG( "Programm wird beendet\n" );
 
