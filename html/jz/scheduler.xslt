@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding="utf-8"?>
-<!-- $Id: scheduler.xslt,v 1.3 2004/12/02 18:10:45 jz Exp $ -->
+<!-- $Id: scheduler.xslt,v 1.4 2004/12/02 22:21:45 jz Exp $ -->
 <xsl:stylesheet xmlns:xsl   = "http://www.w3.org/1999/XSL/Transform" 
                 xmlns:msxsl = "urn:schemas-microsoft-com:xslt"
                 version     = "1.0">
@@ -91,13 +91,13 @@
         <xsl:param name="title"/>
         <xsl:param name="class"/>
 
-        <td style="margin-bottom: 0px; padding-bottom: 0px; padding-left: 0px; padding-right: 5pt; cursor: pointer"
-            onmouseover="this.className='hover'"
-            onmouseout ="this.className=''">
+        <td style="margin-bottom: 0px; padding-bottom: 0px; padding-left: 0px; padding-right: 5pt; cursor: pointer">
+        <!--    onmouseover="this.className='hover'"
+            onmouseout ="this.className=''"-->
                     
             <xsl:element name="p">
                 <xsl:attribute name="onclick">call_error_checked( show_card, '<xsl:value-of select="$name"/>' )</xsl:attribute>
-                <xsl:attribute name="style"  >padding: 1pt 2pt 4pt 2pt</xsl:attribute>
+                <xsl:attribute name="style"  >padding: 1pt 4pt 4pt 4pt</xsl:attribute>
                 <xsl:attribute name="class"><xsl:value-of select="$class"/></xsl:attribute>
                 <xsl:element name="span">
                     <xsl:if test="/spooler/@my_show_card=$name ">
@@ -205,7 +205,6 @@
             <!--col  valign="baseline"  width="110"/-->  
             <col valign="baseline"  width=" 50"  align="right"/>  
             <col valign="baseline"  width=" 30"  align="right"/>
-            <col valign="baseline"/>
             
             <thead>
                 <xsl:call-template name="card_top"/>
@@ -421,7 +420,7 @@
                         
                         <xsl:choose>
                             <xsl:when test="../../@order='yes'">
-                                <td colspan="2" class="order">
+                                <td class="order">
                                     <xsl:if test="@state!='running'">
                                         <xsl:value-of select="@state"/>
                                         <xsl:text> </xsl:text>
@@ -447,7 +446,7 @@
                                 </td>
                             </xsl:when>
                             <xsl:otherwise>
-                                <td colspan="2">
+                                <td>
                                     <xsl:value-of select="@state"/>
                                     <xsl:text> </xsl:text>
                                     <xsl:if test="@in_process_since!=''">
@@ -927,7 +926,7 @@
                 <td colspan="99" class="job">
                     <table cellpadding="0" cellspacing="0" width="100%">
                         <tr>
-                            <td>
+                            <td style="padding-left: 0px">
                                 <b>
                                     Job
                                     <xsl:value-of select="@job"/>
@@ -937,7 +936,7 @@
                                 </xsl:if>
                             </td>
                             
-                            <td align="right">
+                            <td align="right" style="padding-right: 0pt">
                                 <xsl:call-template name="command_menu">
                                     <xsl:with-param name="onclick" select="concat( 'job_menu__onclick(&quot;', @job, '&quot;)' )"/>
                                 </xsl:call-template>
@@ -1049,7 +1048,7 @@
                 <td colspan="99" class="task">
                     <table cellpadding="0" cellspacing="0" width="100%">
                         <tr>
-                            <td>
+                            <td style="padding-left: 0px">
                                 <b>Task&#160;</b>
                                 
                                 <xsl:choose>
@@ -1084,12 +1083,12 @@
                                 </xsl:if>
                                 <xsl:if test="@steps!=''">
                                     <xsl:text>, </xsl:text>
-                                    <xsl:value-of select="@steps"/> steps
+                                    <span style="white-space: nowrap"><xsl:value-of select="@steps"/> steps</span>
                                 </xsl:if>
                             </td>
 
                             <xsl:if test="@id">
-                                <td align="right">
+                                <td align="right" valign="top" style="padding-right: 0pt">
                                     <xsl:call-template name="command_menu">
                                         <xsl:with-param name="onclick" select="concat( 'task_menu__onclick(', @id, ')' )"/>
                                     </xsl:call-template>
