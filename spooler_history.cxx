@@ -1,4 +1,4 @@
-// $Id: spooler_history.cxx,v 1.43 2003/05/12 09:50:39 jz Exp $
+// $Id: spooler_history.cxx,v 1.44 2003/05/12 09:55:06 jz Exp $
 
 #include "spooler.h"
 #include "../zschimmer/z_com.h"
@@ -205,6 +205,8 @@ void Spooler_db::open( const string& db_name )
             }
             catch( const exception& x )  
             { 
+                close();
+
                 if( _spooler->_need_db )  throw;
             
                 _spooler->_log.warn( string("FEHLER BEIM ÖFFNEN DER HISTORIENDATENBANK: ") + x.what() ); 
