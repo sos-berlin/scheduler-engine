@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.331 2004/05/04 06:15:27 jz Exp $
+// $Id: spooler.cxx,v 1.332 2004/05/04 08:53:28 jz Exp $
 /*
     Hier sind implementiert
 
@@ -622,13 +622,12 @@ void Spooler::add_process_class( Process_class* process_class )
 }
 
 //--------------------------------------------------------------------Spooler::init_process_classes
-
+/*
 void Spooler::init_process_classes()
 {
     //while( _process_list.size() < _process_count_max )  new_process();
-
 }
-
+*/
 //---------------------------------------------------------------------Spooler::try_to_free_process
 
 bool Spooler::try_to_free_process( Job* for_job, Process_class* process_class, const Time& now )
@@ -1081,6 +1080,8 @@ string Spooler::state_name( State state )
 
 void Spooler::start_jobs()
 {
+    LOGI( "Jobs werden initialisiert\n" );
+
     FOR_EACH_JOB( job )  (*job)->init();
 }
 
@@ -1581,7 +1582,8 @@ void Spooler::start()
 
     if( _module.set() )
     {
-        LOG( "Startskript wird gestartet" );
+        LOG( "Startskript wird gestartet\n" );
+    
         _module_instance = _module.create_instance();
       //_module_instance->_title = "Scheduler-Script";
         _module_instance->init();
@@ -1596,16 +1598,15 @@ void Spooler::start()
         if( !ok )  throw_xc( "SCHEDULER-183" );
     }
 
-    init_process_classes();
+  //init_process_classes();
   //start_threads();
 
-    LOG( "Jobs werden initialisiert" );
     start_jobs();
 
     
+/*
     if( _is_service || is_daemon )
     {
-/*
         if( _log.fd() > 2 )   // Nicht -1, stdin, stdout, stderr?
         {
             FILE* new_stderr = fdopen( _log.fd(), "w" );
@@ -1618,8 +1619,8 @@ void Spooler::start()
             //else  
             //    _log.error( string("stderr = fdopen(log): ") + strerror(errno) );
         }
-*/
     }
+*/
 }
 
 //------------------------------------------------------------------------------------Spooler::stop

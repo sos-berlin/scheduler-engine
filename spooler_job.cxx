@@ -1,4 +1,4 @@
-// $Id: spooler_job.cxx,v 1.70 2004/05/04 06:15:27 jz Exp $
+// $Id: spooler_job.cxx,v 1.71 2004/05/04 08:53:28 jz Exp $
 /*
     Hier sind implementiert
 
@@ -184,6 +184,8 @@ void Job::init0()
 
 void Job::init()
 {
+    LOGI( "Job " << _name << " wird initialisiert\n" );
+
     _history.open();
 
     _module_ptr = _object_set_descr? &_object_set_descr->_class->_module
