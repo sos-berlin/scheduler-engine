@@ -1,4 +1,4 @@
-// $Id: spooler.h,v 1.78 2002/04/09 08:55:43 jz Exp $
+// $Id: spooler.h,v 1.79 2002/04/10 17:15:11 jz Exp $
 
 #ifndef __SPOOLER_H
 #define __SPOOLER_H
@@ -89,6 +89,7 @@ namespace spooler {
 string                          text_from_xml_with_include  ( const xml::Element_ptr&, const string& include_path );
 int                             read_profile_on_process     ( const string& profile, const string& section, const string& entry, int deflt );
 Archive_switch                  read_profile_archive        ( const string& profile, const string& section, const string& entry, Archive_switch deflt );
+With_log_switch                 read_profile_with_log       ( const string& profile, const string& section, const string& entry, Archive_switch deflt );
 
 //----------------------------------------------------------------------------State_changed_handler
 
@@ -220,7 +221,7 @@ struct Spooler
     string                     _history_columns;
     int                        _history_on_process;
     Archive_switch             _history_archive;
-    bool                       _history_with_log;
+    With_log_switch            _history_with_log;
     string                     _history_tablename;
     string                     _variables_tablename;
 

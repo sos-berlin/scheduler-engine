@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.91 2002/04/09 08:55:43 jz Exp $
+// $Id: spooler.cxx,v 1.92 2002/04/10 17:15:11 jz Exp $
 /*
     Hier sind implementiert
 
@@ -101,16 +101,16 @@ static string thread_info_text( HANDLE h )
 
 int read_profile_on_process( const string& profile, const string& section, const string& entry, int deflt )
 {
-    int result;
+    string v = read_profile_string( profile, section, entry );
 
-    try {
-        result = read_profile_int( profile, section, entry, deflt );
-    }
-    catch( const Xc& ) {
-        result = read_profile_bool( profile, section, entry, deflt > 0 );
-    }
+    if( v == "" )  return deflt;
 
-    return result > 0? result : INT_MAX;
+    try
+    {
+        if( isdigit( (uint)v[0] ) )  return as_int(v);
+                               else  return as_bool(v);
+    }
+    catch( const Xc& ) { return deflt; }
 }
 
 //-----------------------------------------------------------------------------read_profile_archive
@@ -123,6 +123,13 @@ Archive_switch read_profile_archive( const string& profile, const string& sectio
     if( lcase(value) == "gzip" )  return arc_gzip;
 
     return read_profile_bool( profile, section, entry, false )? arc_yes : arc_no;
+}
+
+//----------------------------------------------------------------------------read_profile_with_log
+
+With_log_switch read_profile_with_log( const string& profile, const string& section, const string& entry, With_log_switch deflt )
+{
+    return read_profile_archive( profile, section, entry, deflt );
 }
 
 //---------------------------------------------------------------------------------Spooler::Spooler
@@ -400,7 +407,7 @@ void Spooler::load_arg()
     _history_columns    = read_profile_string    ( _factory_ini, "spooler", "history_columns"    );
     _history_on_process = read_profile_on_process( _factory_ini, "spooler", "history_on_process" , 1 );
     _history_archive    = read_profile_archive   ( _factory_ini, "spooler", "history_archive"    , arc_no );
-    _history_with_log   = read_profile_bool      ( _factory_ini, "spooler", "history_with_log"   , false );
+    _history_with_log   = read_profile_with_log  ( _factory_ini, "spooler", "history_with_log"   , arc_no );
     _db_name            = read_profile_string    ( _factory_ini, "spooler", "db"                 );
     _history_tablename  = read_profile_string    ( _factory_ini, "spooler", "db_history_table"   , "spooler_history" );
     _variables_tablename= read_profile_string    ( _factory_ini, "spooler", "db_variables_table" , "spooler_variables" );
@@ -504,6 +511,7 @@ void Spooler::start()
     _log.open_new();
 
     _db.open( _db_name );
+    _db.spooler_start();
 
     _communication.start_or_rebind();
 
@@ -559,6 +567,7 @@ void Spooler::stop()
     if( _state_cmd == sc_terminate_and_restart 
      || _state_cmd == sc_let_run_terminate_and_restart )  spooler_restart( _is_service );
 
+    _db.spooler_stop();
     _db.close();
 
     set_state( s_stopped );     

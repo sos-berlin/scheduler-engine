@@ -1,4 +1,4 @@
-// $Id: spooler_history.h,v 1.5 2002/04/06 20:07:39 jz Exp $
+// $Id: spooler_history.h,v 1.6 2002/04/10 17:15:12 jz Exp $
 
 #ifndef __SPOOLER_HISTORY_H
 #define __SPOOLER_HISTORY_H
@@ -17,6 +17,10 @@ enum Archive_switch
     arc_gzip
 };
 
+//----------------------------------------------------------------------------------With_log_switch
+
+typedef Archive_switch With_log_switch;
+
 //---------------------------------------------------------------------------------------Spooler_db
 
 struct Spooler_db
@@ -33,6 +37,9 @@ struct Spooler_db
     void                        rollback                ();
     void                        create_table_when_needed( const string& tablename, const string& fields );
     string                      dbname                  ()                                          { return _db_name; }
+
+    void                        spooler_start           ();
+    void                        spooler_stop            ();
 
 
     Fill_zero                  _zero_;
@@ -51,13 +58,14 @@ struct Spooler_db
     Any_file                   _history_table;
     Any_file                   _history_update;
     vector<Dyn_obj>            _history_update_params;
+    int                        _id;
 };
 
 //--------------------------------------------------------------------------------------Transaction
 
 struct Transaction
 {
-                                Transaction             ( Spooler_db* db )                          : _db(db), _guard(&db->_lock) {}
+                                Transaction             ( Spooler_db* );
                                ~Transaction             ();
 
     void                        commit                  ();
@@ -93,7 +101,7 @@ struct Job_history
     Spooler*                   _spooler;
     Job*                       _job;
     int                        _on_process;
-    bool                       _with_log;
+    With_log_switch            _with_log;
     bool                       _use_db;
     bool                       _use_file;
     bool                       _error;
@@ -105,7 +113,8 @@ struct Job_history
     int64                      _record_pos;             // Position des Satzes, der zu Beginn des Jobs geschrieben und am Ende überschrieben oder gelöscht wird.
     string                     _tabbed_record;
     vector<string>             _extra_names;
-    vector<CComVariant>        _extra_values;
+    Record                     _extra_record;
+  //vector<CComVariant>        _extra_values;
 };
 
 //-------------------------------------------------------------------------------------------------

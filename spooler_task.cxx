@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.82 2002/04/09 08:55:45 jz Exp $
+// $Id: spooler_task.cxx,v 1.83 2002/04/10 17:15:12 jz Exp $
 /*
     Hier sind implementiert
 
@@ -224,11 +224,15 @@ Job::In_call::~In_call()
 { 
     _job->set_in_call( "" ); 
 
-    if( log_ptr )
     {
-        *log_ptr << *_job << '.' << _name << "() end";
-        if( _result_set )  *log_ptr << "  result=" << ( _result? "true" : "false" );
-        *log_ptr << '\n';
+        Log_ptr log;
+
+        if( log )
+        {
+            *log << *_job << '.' << _name << "() end";
+            if( _result_set )  *log << "  result=" << ( _result? "true" : "false" );
+            *log << '\n';
+        }
     }
 
     _ASSERTE( _CrtCheckMemory( ) );
@@ -762,6 +766,7 @@ void Job::finish()
         //||  _log.mail_on_error()   &&  has_error() )  _log.send();
 
         _log.send( has_error()? -1 : _last_task_step_count );
+        clear_mail();
 
         //_log.close();
     }
@@ -1032,6 +1037,15 @@ void Job::set_mail_defaults()
     }
 
     _log.set_mail_body( body + "Das Jobprotokoll liegt dieser Nachricht bei.", is_error );
+}
+
+//----------------------------------------------------------------------------------Job::clear_mail
+
+void Job::clear_mail()
+{
+    _log.set_mail_from_name( "" );
+    _log.set_mail_subject( "", true );
+    _log.set_mail_body( "", true );
 }
 
 //---------------------------------------------------------------------------Job::set_error_xc_only

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- $Id: spooler.dtd,v 1.35 2002/04/09 08:25:50 jz Exp $   Joacim Zschimmer,  (C) 2000 SOS GmbH Berlin  -->
+<!-- $Id: spooler.dtd,v 1.36 2002/04/10 17:15:11 jz Exp $   Joacim Zschimmer,  (C) 2000 SOS GmbH Berlin  -->
 
 
 <!ELEMENT spooler               ( config+ | command | answer )>
@@ -128,7 +128,7 @@
 
 <!-- KOMMANDOS  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
-<!ELEMENT command               ( show_state | show_history | modify_spooler | modify_job | add_jobs | signal_object )+ >
+<!ELEMENT command               ( show_state | show_history | modify_spooler | modify_job | kill_task | add_jobs | signal_object )+ >
 
 <!ELEMENT show_state            EMPTY>                                             <!-- Liefert den Zustand des Spoolers -->
 <!ATTLIST show_state            what                (standard|all) 'standard'>     <!-- what="" ist wie what="standard", what="all" liefert <description> -->
@@ -164,6 +164,10 @@
                                                                         <!-- cmd="suspend"  -> state="suspended" -->
                                                                         <!-- cmd="continue" -> state="running" -->
                                                                         <!-- Antwort: <tasks> -->
+
+<!ELEMENT kill_task             EMPTY>
+<!ATTLIST kill_task             job                 CDATA #REQUIRED>
+<!ATTLIST kill_task             id                  CDATA #REQUIRED>
 
 <!ELEMENT start_job             ( params? )>
 <!ATTLIST start_job             job                 CDATA #REQUIRED>
