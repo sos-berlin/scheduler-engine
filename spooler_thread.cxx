@@ -1,4 +1,4 @@
-// $Id: spooler_thread.cxx,v 1.113 2004/03/29 02:13:50 jz Exp $
+// $Id: spooler_thread.cxx,v 1.114 2004/03/29 22:03:14 jz Exp $
 /*
     Hier sind implementiert
 
@@ -45,7 +45,7 @@ Spooler_thread::~Spooler_thread()
     } 
     catch(const exception& x ) { _log.error( x.what() ); }
     
-    _my_event.close();
+  //_my_event.close();
   //_wait_handles.close();
     _task_list.clear();
 }
@@ -386,7 +386,7 @@ bool Spooler_thread::step()
         {
             if( job->priority() >= _spooler->priority_max() )
             {
-                if( _my_event.signaled_then_reset() )  return true;
+              //if( _my_event.signaled_then_reset() )  return true;
                 if( _event  ->signaled()            )  return true;      // Das ist _event oder _spooler->_event
                 if( _spooler->signaled()            )  return true;
 
@@ -441,7 +441,7 @@ bool Spooler_thread::step()
                     {
                         if( task->job() == job )
                         {
-                            if( _my_event.signaled_then_reset() )  return true;
+                          //if( _my_event.signaled_then_reset() )  return true;
                             if( _event  ->signaled()            )  return true;      // Das ist _event oder _spooler->_event
 
                             stepped = do_something( task );
@@ -489,7 +489,7 @@ bool Spooler_thread::step()
             {
                 for( int i = 0; i < job->priority(); i++ )
                 {
-                    if( _my_event.signaled_then_reset() )  return true;
+                  //if( _my_event.signaled_then_reset() )  return true;
                     if( _event  ->signaled()            )  return true;      // Das ist _my_event oder _spooler->_event
 
                     something_done |= do_something( task );
@@ -514,7 +514,7 @@ bool Spooler_thread::step()
 
             if( !job->order_controlled() ) // ||  job->queue_filled() )     // queue_filled() bei Order-Job, falls der (unsinnigerweise?) explizit gestartet worden ist.
             {
-                if( _my_event.signaled_then_reset() )  return true;
+              //if( _my_event.signaled_then_reset() )  return true;
                 if( _event  ->signaled()            )  return true;      // Das ist _my_event oder _spooler->_event
 
                 if( job->priority() == 0 )  something_done |= do_something( task );

@@ -1,4 +1,4 @@
-// $Id: spooler_communication.cxx,v 1.81 2004/03/29 10:11:15 jz Exp $
+// $Id: spooler_communication.cxx,v 1.82 2004/03/29 22:03:14 jz Exp $
 /*
     Hier sind implementiert
 
@@ -830,6 +830,8 @@ void Communication::bind()
 
                 new_channel->add_to_socket_manager( _spooler->_connection_manager );
                 new_channel->socket_expect_signals( Socket_operation::sig_read );
+
+                new_channel->set_event_name( "stdin" );
 
                 _channel_list.push_back( new_channel );
             }

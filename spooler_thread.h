@@ -1,4 +1,4 @@
-// $Id: spooler_thread.h,v 1.54 2004/03/29 02:13:50 jz Exp $
+// $Id: spooler_thread.h,v 1.55 2004/03/29 22:03:14 jz Exp $
 
 #ifndef __SPOOLER_THREAD_H
 #define __SPOOLER_THREAD_H
@@ -94,7 +94,7 @@ struct Spooler_thread : zschimmer::Thread
     int                        _thread_priority;
 
     Event*                     _event;
-    Event                      _my_event;                   // Für _free_threading
+  //Event                      _my_event;                   // Für _free_threading
 
   //ptr<Com_log>               _com_log;                    // COM-Objekt spooler.log
   //ptr<Com_thread>            _com_thread;                 // COM-Objekt

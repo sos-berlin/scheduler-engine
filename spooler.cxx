@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.327 2004/03/29 02:13:49 jz Exp $
+// $Id: spooler.cxx,v 1.328 2004/03/29 22:03:14 jz Exp $
 /*
     Hier sind implementiert
 
@@ -1787,6 +1787,9 @@ void Spooler::run()
         _next_time = latter_day;
         _next_job  = NULL;
 
+        string msg = "Warten";
+
+
         if( _single_thread )
         {
             if( _state != Spooler::s_paused )
@@ -1796,7 +1799,14 @@ void Spooler::run()
                     FOR_EACH( Process_list, (*pc)->_process_list, p )
                     {
                         something_done |= (*p)->async_continue();
-                        _next_time = min( _next_time, Time( localtime_from_gmtime( (*p)->async_next_gmtime() ) ) );
+
+                      //_next_time = min( _next_time, Time( localtime_from_gmtime( (*p)->async_next_gmtime() ) ) );
+                        Time next_time = Time( localtime_from_gmtime( (*p)->async_next_gmtime() ) );
+                        if( next_time < _next_time )
+                        {
+                            _next_time = next_time;
+                            if( log_wait )  msg = S() << "Warten bis " << _next_time << " für pid=" << (*p)->pid();
+                        }
                     }
                 }
             }
@@ -1830,10 +1840,6 @@ void Spooler::run()
         }
 */
 
-        string       msg;
-
-        if( log_wait )  msg = "Warten"; //"Kein Job und keine Task aktiv";
-
         //_next_time = latter_day;
 
 
@@ -1850,9 +1856,13 @@ void Spooler::run()
                 Task* task = _single_thread->get_next_task();
                 if( task ) 
                 {
-                    _next_time = min( _next_time, task->next_time() );
-                    if( log_wait )  if( task )  msg = "Warten bis " + _next_time.as_string() + " für Task " + task->name();
-                                        //else  msg = "Keine Task aktiv";
+                    //_next_time = min( _next_time, task->next_time() );
+                    Time next_time = task->next_time();
+                    if( next_time < _next_time )
+                    {
+                        _next_time = next_time;
+                        if( log_wait )  msg = "Warten bis " + _next_time.as_string() + " für Task " + task->name();
+                    }
                 }
 
                 nothing_done_max += _single_thread->task_count() * 3 + 3;    // Statt der Prozesse zählen wir die Tasks einmal mehr
@@ -1944,6 +1954,10 @@ void Spooler::run()
                 {
                     wait_handles.wait_until( _next_time );
                 }
+            }
+            else
+            {
+                LOG2( "scheduler.wait", "wait_handles.signaled()!  " << wait_handles << "\n" );
             }
 
             wait_handles.clear();

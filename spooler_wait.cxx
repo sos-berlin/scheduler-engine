@@ -1,4 +1,4 @@
-// $Id: spooler_wait.cxx,v 1.98 2004/03/29 02:13:50 jz Exp $
+// $Id: spooler_wait.cxx,v 1.99 2004/03/29 22:03:14 jz Exp $
 /*
     Hier sind implementiert
 
@@ -365,15 +365,7 @@ bool Wait_handles::wait_until_2( Time until )
           //if( _log->log_level() <= log_debug9 )
             if( t > 0  &&  log_category_is_set( "scheduler.wait" ) )
             {
-                string msg = "MsgWaitForMultipleObjects " + sos::as_string(t/1000.0) + "s (bis " + until.as_string() + ")  ";
-                for( int i = 0; i < _handles.size(); i++ )
-                {
-                    if( i > 0 )  msg += ", ";
-                    if( _events[i] )  msg += _events[i]->as_text() + " (0x" + as_hex_string( (int)_handles[i] ) + ")";
-                               else   msg += "NULL";
-                }
-                //_log->debug9( msg );
-                LOG( msg << "\n" );
+                LOG( "MsgWaitForMultipleObjects " << sos::as_string(t/1000.0) << "s (bis " << until << ")  " << as_string() << "\n" );
             }
 
             handles = new HANDLE [ _handles.size()+1 ];
@@ -486,13 +478,16 @@ string Wait_handles::as_string()
         }
         else
         {
-            FOR_EACH_CONST( Event_vector, _events, it )  
+            result = "{";
+
+            for( int i = 0; i < _events.size(); i++ )
             {
-                if( !result.empty() )  result += ", ";
-                result += (*it)->as_text();
+                if( i > 0 )  result += ", ";
+                result += as_hex_string( (int)_handles[i] );
+                if( _events[i] )  result += " " + _events[i]->as_text(); 
             }
 
-            result = "{" + result + "}";
+            result += "}";
         }
     }
 
