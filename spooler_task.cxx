@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.149 2003/05/31 10:01:13 jz Exp $
+// $Id: spooler_task.cxx,v 1.150 2003/05/31 15:17:42 jz Exp $
 /*
     Hier sind implementiert
 
@@ -974,7 +974,8 @@ void Job::set_next_start_time( Time now )
     }
     else
     {
-        _next_start_time = _period.next_try( now );
+        //31.5.03 _next_start_time = _period.next_try( now );
+        _next_start_time = _period.next_try( now + _period.repeat() );
         if( _spooler->_debug && _next_start_time != latter_day )  msg = "Nächste Wiederholung wegen <period repeat=\"" + as_string((double)_period._repeat) + "\">: " + _next_start_time.as_string();
 
         _next_single_start = _run_time.next_single_start( now );
