@@ -1,4 +1,4 @@
-// $Id: spooler_log.cxx,v 1.45 2002/09/29 16:17:24 jz Exp $
+// $Id: spooler_log.cxx,v 1.46 2002/10/18 12:55:59 jz Exp $
 
 #include "spooler.h"
 #include "spooler_mail_jmail.h"
@@ -414,7 +414,7 @@ spooler_com::Imail* Prefix_log::mail()
 
         if( _job )
         {
-            Bstr jobname_bstr = _job->name().c_str();
+            Bstr jobname_bstr = _job->name();
             _mail->add_header_field( Bstr(L"X-SOS-Spooler-Job"), jobname_bstr );
         }
     }
@@ -447,7 +447,7 @@ void Prefix_log::set_mail_from_name( const string& from_name )
         if( !wcschr( old_from, '<' )  &&  wcschr( old_from, '@' ) )
         {
             string from = from_name + " <" + bstr_as_string(old_from) + ">";
-            Bstr from_bstr = from.c_str();
+            Bstr from_bstr = from;
             hr = _mail->put_from( from_bstr );                          if( FAILED(hr) ) throw_ole( hr, "spooler::Mail::from", from.c_str() );
         }
     }
@@ -564,7 +564,7 @@ void Prefix_log::send_really()
     HRESULT hr;
     int ok;
 
-    mail()->add_file( Bstr(_filename.c_str()), NULL, Bstr(L"plain/text"), Bstr(_spooler->_mail_encoding.c_str()) );
+    mail()->add_file( Bstr(_filename), NULL, Bstr(L"plain/text"), Bstr(_spooler->_mail_encoding) );
 
     ok = mail()->send();
 

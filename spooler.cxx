@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.118 2002/10/17 19:56:12 jz Exp $
+// $Id: spooler.cxx,v 1.119 2002/10/18 12:55:59 jz Exp $
 /*
     Hier sind implementiert
 
@@ -210,6 +210,7 @@ static BOOL WINAPI ctrl_c_handler( DWORD dwCtrlType )
     if( dwCtrlType == CTRL_C_EVENT  &&  !ctrl_c_pressed )
     {
         ctrl_c_pressed = true;
+        fprintf( stderr, "Spooler wird wegen Ctrl-C beendet ...\n" );
         spooler->signal( "Ctrl+C" );
         return true;
     }
@@ -326,12 +327,13 @@ void Spooler::wait_until_threads_stopped( Time until )
     Thread_list::iterator it = _thread_list.begin();
     while( it != _thread_list.end() )
     {
-        if( (*it)->_thread_handle.handle() )  wait_handles.add_handle( (*it)->_thread_handle.handle() ),  it++;
-                                        else  THREAD_LOCK( _lock )  it = _thread_list.erase( it );
+        Thread* thread = *it;
+        if( !thread->_terminated  &&  thread->_thread_handle.handle() )  wait_handles.add_handle( (*it)->_thread_handle.handle() ),  it++;
+                           //18.10.2002 else  THREAD_LOCK( _lock )  it = _thread_list.erase( it );
     }
 
     int c = 0;
-    while( _thread_list.size() > 0 )
+    while( wait_handles.length() > 0 )
     {
         Time until_step = Time::now() + (++c < 10? wait_step_for_thread_termination : wait_step_for_thread_termination2 );
         if( until_step > until )  until_step = until;
@@ -339,13 +341,20 @@ void Spooler::wait_until_threads_stopped( Time until )
         int index = wait_handles.wait_until( until_step );
         if( index >= 0 ) 
         {
-            Thread_list::iterator thread = _thread_list.begin();
-            while( index-- > 0 )  thread++;
-            _log.info( "Thread " + (*thread)->name() + " beendet" );
-
-            wait_handles.remove_handle( (*thread)->_thread_handle.handle() );
-            THREAD_LOCK( _lock )  _thread_list.erase( thread );
+            HANDLE h = wait_handles[index];
+            FOR_EACH( Thread_list, _thread_list, it )  
+            {
+                Thread* thread = *it;
+                if( thread->_thread_handle.handle() == h ) 
+                {
+                    _log.info( "Thread " + thread->name() + " beendet" );
+                    wait_handles.remove_handle( h );
+                    //18.10.2002 THREAD_LOCK( _lock )  _thread_list.erase( thread );
+                }
+            }
         }
+
+        if( wait_handles.length() > 0 )  sos_sleep( 0.01 );  // Zur Verschönerung: Nächsten Threads Zeit lassen, sich zu beenden
 
         if( Time::now() > until )  break;
 
@@ -353,10 +362,15 @@ void Spooler::wait_until_threads_stopped( Time until )
         {
             FOR_EACH( Thread_list, _thread_list, it )  
             {
-                string msg = "Warten auf Thread " + (*it)->name() + " [" + thread_info_text( (*it)->_thread_handle.handle() ) + "]";
-                Job* job = (*it)->_current_job;
-                if( job )  msg += ", Job " + job->name() + " " + job->job_state();
-                _log.info( msg );
+                Thread* thread = *it;
+
+                if( !thread->_terminated )
+                {
+                    string msg = "Warten auf Thread " + thread->name() + " [" + thread_info_text( thread->_thread_handle.handle() ) + "]";
+                    Job* job = thread->_current_job;
+                    if( job )  msg += ", Job " + job->name() + " " + job->job_state();
+                    _log.info( msg );
+                }
             }
         }
     }
@@ -685,6 +699,9 @@ void Spooler::stop()
 
     signal_threads( "stop" );
     wait_until_threads_stopped( Time::now() + wait_for_thread_termination );
+
+    FOR_EACH( Thread_list, _thread_list, it )  it = _thread_list.erase( it );
+
 
 /*  interrupt() lässt PerlScript abstürzen
     FOR_EACH( Thread_list, _thread_list, it )

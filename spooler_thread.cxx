@@ -1,4 +1,4 @@
-// $Id: spooler_thread.cxx,v 1.45 2002/10/17 19:56:13 jz Exp $
+// $Id: spooler_thread.cxx,v 1.46 2002/10/18 12:55:59 jz Exp $
 /*
     Hier sind implementiert
 
@@ -137,18 +137,34 @@ void Thread::load_jobs_from_xml( const xml::Element_ptr& element, bool init )
     }
 }
 
+//-----------------------------------------------------------------------------------Thread::close1
+
+void Thread::close1()
+{
+    THREAD_LOCK( _lock )
+    {
+        FOR_EACH( Job_list, _job_list, it )  (*it)->close();
+
+        // Jobs erst bei Spooler-Ende freigeben, s. close()
+        // Beim Beenden des Spooler noch laufende Threads können auf Jobs von bereits beendeten Threads zugreifen.
+        // Damit's nicht knallt: Jobs schließen, aber Objekte halten.
+
+        _script_instance.close();
+
+        // COM-Objekte entkoppeln, falls noch jemand eine Referenz darauf hat:
+        if( _com_log )  _com_log->close();
+    }
+}
+
 //------------------------------------------------------------------------------------Thread::close
 
 void Thread::close()
 {
     THREAD_LOCK( _lock )
     {
-        FOR_EACH( Job_list, _job_list, it )  (*it)->close();
-        _job_list.clear();
-        _script_instance.close();
+        close1();
 
-        // COM-Objekte entkoppeln, falls noch jemand eine Referenz darauf hat:
-        if( _com_log )  _com_log->close();
+        _job_list.clear();
     }
 }
 
@@ -539,7 +555,7 @@ int Thread::run_thread()
         }
 
         stop_jobs();
-        close();
+        close1();
     
         _spooler->signal( "Thread " + _name + " beendet sich" );
 
@@ -558,10 +574,12 @@ int Thread::run_thread()
     if( ret == 1 )
     {
         _log.error( "Thread wird wegen des Fehlers beendet" );
-        close();
+        close1();
         _spooler->signal( "thread error" );
     }
     
+    _terminated = true;
+
     return ret;
 }
 
