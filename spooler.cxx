@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.313 2004/01/06 16:39:36 jz Exp $
+// $Id: spooler.cxx,v 1.314 2004/01/06 20:01:51 jz Exp $
 /*
     Hier sind implementiert
 
@@ -1637,26 +1637,29 @@ bool Spooler::execute_state_cmd()
 {
     bool continue_spooler = true;
 
-    if( _state_cmd == sc_pause                         )  if( _state == s_running )  set_state( s_paused  ), signal_threads( "pause" );
-    if( _state_cmd == sc_continue                      )  if( _state == s_paused  )  set_state( s_running ), signal_threads( "continue" );
-
-    if( _state_cmd == sc_load_config  
-     || _state_cmd == sc_reload       
-     || _state_cmd == sc_terminate             
-     || _state_cmd == sc_terminate_and_restart 
-     || _state_cmd == sc_let_run_terminate_and_restart )
+    if( _state_cmd )
     {
-        if( _state_cmd != _shutdown_cmd )
+        if( _state_cmd == sc_pause                         )  if( _state == s_running )  set_state( s_paused  ), signal_threads( "pause" );
+        if( _state_cmd == sc_continue                      )  if( _state == s_paused  )  set_state( s_running ), signal_threads( "continue" );
+
+        if( _state_cmd == sc_load_config  
+         || _state_cmd == sc_reload       
+         || _state_cmd == sc_terminate             
+         || _state_cmd == sc_terminate_and_restart 
+         || _state_cmd == sc_let_run_terminate_and_restart )
         {
-            set_state( _state_cmd == sc_let_run_terminate_and_restart? s_stopping_let_run : s_stopping );
-            if( _state == s_stopping )  FOR_EACH( Thread_list, _thread_list, t )  (*t)->cmd_shutdown();
-            continue_spooler = false;
+            if( _state_cmd != _shutdown_cmd )
+            {
+                set_state( _state_cmd == sc_let_run_terminate_and_restart? s_stopping_let_run : s_stopping );
+                if( _state == s_stopping )  FOR_EACH( Thread_list, _thread_list, t )  (*t)->cmd_shutdown();
+                continue_spooler = false;
+            }
+
+            _shutdown_cmd = _state_cmd;
         }
 
-        _shutdown_cmd = _state_cmd;
+        _state_cmd = sc_none;
     }
-
-    _state_cmd = sc_none;
 
     return continue_spooler;
 }
@@ -1829,7 +1832,7 @@ void Spooler::run()
         }
 */
 
-        if( !something_done  &&  _next_time > 0 )
+        if( !something_done  &&  _next_time > 0  &&  _state_cmd == sc_none )
         {
             Time now = Time::now();
             if( _next_time > now )
