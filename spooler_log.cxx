@@ -1,4 +1,4 @@
-// $Id: spooler_log.cxx,v 1.86 2004/01/12 09:35:23 jz Exp $
+// $Id: spooler_log.cxx,v 1.87 2004/01/13 06:58:15 jz Exp $
 
 #include "spooler.h"
 #include "spooler_mail.h"
@@ -360,16 +360,9 @@ void Prefix_log::set_profile_section( const string& section )
         _smtp_server     =         read_profile_string ( _spooler->_factory_ini, _section, "smtp"              , _smtp_server );
         _queue_dir       =         read_profile_string ( _spooler->_factory_ini, _section, "mail_queue_dir"    , _queue_dir );
         _from            =         read_profile_string ( _spooler->_factory_ini, _section, "log_mail_from"     , _from );
-        _to              =         read_profile_string ( _spooler->_factory_ini, _section, "log_mail_to"       );
-        _cc              =         read_profile_string ( _spooler->_factory_ini, _section, "log_mail_cc"       );
-        _bcc             =         read_profile_string ( _spooler->_factory_ini, _section, "log_mail_bcc"      );
-
-        if( _to.empty() && _cc.empty() && _bcc.empty() )
-        {       
-            _to  = _spooler->_log_mail_to;
-            _cc  = _spooler->_log_mail_cc;
-            _bcc = _spooler->_log_mail_bcc;
-        }
+        _to              =         read_profile_string ( _spooler->_factory_ini, _section, "log_mail_to"       , _spooler->_log_mail_to );
+        _cc              =         read_profile_string ( _spooler->_factory_ini, _section, "log_mail_cc"       , _spooler->_log_mail_cc );
+        _bcc             =         read_profile_string ( _spooler->_factory_ini, _section, "log_mail_bcc"      , _spooler->_log_mail_bcc );
     }
 }
 
