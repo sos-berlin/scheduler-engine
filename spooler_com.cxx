@@ -1,4 +1,4 @@
-// $Id: spooler_com.cxx,v 1.51 2002/09/13 09:53:22 jz Exp $
+// $Id: spooler_com.cxx,v 1.52 2002/09/13 10:52:25 jz Exp $
 /*
     Hier sind implementiert
 
@@ -1703,6 +1703,26 @@ STDMETHODIMP Com_spooler::get_job_chain( BSTR name, spooler_com::Ijob_chain** re
     return hr;
 }
 
+//----------------------------------------------------------------------------Spooler::create_order
+
+STDMETHODIMP Com_spooler::create_order( Iorder** result )
+{
+    HRESULT hr = NOERROR;
+
+    THREAD_LOCK( _lock )
+    try
+    {
+        if( !_spooler )  return E_POINTER;
+
+        *result = new Order( _spooler );
+        (*result)->AddRef();
+    }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.get_job_chain" ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.get_job_chain" ); }
+
+    return hr;
+}
+
 //-------------------------------------------------------------------------Com_context::Com_context
 
 Com_context::Com_context()
@@ -1869,13 +1889,11 @@ STDMETHODIMP Com_job_chain::add_order( VARIANT* order_or_payload, VARIANT* job_o
 
         CComPtr<spooler_com::Iorder> iorder;
 
-    /*
         if( order_or_payload->vt == VT_DISPATCH  ||  order_or_payload->vt == VT_UNKNOWN )
         {
             hr = V_UNKNOWN(order_or_payload)->QueryInterface( spooler_com::IID_Iorder, (void**)&iorder );
             if( FAILED(hr) )  iorder = NULL;
         }
-    */
 
         if( !iorder )  iorder = new Order( _job_chain->_spooler, *order_or_payload );
 
@@ -2230,7 +2248,7 @@ STDMETHODIMP Com_order::putref_payload( IUnknown* payload )
     {
         if( !_order )  return E_POINTER;
 
-        _order->set_payload( payload );
+        _order->set_payload( CComVariant(payload) );
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Order.payload" ); }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Order.payload" ); }

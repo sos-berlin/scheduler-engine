@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.104 2002/09/13 09:53:23 jz Exp $
+// $Id: spooler_task.cxx,v 1.105 2002/09/13 10:52:25 jz Exp $
 /*
     Hier sind implementiert
 
@@ -281,7 +281,7 @@ void Job::set_xml( const xml::Element_ptr& element )
         if( order )
         {
             if( _temporary )  throw_xc( "SPOOLER-155" );
-            _order_queue = Z_NEW( Order_queue(this) );
+            _order_queue = Z_NEW( Order_queue( this, &_log ) );
         }
 
         string text;

@@ -1,4 +1,4 @@
-// $Id: spooler_com.h,v 1.41 2002/09/13 09:53:23 jz Exp $
+// $Id: spooler_com.h,v 1.42 2002/09/13 10:52:25 jz Exp $
 
 #ifndef __SPOOLER_COM_H
 #define __SPOOLER_COM_H
@@ -330,6 +330,7 @@ struct Com_spooler : spooler_com::Ispooler, Sos_ole_object
     STDMETHODIMP                create_job_chain            ( spooler_com::Ijob_chain** );
     STDMETHODIMP                add_job_chain               ( spooler_com::Ijob_chain* );
     STDMETHODIMP                get_job_chain               ( BSTR, spooler_com::Ijob_chain** );
+    STDMETHODIMP                create_order                ( spooler_com::Iorder** );
 
   protected:
     Thread_semaphore           _lock;

@@ -1,4 +1,4 @@
-// $Id: spooler_order.h,v 1.1 2002/09/12 19:35:15 jz Exp $
+// $Id: spooler_order.h,v 1.2 2002/09/13 10:52:25 jz Exp $
 
 #ifndef __SPOOLER_ORDER_H
 #define __SPOOLER_ORDER_H
@@ -23,7 +23,7 @@ struct Order : Com_order
 
     
                                 Order                   ( Spooler* spooler )                        : _zero_(this+1), _spooler(spooler), Com_order(this) {}
-                                Order                   ( Spooler* spooler, const Payload& );
+                                Order                   ( Spooler* spooler, const VARIANT& );
                                ~Order                   ();
 
 
@@ -50,7 +50,7 @@ struct Order : Com_order
     void                    set_state_text              ( const wstring& state_text )               { THREAD_LOCK( _lock )  _state_text = state_text.c_str(); }
     wstring                     state_text              ()                                          { THREAD_LOCK_RETURN( _lock, wstring, _state_text ); }
 
-    void                    set_payload                 ( const Payload& payload )                  { THREAD_LOCK( _lock )  _payload = payload; }
+    void                    set_payload                 ( const VARIANT& payload )                  { THREAD_LOCK( _lock )  _payload = payload; }
     Payload                     payload                 ()                                          { THREAD_LOCK_RETURN( _lock, Variant, _payload ); }
 
   //Com_order*                  com_order               ()                                          { THREAD_LOCK_RETURN( _lock, Com_order*, _com_order ); }
@@ -78,7 +78,7 @@ struct Order : Com_order
     State                      _state;
     CComBSTR                   _state_text;
     string                     _title;
-    Variant                    _payload;
+    Payload                    _payload;
     bool                       _error;
 
     Job_chain*                 _job_chain;              
@@ -171,7 +171,7 @@ struct Internal_priority
 
 struct Order_queue : Object
 {
-                                Order_queue             ( Job* );
+                                Order_queue             ( Job*, Prefix_log* );
                                ~Order_queue             ();
 
     void                        add_order               ( Order* );
@@ -187,6 +187,7 @@ struct Order_queue : Object
     Fill_zero                  _zero_;
     Spooler*                   _spooler;
     Job*                       _job;
+    Prefix_log*                _log;
     CComPtr<Com_order_queue>   _com_order_queue;
     typedef list< ptr<Order> >  Queue;
     Queue                      _queue;

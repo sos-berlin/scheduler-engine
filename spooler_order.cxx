@@ -1,4 +1,4 @@
-// $Id: spooler_order.cxx,v 1.1 2002/09/12 19:35:15 jz Exp $
+// $Id: spooler_order.cxx,v 1.2 2002/09/13 10:52:25 jz Exp $
 /*
     Hier sind implementiert
 
@@ -219,12 +219,13 @@ ptr<Order> Job_chain::add_order( const Order::Payload& payload )
 */
 //-------------------------------------------------------------------------Order_queue::Order_queue
 
-Order_queue::Order_queue( Job* job )
+Order_queue::Order_queue( Job* job, Prefix_log* log )
 : 
     _zero_(this+1),
     _spooler(job->_spooler), 
     _com_order_queue( new Com_order_queue(this) ),
-    _job(job)
+    _job(job),
+    _log(log)
 {
 }
 
@@ -243,15 +244,19 @@ void Order_queue::add_order( Order* order )
 
     THREAD_LOCK( _lock )
     {
-        Queue::iterator ins = _queue.begin();
+        Queue::iterator ins = _queue.end();
 
         for( Queue::iterator it = _queue.begin(); it != _queue.end(); it++ )
         {
-            if( (*it)->priority() > order->priority() )  ins = it;
-            if( (*it)->id() == order->id() )  throw_xc( "SPOOLER-153", error_string_from_variant( order->id() ), _job->name() );
+            Order* o = *it;
+            if( ins == _queue.end()  &&  order->priority() > o->priority() )  ins = it; 
+            if( o->id() == order->id() )  throw_xc( "SPOOLER-153", error_string_from_variant( order->id() ), _job->name() );
         }
 
         bool was_empty = _queue.empty();
+
+        if( ins != _queue.end() )  _log->info( "ADD_ORDER " + order->obj_name() + " vor " + (*ins)->obj_name() );
+                             else  _log->info( "ADD_ORDER " + order->obj_name() );
 
         _queue.insert( ins, order );
 
@@ -313,7 +318,7 @@ ptr<Order> Order_queue::pop()
 
 //-------------------------------------------------------------------------------------Order::Order
 
-Order::Order( Spooler* spooler, const Payload& payload )
+Order::Order( Spooler* spooler, const VARIANT& payload )
 : 
     _zero_(this+1), 
     _spooler(spooler),
