@@ -385,7 +385,7 @@
                                                 Next start
                                             </xsl:when>
                                             <xsl:otherwise>
-                                                &#160;
+                                                ∙
                                             </xsl:otherwise>
                                         </xsl:choose>
                                     </xsl:otherwise>

@@ -53,3 +53,12 @@ und der Browser vergeblich auf eine Antwort wartet.
 
 Wenn bei Scheduler-Start und need_db=yes die Datenbank erst bei einem späteren Versuch (vor max_db_errors) geöffnet werden kann,
 führt dies nicht mehr zum Fehler.
+
+
+------------------------------------------------
+VERSION 2.0.106  2005-01-24
+
+Neue Eigenschaft spooler.ini_path liefert die Option -ini=.
+
+Keine CPU-Last mehr, wenn Browser http://.../show_log? schließt.
+

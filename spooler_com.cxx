@@ -2422,6 +2422,7 @@ const Com_method Com_spooler::_methods[] =
     { DISPATCH_PROPERTYGET, 26, "Db_orders_table_name"      , (Com_method_ptr)&Com_spooler::get_Db_orders_table_name   , VT_BSTR      },
     { DISPATCH_PROPERTYGET, 27, "Db_history_table_name"     , (Com_method_ptr)&Com_spooler::get_Db_history_table_name  , VT_BSTR      },
     { DISPATCH_PROPERTYGET, 28, "Db_order_history_table_name", (Com_method_ptr)&Com_spooler::get_Db_order_history_table_name, VT_BSTR      },
+    { DISPATCH_PROPERTYGET, 29, "Ini_path"                  , (Com_method_ptr)&Com_spooler::get_Ini_path         , VT_BSTR      },
     {}
 };
 
@@ -2854,6 +2855,14 @@ STDMETHODIMP Com_spooler::get_Db_order_history_table_name( BSTR* result )
 { 
     if( !_spooler )  return E_POINTER;
     return String_to_bstr( _spooler->_order_history_tablename, result ); 
+}
+
+//------------------------------------------------------------------------Com_spooler::get_Ini_path
+
+STDMETHODIMP Com_spooler::get_Ini_path( BSTR* result )                    
+{ 
+    if( !_spooler )  return E_POINTER;
+    return String_to_bstr( _spooler->_factory_ini, result ); 
 }
 
 //----------------------------------------------------------------------------Com_context::_methods

@@ -2557,7 +2557,11 @@ int spooler_main( int argc, char** argv, const string& parameter_line )
                 else
                 if( opt.flag      ( "remove-service"   ) )  do_remove_service = opt.set();
                 else
+                if( opt.with_value( "remove-service"   ) )  do_remove_service = true, service_name = opt.value();
+                else
                 if( opt.flag      ( "renew-service"    ) )  renew_service = opt.set();
+                else
+                if( opt.with_value( "renew-service"    ) )  renew_service = true, service_name = opt.value();
                 else
                 if( opt.with_value( "service-name"     ) )  service_name = opt.value();
                 else

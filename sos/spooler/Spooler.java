@@ -109,4 +109,7 @@ public class Spooler extends Idispatch
 
     /** Name der Datenbanktabelle für die Auftragshistorie */
     public String           db_order_history_table_name()                           { return (String)       com_call( "<db_order_history_table_name" ); }
+
+    /** Option -ini= (factory.ini) */
+    public String           ini_path()                                              { return (String)       com_call( "<ini_path" ); }
 }

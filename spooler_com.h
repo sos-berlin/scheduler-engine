@@ -508,6 +508,7 @@ struct Com_spooler : spooler_com::Ispooler,
     STDMETHODIMP            get_Db_orders_table_name        ( BSTR* );
     STDMETHODIMP            get_Db_history_table_name       ( BSTR* );
     STDMETHODIMP            get_Db_order_history_table_name ( BSTR* );
+    STDMETHODIMP            get_Ini_path                    ( BSTR* );
 
   protected:
     Thread_semaphore           _lock;

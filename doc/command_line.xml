@@ -65,10 +65,11 @@
                     Der Scheduler hat eine DTD, 
                     der die XML-Kommandos und die XML-Konfiguration entsprechen müssen.
                 </p>
+                
+                <p>
+                    Beispiel: <code>scheduler -show-dtd | less</code>
+                </p>
             </description>
-            <example>
-                <code>scheduler meine_konfiguration.xml -show-dtd | less</code>
-            </example>
         </command_option>
 
 
@@ -137,7 +138,7 @@
         </command_option>
 
 
-        <command_option name="install-service" title="Als Windows-Dienst installieren">
+        <command_option name="install-service" type="name" title="Als Windows-Dienst installieren">
             <description>
                 <scheduler_keyword keyword="Service"/>
                 <scheduler_keyword keyword="Dienst"/>
@@ -148,6 +149,7 @@
                 </p>
                 <pre class="indent">
                 
+-config=                
 -id=
 -log=                
 -ini=
@@ -160,6 +162,33 @@
             </description>
         </command_option>
 
+
+        <command_option name="remove-service" type="name" title="Windows-Dienst entfernen">
+            <description>
+                <scheduler_keyword keyword="Service"/>
+                <scheduler_keyword keyword="Dienst"/>
+                <p>
+                    Entfernt einen zuvor mit <code>-install-service</code> installierten Dienst.
+                </p>
+                <p>
+                    <code>-remove-service=</code><i>name</i> ist dasselbe wie
+                    <code>-remove-service -service-name=</code><i>name</i>.
+                </p>
+            </description>
+        </command_option>
+
+<!-- funktioniert nicht 2005-01-22
+        <command_option name="renew-service" type="name" title="Windows-Dienst entfernen und erneut installieren">
+            <description>
+                <scheduler_keyword keyword="Service"/>
+                <scheduler_keyword keyword="Dienst"/>
+                <p>
+                    <code>-renew-service=</code><i>name</i> ist dasselbe wie
+                    <code>-renew-service -service-name=</code><i>name</i>.
+                </p>
+            </description>
+        </command_option>
+-->
 
         <command_option name="service-name" type="name" initial="sos_scheduler" title="Interner Name des Windows-Dienstes">
             <description>

@@ -493,6 +493,9 @@ library Spooler
 
         [propget,helpstring("Name der Datenbanktabelle für die Auftragshistorie")]
         HRESULT                 Db_order_history_table_name( [out,retval] BSTR* );
+
+        [propget,helpstring("Option -ini= (Pfadname der factory.ini)")]
+        HRESULT                 Ini_path                ( [out,retval] BSTR* );
     }
 
     [
