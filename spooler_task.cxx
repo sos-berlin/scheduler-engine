@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.219 2003/11/30 10:35:38 jz Exp $
+// $Id: spooler_task.cxx,v 1.220 2003/12/01 00:29:19 jz Exp $
 /*
     Hier sind implementiert
 
@@ -469,8 +469,8 @@ void Task::set_state( State new_state )
             string msg = "state=" + state_name();
             if( _next_time )  msg += " (" + _next_time.as_string() + ")";
             if( new_state == s_starting  &&  _start_at )  msg += " (at=" + _start_at.as_string() + ")";
-            if( new_state == s_starting  &&  _thread->_free_threading )  msg += ", dem Thread " + _thread->name() + " zugeordnet";
-            if( new_state == s_running && _module_instance && _module_instance->pid() )  msg += ", pid=" + as_string( _module_instance->pid() );
+          //if( new_state == s_starting  &&  _thread->_free_threading )  msg += ", dem Thread " + _thread->name() + " zugeordnet";
+            if( new_state == s_starting  &&  _module_instance && _module_instance->pid() )  msg += ", pid=" + as_string( _module_instance->pid() );
 
             _log.log( log_level, msg );
         }

@@ -1,4 +1,4 @@
-// $Id: spooler_process.cxx,v 1.23 2003/11/30 10:35:38 jz Exp $
+// $Id: spooler_process.cxx,v 1.24 2003/12/01 00:29:18 jz Exp $
 
 #include "spooler.h"
 
@@ -91,7 +91,7 @@ void Process::start()
 
     _running_since = Time::now();
 
-    _spooler->_log.debug( "Prozess pid=" + as_string( pid() ) + " gestartet" );
+    _spooler->_log.debug9( "Prozess pid=" + as_string( pid() ) + " gestartet" );     // pid wird auch von Task::set_state(s_starting) mit log_info protokolliert
 }
 
 //--------------------------------------------------------------------------Process::async_continue

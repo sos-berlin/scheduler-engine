@@ -1,4 +1,4 @@
-// $Id: spooler_log.cxx,v 1.83 2003/11/30 10:35:38 jz Exp $
+// $Id: spooler_log.cxx,v 1.84 2003/12/01 00:29:18 jz Exp $
 
 #include "spooler.h"
 #include "spooler_mail.h"
@@ -456,7 +456,7 @@ void Prefix_log::close2()
 
         try
         {
-            LOG( "close(" << _file << ")\n" );
+            //LOG( "close(" << _file << ")\n" );
 
             int ret = ::close( _file );
             if( ret == -1 )  throw_errno( errno, "close", _filename.c_str() );
