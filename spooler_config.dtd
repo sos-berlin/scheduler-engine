@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- $Id: spooler_config.dtd,v 1.11 2001/01/07 16:35:19 jz Exp $   (C) 2000 SOS GmbH Berlin 
+<!-- $Id: spooler_config.dtd,v 1.12 2001/01/07 16:37:58 jz Exp $   (C) 2000 SOS GmbH Berlin 
      Joacim Zschimmer
 
      Konfiguration für den Spooler. 
@@ -86,16 +86,6 @@
 <!ATTLIST modify_spooler        action  (restart|stop|terminate) #IMPLIED>
 <!ATTLIST modify_spooler        paused              (yes|no) #IMPLIED>
 
-<!--
-<!ELEMENT stop_spooler          EMPTY>                                  <!-- Stoppt den Spooler. Spooler wartet auf weiteres Kommando. -->
-                                                                        <!-- Antwort: <ok> -->
-
-<!ELEMENT restart_spooler       EMPTY>                                  <!-- Stoppt den Spooler, lädt Config erneut und startet -->
-                                                                        <!-- Antwort: <ok> -->
-
-<!ELEMENT terminate_spooler     EMPTY>                                  <!-- Beendet den Spooler -->
-                                                                        <!-- Antwort: <ok> -->
--->
 <!ELEMENT modify_job            EMPTY>
 <!ATTLIST modify_job            job                 CDATA #REQUIRED>
 <!ATTLIST modify_job            action  (start|stop) #REQUIRED>         <!-- start: Startet einen gestoppten (z.B. wegen Fehlers) Job.
