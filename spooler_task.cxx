@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.205 2003/10/10 22:49:07 jz Exp $
+// $Id: spooler_task.cxx,v 1.206 2003/10/11 11:40:00 jz Exp $
 /*
     Hier sind implementiert
 
@@ -655,7 +655,7 @@ bool Task::do_something()
                         {
                             if( _job->order_queue() )
                             {
-                                if( !_order )  _order = _job->order_queue()->get_order_for_processing( now, this );
+                                if( !_order )  THREAD_LOCK( _lock )  _order = _job->order_queue()->get_order_for_processing( now, this );
 
                                 if( !_order )
                                 {
@@ -688,7 +688,7 @@ bool Task::do_something()
 
                 case s_running_waiting_for_order:
                 {
-                    if( !_order )  _order = _job->order_queue()->get_order_for_processing( now, this );
+                    if( !_order )  THREAD_LOCK( _lock )  _order = _job->order_queue()->get_order_for_processing( now, this );
                     if( _order )  set_state( s_running ), loop = true;  // Auftrag da? Dann Task weiterlaufen lassen (Ende der Run_time wird noch geprüft)
                                                                         // _order wird in step__end() wieder abgeräumt
                     break;
@@ -988,7 +988,7 @@ bool Task::step__end()
         {
             _order->postprocessing( result );
             _log.set_order_log( NULL );
-            _order = NULL;
+            THREAD_LOCK( _lock )  _order = NULL;
             result = true;
         }
 
@@ -1139,7 +1139,7 @@ void Task::set_mail_defaults()
 
     if( !is_error )
     {
-        _log.set_mail_subject( "Job " + _name + " gelungen" );
+        _log.set_mail_subject( obj_name() + " gelungen" );
     }
     else
     {

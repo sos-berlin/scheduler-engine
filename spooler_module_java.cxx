@@ -1,4 +1,4 @@
-// $Id: spooler_module_java.cxx,v 1.68 2003/10/10 12:45:39 jz Exp $
+// $Id: spooler_module_java.cxx,v 1.69 2003/10/11 11:40:00 jz Exp $
 /*
     Hier sind implementiert
 
@@ -379,8 +379,8 @@ bool Module::make_java_class( bool force )
         c.set_throw( false );
         c.execute( cmd );
 
-        if( c.stderr_text() != "" )  _log.info( c.stderr_text() ),  _log.info( "" );
-        if( c.stdout_text() != "" )  _log.info( c.stdout_text() ),  _log.info( "" );
+        if( c.stderr_text() != "" )  _log.log( c.exit_code() != 0? log_error : log_info, c.stderr_text() ),  _log.info( "" );
+        if( c.stdout_text() != "" )  _log.log( c.exit_code() != 0? log_error : log_info, c.stdout_text() ),  _log.info( "" );
 
         if( c.xc() )  throw *c.xc();
 

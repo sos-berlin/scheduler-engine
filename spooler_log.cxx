@@ -1,4 +1,4 @@
-// $Id: spooler_log.cxx,v 1.74 2003/10/10 11:19:06 jz Exp $
+// $Id: spooler_log.cxx,v 1.75 2003/10/11 11:40:00 jz Exp $
 
 #include "spooler.h"
 #include "spooler_mail.h"
@@ -283,6 +283,18 @@ Prefix_log::Prefix_log( Spooler* spooler, const string& prefix )
 Prefix_log::~Prefix_log()
 {
     close();
+
+    if( _remove_after_close )
+    {
+        _remove_after_close = false;
+
+        try
+        {
+            int ret = unlink( _filename.c_str() );
+            if( ret == -1 )  throw_errno( errno, "unlink", _filename.c_str() );
+        }
+        catch( const exception&  x ) { _spooler->_log.error( string("FEHLER BEIM LÖSCHEN DER PROTOKOLLDATEI ") + x.what() ); }
+    }
 }
 
 //---------------------------------------------------------------------------------Prefix_log::init
@@ -414,18 +426,6 @@ void Prefix_log::close()
         }
         catch( const exception&  x ) { _spooler->_log.error(x.what());                         _remove_after_close = false; }
         catch( const _com_error& x ) { _spooler->_log.error(bstr_as_string(x.Description()));  _remove_after_close = false; }
-    }
-
-    if( _remove_after_close )
-    {
-        _remove_after_close = false;
-
-        try
-        {
-            int ret = unlink( _filename.c_str() );
-            if( ret == -1 )  throw_errno( errno, "unlink", _filename.c_str() );
-        }
-        catch( const exception&  x ) { _spooler->_log.error( string("FEHLER BEIM LÖSCHEN DER PROTOKOLLDATEI ") + x.what() ); }
     }
 }
 

@@ -1,4 +1,4 @@
-// $Id: spooler_order.cxx,v 1.42 2003/10/08 11:45:06 jz Exp $
+// $Id: spooler_order.cxx,v 1.43 2003/10/11 11:40:00 jz Exp $
 /*
     Hier sind implementiert
 
@@ -98,9 +98,9 @@ xml::Element_ptr Job_chain_node::dom( const xml::Document_ptr& document, Show_wh
 {
     xml::Element_ptr element = document.createElement( "job_chain_node" );
 
-                                        element.setAttribute( "state"      , string_from_variant( _state       ) );
-        if( !_next_state.is_empty()  )  element.setAttribute( "next_state" , string_from_variant( _next_state  ) );
-        if( !_error_state.is_empty() )  element.setAttribute( "error_state", string_from_variant( _error_state ) );
+                                        element.setAttribute( "state"      , debug_string_from_variant( _state       ) );
+        if( !_next_state.is_empty()  )  element.setAttribute( "next_state" , debug_string_from_variant( _next_state  ) );
+        if( !_error_state.is_empty() )  element.setAttribute( "error_state", debug_string_from_variant( _error_state ) );
    
         if( _job )
         {
@@ -775,9 +775,9 @@ xml::Element_ptr Order::dom( const xml::Document_ptr& document, Show_what show )
 
     THREAD_LOCK( _lock )
     {
-        element.setAttribute( "id"        , string_from_variant( _id ) );
+        element.setAttribute( "id"        , debug_string_from_variant( _id ) );
         element.setAttribute( "title"     , _title );
-        element.setAttribute( "state"     , string_from_variant( _state ) );
+        element.setAttribute( "state"     , debug_string_from_variant( _state ) );
 
         if( _job_chain )  
         element.setAttribute( "job_chain" , _job_chain->name() );
@@ -794,10 +794,10 @@ xml::Element_ptr Order::dom( const xml::Document_ptr& document, Show_what show )
         element.setAttribute( "created"   , _created.as_string() );
 
         if( _log.opened() )
-        element.setAttribute( "log_file", _log.filename() );
+        element.setAttribute( "log_file"  , _log.filename() );
 
         if( _setback )
-        element.setAttribute( "setback", _setback.as_string() );
+        element.setAttribute( "setback"   , _setback.as_string() );
 
 
         if( show & show_log )
@@ -921,7 +921,7 @@ void Order::set_state2( const State& state, bool is_error_state )
 
     if( _job_chain )  _log.info( log_line );
 
-    _state = state;
+    THREAD_LOCK( _lock )  _state = state;
 }
 
 //------------------------------------------------------------------------------Order::set_priority
@@ -1145,8 +1145,6 @@ void Order::postprocessing( bool success )
 
 void Order::processing_error()
 {
-    // Was nach einem Jobfehler geschieht, scheint noch nicht ganz zu Ende gedacht zu sein. Joacim 24.6.2003
-
     THREAD_LOCK( _lock )
     {
         _task = NULL;
@@ -1208,7 +1206,7 @@ string Order::obj_name()
     {
         if( _job_chain )  result = _job_chain->name() + " ";
 
-        result += string_from_variant(_id) + rtrim( "  " + _title );
+        result += debug_string_from_variant(_id) + rtrim( "  " + _title );
 
         if( _setback )
             if( _setback == latter_day )  result += ", setback (Maximum erreicht)";
