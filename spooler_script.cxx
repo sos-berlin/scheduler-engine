@@ -1,4 +1,4 @@
-// $Id: spooler_script.cxx,v 1.15 2002/09/29 16:17:25 jz Exp $
+// $Id: spooler_script.cxx,v 1.16 2002/10/21 14:54:18 jz Exp $
 /*
     Hier sind implementiert
 
@@ -28,7 +28,7 @@ bool check_result( const Variant& vt )
 
     HRESULT hr = v.ChangeType( VT_BOOL );
     if( FAILED(hr) )  throw_ole( hr, "VariantChangeType" );
-    return vt.bVal != 0;
+    return v.bVal != 0;
 }
 
 //----------------------------------------------------------------------------------Script::set_xml
