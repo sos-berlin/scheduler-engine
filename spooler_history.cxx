@@ -1,4 +1,4 @@
-// $Id: spooler_history.cxx,v 1.42 2003/05/05 16:51:20 jz Exp $
+// $Id: spooler_history.cxx,v 1.43 2003/05/12 09:50:39 jz Exp $
 
 #include "spooler.h"
 #include "../zschimmer/z_com.h"
@@ -220,8 +220,12 @@ void Spooler_db::close()
     Z_MUTEX( _lock )
     {
         _job_id_select.close();
+        _job_id_select.destroy();
+
       //_history_update.close();
+
         _history_table.close();
+        _history_table.destroy();
 
         _db.close();
         _db.destroy();
@@ -308,6 +312,7 @@ int Spooler_db::get_id()
                     try
                     {
                         open( _spooler->_db_name );
+                        open_history_table();
                         break;
                     }
                     catch( const exception& x )
@@ -857,6 +862,8 @@ xml::Element_ptr Job_history::read_tail( const xml::Document_ptr& doc, int id, i
 
         try
         {
+            if( _use_db  &&  !_spooler->_db->opened() )  throw_xc( "SPOOLER-184" );     // Wenn die DB verübergegehen (wegen Nichterreichbarkeit) geschlossen ist, s. get_id()
+
             Transaction ta = +_spooler->_db;
             {
                 Any_file sel;
@@ -937,8 +944,17 @@ xml::Element_ptr Job_history::read_tail( const xml::Document_ptr& doc, int id, i
 #endif
                     if( with_log )
                     {
-                        string log = file_as_string( "gzip -auto | " + _spooler->_db->_db_name + "-table=" + _spooler->_history_tablename + " -blob=log where \"ID\"=" + as_string(id), "" );
-                        if( !log.empty() ) dom_append_text_element( history_entry, "log", log );
+                        try
+                        {
+#ifdef Z_HPUX
+#   define GZIP_AUTO ""   // gzip -auto liefert ZLIB_STREAM_ERROR mit gcc 3.1, jz 7.5.2003
+#else
+#   define GZIP_AUTO "gzip -auto | "
+#endif
+                            string log = file_as_string( GZIP_AUTO + _spooler->_db->_db_name + "-table=" + _spooler->_history_tablename + " -blob=log where \"ID\"=" + as_string(id), "" );
+                            if( !log.empty() ) dom_append_text_element( history_entry, "log", log );
+                        }
+                        catch( const exception&  x ) { _spooler->_log.warn( string("Historie: ") + x.what() ); }
                     }
 
                     history_element.appendChild( history_entry );

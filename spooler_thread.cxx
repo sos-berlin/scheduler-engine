@@ -1,4 +1,4 @@
-// $Id: spooler_thread.cxx,v 1.80 2003/04/07 12:42:34 jz Exp $
+// $Id: spooler_thread.cxx,v 1.81 2003/05/12 09:50:39 jz Exp $
 /*
     Hier sind implementiert
 
@@ -619,9 +619,9 @@ bool Spooler_thread::process()
 
         remove_temporary_jobs();
     }
-    catch( const Xc&         x ) { _log.error( x.what() ); }
-    catch( const exception&  x ) { _log.error( x.what() ); }
-    catch( const _com_error& x ) { _log.error( as_string( x.Description() ) ); }
+    catch( const Xc&         x ) { _log.error( x.what() ); sos_sleep(1); }      // Sollte nicht besser der Thread beendet werden? jz 9.8.03
+    catch( const exception&  x ) { _log.error( x.what() ); sos_sleep(1); }
+    catch( const _com_error& x ) { _log.error( as_string( x.Description() ) ); sos_sleep(1); }
 
     return something_done;
 }

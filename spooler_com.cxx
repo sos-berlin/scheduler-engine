@@ -1,4 +1,4 @@
-// $Id: spooler_com.cxx,v 1.94 2003/04/11 14:39:44 jz Exp $
+// $Id: spooler_com.cxx,v 1.95 2003/05/12 09:50:39 jz Exp $
 /*
     Hier sind implementiert
 
@@ -76,8 +76,11 @@ static ptr<spooler_com::Iorder> order_from_order_or_payload( Spooler* spooler, c
 
     if( order_or_payload.vt == VT_DISPATCH  ||  order_or_payload.vt == VT_UNKNOWN )
     {
-        HRESULT hr = V_UNKNOWN(&order_or_payload)->QueryInterface( spooler_com::IID_Iorder, iorder.void_pp() );
-        if( FAILED(hr) )  iorder = NULL;
+        if( V_UNKNOWN(&order_or_payload) )
+        {
+            HRESULT hr = V_UNKNOWN(&order_or_payload)->QueryInterface( spooler_com::IID_Iorder, iorder.void_pp() );
+            if( FAILED(hr) )  iorder = NULL;
+        }
     }
 
     if( !iorder )  iorder = new Order( spooler, order_or_payload );
@@ -2400,19 +2403,26 @@ STDMETHODIMP Com_job_chain::add_order( VARIANT* order_or_payload, spooler_com::I
 {
     HRESULT hr = NOERROR;
 
+    LOGI( "add_order\n" );
+
     THREAD_LOCK( _lock )
     try
     {
         if( !_job_chain )  return E_POINTER;
         if( !_job_chain->finished() )  throw_xc( "SPOOLER-151" );
 
+        //Z_DEBUG_ONLY( LOG( "order_from_order_or_payload()\n" ); )
         ptr<spooler_com::Iorder> iorder = order_from_order_or_payload( _job_chain->_spooler, *order_or_payload );
+        if( !iorder )  return E_POINTER;
 
+        //Z_DEBUG_ONLY( LOG( "add_to_job_chain()" ); )
         // Einstieg nur über Order, damit Semaphoren stets in derselben Reihenfolge gesperrt werden.
         dynamic_cast<Order*>( &*iorder )->add_to_job_chain( dynamic_cast<Job_chain*>( this ) );  
 
         *result = iorder;
         (*result)->AddRef();
+
+        //Z_DEBUG_ONLY( LOG( "add_order ok\n" ); )
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Job_chain.add_order" ); }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Job_chain.add_order" ); }
@@ -3105,6 +3115,7 @@ STDMETHODIMP Com_order_queue::add_order( VARIANT* order_or_payload, Iorder** res
     try
     {
         ptr<spooler_com::Iorder> iorder = order_from_order_or_payload( dynamic_cast<Order_queue*>(this)->_spooler, *order_or_payload );
+        if( !iorder )  return E_POINTER;
 
         // Einstieg nur über Order, damit Semaphoren stets in derselben Reihenfolge gesperrt werden.
         dynamic_cast<Order*>( &*iorder )->add_to_order_queue( dynamic_cast<Order_queue*>( this ) );

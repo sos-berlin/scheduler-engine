@@ -1,4 +1,4 @@
-// $Id: spooler_order.cxx,v 1.24 2003/04/04 12:00:55 jz Exp $
+// $Id: spooler_order.cxx,v 1.25 2003/05/12 09:50:39 jz Exp $
 /*
     Hier sind implementiert
 
@@ -743,8 +743,11 @@ void Order::add_to_job_chain( Job_chain* job_chain )
         {
             if( _state.vt == VT_EMPTY )  _state = (*job_chain->_chain.begin())->_state;     // Auftrag bekommt Zustand des ersten Jobs der Jobkette
 
+            //Z_DEBUG_ONLY( LOG( "job_chain->node_from_state()\n" ); )
             Job_chain_node* node = job_chain->node_from_state( _state );
 
+            if( !node->_job  || !node->_job->order_queue() )  throw_xc( "SPOOLER-149", job_chain->name(), error_string_from_variant(_state) );
+            //Z_DEBUG_ONLY( LOG( "node->_job->order_queue()->add_order()\n" ); )
             node->_job->order_queue()->add_order( this );
 
             _job_chain      = job_chain;
