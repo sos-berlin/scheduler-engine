@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.169 2003/02/19 23:17:13 jz Exp $
+// $Id: spooler.cxx,v 1.170 2003/02/23 20:47:24 jz Exp $
 /*
     Hier sind implementiert
 
