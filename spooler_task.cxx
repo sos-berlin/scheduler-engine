@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.249 2004/04/06 09:21:55 jz Exp $
+// $Id: spooler_task.cxx,v 1.250 2004/04/06 10:23:42 jz Exp $
 /*
     Hier sind implementiert
 
@@ -636,7 +636,7 @@ Time Task::next_time()
     
     if( _operation )
     {
-        result = _operation->async_finished()? 0 :                                          // Falls Operation synchron ist (das ist, wenn Task nicht in einem separaten Prozess l‰uft)
+        result = _operation->async_finished()? Time(0) :                                    // Falls Operation synchron ist (das ist, wenn Task nicht in einem separaten Prozess l‰uft)
                  _timeout == latter_day      ? latter_day
                                              : Time( _last_operation_time + _timeout );     // _timeout sollte nicht zu groﬂ sein
     }
