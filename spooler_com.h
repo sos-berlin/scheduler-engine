@@ -1,11 +1,12 @@
-// $Id: spooler_com.h,v 1.52 2002/11/13 13:12:49 jz Exp $
+// $Id: spooler_com.h,v 1.53 2002/11/13 21:20:47 jz Exp $
 
 #ifndef __SPOOLER_COM_H
 #define __SPOOLER_COM_H
-#ifdef SYSTEM_WIN
 
 #include <map>
-#include "../kram/olestd.h"
+//#include "../kram/olestd.h"
+#include "../zschimmer/com.h"
+#include "../kram/com_simple_standards.h"
 #include "../kram/sysxcept.h"
 #include "../kram/sosscrpt.h"
 #include "../kram/com.h"
@@ -17,6 +18,8 @@
 #    else
 #       import "release/spooler.tlb" rename_namespace("spooler_com") raw_interfaces_only named_guids
 #   endif
+#else
+#   include "spooler_idl.h"     // namespace spooler_com
 #endif
 
 
@@ -515,7 +518,7 @@ struct Com_order : spooler_com::Iorder,
     STDMETHODIMP            get_job_chain_node          ( spooler_com::Ijob_chain_node** );
     
     STDMETHODIMP            put_job                     ( VARIANT* );
-    STDMETHODIMP         putref_job                     ( spooler_com::Ijob* job )                  { return put_job( &Variant(job) ); }
+    STDMETHODIMP         putref_job                     ( spooler_com::Ijob* job )                  { Variant v = job; return put_job( &v ); }
     STDMETHODIMP            get_job                     ( spooler_com::Ijob** );
     
     STDMETHODIMP            put_state                   ( VARIANT* );
@@ -567,5 +570,4 @@ struct Com_order_queue : spooler_com::Iorder_queue,
 } //namespace spooler
 } //namespace sos
 
-#endif
 #endif

@@ -1,12 +1,10 @@
-// $Id: Mail.java,v 1.1 2002/11/09 09:13:17 jz Exp $
+// $Id: Mail.java,v 1.2 2002/11/13 21:20:49 jz Exp $
 
 package sos.spooler;
 
 /**
- * Überschrift:
- * Beschreibung:
- * Copyright:     Copyright (c) 2002, SOS GmbH Berlin
- * Organisation:  SOS GmbH Berlin
+ * eMail-Versand
+ *
  * @author Joacim Zschimmer, Zschimmer GmbH
  * @version 1.0
  */

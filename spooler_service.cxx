@@ -1,4 +1,4 @@
-// $Id: spooler_service.cxx,v 1.29 2002/10/14 15:01:28 jz Exp $
+// $Id: spooler_service.cxx,v 1.30 2002/11/13 21:20:48 jz Exp $
 /*
     Hier sind implementiert
 
@@ -10,13 +10,12 @@
 
 
 #include "spooler.h"
+#ifdef Z_WINDOWS
 
 #include "../kram/log.h"
 #include "../kram/sosopt.h"
 #include "../kram/sleep.h"
 #include "../kram/msec.h"
-
-#ifdef SYSTEM_WIN 
 
 #include <windows.h>
 

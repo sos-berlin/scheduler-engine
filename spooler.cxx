@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.127 2002/11/13 18:17:34 jz Exp $
+// $Id: spooler.cxx,v 1.128 2002/11/13 21:20:45 jz Exp $
 /*
     Hier sind implementiert
 
@@ -67,12 +67,14 @@ struct Set_console_code_page
 */
 
 //------------------------------------------------------------------------------int64_from_filetime
+#ifdef Z_WINDOWS
 
 inline int64 int64_from_filetime( FILETIME t )
 {
     return ( (int64)t.dwHighDateTime << 32 ) + t.dwLowDateTime;
 }
 
+#endif
 //---------------------------------------------------------------------------------send_error_email
 
 void send_error_email( const string& error_text, int argc, char** argv )
@@ -123,6 +125,7 @@ void send_error_email( const string& error_text, int argc, char** argv )
 }
 
 //---------------------------------------------------------------------------------thread_info_text
+#ifdef Z_WINDOWS
 
 static string thread_info_text( HANDLE h )
 {
@@ -154,6 +157,7 @@ static string thread_info_text( HANDLE h )
     return result;
 }
 
+#endif
 //---------------------------------------------------------------------read_profile_mail_on_process
 
 int read_profile_mail_on_process( const string& profile, const string& section, const string& entry, int deflt )

@@ -1,4 +1,11 @@
-// $Id: Order.java,v 1.1 2002/11/09 09:13:17 jz Exp $
+// $Id: Order.java,v 1.2 2002/11/13 21:20:49 jz Exp $
+
+/**
+ * Auftrag
+ *
+ * @author Joacim Zschimmer, Zschimmer GmbH
+ * @version $Revision: 1.2 $
+ */
 
 package sos.spooler;
 

@@ -1,6 +1,12 @@
-// $Id: Idispatch.java,v 1.1 2002/11/09 09:13:17 jz Exp $
+// $Id: Idispatch.java,v 1.2 2002/11/13 21:20:49 jz Exp $
 
 package sos.spooler;
+
+/**
+ * Interne Klasse des Spoolers.
+ * @author Joacim Zschimmer, Zschimmer GmbH
+ * @version $Revision: 1.2 $
+ */
 
 public class Idispatch
 {
@@ -54,7 +60,7 @@ public class Idispatch
     }
 
 
-    public final void com_clear()
+    final void com_clear()
     { 
         _idispatch = 0; 
     }

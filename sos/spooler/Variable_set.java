@@ -1,14 +1,12 @@
-// $Id: Variable_set.java,v 1.1 2002/11/09 09:13:18 jz Exp $
+// $Id: Variable_set.java,v 1.2 2002/11/13 21:20:50 jz Exp $
 
 package sos.spooler;
 
 /**
- * Überschrift:
- * Beschreibung:
- * Copyright:     Copyright (c) 2001, SOS GmbH Berlin
- * Organisation:  SOS GmbH Berlin
+ * Variablenmenge.
+ *
  * @author Joacim Zschimmer, Zschimmer GmbH
- * @version 1.0
+ * @version $Revision: 1.2 $
  */
 
 public class Variable_set extends Idispatch

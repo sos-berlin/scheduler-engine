@@ -1,6 +1,13 @@
-// $Id: Job_chain_node.java,v 1.1 2002/11/09 09:13:17 jz Exp $
+// $Id: Job_chain_node.java,v 1.2 2002/11/13 21:20:49 jz Exp $
 
 package sos.spooler;
+
+/**
+ * Jobkettenknoten (Job, Zustand, Folgezustand, Fehlerzustand)
+ *
+ * @author Joacim Zschimmer, Zschimmer GmbH
+ * @version $Revision: 1.2 $
+ */
 
 public class Job_chain_node extends Idispatch
 {

@@ -1,4 +1,4 @@
-// $Id: spooler.h,v 1.98 2002/11/13 18:17:34 jz Exp $
+// $Id: spooler.h,v 1.99 2002/11/13 21:20:46 jz Exp $
 
 #ifndef __SPOOLER_H
 #define __SPOOLER_H
@@ -88,15 +88,10 @@ namespace sos {
 namespace sos {
 
 
-typedef _bstr_t                 Dom_string;
-
-template<typename T>
-inline Dom_string               as_dom_string               ( const T& t )                          { return as_bstr_t( t ); }
-
-string                          program_filename            ();
-string                          directory_of_path           ( const string& );
-string                          basename_of_path            ( const string& );
-string                          extension_of_path           ( const string& );
+//typedef _bstr_t                 Dom_string;
+//
+//template<typename T>
+//inline Dom_string               as_dom_string               ( const T& t )                          { return as_bstr_t( t ); }
 
 namespace spooler {
 

@@ -1,14 +1,12 @@
-// $Id: Thread.java,v 1.1 2002/11/09 09:13:18 jz Exp $
+// $Id: Thread.java,v 1.2 2002/11/13 21:20:50 jz Exp $
 
 package sos.spooler;
 
 /**
- * Überschrift:
- * Beschreibung:
- * Copyright:     Copyright (c) 2002, SOS GmbH Berlin
+ * Spooler-Thread
+ * Copyright (c) 2002, SOS GmbH Berlin
  * Organisation:  SOS GmbH Berlin
- * @author Joacim Zschimmer, Zschimmer GmbH
- * @version 1.0
+ * @version $Revision: 1.2 $
  */
 
 
@@ -16,8 +14,12 @@ public class Thread extends Idispatch
 {
     private                 Thread              ( long idispatch )                  { super(idispatch); }
 
+    /** {@link Log} des Threads. */
     public Log              log                 ()                                  { return (Log)      com_call( "<log"            ); }
+
   //public Script           script              ();
+
     public String           include_path        ()                                  { return (String)   com_call( "<include_path"   ); }
+
     public String           name                ()                                  { return (String)   com_call( "<name"           ); }
 }

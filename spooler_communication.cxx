@@ -1,4 +1,4 @@
-// $Id: spooler_communication.cxx,v 1.32 2002/10/24 09:12:25 jz Exp $
+// $Id: spooler_communication.cxx,v 1.33 2002/11/13 21:20:47 jz Exp $
 /*
     Hier sind implementiert
 
@@ -550,7 +550,7 @@ bool Communication::handle_socket( Channel* channel )
 
 //---------------------------------------------------------------------------Communication::_fd_set
 
-void Communication::_fd_set( SOCKET socket, FD_SET* fdset )
+void Communication::_fd_set( SOCKET socket, fd_set* fdset )
 {
     if( socket != SOCKET_ERROR )
     {

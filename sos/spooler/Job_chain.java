@@ -1,5 +1,12 @@
 // $Id
 
+/**
+ * Jobkette
+ *
+ * @author Joacim Zschimmer, Zschimmer GmbH
+ * @version $Revision: 1.2 $
+ */
+
 package sos.spooler;
 
 public class Job_chain extends Idispatch

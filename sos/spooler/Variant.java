@@ -1,8 +1,16 @@
-// $Id: Variant.java,v 1.1 2002/11/09 09:13:18 jz Exp $
+
+// $Id: Variant.java,v 1.2 2002/11/13 21:20:50 jz Exp $
 
 package sos.spooler;
 
+/**
+ * - ungültig -
+ *
+ * @author Joacim Zschimmer, Zschimmer GmbH
+ * @version $Revision: 1.2 $
+ */
 
+/*
 public class Variant
 {
     public                      Variant                     ( int     value )                       { assign(value); }
@@ -24,3 +32,4 @@ public class Variant
     public native String        as_string                   ();
   //public native ..            as_date_time                ();
 };
+*/

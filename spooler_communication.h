@@ -1,7 +1,19 @@
-// $Id: spooler_communication.h,v 1.2 2001/02/21 10:57:36 jz Exp $
+// $Id: spooler_communication.h,v 1.3 2002/11/13 21:20:47 jz Exp $
 
 #ifndef __SPOOLER_COMMUNICATION_H
 #define __SPOOLER_COMMUNICATION_H
+
+#ifdef __GNUC__
+#   include <errno.h>
+#   include <sys/socket.h>
+#   include <sys/select.h>
+#   include <netdb.h>
+#   include <netinet/in.h>   // gethostbyname()
+#   include <arpa/inet.h>    // inet_addr()
+#   include <unistd.h>       // close()
+
+    typedef int SOCKET;
+#endif
 
 namespace sos {
 namespace spooler {
@@ -47,6 +59,7 @@ struct Named_host : Host
                                 Named_host                  ()                              {}
                                 Named_host                  ( const in_addr& ip )           { set_ip(ip.s_addr); }
                                 Named_host                  ( uint32 ip )                   { set_ip(ip); }
+                               ~Named_host                  ()                              {}                      // gcc 3.2 zuliebe
 
     void                        operator =                  ( const in_addr& ip )           { set_ip(ip.s_addr); }
 
@@ -156,7 +169,7 @@ struct Communication
     int                         run                         ();
     void                        bind                        ();
     bool                        handle_socket               ( Channel* );
-    void                       _fd_set                      ( SOCKET, FD_SET* );
+    void                       _fd_set                      ( SOCKET, fd_set* );
 
     Fill_zero                  _zero_;
     Spooler*                   _spooler;
@@ -164,8 +177,8 @@ struct Communication
     Channel_list               _channel_list;
     SOCKET                     _udp_socket;
     int                        _nfds;
-    FD_SET                     _read_fds;
-    FD_SET                     _write_fds;
+    fd_set                     _read_fds;
+    fd_set                     _write_fds;
     Thread_semaphore           _semaphore;
     bool                       _terminate;
     int                        _tcp_port;

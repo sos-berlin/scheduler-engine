@@ -3,12 +3,8 @@
 package sos.spooler;
 
 /**
- * Überschrift:
- * Beschreibung:
- * Copyright:     Copyright (c) 2002, SOS GmbH Berlin
- * Organisation:  SOS GmbH Berlin
  * @author Joacim Zschimmer, Zschimmer GmbH
- * @version 1.0
+ * @version $Revision: 1.2 $
  */
 
 public class Spooler extends Idispatch

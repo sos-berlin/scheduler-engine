@@ -1,7 +1,8 @@
-// $Id: spooler_service.h,v 1.6 2002/05/16 20:01:42 jz Exp $
+// $Id: spooler_service.h,v 1.7 2002/11/13 21:20:48 jz Exp $
 
 #ifndef __SPOOLER_SERVICE_H
 #define __SPOOLER_SERVICE_H
+#ifdef Z_WINDOWS
 
 namespace sos {
 namespace spooler {
@@ -22,4 +23,5 @@ string                          make_service_display        ( const string& id )
 } //namespace spooler
 } //namespace sos
 
+#endif
 #endif
