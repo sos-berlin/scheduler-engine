@@ -1,4 +1,4 @@
-// $Id: spooler_wait.cxx,v 1.23 2001/11/09 17:08:39 jz Exp $
+// $Id: spooler_wait.cxx,v 1.24 2001/12/12 20:09:12 jz Exp $
 /*
     Hier sind implementiert
 
@@ -373,7 +373,7 @@ void Directory_watcher::watch_directory( const string& directory )
 
     _directory = directory;
 
-    _handle = FindFirstChangeNotification( directory.c_str(), FALSE, FILE_NOTIFY_CHANGE_FILE_NAME );
+    _handle = FindFirstChangeNotification( directory.c_str(), FALSE, FILE_NOTIFY_CHANGE_FILE_NAME | FILE_NOTIFY_CHANGE_DIR_NAME );
     if( _handle == INVALID_HANDLE_VALUE )  _handle = NULL, throw_mswin_error( "FindFirstChangeNotification" );
 }
 
