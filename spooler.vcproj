@@ -46,7 +46,7 @@
 			<Tool
 				Name="VCCustomBuildTool"
 				CommandLine="echo perl ../scheduler_keyword_to_xml.pl *.xml xml/*.xml xml/answer/*.xml
-cd doc &amp;&amp; bash -c &quot;perl ../scheduler_keyword_to_xml.pl *.xml xml/*.xml xml/answer/*.xml&quot;
+cd doc &amp;&amp; rem bash -c &quot;perl ../scheduler_keyword_to_xml.pl *.xml xml/*.xml xml/answer/*.xml&quot;
 echo jar cfm &quot;$(TargetDir)sos.spooler.jar&quot; ../java_manifest sos/spooler/*.class
 cd &quot;$(IntDir)&quot; &amp;&amp; jar cfm &quot;$(TargetDir)sos.spooler.jar&quot; ../java_manifest sos/spooler/*.class
 ant -f ../javadoc.xml"
@@ -124,7 +124,7 @@ ant -f ../javadoc.xml"
 			<Tool
 				Name="VCCustomBuildTool"
 				CommandLine="echo perl ../scheduler_keyword_to_xml.pl *.xml xml/*.xml xml/answer/*.xml
-cd doc &amp;&amp; bash -c &quot;perl ../scheduler_keyword_to_xml.pl *.xml xml/*.xml xml/answer/*.xml&quot;
+cd doc &amp;&amp; rem bash -c &quot;perl ../scheduler_keyword_to_xml.pl *.xml xml/*.xml xml/answer/*.xml&quot;
 echo jar cfm &quot;$(TargetDir)sos.spooler.jar&quot; ../java_manifest sos/spooler/*.class
 cd &quot;$(IntDir)&quot; &amp;&amp; jar cfm &quot;$(TargetDir)sos.spooler.jar&quot; ../java_manifest sos/spooler/*.class
 ant -f ../javadoc.xml"

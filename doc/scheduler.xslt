@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding="utf-8"?>
-<!-- $Id: scheduler.xslt,v 1.37 2004/09/13 17:28:02 jz Exp $ -->
+<!-- $Id: scheduler.xslt,v 1.38 2004/09/16 16:05:46 jz Exp $ -->
 
 <!--
     Änderungswünsche:
@@ -1555,13 +1555,13 @@
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~browse_bar_register-->
 
     <xsl:template name="browse_bar_register">
-
+        <!--
         <xsl:element name="a">
             <xsl:attribute name="href"><xsl:value-of select="$base_dir"/>register.xml</xsl:attribute>
             <xsl:text>Register</xsl:text>
         </xsl:element>
         &#160; &#160; &#160; 
-        
+        -->
     </xsl:template>    
     
 </xsl:stylesheet>
