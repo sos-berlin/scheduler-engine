@@ -1,4 +1,4 @@
-// $Id: spooler_com.cxx,v 1.142 2004/02/29 00:37:39 jz Exp $
+// $Id: spooler_com.cxx,v 1.143 2004/03/17 20:50:55 jz Exp $
 /*
     Hier sind implementiert
 
@@ -615,7 +615,7 @@ STDMETHODIMP Com_variable_set::put_xml( BSTR xml_text )
 
         DOM_FOR_EACH_ELEMENT( doc.documentElement(), e )
         {
-            if( e.nodeName() == "variable" || e.nodeName() == "param" )
+            if( e.nodeName_is( "variable" ) || e.nodeName_is( "param" ) )
             {
                 Bstr    name  = e.getAttribute( "name" );
                 Variant value = e.getAttribute( "value" );
