@@ -1,4 +1,4 @@
-// $Id: spooler.h,v 1.17 2001/01/10 12:43:24 jz Exp $
+// $Id: spooler.h,v 1.18 2001/01/10 14:47:38 jz Exp $
 
 #ifndef __SPOOLER_H
 
@@ -19,9 +19,19 @@
         typedef IXMLDOMDocumentPtr Document_ptr;
     }
 
-#   include <atlbase.h>
 #   include "../kram/olestd.h"
 #   include "../kram/sosscrpt.h"
+
+#   include <atlbase.h>
+//    extern CComModule& _Module;
+//#   include <atlcom.h>
+
+#   if defined _DEBUG
+#       import "debug/spooler.tlb"   no_namespace raw_interfaces_only named_guids
+#    else
+#       import "release/spooler.tlb" no_namespace raw_interfaces_only named_guids
+#   endif
+
 #endif
 
 #include <stdio.h>
@@ -67,7 +77,7 @@ const Time                      latter_day                  = INT_MAX;
 template<typename T>
 struct Mutex
 {
-    typedef Thread_semaphore::Guard Guard;
+    typedef sos::Thread_semaphore::Guard Guard;
 
 
                                 Mutex                   ( const T& t = T() )    : _value(t) {}
@@ -76,7 +86,7 @@ struct Mutex
                                 operator T              ()                      { Guard g = &_semaphore; T v = _value; return v; }
     T                           read_and_reset          ()                      { Guard g = &_semaphore; T v = _value; _value = T(); return v; }
 
-    Thread_semaphore           _semaphore;
+    sos::Thread_semaphore      _semaphore;
     T                          _value;
 };
 
@@ -127,6 +137,26 @@ struct Task_log
     string                     _prefix;
 };
 
+//-------------------------------------------------------------------------------------Com_task_log
+#ifdef SYSTEM_WIN
+
+struct Com_task_log : Icom_task_log, Sos_ole_object
+{
+                                Com_task_log            ( Task* );
+
+    USE_SOS_OLE_OBJECT
+
+    STDMETHODIMP                msg                     ( BSTR line )                           { log( Log::k_msg, line ); }
+    STDMETHODIMP                warn                    ( BSTR line )                           { log( Log::k_msg, line ); }
+    STDMETHODIMP                error                   ( BSTR line )                           { log( Log::k_msg, line ); }
+    STDMETHODIMP                log                     ( Log::Kind kind, BSTR line );
+
+
+    Fill_zero                  _zero_;
+    Task*                      _task;
+};
+
+#endif
 //-------------------------------------------------------------------------------------------Script
 
 struct Script
@@ -148,7 +178,9 @@ struct Script_instance
 {
                                 Script_instance             ( Script* script )              : _script(script) {}
 
+    void                        init                        ();
     void                        load                        ();
+    void                        add_obj                     ( const CComPtr<IDispatch>&, const string& name );
     void                        close                       ();
     CComVariant                 call                        ( const char* name );
     CComVariant                 call                        ( const char* name, int param );
@@ -224,7 +256,7 @@ struct Object_set_descr : Sos_self_deleting
 
 struct Object_set : Sos_self_deleting
 {
-                                Object_set                  ( Spooler*, const Sos_ptr<Object_set_descr>& );
+                                Object_set                  ( Spooler*, Task*, const Sos_ptr<Object_set_descr>& );
                                ~Object_set                  ();
 
     void                        open                        ();
@@ -235,6 +267,7 @@ struct Object_set : Sos_self_deleting
 
     Fill_zero                  _zero_;
     Spooler*                   _spooler;
+    Task*                      _task;
     Sos_ptr<Object_set_descr>  _object_set_descr;
     Script_instance            _script_instance;
     bool                       _use_objects;                // Objektschnittstelle nutzen. Sonst prozedural

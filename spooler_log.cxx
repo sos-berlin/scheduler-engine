@@ -1,13 +1,15 @@
-// $Id: spooler_log.cxx,v 1.1 2001/01/10 12:43:24 jz Exp $
+// $Id: spooler_log.cxx,v 1.2 2001/01/10 14:47:38 jz Exp $
 
 #include "../kram/sos.h"
 #include "../kram/sosdate.h"
 #include "spooler.h"
 
-
 namespace sos {
 namespace spooler {
 
+//-------------------------------------------------------------------------------Typbibliothek
+
+DESCRIBE_CLASS( NULL, Com_task_log, com_task_log, CLSID_Com_task_log, "Spooler.Com_task_log", "1.0", 0 );
 
 //-----------------------------------------------------------------------------------------Log::Log
 
@@ -116,6 +118,38 @@ void Task_log::log( Log::Kind kind, const string& line )
     _log->log( kind, _prefix, line );
 }
 
+//--------------------------------------------------------------------------------Com_task_log::log
+#ifdef SYSTEM_WIN
+
+Com_task_log::Com_task_log( Task* task )
+:
+    Sos_ole_object( com_task_log_class_ptr, this, NULL ),
+    _zero_(this+1),
+    _task(task)
+{ 
+}
+
+#endif
+//--------------------------------------------------------------------------------Com_task_log::log
+#ifdef SYSTEM_WIN
+
+STDMETHODIMP Com_task_log::log( Log::Kind kind, BSTR line )
+{ 
+    HRESULT hr = NOERROR;
+
+    if( !_task )  return E_POINTER;
+
+    try 
+    {
+        _task->_log.log( kind, bstr_as_string( line ) ); 
+    }
+    catch( const Xc&   x )  { hr = _set_excepinfo(x); }
+    catch( const xmsg& x )  { hr = _set_excepinfo(x); }
+
+    return hr;
+}
+
+#endif
 //-------------------------------------------------------------------------------------------------
 
 } //namespace spooler

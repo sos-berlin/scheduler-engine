@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.18 2001/01/10 12:43:23 jz Exp $
+// $Id: spooler.cxx,v 1.19 2001/01/10 14:47:37 jz Exp $
 
 
 
@@ -6,7 +6,7 @@
 /*
     WAS FEHLT?
 
-    Listen etc. sperren bei execute()
+    Dienst.
 
 */
 
@@ -22,6 +22,12 @@
 #   include <sys/types.h>
 #   include <sys/timeb.h>
 //#endif
+
+#if defined SYSTEM_MICROSOFT
+    //CComModule com_module;
+    //CComModule& _Module = com_module;
+#endif
+
 
 namespace sos {
 
@@ -54,14 +60,26 @@ Time now()
 #   endif
 }
 
-//----------------------------------------------------------------------------Script_instance::load
+//----------------------------------------------------------------------------Script_instance::init
 
-void Script_instance::load()
+void Script_instance::init()
 {
     _script_site = new Script_site;
     _script_site->_engine_name = _script->_language;
     _script_site->init_engine();
+}
 
+//----------------------------------------------------------------------------Script_instance::load
+
+void Script_instance::add_obj( const CComPtr<IDispatch>& object, const string& name )
+{
+    _script_site->add_obj( object, SysAllocString_string( name ) );
+}
+
+//----------------------------------------------------------------------------Script_instance::load
+
+void Script_instance::load()
+{
     _script_site->parse( _script->_text );
 }
 
@@ -113,10 +131,11 @@ void Spooler_object::process( Level output_level )
 
 //---------------------------------------------------------------------------Object_set::Object_set
 
-Object_set::Object_set( Spooler* spooler, const Sos_ptr<Object_set_descr>& descr ) 
+Object_set::Object_set( Spooler* spooler, Task* task, const Sos_ptr<Object_set_descr>& descr ) 
 : 
     _zero_(this+1),
     _spooler(spooler),
+    _task(task),
     _object_set_descr(descr),
     _script_instance(&descr->_class->_script) 
 {
@@ -133,6 +152,8 @@ Object_set::~Object_set()
 
 void Object_set::open()
 {
+    _script_instance.init();
+    _script_instance.add_obj( new Com_task_log( _task ), "log" );
     _script_instance.load();
 
     CComVariant object_set_vt;
@@ -421,7 +442,7 @@ bool Task::start()
 
     _running_since = now();
 
-    if( _job->_object_set_descr )  _object_set = SOS_NEW( Object_set( _spooler, _job->_object_set_descr ) );
+    if( _job->_object_set_descr )  _object_set = SOS_NEW( Object_set( _spooler, this, _job->_object_set_descr ) );
 
     try 
     {
@@ -432,6 +453,8 @@ bool Task::start()
 
         if( !_job->_script.empty() )
         {
+            _script_instance.init();
+            _script_instance.add_obj( new Com_task_log( this ), "log" );
             _script_instance.load();
         }
 

@@ -114,6 +114,27 @@ SOURCE=.\spooler.cxx
 # End Source File
 # Begin Source File
 
+SOURCE=.\spooler.odl
+
+!IF  "$(CFG)" == "spooler - Win32 Release"
+
+!ELSEIF  "$(CFG)" == "spooler - Win32 Debug"
+
+# Begin Custom Build
+OutDir=.\Debug
+TargetName=spooler
+InputPath=.\spooler.odl
+
+"$(TargetName).tlb" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	echo mktyplib $(InputPath) -o $(OutDir)/spooler.tlb
+
+# End Custom Build
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
 SOURCE=.\spooler_command.cxx
 # End Source File
 # Begin Source File
@@ -142,6 +163,9 @@ SOURCE=.\spooler.h
 
 # PROP Default_Filter "ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe"
 # End Group
+# Begin Group "XML"
+
+# PROP Default_Filter ""
 # Begin Source File
 
 SOURCE=.\spooler_answer.dtd
@@ -158,5 +182,6 @@ SOURCE=.\spooler_config.dtd
 
 SOURCE=.\spooler_config.xml
 # End Source File
+# End Group
 # End Target
 # End Project
