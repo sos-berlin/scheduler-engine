@@ -1,4 +1,4 @@
-// $Id: spooler_module_com.cxx,v 1.9 2002/11/26 23:35:46 jz Exp $
+// $Id: spooler_module_com.cxx,v 1.10 2002/11/27 00:59:44 jz Exp $
 /*
     Hier sind implementiert
 
@@ -214,7 +214,7 @@ void Scripting_engine_module_instance::close()
 
 void Scripting_engine_module_instance::add_obj( const ptr<IDispatch>& object, const string& name )
 {
-#   ifdef Z_WINDOWS
+#   if 1  // def Z_WINDOWS
 
         _script_site->add_obj( object, Bstr(name) );
 
@@ -258,13 +258,11 @@ void Scripting_engine_module_instance::load()
 {
     if( _script_site->_engine_name != _module->_language )  throw_xc( "SPOOLER-117" );
 
-#ifdef Z_WINDOWS
     if( _com_context->_log     )  _script_site->add_obj( _com_context->_log    , Bstr("spooler_log"    ) );
     if( _com_context->_spooler )  _script_site->add_obj( _com_context->_spooler, Bstr("spooler"        ) );
     if( _com_context->_thread  )  _script_site->add_obj( _com_context->_thread , Bstr("spooler_thread" ) );
     if( _com_context->_job     )  _script_site->add_obj( _com_context->_job    , Bstr("spooler_job"    ) );
     if( _com_context->_task    )  _script_site->add_obj( _com_context->_task   , Bstr("spooler_task"   ) );
-#endif
 
     HRESULT hr = _script_site->_script->SetScriptState( SCRIPTSTATE_INITIALIZED );
     if( FAILED( hr ) )  throw_ole( hr, "IActiveScript::SetScriptState", "SCRIPTSTATE_INITIALIZED" );

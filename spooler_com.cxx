@@ -1,4 +1,4 @@
-// $Id: spooler_com.cxx,v 1.73 2002/11/25 23:36:19 jz Exp $
+// $Id: spooler_com.cxx,v 1.74 2002/11/27 00:59:44 jz Exp $
 /*
     Hier sind implementiert
 
@@ -632,6 +632,7 @@ STDMETHODIMP Com_variable_set_enumerator::Clone( IEnumVARIANT** ppenum )
 
 const Com_method Com_log::_methods[] =
 { 
+    { "info" , (Com_method_ptr)&Com_log::info, 1, 1, { VT_BSTR } },
     { NULL }
 };
 

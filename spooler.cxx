@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.141 2002/11/26 23:35:45 jz Exp $
+// $Id: spooler.cxx,v 1.142 2002/11/27 00:59:44 jz Exp $
 /*
     Hier sind implementiert
 
@@ -841,7 +841,7 @@ void Spooler::run()
                 Job* job = (*it)->next_job_to_start();
                 if( job )
                 {
-                    Time t = next_job->next_time();
+                    Time t = job->next_time();
                     if( t <= now )  
                     if( next_time > t )  next_time = t, next_job = job;
                 }
