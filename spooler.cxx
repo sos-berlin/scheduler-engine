@@ -1,5 +1,6 @@
-// $Id: spooler.cxx,v 1.335 2004/05/12 09:26:33 jz Exp $
+// $Id: spooler.cxx,v 1.336 2004/05/20 21:40:57 jz Exp $
 // §851: Weitere Log-Ausgaben zum Scheduler-Start eingebaut
+// §1479
 
 /*
     Hier sind implementiert
@@ -1817,13 +1818,6 @@ void Spooler::run()
                     FOR_EACH( Process_list, (*pc)->_process_list, p )
                     {
                         something_done |= (*p)->async_continue();
-
-                        Time next_time = Time( localtime_from_gmtime( (*p)->async_next_gmtime() ) );
-                        if( next_time < _next_time )
-                        {
-                            _next_time = next_time;
-                            if( log_wait )  msg = S() << "Warten bis " << _next_time << " für pid=" << (*p)->pid();
-                        }
                     }
                 }
             }
@@ -1938,16 +1932,28 @@ void Spooler::run()
             {
               //if( _single_thread )  wait_handles += _single_thread->_wait_handles;
 
-#               ifdef SYSTEM_WIN
-                    FOR_EACH( Process_class_list, _process_class_list, pc )
+                FOR_EACH( Process_class_list, _process_class_list, pc )
+                {
+                    FOR_EACH( Process_list, (*pc)->_process_list, p )
                     {
-                        FOR_EACH( Process_list, (*pc)->_process_list, p )
-                        {
+#                       ifdef SYSTEM_WIN
+
                             object_server::Connection_to_own_server* server = dynamic_cast<object_server::Connection_to_own_server*>( +(*p)->_connection );
                             if( server  &&  server->_process_handle )  wait_handles.add_handle( server->_process_handle );        // Signalisiert Prozessende
-                        }
+
+#                        else
+
+                            Time next_time = Time( localtime_from_gmtime( (*p)->async_next_gmtime() ) );
+                            //Z_LOG( **p << "->async_next_gmtime() => " << next_time << "\n" );
+                            if( next_time < _next_time )
+                            {
+                                _next_time = next_time;
+                                if( log_wait )  msg = S() << "Warten bis " << _next_time << " für pid=" << (*p)->pid();
+                            }
+
+#                       endif
                     }
-#               endif
+                }
             }
                                                                                             
 #           ifdef SYSTEM_WIN

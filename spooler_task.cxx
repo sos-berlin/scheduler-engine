@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.252 2004/05/20 16:10:33 jz Exp $
+// $Id: spooler_task.cxx,v 1.253 2004/05/20 21:40:57 jz Exp $
 /*
     Hier sind implementiert
 
@@ -1067,7 +1067,7 @@ bool Task::do_something()
                         case s_release:
                         {
                             if( !_operation )  _operation = do_release__start();
-                                        else  operation__end(), set_state( s_ended ), loop = true;
+                                         else  operation__end(), set_state( s_ended ), loop = true;
 
                             something_done = true;
                             break;
