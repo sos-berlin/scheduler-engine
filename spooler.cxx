@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.110 2002/06/29 17:26:41 jz Exp $
+// $Id: spooler.cxx,v 1.111 2002/07/03 12:29:49 jz Exp $
 /*
     Hier sind implementiert
 
@@ -265,9 +265,12 @@ Spooler::~Spooler()
     spooler = NULL;
     SetConsoleCtrlHandler( ctrl_c_handler, false );
 
-    wait_until_threads_stopped( latter_day );
+    if( !_thread_list.empty() )  
+    {
+        wait_until_threads_stopped( latter_day );
+        _thread_list.clear();
+    }
 
-    _thread_list.clear();
     _object_set_class_list.clear();
 
     _communication.close(0.0);

@@ -1,4 +1,4 @@
-// $Id: spooler.odl,v 1.36 2002/06/29 09:49:37 jz Exp $
+// $Id: spooler.odl,v 1.37 2002/07/03 12:29:50 jz Exp $
 
 // Anweisung: midl /nologo /error all /out $(OutDir) $(InputPath)
 
@@ -13,6 +13,7 @@ library spooler
     importlib("STDOLE32.TLB");
     importlib("msxml3.dll");
 
+    interface Ivariable_set;
     interface Ilog;
     interface Itask;
     interface Ithread;
@@ -45,6 +46,37 @@ library spooler
         interface Ierror;
     }
 
+    //------------------------------------------------------------------------------------Ivariable
+
+    [
+        uuid       ( 2B9F8928-6722-40a3-B6EC-2455F0A253F7 ),
+        odl,
+        dual
+    ]
+    interface Ivariable : IDispatch
+    {
+        [id(0),propput]
+        HRESULT                 value                       ( [in] VARIANT* value );
+
+        [id(0),propget]
+        HRESULT                 value                       ( [out,retval] VARIANT* value );
+
+      //HRESULT                 dim                         ( [in] int size );
+
+        [propget]
+        HRESULT                 name                        ( [out,retval] BSTR* name );
+
+        HRESULT                 Clone                       ( [out,retval] Ivariable** );
+    }
+
+    [
+        uuid       ( E5F145CE-7AB6-4204-9306-FECD4BF7A619 )
+    ]
+    coclass Variable
+    {
+        interface Ivariable;
+    }
+
     //---------------------------------------------------------------------------------Variable_set
 
     [
@@ -67,6 +99,13 @@ library spooler
 
         [propget]
         HRESULT                 dom                         ( [out,retval] IXMLDOMDocument** xml_document );
+
+        HRESULT                 Clone                       ( [out,retval] Ivariable_set** result );
+
+        HRESULT                 merge                       ( [in] Ivariable_set* other);
+
+        [id(DISPID_NEWENUM),propget,restricted]
+        HRESULT                 _NewEnum                    ( [out,retval] IUnknown** enumerator );    
     }
 
     [
@@ -75,6 +114,29 @@ library spooler
     coclass Variable_set
     {
         interface Ivariable_set;
+    }
+
+    //----------------------------------------------------------------------Variable_set_enumerator
+
+    [
+        uuid       ( 4FA28F03-7970-43cf-BAFF-5F2F0AF8B1B6 ),
+        odl,
+        dual
+    ]
+    interface Ivariable_set_enumerator : IEnumVARIANT
+    { 
+        HRESULT                 Next                    ( unsigned long celt, VARIANT* rgvar, unsigned long* pceltFetched );
+        HRESULT                 Skip                    ( unsigned long celt );
+        HRESULT                 Reset                   ();
+        HRESULT                 Clone                   ( IEnumVARIANT** ppenum );
+    }
+
+    [
+        uuid       ( EFAC6F36-563F-42a7-86D7-170A1A18D1D5 )
+    ]
+    coclass Variable_set_enumerator
+    {
+        interface Ivariable_set_enumerator;
     }
 
     //-----------------------------------------------------------------------------------Object_set

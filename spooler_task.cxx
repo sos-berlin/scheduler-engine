@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.98 2002/06/29 09:49:38 jz Exp $
+// $Id: spooler_task.cxx,v 1.99 2002/07/03 12:29:50 jz Exp $
 /*
     Hier sind implementiert
 
@@ -252,6 +252,7 @@ Job::Job( Thread* thread )
 {
     _next_time = latter_day;
     _priority  = 1;
+    _default_params = new Com_variable_set;
 }
 
 //----------------------------------------------------------------------------------------Job::~Job
@@ -294,6 +295,8 @@ void Job::set_xml( const xml::Element_ptr& element )
             }
             else
             if( e->tagName == "object_set"  )  _object_set_descr = SOS_NEW( Object_set_descr( e ) );
+            else
+            if( e->tagName == "params"      )  _default_params->set_xml( e );  
             else
             if( e->tagName == "script"      )  _script_xml_element   = e,
                                                _process_filename     = "",
@@ -467,7 +470,10 @@ Sos_ptr<Task> Job::create_task( const CComPtr<spooler_com::Ivariable_set>& param
     Time now = Time::now();
     task->_enqueue_time = now;
     task->_id           = _spooler->_db.get_id();
-    task->_params       = params? params : new Com_variable_set;
+
+    _default_params->Clone( &task->_params );
+    if( params )   task->_params->merge( params );
+
     task->_name         = name;
     task->_start_at     = start_at; 
     

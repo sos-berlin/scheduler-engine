@@ -1,4 +1,4 @@
-// $Id: spooler_com.h,v 1.35 2002/06/29 09:49:37 jz Exp $
+// $Id: spooler_com.h,v 1.36 2002/07/03 12:29:50 jz Exp $
 
 #ifndef __SPOOLER_COM_H
 #define __SPOOLER_COM_H
@@ -64,8 +64,32 @@ struct Com_error: spooler_com::Ierror, Sos_ole_object
     void                        close                       ();
 
   private:
+                                Com_error                   ( const Com_error& );
+    void                        operator =                  ( const Com_error& );
+
     Thread_semaphore           _lock;
     Xc_copy                    _xc;
+};
+
+//-------------------------------------------------------------------------------------Com_variable
+
+struct Com_variable: spooler_com::Ivariable, Sos_ole_object
+{
+                                Com_variable                ( const BSTR name, const VARIANT& );
+                                Com_variable                ( const Com_variable& );
+
+    USE_SOS_OLE_OBJECT
+
+    STDMETHODIMP                put_value                   ( VARIANT* v )                      { HRESULT hr = NOERROR; THREAD_LOCK(_lock) _value = *v; return hr; }
+    STDMETHODIMP                get_value                   ( VARIANT* result )                 { HRESULT hr = NOERROR; THREAD_LOCK(_lock) hr = VariantCopy( result, &_value ); return hr; }
+    STDMETHODIMP                get_name                    ( BSTR* result )                    { return _name.CopyTo(result); }     
+    STDMETHODIMP                Clone                       ( spooler_com::Ivariable** );
+
+  private:
+
+    Thread_semaphore           _lock;
+    CComBSTR                   _name;
+    CComVariant                _value;
 };
 
 //----------------------------------------------------------------------------------Com_variable_set
@@ -73,6 +97,7 @@ struct Com_error: spooler_com::Ierror, Sos_ole_object
 struct Com_variable_set: spooler_com::Ivariable_set, Sos_ole_object
 {
                                 Com_variable_set            ();
+                                Com_variable_set            ( const Com_variable_set& );
 
     USE_SOS_OLE_OBJECT
 
@@ -82,13 +107,43 @@ struct Com_variable_set: spooler_com::Ivariable_set, Sos_ole_object
     STDMETHODIMP                get_var                     ( BSTR, VARIANT* );
     STDMETHODIMP                get_count                   ( int* );
     STDMETHODIMP                get_dom                     ( xml::IXMLDOMDocument** );
+    STDMETHODIMP                Clone                       ( spooler_com::Ivariable_set** );
+    STDMETHODIMP                merge                       ( spooler_com::Ivariable_set* );
+    STDMETHODIMP                get__NewEnum                ( IUnknown** );    
 
 
   private:
-    typedef std::map<CComBSTR,CComVariant>  Map;
+    friend struct               Com_variable_set_enumerator;
+
+    typedef std::map< CComBSTR, CComPtr<Com_variable> >  Map;
+
+    void                        operator =                  ( const Com_variable_set& );
 
     Thread_semaphore           _lock;
     Map                        _map;
+};
+
+//----------------------------------------------------------------------Com_variable_set_enumerator
+
+struct Com_variable_set_enumerator : spooler_com::Ivariable_set_enumerator, Sos_ole_object
+{
+    STDMETHODIMP                QueryInterface          ( REFIID, void** );
+    
+    USE_SOS_OLE_OBJECT_ADDREF_RELEASE
+    USE_SOS_OLE_OBJECT_GETTYPEINFO
+    USE_SOS_OLE_OBJECT_INVOKE           
+
+                                Com_variable_set_enumerator();
+
+    STDMETHODIMP                Next                    ( unsigned long celt, VARIANT* rgvar, unsigned long* pceltFetched );
+    STDMETHODIMP                Skip                    ( unsigned long celt );
+    STDMETHODIMP                Reset                   ();
+    STDMETHODIMP                Clone                   ( IEnumVARIANT** ppenum );
+
+    void                        initialize              ( Com_variable_set* );
+
+    CComPtr<Com_variable_set>       _variable_set;
+    Com_variable_set::Map::iterator _iterator;
 };
 
 //------------------------------------------------------------------------------------------Com_log

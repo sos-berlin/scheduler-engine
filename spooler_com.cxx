@@ -1,4 +1,4 @@
-// $Id: spooler_com.cxx,v 1.44 2002/06/29 09:49:37 jz Exp $
+// $Id: spooler_com.cxx,v 1.45 2002/07/03 12:29:50 jz Exp $
 /*
     Hier sind implementiert
 
@@ -26,7 +26,9 @@ using namespace spooler_com;
 Typelib_descr spooler_typelib ( spooler_com::LIBID_spooler_com, "Spooler", "1.0" );
 
 DESCRIBE_CLASS( &spooler_typelib, Com_error       , error       , spooler_com::CLSID_error       , "Spooler.Error"       , "1.0" )
+DESCRIBE_CLASS( &spooler_typelib, Com_variable    , variable    , spooler_com::CLSID_Variable    , "Spooler.Variable"    , "1.0" )
 DESCRIBE_CLASS( &spooler_typelib, Com_variable_set, variable_set, spooler_com::CLSID_Variable_set, "Spooler.Variable_set", "1.0" )
+DESCRIBE_CLASS( &spooler_typelib, Com_variable_set_enumerator, variable_set_enumerator, CLSID_Variable_set_enumerator, "Spooler.Com_variable_set_enumerator", "1.0" );
 DESCRIBE_CLASS( &spooler_typelib, Com_log         , log         , spooler_com::CLSID_log         , "Spooler.Log"         , "1.0" )
 DESCRIBE_CLASS( &spooler_typelib, Com_job         , job         , spooler_com::CLSID_job         , "Spooler.Job"         , "1.0" )
 DESCRIBE_CLASS( &spooler_typelib, Com_task        , task        , spooler_com::CLSID_Task        , "Spooler.Task"        , "1.0" )
@@ -118,12 +120,62 @@ STDMETHODIMP Com_error::get_text( BSTR* text_bstr )
     return hr;
 }
 
+//-----------------------------------------------------------------------Com_variable::Com_variable
+
+Com_variable::Com_variable( const BSTR name, const VARIANT& value )
+:
+    Sos_ole_object( variable_class_ptr, this )
+{
+    THREAD_LOCK( _lock )
+    {
+        _name = name;
+        _value = value;
+    }
+}
+
+//------------------------------------------------------------------------------Com_variable::Clone
+
+STDMETHODIMP Com_variable::Clone( spooler_com::Ivariable** result ) 
+{ 
+    HRESULT hr = NOERROR; 
+    
+    THREAD_LOCK(_lock)
+    {
+        *result = new Com_variable(_name,_value); 
+        (*result)->AddRef();
+    }
+
+    return hr;
+}
+
 //---------------------------------------------------------------Com_variable_set::Com_variable_set
 
 Com_variable_set::Com_variable_set()
 :
     Sos_ole_object( variable_set_class_ptr, this )
 {
+}
+
+//---------------------------------------------------------------Com_variable_set::Com_variable_set
+
+Com_variable_set::Com_variable_set( const Com_variable_set& o )
+:
+    Sos_ole_object( variable_set_class_ptr, this )
+{
+    THREAD_LOCK( _lock )
+    {
+        for( Map::const_iterator it = o._map.begin(); it != o._map.end(); it++ )
+        {
+            Com_variable* v = it->second;
+            if( v )
+            {
+                CComPtr<Com_variable> clone;
+
+                v->Clone( (Ivariable**)&clone );
+                _map[ it->first ] = clone;
+            }
+        }
+    }
 }
 
 //------------------------------------------------------------------------Com_variable_set::set_xml
@@ -153,7 +205,24 @@ void Com_variable_set::set_xml( const xml::Element_ptr& params )
 
 STDMETHODIMP Com_variable_set::put_var( BSTR name, VARIANT* value )
 {
-    THREAD_LOCK( _lock )  _map[name] = *value;
+    THREAD_LOCK( _lock )  
+    {
+        CComBSTR lname = name;
+
+        bstr_to_lower( &lname );
+
+        Map::iterator it = _map.find( lname );
+        if( it != _map.end()  &&  it->second )
+        {
+            it->second->put_value( value );
+        }
+        else
+        {
+            CComPtr<Com_variable> v = new Com_variable( name, *value );
+            _map[lname] = v;
+        }
+    }
+
     return NOERROR;
 }
 
@@ -161,8 +230,24 @@ STDMETHODIMP Com_variable_set::put_var( BSTR name, VARIANT* value )
 
 STDMETHODIMP Com_variable_set::get_var( BSTR name, VARIANT* value )
 {
-    THREAD_LOCK( _lock )  return VariantCopy( value, &_map[name] );
-    return NOERROR;
+    HRESULT hr = NOERROR;
+
+    THREAD_LOCK( _lock )  
+    {
+        VariantInit( value );
+
+        CComBSTR lname = name;
+        bstr_to_lower( &lname );
+
+        Map::iterator it = _map.find( lname );
+        if( it != _map.end()  &&  it->second )
+        {
+            hr = it->second->get_value( value );
+            if( !FAILED(hr))  hr = S_OK;
+        }
+    }
+
+    return hr;
 }
 
 //----------------------------------------------------------------------Com_variable_set::get_count
@@ -192,11 +277,18 @@ STDMETHODIMP Com_variable_set::get_dom( xml::IXMLDOMDocument** result )
 
         for( Map::iterator it = _map.begin(); it != _map.end(); it++ )
         {
-            if( it->second.vt != VT_EMPTY )
+            Com_variable* v = it->second;
+            if( v )
             {
+                CComBSTR    name;
+                CComVariant value;
+
+                v->get_name( &name );
+                v->get_value( &value );
+
                 xml::Element_ptr var = doc->createElement( "variable" );
-                var->setAttribute( "name" , (BSTR)it->first  );
-                var->setAttribute( "value", it->second );
+                var->setAttribute( "name" , &CComVariant(name) );
+                var->setAttribute( "value", value );
                 varset->appendChild( var );
             }
         }
@@ -208,6 +300,151 @@ STDMETHODIMP Com_variable_set::get_dom( xml::IXMLDOMDocument** result )
     catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Variable_set::dom" ); }
 
     return hr;
+}
+
+//--------------------------------------------------------------------------Com_variable_set::Clone
+
+STDMETHODIMP Com_variable_set::Clone( Ivariable_set** result )
+{
+    HRESULT hr = NOERROR;
+
+    THREAD_LOCK( _lock )
+    try
+    {
+        *result = NULL;
+
+        CComPtr<Com_variable_set> clone = new Com_variable_set( *this );
+
+        *result = clone;
+        (*result)->AddRef();
+    }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Variable_set::Clone" ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Variable_set::Clone" ); }
+
+    return hr;
+}
+
+//--------------------------------------------------------------------------Com_variable_set::merge
+
+STDMETHODIMP Com_variable_set::merge( Ivariable_set* other )
+{
+    HRESULT hr = NOERROR;
+
+    THREAD_LOCK( _lock )
+    try
+    {
+        Com_variable_set* o = dynamic_cast<Com_variable_set*>( other );
+        if( !o )  return E_POINTER;
+
+        for( Map::iterator it = o->_map.begin(); it != o->_map.end(); it++ )
+        {
+            if( it->second )
+            {
+                CComPtr<Com_variable> v;
+                hr = it->second->Clone( (Ivariable**)&v );
+                _map[ it->first ] = v;
+            }
+        }
+    }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Variable_set::merge" ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Variable_set::merge" ); }
+
+    return hr;
+}
+
+//-------------------------------------------------------------------Com_variable_set::get__NewEnum
+
+STDMETHODIMP Com_variable_set::get__NewEnum( IUnknown** iunknown )
+{
+    CComPtr<Com_variable_set_enumerator> e = new Com_variable_set_enumerator;
+    e->initialize( this );
+
+    *iunknown = e;
+    (*iunknown)->AddRef();
+    return NOERROR;
+}
+
+//-------------------------------------------------Com_variable_set_enumerator::Com_variable_set_enumerator
+
+Com_variable_set_enumerator::Com_variable_set_enumerator()
+:
+    Sos_ole_object( variable_set_enumerator_class_ptr, this )
+{
+}
+
+//------------------------------------------------------Com_variable_set_enumerator::QueryInterface
+
+STDMETHODIMP Com_variable_set_enumerator::QueryInterface( REFIID iid, void** obj )
+{                                                                    
+    if( iid == IID_IEnumVARIANT
+     || iid == IID_Ivariable_set_enumerator )
+    {
+        *obj = this;
+        AddRef();
+        return NOERROR;
+    }
+
+    return Sos_ole_object::QueryInterface( iid, obj );
+}                                                                                                                                       
+
+//----------------------------------------------------------Com_variable_set_enumerator::initialize
+
+void Com_variable_set_enumerator::initialize( Com_variable_set* v )
+{
+    _variable_set = v;
+    Reset();
+}
+
+//----------------------------------------------------------------Com_variable_set_enumerator::Next
+
+STDMETHODIMP Com_variable_set_enumerator::Next( unsigned long celt, VARIANT* result, unsigned long* pceltFetched )
+{
+    int i = 0;
+
+    while( i < celt  &&  _iterator != _variable_set->_map.end() )
+    {
+        VariantInit( result );
+
+        if( _iterator->second )
+        {
+            Com_variable* v = NULL;
+            _iterator->second.CopyTo( &v );
+            result->vt = VT_DISPATCH;
+            result->pdispVal = v;
+        }
+
+        _iterator++;
+        result++;
+        i++;
+    }
+
+    if( pceltFetched )  *pceltFetched = i;
+
+    return i < celt? S_FALSE : S_OK;
+}
+
+//--------------------------------------------------------------------Com_variable_set_enumerator::Skip
+
+STDMETHODIMP Com_variable_set_enumerator::Skip( unsigned long celt )
+{
+    while( celt &&  _iterator != _variable_set->_map.end() )  _iterator++;
+
+    return celt? S_FALSE : S_OK;
+}
+
+//-------------------------------------------------------------------Com_variable_set_enumerator::Reset
+
+STDMETHODIMP Com_variable_set_enumerator::Reset()
+{
+    _iterator = _variable_set->_map.begin();
+    return NOERROR;
+}
+
+//-------------------------------------------------------------------Com_variable_set_enumerator::Clone
+
+STDMETHODIMP Com_variable_set_enumerator::Clone( IEnumVARIANT** ppenum )
+{
+    return ERROR;
 }
 
 //---------------------------------------------------------------------------------Com_log::Com_log

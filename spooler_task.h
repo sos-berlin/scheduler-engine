@@ -1,4 +1,4 @@
-// $Id: spooler_task.h,v 1.55 2002/06/03 08:49:12 jz Exp $
+// $Id: spooler_task.h,v 1.56 2002/07/03 12:29:50 jz Exp $
 
 #ifndef __SPOOLER_TASK_H
 #define __SPOOLER_TASK_H
@@ -310,6 +310,8 @@ struct Job : Sos_self_deleting
     string                     _title;                      // <job title="">
     string                     _description;                // <description>
     string                     _state_text;                 // spooler_job.state_text = "..."
+
+    CComPtr<Com_variable_set>  _default_params;
 
     xml::Element_ptr           _script_xml_element;         // <script> aus <config>
     Script*                    _script_ptr;
