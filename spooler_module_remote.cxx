@@ -1,4 +1,4 @@
-// $Id: spooler_module_remote.cxx,v 1.28 2003/08/30 22:40:27 jz Exp $
+// $Id: spooler_module_remote.cxx,v 1.29 2003/08/31 10:04:33 jz Exp $
 /*
     Hier sind implementiert
 
@@ -166,7 +166,7 @@ Async_operation* Remote_module_instance_proxy::begin__start()
     _session = _process->session(); 
     _pid = _session->connection()->pid();
 */
-    _operation = +Z_NEW( Operation( this, Operation::c_begin ) );
+    _operation = +Z_NEW( Operation( this, c_begin ) );
 
     return +_operation;
 }
@@ -182,7 +182,7 @@ bool Remote_module_instance_proxy::begin__end()
 
     // *** Sonderfall, weil es keine _connection für pop_operation gibt ***
     Operation* op = dynamic_cast<Operation*>( +_operation );
-    if( op  &&  op->_call_state == Operation::c_connect )  op->async_check_error();   
+    if( op  &&  op->_call_state == c_connect )  op->async_check_error();   
     // ***
 
 
@@ -199,9 +199,9 @@ Async_operation* Remote_module_instance_proxy::end__start( bool success )
     if( !_remote_instance )  return NULL;
 
     _end_success = success;
-    _operation = +Z_NEW( Operation( this, Operation::c_end ) );
+  //_operation = +Z_NEW( Operation( this, c_end ) );
 
-    //_operation = _remote_instance->call__start( "end", success );
+    _operation = _remote_instance->call__start( "end", success );
     
     return _operation;
 }
@@ -214,11 +214,12 @@ void Remote_module_instance_proxy::end__end()
   //if( _operation->_call_state != Operation::c_finished )  throw_xc( "SPOOLER-191", "end__end", state_name() );
     if( !_operation->async_finished() )  throw_xc( "SPOOLER-191", "end__end", _operation->async_state_text() );
 
-    //_remote_instance->call__end();
-
-    ptr<Async_operation> op = _operation;
     _operation = NULL;
-    op->async_check_error();
+    _remote_instance->call__end();
+
+  //ptr<Async_operation> op = _operation;
+  //_operation = NULL;
+  //op->async_check_error();
 }
 
 //--------------------------------------------------------Remote_module_instance_proxy::step__start
@@ -245,7 +246,7 @@ bool Remote_module_instance_proxy::step__end()
 
 Async_operation* Remote_module_instance_proxy::call__start( const string& method )
 {
-    _operation = _remote_instance->call__start( method );
+    _operation = _remote_instance->call__start( "call", method );
 
     return _operation;
 }
@@ -261,11 +262,29 @@ bool Remote_module_instance_proxy::call__end()
     return check_result( _remote_instance->call__end() );
 }
 
+//-----------------------------------------------------Remote_module_instance_proxy::release__start
+
+Async_operation* Remote_module_instance_proxy::release__start()
+{
+    _operation = _remote_instance->release__start();
+
+    return _operation;
+}
+
+//----------------------------------------------------------Remote_module_instance_proxy::call__end
+
+void Remote_module_instance_proxy::release__end()
+{
+    if( !_operation->async_finished() )  throw_xc( "SPOOLER-191", "release__end", _operation->async_state_text() );
+
+    _operation = NULL;
+    _remote_instance->release__end();
+}
+
 //-----------------------------------------------Remote_module_instance_proxy::Operation::~Operation
 
 Remote_module_instance_proxy::Operation::~Operation()
 {
-    //if( _operation )  _operation->set_async_parent( NULL );
 }
 
 //------------------------------------------------Remote_module_instance_proxy::Operation::Operation
@@ -290,6 +309,204 @@ bool Remote_module_instance_proxy::Operation::begin__end()
 */
 //-----------------------------------------Remote_module_instance_proxy::Operation::async_continue_
 
+bool Remote_module_instance_proxy::continue_async_operation( Operation* operation, bool wait )
+{ 
+  //bool something_done = false;
+
+    switch( operation->_call_state )
+    {
+        // begin__start() ... begin_end()
+
+        case c_begin:
+        {
+            if( !_process )
+            {
+                if( _module->_separate_process 
+                    || _process_class_name.empty()  && !_spooler->process_class_or_null("") )   // Namenlose Prozessklasse nicht bekannt? Dann temporäre Prozessklasse verwenden
+                {
+                    _process = _spooler->new_temporary_process();
+                }
+                else
+                {
+                    //_process = Z_NEW( Process( _spooler ) );        
+                    _process = _spooler->process_class( _process_class_name ) -> select_process_if_available();
+                    if( !_process )  break;
+
+                    // Erstmal immer nur eine Task pro Prozess. 
+                    // Mehrere Tasks pro Prozess erst, wenn sichergestellt ist, dass jede Operation die Antwort liest (v.a. im Fehlerfall),
+                    // sodass nicht eine nicht beendete Operation den Prozess blockiert.
+
+                    //_process = _spooler->process_class( _process_class_name ) -> select_process();
+                }
+
+                _process->add_module_instance( this );
+            }
+
+            _session = _process->session(); 
+            _pid = _session->connection()->pid();
+
+            operation->set_async_child( _session->connect_server__start() );
+
+            operation->_call_state = c_connect;
+            break;
+        }
+
+
+        case c_connect:
+        {
+            operation->set_async_child( NULL );
+            _session->connect_server__end();
+        }
+        
+        // Nächste Operation
+
+        {
+            operation->_multi_qi.allocate( 1 );
+            operation->_multi_qi.set_iid( 0, spooler_com::IID_Iremote_module_instance_server );
+            
+            operation->set_async_child( _session->create_instance__start( spooler_com::CLSID_Remote_module_instance_server, NULL, 0, NULL, 1, operation->_multi_qi ) );
+
+            operation->_call_state = c_create_instance;
+            break;
+        }
+
+
+        case c_create_instance:
+        {
+            operation->set_async_child( NULL );
+            HRESULT hr = _session->create_instance__end( 1, operation->_multi_qi );
+            if( FAILED(hr) )  throw_com( hr, "create_instance" );
+
+            _remote_instance = dynamic_cast<object_server::Proxy*>( operation->_multi_qi[0].pItf );
+            _idispatch = _remote_instance;
+            operation->_multi_qi.clear();
+        }
+
+        // Nächste Operation
+
+        {
+            Variant params ( Variant::vt_array, 8 );
+
+            {
+                Locked_safearray params_array = V_ARRAY( &params );
+
+                params_array[0] = "language="        + _module->_language;
+                params_array[1] = "com_class="       + _module->_com_class_name;
+                params_array[2] = "filename="        + _module->_filename;
+                params_array[3] = "java_class="      + _module->_java_class_name;
+                params_array[4] = "java_class_path=" + _module->_spooler->_java_vm->class_path();
+                params_array[5] = "java_work_dir="   + _module->_spooler->_java_vm->work_dir();
+                params_array[6] = "recompile="       + as_string(_module->_recompile);
+                params_array[7] = "script="          + _module->_source.dom_doc().xml();
+            }
+
+            operation->set_async_child( _remote_instance->call__start( "construct", params ) );
+
+            operation->_call_state = c_construct;
+
+          //something_done = true;
+            break;
+        }
+
+
+        case c_construct:
+        {
+            operation->set_async_child( NULL );
+            _remote_instance->call__end();
+          //something_done = true;
+        }
+            
+        // Nächste Operation
+
+        {
+            Variant objects ( Variant::vt_array, _object_list.size() );
+            Variant names   ( Variant::vt_array, _object_list.size() );
+
+            {
+                Locked_safearray objects_array = V_ARRAY( &objects );
+                Locked_safearray names_array   = V_ARRAY( &names   );
+
+                int i = 0;
+                FOR_EACH_CONST( Object_list, _object_list, o )
+                {
+                    objects_array[i] = o->_object;
+                    names_array[i]   = o->_name;
+                    i++;
+                }
+
+                _object_list.clear();
+            }
+
+            operation->set_async_child( _remote_instance->call__start( "begin", objects, names ) );
+            operation->_call_state = c_call_begin;
+          //something_done = true;
+            break;
+        }
+
+
+        case c_call_begin:
+        {
+            operation->_call_state = c_finished;
+          //something_done = true;
+            break;
+        }
+
+
+
+        // end__start() .. end__end()
+/*
+        case c_end:
+        {
+            operation->set_async_child( _remote_instance->call__start( "end", _end_success ) );
+            operation->_call_state = c_call_end;
+          //something_done = true;
+            break;
+        }
+
+
+        case c_call_end:
+        {
+            operation->set_async_child( NULL );
+            _remote_instance->call__end();
+          //something_done = true;
+        }
+*/
+        // Nächste Operation
+/*
+        {
+            if( _close_instance_at_end )
+            {
+                operation->set_async_child( _remote_instance->release__start() );
+                operation->_call_state = c_release;
+            }
+            else
+                operation->_call_state = c_finished;
+            break;
+        }
+
+
+        case c_release:
+        {
+            operation->set_async_child( NULL );
+            _remote_instance->release__end();
+            _remote_instance = NULL;
+            _idispatch = NULL;
+        }
+*/
+        operation->_call_state = c_finished;
+        break;
+
+
+        default:
+            throw_xc( "Remote_module_instance_proxy::Operation::process" );
+    }
+
+  //return something_done;
+    return false;
+}
+
+//-----------------------------------------Remote_module_instance_proxy::Operation::async_continue_
+/*
 void Remote_module_instance_proxy::Operation::async_continue_( bool wait )
 { 
     bool loop = true;
@@ -478,7 +695,7 @@ void Remote_module_instance_proxy::Operation::async_continue_( bool wait )
 
             case c_release:
             {
-                set_async_child(  NULL );
+                set_async_child( NULL );
                 _proxy->_remote_instance->release__end();
                 _proxy->_remote_instance = NULL;
                 _proxy->_idispatch = NULL;
@@ -492,7 +709,7 @@ void Remote_module_instance_proxy::Operation::async_continue_( bool wait )
         }
     }
 }
-
+*/
 //-----------------------------------------Remote_module_instance_proxy::Operation::async_finished_
 
 bool Remote_module_instance_proxy::Operation::async_finished_()
@@ -503,7 +720,7 @@ bool Remote_module_instance_proxy::Operation::async_finished_()
         // Ein Sonderfall: async_continue() wird hier (statt oben im Hauptprogramm) gerufen,
         // weil die Operation nicht über Connection::current_super_operation() erreichbar ist.
         // Denn diese Operation hat ja noch keine Connection.
-        // Ein zentrales Register alles offenen Operationen wäre gut.
+        // Ein zentrales Register aller offenen Operationen wäre gut.
         // Dann müsste das Hauptprogramm auch nicht die Verbindungen kennen und für jede
         // async_continue() aufrufen.
 
@@ -541,9 +758,9 @@ string Remote_module_instance_proxy::Operation::state_name()
         case c_construct      : return "construct";
         case c_begin          : return "begin";
 
-        case c_end            : return "end";
-        case c_call_end       : return "call_end";
-        case c_release        : return "release";
+      //case c_end            : return "end";
+      //case c_call_end       : return "call_end";
+      //case c_release        : return "release";
 
         case c_finished       : return "finished";
         default               : return as_string(_call_state);      // Für Microsoft

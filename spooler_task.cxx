@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.179 2003/08/30 22:40:27 jz Exp $
+// $Id: spooler_task.cxx,v 1.180 2003/08/31 10:04:33 jz Exp $
 /*
     Hier sind implementiert
 
@@ -426,6 +426,10 @@ string Task::state_name( State state )
         case s_suspended:                   return "suspended";
         case s_end:                         return "end";
         case s_ending:                      return "ending";
+        case s_on_success:                  return "on_success";
+        case s_on_error:                    return "on_error";
+        case s_exit:                        return "exit";
+        case s_release:                     return "release";
         case s_ended:                       return "ended";
         case s_closed:                      return "closed";
         default:                            return as_string( (int)state );
@@ -547,8 +551,7 @@ bool Task::do_something()
 
                 case s_starting:
                 {
-                    ok = begin__end();
-                    _operation = NULL;
+                    ok = operation__end();
 
                     if( !ok || has_error() )  break;
 
@@ -626,14 +629,17 @@ bool Task::do_something()
                 {
                     if( has_error() )  _history.start(),  _success = false;
 
-                    if( !_begin_called )
+                    if( _begin_called )
                     {
                         _operation = do_end__start();
 
                         set_state( s_ending );
                     }
                     else
-                        set_state( s_exit ),  loop = true;
+                    {
+                        set_state( _success? s_on_success : s_on_error );
+                        loop = true;
+                    }
 
                     something_done = true;
 
@@ -643,8 +649,7 @@ bool Task::do_something()
                 
                 case s_ending:
                 {
-                    end__end();
-                    _operation = NULL;
+                    operation__end();
 
                     set_state( _success? s_on_success : s_on_error );
 
@@ -657,7 +662,7 @@ bool Task::do_something()
                 case s_on_success:
                 {
                     if( !_operation )  _operation = do_call__start( spooler_on_success_name );
-                                 else  do_call__end(), _operation = NULL, set_state( s_exit );
+                                 else  operation__end(), set_state( s_exit );
 
                     something_done = true;
                     break;
@@ -667,7 +672,7 @@ bool Task::do_something()
                 case s_on_error:
                 {
                     if( !_operation )  _operation = do_call__start( spooler_on_error_name );
-                                 else  do_call__end(), _operation = NULL, set_state( s_exit );
+                                 else  operation__end(), set_state( s_exit );
 
                     something_done = true;
                     break;
@@ -679,13 +684,23 @@ bool Task::do_something()
                     if( _job->_module._reuse == Module::reuse_task )
                     {
                         if( !_operation )  _operation = do_call__start( spooler_exit_name );
-                                     else  do_call__end(), _operation = NULL, set_state( s_ended ), loop = true;
+                                     else  operation__end(), set_state( s_release ), loop = true;
                     }
                     else
                     {
-                        set_state( s_ended );
+                        set_state( s_release );
                         loop = true;
                     }
+
+                    something_done = true;
+                    break;
+                }
+
+
+                case s_release:
+                {
+                    if( !_operation )  _operation = do_release__start();
+                                 else  operation__end(), set_state( s_ended ), loop = true;
 
                     something_done = true;
                     break;
@@ -821,7 +836,7 @@ void Task::step__start()
 }
 */
 //---------------------------------------------------------------------------------Task::begin__end
-
+/*
 bool Task::begin__end()
 {
     bool result;
@@ -834,9 +849,9 @@ bool Task::begin__end()
 
     return result;
 }
-
+*/
 //-----------------------------------------------------------------------------------Task::end__end
-
+/*
 void Task::end__end()
 {
     try 
@@ -845,7 +860,7 @@ void Task::end__end()
     }
     catch( const exception& x ) { set_error(x); }
 }
-
+*/
 //-----------------------------------------------------------------------------------Task::step__end
 
 bool Task::step__end()
@@ -878,6 +893,32 @@ bool Task::step__end()
 
 
     if( _order )  remove_order_after_error();
+
+    return result;
+}
+
+//-----------------------------------------------------------------------------Task::operation__end
+
+bool Task::operation__end()
+{
+    bool result = false;
+
+    try 
+    {
+        switch( _state )
+        {
+            case s_starting:    result = do_begin__end();    break;
+            case s_ending:               do_end__end();      break;
+            case s_on_error:    result = do_call__end();     break;
+            case s_on_success:  result = do_call__end();     break;
+            case s_exit:        result = do_call__end();     break;
+            case s_release:              do_release__end();  break;
+            default:            throw_xc( "Task::operation__end" );
+        }
+    }
+    catch( const exception& x ) { set_error(x); result = false; }
+
+    _operation = NULL;
 
     return result;
 }
@@ -1227,6 +1268,20 @@ Async_operation* Job_module_task::do_call__start( const string& method )
 bool Job_module_task::do_call__end()
 {
     return _module_instance->step__end();
+}
+
+//---------------------------------------------------------------Job_module_task::do_release__start
+
+Async_operation* Job_module_task::do_release__start()
+{
+    return _module_instance->release__start();
+}
+
+//-----------------------------------------------------------------Job_module_task::do_release__end
+
+void Job_module_task::do_release__end()
+{
+    _module_instance->release__end();
 }
 
 //-----------------------------------------------------------------------Process_task::Process_task

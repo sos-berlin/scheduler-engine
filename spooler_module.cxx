@@ -1,4 +1,4 @@
-// $Id: spooler_module.cxx,v 1.37 2003/08/30 22:40:27 jz Exp $
+// $Id: spooler_module.cxx,v 1.38 2003/08/31 10:04:32 jz Exp $
 /*
     Hier sind implementiert
 
@@ -399,6 +399,7 @@ Variant Module_instance::call_if_exists( const string& name )
 
 void Module_instance::close()
 {
+/*
     if( !_spooler_exit_called  &&  callable() )     // _spooler_exit_called wird auch von Remote_module_instance_server gesetzt.
     {
         try
@@ -411,7 +412,7 @@ void Module_instance::close()
             _log.error( x.what() ); 
         }
     }
-
+*/
     if( _com_log  )  _com_log ->set_log ( NULL );
     if( _com_task )  _com_task->set_task( NULL );
 }
@@ -420,7 +421,7 @@ void Module_instance::close()
 
 Async_operation* Module_instance::begin__start()
 {
-    return NULL;
+    return &dummy_sync_operation;
 }
 
 //----------------------------------------------------------------------Module_instance::begin__end
@@ -446,7 +447,7 @@ bool Module_instance::begin__end()
 
 Async_operation* Module_instance::end__start( bool success )
 {
-    return NULL;
+    return &dummy_sync_operation;
 }
 
 //------------------------------------------------------------------------Module_instance::end__end
@@ -487,7 +488,7 @@ void Module_instance::end__end()
         catch( const exception& x ) { _com_task->log_error( string(spooler_on_error_name) + ": " + x.what() ); }
     }
 */
-
+/*
     if( _close_instance_at_end )        // Z.Z. immer true
     {
         if( _spooler_init_called  &&  !_spooler_exit_called )
@@ -499,13 +500,14 @@ void Module_instance::end__end()
         close();
         _com_task = new Com_task();
     }
+*/
 }
 
 //---------------------------------------------------------------------Module_instance::step__start
 
 Async_operation* Module_instance::step__start()
 {
-    return NULL;
+    return &dummy_sync_operation;
 }
 
 //-----------------------------------------------------------------------Module_instance::step__end
@@ -522,7 +524,7 @@ bool Module_instance::step__end()
 Async_operation* Module_instance::call__start( const string& method )
 {
     _call_method = method;
-    return NULL;
+    return &dummy_sync_operation;
 }
 
 //-----------------------------------------------------------------------Module_instance::step__end
@@ -532,6 +534,20 @@ bool Module_instance::call__end()
     if( _call_method == spooler_exit_name )  _spooler_exit_called = true;
 
     return check_result( call_if_exists( _call_method ) );
+}
+
+//------------------------------------------------------------------Module_instance::release__start
+
+Async_operation* Module_instance::release__start()
+{
+    return &dummy_sync_operation;
+}
+
+//--------------------------------------------------------------------Module_instance::release__end
+
+void Module_instance::release__end()
+{
+    close();
 }
 
 //-------------------------------------------------------------------------------------------------

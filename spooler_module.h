@@ -1,4 +1,4 @@
-// $Id: spooler_module.h,v 1.38 2003/08/30 22:40:27 jz Exp $
+// $Id: spooler_module.h,v 1.39 2003/08/31 10:04:32 jz Exp $
 
 #ifndef __SPOOLER_MODULE_H
 #define __SPOOLER_MODULE_H
@@ -222,6 +222,9 @@ struct Module_instance : Object
 
     virtual Async_operation*    call__start                 ( const string& method );
     virtual bool                call__end                   ();
+
+    virtual Async_operation*    release__start              ();
+    virtual void                release__end                ();
 
   //virtual bool                operation_finished          ()                                      { return true; }
   //virtual void                process                     ( bool wait = false )                   {}

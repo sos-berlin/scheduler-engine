@@ -1,4 +1,4 @@
-// $Id: spooler_task.h,v 1.111 2003/08/30 22:40:27 jz Exp $
+// $Id: spooler_task.h,v 1.112 2003/08/31 10:04:33 jz Exp $
 
 #ifndef __SPOOLER_TASK_H
 #define __SPOOLER_TASK_H
@@ -27,7 +27,8 @@ struct Task : Sos_self_deleting
         s_on_success,           // spooler_on_success
         s_on_error,             // spooler_on_error
         s_exit,                 // spooler_exit
-        s_ended,                // spooler_close() abgeschlossen
+        s_release,              // Release()
+        s_ended,                // 
         s_closed,               // close() gerufen, Object Task ist nicht mehr zu gebrauchen
         s__max
     };
@@ -79,11 +80,12 @@ struct Task : Sos_self_deleting
     bool                        prepare                     ();
     void                        finish                      ();
     Async_operation*            begin__start                ();
-    bool                        begin__end                  ();
+  //bool                        begin__end                  ();
   //void                        end__start                  ();
-    void                        end__end                    ();
+  //void                        end__end                    ();
   //void                        step__start                 ();
     bool                        step__end                   ();
+    bool                        operation__end              ();
 
     void                        set_mail_defaults           ();
     void                        clear_mail                  ();
@@ -127,14 +129,16 @@ struct Task : Sos_self_deleting
     virtual void                do_close                    ()                                      {}
     virtual void                do_load                     ()                                      {}
     virtual void                do_kill                     ()                                      {}
-    virtual Async_operation*    do_begin__start             ()                                      { return NULL; }
+    virtual Async_operation*    do_begin__start             ()                                      { return &dummy_sync_operation; }
     virtual bool                do_begin__end               () = 0;
-    virtual Async_operation*    do_end__start               ()                                      { return NULL; }
+    virtual Async_operation*    do_end__start               ()                                      { return &dummy_sync_operation; }
     virtual void                do_end__end                 () = 0;
-    virtual Async_operation*    do_step__start              ()                                      { return NULL; }
+    virtual Async_operation*    do_step__start              ()                                      { return &dummy_sync_operation; }
     virtual bool                do_step__end                () = 0;
-    virtual Async_operation*    do_call__start              ( const string& method )                { return NULL; }
+    virtual Async_operation*    do_call__start              ( const string& method )                { return &dummy_sync_operation; }
     virtual bool                do_call__end                ()                                      { return true; }           // Default: Nicht implementiert
+    virtual Async_operation*    do_release__start           ()                                      { return &dummy_sync_operation; }
+    virtual void                do_release__end             ()                                      {}
 /*
     virtual bool                loaded                      ()                                      { return true; }
     virtual void                do_close                    ()                                      {}
@@ -178,6 +182,7 @@ struct Task : Sos_self_deleting
     Time                       _next_time;
 
     ptr<Async_operation>       _operation;
+  //bool                       _in_operation;               // .._end() aufrufen, auch wenn _operation == NULL (das ist dann eine synchrone Operation)
     ptr<Com_variable_set>      _params;
     Variant                    _result;
     string                     _name;
@@ -261,6 +266,8 @@ struct Job_module_task : Module_task
     virtual bool                do_step__end                ();
     virtual Async_operation*    do_call__start              ( const string& method );
     virtual bool                do_call__end                ();
+    virtual Async_operation*    do_release__start           ();
+    virtual void                do_release__end             ();
 /*
   //virtual bool                loaded                      ();
     bool                        do_start                    ();
