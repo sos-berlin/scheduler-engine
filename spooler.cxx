@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.80 2002/03/04 11:41:45 jz Exp $
+// $Id: spooler.cxx,v 1.81 2002/03/05 17:09:59 jz Exp $
 /*
     Hier sind implementiert
 
@@ -102,7 +102,7 @@ Spooler::Spooler()
     _zero_(this+1), 
     _security(this),
     _communication(this), 
-    _prefix_log(this),
+    _prefix_log(1),
     _wait_handles(this,&_prefix_log),
     _log(this),
     _script(this),
@@ -392,30 +392,8 @@ void Spooler::load_arg()
                 throw_sos_option_error( opt );
         }
 
-        if( log_level == "error" )  _log_level = log_error;
-        else
-        if( log_level == "warn"  )  _log_level = log_warn;
-        else                     
-        if( log_level == "info"  )  _log_level = log_info;
-        else
-        if( log_level == "debug" )  _log_level = log_debug;
-        else
-        if( strncmp(log_level.c_str(),"debug",5) == 0 )
-        {
-            try {
-                _log_level = -as_uint( log_level.c_str() + 5 );
-            }
-            catch( const Xc& ) { throw_xc( "SPOOLER-133", log_level ); }
-        }
-        else
-        {
-            try {
-                _log_level = as_uint( log_level );
-            }
-            catch( const Xc& ) { throw_xc( "SPOOLER-133", log_level ); }
-        }
+        _log_level = make_log_level( log_level );
 
-        if( _log_level > log_error )  _log_level = log_error;
         if( _log_level <= log_debug_spooler )  _debug = true;
         if( _config_filename.empty() )  throw_xc( "SPOOLER-115" );
     }
@@ -454,6 +432,8 @@ void Spooler::load()
 
     _security.clear();             
     load_arg();
+
+    _prefix_log.init( this );
 
     cp.execute_2( file_as_string( _config_filename ) );
 }

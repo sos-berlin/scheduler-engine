@@ -1,4 +1,4 @@
-// $Id: spooler_log.cxx,v 1.24 2002/03/04 22:28:36 jz Exp $
+// $Id: spooler_log.cxx,v 1.25 2002/03/05 17:10:00 jz Exp $
 
 #include "../kram/sos.h"
 #include "spooler.h"
@@ -26,6 +26,39 @@
 
 namespace sos {
 namespace spooler {
+
+//-----------------------------------------------------------------------------------make_log_level
+
+Log_level make_log_level( const string& name )
+{
+    Log_level log_level = log_debug9;
+
+    if( name == "error" )  log_level = log_error;
+    else
+    if( name == "warn"  )  log_level = log_warn;
+    else                     
+    if( name == "info"  )  log_level = log_info;
+    else
+    if( name == "debug" )  log_level = log_debug;
+    else
+    if( strncmp(name.c_str(),"debug",5) == 0 )
+    {
+        try {
+            log_level = (Log_level)-as_uint( name.c_str() + 5 );
+        }
+        catch( const Xc& ) { throw_xc( "SPOOLER-133", name ); }
+    }
+    else
+    {
+        try {
+            log_level = (Log_level)as_int( name );
+            if( log_level > log_error )  log_level = log_error;
+        }
+        catch( const Xc& ) { throw_xc( "SPOOLER-133", name ); }
+    }
+
+    return log_level;
+}
 
 //-----------------------------------------------------------------------------------------Log::Log
 
@@ -113,9 +146,16 @@ void Log::open_new()
 
 //-----------------------------------------------------------------------------------------Log::log
 
-void Log::log( Log_level level, const string& prefix, const string& line, Prefix_log* extra_log )
+void Log::log( Log_level level, const string& prefix, const string& line )
 {
     if( level < _spooler->_log_level )  return;
+    log2( level, prefix, line );
+}
+
+//----------------------------------------------------------------------------------------Log::log2
+
+void Log::log2( Log_level level, const string& prefix, const string& line, Prefix_log* extra_log )
+{
     if( _file == -1 )  return;
 
     Thread_semaphore::Guard guard = &_semaphore;
@@ -157,6 +197,15 @@ void Log::log( Log_level level, const string& prefix, const string& line, Prefix
 
 //----------------------------------------------------------------------------------Prefix_log::log
 
+Prefix_log::Prefix_log( int )
+:
+    _zero_(this+1),
+    _file(-1)
+{
+}
+
+//----------------------------------------------------------------------------------Prefix_log::log
+
 Prefix_log::Prefix_log( Spooler* spooler, const string& prefix )
 :
     _zero_(this+1),
@@ -165,6 +214,7 @@ Prefix_log::Prefix_log( Spooler* spooler, const string& prefix )
     _prefix(prefix),
     _file(-1)
 {
+    init( spooler, prefix );
 }
 
 //----------------------------------------------------------------------------------Prefix_log::log
@@ -172,6 +222,17 @@ Prefix_log::Prefix_log( Spooler* spooler, const string& prefix )
 Prefix_log::~Prefix_log()
 {
     close();
+}
+
+//---------------------------------------------------------------------------------Prefix_log::init
+
+void Prefix_log::init( Spooler* spooler, const string& prefix )
+{
+    _spooler= spooler;
+    _log = &spooler->_log;
+    _prefix = prefix;
+
+    _log_level = _spooler->_log_level;
 }
 
 //-------------------------------------------------------------------------Prefix_log::set_filename
@@ -190,27 +251,31 @@ void Prefix_log::open()
     _highest_level = -999;
     _highest_msg = "";
     
-    _log_level = _spooler->_log_level;
-    _log_level = read_profile_int( "factory.ini", _section.c_str(), "log_level", _log_level );
-
     if( _file != -1 )  throw_xc( "SPOOLER-134", _filename );
 
-    _mail_on_error   = read_profile_bool( "factory.ini", _section.c_str(), "mail_on_error"  , _spooler->_mail_on_error );
-    _mail_on_success = read_profile_bool( "factory.ini", _section.c_str(), "mail_on_success", _spooler->_mail_on_success );
-
-    _subject = read_profile_string( "factory.ini", _section.c_str(), "log_mail_subject", _spooler->_log_mail_subject );
-
-    LOG( "\nopen " << _filename << '\n' );
-    _file = ::open( _filename.c_str(), O_CREAT | ( _append? 0 : O_TRUNC ) | O_WRONLY, 0666 );
-    if( _file == -1 )  throw_errno( errno, _filename.c_str() );
-
-    if( !_log_buffer.empty() )
+    if( !_filename.empty() )
     {
-        write( _log_buffer.c_str(), _log_buffer.length() );
-        _log_buffer = "";
-    }
+        if( !_section.empty() ) 
+        {
+            _log_level       = make_log_level( read_profile_string( "factory.ini", _section.c_str(), "log_level", as_string(_log_level) ) );
+            _mail_on_error   = read_profile_bool  ( "factory.ini", _section.c_str(), "mail_on_error"   , _spooler->_mail_on_error );
+            _mail_on_success = read_profile_bool  ( "factory.ini", _section.c_str(), "mail_on_success" , _spooler->_mail_on_success );
+            _subject         = read_profile_string( "factory.ini", _section.c_str(), "log_mail_subject", _spooler->_log_mail_subject );
+        }
 
-    log( log_info, "\nProtokoll beginnt in " + _filename );
+
+        LOG( "\nopen " << _filename << '\n' );
+        _file = ::open( _filename.c_str(), O_CREAT | O_APPEND | ( _append? 0 : O_TRUNC ) | O_WRONLY, 0666 );
+        if( _file == -1 )  throw_errno( errno, _filename.c_str(), "Protokolldatei" );
+
+        if( !_log_buffer.empty() )
+        {
+            write( _log_buffer.c_str(), _log_buffer.length() );
+            _log_buffer = "";
+        }
+
+        log( log_info, "\nProtokoll beginnt in " + _filename );
+    }
 }
 
 //----------------------------------------------------------------------------------Prefix_log::log
@@ -267,6 +332,9 @@ spooler_com::Imail* Prefix_log::mail()
         if( !_from_name.empty() )  set_mail_from_name( _from_name ),  _from_name = "";   
         if( !_subject  .empty() )  set_mail_subject  ( _subject ),    _subject   = "";
         if( !_body     .empty() )  set_mail_body     ( _body ),       _body      = "";
+
+        CComBSTR jobname_bstr = _jobname.c_str();
+        _mail->add_header_field( L"X-SOS-Spooler-Job", jobname_bstr );
     }
 
     return _mail;
@@ -396,7 +464,7 @@ void Prefix_log::log( Log_level level, const string& line )
     if( _highest_level < level )  _highest_level = level, _highest_msg = line;
     if( level < _log_level )  return;
 
-    _log->log( level, _prefix, line, this );
+    _log->log2( level, _prefix, line, this );
 }
 
 //---------------------------------------------------------------------------------------

@@ -1,4 +1,4 @@
-// $Id: spooler_script.cxx,v 1.8 2002/03/02 15:22:44 jz Exp $
+// $Id: spooler_script.cxx,v 1.9 2002/03/05 17:10:01 jz Exp $
 /*
     Hier sind implementiert
 
@@ -36,58 +36,13 @@ bool check_result( const CComVariant& vt )
 
 void Script::set_xml( const xml::Element_ptr& element, const string& include_path )
 {
-    string inc = include_path;
-    if( !inc.empty() )  { char c = inc[inc.length()-1];  if( c != '/'  &&  c != '\\' )  inc += "/"; }
-
     _language = as_string( element->getAttribute( L"language" ) );
-    _text = "";
+    _text     = text_from_xml_with_include( element, include_path );
 
-    for( xml::Node_ptr n = element->firstChild; n; n = n->nextSibling )
-    {
-        switch( n->GetnodeType() )
-        {
-            case xml::NODE_CDATA_SECTION:
-            {
-                xml::Cdata_section_ptr c = n;
-                _text += as_string( c->data );
-                break;
-            }
-
-            case xml::NODE_TEXT:
-            {
-                xml::Text_ptr t = n;
-                _text += as_string( t->data );
-                break;
-            }
-
-            case xml::NODE_ELEMENT:     // <include file="..."/>
-            {
-                xml::Element_ptr e = n;
-                string filename = as_string( e->getAttribute( L"file" ) );
-
-                if( filename.length() >= 1 ) 
-                {
-                    if( filename[0] == '\\' 
-                     || filename[0] == '/' 
-                     || filename.length() >= 2 && filename[1] == ':' )  ; // ok, absoluter Dateiname
-                    else  
-                    {
-                        filename = inc + filename;
-                    }
-                }
-                     
-                _text += file_as_string( filename );
-                break;
-            }
-
-            default: ;
-        }
-    }
-    
     string use_engine = as_string( element->getAttribute( L"use_engine" ) );
     
-    if( use_engine == "task"   )  _reuse = reuse_task;
-    if( use_engine == "job"    )  _reuse = reuse_job;
+    if( use_engine == "task" )  _reuse = reuse_task;
+    if( use_engine == "job"  )  _reuse = reuse_job;
 }
 
 //----------------------------------------------------------------------------Script_instance::init

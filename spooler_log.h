@@ -1,4 +1,4 @@
-// $Id: spooler_log.h,v 1.9 2002/03/04 22:28:36 jz Exp $
+// $Id: spooler_log.h,v 1.10 2002/03/05 17:10:00 jz Exp $
 
 #ifndef __SPOOLER_LOG_H
 #define __SPOOLER_LOG_H
@@ -18,6 +18,8 @@ enum Log_level
 };
 */
 
+Log_level                       make_log_level              ( const string& );
+
 //----------------------------------------------------------------------------------------------Log
 
 struct Log
@@ -33,7 +35,8 @@ struct Log
     void                        warn                        ( const string& line )              { log( log_warn  , "", line ); }
     void                        error                       ( const string& line )              { log( log_error , "", line ); }
 
-    void                        log                         ( Log_level, const string& prefix, const string&, Prefix_log* = NULL );
+    void                        log                         ( Log_level, const string& prefix, const string& );
+    void                        log2                        ( Log_level, const string& prefix, const string&, Prefix_log* = NULL );
     void                        collect_stderr              ();
     
     string                      filename                    () const                            { return _filename; }
@@ -55,9 +58,11 @@ struct Log
 
 struct Prefix_log
 {
+                                Prefix_log                  ( int );                            // Für Spooler
                                 Prefix_log                  ( Spooler*, const string& prefix = empty_string );
                                ~Prefix_log                  ();
 
+    void                        init                        ( Spooler*, const string& prefix = empty_string );
     void                        open                        ();
     void                        close                       ();
 
@@ -71,8 +76,18 @@ struct Prefix_log
 
     void                        set_prefix                  ( const string& prefix )            { _prefix = prefix; }
     void                        set_profile_section         ( const string& section )           { _section = section; }
+    void                        set_jobname                 ( const string& jobname )           { _jobname = jobname; }
 
     void                        operator()                  ( const string& line )              { info( line ); }
+    void                        debug9                      ( const string& line )              { log( log_debug9, line ); }
+    void                        debug8                      ( const string& line )              { log( log_debug8, line ); }
+    void                        debug7                      ( const string& line )              { log( log_debug7, line ); }
+    void                        debug6                      ( const string& line )              { log( log_debug6, line ); }
+    void                        debug5                      ( const string& line )              { log( log_debug5, line ); }
+    void                        debug4                      ( const string& line )              { log( log_debug4, line ); }
+    void                        debug3                      ( const string& line )              { log( log_debug3, line ); }
+    void                        debug2                      ( const string& line )              { log( log_debug2, line ); }
+    void                        debug1                      ( const string& line )              { log( log_debug1, line ); }
     void                        debug                       ( const string& line )              { log( log_debug_spooler, line ); }
     void                        info                        ( const string& line )              { log( log_info , line ); }
     void                        warn                        ( const string& line )              { log( log_warn , line ); }
@@ -107,6 +122,7 @@ struct Prefix_log
     Log*                       _log;
     string                     _prefix;
     string                     _section;
+    string                     _jobname;
     int                        _log_level;                  // Ab diesem Level protokollieren, sonst nicht
     int                        _highest_level;
     string                     _highest_msg;

@@ -1,4 +1,4 @@
-// $Id: spooler.h,v 1.67 2002/03/04 11:41:45 jz Exp $
+// $Id: spooler.h,v 1.68 2002/03/05 17:10:00 jz Exp $
 
 #ifndef __SPOOLER_H
 #define __SPOOLER_H
@@ -76,6 +76,9 @@ string                          basename_of_path            ( const string& );
 string                          extension_of_path           ( const string& );
 
 namespace spooler {
+
+
+string                          text_from_xml_with_include  ( const xml::Element_ptr&, const string& include_path );
 
 //----------------------------------------------------------------------------State_changed_handler
 
@@ -185,8 +188,6 @@ struct Spooler
     int                        _argc;
     char**                     _argv;
 
-    Log                        _log;
-    Prefix_log                 _prefix_log;
     bool                       _debug;
     int                        _log_level;
     bool                       _mail_on_error;              // Für Job-Protokolle
@@ -197,6 +198,8 @@ struct Spooler
     string                     _log_mail_cc;
     string                     _log_mail_bcc;
     string                     _log_mail_subject;
+    Log                        _log;
+    Prefix_log                 _prefix_log;
 
     CComPtr<Com_spooler>       _com_spooler;                // COM-Objekt spooler
     CComPtr<Com_log>           _com_log;                    // COM-Objekt spooler.log

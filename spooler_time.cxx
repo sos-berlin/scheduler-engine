@@ -1,4 +1,4 @@
-// $Id: spooler_time.cxx,v 1.11 2001/11/13 10:42:11 jz Exp $
+// $Id: spooler_time.cxx,v 1.12 2002/03/05 17:10:02 jz Exp $
 /*
     Hier sind implementiert
 
@@ -105,8 +105,14 @@ bool Period::is_comming( Time time_of_day )
 
 Time Period::next_try( Time t )
 { 
-    Time result = min( Time( t + _repeat ), latter_day ); 
-    if( result >= end() )  result = latter_day;
+    Time result = latter_day;
+
+    if( _repeat )
+    {
+        result = min( Time( t + _repeat ), latter_day ); 
+        if( result >= end() )  result = latter_day;
+    }
+
     return result;
 }
 

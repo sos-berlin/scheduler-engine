@@ -1,4 +1,4 @@
-// $Id: spooler_config.cxx,v 1.27 2002/03/04 22:28:36 jz Exp $
+// $Id: spooler_config.cxx,v 1.28 2002/03/05 17:10:00 jz Exp $
 
 //#include <precomp.h>
 
@@ -61,6 +61,61 @@ string optional_single_element_as_text( const xml::Element_ptr& element, const s
     if( text_element == NULL )  return empty_string;
 
     return as_string( text_element->nodeValue );
+}
+
+//-----------------------------------------------------------------------text_from_xml_with_include
+
+string text_from_xml_with_include( const xml::Element_ptr& element, const string& include_path )
+{
+    string text;
+    string inc = include_path;
+
+    if( !inc.empty() )  { char c = inc[inc.length()-1];  if( c != '/'  &&  c != '\\' )  inc += "/"; }
+
+
+    for( xml::Node_ptr n = element->firstChild; n; n = n->nextSibling )
+    {
+        switch( n->GetnodeType() )
+        {
+            case xml::NODE_CDATA_SECTION:
+            {
+                xml::Cdata_section_ptr c = n;
+                text += as_string( c->data );
+                break;
+            }
+
+            case xml::NODE_TEXT:
+            {
+                xml::Text_ptr t = n;
+                text += as_string( t->data );
+                break;
+            }
+
+            case xml::NODE_ELEMENT:     // <include file="..."/>
+            {
+                xml::Element_ptr e = n;
+                string filename = as_string( e->getAttribute( L"file" ) );
+
+                if( filename.length() >= 1 ) 
+                {
+                    if( filename[0] == '\\' 
+                     || filename[0] == '/' 
+                     || filename.length() >= 2 && filename[1] == ':' )  ; // ok, absoluter Dateiname
+                    else  
+                    {
+                        filename = inc + filename;
+                    }
+                }
+                     
+                text += file_as_string( filename );
+                break;
+            }
+
+            default: ;
+        }
+    }
+
+    return text;
 }
 
 //--------------------------------------------------------------------------------Security::set_xml
@@ -185,6 +240,9 @@ void Run_time::set_xml( const xml::Element_ptr& element )
     Day                     default_day;
     bool                    period_seen = false;
     
+
+    _once = as_bool( element->getAttribute( L"once" ) );
+
     default_period.set_xml( element, NULL );
     default_day = default_period;
 
@@ -311,7 +369,7 @@ void Job::set_xml( const xml::Element_ptr& element )
 
     for( xml::Element_ptr e = element->firstChild; e; e = e->nextSibling )
     {
-        if( e->tagName == "description" )  _description = as_string( e->text );
+        if( e->tagName == "description" )  _description = text_from_xml_with_include( e, _spooler->include_path() );
         else
         if( e->tagName == "object_set"  )  _object_set_descr = SOS_NEW( Object_set_descr( e ) );
         else

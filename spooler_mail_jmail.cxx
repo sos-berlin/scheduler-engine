@@ -1,4 +1,4 @@
-// $Id: spooler_mail_jmail.cxx,v 1.1 2002/03/03 17:00:09 jz Exp $
+// $Id: spooler_mail_jmail.cxx,v 1.2 2002/03/05 17:10:01 jz Exp $
 
 
 #include "../kram/sos.h"
@@ -113,8 +113,6 @@ void Com_mail::init()
     {
         hr = _msg.CreateInstance( __uuidof( jmail::Message ), NULL );
         if( FAILED(hr) )  throw_ole( hr, "CoCreateInstance", "jmail::Message" );
-
-        //_msg->SimpleLayout = true;
     }
 }
 
@@ -343,6 +341,14 @@ void Com_mail::send()
     add_to_recipients( _bcc, 2 );
 
     _msg->Send( _smtp_server, false );
+}
+
+//-----------------------------------------------------------------------Com_mail::put_header_field
+
+STDMETHODIMP Com_mail::add_header_field( BSTR field_name, BSTR value )
+{
+    if( _msg == 0 )  return E_POINTER;
+    return _msg->AddNativeHeader( field_name, value );
 }
 
 //-------------------------------------------------------------------------------------------------

@@ -1,4 +1,4 @@
-// $Id: spooler_task.h,v 1.31 2002/03/04 22:28:37 jz Exp $
+// $Id: spooler_task.h,v 1.32 2002/03/05 17:10:01 jz Exp $
 
 #ifndef __SPOOLER_TASK_H
 #define __SPOOLER_TASK_H
@@ -186,10 +186,11 @@ struct Job : Sos_self_deleting
     void                        clear_when_directory_changed();
     void                        wake                        ()                          { _event.signal( "wake" ); }
     void                        interrupt_script            ();
+    void                        select_period               ( Time = Time::now() );
     bool                        is_in_period                ( Time = Time::now() );
 
     Sos_ptr<Task>               create_task                 ( const CComPtr<spooler_com::Ivariable_set>& params, const string& task_name );
-    bool                        dequeue_task                ();
+    bool                        dequeue_task                ( Time now = Time::now() );
     void                        remove_from_task_queue      ( Task* );
     void                        close_task                  ();
     bool                        read_script                 ();
@@ -198,6 +199,10 @@ struct Job : Sos_self_deleting
     void                        stop                        ();
     void                        finish                      ();
     void                        set_next_start_time         ( Time now = Time::now() );
+
+    bool                        execute_state_cmd           ();
+    void                        reread                      ();
+    bool                        task_to_start               ( Time now );
     bool                        do_something                ();
     bool                        should_removed              ()                          { return _temporary && _state == s_stopped; }
     void                        set_mail_defaults           ();
@@ -261,8 +266,10 @@ struct Job : Sos_self_deleting
     Run_time                   _run_time;
     int                        _priority;
     bool                       _temporary;                  // Job nach einem Lauf entfernen
-    string                     _title;
-    string                     _description;
+    bool                       _start_once;                 // <run_time start_once="">, wird false nach Start
+
+    string                     _title;                      // <job title="">
+    string                     _description;                // <description>
     string                     _state_text;                 // spooler_job.state_text = "..."
 
     xml::Element_ptr           _script_xml_element;         // <script> aus <config>
@@ -279,7 +286,7 @@ struct Job : Sos_self_deleting
     bool                       _reread;                     // <script> neu einlesen, also <include> erneut ausführen
     string                     _in_call;                    // "spooler_process" etc.
     Time                       _next_start_time;
-    Time                       _next_start_at;
+    Time                       _next_time;                  // Für Thread::wait(): Um diese Zeit soll Job::do_something() gerufen werden.
     Period                     _period;                     // Derzeitige oder nächste Period
     Time                       _repeat;                     // spooler_task.repeat
 
@@ -325,7 +332,10 @@ struct Task : Sos_self_deleting
     friend struct               Com_task;
 
   protected:
+
+    virtual bool                loaded                      ()                              { return true; }
     virtual void                do_close                    ()                              {}
+    virtual bool                do_load                     ()                              { return true; }
     virtual bool                do_start                    () = 0;
     virtual void                do_stop                     ()                              {}
     virtual void                do_end                      () = 0;
@@ -365,6 +375,8 @@ struct Script_task : Task
 {
                                 Script_task                 ( Spooler* sp, const Sos_ptr<Job>& j ) : Task(sp,j) {}
 
+    virtual bool                loaded                      ()                              { return _job->_script_instance.loaded(); }
+  //virtual bool                do_load                     ();
   //bool                        do_start                    ();
   //void                        do_end                      ();
   //bool                        do_step                     ();
@@ -378,6 +390,8 @@ struct Object_set_task : Script_task
 {
                                 Object_set_task             ( Spooler* sp, const Sos_ptr<Job>& j ) : Script_task(sp,j) {}
 
+    virtual bool                loaded                      ()                              { return _object_set && Script_task::loaded(); }
+    virtual bool                do_load                     ();
     void                        do_close                    ();
     bool                        do_start                    ();
     void                        do_end                      ();
@@ -395,6 +409,8 @@ struct Job_script_task : Script_task
 {
                                 Job_script_task             ( Spooler* sp, const Sos_ptr<Job>& j ) : Script_task(sp,j) {}
 
+  //virtual bool                loaded                      ();
+    virtual bool                do_load                     ();
     bool                        do_start                    ();
     void                        do_end                      ();
     bool                        do_step                     ();
@@ -408,6 +424,8 @@ struct Process_task : Task
 {
                                 Process_task                ( Spooler* sp, const Sos_ptr<Job>& j ) : Task(sp,j), _process_handle("process_handle",(HANDLE)NULL) {}
         
+  //virtual bool                loaded                      ();
+  //virtual bool                do_load                     ();
     bool                        do_start                    ();
     void                        do_stop                     ();
     void                        do_end                      ();

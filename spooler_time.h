@@ -1,4 +1,4 @@
-// $Id: spooler_time.h,v 1.5 2002/03/01 20:48:00 jz Exp $
+// $Id: spooler_time.h,v 1.6 2002/03/05 17:10:02 jz Exp $
 
 #ifndef __SPOOLER_TIME_H
 #define __SPOOLER_TIME_H
@@ -245,6 +245,8 @@ struct Run_time
     void                        set_xml                     ( const xml::Element_ptr& ) ;
 
     void                        check                       ();                              
+
+    bool                        once                        ()                      { return _once; }
     Period                      first_period                ()                      { return first_period( Time::now() ); }
     Period                      first_period                ( Time );
     Period                      next_period                 ()                      { return next_period( Time::now() ); }
@@ -263,6 +265,7 @@ struct Run_time
 
     Fill_zero                  _zero_;
 
+    bool                       _once;
     Date_set                   _date_set;
     Weekday_set                _weekday_set;
     Monthday_set               _monthday_set;

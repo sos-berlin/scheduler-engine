@@ -1,4 +1,4 @@
-// $Id: spooler_thread.cxx,v 1.23 2002/03/03 16:59:42 jz Exp $
+// $Id: spooler_thread.cxx,v 1.24 2002/03/05 17:10:01 jz Exp $
 /*
     Hier sind implementiert
 
@@ -265,12 +265,13 @@ void Thread::wait()
                 Job* job = *it;
                 if( job->_state == Job::s_pending ) 
                 {
-                    if( _next_start_time > (*it)->_next_start_time )  next_job = *it, _next_start_time = next_job->_next_start_time;
-                    if( _next_start_time > (*it)->_next_start_at   )  next_job = *it, _next_start_time = next_job->_next_start_at;
+                    if( _next_start_time > (*it)->_next_time )  next_job = *it, _next_start_time = next_job->_next_time;
+                  //if( _next_start_time > (*it)->_next_start_time )  next_job = *it, _next_start_time = next_job->_next_start_time;
+                  //if( _next_start_time > (*it)->_next_start_at   )  next_job = *it, _next_start_time = next_job->_next_start_at;
                 }
             }
 
-            if( next_job )  msg = "Nächster Start " + _next_start_time.as_string() + " Job " + next_job->name();
+            if( next_job )  msg = "Warten bis " + _next_start_time.as_string() + " für Job " + next_job->name();
                       else  msg = "Kein Job zu starten";
         }
     }

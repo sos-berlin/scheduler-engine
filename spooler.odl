@@ -1,4 +1,4 @@
-// $Id: spooler.odl,v 1.22 2002/03/04 22:28:35 jz Exp $
+// $Id: spooler.odl,v 1.23 2002/03/05 17:10:00 jz Exp $
 
 // Anweisung: midl /nologo /error all /out $(OutDir) $(InputPath)
 
@@ -414,6 +414,8 @@ library spooler
 
         [hidden]
         void                    send                    ();
+
+        HRESULT                 add_header_field        ( [in] BSTR field_name, [in] BSTR value );
     }
 
     [

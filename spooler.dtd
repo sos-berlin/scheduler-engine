@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- $Id: spooler.dtd,v 1.31 2002/03/04 22:28:35 jz Exp $   Joacim Zschimmer,  (C) 2000 SOS GmbH Berlin  -->
+<!-- $Id: spooler.dtd,v 1.32 2002/03/05 17:09:59 jz Exp $   Joacim Zschimmer,  (C) 2000 SOS GmbH Berlin  -->
 
 
 <!ELEMENT spooler               ( config+ | command | answer )>
@@ -71,7 +71,7 @@
 <!ATTLIST job                   title               CDATA ''>           <!-- Bezeichnung des Jobs -->
 <!ATTLIST job                   log_append          (yes|no) 'no'>      <!-- Jobprotokoll fortschreiben, nicht überschreiben -->
 
-<!ELEMENT description           ( #PCDATA )>                            <!-- Beschreibung des Jobs -->
+<!ELEMENT description           ( #PCDATA | include )*>                 <!-- Beschreibung des Jobs -->
 
 
 <!ELEMENT object_set            ( levels? )>
@@ -97,6 +97,7 @@
 <!ATTLIST run_time              let_run             (yes|no) 'no'>      <!-- Task zuende laufen lassen, auch wenn Endezeit überschritten ist -->
 <!ATTLIST run_time              repeat              CDATA ''>           <!-- Periode, nach der ein Job erneut gestartet wird, 
                                                                              um zu prüfen, ob die Objektemenge nicht leer ist -->
+<!ATTLIST run_time              once                (yes|no) 'no'>      <!-- Job trotz repeat='' bei Spooler-Start, Reload oder Reread einmal starten -->
 
 <!ELEMENT period                EMPTY>
 <!ATTLIST period                single_start        CDATA    #IMPLIED>  <!-- Ersetzt übergeordnetes single_start, begin und end  --> 
@@ -195,10 +196,9 @@
 
 <!ELEMENT tasks                 ( task+ )>
 
-<!ELEMENT task                  ( queued_tasks? | ERROR? )>
+<!ELEMENT task                  ( description?, queued_tasks?, ERROR? )>
 <!ATTLIST task                  job                 CDATA #REQUIRED>    <!-- Jobname -->
 <!ATTLIST task                  title               CDATA #IMPLIED>
-<!ATTLIST task                  description         CDATA #IMPLIED>
 <!ATTLIST task                  state               (stopped|pending|running|suspended) #REQUIRED>
                                                                         <!-- state="stopped"  : Keine Task wird mehr gestartet -->
                                                                         <!-- state="pending"  : Task wartet auf nächsten  -->

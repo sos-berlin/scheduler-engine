@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.58 2002/03/04 22:28:37 jz Exp $
+// $Id: spooler_task.cxx,v 1.59 2002/03/05 17:10:01 jz Exp $
 /*
     Hier sind implementiert
 
@@ -225,7 +225,7 @@ Job::Job( Thread* thread )
     _script(thread->_spooler),
     _script_instance(&_log)
 {
-    _next_start_at = latter_day;
+    _next_time = latter_day;
 }
 
 //----------------------------------------------------------------------------------------Job::~Job
@@ -295,6 +295,7 @@ void Job::init()
 
     _log.set_prefix( obj_name() );
     _log.set_profile_section( "Job " + _name );
+    _log.set_jobname( _name );
 
     _event.set_name( obj_name() );
     _event.add_to( &_thread->_wait_handles );
@@ -325,8 +326,67 @@ void Job::init()
 
 void Job::init2()
 {
-    _period          = _run_time.next_period( Time::now() );
-    _next_start_time = _period.begin();
+    _start_once = _run_time.once();
+
+  //_period     = _run_time.first_period();
+    _period._end = 0;
+    select_period();
+}
+
+//-------------------------------------------------------------------------------Job::select_period
+
+void Job::select_period( Time now )
+{
+    if( now > _period.end() )
+    {
+        _period = _run_time.next_period(now);
+        _log.debug( "Nächste Periode beginnt " + _period.begin().as_string() );
+
+        _next_start_time = _period.is_single_start() || _period.repeat() != latter_day? max( now, _period.begin() ) 
+                                                                                      : latter_day;
+        if( _next_start_time != latter_day )  _log.debug( "Nächster Start " + _next_start_time.as_string() );
+        _next_time = min( _next_start_time, _period.begin() );
+    }
+    else
+    if( _next_time == latter_day 
+     || _next_time < now         )  _next_time = min( _next_start_time, _run_time.next_period(_period.end()).begin() );
+}
+
+//--------------------------------------------------------------------------------Job::is_in_period
+
+bool Job::is_in_period( Time now )
+{
+    select_period();
+    return now >= _period.begin()  &&  now < _period.end();
+}
+
+//-------------------------------------------------------------------------Job::set_next_start_time
+
+void Job::set_next_start_time( Time now )
+{
+    if( _repeat > 0 )       // spooler_task.repeat
+    {
+        _next_start_time = now + _repeat;
+        _repeat = 0;
+        if( !_period.let_run()  &&  _next_start_time > _period.end() )  _next_start_time = latter_day;
+    }
+    else
+    {
+        _next_start_time = _period.next_try( now );
+    }
+
+    _next_time = _next_start_time;
+
+    if( _next_start_time == latter_day ) 
+    {
+        //Time new_time = _period.is_single_start()? now : max( now, _period.end() );
+
+        select_period( max( now, _period.end() ) );
+        // _next_time ist jetzt _period.begin()
+        //_next_time = max( _next_start_time, _run_time.next_period(_period) );
+    }
+
+    if( _next_start_time != latter_day )  _log.debug( "Nächste Wiederholung: " + _next_start_time.as_string() );
 }
 
 //-------------------------------------------------------------------------Job::jobname_as_filename
@@ -337,7 +397,7 @@ string Job::jobname_as_filename()
 
     for( int i = 0; i < filename.length(); i++ )
     {
-        if( strchr( "\x00\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0A\x0B\x0C\x0D\x0E\x0F"
+        if( strchr(     "\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0A\x0B\x0C\x0D\x0E\x0F"
                     "\x10\x11\x12\x13\x14\x15\x16\x17\x18\x19\x1A\x1B\x1C\x1D\x1E\x1F"
                     "<>:\"/\\|",
                     filename[i] ) )  filename[i] = '_';
@@ -362,35 +422,29 @@ Sos_ptr<Task> Job::create_task( const CComPtr<spooler_com::Ivariable_set>& param
     task->_params       = params? params : new Com_variable_set;
     task->_name         = name;
 
-    _task_queue.push_back( task );
+    Task_queue::iterator it = _task_queue.begin();  // _task_queue nach _start_at geordnet halten
+    while( it != _task_queue.end()  &&  (*it)->_start_at <= task->_start_at )  it++;
+    _task_queue.insert( it, task );
 
     return task;
 }
 
-//---------------------------------------------------------------------------------Job::dequeue_task
+//--------------------------------------------------------------------------------Job::dequeue_task
 
-bool Job::dequeue_task()
+bool Job::dequeue_task( Time now )
 {
     if( _state == s_read_error )  return false;
     if( _task_queue.empty() )  return false;
 
     THREAD_LOCK( _lock )
     {
-        Sos_ptr<Task>   task;
-        Time            now = Time::now();
+        Task_queue::iterator it = _task_queue.begin();
+        if( !is_in_period(now) )  
+            for( ; it != _task_queue.end(); it++ )  if( (*it)->_start_at  &&  (*it)->_start_at <= now )  break;
 
-        _next_start_at = latter_day;
-
-        FOR_EACH( Task_queue, _task_queue, it )
-        {
-            if( !task  &&  now >= (*it)->_start_at )  task = *it,  it = _task_queue.erase( it );
-            else
-            if( _next_start_at > (*it)->_start_at )  _next_start_at = (*it)->_start_at;
-        }
-
-        if( !task )  return false;
-
-        _task = task;
+        _task = *it;
+        it = _task_queue.erase( it );
+        //_next_start_at = it == _task_queue.end()? latter_day : (*it)->_start_at;
 
         _error = NULL;
         _close_engine = false;
@@ -407,7 +461,7 @@ bool Job::dequeue_task()
 
 void Job::remove_from_task_queue( Task* task )
 {
-    _next_start_at = latter_day;
+    //_next_start_at = latter_day;
 
     FOR_EACH( Task_queue, _task_queue, it )  
     {
@@ -415,10 +469,11 @@ void Job::remove_from_task_queue( Task* task )
         {
             _log( task->obj_name() + " aus der Warteschlange entfernt" );
             it = _task_queue.erase( it );
+            break;
         }
         else
         {
-            if( _next_start_at > (*it)->_start_at )  _next_start_at = (*it)->_start_at;
+            //if( _next_start_at > (*it)->_start_at )  _next_start_at = (*it)->_start_at;
         }
     }
 }
@@ -633,37 +688,25 @@ void Job::interrupt_script()
     }
 }
 
-//-------------------------------------------------------------------------Job::set_next_start_time
+//--------------------------------------------------------------------------------------Job::reread
 
-void Job::set_next_start_time( Time now )
+void Job::reread()
 {
-    if( _repeat > 0 ) 
-    {
-        _next_start_time = now + _repeat;
-        _repeat = 0;
-        if( !_period.let_run()  &&  _next_start_time > _period.end() )  _next_start_time = latter_day;
-    }
-    else
-    if( _period.is_single_start() )  _next_start_time = latter_day;
-                               else  _next_start_time = _period.next_try( now );
+    close_task();
+    close_engine();
 
-    if( _next_start_time == latter_day ) 
-    {
-        Time new_time = _period.is_single_start()? now : max( now, _period.end() );
+    _log( "Skript wird erneut gelesen (<include> wird erneut ausgeführt)" );
+    read_script();
 
-        _period          = _run_time.next_period( new_time );
-        _next_start_time = _period.begin();
-    }
+    set_state( s_pending );
+    init2();
 }
 
-//--------------------------------------------------------------------------------Job::do_something
+//---------------------------------------------------------------------------Job::execute_state_cmd
 
-bool Job::do_something()
+bool Job::execute_state_cmd()
 {
-    if( !_state )  return false;
-
     bool something_done = false;
-    bool ok = true;
 
     THREAD_LOCK( _lock )
     {
@@ -671,19 +714,20 @@ bool Job::do_something()
         {
             switch( _state_cmd )
             {
-                case sc_stop:       if( _state != s_stopped  &&  _state != s_read_error )  stop(), something_done = true;
+                case sc_stop:       if( _state != s_stopped  
+                                     && _state != s_read_error )  stop(),                      something_done = true;
                                     break;
 
-                case sc_unstop:     if( _state == s_stopped )  set_state( s_pending ), something_done = true;
+                case sc_unstop:     if( _state == s_stopped    )  set_state( s_pending ),      something_done = true;
                                     break;
 
-                case sc_end:        if( _state == s_running )  end(), finish(), something_done = true;
+                case sc_end:        if( _state == s_running    )  end(), finish(),             something_done = true;
                                     break;
 
-                case sc_suspend:    if( _state == s_running )  set_state( s_suspended ), something_done = true;
+                case sc_suspend:    if( _state == s_running    )  set_state( s_suspended ),    something_done = true;
                                     break;
 
-                case sc_continue:   if( _state == s_suspended )  set_state( s_running ), something_done = true;
+                case sc_continue:   if( _state == s_suspended  )  set_state( s_running ),      something_done = true;
                                     break;
 
                 default: ;
@@ -693,22 +737,56 @@ bool Job::do_something()
         }
     }
 
-    if( _reread  &&  !_task )
+    return something_done;
+}
+
+//-------------------------------------------------------------------------------Job::task_to_start
+
+bool Job::task_to_start( Time now )
+{
+    bool ok = false;
+
+    if( _state == s_pending  &&  is_in_period(now) )
     {
-        _reread = false;
+        THREAD_LOCK( _lock )
+        {
+            for( Directory_watcher_list::iterator it = _directory_watcher_list.begin(); it != _directory_watcher_list.end(); it++ )
+            {
+                if( (*it)->signaled_then_reset() )
+                {
+                    ok = true;
+                    _log.debug( "Task startet wegen eines Ereignisses für Verzeichnis " + (*it)->directory() );
 
-        close_task();
-        close_engine();
+                    if( !(*it)->handle() )  it = _directory_watcher_list.erase( it );  // Folge eines Fehlers, s. Directory_watcher::set_signal
+                }
+            }
 
-        _log( "Skript wird erneut gelesen (<include> wird erneut ausgeführt)" );
-        read_script();
+            if( _event.signaled() )        ok = true,  _log.debug( "Task startet wegen " + _event.as_string() );
 
-        set_state( s_pending );
-        init2();
-        
-        something_done = true;
+          //if( now >= _next_start_at )    ok = true,  _log.debug( "Task startet, weil Task-Startzeit erreicht: " + _next_start_at.as_string() );
+
+            if( now >= _next_start_time )  ok = true,  _log.debug( "Task startet, weil Job-Startzeit erreicht: " + _next_start_time.as_string() );
+
+            if( _start_once )              ok = true,  _start_once = false,  _log.debug( "Task startet wegen <run_time once=\"yes\">" );
+        }
     }
 
+    return ok;
+}
+
+//--------------------------------------------------------------------------------Job::do_something
+
+bool Job::do_something()
+{
+    if( !_state )  return false;
+
+    bool something_done = false;
+    bool ok             = true;
+
+
+    something_done = execute_state_cmd();
+
+    if( _reread  &&  !_task )  _reread = false,  reread(),  something_done = true;
 
     if( _state == s_read_error )  return something_done;
     if( _state == s_stopped    )  return something_done;
@@ -716,100 +794,53 @@ bool Job::do_something()
 
     if( _state == s_pending )
     {
-        bool dequeued = dequeue_task();
-        
-        if( !dequeued )
-        {
-            THREAD_LOCK( _lock )
-            {
-                bool ok = false;
-
-                for( Directory_watcher_list::iterator it = _directory_watcher_list.begin(); it != _directory_watcher_list.end(); it++ )
-                {
-                    if( (*it)->signaled_then_reset() )
-                    {
-                        ok = true;
-
-                        if( _spooler->_debug )  _log.debug( "Task startet wegen eines Ereignisses für Verzeichnis " + (*it)->directory() );
-
-                        if( !(*it)->handle() )  it = _directory_watcher_list.erase( it );  // Folge eines Fehlers, s. Directory_watcher::set_signal
-                    }
-                }
-
-                if( _event.signaled() )
-                {
-                    ok = true;
-                    if( _spooler->_debug )  _log.debug( "Task startet, weil " + _event.as_string() );
-                }
-
-                Time now = Time::now();
-                if( now >= _next_start_time ) 
-                {
-                    ok = true;
-                    if( _spooler->_debug )  _log.debug( "Task startet, weil Job-Startzeit erreicht: " + _next_start_time.as_string() );
-                }
-
-                if( now >= _next_start_at ) 
-                {
-                    ok = true;
-                   if( _spooler->_debug )  _log.debug( "Task startet, weil Task-Startzeit erreicht: " + _next_start_at.as_string() );
-                }
-
-                if( !ok )  return false;
-
-                create_task( NULL, "" ),  dequeue_task();
-            }
-        }
-
-        something_done = true;
+        Time now = Time::now();
+        bool dequeued = dequeue_task(now);
+        if( !dequeued  &&  task_to_start(now) )  create_task( NULL, "" ),  dequeue_task(now);
     }
 
     bool do_a_step = false;
 
-    if( _state == s_start_task )
+    if( _state == s_start_task )    // SPOOLER_INIT, SPOOLER_OPEN
     {
         _event.reset();
-
         _log.open();           // Jobprotokoll, nur wirksam, wenn set_filename() gerufen, s. Job::init().
 
         ok = _task->start();
         if( ok )  do_a_step = true;
         something_done = true;
         
-        if( _state == s_read_error )  //|| _state == s_load_error )  
+        if( _state == s_read_error )
         {
             close_task();
             return something_done;
         }
     }
 
-    if( ok && !has_error() )
+    if( ( _state == s_running || _state == s_running_process )  &&  ok  &&  !has_error() )        // SPOOLER_PROCESS
     {
-        if( _state == s_running || _state == s_running_process )
+        Time now;
+        bool call_step = do_a_step | _task->_let_run;
+        if( !call_step )  now = Time::now(), call_step = _period.is_in_time( now );
+        if( !call_step )   // Period abgelaufen?
         {
-            Time now;
-            bool call_step = do_a_step | _task->_let_run;
-            if( !call_step )  now = Time::now(), call_step = _period.is_in_time( now );
-            if( !call_step )   // Period abgelaufen?
-            {
-                set_next_start_time(now);  
-                call_step = _task->_let_run || _period.is_in_time(now);  // Gilt schon die nächste Periode?
-            }
+            set_next_start_time(now);  
+            call_step = _task->_let_run || _period.is_in_time(now);  // Gilt schon die nächste Periode?
+        }
 
-            if( call_step ) 
-            {
-                ok = _task->step(); 
-                something_done = true;
-            }
-            else
-            {
-                ok = false;
-                _log( "Laufzeitperiode ist abgelaufen, Task wird beendet" );
-            }
+        if( call_step ) 
+        {
+            ok = _task->step(); 
+            something_done = true;
+        }
+        else
+        {
+            ok = false;
+            _log( "Laufzeitperiode ist abgelaufen, Task wird beendet" );
         }
     }
 
-    if( !ok || has_error() )
+    if( !ok || has_error() )        // SPOOLER_CLOSE, SPOOLER_ON_SUCCESS, SPOOLER_ON_ERROR
     {
         //if( _spooler->_debug )  LOG( "spooler_process() lieferte " << ok << ", Fehler=" << _error << '\n' );      // Problem bei Uwe, 20.2.02
 
@@ -1127,7 +1158,7 @@ xml::Element_ptr Job::xml( xml::Document_ptr document, bool show_all )
         job_element->setAttribute( "title"     , as_dom_string( _title ) );
         job_element->setAttribute( "steps"     , as_dom_string( _step_count ) );
         job_element->setAttribute( "state_text", as_dom_string( _state_text ) );
-        job_element->setAttribute( "lof_file"  , as_dom_string( _log.filename() ) );
+        job_element->setAttribute( "log_file"  , as_dom_string( _log.filename() ) );
         
 
 
@@ -1225,7 +1256,7 @@ void Task::set_start_at( Time time )
 { 
     _start_at = time; 
     
-    if( time < _job->_next_start_at )  _job->_next_start_at = time;
+    if( time < _job->_next_time )  _job->_next_time = time;
 }
 
 //--------------------------------------------------------------------------------------Task::start
@@ -1244,6 +1275,12 @@ bool Task::start()
 
     try 
     {
+        if( !loaded() )  
+        {
+            bool ok = do_load();
+            if( !ok || _job->has_error() )  return false;
+        }
+
         bool ok = do_start();
         if( !ok || _job->has_error() )  return false;
         _opened = true;
@@ -1399,9 +1436,9 @@ void Object_set_task::do_close()
     if( _com_object_set )  _com_object_set->close();
 }
 
-//------------------------------------------------------------------------Object_set_task::do_start
+//-------------------------------------------------------------------------Object_set_task::do_load
 
-bool Object_set_task::do_start()
+bool Object_set_task::do_load()
 {
     bool ok;
 
@@ -1417,6 +1454,13 @@ bool Object_set_task::do_start()
         if( !ok || _job->has_error() )  return false;
     }
 
+    return ok;
+}
+
+//------------------------------------------------------------------------Object_set_task::do_start
+
+bool Object_set_task::do_start()
+{
     _job->set_state( Job::s_running );
 
     return _object_set->open();
@@ -1435,6 +1479,13 @@ void Object_set_task::do_end()
 bool Object_set_task::do_step()
 {
     return _object_set->step( _job->_output_level );
+}
+
+//-------------------------------------------------------------------------Job_script_task::do_load
+
+bool Job_script_task::do_load()
+{
+    return _job->load();
 }
 
 //------------------------------------------------------------------------Job_script_task::do_start

@@ -1,4 +1,4 @@
-// $Id: spooler_com.h,v 1.21 2002/03/04 22:28:36 jz Exp $
+// $Id: spooler_com.h,v 1.22 2002/03/05 17:10:00 jz Exp $
 
 #ifndef __SPOOLER_COM_H
 #define __SPOOLER_COM_H
@@ -26,6 +26,15 @@ namespace sos {
 namespace spooler {
 
 using spooler_com::Log_level; //enum   Log_level;
+using spooler_com::log_debug9;
+using spooler_com::log_debug8;
+using spooler_com::log_debug7;
+using spooler_com::log_debug6;
+using spooler_com::log_debug5;
+using spooler_com::log_debug4;
+using spooler_com::log_debug3;
+using spooler_com::log_debug2;
+using spooler_com::log_debug1;
 using spooler_com::log_debug;
 using spooler_com::log_info;
 using spooler_com::log_warn;
