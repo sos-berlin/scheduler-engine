@@ -144,14 +144,28 @@ Spooler_db::Spooler_db( Spooler* spooler )
 
 void Spooler_db::open( const string& db_name )
 {
-    try
+    while(1)
     {
-        open2( db_name );
-    }
-    catch( const exception& x )
-    {
-        if( !_spooler->_wait_endless_for_db_open )  throw;
-        try_reopen_after_error( x );
+        try
+        {
+            open2( db_name );
+            break;
+        }
+        catch( const exception& x )
+        {
+            if( !_spooler->_wait_endless_for_db_open )  throw;
+            
+            try
+            {
+                try_reopen_after_error( x );
+                break;
+            }
+            catch( exception& x )
+            {
+                sos_sleep( 10 );   // Vorsichtshalber nochmal warten
+                continue;
+            }
+        }
     }
 }
 
