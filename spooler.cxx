@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.66 2001/03/22 08:56:50 jz Exp $
+// $Id: spooler.cxx,v 1.67 2001/03/27 08:02:45 jz Exp $
 /*
     Hier sind implementiert
 
@@ -490,6 +490,8 @@ int Spooler::launch( int argc, char** argv )
 
         _argc = argc;
         _argv = argv;
+
+        tzset();
 
         SetThreadPriority( GetCurrentThread(), THREAD_PRIORITY_ABOVE_NORMAL );
 

@@ -1,4 +1,4 @@
-// $Id: spooler_command.cxx,v 1.32 2001/02/23 09:02:11 jz Exp $
+// $Id: spooler_command.cxx,v 1.33 2001/03/27 08:02:46 jz Exp $
 /*
     Hier ist implementiert
 
@@ -62,7 +62,7 @@ xml::Element_ptr create_error_element( xml::Document* document, const Xc_copy& x
 {
     xml::Element_ptr e = document->createElement( "ERROR" );
 
-    e->setAttribute( "time", as_dom_string( Sos_optional_date_time( x.time() - _timezone ).as_string() ) );
+    e->setAttribute( "time", as_dom_string( Sos_optional_date_time( x.time() - _timezone - _dstbias ).as_string() ) );
 
     if( !empty( x->name() )          )  e->setAttribute( "class" , as_dom_string( x->name()          ) );
 

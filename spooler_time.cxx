@@ -1,4 +1,4 @@
-// $Id: spooler_time.cxx,v 1.7 2001/02/04 17:12:43 jz Exp $
+// $Id: spooler_time.cxx,v 1.8 2001/03/27 08:02:46 jz Exp $
 /*
     Hier sind implementiert
 
@@ -61,17 +61,17 @@ Time Time::now()
 
         _timeb  tm;
         _ftime( &tm );
-        return (double)tm.time + (double)tm.millitm / (double)1e3 - _timezone;
+        return (double)tm.time + (double)tm.millitm / (double)1e3 - _timezone - _dstbias;
 
 #   elif define SYSTEM_LINUX
 
         struct timeval tm;
         gettimeofday( &tm, NULL );
-        return (double)tm.tv_sec + (double)tm.tv_usec / (double)1e6 - _timezone;
+        return (double)tm.tv_sec + (double)tm.tv_usec / (double)1e6 - _timezone - _dstbias;
 
 #   else
 
-        return time(NULL) - _timezone;
+        return time(NULL) - _timezone - _dstbias;
 
 #   endif
 }
