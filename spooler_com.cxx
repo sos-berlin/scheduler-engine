@@ -1,4 +1,4 @@
-// $Id: spooler_com.cxx,v 1.149 2004/04/05 08:49:46 jz Exp $
+// $Id: spooler_com.cxx,v 1.150 2004/04/05 09:14:26 jz Exp $
 /*
     Hier sind implementiert
 
@@ -231,19 +231,19 @@ STDMETHODIMP Com_variable::Clone( Ivariable** result )
 const Com_method Com_variable_set::_methods[] =
 { 
    // _flags         , dispid, _name                , _method                                           , _result_type  , _types        , _default_arg_count
-    { DISPATCH_METHOD     , 1, "set_var"            , (Com_method_ptr)&Com_variable_set::set_var        , VT_EMPTY      , { VT_BSTR, VT_BYREF|VT_VARIANT } },
-    { DISPATCH_PROPERTYPUT, 0, "value"              , (Com_method_ptr)&Com_variable_set::put_value      , VT_EMPTY      , { VT_BYREF|VT_VARIANT, VT_BYREF|VT_VARIANT }, 1 },
-    { DISPATCH_PROPERTYGET, 0, "value"              , (Com_method_ptr)&Com_variable_set::get_value      , VT_VARIANT    , { VT_BYREF|VT_VARIANT                      }, 1 },
-    { DISPATCH_PROPERTYPUT, 8, "var"                , (Com_method_ptr)&Com_variable_set::put_var        , VT_EMPTY      , { VT_BSTR, VT_BYREF|VT_VARIANT } },
-    { DISPATCH_PROPERTYGET, 8, "var"                , (Com_method_ptr)&Com_variable_set::get_var        , VT_VARIANT    , { VT_BSTR } },
-    { DISPATCH_PROPERTYGET, 2, "count"              , (Com_method_ptr)&Com_variable_set::get_count      , VT_I4         },
-    { DISPATCH_PROPERTYGET, 3, "dom"                , (Com_method_ptr)&Com_variable_set::get_dom        , VT_DISPATCH   },
+    { DISPATCH_METHOD     , 1, "set_var"            , (Com_method_ptr)&Com_variable_set::Set_var        , VT_EMPTY      , { VT_BSTR, VT_BYREF|VT_VARIANT } },
+    { DISPATCH_PROPERTYPUT, 0, "value"              , (Com_method_ptr)&Com_variable_set::put_Value      , VT_EMPTY      , { VT_BYREF|VT_VARIANT, VT_BYREF|VT_VARIANT }, 1 },
+    { DISPATCH_PROPERTYGET, 0, "value"              , (Com_method_ptr)&Com_variable_set::get_Value      , VT_VARIANT    , { VT_BYREF|VT_VARIANT                      }, 1 },
+    { DISPATCH_PROPERTYPUT, 8, "var"                , (Com_method_ptr)&Com_variable_set::put_Var        , VT_EMPTY      , { VT_BSTR, VT_BYREF|VT_VARIANT } },
+    { DISPATCH_PROPERTYGET, 8, "var"                , (Com_method_ptr)&Com_variable_set::get_Var        , VT_VARIANT    , { VT_BSTR } },
+    { DISPATCH_PROPERTYGET, 2, "count"              , (Com_method_ptr)&Com_variable_set::get_Count      , VT_I4         },
+    { DISPATCH_PROPERTYGET, 3, "dom"                , (Com_method_ptr)&Com_variable_set::get_Dom        , VT_DISPATCH   },
     { DISPATCH_PROPERTYGET, 4, "Clone"              , (Com_method_ptr)&Com_variable_set::Clone          , VT_DISPATCH   },
-    { DISPATCH_PROPERTYGET, 5, "merge"              , (Com_method_ptr)&Com_variable_set::merge          , VT_EMPTY      , { VT_DISPATCH } },
+    { DISPATCH_PROPERTYGET, 5, "merge"              , (Com_method_ptr)&Com_variable_set::Merge          , VT_EMPTY      , { VT_DISPATCH } },
     { DISPATCH_PROPERTYGET, DISPID_NEWENUM, "_NewEnum", (Com_method_ptr)&Com_variable_set::get__NewEnum , VT_DISPATCH   },
-    { DISPATCH_PROPERTYPUT, 6, "xml"                , (Com_method_ptr)&Com_variable_set::put_xml        , VT_EMPTY      , { VT_BSTR } },
-    { DISPATCH_PROPERTYGET, 6, "xml"                , (Com_method_ptr)&Com_variable_set::get_xml        , VT_BSTR       },
-    { DISPATCH_PROPERTYGET, 7, "java_class_name"    , (Com_method_ptr)&Com_variable_set::get_java_class_name, VT_BSTR },
+    { DISPATCH_PROPERTYPUT, 6, "xml"                , (Com_method_ptr)&Com_variable_set::put_Xml        , VT_EMPTY      , { VT_BSTR } },
+    { DISPATCH_PROPERTYGET, 6, "xml"                , (Com_method_ptr)&Com_variable_set::get_Xml        , VT_BSTR       },
+    { DISPATCH_PROPERTYGET, 7, "java_class_name"    , (Com_method_ptr)&Com_variable_set::get_Java_class_name, VT_BSTR },
     {}
 };
 
@@ -2724,9 +2724,9 @@ const Com_method Com_job_chain::_methods[] =
     { DISPATCH_PROPERTYPUT,  1, "name"                      , (Com_method_ptr)&Com_job_chain::put_Name           , VT_EMPTY      , { VT_BSTR } },
     { DISPATCH_PROPERTYGET,  1, "name"                      , (Com_method_ptr)&Com_job_chain::get_Name           , VT_BSTR       },
     { DISPATCH_PROPERTYGET,  2, "order_count"               , (Com_method_ptr)&Com_job_chain::get_Order_count    , VT_INT        },
-    { DISPATCH_METHOD     ,  3, "add_job"                   , (Com_method_ptr)&Com_job_chain::add_Job            , VT_EMPTY      , { VT_VARIANT|VT_BYREF, VT_VARIANT|VT_BYREF, VT_VARIANT|VT_BYREF, VT_VARIANT|VT_BYREF }, 3 },
-    { DISPATCH_METHOD     ,  4, "add_end_state"             , (Com_method_ptr)&Com_job_chain::add_End_state      , VT_EMPTY      , { VT_VARIANT|VT_BYREF } },
-    { DISPATCH_METHOD     ,  5, "add_order"                 , (Com_method_ptr)&Com_job_chain::add_Order          , VT_DISPATCH   , { VT_VARIANT|VT_BYREF } },
+    { DISPATCH_METHOD     ,  3, "add_job"                   , (Com_method_ptr)&Com_job_chain::Add_job            , VT_EMPTY      , { VT_VARIANT|VT_BYREF, VT_VARIANT|VT_BYREF, VT_VARIANT|VT_BYREF, VT_VARIANT|VT_BYREF }, 3 },
+    { DISPATCH_METHOD     ,  4, "add_end_state"             , (Com_method_ptr)&Com_job_chain::Add_end_state      , VT_EMPTY      , { VT_VARIANT|VT_BYREF } },
+    { DISPATCH_METHOD     ,  5, "add_order"                 , (Com_method_ptr)&Com_job_chain::Add_order          , VT_DISPATCH   , { VT_VARIANT|VT_BYREF } },
     { DISPATCH_PROPERTYGET,  6, "node"                      , (Com_method_ptr)&Com_job_chain::get_Node           , VT_DISPATCH   , { VT_VARIANT|VT_BYREF } },
     { DISPATCH_PROPERTYGET,  7, "order_queue"               , (Com_method_ptr)&Com_job_chain::get_Order_queue    , VT_DISPATCH   , { VT_VARIANT|VT_BYREF } },
     { DISPATCH_PROPERTYGET,  8, "java_class_name"           , (Com_method_ptr)&Com_job_chain::get_Java_class_name, VT_BSTR },

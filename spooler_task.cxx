@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.247 2004/04/05 08:49:46 jz Exp $
+// $Id: spooler_task.cxx,v 1.248 2004/04/05 09:14:26 jz Exp $
 /*
     Hier sind implementiert
 
@@ -2011,7 +2011,7 @@ bool Process_task::do_begin__end()
         Variant vt;
         HRESULT hr;
 
-        hr = _params->get_var( Bstr(nr), &vt );
+        hr = _params->get_Var( Bstr(nr), &vt );
         if( FAILED(hr) )  throw_ole( hr, "Variable_set.var", nr.c_str() );
 
         if( vt.vt == VT_EMPTY )  break;
