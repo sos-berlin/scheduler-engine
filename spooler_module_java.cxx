@@ -1,4 +1,4 @@
-// $Id: spooler_module_java.cxx,v 1.61 2003/09/22 09:16:25 jz Exp $
+// $Id: spooler_module_java.cxx,v 1.62 2003/09/23 20:50:24 jz Exp $
 /*
     Hier sind implementiert
 
@@ -486,7 +486,14 @@ Java_idispatch::~Java_idispatch()
 void Java_module_instance::init_java_vm( java::Vm* java_vm )
 {
     string work_dir = java_vm->work_dir();
-    if( !work_dir.empty() )  make_path( work_dir );  // Verzeichnis muss beim Start von Java vorhanden sein, damit Java es in classpath berücksichtigt.
+    if( !work_dir.empty() )
+    {
+        try
+        {
+            make_path( work_dir );  // Verzeichnis muss beim Start von Java vorhanden sein, damit Java es in classpath berücksichtigt.
+        }
+        catch( const exception& x ) { java_vm->_log.warn( "mkdir " + work_dir + " => " + x.what() ); }
+    }
 
     java_vm->start();
 
