@@ -1,4 +1,4 @@
-// $Id: spooler_module.cxx,v 1.10 2002/11/25 08:59:23 jz Exp $
+// $Id: spooler_module.cxx,v 1.11 2002/11/26 23:35:46 jz Exp $
 /*
     Hier sind implementiert
 
@@ -61,12 +61,8 @@ void Module::set_dom_without_source( const xml::Element_ptr& element )
     }
     else
     {
-#       ifdef Z_WINDOWS
-            _kind = kind_scripting_engine;
-             if( _language == "" )  _language = SPOOLER_DEFAULT_LANGUAGE;
-#       else
-            throw_xc( "SPOOLER-179" );
-#       endif
+        _kind = kind_scripting_engine;
+         if( _language == "" )  _language = SPOOLER_DEFAULT_LANGUAGE;
     }
 
     string use_engine = element.getAttribute( "use_engine" );
@@ -112,14 +108,25 @@ ptr<Module_instance> Module::create_instance()
 {
     switch( _kind )
     {
-        case kind_java:              return (Module_instance*) Z_NEW( Java_module_instance( this ) );
-        case kind_scripting_engine:  return (Module_instance*) Z_NEW( Scripting_engine_module_instance( this ) );
+        case kind_java:              
+        {
+            ptr<Java_module_instance> p = Z_NEW( Java_module_instance( this ) );
+            return +p;
+        }
+
+        case kind_scripting_engine:  
+        {
+            ptr<Scripting_engine_module_instance> p = Z_NEW( Scripting_engine_module_instance( this ) );
+            return +p;
+        }
 
 #     ifdef Z_WINDOWS
-        case kind_com:               return (Module_instance*) Z_NEW( Com_module_instance( this ) );
+        case kind_com:               
+            return Z_NEW( Com_module_instance( this ) );
 #     endif
 
-        default:                     throw_xc( "SPOOLER-173" );
+        default:                     
+            throw_xc( "SPOOLER-173" );
     }
 }
 

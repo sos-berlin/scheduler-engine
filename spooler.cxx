@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.140 2002/11/25 10:04:24 jz Exp $
+// $Id: spooler.cxx,v 1.141 2002/11/26 23:35:45 jz Exp $
 /*
     Hier sind implementiert
 
@@ -17,10 +17,6 @@
 #include <sys/stat.h>
 #include <sys/timeb.h>
 
-#ifdef Z_WINDOWS
-#   include <direct.h>
-#endif
-
 #include "../kram/sosprof.h"
 #include "../kram/sosopt.h"
 #include "../kram/sleep.h"
@@ -28,6 +24,14 @@
 #include "../file/anyfile.h"
 #include "../kram/licence.h"
 #include "../kram/sos_mail.h"
+
+#ifdef Z_WINDOWS
+#   include <direct.h>
+#   define DEFAULT_VM_MODULE "msjava.dll"
+#else
+#   define DEFAULT_VM_MODULE "libjava.so"
+#endif
+
 
 
 namespace sos {
@@ -575,7 +579,7 @@ void Spooler::load_arg()
     _need_db            = read_profile_bool      ( _factory_ini, "spooler", "need_db"            , true                );
     _history_tablename  = read_profile_string    ( _factory_ini, "spooler", "db_history_table"   , "spooler_history"   );
     _variables_tablename= read_profile_string    ( _factory_ini, "spooler", "db_variables_table" , "spooler_variables" );
-    _java_vm._filename  = read_profile_string    ( _factory_ini, "java"   , "vm"                 , "msjava.dll"        );
+    _java_vm._filename  = read_profile_string    ( _factory_ini, "java"   , "vm"                 , DEFAULT_VM_MODULE   );
   //_java_vm._ini_options= read_profile_string   ( _factory_ini, "java"   , "options" );
     _java_vm._ini_class_path= read_profile_string( _factory_ini, "java"   , "class_path" );
     _java_vm._javac     = read_profile_string    ( _factory_ini, "java"   , "javac"              , "javac"             );
@@ -614,7 +618,7 @@ void Spooler::load_arg()
                 throw_sos_option_error( opt );
         }
 
-        _temp_dir = read_profile_string( _factory_ini, "spooler", "tmp", get_temp_path() + "spooler" );
+        _temp_dir = read_profile_string( _factory_ini, "spooler", "tmp", get_temp_path() + Z_DIR_SEPARATOR "spooler" );
         _temp_dir = replace_regex( _temp_dir, "[\\/]+", Z_DIR_SEPARATOR );
         _temp_dir = replace_regex( _temp_dir, "\\" Z_DIR_SEPARATOR "$", "" );
         if( _spooler_id != "" )  _temp_dir += Z_DIR_SEPARATOR + _spooler_id;
@@ -822,21 +826,42 @@ void Spooler::run()
         }
 #       else
         {
-            Time            next_time = latter_day;
-            Time            now       = Time::now();
+            Job*    next_job  = NULL;
+            Time    next_time = latter_day;
+            Time    now       = Time::now();
+            string  msg;
+
+            FOR_EACH( Thread_list, _thread_list, it )  (*it)->start();
 
 
             FOR_EACH( Thread_list, _thread_list, it )  
             {
-                Time t = (*it)->next_start_time();
-                if( t <= now )  (*it)->process();
-                if( next_time > t )  next_time = t;
+                (*it)->process();
+
+                Job* job = (*it)->next_job_to_start();
+                if( job )
+                {
+                    Time t = next_job->next_time();
+                    if( t <= now )  
+                    if( next_time > t )  next_time = t, next_job = job;
+                }
             }
 
-            if( next_time > Time::now() )
+            now = Time::now();
+
+            if( next_time > now )
             {
-                sos_sleep( next_time - Time::now() );
+                if( next_job )  msg = "Warten bis " + next_time.as_string() + " für Job " + next_job->name();
+                          else  msg = "Kein Job zu starten";
+
+                _log.debug( msg );
+
+                sos_sleep( next_time - now );
             }
+
+
+            FOR_EACH( Thread_list, _thread_list, it )  (*it)->close1();
+
         }
 #       endif
 

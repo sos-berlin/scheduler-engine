@@ -1,4 +1,4 @@
-// $Id: spooler_task.h,v 1.77 2002/11/26 11:40:19 jz Exp $
+// $Id: spooler_task.h,v 1.78 2002/11/26 23:35:47 jz Exp $
 
 #ifndef __SPOOLER_TASK_H
 #define __SPOOLER_TASK_H
@@ -229,6 +229,8 @@ struct Job : Sos_self_deleting
     void                        finish                      ();
     void                        set_next_start_time         ( Time now = Time::now() );
     void                        set_next_time               ( Time now = Time::now() );
+
+    Time                        next_time                   ()                          { return _next_time; }
 
     bool                        execute_state_cmd           ();
     void                        reread                      ();

@@ -1,4 +1,4 @@
-// $Id: spooler_module_com.cxx,v 1.8 2002/11/25 23:36:22 jz Exp $
+// $Id: spooler_module_com.cxx,v 1.9 2002/11/26 23:35:46 jz Exp $
 /*
     Hier sind implementiert
 
@@ -182,7 +182,12 @@ void Scripting_engine_module_instance::init()
 
     _script_site = new Script_site;
     _script_site->_engine_name = _module->_language;
-    _script_site->init_engine();
+
+//#   ifdef Z_WINDOWS
+        _script_site->init_engine();
+//#    else
+        // Perl auf Unix will init_engine() erst nachdem die Quelle vollständig geladen ist.
+//#   endif
 
     _idispatch = _script_site->dispatch();
 
@@ -205,17 +210,61 @@ void Scripting_engine_module_instance::close()
     _loaded = false;
 }
 
+//------------------------------------------------------------------Scripting_engine_module_instance::add_obj
+
+void Scripting_engine_module_instance::add_obj( const ptr<IDispatch>& object, const string& name )
+{
+#   ifdef Z_WINDOWS
+
+        _script_site->add_obj( object, Bstr(name) );
+
+#    else
+/*
+        // Das ist der gleiche Code wie in factory_process.cxx. Zusammenfassen!
+
+        HRESULT     hr;
+        string      stmt;
+        Bstr        name_bstr;
+        Variant     index_vt;
+        Variant     value_vt;
+
+        hr = it->second->get_name( &name_bstr );                if(FAILED(hr)) throw_ole( hr, "Ihostware_variable::name" );
+        hr = it->second->get_value( &index_vt, &value_vt );     if(FAILED(hr)) throw_ole( hr, "Ihostware_variable::value" );
+
+        if( value_vt.vt != VT_EMPTY )
+        {
+            if( _var_prefix )  stmt = _var_prefix;
+            stmt += bstr_as_string(name_bstr);
+            stmt += '=';
+        
+            if( zschimmer::com::variant_is_numeric(value_vt) || value_vt.vt == VT_BOOL )  
+                stmt += variant_as_string(value_vt);
+            else 
+                stmt += quoted_string( variant_as_string(value_vt), _quote_char, _use_backslash? '\\' : _quote_char );
+
+            stmt += ';';
+        
+            _script_site->parse( stmt );
+        }
+*/
+#   endif
+
+    Com_module_instance_base::add_obj( object, name );
+}
+
 //---------------------------------------------------------------------Scripting_engine_module_instance::load
 
 void Scripting_engine_module_instance::load()
 {
     if( _script_site->_engine_name != _module->_language )  throw_xc( "SPOOLER-117" );
 
+#ifdef Z_WINDOWS
     if( _com_context->_log     )  _script_site->add_obj( _com_context->_log    , Bstr("spooler_log"    ) );
     if( _com_context->_spooler )  _script_site->add_obj( _com_context->_spooler, Bstr("spooler"        ) );
     if( _com_context->_thread  )  _script_site->add_obj( _com_context->_thread , Bstr("spooler_thread" ) );
     if( _com_context->_job     )  _script_site->add_obj( _com_context->_job    , Bstr("spooler_job"    ) );
     if( _com_context->_task    )  _script_site->add_obj( _com_context->_task   , Bstr("spooler_task"   ) );
+#endif
 
     HRESULT hr = _script_site->_script->SetScriptState( SCRIPTSTATE_INITIALIZED );
     if( FAILED( hr ) )  throw_ole( hr, "IActiveScript::SetScriptState", "SCRIPTSTATE_INITIALIZED" );
@@ -228,19 +277,16 @@ void Scripting_engine_module_instance::load()
     _loaded = true;
 }
 
-//------------------------------------------------------------------Scripting_engine_module_instance::add_obj
-
-void Scripting_engine_module_instance::add_obj( const ptr<IDispatch>& object, const string& name )
-{
-    _script_site->add_obj( object, Bstr(name) );
-
-    Com_module_instance_base::add_obj( object, name );
-}
-
 //--------------------------------------------------------------------Scripting_engine_module_instance::start
 
 void Scripting_engine_module_instance::start()
 {
+#   ifdef Z_WINDOWS
+        // init_engine() bereits gerufen
+#    else
+//        _script_site->init_engine();
+#   endif
+
     HRESULT hr = _script_site->_script->SetScriptState( SCRIPTSTATE_STARTED );
     if( FAILED( hr ) )  throw_ole( hr, "IActiveScript::SetScriptState", "SCRIPTSTATE_STARTED" );
 }

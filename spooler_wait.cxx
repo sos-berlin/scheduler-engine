@@ -1,4 +1,4 @@
-// $Id: spooler_wait.cxx,v 1.46 2002/11/26 11:40:20 jz Exp $
+// $Id: spooler_wait.cxx,v 1.47 2002/11/26 23:35:47 jz Exp $
 /*
     Hier sind implementiert
 
@@ -292,11 +292,36 @@ void Wait_handles::remove_handle( HANDLE handle, Event* event )
 
 void Wait_handles::remove( Event* event )
 {
-#ifdef Z_WINDOWS
     if( !event )  return;
 
-    remove_handle( event->handle(), event );
-#endif
+#   ifdef Z_WINDOWS
+
+        remove_handle( event->handle(), event );
+
+#   else
+
+        // Das ist fast der gleiche Code wie von remove_handle(). Kann man das zusammenfassen? 26.11.2002
+
+        THREAD_LOCK( _lock )
+        {
+            Event_vector::iterator it = _events.begin();
+
+            while( it != _events.end() )
+            {
+                if( *it == event )  break;
+                it++;
+            }
+
+            if( it == _events.end() ) {
+                _log->error( "Wait_handles::remove(" + event->as_string() + ") fehlt" );     // Keine Exception. Das wäre nicht gut in einem Destruktor
+                return;
+            }
+
+            _events.erase( it );
+            //_handles.erase( _handles.begin() + ( it - _handles.begin() )  );
+        }
+
+#   endif
 }
 
 //-------------------------------------------------------------------------------Wait_handles::wait

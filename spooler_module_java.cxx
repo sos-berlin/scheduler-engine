@@ -1,4 +1,4 @@
-// $Id: spooler_module_java.cxx,v 1.23 2002/11/25 23:36:22 jz Exp $
+// $Id: spooler_module_java.cxx,v 1.24 2002/11/26 23:35:46 jz Exp $
 /*
     Hier sind implementiert
 
@@ -519,10 +519,10 @@ void Java_vm::init()
 
     int ret;
 
-    typedef int JNICALL JNI_GetDefaultJavaVMInitArgs_func( JavaVMInitArgs* );
+  //typedef int JNICALL JNI_GetDefaultJavaVMInitArgs_func( JavaVMInitArgs* );
     typedef int JNICALL JNI_CreateJavaVM_func            ( JavaVM**, JNIEnv**, JavaVMInitArgs* );
 
-    JNI_GetDefaultJavaVMInitArgs_func*   JNI_GetDefaultJavaVMInitArgs;
+  //JNI_GetDefaultJavaVMInitArgs_func*   JNI_GetDefaultJavaVMInitArgs;
     JNI_CreateJavaVM_func*               JNI_CreateJavaVM;
 
 
@@ -550,8 +550,8 @@ void Java_vm::init()
         module_filename = filename_of_hinstance( vm_module );
         LOG( "HINSTANCE=" << (void*)vm_module << "  " << module_filename << "  " << file_version_info( module_filename ) << '\n' );
 
-        JNI_GetDefaultJavaVMInitArgs = (JNI_GetDefaultJavaVMInitArgs_func*)GetProcAddress( vm_module, "JNI_GetDefaultJavaVMInitArgs" );
-        if( !JNI_GetDefaultJavaVMInitArgs )  throw_mswin_error( "GetProcAddress", "JNI_GetDefaultJavaVMInitArgs" );
+      //JNI_GetDefaultJavaVMInitArgs = (JNI_GetDefaultJavaVMInitArgs_func*)GetProcAddress( vm_module, "JNI_GetDefaultJavaVMInitArgs" );
+      //if( !JNI_GetDefaultJavaVMInitArgs )  throw_mswin_error( "GetProcAddress", "JNI_GetDefaultJavaVMInitArgs" );
 
         JNI_CreateJavaVM = (JNI_CreateJavaVM_func*)GetProcAddress( vm_module, "JNI_CreateJavaVM" );
         if( !JNI_CreateJavaVM )  throw_mswin_error( "GetProcAddress", "JNI_CreateJavaVM" );
@@ -562,8 +562,8 @@ void Java_vm::init()
         void *vm_module = dlopen( _filename.c_str(), RTLD_LAZY );
         if( !vm_module )  throw_xc( "SPOOLER-171", dlerror(), _filename.c_str() );
 
-        JNI_GetDefaultJavaVMInitArgs = (JNI_GetDefaultJavaVMInitArgs_func*)dlsym( vm_module, "JNI_CreateJavaVM" );
-        if( !JNI_GetDefaultJavaVMInitArgs )  throw_xc( "SPOOLER-171", dlerror(), "JNI_CreateJavaVM" );
+      //JNI_GetDefaultJavaVMInitArgs = (JNI_GetDefaultJavaVMInitArgs_func*)dlsym( vm_module, "GetDefaultJavaVMInitArgs" );
+      //if( !JNI_GetDefaultJavaVMInitArgs )  throw_xc( "SPOOLER-171", dlerror(), "GetDefaultJavaVMInitArgs" );
 
         JNI_CreateJavaVM = (JNI_CreateJavaVM_func*)dlsym( vm_module, "JNI_CreateJavaVM" );
         if( !JNI_CreateJavaVM )  throw_xc( "SPOOLER-171", dlerror(), "JNI_CreateJavaVM" );
@@ -603,6 +603,7 @@ void Java_vm::init()
     {
         _vm_args.options[i].optionString = (char*)_options[i]._option.c_str();
         _vm_args.options[i].extraInfo    =        _options[i]._extra;
+        LOG( "Java option " << _vm_args.options[i].optionString << '\n' );
     }
 
 /*  JDK 1.1
@@ -631,9 +632,21 @@ void Java_vm::init()
     // jint disableAsyncGC;         whether asynchronous GC is allowed.
 */
     _thread_data->_env._java_vm = this;
-
     _thread_data->_env._jenv = NULL;
 
+#ifdef __GNUC__
+{
+    //_vm_args.version = 0; //TEST
+    LOG( "&_thread_data->_env._jenv=" << (void*)&_thread_data->_env._jenv << ' ' << (void*)_thread_data->_env._jenv << '\n' );
+    LOG( "JNI_CreateJavaVM()  Linux\n" );
+    JavaVM* vm = NULL;
+    JNIEnv* env = NULL;
+    ret = JNI_CreateJavaVM( &vm, &env, &_vm_args );
+    if( ret < 0 )  throw_java( ret, "JNI_CreateJavaVM", module_filename );
+}
+#endif
+
+    LOG( "JNI_CreateJavaVM()\n" );
     ret = JNI_CreateJavaVM( &_vm, &_thread_data->_env._jenv, &_vm_args );
     if( ret < 0 )  throw_java( ret, "JNI_CreateJavaVM", module_filename );
 

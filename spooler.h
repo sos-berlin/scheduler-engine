@@ -1,4 +1,4 @@
-// $Id: spooler.h,v 1.109 2002/11/26 11:40:19 jz Exp $
+// $Id: spooler.h,v 1.110 2002/11/26 23:35:45 jz Exp $
 
 #ifndef __SPOOLER_H
 #define __SPOOLER_H
@@ -296,7 +296,7 @@ struct Spooler
 
     State_changed_handler      _state_changed_handler;      // Callback für NT-Dienst SetServiceStatus()
 
-    Event                      _event;                      // Vor _wait_handles!
+    Event                      _event;
     Wait_handles               _wait_handles;
 
     xml::Document_ptr          _config_document_to_load;    // Für cmd_load_config(), das Dokument zu _config_element_to_load
