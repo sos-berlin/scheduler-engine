@@ -1,4 +1,4 @@
-// $Id: spooler_com.cxx,v 1.53 2002/09/14 16:23:07 jz Exp $
+// $Id: spooler_com.cxx,v 1.54 2002/09/14 17:26:27 jz Exp $
 /*
     Hier sind implementiert
 
@@ -1882,7 +1882,8 @@ STDMETHODIMP Com_job_chain::add_end_state( VARIANT* state )
     {
         if( !_job_chain )  return E_POINTER;
 
-        _job_chain->add_job( NULL, *state, CComVariant(), CComVariant() );
+        VARIANT error; VariantInit( &error );  error.vt = VT_ERROR;
+        _job_chain->add_job( NULL, *state, error, error );
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Job_chain.add_end_state" ); }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Job_chain.add_end_state" ); }

@@ -1,4 +1,4 @@
-// $Id: spooler_order.cxx,v 1.4 2002/09/14 16:23:07 jz Exp $
+// $Id: spooler_order.cxx,v 1.5 2002/09/14 17:26:28 jz Exp $
 /*
     Hier sind implementiert
 
@@ -90,10 +90,11 @@ void Job_chain::add_job( Job* job, const Variant& state, const Variant& next_sta
     node->_job         = job;
     node->_state       = state;
 
-    if( node->_state.vt == VT_EMPTY || node->_state.vt == VT_ERROR )  node->_state = combstr_from_string( job->name() );
+    //if( node->_state.vt == VT_EMPTY || node->_state.vt == VT_ERROR )  node->_state = combstr_from_string( job->name() );
+    if( node->_state.vt == VT_ERROR )  node->_state = combstr_from_string( job->name() );
 
-    node->_next_state  = next_state;   if( node->_next_state.vt  == VT_ERROR )  node->_next_state.vt  = VT_EMPTY;
-    node->_error_state = error_state;  if( node->_error_state.vt == VT_ERROR )  node->_error_state.vt = VT_EMPTY;
+    node->_next_state  = next_state;   //if( node->_next_state.vt  == VT_ERROR )  node->_next_state.vt  = VT_EMPTY;
+    node->_error_state = error_state;  //if( node->_error_state.vt == VT_ERROR )  node->_error_state.vt = VT_EMPTY;
 
     if( _map.find( node->_state ) != _map.end() )  throw_xc( "SPOOLER-150", error_string_from_variant(node->_state), name() );
 
@@ -113,7 +114,7 @@ void Job_chain::finish()
         
         Chain::iterator next = it;  next++;
 
-        if( n->_next_state.vt == VT_EMPTY  &&  next != _chain.end() )  n->_next_state = (*next)->_state;
+        if( n->_next_state.vt == VT_ERROR  &&  next != _chain.end() )  n->_next_state = (*next)->_state;
 
         Map::iterator next_it  = _map.find( n->_next_state  );
         Map::iterator error_it = _map.find( n->_error_state );
@@ -121,12 +122,12 @@ void Job_chain::finish()
         if( next_it != _map.end() )
             n->_next_node = next_it->second;
         else
-        if( n->_next_state.vt  != VT_EMPTY )  throw_xc( "SPOOLER-149", error_string_from_variant(n->_next_state), name() );
+        if( n->_next_state.vt  != VT_ERROR )  throw_xc( "SPOOLER-149", error_string_from_variant(n->_next_state), name() );
 
         if( error_it != _map.end() )
             n->_error_node = error_it->second;
         else
-        if( n->_error_state.vt != VT_EMPTY )  throw_xc( "SPOOLER-149", error_string_from_variant(n->_error_state), name() );
+        if( n->_error_state.vt != VT_ERROR )  throw_xc( "SPOOLER-149", error_string_from_variant(n->_error_state), name() );
 
     }
 
