@@ -1,4 +1,4 @@
-// $Id: spooler.h,v 1.185 2004/07/24 17:13:40 jz Exp $
+// $Id: spooler.h,v 1.186 2004/07/25 08:57:20 jz Exp $
 // §1172
 
 #ifndef __SPOOLER_H
@@ -110,7 +110,7 @@ namespace sos {
 namespace spooler {
 
 
-extern const char*              default_process_class_name;
+extern const char*              temporary_process_class_name;
 
 
 #ifdef Z_WINDOWS

@@ -1,4 +1,4 @@
-// $Id: spooler_command.cxx,v 1.129 2004/07/24 20:27:47 jz Exp $
+// $Id: spooler_command.cxx,v 1.130 2004/07/25 08:57:20 jz Exp $
 /*
     Hier ist implementiert
 
@@ -88,9 +88,9 @@ void append_error_element( const xml::Element_ptr& element, const Xc_copy& x )
 Command_processor::Command_processor( Spooler* spooler )
 : 
     _zero_(this+1),
-    _spooler(spooler),
-    _host(NULL) 
+    _spooler(spooler)
 {
+    set_host( NULL );
     _spooler->_executing_command = true;
 }
 
@@ -798,6 +798,16 @@ ptr<Http_response> Command_processor::execute_http( const Http_request& http_req
 */
 }
 
+//----------------------------------------------------------------------Command_processor::set_host
+
+void Command_processor::set_host( Host* host )
+{ 
+    _host = host; 
+
+    _security_level = _host? _spooler->security_level( *_host ) 
+                            : Security::seclev_all;
+}
+
 //------------------------------------------------------------------------Command_processor::execute
 
 string Command_processor::execute( const string& xml_text_par, const Time& xml_mod_time, bool indent )
@@ -851,9 +861,6 @@ void Command_processor::execute_2( const string& xml_text, const Time& xml_mod_t
 
         xml::Element_ptr answer_element = _answer.documentElement().appendChild( _answer.createElement( "answer" ) );
         answer_element.setAttribute( "time", Time::now().as_string() );
-
-        _security_level = _host? _spooler->security_level( *_host ) 
-                               : Security::seclev_all;
 
         xml::Document_ptr command_doc;
         command_doc.create();

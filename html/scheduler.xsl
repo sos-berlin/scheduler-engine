@@ -81,36 +81,43 @@
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Scheduler-Info-->
 
     <xsl:template name="scheduler_info">
-        <table cellpadding="0" cellspacing="0" class="scheduler" border="1">
+        <table cellpadding="0" cellspacing="0" class="scheduler">
             <col valign="baseline" align="left"/>
-            <col valign="baseline" align="left"/>
+            <col valign="baseline" align="right"/>
+            <col valign="baseline" width="10"/>
             <tr>
-                <td align="left" style="padding-right: 3ex">
+                <td style="padding-right: 3ex">
                     <span style="margin-top: 2px; margin-bottom: 2pt">
-                        <b>Scheduler</b>&#160;
-                        <span style="font-size: 8pt; white-space: nowrap">(<xsl:value-of select="state/@version"/>)</span>
-
-                        <xsl:text> &#160;</xsl:text>
-                        <xsl:value-of select="state/@state"/>    
-                            <xsl:text>&#160; </xsl:text>
+                        <xsl:element name="span">
+                            <xsl:attribute name="title">Version <xsl:value-of select="state/@version"/></xsl:attribute>
+                            <b>Scheduler</b>
+                        </xsl:element>
+                        <!--xsl:text>&#160;</xsl:text>
+                        <span style="font-size: 8pt; white-space: nowrap">(<xsl:value-of select="state/@version"/>)</span-->
     
                         <xsl:if test="state/@id!=''">
-                            <b style="white-space: nowrap">-id=<xsl:value-of select="state/@id"/></b>
+                            <xsl:text>&#160; </xsl:text>
+                            <b style="white-space: nowrap"><xsl:value-of select="state/@id"/></b>
                         </xsl:if>
+
+                        <xsl:text>&#160; </xsl:text>
+                        <xsl:value-of select="state/@state"/>    
                     </span>
                 </td>
-                <td align="right" style="padding-left: 0">
+                <td style="padding-left: 0">
                     <span style="margin-top: 2px; margin-bottom: 2px">
                         <xsl:value-of select="my:format_datetime( string( state/@time ) )"  disable-output-escaping="yes"/>
                         <span class="small">
-                            &#160;
+                            <xsl:text> &#160;</xsl:text>
                             (<xsl:value-of select="my:datetime_diff( string( state/@spooler_running_since ), $now )"  disable-output-escaping="yes"/>)
                         </span>
                         <xsl:text> </xsl:text>
+                    </span>
+                </td>
+                <td>
                         <xsl:call-template name="command_menu">
                             <xsl:with-param name="onclick" select="'scheduler_menu__onclick()'"/>
                         </xsl:call-template>
-                    </span>
                 </td>
             </tr>
             <tr>
@@ -788,8 +795,20 @@
                 <xsl:for-each select="process_class">
                 
                     <tr style="padding-top: 1ex">
-                        <td colspan="99" style="font-weight: bold">
-                            <xsl:value-of select="@name"/>
+                        <td colspan="99">
+                            <b>
+                                <xsl:choose>
+                                    <xsl:when test="@name!=''">
+                                        <xsl:value-of select="@name"/>
+                                    </xsl:when>
+                                    <xsl:otherwise>
+                                        (default)
+                                    </xsl:otherwise>
+                                </xsl:choose>
+                            </b>
+                            
+                            <xsl:text>&#160; </xsl:text>
+                            max_processes=<xsl:value-of select="@max_processes"/>
                         </td>
                     </tr>
                     
@@ -1233,7 +1252,7 @@
             
             //var ms = date.getMilliseconds();
 
-            return date.toLocaleDateString() + "&#160; " + date.toLocaleTimeString();
+            return date.toLocaleDateString() + ", " + date.toLocaleTimeString();
                    //+ ( ms? ".<span class='milliseconds'>" + ( ms + "000" ).substring( 0, 3 ) + "</span>" : "" );
         }
 
