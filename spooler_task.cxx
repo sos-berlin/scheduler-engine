@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.96 2002/06/16 14:22:13 jz Exp $
+// $Id: spooler_task.cxx,v 1.97 2002/06/18 07:35:45 jz Exp $
 /*
     Hier sind implementiert
 
@@ -282,7 +282,7 @@ void Job::set_xml( const xml::Element_ptr& element )
 
         //for( time::Holiday_set::iterator it = _spooler->_run_time._holidays.begin(); it != _spooler->_run_time._holidays.end(); it++ )
         //    _run_time._holidays.insert( *it );
-        _run_time.set_holidays( _spooler->holidays() );
+        
 
         DOM_FOR_ALL_ELEMENTS( element, e )
         {
@@ -305,7 +305,9 @@ void Job::set_xml( const xml::Element_ptr& element )
                                                _process_param        = as_string( e->getAttribute( L"param" ) ),
                                                _process_log_filename = as_string( e->getAttribute( L"log_file" ) );
             else
-            if( e->tagName == "run_time"  &&  !_spooler->_manual )  _run_time = Run_time(), _run_time.set_xml( e );
+            if( e->tagName == "run_time"  &&  !_spooler->_manual )  _run_time = Run_time(), 
+                                                                    _run_time.set_holidays( _spooler->holidays() ), 
+                                                                    _run_time.set_xml( e );
         }
 
         if( !_run_time.set() )

@@ -1,4 +1,4 @@
-// $Id: spooler_command.h,v 1.9 2002/04/07 19:52:58 jz Exp $
+// $Id: spooler_command.h,v 1.10 2002/06/18 07:35:45 jz Exp $
 
 #ifndef __SPOOLER_COMMAND_H
 #define __SPOOLER_COMMAND_H
@@ -15,7 +15,7 @@ string                          xml_as_string               ( const xml::Documen
 
 struct Command_processor
 {
-                                Command_processor           ( Spooler* spooler )                    : _spooler(spooler),_host(NULL) {}
+                                Command_processor           ( Spooler* spooler )                    : _zero_(this+1),_spooler(spooler),_host(NULL) {}
 
     string                      execute                     ( const string& xml_text );
     void                        execute_2                   ( const string& xml_text );
@@ -34,7 +34,9 @@ struct Command_processor
 
     void                        set_host                    ( Host* host )                          { _host = host; }
 
+    Fill_zero                  _zero_;
     Spooler*                   _spooler;
+    bool                       _load_config_immediately;
     xml::Document_ptr          _answer;
     Xc_copy                    _error;
     Host*                      _host;

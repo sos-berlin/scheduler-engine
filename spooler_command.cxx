@@ -1,4 +1,4 @@
-// $Id: spooler_command.cxx,v 1.54 2002/06/03 08:49:11 jz Exp $
+// $Id: spooler_command.cxx,v 1.55 2002/06/18 07:35:45 jz Exp $
 /*
     Hier ist implementiert
 
@@ -278,7 +278,8 @@ xml::Element_ptr Command_processor::execute_config( const xml::Element_ptr& conf
     string spooler_id = as_string( config_element->getAttribute( "spooler_id" ) );
     if( spooler_id.empty()  ||  spooler_id == _spooler->id()  ||  _spooler->_manual )
     {
-        _spooler->cmd_load_config( config_element );
+        if( _load_config_immediately )  _spooler->load_config( config_element );
+                                  else  _spooler->cmd_load_config( config_element );
     }
 
     return _answer->createElement( "ok" );

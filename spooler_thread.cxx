@@ -1,4 +1,4 @@
-// $Id: spooler_thread.cxx,v 1.35 2002/06/14 18:23:39 jz Exp $
+// $Id: spooler_thread.cxx,v 1.36 2002/06/18 07:35:46 jz Exp $
 /*
     Hier sind implementiert
 
@@ -113,10 +113,11 @@ void Thread::load_jobs_from_xml( const xml::Element_ptr& element, bool init )
         {
             string spooler_id = as_string( e->getAttribute( "spooler_id" ) );
 
-            if( _spooler->_manual? as_string(e->getAttribute(L"name")) == _spooler->_job_name 
+            if( _spooler->_manual? as_string(e->getAttribute("name")) == _spooler->_job_name 
                                  : spooler_id.empty() || spooler_id == _spooler->id() )
             {
-                Sos_ptr<Job> job = get_job_or_null( as_string( e->getAttribute(L"name") ) );
+                string job_name = as_string( e->getAttribute("name") );
+                Sos_ptr<Job> job = get_job_or_null( job_name );
                 if( job )
                 {
                     job->set_xml( e );
@@ -603,7 +604,7 @@ Job* Thread::get_job_or_null( const string& job_name )
         FOR_EACH( Job_list, _job_list, it )
         {
             Job* job = *it;
-            if( job->_state  &&  job->_name == job_name )  return job;
+            if( stricmp( job->_name.c_str(), job_name.c_str() ) == 0 )  return job;
         }
     }
 

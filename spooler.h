@@ -1,4 +1,4 @@
-// $Id: spooler.h,v 1.87 2002/06/16 14:22:13 jz Exp $
+// $Id: spooler.h,v 1.88 2002/06/18 07:35:44 jz Exp $
 
 #ifndef __SPOOLER_H
 #define __SPOOLER_H
@@ -174,6 +174,7 @@ struct Spooler
 
     // Für andere Threads:
     Thread*                     get_thread                  ( const string& thread_name );
+    Thread*                     get_thread_or_null          ( const string& thread_name );
     Object_set_class*           get_object_set_class        ( const string& name );
     Object_set_class*           get_object_set_class_or_null( const string& name );
     Job*                        get_job                     ( const string& job_name );
@@ -193,6 +194,7 @@ struct Spooler
 
     void                        load_arg                    ();
     void                        load                        ();
+    void                        load_config_from_file       ( const string& filename );
     void                        load_config                 ( const xml::Element_ptr& config );
 
     void                        load_object_set_classes_from_xml( Object_set_class_list*, const xml::Element_ptr& );

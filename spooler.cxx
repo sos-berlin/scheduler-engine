@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.104 2002/06/16 14:22:12 jz Exp $
+// $Id: spooler.cxx,v 1.105 2002/06/18 07:35:44 jz Exp $
 /*
     Hier sind implementiert
 
@@ -232,7 +232,7 @@ Spooler::Spooler()
     _script_instance(&_prefix_log),
     _log_level( log_info ),
     _db(this),
-    _factory_ini( default_factory_ini )
+    _factory_ini( default_factory_ini ),
 
     _smtp_server   ("-"),   // Für spooler_log.cxx: Nicht setzen, damit Default aus sos.ini erhalten bleibt
     _log_mail_from ("-"),
@@ -389,7 +389,7 @@ Thread* Spooler::get_thread_or_null( const string& thread_name )
 {
     THREAD_LOCK( _lock )
     {
-        FOR_EACH( Thread_list, _thread_list, it )  if( stricmp( (*it)->name(), thread_name ) == 0 )  return *it;
+        FOR_EACH( Thread_list, _thread_list, it )  if( stricmp( (*it)->name().c_str(), thread_name.c_str() ) == 0 )  return *it;
     }
 
     return NULL;
@@ -427,7 +427,7 @@ Object_set_class* Spooler::get_object_set_class_or_null( const string& name )
 Job* Spooler::get_job( const string& job_name )
 {
     Job* job = get_job_or_null( job_name );
-    if( !job )  throw_xc( "SPOOLER-108", job_name );
+    if( !job  ||  !job->state() )  throw_xc( "SPOOLER-108", job_name );
     return job;
 }
 
@@ -600,7 +600,6 @@ void Spooler::load()
     set_state( s_starting );
     _log.info( "Spooler::load " + _config_filename );
 
-    Command_processor cp = this;
 
     tzset();
 
@@ -609,7 +608,7 @@ void Spooler::load()
 
     _prefix_log.init( this );
 
-    cp.execute_2( file_as_string( _config_filename ) );
+    Command_processor( this ).execute_2( file_as_string( _config_filename ) );
 }
 
 //-----------------------------------------------------------------------------------Spooler::start
@@ -744,7 +743,7 @@ void Spooler::cmd_load_config( const xml::Element_ptr& config )
         _state_cmd = sc_load_config; 
     }
 
-    signal( "load_config" ); 
+    if( GetCurrentThreadId() != _thread_id )  signal( "load_config" ); 
 }
 
 //----------------------------------------------------------------------------Spooler::cmd_continue

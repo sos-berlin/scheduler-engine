@@ -1,4 +1,4 @@
-// $Id: spooler_config.cxx,v 1.40 2002/06/16 14:22:13 jz Exp $
+// $Id: spooler_config.cxx,v 1.41 2002/06/18 07:35:45 jz Exp $
 
 //#include <precomp.h>
 
@@ -265,14 +265,15 @@ void Spooler::load_threads_from_xml( const xml::Element_ptr& element )
     {
         if( e->tagName == "thread" ) 
         {
-            string spooler_id = as_string( e->getAttribute( L"spooler_id" ) );
+            string spooler_id = as_string( e->getAttribute( "spooler_id" ) );
             if( _manual  ||  spooler_id.empty()  ||  spooler_id == _spooler_id )
             {
-                Sos_ptr<Thread> thread = get_thread( as_string( element->getAttribute( "name" ) ) );
+                string thread_name = as_string( e->getAttribute( "name" ) );
+                Sos_ptr<Thread> thread = get_thread_or_null( thread_name );
                 if( !thread )  
                 {
                     thread = SOS_NEW( Thread( this ) );
-                    _thread_list->push_back( thread );
+                    _thread_list.push_back( thread );
                 }
 
                 thread->set_xml( e );
@@ -290,14 +291,17 @@ void Spooler::load_config( const xml::Element_ptr& config_element )
 
     try
     {
-        DOM_FOR_ALL_ELEMENTS( config_element, e )
+        {DOM_FOR_ALL_ELEMENTS( config_element, e )
         {
             if( e->tagName == "base" )
             {
-                string config_filename = as_string( e->getAttribute( "base" ) );
-
+                string config_filename = as_string( e->getAttribute( "file" ) );
+                
+                Command_processor cp ( this );
+                cp._load_config_immediately = true;
+                cp.execute_2( file_as_string( config_filename ) );
             }
-        }
+        }}
 
         _config_document = config_element->ownerDocument; 
         _config_element  = config_element;
@@ -330,14 +334,14 @@ void Spooler::load_config( const xml::Element_ptr& config_element )
             else
             if( e->tagName == "holidays" )
             {
+                _holiday_set.clear();
+
                 DOM_FOR_ALL_ELEMENTS( e, e2 )
                 {
-                    _holiday_set.clear();
-
-                    if( e->tagName == "holiday" )
+                    if( e2->tagName == "holiday" )
                     {
                         Sos_optional_date_time dt;
-                        dt.assign( as_string( e->getAttribute( L"date" ) ) );
+                        dt.assign( as_string( e2->getAttribute( L"date" ) ) );
                         _holiday_set.insert( dt.as_time_t() );
                     }
                 }

@@ -1,4 +1,4 @@
-// $Id: spooler_wait.cxx,v 1.33 2002/05/16 20:01:43 jz Exp $
+// $Id: spooler_wait.cxx,v 1.34 2002/06/18 07:35:46 jz Exp $
 /*
     Hier sind implementiert
 
@@ -48,6 +48,7 @@ bool wait_for_event( HANDLE handle, double wait_time )
         const double max_t = (double)(INT_MAX-10) / 1000.0;
         int ms = min( max_t, wait_time ) * 1000.0;
 
+        LOG( "MsgWaitForMultipleObjects()\n" );
         int ret = MsgWaitForMultipleObjects( 1, &handle, FALSE, ms, QS_ALLINPUT ); 
 
         if( ret == WAIT_OBJECT_0 )  return true;
@@ -301,7 +302,7 @@ int Wait_handles::wait_until( Time until )
         {
             if( _log->log_level() <= log_debug9 )
             {
-                string msg = "MsgWaitForMultipleObjects " + sos::as_string(t/1000.0) + "s  ";
+                string msg = "MsgWaitForMultipleObjects " + sos::as_string(t/1000.0) + "s (bis " + until.as_string() + ")  ";
                 for( int i = 0; i < _handles.size(); i++ )
                 {
                     if( i > 0 )  msg += ", ";

@@ -1,4 +1,4 @@
-// $Id: spooler_time.cxx,v 1.15 2002/06/16 14:22:14 jz Exp $
+// $Id: spooler_time.cxx,v 1.16 2002/06/18 07:35:46 jz Exp $
 /*
     Hier sind implementiert
 
@@ -33,6 +33,15 @@ void Time::operator = ( const Sos_optional_date_time& dt )
 {
     if( dt.has_date() )  _time = dt.as_time_t();
                    else  _time = dt.hour() * 60*60 + dt.minute() * 60 + dt.second();
+}
+
+//---------------------------------------------------------------------------------------Time::set
+
+void Time::set( const string& t )
+{
+    Sos_optional_date_time dt;
+    dt.set_time( t );
+    set( dt.time_as_double() );
 }
 
 //---------------------------------------------------------------------------------Time::as_string
@@ -463,6 +472,20 @@ void Run_time::set_xml( const xml::Element_ptr& element )
             _ultimo_set.set_xml( e, &default_day, &default_period );
         }
         else
+        if( e->tagName == "holidays" )
+        {
+            _holiday_set.clear();
+
+            DOM_FOR_ALL_ELEMENTS( e, e2 )
+            {
+                if( e2->tagName == "holiday" )
+                {
+                    Sos_optional_date_time dt;
+                    dt.assign( as_string( e2->getAttribute( L"date" ) ) );
+                    _holiday_set.insert( dt.as_time_t() );
+                }
+            }
+        }
         if( e->tagName == "holiday" )
         {
             dt.assign( as_string( e->getAttribute( L"date" ) ) );

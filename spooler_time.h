@@ -1,4 +1,4 @@
-// $Id: spooler_time.h,v 1.12 2002/06/16 14:22:14 jz Exp $
+// $Id: spooler_time.h,v 1.13 2002/06/18 07:35:46 jz Exp $
 
 #ifndef __SPOOLER_TIME_H
 #define __SPOOLER_TIME_H
@@ -31,10 +31,14 @@ struct Time
                                 Time                        ( double t = 0.0 )              { set(t); }
                                 Time                        ( int t )                       { set(t); }
                                 Time                        ( uint t )                      { set(t); }
+                                Time                        ( const string& t )             { set(t); }
+                                Time                        ( const char* t   )             { set(t); }
                                 Time                        ( const Sos_optional_date_time& dt ) { *this = dt; }
 
     void                        operator =                  ( double t )                    { set(t); }
     void                        operator =                  ( int t )                       { set(t); }
+    void                        operator =                  ( const string& t )             { set(t); }
+    void                        operator =                  ( const char* t )               { set(t); }
     void                        operator =                  ( const Sos_optional_date_time& );
 
     void                        operator +=                 ( double t )                    { set( _time + t ); }
@@ -68,6 +72,7 @@ struct Time
 
     static double               round                       ( double t )                    { return floor( t * 1000.0 + 0.5 ) / 1000.0; }
     void                        set                         ( double t )                    { _time = round(t); }
+    void                        set                         ( const string& );
     Time                        time_of_day                 () const                        { return _time - midnight(); }
     Time                        midnight                    () const                        { return day_nr() * 24*60*60; }
     int                         day_nr                      () const                        { return uint(_time) / (24*60*60); }
