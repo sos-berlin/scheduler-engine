@@ -1,4 +1,4 @@
-// $Id: spooler.h,v 1.131 2003/05/05 16:51:20 jz Exp $
+// $Id: spooler.h,v 1.132 2003/05/19 08:05:52 jz Exp $
 
 #ifndef __SPOOLER_H
 #define __SPOOLER_H
@@ -232,6 +232,7 @@ struct Spooler
     bool                        signaled                    ()                                  { return _event.signaled(); }
 
     Spooler_thread*             thread_by_thread_id         ( Thread_id );
+    void                        send_error_email            ( const string& subject, const string& body );
 
     void                        send_cmd                    ();
 
@@ -360,7 +361,7 @@ struct Spooler
 
 void                            spooler_restart             ( Log* log, bool is_service );
 void                            send_error_email            ( const string& error_text, int argc, char** argv );
-void                            send_error_email            ( const string& subject, const string& body );
+//void                          send_error_email            ( const string& subject, const string& body );
 
 //extern bool                     spooler_is_running;
 

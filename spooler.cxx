@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.202 2003/05/05 16:51:20 jz Exp $
+// $Id: spooler.cxx,v 1.203 2003/05/19 08:05:52 jz Exp $
 /*
     Hier sind implementiert
 
@@ -84,7 +84,7 @@ static void set_ctrl_c_handler( bool on );
 
 //---------------------------------------------------------------------------------send_error_email
 
-void send_error_email( const string& subject, const string& body )
+static void send_error_email( const string& subject, const string& body )
 {
     try
     {
@@ -1306,6 +1306,28 @@ int Spooler::launch( int argc, char** argv )
 
     //spooler_is_running = false;
     return rc;
+}
+
+//------------------------------------------------------------------------Spooler::send_error_email
+
+void Spooler::send_error_email( const string& subject, const string& body )
+{
+    try
+    {
+        Sos_ptr<mail::Message> msg = mail::create_message( spooler_ptr->_java_vm );
+
+        if( _log_mail_from != ""  &&  _log_mail_from != "-" )  msg->set_from( _log_mail_from );
+        if( _log_mail_to   != ""  &&  _log_mail_to   != "-" )  msg->set_to  ( _log_mail_to   );
+        if( _log_mail_cc   != ""  &&  _log_mail_cc   != "-" )  msg->set_cc  ( _log_mail_cc   );
+        if( _log_mail_bcc  != ""  &&  _log_mail_bcc  != "-" )  msg->set_bcc ( _log_mail_bcc  );
+        if( _smtp_server   != ""  &&  _smtp_server   != "-" )  msg->set_smtp( _smtp_server   );
+
+        msg->add_header_field( "X-SOS-Spooler", "" );
+        msg->set_subject( subject );
+        msg->set_body( body );
+        msg->send(); 
+    }
+    catch( const exception& ) {}
 }
 
 //------------------------------------------------------------------------------------start_process

@@ -1,4 +1,4 @@
-// $Id: spooler_history.cxx,v 1.46 2003/05/18 11:27:30 jz Exp $
+// $Id: spooler_history.cxx,v 1.47 2003/05/19 08:05:53 jz Exp $
 
 #include "spooler.h"
 #include "../zschimmer/z_com.h"
@@ -298,7 +298,7 @@ int Spooler_db::get_id()
             {
                 string body = "db=" + _spooler->_db_name + "\r\n\r\n" + x.what() + "\r\n\r\nDer Spooler versucht, die Datenbank erneut zu oeffnen.";
                 if( !_spooler->_need_db )  body += "\r\nWenn das nicht geht, schreibt der Spooler die Historie in Textdateien.";
-                send_error_email( string("FEHLER BEIM ZUGRIFF AUF DATENBANK: ") + x.what(), body );
+                _spooler->send_error_email( string("FEHLER BEIM ZUGRIFF AUF DATENBANK: ") + x.what(), body );
                 email_sent = true;
             }
 
