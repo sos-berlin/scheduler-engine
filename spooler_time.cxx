@@ -1,4 +1,4 @@
-// $Id: spooler_time.cxx,v 1.24 2002/11/24 16:06:34 jz Exp $
+// $Id: spooler_time.cxx,v 1.25 2002/11/28 11:18:23 jz Exp $
 /*
     Hier sind implementiert
 
@@ -22,7 +22,6 @@
 namespace sos {
 namespace spooler {
 namespace time {
-
 
 Period empty_period;
 

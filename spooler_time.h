@@ -1,4 +1,4 @@
-// $Id: spooler_time.h,v 1.16 2002/11/24 15:33:04 jz Exp $
+// $Id: spooler_time.h,v 1.17 2002/11/28 11:18:23 jz Exp $
 
 #ifndef __SPOOLER_TIME_H
 #define __SPOOLER_TIME_H
@@ -134,7 +134,7 @@ struct Period
     bool                       _let_run;                    // Task zuende laufen lassen, nicht bei _next_end_time beenden
 };
 
-extern Period                   empty_period;
+extern Period                   empty_period;               // gcc 3.2.1: Nicht const, weil gcc diese Variable nicht initialisiert. Das macht spooler.cxx.
 
 typedef set<Period>             Period_set;
 

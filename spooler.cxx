@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.145 2002/11/27 22:06:33 jz Exp $
+// $Id: spooler.cxx,v 1.146 2002/11/28 11:18:20 jz Exp $
 /*
     Hier sind implementiert
 
@@ -273,6 +273,7 @@ Spooler::Spooler()
     _log_mail_bcc  ("-"),
     _mail_queue_dir("-")
 {
+    Z_GNU_ONLY( time::empty_period = Period() );
 
     _tcp_port = 4444;
     _udp_port = 4444;

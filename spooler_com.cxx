@@ -1,4 +1,4 @@
-// $Id: spooler_com.cxx,v 1.75 2002/11/27 06:51:29 jz Exp $
+// $Id: spooler_com.cxx,v 1.76 2002/11/28 11:18:21 jz Exp $
 /*
     Hier sind implementiert
 
@@ -90,11 +90,12 @@ static ptr<spooler_com::Iorder> order_from_order_or_payload( Spooler* spooler, c
 
 const Com_method Com_error::_methods[] =
 { 
-    { "get_java_class_name" , (Com_method_ptr)&Com_error::get_java_class_name, 0, 0 },
-    { "get_is_error"        , (Com_method_ptr)&Com_error::get_is_error       , 0, 0 },
-    { "get_code"            , (Com_method_ptr)&Com_error::get_code           , 0, 0 }, 
-    { "get_text"            , (Com_method_ptr)&Com_error::get_text           , 0, 0 }, 
-    { NULL }
+   // _kind               , _name             , _method                                        , _result_type, _types        , _default_arg_count
+    { DISPATCH_PROPERTYGET, "java_class_name" , (Com_method_ptr)&Com_error::get_java_class_name, VT_BSTR },
+    { DISPATCH_PROPERTYGET, "is_error"        , (Com_method_ptr)&Com_error::get_is_error       , VT_BOOL },
+    { DISPATCH_PROPERTYGET, "code"            , (Com_method_ptr)&Com_error::get_code           , VT_BSTR }, 
+    { DISPATCH_PROPERTYGET, "text"            , (Com_method_ptr)&Com_error::get_text           , VT_BSTR }, 
+    { 0, NULL }
 };
 
 #endif
@@ -126,11 +127,12 @@ STDMETHODIMP Com_error::QueryInterface( const IID& iid, void** result )
 
 const Com_method com_error_methods[] =
 { 
-    { "get_java_class_name" , (Com_method_ptr)&Com_error::get_java_class_name, 0, 0 },
-    { "get_is_error"        , (Com_method_ptr)&Com_error::get_is_error       , 0, 0 },
-    { "get_code"            , (Com_method_ptr)&Com_error::get_code           , 0, 0 }, 
-    { "get_text"            , (Com_method_ptr)&Com_error::get_text           , 0, 0 }, 
-    { NULL }
+    { "java_class_name" , (Com_method_ptr)&Com_error::get_java_class_name, 0, 0 },
+    { "is_error"        , (Com_method_ptr)&Com_error::get_is_error       , 0, 0 },
+    { "code"            , (Com_method_ptr)&Com_error::get_code           , 0, 0 }, 
+    { "text"            , (Com_method_ptr)&Com_error::get_text           , 0, 0 }, 
+    { 0, NULL }
+
 };
 
 HRESULT Com_error::GetIDsOfNames( REFIID iid, LPOLESTR* rgszNames, UINT cNames, LCID lcid, DISPID* rgDispId )
@@ -232,7 +234,7 @@ STDMETHODIMP Com_error::get_text( BSTR* text_bstr )
 
 const Com_method Com_variable::_methods[] =
 { 
-    { NULL }
+    { 0, NULL }
 };
 
 #endif
@@ -283,7 +285,8 @@ STDMETHODIMP Com_variable::Clone( Ivariable** result )
 
 const Com_method Com_variable_set::_methods[] =
 { 
-    { NULL }
+    { 0, NULL }
+
 };
 
 #endif
@@ -540,7 +543,8 @@ STDMETHODIMP Com_variable_set::get__NewEnum( IUnknown** iunknown )
 
 const Com_method Com_variable_set_enumerator::_methods[] =
 { 
-    { NULL }
+    { 0, NULL }
+
 };
 
 #endif
@@ -632,8 +636,11 @@ STDMETHODIMP Com_variable_set_enumerator::Clone( IEnumVARIANT** ppenum )
 
 const Com_method Com_log::_methods[] =
 { 
-    { "info" , (Com_method_ptr)&Com_log::info, 1, 1, { VT_BSTR } },
-    { NULL }
+   // _kind          , _name   , _method                       , _result_type    , _types        , _default_arg_count
+    { DISPATCH_METHOD, "info"  , (Com_method_ptr)&Com_log::info, VT_EMPTY        , { VT_BSTR } },
+    { DISPATCH_METHOD, "error" , (Com_method_ptr)&Com_log::error, VT_EMPTY        , { VT_BSTR } },
+    { 0, NULL }
+
 };
 
 #endif
@@ -1011,7 +1018,8 @@ STDMETHODIMP Com_log::get_collect_max( double* result )
 
 const Com_method Com_object_set::_methods[] =
 { 
-    { NULL }
+    { 0, NULL }
+
 };
 
 #endif
@@ -1058,7 +1066,9 @@ STDMETHODIMP Com_object_set::get_high_level( int* result )
 
 const Com_method Com_job::_methods[] =
 { 
-    { NULL }
+   // _kind          , _name                           , _method                                     , _result_type, _types        , _default_arg_count
+    { DISPATCH_METHOD, "start"                         , (Com_method_ptr)&Com_job::start             , VT_DISPATCH , { VT_VARIANT }, 1 },
+    { 0, NULL }
 };
 
 #endif
@@ -1320,7 +1330,8 @@ STDMETHODIMP Com_job::get_order_queue( Iorder_queue** result )
 
 const Com_method Com_task::_methods[] =
 { 
-    { NULL }
+    { 0, NULL }
+
 };
 
 #endif
@@ -1672,7 +1683,8 @@ STDMETHODIMP Com_task::get_order( Iorder** result )
 
 const Com_method Com_thread::_methods[] =
 { 
-    { NULL }
+    { 0, NULL }
+
 };
 
 #endif
@@ -1767,7 +1779,38 @@ STDMETHODIMP Com_thread::get_name( BSTR* result )
 
 const Com_method Com_spooler::_methods[] =
 { 
-    { NULL }
+   // _kind               , _name                           , _method                                                       , _result_type , _types        , _default_arg_count
+    { DISPATCH_PROPERTYGET, "log"                           , (Com_method_ptr)&Com_spooler::get_log                         , VT_DISPATCH  },
+    { DISPATCH_PROPERTYGET, "id"                            , (Com_method_ptr)&Com_spooler::get_id                          , VT_BSTR      },
+    { DISPATCH_PROPERTYGET, "param"                         , (Com_method_ptr)&Com_spooler::get_param                       , VT_BSTR      },
+  //{ DISPATCH_PROPERTYGET, "script"                        , (Com_method_ptr)&Com_spooler::get_script                      , VT_DISPATCH  },
+    { DISPATCH_PROPERTYGET, "job"                           , (Com_method_ptr)&Com_spooler::get_job                         , VT_DISPATCH  , { VT_BSTR } },
+    // ...
+    { DISPATCH_METHOD     , "let_run_terminate_and_restart" , (Com_method_ptr)&Com_spooler::let_run_terminate_and_restart },
+    //..
+    { 0, NULL }
+
+/*
+    virtual HRESULT     get_log                     ( Ilog** log ) = 0;
+    virtual HRESULT     get_id                      ( BSTR* spooler_id ) = 0;
+    virtual HRESULT     get_param                   ( BSTR* spooler_param ) = 0;
+    virtual HRESULT     get_script                  ( IDispatch** script_object ) = 0;
+    virtual HRESULT     get_job                     ( BSTR name, Ijob** job ) = 0;
+    virtual HRESULT         create_variable_set     ( Ivariable_set** result ) = 0;
+  //HRESULT             put_include_path            ( BSTR include_path ) = 0;
+    virtual HRESULT     get_include_path            ( BSTR* include_path ) = 0;
+    virtual HRESULT     get_log_dir                 ( BSTR* directory ) = 0;
+    virtual HRESULT         let_run_terminate_and_restart() = 0;
+    virtual HRESULT     get_variables               ( Ivariable_set** ) = 0;
+    virtual HRESULT     put_var                     ( BSTR name, VARIANT* value ) = 0;
+    virtual HRESULT     get_var                     ( BSTR name, VARIANT* value ) = 0;
+    virtual HRESULT     get_db_name                 ( BSTR* filename ) = 0;
+    virtual HRESULT         create_job_chain        ( Ijob_chain** result ) = 0;
+    virtual HRESULT         add_job_chain           ( Ijob_chain* job_chain ) = 0;
+    virtual HRESULT     get_job_chain               ( BSTR name, Ijob_chain** result ) = 0;
+    virtual HRESULT         create_order            ( Iorder** result ) = 0;
+    virtual HRESULT     get_is_service              ( VARIANT_BOOL* result ) = 0;
+*/
 };
 
 #endif
@@ -2071,7 +2114,8 @@ STDMETHODIMP Com_spooler::get_is_service( VARIANT_BOOL* result )
 
 const Com_method Com_context::_methods[] =
 { 
-    { NULL }
+    { 0, NULL }
+
 };
 
 #endif
@@ -2088,7 +2132,8 @@ Com_context::Com_context()
 
 const Com_method Com_job_chain::_methods[] =
 { 
-    { NULL }
+    { 0, NULL }
+
 };
 
 #endif
@@ -2342,7 +2387,8 @@ STDMETHODIMP Com_job_chain::get_node( VARIANT* state, Ijob_chain_node** result )
 
 const Com_method Com_job_chain_node::_methods[] =
 { 
-    { NULL }
+    { 0, NULL }
+
 };
 
 #endif
@@ -2421,7 +2467,8 @@ STDMETHODIMP Com_job_chain_node::get_job( Ijob** result )
 
 const Com_method Com_order::_methods[] =
 { 
-    { NULL }
+    { 0, NULL }
+
 };
 
 #endif
@@ -2900,7 +2947,8 @@ STDMETHODIMP Com_order::add_to_job_chain( Ijob_chain* ijob_chain )
 
 const Com_method Com_order_queue::_methods[] =
 { 
-    { NULL }
+    { 0, NULL }
+
 };
 
 #endif
