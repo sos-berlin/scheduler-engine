@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.192 2003/04/01 13:37:12 jz Exp $
+// $Id: spooler.cxx,v 1.193 2003/04/02 18:03:32 jz Exp $
 /*
     Hier sind implementiert
 
@@ -996,7 +996,7 @@ void Spooler::start()
         _module_instance->start();
 
         bool ok = check_result( _module_instance->call_if_exists( "spooler_init()Z" ) );
-        if( !ok )  throw_xc( "SPOOLER-127" );
+        if( !ok )  throw_xc( "SPOOLER-183" );
     }
 
     start_threads();

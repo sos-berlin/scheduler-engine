@@ -1,4 +1,4 @@
-// $Id: Log.java,v 1.4 2003/02/25 20:33:49 jz Exp $
+// $Id: Log.java,v 1.5 2003/04/02 18:03:33 jz Exp $
 
 package sos.spooler;
 
@@ -54,4 +54,6 @@ public class Log extends Idispatch
     public void             set_collect_max             ( double time )                             {                   com_call( ">collect_max", time      ); }
     public void             set_collect_max             ( String time )                             {                   com_call( ">collect_max", time      ); }
     public double               collect_max             ()                                          { return     double_com_call( "<collect_max"            ); }
+
+    public void             set_mail_it                 ( boolean mail_it )                         {                   com_call( ">mail_it"    , mail_it   ); }
 }
