@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.47 2001/11/09 17:08:39 jz Exp $
+// $Id: spooler_task.cxx,v 1.48 2002/03/08 15:27:22 jz Exp $
 /*
     Hier sind implementiert
 
@@ -89,6 +89,7 @@ bool Object_set::open()
     {
         Job::In_call in_call ( _task, spooler_open_name );
         ok = check_result( com_call( _idispatch, spooler_open_name ) );
+        in_call.set_result( ok );
     }
     else  
         ok = true;
@@ -128,6 +129,8 @@ Spooler_object Object_set::get()
 
         if( obj.pdispVal == NULL )  break;  // EOF
         if( _object_set_descr->_level_interval.is_in_interval( object.level() ) )  break;
+
+        //_log.msg( "Objekt-Level " + as_string( object.level() ) + " ist nicht im Intervall" );
     }
 
     return object;
@@ -154,7 +157,9 @@ bool Object_set::step( Level result_level )
     else
     {
         Job::In_call in_call ( _task, spooler_process_name );
-        return check_result( _task->_job->_script_instance.call( spooler_process_name, result_level ) );
+        bool result = check_result( _task->_job->_script_instance.call( spooler_process_name, result_level ) );
+        in_call.set_result( result );
+        return result;
     }
 }
 
@@ -170,7 +175,8 @@ Thread* Object_set::thread() const
 Job::In_call::In_call( Job* job, const string& name ) 
 : 
     _job(job),
-    _name(name)
+    _name(name),
+    _result_set(false)
 { 
     _job->set_in_call(name); 
     LOG( *job << '.' << name << "() begin\n" );
@@ -181,7 +187,8 @@ Job::In_call::In_call( Job* job, const string& name )
 Job::In_call::In_call( Task* task, const string& name ) 
 : 
     _job(task->job()),
-    _name(name)
+    _name(name),
+    _result_set(false)
 { 
     _job->set_in_call(name); 
     LOG( *task->job() << '.' << name << "() begin\n" );
@@ -192,7 +199,13 @@ Job::In_call::In_call( Task* task, const string& name )
 Job::In_call::~In_call()
 { 
     _job->set_in_call( "" ); 
-    LOG( *_job << '.' << _name << "() end\n" );
+
+    if( log_ptr )
+    {
+        *log_ptr << *_job << '.' << _name << "() end";
+        if( _result_set )  *log_ptr << "  result=" << ( _result? "true" : "false" );
+        *log_ptr << '\n';
+    }
 }
 
 //-----------------------------------------------------------------------------------------Job::Job
@@ -449,6 +462,7 @@ bool Job::load()
     {
         In_call in_call ( this, spooler_init_name );
         bool ok = check_result( _script_instance.call_if_exists( spooler_init_name ) );
+        in_call.set_result( ok );
         if( !ok || has_error() )  { _load_error = true; return false; }
     }
 
@@ -635,7 +649,7 @@ bool Job::do_something()
         {
             Time now;
             bool call_step = do_a_step | _task->_let_run;
-            if( !call_step )  now = Time::now(), ok = _period.is_in_time( now );
+            if( !call_step )  now = Time::now(), call_step = _period.is_in_time( now );
             if( !call_step )   // Period abgelaufen?
             {
                 set_next_start_time(now);  
@@ -645,14 +659,17 @@ bool Job::do_something()
             if( call_step ) 
             {
                 ok = _task->step(); 
-
                 something_done = true;
             }
+            else
+                _log.msg( "Laufzeit ist abgelaufen, Task wird beendet." );
         }
     }
 
     if( !ok || has_error() )
     {
+        if( _spooler->_debug )  LOG( "spooler_process() lieferte " << ok << ", Fehler=" << _error << '\n' );      // Problem bei Uwe, 20.2.02
+
         if( _state == s_starting        // Bei Fehler in spooler_init()
          || _state == s_running 
          || _state == s_running_process )  end(), something_done = true;
@@ -663,8 +680,6 @@ bool Job::do_something()
 
     if( _state == s_ended ) 
     {
-        //?jz 7.7.01 schon erledigt.  close_task();
-
         if( _temporary && _repeat == 0 )  
         {
             stop();   // _temporary && s_stopped ==> spooler_thread.cxx entfernt den Job
@@ -676,8 +691,7 @@ bool Job::do_something()
             if( !dequeued )
             {
                 set_next_start_time();
-                /*if( _next_start_time == latter_day )  stop();
-                                                else*/  set_state( s_pending );
+                set_state( s_pending );
             }
         }
 
@@ -692,7 +706,7 @@ bool Job::do_something()
 void Job::set_error( const Xc& x )
 {
     string msg; 
-    if( !_in_call.empty() )  msg = "In " + _in_call + "():";
+    if( !_in_call.empty() )  msg = "In " + _in_call + "(): ";
     
     _log.error( msg + x.what() );
 
@@ -1215,6 +1229,7 @@ bool Job_script_task::do_start()
     {
         Job::In_call in_call ( this, spooler_open_name );
         ok = check_result( _job->_script_instance.call_if_exists( spooler_open_name ) );
+        in_call.set_result( ok );
         if( !ok )  return false;
     }
 
@@ -1236,7 +1251,9 @@ bool Job_script_task::do_step()
     if( !_job->_has_spooler_process )  return false;
 
     Job::In_call in_call ( this, spooler_process_name );
-    return check_result( _job->_script_instance.call( spooler_process_name ) );
+    bool ok = check_result( _job->_script_instance.call( spooler_process_name ) );
+    in_call.set_result( ok );
+    return ok;
 }
 
 //----------------------------------------------------------------------------Process_task::do_start
