@@ -1,4 +1,4 @@
-// $Id: spooler_history.cxx,v 1.99 2004/08/06 08:11:42 jz Exp $
+// $Id: spooler_history.cxx,v 1.100 2004/09/06 07:53:27 jz Exp $
 
 #include "spooler.h"
 #include "../zschimmer/z_com.h"
@@ -1248,6 +1248,7 @@ xml::Element_ptr Job_history::read_tail( const xml::Document_ptr& doc, int id, i
                             string name = type->field_descr_ptr(i)->name();
                             if( name == "parameters" )  param_xml = value;
                                                   else  history_entry.setAttribute( lcase(name), value );
+                            if( lcase(name) == "id" )  history_entry.setAttribute( "task", value );  // id sollte nicht verwendet werden. jz 6.9.04
                         }
                     }
 

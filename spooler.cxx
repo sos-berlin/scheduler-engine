@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.354 2004/09/02 09:33:29 jz Exp $
+// $Id: spooler.cxx,v 1.355 2004/09/06 07:53:27 jz Exp $
 // §851: Weitere Log-Ausgaben zum Scheduler-Start eingebaut
 // §1479
 
@@ -536,7 +536,7 @@ bool Spooler::has_any_order()
 
 //--------------------------------------------------------------------------Spooler::threads_as_xml
 // Anderer Thread
-
+/*
 xml::Element_ptr Spooler::threads_as_xml( const xml::Document_ptr& document, const Show_what& show )
 {
     xml::Element_ptr threads = document.createElement( "threads" );
@@ -554,7 +554,7 @@ xml::Element_ptr Spooler::threads_as_xml( const xml::Document_ptr& document, con
 
     return threads;
 }
-
+*/
 //-----------------------------------------------------------Spooler::load_process_classes_from_dom
 
 void Spooler::load_process_classes_from_dom( const xml::Element_ptr& element, const Time& )

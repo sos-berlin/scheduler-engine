@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet href="../../scheduler.xslt" type="text/xsl"?>
+
+<!--$Id: log.xml,v 1.1 2004/09/06 07:53:28 jz Exp $-->
+
+<xml_element name          = "log" 
+             title         = "Protokoll"
+             sub_directory = "answer/"
+             base_dir      = "../../"
+             parent_page   = "../../xml_answers.xml"
+             author        = "$Author: jz $"
+             date          = "$Date: 2004/09/06 07:53:28 $">
+
+    <xml_parent_elements>
+        <xml_parent_element name="job"/>
+    </xml_parent_elements>
+    
+    <description>
+        <p>
+        </p>
+    </description>
+    
+</xml_element>

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet href="../../scheduler.xslt" type="text/xsl"?>
+
+<!--$Id: spooler.xml,v 1.1 2004/09/06 07:53:28 jz Exp $-->
+
+<xml_element name          = "spooler" 
+             title         = "Wurzelelement der XML-Antwort"
+             sub_directory = "answer/"
+             base_dir      = "../../"
+             parent_page   = "../../xml_answers.xml"
+             author        = "$Author: jz $"
+             date          = "$Date: 2004/09/06 07:53:28 $">
+
+    <xml_child_elements>
+        <xml_child_element directory="xml/answer" name="answer"/>
+    </xml_child_elements>
+
+    <description>
+        <p>
+            Jede Antwort ist in die Elemente <code>&lt;spooler</code> und <code>&lt;answer</code> eingepackt.
+        </p>
+    </description>
+    
+    <example>
+        <pre>
+        </pre>
+    </example>
+        
+</xml_element>

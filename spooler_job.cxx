@@ -1,4 +1,4 @@
-// $Id: spooler_job.cxx,v 1.91 2004/08/26 20:39:36 jz Exp $
+// $Id: spooler_job.cxx,v 1.92 2004/09/06 07:53:27 jz Exp $
 // §851: Weitere Log-Ausgaben zum Scheduler-Start eingebaut
 /*
     Hier sind implementiert
@@ -1604,7 +1604,8 @@ xml::Element_ptr Job::dom( const xml::Document_ptr& document, const Show_what& s
                 Task*            task                = *it;
                 xml::Element_ptr queued_task_element = document.createElement( "queued_task" );
                 
-                queued_task_element.setAttribute( "id"      , task->id() );
+                queued_task_element.setAttribute( "task"    , task->id() );
+                queued_task_element.setAttribute( "id"      , task->id() );                         // veraltet
                 queued_task_element.setAttribute( "enqueued", task->_enqueue_time.as_string() );
                 queued_task_element.setAttribute( "name"    , task->_name );
                 

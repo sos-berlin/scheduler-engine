@@ -1,4 +1,4 @@
-// $Id: spooler.h,v 1.190 2004/09/02 09:33:29 jz Exp $
+// $Id: spooler.h,v 1.191 2004/09/06 07:53:27 jz Exp $
 // §1172
 
 #ifndef __SPOOLER_H
@@ -197,7 +197,7 @@ struct Spooler
     bool                        is_service                  () const                            { return _is_service; }
     string                      directory                   () const                            { return _directory; }
 
-    xml::Element_ptr            threads_as_xml              ( const xml::Document_ptr&, const Show_what& );
+  //xml::Element_ptr            threads_as_xml              ( const xml::Document_ptr&, const Show_what& );
 
     int                         launch                      ( int argc, char** argv, const string& params );                                
     void                        set_state_changed_handler   ( State_changed_handler h )         { _state_changed_handler = h; }

@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.261 2004/07/26 08:24:40 jz Exp $
+// $Id: spooler_task.cxx,v 1.262 2004/09/06 07:53:27 jz Exp $
 /*
     Hier sind implementiert
 
@@ -181,7 +181,7 @@ string start_cause_name( Start_cause cause )
         case cause_period_once        : return "period_once";
         case cause_period_single      : return "period_single";
         case cause_period_repeat      : return "period_repeat";
-        case cause_job_repeat         : return "job_repeat";
+      //case cause_job_repeat         : return "job_repeat";
         case cause_queue              : return "queue";
         case cause_queue_at           : return "queue_at";
         case cause_directory          : return "directory";
@@ -286,6 +286,7 @@ xml::Element_ptr Task::dom( const xml::Document_ptr& document, const Show_what& 
     THREAD_LOCK( _lock )
     {
         task_element.setAttribute( "id"              , _id );
+        task_element.setAttribute( "task"              , _id );
         task_element.setAttribute( "state"           , state_name() );
 
         if( _thread )

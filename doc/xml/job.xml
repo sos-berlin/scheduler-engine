@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="../scheduler.xslt" type="text/xsl"?>
 
-<!--$Id: job.xml,v 1.8 2004/08/30 11:37:16 jz Exp $-->
+<!--$Id: job.xml,v 1.9 2004/09/06 07:53:27 jz Exp $-->
 
 <xml_element name     = "job" 
              title    = "Job"
-             base_dir = ".."
+             base_dir = "../"
              parent_page = "../konfiguration.xml"
              author   = "$Author: jz $"
-             date     = "$Date: 2004/08/30 11:37:16 $">
+             date     = "$Date: 2004/09/06 07:53:27 $">
 
     <xml_parent_elements>
         <xml_parent_element name="jobs">

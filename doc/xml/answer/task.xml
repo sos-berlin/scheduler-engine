@@ -1,0 +1,289 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet href="../../scheduler.xslt" type="text/xsl"?>
+
+<!--$Id: task.xml,v 1.1 2004/09/06 07:53:28 jz Exp $-->
+
+<xml_element name     = "task" 
+             title    = "Task"
+             base_dir = "../../"
+             parent_page = "../../xml_answers.xml"
+             author   = "$Author: jz $"
+             date     = "$Date: 2004/09/06 07:53:28 $">
+
+    <xml_parent_elements>
+        <xml_parent_element name="tasks"/>
+    </xml_parent_elements>
+    
+    <xml_attributes>
+        <xml_attribute name="task" type="zahl">
+            <description>
+                <p>
+                    Die Task-Id.
+                </p>
+            </description>
+        </xml_attribute>
+
+        <xml_attribute name="id" type="zahl">
+            <description>
+                <p>
+                    Die Task-Id.
+                </p>
+                <p>
+                    (XML reservert das Attribut id, es sollte stattdessen <code>task</code> verwendet werden.)
+                </p>
+            </description>
+        </xml_attribute>
+
+        <xml_attribute name="state" type="state">
+            <description>
+                <p>
+                    Der Status der Task:
+                </p>
+                
+                <dl>
+                    <dt><code>state="none"</code></dt>
+                    <dd>
+                        Der anfängliche Status.
+                    </dd>
+                    
+                    <dt><code>state="loading"</code></dt>
+                    <dd>
+                        Der Programmcode der Task wird geladen. 
+                    </dd>
+                    
+                    <dt><code>state="waiting_for_process"</code></dt>
+                    <dd>
+                        Ein Prozess ist gestartet worden und die Task wartet darauf, dass der Prozess bereit ist.
+                    </dd>
+                    
+                    <dt><code>state="starting"</code></dt>
+                    <dd>
+                        Die Task startet. <code>spooler_init()</code> unnd <code>spooler_open()</code> werden aufgerufen.
+                    </dd>
+                    
+                    <dt><code>state="running_process"</code></dt>
+                    <dd>
+                        Nur, wenn der Job mit <scheduler_element name="process"/> definiert ist: Der Prozess läuft.
+                    </dd>
+                    
+                    <dt><code>state="running"</code></dt>
+                    <dd>
+                        Die Task läuft. <code>spooler_process()</code> wird aufgerufen.
+                    </dd>
+                    
+                    <dt><code>state="running_waiting_for_order"</code></dt>
+                    <dd>
+                        Nur bei einem auftragsgesteuerten Job: 
+                        Die Task ist bereit, den nächsten Auftrag auszuführen, aber es liegt kein Auftrag vor.
+                    </dd>
+                    
+                    <dt><code>state="running_delayed"</code></dt>
+                    <dd>
+                        Die Task hat <scheduler_method class="Task" property="delay_spooler_process"/> aufgerufen und wird verzögert.
+                    </dd>
+                    
+                    <dt><code>state="ending"</code></dt>
+                    <dd>
+                        <code>spooler_process()</code> wird nicht mehr aufgerufen.
+                        Der nächste Aufruf ist <code>spooler_close()</code>.
+                    </dd>
+                    
+                    <dt><code>state="on_success"</code></dt>
+                    <dd>
+                        <code>spooler_on_success()</code> wird aufgerufen.
+                    </dd>
+                    
+                    <dt><code>state="on_error"</code></dt>
+                    <dd>
+                        <code>spooler_on_error()</code> wird aufgerufen.
+                    </dd>
+                    
+                    <dt><code>state="exit"</code></dt>
+                    <dd>
+                        <code>spooler_exit()</code> wird aufgerufen.
+                    </dd>
+                    
+                    <dt><code>state="release"</code></dt>
+                    <dd>
+                        Das Task-Objekt wird freigegeben, das Programm wird beendet.
+                    </dd>
+                    
+                    <dt><code>state="ended"</code></dt>
+                    <dd>
+                        Das Task-Objekt ist freigeben.
+                    </dd>
+                    
+                    <dt><code>state="closed"</code></dt>
+                    <dd>
+                        Endzustand.
+                    </dd>
+                </dl>
+            </description>
+        </xml_attribute>
+
+        <xml_attribute name="name" type="name">
+            <description>
+                <p>
+                    Der Name der Task (s. <scheduler_element name="start_job"/>).
+                </p>
+            </description>
+        </xml_attribute>
+
+        <xml_attribute name="running_since" type="yyyy-mm-dd hh:mm:ss.mmm">
+            <description>
+                <p>
+                    Wenn die Task geladen oder gestartet worden ist: Zeitpunkt des Starts der Task.
+                </p>
+            </description>
+        </xml_attribute>
+
+        <xml_attribute name="enqueued" type="yyyy-mm-dd hh:mm:ss.mmm">
+            <description>
+                <p>
+                    Zeitpunkt, wann die Task in die Task-Warteschlange eingereiht worden ist.
+                </p>
+            </description>
+        </xml_attribute>
+
+        <xml_attribute name="start_at" type="yyyy-mm-dd hh:mm:ss.mmm">
+            <description>
+                <p>
+                    Zeitpunkt, wann die Task gestartet werden soll (s. <scheduler_element name="start_job" attribute="at"/>).
+                </p>
+            </description>
+        </xml_attribute>
+
+        <xml_attribute name="idle_since" type="yyyy-mm-dd hh:mm:ss.mmm">
+            <description>
+                <p>
+                    Zeitpunkt, seit dem die Task im Zustand <code>waiting_for_order</code> ist.
+                </p>
+            </description>
+        </xml_attribute>
+
+        <xml_attribute name="in_process_since" type="yyyy-mm-dd hh:mm:ss.mmm">
+            <description>
+                <p>
+                    Zeitpunkt, seit dem <code>spooler_process()</code>, also der gerade aktive Jobschritt ausgeführt wird.
+                </p>
+            </description>
+        </xml_attribute>
+
+        <xml_attribute name="cause" type="cause">
+            <description>
+                <p>
+                    Anlass des Starts.
+                </p>
+                <dl>
+                    <dt><code>cause="none"</code></dt>
+                    <dd>
+                        (Sollte nicht vorkommen.)
+                    </dd>
+                    
+                    <dt><code>cause="period_once"</code></dt>
+                    <dd>
+                        Wegen <scheduler_element name="period" attribute="once" value="yes"/>.
+                    </dd>
+                    
+                    <dt><code>cause="period_single"</code></dt>
+                    <dd>
+                        Wegen <scheduler_element name="period"/>, Attribut <code>single_start</code>.
+                    </dd>
+                    
+                    <dt><code>cause="period_repeat"</code></dt>
+                    <dd>
+                        Wegen <scheduler_element name="period"/>, Attribut <code>repeat</code>.
+                    </dd>
+                    
+                    <dt><code>cause="queue"</code></dt>
+                    <dd>
+                        Die Task war in der Task-Warteschlange, ohne feste Startzeit.
+                    </dd>
+                    
+                    <dt><code>cause="queue_at"</code></dt>
+                    <dd>
+                        Die Task war in der Task-Warteschlange, mit fester Startzeit (s. <scheduler_element name="start_job" attribute="at"/>).
+                    </dd>
+                    
+                    <dt><code>cause="directory"</code></dt>
+                    <dd>
+                        Die Verzeichnisüberwachung (<scheduler_method class="Job" method="start_when_directory_changed"/>) 
+                        hat eine Änderung eines Verzeichnisses festgestellt.
+                    </dd>
+                    
+                    <dt><code>cause="delay_after_error"</code></dt>
+                    <dd>
+                        Der Job geriet in den Fehlerzustand, wurde wegen <scheduler_method class="Job" property="delay_after_error"/>
+                        verzögert und wird jetzt erneut gestartet.
+                    </dd>
+                    
+                    <dt><code>cause="order"</code></dt>
+                    <dd>
+                        Ein Auftrag liegt vor.
+                    </dd>
+                    
+                    <dt><code>cause="wake"</code></dt>
+                    <dd>
+                        Siehe <scheduler_element name="modify_job" attribute="cmd" value="wake"/>.
+                    </dd>
+                </dl>
+            </description>
+        </xml_attribute>
+
+        <xml_attribute name="steps" type="zahl">
+            <description>
+                <p>
+                    Anzahl abgeschlossener Jobschritte, also Aufrufe von <scheduler_method class="Job" method="spooler_process"/>.
+                </p>
+            </description>
+        </xml_attribute>
+
+        <xml_attribute name="log_file" type="dateiname">
+            <description>
+                <p>
+                    Name der Protokolldatei. Das Attribut ist nur gesetzt solange die Task läuft.
+                </p>
+            </description>
+        </xml_attribute>
+
+        <xml_attribute name="calling" type="text">
+            <description>
+                <p>
+                    Name der Methode des Jobs, die gerade aufgerufen wird.
+                </p>
+            </description>
+        </xml_attribute>
+
+        <xml_attribute name="pid" type="zahl">
+            <description>
+                <p>
+                    Kennung des Prozesses, der die Task ausführt.
+                </p>
+            </description>
+        </xml_attribute>
+
+    </xml_attributes>
+    
+    <xml_child_elements>
+        <xml_child_element name="subprocesses"/>
+        
+        <xml_child_element name="log">
+            <description>
+                <p>
+                    Das Protokoll der laufenden Task. Nur wenn im Kommando das Attribut <code>what="log"</code> gesetzt ist.
+                </p>
+            </description>
+        </xml_child_element>
+    </xml_child_elements>
+
+    <description>
+        <p>
+        </p>
+    </description>
+    
+    <example>
+        <pre>
+        </pre>
+    </example>
+        
+</xml_element>

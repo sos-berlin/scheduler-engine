@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet href="../../scheduler.xslt" type="text/xsl"?>
+
+<!--$Id: param.xml,v 1.1 2004/09/06 07:53:28 jz Exp $-->
+
+<xml_element name          = "param" 
+             title         = "Parameter"
+             sub_directory = "answer/"
+             base_dir      = "../../"
+             parent_page   = "../../xml_answers.xml"
+             author        = "$Author: jz $"
+             date          = "$Date: 2004/09/06 07:53:28 $">
+
+    <xml_parent_elements>
+        <xml_parent_element name="params"/>
+    </xml_parent_elements>
+    
+    <xml_attributes>
+        <xml_attribute name="name" type="name" title="Name des Parameters"/>
+        <xml_attribute name="value" type="text" title="Wert des Parameters"/>
+    </xml_attributes>
+
+    <description>
+        <p>
+        </p>
+    </description>
+        
+</xml_element>

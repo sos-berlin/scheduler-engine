@@ -1,4 +1,4 @@
-// $Id: spooler_order.cxx,v 1.73 2004/07/27 13:52:55 jz Exp $
+// $Id: spooler_order.cxx,v 1.74 2004/09/06 07:53:27 jz Exp $
 /*
     Hier sind implementiert
 
@@ -812,7 +812,8 @@ xml::Element_ptr Order::dom( const xml::Document_ptr& document, const Show_what&
 
     THREAD_LOCK( _lock )
     {
-        element.setAttribute( "id"        , debug_string_from_variant( _id ) );
+        element.setAttribute( "order"     , debug_string_from_variant( _id ) );
+        element.setAttribute( "id"        , debug_string_from_variant( _id ) );     // veraltet
         element.setAttribute( "title"     , _title );
         element.setAttribute( "state"     , debug_string_from_variant( _state ) );
 

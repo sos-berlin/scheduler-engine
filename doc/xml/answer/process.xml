@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet href="../../scheduler.xslt" type="text/xsl"?>
+
+<!--$Id: process.xml,v 1.1 2004/09/06 07:53:28 jz Exp $-->
+
+<xml_element name          = "process" 
+             title         = "Prozess"
+             sub_directory = "answer/"
+             base_dir      = "../../"
+             parent_page   = "../../xml_answers.xml"
+             author        = "$Author: jz $"
+             date          = "$Date: 2004/09/06 07:53:28 $">
+
+    <xml_parent_elements>
+        <xml_parent_element name="processes"/>
+    </xml_parent_elements>
+    
+    <xml_attributes>
+        <xml_attribute name="pid" type="zahl" title="Prozess-Id vom Betriebssystems"/>
+        <xml_attribute name="timeout_at" type="yyyy-mm-dd hh:mm:ss.mmm" title="Frist des Prozesses"/>
+        <xml_attribute name="killed" type="yes|no" initial="no" title="Wenn die Task gerade abgebrochen wird"/>
+    </xml_attributes>
+    
+    <description>
+        <p>
+        </p>
+    </description>
+    
+    <example>
+        <pre>
+        </pre>
+    </example>
+        
+</xml_element>

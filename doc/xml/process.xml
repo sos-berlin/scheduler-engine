@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <?xml-stylesheet href="../scheduler.xslt" type="text/xsl"?>
-<!--$Id: process.xml,v 1.7 2004/08/31 11:19:42 jz Exp $-->
+<!--$Id: process.xml,v 1.8 2004/09/06 07:53:28 jz Exp $-->
 
 <xml_element name     = "process" 
              title    = "Externes Programm (alternativ zu &lt;script&gt;)" 
-             base_dir = ".."
+             base_dir = "../"
              parent_page = "../konfiguration.xml"
              author   = "$Author: jz $" 
-             date     = "$Date: 2004/08/31 11:19:42 $">
+             date     = "$Date: 2004/09/06 07:53:28 $">
               
     <xml_parent_elements>
         <xml_parent_element name="job">

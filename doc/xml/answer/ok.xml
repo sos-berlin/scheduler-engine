@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet href="../../scheduler.xslt" type="text/xsl"?>
+
+<!--$Id: ok.xml,v 1.1 2004/09/06 07:53:28 jz Exp $-->
+
+<xml_element name          = "ok" 
+             title         = "Einfache Antwort"
+             sub_directory = "answer/"
+             base_dir      = "../../"
+             parent_page   = "../../xml_answers.xml"
+             author        = "$Author: jz $"
+             date          = "$Date: 2004/09/06 07:53:28 $">
+
+    <xml_parent_elements>
+        <xml_parent_element name="answer"/>
+    </xml_parent_elements>
+    
+
+    <description>
+        <p>
+            Ein leeres Element, mit dem Kommandos antworten, die keine weiteres Ergebnis liefern.
+        </p>
+    </description>
+    
+    <example>
+        <pre>
+        </pre>
+    </example>
+        
+</xml_element>

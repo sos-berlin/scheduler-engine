@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet href="../../scheduler.xslt" type="text/xsl"?>
+
+<!--$Id: history.entry.xml,v 1.1 2004/09/06 07:53:28 jz Exp $-->
+
+<xml_element name          = "history.entry" 
+             title         = "Eintrag in der Task-Historie"
+             sub_directory = "answer/"
+             base_dir      = "../../"
+             parent_page   = "../../xml_answers.xml"
+             author        = "$Author: jz $"
+             date          = "$Date: 2004/09/06 07:53:28 $">
+
+    <xml_parent_elements>
+        <xml_parent_element name="history"/>
+    </xml_parent_elements>
+    
+
+    <xml_attributes>
+        <xml_attribute name="task" type="zahl" title="Task-Id"/>
+        
+        <xml_attribute name="id" type="zahl" title="Task-Id (veraltet)">
+            <description>
+                <p>
+                    Verwenden sie das Attribut <code>task=</code>.
+                </p>
+            </description>
+        </xml_attribute>
+        
+        <xml_attribute name="spooler_id" type="name" title="Scheduler-Id">
+            <description>
+                <p>
+                    Kennung des Schedulers oder <code>"-"</code>, wenn der Scheduler keine Kennung hat.
+                </p>
+            </description>
+        </xml_attribute>
+        
+        <xml_attribute name="job_name" type="name" title="Jobname"/>
+        
+        <xml_attribute name="start_time" type="yyyy-mm-dd hh:mm:ss" title="Zeitpunkt des Starts der Task"/>
+        <xml_attribute name="end_time" type="yyyy-mm-dd hh:mm:ss" title="Zeitpunkt des Endes der Task"/>
+        <xml_attribute name="cause" type="cause" title="Grund des Starts"/>
+        <xml_attribute name="steps" type="zahl" title="Zahl der Jobschritte"/>
+        <xml_attribute name="error" type="0|1" title="&quot;1&quot; bei einem Jobfehler"/>
+        <xml_attribute name="error_code" type="text" title="Fehlercode"/>
+        <xml_attribute name="error_text" type="text" title="Fehlercode mit Fehlertext"/>
+    </xml_attributes>
+    
+    <description>
+        <p>
+        </p>
+    </description>
+    
+    <example>
+        <pre>
+        </pre>
+    </example>
+        
+</xml_element>

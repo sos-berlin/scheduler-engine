@@ -1,4 +1,4 @@
-// $Id: spooler_task.h,v 1.140 2004/07/26 13:57:29 jz Exp $
+// $Id: spooler_task.h,v 1.141 2004/09/06 07:53:27 jz Exp $
 
 #ifndef __SPOOLER_TASK_H
 #define __SPOOLER_TASK_H
@@ -20,7 +20,7 @@ enum Start_cause
     cause_period_once           = 1,    // <run_time once="yes">
     cause_period_single         = 2,    // <run_time single_start="yes">
     cause_period_repeat         = 3,    // <run_time repeat="..">
-    cause_job_repeat            = 4,    // spooler_job.repeat = ..
+  //cause_job_repeat            = 4,    // spooler_job.repeat = ..
     cause_queue                 = 5,    // <start_job at="">
     cause_queue_at              = 6,    // <start_job at="..">
     cause_directory             = 7,    // start_when_directory_changed

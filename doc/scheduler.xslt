@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding="utf-8"?>
-<!-- $Id: scheduler.xslt,v 1.20 2004/08/31 11:19:42 jz Exp $ -->
+<!-- $Id: scheduler.xslt,v 1.21 2004/09/06 07:53:27 jz Exp $ -->
 
 <!--
     Änderungswünsche:
@@ -93,7 +93,7 @@
                                         </td>
                                         <td valign="baseline">
                                             <span class="title">
-                                                <xsl:value-of select="document( concat( 'xml/', @name, '.xml' ) )/xml_element[ @name=current()/@name ]/@title"/>
+                                                <xsl:value-of select="document( concat( 'xml/', /*/@sub_directory, @name, '.xml' ) )/xml_element[ @name=current()/@name ]/@title"/>
                                             </span>
                                         </td>
                                     </tr>
@@ -166,6 +166,7 @@
                 <xsl:apply-templates select="xml_parent_elements"/>
                 <xsl:apply-templates select="xml_attributes"/>
                 <xsl:apply-templates select="xml_child_elements"/>
+                <xsl:apply-templates select="xml_answer"/>
                 
                 <xsl:call-template name="bottom">
                     <xsl:with-param name="parent_page" select="@parent_page"/>
@@ -222,7 +223,7 @@
                     &#160;
                     –
                     <span class="title">
-                        <xsl:value-of select="document( concat( 'xml/', @name, '.xml' ) )/xml_element[ @name=current()/@name ]/@title"/>
+                        <xsl:value-of select="document( concat( 'xml/', /*/@sub_directory, @name, '.xml' ) )/xml_element[ @name=current()/@name ]/@title"/>
                     </span>
                 </td>
             </tr>
@@ -275,6 +276,28 @@
         <xsl:apply-templates mode="setting_description" select="."/>
     </xsl:template>
 
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~xml_answer-->
+
+    <xsl:template match="xml_answer">
+    
+        <h2>
+            Antwort
+        </h2>
+
+        <p>
+            <xsl:call-template name="scheduler_element">
+                <xsl:with-param name="directory" select="'xml/answer'"/>
+                <xsl:with-param name="name"      select="'spooler'"/>
+            </xsl:call-template>
+    &lt;answer>
+        &lt;<xsl:value-of select="@name"/>>
+    &lt;/answer>
+&lt;/spooler>
+        </p>
+
+        <xsl:apply-templates mode="setting_description" select="."/>
+    </xsl:template>
+
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~setting_header_rest-->
 
     <xsl:template match="*" mode="setting_header_rest">
@@ -315,7 +338,7 @@
                     <xsl:element name="a">
                         <xsl:attribute name="class">silent</xsl:attribute>
                         <xsl:attribute name="href">
-                            <xsl:value-of select="$base_dir"/>/ersetzung_von_umgebungsvariablen.xml
+                            <xsl:value-of select="$base_dir"/>ersetzung_von_umgebungsvariablen.xml
                         </xsl:attribute>
                         <xsl:text>hier</xsl:text>
                     </xsl:element>).
@@ -462,7 +485,11 @@
 
     <xsl:template match="scheduler_element" mode="description">
         <xsl:call-template name="scheduler_element">
-            <xsl:with-param name="name" select="@name"/>
+            <xsl:with-param name="directory" select="@directory"/>
+            <xsl:with-param name="name"      select="@name"     />
+            <xsl:with-param name="attribute" select="@attribute"/>
+            <xsl:with-param name="value"     select="@value"    />
+            <xsl:with-param name="parameter" select="@parameter"/>
         </xsl:call-template>
         <!--
         <xsl:element name="a">
@@ -470,6 +497,50 @@
             <code>&lt;<xsl:value-of select="@name"/>></code>
         </xsl:element>
         -->
+    </xsl:template>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~scheduler_element-->
+
+    <xsl:template name="scheduler_element">
+        <xsl:param name="name"/>
+        <xsl:param name="directory"/>
+        <xsl:param name="attribute"/>
+        <xsl:param name="value"     select="'&quot;…&quot;'"/>
+        <xsl:param name="parameter"/>
+        
+        <xsl:element name="a">
+            <xsl:attribute name="class">silent</xsl:attribute>
+            
+            <xsl:variable name="href2">
+                <xsl:if test="$attribute">#attribute_<xsl:value-of select="$attribute"/></xsl:if>
+            </xsl:variable>
+
+            <xsl:if test="$directory">
+                <xsl:attribute name="href"><xsl:value-of select="concat( $base_dir, $directory, $name, '.xml', $href2 )"/></xsl:attribute>
+            </xsl:if>            
+            <xsl:if test="not( $directory )">
+                <xsl:attribute name="href"><xsl:value-of select="concat( $base_dir, 'xml/', $name, '.xml', $href2 )"/></xsl:attribute>
+            </xsl:if>            
+            
+            <code>
+                &lt;<xsl:value-of select="$name"/>
+
+                <xsl:if test="$attribute">
+                    <xsl:text> </xsl:text>
+                    <xsl:value-of select="$attribute"/>
+                    <xsl:text>="</xsl:text>
+                    <xsl:value-of select="$value"/>
+                    <xsl:text>"</xsl:text>
+                </xsl:if>
+
+                <xsl:if test="$parameter">
+                    <xsl:text> </xsl:text>
+                    <xsl:value-of select="$parameter"/>
+                </xsl:if>
+
+                <xsl:text>></xsl:text>
+            </code>
+        </xsl:element>
     </xsl:template>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~scheduler_setting-->
@@ -498,27 +569,6 @@
         </xsl:choose>
     </xsl:template>
 
-    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~scheduler_element-->
-
-    <xsl:template name="scheduler_element">
-        <xsl:param name="name"/>
-        <xsl:param name="attribute"/>
-        
-        <xsl:element name="a">
-            <xsl:attribute name="class">silent</xsl:attribute>
-            <xsl:attribute name="href"><xsl:value-of select="concat( $base_dir, '/xml/', $name, '.xml', '#attribute_', $attribute )"/></xsl:attribute>
-            <code>
-                &lt;<xsl:value-of select="$name"/>
-                <xsl:if test="$attribute">
-                    <xsl:text> </xsl:text>
-                    <xsl:value-of select="$attribute"/>
-                    <xsl:text>="…"</xsl:text>
-                </xsl:if>
-                <xsl:text>></xsl:text>
-            </code>
-        </xsl:element>
-    </xsl:template>
-
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~scheduler_ini_entry-->
 
     <xsl:template match="scheduler_ini_entry" mode="description">
@@ -539,7 +589,7 @@
         
         <xsl:element name="a">
             <xsl:attribute name="class">silent</xsl:attribute>
-            <xsl:attribute name="href"><xsl:value-of select="concat( $base_dir, '/', translate( $file, '.', '_' ), '_', $section, '.xml', '#entry_', $entry )"/></xsl:attribute>
+            <xsl:attribute name="href"><xsl:value-of select="concat( $base_dir, translate( $file, '.', '_' ), '_', $section, '.xml', '#entry_', $entry )"/></xsl:attribute>
             
             <code><xsl:value-of select="$file"/></code>
             
@@ -573,7 +623,7 @@
         
         <xsl:element name="a">
             <xsl:attribute name="class">silent</xsl:attribute>
-            <xsl:attribute name="href"><xsl:value-of select="concat( $base_dir, '/command_line.xml#option_', $name )"/></xsl:attribute>
+            <xsl:attribute name="href"><xsl:value-of select="concat( $base_dir, 'command_line.xml#option_', $name )"/></xsl:attribute>
             <code>-<xsl:value-of select="$name"/></code>
 
 <!--
@@ -584,6 +634,26 @@
             </xsl:if>
 -->            
         </xsl:element>
+    </xsl:template>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~scheduler_method-->
+
+    <xsl:template match="scheduler_method" mode="description">
+        <xsl:call-template name="scheduler_option">
+            <xsl:with-param name="class"    select="@class"/>
+            <xsl:with-param name="method"   select="@method"/>
+            <xsl:with-param name="property" select="@property"/>
+        </xsl:call-template>
+    </xsl:template>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~scheduler_method-->
+
+    <xsl:template name="scheduler_method">
+        <xsl:param name="class"/>
+        <xsl:param name="method"/>
+        <xsl:param name="property"/>
+        
+        <code><xsl:value-of select="@class"/>.<xsl:value-of select="@method | @property"/>()</code>
     </xsl:template>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~command_line-->
@@ -928,7 +998,7 @@
             </title>
             
             <style type="text/css">
-                @import "<xsl:value-of select="$base_dir"/>/scheduler.css";
+                @import "<xsl:value-of select="$base_dir"/>scheduler.css";
             </style>
         </head>
     </xsl:template>
@@ -993,7 +1063,7 @@
             <xsl:if test="not( /*/@suppress_browse_bar='yes' )">
                 <xsl:element name="a">
                     <xsl:attribute name="class">silent</xsl:attribute>
-                    <xsl:attribute name="href"><xsl:value-of select="concat( $base_dir, '/', $start_page )"/></xsl:attribute>
+                    <xsl:attribute name="href"><xsl:value-of select="concat( $base_dir, $start_page )"/></xsl:attribute>
                     <xsl:text>Startseite</xsl:text>
                 </xsl:element>
                 
@@ -1001,7 +1071,7 @@
                     &#160; – &#160;
                     <xsl:element name="a">
                         <xsl:attribute name="class">silent</xsl:attribute>
-                        <!--xsl:attribute name="href"><xsl:value-of select="concat( $base_dir, '/', $parent_page )"/></xsl:attribute-->
+                        <!--xsl:attribute name="href"><xsl:value-of select="concat( $base_dir, $parent_page )"/></xsl:attribute-->
                         <xsl:attribute name="href"><xsl:value-of select="$parent_page"/></xsl:attribute>
                         <xsl:value-of select="document( $parent_page )/*/@title"/>
                     </xsl:element>

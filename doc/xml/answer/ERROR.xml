@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet href="../../scheduler.xslt" type="text/xsl"?>
+
+<!--$Id: ERROR.xml,v 1.1 2004/09/06 07:53:28 jz Exp $-->
+
+<xml_element name          = "ERROR" 
+             title         = "Fehlermeldung"
+             sub_directory = "answer/"
+             base_dir      = "../../"
+             parent_page   = "../../xml_answers.xml"
+             author        = "$Author: jz $"
+             date          = "$Date: 2004/09/06 07:53:28 $">
+
+    <xml_parent_elements>
+        <xml_parent_element name="answer"/>
+    </xml_parent_elements>
+    
+    <xml_attributes>
+        <xml_attribute name="class" type="name">
+            <description>
+                <p>
+                    Name der Exception-Klasse (C++).
+                </p>
+            </description>
+        </xml_attribute>
+        
+        <xml_attribute name="code" type="text">
+            <description>
+                <p>
+                    Fehlercode
+                </p>
+            </description>
+        </xml_attribute>
+        
+        <xml_attribute name="text" type="text">
+            <description>
+                <p>
+                    Fehlercode und Fehlertext.
+                </p>
+            </description>
+        </xml_attribute>
+        
+        <xml_attribute name="source" type="filename">
+            <description>
+                <p>
+                    Name der Datei, die den Fehler enthält.
+                </p>
+            </description>
+        </xml_attribute>
+        
+        <xml_attribute name="line" type="zahl">
+            <description>
+                <p>
+                    Nummer der Zeile (ab 1), die den Fehler enthält.
+                </p>
+            </description>
+        </xml_attribute>
+        
+        <xml_attribute name="col" type="zahl">
+            <description>
+                <p>
+                    Nummer der Spalte (ab 1), die den Fehler enthält.
+                </p>
+            </description>
+        </xml_attribute>
+        
+    </xml_attributes>
+    
+    <description>
+        <p>
+            Wenn das Kommando zu einem Fehler führt, antwortet der Scheduler mit diesem <code>&lt;ERROR></code>-Element.
+        </p>
+    </description>
+
+<!--   Linux: code enthält Exception-Name?
+    <example>
+        <pre>
+&lt;spooler>
+  &lt;answer time="2004-09-06 08:31:30.559">
+    &lt;ERROR time="2004-09-06 08:31:30" code="N9zschimmer2XcE" text="LIBXML2-004  XML-Dokument ist nicht valide (Fehlermeldungen in stderr) [:0: No declaration for element xx]"/>
+  &lt;/answer>
+&lt;/spooler>
+        </pre>
+    </example>
+-->    
+        
+</xml_element>

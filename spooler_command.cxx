@@ -1,4 +1,4 @@
-// $Id: spooler_command.cxx,v 1.139 2004/08/29 11:23:26 jz Exp $
+// $Id: spooler_command.cxx,v 1.140 2004/09/06 07:53:27 jz Exp $
 /*
     Hier ist implementiert
 
@@ -129,14 +129,14 @@ xml::Element_ptr Command_processor::execute_show_jobs( const Show_what& show )
 }
 
 //----------------------------------------------------------Command_processor::execute_show_threads
-
+/*
 xml::Element_ptr Command_processor::execute_show_threads( const Show_what& show )
 {
     if( _security_level < Security::seclev_info )  throw_xc( "SCHEDULER-121" );
 
     return _spooler->threads_as_xml( _answer, show );
 }
-
+*/
 //--------------------------------------------------Command_processor::execute_show_process_classes
 
 xml::Element_ptr Command_processor::execute_show_process_classes( const Show_what& show )
