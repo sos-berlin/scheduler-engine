@@ -1,4 +1,4 @@
-// $Id: spooler_com.cxx,v 1.10 2001/02/10 11:38:06 jz Exp $
+// $Id: spooler_com.cxx,v 1.11 2001/02/21 10:57:35 jz Exp $
 /*
     Hier sind implementiert
 
@@ -542,7 +542,7 @@ STDMETHODIMP Com_spooler::get_id( BSTR* id_bstr )
 {
     if( !_spooler )  return E_POINTER;
 
-    *id_bstr = SysAllocString_string( _spooler->_spooler_id );
+    *id_bstr = SysAllocString_string( _spooler->id() );
     return NOERROR;
 }
 

@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.56 2001/02/21 10:21:58 jz Exp $
+// $Id: spooler.cxx,v 1.57 2001/02/21 10:57:35 jz Exp $
 /*
     Hier sind implementiert
 
@@ -85,6 +85,41 @@ Spooler::~Spooler()
     if( _com_log     )  _com_log->close();
 }
 
+//--------------------------------------------------------------------------Spooler::security_level
+// Anderer Thread
+
+Security::Level Spooler::security_level( const Host& host )
+{
+    THREAD_LOCK( _lock )
+    {
+        return _security.level( host );
+    }
+
+    __assume(0);
+}
+
+
+//--------------------------------------------------------------------------Spooler::threads_as_xml
+// Anderer Thread
+
+xml::Element_ptr Spooler::threads_as_xml( xml::Document_ptr document )
+{
+    xml::Element_ptr threads = document->createElement( "threads" );
+
+    dom_append_nl( threads );
+
+    THREAD_LOCK( _lock )
+    {
+        FOR_EACH( Thread_list, _thread_list, it )
+        {
+            threads->appendChild( (*it)->xml( document ) );
+            dom_append_nl( threads );
+        }
+    }
+
+    return threads;
+}
+
 //--------------------------------------------------------------Spooler::wait_until_threads_stopped
 
 void Spooler::wait_until_threads_stopped( Time until )
@@ -108,7 +143,7 @@ void Spooler::wait_until_threads_stopped( Time until )
             _log.msg( "Thread " + (*thread)->name() + " beendet" );
 
             wait_handles.remove_handle( (*thread)->_thread_handle.handle() );
-            _thread_list.erase( thread );
+            THREAD_LOCK( _lock )  _thread_list.erase( thread );
         }
 
         if( Time::now() > until )  break;
@@ -144,6 +179,32 @@ Thread* Spooler::get_thread( const string& thread_name )
     }
 
     throw_xc( "SPOOLER-128", thread_name );
+    return NULL;
+}
+
+//--------------------------------------------------------------------Spooler::get_object_set_class
+// Anderer Thread
+
+Object_set_class* Spooler::get_object_set_class( const string& name )
+{
+    Object_set_class* c = get_object_set_class_or_null( name );
+    if( !c )  throw_xc( "SPOOLER-101", name );
+    return c;
+}
+
+//-------------------------------------------------------------Spooler::get_object_set_class_or_null
+// Anderer Thread
+
+Object_set_class* Spooler::get_object_set_class_or_null( const string& name )
+{
+    THREAD_LOCK( _lock )
+    {
+        FOR_EACH( Object_set_class_list, _object_set_class_list, it )
+        {
+            if( (*it)->_name == name )  return *it;
+        }
+    }
+
     return NULL;
 }
 
@@ -335,9 +396,9 @@ void Spooler::cmd_load_config( const xml::Element_ptr& config )
 { 
     THREAD_LOCK( _lock )  
     {
-        _config_document=config->ownerDocument; 
-        _config_element=config;
-        _state_cmd=sc_load_config; 
+        _config_document = config->ownerDocument; 
+        _config_element  = config;
+        _state_cmd = sc_load_config; 
     }
 
     signal( "load_config" ); 
@@ -405,26 +466,21 @@ int Spooler::launch( int argc, char** argv )
 
     do
     {
-        THREAD_LOCK( _command_lock )  
+        if( _state_cmd != sc_load_config )  load();
+    
+        THREAD_LOCK( _lock )  
         {
-            if( _state_cmd != sc_load_config )  load();
+            if( _config_element == NULL )  throw_xc( "SPOOLER-116", _spooler_id );
+    
+            load_config( _config_element );
         
-            THREAD_LOCK( _lock )  
-            {
-                if( _config_element == NULL )  throw_xc( "SPOOLER-116", _spooler_id );
-        
-                load_config( _config_element );
-            
-                _config_element = NULL;
-                _config_document = NULL;
-            }
-
-            start();
+            _config_element = NULL;
+            _config_document = NULL;
         }
 
+        start();
         run();
-
-        { THREAD_LOCK( _command_lock )  stop(); }
+        stop();
 
     } while( _state_cmd == sc_reload || _state_cmd == sc_load_config );
 
@@ -608,7 +664,7 @@ int spooler_main( int argc, char** argv )
 
         ret = spooler.launch( argc, argv );
         
-        is_service = spooler._is_service;
+        is_service = spooler.is_service();
     }
 
     return 0;

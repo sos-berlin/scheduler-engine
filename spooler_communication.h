@@ -1,4 +1,4 @@
-// $Id: spooler_communication.h,v 1.1 2001/01/25 20:28:38 jz Exp $
+// $Id: spooler_communication.h,v 1.2 2001/02/21 10:57:36 jz Exp $
 
 #ifndef __SPOOLER_COMMUNICATION_H
 #define __SPOOLER_COMMUNICATION_H
@@ -19,7 +19,7 @@ struct Host
                                 Host                        ( uint32 ip )                   { set_ip(ip); }
 
     void                        operator =                  ( const in_addr& ip )           { set_ip(ip.s_addr); }
-                                operator in_addr            ()                              { return _ip; }
+                                operator in_addr            () const                        { return _ip; }
 
     bool                        operator ==                 ( const Host& h ) const         { return _ip.s_addr == h._ip.s_addr; }
     bool                        operator !=                 ( const Host& h ) const         { return _ip.s_addr != h._ip.s_addr; }

@@ -1,4 +1,4 @@
-// $Id: spooler_communication.cxx,v 1.24 2001/02/12 09:46:10 jz Exp $
+// $Id: spooler_communication.cxx,v 1.25 2001/02/21 10:57:36 jz Exp $
 /*
     Hier sind implementiert
 
@@ -252,7 +252,7 @@ bool Communication::Channel::do_accept( SOCKET listen_socket )
         struct linger l; l.l_onoff=0; l.l_linger=0;
         setsockopt( _socket, SOL_SOCKET, SO_LINGER, (const char*)&l, sizeof l );
 
-        if( _spooler->_security.level( _host ) <= Security::seclev_signal )
+        if( _spooler->security_level( _host ) <= Security::seclev_signal )
         {
             _log.msg( "TCP-Verbindung nicht zugelassen" );
             do_close();
@@ -593,7 +593,7 @@ int Communication::run()
                 if( len > 0 ) 
                 {
                     Named_host host = addr.sin_addr;
-                    if( _spooler->_security.level( host ) < Security::seclev_signal )
+                    if( _spooler->security_level( host ) < Security::seclev_signal )
                     {
                         _spooler->log().error( "UDP-Nachricht von " + host.as_string() + " nicht zugelassen." );
                     }

@@ -1,4 +1,4 @@
-// $Id: spooler_thread.cxx,v 1.11 2001/02/21 10:22:00 jz Exp $
+// $Id: spooler_thread.cxx,v 1.12 2001/02/21 10:57:36 jz Exp $
 /*
     Hier sind implementiert
 
@@ -102,7 +102,7 @@ void Thread::load_jobs_from_xml( const xml::Element_ptr& element, bool init )
         if( e->tagName == "job" ) 
         {
             string spooler_id = as_string( e->getAttribute( "spooler_id" ) );
-            if( spooler_id.empty()  ||  spooler_id == _spooler->_spooler_id )
+            if( spooler_id.empty()  ||  spooler_id == _spooler->id() )
             {
                 Sos_ptr<Job> job = SOS_NEW( Job( this ) );
                 job->set_xml( e );
@@ -195,7 +195,7 @@ bool Thread::step()
         {
             if( _event.signaled_then_reset() )  return true;
             Job* job = *it;
-            if( job->priority() >= _spooler->_priority_max )  something_done |= do_something( job );
+            if( job->priority() >= _spooler->priority_max() )  something_done |= do_something( job );
         }
     }
 
@@ -239,7 +239,7 @@ void Thread::wait()
     {
         _next_start_time = latter_day;
 
-        if( _spooler->_state == Spooler::s_paused )
+        if( _spooler->state() == Spooler::s_paused )
         {
             msg = "Angehalten";
         }
@@ -332,9 +332,9 @@ int Thread::run_thread()
     {
         start();
 
-        while( _spooler->_state != Spooler::s_stopping  &&  _spooler->_state != Spooler::s_stopped )
+        while( _spooler->state() != Spooler::s_stopping  &&  _spooler->state() != Spooler::s_stopped )
         {
-            if( _spooler->_state == Spooler::s_paused )
+            if( _spooler->state() == Spooler::s_paused )
             {
                 wait();
             }

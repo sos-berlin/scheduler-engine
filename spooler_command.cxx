@@ -1,4 +1,4 @@
-// $Id: spooler_command.cxx,v 1.30 2001/02/18 16:14:37 jz Exp $
+// $Id: spooler_command.cxx,v 1.31 2001/02/21 10:57:36 jz Exp $
 /*
     Hier ist implementiert
 
@@ -73,17 +73,7 @@ xml::Element_ptr Command_processor::execute_show_threads()
 {
     if( _security_level < Security::seclev_info )  throw_xc( "SPOOLER-121" );
 
-    xml::Element_ptr threads = _answer->createElement( "threads" );
-
-    dom_append_nl( threads );
-
-    FOR_EACH( Thread_list, _spooler->_thread_list, it )
-    {
-        threads->appendChild( (*it)->xml( _answer ) );
-        dom_append_nl( threads );
-    }
-
-    return threads;
+    return _spooler->threads_as_xml( _answer );
 }
 
 //------------------------------------------------------------Command_processor::execute_show_state
@@ -95,7 +85,7 @@ xml::Element_ptr Command_processor::execute_show_state()
     xml::Element_ptr state_element = _answer->createElement( "state" );
  
     state_element->setAttribute( "time"                 , as_dom_string( Sos_optional_date_time::now().as_string() ) );
-    state_element->setAttribute( "spooler_running_since", as_dom_string( Sos_optional_date_time( _spooler->_spooler_start_time ).as_string() ) );
+    state_element->setAttribute( "spooler_running_since", as_dom_string( Sos_optional_date_time( _spooler->start_time() ).as_string() ) );
 
     state_element->setAttribute( "log_file"             , as_dom_string( _spooler->_log.filename() ) );
 
@@ -132,7 +122,7 @@ xml::Element_ptr Command_processor::execute_modify_spooler( const xml::Element_p
         else
         if( cmd == "abort_immediately"     )  _exit(1);
         else
-        if( cmd == "abort_immediately_and_restart" )  { try{ spooler_restart( _spooler->_is_service ); }catch(...){}; _exit(1); }
+        if( cmd == "abort_immediately_and_restart" )  { try{ spooler_restart( _spooler->is_service() ); }catch(...){}; _exit(1); }
         else
       //if( cmd == "new_log"               )  _spooler->cmd_new_log();
       //else
@@ -189,7 +179,7 @@ xml::Element_ptr Command_processor::execute_config( const xml::Element_ptr& conf
     if( config_element->tagName != "config" )  throw_xc( "SPOOLER-113", as_string( config_element->tagName ) );
 
     string spooler_id = as_string( config_element->getAttribute( "spooler_id" ) );
-    if( spooler_id.empty()  ||  spooler_id == _spooler->_spooler_id )
+    if( spooler_id.empty()  ||  spooler_id == _spooler->id() )
     {
         _spooler->cmd_load_config( config_element );
     }
@@ -258,7 +248,6 @@ string Command_processor::execute( const string& xml_text )
 
 void Command_processor::execute_2( const string& xml_text )
 {
-    THREAD_LOCK( _spooler->_command_lock )
     try 
     {
         _answer = xml::Document_ptr( __uuidof(xml::DOMDocument30), NULL );
@@ -267,7 +256,7 @@ void Command_processor::execute_2( const string& xml_text )
 
         xml::Element_ptr answer_element = _answer->documentElement->appendChild( _answer->createElement( "answer" ) );
 
-        _security_level = _host? _spooler->_security.level( *_host ) 
+        _security_level = _host? _spooler->security_level( *_host ) 
                                : Security::seclev_all;
 
         xml::Document_ptr command_doc ( __uuidof(xml::DOMDocument30), NULL );

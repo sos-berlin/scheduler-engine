@@ -1,4 +1,4 @@
-// $Id: spooler_config.cxx,v 1.14 2001/02/18 16:14:37 jz Exp $
+// $Id: spooler_config.cxx,v 1.15 2001/02/21 10:57:36 jz Exp $
 
 //#include <precomp.h>
 
@@ -323,15 +323,7 @@ void Job::set_xml( const xml::Element_ptr& element )
         if( e->tagName == "run_time"   )  _run_time.set_xml( e );
     }
 
-    if( _object_set_descr )        // _object_set_descr->_class ermitteln
-    {
-        FOR_EACH( Object_set_class_list, _spooler->_object_set_class_list, it )
-        {
-            if( (*it)->_name == _object_set_descr->_class_name )  { _object_set_descr->_class = *it; break; }
-        }
-
-        if( !_object_set_descr->_class )  throw_xc( "SPOOLER-101", _object_set_descr->_class_name );
-    }
+    if( _object_set_descr )  _object_set_descr->_class = _spooler->get_object_set_class( _object_set_descr->_class_name );
 }
 
 //--------------------------------------------------------Spooler::load_object_set_classes_from_xml

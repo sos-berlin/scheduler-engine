@@ -1,4 +1,4 @@
-// $Id: spooler.h,v 1.52 2001/02/21 10:21:58 jz Exp $
+// $Id: spooler.h,v 1.53 2001/02/21 10:57:35 jz Exp $
 
 #ifndef __SPOOLER_H
 #define __SPOOLER_H
@@ -111,18 +111,26 @@ struct Spooler
                                 Spooler                     ();
                                ~Spooler                     ();
 
+    // Aufrufe für andere Threads:
     const string&               id                          () const                            { return _spooler_id; }
+    const string&               param                       () const                            { return _spooler_param; }
     int                         udp_port                    () const                            { return _udp_port; }
     int                         tcp_port                    () const                            { return _tcp_port; }
+    int                         priority_max                () const                            { return _priority_max; }
     State                       state                       () const                            { return _state; }
     Log&                        log                         ()                                  { return _log; }
-    const Security&             security                    () const                            { return _security; }
+    Time                        start_time                  () const                            { return _spooler_start_time; }
+    Security::Level             security_level              ( const Host& );
+    bool                        is_service                  () const                            { return _is_service; }
+    xml::Element_ptr            threads_as_xml              ( xml::Document_ptr );
 
     int                         launch                      ( int argc, char** argv );                                
     void                        set_state_changed_handler   ( State_changed_handler h )         { _state_changed_handler = h; }
 
     // Für andere Threads:
     Thread*                     get_thread                  ( const string& thread_name );
+    Object_set_class*           get_object_set_class        ( const string& name );
+    Object_set_class*           get_object_set_class_or_null( const string& name );
     Job*                        get_job                     ( const string& job_name );
     Job*                        get_job_or_null             ( const string& job_name );
     void                        signal_object               ( const string& object_set_class_name, const Level& );
@@ -161,46 +169,46 @@ struct Spooler
 
     Fill_zero                  _zero_;
 
+    bool                       _is_service;                 // NT-Dienst
     int                        _argc;
     char**                     _argv;
-    string                     _spooler_id;                 // -id=
-    string                     _spooler_param;              // -param= Parameter für Skripten
-    string                     _config_filename;            // -config=
-    int                        _tcp_port;                   // <config tcp=...>
-    int                        _udp_port;                   // <config udp=...>
-    int                        _priority_max;               // <config priority_max=...>
-    string                     _log_directory;              // -log-dir=
-    string                     _log_filename;
 
     Log                        _log;
     Prefix_log                 _prefix_log;
+
+    CComPtr<Com_spooler>       _com_spooler;                // COM-Objekt spooler
+    CComPtr<Com_log>           _com_log;                    // COM-Objekt spooler.log
+
+    Thread_semaphore           _job_name_lock;              // Sperre von get_job(name) bis add_job() für eindeutige Jobnamen
+
+  private:
+    string                     _config_filename;            // -config=
+    string                     _log_directory;              // -log-dir=
+    string                     _log_filename;
+    int                        _priority_max;               // <config priority_max=...>
+    int                        _tcp_port;                   // <config tcp=...>
+    int                        _udp_port;                   // <config udp=...>
+    string                     _spooler_id;                 // -id=
+    string                     _spooler_param;              // -param= Parameter für Skripten
     State_changed_handler      _state_changed_handler;      // Callback für NT-Dienst SetServiceStatus()
 
     xml::Document_ptr          _config_document;            // Das Dokument zu _config_element
     xml::Element_ptr           _config_element;             // Für cmd_load_config()
 
-    bool                       _is_service;                 // NT-Dienst
-
     Security                   _security;                   // <security>
     Object_set_class_list      _object_set_class_list;      // <object_set_classes>
     Communication              _communication;              // TCP und UDP (ein Thread)
-
-    CComPtr<Com_spooler>       _com_spooler;                // COM-Objekt spooler
-    CComPtr<Com_log>           _com_log;                    // COM-Objekt spooler.log
 
     Thread_list                _thread_list;
 
     Time                       _spooler_start_time;
     State                      _state;
     State_cmd                  _state_cmd;
-  //Time                       _wait_for_thread_termination;
 
     Wait_handles               _wait_handles;
     Event                      _event;                      
 
     Thread_semaphore           _lock;
-    Thread_semaphore           _command_lock;               // Synchronisation mit Spooler_command
-    Thread_semaphore           _job_name_lock;              // Sperre von get_job(name) bis add_job() für eindeutige Jobnamen
 };
 
 //-------------------------------------------------------------------------------------------------

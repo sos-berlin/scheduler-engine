@@ -1,4 +1,4 @@
-// $Id: spooler_log.cxx,v 1.11 2001/01/24 12:35:51 jz Exp $
+// $Id: spooler_log.cxx,v 1.12 2001/02/21 10:57:36 jz Exp $
 
 #include "../kram/sos.h"
 #include "spooler.h"
@@ -73,7 +73,7 @@ void Log::open_new( )
 
         filename += "/spooler-";
         filename += time.formatted( "yyyy-mm-dd-HHMMSS" );
-        if( !_spooler->_spooler_id.empty() )  filename += "." + _spooler->_spooler_id;
+        if( !_spooler->id().empty() )  filename += "." + _spooler->id();
         filename += ".log";
     
         _file = fopen( filename.c_str(), "w" );

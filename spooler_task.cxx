@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.31 2001/02/21 10:21:59 jz Exp $
+// $Id: spooler_task.cxx,v 1.32 2001/02/21 10:57:36 jz Exp $
 /*
     Hier sind implementiert
 
@@ -731,6 +731,8 @@ xml::Element_ptr Job::xml( xml::Document_ptr document )
     {
         job_element->setAttribute( "job"  , as_dom_string( _name ) );
         job_element->setAttribute( "state", as_dom_string( state_name() ) );
+
+        if( !_in_call.empty() )  job_element->setAttribute( "calling", as_dom_string( _in_call ) );
 
         if( _state_cmd )  job_element->setAttribute( "cmd", as_dom_string( state_cmd_name() ) );
 
