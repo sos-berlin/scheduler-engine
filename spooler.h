@@ -313,6 +313,7 @@ struct Spooler
     int                        _argc;
     char**                     _argv;
     string                     _parameter_line;
+    bool                       _jobs_started;
 
   public:
     Thread_semaphore           _lock;                       // Command_processor::execute_show_state() sperrt auch, für Zugriff auf _db.

@@ -18,6 +18,8 @@
 #   include <sys/wait.h>
 #endif
 
+#define THREAD_LOCK_DUMMY( x )
+
 
 namespace sos {
 namespace spooler {
@@ -78,7 +80,7 @@ Job::~Job()
 
 void Job::set_dom( const xml::Element_ptr& element, const Time& xml_mod_time )
 {
-    THREAD_LOCK( _lock )
+    THREAD_LOCK_DUMMY( _lock )
     {
         bool order;
 
@@ -193,6 +195,8 @@ void Job::init0()
 {
     LOGI( obj_name() << ".init0()\n" );
 
+    if( _init0_called )  return;
+
     _state = s_none;
 
     _log->set_prefix( "Job  " + _name );       // Zwei Blanks, damit die Länge mit "Task " übereinstimmt
@@ -209,6 +213,8 @@ void Job::init0()
     _next_start_time = latter_day;
 
     set_state( s_pending );
+    
+    _init0_called = true;
 }
 
 //----------------------------------------------------------------------------------------Job::init
@@ -218,18 +224,25 @@ void Job::init()
 {
     LOGI( obj_name() << ".init()\n" );
 
-    _history.open();
-
-    _module_ptr = _object_set_descr? &_object_set_descr->_class->_module
-                                   : &_module;
-
-    if( !_spooler->log_directory().empty()  &&  _spooler->log_directory()[0] != '*' )
+    if( !_init_called )
     {
-        _log->set_append( _log_append );
-        _log->set_filename( _spooler->log_directory() + "/job." + jobname_as_filename() + ".log" );      // Jobprotokoll
+        _history.open();
+
+        _module_ptr = _object_set_descr? &_object_set_descr->_class->_module
+                                    : &_module;
+
+        if( !_spooler->log_directory().empty()  &&  _spooler->log_directory()[0] != '*' )
+        {
+            _log->set_append( _log_append );
+            _log->set_filename( _spooler->log_directory() + "/job." + jobname_as_filename() + ".log" );      // Jobprotokoll
+        }
+
+
+        if( _spooler->_db->opened() )  load_tasks_from_db();
+
+        _init_called = true;
     }
-
-
+    
     init2();
 }
 
@@ -246,8 +259,6 @@ void Job::init2()
 
     Time now = Time::now();
 
-    if( _spooler->_db->opened() )  load_tasks_from_db();
-
     //select_period( now );
     set_next_start_time( now );
 }
@@ -256,7 +267,7 @@ void Job::init2()
 
 void Job::close()
 {
-    THREAD_LOCK( _lock )
+    THREAD_LOCK_DUMMY( _lock )
     {
         clear_when_directory_changed();
 
@@ -325,7 +336,7 @@ string Job::profile_section()
 
 void Job::set_error_xc_only( const Xc& x )
 {
-    THREAD_LOCK( _lock )
+    THREAD_LOCK_DUMMY( _lock )
     {
         _error = x;
         _repeat = 0;
@@ -368,7 +379,7 @@ void Job::set_error( const exception& x )
 
 void Job::signal( const string& signal_name )
 { 
-    THREAD_LOCK( _lock )  _next_time = 0;
+    THREAD_LOCK_DUMMY( _lock )  _next_time = 0;
 
     _spooler->signal( signal_name ); 
 }
@@ -598,7 +609,7 @@ Sos_ptr<Task> Job::get_task_from_queue( Time now )
     if( _state == s_read_error )  return NULL;
     if( _state == s_error      )  return NULL;
 
-    THREAD_LOCK( _lock )
+    THREAD_LOCK_DUMMY( _lock )
     {
         if( _task_queue.empty() )     return NULL;
 
@@ -624,7 +635,7 @@ Sos_ptr<Task> Job::get_task_from_queue( Time now )
 
 void Job::remove_running_task( Task* task )
 {
-    THREAD_LOCK( _lock )  
+    THREAD_LOCK_DUMMY( _lock )  
     {
         Task_list::iterator t = _running_tasks.begin();
         while( t != _running_tasks.end() )
@@ -657,7 +668,7 @@ void Job::remove_running_task( Task* task )
 Sos_ptr<Task> Job::start( const ptr<spooler_com::Ivariable_set>& params, const string& task_name, Time start_at, bool log )
 {
     Sos_ptr<Task> result;
-    THREAD_LOCK( _lock )  result = start_without_lock( params, task_name, start_at, log );
+    THREAD_LOCK_DUMMY( _lock )  result = start_without_lock( params, task_name, start_at, log );
     return result;
 }
 */
@@ -668,7 +679,7 @@ Sos_ptr<Task> Job::start( const ptr<spooler_com::Ivariable_set>& params, const s
 {
     Time now = Time::now();
 
-    THREAD_LOCK( _lock )
+    THREAD_LOCK_DUMMY( _lock )
     {
         if( log && _spooler->_debug )  _log->debug( "start(at=" + start_at.as_string() + ( task_name == ""? "" : ",name=\"" + task_name + '"' ) + ")" );
 
@@ -702,7 +713,7 @@ Sos_ptr<Task> Job::start( const ptr<spooler_com::Ivariable_set>& params, const s
 
 bool Job::read_script()
 {
-    THREAD_LOCK( _lock )
+    THREAD_LOCK_DUMMY( _lock )
     {
         try
         {
@@ -724,7 +735,7 @@ bool Job::read_script()
 
 void Job::stop( bool end_all_tasks )
 {
-    THREAD_LOCK( _lock )
+    THREAD_LOCK_DUMMY( _lock )
     {
         if( end_all_tasks )
         {
@@ -775,14 +786,14 @@ bool Job::execute_state_cmd()
                                    //|| _state == s_suspended
                                                                )                               something_done = true;
                                     set_state( s_running );
-                                    THREAD_LOCK( _lock )  Z_FOR_EACH( Task_list, _running_tasks, t )  (*t)->cmd_end();
+                                    THREAD_LOCK_DUMMY( _lock )  Z_FOR_EACH( Task_list, _running_tasks, t )  (*t)->cmd_end();
                                     break;
 
                 case sc_suspend:    
                 {
                     if( _state == s_running )
                     {
-                        THREAD_LOCK( _lock )
+                        THREAD_LOCK_DUMMY( _lock )
                         {
                             Z_FOR_EACH( Task_list, _running_tasks, t ) 
                             {
@@ -803,7 +814,7 @@ bool Job::execute_state_cmd()
                 {
                     //if( _state == s_suspended )
                     {
-                        THREAD_LOCK( _lock )
+                        THREAD_LOCK_DUMMY( _lock )
                         {
                             Z_FOR_EACH( Task_list, _running_tasks, t ) 
                             {
@@ -853,7 +864,7 @@ bool Job::execute_state_cmd()
 
 void Job::start_when_directory_changed( const string& directory_name, const string& filename_pattern )
 {
-    THREAD_LOCK( _lock )
+    THREAD_LOCK_DUMMY( _lock )
     {
         _log->debug( "start_when_directory_changed \"" + directory_name + "\", \"" + filename_pattern + "\"" );
 
@@ -893,7 +904,7 @@ void Job::start_when_directory_changed( const string& directory_name, const stri
 
 void Job::clear_when_directory_changed()
 {
-    THREAD_LOCK( _lock )
+    THREAD_LOCK_DUMMY( _lock )
     {
         if( !_directory_watcher_list.empty() )  _log->debug( "clear_when_directory_changed" );
 
@@ -909,7 +920,7 @@ void Job::select_period( Time now )
 {
     if( now >= _period.end() )       // Periode abgelaufen?
     {
-        THREAD_LOCK( _lock )  _period = _run_time.next_period(now);  
+        THREAD_LOCK_DUMMY( _lock )  _period = _run_time.next_period(now);  
 
         if( _period.begin() != latter_day )
         {
@@ -932,7 +943,7 @@ bool Job::is_in_period( Time now )
 
 void Job::set_next_start_time( Time now, bool repeat )
 {
-    THREAD_LOCK( _lock )
+    THREAD_LOCK_DUMMY( _lock )
     {
         select_period( now );
 
@@ -1025,7 +1036,7 @@ void Job::set_next_start_time( Time now, bool repeat )
 
 void Job::calculate_next_time( Time now )
 {
-    THREAD_LOCK( _lock )
+    THREAD_LOCK_DUMMY( _lock )
     {
         Time next_time = latter_day;
 
@@ -1154,7 +1165,7 @@ Sos_ptr<Task> Job::task_to_start()
     if( cause                      // Auf weitere Anlässe prüfen und diese protokollieren
      || is_in_period(now) )
     {
-        THREAD_LOCK( _lock )
+        THREAD_LOCK_DUMMY( _lock )
         {
             if( _state == s_pending )
             {
@@ -1305,7 +1316,7 @@ bool Job::do_something()
                         Sos_ptr<Task> task = task_to_start();
                         if( task )
                         {
-                            THREAD_LOCK( _lock )
+                            THREAD_LOCK_DUMMY( _lock )
                             {
                                 _log->open();           // Jobprotokoll, nur wirksam, wenn set_filename() gerufen, s. Job::init().
 
@@ -1368,7 +1379,7 @@ void Job::set_job_error( const string& what )
 
 void Job::set_state( State new_state )
 { 
-    THREAD_LOCK( _lock )  
+    THREAD_LOCK_DUMMY( _lock )  
     {
         if( new_state == _state )  return;
 
@@ -1403,7 +1414,7 @@ void Job::set_state_cmd( State_cmd cmd )
 { 
     bool ok = false;
 
-    //THREAD_LOCK( _lock )          start() (create_task(), get_task_id()) nicht mit gesperrtem _lock rufen, weil DB blockieren kann!
+    //THREAD_LOCK_DUMMY( _lock )          start() (create_task(), get_task_id()) nicht mit gesperrtem _lock rufen, weil DB blockieren kann!
     {
         switch( cmd )
         {
@@ -1455,7 +1466,7 @@ string Job::job_state()
 {
     string st;
 
-    THREAD_LOCK( _lock )
+    THREAD_LOCK_DUMMY( _lock )
     {
         st = "state=" + state_name();
     }
@@ -1558,7 +1569,7 @@ xml::Element_ptr Job::dom( const xml::Document_ptr& document, const Show_what& s
 {
     xml::Element_ptr job_element = document.createElement( "job" );
 
-    THREAD_LOCK( _lock )
+    THREAD_LOCK_DUMMY( _lock )
     {
         job_element.setAttribute( "job"       , _name                   );
         job_element.setAttribute( "state"     , state_name()            );
@@ -1698,7 +1709,7 @@ void Job::kill_queued_task( int task_id )
 
 void Job::kill_task( int id, bool immediately )
 {
-    THREAD_LOCK( _lock )
+    THREAD_LOCK_DUMMY( _lock )
     {
         //Task* task = NULL;
 
@@ -1720,7 +1731,7 @@ void Job::kill_task( int id, bool immediately )
 
 void Job::signal_object( const string& object_set_class_name, const Level& level )
 {
-    THREAD_LOCK( _lock )
+    THREAD_LOCK_DUMMY( _lock )
     {
         if( _state == Job::s_pending
          && _object_set_descr
@@ -1740,7 +1751,7 @@ ptr<Module_instance> Job::create_module_instance()
 {
     ptr<Module_instance>  result;
 
-    THREAD_LOCK( _lock )
+    THREAD_LOCK_DUMMY( _lock )
     {
         if( _state == s_read_error )  throw_xc( "SCHEDULER-190" );
         if( _state == s_error      )  throw_xc( "SCHEDULER-204", _name, _error.what() );
@@ -1758,7 +1769,7 @@ ptr<Module_instance> Job::create_module_instance()
 /*
 Module_instance* Job::get_free_module_instance( Task* task )
 {
-    THREAD_LOCK( _lock )
+    THREAD_LOCK_DUMMY( _lock )
     {
         Z_FOR_EACH( Module_instance_vector, _module_instances, m )
         {
@@ -1782,7 +1793,7 @@ Module_instance* Job::get_free_module_instance( Task* task )
 
 void Job::release_module_instance( Module_instance* module_instance )
 {
-    THREAD_LOCK( _lock )
+    THREAD_LOCK_DUMMY( _lock )
     {
         Z_FOR_EACH( Module_instance_vector, _module_instances, m )
         {

@@ -338,6 +338,8 @@ struct Job : Sos_self_deleting
     long                       _tasks_count;                // Anzahl gestarteter Tasks seit Spooler-Start
     long                       _step_count;                 // Anzahl spooler_process() aller Tasks
 
+    bool                       _init0_called;
+    bool                       _init_called;
     State                      _state;
     State_cmd                  _state_cmd;
     bool                       _reread;                     // <script> neu einlesen, also <include> erneut ausführen

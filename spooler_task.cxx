@@ -19,6 +19,7 @@
 #   include <sys/wait.h>
 #endif
 
+#define THREAD_LOCK_DUMMY( x )
 
 namespace sos {
 namespace spooler {
@@ -262,7 +263,7 @@ void Task::close()
 
 
         // Alle, die mit wait_until_terminated() auf diese Task warten, wecken:
-        THREAD_LOCK( _terminated_events_lock )  
+        THREAD_LOCK_DUMMY( _terminated_events_lock )  
         {
             FOR_EACH( vector<Event*>, _terminated_events, it )  (*it)->signal( "task closed" );
             _terminated_events.clear();
@@ -283,7 +284,7 @@ xml::Element_ptr Task::dom( const xml::Document_ptr& document, const Show_what& 
 {
     xml::Element_ptr task_element = document.createElement( "task" );
 
-    THREAD_LOCK( _lock )
+    THREAD_LOCK_DUMMY( _lock )
     {
         task_element.setAttribute( "id"              , _id );
         task_element.setAttribute( "task"              , _id );
@@ -368,7 +369,7 @@ xml::Element_ptr Task::dom( const xml::Document_ptr& document, const Show_what& 
 
 void Task::enter_thread( Spooler_thread* thread )
 { 
-    THREAD_LOCK( _lock )
+    THREAD_LOCK_DUMMY( _lock )
     {
         _thread = thread;  
 
@@ -383,7 +384,7 @@ void Task::enter_thread( Spooler_thread* thread )
 
 void Task::cmd_end( bool kill_immediately )
 { 
-    THREAD_LOCK( _lock ) 
+    THREAD_LOCK_DUMMY( _lock ) 
     { 
         _end = true; 
         _kill_immediately = kill_immediately;
@@ -429,7 +430,7 @@ void Task::attach_to_a_thread()
 
 void Task::set_error_xc_only( const Xc& x )
 {
-    THREAD_LOCK( _lock )  _error = x;
+    THREAD_LOCK_DUMMY( _lock )  _error = x;
     _job->set_error_xc_only( x );
 }
 
@@ -487,7 +488,7 @@ void Task::set_error( const _com_error& x )
 
 void Task::set_state( State new_state )
 { 
-    THREAD_LOCK( _lock )  
+    THREAD_LOCK_DUMMY( _lock )  
     {
         _idle_since = 0;
 
@@ -589,7 +590,7 @@ string Task::state_name( State state )
 
 void Task::signal( const string& signal_name )
 { 
-    THREAD_LOCK( _lock )
+    THREAD_LOCK_DUMMY( _lock )
     {
         _signaled = true;
         set_next_time( 0 );
@@ -628,7 +629,7 @@ void Task::set_history_field( const string& name, const Variant& value )
 
 void Task::set_next_time( const Time& next_time )
 {
-    THREAD_LOCK( _lock )  _next_time = next_time;
+    THREAD_LOCK_DUMMY( _lock )  _next_time = next_time;
 }
 
 //----------------------------------------------------------------------------------Task::next_time
@@ -998,7 +999,7 @@ bool Task::do_something()
                         {
                             if( !_operation )
                             {
-                                THREAD_LOCK( _lock ) { if( !_ending_since )  _ending_since = now; }    // Wird auch von cmd_end() gesetzt
+                                THREAD_LOCK_DUMMY( _lock ) { if( !_ending_since )  _ending_since = now; }    // Wird auch von cmd_end() gesetzt
 
                                 if( has_error() )  _history.start();
 
@@ -1217,7 +1218,7 @@ void Task::load()
     }
 
 
-    THREAD_LOCK( _lock )
+    THREAD_LOCK_DUMMY( _lock )
     {
         _job->count_task();
         _thread->count_task();
@@ -1258,7 +1259,7 @@ bool Task::step__end()
         {
             _order->postprocessing( result );
             _log->set_order_log( NULL );
-            THREAD_LOCK( _lock )  _order = NULL;
+            THREAD_LOCK_DUMMY( _lock )  _order = NULL;
         }
 
         if( _job->order_queue() )  result = true;           // Auftragsgesteuerte Task immer fortsetzen ( _order kann wieder null sein wegen set_state(), §1495 )
@@ -1314,7 +1315,7 @@ void Task::set_order( Order* order )
 
 Order* Task::take_order( const Time& now )
 {
-    if( !_order )  THREAD_LOCK( _lock )  set_order( _job->order_queue()->get_order_for_processing( now ) );
+    if( !_order )  THREAD_LOCK_DUMMY( _lock )  set_order( _job->order_queue()->get_order_for_processing( now ) );
 
     return _order;
 }
@@ -1409,11 +1410,11 @@ bool Task::wait_until_terminated( double wait_time )
 
     Event event ( obj_name() + " wait_until_terminated" );
 
-    THREAD_LOCK( _terminated_events_lock )  _terminated_events.push_back( &event );
+    THREAD_LOCK_DUMMY( _terminated_events_lock )  _terminated_events.push_back( &event );
 
     bool result = event.wait( wait_time );
 
-    THREAD_LOCK( _terminated_events_lock )  _terminated_events.pop_back();
+    THREAD_LOCK_DUMMY( _terminated_events_lock )  _terminated_events.pop_back();
 
     return result;
 }

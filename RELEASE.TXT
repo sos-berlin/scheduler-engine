@@ -87,3 +87,11 @@ Nächste Startzeit von auftragsgesteuerten Jobs mit zurückgestelltem Auftrag (set
 
 Absturz nach Scheduler-Beendigung behoben (in Hostware)
 
+
+------------------------------------------------
+VERSION 2.0.110  2005-03-17
+
+spooler.execute_xml()
+
+<job> als XML-Kommando übergebbar.
+

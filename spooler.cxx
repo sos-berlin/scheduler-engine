@@ -478,7 +478,12 @@ void Spooler::load_job_from_xml( const xml::Element_ptr& e, const Time& xml_mod_
         {
             job = SOS_NEW( Job( this ) );
             job->set_dom( e, xml_mod_time );
-            if( init )  job->init0(),  job->init();
+            if( init )
+            {
+                job->init0();
+                if( _jobs_started )  job->init();   // Falls Job im Startskript über execute_xml() hingefügt wird: jetzt noch kein init()!
+            }
+
             add_job( job );
         }
     }
@@ -1124,6 +1129,7 @@ string Spooler::state_name( State state )
 void Spooler::start_jobs()
 {
     FOR_EACH_JOB( job )  (*job)->init();
+    _jobs_started = true;
 }
 
 //-------------------------------------------------------------------------------Spooler::stop_jobs
