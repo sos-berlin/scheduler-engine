@@ -1,4 +1,4 @@
-// $Id: spooler_order.h,v 1.6 2002/09/19 10:15:58 jz Exp $
+// $Id: spooler_order.h,v 1.7 2002/09/27 10:48:56 jz Exp $
 
 #ifndef __SPOOLER_ORDER_H
 #define __SPOOLER_ORDER_H
@@ -30,6 +30,7 @@ struct Order : Com_order
     void                    set_id                      ( const Variant& );
     Id                          id                      ()                                          { THREAD_LOCK_RETURN( _lock, Variant, _id ); }
     void                    set_default_id              ();
+    bool                        id_is_equal             ( const Id& id )                            { if( _id_locked ) return _id == id; else THREAD_LOCK_RETURN( _lock, bool, _id == id ); }
 
     void                    set_title                   ( const string& title )                     { THREAD_LOCK(_lock)  _title = title; }
     string&                     title                   ()                                          { THREAD_LOCK_RETURN( _lock, string, _title ); }
@@ -46,7 +47,8 @@ struct Order : Com_order
     Job*                        job                     ();
 
     void                    set_state                   ( const State& );
-    State                       state                   ();
+    State                       state                   ()                                          { THREAD_LOCK_RETURN( _lock, State, _state ); }
+    bool                        state_is_equal          ( const State& state )                      { THREAD_LOCK_RETURN( _lock, bool, _state == state ); }
 
     void                    set_state_text              ( const wstring& state_text )               { THREAD_LOCK( _lock )  _state_text = state_text.c_str(); }
     wstring                     state_text              ()                                          { THREAD_LOCK_RETURN( _lock, wstring, _state_text ); }
@@ -65,17 +67,22 @@ struct Order : Com_order
     void                        remove_from_job_chain   ();
     void                        move_to_node            ( Job_chain_node* );
     void                        postprocessing          ( bool success, Prefix_log* );              // Verarbeitung nach spooler_process()
+    void                        processing_error        ();
 
 
 
   private:
     friend struct               Order_queue;
 
+
+
     Fill_zero                  _zero_;    
     Thread_semaphore           _lock;
     Spooler*                   _spooler;
 
     Id                         _id;
+    bool                       _id_locked;              // Einmal gesperrt, immer gesperrt
+    bool                       _is_users_id;            // Id ist nicht vom Spooler generiert, also nicht sicher eindeutig.
     Priority                   _priority;
     State                      _state;
     wstring                    _state_text;
@@ -86,6 +93,7 @@ struct Order : Com_order
     Job_chain*                 _job_chain;              
     Job_chain_node*            _job_chain_node;         // Nächster Stelle, falls in einer Jobkette
     bool                       _in_job_queue;           // Auftrag ist in _job_chain_node->_job->order_queue() eingehängt
+    bool                       _in_process;             // Auftrag wird gerade von spooler_process() verarbeitet 
     bool                       _moved;                  // true, wenn Job state oder job geändert hat. Dann nicht automatisch in Jobkette weitersetzen
     Order_queue*               _order_queue;            // Auftrag ist in einer Auftragsliste, aber nicht in einer Jobkette. _job_chain == NULL, _job_chain_node == NULL!
 };
@@ -134,6 +142,8 @@ struct Job_chain : Com_job_chain
 
     Order*                      add_order               ( VARIANT* order_or_payload, VARIANT* job_or_state );
 
+    int                         order_count             ();
+
 
     Fill_zero                  _zero_;
     Spooler*                   _spooler;
@@ -176,7 +186,7 @@ struct Order_queue : Com_order_queue
     void                        remove_order            ( Order* );
     int                         length                  () const                                    { return _queue.size(); }
     bool                        empty                   () const                                    { return _queue.empty(); }
-    ptr<Order>                  pop                     ();
+    ptr<Order>                  get_order_for_processing();
     Job*                        job                     () const                                    { return _job; }
 
 
@@ -188,8 +198,17 @@ struct Order_queue : Com_order_queue
     Job*                       _job;
     Prefix_log*                _log;
     CComPtr<Com_order_queue>   _com_order_queue;
+    
     typedef list< ptr<Order> >  Queue;
     Queue                      _queue;
+
+    int                        _highest_priority;       // Zur Optimierung
+    bool                       _has_users_id;           // D.h. id auf Eindeutigkeit prüfen. Bei selbst generierten Ids überflüssig. Zur Optimierung.
+
+
+  //typedef map<Order::Id, Queue::iterator >   Id_map;
+  //Id_map                                    _id_map;
+
 };
 
 //-------------------------------------------------------------------------------------------------

@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.107 2002/09/18 16:52:38 jz Exp $
+// $Id: spooler_task.cxx,v 1.108 2002/09/27 10:48:56 jz Exp $
 /*
     Hier sind implementiert
 
@@ -1759,7 +1759,7 @@ bool Task::step()
     {
         if( _job->_order_queue )
         {
-            _order = _job->_order_queue->pop();
+            _order = _job->_order_queue->get_order_for_processing();
             if( !_order )  return true;
         }
 
@@ -1780,14 +1780,18 @@ bool Task::step()
         if( _order )
         {
             _order->postprocessing( result, &_job->_log );
+            _order = NULL;
             result = true;
         }
     }
     catch( const Xc& x        ) { _job->set_error(x); result = false; }
     catch( const exception& x ) { _job->set_error(x); result = false; }
 
-
-    _order = NULL;
+    if( _order )  // Nach Fehler
+    {
+        _order->processing_error();
+        _order = NULL;
+    }
 
     return result;
 }

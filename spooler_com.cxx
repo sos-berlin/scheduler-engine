@@ -1,4 +1,4 @@
-// $Id: spooler_com.cxx,v 1.55 2002/09/19 09:23:59 jz Exp $
+// $Id: spooler_com.cxx,v 1.56 2002/09/27 10:48:56 jz Exp $
 /*
     Hier sind implementiert
 
@@ -1826,6 +1826,25 @@ STDMETHODIMP Com_job_chain::get_name( BSTR* result )
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Job_chain.name" ); }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Job_chain.name" ); }
+
+    return hr;
+}
+
+//-------------------------------------------------------------------Com_job_chain::get_order_count
+
+STDMETHODIMP Com_job_chain::get_order_count( int* result )
+{
+    HRESULT hr = NOERROR;
+
+    THREAD_LOCK( _lock )
+    try
+    {
+        if( !_job_chain )  return E_POINTER;
+
+        *result = _job_chain->order_count();
+    }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Job_chain.order_count" ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Job_chain.order_count" ); }
 
     return hr;
 }

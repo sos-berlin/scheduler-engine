@@ -1,4 +1,4 @@
-// $Id: spooler_com.h,v 1.44 2002/09/18 18:37:45 jz Exp $
+// $Id: spooler_com.h,v 1.45 2002/09/27 10:48:56 jz Exp $
 
 #ifndef __SPOOLER_COM_H
 #define __SPOOLER_COM_H
@@ -381,13 +381,14 @@ struct Com_job_chain : spooler_com::Ijob_chain, Sos_ole_object
 
     STDMETHODIMP            put_name                    ( BSTR );
     STDMETHODIMP            get_name                    ( BSTR* );
-  //STDMETHODIMP            get_length                  ( int* );
+    STDMETHODIMP            get_order_count             ( int* );
+    STDMETHODIMP            get_order_queue             ( VARIANT* state, spooler_com::Iorder_queue** );
+
     STDMETHODIMP                add_job                 ( VARIANT*, VARIANT*, VARIANT*, VARIANT* );
     STDMETHODIMP                add_end_state           ( VARIANT* );
   //STDMETHODIMP                finish                  ();
 
     STDMETHODIMP                add_order               ( VARIANT* order_or_payload, spooler_com::Iorder** );
-    STDMETHODIMP            get_order_queue             ( VARIANT* state, spooler_com::Iorder_queue** );
 
 
     Thread_semaphore           _lock;

@@ -1,4 +1,4 @@
-// $Id: spooler_order.cxx,v 1.8 2002/09/19 10:15:58 jz Exp $
+// $Id: spooler_order.cxx,v 1.9 2002/09/27 10:48:56 jz Exp $
 /*
     Hier sind implementiert
 
@@ -166,6 +166,25 @@ Job_chain_node* Job_chain::node_from_state_or_null( const State& state )
     return NULL;
 }
 
+//---------------------------------------------------------------------------Job_chain::order_count
+
+int Job_chain::order_count()
+{
+    int       result = 0;
+    set<Job*> jobs;             // Jobs können (theoretisch) doppelt vorkommen, sollen aber nicht doppelt gezählt werden.
+
+    THREAD_LOCK( _lock )
+    {
+        for( Chain::iterator it = _chain.begin(); it != _chain.end(); it++ )
+        {
+            Job* job = (*it)->_job;
+            if( job  &&  !set_includes( jobs, job ) )  jobs.insert( job ),  result += job->order_queue()->length();
+        }
+    }
+
+    return result;
+}
+
 //-------------------------------------------------------------------------Order_queue::Order_queue
 
 Order_queue::Order_queue( Job* job, Prefix_log* log )
@@ -191,24 +210,48 @@ void Order_queue::add_order( Order* order )
 
     THREAD_LOCK( _lock )
     {
-        Queue::iterator ins = _queue.end();
+        Queue::iterator ins       = _queue.end();
+        bool            ins_set   = false;
+        bool            was_empty = _queue.empty();
+        bool            id_found  = false;
 
-        bool was_empty = _queue.empty();
-
-        for( Queue::iterator it = _queue.begin(); it != _queue.end(); it++ )
+/*
+        Id_map::iterator id_it = _id_map.find( order->_id );
+        if( id_it != _id_map.end() )
         {
-            Order* o = *it;
-            if( ins == _queue.end()  &&  order->priority() > o->priority() )  ins = it; 
-            
-            if( o->id() == order->id() )  
+            _log->debug( "Auftrag mit gleicher Id wird ersetzt: " + order->obj_name() );
+            _queue.erase( id_it->second );
+            _id_map.erase( id_it );
+        }
+*/
+        _has_users_id |= order->_is_users_id;
+
+        if( _has_users_id  ||  order->priority() > _highest_priority )            // Optimierung
+        {
+            _highest_priority = max( _highest_priority, order->priority() );
+
+            for( Queue::iterator it = _queue.begin(); it != _queue.end(); it++ )
             {
-                _log->debug( "Auftrag mit gleicher Id wird ersetzt: " + order->obj_name() ); //throw_xc( "SPOOLER-153", error_string_from_variant( order->id() ), _job->name() );
-                _queue.remove( *it );
-                break;
+                Order* o = *it;
+                if( !ins_set  &&  order->priority() > o->priority() )
+                {
+                    ins = it;
+                    ins_set = true; 
+                    if( id_found )  break;
+                }
+            
+                if( !id_found  &&  o->id_is_equal( order->_id ) )  
+                {
+                    _log->debug( "Auftrag mit gleicher Id wird ersetzt: " + order->obj_name() );
+                    if( ins == it )  { ins = _queue.erase( it ); break; }
+                               else  it = _queue.erase( it );
+                    id_found = true;
+                }
             }
         }
 
-        _queue.insert( ins, order );
+        if( ins_set )  _queue.insert( ins, order );
+                 else  _queue.push_back( order );
 
         order->_in_job_queue = true;
 
@@ -229,15 +272,19 @@ void Order_queue::remove_order( Order* order )
         if( it == _queue.end() )  throw_xc( "SPOOLER-156", order->obj_name(), _job->name() );
 
         _queue.erase( it );
+      //_id_map.erase( order->_id );
 
         order->_in_job_queue = false;
     }
 }
 
-//---------------------------------------------------------------------------------Order_queue::pop
+//------------------------------------------------------------Order_queue::get_order_for_processing
 
-ptr<Order> Order_queue::pop()
+ptr<Order> Order_queue::get_order_for_processing()
 {
+    // Die Order_queue gehört genau einem Job. Der Job kann zur selben Zeit nur einen Schritt ausführen.
+    // Deshalb kann nur der erste Auftrag in Verarbeitung sein.
+
     ptr<Order> result;
 
     THREAD_LOCK( _lock )
@@ -245,10 +292,11 @@ ptr<Order> Order_queue::pop()
         if( !_queue.empty() )
         {
             result = _queue.front();
-            result->_in_job_queue = false;
-            result->_moved = false;
+
+            if( result->_in_process )  throw_xc( "Order_queue::get_order_for_processing" );   // Darf nicht passieren
             
-            _queue.pop_front();
+            result->_in_process = true;
+            result->_moved = false;
         }   
     }
 
@@ -285,9 +333,10 @@ void Order::set_id( const Variant& id )
 { 
     THREAD_LOCK(_lock)
     {
-        if( _job_chain  ||  _order_queue )  throw_xc( "SPOOLER-159" );
+        if( _id_locked )  throw_xc( "SPOOLER-159" );
 
         _id = id; 
+        _is_users_id = true;
     }
 }
 
@@ -300,6 +349,7 @@ void Order::set_default_id()
         if( _id.vt == VT_EMPTY )
         {
             set_id( _spooler->get_free_order_id() );  
+            _is_users_id = false;
         }
     }
 }
@@ -310,12 +360,9 @@ void Order::set_job( Job* job )
 {
     THREAD_LOCK( _lock )
     {
-        if( _job_chain )
-        {
-            move_to_node( _job_chain->node_from_job( job ) );       // Fehler, wenn Job nicht in der Jobkette
-        }
-        else
-            throw_xc( "SPOOLER-157", obj_name() );
+        if( !_job_chain )  throw_xc( "SPOOLER-157", obj_name() );
+        
+        move_to_node( _job_chain->node_from_job( job ) );       // Fehler, wenn Job nicht in der Jobkette
     }
 }
 
@@ -344,13 +391,6 @@ void Order::set_state( const State& state )
         if( _job_chain )  move_to_node( _job_chain->node_from_state( state ) );
                     else  _state = state;
     }
-}
-
-//-------------------------------------------------------------------------------------Order::state
-
-Order::State Order::state()
-{
-    THREAD_LOCK_RETURN( _lock, State, _state );
 }
 
 //------------------------------------------------------------------------------Order::set_priority
@@ -399,10 +439,10 @@ void Order::add_to_order_queue( Order_queue* order_queue )
 
     THREAD_LOCK( _lock )
     {
-
         _moved = true;
 
         if( _id.vt == VT_EMPTY )  set_default_id();
+        _id_locked = true;
 
         if( _job_chain )  remove_from_job_chain();
 
@@ -436,6 +476,8 @@ void Order::add_to_job_chain( Job_chain* job_chain )
     THREAD_LOCK( _lock )
     {
         if( _id.vt == VT_EMPTY )  set_default_id(); 
+        
+        _id_locked = true;
 
         if( _job_chain )  remove_from_job_chain();
 
@@ -458,16 +500,17 @@ void Order::move_to_node( Job_chain_node* node )
 {
     THREAD_LOCK( _lock )
     {
-        if( !_job_chain )  throw_xc( "SPOOLER-157", error_string_from_variant(_id) );
+        if( !_job_chain )  throw_xc( "SPOOLER-157", obj_name() );
 
         _moved = true;
+        _in_process = false;
 
         if( _job_chain_node && _in_job_queue )  _job_chain_node->_job->order_queue()->remove_order( this );
 
-        _state = node->_state;
+        _state = node? node->_state : Variant();
         _job_chain_node = node;
 
-        if( node->_job )  node->_job->order_queue()->add_order( this );
+        if( node && node->_job )  node->_job->order_queue()->add_order( this );
     }
 }
 
@@ -477,10 +520,14 @@ void Order::postprocessing( bool success, Prefix_log* log )
 {
     THREAD_LOCK( _lock )
     {
+        _in_process = false;
+
         if( !_moved )
         {
             if( _job_chain_node )
             {
+                _job_chain_node->_job->order_queue()->remove_order( this );
+
                 if( success ) 
                 {
                     if( log )  log->debug( "Auftrag " + obj_name() + ": Neuer Zustand ist " + error_string_from_variant(_job_chain_node->_next_state) );
@@ -498,8 +545,24 @@ void Order::postprocessing( bool success, Prefix_log* log )
                 else 
                 if( log )  log->debug( "Auftrag " + obj_name() + ": Kein weiterer Job, Auftrag ist fertig" );
             }
+            else
+            {
+                _order_queue->remove_order( this );
+                _order_queue = NULL;
+            }
         }
 
+        _moved = false;
+    }
+}
+
+//--------------------------------------------------------------------------Order::processing_error
+
+void Order::processing_error()
+{
+    THREAD_LOCK( _lock )
+    {
+        _in_process = false;
         _moved = false;
     }
 }
