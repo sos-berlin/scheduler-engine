@@ -1053,12 +1053,17 @@ void Order::set_state( const State& state, const Time& start_time )
 
 void Order::set_state2( const State& state, bool is_error_state )
 {
-    string log_line = "set_state " + state.as_string();
+    if( _job_chain )
+    {
+        string log_line = "set_state " + state.as_string();
 
-    if( _job_chain_node && _job_chain_node->_job )  log_line += ", " + _job_chain_node->_job->obj_name();
-    if( is_error_state                           )  log_line += ", Fehlerzustand";
+        if( _job_chain_node && _job_chain_node->_job )  log_line += ", " + _job_chain_node->_job->obj_name();
+        if( is_error_state                           )  log_line += ", Fehlerzustand";
 
-    if( _job_chain )  _log->info( log_line );
+        if( _setback )  log_line += ", at=" + _setback.as_string();
+
+        _log->info( log_line );
+    }
 
     _state = state;
 
@@ -1413,8 +1418,7 @@ Time Order::next_start_time( bool first_call )
     {
         Time now = Time::now();
 
-
-        if( first_call  || now >= _period.end() )       // Periode abgelaufen?
+        if( first_call  ||  now >= _period.end() )       // Periode abgelaufen?
         {
             _period = _run_time->next_period( now, time::wss_next_period_or_single_start );  
         }
@@ -1425,14 +1429,12 @@ Time Order::next_start_time( bool first_call )
 
             if( result >= _period.end() )
             {
-                Period old_period = _period;
+                Period next_period = _run_time->next_period( result, time::wss_next_period_or_single_start );  
 
-                _period = _run_time->next_period( now, time::wss_next_period_or_single_start );  
-
-                if( old_period.end()    != _period.begin()  
-                 || old_period.repeat() != _period.repeat() )
+                if( _period.end()    != next_period.begin()  
+                 || _period.repeat() != next_period.repeat() )
                 {
-                    result = latter_day;       // Perioden sind nicht nahtlos: Wiederholungsintervall neu berechnen
+                    result = next_period.begin();  // Perioden sind nicht nahtlos: Wiederholungsintervall neu berechnen
                 }
             }
         }
