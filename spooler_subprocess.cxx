@@ -86,8 +86,15 @@ Subprocess::~Subprocess()
 
 void Subprocess::close()
 {
-    if( _registered )  _subprocess_register->remove( this );
+    deregister();
     _process.close();
+}
+
+//---------------------------------------------------------------------------Subprocess::deregister
+
+void Subprocess::deregister()
+{
+    if( _registered )  _subprocess_register->remove( this );
 }
 
 //--------------------------------------------------------------------------------Subprocess::Start
@@ -155,16 +162,22 @@ STDMETHODIMP Subprocess::Wait( VARIANT* seconds, VARIANT_BOOL* result )
 
     try
     {
+        bool ok;
+
         if( variant_is_missing( *seconds ) )
         {
             _process.wait();
-            *result = VARIANT_TRUE;
+            ok = true;
         }
         else
         {
-            bool ok = _process.wait( double_from_variant( *seconds ) );
-            *result = ok? VARIANT_TRUE : VARIANT_FALSE;
+            ok = _process.wait( double_from_variant( *seconds ) );
         }
+
+        *result = ok? VARIANT_TRUE : VARIANT_FALSE;
+
+        if( ok )  deregister();
+
     }
     catch( const exception&  x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
 
@@ -270,7 +283,7 @@ STDMETHODIMP Subprocess_register::Create_subprocess( VARIANT* program_and_parame
 
 void Subprocess_register::add( Subprocess* subprocess )
 {
-    Subprocess*& entry = _subprocess_map[ subprocess->_process.pid() ];
+    ptr<Subprocess>& entry = _subprocess_map[ subprocess->_process.pid() ];
 
     if( entry )
     {

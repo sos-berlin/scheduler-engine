@@ -67,6 +67,7 @@ struct Subprocess : idispatch_implementation< Subprocess, spooler_com::Isubproce
 
 
     void                        close                       ();
+    void                        deregister                  ();
     bool                        ignore_error                () const                                { return _ignore_error; }
     bool                        ignore_signal               () const                                { return _ignore_signal; }
 
@@ -100,8 +101,8 @@ struct Subprocess_register : Object
 
     Fill_zero                  _zero_;
 
-    typedef map< int, Subprocess* >  Subprocess_map;
-    Subprocess_map                  _subprocess_map;
+    typedef map< int, ptr<Subprocess> >  Subprocess_map;
+    Subprocess_map                      _subprocess_map;
 };
 
 //-------------------------------------------------------------------------------------------------
