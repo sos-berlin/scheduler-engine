@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="scheduler.xslt" type="text/xsl"?>
 
-<!--$Id: settings.xml,v 1.16 2004/11/08 13:39:13 jz Exp $-->
+<!--$Id: settings.xml,v 1.17 2004/11/12 10:49:31 jz Exp $-->
 
 <!-- Einige Einstellungen können an mehreren Stellen vorgenommen werden:
      - Konfigurationsdatei
@@ -16,7 +16,7 @@
     base_dir    = ""
     title       = "Einstellungen"
     author      = "$Author: jz $"
-    date        = "$Date: 2004/11/08 13:39:13 $"
+    date        = "$Date: 2004/11/12 10:49:31 $"
 >
 
     <setting setting        = "scheduler_log" 
@@ -256,7 +256,7 @@ log = scheduler.wait com_server.* >scheduler.log
             <p>
                 Eine Task kann mit der Methode 
                 <scheduler_method class="Task" method="set_history_field" java_signature="java.lang.String, java.lang.String"/>
-                ja die hier angegebenen Felder der Datenbanktabelle für die Task-Historie setzen.
+                die hier angegebenen Felder der Datenbanktabelle für die Task-Historie setzen.
             </p>
         </description>
     </setting>
