@@ -1,4 +1,4 @@
-// $Id: spooler_com.cxx,v 1.14 2001/06/20 17:55:15 jz Exp $
+// $Id: spooler_com.cxx,v 1.15 2001/07/02 11:13:44 jz Exp $
 /*
     Hier sind implementiert
 
@@ -235,6 +235,23 @@ STDMETHODIMP Com_job::start( VARIANT* params, Itask** itask )
     }
     catch( const Xc&   x )  { hr = _set_excepinfo( x, "Spooler.Job::start" ); }
     catch( const xmsg& x )  { hr = _set_excepinfo( x, "Spooler.Job::start" ); }
+
+    return hr;
+}
+
+//------------------------------------------------------------------------------------Com_job::wake
+
+STDMETHODIMP Com_job::wake()
+{
+    HRESULT hr = NOERROR;
+    if( !_job )  return E_POINTER;
+
+    try
+    {
+        _job->wake();
+    }
+    catch( const Xc&   x )  { hr = _set_excepinfo( x, "Spooler.Job::start_when_directory_changed" ); }
+    catch( const xmsg& x )  { hr = _set_excepinfo( x, "Spooler.Job::start_when_directory_changed" ); }
 
     return hr;
 }

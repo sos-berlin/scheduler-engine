@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.36 2001/03/22 08:56:52 jz Exp $
+// $Id: spooler_task.cxx,v 1.37 2001/07/02 11:13:44 jz Exp $
 /*
     Hier sind implementiert
 
@@ -217,6 +217,7 @@ void Job::close()
 {
     close_task();
 
+    _event.close();
     _directory_watcher.close();
 
     close_engine();
@@ -264,6 +265,8 @@ void Job::init()
     _state = s_none;
 
     _log.set_prefix( "Job " + _name );
+    _event.set_name( "Job " + _name );
+    _event.add_to( &_thread->_wait_handles );
 
     _script_ptr = _object_set_descr? &_object_set_descr->_class->_script
                                    : &_script;
@@ -327,7 +330,6 @@ void Job::start_when_directory_changed( const string& directory_name )
 
         _directory_watcher.watch_directory( directory_name );
         _directory_watcher.set_name( "job(\"" + _name + "\").start_when_directory_changed(\"" + directory_name + "\")" );
-
 
         _directory_watcher.add_to( &_thread->_wait_handles );
 
@@ -398,6 +400,7 @@ void Job::stop()
     close_engine();
 
     // Kein Signal mehr soll kommen, wenn Job gestoppt:
+    //_event.close();
     _directory_watcher.close();
 
     set_state( s_stopped );
@@ -476,9 +479,12 @@ bool Job::do_something()
 
     if( _state == s_pending )
     {
-        if( !_directory_watcher.signaled()  &&  Time::now() < _next_start_time )  return false;
+        if( !_event.signaled()  
+         && !_directory_watcher.signaled()  
+         &&  Time::now() < _next_start_time )  return false;
 
         if( _directory_watcher.signaled() )  _directory_watcher.watch_again();
+
         THREAD_LOCK( _lock )  create_task();
         something_done = true;
     }
@@ -505,7 +511,14 @@ bool Job::do_something()
                 call_step = _task->_let_run || _period.is_in_time(now);  // Gilt schon die nächste Periode?
             }
 
-            if( call_step )   ok = _task->step(), something_done = true;
+            if( call_step ) 
+            {
+                _event.reset();
+
+                ok = _task->step(); 
+
+                something_done = true;
+            }
         }
     }
 

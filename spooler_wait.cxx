@@ -1,4 +1,4 @@
-// $Id: spooler_wait.cxx,v 1.18 2001/06/23 14:19:46 jz Exp $
+// $Id: spooler_wait.cxx,v 1.19 2001/07/02 11:13:44 jz Exp $
 /*
     Hier sind implementiert
 
@@ -76,7 +76,7 @@ void Event::close()
     if( _handle )  CloseHandle( _handle ), _handle = NULL;
 }
 
-//-------------------------------------------------------------------------------------Event::add_to
+//------------------------------------------------------------------------------------Event::add_to
 
 void Event::add_to( Wait_handles* w )                 
 { 

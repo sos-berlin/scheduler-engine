@@ -1,4 +1,4 @@
-// $Id: spooler_task.h,v 1.16 2001/03/22 08:56:52 jz Exp $
+// $Id: spooler_task.h,v 1.17 2001/07/02 11:13:44 jz Exp $
 
 #ifndef __SPOOLER_TASK_H
 #define __SPOOLER_TASK_H
@@ -165,6 +165,7 @@ struct Job : Sos_self_deleting
     void                        start                       ( const CComPtr<spooler_com::Ivariable_set>& params = NULL );
     void                        start_without_lock          ( const CComPtr<spooler_com::Ivariable_set>& params = NULL );
     void                        start_when_directory_changed( const string& directory_name );
+    void                        wake                        ()                          { _event.signal(); }
     void                        interrupt_script            ();
 
     void                        create_task                 ();
@@ -229,6 +230,7 @@ struct Job : Sos_self_deleting
     Script_instance            _script_instance;            // Für use_engine="job"
     bool                       _has_spooler_process;
     Directory_watcher          _directory_watcher;
+    Event                      _event;                      // Zum Starten des Jobs
 
     State                      _state;
     State_cmd                  _state_cmd;

@@ -1,4 +1,4 @@
-// $Id: spooler.odl,v 1.15 2001/07/02 21:38:26 jz Exp $
+// $Id: spooler.odl,v 1.16 2001/07/02 11:13:44 jz Exp $
 
 // Anweisung: midl /nologo /error all /out $(OutDir) $(InputPath)
 
@@ -124,6 +124,8 @@ library spooler
 
         [propget]
         HRESULT                 name                        ( [out,retval] BSTR* name );
+
+        HRESULT                 wake                        ();
     }
 
     [
