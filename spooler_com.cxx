@@ -2377,6 +2377,7 @@ STDMETHODIMP Com_task::get_Stdout_text( BSTR* result )
 
 STDMETHODIMP Com_task::Start_subprocess( VARIANT* program_and_parameters, Isubprocess** result )
 {
+    Z_LOG( __PRETTY_FUNCTION__ << "(" << debug_string_from_variant( *program_and_paramters ) )\n" );
     if( !_task )  return E_POINTER;
 
     return _task->_subprocess_register.Start_subprocess( program_and_parameters, result );
