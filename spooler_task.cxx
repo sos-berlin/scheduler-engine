@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.163 2003/07/29 11:20:48 jz Exp $
+// $Id: spooler_task.cxx,v 1.164 2003/07/30 11:07:34 jz Exp $
 /*
     Hier sind implementiert
 
@@ -455,6 +455,14 @@ string Job::profile_section()
     return "Job " + _name;
 }
 
+//--------------------------------------------------------------------------------------Job::signal
+
+void Job::signal( const string& signal_name )
+{ 
+    _next_time = 0;  
+    _thread->signal( signal_name ); 
+}
+
 //---------------------------------------------------------------------------Job::set_error_xc_only
 
 void Job::set_error_xc_only( const Xc& x )
@@ -566,7 +574,6 @@ Sos_ptr<Task> Job::dequeue_task( Time now )
             //_com_task->set_task( _task );
         }
 
-        //set_state( s_start_task );
         task->set_state( Task::s_start_task );
     }
 
@@ -857,52 +864,55 @@ void Job::calculate_next_time( Time now )
     {
         Time next_time = latter_day;
 
-        bool in_period = is_in_period(now);
-
-        if( _start_once && in_period ) 
+        if( _state != s_stopped )
         {
-            next_time = now;
-        }
-        else
-        {
-            // Minimum von _start_at für _next_time berücksichtigen
-            Task_queue::iterator it = _task_queue.begin();  
-            while( it != _task_queue.end() )
+            bool in_period = is_in_period(now);
+
+            if( _start_once && in_period ) 
             {
-                if( (*it)->_start_at )  break;   // Startzeit angegeben?
-                if( in_period        )  break;   // Ohne Startzeit und Periode ist aktiv?
-                it++;
+                next_time = now;
             }
-
-            if( it != _task_queue.end()  &&  next_time > (*it)->_start_at )  next_time = (*it)->_start_at;
-
-            if( _spooler->state() != Spooler::s_stopping_let_run )
+            else
             {
-                if( next_time > _next_start_time   )  next_time = _next_start_time;
-                if( next_time > _period.end()      )  next_time = _period.end();          // Das ist, wenn die Periode weder repeat noch single_start hat, also keinen automatischen Start
-                if( next_time > _next_single_start )  next_time = _next_single_start;
-            }
-
-            // Gesammelte eMail senden, wenn collected_max erreicht:
-            Time log_time = _log.collect_end();
-            if( log_time > now  &&  next_time > log_time )  next_time = log_time;
-
-
-            Z_FOR_EACH( Task_list, _running_tasks, t )
-            {
-                Task* task = *t;
-                switch( task->_state )
+                // Minimum von _start_at für _next_time berücksichtigen
+                Task_queue::iterator it = _task_queue.begin();  
+                while( it != _task_queue.end() )
                 {
-                    case Task::s_running_delayed:
-                        next_time = min( next_time, task->_next_spooler_process );
-                        break;
+                    if( (*it)->_start_at )  break;   // Startzeit angegeben?
+                    if( in_period        )  break;   // Ohne Startzeit und Periode ist aktiv?
+                    it++;
+                }
 
-                    case Task::s_running_waiting_for_order:
-                        next_time = min( next_time, _order_queue->next_time() );
-                        next_time = min( next_time, _period.end() );                // Thread am Ende der Run_time wecken, damit Task beendet werden kann
-                        break;
+                if( it != _task_queue.end()  &&  next_time > (*it)->_start_at )  next_time = (*it)->_start_at;
 
-                    default: ;
+                if( _state != s_stopping  &&  _spooler->state() != Spooler::s_stopping_let_run )
+                {
+                    if( next_time > _next_start_time   )  next_time = _next_start_time;
+                    if( next_time > _period.end()      )  next_time = _period.end();          // Das ist, wenn die Periode weder repeat noch single_start hat, also keinen automatischen Start
+                    if( next_time > _next_single_start )  next_time = _next_single_start;
+                }
+
+                // Gesammelte eMail senden, wenn collected_max erreicht:
+                Time log_time = _log.collect_end();
+                if( log_time > now  &&  next_time > log_time )  next_time = log_time;
+
+
+                Z_FOR_EACH( Task_list, _running_tasks, t )
+                {
+                    Task* task = *t;
+                    switch( task->_state )
+                    {
+                        case Task::s_running_delayed:
+                            next_time = min( next_time, task->_next_spooler_process );
+                            break;
+
+                        case Task::s_running_waiting_for_order:
+                            next_time = min( next_time, _order_queue->next_time() );
+                            next_time = min( next_time, _period.end() );                // Thread am Ende der Run_time wecken, damit Task beendet werden kann
+                            break;
+
+                        default: ;
+                    }
                 }
             }
         }
@@ -1087,11 +1097,6 @@ bool Job::do_something()
           //_last_task_step_count = 0;
 
             set_state( s_running );
-
-            if( _module_ptr->_reuse == Module::reuse_job )
-            {
-                //task->_module_instance = ...;
-            }
         }
     }
 
@@ -1160,6 +1165,8 @@ void Job::set_state( State new_state )
         if( new_state == s_pending )  reset_error();
 
         _state = new_state;
+
+        if( _state == s_stopped )  _next_start_time = _next_time = latter_day;
 
         if( _spooler->_debug )
         {
@@ -1480,6 +1487,22 @@ Module_instance* Job::get_free_module_instance( Task* task )
     throw_xc( "get_free_module_instance" );
 }
 
+//---------------------------------------------------------------------Job::release_module_instance
+
+void Job::release_module_instance( Module_instance* module_instance )
+{
+    Z_FOR_EACH( Module_instance_vector, _module_instances, m )
+    {
+        if( *m == module_instance )
+        {
+            *m = NULL; 
+            break;
+        }
+    }
+
+    throw_xc( "release_module_instance" );
+}
+
 //---------------------------------------------------------------------------------------Task::Task
 
 Task::Task( Spooler* spooler, const Sos_ptr<Job>& job )    
@@ -1546,29 +1569,34 @@ void Task::close()
 xml::Element_ptr Task::dom( const xml::Document_ptr& document, Show_what show )
 {
     xml::Element_ptr task_element = document.createElement( "task" );
-    task_element.setAttribute( "running_since"   , _running_since.as_string() );
 
-    if( _state == s_running  &&  _last_process_start_time )
-    task_element.setAttribute( "in_process_since", _last_process_start_time.as_string() );
-
-    task_element.setAttribute( "steps"           , _step_count );
-    task_element.setAttribute( "id"              , _id );
-
-    if( !_in_call.empty() )  task_element.setAttribute( "calling", _in_call );
-
-    task_element.setAttribute( "log_file"  , _log.filename()         );
-
-    if( Module_task* t = dynamic_cast<Module_task*>( this ) )
+    THREAD_LOCK( _lock )
     {
-        if( t->_module_instance )  
-        {
-            int pid = t->_module_instance->pid();
-            if( pid ) task_element.setAttribute( "pid", pid );       // separate_process="yes", Remote_module_instance_proxy
-        }
-    }
+        task_element.setAttribute( "running_since"   , _running_since.as_string() );
 
-    if( _order )  dom_append_nl( task_element ),  task_element.appendChild( _order->dom( document, show ) );
-    if( _error )  dom_append_nl( task_element ),  append_error_element( task_element, _error );
+        if( _state == s_running  &&  _last_process_start_time )
+        task_element.setAttribute( "in_process_since", _last_process_start_time.as_string() );
+
+        task_element.setAttribute( "steps"           , _step_count );
+        task_element.setAttribute( "id"              , _id );
+
+        if( !_in_call.empty() )  
+        task_element.setAttribute( "calling"         , _in_call );
+
+        task_element.setAttribute( "log_file"        , _log.filename() );
+
+        if( Module_task* t = dynamic_cast<Module_task*>( this ) )
+        {
+            if( t->_module_instance )  
+            {
+                int pid = t->_module_instance->pid();
+                if( pid ) task_element.setAttribute( "pid", pid );       // separate_process="yes", Remote_module_instance_proxy
+            }
+        }
+
+        if( _order )  dom_append_nl( task_element ),  task_element.appendChild( _order->dom( document, show ) );
+        if( _error )  dom_append_nl( task_element ),  append_error_element( task_element, _error );
+    }
 
     return task_element;
 }
@@ -2156,46 +2184,63 @@ void Task::set_history_field( const string& name, const Variant& value )
 
 bool Module_task::do_load()
 {
+    ptr<Module_instance> module_instance;
+    bool                 is_new = false;
+
+
     if( _job->_module_ptr->_reuse == Module::reuse_job )
     {
-        _module_instance = _job->get_free_module_instance( this );
+        module_instance = _job->get_free_module_instance( this );
     }
     else
     {
-        _module_instance = _job->_module_ptr->create_instance();
+        module_instance = _job->_module_ptr->create_instance();
+        is_new = true;
+        _close_engine = true;
     }
 
-    _module_instance->set_title( obj_name() );
 
-
-    _module_instance->init();
-
-    _module_instance->_com_task->set_task( this );
-    _module_instance->_com_log->set_log( &_log );
-
-    _module_instance->add_obj( (IDispatch*)_spooler->_com_spooler     , "spooler"        );
-    _module_instance->add_obj( (IDispatch*)_job->_thread->_com_thread , "spooler_thread" );
-    _module_instance->add_obj( (IDispatch*)_job->_com_job             , "spooler_job"    );
-    _module_instance->add_obj( (IDispatch*)_module_instance->_com_task, "spooler_task"   );
-    _module_instance->add_obj( (IDispatch*)_module_instance->_com_log , "spooler_log"    );
-
-    try
+    if( !module_instance->loaded() )
     {
-        _module_instance->load();
-        _module_instance->start();
+        module_instance->init();
+        module_instance->add_obj( (IDispatch*)_spooler->_com_spooler    , "spooler"        );
+        module_instance->add_obj( (IDispatch*)_job->_thread->_com_thread, "spooler_thread" );
+        module_instance->add_obj( (IDispatch*)_job->_com_job            , "spooler_job"    );
+        module_instance->add_obj( (IDispatch*)module_instance->_com_task, "spooler_task"   );
+        module_instance->add_obj( (IDispatch*)module_instance->_com_log , "spooler_log"    );
     }
-    catch( const exception& x ) { set_error(x);  _close_engine = true;  return false; }
 
 
-    if( _module_instance->name_exists( spooler_init_name ) )
+    module_instance->set_title( obj_name() );
+    module_instance->_com_task->set_task( this );
+    module_instance->_com_log->set_log( &_log );
+
+    _module_instance = module_instance;
+
+
+    if( !_module_instance->loaded() )
     {
-        Module_instance::In_call in_call ( this, spooler_init_name );
-        bool ok = check_result( _module_instance->call( spooler_init_name ) );
-        in_call.set_result( ok );
-        if( !ok || has_error() )  { _close_engine = true;  return false; }
+        try
+        {
+            module_instance->load();
+            module_instance->start();
+        }
+        catch( const exception& x ) { set_error(x);  _close_engine = true;  return false; }
+    }
+
+    if( is_new )
+    {
+        if( module_instance->name_exists( spooler_init_name ) )
+        {
+            Module_instance::In_call in_call ( this, spooler_init_name );
+            bool ok = check_result( module_instance->call( spooler_init_name ) );
+            in_call.set_result( ok );
+            if( !ok || has_error() )  { _close_engine = true;  return false; }
+        }
     }
 
     //_has_spooler_process = _module_instance->name_exists( spooler_process_name );
+
 
   //set_state( s_loaded );
 
@@ -2208,18 +2253,25 @@ void Module_task::do_close()
 {
     if( _module_instance )  
     { 
-        if( _module_instance )  
+        if( _close_engine ) 
+        {
+            close_engine();
+            _close_engine = false;
+    
+            if( _job->_module_ptr->_reuse == Module::reuse_job )
+            {
+                _job->release_module_instance( _module_instance );
+            }
+        }
+
+      //if( _module_instance )  
         {
             _module_instance->_com_task->set_task( NULL );
             _module_instance->_com_log->set_log( NULL );
           //if( _module_instance->_com_log  )  _module_instance->_com_log->close(), _module_instance->_com_log  = NULL;
         }
 
-        if( _close_engine  ||  _job->_module_ptr->_reuse == Module::reuse_task ) 
-        {
-            close_engine();
-            _close_engine = false;
-        }
+        _module_instance = NULL;
     }
 }
 
@@ -2229,12 +2281,12 @@ void Module_task::close_engine()
 {
     try 
     {
-        //_log.debug3( "close scripting engine engine" );
-        if( _module_instance )  
+        //_log.debug3( "close scripting engine" );
+        //if( _module_instance )  
         {
             _module_instance->close();
             _module_instance->_com_task = new Com_task();
-            _module_instance = NULL;
+            //_module_instance = NULL;
         }
     }
     catch( const exception& x ) { set_error(x); }

@@ -1,4 +1,4 @@
-// $Id: spooler_thread.cxx,v 1.87 2003/07/29 11:20:48 jz Exp $
+// $Id: spooler_thread.cxx,v 1.88 2003/07/30 11:07:34 jz Exp $
 /*
     Hier sind implementiert
 
@@ -242,7 +242,8 @@ void Spooler_thread::start( Event* event_destination )
             if( !ok )  throw_xc( "SPOOLER-127" );
         }
 
-        FOR_EACH_JOB( job )  (*job)->set_event_destination( _event ), (*job)->init();
+      //FOR_EACH_JOB( job )  (*job)->set_event_destination( _event ), (*job)->init();
+        FOR_EACH_JOB( job )  (*job)->init();
 
 
         Z_WINDOWS_ONLY( SetThreadPriority( GetCurrentThread(), _thread_priority ); )
@@ -360,7 +361,7 @@ bool Spooler_thread::step()
                 if( stepped )  break;
             } 
         }
-        while( stepped  );
+        while( stepped );
     }
 
 
@@ -496,33 +497,17 @@ void Spooler_thread::wait()
 
     if( _next_start_time > 0 )
     {
-            if( _spooler->_debug )  
-            {
-                if( _wait_handles.wait(0) == -1 )  _log.debug( msg ), _wait_handles.wait_until( _next_start_time );     // Debug-Ausgabe der Wartezeit nur, wenn kein Ergebnis vorliegt
-            }
-            else
-            {
-                _wait_handles.wait_until( _next_start_time );
-            }
-/*
-#        else
-
-            if( _spooler->_debug )  _log.debug( msg );
-
-            double wait_time = _next_start_time - Time::now();
-
-            while( !_wake  &&  wait_time > 0 )               
-            {
-                double sleep_time = 1.0;
-                sos_sleep( min( sleep_time, wait_time ) );
-                wait_time -= sleep_time;
-            }
-
-#       endif
-*/
+        if( _spooler->_debug )  
+        {
+            if( _wait_handles.wait(0) == -1 )  _log.debug( msg ), _wait_handles.wait_until( _next_start_time );     // Debug-Ausgabe der Wartezeit nur, wenn kein Ergebnis vorliegt
+        }
+        else
+        {
+            _wait_handles.wait_until( _next_start_time );
+        }
     }
 
-    { THREAD_LOCK( _lock )  _next_start_time = 0; }
+    THREAD_LOCK( _lock )  _next_start_time = 0;
 }
 
 //----------------------------------------------------------------------Spooler_thread::do_add_jobs

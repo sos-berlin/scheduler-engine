@@ -1,4 +1,4 @@
-// $Id: spooler_task.h,v 1.98 2003/07/29 11:20:48 jz Exp $
+// $Id: spooler_task.h,v 1.99 2003/07/30 11:07:34 jz Exp $
 
 #ifndef __SPOOLER_TASK_H
 #define __SPOOLER_TASK_H
@@ -183,7 +183,7 @@ struct Job : Sos_self_deleting
     void                        init                        ();                                     // Wird nach Spooler-Skript gerufen, ruft auch init2()
     void                        init2                       ();                                     // Wird nach reread() gerufen
 
-    void                    set_event_destination           ( Event* e )                            { _event = e; }
+  //void                    set_event_destination           ( Event* e )                            { _event = e; }
 
     const string&               name                        () const                                { return _name; }
     State_cmd                   state_cmd                   () const                                { return _state_cmd; }
@@ -210,7 +210,8 @@ struct Job : Sos_self_deleting
     Sos_ptr<Task>               start_without_lock          ( const ptr<spooler_com::Ivariable_set>& params, const string& task_name, Time = 0, bool log = false );
     void                        start_when_directory_changed( const string& directory_name, const string& filename_pattern );
     void                        clear_when_directory_changed();
-    void                        signal                      ( const string& signal_name = "" )      { _next_time = 0;  if( _event )  _event->signal( signal_name ); }
+  //void                        signal                      ( const string& signal_name = "" )      { _next_time = 0;  if( _event )  _event->signal( signal_name ); }
+    void                        signal                      ( const string& signal_name = "" );
     void                        interrupt_script            ();
     void                        select_period               ( Time = Time::now() );
     bool                        is_in_period                ( Time = Time::now() );
@@ -271,6 +272,7 @@ struct Job : Sos_self_deleting
     static bool                 higher_job_chain_priority   ( const Job* a, const Job* b )          { return a->_job_chain_priority > b->_job_chain_priority; }
 
     Module_instance*            get_free_module_instance    ( Task* );
+    void                        release_module_instance     ( Module_instance* );
 
     virtual string             _obj_name                    () const                                { return "Job " + _name; }
 
@@ -325,8 +327,7 @@ struct Job : Sos_self_deleting
     Delay_after_error          _delay_after_error;
     long                       _error_steps;                // Zahl aufeinanderfolgender Fehler
 
-    Event*                     _event;
-  //Event                      _event;                      // Zum Starten des Jobs
+  //Event*                     _event;
     Directory_watcher_list     _directory_watcher_list;
     Xc_copy                    _error;
 
