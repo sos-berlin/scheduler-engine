@@ -129,7 +129,7 @@ cd &quot;$(OutDir)&quot; &amp;&amp; jar cf &quot;$(TargetDir)sos.spooler.jar&quo
 				GenerateDebugInformation="TRUE"
 				ProgramDatabaseFile="../bind/spooler.pdb"
 				SubSystem="1"
-				ImportLibrary=""
+				ImportLibrary="$(targetdir)spooler.lib"
 				TargetMachine="1"/>
 			<Tool
 				Name="VCMIDLTool"
