@@ -1,4 +1,4 @@
-// $Id: spooler_thread.cxx,v 1.44 2002/10/14 15:01:28 jz Exp $
+// $Id: spooler_thread.cxx,v 1.45 2002/10/17 19:56:13 jz Exp $
 /*
     Hier sind implementiert
 
@@ -322,7 +322,6 @@ bool Thread::step()
 
 void Thread::wait()
 {
-    //tzset();
     string msg;
 
     THREAD_LOCK( _lock )
@@ -353,15 +352,14 @@ void Thread::wait()
         }
     }
 
-    //if( !_wait_handles.empty() )  msg += " oder " + _wait_handles.as_string();
+
+    if( _spooler->_debug )  _log.debug( msg );
+
+
     if( _next_start_time > 0 )
     {
-        if( _spooler->_debug )  _log.debug( msg );
-
-
 #       ifdef SYSTEM_WIN
  
-            //_wait_handles.wait_until( _next_start_time );
             wait_until( _next_start_time );
 
 #        else
@@ -378,7 +376,6 @@ void Thread::wait()
     }
 
     { THREAD_LOCK( _lock )  _next_start_time = 0; }
-    //tzset();
 }
 
 //-------------------------------------------------------------------------------Thread::wait_until
@@ -466,7 +463,7 @@ bool Thread::any_tasks_there()
             if( (*it)->state() == Job::s_running_delayed           )  return true;    // Zählt nicht in _running_tasks_count
             if( (*it)->state() == Job::s_running_waiting_for_order )  return true;    // Zählt nicht in _running_tasks_count
             if( (*it)->state() == Job::s_running_process           )  return true;    // Zählt nicht in _running_tasks_count
-            if( (*it)->queue_filled() )  return true;
+            //if( (*it)->queue_filled() )  return true;
         }
     }
 

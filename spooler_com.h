@@ -1,4 +1,4 @@
-// $Id: spooler_com.h,v 1.47 2002/10/03 08:58:21 jz Exp $
+// $Id: spooler_com.h,v 1.48 2002/10/17 19:56:12 jz Exp $
 
 #ifndef __SPOOLER_COM_H
 #define __SPOOLER_COM_H
@@ -312,24 +312,25 @@ struct Com_spooler : spooler_com::Ispooler, Sos_ole_object
 
     void                        close                       ()                                      { THREAD_LOCK(_lock)  _spooler = NULL; }
 
-    STDMETHODIMP                get_log                     ( spooler_com::Ilog** );
-    STDMETHODIMP                get_param                   ( BSTR* );
-    STDMETHODIMP                get_id                      ( BSTR* );
-    STDMETHODIMP                get_script                  ( IDispatch** );
-    STDMETHODIMP                get_job                     ( BSTR job_name, spooler_com::Ijob** );
+    STDMETHODIMP            get_log                         ( spooler_com::Ilog** );
+    STDMETHODIMP            get_param                       ( BSTR* );
+    STDMETHODIMP            get_id                          ( BSTR* );
+    STDMETHODIMP            get_script                      ( IDispatch** );
+    STDMETHODIMP            get_job                         ( BSTR job_name, spooler_com::Ijob** );
     STDMETHODIMP                create_variable_set         ( spooler_com::Ivariable_set** );
-  //STDMETHODIMP                put_include_path            ( BSTR );
-    STDMETHODIMP                get_include_path            ( BSTR* );
-    STDMETHODIMP                get_log_dir                 ( BSTR* );
+  //STDMETHODIMP            put_include_path                ( BSTR );
+    STDMETHODIMP            get_include_path                ( BSTR* );
+    STDMETHODIMP            get_log_dir                     ( BSTR* );
     STDMETHODIMP                let_run_terminate_and_restart();
-    STDMETHODIMP                get_variables               ( spooler_com::Ivariable_set** );
-    STDMETHODIMP                put_var                     ( BSTR name, VARIANT* value );
-    STDMETHODIMP                get_var                     ( BSTR name, VARIANT* value );
-    STDMETHODIMP                get_db_name                 ( BSTR* );
+    STDMETHODIMP            get_variables                   ( spooler_com::Ivariable_set** );
+    STDMETHODIMP            put_var                         ( BSTR name, VARIANT* value );
+    STDMETHODIMP            get_var                         ( BSTR name, VARIANT* value );
+    STDMETHODIMP            get_db_name                     ( BSTR* );
     STDMETHODIMP                create_job_chain            ( spooler_com::Ijob_chain** );
     STDMETHODIMP                add_job_chain               ( spooler_com::Ijob_chain* );
-    STDMETHODIMP                get_job_chain               ( BSTR, spooler_com::Ijob_chain** );
+    STDMETHODIMP            get_job_chain                   ( BSTR, spooler_com::Ijob_chain** );
     STDMETHODIMP                create_order                ( spooler_com::Iorder** );
+    STDMETHODIMP            get_is_service                  ( VARIANT_BOOL* );
 
   protected:
     Thread_semaphore           _lock;

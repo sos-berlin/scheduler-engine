@@ -1,4 +1,4 @@
-// $Id: spooler_com.cxx,v 1.59 2002/10/03 08:58:21 jz Exp $
+// $Id: spooler_com.cxx,v 1.60 2002/10/17 19:56:12 jz Exp $
 /*
     Hier sind implementiert
 
@@ -1758,6 +1758,22 @@ STDMETHODIMP Com_spooler::create_order( Iorder** result )
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.get_job_chain" ); }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.get_job_chain" ); }
+
+    return hr;
+}
+
+//--------------------------------------------------------------------------spooler::get_is_service
+
+STDMETHODIMP Com_spooler::get_is_service( VARIANT_BOOL* result )
+{
+    HRESULT hr = NOERROR;
+
+    THREAD_LOCK( _lock )
+    {
+        if( !_spooler )  return E_POINTER;
+
+        *result = _spooler->is_service();
+    }
 
     return hr;
 }

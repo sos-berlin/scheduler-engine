@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.114 2002/10/04 06:53:17 jz Exp $
+// $Id: spooler_task.cxx,v 1.115 2002/10/17 19:56:13 jz Exp $
 /*
     Hier sind implementiert
 
@@ -1467,6 +1467,7 @@ xml::Element_ptr Job::xml( xml::Document_ptr document, Show_what show )
         job_element->setAttribute( "all_steps" , as_dom_string( _step_count ) );
         job_element->setAttribute( "state_text", as_dom_string( _state_text ) );
         job_element->setAttribute( "log_file"  , as_dom_string( _log.filename() ) );
+        job_element->setAttribute( "order"     , as_dom_string( _order_queue? "yes" : "no" ) );
         
         if( !_in_call.empty() )  job_element->setAttribute( "calling", as_dom_string( _in_call ) );
         if( _state_cmd        )  job_element->setAttribute( "cmd", as_dom_string( state_cmd_name() ) );

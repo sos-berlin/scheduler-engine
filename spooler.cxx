@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.117 2002/10/14 15:01:27 jz Exp $
+// $Id: spooler.cxx,v 1.118 2002/10/17 19:56:12 jz Exp $
 /*
     Hier sind implementiert
 
@@ -643,7 +643,7 @@ void Spooler::start()
 
     _log.set_directory( _log_directory );
     _log.open_new();
-    _log.info( "Spooler startet mit " + _config_filename );
+    _log.info( "Spooler (" VER_PRODUCTVERSION_STR ") startet mit " + _config_filename );
 
 
     _db.open( _db_name, _need_db );
