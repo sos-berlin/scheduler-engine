@@ -1,4 +1,4 @@
-// $Id: spooler_process.cxx,v 1.5 2003/08/30 17:16:49 jz Exp $
+// $Id: spooler_process.cxx,v 1.6 2003/08/31 19:51:29 jz Exp $
 
 #include "spooler.h"
 
@@ -201,15 +201,16 @@ void Process::start()
     parameters.push_back( Parameter( "param", "-log=" + quoted_string( "+" + log_filename() ) ) );
 
     _connection = start_process( parameters );
+    _connection->set_event( &_spooler->_event );
     _session  = Z_NEW( Session( _connection ) );
     _session->set_connection_has_only_this_session();
 }
 
 //--------------------------------------------------------------------------Process::async_continue
 
-void Process::async_continue()
+bool Process::async_continue()
 {
-    _connection->async_continue();
+    return _connection->async_continue();
 }
 
 //---------------------------------------------------------------------------------Process::set_dom

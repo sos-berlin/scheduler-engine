@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.181 2003/08/31 15:02:15 jz Exp $
+// $Id: spooler_task.cxx,v 1.182 2003/08/31 19:51:29 jz Exp $
 /*
     Hier sind implementiert
 
@@ -178,7 +178,8 @@ Task::Task( Job* job )
     _spooler(job->_spooler), 
     _job(job),
     _log(job->_spooler),
-    _history(&job->_history,this)
+    _history(&job->_history,this),
+    _time_out(INT_MAX)
   //_success(true)
 {
     _let_run = _job->_period.let_run();
@@ -476,6 +477,15 @@ void Task::set_history_field( const string& name, const Variant& value )
 void Task::set_next_time( const Time& next_time )
 {
     THREAD_LOCK( _lock )  _next_time = next_time;
+}
+
+//----------------------------------------------------------------------------------Task::next_time
+
+Time Task::next_time()
+{ 
+    return _operation? _time_out == latter_day? latter_day
+                                             : _next_time + _time_out      // _timeout sollte nicht zu groﬂ sein
+                     : _next_time;
 }
 
 //-------------------------------------------------------------------------------Task::do_something

@@ -1,4 +1,4 @@
-// $Id: spooler_thread.h,v 1.49 2003/08/29 13:08:10 jz Exp $
+// $Id: spooler_thread.h,v 1.50 2003/08/31 19:51:29 jz Exp $
 
 #ifndef __SPOOLER_THREAD_H
 #define __SPOOLER_THREAD_H
@@ -61,6 +61,7 @@ struct Spooler_thread : zschimmer::Thread
     void                        signal                      ( const string& signal_name = "" )      { THREAD_LOCK( _lock )  if(_event) _event->signal(signal_name); }
   //Job*                        get_job_or_null             ( const string& job_name );
   //void                        interrupt_scripts           ();
+    void                        nichts_getan                ();
 
     virtual string             _obj_name                    () const                                { return "Thread " + _name; }
 
@@ -76,7 +77,6 @@ struct Spooler_thread : zschimmer::Thread
     void                        wait                        ();
     Task*                       get_next_task_to_run        ();
     void                        remove_ended_tasks          ();
-    void                        nichts_getan                ( double wait_time );
     void                        build_prioritized_order_job_array();
 
 
@@ -120,8 +120,8 @@ struct Spooler_thread : zschimmer::Thread
     long                       _step_count;                 // Seit Spooler-Start ausgeführte Schritte
     long                       _task_count;                 // Seit Spooler-Start gestartetet Tasks
 
-    int                        _nothing_done_count;
-    int                        _nothing_done_max;
+  //int                        _nothing_done_count;
+  //int                        _nothing_done_max;
 
     bool                       _terminated;
 };

@@ -1,4 +1,4 @@
-// $Id: spooler_process.h,v 1.5 2003/08/30 17:16:50 jz Exp $
+// $Id: spooler_process.h,v 1.6 2003/08/31 19:51:29 jz Exp $
 
 #ifndef __SPOOLER_PROCESS_H
 #define __SPOOLER_PROCESS_H
@@ -23,7 +23,8 @@ struct Process : zschimmer::Object
 
     void                        start                       ();
     object_server::Session*     session                     ()                                      { return _session; }
-    void                        async_continue              ();
+  //void                    set_event                       ( Event* e )                            { if( _connection )  _connection->set_event( e ); }
+    bool                        async_continue              ();
     void                        add_module_instance         ( Module_instance* )                    { InterlockedIncrement( &_module_instance_count ); }
     void                        remove_module_instance      ( Module_instance* );
     int                         module_instance_count       ()                                      { return _module_instance_count; }
@@ -54,7 +55,7 @@ typedef list< ptr<Process> >    Process_list;
 struct Process_class : zschimmer::Object
 {
                                 Process_class               ( Spooler* sp, const string& name )        : _zero_(this+1), _spooler(sp), _name(name) {}
-    explicit                    Process_class               ( Spooler* sp, const xml::Element_ptr& e ) : _zero_(this+1) { set_dom( e ); }
+    explicit                    Process_class               ( Spooler* sp, const xml::Element_ptr& e ) : _zero_(this+1), _spooler(sp) { set_dom( e ); }
 
     
     void                        add_process                 ( Process* );

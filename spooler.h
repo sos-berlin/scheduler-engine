@@ -1,4 +1,4 @@
-// $Id: spooler.h,v 1.150 2003/08/29 20:44:24 jz Exp $
+// $Id: spooler.h,v 1.151 2003/08/31 19:51:29 jz Exp $
 
 #ifndef __SPOOLER_H
 #define __SPOOLER_H
@@ -227,6 +227,7 @@ struct Spooler
     void                        signal_threads              ( const string& signal_name );
     void                        wait_until_threads_stopped  ( Time until );
     void                        reload                      ();
+    void                        nichts_getan                ( Spooler_thread*, int anzahl );
     void                        run                         ();
   //void                        start_threads               ();
     Spooler_thread*             new_thread                  ( bool free_threading = true );
@@ -348,6 +349,8 @@ struct Spooler
     Job_list                   _job_list;
     Wait_handles               _wait_handles;
 
+    Event                      _event;
+
   private:
     string                     _config_filename;            // -config=
     string                     _spooler_id;                 // -id=
@@ -366,8 +369,6 @@ struct Spooler
     time::Holiday_set          _holiday_set;                // Feiertage für alle Jobs
 
     State_changed_handler      _state_changed_handler;      // Callback für NT-Dienst SetServiceStatus()
-
-    Event                      _event;
 
     xml::Document_ptr          _config_document_to_load;    // Für cmd_load_config(), das Dokument zu _config_element_to_load
     xml::Element_ptr           _config_element_to_load;     // Für cmd_load_config()

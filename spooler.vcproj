@@ -49,11 +49,11 @@ cd &quot;$(OutDir)&quot; &amp;&amp; jar cf &quot;$(TargetDir)sos.spooler.jar&quo
 				Outputs="$(TargetDir)sos.spooler.jar"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="../misc/lib/libctleasy.lib delayimp.lib version.lib odbc32.lib odbccp32.lib"
+				AdditionalDependencies="../misc/lib/libctleasy.lib delayimp.lib ws2_32.lib version.lib odbc32.lib odbccp32.lib"
 				OutputFile="../bin/spooler.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
-				DelayLoadDLLs="winspool.drv,wsock32.dll,ole32.dll,oleaut32.dll,advapi32.dll,odbc32.dll,libctleasy.dll"
+				DelayLoadDLLs="winspool.drv,ws2_32.dll,ole32.dll,oleaut32.dll,advapi32.dll,odbc32.dll,libctleasy.dll"
 				GenerateMapFile="TRUE"
 				MapFileName="../bin/spooler.map"
 				SubSystem="1"
@@ -121,11 +121,11 @@ cd &quot;$(OutDir)&quot; &amp;&amp; jar cf &quot;$(TargetDir)sos.spooler.jar&quo
 				Outputs="$(TargetDir)sos.spooler.jar"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="../misc/lib/libctleasy.lib delayimp.lib version.lib odbc32.lib odbccp32.lib"
+				AdditionalDependencies="../misc/lib/libctleasy.lib delayimp.lib ws2_32.lib version.lib odbc32.lib odbccp32.lib"
 				OutputFile="../bind/spooler.exe"
 				LinkIncremental="2"
 				SuppressStartupBanner="TRUE"
-				DelayLoadDLLs="winspool.drv,wsock32.dll,ole32.dll,oleaut32.dll,advapi32.dll,odbc32.dll,libctleasy.dll"
+				DelayLoadDLLs="winspool.drv,ws2_32.dll,ole32.dll,oleaut32.dll,advapi32.dll,odbc32.dll,libctleasy.dll"
 				GenerateDebugInformation="TRUE"
 				ProgramDatabaseFile="../bind/spooler.pdb"
 				SubSystem="1"

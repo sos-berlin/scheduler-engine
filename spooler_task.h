@@ -1,4 +1,4 @@
-// $Id: spooler_task.h,v 1.112 2003/08/31 10:04:33 jz Exp $
+// $Id: spooler_task.h,v 1.113 2003/08/31 19:51:29 jz Exp $
 
 #ifndef __SPOOLER_TASK_H
 #define __SPOOLER_TASK_H
@@ -58,7 +58,7 @@ struct Task : Sos_self_deleting
     bool                        do_something                ();
 
     Job*                        job                         ()                                      { return _job; }
-    Time                        next_time                   ()                                      { THREAD_LOCK_RETURN( _lock, Time, _next_time ); }
+    Time                        next_time                   ();
     Spooler_thread*             thread                      ()                                      { return _thread; }
     string                      name                        () const                                { return _obj_name(); }
     virtual string             _obj_name                    () const                                { return "Task " + _job->obj_name() + " " + as_string(_id) ; }
@@ -180,6 +180,7 @@ struct Task : Sos_self_deleting
     Time                       _last_process_start_time;
     Time                       _next_spooler_process;
     Time                       _next_time;
+    Time                       _time_out;                   // Frist für eine Operation (oder INT_MAX)
 
     ptr<Async_operation>       _operation;
   //bool                       _in_operation;               // .._end() aufrufen, auch wenn _operation == NULL (das ist dann eine synchrone Operation)

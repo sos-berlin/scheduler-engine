@@ -1,4 +1,4 @@
-// $Id: spooler_thread.cxx,v 1.99 2003/08/29 13:08:10 jz Exp $
+// $Id: spooler_thread.cxx,v 1.100 2003/08/31 19:51:29 jz Exp $
 /*
     Hier sind implementiert
 
@@ -164,8 +164,8 @@ void Spooler_thread::start( Event* event_destination )
 
         THREAD_LOCK( _spooler->_thread_id_map_lock )  _spooler->_thread_id_map[ current_thread_id() ] = this;
 
-        _nothing_done_count = 0;
-        _nothing_done_max   = _task_list.size() * 2 + 3;
+      //_nothing_done_count = 0;
+      //_nothing_done_max   = _task_list.size() * 2 + 3;
     }
     catch( const exception&  x ) { _terminated = true; _log.error( x.what() ); }
     catch( const _com_error& x ) { _terminated = true; _log.error( as_string( x.Description() ) ); }
@@ -483,11 +483,11 @@ bool Spooler_thread::step()
 
 //---------------------------------------------------------------------Spooler_thread::nichts_getan
 
-void Spooler_thread::nichts_getan( double wait_time )
+void Spooler_thread::nichts_getan()
 {
-    _log.warn( "Nichts getan, running_tasks_count=" + as_string(_running_tasks_count) + " state=" + _spooler->state_name() + " _wait_handles=" + _wait_handles.as_string() );
+  //_log.warn( "Nichts getan, running_tasks_count=" + as_string(_running_tasks_count) + " state=" + _spooler->state_name() + " _wait_handles=" + _wait_handles.as_string() );
 
-    if( _nothing_done_count == _nothing_done_max + 1 )
+  //if( _nothing_done_count == _nothing_done_max + 1 )
     {
         THREAD_LOCK( _lock )
         {
@@ -501,7 +501,7 @@ void Spooler_thread::nichts_getan( double wait_time )
         }
     }
 
-    sos_sleep( wait_time );  // Warten, um bei Wiederholung zu bremsen
+  //sos_sleep( wait_time );  // Warten, um bei Wiederholung zu bremsen
 }
 
 //---------------------------------------------------------Spooler_thread::is_ready_for_termination
@@ -535,14 +535,14 @@ bool Spooler_thread::process()
     try
     {
         something_done = step();
-    
+/*    
         if( something_done )  _nothing_done_count = 0;
         else 
         if( ++_nothing_done_count > _nothing_done_max )  
         {
             nichts_getan( min( 30.0, (double)_nothing_done_count / _nothing_done_max ) );
         }
-
+*/
         _spooler->remove_temporary_jobs();
     }
     catch( const exception&  x ) { _log.error( x.what() ); sos_sleep(1); }

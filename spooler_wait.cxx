@@ -1,4 +1,4 @@
-// $Id: spooler_wait.cxx,v 1.70 2003/08/17 14:26:33 jz Exp $
+// $Id: spooler_wait.cxx,v 1.71 2003/08/31 19:51:29 jz Exp $
 /*
     Hier sind implementiert
 
@@ -354,7 +354,8 @@ int Wait_handles::wait_until_2( Time until )
                     if( _events[i] )  msg += _events[i]->as_text() + " (0x" + as_hex_string( (int)_handles[i] ) + ")";
                                else   msg += "NULL";
                 }
-                _log->debug9( msg );
+                //_log->debug9( msg );
+                LOG( msg << "\n" );
             }
 
             handles = new HANDLE [ _handles.size()+1 ];
@@ -377,7 +378,7 @@ int Wait_handles::wait_until_2( Time until )
                 if( event )
                 {
                     event->set_signal();
-                    if( _spooler->_debug )  _log->debug( event->as_text() );
+                    if( _spooler->_debug )  _log->debug9( event->as_text() );
                 }
 
                 return index;

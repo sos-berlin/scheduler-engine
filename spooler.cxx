@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.232 2003/08/30 22:40:26 jz Exp $
+// $Id: spooler.cxx,v 1.233 2003/08/31 19:51:29 jz Exp $
 /*
     Hier sind implementiert
 
@@ -1452,6 +1452,30 @@ void Spooler::stop()
     // Der Dienst ist hier beendet
 }
 
+//----------------------------------------------------------------------------Spooler::nichts_getan
+
+void Spooler::nichts_getan( Spooler_thread* thread, int anzahl )
+{
+    if( anzahl == 1 )
+    {
+        _log.warn( "Nichts getan, state=" + state_name() + " _wait_handles=" + _wait_handles.as_string() );
+
+        FOR_EACH( Job_list, _job_list, j )  
+        {
+            Job* job = *j;
+
+            _log.warn( job->obj_name() 
+                       + " state=" + job->state_name() ); 
+                        //" queue_filled=" + ( (*it)->queue_filled()? "ja" : "nein" ) + 
+                        //" running_tasks=" + as_string( (*it)->_running_tasks.size() ) );
+        }
+
+        thread->nichts_getan();
+    }
+
+    sos_sleep( min( 30, 1 << anzahl ) );
+}
+
 //-------------------------------------------------------------------------------------Spooler::run
 
 void Spooler::run()
@@ -1460,11 +1484,13 @@ void Spooler::run()
 
     set_state( s_running );
 
-    Spooler_thread* single_thread = _max_threads == 1? new_thread( false ) : NULL;
-
+    Spooler_thread* single_thread        = _max_threads == 1? new_thread( false ) : NULL;
+    int             nichts_getan_zaehler = 0;
 
     while(1)
     {
+        _event.reset();
+
         // Threads ohne Jobs und nach Fehler gestorbene Threads entfernen:
         //FOR_EACH( Thread_list, _thread_list, it )  if( (*it)->empty() )  THREAD_LOCK( _lock )  it = _thread_list.erase(it);
         
@@ -1557,7 +1583,8 @@ void Spooler::run()
         else
 */
         {
-            int  nothing_done_count = 0;
+            int nothing_done_count = 0;
+            int nothing_done_max   = _job_list.size() * 2 + 3;
 
           //while(1)
             {
@@ -1576,12 +1603,6 @@ void Spooler::run()
                 }
                 while( something_done );
 
-                if( nothing_done_count > 3 )  
-                {
-                    _log.warn( "Nichts getan" );
-                    sos_sleep(1);     // Bremse, falls die Koordinierung nicht stimmt
-                }
-
 
                 string       msg = "Kein Job und keine Task aktiv";
                 Wait_handles wait_handles ( this, &_log );
@@ -1590,9 +1611,8 @@ void Spooler::run()
                 if( single_thread )
                 {
                     FOR_EACH( Process_class_list, _process_class_list, pc )  
-                        FOR_EACH( Process_list, (*pc)->_process_list, p )  (*p)->async_continue();
-
-                    _event.reset();
+                        FOR_EACH( Process_list, (*pc)->_process_list, p )  
+                            something_done |= (*p)->async_continue();
 
                     single_thread->process();
 
@@ -1606,7 +1626,13 @@ void Spooler::run()
                         if( _debug )  if( task )  msg = "Warten bis " + _next_time.as_string() + " für Task " + task->name();
                                             else  msg = "Keine Task aktiv";
                     }
+
+                    nothing_done_max += single_thread->task_count() * 3 + 3;    // Statt der Prozesse zählen wir die Tasks einmal mehr
                 }
+
+                if( something_done )  nothing_done_count = 0,  nichts_getan_zaehler = 0;
+                else
+                if( nothing_done_count > nothing_done_max )  nichts_getan( single_thread, ++nichts_getan_zaehler );
 
                 wait_handles += _wait_handles;
 
