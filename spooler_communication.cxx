@@ -1,4 +1,4 @@
-// $Id: spooler_communication.cxx,v 1.61 2003/10/02 21:40:00 jz Exp $
+// $Id: spooler_communication.cxx,v 1.62 2003/10/06 13:35:02 jz Exp $
 /*
     Hier sind implementiert
 
@@ -485,7 +485,7 @@ int Communication::bind_socket( SOCKET socket, struct sockaddr_in* sa )
             if( ret != SOCKET_ERROR ) break;
             if( get_errno() != EADDRINUSE )  break;
 
-            if( isatty( fileno(stderr) ) )  fputc( i % 10 == 0? '0' + i / 10 % 10 : '.', stderr );
+            if( isatty( fileno(stderr) ) && isatty( fileno(stdin) ))  fputc( i % 10 == 0? '0' + i / 10 % 10 : '.', stderr );
         }
 
         if( isatty( fileno(stderr) ) )  fputc( '\n', stderr );

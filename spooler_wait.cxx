@@ -1,4 +1,4 @@
-// $Id: spooler_wait.cxx,v 1.80 2003/10/04 17:02:12 jz Exp $
+// $Id: spooler_wait.cxx,v 1.81 2003/10/06 13:35:02 jz Exp $
 /*
     Hier sind implementiert
 
@@ -410,7 +410,8 @@ int Wait_handles::wait_until_2( Time until )
             if( _events[i] )  wait->add( _events[i] );
         }
 
-        return wait->wait( (double)( until - Time::now() ) );
+        int ret = wait->wait( (double)( until - Time::now() ) );
+        return ret == 0? -1 : 1;
       //return wait->wait( min( directory_watcher_interval, (double)( until - Time::now() ) ) );
 
 
