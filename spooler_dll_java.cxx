@@ -1,4 +1,4 @@
-// $Id: spooler_dll_java.cxx,v 1.4 2004/06/05 08:57:49 jz Exp $
+// $Id: spooler_dll_java.cxx,v 1.5 2004/10/15 13:08:18 jz Exp $
 
 #include "spooler.h"
 #include "../zschimmer/java.h"
@@ -21,7 +21,9 @@ namespace sos
 using namespace zschimmer::java;
 
 
-//-------------------------------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------static
+
+static ptr<java::Vm>            static_java_vm;
 
 //---------------------------------------------------------------------------------------JNI_OnLoad
 
@@ -29,7 +31,11 @@ extern "C" JNIEXPORT jint JNICALL JNI_OnLoad( JavaVM* jvm, void* )
 {
     CoInitialize(NULL);
     zschimmer_init();
-    java::Vm::set_jvm( jvm );
+
+    static_java_vm = Z_NEW( java::Vm( jvm ) );
+    static_java_vm._ptr->AddRef();                 // Damit bei Programmende nicht Release gerufen wird (die Java-DLL ist dann vielleicht schon entladen)
+    //java::Vm::set_jvm( jvm );
+
     return JNI_VERSION_1_2;
 }
 
@@ -37,6 +43,9 @@ extern "C" JNIEXPORT jint JNICALL JNI_OnLoad( JavaVM* jvm, void* )
 
 extern "C" JNIEXPORT void JNICALL JNI_OnUnload( JavaVM*, void* )
 {
+    if( static_java_vm )  static_java_vm._ptr->Release();
+    static_java_vm = NULL;
+
     zschimmer_terminate();
     CoUninitialize();
 }

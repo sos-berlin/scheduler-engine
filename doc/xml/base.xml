@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="../scheduler.xslt" type="text/xsl"?>
 
-<!--$Id: base.xml,v 1.6 2004/09/06 07:53:27 jz Exp $-->
+<!--$Id: base.xml,v 1.7 2004/10/15 13:08:18 jz Exp $-->
 
 <xml_element name     = "base" 
              title    = "Basiskonfiguration"
              base_dir = "../"
              parent_page = "../konfiguration.xml"
              author   = "$Author: jz $"
-             date     = "$Date: 2004/09/06 07:53:27 $">
+             date     = "$Date: 2004/10/15 13:08:18 $">
 
     <xml_parent_elements>
         <xml_parent_element name="config">
@@ -27,13 +27,32 @@
     </xml_attributes>
 
     <description>
+        <scheduler_keyword keyword="Konfiguration"/>
+        <scheduler_keyword keyword="XML-Konfiguration"/>
+
         <p>
+            Mit <code>&lt;base&gt;</code> können Sie eine Basiskonfiguration angegeben.
+            Eine Basiskonfiguration liegt in einer eigenen Datei mit demselben Aufbau einer <a href="../konfiguration.xml">XML-Konfiguration</a>
+            (sie beginnt also wieder mit <scheduler_element name="spooler"/>).
+            In der Basiskonfiguration können Sie Einstellungen vornehmen, 
+            die die übergeordnete Konfiguration (die das Element <code>&lt;base&gt;</code> enthält) 
+            ergänzt oder überschreibt.
+        </p>
+        <p>
+            Der Scheduler verarbeitet die Basiskonfiguration zuerst.
+        <!--
             Mit <code>&lt;base&gt;</code> können Sie eine Basiskonfiguration angegeben, die der Scheduler vor der 
             Konfiguration verarbeitet, die <code>&lt;base&gt;</code> enthält.
             Erst danach verarbeitet er die 
             Konfiguration, die <code>&lt;base></code> enthält.
             In der Basiskonfiguration können Sie Einstellungen vornehmen, die die übergeordnete Konfiguration ergänzt
             oder überschreibt.
+         -->
+        </p>
+        <p>
+            Zum Beispiel kann die Basiskonfiguration die Jobs definieren, 
+            während die übergeordnete Konfiguration die Laufzeiten (<scheduler_element name="run_time"/>)
+            einstellt.
         </p>
         <p>
             Eine Basiskonfiguration kann auf eine weitere Basiskonfiguration verweisen. Der Scheduler prüft nicht, ob eine 

@@ -1,4 +1,4 @@
-// $Id: spooler_communication.cxx,v 1.96 2004/10/07 21:34:48 jz Exp $
+// $Id: spooler_communication.cxx,v 1.97 2004/10/15 13:08:18 jz Exp $
 /*
     Hier sind implementiert
 
@@ -837,7 +837,7 @@ void Communication::bind()
                 _udp_port = _spooler->udp_port();
                 _rebound = true;
 
-                _udp_socket.set_event_name( "UDP:" + ntohs( sa.sin_port ) );
+                _udp_socket.set_event_name( S() << "UDP:" << ntohs( sa.sin_port ) );
 
                 _spooler->log().info( "Scheduler erwartet Kommandos über UDP-Port " + sos::as_string(_udp_port) );
             }

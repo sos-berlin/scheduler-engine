@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding="utf-8"?>
-<!-- $Id: scheduler.xslt,v 1.39 2004/10/09 21:04:42 jz Exp $ -->
+<!-- $Id: scheduler.xslt,v 1.40 2004/10/15 13:08:18 jz Exp $ -->
 
 <!--
     Änderungswünsche:
@@ -901,7 +901,8 @@
             </xsl:if>            
             
             <code>
-                &lt;<xsl:value-of select="$name"/>
+                <xsl:text>&lt;</xsl:text>
+                <xsl:value-of select="$name"/>
 
                 <xsl:if test="$attribute">
                     <xsl:text> </xsl:text>
