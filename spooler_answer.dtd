@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!-- $Id: spooler_answer.dtd,v 1.1 2001/01/09 22:39:37 jz Exp $   Joacim Zschimmer,  (C) 2000 SOS GmbH Berlin  -->
+
+<!--     
+
+     Antworten auf Kommandos an den Spooler
+     s.a. spooler_command.dtd
+     
+-->
+
+<!-- ANTWORTEN AUF DIE KOMMANDOS -->
+
+<!ELEMENT spooler_answer        ( state | task | ERROR )>
+
+<!ELEMENT state                 ( tasks )>
+<!ATTLIST state                 time                CDATA #REQUIRED>    <!-- yyyy-mm-dd HH:MM:SS -->
+<!ATTLIST state                 running_since       CDATA #IMPLIED>     <!-- yyyy-mm-dd HH:MM:SS -->
+<!ATTLIST state                 log_file            CDATA #IMPLIED>
+<!ATTLIST state                 sleeping_until      CDATA #REQUIRED>    <!-- yyyy-mm-dd HH:MM:SS -->
+
+<!ELEMENT tasks                 ( task+ )>
+
+<!ELEMENT task                  ( ERROR? )>
+<!ATTLIST task                  job                 CDATA #REQUIRED>    <!-- Jobname -->
+<!ATTLIST task                  state               (stopped|pending|running|suspended) #REQUIRED>
+                                                                        <!-- state="stopped"  : Keine Task wird mehr gestartet -->
+                                                                        <!-- state="pending"  : Task wartet auf nächsten  -->
+                                                                        <!-- state="running"  : Task läuft -->
+                                                                        <!-- state="suspended": Task vorübergehend angehalten -->
+<!ATTLIST task                  steps               CDATA #IMPLIED>     <!-- Anzahl der bisher ausgeführten Jobschritte -->
+<!ATTLIST task                  running_since       CDATA #IMPLIED>     <!-- yyyy-mm-dd HH:MM:SS -->
+<!ATTLIST task                  next_start_time     CDATA #REQUIRED>    <!-- yyyy-mm-dd HH:MM:SS -->
+
+<!ELEMENT ok                    EMPTY>
+
+<!ELEMENT ERROR                 EMPTY>
+<!ATTLIST state                 time                CDATA #REQUIRED>    <!-- yyyy-mm-dd HH:MM:SS -->
+<!ATTLIST ERROR                 class               CDATA #IMPLIED>     <!-- "EOF" -->
+<!ATTLIST ERROR                 code                CDATA #REQUIRED>    <!-- "SOS-1234" -->
+<!ATTLIST ERROR                 text                CDATA #REQUIRED>    <!-- Fehlertext mit Fehlercode -->
+<!ATTLIST ERROR                 source              CDATA #IMPLIED>     <!-- Dateiname -->
+<!ATTLIST ERROR                 line                CDATA #IMPLIED>     <!-- Zeilennummer, beginned mit 1 -->
+<!ATTLIST ERROR                 col                 CDATA #IMPLIED>     <!-- Spaltennummer, beginned mit 1 -->

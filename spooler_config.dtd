@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- $Id: spooler_config.dtd,v 1.14 2001/01/09 12:57:36 jz Exp $   Joacim Zschimmer,  (C) 2000 SOS GmbH Berlin  -->
+<!-- $Id: spooler_config.dtd,v 1.15 2001/01/09 22:39:02 jz Exp $   Joacim Zschimmer,  (C) 2000 SOS GmbH Berlin  -->
 
 <!--     
 
@@ -71,12 +71,3 @@
 
 <!ELEMENT day                   EMPTY>
 <!ATTLIST day                   day                 CDATA #REQUIRED>
-
-<!ELEMENT ERROR                 EMPTY>
-<!ATTLIST ERROR                 class               CDATA #IMPLIED>     <!-- "EOF" -->
-<!ATTLIST ERROR                 code                CDATA #REQUIRED>    <!-- "SOS-1234" -->
-<!ATTLIST ERROR                 source              CDATA #IMPLIED>     <!-- Dateiname -->
-<!ATTLIST ERROR                 line                CDATA #IMPLIED>     <!-- Zeilennummer, beginned mit 1 -->
-<!ATTLIST ERROR                 col                 CDATA #IMPLIED>     <!-- Spaltennummer, beginned mit 1 -->
-<!ATTLIST ERROR                 text                CDATA #REQUIRED>    <!-- Fehlertext mit Fehlercode -->
-

@@ -1,4 +1,4 @@
-// $Id: spooler.h,v 1.14 2001/01/09 12:57:36 jz Exp $
+// $Id: spooler.h,v 1.15 2001/01/09 22:39:02 jz Exp $
 
 #ifndef __SPOOLER_H
 
@@ -57,6 +57,24 @@ typedef double                  Time;                       // wie time_t: Anzah
 Time                            now();
 
 const Time                      latter_day                  = INT_MAX;
+
+//--------------------------------------------------------------------------------------------Mutex
+
+template<typename T>
+struct Mutex
+{
+    typedef Thread_semaphore::Guard Guard;
+
+
+                                Mutex                   ( const T& t = T() )    : _value(t) {}
+
+    Mutex&                      operator =              ( const T& t )          { Guard g = &_semaphore; _value = t; return *this; }
+                                operator T              ()                      { Guard g = &_semaphore; T v = _value; return v; }
+    T                           read_and_reset          ()                      { Guard g = &_semaphore; T v = _value; _value = T(); return v; }
+
+    Thread_semaphore           _semaphore;
+    T                          _value;
+};
 
 //-------------------------------------------------------------------------------------------Script
 
@@ -156,6 +174,7 @@ struct Object_set_descr : Sos_self_deleting
 struct Object_set : Sos_self_deleting
 {
                                 Object_set                  ( Spooler*, const Sos_ptr<Object_set_descr>& );
+                               ~Object_set                  ();
 
     void                        open                        ();
     void                        close                       ();
@@ -225,6 +244,7 @@ struct Run_time
     void                        check                       ();                              
     Time                        next                        ()                      { return next( now() ); }
     Time                        next                        ( Time );
+    bool                        should_run_now              ()                      { Time nw = now(); return nw >= _next_start_time && nw < _next_end_time; }
 
 
     Fill_zero                  _zero_;
@@ -268,24 +288,6 @@ struct Job : Sos_self_deleting
 
 typedef list< Sos_ptr<Job> >    Job_list;
 
-//--------------------------------------------------------------------------------------------Mutex
-
-template<typename T>
-struct Mutex
-{
-    typedef Thread_semaphore::Guard Guard;
-
-
-                                Mutex                   ( const T& t = T() )    : _value(t) {}
-
-    Mutex&                      operator =              ( const T& t )          { Guard g = &_semaphore; _value = t; return *this; }
-                                operator T              ()                      { Guard g = &_semaphore; T v = _value; return v; }
-    T                           read_and_reset          ()                      { Guard g = &_semaphore; T v = _value; _value = T(); return v; }
-
-    Thread_semaphore           _semaphore;
-    T                          _value;
-};
-
 //----------------------------------------------------------------------------------------------Task
 
 struct Task : Sos_self_deleting
@@ -328,6 +330,7 @@ struct Task : Sos_self_deleting
     static string               state_name                  ( State );
     static State                as_state                    ( const string& );
     
+    string                      state_cmd_name              ()                          { return state_cmd_name( _state_cmd ); }
     static string               state_cmd_name              ( State_cmd );
     static State_cmd            as_state_cmd                ( const string& );
 
@@ -347,17 +350,12 @@ struct Task : Sos_self_deleting
     int                        _running_priority;
     int                        _step_count;
 
+    bool                       _run_until_end;              // Nach Kommando sc_start: Task zuende laufen lassen, nicht bei _next_end_time beenden
     Mutex<State>               _state;
     Mutex<State_cmd>           _state_cmd;
 
     Time                       _running_since;
-/*
-    bool                       _running;
-    bool                       _suspended;
-    
-    bool                       _stopped;
-    bool                       _stop;
-*/
+
     Xc_copy                    _error;
 
     Sos_ptr<Object_set>        _object_set;
@@ -401,6 +399,7 @@ struct Command_processor
     xml::Element_ptr            execute_show_task           ( Task* );
     xml::Element_ptr            execute_modify_job          ( const xml::Element_ptr& );
     xml::Element_ptr            execute_modify_spooler      ( const xml::Element_ptr& );
+    xml::Element_ptr            execute_signal_object       ( const xml::Element_ptr& );
 
     Spooler*                   _spooler;
     xml::Document_ptr          _answer;
@@ -432,7 +431,7 @@ struct Spooler
     void                        cmd_stop                    ();
     void                        cmd_terminate               ();
     void                        cmd_terminate_and_restart   ();
-    void                        cmd_wake                    ()                                  { _sleep = false; }
+    void                        cmd_wake                    ()                                  { _sleeping = false; }
 
     void                        step                        ();
     void                        start_jobs                  ();
@@ -446,7 +445,8 @@ struct Spooler
     Command_processor          _command_processor;
     Time                       _spooler_start_time;
     Thread_semaphore           _semaphore;
-    bool                       _sleep;                      // Besser: sleep mit Signal unterbrechen
+    volatile bool              _sleeping;                    // Besser: sleep mit Signal unterbrechen
+    Time                       _next_start_time;
     bool                       _reload;
     bool                       _stop;
     bool                       _pause;

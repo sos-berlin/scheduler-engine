@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.15 2001/01/09 12:57:36 jz Exp $
+// $Id: spooler.cxx,v 1.16 2001/01/09 22:39:02 jz Exp $
 
 
 
@@ -102,6 +102,13 @@ Object_set::Object_set( Spooler* spooler, const Sos_ptr<Object_set_descr>& descr
 {
 }
 
+//--------------------------------------------------------------------------Object_set::~Object_set
+
+Object_set::~Object_set()
+{
+    _dispatch = NULL;
+}
+
 //---------------------------------------------------------------------------------Object_set::open
 
 void Object_set::open()
@@ -153,6 +160,7 @@ void Object_set::open()
 void Object_set::close()
 {
     com_call( _dispatch, "spooler_close" );
+    _dispatch = NULL;
 
     _script_instance.close();
 }
@@ -407,6 +415,8 @@ bool Task::start()
         }
 
         _state = s_running;
+        _step_count = 0;
+        _run_until_end = false;
         _spooler->_running_jobs_count++;
 
         _next_start_time = max( _next_start_time + _job->_run_time._retry_period, now() );
@@ -421,6 +431,9 @@ bool Task::start()
 
 void Task::end()
 {
+    if( _state == s_suspended )  _state = s_running;
+    if( _state != s_running )  return;
+
     cerr << "Job " << _job->_name << " end\n";
 
     try
@@ -486,11 +499,16 @@ void Task::do_something()
                             break;
 
         case sc_start:      start();
-                            _state = s_running;
+                            _run_until_end = true;
                             break;
 
         case sc_suspend:    _state = s_suspended;
+                            _spooler->_running_jobs_count--;
+                            break;
+
         case sc_continue:   _state = s_running;
+                            _spooler->_running_jobs_count++;
+                            break;
         default: ;
     }
 
@@ -502,10 +520,13 @@ void Task::do_something()
         case s_pending:     if( now() >= _next_start_time )
                             {
                                 start();
+
+                                bool ok = step();
+                                if( !ok )  end();
                             }
                             break;
 
-        case s_running:     if( now() <= _job->_run_time._next_end_time )   // Bei _next_start_time == _next_end_time wenigstens ein step()
+        case s_running:     if( _run_until_end | _job->_run_time.should_run_now() )
                             {
                                 bool ok = step();
                                 if( !ok )  end();
@@ -554,11 +575,25 @@ void Task::set_state_cmd( State_cmd cmd )
     switch( cmd )
     {
         case sc_stop:       ok = true;                  break;
-        case sc_unstop:     ok = _state == s_stopped;   break;
-        case sc_start:      ok = _state == s_pending;   break;
+
+        case sc_unstop:     ok = _state == s_stopped;   if(!ok) break;
+                            _spooler->cmd_wake();
+                            break;
+
+        case sc_start:      ok = _state == s_pending;   if(!ok) break;
+                            _next_start_time = now();  
+                            _spooler->cmd_wake();
+                            break;
+
         case sc_end:        ok = _state == s_running;   break;
+
         case sc_suspend:    ok = _state == s_running;   break;
-        case sc_continue:   ok = _state == s_suspended; break;
+
+        case sc_continue:   ok = _state == s_suspended; if(!ok) break;
+                            _spooler->cmd_wake();
+                            break;
+
+
         default:            ok = false;
     }
 
@@ -636,7 +671,6 @@ void Spooler::step()
 
     FOR_EACH( Task_list, _task_list, it )
     {
-        Time  nw   = now();
         Task* task = *it;
 
         task->do_something();
@@ -686,7 +720,7 @@ void Spooler::wait()
 
     if( _running_jobs_count == 0 )
     {
-        Time  next_start_time = latter_day;
+        _next_start_time = latter_day;
         Task* next_task = NULL;
 
         if( _paused )
@@ -697,36 +731,36 @@ void Spooler::wait()
         {
             Thread_semaphore::Guard guard = &_semaphore;
 
-            next_start_time = latter_day;
+            _next_start_time = latter_day;
             FOR_EACH( Task_list, _task_list, it ) 
             {
                 Task* task = *it;
                 if( task->_state == Task::s_pending ) 
                 {
-                    if( next_start_time > (*it)->_next_start_time )  next_task = *it, next_start_time = next_task->_next_start_time;
+                    if( _next_start_time > (*it)->_next_start_time )  next_task = *it, _next_start_time = next_task->_next_start_time;
                 }
             }
-
         }
 
-        _sleep = true;  // Das muss in einen kritischen Abschnitt!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        _sleeping = true;  // Das muss in einen kritischen Abschnitt!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-        Time wait_time = next_start_time - now();
+        Time wait_time = _next_start_time - now();
         if( wait_time > 0 ) 
         {
-            if( next_task )  cerr << "Job " << next_task->_job->_name << ": Nächster Start " << Sos_optional_date_time( next_start_time ) << '\n';
+            if( next_task )  cerr << "Job " << next_task->_job->_name << ": Nächster Start " << Sos_optional_date_time( _next_start_time ) << '\n';
                        else  cerr << "Kein Job zu starten\n";
 
-            while( _sleep  &&  wait_time > 0 )
+            while( _sleeping  &&  wait_time > 0 )
             {
                 double sleep_time = 1.0;
                 sos_sleep( min( sleep_time, wait_time ) );
                 wait_time -= sleep_time;
             }
 
-            _sleep = false;
+            _sleeping = false;
         }
 
+        _next_start_time = 0;
         tzset();
     }
 }
@@ -763,9 +797,7 @@ void Spooler::stop()
         FOR_EACH( Task_list, _task_list, it ) 
         {
             Task* task = *it;
-        
-            if( task->_state == Task::s_running )  task->end();
-
+            task->end();
             it = _task_list.erase( it );
         }
     }
@@ -820,6 +852,8 @@ void Spooler::cmd_stop()
 
 void Spooler::cmd_terminate()
 {
+    cerr << "Spooler::cmd_terminate_and_restart()\n";
+
     _terminate = true;
     cmd_stop();
 }
@@ -828,6 +862,8 @@ void Spooler::cmd_terminate()
 
 void Spooler::cmd_terminate_and_restart()
 {
+    cerr << "Spooler::cmd_terminate_and_restart()\n";
+
     _terminate_and_restart = true;
     cmd_terminate();
 }

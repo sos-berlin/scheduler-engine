@@ -1,4 +1,4 @@
-// $Id: spooler_command.cxx,v 1.8 2001/01/09 12:57:36 jz Exp $
+// $Id: spooler_command.cxx,v 1.9 2001/01/09 22:39:02 jz Exp $
 
 #include "../kram/sos.h"
 #include "../kram/sleep.h"
@@ -23,23 +23,22 @@ void dom_append_text_element( const xml::Element_ptr& element, const char* eleme
     e->appendChild( text_node );
 }
 */
-
 //-----------------------------------------------------------------------------create_error_element
 
 xml::Element_ptr create_error_element( xml::Document* document, const Xc_copy& x )
 {
     xml::Element_ptr e = document->createElement( "ERROR" );
 
+    e->setAttribute( "time", as_dom_string( Sos_optional_date_time( x.time() - _timezone ).as_string() ) );
+
     if( !empty( x->name() )          )  e->setAttribute( "class" , as_dom_string( x->name()          ) );
 
     e->setAttribute( "code", as_dom_string( x->code() ) );
+    e->setAttribute( "text", as_dom_string( x->what() ) );
     
     if( !empty( x->_pos.filename() ) )  e->setAttribute( "source", as_dom_string( x->_pos.filename() ) );
     if( x->_pos._line >= 0           )  e->setAttribute( "line"  , as_dom_string( x->_pos._line + 1  ) );
     if( x->_pos._col  >= 0           )  e->setAttribute( "col"   , as_dom_string( x->_pos._col + 1   ) );
-
-    e->setAttribute( "text", as_dom_string( x->what() ) );
-    e->setAttribute( "time", as_dom_string( Sos_optional_date_time( x.time() - _timezone ).as_string() ) );
 
     return e;
 }
@@ -60,10 +59,13 @@ xml::Element_ptr Command_processor::execute_show_task( Task* task )
     task_element->setAttribute( "job", as_dom_string( task->_job->_name ) );
     task_element->setAttribute( "state", as_dom_string( task->state_name() ) );
 
+    if( task->_state_cmd )
+        task_element->setAttribute( "cmd", as_dom_string( task->state_cmd_name() ) );
+
     if( task->_state == Task::s_pending )
         task_element->setAttribute( "next_start_time", as_dom_string( Sos_optional_date_time( task->_next_start_time ).as_string() ) );
 
-    if( task->_state & ( Task::s_running | Task::s_suspended ) )
+    if( task->_state == Task::s_running )
         task_element->setAttribute( "running_since", as_dom_string( Sos_optional_date_time( task->_running_since ).as_string() ) );
 
     task_element->setAttribute( "steps", as_dom_string( as_string( task->_step_count ) ) );
@@ -93,12 +95,36 @@ xml::Element_ptr Command_processor::execute_show_state()
 {
     xml::Element_ptr state_element = _answer->createElement( "state" );
  
-    state_element->setAttribute( "time", as_dom_string( Sos_optional_date_time::now().as_string() ) );
+    state_element->setAttribute( "time"                 , as_dom_string( Sos_optional_date_time::now().as_string() ) );
     state_element->setAttribute( "spooler_running_since", as_dom_string( Sos_optional_date_time( _spooler->_spooler_start_time ).as_string() ) );
+    state_element->setAttribute( "sleeping_until"       , as_dom_string( Sos_optional_date_time( _spooler->_next_start_time ).as_string() ) );
     
     state_element->appendChild( execute_show_tasks() );
 
     return state_element;
+}
+
+//--------------------------------------------------------Command_processor::execute_modify_spooler
+
+xml::Element_ptr Command_processor::execute_modify_spooler( const xml::Element_ptr& element )
+{
+    string cmd = as_string( element->getAttribute( "cmd" ) );
+  //if( !cmd.empty() )
+    {
+        if( cmd == "stop"                  )  _spooler->cmd_stop();
+        else
+        if( cmd == "reload"                )  _spooler->cmd_reload();
+        else
+        if( cmd == "terminate"             )  _spooler->cmd_terminate();
+        else
+        if( cmd == "terminate_and_restart" )  _spooler->cmd_terminate_and_restart();
+        else
+        if( cmd == "abort_immediately"     )  _exit(1);
+        else
+            throw_xc( "SPOOLER-106", cmd );
+    }
+    
+    return _answer->createElement( "ok" );
 }
 
 //------------------------------------------------------------Command_processor::execute_modify_job
@@ -138,32 +164,30 @@ xml::Element_ptr Command_processor::execute_modify_job( const xml::Element_ptr& 
     return tasks_element;
 }
 
-//--------------------------------------------------------Command_processor::execute_modify_spooler
+//---------------------------------------------------------Command_processor::execute_signal_object
 
-xml::Element_ptr Command_processor::execute_modify_spooler( const xml::Element_ptr& element )
+xml::Element_ptr Command_processor::execute_signal_object( const xml::Element_ptr& element )
 {
-    string action = as_string( element->getAttribute( "action" ) );
-    if( !action.empty() )
+    string class_name = as_string( element->getAttribute( "class" ) );
+    Level  level      = as_int( element->getAttribute( "level" ) );
+
+    xml::Element_ptr tasks_element = _answer->createElement( "tasks" );
+
+    FOR_EACH( Task_list, _spooler->_task_list, it )
     {
-        if( action == "stop"      )  _spooler->cmd_stop();
-        else
-        if( action == "reload"    )  _spooler->cmd_reload();
-        else
-        if( action == "terminate" )  _spooler->cmd_terminate();
-        else
-        if( action == "terminate_and_restart" )  _spooler->cmd_terminate_and_restart();
-        else
-            throw_xc( "SPOOLER-106", action );
+        Task* task = *it;
+        
+        if( task->_state == Task::s_pending
+         && task->_job->_object_set_descr
+         && task->_job->_object_set_descr->_class->_name == class_name 
+         && task->_job->_object_set_descr->_level_interval.is_in_interval( level ) )
+        {
+            task->set_state_cmd( Task::sc_start );
+            tasks_element->appendChild( execute_show_task( *it ) );
+        }
     }
-    
-    string paused = as_string( element->getAttribute( "paused" ) );
-    if( !paused.empty() )
-    {
-        if( paused == "yes" )  _spooler->cmd_pause();
-                         else  _spooler->cmd_continue();
-    }
-    
-    return _answer->createElement( "ok" );
+
+    return tasks_element;
 }
 
 //---------------------------------------------------------------Command_processor::execute_command
@@ -187,6 +211,8 @@ xml::Element_ptr Command_processor::execute_command( const xml::Element_ptr& ele
     if( element->tagName == "modify_spooler"    )  return execute_modify_spooler( element );
     else
     if( element->tagName == "modify_job"        )  return execute_modify_job( element );
+    else
+    if( element->tagName == "signal_object"     )  return execute_signal_object( element );
     else
     {
         throw_xc( "SPOOLER-105", as_string( element->tagName ) ); return NULL;

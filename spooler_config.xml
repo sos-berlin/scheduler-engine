@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 
-<!-- $Id: spooler_config.xml,v 1.14 2001/01/09 12:57:36 jz Exp $   (C) 2000 SOS GmbH Berlin -->
+<!-- $Id: spooler_config.xml,v 1.15 2001/01/09 22:39:02 jz Exp $   (C) 2000 SOS GmbH Berlin -->
 
 <!DOCTYPE spooler_config SYSTEM "spooler_config.dtd">
 
@@ -77,6 +77,8 @@ class Object_set_class
 
 
     sub spooler_close()
+        dim dummy
+        dummy = 0
     end sub
 
 
@@ -288,7 +290,7 @@ sub spooler_process()
 
             <run_time begin        = "07:11:55" 
                       end          = "21:00" 
-                      retry_period = "6">
+                      retry_period = "9">
 
                 <date date="2001-01-02"/>
                 <date date="2001-01-09"/>
