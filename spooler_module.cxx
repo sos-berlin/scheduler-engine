@@ -1,4 +1,4 @@
-// $Id: spooler_module.cxx,v 1.33 2003/08/27 17:44:48 jz Exp $
+// $Id: spooler_module.cxx,v 1.34 2003/08/27 19:26:37 jz Exp $
 /*
     Hier sind implementiert
 
@@ -337,7 +337,7 @@ void Module_instance::set_in_call( In_call* in_call, const string& extra )
     {
         _in_call = in_call;
 
-        if( in_call  &&  _spooler->_debug )  
+        if( in_call  &&  _spooler  &&  _spooler->_debug )
         {
             _log.debug( in_call->_name + "()  " + extra );
         }
@@ -459,7 +459,7 @@ Async_operation* Module_instance::end__start( bool success )
 
 void Module_instance::end__end()
 {
-    call( spooler_close_name );
+    call_if_exists( spooler_close_name );
 
     // Exception abfangen und spooler_on_error rufen // _com_task->set_error( x )?
 /*

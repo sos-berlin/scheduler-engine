@@ -1,4 +1,4 @@
-// $Id: spooler_module_remote_server.cxx,v 1.19 2003/08/27 10:22:58 jz Exp $
+// $Id: spooler_module_remote_server.cxx,v 1.20 2003/08/27 19:26:37 jz Exp $
 /*
     Hier sind implementiert
 
@@ -284,14 +284,14 @@ STDMETHODIMP Com_remote_module_instance_server::begin( SAFEARRAY* objects_safear
         {
             VARIANT* o = &objects[i];
             if( o->vt != VT_DISPATCH )  return DISP_E_BADVARTYPE;
-          //object_list.push_back( Module_instance::Object_list_entry( V_DISPATCH(o), string_from_variant( names[i]) ) );
-            _server.add_obj( V_DISPATCH(o), string_from_variant( names[i] ) );
+            _server._module_instance->_object_list.push_back( Module_instance::Object_list_entry( V_DISPATCH(o), string_from_variant( names[i]) ) );
+          //_server._module_instance->add_obj( V_DISPATCH(o), string_from_variant( names[i] ) );
         }
 
-        _server.begin__start();
+        _server._module_instance->begin__start();
 
         result->vt = VT_BOOL;
-        V_BOOL( result ) = _server.begin__end();
+        V_BOOL( result ) = _server._module_instance->begin__end();
     }
     catch( const exception& x ) { hr = com_set_error( x, "Remote_module_instance_server::begin" ); }
 
@@ -306,9 +306,9 @@ STDMETHODIMP Com_remote_module_instance_server::end( VARIANT_BOOL succeeded, VAR
 
     try
     {
-        _server.end__start( succeeded != 0 );
+        _server._module_instance->end__start( succeeded != 0 );
 
-        _server.end__end();
+        _server._module_instance->end__end();
     }
     catch( const exception& x ) { hr = com_set_error( x, "Remote_module_instance_server::end" ); }
 
@@ -323,10 +323,10 @@ STDMETHODIMP Com_remote_module_instance_server::step( VARIANT* result )
 
     try
     {
-        _server.step__start();
+        _server._module_instance->step__start();
 
         result->vt = VT_BOOL;
-        V_BOOL( result ) = _server.step__end();
+        V_BOOL( result ) = _server._module_instance->step__end();
     }
     catch( const exception& x ) { hr = com_set_error( x, "Remote_module_instance_server::step" ); }
 

@@ -1,4 +1,4 @@
-// $Id: spooler_job.cxx,v 1.6 2003/08/27 10:22:58 jz Exp $
+// $Id: spooler_job.cxx,v 1.7 2003/08/27 19:26:37 jz Exp $
 /*
     Hier sind implementiert
 
@@ -972,12 +972,13 @@ bool Job::do_something()
         }
     }
 
-
+/*?
     if( !something_done )  
     {
         LOG( obj_name() << ".do_something()  Nichts getan\n" );
         calculate_next_time();
     }
+*/
 
     return something_done;
 }

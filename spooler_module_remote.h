@@ -1,4 +1,4 @@
-// $Id: spooler_module_remote.h,v 1.8 2003/08/27 17:44:48 jz Exp $
+// $Id: spooler_module_remote.h,v 1.9 2003/08/27 19:26:37 jz Exp $
 
 #ifndef __SPOOLER_MODULE_REMOTE_H
 #define __SPOOLER_MODULE_REMOTE_H
@@ -10,19 +10,44 @@ namespace spooler {
 
 //---------------------------------------------------------------------Remote_module_instance_proxy
 
-struct Remote_module_instance_proxy : Com_module_instance_base, 
-                                      Async_operation
+struct Remote_module_instance_proxy : Com_module_instance_base
 {
-    enum Call_state
+
+    struct Operation : Async_operation
     {
-        c_none,
-        c_create_instance,
-        c_construct,
-        c_begin,
-      //c_end,
-      //c_step,        
-        c_finished
+
+        enum Call_state
+        {
+            c_none,
+            c_create_instance,
+            c_construct,
+            c_begin,
+            c_finished
+        };
+
+
+                                Operation                   ( Remote_module_instance_proxy* );
+
+        Async_operation*        begin__start                ();
+        bool                    begin__end                  ();
+
+        virtual bool            async_finished              ();
+        virtual void            async_continue              ( bool wait = false );
+        virtual bool            async_has_error             ()                                      { return _operation? _operation->async_has_error() : false; }
+        virtual void            async_check_error           ()                                      { if( _operation )  _operation->async_check_error(); }
+        virtual string          async_state_text            ();
+
+        string                  state_name                  ();
+
+
+        Fill_zero              _zero_;
+        Remote_module_instance_proxy* _proxy;
+        Call_state             _call_state;
+        Multi_qi               _multi_qi;
+        ptr<Async_operation>   _operation;
+      //Xc_copy                _error;
     };
+
 
 
                                 Remote_module_instance_proxy( Module* module )                      : Com_module_instance_base(module), _zero_(_end_) {}
@@ -45,13 +70,6 @@ struct Remote_module_instance_proxy : Com_module_instance_base,
     virtual Async_operation*    step__start                 ();
     virtual bool                step__end                   ();
 
-    virtual bool                async_finished              ();
-    virtual void                async_continue              ( bool wait = false );
-    virtual bool                async_has_error             ()                                      { return _operation? _operation->async_has_error() : false; }
-    virtual void                async_check_error           ()                                      { if( _operation )  _operation->async_check_error(); }
-    virtual string              async_state_text            ();
-
-    string                      state_name                  ();
 
     Fill_zero                  _zero_;
 
@@ -59,9 +77,6 @@ struct Remote_module_instance_proxy : Com_module_instance_base,
     ptr<object_server::Session>    _session;
     ptr<object_server::Proxy>      _remote_instance;
     ptr<Async_operation>           _operation;
-    Call_state                     _call_state;
-    Multi_qi                       _multi_qi;
-  //Xc_copy                        _error;
 
     Fill_end                   _end_;
 };
