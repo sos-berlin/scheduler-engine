@@ -1,4 +1,4 @@
-// $Id: spooler_command.cxx,v 1.128 2004/07/24 11:36:42 jz Exp $
+// $Id: spooler_command.cxx,v 1.129 2004/07/24 20:27:47 jz Exp $
 /*
     Hier ist implementiert
 
@@ -695,6 +695,8 @@ ptr<Http_response> Command_processor::execute_http( const Http_request& http_req
 
     try
     {
+        if( _security_level < Security::seclev_info )  throw_xc( "SCHEDULER-121" );
+
         if( http_request._http_cmd == "GET" )
         {
             if( path == "/" )  path = "index.html";

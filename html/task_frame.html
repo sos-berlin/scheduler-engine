@@ -1,4 +1,4 @@
-<!-- $Id: task_frame.html,v 1.18 2004/07/24 17:13:40 jz Exp $ -->
+<!-- $Id: task_frame.html,v 1.19 2004/07/24 20:27:47 jz Exp $ -->
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <html>
 
@@ -16,6 +16,20 @@
 </head>
 
 <body>
+
+<table cellspacing="0" cellpadding="0" width="100%" style="margin-bottom: 1ex">
+    <tr>
+        <td align="right" class="small" >
+            <span 
+                  style="cursor: hand; text-decoration: underline" 
+                  onmouseover="this.className='hover'"
+                  onmouseout="this.className=''"
+                  onclick="hide__onclick()">
+                Hide
+            </span>
+        </td>
+    </tr>
+</table>
 
 <!--p>
     <b>
@@ -45,6 +59,8 @@ var _job_name;
 var _task_id;
 var _job_chain_element;
 var _popup;
+var _hidden;
+var _saved_frameset_cols;
 
 //---------------------------------------------------------------------------------------------init
 
@@ -68,6 +84,13 @@ function init()
     }
 }
 
+//---------------------------------------------------------------------------------------------hide
+
+function hide__onclick()
+{
+    hide();
+}
+
 //--------------------------------------------------------------------------------------------clear
 
 function clear()
@@ -77,8 +100,38 @@ function clear()
     _job_element = undefined;
     _job_name    = undefined;
     _task_id     = undefined;
+}
 
-    document.all.stylesheet.innerHTML = "";
+//---------------------------------------------------------------------------------------------hide
+
+function hide()
+{
+    if( !_hidden )
+    {
+        _hidden = true;
+        
+        _saved_frameset_cols = window.parent.left_and_right_frameset.cols; 
+        window.parent.left_and_right_frameset.cols = "100%, 0%";
+    }
+}
+
+//---------------------------------------------------------------------------------------------show
+
+function show()
+{
+    var ok = update();
+
+    if( ok )
+    {
+        if( _hidden )
+        {
+            window.parent.left_and_right_frameset.cols = _saved_frameset_cols;
+            _saved_frameset_cols = undefined;
+            _hidden = false;
+        }
+    }
+    else
+        hide();
 }
 
 //--------------------------------------------------------------------------------show_task_details
@@ -97,6 +150,7 @@ function show_task_details( job_element, task_element )
     //document.all.job_title.innerText = job_title? job_title : "";
 
     document.all.stylesheet.innerHTML = task_element.transformNode( _stylesheet );
+    show();
 }
 
 //---------------------------------------------------------------------------------show_job_details
@@ -109,7 +163,7 @@ function show_job_details( job_element )
     _job_name    = job_element.getAttribute( "job" )
 
     document.all.stylesheet.innerHTML = job_element.transformNode( _stylesheet );
-    update();
+    show();
 }
 
 //---------------------------------------------------------------------------show_job_chain_details
@@ -121,19 +175,23 @@ function show_job_chain_details( job_chain_element )
     _job_chain_element = job_chain_element
     
     document.all.stylesheet.innerHTML = job_chain_element.transformNode( _stylesheet );
-    update();
+    show();
 }
 
 //-------------------------------------------------------------------------------------------update
 
 function update()
 {
+    var ok = false;
+    
     if( _task_id != undefined )
     {
         var response = _scheduler.execute( "<show_task id='" + _task_id + "' what='all'/>" );
         
         var task_element = response.selectSingleNode( "spooler/answer/task" );
         document.all.stylesheet.innerHTML = task_element? task_element.transformNode( _stylesheet ) : "";
+
+        ok = true;
     }
     else
     if( _job_name != undefined )
@@ -143,6 +201,8 @@ function update()
         
         _job_element = response.selectSingleNode( "spooler/answer/job" );
         document.all.stylesheet.innerHTML = _job_element? _job_element.transformNode( _stylesheet ) : "";
+
+        ok = true;
     }
     else
     if( _job_chain_element != undefined )
@@ -154,7 +214,11 @@ function update()
         var job_chain_name = _job_chain_element.getAttribute( "name" );
         _job_chain_element = response.selectSingleNode( "//job_chain[ @name='" + job_chain_name + "' ]" );
         document.all.stylesheet.innerHTML = _job_chain_element? _job_chain_element.transformNode( _stylesheet ) : "";
+
+        ok = true;
     }
+    
+    return ok;
 }
 
 //-------------------------------------------------------------------------------------------------

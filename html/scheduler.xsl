@@ -81,22 +81,22 @@
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Scheduler-Info-->
 
     <xsl:template name="scheduler_info">
-        <table width="100%" cellpadding="0" cellspacing="0" class="scheduler">
-            <col valign="baseline" align="left"/>
+        <table cellpadding="0" cellspacing="0" class="scheduler" border="1">
             <col valign="baseline" align="left"/>
             <col valign="baseline" align="left"/>
             <tr>
-                <td colspan="2" align="left" style="padding-right: 0">
-                    <span style="margin-top: 2px; margin-bottom: 2px">
+                <td align="left" style="padding-right: 3ex">
+                    <span style="margin-top: 2px; margin-bottom: 2pt">
                         <b>Scheduler</b>&#160;
                         <span style="font-size: 8pt; white-space: nowrap">(<xsl:value-of select="state/@version"/>)</span>
-                        <xsl:if test="state/@id!=''">id=
-                            <xsl:text>&#160; </xsl:text>
-                            <b><xsl:value-of select="state/@id"/></b>
-                        </xsl:if>
-                        
+
                         <xsl:text> &#160;</xsl:text>
                         <xsl:value-of select="state/@state"/>    
+                            <xsl:text>&#160; </xsl:text>
+    
+                        <xsl:if test="state/@id!=''">
+                            <b style="white-space: nowrap">-id=<xsl:value-of select="state/@id"/></b>
+                        </xsl:if>
                     </span>
                 </td>
                 <td align="right" style="padding-left: 0">
@@ -116,10 +116,21 @@
             <tr>
                 <td colspan="3">
                     <xsl:value-of select="count( state/jobs/job [ @state='running' ] )" /> jobs running,
-                    &#160;<xsl:value-of select="count( state/jobs/job [ @state='stopped' ] )" /> stopped,
-                    &#160;<xsl:value-of select="count( state/jobs/job [ @waiting_for_process='yes' ] )" /> need process,
-                    &#160;<xsl:value-of select="count( state/jobs/job/tasks/task[ @id ] )" /> tasks,
-                    &#160;<xsl:value-of select="sum( state/jobs/job/order_queue/@length )" /> orders
+                    <span style="white-space: nowrap">
+                        <xsl:value-of select="count( state/jobs/job [ @state='stopped' ] )" /> stopped,
+                    </span>
+                    <xsl:text> </xsl:text>
+                    <span style="white-space: nowrap">
+                        <xsl:value-of select="count( state/jobs/job [ @waiting_for_process='yes' ] )" /> need process,
+                    </span>
+                    <xsl:text> </xsl:text>
+                    <span style="white-space: nowrap">
+                        <xsl:value-of select="count( state/jobs/job/tasks/task[ @id ] )" /> tasks,
+                    </span>
+                    <xsl:text> </xsl:text>
+                    <span style="white-space: nowrap">
+                        <xsl:value-of select="sum( state/jobs/job/order_queue/@length )" /> orders
+                    </span>
                 </td>
             </tr>
         </table>
@@ -128,7 +139,7 @@
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Jobs-->
 
     <xsl:template match="jobs">
-        <table width="100%" cellpadding="0" cellspacing="0" class="job">
+        <table cellpadding="0" cellspacing="0" class="job">
             <caption align="left" class="job">
                 <!--b>Jobs</b>
                 &#160;-->
@@ -149,7 +160,7 @@
             <!--col  valign="baseline"  width="110"/-->  
             <col valign="baseline"  width=" 50"  align="right"/>  
             <col valign="baseline"  width=" 30"  align="right"/>
-            <col valign="baseline"  width="200"/>
+            <col valign="baseline"/>
             
             <thead>
                 <tr style="">
@@ -217,7 +228,9 @@
                             <xsl:value-of select="@state"/>
                             <xsl:if test="not( /spooler/@show_tasks_checkbox ) and tasks/@count>0">
                                 <xsl:text>, </xsl:text>
-                                <xsl:value-of select="tasks/@count"/> tasks
+                                <span style="white-space: nowrap">
+                                    <xsl:value-of select="tasks/@count"/> tasks
+                                </span>
                             </xsl:if>
                         </td>
                         

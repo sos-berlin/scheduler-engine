@@ -1,9 +1,9 @@
-/* $Id: scheduler.css,v 1.13 2004/07/24 17:13:40 jz Exp $ */
+/* $Id: scheduler.css,v 1.14 2004/07/24 20:27:47 jz Exp $ */
 
 body         { font-family: Sans-Serif; font-size: 10pt; margin-top: 5pt; }
 th           { font-size: 10pt; }
 td           { font-size: 10pt; }
-p            { font-size: 10pt; margin-top: 2ex; margin-bottom: 0; padding-left: 3pt;   }
+p            { font-size: 10pt; margin-top: 2ex; margin-bottom: 0; padding-left: 3pt; }
 label        { font-size: 10pt; }
 col          { padding-bottom: 1pt; padding-left: 3pt; padding-right: 2pt }
 caption      { font-size: 10pt; padding-bottom: 5pt; padding-left: 3pt; padding-right: 2pt; padding-top: 2pt }

@@ -1,4 +1,4 @@
-<!-- $Id: jobs_frame.html,v 1.24 2004/07/24 17:13:40 jz Exp $ -->
+<!-- $Id: jobs_frame.html,v 1.25 2004/07/24 20:27:47 jz Exp $ -->
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <html>
 
@@ -43,7 +43,6 @@ var _response;
 var _timer;
 var _scheduler;
 var _show_card = "jobs";
-var _saved_frameset_cols;
 //var _show_jobs            = true;
 //var _show_job_chains      = false;
 //var _show_process_classes = false;
@@ -158,7 +157,7 @@ function update()
 
     if( window.parent.details_frame.document.readyState == "complete" )
     {
-        window.parent.details_frame.update();
+        window.parent.details_frame.show();
     }
     
     if( _timer != undefined )  set_update_timer();
@@ -256,14 +255,14 @@ function show_card( what )
         {
             window.parent.details_frame.clear();
             
-            _saved_frameset_cols = window.parent.left_and_right_frameset.cols; 
-            window.parent.left_and_right_frameset.cols = "100%, 0%";
+            //_saved_frameset_cols = window.parent.left_and_right_frameset.cols; 
+            //window.parent.left_and_right_frameset.cols = "100%, 0%";
         }
-        else
-        if( _saved_frameset_cols != undefined )
+        //else
+        //if( _saved_frameset_cols != undefined )
         {
-            window.parent.left_and_right_frameset.cols = _saved_frameset_cols;
-            _saved_frameset_cols = undefined;
+            //window.parent.left_and_right_frameset.cols = _saved_frameset_cols;
+            //_saved_frameset_cols = undefined;
         }
     
         _show_card = what;
