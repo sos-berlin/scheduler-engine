@@ -1,11 +1,17 @@
-// $Id: spooler_communication.cxx,v 1.13 2001/01/15 14:30:23 jz Exp $
+// $Id: spooler_communication.cxx,v 1.14 2001/01/16 06:23:17 jz Exp $
+/*
+    Hier sind implementiert
 
-//#include <precomp.h>
+    Xml_end_finder
+    Communication::Channer
+    Communication
+*/
 
-#include <ctype.h>
+
 #include "../kram/sos.h"
-#include "../kram/sleep.h"
 #include "spooler.h"
+
+//#include <ctype.h>
 
 #ifdef SYSTEM_WIN
     const int ENOTSOCK = 10038;

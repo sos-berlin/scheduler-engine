@@ -101,9 +101,11 @@ SOURCE=..\kram\sosmain.cxx
 
 !IF  "$(CFG)" == "spooler - Win32 Release"
 
+# SUBTRACT CPP /YX
+
 !ELSEIF  "$(CFG)" == "spooler - Win32 Debug"
 
-# ADD CPP /YX
+# SUBTRACT CPP /YX
 
 !ENDIF 
 
@@ -111,35 +113,52 @@ SOURCE=..\kram\sosmain.cxx
 # Begin Source File
 
 SOURCE=.\spooler.cxx
+# ADD CPP /YX"spooler.h"
 # End Source File
 # Begin Source File
 
 SOURCE=.\spooler_com.cxx
+# ADD CPP /YX"spooler.h"
 # End Source File
 # Begin Source File
 
 SOURCE=.\spooler_command.cxx
+# ADD CPP /YX"spooler.h"
 # End Source File
 # Begin Source File
 
 SOURCE=.\spooler_communication.cxx
+# ADD CPP /YX"spooler.h"
+# End Source File
+# Begin Source File
+
+SOURCE=.\spooler_config.cxx
+# ADD CPP /YX"spooler.h"
 # End Source File
 # Begin Source File
 
 SOURCE=.\spooler_log.cxx
-# ADD CPP /YX
+# ADD CPP /YX"spooler.h"
 # End Source File
 # Begin Source File
 
 SOURCE=.\spooler_service.cxx
+# ADD CPP /YX"spooler.h"
+# End Source File
+# Begin Source File
+
+SOURCE=.\spooler_task.cxx
+# ADD CPP /YX"spooler.h"
+# End Source File
+# Begin Source File
+
+SOURCE=.\spooler_time.cxx
+# ADD CPP /YX"spooler.h"
 # End Source File
 # Begin Source File
 
 SOURCE=.\spooler_wait.cxx
-# End Source File
-# Begin Source File
-
-SOURCE=.\spooler_xml.cxx
+# ADD CPP /YX"spooler.h"
 # End Source File
 # End Group
 # Begin Group "Header-Dateien"

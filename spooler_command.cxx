@@ -1,9 +1,16 @@
-// $Id: spooler_command.cxx,v 1.14 2001/01/15 14:26:29 jz Exp $
+// $Id: spooler_command.cxx,v 1.15 2001/01/16 06:23:17 jz Exp $
+/*
+    Hier ist implementiert
+
+    Command_processor
+*/
+
 
 #include "../kram/sos.h"
+#include "spooler.h"
+
 #include "../kram/sleep.h"
 #include "../file/anyfile.h"
-#include "spooler.h"
 
 
 

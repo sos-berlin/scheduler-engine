@@ -1,10 +1,19 @@
-// $Id: spooler_service.cxx,v 1.2 2001/01/15 14:26:29 jz Exp $
+// $Id: spooler_service.cxx,v 1.3 2001/01/16 06:23:18 jz Exp $
+/*
+    Hier sind implementiert
+
+    install_service()
+    remove_service()
+    service_is_started()
+    spooler_service()
+*/
+
 
 #include "../kram/sos.h"
+#include "spooler.h"
+
 #include "../kram/log.h"
 #include "../kram/sosopt.h"
-#include "../kram/sleep.h"
-#include "spooler.h"
 
 #ifdef SYSTEM_WIN 
 
@@ -237,19 +246,12 @@ static void __stdcall Handler( DWORD dwControl )
             case SERVICE_CONTROL_PARAMCHANGE:       // Windows 2000: Notifies the service that service-specific startup parameters have changed. The service should reread its startup parameters. 
                 spooler_ptr->cmd_reload();
                 break;
-
+/*
             case SERVICE_CONTROL_NETBINDADD:        // Windows 2000: Notifies a network service that there is a new component for binding. The service should bind to the new component.  
-                break;
-
             case SERVICE_CONTROL_NETBINDREMOVE:     // Windows 2000: Notifies a network service that a component for binding has been removed. The service should reread its binding information and unbind from the removed component.  
-                break;
-
             case SERVICE_CONTROL_NETBINDENABLE:     // Windows 2000: Notifies a network service that a disabled binding has been enabled. The service should reread its binding information and add the new binding.  
-                break;
-
             case SERVICE_CONTROL_NETBINDDISABLE:    // Windows 2000: Notifies a network service that one of its bindings has been disabled. The service should reread its binding information and remove the binding. 
-                break;
-
+*/
             default:
                 break;
         }
@@ -271,6 +273,8 @@ static void spooler_state_changed( Spooler*, void* )
 static ulong __stdcall service_thread( void* param )
 {
     LOG( "service_thread\n" );
+
+    Ole_initialize ole;
 
     Service_thread_param* p   = (Service_thread_param*)param;
     int                   ret = 0;

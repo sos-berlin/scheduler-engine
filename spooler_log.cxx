@@ -1,8 +1,9 @@
-// $Id: spooler_log.cxx,v 1.7 2001/01/15 14:26:29 jz Exp $
+// $Id: spooler_log.cxx,v 1.8 2001/01/16 06:23:18 jz Exp $
 
 #include "../kram/sos.h"
-#include "../kram/sosdate.h"
 #include "spooler.h"
+
+#include "../kram/sosdate.h"
 
 namespace sos {
 namespace spooler {

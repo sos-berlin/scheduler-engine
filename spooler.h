@@ -1,4 +1,4 @@
-// $Id: spooler.h,v 1.28 2001/01/15 14:26:28 jz Exp $
+// $Id: spooler.h,v 1.29 2001/01/16 06:23:17 jz Exp $
 
 #ifndef __SPOOLER_H
 #define __SPOOLER_H
@@ -102,9 +102,10 @@ struct Mutex
     Mutex&                      operator =                  ( const T& t )          { Guard g = &_semaphore; _value = t; return *this; }
                                 operator T                  ()                      { return _value; }  // Nicht gesichert
     T                           read_and_reset              ()                      { Guard g = &_semaphore; T v = _value; _value = T(); return v; }
+    T                           read_and_set                ( const T& t )          { Guard g = &_semaphore; T v = _value; _value = t; return v; }
 
     sos::Thread_semaphore      _semaphore;
-    T                          _value;
+    volatile T                 _value;
 };
 
 //----------------------------------------------------------------------------------------------Log
@@ -344,6 +345,7 @@ struct Run_time
 
     int                        _begin_time_of_day;          // Sekunden seit Mitternacht
     int                        _end_time_of_day;            // Sekunden seit Mitternacht
+    bool                       _let_run;                    // Task zuende laufen lassen, nicht bei _next_end_time beenden
 
     set<time_t>                _date_set;
     Weekday_set                _weekday_set;
@@ -371,9 +373,9 @@ struct Job : Sos_self_deleting
     Run_time                   _run_time;
     bool                       _stop_at_end_of_duration;
     bool                       _continual;
-    bool                       _stop_after_error;
+  //bool                       _stop_after_error;
   //bool                       _rerun;
-    bool                       _start_after_spooler;
+  //bool                       _start_after_spooler;
     int                        _priority;
 };
 
@@ -452,7 +454,7 @@ struct Task : Sos_self_deleting
     double                     _cpu_time;
     int                        _step_count;
 
-    bool                       _run_until_end;              // Nach Kommando sc_start: Task zuende laufen lassen, nicht bei _next_end_time beenden
+    bool                       _let_run;                    // Task zuende laufen lassen, nicht bei _next_end_time beenden
     Mutex<State>               _state;
     Mutex<State_cmd>           _state_cmd;
 
@@ -625,13 +627,13 @@ struct Spooler
     {
         sc_none,
         sc_stop,                // s_running | s_paused -> s_stopped
-        sc_start,               // s_paused -> s_running
+      //sc_start,               // s_paused -> s_running
         sc_terminate,           // s_running | s_paused -> s_stopped, exit()
         sc_terminate_and_restart,
         sc_load_config,         
         sc_reload,
         sc_pause,               // s_running -> s_paused
-        sc_continue,            // s_suspended -> s_running
+        sc_continue,            // s_paused -> s_running
         sc__max
     };
 
@@ -657,11 +659,11 @@ struct Spooler
 
     void                        cmd_reload                  ();
     void                        cmd_pause                   ()                                  { _state_cmd = sc_pause; cmd_wake(); }
-    void                        cmd_continue                ()                                  { if( _state == s_paused )  _state = s_running; cmd_wake(); }
+    void                        cmd_continue                ()                                  { if( _state == s_paused )  _state_cmd = sc_continue; cmd_wake(); }
     void                        cmd_stop                    ();
     void                        cmd_terminate               ();
     void                        cmd_terminate_and_restart   ();
-    void                        cmd_load_config             ( const xml::Element_ptr& config )  { _config_element=config; _state_cmd=sc_load_config; cmd_wake(); }
+    void                        cmd_load_config             ( const xml::Element_ptr& config )  { _config_document=config->ownerDocument; _config_element=config; _state_cmd=sc_load_config; cmd_wake(); }
     void                        cmd_wake                    ();
 
     void                        step                        ();
@@ -683,12 +685,17 @@ struct Spooler
     string                     _log_filename;
 
 
-    Thread_semaphore           _semaphore;
-    volatile bool              _sleeping;                   // Besser: sleep mit Signal unterbrechen
     State_changed_handler      _state_changed_handler;
 
+    Thread_semaphore           _semaphore;
+
+    Thread_semaphore           _sleep_semaphore;
+    bool                       _sleeping;
+    bool                       _wake;
     Wait_handles               _wait_handles;               // Vor _task_list!
     Handle                     _command_arrived_event;
+    
+    xml::Document_ptr          _config_document;            // Das Dokument zu _config_element
     xml::Element_ptr           _config_element;             // Für cmd_load_config()
 
     Log                        _log;

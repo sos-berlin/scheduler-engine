@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 
-<!-- $Id: spooler.xml,v 1.5 2001/01/15 14:26:29 jz Exp $   (C) 2000 SOS GmbH Berlin -->
+<!-- $Id: spooler.xml,v 1.6 2001/01/16 06:23:17 jz Exp $   (C) 2000 SOS GmbH Berlin -->
 
 <!DOCTYPE spooler SYSTEM "spooler.dtd">
 
@@ -262,7 +262,7 @@ sub spooler_init()
 
 sub spooler_open()
 {
-    $object_set_class->{spooler_low_level} = $spooler_task->object_set->{low_level};
+    $object_set_class->{spooler_low_level}  = $spooler_task->object_set->{low_level};
     $object_set_class->{spooler_high_level} = $spooler_task->object_set->{high_level};
     $object_set_class->spooler_open();
     return; 
@@ -367,7 +367,7 @@ end function
 
             ]]></script>
 
-            <run_time end="07:00" retry_period="0,01"/>  <!-- Komma wegen altem Fehler in hostware as_double() -->
+            <run_time end="07:00" retry_period="3"/>  <!-- Komma wegen altem Fehler in hostware as_double() -->
 
         </job>
 

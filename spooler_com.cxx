@@ -1,4 +1,12 @@
-// $Id: spooler_com.cxx,v 1.1 2001/01/13 18:43:59 jz Exp $
+// $Id: spooler_com.cxx,v 1.2 2001/01/16 06:23:17 jz Exp $
+/*
+    Hier sind implementiert
+
+    Com_log                     COM-Hülle für Task_log
+    Com_object_set              COM-Hülle für Object_set
+    Com_task                    COM-Hülle für Task
+    Com_spooler                 COM-Hülle für Spooler
+*/
 
 
 #include "../kram/sos.h"

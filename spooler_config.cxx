@@ -1,12 +1,14 @@
-// $Id: spooler_xml.cxx,v 1.17 2001/01/13 22:34:56 jz Exp $
+// $Id: spooler_config.cxx,v 1.1 2001/01/16 06:23:17 jz Exp $
 
 //#include <precomp.h>
 
+/*
+    Hier sind die Methoden verschiedenener Klassen implementiert, die die Konfiguration laden.
+*/
 
 #include "../kram/sos.h"
-#include "../kram/olestd.h"
-#include "../file/anyfile.h"
 #include "spooler.h"
+
 
 namespace sos {
 namespace spooler {
@@ -170,6 +172,9 @@ Run_time::Run_time( const xml::Element_ptr& element )
     dt.set_time( as_string( element->getAttribute( "end" ) ) );
     _end_time_of_day = dt.hour() * 60*60 + dt.minute() * 60 + dt.second();
 
+    _let_run = as_bool( element->getAttribute( "let_run" ) );
+
+
     bool             a_day_set = false;
     xml::Element_ptr e = element->firstChild;
     while( e )
@@ -220,7 +225,8 @@ Job::Job( const xml::Element_ptr& element )
     _zero_(this+1),
     _name           ( as_string( element->getAttribute( "name" ) ) ),
     _run_time       ( default_single_element( element, "run_time" ) ),
-  //_rerun          ( as_bool( as_string( element->getAttribute( "rerun" ) ) ) ),
+  //_rerun          ( as_bool( element->getAttribute( "rerun" ) ) ),
+  //_stop_after_error( as_bool( element->getAttribute( "stop_after_errorn ) ) ),
     _priority       ( as_int( element->getAttribute( "priority" ) ) )
 {
     string text;
@@ -293,7 +299,7 @@ void Spooler::load_config( const xml::Element_ptr& config_element )
                                    _udp_port      = as_int   ( config_element->getAttribute( "udp_port"      ) );
                                    _priority_max  = as_int   ( config_element->getAttribute( "priority_max"  ) );
     if( empty( _log_directory ) )  _log_directory = as_string( config_element->getAttribute( "log_dir"       ) );
-    if( empty( _spooler_param ) )  _spooler_param = as_string( config_element->getAttribute( "spooler_param" ) );
+    if( empty( _spooler_param ) )  _spooler_param = as_string( config_element->getAttribute( "param" ) );
 
 
     xml::Element_ptr e = config_element->firstChild;
@@ -318,51 +324,6 @@ void Spooler::load_config( const xml::Element_ptr& config_element )
     }
 }
 
-//--------------------------------------------------------------------------------Spooler::load_xml
-/*
-void Spooler::load_xml()
-{
-    try 
-    {
-        xml::Document_ptr document ( __uuidof(xml::DOMDocument30), NULL );
-
-        int ok = document->loadXML( as_dom_string( file_as_string( _config_filename ) ) );
-        if( !ok ) 
-        {
-            xml::IXMLDOMParseErrorPtr error = document->GetparseError();
-
-            string text = w_as_string( error->reason );
-            if( text[ text.length()-1 ] == '\n' )  text = as_string( text.c_str(), text.length() - 1 );
-            if( text[ text.length()-1 ] == '\r' )  text = as_string( text.c_str(), text.length() - 1 );
-
-            text += ", code="   + as_hex_string( error->errorCode );
-            text += ", line="   + as_string( error->line );
-            text += ", column=" + as_string( error->linepos );
-
-            throw_xc( "XML-ERROR", text );
-        }
-
-        xml::Element_ptr spooler_element= document->documentElement;
-        if( spooler_element->tagName != "spooler" )  throw_xc( "SPOOLER-113", as_string( spooler_element->tagName ) );
-
-        xml::Element_ptr config_element = spooler_element->firstChild;
-        while( config_element )
-        {
-            if( config_element->tagName != "config" )  throw_xc( "SPOOLER-113", as_string( config_element->tagName ) );
-
-            string spooler_id = as_string( config_element->getAttribute( "spooler_id" ) );
-            if( spooler_id.empty()  ||  spooler_id == _spooler_id )
-            {
-                load_config( config_element );
-                break;
-            }
-
-            config_element = config_element->nextSibling;
-        }
-    }
-    catch( const _com_error& com_error )  { throw_com_error( com_error ); }
-}
-*/
 //-------------------------------------------------------------------------------------------------
 
 } //namespace spooler

@@ -1,10 +1,17 @@
-// $Id: spooler_wait.cxx,v 1.2 2001/01/14 10:26:55 jz Exp $
+// $Id: spooler_wait.cxx,v 1.3 2001/01/16 06:23:18 jz Exp $
+/*
+    Hier sind implementiert
+
+    Directory_watcher
+    Wait_handles
+*/
 
 
 #include "../kram/sos.h"
+#include "spooler.h"
+
 #include "../kram/sleep.h"
 #include "../kram/log.h"
-#include "spooler.h"
 
 
 namespace sos {

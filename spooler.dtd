@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- $Id: spooler.dtd,v 1.1 2001/01/13 22:35:16 jz Exp $   Joacim Zschimmer,  (C) 2000 SOS GmbH Berlin  -->
+<!-- $Id: spooler.dtd,v 1.2 2001/01/16 06:23:17 jz Exp $   Joacim Zschimmer,  (C) 2000 SOS GmbH Berlin  -->
 
 
 <!ELEMENT spooler               ( config+ | command )>
@@ -14,7 +14,7 @@
 <!ATTLIST config                tcp_port            CDATA '4444'>       <!-- Für TCP-Kommandoschnittstelle -->
 <!ATTLIST config                udp_port            CDATA '4444'>       <!-- Für UDP-Kommandoschnittstelle -->
 <!ATTLIST config                priority_max        CDATA '1000'>       <!-- Höchste Priorität. Gibt absoluten Vorrang -->
-<!ATTLIST config                spooler_param       CDATA ''>           <!-- Wird der Eigenschaft spooler_param jedem Skript übergeben -->
+<!ATTLIST config                param               CDATA ''>           <!-- Wird der Eigenschaft spooler.param jedem Skript übergeben -->
 
 
 <!ELEMENT object_set_classes    ( object_set_class+ )>
@@ -43,8 +43,8 @@
 <!ATTLIST job                   output_level        CDATA #IMPLIED>     <!-- Stufennummer. Auf diese Stufe werden die Objekte der Objektemenge gesetzt -->
 <!ATTLIST job                   spooler_id          CDATA ''>           <!-- "": Job läuft auf jedem Spooler, sonst nur Spooler mit derselben Spooler-Id -->
 <!--ATTLIST job                   rerun               (yes|no) 'no' >     <! Laufenden Job bei Abbruch und Neustart des Spoolers erneut starten -->
-<!ATTLIST job                   stop_after_error    (yes|no) 'yes'>     <!-- Nach einem Fehler diesen Job nie wieder starten -->
-<!ATTLIST job                   start_after_spooler (yes|no) 'no' >     <!-- Den Job auch nach verspätetem Start des Spoolers starten -->
+<!--ATTLIST job                   stop_after_error    (yes|no) 'yes'>     <! Nach einem Fehler diesen Job nie wieder starten -->
+<!--ATTLIST job                   start_after_spooler (yes|no) 'no' >     <! Den Job auch nach verspätetem Start des Spoolers starten -->
 
 
 <!ELEMENT object_set            ( levels? )>
@@ -60,6 +60,7 @@
                                                                              um zu prüfen, ob die Objektemenge nicht leer ist -->
 <!ATTLIST run_time              begin               CDATA '00:00:00'>   <!-- HH:MM:SS, Tageszeit, ab der der Job laufen soll -->
 <!ATTLIST run_time              end                 CDATA '24:00:00'>   <!-- HH:MM:SS, Tageszeit, bis zu der der Job laufen soll -->
+<!ATTLIST run_time              let_run             (yes|no) 'no'>      <!-- Task zuende laufen lassen, auch wenn Endezeit überschritten ist -->
 
 <!ELEMENT date                  EMPTY>                                  <!-- Ein bestimmter Tag, an dem der Job laufen soll -->
 <!ATTLIST date                  date                CDATA #IMPLIED>     <!-- yyyy-mm-dd -->
