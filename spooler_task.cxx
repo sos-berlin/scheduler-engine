@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.235 2004/01/30 13:37:49 jz Exp $
+// $Id: spooler_task.cxx,v 1.236 2004/02/02 09:27:52 jz Exp $
 /*
     Hier sind implementiert
 
@@ -1289,7 +1289,7 @@ void Task::set_mail_defaults()
         body += errmsg + "\n\n";
     }
 
-  //_log.set_mail_body( body + "Das Jobprotokoll liegt dieser Nachricht bei.", is_error );
+    _log.set_mail_body( body + "Das Jobprotokoll liegt dieser Nachricht bei.", is_error );
 }
 
 //---------------------------------------------------------------------------------Task::clear_mail
