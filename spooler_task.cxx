@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.191 2003/09/21 07:19:08 jz Exp $
+// $Id: spooler_task.cxx,v 1.192 2003/09/21 18:11:30 jz Exp $
 /*
     Hier sind implementiert
 
@@ -1511,7 +1511,7 @@ bool Process_event::wait( double seconds )
             //int pid = _pid; 
             _pid = 0; 
             //throw_errno( errno, "waitpid", as_string(pid).c_str() ); 
-            set_signal();
+            set_signaled();
             return true;
         }
 
@@ -1522,7 +1522,7 @@ bool Process_event::wait( double seconds )
                 _process_exit_code = WEXITSTATUS( status );
               //LOG( "exit_code=" << _process_exit_code << "\n" );
                 _pid = 0;
-                set_signal();
+                set_signaled();
                 return true;
             }
 
@@ -1531,7 +1531,7 @@ bool Process_event::wait( double seconds )
                 _process_signaled = WTERMSIG( status );
               //LOG( "signal=" << _process_exit_code << "\n" );
                 _pid = 0;
-                set_signal();
+                set_signaled();
                 return true;
             }
         }
