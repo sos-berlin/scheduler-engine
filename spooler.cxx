@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.352 2004/08/30 10:13:52 jz Exp $
+// $Id: spooler.cxx,v 1.353 2004/09/01 19:18:12 jz Exp $
 // §851: Weitere Log-Ausgaben zum Scheduler-Start eingebaut
 // §1479
 
@@ -2531,8 +2531,6 @@ int spooler_main( int argc, char** argv, const string& parameter_line )
 
         for( Sos_option_iterator opt ( argc, argv, parameter_line ); !opt.end(); opt.next() )
         {
-            if( opt.with_value( "sos.ini"          ) )  ;  //schon in sos_main0() geschehen.  set_sos_ini_filename( opt.value() );
-            else
             //if( opt.flag      ( "renew-spooler"    ) )  renew_spooler = program_filename();
           //else
             if( opt.flag      ( "show-dtd"         ) )  { fprintf( stdout, "%s", spooler::dtd_string );  return 0; }
@@ -2572,6 +2570,8 @@ int spooler_main( int argc, char** argv, const string& parameter_line )
                 if( opt.with_value( "need-service"     ) )  dependencies += opt.value(), dependencies += '\0';
                 else
                 {
+                    if( opt.with_value( "sos.ini"          ) )  ;  //schon in sos_main0() geschehen.  set_sos_ini_filename( opt.value() );
+                    else
                     if( opt.with_value( "id"               ) )  id = opt.value();
                     else
                     if( opt.with_value( "ini"              ) )  factory_ini = opt.value(), spooler::error_settings.read( factory_ini );
