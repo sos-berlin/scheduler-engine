@@ -297,6 +297,9 @@ cd &quot;$(IntDir)&quot; &amp;&amp; jar cfm &quot;$(TargetDir)sos.spooler.jar&qu
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\spooler_http.cxx">
+			</File>
+			<File
 				RelativePath=".\spooler_job.cxx">
 			</File>
 			<File
@@ -566,6 +569,9 @@ cd &quot;$(IntDir)&quot; &amp;&amp; jar cfm &quot;$(TargetDir)sos.spooler.jar&qu
 			</File>
 			<File
 				RelativePath="spooler_history.h">
+			</File>
+			<File
+				RelativePath=".\spooler_http.h">
 			</File>
 			<File
 				RelativePath=".\spooler_job.h">

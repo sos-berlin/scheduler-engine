@@ -1,4 +1,4 @@
-// $Id: spooler_command.cxx,v 1.116 2004/07/16 22:05:44 jz Exp $
+// $Id: spooler_command.cxx,v 1.117 2004/07/18 15:38:02 jz Exp $
 /*
     Hier ist implementiert
 
@@ -672,135 +672,18 @@ string xml_as_string( const xml::Document_ptr& document, bool indent )
     catch( const _com_error& ) { return "<?xml version=\"1.0\"?><ERROR/>"; }
 }
 
-//---------------------------------------------------------------------------------------Http_parser
-
-struct Http_parser
-{
-                                Http_parser                 ( const char* str )                     : _next_char( str ) {}
-
-    void                        eat_spaces                  ();
-    void                        eat                         ( const char* str );
-    string                      eat_word                    ();
-    string                      eat_until                   ( const char* character_set );
-    string                      eat_path                    ();
-    void                        eat_line_end                ();
-    char                        next_char                   ()                                      { return *_next_char; }
-
-
-    const char*                _next_char;
-};
-
-//--------------------------------------------------------------------------Http_parser::eat_spaces
-
-void Http_parser::eat_spaces()
-{ 
-    while( *_next_char == ' ' )  _next_char++; 
-}
-
-//---------------------------------------------------------------------------------Http_parser::eat
-
-void Http_parser::eat( const char* what )
-{
-    const char* w = what;
-    while( *w  &&  *_next_char == *w )  w++, _next_char++;
-    if( *w != '\0' )  
-    {
-        if( what[0] == '\n' )  throw_xc( "SCHEDULER-213", "Zeilenende" );
-                         else  throw_xc( "SCHEDULER-213", what );
-    }
-
-    eat_spaces();
-}
-
-//------------------------------------------------------------------------Http_parser::eat_line_end
-
-void Http_parser::eat_line_end()
-{
-    eat_spaces();
-
-    if( *_next_char == '\r' )  _next_char++;
-    eat( "\n" );
-}
-
-//----------------------------------------------------------------------------Http_parser::eat_word
-
-string Http_parser::eat_word()
-{
-    string word;
-    while( *_next_char > ' ' )  word += *_next_char++;
-
-    eat_spaces();
-    return word;
-}
-
-//---------------------------------------------------------------------------Http_parser::eat_until
-
-string Http_parser::eat_until( const char* character_set )
-{
-    string word;
-    while( *_next_char >= ' '  &&  strchr( character_set, *_next_char ) == NULL )  word += *_next_char++;
-
-    eat_spaces();
-    return rtrim( word );
-}
-
-//----------------------------------------------------------------------------Http_parser::eat_path
-
-string Http_parser::eat_path()
-{
-    eat_spaces();
-
-    string path;
-
-    while( (Byte)_next_char[0] > (Byte)' ' )
-    {
-        if( _next_char[0] == '%'  &&  _next_char[1] != '\0'  &&  _next_char[2] != '\0' )
-        {
-            path += (char)hex_as_int32( string( _next_char+1, 2 ) );
-            _next_char += 3;
-        }
-        else
-            path += *_next_char++;
-    }
-
-    eat_spaces();
-    return path;
-}
-
 //-------------------------------------------------------------------Command_processor::execute_http
 
-string Command_processor::execute_http( const string& http_request )
+string Command_processor::execute_http( const Http_request& http_request )
 {
-    string              http_cmd;
-    string              response_body;
-    string              response_content_type;
-    string              path;
-    string              protocol;
-    map<string,string>  headers;
+    string  path                    = http_request._path;
+    string  response_body;
+    string  response_content_type;
 
     try
     {
-        Http_parser parser ( http_request.c_str() );
 
-        http_cmd = parser.eat_word();
-        path     = parser.eat_path();
-        protocol = parser.eat_word();
-                   parser.eat_line_end();
-
-
-        while( parser.next_char() > ' ' )
-        {
-            string name = parser.eat_until( ":" );
-                          parser.eat( ":" );
-            string value = parser.eat_until( "" );
-            headers[ lcase( name ) ] = value;
-            parser.eat_line_end();
-        }
-
-        parser.eat_line_end();
-
-
-        if( http_cmd == "GET" )
+        if( http_request._http_cmd == "GET" )
         {
             if( path == "/" )  path = "index.html";
 
@@ -833,9 +716,9 @@ string Command_processor::execute_http( const string& http_request )
             }
         }
         else
-        if( http_cmd == "POST" )
+        if( http_request._http_cmd == "POST" )
         {
-            response_body = execute( parser._next_char, Time::now(), true );
+            response_body = execute( http_request._body, Time::now(), true );
             response_content_type = "text/xml";
         }
 
@@ -849,7 +732,7 @@ string Command_processor::execute_http( const string& http_request )
     }
     catch( const exception& x )
     {
-        _spooler->log().error( "Fehler beim HTTP-Aufruf " + http_cmd + " " + path + ": " + x.what() );
+        _spooler->log().error( "Fehler beim HTTP-Aufruf " + http_request._http_cmd + " " + path + ": " + x.what() );
         response_body = "<html><head><title>Scheduler</title></head><body>Die Seite kann nicht bereitgestellt werden. Siehe Scheduler-Protokoll</body></html>";
     }
 

@@ -1,4 +1,4 @@
-<!-- $Id: jobs_frame.html,v 1.1 2004/07/16 22:05:44 jz Exp $ -->
+<!-- $Id: jobs_frame.html,v 1.2 2004/07/18 15:38:02 jz Exp $ -->
 <html>
 
 <head>
@@ -28,17 +28,34 @@
 
 <body>
 
+<p>
+    <input id="show_tasks_checkbox" type="checkbox" onclick="show_tasks_checkbox__onclick()" checked="true" NAME="show_tasks_checkbox"/>
+    <label for="show_tasks_checkbox">Show running tasks</label>
+    <br/>
+    <input id="update_periodically_checkbox" type="checkbox" onclick="update_periodically_checkbox__onclick()" NAME="update_periodically_checkbox"/>
+    <label for="update_periodically_checkbox">Update periodically</label>
+    &#160; &#160;
+    <input id="update_button" type="button" value="Update" onclick="update__onclick()" NAME="update_button"/>
+    
+</p>
+
+<hr size="1"/>
+
 <xml id="stylesheet">
     <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0">
         <xsl:template match="/spooler/answer">
-            <b>Scheduler state at <xsl:value-of select="state/@time"/></b>
+            <p>
+                <xsl:value-of select="state/@time"/>
+            </p>
             <p>&#160;</p>
+
             <table>
-                <col valign="top" align="left"  style="padding-right: 2ex" />
-                <col valign="top" align="left"  style="padding-right: 2ex"/>  
-                <col valign="top" align="right" style="padding-right: 2ex"/>
-                <col valign="top" align="left"  style="padding-right: 2ex"/>
-                <col valign="top" align="left"  style="padding-right: 2ex"/>
+                <col valign="top" align="left"  width="150" style="padding-right: 2ex" />
+                <col valign="top" align="left"  width="250" style="padding-right: 2ex"/>  
+                <col valign="top" align="right" width=" 70" style="padding-right: 2ex"/>
+                <col valign="top" align="left"  width="300" style="padding-right: 2ex"/>
+                <col valign="top" align="left"  width="100" style="padding-right: 2ex"/>
+                
                 <thead>
                     <tr>
                         <th>Job</th>
@@ -52,6 +69,7 @@
                         </td>
                     </tr>
                 </thead>
+                
                 <tbody>
                     <xsl:for-each select="state/jobs/job">
                         <tr>
@@ -59,6 +77,10 @@
                                 <b><xsl:value-of select="@job"/></b>
                                 &#160;
                                 <xsl:value-of select="@title"/>
+                                <xsl:if test="@state_text!=''">
+                                    <xsl:text> &#160; - </xsl:text>
+                                    <i><xsl:value-of select="@state_text"/></i>
+                                </xsl:if>
                             </td>
                         </tr>
                         <tr>
@@ -66,12 +88,8 @@
                             </td>
                             <td>
                                 <xsl:value-of select="@state"/>
-                                <xsl:if test="@state_text!=''">
-                                    <xsl:text> &#160; </xsl:text>
-                                    <xsl:value-of select="@state_text"/>
-                                </xsl:if>
                                 <xsl:if test="@waiting_for_process='yes'">
-                                    <br/>(waiting for process)
+                                    <xsl:text> </xsl:text>(waiting for process)
                                 </xsl:if>
                             </td>
                             <td align="right">
@@ -89,7 +107,7 @@
                             </td>
                         </tr>
 
-                        <xsl:if test="tasks/task">
+                        <xsl:if test="/spooler/@my_show_tasks='yes' and tasks/task">
                             <tr>
                                 <td>
                                 </td>
@@ -112,71 +130,78 @@
         <xsl:template match="tasks">
             <xsl:for-each select="task">
                 <xsl:element name="tr">
-                    <xsl:attribute name="style"      >cursor: hand</xsl:attribute>
-                    <xsl:attribute name="onmouseover">this.style.backgroundColor="yellow"</xsl:attribute>
-                    <xsl:attribute name="onmouseout" >this.style.backgroundColor="window"</xsl:attribute>
-                    <xsl:attribute name="onclick">show_task_details( '<xsl:value-of select="../../@job"/>', <xsl:value-of select="@id"/> )</xsl:attribute>
-                    
-                    <td>
-                        &#160; &#160;
-                        <span>
-                            Task <xsl:value-of select="@id"/>
-                        </span>
-                        <xsl:if test="@name!=''">
-                            &#160; <xsl:value-of select="@name"/>
-                        </xsl:if>
-                    </td>
-                    <td>
-                        <xsl:value-of select="@state"/>
-                    </td>
-                    <td>
-                        <xsl:value-of select="@steps"/>
-                    </td>
-                    <td>
-                        <xsl:if test="order">
-                            <xsl:value-of select="order/@id"/>
-                            <xsl:if test="order/@title != ''">
-                                &#160;
-                                <xsl:value-of select="order/@title"/>
-                            </xsl:if>
-                        </xsl:if>
-                    </td>
-<!--                            
-                    <td align="right">
-                        <xsl:choose>
-                            <xsl:when test="@running_since">
-                                started <xsl:value-of select="@start_at"/>
-                            </xsl:when>
-                            <xsl:when test="@start_at">
-                                start at <xsl:value-of select="@start_at"/>
-                            </xsl:when>
-                            <xsl:when test="@enqueued">
-                                enqueued <xsl:value-of select="@enqueued"/>
-                            </xsl:when>
-                            </xsl:choose>
-                    </td>
-                    <td>
-                        <xsl:value-of select="@cause"/>
-                    </td>
-                    <td>
-                        <xsl:value-of select="@idle_since"/>
-                    </td>
-                    <td>
-                        <xsl:value-of select="@running_since"/>
-                    </td>
-                    <td>
-                        <xsl:value-of select="@enqueued"/>
-                    </td>
-                    <td>
-                        <xsl:value-of select="@in_process_since"/>
-                    </td>
-                    <td>
-                        <xsl:value-of select="@calling"/>
-                    </td>
-                    <td>
-                        <xsl:value-of select="@pid"/>
-                    </td>
--->                            
+                    <xsl:choose>
+                        <xsl:when test=" not( @id ) ">
+                            <td>&#160;</td>
+                        </xsl:when>
+                        <xsl:otherwise>
+                            <xsl:attribute name="style"      >cursor: hand</xsl:attribute>
+                            <xsl:attribute name="onmouseover">this.style.backgroundColor="yellow"</xsl:attribute>
+                            <xsl:attribute name="onmouseout" >this.style.backgroundColor="window"</xsl:attribute>
+                            <xsl:attribute name="onclick">show_task_details( '<xsl:value-of select="../../@job"/>', <xsl:value-of select="@id"/> )</xsl:attribute>
+                            
+                            <td>
+                                &#160; &#160;
+                                <span>
+                                    Task <xsl:value-of select="@id"/>
+                                </span>
+                                <xsl:if test="@name!=''">
+                                    &#160; <xsl:value-of select="@name"/>
+                                </xsl:if>
+                            </td>
+                            <td>
+                                <xsl:value-of select="@state"/>
+                            </td>
+                            <td>
+                                <xsl:value-of select="@steps"/>
+                            </td>
+                            <td>
+                                <xsl:if test="order">
+                                    <xsl:value-of select="order/@id"/>
+                                    <xsl:if test="order/@title != ''">
+                                        &#160;
+                                        <i><xsl:value-of select="order/@title"/></i>
+                                    </xsl:if>
+                                </xsl:if>
+                            </td>
+        <!--                            
+                            <td align="right">
+                                <xsl:choose>
+                                    <xsl:when test="@running_since">
+                                        started <xsl:value-of select="@start_at"/>
+                                    </xsl:when>
+                                    <xsl:when test="@start_at">
+                                        start at <xsl:value-of select="@start_at"/>
+                                    </xsl:when>
+                                    <xsl:when test="@enqueued">
+                                        enqueued <xsl:value-of select="@enqueued"/>
+                                    </xsl:when>
+                                    </xsl:choose>
+                            </td>
+                            <td>
+                                <xsl:value-of select="@cause"/>
+                            </td>
+                            <td>
+                                <xsl:value-of select="@idle_since"/>
+                            </td>
+                            <td>
+                                <xsl:value-of select="@running_since"/>
+                            </td>
+                            <td>
+                                <xsl:value-of select="@enqueued"/>
+                            </td>
+                            <td>
+                                <xsl:value-of select="@in_process_since"/>
+                            </td>
+                            <td>
+                                <xsl:value-of select="@calling"/>
+                            </td>
+                            <td>
+                                <xsl:value-of select="@pid"/>
+                            </td>
+        -->                            
+                        </xsl:otherwise>
+                    </xsl:choose>
                 </xsl:element>
             </xsl:for-each>
         </xsl:template>
@@ -191,15 +216,17 @@
 <script defer="true" language="javascript"><!--
 //-------------------------------------------------------------------------------------------------
 
-var stylesheet;
-var response;
+var _stylesheet;
+var _response;
+var _timer;
+//var _update_periodically = false;
 
 //-------------------------------------------------------------------------------------------onload
 
 function do_onload()
 {
-    stylesheet = document.all.stylesheet.XMLDocument;
-    if( stylesheet.parseError.errorCode )  throw new Error( "Fehler im Stylesheet:\n" + stylesheet.parseError.reason );
+    _stylesheet = document.all.stylesheet.XMLDocument;
+    if( _stylesheet.parseError.errorCode )  throw new Error( "Fehler im Stylesheet:\n" + _stylesheet.parseError.reason );
 
     
     document.all.stylesheet.outerHTML = "<span id='stylesheet'></span>";
@@ -207,16 +234,96 @@ function do_onload()
     scheduler = new Scheduler();
     //scheduler.execute_and_fill_html(  "<show_state what='all'/>" );
 
-    response = scheduler.execute( "<show_state what='all'/>" );
-    document.all.stylesheet.innerHTML = response.transformNode( stylesheet );;
+    repeat_update( document.all.update_periodically_checkbox.checked, true );
+    
+    //document.all.update_periodically_checkbox.checked = _update_periodically;
+}
+
+//------------------------------------------------------------update_periodically_checkbox__onclick
+
+function update_periodically_checkbox__onclick()
+{
+    //_update_periodically = document.all.update_periodically_checkbox.checked;
+    
+    repeat_update( document.all.update_periodically_checkbox.checked, document.all.update_periodically_checkbox.checked );
+}
+
+//---------------------------------------------------------------------show_tasks_checkbox__onclick
+
+function show_tasks_checkbox__onclick()
+{
+    update();
+}
+
+//----------------------------------------------------------------------------------update__onclick
+
+function update__onclick()
+{
+    update();
+}
+
+//------------------------------------------------------------------------------------repeat_update
+
+function repeat_update( repeat, call_update )
+{
+    if( _timer != undefined )  window.clearTimeout( _timer ),  _timer = undefined;
+    
+    if( call_update )  update();
+    
+    if( repeat )  _timer = window.setTimeout( "repeat_update(true,true)", 1000, "JavaScript" );
+}
+
+//-------------------------------------------------------------------------------------------update
+
+function update()
+{
+    _response = scheduler.execute( "<show_state what='all'/>" );
+
+    modify_response( _response );
+    
+    document.all.stylesheet.innerHTML = _response.transformNode( _stylesheet );;
+
+    if( window.parent.details_frame.document.readyState == "complete" )
+    {
+        window.parent.details_frame.update();
+    }
+}
+
+//----------------------------------------------------------------------------------modify_response
+
+function modify_response( response )
+{
+    // Antwort manipulieren: <tasks> mit <task> auffüllen, bis <job tasks=".."> erreicht ist.
+
+    var job_elements = response.selectNodes( ".//job" );
+    for( var j = 0; j < job_elements.length; j++ )
+    {
+        var job_element = job_elements[j];
+        
+        var tasks_element = job_element.selectSingleNode( "tasks" );
+        if( tasks_element )
+        {
+            var task_elements = tasks_element.selectNodes( "task" );
+            var n = 1*job_element.getAttribute( "tasks" ) - task_elements.length;
+            for( var t = 0; t < n; t++ )
+            {
+                tasks_element.appendChild( tasks_element.ownerDocument.createElement( "task" ) );
+            }
+        } 
+    }
+    
+    
+    // my_show_task einfügen
+    
+    response.selectSingleNode( "spooler" ).setAttribute( "my_show_tasks", document.all.show_tasks_checkbox.checked? "yes" : "no" );
 }
 
 //--------------------------------------------------------------------------------show_task_details
 
 function show_task_details( job_name, task_id )
 {
-    var job_element  = response.selectSingleNode( ".//job[@job='" + job_name + "']" );
-    var task_element = response.selectSingleNode( ".//task[@id=" + task_id + "]" );
+    var job_element  = _response.selectSingleNode( ".//job[@job='" + job_name + "']" );
+    var task_element = _response.selectSingleNode( ".//task[@id=" + task_id + "]" );
 
     window.parent.details_frame.show_task_details( job_element, task_element );
 }

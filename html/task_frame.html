@@ -1,4 +1,4 @@
-<!-- $Id: task_frame.html,v 1.1 2004/07/16 22:05:44 jz Exp $ -->
+<!-- $Id: task_frame.html,v 1.2 2004/07/18 15:38:02 jz Exp $ -->
 <html>
 
 <head>
@@ -149,26 +149,18 @@ function show_task_details( job_element, task_element )
     
     _task_id = task_element.getAttribute( "id" );
     document.all.stylesheet.innerHTML = task_element.transformNode( _stylesheet );
-    
-    repeat_update();
-}
-
-//------------------------------------------------------------------------------------repeat_update
-
-function repeat_update( call_update )
-{
-    if( _timer != undefined )  window.clearTimeout( _timer ),  _timer = undefined;
-    _timer = window.setTimeout( "repeat_update(true)", 1000, "JavaScript" );
-    if( call_update )  update();
 }
 
 //-------------------------------------------------------------------------------------------update
 
 function update()
 {
-    var response = window.parent.jobs_frame.scheduler.execute( "<show_task id='" + _task_id + "' what='all'/>" );
-    var task_element = response.selectSingleNode( "spooler/answer/task" );
-    document.all.stylesheet.innerHTML = task_element? task_element.transformNode( _stylesheet ) : "";
+    if( _task_id != undefined )
+    {
+        var response = window.parent.jobs_frame.scheduler.execute( "<show_task id='" + _task_id + "' what='all'/>" );
+        var task_element = response.selectSingleNode( "spooler/answer/task" );
+        document.all.stylesheet.innerHTML = task_element? task_element.transformNode( _stylesheet ) : "";
+    }
 }
 
 //-------------------------------------------------------------------------------------------------

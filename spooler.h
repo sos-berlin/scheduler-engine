@@ -1,4 +1,4 @@
-// $Id: spooler.h,v 1.181 2004/07/15 09:20:25 jz Exp $
+// $Id: spooler.h,v 1.182 2004/07/18 15:38:02 jz Exp $
 // §1172
 
 #ifndef __SPOOLER_H
@@ -86,6 +86,7 @@ namespace sos {
 #include "spooler_mail.h"
 #include "spooler_log.h"
 #include "spooler_wait.h"
+#include "spooler_http.h"
 #include "spooler_communication.h"
 #include "spooler_security.h"
 #include "spooler_command.h"

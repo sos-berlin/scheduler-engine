@@ -1,4 +1,4 @@
-// $Id: spooler_communication.cxx,v 1.84 2004/07/15 17:11:33 jz Exp $
+// $Id: spooler_communication.cxx,v 1.85 2004/07/18 15:38:02 jz Exp $
 /*
     Hier sind implementiert
 
@@ -462,22 +462,33 @@ bool Communication::Channel::do_recv()
          || len == 2  &&  buffer[0] == '\r'  &&  buffer[1] == '\n' )  { _spooler->signal( "do_something!" );  _spooler->_last_time_enter_pressed = Time::now().as_time_t(); return true; }
 
         _receive_at_start = false;
-        while( p < buffer+len  &&  isspace( (Byte)*p ) )  p++;      // Blanks am Anfang nicht beachten
-        len -= p - buffer;
+
+        if( string_begins_with( buffer, "GET /" )  ||  string_begins_with( buffer, "POST /" ) )     // Muss vollständig im ersten Datenblock enthalten sein!
+        {
+            _is_http = true;
+            _http_request = Z_NEW( Http_request );
+            _http_parser  = Z_NEW( Http_parser( _http_request ) );
+        }
+        else
+        {
+            while( p < buffer+len  &&  isspace( (Byte)*p ) )  p++;      // Blanks am Anfang nicht beachten
+            len -= p - buffer;
+        }
     }
 
     if( len > 0 )
     {
-        _receive_is_complete = _xml_end_finder.is_complete( p, len );
-        //if( _text.length() > 0 )
-        //{
-        //    _receive_is_complete = _text[0] == '<'? _xml_end_finder.is_complete( p, len )
-        //                                          : p[len-1] == '\n';
-        //}
-
-        if( len >= 2  &&  p[len-2] == '\r' )  _indent = true;      // CR LF am Ende lässt Antwort einrücken. CR LF soll nur bei telnet-Eingabe kommen.
-
-        _text.append( p, len );
+        if( _is_http )
+        {
+            _http_parser->add_text( p, len );
+            _receive_is_complete = _http_parser->is_complete();
+        }
+        else
+        {
+            _receive_is_complete = _xml_end_finder.is_complete( p, len );
+            if( len >= 2  &&  p[len-2] == '\r' )  _indent = true;      // CR LF am Ende lässt Antwort einrücken. CR LF soll nur bei telnet-Eingabe kommen.
+            _text.append( p, len );
+        }
     }
 
     return something_done;
@@ -569,16 +580,20 @@ bool Communication::Channel::async_continue_( bool wait )
                 
                 if( _read_socket != STDIN_FILENO )  cp.set_host( &_host );
 
-                string cmd = _text;
-                recv_clear();
 
-                if( string_begins_with( cmd, "GET /" )
-                 || string_begins_with( cmd, "POST /" ) )
+                if( _is_http  )
                 {
-                    _text = cp.execute_http( cmd );
+                    LOG2( "scheduler.http", "HTTP: " << _http_parser->_text << "\n" );
+                    recv_clear();
+                    _text = cp.execute_http( *_http_request );
+                    _http_parser = NULL;
+                    _http_request = NULL;
                 }
                 else
                 {
+                    string cmd = _text;
+                    recv_clear();
+
                     _log.info( "Kommando " + cmd );
                     _text = cp.execute( cmd, Time::now(), _indent );
                     
