@@ -112,8 +112,9 @@ struct Prefix_log : Object, Has_log
     void                        log2                        ( Log_level, const string& prefix, const string& line, Has_log* );
 
     void                        log_file                    ( const string& filename, const string& title = "" );
-    string                      last_error_line             ()                                  { return _last[ log_error ]; }
-    string                      last                        ( Log_level level )                 { return _last[ level ]; }
+    string                      last_error_line             ()                                  { return last( log_error ); }
+    string                      last                        ( Log_level level )                 { Last::iterator it = _last.find( level );
+                                                                                                  return it == _last.end()? "" : it->second; }
 
     string                      as_string                   ();
 
@@ -163,7 +164,8 @@ struct Prefix_log : Object, Has_log
     int                        _highest_level;
     string                     _highest_msg;
     
-    stdext::hash_map< Log_level, string >  _last;
+    typedef stdext::hash_map< Log_level, string >   Last;
+    Last                       _last;
 
     string                     _title;
     string                     _filename;                   // Name einer zusätzlichen Log-Datei (für die Tasks)

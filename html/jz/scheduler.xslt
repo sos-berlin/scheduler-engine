@@ -225,9 +225,9 @@
     <xsl:template match="jobs">
         <table cellpadding="0" cellspacing="0" width="100%" class="job">
             <col valign="baseline"  width="100"/>
-            <!--col  valign="baseline"  width="110"/-->
             <col valign="baseline"  width="50"  align="right"/>
             <col valign="baseline"  width="30"  align="right"/>
+            <col valign="baseline"/>
 
             <thead>
                 <xsl:call-template name="card_top"/>
@@ -375,7 +375,7 @@
                 <xsl:attribute name="class">task</xsl:attribute>
                 <xsl:choose>
                     <xsl:when test=" not( @id ) ">
-                        <td colspan="1">
+                        <td>
                             <span style="margin-left: 2ex">
                                 <xsl:choose>
                                     <xsl:when test="../../@waiting_for_process='yes'">
@@ -403,11 +403,11 @@
 
                         <xsl:choose>
                             <xsl:when test="../../@order='yes'">
-                                <td colspan="2" class="order">
+                                <td class="order">
                                 </td>
                             </xsl:when>
                             <xsl:otherwise>
-                                <td colspan="2">
+                                <td>
                                 </td>
                             </xsl:otherwise>
                         </xsl:choose>
