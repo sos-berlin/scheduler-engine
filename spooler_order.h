@@ -1,4 +1,4 @@
-// $Id: spooler_order.h,v 1.14 2002/11/11 23:10:34 jz Exp $
+// $Id: spooler_order.h,v 1.15 2002/11/14 12:16:40 jz Exp $
 
 #ifndef __SPOOLER_ORDER_H
 #define __SPOOLER_ORDER_H
@@ -111,7 +111,7 @@ struct Job_chain_node : Com_job_chain_node
 {
                                 Job_chain_node          ()                                          : _zero_(this+1) {}
 
-    xml::Element_ptr            dom                     ( const xml::Document_ptr&, Show_what );
+    xml::Element_ptr            dom                     ( const xml::Document_ptr&, Show_what, Job_chain* );
 
 
 
@@ -199,13 +199,13 @@ struct Order_queue : Com_order_queue
     void                        add_order               ( Order* );
   //Order*                      add_order               ( const Order::Payload& );
     void                        remove_order            ( Order* );
-    int                         length                  () const                                    { return _queue.size(); }
+    int                         length                  ( Job_chain* = NULL );
     bool                        empty                   () const                                    { return _queue.empty(); }
     ptr<Order>                  get_order_for_processing( Task* );
     void                        update_priorities       ();
     ptr<Order>                  order_or_null           ( const Order::Id& );
     Job*                        job                     () const                                    { return _job; }
-    xml::Element_ptr            dom                     ( const xml::Document_ptr&, Show_what );
+    xml::Element_ptr            dom                     ( const xml::Document_ptr&, Show_what, Job_chain* );
 
 
     Fill_zero                  _zero_;

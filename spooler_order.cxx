@@ -1,4 +1,4 @@
-// $Id: spooler_order.cxx,v 1.18 2002/11/11 23:10:33 jz Exp $
+// $Id: spooler_order.cxx,v 1.19 2002/11/14 12:16:40 jz Exp $
 /*
     Hier sind implementiert
 
@@ -77,7 +77,7 @@ xml::Element_ptr Spooler::xml_from_job_chains( const xml::Document_ptr& document
 
 //-------------------------------------------------------------xml::Element_ptr Job_chain_node::xml
 
-xml::Element_ptr Job_chain_node::dom( const xml::Document_ptr& document, Show_what show )
+xml::Element_ptr Job_chain_node::dom( const xml::Document_ptr& document, Show_what show, Job_chain* job_chain )
 {
     xml::Element_ptr element = document.createElement( "job_chain_node" );
 
@@ -92,7 +92,7 @@ xml::Element_ptr Job_chain_node::dom( const xml::Document_ptr& document, Show_wh
             //if( show & show_orders )  
             {
                 dom_append_nl( element );
-                element.appendChild( _job->dom( document, show ) );
+                element.appendChild( _job->dom( document, show, job_chain ) );
                 dom_append_nl( element );
             }
         }
@@ -133,7 +133,7 @@ xml::Element_ptr Job_chain::dom( const xml::Document_ptr& document, Show_what sh
                 FOR_EACH( Chain, _chain, it )
                 {
                     Job_chain_node* node = *it;
-                    element.appendChild( node->dom( document, show ) );
+                    element.appendChild( node->dom( document, show, this ) );
                     dom_append_nl( element );
                 }
             }
@@ -324,20 +324,24 @@ Order_queue::~Order_queue()
 
 //---------------------------------------------------------------------------------Order_queue::dom
 
-xml::Element_ptr Order_queue::dom( const xml::Document_ptr& document, Show_what show )
+xml::Element_ptr Order_queue::dom( const xml::Document_ptr& document, Show_what show, Job_chain* which_job_chain )
 {
     xml::Element_ptr element = document.createElement( "order_queue" );
 
     THREAD_LOCK( _lock )
     {
-        element.setAttribute( "length", length() );
+        element.setAttribute( "length", length(which_job_chain) );
 
         if( show & show_orders )
         {
             FOR_EACH( Queue, _queue, it )
             {
-                dom_append_nl( element );
-                element.appendChild( (*it)->dom( document, show ) );
+                Order* order = *it;
+                if( !which_job_chain  ||  order->job_chain() == which_job_chain )
+                {
+                    dom_append_nl( element );
+                    element.appendChild( order->dom( document, show ) );
+                }
             }
 
             dom_append_nl( element );
@@ -345,6 +349,22 @@ xml::Element_ptr Order_queue::dom( const xml::Document_ptr& document, Show_what 
     }
 
     return element;
+}
+
+//------------------------------------------------------------------------------Order_queue::length
+
+int Order_queue::length( Job_chain* which_job_chain )
+{ 
+    if( which_job_chain )
+    {
+        int count = 0;
+        THREAD_LOCK( _lock )  FOR_EACH( Queue, _queue, it )  if( (*it)->_job_chain == which_job_chain )  count++;
+        return count;
+    }
+    else
+    {
+        return _queue.size(); 
+    }
 }
 
 //---------------------------------------------------------------------------Order_queue::add_order

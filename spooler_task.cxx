@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.120 2002/11/13 21:31:23 jz Exp $
+// $Id: spooler_task.cxx,v 1.121 2002/11/14 12:16:40 jz Exp $
 /*
     Hier sind implementiert
 
@@ -1467,7 +1467,7 @@ string Job::state_cmd_name( Job::State_cmd cmd )
 //-----------------------------------------------------------------------------------------Job::dom
 // Anderer Thread
 
-xml::Element_ptr Job::dom( const xml::Document_ptr& document, Show_what show )
+xml::Element_ptr Job::dom( const xml::Document_ptr& document, Show_what show, Job_chain* which_job_chain )
 {
     xml::Element_ptr job_element = document.createElement( "task" );
 
@@ -1544,7 +1544,7 @@ xml::Element_ptr Job::dom( const xml::Document_ptr& document, Show_what show )
         }
 
         if( _task  &&  _task->_order )  dom_append_nl( job_element ),  job_element.appendChild( _task->_order->dom( document, show ) );
-        if( _order_queue             )  dom_append_nl( job_element ),  job_element.appendChild( _order_queue->dom( document, show ) );
+        if( _order_queue             )  dom_append_nl( job_element ),  job_element.appendChild( _order_queue->dom( document, show, which_job_chain ) );
         if( _error                   )  dom_append_nl( job_element ),  append_error_element( job_element, _error );
     }
 

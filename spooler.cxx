@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.129 2002/11/14 11:10:35 jz Exp $
+// $Id: spooler.cxx,v 1.130 2002/11/14 12:16:40 jz Exp $
 /*
     Hier sind implementiert
 
@@ -66,15 +66,6 @@ struct Set_console_code_page
 };
 */
 
-//------------------------------------------------------------------------------int64_from_filetime
-#ifdef Z_WINDOWS
-
-inline int64 int64_from_filetime( FILETIME t )
-{
-    return ( (int64)t.dwHighDateTime << 32 ) + t.dwLowDateTime;
-}
-
-#endif
 //---------------------------------------------------------------------------------send_error_email
 
 void send_error_email( const string& error_text, int argc, char** argv )

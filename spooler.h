@@ -1,4 +1,4 @@
-// $Id: spooler.h,v 1.99 2002/11/13 21:20:46 jz Exp $
+// $Id: spooler.h,v 1.100 2002/11/14 12:16:40 jz Exp $
 
 #ifndef __SPOOLER_H
 #define __SPOOLER_H
@@ -30,6 +30,8 @@
 
 #ifdef Z_WINDOWS
 #   include <process.h>    // _beginthreadex()
+#   include "../zschimmer/z_windows.h"
+    using namespace zschimmer::windows;
 #endif
         
 #include <set>
@@ -84,15 +86,7 @@ namespace sos {
 
 //-------------------------------------------------------------------------------------------------
 
-
 namespace sos {
-
-
-//typedef _bstr_t                 Dom_string;
-//
-//template<typename T>
-//inline Dom_string               as_dom_string               ( const T& t )                          { return as_bstr_t( t ); }
-
 namespace spooler {
 
 //-------------------------------------------------------------------------------------------------

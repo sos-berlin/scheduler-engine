@@ -1,4 +1,4 @@
-// $Id: spooler_task.h,v 1.70 2002/11/13 12:54:00 jz Exp $
+// $Id: spooler_task.h,v 1.71 2002/11/14 12:16:41 jz Exp $
 
 #ifndef __SPOOLER_TASK_H
 #define __SPOOLER_TASK_H
@@ -178,7 +178,7 @@ struct Job : Sos_self_deleting
                                ~Job                         (); 
 
     void                        set_dom                     ( const xml::Element_ptr& );
-    xml::Element_ptr            dom                         ( const xml::Document_ptr&, Show_what );
+    xml::Element_ptr            dom                         ( const xml::Document_ptr&, Show_what, Job_chain* = NULL );
 
     void                        init0                       ();                         // Wird vor Spooler-Skript gerufen
     void                        init                        ();                         // Wird nach Spooler-Skript gerufen, ruft auch init2()
