@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.111 2002/07/03 12:29:49 jz Exp $
+// $Id: spooler.cxx,v 1.112 2002/07/29 10:28:35 jz Exp $
 /*
     Hier sind implementiert
 
@@ -839,7 +839,7 @@ int Spooler::launch( int argc, char** argv )
     {
         if( _state_cmd != sc_load_config )  load();
 
-        THREAD_LOCK_LOG( _lock, "Spooler::launch load_config" )  
+        THREAD_LOCK( _lock )  
         {
             if( _config_element_to_load == NULL )  throw_xc( "SPOOLER-116", _spooler_id );
 

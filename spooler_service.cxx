@@ -1,4 +1,4 @@
-// $Id: spooler_service.cxx,v 1.26 2002/06/22 07:25:53 jz Exp $
+// $Id: spooler_service.cxx,v 1.27 2002/07/29 10:28:36 jz Exp $
 /*
     Hier sind implementiert
 
@@ -71,6 +71,7 @@ char**                          process_argv;
 
 // Zustände SERVICE_START_PENDING und SERVICE_STOP_PENDING nicht länger als pending_timeout Sekunden:
 Thread_semaphore                set_service_lock;
+Thread_semaphore_with_log       ServiceMain_lock            ( "ServiceMain" );
 Handle                          pending_watchdog_signal;
 bool                            pending_timed_out;
 int                             current_state;
@@ -511,8 +512,6 @@ static uint __stdcall service_thread( void* param )
             LOG( "Spooler launch\n" );
 
             ret = spooler_ptr->launch( p->_argc, p->_argv );
-
-            // Soweit kommt's nicht, denn SetServiceStatus(STOPPED) beendet den Prozess mit exit()
         }
         catch( const Xc& x )
         {
@@ -538,57 +537,60 @@ static uint __stdcall service_thread( void* param )
 
 static void __stdcall ServiceMain( DWORD argc, char** argv )
 {
-    LOGI( "ServiceMain(argc=" << argc << ")\n" );
-    
-    try
+    THREAD_LOCK( ServiceMain_lock )
     {
-        Thread_id               thread_id;
-        DWORD                   exit_code = 0;
-        Service_thread_param    param;
-        int                     ret;
-
-        for( Sos_option_iterator opt ( argc, argv ); !opt.end(); opt.next() )
+        LOGI( "ServiceMain(argc=" << argc << ")\n" );
+    
+        try
         {
-            if( opt.with_value( "log"              ) )  log_start( opt.value() );
-        }
+            Thread_id               thread_id;
+            DWORD                   exit_code = 0;
+            Service_thread_param    param;
+            int                     ret;
 
-        if( argc > 1 )  param._argc = argc, param._argv = argv;                 // Parameter des Dienstes (die sind wohl nur zum Test)
-                  else  param._argc = process_argc, param._argv = process_argv; // Parameter des Programmaufrufs
+            for( Sos_option_iterator opt ( argc, argv ); !opt.end(); opt.next() )
+            {
+                if( opt.with_value( "log"              ) )  log_start( opt.value() );
+            }
 
-        LOG( "RegisterServiceCtrlHandler\n" );
-        service_status_handle = RegisterServiceCtrlHandler( spooler_service_name.c_str(), &Handler );
-        if( !service_status_handle )  throw_mswin_error( "RegisterServiceCtrlHandler" );
+            if( argc > 1 )  param._argc = argc, param._argv = argv;                 // Parameter des Dienstes (die sind wohl nur zum Test)
+                      else  param._argc = process_argc, param._argv = process_argv; // Parameter des Programmaufrufs
 
-        LOG( "CreateThread\n" );
-        thread_handle = _beginthreadex( NULL, 0, service_thread, &param, 0, &thread_id );
-        if( !thread_handle )  throw_mswin_error( "CreateThread" );
+            LOG( "RegisterServiceCtrlHandler\n" );
+            service_status_handle = RegisterServiceCtrlHandler( spooler_service_name.c_str(), &Handler );
+            if( !service_status_handle )  throw_mswin_error( "RegisterServiceCtrlHandler" );
 
-        //do ret = WaitForSingleObject( thread_handle, INT_MAX );  while( ret != WAIT_TIMEOUT );
-        while(1)
-        {
-            LOG( "MsgWaitForMultipleObjects()\n" );
-            ret = MsgWaitForMultipleObjects( 1, &thread_handle._handle, FALSE, INT_MAX, QS_ALLINPUT ); 
+            LOG( "CreateThread\n" );
+            thread_handle = _beginthreadex( NULL, 0, service_thread, &param, 0, &thread_id );
+            if( !thread_handle )  throw_mswin_error( "CreateThread" );
+
+            //do ret = WaitForSingleObject( thread_handle, INT_MAX );  while( ret != WAIT_TIMEOUT );
+            while(1)
+            {
+                LOG( "MsgWaitForMultipleObjects()\n" );
+                ret = MsgWaitForMultipleObjects( 1, &thread_handle._handle, FALSE, INT_MAX, QS_ALLINPUT ); 
             
-            if( ret == WAIT_TIMEOUT )  continue;
-            else
-            if( ret == WAIT_OBJECT_0 + 1 )  windows_message_step();
-            else
-                break;
-        }
+                if( ret == WAIT_TIMEOUT )  continue;
+                else
+                if( ret == WAIT_OBJECT_0 + 1 )  windows_message_step();
+                else
+                    break;
+            }
 
-        if( terminate_immediately )  { LOG( "TerminateProcess()\n" ); TerminateProcess(GetCurrentProcess(),1); }
+            if( terminate_immediately )  { LOG( "TerminateProcess()\n" ); TerminateProcess(GetCurrentProcess(),1); }
 
-        TerminateThread( thread_handle, 999 );   // Sollte nicht nötig sein. Nützt auch nicht, weil Destruktoren nicht gerufen werden und Komnunikations-Thread vielleicht noch läuft.
+            TerminateThread( thread_handle, 999 );   // Sollte nicht nötig sein. Nützt auch nicht, weil Destruktoren nicht gerufen werden und Komnunikations-Thread vielleicht noch läuft.
         
-        //GetExitCodeThread( thread_handle, &exit_code );
-        //if( exit_code == 1 )
-        //{
-        //    restart_service( argc, argv );
-        //}
-        LOG( "ServiceMain ok\n" );
+            //GetExitCodeThread( thread_handle, &exit_code );
+            //if( exit_code == 1 )
+            //{
+            //    restart_service( argc, argv );
+            //}
+            LOG( "ServiceMain ok\n" );
+        }
+        catch( const Xc& x        ) { event_log( x.what(), argc, argv ); }
+        catch( const exception& x ) { event_log( x.what(), argc, argv ); }
     }
-    catch( const Xc& x        ) { event_log( x.what(), argc, argv ); }
-    catch( const exception& x ) { event_log( x.what(), argc, argv ); }
 }
 
 //----------------------------------------------------------------------------------spooler_service
@@ -614,6 +616,8 @@ int spooler_service( const string& service_name, int argc, char** argv )
 
         BOOL ok = StartServiceCtrlDispatcher( ste );
         if( !ok )  throw_mswin_error( "StartServiceCtrlDispatcher" );      // Z.B. nach 15s: MSWIN-00000427  Der Dienstprozess konnte keine Verbindung zum Dienstcontroller herstellen.
+
+        THREAD_LOCK( ServiceMain_lock ) {}      // Warten, bis Thread ServiceMain sich beendet hat, erst dann diesen Mainthread beenden (sonst wird ~Sos_static zu früh gerufen)
 
         spooler_service_name = "";
     }
