@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.16 2001/01/09 22:39:02 jz Exp $
+// $Id: spooler.cxx,v 1.17 2001/01/10 11:00:16 jz Exp $
 
 
 
@@ -709,7 +709,7 @@ void Spooler::start()
 
     _spooler_start_time = now();
 
-    _comm_channel.start_thread();
+    _communication.start_thread();
 }
 
 //------------------------------------------------------------------------------------Spooler::wait

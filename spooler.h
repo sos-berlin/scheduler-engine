@@ -1,4 +1,4 @@
-// $Id: spooler.h,v 1.15 2001/01/09 22:39:02 jz Exp $
+// $Id: spooler.h,v 1.16 2001/01/10 11:00:16 jz Exp $
 
 #ifndef __SPOOLER_H
 
@@ -364,25 +364,104 @@ struct Task : Sos_self_deleting
 
 typedef list< Sos_ptr<Task> >   Task_list;
 
-//----------------------------------------------------------------------------Communication_channel
+//-----------------------------------------------------------------------------------Xml_end_finder
 
-struct Communication_channel
+const int xml_end_finder_token_count = 2;
+
+struct Xml_end_finder
 {
-                                Communication_channel       ( Spooler* );
-                               ~Communication_channel       ();
+    enum Tok { cdata_tok, comment_tok };
+
+
+    struct Tok_entry
+    {
+                                Tok_entry                   ()                          : _index(0),_active(false) {}
+
+        void                    reset                       ()                          { _index = 0; _active = false; }
+        bool                    step_begin                  ( char );
+        void                    step_end                    ( char );
+
+        int                    _index;
+        bool                   _active;
+        const char*            _begin;
+        const char*            _end;
+    };
+
+
+                                Xml_end_finder              ();
+
+    bool                        is_complete                 ( const char* p, int length );
+
+    Fill_zero                  _zero_;
+
+    int                        _open_elements;              // Anzahl der offenen Elemente (ohne <?..?> und <!..>)
+    bool                       _at_start_tag;               // Letztes Zeichen war '<'
+    bool                       _in_special_tag;             // <?, <!
+    bool                       _in_tag;                 
+    bool                       _in_end_tag;             
+    bool                       _xml_is_complete;
+    char                       _last_char;
+    Tok_entry                  _tok [xml_end_finder_token_count];
+};
+
+//------------------------------------------------------------------------------------Communication
+
+struct Communication
+{                                                 
+    struct Channel : Sos_self_deleting
+    {
+
+                                Channel                     ();
+                               ~Channel                     ();
+
+
+        void                    do_accept                   ( SOCKET listen_socket );
+        void                    do_close                    ();
+        void                    do_recv                     ();
+        void                    do_send                     ();
+
+
+        Fill_zero              _zero_;
+        
+        SOCKET                 _socket;
+        struct sockaddr_in     _peer_addr;
+
+        string                 _text;
+
+        bool                   _receive_at_start;
+        bool                   _receive_is_complete;
+        bool                   _eof;
+
+        Xml_end_finder         _xml_end_finder;
+
+        bool                   _send_is_complete;
+        int                    _send_progress;
+
+    };
+
+    typedef list< Sos_ptr<Channel> >  Channel_list;
+
+
+                                Communication               ( Spooler* );
+                               ~Communication               ();
 
     void                        start_thread                ();
 
+    void                        start                       ();
     int                         run                         ();
-    void                        wait_for_connection         ();
-    string                      recv_xml                    ();
-    void                        send_text                   ( const string& );
-
+    bool                        handle_socket               ( Channel* );
 
     Fill_zero                  _zero_;
     Spooler*                   _spooler;
     SOCKET                     _listen_socket;
-    SOCKET                     _socket;
+    Channel_list               _channel_list;
+    SOCKET                     _udp_socket;
+    int                        _nfds;
+    FD_SET                     _read_fds;
+    FD_SET                     _write_fds;
+    Thread_semaphore           _semaphore;
+    bool                       _terminate;
+
     HANDLE                     _thread;
 };
 
@@ -409,7 +488,7 @@ struct Command_processor
 
 struct Spooler
 {
-                                Spooler                     () : _zero_(this+1), _comm_channel(this), _command_processor(this) {}
+                                Spooler                     () : _zero_(this+1), _communication(this), _command_processor(this) {}
 
     void                        load                        ();
     void                        load_xml                    ();
@@ -441,7 +520,7 @@ struct Spooler
     Job_list                   _job_list;
     Task_list                  _task_list;
     int                        _running_jobs_count;
-    Communication_channel      _comm_channel;
+    Communication              _communication;
     Command_processor          _command_processor;
     Time                       _spooler_start_time;
     Thread_semaphore           _semaphore;
