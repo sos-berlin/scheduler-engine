@@ -1,4 +1,4 @@
-// $Id: spooler_com.cxx,v 1.67 2002/11/15 09:47:38 jz Exp $
+// $Id: spooler_com.cxx,v 1.68 2002/11/20 11:03:09 jz Exp $
 /*
     Hier sind implementiert
 
@@ -608,7 +608,7 @@ STDMETHODIMP Com_log::get_mail( Imail** mail )
     {
         if( !_log )  return E_POINTER;
 
-        *mail = _log->mail();
+        *mail = _log->imail();
         if( *mail )  (*mail)->AddRef();
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Log::mail" ); }

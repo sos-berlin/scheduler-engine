@@ -1,4 +1,4 @@
-// $Id: spooler_com.h,v 1.55 2002/11/15 09:47:38 jz Exp $
+// $Id: spooler_com.h,v 1.56 2002/11/20 11:03:10 jz Exp $
 
 #ifndef __SPOOLER_COM_H
 #define __SPOOLER_COM_H
@@ -62,7 +62,7 @@ struct Com_error: spooler_com::Ierror,
 
     STDMETHODIMP                QueryInterface              ( REFIID, void** );
 
-    STDMETHODIMP            get_java_class_name             ( BSTR* result )                            { *result = SysAllocString( L"sos.spooler.Error" ); return S_OK; }
+    STDMETHODIMP            get_java_class_name             ( BSTR* result )                            { return string_to_bstr( "sos.spooler.Error", result ); }
 
     STDMETHODIMP                get_is_error                ( VARIANT_BOOL* );
     STDMETHODIMP                get_code                    ( BSTR* );
@@ -91,11 +91,11 @@ struct Com_variable: spooler_com::Ivariable,
 
     STDMETHODIMP                QueryInterface              ( REFIID, void** );
 
-    STDMETHODIMP            get_java_class_name             ( BSTR* result )                    { *result = SysAllocString( L"sos.spooler.Variable" ); return S_OK; }
+    STDMETHODIMP            get_java_class_name             ( BSTR* result )                        { return string_to_bstr( "sos.spooler.Variable", result ); }
 
-    STDMETHODIMP                put_value                   ( VARIANT* v )                      { HRESULT hr = NOERROR; THREAD_LOCK(_lock) _value = *v; return hr; }
-    STDMETHODIMP                get_value                   ( VARIANT* result )                 { HRESULT hr = NOERROR; THREAD_LOCK(_lock) hr = VariantCopy( result, &_value ); return hr; }
-    STDMETHODIMP                get_name                    ( BSTR* result )                    { return _name.CopyTo(result); }
+    STDMETHODIMP                put_value                   ( VARIANT* v )                          { HRESULT hr = NOERROR; THREAD_LOCK(_lock) _value = *v; return hr; }
+    STDMETHODIMP                get_value                   ( VARIANT* result )                     { HRESULT hr = NOERROR; THREAD_LOCK(_lock) hr = VariantCopy( result, &_value ); return hr; }
+    STDMETHODIMP                get_name                    ( BSTR* result )                        { return _name.CopyTo(result); }
     STDMETHODIMP                Clone                       ( spooler_com::Ivariable** );
 
   private:
@@ -118,7 +118,7 @@ struct Com_variable_set: spooler_com::Ivariable_set,
 
     STDMETHODIMP                QueryInterface              ( REFIID, void** );
 
-    STDMETHODIMP            get_java_class_name             ( BSTR* result )                        { *result = SysAllocString( L"sos.spooler.Variable_set" ); return S_OK; }
+    STDMETHODIMP            get_java_class_name             ( BSTR* result )                        { return string_to_bstr( "sos.spooler.Variable_set", result ); }
 
 #   ifdef Z_WINDOWS
         STDMETHODIMP            get_dom                     ( msxml::IXMLDOMDocument** );
@@ -184,7 +184,7 @@ struct Com_log : spooler_com::Ilog,
 
     STDMETHODIMP                QueryInterface              ( REFIID, void** );
    
-    STDMETHODIMP            get_java_class_name             ( BSTR* result )                        { *result = SysAllocString( L"sos.spooler.Log" ); return S_OK; }
+    STDMETHODIMP            get_java_class_name             ( BSTR* result )                        { return string_to_bstr( "sos.spooler.Log", result ); }
 
     void                        close                       ()                                      { THREAD_LOCK(_lock)  _log = NULL; }        
 
@@ -246,7 +246,7 @@ struct Com_object_set : spooler_com::Iobject_set,
 
     USE_SOS_OLE_OBJECT
 
-  //STDMETHODIMP            get_java_class_name         ( BSTR* result )                            { *result = SysAllocString( L"sos.spooler.Object_set" ); return S_OK; }
+  //STDMETHODIMP            get_java_class_name         ( BSTR* result );
 
     void                        clear                       ()                                      { THREAD_LOCK(_lock)  _object_set = NULL; }
 
@@ -271,7 +271,7 @@ struct Com_job : spooler_com::Ijob,
 
     STDMETHODIMP                QueryInterface              ( REFIID, void** );
 
-    STDMETHODIMP            get_java_class_name             ( BSTR* result )                        { *result = SysAllocString( L"sos.spooler.Job" ); return S_OK; }
+    STDMETHODIMP            get_java_class_name             ( BSTR* result )                        { return string_to_bstr( "sos.spooler.Job", result ); }
 
     void                        close                       ()                                      { THREAD_LOCK(_lock)  _job = NULL; }
 
@@ -306,7 +306,7 @@ struct Com_task : spooler_com::Itask,
 
     STDMETHODIMP                QueryInterface              ( REFIID, void** );
 
-    STDMETHODIMP            get_java_class_name             ( BSTR* result )                        { *result = SysAllocString( L"sos.spooler.Task" ); return S_OK; }
+    STDMETHODIMP            get_java_class_name             ( BSTR* result )                        { return string_to_bstr( "sos.spooler.Task", result ); }
 
     void                        set_task                    ( Task* );
     Task*                       task                        ()                                      { return _task; }
@@ -344,7 +344,7 @@ struct Com_thread : spooler_com::Ithread,
 
     STDMETHODIMP                QueryInterface              ( REFIID, void** );
 
-    STDMETHODIMP            get_java_class_name             ( BSTR* result )                        { *result = SysAllocString( L"sos.spooler.Thread" ); return S_OK; }
+    STDMETHODIMP            get_java_class_name             ( BSTR* result )                        { return string_to_bstr( "sos.spooler.Thread", result ); }
 
     void                        close                       ()                                      { THREAD_LOCK(_lock)  _thread = NULL; }
 
@@ -369,7 +369,7 @@ struct Com_spooler : spooler_com::Ispooler,
 
     USE_SOS_OLE_OBJECT_WITHOUT_QI
 
-    STDMETHODIMP            get_java_class_name             ( BSTR* result )                        { *result = SysAllocString( L"sos.spooler.Spooler" ); return S_OK; }
+    STDMETHODIMP            get_java_class_name             ( BSTR* result )                        { return string_to_bstr( "sos.spooler.Spooler", result ); }
 
     STDMETHODIMP                QueryInterface              ( REFIID, void** );
 
@@ -445,7 +445,7 @@ struct Com_job_chain : spooler_com::Ijob_chain,
 
     STDMETHODIMP                QueryInterface          ( REFIID, void** );
 
-    STDMETHODIMP            get_java_class_name         ( BSTR* result )                            { *result = SysAllocString( L"sos.spooler.Job_chain" ); return S_OK; }
+    STDMETHODIMP            get_java_class_name         ( BSTR* result )                            { return string_to_bstr( "sos.spooler.Job_chain", result ); }
 
     STDMETHODIMP            put_name                    ( BSTR );
     STDMETHODIMP            get_name                    ( BSTR* );
@@ -478,7 +478,7 @@ struct Com_job_chain_node : spooler_com::Ijob_chain_node,
 
     STDMETHODIMP                QueryInterface          ( REFIID, void** );
 
-    STDMETHODIMP            get_java_class_name         ( BSTR* result )                            { *result = SysAllocString( L"sos.spooler.Job_chain_node" ); return S_OK; }
+    STDMETHODIMP            get_java_class_name         ( BSTR* result )                            { return string_to_bstr( "sos.spooler.Job_chain_node", result ); }
 
     STDMETHODIMP            get_state                   ( VARIANT* );
     STDMETHODIMP            get_next_node               ( spooler_com::Ijob_chain_node** );
@@ -554,7 +554,7 @@ struct Com_order_queue : spooler_com::Iorder_queue,
 
     USE_SOS_OLE_OBJECT_WITHOUT_QI
 
-    STDMETHODIMP            get_java_class_name         ( BSTR* result )                            { *result = SysAllocString( L"sos.spooler.Order_queue" ); return S_OK; }
+    STDMETHODIMP            get_java_class_name         ( BSTR* result )                            { return string_to_bstr( "sos.spooler.Order_queue", result ); }
 
     STDMETHODIMP                QueryInterface          ( REFIID, void** );
 

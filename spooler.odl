@@ -1,4 +1,4 @@
-// $Id: spooler.odl,v 1.50 2002/11/15 09:47:37 jz Exp $
+// $Id: spooler.odl,v 1.51 2002/11/20 11:03:09 jz Exp $
 
 // Anweisung: midl /nologo /error all /out $(OutDir) $(InputPath)
 
@@ -619,8 +619,11 @@ library spooler
 
         HRESULT                 dequeue                 ( [out,retval] int* count );
 
-        [hidden]
-        int                     send                    ();
+      //[hidden]
+      //int                     send                    ();
+
+        [propget]
+        HRESULT                 dequeue_log             ( [out,retval] BSTR* text );
     }
 
     [

@@ -1,4 +1,4 @@
-// $Id: spooler_idl.h,v 1.2 2002/11/14 11:10:36 jz Exp $
+// $Id: spooler_idl.h,v 1.3 2002/11/20 11:03:10 jz Exp $
 
 
 /*  Ersatz für spooler.odl für Systeme ohne COM. 
@@ -322,6 +322,7 @@ struct Imail : IDispatch
     HRESULT                 add_header_field        ( BSTR value );
 
     HRESULT                 dequeue                 ( int* count );
+    HRESULT             get_dequeue_log             ( BSTR* );
 
     int                     send                    ();
 };

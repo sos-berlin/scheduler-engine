@@ -1,4 +1,4 @@
-// $Id: spooler_thread.cxx,v 1.52 2002/11/18 21:01:47 jz Exp $
+// $Id: spooler_thread.cxx,v 1.53 2002/11/20 11:03:11 jz Exp $
 /*
     Hier sind implementiert
 
@@ -524,37 +524,11 @@ void Thread::nichts_getan( double wait_time )
     {
         FOR_EACH( Job_list, _job_list, it )  
         {
-            _log.debug( "Job " + (*it)->name() + " state=" + (*it)->state_name() + " queue_filled=" + ( (*it)->queue_filled()? "ja" : "nein" ) );
+            _log.warn( "Job " + (*it)->name() + " state=" + (*it)->state_name() + " queue_filled=" + ( (*it)->queue_filled()? "ja" : "nein" ) );
         }
     }
 
     sos_sleep( wait_time );  // Warten, um bei Wiederholung zu bremsen
-}
-
-//----------------------------------------------------------------------------------Thread::process
-
-bool Thread::process()
-{
-    bool something_done = false;
-
-    try
-    {
-        bool something_done = step();
-    
-        if( something_done )  _nothing_done_count = 0;
-        else 
-        if( ++_nothing_done_count > _nothing_done_max )  
-        {
-            nichts_getan( min( 10.0, (double)_nothing_done_count / _nothing_done_max ) );
-        }
-
-        remove_temporary_jobs();
-    }
-    catch( const Xc&         x ) { _log.error( x.what() ); }
-    catch( const exception&  x ) { _log.error( x.what() ); }
-    catch( const _com_error& x ) { _log.error( as_string( x.Description() ) ); }
-
-    return something_done;
 }
 
 //---------------------------------------------------------------------------------Thread::finished
@@ -568,6 +542,32 @@ bool Thread::finished()
     }
 
     return false;
+}
+
+//----------------------------------------------------------------------------------Thread::process
+
+bool Thread::process()
+{
+    bool something_done = false;
+
+    try
+    {
+        something_done = step();
+    
+        if( something_done )  _nothing_done_count = 0;
+        else 
+        if( ++_nothing_done_count > _nothing_done_max )  
+        {
+            nichts_getan( max( 60.0, (double)_nothing_done_count / _nothing_done_max ) );
+        }
+
+        remove_temporary_jobs();
+    }
+    catch( const Xc&         x ) { _log.error( x.what() ); }
+    catch( const exception&  x ) { _log.error( x.what() ); }
+    catch( const _com_error& x ) { _log.error( as_string( x.Description() ) ); }
+
+    return something_done;
 }
 
 //-------------------------------------------------------------------------------Thread::run_thread
@@ -591,11 +591,10 @@ int Thread::run_thread()
             {
                 process();
 
+                if( finished() )  break;
+
                 if( _running_tasks_count == 0 )
                 {
-                    if( _spooler->state() == Spooler::s_stopping_let_run  &&  !any_tasks_there() )  break;
-                    if( _spooler->_manual )  break;   // Task ist fertig, also Thread beenden
-
                     wait();
                 }
             }

@@ -1,7 +1,7 @@
-// $Id: spooler_log.cxx,v 1.46 2002/10/18 12:55:59 jz Exp $
+// $Id: spooler_log.cxx,v 1.47 2002/11/20 11:03:11 jz Exp $
 
 #include "spooler.h"
-#include "spooler_mail_jmail.h"
+#include "spooler_mail.h"
 
 #include "../kram/sosdate.h"
 #include "../kram/olestd.h"
@@ -333,7 +333,10 @@ void Prefix_log::close()
 
         try
         {
-            send_really();
+            if( !_subject.empty()  ||  !_body.empty() )     // 20.11.2002
+            {
+                send_really();
+            }
         }
         catch( const Xc& x         ) { _spooler->_log.error(x.what()); }
         catch( const exception&  x ) { _spooler->_log.error(x.what()); }
@@ -382,9 +385,9 @@ void Prefix_log::write( const char* text, int len )
     }
 }
 
-//---------------------------------------------------------------------------------Prefix_log::mail
+//--------------------------------------------------------------------------------Prefix_log::imail
 
-spooler_com::Imail* Prefix_log::mail()
+Com_mail* Prefix_log::imail()
 {
     HRESULT hr;
 
@@ -561,22 +564,19 @@ void Prefix_log::send( int reason )
 
 void Prefix_log::send_really()
 {
-    HRESULT hr;
     int ok;
 
-    mail()->add_file( Bstr(_filename), NULL, Bstr(L"plain/text"), Bstr(_spooler->_mail_encoding) );
+    imail()->add_file( Bstr(_filename), NULL, Bstr(L"plain/text"), Bstr(_spooler->_mail_encoding) );
 
-    ok = mail()->send();
+    ok = imail()->send();
 
     if( ok )
     {
         try
         {
-            int result;
-            hr = mail()->dequeue( &result );
-            if( FAILED(hr) )  throw_ole( hr, "mail::dequeue" );
+            imail()->auto_dequeue();
         }
-        catch( const Xc& x ) { warn( string("eMail versendet, aber Fehler Verarbeiten der eMail-Warteschlange: ") + x.what() ); }
+        catch( const Xc& x ) { warn( string("eMail versendet, aber Fehler beim Verarbeiten der eMail-Warteschlange: ") + x.what() ); }
     }
     else
         warn( "eMail konnte nicht versendet werden" );
