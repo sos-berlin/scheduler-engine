@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.288 2003/11/11 15:14:44 jz Exp $
+// $Id: spooler.cxx,v 1.289 2003/11/14 19:37:57 jz Exp $
 /*
     Hier sind implementiert
 
@@ -1210,7 +1210,7 @@ void Spooler::load_arg()
     _log_collect_max    = read_profile_uint  ( _factory_ini, "spooler", "log_collect_max"   , 900 );
 
 
-    if( !_java_vm->running() )
+    //if( !_java_vm->running() )  // Für javac ist's egal, ob Java läuft (für scheduler.dll)
     {
       //_java_vm->set_filename      ( subst_env( read_profile_string( _factory_ini, "java"   , "vm"         , _java_vm->filename()       ) ) );
         _java_vm->prepend_class_path( subst_env( read_profile_string( _factory_ini, "java"   , "class_path" ) ) );
@@ -1377,7 +1377,7 @@ void Spooler::start()
             _java_vm->prepend_class_path( java_work_dir );
         }
 
-        if( _has_java )     // Nur True, wenn Java-Job nicht in eigenem Prozess ausgeführt wird.
+        if( _has_java )     // Nur True, wenn Java-Job nicht in separatem Prozess ausgeführt wird.
         {
             _java_vm->set_log( &_log );
 
