@@ -1,4 +1,4 @@
-// $Id: spooler_communication.cxx,v 1.1 2001/01/03 22:16:23 jz Exp $
+// $Id: spooler_communication.cxx,v 1.2 2001/01/07 10:12:18 jz Exp $
 
 //#include <precomp.h>
 
@@ -231,7 +231,7 @@ void Communication_channel::wait_for_connection()
     setsockopt( _listen_socket, SOL_SOCKET, SO_REUSEADDR, (const char*)&true_, sizeof true_ );
 
 
-    sa.sin_port        = htons( 4444 );
+    sa.sin_port        = htons( _spooler->_tcp_port );
     sa.sin_family      = AF_INET;
     sa.sin_addr.s_addr = 0; /* INADDR_ANY */
 

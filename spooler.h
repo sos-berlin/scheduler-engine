@@ -1,4 +1,4 @@
-// $Id: spooler.h,v 1.10 2001/01/06 22:50:21 jz Exp $
+// $Id: spooler.h,v 1.11 2001/01/07 10:12:18 jz Exp $
 
 #ifndef __SPOOLER_H
 
@@ -68,7 +68,7 @@ const Time                      latter_day                  = INT_MAX;
 struct Object_set_class : Sos_self_deleting
 {
                                 Object_set_class            ()                      {}
-                                Object_set_class            ( xml::Element_ptr );
+                                Object_set_class            ( const xml::Element_ptr& );
 
     string                     _name;
     map<Level,string>          _level_map;
@@ -85,7 +85,7 @@ typedef list< Sos_ptr<Object_set_class> >  Object_set_class_list;
 
 struct Level_interval
 {
-                                Level_interval              ( xml::Element_ptr );
+                                Level_interval              ( const xml::Element_ptr& );
                                 Level_interval              ()                      : _low_level(0), _high_level(0) {}
 
     bool                        is_in_interval              ( Level level )         { return level >= _low_level && level < _high_level; }
@@ -114,7 +114,7 @@ struct Spooler_object
 struct Object_set_descr : Sos_self_deleting
 {
                                 Object_set_descr            ()                      {}
-                                Object_set_descr            ( xml::Element_ptr );
+                                Object_set_descr            ( const xml::Element_ptr& );
 
     string                     _class_name;
     Sos_ptr<Object_set_class>  _class;
@@ -125,12 +125,13 @@ struct Object_set_descr : Sos_self_deleting
 
 struct Object_set : Sos_self_deleting
 {
-                                Object_set                  ( const Sos_ptr<Object_set_descr>& descr ) : _object_set_descr(descr) {}
+                                Object_set                  ( Spooler* spooler, const Sos_ptr<Object_set_descr>& descr ) : _spooler(spooler),_object_set_descr(descr) {}
 
     void                        open                        ();
     void                        close                       ();
     Spooler_object              get                         ();
 
+    Spooler*                   _spooler;
     CComPtr<Script_site>       _script_site;
     CComPtr<IDispatch>         _dispatch;
     Sos_ptr<Object_set_descr>  _object_set_descr;
@@ -141,7 +142,7 @@ struct Object_set : Sos_self_deleting
 struct Day_set
 {
                                 Day_set                     ()                      { memset( _days, 0, sizeof _days ); }
-                                Day_set                     ( xml::Element_ptr );
+                                Day_set                     ( const xml::Element_ptr& );
 
     bool                        is_empty                    ()                      { return memchr( _days, (char)true, sizeof _days ) == NULL; }
     char                        operator []                 ( int i )               { return _days[i]; }
@@ -154,7 +155,7 @@ struct Day_set
 struct Weekday_set : Day_set
 {
                                 Weekday_set                 ()                      {}
-                                Weekday_set                 ( xml::Element_ptr e )  : Day_set( e ) {}
+                                Weekday_set                 ( const xml::Element_ptr& e )  : Day_set( e ) {}
 
     Time                        next_date                   ( Time );             // Mitternacht des nächsten gesetzten Tages
 };
@@ -164,7 +165,7 @@ struct Weekday_set : Day_set
 struct Monthday_set : Day_set
 {
                                 Monthday_set                ()                      {}
-                                Monthday_set                ( xml::Element_ptr e )  : Day_set( e ) {}
+                                Monthday_set                ( const xml::Element_ptr& e )  : Day_set( e ) {}
 
     Time                        next_date                   ( Time );               // Mitternacht des nächsten gesetzten Tages
 };
@@ -174,7 +175,7 @@ struct Monthday_set : Day_set
 struct Ultimo_set : Day_set
 {
                                 Ultimo_set                  ()                      {}
-                                Ultimo_set                  ( xml::Element_ptr e )  : Day_set( e ) {}
+                                Ultimo_set                  ( const xml::Element_ptr& e )  : Day_set( e ) {}
 
     Time                        next_date                   ( Time );               // Mitternacht des nächsten gesetzten Tages
 };
@@ -184,7 +185,7 @@ struct Ultimo_set : Day_set
 struct Run_time
 {
                                 Run_time                    ()                      : _zero_(this+1) {}
-                                Run_time                    ( xml::Element_ptr );
+                                Run_time                    ( const xml::Element_ptr& );
 
     void                        check                       ();                              
     Time                        next                        ()                      { return next( now() ); }
@@ -215,7 +216,7 @@ struct Run_time
 struct Job : Sos_self_deleting
 {
                                 Job                         ()                     : _zero_(this+1) {}
-                                Job                         ( xml::Element_ptr );
+                                Job                         ( const xml::Element_ptr& );
 
 
     Fill_zero                  _zero_;
@@ -298,11 +299,11 @@ struct Command_processor
                                 Command_processor           ( Spooler* spooler )                    : _spooler(spooler) {}
 
     string                      execute                     ( const string& xml_text );
-    xml::Element_ptr            execute_command             ( xml::Element_ptr );
+    xml::Element_ptr            execute_command             ( const xml::Element_ptr& );
     xml::Element_ptr            execute_show_state          ();
     xml::Element_ptr            execute_show_tasks          ();
     xml::Element_ptr            execute_show_task           ( Task* );
-    xml::Element_ptr            execute_modify_job          ( xml::Element_ptr );
+    xml::Element_ptr            execute_modify_job          ( const xml::Element_ptr& );
 
     Spooler*                   _spooler;
     xml::Document_ptr          _answer;
@@ -317,8 +318,8 @@ struct Spooler
     void                        load                        ();
     void                        load_xml                    ();
 
-    void                        load_object_set_classes_from_xml( Object_set_class_list*, xml::Element_ptr );
-    void                        load_jobs_from_xml          ( Job_list*, xml::Element_ptr );
+    void                        load_object_set_classes_from_xml( Object_set_class_list*, const xml::Element_ptr& );
+    void                        load_jobs_from_xml          ( Job_list*, const xml::Element_ptr& );
 
     void                        start                       ();       
     void                        run                         ();
@@ -337,6 +338,11 @@ struct Spooler
     Time                       _spooler_start_time;
     Thread_semaphore           _semaphore;
     bool                       _sleep;                      // Besser: sleep mit Signal unterbrechen
+    int                        _tcp_port;
+    int                        _udp_port;
+    string                     _config_filename;
+    string                     _spooler_id;
+    string                     _object_set_param;
 };
 
 

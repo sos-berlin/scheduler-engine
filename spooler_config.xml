@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 
-<!-- $Id: spooler_config.xml,v 1.10 2001/01/06 22:50:21 jz Exp $   (C) 2000 SOS GmbH Berlin -->
+<!-- $Id: spooler_config.xml,v 1.11 2001/01/07 10:12:18 jz Exp $   (C) 2000 SOS GmbH Berlin -->
 
 <!DOCTYPE spooler_config SYSTEM "spooler_config.dtd">
 
-<spooler_config>
+<spooler_config tcp_port="4444">
 
     <object_set_classes>
 
@@ -42,17 +42,16 @@ class Testobjekt
 
     sub process( new_level )
         log "process " & level & " ==> " & new_level 
-        'file.name = new_level & ".object"
         file.move dir_name & "\" & new_level & "\" & file.name
         level = new_level
     end sub
 
 
-    public level
-
+    public  level
     private file
 
 end class
+
 
 
 class Object_set_class
@@ -98,11 +97,13 @@ class Object_set_class
     end function
 
 
-    public low_level
-    public high_level
+    public spooler_low_level      '<levels low=... >
+    public spooler_high_level     '<levels high=... >
+    public spooler_param          '-object-set-param=...
 
     private file_array
     private index
+
 end class
 
 
@@ -237,16 +238,16 @@ package main;
         <job name           = "Aufbereiten" 
              priority       = "50" 
              output_level   = "200" 
-             spooler        = "Hans"
+             spooler_id     = "Hans"
              rerun          = "no">
 
             <object_set class="Dokumente">
                 <levels low="100" high="200"/>
             </object_set>
 
-            <run_time retry_period="5">
-
-                <time_of_day begin="17:11:55" end="21:00:00"/>
+            <run_time begin         = "17:11:55" 
+                      end           = "21:00:00" 
+                      retry_period  = "5">
 
                 <date date="2001-01-02"/>
                 <date date="2001-01-09"/>
@@ -279,27 +280,26 @@ package main;
 
 
 
-        <job name           = "Test" 
+        <job name           = "Perl" 
              output_level   = "200">
 
-            <object_set class="Test">
+            <object_set class="Perl">
                 <levels low="1" high="3"/>
             </object_set>
 
-            <run_time retry_period="3">
-                <time_of_day begin="00:00:00" end="24:00:00"/>
-                <weekdays>
-                    <day day="0"/>
-                    <day day="1"/>
-                    <day day="2"/>
-                    <day day="3"/>
-                    <day day="4"/>
-                    <day day="5"/>
-                    <day day="6"/>
-                </weekdays>
-            </run_time>
+        </job>
+
+
+        <job name           = "Perlset" 
+             output_level   = "200"
+             spooler_id     = "Fritz">
+
+            <object_set class="Perl">
+                <levels low="1" high="3"/>
+            </object_set>
 
         </job>
+
     </jobs>
 
 </spooler_config>

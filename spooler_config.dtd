@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- $Id: spooler_config.dtd,v 1.9 2001/01/06 22:50:21 jz Exp $   (C) 2000 SOS GmbH Berlin 
+<!-- $Id: spooler_config.dtd,v 1.10 2001/01/07 10:12:18 jz Exp $   (C) 2000 SOS GmbH Berlin 
      Joacim Zschimmer
 
      Konfiguration für den Spooler. 
@@ -33,11 +33,11 @@
 
 <!ELEMENT jobs                  ( job+ )>
 
-<!ELEMENT job                   ( object_set, run_time? )>
+<!ELEMENT job                   ( ( object_set | script ), run_time? )>
 <!ATTLIST job                   name                CDATA #REQUIRED>
 <!ATTLIST job                   priority            CDATA #IMPLIED>
 <!ATTLIST job                   output_level        CDATA #IMPLIED>
-<!ATTLIST job                   spooler             CDATA #IMPLIED>
+<!ATTLIST job                   spooler_id          CDATA ''>
 <!ATTLIST job                   rerun               (yes|no) "no" >     <!-- Laufenden Job bei Abbruch und Neustart des Spoolers erneut starten -->
 <!ATTLIST job                   stop_after_error    (yes|no) "yes">     <!-- Nach einem Fehler diesen Job nie wieder starten -->
 <!ATTLIST job                   start_after_spooler (yes|no) "no" >     <!-- Den Job auch nach verspäteten Start des Spoolers starten -->
@@ -50,12 +50,11 @@
 <!ATTLIST levels                low                 CDATA #REQUIRED>    <!-- low <= level < high -->
 <!ATTLIST levels                high                CDATA #REQUIRED>
 
-<!ELEMENT run_time              ( time_of_day, date*, weekdays?, monthdays?, ultimos?, holiday* )>
+<!ELEMENT run_time              ( time_of_day?, date*, weekdays?, monthdays?, ultimos?, holiday* )>
 <!ATTLIST run_time              retry_period        CDATA "5">          <!-- Periode, nach der ein Job erneut gestartet wird, 
                                                                              um zu prüfen, ob die Objektemenge nicht leer ist -->
-<!ELEMENT time_of_day           EMPTY>                                  <!-- HH:MM:SS -->
-<!ATTLIST time_of_day           begin               CDATA #REQUIRED>    <!-- HH:MM:SS -->
-<!ATTLIST time_of_day           end                 CDATA #REQUIRED>    <!-- HH:MM:SS -->
+<!ATTLIST run_time              begin               CDATA '00:00:00'>   <!-- HH:MM:SS -->
+<!ATTLIST run_time              end                 CDATA '24:00:00'>   <!-- HH:MM:SS -->
 
 <!ELEMENT date                  EMPTY>
 <!ATTLIST date                  date                CDATA #IMPLIED>     <!-- yyyy-mm-dd -->

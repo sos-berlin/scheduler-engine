@@ -1,4 +1,4 @@
-// $Id: spooler_command.cxx,v 1.4 2001/01/06 22:50:21 jz Exp $
+// $Id: spooler_command.cxx,v 1.5 2001/01/07 10:12:18 jz Exp $
 
 #include "../kram/sos.h"
 #include "../kram/sleep.h"
@@ -14,7 +14,7 @@ using namespace std;
 
 //--------------------------------------------------------------------------dom_append_text_element
 /*
-void dom_append_text_element( xml::Element_ptr element, const char* element_name, const string& text )
+void dom_append_text_element( const xml::Element_ptr& element, const char* element_name, const string& text )
 {
     xml::Document_ptr doc       = element->ownerDocument;
     xml::Node_ptr     text_node = doc->createTextNode( as_dom_string( text ) );
@@ -103,7 +103,7 @@ xml::Element_ptr Command_processor::execute_show_state()
 
 //-------------------------------------------------------------Command_processor::execute_start_job
 
-xml::Element_ptr Command_processor::execute_modify_job( xml::Element_ptr element )
+xml::Element_ptr Command_processor::execute_modify_job( const xml::Element_ptr& element )
 {
     string job_name = as_string( element->getAttribute( "job" ) );
     string action   = as_string( element->getAttribute( "action" ) );
@@ -138,7 +138,7 @@ xml::Element_ptr Command_processor::execute_modify_job( xml::Element_ptr element
 
 //---------------------------------------------------------------Command_processor::execute_command
 
-xml::Element_ptr Command_processor::execute_command( xml::Element_ptr element )
+xml::Element_ptr Command_processor::execute_command( const xml::Element_ptr& element )
 {
     if( element->tagName == "show_state" )  return execute_show_state();
     else

@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.11 2001/01/06 22:50:21 jz Exp $
+// $Id: spooler.cxx,v 1.12 2001/01/07 10:12:17 jz Exp $
 
 
 
@@ -11,6 +11,8 @@
 */
 
 #include "../kram/sos.h"
+#include "../kram/sosprof.h"
+#include "../kram/sosopt.h"
 #include "../kram/sleep.h"
 #include "../file/anyfile.h"
 #include "spooler.h"
@@ -72,6 +74,10 @@ void Object_set::open()
     if( object_set_vt.vt != VT_DISPATCH 
      || object_set_vt.pdispVal == NULL  )  throw_xc( "SPOOLER-103", _object_set_descr->_class_name );
     _dispatch = object_set_vt.pdispVal;
+
+    com_invoke( _dispatch, "spooler_low_level" , _object_set_descr->_level_interval._low_level );
+    com_invoke( _dispatch, "spooler_high_level", _object_set_descr->_level_interval._high_level );
+    com_invoke( _dispatch, "spooler_param"     , _spooler->_object_set_param.c_str() );
 
     com_invoke( _dispatch, "spooler_open()" );
 }
@@ -168,7 +174,9 @@ Time Ultimo_set::next_date( Time tim )
 
 void Run_time::check()
 {
+    if( _begin_time_of_day < 0                )  throw_xc( "SPOOLER-104" );
     if( _begin_time_of_day > _end_time_of_day )  throw_xc( "SPOOLER-104" );
+    if( _end_time_of_day > 24*60*60           )  throw_xc( "SPOOLER-104" );
 }
 
 //----------------------------------------------------------------------------------Run_time::next
@@ -277,7 +285,7 @@ bool Task::start()
     cerr << "Job " << _job->_name << " start\n";
 
     _running_since = now();
-    _object_set = SOS_NEW( Object_set( &_job->_object_set_descr ) );
+    _object_set = SOS_NEW( Object_set( _spooler, &_job->_object_set_descr ) );
 
     try 
     {
@@ -339,8 +347,10 @@ void Spooler::step()
 {
     Thread_semaphore::Guard guard = &_semaphore;
 
+
     FOR_EACH( Task_list, _task_list, it )
     {
+        Time  nw   = now();
         Task* task = *it;
 
         if( !task->_running )
@@ -350,13 +360,13 @@ void Spooler::step()
                 task->start();
             }
         }
-        else
+
+        if( task->_running )
         {
-            if( task->_stop )
+            if( task->_stop || task->_job->_run_time._next_end_time > nw )   // Bei _next_start_time == _next_end_time wenistens ein step()
             {
                 task->end();
-                task->_stop = false;
-                task->_stopped = true;
+                if( task->_stop )  task->_stop = false, task->_stopped = true;
             }
             else
             {
@@ -406,7 +416,7 @@ void Spooler::wait()
 
     if( _running_jobs_count == 0 )
     {
-        Time next_start_time;
+        Time  next_start_time = latter_day;
         Task* next_task = NULL;
 
         {
@@ -428,7 +438,8 @@ void Spooler::wait()
         Time wait_time = next_start_time - now();
         if( wait_time > 0 ) 
         {
-            cerr << "Nächster Start: " << Sos_optional_date_time( next_start_time ) << ", Job " << next_task->_job->_name << '\n';
+            if( next_task )  cerr << "Job " << next_task->_job->_name << ": Nächster Start " << Sos_optional_date_time( next_start_time ) << '\n';
+                       else  cerr << "Kein Job zu starten\n";
 
             while( _sleep  &&  wait_time > 0 )
             {
@@ -463,11 +474,31 @@ void Spooler::run()
 
 int sos_main( int argc, char** argv )
 {
+    string config_filename  = read_profile_string( "factory.ini", "spooler", "config" );
+    string spooler_id       = read_profile_string( "factory.ini", "spooler", "spooler-id" );
+    string object_set_param = read_profile_string( "factory.ini", "spooler", "object-set-param" );
+
+    for( Sos_option_iterator opt ( argc, argv ); !opt.end(); opt.next() )
+    {
+        if( opt.with_value( "config"           ) )  config_filename = opt.value();
+        else
+        if( opt.with_value( "spooler-id"       ) )  spooler_id = opt.value();
+        else
+        if( opt.with_value( "object-set-param" ) )  object_set_param = opt.value();
+        else
+            throw_sos_option_error( opt );
+    }
+
+
     HRESULT hr = CoInitialize(NULL);
     if( FAILED(hr) )  throw_ole( hr, "CoInitialize" );
 
     {
         spooler::Spooler spooler;
+        
+        spooler._config_filename  = config_filename;
+        spooler._spooler_id       = spooler_id;
+        spooler._object_set_param = object_set_param;
 
         spooler.load();
         spooler.start();
