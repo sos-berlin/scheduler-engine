@@ -3536,6 +3536,7 @@ const Com_method Com_order::_methods[] =
     { DISPATCH_PROPERTYPUT, 14, "at"                        , (Com_method_ptr)&Com_order::put_At                , VT_EMPTY      , { VT_VARIANT|VT_BYREF } },
     { DISPATCH_PROPERTYGET, 14, "at"                        , (Com_method_ptr)&Com_order::get_At                , VT_DATE       },
     { DISPATCH_PROPERTYGET, 15, "Run_time"                  , (Com_method_ptr)&Com_order::get_Run_time          , VT_DISPATCH   },
+    { DISPATCH_METHOD     , 16, "remove_from_job_chain"     , (Com_method_ptr)&Com_order::Remove_from_job_chain , VT_EMPTY      },
     {}
 };
 
