@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.8 2001/01/05 20:31:22 jz Exp $
+// $Id: spooler.cxx,v 1.9 2001/01/05 23:24:33 jz Exp $
 
 
 
@@ -59,7 +59,8 @@ void Object_set::open()
     _script_site->parse( _object_set_descr->_class->_script );
 
     CComVariant object_set_vt = _script_site->call( "spooler_make_object_set()" );
-    if( object_set_vt.vt != VT_DISPATCH )  throw_xc( "SPOOLER-103", _object_set_descr->_class_name );
+    if( object_set_vt.vt != VT_DISPATCH 
+     || object_set_vt.pdispVal == NULL  )  throw_xc( "SPOOLER-103", _object_set_descr->_class_name );
     _dispatch = object_set_vt.pdispVal;
 
     com_invoke( _dispatch, "spooler_open()" );
@@ -86,7 +87,8 @@ Spooler_object Object_set::get()
         CComVariant obj = com_invoke( _dispatch, "spooler_get()" );
 
         if( obj.vt == VT_EMPTY    )  return Spooler_object(NULL);
-        if( obj.vt != VT_DISPATCH )  throw_xc( "SPOOLER-102", _object_set_descr->_class_name );
+        if( obj.vt != VT_DISPATCH
+         || obj.pdispVal == NULL  )  throw_xc( "SPOOLER-102", _object_set_descr->_class_name );
         
         object = obj.pdispVal;
 
@@ -226,6 +228,8 @@ void Task::set_new_start_time()
 
 void Task::error( const string& error_text )
 {
+    cerr << "Task: " << error_text << '\n';
+
     _error_time = now();
     _error_text = error_text;
 
@@ -264,6 +268,7 @@ void Task::start()
     try 
     {
         _object_set->open();
+        _running = true;
     }
     catch( const Xc& x        ) { start_error( x.what() ); }
     catch( const exception& x ) { start_error( x.what() ); }
@@ -271,7 +276,6 @@ void Task::start()
     _next_start_time = max( _next_start_time + _job->_run_time._retry_period, now() );
     if( now() >= _job->_run_time._next_end_time )  set_new_start_time();
 
-    _running = true;
 }
 
 //-----------------------------------------------------------------------------------------Task::end
