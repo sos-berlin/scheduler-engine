@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.211 2003/05/31 21:50:51 jz Exp $
+// $Id: spooler.cxx,v 1.212 2003/06/01 14:21:18 jz Exp $
 /*
     Hier sind implementiert
 
@@ -1603,6 +1603,10 @@ int sos_main( int argc, char** argv )
 
     ::_argc = argc;
     ::_argv = argv;
+
+#   ifdef Z_WINDOWS
+        SetErrorMode( SEM_FAILCRITICALERRORS | SEM_NOOPENFILEERRORBOX );    // Das System soll sich Messageboxen verkneifen (auﬂer beim Absturz)
+#   endif
 
     try
     {

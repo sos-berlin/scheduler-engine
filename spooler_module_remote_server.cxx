@@ -1,4 +1,4 @@
-// $Id: spooler_module_remote_server.cxx,v 1.8 2003/05/31 21:50:51 jz Exp $
+// $Id: spooler_module_remote_server.cxx,v 1.9 2003/06/01 14:21:19 jz Exp $
 /*
     Hier sind implementiert
 
@@ -35,7 +35,7 @@ Remote_module_instance_server::~Remote_module_instance_server()
 {
     try
     {
-        if( _module_instance )  _module_instance->close();
+        close();
     }
     catch( exception& ) {}
 
@@ -46,6 +46,7 @@ Remote_module_instance_server::~Remote_module_instance_server()
 
 void Remote_module_instance_server::close()
 {
+    if( _module_instance )  _module_instance->close();
     Com_module_instance_base::close();
 }
 
@@ -110,20 +111,20 @@ STDMETHODIMP Com_remote_module_instance_server::QueryInterface( const IID& iid, 
     if( iid == IID_IUnknown )
     {
         *result = (IUnknown*)(Iremote_module_instance_server*)this;
-        AddRef();
+        ((IUnknown*)(Iremote_module_instance_server*)this)->AddRef();
         return S_OK;
     }
     if( iid == IID_IDispatch )
     {
         *result = (IDispatch*)(Iremote_module_instance_server*)this;
-        AddRef();
+        ((IDispatch*)(Iremote_module_instance_server*)this)->AddRef();
         return S_OK;
     }
     else
     if( iid == IID_Iremote_module_instance_server )
     {
         *result = (Iremote_module_instance_server*)this;
-        AddRef();
+        ((Iremote_module_instance_server*)this)->AddRef();
         return S_OK;
     }
     else
@@ -186,6 +187,9 @@ STDMETHODIMP Com_remote_module_instance_server::add_obj( IDispatch* object, BSTR
     try
     {
         _server._module_instance->add_obj( object, string_from_bstr(name) );
+
+        object->AddRef(); int count = object->Release();
+        //fprintf( stderr, "add_obj %08X ref=%d\n", (int)(void*)object, count );
     }
     catch( const exception& x ) { hr = com_set_error( x, "Remote_module_instance_server::add_obj" ); }
 
