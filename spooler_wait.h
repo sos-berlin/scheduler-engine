@@ -1,4 +1,4 @@
-// $Id: spooler_wait.h,v 1.24 2002/11/13 21:20:48 jz Exp $
+// $Id: spooler_wait.h,v 1.25 2002/11/24 15:12:55 jz Exp $
 
 #ifndef __SPOOLER_WAIT_H
 #define __SPOOLER_WAIT_H
@@ -9,8 +9,12 @@
 namespace sos {
 namespace spooler {
 
-void windows_message_step();
-bool wait_for_event( HANDLE handle, double wait_time );
+
+#ifdef Z_WINDOWS
+    void windows_message_step();
+    bool wait_for_event( HANDLE handle, double wait_time );
+#endif
+
 
 struct Wait_handles;
 
@@ -19,10 +23,13 @@ struct Wait_handles;
 struct Event : Handle
 {
                                 Event                       ( const string& name = "" );
-                                Event                       ( const string& name, HANDLE h ) : Handle(h), _zero_(this+1), _name(name) {}
                                ~Event                       ();
 
-    void                        operator =                  ( const HANDLE& h )                 { set_handle(h); }
+
+#   ifdef Z_WINNDOWS
+                                Event                       ( const string& name, HANDLE h ) : Handle(h), _zero_(this+1), _name(name) {}
+        void                    operator =                  ( const HANDLE& h )                 { set_handle(h); }
+#   endif
 
     void                        close                       ();
     void                        set_name                    ( const string& name )              { _name = name; }
@@ -69,13 +76,17 @@ struct Wait_handles
     void                        close                       ();
   //void                        clear                       ()                              { _handles.clear(); _events.clear(); }
     void                        add                         ( Event* );
+
+#ifdef Z_WINDOWS
     void                        add_handle                  ( HANDLE );
-    HANDLE                      operator []                 ( int index )                   { return _handles[index]; }
-    int                         length                      ()                              { return _handles.size(); }
-    void                        remove                      ( Event* );
     void                        remove_handle               ( HANDLE, Event* for_internal_use_only = NULL );
+    HANDLE                      operator []                 ( int index )                   { return _handles[index]; }
     int                         wait_until                  ( Time );
     int                         wait                        ( double time );
+#endif
+
+    int                         length                      ()                              { return _events.size(); }
+    void                        remove                      ( Event* );
     bool                        empty                       () const                        { return _events.empty(); }
 
     string                      as_string                   ();
@@ -89,7 +100,11 @@ struct Wait_handles
 
     Spooler*                   _spooler;
     Prefix_log*                _log;
+
+#ifdef Z_WINDOWS
     vector<HANDLE>             _handles;
+#endif
+
     typedef vector<Event*>      Event_vector;
     Event_vector               _events;
 

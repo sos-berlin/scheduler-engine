@@ -1,4 +1,4 @@
-// $Id: spooler_wait.cxx,v 1.39 2002/11/13 18:17:35 jz Exp $
+// $Id: spooler_wait.cxx,v 1.40 2002/11/24 15:12:55 jz Exp $
 /*
     Hier sind implementiert
 
@@ -8,6 +8,8 @@
 
 
 #include "spooler.h"
+
+#ifdef Z_WINDOWS
 
 #include <io.h>         // findfirst()
 #include <sys/types.h>
@@ -220,12 +222,16 @@ void Wait_handles::add( Event* event )
 {
     THREAD_LOCK( _lock )
     {
-        _handles.push_back( event->handle() );
+#       ifdef Z_WINDOWS
+            _handles.push_back( event->handle() );
+#       endif
+
         _events.push_back( event );
     }
 }
 
 //-------------------------------------------------------------------------Wait_handles::add_handle
+#ifdef Z_WINDOWS
 
 void Wait_handles::add_handle( HANDLE handle )
 {
@@ -236,16 +242,9 @@ void Wait_handles::add_handle( HANDLE handle )
     }
 }
 
-//-----------------------------------------------------------------------------Wait_handles::remove
-
-void Wait_handles::remove( Event* event )
-{
-    if( !event )  return;
-
-    remove_handle( event->handle(), event );
-}
-
+#endif
 //-----------------------------------------------------------------------Wait_handles::remove_handle
+#ifdef Z_WINDOWS
 
 void Wait_handles::remove_handle( HANDLE handle, Event* event )
 {
@@ -270,6 +269,16 @@ void Wait_handles::remove_handle( HANDLE handle, Event* event )
     }
 }
 
+#endif
+//-----------------------------------------------------------------------------Wait_handles::remove
+
+void Wait_handles::remove( Event* event )
+{
+    if( !event )  return;
+
+    remove_handle( event->handle(), event );
+}
+
 //-------------------------------------------------------------------------------Wait_handles::wait
 
 int Wait_handles::wait( double wait_time )
@@ -278,6 +287,7 @@ int Wait_handles::wait( double wait_time )
 }
 
 //-------------------------------------------------------------------------Wait_handles::wait_until
+#ifdef Z_WINDOWS
 
 int Wait_handles::wait_until( Time until )
 {
@@ -352,6 +362,7 @@ int Wait_handles::wait_until( Time until )
     return -1;
 }
 
+#endif
 //--------------------------------------------------------------------------Wait_handles::as_string
 
 string Wait_handles::as_string() 
@@ -492,3 +503,5 @@ void Directory_watcher::set_signal()
 
 } //namespace spooler
 } //namespace sos
+
+#endif

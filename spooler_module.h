@@ -1,4 +1,4 @@
-// $Id: spooler_module.h,v 1.9 2002/11/23 17:28:54 jz Exp $
+// $Id: spooler_module.h,v 1.10 2002/11/24 15:12:50 jz Exp $
 
 #ifndef __SPOOLER_MODULE_H
 #define __SPOOLER_MODULE_H
@@ -61,10 +61,13 @@ struct Module
     enum Kind
     {
         kind_none,
-        kind_com,
-        kind_scripting_engine,
         kind_java,
-        kind_perl
+      //kind_perl,
+
+#     ifdef Z_WINDOWS
+        kind_scripting_engine,
+        kind_com,
+#     endif
     };
 
                                 Module                      ( Spooler* sp, Prefix_log* log )         : _spooler(sp), _log(log) {}
@@ -115,6 +118,7 @@ struct Module
 
 struct Module_instance : Object 
 {
+    Z_GNU_ONLY(                 Module_instance             ();  )                                  // Für gcc 3.2. Nicht implementiert.
                                 Module_instance             ( Module* script )                      : _zero_(this+1), _module(script), _log(script->_log) {}
     virtual                    ~Module_instance             ()                                      {}      // Für gcc 3.2
 

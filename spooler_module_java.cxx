@@ -1,4 +1,4 @@
-// $Id: spooler_module_java.cxx,v 1.18 2002/11/23 17:59:36 jz Exp $
+// $Id: spooler_module_java.cxx,v 1.19 2002/11/24 15:12:50 jz Exp $
 /*
     Hier sind implementiert
 
@@ -11,13 +11,19 @@
 #include "../file/stdfile.h"    // make_path
 
 #ifdef _DEBUG
-#   include "Debug/Idispatch.h"
+#   include "Debug/sos/spooler/Idispatch.h"
 #else
-#   include "Release/Idispatch.h"
+#   include "Release/sos/spooler/Idispatch.h"
 #endif
 
 #include <sys/stat.h>
-#include <sys/utime.h>
+
+#ifdef Z_WINDOWS
+#   include <sys/utime.h>
+#else
+#   include <utime.h>
+#   include <dlfcn.h>
+#endif
 
 using namespace std;
 
@@ -28,7 +34,7 @@ namespace spooler {
 
 const static JNINativeMethod native_methods[] = 
 {
-    { "com_call", "(JLjava/lang/String;[Ljava/lang/Object;)Ljava/lang/Object;", Java_sos_spooler_Idispatch_com_1call }
+    { "com_call", "(JLjava/lang/String;[Ljava/lang/Object;)Ljava/lang/Object;", (void*)Java_sos_spooler_Idispatch_com_1call }
 };
 
 //-------------------------------------------------------------------------------------------static
@@ -109,7 +115,7 @@ static jint JNICALL java_vfprintf( FILE *fp, const char *format, va_list args )
 {
     char buf[1024];
 
-    int ret = _vsnprintf( buf, sizeof(buf), format, args );
+    int ret = vsnprintf( buf, sizeof(buf), format, args );
 
     java_vm->_log( buf );
 
@@ -125,7 +131,7 @@ static jobject jobject_from_variant( JNIEnv* jenv, const VARIANT& v )
     switch( v.vt )
     {
         case VT_EMPTY:
-            return jenv->NewString( L"", 0 );       // Für Job_chain_node.next_state, .error_state ("" wird zu VT_EMPTY)
+            return jenv->NewString( NULL, 0 );       // Für Job_chain_node.next_state, .error_state ("" wird zu VT_EMPTY)
 
       //case VT_NULL: 
       //    return NULL;    //?
@@ -587,7 +593,7 @@ void Java_vm::init()
 
     Z_DEBUG_ONLY( _options.push_back( Option( "-verbose:class,gc,jni" ) ) );
     
-    _options.push_back( Option( "vfprintf", java_vfprintf ) );
+    _options.push_back( Option( "vfprintf", (void*)java_vfprintf ) );
 
     _vm_args.nOptions = _options.size();
     delete _vm_args.options;
@@ -741,9 +747,13 @@ void Java_vm::throw_java( int return_value, const string& text1, const string& t
         case JNI_ERR:       ret_text = "ret=JNI_ERR";                                           break;
         case JNI_EDETACHED: ret_text = "ret=JNI_EDETACHED \"thread detached from the VM\"";     break;
         case JNI_EVERSION:  ret_text = "ret=JNI_EVERSION \"JNI version error\"";                break;
+
+#     ifdef JNI_VERSION_1_4
         case JNI_ENOMEM:    ret_text = "ret=JNI_ENOMEM \"not enough memory\"";                  break;
         case JNI_EEXIST:    ret_text = "ret=JNI_EEXIST \"VM already created\"";                 break;
         case JNI_EINVAL:    ret_text = "ret=JNI_EINVAL \"invalid arguments\"";                  break;
+#     endif
+
         default:            ret_text = "ret=" + as_string(return_value);
     }
 

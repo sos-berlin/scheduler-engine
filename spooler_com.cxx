@@ -1,4 +1,4 @@
-// $Id: spooler_com.cxx,v 1.68 2002/11/20 11:03:09 jz Exp $
+// $Id: spooler_com.cxx,v 1.69 2002/11/24 15:12:46 jz Exp $
 /*
     Hier sind implementiert
 
@@ -918,7 +918,7 @@ STDMETHODIMP Com_object_set::get_low_level( int* result )
     THREAD_LOCK( _lock )
     {
         if( !_object_set )  return E_POINTER;
-        if( GetCurrentThreadId() != _object_set->thread()->_thread_id )  return E_ACCESSDENIED;
+        if( current_thread_id() != _object_set->thread()->_thread_id )  return E_ACCESSDENIED;
 
         *result = _object_set->_object_set_descr->_level_interval._low_level;
     }
@@ -933,7 +933,7 @@ STDMETHODIMP Com_object_set::get_high_level( int* result )
     THREAD_LOCK( _lock )
     {
         if( !_object_set )  return E_POINTER;
-        if( GetCurrentThreadId() != _object_set->thread()->_thread_id )  return E_ACCESSDENIED;
+        if( current_thread_id() != _object_set->thread()->_thread_id )  return E_ACCESSDENIED;
 
         *result = _object_set->_object_set_descr->_level_interval._high_level;
     }
@@ -1092,7 +1092,7 @@ STDMETHODIMP Com_job::get_include_path( BSTR* result )
     THREAD_LOCK( _lock )
     {
         if( !_job )  return E_POINTER;
-        if( GetCurrentThreadId() != _job->thread()->_thread_id )  return E_ACCESSDENIED;
+        if( current_thread_id() != _job->thread()->_thread_id )  return E_ACCESSDENIED;
 
         *result = SysAllocString_string( _job->_thread->_include_path );
     }
@@ -1107,7 +1107,7 @@ STDMETHODIMP Com_job::get_name( BSTR* result )
     THREAD_LOCK( _lock )
     {
         if( !_job )  return E_POINTER;
-        //if( GetCurrentThreadId() != _job->thread()->_thread_id )  return E_ACCESSDENIED;
+        //if( current_thread_id() != _job->thread()->_thread_id )  return E_ACCESSDENIED;
 
         *result = SysAllocString_string( _job->_name );
     }
@@ -1125,7 +1125,7 @@ STDMETHODIMP Com_job::put_state_text( BSTR text )
     try
     {
         if( !_job )  throw_xc( "SPOOLER-122" );
-        if( GetCurrentThreadId() != _job->thread()->_thread_id )  return E_ACCESSDENIED;
+        if( current_thread_id() != _job->thread()->_thread_id )  return E_ACCESSDENIED;
 
         _job->set_state_text( bstr_as_string( text ) );
     }
@@ -1236,7 +1236,7 @@ STDMETHODIMP Com_task::get_object_set( Iobject_set** result )
     try
     {
         if( !_task )  throw_xc( "SPOOLER-122" );
-        if( GetCurrentThreadId() != _task->_job->thread()->_thread_id )  return E_ACCESSDENIED;
+        if( current_thread_id() != _task->_job->thread()->_thread_id )  return E_ACCESSDENIED;
 
         if( !_task->_job->object_set_descr() )  return E_ACCESSDENIED;
         THREAD_LOCK( _task->_job->_lock )  *result = (dynamic_cast<Object_set_task*>(+_task))->_com_object_set;
@@ -1258,7 +1258,7 @@ STDMETHODIMP Com_task::put_error( VARIANT* error_par )
     try
     {
         if( !_task )  throw_xc( "SPOOLER-122" );
-        if( GetCurrentThreadId() != _task->_job->thread()->_thread_id )  return E_ACCESSDENIED;
+        if( current_thread_id() != _task->_job->thread()->_thread_id )  return E_ACCESSDENIED;
 
         Variant error_vt = *error_par;
         hr = error_vt.ChangeType( VT_BSTR );        if( FAILED(hr) )  return hr;
@@ -1377,7 +1377,7 @@ STDMETHODIMP Com_task::put_result( VARIANT* value )
     try
     {
         if( !_task )  throw_xc( "SPOOLER-122" );
-        if( GetCurrentThreadId() != _task->_job->thread()->_thread_id )  return E_ACCESSDENIED;
+        if( current_thread_id() != _task->_job->thread()->_thread_id )  return E_ACCESSDENIED;
         if( !_task->_job->its_current_task(_task) )  throw_xc( "SPOOLER-138" );
 
         THREAD_LOCK( _task->_job->_lock )  hr = _task->_result.Copy( value );
@@ -1418,7 +1418,7 @@ STDMETHODIMP Com_task::put_repeat( double seconds )
     try
     {
         if( !_task )  throw_xc( "SPOOLER-122" );
-        if( GetCurrentThreadId() != _task->_job->thread()->_thread_id )  return E_ACCESSDENIED;
+        if( current_thread_id() != _task->_job->thread()->_thread_id )  return E_ACCESSDENIED;
         if( !_task->_job->its_current_task(_task) )  throw_xc( "SPOOLER-138" );
 
         _task->_job->set_repeat( seconds );
@@ -1439,7 +1439,7 @@ STDMETHODIMP Com_task::put_history_field( BSTR name, VARIANT* value )
     try
     {
         if( !_task )  throw_xc( "SPOOLER-122" );
-        if( GetCurrentThreadId() != _task->_job->thread()->_thread_id )  return E_ACCESSDENIED;
+        if( current_thread_id() != _task->_job->thread()->_thread_id )  return E_ACCESSDENIED;
         if( !_task->_job->its_current_task(_task) )  throw_xc( "SPOOLER-138" );
 
         _task->set_history_field( bstr_as_string(name), *value );
@@ -1517,7 +1517,7 @@ STDMETHODIMP Com_task::get_order( Iorder** result )
     try
     {
         if( !_task )  throw_xc( "SPOOLER-122" );
-        if( GetCurrentThreadId() != _task->job()->thread()->_thread_id )  return E_ACCESSDENIED;
+        if( current_thread_id() != _task->job()->thread()->_thread_id )  return E_ACCESSDENIED;
 
         *result = _task->order();
         if( *result )  (*result)->AddRef();
@@ -1530,7 +1530,7 @@ STDMETHODIMP Com_task::get_order( Iorder** result )
 
 //---------------------------------------------------------------------------Com_thread::Com_thread
 
-Com_thread::Com_thread( Thread* thread )
+Com_thread::Com_thread( Spooler_thread* thread )
 :
     Sos_ole_object( thread_class_ptr, (Ithread*)this ),
     _thread(thread)
@@ -1558,7 +1558,7 @@ STDMETHODIMP Com_thread::get_log( Ilog** com_log )
     THREAD_LOCK( _lock )
     {
         if( !_thread )  return E_POINTER;
-        if( GetCurrentThreadId() != _thread->_thread_id )  return E_ACCESSDENIED;
+        if( current_thread_id() != _thread->_thread_id )  return E_ACCESSDENIED;
 
         *com_log = _thread->_com_log;
         if( *com_log )  (*com_log)->AddRef();
@@ -1574,7 +1574,7 @@ STDMETHODIMP Com_thread::get_script( IDispatch** script_object )
     THREAD_LOCK( _lock )
     {
         if( !_thread )  return E_POINTER;
-        if( GetCurrentThreadId() != _thread->_thread_id )  return E_ACCESSDENIED;
+        if( current_thread_id() != _thread->_thread_id )  return E_ACCESSDENIED;
         if( !_thread->_module_instance )  return E_ACCESSDENIED;
 
         *script_object = _thread->_module_instance->dispatch();
@@ -1591,7 +1591,7 @@ STDMETHODIMP Com_thread::get_include_path( BSTR* result )
     THREAD_LOCK( _lock )
     {
         if( !_thread )  return E_POINTER;
-        if( GetCurrentThreadId() != _thread->_thread_id )  return E_ACCESSDENIED;
+        if( current_thread_id() != _thread->_thread_id )  return E_ACCESSDENIED;
 
         *result = SysAllocString_string( _thread->_include_path );
     }
@@ -1606,7 +1606,7 @@ STDMETHODIMP Com_thread::get_name( BSTR* result )
     THREAD_LOCK( _lock )
     {
         if( !_thread )  return E_POINTER;
-        if( GetCurrentThreadId() != _thread->_thread_id )  return E_ACCESSDENIED;
+        if( current_thread_id() != _thread->_thread_id )  return E_ACCESSDENIED;
 
         *result = SysAllocString_string( _thread->_name );
     }

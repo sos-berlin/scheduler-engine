@@ -1,4 +1,4 @@
-// $Id: spooler_order.h,v 1.16 2002/11/15 09:47:40 jz Exp $
+// $Id: spooler_order.h,v 1.17 2002/11/24 15:12:51 jz Exp $
 
 #ifndef __SPOOLER_ORDER_H
 #define __SPOOLER_ORDER_H
@@ -21,7 +21,8 @@ struct Order : Com_order
     typedef Variant             State;
     typedef Variant             Id;
 
-    
+
+    Z_GNU_ONLY(                 Order                   (); )                                       // Für gcc 3.2. Nicht implementiert
                                 Order                   ( Spooler* spooler )                        : _zero_(this+1), _spooler(spooler), Com_order(this) { init(); }
                                 Order                   ( Spooler* spooler, const VARIANT& );
                                ~Order                   ();
@@ -137,6 +138,7 @@ struct Job_chain : Com_job_chain
     typedef Variant             State;
 
 
+    Z_GNU_ONLY(                 Job_chain               ();  )                                      // Für gcc 3.2. Nicht implementiert
                                 Job_chain               ( Spooler* );
                                ~Job_chain               ();
 
@@ -193,6 +195,7 @@ struct Internal_priority
 
 struct Order_queue : Com_order_queue
 {
+    Z_GNU_ONLY(                 Order_queue             ();  )                                      // Für gcc 3.2. Nicht implementiert
                                 Order_queue             ( Job*, Prefix_log* );
                                ~Order_queue             ();
 

@@ -1,4 +1,4 @@
-// $Id: spooler_task.h,v 1.72 2002/11/22 17:23:54 jz Exp $
+// $Id: spooler_task.h,v 1.73 2002/11/24 15:12:52 jz Exp $
 
 #ifndef __SPOOLER_TASK_H
 #define __SPOOLER_TASK_H
@@ -106,7 +106,7 @@ struct Object_set : Sos_self_deleting
     bool                        step                        ( Level result_level );
     void                        set_in_call                 ( const string& name );
 
-    Thread*                     thread                      () const;
+    Spooler_thread*             thread                      () const;
 
     Fill_zero                  _zero_;
     Spooler*                   _spooler;
@@ -174,7 +174,7 @@ struct Job : Sos_self_deleting
     typedef list< Sos_ptr<Directory_watcher> >  Directory_watcher_list;
     typedef map< int, Time >                    Delay_after_error;
 
-                                Job                         ( Thread* );
+                                Job                         ( Spooler_thread* );
                                ~Job                         (); 
 
     void                        set_dom                     ( const xml::Element_ptr&, const Time& mod_time );
@@ -189,7 +189,7 @@ struct Job : Sos_self_deleting
     State                       state                       () const                    { return _state; }
     Object_set_descr*           object_set_descr            () const                    { return _object_set_descr; }
     int                         priority                    () const                    { return _priority; }
-    Thread*                     thread                      () const                    { return _thread; }
+    Spooler_thread*                     thread                      () const                    { return _thread; }
     string                      job_state                   ();
     string                      include_path                () const;
     string                      title                       ()                          { string title; THREAD_LOCK( _lock )  title = _title;  return title; }
@@ -283,7 +283,7 @@ struct Job : Sos_self_deleting
     friend struct               Object_set_task;
     friend struct               Process_task;
     friend struct               Com_job;
-    friend struct               Thread;
+    friend struct               Spooler_thread;
 
 
     Fill_zero                  _zero_;
@@ -294,7 +294,7 @@ struct Job : Sos_self_deleting
     friend struct Job_history;
 
     string                     _name;
-    Thread*                    _thread;
+    Spooler_thread*                    _thread;
 
 
     Prefix_log                 _log;
@@ -339,7 +339,7 @@ struct Job : Sos_self_deleting
     string                     _in_call;                    // "spooler_process" etc.
     Time                       _delay_until;                // Nach Fehler verzögern
     Time                       _next_start_time;
-    Time                       _next_time;                  // Für Thread::wait(): Um diese Zeit soll Job::do_something() gerufen werden.
+    Time                       _next_time;                  // Für Spooler_thread::wait(): Um diese Zeit soll Job::do_something() gerufen werden.
     Period                     _period;                     // Derzeitige oder nächste Period
     Time                       _next_single_start;
     Time                       _repeat;                     // spooler_task.repeat
@@ -498,6 +498,7 @@ struct Job_script_task : Script_task
 };
 
 //-------------------------------------------------------------------------------------Process_task
+#ifdef Z_WINDOWS
 
 struct Process_task : Task
 {
@@ -517,6 +518,7 @@ struct Process_task : Task
     Event                      _process_handle;
 };
 
+#endif
 //-------------------------------------------------------------------------------------------------
 
 } //namespace spooler

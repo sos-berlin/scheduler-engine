@@ -1,4 +1,4 @@
-// $Id: spooler_communication.cxx,v 1.34 2002/11/22 17:23:52 jz Exp $
+// $Id: spooler_communication.cxx,v 1.35 2002/11/24 15:12:48 jz Exp $
 /*
     Hier sind implementiert
 
@@ -9,7 +9,9 @@
 
 
 #include "spooler.h"
-#include "../kram/sossock.h"
+#include "../kram/sossock1.h"
+
+#ifdef Z_WINDOWS
 
 #ifdef SYSTEM_WIN
     const int ENOTSOCK = 10038;
@@ -254,7 +256,7 @@ bool Communication::Channel::do_accept( SOCKET listen_socket )
     try
     {
         struct sockaddr_in peer_addr;
-        int peer_addr_len = sizeof peer_addr;
+        socklen_t          peer_addr_len = sizeof peer_addr;
 
         _socket = accept( listen_socket, (struct sockaddr*)&peer_addr, &peer_addr_len );
         if( _socket == SOCKET_ERROR )  throw_sos_socket_error( "accept" );
@@ -748,4 +750,4 @@ void Communication::start_or_rebind()
 } //namespace spooler
 } //namespace sos
 
-
+#endif

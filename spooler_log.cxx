@@ -1,10 +1,10 @@
-// $Id: spooler_log.cxx,v 1.47 2002/11/20 11:03:11 jz Exp $
+// $Id: spooler_log.cxx,v 1.48 2002/11/24 15:12:49 jz Exp $
 
 #include "spooler.h"
 #include "spooler_mail.h"
 
 #include "../kram/sosdate.h"
-#include "../kram/olestd.h"
+#include "../kram/com_simple_standards.h"
 #include "../kram/com.h"
 #include "../kram/com_server.h"
 #include "../kram/sosprof.h"
@@ -128,7 +128,7 @@ void Log::open_new()
     }
     else
     {
-        Sos_optional_date_time time = Time::now();
+        Sos_optional_date_time time = Time::now().as_time_t();
         string filename = _directory;
 
         filename += "/spooler-";

@@ -1,4 +1,4 @@
-// $Id: spooler.h,v 1.104 2002/11/23 17:28:53 jz Exp $
+// $Id: spooler.h,v 1.105 2002/11/24 15:12:45 jz Exp $
 
 #ifndef __SPOOLER_H
 #define __SPOOLER_H
@@ -26,7 +26,9 @@
     using namespace zschimmer::xml_libxml2;
 #endif
 
-
+#ifndef Z_WINDOWS
+    const int _dstbias = 3600;
+#endif
 
 #include <stdio.h>
 
@@ -50,6 +52,7 @@
 #include "../zschimmer/zschimmer.h"
 #include "../zschimmer/file.h"
 #include "../zschimmer/z_com.h"
+#include "../zschimmer/threads.h"
 
 using namespace zschimmer;
 using namespace zschimmer::com;
@@ -58,7 +61,7 @@ namespace sos {
     namespace spooler {
         using namespace std;
         struct Spooler;
-        struct Thread;
+        struct Spooler_thread;
         struct Job;
         struct Task;
         struct Job_chain;
@@ -103,7 +106,7 @@ With_log_switch                 read_profile_with_log       ( const string& prof
 
 typedef void (*State_changed_handler)( Spooler*, void* );
 
-typedef map<Thread_id,Thread*>      Thread_id_map;
+typedef map<Thread_id,Spooler_thread*>      Thread_id_map;
 
 //------------------------------------------------------------------------------------------Spooler
 
@@ -164,8 +167,8 @@ struct Spooler
     Thread_id                   thread_id                   () const                            { return _thread_id; }
 
     // Für andere Threads:
-    Thread*                     get_thread                  ( const string& thread_name );
-    Thread*                     get_thread_or_null          ( const string& thread_name );
+    Spooler_thread*             get_thread                  ( const string& thread_name );
+    Spooler_thread*             get_thread_or_null          ( const string& thread_name );
     Object_set_class*           get_object_set_class        ( const string& name );
     Object_set_class*           get_object_set_class_or_null( const string& name );
     Job*                        get_job                     ( const string& job_name );
@@ -214,7 +217,7 @@ struct Spooler
 
     void                        signal                      ( const string& signal_name = "" )  { _log.info( "Signal \"" + signal_name + "\"" ); _event.signal( signal_name ); }
 
-    Thread*                     thread_by_thread_id         ( Thread_id );
+    Spooler_thread*                     thread_by_thread_id         ( Thread_id );
 
     Fill_zero                  _zero_;
 
@@ -255,7 +258,7 @@ struct Spooler
     ptr<Com_spooler>           _com_spooler;                // COM-Objekt spooler
     ptr<Com_log>               _com_log;                    // COM-Objekt spooler.log
 
-    Thread_id_map              _thread_id_map;              // Thread_id -> Thread
+    Thread_id_map              _thread_id_map;              // Thread_id -> Spooler_thread
     Thread_semaphore           _thread_id_map_lock;
 
     Thread_semaphore           _job_name_lock;              // Sperre von get_job(name) bis add_job() für eindeutige Jobnamen

@@ -1,4 +1,4 @@
-// $Id: spooler_history.cxx,v 1.29 2002/11/13 12:53:59 jz Exp $
+// $Id: spooler_history.cxx,v 1.30 2002/11/24 15:12:48 jz Exp $
 
 #include "spooler.h"
 #include "../zschimmer/z_com.h"
@@ -485,13 +485,13 @@ void Job_history::close()
 
 void Job_history::archive( Archive_switch arc, const string& filename )
 {
-    if( GetFileAttributes( filename.c_str() ) != -1 ) 
+    if( file_exists( filename ) )
     {
         string ext   = extension_of_path( filename );
         string rumpf = filename;
         if( ext != "" )  rumpf = filename.substr( 0, filename.length() - ext.length() - 1 );
 
-        Sos_optional_date_time time = Time::now();
+        Sos_optional_date_time time = Time::now().as_time_t();
         string arc_filename = rumpf + "." + time.formatted( "yyyy-mm-dd-HHMMSS" );
         if( ext != "" )  arc_filename +=  "." + ext;
 
@@ -522,7 +522,7 @@ void Job_history::append_tabbed( string value )
     if( strchr( value.c_str(), '\t' )
      || strchr( value.c_str(), '\n' ) )
     {
-        for( i; i < _tabbed_record.length(); i++ )  
+        for(; i < _tabbed_record.length(); i++ )  
         {
             if( _tabbed_record[i] == '\t' )  _tabbed_record[i] = ' ';
             if( _tabbed_record[i] == '\n' )  _tabbed_record[i] = ' ';

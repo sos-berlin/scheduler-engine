@@ -1,4 +1,4 @@
-// $Id: spooler_module_com.cxx,v 1.2 2002/11/06 06:30:48 jz Exp $
+// $Id: spooler_module_com.cxx,v 1.3 2002/11/24 15:12:50 jz Exp $
 /*
     Hier sind implementiert
 
@@ -10,6 +10,8 @@
 
 #include "spooler.h"
 #include "../file/anyfile.h"
+
+#ifdef Z_WINDOWS
 
 using namespace std;
 
@@ -23,7 +25,7 @@ bool check_result( const Variant& vt )
     if( vt.vt == VT_EMPTY    )  return true;                       // Keine Rückgabe? True, also weiter machen
     if( vt.vt == VT_NULL     )  return false;                      // NULL? False
     if( vt.vt == VT_DISPATCH )  return vt.pdispVal != NULL;        // Nothing => False, also Ende
-    if( vt.vt == VT_BOOL     )  return vt.bVal != NULL;            // Nothing => False, also Ende
+    if( vt.vt == VT_BOOL     )  return vt.bVal != 0;               // Nothing => False, also Ende
 
     Variant v = vt;
 
@@ -66,7 +68,8 @@ void Com_module_instance::load()
 {
     if( name_exists( "spooler_set_context" ) )
     {
-        com_call( _idispatch, "spooler_set_context", &Variant(_com_context) );
+        Variant com_context_vt = _com_context;
+        com_call( _idispatch, "spooler_set_context", &_com_context_vt );
     }
 
     _loaded = true;
@@ -245,3 +248,5 @@ void Scripting_engine_module_instance::start()
 
 } //namespace spooler
 } //namespace sos
+
+#endif

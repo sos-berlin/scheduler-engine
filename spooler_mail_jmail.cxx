@@ -1,9 +1,11 @@
-// $Id: spooler_mail_jmail.cxx,v 1.7 2002/09/29 16:17:25 jz Exp $
+// $Id: spooler_mail_jmail.cxx,v 1.8 2002/11/24 15:12:49 jz Exp $
 
 
 #include "../kram/sos.h"
 #include "spooler.h"
 #include "spooler_mail_jmail.h"
+
+#ifdef Z_WINDOWS
 
 namespace sos {
 namespace spooler {
@@ -370,3 +372,4 @@ STDMETHODIMP Com_mail::add_header_field( BSTR field_name, BSTR value )
 } //namespace spooler
 } //namespace sos
 
+#endif

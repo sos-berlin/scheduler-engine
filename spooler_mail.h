@@ -1,4 +1,4 @@
-// $Id: spooler_mail.h,v 1.8 2002/11/22 14:10:13 jz Exp $
+// $Id: spooler_mail.h,v 1.9 2002/11/24 15:12:49 jz Exp $
 
 #ifndef __SPOOLER_MAIL_H
 #define __SPOOLER_MAIL_H
@@ -26,6 +26,7 @@ struct Com_mail : spooler_com::Imail, Sos_ole_object
     void                        operator delete             ( void* ptr )                           { sos_free( ptr ); }
 
 
+    Z_GNU_ONLY(                 Com_mail                    ();  )                                  // Für gcc 3.2. Nicht implementiert
                                 Com_mail                    ( Spooler* );
                                ~Com_mail                    ();
                                 

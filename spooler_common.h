@@ -1,4 +1,4 @@
-// $Id: spooler_common.h,v 1.12 2002/11/22 14:10:12 jz Exp $
+// $Id: spooler_common.h,v 1.13 2002/11/24 15:12:47 jz Exp $
 
 #ifndef __SPOOLER_COMMON_H
 #define __SPOOLER_COMMON_H
@@ -13,7 +13,7 @@ namespace spooler {
 #endif
 
 
-typedef uint                    Thread_id;                  // _beginthreadex()
+typedef zschimmer::Thread::Id   Thread_id;                  // _beginthreadex()
 typedef DWORD                   Process_id;
 
 //-----------------------------------------------------------------------------------------FOR_EACH
@@ -55,10 +55,10 @@ struct Handle : Sos_self_deleting
 #   endif
 };
 
-static HANDLE null_handle = NULL;
+//static HANDLE null_handle = NULL;
 
 //-------------------------------------------------------------------------------------------Atomic
-
+/*
 template<typename T>
 struct Atomic
 {
@@ -101,7 +101,7 @@ struct Simple_atomic
     volatile T                 _value;
     sos::Thread_semaphore      _lock;
 };
-
+*/
 //------------------------------------------------------------------------------------threaded_list
 /*
 template< class T >

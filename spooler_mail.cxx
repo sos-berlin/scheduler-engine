@@ -1,4 +1,4 @@
-// $Id: spooler_mail.cxx,v 1.8 2002/11/20 11:03:11 jz Exp $
+// $Id: spooler_mail.cxx,v 1.9 2002/11/24 15:12:49 jz Exp $
 
 
 #include "spooler.h"
@@ -10,13 +10,11 @@ namespace spooler {
 using namespace std;
 using namespace spooler_com;
 
-static _bstr_t empty_bstr;
-
 //------------------------------------------------------------------------------------Typbibliothek
 
 extern Typelib_descr spooler_typelib;
 
-DESCRIBE_CLASS( &spooler_typelib, Com_mail, mail, spooler_com::CLSID_mail, "Spooler.Mail", "1.0" )
+DESCRIBE_CLASS( &spooler_typelib, Com_mail, mail, CLSID_mail, "Spooler.Mail", "1.0" )
 
 //-------------------------------------------------------------------------------Com_mail::Com_mail
 
@@ -41,7 +39,7 @@ void Com_mail::init()
 {
     if( _msg == NULL )
     {
-        _msg = SOS_NEW( Jmail_message );
+        _msg = SOS_NEW( Mail_message );
         _msg->init();
     }
 }

@@ -1,4 +1,4 @@
-// $Id: spooler_time.h,v 1.14 2002/11/11 23:10:37 jz Exp $
+// $Id: spooler_time.h,v 1.15 2002/11/24 15:12:54 jz Exp $
 
 #ifndef __SPOOLER_TIME_H
 #define __SPOOLER_TIME_H
@@ -29,6 +29,7 @@ struct Time
     };
 
                                 Time                        ( double t = 0.0 )              { set(t); }
+                                Time                        ( time_t t )                    { set(t); }
                                 Time                        ( int t )                       { set(t); }
                                 Time                        ( uint t )                      { set(t); }
                                 Time                        ( const string& t )             { set(t); }
@@ -76,6 +77,7 @@ struct Time
     Time                        time_of_day                 () const                        { return _time - midnight(); }
     Time                        midnight                    () const                        { return day_nr() * 24*60*60; }
     int                         day_nr                      () const                        { return uint(_time) / (24*60*60); }
+    time_t                      as_time_t                   () const                        { return (time_t)( _time + 0.0001 ); }
 
     string                      as_string                   ( With_ms = with_ms ) const;                        
     void                        print                       ( ostream& s ) const            { s << as_string(); }
@@ -108,7 +110,7 @@ struct Period
 
     bool                        operator <                  ( const Period& t ) const               { return _begin < t._begin; }  //für set<>
     bool                        is_in_time                  ( Time t )                              { return t >= _begin && t < _end; }
-    bool                        is_comming                  ( Time time_of_day, With_single_start single_start );
+    bool                        is_comming                  ( Time time_of_day, With_single_start single_start ) const;
 
     Time                        begin                       () const                                { return _begin; }
     Time                        end                         () const                                { return _end; }
@@ -151,8 +153,8 @@ struct Day
                                 operator bool               () const                                { return !_period_set.empty(); }
 
     bool                        has_time                    ( Time time_of_day );
-    const Period&               next_period                 ( Time time_of_day, With_single_start single_start ) { return _period_set.empty()? empty_period: next_period_(time_of_day,single_start); }
-    const Period&               next_period_                ( Time time_of_day, With_single_start single_start );
+    const Period&               next_period                 ( Time time_of_day, With_single_start single_start ) const { return _period_set.empty()? empty_period: next_period_(time_of_day,single_start); }
+    const Period&               next_period_                ( Time time_of_day, With_single_start single_start ) const;
     void                        add                         ( const Period& p )                     { _period_set.insert( p ); }       
 
     void                        print                       ( ostream& ) const;

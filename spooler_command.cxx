@@ -1,4 +1,4 @@
-// $Id: spooler_command.cxx,v 1.66 2002/11/23 17:28:54 jz Exp $
+// $Id: spooler_command.cxx,v 1.67 2002/11/24 15:12:47 jz Exp $
 /*
     Hier ist implementiert
 
@@ -58,9 +58,10 @@ xml::Element_ptr create_error_element( const xml::Document_ptr& document, const 
 {
     xml::Element_ptr e = document.createElement( "ERROR" );
 
-    _timeb  tm;     // Ob die Sommerzeitverschiebung bei der Fehlerzeit berücksichtigt wird, hängt von der _aktuellen_ Zeit ab.
-    _ftime( &tm );  // Nicht schön, aber es funktioniert, weil der Spooler sowieso nicht während der Zeitumstellung laufen soll.
-    e.setAttribute( "time", Sos_optional_date_time( x.time() - _timezone - ( tm.dstflag? _dstbias : 0 ) ).as_string() );
+    timeb  tm;     // Ob die Sommerzeitverschiebung bei der Fehlerzeit berücksichtigt wird, hängt von der _aktuellen_ Zeit ab.
+    ftime( &tm );  // Nicht schön, aber es funktioniert, weil der Spooler sowieso nicht während der Zeitumstellung laufen soll.
+    e.setAttribute( "time", Sos_optional_date_time( (time_t)x.time() - timezone - ( tm.dstflag? _dstbias : 0 ) ).as_string() );
+
 
     if( !empty( x->name() )          )  e.setAttribute( "class" , x->name()          );
 
@@ -127,7 +128,7 @@ xml::Element_ptr Command_processor::execute_show_state( const xml::Element_ptr& 
 
     double cpu_time = get_cpu_time();
     char buffer [30];
-    sprintf( buffer, "%-0.3lf", cpu_time ); 
+    sprintf( buffer, "%-.3lf", cpu_time ); 
     state_element.setAttribute( "cpu_time"             , buffer );
 
     state_element.appendChild( execute_show_threads( show ) );
@@ -145,8 +146,7 @@ xml::Element_ptr Command_processor::execute_show_history( const xml::Element_ptr
 
     string job_name = element.getAttribute( "job" );
     
-    string id_str = element.getAttribute( "id" );
-    int id = id_str != ""? as_uint(id_str) : -1;
+    int id = element.uint_getAttribute( "id", -1 );
 
     string prev_str = element.getAttribute( "prev" );
     int    next     = prev_str == ""   ? ( id == -1? -10 : 0 ) :
@@ -159,6 +159,21 @@ xml::Element_ptr Command_processor::execute_show_history( const xml::Element_ptr
     Sos_ptr<Job> job = _spooler->get_job( job_name );
 
     return job->read_history( _answer, id, next, show );
+}
+
+//--------------------------------------------------------------------------------abort_immediately
+
+static void abort_immediately( int exit_code = 1 )
+{
+#   ifdef Z_WINDOWS
+
+        TerminateProcess( GetCurrentProcess(), exit_code );  // _exit() lässt noch Delphi-Code ausführen.
+
+#    else
+
+        _exit( exit_code );
+
+#   endif
 }
 
 //--------------------------------------------------------Command_processor::execute_modify_spooler
@@ -184,9 +199,9 @@ xml::Element_ptr Command_processor::execute_modify_spooler( const xml::Element_p
         else
         if( cmd == "let_run_terminate_and_restart" )  _spooler->cmd_let_run_terminate_and_restart();
         else
-        if( cmd == "abort_immediately"     )  TerminateProcess(GetCurrentProcess(),1);  // _exit() lässt noch Delphi-Code ausführen.
+        if( cmd == "abort_immediately"     )  abort_immediately();
         else
-        if( cmd == "abort_immediately_and_restart" )  { try{ spooler_restart( NULL, _spooler->is_service() ); }catch(...){}; TerminateProcess(GetCurrentProcess(),1); }
+        if( cmd == "abort_immediately_and_restart" )  { try{ spooler_restart( NULL, _spooler->is_service() ); }catch(...){}; abort_immediately(); }
         else
       //if( cmd == "new_log"               )  _spooler->cmd_new_log();
       //else
@@ -295,7 +310,7 @@ xml::Element_ptr Command_processor::execute_add_jobs( const xml::Element_ptr& ad
 {
     if( _security_level < Security::seclev_all )  throw_xc( "SPOOLER-121" );
 
-    Sos_ptr<Thread> thread = _spooler->get_thread( add_jobs_element.getAttribute( "thread" ) );
+    Sos_ptr<Spooler_thread> thread = _spooler->get_thread( add_jobs_element.getAttribute( "thread" ) );
     thread->cmd_add_jobs( add_jobs_element );
 
     return _answer.createElement( "ok" );

@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.1 2002/11/13 18:17:34 jz Exp $
+# $Id: Makefile,v 1.2 2002/11/24 15:12:44 jz Exp $
 
 ifndef PROD_DIR
 prod_dir = ..
@@ -30,6 +30,23 @@ objects = \
  spooler_time.o\
  spooler_wait.o
 
+java_classes=\
+ sos/spooler/Error.class\
+ sos/spooler/Idispatch.class\
+ sos/spooler/Job.class\
+ sos/spooler/Job_chain.class\
+ sos/spooler/Job_chain_node.class\
+ sos/spooler/Job_impl.class\
+ sos/spooler/Log.class\
+ sos/spooler/Mail.class\
+ sos/spooler/Order.class\
+ sos/spooler/Order_queue.class\
+ sos/spooler/Spooler.class\
+ sos/spooler/Task.class\
+ sos/spooler/Thread.class\
+ sos/spooler/Variable_set.class
+
+java_headers=$(patsubst %.class, %.h, $(java_classes) )
 
 all:: $(BIN_DIR)/spooler
 all:: libspooler.a
@@ -39,12 +56,20 @@ clean:
 
 include $(PROD_DIR)/make/standard.makefile
 
+%.class: %.java
+	mkdir -p $(dir $@)
+	javac -d . -classpath .. $<
 
-libspooler.a: $(objects)
+%.h: %.class
+	mkdir -p $(dir $@)
+	javah -o $@ -classpath . $(subst /,.,$(patsubst %.class, %, $<))
+
+
+libspooler.a: $(java_headers) $(objects)
 	$(AR) $(ARFLAGS) $@ $(objects)
 
 
-$(BIN_DIR)/spooler: spooler.o ../kram/$(O_DIR)/soswnmai.o $(foreach p,$(DEP_PRODUCTS),$(PROD_DIR)/$(p)/$(O_DIR)/lib$(p).a)
+$(BIN_DIR)/spooler: spooler.o libspooler.a ../kram/$(O_DIR)/soswnmai.o $(foreach p,$(DEP_PRODUCTS),$(PROD_DIR)/$(p)/$(O_DIR)/lib$(p).a)
 	-$(CCPP) $(DEBUG) -static $(LINK_FLAGS) -Xlinker -Map -Xlinker $(BIN_DIR)/spooler.map  $^ $(VERBOSE) $(CFLAGS) $(INCLUDES) $(TEMPLATES) $(LIBPATH) $(SOS_LIBS) $(SOS_LIBS) $(ORACLE_LIBS) $(RW_LIBS) $(NET_LIBS) $(C_LIBS) $(LIBS) -o $@
 	echo ^G
 

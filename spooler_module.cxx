@@ -1,4 +1,4 @@
-// $Id: spooler_module.cxx,v 1.6 2002/11/23 17:28:54 jz Exp $
+// $Id: spooler_module.cxx,v 1.7 2002/11/24 15:12:50 jz Exp $
 /*
     Hier sind implementiert
 
@@ -37,6 +37,7 @@ void Module::set_dom_without_source( const xml::Element_ptr& element )
     _java_class_name = element.getAttribute( "java_class" );
     _recompile       = element.bool_getAttribute( "recompile" );
 
+# ifdef Z_WINDOWS
     if( _com_class_name != "" )
     {
         _kind = kind_com;
@@ -45,6 +46,8 @@ void Module::set_dom_without_source( const xml::Element_ptr& element )
         if( _java_class_name != "" )  throw_xc( "SPOOLER-168" );
     }
     else
+# endif
+
     if( _java_class_name != ""  ||  lcase(_language) == "java" )
     {
         _kind = kind_java;
@@ -58,10 +61,12 @@ void Module::set_dom_without_source( const xml::Element_ptr& element )
     }
     else
     {
-        _kind = kind_scripting_engine;
-
-        if( _language == "" )  _language = SPOOLER_DEFAULT_LANGUAGE;
-
+#       ifdef Z_WINDOWS
+            _kind = kind_scripting_engine;
+             if( _language == "" )  _language = SPOOLER_DEFAULT_LANGUAGE;
+#       else
+            throw_xc( "SPOOLER-179" );
+#       endif
     }
 
     string use_engine = element.getAttribute( "use_engine" );
@@ -80,6 +85,7 @@ void Module::set_dom_source_only( const xml::Element_ptr& element, const Time& x
 
     switch( _kind )
     {
+#     ifdef Z_WINDOWS
         case kind_scripting_engine:
             if( _source.empty() )  throw_xc( "SPOOLER-173" );
             break;
@@ -87,6 +93,7 @@ void Module::set_dom_source_only( const xml::Element_ptr& element, const Time& x
         case kind_com:
             if( !_source.empty() )  throw_xc( "SPOOLER-167" );
             break;
+#     endif
 
         case kind_java:
             //if( !_source.empty() )  throw_xc( "SPOOLER-167" );
@@ -105,9 +112,12 @@ ptr<Module_instance> Module::create_instance()
 {
     switch( _kind )
     {
-        case kind_scripting_engine:  return Z_NEW( Scripting_engine_module_instance( this ) );
-        case kind_com:               return Z_NEW( Com_module_instance( this ) );
-        case kind_java:              return Z_NEW( Java_module_instance( this ) );
+#     ifdef Z_WINDOWS
+        case kind_scripting_engine:  return (Module_instance*) Z_NEW( Scripting_engine_module_instance( this ) );
+        case kind_com:               return (Module_instance*) Z_NEW( Com_module_instance( this ) );
+#     endif
+
+        case kind_java:              return (Module_instance*) Z_NEW( Java_module_instance( this ) );
         default:                     throw_xc( "SPOOLER-173" );
     }
 }

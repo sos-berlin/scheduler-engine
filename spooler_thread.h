@@ -1,4 +1,4 @@
-// $Id: spooler_thread.h,v 1.27 2002/11/22 17:23:55 jz Exp $
+// $Id: spooler_thread.h,v 1.28 2002/11/24 15:12:54 jz Exp $
 
 #ifndef __SPOOLER_THREAD_H
 #define __SPOOLER_THREAD_H
@@ -6,12 +6,12 @@
 namespace sos {
 namespace spooler {
 
-//-------------------------------------------------------------------------------------------Thread
+//-----------------------------------------------------------------------------------Spooler_thread
 
-struct Thread : Sos_self_deleting
+struct Spooler_thread : Sos_self_deleting
 {
-                                Thread                      ( Spooler* );
-                               ~Thread                      ();
+                                Spooler_thread              ( Spooler* );
+                               ~Spooler_thread              ();
 
     void                        set_dom                     ( const xml::Element_ptr&, const Time& xml_mod_time );
     xml::Element_ptr            dom                         ( const xml::Document_ptr&, Show_what );
@@ -32,7 +32,7 @@ struct Thread : Sos_self_deleting
     void                        start_thread                ();
 
     int                         run_thread                  ();
-    bool                        running                     ()                              { DWORD rc; return GetExitCodeThread(_thread_handle,&rc)? rc == STILL_ACTIVE : false; }
+  //bool                        running                     ()                              { DWORD rc; return GetExitCodeThread(_thread_handle,&rc)? rc == STILL_ACTIVE : false; }
     bool                        process                     ();                             // Einen Schritt im (Pseudo-)Thread ausführen
     void                        start                       ();
     void                        stop_jobs                   ();
@@ -40,6 +40,9 @@ struct Thread : Sos_self_deleting
     bool                        do_something                ( Job* );
     void                        wait                        ();
     int                         wait_until                  ( Time );
+
+    Time                        next_start_time             ();
+    Job*                        next_job_to_start           ();
 
     bool                        finished                    ();
 
@@ -93,14 +96,14 @@ struct Thread : Sos_self_deleting
     bool                       _terminated;
 
   private:
-                                Thread                      ( const Thread& );      // Nicht implementiert
-    Thread&                     operator =                  ( const Thread& );      // Nicht implementiert
+                                Spooler_thread              ( const Spooler_thread& );      // Nicht implementiert
+    Spooler_thread&             operator =                  ( const Spooler_thread& );      // Nicht implementiert
 
     vector<Job*>               _prioritized_order_job_array;
     Time                       _prioritized_order_job_array_time;
 };
 
-typedef list< Sos_ptr<Thread> >  Thread_list;
+typedef list< Sos_ptr<Spooler_thread> >  Thread_list;
 
 /*
     Threads und Thread::_job_list:

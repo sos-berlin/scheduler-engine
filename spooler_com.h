@@ -1,4 +1,4 @@
-// $Id: spooler_com.h,v 1.57 2002/11/21 09:17:32 jz Exp $
+// $Id: spooler_com.h,v 1.58 2002/11/24 15:12:46 jz Exp $
 
 #ifndef __SPOOLER_COM_H
 #define __SPOOLER_COM_H
@@ -242,6 +242,7 @@ struct Com_object_set : spooler_com::Iobject_set,
                       //spooler_com::Ihas_java_class_name, 
                         Sos_ole_object               
 {
+    Z_GNU_ONLY(                 Com_object_set              ();  )                                  // Für gcc 3.2. Nicht implementiert.
                                 Com_object_set              ( Object_set* );
 
     USE_SOS_OLE_OBJECT
@@ -265,6 +266,7 @@ struct Com_job : spooler_com::Ijob,
                  spooler_com::Ihas_java_class_name, 
                  Sos_ole_object               
 {
+    Z_GNU_ONLY(                 Com_job                     ();  )                                  // Für gcc 3.2. Nicht implementiert.
                                 Com_job                     ( Job* );
 
     USE_SOS_OLE_OBJECT_WITHOUT_QI
@@ -338,7 +340,7 @@ struct Com_thread : spooler_com::Ithread,
                     spooler_com::Ihas_java_class_name, 
                     Sos_ole_object               
 {
-                                Com_thread                  ( Thread* );
+                                Com_thread                  ( Spooler_thread* );
 
     USE_SOS_OLE_OBJECT_WITHOUT_QI
 
@@ -356,7 +358,7 @@ struct Com_thread : spooler_com::Ithread,
 
   protected:
     Thread_semaphore           _lock;
-    Thread*                    _thread;                     // Es gibt nur einen Com_thread pro Thread
+    Spooler_thread*            _thread;                     // Es gibt nur einen Com_thread pro Spooler_thread
 };
 
 //--------------------------------------------------------------------------------------Com_spooler
@@ -365,6 +367,7 @@ struct Com_spooler : spooler_com::Ispooler,
                      spooler_com::Ihas_java_class_name, 
                      Sos_ole_object               
 {
+                                Com_spooler                 ();                                     // Für gcc 3.2. Nicht implementiert.
                                 Com_spooler                 ( Spooler* ); 
 
     USE_SOS_OLE_OBJECT_WITHOUT_QI

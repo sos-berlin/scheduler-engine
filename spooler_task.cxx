@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.123 2002/11/22 17:23:53 jz Exp $
+// $Id: spooler_task.cxx,v 1.124 2002/11/24 15:12:52 jz Exp $
 /*
     Hier sind implementiert
 
@@ -10,7 +10,10 @@
 
 
 #include "spooler.h"
-#include <crtdbg.h>
+
+#ifdef Z_WINDOWS
+#   include <crtdbg.h>
+#endif
 
 namespace sos {
 namespace spooler {
@@ -184,7 +187,7 @@ bool Object_set::step( Level result_level )
 
 //-------------------------------------------------------------------------------Object_set::thread
 
-Thread* Object_set::thread() const
+Spooler_thread* Object_set::thread() const
 { 
     return _task->_job->_thread; 
 }
@@ -203,7 +206,7 @@ Job::In_call::In_call( Job* job, const string& name )
     _job->set_in_call( my_name ); 
     LOG( *job << '.' << my_name << "() begin\n" );
 
-    _ASSERTE( _CrtCheckMemory( ) );
+    Z_WINDOWS_ONLY( _ASSERTE( _CrtCheckMemory( ) ); )
 }
 
 //----------------------------------------------------------------------------Job::In_call::In_call
@@ -220,7 +223,7 @@ Job::In_call::In_call( Task* task, const string& name, const string& extra )
     _job->set_in_call( my_name, extra ); 
     LOG( *task->job() << '.' << my_name << "() begin\n" );
 
-    _ASSERTE( _CrtCheckMemory() );
+    Z_WINDOWS_ONLY( _ASSERTE( _CrtCheckMemory() ); )
 }
 
 //---------------------------------------------------------------------------Job::In_call::~In_call
@@ -240,12 +243,12 @@ Job::In_call::~In_call()
         }
     }
 
-    _ASSERTE( _CrtCheckMemory() );
+    Z_WINDOWS_ONLY( _ASSERTE( _CrtCheckMemory() ); )
 }
 
 //-----------------------------------------------------------------------------------------Job::Job
 
-Job::Job( Thread* thread )
+Job::Job( Spooler_thread* thread )
 : 
     _zero_(this+1),
     _thread(thread),
@@ -495,7 +498,11 @@ Sos_ptr<Task> Job::create_task( const ptr<spooler_com::Ivariable_set>& params, c
 
     //_log.debug( "create_task" );
 
+#ifdef Z_WINDOWS
     if( !_process_filename.empty() )   task = SOS_NEW( Process_task( _spooler, this ) );
+#else
+    if( !_process_filename.empty() )   throw_xc( "create_task", "Process_task ist hier nicht implementiert" );
+#endif
     else
     if( _object_set_descr          )   task = SOS_NEW( Object_set_task( _spooler, this ) );
     else                             
@@ -606,7 +613,7 @@ Sos_ptr<Task> Job::start_without_lock( const ptr<spooler_com::Ivariable_set>& pa
     Sos_ptr<Task> task = create_task( params, task_name, start_at );
     task->_let_run = true;
 
-    if( GetCurrentThreadId() != thread()->_thread_id )  _thread->signal( "start job" );
+    if( current_thread_id() != thread()->_thread_id )  _thread->signal( "start job" );
 
     return task;
 }
@@ -972,7 +979,6 @@ void Job::task_to_start()
 {
     Time now      = Time::now();
     bool dequeued = false;
-    bool ok       = false;
     Start_cause cause = cause_none;
 
     if( _state == s_pending  )
@@ -1002,16 +1008,18 @@ void Job::task_to_start()
                                                                                       
                     if( now >= _next_start_time )  cause = cause_period_repeat,                      _log.debug( "Task startet, weil Job-Startzeit erreicht: " + _next_start_time.as_string() );
 
-                    for( Directory_watcher_list::iterator it = _directory_watcher_list.begin(); it != _directory_watcher_list.end(); it++ )
-                    {
-                        if( (*it)->signaled_then_reset() )
+#                   ifdef Z_WINDOWS
+                        for( Directory_watcher_list::iterator it = _directory_watcher_list.begin(); it != _directory_watcher_list.end(); it++ )
                         {
-                            cause = cause_directory;
-                            _log.debug( "Task startet wegen eines Ereignisses für Verzeichnis " + (*it)->directory() );
+                            if( (*it)->signaled_then_reset() )
+                            {
+                                cause = cause_directory;
+                                _log.debug( "Task startet wegen eines Ereignisses für Verzeichnis " + (*it)->directory() );
 
-                            if( !(*it)->handle() )  it = _directory_watcher_list.erase( it );  // Folge eines Fehlers, s. Directory_watcher::set_signal
+                                if( !(*it)->handle() )  it = _directory_watcher_list.erase( it );  // Folge eines Fehlers, s. Directory_watcher::set_signal
+                            }
                         }
-                    }
+#                   endif
 
                     if( !cause  &&  _order_queue && !_order_queue->empty() )  cause = cause_order,               _log.debug( "Task startet wegen Auftrags" );
                                                                                       
@@ -1038,7 +1046,6 @@ bool Job::do_something()
 
     if( !_state )  return false;
 
-    Start_cause cause          = cause_none;
     bool        something_done = false;
     bool        ok             = true;
     bool        do_a_step      = false;
@@ -1846,24 +1853,25 @@ void Task::cmd_end()
 
 bool Task::wait_until_terminated( double wait_time )
 {
-    Thread_id my_thread_id = GetCurrentThreadId();
+    Thread_id my_thread_id = current_thread_id();
     if( my_thread_id == _job->_thread->_thread_id )  throw_xc( "SPOOLER-125" );     // Deadlock
 
-    Thread* calling_thread = _spooler->thread_by_thread_id( my_thread_id );
+    Spooler_thread* calling_thread = _spooler->thread_by_thread_id( my_thread_id );
     if( calling_thread &&  !calling_thread->_free_threading  &&  !_job->_thread->_free_threading )  throw_xc( "SPOOLER-131" );
 
     Event event ( obj_name() + " wait_until_terminated" );
-    int   i = 0;
+    //int   i = 0;
     
     THREAD_LOCK( _terminated_events_lock ) 
     {
-        i = _terminated_events.size();
+        //i = _terminated_events.size();
         _terminated_events.push_back( &event );
     }
 
     bool result = event.wait( wait_time );
 
-    { THREAD_LOCK( _terminated_events_lock )  _terminated_events.erase( &_terminated_events[i] ); }
+    { THREAD_LOCK( _terminated_events_lock )  _terminated_events.pop_back(); }
+  //{ THREAD_LOCK( _terminated_events_lock )  _terminated_events.erase( &_terminated_events[i] ); }
 
     return result;
 }
@@ -1928,7 +1936,7 @@ void Object_set_task::do_close()
 
 bool Object_set_task::do_load()
 {
-    bool ok;
+    bool ok = true;
 
     if( !_object_set ) 
     {
@@ -2030,6 +2038,7 @@ bool Job_script_task::do_step()
 }
 
 //----------------------------------------------------------------------------Process_task::do_start
+#ifdef Z_WINDOWS
 
 bool Process_task::do_start()
 {
@@ -2134,6 +2143,7 @@ bool Process_task::do_step()
     return !_process_handle.signaled();
 }
 
+#endif
 //-------------------------------------------------------------------------------------------------
 
 } //namespace spoooler

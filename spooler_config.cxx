@@ -1,4 +1,4 @@
-// $Id: spooler_config.cxx,v 1.49 2002/11/22 17:23:52 jz Exp $
+// $Id: spooler_config.cxx,v 1.50 2002/11/24 15:12:48 jz Exp $
 
 //#include <precomp.h>
 
@@ -234,9 +234,9 @@ void Spooler::load_object_set_classes_from_xml( Object_set_class_list* liste, co
     }
 }
 
-//----------------------------------------------------------------------------------Thread::set_dom
+//--------------------------------------------------------------------------Spooler_thread::set_dom
 
-void Thread::set_dom( const xml::Element_ptr& element, const Time& xml_mod_time )
+void Spooler_thread::set_dom( const xml::Element_ptr& element, const Time& xml_mod_time )
 {
     string str;
 
@@ -245,18 +245,20 @@ void Thread::set_dom( const xml::Element_ptr& element, const Time& xml_mod_time 
     str = element.getAttribute( "free_threading" );
     if( !str.empty() )  _free_threading = as_bool( str );
 
-    str = element.getAttribute( "priority" );
-    if( !str.empty() )
-    {
-        if( str == "idle" )  _thread_priority = THREAD_PRIORITY_IDLE;
-        else
+#   ifdef Z_WINDOWS
+        str = element.getAttribute( "priority" );
+        if( !str.empty() )
         {
-            _thread_priority = as_int( str );
+            if( str == "idle" )  _thread_priority = THREAD_PRIORITY_IDLE;
+            else
+            {
+                _thread_priority = as_int( str );
 
-            if( _thread_priority < -15 )  _thread_priority = -15; 
-            if( _thread_priority >  +2 )  _thread_priority =  +2;   // In Windows sollte die Priorität nicht zu hoch werden
+                if( _thread_priority < -15 )  _thread_priority = -15; 
+                if( _thread_priority >  +2 )  _thread_priority =  +2;   // In Windows sollte die Priorität nicht zu hoch werden
+            }
         }
-    }
+#   endif
 
     if( element.getAttributeNode( "include_path" ) )  _include_path = element.getAttribute( "include_path" );
 
@@ -280,10 +282,10 @@ void Spooler::load_threads_from_xml( const xml::Element_ptr& element, const Time
             if( _manual  ||  spooler_id.empty()  ||  spooler_id == _spooler_id )
             {
                 string thread_name = e.getAttribute( "name" );
-                Sos_ptr<Thread> thread = get_thread_or_null( thread_name );
+                Sos_ptr<Spooler_thread> thread = get_thread_or_null( thread_name );
                 if( !thread )  
                 {
-                    thread = SOS_NEW( Thread( this ) );
+                    thread = SOS_NEW( Spooler_thread( this ) );
                     _thread_list.push_back( thread );
                 }
 

@@ -1,4 +1,4 @@
-// $Id: spooler_module_java.h,v 1.9 2002/11/23 17:28:55 jz Exp $
+// $Id: spooler_module_java.h,v 1.10 2002/11/24 15:12:50 jz Exp $
 
 #ifndef __SPOOLER_MODULE_JAVA_H
 #define __SPOOLER_MODULE_JAVA_H
@@ -116,6 +116,7 @@ struct Java_vm                  // Java virtual machine
 
 struct Java_object : Object, Non_cloneable
 {
+    Z_GNU_ONLY(                 Java_object                 ();  )                                  // Für gcc 3.2. Nicht implementiert.
                                 Java_object                 ( Spooler*, jobject = NULL );
                                ~Java_object                 ();
 
@@ -145,6 +146,7 @@ struct Java_global_object : Java_object
 
 struct Java_idispatch : Java_object
 {
+    Z_GNU_ONLY(                 Java_idispatch              ();  )                                  // Für gcc 3.2. Nicht implementiert.
                                 Java_idispatch              ( Spooler* sp, IDispatch*, const string& subclass );
                                ~Java_idispatch              ();
 

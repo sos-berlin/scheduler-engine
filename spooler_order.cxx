@@ -1,4 +1,4 @@
-// $Id: spooler_order.cxx,v 1.21 2002/11/21 09:17:32 jz Exp $
+// $Id: spooler_order.cxx,v 1.22 2002/11/24 15:12:51 jz Exp $
 /*
     Hier sind implementiert
 
@@ -39,7 +39,7 @@ void Spooler::add_job_chain( Job_chain* job_chain )
 
 Job_chain* Spooler::job_chain( const string& name )
 {
-    Job_chain* result;
+    Job_chain* result = NULL;
 
     THREAD_LOCK( _job_chain_lock )
     {
@@ -437,7 +437,8 @@ void Order_queue::remove_order( Order* order )
 
     THREAD_LOCK( _lock )
     {
-        for( Queue::iterator it = _queue.begin(); it != _queue.end(); it++ )  if( *it == order )  break;
+        Queue::iterator it;
+        for( it = _queue.begin(); it != _queue.end(); it++ )  if( *it == order )  break;
 
         if( it == _queue.end() )  throw_xc( "SPOOLER-156", order->obj_name(), _job->name() );
 
@@ -660,7 +661,7 @@ void Order::set_priority( Priority priority )
 
 Com_job* Order::com_job()
 { 
-    Com_job* result;
+    Com_job* result = NULL;
 
     THREAD_LOCK( _lock )
     {

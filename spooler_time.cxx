@@ -1,4 +1,4 @@
-// $Id: spooler_time.cxx,v 1.21 2002/11/13 21:31:24 jz Exp $
+// $Id: spooler_time.cxx,v 1.22 2002/11/24 15:12:54 jz Exp $
 /*
     Hier sind implementiert
 
@@ -47,14 +47,14 @@ void Time::set( const string& t )
 
 string Time::as_string( With_ms with ) const
 {
-    char  buff [30];
-    char* bruch = with == with_ms? buff + sprintf( buff, "%0.3lf", _time ) - 4
-                                 : "";
+    char        buff [30];
+    const char* bruch = with == with_ms? buff + sprintf( buff, "%0.3lf", _time ) - 4
+                                       : "";
 
     if( _time < 100*(24*60*60) )
     {
         char hhmmss [30];
-        int blen = sprintf( hhmmss, "%02d:%02d:%02d", (int)(_time/(60*60)), (int)(_time/60) % 60, (int)_time % 60 );
+        sprintf( hhmmss, "%02d:%02d:%02d", (int)(_time/(60*60)), (int)(_time/60) % 60, (int)_time % 60 );
         return sos::as_string(hhmmss) + bruch;
     }
     else
@@ -69,9 +69,9 @@ Time Time::now()
 {
 #   if 1 //defined SYSTEM_WIN
 
-        _timeb  tm;
-        _ftime( &tm );
-        return (double)tm.time + (double)tm.millitm / (double)1e3 - _timezone - ( tm.dstflag? _dstbias : 0 );
+        timeb  tm;
+        ftime( &tm );
+        return (double)tm.time + (double)tm.millitm / (double)1e3 - timezone - ( tm.dstflag? _dstbias : 0 );
 
 #   elif define SYSTEM_LINUX
 
@@ -158,7 +158,7 @@ void Period::check() const
 
 //-------------------------------------------------------------------------------Period::is_comming
 
-bool Period::is_comming( Time time_of_day, With_single_start single_start )
+bool Period::is_comming( Time time_of_day, With_single_start single_start ) const
 {
     if( single_start & wss_next_period )
     {
@@ -243,7 +243,7 @@ bool Day::has_time( Time time_of_day )
 
 //--------------------------------------------------------------------------------Day::next_period_
 
-const Period& Day::next_period_( Time time_of_day, With_single_start single_start )
+const Period& Day::next_period_( Time time_of_day, With_single_start single_start ) const
 {
     FOR_EACH( Period_set, _period_set, it )
     {
@@ -300,7 +300,7 @@ Period Monthday_set::next_period( Time tim, With_single_start single_start )
 {
     Time                    time_of_day = tim.time_of_day();
     int                     day_nr      = tim.day_nr();
-    Sos_optional_date_time  date        = tim;
+    Sos_optional_date_time  date        = tim.as_time_t();
 
     for( int i = 0; i < 31; i++ )
     {
@@ -316,7 +316,7 @@ Period Monthday_set::next_period( Time tim, With_single_start single_start )
 
 //--------------------------------------------------------------------------Ultimo_set::next_period
 
-Period Ultimo_set::next_period( Time tim, With_single_start single_start )
+Period Ultimo_set::next_period( Time tim, With_single_start single_start ) 
 {
     Time     time_of_day = tim.time_of_day();
     int      day_nr      = tim.day_nr();
@@ -353,11 +353,11 @@ Period Date_set::next_period( Time tim, With_single_start single_start )
 
     FOR_EACH( set<Date>, _date_set, it )
     {
-        Date& date = *it;
+        const Date& date = *it;
         
         if( date._day_nr >= day_nr )
         {
-            const Period& period = date._day.next_period( date._day_nr == day_nr? time_of_day : 0, single_start );
+            const Period& period = date._day.next_period( date._day_nr == day_nr? time_of_day : Time(0), single_start );
             if( !period.empty() )  return date._day_nr*(24*60*60) + period;
         }
     }

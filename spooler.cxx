@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.135 2002/11/23 17:59:36 jz Exp $
+// $Id: spooler.cxx,v 1.136 2002/11/24 15:12:44 jz Exp $
 /*
     Hier sind implementiert
 
@@ -12,8 +12,10 @@
 #include "spooler_version.h"
 
 #include <time.h>
+#include <signal.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/timeb.h>
 
 #ifdef Z_WINDOWS
 #   include <direct.h>
@@ -26,13 +28,6 @@
 #include "../file/anyfile.h"
 #include "../kram/licence.h"
 #include "../kram/sos_mail.h"
-
-#include "../zschimmer/zschimmer.h"
-using zschimmer::lcase;
-
-#include <sys/types.h>
-#include <sys/timeb.h>
-
 
 
 namespace sos {
@@ -65,6 +60,8 @@ struct Set_console_code_page
     uint                       _cp;
 };
 */
+
+static void set_ctrl_c_handler( bool on );
 
 //---------------------------------------------------------------------------------send_error_email
 
@@ -202,18 +199,50 @@ With_log_switch read_profile_with_log( const string& profile, const string& sect
 }
 
 //-----------------------------------------------------------------------------------ctrl_c_handler
+#ifdef Z_WINDOWS
 
-static BOOL WINAPI ctrl_c_handler( DWORD dwCtrlType )
-{
-    if( dwCtrlType == CTRL_C_EVENT  &&  !ctrl_c_pressed )
+    static BOOL WINAPI ctrl_c_handler( DWORD dwCtrlType )
     {
-        ctrl_c_pressed = true;
-        fprintf( stderr, "Spooler wird wegen Ctrl-C beendet ...\n" );
-        spooler->signal( "Ctrl+C" );
-        return true;
+        if( dwCtrlType == CTRL_C_EVENT  &&  !ctrl_c_pressed )
+        {
+            ctrl_c_pressed = true;
+            fprintf( stderr, "Spooler wird wegen Ctrl-C beendet ...\n" );
+            spooler->signal( "Ctrl+C" );
+            return true;
+        }
+        else
+            return false;
     }
-    else
-        return false;
+
+#else
+
+    static void ctrl_c_handler( int sig )
+    {
+        set_ctrl_c_handler( false );
+
+        //if( !ctrl_c_pressed )
+        //{
+            ctrl_c_pressed = true;
+            fprintf( stderr, "Spooler wird wegen Ctrl-C beendet ...\n" );
+            spooler->signal( "Ctrl+C" );
+        //}
+    }
+
+#endif
+//-------------------------------------------------------------------------------set_ctrl_c_handler
+
+static void set_ctrl_c_handler( bool on )
+{
+#   ifdef Z_WINDOWS
+
+        SetConsoleCtrlHandler( ctrl_c_handler, on );
+
+#    else
+
+        ::signal( SIGINT , on? ctrl_c_handler : SIG_DFL );
+        ::signal( SIGTERM, on? ctrl_c_handler : SIG_DFL );
+
+#   endif
 }
 
 //---------------------------------------------------------------------------------Spooler::Spooler
@@ -248,7 +277,7 @@ Spooler::Spooler()
     _com_spooler = new Com_spooler( this );
     _variables   = new Com_variable_set();
 
-    SetConsoleCtrlHandler( ctrl_c_handler, true );
+    set_ctrl_c_handler( true );
     spooler = this;
 }
 
@@ -257,7 +286,7 @@ Spooler::Spooler()
 Spooler::~Spooler() 
 {
     spooler = NULL;
-    SetConsoleCtrlHandler( ctrl_c_handler, false );
+    set_ctrl_c_handler( false );
 
     if( !_thread_list.empty() )  
     {
@@ -285,12 +314,14 @@ Spooler::~Spooler()
 
 Security::Level Spooler::security_level( const Host& host )
 {
+    Security::Level result = Security::seclev_none;
+
     THREAD_LOCK( _lock )
     {
-        return _security.level( host );
+        result = _security.level( host );
     }
 
-    __assume(0);
+    return result;
 }
 
 //--------------------------------------------------------------------------Spooler::threads_as_xml
@@ -315,17 +346,18 @@ xml::Element_ptr Spooler::threads_as_xml( const xml::Document_ptr& document, Sho
 }
 
 //--------------------------------------------------------------Spooler::wait_until_threads_stopped
+#ifdef SPOOLER_USE_THREADS
 
 void Spooler::wait_until_threads_stopped( Time until )
 {
-    assert( GetCurrentThreadId() == _thread_id );
+    assert( current_thread_id() == _thread_id );
 
     Wait_handles wait_handles ( this, &_prefix_log );
 
     Thread_list::iterator it = _thread_list.begin();
     while( it != _thread_list.end() )
     {
-        Thread* thread = *it;
+        Spooler_thread* thread = *it;
         if( !thread->_terminated  &&  thread->_thread_handle.handle() )  wait_handles.add_handle( (*it)->_thread_handle.handle() );
         it++;
     }
@@ -342,7 +374,7 @@ void Spooler::wait_until_threads_stopped( Time until )
             HANDLE h = wait_handles[index];
             FOR_EACH( Thread_list, _thread_list, it )  
             {
-                Thread* thread = *it;
+                Spooler_thread* thread = *it;
                 if( thread->_thread_handle.handle() == h ) 
                 {
                     _log.info( "Thread " + thread->name() + " beendet" );
@@ -360,7 +392,7 @@ void Spooler::wait_until_threads_stopped( Time until )
         {
             FOR_EACH( Thread_list, _thread_list, it )  
             {
-                Thread* thread = *it;
+                Spooler_thread* thread = *it;
 
                 if( !thread->_terminated )
                 {
@@ -374,11 +406,12 @@ void Spooler::wait_until_threads_stopped( Time until )
     }
 }
 
+#endif
 //--------------------------------------------------------------------------Spooler::signal_threads
 
 void Spooler::signal_threads( const string& signal_name )
 {
-    assert( GetCurrentThreadId() == _thread_id );
+    assert( current_thread_id() == _thread_id );
 
     FOR_EACH( Thread_list, _thread_list, it )  (*it)->signal( signal_name );
 }
@@ -386,9 +419,9 @@ void Spooler::signal_threads( const string& signal_name )
 //------------------------------------------------------------------------------Spooler::get_thread
 // Anderer Thread
 
-Thread* Spooler::get_thread( const string& thread_name )
+Spooler_thread* Spooler::get_thread( const string& thread_name )
 {
-    Thread* thread = get_thread_or_null( thread_name );
+    Spooler_thread* thread = get_thread_or_null( thread_name );
     if( !thread )  throw_xc( "SPOOLER-128", thread_name );
 
     return thread;
@@ -397,7 +430,7 @@ Thread* Spooler::get_thread( const string& thread_name )
 //----------------------------------------------------------------------Spooler::get_thread_or_null
 // Anderer Thread
 
-Thread* Spooler::get_thread_or_null( const string& thread_name )
+Spooler_thread* Spooler::get_thread_or_null( const string& thread_name )
 {
     THREAD_LOCK( _lock )
     {
@@ -462,7 +495,7 @@ Job* Spooler::get_job_or_null( const string& job_name )
 
 //---------------------------------------------------------------------Spooler::thread_by_thread_id
 
-Thread* Spooler::thread_by_thread_id( Thread_id id )                    
+Spooler_thread* Spooler::thread_by_thread_id( Thread_id id )                    
 {     
     Thread_id_map::iterator it;
 
@@ -483,7 +516,7 @@ void Spooler::signal_object( const string& object_set_class_name, const Level& l
 
 void Spooler::set_state( State state )
 {
-    assert( GetCurrentThreadId() == _thread_id );
+    assert( current_thread_id() == _thread_id );
 
     if( _state == state )  return;
 
@@ -513,7 +546,7 @@ string Spooler::state_name( State state )
 
 void Spooler::load_arg()
 {
-    assert( GetCurrentThreadId() == _thread_id );
+    assert( current_thread_id() == _thread_id );
 
     for( Sos_option_iterator opt ( _argc, _argv ); !opt.end(); opt.next() )
     {
@@ -616,7 +649,7 @@ void Spooler::load_arg()
 
 void Spooler::load()
 {
-    assert( GetCurrentThreadId() == _thread_id );
+    assert( current_thread_id() == _thread_id );
 
     set_state( s_starting );
     //_log ist noch nicht geöffnet   _log.info( "Spooler::load " + _config_filename );
@@ -641,7 +674,7 @@ void Spooler::load()
 
 void Spooler::start()
 {
-    assert( GetCurrentThreadId() == _thread_id );
+    assert( current_thread_id() == _thread_id );
 
     _state_cmd = sc_none;
     set_state( s_starting );
@@ -685,8 +718,8 @@ void Spooler::start()
             _log.error( "Java kann nicht gestartet werden. Spooler startet ohne Java." );
         }
 
-        SetConsoleCtrlHandler( ctrl_c_handler, false );     // Ctrl-C-Handler von Java überschreiben (Suns Java beendet bei Ctrl-C den Prozess sofort)
-        SetConsoleCtrlHandler( ctrl_c_handler, true );
+        set_ctrl_c_handler( false );     // Ctrl-C-Handler von Java überschreiben (Suns Java beendet bei Ctrl-C den Prozess sofort)
+        set_ctrl_c_handler( true );
     }
 
 
@@ -715,7 +748,7 @@ void Spooler::start()
 
 void Spooler::stop()
 {
-    assert( GetCurrentThreadId() == _thread_id );
+    assert( current_thread_id() == _thread_id );
 
     set_state( _state_cmd == sc_let_run_terminate_and_restart? s_stopping_let_run : s_stopping );
 
@@ -757,7 +790,7 @@ void Spooler::stop()
 
 void Spooler::run()
 {
-    assert( GetCurrentThreadId() == _thread_id );
+    assert( current_thread_id() == _thread_id );
 
     set_state( s_running );
 
@@ -778,7 +811,32 @@ void Spooler::run()
         if( _state_cmd == sc_let_run_terminate_and_restart )  break;
         _state_cmd = sc_none;
 
-        _wait_handles.wait_until( latter_day );
+
+#       ifdef SPOOLER_USE_THREADS
+        {
+            _wait_handles.wait_until( latter_day );
+        }
+#       else
+        {
+            Time            next_time = latter_day;
+            Time            now       = Time::now();
+
+
+            FOR_EACH( Thread_list, _thread_list, it )  
+            {
+                Time t = (*it)->next_start_time();
+                if( t <= now )  (*it)->process();
+                if( next_time > t )  next_time = t;
+            }
+
+            if( next_time > Time::now() )
+            {
+                sos_sleep( next_time - Time::now() );
+            }
+        }
+#       endif
+
+
         _event.reset();
 
         if( ctrl_c_pressed )  _state_cmd = sc_terminate;
@@ -799,7 +857,7 @@ void Spooler::cmd_load_config( const xml::Element_ptr& config, const Time& xml_m
         _state_cmd = sc_load_config; 
     }
 
-    if( GetCurrentThreadId() != _thread_id )  signal( "load_config" ); 
+    if( current_thread_id() != _thread_id )  signal( "load_config" ); 
 }
 
 //----------------------------------------------------------------------------Spooler::cmd_continue
@@ -875,8 +933,11 @@ int Spooler::launch( int argc, char** argv )
 
     tzset();
 
-    _thread_id = GetCurrentThreadId();
-    SetThreadPriority( GetCurrentThread(), THREAD_PRIORITY_ABOVE_NORMAL );
+    _thread_id = current_thread_id();
+
+#   ifdef Z_WINDOWS
+        SetThreadPriority( GetCurrentThread(), THREAD_PRIORITY_ABOVE_NORMAL );
+#   endif
 
     spooler_is_running = true;
 
@@ -917,6 +978,7 @@ int Spooler::launch( int argc, char** argv )
 }
 
 //------------------------------------------------------------------------------------start_process
+#ifdef Z_WINDOWS
 
 static void start_process( const string& command_line )
 {
@@ -951,17 +1013,21 @@ static void start_process( const string& command_line )
     CloseHandle( process_info.hProcess );
 }
 
+#endif
 //----------------------------------------------------------------------------make_new_spooler_path
+#ifdef Z_WINDOWS
 
 static string make_new_spooler_path( const string& this_spooler )
 {
     return directory_of_path(this_spooler) + DIR_SEP + basename_of_path( this_spooler ) + new_suffix + ".exe";
 }
 
+#endif
 //----------------------------------------------------------------------------------spooler_restart
 
 void spooler_restart( Log* log, bool is_service )
 {
+#ifdef Z_WINDOWS
     string this_spooler = program_filename();
     string command_line = GetCommandLine();
     string new_spooler  = make_new_spooler_path( this_spooler );
@@ -991,9 +1057,11 @@ void spooler_restart( Log* log, bool is_service )
     command_line += " -renew-spooler=" + quoted_string(this_spooler,'"','"');
     if( log )  log->info( "Restart Spooler  " + command_line );
     start_process( command_line );
+#endif
 }
 
 //------------------------------------------------------------------------------------spooler_renew
+#ifdef Z_WINDOWS
 
 static void spooler_renew( const string& service_name, const string& renew_spooler, bool is_service, const string& command_line )
 {
@@ -1047,7 +1115,9 @@ static void spooler_renew( const string& service_name, const string& renew_spool
                 else  start_process( quoted_string(renew_spooler,'"','"') + " " + command_line );
 }
 
+#endif
 //----------------------------------------------------------------------------------------full_path
+#ifdef Z_WINDOWS
 
 static string full_path( const string& path )
 {
@@ -1059,7 +1129,9 @@ static string full_path( const string& path )
     return full.char_ptr();
 }
 
+#endif
 //-------------------------------------------------------------------------------delete_new_spooler
+#ifdef Z_WINDOWS
 
 void __cdecl delete_new_spooler( void* )
 {
@@ -1095,6 +1167,7 @@ void __cdecl delete_new_spooler( void* )
     }
 }
 
+#endif
 //-------------------------------------------------------------------------------------spooler_main
 
 int spooler_main( int argc, char** argv )
@@ -1103,11 +1176,9 @@ int spooler_main( int argc, char** argv )
 
     try
     {
-#       ifdef SYSTEM_WIN
-            Ole_initialize ole;
-#       endif
+        Ole_initialize ole;
 
-        spooler::Spooler my_spooler;
+        Spooler my_spooler;
 
         spooler = &my_spooler;
 
@@ -1190,52 +1261,62 @@ int sos_main( int argc, char** argv )
         }
     }
 
-    if( service_name != "" ) 
-    {
-        if( service_display == "" )  service_display = service_name;
-    }
-    else
-    {
-        service_name = spooler::make_service_name(id);
-        if( service_display == "" )  service_display = spooler::make_service_display(id);
-    }
+#   ifdef Z_WINDOWS
+        if( service_name != "" ) 
+        {
+            if( service_display == "" )  service_display = service_name;
+        }
+        else
+        {
+            service_name = spooler::make_service_name(id);
+            if( service_display == "" )  service_display = spooler::make_service_display(id);
+        }
+#   endif
 
     if( log_filename.empty() )  log_filename = read_profile_string( factory_ini, "spooler", "log" );
     if( !log_filename.empty() )  log_start( log_filename );
 
-    if( !renew_spooler.empty() )  
-    { 
-        spooler::spooler_renew( service_name, renew_spooler, renew_service, command_line ); 
-        ret = 0;
-    }
-    else
-    if( do_remove_service | do_install_service )
-    {
-        if( do_remove_service  )  spooler::remove_service( service_name );
-        if( do_install_service ) 
-        {
-            //if( !is_service )  command_line = "-service " + command_line;
-            command_line = "-service=" + service_name + " " + command_line;
-            dependencies += '\0';
-            spooler::install_service( service_name, service_display, service_description, dependencies, command_line );
+#   ifdef Z_WINDOWS
+
+        if( !renew_spooler.empty() )  
+        { 
+            spooler::spooler_renew( service_name, renew_spooler, renew_service, command_line ); 
+            ret = 0;
         }
-        ret = 0;
-    }
-    else
-    {
-        _beginthread( spooler::delete_new_spooler, 50000, NULL );
-
-      //if( !is_service_set )  is_service = spooler::service_is_started(service_name);
-
-        if( is_service )
+        else
+        if( do_remove_service | do_install_service )
         {
-            ret = spooler::spooler_service( service_name, argc, argv );
+            if( do_remove_service  )  spooler::remove_service( service_name );
+            if( do_install_service ) 
+            {
+                //if( !is_service )  command_line = "-service " + command_line;
+                command_line = "-service=" + service_name + " " + command_line;
+                dependencies += '\0';
+                spooler::install_service( service_name, service_display, service_description, dependencies, command_line );
+            }
+            ret = 0;
         }
         else
         {
-            ret = spooler::spooler_main( argc, argv );
+            _beginthread( spooler::delete_new_spooler, 50000, NULL );
+
+          //if( !is_service_set )  is_service = spooler::service_is_started(service_name);
+
+            if( is_service )
+            {
+                ret = spooler::spooler_service( service_name, argc, argv );
+            }
+            else
+            {
+                ret = spooler::spooler_main( argc, argv );
+            }
         }
-    }
+
+#    else
+
+        ret = spooler::spooler_main( argc, argv );
+
+#   endif
 
     return ret;
 }
