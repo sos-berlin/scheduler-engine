@@ -1,4 +1,4 @@
-// $Id: spooler_task.h,v 1.84 2002/12/11 08:50:37 jz Exp $
+// $Id: spooler_task.h,v 1.85 2003/02/18 17:24:04 jz Exp $
 
 #ifndef __SPOOLER_TASK_H
 #define __SPOOLER_TASK_H
@@ -463,7 +463,7 @@ struct Script_task : Task       // Oberklasse für Object_set_task und Job_script
 {
                                 Script_task                 ( Spooler* sp, const Sos_ptr<Job>& j ) : Task(sp,j) {}
 
-    virtual bool                loaded                      ()                              { return _job->_module_instance->loaded(); }
+    virtual bool                loaded                      ()                              { return _job->_module_instance && _job->_module_instance->loaded(); }
   //virtual bool                do_load                     ();
   //bool                        do_start                    ();
   //void                        do_end                      ();

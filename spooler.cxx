@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.165 2003/02/12 18:31:12 jz Exp $
+// $Id: spooler.cxx,v 1.166 2003/02/18 17:24:03 jz Exp $
 /*
     Hier sind implementiert
 
@@ -745,7 +745,9 @@ void Spooler::load_arg()
             else
             if( opt.with_value( "ini"              ) )  ;   //
             else
-            if( opt.with_value( "config"           ) )  _config_filename = opt.value();
+            if( _config_filename.empty()
+             && ( opt.with_value( "config"         ) 
+               || opt.param(1)                     ) )  _config_filename = opt.value();
             else
             if( opt.with_value( "cd"               ) )  { string dir = opt.value(); if( chdir( dir.c_str() ) )  throw_errno( errno, "chdir", dir.c_str() ); }
             else
@@ -850,6 +852,26 @@ void Spooler::start()
     _log.open_new();
     _log.info( string( "Spooler (" VER_PRODUCTVERSION_STR ) + ") startet mit " + _config_filename );
 
+
+    // STDERR und STDOUT ins Spooler-Protokoll leiten
+
+    if( _is_service || is_daemon )
+    {
+        if( _log.fd() > 2 )   // Nicht -1, stdin, stdout, stderr?
+        {
+            FILE* new_stderr = fdopen( _log.fd(), "w" );
+            if( !new_stderr )  throw_errno( errno, "fdopen stderr" );
+            {
+                _log.info( "stdout und stderr werden in diese Protokolldatei geleitet" ); 
+                fclose( stderr ); stderr = new_stderr;
+                fclose( stdout ); stdout = fdopen( _log.fd(), "w" );
+            }
+            //else  
+            //    _log.error( string("stderr = fdopen(log): ") + strerror(errno) );
+        }
+    }
+
+
     _db.open( _db_name, _need_db );
     _db.spooler_start();
 
@@ -899,25 +921,6 @@ void Spooler::start()
     }
 
     start_threads();
-
-    
-    if( _is_service || is_daemon )
-    {
-/*
-        if( _log.fd() > 2 )   // Nicht -1, stdin, stdout, stderr?
-        {
-            FILE* new_stderr = fdopen( _log.fd(), "w" );
-            if( !new_stderr )  throw_errno( errno, "fdopen stderr" );
-            {
-                _log.info( "stdout und stderr werden in diese Protokolldatei geleitet" ); 
-                fclose( stderr ); stderr = new_stderr;
-                fclose( stdout ); stdout = fdopen( _log.fd(), "w" );
-            }
-            //else  
-            //    _log.error( string("stderr = fdopen(log): ") + strerror(errno) );
-        }
-*/
-    }
 }
 
 //------------------------------------------------------------------------------------Spooler::stop
