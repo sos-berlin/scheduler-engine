@@ -1,4 +1,4 @@
-// $Id: spooler_wait.h,v 1.34 2002/12/03 12:54:46 jz Exp $
+// $Id: spooler_wait.h,v 1.35 2002/12/08 10:22:07 jz Exp $
 
 #ifndef __SPOOLER_WAIT_H
 #define __SPOOLER_WAIT_H
@@ -92,36 +92,40 @@ struct Wait_handles : Non_cloneable
 
 struct Directory_watcher : Event
 {
+
+    Z_GNU_ONLY(                 Directory_watcher           (); )
+                                Directory_watcher           ( Prefix_log* log )                     : _zero_(this+1), _log(log) {}
+                               ~Directory_watcher           ()                                      { close(); }
+
 #   ifdef SYSTEM_WIN
-
-                                Directory_watcher           ( Prefix_log* log )             : _log(log) {}
-                               ~Directory_watcher           ()                              { close(); }
-
-                                operator bool               ()                              { return _handle != NULL; }
-                                operator !                  ()                              { return _handle == NULL; }
-
-        void                    watch_directory             ( const string& directory, const string& filename_pattern = "" );
-        bool                    match                       ();
-        
-#    else
-
-                                operator bool               ()                              { return false; }
-        bool                    operator !                  ()                              { return true; };
-        
+//                                operator bool               ()                                    { return _handle != NULL; }
+//                                operator !                  ()                                    { return _handle == NULL; }
 #   endif
 
+    void                        watch_directory             ( const string& directory, const string& filename_pattern = "" );
+    void                        renew                       ();
+    bool                        has_changed                 ();
+    bool                        match                       ();
+        
     virtual void                set_signal                  ();
-    string                      directory                   () const                        { return _directory; }
-    string                      filename_pattern            () const                        { return _filename_pattern; }
+    string                      directory                   () const                                { return _directory; }
+    string                      filename_pattern            () const                                { return _filename_pattern; }
 
   protected: 
     virtual void                close_handle                ();
 
   private:
+    Fill_zero                  _zero_;
     Prefix_log*                _log;
     string                     _directory;
     string                     _filename_pattern;
     z::Regex                   _filename_regex;
+
+#   ifndef Z_WINDOWS
+        typedef list<string>    Filenames;
+        Filenames              _filenames[2];               // Ein alter und ein neuer Zustand
+        int                    _filenames_idx;              // Index des gerade alten Zustands
+#   endif
 };
 
 //-------------------------------------------------------------------------------------------------

@@ -1,4 +1,4 @@
-// $Id: spooler_wait.cxx,v 1.57 2002/12/03 23:07:17 jz Exp $
+// $Id: spooler_wait.cxx,v 1.58 2002/12/08 10:22:06 jz Exp $
 /*
     Hier sind implementiert
 
@@ -14,6 +14,8 @@
 
 #ifdef Z_WINDOWS
 #   include <io.h>         // findfirst()
+#else
+#   include <dirent.h>
 #endif
 
 #include "../kram/sleep.h"
@@ -21,6 +23,12 @@
 
 namespace sos {
 namespace spooler {
+
+//--------------------------------------------------------------------------------------------const
+
+#ifndef Z_WINDOWS
+    const double directory_watcher_interval = 0.1;      // Wartezeit in Sekunden zwischen zwei Verzeichnisüberprüfungen
+#endif
 
 //-----------------------------------------------------------------------------windows_message_step
 #ifdef Z_WINDOWS
@@ -341,7 +349,7 @@ int Wait_handles::wait_until_2( Time until )
         {
             THREAD_LOCK( _lock )
             {
-                int    index = ret - WAIT_OBJECT_0;
+                int       index = ret - WAIT_OBJECT_0;
                 z::Event* event = _events[ index ];
             
                 if( event )
@@ -371,9 +379,33 @@ int Wait_handles::wait_until_2( Time until )
 
 #else
 
-    if( _events.size() != 1 )  throw_xc( "_events.size() != 1", "Fehler in spooler::Wait_handles" );
+    if( _events.size() == 1 )
+    {
+        bool signaled = _events[0]->wait( until - Time::now() );
+        return signaled? 0 : -1;
+    }
+    else
+    {
+        while(1)
+        {
+            for( int i = _events.size() - 1; i >= 0; i-- )
+            {
+                Event* e = dynamic_cast<Event*>( _events[i] );
 
-    return (*_events.rbegin())->wait( until - Time::now() )? 0 : -1;
+                if( typeid( *e ) == typeid (Directory_watcher) )
+                {
+                    if( ((Directory_watcher*)e)->has_changed() )  return i;
+                }
+                else
+                {
+                    bool signaled = e->wait( min( directory_watcher_interval, (double)( until - Time::now() ) ) );
+                    if( signaled )  return i;
+                }
+            }
+
+            if( Time::now() >= until )  return -1;
+        }
+    }
 
 #endif
 }
@@ -447,15 +479,56 @@ struct Directory_reader
     int  _handle;
 };
 
+#else
+
+struct Directory_reader
+{
+    Directory_reader() : _handle(NULL) {}
+    
+    ~Directory_reader()
+    { 
+        close(); 
+    }
+    
+    void close() 
+    { 
+        if( _handle )  closedir( _handle ), _handle = NULL;
+    }
+
+    string first( const string& dirname ) 
+    { 
+        _handle = opendir( dirname.c_str() );
+        if( !_handle )  throw_errno( errno, "opendir" );
+
+        return next();
+    }
+
+    string next() 
+    { 
+        struct dirent* entry = readdir( _handle );
+        if( !entry )  return "";
+
+        return entry->d_name;
+    }
+
+    DIR* _handle;
+};
+
+#endif
 //------------------------------------------------------------------Directory_watcher::close_handle
 
 void Directory_watcher::close_handle()
 {
-    if( _handle )
-    {
-        FindCloseChangeNotification( _handle );
-        _handle = NULL;
-    }
+#   ifdef Z_WINDOWS
+        if( _handle )
+        {
+            FindCloseChangeNotification( _handle );
+            _handle = NULL;
+        }
+
+#   endif
+
+    _filename_regex.close();
 }
 
 //---------------------------------------------------------------Directory_watcher::watch_directory
@@ -469,10 +542,86 @@ void Directory_watcher::watch_directory( const string& directory, const string& 
 
     if( !filename_pattern.empty() )  _filename_regex.compile( filename_pattern );
 
-    _handle = FindFirstChangeNotification( directory.c_str(), FALSE, FILE_NOTIFY_CHANGE_FILE_NAME | FILE_NOTIFY_CHANGE_DIR_NAME );
-    if( !_handle  ||  _handle == INVALID_HANDLE_VALUE )  _handle = NULL, throw_mswin_error( "FindFirstChangeNotification" );
+#   ifdef Z_WINDOWS
+
+        _handle = FindFirstChangeNotification( directory.c_str(), FALSE, FILE_NOTIFY_CHANGE_FILE_NAME | FILE_NOTIFY_CHANGE_DIR_NAME );
+        if( !_handle  ||  _handle == INVALID_HANDLE_VALUE )  _handle = NULL, throw_mswin_error( "FindFirstChangeNotification" );
+
+#    else
+
+        has_changed(); 
+
+#   endif
 }
 
+//-------------------------------------------------------------------------Directory_watcher::renew
+
+void Directory_watcher::renew()
+{
+#   ifdef Z_WINDOWS
+
+        close_handle();
+
+        string directory        = _directory;
+        string filename_pattern = _filename_pattern;
+
+        watch_directory( directory, filename_pattern );
+
+#    else
+
+        has_changed();
+
+#   endif
+}
+
+//-------------------------------------------------------------------Directory_watcher::has_changed
+
+bool Directory_watcher::has_changed()
+{
+#   ifdef Z_WINDOWS
+
+        // Nach wait() zu rufen, damit _signaled auch gesetzt ist!
+        return signaled();
+
+#   else
+
+        bool                changed = false;
+        Filenames*          new_f   = &_filenames[ 1 - _filenames_idx ];
+        Filenames*          old_f   = &_filenames[ _filenames_idx ];
+        Filenames::iterator o       = old_f->begin();
+
+        new_f->clear();
+
+        Directory_reader dir;
+        
+        string filename = dir.first( _directory.c_str() );
+        while( filename != "" )
+        {
+            if( filename != "."  &&  filename != ".." )
+            {
+                if( _filename_pattern.empty()  ||  _filename_regex.match( filename ) )
+                {
+                    new_f->push_back( filename ); 
+                    if( !changed )  if( o == old_f->end()  ||  *o != filename )  changed = true;
+                    if( o != old_f->end() )  o++;
+                }
+            }
+
+            filename = dir.next();
+        }
+
+        if( o != old_f->end() )  changed = true;
+
+        dir.close();
+
+        _filenames_idx = 1 - _filenames_idx;
+
+        if( changed )  set_signal();
+
+        return changed;
+
+#   endif
+}
 
 //-------------------------------------------------------------------------Directory_watcher::match
 
@@ -499,23 +648,30 @@ bool Directory_watcher::match()
 
 void Directory_watcher::set_signal()
 {
-    try
-    {
-        if( _filename_pattern.empty()  ||  match() )  Event::set_signal();
+#   ifdef Z_WINDOWS
 
-        BOOL ok = FindNextChangeNotification( _handle );
-        if( !ok )  throw_mswin_error( "FindNextChangeNotification" );
-    }
-    catch( const Xc& x ) 
-    {
-        _log->error( "Überwachung des Verzeichnisses " + _directory + " wird nach Fehler beendet: " + x.what() ); 
-        _directory = "";   // Damit erneutes start_when_directory_changed() diese (tote) Überwachung nicht erkennt.
+        try
+        {
+            if( _filename_pattern.empty()  ||  match() )  Event::set_signal();
+
+                BOOL ok = FindNextChangeNotification( _handle );
+                if( !ok )  throw_mswin_error( "FindNextChangeNotification" );
+        }
+        catch( const Xc& x ) 
+        {
+            _log->error( "Überwachung des Verzeichnisses " + _directory + " wird nach Fehler beendet: " + x.what() ); 
+            _directory = "";   // Damit erneutes start_when_directory_changed() diese (tote) Überwachung nicht erkennt.
+            Event::set_signal();
+            close();
+        }
+
+#   else
+
         Event::set_signal();
-        close();
-    }
+
+#   endif
 }
 
-#endif
 //-------------------------------------------------------------------------------------------------
 
 } //namespace spooler

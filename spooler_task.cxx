@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.132 2002/12/03 11:42:33 jz Exp $
+// $Id: spooler_task.cxx,v 1.133 2002/12/08 10:22:05 jz Exp $
 /*
     Hier sind implementiert
 
@@ -836,30 +836,32 @@ void Job::start_when_directory_changed( const string& directory_name, const stri
     {
         _log.debug( "start_when_directory_changed \"" + directory_name + "\", \"" + filename_pattern + "\"" );
 
-#       ifdef SYSTEM_WIN
+        Directory_watcher_list::iterator it;
 
-            for( Directory_watcher_list::iterator it = _directory_watcher_list.begin(); it != _directory_watcher_list.end(); it++ )
-            {
-                if( (*it)->directory()        == directory_name 
-                 && (*it)->filename_pattern() == filename_pattern )  it = _directory_watcher_list.erase( it );   // Überwachung erneuern
-                // Wenn das Verzeichnis bereits überwacht war, aber inzwischen gelöscht, und das noch nicht bemerkt worden ist
-                // (weil Spooler_thread::wait vor lauter Jobaktivität nicht gerufen wurde), dann ist es besser, die Überwachung 
-                // hier zu erneuern. Besonders, wenn das Verzeichnis wieder angelegt ist.
-            }
+        for( it = _directory_watcher_list.begin(); it != _directory_watcher_list.end(); it++ )
+        {
+            if( (*it)->directory()        == directory_name 
+             && (*it)->filename_pattern() == filename_pattern )  break;
+        }
 
+        if( it != _directory_watcher_list.end() )
+        {
+            // Windows: Überwachung erneuern
+            // Wenn das Verzeichnis bereits überwacht war, aber inzwischen gelöscht, und das noch nicht bemerkt worden ist
+            // (weil Spooler_thread::wait vor lauter Jobaktivität nicht gerufen wurde), dann ist es besser, die Überwachung 
+            // hier zu erneuern. Besonders, wenn das Verzeichnis wieder angelegt ist.
 
+            (*it)->renew();
+        }
+        else
+        {
             ptr<Directory_watcher> dw = Z_NEW( Directory_watcher( &_log ) );
 
             dw->watch_directory( directory_name, filename_pattern );
             dw->set_name( "job(\"" + _name + "\").start_when_directory_changed(\"" + directory_name + "\")" );
             _directory_watcher_list.push_back( dw );
             dw->add_to( &_thread->_wait_handles );
-
-#        else
-
-            throw_xc( "SPOOLER-112", "Job::start_when_directory_changed" );
-
-#       endif
+        }
     }
 }
 
@@ -1022,18 +1024,18 @@ void Job::task_to_start()
                                                                                       
                     if( now >= _next_start_time )  cause = cause_period_repeat,                      _log.debug( "Task startet, weil Job-Startzeit erreicht: " + _next_start_time.as_string() );
 
-#                   ifdef Z_WINDOWS
-                        for( Directory_watcher_list::iterator it = _directory_watcher_list.begin(); it != _directory_watcher_list.end(); it++ )
+                    for( Directory_watcher_list::iterator it = _directory_watcher_list.begin(); it != _directory_watcher_list.end(); it++ )
+                    {
+                        if( (*it)->signaled_then_reset() )
                         {
-                            if( (*it)->signaled_then_reset() )
-                            {
-                                cause = cause_directory;
-                                _log.debug( "Task startet wegen eines Ereignisses für Verzeichnis " + (*it)->directory() );
+                            cause = cause_directory;
+                            _log.debug( "Task startet wegen eines Ereignisses für Verzeichnis " + (*it)->directory() );
 
-                                if( !(*it)->handle() )  it = _directory_watcher_list.erase( it );  // Folge eines Fehlers, s. Directory_watcher::set_signal
-                            }
+#ifdef Z_WINDOWS
+                            if( !(*it)->handle() )  it = _directory_watcher_list.erase( it );  // Folge eines Fehlers, s. Directory_watcher::set_signal
+#endif
                         }
-#                   endif
+                    }
 
                     if( !cause  &&  _order_queue && !_order_queue->empty() )  cause = cause_order,               _log.debug( "Task startet wegen Auftrags" );
                                                                                       

@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.157 2002/12/04 19:48:08 jz Exp $
+// $Id: spooler.cxx,v 1.158 2002/12/08 10:22:05 jz Exp $
 /*
     Hier sind implementiert
 
@@ -419,7 +419,7 @@ void Spooler::wait_until_threads_stopped( Time until )
 
         Thread_list threads;
 
-        FOR_EACH( Thread_list, _thread_list, it )  threads.push_back( *it );
+        FOR_EACH( Thread_list, _thread_list, it )  if( (*it)->_free_threading )  threads.push_back( *it );
 
         int c = 0;
         while( !threads.empty() )
@@ -654,7 +654,7 @@ bool Spooler::run_threads()
         Spooler_thread* thread = *it;
         if( !thread->_free_threading )
         {
-            if( thread->_next_start_time <= now )//|| thread->_wait_handles.signaled() )
+            if( thread->_next_start_time <= now  ||  thread->_wait_handles.signaled() )
             {
                 bool ok = thread->process();
 
@@ -989,8 +989,6 @@ void Spooler::run()
 
             if( !something_done  &&  _next_time > now )
             {
-                // CODE ÄHNLICH SPOOLER_THREAD.CXX. SOMMERZEITUMSTELLUNG FEHLT HIER.
-
                 string msg;
                 
                 if( _debug )  msg = _next_job? "Warten bis " + _next_time.as_string() + " für Job " + _next_job->name() 
