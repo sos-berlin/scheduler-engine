@@ -1445,6 +1445,15 @@ Time Order::next_start_time( bool first_call )
     return result;
 }
 
+//-----------------------------------------------------------------------Order::before_modify_event
+
+void Order::before_modify_event()
+{
+    if( _task       )  throw_xc( "SCHEDULER-217", obj_name(), _task->obj_name() );
+    if( _moved      )  throw_xc( "SCHEDULER-188", obj_name() );
+    if( _job_chain  )  throw_xc( "SCHEDULER-186", obj_name(), _job_chain->name() );
+}
+
 //----------------------------------------------------------------------------Order::modified_event
 
 void Order::modified_event()

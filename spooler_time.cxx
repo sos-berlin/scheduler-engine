@@ -556,6 +556,9 @@ void Run_time::set_xml( const string& xml )
 
 void Run_time::set_dom( const xml::Element_ptr& element )
 {
+    if( _modified_event_handler )  _modified_event_handler->modified_event();
+
+
     Sos_optional_date_time  dt;
     Period                  default_period;
     Day                     default_day;

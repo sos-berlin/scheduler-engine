@@ -98,6 +98,7 @@ struct Order : Com_order,
 
     xml::Element_ptr            dom                     ( const xml::Document_ptr&, const Show_what&, const string* log = NULL );
     void                    set_run_time                ( const xml::Element_ptr& );
+    void                        before_modify_event     ();
     void                        modified_event          ();
 
     ptr<Prefix_log>            _log;

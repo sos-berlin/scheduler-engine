@@ -25,6 +25,7 @@ typedef DWORD                   Process_id;
 
 struct Modified_event_handler
 {
+    virtual void                 before_modify_event        ()                                      {}
     virtual void                 modified_event             () = 0;
 };
 
