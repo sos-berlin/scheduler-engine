@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.88 2002/04/07 11:47:21 jz Exp $
+// $Id: spooler.cxx,v 1.89 2002/04/07 19:52:58 jz Exp $
 /*
     Hier sind implementiert
 
@@ -101,10 +101,10 @@ static string thread_info_text( HANDLE h )
 int read_profile_on_process( const string& profile, const string& section, const string& entry, int deflt )
 {
     try {
-        return read_profile_int( profile.c_str(), section.c_str(), entry.c_str(), deflt );
+        return read_profile_int( profile, section, entry, deflt );
     }
     catch( const Xc& ) {
-        return read_profile_bool( profile.c_str(), section.c_str(), entry.c_str(), deflt > 0 )? 1 : INT_MAX;
+        return read_profile_bool( profile, section, entry, deflt > 0 )? 1 : INT_MAX;
     }
 }
 
@@ -112,12 +112,12 @@ int read_profile_on_process( const string& profile, const string& section, const
 
 Archive_switch read_profile_archive( const string& profile, const string& section, const string& entry, Archive_switch deflt )
 {
-    string value = read_profile_string( profile.c_str(), section.c_str(), entry.c_str() );
+    string value = read_profile_string( profile, section, entry );
 
     if( value == "" )  return deflt;
     if( lcase(value) == "gzip" )  return arc_gzip;
 
-    return read_profile_bool( profile.c_str(), section.c_str(), entry.c_str(), false )? arc_yes : arc_no;
+    return read_profile_bool( profile, section, entry, false )? arc_yes : arc_no;
 }
 
 //---------------------------------------------------------------------------------Spooler::Spooler
@@ -177,7 +177,6 @@ Security::Level Spooler::security_level( const Host& host )
 
     __assume(0);
 }
-
 
 //--------------------------------------------------------------------------Spooler::threads_as_xml
 // Anderer Thread
@@ -379,21 +378,21 @@ void Spooler::load_arg()
 
     string log_level = as_string( _log_level );
 
-    _spooler_id         = read_profile_string    ( "factory.ini", "spooler", "id"                 );
-    _config_filename    = read_profile_string    ( "factory.ini", "spooler", "config"             );
-    _log_directory      = read_profile_string    ( "factory.ini", "spooler", "log-dir"            );       // veraltet
-    _log_directory      = read_profile_string    ( "factory.ini", "spooler", "log_dir"            , _log_directory );        _log_directory_as_option_set = !_log_directory.empty();
-    _include_path       = read_profile_string    ( "factory.ini", "spooler", "include-path"       );  // veraltet
-    _include_path       = read_profile_string    ( "factory.ini", "spooler", "include_path"       , _include_path );    _include_path_as_option_set = !_include_path.empty();
-    _spooler_param      = read_profile_string    ( "factory.ini", "spooler", "param"              );          _spooler_param_as_option_set = !_spooler_param.empty();
-    log_level           = read_profile_string    ( "factory.ini", "spooler", "log_level"          , log_level );   
-    _history_columns    = read_profile_string    ( "factory.ini", "spooler", "history_columns"    );
-    _history_on_process = read_profile_on_process( "factory.ini", "spooler", "history_on_process" , 1 );
-    _history_archive    = read_profile_archive   ( "factory.ini", "spooler", "history_archive"    , arc_no );
-    _history_with_log   = read_profile_bool      ( "factory.ini", "spooler", "history_with_log"   , false );
-    _db_name            = read_profile_string    ( "factory.ini", "spooler", "db"                 );
-    _history_tablename  = read_profile_string    ( "factory.ini", "spooler", "db_history_table"   , "spooler_history" );
-    _variables_tablename= read_profile_string    ( "factory.ini", "spooler", "db_variables_table" , "spooler_variables" );
+    _spooler_id         = read_profile_string    ( _factory_ini, "spooler", "id"                 );
+    _config_filename    = read_profile_string    ( _factory_ini, "spooler", "config"             );
+    _log_directory      = read_profile_string    ( _factory_ini, "spooler", "log-dir"            );       // veraltet
+    _log_directory      = read_profile_string    ( _factory_ini, "spooler", "log_dir"            , _log_directory );        _log_directory_as_option_set = !_log_directory.empty();
+    _include_path       = read_profile_string    ( _factory_ini, "spooler", "include-path"       );  // veraltet
+    _include_path       = read_profile_string    ( _factory_ini, "spooler", "include_path"       , _include_path );    _include_path_as_option_set = !_include_path.empty();
+    _spooler_param      = read_profile_string    ( _factory_ini, "spooler", "param"              );          _spooler_param_as_option_set = !_spooler_param.empty();
+    log_level           = read_profile_string    ( _factory_ini, "spooler", "log_level"          , log_level );   
+    _history_columns    = read_profile_string    ( _factory_ini, "spooler", "history_columns"    );
+    _history_on_process = read_profile_on_process( _factory_ini, "spooler", "history_on_process" , 1 );
+    _history_archive    = read_profile_archive   ( _factory_ini, "spooler", "history_archive"    , arc_no );
+    _history_with_log   = read_profile_bool      ( _factory_ini, "spooler", "history_with_log"   , false );
+    _db_name            = read_profile_string    ( _factory_ini, "spooler", "db"                 );
+    _history_tablename  = read_profile_string    ( _factory_ini, "spooler", "db_history_table"   , "spooler_history" );
+    _variables_tablename= read_profile_string    ( _factory_ini, "spooler", "db_variables_table" , "spooler_variables" );
 
 
     try
@@ -403,6 +402,8 @@ void Spooler::load_arg()
             if( opt.flag      ( "service"          ) )  ;   // wurde in sos_main() bearbeitet
             else
             if( opt.with_value( "log"              ) )  ;   // wurde in sos_main() bearbeitet
+            else
+            if( opt.with_value( "ini"              ) )  ;   // wurde in sos_main() bearbeitet
             else
             if( opt.with_value( "config"           ) )  _config_filename = opt.value();
             else
@@ -473,20 +474,20 @@ void Spooler::start()
 {
     assert( GetCurrentThreadId() == _thread_id );
 
-    _mail_on_error   = read_profile_bool      ( "factory.ini", "spooler", "mail_on_error"  , _mail_on_error );
-    _mail_on_process = read_profile_on_process( "factory.ini", "spooler", "mail_on_success", _mail_on_process );
-    _mail_on_success = read_profile_bool      ( "factory.ini", "spooler", "mail_on_success", _mail_on_success );
-    _mail_queue_dir  = read_profile_string    ( "factory.ini", "spooler", "mail_queue_dir" , _mail_queue_dir );
-    _mail_encoding   = read_profile_string    ( "factory.ini", "spooler", "mail_encoding"  , "quoted-printable" );
-    _smtp_server     = read_profile_string    ( "factory.ini", "spooler", "smtp"           , _smtp_server );
+    _mail_on_error   = read_profile_bool      ( _factory_ini, "spooler", "mail_on_error"  , _mail_on_error );
+    _mail_on_process = read_profile_on_process( _factory_ini, "spooler", "mail_on_process", _mail_on_process );
+    _mail_on_success = read_profile_bool      ( _factory_ini, "spooler", "mail_on_success", _mail_on_success );
+    _mail_queue_dir  = read_profile_string    ( _factory_ini, "spooler", "mail_queue_dir" , _mail_queue_dir );
+    _mail_encoding   = read_profile_string    ( _factory_ini, "spooler", "mail_encoding"  , "quoted-printable" );
+    _smtp_server     = read_profile_string    ( _factory_ini, "spooler", "smtp"           , _smtp_server );
 
-    _log_mail_from      = read_profile_string( "factory.ini", "spooler", "log_mail_from"   );
-    _log_mail_to        = read_profile_string( "factory.ini", "spooler", "log_mail_to"     );
-    _log_mail_cc        = read_profile_string( "factory.ini", "spooler", "log_mail_cc"     );
-    _log_mail_bcc       = read_profile_string( "factory.ini", "spooler", "log_mail_bcc"    );
-    _log_mail_subject   = read_profile_string( "factory.ini", "spooler", "log_mail_subject");
-    _log_collect_within = read_profile_uint  ( "factory.ini", "spooler", "log_collect_within", 0 );
-    _log_collect_max    = read_profile_uint  ( "factory.ini", "spooler", "log_collect_max"   , 900 );
+    _log_mail_from      = read_profile_string( _factory_ini, "spooler", "log_mail_from"   );
+    _log_mail_to        = read_profile_string( _factory_ini, "spooler", "log_mail_to"     );
+    _log_mail_cc        = read_profile_string( _factory_ini, "spooler", "log_mail_cc"     );
+    _log_mail_bcc       = read_profile_string( _factory_ini, "spooler", "log_mail_bcc"    );
+    _log_mail_subject   = read_profile_string( _factory_ini, "spooler", "log_mail_subject");
+    _log_collect_within = read_profile_uint  ( _factory_ini, "spooler", "log_collect_within", 0 );
+    _log_collect_max    = read_profile_uint  ( _factory_ini, "spooler", "log_collect_max"   , 900 );
 
     _log.set_directory( _log_directory );
     _log.open_new();
@@ -877,7 +878,7 @@ void __cdecl delete_new_spooler( void* )
 
 //-------------------------------------------------------------------------------------spooler_main
 
-int spooler_main( int argc, char** argv )
+int spooler_main( int argc, char** argv, const string& factory_ini )
 {
     int ret;
     bool is_service = false;
@@ -888,6 +889,8 @@ int spooler_main( int argc, char** argv )
 #       endif
 
         spooler::Spooler spooler;
+
+        spooler._factory_ini = factory_ini;
 
         ret = spooler.launch( argc, argv );
         
@@ -908,13 +911,14 @@ int sos_main( int argc, char** argv )
     bool    is_service = false;
     bool    is_service_set = false;
     int     ret;
-    string  log_filename = read_profile_string( "factory.ini", "spooler", "log" );
     bool    do_install_service = false;
     bool    do_remove_service = false;
     string  id;
     string  renew_spooler;
     string  command_line;
     bool    renew_service = false;
+    string  log_filename;
+    string  factory_ini = "factory.ini";
 
     for( Sos_option_iterator opt ( argc, argv ); !opt.end(); opt.next() )
     {
@@ -934,6 +938,8 @@ int sos_main( int argc, char** argv )
                 else
                 if( opt.with_value( "id"               ) )  id = opt.value();
                 else
+                if( opt.with_value( "ini"              ) )  factory_ini = opt.value();
+                else
                 if( opt.with_value( "log"              ) )  log_filename = opt.value();
 
                 if( !command_line.empty() )  command_line += " ";
@@ -942,6 +948,7 @@ int sos_main( int argc, char** argv )
         }
     }
 
+    if( !log_filename.empty() )  log_filename = read_profile_string( factory_ini, "spooler", "log" );
     if( !log_filename.empty() )  log_start( log_filename );
 
     if( !renew_spooler.empty() )  
@@ -972,7 +979,7 @@ int sos_main( int argc, char** argv )
         }
         else
         {
-            ret = spooler::spooler_main( argc, argv );
+            ret = spooler::spooler_main( argc, argv, factory_ini );
         }
     }
 

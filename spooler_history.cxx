@@ -1,4 +1,4 @@
-// $Id: spooler_history.cxx,v 1.8 2002/04/07 11:47:22 jz Exp $
+// $Id: spooler_history.cxx,v 1.9 2002/04/07 19:52:58 jz Exp $
 
 #include "../kram/sos.h"
 #include "spooler.h"
@@ -299,12 +299,12 @@ void Job_history::open()
     {
         Transaction ta = &_spooler->_db;
         {
-            _filename   = read_profile_string    ( "factory.ini", section.c_str(), "history_file" );
-            _on_process = read_profile_on_process( "factory.ini", section.c_str(), "history_on_process", _spooler->_history_on_process );
+            _filename   = read_profile_string    ( _spooler->_factory_ini, section, "history_file" );
+            _on_process = read_profile_on_process( _spooler->_factory_ini, section, "history_on_process", _spooler->_history_on_process );
 
             if( _spooler->_db.opened()  &&  _filename == "" )
             {
-                _with_log = read_profile_bool( "factory.ini", section.c_str(), "history_with_log", _spooler->_history_with_log );
+                _with_log = read_profile_bool( _spooler->_factory_ini, section, "history_with_log", _spooler->_history_with_log );
 
                 set<string> my_columns = set_map( lcase, set_split( ", *", replace_regex( string(history_column_names) + "," + history_column_names_db, ":[^,]+", "" ) ) );
 
@@ -323,8 +323,8 @@ void Job_history::open()
             }
             else
             {
-                string         extra_columns = read_profile_string ( "factory.ini", section.c_str(), "history_columns", _spooler->_history_columns );
-                Archive_switch arc           = read_profile_archive( "factory.ini", section.c_str(), "history_archive", _spooler->_history_archive );
+                string         extra_columns = read_profile_string ( _spooler->_factory_ini, section, "history_columns", _spooler->_history_columns );
+                Archive_switch arc           = read_profile_archive( _spooler->_factory_ini, section, "history_archive", _spooler->_history_archive );
 
                 _type_string = history_column_names;
                 if( extra_columns != "" )  _type_string += "," + extra_columns;
@@ -489,7 +489,7 @@ void Job_history::write( bool start )
                             stmt += ", " + _extra_names[i] + "=" + s;
                         }
                     }
-                    catch( const exception& ) {}
+                    catch( const exception& x ) { _job->_log.warn( string("Historie: ") + x.what() ); }
                 }
 
                 stmt += " where id=" + as_string( _job->_task->_id );
@@ -504,7 +504,7 @@ void Job_history::write( bool start )
                         copy_file( "file -b " + log_filename, 
                                    _spooler->_db.dbname() + " -table=" + _spooler->_history_tablename + " -blob='log' where \"id\"=" + as_string( _job->_task->_id ) );
                     }
-                    catch( const exception& ) {}
+                    catch( const exception& x ) { _job->_log.warn( string("Historie: ") + x.what() ); }
                 }
             }
         }
@@ -534,7 +534,7 @@ void Job_history::write( bool start )
                 try {
                     v = variant_as_string( _extra_values[i] );
                 } 
-                catch( const exception& ) {}
+                catch( const exception& x ) { _job->_log.warn( string("Historie: ") + x.what() ); }
 
                 append_tabbed( v );
             }
@@ -630,6 +630,9 @@ xml::Element_ptr Job_history::read_tail( xml::Document_ptr doc, int n, bool with
 
     if( !_error )  
     {
+        const int max_n = 1000;
+        if( n > max_n )  n = max_n,  _spooler->_log.warn( "Nicht mehr als " + as_string(max_n) + " Historiensätze werden gelesen" );
+
         Transaction ta = &_spooler->_db;
         {
             Any_file sel;
@@ -681,8 +684,8 @@ xml::Element_ptr Job_history::read_tail( xml::Document_ptr doc, int n, bool with
                             par_doc->loadXML( as_dom_string( param_xml ) );
                             history_entry->appendChild( par_doc->documentElement );
                         }
-                        catch( const exception& ) {}
-                        catch( const _com_error& ) {}
+                        catch( const exception&  x ) { _spooler->_log.warn( string("Historie: ") + x.what() ); }
+                        catch( const _com_error& x ) { _spooler->_log.warn( string("Historie: ") + w_as_string(x.Description() )) ; }
                     }
 
                     if( with_log )

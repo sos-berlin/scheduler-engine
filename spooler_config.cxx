@@ -1,4 +1,4 @@
-// $Id: spooler_config.cxx,v 1.33 2002/04/06 20:07:39 jz Exp $
+// $Id: spooler_config.cxx,v 1.34 2002/04/07 19:52:58 jz Exp $
 
 //#include <precomp.h>
 
@@ -386,8 +386,9 @@ void Job::set_xml( const xml::Element_ptr& element )
             else
             if( e->tagName == "script"      )  _script_xml_element = e;
             else
-            if( e->tagName == "process"     )  _process_filename = as_string( e->getAttribute( L"file" ) ),
-                                               _process_param    = as_string( e->getAttribute( L"param" ) );
+            if( e->tagName == "process"     )  _process_filename     = as_string( e->getAttribute( L"file" ) ),
+                                               _process_param        = as_string( e->getAttribute( L"param" ) ),
+                                               _process_log_filename = as_string( e->getAttribute( L"log_file" ) );
             else
             if( e->tagName == "run_time"    )  _run_time.set_xml( e ),  run_time_set = true;
         }

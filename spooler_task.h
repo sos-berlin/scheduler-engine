@@ -1,4 +1,4 @@
-// $Id: spooler_task.h,v 1.46 2002/04/07 11:47:23 jz Exp $
+// $Id: spooler_task.h,v 1.47 2002/04/07 19:52:59 jz Exp $
 
 #ifndef __SPOOLER_TASK_H
 #define __SPOOLER_TASK_H
@@ -212,6 +212,7 @@ struct Job : Sos_self_deleting
     void                        select_period               ( Time = Time::now() );
     bool                        is_in_period                ( Time = Time::now() );
     bool                        its_current_task            ( Task* task )              { return task == _task; }
+    Sos_ptr<Task>               current_task                ()                          { Sos_ptr<Task> task; THREAD_LOCK( _lock ) task = _task;  return task; }
     bool                        queue_filled                ()                          { return !_task_queue.empty(); }
 
     Sos_ptr<Task>               create_task                 ( const CComPtr<spooler_com::Ivariable_set>& params, const string& task_name, Time = latter_day );
@@ -247,6 +248,7 @@ struct Job : Sos_self_deleting
 
     void                        set_state                   ( State );
     void                        set_state_cmd               ( State_cmd );
+    void                        kill_task                   ( int id );
 
     string                      state_name                  ()                          { return state_name( _state ); }
     static string               state_name                  ( State );
@@ -292,8 +294,11 @@ struct Job : Sos_self_deleting
     Level                      _output_level;
     Script                     _script;                     // Job hat ein eigenes Skript
     xml::Element_ptr           _script_element;             // <script> (mit <include>) für <modify_job cmd="reload"/>
+    
     string                     _process_filename;           // Job ist ein externes Programm
     string                     _process_param;              // Parameter für das Programm
+    string                     _process_log_filename;
+
     Run_time                   _run_time;
     int                        _priority;
     bool                       _temporary;                  // Job nach einem Lauf entfernen

@@ -1,4 +1,4 @@
-// $Id: spooler_log.cxx,v 1.37 2002/04/07 11:47:22 jz Exp $
+// $Id: spooler_log.cxx,v 1.38 2002/04/07 19:52:58 jz Exp $
 
 #include "../kram/sos.h"
 #include "spooler.h"
@@ -275,12 +275,12 @@ void Prefix_log::open()
 
         if( !_section.empty() ) 
         {
-            _log_level       = make_log_level( read_profile_string( "factory.ini", _section.c_str(), "log_level", as_string(_log_level) ) );
-            _mail_on_error   = read_profile_bool  ( "factory.ini", _section.c_str(), "mail_on_error"     , _mail_on_error );
-            _mail_on_success = read_profile_bool  ( "factory.ini", _section.c_str(), "mail_on_success"   , _mail_on_success );
-            _subject         = read_profile_string( "factory.ini", _section.c_str(), "log_mail_subject"  , _subject );
-            _collect_within  = (double)read_profile_uint  ( "factory.ini", _section.c_str(), "log_collect_within", _collect_within );
-            _collect_max     = (double)read_profile_uint  ( "factory.ini", _section.c_str(), "log_collect_max"   , _collect_max );
+            _log_level       = make_log_level( read_profile_string( _spooler->_factory_ini, _section, "log_level", as_string(_log_level) ) );
+            _mail_on_error   = read_profile_bool  ( _spooler->_factory_ini, _section, "mail_on_error"     , _mail_on_error );
+            _mail_on_success = read_profile_bool  ( _spooler->_factory_ini, _section, "mail_on_success"   , _mail_on_success );
+            _subject         = read_profile_string( _spooler->_factory_ini, _section, "log_mail_subject"  , _subject );
+            _collect_within  = (double)read_profile_uint  ( _spooler->_factory_ini, _section, "log_collect_within", _collect_within );
+            _collect_max     = (double)read_profile_uint  ( _spooler->_factory_ini, _section, "log_collect_max"   , _collect_max );
         }
 
 
@@ -372,8 +372,8 @@ spooler_com::Imail* Prefix_log::mail()
 
         if( !_smtp_server_read ) {
             if( !_section.empty() ) {
-                _smtp_server = read_profile_string( "factory.ini", _section.c_str(), "smtp"          , _spooler->_smtp_server );
-                _queue_dir   = read_profile_string( "factory.ini", _section.c_str(), "mail_queue_dir", _spooler->_mail_queue_dir );
+                _smtp_server = read_profile_string( _spooler->_factory_ini, _section, "smtp"          , _spooler->_smtp_server );
+                _queue_dir   = read_profile_string( _spooler->_factory_ini, _section, "mail_queue_dir", _spooler->_mail_queue_dir );
             }
             _smtp_server_read = true;
         }
@@ -418,10 +418,10 @@ void Prefix_log::set_mail_header()
 
     if( !_section.empty() )
     {
-        from    = read_profile_string( "factory.ini", _section.c_str(), "log_mail_from"   , _spooler->_log_mail_from );
-        to      = read_profile_string( "factory.ini", _section.c_str(), "log_mail_to"     );
-        cc      = read_profile_string( "factory.ini", _section.c_str(), "log_mail_cc"     , _spooler->_log_mail_cc );
-        bcc     = read_profile_string( "factory.ini", _section.c_str(), "log_mail_bcc"    , _spooler->_log_mail_bcc );
+        from    = read_profile_string( _spooler->_factory_ini, _section, "log_mail_from"   , _spooler->_log_mail_from );
+        to      = read_profile_string( _spooler->_factory_ini, _section, "log_mail_to"     );
+        cc      = read_profile_string( _spooler->_factory_ini, _section, "log_mail_cc"     , _spooler->_log_mail_cc );
+        bcc     = read_profile_string( _spooler->_factory_ini, _section, "log_mail_bcc"    , _spooler->_log_mail_bcc );
     }
 
     if( to.empty() && cc.empty() && bcc.empty() )
@@ -611,7 +611,9 @@ void Prefix_log::log( Log_level level, const string& line )
     if( _highest_level < level )  _highest_level = level, _highest_msg = line;
     if( level < _log_level )  return;
 
-    _log->log2( level, _prefix, line, this );
+
+    string prefix = _prefix;
+    _log->log2( level, _job && _job->current_task()? "Task " + as_string(_job->current_task()->id()) + " " + _job->name() : _prefix, line, this );
 }
 
 //---------------------------------------------------------------------------------------

@@ -1,4 +1,4 @@
-// $Id: spooler_command.cxx,v 1.46 2002/04/07 11:47:22 jz Exp $
+// $Id: spooler_command.cxx,v 1.47 2002/04/07 19:52:58 jz Exp $
 /*
     Hier ist implementiert
 
@@ -197,6 +197,20 @@ xml::Element_ptr Command_processor::execute_modify_job( const xml::Element_ptr& 
     return jobs_element;
 }
 
+//-------------------------------------------------------------Command_processor::execute_kill_task
+
+xml::Element_ptr Command_processor::execute_kill_task( const xml::Element_ptr& element )
+{
+    if( _security_level < Security::seclev_all )  throw_xc( "SPOOLER-121" );
+
+    int    id       = as_int( as_string( element->getAttribute( "id" ) ) );
+    string job_name = as_string( element->getAttribute( "job" ) );              // Hilfsweise
+
+    _spooler->get_job( job_name )->kill_task( id );
+    
+    return _answer->createElement( "ok" );
+}
+
 //-------------------------------------------------------------Command_processor::execute_start_job
 
 xml::Element_ptr Command_processor::execute_start_job( const xml::Element_ptr& element )
@@ -286,6 +300,8 @@ xml::Element_ptr Command_processor::execute_command( const xml::Element_ptr& ele
     if( element->tagName == "modify_job"        )  return execute_modify_job( element );
     else
     if( element->tagName == "start_job"         )  return execute_start_job( element );
+    else
+    if( element->tagName == "kill"              )  return execute_kill_task( element );
     else
     if( element->tagName == "signal_object"     )  return execute_signal_object( element );
     else

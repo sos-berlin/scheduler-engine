@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.79 2002/04/07 11:47:23 jz Exp $
+// $Id: spooler_task.cxx,v 1.80 2002/04/07 19:52:59 jz Exp $
 /*
     Hier sind implementiert
 
@@ -363,36 +363,6 @@ void Job::init2()
 }
 
 //-------------------------------------------------------------------------------Job::select_period
-/*ALT
-void Job::select_period( Time now )
-{
-    if( now > _period.end() )
-    {
-        _period = _run_time.next_period(now);  _log.debug( "Nächste Periode beginnt " + _period.begin().as_string() );
-
-        _next_start_time = _period.has_start()? max( now, _period.begin() )
-                                              : latter_day;
- 
-        if( _next_start_time != latter_day )
-        {
-            _log.debug( "Nächster Start " + _next_start_time.as_string() );
-            _next_time = _next_start_time;
-        }
-        else
-        {
-            _next_time = min( _next_start_time, _period.begin() );
-        }
-    }
-    else
-    if( _next_time == latter_day
-     || _next_time < now         )
-    {
-        _next_time = _next_time < _next_start_time? _next_time = _next_start_time
-                                                  : _run_time.next_period(_period.end()).begin();
-    }
-}
-*/
-//-------------------------------------------------------------------------------Job::select_period
 
 void Job::select_period( Time now )
 {
@@ -529,11 +499,10 @@ Sos_ptr<Task> Job::create_task( const CComPtr<spooler_com::Ivariable_set>& param
 
     Time now = Time::now();
     task->_enqueue_time = now;
+    task->_id           = _spooler->_db.get_id();
     task->_params       = params? params : new Com_variable_set;
     task->_name         = name;
     task->_start_at     = start_at; 
-    
-    //if( task->_start_at < _next_time )  _next_time = start_at;
     
     Task_queue::iterator it = _task_queue.begin();  // _task_queue nach _start_at geordnet halten
     while( it != _task_queue.end()  &&  (*it)->_start_at <= task->_start_at )  it++;
@@ -1307,7 +1276,7 @@ xml::Element_ptr Job::xml( xml::Document_ptr document, bool show_all )
         job_element->setAttribute( "job"       , as_dom_string( _name ) );
         job_element->setAttribute( "state"     , as_dom_string( state_name() ) );
         job_element->setAttribute( "title"     , as_dom_string( _title ) );
-        job_element->setAttribute( "steps"     , as_dom_string( _step_count ) );
+        job_element->setAttribute( "all_steps" , as_dom_string( _step_count ) );
         job_element->setAttribute( "state_text", as_dom_string( _state_text ) );
         job_element->setAttribute( "log_file"  , as_dom_string( _log.filename() ) );
         
@@ -1335,10 +1304,10 @@ xml::Element_ptr Job::xml( xml::Document_ptr document, bool show_all )
         }
 
         if( _task )
-      //THREAD_LOCK( _task->_lock )
         {
             job_element->setAttribute( "running_since", as_dom_string( _task->_running_since.as_string() ) );
-            //job_element->setAttribute( "steps"        , as_dom_string( as_string( _task->_step_count ) ) );
+            job_element->setAttribute( "steps"        , as_dom_string( as_string( _task->_step_count ) ) );
+            job_element->setAttribute( "id"           , as_dom_string( as_string( _task->_id) ) );
         }
         
 
@@ -1368,6 +1337,36 @@ xml::Element_ptr Job::xml( xml::Document_ptr document, bool show_all )
     }
 
     return job_element;
+}
+
+//-----------------------------------------------------------------------------------Job::kill_task
+
+void Job::kill_task( int id )
+{
+    THREAD_LOCK( _lock )
+    {
+        if( _task  &&  _task->_id == id )
+        {
+            _task->cmd_end();
+        }
+        else
+        {
+            for( Task_queue::iterator it = _task_queue.begin(); it != _task_queue.end(); it++ )
+            {
+                if( (*it)->_id == id )  
+                {
+                    Time old_next_time = _next_time;
+
+                    _task_queue.erase( it );
+
+                    set_next_time();
+                    
+                    if( _next_time != old_next_time )  _thread->signal( "task killed" );
+                    break;
+                }
+            }
+        }
+    }
 }
 
 //-------------------------------------------------------------------------------Job::signal_object
@@ -1454,8 +1453,6 @@ bool Task::start()
 
         THREAD_LOCK( _job->_lock )
         {
-            _id = _spooler->_db.get_id();
-
             _job->set_state( Job::s_starting );
             _job->reset_error();
             _job->_delay_until = 0;
@@ -1880,6 +1877,17 @@ void Process_task::do_end()
 
     _process_handle.close();
     _result = (int)exit_code;
+
+    if( !_job->_process_log_filename.empty() ) 
+    {
+        try
+        {
+            Any_file process_log ( "-in -seq " + _job->_process_log_filename );
+            while( !process_log.eof() )  _job->_log.info( process_log.get_string() );
+        }
+        catch( const Xc& x ) { _job->_log.warn( _job->_process_log_filename + ": " + x.what() ); }
+    }
+
     if( exit_code )  throw_xc( "SPOOLER-126", exit_code );
 }
 
