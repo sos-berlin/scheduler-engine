@@ -1,4 +1,4 @@
-// $Id: spooler_module.h,v 1.21 2003/05/31 21:50:51 jz Exp $
+// $Id: spooler_module.h,v 1.22 2003/06/02 09:21:36 jz Exp $
 
 #ifndef __SPOOLER_MODULE_H
 #define __SPOOLER_MODULE_H
@@ -86,13 +86,9 @@ struct Module : Object
     void                        set_source_only             ( const Source_with_parts& );
     void                        init                        ();
 
-
     ptr<Module_instance>        create_instance             ();
-
     bool                        set                         ()                                      { return _set; }
-
     Kind                        kind                        () const                                { return _kind; }
-
     void                        clear_java                  ();
     bool                        make_java_class             ( bool force = false );                 // in spooler_module_java.cxx
     jmethodID                   java_method_id              ( const string& name );                 // in spooler_module_java.cxx
@@ -100,7 +96,8 @@ struct Module : Object
 
     Fill_zero                  _zero_;
     Spooler*                   _spooler;
-    Prefix_log*                _log;
+  //Prefix_log*                _log;
+    Delegated_log              _log;
     bool                       _set;
 
     Source_with_parts          _source;
@@ -119,8 +116,6 @@ struct Module : Object
     // Java
     ptr<java::Vm>              _java_vm;
     string                     _java_class_name;            // <script java_class="...">
-  //string                     _java_class_path;            // <script java_class_path="..">
-  //string                     _java_work_dir;
     bool                       _recompile;                  // <script recompile="..">    Immer kompilieren
 
     jclass                     _java_class;
@@ -152,7 +147,8 @@ struct Module_instance : Object
 
 
     Fill_zero                  _zero_;
-    Prefix_log*                _log;
+  //Prefix_log*                _log;
+    Delegated_log              _log;
     ptr<Module>                _module;
 
     ptr<Com_context>           _com_context;

@@ -1,4 +1,4 @@
-// $Id: spooler_module_remote_server.cxx,v 1.9 2003/06/01 14:21:19 jz Exp $
+// $Id: spooler_module_remote_server.cxx,v 1.10 2003/06/02 09:21:37 jz Exp $
 /*
     Hier sind implementiert
 
@@ -9,6 +9,8 @@
 
 #include "spooler.h"
 #include "spooler_module_remote_server.h"
+#include "../kram/sos_java.h"
+
 
 namespace sos {
 namespace spooler {
@@ -141,33 +143,50 @@ STDMETHODIMP Com_remote_module_instance_server::construct( SAFEARRAY* safearray 
 
     try
     {
+        string           java_class_path;
         Locked_safearray params ( safearray );
 
         for( int i = 0; i < params.count(); i++ )
         {
             if( params[i].vt != VT_BSTR )  throw_xc( "_spooler_construct" );
 
-            const OLECHAR* value = wcschr( V_BSTR( &params[i] ), '=' );
-            if( !value )  throw_xc( "_spooler_construct" );
-            value++;
+            const OLECHAR* ole_value = wcschr( V_BSTR( &params[i] ), '=' );
+            if( !ole_value )  throw_xc( "_spooler_construct" );
+            string key_word = string_from_ole( V_BSTR( &params[i] ), ole_value - V_BSTR( &params[i] ) );
+            ole_value++;
+            string value = string_from_ole( ole_value );
 
-            if( olestring_begins_with( V_BSTR( &params[i] ), "language="   ) )  _server._module->_language        = string_from_ole( value );
+            if( key_word == "language"        )  _server._module->_language        = value;
             else                                                                         
-            if( olestring_begins_with( V_BSTR( &params[i] ), "com_class="  ) )  _server._module->_com_class_name  = string_from_ole( value );
+            if( key_word == "com_class"       )  _server._module->_com_class_name  = value;
             else                                                                         
-            if( olestring_begins_with( V_BSTR( &params[i] ), "filename="   ) )  _server._module->_filename        = string_from_ole( value );
+            if( key_word == "filename"        )  _server._module->_filename        = value;
             else
-            if( olestring_begins_with( V_BSTR( &params[i] ), "java_class=" ) )  _server._module->_java_class_name = string_from_ole( value );
+            if( key_word == "java_class"      )  _server._module->_java_class_name = value;
             else
-            if( olestring_begins_with( V_BSTR( &params[i] ), "recompile="  ) )  _server._module->_recompile       = value[0] == '1';
+            if( key_word == "recompile"       )  _server._module->_recompile       = value[0] == '1';
             else
-            if( olestring_begins_with( V_BSTR( &params[i] ), "script="     ) )  _server._module->_source          = string_from_ole( value );
+            if( key_word == "script"          )  _server._module->_source          = value;
             else
+            if( key_word == "java_class_path" )  java_class_path                   = value;
+            else
+          //if( key_word == "java_work_dir"   )  java_work_dir                     = value;
+          //else
                 throw_xc( "server::construct" );
         }
 
         _server._module->init();
         _server._module->set_source_only( _server._module->_source );
+
+
+        if( _server._module->_kind == Module::kind_java )
+        {
+            _server._module->_java_vm = get_java_vm( false );
+            //java_vm->set_log( &_log );
+          //_server._module->_java_vm->prepend_class_path( _server._module->_java_vm->work_dir() );
+            _server._module->_java_vm->set_class_path( java_class_path );
+            Java_module_instance::init_java_vm( _server._module->_java_vm );
+        }
 
         _server._module_instance = _server._module->create_instance();
         _server._module_instance->init();

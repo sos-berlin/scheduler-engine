@@ -1,4 +1,4 @@
-// $Id: spooler_module_java.cxx,v 1.53 2003/05/31 10:01:13 jz Exp $
+// $Id: spooler_module_java.cxx,v 1.54 2003/06/02 09:21:37 jz Exp $
 /*
     Hier sind implementiert
 
@@ -91,19 +91,37 @@ static jobject jobject_from_variant( JNIEnv* jenv, const VARIANT& v )
 {
     if( v.vt == VT_DISPATCH )
     {
+        string java_class_name;
+
         IDispatch* idispatch = V_DISPATCH( &v );
         if( !idispatch )  return NULL;
 
         ptr<spooler_com::Ihas_java_class_name> j;
         HRESULT hr = idispatch->QueryInterface( spooler_com::IID_Ihas_java_class_name, (void**)&j );
-        if( FAILED( hr ) )  throw_ole( hr, "IID_Ihas_java_class_name" );
+        
+        if( !FAILED( hr ) )
+        {
+            Bstr java_class_name_bstr;
+            hr = j->get_java_class_name( &java_class_name_bstr );
+            if( FAILED(hr) )  throw_ole( hr, "get_java_class_name" );
 
-        Bstr java_class_name_bstr;
-        hr = j->get_java_class_name( &java_class_name_bstr );
-        if( FAILED(hr) )  throw_ole( hr, "get_java_class_name" );
+            java_class_name = string_from_bstr( java_class_name_bstr );
+        }
+        else
+        {
+            //throw_ole( hr, "IID_Ihas_java_class_name" );
+            // Vielleicht gibt's die Eigenschaft java_class_name per IDispatch (so bei einem Proxy des Objektservers)
+            //Bstr property_name = "java_class_name";
+            //DISPID dispid;
+            //hr = idispatch->GetIDsOfNames( IID_NULL, &property_name, 1, STANDARD_LCID, &dispid );
+            //if( !hr )  throw_ole( hr, "java_class_name" );
 
-        string java_class_name = replace_regex( string_from_bstr( java_class_name_bstr ), "\\.", "/" ) ;
-        ptr<Java_idispatch> java_idispatch = Z_NEW( Java_idispatch( spooler_ptr->_java_vm, idispatch, java_class_name ) );
+            //hr = idispatch->Invoke( dispid, IID_NULL, STANDARD_LCID, , dispparams, &result, excepinfo, 
+            java_class_name = string_from_variant( com_property_get( idispatch, "java_class_name" ) );
+        }
+
+        java_class_name = replace_regex( java_class_name, "\\.", "/" ) ;
+        ptr<Java_idispatch> java_idispatch = Z_NEW( Java_idispatch( get_java_vm(), idispatch, java_class_name ) );
 
         thread_data->add_object( java_idispatch );        // Lebensdauer nur bis Ende des Aufrufs der Java-Methode, s. Java_module_instance::call()
 
@@ -144,7 +162,7 @@ JNIEXPORT jobject JNICALL Java_sos_spooler_Idispatch_com_1call( JNIEnv* jenv, jc
         if( name_ptr[0] == '>' )  context |= DISPATCH_PROPERTYPUT, name_ptr++;
                             else  context |= DISPATCH_METHOD;
 
-        hr = idispatch->GetIDsOfNames( IID_NULL, &name_ptr, 1, (LCID)0, &dispid );
+        hr = idispatch->GetIDsOfNames( IID_NULL, &name_ptr, 1, STANDARD_LCID, &dispid );
         if( FAILED(hr) )  throw_com( hr, "GetIDsOfNames", string_from_ole(name_ptr).c_str() );
 
 
@@ -225,7 +243,7 @@ JNIEXPORT jobject JNICALL Java_sos_spooler_Idispatch_com_1call( JNIEnv* jenv, jc
 
         if( jenv->ExceptionCheck() )  return NULL;
 
-        hr = idispatch->Invoke( dispid, IID_NULL, (LCID)0, context, &dispparams, &result, &excepinfo, &arg_nr );
+        hr = idispatch->Invoke( dispid, IID_NULL, STANDARD_LCID, context, &dispparams, &result, &excepinfo, &arg_nr );
         if( FAILED(hr) )  throw_ole_excepinfo( hr, &excepinfo, "Invoke", string_from_bstr(name_bstr).c_str() );
 
         return spooler::jobject_from_variant( jenv, result );
@@ -234,26 +252,6 @@ JNIEXPORT jobject JNICALL Java_sos_spooler_Idispatch_com_1call( JNIEnv* jenv, jc
     catch( const _com_error& x ) { set_java_exception( jenv, x ); }
 
     return NULL;
-}
-
-//----------------------------------------------------------------------------Spooler::init_java_vm
-
-void Spooler::init_java_vm()
-{
-    _java_vm->set_log( &_log );
-
-    _java_vm->start();
-
-  //make_path( _java_vm->work_dir() );       // Java-VM prüft Vorhandensein der Verzeichnisse in classpath schon beim Start
-
-    Env e = _java_vm->env();
-
-    //_idispatch_jclass = e->FindClass( JAVA_IDISPATCH_CLASS );
-    Class idispatch_class ( _java_vm, JAVA_IDISPATCH_CLASS );
-    if( e->ExceptionCheck() )  e.throw_java( "FindClass " JAVA_IDISPATCH_CLASS );
-
-    int ret = e->RegisterNatives( idispatch_class, native_methods, NO_OF( native_methods ) );
-    if( ret < 0 )  throw_java_ret( ret, "RegisterNatives" );
 }
 
 //---------------------------------------------------------------------Java_thread_data::add_object
@@ -355,7 +353,7 @@ bool Module::make_java_class( bool force )
             Mapped_file m ( java_filename, "r" );
             if( m.length() != source.length()  ||  memcmp( m.ptr(), source.data(), m.length() ) != 0 )
             {
-                _log->warn( "Datei " + java_filename + " ist trotz gleichen Zeitstempels verschieden vom Java-Skript" );
+                _log.warn( "Datei " + java_filename + " ist trotz gleichen Zeitstempels verschieden vom Java-Skript" );
                 do_compile = true;
             }
 */
@@ -376,15 +374,15 @@ bool Module::make_java_class( bool force )
         //utimbuf.actime = utimbuf.modtime = (time_t)_source._max_modification_time;
         //utime( java_filename.c_str(), &utimbuf );
 
-        string cmd = '"' + _java_vm->javac_filename() + "\" -verbose -O -classpath " + _spooler->_java_vm->class_path() + ' ' + java_filename;
-        _log->info( cmd );
+        string cmd = '"' + _java_vm->javac_filename() + "\" -verbose -O -classpath " + _java_vm->class_path() + ' ' + java_filename;
+        _log.info( cmd );
         
         System_command c;
         c.set_throw( false );
         c.execute( cmd );
 
-        if( c.stderr_text() != "" )  _log->info( c.stderr_text() ),  _log->info( "" );
-        if( c.stdout_text() != "" )  _log->info( c.stdout_text() ),  _log->info( "" );
+        if( c.stderr_text() != "" )  _log.info( c.stderr_text() ),  _log.info( "" );
+        if( c.stdout_text() != "" )  _log.info( c.stdout_text() ),  _log.info( "" );
 
         if( c.xc() )  throw *c.xc();
 
@@ -398,7 +396,7 @@ bool Module::make_java_class( bool force )
 
 jmethodID Module::java_method_id( const string& name )
 {
-    JNIEnv*   env = _spooler->_java_vm->jenv();
+    JNIEnv*   env = _java_vm->jenv();
     jmethodID method_id;
 
     Method_map::iterator it = _method_map.find( name );
@@ -482,6 +480,24 @@ Java_idispatch::~Java_idispatch()
     }
 }
 */
+//---------------------------------------------------------------Java_module_instance::init_java_vm
+
+void Java_module_instance::init_java_vm( java::Vm* java_vm )
+{
+    java_vm->start();
+
+  //make_path( _java_vm->work_dir() );       // Java-VM prüft Vorhandensein der Verzeichnisse in classpath schon beim Start
+
+    Env e = java_vm->env();
+
+    //_idispatch_jclass = e->FindClass( JAVA_IDISPATCH_CLASS );
+    Class idispatch_class ( java_vm, JAVA_IDISPATCH_CLASS );
+    if( e->ExceptionCheck() )  e.throw_java( "FindClass " JAVA_IDISPATCH_CLASS );
+
+    int ret = e->RegisterNatives( idispatch_class, native_methods, NO_OF( native_methods ) );
+    if( ret < 0 )  throw_java_ret( ret, "RegisterNatives" );
+}
+
 //-------------------------------------------------------Java_module_instance::Java_module_instance
 
 Java_module_instance::Java_module_instance( Vm* vm, Module* module )
@@ -490,7 +506,7 @@ Java_module_instance::Java_module_instance( Vm* vm, Module* module )
     Has_vm(vm),
     _zero_(this+1), 
   //_jobject(_module->_spooler->_java_vm) 
-    _jobject( get_java_vm() ) 
+    _jobject( _java_vm ) 
 {
 }
 
@@ -593,7 +609,7 @@ Variant Java_module_instance::call( const string& name_par )
     bool is_optional;
     string name = name_par;
 
-    if( name[0] == '?' )  is_optional = true,  name.erase( (int)0 );
+    if( name[0] == '?' )  is_optional = true,  name.erase( 0, 1 );
 
     jmethodID method_id = _module->java_method_id( name );
     if( !method_id )  

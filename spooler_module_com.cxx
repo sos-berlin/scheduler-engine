@@ -1,4 +1,4 @@
-// $Id: spooler_module_com.cxx,v 1.14 2003/05/31 21:50:51 jz Exp $
+// $Id: spooler_module_com.cxx,v 1.15 2003/06/02 09:21:37 jz Exp $
 /*
     Hier sind implementiert
 
@@ -108,7 +108,7 @@ void Com_module_instance::init()
     {
         if( !_module )
         {
-            _log->debug( "LoadLibrary " + _module->_filename );
+            _log.debug( "LoadLibrary " + _module->_filename );
             _com_module = LoadLibrary( _module->_filename.c_str() );
             if( !_com_module )  throw_mswin_error( "LoadLibrary", _module->_filename.c_str() );   
         }
@@ -152,7 +152,7 @@ void Com_module_instance::close()
 
     if( _com_module ) 
     {
-        _log->debug( "FreeLibrary " + _module->_filename );
+        _log.debug( "FreeLibrary " + _module->_filename );
         FreeLibrary( _com_module );
         _com_module = NULL;
     }

@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.212 2003/06/01 14:21:18 jz Exp $
+// $Id: spooler.cxx,v 1.213 2003/06/02 09:21:36 jz Exp $
 /*
     Hier sind implementiert
 
@@ -828,9 +828,9 @@ void Spooler::load_arg()
     _history_tablename  = read_profile_string    ( _factory_ini, "spooler", "db_history_table"   , "SPOOLER_HISTORY"   );
     _variables_tablename= read_profile_string    ( _factory_ini, "spooler", "db_variables_table" , "SPOOLER_VARIABLES" );
 
-    _java_vm->set_filename      ( subst_env( read_profile_string( _factory_ini, "java"   , "vm"         , _java_vm->filename()       ) ) );
-    _java_vm->prepend_class_path( subst_env( read_profile_string( _factory_ini, "java"   , "class_path" ) ) );
-    _java_vm->set_javac_filename( subst_env( read_profile_string( _factory_ini, "java"   , "javac"      , _java_vm->javac_filename() ) ) );
+  //_java_vm->set_filename      ( subst_env( read_profile_string( _factory_ini, "java"   , "vm"         , _java_vm->filename()       ) ) );
+  //_java_vm->prepend_class_path( subst_env( read_profile_string( _factory_ini, "java"   , "class_path" ) ) );
+  //_java_vm->set_javac_filename( subst_env( read_profile_string( _factory_ini, "java"   , "javac"      , _java_vm->javac_filename() ) ) );
 
 
     try
@@ -888,6 +888,7 @@ void Spooler::load_arg()
         make_path( java_work_dir );  // Verzeichnis muss beim Start von Java vorhanden sein, damit Java es in classpath berücksichtigt.
         _java_vm->set_work_dir( java_work_dir );
         _java_vm->prepend_class_path( java_work_dir );
+
     }
     catch( const Sos_option_error& )
     {
@@ -980,7 +981,9 @@ void Spooler::start()
     {
         try
         {
-            init_java_vm();    // In spooler_module_java.cxx
+            _java_vm->set_log( &_log );
+            _java_vm->prepend_class_path( _config_java_class_path );        // Nicht so gut hier. Bei jedem Reload wird der Pfad verlängert. Aber Reload lässt Java sowieso nicht neu starten.
+            Java_module_instance::init_java_vm( _java_vm );
         }
         catch( const exception& x )
         {

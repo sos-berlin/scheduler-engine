@@ -1,4 +1,4 @@
-// $Id: spooler_module.cxx,v 1.19 2003/05/31 21:50:51 jz Exp $
+// $Id: spooler_module.cxx,v 1.20 2003/06/02 09:21:36 jz Exp $
 /*
     Hier sind implementiert
 
@@ -44,6 +44,8 @@ void Module::set_dom_without_source( const xml::Element_ptr& element )
      || use_engine == "task" )  _reuse = reuse_task;
     else
     if( use_engine == "job"  )  _reuse = reuse_job;
+
+    init();
 }
 
 //----------------------------------------------------------------------Module::set_dom_source_only
@@ -79,7 +81,7 @@ void Module::set_source_only( const Source_with_parts& source )
 #     endif
 
         default: 
-            throw_xc( "Module::set_dom_source_only" );
+            throw_xc( "Module::set_source_only" );
     }
 
     clear_java();
@@ -212,7 +214,7 @@ void Module_instance::close()
         }
         catch( const exception& x ) 
         { 
-            _log->error( x.what() ); 
+            _log.error( x.what() ); 
         }
     }
 

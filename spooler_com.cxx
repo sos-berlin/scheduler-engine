@@ -1,4 +1,4 @@
-// $Id: spooler_com.cxx,v 1.95 2003/05/12 09:50:39 jz Exp $
+// $Id: spooler_com.cxx,v 1.96 2003/06/02 09:21:36 jz Exp $
 /*
     Hier sind implementiert
 
@@ -94,9 +94,10 @@ static ptr<spooler_com::Iorder> order_from_order_or_payload( Spooler* spooler, c
 const Com_method Com_error::_methods[] =
 { 
    // _flags              , _name             , _method                                        , _result_type, _types        , _default_arg_count
-    { DISPATCH_PROPERTYGET, 1, "is_error"        , (Com_method_ptr)&Com_error::get_is_error       , VT_BOOL },
-    { DISPATCH_PROPERTYGET, 2, "code"            , (Com_method_ptr)&Com_error::get_code           , VT_BSTR }, 
-    { DISPATCH_PROPERTYGET, 3, "text"            , (Com_method_ptr)&Com_error::get_text           , VT_BSTR }, 
+    { DISPATCH_PROPERTYGET, 1, "java_class_name" , (Com_method_ptr)&Com_error::get_java_class_name, VT_BSTR },
+    { DISPATCH_PROPERTYGET, 2, "is_error"        , (Com_method_ptr)&Com_error::get_is_error       , VT_BOOL },
+    { DISPATCH_PROPERTYGET, 3, "code"            , (Com_method_ptr)&Com_error::get_code           , VT_BSTR }, 
+    { DISPATCH_PROPERTYGET, 4, "text"            , (Com_method_ptr)&Com_error::get_text           , VT_BSTR }, 
     {}
 };
 
@@ -192,6 +193,7 @@ const Com_method Com_variable::_methods[] =
     { DISPATCH_PROPERTYGET, 0, "value"              , (Com_method_ptr)&Com_variable::get_value          , VT_VARIANT    },
     { DISPATCH_PROPERTYGET, 1, "name"               , (Com_method_ptr)&Com_variable::get_name           , VT_BSTR       },
     { DISPATCH_METHOD     , 2, "Clone"              , (Com_method_ptr)&Com_variable::Clone              , VT_DISPATCH   },
+    { DISPATCH_PROPERTYGET, 3, "java_class_name"    , (Com_method_ptr)&Com_variable::get_java_class_name, VT_BSTR },
     {}
 };
 
@@ -254,6 +256,7 @@ const Com_method Com_variable_set::_methods[] =
     { DISPATCH_PROPERTYGET, DISPID_NEWENUM, "_NewEnum", (Com_method_ptr)&Com_variable_set::get__NewEnum , VT_DISPATCH   },
     { DISPATCH_PROPERTYPUT, 6, "xml"                , (Com_method_ptr)&Com_variable_set::put_xml        , VT_EMPTY      , { VT_BSTR } },
     { DISPATCH_PROPERTYGET, 6, "xml"                , (Com_method_ptr)&Com_variable_set::get_xml        , VT_BSTR       },
+    { DISPATCH_PROPERTYGET, 7, "java_class_name"    , (Com_method_ptr)&Com_variable_set::get_java_class_name, VT_BSTR },
     {}
 };
 
@@ -684,6 +687,7 @@ const Com_method Com_log::_methods[] =
     { DISPATCH_PROPERTYPUT, 22, "collect_max"          , (Com_method_ptr)&Com_log::put_collect_max         , VT_EMPTY      , { VT_BYREF|VT_VARIANT } },
     { DISPATCH_PROPERTYGET, 22, "collect_max"          , (Com_method_ptr)&Com_log::get_collect_max         , VT_R8         },
     { DISPATCH_PROPERTYPUT, 23, "mail_it"              , (Com_method_ptr)&Com_log::put_mail_it             , VT_EMPTY      , { VT_BOOL } },
+    { DISPATCH_PROPERTYGET, 24, "java_class_name"      , (Com_method_ptr)&Com_log::get_java_class_name     , VT_BSTR },
     {}
 };
 
@@ -1139,6 +1143,7 @@ const Com_method Com_job::_methods[] =
     { DISPATCH_PROPERTYGET,  9, "title"                         , (Com_method_ptr)&Com_job::get_title                   , VT_BSTR       },
     { DISPATCH_PROPERTYPUT, 10, "delay_after_error"             , (Com_method_ptr)&Com_job::put_delay_after_error       , VT_EMPTY      , { VT_I4, VT_BYREF|VT_VARIANT } },
     { DISPATCH_PROPERTYGET, 11, "order_queue"                   , (Com_method_ptr)&Com_job::get_order_queue             , VT_DISPATCH   },
+    { DISPATCH_PROPERTYGET, 12, "java_class_name"               , (Com_method_ptr)&Com_job::get_java_class_name         , VT_BSTR },
     {}
 };
 
@@ -1417,6 +1422,7 @@ const Com_method Com_task::_methods[] =
     { DISPATCH_PROPERTYPUT, 11, "delay_spooler_process"     , (Com_method_ptr)&Com_task::put_delay_spooler_process, VT_EMPTY    , { VT_BYREF|VT_VARIANT } },
     { DISPATCH_PROPERTYPUT, 12, "close_engine"              , (Com_method_ptr)&Com_task::put_close_engine       , VT_EMPTY      , { VT_BOOL } },
     { DISPATCH_PROPERTYGET, 13, "order"                     , (Com_method_ptr)&Com_task::get_order              , VT_DISPATCH   },
+    { DISPATCH_PROPERTYGET, 14, "java_class_name"           , (Com_method_ptr)&Com_task::get_java_class_name    , VT_BSTR },
     {}
 };
 
@@ -1766,6 +1772,7 @@ const Com_method Com_thread::_methods[] =
     { DISPATCH_PROPERTYGET,  2, "script"                    , (Com_method_ptr)&Com_thread::get_script           , VT_DISPATCH  },
     { DISPATCH_PROPERTYGET,  3, "include_path"              , (Com_method_ptr)&Com_thread::get_include_path     , VT_BSTR       },
     { DISPATCH_PROPERTYGET,  4, "name"                      , (Com_method_ptr)&Com_thread::get_name             , VT_BSTR       },
+    { DISPATCH_PROPERTYGET,  5, "java_class_name"           , (Com_method_ptr)&Com_thread::get_java_class_name  , VT_BSTR },
     {}
 };
 
@@ -1880,6 +1887,7 @@ const Com_method Com_spooler::_methods[] =
     { DISPATCH_PROPERTYGET, 15, "job_chain"                 , (Com_method_ptr)&Com_spooler::get_job_chain       , VT_DISPATCH  , { VT_BSTR } },
     { DISPATCH_METHOD     , 16, "create_order"              , (Com_method_ptr)&Com_spooler::create_order        , VT_DISPATCH  },
     { DISPATCH_PROPERTYGET, 17, "is_service"                , (Com_method_ptr)&Com_spooler::get_is_service      , VT_BOOL      },
+    { DISPATCH_PROPERTYGET, 17, "java_class_name"           , (Com_method_ptr)&Com_spooler::get_java_class_name , VT_BSTR },
     {}
 };
 
@@ -2216,6 +2224,7 @@ const Com_method Com_job_chain::_methods[] =
     { DISPATCH_METHOD     ,  5, "add_order"                 , (Com_method_ptr)&Com_job_chain::add_order         , VT_DISPATCH   , { VT_VARIANT|VT_BYREF } },
     { DISPATCH_PROPERTYGET,  6, "node"                      , (Com_method_ptr)&Com_job_chain::get_node          , VT_DISPATCH   , { VT_VARIANT|VT_BYREF } },
     { DISPATCH_PROPERTYGET,  7, "order_queue"               , (Com_method_ptr)&Com_job_chain::get_order_queue   , VT_DISPATCH   , { VT_VARIANT|VT_BYREF } },
+    { DISPATCH_PROPERTYGET,  8, "java_class_name"           , (Com_method_ptr)&Com_job_chain::get_java_class_name, VT_BSTR },
     {}
 };
 
@@ -2484,6 +2493,7 @@ const Com_method Com_job_chain_node::_methods[] =
     { DISPATCH_PROPERTYGET,  4, "job"                       , (Com_method_ptr)&Com_job_chain_node::get_job          , VT_DISPATCH  },
     { DISPATCH_PROPERTYGET,  5, "next_state"                , (Com_method_ptr)&Com_job_chain_node::get_next_state   , VT_VARIANT   },
     { DISPATCH_PROPERTYGET,  6, "error_state"               , (Com_method_ptr)&Com_job_chain_node::get_error_state  , VT_VARIANT   },
+    { DISPATCH_PROPERTYGET,  7, "java_class_name"           , (Com_method_ptr)&Com_job_chain_node::get_java_class_name, VT_BSTR },
     {}
 };
 
@@ -2584,6 +2594,7 @@ const Com_method Com_order::_methods[] =
     { DISPATCH_PROPERTYPUT, 10, "payload"                   , (Com_method_ptr)&Com_order::put_payload           , VT_EMPTY      , { VT_VARIANT|VT_BYREF  } },
     { DISPATCH_PROPERTYGET, 10, "payload"                   , (Com_method_ptr)&Com_order::get_payload           , VT_VARIANT    },
     { DISPATCH_METHOD     , 11, "payload_is_type"           , (Com_method_ptr)&Com_order::payload_is_type       , VT_BOOL       , { VT_BSTR } },
+    { DISPATCH_PROPERTYGET, 12, "java_class_name"           , (Com_method_ptr)&Com_order::get_java_class_name   , VT_BSTR },
     {}
 };
 
@@ -3066,6 +3077,7 @@ const Com_method Com_order_queue::_methods[] =
    // _flags          , dispid, _name                       , _method                                           , _result_type  , _types        , _default_arg_count
     { DISPATCH_PROPERTYGET,  1, "length"                    , (Com_method_ptr)&Com_order_queue::get_length      , VT_INT        },
     { DISPATCH_METHOD     ,  2, "add_order"                 , (Com_method_ptr)&Com_order_queue::add_order       , VT_DISPATCH   , { VT_VARIANT|VT_BYREF } },
+    { DISPATCH_PROPERTYGET,  3, "java_class_name"           , (Com_method_ptr)&Com_order_queue::get_java_class_name, VT_BSTR },
     {}
 };
 

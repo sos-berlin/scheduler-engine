@@ -1,4 +1,4 @@
-// $Id: spooler.odl,v 1.58 2003/05/31 10:01:13 jz Exp $
+// $Id: spooler.odl,v 1.59 2003/06/02 09:21:36 jz Exp $
 
 // Anweisung: midl /nologo /error all /out $(OutDir) $(InputPath)
 
@@ -64,6 +64,10 @@ library spooler
     ]
     interface Ierror : IDispatch
     {
+        [propget]
+        HRESULT                 java_class_name             ( [out,retval] BSTR* result );          // Damit java_class_name über IDispatch, statt über Ihas_java_class_name gerufen werden kann
+                                                                                                    // Für den Objectserver
+
         [id(0),propget]
         HRESULT                 is_error                    ( [out,retval] VARIANT_BOOL* result );
 
@@ -92,6 +96,10 @@ library spooler
     ]
     interface Ivariable : IDispatch
     {
+        [propget]
+        HRESULT                 java_class_name             ( [out,retval] BSTR* result );          // Damit java_class_name über IDispatch, statt über Ihas_java_class_name gerufen werden kann
+                                                                                                    // Für den Objectserver
+
         [id(0),propput]
         HRESULT                 value                       ( [in] VARIANT* value );
 
@@ -124,6 +132,10 @@ library spooler
     ]
     interface Ivariable_set : IDispatch
     {
+        [propget]
+        HRESULT                 java_class_name             ( [out,retval] BSTR* result );          // Damit java_class_name über IDispatch, statt über Ihas_java_class_name gerufen werden kann
+                                                                                                    // Für den Objectserver
+
         HRESULT                 set_var                     ( [in] BSTR name, [in] VARIANT* value );
 
         [id(0),propput]
@@ -217,6 +229,10 @@ library spooler
     ]
     interface Ijob : IDispatch
     {
+        [propget]
+        HRESULT                 java_class_name             ( [out,retval] BSTR* result );          // Damit java_class_name über IDispatch, statt über Ihas_java_class_name gerufen werden kann
+                                                                                                    // Für den Objectserver
+
         HRESULT                 start_when_directory_changed( [in] BSTR directory_name, [in,defaultvalue("")] BSTR filename_pattern );
 
         HRESULT                 clear_when_directory_changed();
@@ -272,6 +288,10 @@ library spooler
     ]
     interface Itask : IDispatch
     {
+        [propget]
+        HRESULT                 java_class_name             ( [out,retval] BSTR* result );          // Damit java_class_name über IDispatch, statt über Ihas_java_class_name gerufen werden kann
+                                                                                                    // Für den Objectserver
+
         [propget]
         HRESULT                 object_set                  ( [out,retval] Iobject_set** result );
 
@@ -338,6 +358,10 @@ library spooler
     interface Ithread : IDispatch
     {
         [propget]
+        HRESULT                 java_class_name             ( [out,retval] BSTR* result );          // Damit java_class_name über IDispatch, statt über Ihas_java_class_name gerufen werden kann
+                                                                                                    // Für den Objectserver
+
+        [propget]
         HRESULT                 log                     ( [out,retval] Ilog** log );
 
         [propget]
@@ -371,6 +395,10 @@ library spooler
     ]
     interface Ispooler : IDispatch
     {
+        [propget]
+        HRESULT                 java_class_name             ( [out,retval] BSTR* result );          // Damit java_class_name über IDispatch, statt über Ihas_java_class_name gerufen werden kann
+                                                                                                    // Für den Objectserver
+
         [propget]
         HRESULT                 log                     ( [out,retval] Ilog** log );
 
@@ -475,6 +503,10 @@ library spooler
     ]
     interface Imail : IDispatch
     {
+        [propget]
+        HRESULT                 java_class_name             ( [out,retval] BSTR* result );          // Damit java_class_name über IDispatch, statt über Ihas_java_class_name gerufen werden kann
+                                                                                                    // Für den Objectserver
+
       //[hidden]
       //void                    init                    ();
 
@@ -561,6 +593,10 @@ library spooler
     interface Ijob_chain_node : IDispatch
     {
         [propget]
+        HRESULT                 java_class_name             ( [out,retval] BSTR* result );          // Damit java_class_name über IDispatch, statt über Ihas_java_class_name gerufen werden kann
+                                                                                                    // Für den Objectserver
+
+        [propget]
         HRESULT                 state                   ( [out,retval] VARIANT* result );
 
         [propget]
@@ -597,6 +633,10 @@ library spooler
     ]
     interface Ijob_chain : IDispatch
     {
+        [propget]
+        HRESULT                 java_class_name             ( [out,retval] BSTR* result );          // Damit java_class_name über IDispatch, statt über Ihas_java_class_name gerufen werden kann
+                                                                                                    // Für den Objectserver
+
         [propput]
         HRESULT                 name                    ( [in] BSTR name );
 
@@ -641,6 +681,10 @@ library spooler
     interface Iorder_queue : IDispatch
     {
         [propget]
+        HRESULT                 java_class_name             ( [out,retval] BSTR* result );          // Damit java_class_name über IDispatch, statt über Ihas_java_class_name gerufen werden kann
+                                                                                                    // Für den Objectserver
+
+        [propget]
         HRESULT                 length                  ( [out,retval] int* result );
 
         HRESULT                 add_order               ( [in] VARIANT* order_or_payload, [out,retval] Iorder** );
@@ -664,6 +708,10 @@ library spooler
     ]
     interface Iorder : IDispatch
     {
+        [propget]
+        HRESULT                 java_class_name             ( [out,retval] BSTR* result );          // Damit java_class_name über IDispatch, statt über Ihas_java_class_name gerufen werden kann
+                                                                                                    // Für den Objectserver
+
         [propput]
         HRESULT                 id                      ( [in] VARIANT* value );
 
@@ -742,6 +790,10 @@ library spooler
     ]
     interface Ilog : IDispatch
     {
+        [propget]
+        HRESULT                 java_class_name             ( [out,retval] BSTR* result );          // Damit java_class_name über IDispatch, statt über Ihas_java_class_name gerufen werden kann
+                                                                                                    // Für den Objectserver
+
         HRESULT                 debug9                  ( [in] BSTR line );
         HRESULT                 debug8                  ( [in] BSTR line );
         HRESULT                 debug7                  ( [in] BSTR line );

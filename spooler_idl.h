@@ -1,4 +1,4 @@
-// $Id: spooler_idl.h,v 1.14 2003/05/31 16:20:50 jz Exp $
+// $Id: spooler_idl.h,v 1.15 2003/06/02 09:21:36 jz Exp $
 
 
 /*  Ersatz für spooler.odl für Systeme ohne COM. 
@@ -68,6 +68,7 @@ struct Ierror : IDispatch
 {
     DEFINE_UUIDOF( Ierror )
 
+    virtual HRESULT     get_java_class_name             ( BSTR* result ) = 0;
     virtual HRESULT     get_is_error                    ( VARIANT_BOOL* result ) = 0;
     virtual HRESULT     get_code                        ( BSTR* code ) = 0;
     virtual HRESULT     get_text                        ( BSTR* text ) = 0;
@@ -82,6 +83,7 @@ struct Ivariable : IDispatch
 {
     DEFINE_UUIDOF( Ivariable )
 
+    virtual HRESULT     get_java_class_name             ( BSTR* result ) = 0;
     virtual HRESULT     put_value                       ( VARIANT* value ) = 0;
     virtual HRESULT     get_value                       ( VARIANT* value ) = 0;
   //virtual HRESULT         dim                         ( int size ) = 0;
@@ -98,6 +100,7 @@ struct Ivariable_set : IDispatch
 {
     DEFINE_UUIDOF( Ivariable_set )
 
+    virtual HRESULT     get_java_class_name             ( BSTR* result ) = 0;
     virtual HRESULT         set_var                     ( BSTR name, VARIANT* value ) = 0;
     virtual HRESULT     put_var                         ( BSTR name, VARIANT* value ) = 0;
     virtual HRESULT     get_var                         ( BSTR name, VARIANT* value ) = 0;
@@ -149,6 +152,7 @@ struct Ijob : IDispatch
 {
     DEFINE_UUIDOF( Ijob )
 
+    virtual HRESULT     get_java_class_name             ( BSTR* result ) = 0;
     virtual HRESULT         start_when_directory_changed( BSTR name, BSTR filename_pattern ) = 0;
     virtual HRESULT         clear_when_directory_changed() = 0;
   //HRESULT                 start_on_signal             () = 0;
@@ -174,6 +178,7 @@ struct Itask : IDispatch
 {
     DEFINE_UUIDOF( Itask )
 
+    virtual HRESULT     get_java_class_name             ( BSTR* result ) = 0;
     virtual HRESULT     get_object_set                  ( Iobject_set** result ) = 0;
     virtual HRESULT     put_error                       ( VARIANT* error_text ) = 0;       // Für PerlScript, das einen Fehlertext nicht durchreicht
     virtual HRESULT     get_error                       ( Ierror** result ) = 0;
@@ -201,6 +206,7 @@ struct Ithread : IDispatch
 {
     DEFINE_UUIDOF( Ithread )
 
+    virtual HRESULT     get_java_class_name             ( BSTR* result ) = 0;
     virtual HRESULT     get_log                     ( Ilog** log ) = 0;
     virtual HRESULT     get_script                  ( IDispatch** script_object ) = 0;
   //HRESULT             put_include_path            ( BSTR include_path ) = 0;
@@ -216,6 +222,7 @@ struct Ispooler : IDispatch
 {
     DEFINE_UUIDOF( Ispooler )
 
+    virtual HRESULT     get_java_class_name             ( BSTR* result ) = 0;
     virtual HRESULT     get_log                     ( Ilog** log ) = 0;
     virtual HRESULT     get_id                      ( BSTR* spooler_id ) = 0;
     virtual HRESULT     get_param                   ( BSTR* spooler_param ) = 0;
@@ -246,6 +253,7 @@ struct Ilog : IDispatch
 {
     DEFINE_UUIDOF( Ilog )
 
+    virtual HRESULT     get_java_class_name             ( BSTR* result ) = 0;
     virtual HRESULT         debug9                  ( BSTR line ) = 0;
     virtual HRESULT         debug8                  ( BSTR line ) = 0;
     virtual HRESULT         debug7                  ( BSTR line ) = 0;
@@ -319,6 +327,8 @@ struct Imail : IDispatch
 {
     DEFINE_UUIDOF( Imail )
 
+    virtual HRESULT     get_java_class_name             ( BSTR* result ) = 0;
+
     virtual HRESULT     put_to                      ( BSTR receipient ) = 0;
     virtual HRESULT     get_to                      ( BSTR* receipient ) = 0;
 
@@ -364,6 +374,8 @@ struct Ijob_chain_node : IDispatch
 {
     DEFINE_UUIDOF( Ijob_chain_node )
 
+    virtual HRESULT     get_java_class_name             ( BSTR* result ) = 0;
+
     virtual HRESULT     get_state                   ( VARIANT* result ) = 0;
 
     virtual HRESULT     get_next_node               ( Ijob_chain_node** result ) = 0;
@@ -383,6 +395,8 @@ struct Ijob_chain : IDispatch
     DEFINE_UUIDOF( Ijob_chain )
 
     
+    virtual HRESULT     get_java_class_name             ( BSTR* result ) = 0;
+
     virtual HRESULT     put_name                    ( BSTR name ) = 0;
 
     virtual HRESULT     get_name                    ( BSTR* result ) = 0;
@@ -412,6 +426,8 @@ struct Iorder_queue : IDispatch
 {
     DEFINE_UUIDOF( Iorder_queue )
 
+    virtual HRESULT     get_java_class_name             ( BSTR* result ) = 0;
+
     virtual HRESULT     get_length                  ( int* result ) = 0;
 
     virtual HRESULT         add_order               ( VARIANT* order_or_payload, Iorder** ) = 0;
@@ -425,6 +441,8 @@ DEFINE_GUID( CLSID_order, 0x8D3FAB02, 0x6DD5, 0x4831, 0x91, 0x6C, 0x46, 0x5E, 0x
 struct Iorder : IDispatch
 {
     DEFINE_UUIDOF( Iorder )
+
+    virtual HRESULT     get_java_class_name             ( BSTR* result ) = 0;
 
     virtual HRESULT     put_id                      ( VARIANT* value ) = 0;
     virtual HRESULT     get_id                      ( VARIANT* result ) = 0;

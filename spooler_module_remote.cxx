@@ -1,4 +1,4 @@
-// $Id: spooler_module_remote.cxx,v 1.6 2003/05/31 21:50:51 jz Exp $
+// $Id: spooler_module_remote.cxx,v 1.7 2003/06/02 09:21:37 jz Exp $
 /*
     Hier sind implementiert
 
@@ -32,17 +32,18 @@ void Remote_module_instance_proxy::init()
     hr = com_create_instance_in_separate_process( spooler_com::CLSID_Remote_module_instance_server, NULL, 0, spooler_com::IID_Iremote_module_instance_server, (void**)&_remote_instance );
     if( FAILED(hr) )  throw_ole( hr, "com_create_instance_in_separate_process" );
 
-    Variant params ( Variant::vt_array, 6 );
+    Variant params ( Variant::vt_array, 7 );
 
     {
         Locked_safearray params_array = V_ARRAY( &params );
 
-        params_array[0] = "language="   + _module->_language;
-        params_array[1] = "com_class="  + _module->_com_class_name;
-        params_array[2] = "filename="   + _module->_filename;
-        params_array[3] = "java_class=" + _module->_java_class_name;
-        params_array[4] = "recompile="  + as_string(_module->_recompile);
-        params_array[5] = "script="     + _module->_source.text();
+        params_array[0] = "language="        + _module->_language;
+        params_array[1] = "com_class="       + _module->_com_class_name;
+        params_array[2] = "filename="        + _module->_filename;
+        params_array[3] = "java_class="      + _module->_java_class_name;
+        params_array[4] = "java_class_path=" + _module->_spooler->_java_vm->class_path();
+        params_array[5] = "recompile="       + as_string(_module->_recompile);
+        params_array[6] = "script="          + _module->_source.text();
     }
 
     _remote_instance->call( "construct", params );
