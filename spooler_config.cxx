@@ -1,4 +1,4 @@
-// $Id: spooler_config.cxx,v 1.64 2003/08/11 19:33:11 jz Exp $
+// $Id: spooler_config.cxx,v 1.65 2003/08/22 07:34:14 jz Exp $
 
 //#include <precomp.h>
 
@@ -235,7 +235,7 @@ void Spooler::load_object_set_classes_from_xml( Object_set_class_list* liste, co
 }
 
 //--------------------------------------------------------------------------Spooler_thread::set_dom
-
+/*
 void Spooler_thread::set_dom( const xml::Element_ptr& element, const Time& xml_mod_time )
 {
     string str;
@@ -269,18 +269,29 @@ void Spooler_thread::set_dom( const xml::Element_ptr& element, const Time& xml_m
         if( e.nodeName_is( "jobs"   ) )  _spooler->load_jobs_from_xml( e, xml_mod_time );   // Zur Kompatibilität
     }
 }
-
+*/
 //-------------------------------------------------------------------Spooler::load_threads_from_xml
 
-void Spooler::load_threads_from_xml( const xml::Element_ptr& element, const Time& xml_mod_time )
+void Spooler::load_threads_from_xml( const xml::Element_ptr& threads_element, const Time& xml_mod_time )
 {
-    DOM_FOR_EACH_ELEMENT( element, e )
+    DOM_FOR_EACH_ELEMENT( threads_element, element )
     {
-        if( e.nodeName_is( "thread" ) )
+        if( element.nodeName_is( "thread" ) )
         {
-            string spooler_id = e.getAttribute( "spooler_id" );
+            string spooler_id = element.getAttribute( "spooler_id" );
             if( _manual  ||  spooler_id.empty()  ||  spooler_id == _spooler_id )
             {
+
+                if( element.getAttributeNode( "include_path" ) )  throw_xc( "SPOOLER-189", "<thread include_path=>" );  //_include_path = element.getAttribute( "include_path" );
+
+                DOM_FOR_EACH_ELEMENT( element, e )
+                {
+                    if( e.nodeName_is( "script" ) )  throw_xc( "SPOOLER-189", "<script in thread>" );  //_module.set_dom( e, xml_mod_time, include_path() );
+                    else
+                    if( e.nodeName_is( "jobs"   ) )  load_jobs_from_xml( e, xml_mod_time );   // Zur Kompatibilität
+                }
+
+/*
                 string thread_name = e.getAttribute( "name" );
                 ptr<Spooler_thread> thread = get_thread_or_null( thread_name );
                 if( !thread )  
@@ -292,6 +303,7 @@ void Spooler::load_threads_from_xml( const xml::Element_ptr& element, const Time
                 }
 
                 thread->set_dom( e, xml_mod_time );
+*/
             }
         }
     }
@@ -324,6 +336,8 @@ void Spooler::load_config( const xml::Element_ptr& config_element, const Time& x
         _tcp_port      = as_int( config_element.getAttribute( "tcp_port"     , as_string( _tcp_port )     ) );
         _udp_port      = as_int( config_element.getAttribute( "udp_port"     , as_string( _udp_port )     ) );
         _priority_max  = as_int( config_element.getAttribute( "priority_max" , as_string( _priority_max ) ) );
+        _max_threads   = as_int( config_element.getAttribute( "threads"      , as_string( _max_threads  ) ) );
+        if( _max_threads < 1 )  _max_threads = 1;
 
         _config_java_class_path = subst_env( config_element.getAttribute( "java_class_path" ) );
         _config_java_options    = subst_env( config_element.getAttribute( "java_options" ) );
@@ -377,8 +391,14 @@ void Spooler::load_config( const xml::Element_ptr& config_element, const Time& x
                 _module.set_dom( e, xml_mod_time, include_path() );
             }
             else
+            if( e.nodeName_is( "jobs" ) )
+            {
+                load_jobs_from_xml( e, xml_mod_time );
+            }
+            else
             if( e.nodeName_is( "threads" ) )
             {
+                _log.warn( "Element <threads> ist veraltet, in " + source_filename );
                 load_threads_from_xml( e, xml_mod_time );
             }
         }

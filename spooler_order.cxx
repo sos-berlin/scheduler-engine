@@ -1,5 +1,5 @@
 
-// $Id: spooler_order.cxx,v 1.31 2003/08/11 19:33:11 jz Exp $
+// $Id: spooler_order.cxx,v 1.32 2003/08/22 07:34:14 jz Exp $
 /*
     Hier sind implementiert
 
@@ -592,10 +592,12 @@ Order* Order_queue::first_order( const Time& now )
 {
     // SEITENEFFEKT: Aufträge aus der _setback_queue, deren Rückstellungszeitpunkt erreicht ist, werden in die _queue verschoben.
 
-    Order* order = NULL;
+    //Order* order = NULL;
 
     THREAD_LOCK( _lock )
     {
+        // Zurückgestellte Aufträge, deren Wartezeit abgelaufen ist, hervorholen
+
         while( !_setback_queue.empty() )
         {
             ptr<Order> o = *_setback_queue.begin();
@@ -606,14 +608,13 @@ Order* Order_queue::first_order( const Time& now )
             add_order( o );
         }
 
-        if( !_queue.empty() )  order = *_queue.begin();
 
-        //if( _setback_queue.empty() )  return false;
-
-        //if( (*_setback_queue.begin())->_setback <= now )  return true;
+        //if( !_queue.empty() )  order = *_queue.begin();
+        FOR_EACH( Queue, _queue, o )  if( !(*o)->_task )  return *o;
     }
 
-    return order;
+    //return order;
+    return NULL;
 }
 
 //------------------------------------------------------------Order_queue::get_order_for_processing
@@ -631,7 +632,7 @@ ptr<Order> Order_queue::get_order_for_processing( const Time& now, Task* task )
 
         if( order )
         {
-            if( order->_task )  throw_xc( "Order_queue::get_order_for_processing" );   // Darf nicht passieren
+          //if( order->_task )  throw_xc( "Order_queue::get_order_for_processing" );   // Darf nicht passieren
             
             order->_task = task;
             order->_setback = 0;

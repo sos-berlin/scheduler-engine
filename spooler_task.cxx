@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.170 2003/08/15 19:13:33 jz Exp $
+// $Id: spooler_task.cxx,v 1.171 2003/08/22 07:34:14 jz Exp $
 /*
     Hier sind implementiert
 
@@ -518,15 +518,7 @@ bool Task::do_something()
             set_state( s_running );
         }
 
-        if( _state == s_running_waiting_for_order )
-        {
-            if( !_order )  _order = _job->order_queue()->get_order_for_processing( now, this );
-
-            if( _order )  set_state( s_running );            // Auftrag da? Dann Task weiterlaufen lassen (Ende der Run_time wird noch geprüft)
-                    else  ok &= _job->_period.is_in_time( now );   // Run_time abgelaufen? Dann Task beenden
-        }
-
-        if( ( _state == s_running || _state == s_running_process )  &&  ok  &&  !has_error() )      // SPOOLER_PROCESS
+        if( ( _state == s_running || _state == s_running_process || _state == s_running_waiting_for_order )  &&  ok  &&  !has_error() )      // SPOOLER_PROCESS
         {
             bool call_step = do_a_step | _let_run;
             if( !call_step )  call_step = _job->_period.is_in_time( now );
@@ -537,9 +529,20 @@ bool Task::do_something()
 
             if( call_step ) 
             {
-                _last_process_start_time = now;
-                ok = step(); 
-                something_done = true;
+                if( ok  &&  _state == s_running_waiting_for_order )
+                {
+                    if( !_order )  _order = _job->order_queue()->get_order_for_processing( now, this );
+                    if( _order )  set_state( s_running );                  // Auftrag da? Dann Task weiterlaufen lassen (Ende der Run_time wird noch geprüft)
+                            else  ok = false;
+                    // _order wird in step() wieder abgeräumt
+                }
+
+                if( ok )
+                {
+                    _last_process_start_time = now;
+                    ok = step(); 
+                    something_done = true;
+                }
             }
             else
             {

@@ -1,4 +1,4 @@
-// $Id: spooler_job.cxx,v 1.3 2003/08/15 19:13:33 jz Exp $
+// $Id: spooler_job.cxx,v 1.4 2003/08/22 07:34:14 jz Exp $
 /*
     Hier sind implementiert
 
@@ -867,51 +867,54 @@ void Job::calculate_next_time( Time now )
 
 Sos_ptr<Task> Job::task_to_start()
 {
+    if( _spooler->state() == Spooler::s_stopping_let_run )  return NULL;
+
     Time            now   = Time::now();
     Start_cause     cause = cause_none;
     Sos_ptr<Task>   task = NULL;
 
-    if( _spooler->state() == Spooler::s_stopping_let_run )  return NULL;
-
-    if( _state == s_pending )
+  //if( _state == s_pending )
     {
         task = dequeue_task( now );
         if( task )  task->_cause = task->_start_at? cause_queue_at : cause_queue;
             
-        if( now >= _next_single_start )  cause = cause_period_single;     
-                                   else  select_period(now);
+        if( _state == s_pending && now >= _next_single_start )  cause = cause_period_single;     
+                                                          else  select_period(now);
 
         if( cause                      // Auf weitere Anlässe prüfen und diese protokollieren
          || is_in_period(now) )
         {
             THREAD_LOCK( _lock )
             {
-                if( _start_once )              cause = cause_period_once,  _start_once = false,     _log.debug( "Task startet wegen <run_time once=\"yes\">" );
-                                                                            
-                if( now >= _next_start_time )  cause = cause_period_repeat,                         _log.debug( "Task startet, weil Job-Startzeit erreicht: " + _next_start_time.as_string() );
-
-                Directory_watcher_list::iterator it = _directory_watcher_list.begin();
-                while( it != _directory_watcher_list.end() )
+                if( _state == s_pending )
                 {
-                    if( (*it)->signaled_then_reset() )
-                    {
-                        cause = cause_directory;
-                        _log.debug( "Task startet wegen eines Ereignisses für Verzeichnis " + (*it)->directory() );
-                        
-                        if( !(*it)->valid() )
-                        {
-                            it = _directory_watcher_list.erase( it );  // Folge eines Fehlers, s. Directory_watcher::set_signal
-                            continue;
-                        }
-                    }
+                    if( _start_once )              cause = cause_period_once,  _start_once = false,     _log.debug( "Task startet wegen <run_time once=\"yes\">" );
+                                                                            
+                    if( now >= _next_start_time )  cause = cause_period_repeat,                         _log.debug( "Task startet, weil Job-Startzeit erreicht: " + _next_start_time.as_string() );
 
-                    it++;
+                    Directory_watcher_list::iterator it = _directory_watcher_list.begin();
+                    while( it != _directory_watcher_list.end() )
+                    {
+                        if( (*it)->signaled_then_reset() )
+                        {
+                            cause = cause_directory;
+                            _log.debug( "Task startet wegen eines Ereignisses für Verzeichnis " + (*it)->directory() );
+                            
+                            if( !(*it)->valid() )
+                            {
+                                it = _directory_watcher_list.erase( it );  // Folge eines Fehlers, s. Directory_watcher::set_signal
+                                continue;
+                            }
+                        }
+
+                        it++;
+                    }
                 }
 
                 if( !cause && _order_queue )
                 {
                     ptr<Order> order = _order_queue->first_order( now );
-                    if( order )                cause = cause_order,                                 _log.debug( "Task startet wegen Auftrag " + order->obj_name() );
+                    if( order )                cause = cause_order,                                     _log.debug( "Task startet wegen Auftrag " + order->obj_name() );
                 }
                                                                                     
                 if( !task && cause )
@@ -942,16 +945,14 @@ bool Job::do_something()
 
     something_done = execute_state_cmd();
 
-  //if( _reread  &&  !_task )  _reread = false,  reread(),  something_done = true;
     if( _reread )  _reread = false,  reread(),  something_done = true;
 
-    if( _state == s_pending )  
+    if( _state == s_pending 
+     || _state == s_running  &&  _running_tasks.size() < _max_tasks )
     {
         Sos_ptr<Task> task = task_to_start();
         if( task )
         {
-          //run_task( task );
-
             _running_tasks.push_back( task );
 
             _log.open();           // Jobprotokoll, nur wirksam, wenn set_filename() gerufen, s. Job::init().
@@ -961,27 +962,15 @@ bool Job::do_something()
             reset_error();
             _repeat = 0;
             _delay_until = 0;
-          //_last_task_step_count = 0;
 
             set_state( s_running );
         }
     }
 
 
-/*
-    // Wenn nichts zu tun ist, dann raus. Der Job soll nicht wegen eines alten Fehlers nachträglich gestoppt werden (s.u.)
-    if( _state == s_pending    )  goto ENDE;
-  //if( _state == s_suspended  )  goto ENDE;
-    if( _state == s_stopped    )  goto ENDE;
-    if( _state == s_read_error )  goto ENDE;
-  //if( _state == s_running_process  &&  !((Process_task*)+_task)->signaled() )  goto ENDE;
-
-ENDE:
-*/
-
     if( !something_done )  
     {
-        LOG( obj_name() << ".do_something()  Nicht getan\n" );
+        LOG( obj_name() << ".do_something()  Nichts getan\n" );
         calculate_next_time();
     }
 

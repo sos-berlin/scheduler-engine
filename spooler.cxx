@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.223 2003/08/15 19:13:33 jz Exp $
+// $Id: spooler.cxx,v 1.224 2003/08/22 07:34:13 jz Exp $
 /*
     Hier sind implementiert
 
@@ -301,6 +301,7 @@ Spooler::Spooler()
     _udp_port = 4444;
     _priority_max = 1000;       // Ein Wert > 1, denn 1 ist die voreingestelle Priorit‰t der Jobs
             
+    _max_threads = 1;
 
     _com_log     = new Com_log( &_log );
     _com_spooler = new Com_spooler( this );
@@ -782,19 +783,34 @@ Spooler_thread* Spooler::select_thread_for_task( Task* task )
     // Kriterien: 
     // - Ein Thread, in dem die wenigsten Tasks desselben Jobs laufen
     // - Ein Thread, in dem die wenigsten Tasks laufen
-    // ? Bei einem Java-Job: Ein Thread (Prozess) mit Java Virtual Machine
+    // ? Bei einem Java-Job: Ein Thread (Prozess) mit Java Virtual Machine - Das lˆsen wir ¸ber Thread-Klassen
     // - Ein Thread der Thread-Klasse (Prozess-Klasse)
 
     // Ggfs. Thread neu starten, wenn Maximum noch nicht erreicht.
 
+    Spooler_thread* result = NULL;
 
-    FOR_EACH( Thread_list, _thread_list, t )
+    THREAD_LOCK( _lock )
     {
-        Spooler_thread* thread = *t;
-        return thread;
+        int min_task_count_for_job = INT_MAX;   // Zahl der Tasks des Jobs f¸r result
+        int min_task_count         = INT_MAX;   // Zahl der Tasks aller Jobs f¸r result
+
+        FOR_EACH( Thread_list, _thread_list, t )
+        {
+            Spooler_thread* thread = *t;
+            
+            int c = thread->task_count( task->job() );
+            if( min_task_count_for_job > c )  min_task_count_for_job = c, result = thread;
+            
+            c = thread->task_count();
+            if( min_task_count > c )  min_task_count = c, result = thread;
+        }
+
+        if( _thread_list.size() < _max_threads  &&  min_task_count > 0 )  result = new_thread();
     }
 
-    throw_xc( "select_thread_for_task" );
+    if( !result )  throw_xc( "select_thread_for_task" );
+    return result;
 }
 
 //---------------------------------------------------------------------------Spooler::signal_object
@@ -876,8 +892,34 @@ void Spooler::close_jobs()
     // Damit's nicht knallt: Jobs schlieﬂen, aber Objekte halten.
 }
 
-//---------------------------------------------------------------------------Spooler::start_threads
+//------------------------------------------------------------------------------Spooler::new_thread
 
+Spooler_thread* Spooler::new_thread()
+{
+    ptr<Spooler_thread>  thread;
+
+    THREAD_LOCK( _lock )
+    {
+        thread = Z_NEW( Spooler_thread( this ) );
+
+        _thread_list.push_back( thread );
+
+        if( thread->_free_threading )  
+        {
+            thread->thread_start();      // Eigener Thread
+            thread->set_thread_termination_event( &_event );        // Signal zu uns, wenn Thread endet
+        }
+        else
+        {
+            thread->start( &_event );    // Unser Thread
+        }
+    }
+
+    return thread;
+}
+
+//---------------------------------------------------------------------------Spooler::start_threads
+/*
 void Spooler::start_threads()
 {
     FOR_EACH( Thread_list, _thread_list, it )  
@@ -895,7 +937,7 @@ void Spooler::start_threads()
         }
     }
 }
-
+*/
 //---------------------------------------------------------------------------Spooler::close_threads
 
 void Spooler::close_threads()
@@ -1253,7 +1295,7 @@ void Spooler::start()
         if( !ok )  throw_xc( "SPOOLER-183" );
     }
 
-    start_threads();
+  //start_threads();
     start_jobs();
 
     
@@ -1333,9 +1375,13 @@ void Spooler::run()
     {
         // Threads ohne Jobs und nach Fehler gestorbene Threads entfernen:
         //FOR_EACH( Thread_list, _thread_list, it )  if( (*it)->empty() )  THREAD_LOCK( _lock )  it = _thread_list.erase(it);
-        bool valid_thread = false;
-        FOR_EACH( Thread_list, _thread_list, it )  valid_thread |= !(*it)->terminated();
-        if( !valid_thread )  { _log.info( "Kein Thread vorhanden. Spooler wird beendet." ); break; }
+        
+        if( _thread_list.size() > 0 )       // Beim Start gibt es noch keinen Thread.
+        {
+            bool valid_thread = false;
+            FOR_EACH( Thread_list, _thread_list, it )  valid_thread |= !(*it)->terminated();
+            if( !valid_thread )  { _log.info( "Kein Thread vorhanden. Spooler wird beendet." ); break; }
+        }
 
         if( _state_cmd == sc_pause                 )  if( _state == s_running )  set_state( s_paused  ), signal_threads( "pause" );
         if( _state_cmd == sc_continue              )  if( _state == s_paused  )  set_state( s_running ), signal_threads( "continue" );

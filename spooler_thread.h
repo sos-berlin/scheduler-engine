@@ -1,4 +1,4 @@
-// $Id: spooler_thread.h,v 1.44 2003/08/15 19:13:33 jz Exp $
+// $Id: spooler_thread.h,v 1.45 2003/08/22 07:34:14 jz Exp $
 
 #ifndef __SPOOLER_THREAD_H
 #define __SPOOLER_THREAD_H
@@ -14,7 +14,7 @@ struct Spooler_thread : zschimmer::Thread
                                 Spooler_thread              ( Spooler* );
                                ~Spooler_thread              ();
 
-    void                        set_dom                     ( const xml::Element_ptr&, const Time& xml_mod_time );
+  //void                        set_dom                     ( const xml::Element_ptr&, const Time& xml_mod_time );
     xml::Element_ptr            dom                         ( const xml::Document_ptr&, Show_what );
     
     const string&               name                        () const                                { return _name; }
@@ -36,6 +36,7 @@ struct Spooler_thread : zschimmer::Thread
 
     void                        add_task                    ( Task* task )                          { _task_list.push_back( task );  signal( task->obj_name() ); }
   //void                        remove_task                 ( Task* this_task )                     { FOR_EACH_TASK( t, task )  if( task == this_task )  { _task_list.erase(t);  break; } }
+    int                         task_count                  ( Job* = NULL );
 
     void                        increment_running_tasks     ()                                      { InterlockedIncrement( &_running_tasks_count ); }
     void                        decrement_running_tasks     ()                                      { InterlockedDecrement( &_running_tasks_count ); }

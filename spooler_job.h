@@ -1,4 +1,4 @@
-// $Id: spooler_job.h,v 1.2 2003/08/14 11:01:14 jz Exp $
+// $Id: spooler_job.h,v 1.3 2003/08/22 07:34:14 jz Exp $
 
 #ifndef __SPOOLER_JOB_H
 #define __SPOOLER_JOB_H
@@ -343,8 +343,8 @@ struct Job : Sos_self_deleting
     
     Task_queue                 _task_queue;                 // Warteschlange der nächsten zu startenden Tasks
   //Sos_ptr<Task>              _task;                       // Es kann nur eine Task geben. Zirkel: _task->_job == this
-    Task_list                  _running_tasks;
-    long                       _running_tasks_count;
+    Task_list                  _running_tasks;              // Alle laufenden Tasks (auch die gestarteten, aber wartenden, z.B. s_running_waiting_for_order)
+    long                       _running_tasks_count;        // Anzahl der Tasks, die tatsächlich laufen (und nicht gerade warten)
     int                        _max_tasks;                  // Max. Anzahl gleichzeitig laufender Tasks. _running_tasks.size() <= _max_tasks!
 
     Job_history                _history;

@@ -1,4 +1,4 @@
-// $Id: spooler_com.cxx,v 1.101 2003/08/11 19:33:11 jz Exp $
+// $Id: spooler_com.cxx,v 1.102 2003/08/22 07:34:13 jz Exp $
 /*
     Hier sind implementiert
 
@@ -1145,7 +1145,7 @@ const Com_method Com_job::_methods[] =
     { DISPATCH_METHOD     ,  1, "start_when_directory_changed"  , (Com_method_ptr)&Com_job::start_when_directory_changed, VT_EMPTY      , { VT_BSTR, VT_BSTR }, 1 },
     { DISPATCH_METHOD     ,  2, "clear_when_directory_changed"  , (Com_method_ptr)&Com_job::clear_when_directory_changed },
     { DISPATCH_METHOD     ,  3, "start"                         , (Com_method_ptr)&Com_job::start                       , VT_DISPATCH   , { VT_BYREF|VT_VARIANT }, 1 },
-    { DISPATCH_PROPERTYGET,  4, "thread"                        , (Com_method_ptr)&Com_job::get_thread                  , VT_DISPATCH   },
+  //{ DISPATCH_PROPERTYGET,  4, "thread"                        , (Com_method_ptr)&Com_job::get_thread                  , VT_DISPATCH   },
     { DISPATCH_PROPERTYGET,  5, "include_path"                  , (Com_method_ptr)&Com_job::get_include_path            , VT_BSTR       },
     { DISPATCH_PROPERTYGET,  6, "name"                          , (Com_method_ptr)&Com_job::get_name                    , VT_BSTR       },
     { DISPATCH_METHOD     ,  7, "wake"                          , (Com_method_ptr)&Com_job::wake                        },
@@ -2245,7 +2245,7 @@ const Com_method Com_context::_methods[] =
    // _flags         , dispid, _name                        , _method                                           , _result_type  , _types        , _default_arg_count
     { DISPATCH_PROPERTYGET,  1, "log"                       , (Com_method_ptr)&Com_context::get_log             , VT_DISPATCH  },
     { DISPATCH_PROPERTYGET,  2, "spooler"                   , (Com_method_ptr)&Com_context::get_spooler         , VT_DISPATCH  },
-    { DISPATCH_PROPERTYGET,  3, "thread"                    , (Com_method_ptr)&Com_context::get_thread          , VT_DISPATCH  },
+  //{ DISPATCH_PROPERTYGET,  3, "thread"                    , (Com_method_ptr)&Com_context::get_thread          , VT_DISPATCH  },
     { DISPATCH_PROPERTYGET,  4, "job"                       , (Com_method_ptr)&Com_context::get_job             , VT_DISPATCH  },
     { DISPATCH_PROPERTYGET,  5, "task"                      , (Com_method_ptr)&Com_context::get_Task            , VT_DISPATCH  },
     {}

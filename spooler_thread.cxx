@@ -1,4 +1,4 @@
-// $Id: spooler_thread.cxx,v 1.93 2003/08/15 19:13:33 jz Exp $
+// $Id: spooler_thread.cxx,v 1.94 2003/08/22 07:34:14 jz Exp $
 /*
     Hier sind implementiert
 
@@ -29,6 +29,7 @@ Spooler_thread::Spooler_thread( Spooler* spooler )
 
   //_com_thread     = new Com_thread( this );
   //_free_threading = _spooler->free_threading_default();
+    _free_threading = true;
   //_include_path   = _spooler->include_path();
 }
 
@@ -166,6 +167,30 @@ void Spooler_thread::start( Event* event_destination )
     }
     catch( const exception&  x ) { _terminated = true; _log.error( x.what() ); }
     catch( const _com_error& x ) { _terminated = true; _log.error( as_string( x.Description() ) ); }
+}
+
+//-----------------------------------------------------------------------Spooler_thread::task_count
+
+int Spooler_thread::task_count( Job* job )
+{
+    int result = 0;
+
+    if( !job )  
+    {
+        result = _task_list.size();
+    }
+    else
+    {
+        THREAD_LOCK( _lock )
+        {
+            FOR_EACH_TASK( t, task )
+            {
+                if( task->job() == job )  result++;
+            }
+        }
+    }
+
+    return result;
 }
 
 //------------------------------------------------Spooler_thread::build_prioritized_order_job_array

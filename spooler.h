@@ -1,4 +1,4 @@
-// $Id: spooler.h,v 1.143 2003/08/12 14:59:45 jz Exp $
+// $Id: spooler.h,v 1.144 2003/08/22 07:34:13 jz Exp $
 
 #ifndef __SPOOLER_H
 #define __SPOOLER_H
@@ -236,7 +236,8 @@ struct Spooler
     void                        run                         ();
     void                        start_jobs                  ();
     void                        close_jobs                  ();
-    void                        start_threads               ();
+  //void                        start_threads               ();
+    Spooler_thread*             new_thread                  ();
     void                        close_threads               ();
   //bool                        run_single_thread           ();
 
@@ -377,6 +378,7 @@ struct Spooler
     Time                       _next_start_time;
 
     Thread_list                _thread_list;                // Alle Threads
+    int                        _max_threads;
 
   //typedef list< Spooler_thread* >  Spooler_thread_list;
   //Spooler_thread_list         _spooler_thread_list;        // Nur Threads mit _free_threading=no, die also keine richtigen Threads sind und im Spooler-Thread laufen
