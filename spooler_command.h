@@ -1,10 +1,26 @@
-// $Id: spooler_command.h,v 1.12 2002/09/19 10:15:58 jz Exp $
+// $Id: spooler_command.h,v 1.13 2002/10/02 05:47:29 jz Exp $
 
 #ifndef __SPOOLER_COMMAND_H
 #define __SPOOLER_COMMAND_H
 
 namespace sos {
 namespace spooler {
+
+//----------------------------------------------------------------------------------------Show_what
+
+enum Show_what
+{
+    show_standard       = 0,
+    
+    show_task_queue     = 0x01,
+    show_order_queue    = 0x02,
+    show_description    = 0x04,
+    show_log            = 0x08,
+
+    show_all            = 0xFF
+};
+
+//-------------------------------------------------------------------------------------------------
 
 void                            dom_append_text_element     ( const xml::Element_ptr& element, const char* element_name, const string& text );
 void                            append_error_element        ( const xml::Element_ptr&, const Xc_copy& );
@@ -25,7 +41,7 @@ struct Command_processor
     xml::Element_ptr            execute_add_order           ( const xml::Element_ptr& );
     xml::Element_ptr            execute_show_state          ( const xml::Element_ptr& );
     xml::Element_ptr            execute_show_history        ( const xml::Element_ptr& );
-    xml::Element_ptr            execute_show_threads        ( bool show_all );
+    xml::Element_ptr            execute_show_threads        ( Show_what );
     xml::Element_ptr            execute_show_job            ( Job* );
     xml::Element_ptr            execute_modify_job          ( const xml::Element_ptr& );
     xml::Element_ptr            execute_start_job           ( const xml::Element_ptr& );

@@ -1,4 +1,4 @@
-// $Id: spooler_task.h,v 1.63 2002/09/29 16:17:25 jz Exp $
+// $Id: spooler_task.h,v 1.64 2002/10/02 05:47:30 jz Exp $
 
 #ifndef __SPOOLER_TASK_H
 #define __SPOOLER_TASK_H
@@ -179,7 +179,7 @@ struct Job : Sos_self_deleting
                                ~Job                         (); 
 
     void                        set_xml                     ( const xml::Element_ptr& );
-    xml::Element_ptr            xml                         ( xml::Document_ptr, bool show_all );
+    xml::Element_ptr            xml                         ( xml::Document_ptr, Show_what );
 
     void                        init0                       ();                         // Wird vor Spooler-Skript gerufen
     void                        init                        ();                         // Wird nach Spooler-Skript gerufen, ruft auch init2()
@@ -200,7 +200,7 @@ struct Job : Sos_self_deleting
     void                        set_in_call                 ( const string& name, const string& extra = "" );
     void                        set_delay_after_error       ( int error_steps, Time delay ) { _delay_after_error[error_steps] = delay; }
 
-    xml::Element_ptr            read_history                ( xml::Document_ptr doc, int id, int n, bool with_log ) { return _history.read_tail( doc, id, n, with_log ); }
+    xml::Element_ptr            read_history                ( xml::Document_ptr doc, int id, int n, Show_what show ) { return _history.read_tail( doc, id, n, show ); }
 
     void                        close                       ();
     void                        close_engine                ();

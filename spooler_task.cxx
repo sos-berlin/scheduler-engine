@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.109 2002/09/29 16:17:25 jz Exp $
+// $Id: spooler_task.cxx,v 1.110 2002/10/02 05:47:30 jz Exp $
 /*
     Hier sind implementiert
 
@@ -1447,7 +1447,7 @@ string Job::state_cmd_name( Job::State_cmd cmd )
 //-----------------------------------------------------------------------------------------Job::xml
 // Anderer Thread
 
-xml::Element_ptr Job::xml( xml::Document_ptr document, bool show_all )
+xml::Element_ptr Job::xml( xml::Document_ptr document, Show_what show )
 {
     xml::Element_ptr job_element = document->createElement( "task" );
 
@@ -1460,11 +1460,8 @@ xml::Element_ptr Job::xml( xml::Document_ptr document, bool show_all )
         job_element->setAttribute( "state_text", as_dom_string( _state_text ) );
         job_element->setAttribute( "log_file"  , as_dom_string( _log.filename() ) );
         
-
-
         if( !_in_call.empty() )  job_element->setAttribute( "calling", as_dom_string( _in_call ) );
-
-        if( _state_cmd )  job_element->setAttribute( "cmd", as_dom_string( state_cmd_name() ) );
+        if( _state_cmd        )  job_element->setAttribute( "cmd", as_dom_string( state_cmd_name() ) );
 
         if( _state == s_pending )
         {
@@ -1497,11 +1494,13 @@ xml::Element_ptr Job::xml( xml::Document_ptr document, bool show_all )
             job_element->setAttribute( "steps"        , as_dom_string( as_string( _task->_step_count ) ) );
             job_element->setAttribute( "id"           , as_dom_string( as_string( _task->_id) ) );
         }
+
+        if( _order_queue )  job_element->setAttribute( "order_queue_length", as_dom_string( as_string( _order_queue->length() ) ) );
         
 
-        if( show_all )  dom_append_text_element( job_element, "description", _description );
+        if( show & show_description )  dom_append_text_element( job_element, "description", _description );
 
-        if( !_task_queue.empty() )
+        if( (show & show_task_queue)  &&  !_task_queue.empty() )
         {
             xml::Element_ptr queue_element = document->createElement( "queued_tasks" );
             dom_append_nl( queue_element );
@@ -1520,6 +1519,13 @@ xml::Element_ptr Job::xml( xml::Document_ptr document, bool show_all )
             }
 
             job_element->appendChild( queue_element );
+        }
+
+        if( (show & show_order_queue)  &&  _order_queue  &&  !_order_queue->empty() )  
+        {
+            dom_append_nl( job_element );
+            job_element->appendChild( _order_queue->xml( document, show ) );
+            dom_append_nl( job_element );
         }
 
         if( _error )  append_error_element( job_element, _error );

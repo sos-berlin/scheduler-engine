@@ -1,4 +1,4 @@
-// $Id: spooler.h,v 1.91 2002/09/29 16:17:23 jz Exp $
+// $Id: spooler.h,v 1.92 2002/10/02 05:47:29 jz Exp $
 
 #ifndef __SPOOLER_H
 #define __SPOOLER_H
@@ -171,7 +171,7 @@ struct Spooler
     Security::Level             security_level              ( const Host& );
     const time::Holiday_set&    holidays                    () const                            { return _holiday_set; }
     bool                        is_service                  () const                            { return _is_service; }
-    xml::Element_ptr            threads_as_xml              ( xml::Document_ptr, bool show_all );
+    xml::Element_ptr            threads_as_xml              ( xml::Document_ptr, Show_what );
 
     int                         launch                      ( int argc, char** argv );                                
     void                        set_state_changed_handler   ( State_changed_handler h )         { _state_changed_handler = h; }

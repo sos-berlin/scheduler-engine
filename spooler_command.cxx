@@ -1,4 +1,4 @@
-// $Id: spooler_command.cxx,v 1.59 2002/09/29 16:17:24 jz Exp $
+// $Id: spooler_command.cxx,v 1.60 2002/10/02 05:47:29 jz Exp $
 /*
     Hier ist implementiert
 
@@ -87,11 +87,11 @@ void append_error_element( const xml::Element_ptr& element, const Xc_copy& x )
 
 //----------------------------------------------------------Command_processor::execute_show_threads
 
-xml::Element_ptr Command_processor::execute_show_threads( bool show_all )
+xml::Element_ptr Command_processor::execute_show_threads( Show_what show )
 {
     if( _security_level < Security::seclev_info )  throw_xc( "SPOOLER-121" );
 
-    return _spooler->threads_as_xml( _answer, show_all );
+    return _spooler->threads_as_xml( _answer, show );
 }
 
 //------------------------------------------------------------Command_processor::execute_show_state
@@ -101,7 +101,11 @@ xml::Element_ptr Command_processor::execute_show_state( const xml::Element_ptr& 
     if( _security_level < Security::seclev_info )  throw_xc( "SPOOLER-121" );
 
     string what = as_string( element->getAttribute( "what" ) );
-    bool show_all = what == "all";
+    Show_what show = what == "all"         ? show_all         :
+                     what == "description" ? show_description :
+                     what == "task_queue"  ? show_task_queue  :
+                     what == "order_queue" ? show_order_queue 
+                                           : show_standard;
 
     xml::Element_ptr state_element = _answer->createElement( "state" );
  
@@ -117,7 +121,7 @@ xml::Element_ptr Command_processor::execute_show_state( const xml::Element_ptr& 
     sprintf( buffer, "%-0.3lf", cpu_time ); 
     state_element->setAttribute( "cpu_time"             , as_dom_string( buffer ) );
 
-    state_element->appendChild( execute_show_threads( show_all ) );
+    state_element->appendChild( execute_show_threads( show ) );
 
     return state_element;
 }
@@ -142,11 +146,13 @@ xml::Element_ptr Command_processor::execute_show_history( const xml::Element_ptr
     if( next_str != "" )  next = as_uint(next_str);
 
     string what = as_string( element->getAttribute( "what" ) );
-    bool show_all = what == "all";
+    Show_what show = what == "all"? show_all :
+                     what == "log"? show_log  
+                                  : show_standard;
 
     Sos_ptr<Job> job = _spooler->get_job( job_name );
 
-    return job->read_history( _answer, id, next, show_all );
+    return job->read_history( _answer, id, next, show );
 }
 
 //--------------------------------------------------------Command_processor::execute_modify_spooler

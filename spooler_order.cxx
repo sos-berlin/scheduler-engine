@@ -1,4 +1,4 @@
-// $Id: spooler_order.cxx,v 1.10 2002/09/29 16:17:25 jz Exp $
+// $Id: spooler_order.cxx,v 1.11 2002/10/02 05:47:30 jz Exp $
 /*
     Hier sind implementiert
 
@@ -202,6 +202,26 @@ Order_queue::~Order_queue()
 {
 }
 
+//---------------------------------------------------------------------------------Order_queue::xml
+
+xml::Element_ptr Order_queue::xml( xml::Document_ptr document, Show_what show )
+{
+    xml::Element_ptr element = document->createElement( "order_queue" );
+
+    THREAD_LOCK( _lock )
+    {
+        FOR_EACH( Queue, _queue, it )
+        {
+            dom_append_nl( element );
+            element->appendChild( (*it)->xml( document, show ) );
+        }
+    }
+
+    dom_append_nl( element );
+
+    return element;
+}
+
 //---------------------------------------------------------------------------Order_queue::add_order
 
 void Order_queue::add_order( Order* order )
@@ -318,6 +338,34 @@ Order::Order( Spooler* spooler, const VARIANT& payload )
 
 Order::~Order()
 {
+}
+
+//---------------------------------------------------------------------------------------Order::xml
+
+xml::Element_ptr Order::xml( xml::Document_ptr document, Show_what show )
+{
+    xml::Element_ptr element = document->createElement( "order" );
+
+    THREAD_LOCK( _lock )
+    {
+        element->setAttribute( "id"        , _id );
+        element->setAttribute( "title"     , _title.c_str() );
+        element->setAttribute( "state"     , _state );
+
+        if( _job_chain )  
+        element->setAttribute( "job_chain" , _job_chain->name().c_str() );
+
+        if( _job_chain_node )
+        element->setAttribute( "job"       , _job_chain_node->_job->name().c_str() );
+
+        if( _order_queue )
+        element->setAttribute( "job"       , _order_queue->job()->name().c_str() );
+
+        element->setAttribute( "state_text", _state_text.c_str() );
+        element->setAttribute( "priority"  , as_dom_string( _priority ) );
+    }
+
+    return element;
 }
 
 //---------------------------------------------------------------------------Order::set_job_by_name

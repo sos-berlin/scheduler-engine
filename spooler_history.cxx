@@ -1,4 +1,4 @@
-// $Id: spooler_history.cxx,v 1.26 2002/09/29 16:17:24 jz Exp $
+// $Id: spooler_history.cxx,v 1.27 2002/10/02 05:47:29 jz Exp $
 
 #include "spooler.h"
 #include "../zschimmer/z_com.h"
@@ -732,9 +732,11 @@ void Job_history::set_extra_field( const string& name, const Variant& value )
 // Anderer Thread.
 // Hier nicht auf _job etc. zugreifen!
 
-xml::Element_ptr Job_history::read_tail( xml::Document_ptr doc, int id, int next, bool with_log )
+xml::Element_ptr Job_history::read_tail( xml::Document_ptr doc, int id, int next, Show_what show )
 {
     if( !_history_yes )  throw_xc( "SPOOLER-141", _job_name );
+
+    bool with_log = ( show & show_log ) != 0;
 
     xml::Element_ptr history_element;
 

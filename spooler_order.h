@@ -1,4 +1,4 @@
-// $Id: spooler_order.h,v 1.8 2002/09/29 16:17:25 jz Exp $
+// $Id: spooler_order.h,v 1.9 2002/10/02 05:47:30 jz Exp $
 
 #ifndef __SPOOLER_ORDER_H
 #define __SPOOLER_ORDER_H
@@ -69,6 +69,7 @@ struct Order : Com_order
     void                        postprocessing          ( bool success, Prefix_log* );              // Verarbeitung nach spooler_process()
     void                        processing_error        ();
 
+    xml::Element_ptr            xml                     ( xml::Document_ptr, Show_what );
 
 
   private:
@@ -88,7 +89,7 @@ struct Order : Com_order
     wstring                    _state_text;
     string                     _title;
     Payload                    _payload;
-    bool                       _error;
+  //bool                       _error;
 
     Job_chain*                 _job_chain;              
     Job_chain_node*            _job_chain_node;         // Nächster Stelle, falls in einer Jobkette
@@ -144,6 +145,8 @@ struct Job_chain : Com_job_chain
 
     int                         order_count             ();
 
+    xml::Element_ptr            xml                     ( xml::Document_ptr, Show_what );
+
 
     Fill_zero                  _zero_;
     Spooler*                   _spooler;
@@ -188,6 +191,7 @@ struct Order_queue : Com_order_queue
     bool                        empty                   () const                                    { return _queue.empty(); }
     ptr<Order>                  get_order_for_processing();
     Job*                        job                     () const                                    { return _job; }
+    xml::Element_ptr            xml                     ( xml::Document_ptr, Show_what );
 
 
     Fill_zero                  _zero_;

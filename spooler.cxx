@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.114 2002/09/14 16:23:07 jz Exp $
+// $Id: spooler.cxx,v 1.115 2002/10/02 05:47:29 jz Exp $
 /*
     Hier sind implementiert
 
@@ -301,7 +301,7 @@ Security::Level Spooler::security_level( const Host& host )
 //--------------------------------------------------------------------------Spooler::threads_as_xml
 // Anderer Thread
 
-xml::Element_ptr Spooler::threads_as_xml( xml::Document_ptr document, bool show_all )
+xml::Element_ptr Spooler::threads_as_xml( xml::Document_ptr document, Show_what show )
 {
     xml::Element_ptr threads = document->createElement( "threads" );
 
@@ -311,7 +311,7 @@ xml::Element_ptr Spooler::threads_as_xml( xml::Document_ptr document, bool show_
     {
         FOR_EACH( Thread_list, _thread_list, it )
         {
-            threads->appendChild( (*it)->xml( document, show_all ) );
+            threads->appendChild( (*it)->xml( document, show ) );
             dom_append_nl( threads );
         }
     }
