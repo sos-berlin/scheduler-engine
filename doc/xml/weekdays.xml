@@ -21,7 +21,12 @@
         <xml_child_element name="day" multiple="yes">
             <description>
                 <p>
-                    Bestimmt den Wochentag. 
+                    Bestimmt den Wochentag.<br/>
+                </p>
+                <p>
+                    <code>&lt;day day="1"></code> für Montag bis<br/>
+                    <code>&lt;day day="7"></code> für Sonntag.<br/>
+                    <code>&lt;day day="0"></code> wird auch als Sonntag interpretiert.
                 </p>
             </description>
         </xml_child_element>        
