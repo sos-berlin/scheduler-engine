@@ -1,4 +1,4 @@
-// $Id: spooler_module_java.cxx,v 1.75 2004/02/15 15:53:37 jz Exp $
+// $Id: spooler_module_java.cxx,v 1.76 2004/02/20 09:49:18 jz Exp $
 /*
     Hier sind implementiert
 
@@ -46,7 +46,7 @@ const static JNINativeMethod native_methods[] =
 
 //-------------------------------------------------------------------------------------------static
 
-zschimmer::Thread_data<Java_thread_data> thread_data;
+static zschimmer::Thread_data<Java_thread_data> thread_data;
 
 //-----------------------------------------------------------------------------jobject_from_variant
 
@@ -109,116 +109,6 @@ JNIEXPORT jobject JNICALL Java_sos_spooler_Idispatch_com_1call( JNIEnv* jenv, jc
     try
     {
         return sos::spooler::jobject_from_variant( jenv, variant_java_com_call( jenv, cls, jidispatch, jname, jparams ), &thread_data->_idispatch_container );
-/*
-        HRESULT     hr;
-        IDispatch*  idispatch = (IDispatch*)(size_t)jidispatch;
-        Bstr        name_bstr;
-        WORD        context = 0;
-        DISPID      dispid = 0;
-        
-        if( !idispatch )  throw_xc( "SCHEDULER-176" );
-
-        // GetIDsOfNames
-
-        jstring_to_bstr( jenv, jname, &name_bstr );
-
-//LOGI( "com_call(" << name_bstr << ")\n" );
-
-        OLECHAR* name_ptr = name_bstr;
-
-        if( !name_ptr )  throw_xc( "Idispatch.com_call", "Name fehlt" );
-
-        if( name_ptr[0] == '<' )  context |= DISPATCH_PROPERTYGET, name_ptr++;
-        else
-        if( name_ptr[0] == '>' )  context |= DISPATCH_PROPERTYPUT, name_ptr++;
-                            else  context |= DISPATCH_METHOD;
-
-        hr = idispatch->GetIDsOfNames( IID_NULL, &name_ptr, 1, STANDARD_LCID, &dispid );
-        if( FAILED(hr) )  throw_com( hr, "GetIDsOfNames", string_from_ole(name_ptr).c_str() );
-
-
-        // Invoke
-
-        Variant         result;
-        Excepinfo       excepinfo;
-        UINT            arg_nr;
-        int             param_count = jenv->GetArrayLength( jparams );
-        Dispparams      dispparams;
-
-        dispparams.set_arg_count( param_count );
-        if( context & DISPATCH_PROPERTYPUT )  dispparams.set_property_put();
-
-        for( int i = 0; i < param_count; i++ )
-        {
-            jobject jparam = jenv->GetObjectArrayElement( jparams, i );
-            if( !jparam )  throw_xc( "NULL-Pointer" );
-            jclass  cls;
-
-            if( cls = jenv->FindClass( "java/lang/String" ), !cls )  return NULL;
-            else
-            if( jenv->IsInstanceOf( jparam, cls ) )
-            {
-                dispparams[i].attach_bstr( NULL );
-                jstring_to_bstr( jenv, (jstring)jparam, &dispparams[i].bstrVal );
-            }
-            else
-            if( jenv->DeleteLocalRef( cls ), cls = jenv->FindClass( "java/lang/Boolean" ), !cls )  return NULL;
-            else
-            if( jenv->IsInstanceOf( jparam, cls ) )
-            {
-                dispparams[i] = jenv->CallBooleanMethod( jparam, jenv->GetMethodID( cls, "booleanValue", "()Z" ) ) != 0;
-            }
-            else
-            if( jenv->DeleteLocalRef( cls ), cls = jenv->FindClass( "java/lang/Integer" ), !cls )  return NULL;
-            else
-            if( jenv->IsInstanceOf( jparam, cls ) )
-            {
-                dispparams[i] = jenv->CallIntMethod( jparam, jenv->GetMethodID( cls, "intValue", "()I" ) );
-            }
-            else
-            if( jenv->DeleteLocalRef( cls ), cls = jenv->FindClass( "java/lang/Long" ), !cls )  return NULL;
-            else
-            if( jenv->IsInstanceOf( jparam, cls ) )
-            {
-                dispparams[i] = jenv->CallLongMethod( jparam, jenv->GetMethodID( cls, "longValue", "()J" ) );
-            }
-            else
-            if( jenv->DeleteLocalRef( cls ), cls = jenv->FindClass( "java/lang/Double" ), !cls )  return NULL;
-            else
-            if( jenv->IsInstanceOf( jparam, cls ) )
-            {
-                dispparams[i] = jenv->CallDoubleMethod( jparam, jenv->GetMethodID( cls, "doubleValue", "()D" ) );
-            }
-            else
-            if( jenv->DeleteLocalRef( cls ), cls = jenv->FindClass( "sos/spooler/Idispatch" ), !cls )  return NULL;
-            else
-            if( jenv->IsInstanceOf( jparam, cls ) )
-            {
-                jfieldID field_id = jenv->GetFieldID( cls, "_idispatch", "J" );
-                if( field_id )
-                {
-                    dispparams[i] = (IDispatch*)(size_t)jenv->GetLongField( jparam, field_id );
-                }
-            }
-            else
-            {
-                //ptr<Java_global_object> o = Z_NEW( Java_global_object( spooler_ptr->_java_vm, jparam ) );
-                //dispparams[i] = o;
-                throw_xc( "SCHEDULER-178", i );
-            }
-
-
-            jenv->DeleteLocalRef( cls );
-            jenv->DeleteLocalRef( jparam );
-        }
-
-        if( jenv->ExceptionCheck() )  return NULL;
-
-        hr = idispatch->Invoke( dispid, IID_NULL, STANDARD_LCID, context, &dispparams, &result, &excepinfo, &arg_nr );
-        if( FAILED(hr) )  throw_ole_excepinfo( hr, &excepinfo, "Invoke", string_from_bstr(name_bstr).c_str() );
-
-        return spooler::jobject_from_variant( jenv, result );
-*/
     }
     catch( const exception&  x ) { set_java_exception( jenv, x ); }
     catch( const _com_error& x ) { set_java_exception( jenv, x ); }
@@ -433,7 +323,6 @@ Java_module_instance::Java_module_instance( Vm* vm, Module* module )
     Module_instance(module),
     Has_vm(vm),
     _zero_(_end_), 
-  //_jobject(_module->_spooler->_java_vm) 
     _jobject( _java_vm ) 
 {
 }

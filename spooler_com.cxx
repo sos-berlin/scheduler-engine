@@ -1,4 +1,4 @@
-// $Id: spooler_com.cxx,v 1.137 2004/02/19 17:17:32 jz Exp $
+// $Id: spooler_com.cxx,v 1.138 2004/02/20 09:49:18 jz Exp $
 /*
     Hier sind implementiert
 
@@ -109,8 +109,9 @@ STDMETHODIMP Com_error::QueryInterface( const IID& iid, void** result )
 {
     if( iid == IID_Ihas_java_class_name )  
     { 
-        AddRef();
-        *result = (Ihas_java_class_name*)this;  
+        Ihas_java_class_name* iface = this;
+        *result = iface;  
+        iface->AddRef();
         return S_OK; 
     }
 
@@ -212,9 +213,10 @@ STDMETHODIMP Com_variable::QueryInterface( const IID& iid, void** result )
 {
     if( iid == IID_Ihas_java_class_name )  
     { 
-        AddRef();
-        *result = (Ihas_java_class_name*)this;  
-        return S_OK; 
+        Ihas_java_class_name* iface = this;
+        *result = iface;  
+        iface->AddRef();
+        return S_OK;
     }
 
     return Sos_ole_object::QueryInterface( iid, result );
@@ -295,9 +297,10 @@ STDMETHODIMP Com_variable_set::QueryInterface( const IID& iid, void** result )
 {
     if( iid == IID_Ihas_java_class_name )  
     { 
-        AddRef();
-        *result = (Ihas_java_class_name*)this;  
-        return S_OK; 
+        Ihas_java_class_name* iface = this;
+        *result = iface;  
+        iface->AddRef();
+        return S_OK;
     }
 
     return Sos_ole_object::QueryInterface( iid, result );
@@ -691,17 +694,23 @@ Com_variable_set_enumerator::Com_variable_set_enumerator()
 
 //------------------------------------------------------Com_variable_set_enumerator::QueryInterface
 
-STDMETHODIMP Com_variable_set_enumerator::QueryInterface( REFIID iid, void** obj )
+STDMETHODIMP Com_variable_set_enumerator::QueryInterface( REFIID iid, void** result )
 {                                                                    
-    if( iid == IID_IEnumVARIANT
-     || iid == IID_Ivariable_set_enumerator )
+    if( iid == IID_IEnumVARIANT )
     {
-        *obj = this;
-        AddRef();
-        return NOERROR;
+        *result = (IEnumVARIANT*)this;
+        (*result)->AddRef();
+        return S_OK;
     }
 
-    return Sos_ole_object::QueryInterface( iid, obj );
+    if( iid == IID_Ivariable_set_enumerator )
+    {
+        *result = (Ivariable_set_enumerator)this;
+        (*result)->AddRef();
+        return S_OK;
+    }
+
+    return Sos_ole_object::QueryInterface( iid, result );
 }                                                                                                                                       
 
 //----------------------------------------------------------Com_variable_set_enumerator::initialize
@@ -822,15 +831,16 @@ STDMETHODIMP Com_log::QueryInterface( const IID& iid, void** result )
 {
     if( iid == IID_Ihas_java_class_name )  
     { 
-        AddRef();
-        *result = (Ihas_java_class_name*)this;  
-        return S_OK; 
+        Ihas_java_class_name* iface = this;
+        *result = iface;  
+        iface->AddRef();
+        return S_OK;
     }
     else
     if( iid == z::com::object_server::IID_Ihas_reference_with_properties )
     {
-        AddRef();
         *result = (Ihas_reference_with_properties*)this;  
+        (*result)->AddRef();
         return S_OK; 
     }
 
@@ -1471,8 +1481,8 @@ STDMETHODIMP Com_job::QueryInterface( const IID& iid, void** result )
 {
     if( iid == IID_Ihas_java_class_name )  
     { 
-        AddRef();
         *result = (Ihas_java_class_name*)this;  
+        (*result)->AddRef();
         return S_OK; 
     }
 
@@ -1814,8 +1824,8 @@ STDMETHODIMP Com_task::QueryInterface( const IID& iid, void** result )
 {
     if( iid == IID_Ihas_java_class_name )  
     { 
-        AddRef();
         *result = (Ihas_java_class_name*)this;  
+        (*result)->AddRef();
         return S_OK; 
     }
 
@@ -2169,8 +2179,8 @@ STDMETHODIMP Com_thread::QueryInterface( const IID& iid, void** result )
 {
     if( iid == IID_Ihas_java_class_name )  
     { 
-        AddRef();
         *result = (Ihas_java_class_name*)this;  
+        (*result)->AddRef();
         return S_OK; 
     }
 
@@ -2289,8 +2299,8 @@ STDMETHODIMP Com_spooler::QueryInterface( const IID& iid, void** result )
 {
     if( iid == IID_Ihas_java_class_name )  
     { 
-        AddRef();
         *result = (Ihas_java_class_name*)this;  
+        (*result)->AddRef();
         return S_OK; 
     }
 
@@ -2721,8 +2731,8 @@ STDMETHODIMP Com_job_chain::QueryInterface( const IID& iid, void** result )
 {
     if( iid == IID_Ihas_java_class_name )  
     { 
-        AddRef();
         *result = (Ihas_java_class_name*)this; 
+        (*result)->AddRef();
         return S_OK; 
     }
 
@@ -2987,8 +2997,8 @@ STDMETHODIMP Com_job_chain_node::QueryInterface( const IID& iid, void** result )
 {
     if( iid == IID_Ihas_java_class_name )  
     { 
-        AddRef();
         *result = (Ihas_java_class_name*)this;  
+        (*result)->AddRef();
         return S_OK; 
     }
 
@@ -3091,8 +3101,8 @@ STDMETHODIMP Com_order::QueryInterface( const IID& iid, void** result )
 {
     if( iid == IID_Ihas_java_class_name )  
     { 
-        AddRef();
         *result = (Ihas_java_class_name*)this;  
+        (*result)->AddRef();
         return S_OK; 
     }
 
@@ -3592,8 +3602,8 @@ STDMETHODIMP Com_order_queue::QueryInterface( const IID& iid, void** result )
 {
     if( iid == IID_Ihas_java_class_name )  
     { 
-        AddRef();
         *result = (Ihas_java_class_name*)this;  
+        (*result)->AddRef();
         return S_OK; 
     }
 
