@@ -1,4 +1,4 @@
-// $Id: spooler_history.h,v 1.3 2002/04/05 22:14:39 jz Exp $
+// $Id: spooler_history.h,v 1.4 2002/04/06 10:22:51 jz Exp $
 
 #ifndef __SPOOLER_HISTORY_H
 #define __SPOOLER_HISTORY_H
@@ -74,6 +74,7 @@ struct Job_history
     xml::Element_ptr            read_tail               ( xml::Document_ptr, int, bool with_log );
 
   private:
+    void                        archive                 ( const string& filename );
     void                        append_tabbed           ( int i )                                   { append_tabbed( as_string(i) ); }
     void                        append_tabbed           ( string );
     void                        write                   ( bool start );
@@ -83,14 +84,14 @@ struct Job_history
     Spooler*                   _spooler;
     Job*                       _job;
     int                        _on_process;
+    bool                       _with_log;
     bool                       _use_db;
     bool                       _use_file;
     bool                       _error;
     bool                       _start_called;
 
     string                     _filename;
-    string                     _columns;
-    bool                       _with_log;
+    string                     _type_string;            // _use_file:  -type=(...) tab ...
     zschimmer::File            _file;
     int64                      _record_pos;             // Position des Satzes, der zu Beginn des Jobs geschrieben und am Ende überschrieben oder gelöscht wird.
     string                     _tabbed_record;

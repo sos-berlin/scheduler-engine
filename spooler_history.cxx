@@ -1,33 +1,30 @@
-// $Id: spooler_history.cxx,v 1.3 2002/04/05 22:14:39 jz Exp $
+// $Id: spooler_history.cxx,v 1.4 2002/04/06 10:22:51 jz Exp $
 
 #include "../kram/sos.h"
 #include "spooler.h"
 #include "../zschimmer/z_com.h"
 
-using zschimmer::replace_regex;
-using zschimmer::split;
-using zschimmer::join;
-using zschimmer::zmap;
-using zschimmer::variant_is_numeric;
+using namespace zschimmer;
 
 namespace sos {
 namespace spooler {
 
-const char history_field_names[] = "id:numeric," 
-                                   "spooler_id,"
-                                   "job_name,"
-                                   "start:Datetime,"
-                                   "end:Datetime,"
-                                   "cause,"
-                                   "steps,"
-                                   "error,"
-                                   "error_code,"
-                                   "error_text,"
-                                   "parameters,"
-                                   "log";
+const char history_column_names[] =    "id"           ":numeric," 
+                                       "spooler_id,"
+                                       "job_name,"
+                                       "start"        ":Datetime,"
+                                       "end"          ":Datetime,"
+                                       "cause,"
+                                       "steps,"
+                                       "error,"
+                                       "error_code,"
+                                       "error_text,"
+                                       "parameters";
+
+const char history_column_names_db[] = "log";    // Spalten zusätzlich in der Datenbank
 
 const int max_field_length = 1024;      // Das ist die Feldgröße von Any_file -type=(...) für tabulierte Datei.
-const int blob_field_size  = 50000;
+const int blob_field_size  = 50000;     // Bis zu dieser Größe wird ein Blob im Datensatz geschrieben
 
 //---------------------------------------------------------------------------------------------test
 /*
@@ -292,85 +289,64 @@ Job_history::~Job_history()
 
 void Job_history::open()
 {
+    string section = _job->profile_section();
+
     try
     {
-        Transaction    ta = &_spooler->_db;
-        Archive_switch archive;
-        string         section = _job->profile_section();
-        vector<string> my_columns = split( ", *", replace_regex( history_field_names, ":[^,]+", "" ) );
-        string         extra_columns;
-
-        _filename     = read_profile_string    ( "factory.ini", section.c_str(), "history_file" );
-        extra_columns = read_profile_string    ( "factory.ini", section.c_str(), "history_columns"    , _spooler->_history_columns    );
-        _on_process   = read_profile_on_process( "factory.ini", section.c_str(), "history_on_process" , _spooler->_history_on_process );
-        archive       = read_profile_archive   ( "factory.ini", section.c_str(), "history_archive"    , _spooler->_history_archive    );
-        _with_log     = read_profile_bool      ( "factory.ini", section.c_str(), "history_with_log"   , _spooler->_history_with_log   );
-
-        _columns = history_field_names;
-        if( extra_columns != "" )  _columns += "," + extra_columns;
-
-        if( _spooler->_db.opened()  &&  _filename == "" )
+        Transaction ta = &_spooler->_db;
         {
-            _spooler->_db.open_history_table();
+            _filename   = read_profile_string    ( "factory.ini", section.c_str(), "history_file" );
+            _on_process = read_profile_on_process( "factory.ini", section.c_str(), "history_on_process", _spooler->_history_on_process );
 
-            const Record_type* type = _spooler->_db._history_table.spec().field_type_ptr();
-            if( type ) {
-                for( int i = 0; i < type->field_count(); i++ )
-                {
-                    string name = type->field_descr_ptr(i)->name();
-                    int j;
-                    for( j = 0; j < my_columns.size(); j++ )  if( stricmp( my_columns[j].c_str(), name.c_str() ) == 0 )  break;
-                    if( j == my_columns.size() )  _extra_names.push_back( name );
-                }
-            }
-
-            _use_db = true;
-        }
-        else
-        {
-            _extra_names = split( ", *", replace_regex( extra_columns, ":[^,]+", "" ) );
-
-            if( _filename == "" )
+            if( _spooler->_db.opened()  &&  _filename == "" )
             {
-                _filename = "/history";
-                if( !_spooler->id().empty() )  _filename += "." + _spooler->id();
-                _filename += ".job." + _job->name() + ".txt";
-            }
-            _filename = make_absolute_filename( _spooler->log_directory(), _filename );
-            if( _filename[0] == '*' )  return;      // log_dir = *stderr
+                _with_log = read_profile_bool( "factory.ini", section.c_str(), "history_with_log", _spooler->_history_with_log );
 
-            if( archive )  
-            {
-        /*
-                if( file_exists( _filename ) ) 
-                {
-                    string arc_filename = ...
-                    if( arc == arc_gzip )
+                set<string> my_columns = set_map( lcase, set_split( ", *", replace_regex( string(history_column_names) + history_column_names_db, ":[^,]+", "" ) ) );
+
+                _spooler->_db.open_history_table();
+
+                const Record_type* type = _spooler->_db._history_table.spec().field_type_ptr();
+                if( type ) {
+                    for( int i = 0; i < type->field_count(); i++ )
                     {
-                        if( arc == arc_gzip )  arc_filename = "gzip | " + arc_filename;
-                        copy_file( "file -b " + _filename, arc_filename );
-                    }
-                    else
-                    {
-                        rename_file( _filename, _arc_filename );
+                        string name = type->field_descr_ptr(i)->name();
+                        if( my_columns.find( lcase(name) ) == my_columns.end() )  _extra_names.push_back( name );
                     }
                 }
 
-                // Was tun im Fehlerfall? Exception in Job::init() abfangen und protokollieren
-        */
+                _use_db = true;
+            }
+            else
+            {
+                string         extra_columns = read_profile_string ( "factory.ini", section.c_str(), "history_columns", _spooler->_history_columns );
+                Archive_switch arc           = read_profile_archive( "factory.ini", section.c_str(), "history_archive", _spooler->_history_archive );
+
+                _type_string = history_column_names;
+                if( extra_columns != "" )  _type_string += "," + extra_columns;
+
+                _extra_names = vector_split( ", *", replace_regex( extra_columns, ":[^,]+", "" ) );
+
+                if( _filename == "" )
+                {
+                    _filename = "/history";
+                    if( !_spooler->id().empty() )  _filename += "." + _spooler->id();
+                    _filename += ".job." + _job->name() + ".txt";
+                }
+                _filename = make_absolute_filename( _spooler->log_directory(), _filename );
+                if( _filename[0] == '*' )  return;      // log_dir = *stderr
+
+                if( arc )  archive( _filename );  
+
+                _file.open( _filename, O_BINARY | O_RDWR | O_CREAT | O_TRUNC, 0600 );
+
+                _file.print( replace_regex( _type_string, "(:[^,]+)?,", "\t" ) + SYSTEM_NL );
+
+                _use_file = true;
             }
 
-            _file.open( _filename, O_BINARY | O_RDWR | O_CREAT | O_TRUNC, 0600 );
-
-            string head_line = history_field_names;
-            if( _extra_names.size() )  head_line += "\t" + join( "\t", _extra_names );
-            _file.print( head_line + SYSTEM_NL );
-            //_file.print( replace_regex( replace_regex( _columns, ":[^,]+", "" ), ", *", "\t" ) + SYSTEM_NL );
-
-            _use_file = true;
+             //record.type()->field_descr_ptr("error_text")->type_ptr()->field_size()
         }
-
-         //record.type()->field_descr_ptr("error_text")->type_ptr()->field_size()
         ta.commit();
  
         _extra_values.resize( _extra_names.size() );
@@ -393,6 +369,29 @@ void Job_history::close()
     { 
         _job->_log.warn( string("FEHLER BEIM SCHLIESSEN DER HISTORIE: ") + x.what() ); 
     }
+}
+
+//-----------------------------------------------------------------------------Job_history::archive
+
+void Job_history::archive( const string& filename )
+{
+/*
+    if( file_exists( _filename ) ) 
+    {
+        string arc_filename = ...
+        if( arc == arc_gzip )
+        {
+            if( arc == arc_gzip )  arc_filename = "gzip | " + arc_filename;
+            copy_file( "file -b " + _filename, arc_filename );
+        }
+        else
+        {
+            rename_file( _filename, _arc_filename );
+        }
+    }
+
+    // Was tun im Fehlerfall? Exception in Job::init() abfangen und protokollieren
+*/
 }
 
 //-----------------------------------------------------------------------Job_history::append_tabbed
@@ -448,17 +447,6 @@ void Job_history::write( bool start )
                     blob.put( parameters );
                     blob.close();
                 }
-
-                string log_filename = _job->_log.filename();
-
-                if( _with_log  &&  !log_filename.empty()  &&  log_filename[0] != '*' )
-                {
-                    try {
-                        copy_file( "file -b " + log_filename, 
-                                   _spooler->_db.dbname() + " -table=" + _spooler->_history_tablename + " -blob='log' where \"id\"=" + as_string( _job->_task->_id ) );
-                    }
-                    catch( const exception& ) {}
-                }
             }
             else
             {
@@ -493,9 +481,19 @@ void Job_history::write( bool start )
 
                 stmt += " where id=" + as_string( _job->_task->_id );
                 _spooler->_db.execute( stmt );
-            }
 
-            // und evtl das Jobprotokoll
+
+                // Jobprotokoll
+                string log_filename = _job->_log.filename();
+                if( _with_log  &&  !log_filename.empty()  &&  log_filename[0] != '*' )
+                {
+                    try {
+                        copy_file( "file -b " + log_filename, 
+                                   _spooler->_db.dbname() + " -table=" + _spooler->_history_tablename + " -blob='log' where \"id\"=" + as_string( _job->_task->_id ) );
+                    }
+                    catch( const exception& ) {}
+                }
+            }
         }
         ta.commit();
     }
@@ -608,7 +606,7 @@ void Job_history::set_extra_field( const string& name, const CComVariant& value 
     throw_xc( "SPOOLER-137", name );
 }
 
-//---------------------------------------------------------------------------Job_history::read_last
+//---------------------------------------------------------------------------Job_history::read_tail
 
 static string prepend_comma( const string& s )  { return ", " + s; }
 
@@ -625,14 +623,14 @@ xml::Element_ptr Job_history::read_tail( xml::Document_ptr doc, int n, bool with
 
             if( _use_file )
             {
-                sel.open( "-in head -" + as_string(n) + " | select * order by id desc | -type=(" + _columns + ") tab -field-names | " + _filename );
+                sel.open( "-in head -" + as_string(n) + " | select * order by id desc | -type=(" + _type_string + ") tab -field-names | " + _filename );
             }
             else
             if( _use_db )
             {
                 sel.open( "-in head -" + as_string(n) + " | " + _spooler->_db._db_name + 
                           "select id, spooler_id, job_name, start, end, cause, steps, error, error_code, error_text " +
-                          join( "", zmap( prepend_comma, _extra_names ) ) +
+                          join( "", vector_map( prepend_comma, _extra_names ) ) +
                           " from " + _spooler->_history_tablename + " where job_name=" + sql_quoted(_job->name()) + " order by id desc" );
             }
             else
@@ -650,30 +648,34 @@ xml::Element_ptr Job_history::read_tail( xml::Document_ptr doc, int n, bool with
     
                 xml::Element_ptr history_entry = doc->createElement( "history.entry" );
         
-                for( int i = 0; i < type->field_count() - 1; i++ )
+                for( int i = 0; i < type->field_count(); i++ )
                 {
-                    history_entry->setAttribute( as_dom_string( type->field_descr_ptr(i)->name() ), as_dom_string( type->as_string( i, rec.byte_ptr() ) ) );
+                    string value = type->as_string( i, rec.byte_ptr() );
+                    if( value != "" )  history_entry->setAttribute( as_dom_string( type->field_descr_ptr(i)->name() ), as_dom_string(value) );
                 }
 
                 int id = type->field_descr_ptr("id")->as_int( rec.byte_ptr() );
-                
-                string param_xml = file_as_string( _spooler->_db._db_name + "-table=" + _spooler->_history_tablename + " -blob=parameters where id=" + as_string(id) );
-                if( !param_xml.empty() )
-                {
-                    dom_append_nl( history_element );
-                    try {
-                        xml::Document_ptr par_doc = xml::Document_ptr( __uuidof(xml::DOMDocument30), NULL );
-                        par_doc->loadXML( as_dom_string( param_xml ) );
-                        history_entry->appendChild( par_doc->documentElement );
-                    }
-                    catch( const exception& ) {}
-                    catch( const _com_error& ) {}
-                }
 
-                if( with_log )
+                if( _use_db )
                 {
-                    string log = file_as_string( _spooler->_db._db_name + "-table=" + _spooler->_history_tablename + " -blob=log where id=" + as_string(id) );
-                    if( !log.empty() ) dom_append_text_element( history_entry, "log", log );
+                    string param_xml = file_as_string( _spooler->_db._db_name + "-table=" + _spooler->_history_tablename + " -blob=parameters where id=" + as_string(id) );
+                    if( !param_xml.empty() )
+                    {
+                        dom_append_nl( history_element );
+                        try {
+                            xml::Document_ptr par_doc = xml::Document_ptr( __uuidof(xml::DOMDocument30), NULL );
+                            par_doc->loadXML( as_dom_string( param_xml ) );
+                            history_entry->appendChild( par_doc->documentElement );
+                        }
+                        catch( const exception& ) {}
+                        catch( const _com_error& ) {}
+                    }
+
+                    if( with_log )
+                    {
+                        string log = file_as_string( _spooler->_db._db_name + "-table=" + _spooler->_history_tablename + " -blob=log where id=" + as_string(id) );
+                        if( !log.empty() ) dom_append_text_element( history_entry, "log", log );
+                    }
                 }
 
                 history_element->appendChild( history_entry );
