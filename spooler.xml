@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 
-<!-- $Id: spooler.xml,v 1.47 2001/07/17 12:46:55 jz Exp $   (C) 2001 SOS GmbH Berlin -->
+<!-- $Id: spooler.xml,v 1.48 2001/07/25 19:43:35 jz Exp $   (C) 2001 SOS GmbH Berlin -->
 
 <!DOCTYPE spooler SYSTEM "s:\prod\spooler\spooler.dtd">
 
@@ -446,12 +446,13 @@ sub spooler_exit()
                     <script language="PerlScript" use_engine="task"><![CDATA[
 #use Win32::OLE;
 #$hostware = Win32::OLE->new('hostWare.Global');
+my $i;
 
 sub spooler_open()
 {
     #$i = $spooler_task->params("zahl");
     #if( undef($i) ) { $i = 10; }
-    $i = 9;
+    $i = 40;
     $spooler_log->msg( "zahl=$i" );
 }
 
@@ -464,10 +465,10 @@ sub spooler_process()
     $params->{spooler_start_after} = 7;
     $task = $spooler->job("single")->start( $params );
     
-    while( --$i % 3 > 0 )
+    while( --$i > 0 )
     {
         $spooler_log->msg( "spooler_process sleep" );
-        sleep(2);
+        sleep(1);
     }
     
     $task->end();
@@ -475,7 +476,7 @@ sub spooler_process()
     #$spooler_job->wake();
 
     $spooler_task->{result} = "Das Ergebnis";
-    return $i / 3;
+    return 0;
 }
 
 sub spooler_close()

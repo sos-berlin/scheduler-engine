@@ -1,4 +1,4 @@
-// $Id: spooler_service.cxx,v 1.12 2001/02/16 20:19:48 jz Exp $
+// $Id: spooler_service.cxx,v 1.13 2001/07/25 19:43:35 jz Exp $
 /*
     Hier sind implementiert
 
@@ -14,6 +14,7 @@
 
 #include "../kram/log.h"
 #include "../kram/sosopt.h"
+#include "../kram/sleep.h"
 
 #ifdef SYSTEM_WIN 
 
@@ -30,6 +31,9 @@ namespace spooler {
 static const char               std_service_name[]          = "DocumentFactory_Spooler";    // Windows 2000 Service
 static const char               std_service_display_name[]  = "DocumentFactory Spooler";    // Gezeigter Name
 static const char               service_description[]       = "Hintergrund-Jobs der Document Factory";
+static const int                stop_timeout                = 30;
+
+static bool                     terminate_immediately       = false;
 
 //-----------------------------------------------------------------------------------Service_handle
 
@@ -55,7 +59,7 @@ struct Service_handle
 
 //-------------------------------------------------------------------------------------------static
 
-static Spooler*                 spooler_ptr;
+static Spooler*                 spooler_ptr;                // Wird auch beim Zwangsbeenden auf NULL gesetzt
 SERVICE_STATUS_HANDLE           service_status_handle;
 Handle                          thread_handle;
 string                          spooler_service_name;
@@ -243,7 +247,7 @@ void service_start( const string& id )
 
 //----------------------------------------------------------------------------------service_handler
 
-static void set_service_status( int spooler_error = 0 )
+static void set_service_status( int spooler_error, int state = 0 )
 {
     if( !service_status_handle )  return;
 
@@ -252,7 +256,7 @@ static void set_service_status( int spooler_error = 0 )
 
     service_status.dwServiceType                = SERVICE_WIN32_OWN_PROCESS;
 
-    service_status.dwCurrentState               = !spooler_ptr? SERVICE_STOPPED //SetServiceStatus() ruft exit()!
+    service_status.dwCurrentState               = !spooler_ptr? SERVICE_STOPPED 
                                                 : spooler_ptr->state() == Spooler::s_stopped ? SERVICE_PAUSED //SetServiceStatus() ruft exit()!
                                                 : spooler_ptr->state() == Spooler::s_starting? SERVICE_START_PENDING
                                                 : spooler_ptr->state() == Spooler::s_stopping? SERVICE_STOP_PENDING
@@ -269,9 +273,43 @@ static void set_service_status( int spooler_error = 0 )
     service_status.dwServiceSpecificExitCode    = spooler_error; 
     service_status.dwCheckPoint                 = 0; 
     service_status.dwWaitHint                   = service_status.dwCurrentState == SERVICE_START_PENDING? 10*1000 : 0;  // 10s erlauben für den Start (wenn es ein Startskript mit DB-Verbindung gibt)
+    service_status.dwWaitHint                   = service_status.dwCurrentState == SERVICE_STOP_PENDING? stop_timeout*1000 : 0;  // 10s erlauben für den Start (wenn es ein Startskript mit DB-Verbindung gibt)
 
     LOG( "SetServiceStatus\n" );
     SetServiceStatus( service_status_handle, &service_status );
+
+    // Keine Wiederkehr bei SERVICE_STOPPED
+}
+
+//--------------------------------------------------------------------------------------kill_thread
+
+static uint __stdcall kill_thread( void* param )
+{
+    double timeout = stop_timeout;
+
+    while( timeout > 0 )
+    {
+        double wait = 0.1;
+        sos_sleep( wait );
+
+        if( !spooler_is_running )  return 0;
+
+        timeout -= wait;
+    }
+
+    LOG( "Weil der Spooler nicht zum Ende kommt, wird jetzt der Prozess sofort beendet\n" );
+  //spooler_ptr = NULL;         // Lässt set_service_status() SERVICE_STOPPED setzen und damit exit() (leider nicht _exit?) rufen
+  //set_service_status( 0, SERVICE_STOPPED );
+  //LOG( "_exit(1)\n" );
+  //_exit(1);                   // (SERVICE_STOPPED kehrt nicht wieder)
+    terminate_immediately = true;
+    BOOL ok = TerminateThread( thread_handle, 999 );
+
+    if( ok )  sos_sleep( 3 );
+
+    LOG( "_exit(1);\n" ); 
+    _exit(1);
+    return 0;
 }
 
 //------------------------------------------------------------------------------------------Handler
@@ -285,8 +323,16 @@ static void __stdcall Handler( DWORD dwControl )
         switch( dwControl )
         {
             case SERVICE_CONTROL_STOP:              // Requests the service to stop.  
+            {
                 spooler_ptr->cmd_terminate();
+                set_service_status( 0, SERVICE_STOP_PENDING );
+
+                Thread_id thread_id;
+
+                _beginthreadex( NULL, 0, kill_thread, NULL, 0, &thread_id );
+
                 break;
+            }
 
             case SERVICE_CONTROL_PAUSE:             // Requests the service to pause.  
                 spooler_ptr->cmd_pause();
@@ -318,14 +364,14 @@ static void __stdcall Handler( DWORD dwControl )
     }
 
 
-    set_service_status();
+    set_service_status( 0 );
 }
 
 //-------------------------------------------------------------------------------------------------
 
 static void spooler_state_changed( Spooler*, void* )
 {
-    set_service_status();
+    set_service_status( 0 );
 }
 
 //-----------------------------------------------------------------------------------service_thread
@@ -345,7 +391,7 @@ static uint __stdcall service_thread( void* param )
 
         spooler._is_service = true;
         spooler.set_state_changed_handler( spooler_state_changed );
-        set_service_status();
+        set_service_status( 0 );
 
         try
         {
@@ -357,7 +403,7 @@ static uint __stdcall service_thread( void* param )
         catch( const Xc& x )
         {
             event_log( x.what() );
-            set_service_status(2);
+            set_service_status( 2 );
             spooler._log.error( x.what() );
             spooler_ptr = NULL;
             ret = 99;
@@ -367,7 +413,7 @@ static uint __stdcall service_thread( void* param )
         spooler_ptr = NULL;
     }
 
-    set_service_status();       // Das beendet den Prozess wegen spooler_ptr == NULL  ==>  SERVICE_STOPPED
+    set_service_status( 0 );       // Das beendet den Prozess wegen spooler_ptr == NULL  ==>  SERVICE_STOPPED
 
     return ret;
 }
@@ -403,6 +449,7 @@ static void __stdcall ServiceMain( DWORD argc, char** argv )
 
         do ret = WaitForSingleObject( thread_handle, INT_MAX );  while( ret != WAIT_TIMEOUT );
 
+        if( terminate_immediately )  { LOG( "_exit(1);\n" ); _exit(0); }
         // Soweit kommt's nicht, denn SetServiceStatus(STOPPED) beendet den Prozess mit exit()
 
         TerminateThread( thread_handle, 999 );   // Sollte nicht nötig sein. Nützt auch nicht, weil Destruktoren nicht gerufen werden und Komnunikations-Thread vielleicht noch läuft.

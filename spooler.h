@@ -1,4 +1,4 @@
-// $Id: spooler.h,v 1.60 2001/07/16 08:51:32 jz Exp $
+// $Id: spooler.h,v 1.61 2001/07/25 19:43:35 jz Exp $
 
 #ifndef __SPOOLER_H
 #define __SPOOLER_H
@@ -134,6 +134,8 @@ struct Spooler
     int                         launch                      ( int argc, char** argv );                                
     void                        set_state_changed_handler   ( State_changed_handler h )         { _state_changed_handler = h; }
 
+    Thread_id                   thread_id                   () const                            { return _thread_id; }
+
     // Für andere Threads:
     Thread*                     get_thread                  ( const string& thread_name );
     Object_set_class*           get_object_set_class        ( const string& name );
@@ -233,6 +235,8 @@ struct Spooler
 //-------------------------------------------------------------------------------------------------
 
 void                            spooler_restart             ( bool is_service );
+
+extern bool                     spooler_is_running;
 
 //-------------------------------------------------------------------------------------------------
 

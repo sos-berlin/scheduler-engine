@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.70 2001/07/16 08:51:31 jz Exp $
+// $Id: spooler.cxx,v 1.71 2001/07/25 19:43:35 jz Exp $
 /*
     Hier sind implementiert
 
@@ -41,6 +41,9 @@ const double renew_wait_time     = 30;      // Wartezeit für Brückenspooler, bis
 const double wait_for_thread_termination                 = latter_day;  // Haltbarkeit des Geduldfadens
 const double wait_step_for_thread_termination            = 5.0;         // Nörgelabstand
 //const double wait_for_thread_termination_after_interrupt = 1.0;
+
+
+bool spooler_is_running = false;
 
 /*
 struct Set_console_code_page
@@ -529,6 +532,8 @@ int Spooler::launch( int argc, char** argv )
         _thread_id = GetCurrentThreadId();
         SetThreadPriority( GetCurrentThread(), THREAD_PRIORITY_ABOVE_NORMAL );
 
+        spooler_is_running = true;
+
         _event.set_name( "Spooler" );
         _event.add_to( &_wait_handles );
 
@@ -564,6 +569,7 @@ int Spooler::launch( int argc, char** argv )
         rc = 9999;
     }
 
+    spooler_is_running = false;
     return rc;
 }
 
