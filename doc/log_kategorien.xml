@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet href="scheduler.xslt" type="text/xsl"?>
+
+<!--$Id: log_kategorien.xml,v 1.1 2004/11/08 18:07:37 jz Exp $-->
+
+<description 
+    title    = "Log-Kategorien" 
+    base_dir = ""
+    author   = "$Author: jz $"
+    date     = "$Date: 2004/11/08 18:07:37 $"
+>
+
+<scheduler_keyword keyword="Log-Kategorien"/>
+
+<p>
+    Fast alle Komponenten (nicht nur der Scheduler) können ein Protokoll des internen Ablaufs schreiben.
+    Wir nennen es kurz Log. 
+    Der Inhalt dieses Logs ist vor allem für die Entwickler der Komponenten interessant.
+    Dem einen oder anderen Problem können Sie aber auch selbst durch einen Blick ins Log auf dem Grund gehen.
+    Sie schalten das Log ein mit dem Eintrag <code>log=</code><i>dateiname</i> in der <code>.ini</code>-Datei.
+</p>
+<p>
+    Zum Beispiel für den Scheduler in der Datei <code>factory.ini:<br/>
+    <br/>
+    [spooler]<br/>
+    log = c:/tmp/scheduler.log</code>
+</p>
+
+
+<h2>Log-Kategorien</h2>
+<p>
+    Wenn das Log nicht allzu groß werden soll, können Sie Log-Kategorieren angegeben.
+    Die wählen aus, was ins Log geschrieben werden soll.
+</p>
+<p>
+    Beispiel:<code><br/>
+    <br/>
+    [spooler]<br/>
+    log = socket.* >c:/tmp/scheduler.log</code>
+</p>
+<p>
+    Die Log-Kategorien werden also durch Blanks getrennt vor den Dateinamen geschrieben.
+    Vor dem Dateinamen steht dann ein ">".
+</p>
+
+<p>
+    <table cellspacing="0" cellpadding="0">
+        <thead>
+            <tr>
+                <td>
+                </td>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+            
+            </tr>
+        </tbody>
+    </table>
+</p>
+
+
+    
+</description>

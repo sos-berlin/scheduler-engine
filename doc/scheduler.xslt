@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding="utf-8"?>
-<!-- $Id: scheduler.xslt,v 1.41 2004/10/21 21:13:56 jz Exp $ -->
+<!-- $Id: scheduler.xslt,v 1.42 2004/11/08 18:07:37 jz Exp $ -->
 
 <!--
     Änderungswünsche:
@@ -92,7 +92,7 @@
     
     <xsl:template match="xml_element">
     
-        <xsl:variable name="title">XML-Element&#160; &lt;<xsl:value-of select="@name"/>><!-- &#160; – &#160; <xsl:value-of select="@title"/>--></xsl:variable>
+        <xsl:variable name="title">XML-Element&#160; &lt;<xsl:value-of select="@name"/>><!-- &#160; – &#160; <xsl:value-of select="@title"/>--><xsl:if test="@category">&#160; &#160; (<xsl:value-of select="@category"/>)</xsl:if></xsl:variable>
 
         <html>
             <xsl:call-template name="html_head">
@@ -777,6 +777,7 @@
                         </td>
                         <td>
                             <xsl:for-each select="*">
+                                <xsl:sort select="@type" order="descending"/>
                                 <xsl:sort select="@register_title"/>
 
                                 <xsl:apply-templates select=".">

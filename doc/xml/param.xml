@@ -1,14 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="../scheduler.xslt" type="text/xsl"?>
 
-<!--$Id: param.xml,v 1.3 2004/09/06 07:53:28 jz Exp $-->
+<!--$Id: param.xml,v 1.4 2004/11/08 18:07:37 jz Exp $-->
 
 <xml_element name     = "param" 
              title    = "Ein Parameter"
+             category = "Konfiguration"
              base_dir = "../"
              parent_page = "../konfiguration.xml"
              author   = "$Author: jz $"
-             date     = "$Date: 2004/09/06 07:53:28 $">
+             date     = "$Date: 2004/11/08 18:07:37 $">
 
     <xml_parent_elements>
         <xml_parent_element name="params">

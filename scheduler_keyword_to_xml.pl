@@ -1,5 +1,5 @@
 #! /usr/bin/perl -W
-# $Id: scheduler_keyword_to_xml.pl,v 1.4 2004/09/13 17:28:02 jz Exp $
+# $Id: scheduler_keyword_to_xml.pl,v 1.5 2004/11/08 18:07:37 jz Exp $
 
 
 my $script_name     = "scheduler_keyword_to_xml.pl";
@@ -58,6 +58,7 @@ sub read_file
     my $head_title   = "";
     my $root_element = "";
     my $name         = "";
+    my $category     = "";
     
     open( FILE, "<$filename" )  or die "$filename: $!";
 
@@ -66,6 +67,7 @@ sub read_file
     {
         if( $root_element eq ""     &&  /\<([^?! \/\>]+)/ )         { $root_element = $1; }
         if( $name         eq ""     &&  / name *= *"(.*)"/ )        { $name = $1; }
+        if( $category     eq ""     &&  / category *= *"(.*)"/ )    { $category = $1; }
         if( $file_title   eq "XXX"  &&  / title *= *"(.*)"/ )       { $file_title = $1; }
         if( $head_title   eq ""     &&  / head_title *= *"(.*)"/ )  { $head_title = $1; }
         if( $root_element  &&  /[^?-]>/ )  { last; }
@@ -76,6 +78,7 @@ sub read_file
     if( $root_element eq "xml_element" )
     { 
         $file_title = "&lt;$name&gt;";
+        $file_title .= " ($category)"  if $category;
 
         my $keyword = $name;
         my $xml_line = "<register_entry register_file='$filename' register_title='$file_title'  register_keyword='$keyword' type='definition'/>\n";

@@ -1,15 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="../../scheduler.xslt" type="text/xsl"?>
 
-<!--$Id: ERROR.xml,v 1.3 2004/09/07 19:16:49 jz Exp $-->
+<!--$Id: ERROR.xml,v 1.4 2004/11/08 18:07:38 jz Exp $-->
 
 <xml_element name          = "ERROR" 
              title         = "Fehlermeldung"
+             category      = "Antwort"
              sub_directory = "answer/"
              base_dir      = "../../"
              parent_page   = "../../xml_commands.xml"
              author        = "$Author: jz $"
-             date          = "$Date: 2004/09/07 19:16:49 $">
+             date          = "$Date: 2004/11/08 18:07:38 $">
 
     <xml_parent_elements>
         <xml_parent_element name="answer">

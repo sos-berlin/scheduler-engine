@@ -2,14 +2,15 @@
 <!--DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"-->
 <?xml-stylesheet href="../scheduler.xslt" type="text/xsl"?>
 
-<!--$Id: kill_task.xml,v 1.6 2004/09/07 06:25:36 jz Exp $-->
+<!--$Id: kill_task.xml,v 1.7 2004/11/08 18:07:37 jz Exp $-->
 
 <xml_element name     = "kill_task" 
              title    = ""
+             category = "Kommando"
              base_dir = "../"
              parent_page = "../xml_commands.xml"
              author   = "$Author: jz $"
-             date     = "$Date: 2004/09/07 06:25:36 $">
+             date     = "$Date: 2004/11/08 18:07:37 $">
 
 
     <description>
