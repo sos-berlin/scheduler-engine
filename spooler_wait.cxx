@@ -1,4 +1,4 @@
-// $Id: spooler_wait.cxx,v 1.1 2001/01/13 18:41:19 jz Exp $
+// $Id: spooler_wait.cxx,v 1.2 2001/01/14 10:26:55 jz Exp $
 
 
 #include "../kram/sos.h"
@@ -51,10 +51,13 @@ void Wait_handles::remove( HANDLE handle )
         it++;
     }
 
-    if( it == _handles.end() )  LOG( "*** Wait_handles::remove " << handle << " fehlt\n" );
+    if( it == _handles.end() ) {
+        LOG( "*** Wait_handles::remove " << handle << " fehlt\n" );     // Keine Exception. Das wäre nicht gut in einem Destruktor
+        return;
+    }
 
     _handles.erase( it );
-    _tasks.erase( _tasks.begin() - ( it - _handles.begin() ) );
+    _tasks.erase( _tasks.begin() + ( it - _handles.begin() ) );
 }
 
 //--------------------------------------------------------------------------------Wait_handles::wait

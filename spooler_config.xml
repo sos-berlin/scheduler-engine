@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 
-<!-- $Id: spooler_config.xml,v 1.24 2001/01/13 22:26:18 jz Exp $   (C) 2000 SOS GmbH Berlin -->
+<!-- $Id: spooler_config.xml,v 1.25 2001/01/14 10:26:55 jz Exp $   (C) 2000 SOS GmbH Berlin -->
 
 <!DOCTYPE spooler_config SYSTEM "spooler_config.dtd">
 
@@ -361,7 +361,7 @@ end function
 
             ]]></script>
 
-            <run_time retry_period="9"/>
+            <run_time retry_period="3"/>
 
         </job>
 
