@@ -1,4 +1,4 @@
-// $Id: spooler_wait.cxx,v 1.56 2002/12/03 12:54:46 jz Exp $
+// $Id: spooler_wait.cxx,v 1.57 2002/12/03 23:07:17 jz Exp $
 /*
     Hier sind implementiert
 
@@ -61,7 +61,7 @@ void Event::close()
 
 void Event::add_to( Wait_handles* w )                 
 { 
-    Z_LOCK( _mutex )
+    Z_MUTEX( _mutex )
     {
         _wait_handles.push_back(w); 
         w->add( this );
@@ -72,7 +72,7 @@ void Event::add_to( Wait_handles* w )
 
 void Event::remove_from( Wait_handles* w )
 {
-    Z_LOCK( _mutex )
+    Z_MUTEX( _mutex )
     {
         FOR_EACH( vector<Wait_handles*>, _wait_handles, it ) 
         {

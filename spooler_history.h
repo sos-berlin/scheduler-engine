@@ -1,4 +1,4 @@
-// $Id: spooler_history.h,v 1.12 2002/11/11 23:10:33 jz Exp $
+// $Id: spooler_history.h,v 1.13 2002/12/03 23:07:16 jz Exp $
 
 #ifndef __SPOOLER_HISTORY_H
 #define __SPOOLER_HISTORY_H
@@ -72,7 +72,7 @@ struct Transaction
     void                        rollback                ();
 
     Spooler_db*                _db;
-    Thread_semaphore::Guard    _guard;
+    Mutex_guard                _guard;
 };
 
 //--------------------------------------------------------------------------------------Job_history

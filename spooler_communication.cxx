@@ -1,4 +1,4 @@
-// $Id: spooler_communication.cxx,v 1.42 2002/12/03 12:54:45 jz Exp $
+// $Id: spooler_communication.cxx,v 1.43 2002/12/03 23:07:16 jz Exp $
 /*
     Hier sind implementiert
 
@@ -390,19 +390,19 @@ Communication::~Communication()
 
 void Communication::close( double wait_time )
 {
+    Z_MUTEX( _semaphore )
     {
-        Thread_semaphore::Guard guard = &_semaphore;
-
         _channel_list.clear();
-        closesocket( _listen_socket );
-        closesocket( _udp_socket );
+
+        if( _listen_socket != SOCKET_ERROR )  closesocket( _listen_socket ),  _listen_socket = SOCKET_ERROR;
+        if( _udp_socket    != SOCKET_ERROR )  closesocket( _udp_socket )   ,  _udp_socket    = SOCKET_ERROR;
 
         _terminate = true;
     }
 
-#ifdef Z_WINDOWS
-    thread_wait_for_termination( wait_time );
-#endif
+#   ifdef Z_WINDOWS
+        thread_wait_for_termination( wait_time );
+#   endif
 
     thread_close();
 }
@@ -421,36 +421,37 @@ void Communication::bind()
 
     if( _udp_port != _spooler->udp_port() )
     {
-        Thread_semaphore::Guard guard = &_semaphore;
+        Z_MUTEX( _semaphore )
+        {
+            if( _udp_socket != SOCKET_ERROR )  closesocket( _udp_socket );
+            _udp_port = 0;
 
-        if( _udp_socket != SOCKET_ERROR )  closesocket( _udp_socket );
-        _udp_port = 0;
+            _udp_socket = socket( AF_INET, SOCK_DGRAM, 0 );
+            if( _udp_socket == SOCKET_ERROR )  throw_sos_socket_error( "socket" );
 
-        _udp_socket = socket( AF_INET, SOCK_DGRAM, 0 );
-        if( _udp_socket == SOCKET_ERROR )  throw_sos_socket_error( "socket" );
+            set_linger( _udp_socket );
+          //setsockopt( _udp_socket, SOL_SOCKET, SO_REUSEADDR, (const char*)&true_, sizeof true_ );
 
-        set_linger( _udp_socket );
-      //setsockopt( _udp_socket, SOL_SOCKET, SO_REUSEADDR, (const char*)&true_, sizeof true_ );
+            sa.sin_port        = htons( _spooler->udp_port() );
+            sa.sin_family      = AF_INET;
+            sa.sin_addr.s_addr = 0; // INADDR_ANY
 
-        sa.sin_port        = htons( _spooler->udp_port() );
-        sa.sin_family      = AF_INET;
-        sa.sin_addr.s_addr = 0; // INADDR_ANY
+            //do {
+                ret = ::bind( _udp_socket, (struct sockaddr*)&sa, sizeof sa );
+                if( ret == SOCKET_ERROR ) {
+                    //if( wait++ < wait_for_free_port  &&  get_errno() == EADDRINUSE )  { sos_sleep(1); continue; }
+                    throw_sos_socket_error( "udp-bind ", as_string(_spooler->udp_port()).c_str() );
+                }
+            //} while(0);
 
-        //do {
-            ret = ::bind( _udp_socket, (struct sockaddr*)&sa, sizeof sa );
-            if( ret == SOCKET_ERROR ) {
-                //if( wait++ < wait_for_free_port  &&  get_errno() == EADDRINUSE )  { sos_sleep(1); continue; }
-                throw_sos_socket_error( "udp-bind ", as_string(_spooler->udp_port()).c_str() );
-            }
-        //} while(0);
+            ret = ioctlsocket( _udp_socket, FIONBIO, &on );
+            if( ret == SOCKET_ERROR )  throw_sos_socket_error( "ioctl(FIONBIO)" );
 
-        ret = ioctlsocket( _udp_socket, FIONBIO, &on );
-        if( ret == SOCKET_ERROR )  throw_sos_socket_error( "ioctl(FIONBIO)" );
+            _udp_port = _spooler->udp_port();
+            _rebound = true;
 
-        _udp_port = _spooler->udp_port();
-        _rebound = true;
-
-        _spooler->log().info( "Spooler erwartet Kommandos über UDP-Port " + sos::as_string(_udp_port) );
+            _spooler->log().info( "Spooler erwartet Kommandos über UDP-Port " + sos::as_string(_udp_port) );
+        }
     }
 
 
@@ -458,39 +459,40 @@ void Communication::bind()
 
     if( _tcp_port != _spooler->tcp_port() )
     {
-        Thread_semaphore::Guard guard = &_semaphore;
+        Z_MUTEX( _semaphore )
+        {
+            if( _listen_socket != SOCKET_ERROR )  closesocket( _listen_socket );
+            _tcp_port = 0;
 
-        if( _listen_socket != SOCKET_ERROR )  closesocket( _listen_socket );
-        _tcp_port = 0;
+            _listen_socket = socket( AF_INET, SOCK_STREAM, 0 );
+            if( _listen_socket == SOCKET_ERROR )  throw_sos_socket_error( "socket" );
 
-        _listen_socket = socket( AF_INET, SOCK_STREAM, 0 );
-        if( _listen_socket == SOCKET_ERROR )  throw_sos_socket_error( "socket" );
+            set_linger( _listen_socket );
+          //setsockopt( _listen_socket, SOL_SOCKET, SO_REUSEADDR, (const char*)&true_, sizeof true_ );
 
-        set_linger( _listen_socket );
-      //setsockopt( _listen_socket, SOL_SOCKET, SO_REUSEADDR, (const char*)&true_, sizeof true_ );
+            sa.sin_port        = htons( _spooler->tcp_port() );
+            sa.sin_family      = AF_INET;
+            sa.sin_addr.s_addr = 0; // INADDR_ANY
 
-        sa.sin_port        = htons( _spooler->tcp_port() );
-        sa.sin_family      = AF_INET;
-        sa.sin_addr.s_addr = 0; // INADDR_ANY
+            //do {
+                ret = ::bind( _listen_socket, (struct sockaddr*)&sa, sizeof sa );
+                if( ret == SOCKET_ERROR ) {
+                    //if( wait++ < wait_for_free_port  &&  get_errno() == EADDRINUSE )  { sos_sleep(1); continue; }
+                    throw_sos_socket_error( "tcp-bind", as_string(_spooler->tcp_port()).c_str() );
+                }
+            //} while(0);
 
-        //do {
-            ret = ::bind( _listen_socket, (struct sockaddr*)&sa, sizeof sa );
-            if( ret == SOCKET_ERROR ) {
-                //if( wait++ < wait_for_free_port  &&  get_errno() == EADDRINUSE )  { sos_sleep(1); continue; }
-                throw_sos_socket_error( "tcp-bind", as_string(_spooler->tcp_port()).c_str() );
-            }
-        //} while(0);
+            ret = listen( _listen_socket, 5 );
+            if( ret == SOCKET_ERROR )  throw_errno( get_errno(), "listen" );
 
-        ret = listen( _listen_socket, 5 );
-        if( ret == SOCKET_ERROR )  throw_errno( get_errno(), "listen" );
+            ret = ioctlsocket( _listen_socket, FIONBIO, &on );
+            if( ret == SOCKET_ERROR )  throw_sos_socket_error( "ioctl(FIONBIO)" );
 
-        ret = ioctlsocket( _listen_socket, FIONBIO, &on );
-        if( ret == SOCKET_ERROR )  throw_sos_socket_error( "ioctl(FIONBIO)" );
+            _tcp_port = _spooler->tcp_port();
+            _rebound = true;
 
-        _tcp_port = _spooler->tcp_port();
-        _rebound = true;
-
-        _spooler->log().info( "Spooler erwartet Kommandos über TCP-Port " + sos::as_string(_tcp_port) );
+            _spooler->log().info( "Spooler erwartet Kommandos über TCP-Port " + sos::as_string(_tcp_port) );
+        }
     }
 }
 
@@ -567,7 +569,7 @@ int Communication::run()
         _nfds = 0;
 
         {
-            Thread_semaphore::Guard guard = &_semaphore;
+            Mutex_guard guard = &_semaphore;
 
             FD_ZERO( &_read_fds );      
             FD_ZERO( &_write_fds );
@@ -588,7 +590,7 @@ int Communication::run()
         int n = ::select( _nfds, &_read_fds, &_write_fds, NULL, NULL );
 
         {
-            Thread_semaphore::Guard guard = &_semaphore;
+            Mutex_guard guard = &_semaphore;
 
             if( _terminate )  break;
             if( _rebound )  { _rebound = false; continue; }

@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.153 2002/12/03 12:54:44 jz Exp $
+// $Id: spooler.cxx,v 1.154 2002/12/03 23:07:15 jz Exp $
 /*
     Hier sind implementiert
 
@@ -179,7 +179,8 @@ With_log_switch read_profile_with_log( const string& profile, const string& sect
         if( dwCtrlType == CTRL_C_EVENT  &&  !ctrl_c_pressed )
         {
             ctrl_c_pressed = true;
-            //Kein Systemaufruf hier!  fprintf( stderr, "Spooler wird wegen Ctrl-C beendet ...\n" );
+            //Kein Systemaufruf hier! (Aber bei Ctrl-C riskieren wir einen Absturz. Ich will diese Meldung sehen.)
+            fprintf( stderr, "Spooler wird wegen Ctrl-C beendet ...\n" );
             spooler->async_signal( "Ctrl+C" );
             return true;
         }
@@ -196,7 +197,8 @@ With_log_switch read_profile_with_log( const string& profile, const string& sect
         //if( !ctrl_c_pressed )
         //{
             ctrl_c_pressed = true;
-            //Kein Systemaufruf hier!  fprintf( stderr, "Spooler wird wegen Ctrl-C beendet ...\n" );
+            //Kein Systemaufruf hier! (Aber bei Ctrl-C riskieren wir einen Absturz. Ich will diese Meldung sehen.)
+            fprintf( stderr, "Spooler wird wegen Ctrl-C beendet ...\n" );
 
             // pthread_mutex_lock:
             // The  mutex  functions  are  not  async-signal  safe.  What  this  means  is  that  they
@@ -1440,6 +1442,8 @@ int sos_main( int argc, char** argv )
         ret = spooler::spooler_main( argc, argv );
 
 #   endif
+
+    LOG( "Programm wird beendet\n" );
 
     return ret;
 }

@@ -1,4 +1,4 @@
-// $Id: spooler_log.cxx,v 1.51 2002/11/30 15:58:30 jz Exp $
+// $Id: spooler_log.cxx,v 1.52 2002/12/03 23:07:17 jz Exp $
 
 #include "spooler.h"
 #include "spooler_mail.h"
@@ -74,9 +74,10 @@ Log::Log( Spooler* spooler )
 
 Log::~Log()         
 {
-    Thread_semaphore::Guard guard = &_semaphore;
-
-    if( _file != -1  &&  _file != fileno(stderr) )  close( _file ),  _file = -1;
+    Z_MUTEX( _semaphore )
+    {
+        if( _file != -1  &&  _file != fileno(stderr) )  close( _file ),  _file = -1;
+    }
 }
 
 //-------------------------------------------------------------------------------Log::set_directory
@@ -111,36 +112,37 @@ void Log::write( Prefix_log* extra_log, const char* text, int len, bool log )
 
 void Log::open_new()
 {
-    Thread_semaphore::Guard guard = &_semaphore;
-
-    if( _file != -1  &&  _file != fileno(stderr) )  close( _file ),  _file = -1;
-    _filename = "";
-
-    if( _directory == "*stderr" )
+    Z_MUTEX( _semaphore )
     {
-        _filename = "*stderr";
-        _file = fileno(stderr);
-    }
-    else
-    if( _directory == "*none" )
-    {
-        _filename = "*none";
-    }
-    else
-    {
-        Sos_optional_date_time time = Time::now().as_time_t();
-        string filename = _directory;
+        if( _file != -1  &&  _file != fileno(stderr) )  close( _file ),  _file = -1;
+        _filename = "";
 
-        filename += "/spooler-";
-        filename += time.formatted( "yyyy-mm-dd-HHMMSS" );
-        if( !_spooler->id().empty() )  filename += "." + _spooler->id();
-        filename += ".log";
+        if( _directory == "*stderr" )
+        {
+            _filename = "*stderr";
+            _file = fileno(stderr);
+        }
+        else
+        if( _directory == "*none" )
+        {
+            _filename = "*none";
+        }
+        else
+        {
+            Sos_optional_date_time time = Time::now().as_time_t();
+            string filename = _directory;
 
-        LOG( "\nopen " << filename << '\n' );
-        _file = open( filename.c_str(), O_CREAT | O_TRUNC | O_WRONLY, 0666 );
-        if( _file == -1 )  throw_errno( errno, filename.c_str() );
+            filename += "/spooler-";
+            filename += time.formatted( "yyyy-mm-dd-HHMMSS" );
+            if( !_spooler->id().empty() )  filename += "." + _spooler->id();
+            filename += ".log";
 
-        _filename = filename;
+            LOG( "\nopen " << filename << '\n' );
+            _file = open( filename.c_str(), O_CREAT | O_TRUNC | O_WRONLY, 0666 );
+            if( _file == -1 )  throw_errno( errno, filename.c_str() );
+
+            _filename = filename;
+        }
     }
 }
 

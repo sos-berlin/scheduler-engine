@@ -332,7 +332,7 @@ SOURCE=.\sos\spooler\Error.java
 
 !IF  "$(CFG)" == "spooler - Win32 Release"
 
-# Begin Custom Build -
+# Begin Custom Build
 OutDir=.\Release
 InputPath=.\sos\spooler\Error.java
 InputName=Error
@@ -353,7 +353,7 @@ BuildCmds= \
 
 !ELSEIF  "$(CFG)" == "spooler - Win32 Debug"
 
-# Begin Custom Build -
+# Begin Custom Build
 OutDir=.\Debug
 InputPath=.\sos\spooler\Error.java
 InputName=Error
@@ -381,7 +381,7 @@ SOURCE=.\sos\spooler\Idispatch.java
 
 !IF  "$(CFG)" == "spooler - Win32 Release"
 
-# Begin Custom Build -
+# Begin Custom Build
 OutDir=.\Release
 InputPath=.\sos\spooler\Idispatch.java
 InputName=Idispatch
@@ -402,7 +402,7 @@ BuildCmds= \
 
 !ELSEIF  "$(CFG)" == "spooler - Win32 Debug"
 
-# Begin Custom Build -
+# Begin Custom Build
 OutDir=.\Debug
 InputPath=.\sos\spooler\Idispatch.java
 InputName=Idispatch
@@ -430,7 +430,7 @@ SOURCE=.\sos\spooler\Job.java
 
 !IF  "$(CFG)" == "spooler - Win32 Release"
 
-# Begin Custom Build -
+# Begin Custom Build
 OutDir=.\Release
 InputPath=.\sos\spooler\Job.java
 InputName=Job
@@ -451,7 +451,7 @@ BuildCmds= \
 
 !ELSEIF  "$(CFG)" == "spooler - Win32 Debug"
 
-# Begin Custom Build -
+# Begin Custom Build
 OutDir=.\Debug
 InputPath=.\sos\spooler\Job.java
 InputName=Job
@@ -479,7 +479,7 @@ SOURCE=.\sos\spooler\Job_chain.java
 
 !IF  "$(CFG)" == "spooler - Win32 Release"
 
-# Begin Custom Build -
+# Begin Custom Build
 OutDir=.\Release
 InputPath=.\sos\spooler\Job_chain.java
 InputName=Job_chain
@@ -500,7 +500,7 @@ BuildCmds= \
 
 !ELSEIF  "$(CFG)" == "spooler - Win32 Debug"
 
-# Begin Custom Build -
+# Begin Custom Build
 OutDir=.\Debug
 InputPath=.\sos\spooler\Job_chain.java
 InputName=Job_chain
@@ -528,7 +528,7 @@ SOURCE=.\sos\spooler\Job_chain_node.java
 
 !IF  "$(CFG)" == "spooler - Win32 Release"
 
-# Begin Custom Build -
+# Begin Custom Build
 OutDir=.\Release
 InputPath=.\sos\spooler\Job_chain_node.java
 InputName=Job_chain_node
@@ -549,7 +549,7 @@ BuildCmds= \
 
 !ELSEIF  "$(CFG)" == "spooler - Win32 Debug"
 
-# Begin Custom Build -
+# Begin Custom Build
 OutDir=.\Debug
 InputPath=.\sos\spooler\Job_chain_node.java
 InputName=Job_chain_node
@@ -577,7 +577,7 @@ SOURCE=.\sos\spooler\Job_impl.java
 
 !IF  "$(CFG)" == "spooler - Win32 Release"
 
-# Begin Custom Build -
+# Begin Custom Build
 OutDir=.\Release
 InputPath=.\sos\spooler\Job_impl.java
 InputName=Job_impl
@@ -598,7 +598,7 @@ BuildCmds= \
 
 !ELSEIF  "$(CFG)" == "spooler - Win32 Debug"
 
-# Begin Custom Build -
+# Begin Custom Build
 OutDir=.\Debug
 InputPath=.\sos\spooler\Job_impl.java
 InputName=Job_impl
@@ -626,7 +626,7 @@ SOURCE=.\sos\spooler\Log.java
 
 !IF  "$(CFG)" == "spooler - Win32 Release"
 
-# Begin Custom Build -
+# Begin Custom Build
 OutDir=.\Release
 InputPath=.\sos\spooler\Log.java
 InputName=Log
@@ -647,7 +647,7 @@ BuildCmds= \
 
 !ELSEIF  "$(CFG)" == "spooler - Win32 Debug"
 
-# Begin Custom Build -
+# Begin Custom Build
 OutDir=.\Debug
 InputPath=.\sos\spooler\Log.java
 InputName=Log
@@ -675,7 +675,7 @@ SOURCE=.\sos\spooler\Mail.java
 
 !IF  "$(CFG)" == "spooler - Win32 Release"
 
-# Begin Custom Build -
+# Begin Custom Build
 OutDir=.\Release
 InputPath=.\sos\spooler\Mail.java
 InputName=Mail
@@ -696,7 +696,7 @@ BuildCmds= \
 
 !ELSEIF  "$(CFG)" == "spooler - Win32 Debug"
 
-# Begin Custom Build -
+# Begin Custom Build
 OutDir=.\Debug
 InputPath=.\sos\spooler\Mail.java
 InputName=Mail
@@ -724,7 +724,7 @@ SOURCE=.\sos\spooler\Order.java
 
 !IF  "$(CFG)" == "spooler - Win32 Release"
 
-# Begin Custom Build -
+# Begin Custom Build
 OutDir=.\Release
 InputPath=.\sos\spooler\Order.java
 InputName=Order
@@ -745,7 +745,7 @@ BuildCmds= \
 
 !ELSEIF  "$(CFG)" == "spooler - Win32 Debug"
 
-# Begin Custom Build -
+# Begin Custom Build
 OutDir=.\Debug
 InputPath=.\sos\spooler\Order.java
 InputName=Order
@@ -773,7 +773,7 @@ SOURCE=.\sos\spooler\Order_queue.java
 
 !IF  "$(CFG)" == "spooler - Win32 Release"
 
-# Begin Custom Build -
+# Begin Custom Build
 OutDir=.\Release
 InputPath=.\sos\spooler\Order_queue.java
 InputName=Order_queue
@@ -794,7 +794,7 @@ BuildCmds= \
 
 !ELSEIF  "$(CFG)" == "spooler - Win32 Debug"
 
-# Begin Custom Build -
+# Begin Custom Build
 OutDir=.\Debug
 InputPath=.\sos\spooler\Order_queue.java
 InputName=Order_queue
@@ -822,7 +822,7 @@ SOURCE=.\sos\spooler\Spooler.java
 
 !IF  "$(CFG)" == "spooler - Win32 Release"
 
-# Begin Custom Build -
+# Begin Custom Build
 OutDir=.\Release
 InputPath=.\sos\spooler\Spooler.java
 InputName=Spooler
@@ -843,7 +843,7 @@ BuildCmds= \
 
 !ELSEIF  "$(CFG)" == "spooler - Win32 Debug"
 
-# Begin Custom Build -
+# Begin Custom Build
 OutDir=.\Debug
 InputPath=.\sos\spooler\Spooler.java
 InputName=Spooler
@@ -871,7 +871,7 @@ SOURCE=.\sos\spooler\Task.java
 
 !IF  "$(CFG)" == "spooler - Win32 Release"
 
-# Begin Custom Build -
+# Begin Custom Build
 OutDir=.\Release
 InputPath=.\sos\spooler\Task.java
 InputName=Task
@@ -892,7 +892,7 @@ BuildCmds= \
 
 !ELSEIF  "$(CFG)" == "spooler - Win32 Debug"
 
-# Begin Custom Build -
+# Begin Custom Build
 OutDir=.\Debug
 InputPath=.\sos\spooler\Task.java
 InputName=Task
@@ -920,7 +920,7 @@ SOURCE=.\sos\spooler\Thread.java
 
 !IF  "$(CFG)" == "spooler - Win32 Release"
 
-# Begin Custom Build -
+# Begin Custom Build
 OutDir=.\Release
 InputPath=.\sos\spooler\Thread.java
 InputName=Thread
@@ -941,7 +941,7 @@ BuildCmds= \
 
 !ELSEIF  "$(CFG)" == "spooler - Win32 Debug"
 
-# Begin Custom Build -
+# Begin Custom Build
 OutDir=.\Debug
 InputPath=.\sos\spooler\Thread.java
 InputName=Thread
@@ -969,7 +969,7 @@ SOURCE=.\sos\spooler\Variable_set.java
 
 !IF  "$(CFG)" == "spooler - Win32 Release"
 
-# Begin Custom Build -
+# Begin Custom Build
 OutDir=.\Release
 InputPath=.\sos\spooler\Variable_set.java
 InputName=Variable_set
@@ -990,7 +990,7 @@ BuildCmds= \
 
 !ELSEIF  "$(CFG)" == "spooler - Win32 Debug"
 
-# Begin Custom Build -
+# Begin Custom Build
 OutDir=.\Debug
 InputPath=.\sos\spooler\Variable_set.java
 InputName=Variable_set
