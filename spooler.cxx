@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.9 2001/01/05 23:24:33 jz Exp $
+// $Id: spooler.cxx,v 1.10 2001/01/06 11:09:44 jz Exp $
 
 
 
@@ -58,7 +58,17 @@ void Object_set::open()
 
     _script_site->parse( _object_set_descr->_class->_script );
 
-    CComVariant object_set_vt = _script_site->call( "spooler_make_object_set()" );
+    CComVariant object_set_vt;
+
+    if( stricmp( _script_site->_engine_name.c_str(), "PerlScript" ) == 0 )
+    {
+        object_set_vt = _script_site->invoke( "main::object_set" );
+    }
+    else
+    {
+        object_set_vt = _script_site->invoke( "spooler_make_object_set()" );
+    }
+
     if( object_set_vt.vt != VT_DISPATCH 
      || object_set_vt.pdispVal == NULL  )  throw_xc( "SPOOLER-103", _object_set_descr->_class_name );
     _dispatch = object_set_vt.pdispVal;
@@ -200,7 +210,8 @@ Time Run_time::next( Time tim_par )
 
     if( _next_start_time < tim_par )
     {
-        _next_start_time += int( (tim_par-_next_start_time) / _retry_period + _retry_period - 0.01 ) * _retry_period;
+        //_next_start_time += int( (tim_par-_next_start_time) / _retry_period + _retry_period - 0.01 ) * _retry_period;
+        _next_start_time = tim_par;
     }
 
     return _next_start_time;
@@ -226,12 +237,11 @@ void Task::set_new_start_time()
 
 //---------------------------------------------------------------------------------------Task::error
 
-void Task::error( const string& error_text )
+void Task::error( const Xc& x)
 {
-    cerr << "Task: " << error_text << '\n';
+    cerr << "Job " << _job->_name << ": " << x << '\n';
 
-    _error_time = now();
-    _error_text = error_text;
+    _error = x;
 
     _running = false;
     _object_set = NULL;
@@ -239,28 +249,28 @@ void Task::error( const string& error_text )
 
 //---------------------------------------------------------------------------------Task::start_error
 
-void Task::start_error( const string& error_text )
+void Task::start_error( const Xc& x )
 {
-    error( error_text );
+    error( x );
 }
 
 //-----------------------------------------------------------------------------------Task::end_error
 
-void Task::end_error( const string& error_text )
+void Task::end_error( const Xc& x )
 {
-    error( error_text );
+    error( x );
 }
 
 //----------------------------------------------------------------------------------Task::step_error
 
-void Task::step_error( const string& error_text )
+void Task::step_error( const Xc& x )
 {
-    error( error_text );
+    error( x );
 }
 
 //---------------------------------------------------------------------------------------Task::start
 
-void Task::start()
+bool Task::start()
 {
     _running_since = now();
     _object_set = SOS_NEW( Object_set( &_job->_object_set_descr ) );
@@ -268,27 +278,32 @@ void Task::start()
     try 
     {
         _object_set->open();
+
         _running = true;
+        _spooler->_running_jobs_count++;
+
+        _next_start_time = max( _next_start_time + _job->_run_time._retry_period, now() );
+        if( now() >= _job->_run_time._next_end_time )  set_new_start_time();
     }
-    catch( const Xc& x        ) { start_error( x.what() ); }
-    catch( const exception& x ) { start_error( x.what() ); }
+    catch( const Xc& x        ) { start_error( x ); return false; }
+  //catch( const exception& x ) { start_error( x.what() ); return false; }
 
-    _next_start_time = max( _next_start_time + _job->_run_time._retry_period, now() );
-    if( now() >= _job->_run_time._next_end_time )  set_new_start_time();
-
+    return true;
 }
 
 //-----------------------------------------------------------------------------------------Task::end
 
 void Task::end()
 {
+
     try
     {
         _object_set->close();
     }
-    catch( const Xc& x        ) { end_error( x.what() ); }
-    catch( const exception& x ) { end_error( x.what() ); }
+    catch( const Xc& x        ) { end_error( x ); }
+  //catch( const exception& x ) { end_error( x.what() ); }
 
+    _spooler->_running_jobs_count--;
     _running = false;
 }
 
@@ -308,8 +323,8 @@ bool Task::step()
 
         _step_count++;
     }
-    catch( const Xc& x        ) { step_error( x.what() ); }
-    catch( const exception& x ) { step_error( x.what() ); }
+    catch( const Xc& x        ) { step_error( x ); return false; }
+  //catch( const exception& x ) { step_error( x.what() ); return false; }
 
     return true;
 }
@@ -326,17 +341,15 @@ void Spooler::step()
 
         if( !task->_running )
         {
-            if( now() >= task->_next_start_time )
+            if( !task->_error  &&  now() >= task->_next_start_time )
             {
                 task->start();
-
-                _running_jobs_count++;
             }
         }
         else
         {
             bool ok = task->step();
-            if( !ok )   task->end(),  _running_jobs_count--;
+            if( !ok )   task->end();
         }
     }
 }
@@ -381,18 +394,22 @@ void Spooler::wait()
     if( _running_jobs_count == 0 )
     {
         Time next_start_time;
+        Task* next_task = NULL;
 
         {
             Thread_semaphore::Guard guard = &_semaphore;
 
             next_start_time = latter_day;
-            FOR_EACH( Task_list, _task_list, it )  if( next_start_time > (*it)->_next_start_time )  next_start_time = (*it)->_next_start_time;
+            FOR_EACH( Task_list, _task_list, it ) 
+            {
+                if( next_start_time > (*it)->_next_start_time )  next_task = *it, next_start_time = next_task->_next_start_time;
+            }
         }
 
         Time diff = next_start_time - now();
         if( diff > 0 ) 
         {
-            cerr << "Nächster Start: " << Sos_optional_date_time( next_start_time ) << '\n';
+            cerr << "Nächster Start: " << Sos_optional_date_time( next_start_time ) << ", Job " << next_task->_job->_name << '\n';
             sos_sleep( diff );
         }
 

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 
-<!-- $Id: spooler_config.xml,v 1.8 2001/01/05 23:24:33 jz Exp $   (C) 2000 SOS GmbH Berlin -->
+<!-- $Id: spooler_config.xml,v 1.9 2001/01/06 11:09:44 jz Exp $   (C) 2000 SOS GmbH Berlin -->
 
 <!DOCTYPE spooler_config SYSTEM "spooler_config.dtd">
 
@@ -81,7 +81,7 @@ class Object_set_class
 
 
     function spooler_get()
-        if spooler_eof then exit function
+        if spooler_eof() then exit function
 
         dim object
         set object = new Testobjekt
@@ -93,9 +93,9 @@ class Object_set_class
     end function
 
 
-    property get spooler_eof()
+    function get spooler_eof()
         spooler_eof = index > ubound(file_array)
-    end property
+    end function
 
 
     public low_level
@@ -218,10 +218,12 @@ package Object_set_class;
 
 package main;
 
-    sub spooler_make_object_set
+    sub spooler_make_object_set()
     {
         return Object_set_class->construct();
     }
+
+    $object_set = spooler_make_object_set();
 
 
             ]]></script>

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- $Id: spooler_config.dtd,v 1.7 2001/01/05 20:31:22 jz Exp $   (C) 2000 SOS GmbH Berlin 
+<!-- $Id: spooler_config.dtd,v 1.8 2001/01/06 11:09:44 jz Exp $   (C) 2000 SOS GmbH Berlin 
 
      Konfiguration für den Spooler. 
      
@@ -9,22 +9,22 @@
 <!-- KONFIGURATION DES SPOOLERS -->
 
 <!ELEMENT spooler_config        ( object_set_classes, jobs? )>
-<!ATTLIST spooler_config        log_file CDATA #IMPLIED>
+<!ATTLIST spooler_config        log_file            CDATA #IMPLIED>
 
 
 <!ELEMENT object_set_classes    ( object_set_class+ )>
 
 <!ELEMENT object_set_class      ( level_decls?, script? )>
-<!ATTLIST object_set_class      name CDATA #REQUIRED >
+<!ATTLIST object_set_class      name                CDATA #REQUIRED>
 
 <!ELEMENT level_decls           ( level_decl+ )>
 
 <!ELEMENT level_decl            EMPTY>
-<!ATTLIST level_decl            level CDATA #REQUIRED>
-<!ATTLIST level_decl            name  CDATA #REQUIRED>
+<!ATTLIST level_decl            level               CDATA #REQUIRED>
+<!ATTLIST level_decl            name                CDATA #REQUIRED>
 
 <!ELEMENT script                ( #PCDATA )>
-<!ATTLIST script                language CDATA "VBScript">
+<!ATTLIST script                language            CDATA "VBScript">
 
 
 
@@ -48,8 +48,8 @@
 <!ATTLIST object_set            class CDATA #REQUIRED>
 
 <!ELEMENT levels                EMPTY>          
-<!ATTLIST levels                low     CDATA #REQUIRED>                <!-- low <= level < high -->
-<!ATTLIST levels                high    CDATA #REQUIRED>
+<!ATTLIST levels                low                 CDATA #REQUIRED>    <!-- low <= level < high -->
+<!ATTLIST levels                high                CDATA #REQUIRED>
 
 <!ELEMENT job.priority          ( #PCDATA )>
 
@@ -58,20 +58,20 @@
                                                                              um zu prüfen, ob die Objektemenge nicht leer ist -->
 
 <!ELEMENT time_of_day           EMPTY>                                  <!-- HH:MM:SS -->
-<!ATTLIST time_of_day           begin CDATA #REQUIRED>                  <!-- HH:MM:SS -->
-<!ATTLIST time_of_day           end   CDATA #REQUIRED>                  <!-- HH:MM:SS -->
+<!ATTLIST time_of_day           begin               CDATA #REQUIRED>    <!-- HH:MM:SS -->
+<!ATTLIST time_of_day           end                 CDATA #REQUIRED>    <!-- HH:MM:SS -->
 
 <!ELEMENT date                  EMPTY>
-<!ATTLIST date                  date  CDATA #IMPLIED>                   <!-- yyyy-mm-dd -->
+<!ATTLIST date                  date                CDATA #IMPLIED>     <!-- yyyy-mm-dd -->
 
 <!ELEMENT weekdays              ( day+ )>                               <!-- 0: Sonntag, 6: Sonnabend -->
 <!ELEMENT monthdays             ( day+ )>                               <!-- 1 bis 31 -->
 <!ELEMENT ultimos               ( day+ )>                               <!-- 0 bis 30 Tage vor Ultimo -->
 <!ELEMENT holiday               EMPTY>                              
-<!ATTLIST holiday               date  CDATA #REQUIRED>                  <!-- yyyy-mm-dd, an diesem Tag den Job nicht starten -->
+<!ATTLIST holiday               date                CDATA #REQUIRED>    <!-- yyyy-mm-dd, an diesem Tag den Job nicht starten -->
 
 <!ELEMENT day                   EMPTY>                                  <!-- Erweiterbar um time* -->
-<!ATTLIST day                   day CDATA #REQUIRED>
+<!ATTLIST day                   day                 CDATA #REQUIRED>
 
 
 
@@ -88,7 +88,7 @@
 
 <!-- ANTWORTEN AUF DIE KOMMANDOS -->
 
-<!ELEMENT spooler.answer        ( state | COMMAND_ERROR )>
+<!ELEMENT spooler.answer        ( state | ERROR )>
 
 <!ELEMENT state                 ( tasks )>
 <!ATTLIST state                 time                CDATA #REQUIRED>    <!-- yyyy-mm-dd HH:MM:SS -->
@@ -97,10 +97,19 @@
 
 <!ELEMENT tasks                 ( task+ )>
 
-<!ELEMENT task                  EMPTY>
+<!ELEMENT task                  ( ERROR? )>
 <!ATTLIST task                  job                 CDATA #REQUIRED>    <!-- yyyy-mm-dd HH:MM:SS -->
+<!ATTLIST task                  running             (yes|no) #REQUIRED> 
 <!ATTLIST task                  steps               CDATA #IMPLIED>     <!-- Anzahl der bisher ausgeführten Jobschritte -->
 <!ATTLIST task                  running_since       CDATA #IMPLIED>     <!-- yyyy-mm-dd HH:MM:SS -->
 <!ATTLIST task                  next_start_time     CDATA #REQUIRED>    <!-- yyyy-mm-dd HH:MM:SS -->
+
+<!ELEMENT ERROR                 EMPTY>
+<!ATTLIST ERROR                 class               CDATA #IMPLIED>     <!-- "EOF" -->
+<!ATTLIST ERROR                 code                CDATA #REQUIRED>    <!-- "SOS-1234" -->
+<!ATTLIST ERROR                 source              CDATA #IMPLIED>     <!-- Dateiname -->
+<!ATTLIST ERROR                 line                CDATA #IMPLIED>     <!-- Zeilennummer, beginned mit 1 -->
+<!ATTLIST ERROR                 col                 CDATA #IMPLIED>     <!-- Spaltennummer, beginned mit 1 -->
+<!ATTLIST ERROR                 text                CDATA #REQUIRED>    <!-- Fehlertext mit Fehlercode -->
 
 <!ELEMENT COMMAND_ERROR         ( #PCDATA )>

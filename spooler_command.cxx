@@ -1,4 +1,4 @@
-// $Id: spooler_command.cxx,v 1.2 2001/01/05 20:31:22 jz Exp $
+// $Id: spooler_command.cxx,v 1.3 2001/01/06 11:09:44 jz Exp $
 
 #include "../kram/sos.h"
 #include "../kram/sleep.h"
@@ -23,6 +23,34 @@ void dom_append_text_element( xml::Element_ptr element, const char* element_name
     e->appendChild( text_node );
 }
 */
+
+//-----------------------------------------------------------------------------create_error_element
+
+xml::Element_ptr create_error_element( xml::Document* document, const Xc_copy& x )
+{
+    xml::Element_ptr e = document->createElement( "ERROR" );
+
+    if( !empty( x->name() )          )  e->setAttribute( "class" , as_dom_string( x->name()          ) );
+
+    e->setAttribute( "code", as_dom_string( x->code() ) );
+    
+    if( !empty( x->_pos.filename() ) )  e->setAttribute( "source", as_dom_string( x->_pos.filename() ) );
+    if( x->_pos._line >= 0           )  e->setAttribute( "line"  , as_dom_string( x->_pos._line + 1  ) );
+    if( x->_pos._col  >= 0           )  e->setAttribute( "col"   , as_dom_string( x->_pos._col + 1   ) );
+
+    e->setAttribute( "text", as_dom_string( x->what() ) );
+    e->setAttribute( "time", as_dom_string( Sos_optional_date_time( x.time() - _timezone ).as_string() ) );
+
+    return e;
+}
+
+//-----------------------------------------------------------------------------append_error_element
+
+void append_error_element( xml::Element* element, const Xc_copy& x )
+{
+    element->appendChild( create_error_element( element->ownerDocument, x ) );
+}
+
 //------------------------------------------------------------Command_processor::execute_show_tasks
 
 xml::Element_ptr Command_processor::execute_show_tasks()
@@ -31,16 +59,20 @@ xml::Element_ptr Command_processor::execute_show_tasks()
 
     FOR_EACH( Task_list, _spooler->_task_list, it )
     {
-        Task* task = *it;
+        Task*            task         = *it;
         xml::Element_ptr task_element = _answer->createElement( "task" );
 
         task_element->setAttribute( "job", as_dom_string( task->_job->_name ) );
 
+        task_element->setAttribute( "running", task->_running? "yes" : "no" );
+
         if( task->_running_since )
-            task_element->setAttribute( "task.running_since", as_dom_string( Sos_optional_date_time( task->_running_since ).as_string() ) );
+            task_element->setAttribute( "running_since", as_dom_string( Sos_optional_date_time( task->_running_since ).as_string() ) );
 
         task_element->setAttribute( "next_start_time", as_dom_string( Sos_optional_date_time( task->_next_start_time ).as_string() ) );
         task_element->setAttribute( "steps", as_dom_string( as_string( task->_step_count ) ) );
+
+        if( task->_error )  append_error_element( task_element, task->_error );
 
         tasks->appendChild( task_element );
     }
@@ -133,9 +165,7 @@ string Command_processor::execute( const string& xml_text )
     }
     catch( const Xc& x )
     {
-        xml::Element_ptr e = _answer->createElement( "COMMAND_ERROR" );
-        e->appendChild( _answer->createTextNode( as_dom_string( x.what() ) ) );
-        spooler_answer->appendChild( e );
+        append_error_element( spooler_answer, x );
     }
 
     _answer->save( "c:/tmp/~spooler.xml" );

@@ -1,4 +1,4 @@
-// $Id: spooler.h,v 1.8 2001/01/05 20:31:22 jz Exp $
+// $Id: spooler.h,v 1.9 2001/01/06 11:09:44 jz Exp $
 
 #ifndef __SPOOLER_H
 
@@ -41,8 +41,13 @@ namespace sos {
 
 typedef _bstr_t Dom_string;
 
-inline Dom_string               as_dom_string               ( const string& str )                   { return as_bstr_t( str ); }
-inline Dom_string               as_dom_string               ( const char* str )                     { return as_bstr_t( str ); }
+template<typename T>
+inline Dom_string               as_dom_string               ( const T& t )                          { return as_bstr_t( t ); }
+
+//inline Dom_string               as_dom_string               ( const string& str )                   { return as_bstr_t( str ); }
+//inline Dom_string               as_dom_string               ( const char* str )                     { return as_bstr_t( str ); }
+//inline Dom_string               as_dom_string               ( Big_int i )                           { return as_bstr_t( i ); }
+//inline Dom_string               as_dom_string               ( Ubig_int i )                          { return as_bstr_t( i ); }
 
 
 namespace spooler {
@@ -234,14 +239,14 @@ struct Task : Sos_self_deleting
 {
                                 Task                        ( Spooler*, const Sos_ptr<Job>& );
 
-    void                        start                       ();
+    bool                        start                       ();
     void                        end                         ();
     bool                        step                        ();
 
-    void                        start_error                 ( const string& );
-    void                        end_error                   ( const string& );
-    void                        step_error                  ( const string& );
-    void                        error                       ( const string& );
+    void                        start_error                 ( const Xc& );
+    void                        end_error                   ( const Xc& );
+    void                        step_error                  ( const Xc& );
+    void                        error                       ( const Xc& );
 
     void                        set_new_start_time          ();
 
@@ -254,8 +259,7 @@ struct Task : Sos_self_deleting
     int                        _running_priority;
     int                        _step_count;
 
-    Time                       _error_time;
-    string                     _error_text;
+    Xc_copy                    _error;
 
     Sos_ptr<Object_set>        _object_set;
     Time                       _next_start_time;            // Zeitpunkt des nächsten Startversuchs, nachdem Objektemenge leer war
