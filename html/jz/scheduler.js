@@ -551,9 +551,12 @@ function popup_menu__show_log__onclick( show_log_command, window_name )
                  ", top="         +  Math.floor( window.screen.availHeight * 0.8 );
 
     var log_window = window.open( document.location.href.replace( /\/[^\/]*$/, "/" ) + show_log_command, window_name, features, true );
-    log_window.focus();
 
-    if( _scheduler )  _scheduler._dependend_windows[ window_name ] = log_window;
+    if( log_window )   // null, wenn Popups blockiert sind.
+    {
+        log_window.focus();
+        if( _scheduler )  _scheduler._dependend_windows[ window_name ] = log_window;
+    }
 
     _popup_menu.close();
 }
