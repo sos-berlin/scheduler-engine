@@ -263,17 +263,39 @@ xml::Element_ptr Prefix_log::dom( const xml::Document_ptr& document, const Show_
     if( _mail_on_success            )  log_element.setAttribute( "mail_on_success", "yes" );
     if( _mail_on_process            )  log_element.setAttribute( "mail_on_success", _mail_on_process );
 
-    if( _smtp_server != ""  &&  _smtp_server != "-" )  log_element.setAttribute( "smtp"        , _smtp_server );
-    if( _to          != ""  &&  _to          != "-" )  log_element.setAttribute( "mail_to"     , _to );
-    if( _cc          != ""  &&  _cc          != "-" )  log_element.setAttribute( "mail_cc"     , _cc );
-    if( _bcc         != ""  &&  _bcc         != "-" )  log_element.setAttribute( "mail_bcc"    , _bcc );
-    if( _from        != ""  &&  _from        != "-" )  log_element.setAttribute( "mail_from"   , _from );
-    if( _subject     != ""  &&  _subject     != "-" )  log_element.setAttribute( "mail_subject", _subject );
+
+    string smtp_server = _smtp_server == "-"? "" : _smtp_server;
+    string from        = _from        == "-"? "" : _from;
+    string to          = _to          == "-"? "" : _to;
+    string cc          = _cc          == "-"? "" : _cc;
+    string bcc         = _bcc         == "-"? "" : _bcc;
+    string subject     = _subject     == "-"? "" : _subject;
+
+    if( _mail )
+    {
+        HRESULT hr;
+        Bstr bstr;
+        hr = _mail->get_Smtp   ( &bstr );  if( !FAILED(hr) )  smtp_server = string_from_bstr( bstr );
+        hr = _mail->get_From   ( &bstr );  if( !FAILED(hr) )  from        = string_from_bstr( bstr );
+        hr = _mail->get_To     ( &bstr );  if( !FAILED(hr) )  to          = string_from_bstr( bstr );
+        hr = _mail->get_Cc     ( &bstr );  if( !FAILED(hr) )  cc          = string_from_bstr( bstr );
+        hr = _mail->get_Bcc    ( &bstr );  if( !FAILED(hr) )  bcc         = string_from_bstr( bstr );
+        hr = _mail->get_Subject( &bstr );  if( !FAILED(hr) )  subject     = string_from_bstr( bstr );
+    }
+
+    if( smtp_server != "" )  log_element.setAttribute( "smtp"        , smtp_server );
+    if( from        != "" )  log_element.setAttribute( "mail_from"   , from );
+    if( to          != "" )  log_element.setAttribute( "mail_to"     , to );
+    if( cc          != "" )  log_element.setAttribute( "mail_cc"     , cc );
+    if( bcc         != "" )  log_element.setAttribute( "mail_bcc"    , bcc );
+    if( subject     != "" )  log_element.setAttribute( "mail_subject", subject );
+
 
     if( show & show_log )
     {
         log_element.appendChild( document.createTextNode( as_string() ) );
     }
+
 
     return log_element;
 }

@@ -1039,14 +1039,7 @@
                 </tr>
             </xsl:if>
             
-            <tr>
-                <td><span class="label">log:</span></td>
-                
-                <td colspan="99">
-                    <xsl:apply-templates mode="string_from_log_attributes" select="log"/>
-                </td>
-            </tr>
-
+            <xsl:apply-templates mode="trs_from_log_attributes" select="log"/>
         </table>
 
 
@@ -1236,13 +1229,7 @@
                 </tr>
             </xsl:if>
 
-            <tr>
-                <td><span class="label">log:</span></td>
-                
-                <td colspan="99">
-                    <xsl:apply-templates mode="string_from_log_attributes" select="log"/>
-                </td>
-            </tr>
+            <xsl:apply-templates mode="trs_from_log_attributes" select="log"/>
 
         </table>
     </xsl:template>
@@ -1470,6 +1457,53 @@
     -->
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~log-->
 
+    <xsl:template mode="trs_from_log_attributes" match="log">
+        
+        <tr>
+            <td><span class="label">log:</span></td>
+            
+            <td colspan="99">
+                <xsl:apply-templates mode="string_from_log_attributes" select="."/>
+            </td>
+        </tr>
+        
+        <xsl:if test="@mail_subject">
+            <tr>
+                <td>
+                    <span class="label">mail subject: </span>
+                </td>
+                <td colspan="99">
+                    <xsl:value-of select="@mail_subject"/>
+                </td>
+            </tr>
+        </xsl:if>
+        
+        <xsl:if test="@last_error">
+            <tr>
+                <td>
+                    <span class="label">last error: </span>
+                </td>
+                <td colspan="99">
+                    <xsl:value-of select="@last_error"/>
+                </td>
+            </tr>
+        </xsl:if>
+        
+        <xsl:if test="@last_warning">
+            <tr>
+                <td>
+                    <span class="label">last warning: </span>
+                </td>
+                <td colspan="99">
+                    <xsl:value-of select="@last_warning"/>
+                </td>
+            </tr>
+        </xsl:if>
+        
+    </xsl:template>
+    
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~log-->
+
     <xsl:template mode="string_from_log_attributes" match="log">
     
         <xsl:if test="@level">
@@ -1482,18 +1516,6 @@
             <xsl:text> &#160; </xsl:text>
         </xsl:if>
         
-        <xsl:if test="@last_error">
-            <br/>
-            last error: <xsl:value-of select="@last_error"/>
-            <br/>
-        </xsl:if>
-        
-        <xsl:if test="@last_warning">
-            <br/>
-            last warning <xsl:value-of select="@last_warning"/>
-            <br/>
-        </xsl:if>
-
         <xsl:if test="@mail_on_error='yes'">
             mail on error
             <xsl:text> &#160; </xsl:text>
@@ -1537,12 +1559,6 @@
         <xsl:if test="@smtp">
             smtp: <xsl:value-of select="@smtp"/>
             <xsl:text> &#160; </xsl:text>
-        </xsl:if>
-        
-        <xsl:if test="@mail_subject">
-            <br/>
-            subject: <xsl:value-of select="@mail_subject"/>
-            <br/>
         </xsl:if>
         
     </xsl:template>

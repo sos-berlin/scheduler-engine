@@ -625,7 +625,6 @@ static void __stdcall ServiceMain( DWORD argc, char** argv )
             thread_handle.set_handle( (HANDLE)_beginthreadex( NULL, 0, service_thread, &param, 0, &thread_id ) );
             if( !thread_handle )  throw_mswin_error( "CreateThread" );
 
-            //do ret = WaitForSingleObject( thread_handle, INT_MAX );  while( ret != WAIT_TIMEOUT );
             while(1)
             {
                 LOG( "MsgWaitForMultipleObjects()\n" );
@@ -642,11 +641,6 @@ static void __stdcall ServiceMain( DWORD argc, char** argv )
 
             TerminateThread( thread_handle, 999 );   // Sollte nicht nötig sein. Nützt auch nicht, weil Destruktoren nicht gerufen werden und Komnunikations-Thread vielleicht noch läuft.
         
-            //GetExitCodeThread( thread_handle, &exit_code );
-            //if( exit_code == 1 )
-            //{
-            //    restart_service( argc, argv );
-            //}
             LOG( "ServiceMain ok\n" );
         }
         catch( const exception& x ) { event_log( x.what(), argc, argv ); }
