@@ -1,4 +1,4 @@
-<!-- $Id: details_frame.html,v 1.7 2004/12/02 13:36:08 jz Exp $ -->
+<!-- $Id: details_frame.html,v 1.8 2004/12/02 13:42:26 jz Exp $ -->
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <html>
 
@@ -168,7 +168,6 @@ function show_job_chain_details( job_chain_element )
  
     _job_chain_element = job_chain_element
     
-    alert(_stylesheet.xml_transform( job_chain_element ));
     document.getElementById( "stylesheet_output" ).innerHTML = _stylesheet.xml_transform( job_chain_element );
     show();
 }
