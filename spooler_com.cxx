@@ -1,4 +1,4 @@
-// $Id: spooler_com.cxx,v 1.43 2002/06/03 08:49:11 jz Exp $
+// $Id: spooler_com.cxx,v 1.44 2002/06/29 09:49:37 jz Exp $
 /*
     Hier sind implementiert
 
@@ -33,6 +33,7 @@ DESCRIBE_CLASS( &spooler_typelib, Com_task        , task        , spooler_com::C
 DESCRIBE_CLASS( &spooler_typelib, Com_object_set  , object_set  , spooler_com::CLSID_object_set  , "Spooler.Object_set"  , "1.0" )
 DESCRIBE_CLASS( &spooler_typelib, Com_thread      , thread      , spooler_com::CLSID_thread      , "Spooler.Thread"      , "1.0" )
 DESCRIBE_CLASS( &spooler_typelib, Com_spooler     , spooler     , spooler_com::CLSID_spooler     , "Spooler.Spooler"     , "1.0" )
+DESCRIBE_CLASS( &spooler_typelib, Com_context     , context     , spooler_com::CLSID_Context     , "Spooler.Context"     , "1.0" )
 
 //--------------------------------------------------------------------------------time_from_variant
 
@@ -1349,6 +1350,14 @@ STDMETHODIMP Com_spooler::get_var( BSTR name, VARIANT* value )
     hr = get_variables( &variables );  if( FAILED(hr) )  return hr;
 
     return variables->get_var( name, value );
+}
+
+//-------------------------------------------------------------------------Com_context::Com_context
+
+Com_context::Com_context()
+: 
+    Sos_ole_object( context_class_ptr, this )
+{
 }
 
 //-------------------------------------------------------------------------------------------------

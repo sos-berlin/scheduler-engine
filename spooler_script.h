@@ -1,4 +1,4 @@
-// $Id: spooler_script.h,v 1.9 2002/04/23 07:00:22 jz Exp $
+// $Id: spooler_script.h,v 1.10 2002/06/29 09:49:38 jz Exp $
 
 #ifndef __SPOOLER_SCRIPT_H
 #define __SPOOLER_SCRIPT_H
@@ -58,7 +58,9 @@ struct Script
     void                        clear                       ()                              { _language="", _source.clear(); }
 
     Spooler*                   _spooler;
-    string                     _language;
+    string                     _com_class_name;             // com_class=
+    string                     _filename;                   // filename=
+    string                     _language;                   // language=
     Source_with_parts          _source;
     Reuse                      _reuse;
 };
@@ -67,12 +69,14 @@ struct Script
 
 struct Script_instance
 {
-                                Script_instance             ( Prefix_log* log )            : _loaded(false), _log(log) {}
+                                Script_instance             ( Prefix_log* log )            : _zero_(this+1), _log(log) {}
+                               ~Script_instance             ();
 
-    void                        init                        ( const string& language );
-    void                        load                        ( const Script& );
+    void                        init                        ( Script* );
+    void                        load                        ();
     void                        start                       ();
-    IDispatch*                  dispatch                    () const                        { return _script_site? _script_site->dispatch() : NULL; }
+  //IDispatch*                  dispatch                    () const                        { return _script_site? _script_site->dispatch() : NULL; }
+    IDispatch*                  dispatch                    () const                        { return _idispatch; }
     void                        add_obj                     ( const CComPtr<IDispatch>&, const string& name );
     void                        close                       ();
     CComVariant                 call_if_exists              ( const char* name );
@@ -81,18 +85,49 @@ struct Script_instance
     CComVariant                 property_get                ( const char* name );
     void                        property_put                ( const char* name, const CComVariant& v ) { _script_site->property_put( name, v ); } 
     void                        optional_property_put       ( const char* name, const CComVariant& v );
-    bool                        name_exists                 ( const char* name )            { return _script_site->name_exists(name); }
+    bool                        name_exists                 ( const string& name );
     bool                        loaded                      ()                              { return _loaded; }
-    void                        interrupt                   ();
+  //void                        interrupt                   ();
 
                                 operator bool               () const                        { return _script_site != NULL; }
 
+
+    typedef HRESULT (WINAPI *DllGetClassObject_func)(CLSID*,IID*,void**);
+
+    Fill_zero                  _zero_;
     Prefix_log*                _log;
+    Script*                    _script;
+
+    CComPtr<Com_context>       _com_context;
+
     CComPtr<Script_site>       _script_site;
+    
+    HMODULE                    _module;                     // Für _script->_filename != ""
+    DllGetClassObject_func     _DllGetClassObject;          // Für _script->_filename != ""
+
+    CComPtr<IDispatch>         _idispatch;
     bool                       _loaded;
     map<string,bool>           _names;
 };
 
+//-----------------------------------------------------------------------------------Script_context
+/*
+struct Script_context
+{
+
+    CComPtr<Spooler_com>       _spooler;
+    CComPtr<Spooler_task>      _task;
+};
+
+//------------------------------------------------------------------------------------Script_object
+
+struct Script_object
+{
+
+    CComPtr
+    CComPtr<IDispatch>         _idispatch;
+};
+*/
 //-------------------------------------------------------------------------------------------------
 
 } //namespace spooler

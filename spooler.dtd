@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- $Id: spooler.dtd,v 1.41 2002/06/18 07:35:44 jz Exp $   Joacim Zschimmer,  (C) 2000 SOS GmbH Berlin  -->
+<!-- $Id: spooler.dtd,v 1.42 2002/06/29 09:49:37 jz Exp $   Joacim Zschimmer,  (C) 2000 SOS GmbH Berlin  -->
 
 
 <!ELEMENT spooler               ( config+ | command | answer )>
@@ -49,6 +49,9 @@
 <!ATTLIST script                use_engine          (task|job) #IMPLIED><!-- use_engine="task"  : Jeder Task eine Scripting Engine -->
                                                                         <!-- use_engine="job"   : Allen Tasks dieses Jobs eine Scripting Engine -->
                                                                         <!--[use_engine="global": Globale Scripting Engine des Spoolers verwenden]-->
+<!ATTLIST script                com_class           CDATA #IMPLIED>     <!-- Für eine COM-Klasse -->
+<!ATTLIST script                filename            CDATA #IMPLIED>     <!-- Falls die COM-Klasse in einer bestimmten DLL liegt -->
+
 
 <!ELEMENT include               EMPTY>
 <!ATTLIST include               file                CDATA #REQUIRED>

@@ -1,4 +1,4 @@
-// $Id: spooler_script.cxx,v 1.11 2002/06/14 18:23:38 jz Exp $
+// $Id: spooler_script.cxx,v 1.12 2002/06/29 09:49:37 jz Exp $
 /*
     Hier sind implementiert
 
@@ -38,8 +38,19 @@ void Script::set_xml( const xml::Element_ptr& element, const string& include_pat
 {
     clear();
 
-    _language = as_string( variant_default( element->getAttribute( L"language" ), "VBScript" ) );
-    _source   = text_from_xml_with_include( element, include_path );
+    _language       = as_string( element->getAttribute( L"language" ) );
+    _source         = text_from_xml_with_include( element, include_path );
+    _com_class_name = as_string( element->getAttribute( L"com_class" ) );
+    _filename       = as_string( element->getAttribute( L"filename" ) );
+
+    if( _com_class_name != "" )
+    {
+        if( _language != "" )  throw_xc( "SPOOLER-145" );
+    }
+    else
+    {
+        if( _language == "" )  _language = "VBScript";
+    }
 
     string use_engine = as_string( element->getAttribute( L"use_engine" ) );
     
@@ -49,41 +60,118 @@ void Script::set_xml( const xml::Element_ptr& element, const string& include_pat
     if( use_engine == "job"  )  _reuse = reuse_job;
 }
 
+//----------------------------------------------------------------Script_instance::~Script_instance
+
+Script_instance::~Script_instance()
+{
+    try {
+        close();
+    }
+    catch( const Xc& ) {}
+}
+
 //----------------------------------------------------------------------------Script_instance::init
 
-void Script_instance::init( const string& language )
+void Script_instance::init( Script* script )
 {
-    _script_site = new Script_site;
-    _script_site->_engine_name = language;
-    _script_site->init_engine();
+    _script = script;
+
+    if( _script->_language != "" )
+    {
+        _script_site = new Script_site;
+        _script_site->_engine_name = _script->_language;
+        _script_site->init_engine();
+
+        _idispatch = _script_site->dispatch();
+    }
+    else
+    {
+        HRESULT hr;
+        CLSID   clsid = string_as_clsid( _script->_com_class_name );
+
+        if( _script->_filename != "" )
+        {
+            if( !_module )
+            {
+                _module = LoadLibrary( _script->_filename.c_str() );
+                if( !_module )  throw_mswin_error( "LoadLibrary", _script->_filename.c_str() );   
+            }
+
+
+            _DllGetClassObject = (DllGetClassObject_func)GetProcAddress( _module, "DllGetClassObject" );
+            if( !_DllGetClassObject )  throw_mswin_error( "GetProcAddress DllGetClassObject", _script->_filename.c_str() );
+
+
+            CComPtr<IClassFactory> class_factory;
+
+            _DllGetClassObject( &clsid, (IID*)&IID_IClassFactory, (void**)&class_factory );
+
+            hr = class_factory->CreateInstance( NULL, IID_IDispatch, (void**)&_idispatch );
+            if( FAILED(hr) )  throw_ole( hr, "CreateInstance", _script->_com_class_name.c_str() );
+        }
+        else
+        {
+            hr = _idispatch.CoCreateInstance( clsid );
+            if( FAILED(hr) )  throw_ole( hr, "CoCreateInstance", _script->_com_class_name.c_str() );
+        }
+    }
 
     //HRESULT hr = _script_site->_script->SetScriptState( SCRIPTSTATE_INITIALIZED );
     //if( FAILED( hr ) )  throw_ole( hr, "IActiveScript::SetScriptState", "SCRIPTSTATE_INITIALIZED" );
+
+    _com_context = new Com_context;
 }
 
-//----------------------------------------------------------------------------Script_instance::load
+//-------------------------------------------------------------------------Script_instance::add_obj
 
 void Script_instance::add_obj( const CComPtr<IDispatch>& object, const string& name )
 {
+    if( name == "spooler_log"    )  _com_context->_log     = (CComQIPtr<spooler_com::Ilog>)    object;
+    else
+    if( name == "spooler"        )  _com_context->_spooler = (CComQIPtr<spooler_com::Ispooler>)object;
+    else
+    if( name == "spooler_thread" )  _com_context->_thread  = (CComQIPtr<spooler_com::Ithread>) object;
+    else
+    if( name == "spooler_job"    )  _com_context->_job     = (CComQIPtr<spooler_com::Ijob>)    object;
+    else
+    if( name == "spooler_task"   )  _com_context->_task    = (CComQIPtr<spooler_com::Itask>)   object;
+    else
+        throw_xc( "Script_instance::add_obj", name.c_str() );
+/*
     CComBSTR name_bstr;
     name_bstr.Attach( SysAllocString_string( name ) );
 
     _script_site->add_obj( object, name_bstr );
+*/
 }
 
 //----------------------------------------------------------------------------Script_instance::load
 
-void Script_instance::load( const Script& script )
+void Script_instance::load()
 {
-    if( !_script_site )  init( script._language );
-                   else  if( _script_site->_engine_name != script._language )  throw_xc( "SPOOLER-117" );
-
-    HRESULT hr = _script_site->_script->SetScriptState( SCRIPTSTATE_INITIALIZED );
-    if( FAILED( hr ) )  throw_ole( hr, "IActiveScript::SetScriptState", "SCRIPTSTATE_INITIALIZED" );
-
-    Z_FOR_EACH_CONST( Source_with_parts::Parts, script._source._parts, it )
+    if( _script_site )     // Scripting Engine?
     {
-        _script_site->parse( it->_text, it->_linenr );
+        /*if( !_script_site )  init( script._language );
+                       else*/  if( _script_site->_engine_name != _script->_language )  throw_xc( "SPOOLER-117" );
+
+        if( _com_context->_log     )  _script_site->add_obj( _com_context->_log, L"spooler_log"    );
+        if( _com_context->_spooler )  _script_site->add_obj( _com_context->_log, L"spooler"        );
+        if( _com_context->_thread  )  _script_site->add_obj( _com_context->_log, L"spooler_thread" );
+        if( _com_context->_job     )  _script_site->add_obj( _com_context->_log, L"spooler_job"    );
+        if( _com_context->_task    )  _script_site->add_obj( _com_context->_log, L"spooler_task"   );
+
+        HRESULT hr = _script_site->_script->SetScriptState( SCRIPTSTATE_INITIALIZED );
+        if( FAILED( hr ) )  throw_ole( hr, "IActiveScript::SetScriptState", "SCRIPTSTATE_INITIALIZED" );
+
+        Z_FOR_EACH_CONST( Source_with_parts::Parts, _script->_source._parts, it )
+        {
+            _script_site->parse( it->_text, it->_linenr );
+        }
+    }
+
+    if( name_exists( "spooler_set_context" ) )
+    {
+        com_call( _idispatch, "spooler_set_context", &CComVariant(_com_context) );
     }
 
     _loaded = true;
@@ -93,62 +181,84 @@ void Script_instance::load( const Script& script )
 
 void Script_instance::start()
 {
-    HRESULT hr = _script_site->_script->SetScriptState( SCRIPTSTATE_STARTED );
-    if( FAILED( hr ) )  throw_ole( hr, "IActiveScript::SetScriptState", "SCRIPTSTATE_STARTED" );
+    if( _script_site )
+    {
+        HRESULT hr = _script_site->_script->SetScriptState( SCRIPTSTATE_STARTED );
+        if( FAILED( hr ) )  throw_ole( hr, "IActiveScript::SetScriptState", "SCRIPTSTATE_STARTED" );
+    }
 }
 
 //---------------------------------------------------------------------------Script_instance::close
 
 void Script_instance::close()
 {
-    if( _script_site )
+    if( _com_context )  _com_context->close();
+
+    if( _idispatch )
     {
         try
         {
             call_if_exists( "spooler_exit" );
         }
         catch( const Xc& x ) { _log->error( x.what() ); }
+    }
 
+    _idispatch = NULL;
+
+    if( _script_site )
+    {
         _script_site->close_engine();
         _script_site = NULL;
     }
 
+    if( _module )  FreeLibrary( _module ),  _module = NULL;
+
     _loaded = false;
+}
+
+//---------------------------------------------------------------------Script_instance::name_exists
+
+bool Script_instance::name_exists( const string& name )
+{ 
+    bool exists;
+
+    map<string,bool>::iterator it = _names.find( name );
+    if( it == _names.end() )  exists = _names[name] = com_name_exists( _idispatch, name );
+                        else  exists = it->second;
+
+    return exists;                        
 }
 
 //------------------------------------------------------------------Script_instance::call_if_exists
 
 CComVariant Script_instance::call_if_exists( const char* name )
 {
-    bool exists;
-
-    map<string,bool>::iterator it = _names.find( name );
-    if( it == _names.end() )  exists = _names[name] = name_exists( name );
-                        else  exists = it->second;
-
-    if( exists )  return call( name );
-                  else  return CComVariant();
+    if( name_exists(name) )  return call( name );
+                       else  return CComVariant();
 }
 
 //----------------------------------------------------------------------------Script_instance::call
 
 CComVariant Script_instance::call( const char* name )
 {
-    return _script_site->call( name );
+    //return _script_site->call( name );
+    return com_call( _idispatch, name );
 }
 
 //----------------------------------------------------------------------------Script_instance::call
 
 CComVariant Script_instance::call( const char* name, int param )
 {
-    return _script_site->call( name, param );
+    //return _script_site->call( name, param );
+    return com_call( _idispatch, name, param );
 }
 
 //--------------------------------------------------------------------Script_instance::property_get
 
 CComVariant Script_instance::property_get( const char* name )
 {
-    return _script_site->property_get( name );
+    //return _script_site->property_get( name );
+    return com_property_get( _idispatch, name );
 }
 
 //-----------------------------------------------------------Script_instance::optional_property_put
@@ -166,12 +276,12 @@ void Script_instance::optional_property_put( const char* name, const CComVariant
 }
 
 //-----------------------------------------------------------------------Script_instance::interrupt
-
+/*
 void Script_instance::interrupt()
 {
     if( _script_site )  _script_site->interrupt();
 }
-
+*/
 //-------------------------------------------------------------------------------------------------
 
 } //namespace spooler

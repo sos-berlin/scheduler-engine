@@ -1,4 +1,4 @@
-// $Id: spooler_com.h,v 1.34 2002/05/16 20:01:42 jz Exp $
+// $Id: spooler_com.h,v 1.35 2002/06/29 09:49:37 jz Exp $
 
 #ifndef __SPOOLER_COM_H
 #define __SPOOLER_COM_H
@@ -274,6 +274,37 @@ struct Com_spooler : spooler_com::Ispooler, Sos_ole_object
   protected:
     Thread_semaphore           _lock;
     Spooler*                   _spooler;                    // Es gibt nur einen Com_spooler
+};
+
+//--------------------------------------------------------------------------------------Com_context
+
+struct Com_context : spooler_com::Icontext, Sos_ole_object               
+{
+                                Com_context                 ();
+
+
+    void                        close                       ()                      { THREAD_LOCK(_lock)  _log     = NULL, 
+                                                                                                          _spooler = NULL, 
+                                                                                                          _thread  = NULL, 
+                                                                                                          _job     = NULL, 
+                                                                                                          _task    = NULL; }
+
+    USE_SOS_OLE_OBJECT
+
+    STDMETHODIMP                get_log                     ( spooler_com::Ilog**     o )        { return _log    .CopyTo(o); }
+    STDMETHODIMP                get_spooler                 ( spooler_com::Ispooler** o )        { return _spooler.CopyTo(o); }
+    STDMETHODIMP                get_thread                  ( spooler_com::Ithread**  o )        { return _thread .CopyTo(o); }
+    STDMETHODIMP                get_job                     ( spooler_com::Ijob**     o )        { return _job    .CopyTo(o); }
+    STDMETHODIMP                get_Task                    ( spooler_com::Itask**    o )        { return _task   .CopyTo(o); }
+
+
+    Thread_semaphore           _lock;
+
+    CComPtr<spooler_com::Ilog>      _log;
+    CComPtr<spooler_com::Ispooler>  _spooler;
+    CComPtr<spooler_com::Ithread>   _thread;
+    CComPtr<spooler_com::Ijob>      _job;
+    CComPtr<spooler_com::Itask>     _task;
 };
 
 //-------------------------------------------------------------------------------------------------

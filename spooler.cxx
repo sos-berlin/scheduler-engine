@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.108 2002/06/22 07:25:53 jz Exp $
+// $Id: spooler.cxx,v 1.109 2002/06/29 09:49:37 jz Exp $
 /*
     Hier sind implementiert
 
@@ -649,12 +649,12 @@ void Spooler::start()
 
     if( !_script.empty() )
     {
-        _script_instance.init( _script._language );
+        _script_instance.init( &_script );
 
         _script_instance.add_obj( (IDispatch*)_com_spooler, "spooler"     );
         _script_instance.add_obj( (IDispatch*)_com_log    , "spooler_log" );
 
-        _script_instance.load( _script );
+        _script_instance.load();
         _script_instance.start();
 
         bool ok = check_result( _script_instance.call_if_exists( "spooler_init" ) );

@@ -1,4 +1,4 @@
-// $Id: spooler_thread.cxx,v 1.36 2002/06/18 07:35:46 jz Exp $
+// $Id: spooler_thread.cxx,v 1.37 2002/06/29 09:49:38 jz Exp $
 /*
     Hier sind implementiert
 
@@ -156,13 +156,13 @@ void Thread::start()
 {
     if( !_script.empty() )
     {
-        _script_instance.init( _script._language );
+        _script_instance.init( &_script );
 
         _script_instance.add_obj( (IDispatch*)_spooler->_com_spooler, "spooler"        );
         _script_instance.add_obj( (IDispatch*)_com_thread           , "spooler_thread" );
         _script_instance.add_obj( (IDispatch*)_com_log              , "spooler_log"    );
 
-        _script_instance.load( _script );
+        _script_instance.load();
         _script_instance.start();
 
         bool ok = check_result( _script_instance.call_if_exists( "spooler_init" ) );
@@ -281,8 +281,6 @@ void Thread::wait()
         {
             Job* next_job = NULL;
 
-            Time wait_time = latter_day;
-
             FOR_EACH_JOB( it )
             {
                 Job* job = *it;
@@ -299,25 +297,28 @@ void Thread::wait()
     }
 
     //if( !_wait_handles.empty() )  msg += " oder " + _wait_handles.as_string();
-    if( _spooler->_debug )  _log.debug( msg );
+    if( _next_start_time > 0 )
+    {
+        if( _spooler->_debug )  _log.debug( msg );
 
 
-#   ifdef SYSTEM_WIN
+#       ifdef SYSTEM_WIN
  
-        //_wait_handles.wait_until( _next_start_time );
-        wait_until( _next_start_time );
+            //_wait_handles.wait_until( _next_start_time );
+            wait_until( _next_start_time );
 
-#    else
+#        else
 
-        wait_time = _next_start_time - Time::now();
-        while( !_wake  &&  wait_time > 0 )               
-        {
-            double sleep_time = 1.0;
-            sos_sleep( min( sleep_time, wait_time ) );
-            wait_time -= sleep_time;
-        }
+            wait_time = _next_start_time - Time::now();
+            while( !_wake  &&  wait_time > 0 )               
+            {
+                double sleep_time = 1.0;
+                sos_sleep( min( sleep_time, wait_time ) );
+                wait_time -= sleep_time;
+            }
 
-#   endif
+#       endif
+    }
 
     { THREAD_LOCK( _lock )  _next_start_time = 0; }
     //tzset();

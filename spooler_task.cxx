@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.97 2002/06/18 07:35:45 jz Exp $
+// $Id: spooler_task.cxx,v 1.98 2002/06/29 09:49:38 jz Exp $
 /*
     Hier sind implementiert
 
@@ -471,11 +471,14 @@ Sos_ptr<Task> Job::create_task( const CComPtr<spooler_com::Ivariable_set>& param
     task->_name         = name;
     task->_start_at     = start_at; 
     
-    Task_queue::iterator it = _task_queue.begin();  // _task_queue nach _start_at geordnet halten
-    while( it != _task_queue.end()  &&  (*it)->_start_at <= task->_start_at )  it++;
-    _task_queue.insert( it, task );
+    THREAD_LOCK( _lock )
+    {
+        Task_queue::iterator it = _task_queue.begin();  // _task_queue nach _start_at geordnet halten
+        while( it != _task_queue.end()  &&  (*it)->_start_at <= task->_start_at )  it++;
+        _task_queue.insert( it, task );
 
-    set_next_time( now );
+        set_next_time( now );
+    }
 
     return task;
 }
@@ -485,10 +488,11 @@ Sos_ptr<Task> Job::create_task( const CComPtr<spooler_com::Ivariable_set>& param
 bool Job::dequeue_task( Time now )
 {
     if( _state == s_read_error )  return false;
-    if( _task_queue.empty() )     return false;
 
     THREAD_LOCK( _lock )
     {
+        if( _task_queue.empty() )     return false;
+
         bool                 in_period = is_in_period(now);
         Task_queue::iterator it        = _task_queue.begin();
         
@@ -521,6 +525,7 @@ void Job::remove_from_task_queue( Task* task )
 {
     //_next_start_at = latter_day;
 
+    THREAD_LOCK( _lock )
     FOR_EACH( Task_queue, _task_queue, it )  
     {
         if( +*it == task )  
@@ -584,7 +589,7 @@ bool Job::read_script()
 
 bool Job::load()
 {
-    _script_instance.init( _script_ptr->_language );
+    _script_instance.init( _script_ptr );
 
     _script_instance.add_obj( (IDispatch*)_spooler->_com_spooler, "spooler"        );
     _script_instance.add_obj( (IDispatch*)_thread->_com_thread  , "spooler_thread" );
@@ -594,7 +599,7 @@ bool Job::load()
 
     try
     {
-        _script_instance.load( *_script_ptr );
+        _script_instance.load();
         _script_instance.start();
     }
     catch( const Xc& x        ) { set_error(x);  _close_engine = true;  return false; }
@@ -686,7 +691,7 @@ void Job::finish()
 }
 
 //----------------------------------------------------------------------------Job::interrupt_script
-
+/*
 void Job::interrupt_script()
 {
     if( _script_instance )
@@ -695,7 +700,7 @@ void Job::interrupt_script()
         _script_instance.interrupt();
     }
 }
-
+*/
 //--------------------------------------------------------------------------------------Job::reread
 
 void Job::reread()
@@ -804,31 +809,34 @@ void Job::clear_when_directory_changed()
 
 void Job::set_next_time( Time now )
 {
-    _next_time = latter_day;
-
-    bool in_period = is_in_period(now);
-
-    // Minimum von _start_at für _next_time berücksichtigen
-    Task_queue::iterator it = _task_queue.begin();  
-    while( it != _task_queue.end() )
+    THREAD_LOCK( _lock )
     {
-        if( (*it)->_start_at )  break;   // Startzeit angegeben?
-        if( in_period        )  break;   // Ohne Startzeit und Periode ist aktiv?
-        it++;
+        _next_time = latter_day;
+
+        bool in_period = is_in_period(now);
+
+        // Minimum von _start_at für _next_time berücksichtigen
+        Task_queue::iterator it = _task_queue.begin();  
+        while( it != _task_queue.end() )
+        {
+            if( (*it)->_start_at )  break;   // Startzeit angegeben?
+            if( in_period        )  break;   // Ohne Startzeit und Periode ist aktiv?
+            it++;
+        }
+
+        if( it != _task_queue.end()  &&  _next_time > (*it)->_start_at )  _next_time = (*it)->_start_at;
+
+        if( _spooler->state() != Spooler::s_stopping_let_run )
+        {
+            if( _next_time > _next_start_time   )  _next_time = _next_start_time;
+            if( _next_time > _period.end()      )  _next_time = _period.end();          // Das ist, wenn die Periode weder repeat noch single_start hat, also keinen automatischen Start
+            if( _next_time > _next_single_start )  _next_time = _next_single_start;
+        }
+
+        // Gesammelte eMail senden, wenn collected_max erreicht:
+        Time log_time = _log.collect_end();
+        if( log_time > now  &&  _next_time > log_time )  _next_time = log_time;
     }
-
-    if( it != _task_queue.end()  &&  _next_time > (*it)->_start_at )  _next_time = (*it)->_start_at;
-
-    if( _spooler->state() != Spooler::s_stopping_let_run )
-    {
-        if( _next_time > _next_start_time   )  _next_time = _next_start_time;
-        if( _next_time > _period.end()      )  _next_time = _period.end();          // Das ist, wenn die Periode weder repeat noch single_start hat, also keinen automatischen Start
-        if( _next_time > _next_single_start )  _next_time = _next_single_start;
-    }
-
-    // Gesammelte eMail senden, wenn collected_max erreicht:
-    Time log_time = _log.collect_end();
-    if( log_time > now  &&  _next_time > log_time )  _next_time = log_time;
 }
 
 //-------------------------------------------------------------------------------Job::select_period
