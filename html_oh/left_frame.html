@@ -1,4 +1,4 @@
-<!-- $Id: left_frame.html,v 1.2 2004/12/01 17:02:14 jz Exp $ -->
+<!-- $Id: left_frame.html,v 1.3 2004/12/02 10:17:36 jz Exp $ -->
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <html>
 
@@ -188,7 +188,8 @@ function update()
     reset_error();
     update_jobs_frame();
     
-    if( window.parent.details_frame.document.readyState == "complete" )
+    //if( window.parent.details_frame.document.readyState == "complete" )
+    if( window.parent._details_frame_loaded )
     {
         window.parent.details_frame.update();
     }

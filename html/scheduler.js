@@ -1,4 +1,4 @@
-// $Id: scheduler.js,v 1.20 2004/12/01 17:02:13 jz Exp $
+// $Id: scheduler.js,v 1.21 2004/12/02 10:17:36 jz Exp $
 
 //----------------------------------------------------------------------------------------------var
 
@@ -405,6 +405,7 @@ function xslt_format_datetime_diff( datetime_earlier, datetime_later, show_plus 
 }
 
 //-----------------------------------------------------------------------date_from_datetime
+// datetime == yyyy-mm-dd-hh-mm-ss[.mmm]
 
 function date_from_datetime( datetime ) 
 {
