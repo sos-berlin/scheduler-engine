@@ -325,7 +325,7 @@ const char file_jz_index_html[] =
     "";
 
 const char file_jz_left_frame_html[] = 
-    "<!-- $Id: left_frame.html 3379 2005-02-26 15:30:01Z jz $ -->\n"
+    "<!-- $Id: left_frame.html 3383 2005-03-05 23:27:38Z jz $ -->\n"
     "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\" \"http://www.w3.org/TR/html4/strict.dtd\">\n"
     "<html>\n"
     "\n"
@@ -912,7 +912,7 @@ const char file_jz_popup_menu_js[] =
     "";
 
 const char file_jz_scheduler_js[] = 
-    "// $Id: scheduler.js 3380 2005-02-27 12:05:48Z jz $\n"
+    "// $Id: scheduler.js 3383 2005-03-05 23:27:38Z jz $\n"
     "\n"
     "//----------------------------------------------------------------------------------------------var\n"
     "\n"
@@ -1906,7 +1906,7 @@ const char file_jz_translation_de_js[] =
 
 const char file_jz_scheduler_xslt[] = 
     "<?xml version='1.0' encoding=\"utf-8\"?>\n"
-    "<!-- $Id: scheduler.xslt 3380 2005-02-27 12:05:48Z jz $ -->\n"
+    "<!-- $Id: scheduler.xslt 3383 2005-03-05 23:27:38Z jz $ -->\n"
     "<xsl:stylesheet xmlns:xsl   = \"http://www.w3.org/1999/XSL/Transform\"\n"
     "xmlns:msxsl = \"urn:schemas-microsoft-com:xslt\"\n"
     "version     = \"1.0\">\n"
