@@ -1,4 +1,4 @@
-// $Id: spooler_history.cxx,v 1.70 2003/12/10 11:29:06 jz Exp $
+// $Id: spooler_history.cxx,v 1.71 2003/12/10 11:30:59 jz Exp $
 
 #include "spooler.h"
 #include "../zschimmer/z_com.h"
@@ -169,7 +169,7 @@ void Spooler_db::open( const string& db_name )
 
 void Spooler_db::open2( const string& db_name )
 {
-Z_DEBUG_ONLY( static int c = 1; if( c-- <= 0 )  throw_xc( "OPENERROR" ); )
+//Z_DEBUG_ONLY( static int c = 1; if( c-- <= 0 )  throw_xc( "OPENERROR" ); )
 
     Z_MUTEX( _lock )
     {
@@ -504,7 +504,7 @@ int Spooler_db::get_id_( const string& variable_name, Transaction* outer_transac
             //id = _job_id_select.get_record().as_int(0);
             //_job_id_select.close( close_cursor );
 
-Z_DEBUG_ONLY( static int c = 3;  if( --c <= 0 )  throw_xc( "FEHLER" ); )
+//Z_DEBUG_ONLY( static int c = 3;  if( --c <= 0 )  throw_xc( "FEHLER" ); )
             execute( "UPDATE " + uquoted(_spooler->_variables_tablename) + " set \"WERT\" = \"WERT\"+1 where \"NAME\"=" + sql::quoted( variable_name ) );
 
             Any_file sel;

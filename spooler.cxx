@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.305 2003/12/10 11:29:06 jz Exp $
+// $Id: spooler.cxx,v 1.306 2003/12/10 11:30:08 jz Exp $
 /*
     Hier sind implementiert
 
@@ -1244,7 +1244,7 @@ void Spooler::load_arg()
 
     // need_db=yes|no|strict
   //_need_db                    =            read_profile_bool      ( _factory_ini, "spooler", "need_db"            , true                );
-    string need_db_str          =            read_profile_string    ( _factory_ini, "spooler", "need_db"            , "yes"                );
+    string need_db_str          =            read_profile_string    ( _factory_ini, "spooler", "need_db"            , "no"                );
     if( stricmp( need_db_str.c_str(), "strict" ) == 0 )
     {
         _need_db = true; 
@@ -1474,7 +1474,7 @@ void Spooler::start()
 
     THREAD_LOCK( _lock )
     {
-        //if( _need_db  && _db_name.empty() )  throw_xc( "SCHEDULER-205" );
+        if( _need_db  && _db_name.empty() )  throw_xc( "SCHEDULER-205" );
 
         _db = SOS_NEW( Spooler_db( this ) );
         _db->open( _db_name );
