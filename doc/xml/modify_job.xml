@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"-->
+<?xml-stylesheet href="../scheduler.xslt" type="text/xsl"?>
+
+<!--$Id: modify_job.xml,v 1.2 2004/08/24 16:22:38 jz Exp $-->
+
+<xml_element name     = "modify_job" 
+             title    = "Kommando an einen Job"
+             base_dir = ".."
+             author   = "$Author: jz $"
+             date     = "$Date: 2004/08/24 16:22:38 $">
+
+
+    <description>
+        <p>
+        </p>
+    </description>
+
+    <xml_attributes>
+        <xml_attribute name="job" type="jobname">
+            <description>
+                <p>
+                    Der Name des Jobs, für den das Kommando gilt.
+                </p>
+            </description>
+        </xml_attribute>
+        
+        <xml_attribute name="cmd" type="cmd">
+            <description>
+                <p>
+                    Folgende Subkommandos sind möglich:
+                </p>
+                
+                <dl>
+                    <dt><code>cmd="stop"</code></dt>
+                    <dd>
+                    </dd>
+                    
+                    <dt><code>cmd="unstop"</code></dt>
+                    <dd>
+                    </dd>
+                    
+                    <dt><code>cmd="start"</code></dt>
+                    <dd>
+                    </dd>
+                    
+                    <dt><code>cmd="wake"</code></dt>
+                    <dd>
+                    </dd>
+                    
+                    <dt><code>cmd="end"</code></dt>
+                    <dd>
+                    </dd>
+                    
+                    <dt><code>cmd="suspend"</code></dt>
+                    <dd>
+                    </dd>
+                    
+                    <dt><code>cmd="continue"</code></dt>
+                    <dd>
+                    </dd>
+                    
+                    <dt><code>all</code></dt>
+                    <dd>
+                    </dd>
+                </dl>
+            </description>
+        </xml_attribute>
+        
+        
+    </xml_attributes>
+
+    
+    <example>
+        <pre>
+&lt;modify_job job="mein_job" cmd="wake"/>
+        </pre>
+    </example>
+</xml_element>    

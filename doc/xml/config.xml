@@ -1,20 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="../scheduler.xslt" type="text/xsl"?>
 
-<!--$Id: config.xml,v 1.5 2004/08/24 07:43:43 jz Exp $-->
+<!--$Id: config.xml,v 1.6 2004/08/24 16:22:38 jz Exp $-->
 
 <xml_element name     = "config" 
              title    = "Konfiguration"
              base_dir = ".."
              author   = "$Author: jz $"
-             date     = "$Date: 2004/08/24 07:43:43 $">
+             date     = "$Date: 2004/08/24 16:22:38 $">
 
     <xml_parent_elements>
         <xml_parent_element name="spooler"/>
     </xml_parent_elements>
 
     <xml_attributes>
-        <xml_attribute name="spooler_id" value="spooler_id">
+        <xml_attribute name="spooler_id" type="spooler_id">
             <!-- Diese Beschreibung wird auch von anderen Elementen verwendet. Also allgemein halten! -->
             <description>
                 Das Element ist nur wirksam, wenn dieses Attribut gleich dem
@@ -23,7 +23,7 @@
             </description>
         </xml_attribute>
         
-        <xml_attribute name="tcp_port" value="zahl" initial="4444" title="Für Kommandos per TCP und HTTP">
+        <xml_attribute name="tcp_port" type="zahl" initial="4444" title="Für Kommandos per TCP und HTTP">
             <description>
                 <p>
                     Der Scheduler kann auf einem TCP-Port während des Betriebs Kommandos entgegennehmen. Hier kann ein 
@@ -44,7 +44,7 @@
             </example>
         </xml_attribute>
         
-        <xml_attribute name="udp_port" value="zahl" initial="4444" title="Für Kommandos per UDP">
+        <xml_attribute name="udp_port" type="zahl" initial="4444" title="Für Kommandos per UDP">
             <description>
                 <p>
                     Auch über UDP kann der Scheduler Kommandos entgegennehmen. 
@@ -60,13 +60,13 @@
             </example>
         </xml_attribute>
         
-        <xml_attribute name="param" value="text" command_line_option="param" title="Zur freien Verwendung">
+        <xml_attribute name="param" type="text" command_line_option="param" title="Zur freien Verwendung">
             <description>
                 Setzt spooler.param (Objekt spooler, Eigenschaft param). Zur freien Verwendung in den Skripten.
             </description>
         </xml_attribute>
 
-        <xml_attribute name="log_dir" value="verzeichnis" option="log-dir" title="Verzeichnis der Protokolle">
+        <xml_attribute name="log_dir" type="verzeichnis" option="log-dir" title="Verzeichnis der Protokolle">
             <description>
                 <p>
                     Gibt das Verzeichnis an, an das der Scheduler die Protokoll schreibt.
@@ -77,13 +77,13 @@
             </description>
         </xml_attribute>
 
-        <xml_attribute name="include_path" value="verzeichnis" option="include-path">
+        <xml_attribute name="include_path" type="verzeichnis" option="include-path">
             <description>
                 Gibt das Basisverzeichnis für <scheduler_element name="include"/> an.
             </description>
         </xml_attribute>
 
-        <xml_attribute name="priority_max" value="zahl" initial="1000">
+        <xml_attribute name="priority_max" type="zahl" initial="1000">
             <description>
                 <p>
                     Höchste Priorität, die eine Task haben kann.
@@ -95,7 +95,7 @@
             </example>
         </xml_attribute>
         
-        <xml_attribute name="java_class_path" value="class_path" subst_env="yes">
+        <xml_attribute name="java_class_path" type="class_path" subst_env="yes">
             <description>
                 <p>
                     Wenn Jobs in Java implementiert sind, kann hier der <code>CLASS_PATH</code> eingestellt werden.
@@ -111,7 +111,7 @@
             </example>
         </xml_attribute>
 
-        <xml_attribute name="java_options" value="options" subst_env="yes">
+        <xml_attribute name="java_options" type="options" subst_env="yes">
             <description>
                 Die Optionen werden der Java Virtual Machine übergeben.
             </description>

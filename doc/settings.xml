@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="scheduler.xslt" type="text/xsl"?>
 
-<!--$Id: settings.xml,v 1.2 2004/08/24 13:28:14 jz Exp $-->
+<!--$Id: settings.xml,v 1.3 2004/08/24 16:22:38 jz Exp $-->
 
 <!-- Einige Einstellungen können an mehreren Stellen vorgenommen werden:
      - Konfigurationsdatei
@@ -15,7 +15,7 @@
 <settings
     base_dir = "."
     author   = "$Author: jz $"
-    date     = "$Date: 2004/08/24 13:28:14 $">
+    date     = "$Date: 2004/08/24 16:22:38 $">
 
     <setting name           = "log_dir" 
              xml_element    = "config"
@@ -28,7 +28,7 @@
                 In dieses Verzeichnis schreibt der Scheduler seine Protokolle.
             </p>
             <p>
-                <scheduler_setting name="log_dir" value="*stderr"/> lässt den Scheduler 
+                <scheduler_setting name="log_dir" type="*stderr"/> lässt den Scheduler 
                 die Protokollausgabe nach stderr (auf den Schirm) schreiben.
             </p>
         </description>

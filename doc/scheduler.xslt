@@ -39,7 +39,7 @@
                                         </xsl:element>
                                     </td>
                                     <td valign="baseline">
-                                        <code>= "</code><span class="type"><xsl:value-of select="@value"/></span><code>"</code>
+                                        <code>= "</code><span class="type"><xsl:value-of select="@type"/></span><code>"</code>
                                     </td>
                                     <td valign="baseline">
                                         <span class="title">
@@ -275,7 +275,7 @@
         
         <p class="list">
             <code><b><xsl:value-of select="@name"/></b>="</code>
-            <span class="type"><xsl:value-of select="@value"/></span>
+            <span class="type"><xsl:value-of select="@type"/></span>
             <code>"</code>
             
             <xsl:if test="@initial">
@@ -435,7 +435,7 @@
         <xsl:choose>
             <xsl:when test="$name">
                 <xsl:element name="a">
-                    <xsl:attribute name="href"><xsl:value-of select="$name"/>.xml</xsl:attribute>
+                    <xsl:attribute name="href"><xsl:value-of select="/*/@base_dir"/>/xml/<xsl:value-of select="$name"/>.xml</xsl:attribute>
                     <code>&lt;<xsl:value-of select="$name"/>></code>
                 </xsl:element>
             </xsl:when>
@@ -537,9 +537,9 @@
         
         <p class="command_option">
             <b><code>-<xsl:value-of select="@name"/></code></b>
-            <xsl:if test="@value">
+            <xsl:if test="@type">
                 <b><code>=</code></b>
-                <span class="type"><xsl:value-of select="@value"/></span>                    
+                <span class="type"><xsl:value-of select="@type"/></span>                    
             </xsl:if>
         </p>
     

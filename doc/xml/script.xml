@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="../scheduler.xslt" type="text/xsl"?>
 
-<!--$Id: script.xml,v 1.5 2004/08/24 07:43:44 jz Exp $-->
+<!--$Id: script.xml,v 1.6 2004/08/24 16:22:38 jz Exp $-->
 
 <xml_element name     = "script" 
              title    = "Programm-Code"
              base_dir = ".."
              author   = "$Author: jz $"
-             date     = "$Date: 2004/08/24 07:43:44 $">
+             date     = "$Date: 2004/08/24 16:22:38 $">
 
     <xml_parent_elements>
         <xml_parent_element name="config"/>
@@ -16,7 +16,7 @@
     
 
     <xml_attributes>
-        <xml_attribute name="language" value="language">
+        <xml_attribute name="language" type="language">
             <description>
                 <p>
                     Sprache des Programm-Codes.
@@ -46,7 +46,7 @@
             </description>
         </xml_attribute>
         
-        <xml_attribute name="com_class" value="com_class_name">
+        <xml_attribute name="com_class" type="com_class_name">
             <description>
                 <p>
                     Name einer COM-Klasse (nur Windows).
@@ -55,7 +55,7 @@
             </description>
         </xml_attribute>
 
-        <xml_attribute name="filename" value="filename">
+        <xml_attribute name="filename" type="filename">
             <description>
                 <p>
                     Zusammen mit dem Attribut <code>com_class</code> können Sie hier den Namen der DLL angeben,
@@ -64,7 +64,7 @@
             </description>
         </xml_attribute>
         
-        <xml_attribute name="java_class" value="java_class_name">
+        <xml_attribute name="java_class" type="java_class_name">
             <description>
                 <p>
                     Wenn der Job als Java-Klasse realisiert ist, dann geben Sie mit diesem Attribut deren Namen an.
@@ -73,7 +73,7 @@
         </xml_attribute>
 
 <!--        
-        <xml_attribute name="recompile" value="yes_no" initial="yes">
+        <xml_attribute name="recompile" type="yes_no" initial="yes">
             <description>
                 <p>
                     Wenn die Java-Klasse als Quell-Code im Element <code>&lt;script</code> enthalten ist, kann mit recompile="
@@ -82,14 +82,14 @@
         </xml_attribute>
 -->
 <!--        
-        <xml_attribute name="process_class" value="prozessklasse">
+        <xml_attribute name="process_class" type="prozessklasse">
             <description>
                 Gibt den Namen der Prozessklasse an, in der der Programm-Code laufen soll. Siehe <scheduler_element name="process_classes"/>.
             </description>
         </xml_attribute>
 -->
 <!--
-        <xml_attribute name="separate_process" value="yes_no">
+        <xml_attribute name="separate_process" type="yes_no">
             <description>
                 <p>
                 </p>
@@ -97,7 +97,7 @@
         </xml_attribute>
 -->
 
-        <xml_attribute name="use_engine" value="scope" initial="task">
+        <xml_attribute name="use_engine" type="scope" initial="task">
             <description>
                 <p>
                     Nur <code>use_engine="task"</code> ist möglich.

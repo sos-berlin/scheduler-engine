@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"-->
+<?xml-stylesheet href="../scheduler.xslt" type="text/xsl"?>
+
+<!--$Id: modify_spooler.xml,v 1.2 2004/08/24 16:22:38 jz Exp $-->
+
+<xml_element name     = "modify_spooler" 
+             title    = "Kommando an den ganzen Scheduler"
+             base_dir = ".."
+             author   = "$Author: jz $"
+             date     = "$Date: 2004/08/24 16:22:38 $">
+
+
+
+    <description>
+        <p>
+        </p>
+    </description>
+
+    <xml_attributes>
+        <xml_attribute name="cmd" value="cmd">
+            <description>
+                <p>
+                    Folgende Subkommandos sind möglich:
+                </p>
+                
+                <dl>
+                    <dt><code>cmd="pause"</code></dt>
+                    <dd>
+                        Hält den Scheduler vorübergehend an.
+                        Tasks in eigenen Prozessen laufen noch solange weiter, wie sie nicht mit dem Scheduler kommunizieren.
+                    </dd>
+                    
+                    <dt><code>cmd="continue"</code></dt>
+                    <dd>
+                        Hebt <code>cmd="pause"</code> auf.
+                    </dd>
+                    
+                    <dt><code>cmd="stop"</code></dt>
+                    <dd>
+                        ?
+                    </dd>
+                    
+                    <dt><code>cmd="reload"</code></dt>
+                    <dd>
+                        Lädt die Skripte der Jobs neu.
+                    </dd>
+                    
+                    <dt><code>cmd="terminate"</code></dt>
+                    <dd>
+                        Beendet den Scheduler ordentlich (näheres <a href="../termination.xml">hier</a>).
+                    </dd>
+                    
+                    <dt><code>cmd="terminate_and_restart"</code></dt>
+                    <dd>
+                        Beendet den Scheduler ordentlich und versucht ihn dann neu zu starten (näheres <a href="../termination.xml">hier</a>).
+                    </dd>
+                    
+                    <dt><code>cmd="let_run_terminate_and_restart"</code></dt>
+                    <dd>
+                        Beendet den Scheduler ordentlich und versucht ihn dann neu zu starten
+                        (näheres <a href="../termination.xml">hier</a>).
+                    </dd>
+                    
+                    <dt><code>cmd="abort_immediately"</code></dt>
+                    <dd>
+                        Bricht den Scheduler sofort ab
+                        (näheres <a href="../termination.xml">hier</a>).
+                    </dd>
+                    
+                    <dt><code>cmd="abort_immediately_and_restart"</code></dt>
+                    <dd>
+                        Bricht den Scheduler sofort ab und versucht ihn dann neu zu starten
+                        (näheres <a href="../termination.xml">hier</a>).
+                    </dd>
+                    
+                </dl>
+            </description>
+        </xml_attribute>
+        
+        
+    </xml_attributes>
+
+    
+    <example>
+        <pre>
+&lt;modify_spooler cmd="abort_immediately_and_restart"/>
+        </pre>
+    </example>
+</xml_element>    

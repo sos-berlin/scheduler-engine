@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"-->
+<?xml-stylesheet href="../scheduler.xslt" type="text/xsl"?>
+
+<!--$Id: add_jobs.xml,v 1.2 2004/08/24 16:22:38 jz Exp $-->
+
+<xml_element name     = "add_jobs" 
+             title    = ""
+             base_dir = ".."
+             author   = "$Author: jz $"
+             date     = "$Date: 2004/08/24 16:22:38 $">
+
+
+    <description>
+        <p>
+            Die Jobs werden mit <code>temporary="yes"</code> hinzugefügt und gestartet.
+            Jeder Job wird gelöscht, sobald er endet.
+        </p>
+        <p>
+            Die Jobnamen müssen eindeutig sein.
+        </p>
+    </description>
+
+    <xml_child_elements>
+        <xml_child_element name="job" multiple="yes"/>
+    </xml_child_elements>
+    
+    
+</xml_element>    

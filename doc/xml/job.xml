@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="../scheduler.xslt" type="text/xsl"?>
 
-<!--$Id: job.xml,v 1.5 2004/08/24 07:43:44 jz Exp $-->
+<!--$Id: job.xml,v 1.6 2004/08/24 16:22:38 jz Exp $-->
 
 <xml_element name     = "job" 
              title    = "Job"
              base_dir = ".."
              author   = "$Author: jz $"
-             date     = "$Date: 2004/08/24 07:43:44 $">
+             date     = "$Date: 2004/08/24 16:22:38 $">
 
     <xml_parent_elements>
         <xml_parent_element name="jobs">
@@ -28,7 +28,7 @@
         </xml_attribute>
 -->
         
-        <xml_attribute name="name" value="jobname">
+        <xml_attribute name="name" type="jobname">
             <description>
                 <p>
                     Jeder Job hat einen eigenen Namen.
@@ -40,13 +40,13 @@
             </description>
         </xml_attribute>
         
-        <xml_attribute name="title" value="zahl">
+        <xml_attribute name="title" type="zahl">
             <description>
                 Eine einzeilige Beschreibung des Jobs.
             </description>
         </xml_attribute>
 
-        <xml_attribute name="order" value="yes_no">
+        <xml_attribute name="order" type="yes_no">
             <description>
                 <p>
                     Bei <code>order="yes"</code> ist der Job auftragsgesteuert. Der Scheduler startet diesen Job nur, wenn ein Auftrag vorliegt.
@@ -54,19 +54,19 @@
             </description>
         </xml_attribute>
         
-        <xml_attribute name="process_class" value="prozessklasse">
+        <xml_attribute name="process_class" type="prozessklasse">
             <description>
                 Gibt den Namen der Prozessklasse an, in der Tasks dieses Jobs laufen sollen. Siehe <scheduler_element name="process_classes"/>.
             </description>
         </xml_attribute>
         
-        <xml_attribute name="tasks" value="zahl" initial="1">
+        <xml_attribute name="tasks" type="zahl" initial="1">
             <description>
                 Von einem Job können mehrere Tasks gleichzeitig laufen. Dieses Attribut begrenzt deren Anzahl.
             </description>
         </xml_attribute>
         
-        <xml_attribute name="timeout" value="dauer">
+        <xml_attribute name="timeout" type="dauer">
             <description>
                 <p>
                     Befristet eine Task-Opertion (spooler_open, spooler_process etc.). 
@@ -78,7 +78,7 @@
             </description>
         </xml_attribute>
         
-        <xml_attribute name="idle_timeout" value="dauer">
+        <xml_attribute name="idle_timeout" type="dauer">
             <description>
                 <p>
                     Begrenzt den Leerlauf eines auftragsgesteuerten Jobs (<code>order="yes"</code>).
@@ -92,7 +92,7 @@
         </xml_attribute>
         
         
-        <xml_attribute name="priority" value="zahl">
+        <xml_attribute name="priority" type="zahl">
             <description>
                 <p>
                     Gibt die Priorität des Jobs an. Eine Zahl zwischen 0 und der Einstellung von <code>&lt;config max_priority="..."></code>.
@@ -109,7 +109,7 @@
         </xml_attribute>
         
 
-        <xml_attribute name="temporary" value="yes_no">
+        <xml_attribute name="temporary" type="yes_no">
             <description>
                 <p>
                     Bei <code>temporary="yes"</code> ist der Job temporär.

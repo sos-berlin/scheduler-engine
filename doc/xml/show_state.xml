@@ -1,33 +1,68 @@
-<html>
+<?xml version="1.0" encoding="utf-8"?>
+<!--DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"-->
+<?xml-stylesheet href="../scheduler.xslt" type="text/xsl"?>
 
-<head>
-  <meta http-equiv="Content-Language" content="de">
-  <meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
-  <title>Scheduler &lt;show_state></title>
-  <meta name="GENERATOR" content="Microsoft FrontPage 6.0">
-  <meta name="ProgId" content="FrontPage.Editor.Document">
-  <style type="text/css">
-    @import "../scheduler.css";
-  </style>
-</head>
+<!--$Id: show_state.xml,v 1.2 2004/08/24 16:22:38 jz Exp $-->
 
-<body>
-
-<h2>&lt;show_state&gt;</h2>
-<code>&lt;show_state what=&quot;<i>what</i>&quot;&gt;</code>
-<p>Liefert</p>
-<code>Neue Seite 1</code></a><p>
-<code><br>
-&lt;spooler&gt;<br>
-&nbsp;&nbsp; &lt;answer&gt;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <a href="spooler_answer_state.html">&lt;state&gt;</a><br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ...<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;/state&gt;<br>
-&nbsp;&nbsp; &lt;/answer&gt;<br>
-&lt;/spooler&gt;<br>
-</code>
+<xml_element name     = "show_state" 
+             title    = "Status zeigen"
+             base_dir = ".."
+             author   = "$Author: jz $"
+             date     = "$Date: 2004/08/24 16:22:38 $">
 
 
-</body>
+    <description>
+        <p>
+        </p>
+    </description>
 
-</html>
+    <xml_attributes>
+        <xml_attribute name="what" type="what">
+            <!-- Text wird von anderen XML-Dokumenten mitbenutzt. Also allgemein halten! -->
+            <description>
+                <p>
+                    Eine durch Komma getrennt Liste folgender Schlüsselwörter:
+                </p>
+
+                <dl>
+                    <dt><code>task_queue</code></dt>
+                    <dd>
+                    </dd>
+                    
+                    <dt><code>job_chain_orders</code></dt>
+                    <dd>
+                    </dd>
+                    
+                    <dt><code>job_orders</code></dt>
+                    <dd>
+                    </dd>
+                    
+                    <dt><code>description</code></dt>
+                    <dd>
+                    </dd>
+                    
+                    <dt><code>log</code></dt>
+                    <dd>
+                    </dd>
+                    
+                    <dt><code>standard</code></dt>
+                    <dd>
+                    </dd>
+                    
+                    <dt><code>all</code></dt>
+                    <dd>
+                    </dd>
+                </dl>
+            </description>
+        </xml_attribute>
+        
+    </xml_attributes>
+
+    
+    <example>
+        <pre>
+&lt;show_state/>
+&lt;show_state what="job_chain_orders,job_orders"/>
+        </pre>
+    </example>
+</xml_element>    

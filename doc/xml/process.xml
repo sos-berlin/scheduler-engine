@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <?xml-stylesheet href="../scheduler.xslt" type="text/xsl"?>
-<!--$Id: process.xml,v 1.3 2004/08/24 07:43:44 jz Exp $-->
+<!--$Id: process.xml,v 1.4 2004/08/24 16:22:38 jz Exp $-->
 
 <xml_element  name     = "process" 
               title    = "Externes Programm (alternativ zu &lt;script&gt;)" 
               base_dir = ".."
               author   = "$Author: jz $" 
-              date     = "$Date: 2004/08/24 07:43:44 $">
+              date     = "$Date: 2004/08/24 16:22:38 $">
               
     <xml_parent_elements>
         <xml_parent_element name="job">
@@ -14,7 +14,7 @@
     </xml_parent_elements>
     
     <xml_attributes>
-        <xml_attribute name="file" value="filename">
+        <xml_attribute name="file" type="filename">
             <description>
                 <p>
                     Name der Datei, die das Programm oder das Skript enthält,
@@ -24,7 +24,7 @@
             </description>
         </xml_attribute>
         
-        <xml_attribute name="param" value="text">
+        <xml_attribute name="param" type="text">
             <description>
                 <p>
                     Gibt den Parameterstring an, der dem Prozess übergeben wird.

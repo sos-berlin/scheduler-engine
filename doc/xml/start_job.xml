@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"-->
+<?xml-stylesheet href="../scheduler.xslt" type="text/xsl"?>
+
+<!--$Id: start_job.xml,v 1.2 2004/08/24 16:22:38 jz Exp $-->
+
+<xml_element name     = "start_job" 
+             title    = ""
+             base_dir = ".."
+             author   = "$Author: jz $"
+             date     = "$Date: 2004/08/24 16:22:38 $">
+
+
+    <description>
+        <p>
+        </p>
+    </description>
+
+    <xml_attributes>
+        <xml_attribute name="job" type="job_name">
+            <description>
+                <p>
+                    Der Jobname.
+                </p>
+            </description>
+        </xml_attribute>
+        
+        <xml_attribute name="name" type="name">
+            <description>
+                <p>
+                    Hier kann er Task ein Name gegeben werden.
+                </p>
+            </description>
+        </xml_attribute>
+
+        <xml_attribute name="after" type="zahl">
+            <description>
+                <p>
+                    Eine Anzahl Sekunden, nach deren Ablauf erst die Task gestartet werden soll.
+                </p>
+            </description>
+        </xml_attribute>
+
+        <xml_attribute name="at" type="yyyy-mm-dd hh:mm:ss">
+            <description>
+                <p>
+                    Zeitpunkt, zu dem die Task gestartet werden soll.
+                    <scheduler_element name="run_time"/> ist außer Kraft.
+                </p>
+                <p>
+                    Statt eines Zeitpunkts kann auch <code>"now"</code> angeben werden.
+                </p>
+            </description>
+        </xml_attribute>
+
+    </xml_attributes>
+
+
+    <xml_child_elements>
+        <xml_child_element name="params"/>
+    </xml_child_elements>
+    
+    <example>
+        <pre>
+&lt;start_job job="mein_job" at="now">
+    &lt;params>
+        &lt;param name="anzahl" value="100"/>
+    &lt;/params>
+&lt;/start_job>        
+        </pre>
+    </example>
+</xml_element>    

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"-->
+<?xml-stylesheet href="../scheduler.xslt" type="text/xsl"?>
+
+<!--$Id: show_job_chains.xml,v 1.2 2004/08/24 16:22:38 jz Exp $-->
+
+<xml_element name     = "show_job_chains" 
+             title    = ""
+             base_dir = ".."
+             author   = "$Author: jz $"
+             date     = "$Date: 2004/08/24 16:22:38 $">
+
+
+    <description>
+        <p>
+        </p>
+    </description>
+
+    <xml_attributes>
+        <xml_attribute name="what" same_as_element="show_state"/>
+    </xml_attributes>
+
+    
+    <example>
+        <pre>
+&lt;show_job_chains/>
+        </pre>
+    </example>
+</xml_element>    
