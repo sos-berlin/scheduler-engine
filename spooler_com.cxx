@@ -1,4 +1,4 @@
-// $Id: spooler_com.cxx,v 1.157 2004/09/25 08:38:48 jz Exp $
+// $Id: spooler_com.cxx,v 1.158 2004/09/30 10:21:30 jz Exp $
 /*
     Hier sind implementiert
 
@@ -1318,8 +1318,9 @@ STDMETHODIMP Com_log_proxy::Invoke( DISPID dispid, const IID& iid, LCID lcid, un
         else 
         {
             if( dispparams->cNamedArgs != 0 )  return DISP_E_BADPARAMCOUNT;
-            result->vt = VT_I4;
-            V_I4(result) = _level;
+
+            if( result )  result->vt = VT_I4, V_I4(result) = _level;
+
             return S_OK;
         }
     }
