@@ -1,4 +1,4 @@
-// $Id: spooler_task.h,v 1.23 2001/08/20 08:32:58 jz Exp $
+// $Id: spooler_task.h,v 1.24 2002/03/08 15:27:22 jz Exp $
 
 #ifndef __SPOOLER_TASK_H
 #define __SPOOLER_TASK_H
@@ -141,9 +141,13 @@ struct Job : Sos_self_deleting
                                 In_call                     ( Job* job  , const string& name );
                                ~In_call                     ();
 
+        void                    set_result                  ( bool result )                     { _result = result; _result_set = true; }
+
         Job*                   _job;
         Log_indent             _log_indent;
         string                 _name;                       // Fürs Log
+        bool                   _result_set;
+        bool                   _result;
     };
 
 

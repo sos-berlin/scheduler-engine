@@ -1,4 +1,4 @@
-// $Id: spooler_thread.cxx,v 1.18 2001/07/17 12:46:56 jz Exp $
+// $Id: spooler_thread.cxx,v 1.19 2002/03/08 15:27:23 jz Exp $
 /*
     Hier sind implementiert
 
@@ -419,7 +419,11 @@ void Thread::signal_object( const string& object_set_class_name, const Level& le
 static uint __stdcall thread( void* param )
 {
     Ole_initialize ole;
-    return ((Thread*)param)->run_thread();
+    
+    uint ret = ((Thread*)param)->run_thread();
+    //_endthreadex( ret );
+
+    return ret;
 }
 
 //-----------------------------------------------------------------------------Thread::start_thread
