@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- $Id: spooler.dtd,v 1.9 2001/01/25 17:45:45 jz Exp $   Joacim Zschimmer,  (C) 2000 SOS GmbH Berlin  -->
+<!-- $Id: spooler.dtd,v 1.10 2001/01/25 20:24:42 jz Exp $   Joacim Zschimmer,  (C) 2000 SOS GmbH Berlin  -->
 
 
 <!ELEMENT spooler               ( config+ | command | answer )>
@@ -71,7 +71,7 @@
 <!ATTLIST run_time              begin               CDATA '00:00:00'>   <!-- HH:MM:SS, Tageszeit, ab der der Job laufen soll -->
 <!ATTLIST run_time              end                 CDATA '24:00:00'>   <!-- HH:MM:SS, Tageszeit, bis zu der der Job laufen soll -->
 <!ATTLIST run_time              let_run             (yes|no) 'no'>      <!-- Task zuende laufen lassen, auch wenn Endezeit überschritten ist -->
-<!ATTLIST run_time              retry_interval      CDATA '5'>          <!-- Periode, nach der ein Job erneut gestartet wird, 
+<!ATTLIST run_time              repeat              CDATA '5'>          <!-- Periode, nach der ein Job erneut gestartet wird, 
                                                                              um zu prüfen, ob die Objektemenge nicht leer ist -->
 
 <!ELEMENT period                EMPTY>
@@ -79,7 +79,7 @@
 <!ATTLIST period                begin               CDATA    #IMPLIED>  <!-- Ersetzt übergeordnetes single_start, begin und end  --> 
 <!ATTLIST period                end                 CDATA    #IMPLIED>  <!-- Ersetzt übergeordnetes single_start, begin und end  --> 
 <!ATTLIST period                let_run             (yes|no) #IMPLIED>  <!-- Ersetzt übergeordnetes let_run  --> 
-<!ATTLIST period                retry_interval      CDATA    #IMPLIED>  <!-- Ersetzt übergeordnetes retry_period  --> 
+<!ATTLIST period                repeat              CDATA    #IMPLIED>  <!-- Ersetzt übergeordnetes repeat  --> 
 
 <!ELEMENT date                  ( period* )>                            <!-- Ein bestimmter Tag, an dem der Job laufen soll -->
 <!ATTLIST date                  date                CDATA #IMPLIED>     <!-- yyyy-mm-dd -->

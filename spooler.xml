@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 
-<!-- $Id: spooler.xml,v 1.17 2001/01/25 17:45:45 jz Exp $   (C) 2001 SOS GmbH Berlin -->
+<!-- $Id: spooler.xml,v 1.18 2001/01/25 20:24:42 jz Exp $   (C) 2001 SOS GmbH Berlin -->
 
 <!DOCTYPE spooler SYSTEM "spooler.dtd">
 
@@ -289,9 +289,9 @@ sub spooler_process()
                 <levels low="100" high="200"/>
             </object_set>
 
-            <run_time begin          = "00:00" 
-                      end            = "24:00" 
-                      retry_interval = "60">
+            <run_time begin  = "00:00" 
+                      end    = "24:00" 
+                      repeat = "60">
 <!--
                 <date date="2001-01-02"/>
                 <date date="2001-01-09"/>
@@ -342,9 +342,11 @@ end function
 
             ]]></script>
 
-            <run_time begin="12:12" end="12:48" retry_interval="4">
-                <period begin="18:41:40" end="18:42"/>
-                <period begin="18:42:30" end="18:43" retry_interval="7"/>
+
+            <run_time begin="12:12" end="12:48" repeat="4">
+
+                <period single_start="19:51:50" end="20:00" let_run="no"/>
+                <period begin="19:52:10" end="19:59:59" repeat="7"/>
 
                 <date date="25.1.2001"/>
                 <date date="26.1.2001"/>
@@ -372,7 +374,7 @@ end function
                 <levels low="1" high="3"/>
             </object_set>
 
-            <run_time retry_interval="3"/>
+            <run_time repeat="3"/>
 
         </job>
 

@@ -1,4 +1,4 @@
-// $Id: spooler_config.cxx,v 1.6 2001/01/25 17:45:45 jz Exp $
+// $Id: spooler_config.cxx,v 1.7 2001/01/25 20:24:42 jz Exp $
 
 //#include <precomp.h>
 
@@ -101,28 +101,29 @@ void Period::set_xml( const xml::Element_ptr& element, const Period* deflt )
 
     if( deflt )  *this = *deflt;
 
+    string let_run = as_string( element->getAttribute( "let_run" ) );
+    if( !let_run.empty() )  _let_run = as_bool( let_run );
+
     string single_start = as_string( element->getAttribute( "single_start" ) );
     if( !single_start.empty() ) 
     {
         dt.set_time( single_start );
         _begin = dt;
-        _retry_interval = latter_day;
+        _repeat = latter_day;
         _single_start = true;
+        if( _let_run )  _end = _begin;
     }
     else
     {
         string begin = as_string( element->getAttribute( "begin" ) );
         if( !begin.empty() )  dt.set_time( begin ), _begin = dt;
 
-        string retry_interval = as_string( element->getAttribute( "retry_interval" ) );
-        if( !retry_interval.empty() )  _retry_interval = as_double( retry_interval );
+        string repeat = as_string( element->getAttribute( "repeat" ) );
+        if( !repeat.empty() )  _repeat = as_double( repeat );
     }
 
     string end = as_string( element->getAttribute( "end" ) );
     if( !end.empty() )  dt.set_time( end ), _end = dt;
-
-    string let_run = as_string( element->getAttribute( "let_run" ) );
-    if( !let_run.empty() )  _let_run = as_bool( let_run );
 
     check();
 }

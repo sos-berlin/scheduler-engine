@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.10 2001/01/25 17:45:45 jz Exp $
+// $Id: spooler_task.cxx,v 1.11 2001/01/25 20:24:42 jz Exp $
 /*
     Hier sind implementiert
 
@@ -294,10 +294,13 @@ void Task::set_next_start_time()
 {
     Time now = Time::now();
 
-    _next_start_time = _period.next_try( now );
+    if( _period.is_single_start() )  _next_start_time = latter_day;
+                               else  _next_start_time = _period.next_try( now );
+
     if( _next_start_time == latter_day ) 
     {
-        _period = _job->_run_time.next_period( _period.end() );
+        Time new_time = _period.is_single_start()? now : max( now, _period.end() );
+        _period = _job->_run_time.next_period( new_time );
         _next_start_time = _period.begin();
     }
 }

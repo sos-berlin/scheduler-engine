@@ -1,4 +1,4 @@
-// $Id: spooler_time.cxx,v 1.5 2001/01/25 17:45:46 jz Exp $
+// $Id: spooler_time.cxx,v 1.6 2001/01/25 20:24:43 jz Exp $
 /*
     Hier sind implementiert
 
@@ -89,11 +89,22 @@ void Period::check() const
     throw_xc( "SPOOLER-104", _begin.as_string(), _end.as_string() );
 }
 
+//-------------------------------------------------------------------------------Period::is_comming
+
+bool Period::is_comming( Time time_of_day )
+{
+    if( time_of_day < _begin
+     || time_of_day < _end   && !_single_start )  return true;
+                 // ^-- Falls time_of_day == previous_period.end(), sonst Schleife!
+
+    return false;
+}
+
 //---------------------------------------------------------------------------------Period::next_try
 
 Time Period::next_try( Time t )
 { 
-    Time result = min( Time( t + _retry_interval ), latter_day ); 
+    Time result = min( Time( t + _repeat ), latter_day ); 
     if( result >= end() )  result = latter_day;
     return result;
 }
@@ -104,7 +115,7 @@ void Period::print( ostream& s ) const
 {
     s << "Period(" << _begin << ".." << _end;
     if( _single_start )  s << " single_start";
-                   else  s << " retry_interval=" << _retry_interval;
+                   else  s << " repeat=" << _repeat;
     if( _let_run )  s << " let_run";
     s << ")";
 }
@@ -127,8 +138,7 @@ const Period& Day::next_period_( Time time_of_day )
 {
     FOR_EACH( Period_set, _period_set, it )
     {
-        if( it->begin() > time_of_day || it->end() > time_of_day )  return *it;//max( it->_begin, time_of_day );
-                                                // ^-- Falls time_of_day == previous_period.end(), sonst Schleife!
+        if( it->is_comming( time_of_day ) )  return *it;
     }
 
     return empty_period;
@@ -280,8 +290,6 @@ Period Run_time::next_period( Time tim_par )
 Period Run_time::next_period_( Time tim_par )
 {
     // Bei der Umschaltung von Winter- auf Sommerzeit fehlt eine Stunde!
-
-    //if( _next_start_time == latter_day )  return empty_period;
 
     Time tim = tim_par;
     Period next;
