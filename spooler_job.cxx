@@ -1058,6 +1058,13 @@ void Job::calculate_next_time( Time now )
                 }
             }
 
+            if( _order_queue )
+            {
+                Time next_order_time = _order_queue->next_time();
+                if( next_time > next_order_time )  next_time = next_order_time;
+            }
+
+
 #           ifdef Z_UNIX
                 if( next_time > _directory_watcher_next_time )  next_time = _directory_watcher_next_time;
 #           endif
@@ -1611,6 +1618,7 @@ xml::Element_ptr Job::dom( const xml::Document_ptr& document, const Show_what& s
 
             if( next > _next_single_start )  next = _next_single_start;
             if( next > next_at_start      )  next = next_at_start;
+            if( _order_queue )  next = min( next, _order_queue->next_time() );
             if( next < latter_day )  job_element.setAttribute( "next_start_time", next.as_string() );
         }
 

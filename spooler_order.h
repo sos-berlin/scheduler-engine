@@ -81,6 +81,8 @@ struct Order : Com_order
     void                        add_to_job              ( const string& job_name );
 
     void                        setback_                ();
+    void                    set_at                      ( const Time& );
+    Time                        at                      ()                                          { return _setback; }
 
     // Auftrag in einer Jobkette:
     void                        add_to_job_chain        ( Job_chain* );
@@ -175,6 +177,8 @@ struct Job_chain : Com_job_chain
 
     void                    set_finished                ( bool b )                                  { _finished = b; }
     bool                        finished                () const                                    { return _finished; }
+
+    void                    set_store_orders_in_database( bool b )                                  { _store_orders_in_database = b; }
     void                        load_orders_from_database();
 
     void                        add_job                 ( Job*, const State& input_state, const State& output_state = error_variant, const State& error_state = error_variant );
@@ -198,6 +202,7 @@ struct Job_chain : Com_job_chain
 
     Fill_zero                  _zero_;
     Spooler*                   _spooler;
+    bool                       _store_orders_in_database;
 
   private:
     friend struct               Order;

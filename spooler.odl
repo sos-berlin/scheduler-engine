@@ -706,6 +706,12 @@ library Spooler
 
         [propget]
         HRESULT                 Order_queue             ( [in] VARIANT* State, [out,retval] Iorder_queue** Result );
+
+        [propput]
+        HRESULT                 Store_orders_in_database( [in] VARIANT_BOOL );
+
+        [propget]
+        HRESULT                 Store_orders_in_database( [out,retval] VARIANT_BOOL* );
     }
 
     [
@@ -818,6 +824,12 @@ library Spooler
         HRESULT                 Payload_is_type         ( [in] BSTR typenam, [out,retval] VARIANT_BOOL* Result );
 
         HRESULT                 Setback                 ();
+
+        [propput]
+        HRESULT                 At                      ( [in] VARIANT* date_time );
+
+        [propget]
+        HRESULT                 At                      ( [out,retval] DATE* Result );
     }
 
     [

@@ -223,6 +223,7 @@ Scheduler.prototype.modify_datetime_for_xslt = function( response )
     this.add_datetime_attributes_for_xslt( response, now, "idle_since"            );
     this.add_datetime_attributes_for_xslt( response, now, "enqueued"              );
     this.add_datetime_attributes_for_xslt( response, now, "created"               );
+    this.add_datetime_attributes_for_xslt( response, now, "setback"               );
     this.add_datetime_attributes_for_xslt( response, now, "start_time"            );
     this.add_datetime_attributes_for_xslt( response, now, "end_time"              );
 }
@@ -360,11 +361,11 @@ function xslt_format_datetime_diff( datetime_earlier, datetime_later, show_plus 
         result += "s";
     }
     else
-    if( abs <    60*60 )  result = Math.floor( abs / (       60 ) ) + "min";
+    if( abs <    60*60 )  result = Math.floor( abs / (       60 ) ) + "m";
     else
     if( abs < 24*60*60 )  result = Math.floor( abs / (    60*60 ) ) + "h";
     else
-                          result = Math.floor( abs / ( 24*60*60 ) ) + "days";
+                          result = Math.floor( abs / ( 24*60*60 ) ) + "d";
 
     return diff < 0             ? "-" + result :
            show_plus && diff > 0? "+" + result
@@ -470,6 +471,75 @@ function update__onclick()
     update();
 }
 
+//----------------------------------------------------------------------------------modify_response
+
+function modify_response( response )
+{
+    // Antwort manipulieren: <tasks> mit <task> auffüllen, bis <job tasks=".."> erreicht ist.
+
+    var job_elements = response.selectNodes( ".//job" );
+    for( var j = 0; j < job_elements.length; j++ )
+    {
+        var job_element = job_elements[j];
+        
+        var tasks_element = job_element.selectSingleNode( "tasks" );
+        if( tasks_element )
+        {
+            var task_elements = tasks_element.selectNodes( "task" );
+            var n = 1*job_element.getAttribute( "tasks" ) - task_elements.length;
+            for( var t = 0; t < n; t++ )
+            {
+                tasks_element.appendChild( tasks_element.ownerDocument.createElement( "task" ) );
+            }
+        } 
+    }
+    
+
+    // Werte der Checkboxen show_tasks_checkbox und show_my_orders ins XML-Dokument übernehmen (für XSL)
+    
+    var spooler_element = response.selectSingleNode( "spooler" );
+    if( spooler_element )
+    {    
+        restore_checkbox_state( response, "show_order_jobs_checkbox"       );
+        restore_checkbox_state( response, "show_tasks_checkbox"            );
+        restore_checkbox_state( response, "show_job_chain_jobs_checkbox"   );
+        restore_checkbox_state( response, "show_job_chain_orders_checkbox" );
+        restore_checkbox_state( response, "show_order_history_checkbox"    );
+
+        spooler_element.setAttribute( "my_max_orders"    , window.parent.left_frame._max_orders    );
+        spooler_element.setAttribute( "my_show_card"     , window.parent.left_frame._show_card     );
+        spooler_element.setAttribute( "my_update_seconds", window.parent.left_frame.update_seconds );
+    }
+}
+
+//------------------------------------------------------------------------------save_checkbox_state
+
+function save_checkbox_state( name )
+{
+    if( document.getElementById( name ) )
+    {
+        window.parent.left_frame._checkbox_states[ name ] = document.getElementById( name ).checked;
+    }
+}
+
+//---------------------------------------------------------------------------restore_checkbox_state
+
+function restore_checkbox_state( response, name )
+{
+    var spooler_element = response.selectSingleNode( "spooler" );
+    if( spooler_element )
+    {
+        //if( document.all[ name ]  &&  document.all[ name ].checked )
+        //{
+         //   spooler_element.setAttribute( name, "yes" );
+        //}
+        //else
+        {
+            if( window.parent.left_frame._checkbox_states[ name ] )  spooler_element.setAttribute( name, "yes" );
+        }
+    }
+}
+
 //----------------------------------------------------------------show_order_jobs_checkbox__onclick
 
 function show_order_jobs_checkbox__onclick()
@@ -504,6 +574,15 @@ function show_job_chain_orders_checkbox__onclick()
     save_checkbox_state( "show_job_chain_orders_checkbox" );
     window.parent.left_frame.reset_error();
     update();
+}
+
+//-------------------------------------------------------------show_order_history_checkbox__onclick
+
+function show_order_history_checkbox__onclick()
+{
+    save_checkbox_state( "show_order_history_checkbox" );
+    window.parent.left_frame.reset_error();
+    window.parent.left_frame.update();
 }
 
 //-------------------------------------------------------------------Popup_menu_builder.add_command

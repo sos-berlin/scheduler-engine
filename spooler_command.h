@@ -23,6 +23,7 @@ enum Show_what_enum
     show_description        = 0x10,
     show_log                = 0x20,
     show_task_history       = 0x40,
+    show_order_history      = 0x80,
 
     show_all_               = 0x80,
     show_all                = 0xFF      // Alle Flags und show_all_ (Bei <show_state> ist z.B. show_orders nicht in show_all enthalten)
@@ -86,6 +87,7 @@ struct Command_processor
     xml::Element_ptr            execute_terminate           ( const xml::Element_ptr& );
     xml::Element_ptr            execute_signal_object       ( const xml::Element_ptr& );
     xml::Element_ptr            execute_show_job_chains     ( const xml::Element_ptr&, const Show_what& );
+    xml::Element_ptr            execute_show_job_chain      ( const xml::Element_ptr&, const Show_what& );
     xml::Element_ptr            execute_show_order          ( const xml::Element_ptr&, const Show_what& );
     xml::Element_ptr            execute_add_order           ( const xml::Element_ptr& );
     xml::Element_ptr            execute_modify_order        ( const xml::Element_ptr& );

@@ -48,7 +48,7 @@ void Spooler::add_job_chain( Job_chain* job_chain )
     }
 */
 
-    if( _db->opened() )  job_chain->load_orders_from_database();
+    if( _db->opened()  &&  job_chain->_store_orders_in_database )  job_chain->load_orders_from_database();
 
 
     _job_chain_time = Time::now();
@@ -141,7 +141,8 @@ Job_chain::Job_chain( Spooler* spooler )
     _zero_(this+1),
     _spooler(spooler),
     _log(_spooler),
-    _lock("Job_chain")
+    _lock("Job_chain"),
+    _store_orders_in_database(true)
 {
     set_name( "" );     // Ruft _log.set_prefix()
 }
@@ -175,6 +176,39 @@ xml::Element_ptr Job_chain::dom( const xml::Document_ptr& document, const Show_w
                 element.appendChild( node->dom( document, modified_show, this ) );
             }
         }
+
+
+        if( show & show_order_history  &&  _spooler->_db->opened() )
+        {
+            xml::Element_ptr order_history_element = document.createElement( "order_history" );
+
+            try
+            {
+                Any_file sel ( "-in " + _spooler->_db->db_name() + "-max-length=32K  "
+                               "select %limit(20) \"ORDER_ID\" as \"ID\", \"START_TIME\", \"TITLE\", \"STATE\", \"STATE_TEXT\""
+                               " from " + sql::uquoted_name( _spooler->_order_history_tablename ) +
+                               " order by \"HISTORY_ID\" desc" );
+
+                while( !sel.eof() )
+                {
+                    Record record = sel.get_record();
+
+                    ptr<Order> order = new Order( _spooler );
+                    order->set_id        ( record.as_string( "id"         ) );
+                    order->set_state     ( record.as_string( "state"      ) );
+                    order->set_state_text( record.as_string( "state_text" ) );
+                    order->set_title     ( record.as_string( "title"      ) );
+
+                    order_history_element.appendChild( order->dom( document, show ) );
+                }
+            }
+            catch( exception& x )
+            {
+                order_history_element.appendChild( create_error_element( document, x, 0 ) );
+            }
+
+            element.appendChild( order_history_element );
+        }
     }
 
     return element;
@@ -204,11 +238,11 @@ void Job_chain::load_orders_from_database()
         Transaction ta ( _spooler->_db );
 
         Any_file sel ( "-in " + _spooler->_db->db_name() + "-max-length=32K "
-                       " select \"ID\", \"PRIORITY\", \"STATE\", \"STATE_TEXT\", \"TITLE\", \"CREATED_TIME\", \"PAYLOAD\""
-                       " from " + sql::uquoted_name( _spooler->_orders_tablename ) +
-                       " where \"SPOOLER_ID\"=" + sql::quoted(_spooler->id_for_db()) + 
-                       " and \"JOB_CHAIN\"=" + sql::quoted(_name) +
-                       " order by \"ORDERING\"" );
+                    " select \"ID\", \"PRIORITY\", \"STATE\", \"STATE_TEXT\", \"TITLE\", \"CREATED_TIME\", \"PAYLOAD\""
+                    " from " + sql::uquoted_name( _spooler->_orders_tablename ) +
+                    " where \"SPOOLER_ID\"=" + sql::quoted(_spooler->id_for_db()) + 
+                    " and \"JOB_CHAIN\"=" + sql::quoted(_name) +
+                    " order by \"ORDERING\"" );
 
         while( !sel.eof() )
         {
@@ -221,7 +255,6 @@ void Job_chain::load_orders_from_database()
 
     _log.debug( as_string(count) + " Aufträge aus der Datenbank gelesen" );
 }
-
 
 //-------------------------------------------------------------------------------Job_chain::add_job
 
@@ -507,6 +540,8 @@ void Order_queue::add_order( Order* order )
             }
 
             _setback_queue.insert( it, order );
+
+            _job->calculate_next_time();
         }
         else
         {
@@ -619,8 +654,6 @@ Order* Order_queue::first_order( const Time& now )
 {
     // SEITENEFFEKT: Aufträge aus der _setback_queue, deren Rückstellungszeitpunkt erreicht ist, werden in die _queue verschoben.
 
-    //Order* order = NULL;
-
     THREAD_LOCK( _lock )
     {
         // Zurückgestellte Aufträge, deren Wartezeit abgelaufen ist, hervorholen
@@ -636,11 +669,9 @@ Order* Order_queue::first_order( const Time& now )
         }
 
 
-        //if( !_queue.empty() )  order = *_queue.begin();
         FOR_EACH( Queue, _queue, o )  if( !(*o)->_task )  return *o;
     }
 
-    //return order;
     return NULL;
 }
 
@@ -675,7 +706,7 @@ Time Order_queue::next_time()
 {
     THREAD_LOCK( _lock )
     {
-        if( !_queue.empty() )  return latter_day;
+        if( !_queue.empty() )  return 0;    //2004-02-25: latter_day;
 
         if( !_setback_queue.empty() )  return (*_setback_queue.begin())->_setback;
     }
@@ -1103,7 +1134,12 @@ void Order::add_to_job_chain( Job_chain* job_chain )
             _job_chain_node = node;
         }
 
-        if( !_is_in_database )  _spooler->_db->insert_order( this ),  _is_in_database = true;
+
+        if( !_is_in_database  &&  job_chain->_store_orders_in_database )
+        {
+            _spooler->_db->insert_order( this );
+            _is_in_database = true;
+        }
     }
 }
 
@@ -1231,7 +1267,7 @@ void Order::postprocessing2()
         _log->close();
     }
 
-    if( _job_chain  &&  _is_in_database )  _spooler->_db->update_order( this );
+    if( _job_chain  &&  ( _is_in_database || finished() ) )  _spooler->_db->update_order( this );
     
     if( finished() )  close();
 }
@@ -1267,6 +1303,25 @@ void Order::setback_()
         order_queue()->add_order( this );
 
         // Weitere Verarbeitung in postprocessing()
+    }
+}
+
+//------------------------------------------------------------------------------------Order::set_at
+
+void Order::set_at( const Time& time )
+{
+    THREAD_LOCK( _lock )
+    {
+        if( _task       )  throw_xc( "SCHEDULER-217", obj_name(), _task->obj_name() );
+        if( _moved      )  throw_xc( "SCHEDULER-188", obj_name() );
+        if( _job_chain  )  throw_xc( "SCHEDULER-186", obj_name(), _job_chain->name() );
+        
+
+        if( job() && order_queue() )  order_queue()->remove_order( this );
+
+        _setback = time;
+
+        if( job() && order_queue() )  order_queue()->add_order( this );
     }
 }
 

@@ -585,6 +585,9 @@ struct Com_job_chain : spooler_com::Ijob_chain,
 
     STDMETHODIMP                Add_order               ( VARIANT* order_or_payload, spooler_com::Iorder** );
 
+    STDMETHODIMP            put_Store_orders_in_database( VARIANT_BOOL );
+    STDMETHODIMP            get_Store_orders_in_database( VARIANT_BOOL* );
+
 
     Thread_semaphore           _lock;
     Job_chain*                 _job_chain;
@@ -663,6 +666,10 @@ struct Com_order : spooler_com::Iorder,
     STDMETHODIMP                Payload_is_type         ( BSTR, VARIANT_BOOL* );
 
     STDMETHODIMP                Setback                 (); 
+
+    STDMETHODIMP            put_At                      ( VARIANT* );
+    STDMETHODIMP            get_At                      ( DATE* );
+
 
   private:
     Fill_zero                  _zero_;

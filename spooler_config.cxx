@@ -87,14 +87,16 @@ Source_with_parts text_from_xml_with_include( const xml::Element_ptr& element, c
 {
     Source_with_parts result;
     string text;
-    string inc = include_path;
-    int    linenr_base = 0;
+    string inc              = include_path;
+    int    linenr_base      = element.line_number(); //? element.line_number() - 1 : 0;
 
     if( !inc.empty() )  { char c = inc[inc.length()-1];  if( c != '/'  &&  c != '\\' )  inc += "/"; }
 
 
     for( xml::Node_ptr n = element.firstChild(); n; n = n.nextSibling() )
     {
+        if( n.line_number() )  linenr_base = n.line_number();
+
         string text;
 
         switch( n.nodeType() )
@@ -115,8 +117,9 @@ Source_with_parts text_from_xml_with_include( const xml::Element_ptr& element, c
             }
 
             TEXT:
+              //result.add( n.line_number(), text, mod_time );
                 result.add( linenr_base, text, mod_time );
-                linenr_base += count_if( text.begin(), text.end(), bind2nd( equal_to<char>(), '\n' ) );
+                linenr_base += count_if( text.begin(), text.end(), bind2nd( equal_to<char>(), '\n' ) );     // Für MSXML
                 break;
 
             case xml::ELEMENT_NODE:     // <include file="..."/>
@@ -150,7 +153,7 @@ Source_with_parts text_from_xml_with_include( const xml::Element_ptr& element, c
 
 void Security::set_dom( const xml::Element_ptr& security_element ) 
 { 
-    bool ignore_unknown_hosts = as_bool( security_element.getAttribute( "ignore_unknown_hosts" ) );
+    bool ignore_unknown_hosts = as_bool( security_element.getAttribute( "ignore_unknown_hosts" ), true );
 
     DOM_FOR_EACH_ELEMENT( security_element, e )
     {

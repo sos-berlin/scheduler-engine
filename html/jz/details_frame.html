@@ -252,9 +252,18 @@ function update( force )
     {
         //var response = _scheduler.execute( "<show_job job='" + _job_name + "' what='all,orders'/>" );
         //window.parent.left_frame.modify_response( response );
-        var response = window.parent.left_frame._response;
         
+        var response       = window.parent.left_frame._response;
         var job_chain_name = _job_chain_element.getAttribute( "name" );
+        
+        var checkbox = document.getElementById( "show_order_history_checkbox" );
+        if( checkbox  &&  checkbox.checked )
+        {
+            var what = "orders,order_history";
+            response = _scheduler.execute( "<show_job_chain job_chain='" + job_chain_name + "' what='" + what + "' />" );
+            modify_response( response );
+        }
+        
         _job_chain_element = response.selectSingleNode( "//job_chain[ @name='" + job_chain_name + "' ]" );
         document.getElementById( "stylesheet_output" ).innerHTML = _job_chain_element? _stylesheet.xml_transform( _job_chain_element ) : "";
 

@@ -2977,6 +2977,8 @@ const Com_method Com_job_chain::_methods[] =
     { DISPATCH_PROPERTYGET,  6, "node"                      , (Com_method_ptr)&Com_job_chain::get_Node           , VT_DISPATCH   , { VT_VARIANT|VT_BYREF } },
     { DISPATCH_PROPERTYGET,  7, "order_queue"               , (Com_method_ptr)&Com_job_chain::get_Order_queue    , VT_DISPATCH   , { VT_VARIANT|VT_BYREF } },
     { DISPATCH_PROPERTYGET,  8, "java_class_name"           , (Com_method_ptr)&Com_job_chain::get_Java_class_name, VT_BSTR },
+    { DISPATCH_PROPERTYPUT,  9, "store_orders_in_database"  , (Com_method_ptr)&Com_job_chain::put_Store_orders_in_database, VT_EMPTY, { VT_BOOL } },
+    { DISPATCH_PROPERTYGET,  9, "store_orders_in_database"  , (Com_method_ptr)&Com_job_chain::get_Store_orders_in_database, VT_BOOL },
     {}
 };
 
@@ -3226,6 +3228,35 @@ STDMETHODIMP Com_job_chain::get_Node( VARIANT* state, Ijob_chain_node** result )
     return hr;
 }
 
+//------------------------------------------------------Com_job_chain::put_Store_orders_in_database
+
+STDMETHODIMP Com_job_chain::put_Store_orders_in_database( VARIANT_BOOL b )
+{
+    HRESULT hr = NOERROR;
+
+    try
+    {
+        if( !_job_chain )  return E_POINTER;
+
+        _job_chain->set_store_orders_in_database( b != VARIANT_FALSE );
+    }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Job_chain.node" ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Job_chain.node" ); }
+
+    return hr;
+}
+
+//------------------------------------------------------Com_job_chain::get_Store_orders_in_database
+
+STDMETHODIMP Com_job_chain::get_Store_orders_in_database( VARIANT_BOOL* result )
+{
+    if( !_job_chain )  return E_POINTER;
+
+    *result = _job_chain->_store_orders_in_database? VARIANT_TRUE : VARIANT_FALSE;
+
+    return S_OK;
+}
+
 //---------------------------------------------------------------------Com_job_chain_node::_methods
 #ifdef Z_COM
 
@@ -3336,6 +3367,8 @@ const Com_method Com_order::_methods[] =
     { DISPATCH_METHOD     , 11, "payload_is_type"           , (Com_method_ptr)&Com_order::Payload_is_type       , VT_BOOL       , { VT_BSTR } },
     { DISPATCH_PROPERTYGET, 12, "java_class_name"           , (Com_method_ptr)&Com_order::get_Java_class_name   , VT_BSTR },
     { DISPATCH_METHOD     , 13, "setback"                   , (Com_method_ptr)&Com_order::Setback               , VT_EMPTY      },
+    { DISPATCH_PROPERTYPUT, 14, "at"                        , (Com_method_ptr)&Com_order::put_At                , VT_EMPTY      , { VT_VARIANT|VT_BYREF } },
+    { DISPATCH_PROPERTYGET, 14, "at"                        , (Com_method_ptr)&Com_order::get_At                , VT_DATE       },
     {}
 };
 
@@ -3800,6 +3833,48 @@ STDMETHODIMP Com_order::Setback()
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Order.setback" ); }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Order.setback" ); }
+
+    return hr;
+}
+
+//--------------------------------------------------------------------------------Com_order::put_At
+
+STDMETHODIMP Com_order::put_At( VARIANT* datetime )
+{
+    HRESULT hr = NOERROR;
+
+    THREAD_LOCK( _lock )
+    try
+    {
+        if( !_order )  return E_POINTER;
+        if( !datetime )  return E_POINTER;
+
+        Time at;
+        at.set_datetime( string_from_variant( *datetime ) );
+
+        _order->set_at( at );
+    }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
+
+    return hr;
+}
+
+//--------------------------------------------------------------------------------Com_order::get_At
+
+STDMETHODIMP Com_order::get_At( DATE* result )
+{
+    HRESULT hr = NOERROR;
+
+    THREAD_LOCK( _lock )
+    try
+    {
+        if( !_order )  return E_POINTER;
+
+        *result = (double)_order->at().as_time_t() / ( 24*3600 );
+    }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
 
     return hr;
 }

@@ -478,6 +478,20 @@ xml::Element_ptr Command_processor::execute_show_job_chains( const xml::Element_
     return _spooler->xml_from_job_chains( _answer, show );
 }
 
+//--------------------------------------------------------Command_processor::execute_show_job_chain
+
+xml::Element_ptr Command_processor::execute_show_job_chain( const xml::Element_ptr& show_job_chain_element, const Show_what& show_ )
+{
+    if( _security_level < Security::seclev_info )  throw_xc( "SCHEDULER-121" );
+
+    Show_what show = show_;
+    if( show & show_all_ )  show |= show | show_description | show_orders;
+
+    string job_chain_name = show_job_chain_element.getAttribute( "job_chain" );
+
+    return _spooler->job_chain( job_chain_name )->dom( _answer, show );
+}
+
 //------------------------------------------------------------Command_processor::execute_show_order
 
 xml::Element_ptr Command_processor::execute_show_order( const xml::Element_ptr& show_order_element, const Show_what& show_ )
@@ -636,6 +650,8 @@ xml::Element_ptr Command_processor::execute_command( const xml::Element_ptr& ele
         else
         if( string_equals_prefix_then_skip( &p, "task_history"     ) )  show |= show_task_history;
         else
+        if( string_equals_prefix_then_skip( &p, "order_history"    ) )  show |= show_order_history;
+        else
         if( string_equals_prefix_then_skip( &p, "standard"         ) )  ;
         else
             throw_xc( "SCHEDULER-164", what );
@@ -671,6 +687,8 @@ xml::Element_ptr Command_processor::execute_command( const xml::Element_ptr& ele
     if( element.nodeName_is( "config"           ) )  return execute_config( element, xml_mod_time );
     else
     if( element.nodeName_is( "show_job_chains"  ) )  return execute_show_job_chains( element, show );
+    else
+    if( element.nodeName_is( "show_job_chain"   ) )  return execute_show_job_chain( element, show );
     else
     if( element.nodeName_is( "show_order"       ) )  return execute_show_order( element, show );
     else

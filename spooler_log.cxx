@@ -257,6 +257,7 @@ xml::Element_ptr Prefix_log::dom( const xml::Document_ptr& document, const Show_
     if( _highest_level >= log_min   )  log_element.setAttribute( "highest_level"  , name_of_log_level( (Log_level)_highest_level ) );
     if( last( log_error ) != ""     )  log_element.setAttribute( "last_error"     , last( log_error ) );
     if( last( log_warn  ) != ""     )  log_element.setAttribute( "last_warning"   , last( log_warn ) );
+    if( last( log_info  ) != ""     )  log_element.setAttribute( "last_info"      , last( log_info ) );
 
     if( _mail_on_error              )  log_element.setAttribute( "mail_on_error"  , "yes" );
     if( _mail_on_warning            )  log_element.setAttribute( "mail_on_warning", "yes" );
