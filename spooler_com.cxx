@@ -1,4 +1,4 @@
-// $Id: spooler_com.cxx,v 1.108 2003/09/24 14:06:10 jz Exp $
+// $Id: spooler_com.cxx,v 1.109 2003/09/26 21:57:14 jz Exp $
 /*
     Hier sind implementiert
 
@@ -2561,7 +2561,7 @@ STDMETHODIMP Com_job_chain::add_order( VARIANT* order_or_payload, spooler_com::I
 {
     HRESULT hr = NOERROR;
 
-    LOGI( "add_order\n" );
+    LOGI( "Job_chain.add_order\n" );
 
     THREAD_LOCK( _lock )
     try
@@ -2569,21 +2569,19 @@ STDMETHODIMP Com_job_chain::add_order( VARIANT* order_or_payload, spooler_com::I
         if( !_job_chain )  return E_POINTER;
         if( !_job_chain->finished() )  throw_xc( "SPOOLER-151" );
 
-        //Z_DEBUG_ONLY( LOG( "order_from_order_or_payload()\n" ); )
         ptr<spooler_com::Iorder> iorder = order_from_order_or_payload( _job_chain->_spooler, *order_or_payload );
         if( !iorder )  return E_POINTER;
 
-        //Z_DEBUG_ONLY( LOG( "add_to_job_chain()" ); )
         // Einstieg nur über Order, damit Semaphoren stets in derselben Reihenfolge gesperrt werden.
         dynamic_cast<Order*>( &*iorder )->add_to_job_chain( dynamic_cast<Job_chain*>( this ) );  
 
         *result = iorder;
         (*result)->AddRef();
-
-        //Z_DEBUG_ONLY( LOG( "add_order ok\n" ); )
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Job_chain.add_order" ); }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Job_chain.add_order" ); }
+
+    LOG( "Job_chain.add_order  hr=" << (void*)hr << "\n" );
 
     return hr;
 }
@@ -3306,6 +3304,8 @@ STDMETHODIMP Com_order_queue::add_order( VARIANT* order_or_payload, Iorder** res
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Order_queue.add_order" ); }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Order_queue.add_order" ); }
+
+    LOG( "Com_order_queue::add_order  hr=" << (void*)hr << "\n" );
 
     return hr;
 }

@@ -1,4 +1,4 @@
-// $Id: spooler_history.cxx,v 1.55 2003/09/24 15:39:57 jz Exp $
+// $Id: spooler_history.cxx,v 1.56 2003/09/26 21:57:14 jz Exp $
 
 #include "spooler.h"
 #include "../zschimmer/z_com.h"
@@ -453,7 +453,7 @@ void Spooler_db::execute( const string& stmt )
 { 
     THREAD_LOCK( _lock )
     {
-        LOG( "Spooler_db::execute  " << stmt << '\n' );
+        LOGI( "Spooler_db::execute  " << stmt << '\n' );
         _db.put( stmt ); 
     }
 }

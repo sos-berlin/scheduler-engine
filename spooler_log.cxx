@@ -1,4 +1,4 @@
-// $Id: spooler_log.cxx,v 1.70 2003/09/26 18:42:29 jz Exp $
+// $Id: spooler_log.cxx,v 1.71 2003/09/26 21:57:14 jz Exp $
 
 #include "spooler.h"
 #include "spooler_mail.h"
@@ -43,6 +43,7 @@ static int my_write( int file, const char* text, int len )
         ret = ::write( file, t, text + len - t );
         if( ret <= 0 )  break;
         t += ret;
+        if( t < text + len )  sos_sleep( 0.001 );
     }
 
     if( ret <= 0  &&  len > 0 )
@@ -51,7 +52,7 @@ static int my_write( int file, const char* text, int len )
 
         if( err == EAGAIN )     // Das kann passieren, wenn ein Thread gleichzeitig nach stderr schreibt.
         {
-            LOG( "Prefix_log::write ERRNO-" << err << " " << strerror(err) );
+            //LOG( "Prefix_log::write ERRNO-" << err << " " << strerror(err) );
             sos_sleep( 0.01 );
             ::write( file, "<<errno=EAGAIN>>", 16 ); 
             ret = ::write( file, t, text + len - t );
