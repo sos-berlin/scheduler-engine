@@ -1,4 +1,4 @@
-// $Id: spooler_com.cxx,v 1.28 2002/03/11 06:55:52 jz Exp $
+// $Id: spooler_com.cxx,v 1.29 2002/03/14 17:26:50 jz Exp $
 /*
     Hier sind implementiert
 
@@ -639,7 +639,7 @@ STDMETHODIMP Com_task::get_error( Ierror** result )
         {
             if( !_task )  throw_xc( "SPOOLER-122" );
 
-            THREAD_LOCK( _task->_job->_lock )  *result = new Com_error( _task->_error );
+            THREAD_LOCK( _task->_job->_lock )  *result = new Com_error( _task->_job->error() );
             (*result)->AddRef();
         }
     }

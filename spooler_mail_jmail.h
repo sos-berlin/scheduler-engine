@@ -1,4 +1,4 @@
-// $Id: spooler_mail_jmail.h,v 1.4 2002/03/13 09:25:56 jz Exp $
+// $Id: spooler_mail_jmail.h,v 1.5 2002/03/14 17:26:50 jz Exp $
 
 #ifndef __SPOOLER_MAIL_JMAIL_H
 #define __SPOOLER_MAIL_JMAIL_H
@@ -30,7 +30,7 @@ struct Com_mail : spooler_com::Imail, Sos_ole_object
 
 
                                 Com_mail                    ( Spooler* );
-                             //~Com_mail                    ();
+                               ~Com_mail                    ();
                                 
     void  __stdcall             init                        ();
 

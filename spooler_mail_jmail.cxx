@@ -1,4 +1,4 @@
-// $Id: spooler_mail_jmail.cxx,v 1.3 2002/03/13 09:25:56 jz Exp $
+// $Id: spooler_mail_jmail.cxx,v 1.4 2002/03/14 17:26:50 jz Exp $
 
 
 #include "../kram/sos.h"
@@ -102,6 +102,13 @@ Com_mail::Com_mail( Spooler* spooler )
     _zero_(this+1),
     _spooler(spooler)
 {
+}
+
+//------------------------------------------------------------------------------Com_mail::~Com_mail
+
+Com_mail::~Com_mail()
+{
+    _msg = NULL;
 }
 
 //-----------------------------------------------------------------------------------Com_mail::init

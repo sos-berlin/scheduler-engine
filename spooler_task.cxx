@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.63 2002/03/13 09:25:56 jz Exp $
+// $Id: spooler_task.cxx,v 1.64 2002/03/14 17:26:50 jz Exp $
 /*
     Hier sind implementiert
 
@@ -331,6 +331,7 @@ void Job::init2()
     _start_once = _run_time.once();
 
   //_period     = _run_time.first_period();
+    _period._begin = 0;
     _period._end = 0;
     select_period();
 }
@@ -388,7 +389,13 @@ void Job::set_next_start_time( Time now )
 
     if( _next_start_time == latter_day ) 
     {
-        select_period( max( now, _period.end() ) );
+        if( now < _period.begin() )     // Nächste Periode hat noch nicht begonnen?
+        {
+            _next_start_time = _period.begin();
+            _next_time = _next_start_time;            
+        }
+        else  
+            select_period( max( now, _period.end() ) );
     }
 
     if( _next_start_time != latter_day )  _log.debug( "Nächste Wiederholung: " + _next_start_time.as_string() );
@@ -466,7 +473,7 @@ bool Job::dequeue_task( Time now )
         _task = *it;
         it = _task_queue.erase( it );
 
-        _error = NULL;
+        reset_error();
         _close_engine = false;
         _repeat = 0;
 
@@ -513,7 +520,7 @@ Sos_ptr<Task> Job::start_without_lock( const CComPtr<spooler_com::Ivariable_set>
 {
     switch( _state )
     {
-        case s_read_error:  throw_xc( "SPOOLER-132", name(), _error->what() );
+        case s_read_error:  throw_xc( "SPOOLER-132", name(), _error? _error->what() : "" );
      
       //case s_load_error:
         case s_stopped:     set_state( s_pending );
@@ -807,16 +814,19 @@ bool Job::do_something()
 
     if( _reread  &&  !_task )  _reread = false,  reread(),  something_done = true;
 
-    if( _state == s_read_error )  return something_done;
-    if( _state == s_stopped    )  return something_done;
-    if( _state == s_suspended  )  return something_done;
-
     if( _state == s_pending )
     {
         Time now = Time::now();
         bool dequeued = dequeue_task(now);
         if( !dequeued  &&  task_to_start(now) )  create_task( NULL, "" ),  dequeue_task(now);
     }
+
+    // Wenn nichts zu tun ist, dann raus. Der Job soll nicht wegen eines alten Fehlers nachträglich gestoppt werden (s.u.)
+    if( _state == s_pending    )  return something_done;    
+    if( _state == s_suspended  )  return something_done;
+    if( _state == s_stopped    )  return something_done;
+    if( _state == s_read_error )  return something_done;
+
 
     bool do_a_step = false;
 
@@ -930,12 +940,7 @@ void Job::set_error_xc( const Xc& x )
     
     _log.error( msg + x.what() );
 
-    THREAD_LOCK( _lock )
-    {
-        _error = x;
-        if( _task )  //THREAD_LOCK( _task->_lock )  
-            _task->_error = _error;
-    }
+    THREAD_LOCK( _lock )  _error = x;
 
     _repeat = 0;
 }
@@ -945,7 +950,7 @@ void Job::set_error_xc( const Xc& x )
 void Job::set_error( const exception& x )
 {
     Xc xc ( "SOS-2000", x.what(), exception_name(x) );
-    set_error( xc );
+    set_error_xc( xc );
 }
 
 //-----------------------------------------------------------------------------------Job::set_error
@@ -975,7 +980,7 @@ void Job::set_state( State new_state )
         if( new_state == s_running  ||  new_state == s_start_task )  _thread->_running_tasks_count++;
         if( _state    == s_running  ||  _state    == s_start_task )  _thread->_running_tasks_count--;
 
-        if( new_state == s_pending )  _error = NULL;
+        if( new_state == s_pending )  reset_error();
 
         _state = new_state;
 
@@ -1289,8 +1294,8 @@ bool Task::start()
         THREAD_LOCK( _job->_lock )
         {
             _job->set_state( Job::s_starting );
+            _job->reset_error();
 
-            _error = _job->_error = NULL;
             _job->_thread->_task_count++;
             _job->_step_count = 0;
             _running_since = Time::now();

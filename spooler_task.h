@@ -1,4 +1,4 @@
-// $Id: spooler_task.h,v 1.34 2002/03/11 06:55:53 jz Exp $
+// $Id: spooler_task.h,v 1.35 2002/03/14 17:26:51 jz Exp $
 
 #ifndef __SPOOLER_TASK_H
 #define __SPOOLER_TASK_H
@@ -214,8 +214,9 @@ struct Job : Sos_self_deleting
     void                        set_error                   ( const Xc& x )             { set_error_xc( x ); }
     void                        set_error                   ( const exception& );
     void                        set_error                   ( const _com_error& );
-    Xc_copy                     error                       ()                          { THREAD_LOCK( _lock )  return _error; }
+    Xc_copy                     error                       ()                          { Xc_copy result; THREAD_LOCK( _lock )  result = _error;  return result; }
     bool                        has_error                   ()                          { return !!_error || _log.highest_level() >= log_error; }
+    void                        reset_error                 ()                          { _error = NULL;  _log.reset_highest_level(); }
 
     void                        set_state                   ( State );
     void                        set_state_cmd               ( State_cmd );
@@ -362,7 +363,7 @@ struct Task : Sos_self_deleting
     CComPtr<spooler_com::Ivariable_set> _params;
     CComVariant                _result;
     string                     _name;
-    Xc_copy                    _error;
+  //Xc_copy                    _error;
 
     Thread_semaphore           _terminated_events_lock;
     vector<Event*>             _terminated_events;

@@ -1,4 +1,4 @@
-// $Id: spooler_log.cxx,v 1.27 2002/03/13 09:25:56 jz Exp $
+// $Id: spooler_log.cxx,v 1.28 2002/03/14 17:26:50 jz Exp $
 
 #include "../kram/sos.h"
 #include "spooler.h"
@@ -188,7 +188,10 @@ void Log::log2( Log_level level, const string& prefix, const string& line, Prefi
 
         if( !prefix.empty() )  write( NULL, "(" + prefix + ") " );     // (Job ...)
 
-        write( extra_log, line.c_str() + begin, next - begin );        // Text
+        int len = next - begin;
+        while( len > 1  &&  line.c_str()[begin+len-1] == '\r' )  len--;
+        write( extra_log, line.c_str() + begin, len );                 // Text
+
         begin = next;
     }
 
@@ -248,7 +251,7 @@ void Prefix_log::set_filename( const string& filename )
 
 void Prefix_log::open()
 {
-    _highest_level = -999;
+    reset_highest_level();
     _highest_msg = "";
     
     if( _file != -1 )  throw_xc( "SPOOLER-134", _filename );
@@ -321,7 +324,7 @@ spooler_com::Imail* Prefix_log::mail()
         _mail = mail;   // Nur bei fehlerfreiem init() speichern
 
         if( !_smtp_server_read ) {
-            _smtp_server = read_profile_string( "factory.ini", _section.c_str(), "smtp", _spooler->_smtp_server );
+            if( !_section.empty() )  _smtp_server = read_profile_string( "factory.ini", _section.c_str(), "smtp", _spooler->_smtp_server );
             _smtp_server_read = true;
         }
         hr = _mail->put_smtp( SysAllocString_string(_smtp_server) );     if( FAILED(hr) ) throw_ole( hr, "spooler::Mail::smtp_server", _smtp_server.c_str() );
@@ -345,14 +348,15 @@ spooler_com::Imail* Prefix_log::mail()
 void Prefix_log::set_mail_header()
 {
     HRESULT hr;
+    string  from, to, cc, bcc;
 
-  //if( _subject.empty() )  _subject = "Protokoll für " + _prefix;
-  //if( _body   .empty() )  _body = _subject;
-
-    string from    = read_profile_string( "factory.ini", _section.c_str(), "log_mail_from"   , _spooler->_log_mail_from );
-    string to      = read_profile_string( "factory.ini", _section.c_str(), "log_mail_to"     );
-    string cc      = read_profile_string( "factory.ini", _section.c_str(), "log_mail_cc"     , "" );
-    string bcc     = read_profile_string( "factory.ini", _section.c_str(), "log_mail_bcc"    , "" );
+    if( !_section.empty() )
+    {
+        from    = read_profile_string( "factory.ini", _section.c_str(), "log_mail_from"   , _spooler->_log_mail_from );
+        to      = read_profile_string( "factory.ini", _section.c_str(), "log_mail_to"     );
+        cc      = read_profile_string( "factory.ini", _section.c_str(), "log_mail_cc"     , "" );
+        bcc     = read_profile_string( "factory.ini", _section.c_str(), "log_mail_bcc"    , "" );
+    }
 
     if( to.empty() && cc.empty() && bcc.empty() )
     {       

@@ -1,4 +1,4 @@
-// $Id: spooler_log.h,v 1.10 2002/03/05 17:10:00 jz Exp $
+// $Id: spooler_log.h,v 1.11 2002/03/14 17:26:50 jz Exp $
 
 #ifndef __SPOOLER_LOG_H
 #define __SPOOLER_LOG_H
@@ -71,6 +71,7 @@ struct Prefix_log
     const string&               filename                    () const                            { return _filename; }
     void                        set_log_level               ( int level )                       { _log_level = level; }
     int                         log_level                   ()                                  { return _log_level; }
+    void                        reset_highest_level         ()                                  { _highest_level = -999; }
     int                         highest_level               () const                            { return _highest_level; }
     string                      highest_msg                 () const                            { return _highest_msg; }
 
