@@ -1,4 +1,4 @@
-// $Id: spooler_module.cxx,v 1.44 2003/09/05 14:34:17 jz Exp $
+// $Id: spooler_module.cxx,v 1.45 2003/09/23 14:01:08 jz Exp $
 /*
     Hier sind implementiert
 
@@ -98,11 +98,12 @@ void Module::set_dom_without_source( const xml::Element_ptr& element )
 {
     _source.clear();  //clear();
 
-    _language         = element.getAttribute     ( "language"  );
-    _com_class_name   = element.getAttribute     ( "com_class" );
-    _filename         = element.getAttribute     ( "filename"  );
-    _java_class_name  = element.getAttribute     ( "java_class" );
-    _recompile        = element.bool_getAttribute( "recompile" );
+    _language           = element.getAttribute     ( "language"  );
+    _com_class_name     = element.getAttribute     ( "com_class" );
+    _filename           = element.getAttribute     ( "filename"  );
+    _java_class_name    = element.getAttribute     ( "java_class" );
+    _recompile          = element.bool_getAttribute( "recompile" );
+    _process_class_name = element.     getAttribute( "process_class" );
 
     bool separate_process_default = false;
 #   ifndef Z_WINDOWS
@@ -366,7 +367,8 @@ void Module_instance::attach_task( Task* task, Prefix_log* log )
     _com_task->set_task( task );
     _com_log ->set_log ( log );
 
-    _title = task->obj_name();          // Titel für Prozess
+    _task_id = task->id();
+    //_title = task->obj_name();          // Titel für Prozess
 }
 
 //---------------------------------------------------------------------Module_instance::detach_task
@@ -376,7 +378,8 @@ void Module_instance::detach_task()
     _com_task->set_task( NULL );
     _com_log ->set_log ( NULL );
     
-    _title = "";
+    _task_id = 0;
+    //_title = "";
 }
 
 //-------------------------------------------------------------------------Module_instance::add_obj

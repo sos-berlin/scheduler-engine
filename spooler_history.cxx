@@ -1,4 +1,4 @@
-// $Id: spooler_history.cxx,v 1.52 2003/07/29 11:20:48 jz Exp $
+// $Id: spooler_history.cxx,v 1.53 2003/09/23 14:01:08 jz Exp $
 
 #include "spooler.h"
 #include "../zschimmer/z_com.h"
@@ -217,8 +217,8 @@ void Spooler_db::open( const string& db_name )
                                           "\"TITLE\"       char(200),"
                                           "\"CREATED_TIME\" datetime not null,"
                                           "\"MOD_TIME\"    datetime,"
-                                          "\"ORDERING\"    integer,"                    // Um die Reihenfolge zu erhalten
-                                          "\"PAYLOAD\"     blob,"
+                                          "\"ORDERING\"    integer not null,"           // Um die Reihenfolge zu erhalten
+                                          "\"PAYLOAD\"     clob,"
                                           "primary key( \"JOB_CHAIN\", \"ID\" )" );
 
                 create_table_when_needed( _spooler->_order_history_tablename, 
@@ -226,8 +226,8 @@ void Spooler_db::open( const string& db_name )
                                           "\"JOB_CHAIN\"   char(100) not null,"         // Primärschlüssel
                                           "\"ORDER_ID\"    char(100) not null,"
                                           "\"SPOOLER_ID\"  char(100),"
-                                          "\"TITLE\"       char(200) not null,"
-                                          "\"STATE\"       varchar(100),"
+                                          "\"TITLE\"       char(200),"
+                                          "\"STATE\"       varchar(100) not null,"
                                           "\"STATE_TEXT\"  varchar(100) not null,"
                                           "\"START_TIME\"  datetime not null,"
                                           "\"END_TIME\"    datetime not null,"

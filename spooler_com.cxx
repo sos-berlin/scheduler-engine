@@ -1,4 +1,4 @@
-// $Id: spooler_com.cxx,v 1.105 2003/09/01 08:28:06 jz Exp $
+// $Id: spooler_com.cxx,v 1.106 2003/09/23 14:01:08 jz Exp $
 /*
     Hier sind implementiert
 
@@ -323,25 +323,34 @@ void Com_variable_set::set_dom( const xml::Element_ptr& params )
 
 STDMETHODIMP Com_variable_set::put_var( BSTR name, VARIANT* value )
 {
-    THREAD_LOCK( _lock )  
+    if( name == NULL )
     {
-        Bstr lname = name;
-
-        bstr_to_lower( &lname );
-
-        Map::iterator it = _map.find( lname );
-        if( it != _map.end()  &&  it->second )
-        {
-            it->second->put_value( value );
-        }
-        else
-        {
-            ptr<Com_variable> v = new Com_variable( name, *value );
-            _map[lname] = v;
-        }
+        if( value->vt != VT_BSTR )  return DISP_E_TYPEMISMATCH;
+        
+        return put_xml( V_BSTR(value) );
     }
+    else
+    {
+        THREAD_LOCK( _lock )  
+        {
+            Bstr lname = name;
 
-    return NOERROR;
+            bstr_to_lower( &lname );
+
+            Map::iterator it = _map.find( lname );
+            if( it != _map.end()  &&  it->second )
+            {
+                it->second->put_value( value );
+            }
+            else
+            {
+                ptr<Com_variable> v = new Com_variable( name, *value );
+                _map[lname] = v;
+            }
+        }
+
+        return NOERROR;
+    }
 }
 
 //------------------------------------------------------------------------Com_variable_set::get_var

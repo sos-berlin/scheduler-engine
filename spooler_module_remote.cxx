@@ -1,4 +1,4 @@
-// $Id: spooler_module_remote.cxx,v 1.35 2003/09/22 09:12:09 jz Exp $
+// $Id: spooler_module_remote.cxx,v 1.36 2003/09/23 14:01:08 jz Exp $
 /*
     Hier sind implementiert
 
@@ -336,6 +336,45 @@ bool Remote_module_instance_proxy::Operation::begin__end()
     return check_result( _remote_instance->call__end() );
 }
 */
+//-------------------------------------------------Remote_module_instance_proxy::try_to_get_process
+
+bool Remote_module_instance_proxy::try_to_get_process()
+{
+    if( _process )  return true;
+
+    if( _module->_separate_process 
+     || _module->_process_class_name.empty()  && !_spooler->process_class_or_null("") )   // Namenlose Prozessklasse nicht bekannt? Dann temporäre Prozessklasse verwenden
+    {
+        _process = _spooler->new_temporary_process();
+    }
+    else
+    {
+        //_process = Z_NEW( Process( _spooler ) );        
+        _process = _spooler->process_class( _module->_process_class_name ) -> select_process_if_available();
+        if( !_process )  return false;
+
+        // Erstmal immer nur eine Task pro Prozess. 
+        // Mehrere Tasks pro Prozess erst, wenn sichergestellt ist, dass jede Operation die Antwort liest (v.a. im Fehlerfall),
+        // sodass nicht eine nicht beendete Operation den Prozess blockiert.
+
+        //_process = _spooler->process_class( _process_class_name ) -> select_process();
+    }
+
+    _process->add_module_instance( this );
+
+    if( !_process->started() )
+    {
+        _process->set_job_name( _job_name );
+        _process->set_task_id ( _task_id  );
+        _process->start();
+    }
+
+    _session = _process->session(); 
+    _pid     = _session->connection()->pid();
+
+    return true;
+}
+
 //-----------------------------------------Remote_module_instance_proxy::Operation::async_continue_
 
 bool Remote_module_instance_proxy::continue_async_operation( Operation* operation, bool wait )
@@ -348,32 +387,13 @@ bool Remote_module_instance_proxy::continue_async_operation( Operation* operatio
 
         case c_begin:
         {
+/*
             if( !_process )
             {
-                if( _module->_separate_process 
-                    || _module->_process_class_name.empty()  && !_spooler->process_class_or_null("") )   // Namenlose Prozessklasse nicht bekannt? Dann temporäre Prozessklasse verwenden
-                {
-                    _process = _spooler->new_temporary_process();
-                }
-                else
-                {
-                    //_process = Z_NEW( Process( _spooler ) );        
-                    _process = _spooler->process_class( _module->_process_class_name ) -> select_process_if_available();
-                    if( !_process )  break;
-
-                    // Erstmal immer nur eine Task pro Prozess. 
-                    // Mehrere Tasks pro Prozess erst, wenn sichergestellt ist, dass jede Operation die Antwort liest (v.a. im Fehlerfall),
-                    // sodass nicht eine nicht beendete Operation den Prozess blockiert.
-
-                    //_process = _spooler->process_class( _process_class_name ) -> select_process();
-                }
-
-                _process->add_module_instance( this );
+                try_to_get_process();
+                if( !_process )  break;
             }
-
-            _session = _process->session(); 
-            _pid = _session->connection()->pid();
-
+*/
             operation->set_async_child( _session->connect_server__start() );
 
             operation->_call_state = c_connect;

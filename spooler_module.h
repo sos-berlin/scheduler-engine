@@ -1,4 +1,4 @@
-// $Id: spooler_module.h,v 1.42 2003/09/05 14:34:17 jz Exp $
+// $Id: spooler_module.h,v 1.43 2003/09/23 14:01:08 jz Exp $
 
 #ifndef __SPOOLER_MODULE_H
 #define __SPOOLER_MODULE_H
@@ -82,15 +82,13 @@ struct Module : Object
     enum Reuse
     {
         reuse_task,
-        reuse_job,
-      //reuse_global
+        reuse_job
     };
 
     enum Kind
     {
         kind_none,
         kind_java,
-      //kind_perl,
         kind_scripting_engine,
         kind_com,
         kind_remote
@@ -118,7 +116,6 @@ struct Module : Object
 
     Fill_zero                  _zero_;
     Spooler*                   _spooler;
-  //Prefix_log*                _log;
     Delegated_log              _log;
     bool                       _set;
 
@@ -190,7 +187,8 @@ struct Module_instance : Object
                                 Module_instance             ( Module* );
     virtual                    ~Module_instance             ()                                      {}      // Für gcc 3.2
 
-  //void                    set_title                       ( const string& title )                 { _title = title; }
+    void                    set_job_name                    ( const string& job_name )              { _job_name = job_name; }
+    void                    set_task_id                     ( int id )                              { _task_id = id; }
 
     void                        clear                       ()                                      { _object_list.clear(); }
     virtual void                close                       ()                                      = 0;
@@ -214,6 +212,8 @@ struct Module_instance : Object
     virtual bool                callable                    ()                                      = 0;
     int                         pid                         ()                                      { return _pid; }        // 0, wenn kein Prozess
 
+    virtual bool                try_to_get_process          ()                                      { return true; }
+
     virtual Async_operation*    begin__start                (); // const Object_list& );
     virtual bool                begin__end                  ();
 
@@ -235,13 +235,13 @@ struct Module_instance : Object
 
     Fill_zero                  _zero_;
 
-    string                     _title;                      // Wird lokalem Objectserver als -title=... übergeben, für die Prozessliste (ps)
+    string                     _job_name;                   // Wird lokalem Objectserver als -job=... übergeben, für die Prozessliste (ps)
+    int                        _task_id;                    // Wird lokalem Objectserver als -task-id=... übergeben, für die Prozessliste (ps)
     Spooler*                   _spooler;
     Delegated_log              _log;
     ptr<Module>                _module;
     int                        _pid;                        // Wird von Remote_module_instance_proxy gesetzt
 
-  //Task*                      _task;
     Object_list                _object_list;
     ptr<IDispatch>             _idispatch;
     map<string,bool>           _names;

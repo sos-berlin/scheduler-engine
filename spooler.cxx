@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.253 2003/09/22 12:17:29 jz Exp $
+// $Id: spooler.cxx,v 1.254 2003/09/23 14:01:07 jz Exp $
 /*
     Hier sind implementiert
 
@@ -548,8 +548,6 @@ Process* Spooler::new_temporary_process()
     process->set_temporary( true );
 
     temporary_process_class()->add_process( process );
-
-    process->start();
 
     return process;
 }
@@ -1382,7 +1380,7 @@ void Spooler::start()
     if( _module.set() )
     {
         _module_instance = _module.create_instance();
-        _module_instance->_title = "Spooler-Script";
+      //_module_instance->_title = "Spooler-Script";
         _module_instance->init();
 
         _module_instance->add_obj( (IDispatch*)_com_spooler, "spooler"     );
@@ -2141,7 +2139,7 @@ int spooler_main( int argc, char** argv, const string& parameter_line )
             if( opt.with_value( "send-cmd"         ) )  send_cmd = opt.value();
             else
           //if( opt.with_value( "execute-job"      ) )  is_object_server = true;       // Parameter ist nur für den Befehl ps
-            if( opt.flag      ( "object-server"    ) )  is_object_server = true;
+            if( opt.flag      ( 'O', "object-server" ) )  is_object_server = true;
             else
             if( opt.with_value( "title"            ) )  ;                               // Damit der Aufrufer einen Kommentar für ps übergeben kann (für -object-server)
             else

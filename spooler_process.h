@@ -1,4 +1,4 @@
-// $Id: spooler_process.h,v 1.8 2003/09/01 08:28:06 jz Exp $
+// $Id: spooler_process.h,v 1.9 2003/09/23 14:01:08 jz Exp $
 
 #ifndef __SPOOLER_PROCESS_H
 #define __SPOOLER_PROCESS_H
@@ -21,7 +21,10 @@ struct Process : zschimmer::Object
 
                                 Process                     ( Spooler* sp )                         : _spooler(sp), _zero_(this+1) {}
     Z_GNU_ONLY(                 Process                     (); )
-    
+
+
+    bool                        started                     ()                                      { return _connection != NULL; }
+
     void                        start                       ();
     object_server::Session*     session                     ()                                      { return _session; }
   //void                    set_event                       ( Event* e )                            { if( _connection )  _connection->set_event( e ); }
@@ -30,6 +33,8 @@ struct Process : zschimmer::Object
     void                        remove_module_instance      ( Module_instance* );
     int                         module_instance_count       ()                                      { return _module_instance_count; }
     void                    set_temporary                   ( bool t )                              { _temporary = t; }
+    void                    set_job_name                    ( const string& job_name )              { _job_name = job_name; }
+    void                    set_task_id                     ( int id )                              { _task_id = id; }
     int                         pid                         ()                                      { return _connection? _connection->pid() : 0; }
     bool                        kill                        ();
 
@@ -45,8 +50,10 @@ struct Process : zschimmer::Object
     ptr<object_server::Session>    _session;                // Wir haben immer nur eine Session pro Verbindung
     bool                       _temporary;                  // Löschen, wenn kein Module_instance mehr läuft
     long                       _module_instance_count;
-    int                        _timeout;                    // Max. Dauer einer Operation
+  //int                        _timeout;                    // Max. Dauer einer Operation
     Process_class*             _process_class;
+    string                     _job_name;
+    int                        _task_id;
 };
 
 //-------------------------------------------------------------------------------------Process_list
@@ -65,8 +72,8 @@ struct Process_class : zschimmer::Object
     void                        add_process                 ( Process* );
     void                        remove_process              ( Process* );
 
-    Process*                    start_process               ();
-    Process*                    select_process_if_available ();                                   // Startet bei Bedarf. Bei _max_processes: return NULL
+    Process*                    new_process                 ();
+    Process*                    select_process_if_available ();                                     // Startet bei Bedarf. Bei _max_processes: return NULL
 
     void                    set_dom                         ( const xml::Element_ptr& );
     xml::Element_ptr            dom                         ( const xml::Document_ptr&, Show_what );

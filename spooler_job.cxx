@@ -1,4 +1,4 @@
-// $Id: spooler_job.cxx,v 1.22 2003/09/22 07:54:56 jz Exp $
+// $Id: spooler_job.cxx,v 1.23 2003/09/23 14:01:08 jz Exp $
 /*
     Hier sind implementiert
 
@@ -899,59 +899,56 @@ Sos_ptr<Task> Job::task_to_start()
 
     Time            now   = Time::now();
     Start_cause     cause = cause_none;
-    Sos_ptr<Task>   task = NULL;
+    Sos_ptr<Task>   task  = NULL;
 
-  //if( _state == s_pending )
+    task = dequeue_task( now );
+    if( task )  cause = task->_start_at? cause_queue_at : cause_queue;
+        
+    if( _state == s_pending && now >= _next_single_start )  cause = cause_period_single;     
+                                                      else  select_period(now);
+
+    if( cause                      // Auf weitere Anlässe prüfen und diese protokollieren
+     || is_in_period(now) )
     {
-        task = dequeue_task( now );
-        if( task )  cause = task->_start_at? cause_queue_at : cause_queue;
-            
-        if( _state == s_pending && now >= _next_single_start )  cause = cause_period_single;     
-                                                          else  select_period(now);
-
-        if( cause                      // Auf weitere Anlässe prüfen und diese protokollieren
-         || is_in_period(now) )
+        THREAD_LOCK( _lock )
         {
-            THREAD_LOCK( _lock )
+            if( _state == s_pending )
             {
-                if( _state == s_pending )
-                {
-                    if( _start_once )              cause = cause_period_once,  _start_once = false,     _log.debug( "Task startet wegen <run_time once=\"yes\">" );
-                                                                            
-                    if( now >= _next_start_time )  cause = cause_period_repeat,                         _log.debug( "Task startet, weil Job-Startzeit erreicht: " + _next_start_time.as_string() );
+                if( _start_once )              cause = cause_period_once,  _start_once = false,     _log.debug( "Task startet wegen <run_time once=\"yes\">" );
+                                                                        
+                if( now >= _next_start_time )  cause = cause_period_repeat,                         _log.debug( "Task startet, weil Job-Startzeit erreicht: " + _next_start_time.as_string() );
 
-                    Directory_watcher_list::iterator it = _directory_watcher_list.begin();
-                    while( it != _directory_watcher_list.end() )
+                Directory_watcher_list::iterator it = _directory_watcher_list.begin();
+                while( it != _directory_watcher_list.end() )
+                {
+                    if( (*it)->signaled_then_reset() )
                     {
-                        if( (*it)->signaled_then_reset() )
+                        cause = cause_directory;
+                        _log.debug( "Task startet wegen eines Ereignisses für Verzeichnis " + (*it)->directory() );
+                        
+                        if( !(*it)->valid() )
                         {
-                            cause = cause_directory;
-                            _log.debug( "Task startet wegen eines Ereignisses für Verzeichnis " + (*it)->directory() );
-                            
-                            if( !(*it)->valid() )
-                            {
-                                it = _directory_watcher_list.erase( it );  // Folge eines Fehlers, s. Directory_watcher::set_signal
-                                continue;
-                            }
+                            it = _directory_watcher_list.erase( it );  // Folge eines Fehlers, s. Directory_watcher::set_signal
+                            continue;
                         }
-
-                        it++;
                     }
-                }
 
-                if( !cause && _order_queue )
-                {
-                    ptr<Order> order = _order_queue->first_order( now );
-                    if( order )                cause = cause_order,                                     _log.debug( "Task startet wegen Auftrag " + order->obj_name() );
+                    it++;
                 }
-                                                                                    
-                if( !task && cause )
-                {
-                    task = create_task( NULL, "", now );
+            }
 
-                    task->_cause = cause;
-                    task->_let_run |= ( cause == cause_period_single );
-                }
+            if( !cause && _order_queue )
+            {
+                ptr<Order> order = _order_queue->first_order( now );
+                if( order )                cause = cause_order,                                     _log.debug( "Task startet wegen Auftrag " + order->obj_name() );
+            }
+                                                                                
+            if( !task && cause )
+            {
+                task = create_task( NULL, "", now );
+
+                task->_cause = cause;
+                task->_let_run |= ( cause == cause_period_single );
             }
         }
     }
@@ -976,7 +973,7 @@ bool Job::do_something()
         if( _reread )  _reread = false,  reread(),  something_done = true;
 
         if( _state == s_pending 
-        || _state == s_running  &&  _running_tasks.size() < _max_tasks )
+         || _state == s_running  &&  _running_tasks.size() < _max_tasks )
         {
             Sos_ptr<Task> task = task_to_start();
             if( task )
@@ -1332,7 +1329,10 @@ ptr<Module_instance> Job::create_module_instance()
     THREAD_LOCK( _lock )
     {
         if( _state == s_read_error )  throw_xc( "SPOOLER-190" );
+
         result = _module_ptr->create_instance();
+
+        result->set_job_name( name() ); 
         result->set_log( &_log );
     }
 

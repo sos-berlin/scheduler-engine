@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.193 2003/09/22 09:12:09 jz Exp $
+// $Id: spooler_task.cxx,v 1.194 2003/09/23 14:01:08 jz Exp $
 /*
     Hier sind implementiert
 
@@ -268,7 +268,11 @@ xml::Element_ptr Task::dom( const xml::Document_ptr& document, Show_what show )
 
         task_element.setAttribute( "name"            , _name );
 
+        if( _running_since )
         task_element.setAttribute( "running_since"   , _running_since.as_string() );
+
+        if( _cause )
+        task_element.setAttribute( "cause"           , start_cause_name( _cause ) );
 
         if( _state == s_running  &&  _last_process_start_time )
         task_element.setAttribute( "in_process_since", _last_process_start_time.as_string() );
@@ -304,7 +308,10 @@ void Task::enter_thread( Spooler_thread* thread )
     THREAD_LOCK( _lock )
     {
         _thread = thread;  
-        set_state( s_start_task );
+
+      //if( dynamic_cast<Remote_module_instance_proxy*>( +_module_instance ) )
+        set_state( s_loading );
+
         thread->add_task( this );       // Jetzt kann der Thread die Task schon starten!
     }
 }
@@ -313,7 +320,7 @@ void Task::enter_thread( Spooler_thread* thread )
 
 void Task::leave_thread()
 { 
-    // Thread entfernt Task die Task, wenn er die Schleife über die _task_list beendet hat. _thread->remove_task( this );  
+    // Thread entfernt die Task, wenn er die Schleife über die _task_list beendet hat. _thread->remove_task( this );  
     _thread = NULL; 
 }
 
@@ -423,6 +430,8 @@ string Task::state_name( State state )
     switch( state )
     {
         case s_none:                        return "none";
+        case s_loading:                     return "loading";
+        case s_waiting_for_process:         return "waiting_for_process";
         case s_start_task:                  return "start_task";
         case s_starting:                    return "starting";
         case s_running:                     return "running";
@@ -487,7 +496,8 @@ void Task::set_next_time( const Time& next_time )
 
 Time Task::next_time()
 { 
-    return _operation? _timeout == latter_day? latter_day
+    return _state == s_waiting_for_process   ? latter_day :
+           _operation? _timeout == latter_day? latter_day
                                              : Time( _last_operation_time + _timeout )     // _timeout sollte nicht zu groß sein
                      : _next_time;
 }
@@ -580,6 +590,18 @@ bool Task::do_something()
 
             switch( _state )
             {
+                case s_loading:
+                {
+                    load();
+
+                case s_waiting_for_process:
+                    bool ok = _module_instance->try_to_get_process();
+                    if( ok )  something_done = true, set_state( s_start_task ), loop = true;
+                        else  set_state( s_waiting_for_process );
+                    break;
+                }
+
+
                 case s_start_task:
                 {
                     _begin_called = true;
@@ -817,29 +839,34 @@ bool Task::do_something()
     return something_done;
 }
 
-//------------------------------------------------------------------------------------Task::prepare
+//---------------------------------------------------------------------------------------Task::load
+
+void Task::load()
+{
+    if( !_spooler->log_directory().empty()  &&  _spooler->log_directory()[0] != '*' )
+    {
+        _log.set_filename( _spooler->log_directory() + "/task." + _job->jobname_as_filename() + "." + as_string(_id) + ".log" );      // Task-Protokoll
+        _log.open();                // Jobprotokoll. Nur wirksam, wenn set_filename() gerufen
+    }
+
+
+    THREAD_LOCK( _lock )
+    {
+        _thread->count_task();
+        reset_error();
+        _running_since = Time::now();
+    }
+
+    do_load();
+    //if( has_error() )  return false;
+}
+
+//---------------------------------------------------------------------------------Task::begin_start
 
 Async_operation* Task::begin__start()
 {
   //try 
     {
-        if( !_spooler->log_directory().empty()  &&  _spooler->log_directory()[0] != '*' )
-        {
-            _log.set_filename( _spooler->log_directory() + "/task." + _job->jobname_as_filename() + "." + as_string(_id) + ".log" );      // Task-Protokoll
-            _log.open();                // Jobprotokoll. Nur wirksam, wenn set_filename() gerufen
-        }
-
-
-        THREAD_LOCK( _lock )
-        {
-            _thread->count_task();
-            reset_error();
-            _running_since = Time::now();
-        }
-
-        do_load();
-        //if( has_error() )  return false;
-
         return do_begin__start();
     }
   //catch( const exception& x ) { set_error( x ); }
@@ -1223,7 +1250,8 @@ void Job_module_task::do_load()
     {
         module_instance = _job->create_module_instance();
         is_new = true;
-        module_instance->set_close_instance_at_end( true );  //_close_engine = true;
+        module_instance->set_close_instance_at_end( true );
+        module_instance->set_job_name( _job->name() );      // Nur zum Debuggen (für shell-Kommando ps)
     }
 
   //module_instance->set_title( obj_name() );
