@@ -47,6 +47,9 @@
 				Name="VCCustomBuildTool"
 				CommandLine="echo jar cfm &quot;$(TargetDir)sos.spooler.jar&quot; ../java_manifest sos/spooler/*.class
 cd &quot;$(IntDir)&quot; &amp;&amp; jar cfm &quot;$(TargetDir)sos.spooler.jar&quot; ../java_manifest sos/spooler/*.class
+echo ant -f ../javadoc.xml
+ant -f ../javadoc.xml
+
 "
 				Outputs="$(TargetDir)sos.spooler.jar"/>
 			<Tool
@@ -123,6 +126,7 @@ cd &quot;$(IntDir)&quot; &amp;&amp; jar cfm &quot;$(TargetDir)sos.spooler.jar&qu
 				Name="VCCustomBuildTool"
 				CommandLine="echo jar cfm &quot;$(TargetDir)sos.spooler.jar&quot; ../java_manifest sos/spooler/*.class
 cd &quot;$(IntDir)&quot; &amp;&amp; jar cfm &quot;$(TargetDir)sos.spooler.jar&quot; ../java_manifest sos/spooler/*.class
+ant -f ../javadoc.xml
 "
 				Outputs="$(TargetDir)sos.spooler.jar"/>
 			<Tool
