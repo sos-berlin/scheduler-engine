@@ -1,4 +1,4 @@
-// $Id: spooler_wait.cxx,v 1.82 2003/10/07 08:36:01 jz Exp $
+// $Id: spooler_wait.cxx,v 1.83 2003/10/07 09:07:28 jz Exp $
 /*
     Hier sind implementiert
 
@@ -533,7 +533,7 @@ struct Directory_reader
     string first( const string& dirname ) 
     { 
         _handle = opendir( dirname.c_str() );
-        if( !_handle )  throw_errno( errno, "opendir" );
+        if( !_handle )  throw_errno( errno, "opendir", dirname.c_str() );
 
         return next();
     }
