@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.16 2003/02/23 20:47:24 jz Exp $
+# $Id: Makefile,v 1.17 2003/03/05 17:15:37 jz Exp $
 
 ifndef PROD_DIR
 prod_dir = ..
@@ -82,7 +82,7 @@ endif
 
 $(BIN_DIR)/spooler: spooler.o $(objects) ../kram/$(O_DIR)/soswnmai.o ../zschimmer/$(O_DIR)/perl_scripting_engine_module.o $(foreach p,$(DEP_PRODUCTS),$(PROD_DIR)/$(p)/$(O_DIR)/lib$(p).a) $(PERL_DIR)/libperl.a
 	-$(CCPP) $(DEBUG) $(LINK_FLAGS) $^ $(LIBPATH) $(SOS_LIBS) $(LIBS) -o $@
+	chmod a+rx $@
 	echo ^G
-
 
 endif

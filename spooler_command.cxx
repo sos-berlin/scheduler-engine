@@ -1,4 +1,4 @@
-// $Id: spooler_command.cxx,v 1.78 2003/03/04 09:08:34 jz Exp $
+// $Id: spooler_command.cxx,v 1.79 2003/03/05 17:15:37 jz Exp $
 /*
     Hier ist implementiert
 
@@ -172,7 +172,8 @@ void Command_processor::abort_immediately( int exit_code )
 
 #    else
 
-        kill( 0, SIGKILL );   // signal is sent to every process in the process group of the current process.
+        //kill( 0, SIGKILL );   // Das killt auch den neuen Spooler.  signal is sent to every process in the process group of the current process.
+        kill( _spooler->_pid, SIGKILL );
         _exit( exit_code );
 
 #   endif
