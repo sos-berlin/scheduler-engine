@@ -91,7 +91,7 @@
 				AssemblerListingLocation="$(IntDir)/"
 				ObjectFile="$(IntDir)/"
 				ProgramDataBaseFileName="$(IntDir)/vc70.pdb"
-				BrowseInformation="2"
+				BrowseInformation="0"
 				WarningLevel="3"
 				DebugInformationFormat="2"/>
 			<Tool

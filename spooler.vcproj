@@ -41,7 +41,7 @@
 				AssemblerListingLocation="$(IntDir)/"
 				ObjectFile="$(IntDir)/"
 				ProgramDataBaseFileName="$(IntDir)/vc70.pdb"
-				BrowseInformation="2"
+				BrowseInformation="0"
 				WarningLevel="3"
 				SuppressStartupBanner="TRUE"
 				DebugInformationFormat="2"/>
@@ -60,7 +60,7 @@ ant -f ../javadoc.xml
 				OutputFile="$(OutDir)/scheduler.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
-				DelayLoadDLLs="winspool.drv;ws2_32.dll;ole32.dll;oleaut32.dll;advapi32.dll;odbc32.dll;libctleasy.dll;js32.dll;liveconnect.dll"
+				DelayLoadDLLs="winspool.drv;ws2_32.dll;ole32.dll;oleaut32.dll;advapi32.dll;odbc32.dll;libctleasy.dll;spidermonkey.dll;liveconnect.dll"
 				ProgramDatabaseFile="$(OutDir)/pdb/$(TargetName).pdb"
 				GenerateMapFile="TRUE"
 				MapFileName="$(OutDir)/pdb/$(TargetName).map"
