@@ -1,4 +1,4 @@
-// $Id: spooler_module_com.cxx,v 1.20 2003/08/30 22:40:27 jz Exp $
+// $Id: spooler_module_com.cxx,v 1.21 2003/09/05 11:16:19 jz Exp $
 /*
     Hier sind implementiert
 
@@ -164,15 +164,15 @@ void Com_module_instance::load()
 
 void Com_module_instance::add_obj( const ptr<IDispatch>& object, const string& name )
 {
-    if( name == "spooler_log"    )  _com_context->_log     = (qi_ptr<spooler_com::Ilog>)    object;
+    if( name == "spooler_log"    )  _com_context->_log     = object;
     else
-    if( name == "spooler"        )  _com_context->_spooler = (qi_ptr<spooler_com::Ispooler>)object;
+    if( name == "spooler"        )  _com_context->_spooler = object;
     else
-  //if( name == "spooler_thread" )  _com_context->_thread  = (qi_ptr<spooler_com::Ithread>) object;
+  //if( name == "spooler_thread" )  _com_context->_thread  = object;
   //else
-    if( name == "spooler_job"    )  _com_context->_job     = (qi_ptr<spooler_com::Ijob>)    object;
+    if( name == "spooler_job"    )  _com_context->_job     = object;
     else
-    if( name == "spooler_task"   )  _com_context->_task    = (qi_ptr<spooler_com::Itask>)   object;
+    if( name == "spooler_task"   )  _com_context->_task    = object;
     else
         throw_xc( "Module_instance::add_obj", name.c_str() );
 

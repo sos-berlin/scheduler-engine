@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.247 2003/09/04 15:53:08 jz Exp $
+// $Id: spooler.cxx,v 1.248 2003/09/05 11:16:18 jz Exp $
 /*
     Hier sind implementiert
 
@@ -1217,6 +1217,8 @@ void Spooler::load_arg()
             else
             if( opt.with_value( "job"              ) )  _job_name = opt.value();        // Nicht von SOS beauftragt
             else
+            if( opt.with_value( "program-file"     ) )  _my_program_filename = opt.value();        // ...\spooler.exe
+            else
             if( opt.with_value( "send-cmd"         ) )  _send_cmd = opt.value();
             else
                 throw_sos_option_error( opt );
@@ -1684,18 +1686,20 @@ void Spooler::run()
                 int ___SPOOLER_IST_GEDROSSELT______SPOOLER_IST_GEDROSSELT______SPOOLER_IST_GEDROSSELT___;
                 if( ++throttle_loop_count > 20 )
                 {
-                    LOG( "Spooler wird gedrosselt... something_done=" << something_done + " _next_time=" + _next_time.as_string() + "\n\n" );
-                    sos_sleep(0.1);                             // Erstmal alle 20 Durchläufe bremsen!
+#                   ifndef Z_WINDOWS
+                        LOG( "Spooler wird gedrosselt... something_done=" << something_done + " _next_time=" + _next_time.as_string() + "\n\n" );
+                        sos_sleep(0.1);                             // Erstmal alle 20 Durchläufe bremsen!
+#                   endif
 
                     if( Time::now() < throttle_time + 0.02 )
                     {
+                        LOG( "Spooler wird gedrosselt... something_done=" << something_done + " _next_time=" + _next_time.as_string() + "\n\n" );
                         sos_sleep(0.4);                         // Bei mehr als 20 Schritten in 20ms
                     }
 
                     throttle_loop_count = 0;
                     throttle_time = Time::now();
                 }
-
 
                 if( !something_done  &&  _next_time > 0 )
                 {

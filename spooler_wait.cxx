@@ -1,4 +1,4 @@
-// $Id: spooler_wait.cxx,v 1.72 2003/09/02 16:28:30 jz Exp $
+// $Id: spooler_wait.cxx,v 1.73 2003/09/05 11:16:19 jz Exp $
 /*
     Hier sind implementiert
 
@@ -377,8 +377,8 @@ int Wait_handles::wait_until_2( Time until )
             
                 if( event )
                 {
-                    event->set_signal();
-                  //if( _spooler->_debug )  _log->debug9( event->as_text() );
+                    event->set_signaled();
+                  //Z_DEBUG_ONLY( if( _spooler->_debug )  _log->debug9( event->as_text() ); )
                 }
 
                 return index;
@@ -693,10 +693,10 @@ void Directory_watcher::set_signal()
 
         try
         {
-            if( _filename_pattern.empty()  ||  match() )  Event::set_signal();
+            if( _filename_pattern.empty()  ||  match() )  Event::set_signaled();
 
-                BOOL ok = FindNextChangeNotification( _handle );
-                if( !ok )  throw_mswin_error( "FindNextChangeNotification" );
+            BOOL ok = FindNextChangeNotification( _handle );
+            if( !ok )  throw_mswin_error( "FindNextChangeNotification" );
         }
         catch( const exception& x ) 
         {
@@ -704,7 +704,7 @@ void Directory_watcher::set_signal()
 
             _log->error( "Überwachung des Verzeichnisses " + _directory + " wird nach Fehler beendet: " + x.what() ); 
             _directory = "";   // Damit erneutes start_when_directory_changed() diese (tote) Überwachung nicht erkennt.
-            Event::set_signal();
+            Event::set_signaled();
             close();
         }
 

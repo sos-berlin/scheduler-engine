@@ -1,4 +1,4 @@
-// $Id: spooler_idl.h,v 1.19 2003/08/11 19:33:11 jz Exp $
+// $Id: spooler_idl.h,v 1.20 2003/09/05 11:16:19 jz Exp $
 
 
 /*  Ersatz für spooler.odl für Systeme ohne COM. 
@@ -311,15 +311,15 @@ struct Ispooler_context : IDispatch
 {
     DEFINE_UUIDOF( Ispooler_context )
 
-    virtual HRESULT     get_log                     ( Ilog** log ) = 0;
+    virtual HRESULT     get_log                     ( Idispatch** log ) = 0;
 
-    virtual HRESULT     get_spooler                 ( Ispooler** spooler ) = 0;
+    virtual HRESULT     get_spooler                 ( Idispatch** spooler ) = 0;
 
   //virtual HRESULT     get_thread                  ( Ithread** thread ) = 0;
 
-    virtual HRESULT     get_job                     ( Ijob** job ) = 0;
+    virtual HRESULT     get_job                     ( Idispatch** job ) = 0;
 
-    virtual HRESULT     get_Task                    ( Itask** task ) = 0;
+    virtual HRESULT     get_Task                    ( Idispatch** task ) = 0;
 };
 
 //-----------------------------------------------------------------------------------------Mail

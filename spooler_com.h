@@ -1,4 +1,4 @@
-// $Id: spooler_com.h,v 1.75 2003/08/30 22:40:26 jz Exp $
+// $Id: spooler_com.h,v 1.76 2003/09/05 11:16:19 jz Exp $
 
 #ifndef __SPOOLER_COM_H
 #define __SPOOLER_COM_H
@@ -421,20 +421,27 @@ struct Com_context : spooler_com::Ispooler_context, Sos_ole_object
 
     USE_SOS_OLE_OBJECT
 
-    STDMETHODIMP                get_log                     ( spooler_com::Ilog**     o )        { return _log    .CopyTo(o); }
-    STDMETHODIMP                get_spooler                 ( spooler_com::Ispooler** o )        { return _spooler.CopyTo(o); }
-  //STDMETHODIMP                get_thread                  ( spooler_com::Ithread**  o )        { return _thread .CopyTo(o); }
-    STDMETHODIMP                get_job                     ( spooler_com::Ijob**     o )        { return _job    .CopyTo(o); }
-    STDMETHODIMP                get_Task                    ( spooler_com::Itask**    o )        { return _task   .CopyTo(o); }
+    STDMETHODIMP                get_log                     ( IDispatch** o )        { return _log    .CopyTo(o); }
+    STDMETHODIMP                get_spooler                 ( IDispatch** o )        { return _spooler.CopyTo(o); }
+  //STDMETHODIMP                get_thread                  ( IDispatch** o )        { return _thread .CopyTo(o); }
+    STDMETHODIMP                get_job                     ( IDispatch** o )        { return _job    .CopyTo(o); }
+    STDMETHODIMP                get_Task                    ( IDispatch** o )        { return _task   .CopyTo(o); }
 
 
     Thread_semaphore           _lock;
 
+    ptr<IDispatch>             _log;
+    ptr<IDispatch>             _spooler;
+  //ptr<IDispatch>             _thread;
+    ptr<IDispatch>             _job;
+    ptr<IDispatch>             _task;
+/*
     ptr<spooler_com::Ilog>     _log;
     ptr<spooler_com::Ispooler> _spooler;
   //ptr<spooler_com::Ithread>  _thread;
     ptr<spooler_com::Ijob>     _job;
     ptr<spooler_com::Itask>    _task;
+*/
 };
 
 //------------------------------------------------------------------------------------Com_job_chain

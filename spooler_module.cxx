@@ -1,4 +1,4 @@
-// $Id: spooler_module.cxx,v 1.42 2003/09/02 16:28:29 jz Exp $
+// $Id: spooler_module.cxx,v 1.43 2003/09/05 11:16:19 jz Exp $
 /*
     Hier sind implementiert
 
@@ -437,7 +437,10 @@ bool Module_instance::begin__end()
         FOR_EACH_CONST( Object_list, _object_list, o )  add_obj( o->_object, o->_name );
         load();
         start();
+    }
 
+    if( !_spooler_init_called )
+    {
         _spooler_init_called = true;
         bool ok = check_result( call_if_exists( spooler_init_name ) );
         if( !ok )  return ok;
@@ -457,6 +460,8 @@ Async_operation* Module_instance::end__start( bool success )
 
 void Module_instance::end__end()
 {
+    if( !loaded() )  return;
+
     //try
     {
         call_if_exists( spooler_close_name );

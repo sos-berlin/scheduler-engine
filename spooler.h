@@ -1,4 +1,4 @@
-// $Id: spooler.h,v 1.155 2003/09/04 15:53:08 jz Exp $
+// $Id: spooler.h,v 1.156 2003/09/05 11:16:19 jz Exp $
 
 #ifndef __SPOOLER_H
 #define __SPOOLER_H
@@ -288,6 +288,7 @@ struct Spooler
     Log                        _base_log;
     Prefix_log                 _log;
     int                        _pid;
+    string                     _my_program_filename;
     bool                       _is_service;                 // NT-Dienst
     bool                       _debug;
     int                        _log_level;
@@ -391,6 +392,7 @@ struct Spooler
     Process_class_list         _process_class_list;
     Process_list               _process_list;
     int                        _process_count_max;
+
 
     Job*                       _next_job;
     Time                       _next_time;

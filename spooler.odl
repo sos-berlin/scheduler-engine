@@ -1,4 +1,4 @@
-// $Id: spooler.odl,v 1.63 2003/08/25 20:41:26 jz Exp $
+// $Id: spooler.odl,v 1.64 2003/09/05 11:16:19 jz Exp $
 
 // Anweisung: midl /nologo /error all /out $(OutDir) $(InputPath)
 
@@ -477,19 +477,19 @@ library spooler
     interface Ispooler_context : IDispatch
     {
         [propget]
-        HRESULT                 log                     ( [out,retval] Ilog** log );
+        HRESULT                 log                     ( [out,retval] Idispatch** log );
 
         [propget]
-        HRESULT                 spooler                 ( [out,retval] Ispooler** spooler );
+        HRESULT                 spooler                 ( [out,retval] Idispatch** spooler );
 
       //[propget]
       //HRESULT                 thread                  ( [out,retval] Ithread** thread );
 
         [propget]
-        HRESULT                 job                     ( [out,retval] Ijob** job );
+        HRESULT                 job                     ( [out,retval] Idispatch** job );
 
         [propget]
-        HRESULT                 task                    ( [out,retval] Itask** task );
+        HRESULT                 task                    ( [out,retval] Idispatch** task );
     }
 
     [
