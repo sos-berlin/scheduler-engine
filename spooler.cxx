@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.95 2002/04/17 21:37:18 jz Exp $
+// $Id: spooler.cxx,v 1.96 2002/04/18 20:08:56 jz Exp $
 /*
     Hier sind implementiert
 
@@ -445,6 +445,8 @@ void Spooler::load_arg()
         {
             if( opt.flag      ( "service"          ) )  ;   // wurde in sos_main() bearbeitet
             else
+            if( opt.with_value( "service"          ) )  ;   // wurde in sos_main() bearbeitet
+            else
             if( opt.with_value( "log"              ) )  ;   // wurde in sos_main() bearbeitet
             else
             if( opt.with_value( "ini"              ) )  ;   //
@@ -840,7 +842,7 @@ void spooler_restart( bool is_service )
 
 //------------------------------------------------------------------------------------spooler_renew
 
-static void spooler_renew( const string& id, const string& renew_spooler, bool is_service, const string& command_line )
+static void spooler_renew( const string& service_name, const string& renew_spooler, bool is_service, const string& command_line )
 {
     string this_spooler = program_filename();
     BOOL   copy_ok      = true;
@@ -853,11 +855,11 @@ static void spooler_renew( const string& id, const string& renew_spooler, bool i
 
         for( t; t > 0; t -= renew_wait_interval )
         {
-            if( spooler::service_state(id) == SERVICE_STOPPED )  break;    
+            if( spooler::service_state(service_name) == SERVICE_STOPPED )  break;    
             sos_sleep( renew_wait_interval );
         }
 
-        if( spooler::service_state(id) != SERVICE_STOPPED )  return;
+        if( spooler::service_state(service_name) != SERVICE_STOPPED )  return;
     }
 
     if( renew_spooler != this_spooler )
@@ -876,7 +878,7 @@ static void spooler_renew( const string& id, const string& renew_spooler, bool i
         }
     }
 
-    if( is_service )  spooler::service_start( id );
+    if( is_service )  spooler::service_start( service_name );
                 else  start_process( quoted_string(renew_spooler,'"','"') + " " + command_line );
 }
 
@@ -958,6 +960,8 @@ int sos_main( int argc, char** argv )
     bool    do_install_service = false;
     bool    do_remove_service = false;
     string  id;
+    string  service_name, service_display;
+    string  service_description = "Hintergrund-Jobs der Document Factory";
     string  renew_spooler;
     string  command_line;
     bool    renew_service = false;
@@ -975,11 +979,21 @@ int sos_main( int argc, char** argv )
         {
             if( opt.flag      ( "install-service"  ) )  do_install_service = opt.set();
             else
+            if( opt.with_value( "install-service"  ) )  do_install_service = true, service_name = opt.value();
+            else
             if( opt.flag      ( "remove-service"   ) )  do_remove_service = opt.set();
             else
+            if( opt.with_value( "service-name"     ) )  service_name = opt.value();
+            else
+            if( opt.with_value( "service-display"  ) )  service_display = opt.value();
+            else
+            if( opt.with_value( "service-descr"    ) )  service_description = opt.value();
+            else
+            if( opt.flag      ( "service"          ) )  is_service = opt.set(), is_service_set = true;
+            else
+            if( opt.with_value( "service"          ) )  is_service = true, is_service_set = true, service_name = opt.value();
+            else
             {
-                if( opt.flag      ( "service"          ) )  is_service = opt.set(), is_service_set = true;
-                else
                 if( opt.with_value( "id"               ) )  id = opt.value();
                 else
                 if( opt.with_value( "ini"              ) )  factory_ini = opt.value();
@@ -992,22 +1006,33 @@ int sos_main( int argc, char** argv )
         }
     }
 
+    if( service_name != "" ) 
+    {
+        if( service_display == "" )  service_display = service_name;
+    }
+    else
+    {
+        service_name = spooler::make_service_name(id);
+        if( service_display == "" )  service_display = spooler::make_service_display(id);
+    }
+
     if( log_filename.empty() )  log_filename = read_profile_string( factory_ini, "spooler", "log" );
     if( !log_filename.empty() )  log_start( log_filename );
 
     if( !renew_spooler.empty() )  
     { 
-        spooler::spooler_renew( id, renew_spooler, renew_service, command_line ); 
+        spooler::spooler_renew( service_name, renew_spooler, renew_service, command_line ); 
         ret = 0;
     }
     else
     if( do_remove_service | do_install_service )
     {
-        if( do_remove_service  )  spooler::remove_service( id );
+        if( do_remove_service  )  spooler::remove_service( service_name );
         if( do_install_service ) 
         {
-            if( !is_service )  command_line = "-service " + command_line;
-            spooler::install_service( id, command_line );
+            //if( !is_service )  command_line = "-service " + command_line;
+            command_line = "-service=" + service_name + " " + command_line;
+            spooler::install_service( service_name, service_display, service_description, command_line );
         }
         ret = 0;
     }
@@ -1015,11 +1040,11 @@ int sos_main( int argc, char** argv )
     {
         _beginthread( spooler::delete_new_spooler, 50000, NULL );
 
-      //if( !is_service_set )  is_service = spooler::service_is_started(id);
+      //if( !is_service_set )  is_service = spooler::service_is_started(service_name);
 
         if( is_service )
         {
-            ret = spooler::spooler_service( id, argc, argv );
+            ret = spooler::spooler_service( service_name, argc, argv );
         }
         else
         {
