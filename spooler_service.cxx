@@ -1,7 +1,9 @@
-// $Id: spooler_service.cxx,v 1.1 2001/01/13 18:43:59 jz Exp $
+// $Id: spooler_service.cxx,v 1.2 2001/01/15 14:26:29 jz Exp $
 
 #include "../kram/sos.h"
 #include "../kram/log.h"
+#include "../kram/sosopt.h"
+#include "../kram/sleep.h"
 #include "spooler.h"
 
 #ifdef SYSTEM_WIN 
@@ -9,13 +11,166 @@
 #include <windows.h>
 
 namespace sos {
+
+string module_filename();
+
 namespace spooler {
 
-//-----------------------------------------------------------------------------Windows 2000 Service
+//--------------------------------------------------------------------------------------------const
 
-static const char               service_name[] = "Spooler";  // Windows 2000 Service
+static const char               service_name[]          = "DocumentFactory_Spooler";    // Windows 2000 Service
+static const char               service_display_name[]  = "DocumentFactory Spooler";    // Gezeigter Name
+static const char               service_description[]   = "Für die Hintergrund-Jobs der DocumentFactory";
+
+//-------------------------------------------------------------------------------------------static
+
 static Spooler*                 spooler_ptr;
 SERVICE_STATUS_HANDLE           service_status_handle;
+Handle                          thread_handle;
+
+//-----------------------------------------------------------------------------Service_thread_param
+
+struct Service_thread_param
+{
+    int                        _argc;
+    char**                     _argv;
+};
+
+//----------------------------------------------------------------------------------------event_log
+
+static void event_log( const string& msg )
+{
+    HANDLE h = RegisterEventSource( NULL, "Application" );
+    const char* m = msg.c_str();
+ 
+    ReportEvent( h,                     // event log handle 
+                 EVENTLOG_ERROR_TYPE,   // event type 
+                 0,                     // category zero 
+                 1,                     // event identifier ???
+                 NULL,                  // no user security identifier 
+                 1,                     // one substitution string 
+                 msg.length(),          // no data 
+                 &m,                    // pointer to string array 
+                 (void*)msg.c_str() );  // pointer to data 
+
+    DeregisterEventSource( h ); 
+
+    cerr << msg << '\n';
+}
+
+//----------------------------------------------------------------------------------install_service
+
+void install_service() 
+{ 
+    SC_HANDLE manager_handle = OpenSCManager( NULL, SERVICES_ACTIVE_DATABASE, SC_MANAGER_CREATE_SERVICE );
+    if( !manager_handle )  throw_mswin_error( "OpenSCManager" );
+
+
+    string program_path = module_filename();
+
+    SC_HANDLE service_handle = CreateService( 
+                                    manager_handle,            // SCManager database 
+                                    service_name,              // name of service 
+                                    service_display_name,      // service name to display 
+                                    SERVICE_ALL_ACCESS,        // desired access 
+                                    SERVICE_WIN32_OWN_PROCESS, // service type 
+                                    SERVICE_DEMAND_START,      // start type   oder SERVICE_AUTO_START
+                                    SERVICE_ERROR_NORMAL,      // error control type 
+                                    program_path.c_str(),      // service's binary 
+                                    NULL,                      // no load ordering group 
+                                    NULL,                      // no tag identifier 
+                                    NULL,                      // no dependencies 
+                                    NULL,                      // LocalSystem account 
+                                    NULL);                     // no password 
+
+    if( !service_handle )  throw_mswin_error( "CreateService" );
+
+
+    OSVERSIONINFO v;  memset( &v, 0, sizeof v ); v.dwOSVersionInfoSize = sizeof v;
+    GetVersionEx( &v );
+    if( v.dwMajorVersion >= 5 )     // Windows 2000?
+    {
+        SERVICE_DESCRIPTION d;
+        d.lpDescription = (char*)service_description;
+        ChangeServiceConfig2( service_handle, SERVICE_CONFIG_DESCRIPTION, &d );
+    }
+
+
+    CloseServiceHandle( service_handle ); 
+    CloseServiceHandle( manager_handle );
+} 
+
+//-----------------------------------------------------------------------------------remove_service
+
+void remove_service() 
+{ 
+    BOOL ok;
+
+    SC_HANDLE manager_handle = OpenSCManager( NULL, SERVICES_ACTIVE_DATABASE, SC_MANAGER_CREATE_SERVICE );
+    if( !manager_handle )  throw_mswin_error( "OpenSCManager" );
+
+    SC_HANDLE service_handle = OpenService( manager_handle, service_name, DELETE );
+    if( !service_handle )  throw_mswin_error( "OpenService" );
+
+    ok = DeleteService( service_handle );
+    if( !ok )  throw_mswin_error( "DeleteService" );
+
+    CloseServiceHandle( service_handle ); 
+    CloseServiceHandle( manager_handle );
+} 
+
+//-------------------------------------------------------------------------------service_is_started
+
+bool service_is_started()
+{
+    OSVERSIONINFO v;  memset( &v, 0, sizeof v ); v.dwOSVersionInfoSize = sizeof v;
+    GetVersionEx( &v );
+    if( v.dwPlatformId != VER_PLATFORM_WIN32_NT )  return false;
+
+
+    bool      is_started     = false;
+    SC_HANDLE manager_handle = 0;
+    SC_HANDLE service_handle = 0;
+
+    try 
+    {
+        BOOL ok;
+        SERVICE_STATUS status;  memset( &status, 0, sizeof status );
+
+        manager_handle = OpenSCManager( NULL, SERVICES_ACTIVE_DATABASE, SC_MANAGER_CREATE_SERVICE );
+        if( !manager_handle ) {
+            if( GetLastError() == ERROR_ACCESS_DENIED          )  goto ENDE;
+            throw_mswin_error( "OpenSCManager" );
+        }
+
+        service_handle = OpenService(manager_handle, service_name, SERVICE_QUERY_STATUS );
+        if( !service_handle ) {
+            if( GetLastError() == ERROR_ACCESS_DENIED          )  goto ENDE;
+            if( GetLastError() == ERROR_INVALID_NAME           )  goto ENDE;
+            if( GetLastError() == ERROR_SERVICE_DOES_NOT_EXIST )  goto ENDE;
+            throw_mswin_error( "OpenService" );
+        }
+
+        ok = QueryServiceStatus( service_handle, &status );
+        if( !ok ) {
+            if( GetLastError() == ERROR_ACCESS_DENIED          )  goto ENDE;
+            throw_mswin_error( "OpenService" );
+        }
+
+        if( status.dwCurrentState == SERVICE_START_PENDING )  is_started = true;
+
+      ENDE:
+        CloseServiceHandle( service_handle ),  service_handle = 0; 
+        CloseServiceHandle( manager_handle ),  manager_handle = 0;
+    }
+    catch( const Xc& )
+    {
+        CloseServiceHandle( service_handle ); 
+        CloseServiceHandle( manager_handle );
+    }
+
+    return is_started;
+}
 
 //----------------------------------------------------------------------------------service_handler
 
@@ -34,7 +189,7 @@ static void set_service_status( int spooler_error = 0 )
                                                 : spooler_ptr->_state == Spooler::s_stopping? SERVICE_STOP_PENDING
                                                 : spooler_ptr->_state == Spooler::s_running ? SERVICE_RUNNING
                                                 : spooler_ptr->_state == Spooler::s_paused  ? SERVICE_PAUSED
-                                                                                            : SERVICE_STOPPED; 
+                                                                                            : SERVICE_START_PENDING; 
 
     service_status.dwControlsAccepted           = SERVICE_ACCEPT_STOP 
                                                 | SERVICE_ACCEPT_PAUSE_CONTINUE 
@@ -46,6 +201,7 @@ static void set_service_status( int spooler_error = 0 )
     service_status.dwCheckPoint                 = 0; 
     service_status.dwWaitHint                   = service_status.dwCurrentState == SERVICE_START_PENDING? 10*1000 : 0;  // 10s erlauben für den Start (wenn es ein Startskript mit DB-Verbindung gibt)
 
+    LOG( "SetServiceStatus\n" );
     SetServiceStatus( service_status_handle, &service_status );
 }
 
@@ -60,7 +216,7 @@ static void __stdcall Handler( DWORD dwControl )
         switch( dwControl )
         {
             case SERVICE_CONTROL_STOP:              // Requests the service to stop.  
-                spooler_ptr->cmd_stop();
+                spooler_ptr->cmd_terminate();
                 break;
 
             case SERVICE_CONTROL_PAUSE:             // Requests the service to pause.  
@@ -103,27 +259,86 @@ static void __stdcall Handler( DWORD dwControl )
     set_service_status();
 }
 
+//-------------------------------------------------------------------------------------------------
+
+static void spooler_state_changed( Spooler*, void* )
+{
+    set_service_status();
+}
+
+//-----------------------------------------------------------------------------------service_thread
+
+static ulong __stdcall service_thread( void* param )
+{
+    LOG( "service_thread\n" );
+
+    Service_thread_param* p   = (Service_thread_param*)param;
+    int                   ret = 0;
+
+    {
+        Spooler spooler;
+        spooler_ptr = &spooler;
+        
+        spooler.set_state_changed_handler( spooler_state_changed );
+        set_service_status();
+
+        try
+        {
+            LOG( "Spooler launch\n" );
+            spooler_ptr->launch( p->_argc, p->_argv );
+        }
+        catch( const Xc& x )
+        {
+            event_log( x.what() );
+            set_service_status(2);
+            spooler._log.error( x.what() );
+            spooler_ptr = NULL;
+            ret = 1;
+          //throw;
+        }
+
+        spooler_ptr = NULL;
+    }
+
+    set_service_status();
+
+    return ret;
+}
+
 //--------------------------------------------------------------------------------------ServiceMain
 
 static void __stdcall ServiceMain( DWORD argc, char** argv )
 {
-    LOGI( "ServiceMain()\n" );
-
-    Spooler spooler;
-
+    LOGI( "ServiceMain(argc=" << argc << ")\n" );
+    
     try
     {
-        spooler_ptr = &spooler;
+        DWORD                   thread_id;
+        Service_thread_param    param;
+        int                     ret;
 
+        for( Sos_option_iterator opt ( argc, argv ); !opt.end(); opt.next() )
+        {
+            if( opt.with_value( "log"              ) )  log_start( opt.value() );
+        }
+
+        param._argc = argc;
+        param._argv = argv;
+
+        LOG( "RegisterServiceCtrlHandler\n" );
         service_status_handle = RegisterServiceCtrlHandler( service_name, &Handler );
         if( !service_status_handle )  throw_mswin_error( "RegisterServiceCtrlHandler" );
+
+        LOG( "CreateThread\n" );
+        thread_handle = CreateThread( NULL, 0, service_thread, &param, 0, &thread_id );
+        if( !thread_handle )  throw_mswin_error( "CreateThread" );
+
+        do ret = WaitForSingleObject( thread_handle, INT_MAX );  while( ret != WAIT_TIMEOUT );
+
+        TerminateThread( thread_handle, 99 );   // Sollte nicht nötig sein. Nützt auch nicht, weil Destruktoren nicht gerufen werden und Komnunikations-Thread vielleicht noch läuft.
     }
-    catch( const Xc& )
-    {
-        set_service_status(2);
-        spooler_ptr = NULL;
-        throw;
-    }
+    catch( const Xc& x        ) { event_log( x.what() ); }
+    catch( const exception& x ) { event_log( x.what() ); }
 }
 
 //----------------------------------------------------------------------------------spooler_service
@@ -143,30 +358,12 @@ int spooler_service( int argc, char** argv )
 
         LOGI( "StartServiceCtrlDispatcher()\n" );
 
-        DWORD ret = StartServiceCtrlDispatcher( ste );
-        if( !ret )  throw_mswin_error( "StartServiceCtrlDispatcher" );      // Z.B. nach 15s: MSWIN-00000427  Der Dienstprozess konnte keine Verbindung zum Dienstcontroller herstellen.
+        BOOL ok = StartServiceCtrlDispatcher( ste );
+        if( !ok )  throw_mswin_error( "StartServiceCtrlDispatcher" );      // Z.B. nach 15s: MSWIN-00000427  Der Dienstprozess konnte keine Verbindung zum Dienstcontroller herstellen.
     }
     catch( const Xc& x )
     {
-
-        HANDLE h; 
-        const char* what = x.what().c_str();
- 
-        h = RegisterEventSource( NULL, "Application" );
-     
-        ReportEvent( h,                     // event log handle 
-                     EVENTLOG_ERROR_TYPE,   // event type 
-                     0,                     // category zero 
-                     1,                     // event identifier ???
-                     NULL,                  // no user security identifier 
-                     1,                     // one substitution string 
-                     x.what().length(),     // no data 
-                     &what,                 // pointer to string array 
-                     (void*)x.what().c_str() );    // pointer to data 
- 
-        DeregisterEventSource( h ); 
-
-        cerr << x;
+        event_log( x.what() );
         return 1;
     }
 

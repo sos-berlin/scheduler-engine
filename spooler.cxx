@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.29 2001/01/14 16:13:12 jz Exp $
+// $Id: spooler.cxx,v 1.30 2001/01/15 14:26:28 jz Exp $
 
 
 /*
@@ -65,7 +65,10 @@ void Script_instance::init()
 
 void Script_instance::add_obj( const CComPtr<IDispatch>& object, const string& name )
 {
-    _script_site->add_obj( object, SysAllocString_string( name ) );
+    CComBSTR name_bstr;
+    name_bstr.Attach( SysAllocString_string( name ) );
+
+    _script_site->add_obj( object, name_bstr );
 }
 
 //----------------------------------------------------------------------------Script_instance::load
@@ -831,11 +834,19 @@ Spooler::~Spooler()
     _object_set_class_list.clear();
 
     _script_instance.close();
-    _communication.close();
+    _communication.close(0.0);
 
     // COM-Objekte entkoppeln, falls noch jemand eine Referenz darauf hat:
     if( _com_spooler )  _com_spooler->close();
     if( _com_log     )  _com_log->close();
+}
+
+//----------------------------------------------------------------------------Spooler::state_state
+
+void Spooler::set_state( State state )
+{
+    _state = state;
+    if( _state_changed_handler )  (*_state_changed_handler)( this, NULL );
 }
 
 //--------------------------------------------------------------------------------Spooler::load_arg
@@ -869,7 +880,7 @@ void Spooler::load_arg()
 
 void Spooler::load()
 {
-    _state = s_starting;
+    set_state( s_starting );
     _log.msg( "Spooler::load" );
 
     {
@@ -895,7 +906,7 @@ void Spooler::start()
                               else  _communication.start_thread();
 
     _state_cmd = sc_none;
-    _state = s_starting;
+    set_state( s_starting );
     _log.msg( "Spooler::start" );
 
     if( !_script_instance._script->empty() )
@@ -925,7 +936,7 @@ void Spooler::start()
 
 void Spooler::stop()
 {
-    _state = s_stopping;
+    set_state( s_stopping );
 
     _log.msg( "Spooler::stop" );
 
@@ -943,7 +954,7 @@ void Spooler::stop()
 
     _script_instance.close();
 
-    _state = s_stopped;
+    set_state( s_stopped );
 }
 
 //------------------------------------------------------------------------------------Spooler::step
@@ -1064,11 +1075,11 @@ void Spooler::run()
 {
     _log.msg( "Spooler::run" );
     
-    _state = s_running;
+    set_state( s_running );
 
     while(1)
     {
-        if( _state_cmd == sc_pause                 )  _state = s_paused; 
+        if( _state_cmd == sc_pause                 )  set_state( s_paused ); 
         if( _state_cmd == sc_load_config           )  break;
         if( _state_cmd == sc_reload                )  break;
         if( _state_cmd == sc_terminate             )  break;
@@ -1140,6 +1151,8 @@ int Spooler::launch( int argc, char** argv )
     _argv = argv;
 
 #   ifdef SYSTEM_WIN
+        Ole_initialize ole;
+
         _command_arrived_event = CreateEvent( NULL, FALSE, FALSE, NULL );
         if( !_command_arrived_event )  throw_mswin_error( "CreateEvent" );
         _wait_handles.add( _command_arrived_event );
@@ -1168,9 +1181,6 @@ int Spooler::launch( int argc, char** argv )
 int spooler_main( int argc, char** argv )
 {
     int ret;
-
-    HRESULT hr = CoInitialize(NULL);
-    if( FAILED(hr) )  throw_ole( hr, "CoInitialize" );
 
     {
         spooler::Spooler spooler;
@@ -1210,8 +1220,6 @@ int spooler_main( int argc, char** argv )
 #       endif
     }
 
-    CoUninitialize();
-
     return 0;
 }
 
@@ -1224,14 +1232,23 @@ int spooler_main( int argc, char** argv )
 int sos_main( int argc, char** argv )
 {
     bool is_service = false;
+    bool is_service_set = false;
     int  ret;
 
     for( Sos_option_iterator opt ( argc, argv ); !opt.end(); opt.next() )
     {
-        if( opt.flag      ( "service"          ) )  is_service = opt.set();
+        if( opt.flag      ( "service"          ) )  is_service = opt.set(), is_service_set = true;
+        else
+        if( opt.flag      ( "install-service"  ) )  { spooler::install_service();  return 0; }
+        else
+        if( opt.flag      ( "remove-service"   ) )  { spooler::remove_service();  return 0; }
         else
         if( opt.with_value( "log"              ) )  log_start( opt.value() );
     }
+
+
+
+    if( !is_service_set )  is_service = spooler::service_is_started();
 
     if( is_service )
     {

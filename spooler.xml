@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 
-<!-- $Id: spooler.xml,v 1.4 2001/01/14 16:13:12 jz Exp $   (C) 2000 SOS GmbH Berlin -->
+<!-- $Id: spooler.xml,v 1.5 2001/01/15 14:26:29 jz Exp $   (C) 2000 SOS GmbH Berlin -->
 
 <!DOCTYPE spooler SYSTEM "spooler.dtd">
 
@@ -10,6 +10,11 @@
     <script language="VBScript"><![CDATA[
 
 dim global
+set hostware = createobject( "hostware.global" )        'Damit hostOLE nicht immer wieder neu geladen wird.
+
+set errfile = createobject( "hostware.file" )
+errfile.open "-out file /dev/stderr"
+errfile.put_line "Spooler-Skript gestartet"
 
 class Global_class
     function method()
@@ -362,7 +367,7 @@ end function
 
             ]]></script>
 
-            <run_time retry_period="0,01"/>  <!-- Komma wegen altem Fehler in hostware as_double() -->
+            <run_time end="07:00" retry_period="0,01"/>  <!-- Komma wegen altem Fehler in hostware as_double() -->
 
         </job>
 
@@ -375,6 +380,8 @@ end function
             <object_set class="Perl">
                 <levels low="1" high="3"/>
             </object_set>
+
+            <run_time retry_period="0,01"/>
 
         </job>
 

@@ -1,4 +1,4 @@
-// $Id: spooler_log.cxx,v 1.6 2001/01/13 18:41:19 jz Exp $
+// $Id: spooler_log.cxx,v 1.7 2001/01/15 14:26:29 jz Exp $
 
 #include "../kram/sos.h"
 #include "../kram/sosdate.h"
@@ -52,13 +52,18 @@ void Log::open_new( )
 {
     Thread_semaphore::Guard guard = &_semaphore;
 
-    if( _file  &&  _file != stderr )  fclose( _file );
+    if( _file  &&  _file != stderr )  fclose( _file ),  _file = NULL;
     _filename = "";
 
     if( _directory == "*stderr" )
     {
         _filename = "*stderr";
         _file = stderr;
+    }
+    else
+    if( _directory == "*none" )
+    {
+        _filename = "*none";
     }
     else
     {

@@ -1,4 +1,4 @@
-// $Id: spooler_command.cxx,v 1.13 2001/01/13 22:26:18 jz Exp $
+// $Id: spooler_command.cxx,v 1.14 2001/01/15 14:26:29 jz Exp $
 
 #include "../kram/sos.h"
 #include "../kram/sleep.h"
@@ -260,14 +260,14 @@ string Command_processor::execute( const string& xml_text )
 
 void Command_processor::execute_2( const string& xml_text )
 {
-    _answer = xml::Document_ptr( __uuidof(xml::DOMDocument30), NULL );
-    _answer->appendChild( _answer->createProcessingInstruction( "xml", "version=\"1.0\" encoding=\"iso-8859-1\"" ) );
-    _answer->appendChild( _answer->createElement( "spooler" ) );
-
-    xml::Element_ptr answer_element = _answer->documentElement->appendChild( _answer->createElement( "answer" ) );
-
     try 
     {
+        _answer = xml::Document_ptr( __uuidof(xml::DOMDocument30), NULL );
+        _answer->appendChild( _answer->createProcessingInstruction( "xml", "version=\"1.0\" encoding=\"iso-8859-1\"" ) );
+        _answer->appendChild( _answer->createElement( "spooler" ) );
+
+        xml::Element_ptr answer_element = _answer->documentElement->appendChild( _answer->createElement( "answer" ) );
+
         xml::Document_ptr command_doc ( __uuidof(xml::DOMDocument30), NULL );
 
         int ok = command_doc->loadXML( as_dom_string( xml_text ) );

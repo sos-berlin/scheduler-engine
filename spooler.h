@@ -1,4 +1,4 @@
-// $Id: spooler.h,v 1.27 2001/01/13 22:34:56 jz Exp $
+// $Id: spooler.h,v 1.28 2001/01/15 14:26:28 jz Exp $
 
 #ifndef __SPOOLER_H
 #define __SPOOLER_H
@@ -89,6 +89,7 @@ struct Handle
 };
 
 //--------------------------------------------------------------------------------------------Mutex
+// Nur für Typen, die in ein Speicherwort passen, also mit genau einem Maschinenbefehl lesbar sind.
 
 template<typename T>
 struct Mutex
@@ -99,7 +100,7 @@ struct Mutex
                                 Mutex                       ( const T& t = T() )    : _value(t) {}
 
     Mutex&                      operator =                  ( const T& t )          { Guard g = &_semaphore; _value = t; return *this; }
-                                operator T                  ()                      { Guard g = &_semaphore; T v = _value; return v; }
+                                operator T                  ()                      { return _value; }  // Nicht gesichert
     T                           read_and_reset              ()                      { Guard g = &_semaphore; T v = _value; _value = T(); return v; }
 
     sos::Thread_semaphore      _semaphore;
@@ -552,7 +553,7 @@ struct Communication
                                ~Communication               ();
 
     void                        start_thread                ();
-    void                        close                       ();
+    void                        close                       ( double wait_time = 0.0 );
     void                        rebind                      ()                                      { bind(); }
     int                         go                          ();
     bool                        started                     ()                                      { return _thread != NULL; }
@@ -601,6 +602,10 @@ struct Command_processor
     xml::Document_ptr          _answer;
 };
 
+//----------------------------------------------------------------------------State_changed_handler
+
+typedef void (*State_changed_handler)( Spooler*, void* );
+
 //------------------------------------------------------------------------------------------Spooler
 
 struct Spooler
@@ -638,7 +643,6 @@ struct Spooler
     void                        load_arg                    ();
     void                        load                        ();
     void                        load_config                 ( const xml::Element_ptr& config );
-  //void                        load_xml                    ();
 
     void                        load_object_set_classes_from_xml( Object_set_class_list*, const xml::Element_ptr& );
     void                        load_jobs_from_xml          ( Job_list*, const xml::Element_ptr& );
@@ -661,7 +665,9 @@ struct Spooler
     void                        cmd_wake                    ();
 
     void                        step                        ();
-    void                        start_jobs                  ();
+
+    void                        set_state                   ( State );
+    void                        set_state_changed_handler   ( State_changed_handler h )         { _state_changed_handler = h; }
 
     Fill_zero                  _zero_;
     
@@ -679,6 +685,8 @@ struct Spooler
 
     Thread_semaphore           _semaphore;
     volatile bool              _sleeping;                   // Besser: sleep mit Signal unterbrechen
+    State_changed_handler      _state_changed_handler;
+
     Wait_handles               _wait_handles;               // Vor _task_list!
     Handle                     _command_arrived_event;
     xml::Element_ptr           _config_element;             // Für cmd_load_config()
@@ -706,7 +714,10 @@ struct Spooler
 };
 
 
-int spooler_service( int argc, char** argv );
+int                             spooler_service             ( int argc, char** argv );
+void                            install_service             ();
+void                            remove_service              ();
+bool                            service_is_started          ();
 
 } //namespace spooler
 } //namespace sos

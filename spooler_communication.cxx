@@ -1,4 +1,4 @@
-// $Id: spooler_communication.cxx,v 1.11 2001/01/13 22:26:18 jz Exp $
+// $Id: spooler_communication.cxx,v 1.12 2001/01/15 14:26:29 jz Exp $
 
 //#include <precomp.h>
 
@@ -249,11 +249,14 @@ Communication::Communication( Spooler* spooler )
 Communication::~Communication()
 {
     close();
+
+    TerminateThread( _thread, 99 );
+    _thread.close();
 }
 
 //-----------------------------------------------------------------------------Communication::close
 
-void Communication::close()
+void Communication::close( double wait_time )
 {
     {
         Thread_semaphore::Guard guard = &_semaphore;
@@ -267,8 +270,7 @@ void Communication::close()
 
     if( _thread ) 
     {
-        WaitForSingleObject( _thread, 1000 );
-        _thread.close();
+        WaitForSingleObject( _thread, min( (double)INT_MAX, wait_time * 1000.0 ) );
     }
 }
 
@@ -333,7 +335,7 @@ void Communication::bind()
         if( _listen_socket == SOCKET_ERROR )  throw_sos_socket_error( "socket" );
         if( _listen_socket >= _nfds )  _nfds = _listen_socket + 1;
 
-        setsockopt( _listen_socket, SOL_SOCKET, SO_REUSEADDR, (const char*)&true_, sizeof true_ );
+      //setsockopt( _listen_socket, SOL_SOCKET, SO_REUSEADDR, (const char*)&true_, sizeof true_ );
 
         sa.sin_port        = htons( _spooler->_tcp_port );
         sa.sin_family      = AF_INET;
