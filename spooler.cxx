@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.241 2003/09/02 11:11:12 jz Exp $
+// $Id: spooler.cxx,v 1.242 2003/09/02 12:17:04 jz Exp $
 /*
     Hier sind implementiert
 
@@ -1490,7 +1490,15 @@ void Spooler::run()
     set_state( s_running );
 
     Spooler_thread* single_thread        = _max_threads == 1? new_thread( false ) : NULL;
+
+    int             nothing_done_count = 0;
+    int             nothing_done_max   = _job_list.size() * 2 + 3;
     int             nichts_getan_zaehler = 0;
+
+    Time            throttle_time       = Time::now();
+    int             throttle_loop_count = 0;
+
+
 
     while(1)
     {
@@ -1588,9 +1596,6 @@ void Spooler::run()
         else
 */
         {
-            int nothing_done_count = 0;
-            int nothing_done_max   = _job_list.size() * 2 + 3;
-
           //while(1)
             {
                 bool something_done = false;
@@ -1669,12 +1674,18 @@ void Spooler::run()
                     //LOG( "Spooler _next_time nach 'nichts getan' = " << _next_time.as_string() << "\n" );
                 }
 
+                int AUF_1000_DURCHGAENGE_PRO_SEKUNDE_GEDROSSELT;
+                if( ++throttle_loop_count > 1000  &&  Time::now() < throttle_time + 1 )
+                {
+                    sos_sleep(1);
+                    throttle_loop_count = 0;
+                    throttle_time = Time::now();
+                }
 
-sos_sleep(0.1); //_next_time = max( _next_time, Time::now() + 0.1 );   // Bremse
 
                 if( _next_time > 0 )
                 {
-_next_time = min( _next_time, Time::now() + 1.0 );      // Wartezeit vorsichtshalber begrenzen
+//_next_time = min( _next_time, Time::now() + 1.0 );      // Wartezeit vorsichtshalber begrenzen
                     if( _debug )  
                     {
                         if( wait_handles.wait(0) == -1 )  /*_log.debug( msg ),*/ wait_handles.wait_until( _next_time );     // Debug-Ausgabe der Wartezeit nur, wenn kein Ergebnis vorliegt
