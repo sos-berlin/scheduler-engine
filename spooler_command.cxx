@@ -1,4 +1,4 @@
-// $Id: spooler_command.cxx,v 1.113 2004/07/15 09:20:25 jz Exp $
+// $Id: spooler_command.cxx,v 1.114 2004/07/15 14:24:04 jz Exp $
 /*
     Hier ist implementiert
 
@@ -161,6 +161,7 @@ xml::Element_ptr Command_processor::execute_show_state( const xml::Element_ptr&,
     state_element.setAttribute( "spooler_running_since", Sos_optional_date_time( (time_t)_spooler->start_time() ).as_string() );
     state_element.setAttribute( "state"                , _spooler->state_name() );
     state_element.setAttribute( "log_file"             , _spooler->_base_log.filename() );
+    state_element.setAttribute( "version"              , VER_PRODUCTVERSION_STR );
 
     if( _spooler->_db )
     {
