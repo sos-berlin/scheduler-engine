@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.162 2002/12/11 08:50:34 jz Exp $
+// $Id: spooler.cxx,v 1.163 2003/01/24 11:44:22 jz Exp $
 /*
     Hier sind implementiert
 
@@ -869,7 +869,13 @@ void Spooler::start()
     }
 
 
-    FOR_EACH( Thread_list, _thread_list, it )  if( !(*it)->empty() )  (*it)->init();
+    FOR_EACH( Thread_list, _thread_list, it )  
+    {
+        Spooler_thread* thread = *it;
+        if( !thread->empty() )  thread->init();
+
+        if( !thread->_free_threading )  _spooler_thread_list.push_back( thread );
+    }
 
 
     if( _module.set() )
