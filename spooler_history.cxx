@@ -1,4 +1,4 @@
-// $Id: spooler_history.cxx,v 1.28 2002/11/11 23:10:33 jz Exp $
+// $Id: spooler_history.cxx,v 1.29 2002/11/13 12:53:59 jz Exp $
 
 #include "spooler.h"
 #include "../zschimmer/z_com.h"
@@ -816,7 +816,8 @@ xml::Element_ptr Job_history::read_tail( const xml::Document_ptr& doc, int id, i
                     {
                         try {
                             dom_append_nl( history_element );
-                            xml::Document_ptr par_doc = msxml::Document_ptr( __uuidof(msxml::DOMDocument30), NULL );
+                            xml::Document_ptr par_doc; // = msxml::Document_ptr( __uuidof(msxml::DOMDocument30), NULL );
+                            par_doc.create();
                             par_doc.load_xml( param_xml );
                             history_entry.appendChild( par_doc.documentElement() );
                         }

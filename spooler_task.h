@@ -1,4 +1,4 @@
-// $Id: spooler_task.h,v 1.69 2002/11/11 23:10:34 jz Exp $
+// $Id: spooler_task.h,v 1.70 2002/11/13 12:54:00 jz Exp $
 
 #ifndef __SPOOLER_TASK_H
 #define __SPOOLER_TASK_H
@@ -383,7 +383,7 @@ struct Task : Sos_self_deleting
     void                        set_history_field           ( const string& name, const Variant& value );
     void                        set_close_engine            ( bool b )                      { _close_engine = b; }
     bool                        has_parameters              ();
-    xml::Document_ptr           parameters_as_dom           ();
+    xml::Document_ptr           parameters_as_dom           ()                              { return _params->dom().detach(); }
     Time                        last_process_start_time     ()                              { return _last_process_start_time; }
 
 
@@ -433,7 +433,7 @@ struct Task : Sos_self_deleting
     Time                       _running_since;
     Time                       _last_process_start_time;
 
-    ptr<spooler_com::Ivariable_set> _params;
+    ptr<Com_variable_set>      _params;
     Variant                    _result;
     string                     _name;
     Time                       _next_spooler_process;

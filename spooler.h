@@ -1,4 +1,4 @@
-// $Id: spooler.h,v 1.96 2002/11/11 23:10:31 jz Exp $
+// $Id: spooler.h,v 1.97 2002/11/13 12:53:58 jz Exp $
 
 #ifndef __SPOOLER_H
 #define __SPOOLER_H
@@ -6,39 +6,25 @@
 #include "../kram/sos.h"
 #include "../kram/sysxcept.h"
 
-#include "../zschimmer/xml_msxml.h"
 
-/*
-#ifdef SYSTEM_WIN
-
-#   import <msxml3.dll> rename_namespace("xml")
-
-    namespace xml 
-    {
-        typedef IXMLDOMElement          Element;
-        typedef IXMLDOMElementPtr       Element_ptr;
-        typedef IXMLDOMTextPtr          Text_ptr;
-        typedef IXMLDOMCDATASectionPtr  Cdata_section_ptr;
-        typedef IXMLDOMNode             Node;
-        typedef IXMLDOMNodePtr          Node_ptr;
-        typedef IXMLDOMNodeList         NodeList;
-        typedef IXMLDOMNodeListPtr      NodeList_ptr;
-        typedef IXMLDOMDocument         Document;
-        typedef IXMLDOMDocumentPtr      Document_ptr;
-        typedef IXMLDOMDocumentTypePtr  DocumentType_ptr;
-    }
-
-
-#define DOM_FOR_ALL_ELEMENTS( PARENT, ITERATOR )                                                \
-                                                                                                \
-    for( xml::Node_ptr ITERATOR##_node = PARENT->firstChild;                                    \
-         ITERATOR##_node;                                                                       \
-         ITERATOR##_node = ITERATOR##_node->nextSibling )                                       \
-                                                                                                \
-    if( xml::Element_ptr ITERATOR = ITERATOR##_node )
-
+#ifdef Z_WINDOWS
+#   define SPOOLER_USE_MSXML                // Microsofts msxml3
+#else
+#   define SPOOLER_USE_LIBXML2              // Gnomes libxml2
 #endif
-*/
+
+
+#ifdef SPOOLER_USE_MSXML
+#   include "../zschimmer/xml_msxml.h"
+    using namespace zschimmer::xml_msxml;
+#endif
+
+#ifdef SPOOLER_USE_LIBXML2
+#   include "../zschimmer/xml_libxml2.h"
+    using namespace zschimmer::xml_libxml2;
+#endif
+
+
 
 #include <stdio.h>
 #include <process.h>    // _beginthreadex()

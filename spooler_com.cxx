@@ -1,4 +1,4 @@
-// $Id: spooler_com.cxx,v 1.64 2002/11/11 23:10:31 jz Exp $
+// $Id: spooler_com.cxx,v 1.65 2002/11/13 12:53:58 jz Exp $
 /*
     Hier sind implementiert
 
@@ -256,7 +256,7 @@ void Com_variable_set::set_dom( const xml::Element_ptr& params )
 
     THREAD_LOCK( _lock )
     {
-        DOM_FOR_ALL_ELEMENTS( params, e )
+        DOM_FOR_EACH_ELEMENT( params, e )
         {
             if( e.nodeName_is( "param" ) ) 
             {
@@ -329,19 +329,44 @@ STDMETHODIMP Com_variable_set::get_count( int* result )
 }
 
 //------------------------------------------------------------------------Com_variable_set::get_dom
+#ifdef Z_WINDOWS
 
-STDMETHODIMP Com_variable_set::get_dom( msxml::IXMLDOMDocument** result )
+STDMETHODIMP Com_variable_set::get_dom( spooler_com::IXMLDOMDocument** doc )  
+{ 
+#   ifdef SPOOLER_HAS_MSXML
+        
+        HRESULT hr = NOERROR;
+
+        try
+        {
+            *doc = dom()._ptr; 
+            (*doc)->AddRef();
+        }
+        catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Variable_set::dom" ); }
+        catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Variable_set::dom" ); }
+
+#    else
+
+        return E_NOTIMPL;
+
+#   endif
+}
+
+#endif
+//------------------------------------------------------------------------Com_variable_set::get_dom
+
+xml::Document_ptr Com_variable_set::dom()
 {
     HRESULT hr = NOERROR;
 
-    THREAD_LOCK( _lock )
-    try
-    {
-        *result = NULL;
-
-        xml::Document_ptr doc = msxml::Document_ptr( __uuidof(msxml::DOMDocument30), NULL );
-        doc.appendChild( doc.createProcessingInstruction( "xml", "version=\"1.0\" encoding=\"iso-8859-1\"" ) );
+    xml::Document_ptr result;
     
+    THREAD_LOCK( _lock )
+    {
+        xml::Document_ptr doc; // = msxml::Document_ptr( __uuidof(spooler_com::DOMDocument30), NULL );
+        doc.create();
+        doc.appendChild( doc.createProcessingInstruction( "xml", "version=\"1.0\" encoding=\"iso-8859-1\"" ) );
+
         xml::Element_ptr varset = doc.createElement( "variable_set" );
         doc.appendChild( varset );
 
@@ -362,14 +387,9 @@ STDMETHODIMP Com_variable_set::get_dom( msxml::IXMLDOMDocument** result )
                 varset.appendChild( var );
             }
         }
-
-        *result = doc._ptr;
-        (*result)->AddRef();
     }
-    catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Variable_set::dom" ); }
-    catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Variable_set::dom" ); }
 
-    return hr;
+    return result.detach();
 }
 
 //--------------------------------------------------------------------------Com_variable_set::Clone

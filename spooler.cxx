@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.125 2002/11/11 23:10:30 jz Exp $
+// $Id: spooler.cxx,v 1.126 2002/11/13 12:53:57 jz Exp $
 /*
     Hier sind implementiert
 
@@ -738,7 +738,7 @@ void Spooler::stop()
 
     if( _module_instance )  _module_instance->close();
 
-    _java_vm.close();
+    //_java_vm.close();  Erneutes _java.init() stürzt ab, deshalb lassen wird Java stehen und schließen es erst am Schluss
 
     if( _state_cmd == sc_terminate_and_restart 
      || _state_cmd == sc_let_run_terminate_and_restart )  spooler_restart( &_log, _is_service );
@@ -900,6 +900,9 @@ int Spooler::launch( int argc, char** argv )
         stop();
 
     } while( _state_cmd == sc_reload || _state_cmd == sc_load_config );
+
+
+    _java_vm.close();
 
     _log.info( "Spooler ordentlich beendet." );
 

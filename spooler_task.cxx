@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.118 2002/11/11 23:10:34 jz Exp $
+// $Id: spooler_task.cxx,v 1.119 2002/11/13 12:54:00 jz Exp $
 /*
     Hier sind implementiert
 
@@ -300,7 +300,7 @@ void Job::set_dom( const xml::Element_ptr& element )
         //    _run_time._holidays.insert( *it );
         
 
-        DOM_FOR_ALL_ELEMENTS( element, e )
+        DOM_FOR_EACH_ELEMENT( element, e )
         {
             if( e.nodeName_is( "description" ) )
             {
@@ -504,7 +504,7 @@ Sos_ptr<Task> Job::create_task( const ptr<spooler_com::Ivariable_set>& params, c
     task->_enqueue_time = now;
     task->_id           = _spooler->_db.get_id();
 
-    _default_params->Clone( task->_params.pp() );
+    _default_params->Clone( (spooler_com::Ivariable_set**)task->_params.pp() );
     if( params )   task->_params->merge( params );
 
     task->_name         = name;
@@ -1875,15 +1875,6 @@ bool Task::has_parameters()
     int n = 0;
     _params->get_count( &n );
     return n != 0;
-}
-
-//--------------------------------------------------------------------------Task::parameters_as_dom
-
-xml::Document_ptr Task::parameters_as_dom()
-{
-    xml::Document_ptr result;
-    _params->get_dom( &result._ptr );
-    return result;
 }
 
 //--------------------------------------------------------------------------Task::set_history_field

@@ -1,4 +1,4 @@
-// $Id: spooler_config.cxx,v 1.46 2002/11/11 23:10:32 jz Exp $
+// $Id: spooler_config.cxx,v 1.47 2002/11/13 12:53:59 jz Exp $
 
 //#include <precomp.h>
 
@@ -24,6 +24,18 @@ namespace spooler {
 
 xml::Element_ptr optional_single_element( const xml::Element_ptr& element, const string& name )
 {
+    int              count = 0;
+    xml::Element_ptr result;
+
+    DOM_FOR_EACH_ELEMENT( element, e )
+    {
+        if( e.nodeName_is( name ) )  result = e, count++;
+    }
+
+    if( count > 1 )  throw_xc( "SOS-1423", name );
+
+    return result;
+/*
     xml::NodeList_ptr list = element.getElementsByTagName( name );
 
     int len = list.length();
@@ -32,6 +44,7 @@ xml::Element_ptr optional_single_element( const xml::Element_ptr& element, const
     if( len > 1 )  throw_xc( "SOS-1423", name );
 
     return list.item(0);
+*/
 }
 
 //---------------------------------------------------------------------------default_single_element
@@ -140,7 +153,7 @@ void Security::set_dom( const xml::Element_ptr& security_element )
 { 
     bool ignore_unknown_hosts = as_bool( security_element.getAttribute( "ignore_unknown_hosts" ) );
 
-    DOM_FOR_ALL_ELEMENTS( security_element, e )
+    DOM_FOR_EACH_ELEMENT( security_element, e )
     {
         if( e.nodeName_is( "allowed_host" ) )
         {
@@ -173,7 +186,7 @@ void Object_set_class::set_dom( const xml::Element_ptr& element )
     string iface = as_string( variant_default( element.getAttribute( "script_interface" ), "oo" ) );
     _object_interface = iface == "oo";
 
-    DOM_FOR_ALL_ELEMENTS( element, e )
+    DOM_FOR_EACH_ELEMENT( element, e )
     {
         if( e.nodeName_is( "script" ) )
         {
@@ -182,7 +195,7 @@ void Object_set_class::set_dom( const xml::Element_ptr& element )
         else
         if( e.nodeName_is( "level_decls" ) )
         {
-            DOM_FOR_ALL_ELEMENTS( e, e2 )
+            DOM_FOR_EACH_ELEMENT( e, e2 )
             {
                 if( e2.nodeName_is( "level_decl" ) )
                 {
@@ -216,7 +229,7 @@ void Object_set_descr::set_dom( const xml::Element_ptr& element )
 
 void Spooler::load_object_set_classes_from_xml( Object_set_class_list* liste, const xml::Element_ptr& element )
 {
-    DOM_FOR_ALL_ELEMENTS( element, e )
+    DOM_FOR_EACH_ELEMENT( element, e )
     {
         if( e.nodeName_is( "object_set_class" ) )  liste->push_back( SOS_NEW( Object_set_class( this, &_prefix_log, e ) ) );
     }
@@ -248,7 +261,7 @@ void Thread::set_dom( const xml::Element_ptr& element )
 
     if( element.getAttributeNode( "include_path" ) )  _include_path = element.getAttribute( "include_path" );
 
-    DOM_FOR_ALL_ELEMENTS( element, e )
+    DOM_FOR_EACH_ELEMENT( element, e )
     {
         if( e.nodeName_is( "script" ) )  _module.set_dom( e, include_path() );
         else
@@ -260,7 +273,7 @@ void Thread::set_dom( const xml::Element_ptr& element )
 
 void Spooler::load_threads_from_xml( const xml::Element_ptr& element )
 {
-    DOM_FOR_ALL_ELEMENTS( element, e )
+    DOM_FOR_EACH_ELEMENT( element, e )
     {
         if( e.nodeName_is( "thread" ) )
         {
@@ -290,7 +303,7 @@ void Spooler::load_config( const xml::Element_ptr& config_element, const string&
 
     try
     {
-        {DOM_FOR_ALL_ELEMENTS( config_element, e )
+        {DOM_FOR_EACH_ELEMENT( config_element, e )
         {
             if( e.nodeName_is( "base" ) )
             {
@@ -304,7 +317,7 @@ void Spooler::load_config( const xml::Element_ptr& config_element, const string&
         }}
 
         _config_document = config_element.ownerDocument();
-        _config_element  = config_element;
+        _config_element = config_element;
 
         _tcp_port      = as_int( config_element.getAttribute( "tcp_port"     , as_string( _tcp_port )     ) );
         _udp_port      = as_int( config_element.getAttribute( "udp_port"     , as_string( _udp_port )     ) );
@@ -320,7 +333,7 @@ void Spooler::load_config( const xml::Element_ptr& config_element, const string&
 
         _free_threading_default = as_bool( as_string( variant_default( config_element.getAttribute( "free_threading" ), _free_threading_default ) ) );
 
-        DOM_FOR_ALL_ELEMENTS( config_element, e )
+        DOM_FOR_EACH_ELEMENT( config_element, e )
         {
             if( e.nodeName_is( "security" ) )
             {
@@ -338,7 +351,7 @@ void Spooler::load_config( const xml::Element_ptr& config_element, const string&
             {
                 _holiday_set.clear();
 
-                DOM_FOR_ALL_ELEMENTS( e, e2 )
+                DOM_FOR_EACH_ELEMENT( e, e2 )
                 {
                     if( e2.nodeName_is( "holiday" ) )
                     {

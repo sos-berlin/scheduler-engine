@@ -1,4 +1,4 @@
-// $Id: spooler_command.cxx,v 1.63 2002/11/11 23:10:32 jz Exp $
+// $Id: spooler_command.cxx,v 1.64 2002/11/13 12:53:59 jz Exp $
 /*
     Hier ist implementiert
 
@@ -39,9 +39,8 @@ using namespace std;
 
 void dom_append_text_element( const xml::Element_ptr& element, const char* element_name, const string& text )
 {
-    xml::Document_ptr doc       = element.ownerDocument();
-    xml::Node_ptr     text_node = doc.createTextNode( text );
-    xml::Element_ptr  e         = element.appendChild( doc.createElement( element_name ) );
+    xml::Node_ptr     text_node = element.ownerDocument().createTextNode( text );
+    xml::Element_ptr  e         = element.appendChild( element.ownerDocument().createElement( element_name ) );
 
     e.appendChild( text_node );
 }
@@ -50,10 +49,7 @@ void dom_append_text_element( const xml::Element_ptr& element, const char* eleme
 
 void dom_append_nl( const xml::Element_ptr& element )
 {
-    xml::Document_ptr doc       = element.ownerDocument();
-    xml::Node_ptr     text_node = doc.createTextNode( "\n" );
-
-    element.appendChild( text_node );
+    element.appendChild( element.ownerDocument().createTextNode( "\n" ) );
 }
 
 //-----------------------------------------------------------------------------create_error_element
@@ -267,7 +263,7 @@ xml::Element_ptr Command_processor::execute_start_job( const xml::Element_ptr& e
 
     ptr<Com_variable_set> pars = new Com_variable_set;
 
-    DOM_FOR_ALL_ELEMENTS( element, e )
+    DOM_FOR_EACH_ELEMENT( element, e )
     {
         if( e.nodeName_is( "params" ) )  { pars->set_dom( e );  break; }
     }
@@ -354,7 +350,7 @@ xml::Element_ptr Command_processor::execute_add_order( const xml::Element_ptr& a
     if( state_name != "" )  order->set_state   ( state_name.c_str() );
 
 
-    DOM_FOR_ALL_ELEMENTS( add_order_element, e )  
+    DOM_FOR_EACH_ELEMENT( add_order_element, e )  
     {
         if( e.nodeName_is( "params" ) )
         { 
@@ -449,7 +445,7 @@ xml::Element_ptr Command_processor::execute_command( const xml::Element_ptr& ele
     if( element.nodeName_is( "modify_order"     ) )  return execute_modify_order( element );
     else
     {
-        throw_xc( "SPOOLER-105", element.nodeName() ); return NULL;
+        throw_xc( "SPOOLER-105", element.nodeName() ); return xml::Element_ptr();
     }
 }
 
@@ -496,7 +492,8 @@ void Command_processor::execute_2( const string& xml_text )
 {
     try 
     {
-        _answer = msxml::Document_ptr( __uuidof(msxml::DOMDocument30), NULL );
+        //_answer = msxml::Document_ptr( __uuidof(msxml::DOMDocument30), NULL );
+        _answer.create();
         _answer.appendChild( _answer.createProcessingInstruction( "xml", "version=\"1.0\" encoding=\"iso-8859-1\"" ) );
         _answer.appendChild( _answer.createElement( "spooler" ) );
 
@@ -513,7 +510,7 @@ void Command_processor::execute_2( const string& xml_text )
         {
             string text;
 
-#           ifdef Z_WINDOWS
+#           ifdef SPOOLER_USE_MSXML
                 msxml::IXMLDOMParseErrorPtr error = command_doc._ptr->parseError;
 
                 text = w_as_string( error->reason );
@@ -541,11 +538,11 @@ void Command_processor::execute_2( const string& xml_text )
         {
             if( e.nodeName_is( "command" ) )
             {
-                xml::NodeList_ptr node_list = e.childNodes();
-
-                for( int i = 0; i < node_list.length(); i++ )
+                DOM_FOR_EACH_ELEMENT( e, node )
+                //xml::NodeList_ptr node_list = e.childNodes();
+                //for( int i = 0; i < node_list.length(); i++ )
                 {
-                    xml::Node_ptr node = node_list.item(i);
+                    //xml::Node_ptr node = node_list.item(i);
 
                     answer_element.appendChild( execute_command( node ) );
                 }

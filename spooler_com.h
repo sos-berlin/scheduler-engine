@@ -1,4 +1,4 @@
-// $Id: spooler_com.h,v 1.50 2002/11/11 23:10:31 jz Exp $
+// $Id: spooler_com.h,v 1.51 2002/11/13 12:53:59 jz Exp $
 
 #ifndef __SPOOLER_COM_H
 #define __SPOOLER_COM_H
@@ -11,10 +11,12 @@
 #include "../kram/com.h"
 #include "../kram/com_server.h"
 
-#if defined _DEBUG
-#    import "debug/spooler.tlb"   rename_namespace("spooler_com") raw_interfaces_only named_guids
-# else
-#    import "release/spooler.tlb" rename_namespace("spooler_com") raw_interfaces_only named_guids
+#ifdef Z_WINDOWS
+#   if defined _DEBUG
+#       import "debug/spooler.tlb"   rename_namespace("spooler_com") raw_interfaces_only named_guids
+#    else
+#       import "release/spooler.tlb" rename_namespace("spooler_com") raw_interfaces_only named_guids
+#   endif
 #endif
 
 
@@ -115,12 +117,18 @@ struct Com_variable_set: spooler_com::Ivariable_set,
 
     STDMETHODIMP            get_java_class_name             ( BSTR* result )                        { *result = SysAllocString( L"sos.spooler.Variable_set" ); return S_OK; }
 
+#   ifdef Z_WINDOWS
+        STDMETHODIMP            get_dom                     ( spooler_com::IXMLDOMDocument** );
+#   endif
+
     void                        set_dom                     ( const xml::Element_ptr& );
+
+    xml::Document_ptr           dom                         ();
+
     STDMETHODIMP                set_var                     ( BSTR name, VARIANT* value )           { return put_var( name, value ); }
     STDMETHODIMP                put_var                     ( BSTR, VARIANT* );
     STDMETHODIMP                get_var                     ( BSTR, VARIANT* );
     STDMETHODIMP                get_count                   ( int* );
-    STDMETHODIMP                get_dom                     ( msxml::IXMLDOMDocument** );
     STDMETHODIMP                Clone                       ( spooler_com::Ivariable_set** );
     STDMETHODIMP                merge                       ( spooler_com::Ivariable_set* );
     STDMETHODIMP                get__NewEnum                ( IUnknown** );    

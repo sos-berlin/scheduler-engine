@@ -1,4 +1,4 @@
-// $Id: spooler_time.cxx,v 1.19 2002/11/11 23:10:37 jz Exp $
+// $Id: spooler_time.cxx,v 1.20 2002/11/13 12:54:01 jz Exp $
 /*
     Hier sind implementiert
 
@@ -209,7 +209,7 @@ void Day::set_dom( const xml::Element_ptr& element, const Day* default_day, cons
   //Period my_default_period ( element, default_period );
     bool   first = true;
 
-    DOM_FOR_ALL_ELEMENTS( element, e )
+    DOM_FOR_EACH_ELEMENT( element, e )
     {
         if( first )  first = false, _period_set.clear();
         _period_set.insert( Period( e, default_period ) );
@@ -385,7 +385,7 @@ void Day_set::set_dom( const xml::Element_ptr& element, const Day* default_day, 
 {
     //Period my_default_period ( element, default_period );
 
-    DOM_FOR_ALL_ELEMENTS( element, e )
+    DOM_FOR_EACH_ELEMENT( element, e )
     {
         if( e.nodeName_is( "day" ) )
         {
@@ -434,7 +434,7 @@ void Run_time::set_dom( const xml::Element_ptr& element )
     bool a_day_set = false;
 
 
-    DOM_FOR_ALL_ELEMENTS( element, e )
+    DOM_FOR_EACH_ELEMENT( element, e )
     {
         if( e.nodeName_is( "period" ) )
         {
@@ -474,7 +474,7 @@ void Run_time::set_dom( const xml::Element_ptr& element )
         {
             _holiday_set.clear();
 
-            DOM_FOR_ALL_ELEMENTS( e, e2 )
+            DOM_FOR_EACH_ELEMENT( e, e2 )
             {
                 if( e2.nodeName_is( "holiday" ) )
                 {
