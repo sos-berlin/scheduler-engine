@@ -1,4 +1,4 @@
-// $Id: spooler_task.h,v 1.60 2002/09/12 19:30:35 jz Exp $
+// $Id: spooler_task.h,v 1.61 2002/09/13 09:53:24 jz Exp $
 
 #ifndef __SPOOLER_TASK_H
 #define __SPOOLER_TASK_H
@@ -341,7 +341,7 @@ struct Job : Sos_self_deleting
 
     CComPtr<Com_job>           _com_job;
     CComPtr<Com_log>           _com_log;
-    CComPtr<Com_task>          _com_task;                   // Objekt bleibt, Inhalt wechselt über die Tasks hinweg (für use_engine="job")
+    CComPtr<Com_task>          _com_task;                   // Objekt bleibt, Inhalt wechselt über die Tasks hinweg (für use_engine="job"), weil Objekt spooler_task bei use_engine="job" in der Scripting Engine bleibt (kann nicht ausgetauscht werden)
     Xc_copy                    _error;
     bool                       _close_engine;               // Bei einem Fehler in spooler_init()
     Sos_ptr<Task>              _task;                       // Es kann nur eine Task geben. Zirkel: _task->_job == this

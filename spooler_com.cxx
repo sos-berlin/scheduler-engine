@@ -1,4 +1,4 @@
-// $Id: spooler_com.cxx,v 1.50 2002/09/12 19:30:34 jz Exp $
+// $Id: spooler_com.cxx,v 1.51 2002/09/13 09:53:22 jz Exp $
 /*
     Hier sind implementiert
 
@@ -1151,7 +1151,7 @@ STDMETHODIMP Com_task::get_error( Ierror** result )
 
 //--------------------------------------------------------------------------------Com_task::get_job
 
-STDMETHODIMP Com_task::get_job( Ijob** com_job )
+STDMETHODIMP Com_task::get_job( Ijob** result )
 {
     HRESULT hr = NOERROR;
 
@@ -1160,8 +1160,8 @@ STDMETHODIMP Com_task::get_job( Ijob** com_job )
     {
         if( !_task )  throw_xc( "SPOOLER-122" );
 
-        *com_job = _task->_job->com_job();
-        (*com_job)->AddRef();
+        *result = _task->_job->com_job();
+        if( *result )  (*result)->AddRef();
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Task.job" ); }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Task.job" ); }
@@ -1181,7 +1181,7 @@ STDMETHODIMP Com_task::get_params( Ivariable_set** result )
         if( !_task )  throw_xc( "SPOOLER-122" );
 
         *result = _task->_params;
-        (*result)->AddRef();
+        if( *result )  (*result)->AddRef();
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Task.params" ); }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Task.params" ); }
@@ -1877,13 +1877,7 @@ STDMETHODIMP Com_job_chain::add_order( VARIANT* order_or_payload, VARIANT* job_o
         }
     */
 
-        if( !iorder )
-        {
-            //ptr<Order> order = Z_NEW( Order( _job_chain->_spooler, *order_or_payload ) );
-            CComPtr<Order> order = new Order( _job_chain->_spooler, *order_or_payload );
-            //iorder = order->com_order();
-            iorder = order;
-        }
+        if( !iorder )  iorder = new Order( _job_chain->_spooler, *order_or_payload );
 
         // Einstieg nur über Order, damit Semaphoren stets in derselben Reihenfolge gesperrt werden.
         hr = dynamic_cast<Com_order*>( &*iorder )->add_to_job_chain( this );  //, job_or_state );
@@ -2103,6 +2097,7 @@ STDMETHODIMP Com_order::get_job( Ijob** result )
         if( !_order )  return E_POINTER;
 
         *result = _order->com_job();
+        if( *result )  (*result)->AddRef();
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Order.job" ); }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Order.job" ); }

@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.103 2002/09/11 18:24:49 jz Exp $
+// $Id: spooler_task.cxx,v 1.104 2002/09/13 09:53:23 jz Exp $
 /*
     Hier sind implementiert
 
@@ -214,7 +214,7 @@ Job::In_call::In_call( Task* task, const string& name, const string& extra )
     _job->set_in_call( name, extra ); 
     LOG( *task->job() << '.' << name << "() begin\n" );
 
-    _ASSERTE( _CrtCheckMemory( ) );
+    _ASSERTE( _CrtCheckMemory() );
 }
 
 //---------------------------------------------------------------------------Job::In_call::~In_call
@@ -234,7 +234,7 @@ Job::In_call::~In_call()
         }
     }
 
-    _ASSERTE( _CrtCheckMemory( ) );
+    _ASSERTE( _CrtCheckMemory() );
 }
 
 //-----------------------------------------------------------------------------------------Job::Job
@@ -1975,7 +1975,7 @@ bool Job_script_task::do_step()
 {
     if( !_job->_has_spooler_process )  return false;
 
-    Job::In_call in_call ( this, spooler_process_name, _order? _order->obj_name() : "" );
+    Job::In_call in_call ( this, spooler_process_name, _order? "Auftrag " + _order->obj_name() : "" );
     bool ok = check_result( _job->_script_instance.call( spooler_process_name ) );
     in_call.set_result( ok );
     return ok;
