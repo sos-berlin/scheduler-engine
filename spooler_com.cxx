@@ -1,4 +1,4 @@
-// $Id: spooler_com.cxx,v 1.109 2003/09/26 21:57:14 jz Exp $
+// $Id: spooler_com.cxx,v 1.110 2003/10/01 11:18:08 jz Exp $
 /*
     Hier sind implementiert
 
@@ -222,6 +222,7 @@ STDMETHODIMP Com_variable::Clone( Ivariable** result )
 { 
     HRESULT hr = NOERROR; 
     
+    fprintf( stderr, "Com_variable::Clone %s=%s\n", string_from_bstr(_name).c_str(), debug_string_from_variant(_value).c_str());
     THREAD_LOCK(_lock)
     {
         *result = new Com_variable(_name,_value); 
@@ -277,6 +278,7 @@ Com_variable_set::Com_variable_set( const Com_variable_set& o )
             {
                 ptr<Com_variable> clone;
 
+fprintf(stderr,"Com_variable_set first=%s\n", string_from_bstr(it->first).c_str() );
                 v->Clone( (Ivariable**)&clone );
                 _map[ it->first ] = clone;
             }
@@ -364,6 +366,7 @@ STDMETHODIMP Com_variable_set::get_value( VARIANT* name, VARIANT* value )
 
 STDMETHODIMP Com_variable_set::put_var( BSTR name, VARIANT* value )
 {
+    fprintf( stderr, "Com_variable_set::put_var %s=%s\n", string_from_bstr(name).c_str(), debug_string_from_variant(*value).c_str() );
     THREAD_LOCK( _lock )  
     {
         Bstr lname = name;
@@ -596,7 +599,7 @@ STDMETHODIMP Com_variable_set::put_xml( BSTR xml_text )
 
         DOM_FOR_EACH_ELEMENT( doc.documentElement(), e )
         {
-            if( e.nodeName() == "variable" )
+            if( e.nodeName() == "variable" || e.nodeName() == "param" )
             {
                 Bstr    name  = e.getAttribute( "name" );
                 Variant value = e.getAttribute( "value" );
