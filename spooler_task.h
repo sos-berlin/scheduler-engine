@@ -1,4 +1,4 @@
-// $Id: spooler_task.h,v 1.40 2002/03/22 09:05:40 jz Exp $
+// $Id: spooler_task.h,v 1.41 2002/04/04 17:18:38 jz Exp $
 
 #ifndef __SPOOLER_TASK_H
 #define __SPOOLER_TASK_H
@@ -100,6 +100,22 @@ struct Object_set : Sos_self_deleting
     CComPtr<IDispatch>         _idispatch;                  // Zeiger auf ein Object_set des Skripts
 };
 
+//--------------------------------------------------------------------------------------Start_cause
+
+enum Start_cause
+{
+    cause_none                  = 0,    // Kein Start
+    cause_period_once           = 1,    // <run_time once="yes">
+    cause_period_single         = 2,    // <run_time single_start="yes">
+    cause_period_repeat         = 3,    // <run_time repeat="..">
+    cause_job_repeat            = 4,    // spooler_job.repeat = ..
+    cause_queue                 = 5,    // <start_job at="">
+    cause_queue_at              = 6,    // <start_job at="..">
+    cause_directory             = 7,    // start_when_directory_changed
+    cause_signal                = 8,
+    cause_delay_after_error     = 9,
+};
+
 //----------------------------------------------------------------------------------------------Job
 
 struct Job : Sos_self_deleting
@@ -176,8 +192,11 @@ struct Job : Sos_self_deleting
     string                      include_path                () const;
     string                      title                       ()                          { string title; THREAD_LOCK( _lock )  title = _title;  return title; }
     string                      jobname_as_filename         ();
+    string                      profile_section             ();
     void                        set_in_call                 ( const string& name );
     void                        set_delay_after_error       ( int error_steps, Time delay ) { _delay_after_error[error_steps] = delay; }
+
+    Any_file                    read_history                ( int n )                   { return _history.read_last(n); }
 
     void                        close                       ();
     void                        close_engine                ();
@@ -205,7 +224,7 @@ struct Job : Sos_self_deleting
 
     bool                        execute_state_cmd           ();
     void                        reread                      ();
-    bool                        task_to_start               ();
+    void                        task_to_start               ();
     bool                        do_something                ();
     bool                        should_removed              ()                          { return _temporary && _state == s_stopped; }
     void                        set_mail_defaults           ();
@@ -252,10 +271,12 @@ struct Job : Sos_self_deleting
 
     Fill_zero                  _zero_;
     Thread_semaphore           _lock;
+    Spooler*                   _spooler;
 
   protected:
+    friend struct Job_history;
+
     string                     _name;
-    Spooler*                   _spooler;
     Thread*                    _thread;
 
 
@@ -306,6 +327,8 @@ struct Job : Sos_self_deleting
     bool                       _close_engine;               // Bei einem Fehler in spooler_init()
     Sos_ptr<Task>              _task;                       // Es kann nur eine Task geben. Zirkel: _task->_job == this
     Task_queue                 _task_queue;                 // Warteschlange der nächsten zu startenden Tasks
+
+    Job_history                _history;
 };
 
 //------------------------------------------------------------------------------------------Job_list
@@ -328,6 +351,8 @@ struct Task : Sos_self_deleting
     bool                        step                        ();
     void                        on_error_on_success         ();
 
+    void                        set_cause                   ( Start_cause );
+
 
     bool                        wait_until_terminated       ( double wait_time = latter_day );
   //void                        set_start_at                ( Time );
@@ -341,6 +366,7 @@ struct Task : Sos_self_deleting
     friend struct               Com_task;
 
   protected:
+    friend struct Job_history;
 
     virtual bool                loaded                      ()                              { return true; }
     virtual void                do_close                    ()                              {}
@@ -355,7 +381,9 @@ struct Task : Sos_self_deleting
     Fill_zero                  _zero_;
     Spooler*                   _spooler;
     Sos_ptr<Job>               _job;                        // Zirkel!
-    
+
+    int                        _id;
+    Start_cause                _cause;
     double                     _cpu_time;
     int                        _step_count;
 

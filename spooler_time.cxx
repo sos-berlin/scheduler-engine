@@ -1,4 +1,4 @@
-// $Id: spooler_time.cxx,v 1.12 2002/03/05 17:10:02 jz Exp $
+// $Id: spooler_time.cxx,v 1.13 2002/04/04 17:18:38 jz Exp $
 /*
     Hier sind implementiert
 
@@ -37,10 +37,11 @@ void Time::operator = ( const Sos_optional_date_time& dt )
 
 //---------------------------------------------------------------------------------Time::as_string
 
-string Time::as_string() const
+string Time::as_string( With_ms with ) const
 {
-    char buff [30];
-    char* bruch = buff + sprintf( buff, "%0.3lf", _time ) - 4;
+    char  buff [30];
+    char* bruch = with == with_ms? buff + sprintf( buff, "%0.3lf", _time ) - 4
+                                 : "";
 
     if( _time < 100*(24*60*60) )
     {

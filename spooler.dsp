@@ -121,6 +121,10 @@ SOURCE=.\spooler_config.cxx
 # End Source File
 # Begin Source File
 
+SOURCE=.\spooler_history.cxx
+# End Source File
+# Begin Source File
+
 SOURCE=.\spooler_log.cxx
 # ADD CPP /YX"spooler.h"
 # End Source File
@@ -215,6 +219,10 @@ SOURCE=.\spooler_common.h
 # Begin Source File
 
 SOURCE=.\spooler_communication.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\spooler_history.h
 # End Source File
 # Begin Source File
 

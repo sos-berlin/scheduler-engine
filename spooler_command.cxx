@@ -1,4 +1,4 @@
-// $Id: spooler_command.cxx,v 1.41 2002/03/15 13:50:29 jz Exp $
+// $Id: spooler_command.cxx,v 1.42 2002/04/04 17:18:38 jz Exp $
 /*
     Hier ist implementiert
 
@@ -121,6 +121,44 @@ xml::Element_ptr Command_processor::execute_show_state( const xml::Element_ptr& 
     return state_element;
 }
 
+//----------------------------------------------------------Command_processor::execute_show_history
+
+xml::Element_ptr Command_processor::execute_show_history( const xml::Element_ptr& element )
+{
+    if( _security_level < Security::seclev_info )  throw_xc( "SPOOLER-121" );
+
+    string job_name = as_string( element->getAttribute( "job" ) );
+    int    tail     = as_int( as_string(element->getAttribute( "tail" ) ) );
+
+    Sos_ptr<Job> job = _spooler->get_job( job_name );
+
+    xml::Element_ptr history_element = _answer->createElement( "history" );
+    dom_append_nl( history_element );
+
+    Any_file result = job->read_history( tail );
+    if( !result.opened() )  throw_xc( "SPOOLER-136" );
+
+    const Record_type* type = result.spec().field_type_ptr();
+    Dynamic_area rec ( type->field_size() );
+    
+    while( !result.eof() )
+    {
+        result.get( &rec );
+    
+        xml::Element_ptr history_entry = _answer->createElement( "history.entry" );
+        
+        for( int i = 0; i < type->field_count() - 1; i++ )
+        {
+            history_entry->setAttribute( as_dom_string( type->field_descr_ptr(i)->name() ), as_dom_string( type->as_string( i, rec.byte_ptr() ) ) );
+        }
+
+        history_element->appendChild( history_entry );
+        dom_append_nl( history_element );
+    }
+
+    return history_element;
+}
+
 //--------------------------------------------------------Command_processor::execute_modify_spooler
 
 xml::Element_ptr Command_processor::execute_modify_spooler( const xml::Element_ptr& element )
@@ -213,7 +251,7 @@ xml::Element_ptr Command_processor::execute_signal_object( const xml::Element_pt
     if( _security_level < Security::seclev_signal )  throw_xc( "SPOOLER-121" );
 
     string class_name = as_string( element->getAttribute( "class" ) );
-    Level  level      = as_int   ( element->getAttribute( "level" ) );
+    Level  level      = int_from_variant( element->getAttribute( "level" ) );
 
     xml::Element_ptr jobs_element = _answer->createElement( "tasks" );
 
@@ -256,6 +294,8 @@ xml::Element_ptr Command_processor::execute_add_jobs( const xml::Element_ptr& ad
 xml::Element_ptr Command_processor::execute_command( const xml::Element_ptr& element )
 {
     if( element->tagName == "show_state"        )  return execute_show_state( element );
+    else
+    if( element->tagName == "show_history"      )  return execute_show_history( element );
     else
     if( element->tagName == "modify_spooler"    )  return execute_modify_spooler( element );
     else

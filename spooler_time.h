@@ -1,4 +1,4 @@
-// $Id: spooler_time.h,v 1.8 2002/03/18 10:11:40 jz Exp $
+// $Id: spooler_time.h,v 1.9 2002/04/04 17:18:39 jz Exp $
 
 #ifndef __SPOOLER_TIME_H
 #define __SPOOLER_TIME_H
@@ -13,6 +13,12 @@ namespace time {
 
 struct Time
 {
+    enum With_ms
+    {
+        without_ms,
+        with_ms
+    };
+
                                 Time                        ( double t = 0.0 )              { set(t); }
                                 Time                        ( int t )                       { set(t); }
                                 Time                        ( uint t )                      { set(t); }
@@ -57,9 +63,9 @@ struct Time
     Time                        midnight                    () const                        { return day_nr() * 24*60*60; }
     int                         day_nr                      () const                        { return uint(_time) / (24*60*60); }
 
-    string                      as_string                   () const;                        
+    string                      as_string                   ( With_ms = with_ms ) const;                        
     void                        print                       ( ostream& s ) const            { s << as_string(); }
-    friend ostream&             operator <<                 ( ostream& s, const Time& o )  { o.print(s); return s; }
+    friend ostream&             operator <<                 ( ostream& s, const Time& o )   { o.print(s); return s; }
 
     static Time                 now                         ();
 

@@ -1,4 +1,4 @@
-// $Id: spooler_config.cxx,v 1.31 2002/03/15 13:50:29 jz Exp $
+// $Id: spooler_config.cxx,v 1.32 2002/04/04 17:18:38 jz Exp $
 
 //#include <precomp.h>
 
@@ -226,7 +226,7 @@ void Day_set::set_xml( const xml::Element_ptr& element, const Day* default_day, 
         {
             Day my_default_day ( e, default_day, default_period );
 
-            int day = as_int( e->getAttribute( L"day" ) );
+            int day = int_from_variant( e->getAttribute( L"day" ) );
             if( (uint)day >= NO_OF(_days) )  throw_xc( "SPOOLER-INVALID-DAY", day );
             _days[day].set_xml( e, &my_default_day, default_period );
         }
@@ -320,7 +320,7 @@ void Object_set_class::set_xml( const xml::Element_ptr& element )
             {
                 if( e2->tagName == "level_decl" ) 
                 {
-                    int    level = as_int( e2->getAttribute( L"level" ) );
+                    int    level = int_from_variant( e2->getAttribute( L"level" ) );
                     string name  = as_string( e2->getAttribute( L"name" ) );
 
                     _level_map[ level ] = name;
@@ -334,8 +334,8 @@ void Object_set_class::set_xml( const xml::Element_ptr& element )
 
 void Level_interval::set_xml( const xml::Element_ptr& element )
 {
-    _low_level  = as_int( element->getAttribute( L"low" ) );
-    _high_level = as_int( element->getAttribute( L"high" ) );
+    _low_level  = int_from_variant( element->getAttribute( L"low" ) );
+    _high_level = int_from_variant( element->getAttribute( L"high" ) );
 }
 
 //------------------------------------------------------------------------Object_set_descr::set_xml
@@ -358,7 +358,7 @@ void Job::set_xml( const xml::Element_ptr& element )
       //_rerun            = as_bool  ( element->getAttribute( L"rerun" ) ) ),
       //_stop_after_error = as_bool  ( element->getAttribute( L"stop_after_errorn ) );
         _temporary        = as_bool  ( element->getAttribute( L"temporary" ) );
-        _priority         = as_int   ( element->getAttribute( L"priority" ) );
+        _priority         = int_from_variant( element->getAttribute( L"priority" ) );
         _title            = as_string( element->getAttribute( L"title" ) );
         _log_append       = as_bool  ( element->getAttribute( L"log_append" ) );
 
@@ -471,9 +471,9 @@ void Spooler::load_config( const xml::Element_ptr& config_element )
     _config_element  = config_element;
 
 
-    _tcp_port      = as_int( config_element->getAttribute( L"tcp_port"     ) );
-    _udp_port      = as_int( config_element->getAttribute( L"udp_port"     ) );
-    _priority_max  = as_int( config_element->getAttribute( L"priority_max" ) );
+    _tcp_port      = int_from_variant( config_element->getAttribute( L"tcp_port"     ) );
+    _udp_port      = int_from_variant( config_element->getAttribute( L"udp_port"     ) );
+    _priority_max  = int_from_variant( config_element->getAttribute( L"priority_max" ) );
 
     if( !_log_directory_as_option_set )  _log_directory = as_string( config_element->getAttribute( L"log_dir"      ) );
     if( !_spooler_param_as_option_set )  _spooler_param = as_string( config_element->getAttribute( L"param"        ) );

@@ -1,4 +1,4 @@
-// $Id: spooler.h,v 1.71 2002/03/22 18:57:42 jz Exp $
+// $Id: spooler.h,v 1.72 2002/04/04 17:18:37 jz Exp $
 
 #ifndef __SPOOLER_H
 #define __SPOOLER_H
@@ -38,13 +38,19 @@
 #include "../kram/sosdate.h"
 #include "../kram/sossock1.h"
 #include "../kram/thread_semaphore.h"
+#include "../kram/com_simple_standards.h"
 #include "../kram/log.h"
+
+#include "../zschimmer/zschimmer.h"
+#include "../zschimmer/file.h"
+
 
 namespace sos {
     namespace spooler {
         using namespace std;
         struct Spooler;
         struct Thread;
+        struct Job;
         struct Task;
     }
 }
@@ -58,6 +64,7 @@ namespace sos {
 #include "spooler_security.h"
 #include "spooler_command.h"
 #include "spooler_script.h"
+#include "spooler_history.h"
 #include "spooler_task.h"
 #include "spooler_thread.h"
 #include "spooler_service.h"
@@ -78,7 +85,16 @@ string                          extension_of_path           ( const string& );
 namespace spooler {
 
 
+enum Archive_switch
+{
+    arc_no = 0,
+    arc_yes,
+    arc_gzip
+};
+
 string                          text_from_xml_with_include  ( const xml::Element_ptr&, const string& include_path );
+int                             read_profile_on_process     ( const string& profile, const string& section, const string& entry, int deflt );
+Archive_switch                  read_profile_archive        ( const string& profile, const string& section, const string& entry, Archive_switch deflt );
 
 //----------------------------------------------------------------------------State_changed_handler
 
@@ -202,6 +218,16 @@ struct Spooler
     string                     _log_mail_subject;
     int                        _log_collect_within;
     int                        _log_collect_max;
+
+    string                     _history_filename;
+    string                     _history_columns;
+    int                        _history_on_process;
+    Archive_switch             _history_archive;
+    bool                       _history_with_log;
+    string                     _history_tablename;
+    string                     _variables_tablename;
+
+
     Log                        _log;
     Prefix_log                 _prefix_log;
 
@@ -213,6 +239,8 @@ struct Spooler
 
     Thread_semaphore           _job_name_lock;              // Sperre von get_job(name) bis add_job() für eindeutige Jobnamen
     Thread_semaphore           _serialize_lock;             // Wenn die Threads nicht nebenläufig sein sollen
+
+    Spooler_db                 _db;
 
   private:
     string                     _config_filename;            // -config=
