@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.222 2003/12/08 10:32:06 jz Exp $
+// $Id: spooler_task.cxx,v 1.223 2003/12/09 12:42:27 jz Exp $
 /*
     Hier sind implementiert
 
@@ -942,6 +942,7 @@ bool Task::do_something()
             }
             catch( _com_error& x )  { throw_com_error( x ); }
         }
+      //catch( Stop_scheduler_exception& ) { throw; }
         catch( const exception& x )
         {
             if( error_count == 0 )  set_error( x );

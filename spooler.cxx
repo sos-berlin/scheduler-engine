@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.300 2003/12/08 10:32:05 jz Exp $
+// $Id: spooler.cxx,v 1.301 2003/12/09 12:42:26 jz Exp $
 /*
     Hier sind implementiert
 
@@ -1222,7 +1222,7 @@ void Spooler::load_arg()
     _order_history_with_log     =            read_profile_with_log  ( _factory_ini, "spooler", "order_history_with_log", arc_no );
     _db_name                    =            read_profile_string    ( _factory_ini, "spooler", "db"                 );
     _need_db                    =            read_profile_bool      ( _factory_ini, "spooler", "need_db"            , true                );
-    _max_db_errors              =            read_profile_int       ( _factory_ini, "spooler", "max_db_errors"      , 10 );
+    _max_db_errors              =            read_profile_int       ( _factory_ini, "spooler", "max_db_errors"      , 5 );
     _order_history_tablename    =            read_profile_string    ( _factory_ini, "spooler", "db_order_history_table", "SCHEDULER_ORDER_HISTORY" );
     _orders_tablename           =            read_profile_string    ( _factory_ini, "spooler", "db_orders_table"    , "SCHEDULER_ORDERS"    );
     _variables_tablename        =            read_profile_string    ( _factory_ini, "spooler", "db_variables_table" , "SCHEDULER_VARIABLES" );

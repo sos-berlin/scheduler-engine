@@ -1,4 +1,4 @@
-// $Id: spooler_job.cxx,v 1.46 2003/12/08 10:32:05 jz Exp $
+// $Id: spooler_job.cxx,v 1.47 2003/12/09 12:42:27 jz Exp $
 /*
     Hier sind implementiert
 
@@ -230,6 +230,16 @@ void Job::close()
     THREAD_LOCK( _lock )
     {
         clear_when_directory_changed();
+
+        Z_FOR_EACH( Task_list, _running_tasks, t )
+        {
+            Task* task = *t;
+            try
+            {
+                task->try_kill();
+            }
+            catch( const exception& x ) { LOG( *task << ".kill() => " << x.what() << "\n" ); }
+        }
 
         Z_FOR_EACH( Task_list, _running_tasks, t )
         {
@@ -1066,6 +1076,7 @@ bool Job::do_something()
         }
         catch( const _com_error& x )  { throw_com_error( x ); }
     }
+  //catch( Stop_scheduler_exception& ) { throw; }
     catch( const exception&  x ) { set_error( x );  set_job_error( x.what() );  sos_sleep(5); }     // Bremsen, falls sicher der Fehler sofort wiederholt
 
     return something_done;

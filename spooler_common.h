@@ -1,4 +1,4 @@
-// $Id: spooler_common.h,v 1.15 2003/12/08 10:32:05 jz Exp $
+// $Id: spooler_common.h,v 1.16 2003/12/09 12:42:26 jz Exp $
 
 #ifndef __SPOOLER_COMMON_H
 #define __SPOOLER_COMMON_H
@@ -28,12 +28,12 @@ typedef DWORD                   Process_id;
 // Der andere Thread muss dieselbe Semaphore LOCK nutzen.
 
 //-------------------------------------------------------------------------Stop_scheduler_exception
-
+/*
 struct Stop_scheduler_exception : Xc
 {
                                 Stop_scheduler_exception    ( const Xc& x )                         : Xc(x) {}
 };
-
+*/
 //-------------------------------------------------------------------------------------------Atomic
 /*
 template<typename T>
