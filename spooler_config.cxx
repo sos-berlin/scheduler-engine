@@ -1,4 +1,4 @@
-// $Id: spooler_config.cxx,v 1.35 2002/04/23 07:00:21 jz Exp $
+// $Id: spooler_config.cxx,v 1.36 2002/05/01 08:52:15 jz Exp $
 
 //#include <precomp.h>
 
@@ -469,7 +469,7 @@ void Spooler::load_threads_from_xml( Thread_list* liste, const xml::Element_ptr&
         if( e->tagName == "thread" ) 
         {
             string spooler_id = as_string( e->getAttribute( L"spooler_id" ) );
-            if( spooler_id.empty()  ||  spooler_id == _spooler_id )
+            if( _manual  ||  spooler_id.empty()  ||  spooler_id == _spooler_id )
             {
                 Sos_ptr<Thread> thread = SOS_NEW( Thread( this ) );
                 thread->set_xml( e );
@@ -494,7 +494,9 @@ void Spooler::load_config( const xml::Element_ptr& config_element )
     _udp_port      = int_from_variant( config_element->getAttribute( L"udp_port"     ) );
     _priority_max  = int_from_variant( config_element->getAttribute( L"priority_max" ) );
 
-    if( !_log_directory_as_option_set )  _log_directory = as_string( config_element->getAttribute( L"log_dir"      ) );
+    string log_dir =        as_string( config_element->getAttribute( L"log_dir"      ) );
+
+    if( !_log_directory_as_option_set && log_dir != "" )  _log_directory = log_dir;
     if( !_spooler_param_as_option_set )  _spooler_param = as_string( config_element->getAttribute( L"param"        ) );
     if( !_include_path_as_option_set  )  _include_path  = as_string( config_element->getAttribute( L"include_path" ) );
 

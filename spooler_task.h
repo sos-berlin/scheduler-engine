@@ -1,4 +1,4 @@
-// $Id: spooler_task.h,v 1.51 2002/04/17 10:21:38 jz Exp $
+// $Id: spooler_task.h,v 1.52 2002/05/01 08:52:15 jz Exp $
 
 #ifndef __SPOOLER_TASK_H
 #define __SPOOLER_TASK_H
@@ -127,7 +127,6 @@ struct Job : Sos_self_deleting
         s_none,
         s_stopped,              // Gestoppt (z.B. wegen Fehler)
         s_read_error,           // Skript kann nicht aus Datei (include) gelesen werden
-      //s_load_error,           // Skript kann nicht in Scripting Engine geladen werden
         s_pending,              // Warten auf Start
         s_start_task,           // Task aus der Warteschlange genommen, muss noch gestartet werden. 
         s_starting,             //

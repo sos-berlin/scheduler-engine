@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.97 2002/04/23 07:00:21 jz Exp $
+// $Id: spooler.cxx,v 1.98 2002/05/01 08:52:14 jz Exp $
 /*
     Hier sind implementiert
 
@@ -464,15 +464,14 @@ void Spooler::load_arg()
             if( opt.with_value( "param"            ) )  _spooler_param = opt.value(),  _spooler_param_as_option_set = true;
             else
             if( opt.with_value( "log-level"        ) )  log_level = opt.value();
-#ifdef _DEBUG  // Nicht von SOS beauftragt
             else
-            if( opt.with_value( "job"              ) )  _job_name = opt.value();
-#endif
+            if( opt.with_value( "job"              ) )  _job_name = opt.value();        // Nicht von SOS beauftragt
             else
                 throw_sos_option_error( opt );
         }
 
         _manual = !_job_name.empty();
+        if( _manual  &&  _log_directory.empty() )  _log_directory = "*stderr";
 
         _log_level = make_log_level( log_level );
 

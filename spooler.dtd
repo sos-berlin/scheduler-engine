@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- $Id: spooler.dtd,v 1.38 2002/04/30 08:59:19 jz Exp $   Joacim Zschimmer,  (C) 2000 SOS GmbH Berlin  -->
+<!-- $Id: spooler.dtd,v 1.39 2002/05/01 08:52:14 jz Exp $   Joacim Zschimmer,  (C) 2000 SOS GmbH Berlin  -->
 
 
 <!ELEMENT spooler               ( config+ | command | answer )>
@@ -171,11 +171,6 @@
 <!ATTLIST kill_task             job                 CDATA #REQUIRED>
 <!ATTLIST kill_task             id                  CDATA #REQUIRED>
 
-<!ELEMENT start_job             ( params? )>
-<!ATTLIST start_job             job                 CDATA #REQUIRED>
-<!ATTLIST start_job             name                CDATA #IMPLIED>     <!-- Name für diese Task -->
-<!ATTLIST start_job             after               CDATA #IMPLIED>     <!-- Erst nach so vielen Sekunden starten -->
-<!ATTLIST start_job             at                  CDATA #IMPLIED>     <!-- Oder genau zu diesem Zeitpunkt (mit Datum!) starten -->
 
 <!ELEMENT params                ( param* )>                             <!-- Parameter für cmd="start" -->
 
