@@ -1,4 +1,4 @@
-// $Id: spooler_log.cxx,v 1.75 2003/10/11 11:40:00 jz Exp $
+// $Id: spooler_log.cxx,v 1.76 2003/10/13 18:08:47 jz Exp $
 
 #include "spooler.h"
 #include "spooler_mail.h"
@@ -290,6 +290,7 @@ Prefix_log::~Prefix_log()
 
         try
         {
+            LOG( "unlink " << _filename << "\n" );
             int ret = unlink( _filename.c_str() );
             if( ret == -1 )  throw_errno( errno, "unlink", _filename.c_str() );
         }
