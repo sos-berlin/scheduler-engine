@@ -1,4 +1,4 @@
-// $Id: spooler_dll.cxx,v 1.2 2003/11/30 10:35:38 jz Exp $
+// $Id: spooler_dll.cxx,v 1.3 2004/06/05 08:57:49 jz Exp $
 
 #include "spooler.h"
 
@@ -40,7 +40,7 @@ extern "C" BOOL WINAPI DllMain( HANDLE hInst, DWORD ul_reason_being_called, LPVO
 
 //--------------------------------------------------------------------------------------------start
 
-extern "C" void __declspec(dllexport) WINAPI/*CALLBACK*/ spooler( HWND window, HINSTANCE, LPTSTR command_line, int show )
+extern "C" void __declspec(dllexport) WINAPI/*CALLBACK*/ spooler( HWND, HINSTANCE, LPTSTR command_line, int )
 {
     sos::Sos_appl my_application;
 

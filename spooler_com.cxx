@@ -1,4 +1,4 @@
-// $Id: spooler_com.cxx,v 1.150 2004/04/05 09:14:26 jz Exp $
+// $Id: spooler_com.cxx,v 1.151 2004/06/05 08:57:49 jz Exp $
 /*
     Hier sind implementiert
 
@@ -440,6 +440,7 @@ STDMETHODIMP Com_variable_set::get_Dom( IXMLDOMDocument** doc )
 
 #    else
 
+        __assume( doc );
         return E_NOTIMPL;
 
 #   endif
@@ -754,7 +755,7 @@ STDMETHODIMP Com_variable_set_enumerator::Reset()
 
 //---------------------------------------------------------------Com_variable_set_enumerator::Clone
 
-STDMETHODIMP Com_variable_set_enumerator::Clone( IEnumVARIANT** ppenum )
+STDMETHODIMP Com_variable_set_enumerator::Clone( IEnumVARIANT** )
 {
     return ERROR;
 }
@@ -1811,7 +1812,7 @@ void Com_task::set_task( Task* task )
 
 //-------------------------------------------------------------------------Com_task::get_object_set
 
-STDMETHODIMP Com_task::get_Object_set( Iobject_set** result )
+STDMETHODIMP Com_task::get_Object_set( Iobject_set** )
 {
     return E_NOTIMPL;
 /*

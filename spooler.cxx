@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.336 2004/05/20 21:40:57 jz Exp $
+// $Id: spooler.cxx,v 1.337 2004/06/05 08:57:49 jz Exp $
 // §851: Weitere Log-Ausgaben zum Scheduler-Start eingebaut
 // §1479
 
@@ -557,7 +557,7 @@ xml::Element_ptr Spooler::threads_as_xml( const xml::Document_ptr& document, Sho
 
 //-----------------------------------------------------------Spooler::load_process_classes_from_dom
 
-void Spooler::load_process_classes_from_dom( const xml::Element_ptr& element, const Time& xml_mod_time )
+void Spooler::load_process_classes_from_dom( const xml::Element_ptr& element, const Time& )
 {
     if( !process_class_or_null( "" ) )
     {
@@ -1009,7 +1009,7 @@ Spooler_thread* Spooler::thread_by_thread_id( Thread_id id )
 
 //----------------------------------------------------------------Spooler::select_thread_for_a_task
 
-Spooler_thread* Spooler::select_thread_for_task( Task* task )
+Spooler_thread* Spooler::select_thread_for_task( Task* )
 {
     assert( current_thread_id() == thread_id() );
 

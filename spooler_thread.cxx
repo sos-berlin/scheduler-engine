@@ -1,4 +1,4 @@
-// $Id: spooler_thread.cxx,v 1.114 2004/03/29 22:03:14 jz Exp $
+// $Id: spooler_thread.cxx,v 1.115 2004/06/05 08:57:49 jz Exp $
 /*
     Hier sind implementiert
 
@@ -64,7 +64,7 @@ void Spooler_thread::init()
 
 //------------------------------------------------------------------------------Spooler_thread::dom
 
-xml::Element_ptr Spooler_thread::dom( const xml::Document_ptr& document, Show_what show )
+xml::Element_ptr Spooler_thread::dom( const xml::Document_ptr& document, Show_what )
 {
     xml::Element_ptr thread_element = document.createElement( "thread" );
 
@@ -748,7 +748,7 @@ int Spooler_thread::run_thread()
 //--------------------------------------------------------------------Spooler_thread::signal_object
 // Anderer Thread
 
-void Spooler_thread::signal_object( const string& object_set_class_name, const Level& level )
+void Spooler_thread::signal_object( const string& , const Level& )
 {
 /*
     THREAD_LOCK( _lock )
@@ -844,7 +844,7 @@ void Spooler_thread::wait_until_thread_stopped( Time until )
 
 //--------------------------------------------------------------Spooler_thread::try_to_free_process
 
-bool Spooler_thread::try_to_free_process( Job* for_job, Process_class* process_class, const Time& now )
+bool Spooler_thread::try_to_free_process( Job* for_job, Process_class* process_class, const Time& )
 {
 /*  Was passiert, wenn ein zweiter Job try_to_free_process() rufen?
     Der beendet doch keine zweite Task, weil die vom ersten Job beendete findet!

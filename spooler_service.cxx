@@ -1,4 +1,4 @@
-// $Id: spooler_service.cxx,v 1.47 2004/02/19 17:17:33 jz Exp $
+// $Id: spooler_service.cxx,v 1.48 2004/06/05 08:57:49 jz Exp $
 /*
     Hier sind implementiert
 
@@ -105,7 +105,7 @@ string make_service_display( const string& id )
 
 //----------------------------------------------------------------------------------------event_log
 
-static void event_log( const string& msg_par, int argc, char** argv, Spooler* spooler = NULL )
+static void event_log( const string& msg_par, int argc, char** argv, Spooler* = NULL )
 {
     string msg = "*** SOS SCHEDULER *** " + msg_par;
 
@@ -397,7 +397,7 @@ static uint __stdcall pending_watchdog_thread( void* )
 
 //--------------------------------------------------------------------------self_destruction_thread
 
-static uint __stdcall self_destruction_thread( void* param )
+static uint __stdcall self_destruction_thread( void* )
 {
     SetThreadPriority( GetCurrentThread(), THREAD_PRIORITY_HIGHEST );
 

@@ -1,4 +1,4 @@
-// $Id: spooler_task.h,v 1.134 2004/06/01 14:19:45 jz Exp $
+// $Id: spooler_task.h,v 1.135 2004/06/05 08:57:49 jz Exp $
 
 #ifndef __SPOOLER_TASK_H
 #define __SPOOLER_TASK_H
@@ -200,7 +200,7 @@ struct Task : Sos_self_deleting
     virtual void                do_end__end                 () = 0;
     virtual Async_operation*    do_step__start              ()                                      { return &dummy_sync_operation; }
     virtual bool                do_step__end                () = 0;
-    virtual Async_operation*    do_call__start              ( const string& method )                { return &dummy_sync_operation; }
+    virtual Async_operation*    do_call__start              ( const string& )                       { return &dummy_sync_operation; }
     virtual bool                do_call__end                ()                                      { return true; }           // Default: Nicht implementiert
     virtual Async_operation*    do_release__start           ()                                      { return &dummy_sync_operation; }
     virtual void                do_release__end             ()                                      {}

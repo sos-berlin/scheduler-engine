@@ -1,4 +1,4 @@
-// $Id: spooler_process.cxx,v 1.28 2004/05/10 12:01:10 jz Exp $
+// $Id: spooler_process.cxx,v 1.29 2004/06/05 08:57:49 jz Exp $
 // §1172
 // §1206
 
@@ -158,7 +158,7 @@ string Process::stderr_filename()
 
 //-------------------------------------------------------------------------------------Process::dom
 
-xml::Element_ptr Process::dom( const xml::Document_ptr& document, Show_what show )
+xml::Element_ptr Process::dom( const xml::Document_ptr& document, Show_what )
 {
     xml::Element_ptr process_element = document.createElement( "process" );
 

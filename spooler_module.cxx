@@ -1,4 +1,4 @@
-// $Id: spooler_module.cxx,v 1.60 2004/05/10 12:03:45 jz Exp $
+// $Id: spooler_module.cxx,v 1.61 2004/06/05 08:57:49 jz Exp $
 // §1172
 /*
     Hier sind implementiert
@@ -381,7 +381,7 @@ void Module_instance::detach_task()
 
 //-------------------------------------------------------------------------Module_instance::add_obj
 
-void Module_instance::add_obj( IDispatch* object, const string& name )
+void Module_instance::add_obj( IDispatch*, const string& )
 {
 }
 
@@ -434,7 +434,7 @@ bool Module_instance::begin__end()
 
 //----------------------------------------------------------------------Module_instance::end__start
 
-Async_operation* Module_instance::end__start( bool success )
+Async_operation* Module_instance::end__start( bool )
 {
     return &dummy_sync_operation;
 }

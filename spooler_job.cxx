@@ -1,4 +1,4 @@
-// $Id: spooler_job.cxx,v 1.80 2004/06/01 06:32:38 jz Exp $
+// $Id: spooler_job.cxx,v 1.81 2004/06/05 08:57:49 jz Exp $
 // §851: Weitere Log-Ausgaben zum Scheduler-Start eingebaut
 /*
     Hier sind implementiert
@@ -513,7 +513,7 @@ void Job::Task_queue::remove_task_from_db( int task_id )
 
 //---------------------------------------------------------------------Job::Task_queue::remove_task
 
-bool Job::Task_queue::remove_task( int task_id, Why_remove why_remove )
+bool Job::Task_queue::remove_task( int task_id, Why_remove )
 {
     bool result = false;
 

@@ -1,4 +1,4 @@
-// $Id: spooler_history.cxx,v 1.95 2004/05/07 14:20:50 jz Exp $
+// $Id: spooler_history.cxx,v 1.96 2004/06/05 08:57:49 jz Exp $
 
 #include "spooler.h"
 #include "../zschimmer/z_com.h"
@@ -691,7 +691,7 @@ void Spooler_db::insert_order( Order* order )
 
 //-------------------------------------------------------------------------Spooler_db::delete_order
 
-void Spooler_db::delete_order( Order* order, Transaction* transaction )
+void Spooler_db::delete_order( Order* order, Transaction* )
 {
     sql::Delete_stmt del ( &_db_descr );
 

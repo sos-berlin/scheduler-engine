@@ -1,4 +1,4 @@
-// $Id: spooler_command.cxx,v 1.110 2004/05/12 07:51:17 jz Exp $
+// $Id: spooler_command.cxx,v 1.111 2004/06/05 08:57:49 jz Exp $
 /*
     Hier ist implementiert
 
@@ -48,7 +48,7 @@ void dom_append_text_element( const xml::Element_ptr& element, const char* eleme
 
 //------------------------------------------------------------------------------------dom_append_nl
 
-void dom_append_nl( const xml::Element_ptr& element )
+void dom_append_nl( const xml::Element_ptr& )
 {
     //indent ersetzt diese Newlines.    element.appendChild( element.ownerDocument().createTextNode( "\n" ) );
 }
@@ -148,7 +148,7 @@ xml::Element_ptr Command_processor::execute_show_process_classes( Show_what show
 
 //------------------------------------------------------------Command_processor::execute_show_state
 
-xml::Element_ptr Command_processor::execute_show_state( const xml::Element_ptr& element, Show_what show )
+xml::Element_ptr Command_processor::execute_show_state( const xml::Element_ptr&, Show_what show )
 {
     if( _security_level < Security::seclev_info )  throw_xc( "SCHEDULER-121" );
 
@@ -456,7 +456,7 @@ xml::Element_ptr Command_processor::execute_add_jobs( const xml::Element_ptr& ad
 
 //-------------------------------------------------------Command_processor::execute_show_job_chains
 
-xml::Element_ptr Command_processor::execute_show_job_chains( const xml::Element_ptr& element, Show_what show )
+xml::Element_ptr Command_processor::execute_show_job_chains( const xml::Element_ptr&, Show_what show )
 {
     if( _security_level < Security::seclev_info )  throw_xc( "SCHEDULER-121" );
 

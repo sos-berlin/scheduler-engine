@@ -1,4 +1,4 @@
-// $Id: spooler_dll_java.cxx,v 1.3 2003/10/19 19:59:02 jz Exp $
+// $Id: spooler_dll_java.cxx,v 1.4 2004/06/05 08:57:49 jz Exp $
 
 #include "spooler.h"
 #include "../zschimmer/java.h"
@@ -35,7 +35,7 @@ extern "C" JNIEXPORT jint JNICALL JNI_OnLoad( JavaVM* jvm, void* )
 
 //-------------------------------------------------------------------------------------JNI_OnUnload
 
-extern "C" JNIEXPORT void JNICALL JNI_OnUnload( JavaVM* jvm, void* )
+extern "C" JNIEXPORT void JNICALL JNI_OnUnload( JavaVM*, void* )
 {
     zschimmer_terminate();
     CoUninitialize();
@@ -43,7 +43,7 @@ extern "C" JNIEXPORT void JNICALL JNI_OnUnload( JavaVM* jvm, void* )
 
 //-------------------------------------------------------------sos.spooler.Spooler_program.construct
 
-JNIEXPORT void JNICALL Java_sos_spooler_Spooler_1program_construct( JNIEnv* jenv, jobject jo, jstring parameters_jstr )
+JNIEXPORT void JNICALL Java_sos_spooler_Spooler_1program_construct( JNIEnv* jenv, jobject, jstring parameters_jstr )
 {
     try
     {
@@ -55,7 +55,7 @@ JNIEXPORT void JNICALL Java_sos_spooler_Spooler_1program_construct( JNIEnv* jenv
 
 //--------------------------------------------------------sos.spooler.Spooler_program.construct_argv
 
-JNIEXPORT void JNICALL Java_sos_spooler_Spooler_1program_construct_1argv( JNIEnv* jenv, jobject jo, jobjectArray jparams )
+JNIEXPORT void JNICALL Java_sos_spooler_Spooler_1program_construct_1argv( JNIEnv* jenv, jobject, jobjectArray jparams )
 {
     char** argv = NULL;
     int    argc = 0;
