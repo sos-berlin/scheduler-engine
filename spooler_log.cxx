@@ -1,4 +1,4 @@
-// $Id: spooler_log.cxx,v 1.88 2004/02/03 14:40:44 jz Exp $
+// $Id: spooler_log.cxx,v 1.89 2004/02/03 16:22:18 jz Exp $
 
 #include "spooler.h"
 #include "spooler_mail.h"
@@ -638,12 +638,14 @@ void Prefix_log::set_mail_body( const string& body, bool overwrite )
 
 void Prefix_log::send( int reason )
 {
+    //LOG2( "joacim", "Prefix_log::send()\n" );
     // reason == -2  =>  Gelegentlicher Aufruf, um Fristen zu prüfen und ggfs. eMail zu versenden
     // reason == -1  =>  Job mit Fehler beendet
     // reason >=  0  =>  Anzahl spooler_process()
 
     if( _file == -1 )       // Nur senden, wenn die Log-Datei beschrieben worden ist
     {
+        //LOG2( "joacim", "Prefix_log::send()  _file == -1\n" );
         _first_send = 0;
         _mail = NULL;
     }
@@ -653,6 +655,8 @@ void Prefix_log::send( int reason )
                      || reason == -1  &&  _mail_on_error
                      || reason ==  0  &&  _mail_on_success
                      || reason  >  0  &&  ( _mail_on_success || _mail_on_process && reason >= _mail_on_process );
+
+        //LOG2( "joacim", "Prefix_log::send()  mail_it=" << mail_it << "\n" );
 
         Time now = Time::now();
 
@@ -680,6 +684,7 @@ void Prefix_log::send( int reason )
                 // denn diese Bedingung wird erst festgestellt, wenn das Protokoll bereits geschrieben ist.
 
                 close2();
+                //LOG2( "joacim", "Prefix_log::send_really()\n" );
                 send_really();
 
                 _first_send = 0;

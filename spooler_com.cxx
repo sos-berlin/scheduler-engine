@@ -1,4 +1,4 @@
-// $Id: spooler_com.cxx,v 1.135 2004/01/31 18:26:30 jz Exp $
+// $Id: spooler_com.cxx,v 1.136 2004/02/03 16:22:17 jz Exp $
 /*
     Hier sind implementiert
 
@@ -1244,47 +1244,6 @@ STDMETHODIMP Com_log::get_last_error_line( BSTR* result )
 
     return hr;
 }
-
-//------------------------------------------------------------------------------------Com_log_proxy
-/*
-const Com_method Com_log_proxy::_methods[] =
-{ 
-   // _flags         , dispid, _name                   , _method                                           , _result_type  , _types        , _default_arg_count
-    { DISPATCH_METHOD     ,  1, "debug9"               , (Com_method_ptr)&Com_log_proxy::debug9                  , VT_EMPTY      , { VT_BSTR } },
-    { DISPATCH_METHOD     ,  2, "debug8"               , (Com_method_ptr)&Com_log_proxy::debug8                  , VT_EMPTY      , { VT_BSTR } },
-    { DISPATCH_METHOD     ,  3, "debug7"               , (Com_method_ptr)&Com_log_proxy::debug7                  , VT_EMPTY      , { VT_BSTR } },
-    { DISPATCH_METHOD     ,  4, "debug6"               , (Com_method_ptr)&Com_log_proxy::debug6                  , VT_EMPTY      , { VT_BSTR } },
-    { DISPATCH_METHOD     ,  5, "debug5"               , (Com_method_ptr)&Com_log_proxy::debug5                  , VT_EMPTY      , { VT_BSTR } },
-    { DISPATCH_METHOD     ,  6, "debug4"               , (Com_method_ptr)&Com_log_proxy::debug4                  , VT_EMPTY      , { VT_BSTR } },
-    { DISPATCH_METHOD     ,  7, "debug3"               , (Com_method_ptr)&Com_log_proxy::debug3                  , VT_EMPTY      , { VT_BSTR } },
-    { DISPATCH_METHOD     ,  8, "debug2"               , (Com_method_ptr)&Com_log_proxy::debug2                  , VT_EMPTY      , { VT_BSTR } },
-    { DISPATCH_METHOD     ,  9, "debug1"               , (Com_method_ptr)&Com_log_proxy::debug1                  , VT_EMPTY      , { VT_BSTR } },
-    { DISPATCH_METHOD     , 10, "debug"                , (Com_method_ptr)&Com_log_proxy::debug                   , VT_EMPTY      , { VT_BSTR } },
-    { DISPATCH_METHOD     ,  0, "info"                 , (Com_method_ptr)&Com_log_proxy::info                    , VT_EMPTY      , { VT_BSTR } },
-    { DISPATCH_METHOD     , 11, "msg"                  , (Com_method_ptr)&Com_log_proxy::msg                     , VT_EMPTY      , { VT_BSTR } },
-    { DISPATCH_METHOD     , 12, "warn"                 , (Com_method_ptr)&Com_log_proxy::warn                    , VT_EMPTY      , { VT_BSTR } },
-    { DISPATCH_METHOD     , 13, "error"                , (Com_method_ptr)&Com_log_proxy::error                   , VT_EMPTY      , { VT_BSTR } },
-    { DISPATCH_METHOD     , 14, "log"                  , (Com_method_ptr)&Com_log_proxy::log                     , VT_EMPTY      , { VT_I4, VT_BSTR } },
-  //{ DISPATCH_PROPERTYGET, 15, "mail"                 , (Com_method_ptr)&Com_log_proxy::get_mail                , VT_DISPATCH  },
-  //{ DISPATCH_PROPERTYPUT, 16, "mail_on_error"        , (Com_method_ptr)&Com_log_proxy::put_mail_on_error       , VT_EMPTY      , { VT_BOOL } },
-  //{ DISPATCH_PROPERTYGET, 16, "mail_on_error"        , (Com_method_ptr)&Com_log_proxy::get_mail_on_error       , VT_BOOL       },
-  //{ DISPATCH_PROPERTYPUT, 17, "mail_on_success"      , (Com_method_ptr)&Com_log_proxy::put_mail_on_success     , VT_EMPTY      , { VT_BOOL } },
-  //{ DISPATCH_PROPERTYGET, 17, "mail_on_success"      , (Com_method_ptr)&Com_log_proxy::get_mail_on_success     , VT_BOOL       },
-  //{ DISPATCH_PROPERTYPUT, 18, "mail_on_process"      , (Com_method_ptr)&Com_log_proxy::put_mail_on_process     , VT_EMPTY      , { VT_I4 } },
-  //{ DISPATCH_PROPERTYGET, 18, "mail_on_process"      , (Com_method_ptr)&Com_log_proxy::get_mail_on_process     , VT_I4         },
-    { DISPATCH_PROPERTYPUT, 19, "level"                , (Com_method_ptr)&Com_log_proxy::put_level               , VT_EMPTY      , { VT_I4 } },
-    { DISPATCH_PROPERTYGET, 19, "level"                , (Com_method_ptr)&Com_log_proxy::get_level               , VT_I4         },
-  //{ DISPATCH_PROPERTYGET, 20, "filename"             , (Com_method_ptr)&Com_log_proxy::get_filename            , VT_BSTR       },
-  //{ DISPATCH_PROPERTYPUT, 21, "collect_within"       , (Com_method_ptr)&Com_log_proxy::put_collect_within      , VT_EMPTY      , { VT_BYREF|VT_VARIANT } },
-  //{ DISPATCH_PROPERTYGET, 21, "collect_within"       , (Com_method_ptr)&Com_log_proxy::get_collect_within      , VT_R8         },
-  //{ DISPATCH_PROPERTYPUT, 22, "collect_max"          , (Com_method_ptr)&Com_log_proxy::put_collect_max         , VT_EMPTY      , { VT_BYREF|VT_VARIANT } },
-  //{ DISPATCH_PROPERTYGET, 22, "collect_max"          , (Com_method_ptr)&Com_log_proxy::get_collect_max         , VT_R8         },
-  //{ DISPATCH_PROPERTYPUT, 23, "mail_it"              , (Com_method_ptr)&Com_log_proxy::put_mail_it             , VT_EMPTY      , { VT_BOOL } },
-  //{ DISPATCH_PROPERTYGET, 24, "java_class_name"      , (Com_method_ptr)&Com_log_proxy::get_java_class_name     , VT_BSTR },
-  //{ DISPATCH_PROPERTYGET, 25, "last_error_line"      , (Com_method_ptr)&Com_log_proxy::get_last_error_line     , VT_BSTR },
-    {}
-};
-*/
 
 //-------------------------------------------------------------------Com_log_proxy::create_instance
 
