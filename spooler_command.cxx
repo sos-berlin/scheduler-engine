@@ -1,4 +1,4 @@
-// $Id: spooler_command.cxx,v 1.114 2004/07/15 14:24:04 jz Exp $
+// $Id: spooler_command.cxx,v 1.115 2004/07/15 17:11:33 jz Exp $
 /*
     Hier ist implementiert
 
@@ -678,7 +678,10 @@ string Command_processor::execute_http( const string& http_request )
 {
     string http_cmd;
     string response_body;
+    string response_content_type;
     string path;
+    string protocol;
+    map<string,string> headers;
 
     try
     {
@@ -687,29 +690,54 @@ string Command_processor::execute_http( const string& http_request )
         while( (Byte)p[0] > (Byte)' ' )  http_cmd += *p++;
         while( p[0] == ' ' )  p++;
 
+        while( (Byte)p[0] > (Byte)' ' )
+        {
+            if( p[0] == '%'  &&  p[1] != '\0'  &&  p[2] != '\0' )
+            {
+                path += (char)hex_as_int32( string( p+1, 2 ) );
+                p += 3;
+            }
+            else
+                path += *p++;
+        }
+        while( p[0] == ' ' )  p++;
+
+        while( (Byte)p[0] > (Byte)' ' )  protocol += *p++;
+        while( p[0]  &&  p[0] != '\n' )  p++;
+        
+        while( p[0] == '\n' )
+        {
+            p++;
+            if( p[0] <= ' ' )  break;
+
+            string name, value;
+            while( (Byte)p[0] > (Byte)' '  &&  p[0] != ':' )  name += *p++;
+            if( p[0] == ':' ) p++;
+            while( p[0] == ' ' )  p++;
+            while( (Byte)p[0] > (Byte)' ' )  value += *p++;
+            headers[ lcase( name ) ] = value;
+            while( p[0]  &&  p[0] != '\n' )  p++;
+        }
+
+        if( p[0] == '\n' )  p++;
+        if( p[0] == '\n' )  p++;
+
+
         if( http_cmd == "GET" )
         {
-            while( (Byte)p[0] > (Byte)' ' )
-            {
-                if( p[0] == '%'  &&  p[1] != '\0'  &&  p[2] != '\0' )
-                {
-                    path += (char)hex_as_int32( string( p+1, 2 ) );
-                    p += 3;
-                }
-                else
-                    path += *p++;
-            }
-            while( p[0] == ' ' )  p++;
-            while( p[0] != '\0'  &&  p[0] != '\n' )  p++;
-            if( p[0] == '\n' )  p++;
-
             if( path == "/" )  path = "index.html";
 
-            if( path.find( "." ) != string::npos )
+            string extension = extension_of_path( path );
+            if( extension != "" )
             {
                 //response_body = file_as_string( directory_of_path( _spooler->_config_filename ) ) + "/html/index.html";
                 if( _spooler->_html_directory.empty() )  throw_xc( "SCHEDULER-212" );
-                response_body = file_as_string( _spooler->_html_directory + "/index.html" );
+                response_body = file_as_string( _spooler->_html_directory + "/" + path );
+
+                if( extension == "html"  
+                 || extension == "htm" )  response_content_type = "text/html";
+                else
+                if( extension == "js"  )  response_content_type = "text/javascript";
             }
             else
             if( path.length() > 0 )
@@ -720,20 +748,23 @@ string Command_processor::execute_http( const string& http_request )
                     string xml = path;
                     if( xml[0] != '<' )  xml = '<' + path + "/>";
                     response_body = execute( xml, Time::now(), true );
+                    response_content_type = "text/xml";
                 }
             }
         }
         else
         if( http_cmd == "POST" )
         {
-            int a=7;
+            response_body = execute( p, Time::now(), true );
+            response_content_type = "text/xml";
         }
 
 
-
-
-
-        if( response_body.empty() )   response_body = execute( "<show_state what=\"all,orders\"/>", Time::now(), true );
+        if( response_body.empty() )
+        {
+            response_body = execute( "<show_state what=\"all,orders\"/>", Time::now(), true );
+            response_content_type = "text/xml";
+        }
 
     }
     catch( const exception& x )
@@ -743,7 +774,7 @@ string Command_processor::execute_http( const string& http_request )
     }
 
     time_t      t;
-    char        time_text[26+1];
+    char        time_text[26];
 
     ::time( &t );
     memset( time_text, 0, sizeof time_text );
@@ -755,12 +786,12 @@ string Command_processor::execute_http( const string& http_request )
         asctime_r( gmtime_r( &t, &tm ), &time_text );
 #   endif
     
-    memcpy( time_text+24, "\r\n", 3 );
+    time_text[24] = '\0';
 
     string response = "HTTP/1.1 200 OK\r\n"
-                      "Content-Type: text/plain\r\n"
+                      "Content-Type: " + response_content_type + "\r\n"
                       "Transfer-Encoding: chunked\r\n"
-                      "Date: " + string(time_text) +
+                      "Date: " + string(time_text) + " GMT\r\n"
                       "Server: Scheduler " + string(VER_PRODUCTVERSION_STR) + "\r\n"
                       "\r\n";
 

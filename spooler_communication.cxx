@@ -1,4 +1,4 @@
-// $Id: spooler_communication.cxx,v 1.83 2004/05/12 07:51:17 jz Exp $
+// $Id: spooler_communication.cxx,v 1.84 2004/07/15 17:11:33 jz Exp $
 /*
     Hier sind implementiert
 
@@ -572,7 +572,8 @@ bool Communication::Channel::async_continue_( bool wait )
                 string cmd = _text;
                 recv_clear();
 
-                if( string_begins_with( cmd, "GET /" ) )
+                if( string_begins_with( cmd, "GET /" )
+                 || string_begins_with( cmd, "POST /" ) )
                 {
                     _text = cp.execute_http( cmd );
                 }
