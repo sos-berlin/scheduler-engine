@@ -1,4 +1,4 @@
-// $Id: spooler_idl.h,v 1.16 2003/06/08 10:00:50 jz Exp $
+// $Id: spooler_idl.h,v 1.17 2003/06/11 08:20:27 jz Exp $
 
 
 /*  Ersatz für spooler.odl für Systeme ohne COM. 
@@ -29,7 +29,8 @@ struct Iorder_queue;
 struct Iorder;
 
 //------------------------------------------------------------------------------------Log_level
-/*
+// S.a. zschimmer/log.h (muss kompatibel sein!)
+
 enum Log_level
 {
     log_debug9 = -9,
@@ -47,7 +48,7 @@ enum Log_level
     log_error  =  2,
   //log_fatal  =  3
 };
-*/
+
 //--------------------------------------------------------------------------Has_java_class_name
 
 DEFINE_GUID(  IID_Ihas_java_class_name, 0x748E665E, 0x6252, 0x418e, 0x88, 0x7A, 0x55, 0xB1, 0x1F, 0xD8, 0x28, 0x70 );
@@ -305,7 +306,7 @@ DEFINE_GUID( CLSID_Spooler_context, 0x47399CB4, 0xB7A4, 0x40f9, 0xA9, 0xAE, 0x7A
 
 struct Ispooler_context : IDispatch
 {
-    DEFINE_UUIDOF( Icontext )
+    DEFINE_UUIDOF( Ispooler_context )
 
     virtual HRESULT     get_log                     ( Ilog** log ) = 0;
 
