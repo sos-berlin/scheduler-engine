@@ -1,4 +1,4 @@
-// $Id: spooler.h,v 1.58 2001/03/22 08:56:51 jz Exp $
+// $Id: spooler.h,v 1.59 2001/07/05 16:31:03 jz Exp $
 
 #ifndef __SPOOLER_H
 #define __SPOOLER_H
@@ -211,6 +211,7 @@ struct Spooler
 
     Thread_list                _thread_list;
 
+    Thread_id                  _thread_id;                  // Haupt-Thread
     Time                       _spooler_start_time;
     State                      _state;
     State_cmd                  _state_cmd;

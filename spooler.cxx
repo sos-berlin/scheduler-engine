@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.67 2001/03/27 08:02:45 jz Exp $
+// $Id: spooler.cxx,v 1.68 2001/07/05 16:31:03 jz Exp $
 /*
     Hier sind implementiert
 
@@ -126,6 +126,8 @@ xml::Element_ptr Spooler::threads_as_xml( xml::Document_ptr document )
 
 void Spooler::wait_until_threads_stopped( Time until )
 {
+    assert( GetCurrentThreadId() == _thread_id );
+
     Wait_handles wait_handles ( this, &_prefix_log );
 
     Thread_list::iterator it = _thread_list.begin();
@@ -170,6 +172,8 @@ void Spooler::wait_until_threads_stopped( Time until )
 
 void Spooler::signal_threads( const string& signal_name )
 {
+    assert( GetCurrentThreadId() == _thread_id );
+
     FOR_EACH( Thread_list, _thread_list, it )  (*it)->signal( signal_name );
 }
 
@@ -252,6 +256,8 @@ void Spooler::signal_object( const string& object_set_class_name, const Level& l
 
 void Spooler::set_state( State state )
 {
+    assert( GetCurrentThreadId() == _thread_id );
+
     if( _state == state )  return;
 
     _log.msg( state_name() );
@@ -279,6 +285,8 @@ string Spooler::state_name( State state )
 
 void Spooler::load_arg()
 {
+    assert( GetCurrentThreadId() == _thread_id );
+
     _spooler_id       = read_profile_string( "factory.ini", "spooler", "id" );
     _config_filename  = read_profile_string( "factory.ini", "spooler", "config" );
     _log_directory    = read_profile_string( "factory.ini", "spooler", "log-dir" );        _log_directory_as_option_set = !_log_directory.empty();
@@ -332,6 +340,8 @@ void Spooler::load_arg()
 
 void Spooler::load()
 {
+    assert( GetCurrentThreadId() == _thread_id );
+
     set_state( s_starting );
     _log.msg( "Spooler::load " + _config_filename );
 
@@ -349,6 +359,8 @@ void Spooler::load()
 
 void Spooler::start()
 {
+    assert( GetCurrentThreadId() == _thread_id );
+
     _log.set_directory( _log_directory );
     _log.open_new();
 
@@ -367,6 +379,8 @@ void Spooler::start()
 
 void Spooler::stop()
 {
+    assert( GetCurrentThreadId() == _thread_id );
+
     set_state( s_stopping );
 
     //_log.msg( "Spooler::stop" );
@@ -396,6 +410,8 @@ void Spooler::stop()
 
 void Spooler::run()
 {
+    assert( GetCurrentThreadId() == _thread_id );
+
     set_state( s_running );
 
     while(1)
@@ -419,6 +435,7 @@ void Spooler::run()
 }
 
 //-------------------------------------------------------------------------Spooler::cmd_load_config
+// Anderer Thread
 
 void Spooler::cmd_load_config( const xml::Element_ptr& config )  
 { 
@@ -433,6 +450,7 @@ void Spooler::cmd_load_config( const xml::Element_ptr& config )
 }
 
 //----------------------------------------------------------------------------Spooler::cmd_continue
+// Anderer Thread
 
 void Spooler::cmd_continue()
 { 
@@ -441,6 +459,7 @@ void Spooler::cmd_continue()
 }
 
 //------------------------------------------------------------------------------Spooler::cmd_reload
+// Anderer Thread
 
 void Spooler::cmd_reload()
 {
@@ -449,6 +468,7 @@ void Spooler::cmd_reload()
 }
 
 //--------------------------------------------------------------------------------Spooler::cmd_stop
+// Anderer Thread
 
 void Spooler::cmd_stop()
 {
@@ -457,6 +477,7 @@ void Spooler::cmd_stop()
 }
 
 //---------------------------------------------------------------------------Spooler::cmd_terminate
+// Anderer Thread
 
 void Spooler::cmd_terminate()
 {
@@ -467,6 +488,7 @@ void Spooler::cmd_terminate()
 }
 
 //---------------------------------------------------------------Spooler::cmd_terminate_and_restart
+// Anderer Thread
 
 void Spooler::cmd_terminate_and_restart()
 {
@@ -493,6 +515,7 @@ int Spooler::launch( int argc, char** argv )
 
         tzset();
 
+        _thread_id = GetCurrentThreadId();
         SetThreadPriority( GetCurrentThread(), THREAD_PRIORITY_ABOVE_NORMAL );
 
         _event.set_name( "Spooler" );

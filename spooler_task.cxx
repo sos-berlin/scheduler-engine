@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.40 2001/07/04 14:49:46 jz Exp $
+// $Id: spooler_task.cxx,v 1.41 2001/07/05 16:31:03 jz Exp $
 /*
     Hier sind implementiert
 
@@ -513,7 +513,7 @@ bool Job::do_something()
             case sc_stop:       if( _state != s_stopped )  stop(), something_done = true;
                                 break;
 
-            case sc_unstop:     if( _state == s_stopped )  set_state( s_pending ), something_done = true;
+            case sc_unstop:     if( _state == s_stopped )  { if( !dequeue_task())  set_state( s_pending ); something_done = true; }
                                 break;
 
             case sc_end:        if( _state == s_running )  end(), something_done = true;
@@ -550,7 +550,7 @@ bool Job::do_something()
 
             if( _directory_watcher.signaled() )  _directory_watcher.watch_again();
 
-            THREAD_LOCK( _lock )  create_task( NULL, "" );
+            THREAD_LOCK( _lock )  create_task( NULL, "" ),  dequeue_task();
         }
 
         something_done = true;
@@ -653,16 +653,21 @@ void Job::set_error( const exception& x )
 
 void Job::set_state( State new_state )
 { 
-    if( new_state == _state )  return;
+    THREAD_LOCK( _lock )  
+    {
+        if( new_state == _state )  return;
 
-    if( new_state == s_running  ||  new_state == s_start_task )  _thread->_running_tasks_count++;
-    if( _state    == s_running  ||  _state    == s_start_task )  _thread->_running_tasks_count--;
+        if( new_state == s_running  ||  new_state == s_start_task )  _thread->_running_tasks_count++;
+        if( _state    == s_running  ||  _state    == s_start_task )  _thread->_running_tasks_count--;
 
-    _state = new_state;
+        if( new_state == s_pending )  _error = NULL;
 
-    if( _spooler->_debug 
-     || new_state == s_starting
-     || new_state == s_ending   ) _log.msg( state_name() ); 
+        _state = new_state;
+
+        if( _spooler->_debug 
+         || new_state == s_starting
+         || new_state == s_ending   ) _log.msg( state_name() ); 
+    }
 }
 
 //-----------------------------------------------------------------------------------Job::set_state
@@ -936,20 +941,23 @@ void Task::set_start_at( Time time )
 
 bool Task::start()
 {
-    _job->set_state( Job::s_starting );
-
-    _error = _job->_error = NULL;
-    _job->_thread->_task_count++;
-    _running_since = Time::now();
-
-    try 
+    THREAD_LOCK( _job->_lock )
     {
-        bool ok = do_start();
-        if( !ok || _job->has_error() )  return false;
-        _opened = true;
+        _job->set_state( Job::s_starting );
+
+        _error = _job->_error = NULL;
+        _job->_thread->_task_count++;
+        _running_since = Time::now();
+
+        try 
+        {
+            bool ok = do_start();
+            if( !ok || _job->has_error() )  return false;
+            _opened = true;
+        }
+        catch( const Xc& x        ) { _job->set_error(x); }
+        catch( const exception& x ) { _job->set_error(x); }
     }
-    catch( const Xc& x        ) { _job->set_error(x); }
-    catch( const exception& x ) { _job->set_error(x); }
 
     return !_job->has_error();
 }

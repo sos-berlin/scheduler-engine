@@ -1,4 +1,4 @@
-// $Id: spooler_thread.cxx,v 1.14 2001/03/17 18:57:23 jz Exp $
+// $Id: spooler_thread.cxx,v 1.15 2001/07/05 16:31:04 jz Exp $
 /*
     Hier sind implementiert
 
@@ -14,7 +14,7 @@ namespace sos {
 namespace spooler {
 
 
-#define FOR_EACH_JOB( ITERATOR )  LOCKED_FOR_EACH( _lock, Job_list, _job_list, ITERATOR )
+#define FOR_EACH_JOB( ITERATOR )  FOR_EACH( Job_list, _job_list, ITERATOR )
 
 //-----------------------------------------------------------------------------------Thread::Thread
 
@@ -156,6 +156,8 @@ void Thread::start()
 
 void Thread::stop_jobs()
 {
+    assert( GetCurrentThreadId() == _thread_id );
+
     FOR_EACH_JOB( it ) 
     {
         _current_job = *it;
@@ -256,6 +258,7 @@ void Thread::wait()
                 if( job->_state == Job::s_pending ) 
                 {
                     if( _next_start_time > (*it)->_next_start_time )  next_job = *it, _next_start_time = next_job->_next_start_time;
+                    if( _next_start_time > (*it)->_next_start_at   )  next_job = *it, _next_start_time = next_job->_next_start_at;
                 }
             }
 

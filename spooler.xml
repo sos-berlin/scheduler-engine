@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 
-<!-- $Id: spooler.xml,v 1.43 2001/07/04 14:49:46 jz Exp $   (C) 2001 SOS GmbH Berlin -->
+<!-- $Id: spooler.xml,v 1.44 2001/07/05 16:31:03 jz Exp $   (C) 2001 SOS GmbH Berlin -->
 
 <!DOCTYPE spooler SYSTEM "s:\prod\spooler\spooler.dtd">
 
@@ -320,13 +320,14 @@ function spooler_process()
     index = index + 1
     if index > 3 then spooler_process=false: exit function
     spooler_task.error = "Ein Fehler"
-    spooler_task.repeat = 2.5
+    spooler_task.repeat = 0.1
     spooler_process = true
 end function
 
                     ]]></script>
 
-
+                    <run_time/>
+<!--
                     <run_time begin="12:12" end="12:48" repeat="4000">
 
                         <period single_start="19:51:50" end="20:00" let_run="no"/>
@@ -343,6 +344,7 @@ end function
                         </weekdays>
 
                     </run_time>
+-->
 
                 </job>
 

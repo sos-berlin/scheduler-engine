@@ -1,4 +1,4 @@
-// $Id: spooler_common.h,v 1.8 2001/02/20 10:37:24 jz Exp $
+// $Id: spooler_common.h,v 1.9 2001/07/05 16:31:03 jz Exp $
 
 #ifndef __SPOOLER_COMMON_H
 #define __SPOOLER_COMMON_H
@@ -20,8 +20,8 @@ typedef DWORD                   Process_id;
 
 #define        FOR_EACH(             TYPE, CONTAINER, ITERATOR )  for( TYPE::iterator       ITERATOR = (CONTAINER).begin(); (ITERATOR) != (CONTAINER).end(); (ITERATOR)++ )
 #define        FOR_EACH_CONST(       TYPE, CONTAINER, ITERATOR )  for( TYPE::const_iterator ITERATOR = (CONTAINER).begin(); (ITERATOR) != (CONTAINER).end(); (ITERATOR)++ )
-#define LOCKED_FOR_EACH(       LOCK, TYPE, CONTAINER, ITERATOR )  for( TYPE::iterator       ITERATOR = (CONTAINER).begin(); (ITERATOR) != (CONTAINER).end(); (LOCK).enter(), (ITERATOR)++, (LOCK).leave() )
-#define LOCKED_FOR_EACH_CONST( LOCK, TYPE, CONTAINER, ITERATOR )  for( TYPE::const_iterator ITERATOR = (CONTAINER).begin(); (ITERATOR) != (CONTAINER).end(); (LOCK).enter(), (ITERATOR)++, (LOCK).leave() )
+//#define LOCKED_FOR_EACH(       LOCK, TYPE, CONTAINER, ITERATOR )  for( TYPE::iterator       ITERATOR = (CONTAINER).begin(); (ITERATOR) != (CONTAINER).end(); (LOCK).enter(), (ITERATOR)++, (LOCK).leave() )
+//#define LOCKED_FOR_EACH_CONST( LOCK, TYPE, CONTAINER, ITERATOR )  for( TYPE::const_iterator ITERATOR = (CONTAINER).begin(); (ITERATOR) != (CONTAINER).end(); (LOCK).enter(), (ITERATOR)++, (LOCK).leave() )
 
 // Bei LOCKED_FOR_EACHxx() ist der Iterator durch eine Semaphore geschützt. 
 // Damit kann einer Liste durchlaufen werden, der ein anderer Thread Elemente hinzufügt.
