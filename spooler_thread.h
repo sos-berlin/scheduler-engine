@@ -1,4 +1,4 @@
-// $Id: spooler_thread.h,v 1.31 2002/11/26 11:40:20 jz Exp $
+// $Id: spooler_thread.h,v 1.32 2002/11/27 09:39:13 jz Exp $
 
 #ifndef __SPOOLER_THREAD_H
 #define __SPOOLER_THREAD_H
@@ -41,8 +41,8 @@ struct Spooler_thread : Sos_self_deleting
     void                        wait                        ();
     int                         wait_until                  ( Time );
 
-    Time                        next_start_time             ();
-    Job*                        next_job_to_start           ();
+  //Time                        next_start_time             ();
+    Job*                        get_next_job_to_start       ();
 
     bool                        finished                    ();
 
@@ -51,7 +51,7 @@ struct Spooler_thread : Sos_self_deleting
 
     // Für andere Threads:
     void                        signal_object               ( const string& object_set_class_name, const Level& );
-    void                        signal                      ( const string& signal_name = "" )  { _event.signal(signal_name); }
+    void                        signal                      ( const string& signal_name = "" )  { THREAD_LOCK( _lock )  _event.signal(signal_name), _next_start_time = 0, _next_job = NULL; }
     Job*                        get_job_or_null             ( const string& job_name );
   //void                        wait_until_thread_stopped   ( Time until );
   //void                        interrupt_scripts           ();
@@ -90,6 +90,7 @@ struct Spooler_thread : Sos_self_deleting
     Job*                       _current_job;                // Job, der gerade einen Schritt tut
 
     Time                       _next_start_time;
+    Job*                       _next_job;
     int                        _running_tasks_count;        // Wenn 0, dann warten
                                                             // Statistik
     int                        _step_count;                 // Seit Spooler-Start ausgeführte Schritte

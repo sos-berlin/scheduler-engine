@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.127 2002/11/27 06:51:30 jz Exp $
+// $Id: spooler_task.cxx,v 1.128 2002/11/27 09:39:11 jz Exp $
 /*
     Hier sind implementiert
 
@@ -613,7 +613,7 @@ Sos_ptr<Task> Job::start_without_lock( const ptr<spooler_com::Ivariable_set>& pa
     Sos_ptr<Task> task = create_task( params, task_name, start_at );
     task->_let_run = true;
 
-    if( current_thread_id() != thread()->_thread_id )  _thread->signal( "start job" );
+    _thread->signal( "start job" );
 
     return task;
 }

@@ -1,4 +1,4 @@
-// $Id: spooler_wait.h,v 1.27 2002/11/24 16:06:35 jz Exp $
+// $Id: spooler_wait.h,v 1.28 2002/11/27 09:39:13 jz Exp $
 
 #ifndef __SPOOLER_WAIT_H
 #define __SPOOLER_WAIT_H
@@ -67,12 +67,16 @@ struct Event : Handle
 
 //-------------------------------------------------------------------------------------Wait_handles
 
-struct Wait_handles
+struct Wait_handles : Non_cloneable
 {
                                 Wait_handles                ( Spooler* spooler, Prefix_log* log )     : _spooler(spooler),_log(log) {}
+                                Wait_handles                ( const Wait_handles& );
                                ~Wait_handles                ();
 
 
+    Wait_handles&               operator +=                 ( Wait_handles& );
+
+    void                        clear                       ();
     void                        close                       ();
   //void                        clear                       ()                              { _handles.clear(); _events.clear(); }
     void                        add                         ( Event* );
@@ -85,6 +89,7 @@ struct Wait_handles
     int                         wait                        ( double time );
 #endif
 
+    bool                        signaled                    ();
     int                         length                      ()                              { return _events.size(); }
     void                        remove                      ( Event* );
     bool                        empty                       () const                        { return _events.empty(); }
@@ -94,10 +99,6 @@ struct Wait_handles
 
 
   protected:
-                                Wait_handles                ( const Wait_handles& );        // Nicht implementiert
-    void                        operator =                  ( const Wait_handles& );        // Nicht implementiert
-
-
     Spooler*                   _spooler;
     Prefix_log*                _log;
 

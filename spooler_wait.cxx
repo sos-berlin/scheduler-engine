@@ -1,4 +1,4 @@
-// $Id: spooler_wait.cxx,v 1.47 2002/11/26 23:35:47 jz Exp $
+// $Id: spooler_wait.cxx,v 1.48 2002/11/27 09:39:13 jz Exp $
 /*
     Hier sind implementiert
 
@@ -214,6 +214,19 @@ string Event::as_string() const
     return result;
 }
 
+//-----------------------------------------------------------------------Wait_handles::Wait_handles
+
+Wait_handles::Wait_handles( const Wait_handles& o )
+: 
+    _spooler ( o._spooler ),
+    _log     ( o._log ),
+#ifdef Z_WINDOWS
+    _handles ( o._handles ),
+#endif
+    _events  ( o._events ) 
+{
+}
+
 //----------------------------------------------------------------------Wait_handles::~Wait_handles
 
 Wait_handles::~Wait_handles()
@@ -232,6 +245,54 @@ void Wait_handles::close()
             if( *it )  _log->warn( "Wait_handles wird vor " + (*it)->as_string() + " geschlossen" );
         }
     }
+}
+
+//------------------------------------------------------------------------------Wait_handles::clear
+
+void Wait_handles::clear()
+{
+    THREAD_LOCK( _lock )
+    {
+        _events.clear();
+
+#       ifdef Z_WINDOWS
+        _handles.clear();
+#       endif
+    }
+}
+
+//---------------------------------------------------------------------------Wait_handles::signaled
+
+bool Wait_handles::signaled()
+{
+    THREAD_LOCK( _lock )
+    {
+        FOR_EACH( vector<Event*>, _events, it )  
+        {
+            if( *it  &&  (*it)->signaled() )  return true;
+        }
+    }
+
+    return false;
+}
+
+//------------------------------------------------------------------------Wait_handles::operator += 
+
+Wait_handles& Wait_handles::operator += ( Wait_handles& o )
+{
+    THREAD_LOCK( _lock )
+    THREAD_LOCK( o._lock )      // Vorsicht, Deadlock-Gefahr!
+    {
+        _events.reserve( _events.size() + o._events.size() );
+        
+        FOR_EACH( Event_vector  , o._events , e )  _events.push_back( *e );
+
+#       ifdef Z_WINDOWS
+        FOR_EACH( vector<HANDLE>, o._handles, h )  _handles.push_back( *h );
+#       endif
+    }
+
+    return *this;
 }
 
 //--------------------------------------------------------------------------------Wait_handles::add

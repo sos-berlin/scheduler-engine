@@ -1,4 +1,4 @@
-// $Id: spooler_thread.cxx,v 1.58 2002/11/25 23:36:23 jz Exp $
+// $Id: spooler_thread.cxx,v 1.59 2002/11/27 09:39:12 jz Exp $
 /*
     Hier sind implementiert
 
@@ -143,23 +143,29 @@ void Spooler_thread::load_jobs_from_xml( const xml::Element_ptr& element, const 
 
 void Spooler_thread::close1()
 {
-    THREAD_LOCK( _lock )
+    try
     {
-        FOR_EACH( Job_list, _job_list, it )  (*it)->close();
+        THREAD_LOCK( _lock )
+        {
+            FOR_EACH( Job_list, _job_list, it )  (*it)->close();
 
-        // Jobs erst bei Spooler-Ende freigeben, s. close()
-        // Beim Beenden des Spooler noch laufende Threads können auf Jobs von bereits beendeten Threads zugreifen.
-        // Damit's nicht knallt: Jobs schließen, aber Objekte halten.
+            // Jobs erst bei Spooler-Ende freigeben, s. close()
+            // Beim Beenden des Spooler noch laufende Threads können auf Jobs von bereits beendeten Threads zugreifen.
+            // Damit's nicht knallt: Jobs schließen, aber Objekte halten.
 
-        if( _module_instance )  _module_instance->close(), _module_instance = NULL;
+            if( _module_instance )  _module_instance->close(), _module_instance = NULL;
 
 
-        // COM-Objekte entkoppeln, falls noch jemand eine Referenz darauf hat:
-        if( _com_log )  _com_log->close();
+            // COM-Objekte entkoppeln, falls noch jemand eine Referenz darauf hat:
+            if( _com_log )  _com_log->close();
+        }
+
+
+        if( current_thread_id() != _spooler->thread_id() )  _spooler->_java_vm.detach_thread();
     }
-
-
-    if( current_thread_id() == _thread_id )  _spooler->_java_vm.detach_thread();
+    catch( const Xc&         x ) { _log.error( x.what() ); }
+    catch( const exception&  x ) { _log.error( x.what() ); }
+    catch( const _com_error& x ) { _log.error( as_string( x.Description() ) ); }
 }
 
 //----------------------------------------------------------------------------Spooler_thread::close
@@ -189,37 +195,43 @@ bool Spooler_thread::has_java()
 
 void Spooler_thread::start()
 {
-    if( has_java() )  
+    try
     {
-        _spooler->_java_vm.attach_thread( _name );
+        if( has_java()  &&  current_thread_id() != _spooler->thread_id() )  
+        {
+            _spooler->_java_vm.attach_thread( _name );
+        }
+
+        if( _module.set() )
+        {
+            _module_instance = _module.create_instance();
+
+            _module_instance->init();
+
+            _module_instance->add_obj( (IDispatch*)_spooler->_com_spooler, "spooler"        );
+            _module_instance->add_obj( (IDispatch*)_com_thread           , "spooler_thread" );
+            _module_instance->add_obj( (IDispatch*)_com_log              , "spooler_log"    );
+
+            _module_instance->load();
+            _module_instance->start();
+
+            bool ok = check_result( _module_instance->call_if_exists( "spooler_init()Z" ) );
+            if( !ok )  throw_xc( "SPOOLER-127" );
+        }
+
+        FOR_EACH_JOB( job )  (*job)->init();
+
+
+        Z_WINDOWS_ONLY( SetThreadPriority( GetCurrentThread(), _thread_priority ); )
+
+        THREAD_LOCK( _spooler->_thread_id_map_lock )  _spooler->_thread_id_map[ current_thread_id() ] = this;
+
+        _nothing_done_count = 0;
+        _nothing_done_max   = _job_list.size() * 2 + 3;
     }
-
-    if( _module.set() )
-    {
-        _module_instance = _module.create_instance();
-
-        _module_instance->init();
-
-        _module_instance->add_obj( (IDispatch*)_spooler->_com_spooler, "spooler"        );
-        _module_instance->add_obj( (IDispatch*)_com_thread           , "spooler_thread" );
-        _module_instance->add_obj( (IDispatch*)_com_log              , "spooler_log"    );
-
-        _module_instance->load();
-        _module_instance->start();
-
-        bool ok = check_result( _module_instance->call_if_exists( "spooler_init()Z" ) );
-        if( !ok )  throw_xc( "SPOOLER-127" );
-    }
-
-    FOR_EACH_JOB( job )  (*job)->init();
-
-
-    Z_WINDOWS_ONLY( SetThreadPriority( GetCurrentThread(), _thread_priority ); )
-
-    THREAD_LOCK( _spooler->_thread_id_map_lock )  _spooler->_thread_id_map[ current_thread_id() ] = this;
-
-    _nothing_done_count = 0;
-    _nothing_done_max   = _job_list.size() * 2 + 3;
+    catch( const Xc&         x ) { _terminated = true; _log.error( x.what() ); }
+    catch( const exception&  x ) { _terminated = true; _log.error( x.what() ); }
+    catch( const _com_error& x ) { _terminated = true; _log.error( as_string( x.Description() ) ); }
 }
 
 //------------------------------------------------------------------------Spooler_thread::stop_jobs
@@ -367,7 +379,7 @@ bool Spooler_thread::step()
 }
 
 //------------------------------------------------------------------Spooler_thread::next_start_time
-
+/*
 Time Spooler_thread::next_start_time()
 {
     Job* next_job = next_job_to_start();
@@ -376,29 +388,36 @@ Time Spooler_thread::next_start_time()
 
     return _next_start_time;
 }
+*/
+//------------------------------------------------------------Spooler_thread::get_next_job_to_start
 
-//----------------------------------------------------------------Spooler_thread::next_job_to_start
-
-Job* Spooler_thread::next_job_to_start()
+Job* Spooler_thread::get_next_job_to_start()
 {
-    Job* next_job = NULL;
-    Time next_start_time = latter_day;
+    _next_job = NULL;
+    
+    _next_start_time = latter_day;
 
     THREAD_LOCK( _lock )
     {
         FOR_EACH_JOB( it )
         {
             Job* job = *it;
+
             if( job->_state == Job::s_pending
              || job->_state == Job::s_running_delayed 
              || job->_state == Job::s_running_waiting_for_order ) 
             {
-                if( next_start_time > (*it)->_next_time )  next_job = *it, next_start_time = next_job->_next_time;
+                if( _next_start_time > (*it)->_next_time ) 
+                {
+                    _next_job = *it; 
+                    _next_start_time = _next_job->_next_time;
+                    if( _next_start_time == 0 )  break;
+                }
             }
         }
     }
 
-    return next_job;
+    return _next_job;
 }
 
 //-----------------------------------------------------------------------------Spooler_thread::wait
@@ -417,12 +436,12 @@ void Spooler_thread::wait()
         }
         else
         {
-            Job* next_job = next_job_to_start();
+            get_next_job_to_start();
 
-            if( next_job )  _next_start_time = next_job->_next_time;
+            if( _next_job )  _next_start_time = _next_job->_next_time;
 
-            if( next_job )  msg = "Warten bis " + _next_start_time.as_string() + " für Job " + next_job->name();
-                      else  msg = "Kein Job zu starten";
+            if( _next_job )  msg = "Warten bis " + _next_start_time.as_string() + " für Job " + _next_job->name();
+                       else  msg = "Kein Job zu starten";
         }
     }
 
@@ -592,7 +611,7 @@ bool Spooler_thread::process()
         else 
         if( ++_nothing_done_count > _nothing_done_max )  
         {
-            nichts_getan( max( 60.0, (double)_nothing_done_count / _nothing_done_max ) );
+            nichts_getan( min( 60.0, (double)_nothing_done_count / _nothing_done_max ) );
         }
 
         remove_temporary_jobs();
@@ -611,39 +630,42 @@ int Spooler_thread::run_thread()
 {
     int ret = 1;
 
-    try
+    start();
+
+    if( !_terminated )  
     {
-        start();
-
-        while( _spooler->state() != Spooler::s_stopping  
-           &&  _spooler->state() != Spooler::s_stopped  )
+        try
         {
-            if( _spooler->state() == Spooler::s_paused )
+            while( _spooler->state() != Spooler::s_stopping  
+               &&  _spooler->state() != Spooler::s_stopped  )
             {
-                wait();
-            }
-            else
-            {
-                process();
-
-                if( finished() )  break;
-
-                if( _running_tasks_count == 0 )
+                if( _spooler->state() == Spooler::s_paused )
                 {
                     wait();
                 }
+                else
+                {
+                    process();
+
+                    if( finished() )  break;
+
+                    if( _running_tasks_count == 0 )
+                    {
+                        wait();
+                    }
+                }
+
+                _event.reset();
             }
 
-            _event.reset();
         }
-
-        close1();
-
-        ret = 0;
+        catch( const Xc&         x ) { _log.error( x.what() ); }
+        catch( const exception&  x ) { _log.error( x.what() ); }
+        catch( const _com_error& x ) { _log.error( as_string( x.Description() ) ); }
     }
-    catch( const Xc&         x ) { _log.error( x.what() ); }
-    catch( const exception&  x ) { _log.error( x.what() ); }
-    catch( const _com_error& x ) { _log.error( as_string( x.Description() ) ); }
+
+    close1();
+    ret = 0;
 
     {THREAD_LOCK( _spooler->_thread_id_map_lock )
     {
@@ -772,17 +794,23 @@ static uint __stdcall thread( void* param )
 
 #endif
 //---------------------------------------------------------------------Spooler_thread::start_thread
-#ifdef Z_WINDOWS
 
 void Spooler_thread::start_thread()
 {
-   _thread_handle = _beginthreadex( NULL, 0, thread, this, 0, &_thread_id );
-   if( !_thread_handle )  throw_mswin_error( "CreateThread" );
+#   ifdef Z_WINDOWS
+       
+        _thread_handle = _beginthreadex( NULL, 0, thread, this, 0, &_thread_id );
+       if( !_thread_handle )  throw_mswin_error( "CreateThread" );
 
-   _log( "thread_id=0x" + as_hex_string( (int)_thread_id ) );
+       _log( "thread_id=0x" + as_hex_string( (int)_thread_id ) );
+
+#   else
+
+       throw_xc( "SPOOLER-180", "free threading" );
+
+#   endif
 }
 
-#endif
 //----------------------------------------------------------------------Spooler_thread::stop_thread
 /*
 void Spooler_thread::stop_thread()

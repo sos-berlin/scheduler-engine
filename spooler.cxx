@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.143 2002/11/27 06:51:29 jz Exp $
+// $Id: spooler.cxx,v 1.144 2002/11/27 09:39:09 jz Exp $
 /*
     Hier sind implementiert
 
@@ -296,7 +296,8 @@ Spooler::~Spooler()
 
     if( !_thread_list.empty() )  
     {
-        wait_until_threads_stopped( latter_day );
+        close_threads();
+        //wait_until_threads_stopped( latter_day );
         _thread_list.clear();
     }
 
@@ -364,7 +365,7 @@ void Spooler::wait_until_threads_stopped( Time until )
     while( it != _thread_list.end() )
     {
         Spooler_thread* thread = *it;
-        if( !thread->_terminated  &&  thread->_thread_handle.handle() )  wait_handles.add_handle( (*it)->_thread_handle.handle() );
+        if( thread->_free_threading && !thread->_terminated  &&  thread->_thread_handle.handle() )  wait_handles.add_handle( (*it)->_thread_handle.handle() );
         it++;
     }
 
@@ -546,6 +547,81 @@ string Spooler::state_name( State state )
         case s_stopping_let_run:    return "stopping_let_run";
         default:                    return as_string( (int)state );
     }
+}
+
+//---------------------------------------------------------------------------Spooler::start_threads
+
+void Spooler::start_threads()
+{
+    FOR_EACH( Thread_list, _thread_list, it )  
+    {
+        Spooler_thread* thread = *it;
+
+        if( !thread->empty() ) 
+        {
+            if( thread->_free_threading )  thread->start_thread();      // Eigener Thread
+                                     else  thread->start();             // Unser Thread
+        }
+    }
+}
+
+//---------------------------------------------------------------------------Spooler::close_threads
+
+void Spooler::close_threads()
+{
+    signal_threads( "stop" );
+    wait_until_threads_stopped( Time::now() + wait_for_thread_termination );
+
+    FOR_EACH( Thread_list, _thread_list, it )  
+    {
+        Spooler_thread* thread = *it;
+        if( !thread->_free_threading ) 
+        {
+            thread->close1();
+        }
+    }
+}
+
+//-----------------------------------------------------------------------------Spooler::run_threads
+
+bool Spooler::run_threads()
+{
+    bool something_done = false;
+    Time now            = Time::now();
+
+    FOR_EACH( Thread_list, _thread_list, it )  
+    {
+        if( _state_cmd != sc_none )  break;
+
+        Spooler_thread* thread = *it;
+        if( !thread->_free_threading )
+        {
+            if( thread->_next_start_time <= now )//|| thread->_wait_handles.signaled() )
+            {
+                bool ok = thread->process();
+
+                something_done |= ok;
+
+                if( !ok )
+                {
+                    thread->get_next_job_to_start();
+/*
+                    Job* job = thread->next_job_to_start();
+                    if( job )
+                    {
+                        Time t = job->next_time();
+                        if( _next_time > t )  _next_time = t, _next_job = job;
+                    }
+*/
+                }
+            }
+
+            //thread->_log.debug9( "_next_start_time=" + thread->_next_start_time.as_string() );
+            if( _next_time > thread->_next_start_time )  _next_time = thread->_next_start_time, _next_job = thread->_next_job;
+        }
+    }
+
+    return something_done;
 }
 
 //--------------------------------------------------------------------------------Spooler::load_arg
@@ -747,11 +823,7 @@ void Spooler::start()
         if( !ok )  throw_xc( "SPOOLER-127" );
     }
 
-#   ifdef SPOOLER_USE_THREADS
-    {
-        FOR_EACH( Thread_list, _thread_list, it )  if( !(*it)->empty() && (*it)->_free_threading )  (*it)->start_thread();
-    }
-#   endif
+    start_threads();
 }
 
 //------------------------------------------------------------------------------------Spooler::stop
@@ -764,8 +836,7 @@ void Spooler::stop()
 
     //_log.msg( "Spooler::stop" );
 
-    signal_threads( "stop" );
-    wait_until_threads_stopped( Time::now() + wait_for_thread_termination );
+    close_threads();
 
     FOR_EACH( Thread_list, _thread_list, it )  it = _thread_list.erase( it );
 
@@ -823,49 +894,41 @@ void Spooler::run()
 
 
 #       ifdef SPOOLER_USE_THREADS
-        {
-            _wait_handles.wait_until( latter_day );
-        }
-#       else
-        {
-            Job*    next_job  = NULL;
-            Time    next_time = latter_day;
-            Time    now       = Time::now();
-            string  msg;
-
-            FOR_EACH( Thread_list, _thread_list, it )  (*it)->start();
-
-
-            FOR_EACH( Thread_list, _thread_list, it )  
+            if( _state == Spooler::s_paused )
             {
-                (*it)->process();
-
-                Job* job = (*it)->next_job_to_start();
-                if( job )
-                {
-                    Time t = job->next_time();
-                    if( t <= now )  
-                    if( next_time > t )  next_time = t, next_job = job;
-                }
+                _wait_handles.wait_until( latter_day );
             }
-
-            now = Time::now();
-
-            if( next_time > now )
-            {
-                if( next_job )  msg = "Warten bis " + next_time.as_string() + " für Job " + next_job->name();
-                          else  msg = "Kein Job zu starten";
-
-                _log.debug( msg );
-
-                sos_sleep( next_time - now );
-            }
-
-
-            FOR_EACH( Thread_list, _thread_list, it )  (*it)->close1();
-
-        }
+#        else
+            _log.error( "Zustand 'paused' ist auf dieser Plattform nicht implementiert" );
 #       endif
+
+        _next_time = latter_day;
+        _next_job  = NULL;
+
+
+        bool something_done = run_threads();
+
+
+        if( !something_done  &&  _state_cmd == sc_none )
+        {
+            Time now = Time::now();
+
+            if( !something_done  &&  _next_time > now )
+            {
+                if( _next_job )  _log.debug( "Warten bis " + _next_time.as_string() + " für Job " + _next_job->name() );
+                           else  _log.debug( "Kein Job zu starten" );
+
+#               ifdef Z_WINDOWS
+                    Wait_handles wait_handles = _wait_handles;
+                    FOR_EACH( Thread_list, _thread_list, it )  if( !(*it)->_free_threading )  wait_handles += (*it)->_wait_handles;
+
+                    wait_handles.wait( _next_time - now );
+                    wait_handles.clear();
+#                else
+                    sos_sleep( _next_time - now );
+#               endif
+            }
+        }
 
 
         _event.reset();

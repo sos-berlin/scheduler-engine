@@ -1,4 +1,4 @@
-// $Id: spooler.h,v 1.111 2002/11/26 23:53:07 jz Exp $
+// $Id: spooler.h,v 1.112 2002/11/27 09:39:10 jz Exp $
 
 #ifndef __SPOOLER_H
 #define __SPOOLER_H
@@ -211,6 +211,9 @@ struct Spooler
     void                        wait_until_threads_stopped  ( Time until );
     void                        reload                      ();
     void                        run                         ();
+    void                        start_threads               ();
+    void                        close_threads               ();
+    bool                        run_threads                 ();
 
   //void                        single_thread_step          ();
     void                        wait                        ();
@@ -316,6 +319,8 @@ struct Spooler
     ptr<Module_instance>       _module_instance;
 
     Thread_list                _thread_list;
+    Time                       _next_time;
+    Job*                       _next_job;
 
     Thread_semaphore           _job_chain_lock;
     typedef map< string, ptr<Job_chain> >  Job_chain_map;
