@@ -1,4 +1,4 @@
-<!-- $Id: jobs_frame.html,v 1.8 2004/07/20 11:41:01 jz Exp $ -->
+<!-- $Id: jobs_frame.html,v 1.9 2004/07/20 19:43:03 jz Exp $ -->
 <html>
 
 <head>
@@ -19,17 +19,16 @@
     <label for="show_tasks_checkbox">Show running tasks</label>
     &#160; &#160;
     <input id="update_periodically_checkbox" type="checkbox" onclick="update_periodically_checkbox__onclick()" NAME="update_periodically_checkbox"/>
-    <label for="update_periodically_checkbox">Update periodically</label>
+    <label for="update_periodically_checkbox">Update <span style="accelerator: true">p</span>eriodically</label>
     &#160; &#160;
     <input id="update_button" type="button" value="Update" onclick="update__onclick()" NAME="update_button"/>
 </p>
 
+<span id="error_message" style="font-weight: bold; color: red"></span>
 
-<xml id="stylesheet" src="scheduler.xsl">
-</xml>
+<xml id="stylesheet" src="scheduler.xsl"></xml>
 
 <script defer="true" type="text/javascript" src="scheduler.js"></script>
-
 <script type="text/javascript" for="window" event="onload"> do_onload(); </script>
 
 <script defer="true" language="javascript"><!--
@@ -38,6 +37,7 @@
 var _stylesheet;
 var _response;
 var _timer;
+var _scheduler;
 //var _update_periodically = false;
 
 //-------------------------------------------------------------------------------------------onload
@@ -50,7 +50,7 @@ function do_onload()
     
     document.all.stylesheet.outerHTML = "<span id='stylesheet'></span>";
     
-    scheduler = new Scheduler();
+    _scheduler = new Scheduler();
     //scheduler.execute_and_fill_html(  "<show_state what='all'/>" );
 
     repeat_update( document.all.update_periodically_checkbox.checked, true );
@@ -62,8 +62,7 @@ function do_onload()
 
 function update_periodically_checkbox__onclick()
 {
-    //_update_periodically = document.all.update_periodically_checkbox.checked;
-    
+    reset_error();
     repeat_update( document.all.update_periodically_checkbox.checked, document.all.update_periodically_checkbox.checked );
 }
 
@@ -71,6 +70,7 @@ function update_periodically_checkbox__onclick()
 
 function show_tasks_checkbox__onclick()
 {
+    reset_error();
     update();
 }
 
@@ -78,25 +78,55 @@ function show_tasks_checkbox__onclick()
 
 function update__onclick()
 {
+    reset_error();
     update();
+}
+
+//--------------------------------------------------------------------------------------reset_error
+
+function reset_error()
+{
+    document.all.error_message.innerHTML = "";
+    window.status = "";
 }
 
 //------------------------------------------------------------------------------------repeat_update
 
 function repeat_update( repeat, call_update )
 {
+    reset_error();
     if( _timer != undefined )  window.clearTimeout( _timer ),  _timer = undefined;
     
-    if( call_update )
+    try
     {
-        var checked = document.all.update_periodically_checkbox.checked;
-        document.all.update_periodically_checkbox.checked = false;     
-
-        update();
-        document.all.update_periodically_checkbox.checked = checked;
+        if( call_update )
+        {
+            document.all.update_periodically_checkbox.checked = false;     
+            update();
+        }
     }
-    
-    if( repeat )  set_update_timer();
+    catch( x )
+    {   
+        repeat = false;
+        var msg = "";
+        
+        if( typeof x == "object" )
+        {
+            if( x.number + 0xFFFFFFFF == 0x800C0004 )  repeat = true,  msg = "Connection to Scheduler lost<br/>";
+            msg += "0x" + hex_string( x.number, 8 ) + "&#160; " + xml_encode( x.message );
+            msg += "<p> </p>";
+        }
+        else
+            msg = xml_encode( x );
+            
+        document.all.error_message.innerHTML = msg;
+    }    
+
+    if( repeat )
+    {
+        document.all.update_periodically_checkbox.checked = true;
+        set_update_timer();
+    }
 }
 
 //---------------------------------------------------------------------------------set_update_timer
@@ -111,7 +141,7 @@ function set_update_timer()
 
 function update_jobs_frame()
 {
-    _response = scheduler.execute( "<show_state what='all'/>" );
+    _response = _scheduler.execute( "<show_state what='all'/>" );
     modify_response( _response );
     document.all.stylesheet.innerHTML = _response.transformNode( _stylesheet );;
 }
@@ -120,6 +150,7 @@ function update_jobs_frame()
 
 function update()
 {
+    reset_error();
     update_jobs_frame();
 
     if( window.parent.details_frame.document.readyState == "complete" )
@@ -179,6 +210,45 @@ function show_job_details( job_name )
 
     update_jobs_frame();
     window.parent.details_frame.show_job_details( job_element );
+}
+
+//-------------------------------------------------------------------------------string_from_object
+
+function string_from_object( object )
+{
+    var result = "{";
+    for( var i in object )  result += i + "=" + object[ i ] + " ";
+    return result + "}";
+}
+
+//--------------------------------------------------------------------------------------hex_string
+
+function hex_string( value, min_length )
+{
+    var result = "";
+    var hex    = "0123456789ABCDEF";
+
+    if( min_length == undefined )  min_length = 1
+
+    do
+    {
+        var digit = value % 16;
+        if( digit < 0 )  digit += 15;
+        result = hex.substring( digit, digit + 1 ) + result;
+        value >>>= 4;
+    }
+    while( value != 0  ||  result.length < min_length );
+
+    return result;
+}
+
+//---------------------------------------------------------------------------------------xml_encode
+
+function xml_encode( text )
+{
+    if( text == null )  return "";
+    return text.toString().replace( /&/g, "&amp;" ).replace( /</g, "&lt;" ).replace( />/g, "&gt;" );
+    //TODO Reguläre Ausdrücke vorkompilieren
 }
 
 //-------------------------------------------------------------------------------------------------

@@ -1,4 +1,4 @@
-// $Id: scheduler.js,v 1.3 2004/07/19 16:34:30 jz Exp $
+// $Id: scheduler.js,v 1.4 2004/07/20 19:43:03 jz Exp $
 
 //----------------------------------------------------------------------------------------Scheduler
 // public
@@ -30,7 +30,13 @@ Scheduler.prototype.execute = function( xml )
     var dom_document = new ActiveXObject( "MSXML2.DOMDocument" );
     
     var ok = dom_document.loadXML( this._xml_http.responseText );
-    if( !ok )  throw new Error( "Fehlerhafte XML-Antwort:  " + dom_document.parseError.reason );
+    if( !ok )  throw new Error( "Fehlerhafte XML-Antwort: " + dom_document.parseError.reason );
+    
+    var error_element = dom_document.selectSingleNode( "spooler/answer/ERROR" );
+    if( error_element )
+    {
+        throw new Error( error_element.getAttribute( "text" ) );
+    }
     
     return dom_document;
 }
@@ -212,3 +218,24 @@ function Scheduler_html_configuration( url )
 }
 
 //-------------------------------------------------------------------------------------------------
+
+/* Fehlercodes von xmlhttp:
+#define DE_E_INVALID_URL               0x800C0002
+#define DE_E_NO_SESSION                0x800C0003
+#define DE_E_CANNOT_CONNECT            0x800C0004
+#define DE_E_RESOURCE_NOT_FOUND        0x800C0005
+#define DE_E_OBJECT_NOT_FOUND          0x800C0006
+#define DE_E_DATA_NOT_AVAILABLE        0x800C0007
+#define DE_E_DOWNLOAD_FAILURE          0x800C0008
+#define DE_E_AUTHENTICATION_REQUIRED   0x800C0009
+#define DE_E_NO_VALID_MEDIA            0x800C000A
+#define DE_E_CONNECTION_TIMEOUT        0x800C000B
+#define DE_E_INVALID_REQUEST           0x800C000C
+#define DE_E_UNKNOWN_PROTOCOL          0x800C000D
+#define DE_E_SECURITY_PROBLEM          0x800C000E
+#define DE_E_CANNOT_LOAD_DATA          0x800C000F
+#define DE_E_CANNOT_INSTANTIATE_OBJECT 0x800C0010
+#define DE_E_REDIRECT_FAILED           0x800C0014
+#define DE_E_REDIRECT_TO_DIR           0x800C0015
+#define DE_E_CANNOT_LOCK_REQUEST       0x800C0016
+*/

@@ -422,49 +422,70 @@
     <xsl:template match="task">
         <xsl:variable name="now" select="string( /spooler/answer/@time )"/>
     
-        <table cellpadding="0" cellspacing="0" class="task" width="100%">
+        <table cellpadding="0" cellspacing="0" class="task" width="100%" >
             <col class="column1" valign="baseline" align="left"  width="1"/>
-            <col class="column"  valign="baseline" align="left"  width="*"  />  
+            <col class="column"  valign="baseline" align="left"  />  
 
             <tr>
                 <td colspan="2">
-                    <b>Task&#160;</b>
-                    
-                    <xsl:choose>
-                        <xsl:when test="not( @id )">
-                            <xsl:if test="../../@waiting_for_process='yes'">
-                                (waiting for process...)
+                    <table cellpadding="0" cellspacing="0" width="100%">
+                        <tr>
+                            <td>
+                                <b>Task&#160;</b>
+                                
+                                <xsl:choose>
+                                    <xsl:when test="not( @id )">
+                                        <xsl:if test="../../@waiting_for_process='yes'">
+                                            (waiting for process...)
+                                        </xsl:if>
+                                    </xsl:when>
+                                    <xsl:otherwise>
+                                        <b>
+                                            <xsl:value-of select="@id"/>
+                                        </b>
+                                    </xsl:otherwise>
+                                </xsl:choose>
+                                
+                                <xsl:if test="@name!=''">
+                                    <xsl:text>&#160; </xsl:text><xsl:value-of select="@name"/>
+                                </xsl:if>
+                                <xsl:if test="@pid">
+                                    <xsl:text>, pid </xsl:text>
+                                    <xsl:value-of select="@pid"/>
+                                </xsl:if>
+                                <xsl:if test="@cause!=''">
+                                    <xsl:text> (start&#160;cause:&#160;</xsl:text><xsl:value-of select="@cause"/><xsl:text>)</xsl:text>
+                                </xsl:if>
+                                <xsl:if test="@state!=''">
+                                    <xsl:text>, </xsl:text>
+                                    <xsl:value-of select="@state"/>
+                                </xsl:if>
+                                <xsl:if test="@calling">
+                                    <xsl:text> </xsl:text>(<xsl:value-of select="@calling"/>)
+                                </xsl:if>
+                                <xsl:if test="@steps!=''">
+                                    <xsl:text>, </xsl:text>
+                                    <xsl:value-of select="@steps"/> steps
+                                </xsl:if>
+                            </td>
+
+                            <xsl:if test="@id">
+                                <td align="right">
+                                    <xsl:element name="span">
+                                        <xsl:attribute name="style">
+                                            cursor: hand; text-decoration: underline; padding-left: 4pt
+                                        </xsl:attribute>
+                                        <xsl:attribute name="onclick">
+                                            task_command__onclick(<xsl:value-of select="@id"/>)
+                                        </xsl:attribute>
+                                        Command
+                                    </xsl:element>
+                                </td>
                             </xsl:if>
-                        </xsl:when>
-                        <xsl:otherwise>
-                            <b>
-                                <xsl:value-of select="@id"/>
-                            </b>
-                        </xsl:otherwise>
-                    </xsl:choose>
-                    
-                    <xsl:if test="@name!=''">
-                        <xsl:text>&#160; </xsl:text><xsl:value-of select="@name"/>
-                    </xsl:if>
-                    <xsl:if test="@pid">
-                        <xsl:text>, pid </xsl:text>
-                        <xsl:value-of select="@pid"/>
-                    </xsl:if>
-                    <xsl:if test="@cause!=''">
-                        <xsl:text> (start&#160;cause:&#160;</xsl:text><xsl:value-of select="@cause"/><xsl:text>)</xsl:text>
-                    </xsl:if>
-                    <xsl:if test="@state!=''">
-                        <xsl:text>, </xsl:text>
-                        <xsl:value-of select="@state"/>
-                    </xsl:if>
-                    <xsl:if test="@calling">
-                        <xsl:text> </xsl:text>(<xsl:value-of select="@calling"/>)
-                    </xsl:if>
-                    <xsl:if test="@steps!=''">
-                        <xsl:text>, </xsl:text>
-                        <xsl:value-of select="@steps"/> steps
-                    </xsl:if>
+                        </tr>
+                    </table>
                 </td>
+                
             </tr>
             
             <tr><td><span style="line-height: 6px">&#160;</span>   </td></tr>

@@ -1,4 +1,4 @@
-<!-- $Id: task_frame.html,v 1.6 2004/07/19 23:13:37 jz Exp $ -->
+<!-- $Id: task_frame.html,v 1.7 2004/07/20 19:43:04 jz Exp $ -->
 <html>
 
 <head>
@@ -28,26 +28,95 @@
 
 <xml id="stylesheet" src="scheduler.xsl"></xml>
 
+
+<xml id="command_popup">
+    <html>
+        <body>
+            <table cellpadding="0" cellspacing="0" width="100%">
+                <tr>
+                    <td style="font-family: Sans-Serif; font-size: 9pt; background-color: menu" 
+                        onmouseover="this.style.backgroundColor='highlight'; this.style.color='highlighttext'"
+                        onmouseout="this.style.backgroundColor=''; this.style.color=''">
+                            Show log
+                    </td>
+                </tr>
+            </table>
+        </body>        
+    </html>
+</xml>
+
+
 <script defer="true" type="text/javascript" src="scheduler.js"></script>
+<script defer="true" type="text/javascript" src="popup_builder.js"></script>
 
 <script type="text/javascript" for="window" event="onload"> do_onload(); </script>
 
 <script defer="true" language="javascript"><!--
 //-------------------------------------------------------------------------------------------------
 
+var _scheduler;
 var _stylesheet;
 var _timer;
 var _job_name;
 var _task_id;
+var _popup;
 
 //-------------------------------------------------------------------------------------------onload
 
 function do_onload()
 {
+    _scheduler = window.parent.jobs_frame._scheduler;
+    
     _stylesheet = document.all.stylesheet.XMLDocument;
     if( _stylesheet.parseError.errorCode )  throw new Error( "Fehler im Stylesheet:\n" + _stylesheet.parseError.reason );
 
     document.all.stylesheet.outerHTML = "<span id='stylesheet'></span>";
+}
+
+//----------------------------------------------------------------------------task_command__onclick
+
+function task_command__onclick( task_id )
+{
+/*
+    var popup = window.createPopup();
+    popup.document.body.innerHTML = document.all.command_popup.innerHTML;
+*/
+    var popup_builder = new Popup_builder();
+    popup_builder.add_entry( "show log"        , "parent.task_command__show_log__onclick(" + task_id + ")" );
+    popup_builder.add_entry( "end"             , "parent.task_command__end__onclick("      + task_id + ")" );
+    popup_builder.add_entry( "kill immediately", "parent.task_command__kill__onclick("     + task_id + ")" );
+    
+    _popup = popup_builder.create_popup();
+    
+    _popup.show( 0, 0, 0, 0 );
+    var width  = 220; //__tree_popup.document.body.scrollWidth;
+    var height = _popup.document.body.scrollHeight - 15;       // -15 ist ausprobiert.
+    _popup.hide();
+    _popup.show( 0, 15, width, height, event.srcElement );
+}
+
+//------------------------------------------------------------------task_command__show_log__onclick
+
+function task_command__show_log__onclick( task_id )
+{
+    alert( "task_id=" + task_id );
+    _popup.hide();
+}
+
+//-----------------------------------------------------------------------task_command__end__onclick
+
+function task_command__end__onclick( task_id )
+{
+    _scheduler.execute( "<kill_task job='" + _job_name + "' id='" + task_id + "'/>" );
+    _popup.hide();
+}
+
+//-----------------------------------------------------------------------task_command__end__onclick
+
+function task_command__kill__onclick( task_id )
+{
+    _scheduler.execute( "<kill_task job='" + _job_name + "' id='" + task_id + "' immediately='yes'/>" );
+    _popup.hide();
 }
 
 //--------------------------------------------------------------------------------show_task_details
@@ -61,7 +130,6 @@ function show_task_details( job_element, task_element )
 
     //document.all.job_name.innerText = "Job " + _job_name;
     //document.all.job_title.innerText = job_title? job_title : "";
-
 
     document.all.stylesheet.innerHTML = task_element.transformNode( _stylesheet );
 }
@@ -83,7 +151,7 @@ function update()
 {
     if( _task_id != undefined )
     {
-        var response = window.parent.jobs_frame.scheduler.execute( "<show_task id='" + _task_id + "' what='all'/>" );
+        var response = _scheduler.execute( "<show_task id='" + _task_id + "' what='all'/>" );
         
         var task_element = response.selectSingleNode( "spooler/answer/task" );
         document.all.stylesheet.innerHTML = task_element? task_element.transformNode( _stylesheet ) : "";
@@ -91,7 +159,7 @@ function update()
     else
     if( _job_name != undefined )
     {
-        var response = window.parent.jobs_frame.scheduler.execute( "<show_job job='" + _job_name + "' what='all,orders'/>" );
+        var response = _scheduler.execute( "<show_job job='" + _job_name + "' what='all,orders'/>" );
         window.parent.jobs_frame.modify_response( response );
         
         var job_element = response.selectSingleNode( "spooler/answer/job" );
