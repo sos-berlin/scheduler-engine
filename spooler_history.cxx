@@ -1,4 +1,4 @@
-// $Id: spooler_history.cxx,v 1.77 2003/12/23 11:22:13 jz Exp $
+// $Id: spooler_history.cxx,v 1.78 2003/12/23 11:27:43 jz Exp $
 
 #include "spooler.h"
 #include "../zschimmer/z_com.h"
@@ -577,12 +577,15 @@ void Spooler_db::spooler_start()
         //try   Fehler beim Spooler-Start führen zum Abbruch
         {
             _id = get_task_id();     // Der Spooler-Satz hat auch eine Id
-     
-            Transaction ta = this;
+
+            if( _db.opened() )   // get_id() kann die DB schließen (nach Fehler)
             {
-                execute( "INSERT into " + uquoted(_spooler->_job_history_tablename) + " (\"ID\",\"SPOOLER_ID\",\"JOB_NAME\",\"START_TIME\") "
-                         "values (" + as_string(_id) + "," + sql_quoted(_spooler->id_for_db()) + ",'(Spooler)',{ts'" + Time::now().as_string(Time::without_ms) + "'})" );
-                ta.commit();
+                Transaction ta = this;
+                {
+                    execute( "INSERT into " + uquoted(_spooler->_job_history_tablename) + " (\"ID\",\"SPOOLER_ID\",\"JOB_NAME\",\"START_TIME\") "
+                             "values (" + as_string(_id) + "," + sql_quoted(_spooler->id_for_db()) + ",'(Spooler)',{ts'" + Time::now().as_string(Time::without_ms) + "'})" );
+                    ta.commit();
+                }
             }
         }
         //catch( const exception& x )  
