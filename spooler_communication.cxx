@@ -1,4 +1,4 @@
-// $Id: spooler_communication.cxx,v 1.31 2002/09/11 10:05:14 jz Exp $
+// $Id: spooler_communication.cxx,v 1.32 2002/10/24 09:12:25 jz Exp $
 /*
     Hier sind implementiert
 
@@ -95,6 +95,7 @@ set<Host> Host::get_host_set_by_name( const string& name )
     }
     else
     {
+        LOG( "gethostbyname " << name << '\n' );
         hostent* h = gethostbyname( name.c_str() );     // In Unix nicht thread-sicher?
         if( !h )  throw_sos_socket_error("gethostbyname", name.c_str() );
         uint32** p = (uint32**)h->h_addr_list;

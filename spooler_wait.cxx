@@ -1,4 +1,4 @@
-// $Id: spooler_wait.cxx,v 1.37 2002/09/14 16:23:08 jz Exp $
+// $Id: spooler_wait.cxx,v 1.38 2002/10/24 09:12:25 jz Exp $
 /*
     Hier sind implementiert
 
@@ -443,7 +443,7 @@ void Directory_watcher::watch_directory( const string& directory, const string& 
     if( !filename_pattern.empty() )  _filename_regex.compile( filename_pattern );
 
     _handle = FindFirstChangeNotification( directory.c_str(), FALSE, FILE_NOTIFY_CHANGE_FILE_NAME | FILE_NOTIFY_CHANGE_DIR_NAME );
-    if( _handle == INVALID_HANDLE_VALUE )  _handle = NULL, throw_mswin_error( "FindFirstChangeNotification" );
+    if( !_handle  ||  _handle == INVALID_HANDLE_VALUE )  _handle = NULL, throw_mswin_error( "FindFirstChangeNotification" );
 }
 
 

@@ -1,4 +1,4 @@
-// $Id: spooler_com.cxx,v 1.60 2002/10/17 19:56:12 jz Exp $
+// $Id: spooler_com.cxx,v 1.61 2002/10/24 09:12:25 jz Exp $
 /*
     Hier sind implementiert
 
@@ -934,11 +934,11 @@ STDMETHODIMP Com_job::start( VARIANT* params, Itask** itask )
         }
 
         Variant task_name_vt;
-        if( pars )  pars->get_var( L"spooler_task_name", &task_name_vt );
+        if( pars )  pars->get_var( Bstr("spooler_task_name"), &task_name_vt );
         hr = task_name_vt.ChangeType( VT_BSTR );    if( FAILED(hr) )  throw_ole( hr, "ChangeType", "spooler_task_name" );
 
         Variant start_after_vt;
-        if( pars )  pars->get_var( L"spooler_start_after", &start_after_vt );
+        if( pars )  pars->get_var( Bstr("spooler_start_after"), &start_after_vt );
         if( start_after_vt.vt != VT_EMPTY )
         {
             hr = start_after_vt.ChangeType( VT_R8 );    if( FAILED(hr) )  throw_ole( hr, "ChangeType", "spooler_start_after" );
