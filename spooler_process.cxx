@@ -1,4 +1,4 @@
-// $Id: spooler_process.cxx,v 1.10 2003/09/01 17:00:52 jz Exp $
+// $Id: spooler_process.cxx,v 1.11 2003/09/02 11:34:59 jz Exp $
 
 #include "spooler.h"
 
@@ -185,7 +185,11 @@ void Process::remove_module_instance( Module_instance* )
             _session = NULL;
         }
 
-        if( _process_class )  _process_class->remove_process( this );
+        if( _process_class )  
+        {
+            _process_class->remove_process( this );
+            _spooler->signal( "Process available" );
+        }
     }
 }
 
