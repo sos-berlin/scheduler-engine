@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.71 2001/07/25 19:43:35 jz Exp $
+// $Id: spooler.cxx,v 1.72 2002/02/25 06:36:55 jz Exp $
 /*
     Hier sind implementiert
 
@@ -54,6 +54,47 @@ struct Set_console_code_page
     uint                       _cp;
 };
 */
+
+//------------------------------------------------------------------------------int64_from_filetime
+
+inline int64 int64_from_filetime( FILETIME t )
+{
+    return ( (int64)t.dwHighDateTime << 32 ) + t.dwLowDateTime;
+}
+
+//---------------------------------------------------------------------------------thread_info_text
+
+static string thread_info_text( HANDLE h )
+{
+    FILETIME creation_time;
+    FILETIME exit_time;
+    FILETIME kernel_time;
+    FILETIME user_time;
+    DWORD    exit_code;
+    BOOL     ok;
+    char     buffer [200];
+    string   result;
+
+
+    ok = GetExitCodeThread( h, &exit_code );
+    if( ok )  if( exit_code == STILL_ACTIVE )  result += "active";
+                                         else  result = "terminated with exit code " + as_string(exit_code);
+         else result = "Unbekannter Thread " + as_hex_string((int)h);
+
+    result += " ";
+
+    ok = GetThreadTimes( h, &creation_time, &exit_time, &kernel_time, &user_time );
+    if( ok )
+    {
+        sprintf( buffer, ", user_time=%-0.10g, kernel_time=%-0.10g", 
+                 (double)int64_from_filetime( user_time   ) / 1E7,
+                 (double)int64_from_filetime( kernel_time ) / 1E7 );
+
+        result += buffer;
+    }
+
+    return result;
+}
 
 //---------------------------------------------------------------------------------Spooler::Spooler
 
@@ -162,7 +203,7 @@ void Spooler::wait_until_threads_stopped( Time until )
         {
             FOR_EACH( Thread_list, _thread_list, it )  
             {
-                string msg = "Warten auf Thread " + (*it)->name();
+                string msg = "Warten auf Thread " + (*it)->name() + " [" + thread_info_text( (*it)->_thread_handle.handle() ) + "]";
                 Job* job = (*it)->_current_job;
                 if( job )  msg += ", Job " + job->name() + " " + job->job_state();
                 _log.msg( msg );
