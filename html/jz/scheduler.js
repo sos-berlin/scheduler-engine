@@ -110,7 +110,7 @@ Scheduler.prototype.close = function()
     //this._configuration = null;
     this._xml_http = null;
 
-    
+
     var dependend_windows = this._dependend_windows;
     this._depended_windows = new Object();
 
