@@ -1,4 +1,4 @@
-// $Id: spooler_history.cxx,v 1.17 2002/04/11 11:19:13 jz Exp $
+// $Id: spooler_history.cxx,v 1.18 2002/04/12 08:16:45 jz Exp $
 
 #include "../kram/sos.h"
 #include "spooler.h"
@@ -24,7 +24,7 @@ const char history_column_names[] =    "id"           ":numeric,"
 const char history_column_names_db[] = "log";    // Spalten zusätzlich in der Datenbank
 
 const int max_field_length = 1024;      // Das ist die Feldgröße von Any_file -type=(...) für tabulierte Datei.
-const int blob_field_size  = 50000;     // Bis zu dieser Größe wird ein Blob im Datensatz geschrieben
+const int blob_field_size  = 1900;      // Bis zu dieser Größe wird ein Blob im Datensatz geschrieben. ODBC erlaubt nur 2000 Zeichen lange Strings
 
 //---------------------------------------------------------------------------------------------test
 /*
@@ -167,7 +167,7 @@ void Spooler_db::open( const string& db_name )
                                       "\"error_code\"  char(50),"
                                       "\"error_text\"  char(250),"
                                       "\"parameters\"  clob,"
-                                      "\"log\"         clob" 
+                                      "\"log\"         blob" 
                                       + join( "", create_extra ) );
 
             stmt = "UPDATE " + _spooler->_variables_tablename + " set \"wert\" = \"wert\"+1 where \"name\"='spooler_job_id'";
@@ -212,7 +212,9 @@ void Spooler_db::open_history_table()
     {
         if( !_history_table.opened() )
         {
-            _history_table.open( "-in -out -key=id sql -table=" + _spooler->_history_tablename + " | " + _db_name + " -max-length=" + as_string(blob_field_size) );
+            _history_table.open( "-in -out -key=id sql -table=" + _spooler->_history_tablename + 
+                                 " -sql-fields=(id,spooler_id,job_name,start_time,cause,parameters) | " +
+                                 " | " + _db_name + " -max-length=" + as_string(blob_field_size) );
         }
     }
 }
@@ -361,6 +363,8 @@ Job_history::Job_history( Job* job )
 { 
     _job = job; 
     _spooler = _job->_spooler; 
+
+    _job_name = job->name();            // Damit read_tail() nicht mehr auf Job zugreift (das ist ein anderer Thread)
 }
 
 //-------------------------------------------------------------------------Job_history::Job_history
@@ -384,8 +388,11 @@ void Job_history::open()
     {
         Transaction ta = &_spooler->_db;
         {
-            _filename   = read_profile_string    ( _spooler->_factory_ini, section, "history_file" );
-            _on_process = read_profile_on_process( _spooler->_factory_ini, section, "history_on_process", _spooler->_history_on_process );
+            _filename   = read_profile_string            ( _spooler->_factory_ini, section, "history_file" );
+            _history_yes= read_profile_bool              ( _spooler->_factory_ini, section, "history"           , _spooler->_history_yes );
+            _on_process = read_profile_history_on_process( _spooler->_factory_ini, section, "history_on_process", _spooler->_history_on_process );
+
+            if( !_history_yes )  return;
 
             if( _spooler->_db.opened()  &&  _filename == "" )
             {
@@ -427,7 +434,7 @@ void Job_history::open()
                 {
                     _filename = "history";
                     if( !_spooler->id().empty() )  _filename += "." + _spooler->id();
-                    _filename += ".job." + _job->name() + ".txt";
+                    _filename += ".job." + _job_name + ".txt";
                 }
                 _filename = make_absolute_filename( _spooler->log_directory(), _filename );
                 if( _filename[0] == '*' )  return;      // log_dir = *stderr
@@ -447,8 +454,6 @@ void Job_history::open()
              //record.type()->field_descr_ptr("error_text")->type_ptr()->field_size()
         }
         ta.commit();
- 
-        //_extra_values.resize( _extra_names.size() );
     }
     catch( const exception& x )  
     { 
@@ -569,6 +574,7 @@ void Job_history::write( bool start )
                 string stmt = "UPDATE " + _spooler->_history_tablename + " set ";
                 stmt +=   "\"end_time\"={ts'" + Time::now().as_string(Time::without_ms) + "'}";
                 stmt += ", \"steps\"=" + as_string( _job->_task->_step_count );
+                stmt += ", \"error\"=" + as_string( _job->has_error() );
                 if( !_job->_error.code().empty() ) stmt += ", \"error_code\"=" + sql_quoted( _job->_error.code() );
                 if( !_job->_error.what().empty() ) stmt += ", \"error_text\"=" + sql_quoted( _job->_error.what().substr( 0, 250 ) );
 
@@ -581,21 +587,7 @@ void Job_history::write( bool start )
                         stmt += ", " + sql_quoted_name(_extra_names[i]) + "=" + s;
                     }
                 }
-/*
-                for( int i = 0; i < _extra_values.size(); i++ ) 
-                {
-                    try {
-                        VARIANT* v = &_extra_values[i];
-                        if( v->vt != VT_EMPTY  &&  v->vt != VT_NULL )
-                        {
-                            string s = variant_as_string(*v);
-                            if( !variant_is_numeric(*v) )  s = sql_quoted(s);
-                            stmt += ", " + sql_quoted_name(_extra_names[i]) + "=" + s;
-                        }
-                    }
-                    catch( const exception& x ) { _job->_log.warn( string("Historie: ") + x.what() ); }
-                }
-*/
+
 
                 stmt += " where id=" + as_string( _job->_task->_id );
                 _spooler->_db.execute( stmt );
@@ -638,20 +630,6 @@ void Job_history::write( bool start )
             {
                 append_tabbed( _extra_record.as_string(i) );
             }
-
-/*
-            for( int i = 0; i < _extra_values.size(); i++ )  
-            {
-                string v;
-            
-                try {
-                    v = variant_as_string( _extra_values[i] );
-                } 
-                catch( const exception& x ) { _job->_log.warn( string("Historie: ") + x.what() ); }
-
-                append_tabbed( v );
-            }
-*/
         }
 
         _file.print( _tabbed_record + SYSTEM_NL );
@@ -663,10 +641,14 @@ void Job_history::write( bool start )
 
 void Job_history::start()
 {
+    if( !_history_yes )  return;
+
+    if( _task_id == _job->_task->id() )  return;        // start() bereits gerufen
+    _task_id = _job->_task->id();
+
     _start_called = true;
 
     _extra_record.construct( _extra_record.type() );
-    //for( int i = 0; i < _extra_values.size(); i++ )  _extra_values[i].Clear();
 
     if( _error )  return;
 
@@ -687,6 +669,8 @@ void Job_history::start()
 
 void Job_history::end()
 {
+    if( !_history_yes )  return;
+
     if( !_start_called )  return;
     _start_called = false;
 
@@ -697,9 +681,10 @@ void Job_history::end()
     {
         if( _use_file )  _file.seek( _record_pos );
 
-        if( _job->has_error()  ||  _job->_task->_step_count >= _on_process )  
-        {
+        //if( _job->has_error() )  
+        //{
             write( false );
+/*
         }
         else
         {
@@ -714,33 +699,34 @@ void Job_history::end()
                 ta.commit();
             }
         }
+*/
     }
     catch( const exception& x )  
     { 
         _spooler->_log.warn( string("FEHLER BEIM SCHREIBEN DER HISTORIE: ") + x.what() ); 
         //_error = true;
     }
+
+    _task_id = 0;
 }
 
 //---------------------------------------------------------------------Job_history::set_extra_field
     
 void Job_history::set_extra_field( const string& name, const CComVariant& value )
 {
-    _extra_record.set_field( name, variant_as_string(value) );
-/*
-    for( int i = 0; i < _extra_values.size(); i++ )
-    {
-        if( stricmp( _extra_names[i].c_str(), name.c_str() ) == 0 )  { _extra_values[i] = value; return; }
-    }
+    if( !_history_yes )  return;
 
-    throw_xc( "SPOOLER-137", name );
-*/
+    _extra_record.set_field( name, variant_as_string(value) );
 }
 
 //---------------------------------------------------------------------------Job_history::read_tail
+// Anderer Thread.
+// Hier nicht auf _job etc. zugreifen!
 
 xml::Element_ptr Job_history::read_tail( xml::Document_ptr doc, int id, int next, bool with_log )
 {
+    if( !_history_yes )  throw_xc( "SPOOLER-141", _job_name );
+
     xml::Element_ptr history_element;
 
     if( !_error )  
@@ -764,7 +750,7 @@ xml::Element_ptr Job_history::read_tail( xml::Document_ptr doc, int id, int next
                 else
                 if( _use_db )
                 {
-                    string clause = " where \"job_name\"=" + sql_quoted(_job->name());
+                    string clause = " where \"job_name\"=" + sql_quoted(_job_name);
                     
                     if( id != -1 )
                     {
@@ -773,8 +759,8 @@ xml::Element_ptr Job_history::read_tail( xml::Document_ptr doc, int id, int next
                         clause += as_string(id);
                     }
 
-                    clause += " order by \"id\"";
-                    if( next < 0 )  clause += " desc";
+                    clause += " order by \"id\" desc";
+                    //if( next < 0 )  clause += " desc";
                     
                     sel.open( "-in head -" + as_string(max(1,abs(next))) + " | " + _spooler->_db._db_name + 
                               "select \"ID\", \"SPOOLER_ID\", \"job_name\", \"start_time\", \"end_time\", \"cause\", \"steps\", \"error\", \"error_code\", \"error_text\" " +

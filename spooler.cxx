@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.93 2002/04/10 19:45:10 jz Exp $
+// $Id: spooler.cxx,v 1.94 2002/04/12 08:16:44 jz Exp $
 /*
     Hier sind implementiert
 
@@ -98,10 +98,27 @@ static string thread_info_text( HANDLE h )
     return result;
 }
 
-//--------------------------------------------------------------------------read_profile_on_process
+//---------------------------------------------------------------------read_profile_mail_on_process
 
-int read_profile_on_process( const string& profile, const string& section, const string& entry, int deflt )
+int read_profile_mail_on_process( const string& profile, const string& section, const string& entry, int deflt )
 {
+    string v = read_profile_string( profile, section, entry );
+
+    if( v == "" )  return deflt;
+
+    try
+    {
+        if( isdigit( (uint)v[0] ) )  return as_int(v);
+                               else  return as_bool(v);
+    }
+    catch( const Xc& ) { return deflt; }
+}
+
+//------------------------------------------------------------------read_profile_history_on_process
+
+int read_profile_history_on_process( const string& profile, const string& section, const string& entry, int deflt )
+{
+    string result;
     string v = read_profile_string( profile, section, entry );
 
     if( v == "" )  return deflt;
@@ -413,7 +430,8 @@ void Spooler::load_arg()
     _spooler_param      = read_profile_string    ( _factory_ini, "spooler", "param"              );          _spooler_param_as_option_set = !_spooler_param.empty();
     log_level           = read_profile_string    ( _factory_ini, "spooler", "log_level"          , log_level );   
     _history_columns    = read_profile_string    ( _factory_ini, "spooler", "history_columns"    );
-    _history_on_process = read_profile_on_process( _factory_ini, "spooler", "history_on_process" , 1 );
+    _history_yes        = read_profile_bool      ( _factory_ini, "spooler", "history"            , true );
+    _history_on_process = read_profile_history_on_process( _factory_ini, "spooler", "history_on_process", 0 );
     _history_archive    = read_profile_archive   ( _factory_ini, "spooler", "history_archive"    , arc_no );
     _history_with_log   = read_profile_with_log  ( _factory_ini, "spooler", "history_with_log"   , arc_no );
     _db_name            = read_profile_string    ( _factory_ini, "spooler", "db"                 );
@@ -500,12 +518,12 @@ void Spooler::start()
 {
     assert( GetCurrentThreadId() == _thread_id );
 
-    _mail_on_error   = read_profile_bool      ( _factory_ini, "spooler", "mail_on_error"  , _mail_on_error );
-    _mail_on_process = read_profile_on_process( _factory_ini, "spooler", "mail_on_process", _mail_on_process );
-    _mail_on_success = read_profile_bool      ( _factory_ini, "spooler", "mail_on_success", _mail_on_success );
-    _mail_queue_dir  = read_profile_string    ( _factory_ini, "spooler", "mail_queue_dir" , _mail_queue_dir );
-    _mail_encoding   = read_profile_string    ( _factory_ini, "spooler", "mail_encoding"  , "quoted-printable" );
-    _smtp_server     = read_profile_string    ( _factory_ini, "spooler", "smtp"           , _smtp_server );
+    _mail_on_error   = read_profile_bool           ( _factory_ini, "spooler", "mail_on_error"  , _mail_on_error );
+    _mail_on_process = read_profile_mail_on_process( _factory_ini, "spooler", "mail_on_process", _mail_on_process );
+    _mail_on_success = read_profile_bool           ( _factory_ini, "spooler", "mail_on_success", _mail_on_success );
+    _mail_queue_dir  = read_profile_string         ( _factory_ini, "spooler", "mail_queue_dir" , _mail_queue_dir );
+    _mail_encoding   = read_profile_string         ( _factory_ini, "spooler", "mail_encoding"  , "quoted-printable" );
+    _smtp_server     = read_profile_string         ( _factory_ini, "spooler", "smtp"           , _smtp_server );
 
     _log_mail_from      = read_profile_string( _factory_ini, "spooler", "log_mail_from"   );
     _log_mail_to        = read_profile_string( _factory_ini, "spooler", "log_mail_to"     );

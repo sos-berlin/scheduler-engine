@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.83 2002/04/10 17:15:12 jz Exp $
+// $Id: spooler_task.cxx,v 1.84 2002/04/12 08:16:45 jz Exp $
 /*
     Hier sind implementiert
 
@@ -915,7 +915,7 @@ bool Job::do_something()
 
     if( _reread  &&  !_task )  _reread = false,  reread(),  something_done = true;
 
-    if( _state == s_pending )  task_to_start();
+    if( _state == s_pending )  task_to_start();                                                 // TASK PENDING?
 
     // Wenn nichts zu tun ist, dann raus. Der Job soll nicht wegen eines alten Fehlers nachträglich gestoppt werden (s.u.)
     if( _state == s_pending    )  goto ENDE;
@@ -924,7 +924,13 @@ bool Job::do_something()
     if( _state == s_read_error )  goto ENDE;
 
 
-    if( _state == s_start_task )    // SPOOLER_INIT, SPOOLER_OPEN
+    if( _state == s_start_task || _state == s_running || _state == s_running_process )          // HISTORIE
+    {
+        if( _task->_step_count == _history.min_steps() )  _history.start();
+    }
+
+
+    if( _state == s_start_task )                                                                // SPOOLER_INIT, SPOOLER_OPEN
     {
         _event.reset();
 
@@ -939,7 +945,8 @@ bool Job::do_something()
         }
     }
 
-    if( ( _state == s_running || _state == s_running_process )  &&  ok  &&  !has_error() )        // SPOOLER_PROCESS
+
+    if( ( _state == s_running || _state == s_running_process )  &&  ok  &&  !has_error() )      // SPOOLER_PROCESS
     {
         Time now;
         bool call_step = do_a_step | _task->_let_run;
@@ -961,8 +968,10 @@ bool Job::do_something()
         }
     }
 
-    if( !ok || has_error() )        // SPOOLER_CLOSE, SPOOLER_ON_SUCCESS, SPOOLER_ON_ERROR
-    {
+    if( !ok || has_error() )                                                                    // SPOOLER_CLOSE
+    {                                                                                           // SPOOLER_ON_SUCCESS, SPOOLER_ON_ERROR
+        if( has_error() )  _history.start();
+
         //if( _spooler->_debug )  LOG( "spooler_process() lieferte " << ok << ", Fehler=" << _error << '\n' );      // Problem bei Uwe, 20.2.02
 
         if( _state == s_start_task
@@ -976,7 +985,7 @@ bool Job::do_something()
     }
 
 
-    if( _state == s_ended )         // Task beendet
+    if( _state == s_ended )                                                                     // TASK BEENDET
     {
         if( _temporary && _repeat == 0 )  
         {
@@ -1467,7 +1476,6 @@ bool Task::start()
 {
     try 
     {
-        //_job->_log.close();
         _job->_log.open();           // Jobprotokoll, nur wirksam, wenn set_filename() gerufen, s. Job::init().
 
         THREAD_LOCK( _job->_lock )
@@ -1478,11 +1486,7 @@ bool Task::start()
 
             _job->_thread->_task_count++;
             _job->_last_task_step_count = 0;
-          //_job->_step_count = 0;
-          //_job->_process_ok = false;
             _running_since = Time::now();
-
-            _job->_history.start();
         }
 
         if( !loaded() )  
@@ -1586,8 +1590,6 @@ bool Task::step()
     try 
     {
         result = do_step();
-
-        //_job->_process_ok |= result;
 
         if( has_step_count()  ||  _step_count == 0 )        // Bei Process_task nur einen Schritt zählen
         {
