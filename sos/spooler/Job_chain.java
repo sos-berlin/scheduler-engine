@@ -1,5 +1,8 @@
 // $Id$
 // $Author$
+// $Revision$
+// $Rev$
+// $LastChangedRevision$
 
 package sos.spooler;
 
