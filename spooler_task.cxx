@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.254 2004/05/31 16:16:02 jz Exp $
+// $Id: spooler_task.cxx,v 1.255 2004/06/01 14:19:45 jz Exp $
 /*
     Hier sind implementiert
 
@@ -1301,17 +1301,6 @@ void Task::set_order( Order* order )
 
     _order = order;
     if( _order )  _order->attach_task( this );  // Auftrag war schon bereitgestellt
-}
-
-//-------------------------------------------------------------------------------Task::remove_order
-// Wird von Order nach set_state() oder dgl. gerufen. 
-// §1495
-
-void Task::remove_order( Order* order )
-{
-    if( order != _order )  throw_xc( "SCHEDULER-211", order->obj_name(), _order->obj_name() );   // Darf nie geschehen!
-
-    _order = NULL;
 }
 
 //---------------------------------------------------------------------------------Task::take_order

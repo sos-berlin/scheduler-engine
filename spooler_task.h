@@ -1,4 +1,4 @@
-// $Id: spooler_task.h,v 1.133 2004/05/31 16:16:02 jz Exp $
+// $Id: spooler_task.h,v 1.134 2004/06/01 14:19:45 jz Exp $
 
 #ifndef __SPOOLER_TASK_H
 #define __SPOOLER_TASK_H
@@ -128,7 +128,6 @@ struct Task : Sos_self_deleting
     void                    set_error_xc_only               ( const Xc& );
 
     void                    set_order                       ( Order* );
-    void                        remove_order                ( Order* );
     Order*                      take_order                  ( const Time& now );
 
   protected:
