@@ -1,4 +1,4 @@
-// $Id: spooler_time.h,v 1.24 2003/09/26 13:39:21 jz Exp $
+// $Id: spooler_time.h,v 1.25 2003/09/26 13:49:01 jz Exp $
 
 #ifndef __SPOOLER_TIME_H
 #define __SPOOLER_TIME_H
@@ -164,7 +164,7 @@ struct Day
 
     bool                        has_time                    ( Time time_of_day );
     Period                      next_period                 ( Time time_of_day, With_single_start single_start ) const { return _period_set.empty()? Period(): next_period_(time_of_day,single_start); }
-    const Period&               next_period_                ( Time time_of_day, With_single_start single_start ) const;
+    Period                      next_period_                ( Time time_of_day, With_single_start single_start ) const;
     void                        add                         ( const Period& p )                     { _period_set.insert( p ); }       
 
     void                        print                       ( ostream& ) const;
