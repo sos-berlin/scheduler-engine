@@ -1,4 +1,4 @@
-// $Id: spooler_history.h,v 1.8 2002/04/12 08:16:45 jz Exp $
+// $Id: spooler_history.h,v 1.9 2002/05/16 20:01:42 jz Exp $
 
 #ifndef __SPOOLER_HISTORY_H
 #define __SPOOLER_HISTORY_H
@@ -27,7 +27,7 @@ struct Spooler_db
 {
                                 Spooler_db              ( Spooler* );
 
-    void                        open                    ( const string& db_name );
+    void                        open                    ( const string& db_name, bool need_db );
     void                        close                   ();
     void                        open_history_table      ();
     bool                        opened                  ()                                          { return _db.opened(); }

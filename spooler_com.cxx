@@ -1,4 +1,4 @@
-// $Id: spooler_com.cxx,v 1.40 2002/04/09 08:55:44 jz Exp $
+// $Id: spooler_com.cxx,v 1.41 2002/05/16 20:01:42 jz Exp $
 /*
     Hier sind implementiert
 
@@ -1076,6 +1076,25 @@ HRESULT Com_task::get_id( int* result )
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Task.id" ); }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Task.id" ); }
+
+    return hr;
+}
+
+//--------------------------------------------------------------Com_task::put_delay_spooler_process
+
+HRESULT Com_task::put_delay_spooler_process( VARIANT* time )
+{
+    HRESULT hr = NOERROR;
+
+    THREAD_LOCK( _lock )
+    try
+    {
+        if( !_task )  throw_xc( "SPOOLER-122" );
+
+        _task->set_delay_spooler_process( time_from_variant( *time ) );
+    }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Task.delay_spooler_process" ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Task.delay_spooler_process" ); }
 
     return hr;
 }

@@ -1,4 +1,4 @@
-// $Id: spooler.h,v 1.82 2002/05/01 08:52:14 jz Exp $
+// $Id: spooler.h,v 1.83 2002/05/16 20:01:41 jz Exp $
 
 #ifndef __SPOOLER_H
 #define __SPOOLER_H
@@ -246,6 +246,7 @@ struct Spooler
 
     string                     _db_name;
     Spooler_db                 _db;
+    bool                       _need_db;
 
     bool                       _manual;
     string                     _job_name;                   // Bei manuellem Betrieb
@@ -297,6 +298,7 @@ struct Spooler
 //-------------------------------------------------------------------------------------------------
 
 void                            spooler_restart             ( bool is_service );
+void                            send_error_email            ( const string& error_text, int argc, char** argv );
 
 extern bool                     spooler_is_running;
 

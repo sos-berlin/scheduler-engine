@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.89 2002/04/23 07:00:22 jz Exp $
+// $Id: spooler_task.cxx,v 1.90 2002/05/16 20:01:43 jz Exp $
 /*
     Hier sind implementiert
 
@@ -822,7 +822,8 @@ bool Job::execute_state_cmd()
                 case sc_suspend:    if( _state == s_running    )  set_state( s_suspended ),    something_done = true;
                                     break;
 
-                case sc_continue:   if( _state == s_suspended  )  set_state( s_running ),      something_done = true;
+                case sc_continue:   if( _state == s_suspended  
+                                     || _state == s_running_delayed )  set_state( s_running ), something_done = true;
                                     break;
 
                 default: ;
@@ -943,6 +944,13 @@ bool Job::do_something()
     }
 
 
+    if( _state == s_running_delayed  &&  Time::now() >= _task->_next_spooler_process )
+    {
+        _task->_next_spooler_process = 0;
+        set_state( s_running );
+    }
+
+
     if( ( _state == s_running || _state == s_running_process )  &&  ok  &&  !has_error() )      // SPOOLER_PROCESS
     {
         Time now;
@@ -965,11 +973,10 @@ bool Job::do_something()
         }
     }
 
+
     if( !ok || has_error() )                                                                    // SPOOLER_CLOSE
     {                                                                                           // SPOOLER_ON_SUCCESS, SPOOLER_ON_ERROR
         if( has_error() )  _history.start();
-
-        //if( _spooler->_debug )  LOG( "spooler_process() lieferte " << ok << ", Fehler=" << _error << '\n' );      // Problem bei Uwe, 20.2.02
 
         if( _state == s_start_task
          || _state == s_starting        // Bei Fehler in spooler_init()
@@ -979,6 +986,13 @@ bool Job::do_something()
         if( _state != s_stopped  &&  has_error()  &&  _repeat == 0  &&  _delay_after_error.empty() )  stop(), something_done = true;
 
         finish();
+    }
+
+
+    if( _state == s_running  &&  _task->_next_spooler_process )
+    {
+        _next_time = _task->_next_spooler_process;
+        set_state( s_running_delayed );
     }
 
 
@@ -1112,6 +1126,8 @@ void Job::set_state( State new_state )
 
         if( new_state == s_pending )  reset_error();
 
+        if( new_state != s_running_delayed  &&  _task )  _task->_next_spooler_process = 0;
+
         _state = new_state;
 
 
@@ -1230,6 +1246,7 @@ string Job::state_name( State state )
         case s_start_task:      return "start_task";
         case s_starting:        return "starting";
         case s_running:         return "running";
+        case s_running_delayed: return "running_delayed";
         case s_running_process: return "running_process";
         case s_suspended:       return "suspended";
         case s_ending:          return "ending";
@@ -1591,6 +1608,8 @@ bool Task::step()
     try 
     {
         result = do_step();
+
+        if( _next_spooler_process )  result = true;
 
         if( has_step_count()  ||  _step_count == 0 )        // Bei Process_task nur einen Schritt zählen
         {

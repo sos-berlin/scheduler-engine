@@ -1,4 +1,4 @@
-// $Id: spooler_task.h,v 1.52 2002/05/01 08:52:15 jz Exp $
+// $Id: spooler_task.h,v 1.53 2002/05/16 20:01:43 jz Exp $
 
 #ifndef __SPOOLER_TASK_H
 #define __SPOOLER_TASK_H
@@ -132,6 +132,7 @@ struct Job : Sos_self_deleting
         s_starting,             //
         s_loaded,               // Skript geladen (mit spooler_init), aber nicht gestartet (spooler_open)
         s_running,              // Läuft
+        s_running_delayed,      // spooler_task.delay_spooler_process gesetzt
         s_running_process,      // Läuft in einem externen Prozess, auf dessen Ende nur gewartet wird
         s_suspended,            // Angehalten
         s_ending,               // end(), also in spooler_close()
@@ -372,6 +373,7 @@ struct Task : Sos_self_deleting
 
     bool                        wait_until_terminated       ( double wait_time = latter_day );
   //void                        set_start_at                ( Time );
+    void                        set_delay_spooler_process   ( Time t )                      { _job->_log.debug("delay_spooler_process=" + t.as_string() ); _next_spooler_process = Time::now() + t; }
 
     Job*                        job                         ()                              { return _job; }
 
@@ -416,6 +418,7 @@ struct Task : Sos_self_deleting
     CComPtr<spooler_com::Ivariable_set> _params;
     CComVariant                _result;
     string                     _name;
+    Time                       _next_spooler_process;
   //Xc_copy                    _error;
 
     Thread_semaphore           _terminated_events_lock;

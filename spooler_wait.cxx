@@ -1,4 +1,4 @@
-// $Id: spooler_wait.cxx,v 1.32 2002/04/30 08:59:19 jz Exp $
+// $Id: spooler_wait.cxx,v 1.33 2002/05/16 20:01:43 jz Exp $
 /*
     Hier sind implementiert
 
@@ -299,8 +299,9 @@ int Wait_handles::wait_until( Time until )
 
         THREAD_LOCK( _lock )
         {
+            if( _log->log_level() <= log_debug9 )
             {
-                string msg = "WaitForMultipleObjects " + sos::as_string(t/1000.0) + "s  ";
+                string msg = "MsgWaitForMultipleObjects " + sos::as_string(t/1000.0) + "s  ";
                 for( int i = 0; i < _handles.size(); i++ )
                 {
                     if( i > 0 )  msg += ", ";
@@ -318,7 +319,7 @@ int Wait_handles::wait_until( Time until )
         
         delete [] handles;  handles = NULL;
 
-        if( ret == WAIT_FAILED )  throw_mswin_error( "WaitForMultipleObjects" );
+        if( ret == WAIT_FAILED )  throw_mswin_error( "MsgWaitForMultipleObjects" );
 
         if( ret >= WAIT_OBJECT_0  &&  ret < WAIT_OBJECT_0 + _handles.size() )
         {

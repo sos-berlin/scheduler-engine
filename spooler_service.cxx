@@ -1,4 +1,4 @@
-// $Id: spooler_service.cxx,v 1.19 2002/04/23 07:00:22 jz Exp $
+// $Id: spooler_service.cxx,v 1.20 2002/05/16 20:01:42 jz Exp $
 /*
     Hier sind implementiert
 
@@ -93,13 +93,14 @@ string make_service_display( const string& id )
 
 //----------------------------------------------------------------------------------------event_log
 
-static void event_log( const string& msg_par )
+static void event_log( const string& msg_par, int argc, char** argv )
 {
     string msg = "***DOCUMENTFACTORY SPOOLER*** " + msg_par;
 
     HANDLE h = RegisterEventSource( NULL, "Application" );
     const char* m = msg.c_str();
  
+    LOG( "ReportEvent()\n" );
     ReportEvent( h,                     // event log handle 
                  EVENTLOG_ERROR_TYPE,   // event type 
                  0,                     // category zero 
@@ -112,12 +113,14 @@ static void event_log( const string& msg_par )
 
     DeregisterEventSource( h ); 
 
-    cerr << msg << '\n';
+    send_error_email( msg_par, argc, argv );
+
+    fprintf( stderr, "%s\n", msg.c_str() );
 }
 
 //----------------------------------------------------------------------------------install_service
 
-void install_service( const string& service_name, const string& service_display, const string& service_description, const string& params ) 
+void install_service( const string& service_name, const string& service_display, const string& service_description, const string& dependencies, const string& params ) 
 { 
     SC_HANDLE manager_handle = OpenSCManager( NULL, SERVICES_ACTIVE_DATABASE, SC_MANAGER_CREATE_SERVICE );
     if( !manager_handle )  throw_mswin_error( "OpenSCManager" );
@@ -140,7 +143,7 @@ void install_service( const string& service_name, const string& service_display,
                                     command_line.c_str(),      // service's binary 
                                     NULL,                      // no load ordering group 
                                     NULL,                      // no tag identifier 
-                                    NULL,                      // no dependencies 
+                                    dependencies.data(),       // dependencies 
                                     NULL,                      // LocalSystem account 
                                     NULL );                    // no password 
 
@@ -279,9 +282,9 @@ static void set_service_status( int spooler_error, int state = 0 )
     service_status.dwWin32ExitCode              = spooler_error? ERROR_SERVICE_SPECIFIC_ERROR : NO_ERROR;              
     service_status.dwServiceSpecificExitCode    = spooler_error; 
     service_status.dwCheckPoint                 = 0; 
-    service_status.dwWaitHint                   = service_status.dwCurrentState == SERVICE_START_PENDING? 10*1000 : 0;  // 10s erlauben für den Start (wenn es ein Startskript mit DB-Verbindung gibt)
-    service_status.dwWaitHint                   = service_status.dwCurrentState == SERVICE_STOP_PENDING? stop_timeout*1000 : 0;  // 10s erlauben für den Start (wenn es ein Startskript mit DB-Verbindung gibt)
-
+    service_status.dwWaitHint                   = service_status.dwCurrentState == SERVICE_START_PENDING? 10*1000 :         // 10s erlauben für den Start (wenn es ein Startskript mit DB-Verbindung gibt)
+                                                  service_status.dwCurrentState == SERVICE_STOP_PENDING ? stop_timeout*1000 
+                                                                                                        : 0;
     string state_name;
     switch( service_status.dwCurrentState )  
     {
@@ -424,7 +427,7 @@ static uint __stdcall service_thread( void* param )
         }
         catch( const Xc& x )
         {
-            event_log( x.what() );
+            event_log( x.what(), p->_argc, p->_argv );
             set_service_status( 2 );
             spooler._log.error( x.what() );
             spooler_ptr = NULL;
@@ -494,8 +497,8 @@ static void __stdcall ServiceMain( DWORD argc, char** argv )
         //}
         LOG( "ServiceMain ok\n" );
     }
-    catch( const Xc& x        ) { event_log( x.what() ); }
-    catch( const exception& x ) { event_log( x.what() ); }
+    catch( const Xc& x        ) { event_log( x.what(), argc, argv ); }
+    catch( const exception& x ) { event_log( x.what(), argc, argv ); }
 }
 
 //----------------------------------------------------------------------------------spooler_service
@@ -526,7 +529,7 @@ int spooler_service( const string& service_name, int argc, char** argv )
     }
     catch( const Xc& x )
     {
-        event_log( x.what() );
+        event_log( x.what(), argc, argv );
         return 1;                                                                               
     }
 

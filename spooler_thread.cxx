@@ -1,4 +1,4 @@
-// $Id: spooler_thread.cxx,v 1.32 2002/04/30 08:59:19 jz Exp $
+// $Id: spooler_thread.cxx,v 1.33 2002/05/16 20:01:43 jz Exp $
 /*
     Hier sind implementiert
 
@@ -274,7 +274,8 @@ void Thread::wait()
             FOR_EACH_JOB( it )
             {
                 Job* job = *it;
-                if( job->_state == Job::s_pending ) 
+                if( job->_state == Job::s_pending
+                 || job->_state == Job::s_running_delayed ) 
                 {
                     if( _next_start_time > (*it)->_next_time )  next_job = *it, _next_start_time = next_job->_next_time;
                 }
@@ -392,6 +393,7 @@ bool Thread::any_tasks_there()
         FOR_EACH( Job_list, _job_list, it )  
         {
             if( (*it)->state() == Job::s_suspended       )  return true;    // Zählt nicht in _running_tasks_count
+            if( (*it)->state() == Job::s_running_delayed )  return true;    // Zählt nicht in _running_tasks_count
             if( (*it)->state() == Job::s_running_process )  return true;    // Zählt nicht in _running_tasks_count
             if( (*it)->queue_filled() )  return true;
         }

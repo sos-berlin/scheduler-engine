@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.98 2002/05/01 08:52:14 jz Exp $
+// $Id: spooler.cxx,v 1.99 2002/05/16 20:01:41 jz Exp $
 /*
     Hier sind implementiert
 
@@ -22,6 +22,7 @@
 #include "../kram/log.h"
 #include "../file/anyfile.h"
 #include "../kram/licence.h"
+#include "../kram/sos_mail_jmail.h"
 
 #include "../zschimmer/zschimmer.h"
 using zschimmer::lcase;
@@ -47,7 +48,10 @@ const double wait_step_for_thread_termination2           = 600.0;       // 2. Nö
 //const double wait_for_thread_termination_after_interrupt = 1.0;
 
 
-bool spooler_is_running = false;
+bool                            spooler_is_running      = false;
+bool                            ctrl_c_pressed          = false;
+static Spooler*                 spooler                 = NULL;
+
 
 /*
 struct Set_console_code_page
@@ -64,6 +68,49 @@ struct Set_console_code_page
 inline int64 int64_from_filetime( FILETIME t )
 {
     return ( (int64)t.dwHighDateTime << 32 ) + t.dwLowDateTime;
+}
+
+//---------------------------------------------------------------------------------send_error_email
+
+void send_error_email( const string& error_text, int argc, char** argv )
+{
+    try
+    {
+        string from = read_profile_string( default_factory_ini, "spooler", "log_mail_from"   );
+        string to   = read_profile_string( default_factory_ini, "spooler", "log_mail_to"     );
+        string cc   = read_profile_string( default_factory_ini, "spooler", "log_mail_cc"     );
+        string bcc  = read_profile_string( default_factory_ini, "spooler", "log_mail_bcc"    );
+        string smtp = read_profile_string( default_factory_ini, "spooler", "smtp"            );
+
+        Jmail_message msg;
+        msg.init();
+        msg.set_from( from );
+
+        if( to   != "" )  msg.set_to  ( to   );
+        if( cc   != "" )  msg.set_cc  ( cc   );
+        if( bcc  != "" )  msg.set_bcc ( bcc  );
+        if( smtp != "" )  msg.set_smtp( smtp );
+
+        msg.set_subject( "FEHLER BEI SPOOLER-START: " + error_text );
+        msg.add_header_field( "X-SOS-Spooler", "" );
+
+        string body;
+
+        for( int i = 0; i < argc; i++ )  body += argv[i], body += ' ';
+        body += "\n\n";
+        body += error_text;
+        msg.set_body( body );
+
+        try
+        {
+            msg.send(); 
+        }
+        catch( const Xc& ) 
+        { 
+            msg.enqueue(); 
+        }
+    }
+    catch( const Xc& ) {}
 }
 
 //---------------------------------------------------------------------------------thread_info_text
@@ -150,6 +197,20 @@ With_log_switch read_profile_with_log( const string& profile, const string& sect
     return read_profile_archive( profile, section, entry, deflt );
 }
 
+//-----------------------------------------------------------------------------------ctrl_c_handler
+
+static BOOL WINAPI ctrl_c_handler( DWORD dwCtrlType )
+{
+    if( dwCtrlType == CTRL_C_EVENT  &&  !ctrl_c_pressed )
+    {
+        ctrl_c_pressed = true;
+        spooler->signal( "Ctrl+C" );
+        return true;
+    }
+    else
+        return false;
+}
+
 //---------------------------------------------------------------------------------Spooler::Spooler
 
 Spooler::Spooler() 
@@ -179,12 +240,18 @@ Spooler::Spooler()
     _com_log     = new Com_log( &_prefix_log );
     _com_spooler = new Com_spooler( this );
     _variables   = new Com_variable_set();
+
+    SetConsoleCtrlHandler( ctrl_c_handler, true );
+    spooler = this;
 }
 
 //--------------------------------------------------------------------------------Spooler::~Spooler
 
 Spooler::~Spooler() 
 {
+    spooler = NULL;
+    SetConsoleCtrlHandler( ctrl_c_handler, false );
+
     wait_until_threads_stopped( latter_day );
 
     _thread_list.clear();
@@ -435,7 +502,8 @@ void Spooler::load_arg()
     _history_archive    = read_profile_archive   ( _factory_ini, "spooler", "history_archive"    , arc_no );
     _history_with_log   = read_profile_with_log  ( _factory_ini, "spooler", "history_with_log"   , arc_no );
     _db_name            = read_profile_string    ( _factory_ini, "spooler", "db"                 );
-    _history_tablename  = read_profile_string    ( _factory_ini, "spooler", "db_history_table"   , "spooler_history" );
+    _need_db            = read_profile_bool      ( _factory_ini, "spooler", "need_db"            , true                );
+    _history_tablename  = read_profile_string    ( _factory_ini, "spooler", "db_history_table"   , "spooler_history"   );
     _variables_tablename= read_profile_string    ( _factory_ini, "spooler", "db_variables_table" , "spooler_variables" );
 
 
@@ -543,7 +611,7 @@ void Spooler::start()
     _log.set_directory( _log_directory );
     _log.open_new();
 
-    _db.open( _db_name );
+    _db.open( _db_name, _need_db );
     _db.spooler_start();
 
     if( !_manual )  _communication.start_or_rebind();
@@ -634,6 +702,8 @@ void Spooler::run()
 
         _wait_handles.wait_until( latter_day );
         _event.reset();
+
+        if( ctrl_c_pressed )  _state_cmd = sc_terminate;
     }
 }
 
@@ -718,54 +788,46 @@ int Spooler::launch( int argc, char** argv )
 {
     int rc;
 
-    try
+    if( !SOS_LICENCE( licence_spooler ) )  throw_xc( "SOS-1000", "Spooler" );
+
+    _argc = argc;
+    _argv = argv;
+
+    tzset();
+
+    _thread_id = GetCurrentThreadId();
+    SetThreadPriority( GetCurrentThread(), THREAD_PRIORITY_ABOVE_NORMAL );
+
+    spooler_is_running = true;
+
+    _event.set_name( "Spooler" );
+    _event.add_to( &_wait_handles );
+
+    _communication.init();  // Für Windows
+
+    do
     {
-        if( !SOS_LICENCE( licence_spooler ) )  throw_xc( "SOS-1000", "Spooler" );
+        if( _state_cmd != sc_load_config )  load();
 
-        _argc = argc;
-        _argv = argv;
-
-        tzset();
-
-        _thread_id = GetCurrentThreadId();
-        SetThreadPriority( GetCurrentThread(), THREAD_PRIORITY_ABOVE_NORMAL );
-
-        spooler_is_running = true;
-
-        _event.set_name( "Spooler" );
-        _event.add_to( &_wait_handles );
-
-        _communication.init();  // Für Windows
-
-        do
+        THREAD_LOCK_LOG( _lock, "Spooler::launch load_config" )  
         {
-            if( _state_cmd != sc_load_config )  load();
+            if( _config_element_to_load == NULL )  throw_xc( "SPOOLER-116", _spooler_id );
+
+            load_config( _config_element_to_load );
     
-            THREAD_LOCK_LOG( _lock, "Spooler::launch load_config" )  
-            {
-                if( _config_element_to_load == NULL )  throw_xc( "SPOOLER-116", _spooler_id );
-    
-                load_config( _config_element_to_load );
-        
-                _config_element_to_load = NULL;
-                _config_document_to_load = NULL;
-            }
+            _config_element_to_load = NULL;
+            _config_document_to_load = NULL;
+        }
 
-            start();
-            run();
-            stop();
+        start();
+        run();
+        stop();
 
-        } while( _state_cmd == sc_reload || _state_cmd == sc_load_config );
+    } while( _state_cmd == sc_reload || _state_cmd == sc_load_config );
 
-        _log.info( "Spooler ordentlich beendet." );
+    _log.info( "Spooler ordentlich beendet." );
 
-        rc = 0;
-    }
-    catch( const Xc& x )
-    {
-        SHOW_ERR( "Fehler " << x );
-        rc = 9999;
-    }
+    rc = 0;
 
     spooler_is_running = false;
     return rc;
@@ -935,21 +997,28 @@ void __cdecl delete_new_spooler( void* )
 int spooler_main( int argc, char** argv )
 {
     int ret;
-    bool is_service = false;
 
+    try
     {
 #       ifdef SYSTEM_WIN
             Ole_initialize ole;
 #       endif
 
-        spooler::Spooler spooler;
+        spooler::Spooler my_spooler;
 
-        ret = spooler.launch( argc, argv );
-        
-        is_service = spooler.is_service();
+        spooler = &my_spooler;
+
+        ret = my_spooler.launch( argc, argv );
+
+        spooler = NULL;
+    }
+    catch( const Xc& x )
+    {
+        SHOW_ERR( "Fehler " << x );
+        ret = 9999;
     }
 
-    return 0;
+    return ret;
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -960,9 +1029,10 @@ int spooler_main( int argc, char** argv )
 
 int sos_main( int argc, char** argv )
 {
+    int ret = 99;
+
     bool    is_service = false;
     bool    is_service_set = false;
-    int     ret;
     bool    do_install_service = false;
     bool    do_remove_service = false;
     string  id;
@@ -973,6 +1043,7 @@ int sos_main( int argc, char** argv )
     bool    renew_service = false;
     string  log_filename;
     string  factory_ini = spooler::default_factory_ini;
+    string  dependencies;
 
     for( Sos_option_iterator opt ( argc, argv ); !opt.end(); opt.next() )
     {
@@ -998,6 +1069,8 @@ int sos_main( int argc, char** argv )
             if( opt.flag      ( "service"          ) )  is_service = opt.set(), is_service_set = true;
             else
             if( opt.with_value( "service"          ) )  is_service = true, is_service_set = true, service_name = opt.value();
+            else
+            if( opt.with_value( "need-service"     ) )  dependencies += opt.value(), dependencies += '\0';
             else
             {
                 if( opt.with_value( "id"               ) )  id = opt.value();
@@ -1038,7 +1111,8 @@ int sos_main( int argc, char** argv )
         {
             //if( !is_service )  command_line = "-service " + command_line;
             command_line = "-service=" + service_name + " " + command_line;
-            spooler::install_service( service_name, service_display, service_description, command_line );
+            dependencies += '\0';
+            spooler::install_service( service_name, service_display, service_description, dependencies, command_line );
         }
         ret = 0;
     }

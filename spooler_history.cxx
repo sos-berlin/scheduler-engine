@@ -1,4 +1,4 @@
-// $Id: spooler_history.cxx,v 1.21 2002/04/17 10:21:38 jz Exp $
+// $Id: spooler_history.cxx,v 1.22 2002/05/16 20:01:42 jz Exp $
 
 #include "../kram/sos.h"
 #include "spooler.h"
@@ -118,7 +118,7 @@ Spooler_db::Spooler_db( Spooler* spooler )
 
 //---------------------------------------------------------------------------------Spooler_db::open
 
-void Spooler_db::open( const string& db_name )
+void Spooler_db::open( const string& db_name, bool need_db )
 {
     string my_db_name = db_name;
 
@@ -128,7 +128,11 @@ void Spooler_db::open( const string& db_name )
     {
         if( _db_name.find(' ') == string::npos )
         {
-            if( !is_absolute_filename( _db_name  )  &&  (_spooler->log_directory() + " ")[0] == '*' )  return;
+            if( !is_absolute_filename( _db_name  )  &&  (_spooler->log_directory() + " ")[0] == '*' ) 
+            {
+                if( need_db )  throw_xc( "SPOOLER-142", _db_name );
+                return;
+            }
 
               _db_name = "odbc "         + make_absolute_filename( _spooler->log_directory(),   _db_name );
             my_db_name = "odbc -create " + make_absolute_filename( _spooler->log_directory(), my_db_name );
@@ -189,6 +193,8 @@ void Spooler_db::open( const string& db_name )
         }
         catch( const exception& x )  
         { 
+            if( need_db )  throw;
+            
             _spooler->_log.warn( string("FEHLER BEIM ÖFFNEN DER HISTORIENDATENBANK: ") + x.what() ); 
         }
     }
