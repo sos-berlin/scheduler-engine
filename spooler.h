@@ -1,4 +1,4 @@
-// $Id: spooler.h,v 1.176 2004/03/15 21:43:45 jz Exp $
+// $Id: spooler.h,v 1.177 2004/03/23 20:22:17 jz Exp $
 
 #ifndef __SPOOLER_H
 #define __SPOOLER_H
@@ -289,7 +289,9 @@ struct Spooler
     bool                        try_to_free_process         ( Job* for_job, Process_class*, const Time& now );
 
     void                        register_process_handle     ( Process_handle );                 // Für abort_immediately()
-    void                        unregister_process_handle   ( Process_handle ); 
+    void                        unregister_process_handle   ( Process_handle );                 // Für abort_immediately()
+    void                        register_pid                ( int );                            // Für abort_immediately()
+    void                        unregister_pid              ( int );                            // Für abort_immediately()
 
 
   private:
@@ -452,7 +454,8 @@ struct Spooler
     string                     _directory;
     File                       _pid_file;
 
-    Process_handle             _process_handles[ max_processes ];    // Für abort_immediately(), mutex-frei alle abhängigen Prozesse
+    Process_handle             _process_handles[ max_processes ];   // Für abort_immediately(), mutex-frei alle abhängigen Prozesse
+    int                        _pids[ max_processes ];              // Für abort_immediately(), mutex-frei alle Task.add_pid(), Subprozesse der Tasks
 };
 
 //-------------------------------------------------------------------------------------------------

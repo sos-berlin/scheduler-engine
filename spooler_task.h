@@ -1,8 +1,9 @@
-// $Id: spooler_task.h,v 1.129 2004/03/23 11:26:54 jz Exp $
+// $Id: spooler_task.h,v 1.130 2004/03/23 20:22:17 jz Exp $
 
 #ifndef __SPOOLER_TASK_H
 #define __SPOOLER_TASK_H
 
+#include <hash_set>
 
 namespace sos {
 namespace spooler {
@@ -130,6 +131,8 @@ struct Task : Sos_self_deleting
 
     bool                        check_timeout               ();
     bool                        try_kill                    ();
+    void                        add_pid                     ( int pid );
+    void                        remove_pid                  ( int pid );
     bool                        wait_until_terminated       ( double wait_time = latter_day );
     void                        set_delay_spooler_process   ( Time t )                              { _log.debug("delay_spooler_process=" + t.as_string() ); _next_spooler_process = Time::now() + t; }
 
@@ -235,6 +238,9 @@ struct Task : Sos_self_deleting
     string                     _name;
     ptr<Order>                 _order;
     string                     _changed_directories;        // Durch Semikolon getrennt
+
+    typedef stdext::hash_set<int> Pids;
+    Pids                       _pids;                       // Für add_pid() und remove_pid(). kill_task immediately_yes soll auch diese Prozesse abbrechen.
     Call_state                 _call_state;
     Xc_copy                    _error;
 

@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.322 2004/02/11 10:41:55 jz Exp $
+// $Id: spooler.cxx,v 1.323 2004/03/23 20:22:16 jz Exp $
 /*
     Hier sind implementiert
 
@@ -629,13 +629,33 @@ void Spooler::register_process_handle( Process_handle p )
     }
 }
 
-//-----------------------------------------------------------------Spooler::register_process_handle
+//---------------------------------------------------------------Spooler::unregister_process_handle
 
 void Spooler::unregister_process_handle( Process_handle p )
 {
     for( int i = 0; i < NO_OF( _process_handles ); i++ )
     {
         if( _process_handles[i] == p )  { _process_handles[i] = 0;  return; }
+    }
+}
+
+//-------------------------------------------------------------------------------Task::register_pid
+
+void Spooler::register_pid( int pid )
+{ 
+    for( int i = 0; i < NO_OF( _pids ); i++ )
+    {
+        if( _pids[i] == 0 )  { _pids[i] = pid;  return; }
+    }
+}
+
+//-----------------------------------------------------------------------------Task::unregister_pid
+
+void Spooler::unregister_pid( int pid )
+{ 
+    for( int i = 0; i < NO_OF( _pids); i++ )
+    {
+        if( _pids[i] == pid )  { _pids[i] = 0;  return; }
     }
 }
 
@@ -1990,19 +2010,8 @@ void Spooler::abort_immediately( bool restart )
     int exit_code = 99;
 
 
-    for( int i = 0; i < NO_OF( _process_handles ); i++ )
-    {
-        if( _process_handles[i] )
-        {
-#           ifdef Z_WINDOWS
-                LOG( "TerminateProcess(" << as_hex_string( (int)_process_handles[i] ) << ",exit_code)\n" );
-                TerminateProcess( _process_handles[i], exit_code );
-#            else
-                LOG( "kill(" << _process_handles[i] << ",SIGKILL)\n" );
-                kill( _process_handles[i], SIGKILL );
-#           endif
-        }
-    }
+    for( int i = 0; i < NO_OF( _process_handles ); i++ )  if( _process_handles[i] )  try_kill_process_immediately( _process_handles[i] );
+    for( int i = 0; i < NO_OF( _pids            ); i++ )  if( _pids[i]            )  try_kill_process_immediately( _pids[i]            );
 
     if( restart )
     {
@@ -2019,7 +2028,7 @@ void Spooler::abort_immediately( bool restart )
         TerminateProcess( GetCurrentProcess(), exit_code );
         _exit( exit_code );
 #    else
-        LOG( "kill( _spooler->_pid, SIGKILL );\n" );
+        LOG( "kill(_pid,SIGKILL);\n" );
         kill( _pid, SIGKILL );
         _exit( exit_code );
 #   endif

@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.239 2004/03/07 19:22:20 jz Exp $
+// $Id: spooler_task.cxx,v 1.240 2004/03/23 20:22:17 jz Exp $
 /*
     Hier sind implementiert
 
@@ -260,6 +260,8 @@ void Task::close()
             FOR_EACH( vector<Event*>, _terminated_events, it )  (*it)->signal( "task closed" );
             _terminated_events.clear();
         }
+
+        FOR_EACH( Pids, _pids, p )  _spooler->unregister_pid( *p );
 
         _closed = true;
 
@@ -628,11 +630,30 @@ bool Task::try_kill()
     try
     {
         _killed = do_kill();
+
+        FOR_EACH( Pids, _pids, p )  try_kill_process_immediately( *p );
+
         if( !_killed ) _log.warn( "Task konnte nicht abgebrochen werden" );
     }
     catch( const exception& x ) { _log.warn( x.what() ); }
 
     return _killed;
+}
+
+//------------------------------------------------------------------------------------Task::add_pid
+
+void Task::add_pid( int pid )
+{ 
+    _pids.insert( pid );  
+    _spooler->register_pid( pid ); 
+}
+
+//---------------------------------------------------------------------------------Task::remove_pid
+
+void Task::remove_pid( int pid )
+{ 
+    _pids.erase ( pid );  
+    _spooler->unregister_pid( pid ); 
 }
 
 //-------------------------------------------------------------------------------Task::do_something

@@ -1,4 +1,4 @@
-// $Id: spooler_job.cxx,v 1.64 2004/03/23 11:26:54 jz Exp $
+// $Id: spooler_job.cxx,v 1.65 2004/03/23 20:22:17 jz Exp $
 /*
     Hier sind implementiert
 
@@ -1085,7 +1085,6 @@ Sos_ptr<Task> Job::task_to_start()
                     //LOG2( "joacim", "Job::task_to_start(): Verzeichnisüberwachung _directory_watcher_next_time=" << _directory_watcher_next_time << ", now=" << now << "\n" );
                     _directory_watcher_next_time = now + directory_watcher_intervall;
 
-sleep(0.5);
                     Directory_watcher_list::iterator it = _directory_watcher_list.begin();
                     while( it != _directory_watcher_list.end() )
                     {
