@@ -1,4 +1,4 @@
-// $Id: spooler_log.cxx,v 1.28 2002/03/14 17:26:50 jz Exp $
+// $Id: spooler_log.cxx,v 1.29 2002/03/18 10:11:39 jz Exp $
 
 #include "../kram/sos.h"
 #include "spooler.h"
@@ -203,7 +203,8 @@ void Log::log2( Log_level level, const string& prefix, const string& line, Prefi
 Prefix_log::Prefix_log( int )
 :
     _zero_(this+1),
-    _file(-1)
+    _file(-1),
+    _collect_max(900)       // Protokolle max. eine Viertelstunde sammeln
 {
 }
 
@@ -243,8 +244,15 @@ void Prefix_log::init( Spooler* spooler, const string& prefix )
 void Prefix_log::set_filename( const string& filename )
 {
     if( _file != -1 )  throw_xc( "spooler_log::filename" );
-
     _filename = filename;
+    _new_filename = "";
+}
+
+//-------------------------------------------------------------------------Prefix_log::set_filename
+
+void Prefix_log::set_new_filename( const string& filename )
+{
+    _new_filename = make_absolute_filename( _spooler->log_directory(), filename );
 }
 
 //---------------------------------------------------------------------------------Prefix_log::open
@@ -290,6 +298,14 @@ void Prefix_log::close()
         log( log_info, "Protokoll endet in " + _filename );
 
         ::close( _file ),  _file = -1;
+
+        if( !_new_filename.empty() )
+        {
+            log( log_info, "Protokolldatei wird umbenannt in " + _new_filename );
+            int ret = rename( _filename.c_str(), _new_filename.c_str() );
+            if( ret == -1 )  throw_errno( errno, "rename", _new_filename.c_str() );
+            _new_filename = "";
+        }
     }
 }
 
@@ -446,15 +462,44 @@ void Prefix_log::set_mail_body( const string& body, bool overwrite )
 
 //---------------------------------------------------------------------------------Prefix_log::send
 
-void Prefix_log::send()
+void Prefix_log::send( int reason )
 {
+    // reason == -1  =>  Job mit Fehler beendet
+    // reason ==  0  =>  Job ohne Fehler mit erstem spooler_process() return false beendet
+    // reason == +1  =>  Job ohne Fehler mit ersten spooler_process() return true beendet,
+    // reason == +2  =>  Gelegentlicher Aufruf, um Fristen zu prüfen und ggfs. eMail zu versenden
+
     if( _file != -1 )       // Nur senden, wenn die Log-Datei beschrieben worden ist
     {
-        close();
-        mail()->add_file( CComBSTR( _filename.c_str() ), L"plain/text" );
-        mail()->send();
-        _mail = NULL;
+        bool mail_it =  reason == -1  &&  _mail_on_error
+                     || reason ==  0  &&  _mail_on_success
+                     || reason == +1  &&  ( _mail_on_success | _mail_on_process );
+
+        Time now = Time::now();
+
+        if( _first_send == 0 )  _first_send = now;
+
+        if( reason > 0  ||  now < _last_send + _collect_within  ||  now > _first_send + _collect_max )
+        {
+            // Wenn die Protokolle in einer eMail gesammelt verschickt werden, wirken 
+            // mail_on_error==false oder mail_on_process==false nicht wie gewünscht,
+            // denn diese Bedingung wird erst festgestellt, wenn das Protokoll bereits geschrieben ist.
+
+            close();
+
+            mail()->add_file( CComBSTR( _filename.c_str() ), L"plain/text" );
+            mail()->send();
+
+            _last_send = now;
+            _first_send = 0;
+        }
+        else
+        if( !mail_it )  close();
+
+        _last_send = now;
     }
+
+    _mail = NULL;
 }
 
 //----------------------------------------------------------------------------------Prefix_log::log

@@ -1,4 +1,4 @@
-// $Id: spooler_service.cxx,v 1.14 2001/07/26 14:28:32 jz Exp $
+// $Id: spooler_service.cxx,v 1.15 2002/03/18 10:11:39 jz Exp $
 /*
     Hier sind implementiert
 
@@ -319,8 +319,8 @@ static uint __stdcall kill_thread( void* param )
 
     if( ok )  sos_sleep( 3 );
 
-    LOG( "_exit(1);\n" ); 
-    _exit(1);
+    LOG( "TerminateProcess()\n" ); 
+    TerminateProcess(GetCurrentProcess(),1);
     return 0;
 }
 

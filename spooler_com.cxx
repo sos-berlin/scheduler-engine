@@ -1,4 +1,4 @@
-// $Id: spooler_com.cxx,v 1.30 2002/03/15 13:50:29 jz Exp $
+// $Id: spooler_com.cxx,v 1.31 2002/03/18 10:11:39 jz Exp $
 /*
     Hier sind implementiert
 
@@ -33,6 +33,20 @@ DESCRIBE_CLASS( &spooler_typelib, Com_task        , task        , spooler_com::C
 DESCRIBE_CLASS( &spooler_typelib, Com_object_set  , object_set  , spooler_com::CLSID_object_set  , "Spooler.Object_set"  , "1.0" )
 DESCRIBE_CLASS( &spooler_typelib, Com_thread      , thread      , spooler_com::CLSID_thread      , "Spooler.Thread"      , "1.0" )
 DESCRIBE_CLASS( &spooler_typelib, Com_spooler     , spooler     , spooler_com::CLSID_spooler     , "Spooler.Spooler"     , "1.0" )
+
+//--------------------------------------------------------------------------------time_from_variant
+
+Time time_from_variant( const VARIANT& vt )
+{
+    string  str = variant_as_string( vt );
+    char*   p   = NULL;
+    double  d   = strtod( str.c_str(), &p );
+    
+    while( isspace(*p) )  p++;
+    
+    if( *p == '\0' )  return d;   // strtod() hat geklappt?
+                else  return Sos_optional_date_time(str);
+}
 
 //-----------------------------------------------------------------------------Com_error::Com_error
 
@@ -274,6 +288,42 @@ STDMETHODIMP Com_log::get_mail_on_success( VARIANT_BOOL* b )
     return hr;
 }
 
+//----------------------------------------------------------------------Com_log::put_mail_on_process
+
+STDMETHODIMP Com_log::put_mail_on_process( VARIANT_BOOL b )
+{
+    HRESULT hr = NOERROR;
+
+    try 
+    {
+        if( !_log )  return E_POINTER;
+
+        _log->set_mail_on_process( b != 0 );
+    }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Log::mail_on_process" ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Log::mail_on_process" ); }
+
+    return hr;
+}
+
+//---------------------------------------------------------------------Com_log::get_mail_on_process
+
+STDMETHODIMP Com_log::get_mail_on_process( VARIANT_BOOL* b )
+{
+    HRESULT hr = NOERROR;
+
+    try 
+    {
+        if( !_log )  return E_POINTER;
+
+        *b = _log->mail_on_process();
+    }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Log::mail_on_process" ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Log::mail_on_process" ); }
+
+    return hr;
+}
+
 //-----------------------------------------------------------------------------------Com_log::level
 
 STDMETHODIMP Com_log::put_level( int level )
@@ -310,7 +360,7 @@ STDMETHODIMP Com_log::get_level( int* level )
     return hr;
 }
 
-//----------------------------------------------------------------------------Com_log::log_filename
+//--------------------------------------------------------------------------------Com_log::filename
 
 STDMETHODIMP Com_log::get_filename( BSTR* filename_bstr )
 {
@@ -324,6 +374,113 @@ STDMETHODIMP Com_log::get_filename( BSTR* filename_bstr )
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Log::filename" ); }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Log::filename" ); }
+
+    return hr;
+}
+
+//----------------------------------------------------------------------------Com_log::new_filename
+
+STDMETHODIMP Com_log::put_new_filename( BSTR filename_bstr )
+{
+    HRESULT hr = NOERROR;
+
+    try 
+    {
+        if( !_log )  return E_POINTER;
+        _log->set_new_filename( bstr_as_string( filename_bstr ) );
+    }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Log::new_filename" ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Log::new_filename" ); }
+
+    return hr;
+}
+
+//----------------------------------------------------------------------------Com_log::new_filename
+
+STDMETHODIMP Com_log::get_new_filename( BSTR* filename_bstr )
+{
+    HRESULT hr = NOERROR;
+
+    try 
+    {
+        if( !_log )  return E_POINTER;
+
+        *filename_bstr = SysAllocString_string( _log->new_filename() );
+    }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Log::new_filename" ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Log::new_filename" ); }
+
+    return hr;
+}
+
+//--------------------------------------------------------------------------Com_log::collect_within
+
+STDMETHODIMP Com_log::put_collect_within( VARIANT* time )
+{
+    HRESULT hr = NOERROR;
+
+    try 
+    {
+        if( !_log )  return E_POINTER;
+
+        _log->set_collect_within( time_from_variant(*time) );
+    }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Log::collect_within" ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Log::collect_within" ); }
+
+    return hr;
+}
+
+//--------------------------------------------------------------------------Com_log::collect_within
+
+STDMETHODIMP Com_log::get_collect_within( double* result )
+{
+    HRESULT hr = NOERROR;
+
+    try 
+    {
+        if( !_log )  return E_POINTER;
+
+        *result = _log->collect_within();
+    }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Log::collect_within" ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Log::collect_within" ); }
+
+    return hr;
+}
+
+//-----------------------------------------------------------------------------Com_log::collect_max
+
+STDMETHODIMP Com_log::put_collect_max( VARIANT* time )
+{
+    HRESULT hr = NOERROR;
+
+    try 
+    {
+        if( !_log )  return E_POINTER;
+
+        _log->set_collect_max( time_from_variant(*time) );
+    }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Log::collect_max" ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Log::collect_max" ); }
+
+    return hr;
+}
+
+//-----------------------------------------------------------------------------Com_log::collect_max
+
+STDMETHODIMP Com_log::get_collect_max( double* result )
+{
+    HRESULT hr = NOERROR;
+
+    try 
+    {
+        if( !_log )  return E_POINTER;
+
+        *result = _log->collect_max();
+    }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Log::collect_max" ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Log::collect_max" ); }
 
     return hr;
 }
@@ -551,11 +708,31 @@ STDMETHODIMP Com_job::get_title( BSTR* title )
 
         *title = SysAllocString_string( _job->title() );
     }
-    catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Job.state_text" ); }
-    catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Job.state_text" ); }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Job.title" ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Job.title" ); }
 
     return hr;
 }
+
+//-------------------------------------------------------------------Com_job::put_delay_after_error
+
+STDMETHODIMP Com_job::put_delay_after_error( int error_steps, VARIANT* time )
+{
+    HRESULT hr = NOERROR;
+
+    try
+    {
+        if( !_job )  throw_xc( "SPOOLER-122" );
+
+        _job->set_delay_after_error( error_steps, time_from_variant(*time) );
+    }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Job.delay_after_error" ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Job.delay_after_error" ); }
+
+    return hr;
+}
+
+
 
 //-------------------------------------------------------------------------------Com_task::Com_task
 

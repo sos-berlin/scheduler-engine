@@ -1,4 +1,4 @@
-// $Id: spooler_log.h,v 1.11 2002/03/14 17:26:50 jz Exp $
+// $Id: spooler_log.h,v 1.12 2002/03/18 10:11:39 jz Exp $
 
 #ifndef __SPOOLER_LOG_H
 #define __SPOOLER_LOG_H
@@ -66,18 +66,25 @@ struct Prefix_log
     void                        open                        ();
     void                        close                       ();
 
-    void                        set_append                  ( bool b )                          { _append = b; }
-    void                        set_filename                ( const string& );
-    const string&               filename                    () const                            { return _filename; }
-    void                        set_log_level               ( int level )                       { _log_level = level; }
+    void                    set_append                      ( bool b )                          { _append = b; }
+    void                    set_filename                    ( const string& );
+    string                      filename                    () const                            { return _filename; }
+    void                    set_new_filename                ( const string& );
+    string                      new_filename                ()                                  { return _new_filename; }
+    void                    set_log_level                   ( int level )                       { _log_level = level; }
     int                         log_level                   ()                                  { return _log_level; }
     void                        reset_highest_level         ()                                  { _highest_level = -999; }
     int                         highest_level               () const                            { return _highest_level; }
     string                      highest_msg                 () const                            { return _highest_msg; }
 
-    void                        set_prefix                  ( const string& prefix )            { _prefix = prefix; }
-    void                        set_profile_section         ( const string& section )           { _section = section; }
-    void                        set_jobname                 ( const string& jobname )           { _jobname = jobname; }
+    void                    set_collect_within              ( Time time )                       { _collect_within = time; }
+    Time                        collect_within              ()                                  { return _collect_within; }
+    void                    set_collect_max                 ( Time time )                       { _collect_max = time; }
+    Time                        collect_max                 ()                                  { return _collect_max; }
+
+    void                    set_prefix                      ( const string& prefix )            { _prefix = prefix; }
+    void                    set_profile_section             ( const string& section )           { _section = section; }
+    void                    set_jobname                     ( const string& jobname )           { _jobname = jobname; }
 
     void                        operator()                  ( const string& line )              { info( line ); }
     void                        debug9                      ( const string& line )              { log( log_debug9, line ); }
@@ -95,20 +102,23 @@ struct Prefix_log
     void                        error                       ( const string& line )              { log( log_error, line ); }
     void                        log                         ( Log_level, const string& );
 
-    void                        set_mail_on_error           ( bool b )                          { _mail_on_error = b; }
+    void                    set_mail_on_error               ( bool b )                          { _mail_on_error = b; }
     bool                        mail_on_error               ()                                  { return _mail_on_error; }
 
-    void                        set_mail_on_success         ( bool b )                          { _mail_on_success = b; }
+    void                    set_mail_on_success             ( bool b )                          { _mail_on_success = b; }
     bool                        mail_on_success             ()                                  { return _mail_on_success; }
+
+    void                    set_mail_on_process             ( bool b )                          { _mail_on_process = b; }
+    bool                        mail_on_process             ()                                  { return _mail_on_process; }
 
     spooler_com::Imail*         mail                        ();
 
     // Defaults setzen, ohne eMail-Objekt anzulegen:
-    void                        set_mail_from_name          ( const string& );
-    void                        set_mail_subject            ( const string&, bool overwrite = false );
-    void                        set_mail_body               ( const string&, bool overwrite = false );
+    void                    set_mail_from_name              ( const string& );
+    void                    set_mail_subject                ( const string&, bool overwrite = false );
+    void                    set_mail_body                   ( const string&, bool overwrite = false );
 
-    void                        send                        ();
+    void                        send                        ( int reason );
 
     friend struct               Log;
 
@@ -129,13 +139,20 @@ struct Prefix_log
     string                     _highest_msg;
 
     string                     _filename;                   // Name einer zusätzlichen Log-Datei (für die Tasks)
+    string                     _new_filename;               // nach close() umbenennen
     bool                       _append;                     // Datei zum Fortschreiben öffnen
     int                        _file;                       // File handle
 
     bool                       _mail_on_error;
     bool                       _mail_on_success;
+    bool                       _mail_on_process;
     CComPtr<spooler_com::Imail> _mail;
     string                     _mail_section;               // Name des Abschnitts in factory.ini für eMail-Einstellungen
+
+    Time                       _collect_within;             // eMails innerhalb dieser Frist sammeln, solange Job keinen Fehler macht
+    Time                       _last_send;                  // Beginn dieser Frist
+    Time                       _collect_max;                // Nach dieser Frist eMail auf jeden Fall versenden
+    Time                       _first_send;                 // Beginn dieser Frist
 
     string                     _smtp_server;                // Aus factory.ini [Job ...]
     bool                       _smtp_server_read;

@@ -1,4 +1,4 @@
-// $Id: spooler_time.h,v 1.7 2002/03/05 20:49:38 jz Exp $
+// $Id: spooler_time.h,v 1.8 2002/03/18 10:11:40 jz Exp $
 
 #ifndef __SPOOLER_TIME_H
 #define __SPOOLER_TIME_H
@@ -26,6 +26,7 @@ struct Time
     void                        operator -=                 ( double t )                    { set( _time - t ); }
 
     Time                        operator -                  ( const Time& t )               { return Time( _time - t ); }
+  //Time                        operator +                  ( const Time& t )               { return Time( _time + t ); }
 
     bool                        operator <                  ( const Time& t ) const         { return _time <  t._time; }
     bool                        operator <=                 ( const Time& t ) const         { return _time <= t._time; }

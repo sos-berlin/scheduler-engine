@@ -1,4 +1,4 @@
-// $Id: spooler_task.h,v 1.36 2002/03/15 13:50:29 jz Exp $
+// $Id: spooler_task.h,v 1.37 2002/03/18 10:11:40 jz Exp $
 
 #ifndef __SPOOLER_TASK_H
 #define __SPOOLER_TASK_H
@@ -155,7 +155,7 @@ struct Job : Sos_self_deleting
 
     typedef list< Sos_ptr<Task> >               Task_queue;
     typedef list< Sos_ptr<Directory_watcher> >  Directory_watcher_list;
-
+    typedef map< int, Time >                    Delay_after_error;
 
                                 Job                         ( Thread* );
                                ~Job                         (); 
@@ -177,6 +177,7 @@ struct Job : Sos_self_deleting
     string                      title                       ()                          { string title; THREAD_LOCK( _lock )  title = _title;  return title; }
     string                      jobname_as_filename         ();
     void                        set_in_call                 ( const string& name );
+    void                        set_delay_after_error       ( int error_steps, Time delay ) { _delay_after_error[error_steps] = delay; }
 
     void                        close                       ();
     void                        close_engine                ();
@@ -200,10 +201,11 @@ struct Job : Sos_self_deleting
     void                        stop                        ();
     void                        finish                      ();
     void                        set_next_start_time         ( Time now = Time::now() );
+    void                        set_next_time               ( Time now = Time::now() );
 
     bool                        execute_state_cmd           ();
     void                        reread                      ();
-    bool                        task_to_start               ( Time now );
+    bool                        task_to_start               ();
     bool                        do_something                ();
     bool                        should_removed              ()                          { return _temporary && _state == s_stopped; }
     void                        set_mail_defaults           ();
@@ -269,6 +271,8 @@ struct Job : Sos_self_deleting
     int                        _priority;
     bool                       _temporary;                  // Job nach einem Lauf entfernen
     bool                       _start_once;                 // <run_time start_once="">, wird false nach Start
+    Delay_after_error          _delay_after_error;
+    int                        _error_steps;                // Zahl aufeinanderfolgender Fehler
 
     string                     _title;                      // <job title="">
     string                     _description;                // <description>
@@ -287,6 +291,7 @@ struct Job : Sos_self_deleting
     State_cmd                  _state_cmd;
     bool                       _reread;                     // <script> neu einlesen, also <include> erneut ausführen
     string                     _in_call;                    // "spooler_process" etc.
+    Time                       _delay_until;                // Nach Fehler verzögern
     Time                       _next_start_time;
     Time                       _next_time;                  // Für Thread::wait(): Um diese Zeit soll Job::do_something() gerufen werden.
     Period                     _period;                     // Derzeitige oder nächste Period
@@ -351,6 +356,7 @@ struct Task : Sos_self_deleting
     
     double                     _cpu_time;
     int                        _step_count;
+    bool                       _process_ok;                 // Einmal spooler_process() mit return true gerufen.
 
     bool                       _let_run;                    // Task zuende laufen lassen, nicht bei _job._period.end() beenden
     bool                       _opened;

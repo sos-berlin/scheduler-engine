@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.65 2002/03/15 13:50:29 jz Exp $
+// $Id: spooler_task.cxx,v 1.66 2002/03/18 10:11:39 jz Exp $
 /*
     Hier sind implementiert
 
@@ -241,6 +241,7 @@ void Job::close()
 {
     close_task();
 
+    _log.close();
     _event.close();
     clear_when_directory_changed();
 
@@ -329,25 +330,25 @@ void Job::init()
 void Job::init2()
 {
     _start_once = _run_time.once();
-
-  //_period     = _run_time.first_period();
+    _delay_until = 0;
     _period._begin = 0;
     _period._end = 0;
+
     select_period();
 }
 
 //-------------------------------------------------------------------------------Job::select_period
-
+/*ALT
 void Job::select_period( Time now )
 {
     if( now > _period.end() )
     {
         _period = _run_time.next_period(now);  _log.debug( "Nächste Periode beginnt " + _period.begin().as_string() );
-       
-        _next_start_time = _period.has_start()? max( now, _period.begin() ) 
-                                              : latter_day;
 
-        if( _next_start_time != latter_day )  
+        _next_start_time = _period.has_start()? max( now, _period.begin() )
+                                              : latter_day;
+ 
+        if( _next_start_time != latter_day )
         {
             _log.debug( "Nächster Start " + _next_start_time.as_string() );
             _next_time = _next_start_time;
@@ -358,31 +359,77 @@ void Job::select_period( Time now )
         }
     }
     else
-    if( _next_time == latter_day 
-     || _next_time < now         )  
+    if( _next_time == latter_day
+     || _next_time < now         )
     {
         _next_time = _next_time < _next_start_time? _next_time = _next_start_time
                                                   : _run_time.next_period(_period.end()).begin();
     }
+}
+*/
+//-------------------------------------------------------------------------------Job::select_period
+
+void Job::select_period( Time now )
+{
+    if( now >= _period.end() )       // Periode abgelaufen?
+    {
+        _period = _run_time.next_period(now);  
+        
+        string rep; if( _period._repeat != latter_day )  rep = _period._repeat.as_string();
+        _log.debug( "Nächste Periode ist <period begin=\"" + _period.begin().as_string() + "\" end=\"" + _period.end().as_string() + "\" repeat=\"" + rep + "\">" );
+
+        if( _period.has_start() )
+        {
+            _next_start_time = max( now, _period.begin() );
+            //_log.debug( "Nächster Start " + _next_start_time.as_string() );
+        }
+        else
+            _next_start_time = latter_day;
+    }
+
+    set_next_time( now );
 }
 
 //--------------------------------------------------------------------------------Job::is_in_period
 
 bool Job::is_in_period( Time now )
 {
-    select_period( now );
-    return now >= _period.begin()  &&  now < _period.end();
+    //select_period( now );
+    return now >= _delay_until  &&  now >= _period.begin()  &&  now < _period.end();
+}
+
+//-------------------------------------------------------------------------------Job::set_next_time
+// Für Spooler_thread
+
+void Job::set_next_time( Time now )
+{
+    _next_time = _next_start_time;
+
+    // Minimum von _start_at für _next_time berücksichtigen
+    Task_queue::iterator it = _task_queue.begin();  
+    while( it != _task_queue.end()  &&  !(*it)->_start_at )  it++;
+    if( it != _task_queue.end()  &&  _next_time > (*it)->_start_at )  _next_time = (*it)->_start_at;
+
+    if( _next_time == latter_day )  // Das ist, wenn die Periode weder repeat noch single_start hat, also keinen automatischen Start
+    {
+        _next_time = _period.end();
+    }
 }
 
 //-------------------------------------------------------------------------Job::set_next_start_time
-
+/*
 void Job::set_next_start_time( Time now )
 {
     if( _repeat > 0 )       // spooler_task.repeat
     {
         _next_start_time = now + _repeat;
         _repeat = 0;
-        if( !_period.let_run()  &&  _next_start_time > _period.end() )  _next_start_time = latter_day;
+        //if( !_period.let_run()  &&  _next_start_time > _period.end() )  _next_start_time = latter_day;
+    }
+    else
+    if( _delay_until )
+    {
+        _next_start_time = _delay_until;
     }
     else
     {
@@ -391,14 +438,14 @@ void Job::set_next_start_time( Time now )
 
     _next_time = _next_start_time;
 
-    if( _next_start_time == latter_day ) 
+    if( _next_start_time == latter_day  ||  _next_start_time > _period.end() )
     {
         if( now < _period.begin() )     // Nächste Periode hat noch nicht begonnen?
         {
             _next_start_time = _period.begin();
-            _next_time = _next_start_time;            
+            _next_time = _next_start_time;
         }
-        else  
+        else
             select_period( max( now, _period.end() ) );
     }
 
@@ -406,9 +453,48 @@ void Job::set_next_start_time( Time now )
 
 
     // Minimum von _start_at für _next_time berücksichtigen
-    Task_queue::iterator it = _task_queue.begin();  
+    Task_queue::iterator it = _task_queue.begin();
     while( it != _task_queue.end()  &&  !(*it)->_start_at )  it++;
     if( it != _task_queue.end()  &&  _next_time > (*it)->_start_at )  _next_time = (*it)->_start_at;
+}
+*/
+//-------------------------------------------------------------------------Job::set_next_start_time
+
+void Job::set_next_start_time( Time now )
+{
+    if( _repeat > 0 )       // spooler_task.repeat
+    {
+        _next_start_time = now + _repeat;
+        _log.debug( "Wiederholung wegen spooler_job.repeat=" + as_string(_repeat) + ": " + _next_start_time.as_string() );
+        _repeat = 0;
+    }
+    else
+    if( _delay_until )
+    {
+        _next_start_time = _delay_until;
+        _log.debug( "Wiederholung wegen delay_after_error: " + _next_start_time.as_string() );
+    }
+    else
+    {
+        _next_start_time = _period.next_try( now );
+        if( _next_start_time != latter_day )  _log.debug( "Nächste Wiederholung wegen <period repeat=\"" + as_string((double)_period._repeat) + "\">: " + _next_start_time.as_string() );
+    }
+
+    if( _next_start_time > _period.end()  ||  _next_start_time == latter_day ) 
+    {
+        if( now < _period.begin() )     // Nächste Periode hat noch nicht begonnen?
+        {
+            _next_start_time = _period.begin();
+            _log.debug( "Nächster Start zu Beginn der Periode: " + _next_start_time.as_string() );
+        }
+        else  
+        if( now >= _period.end() )
+        {
+            select_period( now );
+        }
+    }
+
+    set_next_time( now );
 }
 
 //-------------------------------------------------------------------------Job::jobname_as_filename
@@ -442,16 +528,19 @@ Sos_ptr<Task> Job::create_task( const CComPtr<spooler_com::Ivariable_set>& param
     else                             
                                        task = SOS_NEW( Job_script_task( _spooler, this ) );
 
-    task->_enqueue_time = Time::now();
+    Time now = Time::now();
+    task->_enqueue_time = now;
     task->_params       = params? params : new Com_variable_set;
     task->_name         = name;
     task->_start_at     = start_at; 
     
-    if( task->_start_at < _next_time )  _next_time = start_at;
-
+    //if( task->_start_at < _next_time )  _next_time = start_at;
+    
     Task_queue::iterator it = _task_queue.begin();  // _task_queue nach _start_at geordnet halten
     while( it != _task_queue.end()  &&  (*it)->_start_at <= task->_start_at )  it++;
     _task_queue.insert( it, task );
+
+    set_next_time( now );
 
     return task;
 }
@@ -539,7 +628,7 @@ Sos_ptr<Task> Job::start_without_lock( const CComPtr<spooler_com::Ivariable_set>
     
     task->_let_run = true;
 
-    _thread->signal( "start job" );
+    if( GetCurrentThreadId() != thread()->_thread_id )  _thread->signal( "start job" );
 
     return task;
 }
@@ -700,14 +789,16 @@ void Job::finish()
 
     try
     {
-        if( _log.mail_on_success() && !has_error()  
-        ||  _log.mail_on_error()   &&  has_error() )  _log.send();
+        //if( _log.mail_on_success() && !has_error()  
+        //||  _log.mail_on_error()   &&  has_error() )  _log.send();
 
-        _log.close();
+        _log.send( has_error()? -1 : _task && _task->_process_ok? +1 : 0 );
+
+        //_log.close();
     }
-    catch( const Xc& x         ) { set_error(x); }
-    catch( const exception& x  ) { set_error(x); }
-    catch( const _com_error& x ) { set_error(x); }
+    catch( const Xc& x         ) { _log.warn(x.what()); }  //{ set_error(x); }
+    catch( const exception& x  ) { _log.warn(x.what()); }  //{ set_error(x); }
+    catch( const _com_error& x ) { _log.warn(bstr_as_string(x.Description())); }  //{ set_error(x); }
 }
 
 //----------------------------------------------------------------------------Job::interrupt_script
@@ -775,13 +866,24 @@ bool Job::execute_state_cmd()
 
 //-------------------------------------------------------------------------------Job::task_to_start
 
-bool Job::task_to_start( Time now )
+bool Job::task_to_start()
 {
-    bool ok = false;
+    Time now      = Time::now();
+    bool dequeued = false;
+    bool ok    = false;
 
     if( _state == s_pending  )
     {
-        if( _period._single_start || is_in_period(now) )
+        ok = dequeued = dequeue_task(now);
+        
+        if( _period._single_start  &&  now >= _next_start_time )  
+        {
+            ok = true; //,  _log.debug( "Task startet wegen single_start=" + _period.begin().as_string() );
+        }
+        else
+            select_period(now);
+
+        if( dequeued || ok || is_in_period(now) )
         {
             THREAD_LOCK( _lock )
             {
@@ -798,13 +900,11 @@ bool Job::task_to_start( Time now )
 
                 if( _event.signaled() )        ok = true,  _log.debug( "Task startet wegen " + _event.as_string() );
 
-              //if( now >= _next_start_at )    ok = true,  _log.debug( "Task startet, weil Task-Startzeit erreicht: " + _next_start_at.as_string() );
-
                 if( now >= _next_start_time )  ok = true,  _log.debug( "Task startet, weil Job-Startzeit erreicht: " + _next_start_time.as_string() );
 
                 if( _start_once )              ok = true,  _start_once = false,  _log.debug( "Task startet wegen <run_time once=\"yes\">" );
 
-                if( ok )
+                if( !dequeued && ok )
                 {
                     create_task( NULL, "", now );
                     dequeue_task( now );
@@ -830,13 +930,7 @@ bool Job::do_something()
 
     if( _reread  &&  !_task )  _reread = false,  reread(),  something_done = true;
 
-    if( _state == s_pending )
-    {
-        Time now = Time::now();
-        bool dequeued = dequeue_task(now);
-        //if( !dequeued  &&  task_to_start(now) )  create_task( NULL, "" ),  dequeue_task(now);
-        if( !dequeued )  task_to_start(now);
-    }
+    if( _state == s_pending )  task_to_start();
 
     // Wenn nichts zu tun ist, dann raus. Der Job soll nicht wegen eines alten Fehlers nachträglich gestoppt werden (s.u.)
     if( _state == s_pending    )  return something_done;    
@@ -869,8 +963,9 @@ bool Job::do_something()
         if( !call_step )  now = Time::now(), call_step = _period.is_in_time( now );
         if( !call_step )   // Period abgelaufen?
         {
-            set_next_start_time(now);  
-            call_step = _task->_let_run || _period.is_in_time(now);  // Gilt schon die nächste Periode?
+            //set_next_start_time(now);  
+            //call_step = _task->_let_run || _period.is_in_time(now);  // Gilt schon die nächste Periode?
+            call_step = _task->_let_run  ||  ( select_period(now), is_in_period(now) );
         }
 
         if( call_step ) 
@@ -893,7 +988,7 @@ bool Job::do_something()
          || _state == s_running 
          || _state == s_running_process )  end(), something_done = true;
 
-        if( _state != s_stopped  &&  has_error()  &&  _repeat == 0 )  stop(), something_done = true;
+        if( _state != s_stopped  &&  has_error()  &&  _repeat == 0  &&  _delay_after_error.empty() )  stop(), something_done = true;
 
         finish();
     }
@@ -1001,9 +1096,18 @@ void Job::set_state( State new_state )
 
         _state = new_state;
 
-        if( _spooler->_debug 
-         || new_state == s_starting
-         || new_state == s_ended    ) _log.debug( state_name() ); 
+
+        if( _spooler->_debug )
+        {
+            if( new_state == s_starting ) 
+            {
+                string msg = state_name();
+                if( _task && _task->_start_at )  msg += " (at=" + _task->_start_at.as_string() + ")";
+                _log.debug( msg );
+            }
+            else
+            if( new_state == s_ended    ) _log.debug( state_name() ); 
+        }
     }
 }
 
@@ -1218,6 +1322,7 @@ xml::Element_ptr Job::xml( xml::Document_ptr document, bool show_all )
         if( !_task_queue.empty() )
         {
             xml::Element_ptr queue_element = document->createElement( "queued_tasks" );
+            dom_append_nl( queue_element );
 
             FOR_EACH( Task_queue, _task_queue, it )
             {
@@ -1228,6 +1333,7 @@ xml::Element_ptr Job::xml( xml::Document_ptr document, bool show_all )
                     queued_task_element->setAttribute( "start_at", as_dom_string( (*it)->_start_at.as_string() ) );
 
                 queue_element->appendChild( queued_task_element );
+                dom_append_nl( queue_element );
             }
 
             job_element->appendChild( queue_element );
@@ -1303,13 +1409,14 @@ bool Task::start()
 {
     try 
     {
-        _job->_log.close();
+        //_job->_log.close();
         _job->_log.open();           // Jobprotokoll, nur wirksam, wenn set_filename() gerufen, s. Job::init().
 
         THREAD_LOCK( _job->_lock )
         {
             _job->set_state( Job::s_starting );
             _job->reset_error();
+            _job->_delay_until = 0;
 
             _job->_thread->_task_count++;
             _job->_step_count = 0;
@@ -1352,6 +1459,26 @@ void Task::end()
 
     on_error_on_success();
     close();
+
+
+    // Bei mehreren aufeinanderfolgenden Fehlern Wiederholung verzögern?
+
+    if( _job->has_error() )
+    {
+        _job->_error_steps++;
+    
+        if( !_job->_repeat )   // spooler_task.repeat hat Vorrang
+        {
+            Time delay = 0;
+            FOR_EACH( Job::Delay_after_error, _job->_delay_after_error, it )  
+                if( _job->_error_steps >= it->first )  delay = it->second;
+            _job->_delay_until = Time::now() + delay;
+        }
+    }
+    else
+    {
+       _job->_error_steps = 0;
+    }
 }
 
 //-------------------------------------------------------------------------Task::on_error_on_success
@@ -1396,6 +1523,7 @@ bool Task::step()
         _job->_thread->_step_count++;
         _job->_step_count++;
         _step_count++;
+        _process_ok |= result;
     }
     catch( const Xc& x        ) { _job->set_error(x); return false; }
     catch( const exception& x ) { _job->set_error(x); return false; }
@@ -1462,7 +1590,7 @@ void Script_task::do_on_success()
 
 void Script_task::do_on_error()
 {
-    if( _job->_script_instance.loaded() )
+    //if( _job->_script_instance.loaded() )
     {
         Job::In_call in_call ( this, spooler_on_error_name );
         _job->_script_instance.call_if_exists( spooler_on_error_name );

@@ -1,4 +1,4 @@
-// $Id: spooler_com.h,v 1.25 2002/03/11 06:55:52 jz Exp $
+// $Id: spooler_com.h,v 1.26 2002/03/18 10:11:39 jz Exp $
 
 #ifndef __SPOOLER_COM_H
 #define __SPOOLER_COM_H
@@ -132,10 +132,22 @@ struct Com_log : spooler_com::Ilog, Sos_ole_object
     STDMETHODIMP            put_mail_on_success             ( VARIANT_BOOL );
     STDMETHODIMP            get_mail_on_success             ( VARIANT_BOOL* );
 
+    STDMETHODIMP            put_mail_on_process             ( VARIANT_BOOL );
+    STDMETHODIMP            get_mail_on_process             ( VARIANT_BOOL* );
+
     STDMETHODIMP            put_level                       ( int );
     STDMETHODIMP            get_level                       ( int* );
 
     STDMETHODIMP            get_filename                    ( BSTR* );
+
+    STDMETHODIMP            put_new_filename                ( BSTR );
+    STDMETHODIMP            get_new_filename                ( BSTR* );
+
+    STDMETHODIMP            put_collect_within              ( VARIANT* );
+    STDMETHODIMP            get_collect_within              ( double* );
+
+    STDMETHODIMP            put_collect_max                 ( VARIANT* );
+    STDMETHODIMP            get_collect_max                 ( double* );
 
     Fill_zero                  _zero_;
     Prefix_log*                _log;
@@ -185,6 +197,7 @@ struct Com_job : spooler_com::Ijob, Sos_ole_object
     STDMETHODIMP                get_name                    ( BSTR* );
     STDMETHODIMP                put_state_text              ( BSTR );
     STDMETHODIMP                get_title                   ( BSTR* );
+    STDMETHODIMP                put_delay_after_error       ( int error_steps, VARIANT* time );
 
     Job*                       _job;                        // Es gibt nur einen Com_job pro Job
 };

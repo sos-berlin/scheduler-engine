@@ -1,4 +1,4 @@
-// $Id: spooler_wait.cxx,v 1.27 2002/03/02 19:22:56 jz Exp $
+// $Id: spooler_wait.cxx,v 1.28 2002/03/27 21:33:50 jz Exp $
 /*
     Hier sind implementiert
 
@@ -10,6 +10,7 @@
 #include "../kram/sos.h"
 #include "spooler.h"
 
+#include <io.h>         // findfirst()
 #include "../kram/sleep.h"
 #include "../kram/log.h"
 
@@ -142,23 +143,7 @@ void Event::signal( const string& name )
     THREAD_LOCK( _lock )
     {
         _signal_name = name;
-//      if( _waiting )  
-            { SetEvent( _handle );  return; }
-/*
-        if( !_signaled )
-        {
-            FOR_EACH( vector<Wait_handles*>, _wait_handles, it )
-            {
-                Wait_handles* w = *it;
-                
-                THREAD_LOCK( w->_lock )
-                {
-                    _signaled = true;
-                    if( w->_waiting )  { SetEvent( _handle );  return; }
-                }
-            }
-        }
-*/
+        SetEvent( _handle );  
     }
 }
 
@@ -365,6 +350,47 @@ string Wait_handles::as_string() const
     }
 }
 
+//---------------------------------------------------------------------------------Directory_reader
+
+struct Directory_reader
+{
+    Directory_reader() : _handle(-1) {}
+    
+    ~Directory_reader()
+    { 
+        close(); 
+    }
+    
+    void close() 
+    { 
+        if( _handle != -1 )  _findclose( _handle ),  _handle = -1; 
+    }
+
+    string first( const string& dirname ) 
+    { 
+        string pattern = dirname + "/*";
+        _finddata_t data;
+        _handle = _findfirst( pattern.c_str(), &data ); 
+        if( _handle == -1 )  throw_errno( errno, "_findfirst", dirname.c_str() );  
+        return data.name; 
+    }
+
+    string next() 
+    { 
+        _finddata_t data;
+        int ret = _findnext( _handle, &data ); 
+        if( ret == -1 )  
+        {
+            if( errno == ENOENT )  return "";
+            throw_errno( errno, "_findnext" ); 
+        }
+
+        return data.name; 
+    }
+
+    int  _handle;
+};
+
 //------------------------------------------------------------------Directory_watcher::close_handle
 
 void Directory_watcher::close_handle()
@@ -378,45 +404,57 @@ void Directory_watcher::close_handle()
 
 //---------------------------------------------------------------Directory_watcher::watch_directory
 
-void Directory_watcher::watch_directory( const string& directory )
+void Directory_watcher::watch_directory( const string& directory, const string& filename_pattern )
 {
     close();
 
     _directory = directory;
+    _filename_pattern = filename_pattern;
+
+    if( !filename_pattern.empty() )  _filename_regex.compile( filename_pattern );
 
     _handle = FindFirstChangeNotification( directory.c_str(), FALSE, FILE_NOTIFY_CHANGE_FILE_NAME | FILE_NOTIFY_CHANGE_DIR_NAME );
     if( _handle == INVALID_HANDLE_VALUE )  _handle = NULL, throw_mswin_error( "FindFirstChangeNotification" );
 }
 
-//-------------------------------------------------------------------Directory_watcher::watch_again
-/*
-void Directory_watcher::watch_again()
-{
-    reset();
 
-    BOOL ok = FindNextChangeNotification( _handle );
-    if( !ok )  throw_mswin_error( "FindNextChangeNotification" );
+//-------------------------------------------------------------------------Directory_watcher::match
+
+bool Directory_watcher::match()
+{
+    Directory_reader dir;
+
+    string filename = dir.first( _directory );
+
+    while( !filename.empty() )
+    {
+        if( filename != "."  &&  filename != ".." )
+        {
+            if( _filename_regex.match( filename ) )  return true;
+        }
+
+        filename = dir.next();
+    }
+
+    return false;
 }
-*/
+
 //--------------------------------------------------------------------Directory_watcher::set_signal
 
 void Directory_watcher::set_signal()
 {
-    Event::set_signal();
-
-    BOOL ok = FindNextChangeNotification( _handle );
-    if( !ok )
+    try
     {
-        try
-        {
-            throw_mswin_error( "FindNextChangeNotification" );
-        }
-        catch( const Xc& x ) 
-        {
-            _log->error( "Überwachung des Verzeichnisses " + _directory + " wird nach Fehler beendet: " + x.what() ); 
-            _directory = "";   // Damit erneutes start_when_directory_changed() diese (tote) Überwachung nicht erkennt.
-        }
+        if( _filename_pattern.empty()  ||  match() )  Event::set_signal();
 
+        BOOL ok = FindNextChangeNotification( _handle );
+        if( !ok )  throw_mswin_error( "FindNextChangeNotification" );
+    }
+    catch( const Xc& x ) 
+    {
+        _log->error( "Überwachung des Verzeichnisses " + _directory + " wird nach Fehler beendet: " + x.what() ); 
+        _directory = "";   // Damit erneutes start_when_directory_changed() diese (tote) Überwachung nicht erkennt.
+        Event::set_signal();
         close();
     }
 }

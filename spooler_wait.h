@@ -1,9 +1,10 @@
-// $Id: spooler_wait.h,v 1.18 2002/03/01 20:16:46 jz Exp $
+// $Id: spooler_wait.h,v 1.19 2002/03/27 21:33:50 jz Exp $
 
 #ifndef __SPOOLER_WAIT_H
 #define __SPOOLER_WAIT_H
 
 #include <vector>
+#include "../zschimmer/regex_class.h"
 
 namespace sos {
 namespace spooler {
@@ -42,8 +43,8 @@ struct Event : Handle
 
 
   protected:
-                                Event                       ( const Event& );             // Nicht implementiert
-    void                        operator =                  ( const Event& );             // Nicht implementiert
+                                Event                       ( const Event& );                   // Nicht implementiert
+    void                        operator =                  ( const Event& );                   // Nicht implementiert
 
     virtual void                close_handle                ();
 
@@ -107,8 +108,8 @@ struct Directory_watcher : Event
                                 operator bool               ()                              { return _handle != NULL; }
                                 operator !                  ()                              { return _handle == NULL; }
 
-        void                    watch_directory             ( const string& );
-      //void                    watch_again                 ();
+        void                    watch_directory             ( const string& directory, const string& filename_pattern = "" );
+        bool                    match                       ();
         
 #    else
 
@@ -119,6 +120,7 @@ struct Directory_watcher : Event
 
     virtual void                set_signal                  ();
     string                      directory                   () const                        { return _directory; }
+    string                      filename_pattern            () const                        { return _filename_pattern; }
 
   protected: 
     virtual void                close_handle                ();
@@ -126,6 +128,8 @@ struct Directory_watcher : Event
   private:
     Prefix_log*                _log;
     string                     _directory;
+    string                     _filename_pattern;
+    zschimmer::Regex           _filename_regex;
 };
 
 //-------------------------------------------------------------------------------------------------
