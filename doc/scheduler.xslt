@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding="utf-8"?>
-<!-- $Id: scheduler.xslt,v 1.44 2004/11/15 08:58:20 jz Exp $ -->
+<!-- $Id: scheduler.xslt,v 1.45 2004/12/02 21:56:49 jz Exp $ -->
 
 <!--
     Änderungswünsche:
@@ -668,9 +668,9 @@
                     <xsl:with-param name="title"       select="$title"/>
                 </xsl:call-template>
                 
-                <p>
+                <!--p>
                     Fehlt ein Stichwort? Weitere Stichwörter können bei mir beantragt werden: <a href="mailto:j@zsch.de?subject=Bitte ein neues Stichwort fuer den Scheduler: xxx">j@zsch.de</a>.
-                </p>
+                </p-->
                 
                 <xsl:call-template name="complete_register"/>
 <!--                

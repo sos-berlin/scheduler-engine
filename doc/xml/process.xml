@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <?xml-stylesheet href="../scheduler.xslt" type="text/xsl"?>
-<!--$Id: process.xml,v 1.9 2004/11/08 18:07:37 jz Exp $-->
+<!--$Id: process.xml,v 1.10 2004/12/02 21:56:49 jz Exp $-->
 
 <xml_element name     = "process" 
              title    = "Externes Programm (alternativ zu &lt;script&gt;)" 
@@ -8,7 +8,7 @@
              base_dir = "../"
              parent_page = "../konfiguration.xml"
              author   = "$Author: jz $" 
-             date     = "$Date: 2004/11/08 18:07:37 $">
+             date     = "$Date: 2004/12/02 21:56:49 $">
               
     <xml_parent_elements>
         <xml_parent_element name="job">
@@ -47,11 +47,30 @@
         <xml_attribute name="ignore_error" type="yes|no" initial="no">
             <description>
                 <p>
-                    Bei <code>ingore_error="no"</code> (Voreinstellung) führt ein Exit code ≠ 0 zu einem Jobfehler.
+                    Bei <code>ignore_error="no"</code> (Voreinstellung) führt ein Exit code ≠ 0 zu einem Jobfehler.
                     Der Job wird gestoppt.
                 </p>
                 <p>
-                    Bei <code>ingore_error="yes"</code> führt ein Exit code ≠ 0 nicht zu einem Jobfehler.
+                    Bei <code>ignore_error="yes"</code> führt ein Exit code ≠ 0 nicht zu einem Jobfehler.
+                </p>
+            </description>
+        </xml_attribute>
+
+
+        <xml_attribute name="ignore_signal" type="yes|no" initial="no">
+            <description>
+                <p>
+                    Wirkt nur unter Unix.
+                    (Unter Windows liefert ein abgebrochener Prozess einen Exit code, der von <code>ignore_error=""</code> berücksichtigt wird.)
+                </p>
+                <p>
+                    Bei <code>ignore_signal="no"</code> (Voreinstellung) führt ein Signal 
+                    (d.h. ein Abbruch des Prozesses, z.B. durch <code>kill</code>) 
+                    zu einem Jobfehler.
+                    Der Job wird gestoppt.
+                </p>
+                <p>
+                    Bei <code>ignore_signal="yes"</code> führt ein Signal nicht zu einem Jobfehler.
                 </p>
             </description>
         </xml_attribute>

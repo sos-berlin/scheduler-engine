@@ -1,5 +1,5 @@
 #! /usr/bin/perl -W
-# $Id: scheduler_keyword_to_xml.pl,v 1.8 2004/11/30 22:02:28 jz Exp $
+# $Id: scheduler_keyword_to_xml.pl,v 1.9 2004/12/02 21:56:49 jz Exp $
 
 
 my $script_name     = "scheduler_keyword_to_xml.pl";
@@ -98,7 +98,7 @@ sub read_file
     if( $root_element eq "ini_section" )
     { 
         my $section = $name;
-        $file_title = "Datei $file, Abschnitt [$section]"  if $file_title eq "XXX";
+        $file_title = "Datei $file, Abschnitt [$section]"  if !$file_title || $file_title eq "XXX";
         
         my $xml_line = "<register_entry register_file='$filename#' register_title='$file_title'  register_keyword='$section' type='definition'/>\n";
         add_keyword_reference( $section, "<code>[$section]</code>", $xml_line );
@@ -160,6 +160,18 @@ sub read_file
                 add_keyword_reference( $a_name, "<code>$a_name=</code>", $xml_line );
             }
         }
+
+        if( $root_element eq "xml_element" )
+        {
+            if( my $element = get_element( "xml_attribute" ) )
+            { 
+                my $a_name   = get_attribute( $element, "name" );
+                   $a_name   = get_attribute( $element, "setting" )  if !$a_name;
+                my $xml_line = "<register_entry register_file='$filename#attribute_$a_name' register_title='$file_title'  register_keyword='$a_name' type='definition'/>\n";
+                add_keyword_reference( $a_name, "<code>$a_name=</code>", $xml_line );
+            }
+        }
+
     }
     
     close( FILE );

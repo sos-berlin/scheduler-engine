@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="scheduler.xslt" type="text/xsl"?>
 
-<!--$Id: http.xml,v 1.1 2004/09/12 10:42:23 jz Exp $-->
+<!--$Id: http.xml,v 1.2 2004/12/02 21:56:49 jz Exp $-->
 
 <description 
     title    = "HTTP-Server" 
     base_dir = ""
     author   = "$Author: jz $"
-    date     = "$Date: 2004/09/12 10:42:23 $"
+    date     = "$Date: 2004/12/02 21:56:49 $"
 >
 
 <scheduler_keyword keyword="HTTP-Server"/>
@@ -63,7 +63,7 @@
                 Hauptprotokoll
             </td>
             <td>
-                <code>http://<i>localhost</i>/show_log</code>
+                <code>http://<i>localhost</i>/show_log?</code>
             </td>
         </tr>
         <tr>
@@ -71,7 +71,7 @@
                 Jobprotokoll
             </td>
             <td>
-                <code>http://<i>localhost</i>/show_log&amp;job=<i>jobname</i></code>
+                <code>http://<i>localhost</i>/show_log?job=<i>jobname</i></code>
             </td>
         </tr>
         <tr>
@@ -79,7 +79,7 @@
                 Taskprotokoll
             </td>
             <td>
-                <code>http://<i>localhost</i>/show_log&amp;task=<i>task_id</i></code>
+                <code>http://<i>localhost</i>/show_log?task=<i>task_id</i></code>
             </td>
         </tr>
         <tr>
@@ -87,7 +87,7 @@
                 Auftragsprotokoll
             </td>
             <td>
-                <code>http://<i>localhost</i>/show_log&amp;job_chain=<i>jobkette</i>&amp;order=<i>order_id</i></code>
+                <code>http://<i>localhost</i>/show_log?job_chain=<i>jobkette</i>&amp;order=<i>order_id</i></code>
             </td>
         </tr>
         
