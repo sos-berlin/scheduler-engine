@@ -1,4 +1,4 @@
-// $Id: spooler_task.h,v 1.125 2003/10/28 22:04:27 jz Exp $
+// $Id: spooler_task.h,v 1.126 2003/12/03 08:52:44 jz Exp $
 
 #ifndef __SPOOLER_TASK_H
 #define __SPOOLER_TASK_H
@@ -51,7 +51,7 @@ struct Task : Sos_self_deleting
 
     int                         id                          ()                                      { return _id; }
 
-    void                        cmd_end                     ();
+    void                        cmd_end                     ( bool kill_immediately = false );
     void                        cmd_nice_end                ( Job* for_job = NULL );
 
     void                        close                       ();
@@ -109,6 +109,7 @@ struct Task : Sos_self_deleting
 
 
     bool                        check_timeout               ();
+    bool                        try_kill                    ();
     bool                        wait_until_terminated       ( double wait_time = latter_day );
     void                        set_delay_spooler_process   ( Time t )                              { _log.debug("delay_spooler_process=" + t.as_string() ); _next_spooler_process = Time::now() + t; }
 
@@ -186,6 +187,7 @@ struct Task : Sos_self_deleting
     bool                       _let_run;                    // Task zuende laufen lassen, nicht bei _job._period.end() beenden
     bool                       _begin_called;
     bool                       _end;
+    bool                       _kill_immediately;
     bool                       _closed;
     bool                       _signaled;
 

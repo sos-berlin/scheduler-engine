@@ -1,4 +1,4 @@
-// $Id: spooler_command.cxx,v 1.99 2003/11/30 10:35:38 jz Exp $
+// $Id: spooler_command.cxx,v 1.100 2003/12/03 08:52:44 jz Exp $
 /*
     Hier ist implementiert
 
@@ -319,8 +319,10 @@ xml::Element_ptr Command_processor::execute_kill_task( const xml::Element_ptr& e
 {
     if( _security_level < Security::seclev_all )  throw_xc( "SCHEDULER-121" );
 
-    int    id       = as_int( element.getAttribute( "id" ) );
+    int    id       = element.int_getAttribute( "id" );
     string job_name = element.getAttribute( "job" );              // Hilfsweise
+    bool   immediately = element.bool_getAttribute( "immediately", false );
+    
 
     _spooler->get_job( job_name )->kill_task( id );
     

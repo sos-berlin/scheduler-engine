@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.220 2003/12/01 00:29:19 jz Exp $
+// $Id: spooler_task.cxx,v 1.221 2003/12/03 08:52:44 jz Exp $
 /*
     Hier sind implementiert
 
@@ -314,11 +314,12 @@ void Task::enter_thread( Spooler_thread* thread )
 
 //------------------------------------------------------------------------------------Task::cmd_end
 
-void Task::cmd_end()
+void Task::cmd_end( bool kill_immediately )
 { 
     THREAD_LOCK( _lock ) 
     { 
         _end = true; 
+        _kill_immediately = kill_immediately;
         if( !_ending_since )  _ending_since = Time::now(); 
         signal( "end" ); 
     } 
@@ -572,19 +573,26 @@ bool Task::check_timeout()
     {
         _log.error( "Task wird nach nach Zeitablauf abgebrochen" );
 
-        _kill_tried = true;
-        
-        try
-        {
-            _killed = do_kill();
-            if( !_killed ) _log.warn( "Task konnte nicht abgebrochen werden" );
-        }
-        catch( const exception& x ) { _log.warn( x.what() ); }
-
-        return _killed;
+        return try_kill();
     }
 
     return false;
+}
+
+//-----------------------------------------------------------------------------------Task::try_kill
+
+bool Task::try_kill()
+{
+    _kill_tried = true;
+
+    try
+    {
+        _killed = do_kill();
+        if( !_killed ) _log.warn( "Task konnte nicht abgebrochen werden" );
+    }
+    catch( const exception& x ) { _log.warn( x.what() ); }
+
+    return _killed;
 }
 
 //-------------------------------------------------------------------------------Task::do_something
@@ -598,6 +606,12 @@ bool Task::do_something()
     if( _operation &&  !_operation->async_finished() )  
     {
         return check_timeout();
+    }
+
+    if( _kill_immediately  &&  !_kill_tried ) 
+    {
+        _log.error( "Task wird nach Anforderung abgebrochen" );
+        return try_kill();
     }
 
     bool had_operation      = _operation != NULL;
@@ -1630,7 +1644,7 @@ void Process_task::do_end__end()
 bool Process_task::signaled()
 {
     bool signaled = _process_handle.signaled();
-    _log.debug3( "signaled=" + as_string( signaled ) );
+    //_log.debug3( "signaled=" + as_string( signaled ) );
     return signaled;
 }
 

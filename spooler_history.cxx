@@ -1,4 +1,4 @@
-// $Id: spooler_history.cxx,v 1.61 2003/11/27 19:03:49 jz Exp $
+// $Id: spooler_history.cxx,v 1.62 2003/12/03 08:52:44 jz Exp $
 
 #include "spooler.h"
 #include "../zschimmer/z_com.h"
@@ -322,7 +322,21 @@ void Spooler_db::create_table_when_needed( const string& tablename, const string
 void Spooler_db::try_reopen_after_error( const exception& x )
 {
     _spooler->log().error( string("FEHLER BEIM ZUGRIFF AUF DATENBANK: ") + x.what() );
-    _spooler->log().info( "Datenbank wird geschlossen" );
+
+    bool too_much_errors = false; //_error_count++ >= _spooler->_max_db_errors;
+    
+    if( too_much_errors ) 
+    {
+        string warn_msg = "Nach max_db_errors=" + as_string(_spooler->_max_db_errors) + " Problemen mit der Datenbank wird sie nicht weiter verwendet";
+        _spooler->log().warn( warn_msg );
+        
+        if( _spooler->_need_db ) 
+        {
+            string body = "db=" + _spooler->_db_name + "\r\n\r\n" + x.what() + "\r\n\r\n" + warn_msg;
+            _spooler->send_error_email( string("SCHEDULER WIRD BEENDET WEGEN FEHLERS BEIM ZUGRIFF AUF DATENBANK: ") + x.what(), body );
+            throw x;
+        }
+    }
 
     if( !_email_sent_after_db_error )
     {
@@ -334,13 +348,14 @@ void Spooler_db::try_reopen_after_error( const exception& x )
 
     Z_MUTEX( _lock )
     {
+        _spooler->log().info( "Datenbank wird geschlossen" );
         //try
         //{
             close();
         //}
         //catch( const xception& x ) { _log->warn(" FEHLER BEIM SCHLIESSEN DER DATENBANK: " + x.what() ); }
 
-        sos_sleep( 10 );    // Bremse, falls der Fehler nicht an einer unterbrochenen Verbindung liegt. Denn für jeden Fehler gibt es eine eMail!
+        //sos_sleep( 10 );    // Bremse, falls der Fehler nicht an einer unterbrochenen Verbindung liegt. Denn für jeden Fehler gibt es eine eMail!
 
         while(1)
         {
@@ -480,7 +495,7 @@ void Spooler_db::spooler_start()
 {
     if( _db.opened() )
     {
-        try
+        //try   Fehler beim Spooler-Start führen zum Abbruch
         {
             _id = get_task_id();     // Der Spooler-Satz hat auch eine Id
      
@@ -491,10 +506,10 @@ void Spooler_db::spooler_start()
                 ta.commit();
             }
         }
-        catch( const exception& x )  
-        { 
-            _spooler->_log.warn( string("FEHLER BEIM SCHREIBEN DER HISTORIE: ") + x.what() ); 
-        }
+        //catch( const exception& x )  
+        //{ 
+        //    _spooler->_log.warn( string("FEHLER BEIM SCHREIBEN DER HISTORIE: ") + x.what() ); 
+        //}
     }
 }
 
@@ -756,7 +771,7 @@ xml::Element_ptr Job_chain::read_history( const xml::Document_ptr& doc, int id, 
                     {
                         string name = type->field_descr_ptr(i)->name();
                         if( name == "parameters" )  param_xml = value;
-                                                else  history_entry.setAttribute( lcase(name), value );
+                                              else  history_entry.setAttribute( lcase(name), value );
                     }
                 }
 
@@ -1170,7 +1185,7 @@ void Task_history::write( bool start )
                 _spooler->_db->_history_update_params[6] = _task->_id;
                 _spooler->_db->_history_update.execute();
 */
-                string stmt = "UPDATE " + uquoted(_spooler->_job_history_tablename) + " set ";
+                string stmt = "*test*UPDATE " + uquoted(_spooler->_job_history_tablename) + " set ";
                 stmt +=   "\"START_TIME\"={ts'" + start_time + "'}";
                 stmt += ", \"END_TIME\"={ts'" + Time::now().as_string(Time::without_ms) + "'}";
                 stmt += ", \"STEPS\"=" + as_string( _task->_step_count );

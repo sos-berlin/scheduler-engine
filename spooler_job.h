@@ -1,4 +1,4 @@
-// $Id: spooler_job.h,v 1.12 2003/10/20 16:17:40 jz Exp $
+// $Id: spooler_job.h,v 1.13 2003/12/03 08:52:44 jz Exp $
 
 #ifndef __SPOOLER_JOB_H
 #define __SPOOLER_JOB_H
@@ -223,7 +223,7 @@ struct Job : Sos_self_deleting
 
     void                        set_state                   ( State );
     void                        set_state_cmd               ( State_cmd );
-    void                        kill_task                   ( int id );
+    void                        kill_task                   ( int id, bool immediately = false );
 
     string                      state_name                  ()                                      { return state_name( _state ); }
     static string               state_name                  ( State );

@@ -1,4 +1,4 @@
-// $Id: spooler_history.h,v 1.20 2003/11/27 18:59:50 jz Exp $
+// $Id: spooler_history.h,v 1.21 2003/12/03 08:52:44 jz Exp $
 
 #ifndef __SPOOLER_HISTORY_H
 #define __SPOOLER_HISTORY_H
@@ -88,6 +88,7 @@ struct Spooler_db : Sos_self_deleting
     vector<Dyn_obj>            _history_update_params;
     int                        _id;
     bool                       _email_sent_after_db_error;
+    int                        _error_count;
 };
 
 //--------------------------------------------------------------------------------------Transaction

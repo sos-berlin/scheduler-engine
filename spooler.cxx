@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.298 2003/12/01 18:33:46 jz Exp $
+// $Id: spooler.cxx,v 1.299 2003/12/03 08:52:43 jz Exp $
 /*
     Hier sind implementiert
 
@@ -1199,6 +1199,7 @@ void Spooler::load_arg()
     _order_history_with_log     =            read_profile_with_log  ( _factory_ini, "spooler", "order_history_with_log", arc_no );
     _db_name                    =            read_profile_string    ( _factory_ini, "spooler", "db"                 );
     _need_db                    =            read_profile_bool      ( _factory_ini, "spooler", "need_db"            , true                );
+    _max_db_errors              =            read_profile_int       ( _factory_ini, "spooler", "max_db_errors"      , 10 );
     _order_history_tablename    =            read_profile_string    ( _factory_ini, "spooler", "db_order_history_table", "SCHEDULER_ORDER_HISTORY" );
     _orders_tablename           =            read_profile_string    ( _factory_ini, "spooler", "db_orders_table"    , "SCHEDULER_ORDERS"    );
     _variables_tablename        =            read_profile_string    ( _factory_ini, "spooler", "db_variables_table" , "SCHEDULER_VARIABLES" );
@@ -1340,6 +1341,7 @@ void Spooler::load()
 
     _security.clear();             
     _java_vm = get_java_vm( false );
+    _java_vm->set_destroy_vm( false );   //  Nicht DestroyJavaVM() rufen, denn das hängt manchmal (auch für Dateityp jdbc)
 
 
     load_arg();

@@ -1,4 +1,4 @@
-// $Id: spooler.h,v 1.167 2003/11/25 12:07:51 jz Exp $
+// $Id: spooler.h,v 1.168 2003/12/03 08:52:43 jz Exp $
 
 #ifndef __SPOOLER_H
 #define __SPOOLER_H
@@ -340,7 +340,8 @@ struct Spooler
 
     string                     _db_name;
     Sos_ptr<Spooler_db>        _db;
-    bool                       _need_db;
+    bool                       _need_db;                    // Wenn DB sich nicht öffnen lässt, ohne DB arbeiten und Historie ggfs. in Dateien schreiben
+    int                        _max_db_errors;              // Nach so vielen Fehlen im Scheduler-Leben DB abschalten (wie need_db)
 
     bool                       _has_java;                   // Es gibt ein Java-Modul. Java muss also gestartet werden
     bool                       _has_java_source;            // Es gibt Java-Quell-Code. Wir brauchen ein Arbeitsverzeichnis.

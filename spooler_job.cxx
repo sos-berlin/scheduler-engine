@@ -1,4 +1,4 @@
-// $Id: spooler_job.cxx,v 1.44 2003/10/28 22:04:27 jz Exp $
+// $Id: spooler_job.cxx,v 1.45 2003/12/03 08:52:44 jz Exp $
 /*
     Hier sind implementiert
 
@@ -19,7 +19,7 @@ namespace sos {
 namespace spooler {
 
 
-const int max_task_time_out = 7*24*3600;
+const int max_task_time_out = 365*24*3600;
 
 //---------------------------------------------------------------------------------start_cause_name
 
@@ -1323,7 +1323,7 @@ xml::Element_ptr Job::dom( const xml::Document_ptr& document, Show_what show, Jo
 
 //-----------------------------------------------------------------------------------Job::kill_task
 
-void Job::kill_task( int id )
+void Job::kill_task( int id, bool immediately )
 {
     THREAD_LOCK( _lock )
     {
@@ -1332,7 +1332,7 @@ void Job::kill_task( int id )
         Z_FOR_EACH( Task_list, _running_tasks, t )
         {
             Task* task = *t;
-            if( task->_id == id )  { task->cmd_end();  ok = true;  break; }
+            if( task->_id == id )  { task->cmd_end( immediately );  ok = true;  break; }
         }
 
         if( !ok )
