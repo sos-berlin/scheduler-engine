@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.99 2002/05/16 20:01:41 jz Exp $
+// $Id: spooler.cxx,v 1.100 2002/05/28 21:11:13 jz Exp $
 /*
     Hier sind implementiert
 
@@ -10,6 +10,7 @@
 
 #include "../kram/sos.h"
 #include "spooler.h"
+#include "spooler_version.h"
 
 #include <time.h>
 #include <sys/types.h>
@@ -511,6 +512,8 @@ void Spooler::load_arg()
     {
         for( Sos_option_iterator opt ( _argc, _argv ); !opt.end(); opt.next() )
         {
+            if( opt.flag      ( "V"                ) )  ;   // wurde in sos_main() bearbeitet
+            else
             if( opt.flag      ( "service"          ) )  ;   // wurde in sos_main() bearbeitet
             else
             if( opt.with_value( "service"          ) )  ;   // wurde in sos_main() bearbeitet
@@ -1052,6 +1055,8 @@ int sos_main( int argc, char** argv )
         if( opt.with_value( "renew-spooler"    ) )  renew_spooler = opt.value();
         else
         if( opt.flag      ( "renew-service"    ) )  renew_service = opt.set();
+        else
+        if( opt.flag      ( "V"                ) )  fprintf( stderr, "Spooler %s\n", VER_PRODUCTVERSION_STR );
         else
         {
             if( opt.flag      ( "install-service"  ) )  do_install_service = opt.set();

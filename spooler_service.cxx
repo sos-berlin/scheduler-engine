@@ -1,4 +1,4 @@
-// $Id: spooler_service.cxx,v 1.21 2002/05/28 09:11:58 jz Exp $
+// $Id: spooler_service.cxx,v 1.22 2002/05/28 21:11:13 jz Exp $
 /*
     Hier sind implementiert
 
@@ -260,14 +260,14 @@ static void set_service_status( int spooler_error, int state = 0 )
 
     SERVICE_STATUS service_status;
 
-    DWORD stop_pending = service_stop? SERVICE_PAUSED     // Nur, wenn Dienstesteuerung den Spooler beendet (nicht, wenn ein TCP-Kdo beendet)
-                                     : SERVICE_RUNNING;
+    DWORD stop_pending = service_stop? SERVICE_STOP_PENDING    // Nur, wenn Dienstesteuerung den Spooler beendet 
+                                     : SERVICE_RUNNING;        // Wenn Spooler über TCP beendet wird, soll der Diensteknopt "beenden" frei bleiben. Deshalb paused.
 
     service_status.dwServiceType                = SERVICE_WIN32_OWN_PROCESS;
 
     service_status.dwCurrentState               = state                                              ? state
                                                 : !spooler_ptr                                       ? SERVICE_STOPPED 
-                                                : spooler_ptr->state() == Spooler::s_stopped         ? SERVICE_PAUSED //SetServiceStatus() ruft exit()!
+                                                : spooler_ptr->state() == Spooler::s_stopped         ? SERVICE_STOPPED       //SetServiceStatus() ruft exit()!
                                                 : spooler_ptr->state() == Spooler::s_starting        ? SERVICE_START_PENDING
                                                 : spooler_ptr->state() == Spooler::s_stopping        ? stop_pending
                                                 : spooler_ptr->state() == Spooler::s_stopping_let_run? stop_pending
@@ -349,7 +349,7 @@ static void __stdcall Handler( DWORD dwControl )
             {
                 service_stop = true;
                 spooler_ptr->cmd_terminate();
-                set_service_status( 0, SERVICE_PAUSED );
+                set_service_status( 0, SERVICE_STOP_PENDING );
 
                 Thread_id thread_id;
 
@@ -390,7 +390,7 @@ static void __stdcall Handler( DWORD dwControl )
     }
 
 
-    set_service_status( 0 );
+    //set_service_status( 0 );
 }
 
 //-------------------------------------------------------------------------------------------------
