@@ -1,4 +1,4 @@
-// $Id: spooler.h,v 1.3 2001/01/02 13:51:36 jz Exp $
+// $Id: spooler.h,v 1.4 2001/01/02 19:07:45 jz Exp $
 
 #ifndef __SPOOLER_H
 
@@ -26,28 +26,21 @@
 #include <list>
 #include <time.h>
 
-//#include "../kram/xml_dom.h"
+#include "../kram/sosdate.h"
+
+#define FOR_EACH( TYPE, CONTAINER, ITERATOR )  for( TYPE::iterator ITERATOR = CONTAINER.begin(); ITERATOR != CONTAINER.end(); ITERATOR++ )
 
 namespace sos {
 namespace spooler {
 
 using namespace std;
 
-#define FOR_EACH( TYPE, CONTAINER, ITERATOR )  for( TYPE::iterator ITERATOR = CONTAINER.begin(); ITERATOR != CONTAINER.end(); ITERATOR++ )
                                               
 typedef int Level;
+struct Spooler;
 
-
-/*
-struct Named_level
-{
-    Level                      _level;
-    string                     _name;
-};
-*/
-
-
-//typedef pair<Level,Level>       Level_intervall;    // [a,b) oder a <= x < b == x in Level_intervall
+double now();
+const double latter_day = UINT_MAX;
 
 //---------------------------------------------------------------------------------Object_set_class
 
@@ -122,12 +115,74 @@ struct Object_set : Sos_self_deleting
     Sos_ptr<Object_set_descr>  _object_set_descr;
 };
 
-//-------------------------------------------------------------------------------------------Object
-/*
-struct Object
+//------------------------------------------------------------------------------------------Day_set
+
+struct Day_set
 {
+                                Day_set                     ()                      { memset( _days, 0, sizeof _days ); }
+                                Day_set                     ( xml::Element_ptr );
+
+    bool                        is_empty                    ()                      { return memchr( _days, (char)true, sizeof _days ) == NULL; }
+    char                        operator []                 ( int i )               { return _days[i]; }
+
+    char                       _days                        [31];
 };
-*/
+
+//--------------------------------------------------------------------------------------Weekday_set
+
+struct Weekday_set : Day_set
+{
+                                Weekday_set                 ()                      {}
+                                Weekday_set                 ( xml::Element_ptr e )  : Day_set( e ) {}
+
+    double                      next_date                   ( double );             // Mitternacht des nächsten gesetzten Tages
+};
+
+//--------------------------------------------------------------------------------------Monthday_set
+
+struct Monthday_set : Day_set
+{
+                                Monthday_set                ()                      {}
+                                Monthday_set                ( xml::Element_ptr e )  : Day_set( e ) {}
+
+    double                      next_date                   ( double );             // Mitternacht des nächsten gesetzten Tages
+};
+
+//--------------------------------------------------------------------------------------Ultimo_set
+
+struct Ultimo_set : Day_set
+{
+                                Ultimo_set                  ()                      {}
+                                Ultimo_set                  ( xml::Element_ptr e )  : Day_set( e ) {}
+
+    double                      next_date                   ( double );             // Mitternacht des nächsten gesetzten Tages
+};
+
+//---------------------------------------------------------------------------------------Start_time
+
+struct Start_time
+{
+                                Start_time                  ()                      : _zero_(this+1) {}
+                                Start_time                  ( xml::Element_ptr );
+
+    double                      next                        ()                      { return next( now() ); }
+    double                      next                        ( double );
+
+
+    Fill_zero                  _zero_;
+    int                        _time_of_day;                // Sekunden seit Mitternacht
+
+    double                     _date;
+    Weekday_set                _weekday_set;
+    Monthday_set               _monthday_set;
+    Ultimo_set                 _ultimo_set;                 // 0: Letzter Tag, -1: Vorletzter Tag
+
+    double                     _duration;
+    double                     _repeat_time;
+
+    double                     _next_start_time;
+};
+
 //----------------------------------------------------------------------------------------Job_descr
 
 struct Job_descr : Sos_self_deleting
@@ -140,8 +195,7 @@ struct Job_descr : Sos_self_deleting
     string                     _name;
     Object_set_descr           _object_set_descr;
     Level                      _output_level;
-  //Start_time                 _start_time;
-  //Duration                   _duration;
+    Start_time                 _start_time;
   //Repeat_time                _repeat_time;
     bool                       _stop_at_end_of_duration;
     bool                       _continual;
@@ -157,44 +211,29 @@ typedef list< Sos_ptr<Job_descr> >    Job_descr_list;
 
 struct Job : Sos_self_deleting
 {
-                                Job                         ( const Sos_ptr<Job_descr>& descr )    : _zero_(this+1), _job_descr(descr) {}
+                                Job                         ( Spooler* spooler, const Sos_ptr<Job_descr>& descr );
 
     void                        start                       ();
     void                        end                         ();
     bool                        step                        ();
 
+    void                        set_new_start_time          ();
+
 
     Fill_zero                  _zero_;
+    Spooler*                   _spooler;
     Sos_ptr<Job_descr>         _job_descr;
     bool                       _running;
-    time_t                     _running_since;
+    double                     _running_since;
     int                        _running_priority;
 
     Sos_ptr<Object_set>        _object_set;
-    time_t                     _next_try;                   // Zeitpunkt des nächsten Startversuchs, nachdem Objektemenge leer war
+    double                     _next_start_time;              // Zeitpunkt des nächsten Startversuchs, nachdem Objektemenge leer war
+    double                     _next_end_time;                // + _start_time._duration
 };
 
 typedef list< Sos_ptr<Job> >    Job_list;
 
-//---------------------------------------------------------------------------------------------Task
-/*
-struct Task : Sos_self_deleting
-{
-                                Task                        ( Job* job ) : _zero_(this+1), _job(job) {}
-
-    void                        start                       ();
-    void                        end                         ();
-    void                        step                        ();
-
-
-    Fill_zero                  _zero_;
-
-    Sos_ptr<Job>               _job;
-    bool                       _running;
-    time_t                     _running_since;
-    int                        _priority;
-};
-*/
 //------------------------------------------------------------------------------------------Spooler
 
 struct Spooler
@@ -208,7 +247,8 @@ struct Spooler
     void                        load_jobs_from_xml          ( Job_descr_list*, xml::Element_ptr );
 
     void                        start                       ();       
-    void                        run                         ();       
+    void                        run                         ();
+    void                        wait                        ();
 
     bool                        step                        ();
     void                        start_jobs                  ();
@@ -217,7 +257,9 @@ struct Spooler
     Object_set_class_list      _object_set_class_list;
     Job_descr_list             _job_descr_list;
     Job_list                   _job_list;
-    time_t                     _next_try_period;
+    double                     _try_start_job_period;
+  //double                     _next_start_time;
+    int                        _running_jobs_count;
 };
 
 

@@ -1,4 +1,4 @@
-// $Id: spooler_xml.cxx,v 1.3 2001/01/02 13:51:36 jz Exp $
+// $Id: spooler_xml.cxx,v 1.4 2001/01/02 19:07:45 jz Exp $
 
 //#include <precomp.h>
 
@@ -22,15 +22,35 @@ inline Dom_string               as_dom_string           ( const char* str )     
 
 //----------------------------------------------------------------------------------single_element
 
-xml::Element_ptr single_element( xml::Element_ptr element, const string& name )
+xml::Element_ptr optional_single_element( xml::Element_ptr element, const string& name )
 {
     xml::NodeList_ptr list = element->getElementsByTagName( as_dom_string( name ) );
 
     int len = list->length;
-    if( len == 0 )  throw_xc( "SOS-1422", name );
+    if( len == 0 )  return xml::Element_ptr();
     if( len > 1 )  throw_xc( "SOS-1423", name );
 
     return list->Getitem(0);
+}
+
+//----------------------------------------------------------------------------------single_element
+
+xml::Element_ptr single_element( xml::Element_ptr element, const string& name )
+{
+    xml::Element_ptr result = optional_single_element( element, name );
+    if( result == NULL )  throw_xc( "SOS-1422", name );
+
+    return result;
+}
+
+//----------------------------------------------------------------------------------single_element
+
+string optional_single_element_as_text( xml::Element_ptr element, const string& name )
+{
+    xml::Element_ptr result = optional_single_element( element, name );
+    if( result == NULL )  return empty_string;
+
+    return result->text;
 }
 
 //---------------------------------------------------------------Object_set_class::Object_set_class
@@ -82,14 +102,56 @@ Object_set_descr::Object_set_descr( xml::Element_ptr element )
 {
 }
 
+//----------------------------------------------------------------------------------Day_set::Day_set
+
+Day_set::Day_set( xml::Element_ptr element )
+{
+    memset( _days, (char)false, sizeof _days );
+
+    if( element == NULL )  return;
+
+    xml::Element_ptr e = element->firstChild;
+
+    while( e )
+    {
+        int day = as_int( e->text );
+        if( (uint)day >= NO_OF(_days) )  throw_xc( "SPOOLER-INVALID-DAY", day );
+        _days[day] = true;
+
+        e = e->nextSibling;
+    }
+}
+
+//----------------------------------------------------------------------------Start_time::Start_time
+
+Start_time::Start_time( xml::Element_ptr element )
+: 
+    _zero_(this+1)
+{
+    Sos_optional_date_time zeit;
+    string time_str = optional_single_element_as_text( element, "time" );
+    zeit.set_time( time_str.c_str() );
+    _time_of_day = zeit.hour() * 60*60 + zeit.minute() * 60 + zeit.second();
+
+    _date = Sos_date( optional_single_element_as_text( element, "date" ) ).as_time_t();
+
+    _weekday_set  = optional_single_element( element, "weekdays" );
+    _monthday_set = optional_single_element( element, "monthdays" );
+    _ultimo_set   = optional_single_element( element, "ultimos" );
+
+    xml::Element_ptr duration_element = optional_single_element( element, "duration" );
+    if( duration_element )  _duration = as_int( duration_element->text );
+}
+
 //------------------------------------------------------------------------------Job_descr::Job_descr
 
 Job_descr::Job_descr( xml::Element_ptr element )
 : 
-    _zero_(this+1)
+    _zero_(this+1),
+    _object_set_descr   ( single_element( element, "object_set" ) ),
+    _output_level       ( as_int( single_element( element, "output_level" )->text ) ),
+    _start_time         ( single_element( element, "start_time" ) )
 {
-    _object_set_descr = single_element( element, "object_set" );
-    _output_level = as_int( single_element( element, "output_level" )->text );
 }
 
 //--------------------------------------------------------Spooler::load_object_set_classes_from_xml
@@ -118,24 +180,17 @@ void Spooler::load_jobs_from_xml( Job_descr_list* list, xml::Element_ptr element
 
         if( n->nodeName == "job" ) 
         {
-            try
+            Sos_ptr<Job_descr> job_descr = SOS_NEW( Job_descr( n ) );
+
+            for( Object_set_class_list::iterator it = _object_set_class_list.begin(); it != _object_set_class_list.end(); it++ )
             {
-                Sos_ptr<Job_descr> job_descr = SOS_NEW( Job_descr( n ) );
-
-                for( Object_set_class_list::iterator it = _object_set_class_list.begin(); it != _object_set_class_list.end(); it++ )
-                {
-                    if( (*it)->_name == job_descr->_object_set_descr._class_name )  break;
-                }
-                if( it == _object_set_class_list.end() )  throw_xc( "SPOOLER-101", job_descr->_object_set_descr._class_name );
-
-                job_descr->_object_set_descr._class = *it;
-
-                list->push_back( job_descr );
+                if( (*it)->_name == job_descr->_object_set_descr._class_name )  break;
             }
-            catch( const Xc& )
-            {
-                throw; // Fehler abfangen, melden und dann fortfahren
-            }
+            if( it == _object_set_class_list.end() )  throw_xc( "SPOOLER-101", job_descr->_object_set_descr._class_name );
+
+            job_descr->_object_set_descr._class = *it;
+
+            list->push_back( job_descr );
         }
     }
 }
@@ -154,7 +209,10 @@ void Spooler::load_xml()
             xml::IXMLDOMParseErrorPtr error = document->GetparseError();
 
             string text = w_as_string( error->reason );
-            text += ", code="   + as_string( error->errorCode );
+            if( text[ text.length()-1 ] == '\n' )  text = as_string( text.c_str(), text.length() - 1 );
+            if( text[ text.length()-1 ] == '\r' )  text = as_string( text.c_str(), text.length() - 1 );
+
+            text += ", code="   + as_hex_string( error->errorCode );
             text += ", line="   + as_string( error->line );
             text += ", column=" + as_string( error->linepos );
 
@@ -168,6 +226,11 @@ void Spooler::load_xml()
         {
             xml::Node_ptr node = node_list->Getitem(i);
 
+            if( node->nodeName == "try_start_job_period" )
+            {
+                _try_start_job_period = as_double( xml::Element_ptr(node)->text );
+            }
+            else
             if( node->nodeName == "object_set_classes" )
             {
                 load_object_set_classes_from_xml( &_object_set_class_list, node );

@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
+<!-- $Id: spooler_config.dtd,v 1.3 2001/01/02 19:07:45 jz Exp $   (C) 2000 SOS GmbH Berlin -->
 
-<!-- $Id: spooler_config.dtd,v 1.2 2001/01/02 12:50:24 jz Exp $   (C) 2000 SOS GmbH Berlin -->
+<!ELEMENT spooler_config        ( try_start_job_period?, object_set_classes, jobs? ) >
 
-<!ELEMENT spooler_config        ( object_set_classes, jobs ) >
 
+<!ELEMENT try_start_job_period  ( #PCDATA ) >
 
 
 <!ELEMENT object_set_classes    ( object_set_class+ ) >
@@ -26,7 +27,7 @@
 
 <!ELEMENT jobs                  ( job+ ) >
 
-<!ELEMENT job                   ( object_set, output_level, job_attrs? ) >
+<!ELEMENT job                   ( object_set, output_level, priority?, start_time?, period?, stop_after_error?, rerun?, start_after_spooler? ) >
 <!ATTLIST job                   name CDATA #REQUIRED >
 
 <!ELEMENT object_set            ( object_set_class.name, levels? ) >
@@ -41,11 +42,29 @@
 
 <!ELEMENT high_level            ( level ) >
 
-<!ELEMENT job_attrs             ( priority, start_time?, duration?, period?, stop_after_error?, rerun?, start_after_spooler? ) >
-
 <!ELEMENT priority              ( #PCDATA ) >
 
-<!ELEMENT start_time            ( #PCDATA ) >
+<!ELEMENT start_time            ( time, date?, weekdays?, monthdays?, ultimos?, duration? ) >
+
+<!ELEMENT time                  ( #PCDATA ) >   <!-- HH:MM:SS -->
+
+<!ELEMENT date                  ( #PCDATA ) >   <!-- yyyy-mm-dd -->
+
+<!--
+<!ELEMENT weekdays              ( monday | tuesday | wednesday | thursday | friday | saturday | sunday )+ >
+<!ELEMENT monday                EMPTY>
+<!ELEMENT tuesday               EMPTY>
+<!ELEMENT wednesday             EMPTY>
+<!ELEMENT thursday              EMPTY>
+<!ELEMENT friday                EMPTY>
+<!ELEMENT saturday              EMPTY>
+<!ELEMENT sunday                EMPTY>
+-->
+
+<!ELEMENT weekdays              ( day+ ) >
+<!ELEMENT monthdays             ( day+ ) >
+<!ELEMENT ultimos               ( day+ ) >
+<!ELEMENT day                   ( #PCDATA ) >
 
 <!ELEMENT duration              ( #PCDATA ) >
 
