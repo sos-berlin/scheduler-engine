@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.140 2003/02/24 13:48:27 jz Exp $
+// $Id: spooler_task.cxx,v 1.141 2003/03/01 10:38:45 jz Exp $
 /*
     Hier sind implementiert
 
@@ -313,7 +313,7 @@ void Job::set_dom( const xml::Element_ptr& element, const Time& xml_mod_time )
             if( e.nodeName_is( "description" ) )
             {
                 try { _description = text_from_xml_with_include( e, xml_mod_time, _spooler->include_path() ); }
-                catch( const Xc& x         ) { _spooler->_log.error( x.what() );  _description = x.what(); }
+                catch( const exception& x  ) { _spooler->_log.error( x.what() );  _description = x.what(); }
                 catch( const _com_error& x ) { string d = bstr_as_string(x.Description()); _spooler->_log.error(d);  _description = d; }
             }
             else
