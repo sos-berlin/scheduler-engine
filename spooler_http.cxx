@@ -1,4 +1,4 @@
-// $Id: spooler_http.cxx,v 1.11 2004/07/26 23:05:40 jz Exp $
+// $Id: spooler_http.cxx,v 1.12 2004/07/26 23:47:40 jz Exp $
 /*
     Hier sind implementiert
 
@@ -508,7 +508,7 @@ bool Html_chunk_reader::try_fill_chunk( int recommended_size )
         {
             if( !_chunk_reader->next_chunk_is_ready() )  return _chunk.length() > 0;
 
-            _available_net_chunk_size = _chunk_reader->get_next_chunk_size( 5 );//recommended_size );
+            _available_net_chunk_size = _chunk_reader->get_next_chunk_size( recommended_size );
         }
 
         string text = _chunk_reader->read_chunk( _available_net_chunk_size );
@@ -527,28 +527,56 @@ bool Html_chunk_reader::try_fill_chunk( int recommended_size )
 
             if( _awaiting_class )
             {
-                while( i < text.length()  &&  c != '<'  &&  c != '>'  &&  c != '&'  &&  c != '\r'  &&  c != '\n'  &&  c != ']' )  c = text_data[ ++i ];
+                while( i < text.length()  &&  c != '<'  &&  c != '>'  &&  c != '&'  &&  c != '\r'  &&  c != '\n' )
+                {
+                    if( c == ' '  &&  ++_blank_count == 4 )  break;
+                    c = text_data[ ++i ];
+                }
                 
                 _line_prefix.append( text_data + begin, i - begin );
 
                 if( i == text.length() )  break;
 
-                if( c == ']' )
+                if( c == ' ' )
                 {
-                    int pos = _line_prefix.find( '[' );
-                    if( pos != string::npos )
+                    _awaiting_class = false;
+
+                    /* Stylesheet funktionier nicht wie gedacht. Also lassen wir es
                     {
-                        _awaiting_class = false;
-                        pos++;
+                        string type = "scheduler";
+                        
+                        int left_parenthesis  = _line_prefix.find( '(' );
+                        
+                        if( left_parenthesis != string::npos  )
+                        {
+                            type = lcase( _line_prefix.substr( left_parenthesis + 1, _line_prefix.length() - left_parenthesis - 1 ) );
+                        }
 
                         _chunk += "<span class='log_";
-                        _chunk += _line_prefix.substr( pos, _line_prefix.length() - pos );
+                        _chunk += type;
                         _chunk += "'>";
-                        _chunk += _line_prefix;
 
-                        _line_prefix = "";
-                        _in_span = true;    // </span> nicht vergessen
+                        _in_span++;    // </span> nicht vergessen
                     }
+                    */
+
+                    {
+                        int left_bracket  = _line_prefix.find( '[' );
+                        int right_bracket = _line_prefix.find( ']' );
+                        if( left_bracket != string::npos  &&  right_bracket != string::npos  &&  left_bracket < right_bracket )
+                        {
+
+                            _chunk += "<span class='log_";
+                            _chunk += lcase( _line_prefix.substr( left_bracket + 1, right_bracket - left_bracket - 1 ) );
+                            _chunk += "'>";
+
+                            _in_span++;    // </span> nicht vergessen
+                        }
+                    }
+
+                    _chunk += _line_prefix;
+                    _line_prefix = "";
+                    _blank_count = 0;
                 }
                 else
                 {
@@ -570,10 +598,10 @@ bool Html_chunk_reader::try_fill_chunk( int recommended_size )
                 case '&' : _chunk += "&amp;";  break;
                 case '\r': break;
 
-                case '\n': if( _in_span )  _chunk += "</span>", _in_span = false;
-                            _chunk += c;        
-                            _awaiting_class = true;      // Wir erwarten [info] [error] und dergleichen
-                            break;   
+                case '\n': while( _in_span )  _chunk += "</span>", _in_span--;
+                           _chunk += c;        
+                           _awaiting_class = true;      // Wir erwarten [info] [error] und dergleichen
+                           break;   
 
                 default : _chunk += c;
             }

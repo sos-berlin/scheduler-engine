@@ -1,4 +1,4 @@
-// $Id: spooler_http.h,v 1.8 2004/07/26 23:05:40 jz Exp $
+// $Id: spooler_http.h,v 1.9 2004/07/26 23:47:40 jz Exp $
 
 #ifndef __SPOOLER_HTTP_H
 #define __SPOOLER_HTTP_H
@@ -201,7 +201,8 @@ struct Html_chunk_reader : Chunk_reader_filter
 
     // Für <span class="debug9">...[debug9]...</span>
     bool                       _awaiting_class;             // Wir erwarten [info] und dergleichen
-    bool                       _in_span;                    // Wir müssen am Zeilenende </span> schreiben
+    int                        _blank_count;                // Nach dem vierten Blank haben den Log-Level und Job/Task/Order/Scheduler
+    int                        _in_span;                    // Wir müssen am Zeilenende soviele </span> schreiben
     string                     _line_prefix;                // Zeilenanfang bis "[info"
 };
 

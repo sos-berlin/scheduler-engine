@@ -1,4 +1,4 @@
-/* $Id: scheduler.css,v 1.16 2004/07/26 23:05:41 jz Exp $ */
+/* $Id: scheduler.css,v 1.17 2004/07/26 23:47:40 jz Exp $ */
 
 body         { font-family: Sans-Serif; font-size: 10pt; margin-top: 5pt; }
 th           { font-size: 10pt; }
@@ -44,15 +44,17 @@ td.after_head_space     { margin-top: 0; margin-bottom: 0pt; line-height: 4pt; }
 body.log                { margin-left: 0; padding-left: 0 }
 pre.log                 { font-family: Lucida Console, monospace; font-size: 9pt; line-height: 1.1em; margin-left: 2px; padding-left: 0 }
 
+span.log_job   { color: Blue }
+
 .log_error              { color: Red; }
 .log_warn               { color: tomato; }
 .log_info               { color: black; }
-.log_debug              { color: blue; }
-.log_debug2             { color: blue; }
-.log_debug3             { color: blue; }
-.log_debug4             { color: blue; }
-.log_debug5             { color: blue; }
-.log_debug6             { color: Gray; }
-.log_debug7             { color: Gray; }
-.log_debug8             { color: Gray; }
-.log_debug9             { color: Gray; }
+.log_debug              { color: green; }
+.log_debug2             { color: #408040; }
+.log_debug3             { color: #808080; }
+.log_debug4             { color: #8080FF; }
+.log_debug5             { color: #8080FF; }
+.log_debug6             { color: #8080FF; }
+.log_debug7             { color: #8080FF; }
+.log_debug8             { color: #8080FF; }
+.log_debug9             { color: #a0a0a0; }
