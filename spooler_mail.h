@@ -1,4 +1,4 @@
-// $Id: spooler_mail.h,v 1.18 2004/02/23 07:52:07 jz Exp $
+// $Id: spooler_mail.h,v 1.19 2004/03/20 10:49:01 jz Exp $
 
 #ifndef __SPOOLER_MAIL_H
 #define __SPOOLER_MAIL_H
@@ -38,7 +38,7 @@ struct Com_mail : spooler_com::Imail,
 
     USE_SOS_OLE_OBJECT_WITHOUT_QI
 
-    STDMETHODIMP            get_java_class_name             ( BSTR* result )                        { return string_to_bstr( const_java_class_name(), result ); }
+    STDMETHODIMP            get_java_class_name             ( BSTR* result )                        { return String_to_bstr( const_java_class_name(), result ); }
     STDMETHODIMP_(char*)  const_java_class_name             ()                                      { return (char*)"sos.spooler.Mail"; }
 
     STDMETHODIMP            put_to                          ( BSTR );
@@ -72,7 +72,7 @@ struct Com_mail : spooler_com::Imail,
 
     STDMETHODIMP                dequeue                     ( int* count );
 
-    STDMETHODIMP            get_dequeue_log                 ( BSTR* result )                        { return string_to_bstr( _msg->dequeue_log(), result ); }
+    STDMETHODIMP            get_dequeue_log                 ( BSTR* result )                        { return String_to_bstr( _msg->dequeue_log(), result ); }
 
     int                         auto_dequeue                ()                                      { return _msg->auto_dequeue(); }
 

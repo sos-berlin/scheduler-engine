@@ -44,7 +44,6 @@
 				DebugInformationFormat="2"/>
 			<Tool
 				Name="VCCustomBuildTool"
-				Description="sos.spooler.jar erstellen"
 				CommandLine="echo jar cfm &quot;$(TargetDir)sos.spooler.jar&quot; ../java_manifest sos/spooler/*.class
 cd &quot;$(OutDir)&quot; &amp;&amp; jar cfm &quot;$(TargetDir)sos.spooler.jar&quot; ../java_manifest sos/spooler/*.class
 "
@@ -52,12 +51,13 @@ cd &quot;$(OutDir)&quot; &amp;&amp; jar cfm &quot;$(TargetDir)sos.spooler.jar&qu
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="../misc/lib/libctleasy.lib delayimp.lib ws2_32.lib version.lib odbc32.lib odbccp32.lib"
-				OutputFile="..\bin\scheduler.exe"
+				OutputFile="$(OutDir)\scheduler.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
 				DelayLoadDLLs="winspool.drv,ws2_32.dll,ole32.dll,oleaut32.dll,advapi32.dll,odbc32.dll,libctleasy.dll"
+				ProgramDatabaseFile="$(OutDir)/pdb/$(TargetName).map"
 				GenerateMapFile="TRUE"
-				MapFileName="../bin/spooler.map"
+				MapFileName="$(IntDir)/$(TargetName).map"
 				SubSystem="1"
 				OptimizeReferences="2"
 				OptimizeForWindows98="1"
@@ -118,7 +118,6 @@ cd &quot;$(OutDir)&quot; &amp;&amp; jar cfm &quot;$(TargetDir)sos.spooler.jar&qu
 				DebugInformationFormat="3"/>
 			<Tool
 				Name="VCCustomBuildTool"
-				Description="sos.spooler.jar erstellen"
 				CommandLine="echo jar cfm &quot;$(TargetDir)sos.spooler.jar&quot; ../java_manifest sos/spooler/*.class
 cd &quot;$(OutDir)&quot; &amp;&amp; jar cfm &quot;$(TargetDir)sos.spooler.jar&quot; ../java_manifest sos/spooler/*.class
 "
@@ -126,7 +125,7 @@ cd &quot;$(OutDir)&quot; &amp;&amp; jar cfm &quot;$(TargetDir)sos.spooler.jar&qu
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="../misc/lib/libctleasy.lib delayimp.lib ws2_32.lib version.lib odbc32.lib odbccp32.lib"
-				OutputFile="../bind/scheduler.dll"
+				OutputFile="$(OutDir)\scheduler.dll"
 				LinkIncremental="2"
 				SuppressStartupBanner="TRUE"
 				DelayLoadDLLs="winspool.drv,ws2_32.dll,ole32.dll,oleaut32.dll,advapi32.dll,odbc32.dll,libctleasy.dll"
@@ -134,7 +133,7 @@ cd &quot;$(OutDir)&quot; &amp;&amp; jar cfm &quot;$(TargetDir)sos.spooler.jar&qu
 				ProgramDatabaseFile="../bind/spooler.pdb"
 				SubSystem="1"
 				OptimizeForWindows98="1"
-				ImportLibrary="$(targetdir)spooler.lib"
+				ImportLibrary=""
 				TargetMachine="1"/>
 			<Tool
 				Name="VCMIDLTool"
@@ -657,9 +656,10 @@ cd &quot;$(OutDir)&quot; &amp;&amp; jar cfm &quot;$(TargetDir)sos.spooler.jar&qu
 					Name="Release|Win32">
 					<Tool
 						Name="VCCustomBuildTool"
-						Description="sos.spooler.jar erstellen"
+						Description=""
 						CommandLine="echo javac -d &quot;$(OutDir)&quot; -sourcepath . -classpath &quot;$(OutDir)&quot; &quot;$(InputPath)&quot;
 javac -d &quot;$(OutDir)&quot; -sourcepath . -classpath &quot;$(OutDir)&quot; &quot;$(InputPath)&quot;
+
 echo javah -force -o &quot;$(OutDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(OutDir)&quot; sos.spooler.$(InputName)
 javah -force -o &quot;$(OutDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(OutDir)&quot; sos.spooler.$(InputName)
 "
@@ -670,9 +670,10 @@ javah -force -o &quot;$(OutDir)\sos\spooler\$(InputName).h&quot; -classpath &quo
 					Name="Debug|Win32">
 					<Tool
 						Name="VCCustomBuildTool"
-						Description="sos.spooler.jar erstellen"
+						Description=""
 						CommandLine="echo javac -d &quot;$(OutDir)&quot; -sourcepath . -classpath &quot;$(OutDir)&quot; &quot;$(InputPath)&quot;
 javac -d &quot;$(OutDir)&quot; -sourcepath . -classpath &quot;$(OutDir)&quot; &quot;$(InputPath)&quot;
+
 echo javah -force -o &quot;$(OutDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(OutDir)&quot; sos.spooler.$(InputName)
 javah -force -o &quot;$(OutDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(OutDir)&quot; sos.spooler.$(InputName)
 "
@@ -686,9 +687,10 @@ javah -force -o &quot;$(OutDir)\sos\spooler\$(InputName).h&quot; -classpath &quo
 					Name="Release|Win32">
 					<Tool
 						Name="VCCustomBuildTool"
-						Description="sos.spooler.jar erstellen"
+						Description=""
 						CommandLine="echo javac -d &quot;$(OutDir)&quot; -sourcepath . -classpath &quot;$(OutDir)&quot; &quot;$(InputPath)&quot;
 javac -d &quot;$(OutDir)&quot; -sourcepath . -classpath &quot;$(OutDir)&quot; &quot;$(InputPath)&quot;
+
 echo javah -force -o &quot;$(OutDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(OutDir)&quot; sos.spooler.$(InputName)
 javah -force -o &quot;$(OutDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(OutDir)&quot; sos.spooler.$(InputName)
 "
@@ -699,9 +701,10 @@ javah -force -o &quot;$(OutDir)\sos\spooler\$(InputName).h&quot; -classpath &quo
 					Name="Debug|Win32">
 					<Tool
 						Name="VCCustomBuildTool"
-						Description="sos.spooler.jar erstellen"
+						Description=""
 						CommandLine="echo javac -d &quot;$(OutDir)&quot; -sourcepath . -classpath &quot;$(OutDir)&quot; &quot;$(InputPath)&quot;
 javac -d &quot;$(OutDir)&quot; -sourcepath . -classpath &quot;$(OutDir)&quot; &quot;$(InputPath)&quot;
+
 echo javah -force -o &quot;$(OutDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(OutDir)&quot; sos.spooler.$(InputName)
 javah -force -o &quot;$(OutDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(OutDir)&quot; sos.spooler.$(InputName)
 "
@@ -715,9 +718,10 @@ javah -force -o &quot;$(OutDir)\sos\spooler\$(InputName).h&quot; -classpath &quo
 					Name="Release|Win32">
 					<Tool
 						Name="VCCustomBuildTool"
-						Description="sos.spooler.jar erstellen"
+						Description=""
 						CommandLine="echo javac -d &quot;$(OutDir)&quot; -sourcepath . -classpath &quot;$(OutDir)&quot; &quot;$(InputPath)&quot;
 javac -d &quot;$(OutDir)&quot; -sourcepath . -classpath &quot;$(OutDir)&quot; &quot;$(InputPath)&quot;
+
 echo javah -force -o &quot;$(OutDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(OutDir)&quot; sos.spooler.$(InputName)
 javah -force -o &quot;$(OutDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(OutDir)&quot; sos.spooler.$(InputName)
 "
@@ -728,9 +732,10 @@ javah -force -o &quot;$(OutDir)\sos\spooler\$(InputName).h&quot; -classpath &quo
 					Name="Debug|Win32">
 					<Tool
 						Name="VCCustomBuildTool"
-						Description="sos.spooler.jar erstellen"
+						Description=""
 						CommandLine="echo javac -d &quot;$(OutDir)&quot; -sourcepath . -classpath &quot;$(OutDir)&quot; &quot;$(InputPath)&quot;
 javac -d &quot;$(OutDir)&quot; -sourcepath . -classpath &quot;$(OutDir)&quot; &quot;$(InputPath)&quot;
+
 echo javah -force -o &quot;$(OutDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(OutDir)&quot; sos.spooler.$(InputName)
 javah -force -o &quot;$(OutDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(OutDir)&quot; sos.spooler.$(InputName)
 "
@@ -744,9 +749,10 @@ javah -force -o &quot;$(OutDir)\sos\spooler\$(InputName).h&quot; -classpath &quo
 					Name="Release|Win32">
 					<Tool
 						Name="VCCustomBuildTool"
-						Description="sos.spooler.jar erstellen"
+						Description=""
 						CommandLine="echo javac -d &quot;$(OutDir)&quot; -sourcepath . -classpath &quot;$(OutDir)&quot; &quot;$(InputPath)&quot;
 javac -d &quot;$(OutDir)&quot; -sourcepath . -classpath &quot;$(OutDir)&quot; &quot;$(InputPath)&quot;
+
 echo javah -force -o &quot;$(OutDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(OutDir)&quot; sos.spooler.$(InputName)
 javah -force -o &quot;$(OutDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(OutDir)&quot; sos.spooler.$(InputName)
 "
@@ -757,9 +763,10 @@ javah -force -o &quot;$(OutDir)\sos\spooler\$(InputName).h&quot; -classpath &quo
 					Name="Debug|Win32">
 					<Tool
 						Name="VCCustomBuildTool"
-						Description="sos.spooler.jar erstellen"
+						Description=""
 						CommandLine="echo javac -d &quot;$(OutDir)&quot; -sourcepath . -classpath &quot;$(OutDir)&quot; &quot;$(InputPath)&quot;
 javac -d &quot;$(OutDir)&quot; -sourcepath . -classpath &quot;$(OutDir)&quot; &quot;$(InputPath)&quot;
+
 echo javah -force -o &quot;$(OutDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(OutDir)&quot; sos.spooler.$(InputName)
 javah -force -o &quot;$(OutDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(OutDir)&quot; sos.spooler.$(InputName)
 "
@@ -773,9 +780,10 @@ javah -force -o &quot;$(OutDir)\sos\spooler\$(InputName).h&quot; -classpath &quo
 					Name="Release|Win32">
 					<Tool
 						Name="VCCustomBuildTool"
-						Description="sos.spooler.jar erstellen"
+						Description=""
 						CommandLine="echo javac -d &quot;$(OutDir)&quot; -sourcepath . -classpath &quot;$(OutDir)&quot; &quot;$(InputPath)&quot;
 javac -d &quot;$(OutDir)&quot; -sourcepath . -classpath &quot;$(OutDir)&quot; &quot;$(InputPath)&quot;
+
 echo javah -force -o &quot;$(OutDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(OutDir)&quot; sos.spooler.$(InputName)
 javah -force -o &quot;$(OutDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(OutDir)&quot; sos.spooler.$(InputName)
 "
@@ -786,9 +794,10 @@ javah -force -o &quot;$(OutDir)\sos\spooler\$(InputName).h&quot; -classpath &quo
 					Name="Debug|Win32">
 					<Tool
 						Name="VCCustomBuildTool"
-						Description="sos.spooler.jar erstellen"
+						Description=""
 						CommandLine="echo javac -d &quot;$(OutDir)&quot; -sourcepath . -classpath &quot;$(OutDir)&quot; &quot;$(InputPath)&quot;
 javac -d &quot;$(OutDir)&quot; -sourcepath . -classpath &quot;$(OutDir)&quot; &quot;$(InputPath)&quot;
+
 echo javah -force -o &quot;$(OutDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(OutDir)&quot; sos.spooler.$(InputName)
 javah -force -o &quot;$(OutDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(OutDir)&quot; sos.spooler.$(InputName)
 "
@@ -802,9 +811,10 @@ javah -force -o &quot;$(OutDir)\sos\spooler\$(InputName).h&quot; -classpath &quo
 					Name="Release|Win32">
 					<Tool
 						Name="VCCustomBuildTool"
-						Description="sos.spooler.jar erstellen"
+						Description=""
 						CommandLine="echo javac -d &quot;$(OutDir)&quot; -sourcepath . -classpath &quot;$(OutDir)&quot; &quot;$(InputPath)&quot;
 javac -d &quot;$(OutDir)&quot; -sourcepath . -classpath &quot;$(OutDir)&quot; &quot;$(InputPath)&quot;
+
 echo javah -force -o &quot;$(OutDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(OutDir)&quot; sos.spooler.$(InputName)
 javah -force -o &quot;$(OutDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(OutDir)&quot; sos.spooler.$(InputName)
 "
@@ -815,9 +825,10 @@ javah -force -o &quot;$(OutDir)\sos\spooler\$(InputName).h&quot; -classpath &quo
 					Name="Debug|Win32">
 					<Tool
 						Name="VCCustomBuildTool"
-						Description="sos.spooler.jar erstellen"
+						Description=""
 						CommandLine="echo javac -d &quot;$(OutDir)&quot; -sourcepath . -classpath &quot;$(OutDir)&quot; &quot;$(InputPath)&quot;
 javac -d &quot;$(OutDir)&quot; -sourcepath . -classpath &quot;$(OutDir)&quot; &quot;$(InputPath)&quot;
+
 echo javah -force -o &quot;$(OutDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(OutDir)&quot; sos.spooler.$(InputName)
 javah -force -o &quot;$(OutDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(OutDir)&quot; sos.spooler.$(InputName)
 "
@@ -831,9 +842,10 @@ javah -force -o &quot;$(OutDir)\sos\spooler\$(InputName).h&quot; -classpath &quo
 					Name="Release|Win32">
 					<Tool
 						Name="VCCustomBuildTool"
-						Description="sos.spooler.jar erstellen"
+						Description=""
 						CommandLine="echo javac -d &quot;$(OutDir)&quot; -sourcepath . -classpath &quot;$(OutDir)&quot; &quot;$(InputPath)&quot;
 javac -d &quot;$(OutDir)&quot; -sourcepath . -classpath &quot;$(OutDir)&quot; &quot;$(InputPath)&quot;
+
 echo javah -force -o &quot;$(OutDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(OutDir)&quot; sos.spooler.$(InputName)
 javah -force -o &quot;$(OutDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(OutDir)&quot; sos.spooler.$(InputName)
 "
@@ -844,9 +856,10 @@ javah -force -o &quot;$(OutDir)\sos\spooler\$(InputName).h&quot; -classpath &quo
 					Name="Debug|Win32">
 					<Tool
 						Name="VCCustomBuildTool"
-						Description="sos.spooler.jar erstellen"
+						Description=""
 						CommandLine="echo javac -d &quot;$(OutDir)&quot; -sourcepath . -classpath &quot;$(OutDir)&quot; &quot;$(InputPath)&quot;
 javac -d &quot;$(OutDir)&quot; -sourcepath . -classpath &quot;$(OutDir)&quot; &quot;$(InputPath)&quot;
+
 echo javah -force -o &quot;$(OutDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(OutDir)&quot; sos.spooler.$(InputName)
 javah -force -o &quot;$(OutDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(OutDir)&quot; sos.spooler.$(InputName)
 "
@@ -860,9 +873,10 @@ javah -force -o &quot;$(OutDir)\sos\spooler\$(InputName).h&quot; -classpath &quo
 					Name="Release|Win32">
 					<Tool
 						Name="VCCustomBuildTool"
-						Description="sos.spooler.jar erstellen"
+						Description=""
 						CommandLine="echo javac -d &quot;$(OutDir)&quot; -sourcepath . -classpath &quot;$(OutDir)&quot; &quot;$(InputPath)&quot;
 javac -d &quot;$(OutDir)&quot; -sourcepath . -classpath &quot;$(OutDir)&quot; &quot;$(InputPath)&quot;
+
 echo javah -force -o &quot;$(OutDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(OutDir)&quot; sos.spooler.$(InputName)
 javah -force -o &quot;$(OutDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(OutDir)&quot; sos.spooler.$(InputName)
 "
@@ -873,9 +887,10 @@ javah -force -o &quot;$(OutDir)\sos\spooler\$(InputName).h&quot; -classpath &quo
 					Name="Debug|Win32">
 					<Tool
 						Name="VCCustomBuildTool"
-						Description="sos.spooler.jar erstellen"
+						Description=""
 						CommandLine="echo javac -d &quot;$(OutDir)&quot; -sourcepath . -classpath &quot;$(OutDir)&quot; &quot;$(InputPath)&quot;
 javac -d &quot;$(OutDir)&quot; -sourcepath . -classpath &quot;$(OutDir)&quot; &quot;$(InputPath)&quot;
+
 echo javah -force -o &quot;$(OutDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(OutDir)&quot; sos.spooler.$(InputName)
 javah -force -o &quot;$(OutDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(OutDir)&quot; sos.spooler.$(InputName)
 "
@@ -889,9 +904,10 @@ javah -force -o &quot;$(OutDir)\sos\spooler\$(InputName).h&quot; -classpath &quo
 					Name="Release|Win32">
 					<Tool
 						Name="VCCustomBuildTool"
-						Description="sos.spooler.jar erstellen"
+						Description=""
 						CommandLine="echo javac -d &quot;$(OutDir)&quot; -sourcepath . -classpath &quot;$(OutDir)&quot; &quot;$(InputPath)&quot;
 javac -d &quot;$(OutDir)&quot; -sourcepath . -classpath &quot;$(OutDir)&quot; &quot;$(InputPath)&quot;
+
 echo javah -force -o &quot;$(OutDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(OutDir)&quot; sos.spooler.$(InputName)
 javah -force -o &quot;$(OutDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(OutDir)&quot; sos.spooler.$(InputName)
 "
@@ -902,9 +918,10 @@ javah -force -o &quot;$(OutDir)\sos\spooler\$(InputName).h&quot; -classpath &quo
 					Name="Debug|Win32">
 					<Tool
 						Name="VCCustomBuildTool"
-						Description="sos.spooler.jar erstellen"
+						Description=""
 						CommandLine="echo javac -d &quot;$(OutDir)&quot; -sourcepath . -classpath &quot;$(OutDir)&quot; &quot;$(InputPath)&quot;
 javac -d &quot;$(OutDir)&quot; -sourcepath . -classpath &quot;$(OutDir)&quot; &quot;$(InputPath)&quot;
+
 echo javah -force -o &quot;$(OutDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(OutDir)&quot; sos.spooler.$(InputName)
 javah -force -o &quot;$(OutDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(OutDir)&quot; sos.spooler.$(InputName)
 "
@@ -918,9 +935,10 @@ javah -force -o &quot;$(OutDir)\sos\spooler\$(InputName).h&quot; -classpath &quo
 					Name="Release|Win32">
 					<Tool
 						Name="VCCustomBuildTool"
-						Description="sos.spooler.jar erstellen"
+						Description=""
 						CommandLine="echo javac -d &quot;$(OutDir)&quot; -sourcepath . -classpath &quot;$(OutDir)&quot; &quot;$(InputPath)&quot;
 javac -d &quot;$(OutDir)&quot; -sourcepath . -classpath &quot;$(OutDir)&quot; &quot;$(InputPath)&quot;
+
 echo javah -force -o &quot;$(OutDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(OutDir)&quot; sos.spooler.$(InputName)
 javah -force -o &quot;$(OutDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(OutDir)&quot; sos.spooler.$(InputName)
 "
@@ -931,9 +949,10 @@ javah -force -o &quot;$(OutDir)\sos\spooler\$(InputName).h&quot; -classpath &quo
 					Name="Debug|Win32">
 					<Tool
 						Name="VCCustomBuildTool"
-						Description="sos.spooler.jar erstellen"
+						Description=""
 						CommandLine="echo javac -d &quot;$(OutDir)&quot; -sourcepath . -classpath &quot;$(OutDir)&quot; &quot;$(InputPath)&quot;
 javac -d &quot;$(OutDir)&quot; -sourcepath . -classpath &quot;$(OutDir)&quot; &quot;$(InputPath)&quot;
+
 echo javah -force -o &quot;$(OutDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(OutDir)&quot; sos.spooler.$(InputName)
 javah -force -o &quot;$(OutDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(OutDir)&quot; sos.spooler.$(InputName)
 "
@@ -947,9 +966,10 @@ javah -force -o &quot;$(OutDir)\sos\spooler\$(InputName).h&quot; -classpath &quo
 					Name="Release|Win32">
 					<Tool
 						Name="VCCustomBuildTool"
-						Description="sos.spooler.jar erstellen"
+						Description=""
 						CommandLine="echo javac -d &quot;$(OutDir)&quot; -sourcepath . -classpath &quot;$(OutDir)&quot; &quot;$(InputPath)&quot;
 javac -d &quot;$(OutDir)&quot; -sourcepath . -classpath &quot;$(OutDir)&quot; &quot;$(InputPath)&quot;
+
 echo javah -force -o &quot;$(OutDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(OutDir)&quot; sos.spooler.$(InputName)
 javah -force -o &quot;$(OutDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(OutDir)&quot; sos.spooler.$(InputName)
 "
@@ -960,9 +980,10 @@ javah -force -o &quot;$(OutDir)\sos\spooler\$(InputName).h&quot; -classpath &quo
 					Name="Debug|Win32">
 					<Tool
 						Name="VCCustomBuildTool"
-						Description="sos.spooler.jar erstellen"
+						Description=""
 						CommandLine="echo javac -d &quot;$(OutDir)&quot; -sourcepath . -classpath &quot;$(OutDir)&quot; &quot;$(InputPath)&quot;
 javac -d &quot;$(OutDir)&quot; -sourcepath . -classpath &quot;$(OutDir)&quot; &quot;$(InputPath)&quot;
+
 echo javah -force -o &quot;$(OutDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(OutDir)&quot; sos.spooler.$(InputName)
 javah -force -o &quot;$(OutDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(OutDir)&quot; sos.spooler.$(InputName)
 "
@@ -978,6 +999,7 @@ javah -force -o &quot;$(OutDir)\sos\spooler\$(InputName).h&quot; -classpath &quo
 						Name="VCCustomBuildTool"
 						CommandLine="echo javac -d &quot;$(OutDir)&quot; -sourcepath . -classpath &quot;$(OutDir)&quot; &quot;$(InputPath)&quot;
 javac -d &quot;$(OutDir)&quot; -sourcepath . -classpath &quot;$(OutDir)&quot; &quot;$(InputPath)&quot;
+
 echo javah -force -o &quot;$(OutDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(OutDir)&quot; sos.spooler.$(InputName)
 javah -force -o &quot;$(OutDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(OutDir)&quot; sos.spooler.$(InputName)
 "
@@ -990,6 +1012,7 @@ javah -force -o &quot;$(OutDir)\sos\spooler\$(InputName).h&quot; -classpath &quo
 						Name="VCCustomBuildTool"
 						CommandLine="echo javac -d &quot;$(OutDir)&quot; -sourcepath . -classpath &quot;$(OutDir)&quot; &quot;$(InputPath)&quot;
 javac -d &quot;$(OutDir)&quot; -sourcepath . -classpath &quot;$(OutDir)&quot; &quot;$(InputPath)&quot;
+
 echo javah -force -o &quot;$(OutDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(OutDir)&quot; sos.spooler.$(InputName)
 javah -force -o &quot;$(OutDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(OutDir)&quot; sos.spooler.$(InputName)
 "
@@ -1003,9 +1026,10 @@ javah -force -o &quot;$(OutDir)\sos\spooler\$(InputName).h&quot; -classpath &quo
 					Name="Release|Win32">
 					<Tool
 						Name="VCCustomBuildTool"
-						Description="sos.spooler.jar erstellen"
+						Description=""
 						CommandLine="echo javac -d &quot;$(OutDir)&quot; -sourcepath . -classpath &quot;$(OutDir)&quot; &quot;$(InputPath)&quot;
 javac -d &quot;$(OutDir)&quot; -sourcepath . -classpath &quot;$(OutDir)&quot; &quot;$(InputPath)&quot;
+
 echo javah -force -o &quot;$(OutDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(OutDir)&quot; sos.spooler.$(InputName)
 javah -force -o &quot;$(OutDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(OutDir)&quot; sos.spooler.$(InputName)
 "
@@ -1016,9 +1040,10 @@ javah -force -o &quot;$(OutDir)\sos\spooler\$(InputName).h&quot; -classpath &quo
 					Name="Debug|Win32">
 					<Tool
 						Name="VCCustomBuildTool"
-						Description="sos.spooler.jar erstellen"
+						Description=""
 						CommandLine="echo javac -d &quot;$(OutDir)&quot; -sourcepath . -classpath &quot;$(OutDir)&quot; &quot;$(InputPath)&quot;
 javac -d &quot;$(OutDir)&quot; -sourcepath . -classpath &quot;$(OutDir)&quot; &quot;$(InputPath)&quot;
+
 echo javah -force -o &quot;$(OutDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(OutDir)&quot; sos.spooler.$(InputName)
 javah -force -o &quot;$(OutDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(OutDir)&quot; sos.spooler.$(InputName)
 "
@@ -1032,9 +1057,10 @@ javah -force -o &quot;$(OutDir)\sos\spooler\$(InputName).h&quot; -classpath &quo
 					Name="Release|Win32">
 					<Tool
 						Name="VCCustomBuildTool"
-						Description="sos.spooler.jar erstellen"
+						Description=""
 						CommandLine="echo javac -d &quot;$(OutDir)&quot; -sourcepath . -classpath &quot;$(OutDir)&quot; &quot;$(InputPath)&quot;
 javac -d &quot;$(OutDir)&quot; -sourcepath . -classpath &quot;$(OutDir)&quot; &quot;$(InputPath)&quot;
+
 echo javah -force -o &quot;$(OutDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(OutDir)&quot; sos.spooler.$(InputName)
 javah -force -o &quot;$(OutDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(OutDir)&quot; sos.spooler.$(InputName)
 "
@@ -1045,9 +1071,10 @@ javah -force -o &quot;$(OutDir)\sos\spooler\$(InputName).h&quot; -classpath &quo
 					Name="Debug|Win32">
 					<Tool
 						Name="VCCustomBuildTool"
-						Description="sos.spooler.jar erstellen"
+						Description=""
 						CommandLine="echo javac -d &quot;$(OutDir)&quot; -sourcepath . -classpath &quot;$(OutDir)&quot; &quot;$(InputPath)&quot;
 javac -d &quot;$(OutDir)&quot; -sourcepath . -classpath &quot;$(OutDir)&quot; &quot;$(InputPath)&quot;
+
 echo javah -force -o &quot;$(OutDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(OutDir)&quot; sos.spooler.$(InputName)
 javah -force -o &quot;$(OutDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(OutDir)&quot; sos.spooler.$(InputName)
 "
@@ -1061,9 +1088,10 @@ javah -force -o &quot;$(OutDir)\sos\spooler\$(InputName).h&quot; -classpath &quo
 					Name="Release|Win32">
 					<Tool
 						Name="VCCustomBuildTool"
-						Description="sos.spooler.jar erstellen"
+						Description=""
 						CommandLine="echo javac -d &quot;$(OutDir)&quot; -sourcepath . -classpath &quot;$(OutDir)&quot; &quot;$(InputPath)&quot;
 javac -d &quot;$(OutDir)&quot; -sourcepath . -classpath &quot;$(OutDir)&quot; &quot;$(InputPath)&quot;
+
 echo javah -force -o &quot;$(OutDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(OutDir)&quot; sos.spooler.$(InputName)
 javah -force -o &quot;$(OutDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(OutDir)&quot; sos.spooler.$(InputName)
 "
@@ -1074,9 +1102,10 @@ javah -force -o &quot;$(OutDir)\sos\spooler\$(InputName).h&quot; -classpath &quo
 					Name="Debug|Win32">
 					<Tool
 						Name="VCCustomBuildTool"
-						Description="sos.spooler.jar erstellen"
+						Description=""
 						CommandLine="echo javac -d &quot;$(OutDir)&quot; -sourcepath . -classpath &quot;$(OutDir)&quot; &quot;$(InputPath)&quot;
 javac -d &quot;$(OutDir)&quot; -sourcepath . -classpath &quot;$(OutDir)&quot; &quot;$(InputPath)&quot;
+
 echo javah -force -o &quot;$(OutDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(OutDir)&quot; sos.spooler.$(InputName)
 javah -force -o &quot;$(OutDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(OutDir)&quot; sos.spooler.$(InputName)
 "

@@ -1,4 +1,4 @@
-// $Id: spooler_module_remote_server.cxx,v 1.33 2003/11/30 01:34:07 jz Exp $
+// $Id: spooler_module_remote_server.cxx,v 1.34 2004/03/20 10:49:01 jz Exp $
 /*
     Hier sind implementiert
 
@@ -234,7 +234,7 @@ STDMETHODIMP Com_remote_module_instance_server::construct( SAFEARRAY* safearray 
       //_server._module_instance->init();
       //_server._module_instance->_spooler_exit_called = true;            // Der Client wird spooler_exit() explizit aufrufen, um den Fehler zu bekommen.
     }
-    catch( const exception& x ) { hr = com_set_error( x, "Remote_module_instance_server::construct" ); }
+    catch( const exception& x ) { hr = Com_set_error( x, "Remote_module_instance_server::construct" ); }
 
     return hr;
 }
@@ -250,7 +250,7 @@ STDMETHODIMP Com_remote_module_instance_server::add_obj( IDispatch* object, BSTR
         if( !_server._module_instance )  throw_xc( "SCHEDULER-203", "add_obj", string_from_bstr(name) );
         _server._module_instance->add_obj( object, string_from_bstr(name) );
     }
-    catch( const exception& x ) { hr = com_set_error( x, "Remote_module_instance_server::add_obj" ); }
+    catch( const exception& x ) { hr = Com_set_error( x, "Remote_module_instance_server::add_obj" ); }
 
     return hr;
 }
@@ -267,7 +267,7 @@ STDMETHODIMP Com_remote_module_instance_server::name_exists( BSTR name, VARIANT_
       //_server.load_implicitly();
         *result = _server._module_instance->name_exists( string_from_bstr(name) );
     }
-    catch( const exception& x ) { hr = com_set_error( x, "Remote_module_instance_server::name_exists" ); }
+    catch( const exception& x ) { hr = Com_set_error( x, "Remote_module_instance_server::name_exists" ); }
 
     return hr;
 }
@@ -305,7 +305,7 @@ STDMETHODIMP Com_remote_module_instance_server::call( BSTR name, VARIANT* result
         result->vt = VT_BOOL;
         V_BOOL( result ) = _server._module_instance->call__end();
     }
-    catch( const exception& x ) { hr = com_set_error( x, "Remote_module_instance_server::call" ); }
+    catch( const exception& x ) { hr = Com_set_error( x, "Remote_module_instance_server::call" ); }
 
     return hr;
 }
@@ -335,7 +335,7 @@ STDMETHODIMP Com_remote_module_instance_server::begin( SAFEARRAY* objects_safear
         result->vt = VT_BOOL;
         V_BOOL( result ) = _server._module_instance->begin__end();
     }
-    catch( const exception& x ) { hr = com_set_error( x, "Remote_module_instance_server::begin" ); }
+    catch( const exception& x ) { hr = Com_set_error( x, "Remote_module_instance_server::begin" ); }
 
     return hr;
 }
@@ -354,7 +354,7 @@ STDMETHODIMP Com_remote_module_instance_server::end( VARIANT_BOOL succeeded, VAR
             _server._module_instance->end__end();
         }
     }
-    catch( const exception& x ) { hr = com_set_error( x, "Remote_module_instance_server::end" ); }
+    catch( const exception& x ) { hr = Com_set_error( x, "Remote_module_instance_server::end" ); }
 
     return hr;
 }
@@ -374,7 +374,7 @@ STDMETHODIMP Com_remote_module_instance_server::step( VARIANT* result )
         result->vt = VT_BOOL;
         V_BOOL( result ) = _server._module_instance->step__end();
     }
-    catch( const exception& x ) { hr = com_set_error( x, "Remote_module_instance_server::step" ); }
+    catch( const exception& x ) { hr = Com_set_error( x, "Remote_module_instance_server::step" ); }
 
     return hr;
 }

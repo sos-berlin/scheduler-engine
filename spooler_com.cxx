@@ -1,4 +1,4 @@
-// $Id: spooler_com.cxx,v 1.143 2004/03/17 20:50:55 jz Exp $
+// $Id: spooler_com.cxx,v 1.144 2004/03/20 10:49:00 jz Exp $
 /*
     Hier sind implementiert
 
@@ -644,7 +644,7 @@ STDMETHODIMP Com_variable_set::get_xml( BSTR* xml_doc  )
 
     try
     {
-        hr = string_to_bstr( dom().xml(), xml_doc );
+        hr = String_to_bstr( dom().xml(), xml_doc );
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Variable_set::xml" ); }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Variable_set::xml" ); }
@@ -1224,7 +1224,7 @@ STDMETHODIMP Com_log::get_last_error_line( BSTR* result )
     {
         if( !_log )  return E_POINTER;
 
-        hr = string_to_bstr( _log->last_error_line(), result );
+        hr = String_to_bstr( _log->last_error_line(), result );
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Log::last_error_line" ); }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Log::last_error_line" ); }
@@ -2553,7 +2553,7 @@ STDMETHODIMP Com_spooler::get_directory( BSTR* result )
     {
         if( !_spooler )  return E_POINTER;
 
-        hr = string_to_bstr( _spooler->directory(), result );
+        hr = String_to_bstr( _spooler->directory(), result );
     }
 
     return hr;
@@ -2570,7 +2570,7 @@ STDMETHODIMP Com_spooler::get_hostname( BSTR* result )
     {
         if( !_spooler )  return E_POINTER;
 
-        hr = string_to_bstr( _spooler->_hostname, result );
+        hr = String_to_bstr( _spooler->_hostname, result );
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.get_hostname" ); }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.get_hostname" ); }

@@ -1,4 +1,4 @@
-// $Id: spooler_com.h,v 1.94 2004/03/02 16:12:45 jz Exp $
+// $Id: spooler_com.h,v 1.95 2004/03/20 10:49:01 jz Exp $
 
 #ifndef __SPOOLER_COM_H
 #define __SPOOLER_COM_H
@@ -71,7 +71,7 @@ struct Com_error: spooler_com::Ierror,
 
     USE_SOS_OLE_OBJECT_WITHOUT_QI
 
-    STDMETHODIMP            get_java_class_name             ( BSTR* result )                            { return string_to_bstr( const_java_class_name(), result ); }
+    STDMETHODIMP            get_java_class_name             ( BSTR* result )                            { return String_to_bstr( const_java_class_name(), result ); }
     STDMETHODIMP_(char*)  const_java_class_name             ()                                          { return (char*)"sos.spooler.Error"; }
 
     STDMETHODIMP                get_is_error                ( VARIANT_BOOL* );
@@ -102,7 +102,7 @@ struct Com_variable: spooler_com::Ivariable,
 
     USE_SOS_OLE_OBJECT_WITHOUT_QI
 
-    STDMETHODIMP            get_java_class_name             ( BSTR* result )                        { return string_to_bstr( const_java_class_name(), result ); }
+    STDMETHODIMP            get_java_class_name             ( BSTR* result )                        { return String_to_bstr( const_java_class_name(), result ); }
     STDMETHODIMP_(char*)  const_java_class_name             ()                                      { return (char*)"sos.spooler.Variable"; }
 
     STDMETHODIMP                put_value                   ( VARIANT* v )                          { HRESULT hr = NOERROR; THREAD_LOCK(_lock) _value = *v; return hr; }
@@ -130,7 +130,7 @@ struct Com_variable_set: spooler_com::Ivariable_set,
 
     USE_SOS_OLE_OBJECT_WITHOUT_QI
 
-    STDMETHODIMP            get_java_class_name             ( BSTR* result )                        { return string_to_bstr( const_java_class_name(), result ); }
+    STDMETHODIMP            get_java_class_name             ( BSTR* result )                        { return String_to_bstr( const_java_class_name(), result ); }
     STDMETHODIMP_(char*)  const_java_class_name             ()                                      { return (char*)"sos.spooler.Variable_set"; }
 
     STDMETHODIMP            get_dom                         ( IXMLDOMDocument** );
@@ -207,7 +207,7 @@ struct Com_log : spooler_com::Ilog,
 
 
     // interface Ihas_java_class_name
-    STDMETHODIMP            get_java_class_name             ( BSTR* result )                        { return string_to_bstr( const_java_class_name(), result ); }
+    STDMETHODIMP            get_java_class_name             ( BSTR* result )                        { return String_to_bstr( const_java_class_name(), result ); }
     STDMETHODIMP_(char*)  const_java_class_name             ()                                      { return (char*)"sos.spooler.Log"; }
 
 
@@ -355,7 +355,7 @@ struct Com_job : spooler_com::Ijob,
 
     USE_SOS_OLE_OBJECT_WITHOUT_QI
 
-    STDMETHODIMP            get_java_class_name             ( BSTR* result )                        { return string_to_bstr( const_java_class_name(), result ); }
+    STDMETHODIMP            get_java_class_name             ( BSTR* result )                        { return String_to_bstr( const_java_class_name(), result ); }
     STDMETHODIMP_(char*)  const_java_class_name             ()                                      { return (char*)"sos.spooler.Job"; }
 
     void                        close                       ()                                      { THREAD_LOCK(_lock)  _job = NULL; }
@@ -395,7 +395,7 @@ struct Com_task : spooler_com::Itask,
 
     USE_SOS_OLE_OBJECT_WITHOUT_QI
 
-    STDMETHODIMP            get_java_class_name             ( BSTR* result )                        { return string_to_bstr( const_java_class_name(), result ); }
+    STDMETHODIMP            get_java_class_name             ( BSTR* result )                        { return String_to_bstr( const_java_class_name(), result ); }
     STDMETHODIMP_(char*)  const_java_class_name             ()                                      { return (char*)"sos.spooler.Task"; }
 
     void                        set_task                    ( Task* );
@@ -434,7 +434,7 @@ struct Com_thread : spooler_com::Ithread,
 
     USE_SOS_OLE_OBJECT_WITHOUT_QI
 
-    STDMETHODIMP            get_java_class_name             ( BSTR* result )                        { return string_to_bstr( "sos.spooler.Thread", result ); }
+    STDMETHODIMP            get_java_class_name             ( BSTR* result )                        { return String_to_bstr( "sos.spooler.Thread", result ); }
 
     void                        close                       ()                                      { THREAD_LOCK(_lock)  _thread = NULL; }
 
@@ -462,7 +462,7 @@ struct Com_spooler : spooler_com::Ispooler,
 
     USE_SOS_OLE_OBJECT_WITHOUT_QI
 
-    STDMETHODIMP            get_java_class_name             ( BSTR* result )                        { return string_to_bstr( const_java_class_name(), result ); }
+    STDMETHODIMP            get_java_class_name             ( BSTR* result )                        { return String_to_bstr( const_java_class_name(), result ); }
     STDMETHODIMP_(char*)  const_java_class_name             ()                                      { return (char*)"sos.spooler.Spooler"; }
 
     void                        close                       ()                                      { THREAD_LOCK(_lock)  _spooler = NULL; }
@@ -545,7 +545,7 @@ struct Com_job_chain : spooler_com::Ijob_chain,
 
     void                        close                   ()                                          { THREAD_LOCK( _lock )  _job_chain = NULL; }
 
-    STDMETHODIMP            get_java_class_name         ( BSTR* result )                            { return string_to_bstr( const_java_class_name(), result ); }
+    STDMETHODIMP            get_java_class_name         ( BSTR* result )                            { return String_to_bstr( const_java_class_name(), result ); }
     STDMETHODIMP_(char*)  const_java_class_name         ()                                          { return (char*)"sos.spooler.Job_chain"; }
 
     STDMETHODIMP            put_name                    ( BSTR );
@@ -579,7 +579,7 @@ struct Com_job_chain_node : spooler_com::Ijob_chain_node,
 
     USE_SOS_OLE_OBJECT_WITHOUT_QI
 
-    STDMETHODIMP            get_java_class_name         ( BSTR* result )                            { return string_to_bstr( const_java_class_name(), result ); }
+    STDMETHODIMP            get_java_class_name         ( BSTR* result )                            { return String_to_bstr( const_java_class_name(), result ); }
     STDMETHODIMP_(char*)  const_java_class_name         ()                                          { return (char*)"sos.spooler.Job_chain_node"; }
 
     STDMETHODIMP            get_state                   ( VARIANT* );
@@ -605,7 +605,7 @@ struct Com_order : spooler_com::Iorder,
 
     void                        close                   ()                                          { THREAD_LOCK( _lock )  _order = NULL; }
 
-    STDMETHODIMP            get_java_class_name         ( BSTR* result )                            { return string_to_bstr( const_java_class_name(), result ); }
+    STDMETHODIMP            get_java_class_name         ( BSTR* result )                            { return String_to_bstr( const_java_class_name(), result ); }
     STDMETHODIMP_(char*)  const_java_class_name         ()                                          { return (char*)"sos.spooler.Order"; }
 
     STDMETHODIMP            put_id                      ( VARIANT* );
@@ -660,7 +660,7 @@ struct Com_order_queue : spooler_com::Iorder_queue,
 
     USE_SOS_OLE_OBJECT_WITHOUT_QI
 
-    STDMETHODIMP            get_java_class_name         ( BSTR* result )                            { return string_to_bstr( const_java_class_name(), result ); }
+    STDMETHODIMP            get_java_class_name         ( BSTR* result )                            { return String_to_bstr( const_java_class_name(), result ); }
     STDMETHODIMP_(char*)  const_java_class_name         ()                                          { return (char*)"sos.spooler.Order_queue"; }
 
     STDMETHODIMP            get_length                  ( int* );
