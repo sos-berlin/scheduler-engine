@@ -1,4 +1,4 @@
-// $Id: spooler_command.cxx,v 1.61 2002/10/02 12:54:38 jz Exp $
+// $Id: spooler_command.cxx,v 1.62 2002/10/02 21:06:32 jz Exp $
 /*
     Hier ist implementiert
 
@@ -325,7 +325,7 @@ xml::Element_ptr Command_processor::execute_show_order( const xml::Element_ptr& 
     if( show == show_all_ )  show = Show_what( show_standard );
 
     string    job_chain_name = as_string( show_order_element->getAttribute( "job_chain" ) );
-    Order::Id id             =            show_order_element->getAttribute( "id"        );
+    Order::Id id             =            show_order_element->getAttribute( "order"     );
 
     ptr<Job_chain> job_chain = _spooler->job_chain( job_chain_name );
     ptr<Order>     order     = job_chain->order( id );
@@ -379,7 +379,7 @@ xml::Element_ptr Command_processor::execute_modify_order( const xml::Element_ptr
     if( _security_level < Security::seclev_all )  throw_xc( "SPOOLER-121" );
 
     string    job_chain_name = as_string( modify_order_element->getAttribute( "job_chain" ) );
-    Order::Id id             =            modify_order_element->getAttribute( "id"        );
+    Order::Id id             =            modify_order_element->getAttribute( "order"     );
     string    priority       = as_string( modify_order_element->getAttribute( "priority"  ) );
 
     ptr<Job_chain> job_chain = _spooler->job_chain( job_chain_name );
