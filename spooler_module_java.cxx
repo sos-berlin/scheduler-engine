@@ -1,4 +1,4 @@
-// $Id: spooler_module_java.cxx,v 1.2 2002/11/02 12:23:26 jz Exp $
+// $Id: spooler_module_java.cxx,v 1.3 2002/11/06 06:30:48 jz Exp $
 /*
     Hier sind implementiert
 
@@ -12,10 +12,58 @@
 
 using namespace std;
 
+#define JAVA_IDISPATCH_CLASS "sos.spooler.Idispatch_ref"
+
 namespace sos {
 namespace spooler {
 
 static Java_vm* java_vm;
+
+//-------------------------------------------------------------------------------set_java_exception
+
+static void set_java_exception( JNIEnv* jenv, const char* what )
+{
+    const char* exception_class_name = "java/lang/RuntimeException";
+    jclass exception_class = jenv->FindClass( exception_class_name  );
+
+    if( exception_class )  
+    {
+        int err = jenv->ThrowNew( exception_class, what ); 
+        if( err == 0 )  return;
+    }
+
+    string w = what + string(" --- JNI.FindClass() liefert nicht Klasse ") + exception_class_name;
+
+    if( jenv->ExceptionOccurred() )  jenv->ExceptionDescribe();      // schreibt nach stderr
+
+    jenv->FatalError( w.c_str() );
+}
+
+//-------------------------------------------------------------------------------set_java_exception
+
+static void set_java_exception( JNIEnv* jenv, const exception& x )
+{
+    set_java_exception( jenv, x.what() );
+}
+
+//-------------------------------------------------------------------------------set_java_exception
+
+static void set_java_exception( JNIEnv* jenv, const _com_error& x ) 
+{
+    string what = string_from_ole( x.Description() );
+    set_java_exception( jenv, what.c_str() );
+}
+
+//----------------------------------------------------------------------------------jstring_to_bstr
+
+static void jstring_to_bstr( JNIEnv* jenv, const jstring& jstr, BSTR* bstr )
+{
+    const OLECHAR* str_w = jenv->GetStringChars( jstr, 0 );
+    
+    *bstr = SysAllocString( str_w );
+    
+    jenv->ReleaseStringChars( jstr, str_w );
+}
 
 //------------------------------------------------------------------------------------java_vfprintf
 
@@ -28,6 +76,66 @@ static jint JNICALL java_vfprintf( FILE *fp, const char *format, va_list args )
     java_vm->_log( buf );
 
     return ret;
+}
+
+//---------------------------------------------------------Java sos.spooler.Idispatch.com_method_id
+
+JNIEXPORT jint JNICALL Java_sos_spooler_Idispatch_com_1method_1id( JNIEnv* jenv, jclass, jlong jidispatch, jint context, jstring name )
+{
+    try
+    {
+        HRESULT    hr;
+        IDispatch* idispatch = (IDispatch*)jidispatch;
+        Bstr       name_bstr;
+        
+        jstring_to_bstr( jenv, name, &name_bstr );
+
+        if( !idispatch )  throw_xc( "SPOOLER-176" );
+
+        DISPID dispid = 0;
+        hr = idispatch->GetIDsOfNames( IID_NULL, &name_bstr, 1, (LCID)0, &dispid );
+        if( FAILED(hr) )  throw_com( hr, "GetIDsOfNames", string_from_bstr(name_bstr).c_str() );
+
+        return dispid;
+    }
+    catch( const exception&  x ) { set_java_exception( jenv, x ); }
+    catch( const _com_error& x ) { set_java_exception( jenv, x ); }
+}
+
+//--------------------------------------------------------------Java sos.spooler.Idispatch.com_call
+
+JNIEXPORT jobject JNICALL Java_sos_spooler_Idispatch_com_1call( JNIEnv* jenv, jclass, jlong jidispatch, jint method_id, jint context, 
+                                                                jobjectArray object_array)
+{
+    try
+    {
+        HRESULT    hr;
+        IDispatch* idispatch = (IDispatch*)jidispatch;
+        Variant    result;
+        Excepinfo  excepinfo;
+        UINT       arg_nr = -1;
+
+        if( !idispatch )  throw_xc( "SPOOLER-176" );
+
+        int param_count = jenv->GetArrayLength( object_array );
+        vector<Variant> params;
+        params.reserve( param_count );
+        for( int i = 0; i < param_count; i++ )
+        {
+            jobject p = jenv->GetObjectArrayElement( object_array, i );
+
+            switch( .. )
+            {
+                case ...: params[i] = ...;  break;
+            }
+        }
+
+
+        hr = idispatch->Invoke( method_id, IID_NULL, (LCID)0, context, params, &result, &excepinfo, &arg_nr );
+        if( FAILED(hr) )  throw_com( hr, "Invoke" );
+    }
+    catch( const exception&  x ) { set_java_exception( jenv, x ); }
+    catch( const _com_error& x ) { set_java_exception( jenv, x ); }
 }
 
 //-----------------------------------------------------------------------------Java_vm::get_options
@@ -115,6 +223,7 @@ void Java_vm::init()
     }
 #   else
     {
+        LOG( "dlopen " << _filename << '\n' );
         void *vm_module = dlopen( _filename.c_str(), RTLD_LAZY );
         if( !vm_module )  throw_xc( "SPOOLER-171", dlerror(), _filename.c_str() );
 
@@ -178,6 +287,9 @@ void Java_vm::init()
 */
     ret = JNI_CreateJavaVM( &_vm, &_thread_data->_env, &_vm_args );
     if( ret < 0 )  throw_java( ret, "JNI_CreateJavaVM" );
+
+    int version = env()->GetVersion();
+    LOG( "Java JNI " << ( version >> 16 ) << "." << ( version & 0xFFFF ) << " geladen\n" );
 }
 
 //-----------------------------------------------------------------------------------Java_vm::close
@@ -299,6 +411,64 @@ jmethodID Module::java_method_id( const string& name )
     return method_id;
 }
 
+//-----------------------------------------------------------Java_global_object::Java_global_object
+
+Java_global_object::Java_global_object( Spooler* spooler, jobject jo )
+:
+    _spooler( spooler ),
+    _jobject( NULL )
+{
+    assign( jo );
+}
+
+//----------------------------------------------------------Java_global_object::~Java_global_object
+
+Java_global_object::~Java_global_object()
+{
+    assign( NULL );
+}
+
+//-----------------------------------------------------------------------Java_global_object::assign
+
+void Java_global_object::assign( jobject jo )
+{
+    JNIEnv* jenv = _spooler->_java_vm.env();
+
+    if( _jobject )  jenv->DeleteGlobalRef( jo ), _jobject = NULL;
+    if( jo )  _jobject = jenv->NewGlobalRef( jo );
+}
+
+//-------------------------------------------------------------------Java_idispatch::Java_idispatch
+
+Java_idispatch::Java_idispatch( Spooler* sp, IDispatch* idispatch ) 
+: 
+    Java_global_object( sp ),
+    _idispatch( idispatch )
+{
+    JNIEnv* jenv = _spooler->_java_vm.env();
+
+    jclass idispatch_ref_jclass = jenv->FindClass( JAVA_IDISPATCH_CLASS );
+
+    jobject jo = jenv->NewObject( idispatch_ref_jclass, jenv->GetMethodID( idispatch_ref_jclass, "<init>", "(L)V" ), (long)(IDispatch*)idispatch );
+
+    assign( jo );
+}
+
+//------------------------------------------------------------------Java_idispatch::~Java_idispatch
+
+Java_idispatch::~Java_idispatch()
+{
+    if( _jobject )
+    {
+        JNIEnv* jenv = _spooler->_java_vm.env();
+        jmethodID method_id = jenv->GetMethodID( jenv->GetObjectClass( _jobject ), "clear", "()V" );
+        jenv->CallVoidMethod( _jobject, method_id );
+
+        assign( NULL );
+        _idispatch = NULL;
+    }
+}
+
 //-----------------------------------------------------------------------Java_module_instance::init
 
 void Java_module_instance::init()
@@ -326,11 +496,26 @@ void Java_module_instance::load()
 
     jmethodID method_id = _module->java_method_id( "<init>()V" );
     
-    assert( _object == NULL );
-    _object = _env->NewObject( _module->_java_class, method_id );
-    if( !_object )  _java_vm->throw_java( 0, _module->_java_class_name + " Konstruktor" );
+    assert( _jobject == NULL );
+    _jobject = _env->NewObject( _module->_java_class, method_id );
+    if( !_jobject )  _java_vm->throw_java( 0, _module->_java_class_name + " Konstruktor" );
 
     _loaded = true;
+}
+
+//--------------------------------------------------------------------Java_module_instance::add_obj
+
+void Java_module_instance::add_obj( const ptr<IDispatch>& object, const string& name )
+{
+    string java_class_name = "sos.spooler." + replace_regex_ref( name, "^spooler_(.*)$", "\\u\\1" );    // "spooler_task" -> "sos.spooler.Task"
+
+    jfieldID field_id = _env->GetFieldID( _env->GetObjectClass( _jobject ), name.c_str(), "L" JAVA_IDISPATCH_CLASS ";" );
+
+    _added_jobjects.push_back( Z_NEW( Java_idispatch( _module->_spooler, object ) ) );
+                                                
+    _env->SetObjectField( _jobject, field_id, **_added_jobjects.rbegin() );
+
+    //Com_module_instance_base::add_obj( object, name );
 }
 
 //----------------------------------------------------------------------Java_module_instance::close
@@ -338,7 +523,7 @@ void Java_module_instance::load()
 void Java_module_instance::close()
 {
     _log->warn( "free jobject" );  // jobject freigeben!
-    _object = NULL;
+    _jobject = NULL;
 
     Module_instance::close();
 }
@@ -354,11 +539,11 @@ Variant Java_module_instance::call( const string& name )
 
     if( *name.rbegin() == 'Z' )
     {
-        result = _env->CallBooleanMethod( _object, method_id ) != 0;
+        result = _env->CallBooleanMethod( _jobject, method_id ) != 0;
     }
     else
     {
-        _env->CallVoidMethod( _object, method_id );
+        _env->CallVoidMethod( _jobject, method_id );
     }
 
     if( _env->ExceptionOccurred() )  _java_vm->throw_java( 0, name );
@@ -373,7 +558,7 @@ Variant Java_module_instance::call( const string& name, int param )
     jmethodID method_id = _module->java_method_id( name );
     if( !method_id )  throw_xc( "SPOOLER-174", name, _module->_java_class_name.c_str() );
 
-    bool result = _env->CallBooleanMethod( _object, method_id, param ) != 0;
+    bool result = _env->CallBooleanMethod( _jobject, method_id, param ) != 0;
 
     if( _env->ExceptionOccurred() )  _java_vm->throw_java( 0, name );
 

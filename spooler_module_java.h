@@ -1,4 +1,4 @@
-// $Id: spooler_module_java.h,v 1.2 2002/11/02 12:23:26 jz Exp $
+// $Id: spooler_module_java.h,v 1.3 2002/11/06 06:30:48 jz Exp $
 
 #ifndef __SPOOLER_MODULE_JAVA_H
 #define __SPOOLER_MODULE_JAVA_H
@@ -77,12 +77,37 @@ struct Java_class : Object
     void                        call                        ( const string& signature );
 };
 */
+//-------------------------------------------------------------------------------Java_global_object
+
+struct Java_global_object : Object, Non_cloneable
+{
+                                Java_global_object          ( Spooler*, jobject = NULL );
+                               ~Java_global_object          ();
+
+    void                        operator =                  ( jobject jo )                          { assign( jo ); }
+                                operator jobject            ()                                      { return _jobject; }
+    void                        assign                      ( jobject );
+
+    Spooler*                   _spooler;
+    jobject                    _jobject;
+};
+
+//-------------------------------------------------------------------------------------------------
+
+struct Java_idispatch : Java_global_object
+{
+                                Java_idispatch              ( Spooler* sp, IDispatch* );
+                               ~Java_idispatch              ();
+
+    ptr<IDispatch>             _idispatch;
+};
+
 //-----------------------------------------------------------------------------Java_module_instance
 // Für Java-Objekte
 
 struct Java_module_instance : Module_instance
 {
-                                Java_module_instance        ( Module* script )                      : Module_instance(script), _zero_(this+1) {}
+                                Java_module_instance        ( Module* module )                      : Module_instance(module), _zero_(this+1), _jobject(_module->_spooler) {}
                                ~Java_module_instance        ()                                      { close(); }
 
     void                        init                        ();
@@ -91,13 +116,17 @@ struct Java_module_instance : Module_instance
     Variant                     call                        ( const string& name );
     Variant                     call                        ( const string& name, int param );
     virtual bool                name_exists                 ( const string& name );
-    bool                        callable                    ()                                      { return _object != NULL; }
+    bool                        callable                    ()                                      { return _jobject != NULL; }
+    void                        add_obj                     ( const ptr<IDispatch>& object, const string& name );
 
 
     Fill_zero                  _zero_;
     Java_vm*                   _java_vm;
     JNIEnv*                    _env;
-    jobject                    _object;
+    Java_global_object         _jobject;
+
+    typedef list< ptr<Java_idispatch> >  Added_objects;
+    Added_objects              _added_jobjects;
 };
 
 //-------------------------------------------------------------------------------------------------

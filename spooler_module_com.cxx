@@ -1,4 +1,4 @@
-// $Id: spooler_module_com.cxx,v 1.1 2002/11/01 09:27:11 jz Exp $
+// $Id: spooler_module_com.cxx,v 1.2 2002/11/06 06:30:48 jz Exp $
 /*
     Hier sind implementiert
 
@@ -225,12 +225,14 @@ void Scripting_engine_module_instance::load()
 }
 
 //------------------------------------------------------------------Scripting_engine_module_instance::add_obj
-/*
+
 void Scripting_engine_module_instance::add_obj( const ptr<IDispatch>& object, const string& name )
 {
     _script_site->add_obj( object, Bstr(name) );
+
+    Com_module_instance_base::add_obj( object, name );
 }
-*/
+
 //--------------------------------------------------------------------Scripting_engine_module_instance::start
 
 void Scripting_engine_module_instance::start()
