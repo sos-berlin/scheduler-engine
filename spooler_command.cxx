@@ -1,4 +1,4 @@
-// $Id: spooler_command.cxx,v 1.37 2002/02/28 16:46:06 jz Exp $
+// $Id: spooler_command.cxx,v 1.38 2002/03/01 14:38:09 jz Exp $
 /*
     Hier ist implementiert
 
@@ -142,9 +142,9 @@ xml::Element_ptr Command_processor::execute_modify_spooler( const xml::Element_p
         else
         if( cmd == "terminate_and_restart" )  _spooler->cmd_terminate_and_restart();
         else
-        if( cmd == "abort_immediately"     )  _exit(1);
+        if( cmd == "abort_immediately"     )  TerminateProcess(GetCurrentProcess(),1);  // _exit() lässt noch Delphi-Code ausführen.
         else
-        if( cmd == "abort_immediately_and_restart" )  { try{ spooler_restart( _spooler->is_service() ); }catch(...){}; _exit(1); }
+        if( cmd == "abort_immediately_and_restart" )  { try{ spooler_restart( _spooler->is_service() ); }catch(...){}; TerminateProcess(GetCurrentProcess(),1); }
         else
       //if( cmd == "new_log"               )  _spooler->cmd_new_log();
       //else

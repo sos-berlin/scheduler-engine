@@ -1,4 +1,4 @@
-// $Id: spooler_config.cxx,v 1.22 2002/02/28 16:46:06 jz Exp $
+// $Id: spooler_config.cxx,v 1.23 2002/03/01 14:38:09 jz Exp $
 
 //#include <precomp.h>
 
@@ -175,12 +175,7 @@ void Run_time::set_xml( const xml::Element_ptr& element )
     Day                     default_day;
     bool                    period_seen = false;
     
-    //default_period.set_xml( element, NULL );
-    //default_period._end = 24*60*60;
-    Sos_optional_date_time end;
-    end.set_time( "24:00:00" );
-    default_period._begin = 0;
-    default_period._end = end;
+    default_period.set_xml( element, NULL );
     default_day = default_period;
 
     bool a_day_set = false;

@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.74 2002/02/28 16:46:05 jz Exp $
+// $Id: spooler.cxx,v 1.75 2002/03/01 14:38:09 jz Exp $
 /*
     Hier sind implementiert
 
@@ -14,6 +14,7 @@
 #include <time.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <direct.h>
 
 #include "../kram/sosprof.h"
 #include "../kram/sosopt.h"
@@ -358,6 +359,8 @@ void Spooler::load_arg()
             if( opt.with_value( "log"              ) )  ;   // wurde in sos_main() bearbeitet
             else
             if( opt.with_value( "config"           ) )  _config_filename = opt.value();
+            else
+            if( opt.with_value( "cd"               ) )  { string dir = opt.value(); if( chdir( dir.c_str() ) )  throw_errno( errno, "chdir", dir.c_str() ); }
             else
             if( opt.with_value( "id"               ) )  _spooler_id = opt.value();
             else
