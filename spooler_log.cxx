@@ -1,4 +1,4 @@
-// $Id: spooler_log.cxx,v 1.54 2002/12/08 20:27:26 jz Exp $
+// $Id: spooler_log.cxx,v 1.55 2003/03/07 07:55:03 jz Exp $
 
 #include "spooler.h"
 #include "spooler_mail.h"
@@ -548,7 +548,6 @@ void Prefix_log::set_mail_body( const string& body, bool overwrite )
 
 void Prefix_log::send( int reason )
 {
-#ifdef Z_WINDOWS
     // reason == -2  =>  Gelegentlicher Aufruf, um Fristen zu prüfen und ggfs. eMail zu versenden
     // reason == -1  =>  Job mit Fehler beendet
     // reason >=  0  =>  Anzahl spooler_process()
@@ -556,7 +555,9 @@ void Prefix_log::send( int reason )
     if( _file == -1 )       // Nur senden, wenn die Log-Datei beschrieben worden ist
     {
         _first_send = 0;
+#ifdef Z_WINDOWS
         _mail = NULL;
+#endif
     }
     else
     {
@@ -570,7 +571,9 @@ void Prefix_log::send( int reason )
         if( _first_send == 0  &&  !mail_it )
         {
             close2();    // Protokoll nicht senden
+#ifdef Z_WINDOWS
             _mail = NULL;
+#endif
         }
         else
         {
@@ -594,7 +597,6 @@ void Prefix_log::send( int reason )
     }
  
     _last_send = Time::now();
-#endif
 }
 
 //--------------------------------------------------------------------------Prefix_log::send_really
