@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.100 2002/05/28 21:11:13 jz Exp $
+// $Id: spooler.cxx,v 1.101 2002/05/30 11:56:56 jz Exp $
 /*
     Hier sind implementiert
 
@@ -95,10 +95,16 @@ void send_error_email( const string& error_text, int argc, char** argv )
         msg.set_subject( "FEHLER BEI SPOOLER-START: " + error_text );
         msg.add_header_field( "X-SOS-Spooler", "" );
 
-        string body;
+        string body = "Der Spooler-Dienst konnte nicht gestartet werden.\n"
+                      "\n"
+                      "\n"
+                      "Der Aufruf war:\n"
+                      "\n";
+                       
 
         for( int i = 0; i < argc; i++ )  body += argv[i], body += ' ';
-        body += "\n\n";
+        body += "\n\n\n"
+                "Fehlermeldung:\n";
         body += error_text;
         msg.set_body( body );
 
