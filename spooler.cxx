@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.92 2002/04/10 17:15:11 jz Exp $
+// $Id: spooler.cxx,v 1.93 2002/04/10 19:45:10 jz Exp $
 /*
     Hier sind implementiert
 
@@ -37,6 +37,7 @@ extern const Bool _dll = false;
 
 namespace spooler {
 
+const char* default_factory_ini  = "factory.ini";
 const string new_suffix          = "~new";  // Suffix für den neuen Spooler, der den bisherigen beim Neustart ersetzen soll
 const double renew_wait_interval = 0.1;
 const double renew_wait_time     = 30;      // Wartezeit für Brückenspooler, bis der alte Spooler beendet ist und der neue gestartet werden kann.
@@ -146,6 +147,7 @@ Spooler::Spooler()
     _script_instance(&_prefix_log),
     _log_level( log_info ),
     _db(this),
+    _factory_ini( default_factory_ini ),
 
     _smtp_server   ("-"),   // Für spooler_log.cxx: Nicht setzen, damit Default aus sos.ini erhalten bleibt
     _log_mail_from ("-"),
@@ -394,6 +396,12 @@ void Spooler::load_arg()
 {
     assert( GetCurrentThreadId() == _thread_id );
 
+    for( Sos_option_iterator opt ( _argc, _argv ); !opt.end(); opt.next() )
+    {
+        if( opt.with_value( "ini" ) )  _factory_ini = opt.value();
+    }
+
+
     string log_level = as_string( _log_level );
 
     _spooler_id         = read_profile_string    ( _factory_ini, "spooler", "id"                 );
@@ -421,7 +429,7 @@ void Spooler::load_arg()
             else
             if( opt.with_value( "log"              ) )  ;   // wurde in sos_main() bearbeitet
             else
-            if( opt.with_value( "ini"              ) )  ;   // wurde in sos_main() bearbeitet
+            if( opt.with_value( "ini"              ) )  ;   //
             else
             if( opt.with_value( "config"           ) )  _config_filename = opt.value();
             else
@@ -898,7 +906,7 @@ void __cdecl delete_new_spooler( void* )
 
 //-------------------------------------------------------------------------------------spooler_main
 
-int spooler_main( int argc, char** argv, const string& factory_ini )
+int spooler_main( int argc, char** argv )
 {
     int ret;
     bool is_service = false;
@@ -909,8 +917,6 @@ int spooler_main( int argc, char** argv, const string& factory_ini )
 #       endif
 
         spooler::Spooler spooler;
-
-        spooler._factory_ini = factory_ini;
 
         ret = spooler.launch( argc, argv );
         
@@ -938,7 +944,7 @@ int sos_main( int argc, char** argv )
     string  command_line;
     bool    renew_service = false;
     string  log_filename;
-    string  factory_ini = "factory.ini";
+    string  factory_ini = spooler::default_factory_ini;
 
     for( Sos_option_iterator opt ( argc, argv ); !opt.end(); opt.next() )
     {
@@ -999,7 +1005,7 @@ int sos_main( int argc, char** argv )
         }
         else
         {
-            ret = spooler::spooler_main( argc, argv, factory_ini );
+            ret = spooler::spooler_main( argc, argv );
         }
     }
 

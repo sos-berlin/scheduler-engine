@@ -1,4 +1,4 @@
-// $Id: spooler_history.cxx,v 1.12 2002/04/10 17:15:12 jz Exp $
+// $Id: spooler_history.cxx,v 1.13 2002/04/10 19:45:10 jz Exp $
 
 #include "../kram/sos.h"
 #include "spooler.h"
@@ -306,19 +306,23 @@ void Spooler_db::rollback()
 
 void Spooler_db::spooler_start()
 {
-    try
+    if( _db.opened() )
     {
-        _id = get_id();     // Der Spooler-Satz hat auch eine Id
-        Transaction ta = this;
+        try
         {
-            execute( "INSERT into " + _spooler->_history_tablename + " (id,spooler_id,job_name,start_time) "
-                     "values (" + as_string(_id) + "," + sql_quoted(_spooler->id()) + ",'(Spooler)',{ts'" + Time::now().as_string(Time::without_ms) + "'})" );
-            ta.commit();
+            _id = get_id();     // Der Spooler-Satz hat auch eine Id
+     
+            Transaction ta = this;
+            {
+                execute( "INSERT into " + _spooler->_history_tablename + " (id,spooler_id,job_name,start_time) "
+                         "values (" + as_string(_id) + "," + sql_quoted(_spooler->id()) + ",'(Spooler)',{ts'" + Time::now().as_string(Time::without_ms) + "'})" );
+                ta.commit();
+            }
         }
-    }
-    catch( const exception& x )  
-    { 
-        _spooler->_log.warn( string("FEHLER BEIM SCHREIBEN DER HISTORIE: ") + x.what() ); 
+        catch( const exception& x )  
+        { 
+            _spooler->_log.warn( string("FEHLER BEIM SCHREIBEN DER HISTORIE: ") + x.what() ); 
+        }
     }
 }
 
@@ -326,18 +330,21 @@ void Spooler_db::spooler_start()
 
 void Spooler_db::spooler_stop()
 {
-    try
+    if( _db.opened() )
     {
-        Transaction ta = this;
+        try
         {
-            execute( "UPDATE " + _spooler->_history_tablename + " set end_time={ts'" + Time::now().as_string(Time::without_ms) + "'} "
-                     "where id=" + as_string(_id) );
-            ta.commit();
+            Transaction ta = this;
+            {
+                execute( "UPDATE " + _spooler->_history_tablename + " set end_time={ts'" + Time::now().as_string(Time::without_ms) + "'} "
+                         "where id=" + as_string(_id) );
+                ta.commit();
+            }
         }
-    }
-    catch( const exception& x )  
-    { 
-        _spooler->_log.warn( string("FEHLER BEIM SCHREIBEN DER HISTORIE: ") + x.what() ); 
+        catch( const exception& x )  
+        { 
+            _spooler->_log.warn( string("FEHLER BEIM SCHREIBEN DER HISTORIE: ") + x.what() ); 
+        }
     }
 }
 
