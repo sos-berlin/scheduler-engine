@@ -1,4 +1,4 @@
-// $Id: spooler_com.h,v 1.1 2001/01/13 18:43:59 jz Exp $
+// $Id: spooler_com.h,v 1.2 2001/01/20 23:39:16 jz Exp $
 
 #ifndef __SPOOLER_COM_H
 #define __SPOOLER_COM_H
@@ -27,6 +27,7 @@ namespace spooler {
 enum   Log_kind;
 struct Log;
 struct Object_set;
+struct Job;
 struct Task;
 struct Spooler;
 
@@ -69,6 +70,22 @@ struct Com_object_set : spooler_com::Iobject_set, Sos_ole_object
     Object_set*                _object_set;
 };
 
+//------------------------------------------------------------------------------------------Com_job
+
+struct Com_job : spooler_com::Ijob, Sos_ole_object               
+{
+                                Com_job                     ( Job* );
+
+    USE_SOS_OLE_OBJECT
+
+    void                        close                       ()                              { _job = NULL; }
+
+    STDMETHODIMP                start_when_directory_changed( BSTR directory_name );
+    STDMETHODIMP                start                       ();
+
+    Job*                       _job;
+};
+
 //-----------------------------------------------------------------------------------------Com_task
 
 struct Com_task : spooler_com::Itask, Sos_ole_object               
@@ -80,7 +97,9 @@ struct Com_task : spooler_com::Itask, Sos_ole_object
     void                        close                       ()                              { _task = NULL; }
 
     STDMETHODIMP                get_Object_set              ( spooler_com::Iobject_set** );
-    STDMETHODIMP                wake_when_directory_changed ( BSTR directory_name );
+  //STDMETHODIMP                wake_when_directory_changed ( BSTR directory_name );
+    STDMETHODIMP                error                       ( BSTR error_text );
+    STDMETHODIMP                get_Job                     ( spooler_com::Ijob** );
 
     Task*                      _task;
 };
@@ -97,7 +116,9 @@ struct Com_spooler : spooler_com::Ispooler, Sos_ole_object
 
     STDMETHODIMP                get_Log                     ( spooler_com::Ilog** );
     STDMETHODIMP                get_param                   ( BSTR* );
+    STDMETHODIMP                get_id                      ( BSTR* );
     STDMETHODIMP                get_script                  ( IDispatch** );
+    STDMETHODIMP                get_Job                     ( BSTR job_name, spooler_com::Ijob** );
 
   protected:
     Spooler*                   _spooler;

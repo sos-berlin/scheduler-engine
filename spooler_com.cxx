@@ -1,4 +1,4 @@
-// $Id: spooler_com.cxx,v 1.2 2001/01/16 06:23:17 jz Exp $
+// $Id: spooler_com.cxx,v 1.3 2001/01/20 23:39:16 jz Exp $
 /*
     Hier sind implementiert
 
@@ -25,6 +25,7 @@ using namespace spooler_com;
 Typelib_descr spooler_typelib ( spooler_com::LIBID_spooler_com, "Spooler", "1.0" );
 
 DESCRIBE_CLASS( &spooler_typelib, Com_log       , log       , spooler_com::CLSID_Log       , "Spooler.Log"       , "1.0" )
+DESCRIBE_CLASS( &spooler_typelib, Com_job       , job       , spooler_com::CLSID_Job       , "Spooler.Job"       , "1.0" )
 DESCRIBE_CLASS( &spooler_typelib, Com_task      , task      , spooler_com::CLSID_Task      , "Spooler.Task"      , "1.0" )
 DESCRIBE_CLASS( &spooler_typelib, Com_object_set, object_set, spooler_com::CLSID_Object_set, "Spooler.Object_set", "1.0" )
 DESCRIBE_CLASS( &spooler_typelib, Com_spooler   , spooler   , spooler_com::CLSID_spooler   , "Spooler.Spooler"   , "1.0" )
@@ -104,6 +105,49 @@ STDMETHODIMP Com_object_set::get_high_level( int* result )
     return NOERROR;
 }
 
+//---------------------------------------------------------------------------------Com_job::Com_job
+
+Com_job::Com_job( Job* job )
+:
+    Sos_ole_object( job_class_ptr, this ),
+    _job(job)
+{
+}
+
+//------------------------------------------------------------Com_job::start_when_directory_changed 
+
+STDMETHODIMP Com_job::start_when_directory_changed( BSTR directory_name )
+{
+    HRESULT hr = NOERROR;
+    if( !_job )  return E_POINTER;
+
+    try
+    {
+        _job->start_when_directory_changed( bstr_as_string( directory_name ) );
+    }
+    catch( const Xc&   x )  { hr = _set_excepinfo(x); }
+    catch( const xmsg& x )  { hr = _set_excepinfo(x); }
+
+    return NOERROR;
+}
+
+//-----------------------------------------------------------------------------------Com_job::start
+
+STDMETHODIMP Com_job::start()
+{
+    HRESULT hr = NOERROR;
+    if( !_job )  return E_POINTER;
+
+    try
+    {
+        _job->start();
+    }
+    catch( const Xc&   x )  { hr = _set_excepinfo(x); }
+    catch( const xmsg& x )  { hr = _set_excepinfo(x); }
+
+    return NOERROR;
+}
+
 //-------------------------------------------------------------------------------Com_task::Com_task
 
 Com_task::Com_task( Task* task )
@@ -124,16 +168,36 @@ STDMETHODIMP Com_task::get_Object_set( Iobject_set** result )
     return NOERROR;
 }
 
-//------------------------------------------------------------Com_task::wake_when_directory_changed 
+//----------------------------------------------------------------------------------Com_task::error
 
-STDMETHODIMP Com_task::wake_when_directory_changed( BSTR directory_name )
+STDMETHODIMP Com_task::error( BSTR error_text_bstr )
 {
     HRESULT hr = NOERROR;
     if( !_task )  return E_POINTER;
 
     try
     {
-        _task->wake_when_directory_changed( bstr_as_string( directory_name ) );
+        string error_text = bstr_as_string( error_text_bstr );
+        _task->error( Xc( "SPOOLER-120", error_text.c_str() ) );
+    }
+    catch( const Xc&   x )  { hr = _set_excepinfo(x); }
+    catch( const xmsg& x )  { hr = _set_excepinfo(x); }
+
+    return NOERROR;
+}
+
+//-----------------------------------------------------------------------------...Com_task::get_job
+
+STDMETHODIMP Com_task::get_Job( Ijob** com_job )
+{
+    HRESULT hr = NOERROR;
+
+    if( !_task )  return E_POINTER;
+
+    try
+    {
+        *com_job = _task->_job->_com_job;
+        (*com_job)->AddRef();
     }
     catch( const Xc&   x )  { hr = _set_excepinfo(x); }
     catch( const xmsg& x )  { hr = _set_excepinfo(x); }
@@ -171,6 +235,16 @@ STDMETHODIMP Com_spooler::get_Log( spooler_com::Ilog** com_log )
     return NOERROR;
 }
 
+//----------------------------------------------------------------------------------Com_spooler::id
+
+STDMETHODIMP Com_spooler::get_id( BSTR* id_bstr )
+{
+    if( !_spooler )  return E_POINTER;
+
+    *id_bstr = SysAllocString_string( _spooler->_spooler_id );
+    return NOERROR;
+}
+
 //-------------------------------------------------------------------------------Com_spooler::param
 
 STDMETHODIMP Com_spooler::get_param( BSTR* param_bstr )
@@ -189,6 +263,25 @@ STDMETHODIMP Com_spooler::get_script( IDispatch** script_object )
 
     *script_object = _spooler->_script_instance.dispatch();
     if( *script_object )  (*script_object)->AddRef();
+    return NOERROR;
+}
+
+//-----------------------------------------------------------------------------Com_spooler::get_job
+
+STDMETHODIMP Com_spooler::get_Job( BSTR job_name, Ijob** com_job )
+{
+    HRESULT hr = NOERROR;
+
+    if( !_spooler )  return E_POINTER;
+
+    try
+    {
+        *com_job = _spooler->get_job( bstr_as_string( job_name ) )->_com_job;
+        (*com_job)->AddRef();
+    }
+    catch( const Xc&   x )  { hr = _set_excepinfo(x); }
+    catch( const xmsg& x )  { hr = _set_excepinfo(x); }
+
     return NOERROR;
 }
 

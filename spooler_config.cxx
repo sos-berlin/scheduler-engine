@@ -1,4 +1,4 @@
-// $Id: spooler_config.cxx,v 1.1 2001/01/16 06:23:17 jz Exp $
+// $Id: spooler_config.cxx,v 1.2 2001/01/20 23:39:16 jz Exp $
 
 //#include <precomp.h>
 
@@ -75,6 +75,7 @@ void Script::operator = ( const xml::Element_ptr& element )
     if( use_engine == "job"    )  _reuse = reuse_job;
   //if( use_engine == "global" )  _reuse = reuse_global;
 
+
 /*
     xml::Element_ptr text_element = element->firstChild;
     if( text_element == NULL )  throw_xc( "SPOOLER-107" );
@@ -87,6 +88,9 @@ void Script::operator = ( const xml::Element_ptr& element )
 void Object_set_class::operator = ( const xml::Element_ptr& element )
 {
     _name = as_string( element->getAttribute( "name" ) );
+
+    string iface = as_string( element->getAttribute( "script_interface" ) );
+    _object_interface = iface == "oo";
 
     xml::Element_ptr e = element->firstChild;
     while( e )
@@ -166,13 +170,28 @@ Run_time::Run_time( const xml::Element_ptr& element )
     
     _retry_period = as_double( element->getAttribute( "retry_period" ) );
     
-    dt.set_time( as_string( element->getAttribute( "begin" ) ) );
-    _begin_time_of_day = dt.hour() * 60*60 + dt.minute() * 60 + dt.second();
+    string begin = as_string( element->getAttribute( "begin" ) );
+    if( !begin.empty() )
+    {
+        dt.set_time( begin );
+        _begin_time_of_day = dt;
 
-    dt.set_time( as_string( element->getAttribute( "end" ) ) );
-    _end_time_of_day = dt.hour() * 60*60 + dt.minute() * 60 + dt.second();
+        dt.set_time( as_string( element->getAttribute( "end" ) ) );
+        _end_time_of_day = dt;
+    }
+    else
+    {
+        string single_start = as_string( element->getAttribute( "single_start" ) );
+        if( !single_start.empty() ) 
+        {
+            dt.set_time( single_start );
+            _begin_time_of_day = dt;
+            _retry_period = latter_day;
+        }
+    }
 
     _let_run = as_bool( element->getAttribute( "let_run" ) );
+
 
 
     bool             a_day_set = false;
@@ -218,17 +237,15 @@ Run_time::Run_time( const xml::Element_ptr& element )
     check();
 }
 
-//-----------------------------------------------------------------------------------------Job::Job
+//----------------------------------------------------------------------------------Job::operator =
 
-Job::Job( const xml::Element_ptr& element )
-: 
-    _zero_(this+1),
-    _name           ( as_string( element->getAttribute( "name" ) ) ),
-    _run_time       ( default_single_element( element, "run_time" ) ),
-  //_rerun          ( as_bool( element->getAttribute( "rerun" ) ) ),
-  //_stop_after_error( as_bool( element->getAttribute( "stop_after_errorn ) ) ),
-    _priority       ( as_int( element->getAttribute( "priority" ) ) )
+void Job::operator = ( const xml::Element_ptr& element )
 {
+    _name             = as_string( element->getAttribute( "name" ) );
+  //_rerun            = as_bool( element->getAttribute( "rerun" ) ) ),
+  //_stop_after_error = as_bool( element->getAttribute( "stop_after_errorn ) );
+    _priority         = as_int( element->getAttribute( "priority" ) );
+
     string text;
 
     text = as_string( element->getAttribute( "output_level" ) );
@@ -240,6 +257,8 @@ Job::Job( const xml::Element_ptr& element )
         if( e->tagName == "object_set" )  _object_set_descr = SOS_NEW( Object_set_descr( e ) );
         else
         if( e->tagName == "script"     )  _script = e;
+        else
+        if( e->tagName == "run_time"   )  _run_time = e;
      
         e = e->nextSibling;
     }
@@ -270,7 +289,8 @@ void Spooler::load_jobs_from_xml( Job_list* liste, const xml::Element_ptr& eleme
             string spooler_id = as_string( e->getAttribute( "spooler_id" ) );
             if( spooler_id.empty()  ||  spooler_id == _spooler_id )
             {
-                Sos_ptr<Job> job = SOS_NEW( Job( e ) );
+                Sos_ptr<Job> job = SOS_NEW( Job( this ) );
+                *job = e;
 
                 if( job->_object_set_descr )        // job->_object_set_descr->_class ermitteln
                 {

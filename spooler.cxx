@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.33 2001/01/17 11:12:17 jz Exp $
+// $Id: spooler.cxx,v 1.34 2001/01/20 23:39:15 jz Exp $
 /*
     Hier sind implementiert
 
@@ -29,6 +29,16 @@ namespace sos {
 extern const Bool _dll = false;
 
 namespace spooler {
+
+/*
+struct Set_console_code_page
+{
+                                Set_console_code_page       ( uint cp )         { _cp = GetConsoleOutputCP(); SetConsoleOutputCP( cp ); }
+                               ~Set_console_code_page       ()                  { SetConsoleOutputCP( _cp ); }
+
+    uint                       _cp;
+};
+*/
 
 //----------------------------------------------------------------------------Script_instance::init
 
@@ -131,7 +141,21 @@ Spooler::~Spooler()
     if( _com_log     )  _com_log->close();
 }
 
-//----------------------------------------------------------------------------Spooler::state_state
+//---------------------------------------------------------------------------------Spooler::get_job
+
+Job* Spooler::get_job( const string& job_name )
+{
+    FOR_EACH( Job_list, _job_list, it )
+    {
+        Job* job = *it;
+        if( job->_name == job_name )  return job;
+    }
+
+    throw_xc( "SPOOLER-108", job_name );
+    return NULL;
+}
+
+//-------------------------------------------------------------------------------Spooler::set_state
 
 void Spooler::set_state( State state )
 {
@@ -147,7 +171,7 @@ void Spooler::load_arg()
 {
     _config_filename  = read_profile_string( "factory.ini", "spooler", "config" );
     _log_directory    = read_profile_string( "factory.ini", "spooler", "log-dir" );
-    _spooler_id       = read_profile_string( "factory.ini", "spooler", "spooler-id" );
+    _spooler_id       = read_profile_string( "factory.ini", "spooler", "id" );
     _spooler_param    = read_profile_string( "factory.ini", "spooler", "param" );
 
     try
@@ -162,7 +186,7 @@ void Spooler::load_arg()
             else
             if( opt.with_value( "log-dir"          ) )  _log_directory = opt.value();
             else
-            if( opt.with_value( "spooler-id"       ) )  _spooler_id = opt.value();
+            if( opt.with_value( "id"               ) )  _spooler_id = opt.value();
             else
             if( opt.with_value( "param"            ) )  _spooler_param = opt.value();
             else
@@ -180,7 +204,7 @@ void Spooler::load_arg()
                     "       -service-\n"
                     "       -log=HOSTWARELOGFILENAME\n"
                     "       -log-dir=DIRECTORY|*stderr\n"
-                    "       -spooler-id=ID\n"
+                    "       -id=ID\n"
                     "       -param=PARAM\n";
         }
 
@@ -193,7 +217,7 @@ void Spooler::load_arg()
 void Spooler::load()
 {
     set_state( s_starting );
-    _log.msg( "Spooler::load" );
+    _log.msg( "Spooler::load " + _config_filename );
 
     {
         Thread_semaphore::Guard guard = &_semaphore;
@@ -214,8 +238,7 @@ void Spooler::start()
     _log.set_directory( _log_directory );
     _log.open_new();
 
-    if( _communication.started() )  _communication.rebind();
-                              else  _communication.start_thread();
+    _communication.start_or_rebind();
 
     _state_cmd = sc_none;
     set_state( s_starting );
@@ -241,7 +264,7 @@ void Spooler::start()
         _task_list.push_back( task );
     }
 
-    _spooler_start_time = now();
+    _spooler_start_time = Time::now();
 }
 
 //------------------------------------------------------------------------------------Spooler::stop
@@ -351,7 +374,7 @@ void Spooler::wait()
     }
 
 
-    Time wait_time = _next_start_time - now();
+    Time wait_time = _next_start_time - Time::now();
     if( wait_time > 0 ) 
     {
         if( next_task )  next_task->_log.msg( "Nächster Start " + Sos_optional_date_time( _next_start_time ).as_string() );
@@ -385,7 +408,7 @@ void Spooler::wait()
 
 void Spooler::run()
 {
-    _log.msg( "Spooler::run" );
+  //_log.msg( "Spooler::run" );
     
     set_state( s_running );
 
@@ -478,7 +501,9 @@ int Spooler::launch( int argc, char** argv )
     {
         if( _state_cmd != sc_load_config )  load();
         
-        if( _config_element )  load_config( _config_element ), _config_element = NULL, _config_document = NULL;
+        if( _config_element == NULL )  throw_xc( "SPOOLER-116", _spooler_id );
+            
+        load_config( _config_element ), _config_element = NULL, _config_document = NULL;
 
         start();
         run();
@@ -498,7 +523,11 @@ int spooler_main( int argc, char** argv )
     int ret;
 
     {
-        Ole_initialize ole;
+#       ifdef SYSTEM_WIN
+            Ole_initialize ole;
+          //static Set_console_code_page cp ( 1252 );              // Für die richtigen Umlaute
+#       endif
+
 
         spooler::Spooler spooler;
 

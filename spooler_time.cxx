@@ -1,4 +1,4 @@
-// $Id: spooler_time.cxx,v 1.1 2001/01/16 06:23:18 jz Exp $
+// $Id: spooler_time.cxx,v 1.2 2001/01/20 23:39:16 jz Exp $
 /*
     Hier sind implementiert
 
@@ -23,9 +23,16 @@
 namespace sos {
 namespace spooler {
 
-//---------------------------------------------------------------------------------------------now
+//--------------------------------------------------------------------------------Time::operator =
 
-Time now() 
+void Time::operator = ( const Sos_optional_date_time& dt )
+{
+    _time = dt.hour() * 60*60 + dt.minute() * 60 + dt.second();
+}
+
+//---------------------------------------------------------------------------------------Time::now
+
+Time Time::now() 
 {
 #   if 1 //defined SYSTEM_WIN
 

@@ -1,4 +1,4 @@
-// $Id: spooler_command.cxx,v 1.16 2001/01/17 11:12:17 jz Exp $
+// $Id: spooler_command.cxx,v 1.17 2001/01/20 23:39:16 jz Exp $
 /*
     Hier ist implementiert
 
@@ -69,7 +69,7 @@ xml::Element_ptr Command_processor::execute_show_task( Task* task )
     if( task->_state_cmd )
         task_element->setAttribute( "cmd", as_dom_string( task->state_cmd_name() ) );
 
-    if( task->_state == Task::s_pending )
+    if( task->_state == Task::s_pending && task->_next_start_time != latter_day )
         task_element->setAttribute( "next_start_time", as_dom_string( Sos_optional_date_time( task->_next_start_time ).as_string() ) );
 
     if( task->_state == Task::s_running )

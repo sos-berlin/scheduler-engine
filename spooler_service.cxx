@@ -1,4 +1,4 @@
-// $Id: spooler_service.cxx,v 1.4 2001/01/16 16:40:36 jz Exp $
+// $Id: spooler_service.cxx,v 1.5 2001/01/20 23:39:16 jz Exp $
 /*
     Hier sind implementiert
 
@@ -47,8 +47,10 @@ struct Service_thread_param
 
 //----------------------------------------------------------------------------------------event_log
 
-static void event_log( const string& msg )
+static void event_log( const string& msg_par )
 {
+    string msg = "***DOCUMENTFACTORY SPOOLER*** " + msg_par;
+
     HANDLE h = RegisterEventSource( NULL, "Application" );
     const char* m = msg.c_str();
  

@@ -1,4 +1,4 @@
-// $Id: spooler_wait.cxx,v 1.3 2001/01/16 06:23:18 jz Exp $
+// $Id: spooler_wait.cxx,v 1.4 2001/01/20 23:39:16 jz Exp $
 /*
     Hier sind implementiert
 
@@ -23,7 +23,7 @@ namespace spooler {
 void Directory_watcher::watch_directory( const string& directory )
 {
     _handle = FindFirstChangeNotification( directory.c_str(), FALSE, FILE_NOTIFY_CHANGE_FILE_NAME );
-    if( !_handle )  throw_mswin_error( "FindFirstChangeNotification" );
+    if( _handle == INVALID_HANDLE_VALUE )  _handle = NULL, throw_mswin_error( "FindFirstChangeNotification" );
 }
 
 //-------------------------------------------------------------------Directory_watcher::watch_again
@@ -76,7 +76,7 @@ void Wait_handles::wait( double wait_time )
     {
         int sleep_time_ms = INT_MAX;
         
-        int t = min( sleep_time_ms, int( wait_time * 1000.0 ) );
+        int t = min( (double)sleep_time_ms, wait_time * 1000.0 );
 
         DWORD ret = WaitForMultipleObjects( _handles.size(), &_handles[0], FALSE, t ); 
 

@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.2 2001/01/16 16:40:36 jz Exp $
+// $Id: spooler_task.cxx,v 1.3 2001/01/20 23:39:16 jz Exp $
 /*
     Hier sind implementiert
 
@@ -18,11 +18,35 @@
 namespace sos {
 namespace spooler {
 
+//--------------------------------------------------------------------------------------------const
+
+static const char spooler_init_name[]    = "spooler_init";
+static const char spooler_open_name[]    = "spooler_open";
+static const char spooler_close_name[]   = "spooler_close";
+static const char spooler_get_name[]     = "spooler_get";
+static const char spooler_process_name[] = "spooler_process";
+static const char spooler_level_name[]   = "spooler_level";
+
+//---------------------------------------------------------------------check_spooler_process_result
+
+bool check_spooler_process_result( const CComVariant& vt )
+{
+    if( vt.vt == VT_EMPTY    )  return true;                       // Keine Rückgabe? True, also weiter machen
+    if( vt.vt == VT_DISPATCH )  return vt.pdispVal != NULL;        // Nothing => False, also Ende
+    if( vt.vt == VT_BOOL     )  return vt.bVal != NULL;            // Nothing => False, also Ende
+
+    CComVariant v = vt;
+
+    HRESULT hr = v.ChangeType( VT_BOOL );
+    if( FAILED(hr) )  throw_ole( hr, "VariantChangeType", spooler_process_name );
+    return vt.bVal != 0;
+}
+
 //----------------------------------------------------------------------------Spooler_object::level
 
 Level Spooler_object::level()
 {
-    CComVariant level = com_property_get( _dispatch, "spooler_level" );
+    CComVariant level = com_property_get( _dispatch, spooler_level_name );
     level.ChangeType( VT_INT );
 
     return level.intVal;
@@ -32,7 +56,7 @@ Level Spooler_object::level()
 
 void Spooler_object::process( Level output_level )
 {
-    com_call( _dispatch, "spooler_process", output_level );
+    com_call( _dispatch, spooler_process_name, output_level );
 }
 
 //---------------------------------------------------------------------------Object_set::Object_set
@@ -43,6 +67,7 @@ Object_set::Object_set( Spooler* spooler, Task* task, const Sos_ptr<Object_set_d
     _spooler(spooler),
     _task(task),
     _object_set_descr(descr),
+    _class(descr->_class),
     _script_instance(&descr->_class->_script) 
 {
 }
@@ -60,21 +85,13 @@ void Object_set::open()
 {
     CComVariant object_set_vt;
 
-    if( _script_instance.name_exists( "spooler_dont_use_objects" ) )
-    {
-        _use_objects = false;
-        _script_instance.call( "spooler_dont_use_objects" );
-    }
-    else
-        _use_objects = true;
-
-
-    if( _use_objects )
+    if( _class->_object_interface )
     {
         object_set_vt = _script_instance.call( "spooler_make_object_set" );
 
         if( object_set_vt.vt != VT_DISPATCH 
          || object_set_vt.pdispVal == NULL  )  throw_xc( "SPOOLER-103", _object_set_descr->_class_name );
+
         _dispatch = object_set_vt.pdispVal;
     }
     else
@@ -82,19 +99,19 @@ void Object_set::open()
         _dispatch = _script_instance._script_site->_dispatch;
     }
 
-    com_call( _dispatch, "spooler_open" );
+    if( com_name_exists( _dispatch, spooler_open_name ) )  com_call( _dispatch, spooler_open_name );
 }
 
 //--------------------------------------------------------------------------------Object_set::close
 
 void Object_set::close()
 {
-    com_call( _dispatch, "spooler_close" );
+    if( com_name_exists( _dispatch, spooler_close_name ) )  com_call( _dispatch, spooler_close_name );
     _dispatch = NULL;
 }
 
 //----------------------------------------------------------------------------------Object_set::eof
-
+/*
 bool Object_set::eof()
 {
     CComVariant eof;
@@ -105,7 +122,7 @@ bool Object_set::eof()
 
     return V_BOOL( &eof ) != 0;
 }
-
+*/
 //----------------------------------------------------------------------------------Object_set::get
 
 Spooler_object Object_set::get()
@@ -114,7 +131,7 @@ Spooler_object Object_set::get()
 
     while(1)
     {
-        CComVariant obj = com_call( _dispatch, "spooler_get" );
+        CComVariant obj = com_call( _dispatch, spooler_get_name );
 
         if( obj.vt == VT_EMPTY    )  return Spooler_object(NULL);
         if( obj.vt != VT_DISPATCH
@@ -133,31 +150,75 @@ Spooler_object Object_set::get()
 
 bool Object_set::step( Level result_level )
 {
-    if( eof() ) 
+  //if( eof() )  return false;
+
+    if( _class->_object_interface )
     {
-        return false;
+        Spooler_object object = get();
+        if( object.is_null() )  return false;
+
+        object.process( result_level );
+        return true;
     }
     else
     {
-        if( _use_objects )
-        {
-            Spooler_object object = get();
-
-            if( object.is_null() )  return false;
-
-            object.process( result_level );
-        }
-        else
-        {
-            _script_instance.call( "spooler_get" );
-            _script_instance.call( "spooler_process", result_level );
-        }
-
-        return true;
+        return check_spooler_process_result( _script_instance.call( spooler_process_name, result_level ) );
     }
 }
 
-//-----------------------------------------------------------------------------------------Task::Task
+//-----------------------------------------------------------------------------------------Job::Job
+
+Job::Job( Spooler* spooler )
+: 
+    _zero_(this+1),
+    _spooler(spooler)
+{
+    _com_job = new Com_job( this );
+}
+
+//----------------------------------------------------------------------------------------Job::~Job
+
+Job::~Job()
+{
+    // COM-Objekte entkoppeln, falls noch jemand eine Referenz darauf hat:
+    if( _com_job )  _com_job->close();
+}
+
+//----------------------------------------------------------------Task::wake_when_directory_changed 
+
+void Job::start_when_directory_changed( const string& directory_name )
+{
+    Task* task = NULL;
+    FOR_EACH( Task_list, _spooler->_task_list, it )  if( +(*it)->_job == this )  { task = *it; break; }
+    if( !task )  throw_xc( "Job::start_when_directory_changed" );
+
+#   ifdef SYSTEM_WIN
+
+        task->_directory_watcher.watch_directory( directory_name );
+        if( task->_directory_watcher._handle )  _spooler->_wait_handles.remove( task->_directory_watcher._handle );
+        _spooler->_wait_handles.add( task->_directory_watcher._handle, task );
+
+#    else
+
+        throw_xc( "SPOOLER-112", "wake_when_directory_changed" );
+
+#   endif
+}
+
+//---------------------------------------------------------------------------------------Job::start
+
+void Job::start()
+{
+    Task* task = NULL;
+    FOR_EACH( Task_list, _spooler->_task_list, it )  if( +(*it)->_job == this )  { task = *it; break; }
+    if( !task )  throw_xc( "Job::start" );
+
+    if( !( task->_state & (Task::s_pending|Task::s_stopped) ) )  throw_xc( "SPOOLER-118", _name, task->state_name() );
+
+    task->start();
+}
+
+//---------------------------------------------------------------------------------------Task::Task
 
 Task::Task( Spooler* spooler, const Sos_ptr<Job>& job )    
 : 
@@ -175,7 +236,7 @@ Task::Task( Spooler* spooler, const Sos_ptr<Job>& job )
     _com_task = new Com_task( this );
 }
 
-//-----------------------------------------------------------------------------------------Task::Task
+//---------------------------------------------------------------------------------------Task::Task
 
 Task::~Task()    
 {
@@ -189,24 +250,24 @@ Task::~Task()
     if( _directory_watcher )  _spooler->_wait_handles.remove( _directory_watcher._handle );
 }
 
-//--------------------------------------------------------------------------Task::set_new_start_time
+//-------------------------------------------------------------------------Task::set_new_start_time
 
 void Task::set_new_start_time()
 {
     _next_start_time = _job->_run_time.next();
 }
 
-//---------------------------------------------------------------------------------------Task::error
+//--------------------------------------------------------------------------------------Task::error
 
 void Task::error( const Xc& x )
 {
     _log.error( x.what() );
 
     _error = x;
-    stop();
+  //stop();
 }
 
-//---------------------------------------------------------------------------------------Task::error
+//--------------------------------------------------------------------------------------Task::error
 
 void Task::error( const exception& x )
 {
@@ -214,58 +275,59 @@ void Task::error( const exception& x )
     error( xc );
 }
 
-//---------------------------------------------------------------------------------Task::start_error
+//--------------------------------------------------------------------------------Task::start_error
 
 void Task::start_error( const Xc& x )
 {
     error( x );
 }
 
-//-----------------------------------------------------------------------------------Task::end_error
+//----------------------------------------------------------------------------------Task::end_error
 
 void Task::end_error( const Xc& x )
 {
     error( x );
 }
 
-//----------------------------------------------------------------------------------Task::step_error
+//---------------------------------------------------------------------------------Task::step_error
 
 void Task::step_error( const Xc& x )
 {
     error( x );
 }
 
-//------------------------------------------------------------------------------Task::prepare_script
+//-----------------------------------------------------------------------------Task::prepare_script
 
 void Task::prepare_script()
 {
+    if( _script_instance )  return;
+
+
     Script_instance* s = NULL;
 
     if( _object_set            )  s = &_object_set->_script_instance;
     if( !_job->_script.empty() )  s = &_job_script_instance;
-
     if( !s )  throw_xc( "SPOOLER-111" );
     
-    if( s->_script->_reuse == Script::reuse_task )  _script_instance = NULL;
+  //if( s->_script->_reuse == Script::reuse_task )  _script_instance = NULL;
 
-    if( !_script_instance )
+  //if( !_script_instance )
     {
         _script_instance = s;
         _script_instance->init();
 
-        _script_instance->add_obj( (IDispatch*)_com_log              , "spooler_log"  );
-        _script_instance->add_obj( (IDispatch*)_spooler->_com_spooler, "spooler"      );
+        _script_instance->add_obj( (IDispatch*)_com_log              , "spooler_log" );
+        _script_instance->add_obj( (IDispatch*)_spooler->_com_spooler, "spooler"     );
+
+        _script_instance->add_obj( (IDispatch*)_job->_com_job        , "spooler_job" );
 
         _script_instance->load();
 
         // Bei reuse_job soll spooler_task erst nach spooler_init() bekannt sein,
         // denn spooler_task kann mit jeder Task wechseln (nicht in dieser Version).
-        // Das geht aber nicht, weil spooler_task.wake_on_directory_change() benötigt wird.
-        // wake_on_directory_change() sollte eine Methode von spooler_job sein. Und das gibt es nicht.
         _script_instance->add_obj( (IDispatch*)_com_task, "spooler_task" );
 
-        if( _script_instance->name_exists( "spooler_init" ) )  _script_instance->call( "spooler_init" );
-
+        if( _script_instance->name_exists( spooler_init_name ) )  _script_instance->call( spooler_init_name );
     }
 }
 
@@ -273,16 +335,19 @@ void Task::prepare_script()
 
 bool Task::start()
 {
-    _log.msg( "start" );
+  //_log.msg( "start" );
+
+    _error = NULL;
 
     _spooler->_task_count++;
-    _running_since = now();
+    _running_since = Time::now();
 
     try 
     {
         if( _job->_object_set_descr ) 
         {
-            if( !_object_set  ||  _script_instance->_script->_reuse == Script::reuse_task ) 
+          //if( !_object_set  ||  _script_instance->_script->_reuse == Script::reuse_task ) 
+            if( !_object_set ) 
             {
                 _object_set = SOS_NEW( Object_set( _spooler, this, _job->_object_set_descr ) );
                 _com_object_set = new Com_object_set( _object_set );
@@ -292,6 +357,10 @@ bool Task::start()
         prepare_script();
 
         if( _job->_object_set_descr )  _object_set->open();
+        else
+        if( _script_instance->name_exists( spooler_open_name ) )  _script_instance->call( spooler_open_name );
+
+        _opened = true;
 
         _step_count = 0;
         //_next_start_time = max( _next_start_time + _job->_run_time._retry_period, now() );
@@ -317,7 +386,7 @@ void Task::end()
 
     _state = s_ending;
 
-    _log.msg( "end" );
+  //_log.msg( "end" );
 
     try
     {
@@ -325,14 +394,19 @@ void Task::end()
 
         if( _script_instance  &&  _script_instance->_script->_reuse == Script::reuse_task )
         {
+            if( _script_instance->name_exists( spooler_close_name ) )  _script_instance->call( spooler_close_name );
             _script_instance->close();
+            _script_instance = NULL;
+            _object_set = NULL;
         }
     }
     catch( const Xc& x        ) { end_error(x); }
     catch( const exception& x ) { error(x); }
 
-    _next_start_time = now() + _job->_run_time._retry_period;
-    if( now() >= _job->_run_time._next_end_time )  set_new_start_time();
+    _opened = false;
+
+    _next_start_time = Time::now() + _job->_run_time._retry_period;
+    if( Time::now() >= _job->_run_time._next_end_time )  set_new_start_time();
 
     _state = s_pending;
     _spooler->_running_jobs_count--;
@@ -344,7 +418,7 @@ void Task::stop()
 {
     _log.msg( "stop" );
 
-    end();
+    if( _opened )  end();
 
     try 
     {
@@ -353,6 +427,9 @@ void Task::stop()
     catch( const Xc& x        ) { end_error(x); }
     catch( const exception& x ) { error(x); }
 
+    if( _directory_watcher )  _spooler->_wait_handles.remove( _directory_watcher._handle );
+    _object_set = NULL;
+    _script_instance = NULL;
     _state = s_stopped;
 }
 
@@ -362,16 +439,14 @@ bool Task::step()
 {
     bool result;
 
-    _log.msg( "step" );
+  //_log.msg( "step" );
 
     try 
     {
         if( !_job->_script.empty() ) 
         {
-            CComVariant result_vt = _job_script_instance.call( "spooler_process" );
-            HRESULT hr = result_vt.ChangeType( VT_BOOL );
-            if( FAILED(hr) )  throw_ole( hr, "VariantChangeType", _job->_name.c_str() );
-            result = V_BOOL( &result_vt ) != 0;
+            if( !_job_script_instance.name_exists( spooler_process_name ) )  return false;
+            return check_spooler_process_result( _job_script_instance.call( spooler_process_name ) );
         }
         else
         if( _object_set )
@@ -425,7 +500,7 @@ bool Task::do_something()
     {
         case s_stopped:     break;
 
-        case s_pending:     if( _directory_watcher._signaled || now() >= _next_start_time )
+        case s_pending:     if( _directory_watcher._signaled || Time::now() >= _next_start_time )
                             {
                                 ok = start();  if(!ok) break;
 
@@ -455,6 +530,8 @@ bool Task::do_something()
 
         default:            ;
     }
+
+    if( _error && _state != s_stopped )  stop();
 
     if( _directory_watcher._signaled ) _directory_watcher.watch_again();
 
@@ -497,8 +574,8 @@ void Task::set_state_cmd( State_cmd cmd )
         case sc_unstop:     ok = _state == s_stopped;   if(!ok) break;
                             break;
 
-        case sc_start:      ok = _state == s_pending;   if(!ok) break;
-                            _next_start_time = now();  
+        case sc_start:      ok = ( _state & (s_pending|s_stopped) ) != 0;   if(!ok) break;
+                            _next_start_time = Time::now();  
                             break;
 
         case sc_end:        ok = _state == s_running;   break;
@@ -578,22 +655,6 @@ string Task::state_cmd_name( Task::State_cmd cmd )
         case Task::sc_continue: return "continue";
         default:                return as_string( (int)cmd );
     }
-}
-
-//----------------------------------------------------------------Task::wake_when_directory_changed 
-
-void Task::wake_when_directory_changed( const string& directory_name )
-{
-#   ifdef SYSTEM_WIN
-
-        _directory_watcher.watch_directory( directory_name );
-        _spooler->_wait_handles.add( _directory_watcher._handle, this );
-
-#    else
-
-        throw_xc( "SPOOLER-112", "wake_when_directory_changed" );
-
-#   endif
 }
 
 //-------------------------------------------------------------------------------------------------

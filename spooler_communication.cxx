@@ -1,4 +1,4 @@
-// $Id: spooler_communication.cxx,v 1.14 2001/01/16 06:23:17 jz Exp $
+// $Id: spooler_communication.cxx,v 1.15 2001/01/20 23:39:16 jz Exp $
 /*
     Hier sind implementiert
 
@@ -246,7 +246,9 @@ void Communication::Channel::do_send()
 Communication::Communication( Spooler* spooler )
 : 
     _zero_(this+1), 
-    _spooler(spooler)
+    _spooler(spooler),
+    _udp_socket(SOCKET_ERROR),
+    _listen_socket(SOCKET_ERROR)
 {
 }
 
@@ -258,6 +260,13 @@ Communication::~Communication()
 
     TerminateThread( _thread, 99 );
     _thread.close();
+
+    if( _initialized ) 
+    {
+#       ifdef SYSTEM_WIN
+            WSACleanup();
+#       endif
+    }
 }
 
 //-----------------------------------------------------------------------------Communication::close
@@ -302,7 +311,6 @@ void Communication::bind()
 
         _udp_socket = socket( AF_INET, SOCK_DGRAM, 0 );
         if( _udp_socket == SOCKET_ERROR )  throw_sos_socket_error( "socket" );
-        if( _udp_socket >= _nfds )  _nfds = _udp_socket + 1;
 
       //setsockopt( _udp_socket, SOL_SOCKET, SO_REUSEADDR, (const char*)&true_, sizeof true_ );
 
@@ -339,7 +347,6 @@ void Communication::bind()
 
         _listen_socket = socket( AF_INET, SOCK_STREAM, 0 );
         if( _listen_socket == SOCKET_ERROR )  throw_sos_socket_error( "socket" );
-        if( _listen_socket >= _nfds )  _nfds = _listen_socket + 1;
 
       //setsockopt( _listen_socket, SOL_SOCKET, SO_REUSEADDR, (const char*)&true_, sizeof true_ );
 
@@ -368,17 +375,19 @@ void Communication::bind()
     }
 }
 
-//-----------------------------------------------------------------------------Communication::start
+//-----------------------------------------------------------------------------Communication::init
 
-void Communication::start()
+void Communication::init()
 {
+    if( _initialized )  return;
+
 #   ifdef SYSTEM_WIN
         WSADATA wsa_data;
         int ret = WSAStartup( 0x0101, &wsa_data );
         if( ret )  throw_sos_socket_error( ret, "WSAStartup" );
 #   endif
 
-    bind();
+    _initialized = true;
 }
 
 //---------------------------------------------------------------------Communication::handle_socket
@@ -421,27 +430,42 @@ bool Communication::handle_socket( Channel* channel )
     return true;
 }
 
+//---------------------------------------------------------------------------Communication::_fd_set
+
+void Communication::_fd_set( SOCKET socket, FD_SET* set )
+{
+    if( socket != SOCKET_ERROR )
+    {
+        FD_SET( socket, set );
+        if( _nfds <= socket )  _nfds = socket + 1;
+    }
+}
+
 //-------------------------------------------------------------------------------Communication::run
 
 int Communication::run()
 {
     while(1) 
     {
+        _nfds = 0;
+
         {
             Thread_semaphore::Guard guard = &_semaphore;
 
             FD_ZERO( &_read_fds );      
             FD_ZERO( &_write_fds );
 
-            if( _udp_socket    != SOCKET_ERROR )  FD_SET( _udp_socket, &_read_fds );
-            if( _listen_socket != SOCKET_ERROR )  FD_SET( _listen_socket, &_read_fds );
+            _fd_set( _udp_socket, &_read_fds );
+            _fd_set( _listen_socket, &_read_fds );
 
             FOR_EACH( Channel_list, _channel_list, it )
             {
                 Channel* channel = *it;
-                if( channel->_send_is_complete    )  FD_SET( channel->_socket, &_read_fds );
-                if( channel->_receive_is_complete )  FD_SET( channel->_socket, &_write_fds  );
+                if( channel->_send_is_complete    )  _fd_set( channel->_socket, &_read_fds );
+                if( channel->_receive_is_complete )  _fd_set( channel->_socket, &_write_fds  );
             }
+
+            if( _nfds == 0 )  { _started = false; break; }
         }
 
         int n = ::select( _nfds, &_read_fds, &_write_fds, NULL, NULL );
@@ -456,7 +480,7 @@ int Communication::run()
 
             
             // UDP
-            if( FD_ISSET( _udp_socket, &_read_fds ) )
+            if( _udp_socket != SOCKET_ERROR  &&  FD_ISSET( _udp_socket, &_read_fds ) )
             {
                 char buffer [4096];
                 int len = recv( _udp_socket, buffer, sizeof buffer, 0 );
@@ -468,13 +492,12 @@ int Communication::run()
             }
 
             // Neue TCP-Verbindung
-            if( FD_ISSET( _listen_socket, &_read_fds ) )
+            if( _listen_socket != SOCKET_ERROR  &&  FD_ISSET( _listen_socket, &_read_fds ) )
             {
                 Sos_ptr<Channel> new_channel = SOS_NEW( Channel );
             
                 new_channel->do_accept( _listen_socket );
                 if( new_channel->_socket == SOCKET_ERROR )  return true;
-                if( new_channel->_socket >= _nfds )  _nfds = new_channel->_socket + 1;
 
                 _channel_list.push_back( new_channel );
 
@@ -494,31 +517,42 @@ int Communication::run()
         }
     }
 
-    closesocket( _listen_socket );
-
     return 0;
 }
 
+//---------------------------------------------------------------------------------------is_started
+/*
+bool Communication::is_started()
+{
+    if( !_thread )  return;
+
+    DWORD exit_code;
+
+    BOOL ok = GetExitCodeThread( _thread, exit_code );
+    if( !ok )  throw_mswin_error( "GetExitCodeThread" );
+
+    return exit_code == STILL_ACTIVE;
+}
+*/
 //-----------------------------------------------------------------------------------------------go
 
 int Communication::go()
 {
     int result;
 
+    Ole_initialize ole;
+
     try 
     {
-        HRESULT hr = CoInitialize(NULL);
-        if( FAILED(hr) )  throw_ole( hr, "CoInitialize" );
-
         result = run();
     }
     catch( const Xc& x )
     {
-        _spooler->_log.error( "Communication::thread:  " + x.what() );
+        _spooler->_log.error( "Communication::thread: " + x.what() );
         result = 1;
     }
 
-    CoUninitialize();
+    _started = false;
 
     return result;
 }
@@ -536,7 +570,10 @@ void Communication::start_thread()
 {
     DWORD thread_id;
 
-    start();    // Ports öffnen
+    init();
+    bind();
+
+    _started = true;
 
     _thread = CreateThread( NULL,                        // no security attributes 
                             0,                           // use default stack size  
@@ -546,6 +583,29 @@ void Communication::start_thread()
                             &thread_id );                // returns the thread identifier 
  
    if( !_thread )  throw_mswin_error( "CreateThread" );
+}
+
+//-------------------------------------------------------------------Communication::start_or_rebind
+
+void Communication::start_or_rebind()
+{
+    Thread_semaphore::Guard guard = &_semaphore;
+
+    if( _started )  
+    {
+        rebind();
+    }
+    else 
+    {
+        if( _thread ) 
+        {
+            WaitForSingleObject( _thread, INT_MAX );    // Thread sollte beendet sein
+            CloseHandle( _thread );
+            _thread = NULL;
+        }
+
+        start_thread();
+    }
 }
 
 //-------------------------------------------------------------------------------------------------

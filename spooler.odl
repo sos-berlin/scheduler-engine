@@ -1,4 +1,4 @@
-// $Id: spooler.odl,v 1.2 2001/01/13 18:41:19 jz Exp $
+// $Id: spooler.odl,v 1.3 2001/01/20 23:39:15 jz Exp $
 
 // Änderungen werden nicht automatisch in die spooler.tlb übernommen.
 // Also mit rechter Maustaske "Kompilieren von spooler.odl" klicken.
@@ -41,6 +41,29 @@ library spooler
         interface Iobject_set;
     }
 
+    //------------------------------------------------------------------------------Job
+
+    [
+        uuid       ( 4DF2E8E8-52DA-454f-8ADE-3B5D4FE7F73B ),
+        odl,
+        dual
+    ]
+    interface Ijob : IDispatch
+    {
+        HRESULT                 start_when_directory_changed( [in] BSTR directory_name );
+
+        HRESULT                 start                       ();
+
+    }
+
+    [
+        uuid       ( 15ECAE84-4142-43e6-A38C-C90A299097B4 )
+    ]
+    coclass Job
+    {
+        interface Ijob;
+    }
+
     //-----------------------------------------------------------------------------Task
 
     [
@@ -53,7 +76,12 @@ library spooler
         [propget]
         HRESULT                 object_set                  ( [out,retval] Iobject_set** result );
 
-        HRESULT                 wake_when_directory_changed ( [in] BSTR directory_name );
+      //HRESULT                 wake_when_directory_changed ( [in] BSTR directory_name );
+
+        HRESULT                 error                       ( [in] BSTR error_text );       // Für PerlScript, das einen Fehlertext nicht durchreicht
+
+        [propget]
+        HRESULT                 job                         ( [out,retval] Ijob** job );
     }
 
     [
@@ -77,10 +105,16 @@ library spooler
         HRESULT                 log                     ( [out,retval] Ilog** log );
 
         [propget]
+        HRESULT                 id                      ( [out,retval] BSTR* spooler_id );
+
+        [propget]
         HRESULT                 param                   ( [out,retval] BSTR* spooler_param );
 
         [propget]
         HRESULT                 script                  ( [out,retval] IDispatch** script_object );
+
+        [propget]
+        HRESULT                 job                     ( [in] BSTR job_name, [out,retval] Ijob** job );
     }
 
     [

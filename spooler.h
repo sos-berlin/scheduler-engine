@@ -1,4 +1,4 @@
-// $Id: spooler.h,v 1.30 2001/01/16 16:40:36 jz Exp $
+// $Id: spooler.h,v 1.31 2001/01/20 23:39:15 jz Exp $
 
 #ifndef __SPOOLER_H
 #define __SPOOLER_H
@@ -57,17 +57,131 @@ struct Task;
                                               
 typedef int                     Level;
 struct                          Spooler;
-typedef double                  Time;                       // wie time_t: Anzahl Sekunden seit 1.1.1970
-
-Time                            now();
-
-const Time                      latter_day                  = INT_MAX;
+//typedef double                  Time;                       // wie time_t: Anzahl Sekunden seit 1.1.1970
 
 
 enum Log_kind { log_msg, log_warn, log_error };
 
 
+//---------------------------------------------------------------------------------------------Time
 
+struct Time
+{
+                                Time                        ( double t = 0.0 )              : _time(t) {}
+                                Time                        ( int t )                       : _time(t) {}
+                                Time                        ( const Sos_optional_date_time& dt ) { *this = dt; }
+
+    void                        operator =                  ( double t )                    { _time = t; }
+    void                        operator =                  ( int t )                       { _time = t; }
+    void                        operator =                  ( const Sos_optional_date_time& );
+
+    void                        operator +=                 ( double t )                    { _time += t; }
+    void                        operator -=                 ( double t )                    { _time -= t; }
+
+    bool                        operator <                  ( const Time& t )               { return _time <  t._time; }
+    bool                        operator <=                 ( const Time& t )               { return _time <= t._time; }
+    bool                        operator ==                 ( const Time& t )               { return _time == t._time; }
+    bool                        operator !=                 ( const Time& t )               { return _time != t._time; }
+    bool                        operator >=                 ( const Time& t )               { return _time >= t._time; }
+    bool                        operator >                  ( const Time& t )               { return _time >  t._time; }
+
+    bool                        operator <                  ( double t )                    { return _time <  t; }
+    bool                        operator <=                 ( double t )                    { return _time <= t; }
+    bool                        operator ==                 ( double t )                    { return _time == t; }
+    bool                        operator !=                 ( double t )                    { return _time != t; }
+    bool                        operator >=                 ( double t )                    { return _time >= t; }
+    bool                        operator >                  ( double t )                    { return _time >  t; }
+
+    bool                        operator <                  ( int t )                       { return _time <  t; }
+    bool                        operator <=                 ( int t )                       { return _time <= t; }
+    bool                        operator ==                 ( int t )                       { return _time == t; }
+    bool                        operator !=                 ( int t )                       { return _time != t; }
+    bool                        operator >=                 ( int t )                       { return _time >= t; }
+    bool                        operator >                  ( int t )                       { return _time >  t; }
+
+                                operator double             ()                              { return _time; }
+
+    static Time                 now                         ();
+
+    double                     _time;                       // wie time_t: Anzahl Sekunden seit 1.1.1970 oder seit Mitternacht
+};      
+
+const Time                      latter_day                  = INT_MAX;
+
+//------------------------------------------------------------------------------------------Day_set
+
+struct Day_set
+{
+                                Day_set                     ()                              { memset( _days, 0, sizeof _days ); }
+                                Day_set                     ( const xml::Element_ptr& e )   { *this = e; }
+    void                        operator =                  ( const xml::Element_ptr& );
+
+    bool                        is_empty                    ()                      { return memchr( _days, (char)true, sizeof _days ) == NULL; }
+    char                        operator []                 ( int i )               { return _days[i]; }
+
+    char                       _days                        [31];
+};
+
+//--------------------------------------------------------------------------------------Weekday_set
+
+struct Weekday_set : Day_set
+{
+                                Weekday_set                 ()                      {}
+                                Weekday_set                 ( const xml::Element_ptr& e )  : Day_set( e ) {}
+
+    Time                        next_date                   ( Time );               // 00:00:00 des nächsten gesetzten Tages
+};
+
+//--------------------------------------------------------------------------------------Monthday_set
+
+struct Monthday_set : Day_set
+{
+                                Monthday_set                ()                      {}
+                                Monthday_set                ( const xml::Element_ptr& e )  : Day_set( e ) {}
+
+    Time                        next_date                   ( Time );               // 00:00:00 des nächsten gesetzten Tages
+};
+
+//--------------------------------------------------------------------------------------Ultimo_set
+
+struct Ultimo_set : Day_set
+{
+                                Ultimo_set                  ()                      {}
+                                Ultimo_set                  ( const xml::Element_ptr& e )  : Day_set( e ) {}
+
+    Time                        next_date                   ( Time );               // 00:00:00 des nächsten gesetzten Tages
+};
+
+//----------------------------------------------------------------------------------------Run_time
+
+struct Run_time
+{
+                                Run_time                    ()                      : _zero_(this+1), _retry_period(latter_day) {}
+                                Run_time                    ( const xml::Element_ptr& );
+
+    void                        check                       ();                              
+    Time                        next                        ()                      { return next( Time::now() ); }
+    Time                        next                        ( Time );
+    bool                        should_run_now              ()                      { Time nw = Time::now(); return nw >= _next_start_time && nw < _next_end_time; }
+
+
+    Fill_zero                  _zero_;
+    
+    Time                       _retry_period;
+
+    Time                       _begin_time_of_day;          // Sekunden seit Mitternacht
+    Time                       _end_time_of_day;            // Sekunden seit Mitternacht
+    bool                       _let_run;                    // Task zuende laufen lassen, nicht bei _next_end_time beenden
+
+    set<time_t>                _date_set;
+    Weekday_set                _weekday_set;
+    Monthday_set               _monthday_set;
+    Ultimo_set                 _ultimo_set;                 // 0: Letzter Tag, -1: Vorletzter Tag
+    set<time_t>                _holiday_set;
+
+    Time                       _next_start_time;
+    Time                       _next_end_time;
+};
 
 //-------------------------------------------------------------------------------------------Handle
 
@@ -211,6 +325,7 @@ struct Object_set_class : Sos_self_deleting
     map<Level,string>          _level_map;
     
     Script                     _script;
+    bool                       _object_interface;
 
   //Time                       _process_timeout;
 };
@@ -260,6 +375,16 @@ struct Object_set_descr : Sos_self_deleting
     Level_interval             _level_interval;
 };
 
+//------------------------------------------------------------------------------------Job_interface
+
+struct Job_interface
+{
+    void                        spooler_init                ();
+    void                        spooler_open                ();
+    void                        spooler_close               ();
+    void                        spooler_process             ();
+};
+
 //---------------------------------------------------------------------------------------Object_set
 
 struct Object_set : Sos_self_deleting
@@ -269,7 +394,7 @@ struct Object_set : Sos_self_deleting
 
     void                        open                        ();
     void                        close                       ();
-    bool                        eof                         ();
+  //bool                        eof                         ();
     Spooler_object              get                         ();
     bool                        step                        ( Level result_level );
 
@@ -277,95 +402,25 @@ struct Object_set : Sos_self_deleting
     Spooler*                   _spooler;
     Task*                      _task;
     Sos_ptr<Object_set_descr>  _object_set_descr;
+    Object_set_class*          _class;
     Script_instance            _script_instance;
-    bool                       _use_objects;                // Objektschnittstelle nutzen. Sonst prozedural
     CComPtr<IDispatch>         _dispatch;
 };
 
-//------------------------------------------------------------------------------------------Day_set
-
-struct Day_set
-{
-                                Day_set                     ()                              { memset( _days, 0, sizeof _days ); }
-                                Day_set                     ( const xml::Element_ptr& e )   { *this = e; }
-    void                        operator =                  ( const xml::Element_ptr& );
-
-    bool                        is_empty                    ()                      { return memchr( _days, (char)true, sizeof _days ) == NULL; }
-    char                        operator []                 ( int i )               { return _days[i]; }
-
-    char                       _days                        [31];
-};
-
-//--------------------------------------------------------------------------------------Weekday_set
-
-struct Weekday_set : Day_set
-{
-                                Weekday_set                 ()                      {}
-                                Weekday_set                 ( const xml::Element_ptr& e )  : Day_set( e ) {}
-
-    Time                        next_date                   ( Time );               // 00:00:00 des nächsten gesetzten Tages
-};
-
-//--------------------------------------------------------------------------------------Monthday_set
-
-struct Monthday_set : Day_set
-{
-                                Monthday_set                ()                      {}
-                                Monthday_set                ( const xml::Element_ptr& e )  : Day_set( e ) {}
-
-    Time                        next_date                   ( Time );               // 00:00:00 des nächsten gesetzten Tages
-};
-
-//--------------------------------------------------------------------------------------Ultimo_set
-
-struct Ultimo_set : Day_set
-{
-                                Ultimo_set                  ()                      {}
-                                Ultimo_set                  ( const xml::Element_ptr& e )  : Day_set( e ) {}
-
-    Time                        next_date                   ( Time );               // 00:00:00 des nächsten gesetzten Tages
-};
-
-//----------------------------------------------------------------------------------------Run_time
-
-struct Run_time
-{
-                                Run_time                    ()                      : _zero_(this+1) {}
-                                Run_time                    ( const xml::Element_ptr& );
-
-    void                        check                       ();                              
-    Time                        next                        ()                      { return next( now() ); }
-    Time                        next                        ( Time );
-    bool                        should_run_now              ()                      { Time nw = now(); return nw >= _next_start_time && nw < _next_end_time; }
-
-
-    Fill_zero                  _zero_;
-    
-    Time                       _retry_period;
-
-    int                        _begin_time_of_day;          // Sekunden seit Mitternacht
-    int                        _end_time_of_day;            // Sekunden seit Mitternacht
-    bool                       _let_run;                    // Task zuende laufen lassen, nicht bei _next_end_time beenden
-
-    set<time_t>                _date_set;
-    Weekday_set                _weekday_set;
-    Monthday_set               _monthday_set;
-    Ultimo_set                 _ultimo_set;                 // 0: Letzter Tag, -1: Vorletzter Tag
-    set<time_t>                _holiday_set;
-
-    Time                       _next_start_time;
-    Time                       _next_end_time;
-};
-
-//---------------------------------------------------------------------------------------------Job
+//----------------------------------------------------------------------------------------------Job
 
 struct Job : Sos_self_deleting
 {
-                                Job                         ()                     : _zero_(this+1) {}
-                                Job                         ( const xml::Element_ptr& );
+                                Job                         ( Spooler* );
+                               ~Job                         (); 
 
+    void                        operator =                  ( const xml::Element_ptr& );
+
+    void                        start                       ();
+    void                        start_when_directory_changed( const string& directory_name );
 
     Fill_zero                  _zero_;
+    Spooler*                   _spooler;
     string                     _name;
     Sos_ptr<Object_set_descr>  _object_set_descr;
     Level                      _output_level;
@@ -377,6 +432,7 @@ struct Job : Sos_self_deleting
   //bool                       _rerun;
   //bool                       _start_after_spooler;
     int                        _priority;
+    CComPtr<Com_job>           _com_job;
 };
 
 typedef list< Sos_ptr<Job> >    Job_list;
@@ -441,14 +497,13 @@ struct Task : Sos_self_deleting
 
     void                        set_new_start_time          ();
 
-    void                        wake_when_directory_changed ( const string& directory_name );
-
 
     Fill_zero                  _zero_;
     Spooler*                   _spooler;
     Sos_ptr<Job>               _job;
     Script_instance            _job_script_instance;
     Script_instance*           _script_instance;
+    CComPtr<IDispatch>         _dispatch;
     
     int                        _priority;
     double                     _cpu_time;
@@ -457,10 +512,10 @@ struct Task : Sos_self_deleting
     bool                       _let_run;                    // Task zuende laufen lassen, nicht bei _next_end_time beenden
     Mutex<State>               _state;
     Mutex<State_cmd>           _state_cmd;
+    bool                       _opened;
+    Xc_copy                    _error;
 
     Time                       _running_since;
-
-    Xc_copy                    _error;
 
     Sos_ptr<Object_set>        _object_set;
     Time                       _next_start_time;            // Zeitpunkt des nächsten Startversuchs, nachdem Objektemenge leer war
@@ -554,17 +609,19 @@ struct Communication
                                 Communication               ( Spooler* );
                                ~Communication               ();
 
+    void                        start_or_rebind             ();
     void                        start_thread                ();
     void                        close                       ( double wait_time = 0.0 );
     void                        rebind                      ()                                      { bind(); }
     int                         go                          ();
-    bool                        started                     ()                                      { return _thread != NULL; }
+    bool                        started                     ()                                      { return _started; }
 
   private:
     int                         run                         ();
     void                        bind                        ();
-    void                        start                       ();
+    void                        init                        ();
     bool                        handle_socket               ( Channel* );
+    void                       _fd_set                      ( SOCKET, FD_SET* );
 
     Fill_zero                  _zero_;
     Spooler*                   _spooler;
@@ -579,7 +636,8 @@ struct Communication
     int                        _tcp_port;
     int                        _udp_port;
     bool                       _rebound;
-
+    int                        _initialized;
+    bool                       _started;
     Handle                     _thread;
 };
 
@@ -670,6 +728,8 @@ struct Spooler
 
     void                        set_state                   ( State );
     void                        set_state_changed_handler   ( State_changed_handler h )         { _state_changed_handler = h; }
+
+    Job*                        get_job                     ( const string& job_name );
 
     Fill_zero                  _zero_;
     
