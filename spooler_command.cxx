@@ -1,4 +1,4 @@
-// $Id: spooler_command.cxx,v 1.95 2003/09/27 08:45:17 jz Exp $
+// $Id: spooler_command.cxx,v 1.96 2003/10/07 09:39:50 jz Exp $
 /*
     Hier ist implementiert
 
@@ -148,7 +148,11 @@ xml::Element_ptr Command_processor::execute_show_state( const xml::Element_ptr& 
     double cpu_time = get_cpu_time();
     char buffer [30];
     sprintf( buffer, "%-.3lf", cpu_time ); 
-    state_element.setAttribute( "cpu_time"             , buffer );
+#   ifdef Z_WINDOWS
+        state_element.setAttribute( "cpu_time"             , buffer );
+#   else
+        LOG( "Command_processor::execute_show_state() cpu_time=" << cpu_time << "\n" );
+#   endif
 
     state_element.setAttribute( "loop"                 , _spooler->_loop_counter );
     state_element.setAttribute( "waits"                , _spooler->_wait_counter );
