@@ -1,4 +1,4 @@
-// $Id: spooler.h,v 1.43 2001/02/04 17:12:42 jz Exp $
+// $Id: spooler.h,v 1.44 2001/02/04 22:51:36 jz Exp $
 
 #ifndef __SPOOLER_H
 #define __SPOOLER_H
@@ -177,7 +177,7 @@ struct Spooler
 
     Time                       _spooler_start_time;
     State                      _state;
-    Mutex<State_cmd>           _state_cmd;
+    State_cmd                  _state_cmd;
     Thread_semaphore           _pause_lock;                 // Wenn _state == s_paused
 };
 

@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.18 2001/02/04 17:12:43 jz Exp $
+// $Id: spooler_task.cxx,v 1.19 2001/02/04 22:51:37 jz Exp $
 /*
     Hier sind implementiert
 
@@ -172,13 +172,18 @@ Job::Job( Thread* thread )
 
 Job::~Job()
 {
-    close_task();
+    _log.msg( "~Job" );
+    close();
 }
 
 //---------------------------------------------------------------------------------------Job::close
 
 void Job::close()
 {
+    close_task();
+
+    _directory_watcher.close();
+
     THREAD_SEMA( _task_lock )  stop();
 
     // COM-Objekte entkoppeln, falls noch jemand eine Referenz darauf hat:
@@ -317,14 +322,12 @@ void Job::load()
 
 void Job::stop()
 {
-    if( _state != s_stopped )  _log.msg( "stop" );
+    _log.msg( "stop" );
 
     if( _task )  _task->end();
-
-
-    _directory_watcher.close();
-
     close_task();
+    close_engine();
+
     _state = s_stopped;
 }
 
@@ -359,7 +362,6 @@ bool Job::do_something()
 
     THREAD_SEMA( _task_lock )
     {
-
         switch( _state_cmd.read_and_reset() )
         {
             case sc_stop:       stop(); 
@@ -408,7 +410,7 @@ bool Job::do_something()
                 something_done = true;
             }
 
-            if( _state == s_ended  &&  _task ) 
+            if( _state == s_ended ) 
             {
                 close_task();
                 set_next_start_time();
@@ -416,10 +418,18 @@ bool Job::do_something()
             }
         }
 
-        if( _error )  
+        if( _error  &&  _state != s_stopped )  
         {
-            stop();
-            if( _repeat > 0 )  _state = s_pending;
+            if( _repeat > 0 ) 
+            {
+                _error = NULL;  
+                if( _task )  _task->end();
+                close_task();
+                _state = s_pending;
+                set_next_start_time();
+            }
+            else  
+                stop();
         }
     }
 
@@ -584,7 +594,7 @@ Task::Task( Spooler* spooler, const Sos_ptr<Job>& job )
 
 Task::~Task()    
 {
-    //_job->_log.msg( "~Task" );
+    _job->_log.msg( "~Task" );
 
     try{ close(); } catch(const Xc&) {}
 }
@@ -638,6 +648,8 @@ void Task::start()
     catch( const Xc& x        ) { _job->error(x); return; }
     catch( const exception& x ) { _job->error(x); return; }
 
+    if( _job->_error )  return;
+
     _job->_state = Job::s_running;
     _job->_thread->_running_tasks_count++;
 }
@@ -685,7 +697,6 @@ void Task::end()
     }
     catch( const Xc& x        ) { _job->error(x); }
     catch( const exception& x ) { _job->error(x); }
-
 
     on_error_on_success();
 

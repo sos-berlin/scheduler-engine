@@ -1,14 +1,13 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 
-<!-- $Id: spooler.xml,v 1.24 2001/02/04 17:12:42 jz Exp $   (C) 2001 SOS GmbH Berlin -->
+<!-- $Id: spooler.xml,v 1.25 2001/02/04 22:51:37 jz Exp $   (C) 2001 SOS GmbH Berlin -->
 
 <!DOCTYPE spooler SYSTEM "spooler.dtd">
 
 <spooler>
 <config tcp_port    = "4444" 
         udp_port    = "4444" 
-        log_dir     = "c:\tmp" 
-        use_threads = "yes">
+        log_dir     = "c:\tmp">
 
     <security>
         <allowed_host host="192.168.100.0" level="all"/>
@@ -290,7 +289,7 @@ spooler_log.msg "Spooler-Skript geladen."
                 <job name           = "Aufbereiten" 
                      priority       = "2" 
                      output_level   = "200" 
-                     spooler_id     = "">
+                     spooler_id     = "1">
 
                     <object_set class="Dokumente">
                         <levels low="100" high="200"/>
@@ -344,6 +343,8 @@ function spooler_process()
     spooler_log.msg "*Job einfach: spooler_process index=" & index      '& ", " & spooler.script.global.method()
     index = index + 1
     if index > 3 then spooler_process=false: exit function
+    spooler_task.error = "Ein Fehler"
+    spooler_task.repeat = 2.5
     spooler_process = true
 end function
 
@@ -355,7 +356,7 @@ end function
                         <period single_start="19:51:50" end="20:00" let_run="no"/>
                         <period begin="19:52:10" end="19:59:59" repeat="7"/>
 
-                        <date date="2.2.2001"> <period begin="0:00" end="24:00" repeat="0.1"/> </date>
+                        <date date="4.2.2001"> <period begin="0:00" end="24:00" repeat="0.1"/> </date>
 
                         <weekdays>
                             <day day="1"/>
@@ -383,7 +384,7 @@ end function
 
                 </job>
 
-                <job name="single" spooler_id="x">
+                <job name="single" spooler_id="">
                     <script language="VBScript" use_engine="task"><![CDATA[
 
 spooler_log.msg "*Job single"
@@ -438,7 +439,7 @@ sub spooler_exit()
 
         <thread name="dauer" spooler_id="">
             <jobs>
-                <job name="dauer">
+                <job name="dauer" spooler_id="">
                     <script language="PerlScript" use_engine="task"><![CDATA[
 #use Win32::OLE;
 #$hostware = Win32::OLE->new('hostWare.Global');
@@ -496,7 +497,7 @@ function spooler_close()
 
                     ]]></script>
 
-                    <run_time begin="0:00" let_run="yes"/>
+                    <run_time let_run="yes"/>
                 </job>
             </jobs>
         </thread>

@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.46 2001/02/04 17:12:42 jz Exp $
+// $Id: spooler.cxx,v 1.47 2001/02/04 22:51:36 jz Exp $
 /*
     Hier sind implementiert
 
@@ -198,14 +198,13 @@ void Spooler::run()
     {
         _event.reset();
 
-        State_cmd cmd = _state_cmd.read_and_reset();
-
-        if( cmd == sc_pause                 )  set_state( s_paused ); 
-        if( cmd == sc_continue              )  set_state( s_running );
-        if( cmd == sc_load_config           )  break;
-        if( cmd == sc_reload                )  break;
-        if( cmd == sc_terminate             )  break;
-        if( cmd == sc_terminate_and_restart )  break;
+        if( _state_cmd == sc_pause                 )  set_state( s_paused ); 
+        if( _state_cmd == sc_continue              )  set_state( s_running );
+        if( _state_cmd == sc_load_config           )  break;
+        if( _state_cmd == sc_reload                )  break;
+        if( _state_cmd == sc_terminate             )  break;
+        if( _state_cmd == sc_terminate_and_restart )  break;
+        _state_cmd = sc_none;
 
         if( _state == s_paused )  THREAD_SEMA( _pause_lock )  _wait_handles.wait();
                             else  _wait_handles.wait();
