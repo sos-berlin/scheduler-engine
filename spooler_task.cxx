@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.84 2002/04/12 08:16:45 jz Exp $
+// $Id: spooler_task.cxx,v 1.85 2002/04/12 09:44:52 jz Exp $
 /*
     Hier sind implementiert
 
@@ -250,6 +250,7 @@ Job::Job( Thread* thread )
     _script_instance(&_log),
     _history(this)
 {
+    LOG( "Job::_semaphore=" << hex <<_lock._semaphore.LockSemaphore <<dec << '\n' );
     _next_time = latter_day;
 }
 
@@ -1427,7 +1428,7 @@ Task::Task( Spooler* spooler, const Sos_ptr<Job>& job )
     _let_run = _job->_period.let_run();
 }
 
-//---------------------------------------------------------------------------------------Task::Task
+//--------------------------------------------------------------------------------------Task::~Task
 // Kann von anderem Thread gerufen werden, wenn der noch eine COM-Referenz hat
 
 Task::~Task()    

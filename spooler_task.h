@@ -1,4 +1,4 @@
-// $Id: spooler_task.h,v 1.49 2002/04/10 20:34:14 jz Exp $
+// $Id: spooler_task.h,v 1.50 2002/04/12 09:44:53 jz Exp $
 
 #ifndef __SPOOLER_TASK_H
 #define __SPOOLER_TASK_H
@@ -212,7 +212,7 @@ struct Job : Sos_self_deleting
     void                        select_period               ( Time = Time::now() );
     bool                        is_in_period                ( Time = Time::now() );
     bool                        its_current_task            ( Task* task )              { return task == _task; }
-    Sos_ptr<Task>               current_task                ()                          { Sos_ptr<Task> task; THREAD_LOCK( _lock ) task = _task;  return task; }
+    Task*                       current_task                ()                          { return _task; }
     bool                        queue_filled                ()                          { return !_task_queue.empty(); }
 
     Sos_ptr<Task>               create_task                 ( const CComPtr<spooler_com::Ivariable_set>& params, const string& task_name, Time = latter_day );

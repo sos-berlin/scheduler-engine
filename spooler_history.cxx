@@ -1,4 +1,4 @@
-// $Id: spooler_history.cxx,v 1.18 2002/04/12 08:16:45 jz Exp $
+// $Id: spooler_history.cxx,v 1.19 2002/04/12 09:44:52 jz Exp $
 
 #include "../kram/sos.h"
 #include "spooler.h"
@@ -213,7 +213,7 @@ void Spooler_db::open_history_table()
         if( !_history_table.opened() )
         {
             _history_table.open( "-in -out -key=id sql -table=" + _spooler->_history_tablename + 
-                                 " -sql-fields=(id,spooler_id,job_name,start_time,cause,parameters) | " +
+                               //" -sql-fields=(id,spooler_id,job_name,start_time,cause,parameters) | " +       extra-Felder nicht vergessen!
                                  " | " + _db_name + " -max-length=" + as_string(blob_field_size) );
         }
     }
@@ -363,8 +363,6 @@ Job_history::Job_history( Job* job )
 { 
     _job = job; 
     _spooler = _job->_spooler; 
-
-    _job_name = job->name();            // Damit read_tail() nicht mehr auf Job zugreift (das ist ein anderer Thread)
 }
 
 //-------------------------------------------------------------------------Job_history::Job_history
@@ -383,6 +381,8 @@ Job_history::~Job_history()
 void Job_history::open()
 {
     string section = _job->profile_section();
+
+    _job_name = _job->name();            // Damit read_tail() nicht mehr auf Job zugreift (das ist ein anderer Thread)
 
     try
     {
@@ -534,6 +534,9 @@ void Job_history::write( bool start )
     if( start | _use_file )  parameters = _job->_task->has_parameters()? xml_as_string( _job->_task->parameters_as_dom() )
                                                                        : "";
 
+    string start_time = !start || _job->_task->_running_since? _job->_task->_running_since.as_string(Time::without_ms)
+                                                             : Time::now().as_string(Time::without_ms);
+
     if( _use_db )
     {
         Transaction ta = &_spooler->_db;
@@ -545,7 +548,7 @@ void Job_history::write( bool start )
                 record.set_field( "id"             , _job->_task->_id );
                 record.set_field( "spooler_id"     , _spooler->id() );
                 record.set_field( "job_name"       , _job->name() );
-                record.set_field( "start_time"     , _job->_task->_running_since.as_string(Time::without_ms) );
+                record.set_field( "start_time"     , start_time );
                 record.set_field( "cause"          , start_cause_name( _job->_task->_cause ) );
 
                 if( !parameters.empty()  &&  parameters.length() < blob_field_size )  record.set_field( "parameters", parameters ), parameters = "";
@@ -572,7 +575,8 @@ void Job_history::write( bool start )
                 _spooler->_db._history_update.execute();
 */
                 string stmt = "UPDATE " + _spooler->_history_tablename + " set ";
-                stmt +=   "\"end_time\"={ts'" + Time::now().as_string(Time::without_ms) + "'}";
+                stmt +=   "\"start_time\"={ts'" + start_time + "'}";
+                stmt += ", \"end_time\"={ts'" + Time::now().as_string(Time::without_ms) + "'}";
                 stmt += ", \"steps\"=" + as_string( _job->_task->_step_count );
                 stmt += ", \"error\"=" + as_string( _job->has_error() );
                 if( !_job->_error.code().empty() ) stmt += ", \"error_code\"=" + sql_quoted( _job->_error.code() );
@@ -615,7 +619,7 @@ void Job_history::write( bool start )
         append_tabbed( _job->_task->_id );
         append_tabbed( _spooler->id() );
         append_tabbed( _job->name() );
-        append_tabbed( _job->_task->_running_since.as_string(Time::without_ms) );
+        append_tabbed( start_time );
         append_tabbed( start? "" : Time::now().as_string(Time::without_ms) );
         append_tabbed( start_cause_name( _job->_task->_cause ) );
         append_tabbed( _job->_task->_step_count );
