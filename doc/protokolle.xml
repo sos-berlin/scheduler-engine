@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet href="scheduler.xslt" type="text/xsl"?>
+
+<!--$Id: protokolle.xml,v 1.1 2004/08/29 09:27:27 jz Exp $-->
+
+<description 
+    title    = "Protokolle" 
+    base_dir = "."
+    parent_page = "index.xml"
+    author   = "$Author: jz $"
+    date     = "$Date: 2004/08/29 09:27:27 $"
+>
+
+<p>
+    Im mit <scheduler_option name="log-dir"/> eingestellten Verzeichnis schreibt der Scheduler seine Protokolle.
+</p>
+
+<h3>Hauptprotokoll</h3>
+<p>
+    Das Hauptprotokoll fast alle Protokolle zusammen.
+    Der Dateiname wird aus Scheduler-Id, Datum und Uhrzeit gebildet, z.B. 
+    <code>scheduler-2004-08-24-104111.log</code>.
+</p>
+    
+<h3>Jobprotokolle</h3>
+<p>
+    Für jeden Job erstellt der Scheduler ein Jobprotokoll
+    mit den Starts der Tasks und eingetroffenen Aufträgen.
+    Beispiel: <code>job.mein_job.log</code>
+</p>
+
+<h3>Taskprotokolle</h3>
+<p>
+    Für jeden Task erstellt der Scheduler ein Taskprotokoll. 
+    Der Dateiname wird aus dem Jobnamen und, wenn mehrere Tasks zugelassen sind, der Task-Id gebildet, 
+    z.B.: <code>task.mein_job.log</code> und <code>task.ein_job.1234.log</code>.
+    Taskprotokolle mit Task-Id werden nach Ende der Task gelöscht.
+</p>
+    
+<h3>Auftragsprotokolle</h3>
+<p>
+    Für jeden Auftrag erstellt der Scheduler ein Auftragsprotokoll
+    mit den Ausgaben aller Tasks, die der Auftrag durchläuft.
+    Der Dateiname wird aus der Jobkette und der Auftrags-Id gebildet,
+    z.B.: <code>order.meine_jobkette.9876.log</code>.
+    Das Auftragsprotokoll wird nach Ende des Auftrags gelöscht.
+</p>
+
+</description>

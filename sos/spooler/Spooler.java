@@ -1,11 +1,11 @@
-// $Id: Spooler.java,v 1.10 2004/08/24 19:53:09 jz Exp $
+// $Id: Spooler.java,v 1.11 2004/08/29 09:27:27 jz Exp $
 
 package sos.spooler;
 
 /** Das allgemeine Scheduler-Objekt.
  * 
  * @author Joacim Zschimmer, Zschimmer GmbH
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  */
 
 public class Spooler extends Idispatch
@@ -22,7 +22,7 @@ public class Spooler extends Idispatch
      * Wenn die Kommandozeilenoption -cd= benutzt worden ist, ist es das damit angegebene Verzeichnis. */
     public String           directory           ()                                  { return (String)       com_call( "<directory"                      ); }
     
-    /** @return Liefert die Einstellung include_path */
+    /** @return Liefert die Einstellung include_path (Kommandozeilen-Option <code>-include=</code). */
     public String           include_path        ()                                  { return (String)       com_call( "<include_path"                   ); }
     
     /** @return Wert der Kommandozeilenoption -log-dir= beim Start des Schedulers. 
@@ -54,8 +54,7 @@ public class Spooler extends Idispatch
     public Variable_set     create_variable_set ()                                  { return (Variable_set) com_call( "create_variable_set"             ); }
     
 
-    /** 
-     * Liefert das {@link Log} des Schedulers. Normalerweise sollte man aber die Variable {@link Job_impl#spooler_log} verwenden.  
+    /** Liefert das {@link Log} des Schedulers. Normalerweise sollte man aber die Variable {@link Job_impl#spooler_log} verwenden.  
      */
     public Log              log                 ()                                  { return (Log)          com_call( "<log"                            ); }
     

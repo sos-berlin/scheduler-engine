@@ -2,13 +2,13 @@
 <?xml-stylesheet href="scheduler.xslt" type="text/xsl"?>
 
 
-<!--$Id: konfiguration.xml,v 1.3 2004/08/25 22:00:40 jz Exp $-->
+<!--$Id: konfiguration.xml,v 1.4 2004/08/29 09:27:27 jz Exp $-->
 
 <description 
-    title    = "Konfiguration" 
+    title    = "XML-Konfiguration" 
     base_dir = "."
     author   = "$Author: jz $"
-    date     = "$Date: 2004/08/25 22:00:40 $"
+    date     = "$Date: 2004/08/29 09:27:27 $"
 >
 <p>
     Beim Start des Scheduler geben Sie die Datei an,
@@ -18,11 +18,18 @@
 <p class="example">
     Beispiel
 </p>
-Eine einfache Konfigurationsdatei mit einem Job in JavaScript (für Windows):
 
+<p>
+    Eine einfache Konfigurationsdatei mit einem Job in JavaScript (für Windows):
+</p>
+<!--
+<p>
+    Die <code>DOCTYPE</code>-Zeile ist optional. Hier ist die jeweils aktuelle DTD eingestellt
+</p>
+-->    
 <pre>
 
-&lt;?xml version="1.0" encoding="iso-8859-1"?>
+&lt;?xml version="1.0" encoding="iso-8859-1"?><!--&lt;!DOCTYPE spooler SYSTEM "http://zsch.de/sos/scheduler/scheduler.dtd">-->
 &lt;spooler>
     &lt;config>
         &lt;process_classes/>

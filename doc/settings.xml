@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="scheduler.xslt" type="text/xsl"?>
 
-<!--$Id: settings.xml,v 1.5 2004/08/24 19:53:02 jz Exp $-->
+<!--$Id: settings.xml,v 1.6 2004/08/29 09:27:27 jz Exp $-->
 
 <!-- Einige Einstellungen können an mehreren Stellen vorgenommen werden:
      - Konfigurationsdatei
@@ -13,11 +13,13 @@
 -->
 
 <settings
-    base_dir = "."
-    author   = "$Author: jz $"
-    date     = "$Date: 2004/08/24 19:53:02 $">
+    base_dir    = "."
+    title       = "Einstellungen"
+    author      = "$Author: jz $"
+    date        = "$Date: 2004/08/29 09:27:27 $"
+>
 
-    <setting name           = "log_dir" 
+    <setting setting        = "log_dir" 
              type           = "verzeichnis" 
              title          = "Verzeichnis der Protokolle">
 
@@ -33,7 +35,7 @@
     </setting>
 
 
-    <setting name              = "param" 
+    <setting setting           = "param" 
              api               = "Spooler.param"
              type              = "text" 
              title             = "Zur freien Verwendung">
@@ -47,7 +49,7 @@
     </setting>
 
 
-    <setting name   = "config" 
+    <setting setting= "config" 
              type   = "dateiname" 
              title  = "Konfigurationsdatei">
 
@@ -59,7 +61,7 @@
     </setting>
     
     
-    <setting name   = "spooler_id" 
+    <setting setting= "spooler_id" 
              type   = "scheduler_id">
 
         <description>
@@ -73,7 +75,7 @@
     </setting>
     
 
-    <setting name   = "log_level" 
+    <setting setting= "log_level" 
              type   = "log_level"
              title  = "Protokollausgaben beschränken">
         <description>
@@ -87,7 +89,7 @@
     </setting>
 
 
-    <setting name   = "include_path" 
+    <setting setting= "include_path" 
              type   = "verzeichnis"
              title  = "Für &lt;include&gt;">
         <description>
@@ -98,7 +100,7 @@
     </setting>
 
     
-    <setting name    = "html_dir" 
+    <setting setting = "html_dir" 
              type    = "verzeichnis"
              title   = "Verzeichnis der HTML-Dateien">
         <description>
@@ -112,7 +114,7 @@
     </setting>
 
 
-    <setting name    = "db_tasks_table" 
+    <setting setting = "db_tasks_table" 
              type    = "name"
              initial = "SCHEDULER_TASKS"
              title   = "Name der Datenbanktabelle für die Tasks">
@@ -123,7 +125,7 @@
     </setting>
 
 
-    <setting name    = "db_history_table" 
+    <setting setting = "db_history_table" 
              type    = "name"
              initial = "SCHEDULER_HISTORY"
              title   = "Name der Datenbanktabelle für die Historie">
@@ -134,7 +136,7 @@
     </setting>
 
 
-    <setting name    = "db_order_history_table" 
+    <setting setting = "db_order_history_table" 
              type    = "name"
              initial = "SCHEDULER_ORDER_HISTORY"
              title   = "Name der Datenbanktabelle für die Auftragshistorie">
@@ -145,7 +147,7 @@
     </setting>
 
 
-    <setting name    = "db_orders_table" 
+    <setting setting = "db_orders_table" 
              type    = "name"
              initial = "SCHEDULER_ORDERS"
              title   = "Name der Datenbanktabelle für die Aufträge">
@@ -156,7 +158,7 @@
     </setting>
 
 
-    <setting name    = "db_variables_table" 
+    <setting setting = "db_variables_table" 
              type    = "name"
              initial = "SCHEDULER_VARIABLES"
              title   = "Name der Datenbanktabelle für die Variablen">
@@ -167,7 +169,7 @@
     </setting>
 
 
-    <setting name    = "history_columns" 
+    <setting setting = "history_columns" 
              type    = "name, name, ..."
              title   = "Zusätzliche Spalten in der Historie">
         <description>
@@ -176,7 +178,7 @@
         </description>
     </setting>
 
-    <setting name    = "history" 
+    <setting setting = "history" 
              type    = "yes|no"
              title   = "Historie schreiben?">
         <description>
@@ -186,9 +188,8 @@
     </setting>
 
 
-    <setting name    = "history_file" 
+    <setting setting = "history_file" 
              type    = ""
-             initial = ""
              title   = "Dateiname der Historie (für datenbanklosen Betrieb)">
         <description>
             <p>
@@ -197,7 +198,7 @@
     </setting>
 
 
-    <setting name   = "history_on_process" 
+    <setting setting= "history_on_process" 
              type   = "yes|no|zahl"
              title  = "Nach spooler_process() Historiensatz schreiben?">
         <description>
@@ -207,7 +208,7 @@
     </setting>
 
 
-    <setting name   = "history_archive" 
+    <setting setting= "history_archive" 
              type   = "yes|no"
              title  = "Historiendateien archivieren?">
         <description>
@@ -217,7 +218,7 @@
     </setting>
 
 
-    <setting name   = "history_with_log" 
+    <setting setting= "history_with_log" 
              type   = "yes|no"
              title  = "Protokoll in die Historie schreiben?">
         <description>
@@ -226,7 +227,7 @@
         </description>
     </setting>
 
-    <setting name   = "order_history" 
+    <setting setting= "order_history" 
              type   = "yes_no"
              title  = "Aufträge in die Historie schreiben?">
         <description>
@@ -236,7 +237,7 @@
     </setting>
 
 
-    <setting name   = "order_history_with_log" 
+    <setting setting= "order_history_with_log" 
              type   = "yes|no"
              title  = "Auftragsprotokolle in die Historie schreiben?">
         <description>
@@ -246,7 +247,7 @@
     </setting>
 
 
-    <setting name    = "db" 
+    <setting setting = "db" 
              type    = "hostware_filename"
              title   = "Hostware-Dateiname der Datenbank">
         <description>
@@ -256,7 +257,7 @@
     </setting>
 
 
-    <setting name    = "need_db" 
+    <setting setting = "need_db" 
              type    = "yes|no|strict"
              initial = "no"
              title   = "Ist die Datenbank notwendig?">
@@ -267,7 +268,7 @@
     </setting>
 
 
-    <setting name    = "max_db_errors" 
+    <setting setting = "max_db_errors" 
              type    = "zahl"
              initial = "5"
              title   = "Anzahl Datenbank-Fehler, bevor Scheduler aufgibt">
@@ -277,7 +278,7 @@
         </description>
     </setting>
 
-    <setting name    = "mail_on_error" 
+    <setting setting = "mail_on_error" 
              type    = "yes|no"
              initial = "no"
              title   = "Mit Fehler beendete Task verschickt eMail">
@@ -288,7 +289,7 @@
     </setting>
 
 
-    <setting name    = "mail_on_process" 
+    <setting setting = "mail_on_process" 
              type    = "yes|no|zahl"
              initial = "no"
              title   = "Task mit spooler_process() verschickt eMail">
@@ -299,9 +300,8 @@
     </setting>
 
 
-    <setting name    = "mail_on_success" 
+    <setting setting = "mail_on_success" 
              type    = "yes|no"
-             initial = ""
              title   = "Erfolgreich gelaufende Task verschickt eMail">
         <description>
             <p>
@@ -310,7 +310,7 @@
     </setting>
 
 
-    <setting name    = "mail_queue_dir" 
+    <setting setting = "mail_queue_dir" 
              type    = "verzeichnis"
              title   = "Verzeichnis der zeitweilig nicht versendbaren eMails">
         <description>
@@ -320,7 +320,7 @@
     </setting>
 
 
-    <setting name      = "java_class_path" 
+    <setting setting   = "java_class_path" 
              type      = "dateinamen"
              prepend   = "yes"
              subst_env = "yes"
@@ -335,7 +335,7 @@
     </setting>
 
 
-    <setting name      = "java_options" 
+    <setting setting   = "java_options" 
              type      = "text"
              prepend   = "yes"
              subst_env = "yes"
@@ -348,7 +348,7 @@
     </setting>
 
 
-    <setting name    = "javac" 
+    <setting setting = "javac" 
              type    = "dateiname"
              initial = "javac"
              title   = "Dateiname des Java-Compilers">
@@ -359,9 +359,8 @@
     </setting>
 
 
-    <setting name    = "log_mail_subject" 
+    <setting setting = "log_mail_subject" 
              type    = "text"
-             initial = ""
              title   = "Betreff der eMails">
         <description>
             <p>
@@ -370,9 +369,8 @@
     </setting>
 
 
-    <setting name    = "log_mail_from" 
+    <setting setting = "log_mail_from" 
              type    = "email_address"
-             initial = ""
              title   = "Absender der eMails">
         <description>
             <p>
@@ -381,9 +379,8 @@
     </setting>
 
 
-    <setting name    = "log_mail_to" 
+    <setting setting = "log_mail_to" 
              type    = "email_address"
-             initial = ""
              title   = "To-Empfänger der eMails">
         <description>
             <p>
@@ -392,9 +389,8 @@
     </setting>
 
 
-    <setting name    = "log_mail_cc" 
+    <setting setting = "log_mail_cc" 
              type    = "email_address"
-             initial = ""
              title   = "Cc-Empfänger der eMails">
         <description>
             <p>
@@ -403,9 +399,8 @@
     </setting>
 
 
-    <setting name    = "log_mail_bcc" 
+    <setting setting = "log_mail_bcc" 
              type    = "email_address"
-             initial = ""
              title   = "Bcc-Empfänger der eMails">
         <description>
             <p>
@@ -414,9 +409,8 @@
     </setting>
 
 
-    <setting name    = "smtp" 
+    <setting setting = "smtp" 
              type    = "host_address"
-             initial = ""
              title   = "Hostname oder IP-Nummer des SMTP-Servers für eMail">
         <description>
             <p>
@@ -425,104 +419,10 @@
     </setting>
 
 
-    <setting name    = "" 
-             type    = ""
-             initial = ""
-             title   = "">
-        <description>
-            <p>
-            </p>
-        </description>
-    </setting>
-
-
-    <setting name    = "" 
-             type    = ""
-             initial = ""
-             title   = "">
-        <description>
-            <p>
-            </p>
-        </description>
-    </setting>
-
-
-    <setting name    = "" 
-             type    = ""
-             initial = ""
-             title   = "">
-        <description>
-            <p>
-            </p>
-        </description>
-    </setting>
-
-
-    <setting name    = "" 
-             type    = ""
-             initial = ""
-             title   = "">
-        <description>
-            <p>
-            </p>
-        </description>
-    </setting>
-
-
-    <setting name    = "" 
-             type    = ""
-             initial = ""
-             title   = "">
-        <description>
-            <p>
-            </p>
-        </description>
-    </setting>
-
-
-    <setting name    = "" 
-             type    = ""
-             initial = ""
-             title   = "">
-        <description>
-            <p>
-            </p>
-        </description>
-    </setting>
-
-
-    <setting name    = "" 
-             type    = ""
-             initial = ""
-             title   = "">
-        <description>
-            <p>
-            </p>
-        </description>
-    </setting>
-
-
-    <setting name    = "" 
-             type    = ""
-             initial = ""
-             title   = "">
-        <description>
-            <p>
-            </p>
-        </description>
-    </setting>
-
-
-    <setting name    = "" 
-             type    = ""
-             initial = ""
-             title   = "">
-        <description>
-            <p>
-            </p>
-        </description>
-    </setting>
-
-
+    <description>
+        <p>
+            Hier sind Einstellungen aufgeführt, die an mehreren Stellen vorgenommen werden können.
+        </p>
+    </description>
     
 </settings>

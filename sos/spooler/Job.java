@@ -1,4 +1,4 @@
-// $Id: Job.java,v 1.9 2004/07/25 11:25:57 jz Exp $
+// $Id: Job.java,v 1.10 2004/08/29 09:27:27 jz Exp $
 
 package sos.spooler;
 
@@ -11,15 +11,14 @@ package sos.spooler;
  * 
  * 
  * @author Joacim Zschimmer
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
 
 public class Job extends Idispatch
 {
     private                 Job                 ( long idispatch )                  { super(idispatch); }
     
-    /**
-     * Erzeugt eine neue Task und reiht sie in die Task-Warteschlange ein.
+    /** Erzeugt eine neue Task und reiht sie in die Task-Warteschlange ein.
      * 
      * <p><br/><b>Beispiel</b>
      * <pre>
@@ -33,8 +32,7 @@ public class Job extends Idispatch
     public Task             start               ()                                  { return (Task)       com_call( "start"                         ); }
     
     
-    /**
-     * Erzeugt eine neue Task mit Parametern und reiht sie in die Task-Warteschlange des Jobs ein.
+    /** Erzeugt eine neue Task mit Parametern und reiht sie in die Task-Warteschlange des Jobs ein.
      * 
      * <p>
      * Die Parameter stehen der Task mit {@link Task#params()} zur Verfügung.
@@ -73,8 +71,7 @@ public class Job extends Idispatch
 
     
     
-    /**
-     * Startet eine Task des Jobs, wenn nicht schon eine läuft und &lt;run_time> dies zulässt.
+    /** Startet eine Task des Jobs, wenn nicht schon eine läuft und &lt;run_time> dies zulässt.
      * <p><br/><b>Beispiel</b>
      * <pre>
      *      spooler.job( "job_a" ).wake();
@@ -89,8 +86,7 @@ public class Job extends Idispatch
     
     
     
-    /**
-     * Lässt eine Task starten, sobald sich ein Verzeichnis ändert.
+    /** Lässt eine Task starten, sobald sich ein Verzeichnis ändert.
      * 
      * <p>
      * Wenn keine Task des Jobs läuft und sich das Verzeichnis geändert hat 
@@ -115,8 +111,7 @@ public class Job extends Idispatch
     public void             start_when_directory_changed( String directory_name )                           { com_call( "start_when_directory_changed", directory_name ); }
 
     
-    /**
-     * Lässt eine Task starten, sobald sich ein Verzeichnis ändert, mit Angabe eines Regulären Ausdrucks.
+    /** Lässt eine Task starten, sobald sich ein Verzeichnis ändert, mit Angabe eines Regulären Ausdrucks.
      *
      * <p>
      * Wie {@link #start_when_directory_changed(String)}, mit der Einschränkung, dass nur Dateien beachtet werden, 
@@ -132,8 +127,7 @@ public class Job extends Idispatch
     public void             start_when_directory_changed( String directory_name, String filename_pattern )  { com_call( "start_when_directory_changed", directory_name, filename_pattern ); }
 
     
-    /**
-     * Nimmt alle Aufrufe von start_when_directory_changed() zurück.
+    /** Nimmt alle Aufrufe von start_when_directory_changed() zurück.
      *
      */
     public void             clear_when_directory_changed()                          {                     com_call( "clear_when_directory_changed"  ); }
@@ -144,8 +138,7 @@ public class Job extends Idispatch
     
     
     
-    /**
-     * Dasselbe wie spooler().include_path().
+    /** Dasselbe wie spooler().include_path().
      * 
      * @see Spooler#include_path()
      */
@@ -154,8 +147,7 @@ public class Job extends Idispatch
     
     
     
-    /**
-     * Liefert den Jobnamen.
+    /** Liefert den Jobnamen.
      *  
      * <p><br/><b>Beispiel</b>
      * <pre>
@@ -175,8 +167,7 @@ public class Job extends Idispatch
     
     
     
-    /**
-     * Setzt für die Status-Anzeige einen Text.
+    /** Setzt für die Status-Anzeige einen Text (für die HTML-Oberfläche).
      * 
      * <p><br/><b>Beispiel</b>
      * <pre>
@@ -194,8 +185,7 @@ public class Job extends Idispatch
     
     
     
-    /**
-     * Liefert den in der Konfiguration eingestellten Titel des Jobs.
+    /** Liefert den in der Konfiguration eingestellten Titel des Jobs.
      *
      * <p>
      * Aus &lt;job title="...">
@@ -214,8 +204,7 @@ public class Job extends Idispatch
     public String           title               ()                                  { return (String)     com_call( "<title"                        ); }
 
     
-    /**
-     * Liefert die Auftragswarteschlange des Jobs oder null.
+    /** Liefert die Auftragswarteschlange des Jobs oder null.
      * 
      * <p><br/><b>Beispiel</b>
      * <pre>
@@ -249,8 +238,7 @@ public class Job extends Idispatch
     public void         set_delay_after_error   ( int error_steps, double seconds ) {                     com_call( ">delay_after_error", new Integer(error_steps), new Double(seconds)   ); }
     
     
-    /**
-     * Wie {@link #set_delay_after_error(int,double)}, "HH:MM:SS" und "STOP" können angegeben werden.
+    /** Wie {@link #set_delay_after_error(int,double)}, "HH:MM:SS" und "STOP" können angegeben werden.
      * 
      * <p>
      * Die Verzögerung kann als String "HH:MM:SS" oder "HH:MM:SS" (Stunde, Minute, Sekunde) eingestellt werden.
@@ -281,8 +269,7 @@ public class Job extends Idispatch
     public void         set_delay_after_error   ( int error_steps, String hhmm_ss ) {                     com_call( ">delay_after_error", new Integer(error_steps), hhmm_ss   ); }
     
     
-    /**
-     * Nimmt alle Aufrufe von set_delay_after_error() zurück. 
+    /** Nimmt alle Aufrufe von set_delay_after_error() zurück. 
      */
     public void             clear_delay_after_error()                               {                     com_call( "clear_delay_after_error"       ); }
 }

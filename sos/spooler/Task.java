@@ -1,4 +1,4 @@
-// $Id: Task.java,v 1.10 2004/08/24 19:53:09 jz Exp $
+// $Id: Task.java,v 1.11 2004/08/29 09:27:27 jz Exp $
 
 package sos.spooler;
 
@@ -10,7 +10,7 @@ package sos.spooler;
  * Implementiert wird eine Task durch {@link Job_impl}.
  * 
  * @author Joacim Zschimmer
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  */
 
 public class Task extends Idispatch
@@ -37,8 +37,7 @@ public class Task extends Idispatch
     public Variable_set     params              ()                                  { return (Variable_set) com_call( "<params"                         ); }
     
     
-    /**
-     * Hier kann die Task ein Ergebnis speichern, das von einer anderen, solange wartenden Task
+    /** Hier kann die Task ein Ergebnis speichern, das von einer anderen, solange wartenden Task
      * abgeholt werden kann.
      * 
      * <p>
@@ -126,14 +125,12 @@ public class Task extends Idispatch
     
     
     
-    /**
-     * Verzögert den nächsten Aufruf von spooler_process().
+    /** Verzögert den nächsten Aufruf von spooler_process().
      */
     public void         set_delay_spooler_process( double seconds )                 {                       com_call( ">delay_spooler_process", seconds ); }
 
     
-    /**
-     * Verzögert den nächsten Aufruf von spooler_process().
+    /** Verzögert den nächsten Aufruf von spooler_process().
      * 
      * @param hhmm_ss "HH:MM:SS" oder "HH:MM", die Dauer in Stunde, Minute, Sekunde.
      */
@@ -145,8 +142,7 @@ public class Task extends Idispatch
 
     
 
-    /**
-     * Liefert den zu verarbeitenden Auftrag oder null.
+    /** Liefert den zu verarbeitenden Auftrag oder null.
      */
     public Order            order               ()                                  { return (Order)        com_call( "<order"                          ); }
 
@@ -162,8 +158,7 @@ public class Task extends Idispatch
     public String           changed_directories ()                                  { return (String)       com_call( "<changed_directories"            ); }
 
     
-    /**
-     * Macht dem Scheduler einen abhängigen Prozess bekannt.
+    /** Macht dem Scheduler einen abhängigen Prozess bekannt.
      * 
      * <p>
      * Wenn die Task endet, bricht der Scheduler die evtl. noch laufenden Prozesse ab.
@@ -176,8 +171,7 @@ public class Task extends Idispatch
     
     
 
-    /**
-     * Macht dem Scheduler einen abhängigen, befristeten Prozess bekannt.
+    /** Macht dem Scheduler einen abhängigen, befristeten Prozess bekannt.
      * 
      * <p>
      * Wie {@link #add_pid(int)}, mit dem Zusatz, dass der Scheduler den Prozess nach der
