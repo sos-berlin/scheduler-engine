@@ -2,14 +2,14 @@
 <!--DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"-->
 <?xml-stylesheet href="../scheduler.xslt" type="text/xsl"?>
 
-<!--$Id: allowed_host.xml,v 1.5 2004/09/06 07:53:27 jz Exp $-->
+<!--$Id: allowed_host.xml,v 1.6 2004/09/08 11:17:36 jz Exp $-->
 
 <xml_element name     = "allowed_host" 
              title    = "Rechner, der Verbindung aufnehmen darf"
              parent_page = "../konfiguration.xml"
              base_dir = "../"
              author   = "$Author: jz $"
-             date     = "$Date: 2004/09/06 07:53:27 $">
+             date     = "$Date: 2004/09/08 11:17:36 $">
 
     <xml_parent_elements>
         <xml_parent_element name="security">
@@ -48,10 +48,12 @@
             <span class="mono">&lt;allowed_host></span>
             gibt den Namen oder die IP-Nummer eines Rechners an, der Verbindung mit dem Scheduler aufnehmen darf.
         </p>
+<!--        
         <p>
             Die IP-Nummer kann eine Netzwerkadresse sein (Klasse A, B oder C, das nimmt der Scheduler aber nicht so genau). 
             Dann werden alle Rechner des Netzwerks zugelassen. Das ist der Fall, wenn der letzte Teil der IP-Nummer 0 ist.
         </p>
+-->        
     </description>
     
     <example>

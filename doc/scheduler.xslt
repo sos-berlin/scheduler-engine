@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding="utf-8"?>
-<!-- $Id: scheduler.xslt,v 1.24 2004/09/07 19:16:49 jz Exp $ -->
+<!-- $Id: scheduler.xslt,v 1.25 2004/09/08 11:17:36 jz Exp $ -->
 
 <!--
     Änderungswünsche:
@@ -816,10 +816,9 @@
             <xsl:attribute name="href"><xsl:value-of select="$base_dir"/>javadoc/sos/spooler/<xsl:value-of select="@class"/>.html#<xsl:value-of select="$java_method"/>(<xsl:value-of select="$java_signature"/>)</xsl:attribute>
             <code>
                 <xsl:value-of select="@class"/>
-                
                 <xsl:text>.</xsl:text>
-
-                <xsl:value-of select="$java_method"/>()
+                <xsl:value-of select="$java_method"/>
+                <xsl:text>()</xsl:text>
 <!--                
                 <xsl:if test="@method">
                     <xsl:value-of select="@method"/>()

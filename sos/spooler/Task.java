@@ -1,4 +1,4 @@
-// $Id: Task.java,v 1.12 2004/08/30 10:13:53 jz Exp $
+// $Id: Task.java,v 1.13 2004/09/08 11:17:36 jz Exp $
 
 package sos.spooler;
 
@@ -10,7 +10,7 @@ package sos.spooler;
  * Implementiert wird eine Task durch {@link Job_impl}.
  * 
  * @author Joacim Zschimmer
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.13 $
  */
 
 public class Task extends Idispatch
@@ -138,7 +138,8 @@ public class Task extends Idispatch
     public void         set_delay_spooler_process( String hhmm_ss )                 {                       com_call( ">delay_spooler_process", hhmm_ss ); }
 
     
-    
+
+    /** @deprecated Die Methode galt für use_engine="job", was es nicht mehr gibt. */    
     public void         set_close_engine        ( boolean close_after_task )        {                       com_call( ">close_engine", close_after_task ); }
 
     

@@ -1,11 +1,11 @@
-// $Id: spooler_version.h,v 1.243 2004/09/02 09:33:30 jz Exp $
+// $Id: spooler_version.h,v 1.244 2004/09/08 11:17:36 jz Exp $
 
 #include "../module_version.h"
 
 #define VER_FILEDESC_STR        "Scheduler"
 
-#define VER_PRODUCTVERSION       2,0,86
-#define VER_PRODUCTVERSION_STR  "2.0.86  2004-09-02  " Z_MODULE_VERSION_STR VER_PRODUCTVERSION_DEBUG 
+#define VER_PRODUCTVERSION       2,0,87
+#define VER_PRODUCTVERSION_STR  "2.0.87  2004-09-08  " Z_MODULE_VERSION_STR VER_PRODUCTVERSION_DEBUG 
 
 #define VER_NAME_STR            "Scheduler"
 #define VER_FILENAME_STR        "scheduler.exe"

@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="scheduler.xslt" type="text/xsl"?>
 
-<!--$Id: job.xml,v 1.1 2004/09/07 19:17:14 jz Exp $-->
+<!--$Id: job.xml,v 1.2 2004/09/08 11:17:36 jz Exp $-->
 
 <description 
     title    = "Was ist ein Job?" 
     base_dir = ""
     author   = "$Author: jz $"
-    date     = "$Date: 2004/09/07 19:17:14 $"
+    date     = "$Date: 2004/09/08 11:17:36 $"
 >
     Ein Job wird definiert in der XML-Konfiguration mit <scheduler_element name="job"/>.
     Hier werden der Programmcode, die Laufzeit und andere Dinge angegeben.
@@ -40,14 +40,16 @@
             <td>
                 Der Job stoppt. Der Scheduler startet keine weitere Task und die laufenden Tasks werden beendet.
                 Sobald alle Tasks des Jobs beendet sind, wechselt der Job in den Zustand <code>stopped</code>.
-                Siehe <scheduler_element name="modify_job" attribute="cmd" value="stop"/>.
+                <br/>
+                Siehe das Kommando <scheduler_element name="modify_job" attribute="cmd" value="stop"/>.
             </td>
         </tr>
         <tr>
             <td><code>stopped</code></td>
             <td>
                 Keine Task läuft und der Scheduler startet keine weitere Task.
-                Siehe <scheduler_element name="modify_job" attribute="cmd" value="stop"/>.
+                <br/>
+                Siehe das Kommando <scheduler_element name="modify_job" attribute="cmd" value="stop"/>.
             </td>
         </tr>
         <tr>
@@ -55,13 +57,14 @@
             <td>
                 Das Kommando <code>reread</code> hat zu einem Fehler geführt,
                 und der Job ist unbrauchbar, weil der Programmcode nicht gelesen werden konnte.
-                Siehe <scheduler_element name="modify_job" attribute="cmd" value="reread"/>.
+                <br/>
+                Siehe das Kommando <scheduler_element name="modify_job" attribute="cmd" value="reread"/>.
             </td>
         </tr>
         <tr>
             <td><code>error</code></td>
             <td>
-                Der Scheduler startet keine weitere Task.
+                Wenn eine Task mit Fehler geendet hat, startet der Scheduler keine weitere Task.
                 <!--Der Aufruf <scheduler_method class="Job" property="error"/> liefert den Fehler.-->
             </td>
         </tr>
@@ -72,5 +75,33 @@
     <p>
         Mit dem Kommando <scheduler_element name="modify_job"/> können Sie den Zustand des Jobs ändern.
     </p>
+    
+    
+    <h2>Eine Task starten</h2>
+    <p>
+        In der Konfiguration können Sie mit <scheduler_element name="run_time"/> einstellen, dass eine Task einmal oder periodisch gestartet werden soll.
+    </p>
+    <p>
+        Das Kommando <scheduler_element name="start_job"/> startet eine Task.
+    </p>
+    <p>
+        Wenn die Verzeichnisüberwachung 
+        (<scheduler_method class="Job" method="start_when_directory_changed" java_signature="java.lang.String"/>)
+        aktiv ist und das überwachte Verzeichnis sich ändert, startet der Scheduler eine Task.
+    </p>
+    <p>
+        Wenn der Job auftragsgesteuert ist und ein Auftrag vorliegt, startet der Scheduler eine Task.
+    </p>
+
+
+    <!--
+    <h2>Den Job zeigen</h2>
+    <p>
+        Das Kommando <scheduler_element name="show_job"/> zeigt den Zustand des Jobs, die wartenden und laufenden Tasks und die Aufträge.
+    </p>
+    -->
+
+
+    <scheduler_comment><h2>Verzeichnisüberwachung</h2></scheduler_comment>
                 
 </description>
