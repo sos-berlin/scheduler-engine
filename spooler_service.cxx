@@ -1,4 +1,4 @@
-// $Id: spooler_service.cxx,v 1.36 2003/03/17 18:40:19 jz Exp $
+// $Id: spooler_service.cxx,v 1.37 2003/04/14 09:46:43 jz Exp $
 /*
     Hier sind implementiert
 
@@ -484,12 +484,15 @@ static void __stdcall Handler( DWORD dwControl )
 
     if( spooler_ptr )
     {
+        if( dwControl == SERVICE_CONTROL_STOP 
+         || dwControl == SERVICE_CONTROL_SHUTDOWN )  start_self_destruction();      // Vorsichtshalber vor info()!
+
+        spooler_ptr->log().info( "Service Handler " + string_from_handler_control(dwControl) );
+
         switch( dwControl )
         {
             case SERVICE_CONTROL_STOP:              // Requests the service to stop.  
             {
-                start_self_destruction();
-
                 pending_timed_out = false;
                 service_stop = true;
                 spooler_ptr->cmd_terminate();
@@ -514,7 +517,6 @@ static void __stdcall Handler( DWORD dwControl )
                 break;
 
             case SERVICE_CONTROL_SHUTDOWN:          // Requests the service to perform cleanup tasks, because the system is shutting down. 
-                start_self_destruction();
                 spooler_ptr->cmd_stop();
                 break;
 
