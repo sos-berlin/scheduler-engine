@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.186 2003/03/26 14:44:05 jz Exp $
+// $Id: spooler.cxx,v 1.187 2003/03/26 20:16:41 jz Exp $
 /*
     Hier sind implementiert
 
@@ -458,6 +458,8 @@ void Spooler::wait_until_threads_stopped( Time until )
                     _log.info( "Thread " + thread->name() + " beendet" );
                     it = threads.erase( it );
                 }
+                else
+                    LOG( "Thread " << thread->name() << " läuft noch\n" );
             }
 
             if( threads.size() ==  0 )  break;
@@ -735,6 +737,11 @@ void Spooler::send_cmd()
     SOCKET sock = socket( PF_INET, SOCK_STREAM, 0 );
     if( sock == SOCKET_ERROR ) throw_sos_socket_error( "socket" );
 
+    struct linger l; 
+    l.l_onoff  = 1; 
+    l.l_linger = 5;  // Sekunden
+    setsockopt( sock, SOL_SOCKET, SO_LINGER, (const char*)&l, sizeof l );
+
     sockaddr_in addr;
 
     memset( &addr, 0, sizeof addr );
@@ -774,6 +781,7 @@ void Spooler::send_cmd()
     }
 
     if( !last_was_nl )  fputc( '\n', stdout );
+    fflush( stdout );
 
     closesocket( sock );
 }
@@ -812,7 +820,7 @@ void Spooler::load_arg()
 
     _java_vm->set_filename      ( read_profile_string( _factory_ini, "java"   , "vm"         , _java_vm->filename()       ) );
     _java_vm->prepend_class_path( read_profile_string( _factory_ini, "java"   , "class_path" ) );
-    _java_vm->prepend_class_path( read_profile_string( ""          , "java"   , "class_path" ) );
+  //_java_vm->prepend_class_path( read_profile_string( ""          , "java"   , "class_path" ) );
     _java_vm->set_javac_filename( read_profile_string( _factory_ini, "java"   , "javac"      , _java_vm->javac_filename() ) );
 
 
@@ -953,12 +961,8 @@ void Spooler::start()
     _log.open_new();
     _log.info( string( "Spooler (" VER_PRODUCTVERSION_STR ) + ") startet mit " + _config_filename );
 
-    _db.open( _db_name, _need_db );
-    _db.spooler_start();
 
     if( !_manual )  _communication.start_or_rebind();
-
-    _spooler_start_time = Time::now();
 
     if( _has_java  ) 
     {
@@ -975,6 +979,13 @@ void Spooler::start()
         set_ctrl_c_handler( false );     // Ctrl-C-Handler von Java überschreiben (Suns Java beendet bei Ctrl-C den Prozess sofort)
         set_ctrl_c_handler( true );
     }
+
+
+    _db.open( _db_name, _need_db );
+    _db.spooler_start();
+
+
+    _spooler_start_time = Time::now();
 
 
     FOR_EACH( Thread_list, _thread_list, it )  if( !(*it)->empty() )  (*it)->init();

@@ -1,4 +1,4 @@
-// $Id: spooler_log.cxx,v 1.59 2003/03/19 12:40:26 jz Exp $
+// $Id: spooler_log.cxx,v 1.60 2003/03/26 20:16:42 jz Exp $
 
 #include "spooler.h"
 #include "spooler_mail.h"
@@ -341,6 +341,8 @@ void Prefix_log::close()
 
 void Prefix_log::close2()
 {
+    LOG( "Prefix_log::close2 file=" << (void*)_file << "\n" );
+
     if( _file != -1 )  
     {
         log( log_info, "Protokoll endet in " + _filename );
@@ -507,6 +509,8 @@ void Prefix_log::set_mail_body( const string& body, bool overwrite )
 
 void Prefix_log::send( int reason )
 {
+    LOG( "Prefix_log::send reason=" << reason << "\n" );
+
     // reason == -2  =>  Gelegentlicher Aufruf, um Fristen zu prüfen und ggfs. eMail zu versenden
     // reason == -1  =>  Job mit Fehler beendet
     // reason >=  0  =>  Anzahl spooler_process()
@@ -523,6 +527,8 @@ void Prefix_log::send( int reason )
                      || reason ==  0  &&  _mail_on_success
                      || reason  >  0  &&  ( _mail_on_success || _mail_on_process && reason >= _mail_on_process );
 
+        LOG( "Prefix_log::send mail_it=" << mail_it << "\n" );
+
         Time now = Time::now();
 
         if( _first_send == 0  &&  !mail_it )
@@ -535,9 +541,15 @@ void Prefix_log::send( int reason )
             if( _last_send  == 0  ||  _last_send  > now )  _last_send  = now;
             if( _first_send == 0  ||  _first_send > now )  _first_send = now;
 
-            if( reason == -1  &&  _mail_on_error        // Fehler?
-             || now >= _last_send + _collect_within     // Nicht mehr sammeln?
-             || now >= _first_send + _collect_max )     // Lange genug gesammelt?
+            LOG( "Prefix_log::send now=" << now << " _last_send+collect_within=" << Time(_last_send + _collect_within) << " _first_send+collectmax=" << Time(_first_send + _collect_max) << "\n" );
+            LOG( "Prefix_log::send now=" << now << " collect_within=" << _collect_within << " collectmax=" << _collect_max << "\n" );
+
+            LOG( "now >= _last_send + _collect_within:  " << (now >= _last_send + _collect_within) << "\n" );
+            LOG( "now >= _first_send + _collect_max  :  " << (now >= _first_send + _collect_max) << "\n" );
+
+            if( reason == -1  &&  _mail_on_error              // Fehler?
+             || now >= _last_send + _collect_within - 0.001   // Nicht mehr sammeln?  (ohne -0.001 liefert der Ausdruck manchmal false).
+             || now >= _first_send + _collect_max - 0.001 )   // Lange genug gesammelt?
             {
                 // Wenn die Protokolle in einer eMail gesammelt verschickt werden, wirken 
                 // mail_on_error==false oder mail_on_process==false nicht wie gewünscht,
