@@ -192,6 +192,17 @@
                     </span>
                 </td>
             </tr>
+            
+            <xsl:if test="state/@db_waiting='yes'">
+                <tr>
+                    <td colspan="99" style="color: red">
+                        &#160;<br/>
+                        Scheduler wartet auf die Datenbank ...<br/>
+                        <xsl:value-of select="state/@db_error"/>
+                    </td>
+                </tr>
+            </xsl:if>
+            
         </table>
     </xsl:template>
 
@@ -374,7 +385,7 @@
                                                 Next start
                                             </xsl:when>
                                             <xsl:otherwise>
-                                                .
+                                                &#160;
                                             </xsl:otherwise>
                                         </xsl:choose>
                                     </xsl:otherwise>

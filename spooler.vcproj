@@ -671,16 +671,6 @@ ant -f ../javadoc.xml
 			</File>
 		</Filter>
 		<Filter
-			Name="XML"
-			Filter="">
-			<File
-				RelativePath="spooler.dtd">
-			</File>
-			<File
-				RelativePath="spooler.xml">
-			</File>
-		</Filter>
-		<Filter
 			Name="Java"
 			Filter="*.java">
 			<File
