@@ -18,7 +18,8 @@
 			ConfigurationType="1"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="FALSE"
-			CharacterSet="2">
+			CharacterSet="2"
+			WholeProgramOptimization="FALSE">
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="4"
@@ -49,7 +50,8 @@
 cd doc &amp;&amp; rem bash -c &quot;perl ../scheduler_keyword_to_xml.pl *.xml xml/*.xml xml/answer/*.xml&quot;
 echo jar cfm &quot;$(TargetDir)sos.spooler.jar&quot; ../java_manifest sos/spooler/*.class
 cd &quot;$(IntDir)&quot; &amp;&amp; jar cfm &quot;$(TargetDir)sos.spooler.jar&quot; ../java_manifest sos/spooler/*.class
-ant -f ../javadoc.xml"
+ant -f ../javadoc.xml
+"
 				Outputs="$(TargetDir)sos.spooler.jar"/>
 			<Tool
 				Name="VCLinkerTool"
@@ -127,7 +129,8 @@ ant -f ../javadoc.xml"
 cd doc &amp;&amp; rem bash -c &quot;perl ../scheduler_keyword_to_xml.pl *.xml xml/*.xml xml/answer/*.xml&quot;
 echo jar cfm &quot;$(TargetDir)sos.spooler.jar&quot; ../java_manifest sos/spooler/*.class
 cd &quot;$(IntDir)&quot; &amp;&amp; jar cfm &quot;$(TargetDir)sos.spooler.jar&quot; ../java_manifest sos/spooler/*.class
-ant -f ../javadoc.xml"
+ant -f ../javadoc.xml
+"
 				Outputs="$(TargetDir)sos.spooler.jar"/>
 			<Tool
 				Name="VCLinkerTool"
