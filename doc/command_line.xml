@@ -1,20 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="scheduler.xslt" type="text/xsl"?>
 
-<!--$Id: command_line.xml,v 1.3 2004/08/24 08:50:16 jz Exp $-->
+<!--$Id: command_line.xml,v 1.4 2004/08/24 11:18:23 jz Exp $-->
 
 <command_line program  = "scheduler"
               title    = "Kommandozeile"
               base_dir = "."
               author   = "$Author: jz $"
-              date     = "$Date: 2004/08/24 08:50:16 $">
+              date     = "$Date: 2004/08/24 11:18:23 $">
 
     <command_options>
-        <command_option name="config" value="dateiname" title="Konfigurationsdatei">
+        <command_option name="config" setting="config">
             <description>
-                <p>
-                    Gibt die <a href="konfiguration.html">Konfigurationsdatei</a> an.
-                </p>
                 <p>
                     "<code>-config=</code>" vor dem Dateinamen kann weggelassen werden.
                 </p>
@@ -22,16 +19,7 @@
         </command_option>
 
 
-        <command_option name="log-dir" value="verzeichnis" title="Verzeichnis der Protokolle">
-            <description>
-                <p>
-                    In dieses Verzeichnis schreibt der Scheduler seine Protokolle.
-                </p>
-                <p>
-                    <code>-log-dir="*stderr"</code> lässt stattdessen den Scheduler die Protokollausgabe nach stderr (auf den Schirm) schreiben.
-                </p>
-            </description>
-        </command_option>
+        <command_option name="log-dir" setting="log_dir"/>
 
 
         <command_option name="V" title="Versionsnummer zeigen">
@@ -43,7 +31,7 @@
         </command_option>
 
 
-        <command_option name="cd" value="verzeichnis" title="Arbeitsverzeichnis">
+        <command_option name="cd" type="verzeichnis" title="Arbeitsverzeichnis">
             <description>
                 <p>
                     Ändert das Arbeitsverzeichnis.
@@ -52,50 +40,12 @@
         </command_option>
 
 
-        <command_option name="id" value="spooler_id">
-            <description>
-                <p>
-                    Gibt die Scheduler-Id an.
-                    Der Scheduler wählt aus der Konfigurationsdatei die Einträge mit dem Attribut 
-                    <code>spooler_id="</code><i>spooler_id</i><code>"</code>
-                    aus.
-                </p>
-            </description>
-        </command_option>
+        <command_option name="id"           setting="spooler_id"/>
+        <command_option name="log-level"    setting="log_level"/>
+        <command_option name="param"        setting="param"/>
+        <command_option name="include-path" setting="include_path"/>
 
-
-        <command_option name="log-level" value="level" title="Protokollausgaben beschränken">
-            <description>
-                <p>
-                    Gibt an, ab welcher Stufe Protokollzeilen ausgegeben werden soll.
-                    Jede Protokollzeile ist auf einer der folgenden Stufen:
-                    <code>error</code>, <code>warn</code>, <code>info</code>, <code>debug1</code> bis <code>debug9</code> 
-                    (<code>debug1</code> ist dasselbe wie <code>debug</code>).
-                </p>
-            </description>
-        </command_option>
-
-
-        <command_option name="param" value="text">
-            <description>
-                <p>
-                    Zur freien Verwendung.
-                    Der Parameter ist in den Skripten über <code>spooler.param</code> lesbar.
-                </p>
-            </description>
-        </command_option>
-
-
-        <command_option name="include_path" value="verzeichnis" title="Für &lt;include&gt;">
-            <description>
-                <p>
-                    Verzeichnis für <scheduler_element name="include"/>.
-                </p>
-            </description>
-        </command_option>
-
-
-        <command_option name="cmd" value="xmlkommando" title="Sofort auszuführendes Kommando">
+        <command_option name="cmd" type="xmlkommando" title="Sofort auszuführendes Kommando">
             <description>
                 <p>
                     Der Scheduler führt beim Start das XML-Kommando aus.
@@ -105,7 +55,7 @@
         </command_option>
 
 
-        <command_option name="send-cmd" value="xmlkommando" title="Anderem Scheduler zu schickendes Kommando">
+        <command_option name="send-cmd" type="xmlkommando" title="Anderem Scheduler zu schickendes Kommando">
             <description>
                 <p>
                     Mit dieser Option startet der Scheduler nicht, 
@@ -126,7 +76,7 @@
         </command_option>
 
 
-        <command_option name="ini" value="dateiname" title="Anderer Name für Datei factory.ini">
+        <command_option name="ini" type="dateiname" title="Anderer Name für Datei factory.ini">
             <description>
                 <p>
                     Wählt eine andere Datei für die Datei <code>factory.ini</code> aus.
@@ -136,7 +86,7 @@
         </command_option>
 
 
-        <command_option name="sos.ini" value="dateiname" title="Anderer Name für Datei sos.ini">>
+        <command_option name="sos.ini" type="dateiname" title="Anderer Name für Datei sos.ini">>
             <description>
                 <p>
                     Wählt eine andere Datei für die Hostware-Konfiguration <code>sos.ini</code>aus.

@@ -1,0 +1,300 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet href="scheduler.xslt" type="text/xsl"?>
+
+<!--$Id: settings.xml,v 1.1 2004/08/24 11:18:56 jz Exp $-->
+
+<!-- Einige Einstellungen können an mehreren Stellen vorgenommen werden:
+     - Konfigurationsdatei
+     - factory.ini
+     - Kommandozeile
+     - Programm-Schnittstelle
+
+     Diese Einstellungen werden hier beschrieben.
+-->
+
+<settings
+    base_dir = "."
+    author   = "$Author: jz $"
+    date     = "$Date: 2004/08/24 11:18:56 $">
+
+    <setting name           = "log_dir" 
+             xml_element    = "config"
+             ini_section    = "spooler"
+             type           = "verzeichnis" 
+             title          = "Verzeichnis der Protokolle">
+
+        <description>
+            <p>
+                In dieses Verzeichnis schreibt der Scheduler seine Protokolle.
+            </p>
+            <p>
+                <scheduler_setting name="log_dir" value="*stderr"/> lässt den Scheduler 
+                die Protokollausgabe nach stderr (auf den Schirm) schreiben.
+            </p>
+        </description>
+    </setting>
+
+
+    <setting name              = "param" 
+             is_command_option = "yes"
+             xml_element       = "config"
+             ini_section       = "spooler"
+             api               = "Spooler.param"
+             type              = "text" 
+             title             = "Zur freien Verwendung">
+
+        <description>
+            <p>
+                Zur freien Verwendung.
+                Der Parameter ist in den Skripten über <code>spooler.param</code> lesbar.
+            </p>
+        </description>
+    </setting>
+
+
+    <setting name   = "config" 
+             type   = "dateiname" 
+             title  = "Konfigurationsdatei">
+
+        <description>
+            <p>
+                Gibt die <a href="konfiguration.html">Konfigurationsdatei</a> an.
+            </p>
+        </description>
+    </setting>
+    
+    
+    <setting name   = "spooler_id" 
+             type   = "scheduler_id">
+
+        <description>
+            <p>
+                Gibt die Scheduler-Id an.
+                Der Scheduler wählt aus der Konfigurationsdatei die Einträge mit dem Attribut 
+                <code>spooler_id="</code><i>spooler_id</i><code>"</code>
+                aus.
+            </p>
+        </description>
+    </setting>
+    
+
+    <setting name   = "log_level" 
+             type   = "log_level"
+             title  = "Protokollausgaben beschränken">
+        <description>
+            <p>
+                Legt fest, ab welcher Stufe der Scheduler Protokollzeilen ausgibt.
+                Jede Protokollzeile ist auf einer der folgenden Stufen:
+                <code>error</code>, <code>warn</code>, <code>info</code>, <code>debug1</code> bis <code>debug9</code> 
+                (<code>debug1</code> ist dasselbe wie <code>debug</code>).
+            </p>
+        </description>
+    </setting>
+
+
+    <setting name   = "include_path" 
+             type   = "verzeichnis"
+             title  = "Für &lt;include&gt;">
+        <description>
+            <p>
+                Verzeichnis für <scheduler_element name="include"/>.
+            </p>
+        </description>
+    </setting>
+
+    
+    <setting name    = "html_dir" 
+             type    = "verzeichnis"
+             title   = "Verzeichnis der HTML-Dateien">
+        <description>
+            <p>
+                In diesem Verzeichnis stehen die HTML-Dateien für den HTTP-Server im Scheduler.
+            </p>
+            <p>
+                Wenn die Angabe fehlt, nimmt der Scheduler das Verzeichnis <code>html</code> im Verzeichnis der Konfigurationsdatei.
+            </p>
+        </description>
+    </setting>
+
+
+    <setting name    = "db_tasks_table" 
+             type    = ""
+             initial = "SCHEDULER_TASKS"
+             title   = "Name der Datenbanktabelle für die Tasks">
+        <description>
+            <p>
+            </p>
+        </description>
+    </setting>
+
+
+    <setting name    = "db_history_table" 
+             type    = ""
+             initial = "SCHEDULER_HISTORY"
+             title   = "Name der Datenbanktabelle für die Historie">
+        <description>
+            <p>
+            </p>
+        </description>
+    </setting>
+
+
+    <setting name    = "db_order_history_table" 
+             type    = ""
+             initial = "SCHEDULER_ORDER_HISTORY"
+             title   = "Name der Datenbanktabelle für die Auftragshistorie">
+        <description>
+            <p>
+            </p>
+        </description>
+    </setting>
+
+
+    <setting name    = "db_orders_table" 
+             type    = ""
+             initial = "SCHEDULER_ORDERS"
+             title   = "Name der Datenbanktabelle für die Aufträge">
+        <description>
+            <p>
+            </p>
+        </description>
+    </setting>
+
+
+    <setting name    = "db_variables_table" 
+             type    = ""
+             initial = "SCHEDULER_VARIABLES"
+             title   = "Name der Datenbanktabelle für die Variablen">
+        <description>
+            <p>
+            </p>
+        </description>
+    </setting>
+
+
+    <setting name    = "history_columns" 
+             type    = ""
+             title   = "Zusätzliche Spalten in der Historie">
+        <description>
+            <p>
+            </p>
+        </description>
+    </setting>
+
+    <setting name    = "history" 
+             type    = "yes_no"
+             title   = "Historie schreiben?">
+        <description>
+            <p>
+            </p>
+        </description>
+    </setting>
+
+    <setting name   = "history_on_process" 
+             type   = ""
+             title  = "">
+        <description>
+            <p>
+            </p>
+        </description>
+    </setting>
+
+
+    <setting name   = "history_archive" 
+             type   = ""
+             title  = "">
+        <description>
+            <p>
+            </p>
+        </description>
+    </setting>
+
+
+    <setting name   = "history_with_log" 
+             type   = ""
+             title  = "">
+        <description>
+            <p>
+            </p>
+        </description>
+    </setting>
+
+    <setting name   = "order_history" 
+             type   = "yes_no"
+             title  = "">
+        <description>
+            <p>
+            </p>
+        </description>
+    </setting>
+
+
+    <setting name   = "order_history_with_log" 
+             type   = ""
+             title  = "">
+        <description>
+            <p>
+            </p>
+        </description>
+    </setting>
+
+
+    <setting name    = "db" 
+             type    = "hostware_filename"
+             title   = "Hostware-Dateiname der Datenbank">
+        <description>
+            <p>
+            </p>
+        </description>
+    </setting>
+
+
+    <setting name    = "need_db" 
+             type    = "yes|no|strict"
+             initial = "no"
+             title   = "">
+        <description>
+            <p>
+            </p>
+        </description>
+    </setting>
+
+
+    <setting name    = "max_db_errors" 
+             type    = "zahl"
+             initial = "5"
+             title   = "">
+        <description>
+            <p>
+            </p>
+        </description>
+    </setting>
+
+
+<!--
+    _mail_on_error   =            read_profile_bool           ( _factory_ini, "spooler", "mail_on_error"  , _mail_on_error );
+    _mail_on_process =            read_profile_mail_on_process( _factory_ini, "spooler", "mail_on_process", _mail_on_process );
+    _mail_on_success =            read_profile_bool           ( _factory_ini, "spooler", "mail_on_success", _mail_on_success );
+    _mail_queue_dir  = subst_env( read_profile_string         ( _factory_ini, "spooler", "mail_queue_dir" , _mail_queue_dir ) );
+    _mail_encoding   =            read_profile_string         ( _factory_ini, "spooler", "mail_encoding"  , "base64"        );      // "quoted-printable": Jmail braucht 1s pro 100KB dafür
+    _smtp_server     =            read_profile_string         ( _factory_ini, "spooler", "smtp"           , _smtp_server );
+
+    _log_mail_from      = read_profile_string( _factory_ini, "spooler", "log_mail_from"   );
+    _log_mail_to        = read_profile_string( _factory_ini, "spooler", "log_mail_to"     );
+    _log_mail_cc        = read_profile_string( _factory_ini, "spooler", "log_mail_cc"     );
+    _log_mail_bcc       = read_profile_string( _factory_ini, "spooler", "log_mail_bcc"    );
+    _log_mail_subject   = read_profile_string( _factory_ini, "spooler", "log_mail_subject");
+    _log_collect_within = read_profile_uint  ( _factory_ini, "spooler", "log_collect_within", 0 );
+    _log_collect_max    = read_profile_uint  ( _factory_ini, "spooler", "log_collect_max"   , 900 );
+
+    _my_program_filename = _argv? _argv[0] : "(Programmdateiname fehlt)";
+
+    //if( !_java_vm->running() )  // Für javac ist's egal, ob Java läuft (für scheduler.dll)
+    {
+      //_java_vm->set_filename      ( subst_env( read_profile_string( _factory_ini, "java"   , "vm"         , _java_vm->filename()       ) ) );
+        _java_vm->prepend_class_path( subst_env( read_profile_string( _factory_ini, "java"   , "class_path" ) ) );
+      //_java_vm->set_javac_filename( subst_env( read_profile_string( _factory_ini, "java"   , "javac"      , _java_vm->javac_filename() ) ) );
+    }
+-->    
+    
+</settings>
