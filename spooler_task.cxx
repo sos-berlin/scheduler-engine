@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.210 2003/10/20 17:23:32 jz Exp $
+// $Id: spooler_task.cxx,v 1.211 2003/10/22 23:01:01 jz Exp $
 /*
     Hier sind implementiert
 
@@ -778,7 +778,7 @@ bool Task::do_something()
                     {
                         THREAD_LOCK( _lock ) { if( !_ending_since )  _ending_since = now; }    // Wird auch von cmd_end() gesetzt
 
-                        if( has_error() )  _history.start(); //,  _success = false;
+                        if( has_error() )  _history.start();
 
                         if( _begin_called )
                         {

@@ -1,4 +1,4 @@
-// $Id: spooler_job.cxx,v 1.41 2003/10/20 16:17:40 jz Exp $
+// $Id: spooler_job.cxx,v 1.42 2003/10/22 23:01:00 jz Exp $
 /*
     Hier sind implementiert
 
@@ -778,7 +778,7 @@ void Job::calculate_next_time( Time now )
         if( !_waiting_for_process )
         {
             if( _state == s_pending  
-            || _state == s_running  &&  _running_tasks.size() < _max_tasks )
+             || _state == s_running  &&  _running_tasks.size() < _max_tasks )
             {
                 bool in_period = is_in_period(now);
 
