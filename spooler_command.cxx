@@ -1,4 +1,4 @@
-// $Id: spooler_command.cxx,v 1.65 2002/11/22 17:23:51 jz Exp $
+// $Id: spooler_command.cxx,v 1.66 2002/11/23 17:28:54 jz Exp $
 /*
     Hier ist implementiert
 
@@ -541,7 +541,9 @@ void Command_processor::execute_2( const string& xml_text, const Time& xml_mod_t
 */
         xml::Element_ptr e = command_doc.documentElement();
 
-        if( e.nodeName_is( "spooler" ) )  e = e.firstChild();
+        if( e.nodeName_is( "spooler" ) )  e = e.firstChild(); 
+        
+        while( e  &&  e.nodeType() != xml::ELEMENT_NODE )  e = e.nextSibling();
 
         if( e )
         {

@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.133 2002/11/22 17:23:50 jz Exp $
+// $Id: spooler.cxx,v 1.134 2002/11/23 17:28:53 jz Exp $
 /*
     Hier sind implementiert
 
@@ -529,6 +529,7 @@ void Spooler::load_arg()
     _log_directory      = read_profile_string    ( _factory_ini, "spooler", "log_dir"            , _log_directory );  _log_directory_as_option_set = !_log_directory.empty();
     _include_path       = read_profile_string    ( _factory_ini, "spooler", "include-path"       );  // veraltet
     _include_path       = read_profile_string    ( _factory_ini, "spooler", "include_path"       , _include_path );   _include_path_as_option_set  = !_include_path.empty();
+    _temp_dir           = read_profile_string    ( _factory_ini, "spooler", "tmp"                , get_temp_path() );
     _spooler_param      = read_profile_string    ( _factory_ini, "spooler", "param"              );                   _spooler_param_as_option_set = !_spooler_param.empty();
     log_level           = read_profile_string    ( _factory_ini, "spooler", "log_level"          , log_level );   
     _history_columns    = read_profile_string    ( _factory_ini, "spooler", "history_columns"    );
@@ -543,6 +544,7 @@ void Spooler::load_arg()
     _java_vm._filename  = read_profile_string    ( _factory_ini, "java"   , "vm"                 , "msjava.dll"        );
   //_java_vm._ini_options= read_profile_string   ( _factory_ini, "java"   , "options" );
     _java_vm._ini_class_path= read_profile_string( _factory_ini, "java"   , "class_path" );
+    _java_vm._javac     = read_profile_string    ( _factory_ini, "java"   , "javac"              , "javac"             );
 
 
     try

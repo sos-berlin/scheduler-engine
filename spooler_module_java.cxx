@@ -1,4 +1,4 @@
-// $Id: spooler_module_java.cxx,v 1.16 2002/11/22 17:23:53 jz Exp $
+// $Id: spooler_module_java.cxx,v 1.17 2002/11/23 17:28:54 jz Exp $
 /*
     Hier sind implementiert
 
@@ -17,6 +17,7 @@
 #endif
 
 #include <sys/stat.h>
+#include <sys/utime.h>
 
 using namespace std;
 
@@ -517,16 +518,14 @@ void Java_vm::init()
     JNI_GetDefaultJavaVMInitArgs_func*   JNI_GetDefaultJavaVMInitArgs;
     JNI_CreateJavaVM_func*               JNI_CreateJavaVM;
 
-    
+
+    _work_class_dir = _spooler->temp_dir() + "/spooler";
+    if( _spooler->id() != "" )  _work_class_dir += "/" + _spooler->id();
+    _work_class_dir += "/java";
+        
     if( _filename == "" )  throw_xc( "SPOOLER-170" );
-
-
-
-    _work_class_dir = get_temp_path() + "/spooler/java";
-
-
-
     string module_filename = _filename;
+
 
 #   ifdef SYSTEM_WIN
     {    
@@ -799,38 +798,69 @@ jclass Java_env::get_object_class( jobject o )
 //--------------------------------------------------------------------------Module::make_java_class
 // Quellcode compilieren
 
-void Module::make_java_class( bool force )
+bool Module::make_java_class( bool force )
 {
-    // package voranstellen?:  package spooler.job.jobname
-    // Klassennamen erkennen
-    // Verzeichnisnamen errechnen   tmpdir/spooler.spoolerid/java/
-    // max aller Zeitstempel
-    // Wenn anderer Zeitstempel als xx.java: Datei neu schreiben und moddate der Datei auf Zeitstempel setzen
-    // wenn moddate(.java) > moddate(.class) : javac (wie stderr ins log übernehmen? wie Prozessjob)
-    // Mit Java-Classloader laden
-    // findclass( klassenname )
-    // fertig.
-
-    string filename = _spooler->_java_vm._work_class_dir + "/" + replace_regex( _java_class_name, "\\.", "/" );
+    string filename = replace_regex( _spooler->_java_vm._work_class_dir + "/" + replace_regex( _java_class_name, "\\.", "/" ), "[\\/]+", Z_DIR_SEPARATOR );
+    string java_filename  = filename + ".java";
     string class_filename = filename + ".class";
+    string source;
+    bool   do_compile = force;
 
 
-    struct stat s;
-    int err = ::stat( class_filename.c_str(), &s );
-    if( force || err || _source._max_modification_time > (Time)s.st_mtime )
+    if( !do_compile )
     {
-        string java_filename = filename + ".java";
+        struct stat s;
+        int err = ::stat( class_filename.c_str(), &s );
+        if( err )
+        {
+            do_compile = true;
+        }
+        else
+        if( (time_t)_source._max_modification_time > s.st_mtime )
+        {
+            do_compile = true;
+        }
+        else
+        {
+/*
+            source = _source.text();
+
+            Mapped_file m ( java_filename, "r" );
+            if( m.length() != source.length()  ||  memcmp( m.ptr(), source.data(), m.length() ) != 0 )
+            {
+                _log->warn( "Datei " + java_filename + " ist trotz gleichen Zeitstempels verschieden vom Java-Skript" );
+                do_compile = true;
+            }
+*/
+        }
+    }
+
+    if( do_compile )
+    {
+        if( source.empty() )  source = _source.text();
 
         make_path( directory_of_path( java_filename ) );
 
-        File source_file ( java_filename, "w" );
-        source_file.print( _source );
+        File source_file ( java_filename, "wb" );
+        source_file.print( source );
         source_file.close();
 
-        string cmd = "javac -verbose -O -classpath " + _spooler->_java_vm._complete_class_path + ' ' + java_filename;
+        //struct utimbuf utimbuf;
+        //utimbuf.actime = utimbuf.modtime = (time_t)_source._max_modification_time;
+        //utime( java_filename.c_str(), &utimbuf );
+
+        string cmd = '"' + _spooler->_java_vm._javac + "\" -verbose -O -classpath " + _spooler->_java_vm._complete_class_path + ' ' + java_filename;
         _log->info( cmd );
-        System_command().execute( cmd );
+        
+        System_command c;
+        c.execute( cmd );
+
+        if( c.stderr_text() != "" )  _log->debug( c.stderr_text() ),  _log->debug( "" );
+
+        //utime( class_filename.c_str(), &utimbuf );
     }
+
+    return do_compile;
 }
 
 //--------------------------------------------------------------------------Module::java_method_id
@@ -985,11 +1015,21 @@ void Java_module_instance::init()
 
         if( !_module->_source.empty() )
         {
-            _module->make_java_class();     // Java-Klasse ggfs. übersetzen
+            bool compiled = _module->make_java_class( _module->_recompile );     // Java-Klasse ggfs. übersetzen
 
-            _module->_java_class = _env->_jenv->FindClass( class_name.c_str() );
-
-            if( !_module->_java_class )  _module->make_java_class( true );       // force=true, Mod_time nicht berücksichtigen und auf jeden Fall kompilieren
+            if( !compiled )
+            {
+                try 
+                {
+                    _module->_java_class = _env->find_class( class_name.c_str() );
+                }
+                catch( const exception& x )
+                {
+                    _java_vm->_log.warn( x.what() );
+                    _java_vm->_log.warn( "Die Java-Klasse " + class_name + " konnte nicht geladen werden. Die Java-Quelle wird neu übersetzt, mal sehen, ob's dann geht" );
+                    _module->make_java_class( true );       // force=true, Mod_time nicht berücksichtigen und auf jeden Fall kompilieren
+                }
+            }
         }
 
         _module->_java_class = _env->find_class( class_name.c_str() );

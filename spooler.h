@@ -1,4 +1,4 @@
-// $Id: spooler.h,v 1.103 2002/11/22 17:23:51 jz Exp $
+// $Id: spooler.h,v 1.104 2002/11/23 17:28:53 jz Exp $
 
 #ifndef __SPOOLER_H
 #define __SPOOLER_H
@@ -144,6 +144,7 @@ struct Spooler
     int                         udp_port                    () const                            { return _udp_port; }
     int                         tcp_port                    () const                            { return _tcp_port; }
     string                      include_path                () const                            { return _include_path; }
+    string                      temp_dir                    () const                            { return _temp_dir; }
     int                         priority_max                () const                            { return _priority_max; }
     State                       state                       () const                            { return _state; }
     string                      state_name                  () const                            { return state_name( _state ); }
@@ -279,6 +280,7 @@ struct Spooler
     string                     _log_filename;
     string                     _include_path;
     bool                       _include_path_as_option_set; // -include-path= als Option gesetzt, überschreibt Angabe in spooler.xml
+    string                     _temp_dir;
     string                     _spooler_param;              // -param= Parameter für Skripten
     bool                       _spooler_param_as_option_set;// -param= als Option gesetzt, überschreibt Angabe in spooler.xml
     int                        _priority_max;               // <config priority_max=...>

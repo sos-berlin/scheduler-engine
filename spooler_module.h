@@ -1,4 +1,4 @@
-// $Id: spooler_module.h,v 1.8 2002/11/22 17:23:53 jz Exp $
+// $Id: spooler_module.h,v 1.9 2002/11/23 17:28:54 jz Exp $
 
 #ifndef __SPOOLER_MODULE_H
 #define __SPOOLER_MODULE_H
@@ -78,11 +78,10 @@ struct Module
     ptr<Module_instance>        create_instance             ();
 
     bool                        set                         ()                                      { return _set; }
-  //void                        clear                       ()                                      { _language="", _source.clear(); }
 
     Kind                        kind                        () const                                { return _kind; }
 
-    void                        make_java_class             ( bool force = false );                 // in spooler_module_java.cxx
+    bool                        make_java_class             ( bool force = false );                 // in spooler_module_java.cxx
     jmethodID                   java_method_id              ( const string& name );                 // in spooler_module_java.cxx
 
     Spooler*                   _spooler;
@@ -104,6 +103,7 @@ struct Module
     // Java
     string                     _java_class_name;            // <script java_class="...">
   //string                     _java_class_path;            // <script java_class_path="..">
+    bool                       _recompile;                  // <script recompile="..">    Immer kompilieren
 
     jclass                     _java_class;
     typedef map<string,jmethodID>  Method_map;

@@ -1,4 +1,4 @@
-// $Id: spooler_module.cxx,v 1.5 2002/11/22 17:23:53 jz Exp $
+// $Id: spooler_module.cxx,v 1.6 2002/11/23 17:28:54 jz Exp $
 /*
     Hier sind implementiert
 
@@ -35,6 +35,7 @@ void Module::set_dom_without_source( const xml::Element_ptr& element )
     _filename       = element.getAttribute( "filename"  );
 
     _java_class_name = element.getAttribute( "java_class" );
+    _recompile       = element.bool_getAttribute( "recompile" );
 
     if( _com_class_name != "" )
     {
@@ -44,12 +45,14 @@ void Module::set_dom_without_source( const xml::Element_ptr& element )
         if( _java_class_name != "" )  throw_xc( "SPOOLER-168" );
     }
     else
-    if( _java_class_name != "" )
+    if( _java_class_name != ""  ||  lcase(_language) == "java" )
     {
         _kind = kind_java;
-        
-        if( _language        != "" )  throw_xc( "SPOOLER-166" );
-        if( _com_class_name  != "" )  throw_xc( "SPOOLER-168" );
+     
+        if( _language == "" )  _language = "Java";
+
+        if( lcase(_language) != "java" )  throw_xc( "SPOOLER-166" );
+        if( _com_class_name  != ""     )  throw_xc( "SPOOLER-168" );
 
         _spooler->_has_java = true;
     }
