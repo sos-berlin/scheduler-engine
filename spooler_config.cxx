@@ -1,4 +1,4 @@
-// $Id: spooler_config.cxx,v 1.60 2003/04/14 09:03:35 jz Exp $
+// $Id: spooler_config.cxx,v 1.61 2003/04/28 12:44:43 jz Exp $
 
 //#include <precomp.h>
 
@@ -288,7 +288,7 @@ void Spooler::load_threads_from_xml( const xml::Element_ptr& element, const Time
                     thread = Z_NEW( Spooler_thread( this ) );
                     _thread_list.push_back( thread );
 
-                    if( !thread->_free_threading )  _spooler_thread_list.push_back( thread );
+                    //if( !thread->_free_threading )  _spooler_thread_list.push_back( thread );
                 }
 
                 thread->set_dom( e, xml_mod_time );

@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.199 2003/04/27 11:02:40 jz Exp $
+// $Id: spooler.cxx,v 1.200 2003/04/28 12:44:42 jz Exp $
 /*
     Hier sind implementiert
 
@@ -986,7 +986,14 @@ void Spooler::start()
     _spooler_start_time = Time::now();
 
 
-    FOR_EACH( Thread_list, _thread_list, it )  if( !(*it)->empty() )  (*it)->init();
+    _spooler_thread_list.clear();
+
+    FOR_EACH( Thread_list, _thread_list, it )
+    {
+        Spooler_thread* thread = *it;
+        if( !thread->_free_threading )  _spooler_thread_list.push_back( thread );
+        if( !thread->empty() )  thread->init();
+    }
 
 
     if( _module.set() )
@@ -1267,7 +1274,7 @@ int Spooler::launch( int argc, char** argv )
             if( _config_element_to_load == NULL )  throw_xc( "SPOOLER-116", _spooler_id );
 
             load_config( _config_element_to_load, _config_element_mod_time, _config_source_filename );
-    
+
             _config_element_to_load = NULL;
             _config_document_to_load = NULL;
         }
