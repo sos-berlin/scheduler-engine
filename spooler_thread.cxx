@@ -1,4 +1,4 @@
-// $Id: spooler_thread.cxx,v 1.15 2001/07/05 16:31:04 jz Exp $
+// $Id: spooler_thread.cxx,v 1.16 2001/07/11 08:53:25 jz Exp $
 /*
     Hier sind implementiert
 
@@ -67,6 +67,7 @@ xml::Element_ptr Thread::xml( xml::Document_ptr document )
 
         thread_element->setAttribute( "steps"        , as_dom_string( _step_count ) );
         thread_element->setAttribute( "started_tasks", as_dom_string( _task_count ) );
+        thread_element->setAttribute( "os_thread_id" , as_dom_string( as_hex_string( (int)_thread_id ) ) );
 
         dom_append_nl( thread_element );
 

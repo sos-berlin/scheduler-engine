@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.41 2001/07/05 16:31:03 jz Exp $
+// $Id: spooler_task.cxx,v 1.42 2001/07/11 08:53:24 jz Exp $
 /*
     Hier sind implementiert
 
@@ -169,18 +169,22 @@ Thread* Object_set::thread() const
 
 Job::In_call::In_call( Job* job, const string& name ) 
 : 
-    _job(job) 
+    _job(job),
+    _name(name)
 { 
     _job->set_in_call(name); 
+    LOG( *job << '.' << name << "() begin\n" );
 }
 
 //-----------------------------------------------------------------------------Job::In_call::In_call
 
 Job::In_call::In_call( Task* task, const string& name ) 
 : 
-    _job(task->job()) 
+    _job(task->job()),
+    _name(name)
 { 
     _job->set_in_call(name); 
+    LOG( *task << '.' << name << "() begin\n" );
 }
 
 //---------------------------------------------------------------------------Job::In_call::~In_call
@@ -188,6 +192,7 @@ Job::In_call::In_call( Task* task, const string& name )
 Job::In_call::~In_call()
 { 
     _job->set_in_call( "" ); 
+    LOG( *_job << '.' << _name << "() end\n" );
 }
 
 //-----------------------------------------------------------------------------------------Job::Job
@@ -246,9 +251,10 @@ void Job::close_engine()
 
 void Job::close_task()
 {
+    if( _task )  _task->close();
+
     THREAD_LOCK( _lock )
     {
-        if( _task )  _task->close();
         _task = NULL; 
       //_params = new Com_variable_set; 
       //if( _state != s_stopped )  set_state( s_ended );
@@ -308,7 +314,7 @@ bool Job::dequeue_task()
 {
     if( _task_queue.empty() )  return false;
 
-    THREAD_LOCK( _lock )
+    THREAD_LOCK_LOG( _lock, "Job::dequeue_task" )
     {
         Sos_ptr<Task>   task;
         Time            now = Time::now();
@@ -361,7 +367,7 @@ void Job::remove_from_task_queue( Task* task )
 
 void Job::start( const CComPtr<spooler_com::Ivariable_set>& params, const string& task_name )
 {
-    THREAD_LOCK( _lock )  start_without_lock( params, task_name );
+    THREAD_LOCK_LOG( _lock, "Job::start" )  start_without_lock( params, task_name );
 }
 
 //---------------------------------------------------------------------------------------Job::start
@@ -550,7 +556,7 @@ bool Job::do_something()
 
             if( _directory_watcher.signaled() )  _directory_watcher.watch_again();
 
-            THREAD_LOCK( _lock )  create_task( NULL, "" ),  dequeue_task();
+            THREAD_LOCK_LOG( _lock, "Job::do_something create_task" )  create_task( NULL, "" ),  dequeue_task();
         }
 
         something_done = true;
@@ -666,7 +672,7 @@ void Job::set_state( State new_state )
 
         if( _spooler->_debug 
          || new_state == s_starting
-         || new_state == s_ending   ) _log.msg( state_name() ); 
+         || new_state == s_ended    ) _log.msg( state_name() ); 
     }
 }
 
@@ -886,7 +892,7 @@ xml::Element_ptr Job::xml( xml::Document_ptr document )
 
 void Job::signal_object( const string& object_set_class_name, const Level& level )
 {
-    THREAD_LOCK( _lock )
+    THREAD_LOCK_LOG( _lock, "Job::signal_object" )
     {
         if( _state == Job::s_pending
          && _object_set_descr
@@ -920,7 +926,7 @@ Task::~Task()
 
 void Task::close()
 {
-    if( _job->_com_task )  _job->_com_task->set_task( NULL );
+    if( _job->_com_task )  THREAD_LOCK( _job->_lock )  _job->_com_task->set_task( NULL );
 
     do_close();
 
@@ -941,23 +947,23 @@ void Task::set_start_at( Time time )
 
 bool Task::start()
 {
-    THREAD_LOCK( _job->_lock )
+    THREAD_LOCK_LOG( _job->_lock, "Task::start" )
     {
         _job->set_state( Job::s_starting );
 
         _error = _job->_error = NULL;
         _job->_thread->_task_count++;
         _running_since = Time::now();
-
-        try 
-        {
-            bool ok = do_start();
-            if( !ok || _job->has_error() )  return false;
-            _opened = true;
-        }
-        catch( const Xc& x        ) { _job->set_error(x); }
-        catch( const exception& x ) { _job->set_error(x); }
     }
+
+    try 
+    {
+        bool ok = do_start();
+        if( !ok || _job->has_error() )  return false;
+        _opened = true;
+    }
+    catch( const Xc& x        ) { _job->set_error(x); }
+    catch( const exception& x ) { _job->set_error(x); }
 
     return !_job->has_error();
 }
@@ -966,10 +972,10 @@ bool Task::start()
 
 void Task::end()
 {
+    _job->set_state( Job::s_ending );
+
     if( _opened )  
     {
-        _job->set_state( Job::s_ending );
-
         try
         {
             do_end();

@@ -1,4 +1,4 @@
-// $Id: spooler_wait.cxx,v 1.19 2001/07/02 11:13:44 jz Exp $
+// $Id: spooler_wait.cxx,v 1.20 2001/07/11 08:53:25 jz Exp $
 /*
     Hier sind implementiert
 
@@ -22,7 +22,7 @@ namespace spooler {
 void windows_message_step()
 {
     MSG msg;
-    if( GetMessage( &msg, NULL, 0, 0 ) != -1 )   TranslateMessage( &msg ), DispatchMessage( &msg ); 
+    while( GetMessage( &msg, NULL, 0, 0 ) != -1 )   TranslateMessage( &msg ), DispatchMessage( &msg ); 
 }
 
 //-----------------------------------------------------------------------------------wait_for_event

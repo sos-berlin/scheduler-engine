@@ -1,4 +1,4 @@
-// $Id: spooler_task.h,v 1.20 2001/07/04 14:49:46 jz Exp $
+// $Id: spooler_task.h,v 1.21 2001/07/11 08:53:24 jz Exp $
 
 #ifndef __SPOOLER_TASK_H
 #define __SPOOLER_TASK_H
@@ -142,6 +142,8 @@ struct Job : Sos_self_deleting
                                ~In_call                     ();
 
         Job*                   _job;
+        Log_indent             _log_indent;
+        string                 _name;                       // Fürs Log
     };
 
 
@@ -206,6 +208,9 @@ struct Job : Sos_self_deleting
 
     CComPtr<Com_job>&           com_job                     ()                          { return _com_job; }
     void                        signal_object               ( const string& object_set_class_name, const Level& );
+
+    virtual void               _obj_print                   ( ostream* s ) const        { *s << "Job " << _name; }
+
 
     friend struct               Object_set;
     friend struct               Task;
@@ -284,6 +289,8 @@ struct Task : Sos_self_deleting
     void                        set_start_at                ( Time );
 
     Job*                        job                         ()                              { return _job; }
+
+    virtual void               _obj_print                   ( ostream* s ) const            { *s << "Task " << _name; }
   
     friend struct               Job;
     friend struct               Object_set;

@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.68 2001/07/05 16:31:03 jz Exp $
+// $Id: spooler.cxx,v 1.69 2001/07/11 08:53:24 jz Exp $
 /*
     Hier sind implementiert
 
@@ -110,7 +110,7 @@ xml::Element_ptr Spooler::threads_as_xml( xml::Document_ptr document )
 
     dom_append_nl( threads );
 
-    THREAD_LOCK( _lock )
+    THREAD_LOCK_LOG( _lock, "threads_as_xml" )
     {
         FOR_EACH( Thread_list, _thread_list, it )
         {
@@ -232,7 +232,7 @@ Job* Spooler::get_job( const string& job_name )
 
 Job* Spooler::get_job_or_null( const string& job_name )
 {
-    THREAD_LOCK( _lock )
+    THREAD_LOCK_LOG( _lock, "Spooler::get_job_or_null" )
     {
         FOR_EACH( Thread_list, _thread_list, it )
         {
@@ -249,7 +249,7 @@ Job* Spooler::get_job_or_null( const string& job_name )
 
 void Spooler::signal_object( const string& object_set_class_name, const Level& level )
 {
-    THREAD_LOCK( _lock )  FOR_EACH( Thread_list, _thread_list, t )  (*t)->signal_object( object_set_class_name, level );
+    THREAD_LOCK_LOG( _lock, "Spooler::signal_object" )  FOR_EACH( Thread_list, _thread_list, t )  (*t)->signal_object( object_set_class_name, level );
 }
 
 //-------------------------------------------------------------------------------Spooler::set_state
@@ -527,7 +527,7 @@ int Spooler::launch( int argc, char** argv )
         {
             if( _state_cmd != sc_load_config )  load();
     
-            THREAD_LOCK( _lock )  
+            THREAD_LOCK_LOG( _lock, "Spooler::launch load_config" )  
             {
                 if( _config_element == NULL )  throw_xc( "SPOOLER-116", _spooler_id );
     
