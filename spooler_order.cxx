@@ -1,4 +1,4 @@
-// $Id: spooler_order.cxx,v 1.72 2004/07/27 09:06:52 jz Exp $
+// $Id: spooler_order.cxx,v 1.73 2004/07/27 13:52:55 jz Exp $
 /*
     Hier sind implementiert
 
@@ -825,7 +825,8 @@ xml::Element_ptr Order::dom( const xml::Document_ptr& document, const Show_what&
 
         if( _task )
         {
-        element.setAttribute( "task"            , _task->obj_name() );   // Kann nach set_state() noch die Vorgänger-Task sein (bis spooler_process endet)
+        element.setAttribute( "task"            , _task->id() );   // Kann nach set_state() noch die Vorgänger-Task sein (bis spooler_process endet)
+      //element.setAttribute( "task"            , _task->obj_name() );   // Kann nach set_state() noch die Vorgänger-Task sein (bis spooler_process endet)
         element.setAttribute( "in_process_since", _task->last_process_start_time().as_string() );
         }
 

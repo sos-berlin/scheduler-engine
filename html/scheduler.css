@@ -1,4 +1,4 @@
-/* $Id: scheduler.css,v 1.18 2004/07/27 09:06:52 jz Exp $ */
+/* $Id: scheduler.css,v 1.19 2004/07/27 13:52:55 jz Exp $ */
 
 body         { font-family: Sans-Serif; font-size: 10pt; margin-top: 5pt; }
 th           { font-size: 10pt; }
@@ -43,8 +43,6 @@ td.after_head_space     { margin-top: 0; margin-bottom: 0pt; line-height: 4pt; }
 /* Fürs Protokoll */
 body.log                { margin-left: 0; padding-left: 0 }
 pre.log                 { font-family: Lucida Console, monospace; font-size: 9pt; line-height: 1.1em; margin-left: 2px; padding-left: 0 }
-
-span.log_job   { color: Blue }
 
 .log_error              { color: Red; }
 .log_warn               { color: tomato; }

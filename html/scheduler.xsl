@@ -485,7 +485,7 @@
             
             <col valign="baseline"  width=" 50"/>
             <col valign="baseline"  width="100"/>
-            <col valign="baseline"  width="150"/>
+            <col valign="baseline"  width="120"/>
             <col valign="baseline"  width="40" align="right"/>
             <col valign="baseline"  width="10" align="right"/>
             
@@ -515,11 +515,27 @@
             <tbody class="job_chain">
                 <xsl:for-each select="$job_chain_select">
 
+                    <xsl:if test="( /spooler/@show_job_chain_orders_checkbox or /spooler/@show_job_chain_jobs_checkbox ) and position() &gt; 1">
+                        <tr><td colspan="99"><hr style="color: black" size="1"/></td></tr>
+                    </xsl:if>
+                    
                     <xsl:element name="tr">
                         <xsl:if test="not( $single )">
                             <xsl:attribute name="style">
                                 cursor: hand;
-                                padding-top: 1ex
+<!--                                
+                                <xsl:choose>
+                                    <xsl:when test="/spooler/@show_job_chain_orders_checkbox">
+                                        padding-top: 0pt;
+                                    </xsl:when>
+                                    <xsl:when test="/spooler/@show_job_chain_jobs_checkbox">
+                                        padding-top: 0pt;
+                                    </xsl:when>
+                                    <xsl:otherwise>
+                                        padding-top: 0;
+                                    </xsl:otherwise>
+                                </xsl:choose>
+-->                                
                             </xsl:attribute>
                             <xsl:attribute name="onmouseover">
                                 this.className = "hover"
@@ -530,11 +546,9 @@
                             <xsl:attribute name="onclick">show_job_chain_details( '<xsl:value-of select="@name"/>' )</xsl:attribute>
                         </xsl:if>
                                 
-                        <td>
+                        <td colspan="3">
                             <b><xsl:value-of select="@name"/></b>
                         </td>
-                        <td></td>
-                        <td></td>
                         <td>
                             <xsl:value-of select="@orders"/>
                         </td>
@@ -626,9 +640,11 @@
                 <td></td>
                 
                 <td>
-                    <span style="margin-left: 2ex; white-space: nowrap">
-                        <xsl:value-of select="@task"/>
-                    </span>
+                    <xsl:if test="@task">
+                        <span style="margin-left: 2ex; white-space: nowrap">
+                            Task <xsl:value-of select="@task"/>
+                        </span>
+                    </xsl:if>
                 </td>
                 
                 <xsl:element name="td">

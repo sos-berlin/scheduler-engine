@@ -1,4 +1,4 @@
-<!-- $Id: left_frame.html,v 1.1 2004/07/27 09:06:52 jz Exp $ -->
+<!-- $Id: left_frame.html,v 1.2 2004/07/27 13:52:55 jz Exp $ -->
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <html>
 
@@ -176,7 +176,7 @@ function update()
 
     if( window.parent.details_frame.document.readyState == "complete" )
     {
-        window.parent.details_frame.show();
+        window.parent.details_frame.update();
     }
     
     if( _timer != undefined )  set_update_timer();

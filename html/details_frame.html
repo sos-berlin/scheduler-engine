@@ -1,4 +1,4 @@
-<!-- $Id: details_frame.html,v 1.1 2004/07/27 09:06:52 jz Exp $ -->
+<!-- $Id: details_frame.html,v 1.2 2004/07/27 13:52:55 jz Exp $ -->
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <html>
 
@@ -119,7 +119,7 @@ function hide()
 
 function show()
 {
-    var ok = update();
+    var ok = update( true );
 
     if( ok )
     {
@@ -180,9 +180,13 @@ function show_job_chain_details( job_chain_element )
 
 //-------------------------------------------------------------------------------------------update
 
-function update()
+function update( force )
 {
+    if( force == undefined )  force = false;
+    if( _hidden  &&  !force )  return false;
+
     var ok = false;
+    
     
     if( _task_id != undefined )
     {
