@@ -1,4 +1,4 @@
-// $Id: spooler_communication.cxx,v 1.47 2002/12/08 20:29:01 jz Exp $
+// $Id: spooler_communication.cxx,v 1.48 2002/12/08 20:34:34 jz Exp $
 /*
     Hier sind implementiert
 
@@ -21,8 +21,12 @@ namespace spooler {
 const int wait_for_port_available = 15;   // Soviele Sekunden warten, bis TCP- oder UDP-Port frei wird
 
 #ifdef Z_WINDOWS
+#   include <io.h>
     const int ENOTSOCK = 10038;
     const int EADDRINUSE = WSAEADDRINUSE;
+#   define isatty   _isatty
+#else
+#   include <unistd.h>
 #endif
 
 //---------------------------------------------------------------------------------------get_errno
