@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 
-<!-- $Id: spooler.xml,v 1.44 2001/07/05 16:31:03 jz Exp $   (C) 2001 SOS GmbH Berlin -->
+<!-- $Id: spooler.xml,v 1.45 2001/07/16 08:51:32 jz Exp $   (C) 2001 SOS GmbH Berlin -->
 
 <!DOCTYPE spooler SYSTEM "s:\prod\spooler\spooler.dtd">
 
@@ -8,7 +8,8 @@
 <config tcp_port    = "4444" 
         udp_port    = "4444" 
         log_dir     = "c:\tmp"
-        include_path= "c:\tmp">
+        include_path= "c:\tmp"
+        free_threading="no">
 
     <security>
         <allowed_host host="192.168.100.0" level="all"/>
@@ -439,7 +440,7 @@ sub spooler_exit()
 
         </thread>
 
-        <thread name="dauer" spooler_id="">
+        <thread name="dauer" spooler_id="" free_threading="">
             <jobs>
                 <job name="dauer" spooler_id="">
                     <script language="PerlScript" use_engine="task"><![CDATA[

@@ -1,4 +1,4 @@
-// $Id: spooler_thread.h,v 1.10 2001/07/11 08:53:25 jz Exp $
+// $Id: spooler_thread.h,v 1.11 2001/07/16 08:51:33 jz Exp $
 
 #ifndef __SPOOLER_THREAD_H
 #define __SPOOLER_THREAD_H
@@ -69,10 +69,15 @@ struct Thread : Sos_self_deleting
     int                        _task_count;                 // Seit Spooler-Start gestartetet Tasks
 
     Thread_semaphore           _lock;
+    bool                       _free_threading;             // Dieser Thread soll frei, ohne _serialize_lock laufen.
     Handle                     _thread_handle;
     Thread_id                  _thread_id;
     CComPtr<Com_log>           _com_log;                    // COM-Objekt spooler.log
     CComPtr<Com_thread>        _com_thread;                 // COM-Objekt
+
+  private:
+                                Thread                      ( const Thread& );      // Nicht implementiert
+    Thread&                     operator =                  ( const Thread& );      // Nicht implementiert
 };
 
 typedef list< Sos_ptr<Thread> >  Thread_list;

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- $Id: spooler.dtd,v 1.24 2001/07/03 14:01:49 jz Exp $   Joacim Zschimmer,  (C) 2000 SOS GmbH Berlin  -->
+<!-- $Id: spooler.dtd,v 1.25 2001/07/16 08:51:31 jz Exp $   Joacim Zschimmer,  (C) 2000 SOS GmbH Berlin  -->
 
 
 <!ELEMENT spooler               ( config+ | command | answer )>
@@ -16,6 +16,7 @@
 <!ATTLIST config                priority_max        CDATA '1000'>       <!-- Höchste Priorität. Gibt absoluten Vorrang -->
 <!ATTLIST config                param               CDATA ''>           <!-- Wird der Eigenschaft spooler.param jedem Skript übergeben -->
 <!ATTLIST config                include_path        CDATA #IMPLIED>     <!-- Pfad für <include> -->
+<!ATTLIST config                free_threading      CDATA 'no'>         <!-- Voreinstellung für <thread free_threading> -->
 
 <!ELEMENT security              ( allowed_host* )>
 <!ATTLIST security              ignore_unknown_hosts (yes|no) 'no'>     <!-- Unbekannte Hostnamen bei <allowed_host> ignorieren? -->
@@ -55,6 +56,8 @@
 <!ATTLIST thread                name                CDATA #REQUIRED>
 <!ATTLIST thread                spooler_id          CDATA ''>           <!-- "": Thread läuft auf jedem Spooler, sonst nur Spooler mit derselben Spooler-Id -->
 <!ATTLIST thread                include_path        CDATA #IMPLIED>     <!-- Pfad für <include> -->
+<!ATTLIST thread                free_threading      CDATA #IMPLIED>     <!-- free_threading="yes": Dieser Thread soll frei laufen (nebenläufig) 
+                                                                             Default ist <config free_threading=...> -->
 
 <!ELEMENT jobs                  ( job* )>
 

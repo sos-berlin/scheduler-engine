@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.69 2001/07/11 08:53:24 jz Exp $
+// $Id: spooler.cxx,v 1.70 2001/07/16 08:51:31 jz Exp $
 /*
     Hier sind implementiert
 
@@ -242,6 +242,17 @@ Job* Spooler::get_job_or_null( const string& job_name )
     }
 
     return NULL;
+}
+
+//---------------------------------------------------------------------Spooler::thread_by_thread_id
+
+Thread* Spooler::thread_by_thread_id( Thread_id id )                    
+{     
+    Thread_id_map::iterator it;
+
+    THREAD_LOCK( _thread_id_map_lock )  it = _thread_id_map.find(id); 
+
+    return it != _thread_id_map.end()? it->second : NULL; 
 }
 
 //---------------------------------------------------------------------------Spooler::signal_object

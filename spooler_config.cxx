@@ -1,4 +1,4 @@
-// $Id: spooler_config.cxx,v 1.18 2001/03/22 08:56:52 jz Exp $
+// $Id: spooler_config.cxx,v 1.19 2001/07/16 08:51:32 jz Exp $
 
 //#include <precomp.h>
 
@@ -387,6 +387,9 @@ void Thread::set_xml( const xml::Element_ptr& element )
 {
     _name = as_string( element->getAttribute( "name" ) );
 
+    string str = as_string( element->getAttribute( "free_threading" ) );
+    _free_threading = str.empty()? _spooler->free_threading_default() : as_bool( str );
+
     if( element->getAttributeNode( "include_path" ) )  _include_path = as_string( element->getAttribute( "include_path" ) );
                                                  else  _include_path = _spooler->include_path();
 
@@ -429,6 +432,7 @@ void Spooler::load_config( const xml::Element_ptr& config_element )
     if( !_spooler_param_as_option_set )  _spooler_param = as_string( config_element->getAttribute( "param"        ) );
     if( !_include_path_as_option_set  )  _include_path  = as_string( config_element->getAttribute( "include_path" ) );
 
+    _free_threading_default = as_bool( as_string( config_element->getAttribute( "free_threading" ) ) );
 
     try
     {

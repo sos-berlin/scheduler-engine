@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.42 2001/07/11 08:53:24 jz Exp $
+// $Id: spooler_task.cxx,v 1.43 2001/07/16 08:51:32 jz Exp $
 /*
     Hier sind implementiert
 
@@ -165,7 +165,7 @@ Thread* Object_set::thread() const
     return _task->_job->_thread; 
 }
 
-//-----------------------------------------------------------------------------Job::In_call::In_call
+//----------------------------------------------------------------------------Job::In_call::In_call
 
 Job::In_call::In_call( Job* job, const string& name ) 
 : 
@@ -176,7 +176,7 @@ Job::In_call::In_call( Job* job, const string& name )
     LOG( *job << '.' << name << "() begin\n" );
 }
 
-//-----------------------------------------------------------------------------Job::In_call::In_call
+//----------------------------------------------------------------------------Job::In_call::In_call
 
 Job::In_call::In_call( Task* task, const string& name ) 
 : 
@@ -184,7 +184,7 @@ Job::In_call::In_call( Task* task, const string& name )
     _name(name)
 { 
     _job->set_in_call(name); 
-    LOG( *task << '.' << name << "() begin\n" );
+    LOG( *task->job() << '.' << name << "() begin\n" );
 }
 
 //---------------------------------------------------------------------------Job::In_call::~In_call
@@ -206,7 +206,7 @@ Job::Job( Thread* thread )
     _script(thread->_spooler),
     _script_instance(&_log)
 {
-    //_params = new Com_variable_set;
+    _next_start_at = latter_day;
 }
 
 //----------------------------------------------------------------------------------------Job::~Job
@@ -256,7 +256,6 @@ void Job::close_task()
     THREAD_LOCK( _lock )
     {
         _task = NULL; 
-      //_params = new Com_variable_set; 
       //if( _state != s_stopped )  set_state( s_ended );
     }
 
@@ -314,7 +313,7 @@ bool Job::dequeue_task()
 {
     if( _task_queue.empty() )  return false;
 
-    THREAD_LOCK_LOG( _lock, "Job::dequeue_task" )
+    THREAD_LOCK( _lock )
     {
         Sos_ptr<Task>   task;
         Time            now = Time::now();
@@ -556,7 +555,7 @@ bool Job::do_something()
 
             if( _directory_watcher.signaled() )  _directory_watcher.watch_again();
 
-            THREAD_LOCK_LOG( _lock, "Job::do_something create_task" )  create_task( NULL, "" ),  dequeue_task();
+            THREAD_LOCK( _lock )  create_task( NULL, "" ),  dequeue_task();
         }
 
         something_done = true;
@@ -947,7 +946,7 @@ void Task::set_start_at( Time time )
 
 bool Task::start()
 {
-    THREAD_LOCK_LOG( _job->_lock, "Task::start" )
+    THREAD_LOCK( _job->_lock )
     {
         _job->set_state( Job::s_starting );
 
@@ -1051,10 +1050,15 @@ void Task::cmd_end()
 }
 
 //----------------------------------------------------------------------Task::wait_until_terminated
+// Anderer Thread
 
 bool Task::wait_until_terminated( double wait_time )
 {
-    if( GetCurrentThreadId() == _job->_thread->_thread_id )  throw_xc( "SPOOLER-125" );     // Deadlock
+    Thread_id my_thread_id = GetCurrentThreadId();
+    if( my_thread_id == _job->_thread->_thread_id )  throw_xc( "SPOOLER-125" );     // Deadlock
+
+    Thread* calling_thread = _spooler->thread_by_thread_id( my_thread_id );
+    if( calling_thread &&  !calling_thread->_free_threading  &&  !_job->_thread->_free_threading )  throw_xc( "SPOOLER-131" );
 
     Event event ( "Task " + _job->_name + " wait_until_terminated" );
     int   i = 0;

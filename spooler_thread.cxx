@@ -1,4 +1,4 @@
-// $Id: spooler_thread.cxx,v 1.16 2001/07/11 08:53:25 jz Exp $
+// $Id: spooler_thread.cxx,v 1.17 2001/07/16 08:51:32 jz Exp $
 /*
     Hier sind implementiert
 
@@ -59,15 +59,16 @@ xml::Element_ptr Thread::xml( xml::Document_ptr document )
 
     THREAD_LOCK( _lock )
     {
-        thread_element->setAttribute( "name"         , as_dom_string( _name ) );
-        thread_element->setAttribute( "running_tasks", as_dom_string( _running_tasks_count ) );
+        thread_element->setAttribute( "name"           , as_dom_string( _name ) );
+        thread_element->setAttribute( "running_tasks"  , as_dom_string( _running_tasks_count ) );
 
         if( _next_start_time != 0  &&  _next_start_time != latter_day )
-        thread_element->setAttribute( "sleeping_until", as_dom_string( _next_start_time.as_string() ) );
+        thread_element->setAttribute( "sleeping_until" , as_dom_string( _next_start_time.as_string() ) );
 
-        thread_element->setAttribute( "steps"        , as_dom_string( _step_count ) );
-        thread_element->setAttribute( "started_tasks", as_dom_string( _task_count ) );
-        thread_element->setAttribute( "os_thread_id" , as_dom_string( as_hex_string( (int)_thread_id ) ) );
+        thread_element->setAttribute( "steps"          , as_dom_string( _step_count ) );
+        thread_element->setAttribute( "started_tasks"  , as_dom_string( _task_count ) );
+        thread_element->setAttribute( "os_thread_id"   , as_dom_string( as_hex_string( (int)_thread_id ) ) );
+        thread_element->setAttribute( "free_threading" , as_dom_string( _free_threading? "yes" : "no" ) );
 
         dom_append_nl( thread_element );
 
@@ -173,6 +174,9 @@ void Thread::stop_jobs()
 
 bool Thread::do_something( Job* job )
 {
+    Thread_semaphore::Guard serialize_guard;
+    if( !_free_threading )  serialize_guard.enter( &_spooler->_serialize_lock );
+
     _current_job = job;
 
     bool ok = job->do_something();
@@ -333,6 +337,11 @@ int Thread::run_thread()
     int nothing_done_count = 0;
     int nothing_done_max   = _job_list.size() * 2 + 3;
 
+    THREAD_LOCK( _spooler->_thread_id_map_lock )
+    {
+        _spooler->_thread_id_map[ GetCurrentThreadId() ] = this;
+    }
+
     try
     {
         start();
@@ -349,7 +358,11 @@ int Thread::run_thread()
             
                 if( something_done )  nothing_done_count = 0;
                 else 
-                if( ++nothing_done_count > nothing_done_max )  _log.warn( "Nichts getan" ), sos_sleep(1);  // Warten, um bei Wiederholung zu bremsen
+                if( ++nothing_done_count > nothing_done_max )  
+                {
+                    _log.warn( "Nichts getan, running_tasks_count=" + as_string(_running_tasks_count)  );
+                    sos_sleep(1);  // Warten, um bei Wiederholung zu bremsen
+                }
 
                 remove_temporary_jobs();
 
@@ -362,7 +375,6 @@ int Thread::run_thread()
         stop_jobs();
         close();
     
-        //_log.msg( "Thread 0x" + as_hex_string( (int)_thread_id ) + " beendet sich" );
         _spooler->signal( "Thread " + _name + " beendet sich" );
 
         ret = 0;
@@ -370,6 +382,12 @@ int Thread::run_thread()
     catch( const Xc&         x ) { _log.error( x.what() ); }
     catch( const exception&  x ) { _log.error( x.what() ); }
     catch( const _com_error& x ) { _log.error( as_string( x.Description() ) ); }
+
+    {THREAD_LOCK( _spooler->_thread_id_map_lock )
+    {
+        Thread_id_map::iterator it = _spooler->_thread_id_map.find( GetCurrentThreadId() );
+        if( it != _spooler->_thread_id_map.end() )  _spooler->_thread_id_map.erase( it );
+    }}
 
     if( ret == 1 )
     {

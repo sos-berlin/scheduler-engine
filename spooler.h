@@ -1,4 +1,4 @@
-// $Id: spooler.h,v 1.59 2001/07/05 16:31:03 jz Exp $
+// $Id: spooler.h,v 1.60 2001/07/16 08:51:32 jz Exp $
 
 #ifndef __SPOOLER_H
 #define __SPOOLER_H
@@ -81,6 +81,8 @@ namespace spooler {
 
 typedef void (*State_changed_handler)( Spooler*, void* );
 
+typedef map<Thread_id,Thread*>      Thread_id_map;
+
 //------------------------------------------------------------------------------------------Spooler
 
 struct Spooler
@@ -109,7 +111,6 @@ struct Spooler
         sc__max
     };
 
-
                                 Spooler                     ();
                                ~Spooler                     ();
 
@@ -123,6 +124,7 @@ struct Spooler
     State                       state                       () const                            { return _state; }
     string                      state_name                  () const                            { return state_name( _state ); }
     static string               state_name                  ( State );
+    bool                        free_threading_default      () const                            { return _free_threading_default; }
     Log&                        log                         ()                                  { return _log; }
     Time                        start_time                  () const                            { return _spooler_start_time; }
     Security::Level             security_level              ( const Host& );
@@ -171,6 +173,7 @@ struct Spooler
 
     void                        signal                      ( const string& signal_name = "" )  { _log.msg( "Signal " + signal_name ); _event.signal( signal_name ); }
 
+    Thread*                     thread_by_thread_id         ( Thread_id );
 
     Fill_zero                  _zero_;
 
@@ -185,7 +188,11 @@ struct Spooler
     CComPtr<Com_spooler>       _com_spooler;                // COM-Objekt spooler
     CComPtr<Com_log>           _com_log;                    // COM-Objekt spooler.log
 
+    Thread_id_map              _thread_id_map;              // Thread_id -> Thread
+    Thread_semaphore           _thread_id_map_lock;
+
     Thread_semaphore           _job_name_lock;              // Sperre von get_job(name) bis add_job() für eindeutige Jobnamen
+    Thread_semaphore           _serialize_lock;             // Wenn die Threads nicht nebenläufig sein sollen
 
   private:
     string                     _config_filename;            // -config=
@@ -220,6 +227,7 @@ struct Spooler
     Event                      _event;                      
 
     Thread_semaphore           _lock;
+    bool                       _free_threading_default;
 };
 
 //-------------------------------------------------------------------------------------------------
