@@ -1,4 +1,4 @@
-// $Id: spooler_job.cxx,v 1.10 2003/08/29 20:44:24 jz Exp $
+// $Id: spooler_job.cxx,v 1.11 2003/08/30 15:39:11 jz Exp $
 /*
     Hier sind implementiert
 
@@ -660,7 +660,7 @@ bool Job::execute_state_cmd()
                                         
                                         task->_cause = cause_wake;
                                         task->_let_run = true;
-                                        task->attach_to_a_thread();
+                                        task->attach_to_a_thread();   // Es gibt zZ nur einen Thread
                                     }
                                     break;
 

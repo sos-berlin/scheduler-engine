@@ -1,4 +1,4 @@
-// $Id: spooler_task.h,v 1.109 2003/08/29 08:14:04 jz Exp $
+// $Id: spooler_task.h,v 1.110 2003/08/30 15:39:11 jz Exp $
 
 #ifndef __SPOOLER_TASK_H
 #define __SPOOLER_TASK_H
@@ -187,6 +187,8 @@ struct Task : Sos_self_deleting
     Xc_copy                    _error;
     bool                       _success;                    // true, wenn spooler_on_success() gerufen werden soll,
                                                             // false, wenn spooler_on_error() gerufen werden soll
+
+    ptr<Module_instance>       _module_instance;            // Nur für Module_task. Hier, damit wir nicht immer wieder casten müssen.
 };
 
 //----------------------------------------------------------------------------------------Task_list
@@ -217,8 +219,6 @@ struct Module_task : Task       // Oberklasse für Object_set_task und Job_module
     bool                        loaded                      ()                                      { return _module_instance && _module_instance->loaded(); }
   //bool                        load_module_instance        ();
   //void                        close_engine                ();
-
-    ptr<Module_instance>       _module_instance;
 };
 
 //----------------------------------------------------------------------------------Object_set_task

@@ -1,4 +1,4 @@
-// $Id: spooler_module_remote.cxx,v 1.25 2003/08/29 20:44:25 jz Exp $
+// $Id: spooler_module_remote.cxx,v 1.26 2003/08/30 15:39:11 jz Exp $
 /*
     Hier sind implementiert
 
@@ -139,7 +139,7 @@ Async_operation* Remote_module_instance_proxy::begin__start()
     if( !log_filename().empty() )
     parameters.push_back( Parameter( "param", "-log=" + quoted_string( "+" + log_filename() ) ) );
 */
-    if( !_session )
+    if( !_process )
     {
         if( _process_class_name.empty()  ||  _module->_separate_process )
         {
@@ -147,16 +147,22 @@ Async_operation* Remote_module_instance_proxy::begin__start()
         }
         else
         {
-            _process = Z_NEW( Process( _spooler ) );
-            _spooler->process_class( _process_class_name ) -> add_process( _process );
+            _process = Z_NEW( Process( _spooler ) );        
+            //_process = _spooler->process_class( _process_class_name ) -> select_process();
+            //if( !_process )            
+            // Erstmal immer nur eine Task pro Prozess. 
+            // Mehrere Tasks pro Prozess erst, wenn sichergestellt ist, dass jede Operation die Antwort liest (v.a. im Fehlerfall),
+            // sodass nicht eine nicht beendete Operation den Prozess blockiert.
+
+            //_process = _spooler->process_class( _process_class_name ) -> select_process();
         }
 
         _process->start();
         _process->add_module_instance( this );
-        _session = _process->session(); 
-        _pid = _session->connection()->pid();
     }
 
+    _session = _process->session(); 
+    _pid = _session->connection()->pid();
 
     _operation = +Z_NEW( Operation( this, Operation::c_begin ) );
 

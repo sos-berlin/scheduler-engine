@@ -1,4 +1,4 @@
-// $Id: spooler_module_remote.h,v 1.12 2003/08/29 20:44:25 jz Exp $
+// $Id: spooler_module_remote.h,v 1.13 2003/08/30 15:39:11 jz Exp $
 
 #ifndef __SPOOLER_MODULE_REMOTE_H
 #define __SPOOLER_MODULE_REMOTE_H
@@ -21,6 +21,7 @@ struct Remote_module_instance_proxy : Com_module_instance_base
             c_none,
 
             c_begin,            // call__begin()
+          //c_select_process,   //   Prozess auswählen (evtl
             c_connect,          //   Mit Server verbinden
             c_create_instance,  
             c_construct,        

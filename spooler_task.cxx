@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.176 2003/08/29 08:14:04 jz Exp $
+// $Id: spooler_task.cxx,v 1.177 2003/08/30 15:39:11 jz Exp $
 /*
     Hier sind implementiert
 
@@ -318,7 +318,7 @@ void Task::attach_to_a_thread()
 {
     assert( current_thread_id() == _spooler->thread_id() );
 
-    enter_thread( _spooler->select_thread_for_task( this ) );
+    enter_thread( _spooler->select_thread_for_task( this ) );       // Es ist immer derselbe Thread, denn es gibt nur einen
 }
 
 //--------------------------------------------------------------------------Task::set_error_xc_only
@@ -403,6 +403,7 @@ void Task::set_state( State new_state, const Time& next_time )
             if( _next_time )  msg += " (" + _next_time.as_string() + ")";
             if( new_state == s_start_task  &&  _start_at )  msg += " (at=" + _start_at.as_string() + ")";
             if( new_state == s_start_task  &&  _thread->_free_threading )  msg += ", dem Thread " + _thread->name() + " zugeordnet";
+            if( new_state == s_running && _module_instance && _module_instance->pid() )  msg += ", pid=" + as_string( _module_instance->pid() );
 
             _log.log( log_level, msg );
         }
@@ -633,14 +634,14 @@ bool Task::do_something()
                 {
                     if( has_error() )  _history.start(),  _success = false;
 
-                    if( _opened )
+                  //if( _opened )
                     {
                         _operation = do_end__start();
 
                         set_state( s_ending );
                     }
-                    else
-                        set_state( s_ended ),  loop = true;
+                  //else
+                  //    set_state( s_ended ),  loop = true;
 
                     something_done = true;
 
@@ -1002,11 +1003,13 @@ void Module_task::do_close()
             }
         }
 
+        _module_instance->close();
+
         _module_instance->_com_task->set_task( NULL );
         _module_instance->_com_log->set_log( NULL );
       //if( _module_instance->_com_log  )  _module_instance->_com_log->close(), _module_instance->_com_log  = NULL;
 
-        _module_instance->clear();
+      //_module_instance->clear();
 
         _module_instance = NULL;
     }
