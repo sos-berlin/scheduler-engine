@@ -1,4 +1,4 @@
-// $Id: spooler_log.cxx,v 1.58 2003/03/19 11:59:57 jz Exp $
+// $Id: spooler_log.cxx,v 1.59 2003/03/19 12:40:26 jz Exp $
 
 #include "spooler.h"
 #include "spooler_mail.h"

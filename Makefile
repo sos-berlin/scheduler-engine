@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.18 2003/03/19 11:59:56 jz Exp $
+# $Id: Makefile,v 1.19 2003/03/19 12:38:05 jz Exp $
 
 ifndef PROD_DIR
 prod_dir = ..
@@ -48,7 +48,7 @@ java_classes=\
 java_headers=$(patsubst %.class, %.h, $(java_classes) )
 
 all:: $(BIN_DIR)/spooler
-all:: $(BIN_DIR)/sos.mail.jar
+all:: $(BIN_DIR)/sos.spooler.jar
 
 clean:
 	rm *.o *.d lib*.a lib*.so *.map `find -name "*.class"`
