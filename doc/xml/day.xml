@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="../scheduler.xslt" type="text/xsl"?>
 
-<!--$Id: day.xml,v 1.4 2004/08/25 22:00:41 jz Exp $-->
+<!--$Id: day.xml,v 1.5 2004/08/26 19:40:55 jz Exp $-->
 
 <xml_element name     = "day" 
              title    = "Perioden für bestimmte Tage"
              base_dir = ".."
              author   = "$Author: jz $"
-             date     = "$Date: 2004/08/25 22:00:41 $">
+             date     = "$Date: 2004/08/26 19:40:55 $">
 
     <xml_parent_elements>
         <xml_parent_element name="weekdays">
@@ -62,19 +62,5 @@ Das Attribut <code>day</code> gibt den Tag von 0 für Sonntag bis 6 für Samstag
     </description>
     
     <behavior_with_xml_element element="base" replace_attribute="day"/>
-    
-    <example>
-        <pre>
-&lt;weekdays>
-    &lt;day period begin="10:00" end="12:00"/>
-    &lt;period begin="16:00" end="22:00"/>
-&lt;/day>    
-        </pre>
-    </example>
-    <example>
-        <pre>
-&lt;day date="2004-09-02" begin="14:00" end="18:00"/>
-        </pre>
-    </example>
     
 </xml_element>
