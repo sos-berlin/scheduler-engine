@@ -1,4 +1,4 @@
-// $Id: spooler_com.cxx,v 1.139 2004/02/20 10:22:29 jz Exp $
+// $Id: spooler_com.cxx,v 1.140 2004/02/22 18:16:04 jz Exp $
 /*
     Hier sind implementiert
 
@@ -2656,15 +2656,15 @@ void Com_context::close()
 
 const Com_method Com_job_chain::_methods[] =
 { 
-   // _flags         , dispid, _name                        , _method                                           , _result_type  , _types        , _default_arg_count
-    { DISPATCH_PROPERTYPUT,  1, "name"                      , (Com_method_ptr)&Com_job_chain::put_name          , VT_EMPTY      , { VT_BSTR } },
-    { DISPATCH_PROPERTYGET,  1, "name"                      , (Com_method_ptr)&Com_job_chain::get_name          , VT_BSTR       },
-    { DISPATCH_PROPERTYGET,  2, "order_count"               , (Com_method_ptr)&Com_job_chain::get_order_count   , VT_INT        },
-    { DISPATCH_METHOD     ,  3, "add_job"                   , (Com_method_ptr)&Com_job_chain::add_job           , VT_EMPTY      , { VT_VARIANT|VT_BYREF, VT_VARIANT|VT_BYREF, VT_VARIANT|VT_BYREF, VT_VARIANT|VT_BYREF }, 3 },
-    { DISPATCH_METHOD     ,  4, "add_end_state"             , (Com_method_ptr)&Com_job_chain::add_end_state     , VT_EMPTY      , { VT_VARIANT|VT_BYREF } },
-    { DISPATCH_METHOD     ,  5, "add_order"                 , (Com_method_ptr)&Com_job_chain::add_order         , VT_DISPATCH   , { VT_VARIANT|VT_BYREF } },
-    { DISPATCH_PROPERTYGET,  6, "node"                      , (Com_method_ptr)&Com_job_chain::get_node          , VT_DISPATCH   , { VT_VARIANT|VT_BYREF } },
-    { DISPATCH_PROPERTYGET,  7, "order_queue"               , (Com_method_ptr)&Com_job_chain::get_order_queue   , VT_DISPATCH   , { VT_VARIANT|VT_BYREF } },
+   // _flags         , dispid, _name                        , _method                                            , _result_type  , _types        , _default_arg_count
+    { DISPATCH_PROPERTYPUT,  1, "name"                      , (Com_method_ptr)&Com_job_chain::put_name           , VT_EMPTY      , { VT_BSTR } },
+    { DISPATCH_PROPERTYGET,  1, "name"                      , (Com_method_ptr)&Com_job_chain::get_name           , VT_BSTR       },
+    { DISPATCH_PROPERTYGET,  2, "order_count"               , (Com_method_ptr)&Com_job_chain::get_order_count    , VT_INT        },
+    { DISPATCH_METHOD     ,  3, "add_job"                   , (Com_method_ptr)&Com_job_chain::add_job            , VT_EMPTY      , { VT_VARIANT|VT_BYREF, VT_VARIANT|VT_BYREF, VT_VARIANT|VT_BYREF, VT_VARIANT|VT_BYREF }, 3 },
+    { DISPATCH_METHOD     ,  4, "add_end_state"             , (Com_method_ptr)&Com_job_chain::add_end_state      , VT_EMPTY      , { VT_VARIANT|VT_BYREF } },
+    { DISPATCH_METHOD     ,  5, "add_order"                 , (Com_method_ptr)&Com_job_chain::add_order          , VT_DISPATCH   , { VT_VARIANT|VT_BYREF } },
+    { DISPATCH_PROPERTYGET,  6, "node"                      , (Com_method_ptr)&Com_job_chain::get_node           , VT_DISPATCH   , { VT_VARIANT|VT_BYREF } },
+    { DISPATCH_PROPERTYGET,  7, "order_queue"               , (Com_method_ptr)&Com_job_chain::get_order_queue    , VT_DISPATCH   , { VT_VARIANT|VT_BYREF } },
     { DISPATCH_PROPERTYGET,  8, "java_class_name"           , (Com_method_ptr)&Com_job_chain::get_java_class_name, VT_BSTR },
     {}
 };
