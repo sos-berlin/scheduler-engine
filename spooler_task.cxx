@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.85 2002/04/12 09:44:52 jz Exp $
+// $Id: spooler_task.cxx,v 1.86 2002/04/16 09:30:50 jz Exp $
 /*
     Hier sind implementiert
 
@@ -267,12 +267,12 @@ void Job::close()
 {
     close_task();
 
-    _log.close();
     _event.close();
     clear_when_directory_changed();
 
     close_engine();
 
+    _log.close();
     _history.close();
 
     // COM-Objekte entkoppeln, falls noch jemand eine Referenz darauf hat:
@@ -306,10 +306,8 @@ void Job::close_task()
     THREAD_LOCK( _lock )
     {
         _task = NULL; 
-      //if( _state != s_stopped )  set_state( s_ended );
     }
 
-    //if( _load_error  ||  _script_ptr  &&  _script_ptr->_reuse == Script::reuse_task )  close_engine();
     if( _close_engine  || _script_ptr  &&  _script_ptr->_reuse == Script::reuse_task ) 
     {
         close_engine();
@@ -721,9 +719,8 @@ void Job::end()
      || _state == s_running_process )  
     {
         if( _task )  _task->end();
-        _history.end();
     }
-
+    
     close_task();
 
     if( _state != s_stopped )  set_state( s_ended );
@@ -791,8 +788,8 @@ void Job::interrupt_script()
 
 void Job::reread()
 {
+    _close_engine = true;
     close_task();
-    close_engine();
 
     _log( "Skript wird erneut gelesen (<include> wird erneut ausgeführt)" );
     read_script();
@@ -1443,14 +1440,16 @@ void Task::close()
 {
     if( _closed )  return;
     
+    _job->_history.end();
+
+    do_close();
+
     {
         THREAD_LOCK( _job->_lock )  
             if( _job->_com_task )  
                 if( _job->_com_task->task() == this )      // spooler_task?
                     _job->_com_task->set_task(NULL);
     }
-
-    do_close();
 
     // Alle, die mit wait_until_terminated() auf diese Task warten, wecken:
     THREAD_LOCK( _terminated_events_lock )  
