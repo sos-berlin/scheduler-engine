@@ -1,4 +1,4 @@
-// $Id: spooler_mail.cxx,v 1.17 2003/03/20 19:21:38 jz Exp $
+// $Id: spooler_mail.cxx,v 1.18 2003/09/30 21:54:35 jz Exp $
 
 
 #include "spooler.h"
@@ -42,6 +42,7 @@ const Com_method Com_mail::_methods[] =
     { DISPATCH_METHOD     ,10, "add_header_field", (Com_method_ptr)&Com_mail::add_header_field , VT_EMPTY    , { VT_BSTR, VT_BSTR } },
     { DISPATCH_METHOD     ,11, "dequeue"         , (Com_method_ptr)&Com_mail::dequeue          , VT_INT      },
     { DISPATCH_PROPERTYGET,12, "dequeue_log"     , (Com_method_ptr)&Com_mail::get_dequeue_log  , VT_BSTR     },
+    { DISPATCH_PROPERTYGET,13, "java_class_name" , (Com_method_ptr)&Com_mail::get_java_class_name, VT_BSTR },
     {}
 };
 

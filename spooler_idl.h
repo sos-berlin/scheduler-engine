@@ -1,4 +1,4 @@
-// $Id: spooler_idl.h,v 1.22 2003/09/24 11:15:48 jz Exp $
+// $Id: spooler_idl.h,v 1.23 2003/09/30 21:54:35 jz Exp $
 
 
 /*  Ersatz für spooler.odl für Systeme ohne COM. 
@@ -231,7 +231,7 @@ struct Ispooler : IDispatch
 {
     DEFINE_UUIDOF( Ispooler )
 
-    virtual HRESULT     get_java_class_name             ( BSTR* result ) = 0;
+    virtual HRESULT     get_java_class_name         ( BSTR* result ) = 0;
     virtual HRESULT     get_log                     ( Ilog** log ) = 0;
     virtual HRESULT     get_id                      ( BSTR* spooler_id ) = 0;
     virtual HRESULT     get_param                   ( BSTR* spooler_param ) = 0;
@@ -262,7 +262,7 @@ struct Ilog : IDispatch
 {
     DEFINE_UUIDOF( Ilog )
 
-    virtual HRESULT     get_java_class_name             ( BSTR* result ) = 0;
+    virtual HRESULT     get_java_class_name         ( BSTR* result ) = 0;
     virtual HRESULT         debug9                  ( BSTR line ) = 0;
     virtual HRESULT         debug8                  ( BSTR line ) = 0;
     virtual HRESULT         debug7                  ( BSTR line ) = 0;
@@ -336,7 +336,7 @@ struct Imail : IDispatch
 {
     DEFINE_UUIDOF( Imail )
 
-    virtual HRESULT     get_java_class_name             ( BSTR* result ) = 0;
+    virtual HRESULT     get_java_class_name         ( BSTR* result ) = 0;
 
     virtual HRESULT     put_to                      ( BSTR receipient ) = 0;
     virtual HRESULT     get_to                      ( BSTR* receipient ) = 0;

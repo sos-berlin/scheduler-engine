@@ -1,4 +1,4 @@
-// $Id: spooler_communication.cxx,v 1.59 2003/09/24 19:51:08 jz Exp $
+// $Id: spooler_communication.cxx,v 1.60 2003/09/30 21:54:35 jz Exp $
 /*
     Hier sind implementiert
 
@@ -437,7 +437,7 @@ void Communication::close( double wait_time )
 
 bool Communication::main_thread_exists()
 {
-#   ifdef Z_WINDOWS
+#   ifndef Z_LINUX
 
         return true;
 
