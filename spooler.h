@@ -1,4 +1,4 @@
-// $Id: spooler.h,v 1.13 2001/01/08 21:24:29 jz Exp $
+// $Id: spooler.h,v 1.14 2001/01/09 12:57:36 jz Exp $
 
 #ifndef __SPOOLER_H
 
@@ -82,6 +82,8 @@ struct Script_instance
     void                        load                        ();
     void                        close                       ();
     CComVariant                 call                        ( const char* name );
+    CComVariant                 call                        ( const char* name, int param );
+    CComVariant                 property_get                ( const char* name );
 
     Script*                    _script;
     CComPtr<Script_site>       _script_site;
@@ -153,15 +155,19 @@ struct Object_set_descr : Sos_self_deleting
 
 struct Object_set : Sos_self_deleting
 {
-                                Object_set                  ( Spooler* spooler, const Sos_ptr<Object_set_descr>& descr ) : _spooler(spooler),_object_set_descr(descr),_script_instance(&descr->_class->_script) {}
+                                Object_set                  ( Spooler*, const Sos_ptr<Object_set_descr>& );
 
     void                        open                        ();
     void                        close                       ();
+    bool                        eof                         ();
     Spooler_object              get                         ();
+    bool                        step                        ( Level result_level );
 
+    Fill_zero                  _zero_;
     Spooler*                   _spooler;
     Sos_ptr<Object_set_descr>  _object_set_descr;
     Script_instance            _script_instance;
+    bool                       _use_objects;                // Objektschnittstelle nutzen. Sonst prozedural
     CComPtr<IDispatch>         _dispatch;
 };
 

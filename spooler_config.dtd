@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- $Id: spooler_config.dtd,v 1.13 2001/01/08 21:24:30 jz Exp $   (C) 2000 SOS GmbH Berlin 
-     Joacim Zschimmer
+<!-- $Id: spooler_config.dtd,v 1.14 2001/01/09 12:57:36 jz Exp $   Joacim Zschimmer,  (C) 2000 SOS GmbH Berlin  -->
+
+<!--     
 
      Konfiguration für den Spooler. 
      
@@ -71,56 +72,6 @@
 <!ELEMENT day                   EMPTY>
 <!ATTLIST day                   day                 CDATA #REQUIRED>
 
-
-
-
-
-<!-- KOMMANDOS -->
-
-<!ELEMENT spooler_command       ( show_state | modify_spooler )>
-
-<!ELEMENT show_state            EMPTY>                                  <!-- Liefert den Zustand des Spoolers -->
-                                                                        <!-- Antwort: <state> -->
-
-<!ELEMENT modify_spooler        EMPTY>
-<!ATTLIST modify_spooler        action              (reload|stop|terminate|terminate_and_restart) #IMPLIED>
-<!ATTLIST modify_spooler        suspended           (yes|no) #IMPLIED>
-
-<!ELEMENT modify_job            EMPTY>
-<!ATTLIST modify_job            job                 CDATA #REQUIRED>
-<!ATTLIST modify_job            cmd                 (stop|unstop|start|end|suspend|continue) #IMPLIED>
-                                                                        <!-- cmd="stop"     -> state="stopped" -->
-                                                                        <!-- cmd="unstop"   -> state="pending" -->
-                                                                        <!-- cmd="start"    -> state="running" -->
-                                                                        <!-- cmd="end"      -> state="pending" -->
-                                                                        <!-- cmd="suspend"  -> state="suspended" -->
-                                                                        <!-- cmd="continue" -> state="running" -->
-
-
-
-<!-- ANTWORTEN AUF DIE KOMMANDOS -->
-
-<!ELEMENT spooler_answer        ( state | task | ERROR )>
-
-<!ELEMENT state                 ( tasks )>
-<!ATTLIST state                 time                CDATA #REQUIRED>    <!-- yyyy-mm-dd HH:MM:SS -->
-<!ATTLIST state                 running_since       CDATA #IMPLIED>     <!-- yyyy-mm-dd HH:MM:SS -->
-<!ATTLIST state                 log_file            CDATA #IMPLIED>
-
-<!ELEMENT tasks                 ( task+ )>
-
-<!ELEMENT task                  ( ERROR? )>
-<!ATTLIST task                  job                 CDATA #REQUIRED>    <!-- Jobname -->
-<!ATTLIST task                  state               (stopped|pending|running|suspended) #REQUIRED>
-                                                                        <!-- state="stopped"  : Keine Task wird mehr gestartet -->
-                                                                        <!-- state="pending"  : Task wartet auf Startzeit -->
-                                                                        <!-- state="running"  : Task läuft -->
-                                                                        <!-- state="suspended": Task vorübergehend angehalten -->
-
-<!ATTLIST task                  steps               CDATA #IMPLIED>     <!-- Anzahl der bisher ausgeführten Jobschritte -->
-<!ATTLIST task                  running_since       CDATA #IMPLIED>     <!-- yyyy-mm-dd HH:MM:SS -->
-<!ATTLIST task                  next_start_time     CDATA #REQUIRED>    <!-- yyyy-mm-dd HH:MM:SS -->
-
 <!ELEMENT ERROR                 EMPTY>
 <!ATTLIST ERROR                 class               CDATA #IMPLIED>     <!-- "EOF" -->
 <!ATTLIST ERROR                 code                CDATA #REQUIRED>    <!-- "SOS-1234" -->
@@ -129,6 +80,3 @@
 <!ATTLIST ERROR                 col                 CDATA #IMPLIED>     <!-- Spaltennummer, beginned mit 1 -->
 <!ATTLIST ERROR                 text                CDATA #REQUIRED>    <!-- Fehlertext mit Fehlercode -->
 
-<!ELEMENT ok                    EMPTY>
-
-<!ELEMENT COMMAND_ERROR         ( #PCDATA )>

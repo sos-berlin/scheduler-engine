@@ -1,4 +1,4 @@
-// $Id: spooler_command.cxx,v 1.7 2001/01/08 21:24:29 jz Exp $
+// $Id: spooler_command.cxx,v 1.8 2001/01/09 12:57:36 jz Exp $
 
 #include "../kram/sos.h"
 #include "../kram/sleep.h"
@@ -253,9 +253,15 @@ string Command_processor::execute( const string& xml_text )
         append_error_element( spooler_answer, x );
     }
 
+    string result = _answer->xml;
+    _answer = NULL;
+    return result;
+
+/*  Bei save wird die encoding belassen. Eigenschaft xml verwendet stets unicode, was wir nicht wollen.
     _answer->save( "c:/tmp/~spooler.xml" );
     _answer = NULL;
     return file_as_string( "c:/tmp/~spooler.xml" );
+*/
 }
 
 //-------------------------------------------------------------------------------------------------

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 
-<!-- $Id: spooler_config.xml,v 1.13 2001/01/08 21:24:30 jz Exp $   (C) 2000 SOS GmbH Berlin -->
+<!-- $Id: spooler_config.xml,v 1.14 2001/01/09 12:57:36 jz Exp $   (C) 2000 SOS GmbH Berlin -->
 
 <!DOCTYPE spooler_config SYSTEM "spooler_config.dtd">
 
@@ -144,7 +144,9 @@ sub log
 
 
 
-package Testobjekt;
+{
+    package Testobjekt;
+
 
     sub construct
     {
@@ -164,15 +166,16 @@ package Testobjekt;
         main::log "process " . $self->{name} . ", " . $self->{level} . " ==> $new_level";
         $self->{level} = $new_level;
     }
+}
 
 
 
-package Object_set_class;
+{
+    package Object_set_class;
 
 
     sub construct
     {
-        $main::log_file->put_line( "Object_set_class::construct\n" );
         my $self = {};
         bless( $self );
 
@@ -215,24 +218,61 @@ package Object_set_class;
         if( $self->{index} > 3 ) { return 1; }
         return 0;
     }
+}
 
 
 
-package main;
+sub spooler_make_object_set()
+{
+    my $object_set_class = construct Object_set_class;
+    return $object_set_class;
+}
 
-    sub spooler_make_object_set()
-    {
-        $log_file->put_line( "***** Perl: spooler_make_object_set() *****\n" );
-        my $object_set_class = construct Object_set_class;
-        return $object_set_class;
-    }
+
+
+# Folgender prozeduraler Code, weil PerlScript kein IDispatch, also kein Objekt liefern kann:
+
+my $object_set_class = spooler_make_object_set();
+my $object;
+
+sub spooler_dont_use_objects() { 1; }
+
+sub spooler_open()
+{
+    $object_set_class->spooler_open();
+    0;
+}
+
+sub spooler_close()
+{
+    $object_set_class->spooler_open();
+    0;
+}
+
+sub spooler_get()
+{
+    $object = $object_set_class->spooler_get();
+    0;
+}
+
+sub spooler_eof()
+{
+    $object_set_class->spooler_eof();
+}
+
+sub spooler_process()
+{
+    $object->process( $_ );
+    0;
+}
 
 
             ]]></script>
 
         </object_set_class>
-        
+
     </object_set_classes>
+
 
     <jobs>
 

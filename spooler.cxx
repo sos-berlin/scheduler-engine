@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.14 2001/01/08 21:24:29 jz Exp $
+// $Id: spooler.cxx,v 1.15 2001/01/09 12:57:36 jz Exp $
 
 
 
@@ -14,6 +14,7 @@
 #include "../kram/sosprof.h"
 #include "../kram/sosopt.h"
 #include "../kram/sleep.h"
+#include "../kram/log.h"
 #include "../file/anyfile.h"
 #include "spooler.h"
 
@@ -59,6 +60,20 @@ CComVariant Script_instance::call( const char* name )
     return _script_site->call( name );
 }
 
+//----------------------------------------------------------------------------Script_instance::call
+
+CComVariant Script_instance::call( const char* name, int param )
+{
+    return _script_site->call( name, param );
+}
+
+//--------------------------------------------------------------------Script_instance::property_get
+
+CComVariant Script_instance::property_get( const char* name )
+{
+    return _script_site->property_get( name );
+}
+
 //----------------------------------------------------------------------------Spooler_object::level
 
 Level Spooler_object::level()
@@ -76,6 +91,17 @@ void Spooler_object::process( Level output_level )
     com_call( _dispatch, "process", output_level );
 }
 
+//---------------------------------------------------------------------------Object_set::Object_set
+
+Object_set::Object_set( Spooler* spooler, const Sos_ptr<Object_set_descr>& descr ) 
+: 
+    _zero_(this+1),
+    _spooler(spooler),
+    _object_set_descr(descr),
+    _script_instance(&descr->_class->_script) 
+{
+}
+
 //---------------------------------------------------------------------------------Object_set::open
 
 void Object_set::open()
@@ -83,53 +109,41 @@ void Object_set::open()
     _script_instance.load();
 
     CComVariant object_set_vt;
-/*
-    if( stricmp( _script_instance._script->_language.c_str(), "PerlScript" ) == 0 )
+
+    try
     {
-        HRESULT     hr;
-        CComBSTR    method_bstr = "spooler_make_object_set";
-        long        dispid = 0;
-        CComPtr<IDispatch> dispatch;
-        CComVariant result;
+        CComVariant v = _script_instance.call( "spooler_dont_use_objects" );
+        v.ChangeType( VT_BOOL );
+        _use_objects = V_BOOL( &v ) == 0;
+    }
+    catch( const Xc& ) { _use_objects = true; }
 
-        hr = _script_instance._script_site->_script->GetScriptDispatch( NULL, &dispatch );
-        if( FAILED(hr) )  throw_ole( hr, "QueryInterface" );
 
-        hr = dispatch->GetIDsOfNames( IID_NULL, &method_bstr, 1, (LCID)0, &dispid );
-        if( FAILED(hr) )  throw_ole( hr, "IDispatch::GetIDsOfNames" );
+    if( _use_objects )
+    {
+         object_set_vt = _script_instance.call( "spooler_make_object_set" );
 
-        DISPPARAMS  dispparams;
-        EXCEPINFO   excepinfo;
-        uint        error_arg_no = -1;
-
-        dispparams.rgvarg            = NULL;                        // Array of arguments.
-        dispparams.cArgs             = 0;                           // Number of arguments.
-        dispparams.rgdispidNamedArgs = NULL;                        // Dispatch IDs of named arguments.
-        dispparams.cNamedArgs        = 0;  // Number of named arguments.
-
-        hr = dispatch->Invoke( dispid, IID_NULL, (LCID)0, DISPATCH_METHOD, &dispparams, &result, &excepinfo, &error_arg_no );
-    
-        if( FAILED(hr) ) {
-            if( GetScode(hr) == DISP_E_EXCEPTION )  throw_ole_excepinfo( hr, &excepinfo );
-            Sos_string a;
-            if( error_arg_no >= 0 )  a = as_string( 0 - error_arg_no ) + ". Parameter";
-            throw_ole( hr, "IDispatch::Invoke",  a.c_str() );
-        }
-
+        if( object_set_vt.vt != VT_DISPATCH 
+         || object_set_vt.pdispVal == NULL  )  throw_xc( "SPOOLER-103", _object_set_descr->_class_name );
+        _dispatch = object_set_vt.pdispVal;
     }
     else
-*/
     {
-        object_set_vt = _script_instance.call( "spooler_make_object_set" );
+        _dispatch = _script_instance._script_site->_dispatch;
     }
 
-    if( object_set_vt.vt != VT_DISPATCH 
-     || object_set_vt.pdispVal == NULL  )  throw_xc( "SPOOLER-103", _object_set_descr->_class_name );
-    _dispatch = object_set_vt.pdispVal;
-
-    com_property_put( _dispatch, "spooler_low_level" , _object_set_descr->_level_interval._low_level );
-    com_property_put( _dispatch, "spooler_high_level", _object_set_descr->_level_interval._high_level );
-    com_property_put( _dispatch, "spooler_param"     , _spooler->_object_set_param.c_str() );
+    if( !_use_objects && stricmp( _script_instance._script->_language.c_str(), "PerlScript" ) == 0 )
+    {
+        _script_instance._script_site->parse( "$spooler_low_level="  + as_string( _object_set_descr->_level_interval._low_level ) + ";" );
+        _script_instance._script_site->parse( "$spooler_high_level=" + as_string( _object_set_descr->_level_interval._high_level ) + ";" );
+        _script_instance._script_site->parse( "$spooler_param="      + quoted_string( _spooler->_object_set_param, '\'', '\\' ) + ";" );
+    }
+    else
+    {
+        com_property_put( _dispatch, "spooler_low_level" , _object_set_descr->_level_interval._low_level );
+        com_property_put( _dispatch, "spooler_high_level", _object_set_descr->_level_interval._high_level );
+        com_property_put( _dispatch, "spooler_param"     , _spooler->_object_set_param.c_str() );
+    }
 
     com_call( _dispatch, "spooler_open" );
 }
@@ -141,6 +155,19 @@ void Object_set::close()
     com_call( _dispatch, "spooler_close" );
 
     _script_instance.close();
+}
+
+//----------------------------------------------------------------------------------Object_set::eof
+
+bool Object_set::eof()
+{
+    CComVariant eof;
+
+    eof = com_call( _dispatch, "spooler_eof" );
+
+    eof.ChangeType( VT_BOOL );
+
+    return V_BOOL( &eof ) != 0;
 }
 
 //----------------------------------------------------------------------------------Object_set::get
@@ -156,7 +183,7 @@ Spooler_object Object_set::get()
         if( obj.vt == VT_EMPTY    )  return Spooler_object(NULL);
         if( obj.vt != VT_DISPATCH
          || obj.pdispVal == NULL  )  throw_xc( "SPOOLER-102", _object_set_descr->_class_name );
-        
+    
         object = obj.pdispVal;
 
         if( obj.pdispVal == NULL )  break;  // EOF
@@ -164,6 +191,34 @@ Spooler_object Object_set::get()
     }
 
     return object;
+}
+
+//---------------------------------------------------------------------------------Object_set::step
+
+bool Object_set::step( Level result_level )
+{
+    if( eof() ) 
+    {
+        return false;
+    }
+    else
+    {
+        if( _use_objects )
+        {
+            Spooler_object object = get();
+
+            if( object.is_null() )  return false;
+
+            object.process( result_level );
+        }
+        else
+        {
+            _script_instance.call( "spooler_get" );
+            _script_instance.call( "spooler_process", result_level );
+        }
+
+        return true;
+    }
 }
 
 //---------------------------------------------------------------------------Weekday_set::next_date
@@ -303,7 +358,7 @@ void Task::error( const Xc& x)
     cerr << "Job " << _job->_name << ": " << x << '\n';
 
     _error = x;
-    _state = s_stopped;
+    _state_cmd = sc_stop;
 
     _object_set = NULL;
 }
@@ -405,11 +460,7 @@ bool Task::step()
         else
         if( _object_set )
         {
-            Spooler_object object = _object_set->get();
-
-            if( object.is_null() )  return false;
-
-            object.process( _job->_output_level );
+            return _object_set->step( _job->_output_level );
         }
         else 
             return false; //?
@@ -796,6 +847,8 @@ int sos_main( int argc, char** argv )
 
     for( Sos_option_iterator opt ( argc, argv ); !opt.end(); opt.next() )
     {
+        if( opt.with_value( "log"              ) )  log_start( opt.value() );
+        else
         if( opt.with_value( "config"           ) )  config_filename = opt.value();
         else
         if( opt.with_value( "log-file"         ) )  log_filename = opt.value();
