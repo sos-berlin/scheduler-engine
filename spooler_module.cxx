@@ -47,7 +47,7 @@ xml::Element_ptr Source_part::dom( const xml::Document_ptr& doc ) const
     xml::Element_ptr part_element = doc.createElement( "part_element" );
 
     part_element.setAttribute( "linenr", as_string( _linenr ) );
-    part_element.setAttribute( "modtime", _modification_time.as_string() );
+    part_element.setAttribute( "modtime", _modification_time.as_string( Time::without_ms ) );
     part_element.appendChild( doc.createTextNode( _text ) );
 
     return part_element;

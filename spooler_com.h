@@ -464,7 +464,8 @@ struct Com_task : spooler_com::Itask,
                                     
 //Z_DEFINE_GUID( CLSID_Com_spooler_proxy, 0xfeee47aa, 0x6c1b, 0x11d8, 0x81, 0x03, 0x00, 0x04, 0x76, 0xee, 0x8a, 0xfb );   // {feee47aa-6c1b-11d8-8103-000476ee8afb}
 
-struct Com_task_proxy: com::object_server::proxy_with_local_methods< spooler_com::Itask_proxy >
+struct Com_task_proxy : //com::object_server::proxy_with_local_methods< spooler_com::Itask_proxy >
+                        idispatch_implementation< Com_task_proxy, spooler_com::Itask_proxy > 
 {
     static Class_descriptor     class_descriptor;
 
@@ -479,12 +480,13 @@ struct Com_task_proxy: com::object_server::proxy_with_local_methods< spooler_com
 
     STDMETHODIMP                Start_subprocess            ( VARIANT* program_and_parameters, spooler_com::Isubprocess** result );
 
-    void                        add_subprocess              ( Subprocess* );
-    void                        remove_subprocess           ( Subprocess* );
+  //void                        add_subprocess              ( Subprocess* );
+  //void                        remove_subprocess           ( Subprocess* );
     void                        wait_for_subprocesses       ();
 
-  private:
+
     ptr<Subprocess_register>   _subprocess_register;
+    ptr<object_server::Proxy>  _proxy;
 };
 
 //---------------------------------------------------------------------------------------Com_thread

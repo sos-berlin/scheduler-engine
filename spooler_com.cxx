@@ -2438,7 +2438,9 @@ HRESULT Com_task_proxy::Create_instance( const IID& iid, ptr<IUnknown>* result )
 
 Com_task_proxy::Com_task_proxy()
 : 
-    Proxy_with_local_methods( &class_descriptor ),
+    //Proxy_with_local_methods( &class_descriptor ),
+    Idispatch_implementation( &class_descriptor ),
+    _proxy( Z_NEW( object_server::Proxy( &class_descriptor, static_cast<Object*>( this ) ) ) ),
     _subprocess_register( Z_NEW( Subprocess_register ) )
 {
 }

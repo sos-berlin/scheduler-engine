@@ -108,7 +108,7 @@ STDMETHODIMP Subprocess::Start( VARIANT* program_and_parameters )
 
         if( _task_proxy )
         {
-            _task_proxy->call( "Add_subprocess", pid(), ignore_error(), ignore_signal(), command_line() ); //, subprocess->stdout_path(), subprocess->stderr_path() );
+            _task_proxy->_proxy->call( "Add_subprocess", pid(), ignore_error(), ignore_signal(), command_line() ); //, subprocess->stdout_path(), subprocess->stderr_path() );
         }
     }
     catch( const exception&  x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
