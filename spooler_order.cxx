@@ -1,4 +1,4 @@
-// $Id: spooler_order.cxx,v 1.50 2003/11/25 12:07:51 jz Exp $
+// $Id: spooler_order.cxx,v 1.51 2003/11/27 18:59:50 jz Exp $
 /*
     Hier sind implementiert
 
@@ -329,6 +329,17 @@ Job_chain_node* Job_chain::node_from_state_or_null( const State& state )
 
 ptr<Order> Job_chain::order( const Order::Id& id )
 {
+    ptr<Order> result = order_or_null( id );
+    
+    if( !result )  throw_xc( "SCHEDULER-162", debug_string_from_variant(id), _name );
+    
+    return result;
+}
+
+//-------------------------------------------------------------------------Job_chain::order_or_null
+
+ptr<Order> Job_chain::order_or_null( const Order::Id& id )
+{
     THREAD_LOCK( _lock )
     {
         for( Chain::iterator it = _chain.begin(); it != _chain.end(); it++ )
@@ -340,8 +351,6 @@ ptr<Order> Job_chain::order( const Order::Id& id )
                 if( result )  return result;
             }
         }
-
-        throw_xc( "SCHEDULER-162", debug_string_from_variant(id), _name );
     }
 
     return NULL;
@@ -779,7 +788,7 @@ void Order::close()
 
 //---------------------------------------------------------------------------------------Order::dom
 
-xml::Element_ptr Order::dom( const xml::Document_ptr& document, Show_what show )
+xml::Element_ptr Order::dom( const xml::Document_ptr& document, Show_what show, const string* log )
 {
     xml::Element_ptr element = document.createElement( "order" );
 
@@ -814,7 +823,7 @@ xml::Element_ptr Order::dom( const xml::Document_ptr& document, Show_what show )
         {
             try
             {
-                dom_append_text_element( element, "log", _log.as_string() );
+                dom_append_text_element( element, "log", log? *log : _log.as_string() );
             }
             catch( const exception& x ) { _spooler->_log.warn( string("<show_order what=\"log\">: ") + x.what() ); }
         }

@@ -1,4 +1,4 @@
-// $Id: spooler_history.cxx,v 1.59 2003/11/03 18:26:01 jz Exp $
+// $Id: spooler_history.cxx,v 1.60 2003/11/27 18:59:50 jz Exp $
 
 #include "spooler.h"
 #include "../zschimmer/z_com.h"
@@ -6,12 +6,6 @@
 #include "../kram/sleep.h"
 #include "../kram/sos_java.h"
 
-
-#ifdef Z_HPUX
-#   define GZIP_AUTO ""   // gzip -auto liefert ZLIB_STREAM_ERROR mit gcc 3.1, jz 7.5.2003
-#else
-#   define GZIP_AUTO "gzip -auto | "
-#endif
 
 
 using namespace zschimmer;
@@ -673,7 +667,7 @@ void Spooler_db::write_order_history( Order* order, Transaction* outer_transacti
                 try 
                 {
                     string blob_filename = db_name() + " -table=" + _spooler->_order_history_tablename + " -blob=log where \"HISTORY_ID\"=" + as_string( history_id );
-                    if( _spooler->_order_history_with_log == arc_gzip )  blob_filename = "gzip | " + blob_filename;
+                    if( _spooler->_order_history_with_log == arc_gzip )  blob_filename = GZIP + blob_filename;
                     copy_file( "file -b " + log_filename, blob_filename );
                 }
                 catch( const exception& x ) 
@@ -1203,7 +1197,7 @@ void Task_history::write( bool start )
                 {
                     try {
                         string blob_filename = _spooler->_db->db_name() + " -table=" + _spooler->_job_history_tablename + " -blob='log' where \"ID\"=" + as_string( _task->_id );
-                        if( _job_history->_with_log == arc_gzip )  blob_filename = "gzip | " + blob_filename;
+                        if( _job_history->_with_log == arc_gzip )  blob_filename = GZIP + blob_filename;
                         copy_file( "file -b " + log_filename, blob_filename );
                     }
                     catch( const exception& x ) { _task->_log.warn( string("Historie: ") + x.what() ); }

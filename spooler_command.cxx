@@ -1,4 +1,4 @@
-// $Id: spooler_command.cxx,v 1.97 2003/10/08 11:45:05 jz Exp $
+// $Id: spooler_command.cxx,v 1.98 2003/11/27 18:59:50 jz Exp $
 /*
     Hier ist implementiert
 
@@ -8,6 +8,7 @@
 
 #include "spooler.h"
 #include "../file/anyfile.h"
+#include "../zschimmer/z_sql.h"
 
 // Für temporäre Datei:
 #include <sys/stat.h>               // S_IREAD, stat()
@@ -406,11 +407,61 @@ xml::Element_ptr Command_processor::execute_show_order( const xml::Element_ptr& 
 
     string    job_chain_name = show_order_element.getAttribute( "job_chain" );
     Order::Id id             = show_order_element.getAttribute( "order"     );
+    string    id_string      = string_from_variant( id );
 
     ptr<Job_chain> job_chain = _spooler->job_chain( job_chain_name );
-    ptr<Order>     order     = job_chain->order( id );
+    ptr<Order>     order     = job_chain->order_or_null( id );
 
-    return order->dom( _answer, show );
+    if( order )
+    {
+        return order->dom( _answer, show );
+    }
+    else
+    {
+        if( !_spooler->_db->opened() )  goto NO_ORDER;
+    
+        string history_id;
+
+        {
+            Any_file sel ( "-in " + _spooler->_db->db_name() + 
+                           " select max(\"HISTORY_ID\") as history_id "
+                           " from " + sql::quoted_name( _spooler->_order_history_tablename ) +
+                           " where \"SPOOLER_ID\"=" + sql::quoted( _spooler->id_for_db() ) + 
+                            " and \"JOB_CHAIN\"="   + sql::quoted( job_chain_name ) +
+                            " and \"ORDER_ID\"="    + sql::quoted( id_string ) );
+
+            if( sel.eof() )  goto NO_ORDER;
+
+            history_id = sel.get_record().as_string( "HISTORY_ID" );
+            if( history_id == "" )  goto NO_ORDER;
+        }
+
+        {
+            Any_file sel ( "-in " + _spooler->_db->db_name() + "-max-length=32K "
+                           "select \"ORDER_ID\" as \"ID\", \"START_TIME\", \"TITLE\", \"STATE\", \"STATE_TEXT\""
+                           " from " + sql::quoted_name( _spooler->_order_history_tablename ) +
+                           " where \"HISTORY_ID\"=" + history_id );
+
+            Record record = sel.get_record();
+
+            //order = Z_NEW( Order( _spooler, sel.get_record() );
+            order = new Order( _spooler );
+            order->set_id        ( record.as_string( "id"         ) );
+            order->set_state     ( record.as_string( "state"      ) );
+            order->set_state_text( record.as_string( "state_text" ) );
+            order->set_title     ( record.as_string( "title"      ) );
+          //order->set_priority  ( record.as_int   ( "priority"   ) );
+        }
+
+        string log = file_as_string( GZIP_AUTO + _spooler->_db->db_name() + " -table=" + sql::quoted_name( _spooler->_order_history_tablename ) + " -blob=\"LOG\"" 
+                                     " where \"HISTORY_ID\"=" + history_id );
+
+        return order->dom( _answer, show, &log );
+    }
+
+
+NO_ORDER:
+    throw_xc( "SCHEDULER-162", id_string, job_chain_name );
 }
 
 //-------------------------------------------------------------Command_processor::execute_add_order

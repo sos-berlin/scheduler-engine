@@ -1,9 +1,21 @@
-// $Id: spooler_history.h,v 1.19 2003/07/29 11:20:48 jz Exp $
+// $Id: spooler_history.h,v 1.20 2003/11/27 18:59:50 jz Exp $
 
 #ifndef __SPOOLER_HISTORY_H
 #define __SPOOLER_HISTORY_H
 
 #include "../file/anyfile.h"
+
+
+
+#ifdef Z_HPUX
+#   define GZIP_AUTO ""   // gzip -auto liefert ZLIB_STREAM_ERROR mit gcc 3.1, jz 7.5.2003
+#   define GZIP      ""
+#else
+#   define GZIP_AUTO "gzip -auto | "
+#   define GZIP      "gzip | "
+#endif
+
+
 
 namespace sos {
 namespace spooler {

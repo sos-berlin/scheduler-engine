@@ -1,4 +1,4 @@
-// $Id: spooler_order.h,v 1.28 2003/11/25 12:07:51 jz Exp $
+// $Id: spooler_order.h,v 1.29 2003/11/27 18:59:50 jz Exp $
 
 #ifndef __SPOOLER_ORDER_H
 #define __SPOOLER_ORDER_H
@@ -91,7 +91,7 @@ struct Order : Com_order
     void                        postprocessing          ( bool success );                           // Verarbeitung nach spooler_process()
     void                        processing_error        ();
 
-    xml::Element_ptr            dom                     ( const xml::Document_ptr&, Show_what );
+    xml::Element_ptr            dom                     ( const xml::Document_ptr&, Show_what, const string* log = NULL );
 
     Prefix_log                 _log;
 
@@ -189,6 +189,7 @@ struct Job_chain : Com_job_chain
 
     Order*                      add_order               ( VARIANT* order_or_payload, VARIANT* job_or_state );
     ptr<Order>                  order                   ( const Order::Id& id );
+    ptr<Order>                  order_or_null           ( const Order::Id& id );
 
     void                        register_order          ( Order* );                                 // Um doppelte Auftragskennungen zu entdecken: Fehler SCHEDULER-186
     void                        unregister_order        ( Order* );
