@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.215 2003/11/03 18:26:01 jz Exp $
+// $Id: spooler_task.cxx,v 1.216 2003/11/10 16:07:31 jz Exp $
 /*
     Hier sind implementiert
 
@@ -218,7 +218,7 @@ void Task::close()
             _operation = NULL;
         }
 
-        if( _order )  remove_order_after_error();
+        if( _order )  _order->close();//remove_order_after_error();
 
         _history.end();
 
@@ -890,6 +890,7 @@ bool Task::do_something()
                         //if( log_time > Time::now()  &&  _next_time > log_time )  set_next_time( log_time );
 
                         set_state( s_closed );
+						something_done = true;
                         loop = true;
                     }
 

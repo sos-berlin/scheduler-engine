@@ -1,4 +1,4 @@
-// $Id: spooler_wait.cxx,v 1.84 2003/10/20 21:46:53 jz Exp $
+// $Id: spooler_wait.cxx,v 1.85 2003/11/10 16:07:31 jz Exp $
 /*
     Hier sind implementiert
 
@@ -338,7 +338,7 @@ bool Wait_handles::wait_until_2( Time until )
         
         if( again ) {
             if( t > 1800 )  return false;  // Um mehr als eine halbe Stunde verrechnet? Das muss an der Sommerzeitumstellung liegen
-            _log->info( "Noch " + sos::as_string(wait_time) + "s warten ..." );
+            if( wait_time >= 1.0 )  _log->debug9( "Noch " + sos::as_string(wait_time) + "s warten ..." );
         }
 
         THREAD_LOCK( _lock )

@@ -1,4 +1,4 @@
-// $Id: spooler_order.cxx,v 1.46 2003/10/18 21:23:17 jz Exp $
+// $Id: spooler_order.cxx,v 1.47 2003/11/10 16:07:31 jz Exp $
 /*
     Hier sind implementiert
 
@@ -31,6 +31,8 @@ void Spooler::add_job_chain( Job_chain* job_chain )
         if( _job_chain_map.find( lname ) != _job_chain_map.end() )  throw_xc( "SCHEDULER-160", lname );
 
         _job_chain_map[lname] = job_chain;
+
+        job_chain->set_finished( true );       // _finished erst, wenn Jobkette in der _job_chain_map eingetragen ist.
     }
 
 /*
@@ -278,7 +280,6 @@ void Job_chain::finish()
                                          else  n->_error_state = empty_variant;
         }
 
-        _finished = true;
     }
 }
 

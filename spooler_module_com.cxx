@@ -1,4 +1,4 @@
-// $Id: spooler_module_com.cxx,v 1.23 2003/10/28 22:04:27 jz Exp $
+// $Id: spooler_module_com.cxx,v 1.24 2003/11/10 16:07:31 jz Exp $
 /*
     Hier sind implementiert
 
@@ -55,6 +55,8 @@ void Com_module_instance_base::close__end()
 bool Com_module_instance_base::name_exists( const string& name )
 { 
     bool exists;
+
+    if( !_idispatch )  return false;
 
     map<string,bool>::iterator it = _names.find( name );
     if( it == _names.end() )  exists = _names[name] = com_name_exists( _idispatch, name );

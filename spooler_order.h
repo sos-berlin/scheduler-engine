@@ -1,4 +1,4 @@
-// $Id: spooler_order.h,v 1.26 2003/10/18 21:23:17 jz Exp $
+// $Id: spooler_order.h,v 1.27 2003/11/10 16:07:31 jz Exp $
 
 #ifndef __SPOOLER_ORDER_H
 #define __SPOOLER_ORDER_H
@@ -176,6 +176,7 @@ struct Job_chain : Com_job_chain
     void                    set_name                    ( const string& name )                      { THREAD_LOCK( _lock )  _name = name,  _log.set_prefix( "Jobchain " + _name ); }
     string                      name                    ()                                          { THREAD_LOCK_RETURN( _lock, string, _name ); }
 
+    void                    set_finished                ( bool b )                                  { _finished = b; }
     bool                        finished                () const                                    { return _finished; }
     void                        load_orders_from_database();
 
