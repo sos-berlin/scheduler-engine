@@ -1,4 +1,4 @@
-// $Id: spooler_thread.h,v 1.6 2001/02/18 16:14:38 jz Exp $
+// $Id: spooler_thread.h,v 1.7 2001/02/20 10:37:26 jz Exp $
 
 #ifndef __SPOOLER_THREAD_H
 #define __SPOOLER_THREAD_H
@@ -61,8 +61,8 @@ struct Thread : Sos_self_deleting
   //bool                       _stop;
 
 
-    xml::Element_ptr           _add_jobs_element;           // Kommando <add_jobs>
-    xml::Document_ptr          _add_jobs_document;
+  //xml::Element_ptr           _add_jobs_element;           // Kommando <add_jobs>
+  //xml::Document_ptr          _add_jobs_document;
 
                                                             // Statistik
     int                        _step_count;                 // Seit Spooler-Start ausgeführte Schritte
@@ -76,6 +76,15 @@ struct Thread : Sos_self_deleting
 };
 
 typedef list< Sos_ptr<Thread> >  Thread_list;
+
+/*
+    Threads und Thread::_job_list:
+        Jobs werden nur vom eigenen Thread gelöscht: in remove_temporary_jobs(), close() und stop().
+        Jobs werden auch von anderern Threads hinzugefügt: in do_add_jobs().
+        Beim Lesen der _job_list muss darauf geachtet werden, dass jederzeit Jobs hinzugefügt werden können.
+        Wenn ein anderer Thread die _job_list liest, muss über die Schleife eine Semaphore gelegt werden, weil
+        Jobs vom besitzenden Thread gelöscht werden können.
+*/
 
 //-------------------------------------------------------------------------------------------------
 

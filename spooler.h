@@ -1,4 +1,4 @@
-// $Id: spooler.h,v 1.50 2001/02/18 16:14:37 jz Exp $
+// $Id: spooler.h,v 1.51 2001/02/20 10:37:24 jz Exp $
 
 #ifndef __SPOOLER_H
 #define __SPOOLER_H
@@ -59,9 +59,6 @@ namespace sos {
 #include "spooler_task.h"
 #include "spooler_thread.h"
 #include "spooler_service.h"
-
-#define FOR_EACH(       TYPE, CONTAINER, ITERATOR )  for( TYPE::iterator       ITERATOR = (CONTAINER).begin(); (ITERATOR) != (CONTAINER).end(); (ITERATOR)++ )
-#define FOR_EACH_CONST( TYPE, CONTAINER, ITERATOR )  for( TYPE::const_iterator ITERATOR = (CONTAINER).begin(); (ITERATOR) != (CONTAINER).end(); (ITERATOR)++ )
 
 namespace sos {
 
@@ -202,6 +199,7 @@ struct Spooler
 
     Thread_semaphore           _lock;
     Thread_semaphore           _command_lock;               // Synchronisation mit Spooler_command
+    Thread_semaphore           _job_name_lock;              // Sperre von get_job(name) bis add_job() für eindeutige Jobnamen
 };
 
 //-------------------------------------------------------------------------------------------------

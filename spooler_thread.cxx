@@ -1,4 +1,4 @@
-// $Id: spooler_thread.cxx,v 1.9 2001/02/18 16:14:38 jz Exp $
+// $Id: spooler_thread.cxx,v 1.10 2001/02/20 10:37:25 jz Exp $
 /*
     Hier sind implementiert
 
@@ -12,6 +12,9 @@
 
 namespace sos {
 namespace spooler {
+
+
+#define FOR_EACH_JOB( ITERATOR )  LOCKED_FOR_EACH( _lock, Job_list, _job_list, ITERATOR )
 
 //-----------------------------------------------------------------------------------Thread::Thread
 
@@ -72,7 +75,6 @@ xml::Element_ptr Thread::xml( xml::Document_ptr document )
         FOR_EACH( Job_list, _job_list, it )  jobs_element->appendChild( (*it)->xml(document) ), dom_append_nl( jobs_element );
 
         thread_element->appendChild( jobs_element );
-
     }
 
     return thread_element;
@@ -82,10 +84,13 @@ xml::Element_ptr Thread::xml( xml::Document_ptr document )
 
 void Thread::add_job( const Sos_ptr<Job>& job )
 {
-    Job* j = _spooler->get_job_or_null( job->name() );
-    if( j )  throw_xc( "SPOOLER-130", j->name(), j->thread()->name() );
+    THREAD_LOCK( _spooler->_job_name_lock )
+    {
+        Job* j = _spooler->get_job_or_null( job->name() );
+        if( j )  throw_xc( "SPOOLER-130", j->name(), j->thread()->name() );
 
-    _job_list.push_back( job );
+        THREAD_LOCK( _lock )  _job_list.push_back( job );
+    }
 }
 
 //-----------------------------------------------------------------------Thread::load_jobs_from_xml
@@ -114,12 +119,15 @@ void Thread::load_jobs_from_xml( const xml::Element_ptr& element, bool init )
 
 void Thread::close()
 {
-    FOR_EACH( Job_list, _job_list, it )  (*it)->close();
-    _job_list.clear();
-    _script_instance.close();
+    THREAD_LOCK( _lock )
+    {
+        FOR_EACH( Job_list, _job_list, it )  (*it)->close();
+        _job_list.clear();
+        _script_instance.close();
 
-    // COM-Objekte entkoppeln, falls noch jemand eine Referenz darauf hat:
-    if( _com_log )  _com_log->close();
+        // COM-Objekte entkoppeln, falls noch jemand eine Referenz darauf hat:
+        if( _com_log )  _com_log->close();
+    }
 }
 
 //------------------------------------------------------------------------------------Thread::start
@@ -140,17 +148,19 @@ void Thread::start()
         if( !ok )  throw_xc( "SPOOLER-127" );
     }
 
-    FOR_EACH( Job_list, _job_list, job )  (*job)->init();
+    FOR_EACH_JOB( job )  (*job)->init();
 }
 
 //-------------------------------------------------------------------------------------Thread::stop
 
 void Thread::stop()
 {
-    FOR_EACH( Job_list, _job_list, it )  (*it)->close();
-
-    _job_list.clear();
-    _script_instance.close();
+    THREAD_LOCK( _lock )
+    {
+        FOR_EACH( Job_list, _job_list, it )  (*it)->close();
+        _job_list.clear();
+        _script_instance.close();
+    }
 }
 
 //-------------------------------------------------------------------------------------Thread::step
@@ -166,7 +176,7 @@ bool Thread::step()
     // Erst die Tasks mit höchster Priorität. Die haben absoluten Vorrang:
 
     {
-        FOR_EACH( Job_list, _job_list, it )
+        FOR_EACH_JOB( it )
         {
             if( _event.signaled_then_reset() )  return true;
             Job* job = *it;
@@ -179,7 +189,7 @@ bool Thread::step()
 
     if( !something_done )
     {
-        FOR_EACH( Job_list, _job_list, it )
+        FOR_EACH_JOB( it )
         {
             if( _event.signaled_then_reset() )  return true;
             Job* job = *it;
@@ -192,7 +202,7 @@ bool Thread::step()
 
     if( !something_done )
     {
-        FOR_EACH( Job_list, _job_list, it )
+        FOR_EACH_JOB( it )
         {
             if( _event.signaled_then_reset() )  return true;
             Job* job = *it;
@@ -224,7 +234,7 @@ void Thread::wait()
 
             Time wait_time = latter_day;
 
-            FOR_EACH( Job_list, _job_list, it )
+            FOR_EACH_JOB( it )
             {
                 Job* job = *it;
                 if( job->_state == Job::s_pending ) 
@@ -263,7 +273,7 @@ void Thread::wait()
 }
 
 //------------------------------------------------------------------------------Thread::do_add_jobs
-
+/*
 void Thread::do_add_jobs()
 {
     try
@@ -276,16 +286,22 @@ void Thread::do_add_jobs()
     _add_jobs_element = NULL;  
     _add_jobs_document = NULL;
 }
-
+*/
 //--------------------------------------------------------------------Thread::remove_temporary_jobs
 
 void Thread::remove_temporary_jobs()
 {
-    FOR_EACH( Job_list, _job_list, it )  if( (*it)->should_removed() )  THREAD_LOCK( _lock )  
+    THREAD_LOCK( _lock )
     {
-        (*it)->_log.msg( "Temporärer Job wird entfernt" );
-        (*it)->close(); 
-        it = _job_list.erase( it );
+        FOR_EACH( Job_list, _job_list, it )  
+        {
+            if( (*it)->should_removed() )    
+            {
+                (*it)->_log.msg( "Temporärer Job wird entfernt" );
+                (*it)->close(); 
+                it = _job_list.erase( it );
+            }
+        }
     }
 }
 
@@ -322,7 +338,7 @@ int Thread::run_thread()
 
             _event.reset();
 
-            THREAD_LOCK( _lock )  if( _add_jobs_element )  do_add_jobs();
+          //THREAD_LOCK( _lock )  if( _add_jobs_element )  do_add_jobs();
         }
 
         close();
@@ -351,7 +367,10 @@ int Thread::run_thread()
 
 void Thread::signal_object( const string& object_set_class_name, const Level& level )
 {
-    FOR_EACH( Job_list, _job_list, it )  (*it)->signal_object( object_set_class_name, level );
+    THREAD_LOCK( _lock )
+    {
+        FOR_EACH( Job_list, _job_list, it )  (*it)->signal_object( object_set_class_name, level );
+    }
 }
 
 //-------------------------------------------------------------------------------------------thread
@@ -387,6 +406,7 @@ void Thread::stop_thread()
 }
 */
 //------------------------------------------------------------------------Thread::interrupt_scripts
+// Anderer Thread
 
 void Thread::interrupt_scripts()
 {
@@ -442,6 +462,8 @@ Job* Thread::get_job_or_null( const string& job_name )
 
 void Thread::cmd_add_jobs( const xml::Element_ptr& element )
 {
+    load_jobs_from_xml( element, true );
+/*
     THREAD_LOCK( _lock )
     {
         if( _add_jobs_element )  throw_xc( "SPOOLER-129", _name );
@@ -449,6 +471,7 @@ void Thread::cmd_add_jobs( const xml::Element_ptr& element )
         _add_jobs_element  = element;
         _add_jobs_document = element->ownerDocument;
     }
+*/
 
     signal();
 }

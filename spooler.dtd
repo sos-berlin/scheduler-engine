@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- $Id: spooler.dtd,v 1.19 2001/02/18 16:14:37 jz Exp $   Joacim Zschimmer,  (C) 2000 SOS GmbH Berlin  -->
+<!-- $Id: spooler.dtd,v 1.20 2001/02/20 10:37:24 jz Exp $   Joacim Zschimmer,  (C) 2000 SOS GmbH Berlin  -->
 
 
 <!ELEMENT spooler               ( config+ | command | answer )>
@@ -113,7 +113,7 @@
 
 <!-- KOMMANDOS  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
-<!ELEMENT command               ( show_state | modify_spooler | modify_job | add_jobs | signal_object )>
+<!ELEMENT command               ( show_state | modify_spooler | modify_job | add_jobs | signal_object )+ >
 
 <!ELEMENT show_state            EMPTY>                                  <!-- Liefert den Zustand des Spoolers -->
                                                                         <!-- Antwort: <state> -->

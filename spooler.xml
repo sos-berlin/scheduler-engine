@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 
-<!-- $Id: spooler.xml,v 1.32 2001/02/14 22:06:55 jz Exp $   (C) 2001 SOS GmbH Berlin -->
+<!-- $Id: spooler.xml,v 1.33 2001/02/20 10:37:24 jz Exp $   (C) 2001 SOS GmbH Berlin -->
 
 <!DOCTYPE spooler SYSTEM "s:\prod\spooler\spooler.dtd">
 
@@ -495,6 +495,23 @@ function spooler_close()
                 </job>
             </jobs>
         </thread>
+
+<!--
+        <thread name="perlzwei">
+            <jobs>
+                <job name="perl2">
+                    <script language="PerlScript"><![CDATA[
+                        sub spooler_process()
+                        {
+                            $spooler_log->msg("perl2");
+                            return 0;
+                        }
+                    ]]></script>
+                    <run_time repeat="0.7"/>
+                </job>
+            </jobs>
+        </thread>
+-->
 
     </threads>
 

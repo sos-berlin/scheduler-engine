@@ -1,4 +1,4 @@
-// $Id: spooler_common.h,v 1.7 2001/02/16 18:23:12 jz Exp $
+// $Id: spooler_common.h,v 1.8 2001/02/20 10:37:24 jz Exp $
 
 #ifndef __SPOOLER_COMMON_H
 #define __SPOOLER_COMMON_H
@@ -15,6 +15,17 @@ namespace spooler {
 
 typedef uint                    Thread_id;                  // _beginthreadex()
 typedef DWORD                   Process_id;
+
+//-----------------------------------------------------------------------------------------FOR_EACH
+
+#define        FOR_EACH(             TYPE, CONTAINER, ITERATOR )  for( TYPE::iterator       ITERATOR = (CONTAINER).begin(); (ITERATOR) != (CONTAINER).end(); (ITERATOR)++ )
+#define        FOR_EACH_CONST(       TYPE, CONTAINER, ITERATOR )  for( TYPE::const_iterator ITERATOR = (CONTAINER).begin(); (ITERATOR) != (CONTAINER).end(); (ITERATOR)++ )
+#define LOCKED_FOR_EACH(       LOCK, TYPE, CONTAINER, ITERATOR )  for( TYPE::iterator       ITERATOR = (CONTAINER).begin(); (ITERATOR) != (CONTAINER).end(); (LOCK).enter(), (ITERATOR)++, (LOCK).leave() )
+#define LOCKED_FOR_EACH_CONST( LOCK, TYPE, CONTAINER, ITERATOR )  for( TYPE::const_iterator ITERATOR = (CONTAINER).begin(); (ITERATOR) != (CONTAINER).end(); (LOCK).enter(), (ITERATOR)++, (LOCK).leave() )
+
+// Bei LOCKED_FOR_EACHxx() ist der Iterator durch eine Semaphore geschützt. 
+// Damit kann einer Liste durchlaufen werden, der ein anderer Thread Elemente hinzufügt.
+// Der andere Thread muss dieselbe Semaphore LOCK nutzen.
 
 //-------------------------------------------------------------------------------------------Handle
 
@@ -89,6 +100,81 @@ struct Simple_atomic
     volatile T                 _value;
     sos::Thread_semaphore      _lock;
 };
+
+//------------------------------------------------------------------------------------threaded_list
+/*
+template< class T >
+struct threaded_list : list<T>
+{
+    typedef Thread_semaphore::Guard G;
+
+
+    explicit                    threaded_list               ()   {}
+    explicit                    threaded_list               ( size_type n, const T& v = T(), ) : list(n,v) {}
+    iterator                    begin                       ();
+    const_iterator              begin                       () const;
+    iterator                    end                         ();
+    iterator                    end                         () const;
+    reverse_iterator rbegin();
+    const_reverse_iterator rbegin() const;
+    reverse_iterator rend();
+    const_reverse_iterator rend() const;
+    void resize(size_type n, T x = T());
+    size_type size() const;
+    size_type max_size() const;
+    bool empty() const;
+    A get_allocator() const;
+    reference front();
+    const_reference front() const;
+    reference back();
+    const_reference back() const;
+    void push_front(const T& x);
+    void pop_front();
+    void push_back(const T& x);
+    void pop_back();
+    void assign(const_iterator first, const_iterator last);
+    void assign(size_type n, const T& x = T());
+    iterator insert(iterator it, const T& x = T());
+    void insert(iterator it, size_type n, const T& x);
+    void insert(iterator it,
+        const_iterator first, const_iterator last);
+    void insert(iterator it,
+        const T *first, const T *last);
+    iterator erase(iterator it);
+    iterator erase(iterator first, iterator last);
+    void clear();
+    void swap(threaded_list x);
+    void splice(iterator it, threaded_list& x);
+    void splice(iterator it, threaded_list& x, iterator first);
+    void splice(iterator it, threaded_list& x, iterator first, iterator last);
+    void remove(const T& x);
+    void remove_if(binder2nd<not_equal_to<T> > pr);
+    void unique();
+    void unique(not_equal_to<T> pr);
+    void merge(threaded_list& x);
+    void merge(threaded_list& x, greater<T> pr);
+    void sort();
+    template<class Pred>
+        void sort(greater<T> pr);
+    void reverse();
+
+
+    Thread_semaphore           _lock;
+
+  private:
+                                threaded_list               ( const threaded_list& x );
+                                threaded_list               ( const_iterator first, const_iterator last, const A& al = A() );
+};
+*/
+/*
+template<class T, class A> bool operator== ( const list<T, A>& lhs, const list<T, A>& rhs );
+template<class T, class A> bool operator!= ( const list<T, A>& lhs, const list<T, A>& rhs );
+template<class T, class A> bool operator<  ( const list<T, A>& lhs, const list<T, A>& rhs );
+template<class T, class A> bool operator>  ( const list<T, A>& lhs, const list<T, A>& rhs );
+template<class T, class A> bool operator<= ( const list<T, A>& lhs, const list<T, A>& rhs );
+template<class T, class A> bool operator>= ( const list<T, A>& lhs, const list<T, A>& rhs );
+template<class T, class A> void swap       ( const list<T, A>& lhs, const list<T, A>& rhs );
+*/
 
 //-------------------------------------------------------------------------------------------------
 

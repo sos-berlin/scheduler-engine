@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.28 2001/02/18 16:14:37 jz Exp $
+// $Id: spooler_task.cxx,v 1.29 2001/02/20 10:37:24 jz Exp $
 /*
     Hier sind implementiert
 
@@ -217,6 +217,7 @@ void Job::close_task()
 }
 
 //----------------------------------------------------------------------------------------Job::init
+// Bei <add_jobs> von einem anderen Thread gerufen.
 
 void Job::init()
 {
@@ -226,9 +227,6 @@ void Job::init()
 
     _script_ptr = _object_set_descr? &_object_set_descr->_class->_script
                                    : &_script;
-
-    //_event.set_name( "Job " + _name );
-    //_event.add_to( &_wait_handles );
 
     _period          = _run_time.next_period( Time::now() );
     _next_start_time = _period.begin();
@@ -989,16 +987,6 @@ void Process_task::do_end()
     if( exit_code )  throw_xc( "SPOOLER-126", exit_code );
 }
 
-//----------------------------------------------------------------------------Process_task::do_stop
-/*
-void Process_task::do_stop()
-{
-    TerminateProcess( _process_handle, 999 );
-    //if( !ok )  throw_mswin_error( "TerminateProcess" );
-
-    _process_handle.close();
-}
-*/
 //----------------------------------------------------------------------------Process_task::do_step
 
 bool Process_task::do_step()
