@@ -1,4 +1,4 @@
-// $Id: spooler_wait.cxx,v 1.66 2002/12/11 10:18:06 jz Exp $
+// $Id: spooler_wait.cxx,v 1.67 2002/12/11 11:28:46 jz Exp $
 /*
     Hier sind implementiert
 
@@ -11,11 +11,11 @@
 
 #include <sys/types.h>
 #include <sys/timeb.h>
-#include <sys/time.h>
 
 #ifdef Z_WINDOWS
 #   include <io.h>         // findfirst()
 #else
+#   include <sys/time.h>
 #   include <dirent.h>
 #endif
 
