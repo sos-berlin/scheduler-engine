@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="scheduler.xslt" type="text/xsl"?>
 
-<!--$Id: protokolle.xml,v 1.5 2004/09/11 09:28:26 jz Exp $-->
+<!--$Id: protokolle.xml,v 1.6 2004/09/11 18:31:06 jz Exp $-->
 
 <description 
     title    = "Protokolle" 
     base_dir = ""
     author   = "$Author: jz $"
-    date     = "$Date: 2004/09/11 09:28:26 $"
+    date     = "$Date: 2004/09/11 18:31:06 $"
 >
 
 <scheduler_keyword keyword="Protokoll"/>
@@ -46,6 +46,13 @@
     Der Dateiname wird aus der Jobkette und der Auftrags-Id gebildet,
     z.B.: <code>order.meine_jobkette.9876.log</code>.
     Das Auftragsprotokoll wird nach Ende des Auftrags gelöscht.
+</p>
+
+<h3>scheduler.log</h3>
+<p>
+    Zur Fehlerdiagnose kann der Scheduler das <code>scheduler.log</code> schreiben. 
+    In <scheduler_ini_entry file="factory.ini" section="spooler" entry="log"/> stellen sie den Dateinamen ein.
+    In dieser Dokumentation steht <code>factory.ini</code> für den hier eingestellten Dateinamen.
 </p>
 
 
@@ -90,8 +97,9 @@
     Siehe Kommandos <scheduler_element name="show_state"/>, <scheduler_element name="show_task"/> und <scheduler_element name="show_history"/>.
 </p>
 
-
-
-<scheduler_comment>http:show_log </scheduler_comment>
+<p>
+    Mit einem Browser können Sie den eingebauten <a href="http.xml">HTTP-Server</a> ansprechen 
+    und sich ein Protokoll fortlaufend anzeigen lassen.
+</p>
 
 </description>

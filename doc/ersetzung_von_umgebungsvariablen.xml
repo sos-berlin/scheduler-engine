@@ -2,14 +2,17 @@
 <?xml-stylesheet href="scheduler.xslt" type="text/xsl"?>
 
 
-<!--$Id: ersetzung_von_umgebungsvariablen.xml,v 1.3 2004/09/06 10:03:10 jz Exp $-->
+<!--$Id: ersetzung_von_umgebungsvariablen.xml,v 1.4 2004/09/11 18:31:06 jz Exp $-->
 
 <description 
     title    = "Ersetzung von Umgebungsvariablen" 
     base_dir = ""
     author   = "$Author: jz $"
-    date     = "$Date: 2004/09/06 10:03:10 $"
+    date     = "$Date: 2004/09/11 18:31:06 $"
 >
+
+<scheduler_keyword keyword="Umgebungsvariablen"/>
+<scheduler_keyword keyword="Environment variables"/>
 
 <p>
     In einigen Einstellungen können Umgebungsvariablen benutzt werden. 

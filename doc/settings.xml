@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="scheduler.xslt" type="text/xsl"?>
 
-<!--$Id: settings.xml,v 1.12 2004/09/10 07:30:52 jz Exp $-->
+<!--$Id: settings.xml,v 1.13 2004/09/11 18:31:06 jz Exp $-->
 
 <!-- Einige Einstellungen können an mehreren Stellen vorgenommen werden:
      - Konfigurationsdatei
@@ -16,8 +16,22 @@
     base_dir    = ""
     title       = "Einstellungen"
     author      = "$Author: jz $"
-    date        = "$Date: 2004/09/10 07:30:52 $"
+    date        = "$Date: 2004/09/11 18:31:06 $"
 >
+
+    <setting setting        = "scheduler_log" 
+             type           = "dateiname" 
+             title          = "Dateiname des scheduler.log">
+
+        <description>
+            <p>
+                Wenn diese Einstellung gesetzt ist, 
+                schreibt der Scheduler ein detailliertes Protokoll zur Fehlerdiagnose in die Datei.
+                Geben Sie den Dateinamen absolut an (als vollständigen Pfad).
+            </p>
+        </description>
+    </setting>
+
 
     <setting setting        = "log_dir" 
              type           = "verzeichnis" 

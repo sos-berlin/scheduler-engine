@@ -2,14 +2,14 @@
 <!--DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"-->
 <?xml-stylesheet href="../scheduler.xslt" type="text/xsl"?>
 
-<!--$Id: show_state.xml,v 1.7 2004/09/07 06:25:36 jz Exp $-->
+<!--$Id: show_state.xml,v 1.8 2004/09/11 18:31:06 jz Exp $-->
 
 <xml_element name     = "show_state" 
              title    = "Status zeigen"
              base_dir = "../"
              parent_page = "../xml_commands.xml"
              author   = "$Author: jz $"
-             date     = "$Date: 2004/09/07 06:25:36 $">
+             date     = "$Date: 2004/09/11 18:31:06 $">
 
 
     <description>
@@ -37,27 +37,32 @@
                 <dl>
                     <dt><code>task_queue</code></dt>
                     <dd>
-                        Liefert auch die Task-Warteschlange eines Jobs.
+                        Liefert auch die Task-Warteschlange eines Jobs 
+                        (<scheduler_element name="queued_tasks" directory="xml/answer/"/>).
                     </dd>
                     
                     <dt><code>job_chain_orders</code></dt>
                     <dd>
-                        Liefert auch die Aufträge in einer Jobkette.
+                        Liefert auch die Aufträge in einer Jobkette
+                        (<scheduler_element name="order_queue" directory="xml/answer/"/>).
                     </dd>
                     
                     <dt><code>job_orders</code></dt>
                     <dd>
-                        Liefert auch die Aufträge in einer Auftragswarteschlange außerhalb einer Jobkette.
+                        Liefert auch die Aufträge in einer Auftragswarteschlange außerhalb einer Jobkette
+                        (<scheduler_element name="order_queue" directory="xml/answer/"/>).
                     </dd>
                     
                     <dt><code>description</code></dt>
                     <dd>
-                        Liefert auch die <scheduler_element name="description"/>.
+                        Liefert auch die
+                        (<scheduler_element name="description" directory="xml/answer/"/>).
                     </dd>
                     
                     <dt><code>log</code></dt>
                     <dd>
-                        Liefert auch Protokolle.
+                        Liefert auch Protokolle
+                        (<scheduler_element name="log" directory="xml/answer/"/>).
                     </dd>
                     
                     <dt><code>standard</code></dt>

@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding="utf-8"?>
-<!-- $Id: scheduler.xslt,v 1.33 2004/09/11 09:28:26 jz Exp $ -->
+<!-- $Id: scheduler.xslt,v 1.34 2004/09/11 18:31:06 jz Exp $ -->
 
 <!--
     Änderungswünsche:
@@ -554,17 +554,52 @@
 
                 <a name="stichwörter"/>
                 <h2>Stichwörter</h2>
+                <!--
                 <table cellspacing="0" cellpadding="0">
-                    <col align="baseline"/>
-                    <col align="baseline" style="padding-left: 2ex"/>
-                    <xsl:apply-templates select="register_entry">
-                        <xsl:sort select="@register_keyword"/>
-                        <xsl:sort select="@register_title"/>
-                    </xsl:apply-templates>
+                    <col valign="baseline"/>
+                    <col valign="baseline" style="padding-top: 5pt; padding-left: 2ex"/>
+                    
+                    <xsl:for-each select="register_keyword[ child::register_entry ]">
+                        <xsl:sort select="@keyword"/>
+                        <tr>
+                            <td>
+                                <xsl:value-of select="@keyword"/>
+                            </td>
+                            <td>
+                                <xsl:for-each select="register_entry">
+                                    <xsl:apply-templates select=".">
+                                        <xsl:sort select="@register_keyword"/>
+                                        <xsl:sort select="@register_title"/>
+                                    </xsl:apply-templates>
+                                            
+                                    <xsl:if test="position() &lt; last()">, </xsl:if>
+                                </xsl:for-each>
+                            </td>
+                        </tr>
+                    </xsl:for-each>
+                </table>
+                -->
+                <table cellspacing="0" cellpadding="0">
+                    <col valign="baseline"/>
+                    <col valign="baseline" style="padding-top: 5pt; padding-left: 2ex"/>
+                    
+                    <xsl:call-template name="register">
+                        <xsl:with-param name="children_name" select="'register_entry'"/>
+                    </xsl:call-template>
                 </table>                
                 
                 <a name="optionen"/>
                 <h2>Optionen der Kommandozeile</h2>
+                <table cellspacing="0" cellpadding="0">
+                    <col valign="baseline"/>
+                    <col valign="baseline" style="padding-top: 5pt; padding-left: 2ex"/>
+                    
+                    <xsl:call-template name="register">
+                        <xsl:with-param name="children_name" select="'register_option'"/>
+                    </xsl:call-template>
+                </table>                
+                
+<!--
                 <table cellspacing="0" cellpadding="0">
                     <col align="baseline"/>
                     <col align="baseline" style="padding-left: 2ex"/>
@@ -572,18 +607,23 @@
                         <xsl:sort select="@name"/>
                     </xsl:apply-templates>
                 </table>                
-                
+-->                
                 <a name="ini"/>
                 <h2>Einträge in .ini-Dateien</h2>
                 <table cellspacing="0" cellpadding="0">
                     <col align="baseline"/>
                     <col align="baseline" style="padding-left: 2ex"/>
                     <col align="baseline" style="padding-left: 2ex"/>
+                    <xsl:call-template name="register">
+                        <xsl:with-param name="children_name" select="'register_ini_entry'"/>
+                    </xsl:call-template>
+<!--                    
                     <xsl:apply-templates select="register_ini_entry">
                         <xsl:sort select="@entry"/>
                         <xsl:sort select="@file"/>
                         <xsl:sort select="@title"/>
                     </xsl:apply-templates>
+-->                    
                 </table>                
                 
                 <a name="xml_elemente"/>
@@ -591,9 +631,14 @@
                 <table cellspacing="0" cellpadding="0">
                     <col align="baseline"/>
                     <col align="baseline" style="padding-left: 2ex"/>
+                    <xsl:call-template name="register">
+                        <xsl:with-param name="children_name" select="'register_element'"/>
+                    </xsl:call-template>
+<!--                    
                     <xsl:apply-templates select="register_element">
                         <xsl:sort select="@name"/>
                     </xsl:apply-templates>
+-->                    
                 </table>                
                 
                 <xsl:call-template name="bottom"/>
@@ -602,50 +647,58 @@
         
     </xsl:template>
 
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~register-->
+
+    <xsl:template name="register">
+        <xsl:param name="children_name"/>
+        
+            <xsl:for-each select="*[ name(./*) = $children_name ]">
+                <xsl:sort select="@keyword"/>
+                
+                <tr>
+                    <td>
+                        <xsl:value-of select="@keyword"/>
+                    </td>
+                    <td>
+                        <xsl:for-each select="*[ name(.) = $children_name ]">
+                            <xsl:apply-templates select=".">
+                                <xsl:sort select="@register_keyword"/>
+                                <xsl:sort select="@register_title"/>
+                            </xsl:apply-templates>
+                                        
+                            <xsl:if test="position() &lt; last()">, </xsl:if>
+                        </xsl:for-each>
+                    </td>
+                </tr>
+            </xsl:for-each>
+
+    </xsl:template>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~register_entry-->
     
     <xsl:template match="register_entry">
 
-        <tr>
-            <td>
-                <xsl:value-of select="@register_keyword"/>
-            </td>
-            <td>
-                <xsl:element name="a">
-                    <xsl:attribute name="href"><xsl:value-of select="concat( @register_file, '#keyword__', @register_keyword )"/></xsl:attribute>
-                    <xsl:value-of select="@register_title"/>
-                </xsl:element>
-            </td>
-        </tr>
-        
+        <xsl:element name="a">
+            <xsl:attribute name="href"><xsl:value-of select="concat( @register_file, '#keyword__', @register_keyword )"/></xsl:attribute>
+            <xsl:value-of select="@register_title"/>
+        </xsl:element>
+
     </xsl:template>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~register_ini_entry-->
     
     <xsl:template match="register_ini_entry">
 
-        <tr>
-            <td>
-                <code>
-                    <xsl:value-of select="@entry"/>
-                </code>
-            </td>                
-            <td>
-                <code>
-                    <xsl:value-of select="@file"/>
-                    <xsl:text> [</xsl:text>
-                    <xsl:value-of select="@section"/>
-                    <xsl:text>]</xsl:text>
-                </code>
-            </td>
-            <td>
-                <xsl:element name="a">
-                    <xsl:attribute name="href"><xsl:value-of select="concat( @register_file, '#use_entry__', '@file', '__', '@section', '__', @entry )"/></xsl:attribute>
-                    <xsl:value-of select="@register_title | @register_file"/>
-                </xsl:element>
-            </td>
-        </tr>
+        <code>
+            <xsl:value-of select="@file"/>
+            <xsl:text> [</xsl:text>
+            <xsl:value-of select="@section"/>
+            <xsl:text>]</xsl:text>
+        </code>:
+        <xsl:element name="a">
+            <xsl:attribute name="href"><xsl:value-of select="concat( @register_file, '#use_entry__', '@file', '__', '@section', '__', @entry )"/></xsl:attribute>
+            <xsl:value-of select="@register_title"/>
+        </xsl:element>
         
     </xsl:template>
 
@@ -653,19 +706,10 @@
     
     <xsl:template match="register_option">
 
-        <tr>
-            <td>
-                <code>
-                    -<xsl:value-of select="@name"/>
-                </code>
-            </td>
-            <td>
-                <xsl:element name="a">
-                    <xsl:attribute name="href"><xsl:value-of select="concat( @register_file, '#use_option__', @name )"/></xsl:attribute>
-                    <xsl:value-of select="@register_title | @register_file"/>
-                </xsl:element>
-            </td>
-        </tr>
+        <xsl:element name="a">
+            <xsl:attribute name="href"><xsl:value-of select="concat( @register_file, '#use_option__', @name )"/></xsl:attribute>
+            <xsl:value-of select="@register_title"/>
+        </xsl:element>
         
     </xsl:template>
 
@@ -673,19 +717,10 @@
     
     <xsl:template match="register_element">
 
-        <tr>
-            <td>
-                <code>
-                    &lt;<xsl:value-of select="@name"/>>
-                </code>
-            </td>
-            <td>
-                <xsl:element name="a">
-                    <xsl:attribute name="href"><xsl:value-of select="concat( @register_file, '#use_option__', @name )"/></xsl:attribute>
-                    <xsl:value-of select="@register_title | @register_file"/>
-                </xsl:element>
-            </td>
-        </tr>
+        <xsl:element name="a">
+            <xsl:attribute name="href"><xsl:value-of select="concat( @register_file, '#use_option__', @name )"/></xsl:attribute>
+            <xsl:value-of select="@register_title"/>
+        </xsl:element>
         
     </xsl:template>
 
@@ -1397,9 +1432,13 @@
                 <td align="right">
                     <p style="font-size: 8pt; margin-top: 0">
                         Zuletzt geändert von
-                        <!--xsl:value-of select="           substring-before( substring-after( /*/@author, 'Author: ' ), ' $' )"            />,-->
-                        <xsl:variable name="name" select="document('standards.xml')/standards/authors/author[ @author = current()/@author ]/@full_name"/>
-                        <xsl:value-of select="$name | @author"/>,
+                        <xsl:variable name="name" select="substring-before( substring-after( /*/@author, 'Author: ' ), ' $' )"/>
+                        <xsl:choose>
+                            <xsl:when test="$name = 'jz'">J. Zschimmer</xsl:when>
+                            <xsl:otherwise><xsl:value-of select="$name"/></xsl:otherwise>
+                        </xsl:choose>,
+                        <!--xsl:variable name="name" select="document('standards.xml')/standards/authors/author[ @author = current()/@author ]/@full_name"/>
+                        <xsl:value-of select="$name"/>,-->
                         <xsl:value-of select="translate( substring-before( substring-after( /*/@date,   'Date: '   ), ' $' ), '/', '-' )"/> GMT
                     </p>
                 </td>
@@ -1430,9 +1469,15 @@
                         <xsl:value-of select="document( $parent_page )/*/@title"/>
                     </xsl:element>
                 </xsl:if>
+                
             </xsl:if>
-            
-            &#160;
+
+            <xsl:text> &#160;  &#160;–</xsl:text>
+            <xsl:element name="a">
+                <xsl:attribute name="href"><xsl:value-of select="$base_dir"/>register.xml</xsl:attribute>
+                <xsl:text>Register</xsl:text>
+            </xsl:element>
+            <xsl:text>–</xsl:text>
         </p>
     </xsl:template>    
     

@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="scheduler.xslt" type="text/xsl"?>
 
-<!--$Id: job.xml,v 1.4 2004/09/09 21:45:05 jz Exp $-->
+<!--$Id: job.xml,v 1.5 2004/09/11 18:31:06 jz Exp $-->
 
 <description 
     title    = "Was ist ein Job?" 
     base_dir = ""
     author   = "$Author: jz $"
-    date     = "$Date: 2004/09/09 21:45:05 $"
+    date     = "$Date: 2004/09/11 18:31:06 $"
 >
     Ein Job wird definiert in der XML-Konfiguration mit <b><scheduler_element name="job"/></b>.
     Hier werden der Programmcode, die Laufzeit und andere Dinge angegeben.
@@ -85,8 +85,7 @@
         Das Kommando <scheduler_element name="start_job"/> startet eine Task.
     </p>
     <p>
-        Wenn die Verzeichnisüberwachung 
-        (<scheduler_method class="Job" method="start_when_directory_changed" java_signature="java.lang.String"/>)
+        Wenn die <a href="directory_watch.xml">Verzeichnisüberwachung</a>
         aktiv ist und das überwachte Verzeichnis sich ändert, startet der Scheduler eine Task.
     </p>
     <p>
@@ -104,7 +103,7 @@
 
     <h2>Verzeichnisüberwachung</h2>
     <p>
-        Der Scheduler einen Job starten, wenn sich in einem Dateiverzeichnis etwas tut.
+        Der Scheduler kann einen Job starten, wenn sich in einem Dateiverzeichnis etwas tut.
         Näheres im Kapitel <a href="directory_watch.xml">Verzeichnisüberwachung</a>.
     </p>
     
@@ -115,6 +114,10 @@
         Ein Job in Java eine Implementierung der abstrakten Oberklasse
         <a href="javadoc/sos/spooler/Job_impl.html">sos.spooler.Job_impl</a>.
     </p>
-
+    <p>
+        Die <a href="javadoc/index.html">Java-Schnittstelle</a> stellt weitere Klassen bereit.
+        Sie gilt entsprechend für die COM- und Perl-Schnittstellen, 
+        wenn Sie Ihren Job in einer anderen Sprache implementieren.
+    </p>
                 
 </description>
