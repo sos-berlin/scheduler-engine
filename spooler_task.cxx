@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.113 2002/10/04 06:36:13 jz Exp $
+// $Id: spooler_task.cxx,v 1.114 2002/10/04 06:53:17 jz Exp $
 /*
     Hier sind implementiert
 
@@ -273,7 +273,7 @@ void Job::set_xml( const xml::Element_ptr& element )
       //_rerun            = as_bool         ( element->getAttribute( L"rerun" ) ) ),
       //_stop_after_error = as_bool         ( element->getAttribute( L"stop_after_error" ) );
         _temporary        = as_bool         ( variant_default( element->getAttribute( L"temporary"  ), _temporary  ) );
-        _priority         = int_from_variant( variant_default( element->getAttribute( L"priority"   ), _priority   ) );
+        Variant priority  =                                    element->getAttribute( L"priority"   );
         _title            = as_string       ( variant_default( element->getAttribute( L"title"      ), _title      ) );
         _log_append       = as_bool         ( variant_default( element->getAttribute( L"log_append" ), _log_append ) );
         order             = as_bool         ( variant_default( element->getAttribute( L"order"      ), false       ) );
@@ -281,8 +281,12 @@ void Job::set_xml( const xml::Element_ptr& element )
         if( order )
         {
             if( _temporary )  throw_xc( "SPOOLER-155" );
+            if( priority.vt != VT_NULL )  throw_xc( "SPOOLER-165" );
             _order_queue = new Order_queue( this, &_log );
         }
+        else
+            _priority = int_from_variant( variant_default( priority, _priority ) );
+
 
         string text;
 
