@@ -2,13 +2,13 @@
 <?xml-stylesheet href="scheduler.xslt" type="text/xsl"?>
 
 
-<!--$Id: konfiguration.xml,v 1.1 2004/08/24 15:22:32 jz Exp $-->
+<!--$Id: konfiguration.xml,v 1.2 2004/08/24 18:34:11 jz Exp $-->
 
 <description 
     title    = "Konfiguration" 
     base_dir = "."
     author   = "$Author: jz $"
-    date     = "$Date: 2004/08/24 15:22:32 $"
+    date     = "$Date: 2004/08/24 18:34:11 $"
 >
 <p>
     Beim Start des Scheduler geben Sie die Datei an,
@@ -67,43 +67,43 @@ Klicken Sie auf ein Element, um dessen Beschreibung zu sehen.
 <pre>
 
 
-&lt;<a href="xml/spooler.xml">spooler</a>>
-    &lt;<a href="xml/config.xml">config</a> spooler_id      = ""
+&lt;<a class="silent" href="xml/spooler.xml">spooler</a>>
+    &lt;<a class="silent" href="xml/config.xml">config</a> spooler_id      = ""
             tcp_port        = "4444"
             udp_port        = "4444"
             priority_max    = "1000"
             java_class_path = ""
             java_options    = ""    >
 
-        &lt;<a href="xml/base.xml">base</a> file="…"/>
+        &lt;<a class="silent" href="xml/base.xml">base</a> file="…"/>
 
-        &lt;<a href="xml/holidays.xml">holidays</a>>
-            &lt;<a href="xml/holiday.xml">holiday</a> day="…"/>
+        &lt;<a class="silent" href="xml/holidays.xml">holidays</a>>
+            &lt;<a class="silent" href="xml/holiday.xml">holiday</a> day="…"/>
             …
         &lt;/holiday>
 
-        &lt;<a href="xml/process_classes.xml">process_classes></a>
-            &lt;<a href="xml/process_class.xml">process_class</a> name="…" max_processes="…"/>
+        &lt;<a class="silent" href="xml/process_classes.xml">process_classes></a>
+            &lt;<a class="silent" href="xml/process_class.xml">process_class</a> name="…" max_processes="…"/>
             …
         &lt;/process_classes>
 
-        &lt;<a href="xml/security.xml">security</a>>
-            &lt;<a href="xml/allowed_host.xml">allowed_host</a> name="…" level="…"/>
+        &lt;<a class="silent" href="xml/security.xml">security</a>>
+            &lt;<a class="silent" href="xml/allowed_host.xml">allowed_host</a> name="…" level="…"/>
             …
         &lt;/security>
 
-        &lt;<a href="xml/script.xml">script</a> language   = "…"
+        &lt;<a class="silent" href="xml/script.xml">script</a> language   = "…"
                 java_class = "…"
                 com_class  = "…"
                 filename   = "…" >
-            &lt;<a href="xml/include.xml">include</a> file="…"/>
+            &lt;<a class="silent" href="xml/include.xml">include</a> file="…"/>
             &lt;![CDATA[
                 <i>programm-code</i>… 
             ]]&gt;
         &lt;/script>
 
-        &lt;<a href="xml/jobs.xml">jobs</a>
-            &lt;<a href="xml/job.xml">job</a> name          = "…"
+        &lt;<a class="silent" href="xml/jobs.xml">jobs</a>
+            &lt;<a class="silent" href="xml/job.xml">job</a> name          = "…"
                  title         = ""
                  log_append    = "no"
                  order         = "no"
@@ -113,65 +113,65 @@ Klicken Sie auf ein Element, um dessen Beschreibung zu sehen.
                  idle_timeout  = "" 
                  priority      = "1"   >
 
-                 &lt;<a href="xml/description.xml">description</a>> … &lt;/description>
+                 &lt;<a class="silent" href="xml/description.xml">description</a>> … &lt;/description>
 
-                 &lt;<a href="xml/params.xml">params</a>>
-                     &lt;<a href="xml/param.xml">param</a> name="…" value="…"/>
+                 &lt;<a class="silent" href="xml/params.xml">params</a>>
+                     &lt;<a class="silent" href="xml/param.xml">param</a> name="…" value="…"/>
                      …
                  &lt;/params>
 
-                 &lt;<a href="xml/script.xml">script</a> language   = "…"
+                 &lt;<a class="silent" href="xml/script.xml">script</a> language   = "…"
                          java_class = "…"
                          com_class  = "…"
                          filename   = "…" >
-                     &lt;<a href="xml/include.xml">include</a> file="…"/>
+                     &lt;<a class="silent" href="xml/include.xml">include</a> file="…"/>
                      &lt;![CDATA[
                          <i>programm-code</i>… 
                      ]]&gt;
                  &lt;/script>
                <i>oder</i>
-                 &lt;<a href="xml/process.xml">process</a> file         = "…"
+                 &lt;<a class="silent" href="xml/process.xml">process</a> file         = "…"
                           param        = ""
                           log_file     = ""
                           ignore_error = "no" />
 
-                 &lt;<a href="xml/run_time.xml">run_time</a> let_run="no">
-                     &lt;<a href="xml/period.xml">period</a> let_run      = "…"
+                 &lt;<a class="silent" href="xml/run_time.xml">run_time</a> let_run="no">
+                     &lt;<a class="silent" href="xml/period.xml">period</a> let_run      = "…"
                              begin        = "00:00"
                              end          = "24:00"
                              single_start = "…"     
                              repeat       = "…"     >
                      &lt;/period>
 
-                     &lt;<a href="xml/date.xml">date</a> date="yyyy-mm-dd"/>
+                     &lt;<a class="silent" href="xml/date.xml">date</a> date="yyyy-mm-dd"/>
                      …
 
-                     &lt;<a href="xml/weekdays.xml">weekdays</a>>
-                         &lt;<a href="xml/day.xml">day</a> day="…">
-                             &lt;<a href="xml/period.xml">period></a>…&lt;/period>
+                     &lt;<a class="silent" href="xml/weekdays.xml">weekdays</a>>
+                         &lt;<a class="silent" href="xml/day.xml">day</a> day="…">
+                             &lt;<a class="silent" href="xml/period.xml">period></a>…&lt;/period>
                              …
                          &lt;/day>
                          …
                      &lt;/weekdays>
 
-                     &lt;<a href="xml/monthdays.xml">monthdays</a>>
-                         &lt;<a href="xml/day.xml">day</a> day="…">
-                             &lt;<a href="xml/period.xml">period></a>…&lt;/period>
+                     &lt;<a class="silent" href="xml/monthdays.xml">monthdays</a>>
+                         &lt;<a class="silent" href="xml/day.xml">day</a> day="…">
+                             &lt;<a class="silent" href="xml/period.xml">period></a>…&lt;/period>
                              …
                          &lt;/day>
                          …
                      &lt;/monthdays>
 
-                     &lt;<a href="xml/ultimos.xml">ultimos</a>>
-                         &lt;<a href="xml/day.xml">day</a> day="…">
-                             &lt;<a href="xml/period.xml">period></a>…&lt;/period>
+                     &lt;<a class="silent" href="xml/ultimos.xml">ultimos</a>>
+                         &lt;<a class="silent" href="xml/day.xml">day</a> day="…">
+                             &lt;<a class="silent" href="xml/period.xml">period></a>…&lt;/period>
                              …
                          &lt;/day>
                          …
                      &lt;/ultimos>
 
-                     &lt;<a href="xml/holidays.xml">holidays</a>>
-                         &lt;<a href="xml/holiday.xml">holiday</a> date="yyyy-mm-dd"/>
+                     &lt;<a class="silent" href="xml/holidays.xml">holidays</a>>
+                         &lt;<a class="silent" href="xml/holiday.xml">holiday</a> date="yyyy-mm-dd"/>
                          …
                      &lt;/holidays>
                  &lt;/runtime>

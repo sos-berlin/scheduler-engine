@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="../scheduler.xslt" type="text/xsl"?>
 
-<!--$Id: config.xml,v 1.6 2004/08/24 16:22:38 jz Exp $-->
+<!--$Id: config.xml,v 1.7 2004/08/24 18:34:11 jz Exp $-->
 
 <xml_element name     = "config" 
              title    = "Konfiguration"
              base_dir = ".."
              author   = "$Author: jz $"
-             date     = "$Date: 2004/08/24 16:22:38 $">
+             date     = "$Date: 2004/08/24 18:34:11 $">
 
     <xml_parent_elements>
         <xml_parent_element name="spooler"/>
@@ -77,11 +77,7 @@
             </description>
         </xml_attribute>
 
-        <xml_attribute name="include_path" type="verzeichnis" option="include-path">
-            <description>
-                Gibt das Basisverzeichnis für <scheduler_element name="include"/> an.
-            </description>
-        </xml_attribute>
+        <xml_attribute setting="include_path"/>
 
         <xml_attribute name="priority_max" type="zahl" initial="1000">
             <description>
@@ -95,30 +91,8 @@
             </example>
         </xml_attribute>
         
-        <xml_attribute name="java_class_path" type="class_path" subst_env="yes">
-            <description>
-                <p>
-                    Wenn Jobs in Java implementiert sind, kann hier der <code>CLASS_PATH</code> eingestellt werden.
-                    Das ist eine Liste von Verzeichnissen, in Windows durch Semikolons (;), in Unix 
-                    durch Doppelpunkte getrennt.
-                </p>
-                <p>
-                    Siehe auch <span class="mark">factory.ini [spooler] java_class_path=</span>.
-                </p>
-            </description>
-            <example>
-                <pre>&lt;config java_class_path="c:/programme/java/lib/mail.jar;c:/development/classes;$CLASS_PATH"></pre>
-            </example>
-        </xml_attribute>
-
-        <xml_attribute name="java_options" type="options" subst_env="yes">
-            <description>
-                Die Optionen werden der Java Virtual Machine übergeben.
-            </description>
-            <example>
-                <pre>&lt;config udp_port="4444"></pre>
-            </example>
-        </xml_attribute>
+        <xml_attribute setting="java_class_path"/>
+        <xml_attribute setting="java_options"/>
         
     </xml_attributes>      
     
@@ -164,9 +138,6 @@
                 </p>
                 <p>
                     Bei einem Fehler bricht der Scheduler ab.
-                </p>
-                <p>
-                    <span class="mark">Welche Methoden ruft der Scheduler?</span>
                 </p>
             </description>
             <example>

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="scheduler.xslt" type="text/xsl"?>
 
-<!--$Id: settings.xml,v 1.3 2004/08/24 16:22:38 jz Exp $-->
+<!--$Id: settings.xml,v 1.4 2004/08/24 18:34:11 jz Exp $-->
 
 <!-- Einige Einstellungen können an mehreren Stellen vorgenommen werden:
      - Konfigurationsdatei
@@ -15,11 +15,9 @@
 <settings
     base_dir = "."
     author   = "$Author: jz $"
-    date     = "$Date: 2004/08/24 16:22:38 $">
+    date     = "$Date: 2004/08/24 18:34:11 $">
 
     <setting name           = "log_dir" 
-             xml_element    = "config"
-             ini_section    = "spooler"
              type           = "verzeichnis" 
              title          = "Verzeichnis der Protokolle">
 
@@ -36,9 +34,6 @@
 
 
     <setting name              = "param" 
-             is_command_option = "yes"
-             xml_element       = "config"
-             ini_section       = "spooler"
              api               = "Spooler.param"
              type              = "text" 
              title             = "Zur freien Verwendung">
@@ -58,7 +53,7 @@
 
         <description>
             <p>
-                Gibt die <a href="konfiguration.html">Konfigurationsdatei</a> an.
+                Gibt die <a href="konfiguration.xml">Konfigurationsdatei</a> an.
             </p>
         </description>
     </setting>
@@ -97,7 +92,7 @@
              title  = "Für &lt;include&gt;">
         <description>
             <p>
-                Verzeichnis für <scheduler_element name="include"/>.
+                Verzeichnis der Dateien, die mit <scheduler_element name="include"/> eingezogen werden.
             </p>
         </description>
     </setting>
@@ -325,12 +320,29 @@
     </setting>
 
 
-    <setting name    = "class_path" 
-             type    = "dateinamen"
-             prepend = "yes"
-             title   = "Java-Classpath">
+    <setting name      = "java_class_path" 
+             type      = "dateinamen"
+             prepend   = "yes"
+             subst_env = "yes"
+             title     = "Java-Classpath">
         <description>
             <p>
+                Wenn Jobs in Java implementiert sind, kann hier der <code>CLASS_PATH</code> eingestellt werden.
+                Das ist eine Liste von Verzeichnissen, in Windows durch Semikolons (;), in Unix 
+                durch Doppelpunkte getrennt.
+            </p>
+        </description>
+    </setting>
+
+
+    <setting name      = "java_options" 
+             type      = "text"
+             prepend   = "yes"
+             subst_env = "yes"
+             title     = "Java-Optionen">
+        <description>
+            <p>
+                Die Optionen werden der Java Virtual Machine übergeben.
             </p>
         </description>
     </setting>

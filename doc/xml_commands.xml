@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet href="scheduler.xslt" type="text/xsl"?>
+
+
+<!--$Id: xml_commands.xml,v 1.1 2004/08/24 18:34:19 jz Exp $-->
+
+<description 
+    title    = "XML-Kommandos" 
+    base_dir = "."
+    author   = "$Author: jz $"
+    date     = "$Date: 2004/08/24 18:34:19 $"
+>
+<p>
+</p>
+
+<h2>Kommandos</h2>
+
+<p>
+    <scheduler_element name="add_jobs"/><br/>
+    <scheduler_element name="add_order"/><br/>
+    <scheduler_element name="modify_job"/><br/>
+    <scheduler_element name="modify_order"/><br/>
+    <scheduler_element name="modify_spooler"/><br/>
+    <scheduler_element name="show_history"/><br/>
+    <scheduler_element name="show_job"/><br/>
+    <scheduler_element name="show_jobs"/><br/>
+    <scheduler_element name="show_job_chains"/><br/>
+    <scheduler_element name="show_order"/><br/>
+    <scheduler_element name="show_state"/><br/>
+    <scheduler_element name="show_task"/><br/>
+    <scheduler_element name="start_job"/><br/>
+    <scheduler_element name="terminate"/><br/>
+</p>
+
+</description>
