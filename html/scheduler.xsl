@@ -594,7 +594,7 @@
                                     <xsl:attribute name="onclick">
                                         job_command__onclick('<xsl:value-of select="@job"/>')
                                     </xsl:attribute>
-                                    Command
+                                    Menu
                                 </xsl:element>
 -->                                
                             </td>
@@ -706,7 +706,7 @@
                                 <xsl:choose>
                                     <xsl:when test="not( @id )">
                                         <xsl:if test="../../@waiting_for_process='yes'">
-                                            (need process...)
+                                            (need process)
                                         </xsl:if>
                                     </xsl:when>
                                     <xsl:otherwise>
@@ -752,7 +752,7 @@
                                         <xsl:attribute name="onclick">
                                             task_command__onclick(<xsl:value-of select="@id"/>)
                                         </xsl:attribute>
-                                        Command
+                                        Menu
                                     </xsl:element>
 -->                                    
                                 </td>
@@ -960,7 +960,7 @@
             <xsl:attribute name="onclick">
                 <xsl:value-of select="$onclick"/>
             </xsl:attribute>
-            Command
+            Menu
         </xsl:element>
     </xsl:template>
 

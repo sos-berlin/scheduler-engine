@@ -1,4 +1,4 @@
-// $Id: spooler_http.cxx,v 1.5 2004/07/22 12:10:00 jz Exp $
+// $Id: spooler_http.cxx,v 1.6 2004/07/22 16:19:37 jz Exp $
 /*
     Hier sind implementiert
 
@@ -83,8 +83,7 @@ void Http_parser::parse_header()
     _http_request->_http_cmd = eat_word();
     _http_request->_path     = eat_path();
     _http_request->_protocol = eat_word();
-                              eat_line_end();
-
+                               eat_line_end();
 
     while( next_char() > ' ' )
     {

@@ -1,4 +1,4 @@
-<!-- $Id: jobs_frame.html,v 1.16 2004/07/22 14:15:10 jz Exp $ -->
+<!-- $Id: jobs_frame.html,v 1.17 2004/07/22 16:19:37 jz Exp $ -->
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <html>
 
@@ -106,13 +106,16 @@ function scheduler_command__onclick()
     
     //popup_builder.add_entry  ( "Show log"                       , "parent.scheduler_command__show_log__onclick()" );
     popup_builder.add_show_log( "Show log"                       , "show_log", "show_log" );
+    popup_builder.add_bar();
   //popup_builder.add_command ( "Stop"                           , command( "stop" ), state != "stopped"  &&  state != "stopping"  &&  state != "stopping_let_run" );
     popup_builder.add_command ( "Pause"                          , command( "pause"                         ), state != "paused" );
     popup_builder.add_command ( "Continue"                       , command( "continue"                      ), state == "paused" );
+    popup_builder.add_bar();
   //popup_builder.add_command ( "Reload"                         , command( "reload"                        ), state != "stopped"  &&  state != "stopping" );
     popup_builder.add_command ( "Terminate"                      , command( "terminate"                     ) );
     popup_builder.add_command ( "Terminate and restart"          , command( "terminate_and_restart"         ) );
     popup_builder.add_command ( "Let run, terminate and restart" , command( "let_run_terminate_and_restart" ) );
+    popup_builder.add_bar();
     popup_builder.add_command ( "Abort immediately"              , command( "abort_immediately"             ) );
     popup_builder.add_command ( "Abort immediately and restart"  , command( "abort_immediately_and_restart" ) );
     
