@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.154 2003/06/17 07:39:39 jz Exp $
+// $Id: spooler_task.cxx,v 1.155 2003/06/19 06:22:19 jz Exp $
 /*
     Hier sind implementiert
 
@@ -709,7 +709,7 @@ void Job::stop()
 {
     if( _state != s_stopped )
     {
-        _log.msg( "stop" );
+        _log.info( "stop" );
 
         try 
         {
