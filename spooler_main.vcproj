@@ -81,7 +81,7 @@
 				UsePrecompiledHeader="0"
 				AssemblerOutput="0"
 				WarningLevel="3"
-				DebugInformationFormat="3"/>
+				DebugInformationFormat="2"/>
 			<Tool
 				Name="VCCustomBuildTool"/>
 			<Tool

@@ -40,7 +40,8 @@
 				ObjectFile=".\Release/"
 				ProgramDataBaseFileName=".\Release/"
 				WarningLevel="3"
-				SuppressStartupBanner="TRUE"/>
+				SuppressStartupBanner="TRUE"
+				DebugInformationFormat="2"/>
 			<Tool
 				Name="VCCustomBuildTool"
 				Description="sos.spooler.jar erstellen"
