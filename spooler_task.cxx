@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.143 2003/03/31 17:12:56 jz Exp $
+// $Id: spooler_task.cxx,v 1.144 2003/04/09 15:14:39 jz Exp $
 /*
     Hier sind implementiert
 
@@ -1280,12 +1280,14 @@ void Job::set_error_xc( const Xc& x )
 
 void Job::set_error( const exception& x )
 {
-    if( typeid(x) == typeid(zschimmer::Xc) ) 
+    //if( typeid(x) == typeid(zschimmer::Xc) ) 
+    if( dynamic_cast< const zschimmer::Xc* >( &x ) ) 
     {
         set_error_xc( *(zschimmer::Xc*)&x );
     }
     else
-    if( typeid(x) == typeid(Xc) ) 
+    //if( typeid(x) == typeid(Xc) ) 
+    if( dynamic_cast< const Xc* >( &x ) ) 
     {
         set_error_xc( *(Xc*)&x );
     }
