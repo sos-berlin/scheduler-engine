@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.89 2002/04/07 19:52:58 jz Exp $
+// $Id: spooler.cxx,v 1.90 2002/04/08 20:58:23 jz Exp $
 /*
     Hier sind implementiert
 
@@ -143,6 +143,7 @@ Spooler::Spooler()
 {
     _com_log     = new Com_log( &_prefix_log );
     _com_spooler = new Com_spooler( this );
+    _variables   = new Com_variable_set();
 }
 
 //--------------------------------------------------------------------------------Spooler::~Spooler

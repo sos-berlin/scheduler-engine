@@ -1,4 +1,4 @@
-// $Id: spooler.h,v 1.76 2002/04/07 19:52:58 jz Exp $
+// $Id: spooler.h,v 1.77 2002/04/08 20:58:24 jz Exp $
 
 #ifndef __SPOOLER_H
 #define __SPOOLER_H
@@ -267,6 +267,7 @@ struct Spooler
     Object_set_class_list      _object_set_class_list;      // <object_set_classes>
     Communication              _communication;              // TCP und UDP (ein Thread)
 
+    CComPtr<Ivariable_set>     _variables;
     Script                     _script;                     // <script>
     Script_instance            _script_instance;
 

@@ -1,4 +1,4 @@
-// $Id: spooler_history.cxx,v 1.9 2002/04/07 19:52:58 jz Exp $
+// $Id: spooler_history.cxx,v 1.10 2002/04/08 20:58:25 jz Exp $
 
 #include "../kram/sos.h"
 #include "spooler.h"
@@ -632,54 +632,64 @@ xml::Element_ptr Job_history::read_tail( xml::Document_ptr doc, int n, bool with
     {
         const int max_n = 1000;
         if( n > max_n )  n = max_n,  _spooler->_log.warn( "Nicht mehr als " + as_string(max_n) + " Historiensätze werden gelesen" );
+    
+        with_log &= _use_db;
 
-        Transaction ta = &_spooler->_db;
+        try
         {
-            Any_file sel;
-
-            if( _use_file )
+            Transaction ta = &_spooler->_db;
             {
-                sel.open( "-in -type=(" + _type_string + ") tab -field-names | tail -head=1 -reverse -" + as_string(n) + " | " + _filename );
-                //sel.open( "-in head -" + as_string(n) + " | select * order by id desc | -type=(" + _type_string + ") tab -field-names | " + _filename );
-            }
-            else
-            if( _use_db )
-            {
-                sel.open( "-in head -" + as_string(n) + " | " + _spooler->_db._db_name + 
-                          "select id, spooler_id, job_name, start, end, cause, steps, error, error_code, error_text " +
-                          join( "", vector_map( prepend_comma, _extra_names ) ) +
-                          " from " + _spooler->_history_tablename + " where job_name=" + sql_quoted(_job->name()) + " order by id desc" );
-            }
-            else
-                throw_xc( "SPOOLER-136" );
+                Any_file sel;
 
-            history_element = doc->createElement( "history" );
-            dom_append_nl( history_element );
-
-            const Record_type* type = sel.spec().field_type_ptr();
-            Dynamic_area rec ( type->field_size() );
-    
-            while( !sel.eof() )
-            {
-                sel.get( &rec );
-    
-                xml::Element_ptr history_entry = doc->createElement( "history.entry" );
-        
-                for( int i = 0; i < type->field_count(); i++ )
+                if( _use_file )
                 {
-                    string value = type->as_string( i, rec.byte_ptr() );
-                    if( value != "" )  history_entry->setAttribute( as_dom_string( type->field_descr_ptr(i)->name() ), as_dom_string(value) );
+                    sel.open( "-in -seq tab -field-names | tail -head=1 -reverse -" + as_string(n) + " | " + _filename );
+                  //sel.open( "-in -seq -type=(" + _type_string + ") tab -field-names | tail -head=1 -reverse -" + as_string(n) + " | " + _filename );
                 }
-
-                int id = type->field_descr_ptr("id")->as_int( rec.byte_ptr() );
-
+                else
                 if( _use_db )
                 {
-                    string param_xml = file_as_string( _spooler->_db._db_name + "-table=" + _spooler->_history_tablename + " -blob=parameters where id=" + as_string(id) );
+                    sel.open( "-in head -" + as_string(n) + " | " + _spooler->_db._db_name + 
+                              "select id, spooler_id, job_name, start, end, cause, steps, error, error_code, error_text " +
+                              join( "", vector_map( prepend_comma, _extra_names ) ) +
+                              " from " + _spooler->_history_tablename + " where job_name=" + sql_quoted(_job->name()) + " order by id desc" );
+                }
+                else
+                    throw_xc( "SPOOLER-136" );
+
+                history_element = doc->createElement( "history" );
+                dom_append_nl( history_element );
+
+                const Record_type* type = sel.spec().field_type_ptr();
+                Dynamic_area rec ( type->field_size() );
+    
+                while( !sel.eof() )
+                {
+                    string           param_xml;
+                    xml::Element_ptr history_entry = doc->createElement( "history.entry" );
+
+                    sel.get( &rec );
+        
+                    for( int i = 0; i < type->field_count(); i++ )
+                    {
+                        string value = type->as_string( i, rec.byte_ptr() );
+                        if( value != "" )
+                        {
+                            string name = type->field_descr_ptr(i)->name();
+                            if( name == "parameters" )  param_xml = value;
+                                                  else  history_entry->setAttribute( as_dom_string( name ), as_dom_string(value) );
+                        }
+                    }
+
+                    int id = type->field_descr_ptr("id")->as_int( rec.byte_ptr() );
+
+                    if( _use_db ) 
+                        param_xml = file_as_string( _spooler->_db._db_name + "-table=" + _spooler->_history_tablename + " -blob=parameters where id=" + as_string(id) );
+
                     if( !param_xml.empty() )
                     {
-                        dom_append_nl( history_element );
                         try {
+                            dom_append_nl( history_element );
                             xml::Document_ptr par_doc = xml::Document_ptr( __uuidof(xml::DOMDocument30), NULL );
                             par_doc->loadXML( as_dom_string( param_xml ) );
                             history_entry->appendChild( par_doc->documentElement );
@@ -693,15 +703,16 @@ xml::Element_ptr Job_history::read_tail( xml::Document_ptr doc, int n, bool with
                         string log = file_as_string( _spooler->_db._db_name + "-table=" + _spooler->_history_tablename + " -blob=log where id=" + as_string(id) );
                         if( !log.empty() ) dom_append_text_element( history_entry, "log", log );
                     }
+
+                    history_element->appendChild( history_entry );
+                    dom_append_nl( history_element );
                 }
 
-                history_element->appendChild( history_entry );
-                dom_append_nl( history_element );
+                sel.close();
             }
-
-            sel.close();
+            ta.commit();
         }
-        ta.commit();
+        catch( const _com_error& x ) { throw_com_error( x, "Job_history::read_tail" ); }
     }
 
     return history_element;

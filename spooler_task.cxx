@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.80 2002/04/07 19:52:59 jz Exp $
+// $Id: spooler_task.cxx,v 1.81 2002/04/08 20:58:25 jz Exp $
 /*
     Hier sind implementiert
 
@@ -989,7 +989,7 @@ ENDE:
     return something_done;
 }
 
-//---------------------------------------------------------------------------Job::set_mail_defaults
+//--------------------------------------------------------------------------Job::send_collected_log
 
 void Job::send_collected_log()
 {
@@ -1012,8 +1012,9 @@ void Job::set_mail_defaults()
 
     char hostname[200];
     if( gethostname( hostname, sizeof hostname ) == SOCKET_ERROR )  hostname[0] = '\0';
-    string body = Sos_optional_date_time::now().as_string() + "\n\nJob " + _name + "  " + _title + "\n"
-                  "Spooler -id=" + _spooler->id() + "  host=" + hostname + "\n\n";
+    string body = Sos_optional_date_time::now().as_string() + "\n\nJob " + _name + "  " + _title + "\n";
+    if( _task )  body += "Task-Id " + _task->id() + '\n';
+    body += "Spooler -id=" + _spooler->id() + "  host=" + hostname + "\n\n";
 
     if( !is_error )
     {

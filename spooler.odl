@@ -1,4 +1,4 @@
-// $Id: spooler.odl,v 1.32 2002/04/07 11:47:22 jz Exp $
+// $Id: spooler.odl,v 1.33 2002/04/08 20:58:24 jz Exp $
 
 // Anweisung: midl /nologo /error all /out $(OutDir) $(InputPath)
 
@@ -196,7 +196,7 @@ library spooler
         HRESULT                 history_field               ( [in] BSTR name, [in] VARIANT* value );
 
         [propget]
-        HRESULT                 id                          ( [out] int* result );
+        HRESULT                 id                          ( [out,retval] int* result );
     }
 
     [
@@ -276,6 +276,9 @@ library spooler
         HRESULT                 log_dir                 ( [out,retval] BSTR* directory );
 
         HRESULT                 let_run_terminate_and_restart();
+
+        [propget]
+        HRESULT                 variables               ( [out,retval] Ivariable_set** );
     }
 
     [

@@ -1,4 +1,4 @@
-// $Id: spooler_com.cxx,v 1.38 2002/04/07 11:47:22 jz Exp $
+// $Id: spooler_com.cxx,v 1.39 2002/04/08 20:58:24 jz Exp $
 /*
     Hier sind implementiert
 
@@ -1287,6 +1287,21 @@ STDMETHODIMP Com_spooler::let_run_terminate_and_restart()
         if( !_spooler )  return E_POINTER;
 
         _spooler->cmd_let_run_terminate_and_restart();
+    }
+
+    return NOERROR;
+}
+
+//-----------------------------------------------------------------------Com_spooler::get_variables
+
+STDMETHODIMP Com_spooler::get_variables( Ivariable_set** result )
+{
+    THREAD_LOCK( _lock )
+    {
+        if( !_spooler )  return E_POINTER;
+
+        *result = _spooler->_variables;
+        if( *result )  result->AddRef();
     }
 
     return NOERROR;
