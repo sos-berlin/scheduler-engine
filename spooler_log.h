@@ -1,4 +1,4 @@
-// $Id: spooler_log.h,v 1.18 2002/04/11 05:46:48 jz Exp $
+// $Id: spooler_log.h,v 1.19 2002/04/11 13:30:59 jz Exp $
 
 #ifndef __SPOOLER_LOG_H
 #define __SPOOLER_LOG_H
@@ -87,7 +87,7 @@ struct Prefix_log
 
     void                    set_job                         ( Job* job )                        { _job = job; }
     void                    set_prefix                      ( const string& prefix )            { _prefix = prefix; }
-    void                    set_profile_section             ( const string& section )           { _section = section; }
+    void                    set_profile_section             ( const string& );
 
     void                        operator()                  ( const string& line )              { info( line ); }
     void                        debug9                      ( const string& line )              { log( log_debug9, line ); }
@@ -159,8 +159,8 @@ struct Prefix_log
     Time                       _first_send;                 // Beginn dieser Frist
 
     string                     _smtp_server;                // Aus factory.ini [Job ...]
-    bool                       _smtp_server_read;
     string                     _queue_dir;
+    string                     _to, _cc, _bcc, _from;
     string                     _from_name;
     string                     _subject;
     string                     _body;

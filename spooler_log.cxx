@@ -1,4 +1,4 @@
-// $Id: spooler_log.cxx,v 1.41 2002/04/11 05:46:48 jz Exp $
+// $Id: spooler_log.cxx,v 1.42 2002/04/11 13:30:59 jz Exp $
 
 #include "../kram/sos.h"
 #include "spooler.h"
@@ -236,11 +236,50 @@ Prefix_log::~Prefix_log()
 
 void Prefix_log::init( Spooler* spooler, const string& prefix )
 {
-    _spooler= spooler;
+    _spooler = spooler;
     _log = &spooler->_log;
     _prefix = prefix;
 
     _log_level = _spooler->_log_level;
+}
+
+//------------------------------------------------------------------Prefix_log::set_profile_section
+
+void Prefix_log::set_profile_section( const string& section )
+{ 
+    _section = section; 
+
+    _mail_on_error   = _spooler->_mail_on_error;
+    _mail_on_process = _spooler->_mail_on_process;
+    _mail_on_success = _spooler->_mail_on_success;
+    _subject         = _spooler->_log_mail_subject;
+    _collect_within  = _spooler->_log_collect_within;
+    _collect_max     = _spooler->_log_collect_max;
+
+    if( !_section.empty() ) 
+    {
+        _log_level       = make_log_level( read_profile_string( _spooler->_factory_ini, _section, "log_level", as_string(_log_level) ) );
+        _mail_on_error   =         read_profile_bool  ( _spooler->_factory_ini, _section, "mail_on_error"     , _mail_on_error );
+        _mail_on_success =         read_profile_bool  ( _spooler->_factory_ini, _section, "mail_on_success"   , _mail_on_success );
+        _subject         =         read_profile_string( _spooler->_factory_ini, _section, "log_mail_subject"  , _subject );
+        _collect_within  = (double)read_profile_uint  ( _spooler->_factory_ini, _section, "log_collect_within", _collect_within );
+        _collect_max     = (double)read_profile_uint  ( _spooler->_factory_ini, _section, "log_collect_max"   , _collect_max );
+
+        _smtp_server = read_profile_string( _spooler->_factory_ini, _section, "smtp"          , _spooler->_smtp_server );
+        _queue_dir   = read_profile_string( _spooler->_factory_ini, _section, "mail_queue_dir", _spooler->_mail_queue_dir );
+
+        _from    = read_profile_string( _spooler->_factory_ini, _section, "log_mail_from"   , _spooler->_log_mail_from );
+        _to      = read_profile_string( _spooler->_factory_ini, _section, "log_mail_to"     );
+        _cc      = read_profile_string( _spooler->_factory_ini, _section, "log_mail_cc"     );
+        _bcc     = read_profile_string( _spooler->_factory_ini, _section, "log_mail_bcc"    );
+
+        if( _to.empty() && _cc.empty() && _bcc.empty() )
+        {       
+            _to  = _spooler->_log_mail_to;
+            _cc  = _spooler->_log_mail_cc;
+            _bcc = _spooler->_log_mail_bcc;
+        }
+    }
 }
 
 //-------------------------------------------------------------------------Prefix_log::set_filename
@@ -270,24 +309,6 @@ void Prefix_log::open()
 
     if( !_filename.empty() )
     {
-        _mail_on_error   = _spooler->_mail_on_error;
-        _mail_on_process = _spooler->_mail_on_process;
-        _mail_on_success = _spooler->_mail_on_success;
-        _subject         = _spooler->_log_mail_subject;
-        _collect_within  = _spooler->_log_collect_within;
-        _collect_max     = _spooler->_log_collect_max;
-
-        if( !_section.empty() ) 
-        {
-            _log_level       = make_log_level( read_profile_string( _spooler->_factory_ini, _section, "log_level", as_string(_log_level) ) );
-            _mail_on_error   = read_profile_bool  ( _spooler->_factory_ini, _section, "mail_on_error"     , _mail_on_error );
-            _mail_on_success = read_profile_bool  ( _spooler->_factory_ini, _section, "mail_on_success"   , _mail_on_success );
-            _subject         = read_profile_string( _spooler->_factory_ini, _section, "log_mail_subject"  , _subject );
-            _collect_within  = (double)read_profile_uint  ( _spooler->_factory_ini, _section, "log_collect_within", _collect_within );
-            _collect_max     = (double)read_profile_uint  ( _spooler->_factory_ini, _section, "log_collect_max"   , _collect_max );
-        }
-
-
         LOG( "\nopen " << _filename << '\n' );
         _file = ::open( _filename.c_str(), O_CREAT | ( _append? O_APPEND : O_TRUNC ) | O_WRONLY, 0666 );
         if( _file == -1 )  throw_errno( errno, _filename.c_str(), "Protokolldatei" );
@@ -374,14 +395,6 @@ spooler_com::Imail* Prefix_log::mail()
 
         _mail = mail;   // Nur bei fehlerfreiem init() speichern
 
-        if( !_smtp_server_read ) {
-            if( !_section.empty() ) {
-                _smtp_server = read_profile_string( _spooler->_factory_ini, _section, "smtp"          , _spooler->_smtp_server );
-                _queue_dir   = read_profile_string( _spooler->_factory_ini, _section, "mail_queue_dir", _spooler->_mail_queue_dir );
-            }
-            _smtp_server_read = true;
-        }
-
         if( _smtp_server != "-" )
         {
             CComBSTR smtp_bstr;
@@ -418,34 +431,18 @@ spooler_com::Imail* Prefix_log::mail()
 void Prefix_log::set_mail_header()
 {
     HRESULT hr = NOERROR;
-    string  from, to, cc, bcc;
-
-    if( !_section.empty() )
-    {
-        from    = read_profile_string( _spooler->_factory_ini, _section, "log_mail_from"   , _spooler->_log_mail_from );
-        to      = read_profile_string( _spooler->_factory_ini, _section, "log_mail_to"     );
-        cc      = read_profile_string( _spooler->_factory_ini, _section, "log_mail_cc"     , _spooler->_log_mail_cc );
-        bcc     = read_profile_string( _spooler->_factory_ini, _section, "log_mail_bcc"    , _spooler->_log_mail_bcc );
-    }
-
-    if( to.empty() && cc.empty() && bcc.empty() )
-    {       
-        to  = _spooler->_log_mail_to;
-        cc  = _spooler->_log_mail_cc;
-        bcc = _spooler->_log_mail_bcc;
-    }
 
     CComBSTR from_bstr, to_bstr, cc_bstr, bcc_bstr;
-    from_bstr.Attach( SysAllocString_string(from) );
-    to_bstr  .Attach( SysAllocString_string(to  ) );
-    cc_bstr  .Attach( SysAllocString_string(cc  ) );
-    bcc_bstr .Attach( SysAllocString_string(bcc ) );
+    from_bstr.Attach( SysAllocString_string(_from) );
+    to_bstr  .Attach( SysAllocString_string(_to  ) );
+    cc_bstr  .Attach( SysAllocString_string(_cc  ) );
+    bcc_bstr .Attach( SysAllocString_string(_bcc ) );
 
 
-    if( from != "-" )  hr = _mail->put_from( from_bstr );    if( FAILED(hr) ) throw_ole( hr, "spooler::Mail::from", from.c_str() );
-                       hr = _mail->put_to  ( to_bstr   );    if( FAILED(hr) ) throw_ole( hr, "spooler::Mail::to"  , to.c_str() );
-    if( cc   != "-" )  hr = _mail->put_cc  ( cc_bstr   );    if( FAILED(hr) ) throw_ole( hr, "spooler::Mail::cc"  , cc.c_str() );
-    if( bcc  != "-" )  hr = _mail->put_bcc ( bcc_bstr  );    if( FAILED(hr) ) throw_ole( hr, "spooler::Mail::bcc" , bcc.c_str() );
+    if( _from != "-" )  hr = _mail->put_from( from_bstr );    if( FAILED(hr) ) throw_ole( hr, "spooler::Mail::from", _from.c_str() );
+                        hr = _mail->put_to  ( to_bstr   );    if( FAILED(hr) ) throw_ole( hr, "spooler::Mail::to"  , _to.c_str() );
+    if( _cc   != "-" )  hr = _mail->put_cc  ( cc_bstr   );    if( FAILED(hr) ) throw_ole( hr, "spooler::Mail::cc"  , _cc.c_str() );
+    if( _bcc  != "-" )  hr = _mail->put_bcc ( bcc_bstr  );    if( FAILED(hr) ) throw_ole( hr, "spooler::Mail::bcc" , _bcc.c_str() );
 }
 
 //-------------------------------------------------------------------Prefix_log::set_mail_from_name

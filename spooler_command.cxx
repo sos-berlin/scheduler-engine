@@ -1,4 +1,4 @@
-// $Id: spooler_command.cxx,v 1.49 2002/04/10 20:34:14 jz Exp $
+// $Id: spooler_command.cxx,v 1.50 2002/04/11 13:35:03 jz Exp $
 /*
     Hier ist implementiert
 
@@ -431,7 +431,7 @@ void Command_processor::execute_2( const string& xml_text )
             }
         }
     }
-    catch( const _com_error& com_error ) { throw_com_error(com_error);  }
+    catch( const _com_error& com_error ) { throw_com_error( com_error, "DOM/XML" ); }
 }
 
 //-------------------------------------------------------------------------------------------------
