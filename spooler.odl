@@ -1,4 +1,4 @@
-// $Id: spooler.odl,v 1.33 2002/04/08 20:58:24 jz Exp $
+// $Id: spooler.odl,v 1.34 2002/04/09 08:55:44 jz Exp $
 
 // Anweisung: midl /nologo /error all /out $(OutDir) $(InputPath)
 
@@ -279,6 +279,12 @@ library spooler
 
         [propget]
         HRESULT                 variables               ( [out,retval] Ivariable_set** );
+
+        [id(0),propput]
+        HRESULT                 var                     ( [in] BSTR name, [in] VARIANT* value );
+
+        [id(0),propget]
+        HRESULT                 var                     ( [in] BSTR name, [out,retval] VARIANT* value );
     }
 
     [
@@ -449,7 +455,7 @@ library spooler
         [propget]
         HRESULT                 body                    ( [out,retval] BSTR* body );
 
-        HRESULT                 add_file                ( [in] BSTR filename, [in,defaultvalue("")] BSTR content_type, [in,defaultvalue("")] BSTR encoding );
+        HRESULT                 add_file                ( [in] BSTR real_filename, [in,defaultvalue("")] BSTR mail_filename, [in,defaultvalue("")] BSTR content_type, [in,defaultvalue("")] BSTR encoding );
 
         [propput]
         HRESULT                 smtp                    ( [in] BSTR hostname );

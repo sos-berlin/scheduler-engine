@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.90 2002/04/08 20:58:23 jz Exp $
+// $Id: spooler.cxx,v 1.91 2002/04/09 08:55:43 jz Exp $
 /*
     Hier sind implementiert
 
@@ -41,7 +41,8 @@ const string new_suffix          = "~new";  // Suffix für den neuen Spooler, der
 const double renew_wait_interval = 0.1;
 const double renew_wait_time     = 30;      // Wartezeit für Brückenspooler, bis der alte Spooler beendet ist und der neue gestartet werden kann.
 const double wait_for_thread_termination                 = latter_day;  // Haltbarkeit des Geduldfadens
-const double wait_step_for_thread_termination            = 5.0;         // Nörgelabstand
+const double wait_step_for_thread_termination            = 5.0;         // 1. Nörgelabstand
+const double wait_step_for_thread_termination2           = 600.0;       // 2. Nörgelabstand
 //const double wait_for_thread_termination_after_interrupt = 1.0;
 
 
@@ -100,12 +101,16 @@ static string thread_info_text( HANDLE h )
 
 int read_profile_on_process( const string& profile, const string& section, const string& entry, int deflt )
 {
+    int result;
+
     try {
-        return read_profile_int( profile, section, entry, deflt );
+        result = read_profile_int( profile, section, entry, deflt );
     }
     catch( const Xc& ) {
-        return read_profile_bool( profile, section, entry, deflt > 0 )? 1 : INT_MAX;
+        result = read_profile_bool( profile, section, entry, deflt > 0 );
     }
+
+    return result > 0? result : INT_MAX;
 }
 
 //-----------------------------------------------------------------------------read_profile_archive
@@ -141,6 +146,10 @@ Spooler::Spooler()
     _log_mail_bcc  ("-"),
     _mail_queue_dir("-")
 {
+    char hostname[200];
+    if( gethostname( hostname, sizeof hostname ) == SOCKET_ERROR )  hostname[0] = '\0';
+    _hostname = hostname;
+
     _com_log     = new Com_log( &_prefix_log );
     _com_spooler = new Com_spooler( this );
     _variables   = new Com_variable_set();
@@ -215,9 +224,10 @@ void Spooler::wait_until_threads_stopped( Time until )
                    else THREAD_LOCK( _lock )  it = _thread_list.erase( it );
     }
 
+    int c = 0;
     while( _thread_list.size() > 0 )
     {
-        Time until_step = Time::now() + wait_step_for_thread_termination;
+        Time until_step = Time::now() + (++c < 10? wait_step_for_thread_termination : wait_step_for_thread_termination2 );
         if( until_step > until )  until_step = until;
 
         int index = wait_handles.wait_until( until_step );
@@ -949,7 +959,7 @@ int sos_main( int argc, char** argv )
         }
     }
 
-    if( !log_filename.empty() )  log_filename = read_profile_string( factory_ini, "spooler", "log" );
+    if( log_filename.empty() )  log_filename = read_profile_string( factory_ini, "spooler", "log" );
     if( !log_filename.empty() )  log_start( log_filename );
 
     if( !renew_spooler.empty() )  

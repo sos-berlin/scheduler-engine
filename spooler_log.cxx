@@ -1,4 +1,4 @@
-// $Id: spooler_log.cxx,v 1.38 2002/04/07 19:52:58 jz Exp $
+// $Id: spooler_log.cxx,v 1.39 2002/04/09 08:55:44 jz Exp $
 
 #include "../kram/sos.h"
 #include "spooler.h"
@@ -552,7 +552,7 @@ void Prefix_log::send( int reason )
             if( _last_send  == 0  ||  _last_send  > now )  _last_send  = now;
             if( _first_send == 0  ||  _first_send > now )  _first_send = now;
 
-            if( reason < 0                              // Fehler?
+            if( reason == -1  &&  _mail_on_error        // Fehler?
              || now >= _last_send + _collect_within     // Nicht mehr sammeln?
              || now >= _first_send + _collect_max )     // Lange genug gesammelt?
             {
@@ -578,7 +578,7 @@ void Prefix_log::send_really()
     HRESULT hr;
     int ok;
 
-    mail()->add_file( CComBSTR(_filename.c_str()), CComBSTR("plain/text"), CComBSTR(_spooler->_mail_encoding.c_str()) );
+    mail()->add_file( CComBSTR(_filename.c_str()), NULL, CComBSTR("plain/text"), CComBSTR(_spooler->_mail_encoding.c_str()) );
 
     ok = mail()->send();
 

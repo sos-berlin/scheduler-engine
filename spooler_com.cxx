@@ -1,4 +1,4 @@
-// $Id: spooler_com.cxx,v 1.39 2002/04/08 20:58:24 jz Exp $
+// $Id: spooler_com.cxx,v 1.40 2002/04/09 08:55:44 jz Exp $
 /*
     Hier sind implementiert
 
@@ -1301,10 +1301,34 @@ STDMETHODIMP Com_spooler::get_variables( Ivariable_set** result )
         if( !_spooler )  return E_POINTER;
 
         *result = _spooler->_variables;
-        if( *result )  result->AddRef();
+        if( *result )  (*result)->AddRef();
     }
 
     return NOERROR;
+}
+
+//-----------------------------------------------------------------------------Com_spooler::put_var
+
+STDMETHODIMP Com_spooler::put_var( BSTR name, VARIANT* value )
+{
+    HRESULT hr;
+    CComPtr<Ivariable_set> variables;
+
+    hr = get_variables( &variables );  if( FAILED(hr) )  return hr;
+
+    return variables->put_var( name, value );
+}
+
+//-----------------------------------------------------------------------------Com_spooler::get_var
+
+STDMETHODIMP Com_spooler::get_var( BSTR name, VARIANT* value )
+{
+    HRESULT hr;
+    CComPtr<Ivariable_set> variables;
+
+    hr = get_variables( &variables );  if( FAILED(hr) )  return hr;
+
+    return variables->get_var( name, value );
 }
 
 //-------------------------------------------------------------------------------------------------

@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.81 2002/04/08 20:58:25 jz Exp $
+// $Id: spooler_task.cxx,v 1.82 2002/04/09 08:55:45 jz Exp $
 /*
     Hier sind implementiert
 
@@ -403,19 +403,24 @@ bool Job::is_in_period( Time now )
 
 void Job::set_next_time( Time now )
 {
-    _next_time = _next_start_time;
+    _next_time = latter_day;
 
     // Minimum von _start_at für _next_time berücksichtigen
     Task_queue::iterator it = _task_queue.begin();  
     while( it != _task_queue.end()  &&  !(*it)->_start_at )  it++;
     if( it != _task_queue.end()  &&  _next_time > (*it)->_start_at )  _next_time = (*it)->_start_at;
 
-    if( _next_time == latter_day )  // Das ist, wenn die Periode weder repeat noch single_start hat, also keinen automatischen Start
+    if( _spooler->state() != Spooler::s_stopping_let_run )
     {
-        _next_time = _period.end();
+        _next_time = min( _next_time, _next_start_time );
+
+        if( _next_time == latter_day )  // Das ist, wenn die Periode weder repeat noch single_start hat, also keinen automatischen Start
+        {
+            _next_time = _period.end();
+        }
     }
 
-    // Gesammelte eMail senden`, wenn collected_max erreicht:
+    // Gesammelte eMail senden, wenn collected_max erreicht:
     Time log_time = _log.collect_end();
     if( log_time > now  &&  _next_time > log_time )  _next_time = log_time;
 }
@@ -1010,11 +1015,9 @@ void Job::set_mail_defaults()
 
     _log.set_mail_from_name( profile_section() );
 
-    char hostname[200];
-    if( gethostname( hostname, sizeof hostname ) == SOCKET_ERROR )  hostname[0] = '\0';
     string body = Sos_optional_date_time::now().as_string() + "\n\nJob " + _name + "  " + _title + "\n";
-    if( _task )  body += "Task-Id " + _task->id() + '\n';
-    body += "Spooler -id=" + _spooler->id() + "  host=" + hostname + "\n\n";
+    if( _task )  body += "Task-Id " + as_string(_task->id()) + ", " + as_string(_last_task_step_count) + " Schritte\n";
+    body += "Spooler -id=" + _spooler->id() + "  host=" + _spooler->_hostname + "\n\n";
 
     if( !is_error )
     {
@@ -1322,6 +1325,7 @@ xml::Element_ptr Job::xml( xml::Document_ptr document, bool show_all )
             FOR_EACH( Task_queue, _task_queue, it )
             {
                 xml::Element_ptr queued_task_element = document->createElement( "queued_task" );
+                queued_task_element->setAttribute( "id"      , as_dom_string( as_string( (*it)->id() ) ) );
                 queued_task_element->setAttribute( "enqueued", as_dom_string( (*it)->_enqueue_time.as_string() ) );
                 queued_task_element->setAttribute( "name"    , as_dom_string( (*it)->_name ) );
                 if( (*it)->_start_at )
@@ -1571,7 +1575,7 @@ bool Task::step()
 
         //_job->_process_ok |= result;
 
-        if( _step_count == 0  ||  has_step_count() )        // Bei Process_task nur einen Schritt zählen
+        if( has_step_count()  ||  _step_count == 0 )        // Bei Process_task nur einen Schritt zählen
         {
             _job->_thread->_step_count++;
             _job->_step_count++;

@@ -1,4 +1,4 @@
-// $Id: spooler_command.cxx,v 1.47 2002/04/07 19:52:58 jz Exp $
+// $Id: spooler_command.cxx,v 1.48 2002/04/09 08:55:44 jz Exp $
 /*
     Hier ist implementiert
 
@@ -301,7 +301,7 @@ xml::Element_ptr Command_processor::execute_command( const xml::Element_ptr& ele
     else
     if( element->tagName == "start_job"         )  return execute_start_job( element );
     else
-    if( element->tagName == "kill"              )  return execute_kill_task( element );
+    if( element->tagName == "kill_task"         )  return execute_kill_task( element );
     else
     if( element->tagName == "signal_object"     )  return execute_signal_object( element );
     else

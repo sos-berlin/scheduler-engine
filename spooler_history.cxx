@@ -1,4 +1,4 @@
-// $Id: spooler_history.cxx,v 1.10 2002/04/08 20:58:25 jz Exp $
+// $Id: spooler_history.cxx,v 1.11 2002/04/09 08:55:44 jz Exp $
 
 #include "../kram/sos.h"
 #include "spooler.h"
@@ -51,6 +51,13 @@ inline string sql_quoted( const string& value )
     return quoted_string( value, '\'', '\'' ); 
 }
 
+//------------------------------------------------------------------------------------prepend_comma
+
+static string prepend_comma( const string& s )  
+{ 
+    return ", " + s; 
+}
+
 //------------------------------------------------------------------------Transaction::~Transaction
 
 Transaction::~Transaction()
@@ -100,7 +107,11 @@ void Spooler_db::open( const string& db_name )
 
     if( _db_name != "" )
     {
-        if( _db_name.find(' ') == string::npos )  _db_name = "odbc -create " + make_absolute_filename( _spooler->log_directory(), _db_name );
+        if( _db_name.find(' ') == string::npos )
+        {
+            if( !is_absolute_filename( _db_name  )  &&  (_spooler->log_directory() + " ")[0] == '*' )  return;
+            _db_name = "odbc -create " + make_absolute_filename( _spooler->log_directory(), _db_name );
+        }
 
         try
         {
@@ -116,6 +127,10 @@ void Spooler_db::open( const string& db_name )
                                       "\"name\" char(100) not null primary key,"
                                       "\"wert\" char(250)"            );
 
+
+            vector<string> create_extra = vector_split( " *, *", _spooler->_history_columns );
+            for( int i = 0; i < create_extra.size(); i++ )  create_extra[i] = "," + create_extra[i] + " text(250)";
+
             create_table_when_needed( _spooler->_history_tablename, 
                                       "\"id\"          integer not null primary key,"
                                       "\"spooler_id\"  char(100),"
@@ -128,7 +143,8 @@ void Spooler_db::open( const string& db_name )
                                       "\"error_code\"  char(50),"
                                       "\"error_text\"  char(250),"
                                       "\"parameters\"  longtext,"
-                                      "\"log\"         longtext" );
+                                      "\"log\"         longtext" 
+                                    + join( "", create_extra )   );
 
             stmt = "UPDATE " + _spooler->_variables_tablename + " set \"wert\" = \"wert\"+1 where \"name\"='spooler_job_id'";
             _job_id_update.prepare( _db_name + stmt );
@@ -510,7 +526,8 @@ void Job_history::write( bool start )
         }
         ta.commit();
     }
-    else
+
+    if( _use_file )
     {
         _tabbed_record = "";
         append_tabbed( _job->_task->_id );
@@ -621,9 +638,6 @@ void Job_history::set_extra_field( const string& name, const CComVariant& value 
 
 //---------------------------------------------------------------------------Job_history::read_tail
 
-static string prepend_comma( const string& s )  { return ", " + s; }
-
-
 xml::Element_ptr Job_history::read_tail( xml::Document_ptr doc, int n, bool with_log )
 {
     xml::Element_ptr history_element;
@@ -631,7 +645,7 @@ xml::Element_ptr Job_history::read_tail( xml::Document_ptr doc, int n, bool with
     if( !_error )  
     {
         const int max_n = 1000;
-        if( n > max_n )  n = max_n,  _spooler->_log.warn( "Nicht mehr als " + as_string(max_n) + " Historiensätze werden gelesen" );
+        if( n > max_n )  n = max_n,  _spooler->_log.warn( "Max. " + as_string(max_n) + " Historiensätze werden gelesen" );
     
         with_log &= _use_db;
 
