@@ -1,4 +1,4 @@
-// $Id: spooler_history.cxx,v 1.1 2002/04/05 13:21:47 jz Exp $
+// $Id: spooler_history.cxx,v 1.2 2002/04/05 16:47:34 jz Exp $
 
 #include "../kram/sos.h"
 #include "spooler.h"
@@ -44,7 +44,7 @@ inline string sql_quoted( const string& value )
 
 Transaction::~Transaction()
 { 
-    if( !_ok )  
+    if( _db )  
     {
         try 
         { 
@@ -59,8 +59,8 @@ Transaction::~Transaction()
 void Transaction::commit()
 { 
     _db->commit();   
+    _db = NULL;
     _guard.leave(); 
-    _ok = true; 
 }
 
 //----------------------------------------------------------------------------Transaction::rollback
@@ -68,8 +68,8 @@ void Transaction::commit()
 void Transaction::rollback()
 { 
     _db->rollback(); 
+    _db = NULL; 
     _guard.leave(); 
-    _ok = true; 
 }
 
 //---------------------------------------------------------------------------Spooler_db::Spooler_db
@@ -122,14 +122,11 @@ void Spooler_db::open( const string& db_name )
 
             stmt = "SELECT \"wert\" from " + _spooler->_variables_tablename + " where \"name\"='spooler_job_id'";
             _job_id_select.prepare( "-in " + _db_name + stmt );
-            _job_id_select.execute();
-            if( _job_id_select.eof() )
-            {
-                execute( "INSERT into " + _spooler->_variables_tablename + " (name,wert) values ('spooler_job_id','0')" );
-                commit();
-            }
-            _job_id_select.close( close_cursor );
 
+            _job_id_select.execute();
+            if( _job_id_select.eof() )  execute( "INSERT into " + _spooler->_variables_tablename + " (name,wert) values ('spooler_job_id','0')" );
+            _job_id_select.close( close_cursor );
+            commit();
 
             //stmt = "UPDATE " + _spooler->_history_tablename + " set \"end\"=?, steps=?, \"error\"=?, error_code=?, error_text=?  where \"id\"=?";
             //_history_update.prepare( _db_name + stmt );       //            1        2            3             4             5               6
@@ -170,6 +167,8 @@ void Spooler_db::open_history_table()
 
 void Spooler_db::create_table_when_needed( const string& tablename, const string& fields )
 {
+    Transaction ta = this;
+
     try
     {
         Any_file select;
@@ -181,8 +180,9 @@ void Spooler_db::create_table_when_needed( const string& tablename, const string
     catch( const exception& )
     {
         _db.put( "CREATE TABLE " + tablename + " (" + fields + ") " );
-        _db.put( "COMMIT" );  // Für Jet
     }
+
+    ta.commit();        // Für select und für create table (jedenfalls bei Jet)
 }
 
 //-------------------------------------------------------------------------------Spooler_db::get_id
@@ -190,24 +190,46 @@ void Spooler_db::create_table_when_needed( const string& tablename, const string
 
 int Spooler_db::get_id()
 {
+    int id;
+
+    rollback();
+
     Transaction ta = this;
     {
         if( _db.opened() )
         {
-            _job_id_update.execute();
+            //_job_id_update.execute();    // id++
 
-            _job_id_select.execute();
+            //_job_id_select.execute();
+            //id = _job_id_select.get_record().as_int(0);
+            //_job_id_select.close( close_cursor );
 
-            Record record = _job_id_select.get_record();
-            _job_id_select.close( close_cursor );
+            execute( "UPDATE " + _spooler->_variables_tablename + " set \"wert\" = \"wert\"+1 where \"name\"='spooler_job_id'" );
 
-            ta.commit();
-            return record.as_int(0);
+            Any_file sel;
+            sel.open( "-in " + _db_name + "SELECT \"wert\" from " + _spooler->_variables_tablename + " where \"name\"='spooler_job_id'" );
+            id = sel.get_record().as_int(0);
+
+            LOG( "Spooler_db::get_id() = " << id << '\n' );
         }
         else
         {
-            return ++_next_free_job_id;
+            id = ++_next_free_job_id;
         }
+    }
+    ta.commit();
+
+    return id;
+}
+
+//------------------------------------------------------------------------------Spooler_db::execute
+
+void Spooler_db::execute( const string& stmt )
+{ 
+    THREAD_LOCK( _lock )
+    {
+        LOG( "Spooler_db::execute  " << stmt << '\n' );
+        _db.put( stmt ); 
     }
 }
 
@@ -215,15 +237,21 @@ int Spooler_db::get_id()
 
 void Spooler_db::commit()
 {
-    if( _db.opened() )  _db.put( "COMMIT" );
+    THREAD_LOCK( _lock )
+    {
+        if( _db.opened() )  execute( "COMMIT" );
+    }
 }
 
 //-----------------------------------------------------------------------------Spooler_db::rollback
 
 void Spooler_db::rollback()
 {
-    if( _db.opened() )  _db.put( "ROLLBACK" );
-}
+    THREAD_LOCK( _lock )
+    {
+        if( _db.opened() )  execute( "ROLLBACK" );
+    }
+}   
 
 //-------------------------------------------------------------------------Job_history::Job_history
 
@@ -252,6 +280,7 @@ void Job_history::open()
 {
     try
     {
+        Transaction    ta = &_spooler->_db;
         Archive_switch archive;
 
         string section = _job->profile_section();
@@ -305,8 +334,8 @@ void Job_history::open()
             _use_file = true;
         }
 
-
         //record.type()->field_descr_ptr("error_text")->type_ptr()->field_size()
+        ta.commit();
     }
     catch( const exception& x )  
     { 

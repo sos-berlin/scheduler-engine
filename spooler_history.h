@@ -1,4 +1,4 @@
-// $Id: spooler_history.h,v 1.1 2002/04/05 13:21:47 jz Exp $
+// $Id: spooler_history.h,v 1.2 2002/04/05 16:47:34 jz Exp $
 
 #ifndef __SPOOLER_HISTORY_H
 #define __SPOOLER_HISTORY_H
@@ -19,7 +19,7 @@ struct Spooler_db
     void                        open_history_table      ();
     bool                        opened                  ()                                          { return _db.opened(); }
     int                         get_id                  ();
-    void                        execute                 ( const string& stmt )                      { _db.put( stmt ); }
+    void                        execute                 ( const string& stmt );
     void                        commit                  ();
     void                        rollback                ();
     void                        create_table_when_needed( const string& tablename, const string& fields );
@@ -48,15 +48,14 @@ struct Spooler_db
 
 struct Transaction
 {
-                                Transaction             ( Spooler_db* db ) : _db(db), _guard(&db->_lock), _ok(false)  {}
+                                Transaction             ( Spooler_db* db )                          : _db(db), _guard(&db->_lock) {}
                                ~Transaction             ();
 
     void                        commit                  ();
     void                        rollback                ();
 
-    Thread_semaphore::Guard    _guard;
     Spooler_db*                _db;
-    bool                       _ok;
+    Thread_semaphore::Guard    _guard;
 };
 
 //--------------------------------------------------------------------------------------Job_history
