@@ -1,4 +1,4 @@
-// $Id: spooler_log.h,v 1.37 2003/10/08 11:00:16 jz Exp $
+// $Id: spooler_log.h,v 1.38 2003/10/19 11:41:01 jz Exp $
 
 #ifndef __SPOOLER_LOG_H
 #define __SPOOLER_LOG_H
@@ -103,6 +103,7 @@ struct Prefix_log : Has_log
     void                        log2                        ( Log_level, const string& prefix, const string& line, Has_log* );
 
     void                        log_file                    ( const string& filename );
+    string                      last_error_line             ()                                  { return _last_error_line; }
 
     string                      as_string                   ();
 
@@ -148,6 +149,8 @@ struct Prefix_log : Has_log
     int                        _log_level;                  // Ab diesem Level protokollieren, sonst nicht
     int                        _highest_level;
     string                     _highest_msg;
+    
+    string                     _last_error_line;
 
     string                     _filename;                   // Name einer zusätzlichen Log-Datei (für die Tasks)
     string                     _new_filename;               // nach close() umbenennen

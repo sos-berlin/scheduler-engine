@@ -1,4 +1,4 @@
-// $Id: spooler_com.h,v 1.79 2003/10/16 09:44:25 jz Exp $
+// $Id: spooler_com.h,v 1.80 2003/10/19 11:41:00 jz Exp $
 
 #ifndef __SPOOLER_COM_H
 #define __SPOOLER_COM_H
@@ -242,6 +242,8 @@ struct Com_log : spooler_com::Ilog,
 
     STDMETHODIMP            put_mail_it                     ( VARIANT_BOOL );
 
+    STDMETHODIMP            get_last_error_line             ( BSTR* );
+
   private:
     Fill_zero                  _zero_;
     Thread_semaphore           _lock;
@@ -414,6 +416,7 @@ struct Com_spooler : spooler_com::Ispooler,
     STDMETHODIMP            get_is_service                  ( VARIANT_BOOL* );
     STDMETHODIMP            get_directory                   ( BSTR* );
     STDMETHODIMP                job_chain_exists            ( BSTR name, VARIANT_BOOL* );
+    STDMETHODIMP            get_hostname                    ( BSTR* );
 
   protected:
     Thread_semaphore           _lock;

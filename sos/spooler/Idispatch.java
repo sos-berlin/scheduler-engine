@@ -1,11 +1,11 @@
-// $Id: Idispatch.java,v 1.3 2002/11/14 12:34:50 jz Exp $
+// $Id: Idispatch.java,v 1.4 2003/10/19 11:41:01 jz Exp $
 
 package sos.spooler;
 
 /**
  * Interne Klasse des Spoolers.
  * @author Joacim Zschimmer, Zschimmer GmbH
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 
 public class Idispatch
@@ -79,6 +79,13 @@ public class Idispatch
         return ( (Boolean)com_call( _idispatch, name, params ) ).booleanValue();
     }
 
+
+    boolean boolean_com_call( String name, Object par1 )
+    {
+        Object[] params = new Object[1];
+        params[0] = par1;
+        return ( (Boolean)com_call( _idispatch, name, params ) ).booleanValue();
+    }
 
     int int_com_call( String name )
     {

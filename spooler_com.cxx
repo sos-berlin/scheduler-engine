@@ -1,4 +1,4 @@
-// $Id: spooler_com.cxx,v 1.117 2003/10/16 09:44:25 jz Exp $
+// $Id: spooler_com.cxx,v 1.118 2003/10/19 11:41:00 jz Exp $
 /*
     Hier sind implementiert
 
@@ -769,6 +769,7 @@ const Com_method Com_log::_methods[] =
     { DISPATCH_PROPERTYGET, 22, "collect_max"          , (Com_method_ptr)&Com_log::get_collect_max         , VT_R8         },
     { DISPATCH_PROPERTYPUT, 23, "mail_it"              , (Com_method_ptr)&Com_log::put_mail_it             , VT_EMPTY      , { VT_BOOL } },
     { DISPATCH_PROPERTYGET, 24, "java_class_name"      , (Com_method_ptr)&Com_log::get_java_class_name     , VT_BSTR },
+    { DISPATCH_PROPERTYGET, 25, "last_error_line"      , (Com_method_ptr)&Com_log::get_last_error_line     , VT_BSTR },
     {}
 };
 
@@ -1163,6 +1164,25 @@ STDMETHODIMP Com_log::put_mail_it( VARIANT_BOOL b )
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Log::mail_it" ); }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Log::mail_it" ); }
+
+    return hr;
+}
+
+//---------------------------------------------------------------------Com_log::get_last_error_line
+
+STDMETHODIMP Com_log::get_last_error_line( BSTR* result )
+{
+    HRESULT hr = NOERROR;
+
+    THREAD_LOCK( _lock )
+    try 
+    {
+        if( !_log )  return E_POINTER;
+
+        hr = string_to_bstr( _log->last_error_line(), result );
+    }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Log::last_error_line" ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Log::last_error_line" ); }
 
     return hr;
 }
@@ -2026,6 +2046,7 @@ const Com_method Com_spooler::_methods[] =
     { DISPATCH_PROPERTYGET, 18, "java_class_name"           , (Com_method_ptr)&Com_spooler::get_java_class_name , VT_BSTR      },
     { DISPATCH_PROPERTYGET, 19, "directory"                 , (Com_method_ptr)&Com_spooler::get_directory       , VT_BSTR      },
     { DISPATCH_METHOD     , 20, "job_chain_exists"          , (Com_method_ptr)&Com_spooler::job_chain_exists    , VT_BOOL       , { VT_BSTR } },
+    { DISPATCH_PROPERTYGET, 21, "hostname"                  , (Com_method_ptr)&Com_spooler::get_hostname        , VT_BSTR      },
     {}
 };
 
@@ -2302,8 +2323,27 @@ STDMETHODIMP Com_spooler::job_chain_exists( BSTR name, VARIANT_BOOL* result )
 
         *result = _spooler->job_chain_or_null( string_from_bstr(name) ) != NULL;
     }
-    catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.get_job_chain" ); }
-    catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.get_job_chain" ); }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.job_chain_exists" ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.job_chain_exists" ); }
+
+    return hr;
+}
+
+//--------------------------------------------------------------------Com_spooler::job_chain_exists
+
+STDMETHODIMP Com_spooler::get_hostname( BSTR* result )
+{
+    HRESULT hr = NOERROR;
+
+    THREAD_LOCK( _lock )
+    try
+    {
+        if( !_spooler )  return E_POINTER;
+
+        hr = string_to_bstr( _spooler->_hostname, result );
+    }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.get_hostname" ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.get_hostname" ); }
 
     return hr;
 }
