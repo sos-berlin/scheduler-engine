@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.147 2003/05/18 11:27:30 jz Exp $
+// $Id: spooler_task.cxx,v 1.148 2003/05/23 06:40:28 jz Exp $
 /*
     Hier sind implementiert
 
@@ -284,13 +284,12 @@ void Job::set_dom( const xml::Element_ptr& element, const Time& xml_mod_time )
         bool order;
 
         _name             = element.getAttribute( "name" );
-      //_rerun            = as_bool         ( element.getAttribute( "rerun" ) ) ),
-      //_stop_after_error = as_bool         ( element.getAttribute( "stop_after_error" ) );
         _temporary        = element.bool_getAttribute( "temporary"  , _temporary  );
         _priority         = element. int_getAttribute( "priority"   , _priority   );
         _title            = element.     getAttribute( "title"      , _title      );
         _log_append       = element.bool_getAttribute( "log_append" , _log_append );
         order             = element.bool_getAttribute( "order"      );
+        
 
         if( order )
         {
@@ -509,6 +508,8 @@ Sos_ptr<Task> Job::create_task( const ptr<spooler_com::Ivariable_set>& params, c
 
     //_log.debug( "create_task" );
 
+  //if( _separate_process )            task = SOS_NEW( Remote_task( _spooler, this ) );
+  //else
     if( !_process_filename.empty() )   task = SOS_NEW( Process_task( _spooler, this ) );
     else
     if( _object_set_descr          )   task = SOS_NEW( Object_set_task( _spooler, this ) );
@@ -2399,6 +2400,7 @@ bool Process_task::signaled()
 }
 
 #endif
+
 //-------------------------------------------------------------------------------------------------
 
 } //namespace spoooler

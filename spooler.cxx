@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.204 2003/05/23 06:26:12 jz Exp $
+// $Id: spooler.cxx,v 1.205 2003/05/23 06:40:28 jz Exp $
 /*
     Hier sind implementiert
 
@@ -31,6 +31,7 @@
 #include "../kram/licence.h"
 #include "../kram/sos_mail.h"
 #include "../kram/sos_java.h"
+#include "../zschimmer/com_remote.h"
 
 /*
 #ifdef Z_WINDOWS
@@ -1572,6 +1573,14 @@ int spooler_main( int argc, char** argv )
     return ret;
 }
 
+//------------------------------------------------------------------------------------object_server
+
+int object_server( int argc, char** argv )
+{
+    zschimmer::com::object_server::Server server;
+    return server.main( argc, argv, true );
+}
+
 //-------------------------------------------------------------------------------------------------
 
 } //namespace spooler
@@ -1590,6 +1599,7 @@ int sos_main( int argc, char** argv )
         bool    is_service_set = false;
         bool    do_install_service = false;
         bool    do_remove_service = false;
+        bool    is_object_server = false;
         string  id;
         string  service_name, service_display;
         string  service_description = "Hintergrund-Jobs der Document Factory";
@@ -1610,6 +1620,9 @@ int sos_main( int argc, char** argv )
             if( opt.with_value( "renew-spooler"    ) )  renew_spooler = opt.value();
             else
             if( opt.with_value( "send-cmd"         ) )  send_cmd = opt.value();
+            else
+          //if( opt.with_value( "execute-job"      ) )  is_object_server = true;       // Parameter ist nur für den Befehl ps
+            if( opt.flag      ( "object-server"    ) )  is_object_server = true;
             else
             if( opt.flag      ( "V"                ) )  fprintf( stderr, "Spooler %s\n", VER_PRODUCTVERSION_STR );
             else
@@ -1648,6 +1661,12 @@ int sos_main( int argc, char** argv )
         }
 
         if( send_cmd != "" )  is_service = false;
+
+
+        if( is_object_server )
+        {
+            return spooler::object_server( argc, argv );
+        }
 
 
 #       ifdef Z_WINDOWS

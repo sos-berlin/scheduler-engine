@@ -1,4 +1,4 @@
-// $Id: spooler_module.cxx,v 1.15 2003/03/17 18:40:19 jz Exp $
+// $Id: spooler_module.cxx,v 1.16 2003/05/23 06:40:28 jz Exp $
 /*
     Hier sind implementiert
 
@@ -34,35 +34,43 @@ void Module::set_dom_without_source( const xml::Element_ptr& element )
     _com_class_name = element.getAttribute( "com_class" );
     _filename       = element.getAttribute( "filename"  );
 
-    _java_class_name = element.getAttribute( "java_class" );
-    _recompile       = element.bool_getAttribute( "recompile" );
+    _java_class_name  = element.getAttribute( "java_class" );
+    _recompile        = element.bool_getAttribute( "recompile" );
+    _separate_process = element.bool_getAttribute( "separate_process" );
 
-#ifdef Z_WINDOWS
-    if( _com_class_name != "" )
+    if( _separate_process )
     {
-        _kind = kind_com;
+        _kind = kind_remote;
+    }
+    else
+    {
+#     ifdef Z_WINDOWS
+        if( _com_class_name != "" )
+        {
+            _kind = kind_com;
         
-        if( _language        != "" )  throw_xc( "SPOOLER-145" );
-        if( _java_class_name != "" )  throw_xc( "SPOOLER-168" );
-    }
-    else
-#endif
+            if( _language        != "" )  throw_xc( "SPOOLER-145" );
+            if( _java_class_name != "" )  throw_xc( "SPOOLER-168" );
+        }
+        else
+#     endif
 
-    if( _java_class_name != ""  ||  lcase(_language) == "java" )
-    {
-        _kind = kind_java;
+        if( _java_class_name != ""  ||  lcase(_language) == "java" )
+        {
+            _kind = kind_java;
      
-        if( _language == "" )  _language = "Java";
+            if( _language == "" )  _language = "Java";
 
-        if( lcase(_language) != "java" )  throw_xc( "SPOOLER-166" );
-        if( _com_class_name  != ""     )  throw_xc( "SPOOLER-168" );
+            if( lcase(_language) != "java" )  throw_xc( "SPOOLER-166" );
+            if( _com_class_name  != ""     )  throw_xc( "SPOOLER-168" );
 
-        _spooler->_has_java = true;
-    }
-    else
-    {
-        _kind = kind_scripting_engine;
-         if( _language == "" )  _language = SPOOLER_DEFAULT_LANGUAGE;
+            _spooler->_has_java = true;
+        }
+        else
+        {
+            _kind = kind_scripting_engine;
+             if( _language == "" )  _language = SPOOLER_DEFAULT_LANGUAGE;
+        }
     }
 
     string use_engine = element.getAttribute( "use_engine" );
@@ -81,6 +89,9 @@ void Module::set_dom_source_only( const xml::Element_ptr& element, const Time& x
 
     switch( _kind )
     {
+        case kind_remote:
+            break;
+
         case kind_java:
             //if( !_source.empty() )  throw_xc( "SPOOLER-167" );
             break;
@@ -128,6 +139,12 @@ ptr<Module_instance> Module::create_instance()
         case kind_com:               
             return Z_NEW( Com_module_instance( this ) );
 #     endif
+
+        case kind_remote:
+        {
+            ptr<Remote_module_instance_proxy> p = Z_NEW( Remote_module_instance_proxy( this ) );
+            return +p;
+        }
 
         default:                     
             throw_xc( "SPOOLER-173" );

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- $Id: spooler.dtd,v 1.47 2002/11/23 17:28:53 jz Exp $   Joacim Zschimmer,  (C) 2000 SOS GmbH Berlin  -->
+<!-- $Id: spooler.dtd,v 1.48 2003/05/23 06:40:28 jz Exp $   Joacim Zschimmer,  (C) 2000 SOS GmbH Berlin  -->
 
 
 <!ELEMENT spooler               ( config+ | command | answer )>
@@ -80,6 +80,7 @@
 <!ATTLIST job                   title               CDATA #IMPLIED>     <!-- Bezeichnung des Jobs -->
 <!ATTLIST job                   log_append          (yes|no) #IMPLIED>  <!-- Jobprotokoll fortschreiben, nicht überschreiben -->
 <!ATTLIST job                   order               (yes|no) 'no'>      <!-- Job nimmt Aufträge an -->
+<!ATTLIST job                   separate_process    (yes|no) 'no'>      <!-- Job-Instanzen (Tasks) sollen in getrennten, eigenen Prozessen laufen -->
 
 <!ELEMENT description           ( #PCDATA | include )*>                 <!-- Beschreibung des Jobs -->
 

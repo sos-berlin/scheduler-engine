@@ -1,4 +1,4 @@
-// $Id: spooler_module.h,v 1.16 2003/05/18 11:26:35 jz Exp $
+// $Id: spooler_module.h,v 1.17 2003/05/23 06:40:28 jz Exp $
 
 #ifndef __SPOOLER_MODULE_H
 #define __SPOOLER_MODULE_H
@@ -65,6 +65,7 @@ struct Module
       //kind_perl,
         kind_scripting_engine,
         kind_com,
+        kind_remote
     };
 
                                 Module                      ( Spooler* sp, Prefix_log* log )         : _spooler(sp), _log(log) {}
@@ -92,6 +93,7 @@ struct Module
 
     Source_with_parts          _source;
     Reuse                      _reuse;
+    bool                       _separate_process;           // Das Skript soll einem getrennten, eigenen Prozess laufen
     Kind                       _kind;
 
 

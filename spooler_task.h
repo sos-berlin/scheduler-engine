@@ -1,4 +1,4 @@
-// $Id: spooler_task.h,v 1.90 2003/04/07 12:41:56 jz Exp $
+// $Id: spooler_task.h,v 1.91 2003/05/23 06:40:28 jz Exp $
 
 #ifndef __SPOOLER_TASK_H
 #define __SPOOLER_TASK_H
@@ -523,7 +523,7 @@ struct Process_event : Event
 #endif
 //-------------------------------------------------------------------------------------Process_task
 
-struct Process_task : Task
+struct Process_task : Task      // Job ist irgendein Prozess (z.B. durch ein Shell-Skript implementiert)
 {
     Fill_zero _zero_;
 
@@ -549,6 +549,26 @@ struct Process_task : Task
 #   endif
 };
 
+//--------------------------------------------------------------------------------------Script_task
+/*
+// in spooler_task_remote.cxx
+
+struct Remote_task : Task       // Task läuft in einem eigenen Prozess (in einem Object_server)
+{
+                                Remote_task                 ( Spooler* sp, const Sos_ptr<Job>& j ) : Task(sp,j) {}
+                               ~Remote_task                 ();
+
+    virtual bool                loaded                      ();
+    virtual bool                do_load                     ();
+    bool                        do_start                    ();
+    void                        do_end                      ();
+    bool                        do_step                     ();
+    void                        do_on_success               ();
+    void                        do_on_error                 ();
+
+    IDispatch                  _remote_task;
+};
+*/
 //-------------------------------------------------------------------------------------------------
 
 } //namespace spooler

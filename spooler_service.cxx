@@ -1,4 +1,4 @@
-// $Id: spooler_service.cxx,v 1.38 2003/05/23 06:26:12 jz Exp $
+// $Id: spooler_service.cxx,v 1.39 2003/05/23 06:40:28 jz Exp $
 /*
     Hier sind implementiert
 
@@ -346,7 +346,7 @@ static void set_service_status( int spooler_error, int state = 0 )
     if( !ok )
     {
         try { throw_mswin_error( "SetServiceStatus", state_name(service_status.dwCurrentState).c_str() ); }
-        catch( const exception& x ) { SHOW_MSG(x); }       // Was tun?
+        catch( const exception& x ) { SHOW_MSG(x.what()); }       // Was tun?
     }
 
     if( service_status.dwCurrentState == SERVICE_STOPPED )
