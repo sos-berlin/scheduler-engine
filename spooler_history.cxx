@@ -1,4 +1,4 @@
-// $Id: spooler_history.cxx,v 1.19 2002/04/12 09:44:52 jz Exp $
+// $Id: spooler_history.cxx,v 1.20 2002/04/15 19:08:20 jz Exp $
 
 #include "../kram/sos.h"
 #include "spooler.h"
@@ -167,7 +167,7 @@ void Spooler_db::open( const string& db_name )
                                       "\"error_code\"  char(50),"
                                       "\"error_text\"  char(250),"
                                       "\"parameters\"  clob,"
-                                      "\"log\"         blob" 
+                                      "\"log\"         clob" 
                                       + join( "", create_extra ) );
 
             stmt = "UPDATE " + _spooler->_variables_tablename + " set \"wert\" = \"wert\"+1 where \"name\"='spooler_job_id'";
@@ -426,6 +426,9 @@ void Job_history::open()
                 Archive_switch arc           = read_profile_archive( _spooler->_factory_ini, section, "history_archive", _spooler->_history_archive );
 
                 _type_string = history_column_names;
+
+                _extra_record.construct( make_record_type( extra_columns ) );
+
                 if( extra_columns != "" )  _type_string += "," + extra_columns;
 
                 _extra_names = vector_split( ", *", replace_regex( extra_columns, ":[^,]+", "" ) );
@@ -442,10 +445,7 @@ void Job_history::open()
                 if( arc )  archive( arc, _filename );  
 
                 _file.open( _filename, O_BINARY | O_RDWR | O_CREAT | O_TRUNC, 0600 );
-
                 _file.print( replace_regex( _type_string, "(:[^,]+)?,", "\t" ) + SYSTEM_NL );
-
-                _extra_record.construct( make_record_type( extra_columns ) );
 
                 _job->_log.debug( "Neue Historiendatei eröffnet: " +  _filename );
                 _use_file = true;
