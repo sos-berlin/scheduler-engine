@@ -1,4 +1,4 @@
-// $Id: scheduler.js,v 1.4 2004/12/03 18:39:00 jz Exp $
+// $Id: scheduler.js,v 1.5 2004/12/05 11:26:11 jz Exp $
 
 //----------------------------------------------------------------------------------------------var
 
@@ -59,7 +59,7 @@ function check_browser()
             {
                 if( window.navigator.vendor == "Firefox" )
                 {
-                    if( window.navigator.productSub >= 20041122 )  firefox = 1.0; 
+                    if( window.navigator.productSub >= 20041122 )  firefox = 1.0;
                 }
                 else
                 {
@@ -69,13 +69,13 @@ function check_browser()
             }
         }
     }
-    
-    if( ie < 6.0  &&  firefox < 1.0 )  
+
+    if( ie < 6.0  &&  firefox < 1.0 )
     {
-        var msg = "The page may not work with this browser, which doesn't seem to be one of the following:\n" + 
+        var msg = "The page may not work with this browser, which doesn't seem to be one of the following:\n" +
                   "Microsoft Internet Explorer 6\n" +
                   "Mozilla Firefox 1";
-                  
+
         if( window.navigator != undefined )
         {
             msg += "\n\n\n";
@@ -86,7 +86,7 @@ function check_browser()
             msg += "product="         + window.navigator.product            + "\n";
             msg += "productSub="      + window.navigator.productSub         + "\n";
         }
-        
+
         alert( msg );
     }
 }
@@ -109,7 +109,7 @@ Scheduler.prototype.close = function()
 {
     //this._configuration = null;
     this._xml_http = null;
-    
+
     if( this._log_window )  this._log_window.close(),  this._log_window = undefined;
 }
 
@@ -121,8 +121,8 @@ Scheduler.prototype.execute = function( xml )
     this.call_http( xml );
 
     var dom_document;
-    
-    if( window.DOMParser ) 
+
+    if( window.DOMParser )
     {
         var dom_parser = new DOMParser();
         dom_document = dom_parser.parseFromString( this._xml_http.responseText, "text/xml" );
@@ -134,7 +134,7 @@ Scheduler.prototype.execute = function( xml )
         var ok = dom_document.loadXML( this._xml_http.responseText );
         if( !ok )  throw new Error( "Fehlerhafte XML-Antwort: " + dom_document.parseError.reason );
     }
-    
+
     var error_element = dom_document.selectSingleNode( "spooler/answer/ERROR" );
     if( error_element )
     {
@@ -142,136 +142,10 @@ Scheduler.prototype.execute = function( xml )
     }
 
     this.modify_datetime_for_xslt( dom_document );
-    
+
     return dom_document;
 }
 
-//------------------------------------------------------------------Scheduler.execute_and_fill_html
-// public
-/*
-Scheduler.prototype.execute_and_fill_html = function( xml_query )
-{
-    var dom_document   = this.execute( xml_query );
-    var answer_element = dom_document.selectSingleNode( "spooler/answer" );
-    
-    //dom_document.setProperty( "SelectionLanguage", "XPath" );
-    if( !answer_element )  return;
-
-    this.fill_html_state( document.all.scheduler_state, answer_element.selectSingleNode( "state" ) );
-    this.fill_html_jobs ( document.all.scheduler_jobs , answer_element.selectSingleNode( "state/jobs" ) );
-}
-*/
-//------------------------------------------------------------------------Scheduler.fill_html_state
-/*
-Scheduler.prototype.fill_html_state = function( html_element, state_response_element )
-{
-    if( html_element )
-    {
-        var htmls = new Array();
-        var state_config_element = this._configuration._dom.selectSingleNode( "scheduler/html/state" );
-        
-        if( state_response_element && state_config_element )
-        {
-            var state_element = state_config_element.cloneNode( true );
-            this.fill_spans( state_element, state_response_element );
-            
-            for( var child = state_element.firstChild; child; child = child.nextSibling )  htmls.push( child.xml );
-        }
-        
-        html_element.innerHTML = htmls.join( "" );
-    }
-}
-*/
-//-------------------------------------------------------------------------Scheduler.fill_html_jobs
-/*
-Scheduler.prototype.fill_html_jobs = function( html_element, jobs_response_element )
-{
-    if( html_element )
-    {
-        var htmls = new Array();
-        var job_config_element = this._configuration._dom.selectSingleNode( "scheduler/html/job" );
-        
-        if( jobs_response_element && job_config_element )
-        {
-            var job_response_elements = jobs_response_element.selectNodes( "job" );
-            for( var i = 0; i < job_response_elements.length; i++ )
-            {
-                var job_response_element = job_response_elements[ i ];
-
-                var job_element = job_config_element.cloneNode( true );
-                
-                var tasks_element = job_element.selectSingleNode( ".//scheduler.tasks" );
-                if( tasks_element )
-                {
-                    this.fill_html_tasks( tasks_element, jobs_response_element.selectSingleNode( "tasks" ) );
-                    tasks_element.nodeName = "span";
-                }
-                
-                this.fill_spans( job_element, job_response_element );
-                for( var child = job_element.firstChild; child; child = child.nextSibling )  htmls.push( child.xml );
-            }
-        }    
-
-        html_element.innerHTML = htmls.join( "" );
-    }
-}
-*/
-//-------------------------------------------------------------------------Scheduler.fill_html_jobs
-/*
-Scheduler.prototype.make_html = function( html_element, response_element, config_element, sub_element_name )
-{
-    var result = null;
-    
-    if( html_element )
-    {
-        var htmls = new Array();
-        
-        if( response_element && config_element )
-        {
-            var sub_response_elements = response_element.selectNodes( sub_element_name );
-
-            for( var i = 0; i < sub_response_elements.length; i++ )
-            {
-                var sub_response_element = sub_response_elements[ i ];
-
-                var result = config_element.cloneNode( true );
-                
-                var tasks_element = job_element.selectSingleNode( ".//scheduler.tasks" );
-                if( tasks_element )
-                {
-                    this.fill_html_tasks( tasks_element, jobs_response_element.selectSingleNode( "tasks" ) );
-                    tasks_element.nodeName = "span";
-                }
-                
-                this.fill_spans( job_element, job_response_element );
-            }
-        }    
-    }
-
-    return result;
-}
-*/
-//-----------------------------------------------------------------------------Scheduler.fill_spans
-/*
-Scheduler.prototype.fill_spans = function( html_element, xml_element )
-{
-    var span_elements = html_element.getElementsByTagName( "span" );
-    for( var i = 0; i < span_elements.length; i++ )
-    {
-        var span_element = span_elements[ i ];
-        var text = span_element.text;
-        if( text.substring( 0, 1 ) == "=" )
-        {
-            try
-            {
-                var found_element = xml_element.selectSingleNode( text.substring( 1, text.length ) );
-                span_element.text = found_element? found_element.text : "";
-            }
-            catch( x ) { span_element.text = x.message; }
-        }
-    }
-}
-*/
 //------------------------------------------------------------------------------Scheduler.call_http
 
 Scheduler.prototype.call_http = function( text, debug_text )
@@ -293,10 +167,10 @@ Scheduler.prototype.call_http = function( text, debug_text )
         // || x.number == DE_E_DATA_NOT_AVAILABLE
         // || x.number == DE_E_RESOURCE_NOT_FOUND )
         {
-            x.message = "No connection to Scheduler\n" + 
+            x.message = "No connection to Scheduler\n" +
                         ( x.number? "0x" + hex_string( x.number, 8 ) + ": " : "" ) + x.message;
         }
-        
+
         throw x;
     }
     finally
@@ -322,7 +196,7 @@ Scheduler.prototype.add_datetime_attributes_for_xslt = function( response, now, 
             element.setAttribute( attribute_name + "__xslt_datetime_with_diff_plus", xslt_format_datetime_with_diff( value, now, true ) );
             element.setAttribute( attribute_name + "__xslt_date_or_time"           , xslt_format_date_or_time ( value, now ) );
         }
-    }    
+    }
 }
 
 //---------------------------------------------------------------Scheduler.modify_datetime_for_xslt
@@ -333,8 +207,8 @@ Scheduler.prototype.modify_datetime_for_xslt = function( response )
     var now;
 
     var datetime = response.selectSingleNode( "/spooler/answer/@time" );
-    if( datetime )  now = date_from_datetime( datetime.nodeValue );   
-        
+    if( datetime )  now = date_from_datetime( datetime.nodeValue );
+
     this.add_datetime_attributes_for_xslt( response, now, "time"                  );
     this.add_datetime_attributes_for_xslt( response, now, "spooler_running_since" );
     this.add_datetime_attributes_for_xslt( response, now, "running_since"         );
@@ -347,7 +221,7 @@ Scheduler.prototype.modify_datetime_for_xslt = function( response )
     this.add_datetime_attributes_for_xslt( response, now, "created"               );
 }
 
-//--------------------------------------------------------------------Scheduler.call_error_checked 
+//---------------------------------------------------------------------Scheduler.call_error_checked
 
 Scheduler.prototype.call_error_checked = function( method_name, arg1, arg2, arg3, arg4, arg5 )
 {
@@ -368,13 +242,13 @@ function Stylesheet( url )
     var xml_http = window.XMLHttpRequest? new XMLHttpRequest() : new ActiveXObject( "Msxml2.XMLHTTP" );
     xml_http.open( "GET", url, false );
     xml_http.send( null );
-    
+
     if( window.DOMParser )
     {
         var dom_parser = new DOMParser();
         this._xslt_dom = dom_parser.parseFromString( xml_http.responseText, "text/xml" );
         if( this._xslt_dom.documentElement.nodeName == "parsererror" )  throw new Error( "Fehler im Stylesheet " + url + ": " + this._xslt_dom.documentElement.firstChild.nodeValue );
-     
+
         this._xslt_processor = new XSLTProcessor();
         this._xslt_processor.importStylesheet( this._xslt_dom );
     }
@@ -403,28 +277,28 @@ Stylesheet.prototype.xml_transform = function( dom_document )
 
 //---------------------------------------------------------------------xslt_format_datetime
 
-function xslt_format_datetime( datetime ) 
+function xslt_format_datetime( datetime )
 {
     if( !datetime )  return "";
     return datetime.replace( /\.\d*$/, "" );
-    /*            
+    /*
     var date = typeof datetime == "string"? date_from_datetime( datetime ) : datetime;
-    
+
     //var ms = date.getMilliseconds();
 
     return date.toLocaleDateString() + ", " + date.toLocaleTimeString();
             //+ ( ms? ".<span class='milliseconds'>" + ( ms + "000" ).substring( 0, 3 ) + "</span>" : "" );
-    */                   
+    */
 }
 
 //-----------------------------------------------------------------xslt_format_date_or_time
 
-function xslt_format_date_or_time( datetime ) 
+function xslt_format_date_or_time( datetime )
 {
     if( !datetime )  return "";
-    
+
     var now = new Date();
-    
+
     if(    1*datetime.substr( 0, 4 ) == now.getYear()
         && 1*datetime.substr( 5, 2 ) == now.getMonth() + 1
         && 1*datetime.substr( 8, 2 ) == now.getDate()  )
@@ -444,31 +318,31 @@ function xslt_format_datetime_with_diff( datetime, now, show_plus )
     var date = date_from_datetime( datetime );
     var result = xslt_format_datetime( datetime );
     if( result && now )  result += " \xA0(" + xslt_format_datetime_diff( date, now, show_plus ) + ")";
-    
+
     return result;
 }
 
 //----------------------------------------------------------------xslt_format_datetime_diff
 
-function xslt_format_datetime_diff( datetime_earlier, datetime_later, show_plus ) 
+function xslt_format_datetime_diff( datetime_earlier, datetime_later, show_plus )
 {
     var show_ms;
     if( show_ms   == undefined )  show_ms   = false;
     if( show_plus == undefined )  show_plus = false;
-    
+
     var date_later   = typeof datetime_later   == "string"? date_from_datetime( datetime_later )   : datetime_later;
     var date_earlier = typeof datetime_earlier == "string"? date_from_datetime( datetime_earlier ) : datetime_earlier;
 
     if( !date_later   )  return "";
     if( !date_earlier )  return "";
-    
+
     var diff = ( date_later.getTime() - date_earlier.getTime() ) / 1000.0;
     var abs  = Math.abs( diff );
     var result;
 
     if( abs < 60 )
     {
-        if( show_ms ) 
+        if( show_ms )
         {
             result = abs.toString();
             if( result.match( "." ) )  result = result.replace( ".", ".<span class='milliseconds'>" ) + "</span>";
@@ -485,8 +359,8 @@ function xslt_format_datetime_diff( datetime_earlier, datetime_later, show_plus 
     if( abs < 24*60*60 )  result = Math.floor( abs / (    60*60 ) ) + "h";
     else
                           result = Math.floor( abs / ( 24*60*60 ) ) + "days";
-                            
-    return diff < 0             ? "-" + result : 
+
+    return diff < 0             ? "-" + result :
            show_plus && diff > 0? "+" + result
                                 : result;
 }
@@ -494,18 +368,18 @@ function xslt_format_datetime_diff( datetime_earlier, datetime_later, show_plus 
 //-----------------------------------------------------------------------date_from_datetime
 // datetime == yyyy-mm-dd-hh-mm-ss[.mmm]
 
-function date_from_datetime( datetime ) 
+function date_from_datetime( datetime )
 {
     if( !datetime )  return null;
-    
-    var date = new Date( 1*datetime.substr( 0, 4 ), 
-                         1*datetime.substr( 5, 2 ) - 1, 
+
+    var date = new Date( 1*datetime.substr( 0, 4 ),
+                         1*datetime.substr( 5, 2 ) - 1,
                          1*datetime.substr( 8, 2 ),
                          1*datetime.substr( 11, 2 ),
                          1*datetime.substr( 14, 2 ),
                          1*datetime.substr( 17, 2 ),
                          datetime.length < 23? 0 : 1*datetime.substr( 20, 3 ) );
-    
+
     return date;
 }
 
@@ -538,15 +412,15 @@ function call_error_checked( f, arg1, arg2, arg3, arg4, arg5 )
 //---------------------------------------------------------------------------------handle_exception
 
 function handle_exception( x )
-{    
+{
     var msg = "";
     var error;
-    
+
     if( typeof x == "object" )
     {
         if( x.number )  msg += "0x" + hex_string( x.number, 8 ) + "  ";
         msg += x.message;
-        
+
         error = x;
     }
     else
@@ -554,18 +428,18 @@ function handle_exception( x )
         msg = x;
         error.message = msg;
     }
-        
+
     var e = document.getElementById( "error_message" );
     if( e )
     {
         e.innerHTML = xml_encode( msg ).replace( "\n", "<br/>" ).replace( "  ", "\xA0 " ); // + "<p>&#160;</p>";
-        
-        if( typeof x == "object"  &&  x.stack )  e.style.title = x.stack;  // Firefox
+
+        if( typeof x == "object"  &&  x.stack )  e.style.title = x.stack;  // Firefox?
     }
     else
         alert( msg );
-        
-    return error;            
+
+    return error;
 }
 
 //--------------------------------------------------------------------------------------reset_error
@@ -573,12 +447,12 @@ function handle_exception( x )
 function reset_error()
 {
     var e = document.getElementById( "error_message" );
-    if( e ) 
+    if( e )
     {
         e.innerHTML = "";
         e.style.title = "";
     }
-    
+
     window.status = "";
 }
 
@@ -631,7 +505,7 @@ function show_job_chain_orders_checkbox__onclick()
 
 function Popup_menu_builder__add_command( html, xml_command, is_active )
 {
-    this.add_entry( html, "popup_menu__execute( &quot;" + xml_command + "&quot; )", is_active );
+    this.add_entry( html, "call_error_checked( popup_menu__execute, &quot;" + xml_command + "&quot; )", is_active );
 }
 
 //-------------------------------------------------------------------------------popup_menu.execute
@@ -640,9 +514,9 @@ function Popup_menu_builder__add_command( html, xml_command, is_active )
 function popup_menu__execute( xml_command )
 {
     _popup_menu.close();
-    
-    var error = _scheduler.call_error_checked( "execute", xml_command );
-   
+
+    var error = _scheduler.execute( xml_command );
+
     if( !error )  window.parent.left_frame.update();
 }
 
@@ -667,12 +541,12 @@ function popup_menu__show_log__onclick( show_log_command, window_name )
                  ", height=" + ( Math.floor( window.screen.availHeight * 0.2 ) - 32 ) +
                  ", left=0"  +
                  ", top="    +  Math.floor( window.screen.availHeight * 0.8 );
-    
+
     var log_window = window.open( "http://" + document.location.host + "/" + show_log_command, window_name, features, true );
     log_window.focus();
-    
+
     if( _scheduler )  _scheduler._log_window = log_window;
-    
+
     _popup_menu.close();
 }
 
@@ -681,11 +555,11 @@ function popup_menu__show_log__onclick( show_log_command, window_name )
 function scheduler_menu__onclick()
 {
     var popup_builder = new Popup_menu_builder();
-    
+
     var state = _response.selectSingleNode( "spooler/answer/state" ).getAttribute( "state" );
-    
+
     var command = function( cmd ) { return "<modify_spooler cmd='" + cmd + "'/>"; }
-    
+
     popup_builder.add_show_log( "Show log"                       , "show_log?", "show_log" );
     popup_builder.add_bar();
   //popup_builder.add_command ( "Stop"                           , command( "stop" ), state != "stopped"  &&  state != "stopping"  &&  state != "stopping_let_run" );
@@ -699,7 +573,7 @@ function scheduler_menu__onclick()
     popup_builder.add_bar();
     popup_builder.add_command ( "Abort immediately"              , command( "abort_immediately"             ) );
     popup_builder.add_command ( "Abort immediately and restart"  , command( "abort_immediately_and_restart" ) );
-    
+
     _popup_menu = popup_builder.show_popup_menu();
 }
 
@@ -712,15 +586,15 @@ function job_menu__onclick( job_name )
     var job_element = //document.all._job_element != undefined?
                         _job_element  // _job_element in task_frame.html (detail_frame)                                                                                  // Rechter Rahmen
                       //: _response.selectSingleNode( "spooler/answer/state/jobs/job [ @job = '" + job_name + "' ]" );  // Linker Rahmen
-    
+
     var state = job_element.getAttribute( "state" );
-    
+
     popup_builder.add_show_log( "Show log"        , "show_log?job=" + job_name, "show_log_job_" + job_name );
-    
+
     var description_element = job_element.selectSingleNode( "description" );
     var is_active = description_element? description_element.text != "" : false;
     popup_builder.add_entry   ( "Show description", "show_job_description()", is_active );
-    
+
     popup_builder.add_bar();
     popup_builder.add_command ( "Start task now", "<start_job job='" + job_name + "'/>" );
     popup_builder.add_command ( "Stop"          , "<modify_job job='" + job_name + "' cmd='stop'    />", state != "stopped"  &&  state != "stopping" );
@@ -732,7 +606,7 @@ function job_menu__onclick( job_name )
     popup_builder.add_command ( "End tasks"     , "<modify_job job='" + job_name + "' cmd='end'     />" );
     popup_builder.add_command ( "Suspend tasks" , "<modify_job job='" + job_name + "' cmd='suspend' />" );
     popup_builder.add_command ( "Continue tasks", "<modify_job job='" + job_name + "' cmd='continue'/>" );
-    
+
     _popup_menu = popup_builder.show_popup_menu();
 }
 
@@ -746,7 +620,7 @@ function task_menu__onclick( task_id )
     popup_builder.add_bar();
     popup_builder.add_command ( "End"             , "<kill_task job='" + _job_name + "' id='" + task_id + "'/>" );
     popup_builder.add_command ( "Kill immediately", "<kill_task job='" + _job_name + "' id='" + task_id + "' immediately='yes'/>" );
-    
+
     _popup_menu = popup_builder.show_popup_menu();
 }
 
@@ -760,7 +634,7 @@ function task_menu__onclick( task_id )
     popup_builder.add_bar();
     popup_builder.add_command ( "End"             , "<kill_task job='" + _job_name + "' id='" + task_id + "'/>" );
     popup_builder.add_command ( "Kill immediately", "<kill_task job='" + _job_name + "' id='" + task_id + "' immediately='yes'/>" );
-    
+
     _popup_menu = popup_builder.show_popup_menu();
 }
 
@@ -770,9 +644,9 @@ function order_menu__onclick( job_chain_name, order_id )
 {
     var popup_builder = new Popup_menu_builder();
 
-    popup_builder.add_show_log( "Show log"        , "show_log?job_chain=" + job_chain_name + 
+    popup_builder.add_show_log( "Show log"        , "show_log?job_chain=" + job_chain_name +
                                                             "&order=" + order_id, "show_log_order_" + job_chain_name + "__" + order_id );
-    
+
     _popup_menu = popup_builder.show_popup_menu();
 }
 
@@ -832,7 +706,7 @@ function string_from_object( object )
     for( var i in object )
     {
         result += i + "=";
-        
+
         try
         {
             result += object[ i ] + " ";
@@ -847,4 +721,3 @@ function string_from_object( object )
 }
 
 //-------------------------------------------------------------------------------------------------
-

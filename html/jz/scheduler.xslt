@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding="utf-8"?>
-<!-- $Id: scheduler.xslt,v 1.6 2004/12/03 22:02:55 jz Exp $ -->
+<!-- $Id: scheduler.xslt,v 1.7 2004/12/05 11:26:11 jz Exp $ -->
 <xsl:stylesheet xmlns:xsl   = "http://www.w3.org/1999/XSL/Transform" 
                 xmlns:msxsl = "urn:schemas-microsoft-com:xslt"
                 version     = "1.0">
@@ -95,13 +95,13 @@
         <xsl:param name="title"/>
         <xsl:param name="class"/>
 
-        <td style="margin-bottom: 0px; padding: 0pt 0pt 0pt 5pt; cursor: pointer">
+        <td style="margin-bottom: 0pt; padding: 1ex 0pt 0pt 5pt">
         <!--    onmouseover="this.className='hover'"
             onmouseout ="this.className=''"-->
-                    
-            <xsl:element name="p">
+
+            <xsl:element name="span">
                 <xsl:attribute name="onclick">call_error_checked( show_card, '<xsl:value-of select="$name"/>' )</xsl:attribute>
-                <xsl:attribute name="style"  >padding: 1pt 4pt 4pt 4pt</xsl:attribute>
+                <xsl:attribute name="style"  >cursor: pointer; padding: 1pt 4pt 4pt 4pt</xsl:attribute>
                 <xsl:attribute name="class"><xsl:value-of select="$class"/></xsl:attribute>
                 <xsl:element name="span">
                     <xsl:if test="/spooler/@my_show_card=$name ">
@@ -160,7 +160,7 @@
                 </td>
 
                 <td valign="top" align="right">
-                    <a href="/doc/index.xml" target="documentation" class="small">Doku</a>
+                    <a href="/doc/index.xml" target="documentation" class="small">Doku</a>&#160;
                     
                     <xsl:call-template name="command_menu">
                         <xsl:with-param name="onclick" select="'scheduler_menu__onclick()'"/>
