@@ -1,4 +1,4 @@
-// $Id: popup_builder.js,v 1.3 2004/07/22 16:19:37 jz Exp $
+// $Id: popup_builder.js,v 1.4 2004/07/22 20:42:09 jz Exp $
 
 //------------------------------------------------------------------------------------Popup_builder
 
@@ -10,7 +10,8 @@ function Popup_builder()
   //this._html_array.push( "    td { background-color: menu; color: menutext; font-family: Sans-Serif; font-size: 9pt }" );
   //this._html_array.push( "</style>" );
     this._html_array.push( "</head><body>" );
-    this._html_array.push( "<table cellpadding='0' cellspacing='0' width='100%' style='line-height: 12pt; border: thin outset' >" );
+    this._html_array.push( "<table cellpadding='0' cellspacing='0' width='100%'" +
+                                 " style='background-color: menu; line-height: 12pt; font-family: Tahoma, Sans-Serif; font-size: 8pt; border: thin outset'>" );
     this._finished = false;
 }
 
@@ -22,9 +23,9 @@ Popup_builder.prototype.add_entry = function( html_entry, call, is_active )
     
     html =  "<tr>";
     html += "<td style='";
-    html +=         "background-color: menu;";
+    html +=         "";
     html +=         "color: " + ( is_active? "menutext" : "gray" ) + ";";
-    html +=         "font-family: Tahoma, Sans-Serif; font-size: 8pt; cursor: default; white-space: nowrap; ";
+    html +=         "cursor: default; white-space: nowrap; ";
     html +=         "padding-left=12pt; padding-right=12pt;'";
 
     if( call != undefined  &&  is_active )
@@ -47,10 +48,7 @@ Popup_builder.prototype.add_entry = function( html_entry, call, is_active )
 Popup_builder.prototype.add_bar = function()
 {
     html =  "<tr>";
-    html += "<td style='";
-    html +=         "background-color: menu;";
-    html +=         "color: gray;'";
-    html +=  ">";
+    html += "<td style='color: gray;'>";
     html +=  "<hr size='1'/>";
     html += "</td>";
     html += "</tr>";
@@ -64,6 +62,7 @@ Popup_builder.prototype.html = function()
 {
     if( !this._finished )
     {
+        this._html_array.push( "<tr><td style='background-color: menu; line-height: 3pt'>&#160;</td></tr>" );
         this._html_array.push( "</table></body></html>" );
         this._finished = true;
     }

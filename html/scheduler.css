@@ -1,4 +1,4 @@
-/* $Id: scheduler.css,v 1.8 2004/07/22 20:29:53 jz Exp $ */
+/* $Id: scheduler.css,v 1.9 2004/07/22 20:42:09 jz Exp $ */
 
 body         { font-size: 10pt; }
 th           { font-size: 10pt; }
@@ -24,15 +24,15 @@ pre          { font-family: Lucida Console, monospace; font-size: 9pt; line-heig
 /* Allgemeiner Scheduler-Zustand */
 .scheduler              { background-color: #F0F0F0 }
 
-.job                    { font-family: Sans-Serif; font-size: 10pt; background-color: #fff000 }
+.job                    { font-family: Sans-Serif; font-size: 10pt; background-color: #00c8ff } /*#fff000*/
 .job_error              { color: darkred }
 
-.task                   { font-family: Sans-Serif; font-size: 10pt; background-color: #FFFFA0 } /*#90EE90*/
-.task_hover             { font-family: Sans-Serif; font-size: 10pt; background-color: #FFFFC0; text-decoration: underline }
+.task                   { font-family: Sans-Serif; font-size: 10pt; background-color: #90EE90 }  /*#FFFFA0*/
+.task_hover             { font-family: Sans-Serif; font-size: 10pt; background-color: #90EE90; text-decoration: underline }
                       
-.order                  { font-family: Sans-Serif; font-size: 10pt; background-color: #f0ffff }  /*#E0FFE0*/
+.order                  { font-family: Sans-Serif; font-size: 10pt; background-color: #ffffe0 }  /*#f0ffff*/
                         
-.job_chain              { font-family: Sans-Serif; font-size: 10pt; background-color: #00c8ff }
+.job_chain              { font-family: Sans-Serif; font-size: 10pt; background-color: moccasin }
 
 /* Anklickbar */
 .hover                  { text-decoration: underline }
