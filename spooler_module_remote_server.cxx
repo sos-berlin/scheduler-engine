@@ -1,4 +1,4 @@
-// $Id: spooler_module_remote_server.cxx,v 1.23 2003/09/01 15:15:37 jz Exp $
+// $Id: spooler_module_remote_server.cxx,v 1.24 2003/09/01 16:11:42 jz Exp $
 /*
     Hier sind implementiert
 
@@ -197,13 +197,21 @@ STDMETHODIMP Com_remote_module_instance_server::construct( SAFEARRAY* safearray 
         if( _server._module->_kind == Module::kind_java )
         {
             _server._module->_java_vm = get_java_vm( false );
-            //java_vm->set_log( &_log );
-            _server._module->_java_vm->set_work_dir( java_work_dir );
-            _server._module->_java_vm->set_class_path( java_class_path );
-            _server._module->_java_vm->set_javac_filename( javac );
-            _server._module->_java_vm->set_options( java_options );
-            Java_module_instance::init_java_vm( _server._module->_java_vm );
+            if( !_server._module->_java_vm->running() )
+            {
+                //java_vm->set_log( &_log );
+                _server._module->_java_vm->set_work_dir( java_work_dir );
+                _server._module->_java_vm->set_class_path( java_class_path );
+                _server._module->_java_vm->set_javac_filename( javac );
+                _server._module->_java_vm->set_options( java_options );
+                Java_module_instance::init_java_vm( _server._module->_java_vm );
+            }
+            else
+            {
+                // Parameter für Java können nicht übernommen werden.
+            }
         }
+
 
         _server._module_instance = _server._module->create_instance();
       //_server._module_instance->init();
