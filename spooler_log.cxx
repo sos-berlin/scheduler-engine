@@ -1,4 +1,4 @@
-// $Id: spooler_log.cxx,v 1.69 2003/09/24 21:51:57 jz Exp $
+// $Id: spooler_log.cxx,v 1.70 2003/09/26 18:42:29 jz Exp $
 
 #include "spooler.h"
 #include "spooler_mail.h"
@@ -8,6 +8,7 @@
 #include "../kram/com.h"
 #include "../kram/com_server.h"
 #include "../kram/sosprof.h"
+#include "../kram/sleep.h"
 #include "../file/anyfile.h"
 #include "../zschimmer/olechar.h"
 #include "../zschimmer/file.h"
@@ -29,6 +30,37 @@
 
 namespace sos {
 namespace spooler {
+
+//-----------------------------------------------------------------------------------------my_write
+
+static int my_write( int file, const char* text, int len )
+{
+    int         ret = 0;
+    const char* t   = text;
+   
+    while( t < text + len )   // Solange write() etwas schreiben kann
+    {
+        ret = ::write( file, t, text + len - t );
+        if( ret <= 0 )  break;
+        t += ret;
+    }
+
+    if( ret <= 0  &&  len > 0 )
+    {
+        int err = errno;
+
+        if( err == EAGAIN )     // Das kann passieren, wenn ein Thread gleichzeitig nach stderr schreibt.
+        {
+            LOG( "Prefix_log::write ERRNO-" << err << " " << strerror(err) );
+            sos_sleep( 0.01 );
+            ::write( file, "<<errno=EAGAIN>>", 16 ); 
+            ret = ::write( file, t, text + len - t );
+            if( ret != text + len - t  &&  file != fileno(stderr) )  return -1;  // Nur bei stderr ignorieren wir den Fehler
+        }
+    }
+
+    return len;
+}
 
 //-----------------------------------------------------------------------------------------Log::Log
 
@@ -111,7 +143,7 @@ void Log::write( Prefix_log* extra_log, Prefix_log* order_log, const char* text,
     {
         if( log && log_ptr )  _log_line.append( text, len );
 
-        int ret = ::write( _file, text, len );
+        int ret = my_write( _file, text, len );
         if( ret != len )  throw_errno( errno, "write", _filename.c_str() );
 
         if( extra_log )  extra_log->write( text, len );
@@ -126,7 +158,19 @@ void Log::log( Log_level level, const string& prefix, const string& line )
     if( this == NULL )  return;
 
     if( level < _spooler->_log_level )  return;
-    log2( level, prefix, line );
+
+    try
+    {
+        log2( level, prefix, line );
+    }
+    catch( const exception& x ) 
+    {
+        fprintf( stderr, "%s\n", line.c_str() );
+        fprintf( stderr, "Fehler beim Schreiben des Protokolls: %s\n", x.what() );
+        LOG( "Fehler beim Schreiben des Protokolls: " << x.what() << "\n" );
+        
+        if( level < log_error )  throw;     // Bei error() Exception ignorieren, denn die Funktion wird gerne in Exception-Handlern gerufen
+    }
 }
 
 //----------------------------------------------------------------------------------------Log::log2
@@ -407,7 +451,7 @@ void Prefix_log::write( const char* text, int len )
     }
     else
     {
-        int ret = ::write( _file, text, len );
+        int ret = my_write( _file, text, len );
         if( ret != len )  throw_errno( errno, "write", _filename.c_str() );
     }
 }
