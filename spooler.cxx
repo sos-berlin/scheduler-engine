@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.19 2001/01/10 14:47:37 jz Exp $
+// $Id: spooler.cxx,v 1.20 2001/01/11 11:16:26 jz Exp $
 
 
 
@@ -458,15 +458,15 @@ bool Task::start()
             _script_instance.load();
         }
 
-        _state = s_running;
         _step_count = 0;
-        _run_until_end = false;
-        _spooler->_running_jobs_count++;
-
         _next_start_time = max( _next_start_time + _job->_run_time._retry_period, now() );
         if( now() >= _job->_run_time._next_end_time )  set_new_start_time();
     }
     catch( const Xc& x ) { start_error(x); return false; }
+
+    _state = s_running;
+    _run_until_end = false;
+    _spooler->_running_jobs_count++;
 
     return true;
 }
@@ -533,6 +533,9 @@ bool Task::step()
 
 void Task::do_something()
 {
+    bool ok;
+
+
     switch( _state_cmd.read_and_reset() )
     {
         case sc_stop:       end(); 
@@ -542,7 +545,7 @@ void Task::do_something()
         case sc_unstop:     _state = s_pending;
                             break;
 
-        case sc_start:      start();
+        case sc_start:      ok = start();  if(!ok) break;
                             _run_until_end = true;
                             break;
 
@@ -563,16 +566,16 @@ void Task::do_something()
 
         case s_pending:     if( now() >= _next_start_time )
                             {
-                                start();
+                                ok = start();  if(!ok) break;
 
-                                bool ok = step();
+                                ok = step();
                                 if( !ok )  end();
                             }
                             break;
 
         case s_running:     if( _run_until_end | _job->_run_time.should_run_now() )
                             {
-                                bool ok = step();
+                                ok = step();
                                 if( !ok )  end();
                             }
                             else
@@ -707,50 +710,12 @@ string Task::state_cmd_name( Task::State_cmd cmd )
     }
 }
 
-//--------------------------------------------------------------------------------Spooler::load_arg
-
-void Spooler::load_arg( int argc, char** argv )
-{
-    _config_filename  = read_profile_string( "factory.ini", "spooler", "config" );
-    _log_directory    = read_profile_string( "factory.ini", "spooler", "log-dir" );
-    _spooler_id       = read_profile_string( "factory.ini", "spooler", "spooler-id" );
-    _object_set_param = read_profile_string( "factory.ini", "spooler", "object-set-param" );
-
-    for( Sos_option_iterator opt ( argc, argv ); !opt.end(); opt.next() )
-    {
-        if( opt.with_value( "log"              ) )  log_start( opt.value() );
-        else
-        if( opt.with_value( "config"           ) )  _config_filename = opt.value();
-        else
-        if( opt.with_value( "log-dir"          ) )  _log_directory = opt.value();
-        else
-        if( opt.with_value( "spooler-id"       ) )  _spooler_id = opt.value();
-        else
-        if( opt.with_value( "object-set-param" ) )  _object_set_param = opt.value();
-        else
-            throw_sos_option_error( opt );
-    }
-}
-
-//------------------------------------------------------------------------------------Spooler::load
-
-void Spooler::load()
-{
-    _log.msg( "Spooler::load" );
-
-    tzset();
-
-    {
-        Thread_semaphore::Guard guard = &_semaphore;
-
-        load_xml();
-    }
-}
-
 //-----------------------------------------------------------------------------------Spooler::start
 
 void Spooler::start()
 {
+    _state = s_starting;
+
     _log.set_directory( _log_directory );
     _log.open_new();
     _log.msg( "Spooler::start" );
@@ -763,8 +728,6 @@ void Spooler::start()
     }
 
     _spooler_start_time = now();
-
-    _communication.start_thread();
 }
 
 //------------------------------------------------------------------------------------Spooler::step
@@ -792,7 +755,7 @@ void Spooler::wait()
         _next_start_time = latter_day;
         Task* next_task = NULL;
 
-        if( _paused )
+        if( _state == s_paused )
         {
             _log.msg( "Spooler paused ");
         }
@@ -839,28 +802,43 @@ void Spooler::wait()
 void Spooler::run()
 {
     _log.msg( "Spooler::run" );
+    
+    _state = s_running;
 
     while(1)
     {
-        if( _pause     )  _pause = false, _paused = true;
-        if( _stop      )  stop();
-        if( _terminate )  break;
-        if( _reload    )  reload();
+        switch( _state_cmd )
+        {
+            case sc_pause                 : _state = s_paused; 
+                                            break;
 
-        if( !_paused )  step();
+            case sc_stop:
+            case sc_terminate:
+            case sc_terminate_and_restart : 
+            case sc_reload                : stop();  
+                                            break;
+
+            default: ;
+        }
+
+        if( _state_cmd == sc_reload                )  break;
+        if( _state_cmd == sc_terminate             )  break;
+        if( _state_cmd == sc_terminate_and_restart )  break;
+        _state_cmd = sc_none;
+
+        if( _state == s_running )  step();
 
         wait();
     }
-
-    if( _terminate_and_restart )  restart();
 }
 
 //------------------------------------------------------------------------------------Spooler::stop
 
 void Spooler::stop()
 {
+    _state = s_stopping;
+
     _log.msg( "Spooler::stop" );
-    _stop = false;
 
     {
         FOR_EACH( Task_list, _task_list, it ) 
@@ -873,18 +851,64 @@ void Spooler::stop()
 
     _object_set_class_list.clear();
     _job_list.clear();
+
+    _state = s_stopped;
 }
 
 //----------------------------------------------------------------------------------Spooler::reload
-
+/*
 void Spooler::reload()
 {
     _log.msg( "Spooler::reload" );
 
-    _reload = false;
     stop();
     load();
     start();
+}
+*/
+//--------------------------------------------------------------------------------Spooler::load_arg
+
+void Spooler::load_arg()
+{
+    _config_filename  = read_profile_string( "factory.ini", "spooler", "config" );
+    _log_directory    = read_profile_string( "factory.ini", "spooler", "log-dir" );
+    _spooler_id       = read_profile_string( "factory.ini", "spooler", "spooler-id" );
+    _object_set_param = read_profile_string( "factory.ini", "spooler", "object-set-param" );
+
+    for( Sos_option_iterator opt ( _argc, _argv ); !opt.end(); opt.next() )
+    {
+        if( opt.flag      ( "service"          ) )  ;   // wurde in sos_main() bearbeitet
+        else
+        if( opt.with_value( "log"              ) )  ;   // wurde in sos_main() bearbeitet
+        else
+        if( opt.with_value( "config"           ) )  _config_filename = opt.value();
+        else
+        if( opt.with_value( "log-dir"          ) )  _log_directory = opt.value();
+        else
+        if( opt.with_value( "spooler-id"       ) )  _spooler_id = opt.value();
+        else
+        if( opt.with_value( "object-set-param" ) )  _object_set_param = opt.value();
+        else
+            throw_sos_option_error( opt );
+    }
+}
+
+//------------------------------------------------------------------------------------Spooler::load
+
+void Spooler::load()
+{
+    _state = s_starting;
+    _log.msg( "Spooler::load" );
+
+    load_arg();
+
+    tzset();
+
+    {
+        Thread_semaphore::Guard guard = &_semaphore;
+
+        load_xml();
+    }
 }
 
 //---------------------------------------------------------------------------------Spooler::restart
@@ -905,7 +929,7 @@ void Spooler::restart()
 
 void Spooler::cmd_reload()
 {
-    _reload = true;
+    _state_cmd = sc_reload;
     cmd_wake();
 }
 
@@ -913,7 +937,7 @@ void Spooler::cmd_reload()
 
 void Spooler::cmd_stop()
 {
-    _stop = true;
+    _state_cmd = sc_stop;
     cmd_wake();
 }
 
@@ -921,10 +945,10 @@ void Spooler::cmd_stop()
 
 void Spooler::cmd_terminate()
 {
-    _log.msg( "Spooler::cmd_terminate_and_restart" );
+    _log.msg( "Spooler::cmd_terminate" );
 
-    _terminate = true;
-    cmd_stop();
+    _state_cmd = sc_terminate;
+    cmd_wake();
 }
 
 //---------------------------------------------------------------Spooler::cmd_terminate_and_restart
@@ -933,8 +957,55 @@ void Spooler::cmd_terminate_and_restart()
 {
     _log.msg( "Spooler::cmd_terminate_and_restart" );
 
-    _terminate_and_restart = true;
-    cmd_terminate();
+    _state_cmd = sc_terminate_and_restart;
+    cmd_wake();
+}
+
+//----------------------------------------------------------------------------------Spooler::launch
+
+int Spooler::launch( int argc, char** argv )
+{
+    _argc = argc;
+    _argv = argv;
+
+    do
+    {
+        load();
+
+        if( _state_cmd != sc_reload )
+        {
+            _communication.start_thread();
+        }
+
+        _state_cmd = sc_none;
+
+        start();
+
+        run();
+
+    } while( _state_cmd == sc_reload );
+
+    if( _state_cmd == sc_terminate_and_restart )  restart();
+
+    return 0;
+}
+
+//-------------------------------------------------------------------------------------spooler_main
+
+int spooler_main( int argc, char** argv )
+{
+    HRESULT hr = CoInitialize(NULL);
+    if( FAILED(hr) )  throw_ole( hr, "CoInitialize" );
+
+    {
+        spooler::Spooler spooler;
+
+        spooler.launch( argc, argv );
+    }
+
+    CoUninitialize();
+
+    return 0;
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -945,23 +1016,27 @@ void Spooler::cmd_terminate_and_restart()
 
 int sos_main( int argc, char** argv )
 {
-    HRESULT hr = CoInitialize(NULL);
-    if( FAILED(hr) )  throw_ole( hr, "CoInitialize" );
+    bool service = false;
+    int  ret;
 
+    for( Sos_option_iterator opt ( argc, argv ); !opt.end(); opt.next() )
     {
-        spooler::Spooler spooler;
-
-        
-        spooler.load_arg( argc, argv );
-        spooler.load();
-        spooler.start();
-        spooler.run();
+        if( opt.flag      ( "service"          ) )  service = opt.set();
+        else
+        if( opt.with_value( "log"              ) )  log_start( opt.value() );
     }
 
-    CoUninitialize();
-    return 0;
-}
+    if( argc >= 2 && strcmp( argv[1], "-service" ) == 0 )
+    {
+        ret = spooler::spooler_service( argc, argv );
+    }
+    else
+    {
+        ret = spooler::spooler_main( argc, argv );
+    }
 
+    return ret;
+}
 
 } //namespace sos
 

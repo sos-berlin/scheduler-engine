@@ -118,20 +118,34 @@ SOURCE=.\spooler.odl
 
 !IF  "$(CFG)" == "spooler - Win32 Release"
 
+# Begin Custom Build - mktyplib $(InputPath) /tlb $(OutDir)/spooler.tlb
+OutDir=.\Release
+TargetName=spooler
+InputPath=.\spooler.odl
+
+"$(TargetName).tlb" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	mktyplib $(InputPath) /tlb $(OutDir)/spooler.tlb
+
+# End Custom Build
+
 !ELSEIF  "$(CFG)" == "spooler - Win32 Debug"
 
-# Begin Custom Build
+# Begin Custom Build - mktyplib $(InputPath) /tlb $(OutDir)/spooler.tlb
 OutDir=.\Debug
 TargetName=spooler
 InputPath=.\spooler.odl
 
 "$(TargetName).tlb" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	echo mktyplib $(InputPath) -o $(OutDir)/spooler.tlb
+	mktyplib $(InputPath) /tlb $(OutDir)/spooler.tlb
 
 # End Custom Build
 
 !ENDIF 
 
+# End Source File
+# Begin Source File
+
+SOURCE=.\spooler.rc
 # End Source File
 # Begin Source File
 
@@ -148,6 +162,10 @@ SOURCE=.\spooler_log.cxx
 # End Source File
 # Begin Source File
 
+SOURCE=.\spooler_service.cxx
+# End Source File
+# Begin Source File
+
 SOURCE=.\spooler_xml.cxx
 # End Source File
 # End Group
@@ -157,6 +175,10 @@ SOURCE=.\spooler_xml.cxx
 # Begin Source File
 
 SOURCE=.\spooler.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\spooler_version.h
 # End Source File
 # End Group
 # Begin Group "Ressourcendateien"

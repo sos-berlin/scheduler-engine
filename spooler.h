@@ -1,4 +1,4 @@
-// $Id: spooler.h,v 1.18 2001/01/10 14:47:38 jz Exp $
+// $Id: spooler.h,v 1.19 2001/01/11 11:16:26 jz Exp $
 
 #ifndef __SPOOLER_H
 
@@ -146,9 +146,9 @@ struct Com_task_log : Icom_task_log, Sos_ole_object
 
     USE_SOS_OLE_OBJECT
 
-    STDMETHODIMP                msg                     ( BSTR line )                           { log( Log::k_msg, line ); }
-    STDMETHODIMP                warn                    ( BSTR line )                           { log( Log::k_msg, line ); }
-    STDMETHODIMP                error                   ( BSTR line )                           { log( Log::k_msg, line ); }
+    STDMETHODIMP                msg                     ( BSTR line )                           { return log( Log::k_msg, line ); }
+    STDMETHODIMP                warn                    ( BSTR line )                           { return log( Log::k_msg, line ); }
+    STDMETHODIMP                error                   ( BSTR line )                           { return log( Log::k_msg, line ); }
     STDMETHODIMP                log                     ( Log::Kind kind, BSTR line );
 
 
@@ -573,9 +573,33 @@ struct Command_processor
 
 struct Spooler
 {
+    enum State
+    {
+        s_none,
+        s_stopped,
+        s_starting,
+        s_running,
+        s_paused,
+        s_stopping,
+        s__max
+    };
+
+    enum State_cmd
+    {
+        sc_none,
+        sc_stop,                // s_running | s_paused -> s_stopped
+        sc_start,               // s_paused -> s_running
+        sc_terminate,           // s_running | s_paused -> s_stopped, exit()
+        sc_terminate_and_restart,
+        sc_reload,
+        sc_pause,               // s_running -> s_paused
+        sc_continue,            // s_suspended -> s_running
+        sc__max
+    };
                                 Spooler                     () : _zero_(this+1), _communication(this), _command_processor(this), _log(this) {}
 
-    void                        load_arg                    ( int argc, char** argv );
+    int                         launch                      ( int argc, char** argv );                                
+    void                        load_arg                    ();
     void                        load                        ();
     void                        load_xml                    ();
 
@@ -591,8 +615,8 @@ struct Spooler
     void                        wait                        ();
 
     void                        cmd_reload                  ();
-    void                        cmd_pause                   ()                                  { _pause = true; cmd_wake(); }
-    void                        cmd_continue                ()                                  { _paused = false; cmd_wake(); }
+    void                        cmd_pause                   ()                                  { _state_cmd = sc_pause; cmd_wake(); }
+    void                        cmd_continue                ()                                  { if( _state == s_paused )  _state = s_running; cmd_wake(); }
     void                        cmd_stop                    ();
     void                        cmd_terminate               ();
     void                        cmd_terminate_and_restart   ();
@@ -612,12 +636,8 @@ struct Spooler
     Thread_semaphore           _semaphore;
     volatile bool              _sleeping;                    // Besser: sleep mit Signal unterbrechen
     Time                       _next_start_time;
-    bool                       _reload;
-    bool                       _stop;
-    bool                       _pause;
-    bool                       _paused;
-    bool                       _terminate;
-    bool                       _terminate_and_restart;
+    State                      _state;
+    State_cmd                  _state_cmd;
     int                        _tcp_port;
     int                        _udp_port;
     string                     _config_filename;
@@ -626,8 +646,12 @@ struct Spooler
     string                     _object_set_param;
     string                     _log_directory;
     Log                        _log;
+    int                        _argc;
+    char**                     _argv;
 };
 
+
+int spooler_service( int argc, char** argv );
 
 } //namespace spooler
 } //namespace sos

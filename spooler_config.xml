@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 
-<!-- $Id: spooler_config.xml,v 1.15 2001/01/09 22:39:02 jz Exp $   (C) 2000 SOS GmbH Berlin -->
+<!-- $Id: spooler_config.xml,v 1.16 2001/01/11 11:16:26 jz Exp $   (C) 2000 SOS GmbH Berlin -->
 
 <!DOCTYPE spooler_config SYSTEM "spooler_config.dtd">
 
@@ -21,14 +21,6 @@
 dir_name = "c:\tmp\spooler"
 set fso = createobject( "Scripting.FileSystemObject" )
 
-set log_file = createobject( "hostware.file" )
-log_file.open "-out /dev/stderr"
-log_file.put_line "*Job Aufbereiten"
-
-sub log( text )
-    log_file.put_line text
-end sub
-
 
 class Testobjekt
 
@@ -42,7 +34,7 @@ class Testobjekt
 
 
     sub process( new_level )
-        log "process " & level & " ==> " & new_level 
+        log.msg "process " & level & " ==> " & new_level 
         file.move dir_name & "\" & new_level & "\" & file.name
         level = new_level
     end sub
@@ -88,7 +80,7 @@ class Object_set_class
         dim object
         set object = new Testobjekt
         object.construct file_array(index)
-        log "index=" & index & ", level=" & object.level
+        log.msg "index=" & index & ", level=" & object.level
         index = index + 1
 
         set spooler_get = object
@@ -134,16 +126,7 @@ end function
 use diagnostics;
 use Win32::OLE;
 
-
-$log_file = Win32::OLE->new( 'hostware.file' );
-$log_file->open( "-out /dev/stderr" );
-$log_file->put_line( "*Job Perl" );
-
-sub log
-{
-    $log_file->put_line( shift );
-}
-
+$log->msg( "*Job Perl" );
 
 
 {
@@ -165,7 +148,7 @@ sub log
     {
         my $self = shift;
         my $new_level = shift;
-        main::log "process " . $self->{name} . ", " . $self->{level} . " ==> $new_level";
+        #$log->msg( "process " . $self->{name} . ", " . $self->{level} . " ==> $new_level" );
         $self->{level} = $new_level;
     }
 }
@@ -207,7 +190,7 @@ sub log
         if( $self->spooler_eof() )  { return; }
 
         my $object = Testobjekt::construct( $self->{index} );
-        main::log "index=" . $self->{index} . ", level=" . $object->{level};
+        #$log->msg( "index=" . $self->{index} . ", level=" . $object->{level} );
         $self->{index}++;
 
         return $object;
@@ -327,16 +310,13 @@ sub spooler_process()
 
             <script language="VBScript"><![CDATA[
 
-set log_file = createobject( "hostware.file" )
-log_file.open "-out /dev/stderr"
-
-log_file.put_line "*Job einfach"
+log.msg "*Job einfach"
 
 index = 1
 
 function step()
     if index > 3 then step=false: exit function
-    log_file.put_line "*Job einfach: step " & index
+    log.msg "*Job einfach: step " & index
     index = index + 1
     step = true
 end function

@@ -1,4 +1,4 @@
-// $Id: spooler_log.cxx,v 1.2 2001/01/10 14:47:38 jz Exp $
+// $Id: spooler_log.cxx,v 1.3 2001/01/11 11:16:26 jz Exp $
 
 #include "../kram/sos.h"
 #include "../kram/sosdate.h"
@@ -9,7 +9,8 @@ namespace spooler {
 
 //-------------------------------------------------------------------------------Typbibliothek
 
-DESCRIBE_CLASS( NULL, Com_task_log, com_task_log, CLSID_Com_task_log, "Spooler.Com_task_log", "1.0", 0 );
+Typelib_descr   spooler_typelib ( LIBID_spooler, "Spooler", "1.0" );
+DESCRIBE_CLASS( &spooler_typelib, Com_task_log, com_task_log, CLSID_Com_task_log, "Spooler.Com_task_log", "1.0", 0 );
 
 //-----------------------------------------------------------------------------------------Log::Log
 
@@ -95,7 +96,7 @@ void Log::log( Kind kind, const string& prefix, const string& line )
     }
 
     write( buffer );
-    write( prefix + " " );
+    if( !prefix.empty() )  write( "(" + prefix + ") " );
     write( line );
     write( "\n" );
     fflush( _file );
