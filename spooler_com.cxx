@@ -1,4 +1,4 @@
-// $Id: spooler_com.cxx,v 1.81 2002/12/02 17:19:30 jz Exp $
+// $Id: spooler_com.cxx,v 1.82 2002/12/02 20:43:31 jz Exp $
 /*
     Hier sind implementiert
 
@@ -1518,26 +1518,18 @@ STDMETHODIMP Com_task::get_params( Ivariable_set** result )
 
 STDMETHODIMP Com_task::wait_until_terminated( double wait_time, VARIANT_BOOL* ok )
 {
-#   ifdef SPOOLER_USE_THREADS
+    HRESULT hr = NOERROR;
 
-        HRESULT hr = NOERROR;
+    THREAD_LOCK( _lock )
+    try
+    {
+        if( _task )  *ok = _task->wait_until_terminated( wait_time );
+               else  *ok = true;
+    }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Task.wait_until_terminated" ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Task.wait_until_terminated" ); }
 
-        THREAD_LOCK( _lock )
-        try
-        {
-            if( _task )  *ok = _task->wait_until_terminated( wait_time );
-                   else  *ok = true;
-        }
-        catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Task.wait_until_terminated" ); }
-        catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Task.wait_until_terminated" ); }
-
-        return hr;
-
-#   else
-
-        return E_NOTIMPL;
-
-#   endif
+    return hr;
 }
 
 //------------------------------------------------------------------------------------Com_task::end

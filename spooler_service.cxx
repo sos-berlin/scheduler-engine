@@ -1,4 +1,4 @@
-// $Id: spooler_service.cxx,v 1.33 2002/12/02 17:19:33 jz Exp $
+// $Id: spooler_service.cxx,v 1.34 2002/12/02 20:43:33 jz Exp $
 /*
     Hier sind implementiert
 
@@ -21,10 +21,9 @@
 #include <process.h>
 
 namespace sos {
-
-string module_filename();
-
 namespace spooler {
+
+using namespace zschimmer::windows;
 
 //--------------------------------------------------------------------------------------------const
 
@@ -619,7 +618,7 @@ static void __stdcall ServiceMain( DWORD argc, char** argv )
             if( !service_status_handle )  throw_mswin_error( "RegisterServiceCtrlHandler" );
 
             LOG( "CreateThread\n" );
-            thread_handle = _beginthreadex( NULL, 0, service_thread, &param, 0, &thread_id );
+            thread_handle.set_handle( (HANDLE)_beginthreadex( NULL, 0, service_thread, &param, 0, &thread_id ) );
             if( !thread_handle )  throw_mswin_error( "CreateThread" );
 
             //do ret = WaitForSingleObject( thread_handle, INT_MAX );  while( ret != WAIT_TIMEOUT );

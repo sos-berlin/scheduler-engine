@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.150 2002/12/02 17:19:30 jz Exp $
+// $Id: spooler.cxx,v 1.151 2002/12/02 20:43:30 jz Exp $
 /*
     Hier sind implementiert
 
@@ -363,8 +363,6 @@ void Spooler::wait_until_threads_stopped( Time until )
             }
         }
 
-        if( wait_handles.length() > 0 )  sos_sleep( 0.01 );  // Zur Verkürzung des Protokolls: Nächsten Threads Zeit lassen, sich zu beenden
-
         if( Time::now() > until )  break;
 
         if( index < 0 )
@@ -382,6 +380,8 @@ void Spooler::wait_until_threads_stopped( Time until )
                 }
             }
         }
+
+        if( wait_handles.length() > 0 )  sos_sleep( 0.01 );  // Zur Verkürzung des Protokolls: Nächsten Threads Zeit lassen, sich zu beenden
     }
 }
 
@@ -391,7 +391,7 @@ void Spooler::signal_threads( const string& signal_name )
 {
     assert( current_thread_id() == _thread_id );
 
-    FOR_EACH( Thread_list, _thread_list, it )  (*it)->signal( signal_name );
+    FOR_EACH( Thread_list, _thread_list, it )  if( (*it)->_free_threading )  (*it)->signal( signal_name );
 }
 
 //------------------------------------------------------------------------------Spooler::get_thread
@@ -889,21 +889,12 @@ void Spooler::run()
                 if( _debug )  msg = _next_job? "Warten bis " + _next_time.as_string() + " für Job " + _next_job->name() 
                                              : "Kein Job zu starten";
 
-#               ifdef Z_WINDOWS
+                Wait_handles wait_handles = _wait_handles;
+                FOR_EACH( Thread_list, _thread_list, it )  if( !(*it)->_free_threading )  wait_handles += (*it)->_wait_handles;
 
-                    Wait_handles wait_handles = _wait_handles;
-                    FOR_EACH( Thread_list, _thread_list, it )  if( !(*it)->_free_threading )  wait_handles += (*it)->_wait_handles;
+                if( _debug )  if( wait_handles.wait(0) == -1 )  _log.debug( msg ), wait_handles.wait_until( _next_time );
 
-                    if( _debug )  if( wait_handles.wait(0) == -1 )  _log.debug( msg ), wait_handles.wait_until( _next_time );
-
-                    wait_handles.clear();
-
-#                else
-
-                    _log.debug( msg );
-                    sos_sleep( _next_time - now );
-
-#               endif
+                wait_handles.clear();
             }
         }
 

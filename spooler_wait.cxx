@@ -1,4 +1,4 @@
-// $Id: spooler_wait.cxx,v 1.53 2002/12/02 17:19:36 jz Exp $
+// $Id: spooler_wait.cxx,v 1.54 2002/12/02 20:43:35 jz Exp $
 /*
     Hier sind implementiert
 
@@ -43,52 +43,6 @@ void windows_message_step()
 }
 
 #endif
-//-----------------------------------------------------------------------------------wait_for_event
-#ifdef Z_WINDOWS
-/*
-bool wait_for_event( HANDLE handle, double wait_time )
-{
-    while( wait_time > 0 )
-    {
-        const double max_t = (double)(INT_MAX-10) / 1000.0;
-        int ms = min( max_t, wait_time ) * 1000.0;
-
-        LOG( "MsgWaitForMultipleObjects()\n" );
-        int ret = MsgWaitForMultipleObjects( 1, &handle, FALSE, ms, QS_ALLINPUT ); 
-
-        if( ret == WAIT_OBJECT_0 )  return true;
-        
-        if( ret == WAIT_OBJECT_0 + 1 )  windows_message_step();
-        else
-        if( ret != WAIT_TIMEOUT )  throw_mswin_error( "WaitForSingleObject" );
-
-        wait_time -= max_t;
-    }
-
-    return false;
-}
-*/
-#endif
-//-------------------------------------------------------------------------------------Event::Event
-/*
-Event::Event( const string& name )  
-: 
-    _zero_(this+1),
-    _name(name) 
-{
-#ifdef Z_WINDOWS
-    _handle = CreateEvent( NULL, FALSE, FALSE, NULL );
-    if( !_handle )  throw_mswin_error( "CreateEvent", name.c_str() );
-#endif
-}
-*/
-//------------------------------------------------------------------------------------Event::~Event
-/*
-Event::~Event()
-{
-    close();
-}
-*/
 //-------------------------------------------------------------------------------------Event::close
 
 void Event::close()
@@ -100,15 +54,6 @@ void Event::close()
     close_handle();
 }
 
-//------------------------------------------------------------------------------Event::close_handle
-/*
-void Event::close_handle()
-{
-#ifdef Z_WINDOWS
-    if( _handle )  CloseHandle( _handle ), _handle = NULL;
-#endif
-}
-*/
 //------------------------------------------------------------------------------------Event::add_to
 
 void Event::add_to( Wait_handles* w )                 
@@ -135,114 +80,16 @@ void Event::remove_from( Wait_handles* w )
     }
 }
 
-//--------------------------------------------------------------------------------------Event::wait
-#ifdef Z_WINDOWS
-/*
-bool Event::wait( double wait_time )
-{
-    bool result = wait_for_event( handle(), wait_time );
-
-    return result;
-}
-*/
-#endif
-//------------------------------------------------------------------------------------Event::signal
-/*
-void Event::signal( const string& name )
-{
-    THREAD_LOCK( _lock )
-    {
-        _signaled = true;
-        _signal_name = name;
-
-#       ifdef Z_WINDOWS
-            SetEvent( _handle );  
-#       endif
-    }
-}
-*/
-//------------------------------------------------------------------------------------Event::signal
-/*
-void Event::async_signal( const string& name )
-{
-#   ifdef Z_WINDOWS
-
-        signal( name );
-
-#   else
-
-        // pthread_mutex_lock:
-        // The  mutex  functions  are  not  async-signal  safe.  What  this  means  is  that  they
-        // should  not  be  called from  a signal handler. In particular, calling pthread_mutex_lock 
-        // or pthread_mutex_unlock from a signal handler may deadlock the calling thread.
-        _signaled = true;
-
-#   endif
-}
-*/
-//--------------------------------------------------------------------------------Event::set_signal
-/*
-void Event::set_signal()
-{
-    LOGI( "Event(" << _name << "," << _signal_name << ").set_signal()\n" );
-
-    THREAD_LOCK( _lock )
-    {
-        _signaled = true;
-    }
-}
-*/
-//-------------------------------------------------------------------------------------Event::reset
-/*
-void Event::reset()
-{
-    THREAD_LOCK( _lock )
-    {
-        _signaled = false;
-        _signal_name = "";
-
-#       ifdef Z_WINDOWS
-            ResetEvent( _handle );
-#       endif
-    }
-}
-*/
-//------------------------------------------------------------------------Event::signaled_then_reset
-/*
-bool Event::signaled_then_reset()
-{
-    if( !_signaled )  return false;
-    
-    bool signaled = false;
-
-    THREAD_LOCK( _lock )
-    {
-        signaled = _signaled;
-        reset();
-    }
-
-    return signaled;
-}
-*/
-//---------------------------------------------------------------------------------Event::as_string
-/*
-string Event::as_string() const
-{ 
-    string result = "Ereignis " + _name; 
-    if( !_signal_name.empty() )  result += " \"" + _signal_name + "\"";
-    return result;
-}
-*/
 //-----------------------------------------------------------------------Wait_handles::Wait_handles
 
 Wait_handles::Wait_handles( const Wait_handles& o )
 : 
     _spooler ( o._spooler ),
     _log     ( o._log ),
+    _events  ( o._events ),
 #ifdef Z_WINDOWS
-    _handles ( o._handles ),
+    _handles ( o._handles )
 #endif
-    _events  ( o._events ) 
 {
 }
 
@@ -302,8 +149,6 @@ Wait_handles& Wait_handles::operator += ( Wait_handles& o )
     THREAD_LOCK( _lock )
     THREAD_LOCK( o._lock )      // Vorsicht, Deadlock-Gefahr!
     {
-        //_events.reserve( _events.size() + o._events.size() );
-        
         Event_vector::iterator   e = o._events.begin();
         vector<HANDLE>::iterator h = o._handles.begin();
 
@@ -339,22 +184,9 @@ void Wait_handles::add( z::Event* event )
     }
 }
 
-//-------------------------------------------------------------------------Wait_handles::add_handle
-#ifdef Z_WINDOWS
-/*
-void Wait_handles::add_handle( HANDLE handle )
-{
-    THREAD_LOCK( _lock )
-    {
-        _handles.push_back( handle );
-        _events.push_back( NULL );
-    }
-}
-*/
-#endif
 //-----------------------------------------------------------------------Wait_handles::remove_handle
 #ifdef Z_WINDOWS
-
+/*
 void Wait_handles::remove_handle( HANDLE handle, z::Event* event )
 {
     THREAD_LOCK( _lock )
@@ -377,7 +209,7 @@ void Wait_handles::remove_handle( HANDLE handle, z::Event* event )
         _handles.erase( it );
     }
 }
-
+*/
 #endif
 //-----------------------------------------------------------------------------Wait_handles::remove
 
@@ -385,11 +217,11 @@ void Wait_handles::remove( z::Event* event )
 {
     if( !event )  return;
 
-#   ifdef Z_WINDOWS
+//#   ifdef Z_WINDOWS
 
-        remove_handle( event->handle(), event );
+        //remove_handle( event->handle(), event );
 
-#   else
+//#   else
 
         // Das ist fast der gleiche Code wie von remove_handle(). Kann man das zusammenfassen? 26.11.2002
 
@@ -404,15 +236,15 @@ void Wait_handles::remove( z::Event* event )
             }
 
             if( it == _events.end() ) {
-                _log->error( "Wait_handles::remove(" + event->as_text() + ") fehlt" );     // Keine Exception. Das wäre nicht gut in einem Destruktor
+                _log->error( "Wait_handles::remove(" + event->as_text() + "): Ereignis ist nicht eingetragen" );     // Keine Exception. Das wäre nicht gut in einem Destruktor
                 return;
             }
 
             _events.erase( it );
-            //_handles.erase( _handles.begin() + ( it - _handles.begin() )  );
+            Z_WINDOWS_ONLY( _handles.erase( _handles.begin() + ( it - _events.begin() )  ) );
         }
 
-#   endif
+//#   endif
 }
 
 //-------------------------------------------------------------------------------Wait_handles::wait
@@ -467,11 +299,11 @@ int Wait_handles::wait_until_2( Time until )
     while(1)
     {
         double wait_time = until - Time::now();
-        if( wait_time <= 0 )  break;
         int    sleep_time_ms = INT_MAX;
         int    t = ceil( min( (double)sleep_time_ms, wait_time * 1000.0 ) );
 
-        if( t <= 0 )  break;
+        if( t <= 0 )  t = 0;  //break;
+        
         if( again ) {
             if( t > 1800 )  return -1;  // Um eine halbe Stunde verrechnet? Das muss an der Sommerzeitumstellung liegen
             _log->info( "Noch " + sos::as_string(wait_time) + "s warten ..." );
@@ -527,6 +359,8 @@ int Wait_handles::wait_until_2( Time until )
             again = true;
         else
             throw_mswin_error( "MsgWaitForMultipleObjects" );
+
+        if( wait_time <= 0 )  break;
     }
 
     return -1;

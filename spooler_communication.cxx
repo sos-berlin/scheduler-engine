@@ -1,4 +1,4 @@
-// $Id: spooler_communication.cxx,v 1.39 2002/12/02 17:19:31 jz Exp $
+// $Id: spooler_communication.cxx,v 1.40 2002/12/02 20:43:32 jz Exp $
 /*
     Hier sind implementiert
 
@@ -376,12 +376,7 @@ Communication::Communication( Spooler* spooler )
 
 Communication::~Communication()
 {
-#ifdef Z_WINDOWS
     close();
-
-    TerminateThread( _thread, 99 );
-
-    _thread.close();
 
     if( _initialized ) 
     {
@@ -389,7 +384,6 @@ Communication::~Communication()
             WSACleanup();
 #       endif
     }
-#endif
 }
 
 //-----------------------------------------------------------------------------Communication::close
@@ -406,12 +400,8 @@ void Communication::close( double wait_time )
         _terminate = true;
     }
 
-#ifdef Z_WINDOWS
-    if( _thread ) 
-    {
-        WaitForSingleObject( _thread, min( (double)INT_MAX, wait_time * 1000.0 ) );
-    }
-#endif
+    thread_wait_for_termination( wait_time );
+    thread_close();
 }
 
 //------------------------------------------------------------------------------Communication::bind
@@ -712,25 +702,23 @@ void Communication::start_thread()
 
 void Communication::start_or_rebind()
 {
-#ifdef Z_WINDOWS
-    Thread_semaphore::Guard guard = &_semaphore;
-
-    if( _started )  
+    THREAD_LOCK( _semaphore )
     {
-        rebind();
-    }
-    else 
-    {
-        if( _thread ) 
+        if( _started )  
         {
-            WaitForSingleObject( _thread, INT_MAX );    // Thread sollte beendet sein
-            CloseHandle( _thread );
-            _thread.close();
+            rebind();
         }
+        else 
+        {
+            if( thread_handle() ) 
+            {
+                thread_wait_for_termination();    // Thread sollte beendet sein
+                thread_close();
+            }
 
-        start_thread();
+            start_thread();
+        }
     }
-#endif
 }
 
 //-------------------------------------------------------------------------------------------------

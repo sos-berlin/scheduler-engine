@@ -1,4 +1,4 @@
-// $Id: spooler_task.h,v 1.79 2002/12/02 17:19:34 jz Exp $
+// $Id: spooler_task.h,v 1.80 2002/12/02 20:43:33 jz Exp $
 
 #ifndef __SPOOLER_TASK_H
 #define __SPOOLER_TASK_H
@@ -511,7 +511,7 @@ struct Job_script_task : Script_task
 
 struct Process_task : Task
 {
-                                Process_task                ( Spooler* sp, const Sos_ptr<Job>& j ) : Task(sp,j), _process_handle( (HANDLE)0, "process_handle" ) {}
+                                Process_task                ( Spooler* sp, const Sos_ptr<Job>& j ) : Task(sp,j), _process_handle( "process_handle" ) {}
         
   //virtual bool                loaded                      ();
   //virtual bool                do_load                     ();

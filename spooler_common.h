@@ -1,4 +1,4 @@
-// $Id: spooler_common.h,v 1.13 2002/11/24 15:12:47 jz Exp $
+// $Id: spooler_common.h,v 1.14 2002/12/02 20:43:31 jz Exp $
 
 #ifndef __SPOOLER_COMMON_H
 #define __SPOOLER_COMMON_H
@@ -28,7 +28,7 @@ typedef DWORD                   Process_id;
 // Der andere Thread muss dieselbe Semaphore LOCK nutzen.
 
 //-------------------------------------------------------------------------------------------Handle
-
+/*
 struct Handle : Sos_self_deleting
 {
 #   ifdef SYSTEM_WIN
@@ -54,7 +54,7 @@ struct Handle : Sos_self_deleting
 
 #   endif
 };
-
+*/
 //static HANDLE null_handle = NULL;
 
 //-------------------------------------------------------------------------------------------Atomic

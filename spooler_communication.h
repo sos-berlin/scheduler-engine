@@ -1,4 +1,4 @@
-// $Id: spooler_communication.h,v 1.6 2002/12/02 17:19:32 jz Exp $
+// $Id: spooler_communication.h,v 1.7 2002/12/02 20:43:32 jz Exp $
 
 #ifndef __SPOOLER_COMMUNICATION_H
 #define __SPOOLER_COMMUNICATION_H
@@ -186,7 +186,6 @@ struct Communication : zschimmer::Thread
     bool                       _rebound;
     int                        _initialized;
     bool                       _started;
-    Handle                     _thread;
 };
 
 //-------------------------------------------------------------------------------------------------

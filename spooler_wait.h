@@ -1,4 +1,4 @@
-// $Id: spooler_wait.h,v 1.31 2002/12/02 17:19:36 jz Exp $
+// $Id: spooler_wait.h,v 1.32 2002/12/02 20:43:35 jz Exp $
 
 #ifndef __SPOOLER_WAIT_H
 #define __SPOOLER_WAIT_H
@@ -27,33 +27,12 @@ struct Event : z::Event
 
                                 Event                       ( const string& name = "" )             : Base_class( dont_create, name ), _zero_(this+1) {}
 
-#   ifdef Z_WINDOWS
-                                Event                       ( HANDLE h, const string& name )        : Base_class( h, name ), _zero_(this+1) {}
-#   endif
-
-                             //~Event                       ();
-
-
-#   ifdef Z_WINDOWS
-//                              Event                       ( const string& name, HANDLE h ) : Handle(h), _zero_(this+1), _name(name) {}
-        void                    operator =                  ( const HANDLE& h )                     { set_handle(h); }
-#   endif
-
     virtual void                close                       ();
     void                        add_to                      ( Wait_handles* );
     void                        remove_from                 ( Wait_handles* );
 
-  protected:
-
-  //virtual void                close_handle                ();
-
-
+  private:
     Fill_zero                  _zero_;
-    string                     _name;                       
-    string                     _signal_name;
-    bool                       _signaled;
-    Thread_semaphore           _lock;
-  //bool                       _waiting;
     vector<Wait_handles*>      _wait_handles;
 };
 
@@ -70,26 +49,26 @@ struct Wait_handles : Non_cloneable
 
     void                        clear                       ();
     void                        close                       ();
-  //void                        clear                       ()                              { _handles.clear(); _events.clear(); }
+  //void                        clear                       ()                                      { _handles.clear(); _events.clear(); }
 
     void                        add                         ( zschimmer::Event* );
     void                        remove                      ( zschimmer::Event* );
 
 #ifdef Z_WINDOWS
     void                        add_handle                  ( HANDLE );
-    void                        remove_handle               ( HANDLE, zschimmer::Event* for_internal_use_only = NULL );
-    HANDLE                      operator []                 ( int index )                   { return _handles[index]; }
-    int                         wait_until                  ( Time );                       // Berücksichtigt Sommerzeitumstellung
+  //void                        remove_handle               ( HANDLE, zschimmer::Event* for_internal_use_only = NULL );
+    HANDLE                      operator []                 ( int index )                           { return _handles[index]; }
+    int                         wait_until                  ( Time );                               // Berücksichtigt Sommerzeitumstellung
     int                         wait_until_2                ( Time );
     int                         wait                        ( double time );
 #endif
 
     bool                        signaled                    ();
-    int                         length                      ()                              { return _events.size(); }
-    bool                        empty                       () const                        { return _events.empty(); }
+    int                         length                      ()                                      { return _events.size(); }
+    bool                        empty                       () const                                { return _events.empty(); }
 
     string                      as_string                   ();
-    friend ostream&             operator <<                 ( ostream& s, Wait_handles& w ) { return s << w.as_string(); }
+    friend ostream&             operator <<                 ( ostream& s, Wait_handles& w )         { return s << w.as_string(); }
 
 
   protected:
@@ -105,7 +84,6 @@ struct Wait_handles : Non_cloneable
 
   public:
     Thread_semaphore           _lock;
-  //bool                       _waiting;
 };
 
 //--------------------------------------------------------------------------------Directory_watcher
@@ -114,7 +92,7 @@ struct Directory_watcher : Event
 {
 #   ifdef SYSTEM_WIN
 
-                                Directory_watcher           ( Prefix_log* log )             : Event(NULL,""), _log(log) {}
+                                Directory_watcher           ( Prefix_log* log )             : _log(log) {}
                                ~Directory_watcher           ()                              { close(); }
 
                                 operator bool               ()                              { return _handle != NULL; }
