@@ -1,4 +1,4 @@
-<!-- $Id: jobs_frame.html,v 1.12 2004/07/21 20:40:09 jz Exp $ -->
+<!-- $Id: jobs_frame.html,v 1.13 2004/07/21 21:30:04 jz Exp $ -->
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <html>
 
@@ -114,7 +114,8 @@ function scheduler_command__onclick()
 
 function scheduler_command__show_log__onclick()
 {
-    window.open( "http://" + document.location.host + "/show_log" );
+    var cmd = "show_log";
+    window.open( "http://" + document.location.host + "/" + cmd, cmd, "", true );
     _popup.hide();
 }
 
