@@ -1,4 +1,4 @@
-ï»¿// $Id: scheduler.js,v 1.1 2004/11/30 21:59:46 jz Exp $
+// $Id: scheduler.js,v 1.2 2004/12/01 17:02:14 jz Exp $
 
 //----------------------------------------------------------------------------------------------var
 
@@ -24,7 +24,7 @@ function check_browser()
         {
             if( window.navigator.appName == "Microsoft Internet Explorer" )
             {
-                //if( !window.clientInformation )       KÃ¶nnte Opera sein, oder auch nicht.
+                //if( !window.clientInformation )       Könnte Opera sein, oder auch nicht.
                 //{
                 //    opera = 7;  // Vermutlich Opera, der sich als ie ausgibt. Aber welche Version von Opera ist das?
                 //}
@@ -294,7 +294,7 @@ function update__onclick()
 
 function show_order_jobs_checkbox__onclick()
 {
-    save_checkbox_state( event.srcElement.id );
+    save_checkbox_state( "show_order_jobs_checkbox" );
     window.parent.left_frame.reset_error();
     update();
 }
@@ -303,16 +303,16 @@ function show_order_jobs_checkbox__onclick()
 
 function show_tasks_checkbox__onclick()
 {
-    save_checkbox_state( event.srcElement.id );
+    save_checkbox_state( "show_tasks_checkbox" );
     window.parent.left_frame.reset_error();
     update();
 }
 
 //------------------------------------------------------------show_job_chain_jobs_checkbox__onclick
 
-function show_job_chain_jobs_checkbox__onclick()
+function show_job_chain_jobs_checkbox__onclick( event )
 {
-    save_checkbox_state( event.srcElement.id );
+    save_checkbox_state( "show_job_chain_jobs_checkbox" );
     window.parent.left_frame.reset_error();
     update();
 }
@@ -321,7 +321,7 @@ function show_job_chain_jobs_checkbox__onclick()
 
 function show_job_chain_orders_checkbox__onclick()
 {
-    save_checkbox_state( event.srcElement.id );
+    save_checkbox_state( "show_job_chain_orders_checkbox" );
     window.parent.left_frame.reset_error();
     update();
 }
@@ -335,7 +335,7 @@ function Popup_menu_builder__add_command( html, xml_command, is_active )
 }
 
 //-------------------------------------------------------------------------------popup_menu.execute
-// FÃ¼r Popup_menu_builder.add_command()
+// Für Popup_menu_builder.add_command()
 
 function popup_menu__execute( xml_command )
 {
@@ -369,7 +369,7 @@ function Popup_menu_builder__add_show_log( html, show_log_command, window_name, 
 }
 
 //--------------------------------------------------------------------popup_menu__show_log__onclick
-// FÃ¼r Popup_menu_builder.add_show_log()
+// Für Popup_menu_builder.add_show_log()
 
 function popup_menu__show_log__onclick( show_log_command, window_name )
 {
@@ -526,7 +526,7 @@ function xml_encode( text )
 {
     if( text == null )  return "";
     return text.toString().replace( /&/g, "&amp;" ).replace( /</g, "&lt;" ).replace( />/g, "&gt;" );
-    //TODO RegulÃ¤re AusdrÃ¼cke vorkompilieren
+    //TODO Reguläre Ausdrücke vorkompilieren
 }
 
 //-----------------------------------------------------------------------------------scheduler_init
@@ -535,95 +535,6 @@ function scheduler_init()
 {
     Popup_menu_builder.prototype.add_command  = Popup_menu_builder__add_command;
     Popup_menu_builder.prototype.add_show_log = Popup_menu_builder__add_show_log;
-}
-
-//----------------------------------------------------------------------------------XMLDocument.xml
-// FÃ¼r Firefox
-
-if( window.XMLDocument  &&  !XMLDocument.prototype.xml )
-{
-	Document.prototype.__defineGetter__
-	( 
-	    "xml", 
-	    
-	    function()
-	    {
-		    return new XMLSerializer().serializeToString( this );
-	    } 
-	);
-}
-	
-//---------------------------------------------------------------------XMLDocument.selectSingleNode
-// FÃ¼r Firefox
-
-if( window.XMLDocument  &&  !XMLDocument.prototype.selectSingleNode )
-{
-    window.XMLDocument.prototype.selectSingleNode = function( path )
-    {
-        return this.evaluate( path, this, null, 0, null ).iterateNext();
-    }
-}
-
-//-------------------------------------------------------------------------XMLDocument.selectNodes
-
-if( window.XMLDocument   &&  !XMLDocument.prototype.selectNodes )
-{
-    window.XMLDocument.prototype.selectNodes = function( path )
-    {
-        return this.evaluate( path, this, null, 0, null );
-    }
-}
-
-//------------------------------------------------------------------------XMLDocument.transformNode
-
-if( window.XMLDocument   &&  !XMLDocument.prototype.transformNode )
-{
-    window.XMLDocument.prototype.transformNode = function( stylesheet_dom_document )
-    {
-        var xslt_processor = new XSLTProcessor();
-        xslt_processor.importStylesheet( stylesheet_dom_document );
-		return new XMLSerializer().serializeToString( xslt_processor.transformToDocument( this ) );
-    }
-}
-
-//---------------------------------------------------------------------------------------Stylesheet
-
-function Stylesheet( url )
-{
-    var xml_http = window.XMLHttpRequest? new XMLHttpRequest() : new ActiveXObject( "Msxml2.XMLHTTP" );
-    
-    xml_http.open( "GET", url, false );
-    xml_http.send( null );
-    
-    if( window.DOMParser )
-    {
-        var dom_parser = new DOMParser();
-        var stylesheet_dom = dom_parser.parseFromString( xml_http.responseText, "text/xml" );
-        if( stylesheet_dom.documentElement.nodeName == "parsererror"  )  throw new Error( "Fehler im Stylesheet " + url + ": " + stylesheet_dom.documentElement.firstChild.nodeValue );
-     
-        this._xslt_processor = new XSLTProcessor();
-        this._xslt_processor.importStylesheet( stylesheet_dom );
-    }
-    else
-    {
-        this._xslt_dom = new ActiveXObject( "MSXML2.DOMDocument" );
-        var ok = this._xslt_dom.loadXML( xml_http.responseText );
-        if( !ok )  throw new Error( "Fehlerhafte XML-Antwort: " + this._xslt_dom.parseError.reason );
-    }
-}
-
-//-------------------------------------------------------------------------Stylesheet.xml_transform
-
-Stylesheet.prototype.xml_transform = function( dom_document )
-{
-    if( this._xslt_processor )
-    {
-		return new XMLSerializer().serializeToString( this._xslt_processor.transformToDocument( dom_document ) );
-    }
-    else
-    {
-        return dom_document.transformNode( this._xslt_dom );
-    }
 }
 
 //-------------------------------------------------------------------------------string_from_object
@@ -986,5 +897,3 @@ function changeReadyState(oDOMDoc, iRS)
 #define DE_E_REDIRECT_TO_DIR           0x800C0015
 #define DE_E_CANNOT_LOCK_REQUEST       0x800C0016
 */
-
-

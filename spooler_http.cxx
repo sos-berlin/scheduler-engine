@@ -1,4 +1,4 @@
-// $Id: spooler_http.cxx,v 1.17 2004/11/30 22:02:28 jz Exp $
+// $Id: spooler_http.cxx,v 1.18 2004/12/01 17:02:13 jz Exp $
 /*
     Hier sind implementiert
 
@@ -75,7 +75,8 @@ void Http_parser::add_text( const char* text, int len )
 
 bool Http_parser::is_complete()
 {
-    return _text.length() >= _body_start + _content_length;  // >=, weil Firefox noch ein \r\n anhängt
+    return _reading_body  &&  (    _text.length() == _body_start + _content_length
+                                || _text.length() == _body_start + _content_length + 2 );  // Firefox hängt noch ein \r\n an
 }
 
 //------------------------------------------------------------------------Http_parser::parse_header
@@ -256,6 +257,7 @@ void Http_response::finish()
 
         for( int i = 0; i < _status_text.length(); i++ )  if( (uint)_status_text[i] < ' ' )  _status_text[i] = ' ';
         _header += _status_text;
+        _header += "\r\n";
     }
     else
     {

@@ -1,4 +1,4 @@
-// $Id: spooler_communication.cxx,v 1.98 2004/10/22 09:33:23 jz Exp $
+// $Id: spooler_communication.cxx,v 1.99 2004/12/01 17:02:13 jz Exp $
 /*
     Hier sind implementiert
 
@@ -467,10 +467,10 @@ bool Communication::Channel::do_recv()
 
     const char* p = buffer;
 
-    if( len == 1  &&  buffer[0] == '\x04' )  { _eof = true; return true; }      // Einzelnes Ctrl-D beendet Sitzung
-
     if( _receive_at_start ) 
     {
+        if( len == 1  &&  buffer[0] == '\x04' )  { _eof = true; return true; }      // Einzelnes Ctrl-D beendet Sitzung
+
         if( len == 1  &&  buffer[0] == '\n'   
          || len == 2  &&  buffer[0] == '\r'  &&  buffer[1] == '\n' )  { _spooler->signal( "do_something!" );  _spooler->_last_time_enter_pressed = Time::now().as_time_t(); return true; }
 

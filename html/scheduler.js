@@ -1,4 +1,4 @@
-// $Id: scheduler.js,v 1.19 2004/12/01 13:27:51 jz Exp $
+// $Id: scheduler.js,v 1.20 2004/12/01 17:02:13 jz Exp $
 
 //----------------------------------------------------------------------------------------------var
 
@@ -120,6 +120,8 @@ Scheduler.prototype.execute = function( xml )
     {
         throw new Error( error_element.getAttribute( "text" ) );
     }
+
+    this.modify_datetime_for_xslt( dom_document );
     
     return dom_document;
 }
@@ -268,6 +270,155 @@ Scheduler.prototype.call_http = function( text, debug_text )
     {
         window.status = status;
     }
+}
+
+//-------------------------------------------------------Scheduler.add_datetime_attributes_for_xslt
+
+Scheduler.prototype.add_datetime_attributes_for_xslt = function( response, now, attribute_name )
+{
+    var elements = response.selectNodes( "//*[ @" + attribute_name + "]" );
+    for( var i = 0; i < elements.length; i++ )
+    {
+        var element = elements[ i ];
+        var value   = element.getAttribute( attribute_name );
+        if( value )
+        {
+            element.setAttribute( attribute_name + "__xslt_datetime"               , xslt_format_datetime     ( value, now ) );
+            element.setAttribute( attribute_name + "__xslt_datetime_diff"          , xslt_format_datetime_diff( value, now, false ) );
+            element.setAttribute( attribute_name + "__xslt_datetime_with_diff"     , xslt_format_datetime_with_diff( value, now, false ) );
+            element.setAttribute( attribute_name + "__xslt_datetime_with_diff_plus", xslt_format_datetime_with_diff( value, now, true ) );
+            element.setAttribute( attribute_name + "__xslt_date_or_time"           , xslt_format_date_or_time ( value, now ) );
+        }
+    }    
+}
+
+//---------------------------------------------------------------Scheduler.modify_datetime_for_xslt
+
+Scheduler.prototype.modify_datetime_for_xslt = function( response )
+{
+    // Für Firefox, dass kein Skript im Stylesheet zulässt.
+    var now;
+
+    var datetime = response.selectSingleNode( "/spooler/answer/@time" );
+    if( datetime )  now = date_from_datetime( datetime.nodeValue );   
+        
+    this.add_datetime_attributes_for_xslt( response, now, "time"                  );
+    this.add_datetime_attributes_for_xslt( response, now, "spooler_running_since" );
+    this.add_datetime_attributes_for_xslt( response, now, "running_since"         );
+    this.add_datetime_attributes_for_xslt( response, now, "in_process_since"      );
+    this.add_datetime_attributes_for_xslt( response, now, "spooler_running_since" );
+    this.add_datetime_attributes_for_xslt( response, now, "next_start_time"       );
+    this.add_datetime_attributes_for_xslt( response, now, "start_at"              );
+    this.add_datetime_attributes_for_xslt( response, now, "idle_since"            );
+    this.add_datetime_attributes_for_xslt( response, now, "enqueued"              );
+    this.add_datetime_attributes_for_xslt( response, now, "created"               );
+}
+
+//---------------------------------------------------------------------xslt_format_datetime
+
+function xslt_format_datetime( datetime ) 
+{
+    if( !datetime )  return "";
+    return datetime.replace( /\.\d*$/, "" );
+    /*            
+    var date = typeof datetime == "string"? date_from_datetime( datetime ) : datetime;
+    
+    //var ms = date.getMilliseconds();
+
+    return date.toLocaleDateString() + ", " + date.toLocaleTimeString();
+            //+ ( ms? ".<span class='milliseconds'>" + ( ms + "000" ).substring( 0, 3 ) + "</span>" : "" );
+    */                   
+}
+
+//-----------------------------------------------------------------xslt_format_date_or_time
+
+function xslt_format_date_or_time( datetime ) 
+{
+    if( !datetime )  return "";
+    
+    var now = new Date();
+    
+    if(    1*datetime.substr( 0, 4 ) == now.getYear()
+        && 1*datetime.substr( 5, 2 ) == now.getMonth() + 1
+        && 1*datetime.substr( 8, 2 ) == now.getDate()  )
+    {
+        return datetime.substr( 11, 8 );
+    }
+    else
+    {
+        return datetime.substr( 0, 10 );
+    }
+}
+
+//-----------------------------------------------------------------xslt_format_date_or_time
+
+function xslt_format_datetime_with_diff( datetime, now, show_plus )
+{
+    var date = date_from_datetime( datetime );
+    var result = xslt_format_datetime( datetime );
+    if( result && now )  result += " \xA0(" + xslt_format_datetime_diff( date, now, show_plus ) + ")";
+    
+    return result;
+}
+
+//----------------------------------------------------------------xslt_format_datetime_diff
+
+function xslt_format_datetime_diff( datetime_earlier, datetime_later, show_plus ) 
+{
+    var show_ms;
+    if( show_ms   == undefined )  show_ms   = false;
+    if( show_plus == undefined )  show_plus = false;
+    
+    var date_later   = typeof datetime_later   == "string"? date_from_datetime( datetime_later )   : datetime_later;
+    var date_earlier = typeof datetime_earlier == "string"? date_from_datetime( datetime_earlier ) : datetime_earlier;
+
+    if( !date_later   )  return "";
+    if( !date_earlier )  return "";
+    
+    var diff = ( date_later.getTime() - date_earlier.getTime() ) / 1000.0;
+    var abs  = Math.abs( diff );
+    var result;
+
+    if( abs < 60 )
+    {
+        if( show_ms ) 
+        {
+            result = abs.toString();
+            if( result.match( "." ) )  result = result.replace( ".", ".<span class='milliseconds'>" ) + "</span>";
+        }
+        else
+        {
+            result = Math.floor( abs );
+        }
+        result += "s";
+    }
+    else
+    if( abs <    60*60 )  result = Math.floor( abs / (       60 ) ) + "min";
+    else
+    if( abs < 24*60*60 )  result = Math.floor( abs / (    60*60 ) ) + "h";
+    else
+                          result = Math.floor( abs / ( 24*60*60 ) ) + "days";
+                            
+    return diff < 0             ? "-" + result : 
+           show_plus && diff > 0? "+" + result
+                                : result;
+}
+
+//-----------------------------------------------------------------------date_from_datetime
+
+function date_from_datetime( datetime ) 
+{
+    if( !datetime )  return null;
+    
+    var date = new Date( 1*datetime.substr( 0, 4 ), 
+                         1*datetime.substr( 5, 2 ) - 1, 
+                         1*datetime.substr( 8, 2 ),
+                         1*datetime.substr( 11, 2 ),
+                         1*datetime.substr( 14, 2 ),
+                         1*datetime.substr( 17, 2 ),
+                         datetime.length < 23? 0 : 1*datetime.substr( 20, 3 ) );
+    
+    return date;
 }
 
 //---------------------------------------------------------------------Scheduler_html_configuration

@@ -1,8 +1,7 @@
 <?xml version='1.0' encoding="utf-8"?>
-<!-- $Id: scheduler.xslt,v 1.6 2004/12/01 13:27:52 jz Exp $ -->
+<!-- $Id: scheduler.xslt,v 1.7 2004/12/01 17:02:13 jz Exp $ -->
 <xsl:stylesheet xmlns:xsl   = "http://www.w3.org/1999/XSL/Transform" 
                 xmlns:msxsl = "urn:schemas-microsoft-com:xslt"
-                xmlns:my    = "http://sos-berlin.com/scheduler/mynamespace"
                 version     = "1.0">
 
     <xsl:variable name="now" select="string( /spooler/answer/@time )"/>
@@ -92,12 +91,8 @@
 
     <xsl:template name="scheduler_info">
         <table cellpadding="0" cellspacing="0" class="scheduler">
-            <col valign="baseline" align="left"/>
-            <col valign="baseline" align="right"/>
-            <col valign="baseline" align="right"/>
-
             <tr>
-                <td style="padding-right: 3ex">
+                <td valign="baseline" align="left" style="padding-right: 3ex">
                     <span style="margin-top: 2px; margin-bottom: 2pt">
                     
                         <xsl:element name="span">
@@ -118,23 +113,19 @@
                     </span>
                 </td>
 
-                <td style="padding-left: 0">
+                <td  valign="baseline" align="right" style="padding-left: 0">
                     <span style="margin-top: 2px; margin-bottom: 2px">
-                        <xsl:call-template name="datetime">
-                            <xsl:with-param name="datetime" select="state/@time"/>
-                            <xsl:with-param name="show_diff" select="'small'"/>
-                        </xsl:call-template>
-                        <!--xsl:value-of select="my:format_datetime( string( state/@time ) )"  disable-output-escaping="yes"/
                         <span class="small">
-                            <xsl:text> &#160;</xsl:text>
-                            <(<xsl:value-of select="my:datetime_diff( string( state/@spooler_running_since ), $now )"  disable-output-escaping="yes"/>)>
+                            <xsl:value-of select="state/@time__xslt_datetime"  disable-output-escaping="yes"/>
+                            <xsl:text> (</xsl:text>
+                                <xsl:value-of select="state/@spooler_running_since__xslt_datetime_diff"  disable-output-escaping="yes"/>
+                            <xsl:text>)</xsl:text>
                         </span>
-                        -->
                         <xsl:text> </xsl:text>
                     </span>
                 </td>
 
-                <td align="right">
+                <td  valign="baseline" align="right">
                     <xsl:call-template name="command_menu">
                         <xsl:with-param name="onclick" select="'scheduler_menu__onclick()'"/>
                     </xsl:call-template>
@@ -338,10 +329,8 @@
                             </span>
                         </td>
 
-                        <td>
-                            <xsl:if test="../../@next_start_time">
-                                <!--script <xsl:value-of select="my:datetime_diff( string( ../../@next_start_time), $now )"  disable-output-escaping="yes"/> -->
-                            </xsl:if>
+                        <td align="right">
+                            <xsl:value-of select="../../@next_start_time__xslt_datetime_diff"  disable-output-escaping="yes"/>
                         </td>
                         
                         <td></td>
@@ -372,11 +361,11 @@
                             </xsl:if>
                         </td>
 
-                        <td>
+                        <td align="right">
                             <xsl:if test="@running_since!=''">
                                 <xsl:text> &#160;</xsl:text>
                                 <!--span class="small"-->
-                                    <!--script <xsl:value-of select="my:datetime_diff( string( @running_since ), $now, 0 )"  disable-output-escaping="yes"/>   -->
+                                    <xsl:value-of select="@running_since__xslt_datetime_diff"  disable-output-escaping="yes"/>
                                 <!--/span-->
                             </xsl:if>
                         </td>
@@ -408,7 +397,7 @@
                                     <xsl:if test="@in_process_since!=''">
                                         <xsl:text> &#160;</xsl:text>
                                         <span class="small">
-                                            (<!--script <xsl:value-of select="my:datetime_diff( string( @in_process_since ), $now, 0 )"  disable-output-escaping="yes"/>-->)
+                                            (<xsl:value-of select="@in_process_since__xslt_datetime_diff"  disable-output-escaping="yes"/>)
                                         </span>
                                     </xsl:if>
                                 </td>
@@ -419,7 +408,7 @@
                                     <xsl:text> </xsl:text>
                                     <xsl:if test="@in_process_since!=''">
                                         <span class="small">
-                                            (<!--script <xsl:value-of select="my:datetime_diff( string( @in_process_since ), $now, 0 )"  disable-output-escaping="yes"/>-->)
+                                            (<xsl:value-of select="@in_process_since__xslt_datetime_diff"  disable-output-escaping="yes"/>)
                                         </span>
                                     </xsl:if>
                                 </td>
@@ -866,7 +855,7 @@
                         <tr>
                             <td style="padding-left: 2ex"><xsl:value-of select="@pid"/></td>
                             <td><xsl:value-of select="@job"/><xsl:text>&#160;&#160;</xsl:text><xsl:value-of select="@task_id"/></td>
-                            <td style="white-space: nowrap"><!--script <xsl:value-of select="my:format_datetime_with_diff( string( @running_since ), $now, 0 )" disable-output-escaping="yes"/>--></td>
+                            <td style="white-space: nowrap"><xsl:value-of select="@running_since__datetime_with_diff" disable-output-escaping="yes"/></td>
                             <td class="small"><xsl:value-of select="@operations"/></td>
                             <td class="small"><xsl:value-of select="@callbacks"/></td>
                             <td class="small"><xsl:value-of select="@operation"/></td>
@@ -952,7 +941,7 @@
             <tr>
                 <td><span class="label">next start:</span></td>
                 <td>
-                    <!--script <xsl:value-of select="my:format_datetime_with_diff( string( @next_start_time), $now, true )"  disable-output-escaping="yes"/>-->
+                    <xsl:value-of select="@next_start_time__datetime_with_diff_plus"  disable-output-escaping="yes"/>
                 </td>
             </tr>
 
@@ -1089,37 +1078,28 @@
                 <xsl:when test="@idle_since">
                     <tr>
                         <td><span class="label">idle since:</span></td>
-                        <xsl:if test="@idle_since">
-                            <td><!--script <xsl:value-of select="my:format_datetime_with_diff( string( @idle_since ), $now, 0 )"  disable-output-escaping="yes"/>--></td>
-                        </xsl:if>
+                        <td><xsl:value-of select="@idle_since__xslt_datetime_with_diff"  disable-output-escaping="yes"/></td>
                     </tr>
                 </xsl:when>
                 <xsl:otherwise>
                     <tr>
                         <td><span class="label">in process since:</span></td>
-                        <td><!--script <xsl:value-of select="my:format_datetime_with_diff( string( @in_process_since ), $now, 0 )"  disable-output-escaping="yes"/>--></td>
+                        <td><xsl:value-of select="@in_process_since__xslt_datetime_with_diff"  disable-output-escaping="yes"/></td>
                     </tr>
                 </xsl:otherwise>
             </xsl:choose>
 
             <tr>
-                <!--xsl:choose>
-                    <xsl:when test="@running_since"-->
-                        <td><span class="label">running since:</span></td>
-                        <td>
-                            <!--script <xsl:value-of select="my:format_datetime_with_diff( string( @running_since ), $now, 0 )"  disable-output-escaping="yes"/>-->
-                        </td>
-                    <!--/xsl:when>
-                    <xsl:otherwise>
-                        <td>&#160;</td>
-                    </xsl:otherwise>
-                </xsl:choose-->
+                <td><span class="label">running since:</span></td>
+                <td>
+                    <xsl:value-of select="@running_since__xslt_datetime_with_diff"  disable-output-escaping="yes"/>
+                </td>
             </tr>
 
             <xsl:if test="@enqueued">
                 <tr>
                     <td><span class="label">enqueued at:</span></td>
-                    <td><!--script <xsl:value-of select="my:format_datetime_with_diff( string( @enqueued ), $now, 0 )"  disable-output-escaping="yes"/>--></td>
+                    <td><xsl:value-of select="@enqueued__datetime_with_diff"  disable-output-escaping="yes"/></td>
                 </tr>
             </xsl:if>            
 
@@ -1166,8 +1146,8 @@
                             </xsl:if>
                         </td>
 
-                        <td><!--script <xsl:value-of select="my:format_date_or_time      ( string( @enqueued )       )"  disable-output-escaping="yes"/>--></td>
-                        <td><!--script <xsl:value-of select="my:format_datetime_with_diff( string( @start_at ), $now )"  disable-output-escaping="yes"/>--></td>
+                        <td><xsl:value-of select="@enqueued__xslt_date_or_time"        disable-output-escaping="yes"/></td>
+                        <td><xsl:value-of select="@start_at__xslt_datetime_with_diff"  disable-output-escaping="yes"/></td>
                     </tr>
                 </xsl:for-each>
             </xsl:if>
@@ -1220,7 +1200,7 @@
                             
                             <td><xsl:value-of select="@id"/></td>
                             <!--td class="order"><xsl:value-of select="@priority"/></td-->
-                            <td><!--script <xsl:value-of select="my:format_date_or_time( string( @created ) )"  disable-output-escaping="yes"/>--></td>
+                            <td><xsl:value-of select="@created__date_or_time"  disable-output-escaping="yes"/></td>
                             <td><xsl:value-of select="@state"/></td>
                             <td><xsl:value-of select="@state_text"/></td>
                             <td><xsl:value-of select="@title"/></td>
@@ -1300,11 +1280,11 @@
     </xsl:template>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~datetime-->
-
+    <!--
     <xsl:template name="datetime">
         <xsl:param name="datetime"/>
         <xsl:param name="show_diff"/>
-        <!--script <xsl:value-of select="my:format_datetime( string( $datetime ) )"  disable-output-escaping="yes"/>-->
+        <! - -script <xsl:value-of select="my:format_datetime( string( $datetime ) )"  disable-output-escaping="yes"/>- - >
         
         <xsl:if test="$show_diff='yes'">
             <xsl:text> (</xsl:text>
@@ -1325,128 +1305,13 @@
         </xsl:if>
         
     </xsl:template>
-
+    -->
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~datetime_diff-->
-
+    <!--
     <xsl:template name="datetime_diff">
         <xsl:param name="datetime"/>
-        <!--script <xsl:value-of select="my:datetime_diff( string( state/@spooler_running_since ), $now )"  disable-output-escaping="yes"/>-->
+        <!- -script <xsl:value-of select="my:datetime_diff( string( state/@spooler_running_since ), $now )"  disable-output-escaping="yes"/>- - >
     </xsl:template>
-
-    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~script-->
-
-
-    <msxsl:script language="JavaScript" implements-prefix="my"><![CDATA[
-    
-        //--------------------------------------------------------------------------format_datetime
-    
-        function format_datetime( datetime ) 
-        {
-            if( !datetime )  return "";
-            return datetime.replace( /\.\d*$/, "" );
-            /*            
-            var date = typeof datetime == "string"? date_from_datetime( datetime ) : datetime;
-            
-            //var ms = date.getMilliseconds();
-
-            return date.toLocaleDateString() + ", " + date.toLocaleTimeString();
-                   //+ ( ms? ".<span class='milliseconds'>" + ( ms + "000" ).substring( 0, 3 ) + "</span>" : "" );
-            */                   
-        }
-
-        //----------------------------------------------------------------------format_date_or_time
-        
-        function format_date_or_time( datetime ) 
-        {
-            if( !datetime )  return "";
-            
-            var now = new Date();
-            
-            if(  1*datetime.substring( 0,  4 ) == now.getYear()
-              && 1*datetime.substring( 5,  7 ) == now.getMonth() + 1
-              && 1*datetime.substring( 8, 10 ) == now.getDate()  )
-            {
-                return datetime.substring( 11, 19 );
-            }
-            else
-            {
-                return datetime.substring( 0, 10 );
-            }
-        }
-
-        //----------------------------------------------------------------------format_date_or_time
-        
-        function format_datetime_with_diff( datetime, now, show_plus )
-        {
-            var date = date_from_datetime( datetime );
-            var result = format_datetime( datetime );
-            if( result && now )  result += " &#160;(" + datetime_diff( date, now, show_plus ) + ")";
-            
-            return result;
-        }
-        
-        //----------------------------------------------------------------------------datetime_diff
-        
-        function datetime_diff( datetime_earlier, datetime_later, show_plus ) 
-        {
-            var show_ms;
-            if( show_ms   == undefined )  show_ms   = false;
-            if( show_plus == undefined )  show_plus = false;
-            
-            var date_later   = typeof datetime_later   == "string"? date_from_datetime( datetime_later )   : datetime_later;
-            var date_earlier = typeof datetime_earlier == "string"? date_from_datetime( datetime_earlier ) : datetime_earlier;
-
-            if( !date_later   )  return "";
-            if( !date_earlier )  return "";
-            
-            var diff = ( date_later.getTime() - date_earlier.getTime() ) / 1000.0;
-            var abs  = Math.abs( diff );
-            var result;
-
-            if( abs < 60 )
-            {
-                if( show_ms ) 
-                {
-                    result = abs.toString();
-                    if( result.match( "." ) )  result = result.replace( ".", ".<span class='milliseconds'>" ) + "</span>";
-                }
-                else
-                {
-                     result = Math.floor( abs );
-                }
-                result += "s";
-            }
-            else
-            if( abs <    60*60 )  result = Math.floor( abs / (       60 ) ) + "min";
-            else
-            if( abs < 24*60*60 )  result = Math.floor( abs / (    60*60 ) ) + "h";
-            else
-                                  result = Math.floor( abs / ( 24*60*60 ) ) + "days";
-                                  
-            return diff < 0? "-" + result : 
-                   show_plus && diff > 0? "+" + result
-                           : result;
-        }
-
-        //-----------------------------------------------------------------------date_from_datetime
-        
-        function date_from_datetime( datetime ) 
-        {
-            if( !datetime )  return null;
-            
-            var date = new Date();
-            
-            date.setFullYear    ( 1*datetime.substring( 0, 4 ), 1*datetime.substring( 5, 7 ) - 1, 1*datetime.substring( 8, 10 ) );
-            date.setHours       ( 1*datetime.substring( 11, 13 ) );
-            date.setMinutes     ( 1*datetime.substring( 14, 16 ) );
-            date.setSeconds     ( 1*datetime.substring( 17, 19 ) );
-            date.setMilliseconds( datetime.length < 23? 0 : 1*datetime.substring( 20, 23 ) );
-            
-            return date;
-        }
-
-        //-----------------------------------------------------------------------------------------
-        ]]>
-    </msxsl:script>
+    -->
     
 </xsl:stylesheet>
