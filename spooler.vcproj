@@ -31,6 +31,7 @@
 				EnableFunctionLevelLinking="TRUE"
 				RuntimeTypeInfo="TRUE"
 				UsePrecompiledHeader="2"
+				PrecompiledHeaderThrough="spooler.h"
 				PrecompiledHeaderFile=".\Release/spooler.pch"
 				AssemblerOutput="2"
 				AssemblerListingLocation=".\Release/"
@@ -91,6 +92,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
+				OptimizeForProcessor="3"
 				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE"
 				StringPooling="TRUE"
 				MinimalRebuild="TRUE"
@@ -99,6 +101,7 @@
 				EnableFunctionLevelLinking="TRUE"
 				RuntimeTypeInfo="TRUE"
 				UsePrecompiledHeader="2"
+				PrecompiledHeaderThrough="spooler.h"
 				PrecompiledHeaderFile=".\Debug/spooler.pch"
 				AssemblerListingLocation=".\Debug/"
 				ObjectFile=".\Debug/"

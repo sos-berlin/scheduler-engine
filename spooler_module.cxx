@@ -1,4 +1,4 @@
-// $Id: spooler_module.cxx,v 1.26 2003/07/13 17:52:06 jz Exp $
+// $Id: spooler_module.cxx,v 1.27 2003/07/29 11:20:48 jz Exp $
 /*
     Hier sind implementiert
 
@@ -296,6 +296,9 @@ void Module_instance::init()
     if( !_module->set() )  throw_xc( "SPOOLER-146" );
 
     _spooler_exit_called = false;
+
+    _com_task    = new Com_task;
+    _com_log     = new Com_log;
     _com_context = new Com_context;
 }
 
@@ -340,6 +343,9 @@ void Module_instance::close()
             _log.error( x.what() ); 
         }
     }
+
+  //if( _com_log )  _com_log->close();
+  //if( _com_task )  _com_task->close();
 
     if( _com_context )  _com_context->close(), _com_context = NULL;
 }

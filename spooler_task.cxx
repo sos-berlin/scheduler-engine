@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.162 2003/07/23 08:34:22 jz Exp $
+// $Id: spooler_task.cxx,v 1.163 2003/07/29 11:20:48 jz Exp $
 /*
     Hier sind implementiert
 
@@ -29,9 +29,7 @@
 
 #include "spooler.h"
 
-#ifdef Z_WINDOWS
-#   include <crtdbg.h>
-#else
+#ifndef Z_WINDOWS
 #   include <signal.h>
 #   include <sys/signal.h>
 #   include <sys/wait.h>
@@ -385,6 +383,16 @@ void Job::close()
 
     //close_engine();
     //_module_instance = NULL;
+
+    Z_FOR_EACH( Task_list, _running_tasks, t )
+    {
+        Task* task = *t;
+        task->close();
+    }
+
+    _running_tasks.clear();
+
+
     Z_FOR_EACH( Module_instance_vector, _module_instances, m )
     {
         if( *m ) 
@@ -445,6 +453,47 @@ string Job::jobname_as_filename()
 string Job::profile_section() 
 {
     return "Job " + _name;
+}
+
+//---------------------------------------------------------------------------Job::set_error_xc_only
+
+void Job::set_error_xc_only( const Xc& x )
+{
+    THREAD_LOCK( _lock )  _error = x;
+}
+
+//--------------------------------------------------------------------------------Job::set_error_xc
+
+void Job::set_error_xc( const Xc& x )
+{
+    string msg; 
+  //if( !_in_call.empty() )  msg = "In " + _in_call + "(): ";
+    
+    _log.error( msg + x.what() );
+
+    set_error_xc_only( x );
+
+    _repeat = 0;
+}
+
+//-----------------------------------------------------------------------------------Job::set_error
+
+void Job::set_error( const exception& x )
+{
+    if( dynamic_cast< const zschimmer::Xc* >( &x ) ) 
+    {
+        set_error_xc( *(zschimmer::Xc*)&x );
+    }
+    else
+    if( dynamic_cast< const Xc* >( &x ) ) 
+    {
+        set_error_xc( *(Xc*)&x );
+    }
+    else
+    {
+        Xc xc ( "SOS-2000", x.what(), exception_name(x) );
+        set_error_xc( xc );
+    }
 }
 
 //---------------------------------------------------------------------------------Job::create_task
@@ -625,10 +674,9 @@ bool Task_module_instance::load()
 }
 */
 //-----------------------------------------------------------------------------------------Job::end
-
+/*
 void Job::end()
 {
-/*
     if( !_state )  return;
 
     set_mail_defaults();      // Vor spooler_on_error() bzw. spooler_on_success(); eMail wird in finish() verschickt
@@ -649,16 +697,14 @@ void Job::end()
     close_task();
 
     if( _state != s_stopped )  set_state( s_ended );
-*/
 }
-
+*/
 //----------------------------------------------------------------------------------------Job::stop
 
 void Job::stop()
 {
     if( _state != s_stopping  &&  _state != s_stopped )
     {
-        _log.info( "stop" );
 /*
         try 
         {
@@ -809,36 +855,64 @@ void Job::calculate_next_time( Time now )
 {
     THREAD_LOCK( _lock )
     {
-        _next_time = latter_day;
+        Time next_time = latter_day;
 
         bool in_period = is_in_period(now);
 
-        // Minimum von _start_at für _next_time berücksichtigen
-        Task_queue::iterator it = _task_queue.begin();  
-        while( it != _task_queue.end() )
+        if( _start_once && in_period ) 
         {
-            if( (*it)->_start_at )  break;   // Startzeit angegeben?
-            if( in_period        )  break;   // Ohne Startzeit und Periode ist aktiv?
-            it++;
+            next_time = now;
+        }
+        else
+        {
+            // Minimum von _start_at für _next_time berücksichtigen
+            Task_queue::iterator it = _task_queue.begin();  
+            while( it != _task_queue.end() )
+            {
+                if( (*it)->_start_at )  break;   // Startzeit angegeben?
+                if( in_period        )  break;   // Ohne Startzeit und Periode ist aktiv?
+                it++;
+            }
+
+            if( it != _task_queue.end()  &&  next_time > (*it)->_start_at )  next_time = (*it)->_start_at;
+
+            if( _spooler->state() != Spooler::s_stopping_let_run )
+            {
+                if( next_time > _next_start_time   )  next_time = _next_start_time;
+                if( next_time > _period.end()      )  next_time = _period.end();          // Das ist, wenn die Periode weder repeat noch single_start hat, also keinen automatischen Start
+                if( next_time > _next_single_start )  next_time = _next_single_start;
+            }
+
+            // Gesammelte eMail senden, wenn collected_max erreicht:
+            Time log_time = _log.collect_end();
+            if( log_time > now  &&  next_time > log_time )  next_time = log_time;
+
+
+            Z_FOR_EACH( Task_list, _running_tasks, t )
+            {
+                Task* task = *t;
+                switch( task->_state )
+                {
+                    case Task::s_running_delayed:
+                        next_time = min( next_time, task->_next_spooler_process );
+                        break;
+
+                    case Task::s_running_waiting_for_order:
+                        next_time = min( next_time, _order_queue->next_time() );
+                        next_time = min( next_time, _period.end() );                // Thread am Ende der Run_time wecken, damit Task beendet werden kann
+                        break;
+
+                    default: ;
+                }
+            }
         }
 
-        if( it != _task_queue.end()  &&  _next_time > (*it)->_start_at )  _next_time = (*it)->_start_at;
-
-        if( _spooler->state() != Spooler::s_stopping_let_run )
-        {
-            if( _next_time > _next_start_time   )  _next_time = _next_start_time;
-            if( _next_time > _period.end()      )  _next_time = _period.end();          // Das ist, wenn die Periode weder repeat noch single_start hat, also keinen automatischen Start
-            if( _next_time > _next_single_start )  _next_time = _next_single_start;
-        }
-
-        // Gesammelte eMail senden, wenn collected_max erreicht:
-        Time log_time = _log.collect_end();
-        if( log_time > now  &&  _next_time > log_time )  _next_time = log_time;
+        _next_time = next_time;
     }
 }
 
 //-------------------------------------------------------------------------------Job::set_next_time
-
+/*
 void Job::set_next_time( Time time )
 {
     THREAD_LOCK( _lock )
@@ -846,7 +920,7 @@ void Job::set_next_time( Time time )
         _next_time = min( _next_time, time );
     }
 }
-
+*/
 //-------------------------------------------------------------------------------Job::select_period
 
 void Job::select_period( Time now )
@@ -962,7 +1036,7 @@ Task* Job::task_to_start()
                     {
                         cause = cause_directory;
                         _log.debug( "Task startet wegen eines Ereignisses für Verzeichnis " + (*it)->directory() );
-                        if( !(*it)->valid() )  it = _directory_watcher_list.erase( it );  // Folge eines Fehlers, s. Directory_watcher::set_signal
+                        if( !(*it)->valid() )  it = _directory_watcher_list.erase( it ),  it--;  // Folge eines Fehlers, s. Directory_watcher::set_signal
                     }
                 }
 
@@ -990,13 +1064,11 @@ Task* Job::task_to_start()
 
 bool Job::do_something()
 {
-#   ifdef _DEBUG
-        _log.debug9( "do_something() state=" + state_name() );
-#   endif
+    Z_DEBUG_ONLY( _log.debug9( "do_something() state=" + state_name() ); )
 
     if( !_state )  return false;
 
-    bool something_done = false;
+    bool something_done = false;       
     bool ok             = true;
     bool do_a_step      = false;
 
@@ -1014,6 +1086,8 @@ bool Job::do_something()
             _delay_until = 0;
           //_last_task_step_count = 0;
 
+            set_state( s_running );
+
             if( _module_ptr->_reuse == Module::reuse_job )
             {
                 //task->_module_instance = ...;
@@ -1028,25 +1102,33 @@ bool Job::do_something()
 
         something_done |= task->do_something();
 
-
         switch( task->_state )
         {
             case Task::s_running_delayed:
-                set_next_time( task->_next_spooler_process );
+                //set_next_time( task->_next_spooler_process );
+                calculate_next_time( Time::now() );
                 break;
 
             case Task::s_running_waiting_for_order:
-                set_next_time( min( _period.end(), _order_queue->next_time() ) );     // Thread am Ende der Run_time wecken, damit Task beendet werden kann
+                //set_next_time( min( _period.end(), _order_queue->next_time() ) );     // Thread am Ende der Run_time wecken, damit Task beendet werden kann
+                calculate_next_time( Time::now() );
                 break;
 
             case Task::s_ended:
             {
-                THREAD_LOCK( _lock )  t = _running_tasks.erase( t );
+                THREAD_LOCK( _lock )  t = _running_tasks.erase( t ), t--;
 
-                if( _running_tasks.empty() )  
+                if( _running_tasks.empty() )
                 {
-                    set_next_start_time();
-                    set_state( s_pending );
+                    if( _state == s_stopping )  
+                    {
+                        set_state( s_stopped );
+                    }
+                    else
+                    {
+                        set_next_start_time();
+                        set_state( s_pending );
+                    }
                 }
 
                 break;
@@ -1078,6 +1160,13 @@ void Job::set_state( State new_state )
         if( new_state == s_pending )  reset_error();
 
         _state = new_state;
+
+        if( _spooler->_debug )
+        {
+            if( new_state == s_stopping
+             || new_state == s_stopped  )  _log.info( "state=" + state_name() ); 
+                                     else  _log.debug9( "state=" + state_name() );
+        }
     }
 }
 
@@ -1149,7 +1238,7 @@ string Job::job_state()
     return st;
 }
 
-//---------------------------------------------------------------------------------Job::include_path
+//--------------------------------------------------------------------------------Job::include_path
 
 string Job::include_path() const
 { 
@@ -1162,11 +1251,13 @@ string Job::state_name( State state )
 {
     switch( state )
     {
+        case s_stopping:        return "stopping";
         case s_stopped:         return "stopped";
         case s_read_error:      return "read_error";
       //case s_load_error:      return "load_error";
       //case s_loaded:          return "loaded";
         case s_pending:         return "pending";
+        case s_running:         return "running";
         default:                return as_string( (int)state );
     }
 }
@@ -1279,11 +1370,10 @@ xml::Element_ptr Job::dom( const xml::Document_ptr& document, Show_what show, Jo
             if( next < latter_day )  job_element.setAttribute( "next_start_time", next.as_string() );
         }
 
+
         xml::Element_ptr tasks_element = document.createElement( "tasks" );
-        Z_FOR_EACH( Task_list, _running_tasks, t )
-        {
-            tasks_element.appendChild( (*t)->dom( document, show ) );
-        }
+        Z_FOR_EACH( Task_list, _running_tasks, t )  tasks_element.appendChild( (*t)->dom( document, show ) ), dom_append_nl( tasks_element );
+        job_element.appendChild( tasks_element );
 
 
         if( show & show_description )  dom_append_text_element( job_element, "description", _description );
@@ -1398,9 +1488,12 @@ Task::Task( Spooler* spooler, const Sos_ptr<Job>& job )
     _spooler(spooler), 
     _job(job),
     _log(spooler),
-    _history(&job->_history)
+    _history(&job->_history,this)
 {
     _let_run = _job->_period.let_run();
+
+    _log.set_job( _job );
+    _log.set_task( this );
 }
 
 //--------------------------------------------------------------------------------------Task::~Task
@@ -1444,8 +1537,6 @@ void Task::close()
         FOR_EACH( vector<Event*>, _terminated_events, it )  (*it)->signal( "close task" );
         _terminated_events.clear();
     }
-
-    if( _com_log  )  _com_log->close(),         _com_log  = NULL;
 
     _closed = true;
 }
@@ -1502,6 +1593,7 @@ void Task::set_in_call( const string& name, const string& extra )
 void Task::set_error_xc_only( const Xc& x )
 {
     THREAD_LOCK( _lock )  _error = x;
+    _job->set_error_xc_only( x );
 }
 
 //-------------------------------------------------------------------------------Task::set_error_xc
@@ -1562,8 +1654,10 @@ void Task::set_state( State new_state )
     {
         if( new_state == _state )  return;
 
-        if( new_state == s_running  ||  new_state == s_start_task )  InterlockedIncrement( &_job->_running_tasks_count ),  InterlockedIncrement( &_job->_thread->_running_tasks_count );
-        if( _state    == s_running  ||  _state    == s_start_task )  InterlockedDecrement( &_job->_running_tasks_count ),  InterlockedDecrement( &_job->_thread->_running_tasks_count );
+        if( new_state == s_running )  InterlockedIncrement( &_job->_running_tasks_count ),  InterlockedIncrement( &_job->_thread->_running_tasks_count );
+        if( _state    == s_running )  InterlockedDecrement( &_job->_running_tasks_count ),  InterlockedDecrement( &_job->_thread->_running_tasks_count );
+      //if( new_state == s_running  ||  new_state == s_start_task )  InterlockedIncrement( &_job->_running_tasks_count ),  InterlockedIncrement( &_job->_thread->_running_tasks_count );
+      //if( _state    == s_running  ||  _state    == s_start_task )  InterlockedDecrement( &_job->_running_tasks_count ),  InterlockedDecrement( &_job->_thread->_running_tasks_count );
 
         if( new_state != s_running_delayed )  _next_spooler_process = 0;
 
@@ -1576,10 +1670,11 @@ void Task::set_state( State new_state )
             {
                 string msg = state_name();
                 if( _start_at )  msg += " (at=" + _start_at.as_string() + ")";
-                _log.debug( msg );
+                _log.debug( "state=" + msg );
             }
             else
-            if( new_state == s_ended )  _log.debug( state_name() ); 
+            if( new_state == s_ended )  _log.debug( "state=" + state_name() ); 
+                                  else  _log.debug9( "state=" + state_name() );
         }
     }
 }
@@ -1643,6 +1738,8 @@ void Task::finish()
 
 bool Task::do_something()
 {
+    Z_DEBUG_ONLY( _log.debug9( "do_something() state=" + state_name() ); )
+
     bool something_done = false;
     bool ok             = true;
     bool do_a_step      = false;
@@ -1653,7 +1750,7 @@ bool Task::do_something()
     if( _state == s_running_process  &&  !((Process_task*)+this)->signaled() )  goto ENDE;
 
 
-    // HISTORIE
+    // HISTORIE und _end
     if( _state == s_start_task 
      || _state == s_running 
      || _state == s_running_delayed 
@@ -1661,6 +1758,7 @@ bool Task::do_something()
      || _state == s_running_process )          
     {
         if( _step_count == _job->_history.min_steps() )  _history.start();
+        if( _end )  ok = false;
     }
 
 
@@ -1730,7 +1828,7 @@ bool Task::do_something()
              || _state == s_running_waiting_for_order
              || _state == s_running_process )  end(), something_done = true;
 
-            if( _state != s_stopped  &&  has_error()  &&  _job->_repeat == 0  &&  _job->_delay_after_error.empty() )  stop(), something_done = true;
+            if( has_error()  &&  _job->_repeat == 0  &&  _job->_delay_after_error.empty() )  stop(), something_done = true;
 
             finish();
         }
@@ -1887,13 +1985,22 @@ void Task::end()
             Time delay = 0;
             FOR_EACH( Job::Delay_after_error, _job->_delay_after_error, it )  
                 if( _job->_error_steps >= it->first )  delay = it->second;
-            _job->_delay_until = Time::now() + delay;
+            _job->_delay_until = delay? Time::now() + delay : 0;
         }
     }
     else
     {
        _job->_error_steps = 0;
     }
+
+    set_state( s_ended );
+}
+
+//----------------------------------------------------------------------------------------Task::stop
+
+void Task::stop()
+{
+    _job->stop();
 }
 
 //-------------------------------------------------------------------------Task::on_error_on_success
@@ -1953,8 +2060,8 @@ bool Task::step()
 
         if( has_step_count()  ||  _step_count == 0 )        // Bei Process_task nur einen Schritt zählen
         {
-            _job->_thread->_step_count++;
-            _job->_step_count++;
+            InterlockedIncrement( &_job->_thread->_step_count );
+            InterlockedIncrement( &_job->_step_count );
             _step_count++;
           //_job->_last_task_step_count = _step_count;
         }
@@ -1981,6 +2088,7 @@ bool Task::step()
 }
 
 //------------------------------------------------------------------------------------Task::cmd_end
+/*
 // Anderer Thread
 
 void Task::cmd_end()
@@ -1996,7 +2104,7 @@ void Task::cmd_end()
         }
     }
 }
-
+*/
 //----------------------------------------------------------------------Task::wait_until_terminated
 // Anderer Thread
 
@@ -2039,7 +2147,7 @@ bool Task::has_parameters()
 
 void Task::set_history_field( const string& name, const Variant& value )
 {
-    if( !_job->its_current_task(this) )  throw_xc( "SPOOLER-138" );
+  //if( !_job->its_current_task(this) )  throw_xc( "SPOOLER-138" );
 
     _history.set_extra_field( name, value );
 }
@@ -2061,6 +2169,9 @@ bool Module_task::do_load()
 
 
     _module_instance->init();
+
+    _module_instance->_com_task->set_task( this );
+    _module_instance->_com_log->set_log( &_log );
 
     _module_instance->add_obj( (IDispatch*)_spooler->_com_spooler     , "spooler"        );
     _module_instance->add_obj( (IDispatch*)_job->_thread->_com_thread , "spooler_thread" );
@@ -2084,7 +2195,7 @@ bool Module_task::do_load()
         if( !ok || has_error() )  { _close_engine = true;  return false; }
     }
 
-    _has_spooler_process = _module_instance->name_exists( spooler_process_name );
+    //_has_spooler_process = _module_instance->name_exists( spooler_process_name );
 
   //set_state( s_loaded );
 
@@ -2097,14 +2208,18 @@ void Module_task::do_close()
 {
     if( _module_instance )  
     { 
+        if( _module_instance )  
+        {
+            _module_instance->_com_task->set_task( NULL );
+            _module_instance->_com_log->set_log( NULL );
+          //if( _module_instance->_com_log  )  _module_instance->_com_log->close(), _module_instance->_com_log  = NULL;
+        }
+
         if( _close_engine  ||  _job->_module_ptr->_reuse == Module::reuse_task ) 
         {
             close_engine();
             _close_engine = false;
         }
-
-        if( _module_instance )  _module_instance->_com_task->set_task( NULL );
-        _module_instance->_task = NULL; 
     }
 }
 
@@ -2112,12 +2227,15 @@ void Module_task::do_close()
 
 void Module_task::close_engine()
 {
-    _com_task = new Com_task();
-
     try 
     {
         //_log.debug3( "close scripting engine engine" );
-        if( _module_instance )  _module_instance->close();
+        if( _module_instance )  
+        {
+            _module_instance->close();
+            _module_instance->_com_task = new Com_task();
+            _module_instance = NULL;
+        }
     }
     catch( const exception& x ) { set_error(x); }
 }
@@ -2167,8 +2285,10 @@ bool Object_set_task::do_load()
 
     if( !_module_instance->loaded() )
     {
-        ok = _module_instance->load();
-        if( !ok || _job->has_error() )  return false;
+        //ok = _module_instance->load();
+        //if( !ok || _job->has_error() )  return false;
+        ok = do_load();
+        if( !ok || has_error() )  return false;
     }
 
     return ok;
@@ -2178,7 +2298,7 @@ bool Object_set_task::do_load()
 
 bool Object_set_task::do_start()
 {
-    _job->set_state( Job::s_running );
+    set_state( s_running );
 
     return _object_set->open();
 }
@@ -2217,7 +2337,7 @@ bool Job_module_task::do_start()
         if( !ok || _job->has_error() )  return false;
     }
 */
-    _job->set_state( Job::s_running );
+    set_state( s_running );
 
     if( _module_instance->name_exists( spooler_open_name ) )
     {
@@ -2246,7 +2366,8 @@ void Job_module_task::do_end()
 
 bool Job_module_task::do_step()
 {
-    if( !_module_instance->_has_spooler_process )  return false;
+    //if( !_module_instance->_has_spooler_process )  return false;
+    if( !_module_instance->name_exists( spooler_process_name ) )  return false;
 
     Module_instance::In_call in_call ( this, spooler_process_name, _order? "Auftrag " + _order->obj_name() : "" );
     bool ok = check_result( _module_instance->call( spooler_process_name ) );
@@ -2529,7 +2650,7 @@ bool Process_task::do_start()
     }
 
 
-    set_state( Job::s_running_process );
+    set_state( s_running_process );
 
     _process_handle.set_name( "Process " + _job->_process_filename );
     _process_handle.add_to( &_job->_thread->_wait_handles );

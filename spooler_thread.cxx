@@ -1,4 +1,4 @@
-// $Id: spooler_thread.cxx,v 1.86 2003/06/25 16:03:45 jz Exp $
+// $Id: spooler_thread.cxx,v 1.87 2003/07/29 11:20:48 jz Exp $
 /*
     Hier sind implementiert
 
@@ -89,7 +89,7 @@ xml::Element_ptr Spooler_thread::dom( const xml::Document_ptr& document, Show_wh
 
         dom_append_nl( thread_element );
 
-        xml::Element_ptr jobs_element = document.createElement( "tasks" );
+        xml::Element_ptr jobs_element = document.createElement( "jobs" );
         dom_append_nl( jobs_element );
 
         FOR_EACH( Job_list, _job_list, it )  jobs_element.appendChild( (*it)->dom( document, show ) ), dom_append_nl( jobs_element );
@@ -434,12 +434,15 @@ Job* Spooler_thread::get_next_job_to_start()
         {
             Job* job = *it;
 
-            if( job->_state == Job::s_pending
-             || job->_state == Job::s_running_delayed 
-             || job->_state == Job::s_running_waiting_for_order)
+            if( job->_running_tasks_count == 0 )
+          //if( job->_state == Job::s_pending
+          // || job->_state == Job::s_running_delayed 
+          // || job->_state == Job::s_running_waiting_for_order )
             {
                 if( next_start_time > job->_next_time ) 
                 {
+
+// Durch alle Tasks gehen und _next_time prüfen. Job::_next_time jedesmal neu setzen.
                     _next_job = job; 
                     next_start_time = _next_job->_next_time;
                     if( next_start_time == 0 )  break;
@@ -447,7 +450,7 @@ Job* Spooler_thread::get_next_job_to_start()
             }
 
             if( job->_state == Job::s_pending
-             || job->_state == Job::s_running_waiting_for_order ) 
+          /* || job->_state == Job::s_running_waiting_for_order*/ ) 
             {
                 Time now = Time::now();
 
@@ -565,11 +568,15 @@ bool Spooler_thread::any_tasks_there()
     {
         FOR_EACH( Job_list, _job_list, it )  
         {
+            Job* job = *it;
+            if( !job->_task_queue.empty() )  return true;
+/*
             if( (*it)->state() == Job::s_suspended                 )  return true;    // Zählt nicht in _running_tasks_count
             if( (*it)->state() == Job::s_running_delayed           )  return true;    // Zählt nicht in _running_tasks_count
             if( (*it)->state() == Job::s_running_waiting_for_order )  return true;    // Zählt nicht in _running_tasks_count
             if( (*it)->state() == Job::s_running_process           )  return true;    // Zählt nicht in _running_tasks_count
             //if( (*it)->queue_filled() )  return true;
+*/
         }
     }
 
@@ -588,7 +595,10 @@ void Spooler_thread::nichts_getan( double wait_time )
         {
             FOR_EACH( Job_list, _job_list, it )  
             {
-                _log.warn( "Job " + (*it)->name() + " state=" + (*it)->state_name() + " queue_filled=" + ( (*it)->queue_filled()? "ja" : "nein" ) );
+                _log.warn( "Job " + (*it)->name() + 
+                           " state=" + (*it)->state_name() + 
+                           " queue_filled=" + ( (*it)->queue_filled()? "ja" : "nein" ) + 
+                           " running_tasks=" + as_string( (*it)->_running_tasks.size() ) );
             }
         }
     }
@@ -628,7 +638,6 @@ bool Spooler_thread::process()
 
         remove_temporary_jobs();
     }
-    catch( const Xc&         x ) { _log.error( x.what() ); sos_sleep(1); }      // Sollte nicht besser der Thread beendet werden? jz 9.8.03
     catch( const exception&  x ) { _log.error( x.what() ); sos_sleep(1); }
     catch( const _com_error& x ) { _log.error( as_string( x.Description() ) ); sos_sleep(1); }
 

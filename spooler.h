@@ -1,4 +1,4 @@
-// $Id: spooler.h,v 1.139 2003/06/24 15:46:28 jz Exp $
+// $Id: spooler.h,v 1.140 2003/07/29 11:20:48 jz Exp $
 
 #ifndef __SPOOLER_H
 #define __SPOOLER_H
@@ -39,6 +39,7 @@
 
 #ifdef Z_WINDOWS
 #   include "../zschimmer/z_windows.h"
+#   include <crtdbg.h>
 #endif
         
 #include <set>

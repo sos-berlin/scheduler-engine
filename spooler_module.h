@@ -1,4 +1,4 @@
-// $Id: spooler_module.h,v 1.26 2003/07/23 08:34:22 jz Exp $
+// $Id: spooler_module.h,v 1.27 2003/07/29 11:20:48 jz Exp $
 
 #ifndef __SPOOLER_MODULE_H
 #define __SPOOLER_MODULE_H
@@ -190,8 +190,8 @@ struct Module_instance : Object
     map<string,bool>           _names;
     bool                       _spooler_exit_called;
 
-  //ptr<Com_task>              _com_task;                   // spooler_task
-  //ptr<Com_log>               _com_log;                    // spooler_log
+    ptr<Com_task>              _com_task;                   // spooler_task
+    ptr<Com_log>               _com_log;                    // spooler_log
 };
 
 //------------------------------------------------------------------------------Com_module_instance

@@ -1,4 +1,4 @@
-// $Id: spooler_log.cxx,v 1.66 2003/06/25 16:03:45 jz Exp $
+// $Id: spooler_log.cxx,v 1.67 2003/07/29 11:20:48 jz Exp $
 
 #include "spooler.h"
 #include "spooler_mail.h"
@@ -604,12 +604,12 @@ void Prefix_log::log2( Log_level level, const string& prefix, const string& line
 {
     string line = remove_password( line_par );
 
-    if( level == log_error  &&  _job  &&  !_job->has_error() )  _job->set_error_xc_only( Xc( "SPOOLER-140", line.c_str() ) );
+    if( level == log_error  &&  _task  &&  !_task->has_error() )  _task->set_error_xc_only( Xc( "SPOOLER-140", line.c_str() ) );
 
     if( _highest_level < level )  _highest_level = level, _highest_msg = line;
     if( level < _log_level )  return;
 
-    _log->log2( level, _job && _job->current_task()? "Task " + sos::as_string(_job->current_task()->id()) + " " + _job->name() : _prefix, line, this, _order_log );
+    _log->log2( level, _task? "Task " + sos::as_string(_task->id()) + " " + _job->name() : _prefix, line, this, _order_log );
 }
 
 //----------------------------------------------------------------------------------Stdout_collector

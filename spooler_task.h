@@ -1,4 +1,4 @@
-// $Id: spooler_task.h,v 1.97 2003/07/23 08:34:22 jz Exp $
+// $Id: spooler_task.h,v 1.98 2003/07/29 11:20:48 jz Exp $
 
 #ifndef __SPOOLER_TASK_H
 #define __SPOOLER_TASK_H
@@ -223,7 +223,7 @@ struct Job : Sos_self_deleting
     void                        remove_from_task_queue      ( Task* );
   //void                        close_task                  ();
     bool                        read_script                 ();
-    void                        end                         ();
+  //void                        end                         ();
     void                        stop                        ();
     void                        set_next_start_time         ( Time now = Time::now() );
     void                        set_next_time               ( Time );
@@ -303,7 +303,7 @@ struct Job : Sos_self_deleting
     string                     _process_param;              // Parameter für das Programm
     string                     _process_log_filename;
 
-    int                        _step_count;                 // Anzahl spooler_process() aller Tasks
+    long                       _step_count;                 // Anzahl spooler_process() aller Tasks
 
     State                      _state;
     State_cmd                  _state_cmd;
@@ -394,7 +394,7 @@ struct Task : Sos_self_deleting
 
     int                         id                          ()                              { return _id; }
 
-    void                        cmd_end                     ();
+    void                        cmd_end                     ()                              { _end = true; }
 
     void                        close                       ();
     xml::Element_ptr            dom                         ( const xml::Document_ptr&, Show_what );
@@ -404,6 +404,7 @@ struct Task : Sos_self_deleting
     bool                        load                        ();
     bool                        start                       ();
     void                        end                         ();
+    void                        stop                        ();
     bool                        step                        ();
     void                        on_error_on_success         ();
     void                        finish                      ();
@@ -451,7 +452,7 @@ struct Task : Sos_self_deleting
     friend struct               Com_task;
 
   protected:
-    friend struct Job_history;
+    friend struct               Task_history;
 
     virtual bool                loaded                      ()                              { return true; }
     virtual void                do_close                    ()                              {}
@@ -470,7 +471,7 @@ struct Task : Sos_self_deleting
     Prefix_log                 _log;
     int                        _id;
     Spooler*                   _spooler;
-    Sos_ptr<Job>               _job;                        // Zirkel!
+    Job*                       _job;                        // Zirkel!
     Task_history               _history;
  
     Thread_semaphore           _terminated_events_lock;
@@ -482,6 +483,7 @@ struct Task : Sos_self_deleting
 
     bool                       _let_run;                    // Task zuende laufen lassen, nicht bei _job._period.end() beenden
     bool                       _opened;
+    bool                       _end;
     bool                       _on_error_called;
     bool                       _closed;
 
@@ -490,11 +492,12 @@ struct Task : Sos_self_deleting
     Time                       _start_at;                   // Zu diesem Zeitpunkt (oder danach) starten
     Time                       _running_since;
     Time                       _last_process_start_time;
+    Time                       _next_spooler_process;
+  //Time                       _next_time;
 
     ptr<Com_variable_set>      _params;
     Variant                    _result;
     string                     _name;
-    Time                       _next_spooler_process;
   //bool                       _close_engine;               // Bei einem Fehler in spooler_init()
     bool                       _close_engine;               // Nach Task-Ende Scripting Engine schließen (für use_engine="job")
     ptr<Order>                 _order;
@@ -511,7 +514,7 @@ struct Module_task : Task       // Oberklasse für Object_set_task und Job_module
 {
                                 Module_task                 ( Spooler* sp, const Sos_ptr<Job>& j ) : Task(sp,j) {}
 
-    bool                        loaded                      ()                              { return _module_instance->loaded(); }
+    bool                        loaded                      ()                              { return _module_instance && _module_instance->loaded(); }
     bool                        do_load                     ();
     void                        do_close                    ();
   //bool                        do_start                    ();

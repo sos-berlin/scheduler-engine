@@ -1,4 +1,4 @@
-// $Id: spooler_communication.cxx,v 1.55 2003/05/18 11:27:30 jz Exp $
+// $Id: spooler_communication.cxx,v 1.56 2003/07/29 11:20:48 jz Exp $
 /*
     Hier sind implementiert
 
@@ -607,7 +607,7 @@ bool Communication::handle_socket( Channel* channel )
             channel->_text = cp.execute( cmd, Time::now() );
             if( cp._error )  channel->_log.error( cp._error->what() );
             ok = channel->do_send();
-        if( !ok )  return false;
+            if( !ok )  return false;
         }
 
         if( channel->_eof && channel->_send_is_complete )  return false;

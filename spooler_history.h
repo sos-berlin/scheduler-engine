@@ -1,4 +1,4 @@
-// $Id: spooler_history.h,v 1.18 2003/07/23 08:34:22 jz Exp $
+// $Id: spooler_history.h,v 1.19 2003/07/29 11:20:48 jz Exp $
 
 #ifndef __SPOOLER_HISTORY_H
 #define __SPOOLER_HISTORY_H
@@ -64,6 +64,7 @@ struct Spooler_db : Sos_self_deleting
   private:
     friend struct Spooler;
     friend struct Job_history;
+    friend struct Task_history;
 
     string                     _db_name;
     Any_file                   _db;
@@ -106,12 +107,15 @@ struct Job_history
     xml::Element_ptr            read_tail               ( const xml::Document_ptr&, int id, int next, Show_what );
 
   private:
+    friend struct               Task_history;
+
     void                        archive                 ( Archive_switch, const string& filename );
 
 
     Fill_zero                  _zero_;
     Spooler*                   _spooler;
     Job*                       _job;
+    Task*                      _last_task;              // Wem gehört der zuletzt geschriebene Satz?
     string                     _job_name;
     bool                       _history_yes;
     int                        _on_process;
@@ -124,17 +128,16 @@ struct Job_history
     string                     _filename;
     string                     _type_string;            // _use_file:  -type=(...) tab ...
     zschimmer::File            _file;
-    int64                      _record_pos;             // Position des Satzes, der zu Beginn des Jobs geschrieben und am Ende überschrieben oder gelöscht wird.
     string                     _tabbed_record;
     vector<string>             _extra_names;
-    Record                     _extra_record;
+    Sos_ptr<Record_type>       _extra_type;
 };
 
 //-------------------------------------------------------------------------------------Task_history
 
 struct Task_history
 {
-                                Task_history            ( Job_history* );
+                                Task_history            ( Job_history*, Task* );
                                ~Task_history            ();
 
     void                        start                   ();
@@ -152,11 +155,11 @@ struct Task_history
     Fill_zero                  _zero_;
     Spooler*                   _spooler;
     Job_history*               _job_history;
+    Task*                      _task;
     bool                       _start_called;
 
     int64                      _record_pos;             // Position des Satzes, der zu Beginn des Jobs geschrieben und am Ende überschrieben oder gelöscht wird.
     string                     _tabbed_record;
-    vector<string>             _extra_names;
     Record                     _extra_record;
     int                        _task_id;
 };

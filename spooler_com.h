@@ -1,4 +1,4 @@
-// $Id: spooler_com.h,v 1.72 2003/07/23 08:34:22 jz Exp $
+// $Id: spooler_com.h,v 1.73 2003/07/29 11:20:48 jz Exp $
 
 #ifndef __SPOOLER_COM_H
 #define __SPOOLER_COM_H
@@ -189,6 +189,7 @@ struct Com_log : spooler_com::Ilog,
     STDMETHODIMP            get_java_class_name             ( BSTR* result )                        { return string_to_bstr( "sos.spooler.Log", result ); }
 
     void                        close                       ()                                      { THREAD_LOCK(_lock)  _log = NULL; }        
+    void                    set_log                         ( Prefix_log* );
 
     STDMETHODIMP                debug9                      ( BSTR );
     STDMETHODIMP                debug8                      ( BSTR );
@@ -417,11 +418,7 @@ struct Com_context : spooler_com::Ispooler_context, Sos_ole_object
                                 Com_context                 ();
 
 
-    void                        close                       ()                      { THREAD_LOCK(_lock)  _log     = NULL, 
-                                                                                                          _spooler = NULL, 
-                                                                                                          _thread  = NULL, 
-                                                                                                          _job     = NULL, 
-                                                                                                          _task    = NULL; }
+    void                        close                       ();
 
     USE_SOS_OLE_OBJECT
 

@@ -1,4 +1,4 @@
-// $Id: spooler_time.cxx,v 1.40 2003/06/24 15:46:29 jz Exp $
+// $Id: spooler_time.cxx,v 1.41 2003/07/29 11:20:49 jz Exp $
 /*
     Hier sind implementiert
 
@@ -34,15 +34,15 @@ namespace time {
     
 Period empty_period;
 
-//--------------------------------------------------------------------------------Time::operator =
+//---------------------------------------------------------------------------------Time::operator =
 
 void Time::operator = ( const Sos_optional_date_time& dt )
 {
-    if( dt.has_date() )  _time = dt.as_time_t();
-                   else  _time = dt.hour() * 60*60 + dt.minute() * 60 + dt.second();
+    if( dt.has_date() )  set( dt.as_time_t() );
+                   else  set( dt.hour() * 60*60 + dt.minute() * 60 + dt.second() );
 }
 
-//---------------------------------------------------------------------------------------Time::set
+//----------------------------------------------------------------------------------------Time::set
 
 void Time::set( const string& t )
 {
@@ -51,14 +51,23 @@ void Time::set( const string& t )
     set( dt.time_as_double() );
 }
 
-//------------------------------------------------------------------------------Time::set_datetime
+//----------------------------------------------------------------------------------------Time::set
+
+void Time::set( double t )
+{ 
+    _time = round(t); 
+   
+    Z_DEBUG_ONLY( _time_as_string = _time == latter_day_int? "LATTER_DAY" : as_string(); )
+}
+
+//-------------------------------------------------------------------------------Time::set_datetime
 
 void Time::set_datetime( const string& t )
 {
     set( Sos_optional_date_time(t).as_double() );
 }
 
-//---------------------------------------------------------------------------------Time::as_string
+//----------------------------------------------------------------------------------Time::as_string
 
 string Time::as_string( With_ms with ) const
 {
@@ -556,7 +565,7 @@ Period Run_time::next_period( Time tim_par, With_single_start single_start )
         next = min( next, _monthday_set.next_period( tim, single_start ) );
         next = min( next, _ultimo_set  .next_period( tim, single_start ) );
 
-        if( _holiday_set.find( next.begin().midnight() ) == _holiday_set.end() )  break;
+        if( _holiday_set.find( (uint)next.begin().midnight() ) == _holiday_set.end() )  break;
 
         tim = next.begin().midnight() + 24*60*60;   // Feiertag? Dann nächsten Tag probieren
     }

@@ -1,4 +1,4 @@
-// $Id: spooler_time.h,v 1.18 2003/06/24 15:46:29 jz Exp $
+// $Id: spooler_time.h,v 1.19 2003/07/29 11:20:49 jz Exp $
 
 #ifndef __SPOOLER_TIME_H
 #define __SPOOLER_TIME_H
@@ -72,7 +72,7 @@ struct Time
                                 operator double             () const                        { return _time; }
 
     static double               round                       ( double t )                    { return floor( t * 1000.0 + 0.5 ) / 1000.0; }
-    void                        set                         ( double t )                    { _time = round(t); }
+    void                        set                         ( double );
     void                        set                         ( const string& );
     void                        set_datetime                ( const string& );
     Time                        time_of_day                 () const                        { return _time - midnight(); }
@@ -87,9 +87,11 @@ struct Time
     static Time                 now                         ();
 
     double                     _time;                       // wie time_t: Anzahl Sekunden seit 1.1.1970 oder seit Mitternacht
+    Z_DEBUG_ONLY( string       _time_as_string; )
 };      
 
-const Time                      latter_day                  = INT_MAX;
+const int                       latter_day_int              = INT_MAX;
+const Time                      latter_day                  = latter_day_int;
 
 //-------------------------------------------------------------------------------------------Period
 

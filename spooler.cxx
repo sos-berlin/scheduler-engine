@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.219 2003/06/24 15:46:28 jz Exp $
+// $Id: spooler.cxx,v 1.220 2003/07/29 11:20:48 jz Exp $
 /*
     Hier sind implementiert
 
@@ -1150,7 +1150,6 @@ void Spooler::run()
         //LOG( "spooler: running_tasks_count=" << running_tasks_count  << " _state_cmd=" << (int)_state_cmd << " ctrl_c_pressed=" << ctrl_c_pressed << " _next_time=" << _next_time << "\n" );
         if( running_tasks_count == 0  &&  _state_cmd == sc_none  &&  !ctrl_c_pressed )
         {
-
             FOR_EACH( Spooler_thread_list, _spooler_thread_list, it )  
             {
                 Spooler_thread* thread = *it;
@@ -1175,10 +1174,11 @@ void Spooler::run()
 
                     //msg += " und " + wait_handles.as_string();
 
-                    if( wait_handles.wait(0) == -1 )  _log.debug( msg ); //, wait_handles.wait_until( _next_time );
+                    if( wait_handles.wait(0) == -1 )  _log.debug( msg ), wait_handles.wait_until( _next_time );
                 }
+                else
+                    wait_handles.wait_until( _next_time );
 
-                wait_handles.wait_until( _next_time );
                 wait_handles.clear();
             }
         }
