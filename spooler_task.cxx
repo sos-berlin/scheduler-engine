@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.230 2004/01/04 07:04:42 jz Exp $
+// $Id: spooler_task.cxx,v 1.231 2004/01/04 07:23:21 jz Exp $
 /*
     Hier sind implementiert
 
@@ -1164,11 +1164,10 @@ void Task::finish()
     
         if( !_job->repeat() )   // spooler_task.repeat hat Vorrang
         {
-            Time delay = _job->_delay_after_error.empty()? latter_day : 0;
+            Time delay = _job->_delay_after_error.empty()? latter_day : Time(0);
 
             FOR_EACH( Job::Delay_after_error, _job->_delay_after_error, it )  
                 if( _job->_error_steps >= it->first )  delay = it->second;
-            //_job->_delay_until = delay? Time::now() + delay : Time(0);
 
             if( delay == latter_day )
             {

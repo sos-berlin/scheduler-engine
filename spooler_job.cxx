@@ -1,4 +1,4 @@
-// $Id: spooler_job.cxx,v 1.53 2004/01/04 07:04:42 jz Exp $
+// $Id: spooler_job.cxx,v 1.54 2004/01/04 07:23:21 jz Exp $
 /*
     Hier sind implementiert
 
@@ -1156,7 +1156,7 @@ void Job::set_state( State new_state )
     {
         if( new_state == _state )  return;
 
-        if( new_state == s_pending )  reset_error();
+        if( new_state == s_pending  &&  !_delay_until )  reset_error();      // Bei delay_after_error Fehler stehen lassen
 
         _state = new_state;
 
