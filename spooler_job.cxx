@@ -1,4 +1,4 @@
-// $Id: spooler_job.cxx,v 1.85 2004/07/21 09:41:13 jz Exp $
+// $Id: spooler_job.cxx,v 1.86 2004/07/21 14:23:45 jz Exp $
 // §851: Weitere Log-Ausgaben zum Scheduler-Start eingebaut
 /*
     Hier sind implementiert
@@ -42,12 +42,12 @@ Job::Job( Spooler* spooler )
 : 
     _zero_(this+1),
     _spooler(spooler),
-    _log(spooler),
-    _module(spooler,&_log),
+    _module(spooler,_log),
     _task_queue(this),
     _history(this),
     _lock( "Job" )
 {
+    _log            = Z_NEW( Prefix_log( spooler ) );
     _next_time      = latter_day;
     _directory_watcher_next_time = latter_day;
     _priority       = 1;
@@ -65,7 +65,7 @@ Job::~Job()
     {
         close();
     }
-    catch( exception& x ) { _log.warn( x.what() ); }
+    catch( exception& x ) { _log->warn( x.what() ); }
 }
 
 //-------------------------------------------------------------------------------------Job::set_dom
@@ -103,7 +103,7 @@ void Job::set_dom( const xml::Element_ptr& element, const Time& xml_mod_time )
         {
             if( _temporary )  throw_xc( "SCHEDULER-155" );
             if( element.getAttributeNode( "priority" ) )  throw_xc( "SCHEDULER-165" );
-            _order_queue = new Order_queue( this, &_log );
+            _order_queue = new Order_queue( this, _log );
         }
 
 
@@ -169,9 +169,9 @@ void Job::init0()
 
     _state = s_none;
 
-    _log.set_prefix( "Job  " + _name );       // Zwei Blanks, damit die Länge mit "Task " übereinstimmt
-    _log.set_profile_section( profile_section() );
-    _log.set_job( this );
+    _log->set_prefix( "Job  " + _name );       // Zwei Blanks, damit die Länge mit "Task " übereinstimmt
+    _log->set_profile_section( profile_section() );
+    _log->set_job( this );
 
     _com_job  = new Com_job( this );
   //_com_log  = new Com_log( &_log );
@@ -198,8 +198,8 @@ void Job::init()
 
     if( !_spooler->log_directory().empty()  &&  _spooler->log_directory()[0] != '*' )
     {
-        _log.set_append( _log_append );
-        _log.set_filename( _spooler->log_directory() + "/job." + jobname_as_filename() + ".log" );      // Jobprotokoll
+        _log->set_append( _log_append );
+        _log->set_filename( _spooler->log_directory() + "/job." + jobname_as_filename() + ".log" );      // Jobprotokoll
     }
 
 
@@ -261,7 +261,7 @@ void Job::close()
             }
         }
 
-        _log.close();
+        _log->close();
         _history.close();
 
         // COM-Objekte entkoppeln, falls noch jemand eine Referenz darauf hat:
@@ -312,7 +312,7 @@ void Job::set_error_xc( const Xc& x )
     string msg; 
   //if( !_in_call.empty() )  msg = "In " + _in_call + "(): ";
     
-    _log.error( msg + x.what() );
+    _log->error( msg + x.what() );
 
     set_error_xc_only( x );
 }
@@ -412,7 +412,7 @@ void Job::load_tasks_from_db()
             if( !parameters_xml.empty() )  parameters->set_xml( parameters_xml );
         }
 
-        _log.info( "Zu startende Task aus Datenbank geladen: id=" + as_string(task_id) + " start_at=" + start_at.as_string() );
+        _log->info( "Zu startende Task aus Datenbank geladen: id=" + as_string(task_id) + " start_at=" + start_at.as_string() );
 
 
         Sos_ptr<Task> task = create_task( +parameters, "", start_at, task_id );
@@ -423,7 +423,7 @@ void Job::load_tasks_from_db()
 
         if( !start_at  &&  !_run_time.period_follows( now ) ) 
         {
-            try{ throw_xc( "SCHEDULER-143" ); } catch( const exception& x ) { _log.warn( x.what() ); }
+            try{ throw_xc( "SCHEDULER-143" ); } catch( const exception& x ) { _log->warn( x.what() ); }
         }
 
         _task_queue.enqueue_task( task );
@@ -643,7 +643,7 @@ Sos_ptr<Task> Job::start( const ptr<spooler_com::Ivariable_set>& params, const s
 
     THREAD_LOCK( _lock )
     {
-        if( log && _spooler->_debug )  _log.debug( "start(at=" + start_at.as_string() + ( task_name == ""? "" : ",name=\"" + task_name + '"' ) + ")" );
+        if( log && _spooler->_debug )  _log->debug( "start(at=" + start_at.as_string() + ( task_name == ""? "" : ",name=\"" + task_name + '"' ) + ")" );
 
         switch( _state )
         {
@@ -718,7 +718,7 @@ void Job::stop( bool end_all_tasks )
 
 void Job::reread()
 {
-    _log( "Skript wird erneut gelesen (<include> wird erneut ausgeführt)" );
+    _log->info( "Skript wird erneut gelesen (<include> wird erneut ausgeführt)" );
     read_script();
 }
 
@@ -827,7 +827,7 @@ void Job::start_when_directory_changed( const string& directory_name, const stri
 {
     THREAD_LOCK( _lock )
     {
-        _log.debug( "start_when_directory_changed \"" + directory_name + "\", \"" + filename_pattern + "\"" );
+        _log->debug( "start_when_directory_changed \"" + directory_name + "\", \"" + filename_pattern + "\"" );
 
         for( Directory_watcher_list::iterator it = _directory_watcher_list.begin(); it != _directory_watcher_list.end(); it++ )
         {
@@ -849,7 +849,7 @@ void Job::start_when_directory_changed( const string& directory_name, const stri
             }
         }
 
-        ptr<Directory_watcher> dw = Z_NEW( Directory_watcher( &_log ) );
+        ptr<Directory_watcher> dw = Z_NEW( Directory_watcher( _log ) );
 
         dw->watch_directory( directory_name, filename_pattern );
         dw->set_name( "job(\"" + _name + "\").start_when_directory_changed(\"" + directory_name + "\")" );
@@ -867,7 +867,7 @@ void Job::clear_when_directory_changed()
 {
     THREAD_LOCK( _lock )
     {
-        if( !_directory_watcher_list.empty() )  _log.debug( "clear_when_directory_changed" );
+        if( !_directory_watcher_list.empty() )  _log->debug( "clear_when_directory_changed" );
 
         _directory_watcher_list.clear();
 
@@ -886,10 +886,10 @@ void Job::select_period( Time now )
         if( _period.begin() != latter_day )
         {
             string rep; if( _period._repeat != latter_day )  rep = _period._repeat.as_string();
-            _log.debug( "Nächste Periode ist <period begin=\"" + _period.begin().as_string() + "\" end=\"" + _period.end().as_string() + "\" repeat=\"" + rep + "\">" );
+            _log->debug( "Nächste Periode ist <period begin=\"" + _period.begin().as_string() + "\" end=\"" + _period.end().as_string() + "\" repeat=\"" + rep + "\">" );
         }
         else 
-            _log.debug( "Keine weitere Periode" );
+            _log->debug( "Keine weitere Periode" );
     }
 }
 
@@ -984,7 +984,7 @@ void Job::set_next_start_time( Time now, bool repeat )
         if( _spooler->_debug )
         {
             if( _next_single_start < next_start_time )  msg = "Nächster single_start " + _next_single_start.as_string();
-            if( !msg.empty() )  _log.debug( msg );
+            if( !msg.empty() )  _log->debug( msg );
         }
 
         _next_start_time = next_start_time;
@@ -1190,7 +1190,7 @@ Sos_ptr<Task> Job::task_to_start()
 
         if( cause )
         {
-            if( !log_line.empty() )  _log.debug( log_line );
+            if( !log_line.empty() )  _log->debug( log_line );
 
             if( task )
             {
@@ -1233,7 +1233,7 @@ Sos_ptr<Task> Job::task_to_start()
 
 bool Job::do_something()
 {
-  //Z_DEBUG_ONLY( _log.debug9( "do_something() state=" + state_name() ); )
+  //Z_DEBUG_ONLY( _log->debug9( "do_something() state=" + state_name() ); )
 
     bool something_done     = false;       
     Time now                = Time::now();
@@ -1272,7 +1272,7 @@ bool Job::do_something()
                         {
                             THREAD_LOCK( _lock )
                             {
-                                _log.open();           // Jobprotokoll, nur wirksam, wenn set_filename() gerufen, s. Job::init().
+                                _log->open();           // Jobprotokoll, nur wirksam, wenn set_filename() gerufen, s. Job::init().
 
                                 reset_error();
                                 _repeat = 0;
@@ -1350,8 +1350,8 @@ void Job::set_state( State new_state )
             if( new_state == s_stopping
              || new_state == s_stopped
              || new_state == s_read_error
-             || new_state == s_error      )  _log.info  ( "state=" + state_name() ); 
-                                       else  _log.debug9( "state=" + state_name() );
+             || new_state == s_error      )  _log->info  ( "state=" + state_name() ); 
+                                       else  _log->debug9( "state=" + state_name() );
         }
 
         if( _waiting_for_process  &&  ( _state != s_pending  ||  _state != s_running ) )
@@ -1539,7 +1539,7 @@ xml::Element_ptr Job::dom( const xml::Document_ptr& document, Show_what show, Jo
         if( !_state_text.empty() )
         job_element.setAttribute( "state_text", _state_text             );
 
-        job_element.setAttribute( "log_file"  , _log.filename()         );
+        job_element.setAttribute( "log_file"  , _log->filename()         );
         job_element.setAttribute( "order"     , _order_queue? "yes" : "no" );
         job_element.setAttribute( "tasks"     , _max_tasks              );
         
@@ -1691,7 +1691,7 @@ ptr<Module_instance> Job::create_module_instance()
         result = _module_ptr->create_instance();
 
         result->set_job_name( name() ); 
-        result->set_log( &_log );
+        result->set_log( _log );
     }
 
     return result;

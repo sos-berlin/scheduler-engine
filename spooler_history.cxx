@@ -1,4 +1,4 @@
-// $Id: spooler_history.cxx,v 1.96 2004/06/05 08:57:49 jz Exp $
+// $Id: spooler_history.cxx,v 1.97 2004/07/21 14:23:44 jz Exp $
 
 #include "spooler.h"
 #include "../zschimmer/z_com.h"
@@ -1028,7 +1028,7 @@ Job_history::~Job_history()
     {
         close();
     }
-    catch( const exception& x ) { _job->_log.warn( string("FEHLER BEIM SCHLIESSEN DER JOB-HISTORIE: ") + x.what() ); }
+    catch( const exception& x ) { _job->_log->warn( string("FEHLER BEIM SCHLIESSEN DER JOB-HISTORIE: ") + x.what() ); }
 }
 
 //--------------------------------------------------------------------------------Job_history::open
@@ -1105,7 +1105,7 @@ void Job_history::open()
             _file.open( _filename, O_BINARY | O_RDWR | O_CREAT | O_TRUNC, 0600 );
             _file.print( replace_regex( _type_string, "(:[^,]+)?,", "\t" ) + SYSTEM_NL );
 
-            _job->_log.debug( "Neue Historiendatei eröffnet: " +  _filename );
+            _job->_log->debug( "Neue Historiendatei eröffnet: " +  _filename );
             _use_file = true;
         }
 
@@ -1113,7 +1113,7 @@ void Job_history::open()
     }
     catch( const exception& x )  
     { 
-        _job->_log.warn( string("FEHLER BEIM ÖFFNEN DER HISTORIE: ") + x.what() ); 
+        _job->_log->warn( string("FEHLER BEIM ÖFFNEN DER HISTORIE: ") + x.what() ); 
         _error = true;
     }
 }
@@ -1132,7 +1132,7 @@ void Job_history::close()
     }
     catch( const exception& x )  
     { 
-        _job->_log.warn( string("FEHLER BEIM SCHLIESSEN DER HISTORIE: ") + x.what() ); 
+        _job->_log->warn( string("FEHLER BEIM SCHLIESSEN DER HISTORIE: ") + x.what() ); 
     }
 }
 
@@ -1160,7 +1160,7 @@ void Job_history::archive( Archive_switch arc, const string& filename )
             rename_file( filename, arc_filename );
         }
 
-        _job->_log.info( "Bisherige Historie ist archiviert worden unter " + arc_filename );
+        _job->_log->info( "Bisherige Historie ist archiviert worden unter " + arc_filename );
     }
 }
 
@@ -1425,7 +1425,7 @@ void Task_history::write( bool start )
 
 
                         // Task-Protokoll
-                        string log_filename = _task->_log.filename();
+                        string log_filename = _task->_log->filename();
                         if( _job_history->_with_log  &&  !log_filename.empty()  &&  log_filename[0] != '*' )
                         {
                             try {
@@ -1433,7 +1433,7 @@ void Task_history::write( bool start )
                                 if( _job_history->_with_log == arc_gzip )  blob_filename = GZIP + blob_filename;
                                 copy_file( "file -b " + log_filename, blob_filename );
                             }
-                            catch( const exception& x ) { _task->_log.warn( string("Historie: ") + x.what() ); }
+                            catch( const exception& x ) { _task->_log->warn( string("Historie: ") + x.what() ); }
                         }
                     }
                 }
@@ -1498,7 +1498,7 @@ void Task_history::start()
     }
     catch( const exception& x )  
     { 
-        _task->_log.warn( string("FEHLER BEIM SCHREIBEN DER HISTORIE: ") + x.what() );
+        _task->_log->warn( string("FEHLER BEIM SCHREIBEN DER HISTORIE: ") + x.what() );
         //_error = true;
     }
 }
@@ -1526,7 +1526,7 @@ void Task_history::end()
         }
         else
         {
-            Z_DEBUG_ONLY( if(_use_file|_use_db) _task->_log.debug9( "Historieneintrag wird wieder gelöscht, weil nicht genug Jobschritte ausgeführt worden sind\n" ); )
+            Z_DEBUG_ONLY( if(_use_file|_use_db) _task->_log->debug9( "Historieneintrag wird wieder gelöscht, weil nicht genug Jobschritte ausgeführt worden sind\n" ); )
 
             //if( _use_file )  SetEndOfFile();
 
@@ -1541,7 +1541,7 @@ void Task_history::end()
     }
     catch( const exception& x )  
     { 
-        _task->_log.warn( string("FEHLER BEIM SCHREIBEN DER HISTORIE: ") + x.what() ); 
+        _task->_log->warn( string("FEHLER BEIM SCHREIBEN DER HISTORIE: ") + x.what() ); 
         //_error = true;
     }
 

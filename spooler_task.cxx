@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.256 2004/07/12 17:59:48 jz Exp $
+// $Id: spooler_task.cxx,v 1.257 2004/07/21 14:23:45 jz Exp $
 /*
     Hier sind implementiert
 
@@ -131,7 +131,7 @@ Spooler_object Object_set::get()
         if( obj.pdispVal == NULL )  break;  // EOF
         if( _object_set_descr->_level_interval.is_in_interval( object.level() ) )  break;
 
-        //_log.info( "Objekt-Level " + as_string( object.level() ) + " ist nicht im Intervall" );
+        //_log->info( "Objekt-Level " + as_string( object.level() ) + " ist nicht im Intervall" );
     }
 
     return object;
@@ -200,17 +200,18 @@ Task::Task( Job* job )
     _zero_(this+1), 
     _spooler(job->_spooler), 
     _job(job),
-    _log(job->_spooler),
     _history(&job->_history,this),
     _timeout(job->_task_timeout),
     _lock("Task")
   //_success(true)
 {
+    _log = Z_NEW( Prefix_log( job->_spooler ) );
+
     _let_run = _job->_period.let_run();
 
-    _log.set_job( _job );
-    _log.set_task( this );
-    _log.inherit_settings( _job->_log );
+    _log->set_job( _job );
+    _log->set_task( this );
+    _log->inherit_settings( *_job->_log );
 
     set_subprocess_timeout();
 
@@ -226,7 +227,7 @@ Task::~Task()
     { 
         close(); 
     } 
-    catch( const exception& x ) { _log.warn( x.what() ); }
+    catch( const exception& x ) { _log->warn( x.what() ); }
 }
 
 //--------------------------------------------------------------------------------------Task::close
@@ -252,10 +253,10 @@ void Task::close()
         {
             //do_close();
             Async_operation* op = do_close__start();
-            if( !op->async_finished() )  _log.warn( "Warten auf Abschluss der Task ..." );
+            if( !op->async_finished() )  _log->warn( "Warten auf Abschluss der Task ..." );
             do_close__end();
         }
-        catch( const exception& x ) { _log.error( string("close: ") + x.what() ); }
+        catch( const exception& x ) { _log->error( string("close: ") + x.what() ); }
 
 
         // Alle, die mit wait_until_terminated() auf diese Task warten, wecken:
@@ -310,7 +311,7 @@ xml::Element_ptr Task::dom( const xml::Document_ptr& document, Show_what show )
 
         task_element.setAttribute( "steps"           , _step_count );
 
-        task_element.setAttribute( "log_file"        , _log.filename() );
+        task_element.setAttribute( "log_file"        , _log->filename() );
 
         if( Module_task* t = dynamic_cast<Module_task*>( this ) )
         {
@@ -352,7 +353,7 @@ xml::Element_ptr Task::dom( const xml::Document_ptr& document, Show_what show )
             task_element.appendChild( subprocesses_element );
         }
 
-        if( show & show_log )  dom_append_text_element( task_element, "log", _log.as_string() );
+        if( show & show_log )  dom_append_text_element( task_element, "log", _log->as_string() );
     }
 
     return task_element;
@@ -397,7 +398,7 @@ void Task::cmd_end( bool kill_immediately )
 
 void Task::cmd_nice_end( Job* for_job )
 {
-    _log.debug( "Task wird dem Job " + for_job->name() + " zugunsten beendet" );
+    _log->debug( "Task wird dem Job " + for_job->name() + " zugunsten beendet" );
 
     cmd_end();
 }
@@ -437,7 +438,7 @@ void Task::set_error_xc( const Xc& x )
     //Module_task* t = dynamic_cast<Module_task*>( this );
     //Ist nie in _in_call: if( t  &&  t->_module_instance  &&  t->_module_instance->_in_call )  msg = "In " + t->_module_instance->_in_call->name() + "(): ";
     
-    _log.error( msg + x.what() );
+    _log->error( msg + x.what() );
 
     set_error_xc_only( x );
 }
@@ -546,7 +547,7 @@ void Task::set_state( State new_state )
             //if( new_state == s_starting  &&  _thread->_free_threading )  msg += ", dem Thread " + _thread->name() + " zugeordnet";
                 if( new_state == s_starting  &&  _module_instance && _module_instance->pid() )  msg += ", pid=" + as_string( _module_instance->pid() );
 
-                _log.log( log_level, msg );
+                _log->log( log_level, msg );
             }
         }
     }
@@ -654,7 +655,7 @@ bool Task::check_timeout( const Time& now )
 {
     if( _timeout < latter_day  &&  now > _last_operation_time + _timeout  &&  !_kill_tried )
     {
-        _log.error( "Task wird nach nach Zeitablauf abgebrochen" );
+        _log->error( "Task wird nach nach Zeitablauf abgebrochen" );
         return try_kill();
     }
 
@@ -670,7 +671,7 @@ void Task::add_pid( int pid, const Time& timeout_period )
     if( timeout_period != latter_day )
     {
         timeout = Time::now() + timeout_period;
-        _log.debug9( S() << "add_pid(" << pid << ")  Frist endet " << timeout );
+        _log->debug9( S() << "add_pid(" << pid << ")  Frist endet " << timeout );
     }
 
     _subprocesses[ pid ] = Z_NEW( Subprocess( this, pid, timeout ) );  
@@ -719,7 +720,7 @@ void Task::Subprocess::try_kill()
     {
         bool ok = try_kill_process_immediately( _pid );
 
-        _task->_log.warn( S() << "Subprozess " << _pid << ( ok? " abgebrochen" : " lässt sich nicht abbrechen" ) );
+        _task->_log->warn( S() << "Subprozess " << _pid << ( ok? " abgebrochen" : " lässt sich nicht abbrechen" ) );
 
         _killed = true; 
         _timeout = latter_day; 
@@ -769,9 +770,9 @@ bool Task::try_kill()
 
         FOR_EACH( Subprocesses, _subprocesses, p )  p->second->try_kill();
 
-        if( !_killed ) _log.warn( "Task konnte nicht abgebrochen werden" );
+        if( !_killed ) _log->warn( "Task konnte nicht abgebrochen werden" );
     }
-    catch( const exception& x ) { _log.warn( x.what() ); }
+    catch( const exception& x ) { _log->warn( x.what() ); }
 
     return _killed;
 }
@@ -780,7 +781,7 @@ bool Task::try_kill()
 
 bool Task::do_something()
 {
-    //Z_DEBUG_ONLY( _log.debug9( "do_something() state=" + state_name() ); )
+    //Z_DEBUG_ONLY( _log->debug9( "do_something() state=" + state_name() ); )
 
     bool had_operation      = _operation != NULL;
     bool something_done     = false;
@@ -791,7 +792,7 @@ bool Task::do_something()
 
     if( _kill_immediately  &&  !_kill_tried ) 
     {
-        _log.error( "Task wird nach Anforderung abgebrochen" );
+        _log->error( "Task wird nach Anforderung abgebrochen" );
         return try_kill();
     }
 
@@ -815,7 +816,7 @@ bool Task::do_something()
 
                 if( !let_run ) 
                 {
-                    _log( "Laufzeitperiode ist abgelaufen, Task wird beendet" );
+                    _log->info( "Laufzeitperiode ist abgelaufen, Task wird beendet" );
                     set_state( s_ending );
                 }
             }
@@ -908,7 +909,7 @@ bool Task::do_something()
                         case s_running_process:
                             if( ((Process_task*)this)->signaled() )
                             {
-                                _log( "signaled!" );
+                                _log->info( "signaled!" );
                                 set_state( s_ending );
                                 loop = true;
                             }
@@ -933,7 +934,7 @@ bool Task::do_something()
                                             break;
                                         }
 
-                                        _log.set_order_log( &_order->_log );
+                                        _log->set_order_log( &_order->_log );
                                     }
 
                                     _last_process_start_time = now;
@@ -968,7 +969,7 @@ bool Task::do_something()
                             {
                                 if( now >= _idle_since + _job->_idle_timeout )  
                                 {
-                                    _log.debug9( "idle_timeout ist abgelaufen, Task beendet sich" );
+                                    _log->debug9( "idle_timeout ist abgelaufen, Task beendet sich" );
                                     _end = true;
                                     loop = true;
                                 }
@@ -1086,7 +1087,7 @@ bool Task::do_something()
                                 finish();
 
                                 // Gesammelte eMail senden, wenn collected_max erreicht:
-                                //Time log_time = _log.collect_end();
+                                //Time log_time = _log->collect_end();
                                 //if( log_time > Time::now()  &&  _next_time > log_time )  set_next_time( log_time );
 
                                 set_state( s_closed );
@@ -1127,7 +1128,7 @@ bool Task::do_something()
             catch( const exception& x )
             {
                 if( error_count == 0 )  set_error( x );
-                                 else  _log.error( x.what() );
+                                 else  _log->error( x.what() );
 
                 if( error_count == 0  &&  _state < s_ending )
                 {
@@ -1205,9 +1206,9 @@ void Task::load()
         if( _job->_max_tasks > 1 )  filename += "." + as_string(_id),  remove_after_close = true;
         filename += ".log";
 
-        _log.set_filename( filename );      // Task-Protokoll
-        _log.set_remove_after_close( remove_after_close );
-        _log.open();                // Jobprotokoll. Nur wirksam, wenn set_filename() gerufen
+        _log->set_filename( filename );      // Task-Protokoll
+        _log->set_remove_after_close( remove_after_close );
+        _log->open();                // Jobprotokoll. Nur wirksam, wenn set_filename() gerufen
     }
 
 
@@ -1250,7 +1251,7 @@ bool Task::step__end()
         if( _order )
         {
             _order->postprocessing( result );
-            _log.set_order_log( NULL );
+            _log->set_order_log( NULL );
             THREAD_LOCK( _lock )  _order = NULL;
         }
 
@@ -1319,7 +1320,7 @@ void Task::remove_order_after_error()
     if( _order )
     {
         _order->processing_error();
-        _log.set_order_log( NULL );
+        _log->set_order_log( NULL );
         _order = NULL;
     }
 }
@@ -1380,13 +1381,13 @@ void Task::finish()
         if( !_spooler->_manual )
         {
             set_mail_defaults();
-            _log.send( has_error()? -1 : _step_count );
+            _log->send( has_error()? -1 : _step_count );
         }
 
         clear_mail();
     }
-    catch( const exception& x  ) { _log.warn( x.what() ); }
-    catch( const _com_error& x ) { _log.warn( bstr_as_string(x.Description()) ); }  
+    catch( const exception& x  ) { _log->warn( x.what() ); }
+    catch( const _com_error& x ) { _log->warn( bstr_as_string(x.Description()) ); }  
 }
 
 //----------------------------------------------------------------------Task::wait_until_terminated
@@ -1417,7 +1418,7 @@ void Task::send_collected_log()
 {
     try
     {
-        _log.send( -2 );
+        _log->send( -2 );
     }
     catch( const exception&  x ) { _spooler->_log.error( x.what() ); }
     catch( const _com_error& x ) { _spooler->_log.error( bstr_as_string(x.Description()) ); }
@@ -1429,7 +1430,7 @@ void Task::set_mail_defaults()
 {
     bool is_error = has_error();
 
-    _log.set_mail_from_name( _job->profile_section() );
+    _log->set_mail_from_name( _job->profile_section() );
 
     string body = Sos_optional_date_time::now().as_string() + "\n\nJob " + _job->name() + "  " + _job->title() + "\n";
     body += "Task-Id " + as_string(id()) + ", " + as_string(_step_count) + " Schritte\n";
@@ -1437,26 +1438,26 @@ void Task::set_mail_defaults()
 
     if( !is_error )
     {
-        _log.set_mail_subject( obj_name() + " gelungen" );
+        _log->set_mail_subject( obj_name() + " gelungen" );
     }
     else
     {
-        string errmsg = _error? _error->what() : _log.highest_msg();
-        _log.set_mail_subject( string("FEHLER ") + errmsg, is_error );
+        string errmsg = _error? _error->what() : _log->highest_msg();
+        _log->set_mail_subject( string("FEHLER ") + errmsg, is_error );
     
         body += errmsg + "\n\n";
     }
 
-    _log.set_mail_body( body + "Das Jobprotokoll liegt dieser Nachricht bei.", is_error );
+    _log->set_mail_body( body + "Das Jobprotokoll liegt dieser Nachricht bei.", is_error );
 }
 
 //---------------------------------------------------------------------------------Task::clear_mail
 
 void Task::clear_mail()
 {
-    _log.set_mail_from_name( "", true );
-    _log.set_mail_subject  ( "", true );
-    _log.set_mail_body     ( "", true );
+    _log->set_mail_from_name( "", true );
+    _log->set_mail_subject  ( "", true );
+    _log->set_mail_body     ( "", true );
 }
 
 //-----------------------------------------------------------------------Module_task::do_close__end
@@ -1479,13 +1480,13 @@ void Module_task::do_close__end()
         _module_instance->close__end();
 
         int exit_code = _module_instance->exit_code();
-        if( exit_code != 0 )  _log.warn( "Prozess hat mit Exit code " + as_string(exit_code) + " (0x" + printf_string( "%X", exit_code ) + ") geendet" );
+        if( exit_code != 0 )  _log->warn( "Prozess hat mit Exit code " + as_string(exit_code) + " (0x" + printf_string( "%X", exit_code ) + ") geendet" );
 
         int termination_signal = _module_instance->termination_signal();
-        if( termination_signal != 0 )  _log.warn( "Prozess hat mit Signal " + as_string( termination_signal ) + " geendet" );
+        if( termination_signal != 0 )  _log->warn( "Prozess hat mit Signal " + as_string( termination_signal ) + " geendet" );
 
-        _log.log_file( _module_instance->stdout_filename(), "stdout:" );
-        _log.log_file( _module_instance->stderr_filename(), "stderr:" );
+        _log->log_file( _module_instance->stdout_filename(), "stdout:" );
+        _log->log_file( _module_instance->stderr_filename(), "stderr:" );
 
       //if( _job->_module_ptr->_reuse == Module::reuse_job )  _job->release_module_instance( _module_instance );
 
@@ -1499,7 +1500,7 @@ void Module_task::close_engine()
 {
     try 
     {
-      //_log.debug3( "close scripting engine" );
+      //_log->debug3( "close scripting engine" );
         _module_instance->close();
         _module_instance->_com_task = new Com_task();
       //_module_instance = NULL;
@@ -1621,7 +1622,7 @@ void Job_module_task::do_load()
 
 
     _module_instance = module_instance;
-    _module_instance->attach_task( this, &_log );
+    _module_instance->attach_task( this, _log );
 
     if( !module_instance->loaded() )
     {
@@ -1848,7 +1849,7 @@ bool Process_task::do_kill()
 {
     if( !_process_handle )  return false;
 
-    _log.warn( "Prozess wird abgebrochen" );
+    _log->warn( "Prozess wird abgebrochen" );
 
     LOG( "TerminateProcess(" <<  _process_handle << ",255)\n" );
     BOOL ok = TerminateProcess( _process_handle, 255 );
@@ -1871,7 +1872,7 @@ void Process_task::do_end__end()
     _process_handle.close();
     _result = (int)exit_code;
 
-    _log.log_file( _job->_process_log_filename ); 
+    _log->log_file( _job->_process_log_filename ); 
 
     if( exit_code )
     {
@@ -1882,7 +1883,7 @@ void Process_task::do_end__end()
         catch( const exception& x )
         {
             if( !_job->_process_ignore_error  )  throw;
-            _log.warn( x.what() );
+            _log->warn( x.what() );
         }
     }
 }
@@ -1892,7 +1893,7 @@ void Process_task::do_end__end()
 bool Process_task::signaled()
 {
     bool signaled = _process_handle.signaled();
-    //_log.debug3( "signaled=" + as_string( signaled ) );
+    //_log->debug3( "signaled=" + as_string( signaled ) );
     return signaled;
 }
 
@@ -2072,7 +2073,7 @@ bool Process_task::do_kill()
 {
     if( _process_handle._pid )
     {
-        _log.warn( "Prozess wird abgebrochen" );
+        _log->warn( "Prozess wird abgebrochen" );
 
         LOG( "kill(" << _process_handle._pid << ",SIGTERM)\n" );
         int err = kill( _process_handle._pid, SIGTERM );
@@ -2119,7 +2120,7 @@ void Process_task::do_end__end()
 
     _result = (int)exit_code;
 
-    _log.log_file( _job->_process_log_filename ); 
+    _log->log_file( _job->_process_log_filename ); 
 
     if( exit_code )
     {
@@ -2130,7 +2131,7 @@ void Process_task::do_end__end()
         catch( const exception& x )
         {
             if( !_job->_process_ignore_error )  throw;
-            _log.warn( x.what() );
+            _log->warn( x.what() );
         }
     }
 }

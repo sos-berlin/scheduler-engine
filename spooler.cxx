@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.341 2004/07/20 11:26:46 jz Exp $
+// $Id: spooler.cxx,v 1.342 2004/07/21 14:23:44 jz Exp $
 // §851: Weitere Log-Ausgaben zum Scheduler-Start eingebaut
 // §1479
 
@@ -501,7 +501,7 @@ void Spooler::remove_temporary_jobs()
 
             if( job->should_removed() )    
             {
-                if( _debug )  job->_log.debug( "Temporärer Job wird entfernt" );
+                if( _debug )  job->_log->debug( "Temporärer Job wird entfernt" );
 
                 try
                 {
@@ -985,6 +985,16 @@ Job* Spooler::get_next_job_to_start()
     }
 
     return next_job;
+}
+
+//--------------------------------------------------------------------------------Spooler::get_task
+// Anderer Thread
+
+Sos_ptr<Task> Spooler::get_task( int task_id )
+{
+    Sos_ptr<Task> task = get_task_or_null( task_id );
+    if( !task )  throw_xc( "SCHEDULER-215", task_id );
+    return task;
 }
 
 //------------------------------------------------------------------------Spooler::get_task_or_null

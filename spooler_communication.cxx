@@ -1,4 +1,4 @@
-// $Id: spooler_communication.cxx,v 1.85 2004/07/18 15:38:02 jz Exp $
+// $Id: spooler_communication.cxx,v 1.86 2004/07/21 14:23:44 jz Exp $
 /*
     Hier sind implementiert
 
@@ -22,10 +22,10 @@ const int wait_for_port_available = 60;   // Soviele Sekunden warten, bis TCP- o
 
 #ifdef Z_WINDOWS
 #   include <io.h>
-    const int EWOULDBLOCK = 10035;
-    const int ENOTSOCK   = 10038;
-    const int EADDRINUSE = WSAEADDRINUSE;
-    const int ENOBUFS    = WSAENOBUFS;
+    const int EWOULDBLOCK   = 10035;
+    const int ENOTSOCK      = 10038;
+    const int EADDRINUSE    = WSAEADDRINUSE;
+    const int ENOBUFS       = WSAENOBUFS;
     const int STDIN_FILENO  = (int)GetStdHandle( STD_INPUT_HANDLE );//0;
     const int STDOUT_FILENO = (int)GetStdHandle( STD_OUTPUT_HANDLE );//1;
 #   define ioctl    ioctlsocket
@@ -425,10 +425,11 @@ void Communication::Channel::do_close()
 
 void Communication::Channel::recv_clear()
 {
-    _receive_at_start = true; 
+    _receive_at_start    = true; 
     _receive_is_complete = false;
     _text = "";
     _xml_end_finder = Xml_end_finder();
+    _http_response  = NULL;
 }
 
 //------------------------------------------------------------------Communication::Channel::do_recv
@@ -585,8 +586,10 @@ bool Communication::Channel::async_continue_( bool wait )
                 {
                     LOG2( "scheduler.http", "HTTP: " << _http_parser->_text << "\n" );
                     recv_clear();
-                    _text = cp.execute_http( *_http_request );
-                    _http_parser = NULL;
+
+                    _http_response = cp.execute_http( *_http_request );
+
+                    _http_parser  = NULL;
                     _http_request = NULL;
                 }
                 else
@@ -605,6 +608,25 @@ bool Communication::Channel::async_continue_( bool wait )
                 _send_progress = 0;
                 _send_is_complete = false;
                 do_send();
+            }
+
+            if( _send_is_complete  &&  _http_response )
+            {
+                if( _http_response.eof() )
+                {
+                    _http_response = NULL;
+                }
+                else
+                {
+                    _text = _http_response.read( 32768 );
+
+                    if( _text.length() > 0 )
+                    {
+                        _send_progress = 0;
+                        _send_is_complete = false;
+                        do_send();
+                    }
+                }
             }
         }
 

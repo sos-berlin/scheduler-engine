@@ -1,4 +1,4 @@
-// $Id: spooler_command.cxx,v 1.121 2004/07/20 11:26:46 jz Exp $
+// $Id: spooler_command.cxx,v 1.122 2004/07/21 14:23:44 jz Exp $
 /*
     Hier ist implementiert
 
@@ -674,7 +674,7 @@ string xml_as_string( const xml::Document_ptr& document, bool indent )
 
 //-------------------------------------------------------------------Command_processor::execute_http
 
-string Command_processor::execute_http( const Http_request& http_request )
+ptr<Http_response> Command_processor::execute_http( const Http_request& http_request )
 {
     string  path                    = http_request._path;
     string  response_body;
@@ -704,6 +704,23 @@ string Command_processor::execute_http( const Http_request& http_request )
                 response_body = zschimmer::string_from_file( _spooler->_html_directory + "/" + path );
             }
             else
+            if( string_begins_with( path, "/show_log" ) )
+            {
+                ptr<Prefix_log> log;
+
+                if( string_begins_with( path, "/show_log&task=" ) )  log = _spooler->get_task( as_int( path.substr( 15 ) ) )->log();
+                else
+                if( string_begins_with( path, "/show_log&job="  ) )  log = _spooler->get_job( path.substr( 14 ) )->_log;
+                else
+                if( path == "/show_log"                           )  log = &_spooler->_log;
+                else
+                    throw_xc( "SCHEDULER-214" );
+
+                log->filename();
+
+                response_content_type = "text/html";
+            }
+            else
             if( path.length() > 0 )
             {
                 if( path[0] == '/' )  path.erase( 0, 1 );
@@ -729,7 +746,6 @@ string Command_processor::execute_http( const Http_request& http_request )
             response_body = execute( "<show_state what=\"all,orders\"/>", Time::now(), true );
             response_content_type = "text/xml";
         }
-
     }
     catch( const exception& x )
     {

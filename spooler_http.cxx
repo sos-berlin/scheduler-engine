@@ -1,4 +1,4 @@
-// $Id: spooler_http.cxx,v 1.1 2004/07/18 15:38:02 jz Exp $
+// $Id: spooler_http.cxx,v 1.2 2004/07/21 14:23:45 jz Exp $
 /*
     Hier sind implementiert
 
@@ -20,7 +20,7 @@ namespace spooler {
     
 Http_parser::Http_parser( Http_request* http_request )
 :
-    _zero_(this+1),
+    _zero(this+1),
     _http_request( http_request )
 {
     _text.reserve( 1000 );
@@ -167,6 +167,117 @@ string Http_parser::eat_path()
     return path;
 }
 
+//----------------------------------------------------------------------------Http_response::finish
+
+void Http_response::finish()
+{
+    time_t      t;
+    char        time_text[26];
+
+    ::time( &t );
+    memset( time_text, 0, sizeof time_text );
+
+#   ifdef Z_WINDOWS
+        strcpy( time_text, asctime( gmtime( &t ) ) );
+#    else
+        struct tm  tm;
+        asctime_r( gmtime_r( &t, &tm ), time_text );
+#   endif
+    
+    time_text[24] = '\0';
+
+    _header = "HTTP/1.1 200 OK\r\n"
+              "Content-Type: " + _content_type + "\r\n"
+              "Transfer-Encoding: chunked\r\n"
+              "Date: " + string(time_text) + " GMT\r\n"
+              "Server: Scheduler " + string(VER_PRODUCTVERSION_STR) + "\r\n"
+              "Cache-Control: no-cache\r\n"
+              "\r\n";
+}
+
+//-------------------------------------------------------------------------------Http_response::eof
+
+bool Http_response::eof()
+{
+    if( _chunk_index == 0 )
+    {
+        if( _header_read_pointer <= _header.length() )
+        {
+            return false;
+        }
+        else
+        {
+            _chunk_index++;
+            if( !next_chunk_is_ready() )  return false;
+            return !next_chunk();
+        }
+    }
+    else
+    {
+        return next_chunk_is_ready();
+    }
+}
+
+//------------------------------------------------------------------------------Http_response::read
+
+string Http_response::read( int size )                           
+{
+    if( _chunk_index == 0 )
+    {
+        int length = min( size, (int)_header.length() - _header_read_pointer );
+        int r      = _header_read_pointer;
+        _header_read_pointer += length;
+        return _header.substr( r, length );
+    }
+    else
+    {
+        //response += as_hex_string( (int)response_body.length() ) + "\r\n";
+        //return response + response_body + "\r\n0\r\n\r\n";
+        return read( size );
+    }
+}
+
+//-----------------------------------------------------------------------String_http_response::read
+
+bool String_http_response::read( int size )
+{ 
+    int length = min( size, (int)_text.length() );
+    int r      = _read_pointer; 
+    _read_pointer += length; 
+    return _text.substr( _read_pointer, length ); 
+}
+
+//-------------------------------------------------------------Log_http_response::Log_http_response
+
+Log_http_response::Log_http_response( Prefix_log* log )
+: 
+    _zero(this+1), 
+    _log(log) 
+{
+    if( _log->filename() != "" )
+    {
+        _file.open( _log->filename(), "r" );
+    }
+}
+
+//--------------------------------------------------------------------Log_http_response::next_chunk
+/*
+bool Log_http_response::next_chunk()
+{
+}
+
+//--------------------------------------------------------------------Log_http_response::chunk_size
+
+int Log_http_response::chunk_size()
+{
+}
+
+//--------------------------------------------------------------------------Log_http_response::read
+
+string Log_http_response::read( int size )
+{
+}
+*/
 //-------------------------------------------------------------------------------------------------
 
 } //namespace spooler

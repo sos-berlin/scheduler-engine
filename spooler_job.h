@@ -1,4 +1,4 @@
-// $Id: spooler_job.h,v 1.27 2004/07/21 09:41:13 jz Exp $
+// $Id: spooler_job.h,v 1.28 2004/07/21 14:23:45 jz Exp $
 
 #ifndef __SPOOLER_JOB_H
 #define __SPOOLER_JOB_H
@@ -208,12 +208,12 @@ struct Job : Sos_self_deleting
     string                      jobname_as_filename         ();
     string                      profile_section             ();
     bool                        temporary                   () const                                { return _temporary; }
-    void                        set_delay_after_error       ( int error_steps, Time delay )         { _log.debug9( "delay_after_error["        +as_string(error_steps)+"]="+delay.as_string() ); _delay_after_error[ error_steps ] = delay; }
-    void                        set_stop_after_error        ( int error_steps )                     { _log.debug9( "delay_after_error["        +as_string(error_steps)+"]=\"STOP\""           ); _delay_after_error[ error_steps ] = latter_day; }
-    void                        clear_delay_after_error     ()                                      { _log.debug9( "clear_delay_after_error()" ); _delay_after_error.clear(); }
-    void                        set_delay_order_after_setback( int setbacks, Time delay )           { _log.debug9( "delay_order_after_setback["+as_string(setbacks   )+"]="+delay.as_string() ); _delay_order_after_setback[setbacks   ] = delay; }
+    void                        set_delay_after_error       ( int error_steps, Time delay )         { _log->debug9( "delay_after_error["        +as_string(error_steps)+"]="+delay.as_string() ); _delay_after_error[ error_steps ] = delay; }
+    void                        set_stop_after_error        ( int error_steps )                     { _log->debug9( "delay_after_error["        +as_string(error_steps)+"]=\"STOP\""           ); _delay_after_error[ error_steps ] = latter_day; }
+    void                        clear_delay_after_error     ()                                      { _log->debug9( "clear_delay_after_error()" ); _delay_after_error.clear(); }
+    void                        set_delay_order_after_setback( int setbacks, Time delay )           { _log->debug9( "delay_order_after_setback["+as_string(setbacks   )+"]="+delay.as_string() ); _delay_order_after_setback[setbacks   ] = delay; }
     Time                        get_delay_order_after_setback( int setback_count );
-    void                        set_max_order_setbacks      ( int n )                               { _log.debug9( "max_order_setbacks"+as_string(n) ); _max_order_setbacks = n; }
+    void                        set_max_order_setbacks      ( int n )                               { _log->debug9( "max_order_setbacks"+as_string(n) ); _max_order_setbacks = n; }
     int                         max_order_setbacks          () const                                { return _max_order_setbacks; }
     void                        load_tasks_from_db          ();
     xml::Element_ptr            read_history                ( const xml::Document_ptr& doc, int id, int n, Show_what show ) { return _history.read_tail( doc, id, n, show ); }
@@ -253,7 +253,7 @@ struct Job : Sos_self_deleting
     bool                        do_something                ();
     bool                        should_removed              ()                                      { return _temporary && _state == s_stopped; }
 
-    void                    set_repeat                      ( double seconds )                      { THREAD_LOCK( _lock )  _log.debug( "repeat=" + as_string(seconds) ),  _repeat = seconds; }
+    void                    set_repeat                      ( double seconds )                      { THREAD_LOCK( _lock )  _log->debug( "repeat=" + as_string(seconds) ),  _repeat = seconds; }
     Time                        repeat                      ()                                      { THREAD_LOCK_RETURN( _lock, Time, _repeat ); }
 
     void                        set_state                   ( State );
@@ -269,12 +269,12 @@ struct Job : Sos_self_deleting
     static string               state_cmd_name              ( State_cmd );
     static State_cmd            as_state_cmd                ( const string& );
 
-    void                        set_state_text              ( const string& text )                  { THREAD_LOCK( _lock )  _state_text = text, _log.debug9( "state_text = " + text ); }
+    void                        set_state_text              ( const string& text )                  { THREAD_LOCK( _lock )  _state_text = text, _log->debug9( "state_text = " + text ); }
 
     void                        set_error_xc                ( const Xc& );
     void                        set_error_xc_only           ( const Xc& );
     void                        set_error                   ( const exception& );
-    void                        reset_error                 ()                                      { THREAD_LOCK( _lock )  _error = NULL,  _log.reset_highest_level(); }
+    void                        reset_error                 ()                                      { THREAD_LOCK( _lock )  _error = NULL,  _log->reset_highest_level(); }
     void                        set_job_error               ( const string& what );
 
     void                        signal                      ( const string& signal_name );
@@ -317,7 +317,7 @@ struct Job : Sos_self_deleting
     string                     _name;
     Thread_semaphore           _lock;
     Spooler*                   _spooler;
-    Prefix_log                 _log;
+    ptr<Prefix_log>            _log;
     bool                       _waiting_for_process;        // Task kann nicht gestartet werden, weil kein Prozess in der Prozessklasse verfügbar ist
     bool                       _waiting_for_process_try_again;  
 

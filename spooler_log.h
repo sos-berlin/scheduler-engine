@@ -1,4 +1,4 @@
-// $Id: spooler_log.h,v 1.40 2004/01/12 09:35:23 jz Exp $
+// $Id: spooler_log.h,v 1.41 2004/07/21 14:23:45 jz Exp $
 
 #ifndef __SPOOLER_LOG_H
 #define __SPOOLER_LOG_H
@@ -46,7 +46,7 @@ struct Log
 
 //---------------------------------------------------------------------------------------Prefix_log
 
-struct Prefix_log : Has_log
+struct Prefix_log : Object, Has_log
 {
     Fill_zero _zero_;
 

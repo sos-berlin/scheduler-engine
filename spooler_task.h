@@ -1,4 +1,4 @@
-// $Id: spooler_task.h,v 1.135 2004/06/05 08:57:49 jz Exp $
+// $Id: spooler_task.h,v 1.136 2004/07/21 14:23:45 jz Exp $
 
 #ifndef __SPOOLER_TASK_H
 #define __SPOOLER_TASK_H
@@ -108,6 +108,7 @@ struct Task : Sos_self_deleting
     bool                        do_something                ();
 
     Job*                        job                         ()                                      { return _job; }
+    Prefix_log*                 log                         ()                                      { return _log; }
     Time                        next_time                   ();
     Spooler_thread*             thread                      ()                                      { return _thread; }
     string                      name                        () const                                { return _obj_name(); }
@@ -129,6 +130,7 @@ struct Task : Sos_self_deleting
 
     void                    set_order                       ( Order* );
     Order*                      take_order                  ( const Time& now );
+
 
   protected:
     void                        remove_order_after_error    ();
@@ -161,7 +163,7 @@ struct Task : Sos_self_deleting
     void                        set_subprocess_timeout      ();
     bool                        check_subprocess_timeout    ( const Time& now );
     bool                        wait_until_terminated       ( double wait_time = latter_day );
-    void                        set_delay_spooler_process   ( Time t )                              { _log.debug("delay_spooler_process=" + t.as_string() ); _next_spooler_process = Time::now() + t; }
+    void                        set_delay_spooler_process   ( Time t )                              { _log->debug("delay_spooler_process=" + t.as_string() ); _next_spooler_process = Time::now() + t; }
 
     void                        set_state                   ( State );
 
@@ -171,7 +173,7 @@ struct Task : Sos_self_deleting
     void                        set_error                   ( const exception& );
     void                        set_error                   ( const _com_error& );
     Xc_copy                     error                       ()                                      { Xc_copy result; THREAD_LOCK( _lock )  result = _error;  return result; }
-    void                        reset_error                 ()                                      { THREAD_LOCK( _lock )  _error = NULL,  _log.reset_highest_level(); }
+    void                        reset_error                 ()                                      { THREAD_LOCK( _lock )  _error = NULL,  _log->reset_highest_level(); }
 
     void                    set_next_time                   ( const Time& );
 
@@ -223,7 +225,7 @@ struct Task : Sos_self_deleting
 
     Job*                       _job;
     Thread_semaphore           _lock;
-    Prefix_log                 _log;
+    ptr<Prefix_log>            _log;
     Spooler*                   _spooler;
     Spooler_thread*            _thread;
     Task_history               _history;
