@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.121 2002/11/14 12:16:40 jz Exp $
+// $Id: spooler_task.cxx,v 1.122 2002/11/18 21:01:46 jz Exp $
 /*
     Hier sind implementiert
 
@@ -1627,6 +1627,12 @@ void Task::close()
     if( _closed )  return;
     
     _job->_history.end();
+
+    try
+    {
+        do_stop();
+    }
+    catch( const exception& x ) { _job->_log.warn( x.what() ); }
 
     do_close();
 

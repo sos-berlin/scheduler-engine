@@ -1,4 +1,4 @@
-// $Id: spooler_thread.h,v 1.24 2002/11/11 23:10:36 jz Exp $
+// $Id: spooler_thread.h,v 1.25 2002/11/18 21:01:47 jz Exp $
 
 #ifndef __SPOOLER_THREAD_H
 #define __SPOOLER_THREAD_H
@@ -40,6 +40,8 @@ struct Thread : Sos_self_deleting
     void                        wait                        ();
     int                         wait_until                  ( Time );
 
+    bool                        finished                    ();
+
     void                        do_add_jobs                 ();
     void                        remove_temporary_jobs       ();
 
@@ -74,6 +76,10 @@ struct Thread : Sos_self_deleting
                                                             // Statistik
     int                        _step_count;                 // Seit Spooler-Start ausgeführte Schritte
     int                        _task_count;                 // Seit Spooler-Start gestartetet Tasks
+
+    int                        _nothing_done_count;
+    int                        _nothing_done_max;
+
 
     Thread_semaphore           _lock;
     bool                       _free_threading;             // Dieser Thread soll frei, ohne _serialize_lock laufen.

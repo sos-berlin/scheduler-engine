@@ -1,4 +1,4 @@
-// $Id: spooler_thread.cxx,v 1.51 2002/11/13 12:54:00 jz Exp $
+// $Id: spooler_thread.cxx,v 1.52 2002/11/18 21:01:47 jz Exp $
 /*
     Hier sind implementiert
 
@@ -208,6 +208,14 @@ void Thread::start()
     }
 
     FOR_EACH_JOB( job )  (*job)->init();
+
+
+    SetThreadPriority( GetCurrentThread(), _thread_priority );
+
+    THREAD_LOCK( _spooler->_thread_id_map_lock )  _spooler->_thread_id_map[ GetCurrentThreadId() ] = this;
+
+    _nothing_done_count = 0;
+    _nothing_done_max   = _job_list.size() * 2 + 3;
 }
 
 //--------------------------------------------------------------------------------Thread::stop_jobs
@@ -523,8 +531,106 @@ void Thread::nichts_getan( double wait_time )
     sos_sleep( wait_time );  // Warten, um bei Wiederholung zu bremsen
 }
 
+//----------------------------------------------------------------------------------Thread::process
+
+bool Thread::process()
+{
+    bool something_done = false;
+
+    try
+    {
+        bool something_done = step();
+    
+        if( something_done )  _nothing_done_count = 0;
+        else 
+        if( ++_nothing_done_count > _nothing_done_max )  
+        {
+            nichts_getan( min( 10.0, (double)_nothing_done_count / _nothing_done_max ) );
+        }
+
+        remove_temporary_jobs();
+    }
+    catch( const Xc&         x ) { _log.error( x.what() ); }
+    catch( const exception&  x ) { _log.error( x.what() ); }
+    catch( const _com_error& x ) { _log.error( as_string( x.Description() ) ); }
+
+    return something_done;
+}
+
+//---------------------------------------------------------------------------------Thread::finished
+
+bool Thread::finished()
+{
+    if( _running_tasks_count == 0 )
+    {
+        if( _spooler->state() == Spooler::s_stopping_let_run  &&  !any_tasks_there() )  return true;
+        if( _spooler->_manual )  return true;   // Task ist fertig, also Thread beenden
+    }
+
+    return false;
+}
+
 //-------------------------------------------------------------------------------Thread::run_thread
 
+int Thread::run_thread()
+{
+    int ret = 1;
+
+    try
+    {
+        start();
+
+        while( _spooler->state() != Spooler::s_stopping  
+           &&  _spooler->state() != Spooler::s_stopped  )
+        {
+            if( _spooler->state() == Spooler::s_paused )
+            {
+                wait();
+            }
+            else
+            {
+                process();
+
+                if( _running_tasks_count == 0 )
+                {
+                    if( _spooler->state() == Spooler::s_stopping_let_run  &&  !any_tasks_there() )  break;
+                    if( _spooler->_manual )  break;   // Task ist fertig, also Thread beenden
+
+                    wait();
+                }
+            }
+
+            _event.reset();
+        }
+
+        close1();
+
+        ret = 0;
+    }
+    catch( const Xc&         x ) { _log.error( x.what() ); }
+    catch( const exception&  x ) { _log.error( x.what() ); }
+    catch( const _com_error& x ) { _log.error( as_string( x.Description() ) ); }
+
+    {THREAD_LOCK( _spooler->_thread_id_map_lock )
+    {
+        Thread_id_map::iterator it = _spooler->_thread_id_map.find( GetCurrentThreadId() );
+        if( it != _spooler->_thread_id_map.end() )  _spooler->_thread_id_map.erase( it );
+    }}
+
+    if( ret == 1 )
+    {
+        _log.error( "Thread wird wegen des Fehlers beendet" );
+        close1();
+    }
+    
+    _terminated = true;
+    _spooler->signal( "Thread " + _name + " beendet sich" );
+
+    return ret;
+}
+
+//-------------------------------------------------------------------------------Thread::run_thread
+/*
 int Thread::run_thread()
 {
     int ret = 1;
@@ -601,7 +707,7 @@ int Thread::run_thread()
 
     return ret;
 }
-
+*/
 //----------------------------------------------------------------------------Thread::signal_object
 // Anderer Thread
 
