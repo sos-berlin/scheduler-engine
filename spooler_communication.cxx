@@ -1,4 +1,4 @@
-// $Id: spooler_communication.cxx,v 1.73 2004/01/06 19:52:42 jz Exp $
+// $Id: spooler_communication.cxx,v 1.74 2004/01/07 06:09:00 jz Exp $
 /*
     Hier sind implementiert
 
@@ -259,7 +259,7 @@ bool Communication::Listen_socket::async_continue_( bool wait )
             _communication->_channel_list.push_back( new_channel );
 
             new_channel->add_to_socket_manager( _spooler->_connection_manager );
-            new_channel->socket_expect_signals( Socket_operation::sig_read | Socket_operation::sig_write );
+            new_channel->socket_expect_signals( Socket_operation::sig_read | Socket_operation::sig_write | Socket_operation::sig_except );
             something_done = true;
         }
     }
@@ -347,11 +347,20 @@ bool Communication::Channel::do_accept( SOCKET listen_socket )
 
         LOG2( "socket.accept", "accept(" << listen_socket << ")\n" );
         _read_socket = accept( listen_socket, (struct sockaddr*)&peer_addr, &peer_addr_len );
-        if( _read_socket == SOCKET_ERROR )  throw_sos_socket_error( "accept" );
+        if( _read_socket == SOCKET_ERROR )  
+        {
+            int err = get_errno();
+            if( err == EWOULDBLOCK )  return false;
+            throw_sos_socket_error( err, "accept" );
+        }
         
         _write_socket = _read_socket;
 
         set_linger( _read_socket );
+
+        unsigned long on = 1;
+        int ret = ioctlsocket( _read_socket, FIONBIO, &on );
+        if( ret == SOCKET_ERROR )  throw_sos_socket_error( "ioctl(FIONBIO)" );
 
         _host = peer_addr.sin_addr;
         _log.set_prefix( "TCP-Verbindung mit " + _host.as_string() );
@@ -456,9 +465,14 @@ bool Communication::Channel::do_send()
     {
         LOG2( "socket.send", "send/write(" << _write_socket << "," << count << " bytes)\n" );
         len = _write_socket == STDOUT_FILENO? write ( _write_socket, _text.c_str() + _send_progress, count )
-                                                : ::send( _write_socket, _text.c_str() + _send_progress, count, 0 );
-        if( len < 0 ) {
-            if( get_errno() == EWOULDBLOCK )  return false;
+                                            : ::send( _write_socket, _text.c_str() + _send_progress, count, 0 );
+        if( len < 0 ) 
+        {
+            if( get_errno() == EWOULDBLOCK ) 
+            {
+                _socket_manager->set_fd( Socket_manager::write_fd, _write_socket );
+                return false;
+            }
             throw_sos_socket_error( "send" );
         }
 
@@ -471,6 +485,7 @@ bool Communication::Channel::do_send()
     {
         _send_is_complete = true;
         _text = "";
+        _socket_manager->clear_fd( Socket_manager::write_fd, _write_socket );
     }
 
     return something_done;
@@ -745,16 +760,16 @@ void Communication::bind()
             ret = ioctl( STDIN_FILENO, FIONBIO, &on );   // In Windows nicht möglich
             if( ret == 0 )
             {
-                Sos_ptr<Channel> new_channel = SOS_NEW( Channel( _spooler ) );
+                ptr<Channel> new_channel = Z_NEW( Channel( this ) );
         
                 new_channel->_read_socket  = STDIN_FILENO;
                 new_channel->_write_socket = STDOUT_FILENO;
                 new_channel->_indent = true;
 
-                _channel_list.push_back( new_channel );
+                new_channel->add_to_socket_manager( _spooler->_connection_manager );
+                new_channel->socket_expect_signals( Socket_operation::sig_read );
 
-                _udp_socket.add_to_socket_manager( _spooler->_connection_manager );
-                _udp_socket.socket_expect_signals( Socket_operation::sig_read );
+                _channel_list.push_back( new_channel );
             }
         }
 #   endif
