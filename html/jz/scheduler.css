@@ -1,4 +1,4 @@
-/*  $Id: scheduler.css,v 1.1 2004/11/30 21:59:46 jz Exp $ 
+/*  $Id: scheduler.css,v 1.1 2004/12/02 13:36:08 jz Exp $ 
 
     STYLESHEET FÜR DEN SCHEDULER
 
@@ -12,7 +12,8 @@ th                      { font-size: 10pt; }
 td                      { font-size: 10pt; }
 p                       { font-size: 10pt; margin-top: 2ex; margin-bottom: 0; padding-left: 3pt; }
 label                   { font-size: 10pt; }
-col                     { padding-bottom: 1pt; padding-left: 3pt; padding-right: 2pt }
+/*col                   { padding-bottom: 1pt; padding-left: 3pt; padding-right: 2pt }  /* wirkt nicht in Firefox */
+td                      { padding-bottom: 1pt; padding-left: 3pt; padding-right: 2pt } 
 caption                 { font-size: 10pt; padding-bottom: 5pt; padding-left: 3pt; padding-right: 2pt; padding-top: 2pt }
 
 
@@ -22,8 +23,8 @@ caption                 { font-size: 10pt; padding-bottom: 5pt; padding-left: 3p
 /* Job-Description */
 div.description         {}
 
-th.head1, td.head1      { border-bottom: 1 solid black; }
-th.head , td.head       { border-bottom: 1 solid black; border-left: 1 solid black; }
+th.head1, td.head1      { padding-right: 2pt; border-bottom: 1px solid black; }
+th.head , td.head       { padding-right: 2pt; border-bottom: 1px solid black; border-left: 1px solid black; }
 
 td.after_head_space     { margin-top: 0; margin-bottom: 0pt; line-height: 4pt; }
 

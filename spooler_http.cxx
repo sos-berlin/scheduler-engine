@@ -1,4 +1,4 @@
-// $Id: spooler_http.cxx,v 1.18 2004/12/01 17:02:13 jz Exp $
+// $Id: spooler_http.cxx,v 1.19 2004/12/02 13:38:17 jz Exp $
 /*
     Hier sind implementiert
 
@@ -274,6 +274,8 @@ void Http_response::finish()
 
     if( _chunked                 )  _header += "Transfer-Encoding: chunked\r\n";
     if( _close_connection_at_eof )  _header += "Connection: close\r\n";
+
+    Z_FOR_EACH( Header_fields, _header_fields, h )  _header += h->first + ": " + h->second + "\r\n";
 
     _header += "\r\n";
 

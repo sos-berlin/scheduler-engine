@@ -1,4 +1,4 @@
-<!-- $Id: details_frame.html,v 1.3 2004/12/02 10:17:36 jz Exp $ -->
+<!-- $Id: details_frame.html,v 1.1 2004/12/02 13:36:08 jz Exp $ -->
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <html>
 
@@ -16,14 +16,18 @@
 
 </head>
 
-<body class="right" onload="hide__onclick()">
-<!--body-->
+<body>
 
-<table cellspacing="0" cellpadding="0" width="100%" style="margin-bottom:12px">
+<table cellspacing="0" cellpadding="0" width="100%" style="margin-bottom: 1ex">
     <tr>
         <td align="right" class="small" >
-            <!--a href="javascript:hide__onclick();">&#x25BA;&nbsp;Hide&nbsp;</a-->
-            <input id="hide_button" class="hide_button" type="button" value="&nbsp;Hide&nbsp;" onclick="hide__onclick()" NAME="hide_button"/>
+            <span 
+                  style="cursor: pointer; text-decoration: underline" 
+                  onmouseover="this.className='hover'"
+                  onmouseout="this.className=''"
+                  onclick="hide__onclick()">
+                Hide
+            </span>
         </td>
     </tr>
 </table>
@@ -64,9 +68,9 @@ var _saved_frameset_cols;
 
 function init()
 {
-    _job_element = undefined;
-    _job_name    = undefined;
-    _task_id     = undefined;
+    _job_element       = undefined;
+    _job_name          = undefined;
+    _task_id           = undefined;
     _job_chain_element = undefined;
 
     if( !_scheduler )
@@ -233,7 +237,7 @@ function update( force )
         
         var job_chain_name = _job_chain_element.getAttribute( "name" );
         _job_chain_element = response.selectSingleNode( "//job_chain[ @name='" + job_chain_name + "' ]" );
-        document.getElementById( "stylesheet_output" ).innerHTML = _job_element? _stylesheet.xml_transform( _job_chain_element ) : "";
+        document.getElementById( "stylesheet_output" ).innerHTML = _job_chain_element? _stylesheet.xml_transform( _job_chain_element ) : "";
 
         ok = true;
     }

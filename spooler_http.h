@@ -1,4 +1,4 @@
-// $Id: spooler_http.h,v 1.12 2004/11/30 22:02:28 jz Exp $
+// $Id: spooler_http.h,v 1.13 2004/12/02 13:38:17 jz Exp $
 
 #ifndef __SPOOLER_HTTP_H
 #define __SPOOLER_HTTP_H
@@ -20,6 +20,8 @@ struct Http_request : Object
     bool                        has_parameter               ( const string& name ) const            { return _parameters.find( name ) != _parameters.end(); }
     string                      parameter                   ( const string& name ) const;
     bool                        is_http_1_1                 () const;
+    string                      header_field                ( const string& name ) const            { map<string,string>::const_iterator it = _header.find( name );
+                                                                                                      return it == _header.end()? "" : it->second; }
 
     Fill_zero                  _zero_;
     string                     _http_cmd;
@@ -194,7 +196,8 @@ struct Http_response : Object
     void                    set_event                       ( Event_base* event )                   { _chunk_reader->set_event( event ); }
 
     string                      content_type                ()                                      { return _content_type; }
-    void                    set_content_type                ( string value )                        { _content_type = value; }
+    void                    set_content_type                ( const string& value )                 { _content_type = value; }
+    void                    set_header_field                ( const string& name, const string& value ) { _header_fields[ name ] = value; }
     void                    set_status                      ( int code, const string& text )        { _status_code = code; _status_text = text; }
     void                        finish                      ();
 
@@ -214,6 +217,9 @@ struct Http_response : Object
     string                     _content_type;
     int                        _status_code;
     string                     _status_text;
+
+    typedef map<string,string>  Header_fields;
+    Header_fields              _header_fields;
     string                     _header;
     int                        _chunk_index;                // 0: Header
     uint                       _chunk_size;

@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding="utf-8"?>
-<!-- $Id: scheduler.xslt,v 1.2 2004/12/01 17:02:14 jz Exp $ -->
+<!-- $Id: scheduler_top.xslt,v 1.1 2004/12/02 13:36:40 jz Exp $ -->
 <xsl:stylesheet xmlns:xsl   = "http://www.w3.org/1999/XSL/Transform" 
                 xmlns:msxsl = "urn:schemas-microsoft-com:xslt"
                 xmlns:my    = "http://sos-berlin.com/scheduler/mynamespace"
@@ -15,12 +15,12 @@
 
     <xsl:template match="/spooler/answer">
         
-<!--        <xsl:call-template name="scheduler_info"/> -->
+        <xsl:call-template name="scheduler_info"/> 
         
 
         <!-- Jobs, Jobketten oder Prozessklassen zeigen? -->
         
-        <p class="card_selector">
+<!--        <p class="card_selector">
         
             <xsl:call-template name="card_selector">
                 <xsl:with-param name="name"  select="'jobs'"/>
@@ -56,8 +56,8 @@
         <xsl:if test="/spooler/@my_show_card='process_classes'">
             <xsl:apply-templates select="state/process_classes"/>
         </xsl:if>            
-        
-    </xsl:template>
+//-->        
+    </xsl:template>   
     
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~card_selector-->
     <!-- Zeigt einen Selektor an, z.B. Jobs, Jobketten, Prozessklassen -->
@@ -284,21 +284,21 @@
                         <xsl:attribute name="onmouseover">
                             this.className =
                             <xsl:if test="@order='yes'">
-                                document.getElementById( "scheduler_td_job_<xsl:value-of select="@job"/>__order" ).className =
+                              scheduler_td_job_<xsl:value-of select="@job"/>__order.className =
                             </xsl:if>
                             <xsl:if test="@state_text!=''">
-                                document.getElementById( "scheduler_tr_job_<xsl:value-of select="@job"/>__1" ).className =
+                              scheduler_tr_job_<xsl:value-of select="@job"/>__1.className =
                             </xsl:if>
-                            document.getElementById( "scheduler_tr_job_<xsl:value-of select="@job"/>__2" ).className = "hover"
+                            scheduler_tr_job_<xsl:value-of select="@job"/>__2.className = "hover"
                         </xsl:attribute>
                         <xsl:attribute name="onmouseout" >
                             this.className =
                             <xsl:if test="@state_text!=''">
-                                document.getElementById( "scheduler_tr_job_<xsl:value-of select="@job"/>__1" ).className =
+                              scheduler_tr_job_<xsl:value-of select="@job"/>__1.className =
                             </xsl:if>  
-                            document.getElementById( "scheduler_tr_job_<xsl:value-of select="@job"/>__2" ).className = "job"
+                            scheduler_tr_job_<xsl:value-of select="@job"/>__2.className = "job"
                             <xsl:if test="@order='yes'">
-                                document.getElementById( "scheduler_td_job_<xsl:value-of select="@job"/>__order" ).className = "order"
+                              scheduler_td_job_<xsl:value-of select="@job"/>__order.className = "order"
                             </xsl:if>
                         </xsl:attribute>
                         <xsl:attribute name="onclick">show_job_details('<xsl:value-of select="@job"/>')</xsl:attribute>
@@ -327,17 +327,17 @@
                         <xsl:attribute name="onmouseover">
                             this.className =
                             <xsl:if test="@order='yes'">
-                                document.getElementById( "scheduler_td_job_<xsl:value-of select="@job"/>__order" ).className =
+                              scheduler_td_job_<xsl:value-of select="@job"/>__order.className =
                             </xsl:if>
-                            document.getElementById( "scheduler_tr_job_<xsl:value-of select="@job"/>"    ).className = 
-                            document.getElementById( "scheduler_tr_job_<xsl:value-of select="@job"/>__2" ).className = "hover"
+                            scheduler_tr_job_<xsl:value-of select="@job"/>.className = 
+                            scheduler_tr_job_<xsl:value-of select="@job"/>__2.className = "hover"
                         </xsl:attribute>
                         <xsl:attribute name="onmouseout" >
                             this.className =
-                            document.getElementById( "scheduler_tr_job_<xsl:value-of select="@job"/>"    ).className = 
-                            document.getElementById( "scheduler_tr_job_<xsl:value-of select="@job"/>__2" ).className = "job"
+                            scheduler_tr_job_<xsl:value-of select="@job"/>.className = 
+                            scheduler_tr_job_<xsl:value-of select="@job"/>__2.className = "job"
                             <xsl:if test="@order='yes'">
-                                document.getElementById( "scheduler_td_job_<xsl:value-of select="@job"/>__order" ).className = "order"
+                              scheduler_td_job_<xsl:value-of select="@job"/>__order.className = "order"
                             </xsl:if>
                         </xsl:attribute>
                         <xsl:attribute name="onclick">show_job_details('<xsl:value-of select="@job"/>')</xsl:attribute>        
@@ -355,21 +355,21 @@
                         <xsl:attribute name="onmouseover">
                             this.className =
                             <xsl:if test="@state_text!=''">
-                                document.getElementById( "scheduler_tr_job_<xsl:value-of select="@job"/>__1" ).className =
+                              scheduler_tr_job_<xsl:value-of select="@job"/>__1.className =
                             </xsl:if>
                             <xsl:if test="@order='yes'">
-                                document.getElementById( "scheduler_td_job_<xsl:value-of select="@job"/>__order" ).className =
+                              scheduler_td_job_<xsl:value-of select="@job"/>__order.className =
                             </xsl:if>
-                            document.getElementById( "scheduler_tr_job_<xsl:value-of select="@job"/>" ).className = "hover"
+                            scheduler_tr_job_<xsl:value-of select="@job"/>.className = "hover"
                         </xsl:attribute>
                         <xsl:attribute name="onmouseout" >
                             this.className = 
                             <xsl:if test="@state_text!=''">
-                                document.getElementById( "scheduler_tr_job_<xsl:value-of select="@job"/>__1" ).className =
+                              scheduler_tr_job_<xsl:value-of select="@job"/>__1.className =
                             </xsl:if>
-                            document.getElementById( "scheduler_tr_job_<xsl:value-of select="@job"/>" ).className = "job"
+                            scheduler_tr_job_<xsl:value-of select="@job"/>.className = "job"
                             <xsl:if test="@order='yes'">
-                                document.getElementById( "scheduler_td_job_<xsl:value-of select="@job"/>__order" ).className = "order"
+                              scheduler_td_job_<xsl:value-of select="@job"/>__order.className = "order"
                             </xsl:if>
                         </xsl:attribute>
                         <xsl:attribute name="onclick">show_job_details('<xsl:value-of select="@job"/>')</xsl:attribute>
@@ -396,19 +396,19 @@
                                 <xsl:attribute name="style">cursor: pointer;</xsl:attribute>
                                 <xsl:attribute name="onmouseover">
                                    this.className =
-                                   document.getElementById( "scheduler_tr_job_<xsl:value-of select="@job"/>" ).className =  
+                                   scheduler_tr_job_<xsl:value-of select="@job"/>.className =  
                                    <xsl:if test="@state_text!=''">
-                                       document.getElementById( "scheduler_tr_job_<xsl:value-of select="@job"/>__1" ).className =
+                                       scheduler_tr_job_<xsl:value-of select="@job"/>__1.className =
                                    </xsl:if>
-                                   document.getElementById( "scheduler_tr_job_<xsl:value-of select="@job"/>__2" ).className = "hover"
+                                   scheduler_tr_job_<xsl:value-of select="@job"/>__2.className = "hover"
                                 </xsl:attribute>
                                 <xsl:attribute name="onmouseout" >
                                    this.className =  "order"
-                                   document.getElementById( "scheduler_tr_job_<xsl:value-of select="@job"/>" ).className =  
+                                   scheduler_tr_job_<xsl:value-of select="@job"/>.className =  
                                    <xsl:if test="@state_text!=''">
-                                       document.getElementById( "scheduler_tr_job_<xsl:value-of select="@job"/>__1" ).className =
+                                       scheduler_tr_job_<xsl:value-of select="@job"/>__1.className =
                                    </xsl:if>
-                                   document.getElementById( "scheduler_tr_job_<xsl:value-of select="@job"/>__2" ).className = "job"
+                                   scheduler_tr_job_<xsl:value-of select="@job"/>__2.className = "job"
                                 </xsl:attribute>
                                     &#160; <xsl:value-of select="order_queue/@length"/> orders to process
                                 </xsl:element>

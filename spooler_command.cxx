@@ -1,4 +1,4 @@
-// $Id: spooler_command.cxx,v 1.143 2004/11/30 22:02:28 jz Exp $
+// $Id: spooler_command.cxx,v 1.144 2004/12/02 13:38:17 jz Exp $
 /*
     Hier ist implementiert
 
@@ -701,35 +701,20 @@ ptr<Http_response> Command_processor::execute_http( Http_request* http_request )
 
         if( http_request->_http_cmd == "GET" )
         {
-            if( path == "/" )  path = "/index.html";
-
-            string extension;
-
-            if( !string_begins_with( path, "<" )  &&  !string_begins_with( path, "/<" ) )
+            if( string_begins_with( path, "/<" ) )   // Direktes XML-Kommando, z.B. <show_state/>, <show_state> oder nur <show_state
             {
-                extension = extension_of_path( path );
-             
-                if( extension == "html"  
-                 || extension == "htm"  )  response_content_type = "text/html";
-                else
-                if( extension == "xsl"  )  response_content_type = "text/xsl";
-                else
-                if( extension == "xslt" )  response_content_type = "text/xslt";
-                else
-                if( extension == "js"   )  response_content_type = "text/javascript";
-                else
-                if( extension == "css"  )  response_content_type = "text/css";
-            }
+                string xml = path;
+                if( !string_ends_with( path,  "/>" ) )
+                {
+                    if( string_ends_with( path, ">" ) )  *xml.rbegin() = '/',  xml += ">";
+                                                   else  xml += "/>";
+                }
 
-            if( extension  != "" )
-            {
-                if( _spooler->_html_directory.empty() )  throw_xc( "SCHEDULER-212" );
-                if( path.find( ".." ) != string::npos )  throw_xc( "SCHEDULER-214" );
-                if( path.find( ":" )  != string::npos )  throw_xc( "SCHEDULER-214" );
-                response_body = zschimmer::string_from_file( _spooler->_html_directory + "/" + path );
+                response_body = execute( xml, Time::now(), true );
+                response_content_type = "text/xml";
             }
             else
-            if( string_begins_with( path, "/show_log" ) )
+            if( string_begins_with( path, "/show_log?" ) )
             {
                 ptr<Prefix_log> log;
 
@@ -745,16 +730,32 @@ ptr<Http_response> Command_processor::execute_http( Http_request* http_request )
                 return +response;
             }
             else
-            if( path.length() > 0 )
             {
-                if( path[0] == '/' )  path.erase( 0, 1 );
-                if( path != "" )
+                if( _spooler->_html_directory.empty() )  throw_xc( "SCHEDULER-212" );
+                if( path.find( ".." ) != string::npos )  throw_xc( "SCHEDULER-214" );
+                if( path.find( ":" )  != string::npos )  throw_xc( "SCHEDULER-214" );
+
+                if( filename_of_path( path ).find( '.' ) == string::npos )      // Kein Punkt: Es muss ein Verzeichnis sein!
                 {
-                    string xml = path;
-                    if( xml[0] != '<' )  xml = '<' + path + "/>";
-                    response_body = execute( xml, Time::now(), true );
-                    response_content_type = "text/xml";
+                    if( !string_ends_with( path, "/" ) )  path += "/";
+                    path += "index.html";
                 }
+
+                string extension = extension_of_path( path );
+             
+                if( extension == "html"  
+                 || extension == "htm"  )  response_content_type = "text/html";
+                else
+                if( extension == "xsl"  )  response_content_type = "text/xsl";
+                else
+                if( extension == "xslt" )  response_content_type = "text/xslt";
+                else
+                if( extension == "js"   )  response_content_type = "text/javascript";
+                else
+                if( extension == "css"  )  response_content_type = "text/css";
+
+                if( !string_begins_with( path, "/" ) )  path = "/" + path;
+                response_body = zschimmer::string_from_file( _spooler->_html_directory + path );
             }
         }
         else
@@ -798,6 +799,7 @@ ptr<Http_response> Command_processor::execute_http( Http_request* http_request )
 
     ptr<Http_response> response = Z_NEW( Http_response( http_request, Z_NEW( String_chunk_reader( response_body ) ), response_content_type ) );
     if( http_status_code )  response->set_status( http_status_code, error_text );
+    //if( path != http_request->_path )  response->set_header_field( "Content-Location", "http://" + http_request->header_field( "host" ) + path );
     return +response;
 /*
     time_t      t;

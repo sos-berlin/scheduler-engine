@@ -1,4 +1,4 @@
-// $Id: scheduler.js,v 1.2 2004/12/01 17:02:14 jz Exp $
+// $Id: scheduler.js,v 1.1 2004/12/02 13:36:08 jz Exp $
 
 //----------------------------------------------------------------------------------------------var
 
@@ -120,6 +120,8 @@ Scheduler.prototype.execute = function( xml )
     {
         throw new Error( error_element.getAttribute( "text" ) );
     }
+
+    this.modify_datetime_for_xslt( dom_document );
     
     return dom_document;
 }
@@ -270,6 +272,197 @@ Scheduler.prototype.call_http = function( text, debug_text )
     }
 }
 
+//-------------------------------------------------------Scheduler.add_datetime_attributes_for_xslt
+
+Scheduler.prototype.add_datetime_attributes_for_xslt = function( response, now, attribute_name )
+{
+    var elements = response.selectNodes( "//*[ @" + attribute_name + "]" );
+    for( var i = 0; i < elements.length; i++ )
+    {
+        var element = elements[ i ];
+        var value   = element.getAttribute( attribute_name );
+        if( value )
+        {
+            element.setAttribute( attribute_name + "__xslt_datetime"               , xslt_format_datetime     ( value, now ) );
+            element.setAttribute( attribute_name + "__xslt_datetime_diff"          , xslt_format_datetime_diff( value, now, false ) );
+            element.setAttribute( attribute_name + "__xslt_datetime_with_diff"     , xslt_format_datetime_with_diff( value, now, false ) );
+            element.setAttribute( attribute_name + "__xslt_datetime_with_diff_plus", xslt_format_datetime_with_diff( value, now, true ) );
+            element.setAttribute( attribute_name + "__xslt_date_or_time"           , xslt_format_date_or_time ( value, now ) );
+        }
+    }    
+}
+
+//---------------------------------------------------------------Scheduler.modify_datetime_for_xslt
+
+Scheduler.prototype.modify_datetime_for_xslt = function( response )
+{
+    // Für Firefox, dass kein Skript im Stylesheet zulässt.
+    var now;
+
+    var datetime = response.selectSingleNode( "/spooler/answer/@time" );
+    if( datetime )  now = date_from_datetime( datetime.nodeValue );   
+        
+    this.add_datetime_attributes_for_xslt( response, now, "time"                  );
+    this.add_datetime_attributes_for_xslt( response, now, "spooler_running_since" );
+    this.add_datetime_attributes_for_xslt( response, now, "running_since"         );
+    this.add_datetime_attributes_for_xslt( response, now, "in_process_since"      );
+    this.add_datetime_attributes_for_xslt( response, now, "spooler_running_since" );
+    this.add_datetime_attributes_for_xslt( response, now, "next_start_time"       );
+    this.add_datetime_attributes_for_xslt( response, now, "start_at"              );
+    this.add_datetime_attributes_for_xslt( response, now, "idle_since"            );
+    this.add_datetime_attributes_for_xslt( response, now, "enqueued"              );
+    this.add_datetime_attributes_for_xslt( response, now, "created"               );
+}
+
+//---------------------------------------------------------------------------------------Stylesheet
+
+function Stylesheet( url )
+{
+    var xml_http = window.XMLHttpRequest? new XMLHttpRequest() : new ActiveXObject( "Msxml2.XMLHTTP" );
+    
+    xml_http.open( "GET", url, false );
+    xml_http.send( null );
+    
+    if( window.DOMParser )
+    {
+        var dom_parser = new DOMParser();
+        this._xslt_dom = dom_parser.parseFromString( xml_http.responseText, "text/xml" );
+        if( this._xslt_dom.documentElement.nodeName == "parsererror" )  throw new Error( "Fehler im Stylesheet " + url + ": " + this._xslt_dom.documentElement.firstChild.nodeValue );
+     
+        this._xslt_processor = new XSLTProcessor();
+        this._xslt_processor.importStylesheet( this._xslt_dom );
+    }
+    else
+    {
+        this._xslt_dom = new ActiveXObject( "MSXML2.DOMDocument" );
+        var ok = this._xslt_dom.loadXML( xml_http.responseText );
+        if( !ok )  throw new Error( "Fehlerhafte XML-Antwort: " + this._xslt_dom.parseError.reason );
+    }
+}
+
+//-------------------------------------------------------------------------Stylesheet.xml_transform
+// Liefert einen XML-String
+
+Stylesheet.prototype.xml_transform = function( dom_document )
+{
+    if( this._xslt_processor )
+    {
+		return new XMLSerializer().serializeToString( this._xslt_processor.transformToDocument( dom_document ) );
+    }
+    else
+    {
+        return dom_document.transformNode( this._xslt_dom );
+    }
+}
+
+//---------------------------------------------------------------------xslt_format_datetime
+
+function xslt_format_datetime( datetime ) 
+{
+    if( !datetime )  return "";
+    return datetime.replace( /\.\d*$/, "" );
+    /*            
+    var date = typeof datetime == "string"? date_from_datetime( datetime ) : datetime;
+    
+    //var ms = date.getMilliseconds();
+
+    return date.toLocaleDateString() + ", " + date.toLocaleTimeString();
+            //+ ( ms? ".<span class='milliseconds'>" + ( ms + "000" ).substring( 0, 3 ) + "</span>" : "" );
+    */                   
+}
+
+//-----------------------------------------------------------------xslt_format_date_or_time
+
+function xslt_format_date_or_time( datetime ) 
+{
+    if( !datetime )  return "";
+    
+    var now = new Date();
+    
+    if(    1*datetime.substr( 0, 4 ) == now.getYear()
+        && 1*datetime.substr( 5, 2 ) == now.getMonth() + 1
+        && 1*datetime.substr( 8, 2 ) == now.getDate()  )
+    {
+        return datetime.substr( 11, 8 );
+    }
+    else
+    {
+        return datetime.substr( 0, 10 );
+    }
+}
+
+//-----------------------------------------------------------------xslt_format_date_or_time
+
+function xslt_format_datetime_with_diff( datetime, now, show_plus )
+{
+    var date = date_from_datetime( datetime );
+    var result = xslt_format_datetime( datetime );
+    if( result && now )  result += " \xA0(" + xslt_format_datetime_diff( date, now, show_plus ) + ")";
+    
+    return result;
+}
+
+//----------------------------------------------------------------xslt_format_datetime_diff
+
+function xslt_format_datetime_diff( datetime_earlier, datetime_later, show_plus ) 
+{
+    var show_ms;
+    if( show_ms   == undefined )  show_ms   = false;
+    if( show_plus == undefined )  show_plus = false;
+    
+    var date_later   = typeof datetime_later   == "string"? date_from_datetime( datetime_later )   : datetime_later;
+    var date_earlier = typeof datetime_earlier == "string"? date_from_datetime( datetime_earlier ) : datetime_earlier;
+
+    if( !date_later   )  return "";
+    if( !date_earlier )  return "";
+    
+    var diff = ( date_later.getTime() - date_earlier.getTime() ) / 1000.0;
+    var abs  = Math.abs( diff );
+    var result;
+
+    if( abs < 60 )
+    {
+        if( show_ms ) 
+        {
+            result = abs.toString();
+            if( result.match( "." ) )  result = result.replace( ".", ".<span class='milliseconds'>" ) + "</span>";
+        }
+        else
+        {
+            result = Math.floor( abs );
+        }
+        result += "s";
+    }
+    else
+    if( abs <    60*60 )  result = Math.floor( abs / (       60 ) ) + "min";
+    else
+    if( abs < 24*60*60 )  result = Math.floor( abs / (    60*60 ) ) + "h";
+    else
+                          result = Math.floor( abs / ( 24*60*60 ) ) + "days";
+                            
+    return diff < 0             ? "-" + result : 
+           show_plus && diff > 0? "+" + result
+                                : result;
+}
+
+//-----------------------------------------------------------------------date_from_datetime
+// datetime == yyyy-mm-dd-hh-mm-ss[.mmm]
+
+function date_from_datetime( datetime ) 
+{
+    if( !datetime )  return null;
+    
+    var date = new Date( 1*datetime.substr( 0, 4 ), 
+                         1*datetime.substr( 5, 2 ) - 1, 
+                         1*datetime.substr( 8, 2 ),
+                         1*datetime.substr( 11, 2 ),
+                         1*datetime.substr( 14, 2 ),
+                         1*datetime.substr( 17, 2 ),
+                         datetime.length < 23? 0 : 1*datetime.substr( 20, 3 ) );
+    
+    return date;
+}
+
 //---------------------------------------------------------------------Scheduler_html_configuration
 /*
 function Scheduler_html_configuration( url )
@@ -400,7 +593,7 @@ function scheduler_menu__onclick()
     
     var command = function( cmd ) { return "<modify_spooler cmd='" + cmd + "'/>"; }
     
-    popup_builder.add_show_log( "Show log"                       , "show_log", "show_log" );
+    popup_builder.add_show_log( "Show log"                       , "show_log?", "show_log" );
     popup_builder.add_bar();
   //popup_builder.add_command ( "Stop"                           , command( "stop" ), state != "stopped"  &&  state != "stopping"  &&  state != "stopping_let_run" );
     popup_builder.add_command ( "Pause"                          , command( "pause"                         ), state != "paused" );
@@ -429,7 +622,7 @@ function job_menu__onclick( job_name )
     
     var state = job_element.getAttribute( "state" );
     
-    popup_builder.add_show_log( "Show log"        , "show_log&job=" + job_name, "show_log_job_" + job_name );
+    popup_builder.add_show_log( "Show log"        , "show_log?job=" + job_name, "show_log_job_" + job_name );
     
     var description_element = job_element.selectSingleNode( "description" );
     var is_active = description_element? description_element.text != "" : false;
@@ -456,7 +649,7 @@ function task_menu__onclick( task_id )
 {
     var popup_builder = new Popup_menu_builder();
 
-    popup_builder.add_show_log( "Show log"        , "show_log&task=" + task_id, "show_log_task_" + task_id );
+    popup_builder.add_show_log( "Show log"        , "show_log?task=" + task_id, "show_log_task_" + task_id );
     popup_builder.add_bar();
     popup_builder.add_command ( "End"             , "<kill_task job='" + _job_name + "' id='" + task_id + "'/>" );
     popup_builder.add_command ( "Kill immediately", "<kill_task job='" + _job_name + "' id='" + task_id + "' immediately='yes'/>" );
@@ -470,7 +663,7 @@ function task_menu__onclick( task_id )
 {
     var popup_builder = new Popup_menu_builder();
 
-    popup_builder.add_show_log( "Show log"        , "show_log&task=" + task_id, "show_log_task_" + task_id );
+    popup_builder.add_show_log( "Show log"        , "show_log?task=" + task_id, "show_log_task_" + task_id );
     popup_builder.add_bar();
     popup_builder.add_command ( "End"             , "<kill_task job='" + _job_name + "' id='" + task_id + "'/>" );
     popup_builder.add_command ( "Kill immediately", "<kill_task job='" + _job_name + "' id='" + task_id + "' immediately='yes'/>" );
@@ -484,7 +677,7 @@ function order_menu__onclick( job_chain_name, order_id )
 {
     var popup_builder = new Popup_menu_builder();
 
-    popup_builder.add_show_log( "Show log"        , "show_log&job_chain=" + job_chain_name + 
+    popup_builder.add_show_log( "Show log"        , "show_log?job_chain=" + job_chain_name + 
                                                             "&order=" + order_id, "show_log_order_" + job_chain_name + "__" + order_id );
     
     _popup = popup_builder.show_popup();
@@ -560,321 +753,6 @@ function string_from_object( object )
     return result + "}";
 }
 
-/*
-
-function __XMLNodes(result) 
-{
-    this.length = 0;
-    this.pointer = 0;
-    this.array = new Array();
-    var i = 0;
-    while((this.array[i]=result.iterateNext())!=null)  i++;
-    this.length = this.array.length;
-}
-
-XMLNodes.prototype.nextNode = function() 
-{
-    this.pointer++;
-    return this.array[pointer-1];
-}
-
-XMLNodes.prototype.reset = function() 
-{
-    this.pointer = 0;
-}
-
-XMLDocument.prototype.selectNodes = function(tagname) 
-{
-    var result = this.evaluate(tagname, this, null, 0, null);
-    var xns = new __XMLNodes(result);
-    return xns;
-}
-
-
-*/
-
-
-
-//-----------------------------------------------------------------
-/*
-// Browsers Supported:
-
-//  * <B style="COLOR: black; BACKGROUND-COLOR: #ffff66">Mozilla</B> 1.0+ and browsers based on that and later versions (Netscape, Galeon)
-//  * Internet Explorer 5.0+ with MSXML3.0+ installed (4.0 RTM and later preffered)
-
-//-----------------------------------------------------------------
-// What does it do:
-// This script allows the following in <B style="COLOR: black; BACKGROUND-COLOR: #ffff66">Mozilla</B>
-//  Methods: transformNode(), transformNodeToObject()
-//  Properties: xml (read), innerText(read/write), parseError (you should only read) 
-//-----------------------------------------------------------------
-// NOTES
-// 1 Asynchronus loading
-//  In IE, the async property specifies whether the script should wait for a
-//  domObject.load("somefile.xml");
-//  to finish loading before continuing execution of the next code line.
-//  <B style="COLOR: black; BACKGROUND-COLOR: #ffff66">Mozilla</B> does sem to have implemented such a property yet, but one 
-//  can use the readyState property to see if the file is loaded (the property value will be 4)
-
-//-----------------------------------------------------------------
-
-// Sample use
-
-/ *
-
-// Use the factory class to get the right object for the browser,
-// then treat it as it's an IE DOMObject (meaning methods 'transFormNode',
-// 'transFormNodeToObject' and the 'xml' property
-var xmlDoc = MB_crossBrowserXMLFactory.createDOMDocument("","",null);
-xmlDoc.load("pathTo/fileNameOf.xml");
-var xslDoc = MB_crossBrowserXMLFactory.createDOMDocument("","",null);
-xslDoc.load("pathTo/fileNameOf.xslt");
-function transform()
-{
-		var oOut = MB_crossBrowserXMLFactory.createDOMDocument("","",null);
-		xmlDoc.transformNodeToObject(xslDoc, oOut);
-		document.getElementById("gridView").innerHTML = oOut.xml;
-		document.getElementById("sourceView").value = oOut.xml;
-}
-* /
-
-//-----------------------------------------------------------------
-//browser detection
-//-----------------------------------------------------------------
-var isIE_XML  = (navigator.userAgent.toLowerCase().indexOf("msie") &gt; -1)?true:false;
-var isMoz_XML = (document.implementation &amp;&amp; document.implementation.createDocument)?true:false;
-//=================================================================
-// IE Initialization
-//=================================================================
-//Possible prefixes ActiveX strings for DOM DOcument
-var PROGID_LIST = ["Msxml2.DOMDocument.4.0", "Msxml2.DOMDocument.3.0", "MSXML2.DOMDocument", "MSXML.DOMDocument", "Microsoft.XmlDom"];
-//When the proper prefix is found, store it here
-var PROGID = "";
-var nsCounter = 0;
-
-// <B style="COLOR: black; BACKGROUND-COLOR: #ffff66">Mozilla</B> Initialization
-if(isMoz_XML)
-{
-
-	// Emulate IE's innerText (write)
-	Element.prototype.__defineSetter__("innerText", function (sText)
-	{
-		var s = "" + sText;
-		this.innerHTML = s.replace(/\&amp;/g, "&amp;amp;").replace(/&lt;/g, "&amp;lt;").replace(/&gt;/g, "&amp;gt;");
-	});
-	// Emulate IE's innerText (read)
-	Element.prototype.__defineGetter__("innerText", function ()
-	{
-		function scrapTextNodes(oElem)
-		{
-			var s = "";
-			for(i=0;i&lt;oElem.childNodes.length;i++)
-			{
-				var oNode = oElem.childNodes[i];
-				if(oNode.nodeType == 3)
-					s += oNode.nodeValue;
-				else if(oNode.nodeType == 1)
-					s += "\n" + scrapTextNodes(oNode);
-			}
-			return s;
-		};
-		return scrapTextNodes(this);
-	});	
-	// Emulate the async property (doesn't really do anything...)
-	Document.prototype.async = true;
-	// Emulate the readystate property
-	Document.prototype.readyState = "0";
-	// Emulate the onreadystatechange event
-	Document.prototype.onreadystatechange = null;
-	// The parseError attribute
-	Document.prototype.parseError = 0;
-	// We save a reference to the original load() method
-	Document.prototype.__load__ = Document.prototype.load;
-	// Get a document object
-	MB_crossBrowserXMLFactory.createDOMDocument  = function(strNamespaceURI, strRootTagName)
-	{
-		var oDOMDoc = null;
-		//create the DOM Document the standards way
-		oDOMDoc = document.implementation.createDocument(strNamespaceURI, strRootTagName, null);
-		//add the event listener for the load event
-		oDOMDoc.addEventListener("load", _Document_onload, false);
-		//return the object
-		return oDOMDoc;
-	};
-	// Emulate IE's loadXML() method
-	Document.prototype.loadXML = function(strXML) 
-	{
-		//change the readystate
-		changeReadyState(this, 1);
-		// parse the string to a new doc
-		var oDOMDoc = (new DOMParser()).parseFromString(strXML, "text/xml");
-		// remove exising children from the document object
-		while (this.hasChildNodes())
-			this.removeChild(this.lastChild);
-		// insert and import all new
-		for (var i = 0; i &lt; oDOMDoc.childNodes.length; i++)
-			this.appendChild(this.importNode(oDOMDoc.childNodes[i], true));
-		// immitate an onLoad event fire
-		handleOnLoad(this);
-	};
-	//=============================================================
-	// XSLT Section: transformNodeToObject, transformNode
-	//=============================================================
-	// Emulate IE's transformNodeToObject() method
-	Document.prototype.transformNodeToObject = function(xslDoc, oResult)
-	{
-		var xsltProcessor = new XSLTProcessor();
-		try
-		{
-			xsltProcessor.transformDocument(this, xslDoc, oResult, null);
-		}
-		catch(e)
-		{
-			throw(e);
-		}
-	};
-	// Emulate IE's transformNode() method
-	Document.prototype.transformNode = function(xslDoc)
-	{
-		var out = document.implementation.createDocument("", "", null);
-		this.transformNodeToObject(xslDoc, out);
-		var serializer = new XMLSerializer();
-		try
-		{
-			var str = serializer.serializeToString(out);
-		}
-		catch(e)
-		{
-			throw(e);
-		}
-		return str;
-	};	
-	//=============================================================
-	// XPath Section: selectNodes, <B style="COLOR: black; BACKGROUND-COLOR: #a0ffff">selectSingleNode</B>
-	//=============================================================
-	/ *
-	Document.prototype.setProperty = function(s1, s2){}
-	
-	// Emulate IE's selectNodes() method
-	Document.prototype.selectNodes = function(sExp)
-	{
-		
-	}
-	
-	// Emulate IE's <B style="COLOR: black; BACKGROUND-COLOR: #a0ffff">selectSingleNode</B>() method
-	Document.prototype.<B style="COLOR: black; BACKGROUND-COLOR: #a0ffff">selectSingleNode</B> = function(sExp)
-	{
-		
-	}
-	* /
-	// Emulate IE's xml property
-	Document.prototype.__defineGetter__("xml", function ()
-	{
-		return (new XMLSerializer()).serializeToString(this);
-	});
-
-	// Extend the load() method
-	Document.prototype.load = function(strURL)
-	{
-		//set the parseError to 0
-		this.parseError = 0;
-		//change the readyState
-		changeReadyState(this, 1);
-		//watch for errors
-		try
-		{
-			//call the original load method
-			this.__load__(strURL);
-		}
-		catch (objException)
-		{
-			//set the parseError attribute
-			this.parseError = -9999999;
-			//change the readystate
-			changeReadyState(this, 4);
-		}
-	};
-}
-else if(isIE_XML)
-{
-
-	//define found flag
-	var bFound = false;
-	// pick up the most recent ActiveX ProgID
-	for (var i=0; i &lt; PROGID_LIST.length &amp;&amp; !bFound; i++)
-	{
-		try 
-		{
-			var objXML = new ActiveXObject(PROGID_LIST[i]);
-			//if we got here it works so save the ProgID
-			PROGID = PROGID_LIST[i];
-			bFound = true;
-		}
-		catch(objException){}
-	}
-	// Throw error if a proper ActiveX object is not available
-	if(!bFound)
-		throw "No DOM Document found on your computer. Please upgrade your browser.\n" +
-		      "Browsers Supported: \n" +
-		      " * <B style="COLOR: black; BACKGROUND-COLOR: #ffff66">Mozilla</B> 1.0+ and browsers based on that (Netscape, Galeon)\n" +
-		      " * Internet Explorer 5.0+ with MSXML3.0+ installed (4.0 recommended)";
-
-	MB_crossBrowserXMLFactory.createDOMDocument  = function(strNamespaceURI, strRootTagName)
-	{
-		//variable for the created DOM Document
-		var oDOMDoc = null;
-		//create the DOM Document the IE way
-		oDOMDoc = new ActiveXObject(PROGID);
-		// async is false by default
-		oDOMDoc.async = false;
-		//if there is a root tag name, we need to preload the DOM
-		if (strRootTagName)
-		{
-			//If there is both a namespace and root tag name, then
-			//create an artifical namespace reference and load the XML.
-			if (strNamespaceURI)
-				oDOMDoc.loadXML("&lt;a"+(++nsCounter)+":" + strRootTagName + " xmlns:a"+nsCounter+"=\"" + strNamespaceURI + "\" /&gt;");
-			else
-				oDOMDoc.loadXML("&lt;" + strRootTagName + "/&gt;");
-		}
-		//return the object
-		return oDOMDoc;
-	};
-}
-
-//-----------------------------------------------------------------
-// Our factory; used to create a DOMDocument object through
-// it's createDOMDocument() method
-//-----------------------------------------------------------------
-function MB_crossBrowserXMLFactory()
-{
-}
-
-
-// Moz Utility functions
-function handleOnLoad(oDOMDoc)
-{
-	//check for a parsing error
-	if(!oDOMDoc.documentElement || oDOMDoc.documentElement.nodeName == "parsererror")
-		oDOMDoc.parseError = -9999999;
-	//change the readyState
-	changeReadyState(oDOMDoc, 4);
-}
-
-function _Document_onload()
-{
-	//handle the onload event
-	handleOnLoad(this);
-}
-
-function changeReadyState(oDOMDoc, iRS)
-{
-	//change the readyState
-	oDOMDoc.readyState = iRS;
-	//if there is an onreadystatechange event handler, run it
-	if((oDOMDoc.onreadystatechange != null) &amp;&amp; (typeof oDOMDoc.onreadystatechange == "function"))
-		oDOMDoc.onreadystatechange();
-*/
 //-------------------------------------------------------------------------------------------------
 
 /* Fehlercodes von xmlhttp:
