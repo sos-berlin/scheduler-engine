@@ -1,4 +1,4 @@
-// $Id: spooler_module_java.cxx,v 1.49 2003/04/01 08:59:51 jz Exp $
+// $Id: spooler_module_java.cxx,v 1.50 2003/04/09 10:46:38 jz Exp $
 /*
     Hier sind implementiert
 
@@ -91,7 +91,7 @@ static jobject jobject_from_variant( JNIEnv* jenv, const VARIANT& v )
     if( v.vt == VT_DISPATCH )
     {
         IDispatch* idispatch = V_DISPATCH( &v );
-        if( !idispatch )  goto STANDARD;
+        if( !idispatch )  return NULL;
 
         ptr<spooler_com::Ihas_java_class_name> j;
         HRESULT hr = idispatch->QueryInterface( spooler_com::IID_Ihas_java_class_name, (void**)&j );
@@ -108,9 +108,10 @@ static jobject jobject_from_variant( JNIEnv* jenv, const VARIANT& v )
 
         return *java_idispatch;
     }
-
-STANDARD:
-    return z::java::jobject_from_variant( jenv, v );
+    else
+    {
+        return z::java::jobject_from_variant( jenv, v );
+    }
 }
 
 //--------------------------------------------------------------Java sos.spooler.Idispatch.com_call

@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.195 2003/04/03 11:38:59 jz Exp $
+// $Id: spooler.cxx,v 1.196 2003/04/09 10:48:37 jz Exp $
 /*
     Hier sind implementiert
 
@@ -217,6 +217,8 @@ With_log_switch read_profile_with_log( const string& profile, const string& sect
 
 static void set_ctrl_c_handler( bool on )
 {
+    LOG( "set_ctrl_c_handler(" << on << ")\n" );
+
 #   ifdef Z_WINDOWS
 
         SetConsoleCtrlHandler( ctrl_c_handler, on );
@@ -967,9 +969,6 @@ void Spooler::start()
             _log.error( x.what() );
             _log.error( "Java kann nicht gestartet werden. Spooler startet ohne Java." );
         }
-
-        set_ctrl_c_handler( false );     // Ctrl-C-Handler von Java überschreiben (Suns Java beendet bei Ctrl-C den Prozess sofort)
-        set_ctrl_c_handler( true );
     }
 
 

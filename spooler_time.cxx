@@ -1,4 +1,4 @@
-// $Id: spooler_time.cxx,v 1.37 2003/02/26 08:12:48 jz Exp $
+// $Id: spooler_time.cxx,v 1.38 2003/04/09 10:48:38 jz Exp $
 /*
     Hier sind implementiert
 
@@ -99,7 +99,7 @@ Time Time::now()
         gettimeofday( &tv, NULL );
         localtime_r( &tv.tv_sec, &local_tm );
 
-        return (double)tv.tv_sec + (double)tv.tv_usec / (double)1e6 - timezone - ( local_tm.tm_isdst? _dstbias : 0 ); 
+        return (double)tv.tv_sec + (double)tv.tv_usec / (double)1e6 - timezone + ( local_tm.tm_isdst? _dstbias : 0 ); // Das ist heuristisch. (Warum nicht -_dstbias?) Im Winter 2003 erneut testen!
 
         //gettimeofday( &tv, &tz );
         //return (double)tv.tv_sec + (double)tv.tv_usec / (double)1e6 - timezone - ( daylight? _dstbias : 0 );  // dsttime ist im Winter gesetzt? Das ist doch falsch.   - ( tz.tz_dsttime?_dstbias : 0 );
