@@ -1,4 +1,4 @@
-// $Id: spooler_history.cxx,v 1.73 2003/12/11 09:27:20 jz Exp $
+// $Id: spooler_history.cxx,v 1.74 2003/12/11 09:55:30 jz Exp $
 
 #include "spooler.h"
 #include "../zschimmer/z_com.h"
@@ -415,7 +415,7 @@ void Spooler_db::try_reopen_after_error( const exception& x )
                         break;
                     }
 
-                    _spooler->log().warn( "Eine Minute warten ..." );
+                    _spooler->log().warn( "Eine Minute warten bevor Datenbank erneut geöffnet wird ..." );
                     sos_sleep( 60 );
                 }
             }
@@ -471,6 +471,7 @@ int Spooler_db::get_id( const string& variable_name, Transaction* outer_transact
             catch( const exception& x )
             {
             //if( --retry_count < 0 )  throw;
+                if( outer_transaction )  throw;         // Fehlerschleife in der rufenden Routine, um Transaktion und damit _lock freizugeben!
                 try_reopen_after_error( x );
             }
         }
@@ -800,6 +801,7 @@ void Spooler_db::write_order_history( Order* order, Transaction* outer_transacti
             catch( const exception& x )  
             { 
               //if( --retry_count < 0 )  throw;
+                if( outer_transaction )  throw;         // Fehlerschleife in der rufenden Routine, um Transaktion und damit _lock freizugeben!
                 try_reopen_after_error( x );
             }
         }
