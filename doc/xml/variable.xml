@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="../scheduler.xslt" type="text/xsl"?>
 
-<!--$Id: variable.xml,v 1.1 2004/12/07 09:57:56 jz Exp $-->
+<!--$Id: variable.xml,v 1.2 2004/12/07 14:09:47 jz Exp $-->
 
 <xml_element name     = "variable" 
              title    = "Eine Variable"
@@ -9,7 +9,7 @@
              base_dir = "../"
              parent_page = "../konfiguration.xml"
              author   = "$Author: jz $"
-             date     = "$Date: 2004/12/07 09:57:56 $">
+             date     = "$Date: 2004/12/07 14:09:47 $">
 
     <xml_parent_elements>
         <xml_parent_element name="environment">
@@ -22,7 +22,8 @@
         <xml_attribute name="value">
             <description>
                 <p>
-                    Mit '$' kann der Wert einer Umgebungsvariablen abgerufen werden.
+                    Mit '$' kann der Wert einer Umgebungsvariablen abgerufen werden,
+                    die auch eine vorher mit <code>&lt;variable></code> gesetze Variable sein kann.
                 </p>
             </description>
         </xml_attribute>
