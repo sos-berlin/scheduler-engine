@@ -1,4 +1,4 @@
-// $Id: spooler_wait.cxx,v 1.4 2001/01/20 23:39:16 jz Exp $
+// $Id: spooler_wait.cxx,v 1.5 2001/01/22 11:04:12 jz Exp $
 /*
     Hier sind implementiert
 
@@ -38,10 +38,10 @@ void Directory_watcher::watch_again()
 
 //--------------------------------------------------------------------------------Wait_handles::add
 
-void Wait_handles::add( HANDLE handle, Task* task )
+void Wait_handles::add( HANDLE handle, const string& name, Task* task )
 {
     _handles.push_back( handle );
-    _tasks.push_back( task );
+    _entries.push_back( Entry( name, task ) );
 }
 
 //------------------------------------------------------------------------------Wait_handles::remove
@@ -64,7 +64,7 @@ void Wait_handles::remove( HANDLE handle )
     }
 
     _handles.erase( it );
-    _tasks.erase( _tasks.begin() + ( it - _handles.begin() ) );
+    _entries.erase( _entries.begin() + ( it - _handles.begin() ) );
 }
 
 //--------------------------------------------------------------------------------Wait_handles::wait
@@ -84,12 +84,19 @@ void Wait_handles::wait( double wait_time )
 
         if( ret >= WAIT_OBJECT_0  &&  ret < WAIT_OBJECT_0 + _handles.size() )
         {
-            int index = ret - WAIT_OBJECT_0;
-            Task* task = _tasks[ index ];
+            int    index = ret - WAIT_OBJECT_0;
+            Entry* entry = &_entries[ index ];
+            Task*  task = entry->_task;
+            string msg = "Ereignis " + as_string(index) + " - " + entry->_event_name;
             
-            if( task ) {
+            if( task ) 
+            {
+                task->_log.msg( msg );
                 if( _handles[ index ] == task->_directory_watcher._handle )  task->_directory_watcher._signaled = true;
+                                                                       else  throw_xc( "Wait_handles::wait", entry->_event_name );
             }
+            else
+                _spooler->_log.msg( msg );
 
             return;
         }

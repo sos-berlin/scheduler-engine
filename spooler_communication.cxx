@@ -1,4 +1,4 @@
-// $Id: spooler_communication.cxx,v 1.15 2001/01/20 23:39:16 jz Exp $
+// $Id: spooler_communication.cxx,v 1.16 2001/01/22 11:04:12 jz Exp $
 /*
     Hier sind implementiert
 
@@ -154,6 +154,7 @@ Communication::Channel::Channel()
     _socket( SOCKET_ERROR ),
     _send_is_complete( true )
 {
+    recv_clear();
 }
 
 //-----------------------------------------------------------------Communication::Channel::~Channel
@@ -184,20 +185,21 @@ void Communication::Channel::do_close()
     _socket = SOCKET_ERROR;
 }
 
+//---------------------------------------------------------------Communication::Channel::recv_clear
+
+void Communication::Channel::recv_clear()
+{
+    _receive_at_start = true; 
+    _receive_is_complete = false;
+    _text = "";
+    _xml_end_finder = Xml_end_finder();
+}
+
 //------------------------------------------------------------------Communication::Channel::do_recv
 
 void Communication::Channel::do_recv()
 {
     char buffer [ 4096 ];
-
-    if( _receive_is_complete )         // Neuer Anfang?
-    {
-        _receive_at_start = true; 
-        _receive_is_complete = false;
-        _text = "";
-        _xml_end_finder = Xml_end_finder();
-    }
-
 
     int len = recv( _socket, buffer, sizeof buffer, 0 );
     if( len <= 0 ) {
@@ -408,9 +410,9 @@ bool Communication::handle_socket( Channel* channel )
             if( channel->_receive_is_complete ) 
             {
                 Command_processor cp = _spooler;;
-
-                channel->_receive_is_complete = false;
-                channel->_text = cp.execute( channel->_text );
+                string text = channel->_text;
+                channel->recv_clear();
+                channel->_text = cp.execute( text );
                 channel->do_send();
             }
 

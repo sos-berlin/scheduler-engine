@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.5 2001/01/21 16:59:06 jz Exp $
+// $Id: spooler_task.cxx,v 1.6 2001/01/22 11:04:12 jz Exp $
 /*
     Hier sind implementiert
 
@@ -173,38 +173,30 @@ Job::~Job()
     if( _com_job )  _com_job->close();
 }
 
+//---------------------------------------------------------------------------------------Job::start
+
+void Job::start()
+{
+    if( !( _task->_state & (Task::s_pending|Task::s_stopped) ) )  throw_xc( "SPOOLER-118", _name, _task->state_name() );
+
+    _task->set_state_cmd( Task::sc_start );
+}
+
 //----------------------------------------------------------------Job::start_when_directory_changed
 
 void Job::start_when_directory_changed( const string& directory_name )
 {
-    Task* task = NULL;
-    FOR_EACH( Task_list, _spooler->_task_list, it )  if( +(*it)->_job == this )  { task = *it; break; }
-    if( !task )  throw_xc( "Job::start_when_directory_changed" );
-
 #   ifdef SYSTEM_WIN
 
         _task->_directory_watcher.watch_directory( directory_name );
         if( _task->_directory_watcher._handle )  _spooler->_wait_handles.remove( _task->_directory_watcher._handle );
-        _spooler->_wait_handles.add( _task->_directory_watcher._handle, task );
+        _spooler->_wait_handles.add( _task->_directory_watcher._handle, "start_when_directory_changed", _task );
 
 #    else
 
         throw_xc( "SPOOLER-112", "Job::start_when_directory_changed" );
 
 #   endif
-}
-
-//---------------------------------------------------------------------------------------Job::start
-
-void Job::start()
-{
-    Task* task = NULL;
-    FOR_EACH( Task_list, _spooler->_task_list, it )  if( +(*it)->_job == this )  { task = *it; break; }
-    if( !task )  throw_xc( "Job::start" );
-
-    if( !( task->_state & (Task::s_pending|Task::s_stopped) ) )  throw_xc( "SPOOLER-118", _name, task->state_name() );
-
-    task->start();
 }
 
 //---------------------------------------------------------------------------------------Task::Task
@@ -216,7 +208,7 @@ Task::Task( Spooler* spooler, const Sos_ptr<Job>& job )
     _job(job),
     _log( &spooler->_log, this )
 {
-    set_new_start_time();
+    _next_start_time = _job->_run_time.first();
     _state = s_pending;
     _priority = _job->_priority;
 
@@ -240,13 +232,6 @@ Task::~Task()
     if( _directory_watcher )  _spooler->_wait_handles.remove( _directory_watcher._handle );
 
     _job->_task = NULL;
-}
-
-//-------------------------------------------------------------------------Task::set_new_start_time
-
-void Task::set_new_start_time()
-{
-    _next_start_time = _job->_run_time.next();
 }
 
 //--------------------------------------------------------------------------------------Task::error
@@ -292,6 +277,8 @@ void Task::step_error( const Xc& x )
 
 bool Task::start()
 {
+    _log.msg( "start" );
+
     _error = NULL;
 
     _spooler->_task_count++;
@@ -347,8 +334,8 @@ bool Task::start()
     catch( const exception& x ) { error(x); return false; }
 
     _state = s_running;
-    _let_run = _job->_run_time._let_run;
-    _spooler->_running_jobs_count++;
+    _let_run = _job->_run_time.let_run();
+    _spooler->_running_tasks_count++;
 
     return true;
 }
@@ -380,13 +367,11 @@ void Task::end()
 
     _opened = false;
 
-    Time now = Time::now();
-    _next_start_time = now + _job->_run_time._retry_period;
-    if( now >= _job->_run_time._next_end_time )  set_new_start_time();
+    _next_start_time = _job->_run_time.next_try();
 
     _step_count = 0;
     _state = s_pending;
-    _spooler->_running_jobs_count--;
+    _spooler->_running_tasks_count--;
 }
 
 //----------------------------------------------------------------------------------------Task::stop
@@ -465,11 +450,11 @@ bool Task::do_something()
                             break;
 
         case sc_suspend:    _state = s_suspended;
-                            _spooler->_running_jobs_count--;
+                            _spooler->_running_tasks_count--;
                             break;
 
         case sc_continue:   _state = s_running;
-                            _spooler->_running_jobs_count++;
+                            _spooler->_running_tasks_count++;
                             break;
         default: ;
     }

@@ -1,4 +1,4 @@
-// $Id: spooler_time.cxx,v 1.3 2001/01/21 16:59:06 jz Exp $
+// $Id: spooler_time.cxx,v 1.4 2001/01/22 11:04:12 jz Exp $
 /*
     Hier sind implementiert
 
@@ -123,16 +123,35 @@ void Run_time::check()
     if( _end_time_of_day > 24*60*60           )  throw_xc( "SPOOLER-104" );
 }
 
+//----------------------------------------------------------------------------------Run_time::first
+
+Time Run_time::first( Time tim_par )
+{
+    return next_time( tim_par );
+}
+
 //-----------------------------------------------------------------------------------Run_time::next
 
 Time Run_time::next( Time tim_par )
 {
+    if( _single_start )  return latter_day;
+    return next_time( tim_par );
+}
+
+//------------------------------------------------------------------------------Run_time::next_time
+
+Time Run_time::next_time( Time tim_par )
+{
     // Bei der Umschaltung von Winter- auf Sommerzeit fehlt eine Stunde!
+
+    if( _next_start_time == latter_day )  return latter_day;
 
     Time tim = tim_par;
 
     time_t time_only = (time_t)tim % (24*60*60);
-    if( time_only > _end_time_of_day )  tim += 24*60*60;
+
+    if( _single_start  &&  time_only > _begin_time_of_day
+     || time_only > _end_time_of_day                      )  tim += 24*60*60;
 
     tim -= time_only;
 
@@ -167,6 +186,15 @@ Time Run_time::next( Time tim_par )
     }
 
     return _next_start_time;
+}
+
+//-------------------------------------------------------------------------------Run_time::next_try
+
+Time Run_time::next_try( Time t )
+{ 
+    Time result = min( Time( t + _retry_period ), latter_day ); 
+    if( result >= _next_end_time )  result = next();
+    return result;
 }
 
 //-------------------------------------------------------------------------------------------------

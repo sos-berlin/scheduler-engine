@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 
-<!-- $Id: spooler.xml,v 1.11 2001/01/21 16:59:05 jz Exp $   (C) 2000 SOS GmbH Berlin -->
+<!-- $Id: spooler.xml,v 1.12 2001/01/22 11:04:12 jz Exp $   (C) 2000 SOS GmbH Berlin -->
 
 <!DOCTYPE spooler SYSTEM "spooler.dtd">
 
@@ -346,7 +346,7 @@ end function
                 <levels low="1" high="3"/>
             </object_set>
 
-            <run_time retry_period="1"/>
+            <run_time retry_period="3"/>
 
         </job>
 
@@ -358,7 +358,7 @@ spooler.job("Aufbereiten").start
 
             ]]></script>
 
-            <run_time single_start="15:31:40"/>
+            <run_time single_start="11:31:10"/>
 
         </job>
 

@@ -1,4 +1,4 @@
-// $Id: spooler_config.cxx,v 1.3 2001/01/21 16:59:06 jz Exp $
+// $Id: spooler_config.cxx,v 1.4 2001/01/22 11:04:12 jz Exp $
 
 //#include <precomp.h>
 
@@ -174,6 +174,7 @@ Run_time::Run_time( const xml::Element_ptr& element )
         dt.set_time( single_start );
         _begin_time_of_day = dt;
         _retry_period = latter_day;
+        _single_start = true;
     }
     else
     {

@@ -1,4 +1,4 @@
-// $Id: spooler.h,v 1.33 2001/01/21 16:59:05 jz Exp $
+// $Id: spooler.h,v 1.34 2001/01/22 11:04:12 jz Exp $
 
 #ifndef __SPOOLER_H
 #define __SPOOLER_H
@@ -207,9 +207,20 @@ struct Run_time
                                 Run_time                    ( const xml::Element_ptr& );
 
     void                        check                       ();                              
+    Time                        first                       ()                      { return first( Time::now() ); }
+    Time                        first                       ( Time );
     Time                        next                        ()                      { return next( Time::now() ); }
     Time                        next                        ( Time );
     bool                        should_run_now              ()                      { Time nw = Time::now(); return nw >= _next_start_time && nw < _next_end_time; }
+    Time                        next_try                    ( Time );
+    Time                        next_try                    ()                      { return next_try( Time::now() ); }
+    bool                        let_run                     ()                      { return _let_run; }
+    Time                        next_start_time             ()                      { return _next_start_time; }
+    Time                        next_end_time               ()                      { return _next_end_time; }
+
+
+  private:
+    Time                        next_time                   ( Time );
 
 
     Fill_zero                  _zero_;
@@ -219,6 +230,7 @@ struct Run_time
     Time                       _begin_time_of_day;          // Sekunden seit Mitternacht
     Time                       _end_time_of_day;            // Sekunden seit Mitternacht
     bool                       _let_run;                    // Task zuende laufen lassen, nicht bei _next_end_time beenden
+    bool                       _single_start;
 
     set<time_t>                _date_set;
     Weekday_set                _weekday_set;
@@ -508,8 +520,6 @@ struct Task : Sos_self_deleting
     void                        error                       ( const Xc& );
     void                        error                       ( const exception& );
 
-    void                        set_new_start_time          ();
-
 
     Fill_zero                  _zero_;
     Spooler*                   _spooler;
@@ -597,6 +607,8 @@ struct Communication
         void                    do_close                    ();
         void                    do_recv                     ();
         void                    do_send                     ();
+
+        void                    recv_clear                  ();
 
 
         Fill_zero              _zero_;
@@ -790,9 +802,9 @@ struct Spooler
     State                      _state;
     State_cmd                  _state_cmd;
 
-    int                        _running_jobs_count;
-    int                        _step_count;
-    int                        _task_count;
+    int                        _running_tasks_count;        // Wenn 0, dann warten
+    int                        _step_count;                 // Seit Spooler-Start ausgeführte Schritte
+    int                        _task_count;                 // Seit Spooler-Start gestartetet Tasks
 };
 
 

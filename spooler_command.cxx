@@ -1,4 +1,4 @@
-// $Id: spooler_command.cxx,v 1.17 2001/01/20 23:39:16 jz Exp $
+// $Id: spooler_command.cxx,v 1.18 2001/01/22 11:04:12 jz Exp $
 /*
     Hier ist implementiert
 
@@ -30,6 +30,16 @@ void dom_append_text_element( const xml::Element_ptr& element, const char* eleme
     e->appendChild( text_node );
 }
 */
+//------------------------------------------------------------------------------------dom_append_nl
+
+void dom_append_nl( const xml::Element_ptr& element )
+{
+    xml::Document_ptr doc       = element->ownerDocument;
+    xml::Node_ptr     text_node = doc->createTextNode( as_dom_string( "\n" ) );
+
+    element->appendChild( text_node );
+}
+
 //-----------------------------------------------------------------------------create_error_element
 
 xml::Element_ptr create_error_element( xml::Document* document, const Xc_copy& x )
@@ -88,9 +98,12 @@ xml::Element_ptr Command_processor::execute_show_tasks()
 {
     xml::Element_ptr tasks = _answer->createElement( "tasks" );
 
+    dom_append_nl( tasks );
+
     FOR_EACH( Task_list, _spooler->_task_list, it )
     {
         tasks->appendChild( execute_show_task( *it ) );
+        dom_append_nl( tasks );
     }
 
     return tasks;

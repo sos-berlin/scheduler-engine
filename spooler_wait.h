@@ -1,4 +1,4 @@
-// $Id: spooler_wait.h,v 1.1 2001/01/13 18:41:19 jz Exp $
+// $Id: spooler_wait.h,v 1.2 2001/01/22 11:04:13 jz Exp $
 
 #ifndef __SPOOLER_WAIT_H
 #define __SPOOLER_WAIT_H
@@ -42,16 +42,29 @@ struct Directory_watcher
 
 struct Wait_handles
 {
+    struct Entry
+    {
+                                Entry                       ( const string& name, Task* task = NULL ) : _event_name(name), _task(task) {}
+
+        string                 _event_name;
+        Task*                  _task;
+    };
+
+
+                                Wait_handles                ( Spooler* spooler )            : _spooler(spooler) {}
+
 #   ifdef SYSTEM_WIN
 
-        void                    add                         ( HANDLE, Task* = NULL );
+        void                    add                         ( HANDLE, const string& name, Task* = NULL );
         void                    remove                      ( HANDLE );
         void                    wait                        ( double time );
 
         vector<HANDLE>         _handles;
-        vector<Task*>          _tasks;
+        vector<Entry>          _entries;
 
 #   endif        
+
+    Spooler*                   _spooler;
 };
 
 //-------------------------------------------------------------------------------------------------

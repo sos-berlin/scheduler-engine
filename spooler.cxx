@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.36 2001/01/21 16:59:05 jz Exp $
+// $Id: spooler.cxx,v 1.37 2001/01/22 11:04:11 jz Exp $
 /*
     Hier sind implementiert
 
@@ -125,6 +125,7 @@ Spooler::Spooler()
 : 
     _zero_(this+1), 
     _communication(this), 
+    _wait_handles(this),
     _log(this)
 {
     _com_log     = new Com_log( &_log );
@@ -355,7 +356,13 @@ void Spooler::step()
 
 void Spooler::wait()
 {
-    if( _running_jobs_count > 0  && _state != s_paused )  return;
+    if( _running_tasks_count > 0  && _state != s_paused )  return;
+
+    {
+        Thread_semaphore::Guard guard = &_sleep_semaphore;
+        if( _wake )  { _wake = false; return; }
+        _sleeping = true;
+    }
 
     tzset();
 
@@ -387,8 +394,6 @@ void Spooler::wait()
         if( next_task )  next_task->_log.msg( "Nächster Start " + _next_start_time.as_string() );
                    else  _log.msg( "Kein Job zu starten" );
 
-        _sleeping = true;
-
 #       ifdef SYSTEM_WIN
 
             _wait_handles.wait( wait_time );
@@ -403,9 +408,9 @@ void Spooler::wait()
             }
 
 #       endif
-
-        _sleeping = false;
     }
+
+    _sleeping = false;
 
     _next_start_time = 0;
     tzset();
@@ -432,6 +437,27 @@ void Spooler::run()
         if( _state == s_running )  step();
 
         wait();
+    }
+}
+
+//--------------------------------------------------------------------------------Spooler::cmd_wake
+
+void Spooler::cmd_wake()
+{
+    Thread_semaphore::Guard guard = &_sleep_semaphore;
+
+    if( !_wake )
+    {
+        _wake = true;
+
+#       ifdef SYSTEM_WIN
+
+            if( _sleeping )
+            {
+                SetEvent( _command_arrived_event );
+            }
+
+#       endif
     }
 }
 
@@ -473,23 +499,6 @@ void Spooler::cmd_terminate_and_restart()
     cmd_wake();
 }
 
-//--------------------------------------------------------------------------------Spooler::cmd_wake
-
-void Spooler::cmd_wake()
-{
-#   ifdef SYSTEM_WIN
-
-        SetEvent( _command_arrived_event );
-
-#    else
-
-        Thread_semaphore::Guard guard = &_sleep_semaphore;
-
-        _wake = true;
-
-#   endif
-}
-
 //----------------------------------------------------------------------------------Spooler::launch
 
 int Spooler::launch( int argc, char** argv )
@@ -500,7 +509,7 @@ int Spooler::launch( int argc, char** argv )
 #   ifdef SYSTEM_WIN
         _command_arrived_event = CreateEvent( NULL, FALSE, FALSE, NULL );
         if( !_command_arrived_event )  throw_mswin_error( "CreateEvent" );
-        _wait_handles.add( _command_arrived_event );
+        _wait_handles.add( _command_arrived_event, "Kommando" );
 #   endif
 
 
