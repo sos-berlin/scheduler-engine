@@ -1,4 +1,4 @@
-// $Id: spooler_com.cxx,v 1.159 2004/10/10 16:49:20 jz Exp $
+// $Id: spooler_com.cxx,v 1.160 2004/10/10 19:37:42 jz Exp $
 /*
     Hier sind implementiert
 
@@ -2180,12 +2180,10 @@ STDMETHODIMP Com_task::Remove_pid( int pid )
     return hr;
 }
 
-//------------------------------------------------------------------------Com_task::get_Stderr_text
+//--------------------------------------------------------------Com_task::get_Stderr_or_stdout_text
 
-STDMETHODIMP Com_task::get_Stderr_text( BSTR* result )
+STDMETHODIMP Com_task::get_Stderr_or_stdout_text( BSTR* result, bool get_stderr )
 {
-    Z_LOG( __PRETTY_FUNCTION__ << "()\n" );
-    
     HRESULT hr = S_OK;
     
     try
@@ -2195,13 +2193,26 @@ STDMETHODIMP Com_task::get_Stderr_text( BSTR* result )
         if( !_task )  throw_xc( "SCHEDULER-122" );
         if( !_task->thread()  ||  current_thread_id() != _task->thread()->thread_id() )  return E_ACCESSDENIED;
         if( !_task->_module_instance )  return S_FALSE;
-        
-        return String_to_bstr( string_from_file( _task->_module_instance->stderr_filename() ), result );
+
+        string filename = get_stderr? _task->_module_instance->stderr_filename() 
+                                    : _task->_module_instance->stdout_filename();
+        if( filename == "" )  return S_FALSE;
+
+        return String_to_bstr( string_from_file( filename ), result );
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
     
     return hr;
+}
+
+//------------------------------------------------------------------------Com_task::get_Stderr_text
+
+STDMETHODIMP Com_task::get_Stderr_text( BSTR* result )
+{
+    Z_LOG( __PRETTY_FUNCTION__ << "()\n" );
+
+    return get_Stderr_or_stdout_text( result, true );
 }
 
 //------------------------------------------------------------------------Com_task::get_Stdout_text
@@ -2210,22 +2221,7 @@ STDMETHODIMP Com_task::get_Stdout_text( BSTR* result )
 {
     Z_LOG( __PRETTY_FUNCTION__ << "()\n" );
     
-    HRESULT hr = S_OK;
-    
-    try
-    {
-        *result = NULL;
-
-        if( !_task )  throw_xc( "SCHEDULER-122" );
-        if( !_task->thread()  ||  current_thread_id() != _task->thread()->thread_id() )  return E_ACCESSDENIED;
-        if( !_task->_module_instance )  return S_FALSE;
-        
-        return String_to_bstr( string_from_file( _task->_module_instance->stdout_filename() ), result );
-    }
-    catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
-    catch( const _com_error& x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
-    
-    return hr;
+    return get_Stderr_or_stdout_text( result, false );
 }
 
 //-----------------------------------------------------------------------------Com_thread::_methods
