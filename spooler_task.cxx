@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.49 2002/02/26 09:11:23 jz Exp $
+// $Id: spooler_task.cxx,v 1.50 2002/02/28 16:46:06 jz Exp $
 /*
     Hier sind implementiert
 
@@ -922,14 +922,15 @@ string Job::state_cmd_name( Job::State_cmd cmd )
 //-----------------------------------------------------------------------------------------Job::xml
 // Anderer Thread
 
-xml::Element_ptr Job::xml( xml::Document_ptr document )
+xml::Element_ptr Job::xml( xml::Document_ptr document, bool show_all )
 {
     xml::Element_ptr job_element = document->createElement( "task" );
 
     THREAD_LOCK( _lock )
     {
-        job_element->setAttribute( "job"  , as_dom_string( _name ) );
-        job_element->setAttribute( "state", as_dom_string( state_name() ) );
+        job_element->setAttribute( "job"     , as_dom_string( _name ) );
+        job_element->setAttribute( "state"   , as_dom_string( state_name() ) );
+        job_element->setAttribute( "title"   , as_dom_string( _title ) );
 
         if( !_in_call.empty() )  job_element->setAttribute( "calling", as_dom_string( _in_call ) );
 
@@ -944,6 +945,9 @@ xml::Element_ptr Job::xml( xml::Document_ptr document )
             job_element->setAttribute( "running_since", as_dom_string( _task->_running_since.as_string() ) );
             job_element->setAttribute( "steps"        , as_dom_string( as_string( _task->_step_count ) ) );
         }
+        
+
+        if( show_all )  dom_append_text_element( job_element, "description", _description );
 
         if( !_task_queue.empty() )
         {
@@ -953,7 +957,7 @@ xml::Element_ptr Job::xml( xml::Document_ptr document )
             {
                 xml::Element_ptr queued_task_element = document->createElement( "queued_task" );
                 queued_task_element->setAttribute( "enqueued", as_dom_string( (*it)->_enqueue_time.as_string() ) );
-                queued_task_element->setAttribute( "name", as_dom_string( (*it)->_name ) );
+                queued_task_element->setAttribute( "name"    , as_dom_string( (*it)->_name ) );
                 if( (*it)->_start_at )
                     queued_task_element->setAttribute( "start_at", as_dom_string( (*it)->_start_at.as_string() ) );
 

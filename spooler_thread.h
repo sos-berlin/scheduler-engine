@@ -1,4 +1,4 @@
-// $Id: spooler_thread.h,v 1.13 2001/07/17 12:46:56 jz Exp $
+// $Id: spooler_thread.h,v 1.14 2002/02/28 16:46:06 jz Exp $
 
 #ifndef __SPOOLER_THREAD_H
 #define __SPOOLER_THREAD_H
@@ -14,7 +14,7 @@ struct Thread : Sos_self_deleting
                                ~Thread                      ();
 
     void                        set_xml                     ( const xml::Element_ptr& );
-    xml::Element_ptr            xml                         ( xml::Document_ptr );
+    xml::Element_ptr            xml                         ( xml::Document_ptr, bool show_all );
     void                        load_jobs_from_xml          ( const xml::Element_ptr&, bool init = false );
     void                        add_job                     ( const Sos_ptr<Job>& );
     

@@ -1,4 +1,4 @@
-// $Id: spooler_thread.cxx,v 1.19 2002/03/08 15:27:23 jz Exp $
+// $Id: spooler_thread.cxx,v 1.20 2002/02/28 16:46:06 jz Exp $
 /*
     Hier sind implementiert
 
@@ -54,7 +54,7 @@ void Thread::init()
 
 //--------------------------------------------------------------------------------------Thread::xml
 
-xml::Element_ptr Thread::xml( xml::Document_ptr document )
+xml::Element_ptr Thread::xml( xml::Document_ptr document, bool show_all )
 {
     xml::Element_ptr thread_element = document->createElement( "thread" );
 
@@ -77,7 +77,7 @@ xml::Element_ptr Thread::xml( xml::Document_ptr document )
         xml::Element_ptr jobs_element = document->createElement( "tasks" );
         dom_append_nl( jobs_element );
 
-        FOR_EACH( Job_list, _job_list, it )  jobs_element->appendChild( (*it)->xml(document) ), dom_append_nl( jobs_element );
+        FOR_EACH( Job_list, _job_list, it )  jobs_element->appendChild( (*it)->xml( document, show_all ) ), dom_append_nl( jobs_element );
 
         thread_element->appendChild( jobs_element );
     }

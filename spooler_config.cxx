@@ -1,4 +1,4 @@
-// $Id: spooler_config.cxx,v 1.21 2002/02/26 09:11:22 jz Exp $
+// $Id: spooler_config.cxx,v 1.22 2002/02/28 16:46:06 jz Exp $
 
 //#include <precomp.h>
 
@@ -175,7 +175,12 @@ void Run_time::set_xml( const xml::Element_ptr& element )
     Day                     default_day;
     bool                    period_seen = false;
     
-    default_period.set_xml( element, NULL );
+    //default_period.set_xml( element, NULL );
+    //default_period._end = 24*60*60;
+    Sos_optional_date_time end;
+    end.set_time( "24:00:00" );
+    default_period._begin = 0;
+    default_period._end = end;
     default_day = default_period;
 
     bool a_day_set = false;
@@ -348,10 +353,11 @@ void Job::set_xml( const xml::Element_ptr& element )
     bool run_time_set = false;
 
     _name             = as_string( element->getAttribute( "name" ) );
-  //_rerun            = as_bool( element->getAttribute( "rerun" ) ) ),
-  //_stop_after_error = as_bool( element->getAttribute( "stop_after_errorn ) );
-    _temporary        = as_bool( element->getAttribute( "temporary" ) );
-    _priority         = as_int( element->getAttribute( "priority" ) );
+  //_rerun            = as_bool  ( element->getAttribute( "rerun" ) ) ),
+  //_stop_after_error = as_bool  ( element->getAttribute( "stop_after_errorn ) );
+    _temporary        = as_bool  ( element->getAttribute( "temporary" ) );
+    _priority         = as_int   ( element->getAttribute( "priority" ) );
+    _title            = as_string( element->getAttribute( "title" ) );
 
     string text;
 
@@ -360,19 +366,23 @@ void Job::set_xml( const xml::Element_ptr& element )
 
     for( xml::Element_ptr e = element->firstChild; e; e = e->nextSibling )
     {
-        if( e->tagName == "object_set" )  _object_set_descr = SOS_NEW( Object_set_descr( e ) );
+        if( e->tagName == "description" )  _description = as_string( e->text );
         else
-        if( e->tagName == "script"     )  _script.set_xml( e, include_path() );
+        if( e->tagName == "object_set"  )  _object_set_descr = SOS_NEW( Object_set_descr( e ) );
         else
-        if( e->tagName == "process"    )  _process_filename = as_string( e->getAttribute( "file" ) ),
-                                          _process_param    = as_string( e->getAttribute( "param" ) );
+        if( e->tagName == "script"      )  _script.set_xml( e, include_path() );
         else
-        if( e->tagName == "run_time"   )  _run_time.set_xml( e ),  run_time_set = true;
+        if( e->tagName == "process"     )  _process_filename = as_string( e->getAttribute( "file" ) ),
+                                           _process_param    = as_string( e->getAttribute( "param" ) );
+        else
+        if( e->tagName == "run_time"    )  _run_time.set_xml( e ),  run_time_set = true;
     }
 
     if( !run_time_set )  _run_time.set_xml( element->ownerDocument->createElement( L"run_time" ) );
 
     if( _object_set_descr )  _object_set_descr->_class = _spooler->get_object_set_class( _object_set_descr->_class_name );
+
+    _xml_element = element;
 }
 
 //--------------------------------------------------------Spooler::load_object_set_classes_from_xml
@@ -443,6 +453,13 @@ void Spooler::load_threads_from_xml( Thread_list* liste, const xml::Element_ptr&
 
 void Spooler::load_config( const xml::Element_ptr& config_element )
 {
+    _config_element  = NULL;
+    _config_document = NULL;
+
+    _config_document = config_element->ownerDocument; 
+    _config_element  = config_element;
+
+
     _tcp_port      = as_int( config_element->getAttribute( "tcp_port"     ) );
     _udp_port      = as_int( config_element->getAttribute( "udp_port"     ) );
     _priority_max  = as_int( config_element->getAttribute( "priority_max" ) );
@@ -465,6 +482,11 @@ void Spooler::load_config( const xml::Element_ptr& config_element )
             if( e->tagName == "object_set_classes" )
             {
                 load_object_set_classes_from_xml( &_object_set_class_list, e );
+            }
+            else
+            if( e->tagName == "script" )
+            {
+                _script.set_xml( e, include_path() );
             }
             else
             if( e->tagName == "threads" ) 

@@ -1,4 +1,4 @@
-// $Id: spooler_command.cxx,v 1.36 2001/11/13 10:42:11 jz Exp $
+// $Id: spooler_command.cxx,v 1.37 2002/02/28 16:46:06 jz Exp $
 /*
     Hier ist implementiert
 
@@ -37,7 +37,7 @@ namespace spooler {
 using namespace std;
 
 //--------------------------------------------------------------------------dom_append_text_element
-/*
+
 void dom_append_text_element( const xml::Element_ptr& element, const char* element_name, const string& text )
 {
     xml::Document_ptr doc       = element->ownerDocument;
@@ -46,7 +46,7 @@ void dom_append_text_element( const xml::Element_ptr& element, const char* eleme
 
     e->appendChild( text_node );
 }
-*/
+
 //------------------------------------------------------------------------------------dom_append_nl
 
 void dom_append_nl( const xml::Element_ptr& element )
@@ -88,18 +88,21 @@ void append_error_element( const xml::Element_ptr& element, const Xc_copy& x )
 
 //----------------------------------------------------------Command_processor::execute_show_threads
 
-xml::Element_ptr Command_processor::execute_show_threads()
+xml::Element_ptr Command_processor::execute_show_threads( bool show_all )
 {
     if( _security_level < Security::seclev_info )  throw_xc( "SPOOLER-121" );
 
-    return _spooler->threads_as_xml( _answer );
+    return _spooler->threads_as_xml( _answer, show_all );
 }
 
 //------------------------------------------------------------Command_processor::execute_show_state
 
-xml::Element_ptr Command_processor::execute_show_state()
+xml::Element_ptr Command_processor::execute_show_state( const xml::Element_ptr& element )
 {
     if( _security_level < Security::seclev_info )  throw_xc( "SPOOLER-121" );
+
+    string show_all_str = as_string( element->getAttribute( "all" ) );
+    bool show_all = show_all_str.empty()? false : as_bool( show_all_str );
 
     xml::Element_ptr state_element = _answer->createElement( "state" );
  
@@ -113,7 +116,7 @@ xml::Element_ptr Command_processor::execute_show_state()
     sprintf( buffer, "%-0.3lf", cpu_time ); 
     state_element->setAttribute( "cpu_time"             , as_dom_string( buffer ) );
 
-    state_element->appendChild( execute_show_threads() );
+    state_element->appendChild( execute_show_threads( show_all ) );
 
     return state_element;
 }
@@ -209,7 +212,7 @@ xml::Element_ptr Command_processor::execute_signal_object( const xml::Element_pt
     if( _security_level < Security::seclev_signal )  throw_xc( "SPOOLER-121" );
 
     string class_name = as_string( element->getAttribute( "class" ) );
-    Level  level      = as_int( element->getAttribute( "level" ) );
+    Level  level      = as_int   ( element->getAttribute( "level" ) );
 
     xml::Element_ptr jobs_element = _answer->createElement( "tasks" );
 
@@ -251,7 +254,7 @@ xml::Element_ptr Command_processor::execute_add_jobs( const xml::Element_ptr& ad
 
 xml::Element_ptr Command_processor::execute_command( const xml::Element_ptr& element )
 {
-    if( element->tagName == "show_state"        )  return execute_show_state();
+    if( element->tagName == "show_state"        )  return execute_show_state( element );
     else
     if( element->tagName == "modify_spooler"    )  return execute_modify_spooler( element );
     else

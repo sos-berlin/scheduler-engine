@@ -1,4 +1,4 @@
-// $Id: spooler_task.h,v 1.24 2002/03/08 15:27:22 jz Exp $
+// $Id: spooler_task.h,v 1.25 2002/02/28 16:46:06 jz Exp $
 
 #ifndef __SPOOLER_TASK_H
 #define __SPOOLER_TASK_H
@@ -159,7 +159,7 @@ struct Job : Sos_self_deleting
                                ~Job                         (); 
 
     void                        set_xml                     ( const xml::Element_ptr& );
-    xml::Element_ptr            xml                         ( xml::Document_ptr );
+    xml::Element_ptr            xml                         ( xml::Document_ptr, bool show_all );
 
     void                        init                        ();
 
@@ -246,6 +246,9 @@ struct Job : Sos_self_deleting
     Run_time                   _run_time;
     int                        _priority;
     bool                       _temporary;                  // Job nach einem Lauf entfernen
+    string                     _title;
+    string                     _description;
+    xml::Element_ptr           _xml_element;                // <job> aus <config>
 
     Script*                    _script_ptr;
     Script_instance            _script_instance;            // Für use_engine="job"

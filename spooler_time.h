@@ -1,4 +1,4 @@
-// $Id: spooler_time.h,v 1.3 2001/02/06 09:22:26 jz Exp $
+// $Id: spooler_time.h,v 1.4 2002/02/28 16:46:07 jz Exp $
 
 #ifndef __SPOOLER_TIME_H
 #define __SPOOLER_TIME_H
@@ -100,7 +100,7 @@ struct Period
     friend ostream&             operator <<                 ( ostream& s, const Period& o )  { o.print(s); return s; }
 
 
-  private:
+//private:
     Fill_zero                  _zero_;
     Time                       _repeat;
     Time                       _begin;                      // Sekunden seit Mitternacht

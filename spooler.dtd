@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- $Id: spooler.dtd,v 1.27 2001/07/17 12:46:55 jz Exp $   Joacim Zschimmer,  (C) 2000 SOS GmbH Berlin  -->
+<!-- $Id: spooler.dtd,v 1.28 2002/02/28 16:46:05 jz Exp $   Joacim Zschimmer,  (C) 2000 SOS GmbH Berlin  -->
 
 
 <!ELEMENT spooler               ( config+ | command | answer )>
@@ -8,7 +8,7 @@
 
 <!-- KONFIGURATION DES SPOOLERS - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
-<!ELEMENT config                ( security?, object_set_classes?, threads? )>
+<!ELEMENT config                ( security?, script?, object_set_classes?, threads? )>
 <!ATTLIST config                spooler_id          CDATA ''>           <!-- Diese Konfiguration ist nur für einen Spooler mit dieser Kennung -->
 <!ATTLIST config                log_dir             CDATA #IMPLIED>
 <!ATTLIST config                tcp_port            CDATA '4444'>       <!-- Für TCP-Kommandoschnittstelle -->
@@ -68,6 +68,8 @@
 <!ATTLIST job                   temporary           (yes|no) 'no'>      <!-- Der Job wird nach einem Lauf entfernt -->
 <!ATTLIST job                   output_level        CDATA #IMPLIED>     <!-- Stufennummer. Auf diese Stufe werden die Objekte der Objektemenge gesetzt -->
 <!ATTLIST job                   spooler_id          CDATA ''>           <!-- "": Job läuft auf jedem Spooler, sonst nur Spooler mit derselben Spooler-Id -->
+<!ATTLIST job                   title               CDATA ''>           <!-- Bezeichnung des Jobs -->
+<!ATTLIST job                   description         CDATA ''>           <!-- Beschreibung des Jobs -->
 
 
 <!ELEMENT object_set            ( levels? )>
@@ -91,7 +93,7 @@
 <!ATTLIST run_time              begin               CDATA '00:00:00'>   <!-- HH:MM:SS, Tageszeit, ab der der Job laufen soll -->
 <!ATTLIST run_time              end                 CDATA '24:00:00'>   <!-- HH:MM:SS, Tageszeit, bis zu der der Job laufen soll -->
 <!ATTLIST run_time              let_run             (yes|no) 'no'>      <!-- Task zuende laufen lassen, auch wenn Endezeit überschritten ist -->
-<!ATTLIST run_time              repeat              CDATA '5'>          <!-- Periode, nach der ein Job erneut gestartet wird, 
+<!ATTLIST run_time              repeat              CDATA ''>           <!-- Periode, nach der ein Job erneut gestartet wird, 
                                                                              um zu prüfen, ob die Objektemenge nicht leer ist -->
 
 <!ELEMENT period                EMPTY>
@@ -125,6 +127,7 @@
 <!ELEMENT command               ( show_state | modify_spooler | modify_job | add_jobs | signal_object )+ >
 
 <!ELEMENT show_state            EMPTY>                                  <!-- Liefert den Zustand des Spoolers -->
+<!ATTLIST show_state            all                 (yes|no) 'no'>
                                                                         <!-- Antwort: <state> -->
 
 <!ELEMENT modify_spooler        EMPTY>
@@ -192,6 +195,8 @@
 
 <!ELEMENT task                  ( queued_tasks? | ERROR? )>
 <!ATTLIST task                  job                 CDATA #REQUIRED>    <!-- Jobname -->
+<!ATTLIST task                  title               CDATA #IMPLIED>
+<!ATTLIST task                  description         CDATA #IMPLIED>
 <!ATTLIST task                  state               (stopped|pending|running|suspended) #REQUIRED>
                                                                         <!-- state="stopped"  : Keine Task wird mehr gestartet -->
                                                                         <!-- state="pending"  : Task wartet auf nächsten  -->

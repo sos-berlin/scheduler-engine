@@ -1,4 +1,4 @@
-// $Id: spooler_com.cxx,v 1.20 2001/08/20 13:46:54 jz Exp $
+// $Id: spooler_com.cxx,v 1.21 2002/02/28 16:46:06 jz Exp $
 /*
     Hier sind implementiert
 
@@ -215,6 +215,7 @@ Com_job::Com_job( Job* job )
 STDMETHODIMP Com_job::start_when_directory_changed( BSTR directory_name )
 {
     HRESULT hr = NOERROR;
+
     if( !_job )  return E_POINTER;
 
     try

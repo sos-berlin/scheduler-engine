@@ -1,4 +1,4 @@
-// $Id: spooler.h,v 1.61 2001/07/25 19:43:35 jz Exp $
+// $Id: spooler.h,v 1.62 2002/02/28 16:46:05 jz Exp $
 
 #ifndef __SPOOLER_H
 #define __SPOOLER_H
@@ -129,7 +129,7 @@ struct Spooler
     Time                        start_time                  () const                            { return _spooler_start_time; }
     Security::Level             security_level              ( const Host& );
     bool                        is_service                  () const                            { return _is_service; }
-    xml::Element_ptr            threads_as_xml              ( xml::Document_ptr );
+    xml::Element_ptr            threads_as_xml              ( xml::Document_ptr, bool show_all );
 
     int                         launch                      ( int argc, char** argv );                                
     void                        set_state_changed_handler   ( State_changed_handler h )         { _state_changed_handler = h; }
@@ -211,12 +211,18 @@ struct Spooler
     int                        _udp_port;                   // <config udp=...>
     State_changed_handler      _state_changed_handler;      // Callback für NT-Dienst SetServiceStatus()
 
+    xml::Element_ptr           _config_element_to_load;     // Für cmd_load_config()
+    xml::Document_ptr          _config_document_to_load;    // Für cmd_load_config(), das Dokument zu _config_element_to_load
+
+    xml::Element_ptr           _config_element;             // Die gerade geladene Konfiguration (und Job hat einen Verweis auf <job>)
     xml::Document_ptr          _config_document;            // Das Dokument zu _config_element
-    xml::Element_ptr           _config_element;             // Für cmd_load_config()
 
     Security                   _security;                   // <security>
     Object_set_class_list      _object_set_class_list;      // <object_set_classes>
     Communication              _communication;              // TCP und UDP (ein Thread)
+
+    Script                     _script;                     // <script>
+    Script_instance            _script_instance;
 
     Thread_list                _thread_list;
 

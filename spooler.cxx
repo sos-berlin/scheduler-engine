@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.73 2002/02/26 09:11:22 jz Exp $
+// $Id: spooler.cxx,v 1.74 2002/02/28 16:46:05 jz Exp $
 /*
     Hier sind implementiert
 
@@ -103,7 +103,9 @@ Spooler::Spooler()
     _communication(this), 
     _prefix_log(&_log),
     _wait_handles(this,&_prefix_log),
-    _log(this)
+    _log(this),
+    _script(this),
+    _script_instance(&_prefix_log)
 {
     _com_log     = new Com_log( &_prefix_log );
     _com_spooler = new Com_spooler( this );
@@ -146,7 +148,7 @@ Security::Level Spooler::security_level( const Host& host )
 //--------------------------------------------------------------------------Spooler::threads_as_xml
 // Anderer Thread
 
-xml::Element_ptr Spooler::threads_as_xml( xml::Document_ptr document )
+xml::Element_ptr Spooler::threads_as_xml( xml::Document_ptr document, bool show_all )
 {
     xml::Element_ptr threads = document->createElement( "threads" );
 
@@ -156,7 +158,7 @@ xml::Element_ptr Spooler::threads_as_xml( xml::Document_ptr document )
     {
         FOR_EACH( Thread_list, _thread_list, it )
         {
-            threads->appendChild( (*it)->xml( document ) );
+            threads->appendChild( (*it)->xml( document, show_all ) );
             dom_append_nl( threads );
         }
     }
@@ -421,9 +423,21 @@ void Spooler::start()
 
     _state_cmd = sc_none;
     set_state( s_starting );
-    //_log.msg( "Spooler::start" );
 
     _spooler_start_time = Time::now();
+
+    if( !_script.empty() )
+    {
+        _script_instance.init( _script._language );
+
+        _script_instance.add_obj( (IDispatch*)_com_spooler, "spooler"     );
+        _script_instance.add_obj( (IDispatch*)_com_log    , "spooler_log" );
+
+        _script_instance.load( _script );
+
+        bool ok = check_result( _script_instance.call_if_exists( "spooler_init" ) );
+        if( !ok )  throw_xc( "SPOOLER-127" );
+    }
 
     FOR_EACH( Thread_list, _thread_list, it )  (*it)->start_thread();
 }
@@ -452,6 +466,8 @@ void Spooler::stop()
 */
     _object_set_class_list.clear();
     _thread_list.clear();
+
+    _script_instance.close();
 
     if( _state_cmd == sc_terminate_and_restart )  spooler_restart( _is_service );
    
@@ -494,8 +510,8 @@ void Spooler::cmd_load_config( const xml::Element_ptr& config )
 { 
     THREAD_LOCK( _lock )  
     {
-        _config_document = config->ownerDocument; 
-        _config_element  = config;
+        _config_document_to_load = config->ownerDocument; 
+        _config_element_to_load  = config;
         _state_cmd = sc_load_config; 
     }
 
@@ -584,12 +600,12 @@ int Spooler::launch( int argc, char** argv )
     
             THREAD_LOCK_LOG( _lock, "Spooler::launch load_config" )  
             {
-                if( _config_element == NULL )  throw_xc( "SPOOLER-116", _spooler_id );
+                if( _config_element_to_load == NULL )  throw_xc( "SPOOLER-116", _spooler_id );
     
-                load_config( _config_element );
+                load_config( _config_element_to_load );
         
-                _config_element = NULL;
-                _config_document = NULL;
+                _config_element_to_load = NULL;
+                _config_document_to_load = NULL;
             }
 
             start();

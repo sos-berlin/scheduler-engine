@@ -1,4 +1,4 @@
-// $Id: spooler_command.h,v 1.5 2001/07/16 16:39:36 jz Exp $
+// $Id: spooler_command.h,v 1.6 2002/02/28 16:46:06 jz Exp $
 
 #ifndef __SPOOLER_COMMAND_H
 #define __SPOOLER_COMMAND_H
@@ -6,6 +6,7 @@
 namespace sos {
 namespace spooler {
 
+void                            dom_append_text_element     ( const xml::Element_ptr& element, const char* element_name, const string& text );
 void                            append_error_element        ( const xml::Element_ptr&, const Xc_copy& );
 void                            dom_append_nl               ( const xml::Element_ptr& );
 
@@ -20,8 +21,8 @@ struct Command_processor
     xml::Element_ptr            execute_command             ( const xml::Element_ptr& );
     xml::Element_ptr            execute_config              ( const xml::Element_ptr& );
     xml::Element_ptr            execute_add_jobs            (  const xml::Element_ptr& );
-    xml::Element_ptr            execute_show_state          ();
-    xml::Element_ptr            execute_show_threads        ();
+    xml::Element_ptr            execute_show_state          ( const xml::Element_ptr& );
+    xml::Element_ptr            execute_show_threads        ( bool show_all );
     xml::Element_ptr            execute_show_job            ( Job* );
     xml::Element_ptr            execute_modify_job          ( const xml::Element_ptr& );
     xml::Element_ptr            execute_start_job           ( const xml::Element_ptr& );
