@@ -1,4 +1,4 @@
-// $Id: spooler_job.cxx,v 1.82 2004/07/18 15:38:02 jz Exp $
+// $Id: spooler_job.cxx,v 1.83 2004/07/19 13:08:38 jz Exp $
 // §851: Weitere Log-Ausgaben zum Scheduler-Start eingebaut
 /*
     Hier sind implementiert
@@ -790,7 +790,7 @@ bool Job::execute_state_cmd()
                         set_state( s_pending );
 
                         Time now = Time::now();
-                        Sos_ptr<Task> task = create_task( NULL, "", now );      // create_task() nicht mit gesperrten _lock rufen, denn get_id() in DB blockieren.
+                        Sos_ptr<Task> task = create_task( NULL, "", 0 );      // create_task() nicht mit gesperrten _lock rufen, denn get_id() in DB blockieren.
                         
                         task->_cause = cause_wake;
                         task->_let_run = true;
@@ -1187,7 +1187,7 @@ Sos_ptr<Task> Job::task_to_start()
             }
             else
             {
-                task = create_task( NULL, "", now );     // create_task() nicht mit gesperrten _lock rufen, denn get_id() in DB blockieren.
+                task = create_task( NULL, "", 0 );     // create_task() nicht mit gesperrten _lock rufen, denn get_id() in DB blockieren.
 
                 task->set_order( order );
                 task->_cause = cause;

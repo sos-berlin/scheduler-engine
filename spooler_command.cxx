@@ -1,4 +1,4 @@
-// $Id: spooler_command.cxx,v 1.119 2004/07/19 10:47:05 jz Exp $
+// $Id: spooler_command.cxx,v 1.120 2004/07/19 13:08:38 jz Exp $
 /*
     Hier ist implementiert
 
@@ -816,6 +816,7 @@ void Command_processor::execute_2( const string& xml_text, const Time& xml_mod_t
         _answer.appendChild( _answer.createElement( "spooler" ) );
 
         xml::Element_ptr answer_element = _answer.documentElement().appendChild( _answer.createElement( "answer" ) );
+        answer_element.setAttribute( "time", Time::now().as_string() );
 
         _security_level = _host? _spooler->security_level( *_host ) 
                                : Security::seclev_all;
