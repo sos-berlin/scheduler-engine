@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 
-<!-- $Id: spooler.xml,v 1.7 2001/01/16 16:40:36 jz Exp $   (C) 2000 SOS GmbH Berlin -->
+<!-- $Id: spooler.xml,v 1.8 2001/01/17 11:12:17 jz Exp $   (C) 2000 SOS GmbH Berlin -->
 
 <!DOCTYPE spooler SYSTEM "spooler.dtd">
 
@@ -10,11 +10,11 @@
     <script language="VBScript"><![CDATA[
 
 dim global
-set hostware = createobject( "hostware.global" )        'Damit hostOLE nicht immer wieder neu geladen wird.
+'set hostware = createobject( "hostware.global" )        'Damit hostOLE nicht immer wieder neu geladen wird.
 
-set errfile = createobject( "hostware.file" )
-errfile.open "-out file /dev/stderr"
-errfile.put_line "Spooler-Skript gestartet"
+'set errfile = createobject( "hostware.file" )
+'errfile.open "-out file /dev/stderr"
+'errfile.put_line "Spooler-Skript gestartet"
 
 class Global_class
     function method()
@@ -54,19 +54,19 @@ class Testobjekt
         set file = file_par
         lev = mid( file.name, instr( file.name & "-", "-" ) + 1 )
         lev = left( lev, instr( lev & ".", "." ) - 1 )
-        spooler_level = lev
+        level = lev
     end sub
 
 
-    sub spooler_process( new_level )
-        spooler_log.msg "spooler_process " & spooler_level & " ==> " & new_level 
+    sub process( new_level )
+        spooler_log.msg "process " & level & " ==> " & new_level 
         spooler_log.msg "file(" & file.path & ").move " & dir_name & "\" & new_level & "\" & file.name
         file.move dir_name & "\" & new_level & "\" & file.name
-        spooler_level = new_level
+        level = new_level
     end sub
 
 
-    public  spooler_level
+    public  level
     private file
 
 end class
@@ -108,7 +108,7 @@ class Object_set_class
         dim object
         set object = new Testobjekt
         object.construct file_array(index)
-        spooler_log.msg "index=" & index & ", spooler_level=" & object.spooler_level & ", script_index=" & script_index
+        spooler_log.msg "index=" & index & ", level=" & object.level & ", script_index=" & script_index
         index = index + 1
         script_index = script_index + 1
 
@@ -167,17 +167,17 @@ use Win32::OLE;
         my $self = {};
         bless( $self );
         $self->{name} = shift;
-        $self->{spooler_level} = 100;
+        $self->{level} = 100;
         return $self;
     }
 
 
-    sub spooler_process
+    sub process
     {
         my $self = shift;
         my $new_level = shift;  # Wie holt man den Parameter? Joacim
-        #$main::spooler_log->msg( "spooler_process " . $self->{name} . ", " . $self->{spooler_level} . " ==> $new_level" );
-        $self->{spooler_level} = $new_level;
+        #$main::spooler_log->msg( "process " . $self->{name} . ", " . $self->{level} . " ==> $new_level" );
+        $self->{level} = $new_level;
     }
 }
 
@@ -219,7 +219,7 @@ use Win32::OLE;
         if( $self->spooler_eof() )  { return; }
 
         my $object = Testobjekt::construct( $self->{index} );
-        $main::spooler_log->msg( "index=" . $self->{index} . ", spooler_level=" . $object->{spooler_level} );
+        $main::spooler_log->msg( "index=" . $self->{index} . ", level=" . $object->{level} );
         $self->{index}++;
 
         return $object;
@@ -262,7 +262,7 @@ sub spooler_init()
 
 sub spooler_open()
 {
-    $object_set_class->{spooler_low_level}  = $spooler_task->object_set->{low_level};
+    $object_set_class->{spooler_low_level} = $spooler_task->object_set->{low_level};
     $object_set_class->{spooler_high_level} = $spooler_task->object_set->{high_level};
     $object_set_class->spooler_open();
     return; 
@@ -288,7 +288,7 @@ sub spooler_eof()
 sub spooler_process()
 {
     my $new_level = shift;
-    $object->spooler_process( $new_level );
+    $object->process( $new_level );
     return; 
 }
 
@@ -358,15 +358,16 @@ sub spooler_init()
 end sub
 
 function spooler_process()
-    spooler_log.msg "*Job einfach: step " & index & ", param=" & spooler.script.global.method()
-    index = index + 1
-    if index > 3 then spooler_process=false: exit function
-    spooler_process=true
+    step=true
+    'spooler_log.msg "*Job einfach: step " & index & ", param=" & spooler.script.global.method()
+    'index = index + 1
+    'if index > 3 then step=false: exit function
+    'step = true
 end function
 
             ]]></script>
 
-            <run_time end="07:00" retry_period="3"/>  <!-- Komma wegen altem Fehler in hostware as_double() -->
+            <run_time end="24:00" retry_period="3"/>  <!-- Komma wegen altem Fehler in hostware as_double() -->
 
         </job>
 

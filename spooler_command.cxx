@@ -1,4 +1,4 @@
-// $Id: spooler_command.cxx,v 1.15 2001/01/16 06:23:17 jz Exp $
+// $Id: spooler_command.cxx,v 1.16 2001/01/17 11:12:17 jz Exp $
 /*
     Hier ist implementiert
 
@@ -138,7 +138,7 @@ xml::Element_ptr Command_processor::execute_modify_spooler( const xml::Element_p
         else
       //if( cmd == "new_log"               )  _spooler->cmd_new_log();
       //else
-            throw_xc( "SPOOLER-106", cmd );
+            throw_xc( "SPOOLER-105", cmd );
     }
     
     return _answer->createElement( "ok" );

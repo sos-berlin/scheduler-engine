@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.32 2001/01/16 16:40:35 jz Exp $
+// $Id: spooler.cxx,v 1.33 2001/01/17 11:12:17 jz Exp $
 /*
     Hier sind implementiert
 
@@ -150,21 +150,41 @@ void Spooler::load_arg()
     _spooler_id       = read_profile_string( "factory.ini", "spooler", "spooler-id" );
     _spooler_param    = read_profile_string( "factory.ini", "spooler", "param" );
 
-    for( Sos_option_iterator opt ( _argc, _argv ); !opt.end(); opt.next() )
+    try
     {
-        if( opt.flag      ( "service"          ) )  ;   // wurde in sos_main() bearbeitet
-        else
-        if( opt.with_value( "log"              ) )  ;   // wurde in sos_main() bearbeitet
-        else
-        if( opt.with_value( "config"           ) )  _config_filename = opt.value();
-        else
-        if( opt.with_value( "log-dir"          ) )  _log_directory = opt.value();
-        else
-        if( opt.with_value( "spooler-id"       ) )  _spooler_id = opt.value();
-        else
-        if( opt.with_value( "param"            ) )  _spooler_param = opt.value();
-        else
-            throw_sos_option_error( opt );
+        for( Sos_option_iterator opt ( _argc, _argv ); !opt.end(); opt.next() )
+        {
+            if( opt.flag      ( "service"          ) )  ;   // wurde in sos_main() bearbeitet
+            else
+            if( opt.with_value( "log"              ) )  ;   // wurde in sos_main() bearbeitet
+            else
+            if( opt.with_value( "config"           ) )  _config_filename = opt.value();
+            else
+            if( opt.with_value( "log-dir"          ) )  _log_directory = opt.value();
+            else
+            if( opt.with_value( "spooler-id"       ) )  _spooler_id = opt.value();
+            else
+            if( opt.with_value( "param"            ) )  _spooler_param = opt.value();
+            else
+                throw_sos_option_error( opt );
+        }
+
+        if( _config_filename.empty() )  throw_xc( "SPOOLER-115" );
+    }
+    catch( const Sos_option_error& )
+    {
+        if( !_is_service )
+        {
+            cerr << "usage: " << _argv[0] << "\n"
+                    "       -config=XMLFILE\n"
+                    "       -service-\n"
+                    "       -log=HOSTWARELOGFILENAME\n"
+                    "       -log-dir=DIRECTORY|*stderr\n"
+                    "       -spooler-id=ID\n"
+                    "       -param=PARAM\n";
+        }
+
+        throw;
     }
 }
 
@@ -205,11 +225,11 @@ void Spooler::start()
     {
         _script_instance.init();
 
-        _script_instance.add_obj( (IDispatch*)_com_spooler, "spooler" );
-        _script_instance.add_obj( (IDispatch*)_com_log, "spooler_log" );
+        _script_instance.add_obj( (IDispatch*)_com_spooler, "spooler"     );
+        _script_instance.add_obj( (IDispatch*)_com_log    , "spooler_log" );
 
         _script_instance.load();
-      //_script_instance.optional_property_put( "spooler_param", _spooler_param.c_str() );
+
         if( _script_instance.name_exists( "spooler_init" ) )  _script_instance.call( "spooler_init" );
     }
     
@@ -513,6 +533,11 @@ int spooler_main( int argc, char** argv )
 
             CloseHandle( process_info.hThread );
             CloseHandle( process_info.hProcess );
+
+#        else
+
+            //fork();
+            //spawn();
 
 #       endif
     }
