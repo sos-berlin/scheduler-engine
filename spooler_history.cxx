@@ -1,4 +1,4 @@
-// $Id: spooler_history.cxx,v 1.41 2003/05/05 15:39:55 jz Exp $
+// $Id: spooler_history.cxx,v 1.42 2003/05/05 16:51:20 jz Exp $
 
 #include "spooler.h"
 #include "../zschimmer/z_com.h"
@@ -272,24 +272,28 @@ void Spooler_db::create_table_when_needed( const string& tablename, const string
 
 int Spooler_db::get_id()
 {
-    int id;
+    int  id;
+    bool email_sent = false;
 
     while(1)
     {
         try
         {
             id = get_id_();
-
-#ifdef _DEBUG
-   static a = 3;
-   if( --a == 0 ) throw_xc( "TEST" );
-#endif
             break;
         }
         catch( const exception& x )
         {
             _spooler->log().error( string("FEHLER BEIM ZUGRIFF AUF DATENBANK: ") + x.what() );
             _spooler->log().info( "Datenbank wird geschlossen" );
+
+            if( !email_sent )
+            {
+                string body = "db=" + _spooler->_db_name + "\r\n\r\n" + x.what() + "\r\n\r\nDer Spooler versucht, die Datenbank erneut zu oeffnen.";
+                if( !_spooler->_need_db )  body += "\r\nWenn das nicht geht, schreibt der Spooler die Historie in Textdateien.";
+                send_error_email( string("FEHLER BEIM ZUGRIFF AUF DATENBANK: ") + x.what(), body );
+                email_sent = true;
+            }
 
             Z_MUTEX( _lock )
             {
@@ -309,6 +313,7 @@ int Spooler_db::get_id()
                     catch( const exception& x )
                     {
                         _spooler->log().warn( x.what() );
+
                         if( _spooler->_need_db )
                         {
                             sos_sleep( 30 );

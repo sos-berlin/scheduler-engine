@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.201 2003/05/05 15:39:55 jz Exp $
+// $Id: spooler.cxx,v 1.202 2003/05/05 16:51:20 jz Exp $
 /*
     Hier sind implementiert
 
@@ -84,7 +84,7 @@ static void set_ctrl_c_handler( bool on );
 
 //---------------------------------------------------------------------------------send_error_email
 
-void send_error_email( const string& error_text, int argc, char** argv )
+void send_error_email( const string& subject, const string& body )
 {
     try
     {
@@ -102,25 +102,32 @@ void send_error_email( const string& error_text, int argc, char** argv )
         if( bcc  != "" )  msg->set_bcc ( bcc  );
         if( smtp != "" )  msg->set_smtp( smtp );
 
-        msg->set_subject( "FEHLER BEI SPOOLER-START: " + error_text );
         msg->add_header_field( "X-SOS-Spooler", "" );
-
-        string body = "Der Spooler-Dienst konnte nicht gestartet werden.\n"
-                      "\n"
-                      "\n"
-                      "Der Aufruf war:\n"
-                      "\n";
-                       
-
-        for( int i = 0; i < argc; i++ )  body += argv[i], body += ' ';
-        body += "\n\n\n"
-                "Fehlermeldung:\n";
-        body += error_text;
-
+        msg->set_subject( subject );
         msg->set_body( body );
         msg->send(); 
     }
     catch( const exception& ) {}
+}
+
+//---------------------------------------------------------------------------------send_error_email
+
+void send_error_email( const string& error_text, int argc, char** argv )
+{
+
+    string body = "Der Spooler-Dienst konnte nicht gestartet werden.\n"
+                  "\n"
+                  "\n"
+                  "Der Aufruf war:\n"
+                  "\n";
+                   
+    for( int i = 0; i < argc; i++ )  body += argv[i], body += ' ';
+
+    body += "\n\n\n"
+            "Fehlermeldung:\n";
+    body += error_text;
+
+    send_error_email( "FEHLER BEI SPOOLER-START: " + error_text, body );
 }
 
 //---------------------------------------------------------------------read_profile_mail_on_process
