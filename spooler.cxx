@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.185 2003/03/26 14:29:37 jz Exp $
+// $Id: spooler.cxx,v 1.186 2003/03/26 14:44:05 jz Exp $
 /*
     Hier sind implementiert
 
@@ -450,18 +450,6 @@ void Spooler::wait_until_threads_stopped( Time until )
         int c = 0;
         while( !threads.empty() )
         {
-            Time until_step = Time::now() + (++c < 10? wait_step_for_thread_termination : wait_step_for_thread_termination2 );
-            if( until_step > until )  until_step = until;
-
-            while(1)
-            {
-                Time now = Time::now();
-                if( now > until_step )  break;
-                _event.wait( min( 1.0, (double)( until_step - now ) ) );
-                if( ctrl_c_pressed >= 2 )  set_state( s_stopping ),  signal_threads( "ctrl_c" );
-                _event.reset();
-            }
-
             FOR_EACH( Thread_list, threads, it )  
             {
                 Spooler_thread* thread = *it;
@@ -473,8 +461,20 @@ void Spooler::wait_until_threads_stopped( Time until )
             }
 
             if( threads.size() ==  0 )  break;
-            if( Time::now() > until )  break;
 
+
+            Time until_step = Time::now() + (++c < 10? wait_step_for_thread_termination : wait_step_for_thread_termination2 );
+            if( until_step > until )  until_step = until;
+
+            while(1)
+            {
+                Time now = Time::now();
+                if( now > until_step )  break;
+                _event.wait( min( 1.0, (double)( until_step - now ) ) );
+                if( ctrl_c_pressed >= 2 )  set_state( s_stopping ),  signal_threads( "ctrl_c" );
+                _event.reset();
+            }
+/*
             if( Time::now() >= until_step )
             {
                 sos_sleep( 0.01 );  // Zur Verkürzung des Protokolls: Nächsten Threads Zeit lassen, sich zu beenden
@@ -492,7 +492,8 @@ void Spooler::wait_until_threads_stopped( Time until )
                     }
                 }
             }
-
+*/
+            if( Time::now() > until )  break;
         }
 
 #   endif
@@ -758,6 +759,7 @@ void Spooler::send_cmd()
 
 
     Xml_end_finder xml_end_finder;
+    bool           last_was_nl = true;
 
     while(1)
     {
@@ -767,8 +769,11 @@ void Spooler::send_cmd()
         if( ret == 0 )  break;
         if( ret < 0 )  throw_sos_socket_error( "recv" );
         fwrite( buffer, ret, 1, stdout );
+        last_was_nl = buffer[ret-1] == '\n';
         if( xml_end_finder.is_complete( buffer, ret ) )  break;
     }
+
+    if( !last_was_nl )  fputc( '\n', stdout );
 
     closesocket( sock );
 }
@@ -1245,11 +1250,7 @@ int Spooler::launch( int argc, char** argv )
 
     do
     {
-        if( _state_cmd != sc_load_config )  
-        {
-            load();
-            if( _send_cmd != "" )  { send_cmd();  return 0; }
-        }
+        if( _state_cmd != sc_load_config )  load();
 
         THREAD_LOCK( _lock )  
         {
@@ -1260,6 +1261,8 @@ int Spooler::launch( int argc, char** argv )
             _config_element_to_load = NULL;
             _config_document_to_load = NULL;
         }
+
+        if( _send_cmd != "" )  { send_cmd();  return 0; }
 
         start();
         run();
@@ -1540,6 +1543,7 @@ int sos_main( int argc, char** argv )
     string  renew_spooler;
     string  command_line;
     bool    renew_service = false;
+    string  send_cmd;
     string  log_filename;
     string  factory_ini = spooler::default_factory_ini;
     string  dependencies;
@@ -1551,6 +1555,8 @@ int sos_main( int argc, char** argv )
         if( opt.with_value( "renew-spooler"    ) )  renew_spooler = opt.value();
         else
         if( opt.with_value( "renew-spooler"    ) )  renew_spooler = opt.value();
+        else
+        if( opt.with_value( "send-cmd"         ) )  send_cmd = opt.value();
         else
         if( opt.flag      ( "V"                ) )  fprintf( stderr, "Spooler %s\n", VER_PRODUCTVERSION_STR );
         else
@@ -1587,6 +1593,9 @@ int sos_main( int argc, char** argv )
             }
         }
     }
+
+    if( send_cmd != "" )  is_service = false;
+
 
 #   ifdef Z_WINDOWS
         if( service_name != "" ) 
