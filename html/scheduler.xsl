@@ -117,6 +117,7 @@
                 <td colspan="3">
                     <xsl:value-of select="count( state/jobs/job [ @state='running' ] )" /> jobs running,
                     &#160;<xsl:value-of select="count( state/jobs/job [ @state='stopped' ] )" /> stopped,
+                    &#160;<xsl:value-of select="count( state/jobs/job [ @waiting_for_process='yes' ] )" /> need process,
                     &#160;<xsl:value-of select="count( state/jobs/job/tasks/task[ @id ] )" /> tasks,
                     &#160;<xsl:value-of select="sum( state/jobs/job/order_queue/@length )" /> orders
                 </td>
@@ -267,7 +268,7 @@
                             <span style="margin-left: 2ex">
                                 <xsl:choose>
                                     <xsl:when test="../../@waiting_for_process='yes'">
-                                        Need process
+                                        Needs process
                                     </xsl:when>
                                     <xsl:otherwise>
                                         <xsl:choose>
@@ -763,7 +764,7 @@
                     <td class="head">Running since</td>
                     <td class="head">Operations</td>
                     <td class="head">Callbacks</td>
-                    <td class="head">Operation</td>
+                    <td class="head">Current operation</td>
                 </tr>
                 <tr>
                     <td colspan="99" class="after_head_space">&#160;</td>
@@ -930,7 +931,7 @@
                             <xsl:choose>
                                 <xsl:when test="not( @id )">
                                     <xsl:if test="../../@waiting_for_process='yes'">
-                                        (need process)
+                                        (needs process)
                                     </xsl:if>
                                 </xsl:when>
                                 <xsl:otherwise>
