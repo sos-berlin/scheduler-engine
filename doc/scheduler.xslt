@@ -582,6 +582,7 @@
 
                 <xsl:apply-templates select="ini_sections" mode="table"/>
                 <xsl:apply-templates select="description"/>
+                <hr size="1"/>
                 <xsl:apply-templates select="ini_sections"/>
                 <xsl:call-template name="bottom"/>
             </body>
@@ -599,10 +600,21 @@
             <xsl:for-each select="ini_section">
                 <tr>
                     <td>
-                        <xsl:element name="a">
-                            <xsl:attribute name="href">#section_<xsl:value-of select="@name"/></xsl:attribute>
-                            <code>[<xsl:value-of select="@name"/>]</code>
-                        </xsl:element>
+                        <p class="ini_section">
+                            <!--xsl:element name="a">
+                                <xsl:attribute name="href">#section_<xsl:value-of select="@name"/></xsl:attribute>
+                            </xsl:element-->
+                            
+                            <b>
+                                <code>
+                                    [<xsl:value-of select="@name"/>
+                                    <xsl:if test="@variable_suffix">
+                                        <i>&#160;<xsl:value-of select="@variable_suffix"/></i>
+                                    </xsl:if>
+                                    <xsl:text>]</xsl:text>
+                                </code>
+                            </b>
+                        </p>
                     </td>
                     <td>
                         <span class="title">
@@ -617,7 +629,7 @@
                     <tr>
                         <td>
                             <xsl:element name="a">
-                                <xsl:attribute name="href">#entry_<xsl:value-of select="parent::*/@setting"/>__entry_<xsl:value-of select="@name"/></xsl:attribute>
+                                <xsl:attribute name="href">#setting_<xsl:value-of select="@setting"/></xsl:attribute>
                                 <code><xsl:value-of select="@name | @setting"/></code>
                             </xsl:element>
                         </td>
@@ -646,18 +658,27 @@
                 <xsl:element name="a">
                     <xsl:attribute name="name">section_<xsl:value-of select="@setting"/></xsl:attribute>
                 </xsl:element>
-                <b><code>[<xsl:value-of select="@name"/>]</code></b>
+                <b>
+                    <code>
+                        [<xsl:value-of select="@name"/>
+                        <xsl:if test="@variable_suffix">
+                            <i>&#160;<xsl:value-of select="@variable_suffix"/></i>
+                        </xsl:if>
+                        <xsl:text>]</xsl:text>
+                    </code>
+                </b>
                 <span class="title">
                     <xsl:value-of select="@title"/>
                 </span>
             </p>
 
             <xsl:for-each select="ini_entries/ini_entry">
+                <xsl:sort select="@name"/>
                 <p class="ini_entry">
                     <xsl:variable name="setting" select="document( 'settings.xml' )/settings/setting[ @name = current()/@setting ]"/>
 
                     <xsl:element name="a">
-                        <xsl:attribute name="name">entry_<xsl:value-of select="parent::*/@setting"/>__entry_<xsl:value-of select="@setting"/></xsl:attribute>
+                        <xsl:attribute name="name">setting_<xsl:value-of select="@setting"/></xsl:attribute>
                     </xsl:element>
                     <b><code><xsl:value-of select="@setting"/></code></b>
                     

@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="scheduler.xslt" type="text/xsl"?>
 
-<!--$Id: command_line.xml,v 1.4 2004/08/24 11:18:23 jz Exp $-->
+<!--$Id: command_line.xml,v 1.5 2004/08/24 13:28:14 jz Exp $-->
 
 <command_line program  = "scheduler"
               title    = "Kommandozeile"
               base_dir = "."
               author   = "$Author: jz $"
-              date     = "$Date: 2004/08/24 11:18:23 $">
+              date     = "$Date: 2004/08/24 13:28:14 $">
 
     <command_options>
         <command_option name="config" setting="config">
@@ -100,7 +100,8 @@
     <description>
         <p>
             Der Programmdateiname <code>scheduler</code> muss absolut und vollständig angegeben werden. 
-            In Windows mit der Endung "<code>.exe</code>".
+            In Windows mit der Endung "<code>.exe</code>"
+            (warum? weil der Scheduler den vollständigen Dateinamen braucht, um einen Job oder sich selbst neu zu starten).
         </p>
         <p>
             Die Parameter (rechts vom Gleichheitszeichen) können in Anführungszeichen oder in Aprostrophe

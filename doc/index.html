@@ -1,0 +1,61 @@
+<html>
+
+<!-- $Id: index.html,v 1.1 2004/08/24 13:28:24 jz Exp $ -->
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+    <title>Scheduler</title>
+
+    <style type="text/css">
+        @import "scheduler.css";
+    </style>
+</head>
+
+<body>
+
+<h1>Scheduler</h1>
+
+
+<h3>factory.ini</h3>
+<p>
+    Einige Einstellungen können in der Datei <a href="factory_ini.xml"><code>factory.ini</code></a> vorgenommen werden.
+</p>
+
+
+<h3>XML-Konfiguration</h3>
+<p>
+    Die <a href="konfiguration.html">XML-Konfiguration</a> beschreibt die Jobs und alles was dazu gehört.
+</p>
+
+
+<h3>Kommandozeile</h3>
+<p>
+    <a href="command_line.xml">Start mit der Kommandozeile</a>
+</p>
+
+
+<h3>Bedienung über HTTP</h3>
+<p>
+    Der Scheduler verfügt über einen HTTP-Server und stellt HTML-Seiten zu seiner Bedienung bereit.
+    Sie können den Scheduler über einen Browser (zurzeit nur Microsoft Internet Explorer 6)
+    steuern. Geben Sie z.B. die Adresse <code>http://localhost:4444</code> ein.
+    <code>localhost</code> kann auch ein anderer Rechnername sein.
+    <code>4444</code> ist die konfigurierte TCP-Portnummer des Schedulers.
+</p>
+
+
+<h3>Bedienung über telnet</h3>
+<p>
+    Die XML-Kommandos können auch über einen telnet-Client eingegeben werden.
+    Aufruf: <code>telnet localhost 4444</code>.
+</p>
+
+
+<h3>Protokolle</h3>
+<p>
+    Im mit <code>log_dir</code> eingestellten Verzeichnis schreibt der Scheduler seine Protokolle.
+</p>
+
+</body>
+
+</html>

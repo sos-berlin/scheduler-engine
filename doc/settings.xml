@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="scheduler.xslt" type="text/xsl"?>
 
-<!--$Id: settings.xml,v 1.1 2004/08/24 11:18:56 jz Exp $-->
+<!--$Id: settings.xml,v 1.2 2004/08/24 13:28:14 jz Exp $-->
 
 <!-- Einige Einstellungen können an mehreren Stellen vorgenommen werden:
      - Konfigurationsdatei
@@ -15,7 +15,7 @@
 <settings
     base_dir = "."
     author   = "$Author: jz $"
-    date     = "$Date: 2004/08/24 11:18:56 $">
+    date     = "$Date: 2004/08/24 13:28:14 $">
 
     <setting name           = "log_dir" 
              xml_element    = "config"
@@ -118,7 +118,7 @@
 
 
     <setting name    = "db_tasks_table" 
-             type    = ""
+             type    = "name"
              initial = "SCHEDULER_TASKS"
              title   = "Name der Datenbanktabelle für die Tasks">
         <description>
@@ -129,7 +129,7 @@
 
 
     <setting name    = "db_history_table" 
-             type    = ""
+             type    = "name"
              initial = "SCHEDULER_HISTORY"
              title   = "Name der Datenbanktabelle für die Historie">
         <description>
@@ -140,7 +140,7 @@
 
 
     <setting name    = "db_order_history_table" 
-             type    = ""
+             type    = "name"
              initial = "SCHEDULER_ORDER_HISTORY"
              title   = "Name der Datenbanktabelle für die Auftragshistorie">
         <description>
@@ -151,7 +151,7 @@
 
 
     <setting name    = "db_orders_table" 
-             type    = ""
+             type    = "name"
              initial = "SCHEDULER_ORDERS"
              title   = "Name der Datenbanktabelle für die Aufträge">
         <description>
@@ -162,7 +162,7 @@
 
 
     <setting name    = "db_variables_table" 
-             type    = ""
+             type    = "name"
              initial = "SCHEDULER_VARIABLES"
              title   = "Name der Datenbanktabelle für die Variablen">
         <description>
@@ -173,7 +173,7 @@
 
 
     <setting name    = "history_columns" 
-             type    = ""
+             type    = "name, name, ..."
              title   = "Zusätzliche Spalten in der Historie">
         <description>
             <p>
@@ -182,7 +182,7 @@
     </setting>
 
     <setting name    = "history" 
-             type    = "yes_no"
+             type    = "yes|no"
              title   = "Historie schreiben?">
         <description>
             <p>
@@ -190,9 +190,21 @@
         </description>
     </setting>
 
+
+    <setting name    = "history_file" 
+             type    = ""
+             initial = ""
+             title   = "Dateiname der Historie (für datenbanklosen Betrieb)">
+        <description>
+            <p>
+            </p>
+        </description>
+    </setting>
+
+
     <setting name   = "history_on_process" 
-             type   = ""
-             title  = "">
+             type   = "yes|no|zahl"
+             title  = "Nach spooler_process() Historiensatz schreiben?">
         <description>
             <p>
             </p>
@@ -201,8 +213,8 @@
 
 
     <setting name   = "history_archive" 
-             type   = ""
-             title  = "">
+             type   = "yes|no"
+             title  = "Historiendateien archivieren?">
         <description>
             <p>
             </p>
@@ -211,8 +223,8 @@
 
 
     <setting name   = "history_with_log" 
-             type   = ""
-             title  = "">
+             type   = "yes|no"
+             title  = "Protokoll in die Historie shcreiben?">
         <description>
             <p>
             </p>
@@ -221,7 +233,7 @@
 
     <setting name   = "order_history" 
              type   = "yes_no"
-             title  = "">
+             title  = "Aufträge in die Historie schreiben?">
         <description>
             <p>
             </p>
@@ -230,8 +242,8 @@
 
 
     <setting name   = "order_history_with_log" 
-             type   = ""
-             title  = "">
+             type   = "yes|no"
+             title  = "Auftragsprotokolle in die Historie schreiben?">
         <description>
             <p>
             </p>
@@ -252,7 +264,7 @@
     <setting name    = "need_db" 
              type    = "yes|no|strict"
              initial = "no"
-             title   = "">
+             title   = "Ist die Datenbank notwendig?">
         <description>
             <p>
             </p>
@@ -263,6 +275,147 @@
     <setting name    = "max_db_errors" 
              type    = "zahl"
              initial = "5"
+             title   = "Anzahl Datenbank-Fehler, bevor Scheduler aufgibt">
+        <description>
+            <p>
+            </p>
+        </description>
+    </setting>
+
+    <setting name    = "mail_on_error" 
+             type    = "yes|no"
+             initial = "no"
+             title   = "Mit Fehler beendete Task verschickt eMail">
+        <description>
+            <p>
+            </p>
+        </description>
+    </setting>
+
+
+    <setting name    = "mail_on_process" 
+             type    = "yes|no|zahl"
+             initial = "no"
+             title   = "Task mit spooler_process() verschickt eMail">
+        <description>
+            <p>
+            </p>
+        </description>
+    </setting>
+
+
+    <setting name    = "mail_on_success" 
+             type    = "yes|no"
+             initial = ""
+             title   = "Erfolgreich gelaufende Task verschickt eMail">
+        <description>
+            <p>
+            </p>
+        </description>
+    </setting>
+
+
+    <setting name    = "mail_queue_dir" 
+             type    = "verzeichnis"
+             title   = "Verzeichnis der zeitweilig nicht versendbaren eMails">
+        <description>
+            <p>
+            </p>
+        </description>
+    </setting>
+
+
+    <setting name    = "class_path" 
+             type    = "dateinamen"
+             prepend = "yes"
+             title   = "Java-Classpath">
+        <description>
+            <p>
+            </p>
+        </description>
+    </setting>
+
+
+    <setting name    = "javac" 
+             type    = "dateiname"
+             initial = "javac"
+             title   = "Dateiname des Java-Compilers">
+        <description>
+            <p>
+            </p>
+        </description>
+    </setting>
+
+
+    <setting name    = "log_mail_subject" 
+             type    = "text"
+             initial = ""
+             title   = "Betreff der eMails">
+        <description>
+            <p>
+            </p>
+        </description>
+    </setting>
+
+
+    <setting name    = "log_mail_from" 
+             type    = "email_address"
+             initial = ""
+             title   = "Absender der eMails">
+        <description>
+            <p>
+            </p>
+        </description>
+    </setting>
+
+
+    <setting name    = "log_mail_to" 
+             type    = "email_address"
+             initial = ""
+             title   = "To-Empfänger der eMails">
+        <description>
+            <p>
+            </p>
+        </description>
+    </setting>
+
+
+    <setting name    = "log_mail_cc" 
+             type    = "email_address"
+             initial = ""
+             title   = "Cc-Empfänger der eMails">
+        <description>
+            <p>
+            </p>
+        </description>
+    </setting>
+
+
+    <setting name    = "log_mail_bcc" 
+             type    = "email_address"
+             initial = ""
+             title   = "Bcc-Empfänger der eMails">
+        <description>
+            <p>
+            </p>
+        </description>
+    </setting>
+
+
+    <setting name    = "smtp" 
+             type    = "host_address"
+             initial = ""
+             title   = "Hostname oder IP-Nummer des SMTP-Servers für eMail">
+        <description>
+            <p>
+            </p>
+        </description>
+    </setting>
+
+
+    <setting name    = "" 
+             type    = ""
+             initial = ""
              title   = "">
         <description>
             <p>
@@ -271,30 +424,93 @@
     </setting>
 
 
-<!--
-    _mail_on_error   =            read_profile_bool           ( _factory_ini, "spooler", "mail_on_error"  , _mail_on_error );
-    _mail_on_process =            read_profile_mail_on_process( _factory_ini, "spooler", "mail_on_process", _mail_on_process );
-    _mail_on_success =            read_profile_bool           ( _factory_ini, "spooler", "mail_on_success", _mail_on_success );
-    _mail_queue_dir  = subst_env( read_profile_string         ( _factory_ini, "spooler", "mail_queue_dir" , _mail_queue_dir ) );
-    _mail_encoding   =            read_profile_string         ( _factory_ini, "spooler", "mail_encoding"  , "base64"        );      // "quoted-printable": Jmail braucht 1s pro 100KB dafür
-    _smtp_server     =            read_profile_string         ( _factory_ini, "spooler", "smtp"           , _smtp_server );
+    <setting name    = "" 
+             type    = ""
+             initial = ""
+             title   = "">
+        <description>
+            <p>
+            </p>
+        </description>
+    </setting>
 
-    _log_mail_from      = read_profile_string( _factory_ini, "spooler", "log_mail_from"   );
-    _log_mail_to        = read_profile_string( _factory_ini, "spooler", "log_mail_to"     );
-    _log_mail_cc        = read_profile_string( _factory_ini, "spooler", "log_mail_cc"     );
-    _log_mail_bcc       = read_profile_string( _factory_ini, "spooler", "log_mail_bcc"    );
-    _log_mail_subject   = read_profile_string( _factory_ini, "spooler", "log_mail_subject");
-    _log_collect_within = read_profile_uint  ( _factory_ini, "spooler", "log_collect_within", 0 );
-    _log_collect_max    = read_profile_uint  ( _factory_ini, "spooler", "log_collect_max"   , 900 );
 
-    _my_program_filename = _argv? _argv[0] : "(Programmdateiname fehlt)";
+    <setting name    = "" 
+             type    = ""
+             initial = ""
+             title   = "">
+        <description>
+            <p>
+            </p>
+        </description>
+    </setting>
 
-    //if( !_java_vm->running() )  // Für javac ist's egal, ob Java läuft (für scheduler.dll)
-    {
-      //_java_vm->set_filename      ( subst_env( read_profile_string( _factory_ini, "java"   , "vm"         , _java_vm->filename()       ) ) );
-        _java_vm->prepend_class_path( subst_env( read_profile_string( _factory_ini, "java"   , "class_path" ) ) );
-      //_java_vm->set_javac_filename( subst_env( read_profile_string( _factory_ini, "java"   , "javac"      , _java_vm->javac_filename() ) ) );
-    }
--->    
+
+    <setting name    = "" 
+             type    = ""
+             initial = ""
+             title   = "">
+        <description>
+            <p>
+            </p>
+        </description>
+    </setting>
+
+
+    <setting name    = "" 
+             type    = ""
+             initial = ""
+             title   = "">
+        <description>
+            <p>
+            </p>
+        </description>
+    </setting>
+
+
+    <setting name    = "" 
+             type    = ""
+             initial = ""
+             title   = "">
+        <description>
+            <p>
+            </p>
+        </description>
+    </setting>
+
+
+    <setting name    = "" 
+             type    = ""
+             initial = ""
+             title   = "">
+        <description>
+            <p>
+            </p>
+        </description>
+    </setting>
+
+
+    <setting name    = "" 
+             type    = ""
+             initial = ""
+             title   = "">
+        <description>
+            <p>
+            </p>
+        </description>
+    </setting>
+
+
+    <setting name    = "" 
+             type    = ""
+             initial = ""
+             title   = "">
+        <description>
+            <p>
+            </p>
+        </description>
+    </setting>
+
+
     
 </settings>

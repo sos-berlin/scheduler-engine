@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="scheduler.xslt" type="text/xsl"?>
 
-<!--$Id: factory_ini.xml,v 1.1 2004/08/24 11:18:56 jz Exp $-->
+<!--$Id: factory_ini.xml,v 1.2 2004/08/24 13:28:14 jz Exp $-->
 
 <ini file     = "factory.ini"
      title    = ""
      base_dir = "."
      author   = "$Author: jz $"
-     date     = "$Date: 2004/08/24 11:18:56 $">
+     date     = "$Date: 2004/08/24 13:28:14 $">
 
     <ini_sections>
         <ini_section name="spooler">
@@ -34,8 +34,42 @@
                 <ini_entry setting="db" />
                 <ini_entry setting="need_db" />
                 <ini_entry setting="max_db_errors" />
-                
+                <ini_entry setting="mail_on_error" />
+                <ini_entry setting="mail_on_process" />
+                <ini_entry setting="mail_on_success" />
+                <ini_entry setting="mail_queue_dir" />
+                <ini_entry setting="log_mail_from" />
+                <ini_entry setting="log_mail_to" />
+                <ini_entry setting="log_mail_cc" />
+                <ini_entry setting="log_mail_bcc" />
+                <ini_entry setting="smtp" />
             </ini_entries>
         </ini_section>
+        
+
+        <ini_section name="job" variable_suffix="jobname">
+            <ini_entries>
+                <ini_entry setting="history_file"/> 
+                <ini_entry setting="history" />
+                <ini_entry setting="history_on_process" />
+                <ini_entry setting="history_with_log" />
+                <ini_entry setting="history_columns" />
+                <ini_entry setting="history_archive" />
+                <ini_entry setting="log_level" />
+                <!--ini_entry setting="log_collect_within" />
+                <ini_entry setting="log_collect_max" /-->
+                <ini_entry setting="mail_on_error" />
+                <ini_entry setting="mail_on_process" />
+                <ini_entry setting="mail_on_success" />
+                <ini_entry setting="mail_queue_dir" />
+                <ini_entry setting="log_mail_subject" />
+                <ini_entry setting="log_mail_from" />
+                <ini_entry setting="log_mail_to" />
+                <ini_entry setting="log_mail_cc" />
+                <ini_entry setting="log_mail_bcc" />
+                <!--ini_entry setting="smtp" /-->
+            </ini_entries>
+        </ini_section>
+        
     </ini_sections>
 </ini>
