@@ -43,3 +43,9 @@ VERSION 2.0.101  2004-12-09
 
 Änderungen im HTTP-Server und den HTML-Seiten (jetzt in scheduler/html/jz/, abrufbar mit http://localhost:4444/jz)
 für Firefox.
+
+------------------------------------------------
+VERSION 2.0.105  2005-
+
+Die Sockets werden früher geschlossen, damit die offenen Verbindungen bei Restart nicht an den neuen Scheduler vererbt werden
+und der Browser vergeblich auf eine Antwort wartet.

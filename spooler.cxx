@@ -406,7 +406,6 @@ Spooler::~Spooler()
 
     _object_set_class_list.clear();
 
-    _communication.close( 5 );      // 5 Sekunden aufs Ende warten
     _security.clear();
 
     _event.close();
@@ -1686,6 +1685,8 @@ void Spooler::stop()
     if( _module_instance )  _module_instance->close();
 
     //_java_vm.close();  Erneutes _java.init() stürzt ab, deshalb lassen wird Java stehen und schließen es erst am Schluss
+
+    _communication.close( 5 );      // 5 Sekunden aufs Ende warten. Vor Restart, damit offene Verbindungen nicht vererbt werden.
 
     if( _shutdown_cmd == sc_terminate_and_restart 
      || _shutdown_cmd == sc_let_run_terminate_and_restart )  spooler_restart( &_base_log, _is_service );
