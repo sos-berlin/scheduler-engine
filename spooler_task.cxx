@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.55 2002/03/03 11:55:17 jz Exp $
+// $Id: spooler_task.cxx,v 1.56 2002/03/03 16:59:41 jz Exp $
 /*
     Hier sind implementiert
 
@@ -221,7 +221,7 @@ Job::Job( Thread* thread )
     _zero_(this+1),
     _thread(thread),
     _spooler(thread->_spooler),
-    _log( &thread->_spooler->_log ),
+    _log(thread->_spooler),
     _script(thread->_spooler),
     _script_instance(&_log)
 {
@@ -796,9 +796,9 @@ bool Job::do_something()
     return something_done;
 }
 
-//-----------------------------------------------------------------------------------Job::set_error
+//--------------------------------------------------------------------------------Job::set_error_xc
 
-void Job::set_error( const Xc& x )
+void Job::set_error_xc( const Xc& x )
 {
     string msg; 
     if( !_in_call.empty() )  msg = "In " + _in_call + "(): ";
@@ -823,6 +823,22 @@ void Job::set_error( const exception& x )
     set_error( xc );
 }
 
+//-----------------------------------------------------------------------------------Job::set_error
+#ifdef SYSTEM_HAS_COM
+
+void Job::set_error( const _com_error& x )
+{
+    try
+    {
+        throw_mswin_error( x.Error(), x.Description() );
+    }
+    catch( const Xc& x )
+    {
+        set_error_xc( x );
+    }
+}
+
+#endif
 //-----------------------------------------------------------------------------------Job::set_state
 
 void Job::set_state( State new_state )
@@ -1218,8 +1234,9 @@ void Task::on_error_on_success()
     {
         if( _job->_log.mail_on_success()  ||  _job->_log.mail_on_error() && _job->has_error() )  _job->_log.send();
     }
-    catch( const Xc& x        ) { _job->set_error(x); }
-    catch( const exception& x ) { _job->set_error(x); }
+    catch( const Xc& x         ) { _job->set_error(x); }
+    catch( const exception& x  ) { _job->set_error(x); }
+    catch( const _com_error& x ) { _job->set_error(x); }
 }
 
 //----------------------------------------------------------------------------------------Task::step

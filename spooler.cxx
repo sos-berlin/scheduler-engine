@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.78 2002/03/02 23:17:05 jz Exp $
+// $Id: spooler.cxx,v 1.79 2002/03/03 16:59:41 jz Exp $
 /*
     Hier sind implementiert
 
@@ -102,7 +102,7 @@ Spooler::Spooler()
     _zero_(this+1), 
     _security(this),
     _communication(this), 
-    _prefix_log(&_log),
+    _prefix_log(this),
     _wait_handles(this,&_prefix_log),
     _log(this),
     _script(this),
@@ -111,6 +111,11 @@ Spooler::Spooler()
 {
     _com_log     = new Com_log( &_prefix_log );
     _com_spooler = new Com_spooler( this );
+
+    _mail_on_error   = read_profile_bool  ( "factory.ini", "spooler", "mail_on_error"  , _mail_on_error );
+    _mail_on_success = read_profile_bool  ( "factory.ini", "spooler", "mail_on_success", _mail_on_success );
+    _smtp_server     = read_profile_string( "factory.ini", "spooler", "smtp_server"    , _smtp_server );
+
 }
 
 //--------------------------------------------------------------------------------Spooler::~Spooler

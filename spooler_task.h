@@ -1,4 +1,4 @@
-// $Id: spooler_task.h,v 1.28 2002/03/02 19:22:56 jz Exp $
+// $Id: spooler_task.h,v 1.29 2002/03/03 16:59:42 jz Exp $
 
 #ifndef __SPOOLER_TASK_H
 #define __SPOOLER_TASK_H
@@ -199,8 +199,10 @@ struct Job : Sos_self_deleting
 
     void                        set_repeat                  ( double seconds )          { _repeat = seconds; }
 
-    void                        set_error                   ( const Xc& );
+    void                        set_error_xc                ( const Xc& );
+    void                        set_error                   ( const Xc& x )             { set_error_xc( x ); }
     void                        set_error                   ( const exception& );
+    void                        set_error                   ( const _com_error& );
     Xc_copy                     error                       ()                          { THREAD_LOCK( _lock )  return _error; }
     bool                        has_error                   ()                          { return !!_error; }
 

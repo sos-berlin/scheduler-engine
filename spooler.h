@@ -1,4 +1,4 @@
-// $Id: spooler.h,v 1.65 2002/03/02 20:15:02 jz Exp $
+// $Id: spooler.h,v 1.66 2002/03/03 16:59:41 jz Exp $
 
 #ifndef __SPOOLER_H
 #define __SPOOLER_H
@@ -189,6 +189,9 @@ struct Spooler
     Prefix_log                 _prefix_log;
     bool                       _debug;
     int                        _log_level;
+    bool                       _mail_on_error;              // Für Job-Protokolle
+    bool                       _mail_on_success;            // Für Job-Protokolle
+    string                     _smtp_server;                // Für Job-Protokolle
 
     CComPtr<Com_spooler>       _com_spooler;                // COM-Objekt spooler
     CComPtr<Com_log>           _com_log;                    // COM-Objekt spooler.log

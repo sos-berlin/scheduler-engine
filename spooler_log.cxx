@@ -1,4 +1,4 @@
-// $Id: spooler_log.cxx,v 1.21 2002/03/03 11:55:17 jz Exp $
+// $Id: spooler_log.cxx,v 1.22 2002/03/03 16:59:41 jz Exp $
 
 #include "../kram/sos.h"
 #include "spooler.h"
@@ -159,10 +159,11 @@ void Log::log( Log_level level, const string& prefix, const string& line, Prefix
 
 //----------------------------------------------------------------------------------Prefix_log::log
 
-Prefix_log::Prefix_log( Log* log, const string& prefix )
+Prefix_log::Prefix_log( Spooler* spooler, const string& prefix )
 :
     _zero_(this+1),
-    _log(log),
+    _spooler(spooler),
+    _log(&spooler->_log),
     _prefix(prefix),
     _file(-1)
 {
@@ -207,6 +208,10 @@ spooler_com::Imail* Prefix_log::mail()
         bool ok = read_mail_profile( _section );
         if( !ok )  read_mail_profile( "spooler" );
 
+        string smtp_server = read_profile_string( "factory.ini", section.c_str(), "smtp_server", _spooler->_smtp_server );
+
+        _mail_on_error   = read_profile_bool( "factory.ini", _section.c_str(), "mail_on_error"  , _spooler->_mail_on_error );
+        _mail_on_success = read_profile_bool( "factory.ini", _section.c_str(), "mail_on_success", _spooler->_mail_on_success );
     }
 
     return _mail;
@@ -218,11 +223,11 @@ bool Prefix_log::read_mail_profile( const string& section )
 {
     HRESULT hr;
 
-    string to      = read_profile_string( "", section.c_str(), "mail_log_to"     , "" );
-    string cc      = read_profile_string( "", section.c_str(), "mail_log_cc"     , "" );
-    string bcc     = read_profile_string( "", section.c_str(), "mail_log_bcc"    , "" );
-    string from    = read_profile_string( "", section.c_str(), "mail_log_from"   , "" );
-    string subject = read_profile_string( "", section.c_str(), "mail_log_subject", "" );
+    string from    = read_profile_string( "factory.ini", section.c_str(), "mail_log_from"   , "" );
+    string to      = read_profile_string( "factory.ini", section.c_str(), "mail_log_to"     , "" );
+    string cc      = read_profile_string( "factory.ini", section.c_str(), "mail_log_cc"     , "" );
+    string bcc     = read_profile_string( "factory.ini", section.c_str(), "mail_log_bcc"    , "" );
+    string subject = read_profile_string( "factory.ini", section.c_str(), "mail_log_subject", "" );
 
     if( to.empty() && cc.empty() && bcc.empty() && from.empty() && subject.empty() )
     {
@@ -230,10 +235,10 @@ bool Prefix_log::read_mail_profile( const string& section )
     }
     else
     {
+        hr = _mail->put_from( SysAllocString_string(to) );     if( FAILED(hr) ) throw_ole( hr, "spooler::Mail::from", from.c_str() );
         hr = _mail->put_to  ( SysAllocString_string(to) );     if( FAILED(hr) ) throw_ole( hr, "spooler::Mail::to"  , to.c_str() );
         hr = _mail->put_cc  ( SysAllocString_string(cc) );     if( FAILED(hr) ) throw_ole( hr, "spooler::Mail::cc"  , cc.c_str() );
         hr = _mail->put_bcc ( SysAllocString_string(bcc) );    if( FAILED(hr) ) throw_ole( hr, "spooler::Mail::bcc" , bcc.c_str() );
-        hr = _mail->put_from( SysAllocString_string(to) );     if( FAILED(hr) ) throw_ole( hr, "spooler::Mail::from", from.c_str() );
 
         if( !subject.empty() )
         {
@@ -248,11 +253,14 @@ bool Prefix_log::read_mail_profile( const string& section )
 
 void Prefix_log::send()
 {
-    close();
+    if( _file != -1 )       // Nur senden, wenn die Log-Datei beschrieben worden ist
+    {
+        close();
 
-    if( !_file_added )   mail()->add_file( CComBSTR( _filename.c_str() ), L"plain/text" ),  _file_added = true;
+        if( !_file_added )   mail()->add_file( CComBSTR( _filename.c_str() ), L"plain/text" ),  _file_added = true;
 
-    mail()->send();
+        mail()->send();
+    }
 }
 
 //---------------------------------------------------------------------------------Prefix_log::open

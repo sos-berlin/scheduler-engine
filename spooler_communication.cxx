@@ -1,4 +1,4 @@
-// $Id: spooler_communication.cxx,v 1.27 2002/03/02 19:22:55 jz Exp $
+// $Id: spooler_communication.cxx,v 1.28 2002/03/03 16:59:41 jz Exp $
 /*
     Hier sind implementiert
 
@@ -222,7 +222,7 @@ Communication::Channel::Channel( Spooler* spooler )
     _spooler(spooler),
     _socket( SOCKET_ERROR ),
     _send_is_complete( true ),
-    _log(&spooler->log())
+    _log(_spooler)
 {
     recv_clear();
 }

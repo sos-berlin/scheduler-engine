@@ -1,4 +1,4 @@
-// $Id: spooler_log.h,v 1.6 2002/03/03 11:55:17 jz Exp $
+// $Id: spooler_log.h,v 1.7 2002/03/03 16:59:41 jz Exp $
 
 #ifndef __SPOOLER_LOG_H
 #define __SPOOLER_LOG_H
@@ -55,7 +55,7 @@ struct Log
 
 struct Prefix_log
 {
-                                Prefix_log                  ( Log*, const string& prefix = empty_string );
+                                Prefix_log                  ( Spooler*, const string& prefix = empty_string );
                                ~Prefix_log                  ();
 
     void                        close                       ();
@@ -90,6 +90,7 @@ struct Prefix_log
 
 
     Fill_zero                  _zero_;
+    Spooler*                   _spooler;
     Log*                       _log;
     string                     _prefix;
     string                     _section;
