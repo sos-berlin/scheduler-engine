@@ -1,4 +1,4 @@
-// $Id: spooler_common.h,v 1.2 2001/01/30 13:32:37 jz Exp $
+// $Id: spooler_common.h,v 1.3 2001/02/04 17:12:43 jz Exp $
 
 #ifndef __SPOOLER_COMMON_H
 #define __SPOOLER_COMMON_H
@@ -22,8 +22,9 @@ struct Handle
         void                    operator =                  ( ulong h )                     { close(); _handle = (HANDLE)h; }   // für _beginthreadex()
                                 operator HANDLE             () const                        { return _handle; }
                                 operator !                  () const                        { return _handle == 0; }
-        HANDLE*                 operator &                  ()                              { return &_handle; }
+      //HANDLE*                 operator &                  ()                              { return &_handle; }
 
+        HANDLE                  handle                      () const                        { return _handle; }
         void                    close                       ()                              { if(_handle) { CloseHandle(_handle); _handle=0; } }
 
         HANDLE                 _handle;
@@ -33,6 +34,8 @@ struct Handle
                                 Handle                      ( const Handle& );              // Nicht implementiert
     void                        operator =                  ( const Handle& );              // Nicht implementiert
 };
+
+static HANDLE null_handle = NULL;
 
 //--------------------------------------------------------------------------------------------Mutex
 // Nur für Typen, die in ein Speicherwort passen, also mit genau einem Maschinenbefehl lesbar sind.

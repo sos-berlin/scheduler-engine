@@ -1,4 +1,4 @@
-// $Id: spooler_script.cxx,v 1.3 2001/01/29 10:45:01 jz Exp $
+// $Id: spooler_script.cxx,v 1.4 2001/02/04 17:12:43 jz Exp $
 /*
     Hier sind implementiert
 
@@ -69,8 +69,14 @@ void Script_instance::close()
 
 CComVariant Script_instance::call_if_exists( const char* name )
 {
-    if( name_exists( name ) )  return call( name );
-                         else  return CComVariant();
+    bool exists;
+
+    map<string,bool>::iterator it = _names.find( name );
+    if( it == _names.end() )  exists = _names[name] = name_exists( name );
+                        else  exists = it->second;
+
+    if( exists )  return call( name );
+                  else  return CComVariant();
 }
 
 //----------------------------------------------------------------------------Script_instance::call

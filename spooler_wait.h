@@ -1,4 +1,4 @@
-// $Id: spooler_wait.h,v 1.7 2001/01/30 12:22:57 jz Exp $
+// $Id: spooler_wait.h,v 1.8 2001/02/04 17:12:44 jz Exp $
 
 #ifndef __SPOOLER_WAIT_H
 #define __SPOOLER_WAIT_H
@@ -8,65 +8,83 @@
 namespace sos {
 namespace spooler {
 
-bool wait_for_event( const Handle& handle, double wait_time );
+bool wait_for_event( HANDLE handle, double wait_time );
 
-//--------------------------------------------------------------------------------------Wait_handle
-/*
-struct Wait_handle : Handle
+struct Wait_handles;
+
+//--------------------------------------------------------------------------------------------Event
+
+struct Event : Handle
 {
-                                Wait_handle                 ( HANDLE h, const string& name )    : Handle(h), _name(name) {}
+                                Event                       ( const string& name = "" );
+                              //Event                       ( HANDLE h, const string& name = "" ) : Handle(h), _zero_(this+1), _name(name) {}
+                               ~Event                       ();
 
-    void                        add                         ( Wait_handles* w )                 { _wait_handles_list.push_back(w); }
-    void                        remove                      ( Wait_handles* );
+    void                        close                       ();
+    void                        set_name                    ( const string& name )              { _name = name; }
+    void                        add_to                      ( Wait_handles* );
+    void                        remove_from                 ( Wait_handles* );
 
-    virtual                     signal                      ()                                  { _signaled = true; }
+    bool                        wait                        ( double wait_time );
+    void                        set_signal                  ();
+    void                        signal                      ();
+  //virtual                     signal_event                ()                                  {}
+    bool                        signaled                    () const                            { return _signaled; }
+    bool                        signaled_then_reset         ();
+    void                        reset                       ()                                  { _signaled = false; }
 
+    string                      name                        () const                            { return _name; }
     string                      as_string                   () const                            { return "Ereignis " + _name; }
+    friend ostream&             operator <<                 ( ostream& s, const Event& w ) { return s << w.as_string(); }
 
-    const                      _name;
+
+  protected:
+                                Event                       ( const Event& );             // Nicht implementiert
+    void                        operator =                  ( const Event& );             // Nicht implementiert
+
+
+    Fill_zero                  _zero_;
+    string                     _name;
     bool                       _signaled;
-    vector<Wait_handles*>      _wait_handles_list;
+    Thread_semaphore           _lock;
+    bool                       _waiting;
+    vector<Wait_handles*>      _wait_handles;
 };
-*/
+
 //-------------------------------------------------------------------------------------Wait_handles
 
 struct Wait_handles
 {
-    struct Entry
-    {
-                                Entry                       ( const string& name, Task* task = NULL ) : _event_name(name), _task(task) {}
-
-        string                 _event_name;
-        Task*                  _task;
-    };
-
-
                                 Wait_handles                ( Spooler* spooler )            : _spooler(spooler) {}
 
 
-#   ifdef SYSTEM_WIN
+    void                        clear                       ()                              { _handles.clear(); _events.clear(); }
+    void                        add                         ( Event* );
+    void                        remove                      ( Event* );
+    void                        wait                        ( double time = latter_day );
 
-        void                    clear                       ()                              { _handles.clear(); _entries.clear(); }
-        void                    add                         ( HANDLE, const string& name, Task* = NULL );
-        void                    remove                      ( HANDLE );
-        void                    wait                        ( double time = latter_day );
 
-        vector<HANDLE>         _handles;
-        vector<Entry>          _entries;
+  protected:
+                                Wait_handles                ( const Wait_handles& );        // Nicht implementiert
+    void                        operator =                  ( const Wait_handles& );        // Nicht implementiert
 
-#   endif        
 
     Spooler*                   _spooler;
-    Thread_semaphore           _semaphore;
+    vector<HANDLE>             _handles;
+    vector<Event*>             _events;
+
+  public:
+    Thread_semaphore           _lock;
+    bool                       _waiting;
 };
 
 //--------------------------------------------------------------------------------Directory_watcher
 
-struct Directory_watcher
+struct Directory_watcher : Event
 {
 #   ifdef SYSTEM_WIN
 
-                                Directory_watcher           ( Task* task )                  : _handle(0), _signaled(false), _task(task) {}
+                                Directory_watcher           ( Job* job )                    : _handle(0), _signaled(false), _job(job) {}
                                ~Directory_watcher           ()                              { close(); }
 
                                 operator bool               ()                              { return _handle != NULL; }
@@ -74,7 +92,6 @@ struct Directory_watcher
 
         void                    watch_directory             ( const string& );
         void                    watch_again                 ();
-        void                    close                       ();
         
         HANDLE                 _handle;
 
@@ -86,7 +103,7 @@ struct Directory_watcher
 #   endif
 
 
-    Task*                      _task;
+    Job*                       _job;
     bool                       _signaled;
 };
 

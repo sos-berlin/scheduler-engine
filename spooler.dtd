@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- $Id: spooler.dtd,v 1.12 2001/01/30 12:22:56 jz Exp $   Joacim Zschimmer,  (C) 2000 SOS GmbH Berlin  -->
+<!-- $Id: spooler.dtd,v 1.13 2001/02/04 17:12:42 jz Exp $   Joacim Zschimmer,  (C) 2000 SOS GmbH Berlin  -->
 
 
 <!ELEMENT spooler               ( config+ | command | answer )>
@@ -8,7 +8,7 @@
 
 <!-- KONFIGURATION DES SPOOLERS - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
-<!ELEMENT config                ( security?, script?, object_set_classes?, jobs? )>
+<!ELEMENT config                ( security?, object_set_classes?, threads? )>
 <!ATTLIST config                spooler_id          CDATA ''>           <!-- Diese Konfiguration ist nur für einen Spooler mit dieser Kennung -->
 <!ATTLIST config                log_dir             CDATA #IMPLIED>
 <!ATTLIST config                tcp_port            CDATA '4444'>       <!-- Für TCP-Kommandoschnittstelle -->
@@ -46,11 +46,16 @@
                                                                         <!-- use_engine="job"   : Allen Tasks dieses Jobs eine Scripting Engine -->
                                                                         <!--[use_engine="global": Globale Scripting Engine des Spoolers verwenden]-->
 
+<!ELEMENT threads               ( thread* )>
 
-<!ELEMENT jobs                  ( job+ )>
+<!ELEMENT thread                ( script?, jobs? )>
+<!ATTLIST thread                name                CDATA #REQUIRED>
+<!ATTLIST thread                spooler_id          CDATA ''>           <!-- "": Thread läuft auf jedem Spooler, sonst nur Spooler mit derselben Spooler-Id -->
+
+<!ELEMENT jobs                  ( job* )>
 
 <!ELEMENT job                   ( ( object_set | script ), run_time? )>
-<!ATTLIST job                   name                CDATA #REQUIRED>    <!-- Eindeutiger Name -->
+<!ATTLIST job                   name                CDATA #REQUIRED>    <!-- Über alle Threads eindeutiger Name -->
 <!ATTLIST job                   priority            CDATA '1'>          <!-- Höhere Zahl ist höhere Priorität -->
 <!ATTLIST job                   output_level        CDATA #IMPLIED>     <!-- Stufennummer. Auf diese Stufe werden die Objekte der Objektemenge gesetzt -->
 <!ATTLIST job                   spooler_id          CDATA ''>           <!-- "": Job läuft auf jedem Spooler, sonst nur Spooler mit derselben Spooler-Id -->

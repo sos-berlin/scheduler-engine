@@ -1,4 +1,4 @@
-// $Id: spooler_config.cxx,v 1.9 2001/01/29 10:45:01 jz Exp $
+// $Id: spooler_config.cxx,v 1.10 2001/02/04 17:12:43 jz Exp $
 
 //#include <precomp.h>
 
@@ -257,8 +257,7 @@ void Object_set_class::set_xml( const xml::Element_ptr& element )
     string iface = as_string( element->getAttribute( "script_interface" ) );
     _object_interface = iface == "oo";
 
-    xml::Element_ptr e = element->firstChild;
-    while( e )
+    for( xml::Element_ptr e = element->firstChild; e; e = e->nextSibling )
     {
         if( e->tagName == "script" )
         {
@@ -267,9 +266,7 @@ void Object_set_class::set_xml( const xml::Element_ptr& element )
         else
         if( e->tagName == "level_decls" )
         {
-            xml::Element_ptr e2 = e->firstChild;
-
-            while( e2 )
+            for( xml::Element_ptr e2 = e->firstChild; e2; e2 = e2->nextSibling )
             {
                 if( e2->tagName == "level_decl" ) 
                 {
@@ -278,12 +275,8 @@ void Object_set_class::set_xml( const xml::Element_ptr& element )
 
                     _level_map[ level ] = name;
                 }
-
-                e2 = e2->nextSibling;
             }
         }
-
-        e = e->nextSibling;
     }
 }
 
@@ -317,63 +310,90 @@ void Job::set_xml( const xml::Element_ptr& element )
     text = as_string( element->getAttribute( "output_level" ) );
     if( !text.empty() )  _output_level = as_int( text );
 
-    xml::Element_ptr e = element->firstChild;
-    while( e )
+    for( xml::Element_ptr e = element->firstChild; e; e = e->nextSibling )
     {
         if( e->tagName == "object_set" )  _object_set_descr = SOS_NEW( Object_set_descr( e ) );
         else
         if( e->tagName == "script"     )  _script.set_xml( e );
         else
         if( e->tagName == "run_time"   )  _run_time.set_xml( e ); //, cerr << _run_time;
-     
-        e = e->nextSibling;
     }
-
 }
 
 //--------------------------------------------------------Spooler::load_object_set_classes_from_xml
 
 void Spooler::load_object_set_classes_from_xml( Object_set_class_list* liste, const xml::Element_ptr& element )
 {
-    xml::Element_ptr e = element->firstChild;
-    while( e )
+    for( xml::Element_ptr e = element->firstChild; e; e = e->nextSibling )
     {
         if( e->tagName == "object_set_class" )  liste->push_back( SOS_NEW( Object_set_class( e ) ) );
-        e = e->nextSibling;
     }
 }
 
-//----------------------------------------------------------------------Spooler::load_jobs_from_xml
+//-----------------------------------------------------------------------Thread::load_Jobs_from_xml
 
-void Spooler::load_jobs_from_xml( Job_list* liste, const xml::Element_ptr& element )
+void Thread::load_jobs_from_xml( Job_list* liste, const xml::Element_ptr& element )
 {
-    xml::Element_ptr e = element->firstChild;
-    while( e )
+    for( xml::Element_ptr e = element->firstChild; e; e = e->nextSibling )
     {
         if( e->tagName == "job" ) 
         {
             string spooler_id = as_string( e->getAttribute( "spooler_id" ) );
-            if( spooler_id.empty()  ||  spooler_id == _spooler_id )
+            if( spooler_id.empty()  ||  spooler_id == _spooler->_spooler_id )
             {
                 Sos_ptr<Job> job = SOS_NEW( Job( this ) );
                 job->set_xml( e );
 
                 if( job->_object_set_descr )        // job->_object_set_descr->_class ermitteln
                 {
-                    for( Object_set_class_list::iterator it = _object_set_class_list.begin(); it != _object_set_class_list.end(); it++ )
+                    FOR_EACH( Object_set_class_list, _spooler->_object_set_class_list, it )
                     {
-                        if( (*it)->_name == job->_object_set_descr->_class_name )  break;
+                        if( (*it)->_name == job->_object_set_descr->_class_name ) 
+                        {
+                            job->_object_set_descr->_class = *it;
+                            break;
+                        }
                     }
-                    if( it == _object_set_class_list.end() )  throw_xc( "SPOOLER-101", job->_object_set_descr->_class_name );
 
-                    job->_object_set_descr->_class = *it;
+                    if( !job->_object_set_descr->_class )  throw_xc( "SPOOLER-101", job->_object_set_descr->_class_name );
                 }
 
                 liste->push_back( job );
             }
         }
+    }
+}
 
-        e = e->nextSibling;
+//----------------------------------------------------------------------------------Thread::set_xml
+
+void Thread::set_xml( const xml::Element_ptr& element )
+{
+    _name = as_string( element->getAttribute( "name" ) );
+
+    for( xml::Element_ptr e = element->firstChild; e; e = e->nextSibling )
+    {
+        if( e->tagName == "script" )  _script.set_xml( e );
+        else
+        if( e->tagName == "jobs"   )  load_jobs_from_xml( &_job_list, e );
+    }
+}
+
+//-------------------------------------------------------------------Spooler::load_threads_from_xml
+
+void Spooler::load_threads_from_xml( Thread_list* liste, const xml::Element_ptr& element )
+{
+    for( xml::Element_ptr e = element->firstChild; e; e = e->nextSibling )
+    {
+        if( e->tagName == "thread" ) 
+        {
+            string spooler_id = as_string( e->getAttribute( "spooler_id" ) );
+            if( spooler_id.empty()  ||  spooler_id == _spooler_id )
+            {
+                Sos_ptr<Thread> thread = SOS_NEW( Thread( this ) );
+                thread->set_xml( e );
+                liste->push_back( thread );
+            }
+        }
     }
 }
 
@@ -384,22 +404,15 @@ void Spooler::load_config( const xml::Element_ptr& config_element )
                                    _tcp_port      = as_int   ( config_element->getAttribute( "tcp_port"     ) );
                                    _udp_port      = as_int   ( config_element->getAttribute( "udp_port"     ) );
                                    _priority_max  = as_int   ( config_element->getAttribute( "priority_max" ) );
-                                   _use_threads   = as_bool  ( config_element->getAttribute( "use_threads"  ) );
     if( empty( _log_directory ) )  _log_directory = as_string( config_element->getAttribute( "log_dir"      ) );
     if( empty( _spooler_param ) )  _spooler_param = as_string( config_element->getAttribute( "param"        ) );
 
 
-    xml::Element_ptr e = config_element->firstChild;
-    while( e )
+    for( xml::Element_ptr e = config_element->firstChild; e; e = e->nextSibling )
     {
         if( e->tagName == "security" )
         {
             _security.set_xml( e );
-        }
-        else
-        if( e->tagName == "script" )
-        {
-            _script.set_xml( e );
         }
         else
         if( e->tagName == "object_set_classes" )
@@ -407,12 +420,10 @@ void Spooler::load_config( const xml::Element_ptr& config_element )
             load_object_set_classes_from_xml( &_object_set_class_list, e );
         }
         else
-        if( e->tagName == "jobs" ) 
+        if( e->tagName == "threads" ) 
         {
-            load_jobs_from_xml( &_job_list, e );
+            load_threads_from_xml( &_thread_list, e );
         }
-
-        e = e->nextSibling;
     }
 }
 

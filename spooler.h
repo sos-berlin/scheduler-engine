@@ -1,4 +1,4 @@
-// $Id: spooler.h,v 1.42 2001/01/30 13:32:36 jz Exp $
+// $Id: spooler.h,v 1.43 2001/02/04 17:12:42 jz Exp $
 
 #ifndef __SPOOLER_H
 #define __SPOOLER_H
@@ -39,6 +39,9 @@
 namespace sos {
     namespace spooler {
         using namespace std;
+        struct Spooler;
+        struct Thread;
+        struct Task;
     }
 }
 
@@ -52,6 +55,7 @@ namespace sos {
 #include "spooler_command.h"
 #include "spooler_script.h"
 #include "spooler_task.h"
+#include "spooler_thread.h"
 #include "spooler_service.h"
 
 #define FOR_EACH( TYPE, CONTAINER, ITERATOR )  for( TYPE::iterator ITERATOR = CONTAINER.begin(); ITERATOR != CONTAINER.end(); ITERATOR++ )
@@ -67,11 +71,6 @@ inline Dom_string               as_dom_string               ( const T& t )      
 
 
 namespace spooler {
-
-
-struct                          Spooler;
-struct                          Task;
-
 
 //----------------------------------------------------------------------------State_changed_handler
 
@@ -115,7 +114,7 @@ struct Spooler
     void                        load_config                 ( const xml::Element_ptr& config );
 
     void                        load_object_set_classes_from_xml( Object_set_class_list*, const xml::Element_ptr& );
-    void                        load_jobs_from_xml          ( Job_list*, const xml::Element_ptr& );
+    void                        load_threads_from_xml       ( Thread_list*, const xml::Element_ptr& );
 
     void                        start                       ();
     void                        stop                        ();
@@ -125,17 +124,17 @@ struct Spooler
 
     void                        single_thread_step          ();
     void                        wait                        ();
-    void                        remove_ended_tasks          ();
+  //void                        remove_ended_tasks          ();
 
 
     void                        cmd_reload                  ();
-    void                        cmd_pause                   ()                                  { _state_cmd = sc_pause; cmd_wake(); }
+    void                        cmd_pause                   ()                                  { _state_cmd = sc_pause; signal(); }
     void                        cmd_continue                ();
     void                        cmd_stop                    ();
     void                        cmd_terminate               ();
     void                        cmd_terminate_and_restart   ();
-    void                        cmd_load_config             ( const xml::Element_ptr& config )  { _config_document=config->ownerDocument; _config_element=config; _state_cmd=sc_load_config; cmd_wake(); }
-    void                        cmd_wake                    ();
+    void                        cmd_load_config             ( const xml::Element_ptr& config )  { _config_document=config->ownerDocument; _config_element=config; _state_cmd=sc_load_config; signal(); }
+    void                        signal                      ()                                  { _event.signal(); }
 
     void                        set_state                   ( State );
     void                        set_state_changed_handler   ( State_changed_handler h )         { _state_changed_handler = h; }
@@ -154,50 +153,32 @@ struct Spooler
     int                        _priority_max;               // <config priority_max=...>
     string                     _log_directory;              // -log-dir=
     string                     _log_filename;
-    bool                       _use_threads;
 
     State_changed_handler      _state_changed_handler;      // Callback für NT-Dienst SetServiceStatus()
 
-    Thread_semaphore           _semaphore;
-
-    Thread_semaphore           _sleep_semaphore;
-    bool                       _sleeping;
-    bool                       _wake;
-    Handle                     _command_arrived_event;      // Kommando über TCP oder UDP eingetroffen
-
+    Event                      _event;                      
                                                             // <config> wird vom Haupt-Thread ausgeführt
     xml::Document_ptr          _config_document;            // Das Dokument zu _config_element
     xml::Element_ptr           _config_element;             // Für cmd_load_config()
 
     Log                        _log;
+    Prefix_log                 _prefix_log;
     bool                       _is_service;                 // NT-Dienst
-
-    Script                     _script;                     // <script>
-    Script_instance            _script_instance;
 
     Security                   _security;                   // <security>
     Object_set_class_list      _object_set_class_list;      // <object_set_classes>
-    Job_list                   _job_list;                   // <jobs>
-    Task_list                  _task_list;                  // Nur Spooler-Thread änder
-    Thread_semaphore           _task_list_lock;             // Spooler-Thread ändert, anderer Thread liest
     Wait_handles               _wait_handles;
     Communication              _communication;              // TCP und UDP (ein Thread)
 
     CComPtr<Com_spooler>       _com_spooler;                // COM-Objekt spooler
     CComPtr<Com_log>           _com_log;                    // COM-Objekt spooler.log
 
-  //list<Thread>               _thread_list;
+    Thread_list                _thread_list;
 
     Time                       _spooler_start_time;
-    Time                       _next_start_time;
     State                      _state;
-    State_cmd                  _state_cmd;
-
-    int                        _running_tasks_count;        // Wenn 0, dann warten
-
-                                                            // Statistik
-    int                        _step_count;                 // Seit Spooler-Start ausgeführte Schritte
-    int                        _task_count;                 // Seit Spooler-Start gestartetet Tasks
+    Mutex<State_cmd>           _state_cmd;
+    Thread_semaphore           _pause_lock;                 // Wenn _state == s_paused
 };
 
 

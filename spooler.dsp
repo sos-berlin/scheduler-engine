@@ -147,6 +147,10 @@ SOURCE=.\spooler_task.cxx
 # End Source File
 # Begin Source File
 
+SOURCE=.\spooler_thread.cxx
+# End Source File
+# Begin Source File
+
 SOURCE=.\spooler_time.cxx
 # ADD CPP /YX"spooler.h"
 # End Source File
@@ -227,6 +231,10 @@ SOURCE=.\spooler_service.h
 # Begin Source File
 
 SOURCE=.\spooler_task.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\spooler_thread.h
 # End Source File
 # Begin Source File
 

@@ -1,4 +1,4 @@
-// $Id: spooler_communication.cxx,v 1.21 2001/01/30 13:32:37 jz Exp $
+// $Id: spooler_communication.cxx,v 1.22 2001/02/04 17:12:43 jz Exp $
 /*
     Hier sind implementiert
 
@@ -699,7 +699,7 @@ void Communication::start_thread()
                               0,                           // use default creation flags 
                               &thread_id );                // returns the thread identifier 
  
-   if( !_thread )  throw_mswin_error( "CreateThread" );
+    if( !_thread )  throw_mswin_error( "CreateThread" );
 }
 
 //-------------------------------------------------------------------Communication::start_or_rebind

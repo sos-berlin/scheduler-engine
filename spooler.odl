@@ -1,4 +1,4 @@
-// $Id: spooler.odl,v 1.7 2001/01/30 12:22:56 jz Exp $
+// $Id: spooler.odl,v 1.8 2001/02/04 17:12:42 jz Exp $
 
 // Änderungen werden nicht automatisch in die spooler.tlb übernommen.
 // Also mit rechter Maustaske "Kompilieren von spooler.odl" klicken.
@@ -151,6 +151,9 @@ library spooler
         HRESULT                 result                      ( [out,retval] VARIANT* value );
 
         HRESULT                 wait_until_terminated       ( [in,defaultvalue(999999999)] double wait_time, [out,retval] VARIANT_BOOL* ok );
+
+        [propput,helpstring("Task nach der Anzahl Sekunden erneut starten")]
+        HRESULT                 repeat                      ( [in] double seconds );
     }
 
     [

@@ -1,4 +1,4 @@
-// $Id: spooler_time.cxx,v 1.6 2001/01/25 20:24:43 jz Exp $
+// $Id: spooler_time.cxx,v 1.7 2001/02/04 17:12:43 jz Exp $
 /*
     Hier sind implementiert
 
@@ -109,6 +109,13 @@ Time Period::next_try( Time t )
     return result;
 }
 
+//----------------------------------------------------------------------Period::set_next_start_time
+/*
+void Period::set_next_start_time( const Time& time )
+{
+    if( time > _end )  _begin = time;
+}
+*/
 //------------------------------------------------------------------------------------Period::print
 
 void Period::print( ostream& s ) const

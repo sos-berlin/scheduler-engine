@@ -1,4 +1,4 @@
-// $Id: spooler_com.cxx,v 1.6 2001/01/30 12:22:56 jz Exp $
+// $Id: spooler_com.cxx,v 1.7 2001/02/04 17:12:43 jz Exp $
 /*
     Hier sind implementiert
 
@@ -116,21 +116,11 @@ STDMETHODIMP Com_variable_set::get_count( int* result )
 
 //---------------------------------------------------------------------------------Com_log::Com_log
 
-Com_log::Com_log( Log* log )
+Com_log::Com_log( Prefix_log* log )
 :
     Sos_ole_object( log_class_ptr, this ),
     _zero_(this+1),
     _log(log)
-{ 
-}
-
-//---------------------------------------------------------------------------------Com_log::Com_log
-
-Com_log::Com_log( Task* task )
-:
-    Sos_ole_object( log_class_ptr, this ),
-    _zero_(this+1),
-    _task(task)
 { 
 }
 
@@ -148,11 +138,9 @@ STDMETHODIMP Com_log::log( Log_kind kind, BSTR line )
 
     try 
     {
-        if( _task )  _task->_log.log( kind, bstr_as_string( line ) ); 
-        else
-        if( _log )  _log->log( kind, empty_string, bstr_as_string( line ) ); 
-        else
-            hr = E_POINTER;
+        if( !_log )  return E_POINTER;
+
+        if( _log )  _log->log( kind, bstr_as_string( line ) ); 
     }
     catch( const Xc&   x )  { hr = _set_excepinfo(x); }
     catch( const xmsg& x )  { hr = _set_excepinfo(x); }
@@ -233,8 +221,9 @@ STDMETHODIMP Com_job::start( VARIANT* params, Itask** itask )
             if( FAILED(hr) )  return hr;
         }
 
-        Task* task = _job->start( pars );
-        *itask = task->_com_task;
+        _job->start( pars );
+
+        *itask = _job->_com_task;
         (*itask)->AddRef();
     }
     catch( const Xc&   x )  { hr = _set_excepinfo(x); }
@@ -252,15 +241,16 @@ Com_task::Com_task( Task* task )
 {
 }
 
-//----------------------------------------------------------------------------------Com_task::close
-/*
-void Com_task::close()
-{ 
-    //Thread_semaphore::Guard guard = &_semaphore;
+//-------------------------------------------------------------------------------Com_task::set_task
 
-    _task = NULL; 
+void Com_task::set_task( Task* task )
+{ 
+    THREAD_SEMA( _lock )
+    {
+        _task = task; 
+    }
 }
-*/
+
 //-------------------------------------------------------------------------Com_task::get_object_set
 
 STDMETHODIMP Com_task::get_object_set( Iobject_set** result )
@@ -269,12 +259,13 @@ STDMETHODIMP Com_task::get_object_set( Iobject_set** result )
 
     try
     {
-        //Thread_semaphore::Guard guard = &_semaphore;
+        THREAD_SEMA( _lock )
+        {
+            if( !_task )  throw_xc( "SPOOLER-122" );
 
-        //if( !_task )  throw_xc( "SPOOLER-122" );
-
-        *result = _task->_com_object_set;
-        if( *result )  (*result)->AddRef();
+            *result = _task->_com_object_set;
+            if( *result )  (*result)->AddRef();
+        }
     }
     catch( const Xc&   x )  { hr = _set_excepinfo(x); }
     catch( const xmsg& x )  { hr = _set_excepinfo(x); }
@@ -290,15 +281,15 @@ STDMETHODIMP Com_task::put_error( VARIANT* error_par )
 
     try
     {
-        //THREAD_SEMA( _semaphore )
+        THREAD_SEMA( _lock )
         {
-            //if( !_task )  throw_xc( "SPOOLER-122" );
+            if( !_task )  throw_xc( "SPOOLER-122" );
 
             CComVariant error_vt = *error_par;
             hr = error_vt.ChangeType( VT_BSTR );        if( FAILED(hr) )  return hr;
 
             string error_text = bstr_as_string( error_vt.bstrVal );
-            _task->error( Xc( "SPOOLER-120", error_text.c_str() ) );
+            _task->_job->error( Xc( "SPOOLER-120", error_text.c_str() ) );
         }
     }
     catch( const Xc&   x )  { hr = _set_excepinfo(x); }
@@ -315,11 +306,11 @@ STDMETHODIMP Com_task::get_error( Ierror** result )
 
     try
     {
-        //THREAD_SEMA( _semaphore )
+        THREAD_SEMA( _lock )
         {
-            //if( !_task )  throw_xc( "SPOOLER-122" );
+            if( !_task )  throw_xc( "SPOOLER-122" );
 
-            *result = new Com_error( _task->_error );   // _task? _task->_error : _error
+            *result = new Com_error( _task->_job->_error );   // _task? _task->_error : _error
             (*result)->AddRef();
         }
     }
@@ -337,7 +328,7 @@ STDMETHODIMP Com_task::get_job( Ijob** com_job )
 
     try
     {
-        //THREAD_SEMA( _semaphore )
+        THREAD_SEMA( _lock )
         {
             if( !_task )  throw_xc( "SPOOLER-122" );
 
@@ -359,11 +350,11 @@ STDMETHODIMP Com_task::get_params( Ivariable_set** result )
 
     try
     {
-        //THREAD_SEMA( _semaphore )
+        THREAD_SEMA( _lock )
         {
             if( !_task )  throw_xc( "SPOOLER-122" );
 
-            *result = _task->_params;
+            *result = _task->_job->_params;
             (*result)->AddRef();
         }
     }
@@ -381,16 +372,31 @@ STDMETHODIMP Com_task::wait_until_terminated( double wait_time, VARIANT_BOOL* ok
 
     try
     {
-        //THREAD_SEMA( _semaphore )
+        THREAD_SEMA( _lock )
         {
-            if( _task )
-            {
-                *ok = _task->wait_until_terminated( wait_time );
-            }
-            else
-            {
-                *ok = true;
-            }
+            if( _task )  *ok = _task->wait_until_terminated( wait_time );
+                   else  *ok = true;
+        }
+    }
+    catch( const Xc&   x )  { hr = _set_excepinfo(x); }
+    catch( const xmsg& x )  { hr = _set_excepinfo(x); }
+
+    return hr;
+}
+
+//-----------------------------------------------------------------------------Com_task::put_repeat
+
+STDMETHODIMP Com_task::put_repeat( double seconds )
+{
+    HRESULT hr = NOERROR;
+
+    try
+    {
+        THREAD_SEMA( _lock )
+        {
+            if( !_task )  throw_xc( "SPOOLER-122" );
+
+            _task->_job->set_repeat( seconds );
         }
     }
     catch( const Xc&   x )  { hr = _set_excepinfo(x); }
@@ -454,10 +460,12 @@ STDMETHODIMP Com_spooler::get_param( BSTR* param_bstr )
 STDMETHODIMP Com_spooler::get_script( IDispatch** script_object )
 {
     if( !_spooler )  return E_POINTER;
-
+    return E_POINTER;
+/*
     *script_object = _spooler->_script_instance.dispatch();
     if( *script_object )  (*script_object)->AddRef();
     return NOERROR;
+*/
 }
 
 //-----------------------------------------------------------------------------Com_spooler::get_job

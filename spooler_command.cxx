@@ -1,4 +1,4 @@
-// $Id: spooler_command.cxx,v 1.23 2001/01/30 12:22:57 jz Exp $
+// $Id: spooler_command.cxx,v 1.24 2001/02/04 17:12:43 jz Exp $
 /*
     Hier ist implementiert
 
@@ -67,53 +67,87 @@ void append_error_element( const xml::Element_ptr& element, const Xc_copy& x )
     element->appendChild( create_error_element( element->ownerDocument, x ) );
 }
 
-//------------------------------------------------------------Command_processor::execute_show_tasks
+//-------------------------------------------------------------Command_processor::execute_show_jobs
 
-xml::Element_ptr Command_processor::execute_show_task( Task* task )
+xml::Element_ptr Command_processor::execute_show_job( Job* job )
 {
     if( _security_level < Security::seclev_info )  throw_xc( "SPOOLER-121" );
 
-    xml::Element_ptr task_element = _answer->createElement( "task" );
+    xml::Element_ptr job_element = _answer->createElement( "task" );
 
-    task_element->setAttribute( "job", as_dom_string( task->_job->_name ) );
-    task_element->setAttribute( "state", as_dom_string( task->state_name() ) );
+    job_element->setAttribute( "job", as_dom_string( job->_name ) );
+    job_element->setAttribute( "state", as_dom_string( job->state_name() ) );
 
-    if( task->_state_cmd )
-        task_element->setAttribute( "cmd", as_dom_string( task->state_cmd_name() ) );
+    if( job->_state_cmd )
+        job_element->setAttribute( "cmd", as_dom_string( job->state_cmd_name() ) );
 
-    if( task->_state == Task::s_pending && task->_next_start_time != latter_day )
-        task_element->setAttribute( "next_start_time", as_dom_string( Sos_optional_date_time( task->_next_start_time ).as_string() ) );
+    if( job->_state == Job::s_pending && job->_next_start_time != latter_day )
+        job_element->setAttribute( "next_start_time", as_dom_string( Sos_optional_date_time( job->_next_start_time ).as_string() ) );
 
-    if( task->_state == Task::s_running )
-        task_element->setAttribute( "running_since", as_dom_string( Sos_optional_date_time( task->_running_since ).as_string() ) );
-
-    task_element->setAttribute( "steps", as_dom_string( as_string( task->_step_count ) ) );
-
-    if( task->_error )  append_error_element( task_element, task->_error );
-
-    return task_element;
-}
-
-//------------------------------------------------------------Command_processor::execute_show_tasks
-
-xml::Element_ptr Command_processor::execute_show_tasks()
-{
-    if( _security_level < Security::seclev_info )  throw_xc( "SPOOLER-121" );
-
-    xml::Element_ptr tasks = _answer->createElement( "tasks" );
-
-    dom_append_nl( tasks );
-
-    THREAD_SEMA( _spooler->_task_list_lock )
+    THREAD_SEMA( job->_task_lock )
     {
-        FOR_EACH( Task_list, _spooler->_task_list, it )
+        if( job->_task )
         {
-            tasks->appendChild( execute_show_task( *it ) );
-            dom_append_nl( tasks );
+            job_element->setAttribute( "running_since", as_dom_string( Sos_optional_date_time( job->_task->_running_since ).as_string() ) );
+            job_element->setAttribute( "steps"        , as_dom_string( as_string( job->_task->_step_count ) ) );
         }
     }
 
-    return tasks;
+    if( job->_error )  append_error_element( job_element, job->_error );
+
+    return job_element;
+}
+
+//------------------------------------------------------------Command_processor::execute_show_jobs
+
+xml::Element_ptr Command_processor::execute_show_jobs( Thread* thread )
+{
+    if( _security_level < Security::seclev_info )  throw_xc( "SPOOLER-121" );
+
+    xml::Element_ptr jobs = _answer->createElement( "tasks" );
+
+    dom_append_nl( jobs );
+
+    FOR_EACH( Job_list, thread->_job_list, it )
+    {
+        jobs->appendChild( execute_show_job( *it ) );
+        dom_append_nl( jobs );
+    }
+
+    return jobs;
+}
+
+//-----------------------------------------------------------Command_processor::execute_show_thread
+
+xml::Element_ptr Command_processor::execute_show_thread( Thread* thread )
+{
+    if( _security_level < Security::seclev_info )  throw_xc( "SPOOLER-121" );
+
+    xml::Element_ptr thread_element = _answer->createElement( "thread" );
+
+    thread_element->setAttribute( "name", as_dom_string( thread->_name ) );
+    thread_element->appendChild( execute_show_jobs( thread) );
+
+    return thread_element;
+}
+
+//----------------------------------------------------------Command_processor::execute_show_threads
+
+xml::Element_ptr Command_processor::execute_show_threads()
+{
+    if( _security_level < Security::seclev_info )  throw_xc( "SPOOLER-121" );
+
+    xml::Element_ptr threads = _answer->createElement( "threads" );
+
+    dom_append_nl( threads );
+
+    FOR_EACH( Thread_list, _spooler->_thread_list, it )
+    {
+        threads->appendChild( execute_show_thread( *it ) );
+        dom_append_nl( threads );
+    }
+
+    return threads;
 }
 
 //------------------------------------------------------------Command_processor::execute_show_state
@@ -127,13 +161,6 @@ xml::Element_ptr Command_processor::execute_show_state()
     state_element->setAttribute( "time"                 , as_dom_string( Sos_optional_date_time::now().as_string() ) );
     state_element->setAttribute( "spooler_running_since", as_dom_string( Sos_optional_date_time( _spooler->_spooler_start_time ).as_string() ) );
 
-    if( _spooler->_next_start_time != latter_day )
-    state_element->setAttribute( "sleeping_until"       , as_dom_string( Sos_optional_date_time( _spooler->_next_start_time ).as_string() ) );
-
-    if( _spooler->_use_threads )  state_element->setAttribute( "use_threads", "yes" );
-
-    state_element->setAttribute( "tasks"                , as_dom_string( _spooler->_task_count ) );
-    state_element->setAttribute( "steps"                , as_dom_string( _spooler->_step_count ) );
     state_element->setAttribute( "log_file"             , as_dom_string( _spooler->_log.filename() ) );
 
     double cpu_time = get_cpu_time();
@@ -141,7 +168,7 @@ xml::Element_ptr Command_processor::execute_show_state()
     sprintf( buffer, "%-0.3lf", cpu_time ); 
     state_element->setAttribute( "cpu_time"             , as_dom_string( buffer ) );
 
-    state_element->appendChild( execute_show_tasks() );
+    state_element->appendChild( execute_show_threads() );
 
     return state_element;
 }
@@ -199,42 +226,22 @@ xml::Element_ptr Command_processor::execute_modify_job( const xml::Element_ptr& 
     string cmd_name   = as_string( element->getAttribute( "cmd" ) );
     string state_name = as_string( element->getAttribute( "state" ) );
 
-    Task::State_cmd cmd = cmd_name.empty()? Task::sc_none 
-                                             : Task::as_state_cmd( cmd_name );
+    Job::State_cmd cmd = cmd_name.empty()? Job::sc_none 
+                                         : Job::as_state_cmd( cmd_name );
 
-    Task::State state = state_name.empty()? Task::s_none 
-                                          : Task::as_state( state_name );
+    Job::State state = state_name.empty()? Job::s_none 
+                                         : Job::as_state( state_name );
 
-    xml::Element_ptr tasks_element = _answer->createElement( "tasks" );
+    xml::Element_ptr jobs_element = _answer->createElement( "jobs" );
     bool found = false;
 
-    FOR_EACH( Job_list, _spooler->_job_list, it )
-    {
-        Job* job = *it;
-        if( job->_name == job_name ) 
-        {
-            found = true;
-            Task* task = NULL;
+    Job* job = _spooler->get_job( job_name );
 
-            if( job->_task )
-            {
-                task = job->_task;
-                if( cmd )  task->set_state_cmd( cmd );
-                else
-                if( state )  task->set_state( state );      // experimentell
-            }
-            else
-            if( cmd == Task::sc_unstop )  task = job->create_task(NULL);
-            else
-            if( cmd == Task::sc_start )   task = job->start(NULL);
-
-            if( task )  tasks_element->appendChild( execute_show_task( task ) );
-        }
-    }
+    if( cmd )  job->set_state_cmd( cmd );
+    else
+    if( state )  job->set_state( state );      // experimentell
     
-    if( !found )  throw_xc( "SPOOLER-108", job_name );
-
-    return tasks_element;
+    return jobs_element;
 }
 
 //---------------------------------------------------------Command_processor::execute_signal_object
@@ -246,26 +253,20 @@ xml::Element_ptr Command_processor::execute_signal_object( const xml::Element_pt
     string class_name = as_string( element->getAttribute( "class" ) );
     Level  level      = as_int( element->getAttribute( "level" ) );
 
-    xml::Element_ptr tasks_element = _answer->createElement( "tasks" );
+    xml::Element_ptr jobs_element = _answer->createElement( "jobs" );
 
-    THREAD_SEMA( _spooler->_task_list_lock )
+    Job* job = _spooler->get_job( as_string( element->getAttribute( "job" ) ) );
+    
+    if( job->_state == Job::s_pending
+     && job->_object_set_descr
+     && job->_object_set_descr->_class->_name == class_name 
+     && job->_object_set_descr->_level_interval.is_in_interval( level ) )
     {
-        FOR_EACH( Task_list, _spooler->_task_list, it )
-        {
-            Task* task = *it;
-        
-            if( task->_state == Task::s_pending
-             && task->_job->_object_set_descr
-             && task->_job->_object_set_descr->_class->_name == class_name 
-             && task->_job->_object_set_descr->_level_interval.is_in_interval( level ) )
-            {
-                task->set_state_cmd( Task::sc_start );
-                tasks_element->appendChild( execute_show_task( *it ) );
-            }
-        }
+        job->set_state_cmd( Job::sc_start );
+        jobs_element->appendChild( execute_show_job( job ) );
     }
 
-    return tasks_element;
+    return jobs_element;
 }
 
 //----------------------------------------------------------------Command_processor::execute_config

@@ -1,4 +1,4 @@
-// $Id: spooler_com.h,v 1.7 2001/01/30 12:22:56 jz Exp $
+// $Id: spooler_com.h,v 1.8 2001/02/04 17:12:43 jz Exp $
 
 #ifndef __SPOOLER_COM_H
 #define __SPOOLER_COM_H
@@ -25,6 +25,7 @@ namespace sos {
 namespace spooler {
 
 enum   Log_kind;
+struct Prefix_log;
 struct Log;
 struct Object_set;
 struct Job;
@@ -68,13 +69,12 @@ struct Com_variable_set: spooler_com::Ivariable_set, Sos_ole_object
 
 struct Com_log : spooler_com::Ilog, Sos_ole_object               
 {
-                                Com_log                     ( Log* = NULL );             
-                                Com_log                     ( Task* );             
+                                Com_log                     ( Prefix_log* = NULL );
                              //~Com_log                     ();
 
     USE_SOS_OLE_OBJECT
 
-    void                        close                       ()                              { _log = NULL; _task = NULL; }        
+    void                        close                       ()                              { _log = NULL; }        
 
     STDMETHODIMP                msg                         ( BSTR );
     STDMETHODIMP                warn                        ( BSTR );
@@ -83,8 +83,7 @@ struct Com_log : spooler_com::Ilog, Sos_ole_object
 
 
     Fill_zero                  _zero_;
-    Log*                       _log;
-    Task*                      _task;
+    Prefix_log*                _log;
 };
 
 //----------------------------------------------------------------------------------Com_object_set
@@ -127,7 +126,7 @@ struct Com_task : spooler_com::Itask, Sos_ole_object
 
     USE_SOS_OLE_OBJECT
 
-  //void                        close                       ();
+    void                        set_task                    ( Task* );
 
     STDMETHODIMP                get_object_set              ( spooler_com::Iobject_set** );
   //STDMETHODIMP                wake_when_directory_changed ( BSTR directory_name );
@@ -138,12 +137,13 @@ struct Com_task : spooler_com::Itask, Sos_ole_object
     STDMETHODIMP                wait_until_terminated       ( double wait_time, VARIANT_BOOL* ok );
     STDMETHODIMP                put_result                  ( VARIANT* value )              { return _result.Copy(value); }
     STDMETHODIMP                get_result                  ( VARIANT* value )              { VariantInit(value); return VariantCopy(value,&_result); }
+    STDMETHODIMP                put_repeat                  ( double seconds );
 
-  //Task*                      _task;                       // Es gibt nur einen Com_task pro Task
+  private:
     Sos_ptr<Task>              _task;
   //Xc_copy                    _error;                      // Nur gültig, wenn _task == NULL
     CComVariant                _result;                     // Das Ergebnis ist noch nach ~Task zugreifbar
-  //Thread_semaphore           _semaphore;
+    Thread_semaphore           _lock;
 };
 
 //--------------------------------------------------------------------------------------Com_spooler

@@ -1,4 +1,4 @@
-// $Id: spooler_wait.cxx,v 1.8 2001/01/30 12:22:57 jz Exp $
+// $Id: spooler_wait.cxx,v 1.9 2001/02/04 17:12:44 jz Exp $
 /*
     Hier sind implementiert
 
@@ -20,7 +20,7 @@ namespace spooler {
 
 //-----------------------------------------------------------------------------------wait_for_event
 
-bool wait_for_event( const Handle& handle, double wait_time )
+bool wait_for_event( HANDLE handle, double wait_time )
 {
     while( wait_time > 0 )
     {
@@ -38,35 +38,154 @@ bool wait_for_event( const Handle& handle, double wait_time )
     return false;
 }
 
-//--------------------------------------------------------------------------------Wait_handles::add
+//-------------------------------------------------------------------------------------Event::Event
 
-void Wait_handles::add( HANDLE handle, const string& name, Task* task )
+Event::Event( const string& name )  
+: 
+    Handle(NULL), 
+    _zero_(this+1),
+    _name(name) 
 {
-    _handles.push_back( handle );
-    _entries.push_back( Entry( name, task ) );
+    _handle = CreateEvent( NULL, FALSE, FALSE, name.c_str() );
+    if( !_handle )  throw_mswin_error( "CreateEvent", name.c_str() );
 }
 
-//------------------------------------------------------------------------------Wait_handles::remove
+//------------------------------------------------------------------------------------Event::~Event
 
-void Wait_handles::remove( HANDLE handle )
+Event::~Event()
 {
-    if( !handle )  return;
+    close();
+}
+
+//-------------------------------------------------------------------------------------Event::close
+
+void Event::close()
+{
+    FOR_EACH( vector<Wait_handles*>, _wait_handles, it )  (*it)->remove( this );
+}
+
+//-------------------------------------------------------------------------------------Event::add_to
+
+void Event::add_to( Wait_handles* w )                 
+{ 
+    _wait_handles.push_back(w); 
+    w->add( this );
+}
+
+//-------------------------------------------------------------------------------Event::remove_from
+
+void Event::remove_from( Wait_handles* w )
+{
+    FOR_EACH( vector<Wait_handles*>, _wait_handles, it ) 
+    {
+        if( *it == w )  _wait_handles.erase( it );
+    }
+
+    w->remove( this );
+}
+
+//--------------------------------------------------------------------------------------Event::wait
+
+bool Event::wait( double wait_time )
+{
+    THREAD_SEMA( _lock )
+    {
+        bool signaled = _signaled;
+        _signaled = false;
+        if( signaled )  return true;
+
+        _waiting = true;
+    }
+
+    bool result = wait_for_event( handle(), wait_time );
+
+    _waiting = false;
+
+    return result;
+}
+
+//------------------------------------------------------------------------------------Event::signal
+
+void Event::signal()
+{
+    THREAD_SEMA( _lock )
+    {
+        if( _waiting )  { SetEvent( _handle );  return; }
+
+        if( !_signaled )
+        {
+            FOR_EACH( vector<Wait_handles*>, _wait_handles, it )
+            {
+                Wait_handles* w = *it;
+                
+                THREAD_SEMA( w->_lock )
+                {
+                    _signaled = true;
+                    if( w->_waiting )  { SetEvent( _handle );  return; }
+                }
+            }
+        }
+    }
+}
+
+//--------------------------------------------------------------------------------Event::set_signal
+
+void Event::set_signal()
+{
+    THREAD_SEMA( _lock )
+    {
+        _signaled = true;
+    }
+
+    //if( signaled )  signal_event();
+}
+
+//------------------------------------------------------------------------Event::signaled_then_reset
+
+bool Event::signaled_then_reset()
+{
+    if( !_signaled )  return false;
+    
+    bool signaled = false;
+
+    THREAD_SEMA( _lock )
+    {
+        signaled = _signaled;
+        _signaled = false;
+    }
+
+    return signaled;
+}
+
+//--------------------------------------------------------------------------------Wait_handles::add
+
+void Wait_handles::add( Event* event )
+{
+    _handles.push_back( event->handle() );
+    _events.push_back( event );
+}
+
+//-----------------------------------------------------------------------------Wait_handles::remove
+
+void Wait_handles::remove( Event* event )
+{
+    if( !event )  return;
 
     vector<HANDLE>::iterator it = _handles.begin();
 
     while( it != _handles.end() )
     {
-        if( *it == handle )  break;
+        if( *it == event )  break;
         it++;
     }
 
     if( it == _handles.end() ) {
-        LOG( "*** Wait_handles::remove " << handle << " fehlt\n" );     // Keine Exception. Das wäre nicht gut in einem Destruktor
+        LOG( "*** Wait_handles::remove " << event << " fehlt\n" );     // Keine Exception. Das wäre nicht gut in einem Destruktor
         return;
     }
 
     _handles.erase( it );
-    _entries.erase( _entries.begin() + ( it - _handles.begin() ) );
+    _events.erase( _events.begin() + ( it - _handles.begin() ) );
 }
 
 //--------------------------------------------------------------------------------Wait_handles::wait
@@ -74,54 +193,36 @@ void Wait_handles::remove( HANDLE handle )
 
 void Wait_handles::wait( double wait_time )
 {
-/*
-    if( _handles.size() == 0  &&  wait_time < latter_day ) 
+    THREAD_SEMA( _lock )
     {
-        sos_sleep( wait_time );
+        FOR_EACH( vector<Event*>, _events, it)  if( (*it)->signaled() )  return;
+        _waiting = true;
     }
-    else
-*/
+
+    while( wait_time > 0 )
     {
-        while( wait_time > 0 )
+        int sleep_time_ms = INT_MAX;
+    
+        int t = min( (double)sleep_time_ms, wait_time * 1000.0 );
+
+        DWORD ret = WaitForMultipleObjects( _handles.size(), &_handles[0], FALSE, t ); 
+
+        if( ret == WAIT_FAILED )  throw_mswin_error( "WaitForMultipleObjects" );
+
+        if( ret >= WAIT_OBJECT_0  &&  ret < WAIT_OBJECT_0 + _handles.size() )
         {
-            int sleep_time_ms = INT_MAX;
-        
-            int t = min( (double)sleep_time_ms, wait_time * 1000.0 );
-
-            DWORD ret = WaitForMultipleObjects( _handles.size(), &_handles[0], FALSE, t ); 
-
-            if( ret == WAIT_FAILED )  throw_mswin_error( "WaitForMultipleObjects" );
-
-            if( ret >= WAIT_OBJECT_0  &&  ret < WAIT_OBJECT_0 + _handles.size() )
-            {
-                int    index = ret - WAIT_OBJECT_0;
-                Entry* entry = &_entries[ index ];
-                Task*  task = entry->_task;
-                string msg = "Ereignis " + as_string(index) + " - " + entry->_event_name;
-            
-                if( task ) 
-                {
-                    task->_log.msg( msg );
-
-                    // (Besser nicht jedes Ereignis hier abfragen, sondern: struct Directory_watcher : Wait_handle)
-
-                    if( _handles[ index ] == task->_wake_event ) ;//ok
-                    else
-                    if( _handles[ index ] == task->_directory_watcher._handle )  task->_directory_watcher._signaled = true;
-                    else  
-                        throw_xc( "Wait_handles::wait", entry->_event_name );
-                }
-                else
-                    _spooler->_log.msg( msg );
-
-                return;
-            }
-
-            if( ret != WAIT_TIMEOUT )  throw_mswin_error( "WaitForMultipleObjects" );
-
-            wait_time -= sleep_time_ms / 1000;
+            int index = ret - WAIT_OBJECT_0;
+            //_events[ index ]->signal();
+            _spooler->_log.msg( "Ereignis " + _events[index]->name() );
+            return;
         }
+
+        if( ret != WAIT_TIMEOUT )  throw_mswin_error( "WaitForMultipleObjects" );
+
+        wait_time -= sleep_time_ms / 1000;
     }
+
+    _waiting = false;
 }
 
 #endif
@@ -131,13 +232,10 @@ void Directory_watcher::watch_directory( const string& directory )
 {
     close();
 
+    set_name( "start_when_directory_changed(\"" + directory + "\")" );
+
     _handle = FindFirstChangeNotification( directory.c_str(), FALSE, FILE_NOTIFY_CHANGE_FILE_NAME );
     if( _handle == INVALID_HANDLE_VALUE )  _handle = NULL, throw_mswin_error( "FindFirstChangeNotification" );
-
-
-    Wait_handles& wh = _task->_spooler->_use_threads? _task->_wait_handles 
-                                                    : _task->_spooler->_wait_handles;
-    wh.add( _handle, "start_when_directory_changed", _task );
 }
 
 //-------------------------------------------------------------------Directory_watcher::watch_again
@@ -148,21 +246,6 @@ void Directory_watcher::watch_again()
 
     BOOL ok = FindNextChangeNotification( _handle );
     if( !ok )  throw_mswin_error( "FindNextChangeNotification" );
-}
-
-//--------------------------------------------------------------------------Directory_watcher::close
-
-void Directory_watcher::close()
-{ 
-    if( _handle ) 
-    {
-        Wait_handles& wh = _task->_spooler->_use_threads? _task->_wait_handles 
-                                                        : _task->_spooler->_wait_handles;
-        wh.remove( _handle );
-
-        CloseHandle( _handle );  
-        _handle = NULL; 
-    }
 }
 
 //-------------------------------------------------------------------------------------------------

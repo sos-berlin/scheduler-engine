@@ -1,4 +1,4 @@
-// $Id: spooler_time.h,v 1.1 2001/01/25 20:28:38 jz Exp $
+// $Id: spooler_time.h,v 1.2 2001/02/04 17:12:43 jz Exp $
 
 #ifndef __SPOOLER_TIME_H
 #define __SPOOLER_TIME_H
@@ -86,6 +86,8 @@ struct Period
     Time                        repeat                      () const                        { return _repeat; }
     bool                        is_single_start             () const                        { return _single_start; }
     bool                        let_run                     () const                        { return _let_run; }
+
+  //void                        set_next_start_time         ( const Time& );
 
     void                        check                       () const;
     void                        print                       ( ostream& ) const;

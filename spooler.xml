@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 
-<!-- $Id: spooler.xml,v 1.23 2001/01/30 13:32:36 jz Exp $   (C) 2001 SOS GmbH Berlin -->
+<!-- $Id: spooler.xml,v 1.24 2001/02/04 17:12:42 jz Exp $   (C) 2001 SOS GmbH Berlin -->
 
 <!DOCTYPE spooler SYSTEM "spooler.dtd">
 
@@ -8,38 +8,12 @@
 <config tcp_port    = "4444" 
         udp_port    = "4444" 
         log_dir     = "c:\tmp" 
-        use_threads = "no">
+        use_threads = "yes">
 
     <security>
         <allowed_host host="192.168.100.0" level="all"/>
         <allowed_host host="lillerud"      level="all"/>
     </security>
-
-    <script language="VBScript"><![CDATA[
-
-dim global
-'set hostware = createobject( "hostware.global" )        'Damit hostOLE nicht immer wieder neu geladen wird.
-
-'set errfile = createobject( "hostware.file" )
-'errfile.open "-out file /dev/stderr"
-'errfile.put_line "Spooler-Skript gestartet"
-
-var="Variable des Spooler-Skripts"
-
-class Global_class
-    function method()
-        method="Ich bin von der globalen Methode" & ", spooler.param=" & spooler.param
-    end function
-end class
-
-sub spooler_init
-    set global = new Global_class 
-    spooler_log.msg "spooler_init des Spooler-Skripts ausgeführt"
-end sub
-
-spooler_log.msg "Spooler-Skript geladen."   
-
-    ]]></script>
 
     <object_set_classes>
 
@@ -271,7 +245,7 @@ sub spooler_process()
 {
     my $new_level = shift;
     $object = $object_set_class->spooler_get();
-    if( !ref($object) ) { $spooler_task->{error} = "Fehler aus Perl"; exit(); }  #{ return 0; }  
+    if( !ref($object) ) { return 0; }  #{ $spooler_task->{error} = "Fehler aus Perl"; exit(); }  
     $object->spooler_process( $new_level );
     return 1;
 }
@@ -283,55 +257,83 @@ sub spooler_process()
     </object_set_classes>
 
 
-    <jobs>
+    <threads>
+        <thread name="Eins">
+            <script language="VBScript"><![CDATA[
 
-        <job name           = "Aufbereiten" 
-             priority       = "2" 
-             output_level   = "200" 
-             spooler_id     = "keiner">
+dim global
+'set hostware = createobject( "hostware.global" )        'Damit hostOLE nicht immer wieder neu geladen wird.
 
-            <object_set class="Dokumente">
-                <levels low="100" high="200"/>
-            </object_set>
+'set errfile = createobject( "hostware.file" )
+'errfile.open "-out file /dev/stderr"
+'errfile.put_line "Spooler-Skript gestartet"
 
-            <run_time begin  = "00:00" 
-                      end    = "24:00" 
-                      repeat = "10">
+var="Variable des Spooler-Skripts"
+
+class Global_class
+    function method()
+        method="Ich bin von der globalen Methode" & ", spooler.param=" & spooler.param
+    end function
+end class
+
+sub spooler_init
+    set global = new Global_class 
+    spooler_log.msg "spooler_init des Spooler-Skripts ausgeführt"
+end sub
+
+spooler_log.msg "Spooler-Skript geladen."   
+
+    ]]></script>
+
+            <jobs>
+
+                <job name           = "Aufbereiten" 
+                     priority       = "2" 
+                     output_level   = "200" 
+                     spooler_id     = "">
+
+                    <object_set class="Dokumente">
+                        <levels low="100" high="200"/>
+                    </object_set>
+
+                    <run_time begin  = "00:00" 
+                              end    = "24:00" 
+                              repeat = "10">
 <!--
-                <date date="2001-01-02"/>
-                <date date="2001-01-09"/>
+                        <date date="2001-01-02"/>
+                        <date date="2001-01-09"/>
 
-                <weekdays>
-                    <day day="1"/>
-                    <day day="2"/>
-                    <day day="5"/>
-                </weekdays>
+                        <weekdays>
+                            <day day="1"/>
+                            <day day="2"/>
+                            <day day="5"/>
+                        </weekdays>
 
-                <monthdays>
-                    <day day="2"/>
-                    <day day="3"/>
-                </monthdays>
+                        <monthdays>
+                            <day day="2"/>
+                            <day day="3"/>
+                        </monthdays>
 
-                <ultimos>
-                    <day day="0"/>
-                </ultimos>
+                        <ultimos>
+                            <day day="0"/>
+                        </ultimos>
 
-                <holiday date="2001-05-01"/>
-                <holiday date="2001-12-24"/>
-                <holiday date="2001-12-25"/>
-                <holiday date="2001-12-26"/>
-                <holiday date="2001-12-31"/>
-                <holiday date="2002-01-01"/>
+                        <holiday date="2001-05-01"/>
+                        <holiday date="2001-12-24"/>
+                        <holiday date="2001-12-25"/>
+                        <holiday date="2001-12-26"/>
+                        <holiday date="2001-12-31"/>
+                        <holiday date="2002-01-01"/>
 -->
-            </run_time>
+                    </run_time>
 
-        </job>
+                </job>
 
 
 
-        <job name="einfach" priority="3" spooler_id="time">
+                <job name="einfach" priority="3" spooler_id="">
 
-            <script language="VBScript" use_engine="task"><![CDATA[
+                    <script language="VBScript" use_engine="task"><![CDATA[
 
 'spooler_log.msg "*Job einfach"
 
@@ -345,44 +347,44 @@ function spooler_process()
     spooler_process = true
 end function
 
-            ]]></script>
+                    ]]></script>
 
 
-            <run_time begin="12:12" end="12:48" repeat="4">
+                    <run_time begin="12:12" end="12:48" repeat="4">
 
-                <period single_start="19:51:50" end="20:00" let_run="no"/>
-                <period begin="19:52:10" end="19:59:59" repeat="7"/>
+                        <period single_start="19:51:50" end="20:00" let_run="no"/>
+                        <period begin="19:52:10" end="19:59:59" repeat="7"/>
 
-                <date date="29.1.2001"> <period begin="0:00" end="24:00" repeat="7"/> </date>
+                        <date date="2.2.2001"> <period begin="0:00" end="24:00" repeat="0.1"/> </date>
 
-                <weekdays>
-                    <day day="1"/>
-                    <day day="3">
-                        <period begin="7:00" end="12:00"/>
-                        <period begin="13:00" end="19:00"/>
-                    </day>
-                </weekdays>
+                        <weekdays>
+                            <day day="1"/>
+                            <day day="3">
+                                <period begin="7:00" end="12:00"/>
+                                <period begin="13:00" end="19:00"/>
+                            </day>
+                        </weekdays>
 
-            </run_time>
+                    </run_time>
 
-        </job>
+                </job>
 
 
-        <job name           = "Perlset" 
-             output_level   = "200"
-             priority       = "1"
-             spooler_id     = "perl">
+                <job name           = "Perlset" 
+                     output_level   = "200"
+                     priority       = "1"
+                     spooler_id     = "perl">
 
-            <object_set class="Perl">
-                <levels low="1" high="3"/>
-            </object_set>
+                    <object_set class="Perl">
+                        <levels low="1" high="3"/>
+                    </object_set>
 
-            <run_time repeat="3"/>
+                    <run_time repeat="0.5"/>
 
-        </job>
+                </job>
 
-        <job name="single" spooler_id="x">
-            <script language="VBScript" use_engine="task"><![CDATA[
+                <job name="single" spooler_id="x">
+                    <script language="VBScript" use_engine="task"><![CDATA[
 
 spooler_log.msg "*Job single"
 
@@ -406,15 +408,15 @@ sub spooler_on_success()
     spooler_log.msg "spooler_on_success: error=" & spooler_task.error & " code=" & spooler_task.error.code & " text=" & spooler_task.error.text
 end sub
 
-            ]]></script>
+                    ]]></script>
 
-            <run_time single_start="11:31:10"/>
+                    <run_time single_start="11:31:10"/>
 
-        </job>
+                </job>
 
 
-        <job name="perl" spooler_id="perl">
-            <script language="PerlScript" use_engine="task"><![CDATA[
+                <job name="perl" spooler_id="perl">
+                    <script language="PerlScript" use_engine="task"><![CDATA[
 
 $spooler_log->msg( "*Job perl" );
 $spooler->job("Aufbereiten")->start();
@@ -424,15 +426,20 @@ sub spooler_exit()
     $spooler->msg( "spooler_exit()" );
 }
 
-            ]]></script>
+                    ]]></script>
             
-            <run_time/>
+                    <run_time repeat="6"/>
 
-        </job>
+                </job>
 
+            </jobs>
 
-        <job name="dauer" spooler_id="">
-            <script language="PerlScript" use_engine="task"><![CDATA[
+        </thread>
+
+        <thread name="dauer" spooler_id="">
+            <jobs>
+                <job name="dauer">
+                    <script language="PerlScript" use_engine="task"><![CDATA[
 #use Win32::OLE;
 #$hostware = Win32::OLE->new('hostWare.Global');
 
@@ -460,14 +467,16 @@ sub spooler_close()
     #$spooler_task->{error} = "Fehler";
 }
 
-            ]]></script>
+                    ]]></script>
+                </job> 
+            </jobs>
+        </thread>
 
-            <!-- <run_time begin="0:00" let_run="yes"/> -->
-        </job> 
 
-
-        <job name="steuerung">
-            <script language="JScript"><![CDATA[
+        <thread name="job control" spooler_id="">
+            <jobs>
+                <job name="steuerung">
+                    <script language="JScript"><![CDATA[
 
 function spooler_process()
 {
@@ -485,12 +494,14 @@ function spooler_close()
     spooler_log.msg("spooler_close");
 }
 
-            ]]></script>
+                    ]]></script>
 
-            <run_time begin="0:00" let_run="yes"/>
-        </job>
+                    <run_time begin="0:00" let_run="yes"/>
+                </job>
+            </jobs>
+        </thread>
 
-    </jobs>
+    </threads>
 
 </config>
 </spooler>
