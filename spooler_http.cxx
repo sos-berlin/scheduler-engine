@@ -1,4 +1,4 @@
-// $Id: spooler_http.cxx,v 1.15 2004/07/27 09:06:52 jz Exp $
+// $Id: spooler_http.cxx,v 1.16 2004/09/25 08:38:48 jz Exp $
 /*
     Hier sind implementiert
 
@@ -296,7 +296,7 @@ string Http_response::read( int recommended_size )
         if( _chunked )  result.append( "\r\n" );
     }
 
-    //Z_LOG( __FUNCTION__ << "() ==> " << result << "\n" );
+    //Z_LOG( __PRETTY_FUNCTION__ << "() ==> " << result << "\n" );
 
     return result;
 }
@@ -315,7 +315,7 @@ string Http_response::start_new_chunk()
     
     if( _chunked )  result = as_hex_string( (int)_chunk_size ) + "\r\n";
     
-    //Z_LOG( __FUNCTION__ << "  chunk_size=" << _chunk_size << "\n" );
+    //Z_LOG( __PRETTY_FUNCTION__ << "  chunk_size=" << _chunk_size << "\n" );
 
     if( _chunk_size > 0 )
     {

@@ -1,4 +1,4 @@
-// $Id: spooler_com.cxx,v 1.156 2004/09/23 15:40:56 jz Exp $
+// $Id: spooler_com.cxx,v 1.157 2004/09/25 08:38:48 jz Exp $
 /*
     Hier sind implementiert
 
@@ -2138,7 +2138,7 @@ STDMETHODIMP Com_task::get_Changed_directories( BSTR* result )
 
 STDMETHODIMP Com_task::Add_pid( int pid, VARIANT* timeout )
 {
-    Z_LOG( __FUNCTION__ << "(" << pid << "," << debug_string_from_variant( *timeout ) << ")\n" );
+    Z_LOG( __PRETTY_FUNCTION__ << "(" << pid << "," << debug_string_from_variant( *timeout ) << ")\n" );
     
     HRESULT hr = S_OK;
     
@@ -2160,7 +2160,7 @@ STDMETHODIMP Com_task::Add_pid( int pid, VARIANT* timeout )
 
 STDMETHODIMP Com_task::Remove_pid( int pid )
 {
-    Z_LOG( __FUNCTION__ << "(" << pid << ")\n" );
+    Z_LOG( __PRETTY_FUNCTION__ << "(" << pid << ")\n" );
     
     HRESULT hr = S_OK;
     
