@@ -1,4 +1,4 @@
-// $Id: spooler_job.cxx,v 1.23 2003/09/23 14:01:08 jz Exp $
+// $Id: spooler_job.cxx,v 1.24 2003/09/25 10:57:06 jz Exp $
 /*
     Hier sind implementiert
 
@@ -1196,9 +1196,15 @@ xml::Element_ptr Job::dom( const xml::Document_ptr& document, Show_what show, Jo
     {
         job_element.setAttribute( "job"       , _name                   );
         job_element.setAttribute( "state"     , state_name()            );
+
+        if( !_title.empty() )
         job_element.setAttribute( "title"     , _title                  );
+
         job_element.setAttribute( "all_steps" , _step_count             );
+
+        if( !_state_text.empty() )
         job_element.setAttribute( "state_text", _state_text             );
+
         job_element.setAttribute( "log_file"  , _log.filename()         );
         job_element.setAttribute( "order"     , _order_queue? "yes" : "no" );
         
