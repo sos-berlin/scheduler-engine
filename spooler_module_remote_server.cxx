@@ -1,4 +1,4 @@
-// $Id: spooler_module_remote_server.cxx,v 1.21 2003/08/27 22:18:50 jz Exp $
+// $Id: spooler_module_remote_server.cxx,v 1.22 2003/08/31 15:02:15 jz Exp $
 /*
     Hier sind implementiert
 
@@ -52,7 +52,7 @@ void Remote_module_instance_server::close()
 }
 
 //---------------------------------------------------Remote_module_instance_server::load_implicitly
-
+/*
 void Remote_module_instance_server::load_implicitly()
 {
     if( !_loaded_and_started )
@@ -68,7 +68,7 @@ void Remote_module_instance_server::load_implicitly()
         _loaded_and_started = true;
     }
 }
-
+*/
 //------------------------------------------------------Com_remote_module_instance_server::_methods
 #ifdef Z_COM
 
@@ -237,7 +237,7 @@ STDMETHODIMP Com_remote_module_instance_server::name_exists( BSTR name, VARIANT_
 
     try
     {
-        _server.load_implicitly();
+      //_server.load_implicitly();
         *result = _server._module_instance->name_exists( string_from_bstr(name) );
     }
     catch( const exception& x ) { hr = com_set_error( x, "Remote_module_instance_server::name_exists" ); }
@@ -255,7 +255,7 @@ STDMETHODIMP Com_remote_module_instance_server::call( BSTR name, VARIANT* result
 
     try
     {
-        _server.load_implicitly();
+      //_server.load_implicitly();
         _server._module_instance->call( string_from_bstr(name) ).CopyTo( result );
     }
     catch( const exception& x ) { hr = com_set_error( x, "Remote_module_instance_server::call" ); }

@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.180 2003/08/31 10:04:33 jz Exp $
+// $Id: spooler_task.cxx,v 1.181 2003/08/31 15:02:15 jz Exp $
 /*
     Hier sind implementiert
 
@@ -179,6 +179,7 @@ Task::Task( Job* job )
     _job(job),
     _log(job->_spooler),
     _history(&job->_history,this)
+  //_success(true)
 {
     _let_run = _job->_period.let_run();
 
@@ -627,7 +628,7 @@ bool Task::do_something()
 
                 case s_end:
                 {
-                    if( has_error() )  _history.start(),  _success = false;
+                    if( has_error() )  _history.start(); //,  _success = false;
 
                     if( _begin_called )
                     {
@@ -637,7 +638,7 @@ bool Task::do_something()
                     }
                     else
                     {
-                        set_state( _success? s_on_success : s_on_error );
+                        set_state( s_exit );
                         loop = true;
                     }
 
@@ -651,7 +652,7 @@ bool Task::do_something()
                 {
                     operation__end();
 
-                    set_state( _success? s_on_success : s_on_error );
+                    set_state( has_error()? s_on_error : s_on_success );
 
                     loop = true;
                     something_done = true;
@@ -734,7 +735,7 @@ bool Task::do_something()
 
             if( !ok || has_error() )  
             {
-                _success = false;
+                //_success = false;
 
                 if( !_operation  &&  _state < s_end )  set_state( s_end );
             }
@@ -1230,7 +1231,7 @@ Async_operation* Job_module_task::do_end__start()
 {
     if( !_module_instance )  return NULL;
 
-    return _module_instance->end__start( _success );
+    return _module_instance->end__start( !has_error() );        // Parameter wird nicht benutzt
 }
 
 //---------------------------------------------------------------------Job_module_task::do_end__end
@@ -1267,7 +1268,7 @@ Async_operation* Job_module_task::do_call__start( const string& method )
 
 bool Job_module_task::do_call__end()
 {
-    return _module_instance->step__end();
+    return _module_instance->call__end();
 }
 
 //---------------------------------------------------------------Job_module_task::do_release__start
