@@ -1,4 +1,4 @@
-// $Id: scheduler.js,v 1.2 2004/07/18 15:38:02 jz Exp $
+// $Id: scheduler.js,v 1.3 2004/07/19 16:34:30 jz Exp $
 
 //----------------------------------------------------------------------------------------Scheduler
 // public
@@ -187,7 +187,7 @@ Scheduler.prototype.call_http = function( text, debug_text )
     this._xml_http.setRequestHeader( "Cache-Control", "no-cache" );
 
     var status = window.status;
-    window.status = text;
+    window.status = "Waiting for response from scheduler ...";//text;
     
     try
     {

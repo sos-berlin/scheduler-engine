@@ -1,4 +1,4 @@
-<!-- $Id: task_frame.html,v 1.4 2004/07/19 10:47:05 jz Exp $ -->
+<!-- $Id: task_frame.html,v 1.5 2004/07/19 16:34:31 jz Exp $ -->
 <html>
 
 <head>
@@ -16,13 +16,13 @@
 
 <body>
 
-<p>
+<!--p>
     <b>
         <span id="job_name"></span>
         &#160;
         <span id="job_title"></span>
     </b>
-</p>
+</p-->
 
 <p>&#160;</p>
 
@@ -59,8 +59,8 @@ function show_task_details( job_element, task_element )
     _job_name = job_element.getAttribute( "job" )
     _task_id = task_element.getAttribute( "id" );
 
-    document.all.job_name.innerText = "Job " + _job_name;
-    document.all.job_title.innerText = job_title? job_title : "";
+    //document.all.job_name.innerText = "Job " + _job_name;
+    //document.all.job_title.innerText = job_title? job_title : "";
 
 
     document.all.stylesheet.innerHTML = task_element.transformNode( _stylesheet );

@@ -16,12 +16,13 @@ pre          { font-family: Lucida Console, monospace; font-size: 9pt; margin-le
 .mono        { font-family: Lucida Console, monospace; font-size: 9pt }
 .small       { font-family: Sans-Serif; font-size: 8pt }
 
-.job                { font-family: Sans-Serif; font-size: 10pt; background-color: #00BFFF }
-.job_list           { font-family: Sans-Serif; font-size: 10pt; background-color: #00BFFF }
-.job_list_hover     { font-family: Sans-Serif; font-size: 10pt; background-color: #00BFFF; text-decoration: underline }
-.task               { font-family: Sans-Serif; font-size: 10pt; background-color: #90EE90 }
-.task_list          { font-family: Sans-Serif; font-size: 10pt; background-color: #90EE90 }
-.task_list_hover    { font-family: Sans-Serif; font-size: 10pt; background-color: #90EE90; text-decoration: underline }
-.order              { font-family: Sans-Serif; font-size: 10pt; background-color: #FFFF80 }
-.order_list         { font-family: Sans-Serif; font-size:  8pt; background-color: #FFFF80 }
-.milliseconds       { font-family: Sans-Serif; font-size:  8pt }
+.job                 { font-family: Sans-Serif; font-size: 10pt; background-color: #00BFFF }
+.job_list            { font-family: Sans-Serif; font-size: 10pt; background-color: #00BFFF }
+.job_list_hover      { font-family: Sans-Serif; font-size: 10pt; background-color: #00BFFF; text-decoration: underline }
+.task                { font-family: Sans-Serif; font-size: 10pt; background-color: #90EE90 }
+.task_list           { font-family: Sans-Serif; font-size: 10pt; background-color: #90EE90 }
+.task_list_hover     { font-family: Sans-Serif; font-size: 10pt; background-color: #90EE90; text-decoration: underline }
+.order               { font-family: Sans-Serif; font-size: 10pt; background-color: #FFFF80 }
+.order_list          { font-family: Sans-Serif; font-size:  8pt; background-color: #FFFF80 }
+.milliseconds        { font-family: Sans-Serif; font-size:  8pt }
+.waiting_for_process { font-style: italic }

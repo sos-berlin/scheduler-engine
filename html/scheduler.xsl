@@ -5,10 +5,14 @@
                 version="1.0">
 
     <xsl:template match="/spooler/answer">
+        <xsl:variable name="now" select="string( /spooler/answer/@time )"/>
 
         <table width="100%" cellpadding="0" cellspacing="0">
+            <col valign="top" align="left"/>
+            <col valign="top" align="left"/>
+            <col valign="top" align="left"/>
             <tr>
-                <td align="left">
+                <td colspan="2" align="left">
                     <b>
                         Scheduler
                         <xsl:text>&#160; </xsl:text>
@@ -16,23 +20,29 @@
                             <xsl:value-of select="state/@id"/>
                         </xsl:if>
                     </b>
+                    <xsl:value-of select="state/@state"/>    
                     <br/>
                     <span style="font-size: 8pt"><xsl:value-of select="state/@version"/></span>
                 </td>
                 <td align="right">
                     <xsl:value-of select="my:format_datetime( string( state/@time ) )"  disable-output-escaping="yes"/>
+                    <span class="small">
+                        &#160;
+                        (<xsl:value-of select="my:datetime_diff( string( state/@spooler_running_since ), $now )"  disable-output-escaping="yes"/>)
+                    </span>
                 </td>
             </tr>
         </table>
         <p>&#160;</p>
 
+
         <table cellpadding="0" cellspacing="0">
-            <col valign="top" align="left"  width="150" style="padding-right: 2ex; padding-bottom: 1px"/>
+            <col valign="top" align="left"  width=" 90" style="padding-right: 2ex; padding-bottom: 1px"/>
             <col valign="top" align="left"  width="120" style="padding-right: 2ex"/>  
-            <col valign="top" align="right" width=" 50" style="padding-right: 2ex"/>
+            <col valign="top" align="right" width=" 30" style="padding-right: 2ex"/>
             <col valign="top" align="left"  width="200" style="padding-right: 2ex"/>
             
-            <thead>
+            <thead class="job">
                 <tr>
                     <td>Job</td>
                     <td>State</td>
@@ -41,7 +51,7 @@
                 </tr>
                 <tr>
                     <td colspan="99" height="9">
-                        <hr style="margin-top: 0; margin-bottom: 4px" size="1"/>
+                        <hr style="margin-top: 0; margin-bottom: 0px; color: black" size="1"/>
                     </td>
                 </tr>
             </thead>
@@ -88,9 +98,9 @@
                         <xsl:attribute name="onclick">show_job_details('<xsl:value-of select="@job"/>')</xsl:attribute>
                         
                         <td>
-                            <xsl:if test="@waiting_for_process='yes'">
-                                waiting for process
-                            </xsl:if>
+                            <!--xsl:if test="@waiting_for_process='yes'">
+                                <span class="waiting_for_process">waiting for process!</span>
+                            </xsl:if-->
                         </td>
                         
                         <td>
@@ -143,7 +153,19 @@
                 <xsl:attribute name="class">task</xsl:attribute>
                 <xsl:choose>
                     <xsl:when test=" not( @id ) ">
-                        <td colspan="3"><span style="margin-left: 2ex">.</span></td>
+                        <td colspan="3">
+                            <span style="margin-left: 2ex">
+                                <xsl:choose>
+                                    <xsl:when test="../../../job/@waiting_for_process='yes'">
+                                        Waiting for process ...
+                                    </xsl:when>
+                                    <xsl:otherwise>
+                                        .
+                                    </xsl:otherwise>
+                                </xsl:choose>
+                            </span>
+                        </td>
+                        
                         <xsl:choose>
                             <xsl:when test="../../@order='yes'">
                                 <td class="order">
@@ -164,7 +186,7 @@
                         <td>
                             <b>
                                 <span style="margin-left: 2ex">
-                                    Task <xsl:value-of select="@id"/>
+                                    Task&#160;<xsl:value-of select="@id"/>
                                 </span>
                                 <xsl:if test="@name!=''">
                                     &#160; <xsl:value-of select="@name"/>
@@ -177,7 +199,7 @@
                             <xsl:if test="@running_since!=''">
                                 <xsl:text> &#160;</xsl:text>
                                 <span class="small">
-                                    (<xsl:value-of select="my:diff_datetime( string( @running_since ), $now )"  disable-output-escaping="yes"/>)
+                                    (<xsl:value-of select="my:datetime_diff( string( @running_since ), $now, 0 )"  disable-output-escaping="yes"/>)
                                 </span>
                             </xsl:if>
                         </td>
@@ -201,7 +223,7 @@
                                     <xsl:if test="@in_process_since!=''">
                                         <xsl:text> &#160;</xsl:text>
                                         <span class="small">
-                                            (<xsl:value-of select="my:diff_datetime( string( @in_process_since ), $now )"  disable-output-escaping="yes"/>)
+                                            (<xsl:value-of select="my:datetime_diff( string( @in_process_since ), $now, 0 )"  disable-output-escaping="yes"/>)
                                         </span>
                                     </xsl:if>
                                 </td>
@@ -210,7 +232,7 @@
                                 <td>
                                     <xsl:if test="@in_process_since!=''">
                                         <span class="small">
-                                            (<xsl:value-of select="my:diff_datetime( string( @in_process_since ), $now )"  disable-output-escaping="yes"/>)
+                                            (<xsl:value-of select="my:datetime_diff( string( @in_process_since ), $now, 0 )"  disable-output-escaping="yes"/>)
                                         </span>
                                     </xsl:if>
                                 </td>
@@ -261,6 +283,8 @@
         
     
     <xsl:template match="job">
+        <xsl:variable name="now" select="string( /spooler/answer/@time )"/>
+        
         <table cellpadding="0" cellspacing="0" width="100%" class="job">
             <col valign="top" align="left" width="100" style="padding-right: 2ex; padding-bottom: 1pt" />
             <col valign="top" align="left" width="*"   style="padding-right: 2ex"/>  
@@ -288,9 +312,10 @@
                 <td>state</td>
                 <td>
                     <xsl:value-of select="@state"/>
-                    <xsl:if test="@waiting_for_process='yes'">
-                        <xsl:text> </xsl:text>(waiting for process)
-                    </xsl:if>
+                    <!--xsl:if test="@waiting_for_process='yes'">
+                        <xsl:text>,</xsl:text>
+                        <span class="waiting_for_process"> waiting for process!</span>
+                    </xsl:if-->
                     <xsl:if test="@state_text">
                         <xsl:text> - </xsl:text>
                         <xsl:value-of select="@state_text"/>
@@ -322,7 +347,9 @@
                 
             <tr>
                 <td>next start time</td>
-                <td><xsl:value-of select="@next_start_time"/></td>
+                <td>
+                    <xsl:value-of select="my:format_datetime_with_diff( string( @next_start_time), $now, true )"  disable-output-escaping="yes"/>
+                </td>
             </tr>
 
             <tr>
@@ -374,10 +401,17 @@
 
             <tr>
                 <td colspan="2">
-                    <b>
-                        Task
-                        <xsl:value-of select="@id"/>
-                    </b>
+                    <xsl:choose>
+                        <xsl:when test="not( @id ) and ../../../job/@waiting_for_process='yes'">
+                            Task (waiting for process ...)
+                        </xsl:when>
+                        <xsl:otherwise>
+                            <b>
+                                Task
+                                <xsl:value-of select="@id"/>
+                            </b>
+                        </xsl:otherwise>
+                    </xsl:choose>
                     
                     <xsl:if test="@name!=''">
                         <xsl:text>&#160; </xsl:text><xsl:value-of select="@name"/>
@@ -419,14 +453,14 @@
             <xsl:if test="@enqueued">
                 <tr>
                     <td>enqueued at</td>
-                    <td><xsl:value-of select="my:format_datetime_with_diff( string( @enqueued ), $now )"  disable-output-escaping="yes"/></td>
+                    <td><xsl:value-of select="my:format_datetime_with_diff( string( @enqueued ), $now, 0 )"  disable-output-escaping="yes"/></td>
                 </tr>
             </xsl:if>            
 
             <xsl:if test="@start_at">
                 <tr>
                     <td>start at</td>
-                    <td><xsl:value-of select="my:format_datetime_with_diff( string( @start_at ), $now )"  disable-output-escaping="yes"/></td>
+                    <td><xsl:value-of select="my:format_datetime_with_diff( string( @start_at ), $now, 0 )"  disable-output-escaping="yes"/></td>
                 </tr>
             </xsl:if>
 
@@ -435,7 +469,7 @@
                     <xsl:when test="@running_since">
                         <td>running since</td>
                         <td>
-                            <xsl:value-of select="my:format_datetime_with_diff( string( @running_since ), $now )"  disable-output-escaping="yes"/>
+                            <xsl:value-of select="my:format_datetime_with_diff( string( @running_since ), $now, 0 )"  disable-output-escaping="yes"/>
                         </td>
                     </xsl:when>
                     <xsl:otherwise>
@@ -447,7 +481,7 @@
             <xsl:if test="@in_process_since">
                 <tr>
                     <td>in process since</td>
-                    <td><xsl:value-of select="my:format_datetime_with_diff( string( @in_process_since ), $now )"  disable-output-escaping="yes"/></td>
+                    <td><xsl:value-of select="my:format_datetime_with_diff( string( @in_process_since ), $now, 0 )"  disable-output-escaping="yes"/></td>
                 </tr>
             </xsl:if>
 
@@ -455,7 +489,7 @@
                 <tr>
                     <td>idle since</td>
                     <xsl:if test="@idle_since">
-                        <td><xsl:value-of select="my:format_datetime_with_diff( string( @idle_since ), $now )"  disable-output-escaping="yes"/></td>
+                        <td><xsl:value-of select="my:format_datetime_with_diff( string( @idle_since ), $now, 0 )"  disable-output-escaping="yes"/></td>
                     </xsl:if>
                 </tr>
             </xsl:if>
@@ -504,8 +538,8 @@
                             </xsl:if>
                         </td>
 
-                        <td><xsl:value-of select="my:format_date_or_time( string( @enqueued ) )"  disable-output-escaping="yes"/></td>
-                        <td><xsl:value-of select="my:format_datetime    ( string( @start_at )       )"  disable-output-escaping="yes"/></td>
+                        <td><xsl:value-of select="my:format_date_or_time      ( string( @enqueued )       )"  disable-output-escaping="yes"/></td>
+                        <td><xsl:value-of select="my:format_datetime_with_diff( string( @start_at ), $now )"  disable-output-escaping="yes"/></td>
                     </tr>
                 </xsl:for-each>
             </xsl:if>
@@ -525,16 +559,16 @@
             </caption>
             
             <col valign="top" align="left"  width=" 40"  style="padding-right: 2ex; padding-bottom: 1pt" />
-            <col valign="top" align="left"  width=" 20"  style="padding-right: 2ex"/>  
+            <!--col valign="top" align="left"  width=" 15"  style="padding-right: 2ex"/-->  
             <col valign="top" align="left"  width=" 70"  style="padding-right: 2ex"/>  
-            <col valign="top" align="left"  width=" 50"  style="padding-right: 2ex"/>  
+            <col valign="top" align="left"  width=" 40"  style="padding-right: 2ex"/>  
             <col valign="top" align="left"  width="*"    style="padding-right: 2ex"/>  
             <col valign="top" align="left"  width="*"    style="padding-right: 2ex"/>  
             
             <thead>
                 <tr>
                     <td class="order_list">Id</td>
-                    <td class="order_list">Pri</td>
+                    <!--td class="order_list">Pri</td-->
                     <td class="order_list">Created</td>
                     <td class="order_list">State</td>
                     <td class="order_list">State text</td>
@@ -553,7 +587,7 @@
                         </xsl:if>                
                         
                         <td class="order_list"><xsl:value-of select="@id"/></td>
-                        <td class="order_list"><xsl:value-of select="@priority"/></td>
+                        <!--td class="order_list"><xsl:value-of select="@priority"/></td-->
                         <td class="order_list"><xsl:value-of select="my:format_date_or_time( string( @created ) )"  disable-output-escaping="yes"/></td>
                         <td class="order_list"><xsl:value-of select="@state"/></td>
                         <td class="order_list"><xsl:value-of select="@state_text"/></td>
@@ -598,19 +632,21 @@
         }
 
         
-        function format_datetime_with_diff( datetime, now )
+        function format_datetime_with_diff( datetime, now, show_plus )
         {
             var date = date_from_datetime( datetime );
             var result = format_datetime( date );
-            if( result && now )  result += " &#160;(" + diff_datetime( date, now ) + ")";
+            if( result && now )  result += " &#160;(" + datetime_diff( date, now, show_plus ) + ")";
             
             return result;
         }
         
         
-        function diff_datetime( datetime_earlier, datetime_later, with_ms ) 
+        function datetime_diff( datetime_earlier, datetime_later, show_plus ) 
         {
-            if( with_ms == undefined )  with_ms = false;
+            var show_ms;
+            if( show_ms   == undefined )  show_ms   = false;
+            if( show_plus == undefined )  show_plus = false;
             
             var date_later   = typeof datetime_later   == "string"? date_from_datetime( datetime_later )   : datetime_later;
             var date_earlier = typeof datetime_earlier == "string"? date_from_datetime( datetime_earlier ) : datetime_earlier;
@@ -619,17 +655,32 @@
             if( !date_earlier )  return "";
             
             var diff = ( date_later.getTime() - date_earlier.getTime() ) / 1000.0;
+            var abs  = Math.abs( diff );
+            var result;
 
-            if( diff <       60 )
+            if( abs < 60 )
             {
-                if( !with_ms )  return Math.floor( diff ) + "s";
-                var result = diff.toString();
-                if( result.match( "." ) )  result = result.replace( ".", ".<span class='milliseconds'>" ) + "</span>";
-                return result + "s";
+                if( show_ms ) 
+                {
+                    result = abs.toString();
+                    if( result.match( "." ) )  result = result.replace( ".", ".<span class='milliseconds'>" ) + "</span>";
+                }
+                else
+                {
+                     result = Math.floor( abs );
+                }
+                result += "s";
             }
-            if( diff <    60*60 )  return Math.floor( diff / (       60 ) ) + "min";
-            if( diff < 24*60*60 )  return Math.floor( diff / (    60*60 ) ) + "h";
-                                   return Math.floor( diff / ( 24*60*60 ) ) + "days";
+            else
+            if( abs <    60*60 )  result = Math.floor( abs / (       60 ) ) + "min";
+            else
+            if( abs < 24*60*60 )  result = Math.floor( abs / (    60*60 ) ) + "h";
+            else
+                                  result = Math.floor( abs / ( 24*60*60 ) ) + "days";
+                                  
+            return diff < 0? "-" + result : 
+                   show_plus && diff > 0? "+" + result
+                           : result;
         }
 
 

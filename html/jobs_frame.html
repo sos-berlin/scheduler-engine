@@ -1,4 +1,4 @@
-<!-- $Id: jobs_frame.html,v 1.5 2004/07/19 13:08:38 jz Exp $ -->
+<!-- $Id: jobs_frame.html,v 1.6 2004/07/19 16:34:30 jz Exp $ -->
 <html>
 
 <head>
@@ -96,7 +96,7 @@ function repeat_update( repeat, call_update )
         document.all.update_periodically_checkbox.checked = checked;
     }
     
-    if( repeat )  _timer = window.setTimeout( "repeat_update(true,true)", 1000, "JavaScript" );
+    if( repeat )  _timer = window.setTimeout( "repeat_update(true,true)", 5000, "JavaScript" );
 }
 
 //-------------------------------------------------------------------------------------------update
