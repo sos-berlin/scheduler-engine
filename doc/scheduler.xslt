@@ -1,5 +1,13 @@
 <?xml version='1.0' encoding="utf-8"?>
-<!-- $Id -->
+<!-- $Id: scheduler.xslt,v 1.15 2004/08/28 12:15:54 jz Exp $ -->
+
+<!--
+    Änderungswünsche:
+    
+    @same_as_element sollte durch setting ersetzt werden.
+    Zentrale Einstellung nur noch in settings.xml dokumentieren.
+-->
+
 
 <xsl:stylesheet xmlns:xsl = "http://www.w3.org/1999/XSL/Transform" 
                 version   = "1.0">
