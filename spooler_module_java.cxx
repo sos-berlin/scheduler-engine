@@ -1,4 +1,4 @@
-// $Id: spooler_module_java.cxx,v 1.76 2004/02/20 09:49:18 jz Exp $
+// $Id: spooler_module_java.cxx,v 1.77 2004/02/22 20:10:29 jz Exp $
 /*
     Hier sind implementiert
 
@@ -114,6 +114,13 @@ JNIEXPORT jobject JNICALL Java_sos_spooler_Idispatch_com_1call( JNIEnv* jenv, jc
     catch( const _com_error& x ) { set_java_exception( jenv, x ); }
 
     return NULL;
+}
+
+//------------------------------------------Java_idispatch_stack_frame::~Java_idispatch_stack_frame
+
+Java_idispatch_stack_frame::~Java_idispatch_stack_frame()
+{ 
+    thread_data->_idispatch_container.release_objects(); 
 }
 
 //-------------------------------------------------------------------------------Module::clear_java

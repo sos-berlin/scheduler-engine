@@ -1,4 +1,4 @@
-// $Id: spooler_module_java.h,v 1.31 2004/02/22 19:55:38 jz Exp $
+// $Id: spooler_module_java.h,v 1.32 2004/02/22 20:10:29 jz Exp $
 
 #ifndef __SPOOLER_MODULE_JAVA_H
 #define __SPOOLER_MODULE_JAVA_H
@@ -35,7 +35,7 @@ struct Java_thread_data
 struct Java_idispatch_stack_frame
 {
                                 Java_idispatch_stack_frame  ()                                      {}
-                               ~Java_idispatch_stack_frame  ()                                      { thread_data->_idispatch_container.release_objects(); }
+                               ~Java_idispatch_stack_frame  ();
 };
 
 //--------------------------------------------------------------------------------------Java_object
