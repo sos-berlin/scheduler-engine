@@ -1,11 +1,17 @@
 <?xml version='1.0'?>
+<!-- $Id -->
 <xsl:stylesheet xmlns:xsl   = "http://www.w3.org/1999/XSL/Transform" 
                 xmlns:msxsl = "urn:schemas-microsoft-com:xslt"
-                xmlns:my    = "http://sos-berlin.com/mynamespace"
-                version="1.0">
+                xmlns:my    = "http://sos-berlin.com/scheduler/mynamespace"
+                version     = "1.0">
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Gesamtsicht-->
 
     <xsl:template match="/spooler/answer">
         <xsl:variable name="now" select="string( /spooler/answer/@time )"/>
+        
+        
+        <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Scheduler-Info-->
 
         <table width="100%" cellpadding="0" cellspacing="0">
             <col class="column1" valign="baseline" align="left"/>
@@ -34,7 +40,14 @@
             </tr>
         </table>
         <p>&#160;</p>
+        
+        <xsl:apply-templates select="state/jobs"/>
+    </xsl:template>
+    
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Jobs-->
 
+    <xsl:template match="jobs">
+        <xsl:variable name="now" select="string( /spooler/answer/@time )"/>
 
         <table cellpadding="0" cellspacing="0">
             <col class="column1" valign="baseline"  width=" 90"/>
@@ -59,7 +72,7 @@
             </thead>
             
             <tbody>
-                <xsl:for-each select="state/jobs/job">
+                <xsl:for-each select="job">
                 
                     <xsl:element name="tr">
                         <xsl:attribute name="id"         >scheduler_tr_job_<xsl:value-of select="@job"/></xsl:attribute>
@@ -86,9 +99,9 @@
                     </xsl:element>
                     
                     <xsl:element name="tr">
-                        <xsl:attribute name="id">scheduler_tr_job_<xsl:value-of select="@job"/>__2</xsl:attribute>
-                        <xsl:attribute name="class"      >job</xsl:attribute>
-                        <xsl:attribute name="style"      >cursor: hand</xsl:attribute>
+                        <xsl:attribute name="id"   >scheduler_tr_job_<xsl:value-of select="@job"/>__2</xsl:attribute>
+                        <xsl:attribute name="class">job         </xsl:attribute>
+                        <xsl:attribute name="style">cursor: hand</xsl:attribute>
                         <xsl:attribute name="onmouseover">
                             this.className =
                             scheduler_tr_job_<xsl:value-of select="@job"/>.className = "job_list_hover"
@@ -157,6 +170,8 @@
             </tbody>
         </table>
     </xsl:template>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Tasks (in Jobs)-->
 
     <xsl:template match="tasks" mode="list">
         <xsl:variable name="now" select="string( /spooler/answer/@time )"/>
@@ -314,6 +329,7 @@
         </xsl:for-each>
     </xsl:template>
         
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Detailsicht eines Jobs-->
     
     <xsl:template match="job">
         <xsl:variable name="now" select="string( /spooler/answer/@time )"/>
@@ -324,14 +340,32 @@
 
             <tr>
                 <td colspan="2">
-                    <b>
-                        Job
-                        <xsl:value-of select="@job"/>
-                    </b>
-                    <xsl:if test="@title">
-                        <xsl:text> &#160; </xsl:text><xsl:value-of select="@title"/>
-                    </xsl:if>
-                </td>
+                    <table cellpadding="0" cellspacing="0" width="100%">
+                        <tr>
+                            <td>
+                                <b>
+                                    Job
+                                    <xsl:value-of select="@job"/>
+                                </b>
+                                <xsl:if test="@title">
+                                    <xsl:text> &#160; </xsl:text><xsl:value-of select="@title"/>
+                                </xsl:if>
+                            </td>
+                            
+                            <td align="right">
+                                <xsl:element name="span">
+                                    <xsl:attribute name="style">
+                                        cursor: hand; text-decoration: underline; padding-left: 4pt
+                                    </xsl:attribute>
+                                    <xsl:attribute name="onclick">
+                                        job_command__onclick('<xsl:value-of select="@job"/>')
+                                    </xsl:attribute>
+                                    Command
+                                </xsl:element>
+                            </td>
+                        </tr>
+                    </table>
+                </td>                
             </tr>
             
             <tr><td>&#160;</td></tr>
@@ -418,6 +452,7 @@
         
     </xsl:template>
 
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Detailsicht eines Task-->
     
     <xsl:template match="task">
         <xsl:variable name="now" select="string( /spooler/answer/@time )"/>
@@ -552,7 +587,7 @@
         </table>
     </xsl:template>
 
-
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~queued_tasks-->
 
     <xsl:template match="queued_tasks" mode="list">
         <xsl:variable name="now" select="string( /spooler/answer/@time )"/>
@@ -601,8 +636,7 @@
         </table>
     </xsl:template>
         
-    
-
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Order_queue-->
 
     <xsl:template match="order_queue" mode="list">
         <table class="order" cellpadding="0" cellspacing="0" width="100%">
@@ -653,8 +687,8 @@
         </table>
     </xsl:template> 
 
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ERROR-->
 
-    
     <xsl:template match="ERROR">
         <span class="error">
             <xsl:value-of select="@time"/><br/>
@@ -678,6 +712,8 @@
 
     <msxsl:script language="JavaScript" implements-prefix="my"><![CDATA[
     
+        //--------------------------------------------------------------------------format_datetime
+    
         function format_datetime( datetime ) 
         {
             var date = typeof datetime == "string"? date_from_datetime( datetime ) : datetime;
@@ -689,6 +725,7 @@
                    //+ ( ms? ".<span class='milliseconds'>" + ( ms + "000" ).substring( 0, 3 ) + "</span>" : "" );
         }
 
+        //----------------------------------------------------------------------format_date_or_time
         
         function format_date_or_time( datetime ) 
         {
@@ -708,6 +745,7 @@
             }
         }
 
+        //----------------------------------------------------------------------format_date_or_time
         
         function format_datetime_with_diff( datetime, now, show_plus )
         {
@@ -718,6 +756,7 @@
             return result;
         }
         
+        //----------------------------------------------------------------------------datetime_diff
         
         function datetime_diff( datetime_earlier, datetime_later, show_plus ) 
         {
@@ -760,7 +799,8 @@
                            : result;
         }
 
-
+        //-----------------------------------------------------------------------date_from_datetime
+        
         function date_from_datetime( datetime ) 
         {
             if( !datetime )  return null;
@@ -776,6 +816,7 @@
             return date;
         }
 
+        //-----------------------------------------------------------------------------------------
         ]]>
     </msxsl:script>
     

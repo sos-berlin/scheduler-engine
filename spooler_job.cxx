@@ -1,4 +1,4 @@
-// $Id: spooler_job.cxx,v 1.83 2004/07/19 13:08:38 jz Exp $
+// $Id: spooler_job.cxx,v 1.84 2004/07/21 08:20:36 jz Exp $
 // §851: Weitere Log-Ausgaben zum Scheduler-Start eingebaut
 /*
     Hier sind implementiert
@@ -743,38 +743,49 @@ bool Job::execute_state_cmd()
                                      || _state == s_error      )  set_state( s_pending ),      something_done = true,  set_next_start_time( Time::now() );
                                     break;
 
-                case sc_end:        if( _state == s_running    )                               something_done = true;
+                case sc_end:        if( _state == s_running 
+                                     || _state == s_suspended  )                               something_done = true;
+                                    set_state( s_running );
                                     THREAD_LOCK( _lock )  Z_FOR_EACH( Task_list, _running_tasks, t )  (*t)->cmd_end();
                                     break;
 
                 case sc_suspend:    
                 {
-                    THREAD_LOCK( _lock )
+                    if( _state == s_running )
                     {
-                        Z_FOR_EACH( Task_list, _running_tasks, t ) 
+                        THREAD_LOCK( _lock )
                         {
-                            Task* task = *t;
-                            if( task->_state == Task::s_running 
-                                || task->_state == Task::s_running_delayed
-                                || task->_state == Task::s_running_waiting_for_order )  task->set_state( Task::s_suspended );
+                            Z_FOR_EACH( Task_list, _running_tasks, t ) 
+                            {
+                                Task* task = *t;
+                                if( task->_state == Task::s_running 
+                                 || task->_state == Task::s_running_delayed
+                                 || task->_state == Task::s_running_waiting_for_order )  task->set_state( Task::s_suspended );
+                            }
+
+                            set_state( s_suspended );
+                            something_done = true;
                         }
-                        something_done = true;
                     }
                     break;
                 }
 
                 case sc_continue:   
                 {
-                    THREAD_LOCK( _lock )
+                    if( _state == s_suspended )
                     {
-                        Z_FOR_EACH( Task_list, _running_tasks, t ) 
+                        THREAD_LOCK( _lock )
                         {
-                            Task* task = *t;
-                            if( task->_state == Task::s_suspended 
-                             || task->_state == Task::s_running_delayed
-                             || task->_state == Task::s_running_waiting_for_order )  task->set_state( Task::s_running );
+                            Z_FOR_EACH( Task_list, _running_tasks, t ) 
+                            {
+                                Task* task = *t;
+                                if( task->_state == Task::s_suspended 
+                                 || task->_state == Task::s_running_delayed
+                                 || task->_state == Task::s_running_waiting_for_order )  task->set_state( Task::s_running );
+                            }
+                            set_state( s_running );
+                            something_done = true;
                         }
-                        something_done = true;
                     }
                     break;
                 }
@@ -992,7 +1003,7 @@ void Job::calculate_next_time( Time now )
         if( !_waiting_for_process )
         {
             if( _state == s_pending  
-             || _state == s_running  &&  _running_tasks.size() < _max_tasks )
+             || _state == s_running   &&  _running_tasks.size() < _max_tasks )
             {
                 bool in_period = is_in_period(now);
 
@@ -1435,6 +1446,7 @@ string Job::state_name( State state )
         case s_error:           return "error";
         case s_pending:         return "pending";
         case s_running:         return "running";
+        case s_suspended:       return "suspended";
         default:                return as_string( (int)state );
     }
 }

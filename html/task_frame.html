@@ -1,4 +1,5 @@
-<!-- $Id: task_frame.html,v 1.7 2004/07/20 19:43:04 jz Exp $ -->
+<!-- $Id: task_frame.html,v 1.8 2004/07/21 08:20:36 jz Exp $ -->
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <html>
 
 <head>
@@ -49,7 +50,7 @@
 <script defer="true" type="text/javascript" src="scheduler.js"></script>
 <script defer="true" type="text/javascript" src="popup_builder.js"></script>
 
-<script type="text/javascript" for="window" event="onload"> do_onload(); </script>
+<!-- script type="text/javascript" for="window" event="onload"> do_onload(); </script-->
 
 <script defer="true" language="javascript"><!--
 //-------------------------------------------------------------------------------------------------
@@ -57,42 +58,75 @@
 var _scheduler;
 var _stylesheet;
 var _timer;
+var _job_element;
 var _job_name;
 var _task_id;
 var _popup;
 
-//-------------------------------------------------------------------------------------------onload
+//---------------------------------------------------------------------------------------------init
 
-function do_onload()
+function init()
 {
-    _scheduler = window.parent.jobs_frame._scheduler;
-    
-    _stylesheet = document.all.stylesheet.XMLDocument;
-    if( _stylesheet.parseError.errorCode )  throw new Error( "Fehler im Stylesheet:\n" + _stylesheet.parseError.reason );
+    if( !_scheduler )
+    {
+        _scheduler = window.parent.jobs_frame._scheduler;
+        
+        _stylesheet = document.all.stylesheet.XMLDocument;
+        if( _stylesheet.parseError.errorCode )  throw new Error( "Fehler im Stylesheet:\n" + _stylesheet.parseError.reason );
 
-    document.all.stylesheet.outerHTML = "<span id='stylesheet'></span>";
+        document.all.stylesheet.outerHTML = "<span id='stylesheet'></span>";
+        
+        Popup_builder.prototype.add_command = Popup_builder__add_command;
+    }
+}
+
+//------------------------------------------------------------------------Popup_builder.add_command
+
+function Popup_builder__add_command( html, xml_command, is_active )
+{
+    this.add_entry( html, "parent.popup__execute(&quot;" + xml_command + "&quot;)", is_active );
+}
+
+//-----------------------------------------------------------------------------job_command__onclick
+
+function job_command__onclick( job_name )
+{
+    var popup_builder = new Popup_builder();
+    
+    var state = _job_element.getAttribute( "state" );
+    
+    popup_builder.add_command( "start task now", "parent.task_command__start_task_now__onclick('" + job_name + "')" );
+    popup_builder.add_command( "stop"          , "<modify_job job='" + job_name + "' cmd='stop'    />", state != "stopped"  &&  state != "stopping" );
+    popup_builder.add_command( "unstop"        , "<modify_job job='" + job_name + "' cmd='unstop'  />", state == "stopped"  ||  state == "stopping" );
+    popup_builder.add_command( "wake"          , "<modify_job job='" + job_name + "' cmd='wake'    />" );
+    popup_builder.add_command( "start"         , "<modify_job job='" + job_name + "' cmd='start'   />" );
+    popup_builder.add_command( "end"           , "<modify_job job='" + job_name + "' cmd='end'     />" );
+    popup_builder.add_command( "suspend"       , "<modify_job job='" + job_name + "' cmd='suspend' />", state != "suspended" );
+    popup_builder.add_command( "continue"      , "<modify_job job='" + job_name + "' cmd='continue'/>", state == "suspended" );
+    popup_builder.add_command( "reread"        , "<modify_job job='" + job_name + "' cmd='reread'  />" );
+    
+    _popup = popup_builder.show_popup();
+}
+
+//-----------------------------------------------------------------------------------popup__execute
+
+function popup__execute( xml_command )
+{
+    _scheduler.execute( xml_command );
+    _popup.hide();
 }
 
 //----------------------------------------------------------------------------task_command__onclick
 
 function task_command__onclick( task_id )
 {
-/*
-    var popup = window.createPopup();
-    popup.document.body.innerHTML = document.all.command_popup.innerHTML;
-*/
     var popup_builder = new Popup_builder();
-    popup_builder.add_entry( "show log"        , "parent.task_command__show_log__onclick(" + task_id + ")" );
-    popup_builder.add_entry( "end"             , "parent.task_command__end__onclick("      + task_id + ")" );
-    popup_builder.add_entry( "kill immediately", "parent.task_command__kill__onclick("     + task_id + ")" );
+
+    popup_builder.add_entry  ( "show log"        , "parent.task_command__show_log__onclick(" + task_id + ")" );
+    popup_builder.add_command( "end"             , "<kill_task job='" + _job_name + "' id='" + task_id + "'/>" );
+    popup_builder.add_command( "kill immediately", "<kill_task job='" + _job_name + "' id='" + task_id + "' immediately='yes'/>" );
     
-    _popup = popup_builder.create_popup();
-    
-    _popup.show( 0, 0, 0, 0 );
-    var width  = 220; //__tree_popup.document.body.scrollWidth;
-    var height = _popup.document.body.scrollHeight - 15;       // -15 ist ausprobiert.
-    _popup.hide();
-    _popup.show( 0, 15, width, height, event.srcElement );
+    _popup = popup_builder.show_popup();
 }
 
 //------------------------------------------------------------------task_command__show_log__onclick
@@ -103,30 +137,17 @@ function task_command__show_log__onclick( task_id )
     _popup.hide();
 }
 
-//-----------------------------------------------------------------------task_command__end__onclick
-
-function task_command__end__onclick( task_id )
-{
-    _scheduler.execute( "<kill_task job='" + _job_name + "' id='" + task_id + "'/>" );
-    _popup.hide();
-}
-
-//-----------------------------------------------------------------------task_command__end__onclick
-
-function task_command__kill__onclick( task_id )
-{
-    _scheduler.execute( "<kill_task job='" + _job_name + "' id='" + task_id + "' immediately='yes'/>" );
-    _popup.hide();
-}
-
 //--------------------------------------------------------------------------------show_task_details
 
 function show_task_details( job_element, task_element )
 {
+    init();
+    
     var job_title = job_element.getAttribute( "title" );
     
-    _job_name = job_element.getAttribute( "job" )
-    _task_id = task_element.getAttribute( "id" );
+    _job_element = job_element;
+    _job_name    = job_element.getAttribute( "job" )
+    _task_id     = task_element.getAttribute( "id" );
 
     //document.all.job_name.innerText = "Job " + _job_name;
     //document.all.job_title.innerText = job_title? job_title : "";
@@ -138,8 +159,11 @@ function show_task_details( job_element, task_element )
 
 function show_job_details( job_element )
 {
-    _job_name = job_element.getAttribute( "job" )
-    _task_id  = undefined;
+    init();
+ 
+    _job_element = job_element;   
+    _job_name    = job_element.getAttribute( "job" )
+    _task_id     = undefined;
 
     document.all.stylesheet.innerHTML = job_element.transformNode( _stylesheet );
     update();
@@ -162,8 +186,8 @@ function update()
         var response = _scheduler.execute( "<show_job job='" + _job_name + "' what='all,orders'/>" );
         window.parent.jobs_frame.modify_response( response );
         
-        var job_element = response.selectSingleNode( "spooler/answer/job" );
-        document.all.stylesheet.innerHTML = job_element? job_element.transformNode( _stylesheet ) : "";
+        _job_element = response.selectSingleNode( "spooler/answer/job" );
+        document.all.stylesheet.innerHTML = _job_element? _job_element.transformNode( _stylesheet ) : "";
     }
 }
 
