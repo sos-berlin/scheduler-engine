@@ -1,29 +1,24 @@
-<html>
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet href="scheduler.xslt" type="text/xsl"?>
 
-<!-- $Id: konfiguration.html,v 1.3 2004/08/24 13:28:14 jz Exp $ -->
 
-<head>
-    <meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
-    <title>Scheduler - Konfiguration</title>
+<!--$Id: konfiguration.xml,v 1.1 2004/08/24 15:22:32 jz Exp $-->
 
-    <style type="text/css">
-        @import "scheduler.css";
-    </style>
-</head>
-
-<body>
-
-<h2>Konfiguration</h2>
-
+<description 
+    title    = "Konfiguration" 
+    base_dir = "."
+    author   = "$Author: jz $"
+    date     = "$Date: 2004/08/24 15:22:32 $"
+>
 <p>
     Beim Start des Scheduler geben Sie die Datei an,
-    die die in XML formulierte Konfiguration enth�lt.
+    die die in XML formulierte Konfiguration enthält.
 </p>
 
 <p class="example">
     Beispiel
 </p>
-Eine einfache Konfigurationsdatei mit einem Job in JavaScript (f�r Windows):
+Eine einfache Konfigurationsdatei mit einem Job in JavaScript (für Windows):
 
 <pre>
 
@@ -41,18 +36,18 @@ Eine einfache Konfigurationsdatei mit einem Job in JavaScript (f�r Windows):
                         return false;
                     }
                     
-                ]]>&lt;/script>
+                ]]&gt;&lt;/script>
 
                 &lt;run_time repeat="10"/>
             &lt;/job>
         &lt;/jobs>
     &lt;/config>
-&lt;/spooler></p>
+&lt;/spooler>
 </pre>
 
 <p>
     Konfiguriert ist hier der Job test_job, den der Scheduler alle 10 Sekunden wiederholen wird. Wenn diese Konfiguration 
-    in der Datei <code>hallo_welt.xml</code> abgelegt ist, k�nnen sie den Scheduler so starten:
+    in der Datei <code>hallo_welt.xml</code> abgelegt ist, können sie den Scheduler so starten:
 </p>
 
 <pre>
@@ -61,7 +56,7 @@ scheduler hallo_welt.xml
 </pre>
 
 <p>
-    Sie k�nnen den Scheduler mit Ctrl-C abbbrechen.
+    Sie können den Scheduler mit Ctrl-C abbbrechen.
 </p>
 
 
@@ -80,35 +75,35 @@ Klicken Sie auf ein Element, um dessen Beschreibung zu sehen.
             java_class_path = ""
             java_options    = ""    >
 
-        &lt;<a href="xml/base.xml">base</a> file="&hellip;"/>
+        &lt;<a href="xml/base.xml">base</a> file="…"/>
 
         &lt;<a href="xml/holidays.xml">holidays</a>>
-            &lt;<a href="xml/holiday.xml">holiday</a> day="&hellip;"/>
-            &hellip;
+            &lt;<a href="xml/holiday.xml">holiday</a> day="…"/>
+            …
         &lt;/holiday>
 
         &lt;<a href="xml/process_classes.xml">process_classes></a>
-            &lt;<a href="xml/process_class.xml">process_class</a> name="&hellip;" max_processes="&hellip;"/>
-            &hellip;
+            &lt;<a href="xml/process_class.xml">process_class</a> name="…" max_processes="…"/>
+            …
         &lt;/process_classes>
 
         &lt;<a href="xml/security.xml">security</a>>
-            &lt;<a href="xml/allowed_host.xml">allowed_host</a> name="&hellip;" level="&hellip;"/>
-            &hellip;
+            &lt;<a href="xml/allowed_host.xml">allowed_host</a> name="…" level="…"/>
+            …
         &lt;/security>
 
-        &lt;<a href="xml/script.xml">script</a> language   = "&hellip;"
-                java_class = "&hellip;"
-                com_class  = "&hellip;"
-                filename   = "&hellip;" >
-            &lt;<a href="xml/include.xml">include</a> file="&hellip;"/>
+        &lt;<a href="xml/script.xml">script</a> language   = "…"
+                java_class = "…"
+                com_class  = "…"
+                filename   = "…" >
+            &lt;<a href="xml/include.xml">include</a> file="…"/>
             &lt;![CDATA[
-                <i>programm-code</i>&hellip; 
-            ]]>
+                <i>programm-code</i>… 
+            ]]&gt;
         &lt;/script>
 
         &lt;<a href="xml/jobs.xml">jobs</a>
-            &lt;<a href="xml/job.xml">job</a> name          = "&hellip;"
+            &lt;<a href="xml/job.xml">job</a> name          = "…"
                  title         = ""
                  log_append    = "no"
                  order         = "no"
@@ -118,75 +113,73 @@ Klicken Sie auf ein Element, um dessen Beschreibung zu sehen.
                  idle_timeout  = "" 
                  priority      = "1"   >
 
-                 &lt;<a href="xml/description.xml">description</a>> &hellip; &lt;/description>
+                 &lt;<a href="xml/description.xml">description</a>> … &lt;/description>
 
                  &lt;<a href="xml/params.xml">params</a>>
-                     &lt;<a href="xml/param.xml">param</a> name="&hellip;" value="&hellip;"/>
-                     &hellip;
+                     &lt;<a href="xml/param.xml">param</a> name="…" value="…"/>
+                     …
                  &lt;/params>
 
-                 &lt;<a href="xml/script.xml">script</a> language   = "&hellip;"
-                         java_class = "&hellip;"
-                         com_class  = "&hellip;"
-                         filename   = "&hellip;" >
-                     &lt;<a href="xml/include.xml">include</a> file="&hellip;"/>
+                 &lt;<a href="xml/script.xml">script</a> language   = "…"
+                         java_class = "…"
+                         com_class  = "…"
+                         filename   = "…" >
+                     &lt;<a href="xml/include.xml">include</a> file="…"/>
                      &lt;![CDATA[
-                         <i>programm-code</i>&hellip; 
-                     ]]>
+                         <i>programm-code</i>… 
+                     ]]&gt;
                  &lt;/script>
                <i>oder</i>
-                 &lt;<a href="xml/process.xml">process</a> file         = "&hellip;"
+                 &lt;<a href="xml/process.xml">process</a> file         = "…"
                           param        = ""
                           log_file     = ""
                           ignore_error = "no" />
 
                  &lt;<a href="xml/run_time.xml">run_time</a> let_run="no">
-                     &lt;<a href="xml/period.xml">period</a> let_run      = "&hellip;"
+                     &lt;<a href="xml/period.xml">period</a> let_run      = "…"
                              begin        = "00:00"
                              end          = "24:00"
-                             single_start = "&hellip;"     
-                             repeat       = "&hellip;"     >
+                             single_start = "…"     
+                             repeat       = "…"     >
                      &lt;/period>
 
                      &lt;<a href="xml/date.xml">date</a> date="yyyy-mm-dd"/>
-                     &hellip;
+                     …
 
                      &lt;<a href="xml/weekdays.xml">weekdays</a>>
-                         &lt;<a href="xml/day.xml">day</a> day="&hellip;">
-                             &lt;<a href="xml/period.xml">period></a>&hellip;&lt;/period>
-                             &hellip;
+                         &lt;<a href="xml/day.xml">day</a> day="…">
+                             &lt;<a href="xml/period.xml">period></a>…&lt;/period>
+                             …
                          &lt;/day>
-                         &hellip;
+                         …
                      &lt;/weekdays>
 
                      &lt;<a href="xml/monthdays.xml">monthdays</a>>
-                         &lt;<a href="xml/day.xml">day</a> day="&hellip;">
-                             &lt;<a href="xml/period.xml">period></a>&hellip;&lt;/period>
-                             &hellip;
+                         &lt;<a href="xml/day.xml">day</a> day="…">
+                             &lt;<a href="xml/period.xml">period></a>…&lt;/period>
+                             …
                          &lt;/day>
-                         &hellip;
+                         …
                      &lt;/monthdays>
 
                      &lt;<a href="xml/ultimos.xml">ultimos</a>>
-                         &lt;<a href="xml/day.xml">day</a> day="&hellip;">
-                             &lt;<a href="xml/period.xml">period></a>&hellip;&lt;/period>
-                             &hellip;
+                         &lt;<a href="xml/day.xml">day</a> day="…">
+                             &lt;<a href="xml/period.xml">period></a>…&lt;/period>
+                             …
                          &lt;/day>
-                         &hellip;
+                         …
                      &lt;/ultimos>
 
                      &lt;<a href="xml/holidays.xml">holidays</a>>
                          &lt;<a href="xml/holiday.xml">holiday</a> date="yyyy-mm-dd"/>
-                         &hellip;
+                         …
                      &lt;/holidays>
                  &lt;/runtime>
              &lt;/job>
-             &hellip;
+             …
         &lt;/jobs>
     &lt;/config>
 &lt;/spooler>
 </pre>
 
-</body>
-
-</html>
+</description>

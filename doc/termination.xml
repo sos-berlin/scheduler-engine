@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet href="scheduler.xslt" type="text/xsl"?>
+
+<!--$Id: termination.xml,v 1.1 2004/08/24 15:22:32 jz Exp $-->
+
+<description 
+    title    = "Beendigung des Schedulers" 
+    base_dir = "."
+    author   = "$Author: jz $"
+    date     = "$Date: 2004/08/24 15:22:32 $"
+>
+
+    <h2>Ordentliches Beenden</h2>
+    Der Scheduler beendet sich erst, wenn kein Job mehr läuft.
+
+
+    <h2>Abbruch</h2>
+    <p>
+        Der Scheduler bricht allen Prozesse (einschließlich der mit add_pid() registrierten fremden Prozesse) sofort ab
+        (Unix: <code>kill -s KILL</code>, Windows: <code>TerminateProcess()</code>). Dann bricht er sich selbst ab.
+    </p>
+    <p>
+        Vorteil: Der Abbruch wirkt sofort.
+    </p>
+    <p>
+        Nachteil: Sie Software, insbesondere die Jobs können nicht darauf reagieren. 
+        Z.B. können temporäre Dateien nicht gelöscht werden.
+    </p>
+</description>

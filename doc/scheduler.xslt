@@ -297,7 +297,16 @@
             </xsl:if>
             
             <xsl:if test="@subst_env='yes'">
-                Umgebungsvariablen (z.B. <code>$HOME</code>) werden ersetzt.
+                <p>
+                    Umgebungsvariablen (z.B. <code>$HOME</code>) werden ersetzt
+                    (s.
+                    <xsl:element name="a">
+                        <xsl:attribute name="href">
+                            <xsl:value-of select="/*/@base_dir"/>/ersetzung_von_umgebungsvariablen.xml
+                        </xsl:attribute>
+                        hier
+                    </xsl:element>)
+                </p>
                 <p/>
             </xsl:if>
             
@@ -323,6 +332,29 @@
         <xsl:copy-of select="* | text()"/>
     </xsl:template>
     
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~/description-->
+    
+    <xsl:template match="/description">
+
+        <xsl:variable name="title">Scheduler&#160; –&#160; <xsl:value-of select="@title"/></xsl:variable>
+
+        <html>
+            <xsl:call-template name="html_head">
+                <xsl:with-param name="title" select="$title"/>
+            </xsl:call-template>
+        
+            <body>
+                <h1>
+                    <xsl:value-of select="$title"/>
+                </h1>
+
+                <xsl:apply-templates select="node()" mode="description"/>
+                <xsl:call-template name="bottom"/>
+            </body>
+        </html>
+        
+    </xsl:template>
+
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~description-->
 
     <xsl:template match="description">

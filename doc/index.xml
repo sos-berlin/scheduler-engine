@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet href="scheduler.xslt" type="text/xsl"?>
+
+<!--$Id: index.xml,v 1.1 2004/08/24 15:22:32 jz Exp $-->
+
+<description 
+    title    = "" 
+    base_dir = "."
+    author   = "$Author: jz $"
+    date     = "$Date: 2004/08/24 15:22:32 $"
+>
+
+<h3>factory.ini</h3>
+<p>
+    Einige Einstellungen können in der Datei <a href="factory_ini.xml"><code>factory.ini</code></a> vorgenommen werden.
+</p>
+
+
+<h3>XML-Konfiguration</h3>
+<p>
+    Die <a href="konfiguration.xml">XML-Konfiguration</a> beschreibt die Jobs und alles was dazu gehört.
+</p>
+
+
+<h3>Kommandozeile</h3>
+<p>
+    <a href="command_line.xml">Start mit der Kommandozeile</a>
+</p>
+
+
+<h3>Bedienung über HTTP</h3>
+<p>
+    Der Scheduler verfügt über einen HTTP-Server und stellt HTML-Seiten zu seiner Bedienung bereit.
+    Sie können den Scheduler über einen Browser (zurzeit nur Microsoft Internet Explorer 6)
+    steuern. Geben Sie z.B. die Adresse <code>http://localhost:4444</code> ein.
+    <code>localhost</code> kann auch ein anderer Rechnername sein.
+    <code>4444</code> ist die konfigurierte TCP-Portnummer des Schedulers.
+</p>
+
+
+<h3>Bedienung über telnet</h3>
+<p>
+    Die XML-Kommandos können auch über einen telnet-Client eingegeben werden.
+    Aufruf: <code>telnet localhost 4444</code>.
+</p>
+
+
+<h3>Protokolle</h3>
+<p>
+    Im mit <code>log_dir</code> eingestellten Verzeichnis schreibt der Scheduler seine Protokolle.
+</p>
+
+<p>
+    <hr size="1"/>
+</p>
+<h3>Ältere Dokumentation</h3>
+<p><a href="old/order/index.html">Aufträge</a>&#160;</p>
+
+<p><a href="old/spooler_1.1.html">Spooler 1.1</a></p>
+
+<p><a href="old/spooler_history.html">Spooler History</a></p>
+
+<p><a href="old/spooler_dienst.html">Spooler als Dienst</a></p>
+
+<p><a href="old/spooler_job_com.html">Spooler-Skripte als COM-Klassen implementieren</a></p>
+
+<p><a href="old/spooler_java.html">Spooler-Jobs als Java-Klassen</a></p>
+
+
+<p>&#160;</p>
+
+<h3>Vorschläge</h3>
+
+<p><a href="old/spooler_externe_programme.html">Externe Programme im Spooler</a></p>
+
+<p><a href="old/spooler_verteilt.html">Verteilter Spooler</a></p>
+
+<p><a href="old/spooler_handbetrieb.html">Spooler im Handbetrieb</a></p>
+
+</description>

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet href="scheduler.xslt" type="text/xsl"?>
+
+
+<!--$Id: ersetzung_von_umgebungsvariablen.xml,v 1.1 2004/08/24 15:22:32 jz Exp $-->
+
+<description 
+    title    = "Konfiguration" 
+    base_dir = "."
+    author   = "$Author: jz $"
+    date     = "$Date: 2004/08/24 15:22:32 $"
+>
+
+<p>
+    In einigen Einstellungen können Umgebungsvariablen benutzt werden. 
+    Diese werden mit einem Dollarzeichen ($) eingeleitet.
+    Alle folgenden alphanumerischen Zeichen und Unterstriche werden zum Variablennamen gerechnet. 
+    In Unix ist die Großschreibung relevant.
+</p>
+
+<p class="example">Beispiel</p>
+<pre>
+    
+html_dir = $HOME/scheduler/html
+</pre>
+
+</description>
