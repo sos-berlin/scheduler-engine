@@ -1,4 +1,4 @@
-// $Id: scheduler.js,v 1.25 2004/12/09 11:15:57 jz Exp $
+// $Id: scheduler.js,v 1.26 2004/12/09 11:51:16 jz Exp $
 
 //----------------------------------------------------------------------------------------------var
 
@@ -542,7 +542,7 @@ function popup_menu__show_log__onclick( show_log_command, window_name )
                  ", left=0"  +
                  ", top="    +  Math.floor( window.screen.availHeight * 0.8 );
 
-    var log_window = window.open( "http://" + document.location.host + "/" + show_log_command, window_name, features, true );
+    var log_window = window.open( document.location.href.replace( /\/[^\/]*$/, "/" ) + show_log_command, window_name, features, true );
     log_window.focus();
 
     if( _scheduler )  _scheduler._log_window = log_window;

@@ -1,4 +1,4 @@
-// $Id: show_log.js,v 1.4 2004/12/09 11:15:57 jz Exp $
+// $Id: show_log.js,v 1.5 2004/12/09 11:51:49 jz Exp $
 
 // Javascript-Code für HTTP Show log des Schedulers.
 // Der Scheduler liefert über HTTP die Ausgaben eines Protokolls bis dieses geschlossen wird.
@@ -29,8 +29,16 @@ var error                = false;   // Nach Fehler kein Timer-Intervall mehr
 start_timer();
 modify_title();
 
-window.onscroll             = window__onscroll;
 document.onreadystatechange = document__onreadystatechange;
+window.onscroll             = window__onscroll;
+
+if( window.navigator.vendor == "Firefox" )      // Firefox ruft onscroll nur auf, wenn der Knopf in der Bildlaufleiste mit der Maus verschoben wird.
+{                                               // Nicht beim Mausklick auf die Leiste oder bei Page-Up.
+    window.onkeydown            = stop_timer;
+    window.onmousedown          = stop_timer;
+    window.onkeyup              = window__onscroll;
+    window.onmouseup            = window__onscroll;
+}
 
 //--------------------------------------------------------------------------------------start_timer
 
