@@ -726,7 +726,7 @@ STDMETHODIMP Com_variable_set::get_Xml( BSTR* xml_doc  )
 
 //------------------------------------------------------------Com_variable_set_enumerator::_methods
 #ifdef Z_COM
-
+/*
 const Com_method Com_variable_set_enumerator::_methods[] =
 { 
    // _flags         , dispid, _name    , _method                                               , _result_type  , _types        , _default_arg_count
@@ -736,7 +736,7 @@ const Com_method Com_variable_set_enumerator::_methods[] =
     { DISPATCH_METHOD     , 4, "Clone"  , (Com_method_ptr)&Com_variable_set_enumerator::Clone   , VT_DISPATCH  },
     {}
 };
-
+*/
 #endif
 //-----------------------------------------Com_variable_set_enumerator::Com_variable_set_enumerator
 

@@ -185,9 +185,11 @@ struct Com_variable_set: spooler_com::Ivariable_set,
 
 struct Com_variable_set_enumerator : spooler_com::Ivariable_set_enumerator, Sos_ole_object
 {
+    STDMETHODIMP_(ULONG)        AddRef                  ()                                          { return Sos_ole_object::AddRef(); }
+    STDMETHODIMP_(ULONG)        Release                 ()                                          { return Sos_ole_object::Release(); }
     STDMETHODIMP                QueryInterface          ( REFIID, void** );
     
-    USE_SOS_OLE_OBJECT_WITHOUT_QI
+    //USE_SOS_OLE_OBJECT_WITHOUT_QI
 
                                 Com_variable_set_enumerator();
 
