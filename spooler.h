@@ -1,4 +1,4 @@
-// $Id: spooler.h,v 1.36 2001/01/24 12:35:50 jz Exp $
+// $Id: spooler.h,v 1.37 2001/01/25 17:45:45 jz Exp $
 
 #ifndef __SPOOLER_H
 #define __SPOOLER_H
@@ -35,6 +35,13 @@
 #include "../kram/sosdate.h"
 #include "../kram/sossock1.h"
 #include "../kram/thread_semaphore.h"
+#include "../kram/log.h"
+
+namespace sos {
+    namespace spooler {
+        using namespace std;
+    }
+}
 
 #include "spooler_common.h"
 #include "spooler_log.h"
@@ -48,6 +55,7 @@
 #include "spooler_service.h"
 
 #define FOR_EACH( TYPE, CONTAINER, ITERATOR )  for( TYPE::iterator ITERATOR = CONTAINER.begin(); ITERATOR != CONTAINER.end(); ITERATOR++ )
+#define FOR_EACH_CONST( TYPE, CONTAINER, ITERATOR )  for( TYPE::const_iterator ITERATOR = CONTAINER.begin(); ITERATOR != CONTAINER.end(); ITERATOR++ )
 
 namespace sos {
 
@@ -59,8 +67,6 @@ inline Dom_string               as_dom_string               ( const T& t )      
 
 
 namespace spooler {
-
-using namespace std;
 
 
 struct                          Spooler;

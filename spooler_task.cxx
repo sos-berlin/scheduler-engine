@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.9 2001/01/24 12:35:51 jz Exp $
+// $Id: spooler_task.cxx,v 1.10 2001/01/25 17:45:45 jz Exp $
 /*
     Hier sind implementiert
 
@@ -218,7 +218,10 @@ Task::Task( Spooler* spooler, const Sos_ptr<Job>& job )
     _job(job),
     _log( &spooler->_log, "Job " + job->_name )
 {
-    _next_start_time = _job->_run_time.first();
+    Time now = Time::now();
+    _period = _job->_run_time.next_period( now );
+    _next_start_time = _period.begin();
+
     _state = s_pending;
     _priority = _job->_priority;
 
@@ -285,6 +288,20 @@ void Task::step_error( const Xc& x )
     error( x );
 }
 
+//-------------------------------------------------------------------------Task::set_next_start_time
+
+void Task::set_next_start_time()
+{
+    Time now = Time::now();
+
+    _next_start_time = _period.next_try( now );
+    if( _next_start_time == latter_day ) 
+    {
+        _period = _job->_run_time.next_period( _period.end() );
+        _next_start_time = _period.begin();
+    }
+}
+
 //---------------------------------------------------------------------------------------Task::start
 
 bool Task::start()
@@ -345,7 +362,7 @@ bool Task::start()
     catch( const exception& x ) { error(x); return false; }
 
     _state = s_running;
-    _let_run = _job->_run_time.let_run();
+    //_let_run = _job->_run_time.let_run();
     _spooler->_running_tasks_count++;
 
     return true;
@@ -414,7 +431,7 @@ void Task::end()
     _opened = false;
     _params = NULL;
 
-    _next_start_time = _job->_run_time.next_try();
+    set_next_start_time();
 
     _step_count = 0;
     _state = s_pending;
@@ -518,32 +535,44 @@ bool Task::do_something()
         {
             case s_stopped:     break;
 
-            case s_pending:     if( _directory_watcher._signaled || Time::now() >= _next_start_time )
-                                {
-                                    if( _directory_watcher._signaled )  _directory_watcher.watch_again();
+            case s_pending:     
+            {
+                if( _directory_watcher._signaled || Time::now() >= _next_start_time )
+                {
+                    if( _directory_watcher._signaled )  _directory_watcher.watch_again();
 
-                                    ok = start();  if(!ok) break;
+                    ok = start();  if(!ok) break;
 
-                                    ok = step();
-                                    if( !ok )  { end(); break; }
+                    ok = step();
+                    if( !ok )  { end(); break; }
 
-                                    something_done = true;
-                                }
-                                break;
+                    something_done = true;
+                }
+                break;
+            }
 
-            case s_running:     if( _let_run 
-                                  | _job->_run_time.should_run_now() )
-                                {
-                                    ok = step();
-                                    if( !ok )  { end(); break; }
+            case s_running:  
+            {
+                Time now = Time::now();
 
-                                    something_done = true;
-                                }
-                                else
-                                {
-                                    end();
-                                }
-                                break;
+                if( _period.let_run() || _period.is_in_time( now ) )    
+                    ok = true;
+                else {
+                    set_next_start_time();
+                    ok = _period.let_run() || _period.is_in_time( now );
+                }
+
+                if( ok ) {
+                    ok = step();
+                    if( !ok )  { end(); break; }
+
+                    something_done = true;
+                }
+                else
+                    end();
+
+                break;
+            }
 
             case s_suspended:   break;
 

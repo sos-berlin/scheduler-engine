@@ -1,4 +1,4 @@
-// $Id: spooler_command.cxx,v 1.19 2001/01/24 12:35:50 jz Exp $
+// $Id: spooler_command.cxx,v 1.20 2001/01/25 17:45:45 jz Exp $
 /*
     Hier ist implementiert
 
@@ -138,6 +138,18 @@ xml::Element_ptr Command_processor::execute_show_state()
     return state_element;
 }
 
+//-----------------------------------------------------------Command_processor::execute_show_config
+/*
+xml::Element_ptr Command_processor::execute_show_config()
+{
+    if( _security_level < Security::seclev_info )  throw_xc( "SPOOLER-121" );
+
+    xml::Element_ptr config_element = _answer->createElement( "config" );
+    xml::Element_ptr run_
+ 
+    return config_element;
+}
+*/
 //--------------------------------------------------------Command_processor::execute_modify_spooler
 
 xml::Element_ptr Command_processor::execute_modify_spooler( const xml::Element_ptr& element )
@@ -274,10 +286,12 @@ string Command_processor::execute( const string& xml_text )
 {
     try 
     {
+        _error = NULL;
         execute_2( xml_text );
     }
     catch( const Xc& x )
     {
+        _error = x;
         append_error_element( _answer->documentElement->firstChild, x );
     }
 
@@ -308,7 +322,7 @@ void Command_processor::execute_2( const string& xml_text )
         xml::Document_ptr command_doc ( __uuidof(xml::DOMDocument30), NULL );
 
         int ok = command_doc->loadXML( as_dom_string( xml_text ) );
-        if( !ok ) // DOPPELT DOPPELT DOPPELT DOPPELT
+        if( !ok )
         {
             xml::IXMLDOMParseErrorPtr error = command_doc->GetparseError();
 

@@ -1,4 +1,4 @@
-// $Id: spooler_wait.h,v 1.3 2001/01/22 13:42:08 jz Exp $
+// $Id: spooler_wait.h,v 1.4 2001/01/25 17:45:46 jz Exp $
 
 #ifndef __SPOOLER_WAIT_H
 #define __SPOOLER_WAIT_H
@@ -7,8 +7,6 @@
 
 namespace sos {
 namespace spooler {
-
-using namespace std;
 
 //--------------------------------------------------------------------------------Directory_watcher
 

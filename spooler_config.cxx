@@ -1,4 +1,4 @@
-// $Id: spooler_config.cxx,v 1.5 2001/01/24 12:35:51 jz Exp $
+// $Id: spooler_config.cxx,v 1.6 2001/01/25 17:45:45 jz Exp $
 
 //#include <precomp.h>
 
@@ -62,9 +62,173 @@ string optional_single_element_as_text( const xml::Element_ptr& element, const s
     return as_string( text_element->nodeValue );
 }
 
-//-------------------------------------------------------------------------------Script::operator =
+//--------------------------------------------------------------------------------Security::set_xml
 
-void Script::operator = ( const xml::Element_ptr& element )
+void Security::set_xml( const xml::Element_ptr& security_element ) 
+{ 
+    bool ignore_unknown_hosts = as_bool( security_element->getAttribute( "ignore_unknown_hosts" ) );
+
+    for( xml::Element_ptr e = security_element->firstChild; e; e = e->nextSibling )
+    {
+        if( e->tagName == "allowed_host" )
+        {
+            string    hostname = as_string( e->getAttribute( "host" ) );
+            set<Host> host_set;
+
+            try {
+                host_set = Host::get_host_set_by_name( hostname );
+            }
+            catch( const Xc& x )
+            {
+                _spooler->_log.error( "<allowed_host host=\"" + hostname + "\">  " + x.what() );
+                if( !ignore_unknown_hosts )  throw;
+            }
+            
+            FOR_EACH( set<Host>, host_set, h )
+            {
+                _host_map[ *h ] = as_level( as_string( e->getAttribute( "level" ) ) );
+            }
+        }
+    }
+}
+
+//----------------------------------------------------------------------------------Period::set_xml
+namespace time {
+
+void Period::set_xml( const xml::Element_ptr& element, const Period* deflt )
+{
+    Sos_optional_date_time dt;
+
+    if( deflt )  *this = *deflt;
+
+    string single_start = as_string( element->getAttribute( "single_start" ) );
+    if( !single_start.empty() ) 
+    {
+        dt.set_time( single_start );
+        _begin = dt;
+        _retry_interval = latter_day;
+        _single_start = true;
+    }
+    else
+    {
+        string begin = as_string( element->getAttribute( "begin" ) );
+        if( !begin.empty() )  dt.set_time( begin ), _begin = dt;
+
+        string retry_interval = as_string( element->getAttribute( "retry_interval" ) );
+        if( !retry_interval.empty() )  _retry_interval = as_double( retry_interval );
+    }
+
+    string end = as_string( element->getAttribute( "end" ) );
+    if( !end.empty() )  dt.set_time( end ), _end = dt;
+
+    string let_run = as_string( element->getAttribute( "let_run" ) );
+    if( !let_run.empty() )  _let_run = as_bool( let_run );
+
+    check();
+}
+
+//-------------------------------------------------------------------------------------Day::set_xml
+
+void Day::set_xml( const xml::Element_ptr& element, const Day* default_day, const Period* default_period )
+{
+    if( default_day )  _period_set = default_day->_period_set;
+
+  //Period my_default_period ( element, default_period );
+    bool   first = true;
+
+    for( xml::Element_ptr e = element->firstChild; e; e = e->nextSibling )
+    {
+        if( first )  first = false, _period_set.clear();
+        _period_set.insert( Period( e, default_period ) );
+    }
+
+  //if( _period_set.empty() )  _period_set.insert( my_default_period );
+}
+
+//---------------------------------------------------------------------------------Day_set::set_xml
+
+void Day_set::set_xml( const xml::Element_ptr& element, const Day* default_day, const Period* default_period )
+{
+    //Period my_default_period ( element, default_period );
+
+    for( xml::Element_ptr e = element->firstChild; e; e = e->nextSibling )
+    {
+        if( e->tagName == "day" )
+        {
+            Day my_default_day ( e, default_day, default_period );
+
+            int day = as_int( e->getAttribute( "day" ) );
+            if( (uint)day >= NO_OF(_days) )  throw_xc( "SPOOLER-INVALID-DAY", day );
+            _days[day].set_xml( e, &my_default_day, default_period );
+        }
+    }
+}
+
+//--------------------------------------------------------------------------------Run_time::set_xml
+
+void Run_time::set_xml( const xml::Element_ptr& element )
+{
+    Sos_optional_date_time  dt;
+    Period                  default_period;
+    Day                     default_day;
+    bool                    period_seen = false;
+    
+    default_period.set_xml( element, NULL );
+    default_day = default_period;
+
+    bool a_day_set = false;
+    
+    for( xml::Element_ptr e = element->firstChild; e; e = e->nextSibling )
+    {
+        if( e->tagName == "period" )
+        {
+            if( !period_seen )  period_seen = true, default_day = Day();
+            default_day.add( Period( e, &default_period ) );
+        }
+        else
+        if( e->tagName == "date" )
+        {
+            a_day_set = true;
+            dt.assign( as_string( e->getAttribute( "date" ) ) );
+            Date date;
+            date._day_nr = dt.as_time_t() / (24*60*60);
+            date._day.set_xml( e, &default_day, &default_period );
+            _date_set._date_set.insert( date );
+        }
+        else
+        if( e->tagName == "weekdays" )
+        {
+            a_day_set = true;
+            _weekday_set.set_xml( e, &default_day, &default_period );
+        }
+        else
+        if( e->tagName == "monthdays" )
+        {
+            a_day_set = true;
+            _monthday_set.set_xml( e, &default_day, &default_period );
+        }
+        else
+        if( e->tagName == "ultimos" )
+        {
+            a_day_set = true;
+            _ultimo_set.set_xml( e, &default_day, &default_period );
+        }
+        else
+        if( e->tagName == "holiday" )
+        {
+            dt.assign( as_string( e->getAttribute( "date" ) ) );
+            _holiday_set.insert( dt.as_time_t() );
+        }
+    }
+
+    if( !a_day_set )  for( int i = 0; i < 7; i++ )  _weekday_set._days[i] = default_day;
+}
+
+} //namespace time
+
+//----------------------------------------------------------------------------------Script::set_xml
+
+void Script::set_xml( const xml::Element_ptr& element )
 {
     _language = as_string( element->getAttribute( "language" ) );
     _text = as_string( element->text );
@@ -83,9 +247,9 @@ void Script::operator = ( const xml::Element_ptr& element )
 */
 }
 
-//---------------------------------------------------------------------Object_set_class::operator =
+//------------------------------------------------------------------------Object_set_class::set_xml
 
-void Object_set_class::operator = ( const xml::Element_ptr& element )
+void Object_set_class::set_xml( const xml::Element_ptr& element )
 {
     _name = as_string( element->getAttribute( "name" ) );
 
@@ -97,7 +261,7 @@ void Object_set_class::operator = ( const xml::Element_ptr& element )
     {
         if( e->tagName == "script" )
         {
-            _script = e;
+            _script.set_xml( e );
         }
         else
         if( e->tagName == "level_decls" )
@@ -122,121 +286,25 @@ void Object_set_class::operator = ( const xml::Element_ptr& element )
     }
 }
 
-//-------------------------------------------------------------------Level_interval::Level_interval
+//--------------------------------------------------------------------------Level_interval::set_xml
 
-void Level_interval::operator = ( const xml::Element_ptr& element )
+void Level_interval::set_xml( const xml::Element_ptr& element )
 {
     _low_level  = as_int( element->getAttribute( "low" ) );
     _high_level = as_int( element->getAttribute( "high" ) );
 }
 
-//---------------------------------------------------------------Object_set_descr::Object_set_descr
+//------------------------------------------------------------------------Object_set_descr::set_xml
 
-void Object_set_descr::operator = ( const xml::Element_ptr& element )
+void Object_set_descr::set_xml( const xml::Element_ptr& element )
 { 
     _class_name     = as_string( element->getAttribute( "class" ) );
-    _level_interval = single_element( element, "levels" );
+    _level_interval.set_xml( single_element( element, "levels" ) );
 }
 
-//------------------------------------------------------------------------------Day_set::operator =
+//-------------------------------------------------------------------------------------Job::set_xml
 
-void Day_set::operator = ( const xml::Element_ptr& element )
-{
-    memset( _days, (char)false, sizeof _days );
-
-    if( element == NULL )  return;
-
-    xml::Element_ptr e = element->firstChild;
-    while( e )
-    {
-        if( e->tagName == "day" )
-        {
-            int day = as_int( e->getAttribute( "day" ) );
-            if( (uint)day >= NO_OF(_days) )  throw_xc( "SPOOLER-INVALID-DAY", day );
-            _days[day] = true;
-        }
-
-        e = e->nextSibling;
-    }
-}
-
-//-------------------------------------------------------------------------------Run_time::Run_time
-
-Run_time::Run_time( const xml::Element_ptr& element )
-: 
-    _zero_(this+1)
-{
-    Sos_optional_date_time  dt;
-    
-    string single_start = as_string( element->getAttribute( "single_start" ) );
-    if( !single_start.empty() ) 
-    {
-        dt.set_time( single_start );
-        _begin_time_of_day = dt;
-        _retry_period = latter_day;
-        _single_start = true;
-    }
-    else
-    {
-        dt.set_time( as_string( element->getAttribute( "begin" ) ) );
-        _begin_time_of_day = dt;
-
-        _retry_period = as_double( element->getAttribute( "retry_period" ) );
-    }
-
-    dt.set_time( as_string( element->getAttribute( "end" ) ) );
-    _end_time_of_day = dt;
-
-    _let_run = as_bool( element->getAttribute( "let_run" ) );
-
-
-
-    bool             a_day_set = false;
-    xml::Element_ptr e = element->firstChild;
-    while( e )
-    {
-        if( e->tagName == "date" )
-        {
-            a_day_set = true;
-            dt.assign( as_string( e->getAttribute( "date" ) ) );
-            _date_set.insert( dt.as_time_t() );
-        }
-        else
-        if( e->tagName == "weekdays" )
-        {
-            a_day_set = true;
-            _weekday_set = e;
-        }
-        else
-        if( e->tagName == "monthdays" )
-        {
-            a_day_set = true;
-            _monthday_set = e;
-        }
-        else
-        if( e->tagName == "ultimos" )
-        {
-            a_day_set = true;
-            _ultimo_set = e;
-        }
-        else
-        if( e->tagName == "holiday" )
-        {
-            dt.assign( as_string( e->getAttribute( "date" ) ) );
-            _holiday_set.insert( dt.as_time_t() );
-        }
-
-        e = e->nextSibling;
-    }
-
-    if( !a_day_set )  for( int i = 0; i < 7; i++ )  _weekday_set._days[i] = true;
-
-    check();
-}
-
-//----------------------------------------------------------------------------------Job::operator =
-
-void Job::operator = ( const xml::Element_ptr& element )
+void Job::set_xml( const xml::Element_ptr& element )
 {
     _name             = as_string( element->getAttribute( "name" ) );
   //_rerun            = as_bool( element->getAttribute( "rerun" ) ) ),
@@ -253,9 +321,9 @@ void Job::operator = ( const xml::Element_ptr& element )
     {
         if( e->tagName == "object_set" )  _object_set_descr = SOS_NEW( Object_set_descr( e ) );
         else
-        if( e->tagName == "script"     )  _script = e;
+        if( e->tagName == "script"     )  _script.set_xml( e );
         else
-        if( e->tagName == "run_time"   )  _run_time = e;
+        if( e->tagName == "run_time"   )  _run_time.set_xml( e ); //, cerr << _run_time;
      
         e = e->nextSibling;
     }
@@ -287,7 +355,7 @@ void Spooler::load_jobs_from_xml( Job_list* liste, const xml::Element_ptr& eleme
             if( spooler_id.empty()  ||  spooler_id == _spooler_id )
             {
                 Sos_ptr<Job> job = SOS_NEW( Job( this ) );
-                *job = e;
+                job->set_xml( e );
 
                 if( job->_object_set_descr )        // job->_object_set_descr->_class ermitteln
                 {
@@ -324,12 +392,12 @@ void Spooler::load_config( const xml::Element_ptr& config_element )
     {
         if( e->tagName == "security" )
         {
-            _security = e;
+            _security.set_xml( e );
         }
         else
         if( e->tagName == "script" )
         {
-            _script = e;
+            _script.set_xml( e );
         }
         else
         if( e->tagName == "object_set_classes" )

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 
-<!-- $Id: spooler.xml,v 1.16 2001/01/24 13:28:54 jz Exp $   (C) 2001 SOS GmbH Berlin -->
+<!-- $Id: spooler.xml,v 1.17 2001/01/25 17:45:45 jz Exp $   (C) 2001 SOS GmbH Berlin -->
 
 <!DOCTYPE spooler SYSTEM "spooler.dtd">
 
@@ -283,15 +283,15 @@ sub spooler_process()
         <job name           = "Aufbereiten" 
              priority       = "2" 
              output_level   = "200" 
-             spooler_id     = "">
+             spooler_id     = "aufbereiten">
 
             <object_set class="Dokumente">
                 <levels low="100" high="200"/>
             </object_set>
 
-            <run_time begin        = "00:00" 
-                      end          = "24:00" 
-                      retry_period = "60">
+            <run_time begin          = "00:00" 
+                      end            = "24:00" 
+                      retry_interval = "60">
 <!--
                 <date date="2001-01-02"/>
                 <date date="2001-01-09"/>
@@ -324,7 +324,7 @@ sub spooler_process()
 
 
 
-        <job name="einfach" priority="3" spooler_id="einfach">
+        <job name="einfach" priority="3" spooler_id="time">
 
             <script language="VBScript" use_engine="task"><![CDATA[
 
@@ -336,13 +336,29 @@ function spooler_process()
     'spooler_process=true
     spooler_log.msg "*Job einfach: spooler_process index=" & index & ", param=" & spooler.script.global.method()
     index = index + 1
-    if index > 3 then spooler_proces=false: exit function
-    spooler_proces = true
+    if index > 3 then spooler_process=false: exit function
+    spooler_process = true
 end function
 
             ]]></script>
 
-            <run_time end="24:00" retry_period="3"/>  <!-- Komma wegen altem Fehler in hostware as_double() -->
+            <run_time begin="12:12" end="12:48" retry_interval="4">
+                <period begin="18:41:40" end="18:42"/>
+                <period begin="18:42:30" end="18:43" retry_interval="7"/>
+
+                <date date="25.1.2001"/>
+                <date date="26.1.2001"/>
+                <date date="27.1.2001"> <period begin="4:44" end="5:55"/> </date>
+
+                <weekdays>
+                    <day day="1"/>
+                    <day day="3">
+                        <period begin="7:00" end="12:00"/>
+                        <period begin="13:00" end="19:00"/>
+                    </day>
+                </weekdays>
+
+            </run_time>
 
         </job>
 
@@ -356,11 +372,11 @@ end function
                 <levels low="1" high="3"/>
             </object_set>
 
-            <run_time retry_period="3"/>
+            <run_time retry_interval="3"/>
 
         </job>
 
-        <job name="single">
+        <job name="single" spooler_id="x">
             <script language="VBScript" use_engine="task"><![CDATA[
 
 spooler_log.msg "*Job single"
