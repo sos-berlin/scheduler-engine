@@ -1,4 +1,4 @@
-/* $Id: scheduler.css,v 1.17 2004/07/26 23:47:40 jz Exp $ */
+/* $Id: scheduler.css,v 1.18 2004/07/27 09:06:52 jz Exp $ */
 
 body         { font-family: Sans-Serif; font-size: 10pt; margin-top: 5pt; }
 th           { font-size: 10pt; }
@@ -49,7 +49,7 @@ span.log_job   { color: Blue }
 .log_error              { color: Red; }
 .log_warn               { color: tomato; }
 .log_info               { color: black; }
-.log_debug              { color: green; }
+.log_debug              { color: darkgreen; }
 .log_debug2             { color: #408040; }
 .log_debug3             { color: #808080; }
 .log_debug4             { color: #8080FF; }

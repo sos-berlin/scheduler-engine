@@ -1,4 +1,4 @@
-<!-- $Id: task_frame.html,v 1.19 2004/07/24 20:27:47 jz Exp $ -->
+<!-- $Id: details_frame.html,v 1.1 2004/07/27 09:06:52 jz Exp $ -->
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <html>
 
@@ -73,7 +73,7 @@ function init()
 
     if( !_scheduler )
     {
-        _scheduler = window.parent.jobs_frame._scheduler;
+        _scheduler = window.parent.left_frame._scheduler;
         
         _stylesheet = document.all.stylesheet.XMLDocument;
         if( _stylesheet.parseError.errorCode )  throw new Error( "Fehler im Stylesheet:\n" + _stylesheet.parseError.reason );
@@ -197,7 +197,7 @@ function update()
     if( _job_name != undefined )
     {
         var response = _scheduler.execute( "<show_job job='" + _job_name + "' what='all,orders'/>" );
-        window.parent.jobs_frame.modify_response( response );
+        window.parent.left_frame.modify_response( response );
         
         _job_element = response.selectSingleNode( "spooler/answer/job" );
         document.all.stylesheet.innerHTML = _job_element? _job_element.transformNode( _stylesheet ) : "";
@@ -208,8 +208,8 @@ function update()
     if( _job_chain_element != undefined )
     {
         //var response = _scheduler.execute( "<show_job job='" + _job_name + "' what='all,orders'/>" );
-        //window.parent.jobs_frame.modify_response( response );
-        var response = window.parent.jobs_frame._response;
+        //window.parent.left_frame.modify_response( response );
+        var response = window.parent.left_frame._response;
         
         var job_chain_name = _job_chain_element.getAttribute( "name" );
         _job_chain_element = response.selectSingleNode( "//job_chain[ @name='" + job_chain_name + "' ]" );

@@ -1,4 +1,4 @@
-// $Id: spooler_http.h,v 1.10 2004/07/27 08:24:03 jz Exp $
+// $Id: spooler_http.h,v 1.11 2004/07/27 09:06:52 jz Exp $
 
 #ifndef __SPOOLER_HTTP_H
 #define __SPOOLER_HTTP_H
@@ -69,25 +69,26 @@ struct Http_parser : Object
 
         int size = get_next_chunk_size();
         if( size == 0 )  break;  // EOF
-        read_chunk()  bis genau size Bytes gelesen
+        read_from_chunk()  bis genau size Bytes gelesen
     }
 */
 
 struct Chunk_reader : Object
 {
-                                Chunk_reader                ()                                      : _zero_(this+1), _recommended_chunk_size( recommended_chunk_size ) {}
+                                Chunk_reader                ()                                      : _zero_(this+1), _recommended_block_size( recommended_chunk_size ) {}
 
-    virtual void                recommend_chunk_size        ( size )                                { _recommended_chunk_size; }
+    virtual void                recommend_block_size        ( int size )                            { _recommended_block_size = size; }
+    int                         recommended_block_size      () const                                { return _recommended_block_size; }
     virtual void            set_event                       ( Event_base* )                         {}
 
 
     virtual bool                next_chunk_is_ready         ()                                      = 0;
     virtual int                 get_next_chunk_size         ()                                      = 0;
-    virtual string              read_chunk                  ( int size )                            = 0;
+    virtual string              read_from_chunk             ( int size )                            = 0;
 
 
     Fill_zero                  _zero_;
-    int                        _recommended_chunk_size;
+    int                        _recommended_block_size;
 };
 
 //-----------------------------------------------------------------------------String_chunk_reader
@@ -99,7 +100,7 @@ struct String_chunk_reader : Chunk_reader
   protected:
     bool                        next_chunk_is_ready         ()                                      { return true; }
     int                         get_next_chunk_size         ();
-    string                      read_chunk                  ( int size );
+    string                      read_from_chunk             ( int size );
 
 
     Fill_zero                  _zero_;
@@ -112,8 +113,8 @@ struct String_chunk_reader : Chunk_reader
 
 struct Log_chunk_reader : Chunk_reader
 {
-                                Log_chunk_reader           ( Prefix_log* );
-                               ~Log_chunk_reader           ();
+                                Log_chunk_reader            ( Prefix_log* );
+                               ~Log_chunk_reader            ();
 
     void                    set_event                       ( Event_base* );
 
@@ -121,7 +122,7 @@ struct Log_chunk_reader : Chunk_reader
   protected:
     bool                        next_chunk_is_ready         ();
     int                         get_next_chunk_size         ();
-    string                      read_chunk                  ( int size );
+    string                      read_from_chunk             ( int size );
 
 
     Fill_zero                  _zero_;
@@ -153,13 +154,13 @@ struct Html_chunk_reader : Chunk_reader_filter
                                 Html_chunk_reader           ( Chunk_reader*, const string& title );
                                ~Html_chunk_reader           ();
 
-    virtual void                recommend_chunk_size        ( size )                                { _chunk_reader->recommend_chunk_size( size );
-                                                                                                      Chunk_reader_filter::recommend_chunk_size( size ); }
+    virtual void                recommend_block_size        ( int size )                            { _chunk_reader->recommend_block_size( size );
+                                                                                                      Chunk_reader_filter::recommend_block_size( size ); }
 
   protected:
     bool                        next_chunk_is_ready         ();
     int                         get_next_chunk_size         ();
-    string                      read_chunk                  ( int size );
+    string                      read_from_chunk             ( int size );
     bool                        try_fill_chunk              ();
 
 
@@ -173,7 +174,7 @@ struct Html_chunk_reader : Chunk_reader_filter
 
     // Für <span class="debug9">...[debug9]...</span>
     bool                       _awaiting_class;             // Wir erwarten [info] und dergleichen
-    int                        _blank_count;                // Nach dem vierten Blank haben den Log-Level und Job/Task/Order/Scheduler
+  //int                        _blank_count;                // Nach dem vierten Blank haben den Log-Level und Job/Task/Order/Scheduler
     int                        _in_span;                    // Wir müssen am Zeilenende soviele </span> schreiben
     string                     _line_prefix;                // Zeilenanfang bis "[info"
 };
@@ -184,7 +185,8 @@ struct Http_response : Object
 {
                                 Http_response               ( const Http_request*, Chunk_reader*, const string& content_type );
     
-    void                        recommend_chunk_size        ( int size )                            { _chunk_reader->recommend_chunk_size( size ); }
+    void                        recommend_block_size        ( int size )                            { _chunk_reader->recommend_block_size( size ); }
+    int                         recommended_block_size      () const                                { return _chunk_reader->_recommended_block_size; }
 
   //bool                        is_http_1_1                 ()                                      { return _http_1_1; }
     bool                        close_connection_at_eof     ()                                      { return _close_connection_at_eof; }

@@ -1,4 +1,4 @@
-// $Id: spooler_communication.cxx,v 1.94 2004/07/26 23:05:40 jz Exp $
+// $Id: spooler_communication.cxx,v 1.95 2004/07/27 09:06:52 jz Exp $
 /*
     Hier sind implementiert
 
@@ -601,6 +601,7 @@ bool Communication::Channel::async_continue_( bool wait )
 
                     _http_response = cp.execute_http( _http_request );
                     _http_response->set_event( &_socket_event );
+                    _http_response->recommend_block_size( 32768 );
 
                     _http_parser  = NULL;
                     _http_request = NULL;
@@ -626,7 +627,7 @@ bool Communication::Channel::async_continue_( bool wait )
 
         while( _http_response  &&  _send_is_complete )
         {
-            _text = _http_response->read( 32768 );  // Die Größe ist nur eine Empfehlung
+            _text = _http_response->read( _http_response->recommended_block_size() );
 
             if( _text.length() == 0 )               // Zurzeit keine Daten da? Dann warten wir auf ein Signal in _socket_event (von spooler_log.cxx)
             {

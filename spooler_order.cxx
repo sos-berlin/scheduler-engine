@@ -1,4 +1,4 @@
-// $Id: spooler_order.cxx,v 1.71 2004/07/24 11:36:42 jz Exp $
+// $Id: spooler_order.cxx,v 1.72 2004/07/27 09:06:52 jz Exp $
 /*
     Hier sind implementiert
 
@@ -88,17 +88,14 @@ xml::Element_ptr Spooler::xml_from_job_chains( const xml::Document_ptr& document
 {
     xml::Element_ptr job_chains_element = document.createElement( "job_chains" );
 
-        dom_append_nl( job_chains_element );
-
-        THREAD_LOCK( _job_chain_lock )
+    THREAD_LOCK( _job_chain_lock )
+    {
+        FOR_EACH( Job_chain_map, _job_chain_map, it )
         {
-            FOR_EACH( Job_chain_map, _job_chain_map, it )
-            {
-                Job_chain* job_chain = it->second;
-                job_chains_element.appendChild( job_chain->dom( document, show ) );
-                dom_append_nl( job_chains_element );            
-            }
+            Job_chain* job_chain = it->second;
+            job_chains_element.appendChild( job_chain->dom( document, show ) );
         }
+    }
 
     return job_chains_element;
 }
@@ -165,25 +162,20 @@ xml::Element_ptr Job_chain::dom( const xml::Document_ptr& document, const Show_w
 
     xml::Element_ptr element = document.createElement( "job_chain" );
 
-        THREAD_LOCK( _lock )
-        {
-            element.setAttribute( "name"  , _name );
-            element.setAttribute( "orders", order_count() );
-    
-            if( _finished )
-            {
-                dom_append_nl( element );
+    THREAD_LOCK( _lock )
+    {
+        element.setAttribute( "name"  , _name );
+        element.setAttribute( "orders", order_count() );
 
-                FOR_EACH( Chain, _chain, it )
-                {
-                    Job_chain_node* node = *it;
-                    element.appendChild( node->dom( document, modified_show, this ) );
-                    dom_append_nl( element );
-                }
+        if( _finished )
+        {
+            FOR_EACH( Chain, _chain, it )
+            {
+                Job_chain_node* node = *it;
+                element.appendChild( node->dom( document, modified_show, this ) );
             }
         }
-
-        dom_append_nl( element );
+    }
 
     return element;
 }

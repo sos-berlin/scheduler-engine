@@ -445,42 +445,42 @@
 
         <table cellpadding="0" cellspacing="0">
             <caption align="left" class="job_chain">
-                    <!--
-                    <xsl:choose>
-                        <xsl:when test="not( $single )">
-                            <!- -b>Job chains</b- ->
-                        </xsl:when>
-                        <xsl:otherwise>
-                            <!- -<b>Job chain &#160;<xsl:value-of select="@name"/></b>- ->
-                        </xsl:otherwise>
-                    </xsl:choose>
+                <!--
+                <xsl:choose>
+                    <xsl:when test="not( $single )">
+                        <!- -b>Job chains</b- ->
+                    </xsl:when>
+                    <xsl:otherwise>
+                        <!- -<b>Job chain &#160;<xsl:value-of select="@name"/></b>- ->
+                    </xsl:otherwise>
+                </xsl:choose>
+                &#160;
+                -->
+
+                <xsl:if test="not( $single )">
+                    <!-- Checkbox für Show jobs-->
+                    <xsl:element name="input">
+                        <xsl:attribute name="id"     >show_job_chain_jobs_checkbox</xsl:attribute>
+                        <xsl:attribute name="type"   >checkbox</xsl:attribute>
+                        <xsl:attribute name="onclick">show_job_chain_jobs_checkbox__onclick()</xsl:attribute>
+                        <xsl:if test="/spooler/@show_job_chain_jobs_checkbox">
+                            <xsl:attribute name="checked">checked</xsl:attribute>
+                        </xsl:if>
+                    </xsl:element>
+                    <label for="show_job_chain_jobs_checkbox">Show jobs</label>
+
+                    <!-- Checkbox für Show orders-->
                     &#160;
-                    -->
-
-                    <xsl:if test="not( $single )">
-                        <!-- Checkbox für Show jobs-->
-                        <xsl:element name="input">
-                            <xsl:attribute name="id"     >show_job_chain_jobs_checkbox</xsl:attribute>
-                            <xsl:attribute name="type"   >checkbox</xsl:attribute>
-                            <xsl:attribute name="onclick">show_job_chain_jobs_checkbox__onclick()</xsl:attribute>
-                            <xsl:if test="/spooler/@show_job_chain_jobs_checkbox">
-                                <xsl:attribute name="checked">checked</xsl:attribute>
-                            </xsl:if>
-                        </xsl:element>
-                        <label for="show_job_chain_jobs_checkbox">Show jobs</label>
-
-                        <!-- Checkbox für Show orders-->
-                        &#160;
-                        <xsl:element name="input">
-                            <xsl:attribute name="id"     >show_job_chain_orders_checkbox</xsl:attribute>
-                            <xsl:attribute name="type"   >checkbox</xsl:attribute>
-                            <xsl:attribute name="onclick">show_job_chain_orders_checkbox__onclick()</xsl:attribute>
-                            <xsl:if test="/spooler/@show_job_chain_orders_checkbox or $single">
-                                <xsl:attribute name="checked">checked</xsl:attribute>
-                            </xsl:if>
-                        </xsl:element>
-                        <label for="show_job_chain_orders_checkbox">Show orders</label>
-                    </xsl:if>                    
+                    <xsl:element name="input">
+                        <xsl:attribute name="id"     >show_job_chain_orders_checkbox</xsl:attribute>
+                        <xsl:attribute name="type"   >checkbox</xsl:attribute>
+                        <xsl:attribute name="onclick">show_job_chain_orders_checkbox__onclick()</xsl:attribute>
+                        <xsl:if test="/spooler/@show_job_chain_orders_checkbox or $single">
+                            <xsl:attribute name="checked">checked</xsl:attribute>
+                        </xsl:if>
+                    </xsl:element>
+                    <label for="show_job_chain_orders_checkbox">Show orders</label>
+                </xsl:if>                    
             </caption>
             
             <col valign="baseline"  width=" 50"/>

@@ -1,4 +1,4 @@
-// $Id: scheduler.js,v 1.13 2004/07/26 13:54:36 jz Exp $
+// $Id: scheduler.js,v 1.14 2004/07/27 09:06:52 jz Exp $
 
 //----------------------------------------------------------------------------------------Scheduler
 // public
@@ -207,7 +207,7 @@ function Scheduler_html_configuration( url )
 function show_tasks_checkbox__onclick()
 {
     save_checkbox_state( event.srcElement.id );
-    window.parent.jobs_frame.reset_error();
+    window.parent.left_frame.reset_error();
     update();
 }
 
@@ -216,7 +216,7 @@ function show_tasks_checkbox__onclick()
 function show_job_chain_jobs_checkbox__onclick()
 {
     save_checkbox_state( event.srcElement.id );
-    window.parent.jobs_frame.reset_error();
+    window.parent.left_frame.reset_error();
     update();
 }
 
@@ -225,7 +225,7 @@ function show_job_chain_jobs_checkbox__onclick()
 function show_job_chain_orders_checkbox__onclick()
 {
     save_checkbox_state( event.srcElement.id );
-    window.parent.jobs_frame.reset_error();
+    window.parent.left_frame.reset_error();
     update();
 }
 
@@ -233,7 +233,7 @@ function show_job_chain_orders_checkbox__onclick()
 
 function update__onclick()
 {
-    window.parent.jobs_frame.reset_error();
+    window.parent.left_frame.reset_error();
     update();
 }
 
@@ -255,7 +255,7 @@ function popup_menu__execute( xml_command )
     try
     {
         _scheduler.execute( xml_command );
-        window.parent.jobs_frame.update();
+        window.parent.left_frame.update();
     }
     catch( x )
     {

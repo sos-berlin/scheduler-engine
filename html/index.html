@@ -1,4 +1,4 @@
-<!-- $Id: index.html,v 1.6 2004/07/26 17:57:33 jz Exp $ -->
+<!-- $Id: index.html,v 1.7 2004/07/27 09:06:52 jz Exp $ -->
 <html>
     <head>
         <TITLE>Scheduler</TITLE>
@@ -7,8 +7,10 @@
     </head>
     
     <frameset id="left_and_right_frameset" cols="50%,50%">
-        <frame name="jobs_frame" src="jobs_frame.html">
-        <frame name="details_frame" src="task_frame.html">
+    
+        <frame name="left_frame"    src="left_frame.html"   >
+        <frame name="details_frame" src="details_frame.html">
+        
         <noframes>
             <p>Only a browser supporting frames can show this page.</p>
         </noframes>
@@ -17,7 +19,7 @@
     <script event="onload" for="window"><!--
     
         //alert("x"); 
-        //document.all.jobs_frame.start();
+        //document.all.left_frame.start();
         //document.all.details_frame.start();
     
     --></script>
