@@ -1,4 +1,4 @@
-// $Id: spooler_command.cxx,v 1.111 2004/06/05 08:57:49 jz Exp $
+// $Id: spooler_command.cxx,v 1.112 2004/07/12 17:59:48 jz Exp $
 /*
     Hier ist implementiert
 
@@ -677,10 +677,26 @@ string Command_processor::execute_http( const string& http_request )
 {
     string xml_response = execute( "<show_state what=\"all,orders\"/>", Time::now(), true );
 
+    time_t      t;
+    char        time_text[26+1];
+
+    ::time( &t );
+    memset( time_text, 0, sizeof time_text );
+
+#   ifdef Z_WINDOWS
+        strcpy( time_text, asctime( gmtime( &t ) ) );
+#    else
+        struct tm  tm;
+        asctime_r( gmtime_r( &t, &tm ), &time_text );
+#   endif
+    
+    memcpy( time_text+25, "\r\n", 2 );
+    
+
     string response = "HTTP/1.1 200 OK\r\n"
                       "Content-Type: text/plain\r\n"
-                      "Transfer-Encoding: chunked\n"
-                      "Date: Wed, 12 May 2004 06:48:41 GMT\r\n"
+                      "Transfer-Encoding: chunked\r\n"
+                      "Date: " + string(time_text) +
                       "Server: Scheduler " + string(VER_PRODUCTVERSION_STR) + "\r\n"
                       "\r\n";
 

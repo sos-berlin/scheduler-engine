@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.255 2004/06/01 14:19:45 jz Exp $
+// $Id: spooler_task.cxx,v 1.256 2004/07/12 17:59:48 jz Exp $
 /*
     Hier sind implementiert
 
@@ -1013,7 +1013,7 @@ bool Task::do_something()
 
                                 set_state( loaded()? has_error()? s_on_error 
                                                                 : s_on_success 
-                                                : s_release );
+                                                   : s_release );
 
                                 set_mail_defaults();
 
@@ -1029,7 +1029,7 @@ bool Task::do_something()
                         case s_on_success:
                         {
                             if( !_operation )  _operation = do_call__start( spooler_on_success_name );
-                                        else  operation__end(), set_state( s_exit ), loop = true;
+                                         else  operation__end(), set_state( s_exit ), loop = true;
 
                             something_done = true;
                             break;
@@ -1039,7 +1039,7 @@ bool Task::do_something()
                         case s_on_error:
                         {
                             if( !_operation )  _operation = do_call__start( spooler_on_error_name );
-                                        else  operation__end(), set_state( s_exit ), loop = true;
+                                         else  operation__end(), set_state( s_exit ), loop = true;
 
                             something_done = true;
                             break;
@@ -1051,7 +1051,7 @@ bool Task::do_something()
                             if( _job->_module._reuse == Module::reuse_task )
                             {
                                 if( !_operation )  _operation = do_call__start( spooler_exit_name );
-                                            else  operation__end(), set_state( s_release ), loop = true;
+                                             else  operation__end(), set_state( s_release ), loop = true;
                             }
                             else
                             {

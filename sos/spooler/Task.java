@@ -1,10 +1,15 @@
-// $Id: Task.java,v 1.6 2004/03/26 16:15:32 jz Exp $
+// $Id: Task.java,v 1.7 2004/07/12 17:59:49 jz Exp $
 
 package sos.spooler;
 
 /**
- * @author Joacim Zschimmer, Zschimmer GmbH
- * @version $Revision: 1.6 $
+ * Eine Task.
+ * 
+ * <p>
+ * Eine Task kann wartent in der Task-Warteschlange des Jobs sein oder laufen.
+ * 
+ * @author Joacim Zschimmer
+ * @version $Revision: 1.7 $
  */
 
 public class Task extends Idispatch
@@ -12,42 +17,188 @@ public class Task extends Idispatch
     private                 Task                ( long idispatch )                  { super(idispatch); }
     
   //public Object_set       object_set
-    
-    public void         set_error               ( String text )                     {                       com_call( ">error", text                    ); }
-    public Error            error               ()                                  { return (Error)        com_call( "<error"                          ); }
 
+    
+    /** Liefert den {@link Job}, zu der die Task gehört. */
     public Job              job                 ()                                  { return (Job)          com_call( "<job"                            ); }
     
-    public Variable_set     params              ()                                  { return (Variable_set) com_call( "<params"                         ); }
     
-    public void         set_result              ( String value )                    {                       com_call( ">result", value                  ); }
-    public String           result              ()                                  { return (String)       com_call( "<result"                         ); }
-    
-    public boolean          wait_until_terminated()                                 { return        boolean_com_call( "wait_until_terminated"           ); }
-    public boolean          wait_until_terminated( double wait_seconds )            { return ( (Boolean)    com_call( "wait_until_terminated", new Double(wait_seconds) ) ).booleanValue(); }
-    
-    public void         set_repeat              ( double seconds )                  {                       com_call( ">repeat", seconds                ); }
-    
-    public Thread           thread              ()                                  { return (Thread)       com_call( "<thread"                         ); }
-    
-    public void             end                 ()                                  {                       com_call( "end"                             ); }
-    
-    public void         set_history_field       ( String name, String value )       {                       com_call( ">history_field", name, value     ); }
-    
+
+    /** Liefert die Kennung der Task. */
     public int              id                  ()                                  { return            int_com_call( "<id"                             ); }
     
+    /** Liefert die Parameter der Task.
+     * 
+     * <p>
+     * Eine Task kann Parameter haben. Die Parameter können in der Konfiguration mit &lt;parameter>, 
+     * mit {@link Job#start(Variable_set)} oder mit &lt;start_job> gesetzt werden. 
+     */
+    public Variable_set     params              ()                                  { return (Variable_set) com_call( "<params"                         ); }
+    
+    
+    /**
+     * Setzt das Ergebnis der Task.
+     * 
+     * <p>
+     * Das Ergebnis kann mit {@link #result()} abgeholt werden.
+     * @param value
+     */
+    public void         set_result              ( String value )                    {                       com_call( ">result", value                  ); }
+    
+    
+    
+    /** Liefert das mit set_result() gesetzte Ergebnis. */
+    public String           result              ()                                  { return (String)       com_call( "<result"                         ); }
+    
+    
+    
+    /** Startet erneut eine Task nach der eingestellten Zeit.
+     * 
+     * <p>
+     * Diese Methode gehört eigentlich in die Klasse Job. Sieht hat nichts mit der gerade laufenden Task zu tun.
+     * <p>
+     * Wenn nach Ablauf der angegebenen Zeit keine Task des Jobs läuft, startet der Scheduler eine Task.
+     *  
+     * @param seconds
+     */
+    public void         set_repeat              ( double seconds )                  {                       com_call( ">repeat", seconds                ); }
+    
+    
+    
+    /** Veranlasst den Scheduler, nicht mehr spooler_process() zu rufen.
+     * 
+     * <p>
+     * Der nächste Aufruf wird spooler_close() sein.
+     */
+    public void             end                 ()                                  {                       com_call( "end"                             ); }
+    
+    
+    
+    /** Setzt einen Fehler und stoppt den Job.
+     *
+     * @param text Fehlertext
+     */ 
+    public void         set_error               ( String text )                     {                       com_call( ">error", text                    ); }
+    
+    
+    
+    /**
+     * Liefert den Fehler der Task als {@link Error}.
+     */
+    public Error            error               ()                                  { return (Error)        com_call( "<error"                          ); }
+
+    
+    
+    /** Wartet aufs Ende einer anderen Task.
+     * 
+     * <p>
+     * In Kombination mit {@link Job#start()} kann eine Task aufs Ende einer anderen warten.
+     * <p>
+     * Wenn die andere Task nicht starten kann, weil nicht genügend Ressourcen bereitstehen, kann dieser Aufruf
+     * zur Verklemmung führen.
+     */
+    public boolean          wait_until_terminated()                                 { return        boolean_com_call( "wait_until_terminated"           ); }
+    
+    
+    
+    /** Wie {@link #wait_until_terminated()}, mit Begrenzung der Wartezeit. 
+     * 
+     * @return true, wenn Task geendet; false, wenn Zeit abgelaufen. */
+    public boolean          wait_until_terminated( double wait_seconds )            { return ( (Boolean)    com_call( "wait_until_terminated", new Double(wait_seconds) ) ).booleanValue(); }
+    
+    
+    
+  //public Thread           thread              ()                                  { return (Thread)       com_call( "<thread"                         ); }
+
+    
+    
+    /** Setzt ein Feld in der Task-Historie.
+     * 
+     * <p>
+     * Die Datenbanktabelle muss eine Spalte mit dem Namen haben. 
+     */ 
+    public void         set_history_field       ( String name, String value )       {                       com_call( ">history_field", name, value     ); }
+    
+    
+    
+    /**
+     * Verzögert den nächsten Aufruf von spooler_process().
+     */
     public void         set_delay_spooler_process( double seconds )                 {                       com_call( ">delay_spooler_process", seconds ); }
+
+    
+    /**
+     * Verzögert den nächsten Aufruf von spooler_process().
+     * 
+     * @param hhmm_ss "HH:MM:SS" oder "HH:MM", die Dauer in Stunde, Minute, Sekunde.
+     */
     public void         set_delay_spooler_process( String hhmm_ss )                 {                       com_call( ">delay_spooler_process", hhmm_ss ); }
+
+    
     
     public void         set_close_engine        ( boolean close_after_task )        {                       com_call( ">close_engine", close_after_task ); }
+
     
+
+    /**
+     * Liefert den zu verarbeitenden Auftrag oder null.
+     */
     public Order            order               ()                                  { return (Order)        com_call( "<order"                          ); }
+
     
-    /** Mehrere Verzeichnisnamen sind durch Semikolon getrennt */
+    
+    /** Liefert die Verzeichnisse, deren Änderung den Start der Task veranlasst haben.
+     * 
+     * Mehrere Verzeichnisnamen sind durch Semikolon getrennt.
+     * 
+     * @see Job#start_when_directory_changed(String)
+     * @see Job#start_when_directory_changed(String,String)
+     */
     public String           changed_directories ()                                  { return (String)       com_call( "<changed_directories"            ); }
 
+    
+    /**
+     * Macht dem Scheduler einen abhängigen Prozess bekannt.
+     * 
+     * <p>
+     * Wenn die Task endet, bricht der Scheduler die evtl. noch laufenden Prozesse ab.
+     * <p>
+     * Der Aufruf kann für mehrere Prozesse wiederholt werden.
+     *  
+     * @param pid Die Prozess-Id
+     */
     public void             add_pid             ( int pid )                         {                       com_call( "add_pid", pid                    ); }
+    
+    
+
+    /**
+     * Macht dem Scheduler einen abhängigen, befristeten Prozess bekannt.
+     * 
+     * <p>
+     * Wie {@link #add_pid(int)}, mit dem Zusatz, dass der Scheduler den Prozess nach der
+     * angegebenen Zeit abbricht, sollte er noch laufen.
+     * <p>
+     * Mit dem Aufruf kann die Laufzeit von abhängigen Prozessen eingegeschränkt werden.
+     * Bei Task-Ende bricht der Scheduler noch laufende abhängigen Prozesse in jeden Fall ab.
+     * <p>
+     * Wenn der Scheduler einen Prozess abbricht, gibt es einen Eintrag ins Protokoll.
+     * Die Task erfährt davon nichts.  
+     *  
+     * @param pid Die Prozess-Id
+     * @param timeout_seconds Die Frist für den Prozess
+     */
     public void             add_pid             ( int pid, double timeout_seconds ) {                       com_call( "add_pid", new Integer(pid), new Double(timeout_seconds) ); }
 
+    
+    
+    /** Nimmt ein add_pid() zurück.
+     * 
+     * <p>
+     * Wenn die Pid nicht bekannt ist, gibt es keinen Fehler.
+     * 
+     * @param pid Die Prozess-Id
+     * @see #add_pid(int)
+     * @see #add_pid(int,double)
+     */
     public void             remove_pid          ( int pid )                         {                       com_call( "remove_pid", pid                 ); }
 }
