@@ -1,4 +1,4 @@
-// $Id: spooler.h,v 1.160 2003/10/02 21:39:59 jz Exp $
+// $Id: spooler.h,v 1.161 2003/10/03 13:14:02 jz Exp $
 
 #ifndef __SPOOLER_H
 #define __SPOOLER_H
@@ -353,7 +353,8 @@ struct Spooler
     Job_list                   _job_list;
     Wait_handles               _wait_handles;
 
-    Event                      _event;
+    Event                      _event;                      // Für Signale aus anderen Threads, mit Betriebssystem implementiert (nicht Unix)
+  //Simple_event               _simple_event;               // Für Signale aus demselben Thread, ohne Betriebssystem implementiert
 
     int                        _loop_counter;               // Zähler der Schleifendurchläufe in spooler.cxx
     int                        _wait_counter;               // Zähler der Aufrufe von wait_until()

@@ -1,4 +1,4 @@
-// $Id: spooler_wait.cxx,v 1.78 2003/10/02 22:52:50 jz Exp $
+// $Id: spooler_wait.cxx,v 1.79 2003/10/03 13:14:02 jz Exp $
 /*
     Hier sind implementiert
 
@@ -184,7 +184,7 @@ Wait_handles& Wait_handles::operator += ( Wait_handles& o )
 
 //--------------------------------------------------------------------------------Wait_handles::add
 
-void Wait_handles::add( z::Event* event )
+void Wait_handles::add( System_event* event )
 {
     THREAD_LOCK( _lock )
     {
@@ -225,7 +225,7 @@ void Wait_handles::remove_handle( HANDLE handle, z::Event_base* event )
 #endif
 //-----------------------------------------------------------------------------Wait_handles::remove
 
-void Wait_handles::remove( z::Event* event )
+void Wait_handles::remove( System_event* event )
 {
     if( !event )  return;
 
