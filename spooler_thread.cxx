@@ -1,4 +1,4 @@
-// $Id: spooler_thread.cxx,v 1.91 2003/08/12 14:59:46 jz Exp $
+// $Id: spooler_thread.cxx,v 1.92 2003/08/14 11:01:14 jz Exp $
 /*
     Hier sind implementiert
 
@@ -195,6 +195,7 @@ Task* Spooler_thread::get_next_task_to_run()
     {
         FOR_EACH_TASK( t, task )
         {
+            _log.debug( task->name() + ".next_time=" + task->next_time().as_string() );
             if( next_time > task->next_time() )  next_time = task->next_time();
             if( next_time == 0 )  break;
         }
@@ -324,9 +325,11 @@ bool Spooler_thread::step()
         }
 
 
-        bool stepped = false;
+        bool stepped;
         do
         {
+            stepped = false;
+
             FOR_EACH( vector<Job*>, _prioritized_order_job_array, it )
             {
                 Job* job = *it;

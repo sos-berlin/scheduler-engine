@@ -1,4 +1,4 @@
-// $Id: spooler_module.h,v 1.31 2003/08/12 14:59:45 jz Exp $
+// $Id: spooler_module.h,v 1.32 2003/08/14 11:01:14 jz Exp $
 
 #ifndef __SPOOLER_MODULE_H
 #define __SPOOLER_MODULE_H
@@ -16,12 +16,12 @@ namespace spooler {
 
 //--------------------------------------------------------------------------------------------const
 
-const string spooler_init_name;
-const string spooler_open_name;
-const string spooler_close_name;
-const string spooler_process_name;
-const string spooler_on_error_name;
-const string spooler_on_success_name;
+extern const string spooler_init_name;
+extern const string spooler_open_name;
+extern const string spooler_close_name;
+extern const string spooler_process_name;
+extern const string spooler_on_error_name;
+extern const string spooler_on_success_name;
 
 //-------------------------------------------------------------------------------------------------
 

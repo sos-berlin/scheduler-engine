@@ -1,4 +1,4 @@
-// $Id: spooler_job.h,v 1.1 2003/08/11 19:33:11 jz Exp $
+// $Id: spooler_job.h,v 1.2 2003/08/14 11:01:14 jz Exp $
 
 #ifndef __SPOOLER_JOB_H
 #define __SPOOLER_JOB_H
@@ -200,7 +200,10 @@ struct Job : Sos_self_deleting
     bool                        queue_filled                ()                                      { return !_task_queue.empty(); }
 
     Sos_ptr<Task>               create_task                 ( const ptr<spooler_com::Ivariable_set>& params, const string& task_name, Time = latter_day );
-    Sos_ptr<Task>               dequeue_task                ( Time now = Time::now() );
+    void                        enqueue_task                ( const Sos_ptr<Task>& );
+    Sos_ptr<Task>               dequeue_task                ( Time now );
+    void                        run_task                    ( const Sos_ptr<Task>&  );
+
     void                        remove_from_task_queue      ( Task* );
     void                        remove_running_task         ( Task* );
   //void                        close_task                  ();
@@ -215,7 +218,7 @@ struct Job : Sos_self_deleting
 
     bool                        execute_state_cmd           ();
     void                        reread                      ();
-    Task*                       task_to_start               ();
+    Sos_ptr<Task>               task_to_start               ();
     bool                        do_something                ();
     bool                        should_removed              ()                                      { return _temporary && _state == s_stopped; }
 

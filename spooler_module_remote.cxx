@@ -1,4 +1,4 @@
-// $Id: spooler_module_remote.cxx,v 1.15 2003/08/11 19:33:11 jz Exp $
+// $Id: spooler_module_remote.cxx,v 1.16 2003/08/14 11:01:14 jz Exp $
 /*
     Hier sind implementiert
 
@@ -23,7 +23,7 @@ Remote_module_instance_proxy::~Remote_module_instance_proxy()
 }
 
 //---------------------------------------------------------------Remote_module_instance_proxy::init
-/*
+
 void Remote_module_instance_proxy::init()
 {
     HRESULT hr;
@@ -58,7 +58,7 @@ void Remote_module_instance_proxy::init()
 
     _idispatch = _remote_instance;
 }
-*/
+
 //---------------------------------------------------------------Remote_module_instance_proxy::load
 
 void Remote_module_instance_proxy::load()

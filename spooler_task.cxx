@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.168 2003/08/12 14:59:45 jz Exp $
+// $Id: spooler_task.cxx,v 1.169 2003/08/14 11:01:14 jz Exp $
 /*
     Hier sind implementiert
 
@@ -272,6 +272,8 @@ xml::Element_ptr Task::dom( const xml::Document_ptr& document, Show_what show )
 
 void Task::enter_thread( Spooler_thread* thread )
 { 
+    set_state( s_start_task );
+
     _thread = thread;  
     thread->add_task( this ); 
 }
