@@ -221,7 +221,7 @@ DEFINE_GUID( CLSID_Task_proxy, 0xfeee47aa, 0x6c1b, 0x11d8, 0x81, 0x03, 0x00, 0x0
 
 struct Itask_proxy : IDispatch
 {
-    virtual HRESULT         Start_subprocess            ( VARIANT* program_and_parameters, Isubprocess** );
+    virtual HRESULT         Start_subprocess            ( VARIANT* program_and_parameters, Isubprocess** ) = 0;
 };
 
 //---------------------------------------------------------------------------------------Thread

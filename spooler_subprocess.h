@@ -51,7 +51,7 @@ struct Subprocess : idispatch_implementation< Subprocess, spooler_com::Isubproce
     STDMETHODIMP            get_Ignore_error                ( VARIANT_BOOL* result )                { *result = _ignore_error? VARIANT_TRUE: VARIANT_FALSE;  return S_OK; }
     STDMETHODIMP            put_Ignore_signal               ( VARIANT_BOOL b )                      { _ignore_signal= b != 0;  return S_OK; }
     STDMETHODIMP            get_Ignore_signal               ( VARIANT_BOOL* result )                { *result = _ignore_signal? VARIANT_TRUE: VARIANT_FALSE;  return S_OK; }
-    STDMETHODIMP                Wait                        ( double seconds )                      { Z_COM_IMPLEMENT( _process.wait( seconds ) ); }
+    STDMETHODIMP                Wait                        ( double seconds )                      { return E_NOTIMPL; }//Z_COM_IMPLEMENT( _process.wait( seconds ) ); }
     STDMETHODIMP                Kill                        ( int signal )                          { return E_NOTIMPL; }
 
 

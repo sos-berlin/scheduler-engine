@@ -48,7 +48,7 @@ DESCRIBE_CLASS( &spooler_typelib, Com_order_queue   , order_queue   , CLSID_Orde
 
 Typelib_ref                         typelib;  
 
-Com_task_proxy::Class_descriptor    Com_task_proxy::class_descriptor ( &typelib, "Spooler.Spooler_proxy" );
+Com_task_proxy::Class_descriptor    Com_task_proxy::class_descriptor ( &typelib, "Spooler.Task_proxy", Com_task_proxy::_methods );
 
 //-----------------------------------------------------------------------------IID_Ihostware_dynobj
 
@@ -2408,7 +2408,7 @@ STDMETHODIMP Com_task::Add_subprocess( int pid, BSTR timeout_at, VARIANT_BOOL ig
 
 //-------------------------------------------------------------------------Com_task_proxy::_methods
 #ifdef Z_COM
-/*
+
 // Dispid wie bei Com_task!
 
 const Com_method Com_task_proxy::_methods[] =
@@ -2418,16 +2418,16 @@ const Com_method Com_task_proxy::_methods[] =
   //{ DISPATCH_METHOD, 21, "Wait_for_subprocesses" , (Com_method_ptr)&Com_task_proxy::Wait_for_subprocesses, VT_EMTPY    },
     {}
 };
-*/
+
 #endif
 //------------------------------------------------------------------Com_task_proxy::Create_instance
-/*
+
 HRESULT Com_task_proxy::Create_instance( const IID& iid, ptr<IUnknown>* result )
 {
     if( iid == object_server::IID_Iproxy )
     {
         ptr<Com_task_proxy> instance = Z_NEW( Com_task_proxy );
-        *result = static_cast<Object*>( instance.take() );
+        *result = static_cast<IDispatch*>( instance.take() );
         return S_OK;
     }
 
@@ -2440,7 +2440,7 @@ Com_task_proxy::Com_task_proxy()
 : 
     //Proxy_with_local_methods( &class_descriptor ),
     Idispatch_implementation( &class_descriptor ),
-    _proxy( Z_NEW( object_server::Proxy( &class_descriptor, static_cast<Object*>( this ) ) ) ),
+    _proxy( Z_NEW( object_server::Proxy( &class_descriptor, static_cast<IDispatch*>( this ) ) ) ),
     _subprocess_register( Z_NEW( Subprocess_register ) )
 {
 }
@@ -2451,7 +2451,7 @@ STDMETHODIMP Com_task_proxy::Start_subprocess( VARIANT* program_and_parameters, 
 {
     return _subprocess_register->Start_subprocess( program_and_parameters, result );
 }
-*/
+
 //-------------------------------------------------------------------Com_task_proxy::add_subprocess
 /*
 void Com_task_proxy::add_subprocess( Subprocess* subprocess  )

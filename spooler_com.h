@@ -469,14 +469,16 @@ struct Com_task_proxy : //com::object_server::proxy_with_local_methods< spooler_
 {
     static Class_descriptor     class_descriptor;
 
+#   ifndef SYSTEM_HAS_COM
+        static const ::zschimmer::com::Com_method _methods[];
+        //Z_DEFINE_GETIDSOFNAMES_AND_INVOKE
+#   endif
+
+
     static HRESULT              Create_instance             ( const IID& iid, ptr<IUnknown>* result );
 
 
                                 Com_task_proxy              ();
-
-#ifndef SYSTEM_HAS_COM
-    //Z_DEFINE_GETIDSOFNAMES_AND_INVOKE
-#endif
 
     STDMETHODIMP                Start_subprocess            ( VARIANT* program_and_parameters, spooler_com::Isubprocess** result );
 
