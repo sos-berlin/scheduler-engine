@@ -20,6 +20,7 @@ p.first         { margin-top: 1ex; }
 p.mono          { font-family: Lucida Console, monospace; font-size: 9pt; margin-left: 4ex }
 .mono           { font-family: Lucida Console, monospace; font-size: 9pt }
 code            { font-family: Lucida Console, monospace; font-size: 9pt;  }
+.code           { font-family: Lucida Console, monospace; font-size: 9pt;  }
 .comment        { background-color: #FFFF00 }
 
 a.silent        { text-decoration: none; color: #0000A0 }
@@ -44,6 +45,7 @@ div.list:first-line { margin-left: 0; margin-top: 9ex; }
 
 span.title          { font-style: normal; }
 span.type           { font-style: italic; }
+.small              { font-size: 8pt; }
 
 /*p.parent_element    { margin-top: 4ex; font-family: Lucida Console, monospace; font-size: 9pt; }*/
 p.xml_element       { margin-top: 2ex; }

@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet href="scheduler.xslt" type="text/xsl"?>
+
+<!--$Id: datenbank.xml,v 1.1 2004/09/08 20:34:40 jz Exp $-->
+
+<description 
+    title               = "Datenbank" 
+    base_dir            = ""
+    author              = "$Author: jz $"
+    date                = "$Date: 2004/09/08 20:34:40 $"
+>
+
+<p>
+Der Scheduler kann mit einer Datenbank betrieben werden. Das hat folgende Zwecke.
+<br/>&#160;
+</p>
+
+<ul>
+    <li>
+        Task-Warteschlange: Die in eine Warteschlange eingereihten Tasks werden in der Datenbank gehalten.
+        Wenn der Scheduler erneut startet, liest er die Warteschlange aus der Datenbank.
+    </li>
+    <li>
+        Aufträge: Jeder Auftrag wird in einer Tabelle gehalten.
+        Wenn der Scheduler erneut startet, liest er die Aufträge aus der Datenbank.
+    </li>
+    <li>
+        Task-Historie: Für jede Task schreibt der Scheduler einen Satz.
+    </li>
+    <li>
+        Auftrags-Historie: Für jeden Auftrag schreibt der Scheduler einen Satz.
+    </li>
+</ul>
+
+<h2>Einstellung</h2>
+<p>
+    Siehe <scheduler_ini_entry file="factory.ini" section="spooler" entry="db"/>.
+    <br/>
+    Siehe <scheduler_ini_entry file="factory.ini" section="spooler" entry="need_db"/>.
+</p>
+
+
+
+<pre>
+- die Wirkung von need_db= sollte beschrieben werden zusammen mit max_db_errors=. Hier auf den Versand der eMails hinweisen.
+ 
+- für den Abschnitt [job jobname] darauf hinweisen, dass diese optional sind und bei Vorhandensein die gleichnamigen Einträge aus dem Abschnitt [spooler] überschreiben.
+
+
+(Ein Kapitel über die Scheduler-Datenbank: Tabellennamen, Create-Tables, automatisches Einrichten, wann wird ein Satz geschrieben, wann geändert, wann gelesen? need-DB, Verhalten bei DB-Fehlern.)
+=> need_db und Verhalten bei DB-Fehler soll dokumentiert werden
+
+
+</pre>
+
+</description>

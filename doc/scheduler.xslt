@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding="utf-8"?>
-<!-- $Id: scheduler.xslt,v 1.26 2004/09/08 19:23:23 jz Exp $ -->
+<!-- $Id: scheduler.xslt,v 1.27 2004/09/08 20:34:13 jz Exp $ -->
 
 <!--
     Änderungswünsche:
@@ -970,7 +970,7 @@
                 <tr>
                     <td colspan="3">
                         <xsl:apply-templates mode="setting_description" select="."/>
-                        <p/>
+                        <p>&#160;</p>
                     </td>
                 </tr>
 
@@ -986,11 +986,11 @@
                             </xsl:element>
                         </td>
                         <td>
-                            <code>= </code><span class="type"><xsl:value-of select="$setting/@type"/></span>
+                            <code>= </code><span class="type"><xsl:value-of select="@type | $setting/@type"/></span>
                         </td>
                         <td>
                             <span class="title">
-                                <xsl:value-of select="$setting/@title"/>
+                                <xsl:value-of select="@title | $setting/@title"/>
                             </span>
                         </td>
                     </tr>
@@ -1068,7 +1068,7 @@
                             <b><code><xsl:value-of select="@name | @setting"/></code></b>
                             
                             <b><code>=</code></b>
-                            <span class="type"><xsl:value-of select="$setting/@type"/></span>
+                            <span class="type"><xsl:value-of select="@type | $setting/@type"/></span>
                         </td>
                         <td>
                             <xsl:apply-templates select="." mode="setting_header_rest"/>            

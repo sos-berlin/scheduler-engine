@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet href="scheduler.xslt" type="text/xsl"?>
+
+<!--$Id: sos_ini_java.xml,v 1.1 2004/09/08 20:34:13 jz Exp $-->
+
+<ini_section 
+    file     = "sos.ini"
+    name     = "java"
+    title    = ""
+    base_dir = ""
+    author   = "$Author: jz $"
+    date     = "$Date: 2004/09/08 20:34:13 $">
+
+    <ini_entries>
+        <ini_entry setting="vm" type="dateiname" title="Dateiname der Java virtual machine">
+            <description>
+                <p>
+                    Voreingestellt ist für Windows <code>jvm.dll</code>, für HP-UX <code>jvm.sl</code> und sonst <code>jvm.so</code>.
+                </p>
+                <p>
+                    Wenn das Verzeichnis des Moduls nicht im <code>PATH</code> ist, 
+                    können Sie hier den vollständigen Pfad angeben.
+                </p>
+            </description>
+        </ini_entry>
+
+        <ini_entry setting="class_path" type="verzeichnisse" title="classpath">
+            <description>
+                <p>
+                    Das ist der <code>class_path</code> für Java.
+                    Sie geben hier Verzeichnisse oder Pfade von Jar-Dateien an.
+                    Die Namen trennen sie in Windows mit "<code>;</code>", sonst mit "<code>:</code>".
+                </p>
+            </description>
+            <example>
+                <pre>
+class_path = s:\prod\bind\sos.spooler.jar;s:\prod\bind\sos.hostware.jar;s:\prod\bind\sos.mail.jar
+                </pre>
+            </example>
+        </ini_entry>
+
+        <ini_entry setting="options" type="dateiname" title="Optionen für Java">
+            <description>
+                <p>
+                </p>
+            </description>
+
+            <example>
+                <pre>
+options = -Xdebug -Djava.library.path=s:/prod/bind
+                </pre>
+            </example>
+        </ini_entry>
+
+    </ini_entries>
+    
+    <description>
+        <p>
+            Hier werden Einstellungen für Java vorgenommen.
+        </p>
+    </description>
+</ini_section>

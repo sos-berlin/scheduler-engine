@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet href="scheduler.xslt" type="text/xsl"?>
+
+<!--$Id: email.xml,v 1.1 2004/09/08 20:34:40 jz Exp $-->
+
+<description 
+    title               = "eMail-Versand" 
+    base_dir            = ""
+    author              = "$Author: jz $"
+    date                = "$Date: 2004/09/08 20:34:40 $"
+>
+
+    <h2>Einstellungen zur eMail</h2>
+
+        <p>
+            Die Einstellungen für eine eMail können Sie hier vornehmen:
+            <div class="indent">
+                <scheduler_ini_entry file="factory.ini" section="spooler" entry="smtp"/>
+                <br/>
+                <scheduler_ini_entry file="factory.ini" section="spooler" entry="log_mail_subject"/>
+                <br/>
+                <scheduler_ini_entry file="factory.ini" section="spooler" entry="log_mail_from"/>
+                <br/>
+                <scheduler_ini_entry file="factory.ini" section="spooler" entry="log_mail_to"/>
+                <br/>
+                <scheduler_ini_entry file="factory.ini" section="spooler" entry="log_mail_cc"/>
+                <br/>
+                <scheduler_ini_entry file="factory.ini" section="spooler" entry="log_mail_bcc"/>
+            </div>
+        </p>
+        <p>
+            Oder wenn Sie besondere Einstellungen für einen bestimmten Job vornehmen wollen:
+            <div class="indent">
+                <scheduler_ini_entry file="factory.ini" section="job" entry="log_mail_subject"/>
+                <br/>
+                <scheduler_ini_entry file="factory.ini" section="job" entry="log_mail_from"/>
+                <br/>
+                <scheduler_ini_entry file="factory.ini" section="job" entry="log_mail_to"/>
+                <br/>
+                <scheduler_ini_entry file="factory.ini" section="job" entry="log_mail_cc"/>
+                <br/>
+                <scheduler_ini_entry file="factory.ini" section="job" entry="log_mail_bcc"/>
+            </div>
+        </p>
+
+    
+    <h2>eMails nach dem Ende einer Task</h2>
+
+        <p>
+            Wenn eine Task endet, kann der Scheduler eine eMail mit dem Task-Protokoll verschicken.
+        </p>
+        <p>
+            Ob nach Ende einer Task das Protokoll verschickt werden soll, bestimmen Sie mit diesen Einstellungen:
+            <div class="indent">
+                <scheduler_ini_entry file="factory.ini" section="spooler" entry="mail_on_success"/>
+                <br/>
+                <scheduler_ini_entry file="factory.ini" section="spooler" entry="mail_on_process"/>
+                <br/>
+                <scheduler_ini_entry file="factory.ini" section="spooler" entry="mail_on_error"/>
+            </div>
+        </p>
+        <p>
+            Und speziell für einen Job:
+            <div class="indent">
+                <scheduler_ini_entry file="factory.ini" section="job" entry="mail_on_success"/>
+                <br/>
+                <scheduler_ini_entry file="factory.ini" section="job" entry="mail_on_process"/>
+                <br/>
+                <scheduler_ini_entry file="factory.ini" section="job" entry="mail_on_error"/>
+                <br/>
+            </div>
+        </p>
+
+
+
+    <h2>eMails, wenn der Scheduler wegen eines Fehlers sich beendet</h2>
+
+        <p>
+            Für diese eMails werden die Einstellungen im Abschnit <code>[spooler]</code> der Datei <code>factory.ini</code> verwendet.
+        </p>
+        <p>
+            Wenn ein Fehler auftritt, 
+            bevor die Option <scheduler_option name="ini"/> berücksichtigt werden konnte,
+            verwendet der Scheduler die Einstellungen aus der Datei <code>factory.ini</code> mit unverändertem Namen.
+        </p>
+        <p>
+            Wenn der Scheduler als Dienst oder Daemon läuft und 
+            ein Fehler auftritt, der so ernst ist, dass der Scheduler abbrechen muss,
+            verschickt er eine eMail mit der Fehlermeldung.
+        </p>    
+        <p>
+            Wenn ein Datenbankfehler auftritt, verschickt der Scheduler eine eMail.
+            Fehler, die bei den Versuchen auftreten, die Datenbank erneut zu öffnen, führen nicht zu einer eMail.
+        </p>    
+        <p>
+            Wenn der Scheduler nach einem Fehler den Datenbankbetrieb aufgibt, schickt er eine eMail.
+        </p>    
+
+    
+    <h2>
+        Installation mit JavaMail
+    </h2>
+    
+        <p>
+            Für den eMail-Versand mit JavaMail werden folgende Dateien im <code>class_path</code> benötigt.
+        </p>
+
+        <p>
+            <table cellspacing="0" cellpadding="0">
+                <col valign="baseline" class="code"/>
+                <col valign="baseline" style="padding-left: 2ex"/>
+                <tr>
+                    <td>
+                        sos.mail.jar
+                    </td>
+                    <td class="small">
+                        (wird mit dem Scheduler geliefert)
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        mail.jar
+                    </td>
+                    <td class="small">
+                        (Sun Microsystems, Inc.)
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        smtp.jar
+                    </td>
+                    <td class="small">
+                        (Sun Microsystems, Inc.)
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        activation.jar
+                    </td>
+                    <td class="small">
+                        (Sun Microsystems, Inc.)
+                    </td>
+                </tr>
+            </table>
+
+            <br/>            
+            Siehe <scheduler_ini_entry file="sos.ini" section="java" entry="class_path"/>.
+        </p>
+            
+    
+
+</description>
