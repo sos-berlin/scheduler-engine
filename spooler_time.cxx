@@ -1,4 +1,4 @@
-// $Id: spooler_time.cxx,v 1.26 2002/11/28 11:21:24 jz Exp $
+// $Id: spooler_time.cxx,v 1.27 2002/11/28 12:01:12 jz Exp $
 /*
     Hier sind implementiert
 
@@ -23,6 +23,7 @@ namespace sos {
 namespace spooler {
 namespace time {
 
+    
 Period empty_period;
 
 //--------------------------------------------------------------------------------Time::operator =
