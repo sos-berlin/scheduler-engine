@@ -1,4 +1,4 @@
-// $Id: spooler.odl,v 1.69 2003/10/19 11:41:00 jz Exp $
+// $Id: spooler.odl,v 1.70 2003/12/09 19:37:51 jz Exp $
 
 // Anweisung: midl /nologo /error all /out $(OutDir) $(InputPath)
 
@@ -903,6 +903,59 @@ library spooler
         interface Ihas_java_class_name;
     }
 
+    //------------------------------------------------------------------------------------------Log
+/*
+    [
+        uuid       ( 3B6C8A62-B511-445d-A2A2-E852BC2E05A0 ),
+        odl,
+        dual
+    ]
+    interface Ilog_proxy : IDispatch
+    {
+        [propget]
+        HRESULT                 java_class_name         ( [out,retval] BSTR* result );          // Damit java_class_name über IDispatch, statt über Ihas_java_class_name gerufen werden kann
+                                                                                                // Für den Objectserver
+
+        HRESULT                 debug9                  ( [in] BSTR line );
+        HRESULT                 debug8                  ( [in] BSTR line );
+        HRESULT                 debug7                  ( [in] BSTR line );
+        HRESULT                 debug6                  ( [in] BSTR line );
+        HRESULT                 debug5                  ( [in] BSTR line );
+        HRESULT                 debug4                  ( [in] BSTR line );
+        HRESULT                 debug3                  ( [in] BSTR line );
+        HRESULT                 debug2                  ( [in] BSTR line );
+        HRESULT                 debug1                  ( [in] BSTR line );
+        
+        HRESULT                 debug                   ( [in] BSTR line );
+        
+        [id(0)]
+        HRESULT                 info                    ( [in] BSTR line );
+        
+        HRESULT                 msg                     ( [in] BSTR line );     // Zur Kompatibilität, wie info()
+        
+        HRESULT                 warn                    ( [in] BSTR line );
+        
+        HRESULT                 error                   ( [in] BSTR line );
+
+        HRESULT                 log                     ( [in] enum Log_level, [in] BSTR line );
+
+        [propput]
+        HRESULT                 level                   ( [in] int level );
+
+        [propget]
+        HRESULT                 level                   ( [out,retval] int* level );
+
+    }
+
+    [
+        uuid       ( 032974D7-8668-41c4-A204-3E893E06846F )
+    ]
+    coclass Log
+    {
+        interface Ilog;
+        interface Ihas_java_class_name;
+    }
+*/
     //----------------------------------------------------------------Remote_module_instance_server
 
     [

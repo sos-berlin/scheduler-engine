@@ -1,4 +1,4 @@
-// $Id: spooler_module_com.cxx,v 1.24 2003/11/10 16:07:31 jz Exp $
+// $Id: spooler_module_com.cxx,v 1.25 2003/12/09 19:37:52 jz Exp $
 /*
     Hier sind implementiert
 
@@ -164,7 +164,7 @@ void Com_module_instance::load()
 
 //---------------------------------------------------------------------Com_module_instance::add_obj
 
-void Com_module_instance::add_obj( const ptr<IDispatch>& object, const string& name )
+void Com_module_instance::add_obj( IDispatch* object, const string& name )
 {
     if( name == "spooler_log"    )  _com_context->_log     = object;
     else
@@ -242,7 +242,7 @@ void Scripting_engine_module_instance::close__end()
 
 //------------------------------------------------------------------Scripting_engine_module_instance::add_obj
 
-void Scripting_engine_module_instance::add_obj( const ptr<IDispatch>& object, const string& name )
+void Scripting_engine_module_instance::add_obj( IDispatch* object, const string& name )
 {
 #   if 1  // def Z_WINDOWS
 

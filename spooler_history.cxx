@@ -1,4 +1,4 @@
-// $Id: spooler_history.cxx,v 1.65 2003/12/09 12:42:26 jz Exp $
+// $Id: spooler_history.cxx,v 1.66 2003/12/09 19:37:52 jz Exp $
 
 #include "spooler.h"
 #include "../zschimmer/z_com.h"
@@ -453,8 +453,6 @@ int Spooler_db::get_id_( const string& variable_name, Transaction* outer_transac
             //_job_id_select.execute();
             //id = _job_id_select.get_record().as_int(0);
             //_job_id_select.close( close_cursor );
-
-static int c = 0; if( ++c >= 3 )  throw_xc( "FEHLER" );
 
             execute( "UPDATE " + uquoted(_spooler->_variables_tablename) + " set \"WERT\" = \"WERT\"+1 where \"NAME\"=" + sql::quoted( variable_name ) );
 

@@ -1,4 +1,4 @@
-// $Id: spooler_module.cxx,v 1.56 2003/11/30 10:35:38 jz Exp $
+// $Id: spooler_module.cxx,v 1.57 2003/12/09 19:37:52 jz Exp $
 /*
     Hier sind implementiert
 
@@ -394,7 +394,7 @@ void Module_instance::detach_task()
 
 //-------------------------------------------------------------------------Module_instance::add_obj
 
-void Module_instance::add_obj( const ptr<IDispatch>& object, const string& name )
+void Module_instance::add_obj( IDispatch* object, const string& name )
 {
 }
 

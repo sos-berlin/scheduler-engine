@@ -1,4 +1,4 @@
-// $Id: spooler_module_java.cxx,v 1.73 2003/11/30 01:34:07 jz Exp $
+// $Id: spooler_module_java.cxx,v 1.74 2003/12/09 19:37:52 jz Exp $
 /*
     Hier sind implementiert
 
@@ -541,7 +541,7 @@ void Java_module_instance::init()
 
 //--------------------------------------------------------------------Java_module_instance::add_obj
 
-void Java_module_instance::add_obj( const ptr<IDispatch>& object, const string& name )
+void Java_module_instance::add_obj( IDispatch* object, const string& name )
 {
     Env e = env();
 

@@ -1,4 +1,4 @@
-// $Id: spooler_module_com.h,v 1.12 2003/10/28 22:04:27 jz Exp $
+// $Id: spooler_module_com.h,v 1.13 2003/12/09 19:37:52 jz Exp $
 
 #ifndef __SPOOLER_MODULE_COM_H
 #define __SPOOLER_MODULE_COM_H
@@ -41,7 +41,7 @@ struct Com_module_instance : Com_module_instance_base
                                ~Com_module_instance         ();
 
     void                        init                        ();
-    virtual void                add_obj                     ( const ptr<IDispatch>&, const string& name );
+    virtual void                add_obj                     ( IDispatch*, const string& name );
     void                        load                        ();
     void                        close__end                  ();
 
@@ -70,7 +70,7 @@ struct Scripting_engine_module_instance : Com_module_instance_base
     void                        init                        ();
     void                        load                        ();
     void                        start                       ();
-    virtual void                add_obj                     ( const ptr<IDispatch>&, const string& name );
+    virtual void                add_obj                     ( IDispatch*, const string& name );
     Variant                     call                        ( const string& name );
     Variant                     call                        ( const string& name, int param );
 

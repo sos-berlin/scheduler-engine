@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.223 2003/12/09 12:42:27 jz Exp $
+// $Id: spooler_task.cxx,v 1.224 2003/12/09 19:37:52 jz Exp $
 /*
     Hier sind implementiert
 
@@ -1419,11 +1419,13 @@ void Job_module_task::do_load()
     if( !module_instance->loaded() )
     {
         module_instance->init();
+
         module_instance->add_obj( (IDispatch*)_spooler->_com_spooler    , "spooler"        );
       //module_instance->add_obj( (IDispatch*)_job->_thread->_com_thread, "spooler_thread" );
         module_instance->add_obj( (IDispatch*)_job->_com_job            , "spooler_job"    );
         module_instance->add_obj( (IDispatch*)module_instance->_com_task, "spooler_task"   );
         module_instance->add_obj( (IDispatch*)module_instance->_com_log , "spooler_log"    );
+
         module_instance->load();
         module_instance->start();
     }

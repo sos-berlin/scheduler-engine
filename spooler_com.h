@@ -1,4 +1,4 @@
-// $Id: spooler_com.h,v 1.84 2003/12/08 10:32:05 jz Exp $
+// $Id: spooler_com.h,v 1.85 2003/12/09 19:37:51 jz Exp $
 
 #ifndef __SPOOLER_COM_H
 #define __SPOOLER_COM_H
@@ -190,7 +190,7 @@ struct Com_variable_set_enumerator : spooler_com::Ivariable_set_enumerator, Sos_
 
 struct Com_log : spooler_com::Ilog, 
                  spooler_com::Ihas_java_class_name, 
-                 z::com::object_server::Ireference_with_properties,
+                 z::com::object_server::Ihas_reference_with_properties,
                  Sos_ole_object               
 {
                                 Com_log                     ( Prefix_log* = NULL );
@@ -206,7 +206,7 @@ struct Com_log : spooler_com::Ilog,
 
 
     // interface Ireference_with_properties
-    STDMETHODIMP            get_reference_with_properties   ( const IID&, ptr<z::com::object_server::Reference_with_properties>* );
+    ptr<z::com::object_server::Reference_with_properties> get_reference_with_properties();
 
 
     // interface Ilog
@@ -266,9 +266,15 @@ struct Com_log : spooler_com::Ilog,
 
 //------------------------------------------------------------------------------------Com_log_proxy
 
+Z_DEFINE_GUID( CLSID_Com_log_proxy, 0x9c7468ed, 0xccf8, 0x4f4d, 0x88, 0x31, 0x16, 0x4d, 0xdc, 0x81, 0xb9, 0x82 );   // {9C7468ED-CCF8-4f4d-8831-164DDC81B982}
+
+
 struct Com_log_proxy: object_server::Proxy 
 {
                               //Com_log                     ();
+
+    static HRESULT              create_instance             ( const IID& iid, ptr<IUnknown>* result );
+
 
     void                    set_property                    ( const string& name, const Variant& value );
 

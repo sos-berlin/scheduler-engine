@@ -1,4 +1,4 @@
-// $Id: spooler_module.h,v 1.54 2003/11/30 01:34:07 jz Exp $
+// $Id: spooler_module.h,v 1.55 2003/12/09 19:37:52 jz Exp $
 
 #ifndef __SPOOLER_MODULE_H
 #define __SPOOLER_MODULE_H
@@ -176,7 +176,7 @@ struct Module_instance : Object
     struct Object_list_entry
     {
                                 Object_list_entry           ()                                      {}
-                                Object_list_entry           ( const ptr<IDispatch>& object, const string& name ) : _object(object), _name(name) {}
+                                Object_list_entry           ( IDispatch* object, const string& name ) : _object(object), _name(name) {}
 
         ptr<IDispatch>         _object;
         string                 _name;
@@ -204,7 +204,8 @@ struct Module_instance : Object
 
     void                        attach_task                 ( Task*, Prefix_log* );
     void                        detach_task                 ();
-    virtual void                add_obj                     ( const ptr<IDispatch>&, const string& name );
+    virtual void                add_obj                     ( IDispatch*, const string& name );
+  //virtual void                add_log_obj                 ( Com_log* log, const string& name )    { add_obj( log, name ); }
     virtual void                load                        ()                                      {}
     virtual void                start                       ()                                      {}
     virtual IDispatch*          dispatch                    () const                                { throw_xc( "SCHEDULER-172", "dispatch()" ); }

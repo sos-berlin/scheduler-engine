@@ -1,4 +1,4 @@
-// $Id: spooler_com.cxx,v 1.123 2003/12/08 10:32:05 jz Exp $
+// $Id: spooler_com.cxx,v 1.124 2003/12/09 19:37:51 jz Exp $
 /*
     Hier sind implementiert
 
@@ -795,10 +795,10 @@ STDMETHODIMP Com_log::QueryInterface( const IID& iid, void** result )
         return S_OK; 
     }
     else
-    if( iid == z::com::object_server::IID_Ireference_with_properties )
+    if( iid == z::com::object_server::IID_Ihas_reference_with_properties )
     {
         AddRef();
-        *result = (Ireference_with_properties*)this;  
+        *result = (Ihas_reference_with_properties*)this;  
         return S_OK; 
     }
 
@@ -807,27 +807,24 @@ STDMETHODIMP Com_log::QueryInterface( const IID& iid, void** result )
 
 //-----------------------------------------------------------Com_log::get_reference_with_properties
 
-STDMETHODIMP Com_log::get_reference_with_properties( const IID& iid, ptr<object_server::Reference_with_properties>* result )
+ptr<object_server::Reference_with_properties> Com_log::get_reference_with_properties()   //( const IID& iid )
 {
-    HRESULT hr = NOERROR;
+    ptr<object_server::Reference_with_properties> result;
 
-    if( iid != IID_Ilog )  return E_NOINTERFACE;
+    //if( iid != IID_Ilog )  return E_NOINTERFACE;
+
     
-    try
+    THREAD_LOCK( _lock )
     {
-        THREAD_LOCK( _lock )
-        {
-            if( !_log )  return E_POINTER;
-            //*result = _log->get_reference_with_properties();
-            *result = Z_NEW( object_server::Reference_with_properties( "Com_log_proxy", (Ilog*)this ) );  // IDispatch* wird von Com_log eingesetzt.
+        if( !_log )  throw_com( E_POINTER, "Com_log::get_reference_with_properties" );
 
-            (*result)->set_property( "level", _log->log_level() );
-        }
+        //*result = _log->get_reference_with_properties();
+        result = Z_NEW( object_server::Reference_with_properties( CLSID_Com_log_proxy, (Ilog*)this ) );  // IDispatch* wird von Com_log eingesetzt.
+
+        result->set_property( "level", _log->log_level() );
     }
-    catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Log::get_reference_with_properties" ); }
-    catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Log::get_reference_with_properties" ); }
 
-    return NOERROR;
+    return result;
 }
 
 //--------------------------------------------------------------------------------Com_log::set_task
@@ -1260,6 +1257,22 @@ const Com_method Com_log_proxy::_methods[] =
 };
 */
 
+//-------------------------------------------------------------------Com_log_proxy::create_instance
+
+HRESULT Com_log_proxy::create_instance( const IID& iid, ptr<IUnknown>* result )
+{
+    if( iid == object_server::IID_Iproxy )
+    {
+        ptr<Com_log_proxy> instance = Z_NEW( Com_log_proxy );
+        *result = +instance;
+        return S_OK;
+    }
+
+    return E_NOINTERFACE;
+}
+
+//----------------------------------------------------------------------Com_log_proxy::set_property
+
 void Com_log_proxy::set_property( const string& name, const Variant& value )
 {
     if( name == "level" )  _level = value.as_int();
@@ -1288,10 +1301,6 @@ STDMETHODIMP Com_log_proxy::GetIDsOfNames( const IID& iid, OLECHAR** rgszNames, 
 STDMETHODIMP Com_log_proxy::Invoke( DISPID dispid, const IID& iid, LCID lcid, unsigned short flags, DISPPARAMS* dispparams, 
                                     VARIANT* result, EXCEPINFO* excepinfo, UINT* arg_nr )
 {
-    //hr = com_invoke( this, _methods, dispid, iid, lcid, flags, dispparams, arg_nr, result, excepinfo );     // Erst lokale Proxy-Implementierung versuchen
-    
-    //if( hr == DISP_E_MEMBERNOTFOUND )
-
     const Bstr& name = name_from_dispid( dispid );
 
     if( name == "debug9" )  { if( _level > spooler_com::log_debug9 )  return S_FALSE; }
@@ -1316,6 +1325,12 @@ STDMETHODIMP Com_log_proxy::Invoke( DISPID dispid, const IID& iid, LCID lcid, un
     else                                                                              
     if( name == "info"   )  { if( _level > spooler_com::log_info   )  return S_FALSE; }
     else
+    if( name == "log"   )
+    {
+        if( dispparams->cArgs != 2 )  return DISP_E_BADPARAMCOUNT;
+        if( int_from_variant( dispparams->rgvarg[ dispparams->cArgs - 1 ] ) < _level )  return S_FALSE;
+    }
+    else
     if( name == "level" )
     {
         if( flags & DISPATCH_PROPERTYPUT )
@@ -1333,7 +1348,6 @@ STDMETHODIMP Com_log_proxy::Invoke( DISPID dispid, const IID& iid, LCID lcid, un
             //return S_OK;
         }
     }
-
 
     return Proxy::Invoke( dispid, iid, lcid, flags, dispparams, result, excepinfo, arg_nr );      // Server aufrufen
 }

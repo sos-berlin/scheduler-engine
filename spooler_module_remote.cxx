@@ -1,4 +1,4 @@
-// $Id: spooler_module_remote.cxx,v 1.52 2003/12/08 10:32:05 jz Exp $
+// $Id: spooler_module_remote.cxx,v 1.53 2003/12/09 19:37:52 jz Exp $
 /*
     Hier sind implementiert
 
@@ -143,25 +143,26 @@ string Remote_module_instance_proxy::stderr_filename()
 
 //------------------------------------------------------------Remote_module_instance_proxy::add_obj
 
-void Remote_module_instance_proxy::add_obj( const ptr<IDispatch>& object, const string& name )
+void Remote_module_instance_proxy::add_obj( IDispatch* object, const string& name )
 {
     _object_list.push_back( Object_list_entry( object, name ) );
 }
 
 //--------------------------------------------------------Remote_module_instance_proxy::add_log_obj
-
+/*
 void Remote_module_instance_proxy::add_log_obj( Com_log* log, const string& name )
 {
-    object_server::Reference_with_properties remote_ref ( "sos::spooler::Log", log );
+    typedef object_server::Reference_with_properties  Ref;
+    ptr<Ref> remote_ref = Z_NEW( Ref( "sos::spooler::Log", log ) );
     
     int level = 0;
     log->get_level( &level );
 
-    remote_ref.set_property( "level", level );
+    remote_ref->set_property( "level", level );
 
-    _object_list.push_back( Object_list_entry( log, name ) );
+    _object_list.push_back( Object_list_entry( remote_ref, name ) );
 }
-
+*/
 //--------------------------------------------------------Remote_module_instance_proxy::name_exists
 
 bool Remote_module_instance_proxy::name_exists( const string& name )
