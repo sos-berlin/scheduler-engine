@@ -1,4 +1,4 @@
-// $Id: spooler_command.cxx,v 1.120 2004/07/19 13:08:38 jz Exp $
+// $Id: spooler_command.cxx,v 1.121 2004/07/20 11:26:46 jz Exp $
 /*
     Hier ist implementiert
 
@@ -747,7 +747,7 @@ string Command_processor::execute_http( const Http_request& http_request )
         strcpy( time_text, asctime( gmtime( &t ) ) );
 #    else
         struct tm  tm;
-        asctime_r( gmtime_r( &t, &tm ), &time_text );
+        asctime_r( gmtime_r( &t, &tm ), time_text );
 #   endif
     
     time_text[24] = '\0';
