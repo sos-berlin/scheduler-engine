@@ -1,4 +1,4 @@
-// $Id: spooler_wait.cxx,v 1.22 2001/09/14 12:39:41 jz Exp $
+// $Id: spooler_wait.cxx,v 1.23 2001/11/09 17:08:39 jz Exp $
 /*
     Hier sind implementiert
 
@@ -290,7 +290,7 @@ int Wait_handles::wait_until( Time until )
         if( t <= 0 )  break;
         if( again )  _log->msg( "Noch " + sos::as_string(wait_time) + "s warten ..." );
 
-#       ifdef DEBUG
+#       ifdef DEBUGxxx
         {
             string msg = "WaitForMultipleObjects " + sos::as_string(t/1000.0) + "ms  ";
             for( int i = 0; i < _handles.size(); i++ )
@@ -370,6 +370,8 @@ string Wait_handles::as_string() const
 void Directory_watcher::watch_directory( const string& directory )
 {
     close();
+
+    _directory = directory;
 
     _handle = FindFirstChangeNotification( directory.c_str(), FALSE, FILE_NOTIFY_CHANGE_FILE_NAME );
     if( _handle == INVALID_HANDLE_VALUE )  _handle = NULL, throw_mswin_error( "FindFirstChangeNotification" );

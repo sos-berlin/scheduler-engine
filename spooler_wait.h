@@ -1,4 +1,4 @@
-// $Id: spooler_wait.h,v 1.16 2001/09/14 12:39:41 jz Exp $
+// $Id: spooler_wait.h,v 1.17 2001/11/09 17:08:39 jz Exp $
 
 #ifndef __SPOOLER_WAIT_H
 #define __SPOOLER_WAIT_H
@@ -114,6 +114,11 @@ struct Directory_watcher : Event
                                 operator !                  ()                              { return true; };
         
 #   endif
+
+    string                      directory                   () const                        { return _directory; }
+
+  private:
+    string                     _directory;
 };
 
 //-------------------------------------------------------------------------------------------------

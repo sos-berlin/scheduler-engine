@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.46 2001/08/20 13:46:55 jz Exp $
+// $Id: spooler_task.cxx,v 1.47 2001/11/09 17:08:39 jz Exp $
 /*
     Hier sind implementiert
 
@@ -390,9 +390,19 @@ void Job::start_when_directory_changed( const string& directory_name )
 {
     THREAD_LOCK( _lock )
     {
-        if( _spooler->_debug )  _log.msg( "start_when_directory_changed " + directory_name + "\"" );
+        if( _spooler->_debug )  _log.msg( "start_when_directory_changed \"" + directory_name + "\"" );
 
 #       ifdef SYSTEM_WIN
+
+            for( Directory_watcher_array::iterator it = _directory_watcher_array.begin(); it != _directory_watcher_array.end(); it++ )
+            {
+                if( (*it)->directory() == directory_name )
+                {
+                    if( _spooler->_debug )  _log.msg( "Verzeichnis wird bereits beobachtet." );
+                    return;
+                }
+            }
+
 
             Sos_ptr<Directory_watcher> dw = SOS_NEW( Directory_watcher );
 
@@ -643,7 +653,10 @@ bool Job::do_something()
 
     if( !ok || has_error() )
     {
-        if( _state == s_running || _state == s_running_process )  end(), something_done = true;
+        if( _state == s_starting        // Bei Fehler in spooler_init()
+         || _state == s_running 
+         || _state == s_running_process )  end(), something_done = true;
+
         if( _state != s_stopped  &&  has_error()  &&  _repeat == 0 )  stop(), something_done = true;
     }
 
