@@ -1,4 +1,4 @@
-// $Id: spooler_thread.cxx,v 1.78 2003/03/31 13:45:37 jz Exp $
+// $Id: spooler_thread.cxx,v 1.79 2003/04/07 12:41:57 jz Exp $
 /*
     Hier sind implementiert
 
@@ -429,14 +429,25 @@ Job* Spooler_thread::get_next_job_to_start()
             Job* job = *it;
 
             if( job->_state == Job::s_pending
-             || job->_state == Job::s_running_delayed 
-             || job->_state == Job::s_running_waiting_for_order ) 
+             || job->_state == Job::s_running_delayed )
             {
-                if( next_start_time > (*it)->_next_time ) 
+                if( next_start_time > job->_next_time ) 
                 {
-                    _next_job = *it; 
+                    _next_job = job; 
                     next_start_time = _next_job->_next_time;
                     if( next_start_time == 0 )  break;
+                }
+            }
+
+            if( job->_state == Job::s_pending
+             || job->_state == Job::s_running_waiting_for_order ) 
+            {
+                if( job->_order_queue  &&  !job->_order_queue->empty() 
+                 && ( job->_state != Job::s_pending || job->is_in_period() ) )
+                {
+                    _next_job = job; 
+                    next_start_time = 0; 
+                    break; 
                 }
             }
         }

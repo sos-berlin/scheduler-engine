@@ -1,4 +1,4 @@
-// $Id: spooler_task.h,v 1.89 2003/03/27 11:51:06 jz Exp $
+// $Id: spooler_task.h,v 1.90 2003/04/07 12:41:56 jz Exp $
 
 #ifndef __SPOOLER_TASK_H
 #define __SPOOLER_TASK_H
@@ -190,7 +190,7 @@ struct Job : Sos_self_deleting
     State                       state                       () const                    { return _state; }
     Object_set_descr*           object_set_descr            () const                    { return _object_set_descr; }
     int                         priority                    () const                    { return _priority; }
-    Spooler_thread*                     thread                      () const                    { return _thread; }
+    Spooler_thread*             thread                      () const                    { return _thread; }
     string                      job_state                   ();
     string                      include_path                () const;
     string                      title                       ()                          { string title; THREAD_LOCK( _lock )  title = _title;  return title; }
