@@ -1,4 +1,4 @@
-<!-- $Id: jobs_frame.html,v 1.21 2004/07/23 17:53:39 jz Exp $ -->
+<!-- $Id: jobs_frame.html,v 1.22 2004/07/24 11:36:42 jz Exp $ -->
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <html>
 
@@ -37,7 +37,7 @@
 <script defer="true" language="javascript"><!--
 //--------------------------------------------------------------------------------------------const
 
-var job_chain_orders_limit = 10;
+var _max_orders = 10;
 
 //----------------------------------------------------------------------------------------------var
 
@@ -45,6 +45,9 @@ var _stylesheet;
 var _response;
 var _timer;
 var _scheduler;
+var _show_jobs       = true;
+var _show_job_chains = false;
+
 //var _update_periodically = false;
 
 //-------------------------------------------------------------------------------------------onload
@@ -128,14 +131,20 @@ function set_update_timer()
 
 function update_jobs_frame()
 {
-    var what = "";
-    if( document.all.show_orders_checkbox  &&  document.all.show_orders_checkbox.checked )
+    var what       = "";
+    var max_orders = 0;
+    
+    if( document.all.show_job_chain_orders_checkbox  &&  document.all.show_job_chain_orders_checkbox.checked 
+     || window.parent.details_frame._job_chain_element )
     {
-        what = "orders=" + job_chain_orders_limit;
+        what = "job_chain_orders";
+        max_orders = window.parent.details_frame._job_chain_element? 9999 : _max_orders;
     }
     
-    _response = _scheduler.execute( "<show_state what='" + what + "'/>" );
+    _response = _scheduler.execute( "<show_state what='" + what + "' max_orders='" + max_orders + "'/>" );
     modify_response( _response );
+    var scheduler_id = _response.selectSingleNode( "spooler/answer/state" ).getAttribute( "id" );
+    document.title = "Scheduler " + ( scheduler_id? " id=" + scheduler_id : "" );
     document.all.stylesheet.innerHTML = _response.transformNode( _stylesheet );;
 }
 
@@ -188,11 +197,41 @@ function modify_response( response )
             spooler_element.setAttribute( "my_show_tasks", "yes" );
         }
         
-        if( document.all.show_orders_checkbox  &&  document.all.show_orders_checkbox.checked )
+        if( document.all.show_job_chain_orders_checkbox  &&  document.all.show_job_chain_orders_checkbox.checked )
         {
-            spooler_element.setAttribute( "my_show_orders", job_chain_orders_limit );
+            spooler_element.setAttribute( "my_show_job_chain_orders", "yes" );
         }
+
+        if( document.all.show_job_chain_jobs_checkbox  &&  document.all.show_job_chain_jobs_checkbox.checked )
+        {
+            spooler_element.setAttribute( "my_show_job_chain_jobs", "yes" );
+        }
+
+        spooler_element.setAttribute( "my_max_orders", _max_orders );
+        
+        if( _show_jobs       ) spooler_element.setAttribute( "my_show_jobs"      , "yes" );
+        if( _show_job_chains ) spooler_element.setAttribute( "my_show_job_chains", "yes" );
     }
+}
+
+//----------------------------------------------------------------------------------------show_jobs
+
+function show_jobs()
+{
+    _show_jobs       = true;
+    _show_job_chains = false;
+    
+    update();
+}
+
+//----------------------------------------------------------------------------------show_job_chains
+
+function show_job_chains()
+{
+    _show_jobs       = false;
+    _show_job_chains = true;
+    
+    update();
 }
 
 //--------------------------------------------------------------------------------show_task_details
@@ -212,8 +251,8 @@ function show_job_details( job_name )
 {
     var job_element  = _response.selectSingleNode( ".//job[@job='" + job_name + "']" );
 
-    update_jobs_frame();
     window.parent.details_frame.show_job_details( job_element );
+    update_jobs_frame();
 }
 
 //---------------------------------------------------------------------------show_job_chain_details
@@ -222,8 +261,8 @@ function show_job_chain_details( job_chain_name )
 {
     var job_chain_element = _response.selectSingleNode( ".//job_chain[@name='" + job_chain_name + "']" );
 
-    update_jobs_frame();
     window.parent.details_frame.show_job_chain_details( job_chain_element );
+    update();
 }
 
 //-------------------------------------------------------------------------------------------------

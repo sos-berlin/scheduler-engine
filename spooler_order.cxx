@@ -1,4 +1,4 @@
-// $Id: spooler_order.cxx,v 1.70 2004/07/23 10:09:47 jz Exp $
+// $Id: spooler_order.cxx,v 1.71 2004/07/24 11:36:42 jz Exp $
 /*
     Hier sind implementiert
 
@@ -159,6 +159,10 @@ Job_chain::~Job_chain()
 
 xml::Element_ptr Job_chain::dom( const xml::Document_ptr& document, const Show_what& show )
 {
+    Show_what modified_show = show;
+    if( modified_show | show_job_chain_orders )  modified_show |= show_orders;
+
+
     xml::Element_ptr element = document.createElement( "job_chain" );
 
         THREAD_LOCK( _lock )
@@ -173,7 +177,7 @@ xml::Element_ptr Job_chain::dom( const xml::Document_ptr& document, const Show_w
                 FOR_EACH( Chain, _chain, it )
                 {
                     Job_chain_node* node = *it;
-                    element.appendChild( node->dom( document, show, this ) );
+                    element.appendChild( node->dom( document, modified_show, this ) );
                     dom_append_nl( element );
                 }
             }
@@ -440,7 +444,7 @@ xml::Element_ptr Order_queue::dom( const xml::Document_ptr& document, const Show
 
         if( show & show_orders )
         {
-            int limit = show._order_limit;
+            int limit = show._max_orders;
 
             Queue* queues[] = { &_queue, &_setback_queue };
             for( Queue** q = queues; q < queues + NO_OF(queues); q++ )

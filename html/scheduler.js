@@ -1,4 +1,4 @@
-// $Id: scheduler.js,v 1.9 2004/07/23 17:53:39 jz Exp $
+// $Id: scheduler.js,v 1.10 2004/07/24 11:36:42 jz Exp $
 
 //----------------------------------------------------------------------------------------Scheduler
 // public
@@ -207,9 +207,25 @@ function show_tasks_checkbox__onclick()
     update();
 }
 
-//--------------------------------------------------------------------show_orders_checkbox__onclick
+//------------------------------------------------------------show_job_chain_jobs_checkbox__onclick
 
-function show_orders_checkbox__onclick()
+function show_job_chain_jobs_checkbox__onclick()
+{
+    window.parent.jobs_frame.reset_error();
+    update();
+}
+
+//----------------------------------------------------------show_job_chain_orders_checkbox__onclick
+
+function show_job_chain_orders_checkbox__onclick()
+{
+    window.parent.jobs_frame.reset_error();
+    update();
+}
+
+//------------------------------------------------------------show_job_chain_jobs_checkbox__onclick
+
+function show_job_chain_jobs_checkbox__onclick()
 {
     window.parent.jobs_frame.reset_error();
     update();
@@ -309,8 +325,12 @@ function scheduler_menu__onclick()
 function job_menu__onclick( job_name )
 {
     var popup_builder = new Popup_menu_builder();
+
+    var job_element = //document.all._job_element != undefined?
+                        _job_element                                                                                  // Rechter Rahmen
+                      //: _response.selectSingleNode( "spooler/answer/state/jobs/job [ @job = '" + job_name + "' ]" );  // Linker Rahmen
     
-    var state = _job_element.getAttribute( "state" );
+    var state = job_element.getAttribute( "state" );
     
     popup_builder.add_show_log( "Show log"      , "show_log&job=" + job_name, "show_log_job_" + job_name );
     popup_builder.add_bar();

@@ -1,4 +1,4 @@
-// $Id: spooler_command.h,v 1.29 2004/07/22 22:45:56 jz Exp $
+// $Id: spooler_command.h,v 1.30 2004/07/24 11:36:42 jz Exp $
 
 #ifndef __SPOOLER_COMMAND_H
 #define __SPOOLER_COMMAND_H
@@ -10,15 +10,17 @@ namespace spooler {
 
 enum Show_what_enum
 {
-    show_standard       = 0,
+    show_standard           = 0,
     
-    show_task_queue     = 0x01,     // Task Queue zeigen
-    show_orders         = 0x02,     // Jede Order in der Order_queue zeigen
-    show_description    = 0x04,
-    show_log            = 0x08,
+    show_task_queue         = 0x01,     // Task Queue zeigen
+    show_job_orders         = 0x02,     // Jede Order in der Order_queue zeigen, nur unter <job>
+    show_job_chain_orders   = 0x04,     // Jede Order in der Order_queue zeigen, nur unter <job_chain>
+    show_orders             = 0x08,     // Jede Order in der Order_queue zeigen
+    show_description        = 0x10,
+    show_log                = 0x20,
 
-    show_all_           = 0x80,
-    show_all            = 0xFF      // Alle Flags und show_all_ (Bei <show_state> ist z.B. show_orders nicht in show_all enthalten)
+    show_all_               = 0x80,
+    show_all                = 0xFF      // Alle Flags und show_all_ (Bei <show_state> ist z.B. show_orders nicht in show_all enthalten)
 };
 
 inline Show_what_enum operator | ( Show_what_enum a, Show_what_enum b )  { return (Show_what_enum)( (int)a | (int)b ); } 
@@ -27,7 +29,7 @@ inline Show_what_enum operator | ( Show_what_enum a, Show_what_enum b )  { retur
 
 struct Show_what
 {
-                                Show_what                   ( Show_what_enum what = show_standard ) : _zero_(this+1), _what(what), _order_limit(INT_MAX) {}
+                                Show_what                   ( Show_what_enum what = show_standard ) : _zero_(this+1), _what(what), _max_orders(INT_MAX) {}
 
                                 operator Show_what_enum     () const                                { return _what; }
     int                         operator &                  ( Show_what_enum w ) const              { return _what & w; }
@@ -36,7 +38,7 @@ struct Show_what
 
     Fill_zero                  _zero_;
     Show_what_enum             _what;
-    int                        _order_limit;
+    int                        _max_orders;
 };
 
 //-------------------------------------------------------------------------------------------------

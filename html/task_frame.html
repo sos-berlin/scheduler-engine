@@ -1,4 +1,4 @@
-<!-- $Id: task_frame.html,v 1.16 2004/07/23 17:53:39 jz Exp $ -->
+<!-- $Id: task_frame.html,v 1.17 2004/07/24 11:36:42 jz Exp $ -->
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <html>
 
@@ -130,6 +130,17 @@ function update()
         
         _job_element = response.selectSingleNode( "spooler/answer/job" );
         document.all.stylesheet.innerHTML = _job_element? _job_element.transformNode( _stylesheet ) : "";
+    }
+    else
+    if( _job_chain_element != undefined )
+    {
+        //var response = _scheduler.execute( "<show_job job='" + _job_name + "' what='all,orders'/>" );
+        //window.parent.jobs_frame.modify_response( response );
+        var response = window.parent.jobs_frame._response;
+        
+        var job_chain_name = _job_chain_element.getAttribute( "name" );
+        _job_chain_element = response.selectSingleNode( "//job_chain[ @name='" + job_chain_name + "' ]" );
+        document.all.stylesheet.innerHTML = _job_chain_element? _job_chain_element.transformNode( _stylesheet ) : "";
     }
 }
 

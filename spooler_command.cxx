@@ -1,4 +1,4 @@
-// $Id: spooler_command.cxx,v 1.127 2004/07/23 10:09:47 jz Exp $
+// $Id: spooler_command.cxx,v 1.128 2004/07/24 11:36:42 jz Exp $
 /*
     Hier ist implementiert
 
@@ -600,34 +600,31 @@ xml::Element_ptr Command_processor::execute_modify_order( const xml::Element_ptr
 
 xml::Element_ptr Command_processor::execute_command( const xml::Element_ptr& element, const Time& xml_mod_time )
 {
+    Show_what show;
+
+    string max_orders = element.getAttribute( "max_orders" );
+    if( max_orders != "" )  show._max_orders = as_int( max_orders );
+
     string what = element.getAttribute( "what" );
 
-    Show_what show;
-    
     const char* p = what.c_str();  // Bsp: "all"  "orders,description"  "task_queue,orders,description,"
     while( *p )
     {
-        if( string_equals_prefix_then_skip( &p, "all"         ) )  show |= show_all_;
+        if( string_equals_prefix_then_skip( &p, "all"              ) )  show |= show_all_;
         else
-        if( string_equals_prefix_then_skip( &p, "task_queue"  ) )  show |= show_task_queue;
+        if( string_equals_prefix_then_skip( &p, "task_queue"       ) )  show |= show_task_queue;
         else
-        if( string_equals_prefix_then_skip( &p, "orders"      ) )
-        {
-            show |= show_orders;
-
-            if( p[0] == '=' )
-            {
-                p++;
-                show._order_limit = 0;
-                while( isdigit( (uint)p[0] ) )  show._order_limit *= 10,  show._order_limit += p++[0] - '0';
-            }
-        }
+        if( string_equals_prefix_then_skip( &p, "orders"           ) )  show |= show_orders;
         else
-        if( string_equals_prefix_then_skip( &p, "description" ) )  show |= show_description;
+        if( string_equals_prefix_then_skip( &p, "job_chain_orders" ) )  show |= show_job_chain_orders;
         else
-        if( string_equals_prefix_then_skip( &p, "log"         ) )  show |= show_log;
+        if( string_equals_prefix_then_skip( &p, "job_orders"       ) )  show |= show_job_orders;
         else
-        if( string_equals_prefix_then_skip( &p, "standard"    ) )  ;
+        if( string_equals_prefix_then_skip( &p, "description"      ) )  show |= show_description;
+        else
+        if( string_equals_prefix_then_skip( &p, "log"              ) )  show |= show_log;
+        else
+        if( string_equals_prefix_then_skip( &p, "standard"         ) )  ;
         else
             throw_xc( "SCHEDULER-164", what );
 

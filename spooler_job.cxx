@@ -1,4 +1,4 @@
-// $Id: spooler_job.cxx,v 1.89 2004/07/22 22:45:56 jz Exp $
+// $Id: spooler_job.cxx,v 1.90 2004/07/24 11:36:42 jz Exp $
 // §851: Weitere Log-Ausgaben zum Scheduler-Start eingebaut
 /*
     Hier sind implementiert
@@ -1618,8 +1618,15 @@ xml::Element_ptr Job::dom( const xml::Document_ptr& document, const Show_what& s
             }
         }
 
-        if( _order_queue             )  dom_append_nl( job_element ),  job_element.appendChild( _order_queue->dom( document, show, which_job_chain ) );
-        if( _error                   )  dom_append_nl( job_element ),  append_error_element( job_element, _error );
+        if( _order_queue )
+        {
+            Show_what modified_show = show;
+            if( modified_show | show_job_orders )  modified_show |= show_orders;
+
+            job_element.appendChild( _order_queue->dom( document, modified_show, which_job_chain ) );
+        }
+
+        if( _error       )  append_error_element( job_element, _error );
     }
 
     return job_element;
