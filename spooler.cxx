@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.294 2003/11/30 10:35:37 jz Exp $
+// $Id: spooler.cxx,v 1.295 2003/11/30 20:52:03 jz Exp $
 /*
     Hier sind implementiert
 
@@ -1223,6 +1223,7 @@ void Spooler::load_arg()
     _log_collect_within = read_profile_uint  ( _factory_ini, "spooler", "log_collect_within", 0 );
     _log_collect_max    = read_profile_uint  ( _factory_ini, "spooler", "log_collect_max"   , 900 );
 
+    _my_program_filename = _argv? _argv[0] : "(Programmdateiname fehlt)";
 
     //if( !_java_vm->running() )  // Für javac ist's egal, ob Java läuft (für scheduler.dll)
     {
