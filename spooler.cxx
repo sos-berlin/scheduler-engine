@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.181 2003/03/19 21:19:04 jz Exp $
+// $Id: spooler.cxx,v 1.182 2003/03/26 09:14:02 jz Exp $
 /*
     Hier sind implementiert
 
@@ -822,7 +822,7 @@ void Spooler::load()
     tzset();
 
     _security.clear();             
-    _java_vm = Z_NEW( java::Vm( false ) );
+    _java_vm = get_java_vm( false );  //Z_NEW( java::Vm( false ) );
 
     load_arg();
 
