@@ -56,7 +56,7 @@ ant -f ../javadoc.xml
 				Outputs="$(TargetDir)sos.spooler.jar"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="../misc/lib/libctleasy.lib delayimp.lib ws2_32.lib version.lib odbc32.lib odbccp32.lib ../../js/src/$(IntDir)/js32.lib ../../js/src/liveconnect/$(IntDir)/liveconnect.lib"
+				AdditionalDependencies="../misc/lib/libctleasy.lib delayimp.lib ws2_32.lib version.lib odbc32.lib odbccp32.lib ../../js/src/$(IntDir)/spidermonkey.lib ../../js/src/liveconnect/$(IntDir)/liveconnect.lib"
 				OutputFile="$(OutDir)/scheduler.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
@@ -135,11 +135,11 @@ ant -f ../javadoc.xml
 				Outputs="$(TargetDir)sos.spooler.jar"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="../misc/lib/libctleasy.lib delayimp.lib ws2_32.lib version.lib odbc32.lib odbccp32.lib ../../js/src/$(IntDir)/js32.lib ../../js/src/liveconnect/$(IntDir)/liveconnect.lib"
+				AdditionalDependencies="../misc/lib/libctleasy.lib delayimp.lib ws2_32.lib version.lib odbc32.lib odbccp32.lib ../../js/src/$(IntDir)/spidermonkey.lib ../../js/src/liveconnect/$(IntDir)/liveconnect.lib"
 				OutputFile="$(OutDir)\scheduler.dll"
 				LinkIncremental="2"
 				SuppressStartupBanner="TRUE"
-				DelayLoadDLLs="winspool.drv;ws2_32.dll;ole32.dll;oleaut32.dll;advapi32.dll;odbc32.dll;libctleasy.dll;js32.dll;liveconnect.dll"
+				DelayLoadDLLs="winspool.drv;ws2_32.dll;ole32.dll;oleaut32.dll;advapi32.dll;odbc32.dll;libctleasy.dll;spidermonkey.dll;liveconnect.dll"
 				GenerateDebugInformation="TRUE"
 				ProgramDatabaseFile="../bind/spooler.pdb"
 				SubSystem="1"
