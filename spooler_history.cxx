@@ -1,4 +1,4 @@
-// $Id: spooler_history.cxx,v 1.39 2003/04/03 11:37:10 jz Exp $
+// $Id: spooler_history.cxx,v 1.40 2003/04/04 11:31:50 jz Exp $
 
 #include "spooler.h"
 #include "../zschimmer/z_com.h"
@@ -243,7 +243,7 @@ void Spooler_db::create_table_when_needed( const string& tablename, const string
     try
     {
         Any_file select;
-        select.open( "-in " + _db_name + " SELECT count(*) from " + tablename );
+        select.open( "-in " + _db_name + " SELECT count(*) from " + uquoted(tablename) );
         select.get_record();
         select.close();
         // ok
@@ -252,7 +252,7 @@ void Spooler_db::create_table_when_needed( const string& tablename, const string
     {
         _spooler->_log.warn( x.what() );
         _spooler->_log.info( "Tabelle " + tablename + " wird eingerichtet" );
-        _db.put( "CREATE TABLE " + tablename + " (" + fields + ") " );
+        _db.put( "CREATE TABLE " + uquoted(tablename) + " (" + fields + ") " );
     }
 
     ta.commit();        // Für select und für create table (jedenfalls bei Jet)
@@ -279,7 +279,7 @@ int Spooler_db::get_id()
             execute( "UPDATE " + uquoted(_spooler->_variables_tablename) + " set \"WERT\" = \"WERT\"+1 where \"NAME\"='spooler_job_id'" );
 
             Any_file sel;
-            sel.open( "-in " + _db_name + "SELECT \"WERT\" from " + _spooler->_variables_tablename + " where \"NAME\"='spooler_job_id'" );
+            sel.open( "-in " + _db_name + "SELECT \"WERT\" from " + uquoted(_spooler->_variables_tablename) + " where \"NAME\"='spooler_job_id'" );
             id = sel.get_record().as_int(0);
 
             LOG( "Spooler_db::get_id() = " << id << '\n' );
