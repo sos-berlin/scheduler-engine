@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="../scheduler.xslt" type="text/xsl"?>
 
-<!--$Id: run_time.xml,v 1.7 2004/09/06 07:53:28 jz Exp $-->
+<!--$Id: run_time.xml,v 1.8 2004/09/09 10:14:34 jz Exp $-->
 
 <xml_element name     = "run_time" 
              title    = "Laufzeiten des Jobs"
              base_dir = "../"
              parent_page = "../konfiguration.xml"
              author   = "$Author: jz $"
-             date     = "$Date: 2004/09/06 07:53:28 $">
+             date     = "$Date: 2004/09/09 10:14:34 $">
 
     <xml_parent_elements>
         <xml_parent_element name="job">
@@ -20,7 +20,7 @@
         <xml_attribute name="once" type="yes_no" initial="no">
             <description>
                 <p>
-                    Bei <code>once="yes"</code> startet der <span class="sos_name">Schedulers</span>
+                    Bei <code>once="yes"</code> startet der <span class="sos_name">Scheduler</span>
                     den Job einmal nach Start des <span class="sos_name">Schedulers</span>,
                     sobald die <code>&lt;run_time</code> dies zulässt.
                 </p>

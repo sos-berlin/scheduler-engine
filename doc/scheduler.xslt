@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding="utf-8"?>
-<!-- $Id: scheduler.xslt,v 1.27 2004/09/08 20:34:13 jz Exp $ -->
+<!-- $Id: scheduler.xslt,v 1.28 2004/09/09 10:14:34 jz Exp $ -->
 
 <!--
     Änderungswünsche:
@@ -152,6 +152,9 @@
                                 <col/>
                                 <col style="padding-left: 4ex"/>
                                 <xsl:for-each select="xml_child_elements/xml_child_element">
+                                
+                                    <xsl:variable name="element" select="document( concat( 'xml/', /*/@sub_directory, @name, '.xml' ) )/xml_element[ @name=current()/@name ]"/>
+                                
                                     <tr>
                                         <td valign="baseline">
                                             <xsl:element name="a">
@@ -163,7 +166,7 @@
                                         </td>
                                         <td valign="baseline">
                                             <span class="title">
-                                                <xsl:value-of select="document( concat( 'xml/', /*/@sub_directory, @name, '.xml' ) )/xml_element[ @name=current()/@name ]/@title"/>
+                                                <xsl:value-of select="@title | $element/@title"/>
                                             </span>
                                         </td>
                                     </tr>
@@ -261,6 +264,8 @@
         
     <xsl:template match="xml_parent_element | xml_child_element">
 
+        <xsl:variable name="element" select="document( concat( 'xml/', /*/@sub_directory, @name, '.xml' ) )/xml_element[ @name=current()/@name ]"/>
+
         <xsl:if test="self::xml_child_element">
             <xsl:element name="a">
                 <xsl:attribute name="name">element_<xsl:value-of select="@name"/></xsl:attribute>
@@ -290,7 +295,7 @@
                     &#160;
                     –
                     <span class="title">
-                        <xsl:value-of select="document( concat( 'xml/', /*/@sub_directory, @name, '.xml' ) )/xml_element[ @name=current()/@name ]/@title"/>
+                        <xsl:value-of select="@title | $element/@title"/>
                     </span>
                 </td>
             </tr>
@@ -528,11 +533,14 @@
         
             <body>
                 <xsl:call-template name="body_start">
-                    <xsl:with-param name="title" select="@title"/>
+                    <xsl:with-param name="title"       select="@title"/>
+                    <xsl:with-param name="parent_page" select="@parent_page"/>
                 </xsl:call-template>
 
                 <xsl:apply-templates select="node()" mode="description"/>
-                <xsl:call-template name="bottom"/>
+                <xsl:call-template name="bottom">
+                    <xsl:with-param name="parent_page" select="@parent_page"/>
+                </xsl:call-template>
             </body>
         </html>
         

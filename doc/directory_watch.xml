@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet href="scheduler.xslt" type="text/xsl"?>
+
+<!--$Id: directory_watch.xml,v 1.1 2004/09/09 10:14:34 jz Exp $-->
+
+<description 
+    title       = "Verzeichnisüberwachung" 
+    base_dir    = ""
+    parent_page = "job.xml"
+    author      = "$Author: jz $"
+    date        = "$Date: 2004/09/09 10:14:34 $"
+>
+
+    <p>
+        Ein Job, der in einem Verzeichnis eintreffende Dateien verarbeitet, 
+        kann sich der Verzeichnisüberwachung bedienen.
+        Mit dem Aufruf <scheduler_method class="Job" method="start_when_directory_changed" java_signature="java.lang.String"/>
+        sorgt der Scheduler dafür, dass eine Task läuft, sobald sich das Verzeichnis ändert.
+    </p>
+    <p>
+        Sie können den Aufruf für mehrere Verzeichnisse wiederholen.
+    </p>
+    <p>
+        Der Aufruf kann im Startskript (Element <code>&lt;script></code> in <scheduler_element name="config"/>)
+        oder im Job selbst (in <scheduler_method class="Job_impl" method="spooler_init"/>) untergebracht sein.
+        Im letzten Fall muss der Job einmal laufen, damit der Aufruf auch ausgeführt wird 
+        (s. <scheduler_element name="run_time" attribute="once" value="yes"/>).
+    </p>
+    
+    
+    
+    <h2>Was ist eine Änderung eines Verzeichnisses?</h2>
+    
+        <p>
+            Wenn eine Datei oder ein Unterverzeichnis hinzugefügt, gelöscht oder umbenannt wird.
+        </p>
+    
+    
+    <h2>Mit Regulärem Ausdruck filtern</h2>
+    
+        <p>
+            Der Methode <scheduler_method class="Job" method="start_when_directory_changed" java_signature="java.lang.String, java.lang.String"/>
+            können Sie einen Regulären Ausdruck (nach POSIX 1003.2) übergeben.
+            Der Scheduler betrachtet dann das Verzeichnis nur als geändert, 
+            wenn es nach der Änderung eine Datei oder ein Verzeichnis enthält,
+            dessen Name zum Regulären Ausdruck passt.
+        </p>
+        
+        
+    <h2>Welches Verzeichnis hat sich geändert?</h2>        
+    
+        <p>
+            Wenn Sie mehrere Verzeichnisse überwachen, gibt der Aufruf
+            <scheduler_method class="Task" method="changed_directories"/>
+            die Namen der geänderten Verzeichnisse zurück, durch Semikolon getrennt.
+        </p>
+    
+    
+    <h2>Fehler bei der Verzeichnisüberwachung</h2>    
+    
+        <p>
+            Wenn z.B. ein Verzeichnis nicht mehr zugreifbar ist (gelöscht oder nicht mehr erreichbar),
+            gilt das als Änderung und der Scheduler startet eine Task.
+        </p>
+        <p>
+            Ein wiederholter Aufruf von 
+            <scheduler_method class="Job" method="start_when_directory_changed" java_signature="java.lang.String"/>
+            führt dann zu einem Fehler.
+        </p>
+        
+                
+</description>

@@ -1,4 +1,4 @@
-// $Id: Job.java,v 1.10 2004/08/29 09:27:27 jz Exp $
+// $Id: Job.java,v 1.11 2004/09/09 10:14:34 jz Exp $
 
 package sos.spooler;
 
@@ -11,7 +11,7 @@ package sos.spooler;
  * 
  * 
  * @author Joacim Zschimmer
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  */
 
 public class Job extends Idispatch
@@ -110,6 +110,11 @@ public class Job extends Idispatch
     
     public void             start_when_directory_changed( String directory_name )                           { com_call( "start_when_directory_changed", directory_name ); }
 
+    /** Lässt eine Task starten, sobald sich ein Verzeichnis ändert.
+    * @see #start_when_directory_changed( String )
+    */
+    public void             start_when_directory_changed( java.io.File directory_name )                     { com_call( "start_when_directory_changed", directory_name.toString() ); }
+
     
     /** Lässt eine Task starten, sobald sich ein Verzeichnis ändert, mit Angabe eines Regulären Ausdrucks.
      *
@@ -127,6 +132,12 @@ public class Job extends Idispatch
     public void             start_when_directory_changed( String directory_name, String filename_pattern )  { com_call( "start_when_directory_changed", directory_name, filename_pattern ); }
 
     
+    /** Lässt eine Task starten, sobald sich ein Verzeichnis ändert.
+    * @see #start_when_directory_changed( String, String )
+    */
+    public void             start_when_directory_changed( java.io.File directory_name, String filename_pattern )  { com_call( "start_when_directory_changed", directory_name.toString(), filename_pattern ); }
+
+
     /** Nimmt alle Aufrufe von start_when_directory_changed() zurück.
      *
      */
