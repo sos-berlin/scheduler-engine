@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding="utf-8"?>
-<!-- $Id: scheduler.xslt,v 1.5 2004/12/03 18:39:00 jz Exp $ -->
+<!-- $Id: scheduler.xslt,v 1.6 2004/12/03 22:02:55 jz Exp $ -->
 <xsl:stylesheet xmlns:xsl   = "http://www.w3.org/1999/XSL/Transform" 
                 xmlns:msxsl = "urn:schemas-microsoft-com:xslt"
                 version     = "1.0">
@@ -30,9 +30,6 @@
                         <b><span style="white-space: nowrap">-id=<xsl:value-of select="state/@id"/></span></b>
                         &#160; 
                     </xsl:if>
-                </td>
-                <td align="right">
-                    <a href="/doc/index.xml" target="documentation" class="small">Doku</a>
                 </td>
             </tr>
             <tr>
@@ -163,6 +160,8 @@
                 </td>
 
                 <td valign="top" align="right">
+                    <a href="/doc/index.xml" target="documentation" class="small">Doku</a>
+                    
                     <xsl:call-template name="command_menu">
                         <xsl:with-param name="onclick" select="'scheduler_menu__onclick()'"/>
                     </xsl:call-template>
@@ -262,10 +261,10 @@
                     <xsl:element name="tr">
                         <xsl:attribute name="id"         >scheduler_tr_job_<xsl:value-of select="@job"/></xsl:attribute>
                         <xsl:attribute name="class"      >job</xsl:attribute>
-                        <xsl:attribute name="style"      >cursor: pointer; padding-top: 5pt</xsl:attribute>
+                        <xsl:attribute name="style"      >cursor: default; padding-top: 5pt</xsl:attribute>
                         <xsl:attribute name="onmouseover">
                             this.className =
-                            document.getElementById( "scheduler_tr_job_<xsl:value-of select="@job"/>__2" ).className = "hover"
+                            document.getElementById( "scheduler_tr_job_<xsl:value-of select="@job"/>__2" ).className = "job_hover"
                         </xsl:attribute>
                         <xsl:attribute name="onmouseout" >
                             this.className =
@@ -295,10 +294,10 @@
                     <xsl:element name="tr">
                         <xsl:attribute name="id"   >scheduler_tr_job_<xsl:value-of select="@job"/>__2</xsl:attribute>
                         <xsl:attribute name="class">job         </xsl:attribute>
-                        <xsl:attribute name="style">cursor: pointer</xsl:attribute>
+                        <xsl:attribute name="style">cursor: default</xsl:attribute>
                         <xsl:attribute name="onmouseover">
                             this.className =
-                            document.getElementById( "scheduler_tr_job_<xsl:value-of select="@job"/>" ).className = "hover"
+                            document.getElementById( "scheduler_tr_job_<xsl:value-of select="@job"/>" ).className = "job_hover"
                         </xsl:attribute>
                         <xsl:attribute name="onmouseout" >
                             this.className = 
@@ -397,7 +396,7 @@
                         </xsl:choose>
                     </xsl:when>
                     <xsl:otherwise>
-                        <xsl:attribute name="style"      >cursor: pointer</xsl:attribute>
+                        <xsl:attribute name="style"      >cursor: default</xsl:attribute>
                         <xsl:attribute name="onmouseover">this.className='task_hover'</xsl:attribute>
                         <xsl:attribute name="onmouseout" >this.className='task'</xsl:attribute>
                         <xsl:attribute name="onclick">call_error_checked( show_task_details, '<xsl:value-of select="../../@job"/>', <xsl:value-of select="@id"/> )</xsl:attribute>
@@ -590,7 +589,7 @@
                     <xsl:element name="tr">
                         <xsl:if test="not( $single )">
                             <xsl:attribute name="style">
-                                cursor: pointer;
+                                cursor: default;
 <!--                                
                                 <xsl:choose>
                                     <xsl:when test="/spooler/@show_job_chain_orders_checkbox">
@@ -606,7 +605,7 @@
 -->                                
                             </xsl:attribute>
                             <xsl:attribute name="onmouseover">
-                                this.className = "hover"
+                                this.className = "job_chain_hover"
                             </xsl:attribute>
                             <xsl:attribute name="onmouseout" >
                                 this.className = "job_chain"
@@ -643,11 +642,11 @@
                                 
                                 <xsl:if test="not( $single )">
                                     <xsl:attribute name="style">
-                                        cursor: pointer; 
+                                        cursor: default; 
                                         <xsl:value-of select="$tr_style"/>
                                     </xsl:attribute>
                                     <xsl:attribute name="onmouseover">
-                                        this.className = "hover"
+                                        this.className = "job"
                                     </xsl:attribute>
                                     <xsl:attribute name="onmouseout" >
                                         this.className = "job_chain"
@@ -1332,7 +1331,7 @@
                 <xsl:value-of select="$onclick"/>
             </xsl:attribute>
             
-            Menu
+            <xsl:text>Menu</xsl:text>
             
         </xsl:element>
     </xsl:template>
