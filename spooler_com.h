@@ -1,10 +1,10 @@
-// $Id: spooler_com.h,v 1.59 2002/11/24 15:32:58 jz Exp $
+// $Id: spooler_com.h,v 1.60 2002/11/25 08:57:24 jz Exp $
 
 #ifndef __SPOOLER_COM_H
 #define __SPOOLER_COM_H
 
 #include <map>
-//#include "../kram/olestd.h"
+
 #include "../zschimmer/com.h"
 #include "../kram/com_simple_standards.h"
 #include "../kram/sysxcept.h"
@@ -84,6 +84,7 @@ struct Com_variable: spooler_com::Ivariable,
                      spooler_com::Ihas_java_class_name, 
                      Sos_ole_object
 {
+    Z_GNU_ONLY(                 Com_variable                ();  )                                  // Für gcc 3.2. Nicht implementiert.
                                 Com_variable                ( const BSTR name, const VARIANT& );
                                 Com_variable                ( const Com_variable& );
 

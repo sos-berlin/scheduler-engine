@@ -1,4 +1,4 @@
-// $Id: spooler_module_java.cxx,v 1.21 2002/11/24 16:06:34 jz Exp $
+// $Id: spooler_module_java.cxx,v 1.22 2002/11/25 08:57:27 jz Exp $
 /*
     Hier sind implementiert
 
@@ -23,7 +23,7 @@
 #else
 #   include <utime.h>
 #   include <dlfcn.h>
-#   define vsnprintf    _vsnprintf
+#   define _vsnprintf    vsnprintf
 #endif
 
 using namespace std;

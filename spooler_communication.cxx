@@ -1,4 +1,4 @@
-// $Id: spooler_communication.cxx,v 1.36 2002/11/24 15:32:59 jz Exp $
+// $Id: spooler_communication.cxx,v 1.37 2002/11/25 08:57:25 jz Exp $
 /*
     Hier sind implementiert
 
@@ -11,7 +11,6 @@
 #include "spooler.h"
 #include "../kram/sossock1.h"
 
-#ifdef Z_WINDOWS
 
 #ifdef SYSTEM_WIN
     const int ENOTSOCK = 10038;
@@ -377,9 +376,11 @@ Communication::Communication( Spooler* spooler )
 
 Communication::~Communication()
 {
+#ifdef Z_WINDOWS
     close();
 
     TerminateThread( _thread, 99 );
+
     _thread.close();
 
     if( _initialized ) 
@@ -388,6 +389,7 @@ Communication::~Communication()
             WSACleanup();
 #       endif
     }
+#endif
 }
 
 //-----------------------------------------------------------------------------Communication::close
@@ -404,11 +406,12 @@ void Communication::close( double wait_time )
         _terminate = true;
     }
 
-
+#ifdef Z_WINDOWS
     if( _thread ) 
     {
         WaitForSingleObject( _thread, min( (double)INT_MAX, wait_time * 1000.0 ) );
     }
+#endif
 }
 
 //------------------------------------------------------------------------------Communication::bind
@@ -418,7 +421,6 @@ void Communication::bind()
     struct sockaddr_in  sa;
     int                 ret;
     unsigned long       on = 1;
-    BOOL                true_ = 1;
   //int                 wait = 0;       // Längstens wait_for_free_port Sekunden warten
 
 
@@ -606,7 +608,7 @@ int Communication::run()
             {
                 char buffer [4096];
                 sockaddr_in addr;     
-                int         addr_len = sizeof addr;
+                socklen_t   addr_len = sizeof addr;
 
                 addr.sin_addr.s_addr = 0;
                 int len = recvfrom( _udp_socket, buffer, sizeof buffer, 0, (sockaddr*)&addr, &addr_len );
@@ -670,6 +672,7 @@ bool Communication::is_started()
 }
 */
 //-----------------------------------------------------------------------------------------------go
+#ifdef Z_WINDOWS
 
 int Communication::go()
 {
@@ -722,10 +725,12 @@ void Communication::start_thread()
     if( !_thread )  throw_mswin_error( "CreateThread" );
 }
 
+#endif
 //-------------------------------------------------------------------Communication::start_or_rebind
 
 void Communication::start_or_rebind()
 {
+#ifdef Z_WINDOWS
     Thread_semaphore::Guard guard = &_semaphore;
 
     if( _started )  
@@ -743,6 +748,7 @@ void Communication::start_or_rebind()
 
         start_thread();
     }
+#endif
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -750,4 +756,3 @@ void Communication::start_or_rebind()
 } //namespace spooler
 } //namespace sos
 
-#endif

@@ -1,4 +1,4 @@
-// $Id: spooler_command.cxx,v 1.69 2002/11/24 16:06:33 jz Exp $
+// $Id: spooler_command.cxx,v 1.70 2002/11/25 08:57:25 jz Exp $
 /*
     Hier ist implementiert
 
@@ -162,15 +162,15 @@ xml::Element_ptr Command_processor::execute_show_history( const xml::Element_ptr
 
 //--------------------------------------------------------------------------------abort_immediately
 
-static void abort_immediately()
+static void abort_immediately( int exit_code = 1 )
 {
 #   ifdef Z_WINDOWS
 
-        TerminateProcess( GetCurrentProcess(), 1 );  // _exit() lässt noch Delphi-Code ausführen.
+        TerminateProcess( GetCurrentProcess(), exit_code );  // _exit() lässt noch Delphi-Code ausführen.
 
 #    else
 
-        _exit();
+        _exit( exit_code );
 
 #   endif
 }

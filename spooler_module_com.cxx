@@ -1,4 +1,4 @@
-// $Id: spooler_module_com.cxx,v 1.5 2002/11/24 16:06:34 jz Exp $
+// $Id: spooler_module_com.cxx,v 1.6 2002/11/25 08:57:27 jz Exp $
 /*
     Hier sind implementiert
 
@@ -11,7 +11,6 @@
 #include "spooler.h"
 #include "../file/anyfile.h"
 
-#ifdef Z_WINDOWS
 
 using namespace std;
 
@@ -63,12 +62,13 @@ void Com_module_instance_base::close()
 }
 
 //------------------------------------------------------------------------Com_module_instance::load
+#ifdef Z_WINDOWS
 
 void Com_module_instance::load()
 {
     if( name_exists( "spooler_set_context" ) )
     {
-        Variant com_context_vt = _com_context;
+        Variant com_context_vt = +_com_context;
         com_call( _idispatch, "spooler_set_context", &com_context_vt );
     }
 
@@ -163,6 +163,7 @@ void Com_module_instance::close()
     _loaded = false;
 }
 
+#endif
 //------------------------------Scripting_engine_module_instance::~Scripting_engine_module_instance
 
 Scripting_engine_module_instance::~Scripting_engine_module_instance()
@@ -210,11 +211,11 @@ void Scripting_engine_module_instance::load()
 {
     if( _script_site->_engine_name != _module->_language )  throw_xc( "SPOOLER-117" );
 
-    if( _com_context->_log     )  _script_site->add_obj( _com_context->_log    , L"spooler_log"    );
-    if( _com_context->_spooler )  _script_site->add_obj( _com_context->_spooler, L"spooler"        );
-    if( _com_context->_thread  )  _script_site->add_obj( _com_context->_thread , L"spooler_thread" );
-    if( _com_context->_job     )  _script_site->add_obj( _com_context->_job    , L"spooler_job"    );
-    if( _com_context->_task    )  _script_site->add_obj( _com_context->_task   , L"spooler_task"   );
+    if( _com_context->_log     )  _script_site->add_obj( _com_context->_log    , Bstr("spooler_log"    ) );
+    if( _com_context->_spooler )  _script_site->add_obj( _com_context->_spooler, Bstr("spooler"        ) );
+    if( _com_context->_thread  )  _script_site->add_obj( _com_context->_thread , Bstr("spooler_thread" ) );
+    if( _com_context->_job     )  _script_site->add_obj( _com_context->_job    , Bstr("spooler_job"    ) );
+    if( _com_context->_task    )  _script_site->add_obj( _com_context->_task   , Bstr("spooler_task"   ) );
 
     HRESULT hr = _script_site->_script->SetScriptState( SCRIPTSTATE_INITIALIZED );
     if( FAILED( hr ) )  throw_ole( hr, "IActiveScript::SetScriptState", "SCRIPTSTATE_INITIALIZED" );
@@ -248,5 +249,3 @@ void Scripting_engine_module_instance::start()
 
 } //namespace spooler
 } //namespace sos
-
-#endif

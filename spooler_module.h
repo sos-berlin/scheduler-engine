@@ -1,4 +1,4 @@
-// $Id: spooler_module.h,v 1.11 2002/11/24 15:33:00 jz Exp $
+// $Id: spooler_module.h,v 1.12 2002/11/25 08:57:26 jz Exp $
 
 #ifndef __SPOOLER_MODULE_H
 #define __SPOOLER_MODULE_H
@@ -63,11 +63,8 @@ struct Module
         kind_none,
         kind_java,
       //kind_perl,
-
-#     ifdef Z_WINDOWS
         kind_scripting_engine,
         kind_com,
-#     endif
     };
 
                                 Module                      ( Spooler* sp, Prefix_log* log )         : _spooler(sp), _log(log) {}

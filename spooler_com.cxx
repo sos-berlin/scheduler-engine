@@ -1,4 +1,4 @@
-// $Id: spooler_com.cxx,v 1.69 2002/11/24 15:12:46 jz Exp $
+// $Id: spooler_com.cxx,v 1.70 2002/11/25 08:57:23 jz Exp $
 /*
     Hier sind implementiert
 
@@ -12,11 +12,11 @@
 #include "spooler.h"
 //#include "../hostole/hostole.h"
 #include "../zschimmer/z_com.h"
+#include "../zschimmer/z_com_server.h"
+
 
 using namespace zschimmer::com;
 
-
-#ifdef SYSTEM_WIN
 
 namespace sos {
 namespace spooler {
@@ -46,7 +46,8 @@ DESCRIBE_CLASS( &spooler_typelib, Com_order_queue   , order_queue   , CLSID_orde
 
 //-----------------------------------------------------------------------------IID_Ihostware_dynobj
 
-extern "C" const GUID IID_Ihostware_dynobj = { 0x9F716A02, 0xD1F0, 0x11CF, { 0x86, 0x9D, 0x44, 0x45, 0x53, 0x54, 0x00, 0x00 } };
+//extern "C" const GUID IID_Ihostware_dynobj = { 0x9F716A02, 0xD1F0, 0x11CF, { 0x86, 0x9D, 0x44, 0x45, 0x53, 0x54, 0x00, 0x00 } };
+DEFINE_GUID( IID_Ihostware_dynobj, 0x9F716A02, 0xD1F0, 0x11CF, 0x86, 0x9D, 0x44, 0x45, 0x53, 0x54, 0x00, 0x00 );
 
 //--------------------------------------------------------------------------------time_from_variant
 
@@ -104,6 +105,52 @@ STDMETHODIMP Com_error::QueryInterface( const IID& iid, void** result )
     return Sos_ole_object::QueryInterface( iid, result );
 }
 
+//-------------------------------------------------------------------------Com_error::GetIDsOfNames
+#ifndef SYSTEM_HAS_COM
+
+static const Com_method com_error_methods[] =
+{ 
+    { L"get_java_class_name" , 0, 0, },
+    { L"get_is_error"        , 0, 0, },
+    { L"get_code"            , 0, 0, }, 
+    { L"get_text"            , 0, 0, }, 
+    { NULL }
+};
+
+HRESULT Com_error::GetIDsOfNames( REFIID iid, LPOLESTR* rgszNames, UINT cNames, LCID lcid, DISPID* rgDispId )
+{
+    return com_get_dispid( com_error_methods, iid, rgszNames, cNames, lcid, rgDispId );
+}
+
+//--------------------------------------------------------------------Com_error::Invoke
+
+HRESULT Com_error::Invoke( DISPID dispid, REFIID iid, LCID lcid, WORD flags, DISPPARAMS* dispparams, VARIANT* result, EXCEPINFO* excepinfo, UINT* )
+{
+    HRESULT hr;
+    vector<Variant> args;
+
+    memset( excepinfo, 0, sizeof *excepinfo );
+    VariantInit( result );
+    
+    hr = com_prepare_args_for_invoke( &args, com_error_methods, dispid, iid, lcid, flags, dispparams );
+    if( SUCCEEDED(hr) )
+    {
+        switch( dispid )
+        {
+            case z_dispid_base+0:   result->vt = VT_BSTR; hr = get_java_class_name( &V_BSTR( result ) );     break;
+            case z_dispid_base+1:   result->vt = VT_BOOL; hr = get_is_error( &V_BOOL( result ) );            break;
+            case z_dispid_base+2:   result->vt = VT_BSTR; hr = get_code( &V_BSTR( result ) );                break;
+            case z_dispid_base+3:   result->vt = VT_BSTR; hr = get_text( &V_BSTR( result ) );                break;
+            default:                hr = DISP_E_MEMBERNOTFOUND;
+        }
+    }
+
+    if( FAILED(hr) )  get_error_info( hr, excepinfo );
+
+    return hr;
+}
+
+#endif
 //---------------------------------------------------------------------------------Com_error::close
 
 void Com_error::close()
@@ -357,8 +404,6 @@ STDMETHODIMP Com_variable_set::get_dom( msxml::IXMLDOMDocument** doc )
 
 xml::Document_ptr Com_variable_set::dom()
 {
-    HRESULT hr = NOERROR;
-
     xml::Document_ptr result;
     
     THREAD_LOCK( _lock )
@@ -2764,5 +2809,3 @@ STDMETHODIMP Com_order_queue::add_order( VARIANT* order_or_payload, Iorder** res
 
 } //namespace spooler
 } //namespace sos
-
-#endif

@@ -1,4 +1,4 @@
-// $Id: spooler_wait.cxx,v 1.41 2002/11/24 15:33:04 jz Exp $
+// $Id: spooler_wait.cxx,v 1.42 2002/11/25 08:57:27 jz Exp $
 /*
     Hier sind implementiert
 
@@ -9,11 +9,13 @@
 
 #include "spooler.h"
 
-#ifdef Z_WINDOWS
-
-#include <io.h>         // findfirst()
 #include <sys/types.h>
 #include <sys/timeb.h>
+
+#ifdef Z_WINDOWS
+#   include <io.h>         // findfirst()
+#endif
+
 #include "../kram/sleep.h"
 #include "../kram/log.h"
 
@@ -22,6 +24,7 @@ namespace sos {
 namespace spooler {
 
 //-----------------------------------------------------------------------------windows_message_step
+#ifdef Z_WINDOWS
 
 void windows_message_step()
 {
@@ -40,7 +43,9 @@ void windows_message_step()
     }
 }
 
+#endif
 //-----------------------------------------------------------------------------------wait_for_event
+#ifdef Z_WINDOWS
 
 bool wait_for_event( HANDLE handle, double wait_time )
 {
@@ -64,6 +69,7 @@ bool wait_for_event( HANDLE handle, double wait_time )
     return false;
 }
 
+#endif
 //-------------------------------------------------------------------------------------Event::Event
 
 Event::Event( const string& name )  
@@ -71,8 +77,10 @@ Event::Event( const string& name )
     _zero_(this+1),
     _name(name) 
 {
+#ifdef Z_WINDOWS
     _handle = CreateEvent( NULL, FALSE, FALSE, NULL );
     if( !_handle )  throw_mswin_error( "CreateEvent", name.c_str() );
+#endif
 }
 
 //------------------------------------------------------------------------------------Event::~Event
@@ -96,7 +104,9 @@ void Event::close()
 
 void Event::close_handle()
 {
+#ifdef Z_WINDOWS
     if( _handle )  CloseHandle( _handle ), _handle = NULL;
+#endif
 }
 
 //------------------------------------------------------------------------------------Event::add_to
@@ -126,6 +136,7 @@ void Event::remove_from( Wait_handles* w )
 }
 
 //--------------------------------------------------------------------------------------Event::wait
+#ifdef Z_WINDOWS
 
 bool Event::wait( double wait_time )
 {
@@ -134,6 +145,7 @@ bool Event::wait( double wait_time )
     return result;
 }
 
+#endif
 //------------------------------------------------------------------------------------Event::signal
 
 void Event::signal( const string& name )
@@ -142,7 +154,10 @@ void Event::signal( const string& name )
     {
         _signaled = true;
         _signal_name = name;
-        SetEvent( _handle );  
+
+#       ifdef Z_WINDOWS
+            SetEvent( _handle );  
+#       endif
     }
 }
 
@@ -166,7 +181,10 @@ void Event::reset()
     {
         _signaled = false;
         _signal_name = "";
-        ResetEvent( _handle );
+
+#       ifdef Z_WINDOWS
+            ResetEvent( _handle );
+#       endif
     }
 }
 
@@ -271,6 +289,7 @@ void Wait_handles::remove_handle( HANDLE handle, Event* event )
 
 #endif
 //-----------------------------------------------------------------------------Wait_handles::remove
+#ifdef Z_WINDOWS
 
 void Wait_handles::remove( Event* event )
 {
@@ -287,7 +306,6 @@ int Wait_handles::wait( double wait_time )
 }
 
 //-------------------------------------------------------------------------Wait_handles::wait_until
-#ifdef Z_WINDOWS
 
 int Wait_handles::wait_until( Time until )
 {
@@ -391,6 +409,7 @@ string Wait_handles::as_string()
 }
 
 //---------------------------------------------------------------------------------Directory_reader
+#ifdef Z_WINDOWS
 
 struct Directory_reader
 {
@@ -499,9 +518,8 @@ void Directory_watcher::set_signal()
     }
 }
 
+#endif
 //-------------------------------------------------------------------------------------------------
 
 } //namespace spooler
 } //namespace sos
-
-#endif

@@ -1,4 +1,4 @@
-// $Id: spooler_module.cxx,v 1.8 2002/11/24 15:33:00 jz Exp $
+// $Id: spooler_module.cxx,v 1.9 2002/11/25 08:57:26 jz Exp $
 /*
     Hier sind implementiert
 
@@ -37,7 +37,7 @@ void Module::set_dom_without_source( const xml::Element_ptr& element )
     _java_class_name = element.getAttribute( "java_class" );
     _recompile       = element.bool_getAttribute( "recompile" );
 
-# ifdef Z_WINDOWS
+#ifdef Z_WINDOWS
     if( _com_class_name != "" )
     {
         _kind = kind_com;
@@ -46,7 +46,7 @@ void Module::set_dom_without_source( const xml::Element_ptr& element )
         if( _java_class_name != "" )  throw_xc( "SPOOLER-168" );
     }
     else
-# endif
+#endif
 
     if( _java_class_name != ""  ||  lcase(_language) == "java" )
     {
@@ -85,19 +85,19 @@ void Module::set_dom_source_only( const xml::Element_ptr& element, const Time& x
 
     switch( _kind )
     {
-#     ifdef Z_WINDOWS
+        case kind_java:
+            //if( !_source.empty() )  throw_xc( "SPOOLER-167" );
+            break;
+
         case kind_scripting_engine:
             if( _source.empty() )  throw_xc( "SPOOLER-173" );
             break;
 
+#     ifdef Z_WINDOWS
         case kind_com:
             if( !_source.empty() )  throw_xc( "SPOOLER-167" );
             break;
 #     endif
-
-        case kind_java:
-            //if( !_source.empty() )  throw_xc( "SPOOLER-167" );
-            break;
 
         default: 
             throw_xc( "Module::set_dom_source_only" );
@@ -112,12 +112,13 @@ ptr<Module_instance> Module::create_instance()
 {
     switch( _kind )
     {
-#     ifdef Z_WINDOWS
+        case kind_java:              return (Module_instance*) Z_NEW( Java_module_instance( this ) );
         case kind_scripting_engine:  return (Module_instance*) Z_NEW( Scripting_engine_module_instance( this ) );
+
+#     ifdef Z_WINDOWS
         case kind_com:               return (Module_instance*) Z_NEW( Com_module_instance( this ) );
 #     endif
 
-        case kind_java:              return (Module_instance*) Z_NEW( Java_module_instance( this ) );
         default:                     throw_xc( "SPOOLER-173" );
     }
 }

@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.137 2002/11/24 15:32:57 jz Exp $
+// $Id: spooler.cxx,v 1.138 2002/11/25 08:57:23 jz Exp $
 /*
     Hier sind implementiert
 
@@ -67,6 +67,7 @@ static void set_ctrl_c_handler( bool on );
 
 void send_error_email( const string& error_text, int argc, char** argv )
 {
+#ifdef Z_WINDOWS
     try
     {
         string from = read_profile_string( default_factory_ini, "spooler", "log_mail_from"   );
@@ -110,6 +111,7 @@ void send_error_email( const string& error_text, int argc, char** argv )
         }
     }
     catch( const Xc& ) {}
+#endif
 }
 
 //---------------------------------------------------------------------------------thread_info_text
@@ -333,7 +335,7 @@ xml::Element_ptr Spooler::threads_as_xml( const xml::Document_ptr& document, Sho
 
     dom_append_nl( threads );
 
-    THREAD_LOCK_LOG( _lock, "threads_as_xml" )
+    THREAD_LOCK( _lock )
     {
         FOR_EACH( Thread_list, _thread_list, it )
         {
@@ -346,10 +348,10 @@ xml::Element_ptr Spooler::threads_as_xml( const xml::Document_ptr& document, Sho
 }
 
 //--------------------------------------------------------------Spooler::wait_until_threads_stopped
-#ifdef SPOOLER_USE_THREADS
 
 void Spooler::wait_until_threads_stopped( Time until )
 {
+#ifdef SPOOLER_USE_THREADS
     assert( current_thread_id() == _thread_id );
 
     Wait_handles wait_handles ( this, &_prefix_log );
@@ -404,9 +406,9 @@ void Spooler::wait_until_threads_stopped( Time until )
             }
         }
     }
+#endif
 }
 
-#endif
 //--------------------------------------------------------------------------Spooler::signal_threads
 
 void Spooler::signal_threads( const string& signal_name )
@@ -481,7 +483,7 @@ Job* Spooler::get_job( const string& job_name )
 
 Job* Spooler::get_job_or_null( const string& job_name )
 {
-    THREAD_LOCK_LOG( _lock, "Spooler::get_job_or_null" )
+    THREAD_LOCK( _lock )
     {
         FOR_EACH( Thread_list, _thread_list, it )
         {
@@ -509,7 +511,7 @@ Spooler_thread* Spooler::thread_by_thread_id( Thread_id id )
 
 void Spooler::signal_object( const string& object_set_class_name, const Level& level )
 {
-    THREAD_LOCK_LOG( _lock, "Spooler::signal_object" )  FOR_EACH( Thread_list, _thread_list, t )  (*t)->signal_object( object_set_class_name, level );
+    THREAD_LOCK( _lock )  FOR_EACH( Thread_list, _thread_list, t )  (*t)->signal_object( object_set_class_name, level );
 }
 
 //-------------------------------------------------------------------------------Spooler::set_state
@@ -741,7 +743,9 @@ void Spooler::start()
         if( !ok )  throw_xc( "SPOOLER-127" );
     }
 
-    FOR_EACH( Thread_list, _thread_list, it )  if( !(*it)->empty() )  (*it)->start_thread();
+#   ifdef SPOOLER_USE_THREADS
+        FOR_EACH( Thread_list, _thread_list, it )  if( !(*it)->empty() )  (*it)->start_thread();
+#   endif
 }
 
 //------------------------------------------------------------------------------------Spooler::stop
