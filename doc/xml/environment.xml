@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="../scheduler.xslt" type="text/xsl"?>
 
-<!--$Id: environment.xml,v 1.1 2004/12/07 09:57:56 jz Exp $-->
+<!--$Id: environment.xml,v 1.2 2004/12/07 14:50:08 jz Exp $-->
 
 <xml_element name     = "environment" 
              title    = "Umgebungsvariablen"
@@ -9,7 +9,7 @@
              base_dir = "../"
              parent_page = "../konfiguration.xml"
              author   = "$Author: jz $"
-             date     = "$Date: 2004/12/07 09:57:56 $">
+             date     = "$Date: 2004/12/07 14:50:08 $">
 
     <xml_parent_elements>
         <xml_parent_element name="process"/>
@@ -21,7 +21,7 @@
     
     <description>
         <p>
-            Bestimmt die Umgebungsvariablen für einen Prozess.
+            Bestimmt die zusätzlichen Umgebungsvariablen für einen Prozess.
         </p>
     </description>
     

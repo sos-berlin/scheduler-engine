@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="../scheduler.xslt" type="text/xsl"?>
 
-<!--$Id: variable.xml,v 1.3 2004/12/07 14:31:18 jz Exp $-->
+<!--$Id: variable.xml,v 1.4 2004/12/07 14:50:08 jz Exp $-->
 
 <xml_element name     = "variable" 
              title    = "Eine Variable"
@@ -9,7 +9,7 @@
              base_dir = "../"
              parent_page = "../konfiguration.xml"
              author   = "$Author: jz $"
-             date     = "$Date: 2004/12/07 14:31:18 $">
+             date     = "$Date: 2004/12/07 14:50:08 $">
 
     <xml_parent_elements>
         <xml_parent_element name="environment">
@@ -22,6 +22,9 @@
                 <p>
                     Der Name der Umgebungsvariablen.
                     Unter Windows ist die Großschreibung nicht relevant.
+                </p>
+                <p>
+                    Derselbe Name kann mehrmals verwendet werden, wenn der Wert erweitert werden soll (s. Beispiel mit <code>PATH</code>).
                 </p>
             </description>
         </xml_attribute>
