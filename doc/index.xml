@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="scheduler.xslt" type="text/xsl"?>
 
-<!--$Id: index.xml,v 1.8 2004/08/31 18:32:38 jz Exp $-->
+<!--$Id: index.xml,v 1.9 2004/09/06 10:03:10 jz Exp $-->
 
 <description 
     title               = "Startseite" 
-    base_dir            = "."
+    base_dir            = ""
     suppress_browse_bar = "yes"
     author              = "$Author: jz $"
-    date                = "$Date: 2004/08/31 18:32:38 $"
+    date                = "$Date: 2004/09/06 10:03:10 $"
 >
 
 <h3><a href="command_line.xml">Kommandozeile</a></h3>

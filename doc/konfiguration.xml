@@ -2,13 +2,13 @@
 <?xml-stylesheet href="scheduler.xslt" type="text/xsl"?>
 
 
-<!--$Id: konfiguration.xml,v 1.6 2004/08/30 10:13:52 jz Exp $-->
+<!--$Id: konfiguration.xml,v 1.7 2004/09/06 10:03:10 jz Exp $-->
 
 <description 
     title    = "XML-Konfiguration" 
-    base_dir = "."
+    base_dir = ""
     author   = "$Author: jz $"
-    date     = "$Date: 2004/08/30 10:13:52 $"
+    date     = "$Date: 2004/09/06 10:03:10 $"
 >
 <p>
     Beim Start des Scheduler geben Sie die Datei an,

@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="scheduler.xslt" type="text/xsl"?>
 
-<!--$Id: protokolle.xml,v 1.1 2004/08/29 09:27:27 jz Exp $-->
+<!--$Id: protokolle.xml,v 1.2 2004/09/06 10:03:10 jz Exp $-->
 
 <description 
     title    = "Protokolle" 
-    base_dir = "."
+    base_dir = ""
     parent_page = "index.xml"
     author   = "$Author: jz $"
-    date     = "$Date: 2004/08/29 09:27:27 $"
+    date     = "$Date: 2004/09/06 10:03:10 $"
 >
 
 <p>

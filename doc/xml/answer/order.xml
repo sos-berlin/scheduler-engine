@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="../../scheduler.xslt" type="text/xsl"?>
 
-<!--$Id: order.xml,v 1.1 2004/09/06 07:53:28 jz Exp $-->
+<!--$Id: order.xml,v 1.2 2004/09/06 10:03:10 jz Exp $-->
 
 <xml_element name          = "order" 
              title         = "Auftrag"
@@ -9,11 +9,11 @@
              base_dir      = "../../"
              parent_page   = "../../xml_answers.xml"
              author        = "$Author: jz $"
-             date          = "$Date: 2004/09/06 07:53:28 $">
+             date          = "$Date: 2004/09/06 10:03:10 $">
 
     <xml_parent_elements>
         <xml_parent_element name="answer"/>
-        <xml_parent_element name="orders"/>
+        <xml_parent_element name="order_queue"/>
     </xml_parent_elements>
     
     <xml_attributes>
@@ -24,7 +24,15 @@
         <xml_attribute name="job" type="name" title="Job"/>
         <xml_attribute name="task" type="id" title="Kennung der Task, die den Auftrag gerade ausführt"/>
         <xml_attribute name="in_process_since" type="yyyy-mm-dd hh:mm:ss.mmm" title="Seit wann die Task den Auftrag ausführt"/>
-        <xml_attribute name="state_text" type="text" title="Zustandstext"/>
+        
+        <xml_attribute name="state_text" type="text" title="Zustandstext">
+            <description>
+                <p>
+                    Siehe <scheduler_method class="Order" property="state_text"/>.
+                </p>
+            </description>    
+        </xml_attribute>
+        
         <xml_attribute name="priority" type="zahl" title="Priorität"/>
         <xml_attribute name="created" type="yyyy-mm-dd hh:mm:ss.mmm" title="Wann der Auftrag erzeugt worden ist"/>
         <xml_attribute name="log_file" type="dateiname" title="Name der Protokolldatei"/>

@@ -2,71 +2,40 @@
 <?xml-stylesheet href="scheduler.xslt" type="text/xsl"?>
 
 
-<!--$Id: xml_commands.xml,v 1.3 2004/08/27 17:49:52 jz Exp $-->
+<!--$Id: xml_commands.xml,v 1.4 2004/09/06 10:03:10 jz Exp $-->
 
-<description 
+<xml_commands
     title    = "XML-Kommandos" 
-    base_dir = "."
+    base_dir = ""
     author   = "$Author: jz $"
-    date     = "$Date: 2004/08/27 17:49:52 $"
->
-<p>
-</p>
+    date     = "$Date: 2004/09/06 10:03:10 $"
+>    
+    <description>
+        <p>
+            Die Kommandos können über TCP (z.B. telnet), über HTTP 
+            und über die Kommandozeilenoptionen <scheduler_option name="cmd"/> und <scheduler_option name="send_cmd"/>
+            gegeben werden.
+        </p>
 
-<h2>Kommandos</h2>
+        <p>&#160;</p>
+    </description>
 
-<p>
-    Die Kommandos können über TCP (z.B. telnet), über HTTP 
-    und über die Kommandozeilenoptionen <scheduler_option name="cmd"/> und <scheduler_option name="send_cmd"/>
-    gegeben werden.
-</p>
+    <scheduler_commands>
+        <scheduler_command name="add_jobs"           answer="ok"/>
+        <scheduler_command name="add_order"          answer="ok"/>
+        <scheduler_command name="kill_task"          answer="ok"/>
+        <scheduler_command name="modify_job"         answer="ok"/>
+        <scheduler_command name="modify_order"       answer="ok"/>
+        <scheduler_command name="modify_spooler"     answer="ok"/>
+        <scheduler_command name="show_history"       answer="history"/>
+        <scheduler_command name="show_job"           answer="job"/>
+        <scheduler_command name="show_jobs"          answer="jobs"/>
+        <scheduler_command name="show_job_chains"    answer="job_chains"/>
+        <scheduler_command name="show_order"         answer="order"/>
+        <scheduler_command name="show_state"         answer="state"/>
+        <scheduler_command name="show_task"          answer="task"/>
+        <scheduler_command name="start_job"          answer="ok"/>
+        <scheduler_command name="terminate"          answer="ok"/>
+    </scheduler_commands>
 
-<p>&#160;</p>
-
-<p>
-    <scheduler_element name="add_jobs"/><br/>
-</p>
-<p>
-    <scheduler_element name="add_order"/><br/>
-</p>
-<p>
-    <scheduler_element name="kill_task"/><br/>
-</p>
-<p>
-    <scheduler_element name="modify_job"/><br/>
-</p>
-<p>
-    <scheduler_element name="modify_order"/><br/>
-</p>
-<p>
-    <scheduler_element name="modify_spooler"/><br/>
-</p>
-<p>
-    <scheduler_element name="show_history"/><br/>
-</p>
-<p>
-    <scheduler_element name="show_job"/><br/>
-</p>
-<p>
-    <scheduler_element name="show_jobs"/><br/>
-</p>
-<p>
-    <scheduler_element name="show_job_chains"/><br/>
-</p>
-<p>
-    <scheduler_element name="show_order"/><br/>
-</p>
-<p>
-    <scheduler_element name="show_state"/>, <a class="silent" href="xml/show_state.xml"><code>&lt;s></code></a><br/>
-</p>
-<p>
-    <scheduler_element name="show_task"/><br/>
-</p>
-<p>
-    <scheduler_element name="start_job"/><br/>
-</p>
-<p>
-    <scheduler_element name="terminate"/><br/>
-</p>
-
-</description>
+</xml_commands>

@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding="utf-8"?>
-<!-- $Id: scheduler.xslt,v 1.21 2004/09/06 07:53:27 jz Exp $ -->
+<!-- $Id: scheduler.xslt,v 1.22 2004/09/06 10:03:10 jz Exp $ -->
 
 <!--
     Änderungswünsche:
@@ -16,6 +16,76 @@
     <xsl:variable name="base_dir"   select="/*/@base_dir"/>
         
         
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~xml_commands-->
+    <!-- Für xml_commands.xml -->
+    
+    <xsl:template match="xml_commands">
+    
+        <xsl:variable name="title" select="@title"/>
+
+        <html>
+            <xsl:call-template name="html_head">
+                <xsl:with-param name="title" select="$title"/>
+            </xsl:call-template>
+
+            
+            <body>
+                <xsl:call-template name="body_start">
+                    <xsl:with-param name="title"       select="$title"/>
+                    <xsl:with-param name="parent_page" select="@parent_page"/>
+                </xsl:call-template>
+                
+                <xsl:apply-templates select="description"/>
+                <xsl:apply-templates select="scheduler_commands"/>
+                
+                <xsl:call-template name="bottom">
+                    <xsl:with-param name="parent_page" select="@parent_page"/>
+                </xsl:call-template>
+            </body>
+        </html>
+    
+    </xsl:template>
+    
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~scheduler_commands-->
+    <!-- Für xml_commands.xml -->
+
+    <xsl:template match="scheduler_commands">
+        <table cellspacing="0" cellpadding="0">
+            <col valign="baseline"/>
+            <col valign="baseline" style="padding-top: 1ex; padding-left: 2ex"/>
+            <thead>
+                <tr>
+                    <td>Kommando</td>
+                    <td>Antwort (eingepackt in <code>&lt;spooler>&lt;answer></code>)</td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        <hr size="1"/>
+                    </td>
+                </tr>
+            </thead>
+            <tbody>
+                <xsl:for-each select="scheduler_command">
+                    <xsl:sort select="@name"/>
+                    <tr>
+                        <td>
+                            <xsl:call-template name="scheduler_element">
+                                <xsl:with-param name="name" select="@name"/>
+                            </xsl:call-template>
+                        </td>
+                        <td>
+                            <xsl:call-template name="scheduler_element">
+                                <xsl:with-param name="directory" select="'xml/answer/'"/>
+                                <xsl:with-param name="name" select="@answer"/>
+                            </xsl:call-template>
+                        </td>
+                    </tr>
+                </xsl:for-each>
+            </tbody>
+        </table>
+    </xsl:template>
+
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~xml_element-->
     
     <xsl:template match="xml_element">
@@ -166,7 +236,8 @@
                 <xsl:apply-templates select="xml_parent_elements"/>
                 <xsl:apply-templates select="xml_attributes"/>
                 <xsl:apply-templates select="xml_child_elements"/>
-                <xsl:apply-templates select="xml_answer"/>
+                <!--xsl:apply-templates select="xml_answer"/-->
+                <xsl:call-template name="xml_answer"/>
                 
                 <xsl:call-template name="bottom">
                     <xsl:with-param name="parent_page" select="@parent_page"/>
@@ -277,7 +348,7 @@
     </xsl:template>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~xml_answer-->
-
+    <!--
     <xsl:template match="xml_answer">
     
         <h2>
@@ -286,7 +357,7 @@
 
         <p>
             <xsl:call-template name="scheduler_element">
-                <xsl:with-param name="directory" select="'xml/answer'"/>
+                <xsl:with-param name="directory" select="'xml/answer/'"/>
                 <xsl:with-param name="name"      select="'spooler'"/>
             </xsl:call-template>
     &lt;answer>
@@ -296,6 +367,52 @@
         </p>
 
         <xsl:apply-templates mode="setting_description" select="."/>
+    </xsl:template>
+    -->
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~xml_answer-->
+
+    <xsl:template name="xml_answer">
+    
+        <xsl:variable name="command_element" select="document('xml_commands.xml')//scheduler_command[ @name = current()/@name ]" />
+    
+        <h2>
+            Antwort
+        </h2>
+
+        <p>
+            <code>
+                <xsl:call-template name="scheduler_element">
+                    <xsl:with-param name="directory" select="'xml/answer/'"/>
+                    <xsl:with-param name="name"      select="'spooler'"/>
+                </xsl:call-template>
+            </code>
+            <br/>
+            <code>&#160; &#160;</code>
+
+            <code>
+                <xsl:call-template name="scheduler_element">
+                    <xsl:with-param name="directory" select="'xml/answer/'"/>
+                    <xsl:with-param name="name"      select="'answer'"/>
+                </xsl:call-template>
+            </code>        
+            <br/>
+            <code>&#160; &#160; &#160; &#160;</code>
+
+            <code>
+                <xsl:call-template name="scheduler_element">
+                    <xsl:with-param name="directory" select="'xml/answer/'"/>
+                    <xsl:with-param name="name"      select="$command_element/@answer"/>
+                    <xsl:with-param name="parameter" select="'…'"/>
+                </xsl:call-template>
+            </code>        
+            <br/>
+            <code>&#160; &#160;</code>
+            
+            <code>&lt;answer</code>
+            <br/>
+            <code>&lt;spooler></code>
+        </p>
+
     </xsl:template>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~setting_header_rest-->
@@ -639,10 +756,11 @@
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~scheduler_method-->
 
     <xsl:template match="scheduler_method" mode="description">
-        <xsl:call-template name="scheduler_option">
-            <xsl:with-param name="class"    select="@class"/>
-            <xsl:with-param name="method"   select="@method"/>
-            <xsl:with-param name="property" select="@property"/>
+        <xsl:call-template name="scheduler_method">
+            <xsl:with-param name="class"     select="@class"/>
+            <xsl:with-param name="method"    select="@method"/>
+            <xsl:with-param name="property"  select="@property"/>
+            <xsl:with-param name="signature" select="@signature"/>
         </xsl:call-template>
     </xsl:template>
 
@@ -652,8 +770,13 @@
         <xsl:param name="class"/>
         <xsl:param name="method"/>
         <xsl:param name="property"/>
+        <xsl:param name="signature"/>
         
-        <code><xsl:value-of select="@class"/>.<xsl:value-of select="@method | @property"/>()</code>
+        <xsl:element name="a">
+            <xsl:attribute name="href"><xsl:value-of select="$base_dir"/>javadoc/sos/spooler/<xsl:value-of select="@class"/>.html#<xsl:value-of select="@method | @property"/>(<xsl:value-of select="@signature"/>)</xsl:attribute>
+            <code><xsl:value-of select="@class"/>.<xsl:value-of select="@method | @property"/>()</code>
+        </xsl:element>
+        
     </xsl:template>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~command_line-->
@@ -1085,3 +1208,4 @@
 </xsl:stylesheet>
 
 <!-- Das ist ein Gedankenstrich: – -->
+<!-- Das ist drei Punkte: … -->
