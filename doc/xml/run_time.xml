@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="../scheduler.xslt" type="text/xsl"?>
 
-<!--$Id: run_time.xml,v 1.2 2004/08/22 20:09:24 jz Exp $-->
+<!--$Id: run_time.xml,v 1.3 2004/08/23 11:15:32 jz Exp $-->
 
 <xml_element name     = "run_time" 
              title    = "Laufzeit"
              base_dir = ".."
              author   = "$Author: jz $"
-             date     = "$Date: 2004/08/22 20:09:24 $">
+             date     = "$Date: 2004/08/23 11:15:32 $">
 
     <xml_parent_elements>
         <xml_parent_element name="job">
@@ -25,6 +25,9 @@
                 </p>
             </description>
         </xml_attribute>
+
+        <!-- Die Beschreibungen für let_run, single_start, begin und end werden auch für andere Elemente (date, weekday etc.) verwendet.
+             Also den Text neutral halten! -->
         
         <xml_attribute name="let_run" value="yes_no">
             <description>
@@ -37,7 +40,8 @@
         <xml_attribute name="single_start" value="hh:mm[:ss]">
             <description>
                 <p>
-                    Voreinstellung für in <code>&lt;run_time></code> enthaltene <scheduler_element name="period"/>.
+                    Wenn das Element leer ist (also kein <code>&lt;period></code> enthält),
+                    generiert der Scheduler eine Periode mit dieser Einstellung.
                 </p>
             </description>
         </xml_attribute>
@@ -45,15 +49,19 @@
         <xml_attribute name="begin" value="hh:mm[:ss]" initial="00:00">
             <description>
                 <p>
-                    Voreinstellung für in <code>&lt;run_time></code> enthaltene <scheduler_element name="period"/>.
+                    Wenn das Element leer ist (also kein <code>&lt;period></code> enthält),
+                    generiert der Scheduler eine Periode mit dieser Einstellung, 
+                    anderfalls ist es die Voreinstellung für in diesem Element enthaltene <scheduler_element name="period"/>.
                 </p>
             </description>
         </xml_attribute>
 
-        <xml_attribute name="end" value="hh:mm[:ss]" initial="04:00">
+        <xml_attribute name="end" value="hh:mm[:ss]" initial="24:00">
             <description>
                 <p>
-                    Voreinstellung für in <code>&lt;run_time></code> enthaltene <scheduler_element name="period"/>.
+                    Wenn das Element leer ist (also kein <code>&lt;period></code> enthält),
+                    generiert der Scheduler eine Periode mit dieser Einstellung, 
+                    anderfalls ist es die Voreinstellung für in diesem Element enthaltene <scheduler_element name="period"/>.
                 </p>
             </description>
         </xml_attribute>
@@ -111,7 +119,7 @@
             <code>&lt;run_time></code> gibt an, zu welchen Zeiten der Scheduler Tasks dieses Jobs laufen lässt.
             Das wird realisiert durch Perioden (s. <scheduler_element name="period"/>).
             Der Scheduler wählt die erste Periode aus, die zu einer Zeit gilt (deren Ende noch nicht abgelaufen ist).
-            Diese Periode gilt bis zu ihrem Ende.
+            Diese Periode gilt bis zu ihrem Ende. Dann wählt der Scheduler erneut eine Periode aus.
         </p>
         <p>
             Eine Periode mit <code>single_start</code> gilt nur für einen Zeitpunkt.

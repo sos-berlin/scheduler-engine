@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet href="../scheduler.xslt" type="text/xsl"?>
+
+<!--$Id: ultimos.xml,v 1.1 2004/08/23 11:15:32 jz Exp $-->
+
+<xml_element name     = "ultimos" 
+             title    = "Laufzeit für bestimmte Tage des Monats, vom Ende her gezählt"
+             base_dir = ".."
+             author   = "$Author: jz $"
+             date     = "$Date: 2004/08/23 11:15:32 $">
+
+    <xml_parent_elements>
+        <xml_parent_element name="run_time">
+        </xml_parent_element>        
+    </xml_parent_elements>
+    
+
+    <xml_child_elements>
+        <xml_child_element name="day" multiple="yes">
+            <description>
+                <p>
+                    Bestimmt den Tag des Monats. 
+                </p>
+            </description>
+        </xml_child_element>        
+    </xml_child_elements>
+    
+    
+    
+    <description>
+        <p>
+            Setzt die Perioden für einen bestimmten Tag des Monats fest, vom Ende her gezählt.
+        </p>
+    </description>
+    
+    <description for_element="base">
+        <p>
+            ??? Ersetzt ein &lt;date> mit gleichem Datum aus der Basiskonfiguration.
+        </p>
+    </description>
+    
+    <example>
+        <pre>
+&lt;montdays>
+    &lt;day day="0" begin="10:00" end="12:00"/>
+    &lt;day day="1">
+        &lt;period begin="08:00" end="12:00"/>
+        &lt;period begin="15:00" end="18:00"/>
+    &lt;/day>
+&lt;/day>    
+        </pre>
+        <p>
+            Setzt die Laufzeit fest für den Letzten eines Monats 10:00 bis 12:00 und
+            für den Vorletzten eines Monats 08:00 bis 12:00 und 15:00 bis 18:00.
+        </p>
+    </example>
+    
+</xml_element>

@@ -121,7 +121,20 @@
                 
                 <p>&#160;</p>
                 
-                <xsl:apply-templates select="description"/>
+                <xsl:apply-templates select="description [ not( @for_element ) ]"/>
+                
+                <xsl:if test="description [ @for_element ]">
+                    <p class="example">
+                        Verhalten mit 
+                            <xsl:call-template name="scheduler_element">
+                                <xsl:with-param name="name" select="'base'"/>
+                            </xsl:call-template>
+                    </p>
+                    <div class="indent">
+                        <xsl:apply-templates select="description [ @for_element ]"/>
+                    </div>
+                </xsl:if>
+                
                 <xsl:apply-templates select="example"/>
                 <xsl:apply-templates select="xml_parent_elements"/>
                 <xsl:apply-templates select="xml_attributes"/>
@@ -192,6 +205,12 @@
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~xml_attribute-->
 
+    <xsl:template match="xml_attribute [ @same_as_element ]">
+        <xsl:apply-templates select="document( concat( 'xml/', @same_as_element, '.xml' ) )/xml_element/xml_attributes/xml_attribute[ @name=current()/@name ]"/>
+    </xsl:template>
+    
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~xml_attribute-->
+
     <xsl:template match="xml_attribute">
     
         <xsl:element name="a">
@@ -204,7 +223,7 @@
             </span>="<i><xsl:value-of select="@value"/></i>"
             
             <xsl:if test="@initial">
-                &#160;(Startwert: <xsl:value-of select="@initial"/>)
+                &#160;(Initialwert: <xsl:value-of select="@initial"/>)
             </xsl:if>
         </p>
 
@@ -284,10 +303,34 @@
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~scheduler_element-->
 
     <xsl:template match="scheduler_element" mode="description">
+        <xsl:call-template name="scheduler_element">
+            <xsl:with-param name="name" select="@name"/>
+        </xsl:call-template>
+        <!--
         <xsl:element name="a">
             <xsl:attribute name="href"><xsl:value-of select="@name"/>.xml</xsl:attribute>
             <code>&lt;<xsl:value-of select="@name"/>></code>
         </xsl:element>
+        -->
+    </xsl:template>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~scheduler_element-->
+
+    <xsl:template name="scheduler_element">
+        <xsl:param name="name"/>
+        <xsl:choose>
+            <xsl:when test="$name">
+                <xsl:element name="a">
+                    <xsl:attribute name="href"><xsl:value-of select="$name"/>.xml</xsl:attribute>
+                    <code>&lt;<xsl:value-of select="$name"/>></code>
+                </xsl:element>
+            </xsl:when>
+            <!--
+            <xsl:otherwise>
+                <code>&lt;<xsl:value-of select="/xml_element/@name"/>></code>
+            </xsl:otherwise>
+            -->
+        </xsl:choose>
     </xsl:template>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~scheduler_option-->

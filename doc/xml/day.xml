@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet href="../scheduler.xslt" type="text/xsl"?>
+
+<!--$Id: day.xml,v 1.1 2004/08/23 11:15:32 jz Exp $-->
+
+<xml_element name     = "weekdays" 
+             title    = "Laufzeit für bestimmte Wochentage"
+             base_dir = ".."
+             author   = "$Author: jz $"
+             date     = "$Date: 2004/08/23 11:15:32 $">
+
+    <xml_parent_elements>
+        <xml_parent_element name="run_time">
+        </xml_parent_element>        
+    </xml_parent_elements>
+
+
+    <xml_child_elements>
+        <xml_child_element name="day" multiple="yes">
+            <description>
+                <p>
+                    Bestimmt den Wochentag. 
+                </p>
+            </description>
+        </xml_child_element>        
+    </xml_child_elements>
+    
+    
+    <xml_attributes>
+        <xml_attribute name="day" value="zahl">
+            <description>
+                <p>
+                    Gibt die Nummer des Tages an, abhängig vom Eltern-Element.
+                </p>
+
+                <dl>
+                    <dt>In <scheduler_element name="weekdays"/>:</dt>
+                    <dd>
+                        0 für Sonntag, 1 für Montag usw. bis 6 für Samstag.
+                    </dd>
+
+                    <dt>In <scheduler_element name="monthdays"/>:</dt>
+                    <dd>
+                        Der Tag des Monats (1 bis 31).
+                    </dd>
+
+                    <dt>In <scheduler_element name="ultimos"/>:</dt>
+                    <dd>
+                        0 für den letzten Tag, 1 für den vorletzten usw.
+                    </dd>
+                </dl>
+            </description>
+        </xml_attribute>
+
+        <xml_attribute name="let_run"       same_as_element="run_time"/>
+        <xml_attribute name="single_start"  same_as_element="run_time"/>
+        <xml_attribute name="begin"         same_as_element="run_time"/>
+        <xml_attribute name="end"           same_as_element="run_time"/>
+    </xml_attributes>
+
+Das Attribut <code>day</code> gibt den Tag von 0 für Sonntag bis 6 für Samstag an.    
+    
+    <description>
+        <p>
+            setzt die Perioden für einen bestimmten Tag fest.
+        </p>
+    </description>
+    
+    <description for_element="base">
+        <p>
+            Ersetzt ein &lt;date> mit gleichem Datum aus der Basiskonfiguration.
+        </p>
+    </description>
+    
+    <example>
+        <pre>
+&lt;weekdays>
+    &lt;day period begin="10:00" end="12:00"/>
+    &lt;period begin="16:00" end="22:00"/>
+&lt;/day>    
+        </pre>
+    </example>
+    <example>
+        <pre>
+&lt;day date="2004-09-02" begin="14:00" end="18:00"/>
+        </pre>
+    </example>
+    
+</xml_element>

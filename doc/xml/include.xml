@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet href="../scheduler.xslt" type="text/xsl"?>
+
+<!--$Id: include.xml,v 1.2 2004/08/23 11:15:32 jz Exp $-->
+
+<xml_element name     = "include" 
+             title    = "Text aus einer Datei einfügen"
+             base_dir = ".."
+             author   = "$Author: jz $"
+             date     = "$Date: 2004/08/23 11:15:32 $">
+
+    <xml_parent_elements>
+        <xml_parent_element name="script">
+        </xml_parent_element>        
+        <xml_parent_element name="description">
+        </xml_parent_element>        
+    </xml_parent_elements>
+    
+    
+    <xml_attributes>
+        <xml_attribute name="file" value="filename">
+            <description>
+                <p>
+                    Der Name der Datei, deren Inhalt eingefügt werden soll.
+                </p>
+            </description>
+        </xml_attribute>
+        
+    </xml_attributes>
+    
+    <description>
+        <p>
+            <code>&lt;include></code> kann in den Text der Eltern-Elemente gemischt werden.
+        </p>
+    </description>
+        
+</xml_element>

@@ -8,11 +8,14 @@ td              { font-size: 10pt }
 div             { font-size: 10pt }
 /*p:first-child   { font-size: 10pt; margin-top: 0; margin-bottom: 0 }   Wirkt in ie6 nicht */
 li              { font-size: 10pt }
-pre             { font-family: Lucida Console, monospace; font-size: 9pt; margin-left: 4ex; line-height: 1.2em;  }
+pre             { font-family: Lucida Console, monospace; font-size: 9pt; margin-left: 4ex; margin-top: 2pt; line-height: 1.2em;  }
 col             { padding-bottom: 1pt; padding-right: 2pt }
 caption         { font-size: 10pt; padding-bottom: 5pt; padding-left: 3pt; padding-right: 2pt; padding-top: 2pt }
 
-p.first         { margin-top: 0; }
+dt              { margin-top: 4ex; }
+dd              { margin-left: 4ex }
+
+p.first         { margin-top: 1ex; }
 p.mono          { font-family: Lucida Console, monospace; font-size: 9pt; margin-left: 4ex }
 .mono           { font-family: Lucida Console, monospace; font-size: 9pt }
 code            { font-family: Lucida Console, monospace; font-size: 9pt;  }

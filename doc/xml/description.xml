@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet href="../scheduler.xslt" type="text/xsl"?>
+
+<!--$Id: description.xml,v 1.1 2004/08/23 11:15:32 jz Exp $-->
+
+<xml_element name     = "description" 
+             title    = "Beschreibung"
+             base_dir = ".."
+             author   = "$Author: jz $"
+             date     = "$Date: 2004/08/23 11:15:32 $">
+
+    <xml_parent_elements>
+        <xml_parent_element name="job">
+        </xml_parent_element>        
+    </xml_parent_elements>
+
+    
+    <xml_child_elements>
+        <xml_child_element name="include">
+            <description>
+                <p>
+                    Dieses Element kann in den Text gestreut werden 
+                    (aber außerhalb von <code>&lt;[CDATA[</code>&#160; und&#160; <code>]]&gt;</code>),
+                    um Quell-Code, der in anderen Dateien steht, einzuziehen.
+                </p>
+            </description>
+        </xml_child_element>        
+    </xml_child_elements>
+    
+    
+    <description>
+        <p>
+            Eine Beschreibung des Jobs, die in der HTML-Oberfläche gezeigt wird.
+        </p>
+    </description>
+    
+    
+    <example>
+        <pre>
+&lt;job name="mein_job">
+    &lt;description>
+
+Das ist die Beschreibung meines Jobs:
+&lt;include file="beschreibung_meines_jobs.txt"/>
+
+    &lt;/description>
+    ...
+&lt;/job>        
+        </pre>
+    </example>
+        
+</xml_element>

@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet href="../scheduler.xslt" type="text/xsl"?>
+
+<!--$Id: period.xml,v 1.1 2004/08/23 11:15:58 jz Exp $-->
+
+<xml_element name     = "period" 
+             title    = "Laufzeit"
+             base_dir = ".."
+             author   = "$Author: jz $"
+             date     = "$Date: 2004/08/23 11:15:58 $">
+
+    <xml_parent_elements>
+        <xml_parent_element name="run_time">
+        </xml_parent_element>        
+    </xml_parent_elements>
+    
+
+    <xml_attributes>
+        <xml_attribute name="let_run" value="yes_no">
+            <description>
+                <p>
+                    <code>let_run="yes"</code> gibt an, dass der Scheduler die Task weiterlaufen lassen soll,
+                    auch wenn die <code>&lt;run_time</code> das eigentlich nicht mehr zulässt.
+                </p>
+                <p>
+                    Bei <code>let_run="no"</code> beendet der Scheduler die Task
+                    (ruft also nicht mehr spooler_process, sondern spooler_close auf), 
+                    sobald die <code>&lt;run_time</code> nicht mehr gilt.
+                </p>
+            </description>
+        </xml_attribute>
+
+        <xml_attribute name="single_start" value="hh:mm[:ss]">
+            <description>
+                <p>
+                    Der Job soll zu der angegebenen Uhrzeit starten.
+                </p>
+                <p>
+                    Schließt die Attribute <code>begin</code> und <code>end</code> aus.
+                </p>
+            </description>
+        </xml_attribute>
+        
+        <xml_attribute name="begin" value="hh:mm[:ss]" initial="00:00">
+            <description>
+                <p>
+                    Ab dieser Uhrzeit darf der Job laufen.
+                </p>
+            </description>
+        </xml_attribute>
+
+        <xml_attribute name="end" value="hh:mm[:ss]" initial="24:00">
+            <description>
+                <p>
+                    Um diese Zeit endet die Periode.
+                    Wenn dann <code>let_run="no"</code> gesetzt ist und keine weitere Periode gilt,
+                    beendet der Scheduler laufende Tasks (durch Aufruf von <code>spooler_close()</code>).
+                </p>
+            </description>
+        </xml_attribute>
+
+        <xml_attribute name="repeat" value="hh:mm[:ss] oder sekunden">
+            <description>
+                <p>
+                    Der Job wird, wenn er nicht schon läuft, zu Beginn der Periode gestartet.
+                    Nach Jobende soll der Scheduler den Job nach ablauf der angegebenen Zeit erneut starten, 
+                    soweit die <code>&lt;run_time</code> das zulässt.
+                    Die Wiederholung kann im Format hh:mm oder hh:mm:ss oder in Sekunden angegeben werden.
+                </p>
+                <p>
+                    Bei <code>repeat="0"</code> wird der Job nicht wiederholt (default).
+                </p>
+            </description>
+        </xml_attribute>
+    </xml_attributes>
+
+
+    <description>
+        <p>
+            Eine Periode gibt an, wann ein Job laufen darf. Sie kann einen Zeitraum innerhalb eines Tages umfassen
+            (Attribute <code>begin</code> und <code>end</code>) oder einen Zeitpunkt (Attribut <code>single_start</code>).
+        </p>
+    </description>
+    
+</xml_element>

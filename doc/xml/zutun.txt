@@ -1,0 +1,4 @@
+$Id: zutun.txt,v 1.1 2004/08/23 11:15:32 jz Exp $
+
+Perl für Unix beschreiben. libsosperl.so, perl 5.8, libperl.so threading.
+

@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="../scheduler.xslt" type="text/xsl"?>
 
-<!--$Id: script.xml,v 1.2 2004/08/22 20:09:24 jz Exp $-->
+<!--$Id: script.xml,v 1.3 2004/08/23 11:15:32 jz Exp $-->
 
 <xml_element name     = "script" 
              title    = "Programm-Code"
              base_dir = ".."
              author   = "$Author: jz $"
-             date     = "$Date: 2004/08/22 20:09:24 $">
+             date     = "$Date: 2004/08/23 11:15:32 $">
 
     <xml_parent_elements>
         <xml_parent_element name="config">
@@ -27,11 +27,30 @@
         <xml_attribute name="language" value="language">
             <description>
                 <p>
-                    Sprache des Programm-Codes. 
-                    Möglich sind <code>"java"</code>, <code>"perl"</code> 
-                    und die Sprachen der Microsoft Scripting Engines <code>"VBScript"</code> und <code>"JavaScript"</code>.
+                    Sprache des Programm-Codes.
+                    Wird nicht zusammen mit dem Attribute <code>com_class</code> verwendet.
                     Die Großschreibung spielt keine Rolle.
                 </p>
+                
+                <dl>
+                    <dt><code>language="java"</code></dt>
+                    <dd>
+                        Den Name der Klasse geben Sie mit dem Attribut <code>java_class</code> an.
+                        Sie können den Programm-Code der Java-Klasse als Text in <code>&lt;script></code> angegeben.
+                        Der Scheduler kompiliert den Code mit <code>javac</code>.
+                    </dd>
+                    
+                    <dt><code>language="PerlScript"</code></dt>
+                    <dd>
+                        In Windows wird PerlScript verwendet, wenn es installiert ist. 
+                        In Unix wird Perl direkt verwendet.
+                    </dd>
+                    
+                    <dt><code>language="JavaScript"</code> oder <code>"VBScript"</code></dt>
+                    <dd>
+                        JavaScript und VBScript sind in Windows vorhandene Sprachen (Scripting engines).
+                    </dd>
+                </dl>
             </description>
         </xml_attribute>
         
@@ -89,7 +108,7 @@
         <xml_attribute name="use_engine" value="scope" initial="task">
             <description>
                 <p>
-                    Nur <code>&lt;use_engine="task"></code> ist möglich.
+                    Nur <code>use_engine="task"</code> ist möglich.
                 </p>
             </description>
         </xml_attribute>
@@ -114,10 +133,10 @@
         <p>
             Hier wird der auszuführende Programm-Code angegeben, entweder direkt als Text oder indirekt als Verweis auf Binär-Code. 
         </p>
-            <p>
-                <code>&lt;script></code> kann den Quell-Code als Text enthalten. Er kann in <code>&lt;[CDATA[</code>&#160; und&#160; <code>]]&gt;</code> 
-                eingeschlossen sein.
-            </p>
+        <p>
+            <code>&lt;script></code> kann den Quell-Code als Text enthalten. Er kann in <code>&lt;[CDATA[</code>&#160; und&#160; <code>]]&gt;</code> 
+            eingeschlossen sein.
+        </p>
     </description>
     
 </xml_element>
