@@ -461,6 +461,9 @@ cd $(ProjectDir)
 				RelativePath=".\spooler_process.cxx">
 			</File>
 			<File
+				RelativePath=".\spooler_remote.cxx">
+			</File>
+			<File
 				RelativePath="spooler_security.cxx">
 				<FileConfiguration
 					Name="Release|Win32">

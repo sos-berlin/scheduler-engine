@@ -482,6 +482,10 @@ void Day_set::set_dom( const xml::Element_ptr& element, const Day* default_day, 
             Day my_default_day ( e, default_day, default_period );
 
             int day = int_from_variant( e.getAttribute( "day" ) );
+
+            if( _minimum == 0  &&  _maximum == 6  &&  day == 7 )  day = 0;      // Sonntag darf auch 7 sein
+
+            if( day < _minimum  ||  day > _maximum )  throw_xc( "SCHEDULER-221", day, _minimum, _maximum );
             if( (uint)day >= NO_OF(_days) )  throw_xc( "SCHEDULER-INVALID-DAY", day );
             _days[day].set_dom( e, &my_default_day, default_period );
         }

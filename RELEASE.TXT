@@ -112,3 +112,12 @@ VERSION 2.0.113  2005-03-31
 
 spooler_task.order.run_time.xml = "<run_time repeat='5'/>";
 spooler_task.order.remove_from_job_chain();
+
+
+------------------------------------------------
+VERSION 2.0.116  2005-04-06
+
+<day day="...">: Die Tagesnummer wird jetzt strenger geprüft.
+<monthdays>: 1..31
+<ultimos>: 0..30
+<weekdays>: 0..6, aber 7 wird zu 0 (Sonntag)

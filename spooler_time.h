@@ -179,8 +179,8 @@ struct Day
 
 struct Day_set
 {
-                                Day_set                     ()                                      {} 
-    explicit                    Day_set                     ( const xml::Element_ptr& e )           { set_dom(e); }
+                                Day_set                     ( int minimum, int maximum )                 : _minimum(minimum), _maximum(maximum) {} 
+    explicit                    Day_set                     ( int minimum, int maximum, const xml::Element_ptr& e )  : _minimum(minimum), _maximum(maximum) { set_dom(e); }
 
     void                        set_dom                     ( const xml::Element_ptr&, const Day* = NULL, const Period* = NULL );
 
@@ -191,15 +191,17 @@ struct Day_set
     friend ostream&             operator <<                 ( ostream& s, const Day_set& o )        { o.print(s); return s; }
 
 
-    Day                        _days                        [31];
+    int                        _minimum;
+    int                        _maximum;
+    Day                        _days                        [1+31];
 };
 
 //--------------------------------------------------------------------------------------Weekday_set
 
 struct Weekday_set : Day_set
 {
-                                Weekday_set                 ()                                      {}
-    explicit                    Weekday_set                 ( const xml::Element_ptr& e )           : Day_set( e ) {}
+                                Weekday_set                 ()                                      : Day_set( 0, 6 ) {}
+    explicit                    Weekday_set                 ( const xml::Element_ptr& e )           : Day_set( 0, 6, e ) {}
 
     Period                      next_period                 ( Time, With_single_start single_start );
 
@@ -211,8 +213,8 @@ struct Weekday_set : Day_set
 
 struct Monthday_set : Day_set
 {
-                                Monthday_set                ()                                      {}
-    explicit                    Monthday_set                ( const xml::Element_ptr& e )           : Day_set( e ) {}
+                                Monthday_set                ()                                      : Day_set( 1, 31 ) {}
+    explicit                    Monthday_set                ( const xml::Element_ptr& e )           : Day_set( 1, 31, e ) {}
 
     Period                      next_period                 ( Time, With_single_start single_start );
 
@@ -224,8 +226,8 @@ struct Monthday_set : Day_set
 
 struct Ultimo_set : Day_set
 {
-                                Ultimo_set                  ()                                      {}
-    explicit                    Ultimo_set                  ( const xml::Element_ptr& e )           : Day_set( e ) {}
+                                Ultimo_set                  ()                                      : Day_set( 0, 30 ) {}
+    explicit                    Ultimo_set                  ( const xml::Element_ptr& e )           : Day_set( 0, 30, e ) {}
 
     Period                      next_period                 ( Time, With_single_start single_start );
 
