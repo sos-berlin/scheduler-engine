@@ -2,13 +2,13 @@
 <?xml-stylesheet href="scheduler.xslt" type="text/xsl"?>
 
 
-<!--$Id: xml_commands.xml,v 1.1 2004/08/24 18:34:19 jz Exp $-->
+<!--$Id: xml_commands.xml,v 1.2 2004/08/24 18:39:42 jz Exp $-->
 
 <description 
     title    = "XML-Kommandos" 
     base_dir = "."
     author   = "$Author: jz $"
-    date     = "$Date: 2004/08/24 18:34:19 $"
+    date     = "$Date: 2004/08/24 18:39:42 $"
 >
 <p>
 </p>
@@ -16,19 +16,53 @@
 <h2>Kommandos</h2>
 
 <p>
+    Die Kommandos können über TCP (z.B. telnet), über HTTP 
+    und über die Kommandozeilenoptionen <scheduler_option name="cmd"/> und <scheduler_option name="send_cmd"/>
+    gegeben werden.
+</p>
+
+<p>&#160;</p>
+
+<p>
     <scheduler_element name="add_jobs"/><br/>
+</p>
+<p>
     <scheduler_element name="add_order"/><br/>
+</p>
+<p>
     <scheduler_element name="modify_job"/><br/>
+</p>
+<p>
     <scheduler_element name="modify_order"/><br/>
+</p>
+<p>
     <scheduler_element name="modify_spooler"/><br/>
+</p>
+<p>
     <scheduler_element name="show_history"/><br/>
+</p>
+<p>
     <scheduler_element name="show_job"/><br/>
+</p>
+<p>
     <scheduler_element name="show_jobs"/><br/>
+</p>
+<p>
     <scheduler_element name="show_job_chains"/><br/>
+</p>
+<p>
     <scheduler_element name="show_order"/><br/>
+</p>
+<p>
     <scheduler_element name="show_state"/><br/>
+</p>
+<p>
     <scheduler_element name="show_task"/><br/>
+</p>
+<p>
     <scheduler_element name="start_job"/><br/>
+</p>
+<p>
     <scheduler_element name="terminate"/><br/>
 </p>
 

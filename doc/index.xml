@@ -1,31 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="scheduler.xslt" type="text/xsl"?>
 
-<!--$Id: index.xml,v 1.2 2004/08/24 18:34:11 jz Exp $-->
+<!--$Id: index.xml,v 1.3 2004/08/24 18:39:42 jz Exp $-->
 
 <description 
-    title    = "" 
+    title    = "Startseite" 
     base_dir = "."
     author   = "$Author: jz $"
-    date     = "$Date: 2004/08/24 18:34:11 $"
+    date     = "$Date: 2004/08/24 18:39:42 $"
 >
 
-<h3>Kommandozeile</h3>
+<h3><a href="command_line.xml">Kommandozeile</a></h3>
 <p>
-    Die <a href="command_line.xml">Optionen</a> an der Kommandozeile haben Vorrang.
+    Die Optionen an der Kommandozeile haben Vorrang.
 </p>
 
 
-<h3>factory.ini</h3>
+<h3><a href="factory_ini.xml">factory.ini</a></h3>
 <p>
-    Die Einstellungen in der Datei <a href="factory_ini.xml"><code>factory.ini</code></a> haben Vorrang 
+    Die Einstellungen in der Datei <code>factory.ini</code> haben Vorrang 
     vor den Einstellungen in der XML-Konfiguration (leere Einträge "<code>eintrag=</code>" gelten als nicht vorhanden).
 </p>
 
 
-<h3>XML-Konfiguration</h3>
+<h3><a href="konfiguration.xml">XML-Konfiguration</a></h3>
 <p>
-    Die <a href="konfiguration.xml">XML-Konfiguration</a> beschreibt die Jobs und alles was dazu gehört.
+    Die XML-Konfiguration enthält die Beschreibungen der Jobs und alles was dazu gehört.
 </p>
 
 
@@ -46,10 +46,9 @@
 </p>
 
 
-<h3>XML-Kommandos</h3>
+<h3><a href="xml_commands.xml">XML-Kommandos</a></h3>
 <p>
     Über TCP und UDP nimmt der Scheduler Kommandos in XML entgegen.
-    Die Kommandos sind <a href="xml_commands.xml">hier</a> beschrieben.
 </p>
 
 <h3>Protokolle</h3>
