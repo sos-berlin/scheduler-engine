@@ -1,4 +1,4 @@
-// $Id: spooler_wait.cxx,v 1.67 2002/12/11 11:28:46 jz Exp $
+// $Id: spooler_wait.cxx,v 1.68 2002/12/11 11:38:49 jz Exp $
 /*
     Hier sind implementiert
 
@@ -282,18 +282,30 @@ int Wait_handles::wait_until( Time until )
     while(1)
     {
         Time now       = Time::now();
-        Time today2    = now.midnight() + 2*3600;           // Heute 2:00 Uhr (für Sommerzeitbeginn: Uhr springt von 2 Uhr auf 3 Uhr)
-        Time tomorrow2 = now.midnight() + 2*3600 + 24*3600;
-        Time today3    = now.midnight() + 3*3600;           // Heute 3:00 Uhr (für Winterzeitbeginn: Uhr springt von 3 Uhr auf 2 Uhr)
         int  ret       = -1;
 
-        if( now < today2  &&  until >= today2 )     ret = wait_until_2( today2 + 0.01 );
-        else
-        if( now < today3  &&  until >= today3 )     ret = wait_until_2( today3 + 0.01 );
-        else 
-        if( until >= tomorrow2 )                    ret = wait_until_2( tomorrow2 + 0.01 );
-        else
-            break;
+        if( tm1.tm_isdst )  // Wir haben Sommerzeit?
+        {
+            Time today3    = now.midnight() + 3*3600;            // Heute 3:00 Uhr (für Winterzeitbeginn: Uhr springt von 3 Uhr auf 2 Uhr)
+            Time tomorrow3 = now.midnight() + 3*3600 + 24*3600;  // Morgen 3:00
+
+            if( now < today3  &&  until >= today3 )    ret = wait_until_2( today3 + 0.01 );
+            else 
+            if( until >= tomorrow3 )                                      ret = wait_until_2( tomorrow3 + 0.01 );
+            else
+                break;
+        }
+        else                // Wir haben Winterzeit?
+        {
+            Time today2    = now.midnight() + 2*3600;            // Heute 2:00 Uhr (für Sommerzeitbeginn: Uhr springt von 2 Uhr auf 3 Uhr)
+            Time tomorrow2 = now.midnight() + 2*3600 + 24*3600;  // Morgen 3:00
+
+            if( now < today2  &&  until >= today2 )     ret = wait_until_2( today2 + 0.01 );
+            else 
+            if( until >= tomorrow2 )                                      ret = wait_until_2( tomorrow2 + 0.01 );
+            else
+                break;
+        }
 
         if( ret != -1 )  return ret;
 
@@ -323,10 +335,11 @@ int Wait_handles::wait_until_2( Time until )
         int    sleep_time_ms = INT_MAX;
         int    t = ceil( min( (double)sleep_time_ms, wait_time * 1000.0 ) );
 
-        if( t <= 0 )  t = 0;  //break;
+        if( t <= 0 )  if( again )  break;
+                             else  t = 0;  //break;
         
         if( again ) {
-            if( t > 1800 )  return -1;  // Um eine halbe Stunde verrechnet? Das muss an der Sommerzeitumstellung liegen
+            if( t > 1800 )  return -1;  // Um mehr als eine halbe Stunde verrechnet? Das muss an der Sommerzeitumstellung liegen
             _log->info( "Noch " + sos::as_string(wait_time) + "s warten ..." );
         }
 
@@ -380,8 +393,6 @@ int Wait_handles::wait_until_2( Time until )
             again = true;
         else
             throw_mswin_error( "MsgWaitForMultipleObjects" );
-
-        if( wait_time <= 0 )  break;
     }
 
     return -1;
