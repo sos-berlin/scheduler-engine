@@ -44,6 +44,7 @@ java_classes=\
  sos/spooler/Order_queue.class\
  sos/spooler/Spooler.class\
  sos/spooler/Spooler_program.class\
+ sos/spooler/Subprocess.class\
  sos/spooler/Task.class\
  sos/spooler/Variable_set.class
 
