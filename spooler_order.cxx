@@ -274,7 +274,9 @@ int Job_chain::remove_all_pending_orders()
             result++;
         }
         else
-            Z_LOG( __FUNCTION__ ": " << order->obj_name() << " wird nicht entfernt, weil in Verarbeitung durch " << order->_task->obj_name() << "\n" );
+        {
+            Z_LOG( __FUNCTION__ << ": " << order->obj_name() << " wird nicht entfernt, weil in Verarbeitung durch " << order->_task->obj_name() << "\n" );
+        }
     }
 
     return result;
