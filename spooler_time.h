@@ -1,4 +1,4 @@
-// $Id: spooler_time.h,v 1.22 2003/09/04 15:53:08 jz Exp $
+// $Id: spooler_time.h,v 1.23 2003/09/26 10:46:41 jz Exp $
 
 #ifndef __SPOOLER_TIME_H
 #define __SPOOLER_TIME_H
@@ -144,7 +144,7 @@ struct Period
     bool                       _let_run;                    // Task zuende laufen lassen, nicht bei _next_end_time beenden
 };
 
-extern Period                   empty_period;               // gcc 3.2.1: Nicht const, weil gcc diese Variable nicht initialisiert. Das macht spooler.cxx.
+//extern Period                   empty_period;               // gcc 3.2.1: Nicht const, weil gcc diese Variable nicht initialisiert. Das macht spooler.cxx.
 
 typedef set<Period>             Period_set;
 
@@ -163,7 +163,7 @@ struct Day
                                 operator bool               () const                                { return !_period_set.empty(); }
 
     bool                        has_time                    ( Time time_of_day );
-    const Period&               next_period                 ( Time time_of_day, With_single_start single_start ) const { return _period_set.empty()? empty_period: next_period_(time_of_day,single_start); }
+    const Period&               next_period                 ( Time time_of_day, With_single_start single_start ) const { return _period_set.empty()? Period(): next_period_(time_of_day,single_start); }
     const Period&               next_period_                ( Time time_of_day, With_single_start single_start ) const;
     void                        add                         ( const Period& p )                     { _period_set.insert( p ); }       
 

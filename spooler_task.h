@@ -1,4 +1,4 @@
-// $Id: spooler_task.h,v 1.118 2003/09/23 14:01:08 jz Exp $
+// $Id: spooler_task.h,v 1.119 2003/09/26 10:46:41 jz Exp $
 
 #ifndef __SPOOLER_TASK_H
 #define __SPOOLER_TASK_H
@@ -103,7 +103,7 @@ struct Task : Sos_self_deleting
     bool                        wait_until_terminated       ( double wait_time = latter_day );
     void                        set_delay_spooler_process   ( Time t )                              { _log.debug("delay_spooler_process=" + t.as_string() ); _next_spooler_process = Time::now() + t; }
 
-    void                        set_state                   ( State, const Time& wait_until = 0 );
+    void                        set_state                   ( State );
 
     void                        set_error_xc                ( const Xc& );
     void                        set_error                   ( const Xc& x )                         { set_error_xc( x ); }
@@ -155,8 +155,11 @@ struct Task : Sos_self_deleting
     virtual bool                has_step_count              ()                                      { return true; }
 
     Fill_zero                  _zero_;
+
     Z_DEBUG_ONLY( string       _job_name; )
     int                        _id;
+    State                      _state;
+
     Job*                       _job;
     Thread_semaphore           _lock;
     Prefix_log                 _log;
@@ -196,11 +199,9 @@ struct Task : Sos_self_deleting
   //bool                       _close_engine;               // Bei einem Fehler in spooler_init()
   //bool                       _close_engine;               // Nach Task-Ende Scripting Engine schließen (für use_engine="job")
     ptr<Order>                 _order;
-    State                      _state;
-    bool                       _processing;                 // In asynchroner Ausführung (zwischen xxx__begin() und xxx__end())
     Call_state                 _call_state;
     Xc_copy                    _error;
-    bool                       _success;                    // true, wenn spooler_on_success() gerufen werden soll,
+  //bool                       _success;                    // true, wenn spooler_on_success() gerufen werden soll,
                                                             // false, wenn spooler_on_error() gerufen werden soll
 
     ptr<Module_instance>       _module_instance;            // Nur für Module_task. Hier, damit wir nicht immer wieder casten müssen.

@@ -1,4 +1,4 @@
-// $Id: spooler_time.cxx,v 1.46 2003/09/22 07:54:56 jz Exp $
+// $Id: spooler_time.cxx,v 1.47 2003/09/26 10:46:41 jz Exp $
 /*
     Hier sind implementiert
 
@@ -35,7 +35,7 @@ extern const int                       latter_day_int              = INT_MAX;
 extern const Time                      latter_day                  = latter_day_int;
 static const char                      last_day_name[]             = "never";
 
-Period empty_period;
+//Period empty_period;
 
 //---------------------------------------------------------------------------------time_from_string
 
@@ -326,7 +326,7 @@ const Period& Day::next_period_( Time time_of_day, With_single_start single_star
         if( it->is_comming( time_of_day, single_start ) )  return *it;
     }
 
-    return empty_period;
+    return Period();
 }
 
 //---------------------------------------------------------------------------------------Day::print
@@ -367,7 +367,7 @@ Period Weekday_set::next_period( Time tim, With_single_start single_start )
         time_of_day = 0;
     }
 
-    return empty_period;
+    return Period();
 }
 
 //------------------------------------------------------------------------Monthday_set::next_period
@@ -387,7 +387,7 @@ Period Monthday_set::next_period( Time tim, With_single_start single_start )
         time_of_day = 0;
     }
 
-    return empty_period;
+    return Period();
 }
 
 //--------------------------------------------------------------------------Ultimo_set::next_period
@@ -407,7 +407,7 @@ Period Ultimo_set::next_period( Time tim, With_single_start single_start )
         time_of_day = 0;
     }
 
-    return empty_period;
+    return Period();
 }
 
 //--------------------------------------------------------------------------------------Date::print
@@ -438,7 +438,7 @@ Period Date_set::next_period( Time tim, With_single_start single_start )
         }
     }
 
-    return empty_period;
+    return Period();
 }
 
 //---------------------------------------------------------------------------------Date_set::print
@@ -586,7 +586,7 @@ Period Run_time::next_period( Time tim_par, With_single_start single_start )
  
     while(1)
     {
-        next = empty_period;
+        next = Period();
 
         next = min( next, _date_set    .next_period( tim, single_start ) );
         next = min( next, _weekday_set .next_period( tim, single_start ) );

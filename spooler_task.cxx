@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.196 2003/09/24 21:51:57 jz Exp $
+// $Id: spooler_task.cxx,v 1.197 2003/09/26 10:46:41 jz Exp $
 /*
     Hier sind implementiert
 
@@ -394,11 +394,24 @@ void Task::set_error( const _com_error& x )
 #endif
 //----------------------------------------------------------------------------------Task::set_state
 
-void Task::set_state( State new_state, const Time& next_time )
+void Task::set_state( State new_state )
 { 
     THREAD_LOCK( _lock )  
     {
-        if( new_state == _state  &&  next_time == _next_time )  return;
+        switch( new_state )
+        {
+            case s_waiting_for_process:         _next_time = latter_day;                        break;
+            case s_running_process:             _next_time = latter_day;                        break;
+            case s_running_delayed:             _next_time = _next_spooler_process;             break;
+            case s_running_waiting_for_order:   _next_time = _job->order_queue()->next_time();  break;
+            default:                            _next_time = 0;
+        }
+
+        if( _next_time && !_let_run )  _next_time = min( _next_time, _job->_period.end() ); // Am Ende der Run_time wecken, damit die Task beendet werden kann
+
+
+      //if( new_state == _state  &&  next_time == _next_time )  return;
+        if( new_state == _state )  return;
 
         if( new_state == s_running  ||  new_state == s_start_task )  _job->increment_running_tasks(),  _thread->increment_running_tasks();
         if( _state    == s_running  ||  _state    == s_start_task )  _job->decrement_running_tasks(),  _thread->decrement_running_tasks();
@@ -406,9 +419,9 @@ void Task::set_state( State new_state, const Time& next_time )
         if( new_state != s_running_delayed )  _next_spooler_process = 0;
 
         _state = new_state;
-        _next_time = next_time;
+      //_next_time = next_time;
 
-        
+
         Log_level log_level = new_state == s_start_task? log_info : log_debug_spooler;
         if( log_level >= log_info || _spooler->_debug )
         {
@@ -496,7 +509,8 @@ void Task::set_next_time( const Time& next_time )
 
 Time Task::next_time()
 { 
-    return _state == s_waiting_for_process   ? latter_day :
+    return //_state == s_waiting_for_process   ? latter_day :
+           //_state == s_waiting_for_order     ? latter_day :
            _operation? _timeout == latter_day? latter_day
                                              : Time( _last_operation_time + _timeout )     // _timeout sollte nicht zu groß sein
                      : _next_time;
@@ -536,13 +550,14 @@ bool Task::do_something()
         return check_timeout();
     }
 
-    bool had_operation  = _operation != NULL;
-    bool something_done = false;
+    bool had_operation      = _operation != NULL;
+    bool something_done     = false;
+    Time now                = Time::now();
+    Time next_time_at_begin = _next_time;
 
 
     try
     {
-        Time now = Time::now();
 
         // Periode endet?
         if( !_operation )
@@ -633,7 +648,7 @@ bool Task::do_something()
                     {
                         if( _next_spooler_process )
                         {
-                            set_state( s_running_delayed, _next_spooler_process );
+                            set_state( s_running_delayed );
                         }
                         else
                         {
@@ -643,7 +658,7 @@ bool Task::do_something()
 
                                 if( !_order )
                                 {
-                                    set_state( s_running_waiting_for_order, _job->order_queue()->next_time() );
+                                    set_state( s_running_waiting_for_order );
                                     break;
                                 }
 
@@ -780,8 +795,8 @@ bool Task::do_something()
                     finish();
 
                     // Gesammelte eMail senden, wenn collected_max erreicht:
-                    Time log_time = _log.collect_end();
-                    if( log_time > Time::now()  &&  _next_time > log_time )  set_next_time( log_time );
+                    //Time log_time = _log.collect_end();
+                    //if( log_time > Time::now()  &&  _next_time > log_time )  set_next_time( log_time );
 
                     break;
                 }
@@ -813,7 +828,7 @@ bool Task::do_something()
 
         if( _operation && !had_operation )  _last_operation_time = now;    // Für _timeout
 
-        if( _next_time && !_let_run )  set_next_time( min( _next_time, _job->_period.end() ) );                      // Am Ende der Run_time wecken, damit die Task beendet werden kann
+      //if( _next_time && !_let_run )  set_next_time( min( _next_time, _job->_period.end() ) );                      // Am Ende der Run_time wecken, damit die Task beendet werden kann
 
 
 /*
@@ -829,6 +844,22 @@ bool Task::do_something()
         set_error( x );
         finish();
         something_done = true;
+    }
+
+
+    if( !something_done  &&  _next_time <= now )    // Obwohl _next_time erreicht, ist nichts getan?
+    {
+        set_state( state() );  // _next_time neu setzen
+
+        if( _next_time <= now )
+        {
+            LOG( obj_name() << ".do_something()  Nichts getan. state=" << state_name() << ", _next_time= " << _next_time << ", wird verzögert\n" );
+            _next_time = Time::now() + 0.1;
+        }
+        else
+        {
+            Z_DEBUG_ONLY( LOG( obj_name() << ".do_something()  Nichts getan. state=" << state_name() << ", _next_time war " << next_time_at_begin << "\n" ); )
+        }
     }
 
 

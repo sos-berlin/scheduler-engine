@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.260 2003/09/26 06:56:28 jz Exp $
+// $Id: spooler.cxx,v 1.261 2003/09/26 10:46:41 jz Exp $
 /*
     Hier sind implementiert
 
@@ -296,7 +296,7 @@ Spooler::Spooler()
     if( spooler_ptr )  throw_xc( "spooler_ptr" );
     spooler_ptr = this;
 
-    Z_GNU_ONLY( time::empty_period = Period() );
+  //Z_GNU_ONLY( time::empty_period = Period() );
 
     _pid = getpid();
 
