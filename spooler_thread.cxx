@@ -1,4 +1,4 @@
-// $Id: spooler_thread.cxx,v 1.61 2002/11/28 11:18:22 jz Exp $
+// $Id: spooler_thread.cxx,v 1.62 2002/11/29 12:04:16 jz Exp $
 /*
     Hier sind implementiert
 
@@ -74,7 +74,10 @@ xml::Element_ptr Spooler_thread::dom( const xml::Document_ptr& document, Show_wh
 
         thread_element.setAttribute( "steps"          , _step_count );
         thread_element.setAttribute( "started_tasks"  , _task_count );
+
+        if( _thread_id != _spooler->thread_id() )
         thread_element.setAttribute( "os_thread_id"   , as_hex_string( (int)_thread_id ) );
+
         thread_element.setAttribute( "free_threading" , _free_threading? "yes" : "no" );
 
 #       ifdef Z_WINDOWS
@@ -195,6 +198,8 @@ bool Spooler_thread::has_java()
 
 void Spooler_thread::start()
 {
+    if( !_thread_id )  _thread_id = _spooler->thread_id();
+
     try
     {
         if( has_java()  &&  current_thread_id() != _spooler->thread_id() )  

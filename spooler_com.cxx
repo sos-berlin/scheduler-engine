@@ -1,4 +1,4 @@
-// $Id: spooler_com.cxx,v 1.77 2002/11/28 11:21:23 jz Exp $
+// $Id: spooler_com.cxx,v 1.78 2002/11/29 12:04:15 jz Exp $
 /*
     Hier sind implementiert
 
@@ -90,12 +90,11 @@ static ptr<spooler_com::Iorder> order_from_order_or_payload( Spooler* spooler, c
 
 const Com_method Com_error::_methods[] =
 { 
-   // _kind               , _name             , _method                                        , _result_type, _types        , _default_arg_count
-    { DISPATCH_PROPERTYGET, "java_class_name" , (Com_method_ptr)&Com_error::get_java_class_name, VT_BSTR },
-    { DISPATCH_PROPERTYGET, "is_error"        , (Com_method_ptr)&Com_error::get_is_error       , VT_BOOL },
-    { DISPATCH_PROPERTYGET, "code"            , (Com_method_ptr)&Com_error::get_code           , VT_BSTR }, 
-    { DISPATCH_PROPERTYGET, "text"            , (Com_method_ptr)&Com_error::get_text           , VT_BSTR }, 
-    { 0, NULL }
+   // _flags              , _name             , _method                                        , _result_type, _types        , _default_arg_count
+    { DISPATCH_PROPERTYGET, 1, "is_error"        , (Com_method_ptr)&Com_error::get_is_error       , VT_BOOL },
+    { DISPATCH_PROPERTYGET, 2, "code"            , (Com_method_ptr)&Com_error::get_code           , VT_BSTR }, 
+    { DISPATCH_PROPERTYGET, 3, "text"            , (Com_method_ptr)&Com_error::get_text           , VT_BSTR }, 
+    {}
 };
 
 #endif
@@ -122,55 +121,6 @@ STDMETHODIMP Com_error::QueryInterface( const IID& iid, void** result )
     return Sos_ole_object::QueryInterface( iid, result );
 }
 
-//-------------------------------------------------------------------------Com_error::GetIDsOfNames
-#if 0 //ndef SYSTEM_HAS_COM
-
-const Com_method com_error_methods[] =
-{ 
-    { "java_class_name" , (Com_method_ptr)&Com_error::get_java_class_name, 0, 0 },
-    { "is_error"        , (Com_method_ptr)&Com_error::get_is_error       , 0, 0 },
-    { "code"            , (Com_method_ptr)&Com_error::get_code           , 0, 0 }, 
-    { "text"            , (Com_method_ptr)&Com_error::get_text           , 0, 0 }, 
-    { 0, NULL }
-
-};
-
-HRESULT Com_error::GetIDsOfNames( REFIID iid, LPOLESTR* rgszNames, UINT cNames, LCID lcid, DISPID* rgDispId )
-{
-    return com_get_dispid( com_error_methods, iid, rgszNames, cNames, lcid, rgDispId );
-}
-
-//--------------------------------------------------------------------------------Com_error::Invoke
-
-HRESULT Com_error::Invoke( DISPID dispid, REFIID iid, LCID lcid, WORD flags, DISPPARAMS* dispparams, VARIANT* result, EXCEPINFO* excepinfo, UINT* )
-{
-    return com_invoke( this, com_error_methods, dispid, iid, lcid, flags, dispparams, result, excepinfo );
-/*
-    HRESULT hr;
-    vector<Variant> args;
-    bool called = false;
-   
-    hr = com_prepare_args_for_invoke( this, com_error_methods, dispid, iid, lcid, flags, dispparams, result, excepinfo, &args, &called );
-
-    if( !called )
-    {
-        switch( dispid )
-        {
-            case z_dispid_base+0:   result->vt = VT_BSTR; hr = get_java_class_name( &V_BSTR( result ) );     break;
-            case z_dispid_base+1:   result->vt = VT_BOOL; hr = get_is_error( &V_BOOL( result ) );            break;
-            case z_dispid_base+2:   result->vt = VT_BSTR; hr = get_code( &V_BSTR( result ) );                break;
-            case z_dispid_base+3:   result->vt = VT_BSTR; hr = get_text( &V_BSTR( result ) );                break;
-            default:                hr = DISP_E_MEMBERNOTFOUND;
-        }
-    }
-
-    if( FAILED(hr) )  get_error_info( hr, excepinfo );
-
-    return hr;
-*/
-}
-
-#endif
 //---------------------------------------------------------------------------------Com_error::close
 
 void Com_error::close()
@@ -234,7 +184,12 @@ STDMETHODIMP Com_error::get_text( BSTR* text_bstr )
 
 const Com_method Com_variable::_methods[] =
 { 
-    { 0, NULL }
+   // _flags         , dispid, _name                , _method                                           , _result_type  , _types        , _default_arg_count
+    { DISPATCH_PROPERTYPUT, 0, "value"              , (Com_method_ptr)&Com_variable::put_value          , VT_EMPTY      , { VT_BYREF|VT_VARIANT } },
+    { DISPATCH_PROPERTYGET, 0, "value"              , (Com_method_ptr)&Com_variable::get_value          , VT_VARIANT    },
+    { DISPATCH_PROPERTYGET, 1, "name"               , (Com_method_ptr)&Com_variable::get_name           , VT_BSTR       },
+    { DISPATCH_METHOD     , 2, "Clone"              , (Com_method_ptr)&Com_variable::Clone              , VT_DISPATCH   },
+    {}
 };
 
 #endif
@@ -285,8 +240,16 @@ STDMETHODIMP Com_variable::Clone( Ivariable** result )
 
 const Com_method Com_variable_set::_methods[] =
 { 
-    { 0, NULL }
-
+   // _flags         , dispid, _name                , _method                                           , _result_type  , _types        , _default_arg_count
+    { DISPATCH_METHOD     , 1, "set_var"            , (Com_method_ptr)&Com_variable_set::set_var        , VT_EMPTY      , { VT_BSTR, VT_BYREF|VT_VARIANT } },
+    { DISPATCH_PROPERTYPUT, 0, "var"                , (Com_method_ptr)&Com_variable_set::put_var        , VT_EMPTY      , { VT_BSTR, VT_BYREF|VT_VARIANT } },
+    { DISPATCH_PROPERTYGET, 0, "var"                , (Com_method_ptr)&Com_variable_set::get_var        , VT_VARIANT    , { VT_BSTR } },
+    { DISPATCH_PROPERTYGET, 2, "count"              , (Com_method_ptr)&Com_variable_set::get_count      , VT_I4         },
+  //{ DISPATCH_PROPERTYGET, 3, "dom"                , (Com_method_ptr)&Com_variable_set::get_dom        , VT_DISPATCH   },
+    { DISPATCH_PROPERTYGET, 4, "Clone"              , (Com_method_ptr)&Com_variable_set::Clone          , VT_DISPATCH   },
+    { DISPATCH_PROPERTYGET, 5, "merge"              , (Com_method_ptr)&Com_variable_set::Clone          , VT_EMPTY      , { VT_DISPATCH } },
+    { DISPATCH_PROPERTYGET, DISPID_NEWENUM, "_NewEnum", (Com_method_ptr)&Com_variable_set::get__NewEnum , VT_DISPATCH   },
+    {}
 };
 
 #endif
@@ -543,8 +506,12 @@ STDMETHODIMP Com_variable_set::get__NewEnum( IUnknown** iunknown )
 
 const Com_method Com_variable_set_enumerator::_methods[] =
 { 
-    { 0, NULL }
-
+   // _flags         , dispid, _name    , _method                                               , _result_type  , _types        , _default_arg_count
+    { DISPATCH_METHOD     , 1, "Next"   , (Com_method_ptr)&Com_variable_set_enumerator::Next    , VT_LONG       , { VT_LONG, VT_BYREF|VT_VARIANT } },
+    { DISPATCH_METHOD     , 2, "Skip"   , (Com_method_ptr)&Com_variable_set_enumerator::Skip    , VT_EMPTY      , { VT_LONG } },
+    { DISPATCH_METHOD     , 3, "Reset"  , (Com_method_ptr)&Com_variable_set_enumerator::Reset   },
+    { DISPATCH_METHOD     , 4, "Clone"  , (Com_method_ptr)&Com_variable_set_enumerator::Clone   , VT_DISPATCH  },
+    {}
 };
 
 #endif
@@ -636,11 +603,37 @@ STDMETHODIMP Com_variable_set_enumerator::Clone( IEnumVARIANT** ppenum )
 
 const Com_method Com_log::_methods[] =
 { 
-   // _kind          , _name   , _method                       , _result_type    , _types        , _default_arg_count
-    { DISPATCH_METHOD, "info"  , (Com_method_ptr)&Com_log::info, VT_EMPTY        , { VT_BSTR } },
-    { DISPATCH_METHOD, "error" , (Com_method_ptr)&Com_log::error, VT_EMPTY        , { VT_BSTR } },
-    { 0, NULL }
-
+   // _flags         , dispid, _name                   , _method                                           , _result_type  , _types        , _default_arg_count
+    { DISPATCH_METHOD     ,  1, "debug9"               , (Com_method_ptr)&Com_log::debug9                  , VT_EMPTY      , { VT_BSTR } },
+    { DISPATCH_METHOD     ,  2, "debug8"               , (Com_method_ptr)&Com_log::debug8                  , VT_EMPTY      , { VT_BSTR } },
+    { DISPATCH_METHOD     ,  3, "debug7"               , (Com_method_ptr)&Com_log::debug7                  , VT_EMPTY      , { VT_BSTR } },
+    { DISPATCH_METHOD     ,  4, "debug6"               , (Com_method_ptr)&Com_log::debug6                  , VT_EMPTY      , { VT_BSTR } },
+    { DISPATCH_METHOD     ,  5, "debug5"               , (Com_method_ptr)&Com_log::debug5                  , VT_EMPTY      , { VT_BSTR } },
+    { DISPATCH_METHOD     ,  6, "debug4"               , (Com_method_ptr)&Com_log::debug4                  , VT_EMPTY      , { VT_BSTR } },
+    { DISPATCH_METHOD     ,  7, "debug3"               , (Com_method_ptr)&Com_log::debug3                  , VT_EMPTY      , { VT_BSTR } },
+    { DISPATCH_METHOD     ,  8, "debug2"               , (Com_method_ptr)&Com_log::debug2                  , VT_EMPTY      , { VT_BSTR } },
+    { DISPATCH_METHOD     ,  9, "debug1"               , (Com_method_ptr)&Com_log::debug1                  , VT_EMPTY      , { VT_BSTR } },
+    { DISPATCH_METHOD     , 10, "debug"                , (Com_method_ptr)&Com_log::debug                   , VT_EMPTY      , { VT_BSTR } },
+    { DISPATCH_METHOD     ,  0, "info"                 , (Com_method_ptr)&Com_log::info                    , VT_EMPTY      , { VT_BSTR } },
+    { DISPATCH_METHOD     , 11, "msg"                  , (Com_method_ptr)&Com_log::msg                     , VT_EMPTY      , { VT_BSTR } },
+    { DISPATCH_METHOD     , 12, "warn"                 , (Com_method_ptr)&Com_log::warn                    , VT_EMPTY      , { VT_BSTR } },
+    { DISPATCH_METHOD     , 13, "error"                , (Com_method_ptr)&Com_log::error                   , VT_EMPTY      , { VT_BSTR } },
+    { DISPATCH_METHOD     , 14, "log"                  , (Com_method_ptr)&Com_log::log                     , VT_EMPTY      , { VT_I4, VT_BSTR } },
+    { DISPATCH_PROPERTYGET, 15, "mail"                 , (Com_method_ptr)&Com_log::get_mail                , VT_DISPATCH  },
+    { DISPATCH_PROPERTYPUT, 16, "mail_on_error"        , (Com_method_ptr)&Com_log::put_mail_on_error       , VT_EMPTY      , { VT_BOOL } },
+    { DISPATCH_PROPERTYGET, 16, "mail_on_error"        , (Com_method_ptr)&Com_log::get_mail_on_error       , VT_BOOL       },
+    { DISPATCH_PROPERTYPUT, 17, "mail_on_success"      , (Com_method_ptr)&Com_log::put_mail_on_success     , VT_EMPTY      , { VT_BOOL } },
+    { DISPATCH_PROPERTYGET, 17, "mail_on_success"      , (Com_method_ptr)&Com_log::get_mail_on_success     , VT_BOOL       },
+    { DISPATCH_PROPERTYPUT, 18, "mail_on_process"      , (Com_method_ptr)&Com_log::put_mail_on_process     , VT_EMPTY      , { VT_I4 } },
+    { DISPATCH_PROPERTYGET, 18, "mail_on_success"      , (Com_method_ptr)&Com_log::get_mail_on_success     , VT_I4         },
+    { DISPATCH_PROPERTYPUT, 19, "level"                , (Com_method_ptr)&Com_log::put_level               , VT_EMPTY      , { VT_I4 } },
+    { DISPATCH_PROPERTYGET, 19, "level"                , (Com_method_ptr)&Com_log::get_level               , VT_I4         },
+    { DISPATCH_PROPERTYGET, 20, "filename"             , (Com_method_ptr)&Com_log::get_filename            , VT_BSTR       },
+    { DISPATCH_PROPERTYPUT, 21, "collect_within"       , (Com_method_ptr)&Com_log::put_collect_within      , VT_EMPTY      , { VT_BYREF|VT_VARIANT } },
+    { DISPATCH_PROPERTYGET, 21, "collect_within"       , (Com_method_ptr)&Com_log::get_collect_within      , VT_R8         },
+    { DISPATCH_PROPERTYPUT, 22, "collect_max"          , (Com_method_ptr)&Com_log::put_collect_max         , VT_EMPTY      , { VT_BYREF|VT_VARIANT } },
+    { DISPATCH_PROPERTYGET, 22, "collect_max"          , (Com_method_ptr)&Com_log::get_collect_max         , VT_R8         },
+    {}
 };
 
 #endif
@@ -1018,8 +1011,10 @@ STDMETHODIMP Com_log::get_collect_max( double* result )
 
 const Com_method Com_object_set::_methods[] =
 { 
-    { 0, NULL }
-
+   // _flags         , dispid, _name                   , _method                                           , _result_type  , _types        , _default_arg_count
+    { DISPATCH_PROPERTYGET,  1, "low_level"            , (Com_method_ptr)&Com_object_set::get_low_level    , VT_I4         },
+    { DISPATCH_PROPERTYGET,  2, "high_level"           , (Com_method_ptr)&Com_object_set::get_high_level   , VT_I4         },
+    {}
 };
 
 #endif
@@ -1066,9 +1061,19 @@ STDMETHODIMP Com_object_set::get_high_level( int* result )
 
 const Com_method Com_job::_methods[] =
 { 
-   // _kind          , _name                           , _method                                     , _result_type, _types        , _default_arg_count
-    { DISPATCH_METHOD, "start"                         , (Com_method_ptr)&Com_job::start             , VT_DISPATCH , { VT_VARIANT }, 1 },
-    { 0, NULL }
+   // _flags         , dispid, _name                            , _method                                               , _result_type  , _types        , _default_arg_count
+    { DISPATCH_METHOD     ,  1, "start_when_directory_changed"  , (Com_method_ptr)&Com_job::start_when_directory_changed, VT_EMPTY      , { VT_BSTR, VT_BSTR }, 1 },
+    { DISPATCH_METHOD     ,  2, "clear_when_directory_changed"  , (Com_method_ptr)&Com_job::clear_when_directory_changed },
+    { DISPATCH_METHOD     ,  3, "start"                         , (Com_method_ptr)&Com_job::start                       , VT_DISPATCH   , { VT_BYREF|VT_VARIANT }, 1 },
+    { DISPATCH_PROPERTYGET,  4, "thread"                        , (Com_method_ptr)&Com_job::get_thread                  , VT_DISPATCH   },
+    { DISPATCH_PROPERTYGET,  5, "include_path"                  , (Com_method_ptr)&Com_job::get_include_path            , VT_BSTR       },
+    { DISPATCH_PROPERTYGET,  6, "name"                          , (Com_method_ptr)&Com_job::get_name                    , VT_BSTR       },
+    { DISPATCH_METHOD     ,  7, "wake"                          , (Com_method_ptr)&Com_job::wake                        },
+    { DISPATCH_PROPERTYPUT,  8, "state_text"                    , (Com_method_ptr)&Com_job::put_state_text              , VT_EMPTY      , { VT_BSTR } },
+    { DISPATCH_PROPERTYGET,  9, "title"                         , (Com_method_ptr)&Com_job::get_title                   , VT_BSTR       },
+    { DISPATCH_PROPERTYPUT, 10, "delay_after_error"             , (Com_method_ptr)&Com_job::put_delay_after_error       , VT_EMPTY      , { VT_I4, VT_BYREF|VT_VARIANT } },
+    { DISPATCH_PROPERTYGET, 11, "order_queue"                   , (Com_method_ptr)&Com_job::get_order_queue             , VT_DISPATCH   },
+    {}
 };
 
 #endif
@@ -1330,8 +1335,23 @@ STDMETHODIMP Com_job::get_order_queue( Iorder_queue** result )
 
 const Com_method Com_task::_methods[] =
 { 
-    { 0, NULL }
-
+   // _flags         , dispid, _name                        , _method                                           , _result_type  , _types        , _default_arg_count
+    { DISPATCH_PROPERTYGET,  1, "object_set"                , (Com_method_ptr)&Com_task::get_object_set         , VT_DISPATCH  },
+    { DISPATCH_PROPERTYPUT,  2, "error"                     , (Com_method_ptr)&Com_task::put_error              , VT_EMPTY      , { VT_BYREF|VT_VARIANT } },
+    { DISPATCH_PROPERTYGET,  2, "error"                     , (Com_method_ptr)&Com_task::get_error              , VT_DISPATCH  },
+    { DISPATCH_PROPERTYGET,  3, "job"                       , (Com_method_ptr)&Com_task::get_job                , VT_DISPATCH  },
+    { DISPATCH_PROPERTYGET,  4, "params"                    , (Com_method_ptr)&Com_task::get_params             , VT_DISPATCH  },
+    { DISPATCH_PROPERTYPUT,  5, "result"                    , (Com_method_ptr)&Com_task::put_result             , VT_EMPTY      , { VT_BYREF|VT_DISPATCH } },
+    { DISPATCH_PROPERTYGET,  5, "result"                    , (Com_method_ptr)&Com_task::get_result             , VT_DISPATCH  },
+    { DISPATCH_METHOD     ,  6, "wait_until_terminated"     , (Com_method_ptr)&Com_task::wait_until_terminated  , VT_BOOL       , { VT_R8 } },
+    { DISPATCH_PROPERTYPUT,  7, "repeat"                    , (Com_method_ptr)&Com_task::put_repeat             , VT_EMPTY      , { VT_R8 } },
+    { DISPATCH_METHOD     ,  8, "end"                       , (Com_method_ptr)&Com_task::end                    },
+    { DISPATCH_PROPERTYPUT,  9, "history_field"             , (Com_method_ptr)&Com_task::put_history_field      , VT_EMPTY      , { VT_BSTR, VT_BYREF|VT_VARIANT } },
+    { DISPATCH_PROPERTYGET, 10, "id"                        , (Com_method_ptr)&Com_task::get_id                 , VT_I4         },
+    { DISPATCH_PROPERTYPUT, 11, "delay_spooler_process"     , (Com_method_ptr)&Com_task::put_delay_spooler_process, VT_EMPTY    , { VT_BYREF|VT_VARIANT } },
+    { DISPATCH_PROPERTYPUT, 12, "close_engine"              , (Com_method_ptr)&Com_task::put_close_engine       , VT_EMPTY      , { VT_BOOL } },
+    { DISPATCH_PROPERTYGET, 13, "order"                     , (Com_method_ptr)&Com_task::get_order              , VT_DISPATCH   },
+    {}
 };
 
 #endif
@@ -1683,8 +1703,12 @@ STDMETHODIMP Com_task::get_order( Iorder** result )
 
 const Com_method Com_thread::_methods[] =
 { 
-    { 0, NULL }
-
+   // _flags         , dispid, _name                        , _method                                           , _result_type  , _types        , _default_arg_count
+    { DISPATCH_PROPERTYGET,  1, "log"                       , (Com_method_ptr)&Com_thread::get_log              , VT_DISPATCH  },
+    { DISPATCH_PROPERTYGET,  2, "script"                    , (Com_method_ptr)&Com_thread::get_script           , VT_DISPATCH  },
+    { DISPATCH_PROPERTYGET,  3, "include_path"              , (Com_method_ptr)&Com_thread::get_include_path     , VT_BSTR       },
+    { DISPATCH_PROPERTYGET,  4, "name"                      , (Com_method_ptr)&Com_thread::get_name             , VT_BSTR       },
+    {}
 };
 
 #endif
@@ -1779,38 +1803,25 @@ STDMETHODIMP Com_thread::get_name( BSTR* result )
 
 const Com_method Com_spooler::_methods[] =
 { 
-   // _kind               , _name                           , _method                                                       , _result_type , _types        , _default_arg_count
-    { DISPATCH_PROPERTYGET, "log"                           , (Com_method_ptr)&Com_spooler::get_log                         , VT_DISPATCH  },
-    { DISPATCH_PROPERTYGET, "id"                            , (Com_method_ptr)&Com_spooler::get_id                          , VT_BSTR      },
-    { DISPATCH_PROPERTYGET, "param"                         , (Com_method_ptr)&Com_spooler::get_param                       , VT_BSTR      },
-  //{ DISPATCH_PROPERTYGET, "script"                        , (Com_method_ptr)&Com_spooler::get_script                      , VT_DISPATCH  },
-    { DISPATCH_PROPERTYGET, "job"                           , (Com_method_ptr)&Com_spooler::get_job                         , VT_DISPATCH  , { VT_BSTR } },
-    // ...
-    { DISPATCH_METHOD     , "let_run_terminate_and_restart" , (Com_method_ptr)&Com_spooler::let_run_terminate_and_restart },
-    //..
-    { 0, NULL }
-
-/*
-    virtual HRESULT     get_log                     ( Ilog** log ) = 0;
-    virtual HRESULT     get_id                      ( BSTR* spooler_id ) = 0;
-    virtual HRESULT     get_param                   ( BSTR* spooler_param ) = 0;
-    virtual HRESULT     get_script                  ( IDispatch** script_object ) = 0;
-    virtual HRESULT     get_job                     ( BSTR name, Ijob** job ) = 0;
-    virtual HRESULT         create_variable_set     ( Ivariable_set** result ) = 0;
-  //HRESULT             put_include_path            ( BSTR include_path ) = 0;
-    virtual HRESULT     get_include_path            ( BSTR* include_path ) = 0;
-    virtual HRESULT     get_log_dir                 ( BSTR* directory ) = 0;
-    virtual HRESULT         let_run_terminate_and_restart() = 0;
-    virtual HRESULT     get_variables               ( Ivariable_set** ) = 0;
-    virtual HRESULT     put_var                     ( BSTR name, VARIANT* value ) = 0;
-    virtual HRESULT     get_var                     ( BSTR name, VARIANT* value ) = 0;
-    virtual HRESULT     get_db_name                 ( BSTR* filename ) = 0;
-    virtual HRESULT         create_job_chain        ( Ijob_chain** result ) = 0;
-    virtual HRESULT         add_job_chain           ( Ijob_chain* job_chain ) = 0;
-    virtual HRESULT     get_job_chain               ( BSTR name, Ijob_chain** result ) = 0;
-    virtual HRESULT         create_order            ( Iorder** result ) = 0;
-    virtual HRESULT     get_is_service              ( VARIANT_BOOL* result ) = 0;
-*/
+   // _flags         , dispid, _name                        , _method                                           , _result_type  , _types        , _default_arg_count
+    { DISPATCH_PROPERTYGET,  1, "log"                       , (Com_method_ptr)&Com_spooler::get_log             , VT_DISPATCH  },
+    { DISPATCH_PROPERTYGET,  2, "id"                        , (Com_method_ptr)&Com_spooler::get_id              , VT_BSTR      },
+    { DISPATCH_PROPERTYGET,  3, "param"                     , (Com_method_ptr)&Com_spooler::get_param           , VT_BSTR      },
+    { DISPATCH_PROPERTYGET,  4, "script"                    , (Com_method_ptr)&Com_spooler::get_script          , VT_DISPATCH  },
+    { DISPATCH_PROPERTYGET,  5, "job"                       , (Com_method_ptr)&Com_spooler::get_job             , VT_DISPATCH  , { VT_BSTR } },
+    { DISPATCH_METHOD     ,  6, "create_variable_set"       , (Com_method_ptr)&Com_spooler::create_variable_set , VT_DISPATCH  },
+    { DISPATCH_PROPERTYGET,  7, "include_path"              , (Com_method_ptr)&Com_spooler::get_include_path    , VT_BSTR      },
+    { DISPATCH_PROPERTYGET,  8, "log_dir"                   , (Com_method_ptr)&Com_spooler::get_log_dir         , VT_BSTR      },
+    { DISPATCH_METHOD     ,  9, "let_run_terminate_and_restart", (Com_method_ptr)&Com_spooler::let_run_terminate_and_restart },
+    { DISPATCH_PROPERTYGET, 10, "variables"                 , (Com_method_ptr)&Com_spooler::get_variables       , VT_DISPATCH  },
+    { DISPATCH_PROPERTYPUT, 11, "var"                       , (Com_method_ptr)&Com_spooler::put_var             , VT_EMPTY     , { VT_BYREF|VT_VARIANT } },
+    { DISPATCH_PROPERTYGET, 11, "var"                       , (Com_method_ptr)&Com_spooler::get_var             , VT_DISPATCH  , { VT_BSTR } },
+    { DISPATCH_PROPERTYGET, 12, "db_name"                   , (Com_method_ptr)&Com_spooler::get_variables       , VT_BSTR      },
+    { DISPATCH_METHOD     , 13, "create_job_chain"          , (Com_method_ptr)&Com_spooler::create_job_chain    , VT_DISPATCH  },
+    { DISPATCH_METHOD     , 14, "add_job_chain"             , (Com_method_ptr)&Com_spooler::create_job_chain    , VT_EMPTY     , { VT_DISPATCH } },
+    { DISPATCH_PROPERTYGET, 15, "job_chain"                 , (Com_method_ptr)&Com_spooler::get_job_chain       , VT_DISPATCH  , { VT_BSTR } },
+    { DISPATCH_METHOD     , 16, "create_order"              , (Com_method_ptr)&Com_spooler::create_order        , VT_DISPATCH  },
+    { DISPATCH_PROPERTYGET, 17, "is_service"                , (Com_method_ptr)&Com_spooler::get_is_service      , VT_BOOL      },
 };
 
 #endif
@@ -2114,8 +2125,7 @@ STDMETHODIMP Com_spooler::get_is_service( VARIANT_BOOL* result )
 
 const Com_method Com_context::_methods[] =
 { 
-    { 0, NULL }
-
+    {}
 };
 
 #endif
@@ -2132,8 +2142,7 @@ Com_context::Com_context()
 
 const Com_method Com_job_chain::_methods[] =
 { 
-    { 0, NULL }
-
+    {}
 };
 
 #endif
@@ -2387,8 +2396,7 @@ STDMETHODIMP Com_job_chain::get_node( VARIANT* state, Ijob_chain_node** result )
 
 const Com_method Com_job_chain_node::_methods[] =
 { 
-    { 0, NULL }
-
+    {}
 };
 
 #endif
@@ -2467,8 +2475,7 @@ STDMETHODIMP Com_job_chain_node::get_job( Ijob** result )
 
 const Com_method Com_order::_methods[] =
 { 
-    { 0, NULL }
-
+    {}
 };
 
 #endif
@@ -2947,8 +2954,7 @@ STDMETHODIMP Com_order::add_to_job_chain( Ijob_chain* ijob_chain )
 
 const Com_method Com_order_queue::_methods[] =
 { 
-    { 0, NULL }
-
+    {}
 };
 
 #endif
