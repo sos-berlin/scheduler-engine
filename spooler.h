@@ -1,4 +1,4 @@
-// $Id: spooler.h,v 1.172 2003/12/10 11:29:06 jz Exp $
+// $Id: spooler.h,v 1.173 2003/12/30 13:53:29 jz Exp $
 
 #ifndef __SPOOLER_H
 #define __SPOOLER_H
@@ -220,6 +220,7 @@ struct Spooler
     Job*                        get_job                     ( const string& job_name );
     Job*                        get_job_or_null             ( const string& job_name );
     Job*                        get_next_job_to_start       ();
+    Sos_ptr<Task>               get_task_or_null            ( int task_id );
 
     friend struct               Com_spooler;
 

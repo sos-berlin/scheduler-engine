@@ -1,4 +1,4 @@
-// $Id: spooler_thread.h,v 1.52 2003/10/18 21:23:18 jz Exp $
+// $Id: spooler_thread.h,v 1.53 2003/12/30 13:53:30 jz Exp $
 
 #ifndef __SPOOLER_THREAD_H
 #define __SPOOLER_THREAD_H
@@ -42,6 +42,7 @@ struct Spooler_thread : zschimmer::Thread
   //void                        remove_task                 ( Task* this_task )                     { FOR_EACH_TASK( t, task )  if( task == this_task )  { _task_list.erase(t);  break; } }
     int                         task_count                  ( Job* = NULL );
 
+    Sos_ptr<Task>               get_task_or_null            ( int task_id );
     Task*                       get_next_task               ();
 
     void                        increment_running_tasks     ()                                      { InterlockedIncrement( &_running_tasks_count ); }

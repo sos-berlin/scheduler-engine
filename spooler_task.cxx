@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.228 2003/12/25 07:34:27 jz Exp $
+// $Id: spooler_task.cxx,v 1.229 2003/12/30 13:53:30 jz Exp $
 /*
     Hier sind implementiert
 
@@ -293,6 +293,8 @@ xml::Element_ptr Task::dom( const xml::Document_ptr& document, Show_what show )
 
         if( _order )  dom_append_nl( task_element ),  task_element.appendChild( _order->dom( document, show ) );
         if( _error )  dom_append_nl( task_element ),  append_error_element( task_element, _error );
+
+        if( show & show_log )  dom_append_text_element( task_element, "log", _log.as_string() );
     }
 
     return task_element;

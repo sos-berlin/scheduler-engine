@@ -1,4 +1,4 @@
-// $Id: spooler_job.h,v 1.15 2003/12/11 10:24:14 jz Exp $
+// $Id: spooler_job.h,v 1.16 2003/12/30 13:53:30 jz Exp $
 
 #ifndef __SPOOLER_JOB_H
 #define __SPOOLER_JOB_H
@@ -323,6 +323,7 @@ struct Job : Sos_self_deleting
     long                       _error_steps;                // Zahl aufeinanderfolgender Fehler
 
     Directory_watcher_list     _directory_watcher_list;
+    Time                       _directory_watcher_last_time;
     Xc_copy                    _error;
 
     ptr<Com_variable_set>      _default_params;

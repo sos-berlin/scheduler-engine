@@ -1,4 +1,4 @@
-// $Id: spooler_history.h,v 1.23 2003/12/10 11:29:06 jz Exp $
+// $Id: spooler_history.h,v 1.24 2003/12/30 13:53:30 jz Exp $
 
 #ifndef __SPOOLER_HISTORY_H
 #define __SPOOLER_HISTORY_H
@@ -54,6 +54,8 @@ struct Spooler_db : Sos_self_deleting
     int                         get_order_id            ( Transaction* ta = NULL )                  { return get_id( "spooler_order_id", ta ); }
     int                         get_order_ordering      ( Transaction* ta = NULL )                  { return get_id( "spooler_order_ordering", ta ); }
     int                         get_order_history_id    ( Transaction* ta )                         { return get_id( "spooler_order_history_id", ta ); }
+
+    xml::Element_ptr            read_task               ( const xml::Document_ptr&, int task_id, Show_what );
 
     void                        insert_order            ( Order* );
     void                        update_order            ( Order* );

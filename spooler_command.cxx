@@ -1,4 +1,4 @@
-// $Id: spooler_command.cxx,v 1.104 2003/12/25 07:34:27 jz Exp $
+// $Id: spooler_command.cxx,v 1.105 2003/12/30 13:53:30 jz Exp $
 /*
     Hier ist implementiert
 
@@ -322,82 +322,32 @@ xml::Element_ptr Command_processor::execute_modify_job( const xml::Element_ptr& 
 }
 
 //-------------------------------------------------------------Command_processor::execute_show_task
-/*
+
 xml::Element_ptr Command_processor::execute_show_task( const xml::Element_ptr& element, Show_what show )
 {
     if( _security_level < Security::seclev_info )  throw_xc( "SCHEDULER-121" );
 
-    int id = element.int_getAttribute( "id" );
+    int task_id = element.int_getAttribute( "id" );
 
-    ptr<Task> task = _spooler->get_task_or_null( id );
+    Sos_ptr<Task> task = _spooler->get_task_or_null( task_id );
     if( task )
     {
         return task->dom( _answer, show );
     }
     else
     {
-        if( !_spooler->_db->opened() )  goto NO_TASK;
-    
-        string history_id;
-
-        {
-            Any_file sel ( "-in " + _spooler->_db->db_name() + 
-                           "select \"ID\", \"SPOOLER_ID\", \"JOB_NAME\", \"START_TIME\", \"END_TIME\", \"CAUSE\", \"STEPS\", \"ERROR\", \"ERROR_CODE\", \"ERROR_TEXT\" " +
-                         //join( "", vector_map( prepend_comma, _extra_names ) ) +
-                           "  from " + uquoted(_spooler->_job_history_tablename) + 
-                           "  where \"ID\"=" + as_string(id) );
-            if( sel.eof() )  goto NO_ORDER;
-
-            Record record = sel.get_record();
-
-
-            // s.a. Task::dom() zum Aufbau des XML-Elements <task>
-            xml::Element_ptr task_element = document.createElement( "task" );
-
-            task_element.setAttribute( "id"              , id );
-          //task_element.setAttribute( "state"           , state_name() );
-
-          //if( _thread )
-          //task_element.setAttribute( "thread"          , _thread->name() );
-
-          //task_element.setAttribute( "name"            , _name );
-
-          //if( _running_since )
-          //task_element.setAttribute( "running_since"   , _running_since.as_string() );
-
-          //if( _idle_since )
-          //task_element.setAttribute( "idle_since"      , _idle_since.as_string() );
-
-            task_element.setAttribute( "cause"           , record.as_string( "CAUSE" ) );
-
-          //if( _state == s_running  &&  _last_process_start_time )
-          //task_element.setAttribute( "in_process_since", _last_process_start_time.as_string() );
-
-            task_element.setAttribute( "steps"           , record.as_string( "STEPS" );
-
-          //task_element.setAttribute( "log_file"        , _log.filename() );
-
-            if( _error )  append_error_element( task_element, _error );
-
-            string log = file_as_string( GZIP_AUTO + _spooler->_db->db_name() + " -table=" + sql::quoted_name( _spooler->_order_history_tablename ) + " -blob=\"LOG\"" 
-                                        " where \"HISTORY_ID\"=" + history_id );
-
-        }
-
-        return order->dom( _answer, show, &log );
+        return _spooler->_db->read_task( _answer, task_id, show );
     }
-    
-    return _answer.createElement( "ok" );
 }
-*/
+
 //-------------------------------------------------------------Command_processor::execute_kill_task
 
 xml::Element_ptr Command_processor::execute_kill_task( const xml::Element_ptr& element )
 {
     if( _security_level < Security::seclev_all )  throw_xc( "SCHEDULER-121" );
 
-    int    id          = element.int_getAttribute( "id" );
-    string job_name    = element.getAttribute( "job" );              // Hilfsweise
+    int    id          = element. int_getAttribute( "id" );
+    string job_name    = element.     getAttribute( "job" );              // Hilfsweise
     bool   immediately = element.bool_getAttribute( "immediately", false );
     
 
@@ -645,8 +595,8 @@ xml::Element_ptr Command_processor::execute_command( const xml::Element_ptr& ele
     else
     if( element.nodeName_is( "start_job"        ) )  return execute_start_job( element );
     else
-  //if( element.nodeName_is( "show_task"        ) )  return execute_show_task( element, show );
-  //else
+    if( element.nodeName_is( "show_task"        ) )  return execute_show_task( element, show );
+    else
     if( element.nodeName_is( "kill_task"        ) )  return execute_kill_task( element );
     else
     if( element.nodeName_is( "add_jobs"         ) )  return execute_add_jobs( element );

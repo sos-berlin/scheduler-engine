@@ -1,4 +1,4 @@
-// $Id: spooler_thread.cxx,v 1.109 2003/12/08 10:32:06 jz Exp $
+// $Id: spooler_thread.cxx,v 1.110 2003/12/30 13:53:30 jz Exp $
 /*
     Hier sind implementiert
 
@@ -222,6 +222,20 @@ void Spooler_thread::build_prioritized_order_job_array()
     sort( _prioritized_order_job_array.begin(), _prioritized_order_job_array.end(), Job::higher_job_chain_priority );
 
     //FOR_EACH( vector<Job*>, _prioritized_order_job_array, i )  _log.debug( "build_prioritized_order_job_array: Job " + (*i)->name() );
+}
+
+//-----------------------------------------------------------------Spooler_thread::get_task_or_null
+
+Sos_ptr<Task> Spooler_thread::get_task_or_null( int task_id )
+{
+    Sos_ptr<Task> result = NULL;
+
+    THREAD_LOCK( _lock )
+    {
+        FOR_EACH_TASK( t, task )  if( task->id() == task_id )  { result = task;  break; }
+    }
+
+    return result;
 }
 
 //-------------------------------------------------------------Spooler_thread::get_next_task_to_run

@@ -1,4 +1,4 @@
-// $Id: spooler_job.cxx,v 1.50 2003/12/13 17:37:04 jz Exp $
+// $Id: spooler_job.cxx,v 1.51 2003/12/30 13:53:30 jz Exp $
 /*
     Hier sind implementiert
 
@@ -683,6 +683,8 @@ void Job::start_when_directory_changed( const string& directory_name, const stri
         dw->set_name( "job(\"" + _name + "\").start_when_directory_changed(\"" + directory_name + "\")" );
         _directory_watcher_list.push_back( dw );
         dw->add_to( &_spooler->_wait_handles );
+
+        _directory_watcher_last_time = 0;
     }
 }
 
@@ -910,24 +912,34 @@ Sos_ptr<Task> Job::task_to_start()
                 if( _start_once )              cause = cause_period_once,  _start_once = false,     log_line += "Task startet wegen <run_time once=\"yes\">\n";
                 else
                 if( now >= _next_start_time )  cause = cause_period_repeat,                         log_line += "Task startet, weil Job-Startzeit erreicht: " + _next_start_time.as_string();
-                                                                        
-                Directory_watcher_list::iterator it = _directory_watcher_list.begin();
-                while( it != _directory_watcher_list.end() )
-                {
-                    if( (*it)->signaled_then_reset() )
-                    {
-                        cause = cause_directory;
-                        log_line += "Task startet wegen eines Ereignisses für Verzeichnis " + (*it)->directory();
-                        
-                        if( !(*it)->valid() )
-                        {
-                            it = _directory_watcher_list.erase( it );  // Folge eines Fehlers, s. Directory_watcher::set_signal
-                            continue;
-                        }
-                    }
 
-                    it++;
+
+#ifdef Z_UNIX
+                if( now >= _directory_watcher_last_time + 1.0 )
+#endif
+                {
+                    LOG2( "joacim", "Job::task_to_start(): Verzeichnisüberwachung _directory_watcher_last_time=" << _directory_watcher_last_time << ", now=" << now << "\n" );
+                    _directory_watcher_last_time = now;
+
+                    Directory_watcher_list::iterator it = _directory_watcher_list.begin();
+                    while( it != _directory_watcher_list.end() )
+                    {
+                        if( (*it)->signaled_then_reset() )
+                        {
+                            cause = cause_directory;
+                            log_line += "Task startet wegen eines Ereignisses für Verzeichnis " + (*it)->directory();
+                            
+                            if( !(*it)->valid() )
+                            {
+                                it = _directory_watcher_list.erase( it );  // Folge eines Fehlers, s. Directory_watcher::set_signal
+                                continue;
+                            }
+                        }
+
+                        it++;
+                    }
                 }
+
             }
 
             if( !cause  &&  _order_queue )

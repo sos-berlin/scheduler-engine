@@ -1,4 +1,4 @@
-// $Id: spooler_history.cxx,v 1.79 2003/12/30 10:42:55 jz Exp $
+// $Id: spooler_history.cxx,v 1.80 2003/12/30 13:53:30 jz Exp $
 
 #include "spooler.h"
 #include "../zschimmer/z_com.h"
@@ -820,7 +820,7 @@ void Spooler_db::write_order_history( Order* order, Transaction* outer_transacti
 }
 
 //---------------------------------------------------------------------Job_chain::read_order_history
-#if 0
+/*
 xml::Element_ptr Job_chain::read_history( const xml::Document_ptr& doc, int id, int next, Show_what show )
 {
     bool with_log = ( show & show_log ) != 0;
@@ -836,7 +836,7 @@ xml::Element_ptr Job_chain::read_history( const xml::Document_ptr& doc, int id, 
         Transaction ta ( +_spooler->_db );
         {
             Any_file sel;
-/*
+/ *
             if( _use_file )
             {
                 if( id != -1  ||  next >= 0 )  throw_xc( "SCHEDULER-139" );
@@ -844,7 +844,7 @@ xml::Element_ptr Job_chain::read_history( const xml::Document_ptr& doc, int id, 
             }
             else
             if( _use_db )
-*/
+* /
             {
                 string prefix = ( next < 0? "-in -seq head -" : "-in -seq tail -reverse -" ) + as_string(max(1,abs(next))) + " | ";
                 string clause = " where \"JOB_CHAIN\"=" + sql_quoted(_job_name);
@@ -917,8 +917,80 @@ xml::Element_ptr Job_chain::read_history( const xml::Document_ptr& doc, int id, 
 
     return history_element;
 }
+*/
+//----------------------------------------------------------------------------Spooler_db::read_task
+// Die XML-Struktur ist wie Task::dom(), nicht wie Job_history::read_tail()
 
-#endif
+xml::Element_ptr Spooler_db::read_task( const xml::Document_ptr& doc, int task_id, Show_what show )
+{
+    if( !opened() )  throw_xc( "SCHEDULER-184" );
+
+    xml::Element_ptr task_element = doc.createElement( "task" );
+
+    try
+    {
+        Transaction ta ( this );
+        {
+            Any_file sel ( "-in " + _spooler->_db->db_name() + 
+                            "select \"SPOOLER_ID\", \"JOB_NAME\", \"START_TIME\", \"END_TIME\", \"CAUSE\", \"STEPS\", \"ERROR\", \"ERROR_CODE\", \"ERROR_TEXT\" " +
+                            "  from " + quoted_string( ucase( _spooler->_job_history_tablename ), '\"', '\"' ) +
+                            "  where \"ID\"=" + as_string(task_id) );
+            if( sel.eof() )  throw_xc( "SCHEDULER-207", task_id );
+
+            Record record = sel.get_record();
+
+
+            // s.a. Task::dom() zum Aufbau des XML-Elements <task>
+            task_element.setAttribute( "id"              , task_id );
+            //task_element.setAttribute( "state"           , state_name() );
+
+            //if( _thread )
+            //task_element.setAttribute( "thread"          , _thread->name() );
+
+            //task_element.setAttribute( "name"            , _name );
+
+            //if( _running_since )
+            //task_element.setAttribute( "running_since"   , _running_since.as_string() );
+            task_element.setAttribute( "start_time"      , record.as_string( "START_TIME" ) );      // Gibt es nicht in Task::dom()
+            task_element.setAttribute( "end_time"        , record.as_string( "END_TIME" ) );        // Gibt es nicht in Task::dom()
+
+            //if( _idle_since )
+            //task_element.setAttribute( "idle_since"      , _idle_since.as_string() );
+
+            task_element.setAttribute( "cause"           , record.as_string( "CAUSE" ) );
+
+            //if( _state == s_running  &&  _last_process_start_time )
+            //task_element.setAttribute( "in_process_since", _last_process_start_time.as_string() );
+
+            task_element.setAttribute( "steps"           , record.as_string( "STEPS" ) );
+
+            //task_element.setAttribute( "log_file"        , _log.filename() );
+
+            if( record.as_int( "ERROR" ) )  
+            {
+                xml::Element_ptr error_element = doc.createElement( "ERROR" );
+                error_element.setAttribute( "code", record.as_string( "ERROR_CODE" ) );
+                error_element.setAttribute( "text", record.as_string( "ERROR_TEXT" ) );
+                task_element.appendChild( error_element );
+            }
+
+            if( show & show_log )
+            {
+                try
+                {
+                    string log = file_as_string( GZIP_AUTO + _spooler->_db->db_name() + " -table=" + sql::quoted_name( _spooler->_job_history_tablename ) + " -blob=\"LOG\"" 
+                                                " where \"ID\"=" + as_string(task_id) );
+                    dom_append_text_element( task_element, "log", log );
+                }
+                catch( const exception& x ) { _spooler->_log.warn( "FEHLER BEIM LESEN DES LOGS FÜR TASK " + as_string(task_id) + " AUS DER DATENBANK: " + x.what() ); }
+            }
+        }
+    }
+    catch( const _com_error& x ) { throw_com_error( x, "Spooler_db::read_task" ); }
+
+    return task_element;
+}
+
 //-------------------------------------------------------------------------Job_history::Job_history
 
 Job_history::Job_history( Job* job )

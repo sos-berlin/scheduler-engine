@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.308 2003/12/23 11:13:37 jz Exp $
+// $Id: spooler.cxx,v 1.309 2003/12/30 13:53:29 jz Exp $
 /*
     Hier sind implementiert
 
@@ -914,6 +914,15 @@ Job* Spooler::get_next_job_to_start()
     }
 
     return next_job;
+}
+
+//------------------------------------------------------------------------Spooler::get_task_or_null
+// Anderer Thread
+
+Sos_ptr<Task> Spooler::get_task_or_null( int task_id )
+{
+    if( !_single_thread )  return NULL;
+    return _single_thread->get_task_or_null( task_id );
 }
 
 //---------------------------------------------------------------------Spooler::thread_by_thread_id
