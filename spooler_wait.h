@@ -1,4 +1,4 @@
-// $Id: spooler_wait.h,v 1.14 2001/03/05 11:31:55 jz Exp $
+// $Id: spooler_wait.h,v 1.15 2001/07/26 14:28:33 jz Exp $
 
 #ifndef __SPOOLER_WAIT_H
 #define __SPOOLER_WAIT_H
@@ -8,6 +8,7 @@
 namespace sos {
 namespace spooler {
 
+void windows_message_step();
 bool wait_for_event( HANDLE handle, double wait_time );
 
 struct Wait_handles;

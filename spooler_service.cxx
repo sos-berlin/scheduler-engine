@@ -1,4 +1,4 @@
-// $Id: spooler_service.cxx,v 1.13 2001/07/25 19:43:35 jz Exp $
+// $Id: spooler_service.cxx,v 1.14 2001/07/26 14:28:32 jz Exp $
 /*
     Hier sind implementiert
 
@@ -266,8 +266,8 @@ static void set_service_status( int spooler_error, int state = 0 )
 
     service_status.dwControlsAccepted           = SERVICE_ACCEPT_STOP 
                                                 | SERVICE_ACCEPT_PAUSE_CONTINUE 
-                                                | SERVICE_ACCEPT_SHUTDOWN 
-                                                | SERVICE_ACCEPT_PARAMCHANGE; 
+                                                | SERVICE_ACCEPT_SHUTDOWN;
+                             // Nicht für NT 4: | SERVICE_ACCEPT_PARAMCHANGE; 
     
     service_status.dwWin32ExitCode              = spooler_error? ERROR_SERVICE_SPECIFIC_ERROR : NO_ERROR;              
     service_status.dwServiceSpecificExitCode    = spooler_error; 
@@ -275,9 +275,25 @@ static void set_service_status( int spooler_error, int state = 0 )
     service_status.dwWaitHint                   = service_status.dwCurrentState == SERVICE_START_PENDING? 10*1000 : 0;  // 10s erlauben für den Start (wenn es ein Startskript mit DB-Verbindung gibt)
     service_status.dwWaitHint                   = service_status.dwCurrentState == SERVICE_STOP_PENDING? stop_timeout*1000 : 0;  // 10s erlauben für den Start (wenn es ein Startskript mit DB-Verbindung gibt)
 
-    LOG( "SetServiceStatus\n" );
-    SetServiceStatus( service_status_handle, &service_status );
+    string state_name;
+    switch( service_status.dwCurrentState )  
+    {
+        case SERVICE_STOPPED        : state_name = "SERVICE_STOPPED";       break;
+        case SERVICE_PAUSED         : state_name = "SERVICE_PAUSED";        break;
+        case SERVICE_START_PENDING  : state_name = "SERVICE_START_PENDING"; break;
+        case SERVICE_STOP_PENDING   : state_name = "SERVICE_STOP_PENDING";  break;
+        case SERVICE_RUNNING        : state_name = "SERVICE_RUNNING";       break;
+        default                     : state_name = as_string( (int)service_status.dwCurrentState );
+    }
 
+    LOG( "SetServiceStatus " << state_name << '\n' );
+    BOOL ok = SetServiceStatus( service_status_handle, &service_status );
+    if( !ok )
+    {
+        try { throw_mswin_error( "SetServiceStatus", state_name.c_str() ); }
+        catch( const Xc& x ) { SHOW_MSG(x); }       // Was tun?
+    }
+    
     // Keine Wiederkehr bei SERVICE_STOPPED
 }
 
@@ -298,10 +314,6 @@ static uint __stdcall kill_thread( void* param )
     }
 
     LOG( "Weil der Spooler nicht zum Ende kommt, wird jetzt der Prozess sofort beendet\n" );
-  //spooler_ptr = NULL;         // Lässt set_service_status() SERVICE_STOPPED setzen und damit exit() (leider nicht _exit?) rufen
-  //set_service_status( 0, SERVICE_STOPPED );
-  //LOG( "_exit(1)\n" );
-  //_exit(1);                   // (SERVICE_STOPPED kehrt nicht wieder)
     terminate_immediately = true;
     BOOL ok = TerminateThread( thread_handle, 999 );
 
@@ -378,7 +390,7 @@ static void spooler_state_changed( Spooler*, void* )
 
 static uint __stdcall service_thread( void* param )
 {
-    LOG( "service_thread\n" );
+    LOGI( "service_thread\n" );
 
     Ole_initialize ole;
 
@@ -414,6 +426,7 @@ static uint __stdcall service_thread( void* param )
     }
 
     set_service_status( 0 );       // Das beendet den Prozess wegen spooler_ptr == NULL  ==>  SERVICE_STOPPED
+    LOG( "service_thread ok\n" );
 
     return ret;
 }
@@ -447,10 +460,20 @@ static void __stdcall ServiceMain( DWORD argc, char** argv )
         thread_handle = _beginthreadex( NULL, 0, service_thread, &param, 0, &thread_id );
         if( !thread_handle )  throw_mswin_error( "CreateThread" );
 
-        do ret = WaitForSingleObject( thread_handle, INT_MAX );  while( ret != WAIT_TIMEOUT );
+        //do ret = WaitForSingleObject( thread_handle, INT_MAX );  while( ret != WAIT_TIMEOUT );
+        while(1)
+        {
+            LOG( "MsgWaitForMultipleObjects()\n" );
+            ret = MsgWaitForMultipleObjects( 1, &thread_handle._handle, FALSE, INT_MAX, QS_ALLINPUT ); 
+            
+            if( ret == WAIT_TIMEOUT )  continue;
+            else
+            if( ret == WAIT_OBJECT_0 + 1 )  windows_message_step();
+            else
+                break;
+        }
 
         if( terminate_immediately )  { LOG( "_exit(1);\n" ); _exit(0); }
-        // Soweit kommt's nicht, denn SetServiceStatus(STOPPED) beendet den Prozess mit exit()
 
         TerminateThread( thread_handle, 999 );   // Sollte nicht nötig sein. Nützt auch nicht, weil Destruktoren nicht gerufen werden und Komnunikations-Thread vielleicht noch läuft.
         
@@ -459,6 +482,7 @@ static void __stdcall ServiceMain( DWORD argc, char** argv )
         //{
         //    restart_service( argc, argv );
         //}
+        LOG( "ServiceMain ok\n" );
     }
     catch( const Xc& x        ) { event_log( x.what() ); }
     catch( const exception& x ) { event_log( x.what() ); }
