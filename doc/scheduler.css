@@ -1,11 +1,12 @@
-body            { font-size: 10pt; font-family: Arial sans-serif; }
-h1              { font-size: 14pt; font-weight: bold; margin-bottom: 4ex;  }
-/*h2              { font-size: 12pt; font-weight: bold; margin-top: 6ex;  }*/
-h2              { font-size: 12pt; font-weight: bold; margin-top: 4ex; border-top: 1 solid #f0f0f0; padding-top: 3ex;  }
+/* $Id: scheduler.css,v 1.19 2004/09/13 08:52:02 jz Exp $ */
 
+body            { font-size: 10pt; font-family: Arial, sans-serif; }
+h1              { font-size: 14pt; font-weight: bold; margin-bottom: 4ex;  }
+h2              { font-size: 12pt; font-weight: bold; margin-top: 4ex; border-top: 1px solid #f0f0f0; padding-top: 3ex; }
 h3              { font-size: 10pt; font-weight: bold; margin-top: 4ex;  }
 .zwischentitel  { font-weight: bold; margin-top: 6ex }
-p               { font-size: 10pt; margin-top-: 2ex; margin-bottom: 0  }
+
+p               { font-size: 10pt; margin-bottom: 0 }
 td              { font-size: 10pt }
 div             { font-size: 10pt }
 /*p:first-child   { font-size: 10pt; margin-top: 0; margin-bottom: 0 }   Wirkt in ie6 nicht */
@@ -20,9 +21,9 @@ dd              { margin-left: 4ex }
 
 p.first         { margin-top: 1ex; }
 p.mono          { font-family: Lucida Console, monospace; font-size: 9pt; margin-left: 4ex }
-.mono           { font-family: Lucida Console, monospace; font-size: 9pt }
-code            { font-family: Lucida Console, monospace; font-size: 9pt;  }
-.code           { font-family: Lucida Console, monospace; font-size: 9pt;  }
+.mono           { font-family: Lucida Console, monospace; font-size: 9pt; }
+code            { font-family: Lucida Console, monospace; font-size: 9pt; }
+.code           { font-family: Lucida Console, monospace; font-size: 9pt; }
 .comment        { background-color: #FFFF00 }
 
 a.silent        { text-decoration: none; color: #0000A0 }
@@ -33,10 +34,6 @@ a:active        { color: #0000A0 }
 a:visited       { color: #0000A0 }
 a:hover         { background-color: #e0e0FF }
 
-/*
-.list           { margin-top: 4ex }
-.list_text2     { margin-left: 4ex }
-*/
 
 /*.list:first-line { margin-left: 0; margin-top: 4ex; margin-bottom: 2pt }*/
 .list               { margin-top: 4ex }
@@ -53,7 +50,6 @@ span.type           { font-style: italic; }
 
 span.register_definition { color: blue; }
 
-/*p.parent_element    { margin-top: 4ex; font-family: Lucida Console, monospace; font-size: 9pt; }*/
 p.xml_element       { margin-top: 2ex; }
 p.xml_attribute     { margin-top: 4ex; }
 p.example           { margin-top: 4ex; font-weight: bold; }
@@ -63,5 +59,4 @@ p.ini_entry         { margin-top: 2ex; border-top: 1 solid #f0f0f0; padding-top:
 /*p.register_keyword  { margin-top: 0; }*/
 .sos_name           { font-variant: small-caps; }
 
-
-.indent         { margin-left: 4ex; }
+.indent             { margin-left: 4ex; }
