@@ -1669,7 +1669,7 @@
                         </xsl:choose>,
                         <!--xsl:variable name="name" select="document('standards.xml')/standards/authors/author[ @author = current()/@author ]/@full_name"/>
                         <xsl:value-of select="$name"/>,-->
-                        <xsl:value-of select="translate( substring-before( substring-after( /*/@date,   'Date: '   ), ' $' ), '/', '-' )"/> GMT
+                        <xsl:value-of select="translate( substring-before( substring-after( /*/@date,   'Date: '   ), ' (' ), '/', '-' )"/>
                     </p>
                 </td>
             </tr>

@@ -34,15 +34,20 @@
                         Der Scheduler kompiliert den Code mit <code>javac</code>.
                     </dd>
                     
+                    <dt><code>language="JavaScript"</code></dt>
+                    <dd>
+                        <a href="../script_language_javascript.xml">JavaScript</a> liegt in der Implementierung von Mozilla Spidermonkey vor und wird mit dem Scheduler ausgeliefert.
+                    </dd>
+                    
+                    <dt><code>language="JScript"</code> oder <code>"VBScript"</code></dt>
+                    <dd>
+                        <a href="../script_language_javascript.xml">JScript</a> und VBScript sind in Windows vorhandene Sprachen (Scripting engines).
+                    </dd>
+
                     <dt><code>language="PerlScript"</code></dt>
                     <dd>
                         In Windows wird PerlScript verwendet, wenn es installiert ist. 
                         In Unix wird Perl direkt verwendet.
-                    </dd>
-                    
-                    <dt><code>language="JavaScript"</code> oder <code>"VBScript"</code></dt>
-                    <dd>
-                        JavaScript und VBScript sind in Windows vorhandene Sprachen (Scripting engines).
                     </dd>
                 </dl>
             </description>

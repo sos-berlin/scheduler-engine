@@ -186,7 +186,13 @@
         </p>
     </div>
     
-    <p><b>JavaScript, VBScript</b></p>
+    <p><b><a href="script_language_javascript.xml">JavaScript und JScript</a></b></p>
+    <div class="indent">
+        <p>
+        </p>
+    </div>
+                
+    <p><b>VBScript</b></p>
     <div class="indent">
         <p>
         </p>
