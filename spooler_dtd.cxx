@@ -75,6 +75,7 @@ const char dtd_string[] =
 "                                                                        <!-- level='all'      Alles zugelassen -->\n"
 "\n"
 "<!ELEMENT process_classes       ( process_class* )>\n"
+//"<!ATTLIST process_classes       use                 CDATA #IMPLIED>\n"
 "\n"
 "<!ELEMENT process_class         EMPTY>\n"
 "<!ATTLIST process_class         name                CDATA #IMPLIED>\n"
