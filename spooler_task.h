@@ -1,4 +1,4 @@
-// $Id: spooler_task.h,v 1.92 2003/06/24 21:10:44 jz Exp $
+// $Id: spooler_task.h,v 1.93 2003/06/25 12:27:49 jz Exp $
 
 #ifndef __SPOOLER_TASK_H
 #define __SPOOLER_TASK_H
@@ -186,6 +186,8 @@ struct Job : Sos_self_deleting
     void                        init                        ();                         // Wird nach Spooler-Skript gerufen, ruft auch init2()
     void                        init2                       ();                         // Wird nach reread() gerufen
 
+    void                    set_event_destination           ( Event* e )                { _event = e; }
+
     const string&               name                        () const                    { return _name; }
     State_cmd                   state_cmd                   () const                    { return _state_cmd; }
     State                       state                       () const                    { return _state; }
@@ -295,6 +297,7 @@ struct Job : Sos_self_deleting
 
 
     Fill_zero                  _zero_;
+    string                     _name;
     Thread_semaphore           _lock;
     Spooler*                   _spooler;
 
@@ -303,7 +306,6 @@ struct Job : Sos_self_deleting
 
     Spooler_thread*            _thread;
 
-    string                     _name;
     string                     _title;                      // <job title="">
     string                     _description;                // <description>
     string                     _state_text;                 // spooler_job.state_text = "..."
@@ -432,13 +434,13 @@ struct Task : Sos_self_deleting
     virtual bool                has_step_count              ()                              { return true; }
 
     Fill_zero                  _zero_;
+    int                        _id;
     Spooler*                   _spooler;
     Sos_ptr<Job>               _job;                        // Zirkel!
 
     Thread_semaphore           _terminated_events_lock;
     vector<Event*>             _terminated_events;
 
-    int                        _id;
     Start_cause                _cause;
     double                     _cpu_time;
     int                        _step_count;

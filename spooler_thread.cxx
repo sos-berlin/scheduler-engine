@@ -1,4 +1,4 @@
-// $Id: spooler_thread.cxx,v 1.84 2003/06/24 21:10:44 jz Exp $
+// $Id: spooler_thread.cxx,v 1.85 2003/06/25 12:27:49 jz Exp $
 /*
     Hier sind implementiert
 
@@ -242,7 +242,7 @@ void Spooler_thread::start( Event* event_destination )
             if( !ok )  throw_xc( "SPOOLER-127" );
         }
 
-        FOR_EACH_JOB( job )  (*job)->init();
+        FOR_EACH_JOB( job )  (*job)->set_event_destination( _event ), (*job)->init();
 
 
         Z_WINDOWS_ONLY( SetThreadPriority( GetCurrentThread(), _thread_priority ); )
@@ -450,7 +450,7 @@ Job* Spooler_thread::get_next_job_to_start()
             {
                 Time now = Time::now();
 
-                if( job->_order_queue  &&  !job->_order_queue->get_order_for_processing( now ) 
+                if( job->_order_queue  &&  !job->_order_queue->has_order( now ) 
                  && ( job->_state != Job::s_pending || job->is_in_period(now) ) )
                 {
                     _next_job = job; 

@@ -1,4 +1,4 @@
-// $Id: spooler_order.h,v 1.21 2003/06/24 21:10:44 jz Exp $
+// $Id: spooler_order.h,v 1.22 2003/06/25 12:27:48 jz Exp $
 
 #ifndef __SPOOLER_ORDER_H
 #define __SPOOLER_ORDER_H
@@ -43,7 +43,7 @@ struct Order : Com_order
 
     void                    set_title                   ( const string& title )                     { THREAD_LOCK(_lock)  _title = title,  _title_modified = true; }
     string&                     title                   ()                                          { THREAD_LOCK_RETURN( _lock, string, _title ); }
-    string                      obj_name                ()                                          { THREAD_LOCK_RETURN( _lock, string, string_from_variant(_id) + rtrim( "  " + _title ) ); }
+    string                      obj_name                ();
                                                             
     void                    set_priority                ( Priority );
     Priority                    priority                () const                                    { return _priority; }
@@ -59,10 +59,10 @@ struct Order : Com_order
     void                    set_job_by_name             ( const string& );
     Job*                        job                     ();
 
-    void                    set_task                    ( Task* task )                              { _task = task; }
+  //void                    set_task                    ( Task* task )                              { _task = task; }
 
     void                    set_state                   ( const State& );
-    void                    set_state2                  ( const State& );
+    void                    set_state2                  ( const State&, bool is_error_state = false );
     State                       state                   ()                                          { THREAD_LOCK_RETURN( _lock, State, _state ); }
     bool                        state_is_equal          ( const State& state )                      { THREAD_LOCK_RETURN( _lock, bool, _state == state ); }
 
@@ -72,7 +72,7 @@ struct Order : Com_order
     Time                        start_time              () const                                    { return _start_time; }
     Time                        end_time                () const                                    { return _end_time; }
 
-    void                    set_payload                 ( const VARIANT& payload )                  { THREAD_LOCK( _lock )  _payload = payload; }
+    void                    set_payload                 ( const VARIANT& payload )                  { THREAD_LOCK( _lock )  _payload = payload,  _payload_modified = true; }
     Payload                     payload                 ()                                          { THREAD_LOCK_RETURN( _lock, Variant, _payload ); }
 
     Com_job*                    com_job                 ();
@@ -84,7 +84,7 @@ struct Order : Com_order
     void                        setback_                ();
 
     // Auftrag in einer Jobkette:
-    void                        add_to_job_chain        ( Job_chain*, bool write_to_database = true );
+    void                        add_to_job_chain        ( Job_chain* );
     void                        remove_from_job_chain   ();
     void                        move_to_node            ( Job_chain_node* );
     void                        postprocessing          ( bool success, Prefix_log* );              // Verarbeitung nach spooler_process()
@@ -99,6 +99,7 @@ struct Order : Com_order
     void                        postprocessing2         ();
 
     friend struct               Order_queue;
+    friend struct               Job_chain;
     friend void                 Spooler_db::insert_order( Order* );
     friend void                 Spooler_db::update_order( Order* );
 
@@ -120,6 +121,7 @@ struct Order : Com_order
     Job_chain_node*            _job_chain_node;         // Nächster Stelle, falls in einer Jobkette
     Order_queue*               _order_queue;            // Auftrag ist in einer Auftragsliste, aber nicht in einer Jobkette. _job_chain == NULL, _job_chain_node == NULL!
     Payload                    _payload;
+    bool                       _payload_modified;       // (Bei einem Objekt wird nur bemerkt, dass die Referenz geändert wurde, nicht das Objekt selbst)
 
     Time                       _created;
     Time                       _start_time;             // Erster Jobschritt
@@ -131,6 +133,7 @@ struct Order : Com_order
     bool                       _moved;                  // true, wenn Job state oder job geändert hat. Dann nicht automatisch in Jobkette weitersetzen
     Time                       _setback;                // Bis wann der Auftrag zurückgestellt ist
     int                        _setback_count;
+    bool                       _is_in_database;
 };
 
 //-----------------------------------------------------------------------------------Job_chain_node
@@ -169,7 +172,7 @@ struct Job_chain : Com_job_chain
                                 Job_chain               ( Spooler* );
                                ~Job_chain               ();
 
-    void                    set_name                    ( const string& name )                      { THREAD_LOCK( _lock )  _name = name; }
+    void                    set_name                    ( const string& name )                      { THREAD_LOCK( _lock )  _name = name,  _log.set_prefix( "Jobchain " + _name ); }
     string                      name                    ()                                          { THREAD_LOCK_RETURN( _lock, string, _name ); }
 
     bool                        finished                () const                                    { return _finished; }
@@ -199,6 +202,7 @@ struct Job_chain : Com_job_chain
   private:
     friend struct               Order;
     Thread_semaphore           _lock;
+    Prefix_log                 _log;
     string                     _name;
     bool                       _finished;               // add_job() gesperrt, add_order() frei
 
@@ -237,9 +241,10 @@ struct Order_queue : Com_order_queue
   //Order*                      add_order               ( const Order::Payload& );
     void                        remove_order            ( Order* );
     int                         length                  ( Job_chain* = NULL );
-  //bool                        empty                   () const                                    { return _queue.empty(); }
-    bool                        has_order               ( const Time& );
-    ptr<Order>                  get_order_for_processing( const Time& now );
+    Order*                      first_order             ( const Time& now );
+    bool                        has_order               ( const Time& now )                         { return first_order(now) != NULL; }
+    ptr<Order>                  get_order_for_processing( const Time& now, Task* );
+    Time                        next_time               ();
     void                        update_priorities       ();
     ptr<Order>                  order_or_null           ( const Order::Id& );
     Job*                        job                     () const                                    { return _job; }
@@ -256,7 +261,8 @@ struct Order_queue : Com_order_queue
     ptr<Com_order_queue>       _com_order_queue;
     
     typedef list< ptr<Order> >  Queue;
-    Queue                      _queue;
+    Queue                      _queue;                  // Order._setback == 0
+    Queue                      _setback_queue ;         // Order._setback > 0
 
     int                        _lowest_priority;        // Zur Optimierung
     int                        _highest_priority;       // Zur Optimierung

@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.157 2003/06/24 21:10:44 jz Exp $
+// $Id: spooler_task.cxx,v 1.158 2003/06/25 12:27:49 jz Exp $
 /*
     Hier sind implementiert
 
@@ -1043,10 +1043,9 @@ void Job::task_to_start()
                     }
 
                     //if( !cause  &&  _order_queue  &&  !_order_queue->empty() )  cause = cause_order,               _log.debug( "Task startet wegen Auftrags" );
-                    ptr<Order> order;
                     if( !cause  &&  _order_queue )
                     {
-                        order = _order_queue->get_order_for_processing( now );
+                        ptr<Order> order = _order_queue->first_order( now );
                         if( order )                 cause = cause_order,                                _log.debug( "Task startet wegen Auftrag " + order->obj_name() );
                     }
                                                                                       
@@ -1056,7 +1055,7 @@ void Job::task_to_start()
                         dequeue_task( now );
                         _task->_cause = cause;
                         _task->_let_run |= ( cause == cause_period_single );
-                        if( order )  _task->_order = order, order->set_task( _task );
+                        //if( order )  _task->_order = order, order->set_task( _task );
                     }
                 }
             }
@@ -1131,15 +1130,10 @@ bool Job::do_something()
 
         if( _state == s_running_waiting_for_order )
         {
-            if( !_task->_order )  _task->_order = _order_queue->get_order_for_processing( now );
+            if( !_task->_order )  _task->_order = _order_queue->get_order_for_processing( now, _task );
 
-            if( _task->_order )  
-            {
-                _task->_order->set_task( _task );
-                set_state( s_running );            // Auftrag da? Dann Task weiterlaufen lassen (Ende der Run_time wird noch geprüft)
-            }
-            else  
-                ok &= _period.is_in_time( now );   // Run_time abgelaufen? Dann Task beenden
+            if( _task->_order )  set_state( s_running );            // Auftrag da? Dann Task weiterlaufen lassen (Ende der Run_time wird noch geprüft)
+            else  ok &= _period.is_in_time( now );   // Run_time abgelaufen? Dann Task beenden
         }
 
         if( ( _state == s_running || _state == s_running_process )  &&  ok  &&  !has_error() )      // SPOOLER_PROCESS
@@ -1188,13 +1182,11 @@ bool Job::do_something()
             set_state( s_running_delayed );
         }
 
-/*
-        if( _state == s_running  &&  _order_queue  &&  _order_queue->empty() )
+        if( _state == s_running  &&  _order_queue  &&  !_order_queue->has_order( now ) )
         {
             set_state( Job::s_running_waiting_for_order );  
-            _next_time = _period.end();     // Thread am Ende der Run_time wecken, damit Task beendet werden kann
+            _next_time = min( _period.end(), _order_queue->next_time() );     // Thread am Ende der Run_time wecken, damit Task beendet werden kann
         }
-*/
 
         if( _state == s_ended )                                                                     // TASK BEENDET
         {
@@ -1870,7 +1862,7 @@ bool Task::step()
     {
         if( _job->_order_queue )
         {
-            //_order = _job->_order_queue->get_order_for_processing( this );
+            if( !_order )  _order = _job->_order_queue->get_order_for_processing( Time::now(), this );
             if( !_order )  return true;
 
             _job->_log.set_order_log( &_order->_log );
