@@ -4,7 +4,7 @@ package sos.spooler;
 
 /**
  * @author Joacim Zschimmer, Zschimmer GmbH
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 
 public class Spooler extends Idispatch

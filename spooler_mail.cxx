@@ -1,4 +1,4 @@
-// $Id: spooler_mail.cxx,v 1.16 2003/03/19 21:19:04 jz Exp $
+// $Id: spooler_mail.cxx,v 1.17 2003/03/20 19:21:38 jz Exp $
 
 
 #include "spooler.h"
@@ -40,7 +40,7 @@ const Com_method Com_mail::_methods[] =
     { DISPATCH_PROPERTYPUT, 9, "queue_dir"       , (Com_method_ptr)&Com_mail::put_queue_dir    , VT_EMPTY    , { VT_BSTR } },
     { DISPATCH_PROPERTYGET, 9, "queue_dir"       , (Com_method_ptr)&Com_mail::get_queue_dir    , VT_BSTR     },
     { DISPATCH_METHOD     ,10, "add_header_field", (Com_method_ptr)&Com_mail::add_header_field , VT_EMPTY    , { VT_BSTR, VT_BSTR } },
-    { DISPATCH_METHOD     ,11, "dequeue"         , (Com_method_ptr)&Com_mail::dequeue          , VT_EMPTY    },
+    { DISPATCH_METHOD     ,11, "dequeue"         , (Com_method_ptr)&Com_mail::dequeue          , VT_INT      },
     { DISPATCH_PROPERTYGET,12, "dequeue_log"     , (Com_method_ptr)&Com_mail::get_dequeue_log  , VT_BSTR     },
     {}
 };
