@@ -1911,7 +1911,7 @@ const Com_method Com_task::_methods[] =
     { DISPATCH_METHOD     , 17, "remove_pid"                , (Com_method_ptr)&Com_task::Remove_pid             , VT_EMPTY      , { VT_INT } },
     { DISPATCH_PROPERTYGET, 18, "stderr_text"               , (Com_method_ptr)&Com_task::get_Stderr_text        , VT_BSTR       },
     { DISPATCH_PROPERTYGET, 19, "stdout_text"               , (Com_method_ptr)&Com_task::get_Stdout_text        , VT_BSTR       },
-    { DISPATCH_METHOD     , 20, "Create_subprocess"         , (Com_method_ptr)&Com_task::Create_subprocess      , VT_DISPATCH   , { VT_BYREF|VT_VARIANT } },
+    { DISPATCH_METHOD     , 20, "Create_subprocess"         , (Com_method_ptr)&Com_task::Create_subprocess      , VT_DISPATCH   , { VT_BYREF|VT_VARIANT }, 1 },
     { DISPATCH_METHOD     , 21, "Add_subprocess"            , (Com_method_ptr)&Com_task::Add_subprocess         , VT_EMPTY      , { VT_INT, VT_R8, VT_BOOL, VT_BOOL, VT_BSTR }, 1 },
     {}
 };
