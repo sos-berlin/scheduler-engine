@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="scheduler.xslt" type="text/xsl"?>
 
-<!--$Id: index.xml,v 1.19 2004/10/09 21:04:42 jz Exp $-->
+<!--$Id: index.xml,v 1.20 2004/12/07 09:57:56 jz Exp $-->
 
 <description 
-    head_title          = "Erste Seite" 
+    head_title          = "Dokumentation" 
     base_dir            = ""
     suppress_browse_bar = "yes"
     author              = "$Author: jz $"
-    date                = "$Date: 2004/10/09 21:04:42 $"
+    date                = "$Date: 2004/12/07 09:57:56 $"
 >
 
 <style>

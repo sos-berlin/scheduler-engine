@@ -1,4 +1,4 @@
-// $Id: spooler_job.h,v 1.30 2004/11/17 10:17:34 jz Exp $
+// $Id: spooler_job.h,v 1.31 2004/12/07 09:57:55 jz Exp $
 
 #ifndef __SPOOLER_JOB_H
 #define __SPOOLER_JOB_H
@@ -333,6 +333,7 @@ struct Job : Sos_self_deleting
     string                     _process_log_filename;
     bool                       _process_ignore_error;
     bool                       _process_ignore_signal;
+    ptr<Com_variable_set>      _process_environment;
 
     long                       _tasks_count;                // Anzahl gestarteter Tasks seit Spooler-Start
     long                       _step_count;                 // Anzahl spooler_process() aller Tasks

@@ -2,13 +2,13 @@
 <?xml-stylesheet href="scheduler.xslt" type="text/xsl"?>
 
 
-<!--$Id: konfiguration.xml,v 1.10 2004/10/15 13:08:18 jz Exp $-->
+<!--$Id: konfiguration.xml,v 1.11 2004/12/07 09:57:56 jz Exp $-->
 
 <description 
     title    = "XML-Konfiguration" 
     base_dir = ""
     author   = "$Author: jz $"
-    date     = "$Date: 2004/10/15 13:08:18 $"
+    date     = "$Date: 2004/12/07 09:57:56 $"
 >
 
 <scheduler_keyword keyword="Konfiguration"/>
@@ -154,7 +154,14 @@ scheduler hallo_welt.xml
                  &lt;<a class="silent" href="xml/process.xml">process</a> file         = "…"
                           param        = ""
                           log_file     = ""
-                          ignore_error = "no" />
+                          ignore_error = "no"
+                          ignore_signal= "no" >
+                     &lt;<a class="silent" href="xml/environment.xml">environment</a>>
+                         &lt;<a class="silent" href="xml/variable.xml">variable</a> name  = "…"
+                                   value = "…"
+                         &lt;/variable>
+                     &lt;/environment>                          
+                 &lt;/process>
 
                  &lt;<a class="silent" href="xml/run_time.xml">run_time</a> let_run="no">
                      &lt;<a class="silent" href="xml/period.xml">period</a> let_run      = "…"

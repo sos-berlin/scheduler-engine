@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <?xml-stylesheet href="../scheduler.xslt" type="text/xsl"?>
-<!--$Id: process.xml,v 1.10 2004/12/02 21:56:49 jz Exp $-->
+<!--$Id: process.xml,v 1.11 2004/12/07 09:57:56 jz Exp $-->
 
 <xml_element name     = "process" 
              title    = "Externes Programm (alternativ zu &lt;script&gt;)" 
@@ -8,7 +8,7 @@
              base_dir = "../"
              parent_page = "../konfiguration.xml"
              author   = "$Author: jz $" 
-             date     = "$Date: 2004/12/02 21:56:49 $">
+             date     = "$Date: 2004/12/07 09:57:56 $">
               
     <xml_parent_elements>
         <xml_parent_element name="job">
@@ -76,6 +76,20 @@
         </xml_attribute>
     </xml_attributes>
 
+
+    <xml_child_elements>
+        <xml_child_element name="environment">
+            <description>
+                <p>
+                    Die hier aufgeführten Umgebungsvariablen werden zusammen mit den Umgebungsvariablen des Scheduler-Prozesses
+                    dem neuen Prozess übergeben.
+                    Erste überschreiben letztere gleichen Namens.
+                </p>
+            </description>
+        </xml_child_element>
+    </xml_child_elements>
+
+    
     <description>
         <p>
             Beim Start des Jobs, also zu Beginn einer Task, wird ein Prozess eingerichtet. 

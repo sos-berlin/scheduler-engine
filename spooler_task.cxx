@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.266 2004/12/05 13:25:31 jz Exp $
+// $Id: spooler_task.cxx,v 1.267 2004/12/07 09:57:55 jz Exp $
 /*
     Hier sind implementiert
 
@@ -1776,6 +1776,20 @@ void Process_task::close_handle()
     }
 }
 
+//------------------------------------------------------Process_task::variable_set_from_environment
+
+ptr<Com_variable_set> Process_task::variable_set_from_environment()
+{
+    ptr<Com_variable_set> result = new Com_variable_set();
+    for( char** e = environ; *e; e++ )
+    {
+        const char* equal = strchr( *e, '=' );
+        if( equal )  result->set_var( string( *e, equal ), equal + 1 );
+    }
+
+    return result;
+}
+
 //----------------------------------------------------------------------Process_task::do_close__end
 
 void Process_task::do_close__end()
@@ -1828,13 +1842,22 @@ bool Process_task::do_begin__end()
     }
 
 
+    // Environment
+
+    ptr<Com_variable_set> v   = variable_set_from_environment();
+    v->merge( _job->_process_environment );
+    S env;
+    Z_FOR_EACH( Com_variable_set::Map, v->_map, m )
+        env << string_from_bstr ( m->first ) << "=" << string_from_variant( m->second->_value ) << '\0';
+    env << '\0';
+
     ok = CreateProcess( _job->_process_filename.c_str(),  // application name
                         (char*)command_line.c_str(),      // command line 
                         NULL,                       // process security attributes 
                         NULL,                       // primary thread security attributes 
                         FALSE,                      // handles are inherited?
                         0,                          // creation flags 
-                        NULL,                       // use parent's environment 
+                        (char*)((string)env).c_str(),      // use parent's environment 
                         NULL,                       // use parent's current directory 
                         &startup_info,              // STARTUPINFO pointer 
                         &process_info );            // receives PROCESS_INFORMATION 
@@ -2042,10 +2065,8 @@ bool Process_task::do_begin__end()
     }
 
 
-#   ifndef SYSTEM_WINDOWS
-        LOG( "signal(SIGCHLD,SIG_DFL)\n" );
-        ::signal( SIGCHLD, SIG_DFL );                 // Java verändert das Signal-Verhalten, so dass waitpid() ohne diesen Aufruf versagte.
-#   endif
+    LOG( "signal(SIGCHLD,SIG_DFL)\n" );
+    ::signal( SIGCHLD, SIG_DFL );                 // Java verändert das Signal-Verhalten, so dass waitpid() ohne diesen Aufruf versagte.
 
     if( log_ptr )  *log_ptr << "fork()  ";
     int pid = fork();
@@ -2057,16 +2078,41 @@ bool Process_task::do_begin__end()
         
         case 0:
         {
+            // Arguments 
+
             char** args = new char* [ string_args.size() + 1 ];
             int    i;
 
             for( i = 0; i < string_args.size(); i++ )  args[i] = (char*)string_args[i].c_str();
             args[i] = NULL;
 
-            execvp( _job->_process_filename.c_str(), args );
 
-            fprintf( stderr, "ERRNO-%d  %s, bei execlp(\"%s\")\n", errno, strerror(errno), _job->_process_filename.c_str() );
-            _exit( errno? errno : 250 );  // Wie melden wir den Fehler an den rufenden Prozess?
+            // Environment
+
+            ptr<Com_variable_set> v   = variable_set_from_environment();
+            char**                env = new char* [ v->_map.size() + 1 ];
+            i = 0;
+
+            Z_FOR_EACH( Com_variable_set::Map, v->_map, m )
+            {
+                string name  = string_from_bstr ( m->first );
+                string value = string_from_value( m->second );
+                char* env_string = new char[ name.length() + 1 + value.length() ];
+                strcpy( env_string, name.c_str() );
+                strcat( env_string, "=" );
+                strcat( env_string, value.c_str() );
+                env[ i++ ] = env_string;
+            }
+            env[i] = NULL;
+
+
+            Z_LOG( "execvp(\"" << _job->_process_filename << "\")\n" );
+            execve( _job->_process_filename.c_str(), args, env );
+
+            int e = errno;
+            Z_LOG( "execvp()  errno-" << e << "  " << strerror(e) << "\n" );
+            fprintf( stderr, "ERRNO-%d  %s, bei execlp(\"%s\")\n", e, strerror(e), _job->_process_filename.c_str() );
+            _exit( e? e : 250 );  // Wie melden wir den Fehler an den rufenden Prozess?
         }
 
         default:

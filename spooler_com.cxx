@@ -1,4 +1,4 @@
-// $Id: spooler_com.cxx,v 1.162 2004/11/08 13:39:13 jz Exp $
+// $Id: spooler_com.cxx,v 1.163 2004/12/07 09:57:55 jz Exp $
 /*
     Hier sind implementiert
 
@@ -253,15 +253,28 @@ const Com_method Com_variable_set::_methods[] =
 Com_variable_set::Com_variable_set()
 :
     Sos_ole_object( variable_set_class_ptr, (Ivariable_set*)this ),
-    _lock("Com_variable_set")
+    _lock("Com_variable_set"),
+    _ignore_case(true)
 {
+}
+
+//---------------------------------------------------------------Com_variable_set::Com_variable_set
+
+Com_variable_set::Com_variable_set( const xml::Element_ptr& element, const string& variable_element_name )
+:
+    Sos_ole_object( variable_set_class_ptr, (Ivariable_set*)this ),
+    _lock("Com_variable_set"),
+    _ignore_case(true)
+{
+    set_dom( element, variable_element_name );
 }
 
 //---------------------------------------------------------------Com_variable_set::Com_variable_set
 
 Com_variable_set::Com_variable_set( const Com_variable_set& o )
 :
-    Sos_ole_object( variable_set_class_ptr, (Ivariable_set*)this )
+    Sos_ole_object( variable_set_class_ptr, (Ivariable_set*)this ),
+    _ignore_case(o._ignore_case)
 {
     THREAD_LOCK( _lock )
     {
@@ -290,7 +303,7 @@ STDMETHODIMP Com_variable_set::QueryInterface( const IID& iid, void** result )
 
 //------------------------------------------------------------------------Com_variable_set::set_dom
 
-void Com_variable_set::set_dom( const xml::Element_ptr& params )
+void Com_variable_set::set_dom( const xml::Element_ptr& params, const string& variable_element_name )
 {
     HRESULT hr;
 
@@ -298,7 +311,7 @@ void Com_variable_set::set_dom( const xml::Element_ptr& params )
     {
         DOM_FOR_EACH_ELEMENT( params, e )
         {
-            if( e.nodeName_is( "param" ) ) 
+            if( e.nodeName_is( variable_element_name ) ) 
             {
                 Bstr    name  = e.getAttribute( "name" );
                 Variant value = e.getAttribute( "value" );
@@ -350,6 +363,48 @@ STDMETHODIMP Com_variable_set::get_Value( VARIANT* name, VARIANT* value )
         return DISP_E_TYPEMISMATCH;
 }
 
+//------------------------------------------------------------------------Com_variable_set::set_var
+
+void Com_variable_set::set_var( const string& name, const Variant& value )
+{
+    HRESULT hr = put_Var( Bstr( name ), (VARIANT*)&value );
+    if( FAILED(hr) )  throw_ole( hr, "Ivariable_set::put_var" );
+}
+
+//---------------------------------------------------------------------Com_variable_set::get_string
+
+string Com_variable_set::get_string( const string& name )
+{
+    Variant result;
+    
+    HRESULT hr = get_Var( Bstr(name), &result );
+    if( FAILED(hr) )  throw_com( hr, "Ivariable_set::get_Var" );
+
+    return string_from_variant( result );
+}
+
+
+//-------------------------------------------------------------Com_variable_set::get_string_by_name
+
+string Com_variable_set::get_string_by_name( const string& name, bool* name_found ) const
+{
+    Variant result;
+    
+    get_var( Bstr(name), &result );
+
+    *name_found = !result.is_empty();
+
+    return string_from_variant( result );
+}
+
+//--------------------------------------------------------------------------Com_variable_set::merge
+
+void Com_variable_set::merge( const Com_variable_set* other )
+{
+    HRESULT hr = Merge( const_cast<Com_variable_set*>( other ) );
+    if( FAILED(hr) )  throw_com( hr, "Com_variable_set::merge" );
+}
+
 //------------------------------------------------------------------------Com_variable_set::put_var
 
 STDMETHODIMP Com_variable_set::put_Var( BSTR name, VARIANT* value )
@@ -365,7 +420,7 @@ STDMETHODIMP Com_variable_set::put_Var( BSTR name, VARIANT* value )
         {
             Bstr lname = name;
 
-            bstr_to_lower( &lname._bstr );
+            if( _ignore_case )  bstr_to_lower( &lname._bstr );
 
             Map::iterator it = _map.find( lname );
             if( it != _map.end()  &&  it->second )
@@ -387,26 +442,33 @@ STDMETHODIMP Com_variable_set::put_Var( BSTR name, VARIANT* value )
 
 //------------------------------------------------------------------------Com_variable_set::get_var
 
+void Com_variable_set::get_var( BSTR name, VARIANT* value ) const
+{
+    THREAD_LOCK( _lock )  
+    {
+        VariantInit( value );
+
+        Bstr lname = name;
+        if( _ignore_case )  bstr_to_lower( &lname._bstr );
+
+        Map::const_iterator it = _map.find( lname );
+        if( it != _map.end()  &&  it->second )
+        {
+            HRESULT hr = it->second->get_Value( value );
+            if( !FAILED(hr))  hr = S_OK;
+        }
+    }
+}
+
+//------------------------------------------------------------------------Com_variable_set::get_var
+
 STDMETHODIMP Com_variable_set::get_Var( BSTR name, VARIANT* value )
 {
     HRESULT hr = NOERROR;
 
     try
     {
-        THREAD_LOCK( _lock )  
-        {
-            VariantInit( value );
-
-            Bstr lname = name;
-            bstr_to_lower( &lname._bstr );
-
-            Map::iterator it = _map.find( lname );
-            if( it != _map.end()  &&  it->second )
-            {
-                hr = it->second->get_Value( value );
-                if( !FAILED(hr))  hr = S_OK;
-            }
-        }
+        get_var( name, value );
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Variable_set::var" ); }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Variable_set::var" ); }
@@ -555,7 +617,7 @@ STDMETHODIMP Com_variable_set::Clone( Ivariable_set** result )
     return hr;
 }
 
-//--------------------------------------------------------------------------Com_variable_set::merge
+//--------------------------------------------------------------------------Com_variable_set::Merge
 
 STDMETHODIMP Com_variable_set::Merge( Ivariable_set* other )
 {
@@ -573,7 +635,10 @@ STDMETHODIMP Com_variable_set::Merge( Ivariable_set* other )
             {
                 ptr<Com_variable> v;
                 hr = it->second->Clone( (Ivariable**)&v );
-                _map[ it->first ] = v;
+
+                Bstr name = v->_name;
+                if( _ignore_case )  bstr_to_lower( &name );
+                _map[ name ] = v;
             }
         }
     }

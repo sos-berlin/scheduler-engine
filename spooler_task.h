@@ -1,4 +1,4 @@
-// $Id: spooler_task.h,v 1.143 2004/12/05 13:25:32 jz Exp $
+// $Id: spooler_task.h,v 1.144 2004/12/07 09:57:56 jz Exp $
 
 #ifndef __SPOOLER_TASK_H
 #define __SPOOLER_TASK_H
@@ -379,6 +379,7 @@ struct Process_task : Task      // Job ist irgendein Prozess (z.B. durch ein She
                                ~Process_task                ();
 
     void                        close_handle                ();
+    ptr<Com_variable_set>       variable_set_from_environment();
 
     virtual bool                do_kill                     ();
     virtual void                do_close__end               ();

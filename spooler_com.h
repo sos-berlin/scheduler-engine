@@ -1,9 +1,7 @@
-// $Id: spooler_com.h,v 1.102 2004/11/08 13:39:13 jz Exp $
+// $Id: spooler_com.h,v 1.103 2004/12/07 09:57:55 jz Exp $
 
 #ifndef __SPOOLER_COM_H
 #define __SPOOLER_COM_H
-
-#include <map>
 
 #include "../zschimmer/com.h"
 #include "../zschimmer/com_server.h"
@@ -110,8 +108,7 @@ struct Com_variable: spooler_com::Ivariable,
     STDMETHODIMP            get_Name                        ( BSTR* result )                        { return _name.CopyTo(result); }
     STDMETHODIMP                Clone                       ( spooler_com::Ivariable** );
 
-  private:
-
+//private:
     Thread_semaphore           _lock;
     Bstr                       _name;
     Variant                    _value;
@@ -121,9 +118,11 @@ struct Com_variable: spooler_com::Ivariable,
 
 struct Com_variable_set: spooler_com::Ivariable_set, 
                          spooler_com::Ihas_java_class_name, 
-                         Sos_ole_object
+                         Sos_ole_object,
+                         zschimmer::Get_string_by_name_interface
 {
                                 Com_variable_set            ();
+                                Com_variable_set            ( const xml::Element_ptr&, const string& variable_element_name = "param" );
                                 Com_variable_set            ( const Com_variable_set& );
 
     STDMETHODIMP                QueryInterface              ( REFIID, void** );
@@ -134,10 +133,16 @@ struct Com_variable_set: spooler_com::Ivariable_set,
     STDMETHODIMP_(char*)  const_java_class_name             ()                                      { return (char*)"sos.spooler.Variable_set"; }
 
     STDMETHODIMP            get_Dom                         ( IXMLDOMDocument** );
-    void                    set_dom                         ( const xml::Element_ptr& );
+    void                    set_dom                         ( const xml::Element_ptr&, const string& variable_element_name = "param" );
 
     xml::Document_ptr           dom                         ();
     xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const string& element_name, const string& subelement_name );
+
+    void                        set_var                     ( const string& name, const Variant& value );
+    void                        get_var                     ( BSTR name, VARIANT* value ) const;
+    string                      get_string                  ( const string& name );
+    string                      get_string_by_name          ( const string& name, bool* name_found ) const;
+    void                        merge                       ( const Com_variable_set* );
 
     STDMETHODIMP                Set_var                     ( BSTR name, VARIANT* value )           { return put_Var( name, value ); }
 
@@ -159,15 +164,16 @@ struct Com_variable_set: spooler_com::Ivariable_set,
     static const string         xml_element_name            ()                                      { return "sos.spooler.variable_set"; }
 
 
-  private:
+//private:
     friend struct               Com_variable_set_enumerator;
 
-    typedef std::map< Bstr, ptr<Com_variable> >  Map;
+    typedef stdext::hash_map< Bstr, ptr<Com_variable> >  Map;
 
     void                        operator =                  ( const Com_variable_set& );
 
-    Thread_semaphore           _lock;
+    mutable Thread_semaphore   _lock;
     Map                        _map;
+    bool                       _ignore_case;
 };
 
 //----------------------------------------------------------------------Com_variable_set_enumerator

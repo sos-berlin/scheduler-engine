@@ -1,4 +1,4 @@
-// $Id: spooler_job.cxx,v 1.96 2004/11/17 10:17:34 jz Exp $
+// $Id: spooler_job.cxx,v 1.97 2004/12/07 09:57:55 jz Exp $
 // §851: Weitere Log-Ausgaben zum Scheduler-Start eingebaut
 /*
     Hier sind implementiert
@@ -141,13 +141,37 @@ void Job::set_dom( const xml::Element_ptr& element, const Time& xml_mod_time )
                 _process_log_filename = "";
             }
             else
-            if( e.nodeName_is( "process"    ) )  _module_xml_document  = NULL,
-                                                 _module_xml_element   = NULL,
-                                                 _process_filename     = e.     getAttribute( "file" ),
-                                                 _process_param        = e.     getAttribute( "param" ),
-                                                 _process_log_filename = e.     getAttribute( "log_file" ),
-                                                 _process_ignore_error = e.bool_getAttribute( "ignore_error" ),
-                                                 _process_ignore_signal= e.bool_getAttribute( "ignore_signal" );
+            if( e.nodeName_is( "process"    ) )
+            {
+                _module_xml_document  = NULL;
+                _module_xml_element   = NULL;
+                _process_filename     = e.     getAttribute( "file" );
+                _process_param        = e.     getAttribute( "param" );
+                _process_log_filename = e.     getAttribute( "log_file" );
+                _process_ignore_error = e.bool_getAttribute( "ignore_error" );
+                _process_ignore_signal= e.bool_getAttribute( "ignore_signal" );
+
+                DOM_FOR_EACH_ELEMENT( e, ee )
+                {
+                    if( ee.nodeName_is( "environment" ) )
+                    {
+                        _process_environment = new Com_variable_set();
+
+#ifndef Z_WINDOWS
+                        _process_environment->_ignore_case = false;
+#endif
+
+                        DOM_FOR_EACH_ELEMENT( ee, eee )
+                        {
+                            if( eee.nodeName_is( "variable" ) ) 
+                            {
+                                _process_environment->set_var( eee.getAttribute( "name" ), 
+                                                               subst_env( eee.getAttribute( "value" ), _process_environment ) );
+                            }
+                        }
+                    }
+                }
+            }
             else
             if( e.nodeName_is( "run_time" ) &&  !_spooler->_manual )  _run_time = Run_time(), 
                                                                       _run_time.set_holidays( _spooler->holidays() ), 

@@ -1,4 +1,4 @@
-// $Id: spooler_dtd.cxx,v 1.7 2004/11/17 10:17:34 jz Exp $
+// $Id: spooler_dtd.cxx,v 1.8 2004/12/07 09:57:55 jz Exp $
 /*
     Hier ist implementiert
 
@@ -19,7 +19,7 @@ using namespace std;
 const char dtd_string[] = 
 
 "<?xml version='1.0' encoding='iso-8859-1'?>\n"
-"<!-- $Id: spooler_dtd.cxx,v 1.7 2004/11/17 10:17:34 jz Exp $ -->\n"
+"<!-- $Id: spooler_dtd.cxx,v 1.8 2004/12/07 09:57:55 jz Exp $ -->\n"
 "\n"
 "\n"
 "<!ENTITY % command              ' add_jobs\n" 
@@ -147,12 +147,18 @@ const char dtd_string[] =
 "<!ATTLIST levels                low                 CDATA #REQUIRED>    <!-- low <= level < high -->\n"
 "<!ATTLIST levels                high                CDATA #REQUIRED>\n"
 "\n"
-"<!ELEMENT process               EMPTY>\n"
+"<!ELEMENT process               ( environment? )>\n"
 "<!ATTLIST process               file                CDATA #REQUIRED>\n"
 "<!ATTLIST process               param               CDATA #IMPLIED>\n"
 "<!ATTLIST process               log_file            CDATA #IMPLIED>\n"
 "<!ATTLIST process               ignore_error        CDATA #IMPLIED>\n"
 "<!ATTLIST process               ignore_signal       CDATA #IMPLIED>\n"
+"\n"
+"<!ELEMENT environment           ( variable* )>\n"
+"\n"
+"<!ELEMENT variable              EMPTY>\n"
+"<!ATTLIST variable              name                CDATA #REQUIRED>\n"
+"<!ATTLIST variable              value               CDATA #REQUIRED>\n"
 "\n"
 "<!-- wenn der DLL-Aufruf implementiert ist:\n"
 "<!ELEMENT module                EMPTY>\n"
