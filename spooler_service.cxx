@@ -1,4 +1,4 @@
-// $Id: spooler_service.cxx,v 1.45 2003/10/30 11:58:07 jz Exp $
+// $Id: spooler_service.cxx,v 1.46 2003/12/10 09:09:07 jz Exp $
 /*
     Hier sind implementiert
 
@@ -432,6 +432,12 @@ static uint __stdcall self_destruction_thread( void* param )
         } 
         catch( ... ) {}
 */
+        try
+        {
+            if( spooler_ptr )  spooler_ptr->abort_immediately();
+        }
+        catch( ... ) {}
+
         TerminateProcess( GetCurrentProcess(), 1 );
     }
 

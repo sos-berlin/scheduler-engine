@@ -1,4 +1,4 @@
-// $Id: spooler_history.cxx,v 1.68 2003/12/09 21:01:12 jz Exp $
+// $Id: spooler_history.cxx,v 1.69 2003/12/10 09:09:07 jz Exp $
 
 #include "spooler.h"
 #include "../zschimmer/z_com.h"
@@ -333,7 +333,7 @@ void Spooler_db::try_reopen_after_error( const exception& x )
     catch( const exception& x ) { _spooler->_log.warn( string("FEHLER BEIM SCHLIESSEN DER DATENBANK: ") + x.what() ); }
 
 
-    bool too_much_errors = ++_error_count > _spooler->_max_db_errors;
+    bool too_much_errors = ++_error_count >= _spooler->_max_db_errors;
     
     string max_warn_msg = "Nach max_db_errors=" + as_string(_spooler->_max_db_errors) + " Problemen mit der Datenbank wird sie nicht weiter verwendet";
 
