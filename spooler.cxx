@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.349 2004/07/26 12:09:58 jz Exp $
+// $Id: spooler.cxx,v 1.350 2004/07/26 16:28:19 jz Exp $
 // §851: Weitere Log-Ausgaben zum Scheduler-Start eingebaut
 // §1479
 
@@ -1969,12 +1969,10 @@ void Spooler::run()
                 }
             }
                                                                                             
-#           ifdef SYSTEM_WIN
-                // Events für spooler_communication.cxx
-                vector<z::Event*> events;
-                _connection_manager->get_events( &events );
-                FOR_EACH( vector<z::Event*>, events, e )  wait_handles.add( *e );
-#           endif
+            // Events für spooler_communication.cxx
+            vector<System_event*> events;
+            _connection_manager->get_events( &events );
+            FOR_EACH( vector<System_event*>, events, e )  wait_handles.add( *e );
 
             wait_handles += _wait_handles;
             if( !wait_handles.signaled() )

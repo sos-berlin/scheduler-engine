@@ -1,4 +1,4 @@
-// $Id: spooler_communication.cxx,v 1.90 2004/07/26 12:09:58 jz Exp $
+// $Id: spooler_communication.cxx,v 1.91 2004/07/26 16:28:20 jz Exp $
 /*
     Hier sind implementiert
 
@@ -596,10 +596,7 @@ bool Communication::Channel::async_continue_( bool wait )
                     recv_clear();
 
                     _http_response = cp.execute_http( *_http_request );
-
-#                   ifdef Z_WINDOWS
-                        _http_response->set_event( &this->_socket_event );
-#                   endif
+                    _http_response->set_event( &_socket_event );
 
                     _http_parser  = NULL;
                     _http_request = NULL;
@@ -621,22 +618,22 @@ bool Communication::Channel::async_continue_( bool wait )
                     do_send();
                 }
             }
+        }
 
-            while( _http_response  &&  _send_is_complete )
+        while( _http_response  &&  _send_is_complete )
+        {
+            if( _http_response->eof() )
             {
-                if( _http_response->eof() )
-                {
-                    _http_response = NULL;
-                    break;
-                }
-
-                _text = _http_response->read( 32768 );  // Die Größe ist nur eine Empfehlung
-                if( _text.length() == 0 )  break;       // Zurzeit keine Daten da? Dann warten wir auf ein Signal (von spooler_log.cxx)
-
-                _send_progress = 0;
-                _send_is_complete = false;
-                do_send();
+                _http_response = NULL;
+                break;
             }
+
+            _text = _http_response->read( 32768 );  // Die Größe ist nur eine Empfehlung
+            if( _text.length() == 0 )  break;       // Zurzeit keine Daten da? Dann warten wir auf ein Signal in _socket_event (von spooler_log.cxx)
+
+            _send_progress = 0;
+            _send_is_complete = false;
+            do_send();
         }
 
         if( _eof && _send_is_complete )  { _communication->remove_channel( this );  return true; }
