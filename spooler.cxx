@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.251 2003/09/22 07:54:56 jz Exp $
+// $Id: spooler.cxx,v 1.252 2003/09/22 09:12:09 jz Exp $
 /*
     Hier sind implementiert
 
@@ -1498,10 +1498,10 @@ bool Spooler::execute_state_cmd()
     if( _state_cmd == sc_continue                      )  if( _state == s_paused  )  set_state( s_running ), signal_threads( "continue" );
 
     if( _state_cmd == sc_load_config  
-        || _state_cmd == sc_reload       
-        || _state_cmd == sc_terminate             
-        || _state_cmd == sc_terminate_and_restart 
-        || _state_cmd == sc_let_run_terminate_and_restart )
+     || _state_cmd == sc_reload       
+     || _state_cmd == sc_terminate             
+     || _state_cmd == sc_terminate_and_restart 
+     || _state_cmd == sc_let_run_terminate_and_restart )
     {
         if( _state_cmd != _shutdown_cmd )
         {
@@ -1552,8 +1552,10 @@ void Spooler::run()
         }
 
 
-        bool continue_spooler = execute_state_cmd();
-        if( !continue_spooler )  if( !single_thread || !single_thread->has_tasks() )  break;
+        //bool continue_spooler = execute_state_cmd();
+        //if( !continue_spooler )  if( !single_thread || !single_thread->has_tasks() )  break;
+        execute_state_cmd();
+        if( _shutdown_cmd )  if( !single_thread  ||  !single_thread->has_tasks() )  break;
 
 
         if( _state == Spooler::s_paused )

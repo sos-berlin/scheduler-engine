@@ -1,4 +1,4 @@
-// $Id: spooler_module_remote.cxx,v 1.34 2003/09/02 16:28:29 jz Exp $
+// $Id: spooler_module_remote.cxx,v 1.35 2003/09/22 09:12:09 jz Exp $
 /*
     Hier sind implementiert
 
@@ -306,6 +306,7 @@ void Remote_module_instance_proxy::release__end()
     {
         _operation = NULL;
         _remote_instance->release__end();
+        _remote_instance = NULL;
     }
 }
 

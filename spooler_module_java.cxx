@@ -1,4 +1,4 @@
-// $Id: spooler_module_java.cxx,v 1.60 2003/09/04 15:53:08 jz Exp $
+// $Id: spooler_module_java.cxx,v 1.61 2003/09/22 09:16:25 jz Exp $
 /*
     Hier sind implementiert
 
@@ -610,7 +610,7 @@ Variant Java_module_instance::call( const string& name_par )
 {
     Env    e = env();
     Java_idispatch_stack_frame stack_frame;
-    bool   is_optional;
+    bool   is_optional = false;
     string name = name_par;
 
     if( name[0] == '?' )  is_optional = true,  name.erase( 0, 1 );

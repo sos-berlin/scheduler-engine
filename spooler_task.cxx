@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.192 2003/09/21 18:11:30 jz Exp $
+// $Id: spooler_task.cxx,v 1.193 2003/09/22 09:12:09 jz Exp $
 /*
     Hier sind implementiert
 
@@ -207,49 +207,49 @@ Task::~Task()
 
 void Task::close()
 {
-    if( _closed )  return;
-    
-
-    if( _operation )
+    if( !_closed ) 
     {
-        // Was machen wir jetzt?
-        // _operation->kill()?
-        LOG( *this << " _operation ist nicht NULL\n" );
-        _operation = NULL;
-    }
+        if( _operation )
+        {
+            // Was machen wir jetzt?
+            // _operation->kill()?
+            LOG( *this << " _operation ist nicht NULL\n" );
+            _operation = NULL;
+        }
 
-    if( _order )  remove_order_after_error();
+        if( _order )  remove_order_after_error();
 
-    _history.end();
-/*
-    try
-    {
-        do_kill();
-    }
-    catch( const exception& x ) { _log.warn( x.what() ); }
-*/
-    try
-    {
-        do_close();
-    }
-    catch( const exception& x ) { _log.error( string("close: ") + x.what() ); }
-/*
-    THREAD_LOCK( _job->_lock )  
-        if( _job->_com_task )  
-            if( _job->_com_task->task() == this )      // spooler_task?
-                _job->_com_task->set_task(NULL);
-*/
+        _history.end();
+    /*
+        try
+        {
+            do_kill();
+        }
+        catch( const exception& x ) { _log.warn( x.what() ); }
+    */
+        try
+        {
+            do_close();
+        }
+        catch( const exception& x ) { _log.error( string("close: ") + x.what() ); }
+    /*
+        THREAD_LOCK( _job->_lock )  
+            if( _job->_com_task )  
+                if( _job->_com_task->task() == this )      // spooler_task?
+                    _job->_com_task->set_task(NULL);
+    */
 
-    // Alle, die mit wait_until_terminated() auf diese Task warten, wecken:
-    THREAD_LOCK( _terminated_events_lock )  
-    {
-        FOR_EACH( vector<Event*>, _terminated_events, it )  (*it)->signal( "task closed" );
-        _terminated_events.clear();
+        // Alle, die mit wait_until_terminated() auf diese Task warten, wecken:
+        THREAD_LOCK( _terminated_events_lock )  
+        {
+            FOR_EACH( vector<Event*>, _terminated_events, it )  (*it)->signal( "task closed" );
+            _terminated_events.clear();
+        }
+
+        _closed = true;
     }
 
     set_state( s_closed );
-
-    _closed = true;
 }
 
 //----------------------------------------------------------------------------------------Task::dom
@@ -540,18 +540,20 @@ bool Task::do_something()
         Time now = Time::now();
 
         // Periode endet?
-        if( !_operation
-         || _state == s_running 
-         || _state == s_running_process 
-         || _state == s_running_delayed  
-         || _state == s_running_waiting_for_order )      
+        if( !_operation )
         {
-            bool let_run = _let_run  ||  _job->_period.is_in_time( now )  ||  ( _job->select_period(now), _job->is_in_period(now) );
-
-            if( !let_run ) 
+            if( _state == s_running 
+             || _state == s_running_process 
+             || _state == s_running_delayed  
+             || _state == s_running_waiting_for_order )      
             {
-                _log( "Laufzeitperiode ist abgelaufen, Task wird beendet" );
-                set_state( s_end );
+                bool let_run = _let_run  ||  _job->_period.is_in_time( now )  ||  ( _job->select_period(now), _job->is_in_period(now) );
+
+                if( !let_run ) 
+                {
+                    _log( "Laufzeitperiode ist abgelaufen, Task wird beendet" );
+                    set_state( s_end );
+                }
             }
         }
 
@@ -563,17 +565,18 @@ bool Task::do_something()
             bool ok = true;
 
             // HISTORIE und _end
-            if( !_operation
-             || _state == s_start_task 
-             || _state == s_running 
-             || _state == s_running_delayed 
-             || _state == s_running_waiting_for_order 
-             || _state == s_running_process           )
+            if( !_operation )
             {
-                if( _step_count == _job->_history.min_steps() )  _history.start();
-                if( _end )  set_state( s_end );
+                if( _state == s_start_task 
+                 || _state == s_running 
+                 || _state == s_running_delayed 
+                 || _state == s_running_waiting_for_order 
+                 || _state == s_running_process           )
+                {
+                    if( _step_count == _job->_history.min_steps() )  _history.start();
+                    if( _end )  set_state( s_end );
+                }
             }
-
 
             switch( _state )
             {
@@ -787,23 +790,8 @@ bool Task::do_something()
                 }
 
             
-                if( _killed  &&  _state < s_ended )  set_state( s_ended );
+                if( _killed  &&  _state < s_ended )  set_state( s_ended ), loop = true;
             }
-
-/*
-            switch( _state )
-            {
-                case s_running:
-                    if( _next_spooler_process )                     set_state( s_running_delayed, _next_spooler_process );
-
-                    if( !_order  
-                     && _job->order_queue()  
-                     && !_job->order_queue()->has_order( now ) )    set_state( s_running_waiting_for_order, _job->order_queue()->next_time() );
-                    break;
-
-                default: ;
-            }
-*/
         }
 
         if( _operation && !had_operation )  _last_operation_time = now;    // Für _timeout

@@ -1,4 +1,4 @@
-// $Id: spooler_thread.cxx,v 1.102 2003/09/02 05:29:15 jz Exp $
+// $Id: spooler_thread.cxx,v 1.103 2003/09/22 09:12:10 jz Exp $
 /*
     Hier sind implementiert
 
@@ -513,7 +513,7 @@ bool Spooler_thread::is_ready_for_termination()
         if( _spooler->state() == Spooler::s_stopping_let_run  &&  !_spooler->has_any_order() ) 
         {
             if( _task_list.size() == 0 )  return true;
-            FOR_EACH_TASK( t, task )  task->cmd_end(); 
+            //? FOR_EACH_TASK( t, task )  task->cmd_end(); 
         }
 
         if( _task_list.size() == 0 )
