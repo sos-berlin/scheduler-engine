@@ -1,0 +1,427 @@
+<html>
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<meta name="ProgId" content="FrontPage.Editor.Document">
+<style type="text/css">
+h1           { font-size: 24pt; font-weight: bold; margin-bottom: 4ex;  }
+h2           { font-size: 12pt; font-weight: bold; margin-top: 10ex; }
+h3           { font-size: 10pt; font-weight: bold; margin-top: 6ex }
+.zwischentitel { font-weight: bold; margin-top: 6ex }
+td           { font-size: 10pt; margin-top: 2ex; margin-bottom: 0  }
+p            { font-size: 10pt; margin-top: 2ex; margin-bottom: 0  }
+li           { font-size: 10pt }
+pre          { font-family: Lucida Console, monospace; font-size: 9pt; margin-left: 5mm; line-height: 1.2em; }
+hr           { size: 1 }
+.indent      { margin-left: 5mm; }
+.mono        { font-family: Lucida Console, monospace; font-size: 9pt }
+</style>
+
+<title>Jobketten im Spooler - Spezifikation</title>
+</head>
+<body>
+
+
+
+<h1>Spooler mit Jobketten - Spezifikation
+</h1>
+
+<p align="right">29. August 2002
+</p>
+
+<h2>Inhalt
+</h2>
+<p class="indent"><a href="#jobkette">Jobkette</a>
+</p>
+<p class="indent"><a href="#job">Auftragsgesteuerter Job</a>
+</p>
+<p class="indent"><a href="#auftrag">Auftrag</a>
+</p>
+<p class="indent"><a href="#auftragsliste">Auftragsliste</a>
+</p>
+<p class="indent"><a href="#auftrag_tcp">Auftrag per TCP und XML erteilen</a>
+</p>
+
+<p class="indent">&nbsp;</p>
+<hr size="1">
+
+<h2><a name="jobkette"></a>Jobkette
+</h2>
+<p>Eine Jobkette wird mit <font class="mono">spooler.create_job_chain()</font>
+erzeugt, mit <font class="mono">job_chain.add_job()</font> aufgebaut und mit <font class="mono">spooler.add_job_chain()</font>
+dem Spooler übergeben (und dabei geprüft).
+</p>
+<h3>Methode spooler.create_job_chain()
+</h3>
+<p>set <i>job_chain</i> = <font class="mono"><b>spooler.create_job_chain() </b></font>
+</p>
+<p>Erzeugt eine neue Jobkette. Die Methode kann im Spooler-Skript gerufen
+werden, das der Spooler bei seinem Start ausführt.
+</p>
+<h3>Eigenschaft job_chain.name
+</h3>
+<p>Der Name der Jobkette.
+</p>
+<h3>Methode job_chain.add_job()
+</h3>
+<p>Die Methode <font class="mono">add_job()</font> fügt der Jobkette einen Job
+hinzu.
+</p>
+<p><i>job_chain</i><font class="mono"><b>.add_job( &quot;</b></font><i>jobname</i><font class="mono"><b>&quot;</b></font>&nbsp;
+<font class="mono"><b>,</b></font> [<i>zustand_vor</i>] <b><font class="mono">, </font></b>[<i>zustand_nach</i>]
+<b><font class="mono">, </font></b>[<i>zustand_fehler</i>] <font class="mono"><b>)</b></font>
+</p>
+<p><i><br>
+jobname</i>
+</p>
+<p class="indent">benennt den Job, der auf den Auftrag einen Jobschritt
+ausführen soll.
+</p>
+<p><i><br>
+zustand_vor</i>
+</p>
+<p class="indent">Der Wert (oder der Name), der dieser Stelle in der Jobkette
+zuzuordnen ist. Default ist der Jobname.
+Eine Zahl oder ein String kann angegeben werden.
+</p>
+<p class="indent">Derselbe Wert darf nicht für zwei Jobs angegeben werden.
+</p>
+<p><i><br>
+zustand_nach</i>
+</p>
+<p class="indent">Nach fehlerloser Ausführung des Jobschritts soll der Auftrag
+auf diese Stelle in der Jobkette gesetzt werden. Default ist die Position des
+nächsten mit <font class="mono">add_job()</font> der Jobkette hinzugefügten
+Jobs.
+</p>
+<p><i><br>
+zustand_fehler</i>
+</p>
+<p class="indent">Nach fehlerhafter Ausführung des Jobschritts soll der Auftrag
+auf diesen Zustand, also die Stelle in der Jobkette gesetzt werden. Default ist
+das Ende der Jobkette.
+</p>
+<p>&nbsp;
+</p>
+<p>Jeder Zustand muss definiert sein. Endzustände werden mit dem Pseudo-Job
+&quot;<font class="mono">*end</font>&quot; definiert. Wenn der Parameter <i>zustand_vor</i>
+bei keinem Aufruf angegeben wird, definiert der Spooler selbst einen Endzustand
+mit dem Pseudo-Job
+&quot;<font class="mono">*end</font>&quot;.
+</p>
+<h3>Methode spooler.add_job_chain()
+</h3>
+<p>Die Methode trägt die Jobkette im Spooler ein und prüft dabei, ob alle
+Zustände definiert sind. Bei einem Fehler wird eine Exception ausgelöst, die
+vom Skript abgefangen werden kann.</p>
+<h3>Beispiel
+</h3>
+<pre>&lt;spooler&gt;
+    &lt;script&gt;
+<font color="#0000FF">        set job_chain = spooler.create_job_chain(&quot;dokument_drucken&quot;)
+</font>
+<font color="#0000FF">        job_chain.add_job &quot;aufbereiten&quot;, 100,  400, 8888
+        job_chain.add_job &quot;drucken&quot;    , 400, 1000, 8888
+        job_chain.add_job &quot;*end&quot;       , 1000
+</font>
+        on error goto 0
+<font color="#0000FF">          spooler.add_job_chain job_chain</font><span style="background-color: #FFFF00">
+</span>          if err then spooler_log.warn &quot;Fehler in der Jobkette wird ignoriert: &quot; &amp; err.description
+        on error resume next
+    &lt;/script&gt;
+&lt;/job&gt;</pre>
+<p>oder</p>
+<pre>&lt;spooler&gt;
+    &lt;script&gt;
+<font color="#0000FF">        set job_chain = spooler.create_job_chain(&quot;dokument_drucken&quot;)
+</font>
+<font color="#0000FF">        job_chain.add_job &quot;aufbereiten&quot;
+        job_chain.add_job &quot;drucken&quot;
+
+        spooler.add_job_chain job_chain</font><span style="background-color: #FFFF00">
+</span>    &lt;/script&gt;
+&lt;/job&gt;</pre>
+<pre>&nbsp;</pre>
+<p>&nbsp;</p>
+<hr size="1">
+<h2><a name="job"></a>Auftragsgesteuerter Job
+</h2>
+<p>Ein Job, der die Methode <font class="mono">spooler_order()</font>
+implementiert, ist auftragsgesteuert. Die Methode ersetzt <font class="mono">spooler_process()</font>.
+Alle anderen Methoden (<font class="mono">spooler_open()</font> etc.) bleiben
+bestehen.</p>
+<p><i><font color="#0000FF">Dass ein Job auftragsgesteuert ist, wird erst beim
+Laden erkannt. Der Spooler lädt also zunächst den Job (sobald seine Run_time
+erreicht ist) und stellt dann fest, ob die Methode spooler_order() implementiert
+ist. Wenn kein Auftrag da ist, ist der Job überflüssigerweise geladen :-(. Die
+Task wird dann erst gestartet (spooler_open() usw.), wenn ein Auftrag da ist.
+Das ist nicht sooo elegant.</font></i></p>
+<p><i><font color="#0000FF">Alternative: Dass ein Job auftragsgesteuert ist,
+wird im XML-Element &lt;job&gt; erklärt. Statt spooler_order() können wir dann
+das alte spooler_process() verwenden, was euch ja lieber ist. Nachteil: Man darf
+die Einstellung in &lt;job&gt; nicht vergessen. Vielleicht halb so
+schlimm.&nbsp;</font></i></p>
+<h3>Methode spooler_order()</h3>
+<p>Der Auftrag wird der neuen Methode <font class="mono">spooler_order()</font>
+übergeben.</p>
+<pre>&lt;job name=&quot;aufbereiten&quot;&gt;
+    &lt;script&gt;
+        function spooler_order( order )
+            ok = aufbereiten order.payload
+            spooler_order = ok
+        end function
+    &lt;/script&gt;
+&lt;/job&gt;</pre>
+<p><font color="#0000FF"><i>oder</i></font></p>
+<pre><font color="#0000FF">&lt;job name=&quot;aufbereiten&quot; order=&quot;yes&quot;&gt;
+    &lt;script&gt;
+        function spooler_process
+            ok = aufbereiten spooler_task.order.payload
+            spooler_process = ok
+        end function
+    &lt;/script&gt;
+&lt;/job&gt;</font></pre>
+<p>&nbsp;</p>
+<p class="zwischentitel">Fehler bei spooler_order()</p>
+<p>Ein Fehler in <font class="mono">spooler_order()</font> führt wie gewohnt zum
+Stopp des Jobs.</p>
+<p>Wenn nur der Auftrag fehlerhaft ist, der Job aber weiterlaufen soll, gibt <font class="mono">spooler_order()</font>
+false zurück. True heißt, dass der Jobschritt ordentlich ausgeführt worden
+ist.</p>
+<p class="zwischentitel">Zustand des Auftrags</p>
+<p>Der Job kann selbst die Position des Auftrags bestimmen. Direkt durch Angabe
+des Jobs</p>
+<pre>order.job = &quot;drucken&quot;</pre>
+<p>oder über den Zustand</p>
+<pre>order.state = 400</pre>
+<p>Der Spooler nimmt dann den Auftrag sofort aus der Auftragsliste des aktuellen
+Jobs und fügt ihn in die andere Auftragsliste ein. Die Operation sollte also
+zum Schluss ausgeführt werden.</p>
+<p>Wenn der Job nicht die Position geändert hat und der Auftrag sich in einer
+Jobkette befindet, ändert der Spooler die Position, wie es in der Jobkette
+festgelegt ist.</p>
+<p class="zwischentitel">Beenden der Task</p>
+<p>Eine auftragsgesteuerte Task beendet sich nur in diesen Fällen:</p>
+<ul>
+<li>Die &lt;run_time&gt; läuft ab (es gilt <font class="mono"> let_run=&quot;no&quot;</font>).</li>
+<li>Explizit durch Aufruf von <font class="mono"> spooler_task.end()</font></li>
+</ul>
+<hr size="1">
+<h2><a name="auftrag"></a>Auftrag
+</h2>
+<p>Ein Auftrag hat folgende Eigenschaften und Methoden.
+</p>
+<p><font class="mono"><b><br>
+id</b></font>
+</p>
+<p class="indent">(Optional) Eine in der Jobkette <i>eindeutige </i>Kennung des
+Auftrags.&nbsp;
+</p>
+<p class="indent">Wenn die Kennung beim Einfügen nicht gesetzt ist, erzeugt der
+Spooler eine.
+</p>
+<p class="indent">Nur vor dem Einfügen in eine Auftragsliste änderbar.
+</p>
+<p><font class="mono"><b><br>
+title
+</b></font>
+</p>
+<p class="indent">(Optional) Eine für den Benutzer lesbare Bezeichnung des
+Auftrags, die z.B. im Protokoll verwendet wird.&nbsp;
+</p>
+<pre>   spooler_log &quot;Bearbeite Auftrag &quot; &amp; order.title</pre>
+<p class="indent">Wenn der Titel beim Einfügen nicht gesetzt ist, versucht der
+Spooler, einen zu erzeugen.
+</p>
+<p class="indent">Änderbar.
+</p>
+<p><font class="mono"><b><br>
+<br>
+priority</b></font>
+</p>
+<p class="indent">Default: 0. Aufträge mit höherem Prioritätswert werden vor
+anderen Aufträgen dem Job zugeführt. Aufträge mit gleicher Priorität werden
+in der Reihenfolge ausgeführt, in der sie in die Auftragsliste eingetragen
+worden sind.&nbsp;&nbsp;
+</p>
+<p class="indent">Nur vor dem Einfügen in eine Auftragsliste änderbar.
+</p>
+<p><font class="mono"><b><br>
+job_chain</b></font>
+</p>
+<p class="indent">Die Jobkette in der sich der Auftrag befindet.
+</p>
+<pre>   spooler_log &quot;Auftrag befindet sich in der Jobkette&quot; &amp; order.job_chain.name</pre>
+<p class="indent">Nicht änderbar.
+</p>
+<p><font class="mono"><b><br>
+job</b></font>
+</p>
+<p class="indent">Der Name des Jobs, der dran ist. D.h. die Position des
+Auftrags in der Jobette.
+</p>
+<p class="indent">Die Eigenschaft ist beschreibbar, um die Position des Jobs in
+der Jobkette zu ändern.
+</p>
+<p class="indent"><font class="mono">job </font>kann auf<font class="mono">
+&quot;*end&quot; </font>gesetzt werden. Der Auftrag ist damit erledigt und
+verschwindet aus dem Spooler.
+</p>
+<p><font class="mono"><b><br>
+state</b></font>
+</p>
+<p class="indent">Gibt den Zustand des Auftrags an, wenn beim Aufbau der
+Jobkette den Job Zustände zugeordnet sind. <font class="mono">state</font> ist
+eine andere Darstellung der Eigenschaft <font class="mono">job</font>.
+</p>
+<p class="indent"><font class="mono">state</font> kann wie <font class="mono">job</font>
+geändert werden. Es muss ein definierter Wert der Jobkette angegeben werden (s.
+<a href="#jobkette">Jobkette</a>).
+</p>
+<p><font class="mono"><b><br>
+state_text</b></font>
+</p>
+<p class="indent">Wird vom Spooler im Protokoll und an der TCP-Schnittstelle
+(sobald diese erweitert ist) gezeigt. Kann z.B. eine Fehlermeldung oder einen
+Hinweis enthalten. Wird vom Spooler nicht geändert. Ist unabhängig von <font class="mono">state</font>.
+</p>
+<p><font class="mono"><b><br>
+error</b></font>
+</p>
+<p class="indent">True, genau dann, wenn der letzte Jobschritt sich mit false
+beendet hat.
+</p>
+<p><font class="mono"><b><br>
+payload</b></font>
+</p>
+<p class="indent">Die Nutzlast, z.B. ein <font class="mono">Variable_set</font>
+oder ein Hostware-Datensatz. Irgendwas (ein Variant). Also der erste Parameter von
+<font class="mono">order_queue.add_order()</font> (s. <a href="#auftragsliste">Auftragsliste</a>).
+</p>
+<pre>   wert = order.payload.obj_field(&quot;feld&quot;)       'payload ist hier ein Hostware-Datensatz</pre>
+<pre>   wert = order.payload.var(&quot;variable&quot;)         'payload ist hier ein Variable_set</pre>
+<p class="indent"><i>(Randnotiz: Man könnte auch Dyn_obj zu einer Collection
+machen und eine Methode Item() spendieren. Variable_set bekommt dann auch eine
+und dann sind beide einheitlich ansprechbar. Bis auf die Feldtypen.
+order.payload.Item(&quot;name&quot;). )</i>
+</p>
+<p><font class="mono"><b><br>
+payload_is_type()</b></font>
+</p>
+<p class="indent">Die Methode stellt fest, ob <font class="mono">payload</font>
+vom gewünschten Typ ist. Weil Perl anscheinend <font class="mono">QueryInterface()</font>
+nicht zugänglich macht, kann mit dieser Methode geprüft werden, ob <font class="mono">payload</font>
+ein <font class="mono">Hostware.Dyn_obj</font> oder ein <font class="mono">Spooler.Variable_set</font>
+ist. So ist es auch schöner. Nur diese beiden Typen werden geprüft.
+Großschreibung des Parameter ist egal.
+</p>
+<pre>   if( $order-&gt;payload_is_type( &quot;Hostware.Dyn_obj&quot; ) ) { ... }</pre>
+<p class="indent">Das entspricht in C++ etwa
+</p>
+<pre>   hr = order-&gt;QueryInterface( IID_Hostware_Dyn_obj, &amp;pointer );
+   if( SUCCESS(hr) )  ...</pre>
+<p class="indent">&nbsp;</p>
+<hr size="1">
+<h2><a name="auftragsliste"></a>Auftragsliste
+</h2>
+<p class="zwischentitel"><font color="#C0C0C0">Auftrag einem Job zuordnen&nbsp;
+-- gestrichen --</font></p>
+<p><font color="#C0C0C0">Jeder auftragsgesteuerte Job hat eine Auftragsliste, die vom Spooler im
+Speicher gehalten wird. Der Job wird gestartet, sobald die Auftragsliste nicht
+leer ist (und seine &lt;run_time&gt; es erlaubt).</font></p>
+<p><font color="#C0C0C0">Die Auftragsliste eines Jobs kann mit diesem Aufruf gefüllt werden:</font></p>
+<p class="indent"><font color="#C0C0C0"><font class="mono">spooler.job( &quot;</font><i>jobname</i><font class="mono">&quot;
+).order_queue.add_order </font><i>payload</i><font class="mono"> </font><i>|</i><font class="mono">
+</font><i>order</i></font></p>
+<p><font color="#C0C0C0"><br>
+Als Parameter kann direkt die Nutzlast übergeben werden.&nbsp;</font></p>
+<pre><font color="#C0C0C0">spooler.job(&quot;drucken&quot;).order_queue.add_order file.get()       'Einfacher Fall</font></pre>
+<p><font color="#C0C0C0">Der Spooler baut implizit einen Auftrag zusammen und setzt die <font class="mono">payload</font>
+des Auftrags auf den Hostware-Datensatz.</font></p>
+<p><font color="#C0C0C0"><br>
+Wenn weitere Angaben zum Auftrag gemacht werden sollen, kann er auch selbst
+zusammengebaut werden:</font></p>
+<pre><font color="#C0C0C0">set record = file.get()              'Inhalt des Auftrags
+
+set order = spooler.create_order()
+
+set order.payload  = record
+    order.id       = record.id
+    order.priority = 100
+    order.title    = &quot;Dokument der Vorlage &quot; &amp; order.templatename
+
+spooler.job(&quot;drucken&quot;).order_queue.add_order order</font></pre>
+<p><font color="#C0C0C0"><font class="mono"><br>
+add_order() </font>liefert eingefügten Auftrag als Funktionsergebnis.</font></p>
+<p class="zwischentitel">Auftrag in eine Jobkette einfügen</p>
+<p>Die Auftragsliste einer Jobkette ist eigentlich die Auftragslisten der Jobs
+darin. Die Position des Auftrags bestimmt den Job.</p>
+<p class="indent"><font class="mono">spooler.job_chain(&quot;</font><i>name</i><font class="mono">&quot;).add_order</font>
+ <i>payload</i><font class="mono"> </font><i>|</i><font class="mono"> </font><i>order</i><font class="mono">,</font> 
+ [<i>position</i>]</p>
+<p>z.B.</p>
+<pre>set order = spooler.job_chain(&quot;dokument_drucken&quot;).add_order file.get()       'Einfacher Fall
+spooler_log &quot;Vom Spooler vergebene Auftragskennung ist &quot; &amp; order.id</pre>
+<p>oder</p>
+<pre>set record = file.get()              'Inhalt des Auftrags
+
+set order = <font color="#0000FF">spooler.create_order()</font>
+
+set order<font color="#0000FF">.payload</font>  = record
+    order<font color="#0000FF">.id</font>       = record.id
+    order<font color="#0000FF">.priority</font> = 100
+    order<font color="#0000FF">.title</font>    = &quot;Dokument der Vorlage &quot; &amp; order.templatename
+
+<font color="#0000FF">spooler.job_chain(&quot;</font>dokumment_drucken<font color="#0000FF">&quot;).add_order order</font></pre>
+<p><font class="mono"><br>
+add_order() </font>liefert eingefügten Auftrag als Funktionsergebnis.</p>
+<h3>Erkennung doppelter Aufträge</h3>
+<p>Beide Methoden<font class="mono"> add_order()</font> (der Auftragsliste des
+Jobs und der Jobkette) prüfen anhand der id, ob der Auftrag schon eingetragen
+ist. Natürlich nur, wenn die <font class="mono">id</font> auch gesetzt ist. Hat
+die Auftragsliste oder Jobkette bereits einen Auftrag mit derselben <font class="mono">id</font>,
+wird er ersetzt. Wenn die Priorität nicht eingestellt (oder 0) ist, ändert der
+Spooler die Stelle in der Liste nicht.&nbsp;</p>
+<h3>Anzahl der Aufträge</h3>
+<p><font class="mono">spooler.job(&quot;</font><i>job</i><font class="mono">&quot;).order_queue.length</font>
+liefert die Anzahl der Aufträge der Auftragsliste.</p>
+<p><font class="mono">spooler.job_chain(&quot;</font><i>jobkette</i><font class="mono">&quot;).length</font>
+liefert die Anzahl der Aufträge in der Jobkette, also die Summe der Längen
+aller Auftragslisten darin.</p>
+<p>&nbsp;</p>
+<hr size="1">
+<h2><a name="auftrag_tcp"></a>Aufträge über die TCP-Schnittstelle übergeben
+</h2>
+<p>Über das XML-Element <font class="mono">&lt;add_order&gt;</font> kann ein
+Auftrag an eine Jobkette übergeben werden. Die Attribute <font class="mono">position</font>,
+<font class="mono">priority</font>, <font class="mono">id</font> und <font class="mono">title</font>
+sind optional. Die Parameter werden als <font class="mono">Variable_set</font>
+übergeben.
+</p>
+<pre>&lt;add_order job_chain=&quot;<i>name</i>&quot; position=&quot;<i>position</i>&quot; priority=&quot;<i>priority</i>&quot; id=&quot;<i>id</i>&quot; title=&quot;<i>title</i>&quot;&gt;
+    &lt;params&gt;
+        &lt;param name=&quot;<i>param1</i>&quot; value=&quot;<i>wert1</i>&quot;/&gt;
+        ...
+    &lt;/params&gt;
+&lt;/add_order&gt;</pre>
+<p>Ein Auftrag kann auch direkt einem Job zugestellt werden. Die Attribute <font class="mono">job_chain</font>
+und <font class="mono">position</font> werden dann durch <font class="mono">job</font>
+ersetzt.
+</p>
+<pre>&lt;add_order job=&quot;<i>name</i>&quot; priority=&quot;<i>priority</i>&quot; id=&quot;<i>id</i>&quot; title=&quot;<i>title</i>&quot;&gt;
+    &lt;params&gt;
+        ....
+    &lt;/params&gt;
+&lt;/add_order&gt;</pre>
+<p>&nbsp;
+</p>
+
+<HR SIZE=1>
+<FONT face="Arial" size="2">Dipl.-Inform. Joacim Zschimmer&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+<A href="mailto:j@zsch.de">j@zsch.de</A>
+&nbsp; &nbsp; &nbsp; &nbsp;&nbsp;(030) 3470 2520&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;Zschimmer GmbH</FONT>
+
+</body>
+
+</html>

@@ -1,0 +1,651 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<meta name="Author" content="Joacim Zschimmer">
+
+<title>Spooler 1.1</title>
+<style type="text/css">
+h1           { font-size: 24pt; font-weight: bold; margin-bottom: 4ex;  }
+h2           { font-size: 12pt; font-weight: bold; margin-top: 10ex; }
+h3           { font-size: 10pt; font-weight: bold; margin-top: 6ex }
+.zwischentitel { font-weight: bold; margin-top: 6ex }
+p            { font-size: 10pt; margin-top: 2ex; margin-bottom: 0  }
+li           { font-size: 10pt }
+pre          { font-family: Lucida Console, monospace; font-size: 9pt; margin-left: 4ex; line-height: 1.2em; }
+.mono        { font-family: Lucida Console, monospace; font-size: 9pt }
+</style>
+</head>
+
+<body>
+
+<h1>Spooler 1.1</h1>
+<p>Änderungen gegenüber der Version 1.0.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;9.
+April 2002</p>
+<h2>1.&nbsp; XML-Konfigurationsdatei</h2>
+<h3>1.1&nbsp; Job-Titel &lt;title&gt; und -Beschreibung &lt;description&gt;</h3>
+
+<p>Einem Job kann zu seinen Namen ein einzeiliger Titel und eine mehrzeilige
+Beschreibung gegeben werden. Der Titel wird als Attribut in <font class="mono"> &lt;job&gt;</font>
+angegeben.</p>
+
+<p>Eine Beschreibung wird im Element <font class="mono"> &lt;description&gt;</font> gleich hinter
+<font class="mono">
+&lt;job&gt;</font> angegeben. Mit <font class="mono"> &lt;include&gt;</font> können andere Dateien eingezogen
+werden. Dabei wird das mit <font class="mono"> -include-path=</font> angegebene Verzeichnis verwendet (wie
+bei <font class="mono"> &lt;script&gt;</font>).</p>
+
+<p>Das Kommando <font class="mono">&lt;show_state what=&quot;all&quot;/&gt;</font> zeigt die Beschreibungen
+<font class="mono"> &lt;description&gt;</font> der Jobs.&nbsp;</p>
+
+<p class="zwischentitel">Beispiel</p>
+
+<pre>&lt;job name=&quot;job1&quot; title=&quot;Das ist der 1. Job&quot;&gt;
+    &lt;description&gt;
+Das ist eine 
+mehrzeilige
+Beschreibung.
+&lt;include file=&quot;weiteres.txt&quot;/&gt;   &lt;/description&gt;
+...
+&lt;/job&gt;
+</pre>
+
+<p class="zwischentitel">DTD</p>
+
+<pre>&lt;!ATTLIST job title CDATA ''&gt;
+&lt;!ELEMENT job ( description?, ( object_set | script | process ), run_time? )&gt;
+&lt;!ELEMENT description ( #PCDATA | include )*&gt;</pre>
+
+<h3>1.2&nbsp; Fehler bei &lt;include&gt;</h3>
+
+
+<p>Ein Fehler bei <font class="mono"> &lt;include&gt;</font> im Jobskript setzt
+den Job in den Zustand <i>read_error</i>. Er kann nicht gestartet werden, sondern nur
+mit dem Kommando <font class="mono"> reread</font> erneut gelesen werden (s.
+<font class="mono">reread</font>).</p>
+
+
+<p>Ein Fehler bei <font class="mono"> &lt;include&gt;</font> in Description
+wird nicht ins Spooler-Protokoll geschrieben, weil das Protokoll noch nicht geöffnet
+ist. Die Fehlermeldung wird als description verwendet und ist mit
+&lt;show_state what=&quot;all&quot;/&gt; zu sehen. Der Spooler fährt fort.</p>
+
+
+<h2>2.&nbsp; XML-Kommandos</h2>
+<h3>2.1&nbsp; &lt;show_state&gt;</h3>
+
+<p><font class="mono">&lt;show_state&gt;</font> liefert in <font class="mono"> &lt;task&gt;</font> das neue Attribute
+<font class="mono">steps</font> mit der Anzahl ausgeführter
+<font class="mono"> spooler_process()</font> seit Spooler-Start.</p>
+
+<h3>2.2&nbsp; Reread von Job-Skripten</h3>
+
+
+<p>Neues Kommando: <font class="mono"> &lt;modify_job
+job=&quot;</font><i>jobname</i><font class="mono">&quot; cmd=&quot;reread&quot;/&gt;</font></p>
+
+
+<p>Liest das Job-Skript erneut, sobald der Job
+beendet ist. Der Job wird nicht durch das Kommando beendet. Das Jobskript&nbsp;wird eingelesen, aber&nbsp;erst
+beim nächsten Start des Jobs in die Scripting Engine&nbsp;geladen.
+Syntaxfehler werden also erst beim nächsten Jobstart erkannt.</p>
+
+
+<p>Fehler beim Einlesen (das sind nur Fehler bei <font class="mono">
+&lt;include&gt;</font>: Lesen der Include-Datei) setzen den Job in den Zustand <i>read_error</i> (ebenso, wenn beim Spooler-Start die
+Konfigurationsdatei gelesen wird).</p>
+
+
+<p>Ein Job im Zustand <i>read_error</i> kann
+nicht gestartet werden. Er kann nur neu eingelesen werden.</p>
+
+
+
+
+<h3>2.3&nbsp; Trennen des Laden und Ausführens von Skripten</h3>
+<p>
+Ein Fehler beim Ausführen des Job-Skripts während&nbsp;des
+Ladens oder in <font class="mono">spooler_init()</font> führt zum Aufruf von <font class="mono">spooler_on_error()</font>. Der Job wird gestoppt.
+<font class="mono">spooler_exit()</font> wird gerufen (obwohl <font class="mono">spooler_init()</font>
+nicht gerufen worden ist!) und die
+Scripting Engine wird geschlossen.</p>
+
+<p><font class="mono">spooler_on_error()</font> muss also auch mit Fehlern
+umgehen, die beim Laden oder in <font class="mono">spooler_init()</font>
+auftreten.&nbsp;</p>
+
+<p><font class="mono">spooler_exit()</font> wird gerufen, auch wenn <font class="mono">spooler_init()</font>
+nicht gerufen worden ist.</p>
+
+<h2>3.&nbsp; Perioden</h2>
+<h3>3.1&nbsp; &lt;run_time&gt;, Perioden</h3>
+
+<p> Der Algorithmus für die Perioden ist
+erneuert. Die Perioden werden strenger beachtet. </p><p><font class="mono">repeat</font>
+ist jetzt leer voreingestellt, damit wird ein Job nicht mehr automatisch
+wiederholt. Der Job wird nicht mehr zu Beginn einer Periode oder beim
+Spooler-Start gestartet.</p>
+
+
+<p><font class="mono">&lt;run_time repeat=&quot;&quot; 
+once=&quot;yes&quot;&gt;</font>:&nbsp; Bei <font class="mono"> repeat=&quot;&quot;</font> 
+und
+<font class="mono">
+once=&quot;yes&quot;</font> ist eingestellt, dass der Job einmal anläuft zu Beginn
+der ersten Periode nach dem Spoolerstart (oder Reload oder Reread). Damit kann
+der Job sein <font class="mono"> start_when_directory_changed()</font> ausführen.</p>
+
+<p>Fehlendes <font class="mono"> &lt;run_time&gt;</font> wirkt wie ein
+leeres <font class="mono"> &lt;run_time/&gt;</font>, also eine tägliche Periode von 00:00 bis 24:00.</p>
+
+<p>Ein Job wird nicht mehr außerhalb einer
+Periode gestartet, es sei denn, bei <font class="mono"> &lt;start_job&gt;</font> ist
+<font class="mono"> at=&quot;</font>...<font class="mono">&quot;</font>
+angegeben. <font class="mono"> at=&quot;now&quot;</font> ist hier möglich.</p>
+
+
+<p>Bei <font class="mono"> &lt;show_state&gt;</font> versucht der Spooler,
+die nächste Startzeit anzugeben. Dazu sieht er sich die nächsten hundert
+Perioden (was reichen sollte), bis er eine Periode mit <font class="mono"> single_start</font> oder
+<font class="mono">
+repeat</font> erreicht.</p>
+
+<h3>3.2&nbsp; Attribut repeat= in &lt;run_time&gt; kann auch als hh:mm:ss angegeben
+werden</h3>
+
+<p>Formate sind also: Sekunden oder hh:mm oder
+  hh:mm:ss (Vornullen müssen nicht angegeben werden).</p>
+
+<p><font class="mono">10:00</font> bedeutet zehn Stunden (wie <font class="mono">10:00:00</font>),</p>
+<p><font class="mono">00:00:10</font> bedeutet 10 Sekunden.</p>
+
+
+  <p>Mehr als 24 Stunden können angegeben werden.&nbsp;
+  Bsp: <font class="mono"> 48:00:00</font> (2 Tage),</p>
+
+
+
+<h3>3.3&nbsp; &lt;holiday&gt;</h3>
+
+
+  <p>Feiertage können mit <font class="mono"> &lt;holiday&gt;</font> zusätzlich
+  für alle Jobs in <font class="mono"> &lt;config&gt;</font> vor <font class="mono"> &lt;threads&gt;</font> angegeben werden.</p>
+
+<h3>3.4&nbsp; &lt;start_job at=&quot;now&quot;&gt;</h3>
+
+<p>Bei <font class="mono"> &lt;start_job&gt;</font> ist voreingestellt, dass der Job sofort, ohne
+Rücksicht auf die Perioden gestartet wird.&nbsp;</p>
+
+<p>Mit <font class="mono"> &lt;start_job at=&quot;period&quot;</font>&gt; wird der Job erst gestartet, wenn
+die Perioden (<font class="mono">&lt;run_time&gt;</font>) es zulassen.&nbsp;</p>
+
+<h3>3.5&nbsp; Verfahren</h3>
+
+<p>Zu Beginn oder wenn das Ende einer Periode erreicht ist, wird die nächste
+Periode ausgewählt. Das ist die mit der kleinsten Anfangszeit (<font class="mono">begin</font>)
+und einer noch nicht erreichten Endezeit (<font class="mono">end</font>).&nbsp;</p>
+
+<p>Ein Job wird automatisch gestartet</p>
+
+<ul>
+  <li>zu Beginn einer&nbsp;Periode, wenn in ihr <font class="mono">repeat=</font>
+    oder <font class="mono">single_start=</font> angegeben ist,</li>
+  <li>ein vorangehender Lauf <font class="mono">spooler_task.repeat</font>
+    gesetzt hat und die Zeit erreicht ist,</li>
+  <li>ein vorangehender Lauf fehlerhaft war und <font class="mono">delay_after_error</font>
+    abgelaufen ist,</li>
+  <li>nach der in der Periode mit <font class="mono">repeat=</font>
+    angegebenen Intervall nach dem Jobende,</li>
+  <li>nach einem Ereignis der Verzeichnisüberwachung,</li>
+  <li>oder bei einer zugeordneten Objektemenge durch das Kommando <font class="mono">&lt;signal_object&gt;</font>.</li>
+</ul>
+<p>Außerdem wird der Job bei <font class="mono">&lt;runtime
+once=&quot;yes&quot;&gt;</font> sobald wie möglich einmal gestartet.</p>
+
+<p>Ein Job läuft nur an, wenn der Job eine Startzeit hat (<font class="mono">at</font>)
+oder</p>
+
+<ul>
+  <li>der Job nicht gestoppt ist,</li>
+  <li>es eine Periode für die aktuelle Zeit gibt,</li>
+  <li>und die Verzögerung nach Fehler (<font class="mono">delay_after_error</font>)
+    nicht wirkt.</li>
+</ul>
+
+<h3>3.6&nbsp; Sommer- und Winterzeit</h3>
+
+<p>Der Spooler berücksichtigt die Zeitumstellung zu Beginn und Ende der
+Sommerzeit. Jobs mit einer Startzeit nach 3 Uhr werden korrekt gestartet.&nbsp;</p>
+
+<p>Zum Ende der Sommerzeit, wenn die Uhr eine Stunde zurückgestellt wird, sich
+also die Zeit zwischen 2 und 3 Uhr wiederholt, setzen die Jobs in der Regel eine
+Stunde aus. Bei einem externen Ereignis (Verzeichnisänderung, &lt;start_job&gt;)
+wird der Job aber gestartet (sofern es die Periode zulässt) und anschließend
+wird der Job korrekt wiederholt.</p>
+
+<p>Ein Job, der eine Startzeit zwischen 2 und 3 Uhr hat, <i>kann</i> zum Ende
+der Sommerzeit zweimal gestartet werden.</p>
+
+<p>Das Verfahren könnte man noch verfeinern, aber ich denke es ist ausreichend.</p>
+
+<h2>4.&nbsp; Objekte und Methoden des Spoolers</h2>
+<h3>4.1&nbsp; Verzeichnisfehler bei start_when_directory_changed()</h3>
+<p>Wenn das mit <font class="mono"> start_when_directory_changed()</font> überwachte Verzeichnis gelöscht wird, 
+wird die Fehlermeldung ins Spooler-Protokoll geschrieben und die Verzeichnisüberwachung beendet. Das passiert, wenn der
+Thread gerade im Leerlauf ist, er also auf den nächsten Jobstart wartet.
+Daraufhin wird der Job gestartet. Der Job erhält keine Mitteilung über den
+Vorfall, auch wird deswegen nicht <font class="mono"> spooler_on_error()</font> gerufen. Am besten ist,
+<font class="mono">
+start_when_directory_changed()</font> jedesmal neu zu rufen (was bei nicht
+vorhandenem Verzeichnis zu einem Fehler führt).
+</p>
+<p><font class="mono">start_when_directory_changed()</font> auf ein bereits überwachtes
+Verzeichnis wird nicht mehr ignoriert. Der Aufruf schließt die bisherige Überwachung
+und eröffnet eine neue. Damit kann eine wegen gelöschten und wieder
+angelegten Verzeichnisses ungültig gewordene Überwachung fehlerlos erneuert
+werden.</p>
+<p>Solange die Überwachung eines gelöschten
+Verzeichnisses nicht geschlossen wird, kann das Verzeichnis nicht mehr unter
+diesem Namen angelegt werden. Die noch offene Überwachung veranlasst Windows,
+den Namen zu sperren (vielleicht sollten wir doch den Spooler nach Linux
+portieren).</p>
+<h3>4.2&nbsp; start_when_directory_changed( <i> dirname</i> [, <i> filenamepattern</i> ] )</h3>
+
+<p>Der optionale zweite Parameter gibt mit
+einem regulärem Ausdruck ein Dateinamensmuster an. Nur wenn eine Datei mit
+diesem Muster im überwachten Verzeichnis vorhanden ist, wird der Job
+gestartet.</p>
+
+<h2>5.&nbsp; Protokolle</h2>
+<h3>5.1&nbsp; Objekt spooler_log</h3>
+
+<pre>spooler_log( &quot;info&quot; )                wirkt wie spooler_log.info( &quot;info&quot; )
+spooler_log.error( &quot;...&quot; )
+spooler_log.warn( &quot;...&quot; )
+spooler_log.info( &quot;...&quot; )
+spooler_log.debug( &quot;...&quot; )           wirkt wie spooler_log.debug1( &quot;...&quot; )
+spooler_log.debug1( &quot;...&quot; )
+...
+spooler_log.debug9( &quot;...&quot; )
+spooler_log.log( log_level, &quot;...&quot; ), log_level: -9...2 (-9...-1: debug, 0: info, 1: warn, 2: error)</pre>
+
+
+<p><font class="mono">spooler_log.error()</font> führt wieder zum
+Stopp des Jobs.</p>
+
+
+
+<p>Der Spooler schreibt seine Debug-Ausgaben mit <font class="mono">log_debug3</font>.</p>
+
+
+
+<p>Den Schalter <font class="mono"> -debug</font> beim Spooler-Aufruf gibt es
+nicht mehr. Ebenso der Eintrag in factory.ini</p>
+
+
+<p>In <font class="mono">factory.ini</font> <font class="mono"> [job
+</font> ...<font class="mono">]</font> kann
+<font class="mono">log_level =
+error|warn|...|debug9</font> oder -9...2 der Log-Level eingestellt werden. Default
+ist der Eintrag in <font class="mono">[spooler]</font>.</p>
+
+
+<p>Dafür gibt's den neuen Schalter <font class="mono">-log-level=error</font>|<font class="mono">warn</font>|<font class="mono">info</font>|<font class="mono">debug</font>|<font class="mono">debug1</font>|...|<font class="mono">debug9</font> oder -9...2. Und den dazu
+passenden Eintrag in der <font class="mono">factory.ini</font>.</p>
+
+<p>Für jeden Job wird ins mit -log-dir= eingestellte
+Verzeichnis ein Jobprotokoll geschrieben (nicht bei -log-dir=*stderr, weil
+kein Verzeichnis angegeben ist).</p>
+
+
+<p>
+Der Dateiname ist <font class="mono">job.</font><i>jobname</i><font class="mono">.log</font>. Der Jobname sollte
+also etwas sein, was in einem Dateinamen verwendet werden kann. Die Datei
+bei jedem Jobstart überschrieben. Diese Datei wird für den eMail-Versand
+verwendet. Zeichen in <i>jobname</i>, die nicht im Dateinamen verwendet
+werden können, werden gegen &quot;_&quot; getauscht.
+</p>
+<p>
+
+Mit <font class="mono"> &lt;job </font>...<font class="mono">
+log_append=&quot;yes&quot;&gt;</font> wird das Protokoll
+fortgeschrieben.
+</p>
+<p>
+<font class="mono">
+spooler_log.filename</font> enthält den Dateinamen des Jobprotokolls (nur
+lesbar).
+</p>
+<p>
+<font class="mono">
+spooler_log.new_filename</font>  kann auf den Namen einer Datei gesetzt werden,
+in die die Protokolldatei nach dem Schließen kopiert werden soll.
+</p>
+<p><font class="mono">spooler_log.level</font> enthält den Level, ab dem
+protokolliert wird. Kann
+jederzeit verändert werden (für die Task). Nur numerische -9 bis 2.
+</p>
+<h3>5.2&nbsp; Log per eMail verschicken</h3>
+
+<p>
+Das Job-Protokoll kann nach Job-Ende als eMail
+verschickt werden.
+</p>
+<p>
+Einstellungen hierzu:
+</p>
+<pre>spooler_log.mail_on_error&nbsp;&nbsp; =<i> boolean</i>
+spooler_log.mail_on_success&nbsp;=<i> boolean</i>
+spooler_log.mail_on_process =<i> boolean</i>|1|2</pre>
+<p><font class="mono">mail_on_error</font> lässt das Protokoll im
+Fehlerfall verschicken.
+</p>
+<p><font class="mono">mail_on_success</font> lässt das Protokol im
+Erfolgsfall (=kein Fehler) verschicken.
+</p>
+<p><font class="mono">mail_on_process</font> lässt das Protokoll im
+Erfolgsfall (=kein Fehler) verschicken, wenn die Task soviele <font class="mono">spooler_process()</font>
+wie angegeben ausgeführt hat. Der Booleschen True (1 oder -1) wird als 1
+interpretiert. Bei False (0) gilt der Schalter als nicht gesetzt.
+</p>
+<p>
+Die Voreinstellungen können in der factory.ini geändert werden:
+</p>
+<pre>[Job <i>jobname</i>]
+mail_on_error   = <i>boolean
+</i>mail_on_success = <i>boolean
+</i>mail_on_process = <i>boolean</i>|1|2</pre>
+<p>Diese Einstellungen werden hier voreingestellt:</p>
+<pre>[spooler]
+mail_on_error   = <i>boolean</i>
+mail_on_success = <i>boolean
+</i>mail_on_process = <i>boolean</i>|1|2
+mail_encoding   = <u>quoted-printable</u>|base64</pre>
+<p>Die eMail-Angaben können im Objekt <font class="mono">
+spooler_log.mail</font> eingestellt werden:</p>
+
+
+<pre>spooler_log.mail.from     = &quot;<i>emailadresse</i>&quot;
+spooler_log.mail.to       = &quot;<i>emailadresse</i>, ...&quot;
+spooler_log.mail.cc       = &quot;<i>emailadresse</i>, ...&quot;
+spooler_log.mail.bcc      = &quot;<i>emailadresse</i>, ...&quot;
+spooler_log.mail.subject  = &quot;<i>betreff</i>&quot;
+spooler_log.mail.body     = &quot;<i>text</i>&quot;
+spooler_log.mail.smtp     = &quot;<i>hostname</i>&quot;</pre>
+
+
+<p><i>emailadresse</i> ist eine einfache
+eMail-Adresse oder ein Klarname mit eMail-Adresse in spitzen Klammern: <font class="mono">Joacim Zschimmer &lt;j@zsch.de&gt;</font>.
+Komma im Namen ist nicht erlaubt.</p>
+
+<p>Alle diese Eigenschaften können auch gelesen
+werden. <font class="mono"> subject</font> und <font class="mono"> body</font> sind vorbesetzt. Mindestens müssen
+<font class="mono">from</font>, <font class="mono"> to</font> und <font class="mono">
+smtp</font> gesetzt werden.</p>
+
+<p>Die Angaben können in der <font class="mono">factory.ini</font> vorbesetzt
+werden. Zunächst wird im Abschnitt <font class="mono"> [job</font> <i>jobname</i><font class="mono">]</font> nachgesehen, dann
+in <font class="mono">[spooler]</font>. Die Einträge lauten <font class="mono">log_mail_from</font>,
+<font class="mono">log_mail_to</font>, <font class="mono">log_mail_cc</font>,
+<font class="mono">log_mail_bcc</font>, <font class="mono"> log_mail_subject</font> und
+<font class="mono">smtp</font>. Diese Einträge <font class="mono">log_mail_to</font>,
+..<font class="mono">_cc</font>, <font class="mono"> _bcc</font> werden nur aus dem Abschnitt
+<font class="mono"> [spooler]</font> gelesen, wenn keiner von
+ihnen im Abschnitt <font class="mono">[job</font> <i>jobname</i><font class="mono">]</font> aufgeführt ist (sie werden also wie ein Eintrag behandelt).
+
+<p>Im Abschnitt <font class="mono"> [spooler]</font> sollten die Einträge <font class="mono">log_mail_from</font>,
+<font class="mono"> log_mail_to</font> und <font class="mono"> smtp</font> gesetzt sein. Wenn ein Fehler
+bereits beim Jobstart auftritt (oder davor, wenn Verzeichnisüberwachung
+versagt), dann wird die eMail zuverlässig gesendet, auch wenn der Job nicht
+mehr dazu kommt, diese Einstellungen zu setzen.</p>
+
+<p>Die Einträge <font class="mono"> log_mail_subject</font> werden bei einem
+Jobfehler nicht beachtet. Stattdessen wird subject mit der Fehlermeldung
+vorbesetzt. In <font class="mono">spooler_on_error()</font> kann der Eintrag überschrieben werden.</p>
+
+<p>Die eMail wird mit &quot;<font class="mono">X-SOS-Spooler-Job: </font><i> jobname</i>&quot;
+im Header verschickt. Das kann von z.B. procmail verwendet werden, um die
+eMail zu sortieren (so dass sie Joacim nicht als SMS geschickt wird.) (Man kann
+ich auch einen Eintrag für den Fehlerfall denken: <font class="mono"> X-SOS-Error:
+</font><i>fehlermeldung</i>).</p>
+
+<p class="zwischentitel">Encoding quoted-printable oder base64</p>
+
+<p>Das Protokoll wird beim Versand mit quoted-printable codiert. Diese Codierung
+kann in der factory.ini auf einen anderen von Jmail akzeptierten Wert geändert
+werden.&nbsp;</p>
+
+<pre>[spooler]
+mail_encoding = <u>quoted-printable</u>|base64</pre>
+<p class="zwischentitel">Zusätzliche Dateien verschicken</p>
+
+<p>An die eMail lassen sich mit <font class="mono">add_file()</font>
+zusätzliche Dateien anhängen&nbsp;</p>
+
+<pre>spooler_log.mail.add_file <i>filename</i></pre>
+<p>Die Anhang wird codiert, wie mit <font class="mono">mail_encoding</font> in
+der <font class="mono">factory.ini</font> eingestellt.</p>
+
+<p>Wenn eMail gesammelt wird (s.u.), werden auch die Anhänge gesammelt. Das
+kann umfangreich werden.&nbsp;</p>
+
+
+<h3>5.3&nbsp; eMail-Protokolle sammeln</h3>
+
+<p>Protokolle von fehlerfreien Jobs können gesammelt per eMail verschickt
+werden. Dazu gibt es zwei Einstellungen: <font class="mono">collect_within</font>
+gibt die Frist an, innerhalb der die Protokolle gesammelt werden sollen. <font class="mono">collect_max</font>
+ist die längste Zeit, die die Protokolle gesammelt werden sollen. Wenn der Job
+einen Fehler hat, werden die gesammelten Protokolle sofort (nach Job-Ende)
+verschickt.&nbsp;
+</p>
+<pre>spooler_log.collect_within = <i>sekunden</i>
+spooler_log.collect_max&nbsp;&nbsp;&nbsp; = <i>sekunden</i></pre>
+<p>Die Werte sind wie üblich in der factory.ini den Abschnitten <font class="mono">[job</font>
+...<font class="mono">]</font> und <font class="mono">[spooler]</font>
+voreingestellt:
+</p>
+<pre>log_collect_within = <i>sekunden</i>
+log_collect_max&nbsp;&nbsp;&nbsp; = <i>sekunden</i></pre>
+<p><font class="mono">collect_max</font> ist mit 900s (eine Viertelstunde)
+voreingestellt.
+</p>
+<p>Bei der Kombination <font class="mono">mail_on_process=yes</font> und <font class="mono">mail_on_success=no</font>
+kann letztere Einstellung ohne Wirkung sein (die Protokolle werden fortlaufend
+in eine Datei geschrieben und werden nicht nachträglich entfernt).
+</p>
+
+
+<h3>5.4&nbsp; Warteschlange für Fehler beim eMail-Versand</h3>
+
+<p>Damit die eMail im Fehlerfall (wenn der SMTP-Server gerade unpässlich ist)
+nicht verloren geht, wird sie in ein Verzeichnis geschrieben. Dieses Verzeichnis
+wird mit der Einstellung <font class="mono">queue_dir</font> festgelegt. Nachdem
+wieder ein Protokoll versendet werden konnte, versendet der Spooler die in der
+Warteschlange aufgelaufenen Nachrichten bis ein Fehler auftritt.
+</p>
+<p>Mit der Methode <font class="mono">dequeue()</font> kann ein Job geschrieben
+werden, der die Warteschlange abarbeitet bis ein Fehler auftritt.&nbsp;
+</p>
+<p>Das Verzeichnis wird eingestellt in der <font class="mono">sos.ini</font>
+(s.a. <a href="../dateitypen/dateityp_mail.html">Dateityp mail</a>):
+</p>
+<pre>[mail]
+queue_dir=<i>verzeichnis</i></pre>
+<p>Die Einstellung kann überschrieben werden in der <font class="mono">factory.ini</font>:
+</p>
+<pre>[spooler]
+mail_queue_dir=<i>verzeichnis</i></pre>
+<p>und
+</p>
+<pre>[Job <i>jobname</i>]
+mail_queue_dir=<i>verzeichnis</i></pre>
+<p>Und im Skript als Eigenschaft
+</p>
+<pre>spooler_log.mail.queue_dir</pre>
+<p><br>
+Hier ein Beispiel für einen Job, der alle Viertelstunde versucht, die
+Warteschlange abzuräumen:
+</p>
+<pre>&lt;thread name=&quot;mail_queue&quot;&gt;
+    &lt;jobs&gt;
+        &lt;job name=&quot;mail_queue&quot; title=&quot;Kümmert sich um die eMail-Warteschlange&quot;&gt;
+            &lt;script language=&quot;PerlScript&quot;&gt;
+&lt;![CDATA[
+
+sub spooler_open
+{
+    eval
+    {
+        $count = $spooler_log-&gt;mail-&gt;dequeue();
+        $spooler_log-&gt;info( &quot;$count eMails versendet. eMail-Warteschlange ist leer&quot; )  if $count;
+    };
+    if( $@ ) { $spooler_log-&gt;warn( &quot;$@. eMail-Warteschlange kann nicht geleert werden&quot; ); }
+
+    0;
+}
+
+]]&gt;
+            &lt;/script&gt;
+            &lt;run_time repeat=&quot;0:15&quot;/&gt;
+        &lt;/job&gt;
+    &lt;/jobs&gt;
+&lt;/thread&gt;</pre>
+
+
+<h2>A.&nbsp; Neue Option -cd=arbeitsverzeichnis</h2>
+
+<p>Mit der Option <font class="mono"> -cd</font> kann das Arbeitsverzeichnis
+für den Spooler eingestellt werden. Die Option wirkt sofort, die Position
+dieser Option unter den anderen Optionen kann also von Bedeutung sein. Die
+Option ist besonders beim Betrieb als Dienst nützlich, denn ohne diese Option
+war das das Systemverzeichnis (<font class="mono">c:\winnt\system32</font>) das Arbeitsverzeichnis.
+(Dateien ohne absoluten Pfadnamen werden im Arbeitsverzeichnis angelegt).</p>
+
+
+<p>
+Allerdings ist es grundsätzlich besser, absolute Pfadnamen zu verwenden. Denn
+man kann ja nie wissen, ob nicht irgendein nachrangiges Modul das
+Arbeitsverzeichnis ändert. <font class="mono"> -cd</font> ist also mehr für den Test (z.B. für den
+Delphi-Debugger).</p>
+
+
+<h2>B.&nbsp; factory.ini</h2>
+
+<p>Zur Vereinheitlichung heißen die alten Einträge
+jetzt <font class="mono"> log_dir</font> und <font class="mono">include_path</font>.
+<font class="mono">log-dir</font> und <font class="mono"> include-path</font> werden zur
+Kompatibilität noch unterstützt.</p>
+
+
+<h2>C.&nbsp; spooler_job.state_text = &quot;...&quot;</h2>
+
+
+<p>Hier kann ein Text zum Job gespeichert werden,
+der mit <font class="mono"> &lt;show_state&gt;</font> in <font class="mono"> &lt;job state_text=&quot;</font>...<font class="mono">&quot;&gt;</font> gelesen
+werden kann.</p>
+
+<h2>D.&nbsp; &lt;show_state&gt; liefert Namen des Jobprotokolls</h2>
+
+<p>In <font class="mono"> &lt;task log_file=&quot;</font>...<font class="mono">&quot;&gt;</font></p>
+
+
+<h2>E.&nbsp; Spooler-Skript</h2>
+
+
+<p>Es gibt wieder das alte Spooler-Skript. Es läuft
+im Haupt-Thread des Spoolers und wird nur beim Spooler-Start ausgeführt.</p>
+
+
+<p>Mit <font class="mono"> spooler.thread</font> ist es aus den anderen
+Skripts erreichbar. Bei Benutzung dieser Eigenschaft gibt es aber einen Fehler (liegt offenbar an
+den Scripting Engines), womit die Eigenschaft unbrauchbar ist.</p>
+
+
+<p class="zwischentitel">spooler.variables</p>
+
+<p>Die Eigenschaft <font class="mono">spooler.variables</font> ist eine
+Variablenmenge (<font class="mono">Ivariables_set</font>). Hier können
+Variablen zwischen dem Spooler-Skript und den anderen Skripten ausgetauscht
+werden. Die Variablenmenge wird so benutzt wie die, die von <font class="mono">spooler.create_variable_set()</font>
+geliefert wird.</p>
+
+<p>spooler hat die Default-Eigenschaft var, mit der die Variablen kürzer
+angesprochen werden können.</p>
+
+<p>Beispiele</p>
+
+<pre>spooler.variables.var(&quot;name&quot;) = wert
+spooler.variables(&quot;name&quot;) = wert
+spooler.var(&quot;name&quot;) = wert
+spooler(&quot;name&quot;) = wert</pre>
+
+<p>Die Variablenmenge kann auch Objekte aufnehmen.</p>
+
+<pre>set spooler(&quot;file&quot;) = createobject( &quot;hostware.file&quot; )</pre>
+
+<h2>F.&nbsp; spooler.log_dir</h2>
+<p>Diese Eigenschaft liefert den Namen des Protokollverzeichnisses.</p>
+
+<h2>G.&nbsp; Verzögern fehlerhafter Jobs (delay_after_error)</h2>
+<p>Ein fehlerhafter Job kann mit <font class="mono">spooler_task.repeat</font>
+wiederholt werden, er wird dann nicht gestoppt. Mit <font class="mono">delay_after_error</font>
+gibt es ein neues Verfahren, das die Wiederholungszeit mit jedem Fehler
+verlängern kann:</p>
+
+<p class="mono">spooler_job.delay_after_error(<i>schrittzahl</i>) = <i>sekunden</i></p>
+
+<p>Die Einstellung lässt den Job im Fehlerfall <i>nicht</i> stoppen, sondern
+verzögert wiederholen. Nach einer ununterbrochenen Folge von <i>schrittzahl </i>fehlerhaften
+Jobs wird der Job nach der angegebenen Zeit wiederholt. Bis dahin wird der Job
+nicht gestartet, so als hätte der Job keine Periode. Nur mit einer expliziten
+Startzeit (wie z.B. <font class="mono">&lt;start_job&gt;</font>) kann der
+Job in dieser Zeit gestartet werden.</p>
+
+<p>Statt <i>sekunden</i> kann auch eine Zeit als String angeben werden, z.B.: <font class="mono">&quot;00:05:00&quot;</font>
+für fünf Minuten.</p>
+
+<pre>spooler_job.delay_after_error(3)  = 10
+spooler_job.delay_after_error(10) = 60
+spooler_job.delay_after_error(15) = &quot;01:00&quot;
+spooler_job.delay_after_error(25) = &quot;12:00&quot;</pre>
+
+<p>Diese Einstellungen lassen den Job nach 3, 10, 15 und 25 aufeinanderfolgenden
+Fehlern bis zu 12 Stunden verzögern.</p>
+
+<p>Eine für einen Job vorgenommene Einstellung kann nicht zurückgenommen
+werden. Sie gilt für mehrere Jobläufe. Die Einstellungen sollten bei der
+Initialisierung (<font class="mono">spooler_init</font>) vorgenommen werden.</p>
+
+<p><br>
+Und mit folgender Einstellung kann im andauernden Fehlerfall der Spooler
+ausgelastet werden:</p>
+
+<pre>spooler_job.delay_after_error(1) = 0</pre>
+
+<p><font class="mono"><br>
+spooler_task.repeat</font> ist bei spooler_job.<font class="mono">delay_after_error</font>
+ohne Wirkung.</p>
+
+<h2>G.&nbsp; Neustart des Spooler nachdem alle Jobs sich normal beendet haben</h2>
+<p>Ein neues Kommando beendet den Spooler, ohne jedoch einen laufenden Job zu
+beenden. Auch Tasks in der Warteschlange werden ausgeführt, bevor der Spooler
+sich beendet. Andere Jobs werden nicht neu gestartet.</p>
+<p>Kommando über die TCP-Schnittstelle:</p>
+<pre>&lt;modify_spooler cmd=&quot;let_run_terminate_and_restart&quot;/&gt;</pre>
+<p>Als COM-Methode:</p>
+<pre>spooler.let_run_terminate_and_restart()</pre>
+<p>Wenn ein Job mit später Ausführungszeit in der Warteschlange ist, kann sich
+das Spooler-Ende hinauszögern.</p>
+
+<p>Der Spooler ist solange im neuen Zustand <font class="mono">stopped_let_run</font>.</p>
+
+<p>&nbsp;</p>
+
+<HR SIZE=1>
+<FONT face="Arial" size="2">Dipl.-Inform. Joacim Zschimmer&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+<A href="mailto:j@zsch.de">j@zsch.de</A>
+&nbsp; &nbsp; &nbsp; &nbsp;&nbsp;(030) 3470 2520&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;Zschimmer GmbH</FONT>
+
+</body>
+</html>

@@ -1,0 +1,128 @@
+<html>
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<meta name="ProgId" content="FrontPage.Editor.Document">
+<style type="text/css">
+h1           { font-size: 24pt; font-weight: bold; margin-bottom: 4ex;  }
+h2           { font-size: 12pt; font-weight: bold; margin-top: 10ex; }
+h3           { font-size: 10pt; font-weight: bold; margin-top: 6ex }
+.zwischentitel { font-weight: bold; margin-top: 6ex }
+td           { font-size: 10pt; margin-top: 2ex; margin-bottom: 0  }
+p            { font-size: 10pt; margin-top: 2ex; margin-bottom: 0  }
+li           { font-size: 10pt }
+pre          { font-family: Lucida Console, monospace; font-size: 9pt; margin-left: 5mm; line-height: 1.2em; }
+.indent      { margin-left: 5mm; }
+.mono        { font-family: Lucida Console, monospace; font-size: 9pt }
+</style>
+
+<title>Aufträge im Spooler - Anforderungen</title>
+</head>
+<body>
+
+
+
+<h1>Aufträge im Spooler - Anforderungen
+</h1>
+
+<p align="right">18. September 2002
+</p>
+
+<h2>Anforderung
+</h2>
+<p>Es sollen Workflows oder Jobketten realisiert werden, z.B.:
+</p>
+<ol>
+<li>a) Dokument aufbereiten;&nbsp; b) als eMail versenden</li>
+<li>a) Dokument aufbereiten;&nbsp; b)
+Drucken</li>
+<li>a) Dokument aufbereiten;&nbsp; b)
+als Fax versenden</li>
+</ol>
+<p>Es liegen Aufträge vor für diese Jobketten vor. Im Auftrag ist vermerkt,
+welche Jobkette zu durchlaufen ist.</p>
+<p>Der Spooler soll berichten können, welche Aufträge vorliegen und wo sie
+sich in der Jobkette befinden.</p>
+<p>Vorrangige Aufträge sollen zuerst ausgeführt werden.</p>
+<p>Der Spooler soll bei einem Neustart die Verarbeitung fortsetzen können.</p>
+<p>Die neue Technik soll für einen Verteilten Spooler nutzbar sein.</p>
+<p>&nbsp;</p>
+<p>Der bisherige Spooler kennt nur die Operationen, die Jobschritte. Der neue
+Spooler wird die Dinge kennen, mit denen die Jobs arbeiten. Diese Dinge werden
+im Vordergrund stehen. Er kann über die Dinge berichten: Ihre Anzahl, ihren
+Verabeitungsstand, ihren Namen.</p>
+<h2>Was brauchen wir?</h2>
+<p class="zwischentitel">Jobketten</p>
+<p class="indent">Eine Jobkette ist eine Folge von Jobs. Mit Verzweigung
+nach jedem Jobschritt: einen Zweig für die erfolgte, einen für die fehlerhafte
+Ausführung.&nbsp;</p>
+<p class="indent">Ein Auftrag wird durch die Jobkette durchgereicht. Jeder Job
+führt dazu genau einen Schritt aus, der den Zustand des Auftrags ändert.</p>
+<p class="zwischentitel">Auftragsgesteuerte Jobs</p>
+<p class="indent">Der Spooler wird zusätzlich zu den bisherigen Jobs
+auftragsgesteuerte Jobs kennen. Diese Jobs werden nur gestartet, wenn Aufträge
+für sie vorliegen. Ein Auftrag führt zu genau einem Jobschritt. Wir betrachten
+hier nur diese Jobs.</p>
+<p class="indent">Diese Jobs werden ihre Aufträge nicht mehr selber
+lesen.&nbsp;</p>
+<p class="zwischentitel">Aufträge</p>
+<p class="indent">Ein Auftrag hat einen <i>Titel</i> (etwas, was dem Bediener
+den Auftrag wiedererkennen lässt, dem Spooler ist das egal), eine <i>Priorität
+</i>(eine höhere Priorität lässt den Auftrag vor anderen ausführen), und
+einen <i>Zustand</i>, der einem Job in der Jobkette zugeordnet ist.</p>
+<p class="indent">Ein Auftrag durchläuft also die Jobs einer Jobkette, indem
+seinen Zustand geändert wird.</p>
+<p class="indent">Nach der Ausführung eines Auftrags durch einen Jobschritt
+erhält er seinen nächsten Zustand und dadurch seine nächste Position in der Jobkette.</p>
+<p class="zwischentitel">Auftragslisten</p>
+<p class="indent">(Eigentlich eine Auftragswarteschlange)</p>
+<p class="indent">Jeder auftragsgesteuerte Job hat eine Auftragsliste. Jedes
+Skript (jeder Job) kann die Auftragsliste füllen. Die Aufträge sind nach ihrer
+Priorität geordnet. Ein Job wird nur gestartet, wenn seine Auftragsliste nicht
+leer ist.&nbsp;</p>
+<p class="indent">Die Auftragslisten werden flüchtig im Speicher gehalten, sie
+sind also beim Neustart verloren. Das macht aber nichts, denn sie lassen sich
+jederzeit neu aufgebauen.</p>
+<p class="indent">Eine Auftragsliste kann durch einen Job gefüllt werden oder
+durch eine Auftragsquelle.</p>
+<p class="zwischentitel"><font color="#808080">Auftragsquelle&nbsp; (nicht
+realisiert)</font></p>
+<p class="indent"><font color="#808080">Die Auftragslisten können programmiert
+mit einem Job gefüllt werden. Die Quelle der Aufträge lässt sich aber so
+beschreiben, dass der Spooler selbst die Aufträge liest.</font></p>
+<p class="indent"><font color="#808080">In der Regel liegen die Aufträge in
+irgendeiner Form in einer Datenbank oder in einem Dateiverzeichnis.
+Auftragsquellen abstrahieren davon. Eine Auftragsquelle kann eröffnet werden
+und liefert dann mit ihrer Methode <font class="mono">
+get()</font>  die einzelnen Aufträge.&nbsp;</font></p>
+<p class="indent"><font color="#808080">Auftragsquellen können parametrisiert
+sein, sodass sich eine Implementierung für verschiedene Zwecke (z.B. alle
+Stellen einer Jobkette) verwenden lässt.</font></p>
+<p class="indent"><font color="#808080">Wenn die Auftragsquelle ein
+Datenbank-Select ist, muss das Select abgeschlossen sein, bevor der Job startet.
+Jeder Jobschritt führt (idR) zu einem Commit, was das Select ungültig macht.
+Also wird der Spooler solche Auftragsquellen zuvor in die Auftragsliste
+kopieren.</font></p>
+<p class="zwischentitel"><font color="#808080">Ansicht&nbsp; (nicht realisiert)</font></p>
+<p class="indent"><font color="#808080">Über die TCP-Schnittstelle berichtet der Spooler über den
+Verarbeitungsstand.</font></p>
+<p class="indent"><font color="#808080">Zu jedem Job gibt er die Länge der Auftragsliste an, optional
+auch die Aufträge selbst (hierzu wird die Eigenschaft <font class="mono">title</font>
+verwendet). Die Anzahl der erfolgreichen und fehlerhaften Jobschritte wird
+gezeigt.</font></p>
+<p class="indent"><font color="#808080">Die Jobketten werden mit den einzelnen Jobs gezeigt, die Jobs
+wieder mit allen Informationen.</font></p>
+<p class="indent"><font color="#808080">Wenn die Aufträge auch eine Kennung haben, kann gezielt der
+Verarbeitungsstand eines Auftrags, also die Position in einer Jobkette, gezeigt
+werden.</font></p>
+<p>&nbsp;</p>
+
+<HR SIZE=1>
+<FONT face="Arial" size="2">Dipl.-Inform. Joacim Zschimmer&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+<A href="mailto:j@zsch.de">j@zsch.de</A>
+&nbsp; &nbsp; &nbsp; &nbsp;&nbsp;(030) 3470 2520&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;Zschimmer GmbH</FONT>
+
+</body>
+
+</html>

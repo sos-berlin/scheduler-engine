@@ -1,0 +1,98 @@
+<html>
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<meta name="ProgId" content="FrontPage.Editor.Document">
+<style type="text/css">
+h1           { font-size: 24pt; font-weight: bold; margin-bottom: 4ex;  }
+h2           { font-size: 12pt; font-weight: bold; margin-top: 10ex; }
+h3           { font-size: 10pt; font-weight: bold; margin-top: 6ex }
+.zwischentitel { font-weight: bold; margin-top: 6ex }
+td           { font-size: 10pt; margin-top: 2ex; margin-bottom: 0  }
+p            { font-size: 10pt; margin-top: 2ex; margin-bottom: 0  }
+li           { font-size: 10pt }
+pre          { font-family: Lucida Console, monospace; font-size: 9pt; margin-left: 4ex; line-height: 1.2em; }
+.mono        { font-family: Lucida Console, monospace; font-size: 9pt }
+</style>
+
+<title>Verteilter Spooler&nbsp; (Vorschlag)</title>
+</head>
+<body>
+
+
+
+<h1>Verteilter Spooler&nbsp; (Vorschlag)</h1>
+
+
+
+<p align="right">11. April 2002</p>
+
+<h2>1.&nbsp; Anforderungen
+</h2>
+<p>Der Spooler soll in mehreren Prozessen und auf mehreren Rechnern (mit
+verschiedenen Betriebssystemen) laufen können und als <i>ein</i> Spooler
+erscheinen.
+</p>
+<ul>
+<li>Der Benutzer sieht an der TCP-Schnittstelle nur einen Spooler</li>
+<li>Es gibt nur eine XML-Konfiguration</li>
+<li>Jeder Job kann in jedem Prozess laufen (Zuordnungen sind aber möglich)</li>
+<li>Der Spooler verteilt Aufträge an die verschiedenen Prozesse</li>
+<li>Der Spooler kann neue Prozesse starten und sie wieder beenden</li>
+</ul>
+<p>Der erste gestartete Spooler ist der <i>Häuptling</i>, der die anderen
+Spooler steuert. Der Häuptling kann sich auf die Steuerung beschränken oder
+auch selbst Aufträge ausführen.</p>
+<p>Die Prozesse sind über TCP mit dem Häuptling verbunden.&nbsp;</p>
+<h2>2.&nbsp; Entwurf
+</h2>
+<p><img border="0" src="spooler_verteilt_1.png" width="866" height="445"></p>
+<h3>2.1&nbsp; Aufträge
+</h3>
+<p>Damit derselbe Job auf mehreren Prozessen laufen kann, werden <i>Aufträge</i>
+eingeführt. Ein Job wird gestartet, wenn ein Auftrag vorliegt. Mit jedem
+Auftrag wird ein Jobschritt ausgeführt. Wenn alle Aufträge ausgeführt sind,
+wird der Job beendet. Die bisherigen Objektemengen entsprechen dem ungefähr.</p>
+<p>Die Aufträge stammen aus einer Objektequelle, die der Häuptling liest.</p>
+<p>Ein Auftrag muss sich als Text darstellen lassen. Die Aufträge werden in XML
+codiert.</p>
+<p>Jeder Auftrag hat eine Kennung. Der Auftrag wird unter der Kennung in der
+Spooler-Datenbank gespeichert, zunächst nur zur Protokollierung. Zeitpunkt der
+Annahme und Ausführung und ein evtl. Fehler werden festgehalten.&nbsp;</p>
+<h3>2.2&nbsp; Auftragsquelle
+</h3>
+<p>Auftragsquelle ist eine Hostware-Datei, ein Verzeichnis mit Hostware-Dateien
+oder ein Skript. In der ersten Version nur letzteres. Das Skript liefert jeden
+Auftrag einzeln als Hostware-Datensatz, Variablenmenge, XML- Dokument oder
+DOM-Dokument.
+</p>
+<p>Sobald ein Auftrag ausgeführt ist, wird das der Auftragsquelle mitgeteilt.
+Die Auftragsquelle kann dann den Auftrag kennzeichnen oder löschen. Mehrere
+Aufträge können gleichzeitig in Ausführung sein.
+</p>
+<h3>2.3.&nbsp; Auftragsverteilung
+</h3>
+<p>Der Häuptling liest einen Auftrag aus einer Datenquelle, wenn es einen
+Spooler gibt, der den Auftrag verarbeiten kann.</p>
+<p>Der Häuptling hat für jede Auftragsquelle eine Liste von Spoolern, die
+Aufträge dieser Auftragsquelle ausführen können.</p>
+<p>Ein Spooler kann mehrere Aufträge annehmen. Sie werden in einer
+Warteschlange gehalten. Der Häuptling kennt die Länge der Warteschlangen und
+gibt den nächsten Auftrag den Spooler mit der kürzesten Warteschlange.</p>
+<p>Nach Ausführung eines Auftrags (fehlerlos oder fehlerhaft) schickt der
+ausführende Spooler dem Häuptling eine Antwort mit der Auftragskennung. Der
+Häuptling übermittelt die Information der Auftragsquelle.</p>
+<p>&nbsp;</p>
+
+<p>&nbsp;
+</p>
+
+<HR SIZE=1>
+<FONT face="Arial" size="2">Dipl.-Inform. Joacim Zschimmer&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+<A href="mailto:j@zsch.de">j@zsch.de</A>
+&nbsp; &nbsp; &nbsp; &nbsp;&nbsp;(030) 3470 2520&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;Zschimmer GmbH</FONT>
+
+</body>
+
+</html>

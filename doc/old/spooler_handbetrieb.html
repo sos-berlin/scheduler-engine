@@ -1,0 +1,88 @@
+<html>
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<meta name="ProgId" content="FrontPage.Editor.Document">
+<style type="text/css">
+h1           { font-size: 24pt; font-weight: bold; margin-bottom: 4ex;  }
+h2           { font-size: 12pt; font-weight: bold; margin-top: 10ex; }
+h3           { font-size: 10pt; font-weight: bold; margin-top: 6ex }
+.zwischentitel { font-weight: bold; margin-top: 6ex }
+p            { font-size: 10pt; margin-top: 2ex; margin-bottom: 0  }
+li           { font-size: 10pt }
+pre          { font-family: Lucida Console, monospace; font-size: 9pt; margin-left: 4ex; line-height: 1.2em; }
+.mono        { font-family: Lucida Console, monospace; font-size: 9pt }
+</style>
+
+<title>Spooler im Handbetrieb  (Vorschlag)</title>
+</head>
+<body>
+
+
+
+<h1>Spooler im Handbetrieb&nbsp; (Vorschlag)</h1>
+
+<p>Der Spooler kann so gestartet werden, dass er einen bestimmten Job sofort
+ausführt und sich dann beendet.</p>
+
+<p class="zwischentitel">Zwecke</p>
+
+<ul>
+<li>Ein Skript zu testen, das die inzwischen zahlreichen Spooler-Methoden nutzt
+(also cscript zu ersetzen)</li>
+<li>Einen Job im Notbetrieb zu starten</li>
+</ul>
+<p class="zwischentitel">Aufruf</p>
+
+<p><font class="mono"><b>spooler -config=</b></font><i>spooler.xml</i>&nbsp;&nbsp;
+<b><font class="mono">-m</font></b>[<font class="mono"><b>anual</b></font>]<font class="mono"><b>=</b></font><i>jobname&nbsp;
+</i>[<font class="mono"><b>-single-step</b></font>]&nbsp;<i> </i>[<font class="mono"><b>-par-</b></font><i>parameter</i><font class="mono"><b>=</b></font><i>wert
+</i>...]</p>
+
+<p>&nbsp;</p>
+
+<p>Dabei gilt</p>
+
+<ul>
+<li><font class="mono">&lt;run_time&gt;</font> wird nicht beachtet</li>
+<li>TCP und UDP werden nur eröffnet, wenn in der Kommandozeile angegeben (<font class="mono">-tcp=</font>)</li>
+<li>Der Job wird sofort gestartet</li>
+<li>Das Jobprotokoll wird nach stderr geschrieben</li>
+<li>Die Historie wird wie gewohnt geschrieben (oder nicht?)</li>
+<li>eMail wird nicht versendet (um nicht den Operateur zu verwirren)</li>
+<li>Ctrl-C beendet den Spooler normal (zweites Ctrl-C wirkt aber sofort)</li>
+</ul>
+<p class="zwischentitel">Umgebungsvariablen</p>
+<p>Um den Aufruf zu verkürzen, können Parameter über Umgebungsvariablen
+gesetzt werden: <font class="mono">SPOOLER_ID</font>, <font class="mono">SPOOLER_CONFIG</font>,
+<font class="mono">SPOOLER_LOG_DIR</font> etc.</p>
+<p class="zwischentitel">Job-Parameter</p>
+<p>Dem Job können in der Kommandozeile mit <font class="mono">-par</font>
+Parameter übergeben werden.</p>
+<p class="zwischentitel">Einzelschritte</p>
+<p>Mit einem Schalter <font class="mono">-single-step</font> wartet der Spooler
+vor der Ausführung eines Jobschritts (<font class="mono">spooler_process</font>)
+darauf, dass der Benutzer die Eingabetaste drückt.</p>
+<p class="zwischentitel">spooler.manual</p>
+<p>Die neue Eigenschaft <font class="mono">spooler.manual</font> liefert im
+Handbetrieb true.</p>
+<p class="zwischentitel">Debugger</p>
+<p>Kann man auch Microsofts Script-Debugger aktivieren?</p>
+
+<p>&nbsp;
+
+</p>
+
+<p>&nbsp;
+
+</p>
+
+<HR SIZE=1>
+<FONT face="Arial" size="2">Dipl.-Inform. Joacim Zschimmer&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+<A href="mailto:j@zsch.de">j@zsch.de</A>
+&nbsp; &nbsp; &nbsp; &nbsp;&nbsp;(030) 3470 2520&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;Zschimmer GmbH</FONT>
+
+</body>
+
+</html>

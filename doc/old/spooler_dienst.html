@@ -1,0 +1,123 @@
+<html>
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<meta name="ProgId" content="FrontPage.Editor.Document">
+<style type="text/css">
+h1           { font-size: 24pt; font-weight: bold; margin-bottom: 4ex;  }
+h2           { font-size: 12pt; font-weight: bold; margin-top: 10ex; }
+h3           { font-size: 10pt; font-weight: bold; margin-top: 6ex }
+.zwischentitel { font-weight: bold; margin-top: 6ex }
+td           { font-size: 10pt; margin-top: 2ex; margin-bottom: 0  }
+p            { font-size: 10pt; margin-top: 2ex; margin-bottom: 0  }
+li           { font-size: 10pt }
+pre          { font-family: Lucida Console, monospace; font-size: 9pt; margin-left: 4ex; line-height: 1.2em; }
+.indent      { margin-left: 4ex; }
+.mono        { font-family: Lucida Console, monospace; font-size: 9pt }
+</style>
+
+<title>Spooler als Dienst</title>
+</head>
+<body>
+
+
+
+<h1>Spooler als Dienst</h1>
+
+<p align="right">19. Mai 2002</p>
+
+<p class="zwischentitel">Aufruf
+</p>
+<p><font class="mono">spooler&nbsp; -remove-service</font> &nbsp; [<font class="mono">-service-name=</font><i>name</i>]&nbsp;&nbsp;
+[<font class="mono">-id=</font><i>id</i>]
+</p>
+<p><font class="mono">spooler&nbsp; </font>[<font class="mono">-remove-service</font>]
+&nbsp; <font class="mono">-install-service</font><br>
+<font class="mono">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </font>[<font class="mono">-service-name=</font><i>name</i>]&nbsp;&nbsp;
+[<font class="mono">-service-display=</font><i>gezeigtername</i>]&nbsp; &nbsp; [<font class="mono">-service-descr=</font><i>beschreibung</i>]<br>
+<font class="mono">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </font>[<font class="mono">-need-service=</font><i>name</i>]<br>
+<font class="mono">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </font>[<i>optionen</i>]
+</p>
+<p class="zwischentitel">Parameter
+</p>
+<p><br>
+<font class="mono">
+-remove-service</font></p>
+
+<p class="indent">Entfernt den Dienst. Der Dienst muss vorhanden sein.</p>
+
+<p><br>
+<font class="mono">
+-install-service</font></p>
+
+<p class="indent">Installiert den Dienst. Die Optionen <i>optionen</i>, die hier nicht aufgeführt
+sind, werden beim Start des Dienst dem Spooler übergeben (v.a. <font class="mono">-id=</font>,
+<font class="mono">-log-dir=</font>)</p>
+
+<p><br>
+<font class="mono">-service-name=</font><i>name</i></p>
+
+<p class="indent">Stellt den (internen) Dienstnamen ein für <font class="mono"> -remove-service</font>
+oder <font class="mono">-install-service</font>.</p>
+
+<p class="indent">Voreinstellung ist <font class="mono">DocumentFactory_Spooler</font>. Wenn die Option
+<font class="mono">
+-id=</font> angegeben ist: <font class="mono"> DocumentFactory_Spooler_</font><i>id</i></p>
+
+<p><br>
+<font class="mono">
+-service-display=</font><i>gezeigtername</i></p>
+
+<p class="indent">Gibt den angezeigten Namen des Dienstes an.</p>
+
+<p class="indent">Voreinstellung bei nicht angegebenen -service-name ist &quot;DocumentFactory Spooler&quot;.
+Wenn die Option <font class="mono"> -id=</font> angegeben ist: &quot;DocumentFactory Spooler -id=<i>id</i>&quot;.
+Wenn <font class="mono"> -service-name=</font> angegeben ist, ist dies als angezeigter Name voreinstellt.</p>
+
+<p><br>
+<font class="mono">-service-descr=</font><i>beschreibung</i></p>
+
+<p class="indent">Setzt die Beschreibung des Dienstes. Voreinstellung ist &quot;Hintergrund-Jobs der Document Factory&quot;.&nbsp;</p>
+
+<p class="indent">In Windows NT 4 ignoriert der Spooler diese Option.</p>
+
+<p><br>
+<font class="mono">-need-service=</font><i>dienst</i></p>
+
+<p class="indent">Gibt einen anderen Dienst an, von dem dieser Dienst abhängig
+ist. Windows startet diesen Dienst erst, wenn der andere Dienst läuft. Die
+Option kann mehrfach angegeben werden. Ein unbekannter Dienstname wird von
+Windows nicht bemängelt.&nbsp;</p>
+
+<p class="indent">Der Name eines Dienstes wird in der Dialogbox zum Dienst in
+der Dienststeuerung angezeigt.</p>
+
+<p class="zwischentitel">Fehler beim Start
+</p>
+<p class="indent">Die Dienststeuerung in Windows erlaubt es dem Dienst nicht,
+eine Fehlermeldung zurückzugeben, wenn der Dienst nicht starten kann. Deshalb
+schreibt der Dienst einen einfachen Eintrag in die Ereignissteuerung (auch das
+wird von Windows nicht einfach gemacht).
+</p>
+
+<p class="indent">Außerdem wird eine eMail mit der Fehlermeldung verschickt.
+Dazu werden die Einträge aus der Datei <font class="mono">factory.ini</font> <font class="mono">log_mail_from</font>,
+<font class="mono">log_mail_to</font>, <font class="mono">log_mail_cc</font>, <font class="mono">log_mail_bcc</font>
+und <font class="mono">smtp</font> verwendet. Eine mit <font class="mono">-ini=</font>
+eingestellte Konfigurationsdatei wird <i>nicht</i> verwendet. Die Einstellungen
+in der <font class="mono">sos.ini</font>, Abschnitt <font class="mono">[mail]</font>
+werden auch verwendet (s.a. <a href="../dateitypen/dateityp_mail.html">Dateityp <font class="mono">mail</font></a>).
+</p>
+
+<p>&nbsp;
+</p>
+
+<HR SIZE=1>
+<FONT face="Arial" size="2">Dipl.-Inform. Joacim Zschimmer&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+<A href="mailto:j@zsch.de">j@zsch.de</A>
+&nbsp; &nbsp; &nbsp; &nbsp;&nbsp;(030) 3470 2520&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;Zschimmer GmbH</FONT>
+
+</body>
+
+</html>

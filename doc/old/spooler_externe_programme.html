@@ -1,0 +1,185 @@
+<html>
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<meta name="ProgId" content="FrontPage.Editor.Document">
+<style type="text/css">
+h1           { font-size: 24pt; font-weight: bold; margin-bottom: 4ex;  }
+h2           { font-size: 12pt; font-weight: bold; margin-top: 10ex; }
+h3           { font-size: 10pt; font-weight: bold; margin-top: 6ex }
+.zwischentitel { font-weight: bold; margin-top: 6ex }
+td           { font-size: 10pt; margin-top: 2ex; margin-bottom: 0  }
+p            { font-size: 10pt; margin-top: 2ex; margin-bottom: 0  }
+li           { font-size: 10pt }
+pre          { font-family: Lucida Console, monospace; font-size: 9pt; margin-left: 4ex; line-height: 1.2em; }
+.mono        { font-family: Lucida Console, monospace; font-size: 9pt }
+</style>
+
+<title>Externe Programme im Spooler&nbsp; (Vorschlag)</title>
+</head>
+<body>
+
+
+
+<h1>Externe Programe im Spooler&nbsp; (Vorschlag)</h1>
+
+<h2>1.&nbsp; stderr und stdout einsammeln
+</h2>
+<p>Wenn ein externes Programme (<font class="mono">&lt;process&gt;</font>) gestartet wird, übernimmt der
+Spooler während des Programmlaufs kontinuierlich die Ausgaben von stderr und
+stdout und schreibt sie ins Jobprotokoll. Dazu verbindet sich der Spooler mit
+dem Prozess über zwei Pipes. Dateien werden nicht gebraucht.
+</p>
+<h2>2.&nbsp; Externes Programm im Skript starten
+</h2>
+<pre>spooler_task.system &quot;...&quot;</pre>
+<p>Führt die Kommandozeile aus. Wenn der Returncode nicht 0 ist, wird eine
+Exception ausgelöst (wie bei <font class="mono"> &lt;process&gt;</font>). Wenn das nicht gewünscht ist,
+kann mit folgender Anweisung das Skript den Returncode selber auswerten:
+</p>
+<pre>rc = spooler_task.system_rc( &quot;...&quot; )</pre>
+<h2>3.&nbsp; Externes Programm asynchron im Skript starten
+</h2>
+<p>
+Damit Langläufer nicht den Spooler blockieren, können wir das ganze noch asynchron machen:
+</p>
+<pre>set my_prog = spooler_task.system_async( &quot;...&quot; )</pre>
+<p>Der Spooler beendet die Task erst, wenn sich alle von der Task gestarteten
+Programme beendet haben. Damit kann
+</p>
+
+<pre>&lt;process file=&quot;sqlldr 1.dat&quot;/&gt;</pre>
+
+<p>als Skript geschrieben werden. Beide Formulierungen haben dieselbe
+Wirkung.&nbsp;
+</p>
+
+<pre>&lt;script&gt;
+    sub spooler_open
+        spooler_task.system_async &quot;sqlldr 1.dat&quot;
+    end sub
+&lt;/script&gt;</pre>
+
+<p>Das Skript können wir um eine Prüfung des Returncodes erweitern. Der Spooler
+ruft <font class="mono">spooler_close</font> erst, wenn sich das Programm
+beendet hat.
+</p>
+
+<pre>&lt;script&gt;
+    dim my_prog
+
+    sub spooler_open
+        set my_prog = spooler_task.system_async( &quot;sqlldr 1.dat&quot; )
+        my_prog.check_retcode = false    'Wir prüfen retcode selber
+    end sub
+
+    sub spooler_close
+        'sqlldr ist jetzt fertig
+
+        select case my_prog.retcode &lt;&gt; 0
+            case 0    : spooler_log.info &quot;Alles in Ordnung&quot;
+            case 1    : spooler_log.into &quot;retcode = 1&quot;
+            case else : spooler_log.error &quot;sqlldr liefert Fehler &quot; &amp; my_prog.retcode
+        end select
+    end sub
+&lt;/script&gt;</pre>
+
+<p>Jetzt können wir noch die Laufzeit überwachen. Wenn das Programm länger
+als eine Minute braucht, geben wir minütlich eine Warnung aus. Nach zehn
+Minuten brechen wir das Programm ab. Dazu gibt es den neuen Aufruf
+</p>
+
+<pre>spooler_task.delay_spooler_process = 60</pre>
+
+<p>Der Aufruf lässt <font class="mono">spooler_process</font> erst nach einer Minute Wartezeit aufrufen lässt, wenn
+das externe Programm sich nicht zuvor beendet hat. Die Überwachung sieht dann
+so aus:
+</p>
+
+<pre>&lt;script&gt;
+    dim my_prog
+
+    sub spooler_open
+        set my_prog = spooler_task.system_async( &quot;sqlldr 1.dat&quot; )
+        my_prog.check_retcode = false    'Wir prüfen retcode selber
+        spooler_task.delay_spooler_process = 60
+    end sub
+
+    sub spooler_process
+        if my_prog.running then
+            log.warn &quot;sqlldr ist ja immer noch nicht fertig.&quot;
+            if my_prog.elapsed_time &gt;= 600 then
+                my_prog.kill
+             else
+                spooler_task.delay_spooler_process = 60
+            end if
+        end if
+    end sub
+
+    sub spooler_close
+        ...
+    end sub
+&lt;/script&gt;</pre>
+
+<h2>
+4.&nbsp; delay_spooler_process ohne externes Programm
+</h2>
+
+<p>
+Mit <font class="mono"> spooler_task.delay_spooler_process</font> kann ein Job selbst auf
+Verzeichnisüberwachung oder <font class="mono"> &lt;signal&gt;</font> warten.&nbsp;
+</p>
+
+<pre>&lt;script&gt;
+    dim db
+
+    sub spooler_open
+        set db = createobject(...)
+        db.open ...
+        spooler_task.delay_spooler_process = 60
+    end sub
+
+    sub spooler_process
+        if etwas_zu_tun() then
+            tu_es
+            spooler_task.delay_spooler_process = 60
+         else
+            'Task beendet sich
+        end if
+    end sub
+
+    sub spooler_close
+        ...
+    end sub
+
+    spooler_job.start_when_directory_changed &quot;c:\...&quot;
+&lt;/script&gt;</pre>
+
+<p>Die Task läuft, solange sie innerhalb einer Minute etwas zu tun hat.
+Andernfalls beendet sie sich und gibt ihre Ressourcen frei. Der Job wird bei
+einem Ereignis (hier von der Verzeichnisüberwachung) wie üblich erneut
+gestartet.
+</p>
+
+<p>Eine laufende Task kann damit Aufträge verarbeiten, die mit kleinen Pausen
+eintreffen, ohne die Ressourcen freizugeben.
+</p>
+
+<p>Ein Ereignis (Verzeichnis, Signal usw.) führt bei einer laufenden,
+verzögerten Task dazu, dass <font class="mono">spooler_process</font> gerufen
+wird. Andernfalls wird wie bisher eine neue Task gestartet.
+<br>
+</p>
+
+<p>&nbsp;
+</p>
+
+<HR SIZE=1>
+<FONT face="Arial" size="2">Dipl.-Inform. Joacim Zschimmer&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+<A href="mailto:j@zsch.de">j@zsch.de</A>
+&nbsp; &nbsp; &nbsp; &nbsp;&nbsp;(030) 3470 2520&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;Zschimmer GmbH</FONT>
+
+</body>
+
+</html>
