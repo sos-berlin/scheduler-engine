@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.76 2002/04/05 22:14:39 jz Exp $
+// $Id: spooler_task.cxx,v 1.77 2002/04/06 16:31:51 jz Exp $
 /*
     Hier sind implementiert
 
@@ -26,6 +26,26 @@ static const char spooler_process_name   [] = "spooler_process";
 static const char spooler_level_name     [] = "spooler_level";
 static const char spooler_on_error_name  [] = "spooler_on_error";
 static const char spooler_on_success_name[] = "spooler_on_success";
+
+//---------------------------------------------------------------------------------start_cause_name
+
+string start_cause_name( Start_cause cause )
+{
+    switch( cause )
+    {
+        case cause_none               : return "none";
+        case cause_period_once        : return "period_once";
+        case cause_period_single      : return "period_single";
+        case cause_period_repeat      : return "period_repeat";
+        case cause_job_repeat         : return "job_repeat";
+        case cause_queue              : return "queue";
+        case cause_queue_at           : return "queue_at";
+        case cause_directory          : return "directory";
+        case cause_signal             : return "signal";
+        case cause_delay_after_error  : return "delay_after_error";
+        default                       : return as_string( (int)cause );
+    }
+}
 
 //----------------------------------------------------------------------------Spooler_object::level
 

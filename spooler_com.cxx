@@ -1,4 +1,4 @@
-// $Id: spooler_com.cxx,v 1.35 2002/04/06 12:45:50 jz Exp $
+// $Id: spooler_com.cxx,v 1.36 2002/04/06 16:31:51 jz Exp $
 /*
     Hier sind implementiert
 
@@ -59,11 +59,25 @@ Com_error::Com_error( const Xc_copy& x )
 {
 }
 
+//---------------------------------------------------------------------------------Com_error::close
+
+void Com_error::close()
+{ 
+    THREAD_LOCK( _lock )
+    {
+        _xc = NULL; 
+    }
+}
+
 //------------------------------------------------------------------------------Com_error::is_error
 
 STDMETHODIMP Com_error::get_is_error( VARIANT_BOOL* result )
 {
-    *result = _xc != NULL;
+    THREAD_LOCK( _lock )
+    {
+        *result = _xc != NULL;
+    }
+
     return NOERROR;
 }
 
@@ -73,6 +87,7 @@ STDMETHODIMP Com_error::get_code( BSTR* code_bstr )
 {
     HRESULT hr = NOERROR;
 
+    THREAD_LOCK( _lock )
     try
     {
         if( !_xc )  *code_bstr = NULL;
@@ -90,6 +105,7 @@ STDMETHODIMP Com_error::get_text( BSTR* text_bstr )
 {
     HRESULT hr = NOERROR;
 
+    THREAD_LOCK( _lock )
     try
     {
         if( !_xc )  *text_bstr = NULL;
@@ -115,16 +131,19 @@ void Com_variable_set::set_xml( const xml::Element_ptr& params )
 {
     HRESULT hr;
 
-    for( xml::Element_ptr e = params->firstChild; e; e = e->nextSibling )
+    THREAD_LOCK( _lock )
     {
-        if( e->tagName == "param" ) 
+        for( xml::Element_ptr e = params->firstChild; e; e = e->nextSibling )
         {
-            CComVariant name  = e->getAttribute( "name" );
-            hr = name.ChangeType( VT_BSTR );                    if( FAILED(hr) )  throw_ole( hr, "ChangeType" );
+            if( e->tagName == "param" ) 
+            {
+                CComVariant name  = e->getAttribute( "name" );
+                hr = name.ChangeType( VT_BSTR );                    if( FAILED(hr) )  throw_ole( hr, "ChangeType" );
 
-            CComVariant value = e->getAttribute( "value" );
+                CComVariant value = e->getAttribute( "value" );
 
-            hr = put_var( name.bstrVal, &value );               if( FAILED(hr) )  throw_ole( hr, "Ivariable_set::put_var" );
+                hr = put_var( name.bstrVal, &value );               if( FAILED(hr) )  throw_ole( hr, "Ivariable_set::put_var" );
+            }
         }
     }
 }
@@ -159,13 +178,14 @@ STDMETHODIMP Com_variable_set::get_dom( xml::IXMLDOMDocument** result )
 {
     HRESULT hr = NOERROR;
 
+    THREAD_LOCK( _lock )
     try
     {
         *result = NULL;
 
         xml::Document_ptr doc = xml::Document_ptr( __uuidof(xml::DOMDocument30), NULL );
         doc->appendChild( doc->createProcessingInstruction( "xml", "version=\"1.0\" encoding=\"iso-8859-1\"" ) );
-        
+    
         xml::Element_ptr varset = doc->createElement( "variable_set" );
         doc->appendChild( varset );
 
@@ -222,6 +242,7 @@ STDMETHODIMP Com_log::log( Log_level level, BSTR line )
 { 
     HRESULT hr = NOERROR;
 
+    THREAD_LOCK( _lock )
     try 
     {
         if( !_log )  return E_POINTER;
@@ -240,6 +261,7 @@ STDMETHODIMP Com_log::get_mail( spooler_com::Imail** mail )
 { 
     HRESULT hr = NOERROR;
 
+    THREAD_LOCK( _lock )
     try 
     {
         if( !_log )  return E_POINTER;
@@ -259,6 +281,7 @@ STDMETHODIMP Com_log::put_mail_on_error( VARIANT_BOOL b )
 {
     HRESULT hr = NOERROR;
 
+    THREAD_LOCK( _lock )
     try 
     {
         if( !_log )  return E_POINTER;
@@ -277,6 +300,7 @@ STDMETHODIMP Com_log::get_mail_on_error( VARIANT_BOOL* b )
 {
     HRESULT hr = NOERROR;
 
+    THREAD_LOCK( _lock )
     try 
     {
         if( !_log )  return E_POINTER;
@@ -296,6 +320,7 @@ STDMETHODIMP Com_log::put_mail_on_success( VARIANT_BOOL b )
 {
     HRESULT hr = NOERROR;
 
+    THREAD_LOCK( _lock )
     try 
     {
         if( !_log )  return E_POINTER;
@@ -314,6 +339,7 @@ STDMETHODIMP Com_log::get_mail_on_success( VARIANT_BOOL* b )
 {
     HRESULT hr = NOERROR;
 
+    THREAD_LOCK( _lock )
     try 
     {
         if( !_log )  return E_POINTER;
@@ -332,6 +358,7 @@ STDMETHODIMP Com_log::put_mail_on_process( VARIANT_BOOL b )
 {
     HRESULT hr = NOERROR;
 
+    THREAD_LOCK( _lock )
     try 
     {
         if( !_log )  return E_POINTER;
@@ -350,6 +377,7 @@ STDMETHODIMP Com_log::get_mail_on_process( VARIANT_BOOL* b )
 {
     HRESULT hr = NOERROR;
 
+    THREAD_LOCK( _lock )
     try 
     {
         if( !_log )  return E_POINTER;
@@ -368,6 +396,7 @@ STDMETHODIMP Com_log::put_level( int level )
 {
     HRESULT hr = NOERROR;
 
+    THREAD_LOCK( _lock )
     try 
     {
         if( !_log )  return E_POINTER;
@@ -386,6 +415,7 @@ STDMETHODIMP Com_log::get_level( int* level )
 {
     HRESULT hr = NOERROR;
 
+    THREAD_LOCK( _lock )
     try 
     {
         if( !_log )  return E_POINTER;
@@ -404,6 +434,7 @@ STDMETHODIMP Com_log::get_filename( BSTR* filename_bstr )
 {
     HRESULT hr = NOERROR;
 
+    THREAD_LOCK( _lock )
     try 
     {
         if( !_log )  return E_POINTER;
@@ -422,6 +453,7 @@ STDMETHODIMP Com_log::put_new_filename( BSTR filename_bstr )
 {
     HRESULT hr = NOERROR;
 
+    THREAD_LOCK( _lock )
     try 
     {
         if( !_log )  return E_POINTER;
@@ -439,6 +471,7 @@ STDMETHODIMP Com_log::get_new_filename( BSTR* filename_bstr )
 {
     HRESULT hr = NOERROR;
 
+    THREAD_LOCK( _lock )
     try 
     {
         if( !_log )  return E_POINTER;
@@ -457,6 +490,7 @@ STDMETHODIMP Com_log::put_collect_within( VARIANT* time )
 {
     HRESULT hr = NOERROR;
 
+    THREAD_LOCK( _lock )
     try 
     {
         if( !_log )  return E_POINTER;
@@ -475,6 +509,7 @@ STDMETHODIMP Com_log::get_collect_within( double* result )
 {
     HRESULT hr = NOERROR;
 
+    THREAD_LOCK( _lock )
     try 
     {
         if( !_log )  return E_POINTER;
@@ -493,6 +528,7 @@ STDMETHODIMP Com_log::put_collect_max( VARIANT* time )
 {
     HRESULT hr = NOERROR;
 
+    THREAD_LOCK( _lock )
     try 
     {
         if( !_log )  return E_POINTER;
@@ -511,6 +547,7 @@ STDMETHODIMP Com_log::get_collect_max( double* result )
 {
     HRESULT hr = NOERROR;
 
+    THREAD_LOCK( _lock )
     try 
     {
         if( !_log )  return E_POINTER;
@@ -536,10 +573,14 @@ Com_object_set::Com_object_set( Object_set* object_set )
 
 STDMETHODIMP Com_object_set::get_low_level( int* result )
 {
-    if( !_object_set )  return E_POINTER;
-    if( GetCurrentThreadId() != _object_set->thread()->_thread_id )  return E_ACCESSDENIED;
+    THREAD_LOCK( _lock )
+    {
+        if( !_object_set )  return E_POINTER;
+        if( GetCurrentThreadId() != _object_set->thread()->_thread_id )  return E_ACCESSDENIED;
 
-    *result = _object_set->_object_set_descr->_level_interval._low_level;
+        *result = _object_set->_object_set_descr->_level_interval._low_level;
+    }
+
     return NOERROR;
 }
 
@@ -547,10 +588,13 @@ STDMETHODIMP Com_object_set::get_low_level( int* result )
 
 STDMETHODIMP Com_object_set::get_high_level( int* result )
 {
-    if( !_object_set )  return E_POINTER;
-    if( GetCurrentThreadId() != _object_set->thread()->_thread_id )  return E_ACCESSDENIED;
+    THREAD_LOCK( _lock )
+    {
+        if( !_object_set )  return E_POINTER;
+        if( GetCurrentThreadId() != _object_set->thread()->_thread_id )  return E_ACCESSDENIED;
 
-    *result = _object_set->_object_set_descr->_level_interval._high_level;
+        *result = _object_set->_object_set_descr->_level_interval._high_level;
+    }
     return NOERROR;
 }
 
@@ -569,10 +613,11 @@ STDMETHODIMP Com_job::start_when_directory_changed( BSTR directory_name, BSTR fi
 {
     HRESULT hr = NOERROR;
 
-    if( !_job )  return E_POINTER;
-
+    THREAD_LOCK( _lock )
     try
     {
+        if( !_job )  return E_POINTER;
+
         _job->start_when_directory_changed( bstr_as_string( directory_name ), bstr_as_string( filename_pattern ) );
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Job::start_when_directory_changed" ); }
@@ -586,10 +631,11 @@ STDMETHODIMP Com_job::start_when_directory_changed( BSTR directory_name, BSTR fi
 STDMETHODIMP Com_job::clear_when_directory_changed()
 {
     HRESULT hr = NOERROR;
-    if( !_job )  return E_POINTER;
 
+    THREAD_LOCK( _lock )
     try
     {
+        if( !_job )  return E_POINTER;
         _job->clear_when_directory_changed();
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Job::clear_when_directory_changed" ); }
@@ -604,49 +650,42 @@ STDMETHODIMP Com_job::start( VARIANT* params, Itask** itask )
 {
     HRESULT hr = NOERROR;
 
+    THREAD_LOCK( _lock )
     try
     {
+        if( !_job )  return E_POINTER;
+
+        Sos_ptr<Task>           task;
+
+        CComPtr<Ivariable_set>  pars;
+        Time                    start_at = 0; 
+
+        if( params  &&  params->vt != VT_EMPTY  &&  params->vt != VT_NULL  &&  params->vt != VT_ERROR )
+        {
+            if( params->vt != VT_DISPATCH && params->vt != VT_UNKNOWN )  return DISP_E_TYPEMISMATCH;
+            hr = params->punkVal->QueryInterface( IID_Ivariable_set, (void**)&pars );
+            if( FAILED(hr) )  return hr;
+        }
+
+        CComVariant task_name_vt;
+        if( pars )  pars->get_var( L"spooler_task_name", &task_name_vt );
+        hr = task_name_vt.ChangeType( VT_BSTR );    if( FAILED(hr) )  throw_ole( hr, "ChangeType", "spooler_task_name" );
+
+        CComVariant start_after_vt;
+        if( pars )  pars->get_var( L"spooler_start_after", &start_after_vt );
+        if( start_after_vt.vt != VT_EMPTY )
+        {
+            hr = start_after_vt.ChangeType( VT_R8 );    if( FAILED(hr) )  throw_ole( hr, "ChangeType", "spooler_start_after" );
+            start_at = Time::now() + start_after_vt.dblVal;
+        }
+
         THREAD_LOCK_LOG( _job->_lock, "Com_job::start" )
         {
-            if( !_job )  return E_POINTER;
-
-            Sos_ptr<Task>           task;
-            CComPtr<Ivariable_set>  pars;
-            Time                    start_at = 0; 
-
-            if( params  &&  params->vt != VT_EMPTY  &&  params->vt != VT_NULL  &&  params->vt != VT_ERROR )
-            {
-                if( params->vt != VT_DISPATCH && params->vt != VT_UNKNOWN )  return DISP_E_TYPEMISMATCH;
-                hr = params->punkVal->QueryInterface( IID_Ivariable_set, (void**)&pars );
-                if( FAILED(hr) )  return hr;
-            }
-
-            CComVariant task_name_vt;
-            if( pars )  pars->get_var( L"spooler_task_name", &task_name_vt );
-            hr = task_name_vt.ChangeType( VT_BSTR );    if( FAILED(hr) )  throw_ole( hr, "ChangeType", "spooler_task_name" );
-/*
-            CComVariant start_at_vt;
-            if( pars )  pars->get_var( L"spooler_start_at", &start_after_at );
-            if( start_after_vt.vt != VT_EMPTY )
-            {
-                hr = start_at_vt.ChangeType( VT_TIMESTAMP );      if( FAILED(hr) )  throw_ole( hr, "ChangeType", "spooler_start_after" );
-            
-            }
-*/
-            CComVariant start_after_vt;
-            if( pars )  pars->get_var( L"spooler_start_after", &start_after_vt );
-            if( start_after_vt.vt != VT_EMPTY )
-            {
-                hr = start_after_vt.ChangeType( VT_R8 );    if( FAILED(hr) )  throw_ole( hr, "ChangeType", "spooler_start_after" );
-                start_at = Time::now() + start_after_vt.dblVal;
-            }
-
-                task = _job->start_without_lock( pars, bstr_as_string( task_name_vt.bstrVal ), start_at );
-            }
-
-            *itask = new Com_task( task );
-            (*itask)->AddRef();
+            task = _job->start_without_lock( pars, bstr_as_string( task_name_vt.bstrVal ), start_at );
         }
+
+        *itask = new Com_task( task );
+        (*itask)->AddRef();
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Job::start" ); }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Job::start" ); }
@@ -659,10 +698,11 @@ STDMETHODIMP Com_job::start( VARIANT* params, Itask** itask )
 STDMETHODIMP Com_job::wake()
 {
     HRESULT hr = NOERROR;
-    if( !_job )  return E_POINTER;
 
+    THREAD_LOCK( _lock )
     try
     {
+        if( !_job )  return E_POINTER;
         _job->wake();
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Job::start_when_directory_changed" ); }
@@ -676,33 +716,30 @@ STDMETHODIMP Com_job::wake()
 STDMETHODIMP Com_job::get_thread( spooler_com::Ithread** thread )
 {
     HRESULT hr = NOERROR;
-    if( !_job )  return E_POINTER;
 
-    *thread = _job->_thread->_com_thread;
-    if( *thread )  (*thread)->AddRef();
+    THREAD_LOCK( _lock )
+    {
+        if( !_job )  return E_POINTER;
+
+        *thread = _job->_thread->_com_thread;
+        if( *thread )  (*thread)->AddRef();
+    }
 
     return hr;
 }
 
-//------------------------------------------------------------------------Com_job::put_include_path
-/*
-STDMETHODIMP Com_job::put_include_path( BSTR include_path_bstr )
-{
-    if( !_job )  return E_POINTER;
-    if( GetCurrentThreadId() != _job->thread()->_thread_id )  return E_ACCESSDENIED;
-
-    _job->_thread->_include_path = bstr_as_string( include_path_bstr );
-    return NOERROR;
-}
-*/
 //------------------------------------------------------------------------Com_job::get_include_path
 
 STDMETHODIMP Com_job::get_include_path( BSTR* result )
 {
-    if( !_job )  return E_POINTER;
-    if( GetCurrentThreadId() != _job->thread()->_thread_id )  return E_ACCESSDENIED;
+    THREAD_LOCK( _lock )
+    {
+        if( !_job )  return E_POINTER;
+        if( GetCurrentThreadId() != _job->thread()->_thread_id )  return E_ACCESSDENIED;
 
-    *result = SysAllocString_string( _job->_thread->_include_path );
+        *result = SysAllocString_string( _job->_thread->_include_path );
+    }
+
     return NOERROR;
 }
 
@@ -710,10 +747,14 @@ STDMETHODIMP Com_job::get_include_path( BSTR* result )
 
 STDMETHODIMP Com_job::get_name( BSTR* result )
 {
-    if( !_job )  return E_POINTER;
-    if( GetCurrentThreadId() != _job->thread()->_thread_id )  return E_ACCESSDENIED;
+    THREAD_LOCK( _lock )
+    {
+        if( !_job )  return E_POINTER;
+        if( GetCurrentThreadId() != _job->thread()->_thread_id )  return E_ACCESSDENIED;
 
-    *result = SysAllocString_string( _job->_name );
+        *result = SysAllocString_string( _job->_name );
+    }
+
     return NOERROR;
 }
 
@@ -723,6 +764,7 @@ STDMETHODIMP Com_job::put_state_text( BSTR text )
 {
     HRESULT hr = NOERROR;
 
+    THREAD_LOCK( _lock )
     try
     {
         if( !_job )  throw_xc( "SPOOLER-122" );
@@ -742,6 +784,7 @@ STDMETHODIMP Com_job::get_title( BSTR* title )
 {
     HRESULT hr = NOERROR;
 
+    THREAD_LOCK( _lock )
     try
     {
         if( !_job )  throw_xc( "SPOOLER-122" );
@@ -760,6 +803,7 @@ STDMETHODIMP Com_job::put_delay_after_error( int error_steps, VARIANT* time )
 {
     HRESULT hr = NOERROR;
 
+    THREAD_LOCK( _lock )
     try
     {
         if( !_job )  throw_xc( "SPOOLER-122" );
@@ -799,17 +843,15 @@ STDMETHODIMP Com_task::get_object_set( Iobject_set** result )
 {
     HRESULT hr = NOERROR;
 
+    THREAD_LOCK( _lock )
     try
     {
-        THREAD_LOCK( _lock )
-        {
-            if( !_task )  throw_xc( "SPOOLER-122" );
-            if( GetCurrentThreadId() != _task->_job->thread()->_thread_id )  return E_ACCESSDENIED;
+        if( !_task )  throw_xc( "SPOOLER-122" );
+        if( GetCurrentThreadId() != _task->_job->thread()->_thread_id )  return E_ACCESSDENIED;
 
-            if( !_task->_job->object_set_descr() )  return E_ACCESSDENIED;
-            THREAD_LOCK( _task->_job->_lock )  *result = (dynamic_cast<Object_set_task*>(+_task))->_com_object_set;
-            if( *result )  (*result)->AddRef();
-        }
+        if( !_task->_job->object_set_descr() )  return E_ACCESSDENIED;
+        THREAD_LOCK( _task->_job->_lock )  *result = (dynamic_cast<Object_set_task*>(+_task))->_com_object_set;
+        if( *result )  (*result)->AddRef();
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Task::object_set" ); }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Task::object_set" ); }
@@ -823,19 +865,17 @@ STDMETHODIMP Com_task::put_error( VARIANT* error_par )
 {
     HRESULT hr = NOERROR;
 
+    THREAD_LOCK( _lock )
     try
     {
-        THREAD_LOCK( _lock )
-        {
-            if( !_task )  throw_xc( "SPOOLER-122" );
-            if( GetCurrentThreadId() != _task->_job->thread()->_thread_id )  return E_ACCESSDENIED;
+        if( !_task )  throw_xc( "SPOOLER-122" );
+        if( GetCurrentThreadId() != _task->_job->thread()->_thread_id )  return E_ACCESSDENIED;
 
-            CComVariant error_vt = *error_par;
-            hr = error_vt.ChangeType( VT_BSTR );        if( FAILED(hr) )  return hr;
+        CComVariant error_vt = *error_par;
+        hr = error_vt.ChangeType( VT_BSTR );        if( FAILED(hr) )  return hr;
 
-            string error_text = bstr_as_string( error_vt.bstrVal );
-            _task->_job->set_error( Xc( "SPOOLER-120", error_text.c_str() ) );
-        }
+        string error_text = bstr_as_string( error_vt.bstrVal );
+        _task->_job->set_error( Xc( "SPOOLER-120", error_text.c_str() ) );
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Task::error" ); }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Task::error" ); }
@@ -849,15 +889,13 @@ STDMETHODIMP Com_task::get_error( Ierror** result )
 {
     HRESULT hr = NOERROR;
 
+    THREAD_LOCK( _lock )
     try
     {
-        THREAD_LOCK( _lock )
-        {
-            if( !_task )  throw_xc( "SPOOLER-122" );
+        if( !_task )  throw_xc( "SPOOLER-122" );
 
-            THREAD_LOCK( _task->_job->_lock )  *result = new Com_error( _task->_job->error() );
-            (*result)->AddRef();
-        }
+        THREAD_LOCK( _task->_job->_lock )  *result = new Com_error( _task->_job->error() );
+        (*result)->AddRef();
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Task.Error" ); }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Task.Error" ); }
@@ -871,15 +909,13 @@ STDMETHODIMP Com_task::get_job( Ijob** com_job )
 {
     HRESULT hr = NOERROR;
 
+    THREAD_LOCK( _lock )
     try
     {
-        THREAD_LOCK( _lock )
-        {
-            if( !_task )  throw_xc( "SPOOLER-122" );
+        if( !_task )  throw_xc( "SPOOLER-122" );
 
-            *com_job = _task->_job->com_job();
-            (*com_job)->AddRef();
-        }
+        *com_job = _task->_job->com_job();
+        (*com_job)->AddRef();
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Task.job" ); }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Task.job" ); }
@@ -893,15 +929,13 @@ STDMETHODIMP Com_task::get_params( Ivariable_set** result )
 {
     HRESULT hr = NOERROR;
 
+    THREAD_LOCK( _lock )
     try
     {
-        THREAD_LOCK( _lock )
-        {
-            if( !_task )  throw_xc( "SPOOLER-122" );
+        if( !_task )  throw_xc( "SPOOLER-122" );
 
-            *result = _task->_params;
-            (*result)->AddRef();
-        }
+        *result = _task->_params;
+        (*result)->AddRef();
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Task.params" ); }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Task.params" ); }
@@ -915,13 +949,11 @@ STDMETHODIMP Com_task::wait_until_terminated( double wait_time, VARIANT_BOOL* ok
 {
     HRESULT hr = NOERROR;
 
+    THREAD_LOCK( _lock )
     try
     {
-        THREAD_LOCK( _lock )
-        {
-            if( _task )  *ok = _task->wait_until_terminated( wait_time );
-                   else  *ok = true;
-        }
+        if( _task )  *ok = _task->wait_until_terminated( wait_time );
+               else  *ok = true;
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Task.wait_until_terminated" ); }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Task.wait_until_terminated" ); }
@@ -935,12 +967,10 @@ STDMETHODIMP Com_task::end()
 {
     HRESULT hr = NOERROR;
 
+    THREAD_LOCK( _lock )
     try
     {
-        THREAD_LOCK( _lock )
-        {
-            if( _task )  _task->cmd_end();
-        }
+        if( _task )  _task->cmd_end();
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Task.end" ); }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Task.end" ); }
@@ -954,16 +984,14 @@ STDMETHODIMP Com_task::put_result( VARIANT* value )
 {
     HRESULT hr = NOERROR;
 
+    THREAD_LOCK( _lock )
     try
     {
-        THREAD_LOCK( _lock )
-        {
-            if( !_task )  throw_xc( "SPOOLER-122" );
-            if( GetCurrentThreadId() != _task->_job->thread()->_thread_id )  return E_ACCESSDENIED;
-            if( !_task->_job->its_current_task(_task) )  throw_xc( "SPOOLER-138" );
+        if( !_task )  throw_xc( "SPOOLER-122" );
+        if( GetCurrentThreadId() != _task->_job->thread()->_thread_id )  return E_ACCESSDENIED;
+        if( !_task->_job->its_current_task(_task) )  throw_xc( "SPOOLER-138" );
 
-            THREAD_LOCK( _task->_job->_lock )  hr = _task->_result.Copy( value );
-        }
+        THREAD_LOCK( _task->_job->_lock )  hr = _task->_result.Copy( value );
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Task.result" ); }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Task.result" ); }
@@ -977,15 +1005,13 @@ STDMETHODIMP Com_task::get_result( VARIANT* value )
 {
     HRESULT hr = NOERROR;
 
+    THREAD_LOCK( _lock )
     try
     {
-        THREAD_LOCK( _lock )
-        {
-            if( !_task )  throw_xc( "SPOOLER-122" );
+        if( !_task )  throw_xc( "SPOOLER-122" );
 
-            VariantInit( value ); 
-            THREAD_LOCK( _task->_job->_lock )  hr = VariantCopy( value, &_task->_result );
-        }
+        VariantInit( value ); 
+        THREAD_LOCK( _task->_job->_lock )  hr = VariantCopy( value, &_task->_result );
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Task.result" ); }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Task.result" ); }
@@ -999,16 +1025,14 @@ STDMETHODIMP Com_task::put_repeat( double seconds )
 {
     HRESULT hr = NOERROR;
 
+    THREAD_LOCK( _lock )
     try
     {
-        THREAD_LOCK( _lock )
-        {
-            if( !_task )  throw_xc( "SPOOLER-122" );
-            if( GetCurrentThreadId() != _task->_job->thread()->_thread_id )  return E_ACCESSDENIED;
-            if( !_task->_job->its_current_task(_task) )  throw_xc( "SPOOLER-138" );
+        if( !_task )  throw_xc( "SPOOLER-122" );
+        if( GetCurrentThreadId() != _task->_job->thread()->_thread_id )  return E_ACCESSDENIED;
+        if( !_task->_job->its_current_task(_task) )  throw_xc( "SPOOLER-138" );
 
-            _task->_job->set_repeat( seconds );
-        }
+        _task->_job->set_repeat( seconds );
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Task.repeat" ); }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Task.repeat" ); }
@@ -1022,16 +1046,14 @@ STDMETHODIMP Com_task::put_history_field( BSTR name, VARIANT* value )
 {
     HRESULT hr = NOERROR;
 
+    THREAD_LOCK( _lock )
     try
     {
-        THREAD_LOCK( _lock )
-        {
-            if( !_task )  throw_xc( "SPOOLER-122" );
-            if( GetCurrentThreadId() != _task->_job->thread()->_thread_id )  return E_ACCESSDENIED;
-            if( !_task->_job->its_current_task(_task) )  throw_xc( "SPOOLER-138" );
+        if( !_task )  throw_xc( "SPOOLER-122" );
+        if( GetCurrentThreadId() != _task->_job->thread()->_thread_id )  return E_ACCESSDENIED;
+        if( !_task->_job->its_current_task(_task) )  throw_xc( "SPOOLER-138" );
 
-            _task->set_history_field( bstr_as_string(name), *value );
-        }
+        _task->set_history_field( bstr_as_string(name), *value );
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Task.history_field" ); }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Task.history_field" ); }
@@ -1052,11 +1074,15 @@ Com_thread::Com_thread( Thread* thread )
 
 STDMETHODIMP Com_thread::get_log( spooler_com::Ilog** com_log )
 {
-    if( !_thread )  return E_POINTER;
-    if( GetCurrentThreadId() != _thread->_thread_id )  return E_ACCESSDENIED;
+    THREAD_LOCK( _lock )
+    {
+        if( !_thread )  return E_POINTER;
+        if( GetCurrentThreadId() != _thread->_thread_id )  return E_ACCESSDENIED;
 
-    *com_log = _thread->_com_log;
-    if( *com_log )  (*com_log)->AddRef();
+        *com_log = _thread->_com_log;
+        if( *com_log )  (*com_log)->AddRef();
+    }
+
     return NOERROR;
 }
 
@@ -1064,33 +1090,30 @@ STDMETHODIMP Com_thread::get_log( spooler_com::Ilog** com_log )
 
 STDMETHODIMP Com_thread::get_script( IDispatch** script_object )
 {
-    if( !_thread )  return E_POINTER;
-    if( GetCurrentThreadId() != _thread->_thread_id )  return E_ACCESSDENIED;
+    THREAD_LOCK( _lock )
+    {
+        if( !_thread )  return E_POINTER;
+        if( GetCurrentThreadId() != _thread->_thread_id )  return E_ACCESSDENIED;
 
-    *script_object = _thread->_script_instance.dispatch();
-    if( *script_object )  (*script_object)->AddRef();
+        *script_object = _thread->_script_instance.dispatch();
+        if( *script_object )  (*script_object)->AddRef();
+    }
+
     return NOERROR;
 }
 
-//----------------------------------------------------------------------Com_thread::put_include_path
-/*
-STDMETHODIMP Com_thread::put_include_path( BSTR include_path_bstr )
-{
-    if( !_thread )  return E_POINTER;
-    if( GetCurrentThreadId() != _thread->_thread_id )  return E_ACCESSDENIED;
-
-    _thread->_include_path = bstr_as_string( include_path_bstr );
-    return NOERROR;
-}
-*/
 //---------------------------------------------------------------------Com_thread::get_include_path
 
 STDMETHODIMP Com_thread::get_include_path( BSTR* result )
 {
-    if( !_thread )  return E_POINTER;
-    if( GetCurrentThreadId() != _thread->_thread_id )  return E_ACCESSDENIED;
+    THREAD_LOCK( _lock )
+    {
+        if( !_thread )  return E_POINTER;
+        if( GetCurrentThreadId() != _thread->_thread_id )  return E_ACCESSDENIED;
 
-    *result = SysAllocString_string( _thread->_include_path );
+        *result = SysAllocString_string( _thread->_include_path );
+    }
+
     return NOERROR;
 }
 
@@ -1098,10 +1121,14 @@ STDMETHODIMP Com_thread::get_include_path( BSTR* result )
 
 STDMETHODIMP Com_thread::get_name( BSTR* result )
 {
-    if( !_thread )  return E_POINTER;
-    if( GetCurrentThreadId() != _thread->_thread_id )  return E_ACCESSDENIED;
+    THREAD_LOCK( _lock )
+    {
+        if( !_thread )  return E_POINTER;
+        if( GetCurrentThreadId() != _thread->_thread_id )  return E_ACCESSDENIED;
 
-    *result = SysAllocString_string( _thread->_name );
+        *result = SysAllocString_string( _thread->_name );
+    }
+
     return NOERROR;
 }
 
@@ -1114,24 +1141,18 @@ Com_spooler::Com_spooler( Spooler* spooler )
 {
 }
 
-//--------------------------------------------------------------------Com_spooler::get_current_task
-/*
-STDMETHODIMP Com_spooler::get_current_task( spooler_com::Itask* com_task )
-{
-    if( !_spooler )  return E_POINTER;
-
-    *com_task = _task->_com_task;
-    return NOERROR;
-}
-*/
 //-----------------------------------------------------------------------------Com_spooler::get_Log
 
 STDMETHODIMP Com_spooler::get_log( spooler_com::Ilog** com_log )
 {
-    if( !_spooler )  return E_POINTER;
+    THREAD_LOCK( _lock )
+    {
+        if( !_spooler )  return E_POINTER;
 
-    *com_log = _spooler->_com_log;
-    if( *com_log )  (*com_log)->AddRef();
+        *com_log = _spooler->_com_log;
+        if( *com_log )  (*com_log)->AddRef();
+    }
+
     return NOERROR;
 }
 
@@ -1139,9 +1160,13 @@ STDMETHODIMP Com_spooler::get_log( spooler_com::Ilog** com_log )
 
 STDMETHODIMP Com_spooler::get_id( BSTR* id_bstr )
 {
-    if( !_spooler )  return E_POINTER;
+    THREAD_LOCK( _lock )
+    {
+        if( !_spooler )  return E_POINTER;
 
-    *id_bstr = SysAllocString_string( _spooler->id() );
+        *id_bstr = SysAllocString_string( _spooler->id() );
+    }
+
     return NOERROR;
 }
 
@@ -1149,9 +1174,13 @@ STDMETHODIMP Com_spooler::get_id( BSTR* id_bstr )
 
 STDMETHODIMP Com_spooler::get_param( BSTR* param_bstr )
 {
-    if( !_spooler )  return E_POINTER;
+    THREAD_LOCK( _lock )
+    {
+        if( !_spooler )  return E_POINTER;
 
-    *param_bstr = SysAllocString_string( _spooler->_spooler_param );
+        *param_bstr = SysAllocString_string( _spooler->_spooler_param );
+    }
+
     return NOERROR;
 }
 
@@ -1159,10 +1188,14 @@ STDMETHODIMP Com_spooler::get_param( BSTR* param_bstr )
 
 STDMETHODIMP Com_spooler::get_script( IDispatch** script_object )
 {
-    if( !_spooler )  return E_POINTER;
+    THREAD_LOCK( _lock )
+    {
+        if( !_spooler )  return E_POINTER;
 
-    *script_object = _spooler->_script_instance.dispatch();
-    if( *script_object )  (*script_object)->AddRef();
+        *script_object = _spooler->_script_instance.dispatch();
+        if( *script_object )  (*script_object)->AddRef();
+    }
+
     return NOERROR;
 }
 
@@ -1172,10 +1205,10 @@ STDMETHODIMP Com_spooler::get_job( BSTR job_name, Ijob** com_job )
 {
     HRESULT hr = NOERROR;
 
-    if( !_spooler )  return E_POINTER;
-
+    THREAD_LOCK( _lock )
     try
     {
+        if( !_spooler )  return E_POINTER;
         *com_job = _spooler->get_job( bstr_as_string( job_name ) )->com_job();
         (*com_job)->AddRef();
     }
@@ -1189,28 +1222,27 @@ STDMETHODIMP Com_spooler::get_job( BSTR job_name, Ijob** com_job )
 
 STDMETHODIMP Com_spooler::create_variable_set( Ivariable_set** result )
 {
-    if( !_spooler )  return E_POINTER;
+    THREAD_LOCK( _lock )
+    {
+        if( !_spooler )  return E_POINTER;
 
-    *result = new Com_variable_set;
-    (*result)->AddRef();
+        *result = new Com_variable_set;
+        (*result)->AddRef();
+    }
+
     return NOERROR;
 }
 
-//--------------------------------------------------------------------Com_spooler::put_include_path
-/*
-STDMETHODIMP Com_spooler::put_include_path( BSTR include_path_bstr )
-{
-    if( !_spooler )  return E_POINTER;
-    THREAD_LOCK( _spooler->_lock )  _spooler->_include_path = bstr_as_string( include_path_bstr );
-    return NOERROR;
-}
-*/
 //--------------------------------------------------------------------Com_spooler::get_include_path
 
 STDMETHODIMP Com_spooler::get_include_path( BSTR* result )
 {
-    if( !_spooler )  return E_POINTER;
-    THREAD_LOCK( _spooler->_lock )  *result = SysAllocString_string( _spooler->_include_path );
+    THREAD_LOCK( _lock )
+    {
+        if( !_spooler )  return E_POINTER;
+        THREAD_LOCK( _spooler->_lock )  *result = SysAllocString_string( _spooler->_include_path );
+    }
+
     return NOERROR;
 }
 
@@ -1218,8 +1250,12 @@ STDMETHODIMP Com_spooler::get_include_path( BSTR* result )
 
 STDMETHODIMP Com_spooler::get_log_dir( BSTR* result )
 {
-    if( !_spooler )  return E_POINTER;
-    THREAD_LOCK( _spooler->_lock )  *result = SysAllocString_string( _spooler->_log_directory );
+    THREAD_LOCK( _lock )
+    {
+        if( !_spooler )  return E_POINTER;
+        THREAD_LOCK( _spooler->_lock )  *result = SysAllocString_string( _spooler->_log_directory );
+    }
+
     return NOERROR;
 }
 

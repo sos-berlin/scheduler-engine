@@ -1,4 +1,4 @@
-// $Id: spooler_history.cxx,v 1.5 2002/04/06 12:45:50 jz Exp $
+// $Id: spooler_history.cxx,v 1.6 2002/04/06 16:31:51 jz Exp $
 
 #include "../kram/sos.h"
 #include "spooler.h"
@@ -419,8 +419,10 @@ void Job_history::append_tabbed( string value )
 
 void Job_history::write( bool start )
 {
-    string parameters = _job->_task->has_parameters()? xml_as_string( _job->_task->parameters_as_dom() )
-                                                     : "";
+    string parameters;
+    
+    if( start | _use_file )  parameters = _job->_task->has_parameters()? xml_as_string( _job->_task->parameters_as_dom() )
+                                                                       : "";
 
     if( _use_db )
     {
@@ -434,7 +436,7 @@ void Job_history::write( bool start )
                 record.set_field( "spooler_id"     , _spooler->id() );
                 record.set_field( "job_name"       , _job->name() );
                 record.set_field( "start"          , _job->_task->_running_since.as_string(Time::without_ms) );
-                record.set_field( "cause"          , (int)_job->_task->_cause );
+                record.set_field( "cause"          , start_cause_name( _job->_task->_cause ) );
 
                 if( !parameters.empty()  &&  parameters.length() < blob_field_size )  record.set_field( "parameters", parameters ), parameters = "";
 
@@ -505,7 +507,7 @@ void Job_history::write( bool start )
         append_tabbed( _job->name() );
         append_tabbed( _job->_task->_running_since.as_string(Time::without_ms) );
         append_tabbed( start? "" : Time::now().as_string(Time::without_ms) );
-        append_tabbed( _job->_task->_cause );
+        append_tabbed( start_cause_name( _job->_task->_cause ) );
         append_tabbed( _job->_task->_step_count );
         append_tabbed( _job->has_error()? 1 : 0 );
         append_tabbed( _job->_error.code() );
@@ -623,7 +625,7 @@ xml::Element_ptr Job_history::read_tail( xml::Document_ptr doc, int n, bool with
 
             if( _use_file )
             {
-                sel.open( "-in -type=(" + _type_string + ") tab -field-names | tail -reverse -" + as_string(1+n) + " | " + _filename );
+                sel.open( "-in -type=(" + _type_string + ") tab -field-names | tail -head=1 -reverse -" + as_string(n) + " | " + _filename );
                 //sel.open( "-in head -" + as_string(n) + " | select * order by id desc | -type=(" + _type_string + ") tab -field-names | " + _filename );
             }
             else

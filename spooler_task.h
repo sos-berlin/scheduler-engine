@@ -1,4 +1,4 @@
-// $Id: spooler_task.h,v 1.43 2002/04/05 22:14:39 jz Exp $
+// $Id: spooler_task.h,v 1.44 2002/04/06 16:31:51 jz Exp $
 
 #ifndef __SPOOLER_TASK_H
 #define __SPOOLER_TASK_H
@@ -49,6 +49,24 @@ struct Object_set_class : Sos_self_deleting
 
 typedef list< Sos_ptr<Object_set_class> >  Object_set_class_list;
 
+//--------------------------------------------------------------------------------------Start_cause
+
+enum Start_cause
+{
+    cause_none                  = 0,    // Kein Start
+    cause_period_once           = 1,    // <run_time once="yes">
+    cause_period_single         = 2,    // <run_time single_start="yes">
+    cause_period_repeat         = 3,    // <run_time repeat="..">
+    cause_job_repeat            = 4,    // spooler_job.repeat = ..
+    cause_queue                 = 5,    // <start_job at="">
+    cause_queue_at              = 6,    // <start_job at="..">
+    cause_directory             = 7,    // start_when_directory_changed
+    cause_signal                = 8,
+    cause_delay_after_error     = 9,
+};
+
+string                          start_cause_name            ( Start_cause );
+
 //-----------------------------------------------------------------------------------Spooler_object
 
 struct Spooler_object
@@ -98,22 +116,6 @@ struct Object_set : Sos_self_deleting
     Sos_ptr<Object_set_descr>  _object_set_descr;
     Object_set_class*          _class;
     CComPtr<IDispatch>         _idispatch;                  // Zeiger auf ein Object_set des Skripts
-};
-
-//--------------------------------------------------------------------------------------Start_cause
-
-enum Start_cause
-{
-    cause_none                  = 0,    // Kein Start
-    cause_period_once           = 1,    // <run_time once="yes">
-    cause_period_single         = 2,    // <run_time single_start="yes">
-    cause_period_repeat         = 3,    // <run_time repeat="..">
-    cause_job_repeat            = 4,    // spooler_job.repeat = ..
-    cause_queue                 = 5,    // <start_job at="">
-    cause_queue_at              = 6,    // <start_job at="..">
-    cause_directory             = 7,    // start_when_directory_changed
-    cause_signal                = 8,
-    cause_delay_after_error     = 9,
 };
 
 //----------------------------------------------------------------------------------------------Job

@@ -1,4 +1,4 @@
-// $Id: spooler_com.h,v 1.29 2002/04/05 22:14:38 jz Exp $
+// $Id: spooler_com.h,v 1.30 2002/04/06 16:31:51 jz Exp $
 
 #ifndef __SPOOLER_COM_H
 #define __SPOOLER_COM_H
@@ -53,10 +53,6 @@ struct Spooler;
 
 struct Com_error: spooler_com::Ierror, Sos_ole_object
 {
-    void*                       operator new                ( uint size )                           { return sos_alloc( size, "spooler.Error" ); }
-    void                        operator delete             ( void* ptr )                           { sos_free( ptr ); }
-
-
                                 Com_error                   ( const Xc_copy& );
 
     USE_SOS_OLE_OBJECT
@@ -65,8 +61,10 @@ struct Com_error: spooler_com::Ierror, Sos_ole_object
     STDMETHODIMP                get_code                    ( BSTR* );
     STDMETHODIMP                get_text                    ( BSTR* );
 
-    void                        close                       ()                                      { _xc = NULL; }
+    void                        close                       ();
 
+  private:
+    Thread_semaphore           _lock;
     Xc_copy                    _xc;
 };
 
@@ -74,10 +72,6 @@ struct Com_error: spooler_com::Ierror, Sos_ole_object
 
 struct Com_variable_set: spooler_com::Ivariable_set, Sos_ole_object
 {
-    void*                       operator new                ( uint size )                           { return sos_alloc( size, "spooler.Variable_set" ); }
-    void                        operator delete             ( void* ptr )                           { sos_free( ptr ); }
-
-
                                 Com_variable_set            ();
 
     USE_SOS_OLE_OBJECT
@@ -90,26 +84,23 @@ struct Com_variable_set: spooler_com::Ivariable_set, Sos_ole_object
     STDMETHODIMP                get_dom                     ( xml::IXMLDOMDocument** );
 
 
+  private:
     typedef std::map<CComBSTR,CComVariant>  Map;
 
-    Map                        _map;
     Thread_semaphore           _lock;
+    Map                        _map;
 };
 
 //------------------------------------------------------------------------------------------Com_log
 
 struct Com_log : spooler_com::Ilog, Sos_ole_object               
 {
-    void*                       operator new                ( uint size )                           { return sos_alloc( size, "spooler.Log" ); }
-    void                        operator delete             ( void* ptr )                           { sos_free( ptr ); }
-
-
                                 Com_log                     ( Prefix_log* = NULL );
                              //~Com_log                     ();
 
     USE_SOS_OLE_OBJECT
 
-    void                        close                       ()                                      { _log = NULL; }        
+    void                        close                       ()                                      { THREAD_LOCK(_lock)  _log = NULL; }        
 
     STDMETHODIMP                debug9                      ( BSTR );
     STDMETHODIMP                debug8                      ( BSTR );
@@ -153,7 +144,9 @@ struct Com_log : spooler_com::Ilog, Sos_ole_object
     STDMETHODIMP            put_collect_max                 ( VARIANT* );
     STDMETHODIMP            get_collect_max                 ( double* );
 
+  private:
     Fill_zero                  _zero_;
+    Thread_semaphore           _lock;
     Prefix_log*                _log;
 };
 
@@ -161,19 +154,18 @@ struct Com_log : spooler_com::Ilog, Sos_ole_object
 
 struct Com_object_set : spooler_com::Iobject_set, Sos_ole_object               
 {
-    void*                       operator new                ( uint size )                           { return sos_alloc( size, "spooler.Object_set" ); }
-    void                        operator delete             ( void* ptr )                           { sos_free( ptr ); }
-
-
                                 Com_object_set              ( Object_set* );
 
     USE_SOS_OLE_OBJECT
 
-    void                        clear                       ()                                      { _object_set = NULL; }
+    void                        clear                       ()                                      { THREAD_LOCK(_lock)  _object_set = NULL; }
 
     STDMETHODIMP                get_low_level               ( int* );
     STDMETHODIMP                get_high_level              ( int* );
 
+
+  private:
+    Thread_semaphore           _lock;
     Object_set*                _object_set;
 };
 
@@ -181,15 +173,11 @@ struct Com_object_set : spooler_com::Iobject_set, Sos_ole_object
 
 struct Com_job : spooler_com::Ijob, Sos_ole_object               
 {
-    void*                       operator new                ( uint size )                           { return sos_alloc( size, "spooler.Job" ); }
-    void                        operator delete             ( void* ptr )                           { sos_free( ptr ); }
-
-
                                 Com_job                     ( Job* );
 
     USE_SOS_OLE_OBJECT
 
-    void                        close                       ()                                      { _job = NULL; }
+    void                        close                       ()                                      { THREAD_LOCK(_lock)  _job = NULL; }
 
     STDMETHODIMP                start_when_directory_changed( BSTR directory_name, BSTR filename_pattern );
     STDMETHODIMP                clear_when_directory_changed();
@@ -203,6 +191,8 @@ struct Com_job : spooler_com::Ijob, Sos_ole_object
     STDMETHODIMP                get_title                   ( BSTR* );
     STDMETHODIMP                put_delay_after_error       ( int error_steps, VARIANT* time );
 
+  private:
+    Thread_semaphore           _lock;
     Job*                       _job;                        // Es gibt nur einen Com_job pro Job
 };
 
@@ -210,16 +200,12 @@ struct Com_job : spooler_com::Ijob, Sos_ole_object
 
 struct Com_task : spooler_com::Itask, Sos_ole_object               
 {
-    void*                       operator new                ( uint size )                           { return sos_alloc( size, "spooler.Task" ); }
-    void                        operator delete             ( void* ptr )                           { sos_free( ptr ); }
-
-
                                 Com_task                    ( Task* = NULL );
 
     USE_SOS_OLE_OBJECT
 
     void                        set_task                    ( Task* );
-    Task*                       task                        () const                                { return _task; }
+    Task*                       task                        ()                                      { return _task; }
 
     STDMETHODIMP                get_object_set              ( spooler_com::Iobject_set** );
     STDMETHODIMP                put_error                   ( VARIANT* error_text );
@@ -234,23 +220,19 @@ struct Com_task : spooler_com::Itask, Sos_ole_object
     STDMETHODIMP                put_history_field           ( BSTR name, VARIANT* value );
 
   private:
-    Sos_ptr<Task>              _task;
     Thread_semaphore           _lock;
+    Sos_ptr<Task>              _task;
 };
 
 //---------------------------------------------------------------------------------------Com_thread
 
 struct Com_thread : spooler_com::Ithread, Sos_ole_object               
 {
-    void*                       operator new                ( uint size )                           { return sos_alloc( size, "spooler.Thread" ); }
-    void                        operator delete             ( void* ptr )                           { sos_free( ptr ); }
-
-
                                 Com_thread                  ( Thread* );
 
     USE_SOS_OLE_OBJECT
 
-    void                        close                       ()                                      { _thread = NULL; }
+    void                        close                       ()                                      { THREAD_LOCK(_lock)  _thread = NULL; }
 
     STDMETHODIMP                get_log                     ( spooler_com::Ilog** );
     STDMETHODIMP                get_script                  ( IDispatch** );
@@ -259,6 +241,7 @@ struct Com_thread : spooler_com::Ithread, Sos_ole_object
     STDMETHODIMP                get_name                    ( BSTR* );
 
   protected:
+    Thread_semaphore           _lock;
     Thread*                    _thread;                     // Es gibt nur einen Com_thread pro Thread
 };
 
@@ -266,15 +249,11 @@ struct Com_thread : spooler_com::Ithread, Sos_ole_object
 
 struct Com_spooler : spooler_com::Ispooler, Sos_ole_object               
 {
-    void*                       operator new                ( uint size )                           { return sos_alloc( size, "spooler.Spooler" ); }
-    void                        operator delete             ( void* ptr )                           { sos_free( ptr ); }
-
-
                                 Com_spooler                 ( Spooler* ); 
 
     USE_SOS_OLE_OBJECT
 
-    void                        close                       ()                                      { _spooler = NULL; }
+    void                        close                       ()                                      { THREAD_LOCK(_lock)  _spooler = NULL; }
 
     STDMETHODIMP                get_log                     ( spooler_com::Ilog** );
     STDMETHODIMP                get_param                   ( BSTR* );
@@ -287,6 +266,7 @@ struct Com_spooler : spooler_com::Ispooler, Sos_ole_object
     STDMETHODIMP                get_log_dir                 ( BSTR* );
 
   protected:
+    Thread_semaphore           _lock;
     Spooler*                   _spooler;                    // Es gibt nur einen Com_spooler
 };
 
