@@ -1,4 +1,4 @@
-// $Id: spooler_log.cxx,v 1.95 2004/10/19 16:08:47 jz Exp $
+// $Id: spooler_log.cxx,v 1.96 2004/10/22 09:33:23 jz Exp $
 
 #include "spooler.h"
 #include "spooler_mail.h"
@@ -126,10 +126,10 @@ void Log::open_new()
             if( !_spooler->id().empty() )  filename += "." + _spooler->id();
             filename += ".log";
 
-            LOG2( "scheduler.log", "\nopen(\"" << filename << "\")\n" );
+            Z_LOG2( "scheduler.log", "\nopen(\"" << filename << "\")\n" );
             _file = open( filename.c_str(), O_CREAT | O_TRUNC | O_WRONLY | O_NOINHERIT, 0666 );
             if( _file == -1 )  throw_errno( errno, filename.c_str() );
-            LOG2( "scheduler.log", "open() => " << _file << "\n" );
+            Z_LOG2( "scheduler.log", "open() => " << _file << "\n" );
 
             _filename = filename;
         }
@@ -321,7 +321,7 @@ Prefix_log::~Prefix_log()
         {
             if( _file != -1 ) { LOG( "extra close("<<_file<<")\n" ); ::close( _file ), _file = -1; }    // Manchmal ist Datei bei unlink gesperrt: ERRNO-13. Warum?
 
-            LOG2( "scheduler.log", "unlink " << _filename << "\n" );
+            Z_LOG2( "scheduler.log", "unlink " << _filename << "\n" );
             int ret = unlink( _filename.c_str() );
             if( ret == -1 )  throw_errno( errno, "unlink", _filename.c_str() );
         }
@@ -420,7 +420,7 @@ void Prefix_log::open()
 
     if( !_filename.empty() )
     {
-        LOG2( "scheduler.log", "\nopen " << _filename << '\n' );
+        Z_LOG2( "scheduler.log", "\nopen " << _filename << '\n' );
         _file = ::open( _filename.c_str(), O_CREAT | ( _append? O_APPEND : O_TRUNC ) | O_WRONLY | O_NOINHERIT, 0666 );
         if( _file == -1 )  throw_errno( errno, _filename.c_str(), "Protokolldatei" );
 
@@ -650,14 +650,14 @@ void Prefix_log::set_mail_body( const string& body, bool overwrite )
 
 void Prefix_log::send( int reason )
 {
-    //LOG2( "joacim", "Prefix_log::send()\n" );
+    //Z_LOG2( "joacim", "Prefix_log::send()\n" );
     // reason == -2  =>  Gelegentlicher Aufruf, um Fristen zu prüfen und ggfs. eMail zu versenden
     // reason == -1  =>  Job mit Fehler beendet
     // reason >=  0  =>  Anzahl spooler_process()
 
     if( _file == -1 )       // Nur senden, wenn die Log-Datei beschrieben worden ist
     {
-        //LOG2( "joacim", "Prefix_log::send()  _file == -1\n" );
+        //Z_LOG2( "joacim", "Prefix_log::send()  _file == -1\n" );
         _first_send = 0;
         _mail = NULL;
     }
@@ -668,7 +668,7 @@ void Prefix_log::send( int reason )
                      || reason ==  0  &&  _mail_on_success
                      || reason  >  0  &&  ( _mail_on_success || _mail_on_process && reason >= _mail_on_process );
 
-        //LOG2( "joacim", "Prefix_log::send()  mail_it=" << mail_it << "\n" );
+        //Z_LOG2( "joacim", "Prefix_log::send()  mail_it=" << mail_it << "\n" );
         Time now = Time::now();
 
         if( _first_send == 0  &&  !mail_it )
@@ -695,7 +695,7 @@ void Prefix_log::send( int reason )
                 // denn diese Bedingung wird erst festgestellt, wenn das Protokoll bereits geschrieben ist.
 
                 close2();
-                //LOG2( "joacim", "Prefix_log::send_really()\n" );
+                //Z_LOG2( "joacim", "Prefix_log::send_really()\n" );
                 send_really();
 
                 _first_send = 0;

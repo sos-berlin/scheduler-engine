@@ -1,4 +1,4 @@
-// $Id: spooler_order.cxx,v 1.74 2004/09/06 07:53:27 jz Exp $
+// $Id: spooler_order.cxx,v 1.75 2004/10/22 09:33:23 jz Exp $
 /*
     Hier sind implementiert
 
@@ -937,7 +937,7 @@ void Order::set_payload( const VARIANT& payload )
 { 
     THREAD_LOCK( _lock )  
     { 
-        LOG2( "scheduler.order", "Order " << obj_name() << ".payload=" << debug_string_from_variant(payload) << "\n" );
+        Z_LOG2( "scheduler.order", "Order " << obj_name() << ".payload=" << debug_string_from_variant(payload) << "\n" );
         _payload = payload;  
         _payload_modified = true; 
     }

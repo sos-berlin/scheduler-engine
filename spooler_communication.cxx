@@ -1,4 +1,4 @@
-// $Id: spooler_communication.cxx,v 1.97 2004/10/15 13:08:18 jz Exp $
+// $Id: spooler_communication.cxx,v 1.98 2004/10/22 09:33:23 jz Exp $
 /*
     Hier sind implementiert
 
@@ -338,7 +338,7 @@ Communication::Channel::~Channel()
 
     if( _read_socket != SOCKET_ERROR  &&  _read_socket != STDIN_FILENO )
     {
-        LOG2( "socket.close", "close(" << _read_socket << ")\n" );
+        Z_LOG2( "socket.close", "close(" << _read_socket << ")\n" );
         closesocket( _read_socket );
     }
 
@@ -364,12 +364,12 @@ bool Communication::Channel::do_accept( SOCKET listen_socket )
         struct sockaddr_in peer_addr;
         sockaddrlen_t      peer_addr_len = sizeof peer_addr;
 
-        LOG2( "socket.accept", "accept(" << listen_socket << ")\n" );
+        Z_LOG2( "socket.accept", "accept(" << listen_socket << ")\n" );
         _read_socket = accept( listen_socket, (struct sockaddr*)&peer_addr, &peer_addr_len );
         if( _read_socket == SOCKET_ERROR )  
         {
             int err = socket_errno();
-            LOG2( "socket.accept","  errno=" << err << "\n" );
+            Z_LOG2( "socket.accept","  errno=" << err << "\n" );
             if( err == EWOULDBLOCK )  return false;
             throw_sos_socket_error( err, "accept" );
         }
@@ -425,7 +425,7 @@ void Communication::Channel::do_close()
 
     if( _read_socket != SOCKET_ERROR  &&  _read_socket != STDIN_FILENO )
     {
-        LOG2( "socket.close", "close(" << _read_socket << ")\n" );
+        Z_LOG2( "socket.close", "close(" << _read_socket << ")\n" );
         closesocket( _read_socket );
     }
     
@@ -452,7 +452,7 @@ bool Communication::Channel::do_recv()
 
     char buffer [ 4096 ];
 
-    LOG2( "socket.recv", "recv/read(" << _read_socket << ")\n" );
+    Z_LOG2( "socket.recv", "recv/read(" << _read_socket << ")\n" );
     int len = _read_socket == STDIN_FILENO? read( _read_socket, buffer, sizeof buffer )
                                           : recv( _read_socket, buffer, sizeof buffer, 0 );
 
@@ -528,7 +528,7 @@ bool Communication::Channel::do_send()
             int len = _write_socket == STDOUT_FILENO? write ( _write_socket, _text.data() + _send_progress, c )
                                                     : ::send( _write_socket, _text.data() + _send_progress, c, 0 );
             err = len < 0? socket_errno() : 0;
-            LOG2( "socket.send", "send/write(" << _write_socket << "," << c << " bytes) ==> " << len << "  errno=" << err << "\n" );
+            Z_LOG2( "socket.send", "send/write(" << _write_socket << "," << c << " bytes) ==> " << len << "  errno=" << err << "\n" );
             if( len == 0 )  break;   // Vorsichtshalber
             if( len < 0 ) 
             {
@@ -596,7 +596,7 @@ bool Communication::Channel::async_continue_( bool wait )
 
                 if( _is_http )
                 {
-                    LOG2( "scheduler.http", "HTTP: " << _http_parser->_text << "\n" );
+                    Z_LOG2( "scheduler.http", "HTTP: " << _http_parser->_text << "\n" );
                     recv_clear();
 
                     _http_response = cp.execute_http( _http_request );
@@ -873,7 +873,7 @@ void Communication::bind()
                 ret = bind_socket( _listen_socket._read_socket, &sa );
                 if( ret == SOCKET_ERROR )  throw_sos_socket_error( "tcp-bind", as_string(_spooler->tcp_port()).c_str() );
 
-                LOG2( "socket.listen", "listen()\n" );
+                Z_LOG2( "socket.listen", "listen()\n" );
                 ret = listen( _listen_socket._read_socket, 5 );
                 if( ret == SOCKET_ERROR )  throw_errno( socket_errno(), "listen" );
 

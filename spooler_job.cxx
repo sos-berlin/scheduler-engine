@@ -1,4 +1,4 @@
-// $Id: spooler_job.cxx,v 1.94 2004/09/09 12:05:05 jz Exp $
+// $Id: spooler_job.cxx,v 1.95 2004/10/22 09:33:23 jz Exp $
 // §851: Weitere Log-Ausgaben zum Scheduler-Start eingebaut
 /*
     Hier sind implementiert
@@ -1073,7 +1073,7 @@ void Job::check_for_changed_directory( const Time& now )
 #   endif
 
 
-    //LOG2( "joacim", "Job::task_to_start(): Verzeichnisüberwachung _directory_watcher_next_time=" << _directory_watcher_next_time << ", now=" << now << "\n" );
+    //Z_LOG2( "joacim", "Job::task_to_start(): Verzeichnisüberwachung _directory_watcher_next_time=" << _directory_watcher_next_time << ", now=" << now << "\n" );
     _directory_watcher_next_time = now + directory_watcher_intervall;
 
     Directory_watcher_list::iterator it = _directory_watcher_list.begin();
@@ -1308,7 +1308,7 @@ bool Job::do_something()
                 }
                 else
                 {
-                    LOG2( "scheduler.nothing_done", obj_name() << ".do_something()  Nichts getan. state=" << state_name() << ", _next_time war " << next_time_at_begin << "\n" );
+                    Z_LOG2( "scheduler.nothing_done", obj_name() << ".do_something()  Nichts getan. state=" << state_name() << ", _next_time war " << next_time_at_begin << "\n" );
                 }
             }
         }

@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="scheduler.xslt" type="text/xsl"?>
 
-<!--$Id: log_categories.xml,v 1.1 2004/10/21 21:13:56 jz Exp $-->
+<!--$Id: log_categories.xml,v 1.2 2004/10/22 09:33:24 jz Exp $-->
 
 <log_categories 
     title    = "Log-Kategorien" 
     base_dir = ""
     author   = "$Author: jz $"
-    date     = "$Date: 2004/10/21 21:13:56 $"
+    date     = "$Date: 2004/10/22 09:33:24 $"
 >
 
     <scheduler_keyword keyword="Log-Kategorien"/>
@@ -95,10 +95,14 @@
     </log_category>
 
     <log_category name="spidermonkey"   title="JavaScript-Implementierung Spidermonkey">
-        <log_category name="callback"       title="Rückrufe von Spidermonkey"/>
-        <log_category name="idispatch"      title="Verwaltung der COM-Objekte"/>
+        <log_category name="callback"       local_default="off"  title="Rückrufe von Spidermonkey"/>
+        <log_category name="idispatch"      local_default="off"  title="Verwaltung der COM-Objekte"/>
     </log_category>
     
+    <log_category name="sossql"         title="SQL-Prozessor (Dateityp sossql)">
+        <log_category name="get_key"       title="Operation get_key()"/>
+    </log_category>
+
     
     <description>
         <p>
@@ -117,9 +121,6 @@
             Die Kategorien sind hierarchich organisiert.
             Sie können eine Kategorie mit all deren Unterkategorien auswählen, indem Sie dem Namen ein "<code>.*</code>" anhängen. 
             Beispiel: <code>scheduler.*</code>.
-        </p>
-        <p>
-            &#160;  
         </p>
     </description>
 

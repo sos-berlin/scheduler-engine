@@ -1,4 +1,4 @@
-// $Id: spooler_module.cxx,v 1.61 2004/06/05 08:57:49 jz Exp $
+// $Id: spooler_module.cxx,v 1.62 2004/10/22 09:33:23 jz Exp $
 // §1172
 /*
     Hier sind implementiert
@@ -280,7 +280,7 @@ Module_instance::In_call::In_call( Module_instance* module_instance, const strin
         _name = pos == string::npos? name : name.substr( 0, pos );
 
         _module_instance->set_in_call( this, extra ); 
-        LOG2( "scheduler.call", *_module_instance << '.' << _name << "() begin\n" );
+        Z_LOG2( "scheduler.call", *_module_instance << '.' << _name << "() begin\n" );
 
         Z_WINDOWS_ONLY( _ASSERTE( _CrtCheckMemory() ); )
     }
@@ -294,16 +294,11 @@ Module_instance::In_call::~In_call()
     {
         _module_instance->set_in_call( NULL ); 
 
-        if( log_category_is_set( "scheduler.call" ) )
+        if( z::Log_ptr log = "scheduler.call" )
         {
-            Log_ptr log;
-
-            if( log )
-            {
-                *log << *_module_instance << '.' << _name << "() end";
-                if( _result_set )  *log << "  result=" << ( _result? "true" : "false" );
-                *log << '\n';
-            }
+            *log << *_module_instance << '.' << _name << "() end";
+            if( _result_set )  *log << "  result=" << ( _result? "true" : "false" );
+            *log << '\n';
         }
 
         Z_WINDOWS_ONLY( _ASSERTE( _CrtCheckMemory() ); )

@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.356 2004/10/09 20:52:54 jz Exp $
+// $Id: spooler.cxx,v 1.357 2004/10/22 09:33:23 jz Exp $
 // §851: Weitere Log-Ausgaben zum Scheduler-Start eingebaut
 // §1479
 
@@ -1997,7 +1997,7 @@ void Spooler::run()
             }
             else
             {
-                LOG2( "scheduler.wait", "wait_handles.signaled()!  " << wait_handles << "\n" );
+                Z_LOG2( "scheduler.wait", "wait_handles.signaled()!  " << wait_handles << "\n" );
             }
 
             wait_handles.clear();

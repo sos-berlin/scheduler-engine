@@ -1,4 +1,4 @@
-// $Id: spooler_wait.cxx,v 1.100 2004/03/30 06:00:29 jz Exp $
+// $Id: spooler_wait.cxx,v 1.101 2004/10/22 09:33:24 jz Exp $
 /*
     Hier sind implementiert
 
@@ -148,7 +148,7 @@ bool Wait_handles::signaled()
     {
         FOR_EACH( Event_vector, _events, it )  
         {
-            if( *it  &&  (*it)->signaled() )  { LOG2( "scheduler.wait", **it << " signaled!\n" );  return true; }
+            if( *it  &&  (*it)->signaled() )  { Z_LOG2( "scheduler.wait", **it << " signaled!\n" );  return true; }
         }
     }
 
@@ -363,10 +363,7 @@ bool Wait_handles::wait_until_2( Time until )
         THREAD_LOCK( _lock )
         {
           //if( _log->log_level() <= log_debug9 )
-            if( t > 0  &&  log_category_is_set( "scheduler.wait" ) )
-            {
-                LOG( "MsgWaitForMultipleObjects " << sos::as_string(t/1000.0) << "s (bis " << until << ")  " << as_string() << "\n" );
-            }
+            if( t > 0 )  Z_LOG2( "scheduler.wait", "MsgWaitForMultipleObjects " << sos::as_string(t/1000.0) << "s (bis " << until << ")  " << as_string() << "\n" );
 
             handles = new HANDLE [ _handles.size()+1 ];
             for( int i = 0; i < _handles.size(); i++ )  handles[i] = _handles[i];
@@ -387,11 +384,11 @@ bool Wait_handles::wait_until_2( Time until )
             
                 if( event )
                 {
-                    if( t > 0 )  LOG2( "scheduler.wait", "... Event " << event->as_text() << "\n" );
+                    if( t > 0 )  Z_LOG2( "scheduler.wait", "... Event " << event->as_text() << "\n" );
                     event->set_signaled();
                 }
                 else
-                    if( t > 0 )  LOG2( "scheduler.wait", "... Event " << index << "\n" );
+                    if( t > 0 )  Z_LOG2( "scheduler.wait", "... Event " << index << "\n" );
 
                 return true; //index;
             }
@@ -418,7 +415,7 @@ bool Wait_handles::wait_until_2( Time until )
         Time now = Time::now();
 
       //if( _log->log_level() <= log_debug9  &&  until > now )   LOG( "wait_until " << until.as_string() << " " << as_string() << "\n" );
-        if( until > now )   LOG2( "scheduler.wait", "wait_until " << until.as_string() << " " << as_string() << "\n" );
+        if( until > now )   Z_LOG2( "scheduler.wait", "wait_until " << until.as_string() << " " << as_string() << "\n" );
 
         ptr<Socket_wait> wait = _spooler->_connection_manager->create_wait();
 
@@ -721,7 +718,7 @@ bool Directory_watcher::match()
     {
         if( filename != "."  &&  filename != ".." )
         {
-            if( _filename_regex.match( filename ) )  { LOG2( "joacim", "Directory_watcher.match()  " << filename << " matches\n" ); return true; }
+            if( _filename_regex.match( filename ) )  { Z_LOG2( "joacim", "Directory_watcher.match()  " << filename << " matches\n" ); return true; }
         }
 
         filename = dir.next();
