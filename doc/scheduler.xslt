@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding="utf-8"?>
-<!-- $Id: scheduler.xslt,v 1.36 2004/09/12 10:38:53 jz Exp $ -->
+<!-- $Id: scheduler.xslt,v 1.37 2004/09/13 17:28:02 jz Exp $ -->
 
 <!--
     Änderungswünsche:
@@ -215,14 +215,14 @@
                             an der entsprechenden Stelle
                             mit gleichem Attribut <code><xsl:value-of select="@complete_attribute"/>=</code>
                             aus der Basiskonfiguration.
-                            <!--Hier angegebene Attribute überschreiben die aus der Basiskonfiguration.-->
+                            Hier angegebene Attribute überschreiben die aus der Basiskonfiguration.
                         </xsl:if>
                         
                         <xsl:if test="@complete='yes'">
                             Ergänzt ein Element <code>&lt;<xsl:value-of select="parent::*/@name"/>></code>
                             an der entsprechenden Stelle
                             aus der Basiskonfiguration.
-                            <!--Hier angegebene Attribute überschreiben die aus der Basiskonfiguration.-->
+                            Hier angegebene Attribute überschreiben die aus der Basiskonfiguration.
                         </xsl:if>
                         
                         <xsl:if test="@allowed='no'">
@@ -519,7 +519,8 @@
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~example-->
 
     <xsl:template match="example">
-        <p class="example">Beispiel</p>
+        <!--<p class="example">Beispiel</p>-->
+        <h2>Beispiel</h2>
         <xsl:copy-of select="* | text()"/>
     </xsl:template>
     
@@ -590,6 +591,34 @@
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~complete_register-->
 
     <xsl:template name="complete_register">
+
+        <a href="#letter__a">A&#160;</a>
+        <a href="#letter__b">B&#160;</a>
+        <a href="#letter__c">C&#160;</a>
+        <a href="#letter__d">D&#160;</a>
+        <a href="#letter__e">E&#160;</a>
+        <a href="#letter__f">F&#160;</a>
+        <a href="#letter__g">G&#160;</a>
+        <a href="#letter__h">H&#160;</a>
+        <a href="#letter__i">I&#160;</a>
+        <a href="#letter__j">J&#160;</a>
+        <a href="#letter__k">K&#160;</a>
+        <a href="#letter__l">L&#160;</a>
+        <a href="#letter__m">M&#160;</a>
+        <a href="#letter__n">N&#160;</a>
+        <a href="#letter__o">O&#160;</a>
+        <a href="#letter__p">P&#160;</a>
+        <a href="#letter__q">Q&#160;</a>
+        <a href="#letter__r">R&#160;</a>
+        <a href="#letter__s">S&#160;</a>
+        <a href="#letter__t">T&#160;</a>
+        <a href="#letter__u">U&#160;</a>
+        <a href="#letter__v">V&#160;</a>
+        <a href="#letter__w">W&#160;</a>
+        <a href="#letter__x">X&#160;</a>
+        <a href="#letter__y">Y&#160;</a>
+        <a href="#letter__z">Z&#160;</a>
+        <p>&#160;</p>
         
         <p>
             <table cellspacing="0" cellpadding="0">
@@ -597,7 +626,21 @@
                 <col valign="baseline" style="padding-top: 2pt; padding-left: 2ex"/>
 
                 <xsl:for-each select="*">
-                    <xsl:sort select="@keyword"/>
+                    <!--xsl:sort select="@keyword"/   Nicht hier sortieren, sonst funktioniert preceding-sibling:self nicht. -->
+
+                    <xsl:variable name="first_letter" select="translate( substring( @keyword, 1, 1 ), 'abcdefghijklmnopqrstuvwxyz', 'ABCDEFGHIJKLMNOPQRSTUVWXYZ' )"/>
+                    
+                    <xsl:if test="$first_letter != translate( substring( (preceding-sibling::*)[ position() = last() ]/@keyword, 1, 1 ), 'abcdefghijklmnopqrstuvwxyz', 'ABCDEFGHIJKLMNOPQRSTUVWXYZ' )">
+                        <tr><td colspan="9">
+                            <xsl:element name="a">
+                                <xsl:attribute name="name">letter__<xsl:value-of select="$first_letter"/></xsl:attribute>
+                            </xsl:element>
+                            <xsl:if test="position() > 1">
+                                &#160;<br/><!--<hr size="1" style="color: #f0f0f0"/>-->
+                            </xsl:if>
+                            <b><xsl:value-of select="$first_letter"/></b>
+                        </td></tr>
+                    </xsl:if>
                     
                     <tr>
                         <td nowrap="true">

@@ -1,5 +1,5 @@
 #! /usr/bin/perl -W
-# $Id: scheduler_keyword_to_xml.pl,v 1.3 2004/09/12 10:38:53 jz Exp $
+# $Id: scheduler_keyword_to_xml.pl,v 1.4 2004/09/13 17:28:02 jz Exp $
 
 
 my $script_name     = "scheduler_keyword_to_xml.pl";
@@ -30,7 +30,8 @@ while( my $filename = shift )
 }
 
 
-foreach my $keyword ( sort keys %keyword_references )
+my @keys = sort { lc($a) cmp lc($b) } keys %keyword_references;
+foreach my $keyword ( @keys )
 {
     print OUTPUT "<register_keyword keyword='$keyword'>\n";
     my $last_xml_line = "";
@@ -78,7 +79,7 @@ sub read_file
 
         my $keyword = $name;
         my $xml_line = "<register_entry register_file='$filename' register_title='$file_title'  register_keyword='$keyword' type='definition'/>\n";
-        push( @{$keyword_references{$keyword}}, $xml_line );  # s. Perl Cookbook Seite 140 (5.7)
+        add_keyword_reference( $keyword, $xml_line );
     }
     #if( $root_element eq "xml_element" )  { $file_title = "XML-Element $file_title" }
         
@@ -89,7 +90,7 @@ sub read_file
         {
             my $keyword = $2? $2 : $3;
             my $xml_line = "<register_entry register_file='$filename' register_title='$file_title'  register_keyword='$keyword'/>\n";
-            push( @{$keyword_references{$keyword}}, $xml_line );  # s. Perl Cookbook Seite 140 (5.7)
+            add_keyword_reference( $keyword, $xml_line );
         }
 
         if( my $element = get_element( "scheduler_ini_entry" ) )
@@ -98,16 +99,14 @@ sub read_file
             my $a_section = get_attribute( $element, "section" );
             my $a_entry   = get_attribute( $element, "entry" );
             my $xml_line  = "<register_ini_entry register_file='$filename' register_title='$file_title' file='$a_file' section='$a_section' entry='$a_entry'/>\n";
-            my $keyword   = $a_entry;
-            push( @{$keyword_references{$keyword}}, $xml_line );  # s. Perl Cookbook Seite 140 (5.7)
+            add_keyword_reference( $a_entry, $xml_line );
         }
 
         if( my $element = get_element( "scheduler_option" ) )
         {
             my $a_name    = get_attribute( $element, "name" );
             my $xml_line  = "<register_option register_file='$filename' register_title='$file_title' name='$a_name'/>\n";
-            my $keyword   = $a_name;
-            push( @{$keyword_references{$keyword}}, $xml_line );  # s. Perl Cookbook Seite 140 (5.7)
+            add_keyword_reference( $a_name, $xml_line );
         }
 
         if( my $element = get_element( "scheduler_element" ) )
@@ -115,12 +114,20 @@ sub read_file
             my $a_name    = get_attribute( $element, "name" );
             #my $a_directory = get_attribute( $element, "directory" );
             my $xml_line  = "<register_element register_file='$filename' register_title='$file_title' name='$a_name'/>\n";  # directory='$directory
-            my $keyword   = $a_name;
-            push( @{$keyword_references{$keyword}}, $xml_line );  # s. Perl Cookbook Seite 140 (5.7)
+            add_keyword_reference( $a_name, $xml_line );
         }
     }
     
     close( FILE );
+}
+
+
+sub add_keyword_reference
+{
+    my $keyword  = shift;
+    my $xml_line = shift;
+    
+    push( @{$keyword_references{$keyword}}, $xml_line );  # s. Perl Cookbook Seite 140 (5.7)
 }
 
 
