@@ -1,4 +1,4 @@
-// $Id: spooler_module_remote.cxx,v 1.4 2003/05/31 14:24:25 jz Exp $
+// $Id: spooler_module_remote.cxx,v 1.5 2003/05/31 20:31:06 jz Exp $
 /*
     Hier sind implementiert
 
@@ -14,8 +14,6 @@ namespace sos {
 namespace spooler {
 
 using namespace zschimmer::com::object_server;
-
-//-------------------------------------------------------------------------------------------------
 
 //--------------------------------------Remote_module_instance_proxy::~Remote_module_instance_proxy
 
@@ -65,13 +63,6 @@ void Remote_module_instance_proxy::close()
     _remote_instance = NULL;
 }
 
-//-----------------------------------------------------------Remote_module_instance_proxy::dispatch
-/*
-IDispatch* Remote_module_instance_proxy::dispatch() const
-{ 
-    return _idispatch; 
-}
-*/
 //------------------------------------------------------------Remote_module_instance_proxy::add_obj
 
 void Remote_module_instance_proxy::add_obj( const ptr<IDispatch>& object, const string& name )
