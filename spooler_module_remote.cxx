@@ -1,4 +1,4 @@
-// $Id: spooler_module_remote.cxx,v 1.53 2003/12/09 19:37:52 jz Exp $
+// $Id: spooler_module_remote.cxx,v 1.54 2004/01/14 19:19:32 jz Exp $
 /*
     Hier sind implementiert
 
@@ -256,8 +256,9 @@ bool Remote_module_instance_proxy::begin__end()
 
     // _remote_instance->call__end() ist nicht gut, wenn _remote_instance->call__start() einen Fehler gemeldet hat. Das sollte anders codiert werden.
     // Ein Fehler in _remote_instance->call__start() wird durch den Fehler "pop_operation() bei leerem Stack" überdeckt.
+    // Das hier sollte überarbeitet werden. Im Fehlerfall ist mal eine Operation offen, die beendet werden muss, und mal nicht.
+    if( !operation->async_child() )  operation->async_check_error();
     if( _remote_instance )  result = check_result( _remote_instance->call__end() );   // call__end() vor der Fehlerprüfung rufen, sonst werden untere Operationen nicht beendet. 12.11.03
-
     operation->async_check_error();  // Wenn create_instance() fehlgeschlagen ist
 
     return result;

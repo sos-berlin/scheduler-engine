@@ -1,4 +1,4 @@
-// $Id: spooler_com.cxx,v 1.131 2004/01/13 06:58:15 jz Exp $
+// $Id: spooler_com.cxx,v 1.132 2004/01/14 19:19:32 jz Exp $
 /*
     Hier sind implementiert
 
@@ -366,6 +366,9 @@ STDMETHODIMP Com_variable_set::get_value( VARIANT* name, VARIANT* value )
 
 STDMETHODIMP Com_variable_set::put_var( BSTR name, VARIANT* value )
 {
+    // Vorsicht mit _map.erase(): Ein Iterator auf das gelöschte Element wird ungültig. 
+    // Com_variable_set_enumerator müsste dann ungültig werden. Aber wir benutzen erase() nicht.
+
     THREAD_LOCK( _lock )  
     {
         Bstr lname = name;
@@ -582,7 +585,7 @@ STDMETHODIMP Com_variable_set::get__NewEnum( IUnknown** iunknown )
 
     *iunknown = e;
     (*iunknown)->AddRef();
-    return NOERROR;
+    return NOERROR;                                            
 }
 
 //------------------------------------------------------------------------Com_variable_set::put_xml

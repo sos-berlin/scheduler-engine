@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.319 2004/01/13 12:41:07 jz Exp $
+// $Id: spooler.cxx,v 1.320 2004/01/14 19:19:32 jz Exp $
 /*
     Hier sind implementiert
 
@@ -2100,13 +2100,9 @@ void Spooler::send_error_email( const string& subject, const string& text )
         if( _log_mail_bcc  != ""  &&  _log_mail_bcc  != "-" )  msg->set_bcc ( _log_mail_bcc  );
         if( _smtp_server   != ""  &&  _smtp_server   != "-" )  msg->set_smtp( _smtp_server   );
 
-        body = remove_password( text );
-        body += "\n\n";
-        body += "Host=" + spooler->_hostname + "  Scheduler-Id=" + spooler->id();
-
         msg->add_header_field( "X-SOS-Spooler", "" );
         msg->set_subject( remove_password( subject ) );
-        msg->set_body( body );
+        msg->set_body( remove_password( text ) );
         msg->send(); 
     }
     catch( const exception& x ) 
