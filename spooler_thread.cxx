@@ -1,4 +1,4 @@
-// $Id: spooler_thread.cxx,v 1.34 2002/05/28 09:11:59 jz Exp $
+// $Id: spooler_thread.cxx,v 1.35 2002/06/14 18:23:39 jz Exp $
 /*
     Hier sind implementiert
 
@@ -29,7 +29,9 @@ Thread::Thread( Spooler* spooler )
     _script_instance(&_log),
     _thread_priority( THREAD_PRIORITY_NORMAL )   // Windows
 {
-    _com_thread = new Com_thread( this );
+    _com_thread     = new Com_thread( this );
+    _free_threading = _spooler->free_threading_default();
+    _include_path   = _spooler->include_path();
 }
 
 //----------------------------------------------------------------------------------Thread::~Thread
@@ -114,10 +116,19 @@ void Thread::load_jobs_from_xml( const xml::Element_ptr& element, bool init )
             if( _spooler->_manual? as_string(e->getAttribute(L"name")) == _spooler->_job_name 
                                  : spooler_id.empty() || spooler_id == _spooler->id() )
             {
-                Sos_ptr<Job> job = SOS_NEW( Job( this ) );
-                job->set_xml( e );
-                if( init )  job->init();
-                add_job( job );
+                Sos_ptr<Job> job = get_job_or_null( as_string( e->getAttribute(L"name") ) );
+                if( job )
+                {
+                    job->set_xml( e );
+                    if( init )  job->init();
+                }
+                else
+                {
+                    job = SOS_NEW( Job( this ) );
+                    job->set_xml( e );
+                    if( init )  job->init();
+                    add_job( job );
+                }
             }
         }
     }

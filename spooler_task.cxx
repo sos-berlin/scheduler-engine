@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.94 2002/06/03 08:49:11 jz Exp $
+// $Id: spooler_task.cxx,v 1.95 2002/06/14 18:23:38 jz Exp $
 /*
     Hier sind implementiert
 
@@ -251,6 +251,7 @@ Job::Job( Thread* thread )
     _history(this)
 {
     _next_time = latter_day;
+    _priority  = 1;
 }
 
 //----------------------------------------------------------------------------------------Job::~Job

@@ -1,4 +1,4 @@
-// $Id: spooler_config.cxx,v 1.38 2002/05/28 09:11:58 jz Exp $
+// $Id: spooler_config.cxx,v 1.39 2002/06/14 18:23:38 jz Exp $
 
 //#include <precomp.h>
 
@@ -9,6 +9,11 @@
 #include "../kram/sos.h"
 #include "spooler.h"
 #include "../file/anyfile.h"
+
+#include "../zschimmer/z_com.h"
+
+using namespace zschimmer::com;
+
 
 #include <algorithm>
 
@@ -184,7 +189,7 @@ void Period::set_xml( const xml::Element_ptr& element, const Period* deflt )
     }
     else
     {
-        string begin = as_string( element->getAttribute( L"begin" ) );
+        string begin = as_string( variant_default( element->getAttribute( L"begin" ), "00:00:00" ) );
         if( !begin.empty() )  dt.set_time( begin ), _begin = dt;
 
         string repeat = as_string( element->getAttribute( L"repeat" ) );
@@ -203,7 +208,7 @@ void Period::set_xml( const xml::Element_ptr& element, const Period* deflt )
         if( _repeat == 0 )  _repeat = latter_day;
     }
 
-    string end = as_string( element->getAttribute( L"end" ) );
+    string end = as_string( variant_default( element->getAttribute( L"end" ), "24:00:00" ) );
     if( !end.empty() )  dt.set_time( end ), _end = dt;
 
     check();
@@ -256,7 +261,7 @@ void Run_time::set_xml( const xml::Element_ptr& element )
     bool                    period_seen = false;
     
 
-    _once = as_bool( element->getAttribute( L"once" ) );
+    _once = as_bool( variant_default( element->getAttribute( L"once" ), _once ) );
 
     default_period.set_xml( element, NULL );
     default_day = default_period;
@@ -318,7 +323,7 @@ void Object_set_class::set_xml( const xml::Element_ptr& element )
 {
     _name = as_string( element->getAttribute( L"name" ) );
 
-    string iface = as_string( element->getAttribute( L"script_interface" ) );
+    string iface = as_string( variant_default( element->getAttribute( L"script_interface" ), "oo" ) );
     _object_interface = iface == "oo";
 
     DOM_FOR_ALL_ELEMENTS( element, e )
@@ -368,13 +373,13 @@ void Job::set_xml( const xml::Element_ptr& element )
     {
         bool run_time_set = false;
 
-        _name             = as_string( element->getAttribute( L"name" ) );
-      //_rerun            = as_bool  ( element->getAttribute( L"rerun" ) ) ),
-      //_stop_after_error = as_bool  ( element->getAttribute( L"stop_after_errorn ) );
-        _temporary        = as_bool  ( element->getAttribute( L"temporary" ) );
-        _priority         = int_from_variant( element->getAttribute( L"priority" ) );
-        _title            = as_string( element->getAttribute( L"title" ) );
-        _log_append       = as_bool  ( element->getAttribute( L"log_append" ) );
+        _name             = as_string       ( element->getAttribute( L"name" ) );
+      //_rerun            = as_bool         ( element->getAttribute( L"rerun" ) ) ),
+      //_stop_after_error = as_bool         ( element->getAttribute( L"stop_after_errorn ) );
+        _temporary        = as_bool         ( variant_default( element->getAttribute( L"temporary"  ), _temporary  ) );
+        _priority         = int_from_variant( variant_default( element->getAttribute( L"priority"   ), _priority   ) );
+        _title            = as_string       ( variant_default( element->getAttribute( L"title"      ), _title      ) );
+        _log_append       = as_bool         ( variant_default( element->getAttribute( L"log_append" ), _log_append ) );
 
         string text;
 
@@ -396,7 +401,10 @@ void Job::set_xml( const xml::Element_ptr& element )
             else
             if( e->tagName == "object_set"  )  _object_set_descr = SOS_NEW( Object_set_descr( e ) );
             else
-            if( e->tagName == "script"      )  _script_xml_element = e;
+            if( e->tagName == "script"      )  _script_xml_element = e,
+                                               _process_filename = "",
+                                               _process_param    = "",
+                                               _process_log_filename = "";
             else
             if( e->tagName == "process"     )  _process_filename     = as_string( e->getAttribute( L"file" ) ),
                                                _process_param        = as_string( e->getAttribute( L"param" ) ),
@@ -434,7 +442,7 @@ void Thread::set_xml( const xml::Element_ptr& element )
     _name = as_string( element->getAttribute( L"name" ) );
 
     str = as_string( element->getAttribute( L"free_threading" ) );
-    _free_threading = str.empty()? _spooler->free_threading_default() : as_bool( str );
+    if( !str.empty() )  _free_threading = as_bool( str );
 
     str = as_string( element->getAttribute( L"priority" ) );
     if( !str.empty() )
@@ -450,7 +458,6 @@ void Thread::set_xml( const xml::Element_ptr& element )
     }
 
     if( element->getAttributeNode( L"include_path" ) )  _include_path = as_string( element->getAttribute( L"include_path" ) );
-                                                  else  _include_path = _spooler->include_path();
 
     DOM_FOR_ALL_ELEMENTS( element, e )
     {
@@ -462,7 +469,7 @@ void Thread::set_xml( const xml::Element_ptr& element )
 
 //-------------------------------------------------------------------Spooler::load_threads_from_xml
 
-void Spooler::load_threads_from_xml( Thread_list* liste, const xml::Element_ptr& element )
+void Spooler::load_threads_from_xml( const xml::Element_ptr& element )
 {
     DOM_FOR_ALL_ELEMENTS( element, e )
     {
@@ -471,9 +478,14 @@ void Spooler::load_threads_from_xml( Thread_list* liste, const xml::Element_ptr&
             string spooler_id = as_string( e->getAttribute( L"spooler_id" ) );
             if( _manual  ||  spooler_id.empty()  ||  spooler_id == _spooler_id )
             {
-                Sos_ptr<Thread> thread = SOS_NEW( Thread( this ) );
+                Sos_ptr<Thread> thread = get_thread( as_string( element->getAttribute( "name" ) ) );
+                if( !thread )  
+                {
+                    thread = SOS_NEW( Thread( this ) );
+                    _thread_list->push_back( thread );
+                }
+
                 thread->set_xml( e );
-                liste->push_back( thread );
             }
         }
     }
@@ -490,17 +502,17 @@ void Spooler::load_config( const xml::Element_ptr& config_element )
     _config_element  = config_element;
 
 
-    _tcp_port      = int_from_variant( config_element->getAttribute( L"tcp_port"     ) );
-    _udp_port      = int_from_variant( config_element->getAttribute( L"udp_port"     ) );
-    _priority_max  = int_from_variant( config_element->getAttribute( L"priority_max" ) );
+    _tcp_port      = int_from_variant( variant_default( config_element->getAttribute( L"tcp_port"     ), _tcp_port     ) );
+    _udp_port      = int_from_variant( variant_default( config_element->getAttribute( L"udp_port"     ), _udp_port     ) );
+    _priority_max  = int_from_variant( variant_default( config_element->getAttribute( L"priority_max" ), _priority_max ) );
 
     string log_dir =        as_string( config_element->getAttribute( L"log_dir"      ) );
 
     if( !_log_directory_as_option_set && log_dir != "" )  _log_directory = log_dir;
-    if( !_spooler_param_as_option_set )  _spooler_param = as_string( config_element->getAttribute( L"param"        ) );
-    if( !_include_path_as_option_set  )  _include_path  = as_string( config_element->getAttribute( L"include_path" ) );
+    if( !_spooler_param_as_option_set )  _spooler_param = as_string( variant_default( config_element->getAttribute( L"param"        ), _spooler_param ) );
+    if( !_include_path_as_option_set  )  _include_path  = as_string( variant_default( config_element->getAttribute( L"include_path" ), _include_path  ) );
 
-    _free_threading_default = as_bool( as_string( config_element->getAttribute( L"free_threading" ) ) );
+    _free_threading_default = as_bool( as_string( variant_default( config_element->getAttribute( L"free_threading" ), _free_threading_default ) ) );
 
     try
     {
@@ -508,12 +520,29 @@ void Spooler::load_config( const xml::Element_ptr& config_element )
         {
             if( e->tagName == "security" )
             {
+                _security.clear();
                 _security.set_xml( e );
             }
             else
             if( e->tagName == "object_set_classes" )
             {
+                _object_set_class_list.clear();
                 load_object_set_classes_from_xml( &_object_set_class_list, e );
+            }
+            else
+            if( e->tagName == "holidays" )
+            {
+                DOM_FOR_ALL_ELEMENTS( e, e2 )
+                {
+                    _holiday_set.clear();
+
+                    if( e->tagName == "holiday" )
+                    {
+                        Sos_optional_date_time dt;
+                        dt.assign( as_string( e->getAttribute( L"date" ) ) );
+                        _holiday_set.insert( dt.as_time_t() );
+                    }
+                }
             }
             else
             if( e->tagName == "holiday" )
@@ -530,7 +559,7 @@ void Spooler::load_config( const xml::Element_ptr& config_element )
             else
             if( e->tagName == "threads" ) 
             {
-                load_threads_from_xml( &_thread_list, e );
+                load_threads_from_xml( e );
             }
         }
     }

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- $Id: spooler.dtd,v 1.39 2002/05/01 08:52:14 jz Exp $   Joacim Zschimmer,  (C) 2000 SOS GmbH Berlin  -->
+<!-- $Id: spooler.dtd,v 1.40 2002/06/14 18:23:37 jz Exp $   Joacim Zschimmer,  (C) 2000 SOS GmbH Berlin  -->
 
 
 <!ELEMENT spooler               ( config+ | command | answer )>
@@ -8,18 +8,18 @@
 
 <!-- KONFIGURATION DES SPOOLERS - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
-<!ELEMENT config                ( security?, script?, object_set_classes?, holiday*, threads? )>
+<!ELEMENT config                ( security?, script?, object_set_classes?, ( holidays | holiday* ), threads? )>
 <!ATTLIST config                spooler_id          CDATA ''>           <!-- Diese Konfiguration ist nur für einen Spooler mit dieser Kennung -->
 <!ATTLIST config                log_dir             CDATA #IMPLIED>
-<!ATTLIST config                tcp_port            CDATA '4444'>       <!-- Für TCP-Kommandoschnittstelle -->
-<!ATTLIST config                udp_port            CDATA '4444'>       <!-- Für UDP-Kommandoschnittstelle -->
-<!ATTLIST config                priority_max        CDATA '1000'>       <!-- Höchste Priorität. Gibt absoluten Vorrang -->
-<!ATTLIST config                param               CDATA ''>           <!-- Wird der Eigenschaft spooler.param jedem Skript übergeben -->
+<!ATTLIST config                tcp_port            CDATA #IMPLIED>     <!-- Für TCP-Kommandoschnittstelle -->
+<!ATTLIST config                udp_port            CDATA #IMPLIED>     <!-- Für UDP-Kommandoschnittstelle -->
+<!ATTLIST config                priority_max        CDATA #IMPLIED>     <!-- Höchste Priorität. Gibt absoluten Vorrang -->
+<!ATTLIST config                param               CDATA #IMPLIED>     <!-- Wird der Eigenschaft spooler.param jedem Skript übergeben -->
 <!ATTLIST config                include_path        CDATA #IMPLIED>     <!-- Pfad für <include> -->
-<!ATTLIST config                free_threading      CDATA 'no'>         <!-- Voreinstellung für <thread free_threading> -->
+<!ATTLIST config                free_threading      CDATA #IMPLIED>     <!-- Voreinstellung für <thread free_threading> -->
 
 <!ELEMENT security              ( allowed_host* )>
-<!ATTLIST security              ignore_unknown_hosts (yes|no) 'no'>     <!-- Unbekannte Hostnamen bei <allowed_host> ignorieren? -->
+<!ATTLIST security              ignore_unknown_hosts (yes|no) #IMPLIED> <!-- Unbekannte Hostnamen bei <allowed_host> ignorieren? -->
 
 <!ELEMENT allowed_host          EMPTY>
 <!ATTLIST allowed_host          host                CDATA #REQUIRED>
@@ -33,7 +33,7 @@
 
 <!ELEMENT object_set_class      ( level_decls?, script? )>
 <!ATTLIST object_set_class      name                CDATA #REQUIRED>
-<!ATTLIST object_set_class      script_interface    (oo|procedural) 'oo'> <!-- Objektorientierte oder prozedurale Schnittstelle -->
+<!ATTLIST object_set_class      script_interface    (oo|procedural) #IMPLIED> <!-- Objektorientierte oder prozedurale Schnittstelle -->
 
 <!ELEMENT level_decls           ( level_decl+ )>
 
@@ -42,8 +42,8 @@
 <!ATTLIST level_decl            name                CDATA #REQUIRED>    <!-- Name der Stufe, in der Objektemengeklasse eindeutig -->
 
 <!ELEMENT script                ( #PCDATA | include )*>
-<!ATTLIST script                language            CDATA 'VBScript'>   <!-- Z.B. "VBScript", "JavaScript", "PerlScript" -->
-<!ATTLIST script                use_engine          (task|job) 'task'>  <!-- use_engine="task"  : Jeder Task eine Scripting Engine -->
+<!ATTLIST script                language            CDATA #IMPLIED>   <!-- Z.B. "VBScript", "JavaScript", "PerlScript" -->
+<!ATTLIST script                use_engine          (task|job) #IMPLIED><!-- use_engine="task"  : Jeder Task eine Scripting Engine -->
                                                                         <!-- use_engine="job"   : Allen Tasks dieses Jobs eine Scripting Engine -->
                                                                         <!--[use_engine="global": Globale Scripting Engine des Spoolers verwenden]-->
 
@@ -54,7 +54,7 @@
 
 <!ELEMENT thread                ( script?, jobs? )>
 <!ATTLIST thread                name                CDATA #REQUIRED>
-<!ATTLIST thread                spooler_id          CDATA ''>           <!-- "": Thread läuft auf jedem Spooler, sonst nur Spooler mit derselben Spooler-Id -->
+<!ATTLIST thread                spooler_id          CDATA #IMPLIED>     <!-- "": Thread läuft auf jedem Spooler, sonst nur Spooler mit derselben Spooler-Id -->
 <!ATTLIST thread                include_path        CDATA #IMPLIED>     <!-- Pfad für <include> -->
 <!ATTLIST thread                free_threading      CDATA #IMPLIED>     <!-- free_threading="yes": Dieser Thread soll frei laufen (nebenläufig) 
                                                                              Default ist <config free_threading=...> -->
@@ -64,12 +64,12 @@
 
 <!ELEMENT job                   ( description?, ( object_set | script | process ), run_time? )>
 <!ATTLIST job                   name                CDATA #REQUIRED>    <!-- Über alle Threads eindeutiger Name -->
-<!ATTLIST job                   priority            CDATA '1'>          <!-- Höhere Zahl ist höhere Priorität -->
+<!ATTLIST job                   priority            CDATA #IMPLIED>          <!-- Höhere Zahl ist höhere Priorität -->
 <!ATTLIST job                   temporary           (yes|no) 'no'>      <!-- Der Job wird nach einem Lauf entfernt -->
 <!ATTLIST job                   output_level        CDATA #IMPLIED>     <!-- Stufennummer. Auf diese Stufe werden die Objekte der Objektemenge gesetzt -->
-<!ATTLIST job                   spooler_id          CDATA ''>           <!-- "": Job läuft auf jedem Spooler, sonst nur Spooler mit derselben Spooler-Id -->
-<!ATTLIST job                   title               CDATA ''>           <!-- Bezeichnung des Jobs -->
-<!ATTLIST job                   log_append          (yes|no) 'no'>      <!-- Jobprotokoll fortschreiben, nicht überschreiben -->
+<!ATTLIST job                   spooler_id          CDATA #IMPLIED>     <!-- "": Job läuft auf jedem Spooler, sonst nur Spooler mit derselben Spooler-Id -->
+<!ATTLIST job                   title               CDATA #IMPLIED>     <!-- Bezeichnung des Jobs -->
+<!ATTLIST job                   log_append          (yes|no) #IMPLIED>  <!-- Jobprotokoll fortschreiben, nicht überschreiben -->
 
 <!ELEMENT description           ( #PCDATA | include )*>                 <!-- Beschreibung des Jobs -->
 
@@ -83,8 +83,8 @@
 
 <!ELEMENT process               EMPTY>
 <!ATTLIST process               file                CDATA #REQUIRED>
-<!ATTLIST process               param               CDATA ''>
-<!ATTLIST process               log_file            CDATA ''>
+<!ATTLIST process               param               CDATA #IMPLIED>
+<!ATTLIST process               log_file            CDATA #IMPLIED>
 
 <!-- wenn der DLL-Aufruf implementiert ist:
 <!ELEMENT module                EMPTY>
@@ -93,12 +93,12 @@
 
 <!ELEMENT run_time              ( period*, date*, weekdays?, monthdays?, ultimos?, holiday* )>
 <!ATTLIST run_time              single_start        CDATA #IMPLIED>     <!-- Statt begin: Task wird nur einmal um diese Zeit gestartet --> 
-<!ATTLIST run_time              begin               CDATA '00:00:00'>   <!-- HH:MM:SS, Tageszeit, ab der der Job laufen soll -->
-<!ATTLIST run_time              end                 CDATA '24:00:00'>   <!-- HH:MM:SS, Tageszeit, bis zu der der Job laufen soll -->
-<!ATTLIST run_time              let_run             (yes|no) 'no'>      <!-- Task zuende laufen lassen, auch wenn Endezeit überschritten ist -->
-<!ATTLIST run_time              repeat              CDATA ''>           <!-- Periode, nach der ein Job erneut gestartet wird, 
+<!ATTLIST run_time              begin               CDATA #IMPLIED>     <!-- HH:MM:SS, Tageszeit, ab der der Job laufen soll -->
+<!ATTLIST run_time              end                 CDATA #IMPLIED>     <!-- HH:MM:SS, Tageszeit, bis zu der der Job laufen soll -->
+<!ATTLIST run_time              let_run             (yes|no) #IMPLIED>  <!-- Task zuende laufen lassen, auch wenn Endezeit überschritten ist -->
+<!ATTLIST run_time              repeat              CDATA #IMPLIED>     <!-- Periode, nach der ein Job erneut gestartet wird, 
                                                                              um zu prüfen, ob die Objektemenge nicht leer ist -->
-<!ATTLIST run_time              once                (yes|no) 'no'>      <!-- Job trotz repeat='' bei Spooler-Start, Reload oder Reread einmal starten -->
+<!ATTLIST run_time              once                (yes|no) #IMPLIED>  <!-- Job trotz repeat='' bei Spooler-Start, Reload oder Reread einmal starten -->
 
 <!ELEMENT period                EMPTY>
 <!ATTLIST period                single_start        CDATA    #IMPLIED>  <!-- Ersetzt übergeordnetes single_start, begin und end  --> 
@@ -116,6 +116,8 @@
 
 <!ELEMENT ultimos               ( day+ )>                               <!-- 0 bis 30 Tage vor Ultimo -->
 
+<!ELEMENT holidays              ( holidays* )>                              
+
 <!ELEMENT holiday               EMPTY>                              
 <!ATTLIST holiday               date                CDATA #REQUIRED>    <!-- yyyy-mm-dd, an diesem Tag den Job nicht starten -->
 
@@ -131,13 +133,13 @@
 <!ELEMENT command               ( show_state | show_history | modify_spooler | modify_job | kill_task | add_jobs | start_job | signal_object )+ >
 
 <!ELEMENT show_state            EMPTY>                                             <!-- Liefert den Zustand des Spoolers -->
-<!ATTLIST show_state            what                (standard|all) 'standard'>     <!-- what="" ist wie what="standard", what="all" liefert <description> -->
+<!ATTLIST show_state            what                (standard|all) #IMPLIED>       <!-- what="" ist wie what="standard", what="all" liefert <description> -->
 
                                                                                    <!-- Antwort: <state> -->
 
 <!ELEMENT show_history          EMPTY>
 <!ATTLIST show_history          job                 CDATA #REQUIRED>
-<!ATTLIST show_history          what                (standard|all) 'standard'>     <!-- what="" ist wie what="standard", what="all" liefert <description> -->
+<!ATTLIST show_history          what                (standard|all) #IMPLIED>       <!-- what="" ist wie what="standard", what="all" liefert <description> -->
 <!ATTLIST show_history          id                  CDATA #IMPLIED>
 <!ATTLIST show_history          prev                CDATA #IMPLIED>
 <!ATTLIST show_history          next                CDATA #IMPLIED>

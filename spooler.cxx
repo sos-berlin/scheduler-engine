@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.102 2002/06/03 08:49:10 jz Exp $
+// $Id: spooler.cxx,v 1.103 2002/06/14 18:23:37 jz Exp $
 /*
     Hier sind implementiert
 
@@ -232,7 +232,7 @@ Spooler::Spooler()
     _script_instance(&_prefix_log),
     _log_level( log_info ),
     _db(this),
-    _factory_ini( default_factory_ini ),
+    _factory_ini( default_factory_ini )
 
     _smtp_server   ("-"),   // Für spooler_log.cxx: Nicht setzen, damit Default aus sos.ini erhalten bleibt
     _log_mail_from ("-"),
@@ -240,6 +240,12 @@ Spooler::Spooler()
     _log_mail_bcc  ("-"),
     _mail_queue_dir("-")
 {
+
+    _tcp_port = 4444;
+    _udp_port = 4444;
+    _priority_max = 1000;
+            
+
     char hostname[200];
     if( gethostname( hostname, sizeof hostname ) == SOCKET_ERROR )  hostname[0] = '\0';
     _hostname = hostname;
@@ -372,7 +378,7 @@ Thread* Spooler::get_thread( const string& thread_name )
 {
     THREAD_LOCK( _lock )
     {
-        FOR_EACH( Thread_list, _thread_list, it )  if( (*it)->name() == thread_name )  return *it;
+        FOR_EACH( Thread_list, _thread_list, it )  if( stricmp( (*it)->name(), thread_name ) == 0 )  return *it;
     }
 
     throw_xc( "SPOOLER-128", thread_name );

@@ -1,4 +1,4 @@
-// $Id: spooler_script.cxx,v 1.10 2002/04/23 07:00:21 jz Exp $
+// $Id: spooler_script.cxx,v 1.11 2002/06/14 18:23:38 jz Exp $
 /*
     Hier sind implementiert
 
@@ -36,12 +36,16 @@ bool check_result( const CComVariant& vt )
 
 void Script::set_xml( const xml::Element_ptr& element, const string& include_path )
 {
-    _language = as_string( element->getAttribute( L"language" ) );
+    clear();
+
+    _language = as_string( variant_default( element->getAttribute( L"language" ), "VBScript" ) );
     _source   = text_from_xml_with_include( element, include_path );
 
     string use_engine = as_string( element->getAttribute( L"use_engine" ) );
     
-    if( use_engine == "task" )  _reuse = reuse_task;
+    if( use_engine == ""
+     || use_engine == "task" )  _reuse = reuse_task;
+    else
     if( use_engine == "job"  )  _reuse = reuse_job;
 }
 

@@ -1,4 +1,4 @@
-// $Id: spooler.h,v 1.85 2002/06/03 08:49:11 jz Exp $
+// $Id: spooler.h,v 1.86 2002/06/14 18:23:38 jz Exp $
 
 #ifndef __SPOOLER_H
 #define __SPOOLER_H
@@ -194,7 +194,7 @@ struct Spooler
     void                        load_config                 ( const xml::Element_ptr& config );
 
     void                        load_object_set_classes_from_xml( Object_set_class_list*, const xml::Element_ptr& );
-    void                        load_threads_from_xml       ( Thread_list*, const xml::Element_ptr& );
+    void                        load_threads_from_xml       ( const xml::Element_ptr& );
 
     void                        set_state                   ( State );
 
