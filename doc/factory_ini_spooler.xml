@@ -47,6 +47,7 @@
         <ini_entry setting="log_mail_bcc" />
         <ini_entry setting="mail_encoding" />
         <ini_entry setting="mail_on_error" />
+        <ini_entry setting="mail_on_warning" />
         <ini_entry setting="mail_on_process" />
         <ini_entry setting="mail_on_success" />
         <ini_entry setting="mail_queue_dir" />

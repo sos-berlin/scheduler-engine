@@ -103,6 +103,9 @@
                 <p>
                     In dieser Dokumentation ist dann mit der Datei <code>factory.ini</code> die hier eingestellte gemeint.
                 </p>
+                <p>
+                    Siehe auch <scheduler_method class="Spooler" property="ini_path"/>
+                </p>
             </description>
         </command_option>
 

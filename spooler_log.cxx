@@ -261,7 +261,7 @@ xml::Element_ptr Prefix_log::dom( const xml::Document_ptr& document, const Show_
     if( _mail_on_error              )  log_element.setAttribute( "mail_on_error"  , "yes" );
     if( _mail_on_warning            )  log_element.setAttribute( "mail_on_warning", "yes" );
     if( _mail_on_success            )  log_element.setAttribute( "mail_on_success", "yes" );
-    if( _mail_on_process            )  log_element.setAttribute( "mail_on_success", _mail_on_process );
+    if( _mail_on_process            )  log_element.setAttribute( "mail_on_process", _mail_on_process );
 
 
     string smtp_server = _smtp_server == "-"? "" : _smtp_server;

@@ -229,8 +229,6 @@ log = scheduler.wait com_server.* >scheduler.log
              title   = "Name der Datenbanktabelle für die Aufträge">
         <description>
             <p>
-            </p>
-            <p>
                 Siehe auch <scheduler_method class="Spooler" method="db_orders_table_name"/>
             </p>
         </description>
@@ -499,6 +497,19 @@ db  = jdbc -wait=15 -class=com.mysql.jdbc.Driver jdbc:mysql://localhost/factory:
              title   = "Mit Fehler beendete Task verschickt eMail">
         <description>
             <p>
+                Siehe auch <scheduler_method class="Log" property="mail_on_error"/>
+            </p>
+        </description>
+    </setting>
+
+
+    <setting setting = "mail_on_warning" 
+             type    = "yes|no"
+             initial = "no"
+             title   = "Wenn eine Warnung oder ein Fehler ausgegeben worden ist, wird am Task-Ende eine eMail verschickt">
+        <description>
+            <p>
+                Siehe auch <scheduler_method class="Log" property="mail_on_warning"/>
             </p>
         </description>
     </setting>
@@ -510,6 +521,7 @@ db  = jdbc -wait=15 -class=com.mysql.jdbc.Driver jdbc:mysql://localhost/factory:
              title   = "Task mit spooler_process() verschickt eMail">
         <description>
             <p>
+                Siehe auch <scheduler_method class="Log" property="mail_on_process"/>
             </p>
         </description>
     </setting>
@@ -521,6 +533,7 @@ db  = jdbc -wait=15 -class=com.mysql.jdbc.Driver jdbc:mysql://localhost/factory:
              title   = "Erfolgreich gelaufende Task verschickt eMail">
         <description>
             <p>
+                Siehe auch <scheduler_method class="Log" property="mail_on_success"/>
             </p>
         </description>
     </setting>
