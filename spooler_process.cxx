@@ -1,4 +1,4 @@
-// $Id: spooler_process.cxx,v 1.14 2003/09/27 15:32:11 jz Exp $
+// $Id: spooler_process.cxx,v 1.15 2003/09/28 09:30:49 jz Exp $
 
 #include "spooler.h"
 
@@ -64,9 +64,12 @@ void Process::start()
         _connection->set_async();
     }
 
+
     _connection->set_event( &_spooler->_event );
     _session  = Z_NEW( Session( _connection ) );
     _session->set_connection_has_only_this_session();
+
+    _running_since = Time::now();
 
     _spooler->_log.debug( "Prozess pid=" + as_string( pid() ) + " gestartet" );
 }
@@ -95,8 +98,8 @@ xml::Element_ptr Process::dom( const xml::Document_ptr& document, Show_what show
     {
         //process_element.setAttribute( "name"           , _name );
 
-        if( _session && _session->connection() )
-        process_element.setAttribute( "pid"              , _session->connection()->pid() );
+        if( _connection )
+        process_element.setAttribute( "pid"              , _connection->pid() );
       //process_element.setAttribute( "module_instances" , _module_instance_count );
 
         if( !_job_name.empty() )
@@ -104,6 +107,14 @@ xml::Element_ptr Process::dom( const xml::Document_ptr& document, Show_what show
 
         if( _task_id )
         process_element.setAttribute( "task_id"          , _task_id );
+
+        if( _connection )
+        {
+            process_element.setAttribute( "operations", _connection->operation_count() );
+            process_element.setAttribute( "callbacks", _connection->callback_count() );
+        }
+
+        process_element.setAttribute( "running_since", _running_since.as_string() );
 
         Async_operation* operation = _connection? _connection->current_super_operation() : NULL;
         if( operation )
