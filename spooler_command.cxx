@@ -1,4 +1,4 @@
-// $Id: spooler_command.cxx,v 1.137 2004/08/27 17:49:52 jz Exp $
+// $Id: spooler_command.cxx,v 1.138 2004/08/29 11:20:58 jz Exp $
 /*
     Hier ist implementiert
 
@@ -40,7 +40,7 @@ using namespace std;
 
 const char dtd_string[] = 
 "<?xml version='1.0' encoding='iso-8859-1'?>\n"
-"<!-- $Rev$ $Date: 2004/08/27 17:49:52 $  Joacim Zschimmer,  (C) 2000 SOS GmbH Berlin  -->\n"
+"<!-- $Revision: 1.138 $ $Date: 2004/08/29 11:20:58 $  Joacim Zschimmer,  (C) 2000 SOS GmbH Berlin  -->\n"
 "\n"
 "\n"
 "<!ENTITY % command              ' add_jobs\n" 
@@ -319,6 +319,9 @@ const char dtd_string[] =
 "<!ATTLIST start_job             at                  CDATA #IMPLIED>     <!-- Startzeitpunkt, auch 'now' und 'today 17:00' -->\n"
 "<!ATTLIST start_job             after               CDATA #IMPLIED>     <!-- oder Start nach soviel Sekunden -->\n"
                                                                         "<!-- Antwort: <ok> -->\n"
+"\n"
+"\n"
+"<!ELEMENT terminate             EMPTY>\n"
 "\n"
 "\n"
 "<!ELEMENT params                ( param* )>                             <!-- Parameter für cmd='start' -->\n"
@@ -1223,7 +1226,9 @@ void Command_processor::execute_2( const string& xml_text, const Time& xml_mod_t
             throw_xc( "XML-ERROR", text );
         }
 
-        command_doc.validate_dtd_string( dtd_string );
+        if( !_spooler->_dtd )  _spooler->_dtd.read( dtd_string );
+        
+        command_doc.validate_against_dtd( _spooler->_dtd );
 
 /*
         xml::DocumentType_ptr doctype = command_doc->doctype;

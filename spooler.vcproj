@@ -277,6 +277,9 @@ cd &quot;$(IntDir)&quot; &amp;&amp; jar cfm &quot;$(TargetDir)sos.spooler.jar&qu
 				RelativePath=".\spooler_dll_java.cxx">
 			</File>
 			<File
+				RelativePath=".\spooler_dtd.cxx">
+			</File>
+			<File
 				RelativePath="spooler_history.cxx">
 				<FileConfiguration
 					Name="Release|Win32">
