@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.194 2003/04/03 11:37:10 jz Exp $
+// $Id: spooler.cxx,v 1.195 2003/04/03 11:38:59 jz Exp $
 /*
     Hier sind implementiert
 
@@ -465,9 +465,9 @@ void Spooler::wait_until_threads_stopped( Time until )
             FOR_EACH( Thread_list, threads, it )  
             {
                 Spooler_thread* thread = *it;
-                if( thread->thread_is_running() ) 
+                if( !thread->thread_is_running() ) 
                 {
-                    _log.debug( "Thread " + thread->name() + " sollte sich gleich beenden ..." );
+                    _log.debug( "Thread " + thread->name() + " sollte gleich beendet sein ..." );
                     thread->thread_wait_for_termination();
 
                     _log.info( "Thread " + thread->name() + " beendet" );
@@ -488,7 +488,7 @@ void Spooler::wait_until_threads_stopped( Time until )
                 {
                     Spooler_thread* thread = *it;
 
-                    if( !thread->thread_is_running() ) 
+                    if( thread->thread_is_running() ) 
                     {
                         string msg = "Warten auf Thread " + thread->name() + " [" + thread->thread_as_text() + "]";
                         Job* job = thread->_current_job;
@@ -1539,6 +1539,9 @@ int spooler_main( int argc, char** argv )
 
 int sos_main( int argc, char** argv )
 {
+    LOG( "Spooler " VER_PRODUCTVERSION_STR "\n" );
+
+
     int ret = 99;
 
     bool    is_service = false;
