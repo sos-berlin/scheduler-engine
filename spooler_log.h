@@ -1,4 +1,4 @@
-// $Id: spooler_log.h,v 1.25 2002/12/04 16:47:12 jz Exp $
+// $Id: spooler_log.h,v 1.26 2002/12/08 18:24:48 jz Exp $
 
 #ifndef __SPOOLER_LOG_H
 #define __SPOOLER_LOG_H
@@ -106,6 +106,8 @@ struct Prefix_log
     void                        warn                        ( const string& line )              { log( log_warn  , line ); }
     void                        error                       ( const string& line )              { log( log_error , line ); }
     void                        log                         ( Log_level, const string& );
+
+    void                        log_file                    ( const string& filename );
 
     void                    set_mail_on_error               ( bool b )                          { _mail_on_error = b; }
     bool                        mail_on_error               ()                                  { return _mail_on_error; }

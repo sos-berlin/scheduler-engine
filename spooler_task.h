@@ -1,4 +1,4 @@
-// $Id: spooler_task.h,v 1.80 2002/12/02 20:43:33 jz Exp $
+// $Id: spooler_task.h,v 1.81 2002/12/08 18:24:49 jz Exp $
 
 #ifndef __SPOOLER_TASK_H
 #define __SPOOLER_TASK_H
@@ -506,12 +506,26 @@ struct Job_script_task : Script_task
   //void                        do_on_error                 ();
 };
 
+//------------------------------------------------------------------------------------Process_event
+#ifndef Z_WINDOWS
+
+struct Process_event : Event
+{
+    virtual bool                wait                        ( double seconds );
+
+    int                        _pid;
+    int                        _process_signaled;
+    int                        _process_exit_code;
+};
+
+#endif
 //-------------------------------------------------------------------------------------Process_task
-#ifdef Z_WINDOWS
 
 struct Process_task : Task
 {
-                                Process_task                ( Spooler* sp, const Sos_ptr<Job>& j ) : Task(sp,j), _process_handle( "process_handle" ) {}
+    Fill_zero _zero_;
+
+                                Process_task                ( Spooler* sp, const Sos_ptr<Job>& j );
         
   //virtual bool                loaded                      ();
   //virtual bool                do_load                     ();
@@ -523,11 +537,14 @@ struct Process_task : Task
     void                        do_on_error                 ()                                  {}
     virtual bool                has_step_count              ()                                  { return false; }
 
-    Process_id                 _process_id;
-    Event                      _process_handle;
+#   ifdef Z_WINDOWS
+        Process_id             _process_id;
+        Event                  _process_handle;
+#    else
+        Process_event          _process_event;
+#   endif
 };
 
-#endif
 //-------------------------------------------------------------------------------------------------
 
 } //namespace spooler

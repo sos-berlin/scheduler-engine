@@ -1,4 +1,4 @@
-// $Id: spooler_log.cxx,v 1.52 2002/12/03 23:07:17 jz Exp $
+// $Id: spooler_log.cxx,v 1.53 2002/12/08 18:24:47 jz Exp $
 
 #include "spooler.h"
 #include "spooler_mail.h"
@@ -208,7 +208,25 @@ void Log::log2( Log_level level, const string& prefix, const string& line, Prefi
     }
 }
 
-//----------------------------------------------------------------------------------Prefix_log::log
+//-----------------------------------------------------------------------------Prefix_log::log_file
+
+void Prefix_log::log_file( const string& filename )
+{
+    if( !filename.empty() ) 
+    {
+        try
+        {
+            Any_file file ( "-in -seq " + filename );
+            while( !file.eof() )  info( file.get_string() );
+        }
+        catch( const Xc& x ) 
+        { 
+            warn( filename + ": " + x.what() ); 
+        }
+    }
+}
+
+//---------------------------------------------------------------------------Prefix_log::Prefix_log
 
 Prefix_log::Prefix_log( int )
 :
@@ -217,7 +235,7 @@ Prefix_log::Prefix_log( int )
 {
 }
 
-//----------------------------------------------------------------------------------Prefix_log::log
+//---------------------------------------------------------------------------Prefix_log::Prefix_log
 
 Prefix_log::Prefix_log( Spooler* spooler, const string& prefix )
 :
@@ -230,7 +248,7 @@ Prefix_log::Prefix_log( Spooler* spooler, const string& prefix )
     init( spooler, prefix );
 }
 
-//----------------------------------------------------------------------------------Prefix_log::log
+//--------------------------------------------------------------------------Prefix_log::~Prefix_log
 
 Prefix_log::~Prefix_log()
 {

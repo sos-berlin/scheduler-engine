@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.11 2002/12/08 10:22:05 jz Exp $
+# $Id: Makefile,v 1.12 2002/12/08 18:24:46 jz Exp $
 
 ifndef PROD_DIR
 prod_dir = ..
@@ -69,8 +69,6 @@ include $(PROD_DIR)/make/standard.makefile
 
 $(BIN_DIR)/spooler: spooler.o $(objects) ../kram/$(O_DIR)/soswnmai.o ../zschimmer/$(O_DIR)/perl_scripting_engine_module.o $(foreach p,$(DEP_PRODUCTS),$(PROD_DIR)/$(p)/$(O_DIR)/lib$(p).a) $(PERL_DIR)/libperl.a
 	-$(CCPP) $(DEBUG) $(LINK_FLAGS) -Xlinker -Map -Xlinker $(BIN_DIR)/spooler.map  $^ $(LIBPATH) $(SOS_LIBS) $(LIBS) -o $@
-	#-$(CCPP) $(DEBUG) $(LINK_FLAGS) -Xlinker -Map -Xlinker $(BIN_DIR)/spooler.map  $^ $(VERBOSE) $(CFLAGS) $(INCLUDES) $(TEMPLATES) $(LIBPATH) $(SOS_LIBS) $(SOS_LIBS) -lz -lpthread -ldl $(C_LIBS) $(LIBS) $(LIBS) -o $@
-	#STATISCH: -$(CCPP) $(DEBUG) -static $(LINK_FLAGS) -Xlinker -Map -Xlinker $(BIN_DIR)/spooler.map  $^ $(VERBOSE) $(CFLAGS) $(INCLUDES) $(TEMPLATES) $(LIBPATH) $(SOS_LIBS) $(SOS_LIBS) -lxml2 -lz -ldl $(C_LIBS) $(LIBS) $(LIBS) -o $@
 	echo ^G
 
 

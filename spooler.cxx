@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.158 2002/12/08 10:22:05 jz Exp $
+// $Id: spooler.cxx,v 1.159 2002/12/08 18:24:47 jz Exp $
 /*
     Hier sind implementiert
 
@@ -660,22 +660,11 @@ bool Spooler::run_threads()
 
                 something_done |= ok;
 
-                if( !ok )
-                {
-                    thread->get_next_job_to_start();
-/*
-                    Job* job = thread->next_job_to_start();
-                    if( job )
-                    {
-                        Time t = job->next_time();
-                        if( _next_time > t )  _next_time = t, _next_job = job;
-                    }
-*/
-                }
+                if( !ok )  thread->get_next_job_to_start();
             }
 
             //thread->_log.debug9( "_next_start_time=" + thread->_next_start_time.as_string() );
-            if( _next_time > thread->_next_start_time )  _next_time = thread->_next_start_time, _next_job = thread->_next_job;
+            if( thread->_next_job  &&  _next_time > thread->_next_start_time )  _next_time = thread->_next_start_time, _next_job = thread->_next_job;
         }
     }
 
@@ -982,12 +971,15 @@ void Spooler::run()
 
         bool something_done = run_threads();
 
+        int running_tasks_count = 0;
+        FOR_EACH( Thread_list, _thread_list, it2 )  running_tasks_count += (*it2)->_running_tasks_count;
 
-        if( !something_done  &&  _state_cmd == sc_none )
+LOG( "spooler: running_tasks_count=" << running_tasks_count  << " _state_cmd=" << (int)_state_cmd << " ctrl_c_pressed=" << ctrl_c_pressed << " _next_time=" << _next_time << "\n" );
+        if( running_tasks_count == 0  &&  _state_cmd == sc_none  &&  !ctrl_c_pressed )
         {
             Time now = Time::now();
 
-            if( !something_done  &&  _next_time > now )
+            if( _next_time > now )
             {
                 string msg;
                 

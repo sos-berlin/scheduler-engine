@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.135 2002/12/08 12:05:50 jz Exp $
+// $Id: spooler_task.cxx,v 1.136 2002/12/08 18:24:48 jz Exp $
 /*
     Hier sind implementiert
 
@@ -13,6 +13,9 @@
 
 #ifdef Z_WINDOWS
 #   include <crtdbg.h>
+#else
+#   include <sys/signal.h>
+#   include <sys/wait.h>
 #endif
 
 namespace sos {
@@ -378,7 +381,10 @@ void Job::init()
     _module_ptr = _object_set_descr? &_object_set_descr->_class->_module
                                    : &_module;
 
-    _module_instance = _module_ptr->create_instance();
+    if( _process_filename.empty() )
+    {
+        _module_instance = _module_ptr->create_instance();
+    }
 
 
     if( !_spooler->log_directory().empty()  &&  _spooler->log_directory()[0] != '*' )
@@ -461,7 +467,7 @@ void Job::close_task()
         _task = NULL; 
     }
 
-    if( _close_engine  || _module_ptr  &&  _module_ptr->_reuse == Module::reuse_task ) 
+    if( _close_engine  ||  _module_ptr && _module_ptr->_reuse == Module::reuse_task ) 
     {
         close_engine();
         _close_engine = false;
@@ -500,11 +506,7 @@ Sos_ptr<Task> Job::create_task( const ptr<spooler_com::Ivariable_set>& params, c
 
     //_log.debug( "create_task" );
 
-#ifdef Z_WINDOWS
     if( !_process_filename.empty() )   task = SOS_NEW( Process_task( _spooler, this ) );
-#else
-    if( !_process_filename.empty() )   throw_xc( "create_task", "Process_task ist hier nicht implementiert" );
-#endif
     else
     if( _object_set_descr          )   task = SOS_NEW( Object_set_task( _spooler, this ) );
     else                             
@@ -2056,6 +2058,19 @@ bool Job_script_task::do_step()
     return ok;
 }
 
+//-----------------------------------------------------------------------Process_task::Process_task
+
+Process_task::Process_task( Spooler* sp, const Sos_ptr<Job>& j ) 
+: 
+    Task(sp,j),
+    _zero_(this+1)
+
+#   ifdef Z_WINDOWS
+        ,_process_handle( "process_handle" ) 
+#   endif
+{
+}
+
 //----------------------------------------------------------------------------Process_task::do_start
 #ifdef Z_WINDOWS
 
@@ -2142,15 +2157,7 @@ void Process_task::do_end()
     _process_handle.close();
     _result = (int)exit_code;
 
-    if( !_job->_process_log_filename.empty() ) 
-    {
-        try
-        {
-            Any_file process_log ( "-in -seq " + _job->_process_log_filename );
-            while( !process_log.eof() )  _job->_log.info( process_log.get_string() );
-        }
-        catch( const Xc& x ) { _job->_log.warn( _job->_process_log_filename + ": " + x.what() ); }
-    }
+    _job->_log.log_file( _job->_process_log_filename ); 
 
     if( exit_code )  throw_xc( "SPOOLER-126", exit_code );
 }
@@ -2160,6 +2167,173 @@ void Process_task::do_end()
 bool Process_task::do_step()
 {
     return !_process_handle.signaled();
+}
+
+#endif
+//------------------------------------------------------------------------------Process_event::wait
+#ifndef Z_WINDOWS
+
+bool Process_event::wait( double seconds )
+{
+    if( !_pid )  return true;
+
+    while(1)
+    {
+        int status = 0;
+
+      //if( log_ptr )  *log_ptr << "waitpid(" << _pid << ")  ";
+
+        int ret = waitpid( _pid, &status, WNOHANG | WUNTRACED );    // WUNTRACED: "which means to also return for children which are stopped, and whose status has not been reported."
+        if( ret == -1 )  throw_errno( errno, "waitpid" );
+
+        if( ret == _pid )
+        {
+            if( WIFEXITED( status ) )
+            {
+                _process_exit_code = WEXITSTATUS( status );
+              //LOG( "exit_code=" << _process_exit_code << "\n" );
+                _pid = 0;
+                set_signal();
+                return true;
+            }
+
+            if( WIFSIGNALED( status ) )
+            {
+                _process_signaled = WTERMSIG( status );
+              //LOG( "signal=" << _process_exit_code << "\n" );
+                _pid = 0;
+                set_signal();
+                return true;
+            }
+        }
+
+      //LOG( "Prozess läuft noch\n" );
+
+        if( seconds < 0.0001 )  break;
+
+        double w = min( 0.1, seconds );
+        seconds -= w;
+
+        struct timespec t;
+        t.tv_sec = (time_t)floor( w );
+        t.tv_nsec = (time_t)max( 0.0, ( w - floor( w ) ) * 1e9 );
+
+        int err = nanosleep( &t, NULL );
+        if( err )
+        {
+            if( errno == EINTR )  return true;
+            throw_errno( errno, "nanosleep" );
+        }
+    }
+
+    return false;
+}
+
+#endif
+//----------------------------------------------------------------------------Process_task::do_start
+#ifndef Z_WINDOWS
+
+bool Process_task::do_start()
+{
+    vector<string> string_args;
+
+    if( _job->_process_param != "" )  string_args.push_back( _job->_process_param );
+
+    for( int i = 1;; i++ )
+    {
+        string nr = as_string(i);
+        Variant vt;
+        HRESULT hr;
+
+        hr = _params->get_var( Bstr(nr), &vt );
+        if( FAILED(hr) )  throw_ole( hr, "Variable_set.var", nr.c_str() );
+
+        if( vt.vt == VT_EMPTY )  break;
+
+        string_args.push_back( string_from_variant( vt ) );
+    }
+
+
+    if( log_ptr )  *log_ptr << "fork()  ";
+    int pid = fork();
+
+    switch( pid )
+    {
+        case -1:    
+            throw_errno( errno, "fork" );
+        
+        case 0:
+        {
+            char** args = new char* [ string_args.size() + 1 ];
+            int    i;
+
+            for( i = 0; i < string_args.size(); i++ )  args[i] = (char*)string_args[i].c_str();
+            args[i] = NULL;
+
+            execvp( _job->_process_filename.c_str(), args );
+
+            fprintf( stderr, "ERRNO-%d  %s\nbei execlp(\"%s\")", errno, strerror(errno), _job->_process_filename.c_str() );
+            _exit( errno? errno : 250 );  // Wie melden wir den Fehler an den rufenden Prozess?
+        }
+
+        default:
+            LOG( "pid=" << pid << "\n" );
+            _process_event._pid = pid;
+            break;
+    }
+
+
+    _job->set_state( Job::s_running_process );
+
+    _process_event.set_name( "Process " + _job->_process_filename );
+    _process_event.add_to( &_job->_thread->_wait_handles );
+
+    return true;
+}
+
+//----------------------------------------------------------------------------Process_task::do_stop
+
+void Process_task::do_stop()
+{
+    if( _process_event._pid )
+    {
+        _job->_log.warn( "Prozess wird abgebrochen" );
+
+        int err = kill( _process_event._pid, SIGTERM );
+        if( err )  throw_errno( errno, "killpid" );
+    }
+}
+
+//-----------------------------------------------------------------------------Process_task::do_end
+
+void Process_task::do_end()
+{
+    if( _process_event._pid )
+    {
+        do_step();      // waitpid() sollte schon gerufen sein. 
+
+        if( _process_event._pid )   throw_xc( "SPOOLER-179", _process_event._pid );       // Sollte nicht passieren (ein Zombie wird stehen bleiben)
+    }
+
+    _process_event.close();
+
+    if( _process_event._process_signaled )  throw_xc( "SPOOLER-181", _process_event._process_signaled );
+
+    _result = (int)_process_event._process_exit_code;
+
+    _job->_log.log_file( _job->_process_log_filename ); 
+
+    if( _process_event._process_exit_code )  throw_xc( "SPOOLER-126", _process_event._process_exit_code );
+}
+
+//----------------------------------------------------------------------------Process_task::do_step
+
+bool Process_task::do_step()
+{
+    _process_event.wait( 0 );
+
+    //LOG( "Process_task::do_step() signaled=" << _process_event.signaled() << "\n" );
+    return !_process_event.signaled();
 }
 
 #endif

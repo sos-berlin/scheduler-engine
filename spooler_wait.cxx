@@ -1,4 +1,4 @@
-// $Id: spooler_wait.cxx,v 1.60 2002/12/08 12:05:51 jz Exp $
+// $Id: spooler_wait.cxx,v 1.61 2002/12/08 18:24:50 jz Exp $
 /*
     Hier sind implementiert
 
@@ -399,7 +399,7 @@ int Wait_handles::wait_until_2( Time until )
                 else
                 {
                     bool signaled = e->wait( min( directory_watcher_interval, (double)( until - Time::now() ) ) );
-                    if( signaled )  return i;
+                    if( signaled )  return i;  // Leider auch bei EINTR
                 }
             }
 
@@ -559,7 +559,7 @@ void Directory_watcher::watch_directory( const string& directory, const string& 
 
 void Directory_watcher::renew()
 {
-    has_changed();
+    has_changed_2();
 }
 
 #endif
