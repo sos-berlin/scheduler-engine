@@ -1,4 +1,4 @@
-// $Id: spooler_wait.cxx,v 1.87 2003/11/30 10:35:38 jz Exp $
+// $Id: spooler_wait.cxx,v 1.88 2003/12/01 09:18:26 jz Exp $
 /*
     Hier sind implementiert
 
@@ -196,6 +196,19 @@ void Wait_handles::add( System_event* event )
     }
 }
 
+//--------------------------------------------------------------------------Wait_handles::add_handle
+#ifdef Z_WINDOWS
+
+void Wait_handles::add_handle( HANDLE handle )
+{
+    THREAD_LOCK( _lock )
+    {
+        _handles.push_back( handle );
+        _events.push_back( NULL );
+    }
+}
+
+#endif
 //-----------------------------------------------------------------------Wait_handles::remove_handle
 #ifdef Z_WINDOWS
 /*
@@ -344,7 +357,7 @@ bool Wait_handles::wait_until_2( Time until )
         THREAD_LOCK( _lock )
         {
           //if( _log->log_level() <= log_debug9 )
-            if( log_category_is_set( "scheduler.wait" ) )
+            if( t > 0  &&  log_category_is_set( "scheduler.wait" ) )
             {
                 string msg = "MsgWaitForMultipleObjects " + sos::as_string(t/1000.0) + "s (bis " + until.as_string() + ")  ";
                 for( int i = 0; i < _handles.size(); i++ )
@@ -374,7 +387,13 @@ bool Wait_handles::wait_until_2( Time until )
                 int            index = ret - WAIT_OBJECT_0;
                 z::Event_base* event = _events[ index ];
             
-                if( event )  event->set_signaled();
+                if( event )
+                {
+                    if( t > 0 )  LOG2( "scheduler.wait", "... Event " << event->as_text() << "\n" );
+                    event->set_signaled();
+                }
+                else
+                    if( t > 0 )  LOG2( "scheduler.wait", "... Event " << index << "\n" );
 
                 return true; //index;
             }

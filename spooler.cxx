@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.295 2003/11/30 20:52:03 jz Exp $
+// $Id: spooler.cxx,v 1.296 2003/12/01 09:18:26 jz Exp $
 /*
     Hier sind implementiert
 
@@ -1652,7 +1652,7 @@ void Spooler::run()
                 }
             }
 
-            Time earliest = Time::now() + 0.1;
+            Time earliest = Time::now(); // + 0.1;
             if( _next_time < earliest ) 
             {
 #               ifdef Z_DEBUG
@@ -1703,6 +1703,16 @@ void Spooler::run()
             }
 
             nothing_done_max += _single_thread->task_count() * 3 + 3;    // Statt der Prozesse zählen wir die Tasks einmal mehr
+        }
+
+
+        FOR_EACH( Process_class_list, _process_class_list, pc )
+        {
+            FOR_EACH( Process_list, (*pc)->_process_list, p )
+            {
+                object_server::Connection_to_own_server* server = dynamic_cast<object_server::Connection_to_own_server*>( +(*p)->_connection );
+                if( server  &&  server->_process_handle )  wait_handles.add_handle( server->_process_handle );        // Signalisiert Prozessende
+            }
         }
 
 
