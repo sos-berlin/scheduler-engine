@@ -1,4 +1,4 @@
-<!-- $Id: task_frame.html,v 1.2 2004/07/18 15:38:02 jz Exp $ -->
+<!-- $Id: task_frame.html,v 1.3 2004/07/18 20:01:20 jz Exp $ -->
 <html>
 
 <head>
@@ -40,22 +40,156 @@
 
 <xml id="stylesheet">
     <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0">
-        <xsl:template match="task">
-            <b>Task <xsl:value-of select="@id"/></b>
-            <xsl:if test="@pid">
-                pid=<xsl:value-of select="@pid"/>
-            </xsl:if>
-            
-            <table>
+
+        <xsl:template match="job">
+            <table cellpadding="0" cellspacing="0" style="color: blue">
+                <col valign="top" align="left"  style="padding-right: 2ex; padding-bottom: 1pt" />
+                <col valign="top" align="left"  style="padding-right: 2ex"/>  
+
                 <tr>
-                    <td>pid</td>
+                    <td>Job</td>
                     <td>
-                        <xsl:value-of select="@pid"/>
+                        <xsl:value-of select="@job"/>
+                        <xsl:if test="@title">
+                            <xsl:text>&#160; </xsl:text><xsl:value-of select="@title"/>
+                        </xsl:if>
                     </td>
                 </tr>
                     
                 <tr>
-                    <td>enqueued</td>
+                    <td>description</td>
+                    <td>
+                        <xsl:value-of select="description"/>
+                    </td>
+                </tr>
+                    
+                <tr>
+                    <td>state</td>
+                    <td>
+                        <xsl:value-of select="@state"/>
+                        <xsl:if test="@waiting_for_process='yes'">
+                            <xsl:text> </xsl:text>(waiting for process)
+                        </xsl:if>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td>state text</td>
+                    <td>
+                        <i><xsl:value-of select="@state_text"/></i>
+                    </td>
+                </tr>
+                
+                <tr>
+                    <td>error</td>
+                    <td>
+                        <span style="color: red">
+                            <xsl:value-of select="ERROR/@time"/>
+                            <xsl:value-of select="ERROR/@text"/>
+                            <xsl:if test="ERROR/@source">
+                                <xsl:text> </xsl:text>
+                                source <xsl:value-of select="ERROR/@source"/>
+                            </xsl:if>
+                            <xsl:if test="ERROR/@line">
+                                <xsl:text> </xsl:text>
+                                line <xsl:value-of select="ERROR/@line"/>
+                            </xsl:if>
+                            <xsl:if test="ERROR/@source">
+                                <xsl:text> </xsl:text>
+                                column <xsl:value-of select="ERROR/@col"/>
+                            </xsl:if>
+                        </span>
+                    </td>
+                </tr>
+                    
+                <tr>
+                    <td>next start time</td>
+                    <td><xsl:value-of select="@next_start_time"/></td>
+                </tr>
+
+                <tr>
+                    <td>steps</td>
+                    <td><xsl:value-of select="@all_steps"/></td>
+                </tr>
+
+                <tr>
+                    <td>orders</td>
+                    <td>
+                        <xsl:choose>
+                            <xsl:when test="@order!='yes'">
+                                (no order job)
+                            </xsl:when>
+                            <xsl:when test="order_queue/@length!=''">
+                                <xsl:value-of select="order_queue/@length"/> orders to process
+                            </xsl:when>
+                        </xsl:choose>
+                    </td>
+                </tr>
+                
+            </table>
+
+            
+            <p>&#160; </p>
+            
+            <xsl:for-each select="tasks/task">
+                <p> </p>
+                <xsl:apply-templates select="."/>
+            </xsl:for-each>
+
+            
+            <p>&#160; </p>
+            
+            <xsl:apply-templates select="order_queue"/>
+            
+        </xsl:template>
+
+        
+        <xsl:template match="task">
+            <table cellpadding="0" cellspacing="0" style="color: green">
+                <col valign="top" align="left"  style="padding-right: 2ex; padding-bottom: 1pt" />
+                <col valign="top" align="left"  style="padding-right: 2ex"/>  
+
+                <tr>
+                    <td colspan="2">
+                        <b>
+                        Task
+
+                        <xsl:value-of select="@id"/>
+                        <xsl:if test="@name!=''">
+                            <xsl:text>&#160; </xsl:text><xsl:value-of select="@name"/>
+                        </xsl:if>
+                        <xsl:if test="@pid">
+                            <xsl:text>, pid </xsl:text>
+                            <xsl:value-of select="@pid"/>
+                        </xsl:if>
+                        <xsl:if test="@state!=''">
+                            <xsl:text>, </xsl:text>
+                            <xsl:value-of select="@state"/>
+                        </xsl:if>
+                        <xsl:if test="@calling">
+                            <xsl:text> </xsl:text>(<xsl:value-of select="@calling"/>)
+                        </xsl:if>
+                        <xsl:if test="@steps!=''">
+                            <xsl:text>, </xsl:text>
+                            <xsl:value-of select="@steps"/> steps
+                        </xsl:if>
+                        </b>
+                    </td>
+                </tr>
+                    
+                <tr>
+                    <td>processing order</td>
+                    <xsl:if test="order">
+                        <td>
+                            <xsl:value-of select="order/@id"/>
+                            &#160;
+                            <xsl:value-of select="order/@title"/>
+                        </td>
+                    </xsl:if>
+                </tr>
+                
+                <tr>
+                    <td>enqueued at</td>
                     <td><xsl:value-of select="@enqueued"/></td>
                 </tr>
 
@@ -66,16 +200,15 @@
 
                 <tr>
                     <td>running since</td>
-                    <td><xsl:value-of select="@running_since"/></td>
-                </tr>
-
-                <tr>
-                    <td>cause</td>
                     <td>
-                        <xsl:value-of select="@cause"/>
+                        <xsl:value-of select="@running_since"/>
+                        <xsl:if test="@cause!=''">
+                            <xsl:text> </xsl:text>
+                            (<xsl:value-of select="@cause"/>)
+                        </xsl:if>
                     </td>
                 </tr>
-                
+
                 <tr>
                     <td>in process since</td>
                     <td><xsl:value-of select="@in_process_since"/></td>
@@ -88,31 +221,54 @@
                     </xsl:if>
                 </tr>
 
-                <tr>
-                    <td>order</td>
-                    <xsl:if test="order">
-                        <td>
-                            <xsl:value-of select="order/@id"/>
-                            &#160;
-                            <xsl:value-of select="order/@title"/>
-                        </td>
-                    </xsl:if>
-                </tr>
-
-                <tr>
-                    <td>steps</td>
-                    <td><xsl:value-of select="@steps"/></td>
-                </tr>
-                
-                <tr>
-                    <td>calling</td>
-                    <td>
-                        <xsl:value-of select="@calling"/>
-                    </td>
-                </tr>
-                
             </table>
         </xsl:template>
+
+
+        <xsl:template match="order_queue">
+            <table cellpadding="0" cellspacing="0">
+                <col valign="top" align="left"  width="100"  style="padding-right: 2ex; padding-bottom: 1pt" />
+                <col valign="top" align="left"  width=" 50"  style="padding-right: 2ex"/>  
+                <col valign="top" align="left"  width=" 30"  style="padding-right: 2ex"/>  
+                <col valign="top" align="left"  width=" 50"  style="padding-right: 2ex"/>  
+                <col valign="top" align="left"  width="200"  style="padding-right: 2ex"/>  
+                <col valign="top" align="left"  width="200"  style="padding-right: 2ex"/>  
+                
+                <thead>
+                    <tr>
+                        <td>Job chain</td>
+                        <td>Id</td>
+                        <td>Pri</td>
+                        <td>State</td>
+                        <td>State text</td>
+                        <td>Title</td>
+                    </tr>
+                    <tr>
+                        <td colspan="99"><hr size="1"/></td>
+                    </tr>
+                </thead>
+                
+                <tbody>
+                    <xsl:apply-templates select="./order"/>
+                </tbody>
+            </table>
+        </xsl:template> 
+
+
+        <xsl:template match="order">
+            <xsl:element name="tr">
+                <xsl:if test="@task">
+                    <xsl:attribute name="style">color: green; font-weight: bold</xsl:attribute>
+                </xsl:if>                
+                
+                <td><xsl:value-of select="@job_chain"/></td>
+                <td><xsl:value-of select="@id"/></td>
+                <td><xsl:value-of select="@priority"/></td>
+                <td><xsl:value-of select="@state"/></td>
+                <td><xsl:value-of select="@state_text"/></td>
+                <td><xsl:value-of select="@title"/></td>
+            </xsl:element>
+        </xsl:template>                 
         
     </xsl:stylesheet>
 </xml>
@@ -126,6 +282,7 @@
 
 var _stylesheet;
 var _timer;
+var _job_name;
 var _task_id;
 
 //-------------------------------------------------------------------------------------------onload
@@ -144,11 +301,25 @@ function show_task_details( job_element, task_element )
 {
     var job_title = job_element.getAttribute( "title" );
     
-    document.all.job_name.innerText = "Job " + job_element.getAttribute( "job" );
-    document.all.job_title.innerText = job_title? job_title : "";
-    
+    _job_name = job_element.getAttribute( "job" )
     _task_id = task_element.getAttribute( "id" );
+
+    document.all.job_name.innerText = "Job " + _job_name;
+    document.all.job_title.innerText = job_title? job_title : "";
+
+
     document.all.stylesheet.innerHTML = task_element.transformNode( _stylesheet );
+}
+
+//---------------------------------------------------------------------------------show_job_details
+
+function show_job_details( job_element )
+{
+    _job_name = job_element.getAttribute( "job" )
+    _task_id  = undefined;
+
+    document.all.stylesheet.innerHTML = job_element.transformNode( _stylesheet );
+    update();
 }
 
 //-------------------------------------------------------------------------------------------update
@@ -158,8 +329,18 @@ function update()
     if( _task_id != undefined )
     {
         var response = window.parent.jobs_frame.scheduler.execute( "<show_task id='" + _task_id + "' what='all'/>" );
+        
         var task_element = response.selectSingleNode( "spooler/answer/task" );
         document.all.stylesheet.innerHTML = task_element? task_element.transformNode( _stylesheet ) : "";
+    }
+    else
+    if( _job_name != undefined )
+    {
+        var response = window.parent.jobs_frame.scheduler.execute( "<show_job job='" + _job_name + "' what='all,orders'/>" );
+        window.parent.jobs_frame.modify_response( response );
+        
+        var job_element = response.selectSingleNode( "spooler/answer/job" );
+        document.all.stylesheet.innerHTML = job_element? job_element.transformNode( _stylesheet ) : "";
     }
 }
 

@@ -1,4 +1,4 @@
-// $Id: spooler_command.cxx,v 1.117 2004/07/18 15:38:02 jz Exp $
+// $Id: spooler_command.cxx,v 1.118 2004/07/18 20:01:20 jz Exp $
 /*
     Hier ist implementiert
 
@@ -682,25 +682,20 @@ string Command_processor::execute_http( const Http_request& http_request )
 
     try
     {
-
         if( http_request._http_cmd == "GET" )
         {
             if( path == "/" )  path = "index.html";
 
-            if( !string_ends_with( path, ">" ) )
-            {
-                string extension = extension_of_path( path );
-                if( extension != "" )
-                {
-                    //response_body = file_as_string( directory_of_path( _spooler->_config_filename ) ) + "/html/index.html";
-                    if( _spooler->_html_directory.empty() )  throw_xc( "SCHEDULER-212" );
-                    response_body = file_as_string( _spooler->_html_directory + "/" + path );
+            string extension = extension_of_path( path );
+            if( extension == "html"  
+             || extension == "htm" )  response_content_type = "text/html";
+            else
+            if( extension == "js"  )  response_content_type = "text/javascript";
 
-                    if( extension == "html"  
-                     || extension == "htm" )  response_content_type = "text/html";
-                    else
-                    if( extension == "js"  )  response_content_type = "text/javascript";
-                }
+            if( response_content_type != "" )
+            {
+                if( _spooler->_html_directory.empty() )  throw_xc( "SCHEDULER-212" );
+                response_body = file_as_string( _spooler->_html_directory + "/" + path );
             }
             else
             if( path.length() > 0 )

@@ -1,4 +1,4 @@
-<!-- $Id: jobs_frame.html,v 1.2 2004/07/18 15:38:02 jz Exp $ -->
+<!-- $Id: jobs_frame.html,v 1.3 2004/07/18 20:01:20 jz Exp $ -->
 <html>
 
 <head>
@@ -36,7 +36,6 @@
     <label for="update_periodically_checkbox">Update periodically</label>
     &#160; &#160;
     <input id="update_button" type="button" value="Update" onclick="update__onclick()" NAME="update_button"/>
-    
 </p>
 
 <hr size="1"/>
@@ -49,12 +48,11 @@
             </p>
             <p>&#160;</p>
 
-            <table>
-                <col valign="top" align="left"  width="150" style="padding-right: 2ex" />
+            <table cellpadding="0" cellspacing="0">
+                <col valign="top" align="left"  width="150" style="padding-right: 2ex; padding-bottom: 1px"/>
                 <col valign="top" align="left"  width="250" style="padding-right: 2ex"/>  
                 <col valign="top" align="right" width=" 70" style="padding-right: 2ex"/>
-                <col valign="top" align="left"  width="300" style="padding-right: 2ex"/>
-                <col valign="top" align="left"  width="100" style="padding-right: 2ex"/>
+                <col valign="top" align="left"  width="200" style="padding-right: 2ex"/>
                 
                 <thead>
                     <tr>
@@ -72,7 +70,18 @@
                 
                 <tbody>
                     <xsl:for-each select="state/jobs/job">
-                        <tr>
+                        <xsl:element name="tr">
+                            <xsl:attribute name="id"         >scheduler_tr_job_<xsl:value-of select="@job"/></xsl:attribute>
+                            <xsl:attribute name="style"      >cursor: hand; color: blue</xsl:attribute>
+                            <xsl:attribute name="onmouseover">
+                                this.style.backgroundColor="yellow";
+                                scheduler_tr_job_<xsl:value-of select="@job"/>__2.style.backgroundColor="yellow"
+                            </xsl:attribute>
+                            <xsl:attribute name="onmouseout" >
+                                this.style.backgroundColor="window"
+                                scheduler_tr_job_<xsl:value-of select="@job"/>__2.style.backgroundColor="window"
+                            </xsl:attribute>
+                            <xsl:attribute name="onclick">show_job_details('<xsl:value-of select="@job"/>')</xsl:attribute>
                             <td colspan="99">
                                 <b><xsl:value-of select="@job"/></b>
                                 &#160;
@@ -82,8 +91,20 @@
                                     <i><xsl:value-of select="@state_text"/></i>
                                 </xsl:if>
                             </td>
-                        </tr>
-                        <tr>
+                        </xsl:element>
+                        
+                        <xsl:element name="tr">
+                            <xsl:attribute name="id">scheduler_tr_job_<xsl:value-of select="@job"/>__2</xsl:attribute>
+                            <xsl:attribute name="style"      >cursor: hand; color: blue</xsl:attribute>
+                            <xsl:attribute name="onmouseover">
+                                this.style.backgroundColor="yellow";
+                                scheduler_tr_job_<xsl:value-of select="@job"/>.style.backgroundColor="yellow"
+                            </xsl:attribute>
+                            <xsl:attribute name="onmouseout" >
+                                this.style.backgroundColor="window"
+                                scheduler_tr_job_<xsl:value-of select="@job"/>.style.backgroundColor="window"
+                            </xsl:attribute>
+                            <xsl:attribute name="onclick">show_job_details('<xsl:value-of select="@job"/>')</xsl:attribute>
                             <td>
                             </td>
                             <td>
@@ -105,7 +126,7 @@
                                     </xsl:when>
                                 </xsl:choose>
                             </td>
-                        </tr>
+                        </xsl:element>
 
                         <xsl:if test="/spooler/@my_show_tasks='yes' and tasks/task">
                             <tr>
@@ -132,10 +153,11 @@
                 <xsl:element name="tr">
                     <xsl:choose>
                         <xsl:when test=" not( @id ) ">
-                            <td>&#160;</td>
+                            <xsl:attribute name="style">color: green</xsl:attribute>
+                            <td>&#160; &#160; . </td>
                         </xsl:when>
                         <xsl:otherwise>
-                            <xsl:attribute name="style"      >cursor: hand</xsl:attribute>
+                            <xsl:attribute name="style"      >cursor: hand; color: green</xsl:attribute>
                             <xsl:attribute name="onmouseover">this.style.backgroundColor="yellow"</xsl:attribute>
                             <xsl:attribute name="onmouseout" >this.style.backgroundColor="window"</xsl:attribute>
                             <xsl:attribute name="onclick">show_task_details( '<xsl:value-of select="../../@job"/>', <xsl:value-of select="@id"/> )</xsl:attribute>
@@ -268,7 +290,14 @@ function repeat_update( repeat, call_update )
 {
     if( _timer != undefined )  window.clearTimeout( _timer ),  _timer = undefined;
     
-    if( call_update )  update();
+    if( call_update )
+    {
+        var checked = document.all.update_periodically_checkbox.checked;
+        document.all.update_periodically_checkbox.checked = false;     
+
+        update();
+        document.all.update_periodically_checkbox.checked = checked;
+    }
     
     if( repeat )  _timer = window.setTimeout( "repeat_update(true,true)", 1000, "JavaScript" );
 }
@@ -315,7 +344,8 @@ function modify_response( response )
     
     // my_show_task einfügen
     
-    response.selectSingleNode( "spooler" ).setAttribute( "my_show_tasks", document.all.show_tasks_checkbox.checked? "yes" : "no" );
+    var spooler_element = response.selectSingleNode( "spooler" );
+    if( spooler_element )  spooler_element.setAttribute( "my_show_tasks", document.all.show_tasks_checkbox.checked? "yes" : "no" );
 }
 
 //--------------------------------------------------------------------------------show_task_details
@@ -326,6 +356,15 @@ function show_task_details( job_name, task_id )
     var task_element = _response.selectSingleNode( ".//task[@id=" + task_id + "]" );
 
     window.parent.details_frame.show_task_details( job_element, task_element );
+}
+
+//---------------------------------------------------------------------------------show_job_details
+
+function show_job_details( job_name )
+{
+    var job_element  = _response.selectSingleNode( ".//job[@job='" + job_name + "']" );
+
+    window.parent.details_frame.show_job_details( job_element );
 }
 
 //-------------------------------------------------------------------------------------------------
