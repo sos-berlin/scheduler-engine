@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding="utf-8"?>
-<!-- $Id: scheduler.xslt,v 1.38 2004/09/16 16:05:46 jz Exp $ -->
+<!-- $Id: scheduler.xslt,v 1.39 2004/10/09 21:04:42 jz Exp $ -->
 
 <!--
     Änderungswünsche:
@@ -541,7 +541,7 @@
                 </xsl:call-template>
                 
                 <p>
-                    (Das Register ist ein Experiment.)
+                    Fehlt ein Stichwort? Weitere Stichwörter können bei mir beantragt werden: <a href="mailto:j@zsch.de?subject=Bitte ein neues Stichwort fuer den Scheduler: xxx">j@zsch.de</a>.
                 </p>
                 
                 <xsl:call-template name="complete_register"/>
@@ -592,32 +592,35 @@
 
     <xsl:template name="complete_register">
 
-        <a href="#letter__a">A&#160;</a>
-        <a href="#letter__b">B&#160;</a>
-        <a href="#letter__c">C&#160;</a>
-        <a href="#letter__d">D&#160;</a>
-        <a href="#letter__e">E&#160;</a>
-        <a href="#letter__f">F&#160;</a>
-        <a href="#letter__g">G&#160;</a>
-        <a href="#letter__h">H&#160;</a>
-        <a href="#letter__i">I&#160;</a>
-        <a href="#letter__j">J&#160;</a>
-        <a href="#letter__k">K&#160;</a>
-        <a href="#letter__l">L&#160;</a>
-        <a href="#letter__m">M&#160;</a>
-        <a href="#letter__n">N&#160;</a>
-        <a href="#letter__o">O&#160;</a>
-        <a href="#letter__p">P&#160;</a>
-        <a href="#letter__q">Q&#160;</a>
-        <a href="#letter__r">R&#160;</a>
-        <a href="#letter__s">S&#160;</a>
-        <a href="#letter__t">T&#160;</a>
-        <a href="#letter__u">U&#160;</a>
-        <a href="#letter__v">V&#160;</a>
-        <a href="#letter__w">W&#160;</a>
-        <a href="#letter__x">X&#160;</a>
-        <a href="#letter__y">Y&#160;</a>
-        <a href="#letter__z">Z&#160;</a>
+        <p>
+            <a href="#letter__a">A&#160;</a>
+            <a href="#letter__b">B&#160;</a>
+            <a href="#letter__c">C&#160;</a>
+            <a href="#letter__d">D&#160;</a>
+            <a href="#letter__e">E&#160;</a>
+            <a href="#letter__f">F&#160;</a>
+            <a href="#letter__g">G&#160;</a>
+            <a href="#letter__h">H&#160;</a>
+            <a href="#letter__i">I&#160;</a>
+            <a href="#letter__j">J&#160;</a>
+            <a href="#letter__k">K&#160;</a>
+            <a href="#letter__l">L&#160;</a>
+            <a href="#letter__m">M&#160;</a>
+            <a href="#letter__n">N&#160;</a>
+            <a href="#letter__o">O&#160;</a>
+            <a href="#letter__p">P&#160;</a>
+            <a href="#letter__q">Q&#160;</a>
+            <a href="#letter__r">R&#160;</a>
+            <a href="#letter__s">S&#160;</a>
+            <a href="#letter__t">T&#160;</a>
+            <a href="#letter__u">U&#160;</a>
+            <a href="#letter__v">V&#160;</a>
+            <a href="#letter__w">W&#160;</a>
+            <a href="#letter__x">X&#160;</a>
+            <a href="#letter__y">Y&#160;</a>
+            <a href="#letter__z">Z&#160;</a>
+        </p>
+
         <p>&#160;</p>
         
         <p>
@@ -1555,13 +1558,13 @@
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~browse_bar_register-->
 
     <xsl:template name="browse_bar_register">
-        <!--
+
         <xsl:element name="a">
             <xsl:attribute name="href"><xsl:value-of select="$base_dir"/>register.xml</xsl:attribute>
             <xsl:text>Register</xsl:text>
         </xsl:element>
         &#160; &#160; &#160; 
-        -->
+
     </xsl:template>    
     
 </xsl:stylesheet>

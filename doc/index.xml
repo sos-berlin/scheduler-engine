@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="scheduler.xslt" type="text/xsl"?>
 
-<!--$Id: index.xml,v 1.18 2004/09/11 18:31:06 jz Exp $-->
+<!--$Id: index.xml,v 1.19 2004/10/09 21:04:42 jz Exp $-->
 
 <description 
     head_title          = "Erste Seite" 
     base_dir            = ""
     suppress_browse_bar = "yes"
     author              = "$Author: jz $"
-    date                = "$Date: 2004/09/11 18:31:06 $"
+    date                = "$Date: 2004/10/09 21:04:42 $"
 >
 
 <style>
@@ -29,6 +29,12 @@
     Hier sind wichtige Teile des Schedulers beschrieben.
 </p>
 
+<!--
+<p>
+    Es gibt ein <a href="register.xml">Register</a>.
+    Auf jeder Seite befindet sich oben rechts ein Verweis darauf.
+</p>
+-->
 
 <h2>Einstellungen und Datenbank</h2>
 <dl>
