@@ -28,8 +28,8 @@
                             </xsl:if>
                         </b>
                         <xsl:value-of select="state/@state"/>    
-                        <br/>
-                        <span style="font-size: 8pt"><xsl:value-of select="state/@version"/></span>
+                        <xsl:text>&#160; </xsl:text>
+                        <span style="font-size: 8pt; white-space: nowrap"><xsl:value-of select="state/@version"/></span>
                     </p>
                 </td>
                 <td align="right">
@@ -39,7 +39,7 @@
                             &#160;
                             (<xsl:value-of select="my:datetime_diff( string( state/@spooler_running_since ), $now )"  disable-output-escaping="yes"/>)
                         </span>
-                        <br/>
+                        <xsl:text> </xsl:text>
                         <xsl:call-template name="command_menu">
                             <xsl:with-param name="onclick" select="'scheduler_menu__onclick()'"/>
                         </xsl:call-template>
@@ -973,7 +973,7 @@
             </caption>
             
             <xsl:if test="queued_task">
-                <col valign="baseline" align="left" width="50"/>
+                <col valign="baseline" align="left" width="40"/>
                 <col valign="baseline" align="left" width="70"/>
                 <col valign="baseline" align="left" width="250"/>
                 
