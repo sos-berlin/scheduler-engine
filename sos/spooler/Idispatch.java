@@ -1,4 +1,4 @@
-// $Id: Idispatch.java,v 1.6 2004/07/13 11:28:06 jz Exp $
+// $Id$
 
 package sos.spooler;
 

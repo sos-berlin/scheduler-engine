@@ -2,13 +2,13 @@
 <?xml-stylesheet href="scheduler.xsl" type="text/xsl"?>
 
 
-<!--$Id: xml_commands.xml,v 1.6 2004/12/10 11:20:39 jz Exp $-->
+<!--$Id$-->
 
 <xml_commands
     title    = "XML-Kommandos" 
     base_dir = ""
-    author   = "$Author: jz $"
-    date     = "$Date: 2004/12/10 11:20:39 $"
+    author   = "$Author$"
+    date     = "$Date$"
 >    
     <description>
         <p>

@@ -1,4 +1,4 @@
-// $Id: translation_de.js,v 1.1 2004/11/30 21:48:19 jz Exp $
+// $Id$
 
 function init_translation_table( t )
 {

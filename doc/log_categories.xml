@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="scheduler.xsl" type="text/xsl"?>
 
-<!--$Id: log_categories.xml,v 1.6 2004/12/10 11:20:38 jz Exp $-->
+<!--$Id$-->
 
 <log_categories 
     title    = "Log-Kategorien" 
     base_dir = ""
-    author   = "$Author: jz $"
-    date     = "$Date: 2004/12/10 11:20:38 $"
+    author   = "$Author$"
+    date     = "$Date$"
 >
 
     <scheduler_keyword keyword="Log-Kategorien"/>

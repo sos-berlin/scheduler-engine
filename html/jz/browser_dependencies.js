@@ -1,4 +1,4 @@
-// $Id: browser_dependencies.js,v 1.1 2004/12/02 13:36:08 jz Exp $
+// $Id$
 
 // Anpassungen für DOM und XSL-T
 

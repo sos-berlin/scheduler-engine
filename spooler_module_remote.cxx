@@ -1,4 +1,4 @@
-// $Id: spooler_module_remote.cxx,v 1.55 2004/04/14 14:16:52 jz Exp $
+// $Id$
 /*
     Hier sind implementiert
 

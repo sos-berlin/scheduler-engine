@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding="utf-8"?>
-<!-- $Id: scheduler.xsl,v 1.1 2004/12/10 11:20:38 jz Exp $ -->
+<!-- $Id$ -->
 
 <!--
     Änderungswünsche:

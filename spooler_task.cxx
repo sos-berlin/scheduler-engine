@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.274 2004/12/28 11:40:02 jz Exp $
+// $Id$
 /*
     Hier sind implementiert
 

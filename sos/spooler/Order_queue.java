@@ -1,4 +1,4 @@
-// $Id: Order_queue.java,v 1.6 2004/09/11 19:27:01 jz Exp $
+// $Id$
 
 package sos.spooler;
 

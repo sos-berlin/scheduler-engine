@@ -1,4 +1,4 @@
-// $Id: spooler_start_dll.cxx,v 1.3 2003/12/01 13:17:38 jz Exp $
+// $Id$
 
 #include "spooler.h"
 

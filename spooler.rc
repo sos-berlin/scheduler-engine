@@ -1,4 +1,4 @@
-// $Id: spooler.rc,v 1.1 2001/01/13 18:41:19 jz Exp $
+// $Id$
 
 #ifdef _DEBUG
 1                       TYPELIB MOVEABLE PURE   "debug\\spooler.tlb"

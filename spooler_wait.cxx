@@ -1,4 +1,4 @@
-// $Id: spooler_wait.cxx,v 1.101 2004/10/22 09:33:24 jz Exp $
+// $Id$
 /*
     Hier sind implementiert
 

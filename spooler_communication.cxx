@@ -1,4 +1,4 @@
-// $Id: spooler_communication.cxx,v 1.101 2004/12/08 12:35:06 jz Exp $
+// $Id$
 /*
     Hier sind implementiert
 

@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="../scheduler.xsl" type="text/xsl"?>
 
-<!--$Id: security.xml,v 1.10 2004/12/10 11:20:39 jz Exp $-->
+<!--$Id$-->
 
 <xml_element name     = "security" 
              title    = "Zugriffsschutz für TCP, HTTP und UDP"
              category = "Konfiguration"
              base_dir = "../"
              parent_page = "../konfiguration.xml"
-             author   = "$Author: jz $"
-             date     = "$Date: 2004/12/10 11:20:39 $">
+             author   = "$Author$"
+             date     = "$Date$">
 
     <xml_parent_elements>
         <xml_parent_element name="config">

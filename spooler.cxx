@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.358 2004/12/10 16:21:33 jz Exp $
+// $Id$
 // §851: Weitere Log-Ausgaben zum Scheduler-Start eingebaut
 // §1479
 

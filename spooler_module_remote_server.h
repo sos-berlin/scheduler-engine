@@ -1,4 +1,4 @@
-// $Id: spooler_module_remote_server.h,v 1.12 2004/04/05 08:49:46 jz Exp $
+// $Id$
 
 #ifndef __SPOOLER_MODULE_REMOTE_SERVER_H
 #define __SPOOLER_MODULE_REMOTE_SERVER_H

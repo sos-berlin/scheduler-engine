@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="scheduler.xsl" type="text/xsl"?>
 
-<!--$Id: factory_ini_java.xml,v 1.3 2004/12/10 11:20:38 jz Exp $-->
+<!--$Id$-->
 
 <ini_section 
     name     = "java"
     file     = "factory.ini"
     title    = "Datei factory.ini, Abschnitt [java]"
     base_dir = ""
-    author   = "$Author: jz $"
-    date     = "$Date: 2004/12/10 11:20:38 $">
+    author   = "$Author$"
+    date     = "$Date$">
 
     <ini_entries>
         <ini_entry name="class_path" type="class_path" title="Für Java">

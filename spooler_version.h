@@ -1,4 +1,4 @@
-// $Id: spooler_version.h,v 1.262 2004/12/13 09:46:56 jz Exp $
+// $Id$
 
 #include "../module_version.h"
 

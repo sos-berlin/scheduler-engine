@@ -2,13 +2,13 @@
 <?xml-stylesheet href="scheduler.xsl" type="text/xsl"?>
 
 
-<!--$Id: ersetzung_von_umgebungsvariablen.xml,v 1.5 2004/12/10 11:20:38 jz Exp $-->
+<!--$Id$-->
 
 <description 
     title    = "Ersetzung von Umgebungsvariablen" 
     base_dir = ""
-    author   = "$Author: jz $"
-    date     = "$Date: 2004/12/10 11:20:38 $"
+    author   = "$Author$"
+    date     = "$Date$"
 >
 
 <scheduler_keyword keyword="Umgebungsvariablen"/>

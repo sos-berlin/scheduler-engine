@@ -1,4 +1,4 @@
-// $Id: spooler_history.cxx,v 1.100 2004/09/06 07:53:27 jz Exp $
+// $Id$
 
 #include "spooler.h"
 #include "../zschimmer/z_com.h"

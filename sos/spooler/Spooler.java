@@ -1,4 +1,4 @@
-// $Id: Spooler.java,v 1.12 2004/11/08 13:39:13 jz Exp $
+// $Id$
 
 package sos.spooler;
 

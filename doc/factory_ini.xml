@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="scheduler.xsl" type="text/xsl"?>
 
-<!--$Id: factory_ini.xml,v 1.10 2004/12/10 11:20:38 jz Exp $-->
+<!--$Id$-->
 
 <ini file     = "factory.ini"
      title    = "Datei factory.ini, Übersicht"
      base_dir = ""
-     author   = "$Author: jz $"
-     date     = "$Date: 2004/12/10 11:20:38 $">
+     author   = "$Author$"
+     date     = "$Date$">
 
     <ini_sections>
         <ini_section name="spooler"/>

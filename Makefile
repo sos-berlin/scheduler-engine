@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.31 2004/12/20 08:58:04 jz Exp $
+# $Id$
 
 ifndef PROD_DIR
 prod_dir = ..

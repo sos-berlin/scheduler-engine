@@ -1,4 +1,4 @@
-// $Id: Variable_set.java,v 1.9 2004/07/25 11:25:57 jz Exp $
+// $Id$
 
 package sos.spooler;
 

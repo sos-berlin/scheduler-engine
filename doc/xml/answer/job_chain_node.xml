@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="../../scheduler.xsl" type="text/xsl"?>
 
-<!--$Id: job_chain_node.xml,v 1.4 2004/12/10 11:20:39 jz Exp $-->
+<!--$Id$-->
 
 <xml_element name          = "job_chain_node" 
              title         = "Stelle in einer Jobkette"
@@ -9,8 +9,8 @@
              sub_directory = "answer/"
              base_dir      = "../../"
              parent_page   = "../../xml_commands.xml"
-             author        = "$Author: jz $"
-             date          = "$Date: 2004/12/10 11:20:39 $">
+             author        = "$Author$"
+             date          = "$Date$">
 
     <xml_parent_elements>
         <xml_parent_element name="job_chain"/>

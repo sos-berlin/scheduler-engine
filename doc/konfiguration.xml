@@ -2,13 +2,13 @@
 <?xml-stylesheet href="scheduler.xsl" type="text/xsl"?>
 
 
-<!--$Id: konfiguration.xml,v 1.12 2004/12/10 11:20:38 jz Exp $-->
+<!--$Id$-->
 
 <description 
     title    = "XML-Konfiguration" 
     base_dir = ""
-    author   = "$Author: jz $"
-    date     = "$Date: 2004/12/10 11:20:38 $"
+    author   = "$Author$"
+    date     = "$Date$"
 >
 
 <scheduler_keyword keyword="Konfiguration"/>

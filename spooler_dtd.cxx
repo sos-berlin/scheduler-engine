@@ -1,4 +1,4 @@
-// $Id: spooler_dtd.cxx,v 1.8 2004/12/07 09:57:55 jz Exp $
+// $Id$
 /*
     Hier ist implementiert
 
@@ -19,7 +19,7 @@ using namespace std;
 const char dtd_string[] = 
 
 "<?xml version='1.0' encoding='iso-8859-1'?>\n"
-"<!-- $Id: spooler_dtd.cxx,v 1.8 2004/12/07 09:57:55 jz Exp $ -->\n"
+"<!-- $Id$ -->\n"
 "\n"
 "\n"
 "<!ENTITY % command              ' add_jobs\n" 

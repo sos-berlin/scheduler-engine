@@ -1,4 +1,4 @@
-// $Id: show_log.js,v 1.5 2004/12/09 11:51:49 jz Exp $
+// $Id$
 
 // Javascript-Code für HTTP Show log des Schedulers.
 // Der Scheduler liefert über HTTP die Ausgaben eines Protokolls bis dieses geschlossen wird.

@@ -1,4 +1,4 @@
-// $Id: spooler_module.cxx,v 1.62 2004/10/22 09:33:23 jz Exp $
+// $Id$
 // §1172
 /*
     Hier sind implementiert

@@ -1,4 +1,4 @@
-// $Id: spooler_config.cxx,v 1.73 2004/08/27 17:49:52 jz Exp $
+// $Id$
 
 //#include <precomp.h>
 

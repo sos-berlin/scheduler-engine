@@ -1,4 +1,4 @@
-// $Id: spooler_http.h,v 1.13 2004/12/02 13:38:17 jz Exp $
+// $Id$
 
 #ifndef __SPOOLER_HTTP_H
 #define __SPOOLER_HTTP_H

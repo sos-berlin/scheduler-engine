@@ -1,4 +1,4 @@
-// $Id: popup_menu.js,v 1.4 2004/12/08 12:35:06 jz Exp $
+// $Id$
 
 var __current_popup_menu;
 
