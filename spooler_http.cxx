@@ -1,4 +1,4 @@
-// $Id: spooler_http.cxx,v 1.12 2004/07/26 23:47:40 jz Exp $
+// $Id: spooler_http.cxx,v 1.13 2004/07/27 08:24:03 jz Exp $
 /*
     Hier sind implementiert
 
@@ -266,7 +266,7 @@ bool Http_response::eof()
 
 //------------------------------------------------------------------------------Http_response::read
 
-string Http_response::read( int recommended_size )                           
+string Http_response::read( int _recommended_chunk_size )                           
 {
     string result;
 
@@ -274,7 +274,7 @@ string Http_response::read( int recommended_size )
 
     if( _chunk_index == 0  &&  _chunk_offset < _chunk_size )
     {
-        //uint length = min( recommended_size, _header.length() - _chunk_offset );
+        //uint length = min( _recommended_chunk_size, _header.length() - _chunk_offset );
         //uint r      = _chunk_offset;
         //_chunk_offset += length;
         //return _header.substr( r, length );
@@ -284,12 +284,12 @@ string Http_response::read( int recommended_size )
 
     if( _chunk_offset == _chunk_size ) 
     {
-        result += start_new_chunk( recommended_size );
+        result += start_new_chunk( _recommended_chunk_size );
     }
 
     if( _chunk_offset < _chunk_size )
     {
-        string data =_chunk_reader->read_chunk( min( recommended_size, (int)( _chunk_size - _chunk_offset ) ) );
+        string data =_chunk_reader->read_chunk( min( _recommended_chunk_size, (int)( _chunk_size - _chunk_offset ) ) );
         _chunk_offset += data.length();
         result += data;
     }
@@ -307,13 +307,13 @@ string Http_response::read( int recommended_size )
 
 //-------------------------------------------------------------------Http_response::start_new_chunk
 
-string Http_response::start_new_chunk( int recommended_size )
+string Http_response::start_new_chunk()
 {
     if( !_chunk_reader->next_chunk_is_ready() )  return "";
 
     _chunk_index++;
     _chunk_offset = 0;
-    _chunk_size   = _chunk_reader->get_next_chunk_size( recommended_size );
+    _chunk_size   = _chunk_reader->get_next_chunk_size();
 
     string result;
     
@@ -336,7 +336,7 @@ string Http_response::start_new_chunk( int recommended_size )
 
 //---------------------------------------------------------String_chunk_reader::get_next_chunk_size
 
-int String_chunk_reader::get_next_chunk_size( int recommended_size )
+int String_chunk_reader::get_next_chunk_size()
 {
     if( _get_next_chunk_size_called )  return 0;
     _get_next_chunk_size_called = true;
@@ -346,9 +346,9 @@ int String_chunk_reader::get_next_chunk_size( int recommended_size )
 
 //------------------------------------------------------------------------String_chunk_reader::read
 
-string String_chunk_reader::read_chunk( int recommended_size )
+string String_chunk_reader::read_chunk( int _recommended_chunk_size )
 { 
-    int length = min( recommended_size, (int)_text.length() );
+    int length = min( _recommended_chunk_size, (int)_text.length() );
 
     int offset = _offset;
     _offset += length;
@@ -405,12 +405,12 @@ bool Log_chunk_reader::next_chunk_is_ready()
 
 //-----------------------------------------------------------Log_chunk_reader::get_next_chunk_size
 
-int Log_chunk_reader::get_next_chunk_size( int recommended_size )
+int Log_chunk_reader::get_next_chunk_size( int _recommended_chunk_size )
 {
     if( _file.opened()  &&  !_file_eof )
     {
         uint64 size = _file.length() - _file.tell();
-        if( size > 0 )  return size < recommended_size? (int)size : recommended_size;
+        if( size > 0 )  return size < _recommended_chunk_size? (int)size : _recommended_chunk_size;
     }
 
     return 0;  // eof
@@ -418,9 +418,9 @@ int Log_chunk_reader::get_next_chunk_size( int recommended_size )
 
 //--------------------------------------------------------------------Log_chunk_reader::read_chunk
 
-string Log_chunk_reader::read_chunk( int recommended_size )
+string Log_chunk_reader::read_chunk( int _recommended_chunk_size )
 { 
-    return _file.read_string( recommended_size );
+    return _file.read_string( _recommended_chunk_size );
 }
 
 //-------------------------------------------------------------Html_chunk_reader::Html_chunk_reader
@@ -491,24 +491,24 @@ bool Html_chunk_reader::next_chunk_is_ready()
 
 //-----------------------------------------------------------Html_chunk_reader::get_next_chunk_size
 
-int Html_chunk_reader::get_next_chunk_size( int recommended_size )
+int Html_chunk_reader::get_next_chunk_size( int _recommended_chunk_size )
 {
     return _chunk.length();
 }
 
 //----------------------------------------------------------------Html_chunk_reader::try_fill_chunk
 
-bool Html_chunk_reader::try_fill_chunk( int recommended_size )
+bool Html_chunk_reader::try_fill_chunk( int _recommended_chunk_size )
 {
     _chunk = "";
 
-    while( _chunk.length() < recommended_size )
+    while( _chunk.length() < _recommended_chunk_size )
     {
         if( _available_net_chunk_size == 0 )
         {
             if( !_chunk_reader->next_chunk_is_ready() )  return _chunk.length() > 0;
 
-            _available_net_chunk_size = _chunk_reader->get_next_chunk_size( recommended_size );
+            _available_net_chunk_size = _chunk_reader->get_next_chunk_size( _recommended_chunk_size );
         }
 
         string text = _chunk_reader->read_chunk( _available_net_chunk_size );
@@ -613,7 +613,7 @@ bool Html_chunk_reader::try_fill_chunk( int recommended_size )
 
 //--------------------------------------------------------------------Html_chunk_reader::read_chunk
 
-string Html_chunk_reader::read_chunk( int recommended_size )
+string Html_chunk_reader::read_chunk( int _recommended_chunk_size )
 { 
     switch( _state )
     {
