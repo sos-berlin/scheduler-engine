@@ -33,10 +33,11 @@
     </dl>
     
 
-    <h2>Java-Exceptions in Spidermonkey</h2>
 
     <scheduler_keyword keyword="Java-Exception"/>
     <scheduler_keyword keyword="Exception (Java)"/>
+
+    <h2>Java-Exceptions in Spidermonkey</h2>
 
     <p>
         Bei einer Exception in einem Java-Konstruktor und in einer Java-Methode werden Exception-Objekt unterschiedlicher Klassen erzeugt.

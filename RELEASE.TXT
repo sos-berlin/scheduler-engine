@@ -44,8 +44,12 @@ VERSION 2.0.101  2004-12-09
 Änderungen im HTTP-Server und den HTML-Seiten (jetzt in scheduler/html/jz/, abrufbar mit http://localhost:4444/jz)
 für Firefox.
 
+
 ------------------------------------------------
-VERSION 2.0.105  2005-
+VERSION 2.0.105  2005-01-20
 
 Die Sockets werden früher geschlossen, damit die offenen Verbindungen bei Restart nicht an den neuen Scheduler vererbt werden
 und der Browser vergeblich auf eine Antwort wartet.
+
+Wenn bei Scheduler-Start und need_db=yes die Datenbank erst bei einem späteren Versuch (vor max_db_errors) geöffnet werden kann,
+führt dies nicht mehr zum Fehler.

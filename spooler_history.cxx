@@ -144,27 +144,16 @@ Spooler_db::Spooler_db( Spooler* spooler )
 
 void Spooler_db::open( const string& db_name )
 {
-    //try
+    try
     {
-        while(1)
-        {
-            try
-            {
-                open2( db_name );
-                break;
-            }
-            catch( const exception& x )
-            {
-                if( !_spooler->_wait_endless_for_db_open )  throw;
-                try_reopen_after_error( x );
-            }
-        }
+        open2( db_name );
+        break;
     }
-    //catch( const exception& x ) 
-    //{ 
-    //    //_spooler->log().error( string("FEHLER BEIM LESEN DER NÄCHSTEN ID: ") + x.what() ); 
-    //    throw;
-    //}
+    catch( const exception& x )
+    {
+        if( !_spooler->_wait_endless_for_db_open )  throw;
+        try_reopen_after_error( x );
+    }
 }
 
 //--------------------------------------------------------------------------------Spooler_db::open2
