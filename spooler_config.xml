@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 
-<!-- $Id: spooler_config.xml,v 1.19 2001/01/12 12:20:55 jz Exp $   (C) 2000 SOS GmbH Berlin -->
+<!-- $Id: spooler_config.xml,v 1.20 2001/01/12 13:28:29 jz Exp $   (C) 2000 SOS GmbH Berlin -->
 
 <!DOCTYPE spooler_config SYSTEM "spooler_config.dtd">
 
@@ -243,31 +243,34 @@ sub spooler_dont_use_objects()
 
 sub spooler_open()
 {
+    $object_set_class->{spooler_low_level} = $spooler_low_level;
+    $object_set_class->{spooler_high_level} = $spooler_high_level;
     $object_set_class->spooler_open();
-    0;
+    return; 
 }
 
 sub spooler_close()
 {
     $object_set_class->spooler_open();
-    0;
+    return; 
 }
 
 sub spooler_get()
 {
     $object = $object_set_class->spooler_get();
-    0;
+    return; 
 }
 
 sub spooler_eof()
 {
-    $object_set_class->spooler_eof();
+    return $object_set_class->spooler_eof();
 }
 
 sub spooler_process()
 {
-    $object->process( $_ );
-    0;
+    my $new_level = shift;
+    $object->process( $new_level );
+    return; 
 }
 
 
