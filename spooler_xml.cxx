@@ -1,4 +1,4 @@
-// $Id: spooler_xml.cxx,v 1.8 2001/01/07 10:12:18 jz Exp $
+// $Id: spooler_xml.cxx,v 1.9 2001/01/07 16:35:19 jz Exp $
 
 //#include <precomp.h>
 
@@ -7,7 +7,6 @@
 #include "../kram/olestd.h"
 #include "../file/anyfile.h"
 #include "spooler.h"
-
 
 namespace sos {
 namespace spooler {
@@ -54,25 +53,38 @@ string optional_single_element_as_text( const xml::Element_ptr& element, const s
 {
     xml::Element_ptr result = optional_single_element( element, name );
     if( result == NULL )  return empty_string;
+    
+    xml::Element_ptr text_element = result->firstChild;
+    if( text_element == NULL )  return empty_string;
 
-    return as_string( result->firstChild->nodeValue );
+    return as_string( text_element->nodeValue );
 }
 
-//---------------------------------------------------------------Object_set_class::Object_set_class
+//-------------------------------------------------------------------------------Script::operator =
 
-Object_set_class::Object_set_class( const xml::Element_ptr& element )
+void Script::operator = ( const xml::Element_ptr& element )
+{
+    _language = as_string( element->getAttribute( "language" ) );
+    _text = as_string( element->text );
+/*
+    xml::Element_ptr text_element = element->firstChild;
+    if( text_element == NULL )  throw_xc( "SPOOLER-107" );
+    _text = as_string( text_element->nodeValue );
+*/
+}
+
+//---------------------------------------------------------------------Object_set_class::operator =
+
+void Object_set_class::operator = ( const xml::Element_ptr& element )
 {
     _name = as_string( element->getAttribute( "name" ) );
 
     xml::Element_ptr e = element->firstChild;
-
     while( e )
     {
         if( e->tagName == "script" )
         {
-            xml::Element_ptr text_element = e->firstChild;
-            if( text_element )  _script = as_string( text_element->nodeValue );
-            _script_language = as_string( e->getAttribute( "language" ) );
+            _script = e;
         }
         else
         if( e->tagName == "level_decls" )
@@ -99,32 +111,29 @@ Object_set_class::Object_set_class( const xml::Element_ptr& element )
 
 //-------------------------------------------------------------------Level_interval::Level_interval
 
-Level_interval::Level_interval( const xml::Element_ptr& element )
-:
-    _low_level ( as_int( element->getAttribute( "low" ) ) ),
-    _high_level( as_int( element->getAttribute( "high" ) ) )
+void Level_interval::operator = ( const xml::Element_ptr& element )
 {
+    _low_level  = as_int( element->getAttribute( "low" ) );
+    _high_level = as_int( element->getAttribute( "high" ) );
 }
 
 //---------------------------------------------------------------Object_set_descr::Object_set_descr
 
-Object_set_descr::Object_set_descr( const xml::Element_ptr& element )
-: 
-    _class_name( as_string( element->getAttribute( "class" ) ) ),
-    _level_interval( single_element( element, "levels" ) )
-{
+void Object_set_descr::operator = ( const xml::Element_ptr& element )
+{ 
+    _class_name     = as_string( element->getAttribute( "class" ) );
+    _level_interval = single_element( element, "levels" );
 }
 
-//---------------------------------------------------------------------------------Day_set::Day_set
+//------------------------------------------------------------------------------Day_set::operator =
 
-Day_set::Day_set( const xml::Element_ptr& element )
+void Day_set::operator = ( const xml::Element_ptr& element )
 {
     memset( _days, (char)false, sizeof _days );
 
     if( element == NULL )  return;
 
     xml::Element_ptr e = element->firstChild;
-
     while( e )
     {
         if( e->tagName == "day" )
@@ -156,7 +165,6 @@ Run_time::Run_time( const xml::Element_ptr& element )
 
     bool             a_day_set = false;
     xml::Element_ptr e = element->firstChild;
-
     while( e )
     {
         if( e->tagName == "date" )
@@ -204,24 +212,35 @@ Job::Job( const xml::Element_ptr& element )
 : 
     _zero_(this+1),
     _name               ( as_string( element->getAttribute( "name" ) ) ),
-    _object_set_descr   ( single_element( element, "object_set" ) ),
-    _output_level       ( as_int( as_string( element->getAttribute( "output_level" ) ) ) ),
     _run_time           ( default_single_element( element, "run_time" ) ),
     _rerun              ( as_bool( as_string( element->getAttribute( "rerun" ) ) ) )
 {
+    string text;
+
+    text = as_string( element->getAttribute( "output_level" ) );
+    if( !text.empty() )  _output_level = as_int( text );
+
+    xml::Element_ptr e = element->firstChild;
+    while( e )
+    {
+        if( e->tagName == "object_set" )  _object_set_descr = SOS_NEW( Object_set_descr( e ) );
+        else
+        if( e->tagName == "script"     )  _script = e;
+     
+        e = e->nextSibling;
+    }
+
 }
 
 //--------------------------------------------------------Spooler::load_object_set_classes_from_xml
 
 void Spooler::load_object_set_classes_from_xml( Object_set_class_list* list, const xml::Element_ptr& element )
 {
-    xml::NodeList_ptr node_list = element->childNodes;
-
-    for( int i = 0; i < node_list->length; i++ )
+    xml::Element_ptr e = element->firstChild;
+    while( e )
     {
-        xml::Node_ptr n = node_list->Getitem(i);
-
-        if( n->nodeName == "object_set_class" )  list->push_back( SOS_NEW( Object_set_class( n ) ) );
+        if( e->tagName == "object_set_class" )  list->push_back( SOS_NEW( Object_set_class( e ) ) );
+        e = e->nextSibling;
     }
 }
 
@@ -230,7 +249,6 @@ void Spooler::load_object_set_classes_from_xml( Object_set_class_list* list, con
 void Spooler::load_jobs_from_xml( Job_list* list, const xml::Element_ptr& element )
 {
     xml::Element_ptr e = element->firstChild;
-
     while( e )
     {
         if( e->tagName == "job" ) 
@@ -240,13 +258,16 @@ void Spooler::load_jobs_from_xml( Job_list* list, const xml::Element_ptr& elemen
             {
                 Sos_ptr<Job> job = SOS_NEW( Job( e ) );
 
-                for( Object_set_class_list::iterator it = _object_set_class_list.begin(); it != _object_set_class_list.end(); it++ )
+                if( job->_object_set_descr )        // job->_object_set_descr->_class ermitteln
                 {
-                    if( (*it)->_name == job->_object_set_descr._class_name )  break;
-                }
-                if( it == _object_set_class_list.end() )  throw_xc( "SPOOLER-101", job->_object_set_descr._class_name );
+                    for( Object_set_class_list::iterator it = _object_set_class_list.begin(); it != _object_set_class_list.end(); it++ )
+                    {
+                        if( (*it)->_name == job->_object_set_descr->_class_name )  break;
+                    }
+                    if( it == _object_set_class_list.end() )  throw_xc( "SPOOLER-101", job->_object_set_descr->_class_name );
 
-                job->_object_set_descr._class = *it;
+                    job->_object_set_descr->_class = *it;
+                }
 
                 list->push_back( job );
             }
@@ -282,9 +303,9 @@ void Spooler::load_xml()
 
         xml::Element_ptr spooler_config = document->documentElement;
 
-        _tcp_port = as_int( spooler_config->getAttribute( "tcp_port" ) );
-        _udp_port = as_int( spooler_config->getAttribute( "udp_port" ) );
-      //_object_set_param = as_string( spooler_config->getAttribute( "object_set_param" ) );
+        _tcp_port     = as_int( spooler_config->getAttribute( "tcp_port" ) );
+        _udp_port     = as_int( spooler_config->getAttribute( "udp_port" ) );
+        _log_filename = as_string( spooler_config->getAttribute( "log_file" ) );
 
 
         xml::Element_ptr e = spooler_config->firstChild;

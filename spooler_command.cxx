@@ -1,4 +1,4 @@
-// $Id: spooler_command.cxx,v 1.5 2001/01/07 10:12:18 jz Exp $
+// $Id: spooler_command.cxx,v 1.6 2001/01/07 16:35:19 jz Exp $
 
 #include "../kram/sos.h"
 #include "../kram/sleep.h"
@@ -101,50 +101,88 @@ xml::Element_ptr Command_processor::execute_show_state()
     return state_element;
 }
 
-//-------------------------------------------------------------Command_processor::execute_start_job
+//------------------------------------------------------------Command_processor::execute_modify_job
 
 xml::Element_ptr Command_processor::execute_modify_job( const xml::Element_ptr& element )
 {
     string job_name = as_string( element->getAttribute( "job" ) );
     string action   = as_string( element->getAttribute( "action" ) );
     xml::Element_ptr tasks_element = _answer->createElement( "tasks" );
+    bool found = false;
 
     FOR_EACH( Task_list, _spooler->_task_list, it )
     {
         Task* task = *it;
         if( task->_job->_name == job_name ) 
         {
-            if( action == "start" )
-            {
-                if( !task->_running ) 
-                {
-                    task->_stopped = false;
-                    task->_error = NULL;
-                    _spooler->_sleep = false;
-                }
-            }
+            found = true;
+
+            if( action == "start" )  task->cmd_start();
             else
-            if( action == "stop" )
-            {
-                if( task->_running )  task->_stop = true;
-            }
+            if( action == "stop"  )  task->cmd_stop();
+            else
+                throw_xc( "SPOOLER-106", action );
 
             tasks_element->appendChild( execute_show_task( *it ) );
         }
     }
     
+    if( !found )  throw_xc( "SPOOLER-108", job_name );
+
     return tasks_element;
+}
+
+//--------------------------------------------------------Command_processor::execute_modify_spooler
+
+xml::Element_ptr Command_processor::execute_modify_spooler( const xml::Element_ptr& element )
+{
+    string action = as_string( element->getAttribute( "action" ) );
+    if( !action.empty() )
+    {
+        if( action == "stop"      )  _spooler->cmd_stop();
+        else
+        if( action == "restart"   )  _spooler->cmd_restart();
+        else
+        if( action == "terminate" )  _spooler->cmd_terminate();
+        else
+            throw_xc( "SPOOLER-106", action );
+    }
+    
+    string paused = as_string( element->getAttribute( "paused" ) );
+    if( !paused.empty() )
+    {
+        if( paused == "yes" )  _spooler->cmd_pause();
+                         else  _spooler->cmd_continue();
+    }
+    
+    return _answer->createElement( "ok" );
 }
 
 //---------------------------------------------------------------Command_processor::execute_command
 
 xml::Element_ptr Command_processor::execute_command( const xml::Element_ptr& element )
 {
-    if( element->tagName == "show_state" )  return execute_show_state();
+    if( element->tagName == "show_state"        )  return execute_show_state();
     else
-    if( element->tagName == "modify_job" )  return execute_modify_job( element );
+/*
+    if( element->tagName == "pause_spooler"     )  { _spooler->cmd_pause();     return _answer->createElement( "ok" ); }
     else
-        throw_xc( "SOS-1425", as_string( element->tagName ) ); return NULL;
+    if( element->tagName == "continue_spooler"  )  { _spooler->cmd_continue();  return _answer->createElement( "ok" ); }
+    else
+    if( element->tagName == "stop_spooler"      )  { _spooler->cmd_stop();      return _answer->createElement( "ok" ); }
+    else
+    if( element->tagName == "terminate_spooler" )  { _spooler->cmd_terminate(); return _answer->createElement( "ok" ); }
+    else
+    if( element->tagName == "restart_spooler"   )  { _spooler->cmd_restart();   return _answer->createElement( "ok" ); }
+    else
+*/
+    if( element->tagName == "modify_spooler"    )  return execute_modify_spooler( element );
+    else
+    if( element->tagName == "modify_job"        )  return execute_modify_job( element );
+    else
+    {
+        throw_xc( "SPOOLER-105", as_string( element->tagName ) ); return NULL;
+    }
 }
 
 //------------------------------------------------------------------------Command_processor::execute

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- $Id: spooler_config.dtd,v 1.10 2001/01/07 10:12:18 jz Exp $   (C) 2000 SOS GmbH Berlin 
+<!-- $Id: spooler_config.dtd,v 1.11 2001/01/07 16:35:19 jz Exp $   (C) 2000 SOS GmbH Berlin 
      Joacim Zschimmer
 
      Konfiguration für den Spooler. 
@@ -10,9 +10,9 @@
 <!-- KONFIGURATION DES SPOOLERS -->
 
 <!ELEMENT spooler_config        ( object_set_classes, jobs? )>
-<!ATTLIST spooler_config        log_file            CDATA #IMPLIED>
-<!ATTLIST spooler_config        tcp_port            CDATA "4444">
-<!ATTLIST spooler_config        udp_port            CDATA "4444">
+<!--ATTLIST spooler_config        log_file            CDATA #IMPLIED-->
+<!ATTLIST spooler_config        tcp_port            CDATA "4444">       <!-- Für TCP-Kommandoschnittstelle -->
+<!ATTLIST spooler_config        udp_port            CDATA "4444">       <!-- Für UDP-Kommandoschnittstelle -->
 
 
 <!ELEMENT object_set_classes    ( object_set_class+ )>
@@ -23,21 +23,21 @@
 <!ELEMENT level_decls           ( level_decl+ )>
 
 <!ELEMENT level_decl            EMPTY>
-<!ATTLIST level_decl            level               CDATA #REQUIRED>
-<!ATTLIST level_decl            name                CDATA #REQUIRED>
+<!ATTLIST level_decl            level               CDATA #REQUIRED>    <!-- Stufennummer, in der Objektemengeklasse eindeutig -->
+<!ATTLIST level_decl            name                CDATA #REQUIRED>    <!-- Name der Stufe, in der Objektemengeklasse eindeutig -->
 
 <!ELEMENT script                ( #PCDATA )>
-<!ATTLIST script                language            CDATA "VBScript">
+<!ATTLIST script                language            CDATA "VBScript">   <!-- Z.B. "VBScript", "JavaScript", "PerlScript" -->
 
 
 
 <!ELEMENT jobs                  ( job+ )>
 
 <!ELEMENT job                   ( ( object_set | script ), run_time? )>
-<!ATTLIST job                   name                CDATA #REQUIRED>
-<!ATTLIST job                   priority            CDATA #IMPLIED>
-<!ATTLIST job                   output_level        CDATA #IMPLIED>
-<!ATTLIST job                   spooler_id          CDATA ''>
+<!ATTLIST job                   name                CDATA #REQUIRED>    <!-- Eindeutiger Name -->
+<!ATTLIST job                   priority            CDATA #IMPLIED>     <!-- Höhere Zahl ist höhere Priorität -->
+<!ATTLIST job                   output_level        CDATA #IMPLIED>     <!-- Stufennummer. Auf diese Stufe werden die Objekte der Objektemenge gesetzt -->
+<!ATTLIST job                   spooler_id          CDATA ''>           <!-- "": Job läuft auf jedem Spooler, sonst nur Spooler mit derselben Spooler-Id -->
 <!ATTLIST job                   rerun               (yes|no) "no" >     <!-- Laufenden Job bei Abbruch und Neustart des Spoolers erneut starten -->
 <!ATTLIST job                   stop_after_error    (yes|no) "yes">     <!-- Nach einem Fehler diesen Job nie wieder starten -->
 <!ATTLIST job                   start_after_spooler (yes|no) "no" >     <!-- Den Job auch nach verspäteten Start des Spoolers starten -->
@@ -53,10 +53,10 @@
 <!ELEMENT run_time              ( time_of_day?, date*, weekdays?, monthdays?, ultimos?, holiday* )>
 <!ATTLIST run_time              retry_period        CDATA "5">          <!-- Periode, nach der ein Job erneut gestartet wird, 
                                                                              um zu prüfen, ob die Objektemenge nicht leer ist -->
-<!ATTLIST run_time              begin               CDATA '00:00:00'>   <!-- HH:MM:SS -->
-<!ATTLIST run_time              end                 CDATA '24:00:00'>   <!-- HH:MM:SS -->
+<!ATTLIST run_time              begin               CDATA '00:00:00'>   <!-- HH:MM:SS, Tageszeit, ab der der Job laufen soll -->
+<!ATTLIST run_time              end                 CDATA '24:00:00'>   <!-- HH:MM:SS, Tageszeit, bis zu der der Job laufen soll -->
 
-<!ELEMENT date                  EMPTY>
+<!ELEMENT date                  EMPTY>                                  <!-- Ein bestimmter Tag, an dem der Job laufen soll -->
 <!ATTLIST date                  date                CDATA #IMPLIED>     <!-- yyyy-mm-dd -->
 
 <!ELEMENT weekdays              ( day+ )>                               <!-- 0: Sonntag, 6: Sonnabend -->
@@ -68,7 +68,7 @@
 <!ELEMENT holiday               EMPTY>                              
 <!ATTLIST holiday               date                CDATA #REQUIRED>    <!-- yyyy-mm-dd, an diesem Tag den Job nicht starten -->
 
-<!ELEMENT day                   EMPTY>                                  <!-- Erweiterbar um time* -->
+<!ELEMENT day                   EMPTY>
 <!ATTLIST day                   day                 CDATA #REQUIRED>
 
 
@@ -77,15 +77,31 @@
 
 <!-- KOMMANDOS -->
 
-<!ELEMENT spooler_command       ( show_state | modify_job )>
+<!ELEMENT spooler_command       ( show_state | modify_spooler )>
 
-<!ELEMENT show_state            EMPTY>
-<!-- Antwort: <state> -->
+<!ELEMENT show_state            EMPTY>                                  <!-- Liefert den Zustand des Spoolers -->
+                                                                        <!-- Antwort: <state> -->
 
+<!ELEMENT modify_spooler        EMPTY>
+<!ATTLIST modify_spooler        action  (restart|stop|terminate) #IMPLIED>
+<!ATTLIST modify_spooler        paused              (yes|no) #IMPLIED>
+
+<!--
+<!ELEMENT stop_spooler          EMPTY>                                  <!-- Stoppt den Spooler. Spooler wartet auf weiteres Kommando. -->
+                                                                        <!-- Antwort: <ok> -->
+
+<!ELEMENT restart_spooler       EMPTY>                                  <!-- Stoppt den Spooler, lädt Config erneut und startet -->
+                                                                        <!-- Antwort: <ok> -->
+
+<!ELEMENT terminate_spooler     EMPTY>                                  <!-- Beendet den Spooler -->
+                                                                        <!-- Antwort: <ok> -->
+-->
 <!ELEMENT modify_job            EMPTY>
 <!ATTLIST modify_job            job                 CDATA #REQUIRED>
-<!ATTLIST modify_job            action              (start|stop) #REQUIRED>
-<!-- Antwort: <tasks> -->
+<!ATTLIST modify_job            action  (start|stop) #REQUIRED>         <!-- start: Startet einen gestoppten (z.B. wegen Fehlers) Job.
+                                                                             stop : Stoppt einen Job, d.h. beendet ihn. 
+                                                                                    Job wird nicht mehr gestartet -->
+                                                                        <!-- Antwort: <tasks>, alle betroffenen Tasks (0 oder 1) -->
 
 
 
@@ -114,5 +130,7 @@
 <!ATTLIST ERROR                 line                CDATA #IMPLIED>     <!-- Zeilennummer, beginned mit 1 -->
 <!ATTLIST ERROR                 col                 CDATA #IMPLIED>     <!-- Spaltennummer, beginned mit 1 -->
 <!ATTLIST ERROR                 text                CDATA #REQUIRED>    <!-- Fehlertext mit Fehlercode -->
+
+<!ELEMENT ok                    EMPTY>
 
 <!ELEMENT COMMAND_ERROR         ( #PCDATA )>

@@ -1,4 +1,4 @@
-// $Id: spooler_communication.cxx,v 1.2 2001/01/07 10:12:18 jz Exp $
+// $Id: spooler_communication.cxx,v 1.3 2001/01/07 16:35:19 jz Exp $
 
 //#include <precomp.h>
 
@@ -82,10 +82,14 @@ Communication_channel::Communication_channel( Spooler* spooler )
 
 Communication_channel::~Communication_channel()
 {
-    if( _thread )  CloseHandle( _thread );
-
     closesocket( _listen_socket );
     closesocket( _socket );
+
+    if( _thread ) 
+    {
+        WaitForSingleObject( _thread, 1000 );
+        CloseHandle( _thread );
+    }
 }
 
 //-------------------------------------------------------------------Communication_channel::recv_xml

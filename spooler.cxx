@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.12 2001/01/07 10:12:17 jz Exp $
+// $Id: spooler.cxx,v 1.13 2001/01/07 16:35:18 jz Exp $
 
 
 
@@ -33,11 +33,37 @@ Time now()
     return time(NULL) - _timezone;
 }
 
+//----------------------------------------------------------------------------Script_instance::load
+
+void Script_instance::load()
+{
+    _script_site = new Script_site;
+    _script_site->_engine_name = _script->_language;
+    _script_site->init_engine();
+
+    _script_site->parse( _script->_text );
+}
+
+//---------------------------------------------------------------------------Script_instance::close
+
+void Script_instance::close()
+{
+    _script_site->close_engine();
+    _script_site = NULL;
+}
+
+//----------------------------------------------------------------------------Script_instance::call
+
+CComVariant Script_instance::call( const char* name )
+{
+    return _script_site->call( name );
+}
+
 //----------------------------------------------------------------------------Spooler_object::level
 
 Level Spooler_object::level()
 {
-    CComVariant level = com_invoke( _dispatch, "level" );
+    CComVariant level = com_property_get( _dispatch, "level" );
     level.ChangeType( VT_INT );
 
     return level.intVal;
@@ -47,49 +73,45 @@ Level Spooler_object::level()
 
 void Spooler_object::process( Level output_level )
 {
-    com_invoke( _dispatch, "process()", output_level );
+    com_call( _dispatch, "process", output_level );
 }
 
 //---------------------------------------------------------------------------------Object_set::open
 
 void Object_set::open()
 {
-    _script_site = new Script_site;
-    _script_site->_engine_name = _object_set_descr->_class->_script_language;
-    _script_site->init_engine();
-
-    _script_site->parse( _object_set_descr->_class->_script );
+    _script_instance.load();
 
     CComVariant object_set_vt;
-
-    //if( stricmp( _script_site->_engine_name.c_str(), "PerlScript" ) == 0 )
-    //{
-    //    object_set_vt = _script_site->invoke( "object_set" );
-    //}
-    //else
+/*
+    if( stricmp( _script_instance._script->_language.c_str(), "PerlScript" ) == 0 )
     {
-        object_set_vt = _script_site->invoke( "spooler_make_object_set()" );
+        object_set_vt = _script_site->com_property_get( "object_set" );
+    }
+    else
+*/
+    {
+        object_set_vt = _script_instance.call( "spooler_make_object_set" );
     }
 
     if( object_set_vt.vt != VT_DISPATCH 
      || object_set_vt.pdispVal == NULL  )  throw_xc( "SPOOLER-103", _object_set_descr->_class_name );
     _dispatch = object_set_vt.pdispVal;
 
-    com_invoke( _dispatch, "spooler_low_level" , _object_set_descr->_level_interval._low_level );
-    com_invoke( _dispatch, "spooler_high_level", _object_set_descr->_level_interval._high_level );
-    com_invoke( _dispatch, "spooler_param"     , _spooler->_object_set_param.c_str() );
+    com_property_put( _dispatch, "spooler_low_level" , _object_set_descr->_level_interval._low_level );
+    com_property_put( _dispatch, "spooler_high_level", _object_set_descr->_level_interval._high_level );
+    com_property_put( _dispatch, "spooler_param"     , _spooler->_object_set_param.c_str() );
 
-    com_invoke( _dispatch, "spooler_open()" );
+    com_call( _dispatch, "spooler_open" );
 }
 
 //--------------------------------------------------------------------------------Object_set::close
 
 void Object_set::close()
 {
-    com_invoke( _dispatch, "spooler_close()" );
+    com_call( _dispatch, "spooler_close" );
 
-    _script_site->close_engine();
-    _script_site = NULL;
+    _script_instance.close();
 }
 
 //----------------------------------------------------------------------------------Object_set::get
@@ -100,7 +122,7 @@ Spooler_object Object_set::get()
 
     while(1)
     {
-        CComVariant obj = com_invoke( _dispatch, "spooler_get()" );
+        CComVariant obj = com_call( _dispatch, "spooler_get" );
 
         if( obj.vt == VT_EMPTY    )  return Spooler_object(NULL);
         if( obj.vt != VT_DISPATCH
@@ -227,11 +249,12 @@ Time Run_time::next( Time tim_par )
 
 //-----------------------------------------------------------------------------------------Task::Task
 
-Task::Task( Spooler* spooler, const Sos_ptr<Job>& descr )    
+Task::Task( Spooler* spooler, const Sos_ptr<Job>& job )    
 : 
     _zero_(this+1), 
     _spooler(spooler), 
-    _job(descr) 
+    _job(job),
+    _script_instance(&job->_script)
 {
     set_new_start_time();
 }
@@ -285,11 +308,20 @@ bool Task::start()
     cerr << "Job " << _job->_name << " start\n";
 
     _running_since = now();
-    _object_set = SOS_NEW( Object_set( _spooler, &_job->_object_set_descr ) );
+
+    if( _job->_object_set_descr )  _object_set = SOS_NEW( Object_set( _spooler, _job->_object_set_descr ) );
 
     try 
     {
-        _object_set->open();
+        if( _object_set ) 
+        {
+            _object_set->open();
+        }
+
+        if( !_job->_script.empty() )
+        {
+            _script_instance.load();
+        }
 
         _running = true;
         _spooler->_running_jobs_count++;
@@ -297,7 +329,7 @@ bool Task::start()
         _next_start_time = max( _next_start_time + _job->_run_time._retry_period, now() );
         if( now() >= _job->_run_time._next_end_time )  set_new_start_time();
     }
-    catch( const Xc& x        ) { start_error( x ); return false; }
+    catch( const Xc& x ) { start_error(x); return false; }
 
     return true;
 }
@@ -310,9 +342,17 @@ void Task::end()
 
     try
     {
-        _object_set->close();
+        if( _object_set )
+        {
+            _object_set->close();
+        }
+
+        if( !_job->_script.empty() ) 
+        {
+            _script_instance.close();
+        }
     }
-    catch( const Xc& x        ) { end_error( x ); }
+    catch( const Xc& x ) { end_error(x); }
 
     _spooler->_running_jobs_count--;
     _running = false;
@@ -328,15 +368,27 @@ bool Task::step()
 
     try 
     {
-        Spooler_object object = _object_set->get();
+        if( !_job->_script.empty() ) 
+        {
+            CComVariant result = _script_instance.call( "step" );
+            result.ChangeType( VT_BOOL );
+            if( !V_BOOL( &result ) )  return false;
+        }
+        else
+        if( _object_set )
+        {
+            Spooler_object object = _object_set->get();
 
-        if( object.is_null() )  return false;
+            if( object.is_null() )  return false;
 
-        object.process( _job->_output_level );
+            object.process( _job->_output_level );
+        }
+        else 
+            return false; //?
 
         _step_count++;
     }
-    catch( const Xc& x        ) { step_error( x ); return false; }
+    catch( const Xc& x ) { step_error(x); return false; }
 
     return true;
 }
@@ -363,7 +415,7 @@ void Spooler::step()
 
         if( task->_running )
         {
-            if( task->_stop || task->_job->_run_time._next_end_time > nw )   // Bei _next_start_time == _next_end_time wenistens ein step()
+            if( task->_stop || nw > task->_job->_run_time._next_end_time )   // Bei _next_start_time == _next_end_time wenigstens ein step()
             {
                 task->end();
                 if( task->_stop )  task->_stop = false, task->_stopped = true;
@@ -377,10 +429,24 @@ void Spooler::step()
     }
 }
 
+//----------------------------------------------------------------------------------Task::cmd_start
+
+void Task::cmd_start()
+{ 
+    if( !_running ) 
+    { 
+        _stopped = false; 
+        _error = NULL; 
+        _spooler->cmd_wake(); 
+    } 
+}
+
 //------------------------------------------------------------------------------------Spooler::load
 
 void Spooler::load()
 {
+    cerr << "Spooler::load\n";
+
     tzset();
 
     {
@@ -394,6 +460,8 @@ void Spooler::load()
 
 void Spooler::start()
 {
+    cerr << "Spooler::start\n";
+
     Thread_semaphore::Guard guard = &_semaphore;
 
     FOR_EACH( Job_list, _job_list, it )
@@ -419,6 +487,11 @@ void Spooler::wait()
         Time  next_start_time = latter_day;
         Task* next_task = NULL;
 
+        if( _paused )
+        {
+            cerr << "Spooler paused\n";
+        }
+        else
         {
             Thread_semaphore::Guard guard = &_semaphore;
 
@@ -432,8 +505,9 @@ void Spooler::wait()
                 }
             }
 
-            _sleep = true;
         }
+
+        _sleep = true;  // Das muss in einen kritischen Abschnitt!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
         Time wait_time = next_start_time - now();
         if( wait_time > 0 ) 
@@ -459,11 +533,77 @@ void Spooler::wait()
 
 void Spooler::run()
 {
+    cerr << "Spooler::run\n";
+
     while(1)
     {
-        step();
+        if( _pause     )  _pause = false, _paused = true;
+        if( _stop      )  stop();
+        if( _terminate )  break;
+        if( _restart   )  restart();
+
+        if( !_paused )  step();
+
         wait();
     }
+}
+
+//------------------------------------------------------------------------------------Spooler::stop
+
+void Spooler::stop()
+{
+    cerr << "Spooler::stop\n";
+    _stop = false;
+
+    {
+        FOR_EACH( Task_list, _task_list, it ) 
+        {
+            Task* task = *it;
+        
+            if( task->_running )  task->end();
+
+            it = _task_list.erase( it );
+        }
+    }
+
+    _object_set_class_list.clear();
+    _job_list.clear();
+}
+
+//---------------------------------------------------------------------------------Spooler::restart
+
+void Spooler::restart()
+{
+    cerr << "Spooler::restart\n";
+
+    _restart = false;
+    stop();
+    load();
+    start();
+}
+
+//-----------------------------------------------------------------------------Spooler::cmd_restart
+
+void Spooler::cmd_restart()
+{
+    _restart = true;
+    cmd_wake();
+}
+
+//--------------------------------------------------------------------------------Spooler::cmd_stop
+
+void Spooler::cmd_stop()
+{
+    _stop = true;
+    cmd_wake();
+}
+
+//---------------------------------------------------------------------------Spooler::cmd_terminate
+
+void Spooler::cmd_terminate()
+{
+    _terminate = true;
+    cmd_stop();
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -475,12 +615,15 @@ void Spooler::run()
 int sos_main( int argc, char** argv )
 {
     string config_filename  = read_profile_string( "factory.ini", "spooler", "config" );
+    string log_filename     = read_profile_string( "factory.ini", "spooler", "log-file" );
     string spooler_id       = read_profile_string( "factory.ini", "spooler", "spooler-id" );
     string object_set_param = read_profile_string( "factory.ini", "spooler", "object-set-param" );
 
     for( Sos_option_iterator opt ( argc, argv ); !opt.end(); opt.next() )
     {
         if( opt.with_value( "config"           ) )  config_filename = opt.value();
+        else
+        if( opt.with_value( "log-file"         ) )  log_filename = opt.value();
         else
         if( opt.with_value( "spooler-id"       ) )  spooler_id = opt.value();
         else
@@ -497,6 +640,7 @@ int sos_main( int argc, char** argv )
         spooler::Spooler spooler;
         
         spooler._config_filename  = config_filename;
+        spooler._log_filename     = log_filename;
         spooler._spooler_id       = spooler_id;
         spooler._object_set_param = object_set_param;
 

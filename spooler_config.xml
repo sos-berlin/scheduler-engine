@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 
-<!-- $Id: spooler_config.xml,v 1.11 2001/01/07 10:12:18 jz Exp $   (C) 2000 SOS GmbH Berlin -->
+<!-- $Id: spooler_config.xml,v 1.12 2001/01/07 16:35:19 jz Exp $   (C) 2000 SOS GmbH Berlin -->
 
 <!DOCTYPE spooler_config SYSTEM "spooler_config.dtd">
 
@@ -23,6 +23,7 @@ set fso = createobject( "Scripting.FileSystemObject" )
 
 set log_file = createobject( "hostware.file" )
 log_file.open "-out /dev/stderr"
+log_file.put_line "*Job Aufbereiten"
 
 sub log( text )
     log_file.put_line text
@@ -92,10 +93,11 @@ class Object_set_class
     end function
 
 
-    function get spooler_eof()
+    function spooler_eof()
         spooler_eof = index > ubound(file_array)
     end function
 
+    
 
     public spooler_low_level      '<levels low=... >
     public spooler_high_level     '<levels high=... >
@@ -108,17 +110,14 @@ end class
 
 
 
-
 function spooler_make_object_set
-    set object_set = new Object_set_class
-    set spooler_make_object_set = object_set
+    set spooler_make_object_set = new Object_set_class
 end function
 
             ]]></script>
 
         </object_set_class>
 
-        <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
         <object_set_class name="Perl">
 
@@ -136,6 +135,7 @@ use Win32::OLE;
 
 $log_file = Win32::OLE->new( 'hostware.file' );
 $log_file->open( "-out /dev/stderr" );
+$log_file->put_line( "*Job Perl" );
 
 sub log
 {
@@ -224,13 +224,13 @@ package main;
         return Object_set_class->construct();
     }
 
-    #$object_set = spooler_make_object_set();
+    $object_set = spooler_make_object_set();
 
 
             ]]></script>
 
         </object_set_class>
-
+        
     </object_set_classes>
 
     <jobs>
@@ -238,16 +238,16 @@ package main;
         <job name           = "Aufbereiten" 
              priority       = "50" 
              output_level   = "200" 
-             spooler_id     = "Hans"
+             spooler_id     = ""
              rerun          = "no">
 
             <object_set class="Dokumente">
                 <levels low="100" high="200"/>
             </object_set>
 
-            <run_time begin         = "17:11:55" 
-                      end           = "21:00:00" 
-                      retry_period  = "5">
+            <run_time begin        = "07:11:55" 
+                      end          = "21:00" 
+                      retry_period = "6">
 
                 <date date="2001-01-02"/>
                 <date date="2001-01-09"/>
@@ -255,7 +255,7 @@ package main;
                 <weekdays>
                     <day day="1"/>
                     <day day="2"/>
-                    <day day="5"/>
+                    <day day="0"/>
                 </weekdays>
 
                 <monthdays>
@@ -280,12 +280,27 @@ package main;
 
 
 
-        <job name           = "Perl" 
-             output_level   = "200">
+        <job name="einfach">
 
-            <object_set class="Perl">
-                <levels low="1" high="3"/>
-            </object_set>
+            <script language="VBScript"><![CDATA[
+
+set log_file = createobject( "hostware.file" )
+log_file.open "-out /dev/stderr"
+
+log_file.put_line "*Job einfach"
+
+index = 1
+
+function step()
+    if index > 3 then step=false: exit function
+    log_file.put_line "*Job einfach: step " & index
+    index = index + 1
+    step = true
+end function
+
+            ]]></script>
+
+            <run_time retry_period="10"/>
 
         </job>
 
