@@ -2527,11 +2527,12 @@ int spooler_main( int argc, char** argv, const string& parameter_line )
 
 int object_server( int argc, char** argv )
 {
+//show_msg("object_server");
     zschimmer::com::object_server::Server server;
 
     server.register_class( spooler_com::CLSID_Remote_module_instance_server, Com_remote_module_instance_server::Create_instance );
     server.register_class(              CLSID_Com_log_proxy                , Com_log_proxy                    ::Create_instance );
-  //server.register_class( spooler_com::CLSID_Task_proxy                   , Com_task_proxy                   ::Create_instance );
+    server.register_class( spooler_com::CLSID_Task_proxy                   , Com_task_proxy                   ::Create_instance );
 
     return server.main( argc, argv, true );
 }

@@ -19,6 +19,7 @@ struct Process_class;
 struct Subprocess : idispatch_implementation< Subprocess, spooler_com::Isubprocess >
 {
     static Class_descriptor     class_descriptor;
+    static const Com_method     _methods[];
 
 
                                 Subprocess                  ( Subprocess_register*, Com_task_proxy* = NULL );
@@ -27,12 +28,10 @@ struct Subprocess : idispatch_implementation< Subprocess, spooler_com::Isubproce
                                ~Subprocess                  ();
 
 
-  //STDMETHODIMP_(ULONG)        AddRef                      ()                                      { return Idispatch_implementation::AddRef(); }
-  //STDMETHODIMP_(ULONG)        Release                     ()                                      { return Idispatch_implementation::Release(); }
-    
     // interface Ihas_java_class_name
     STDMETHODIMP            get_Java_class_name             ( BSTR* result )                        { return String_to_bstr( const_java_class_name(), result ); }
     STDMETHODIMP_(char*)  const_java_class_name             ()                                      { return (char*)"sos.spooler.Subprocess"; }
+
 
     // interface Isubprocess
     STDMETHODIMP                Close                       ()                                      { Z_COM_IMPLEMENT( close() ); }
@@ -42,17 +41,17 @@ struct Subprocess : idispatch_implementation< Subprocess, spooler_com::Isubproce
     STDMETHODIMP                Raise_priority              ( int, VARIANT_BOOL* )                  { return E_NOTIMPL; }
     STDMETHODIMP                Lower_priority              ( int, VARIANT_BOOL* )                  { return E_NOTIMPL; }
 
-    STDMETHODIMP            get_Pid                         ( int* result )                         { *result = _process.pid();  return S_OK; }
+    STDMETHODIMP            get_Pid                         ( int* result )                         { *result = _process.pid();         return S_OK; }
     STDMETHODIMP            get_Terminated                  ( VARIANT_BOOL* result )                { *result = _process.terminated();  return S_OK; }
-    STDMETHODIMP            get_Exit_code                   ( int* result )                         { *result = _process.exit_code();  return S_OK; }
+    STDMETHODIMP            get_Exit_code                   ( int* result )                         { *result = _process.exit_code();   return S_OK; }
     STDMETHODIMP            get_Stdout_path                 ( BSTR* )                               { return E_NOTIMPL; }
     STDMETHODIMP            get_Stderr_path                 ( BSTR* )                               { return E_NOTIMPL; }
     STDMETHODIMP            put_Ignore_error                ( VARIANT_BOOL b )                      { _ignore_error = b != 0;  return S_OK; } 
     STDMETHODIMP            get_Ignore_error                ( VARIANT_BOOL* result )                { *result = _ignore_error? VARIANT_TRUE: VARIANT_FALSE;  return S_OK; }
     STDMETHODIMP            put_Ignore_signal               ( VARIANT_BOOL b )                      { _ignore_signal= b != 0;  return S_OK; }
     STDMETHODIMP            get_Ignore_signal               ( VARIANT_BOOL* result )                { *result = _ignore_signal? VARIANT_TRUE: VARIANT_FALSE;  return S_OK; }
-    STDMETHODIMP                Wait                        ( double seconds )                      { return E_NOTIMPL; }//Z_COM_IMPLEMENT( _process.wait( seconds ) ); }
-    STDMETHODIMP                Kill                        ( int signal )                          { return E_NOTIMPL; }
+    STDMETHODIMP                Wait                        ( VARIANT* seconds, VARIANT_BOOL* );
+    STDMETHODIMP                Kill                        ( int signal )                          { Z_COM_IMPLEMENT( _process.kill( signal ) ); }
 
 
     void                        close                       ();
@@ -79,7 +78,7 @@ struct Subprocess_register : Object
                                ~Subprocess_register         ();
 
 
-    STDMETHODIMP                Start_subprocess            ( VARIANT* program_and_parameters, spooler_com::Isubprocess** result );
+    STDMETHODIMP                Start_subprocess            ( VARIANT* program_and_parameters, spooler_com::Isubprocess** result, Com_task_proxy* = NULL );
 
     void                        wait                        ();                                     // Exception, wenn ein Prozess einen Fehler lieferte
     void                        add                         ( Subprocess* );

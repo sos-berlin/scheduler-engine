@@ -82,7 +82,7 @@ const Com_method Com_remote_module_instance_server::_methods[] =
     { DISPATCH_METHOD     , 5, "begin"                , (Com_method_ptr)&Com_remote_module_instance_server::Begin                , VT_VARIANT   , { VT_BYREF|VT_ARRAY|VT_VARIANT, VT_BYREF|VT_ARRAY|VT_VARIANT } },
     { DISPATCH_METHOD     , 6, "end"                  , (Com_method_ptr)&Com_remote_module_instance_server::End                  , VT_VARIANT   , { VT_BOOL } },
     { DISPATCH_METHOD     , 7, "step"                 , (Com_method_ptr)&Com_remote_module_instance_server::Step                 , VT_VARIANT   },
-    { DISPATCH_METHOD     , 8, "Task_proxy.Wait_for_subprocesses", (Com_method_ptr)&Com_remote_module_instance_server::Wait_for_subprocesses, VT_EMPTY     },
+    { DISPATCH_METHOD     , 8, "Wait_for_subprocesses", (Com_method_ptr)&Com_remote_module_instance_server::Wait_for_subprocesses, VT_EMPTY     },
     {}
 };
 
@@ -281,7 +281,7 @@ STDMETHODIMP Com_remote_module_instance_server::Name_exists( BSTR name, VARIANT_
 
 //----------------------------------------------------------Com_remote_module_instance_server::call
 
-STDMETHODIMP Com_remote_module_instance_server::Call( BSTR name, VARIANT* result )
+STDMETHODIMP Com_remote_module_instance_server::Call( BSTR name_bstr, VARIANT* result )
 {
     HRESULT hr = NOERROR;
 
@@ -292,26 +292,24 @@ STDMETHODIMP Com_remote_module_instance_server::Call( BSTR name, VARIANT* result
       //_server.load_implicitly();
       //_server._module_instance->call( string_from_bstr(name) ).CopyTo( result );
 
+        string name = string_from_bstr( name_bstr );
+
         if( !_server._module_instance )  
         {
-            string nam = string_from_bstr( name );
 
-            if( nam == spooler_close_name
-             || nam == spooler_on_error_name
-             || nam == spooler_exit_name     ) 
+            if( name == spooler_close_name
+             || name == spooler_on_error_name
+             || name == spooler_exit_name     ) 
             {
                 result->vt = VT_EMPTY;
                 return hr;
             }
 
-            throw_xc( "SCHEDULER-203", "call", string_from_bstr(name) );
+            throw_xc( "SCHEDULER-203", "call", name );
         }
 
-        _server._module_instance->call__start( string_from_bstr(name) ) -> async_finish();
-
+        _server._module_instance->call__start( name ) -> async_finish();
         _server._module_instance->call__end().move_to( result );
-        //result->vt = VT_BOOL;
-        //V_BOOL( result ) = _server._module_instance->call__end();
     }
     catch( const exception& x ) { hr = Com_set_error( x, "Remote_module_instance_server::call" ); }
 
@@ -391,6 +389,8 @@ STDMETHODIMP Com_remote_module_instance_server::Step( VARIANT* result )
 
 STDMETHODIMP Com_remote_module_instance_server::Wait_for_subprocesses()
 {
+    Z_LOGI( "Com_remote_module_instance_server::Wait_for_subprocesses()\n" );
+
     HRESULT hr = NOERROR;
 
     try

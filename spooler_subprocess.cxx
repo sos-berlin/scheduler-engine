@@ -30,7 +30,31 @@ namespace spooler {
 
 //-------------------------------------------------------------------------------------------------
 
-Subprocess::Class_descriptor    Subprocess::class_descriptor ( &typelib, "Spooler.Subprocess" );
+Subprocess::Class_descriptor    Subprocess::class_descriptor ( &typelib, "Spooler.Subprocess", Subprocess::_methods );
+
+//-----------------------------------------------------------------------------Subprocess::_methods
+
+const Com_method Subprocess::_methods[] =
+{ 
+    COM_METHOD      ( Subprocess,  1, Close         , VT_EMPTY , 0, {}          ),
+    COM_METHOD      ( Subprocess,  2, Start         , VT_EMPTY , 0, { VT_BYREF|VT_VARIANT }  ),
+    COM_PROPERTY_PUT( Subprocess,  3, Priority      ,            0, { VT_INT }  ),
+    COM_PROPERTY_GET( Subprocess,  3, Priority      , VT_INT   , 0, {}          ),
+    COM_METHOD      ( Subprocess,  4, Raise_priority, VT_EMPTY , 0, { VT_INT  } ),
+    COM_METHOD      ( Subprocess,  5, Lower_priority, VT_EMPTY , 0, { VT_INT  } ),
+    COM_PROPERTY_GET( Subprocess,  6, Pid           , VT_INT   , 0, {}          ),
+    COM_PROPERTY_GET( Subprocess,  7, Terminated    , VT_BOOL  , 0, {}          ),
+    COM_PROPERTY_GET( Subprocess,  8, Exit_code     , VT_INT   , 0, {}          ),
+    COM_PROPERTY_GET( Subprocess,  9, Stdout_path   , VT_BSTR  , 0, {}          ),
+    COM_PROPERTY_GET( Subprocess, 10, Stderr_path   , VT_BSTR  , 0, {}          ),
+    COM_PROPERTY_PUT( Subprocess, 11, Ignore_error  ,            0, { VT_BOOL } ),
+    COM_PROPERTY_GET( Subprocess, 11, Ignore_error  , VT_BOOL  , 0, {}          ),
+    COM_PROPERTY_PUT( Subprocess, 12, Ignore_signal ,            0, { VT_BSTR } ),
+    COM_PROPERTY_GET( Subprocess, 12, Ignore_signal , VT_BOOL  , 0, { VT_BOOL } ),
+    COM_METHOD      ( Subprocess, 13, Wait          , VT_BOOL  , 1, { VT_BYREF|VT_VARIANT } ),
+    COM_METHOD      ( Subprocess, 14, Kill          , VT_EMPTY , 0, { VT_INT  } ),
+    {}
+};
 
 //---------------------------------------------------------------------------Subprocess::Subprocess
 
@@ -54,21 +78,6 @@ Subprocess::~Subprocess()
     catch( exception& x )  { Z_LOG( "Subprocess::close():  " << x.what() << "\n" ); }
 }
 
-//--------------------------------------------------------------------------------Subprocess::Close
-/*
-STDMETHODIMP Subprocess::Close()
-{
-    HRESULT hr = S_OK;
-    
-    try
-    {
-        close();
-    }
-    catch( const exception&  x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
-    
-    return hr;
-}
-*/
 //--------------------------------------------------------------------------------Subprocess::close
 
 void Subprocess::close()
@@ -108,11 +117,35 @@ STDMETHODIMP Subprocess::Start( VARIANT* program_and_parameters )
 
         if( _task_proxy )
         {
-            _task_proxy->_proxy->call( "Add_subprocess", _process.pid(), ignore_error(), ignore_signal(), _process.command_line() ); //, subprocess->stdout_path(), subprocess->stderr_path() );
+            _task_proxy->call( "Add_subprocess", _process.pid(), "never", ignore_error(), ignore_signal(), _process.command_line() ); //, subprocess->stdout_path(), subprocess->stderr_path() );
         }
     }
     catch( const exception&  x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
     
+    return hr;
+}
+
+//---------------------------------------------------------------------------------Subprocess::Wait
+
+STDMETHODIMP Subprocess::Wait( VARIANT* seconds, VARIANT_BOOL* result )
+{ 
+    HRESULT hr = S_OK;
+
+    try
+    {
+        if( variant_is_missing( *seconds ) )
+        {
+            _process.wait();
+            *result = VARIANT_TRUE;
+        }
+        else
+        {
+            bool ok = _process.wait( double_from_variant( *seconds ) );
+            *result = ok? VARIANT_TRUE : VARIANT_FALSE;
+        }
+    }
+    catch( const exception&  x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
+
     return hr;
 }
 
@@ -125,14 +158,15 @@ Subprocess_register::~Subprocess_register()
 
 //------------------------------------------------------------Subprocess_register::Start_subprocess
 
-STDMETHODIMP Subprocess_register::Start_subprocess( VARIANT* program_and_parameters, spooler_com::Isubprocess** result )
+STDMETHODIMP Subprocess_register::Start_subprocess( VARIANT* program_and_parameters, spooler_com::Isubprocess** result, 
+                                                    Com_task_proxy* task_proxy )
 {
     Z_LOGI( "Subprocess_register::Start_subprocess()\n" );
     HRESULT hr = S_OK;
     
     try
     {
-        ptr<Subprocess> subprocess = Z_NEW( Subprocess( this ) );
+        ptr<Subprocess> subprocess = Z_NEW( Subprocess( this, task_proxy ) );
 
         if( !variant_is_missing( *program_and_parameters ) )
         {
@@ -168,8 +202,8 @@ void Subprocess_register::remove( Subprocess* subprocess )
 {
     if( subprocess->_registered )
     {
-        _subprocess_map.erase( subprocess->_process.pid() );
         subprocess->_registered = false;
+        _subprocess_map.erase( subprocess->_process.pid() );
     }
 }
 

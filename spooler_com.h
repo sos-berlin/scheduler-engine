@@ -70,7 +70,7 @@ struct Com_error: spooler_com::Ierror,
 {
                                 Com_error                   ( const Xc_copy& );
 
-    STDMETHODIMP                QueryInterface              ( REFIID, void** );
+    STDMETHODIMP                QueryInterface              ( const IID&, void** );
 
     USE_SOS_OLE_OBJECT_WITHOUT_QI
 
@@ -101,7 +101,7 @@ struct Com_variable: spooler_com::Ivariable,
                                 Com_variable                ( const BSTR name, const VARIANT& );
                                 Com_variable                ( const Com_variable& );
 
-    STDMETHODIMP                QueryInterface              ( REFIID, void** );
+    STDMETHODIMP                QueryInterface              ( const IID&, void** );
 
     USE_SOS_OLE_OBJECT_WITHOUT_QI
 
@@ -130,7 +130,7 @@ struct Com_variable_set: spooler_com::Ivariable_set,
                                 Com_variable_set            ( const xml::Element_ptr&, const string& variable_element_name = "param" );
                                 Com_variable_set            ( const Com_variable_set& );
 
-    STDMETHODIMP                QueryInterface              ( REFIID, void** );
+    STDMETHODIMP                QueryInterface              ( const IID&, void** );
 
     USE_SOS_OLE_OBJECT_WITHOUT_QI
 
@@ -187,7 +187,7 @@ struct Com_variable_set_enumerator : spooler_com::Ivariable_set_enumerator, Sos_
 {
     STDMETHODIMP_(ULONG)        AddRef                  ()                                          { return Sos_ole_object::AddRef(); }
     STDMETHODIMP_(ULONG)        Release                 ()                                          { return Sos_ole_object::Release(); }
-    STDMETHODIMP                QueryInterface          ( REFIID, void** );
+    STDMETHODIMP                QueryInterface          ( const IID&, void** );
     
     //USE_SOS_OLE_OBJECT_WITHOUT_QI
 
@@ -214,7 +214,7 @@ struct Com_log : spooler_com::Ilog,
                                 Com_log                     ( Prefix_log* = NULL );
                              //~Com_log                     ();
 
-    STDMETHODIMP                QueryInterface              ( REFIID, void** );
+    STDMETHODIMP                QueryInterface              ( const IID&, void** );
    
     USE_SOS_OLE_OBJECT_WITHOUT_QI
 
@@ -302,7 +302,7 @@ struct Com_log_proxy: object_server::Proxy
 
     void                    set_property                    ( const string& name, const Variant& value );
 
-  //STDMETHODIMP                QueryInterface              ( REFIID, void** );
+  //STDMETHODIMP                QueryInterface              ( const IID&, void** );
    
   //STDMETHODIMP                GetIDsOfNames               ( const IID&, OLECHAR** rgszNames, UINT cNames, LCID, DISPID* );
 
@@ -369,7 +369,7 @@ struct Com_job : spooler_com::Ijob,
     Z_GNU_ONLY(                 Com_job                     ();  )                                  // Für gcc 3.2. Nicht implementiert.
                                 Com_job                     ( Job* );
 
-    STDMETHODIMP                QueryInterface              ( REFIID, void** );
+    STDMETHODIMP                QueryInterface              ( const IID&, void** );
 
     USE_SOS_OLE_OBJECT_WITHOUT_QI
 
@@ -410,7 +410,7 @@ struct Com_task : spooler_com::Itask,
                                 Com_task                    ( Task* = NULL );
                                ~Com_task                    ()                                      {}
 
-    STDMETHODIMP                QueryInterface              ( REFIID, void** );
+    STDMETHODIMP                QueryInterface              ( const IID&, void** );
 
     USE_SOS_OLE_OBJECT_WITHOUT_QI
 
@@ -464,8 +464,8 @@ struct Com_task : spooler_com::Itask,
                                     
 //Z_DEFINE_GUID( CLSID_Com_spooler_proxy, 0xfeee47aa, 0x6c1b, 0x11d8, 0x81, 0x03, 0x00, 0x04, 0x76, 0xee, 0x8a, 0xfb );   // {feee47aa-6c1b-11d8-8103-000476ee8afb}
 
-struct Com_task_proxy : //com::object_server::proxy_with_local_methods< spooler_com::Itask_proxy >
-                        idispatch_implementation< Com_task_proxy, spooler_com::Itask_proxy > 
+struct Com_task_proxy : idispatch_implementation< Com_task_proxy, spooler_com::Itask_proxy >,
+                        com::object_server::Proxy
 {
     static Class_descriptor     class_descriptor;
     static const com::Com_method _methods[];
@@ -478,15 +478,18 @@ struct Com_task_proxy : //com::object_server::proxy_with_local_methods< spooler_
 
                                 Com_task_proxy              ();
 
+    STDMETHODIMP_(ULONG)        AddRef                      ()                                      { return Idispatch_implementation::AddRef(); }
+    STDMETHODIMP_(ULONG)        Release                     ()                                      { return Idispatch_implementation::Release(); }
+    STDMETHODIMP                QueryInterface              ( const IID&, void** );
+
+
     STDMETHODIMP                Start_subprocess            ( VARIANT* program_and_parameters, spooler_com::Isubprocess** result );
 
-  //void                        add_subprocess              ( Subprocess* );
-  //void                        remove_subprocess           ( Subprocess* );
     void                        wait_for_subprocesses       ();
 
 
     ptr<Subprocess_register>   _subprocess_register;
-    ptr<object_server::Proxy>  _proxy;
+  //ptr<object_server::Proxy>  _proxy;
 };
 
 //---------------------------------------------------------------------------------------Com_thread
@@ -497,7 +500,7 @@ struct Com_thread : spooler_com::Ithread,
 {
                                 Com_thread                  ( Spooler_thread* );
 
-    STDMETHODIMP                QueryInterface              ( REFIID, void** );
+    STDMETHODIMP                QueryInterface              ( const IID&, void** );
 
     USE_SOS_OLE_OBJECT_WITHOUT_QI
 
@@ -525,7 +528,7 @@ struct Com_spooler : spooler_com::Ispooler,
                                 Com_spooler                 ();                                     // Für gcc 3.2. Nicht implementiert.
                                 Com_spooler                 ( Spooler* ); 
 
-    STDMETHODIMP                QueryInterface              ( REFIID, void** );
+    STDMETHODIMP                QueryInterface              ( const IID&, void** );
 
     USE_SOS_OLE_OBJECT_WITHOUT_QI
 
@@ -620,7 +623,7 @@ struct Com_job_chain : spooler_com::Ijob_chain,
 {
                                 Com_job_chain           ( Job_chain* );
 
-    STDMETHODIMP                QueryInterface          ( REFIID, void** );
+    STDMETHODIMP                QueryInterface          ( const IID&, void** );
 
     USE_SOS_OLE_OBJECT_WITHOUT_QI
 
@@ -661,7 +664,7 @@ struct Com_job_chain_node : spooler_com::Ijob_chain_node,
 {
                                 Com_job_chain_node      ();
 
-    STDMETHODIMP                QueryInterface          ( REFIID, void** );
+    STDMETHODIMP                QueryInterface          ( const IID&, void** );
 
     USE_SOS_OLE_OBJECT_WITHOUT_QI
 
@@ -685,7 +688,7 @@ struct Com_order : spooler_com::Iorder,
                                 Com_order               ( Order* );
                               //Com_order               ();
 
-    STDMETHODIMP                QueryInterface          ( REFIID, void** );
+    STDMETHODIMP                QueryInterface          ( const IID&, void** );
 
     USE_SOS_OLE_OBJECT_WITHOUT_QI
 
@@ -749,7 +752,7 @@ struct Com_order_queue : spooler_com::Iorder_queue,
                                 Com_order_queue         ();
 
 
-    STDMETHODIMP                QueryInterface          ( REFIID, void** );
+    STDMETHODIMP                QueryInterface          ( const IID&, void** );
 
     USE_SOS_OLE_OBJECT_WITHOUT_QI
 
@@ -774,7 +777,7 @@ struct Com_subprocess : spooler_com::Isubprocess,
                                 Com_subprocess          ();
 
 
-    STDMETHODIMP                QueryInterface          ( REFIID, void** );
+    STDMETHODIMP                QueryInterface          ( const IID&, void** );
 
     USE_SOS_OLE_OBJECT_WITHOUT_QI
 
@@ -791,7 +794,7 @@ struct Com_subprocess : spooler_com::Isubprocess,
     STDMETHODIMP            get_Ignore_error            ( VARIANT_BOOL* );
     STDMETHODIMP            put_Ignore_signal           ( VARIANT_BOOL );
     STDMETHODIMP            get_Ignore_signal           ( VARIANT_BOOL* );
-    STDMETHODIMP                Wait                    ( double seconds );
+    STDMETHODIMP                Wait                    ( VARIANT*, VARIANT_BOOL* );
     STDMETHODIMP                Kill                    ( int signal );
 
   private:

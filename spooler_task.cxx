@@ -579,6 +579,7 @@ string Task::state_name( State state )
         case s_suspended:                   return "suspended";
       //case s_end:                         return "end";
         case s_ending:                      return "ending";
+        case s_ending_waiting_for_subprocesses: return "ending_waiting_for_subprocesses";
         case s_on_success:                  return "on_success";
         case s_on_error:                    return "on_error";
         case s_exit:                        return "exit";
@@ -698,11 +699,11 @@ void Task::remove_pid( int pid )
 
 //------------------------------------------------------------------------------------Task::add_pid
 
-void Task::add_subprocess( int pid, const Time& timeout_at, bool respect_exitcode, bool respect_signal, const string& title )
+void Task::add_subprocess( int pid, const Time& timeout_at, bool ignore_exitcode, bool ignore_signal, const string& title )
 { 
     Time timeout = latter_day;
     
-    _registered_pids[ pid ] = Z_NEW( Registered_pid( this, pid, timeout_at, true, respect_exitcode, respect_signal, title ) );  
+    _registered_pids[ pid ] = Z_NEW( Registered_pid( this, pid, timeout_at, true, ignore_exitcode, ignore_signal, title ) );  
 
     set_subprocess_timeout();
 }
@@ -1061,9 +1062,9 @@ bool Task::do_something()
                             {
                                 if( shall_wait_for_registered_pid() )
                                 {
-                                    if( dynamic_cast< Remote_module_instance_proxy* >( +_module_instance ) )
+                                    if( Remote_module_instance_proxy* m = dynamic_cast< Remote_module_instance_proxy* >( +_module_instance ) )
                                     {
-                                        _operation = do_call__start( "Task_proxy.Wait_for_subprocesses" );
+                                        _operation = m->_remote_instance->call__start( "Wait_for_subprocesses" );
                                     }
                                     else
                                     {
@@ -1348,7 +1349,12 @@ bool Task::operation__end()
         {
             case s_starting:                        result = do_begin__end();    break;
             case s_ending:                                   do_end__end();      break;
-            case s_ending_waiting_for_subprocesses:          do_call__end();     break;
+            
+            case s_ending_waiting_for_subprocesses: if( Remote_module_instance_proxy* m = dynamic_cast< Remote_module_instance_proxy* >( +_module_instance ) )
+                                                        m->_remote_instance->call__end();
+                                                    else throw_xc( "NO_REMOTE_INSTANCE" );
+                                                    break;
+
             case s_on_error:                        result = do_call__end();     break;
             case s_on_success:                      result = do_call__end();     break;
             case s_exit:                            result = do_call__end();     break;

@@ -2377,7 +2377,7 @@ STDMETHODIMP Com_task::get_Stdout_text( BSTR* result )
 
 STDMETHODIMP Com_task::Start_subprocess( VARIANT* program_and_parameters, Isubprocess** result )
 {
-    Z_LOG( __PRETTY_FUNCTION__ << "(" << debug_string_from_variant( *program_and_paramters ) )\n" );
+    Z_LOG( __PRETTY_FUNCTION__ << "(" << debug_string_from_variant( *program_and_parameters ) << "\n" );
     if( !_task )  return E_POINTER;
 
     return _task->_subprocess_register.Start_subprocess( program_and_parameters, result );
@@ -2412,7 +2412,6 @@ STDMETHODIMP Com_task::Add_subprocess( int pid, BSTR timeout_at, VARIANT_BOOL ig
 
 const Com_method Com_task_proxy::_methods[] =
 { 
-    //          _flags             , _name                   , _method                                               , _result_type, _types        , _default_arg_count
     COM_METHOD( Com_task_proxy, 20, Start_subprocess      , VT_DISPATCH , 0, { VT_BYREF|VT_VARIANT } ),
   //COM_METHOD( DISPATCH_METHOD, 21, "Wait_for_subprocesses" , Com_task_proxy::Wait_for_subprocesses, VT_EMTPY    , 0, {} ),
     {}
@@ -2425,7 +2424,7 @@ HRESULT Com_task_proxy::Create_instance( const IID& iid, ptr<IUnknown>* result )
     if( iid == object_server::IID_Iproxy )
     {
         ptr<Com_task_proxy> instance = Z_NEW( Com_task_proxy );
-        *result = static_cast<IDispatch*>( instance.take() );
+        *result = static_cast<IDispatch*>( static_cast<Proxy*>( instance.take() ) );
         return S_OK;
     }
 
@@ -2436,38 +2435,30 @@ HRESULT Com_task_proxy::Create_instance( const IID& iid, ptr<IUnknown>* result )
 
 Com_task_proxy::Com_task_proxy()
 : 
-    //Proxy_with_local_methods( &class_descriptor ),
     Idispatch_implementation( &class_descriptor ),
-    _proxy( Z_NEW( object_server::Proxy( &class_descriptor, static_cast<IDispatch*>( this ) ) ) ),
+    object_server::Proxy( &class_descriptor, static_cast<Itask_proxy*>( this ) ),
+  //_proxy( Z_NEW( object_server::Proxy( &class_descriptor, static_cast<Itask_proxy*>( this ) ) ) ),
     _subprocess_register( Z_NEW( Subprocess_register ) )
 {
+}
+
+//-------------------------------------------------------------------Com_task_proxy::QueryInterface
+
+STDMETHODIMP Com_task_proxy::QueryInterface( const IID& iid, void** result )
+{
+    HRESULT hr = Idispatch_implementation::QueryInterface( iid, result );
+    if( SUCCEEDED( hr ) )  return hr;
+
+    return object_server::Proxy::QueryInterface( iid, result );
 }
 
 //-----------------------------------------------------------------Com_task_proxy::Start_subprocess
 
 STDMETHODIMP Com_task_proxy::Start_subprocess( VARIANT* program_and_parameters, Isubprocess** result )
 {
-    return _subprocess_register->Start_subprocess( program_and_parameters, result );
+    return _subprocess_register->Start_subprocess( program_and_parameters, result, this );
 }
 
-//-------------------------------------------------------------------Com_task_proxy::add_subprocess
-/*
-void Com_task_proxy::add_subprocess( Subprocess* subprocess  )
-{
-    call( "Add_subprocess", subprocess->pid(), subprocess->ignore_error(), subprocess->ignore_signal(), subprocess->command_line() ); //, subprocess->stdout_path(), subprocess->stderr_path() );
-
-    _subprocess_register->add( subprocess );
-}
-
-//----------------------------------------------------------------Com_task_proxy::remove_subprocess
-
-void Com_task_proxy::remove_subprocess( Subprocess* subprocess  )
-{
-    _subprocess_register->remove( subprocess );
-
-    call( "Remove_pid", subprocess->pid() );
-}
-*/
 //------------------------------------------------------------Com_task_proxy::wait_for_subprocesses
 
 void Com_task_proxy::wait_for_subprocesses()

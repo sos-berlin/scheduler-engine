@@ -26,19 +26,19 @@
         <col valign="baseline" style="padding-top: 1ex; padding-left: 2ex"/>
         
         <tr>
-            <td><code>pending</code></td>
+            <td><scheduler_keyword keyword="pending"/><code>pending</code></td>
             <td>
                 Keine Task läuft. Das ist der anfängliche Zustand.
             </td>
         </tr>
         <tr>
-            <td><code>running</code></td>
+            <td><scheduler_keyword keyword="running"/><code>running</code></td>
             <td>
                 Wenigstens eine Task läuft.
             </td>
         </tr>
         <tr>
-            <td><code>stopping</code></td>
+            <td><scheduler_keyword keyword="stopping"/><code>stopping</code></td>
             <td>
                 Der Job stoppt. Der Scheduler startet keine weitere Task und die laufenden Tasks werden beendet.
                 Sobald alle Tasks des Jobs beendet sind, wechselt der Job in den Zustand <code>stopped</code>.
@@ -47,7 +47,7 @@
             </td>
         </tr>
         <tr>
-            <td><code>stopped</code></td>
+            <td><scheduler_keyword keyword="stopped"/><code>stopped</code></td>
             <td>
                 Keine Task läuft und der Scheduler startet keine weitere Task.
                 <br/>
@@ -55,7 +55,7 @@
             </td>
         </tr>
         <tr>
-            <td><code>read_error</code></td>
+            <td><scheduler_keyword keyword="read_error"/><code>read_error</code></td>
             <td>
                 Das Kommando <code>reread</code> hat zu einem Fehler geführt,
                 und der Job ist unbrauchbar, weil der Programmcode nicht gelesen werden konnte.
@@ -64,7 +64,7 @@
             </td>
         </tr>
         <tr>
-            <td><code>error</code></td>
+            <td><scheduler_keyword keyword="error"/><code>error</code></td>
             <td>
                 Wenn eine Task mit Fehler geendet hat, startet der Scheduler keine weitere Task.
                 <!--Der Aufruf <scheduler_method class="Job" property="error"/> liefert den Fehler.-->

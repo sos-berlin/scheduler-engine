@@ -1160,9 +1160,9 @@ library Spooler
         [propget]
         HRESULT                 Ignore_signal           ( [out,retval] VARIANT_BOOL* );
 
-        HRESULT                 Wait                    ( [in,defaultvalue(999999999)] double seconds );
+        HRESULT                 Wait                    ( [in,optional] VARIANT* seconds, [out,retval] VARIANT_BOOL* );       // seconds: VT_DOUBLE oder VT_INT
 
-        HRESULT                 Kill                    ( [in,defaultvalue(9)] int signal );
+        HRESULT                 Kill                    ( [in,defaultvalue(0)] int signal );
     };
 
     [
