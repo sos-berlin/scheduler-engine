@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.324 2004/03/26 08:30:14 jz Exp $
+// $Id: spooler.cxx,v 1.325 2004/03/26 08:59:40 jz Exp $
 /*
     Hier sind implementiert
 
@@ -249,7 +249,8 @@ With_log_switch read_profile_with_log( const string& profile, const string& sect
         {
             case SIGUSR1:
             {
-                z::log_categories.toggle_all();
+                z::log_categories.toggle_all();         // Das kann vom Signal-Handler aufgerufen werden.
+                ::signal( sig, ctrl_c_handler );        // Signal wieder zulassen.
                 break;
             }
 
@@ -288,8 +289,9 @@ static void set_ctrl_c_handler( bool on )
 
 #    else
 
-        ::signal( SIGINT , on? ctrl_c_handler : SIG_DFL );
-        ::signal( SIGTERM, on? ctrl_c_handler : SIG_DFL );
+        ::signal( SIGINT , on? ctrl_c_handler : SIG_DFL );      // Ctrl-C
+        ::signal( SIGTERM, on? ctrl_c_handler : SIG_DFL );      // Normales kill 
+        ::signal( SIGUSR1, on? ctrl_c_handler : SIG_DFL );      // Log erweitern oder zurücknehmen
 
 #   endif
 }
