@@ -1,0 +1,43 @@
+body            { font-size: 10pt; font-family: Arial sans-serif; }
+h1              { font-size: 14pt; font-weight: bold; margin-bottom: 4ex;  }
+h2              { font-size: 12pt; font-weight: bold; margin-top: 8ex; }
+h3              { font-size: 10pt; font-weight: bold; margin-top: 4ex }
+.zwischentitel  { font-weight: bold; margin-top: 6ex }
+p               { font-size: 10pt; margin-top: 2ex; margin-bottom: 0  }
+td              { font-size: 10pt }
+div             { font-size: 10pt }
+/*p:first-child   { font-size: 10pt; margin-top: 0; margin-bottom: 0 }   Wirkt in ie6 nicht */
+li              { font-size: 10pt }
+pre             { font-family: Lucida Console, monospace; font-size: 9pt; margin-left: 4ex; line-height: 1.2em;  }
+col             { padding-bottom: 1pt; padding-right: 2pt }
+caption         { font-size: 10pt; padding-bottom: 5pt; padding-left: 3pt; padding-right: 2pt; padding-top: 2pt }
+
+p.mono          { font-family: Lucida Console, monospace; font-size: 9pt; margin-left: 4ex }
+.mono           { font-family: Lucida Console, monospace; font-size: 9pt }
+code            { font-family: Lucida Console, monospace; font-size: 9pt;  }
+.mark           { background-color: #FFFF00 }
+
+a               { text-decoration: none; color: #0000A0 }
+
+/*
+.list           { margin-top: 4ex }
+.list_text2     { margin-left: 4ex }
+*/
+
+/*.list:first-line { margin-left: 0; margin-top: 4ex; margin-bottom: 2pt }*/
+.list               { margin-top: 4ex }
+.list_text          { margin-left: 4ex; margin-top: 2pt }
+
+/* geht nicht:
+div.list            { margin-left: 4ex; }
+div.list:first-line { margin-left: 0; margin-top: 9ex; }
+*/
+
+
+p.parent_element    { margin-top: 4ex; font-family: Lucida Console, monospace; font-size: 9pt; }
+p.element           { margin-top: 4ex; font-weight: bold; font-family: Lucida Console, monospace; font-size: 9pt; }
+p.attribute         { margin-top: 4ex; }
+p.example           { margin-top: 4ex; font-weight: bold; }
+
+
+.indent         { margin-left: 4ex; }

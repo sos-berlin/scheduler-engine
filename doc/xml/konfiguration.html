@@ -1,0 +1,395 @@
+<html>
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+<title>Neue Seite 1</title>
+<meta name="GENERATOR" content="Microsoft FrontPage 6.0">
+<meta name="ProgId" content="FrontPage.Editor.Document">
+
+<style type="text/css">
+    @import "../scheduler.css";
+</style>
+</head>
+
+<body>
+
+<h2>Konfiguration</h2>
+<p>Beim Start des Scheduler geben Sie mit dem Parameter -config= die Datei an, die die in XML formulierte Konfiguration 
+enthält. </p>
+<p>Beispiel für eine einfache Konfigurationsdatei mit einem Job in JavaScript (für Windows):</p>
+<pre>
+&lt;?xml version=&quot;1.0&quot; encoding=&quot;iso-8859-1&quot;?&gt;
+&lt;spooler&gt;
+    &lt;config&gt;
+        &lt;process_classes/&gt;
+        &lt;jobs&gt;
+            &lt;job name=&quot;test_job&quot; title=&quot;Das ist der Titel des Jobs test_job&quot;&gt;
+                &lt;script language=&quot;JavaScript&quot;&gt;&lt;![CDATA[
+
+function spooler_process()
+{
+    spooler_log.info( &quot;Hallo Welt!&quot; );
+    return false;
+}
+                ]]&gt;&lt;/script&gt;
+
+                &lt;run_time repeat=&quot;10&quot;/&gt;
+            &lt;/job&gt; &lt;/jobs&gt;
+    &lt;/config&gt;
+&lt;/spooler&gt;</p>
+<p>Konfiguriert ist hier der Job test_job, den der Scheduler alle 10 Sekunden wiederholen wird. Wenn diese Konfiguration 
+in der Datei scheduler.xml abgelegt ist, können sie den Scheduler so starten:</p>
+<pre>
+scheduler -config=scheduler.xml -log-dir=*stderr<p>Der Parameter -log-dir=*stderr stellt ein, dass der Scheduler das 
+Protokoll nach stderr, also zum Schirm schreibt. Mit Ctrl-C lässt sich der Scheduler abbbrechen.<h2>Schema</h2>
+
+
+<pre>&lt;spooler&gt;
+    &lt;<a href="config.html">config</a> spooler_id      = &quot;&quot;
+            tcp_port        = &quot;4444&quot;
+            udp_port        = &quot;4444&quot;
+            priority_max    = &quot;1000&quot;
+            java_class_path = &quot;&quot;
+            java_options    = &quot;&quot;    &gt;
+
+        &lt;<a href="base.html">base</a>/&gt;
+
+        &lt;<a href="holidays.html">holidays</a>&gt;
+            &lt;holiday day=&quot;...&quot;/&gt;
+            ...
+        &lt;/holiday&gt;
+
+        &lt;process_classes&gt;
+            &lt;process_class name=&quot;...&quot; max_processes=&quot;...&quot;/&gt;
+            ...
+        &lt;/process_classes&gt;
+
+        &lt;<a href="security.html">security</a>&gt;
+            &lt;allowed_host name=&quot;...&quot; level=&quot;...&quot;/&gt;
+            ...
+        &lt;/security&gt;
+
+        &lt;script language=&quot;...&quot;&gt;&lt;![CDATA[ ... ]]&gt;&lt;/script&gt;
+
+        &lt;jobs&gt;
+            &lt;job name          = &quot;...&quot;
+                 title         = &quot;&quot;
+                 log_append    = &quot;no&quot;
+                 order         = &quot;no&quot;
+                 process_class = &quot;&quot;
+                 tasks         = &quot;1&quot;
+                 timeout       = &quot;&quot; 
+                 idle_timeout  = &quot;&quot; 
+                 priority      = &quot;1&quot;   &gt;
+
+                 &lt;description&gt; ... &lt;/description&gt;
+
+                 &lt;params&gt;
+                     &lt;param name=&quot;...&quot; value=&quot;...&quot;/&gt;
+                     ...
+                 &lt;/params&gt;
+
+                 &lt;script language=&quot;...&quot;&gt;&lt;![CDATA[ ... ]]&gt;&lt;/script&gt;
+                     oder
+                 &lt;process file         = &quot;...&quot;
+                          param        = &quot;&quot;
+                          log_file     = &quot;&quot;
+                          ignore_error = &quot;no&quot; /&gt;
+
+                 &lt;runtime let_run=&quot;no&quot;&gt;
+                     &lt;period let_run      = &quot;...&quot;
+                             begin        = &quot;00:00&quot;
+                             end          = &quot;24:00&quot;
+                             repeat       = &quot;&quot;
+                             single_start = &quot;&quot;     &gt;
+                     &lt;/period&gt;
+
+                     &lt;date date=&quot;yyyy-mm-dd&quot;/&gt;
+                     ...
+
+                     &lt;weekdays&gt;
+                         &lt;day day=&quot;...&quot;&gt;
+                             &lt;period&gt;...&lt;/period&gt;
+                             ...
+                         &lt;/day&gt;
+                         ...
+                     &lt;/weekdays&gt;
+
+                     &lt;monthdays&gt;
+                         &lt;day day=&quot;...&quot;&gt;
+                             &lt;period&gt;...&lt;/period&gt;
+                             ...
+                         &lt;/day&gt;
+                         ...
+                     &lt;/monthdays&gt;
+
+                     &lt;ultimos&gt;
+                         &lt;day day=&quot;...&quot;&gt;
+                             &lt;period&gt;...&lt;/period&gt;
+                             ...
+                         &lt;/day&gt;
+                         ...
+                     &lt;/ultimos&gt;
+
+                     &lt;holidays&gt;
+                         &lt;holiday date=&quot;yyyy-mm-dd&quot;/&gt;
+                         ...
+                     &lt;/holidays&gt;
+
+                 &lt;/runtime&gt;
+                 
+             &lt;/job&gt;
+             ...
+        &lt;/jobs&gt;
+    &lt;/config&gt;
+&lt;/spooler&gt;<br>
+&nbsp;</pre><p>&nbsp;</pre>&nbsp;</p><p><br>
+&lt;!ELEMENT spooler ( config+ | command | answer )&gt;<br>
+&lt;!ELEMENT config ( security?, object_set_classes?, threads? )&gt;<br>
+Enthält die vollständige Konfiguration für einen SPOOLER.<br>
+&lt;!ATTLIST config spooler_id CDATA ''&gt;<br>
+Der SPOOLER wählt die Konfiguration aus, deren Spooler-Id leer ist oder mit der beim Start des SPOOLERS angegebenen 
+übereinstimmt. Eine passende Konfiguration muss vorhanden sein. Nachfolgende Konfigurationen werden nicht beachtet. Eine 
+Default-Konfiguration mit spooler_id=&quot;&quot; sollte daher zum Schluss angegeben werden.<br>
+&lt;!ATTLIST config log_dir CDATA #IMPLIED&gt;<br>
+In dieses Verzeichnis werden die SPOOLER-Logs geschrieben. Wenn *stderr angegeben ist, wird das Log nach stderr 
+geschrieben. <br>
+Wenn die Log-Datei in dem Verzeichnis nicht angelegt werden kann, beendet sich der SPOOLER.<br>
+&lt;!ATTLIST config tcp_port CDATA '4444'&gt;<br>
+TCP-Port, an dem der SPOOLER Kommandos entgegen nimmt.<br>
+Wenn der Port nicht geöffnet werden kann, beendet sich der SPOOLER.<br>
+Bei tcp_port=&quot;0&quot; wird kein TCP-Port geöffnet, dadurch kann die Steuerung des SPOOLERS per TCP-Kommando, z.B. über eine 
+Web-Seite, unterbunden werden.<br>
+&lt;!ATTLIST config udp_port CDATA '4444'&gt;<br>
+UDP-Port, an dem der SPOOLER Kommandos entgegen nimmt.<br>
+Wenn der Port nicht geöffnet werden kann, beendet sich der SPOOLER.<br>
+Bei udp_port=&quot;0&quot; wird kein UDP-Port geöffnet, dadurch kann die Steuerung des SPOOLERS per TCP-Kommando, z.B. über eine 
+Web-Seite, unterbunden werden.<br>
+&lt;!ATTLIST config priority_max CDATA '1000'&gt;<br>
+Höchste Priorität, die eine Task haben kann.<br>
+&lt;!ATTLIST config param CDATA ''&gt;<br>
+Parameter, der den Skripten als Eigenschaft spooler.param bereitgestellt wird. <br>
+&lt;!ATTLIST config include_path CDATA ''&gt;<br>
+Verzeichnis, das auf relative Dateinamen im Element &lt;include&gt; (in &lt;script&gt;) angewendet werden soll.<br>
+&lt;!ATTLIST config free_threading CDATA 'no'&gt;<br>
+Bei free_threading='no' (default) werden die Threads serialisiert. Bei free_threading='yes' laufen die Threads parallel. 
+Dabei ist auf Wechselwirkungen zu achten, die bei der Serialisierung nicht auftreten. Im Element &lt;thread&gt; kann einzelnen 
+Threads die Eigenschaft gegeben werden, parallel zu den anderen zu laufen. <br>
+<br>
+&lt;!ELEMENT security ( allowed_host* )&gt;<br>
+Setzt die Sicherheitseinstellungen.<br>
+&lt;!ATTLIST security ignore_unknown_hosts (yes|no) 'no'&gt;<br>
+Wenn im Element allowed_host ein unbekannter bzw. nicht auflösbarer Hostname angegeben wird, wird der Start des SPOOLERS 
+trotzdem fortgesetzt.<br>
+&lt;!ELEMENT allowed_host EMPTY&gt;<br>
+Gibt einen Host oder ein Netzwerk an, die mit dem SPOOLER über TCP oder UDP kommunizieren dürfen. Ohne diesem Element 
+ist die Kommunikation über TCP und UDP gesperrt.<br>
+Eine häufig anzutreffende Einstellung ist localhost bzw. 127.0.0.1, wenn der Server, auf dem der SPOOLER abläuft 
+gleichzeitig den Web-Server mit der Web-Seite zur SPOOLER-Kontrolle betreibt; die Einstellung verhindert, dass von 
+anderen Rechnern mit dem SPOOLER kommuniziert werden kann. <br>
+&lt;!ATTLIST allowed_host host CDATA #REQUIRED&gt;<br>
+Name oder IP-Nummer des Hosts oder die IP-Nummer eines Netzwerks der Klasse A, B oder C. Der Name eines Netzwerks kann 
+nicht angegeben werden.<br>
+Die Einstellung für einen Host hat Vorrang vor der Einstellung für ein Netzwerk.<br>
+&lt;!ATTLIST allowed_host level (none|signal|info|all) #REQUIRED&gt;<br>
+level=&quot;none&quot;: Nichts ist zugelassen.<br>
+level=&quot;signal&quot;: Nur &lt;signal-object&gt; über UDP ist zugelassen.<br>
+level=&quot;info&quot;: &lt;show_state&gt; ist zugelassen.<br>
+level=&quot;all&quot;: Alle Kommandos sind zugelassen.<br>
+<br>
+&lt;!ELEMENT object_set_classes ( object_set_class+ )&gt;<br>
+Enthält die Objektmengenklassen.<br>
+<br>
+&lt;!ELEMENT object_set_class ( level_decls?, script? )&gt;<br>
+Eine Objektmengenklasse ist beschrieben durch die bezeichnete Stufe der Objekte und ein Skript, das die Methoden für 
+eine Objektmenge und deren Objekte enthält.<br>
+&lt;!ATTLIST object_set_class name CDATA #REQUIRED&gt;<br>
+Name der Klasse.<br>
+Beispiel: Dokumente<br>
+&lt;!ATTLIST object_set_class script_interface (oo|procedural) 'oo'&gt; <br>
+Gibt an, ob die objektorientierte oder die prozedurale Schnittstelle verwendet werden soll.<br>
+<br>
+&lt;!ELEMENT level_decls ( level_decl+ )&gt;<br>
+Verzeichnis der Stufen, die ein Objekt haben kann. Das Verzeichnis muss nicht vollständig sein und kann auch ganz 
+fehlen.<br>
+<br>
+&lt;!ELEMENT level_decl EMPTY&gt;<br>
+Jedes Objekt hat eine Stufe, die durch eine Nummer angegeben ist. Den Stufennummern werden hier Bezeichnungen 
+zugeordnet.<br>
+&lt;!ATTLIST level_decl level CDATA #REQUIRED&gt;<br>
+Nummer der Stufe. Die Nummer ist eine natürliche Zahl. Eine höhere Nummer bezeichnet eine höhere Stufe.<br>
+&lt;!ATTLIST level_decl name CDATA #REQUIRED&gt;<br>
+Bezeichnung der Stufe.<br>
+<br>
+&lt;!ELEMENT script ( #PCDATA | include )*&gt;<br>
+Skript mit den Methoden für eine Objektmenge und deren Objekte.<br>
+&lt;!ATTLIST script language CDATA 'VBScript'&gt;<br>
+Jede installierte Skriptsprache, die nach Microsofts Scripting Engines implementiert ist, kann angegeben werden.<br>
+Bespiele: VBScript, JScript, PerlScript<br>
+<br>
+&lt;!ATTLIST script use_engine (task|job) 'task'&gt;<br>
+Mit use_engine=&quot;task&quot; erhält jede Task eine eigene Scripting Engine. Damit sind die Tasks eines Jobs voneinander 
+isoliert.<br>
+Mit use_engine=&quot;job&quot; wird dieselbe Scripting Engine für alle Tasks desselben Jobs verwendet. Die Scripting Engine wird 
+nur beendet, wenn die Task gestoppt wird. Die Routine spooler_init() des Skripts wird nur einmal vor der ersten Task 
+gerufen, spooler_exit() nur einmal nach der letzten Task.<br>
+Für Skripte mit der Sprache PerlScript sollte die Einstellung use_engine=&quot;task&quot; gewählt werden.<br>
+Zum Aufbau des Skripts s.u.<br>
+&lt;!ELEMENT include EMPTY&gt;<br>
+Fügt an der Stelle Text aus einer anderen Datei ein. Damit kann ein Skript eine mehrfach verwendbare Datei nutzen.<br>
+&lt;!ATTLIST include file CDATA #REQUIRED&gt;<br>
+Gibt den Namen der Datei an, deren Inhalt hier eingesetzt werden soll. Wenn der Dateiname relativ ist, wird das 
+Verzeichnis aus include_path verwendet.<br>
+<br>
+&lt;!ELEMENT threads ( thread+ )&gt;<br>
+Alle Threads werden hier aufgeführt. Damit der SPOOLER überhaupt einen Job ausführen kann, muss ein Thread definiert 
+werden. In der Regel genügt ein Thread. Werden mehrere Threads definiert, sollte auf Komplikationen geachtet werden, die 
+vielleicht durch die Nebenläufigkeit auftreten können.<br>
+<br>
+&lt;!ELEMENT thread ( script?, jobs? )&gt;<br>
+Ein Thread hat ein Thread-Skript und Jobs. Das Thread-Skript wird mit dem Thread gestartet und bleibt solange aktiv bis 
+der Thread beendet wird (in der Regel erst bei Beendigung des SPOOLERS). Die Skripte der Jobs können auf das 
+Thread-Skript zugreifen über spooler_thread.script.<br>
+&lt;!ATTLIST thread spooler_id CDATA ''&gt;<br>
+Kennung des SPOOLERS, für den der Thread bestimmt ist. Der Thread wird vom SPOOLER nur berücksichtigt, wenn dieses 
+Attribut nicht leer ist und mit der Option -spooler-id= vom SPOOLER-Start übereinstimmt. <br>
+&lt;!ATTLIST thread include_path CDATA #IMPLIED&gt;<br>
+Gibt das Verzeichnis für relative Dateinamen im &lt;include&gt;-Element für Skripte dieses Threads an.<br>
+&lt;!ATTLIST thread free_threading CDATA #IMPLIED&gt; <br>
+Default ist &lt;config free_threading=&quot;no&quot;&gt;. Mit free_threading=&quot;yes&quot; wird dieser Thread nebenläufig geschaltet.<br>
+&lt;!ATTLIST thread priority CDATA #IMPLIED&gt;<br>
+Gibt die relative Priorität des Threads im Betriebssystem Windows an. Werte von -15 (niedriger) bis +2 (höher) können 
+angegeben werden. 0 ist neutral. &quot;idle&quot; gibt die niedrigste Priorität an<br>
+<br>
+&lt;!ELEMENT jobs ( job+ )&gt;<br>
+Alle Jobs werden hier aufgeführt.<br>
+<br>
+&lt;!ELEMENT job ( ( object_set | script | process ), run_time? )&gt;<br>
+Ein Job beschreibt eine Aufgabe, die zu bestimmten Zeiten durchzuführen ist. Ein Job kann sich auf eine Objektmenge 
+beziehen oder ein eigenes Skript haben. <br>
+Gelangt ein Job zur Ausführung, entsteht eine Task. Von einem Job kann nur eine Task laufen.<br>
+&lt;!ATTLIST job name CDATA #REQUIRED&gt;<br>
+Name, der den Job identifiziert.<br>
+&lt;!ATTLIST job priority CDATA '1'&gt;<br>
+Eine höhere Zahl bezeichnet eine höhere Priorität. Niedrigste Priorität ist 0, die höchste ist im Attribut max-priority 
+im Element config festgelegt.<br>
+Die niedrigste und die höchste Priorität haben besondere Bedeutungen: Priorität 0 lässt eine Task nur ausgeführen, wenn 
+kein keine Task mit höherer Priorität läuft, wenn also sonst nichts zu tun ist. Die höchste Priorität gibt absoluten 
+Vorrang. Tasks mit niedriger Priorität werden solange angehalten, bis keine Task mit der höchsten Priorität mehr läuft.<br>
+&lt;!ATTLIST job output_level CDATA #IMPLIED&gt;<br>
+Wenn der Job mit einer Objektmenge arbeitet, bezeichnet dieses Attribut die Stufe, auf die der Job die Objekte der 
+Objektmenge befördert. Dieses Attribut muss in diesem Fall angegeben werden.<br>
+&lt;!ATTLIST job spooler_id CDATA ''&gt;<br>
+Kennung des SPOOLERS, für den der Job bestimmt ist. Der Job wird vom SPOOLER nur berücksichtigt, wenn dieses Attribut 
+nicht leer ist und mit der Option -spooler-id= vom SPOOLER-Start übereinstimmt. <br>
+<br>
+&lt;!ELEMENT object_set ( levels? )&gt;<br>
+Beschreibt die Objektmenge, mit der der Job arbeitet.<br>
+&lt;!ATTLIST object_set class CDATA #REQUIRED&gt;<br>
+Name der Objektmengenklasse, wie sie mit einem Element object_set_class deklariert ist.<br>
+<br>
+&lt;!ELEMENT levels EMPTY&gt; <br>
+Intervall von Stufen, auf die die Objektmenge beschränkt werden soll.<br>
+&lt;!ATTLIST levels low CDATA #REQUIRED&gt;<br>
+Kleinste Stufennummer.<br>
+&lt;!ATTLIST levels high CDATA #REQUIRED&gt;<br>
+Nummer der Stufe, die nicht mehr berücksichtigt werden soll.<br>
+&lt;!ELEMENT process EMPTY&gt;<br>
+Beim Start des Jobs, also zu Beginn einer Task, wird ein Prozess eingerichtet. Der Prozess ist nebenläufig zum Thread. 
+Der Spooler überwacht den Prozess und beendet die Task nachdem der Prozess sich beendet hat. Ein exit code verschieden 
+zu 0 wird als Fehler interpretiert. Der exit code ist das Ergebnis der Task (in task.result).<br>
+&lt;!ATTLIST process file CDATA #REQUIRED&gt;<br>
+Name der Datei, die das Programm oder das Skript enthält, mit dem der Prozess gestartet werden soll.<br>
+&lt;!ATTLIST process param CDATA ''&gt;<br>
+Gibt den Parameterstring an, der dem Prozess übergeben wird.<br>
+&lt;!ELEMENT run_time ( period*, date*, weekdays?, monthdays?, ultimos?, holiday* )&gt;<br>
+Gibt die Zeiten an, zu denen der Job laufen soll. Wenn das Element run_time fehlt, wird der Job nicht nach Zeit 
+gestartet.<br>
+Ein Job kann einmal zu einer bestimmten Uhrzeit (single_start) oder mehrmals in einem Zeitraum (begin) gestartet werden.<br>
+&lt;!ATTLIST run_time single_start CDATA #IMPLIED&gt;<br>
+Voreinstellung für Attribut begin des Elements period (Tageszeit, zu der der Job einmal gestartet werden soll).<br>
+Format: HH:MM[:SS]<br>
+Die Zeiten von 00:00 bis 23:59:59 können angegeben werden.<br>
+Die Task wird zur end_time beendet, wenn nicht let_run=&quot;yes&quot; ist.<br>
+&lt;!ATTLIST run_time begin CDATA '00:00:00'&gt;<br>
+Voreinstellung für Attribut begin des Elements period (Tageszeit, ab der die Task laufen soll).<br>
+Format: HH:MM[:SS]<br>
+begin kann nicht mit single_start kombiniert werden.<br>
+&lt;!ATTLIST run_time end CDATA '24:00:00'&gt;<br>
+Voreinstellung für Attribut end des Elements period (Tageszeit, bis vor der die Task laufen soll). <br>
+Format: HH:MM[:SS]<br>
+&lt;!ATTLIST run_time let_run (yes|no) 'no'&gt;<br>
+Voreinstellung für Attribut let_run des Elements period (gibt an, ob beim Erreichen der Endezeit kein Schritt mehr 
+ausgeführt und die Task beendet werden soll).<br>
+&lt;!ATTLIST run_time repeat CDATA '5'&gt;<br>
+Voreinstellung für Attribut repeat des Elements period (gibt die Zeit in Sekunden an, die längstens zwischen dem Ende 
+einer Task und dem erneuten Start verstreichen soll).<br>
+Kann nicht mit single_start kominiert werden.<br>
+<br>
+&lt;!ELEMENT date period&gt;<br>
+Gibt ein Tag an, an dem der Job laufen soll.<br>
+&lt;!ATTLIST date date CDATA #IMPLIED&gt;<br>
+Datum des Tags im Format yyyy-mm-dd (oder ein anderes hostWare-Format).<br>
+<br>
+&lt;!ELEMENT weekdays ( day+ )&gt;<br>
+Gibt die Wochentage an, an denen der Job laufen soll. 0 bezeichnet den Sonntag, 1 Montag usw. bis 6 Sonnabend.<br>
+<br>
+&lt;!ELEMENT monthdays ( day+ )&gt;<br>
+Gibt die Tage im Monat an, an denen der Job laufen soll.<br>
+<br>
+&lt;!ELEMENT ultimos ( day+ )&gt;<br>
+Gibt die Tage im Monat an, rückwärts vom letzen Tag gezählt, an denen der Job laufen soll. 0 bezeichnet den letzen Tag, 
+1 den vorletzten usw.<br>
+<br>
+&lt;!ELEMENT holiday EMPTY&gt; <br>
+Gibt die Tage an, an denen der Job nicht starten soll. Vorher eingestellte Tage, auch mit dem Element date, werden mit 
+dieser Angabe widerrufen.<br>
+&lt;!ATTLIST holiday date CDATA #REQUIRED&gt;<br>
+Datum des Tags im Format yyyy-mm-dd (oder ein anderes hostWare-Format).<br>
+<br>
+&lt;!ELEMENT day period&gt;<br>
+&lt;!ATTLIST day day CDATA #REQUIRED&gt;<br>
+Gibt für die Elemente weekdays, monthdays und ultimos die Nummern der Tage an.<br>
+<br>
+&lt;!ELEMENT period EMPTY&gt;<br>
+Beschreibt die Tageszeit, zu der der Job laufen soll. <br>
+&lt;!ATTLIST period single_start CDATA #IMPLIED&gt; <br>
+Tageszeit, zu der der Job einmal gestartet werden soll.<br>
+Format: HH:MM[:SS]<br>
+Die Zeiten von 00:00 bis 23:59:59 können angegeben werden.<br>
+Die Task wird zur end_time beendet, wenn nicht let_run=&quot;yes&quot; ist.<br>
+Kann nicht zusammen mit den Attributen begin und repeat angegeben werden.<br>
+Voreinstellung ist die im Element run_time gemachte Angabe.<br>
+<br>
+&lt;!ATTLIST period begin CDATA #IMPLIED&gt; <br>
+Tageszeit, ab der die Task laufen soll.<br>
+Format: HH:MM[:SS]<br>
+Die Zeiten von 00:00 bis 23:59:59 können angegeben werden.<br>
+begin kann nicht mit dem Attribut single_start kombiniert werden.<br>
+Voreinstellung ist die im Element run_time gemachte Angabe.<br>
+<br>
+&lt;!ATTLIST period end CDATA #IMPLIED&gt; <br>
+Tageszeit, bis zu der die Task laufen soll. <br>
+Format: HH:MM[:SS]<br>
+Die Zeiten von 00:00 bis 24:00:00 können angegeben werden.<br>
+Wenn Beginn- und Endezeit übereinstimmen, wird bei let_run=no die Task zur angegeben Zeit gestartet und nur ein Schritt 
+ausgeführt.<br>
+Voreinstellung ist die im Element run_time gemachte Angabe.<br>
+<br>
+&lt;!ATTLIST period let_run (yes|no) #IMPLIED&gt; <br>
+Gibt an, ob beim Erreichen der Endezeit kein Schritt mehr ausgeführt und die Task beendet werden soll <br>
+Voreinstellung ist die im Element run_time gemachte Angabe.<br>
+<br>
+&lt;!ATTLIST period repeat CDATA #IMPLIED&gt;<br>
+Gibt die Zeit in Sekunden an, die längstens zwischen dem Ende einer Task und dem erneuten Start verstreichen soll).<br>
+Kann nicht mit dem Attribut single_start kominiert werden.<br>
+Voreinstellung ist die im Element run_time gemachte Angabe.<br>
+<br>
+<br>
+<br>
+<br>
+&nbsp;</p>
+
+</body>
+
+</html>

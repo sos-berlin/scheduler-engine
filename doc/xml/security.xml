@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet href="../scheduler.xslt" type="text/xsl"?>
+<!--$Id: security.xml,v 1.1 2004/08/21 10:27:01 jz Exp $-->
+
+<xml_element name     = "security" 
+             title    = "Zugriffsschutz"
+             base_dir = ".."
+             author   = "$Author: jz $"
+             date     = "$Date: 2004/08/21 10:27:01 $">
+
+    <xml_parent_elements>
+        <xml_parent_element name="config">
+        </xml_parent_element>        
+    </xml_parent_elements>
+
+    <xml_child_elements>
+        <xml_child_element name="allowed_host">
+        </xml_child_element>        
+    </xml_child_elements>
+
+    <description>
+        <p>
+            <code>&lt;security></code> gibt die Rechner und Netzwerke an, die per TCP und UDP Kommandos ausführen dürfen.
+        </p>
+    </description>
+</xml_element>

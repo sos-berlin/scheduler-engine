@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet href="../scheduler.xslt" type="text/xsl"?>
+<!--$Id: base.xml,v 1.1 2004/08/21 10:27:01 jz Exp $-->
+
+<xml_element name     = "base" 
+             title    = "Basiskonfiguration"
+             base_dir = ".."
+             author   = "$Author: jz $"
+             date     = "$Date: 2004/08/21 10:27:01 $">
+
+    <xml_parent_elements>
+        <xml_parent_element name="config">
+        </xml_parent_element>        
+    </xml_parent_elements>
+
+    <xml_attributes>
+        <xml_attribute name="file" value="filename">
+            <description>
+                <i>filename</i> gibt den Dateinamen der Basiskonfiguration an.
+                <p/>
+                Wenn der Dateiname nicht absolut ist, geht der Scheduler vom Verzeichnis der Konfigurationsdatei aus,
+                die das <code>&lt;base></code>-Element enthält.
+            </description>
+        </xml_attribute>
+    </xml_attributes>
+
+    <description>
+        <p>
+            Mit <code>&lt;base&gt;</code> können Sie eine Basiskonfiguration angegeben, die der Scheduler vor der 
+            Konfiguration verarbeitet, die <code>&lt;base&gt;</code> enthält. Erst danach verarbeitet er die 
+            Konfiguration, die <code>&lt;base></code> enthält. In der Basiskonfiguration können Sie Einstellungen 
+            vorgenommen, die die übergeordnete Konfiguration ergänzt.
+        </p>
+        <p>
+            Eine Basiskonfiguration kann auf eine weitere Basiskonfiguration verweisen. Der Scheduler prüft nicht, ob eine 
+            Basiskonfiguration selbstbezüglich aufgerufen wird.
+        </p>
+    </description>
+</xml_element>

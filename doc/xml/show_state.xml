@@ -1,0 +1,33 @@
+<html>
+
+<head>
+  <meta http-equiv="Content-Language" content="de">
+  <meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+  <title>Scheduler &lt;show_state></title>
+  <meta name="GENERATOR" content="Microsoft FrontPage 6.0">
+  <meta name="ProgId" content="FrontPage.Editor.Document">
+  <style type="text/css">
+    @import "../scheduler.css";
+  </style>
+</head>
+
+<body>
+
+<h2>&lt;show_state&gt;</h2>
+<code>&lt;show_state what=&quot;<i>what</i>&quot;&gt;</code>
+<p>Liefert</p>
+<code>Neue Seite 1</code></a><p>
+<code><br>
+&lt;spooler&gt;<br>
+&nbsp;&nbsp; &lt;answer&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <a href="spooler_answer_state.html">&lt;state&gt;</a><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ...<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;/state&gt;<br>
+&nbsp;&nbsp; &lt;/answer&gt;<br>
+&lt;/spooler&gt;<br>
+</code>
+
+
+</body>
+
+</html>
