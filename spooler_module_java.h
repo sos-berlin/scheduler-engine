@@ -1,4 +1,4 @@
-// $Id: spooler_module_java.h,v 1.6 2002/11/08 20:11:23 jz Exp $
+// $Id: spooler_module_java.h,v 1.7 2002/11/22 14:06:27 jz Exp $
 
 #ifndef __SPOOLER_MODULE_JAVA_H
 #define __SPOOLER_MODULE_JAVA_H
@@ -98,8 +98,10 @@ struct Java_vm                  // Java virtual machine
     Spooler*                   _spooler;
     Prefix_log                 _log;
     string                     _filename;
+    string                     _work_class_dir;
     string                     _ini_class_path;
     string                     _config_class_path;
+    string                     _complete_class_path;
   //JDK1_1InitArgs             _vm_args;
     JavaVMInitArgs             _vm_args;
     vector<Option>             _options;
@@ -157,14 +159,16 @@ struct Java_module_instance : Module_instance
                                 Java_module_instance        ( Module* module )                      : Module_instance(module), _zero_(this+1), _jobject(_module->_spooler) {}
                                ~Java_module_instance        ()                                      { close(); }
 
-    void                        init                        ();
-    void                        load                        ();
     void                        close                       ();
+    void                        init                        ();
+    void                        add_obj                     ( const ptr<IDispatch>& object, const string& name );
+    void                        load                        ();
     Variant                     call                        ( const string& name );
     Variant                     call                        ( const string& name, int param );
     virtual bool                name_exists                 ( const string& name );
     bool                        callable                    ()                                      { return _jobject != NULL; }
-    void                        add_obj                     ( const ptr<IDispatch>& object, const string& name );
+
+    void                        make_class                  ();
 
 
     Fill_zero                  _zero_;

@@ -1,4 +1,4 @@
-// $Id: spooler_module.h,v 1.5 2002/11/22 08:34:11 jz Exp $
+// $Id: spooler_module.h,v 1.6 2002/11/22 14:06:27 jz Exp $
 
 #ifndef __SPOOLER_MODULE_H
 #define __SPOOLER_MODULE_H
@@ -80,6 +80,7 @@ struct Module
 
     Kind                        kind                        () const                                { return _kind; }
 
+    void                        make_java_class             ();                                     // in spooler_module_java.cxx
     jmethodID                   java_method_id              ( const string& name );                 // in spooler_module_java.cxx
 
     Spooler*                   _spooler;
@@ -115,12 +116,12 @@ struct Module_instance : Object
                                 Module_instance             ( Module* script )                      : _zero_(this+1), _module(script), _log(script->_log) {}
     virtual                    ~Module_instance             ()                                      {}      // Für gcc 3.2
 
+    virtual void                close                       ()                                      = 0;
     virtual void                init                        ();
+    virtual void                add_obj                     ( const ptr<IDispatch>&, const string& name );
     virtual void                load                        ()                                      {}
     virtual void                start                       ()                                      {}
     virtual IDispatch*          dispatch                    () const                                { throw_xc( "SPOOLER-172", "dispatch()" ); }
-    virtual void                add_obj                     ( const ptr<IDispatch>&, const string& name );
-    virtual void                close                       ()                                      = 0;
     Variant                     call_if_exists              ( const string& name );
     virtual Variant             call                        ( const string& name )                  = 0;
     virtual Variant             call                        ( const string& name, int param )       = 0;

@@ -1,4 +1,4 @@
-// $Id: spooler_module.cxx,v 1.3 2002/11/11 23:10:33 jz Exp $
+// $Id: spooler_module.cxx,v 1.4 2002/11/22 14:06:26 jz Exp $
 /*
     Hier sind implementiert
 
@@ -77,7 +77,7 @@ void Module::set_dom_source_only( const xml::Element_ptr& element, const string&
             break;
 
         case kind_java:
-            if( !_source.empty() )  throw_xc( "SPOOLER-167" );
+            //if( !_source.empty() )  throw_xc( "SPOOLER-167" );
             break;
 
         default: 
