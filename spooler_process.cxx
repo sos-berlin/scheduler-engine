@@ -1,4 +1,4 @@
-// $Id: spooler_process.cxx,v 1.2 2003/08/28 20:48:25 jz Exp $
+// $Id: spooler_process.cxx,v 1.3 2003/08/29 08:14:04 jz Exp $
 
 #include "spooler.h"
 
@@ -191,7 +191,8 @@ void Process::start()
     if( !log_filename().empty() )
     parameters.push_back( Parameter( "param", "-log=" + quoted_string( "+" + log_filename() ) ) );
 
-    _session  = Z_NEW( Session( start_process( parameters ) ) );
+    _connection = start_process( parameters );
+    _session  = Z_NEW( Session( _connection ) );
     _session->set_connection_has_only_this_session();
 }
 
@@ -199,14 +200,7 @@ void Process::start()
 
 void Process::async_continue()
 {
-    Async_operation* operation = _session->current_operation();
-
-    if( operation )  
-    {
-        operation = operation->async_super_operation();
-        if( _spooler->_debug )  _spooler->_log.debug9( "async_continue " + operation->async_state_text() );
-        operation->async_continue();
-    }
+    _connection->async_continue();
 }
 
 //-------------------------------------------------------------------------------------Process::dom
@@ -218,6 +212,10 @@ xml::Element_ptr Process::dom( const xml::Document_ptr& document, Show_what show
     //process_element.setAttribute( "name"           , _name );
     process_element.setAttribute( "pid"              , _session->connection()->pid() );
     process_element.setAttribute( "module_instances" , _module_instance_count );
+
+    Async_operation* operation = _connection? _connection->current_super_operation() : NULL;
+    if( operation )
+    process_element.setAttribute( "operation"        , operation->async_state_text() );
 
     //process_element.setAttribute( "steps"          , _step_count );
     //process_element.setAttribute( "started_tasks"  , _task_count );

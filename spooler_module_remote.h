@@ -1,4 +1,4 @@
-// $Id: spooler_module_remote.h,v 1.10 2003/08/28 20:48:25 jz Exp $
+// $Id: spooler_module_remote.h,v 1.11 2003/08/29 08:14:04 jz Exp $
 
 #ifndef __SPOOLER_MODULE_REMOTE_H
 #define __SPOOLER_MODULE_REMOTE_H
@@ -19,15 +19,22 @@ struct Remote_module_instance_proxy : Com_module_instance_base
         enum Call_state
         {
             c_none,
-            c_connect,
-            c_create_instance,
-            c_construct,
-            c_begin,
-            c_finished
+
+            c_begin,            // call__begin()
+            c_connect,          //   Mit Server verbinden
+            c_create_instance,  
+            c_construct,        
+            c_call_begin,       //   spooler_open() 
+
+            c_end,              // end__begin()
+            c_call_end,         //   spooler_close()
+            c_release,          //   Release()
+
+            c_finished,
         };
 
 
-                                Operation                   ( Remote_module_instance_proxy* );
+                                Operation                   ( Remote_module_instance_proxy*, Call_state first_state );
 
         Async_operation*        begin__start                ();
         bool                    begin__end                  ();
@@ -46,7 +53,6 @@ struct Remote_module_instance_proxy : Com_module_instance_base
         Call_state             _call_state;
         Multi_qi               _multi_qi;
         ptr<Async_operation>   _operation;
-      //Xc_copy                _error;
     };
 
 
@@ -78,6 +84,7 @@ struct Remote_module_instance_proxy : Com_module_instance_base
     ptr<object_server::Session>    _session;
     ptr<object_server::Proxy>      _remote_instance;
     ptr<Async_operation>           _operation;
+    bool                           _end_success;            // Für end__start()
 
     Fill_end                   _end_;
 };

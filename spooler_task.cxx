@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.175 2003/08/28 20:48:25 jz Exp $
+// $Id: spooler_task.cxx,v 1.176 2003/08/29 08:14:04 jz Exp $
 /*
     Hier sind implementiert
 
@@ -184,6 +184,8 @@ Task::Task( Job* job )
 
     _log.set_job( _job );
     _log.set_task( this );
+
+    Z_DEBUG_ONLY( _job_name = job->name(); )
 }
 
 //--------------------------------------------------------------------------------------Task::~Task
@@ -277,7 +279,7 @@ xml::Element_ptr Task::dom( const xml::Document_ptr& document, Show_what show )
                 task_element.setAttribute( "calling"         , t->_module_instance->_in_call->name() );
 
                 int pid = t->_module_instance->pid();
-                if( pid ) task_element.setAttribute( "pid", pid );       // separate_process="yes", Remote_module_instance_proxy
+                if( pid )  task_element.setAttribute( "pid", pid );       // separate_process="yes", Remote_module_instance_proxy
             }
         }
 
@@ -989,10 +991,10 @@ void Module_task::do_close()
 {
     if( _module_instance )  
     { 
-        if( _close_engine ) 
+        //if( _close_engine ) 
         {
-            close_engine();
-            _close_engine = false;
+            //close_engine();
+            //_close_engine = false;
     
             if( _job->_module_ptr->_reuse == Module::reuse_job )
             {
@@ -1011,7 +1013,7 @@ void Module_task::do_close()
 }
 
 //------------------------------------------------------------------------Module_task::close_engine
-
+/*
 void Module_task::close_engine()
 {
     try 
@@ -1023,7 +1025,7 @@ void Module_task::close_engine()
     }
     catch( const exception& x ) { set_error(x); }
 }
-
+*/
 //------------------------------------------------------------------------Object_set_task::do_close
 // Kann von anderem Thread gerufen werden, wenn der noch eine COM-Referenz hat
 /*
@@ -1118,7 +1120,7 @@ void Job_module_task::do_load()
     {
         module_instance = _job->create_module_instance();
         is_new = true;
-        _close_engine = true;
+        module_instance->set_close_instance_at_end( true );  //_close_engine = true;
     }
 
     module_instance->set_title( obj_name() );

@@ -1,4 +1,4 @@
-// $Id: spooler_module.h,v 1.35 2003/08/27 17:44:48 jz Exp $
+// $Id: spooler_module.h,v 1.36 2003/08/29 08:14:04 jz Exp $
 
 #ifndef __SPOOLER_MODULE_H
 #define __SPOOLER_MODULE_H
@@ -192,6 +192,7 @@ struct Module_instance : Object
     virtual void                init                        ();
     void                    set_log                         ( Prefix_log* log )                     { _log = log; }
     void                    set_in_call                     ( In_call* in_call, const string& extra = "" );
+    void                    set_close_instance_at_end       ( bool b )                              { _close_instance_at_end = b; }   // Nach spooler_close() Instanz schlieﬂen
 
     virtual void                add_obj                     ( const ptr<IDispatch>&, const string& name );
     virtual void                load                        ()                                      {}
@@ -234,8 +235,8 @@ struct Module_instance : Object
     bool                       _spooler_init_called;
     bool                       _spooler_exit_called;
     bool                       _spooler_open_called;
+    bool                       _close_instance_at_end;
     In_call*                   _in_call;
-
     ptr<Com_task>              _com_task;                   // spooler_task
     ptr<Com_log>               _com_log;                    // spooler_log
 

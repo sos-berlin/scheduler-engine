@@ -1,5 +1,5 @@
 
-// $Id: spooler_order.cxx,v 1.33 2003/08/25 20:41:27 jz Exp $
+// $Id: spooler_order.cxx,v 1.34 2003/08/29 08:14:04 jz Exp $
 /*
     Hier sind implementiert
 
@@ -235,7 +235,7 @@ void Job_chain::add_job( Job* job, const Order::State& state, const Order::State
         if( node_from_state_or_null( node->_state ) )  
         {
             if( !job  &&  next_state.is_error()  &&  error_state.is_error() )  return;     // job_chain.add_end_state() darf mehrfach gerufen werden.
-            throw_xc( "SPOOLER-150", error_string_from_variant(node->_state), name() );
+            throw_xc( "SPOOLER-150", debug_string_from_variant(node->_state), name() );
         }
 
         _chain.push_back( node );
@@ -298,7 +298,7 @@ Job_chain_node* Job_chain::node_from_job( Job* job )
 Job_chain_node* Job_chain::node_from_state( const State& state )
 {
     Job_chain_node* result = node_from_state_or_null( state );
-    if( !result )  throw_xc( "SPOOLER-149", name(), error_string_from_variant(state) );
+    if( !result )  throw_xc( "SPOOLER-149", name(), debug_string_from_variant(state) );
     return result;
 }
 
@@ -334,7 +334,7 @@ ptr<Order> Job_chain::order( const Order::Id& id )
             }
         }
 
-        throw_xc( "SPOOLER-162", error_string_from_variant(id), _name );
+        throw_xc( "SPOOLER-162", debug_string_from_variant(id), _name );
     }
 
     return NULL;
@@ -1025,7 +1025,7 @@ void Order::add_to_job_chain( Job_chain* job_chain )
             //Z_DEBUG_ONLY( LOG( "job_chain->node_from_state()\n" ); )
             Job_chain_node* node = job_chain->node_from_state( _state );
 
-            if( !node->_job  || !node->_job->order_queue() )  throw_xc( "SPOOLER-149", job_chain->name(), error_string_from_variant(_state) );
+            if( !node->_job  || !node->_job->order_queue() )  throw_xc( "SPOOLER-149", job_chain->name(), debug_string_from_variant(_state) );
             //Z_DEBUG_ONLY( LOG( "node->_job->order_queue()->add_order()\n" ); )
             node->_job->order_queue()->add_order( this );
 

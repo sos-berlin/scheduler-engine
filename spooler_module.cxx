@@ -1,4 +1,4 @@
-// $Id: spooler_module.cxx,v 1.34 2003/08/27 19:26:37 jz Exp $
+// $Id: spooler_module.cxx,v 1.35 2003/08/29 08:14:04 jz Exp $
 /*
     Hier sind implementiert
 
@@ -501,7 +501,11 @@ void Module_instance::end__end()
         call_if_exists( spooler_exit_name );
     }
 
-    close();
+    if( _close_instance_at_end )
+    {
+        close();
+        _com_task = new Com_task();
+    }
 }
 
 //---------------------------------------------------------------------Module_instance::step__start

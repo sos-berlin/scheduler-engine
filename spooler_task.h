@@ -1,4 +1,4 @@
-// $Id: spooler_task.h,v 1.108 2003/08/28 20:48:25 jz Exp $
+// $Id: spooler_task.h,v 1.109 2003/08/29 08:14:04 jz Exp $
 
 #ifndef __SPOOLER_TASK_H
 #define __SPOOLER_TASK_H
@@ -88,7 +88,7 @@ struct Task : Sos_self_deleting
 
     void                        set_cause                   ( Start_cause );
     void                        set_history_field           ( const string& name, const Variant& value );
-    void                        set_close_engine            ( bool b )                              { _close_engine = b; }
+    virtual void                set_close_engine            ( bool )                                {}      // Für Module_task
     bool                        has_parameters              ();
     xml::Document_ptr           parameters_as_dom           ()                                      { return _params->dom(); }
 
@@ -143,11 +143,12 @@ struct Task : Sos_self_deleting
     virtual bool                has_step_count              ()                                      { return true; }
 
     Fill_zero                  _zero_;
+    Z_DEBUG_ONLY( string       _job_name; )
+    int                        _id;
+    Job*                       _job;
     Thread_semaphore           _lock;
     Prefix_log                 _log;
-    int                        _id;
     Spooler*                   _spooler;
-    Job*                       _job;
     Spooler_thread*            _thread;
     Task_history               _history;
  
@@ -177,7 +178,7 @@ struct Task : Sos_self_deleting
     Variant                    _result;
     string                     _name;
   //bool                       _close_engine;               // Bei einem Fehler in spooler_init()
-    bool                       _close_engine;               // Nach Task-Ende Scripting Engine schließen (für use_engine="job")
+  //bool                       _close_engine;               // Nach Task-Ende Scripting Engine schließen (für use_engine="job")
     ptr<Order>                 _order;
     State                      _state;
     bool                       _in_step;                    // Für s_running: step() wird gerade ausgeführt, step__end() muss noch gerufen werden
@@ -200,6 +201,8 @@ struct Module_task : Task       // Oberklasse für Object_set_task und Job_module
 {
                                 Module_task                 ( Job* j )                              : Task(j) {}
 
+    virtual void                set_close_engine            ( bool b )                              { if( _module_instance )  _module_instance->set_close_instance_at_end(b); }
+
   //virtual void                do_load                     ();
     virtual void                do_close                    ();
   //virtual void                do_kill                     ()                                      {}
@@ -213,7 +216,7 @@ struct Module_task : Task       // Oberklasse für Object_set_task und Job_module
 */
     bool                        loaded                      ()                                      { return _module_instance && _module_instance->loaded(); }
   //bool                        load_module_instance        ();
-    void                        close_engine                ();
+  //void                        close_engine                ();
 
     ptr<Module_instance>       _module_instance;
 };
