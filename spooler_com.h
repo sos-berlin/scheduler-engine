@@ -1,4 +1,4 @@
-// $Id: spooler_com.h,v 1.16 2001/08/20 13:46:55 jz Exp $
+// $Id: spooler_com.h,v 1.17 2001/10/19 17:46:26 jz Exp $
 
 #ifndef __SPOOLER_COM_H
 #define __SPOOLER_COM_H
@@ -7,8 +7,9 @@
 #include <map>
 #include "../kram/olestd.h"
 #include "../kram/sysxcept.h"
-
 #include "../kram/sosscrpt.h"
+#include "../kram/com.h"
+#include "../kram/com_server.h"
 
 #include <atlbase.h>
 //    extern CComModule& _Module;
