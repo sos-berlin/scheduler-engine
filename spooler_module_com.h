@@ -1,4 +1,4 @@
-// $Id: spooler_module_com.h,v 1.5 2002/12/02 17:19:32 jz Exp $
+// $Id: spooler_module_com.h,v 1.6 2002/12/04 17:30:21 jz Exp $
 
 #ifndef __SPOOLER_MODULE_COM_H
 #define __SPOOLER_MODULE_COM_H
@@ -34,6 +34,7 @@ struct Com_module_instance_base : Module_instance
 
 //------------------------------------------------------------------------------Com_module_instance
 // Für COM-Objekte
+#ifdef Z_WINDOWS
 
 struct Com_module_instance : Com_module_instance_base
 {
@@ -49,12 +50,11 @@ struct Com_module_instance : Com_module_instance_base
 
     Fill_zero                  _zero_;
 
-#   ifdef Z_WINDOWS
-        HMODULE                _com_module;                 // Für _module->_filename != ""
-        DllGetClassObject_func _DllGetClassObject;          // Für _module->_filename != ""
-#   endif
+    HMODULE                    _com_module;                 // Für _module->_filename != ""
+    DllGetClassObject_func     _DllGetClassObject;          // Für _module->_filename != ""
 };
 
+#endif
 //-----------------------------------------------------------------Scripting_engine_module_instance
 // Für Scripting Engines
 

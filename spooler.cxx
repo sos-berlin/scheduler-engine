@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.155 2002/12/04 16:47:11 jz Exp $
+// $Id: spooler.cxx,v 1.156 2002/12/04 17:30:20 jz Exp $
 /*
     Hier sind implementiert
 
@@ -886,7 +886,6 @@ void Spooler::start()
     
     if( _is_service || is_daemon )
     {
-        fclose( stdin );
 /*
         if( _log.fd() > 2 )   // Nicht -1, stdin, stdout, stderr?
         {
