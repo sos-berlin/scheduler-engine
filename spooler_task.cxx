@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.233 2004/01/22 09:02:43 jz Exp $
+// $Id: spooler_task.cxx,v 1.234 2004/01/29 21:06:25 jz Exp $
 /*
     Hier sind implementiert
 
@@ -171,6 +171,28 @@ Spooler_thread* Object_set::thread() const
     return _task->_job->_thread; 
 }
 */
+//---------------------------------------------------------------------------------start_cause_name
+
+string start_cause_name( Start_cause cause )
+{
+    switch( cause )
+    {
+        case cause_none               : return "none";
+        case cause_period_once        : return "period_once";
+        case cause_period_single      : return "period_single";
+        case cause_period_repeat      : return "period_repeat";
+        case cause_job_repeat         : return "job_repeat";
+        case cause_queue              : return "queue";
+        case cause_queue_at           : return "queue_at";
+        case cause_directory          : return "directory";
+        case cause_signal             : return "signal";
+        case cause_delay_after_error  : return "delay_after_error";
+        case cause_order              : return "order";
+        case cause_wake               : return "wake";
+        default                       : return as_string( (int)cause );
+    }
+}
+
 //---------------------------------------------------------------------------------------Task::Task
 
 Task::Task( Job* job )    
@@ -265,6 +287,12 @@ xml::Element_ptr Task::dom( const xml::Document_ptr& document, Show_what show )
 
         if( _running_since )
         task_element.setAttribute( "running_since"   , _running_since.as_string() );
+
+        if( _enqueue_time )
+        task_element.setAttribute( "enqueued"        , _enqueue_time.as_string() );
+
+        if( _start_at )
+        task_element.setAttribute( "start_at"        , _start_at.as_string() );
 
         if( _idle_since )
         task_element.setAttribute( "idle_since"      , _idle_since.as_string() );

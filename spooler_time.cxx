@@ -1,4 +1,4 @@
-// $Id: spooler_time.cxx,v 1.53 2004/01/12 09:35:23 jz Exp $
+// $Id: spooler_time.cxx,v 1.54 2004/01/29 21:06:25 jz Exp $
 /*
     Hier sind implementiert
 
@@ -85,7 +85,7 @@ void Time::set( double t )
 
 void Time::set_datetime( const string& t )
 {
-    set( Sos_optional_date_time(t).as_double() );
+    set( Sos_optional_date_time(t).as_time_t() );
 }
 
 //----------------------------------------------------------------------------------Time::as_string

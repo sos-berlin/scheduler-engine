@@ -1,4 +1,4 @@
-// $Id: spooler_com.h,v 1.87 2004/01/04 07:04:42 jz Exp $
+// $Id: spooler_com.h,v 1.88 2004/01/29 21:06:25 jz Exp $
 
 #ifndef __SPOOLER_COM_H
 #define __SPOOLER_COM_H
@@ -150,6 +150,7 @@ struct Com_variable_set: spooler_com::Ivariable_set,
     STDMETHODIMP                get__NewEnum                ( IUnknown** );    
     STDMETHODIMP            put_xml                         ( BSTR xml_text );
     STDMETHODIMP            get_xml                         ( BSTR* xml_text );
+    void                    set_xml                         ( const string& xml_text );
 
     static const string         xml_element_name            ()                                      { return "sos.spooler.variable_set"; }
 

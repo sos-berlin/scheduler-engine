@@ -1,4 +1,4 @@
-// $Id: spooler_history.h,v 1.25 2004/01/07 08:57:51 jz Exp $
+// $Id: spooler_history.h,v 1.26 2004/01/29 21:06:25 jz Exp $
 
 #ifndef __SPOOLER_HISTORY_H
 #define __SPOOLER_HISTORY_H
@@ -47,13 +47,14 @@ struct Spooler_db : Sos_self_deleting
     string                      db_name                 ()                                          { return _db_name; }
     string                      error                   ()                                          { THREAD_LOCK_RETURN( _error_lock, string, _error ); }
     bool                        is_waiting              () const                                    { return _waiting; }
+    void                        check_table_columns     ( int free_id );
 
     void                        spooler_start           ();
     void                        spooler_stop            ();
 
-    int                         get_task_id             ()                                          { return get_id( "spooler_job_id" ); }
-    int                         get_order_id            ( Transaction* ta = NULL )                  { return get_id( "spooler_order_id", ta ); }
-    int                         get_order_ordering      ( Transaction* ta = NULL )                  { return get_id( "spooler_order_ordering", ta ); }
+    int                         get_task_id             ( Transaction* ta = NULL )                  { return get_id( "spooler_job_id"          , ta ); }
+    int                         get_order_id            ( Transaction* ta = NULL )                  { return get_id( "spooler_order_id"        , ta ); }
+    int                         get_order_ordering      ( Transaction* ta = NULL )                  { return get_id( "spooler_order_ordering"  , ta ); }
     int                         get_order_history_id    ( Transaction* ta )                         { return get_id( "spooler_order_history_id", ta ); }
 
     xml::Element_ptr            read_task               ( const xml::Document_ptr&, int task_id, Show_what );
@@ -164,6 +165,9 @@ struct Task_history
                                 Task_history            ( Job_history*, Task* );
                                ~Task_history            ();
 
+    void                        init_record             ();
+    void                        remove_record           ();
+    void                        enqueue                 ();
     void                        start                   ();
     void                        end                     ();
     void                        set_extra_field         ( const string& name, const Variant& value );
@@ -181,6 +185,7 @@ struct Task_history
     Job_history*               _job_history;
     Task*                      _task;
     bool                       _start_called;
+    bool                       _initialized;
 
     int64                      _record_pos;             // Position des Satzes, der zu Beginn des Jobs geschrieben und am Ende überschrieben oder gelöscht wird.
     string                     _tabbed_record;

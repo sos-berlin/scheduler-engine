@@ -1,4 +1,4 @@
-// $Id: spooler_com.cxx,v 1.132 2004/01/14 19:19:32 jz Exp $
+// $Id: spooler_com.cxx,v 1.133 2004/01/29 21:06:25 jz Exp $
 /*
     Hier sind implementiert
 
@@ -586,6 +586,14 @@ STDMETHODIMP Com_variable_set::get__NewEnum( IUnknown** iunknown )
     *iunknown = e;
     (*iunknown)->AddRef();
     return NOERROR;                                            
+}
+
+//------------------------------------------------------------------------Com_variable_set::set_xml
+
+void Com_variable_set::set_xml( const string& xml_text )  
+{ 
+    HRESULT hr = put_xml( Bstr( xml_text ) );
+    if( FAILED(hr) )  throw_ole( hr, "Variable_set::xml" );
 }
 
 //------------------------------------------------------------------------Com_variable_set::put_xml

@@ -1,4 +1,4 @@
-// $Id: spooler_task.h,v 1.127 2003/12/09 20:44:45 jz Exp $
+// $Id: spooler_task.h,v 1.128 2004/01/29 21:06:25 jz Exp $
 
 #ifndef __SPOOLER_TASK_H
 #define __SPOOLER_TASK_H
@@ -6,6 +6,26 @@
 
 namespace sos {
 namespace spooler {
+
+//--------------------------------------------------------------------------------------Start_cause
+
+enum Start_cause
+{
+    cause_none                  = 0,    // Noch nicht gestartet
+    cause_period_once           = 1,    // <run_time once="yes">
+    cause_period_single         = 2,    // <run_time single_start="yes">
+    cause_period_repeat         = 3,    // <run_time repeat="..">
+    cause_job_repeat            = 4,    // spooler_job.repeat = ..
+    cause_queue                 = 5,    // <start_job at="">
+    cause_queue_at              = 6,    // <start_job at="..">
+    cause_directory             = 7,    // start_when_directory_changed
+    cause_signal                = 8,
+    cause_delay_after_error     = 9,
+    cause_order                 = 10,
+    cause_wake                  = 11    // sc_wake
+};
+
+string                          start_cause_name            ( Start_cause );
 
 //----------------------------------------------------------------------------------------------Task
 
@@ -133,6 +153,7 @@ struct Task : Sos_self_deleting
 
   
     friend struct               Job;
+    friend struct               Job::Task_queue;
     friend struct               Object_set;
     friend struct               Com_task;
 
@@ -206,6 +227,7 @@ struct Task : Sos_self_deleting
     bool                       _killed;                     // Task abgebrochen (nach do_kill/timeout)
     bool                       _kill_tried;
     bool                       _module_instance_async_error;    // SCHEDULER-202
+    bool                       _is_in_db;                   // Datensatz für diese Task ist in der Datenbank
 
     ptr<Async_operation>       _operation;
     ptr<Com_variable_set>      _params;

@@ -1,4 +1,4 @@
-// $Id: spooler_job.h,v 1.18 2004/01/04 07:04:42 jz Exp $
+// $Id: spooler_job.h,v 1.19 2004/01/29 21:06:25 jz Exp $
 
 #ifndef __SPOOLER_JOB_H
 #define __SPOOLER_JOB_H
@@ -98,26 +98,6 @@ struct Object_set : Sos_self_deleting
     ptr<IDispatch>             _idispatch;                  // Zeiger auf ein Object_set des Skripts
 };
 
-//--------------------------------------------------------------------------------------Start_cause
-
-enum Start_cause
-{
-    cause_none                  = 0,    // Kein Start
-    cause_period_once           = 1,    // <run_time once="yes">
-    cause_period_single         = 2,    // <run_time single_start="yes">
-    cause_period_repeat         = 3,    // <run_time repeat="..">
-    cause_job_repeat            = 4,    // spooler_job.repeat = ..
-    cause_queue                 = 5,    // <start_job at="">
-    cause_queue_at              = 6,    // <start_job at="..">
-    cause_directory             = 7,    // start_when_directory_changed
-    cause_signal                = 8,
-    cause_delay_after_error     = 9,
-    cause_order                 = 10,
-    cause_wake                  = 11    // sc_wake
-};
-
-string                          start_cause_name            ( Start_cause );
-
 //----------------------------------------------------------------------------------------------Job
 
 struct Job : Sos_self_deleting
@@ -166,8 +146,37 @@ struct Job : Sos_self_deleting
     };
 */
 
+    struct Task_queue
+    {
+        typedef list< Sos_ptr<Task> >   Queue;
+        typedef Queue::iterator         iterator;
 
-    typedef list< Sos_ptr<Task> >               Task_queue;
+        enum Why_remove
+        {
+            w_task_killed,
+            w_task_started
+        };
+
+        
+                                Task_queue                  ( Job* job )                            : _job(job) {}
+
+      //void                    load_from_db                ();
+        void                    clear                       ()                                      { _queue.clear(); }
+        int                     size                        () const                                { return _queue.size(); }
+        bool                    empty                       () const                                { return _queue.empty(); }
+        iterator                begin                       ()                                      { return _queue.begin(); }
+        iterator                end                         ()                                      { return _queue.end(); }
+
+        void                    enqueue_task                ( const Sos_ptr<Task>& );
+        bool                    remove_task                 ( int task_id, Why_remove );
+        
+
+      private:
+        Job* const             _job;
+        Queue                  _queue;
+    };
+
+
     typedef list< Sos_ptr<Task> >               Task_list;
     typedef list< ptr<Directory_watcher> >      Directory_watcher_list;
     typedef map< int, Time >                    Delay_after_error;
@@ -202,6 +211,7 @@ struct Job : Sos_self_deleting
     Time                        get_delay_order_after_setback( int setback_count );
     void                        set_max_order_setbacks      ( int n )                               { _log.debug9( "max_order_setbacks"+as_string(n) ); _max_order_setbacks = n; }
     int                         max_order_setbacks          () const                                { return _max_order_setbacks; }
+    void                        load_tasks_from_db          ();
     xml::Element_ptr            read_history                ( const xml::Document_ptr& doc, int id, int n, Show_what show ) { return _history.read_tail( doc, id, n, show ); }
 
     void                        close                       ();
@@ -215,12 +225,12 @@ struct Job : Sos_self_deleting
     bool                        is_in_period                ( Time = Time::now() );
     bool                        queue_filled                ()                                      { return !_task_queue.empty(); }
 
-    Sos_ptr<Task>               create_task                 ( const ptr<spooler_com::Ivariable_set>& params, const string& task_name, Time = latter_day );
-    void                        enqueue_task                ( const Sos_ptr<Task>& );
+    Sos_ptr<Task>               create_task                 ( const ptr<spooler_com::Ivariable_set>& params, const string& task_name, const Time& = latter_day );
+    Sos_ptr<Task>               create_task                 ( const ptr<spooler_com::Ivariable_set>& params, const string& task_name, const Time&, int id );
     Sos_ptr<Task>               get_task_from_queue         ( Time now );
     void                        run_task                    ( const Sos_ptr<Task>&  );
 
-    void                        remove_from_task_queue      ( Task*, Log_level );
+  //void                        remove_from_task_queue      ( Task*, Log_level );
     void                        remove_running_task         ( Task* );
   //void                        close_task                  ();
     bool                        read_script                 ();

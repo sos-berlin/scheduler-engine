@@ -1,4 +1,4 @@
-// $Id: spooler_job.cxx,v 1.55 2004/01/26 11:26:14 jz Exp $
+// $Id: spooler_job.cxx,v 1.56 2004/01/29 21:06:25 jz Exp $
 /*
     Hier sind implementiert
 
@@ -23,28 +23,6 @@ namespace spooler {
 const int    max_task_time_out             = 365*24*3600;
 const double directory_watcher_intervall   = 1.0;              // Nur für Unix (Windows gibt ein asynchrones Signal)
 
-//---------------------------------------------------------------------------------start_cause_name
-
-string start_cause_name( Start_cause cause )
-{
-    switch( cause )
-    {
-        case cause_none               : return "none";
-        case cause_period_once        : return "period_once";
-        case cause_period_single      : return "period_single";
-        case cause_period_repeat      : return "period_repeat";
-        case cause_job_repeat         : return "job_repeat";
-        case cause_queue              : return "queue";
-        case cause_queue_at           : return "queue_at";
-        case cause_directory          : return "directory";
-        case cause_signal             : return "signal";
-        case cause_delay_after_error  : return "delay_after_error";
-        case cause_order              : return "order";
-        case cause_wake               : return "wake";
-        default                       : return as_string( (int)cause );
-    }
-}
-
 //----------------------------------------------------------------------Job::Delay_after_error::set
 /*
 void Job::Delay_after_error::set( int error_steps, const Time& delay )
@@ -61,6 +39,7 @@ Job::Job( Spooler* spooler )
     _spooler(spooler),
     _log(spooler),
     _module(spooler,&_log),
+    _task_queue(this),
     _history(this)
 {
     _next_time = latter_day;
@@ -229,6 +208,8 @@ void Job::init2()
 
     Time now = Time::now();
 
+    load_tasks_from_db();
+
     //select_period( now );
     set_next_start_time( now );
 }
@@ -258,7 +239,6 @@ void Job::close()
         }
 
         _running_tasks.clear();
-
         _task_queue.clear();
 
         Z_FOR_EACH( Module_instance_vector, _module_instances, m )
@@ -359,7 +339,7 @@ void Job::signal( const string& signal_name )
 // Wird auch vom Kommunikations-Thread für <start_job> gerufen!
 // create_task() nicht mit gesperrten _lock rufen, denn get_id() in DB blockieren!
 
-Sos_ptr<Task> Job::create_task( const ptr<spooler_com::Ivariable_set>& params, const string& name, Time start_at )
+Sos_ptr<Task> Job::create_task( const ptr<spooler_com::Ivariable_set>& params, const string& name, const Time& start_at, int id )
 {
     Sos_ptr<Task> task;
 
@@ -370,8 +350,7 @@ Sos_ptr<Task> Job::create_task( const ptr<spooler_com::Ivariable_set>& params, c
                                        task = SOS_NEW( Job_module_task( this ) );
 
     Time now = Time::now();
-    task->_enqueue_time = now;
-    task->_id           = _spooler->_db->get_task_id();
+    task->_id           = id;
 
     _default_params->Clone( (spooler_com::Ivariable_set**)task->_params.pp() );
     if( params )  task->_params->merge( params );
@@ -382,18 +361,99 @@ Sos_ptr<Task> Job::create_task( const ptr<spooler_com::Ivariable_set>& params, c
     return task;
 }
 
-//--------------------------------------------------------------------------------Job::enqueue_task
+//---------------------------------------------------------------------------------Job::create_task
+// Wird auch vom Kommunikations-Thread für <start_job> gerufen!
+// create_task() nicht mit gesperrten _lock rufen, denn get_id() in DB blockieren!
 
-void Job::enqueue_task( const Sos_ptr<Task>& task )
+Sos_ptr<Task> Job::create_task( const ptr<spooler_com::Ivariable_set>& params, const string& name, const Time& start_at )
 {
-    THREAD_LOCK( _lock )
-    {
-        Task_queue::iterator it = _task_queue.begin();  // _task_queue nach _start_at geordnet halten
-        while( it != _task_queue.end()  &&  (*it)->_start_at <= task->_start_at )  it++;
-        _task_queue.insert( it, task );
+    return create_task( params, name, start_at, _spooler->_db->get_task_id() );
+}
 
-        calculate_next_time( Time::now() );
+//--------------------------------------------------------------------------Job::load_tasks_from_db
+
+void Job::load_tasks_from_db()
+{
+    Time now = Time::now();
+
+    Transaction ta ( _spooler->_db );
+
+    Any_file sel ( "-in " + _spooler->_db->db_name() + 
+                    "select \"ID\", \"ENQUEUE_TIME\", \"START_AT_TIME\"" //, length(\"PARAMETERS\") parlen " +
+                    "  from " + quoted_string( ucase( _spooler->_job_history_tablename ), '"', '"' ) +
+                    "  where \"IN_QUEUE\"=1"
+                     " and \"SPOOLER_ID\"=" + quoted_string( _spooler->id_for_db(), '\'', '\'' ) +
+                     " and \"JOB_NAME\"=" + quoted_string( _name, '\'', '\'' ) +
+                    "  order by \"ID\"" );
+    
+    while( !sel.eof() )
+    {
+        Record record = sel.get_record();
+
+        int                     task_id    = record.as_int   ( "id" );
+        Time                    start_at;
+        ptr<Com_variable_set>   parameters = new Com_variable_set;
+
+        start_at.set_datetime( record.as_string( "start_at_time" ) );
+
+        //if( !record.null( "parlen" )  &&  record.as_int( "parlen" ) > 0 )
+        {
+            string parameters_xml = file_as_string( _spooler->_db->db_name() + " -table=" + _spooler->_job_history_tablename + " -blob='parameters'"
+                                                                               " where \"ID\"=" + as_string( task_id ) );
+            if( !parameters_xml.empty() )  parameters->set_xml( parameters_xml );
+        }
+
+
+        Sos_ptr<Task> task = create_task( +parameters, "", start_at, task_id );
+        
+        task->_is_in_db     = true;
+        task->_let_run      = true;
+        task->_enqueue_time.set_datetime( record.as_string( "enqueue_time" ) );
+
+        if( !start_at  &&  !_run_time.period_follows( now ) ) 
+        {
+            try{ throw_xc( "SCHEDULER-143" ); } catch( const exception& x ) { _log.warn( x.what() ); }
+        }
+
+        _task_queue.enqueue_task( task );
     }
+}
+
+//--------------------------------------------------------------------Job::Task_queue::enqueue_task
+
+void Job::Task_queue::enqueue_task( const Sos_ptr<Task>& task )
+{
+    if( !task->_enqueue_time )  task->_enqueue_time = Time::now();
+
+    if( !task->_is_in_db  &&  _job->_spooler->_db->opened() )
+    {
+        task->_history.enqueue();
+    }
+
+
+    Queue::iterator it = _queue.begin();  // _queue nach _start_at geordnet halten
+    while( it != _queue.end()  &&  (*it)->_start_at <= task->_start_at )  it++;
+    _queue.insert( it, task );
+}
+
+//---------------------------------------------------------------------Job::Task_queue::remove_task
+
+bool Job::Task_queue::remove_task( int task_id, Why_remove )
+{
+    bool result = false;
+
+    for( Queue::iterator it = _queue.begin(); it != _queue.end(); it++ )
+    {
+        if( (*it)->_id == task_id )  
+        {
+          //_job->_log.log( log_level, task->obj_name() + " wird aus der Warteschlange entfernt" );
+            _queue.erase( it );
+            result = true;
+            break;
+        }
+    }
+
+    return result;
 }
 
 //-------------------------------------------------------------------------Job::get_task_from_queue
@@ -421,8 +481,6 @@ Sos_ptr<Task> Job::get_task_from_queue( Time now )
             }
 
             if( it == _task_queue.end() )  return NULL;
-
-            //_task_queue.erase( it );
         }
     }
 
@@ -430,7 +488,7 @@ Sos_ptr<Task> Job::get_task_from_queue( Time now )
 }
 
 //----------------------------------------------------------------------Job::remove_from_task_queue
-
+/*
 void Job::remove_from_task_queue( Task* task, Log_level log_level )
 {
     THREAD_LOCK( _lock )
@@ -446,8 +504,8 @@ void Job::remove_from_task_queue( Task* task, Log_level log_level )
         }
     }
 }
-
-//---------------------------------------------------------------------------------Job::remove_task
+*/
+//-------------------------------------------------------------------------Job::remove_running_task
 
 void Job::remove_running_task( Task* task )
 {
@@ -493,6 +551,8 @@ Sos_ptr<Task> Job::start( const ptr<spooler_com::Ivariable_set>& params, const s
 
 Sos_ptr<Task> Job::start( const ptr<spooler_com::Ivariable_set>& params, const string& task_name, Time start_at, bool log )
 {
+    Time now = Time::now();
+
     THREAD_LOCK( _lock )
     {
         if( log && _spooler->_debug )  _log.debug( "start(at=" + start_at.as_string() + ( task_name == ""? "" : ",name=\"" + task_name + '"' ) + ")" );
@@ -509,12 +569,14 @@ Sos_ptr<Task> Job::start( const ptr<spooler_com::Ivariable_set>& params, const s
             default: ;
         }
 
-        if( !start_at  &&  !_run_time.period_follows( Time::now() ) )   throw_xc( "SCHEDULER-143" );
+        if( !start_at  &&  !_run_time.period_follows( now ) )   throw_xc( "SCHEDULER-143" );
     }
 
     Sos_ptr<Task> task = create_task( params, task_name, start_at );
     task->_let_run = true;
-    enqueue_task( task );
+
+    _task_queue.enqueue_task( task );
+    calculate_next_time( now );
 
     signal( "start job" );
 
@@ -1022,7 +1084,8 @@ Sos_ptr<Task> Job::task_to_start()
 
             if( task )
             {
-                remove_from_task_queue( task, log_none );
+                //remove_from_task_queue( task, log_none );
+                _task_queue.remove_task( task->id(), Task_queue::w_task_started );
             }
             else
             {
@@ -1407,7 +1470,6 @@ xml::Element_ptr Job::dom( const xml::Document_ptr& document, Show_what show, Jo
 
         if( (show & show_task_queue)  &&  !_task_queue.empty() )
         {
-
             FOR_EACH( Task_queue, _task_queue, it )
             {
                 xml::Element_ptr queued_task_element = document.createElement( "queued_task" );
@@ -1420,7 +1482,6 @@ xml::Element_ptr Job::dom( const xml::Document_ptr& document, Show_what show, Jo
                 queue_element.appendChild( queued_task_element );
                 dom_append_nl( queue_element );
             }
-
         }
 
         if( _order_queue             )  dom_append_nl( job_element ),  job_element.appendChild( _order_queue->dom( document, show, which_job_chain ) );
@@ -1446,19 +1507,12 @@ void Job::kill_task( int id, bool immediately )
 
         if( !ok )
         {
-            for( Task_queue::iterator it = _task_queue.begin(); it != _task_queue.end(); it++ )
+            ok = _task_queue.remove_task( id, Task_queue::w_task_killed );
+            if( ok )
             {
-                if( (*it)->_id == id )  
-                {
-                    Time old_next_time = _next_time;
-
-                    _task_queue.erase( it );
-
-                    calculate_next_time();
-                    
-                    if( _next_time != old_next_time )  signal( "task killed" );
-                    break;
-                }
+                Time old_next_time = _next_time;
+                calculate_next_time();
+                if( _next_time != old_next_time )  signal( "task killed" );
             }
         }
     }

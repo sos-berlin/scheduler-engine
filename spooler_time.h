@@ -1,4 +1,4 @@
-// $Id: spooler_time.h,v 1.25 2003/09/26 13:49:01 jz Exp $
+// $Id: spooler_time.h,v 1.26 2004/01/29 21:06:25 jz Exp $
 
 #ifndef __SPOOLER_TIME_H
 #define __SPOOLER_TIME_H
@@ -74,6 +74,7 @@ struct Time
     bool                        operator >                  ( int t ) const                 { return _time >  round(t); }
 
                                 operator double             () const                        { return _time; }
+    bool                        operator !                  () const                        { return _time == 0; }
 
     static double               round                       ( double t )                    { return floor( t * 1000.0 + 0.5 ) / 1000.0; }
     void                        set                         ( double );
