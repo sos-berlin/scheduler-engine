@@ -1167,38 +1167,36 @@ Sos_ptr<Task> Job::task_to_start()
     task = get_task_from_queue( now );
     if( task )  cause = task->_start_at? cause_queue_at : cause_queue;
         
-    if( _state == s_pending && now >= _next_single_start )  cause = cause_period_single;     
-                                                    //else  select_period(now);
-
-    if( cause                      // Auf weitere Anlässe prüfen und diese protokollieren
-     || is_in_period(now) )
+    if( _state == s_pending  &&  now >= _next_single_start )  
     {
-        THREAD_LOCK_DUMMY( _lock )
+                                           cause = cause_period_single,                         log_line += "Task startet wegen <period single_start=\"...\">\n";
+    }
+    else
+    if( is_in_period(now) )
+    {
+        if( _state == s_pending )
         {
-            if( _state == s_pending )
+            if( _start_once )              cause = cause_period_once,                           log_line += "Task startet wegen <run_time once=\"yes\">\n";
+            else
+            if( now >= _next_start_time )  
+                if( _delay_until && now >= _delay_until )
+                                           cause = cause_delay_after_error,                     log_line += "Task startet wegen delay_after_error\n";
+                                      else cause = cause_period_repeat,                         log_line += "Task startet, weil Job-Startzeit erreicht: " + _next_start_time.as_string();
+
+            if( _directory_changed  )      cause = cause_directory,                             log_line += "Task startet wegen eines Ereignisses für Verzeichnis " + _changed_directories;
+        }
+
+        if( !cause  &&  _order_queue )
+        {
+            order = _order_queue->first_order( now );
+            if( order )
             {
-                if( _start_once )              cause = cause_period_once,  _start_once = false,     log_line += "Task startet wegen <run_time once=\"yes\">\n";
-                else
-                if( now >= _next_start_time )  
-                    if( _delay_until && now >= _delay_until )
-                                               cause = cause_delay_after_error,                     log_line += "Task startet wegen delay_after_error\n";
-                                          else cause = cause_period_repeat,                         log_line += "Task startet, weil Job-Startzeit erreicht: " + _next_start_time.as_string();
+                bool there_is_another_task_ready = false;
+                FOR_EACH( Task_list, _running_tasks, t )
+                    if( (*t)->state() == Task::s_running_waiting_for_order 
+                        || (*t)->state() == Task::s_suspended                 )  { there_is_another_task_ready = true; break; }
 
-                if( _directory_changed  )      cause = cause_directory,                             log_line += "Task startet wegen eines Ereignisses für Verzeichnis " + _changed_directories;
-            }
-
-            if( !cause  &&  _order_queue )
-            {
-                order = _order_queue->first_order( now );
-                if( order )
-                {
-                    bool there_is_another_task_ready = false;
-                    FOR_EACH( Task_list, _running_tasks, t )
-                        if( (*t)->state() == Task::s_running_waiting_for_order 
-                         || (*t)->state() == Task::s_suspended                 )  { there_is_another_task_ready = true; break; }
-
-                    if( there_is_another_task_ready )  order = NULL;  // Soll sich doch die bereits laufende Task um den Auftrag kümmern!
-                }
+                if( there_is_another_task_ready )  order = NULL;  // Soll sich doch die bereits laufende Task um den Auftrag kümmern!
             }
         }
     }
@@ -1279,6 +1277,8 @@ Sos_ptr<Task> Job::task_to_start()
             if( notify )  _module._process_class->notify_a_process_is_idle();       // Dieser Job braucht den Prozess nicht mehr. Also nächsten Job benachrichtigen!
         }
     }
+
+    if( task )  _start_once = false;
 
     return cause? task : NULL;
 }
