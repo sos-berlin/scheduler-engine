@@ -1,4 +1,4 @@
-// $Id: spooler_config.cxx,v 1.71 2004/08/23 16:28:30 jz Exp $
+// $Id: spooler_config.cxx,v 1.72 2004/08/26 22:24:52 jz Exp $
 
 //#include <precomp.h>
 
@@ -313,6 +313,9 @@ void Spooler::load_threads_from_xml( const xml::Element_ptr& threads_element, co
 
 void Spooler::load_config( const xml::Element_ptr& config_element, const Time& xml_mod_time, const string& source_filename )
 {
+    config_element.ownerDocument().validate_dtd_string( dtd_string );  // Nur <spooler> <config> validieren, nicht die Kommandos. Deshalb hier (s. spooler_command.cxx)
+
+
     _config_element  = NULL;
     _config_document = NULL;
 

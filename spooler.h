@@ -1,4 +1,4 @@
-// $Id: spooler.h,v 1.187 2004/07/26 08:24:40 jz Exp $
+// $Id: spooler.h,v 1.188 2004/08/26 22:24:51 jz Exp $
 // §1172
 
 #ifndef __SPOOLER_H
@@ -111,6 +111,7 @@ namespace spooler {
 
 
 extern const char*              temporary_process_class_name;
+extern const char               dtd_string[];
 
 
 #ifdef Z_WINDOWS

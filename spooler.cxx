@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.350 2004/07/26 16:28:19 jz Exp $
+// $Id: spooler.cxx,v 1.351 2004/08/26 22:24:51 jz Exp $
 // §851: Weitere Log-Ausgaben zum Scheduler-Start eingebaut
 // §1479
 
@@ -2535,6 +2535,8 @@ int spooler_main( int argc, char** argv, const string& parameter_line )
             else
             //if( opt.flag      ( "renew-spooler"    ) )  renew_spooler = program_filename();
           //else
+            if( opt.flag      ( "show-dtd"         ) )  { fprintf( stdout, "%s", spooler::dtd_string );  return 0; }
+            else
             if( opt.with_value( "renew-spooler"    ) )  renew_spooler = opt.value();
             else
             if( opt.with_value( "renew-spooler"    ) )  renew_spooler = opt.value();
