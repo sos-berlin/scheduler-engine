@@ -1,4 +1,4 @@
-// $Id: spooler.h,v 1.157 2003/09/21 17:58:20 jz Exp $
+// $Id: spooler.h,v 1.158 2003/09/24 18:50:33 jz Exp $
 
 #ifndef __SPOOLER_H
 #define __SPOOLER_H
@@ -346,7 +346,8 @@ struct Spooler
     bool                       _manual;
     string                     _job_name;                   // Bei manuellem Betrieb
 
-    string                     _send_cmd;
+    string                     _send_cmd;                   // Der Spooler soll nur dem eigentlichen Spooler dieses Kommando schicken und sich dann beenden.
+    string                     _xml_cmd;                    // Parameter -cmd, ein zuerst auszuführendes Kommando.
     string                     _pid_filename;
 
     Job_list                   _job_list;

@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.256 2003/09/24 14:06:09 jz Exp $
+// $Id: spooler.cxx,v 1.257 2003/09/24 18:50:33 jz Exp $
 /*
     Hier sind implementiert
 
@@ -1220,6 +1220,8 @@ void Spooler::load_arg()
             else
             if( opt.with_value( "send-cmd"         ) )  _send_cmd = opt.value();
             else
+            if( opt.with_value( "cmd"              ) )  _xml_cmd = opt.value();
+            else
                 throw_sos_option_error( opt );
         }
 
@@ -1522,6 +1524,15 @@ bool Spooler::execute_state_cmd()
 void Spooler::run()
 {
     set_state( s_running );
+
+
+    if( !_xml_cmd.empty() )
+    {
+        Command_processor cp ( this );
+        cout << cp.execute( _xml_cmd, Time::now() );                 // Bei einem Fehler Abbruch
+        _xml_cmd = "";
+    }
+
 
     Spooler_thread* single_thread        = _max_threads == 1? new_thread( false ) : NULL;
 
