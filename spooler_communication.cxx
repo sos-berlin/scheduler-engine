@@ -1,4 +1,4 @@
-// $Id: spooler_communication.cxx,v 1.77 2004/01/07 14:44:47 jz Exp $
+// $Id: spooler_communication.cxx,v 1.78 2004/01/12 07:25:27 jz Exp $
 /*
     Hier sind implementiert
 
@@ -233,7 +233,8 @@ bool Xml_end_finder::is_complete( const char* p, int len )
                 else
                 if( *p == '<' )  _in_tag = true, _at_start_tag = true;
                 else
-                if( _open_elements == 0  &&  !isspace( (Byte)*p ) )  { _xml_is_complete = true; break; }  // Das ist ein Fehler
+              //if( _open_elements == 0  &&  !isspace( (Byte)*p ) )  { _xml_is_complete = true; break; }  // Das ist ein Fehler
+                if( _open_elements == 0  &&  p[0] == '\n' )  { _xml_is_complete = true; break; }  // Kein XML? Dann nehmen wir \n als Ende
             }
         }
 
@@ -443,9 +444,10 @@ bool Communication::Channel::do_recv()
 
     const char* p = buffer;
 
+    if( len == 1  &&  buffer[0] == '\x04' )  { _eof = true; return true; }      // Einzelnes Ctrl-D beendet Sitzung
+
     if( _receive_at_start ) 
     {
-        if( len == 1  &&  buffer[0] == '\x04' )  { _eof = true; return true; }      // Einzelnes Ctrl-D beendet Sitzung
         if( len == 1  &&  buffer[0] == '\n'   
          || len == 2  &&  buffer[0] == '\r'  &&  buffer[1] == '\n' )  { _spooler->signal( "do_something!" );  _spooler->_last_time_enter_pressed = Time::now().as_time_t(); return true; }
 
@@ -454,11 +456,19 @@ bool Communication::Channel::do_recv()
         len -= p - buffer;
     }
 
-    _receive_is_complete = _xml_end_finder.is_complete( p, len );
+    if( len > 0 )
+    {
+        _receive_is_complete = _xml_end_finder.is_complete( p, len );
+        //if( _text.length() > 0 )
+        //{
+        //    _receive_is_complete = _text[0] == '<'? _xml_end_finder.is_complete( p, len )
+        //                                          : p[len-1] == '\n';
+        //}
 
-    if( len >= 2  &&  buffer[len-2] == '\r' )  _indent = true;      // CR LF am Ende lässt Antwort einrücken. CR LF soll nur bei telnet-Eingabe kommen.
-  //if( len >= 1  &&  buffer[len-1] == '\n' )  _indent = true;      // LF am Ende lässt Antwort einrücken. LF soll nur bei telnet-Eingabe kommen.
-    _text.append( p, len );
+        if( len >= 2  &&  p[len-2] == '\r' )  _indent = true;      // CR LF am Ende lässt Antwort einrücken. CR LF soll nur bei telnet-Eingabe kommen.
+
+        _text.append( p, len );
+    }
 
     return something_done;
 }
@@ -469,7 +479,7 @@ bool Communication::Channel::do_send()
 {
     bool something_done = false;
 
-    if( _send_is_complete )  _send_progress = 0, _send_is_complete = false;     // Am Anfang
+    //if( _send_is_complete )  _send_progress = 0, _send_is_complete = false;     // Am Anfang
 
     while(1)
     {
@@ -533,6 +543,7 @@ bool Communication::Channel::async_continue_( bool wait )
     try
     {
         //if( socket_write_signaled() ) 
+        if( !_send_is_complete )
         {
             something_done |= do_send();
         }
@@ -552,9 +563,13 @@ bool Communication::Channel::async_continue_( bool wait )
                 recv_clear();
                 _log.info( "Kommando " + cmd );
                 _text = cp.execute( cmd, Time::now(), _indent );
-                //if( _indent )  channel->_text = _text.replace( "\n", "\r\n" );
+                
+                if( _indent )  _text = replace_regex( _text, "\n", "\r\n" );      // Für Windows-telnet
+
                 if( cp._error )  _log.error( cp._error->what() );
 
+                _send_progress = 0;
+                _send_is_complete = false;
                 do_send();
             }
         }
