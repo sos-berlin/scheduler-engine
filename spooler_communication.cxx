@@ -1,4 +1,4 @@
-// $Id: spooler_communication.cxx,v 1.80 2004/03/29 02:13:50 jz Exp $
+// $Id: spooler_communication.cxx,v 1.81 2004/03/29 10:11:15 jz Exp $
 /*
     Hier sind implementiert
 
@@ -393,6 +393,8 @@ bool Communication::Channel::do_accept( SOCKET listen_socket )
             return false;
         }
 
+        set_event_name( S() << "TCP:" << _host.as_string() << "/" << ntohs( peer_addr.sin_port ) );
+
         _log.info( "TCP-Verbindung angenommen" );
 
     }
@@ -759,6 +761,8 @@ void Communication::bind()
 
                 _udp_port = _spooler->udp_port();
                 _rebound = true;
+
+                _udp_socket.set_event_name( "UDP:" + ntohs( sa.sin_port ) );
 
                 _spooler->log().info( "Scheduler erwartet Kommandos über UDP-Port " + sos::as_string(_udp_port) );
             }
