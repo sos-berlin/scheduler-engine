@@ -1,4 +1,4 @@
-// $Id: Variable_set.java,v 1.2 2002/11/13 21:20:50 jz Exp $
+// $Id: Variable_set.java,v 1.3 2002/11/14 12:34:50 jz Exp $
 
 package sos.spooler;
 
@@ -6,7 +6,7 @@ package sos.spooler;
  * Variablenmenge.
  *
  * @author Joacim Zschimmer, Zschimmer GmbH
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 
 public class Variable_set extends Idispatch

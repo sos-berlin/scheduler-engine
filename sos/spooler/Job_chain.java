@@ -4,7 +4,7 @@
  * Jobkette
  *
  * @author Joacim Zschimmer, Zschimmer GmbH
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 
 package sos.spooler;

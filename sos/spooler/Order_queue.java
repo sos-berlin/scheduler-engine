@@ -1,10 +1,10 @@
-// $Id: Order_queue.java,v 1.2 2002/11/13 21:20:49 jz Exp $
+// $Id: Order_queue.java,v 1.3 2002/11/14 12:34:50 jz Exp $
 
 /**
  * Auftragsliste eines Jobs.
  *
  * @author Joacim Zschimmer, Zschimmer GmbH
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 
 package sos.spooler;

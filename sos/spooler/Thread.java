@@ -1,4 +1,4 @@
-// $Id: Thread.java,v 1.2 2002/11/13 21:20:50 jz Exp $
+// $Id: Thread.java,v 1.3 2002/11/14 12:34:50 jz Exp $
 
 package sos.spooler;
 
@@ -6,7 +6,7 @@ package sos.spooler;
  * Spooler-Thread
  * Copyright (c) 2002, SOS GmbH Berlin
  * Organisation:  SOS GmbH Berlin
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 
 
