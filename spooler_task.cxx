@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.16 2001/01/30 12:22:57 jz Exp $
+// $Id: spooler_task.cxx,v 1.17 2001/01/30 13:32:37 jz Exp $
 /*
     Hier sind implementiert
 
@@ -269,6 +269,8 @@ Task::Task( Spooler* spooler, const Sos_ptr<Job>& job )
 
     if( _script_ptr->_reuse == Script::reuse_job )  _script_instance_ptr = &_job->_script_instance;
                                               else  _script_instance_ptr = &_script_instance, _use_task_engine = true;
+
+    _log.msg( "*** Task()");
 }
 
 //---------------------------------------------------------------------------------------Task::Task
@@ -276,12 +278,9 @@ Task::Task( Spooler* spooler, const Sos_ptr<Job>& job )
 
 Task::~Task()    
 {
+    _log.msg( "~~~~Task" );
+
     try{ close(); } catch(const Xc&) {}
-
-    if( _thread )  TerminateThread( _thread, 999 );
-
-    // COM-Objekte entkoppeln, falls noch jemand eine Referenz darauf hat:
-    if( _com_object_set  )  _com_object_set->close();
 
     if( _com_task )  
     { 
@@ -289,18 +288,22 @@ Task::~Task()
       //_com_task->close(); 
     }   
 
-    if( _com_log )  _com_log->close();
 }
 
 //--------------------------------------------------------------------------------------Task::close
 
 void Task::close()
 {
+    if( _thread )  TerminateThread( _thread, 999 ), _thread.close();
+
     _script_instance.close();
     _params = NULL;
     _directory_watcher.close();
     _job->_task = NULL;
     _com_task = NULL;
+    // COM-Objekte entkoppeln, falls noch jemand eine Referenz darauf hat:
+    if( _com_object_set  )  _com_object_set->close();
+    if( _com_log )  _com_log->close();
 
   //FOR_EACH( Task_list, _spooler->_task_list, it )  if( +*it == this )  { _spooler->_task_list.erase( it );  break; }
 }
@@ -839,7 +842,7 @@ int Task::run_thread()
     }
     catch( const Xc& x ) { error(x); result = 1; }
 
-    close();
+    _log.msg( "Thread 0x" + as_hex_string( (int)_thread_id ) + " beendet sich" );
     SetEvent( _spooler->_command_arrived_event );
     
     return result;
@@ -847,7 +850,7 @@ int Task::run_thread()
 
 //-------------------------------------------------------------------------------------------thread
 
-static ulong __stdcall thread( void* param )
+static uint __stdcall thread( void* param )
 {
     Ole_initialize ole;
     return ((Task*)param)->run_thread();
@@ -857,7 +860,7 @@ static ulong __stdcall thread( void* param )
 
 void Task::start_thread()
 {
-    _thread = CreateThread( NULL, 0, thread, this, 0, &_thread_id );
+   _thread = _beginthreadex( NULL, 0, thread, this, 0, &_thread_id );
    if( !_thread )  throw_mswin_error( "CreateThread" );
 
    _log.msg( "Thread 0x" + as_hex_string( (int)_thread_id ) );

@@ -1,4 +1,4 @@
-// $Id: spooler_service.cxx,v 1.7 2001/01/27 19:26:16 jz Exp $
+// $Id: spooler_service.cxx,v 1.8 2001/01/30 13:32:37 jz Exp $
 /*
     Hier sind implementiert
 
@@ -302,7 +302,7 @@ static void spooler_state_changed( Spooler*, void* )
 
 //-----------------------------------------------------------------------------------service_thread
 
-static ulong __stdcall service_thread( void* param )
+static uint __stdcall service_thread( void* param )
 {
     LOG( "service_thread\n" );
 
@@ -352,7 +352,7 @@ static void __stdcall ServiceMain( DWORD argc, char** argv )
     
     try
     {
-        DWORD                   thread_id;
+        Thread_id               thread_id;
         DWORD                   exit_code = 0;
         Service_thread_param    param;
         int                     ret;
@@ -370,7 +370,7 @@ static void __stdcall ServiceMain( DWORD argc, char** argv )
         if( !service_status_handle )  throw_mswin_error( "RegisterServiceCtrlHandler" );
 
         LOG( "CreateThread\n" );
-        thread_handle = CreateThread( NULL, 0, service_thread, &param, 0, &thread_id );
+        thread_handle = _beginthreadex( NULL, 0, service_thread, &param, 0, &thread_id );
         if( !thread_handle )  throw_mswin_error( "CreateThread" );
 
         do ret = WaitForSingleObject( thread_handle, INT_MAX );  while( ret != WAIT_TIMEOUT );

@@ -1,10 +1,14 @@
-// $Id: spooler_common.h,v 1.1 2001/01/25 20:28:38 jz Exp $
+// $Id: spooler_common.h,v 1.2 2001/01/30 13:32:37 jz Exp $
 
 #ifndef __SPOOLER_COMMON_H
 #define __SPOOLER_COMMON_H
 
 namespace sos {
 namespace spooler {
+
+
+
+typedef uint                    Thread_id;                  // _beginthreadex()
 
 //-------------------------------------------------------------------------------------------Handle
 
@@ -15,6 +19,7 @@ struct Handle
                                ~Handle                      ()                              { close(); }
 
         void                    operator =                  ( HANDLE h )                    { close(); _handle = h; }
+        void                    operator =                  ( ulong h )                     { close(); _handle = (HANDLE)h; }   // für _beginthreadex()
                                 operator HANDLE             () const                        { return _handle; }
                                 operator !                  () const                        { return _handle == 0; }
         HANDLE*                 operator &                  ()                              { return &_handle; }
@@ -23,6 +28,10 @@ struct Handle
 
         HANDLE                 _handle;
 #   endif
+
+  private:
+                                Handle                      ( const Handle& );              // Nicht implementiert
+    void                        operator =                  ( const Handle& );              // Nicht implementiert
 };
 
 //--------------------------------------------------------------------------------------------Mutex

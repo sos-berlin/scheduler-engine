@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.44 2001/01/30 12:22:56 jz Exp $
+// $Id: spooler.cxx,v 1.45 2001/01/30 13:32:36 jz Exp $
 /*
     Hier sind implementiert
 
@@ -379,8 +379,9 @@ void Spooler::remove_ended_tasks()
             bool restart = task->_state == Task::s_ended;
             Job* job     = task->_job;
 
-            THREAD_SEMA( _task_list_lock )  it = _task_list.erase( it );
-            // Task wird erst zerstört, wenn letzes ~Com_task gerufen.
+            THREAD_SEMA( _task_list_lock )   (*it)->close(), it = _task_list.erase( it );
+
+            // Task wird erst zerstört, wenn letztes ~Com_task gerufen.
 
             if( restart )  job->create_task();
         }

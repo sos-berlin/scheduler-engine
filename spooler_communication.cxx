@@ -1,4 +1,4 @@
-// $Id: spooler_communication.cxx,v 1.20 2001/01/25 17:45:45 jz Exp $
+// $Id: spooler_communication.cxx,v 1.21 2001/01/30 13:32:37 jz Exp $
 /*
     Hier sind implementiert
 
@@ -676,7 +676,7 @@ int Communication::go()
 
 //-------------------------------------------------------------------------------------------thread
 
-static ulong __stdcall thread( void* param )
+static uint __stdcall thread( void* param )
 {
     return ((Communication*)param)->go();
 }
@@ -685,19 +685,19 @@ static ulong __stdcall thread( void* param )
 
 void Communication::start_thread()
 {
-    DWORD thread_id;
+    Thread_id thread_id;
 
     init();
     bind();
 
     _started = true;
 
-    _thread = CreateThread( NULL,                        // no security attributes 
-                            0,                           // use default stack size  
-                            thread,                      // thread function 
-                            this,                        // argument to thread function 
-                            0,                           // use default creation flags 
-                            &thread_id );                // returns the thread identifier 
+    _thread = _beginthreadex( NULL,                        // no security attributes 
+                              0,                           // use default stack size  
+                              thread,                      // thread function 
+                              this,                        // argument to thread function 
+                              0,                           // use default creation flags 
+                              &thread_id );                // returns the thread identifier 
  
    if( !_thread )  throw_mswin_error( "CreateThread" );
 }
@@ -718,7 +718,7 @@ void Communication::start_or_rebind()
         {
             WaitForSingleObject( _thread, INT_MAX );    // Thread sollte beendet sein
             CloseHandle( _thread );
-            _thread = NULL;
+            _thread.close();
         }
 
         start_thread();

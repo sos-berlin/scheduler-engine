@@ -1,4 +1,4 @@
-// $Id: spooler_task.h,v 1.5 2001/01/30 12:22:57 jz Exp $
+// $Id: spooler_task.h,v 1.6 2001/01/30 13:32:37 jz Exp $
 
 #ifndef __SPOOLER_TASK_H
 #define __SPOOLER_TASK_H
@@ -244,7 +244,7 @@ struct Task : Sos_self_deleting
 
     // Threading
     Handle                     _thread;
-    ulong                      _thread_id;
+    Thread_id                  _thread_id;
     Wait_handles               _wait_handles; 
     Handle                     _wake_event;                 // Task wecken
     Handle                     _task_event;                 // Änderung in der Task, Spooler wecken
