@@ -1,4 +1,4 @@
-// $Id: spooler_log.cxx,v 1.92 2004/04/05 08:49:46 jz Exp $
+// $Id: spooler_log.cxx,v 1.93 2004/07/21 20:40:09 jz Exp $
 
 #include "spooler.h"
 #include "spooler_mail.h"
@@ -432,6 +432,8 @@ void Prefix_log::open()
 
 void Prefix_log::close()
 {
+    _closed = true;
+
     if( _file != -1 )  
     {
         close2();
@@ -446,6 +448,9 @@ void Prefix_log::close()
         catch( const exception&  x ) { _spooler->_log.error(x.what());                         _remove_after_close = false; }
         catch( const _com_error& x ) { _spooler->_log.error(bstr_as_string(x.Description()));  _remove_after_close = false; }
     }
+
+    signal_events();
+    _events.clear();
 }
 
 //-------------------------------------------------------------------------------Prefix_log::close2
@@ -733,6 +738,35 @@ void Prefix_log::log2( Log_level level, const string& prefix, const string& line
     if( level == log_error )  _last_error_line = line;
 
     _log->log2( level, _task? "Task " + _job->name() + " " + sos::as_string(_task->id()) : _prefix, line, this, _order_log );
+
+    signal_events();
+}
+
+//----------------------------------------------------------------------------Prefix_log::add_event
+
+void Prefix_log::add_event( Event_base* event )
+{ 
+    _events.push_back( event ); 
+}
+
+//-------------------------------------------------------------------------Prefix_log::remove_event
+
+void Prefix_log::remove_event( Event_base* event )
+{
+    Z_FOR_EACH( list<Event_base*>, _events, e )
+    {
+        if( *e == event )  { _events.erase( e );  return; }
+    }
+}
+
+//------------------------------------------------------------------------Prefix_log::signal_events
+
+void Prefix_log::signal_events()
+{
+    Z_FOR_EACH( list<Event_base*>, _events, e )
+    {
+        (*e)->signal( "Log" );
+    }
 }
 
 //----------------------------------------------------------------------------------Stdout_collector

@@ -1,4 +1,4 @@
-// $Id: spooler_log.h,v 1.41 2004/07/21 14:23:45 jz Exp $
+// $Id: spooler_log.h,v 1.42 2004/07/21 20:40:09 jz Exp $
 
 #ifndef __SPOOLER_LOG_H
 #define __SPOOLER_LOG_H
@@ -59,6 +59,7 @@ struct Prefix_log : Object, Has_log
     void                        close                       ();
     void                        close2                      ();
     bool                        opened                      () const                            { return _file != -1; }
+    bool                        closed                      () const                            { return _closed; }
 
     void                    set_append                      ( bool b )                          { _append = b; }
     void                    set_filename                    ( const string& );
@@ -84,6 +85,10 @@ struct Prefix_log : Object, Has_log
     void                    set_prefix                      ( const string& prefix )            { _prefix = prefix; }
     void                    set_profile_section             ( const string& );
     void                    set_order_log                   ( Prefix_log* log )                 { _order_log = log; }
+
+    void                        add_event                   ( Event_base* );
+    void                        remove_event                ( Event_base* );
+    void                        signal_events               ();
 
     void                        operator()                  ( const string& line )              { info( line ); }
     void                        debug9                      ( const string& line )              { log( log_debug9, line ); }
@@ -156,6 +161,7 @@ struct Prefix_log : Object, Has_log
     string                     _new_filename;               // nach close() umbenennen
     bool                       _append;                     // Datei zum Fortschreiben öffnen
     int                        _file;                       // File handle
+    bool                       _closed;
 
     bool                       _mail_on_error;
     bool                       _mail_on_success;
@@ -179,6 +185,7 @@ struct Prefix_log : Object, Has_log
     string                     _log_buffer;                 // Für Jobprotokollausgaben bis open(), also vor dem Jobstart
 
     bool                       _remove_after_close;
+    list<Event_base*>          _events;
 };
 
 //-------------------------------------------------------------------------------------------------

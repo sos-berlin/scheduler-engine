@@ -1,4 +1,4 @@
-<!-- $Id: task_frame.html,v 1.9 2004/07/21 09:41:13 jz Exp $ -->
+<!-- $Id: task_frame.html,v 1.10 2004/07/21 20:40:09 jz Exp $ -->
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <html>
 
@@ -28,24 +28,6 @@
 
 
 <xml id="stylesheet" src="scheduler.xsl"></xml>
-
-
-<xml id="command_popup">
-    <html>
-        <body>
-            <table cellpadding="0" cellspacing="0" width="100%">
-                <tr>
-                    <td style="font-family: Sans-Serif; font-size: 9pt; background-color: menu" 
-                        onmouseover="this.style.backgroundColor='highlight'; this.style.color='highlighttext'"
-                        onmouseout="this.style.backgroundColor=''; this.style.color=''">
-                            Show log
-                    </td>
-                </tr>
-            </table>
-        </body>        
-    </html>
-</xml>
-
 
 <script defer="true" type="text/javascript" src="scheduler.js"></script>
 <script defer="true" type="text/javascript" src="popup_builder.js"></script>
@@ -88,15 +70,15 @@ function job_command__onclick( job_name )
     
     var state = _job_element.getAttribute( "state" );
     
-    popup_builder.add_command( "start task now", "parent.task_command__start_task_now__onclick('" + job_name + "')" );
-    popup_builder.add_command( "stop"          , "<modify_job job='" + job_name + "' cmd='stop'    />", state != "stopped"  &&  state != "stopping" );
-    popup_builder.add_command( "unstop"        , "<modify_job job='" + job_name + "' cmd='unstop'  />", state == "stopped"  ||  state == "stopping" );
-    popup_builder.add_command( "wake"          , "<modify_job job='" + job_name + "' cmd='wake'    />" );
-    popup_builder.add_command( "start"         , "<modify_job job='" + job_name + "' cmd='start'   />" );
-    popup_builder.add_command( "reread"        , "<modify_job job='" + job_name + "' cmd='reread'  />" );
-    popup_builder.add_command( "end tasks"     , "<modify_job job='" + job_name + "' cmd='end'     />" );
-    popup_builder.add_command( "suspend tasks" , "<modify_job job='" + job_name + "' cmd='suspend' />" );
-    popup_builder.add_command( "continue tasks", "<modify_job job='" + job_name + "' cmd='continue'/>" );
+    popup_builder.add_command( "Start task now", "parent.task_command__start_task_now__onclick('" + job_name + "')" );
+    popup_builder.add_command( "Stop"          , "<modify_job job='" + job_name + "' cmd='stop'    />", state != "stopped"  &&  state != "stopping" );
+    popup_builder.add_command( "Unstop"        , "<modify_job job='" + job_name + "' cmd='unstop'  />", state == "stopped"  ||  state == "stopping" );
+    popup_builder.add_command( "Wake"          , "<modify_job job='" + job_name + "' cmd='wake'    />" );
+    popup_builder.add_command( "Start"         , "<modify_job job='" + job_name + "' cmd='start'   />" );
+    popup_builder.add_command( "Reread"        , "<modify_job job='" + job_name + "' cmd='reread'  />" );
+    popup_builder.add_command( "End tasks"     , "<modify_job job='" + job_name + "' cmd='end'     />" );
+    popup_builder.add_command( "Suspend tasks" , "<modify_job job='" + job_name + "' cmd='suspend' />" );
+    popup_builder.add_command( "Continue tasks", "<modify_job job='" + job_name + "' cmd='continue'/>" );
     
     _popup = popup_builder.show_popup();
 }
@@ -107,9 +89,9 @@ function task_command__onclick( task_id )
 {
     var popup_builder = new Popup_builder();
 
-    popup_builder.add_entry  ( "show log"        , "parent.task_command__show_log__onclick(" + task_id + ")" );
-    popup_builder.add_command( "end"             , "<kill_task job='" + _job_name + "' id='" + task_id + "'/>" );
-    popup_builder.add_command( "kill immediately", "<kill_task job='" + _job_name + "' id='" + task_id + "' immediately='yes'/>" );
+    popup_builder.add_entry  ( "Show log"        , "parent.task_command__show_log__onclick(" + task_id + ")" );
+    popup_builder.add_command( "End"             , "<kill_task job='" + _job_name + "' id='" + task_id + "'/>" );
+    popup_builder.add_command( "Kill immediately", "<kill_task job='" + _job_name + "' id='" + task_id + "' immediately='yes'/>" );
     
     _popup = popup_builder.show_popup();
 }
@@ -118,7 +100,7 @@ function task_command__onclick( task_id )
 
 function task_command__show_log__onclick( task_id )
 {
-    alert( "task_id=" + task_id );
+    window.open( "http://" + document.location.host + "/show_log&task=" + task_id );
     _popup.hide();
 }
 

@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.257 2004/07/21 14:23:45 jz Exp $
+// $Id: spooler_task.cxx,v 1.258 2004/07/21 20:40:09 jz Exp $
 /*
     Hier sind implementiert
 
@@ -228,6 +228,8 @@ Task::~Task()
         close(); 
     } 
     catch( const exception& x ) { _log->warn( x.what() ); }
+
+    _log->close();
 }
 
 //--------------------------------------------------------------------------------------Task::close

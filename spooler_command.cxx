@@ -1,4 +1,4 @@
-// $Id: spooler_command.cxx,v 1.122 2004/07/21 14:23:44 jz Exp $
+// $Id: spooler_command.cxx,v 1.123 2004/07/21 20:40:09 jz Exp $
 /*
     Hier ist implementiert
 
@@ -716,9 +716,8 @@ ptr<Http_response> Command_processor::execute_http( const Http_request& http_req
                 else
                     throw_xc( "SCHEDULER-214" );
 
-                log->filename();
-
-                response_content_type = "text/html";
+                ptr<Log_http_response> response = Z_NEW( Log_http_response( log, "text/html" ) );
+                return +response;
             }
             else
             if( path.length() > 0 )
@@ -753,6 +752,9 @@ ptr<Http_response> Command_processor::execute_http( const Http_request& http_req
         response_body = "<html><head><title>Scheduler</title></head><body>Die Seite kann nicht bereitgestellt werden. Siehe Scheduler-Protokoll</body></html>";
     }
 
+    ptr<String_http_response> response = Z_NEW( String_http_response( response_body, response_content_type ) );
+    return +response;
+/*
     time_t      t;
     char        time_text[26];
 
@@ -778,6 +780,7 @@ ptr<Http_response> Command_processor::execute_http( const Http_request& http_req
 
     response += as_hex_string( (int)response_body.length() ) + "\r\n";
     return response + response_body + "\r\n0\r\n\r\n";
+*/
 }
 
 //------------------------------------------------------------------------Command_processor::execute

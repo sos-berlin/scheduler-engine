@@ -1,4 +1,4 @@
-// $Id: spooler_communication.cxx,v 1.86 2004/07/21 14:23:44 jz Exp $
+// $Id: spooler_communication.cxx,v 1.87 2004/07/21 20:40:09 jz Exp $
 /*
     Hier sind implementiert
 
@@ -588,6 +588,7 @@ bool Communication::Channel::async_continue_( bool wait )
                     recv_clear();
 
                     _http_response = cp.execute_http( *_http_request );
+                    _http_response->set_event( &this->_socket_event );
 
                     _http_parser  = NULL;
                     _http_request = NULL;
@@ -610,23 +611,20 @@ bool Communication::Channel::async_continue_( bool wait )
                 do_send();
             }
 
-            if( _send_is_complete  &&  _http_response )
+            while( _send_is_complete  &&  _http_response )
             {
-                if( _http_response.eof() )
+                if( _http_response->eof() )
                 {
                     _http_response = NULL;
+                    break;
                 }
-                else
-                {
-                    _text = _http_response.read( 32768 );
 
-                    if( _text.length() > 0 )
-                    {
-                        _send_progress = 0;
-                        _send_is_complete = false;
-                        do_send();
-                    }
-                }
+                _text = _http_response->read( 32768 );  // Die Größe ist nur eine Empfehlung
+                if( _text.length() == 0 )  break;
+
+                _send_progress = 0;
+                _send_is_complete = false;
+                do_send();
             }
         }
 

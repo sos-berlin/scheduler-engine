@@ -1,4 +1,4 @@
-// $Id: spooler_http.cxx,v 1.2 2004/07/21 14:23:45 jz Exp $
+// $Id: spooler_http.cxx,v 1.3 2004/07/21 20:40:09 jz Exp $
 /*
     Hier sind implementiert
 
@@ -9,7 +9,7 @@
 
 
 #include "spooler.h"
-
+#include "spooler_version.h"
 
 using namespace std;
 
@@ -20,7 +20,7 @@ namespace spooler {
     
 Http_parser::Http_parser( Http_request* http_request )
 :
-    _zero(this+1),
+    _zero_(this+1),
     _http_request( http_request )
 {
     _text.reserve( 1000 );
@@ -187,99 +187,234 @@ void Http_response::finish()
     time_text[24] = '\0';
 
     _header = "HTTP/1.1 200 OK\r\n"
-              "Content-Type: " + _content_type + "\r\n"
+              "Content-Type: "  + _content_type + "\r\n"
               "Transfer-Encoding: chunked\r\n"
               "Date: " + string(time_text) + " GMT\r\n"
               "Server: Scheduler " + string(VER_PRODUCTVERSION_STR) + "\r\n"
               "Cache-Control: no-cache\r\n"
               "\r\n";
+
+    _chunk_size = _header.length();
 }
 
 //-------------------------------------------------------------------------------Http_response::eof
 
 bool Http_response::eof()
 {
-    if( _chunk_index == 0 )
-    {
-        if( _header_read_pointer <= _header.length() )
-        {
-            return false;
-        }
-        else
-        {
-            _chunk_index++;
-            if( !next_chunk_is_ready() )  return false;
-            return !next_chunk();
-        }
-    }
-    else
-    {
-        return next_chunk_is_ready();
-    }
+    return _eof;
 }
 
 //------------------------------------------------------------------------------Http_response::read
 
-string Http_response::read( int size )                           
+string Http_response::read( int recommended_size )                           
 {
     if( _chunk_index == 0 )
     {
-        int length = min( size, (int)_header.length() - _header_read_pointer );
-        int r      = _header_read_pointer;
-        _header_read_pointer += length;
-        return _header.substr( r, length );
+        if( _chunk_offset < _chunk_size )
+        {
+            //uint length = min( recommended_size, _header.length() - _chunk_offset );
+            //uint r      = _chunk_offset;
+            //_chunk_offset += length;
+            //return _header.substr( r, length );
+            _chunk_offset = _chunk_size;
+            return _header;
+        }
+
+        return start_new_chunk();
     }
     else
     {
-        //response += as_hex_string( (int)response_body.length() ) + "\r\n";
-        //return response + response_body + "\r\n0\r\n\r\n";
-        return read( size );
+        string result;
+
+        if( _chunk_offset < _chunk_size )
+        {
+            result = read_chunk( min( recommended_size, (int)( _chunk_size - _chunk_offset ) ) );
+            _chunk_offset += result.length();
+        }
+
+        if( _chunk_offset == _chunk_size  &&  !_chunk_eof ) 
+        {
+            _chunk_eof = true;
+            result.append( "\r\n" );
+        }
+
+        if( _chunk_offset == _chunk_size ) 
+        {
+            result.append( start_new_chunk() );
+        }
+
+        return result;
     }
+}
+
+//-------------------------------------------------------------------Http_response::start_new_chunk
+
+string Http_response::start_new_chunk()
+{
+    if( !next_chunk_is_ready() )  return "";
+
+    _chunk_index++;
+    _chunk_offset = 0;
+    _chunk_size   = get_next_chunk_size();
+
+    string result = as_hex_string( (int)_chunk_size ) + "\r\n";
+    
+    if( _chunk_size > 0 )
+    {
+        _chunk_eof = false;
+    }
+    else
+    {
+        _eof = true;
+        result += "\r\n";    
+    }
+    
+    return result;
+}
+
+//--------------------------------------------------------tring_http_response::String_http_response
+
+String_http_response::String_http_response( const string& text, string content_type )
+: 
+    _zero_(this+1), 
+    _text(text) 
+{ 
+    set_content_type( content_type ); 
+    finish();
+}
+
+//--------------------------------------------------------String_http_response::get_next_chunk_size
+
+uint String_http_response::get_next_chunk_size()
+{
+    return _chunk_index == 1? _text.length() : 0;
 }
 
 //-----------------------------------------------------------------------String_http_response::read
 
-bool String_http_response::read( int size )
+string String_http_response::read_chunk( int recommended_size )
 { 
-    int length = min( size, (int)_text.length() );
-    int r      = _read_pointer; 
-    _read_pointer += length; 
-    return _text.substr( _read_pointer, length ); 
+    int length = min( recommended_size, (int)_text.length() );
+    return _text.substr( _chunk_offset, length ); 
 }
 
 //-------------------------------------------------------------Log_http_response::Log_http_response
 
-Log_http_response::Log_http_response( Prefix_log* log )
+Log_http_response::Log_http_response( Prefix_log* log, string content_type )
 : 
-    _zero(this+1), 
+    _zero_(this+1), 
     _log(log) 
 {
-    if( _log->filename() != "" )
+    set_content_type( content_type );
+    finish();
+
+    _html_prefix = "<html>" 
+                        "<head>" 
+                            "<style type='text/css'>"
+                                "@import 'scheduler.css';"
+                                "pre { font-family: Lucida Console, monospace; font-size: 10pt }"
+                            "</style>"
+                            "<title>Scheduler log</title>"
+                        "</head>" 
+                        "<body>" 
+                            "<pre class='log'>";
+
+    _html_suffix =          "</pre>"
+                        "</body>"
+                    "</html>";
+}
+
+//------------------------------------------------------------Log_http_response::~Log_http_response
+
+Log_http_response::~Log_http_response()
+{
+    if( _event )  _log->remove_event( _event );
+}
+
+//---------------------------------------------------------------------Log_http_response::set_event
+
+void Log_http_response::set_event( Event_base* event )
+{
+    _event = event;
+    _log->add_event( _event );
+}
+
+//-----------------------------------------------------------Log_http_response::next_chunk_is_ready
+
+bool Log_http_response::next_chunk_is_ready()
+{ 
+    //if( _html_prefix != "" )  return true;
+    
+    //if( _log->closed() )  true;
+    //if( !_log->opened() )  return false;       // Noch nicht begonnen?
+
+
+    if( !_file.opened() )
     {
-        _file.open( _log->filename(), "r" );
+        _file.open( _log->filename(), "rb" );
     }
+
+    if( _file.tell() == _file.length() )
+    {
+        if( _log->closed() )
+        {
+            _file_eof = true;
+            return true;
+        }
+        else
+            return false;
+    }
+
+    //if( _html_suffix != "" )  return true;
+    return true;
 }
 
-//--------------------------------------------------------------------Log_http_response::next_chunk
-/*
-bool Log_http_response::next_chunk()
+//-----------------------------------------------------------Log_http_response::get_next_chunk_size
+
+uint Log_http_response::get_next_chunk_size()
 {
+    if( _html_prefix.length() > 0 )  return _html_prefix.length();
+
+    if( _file.opened()  &&  !_file_eof )
+    {
+        uint64 size = _file.length() - _file.tell();
+        if( size > 0 )  return size < INT_MAX? (uint)size : INT_MAX;
+    }
+
+    if( _html_suffix.length() > 0 )  return _html_suffix.length();
+
+    return 0;    // eof
 }
 
-//--------------------------------------------------------------------Log_http_response::chunk_size
+//--------------------------------------------------------------------Log_http_response::read_chunk
 
-int Log_http_response::chunk_size()
-{
+string Log_http_response::read_chunk( int recommended_size )
+{ 
+    string result;
+
+    if( _html_prefix != "" )
+    {
+        result = _html_prefix;
+        _html_prefix = "";
+    }
+    else
+    if( _file.opened()  &&  !_file_eof )
+    {
+        return _file.read_string( recommended_size );
+    }
+    else
+    if( _html_suffix != "" )
+    {
+        result = _html_suffix;
+        _html_suffix = "";
+    }
+    else
+        throw_xc( __FUNCTION__ );
+
+    return result;
 }
 
-//--------------------------------------------------------------------------Log_http_response::read
-
-string Log_http_response::read( int size )
-{
-}
-*/
 //-------------------------------------------------------------------------------------------------
 
 } //namespace spooler
 } //namespace sos
-

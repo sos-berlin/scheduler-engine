@@ -1,4 +1,4 @@
-// $Id: spooler_http.h,v 1.2 2004/07/21 14:23:45 jz Exp $
+// $Id: spooler_http.h,v 1.3 2004/07/21 20:40:09 jz Exp $
 
 #ifndef __SPOOLER_HTTP_H
 #define __SPOOLER_HTTP_H
@@ -53,61 +53,77 @@ struct Http_parser : Object
 
 //------------------------------------------------------------------------------------Http_response
 
-struct Http_response
+struct Http_response : Object
 {
                                 Http_response               ()                                      : _zero_(this+1) {}
 
+    virtual void            set_event                       ( Event_base* )                         {}
+
     string                      content_type                ()                                      { return _content_type; }
+    void                    set_content_type                ( string value )                        { _content_type = value; }
     void                        finish                      ();
 
     bool                        eof                         ();
-    string                      read                        ( int size );
+    string                      read                        ( int recommended_size );
+
+  protected:
+    string                      start_new_chunk             ();
 
     virtual bool                next_chunk_is_ready         ()                                      = 0;
-    virtual bool                next_chunk                  ()                                      = 0;
-    virtual int                 chunk_size                  ()                                      = 0;
-    virtual string              read                        ( int size )                            = 0;
+    virtual uint                get_next_chunk_size         ()                                      = 0;
+    virtual string              read_chunk                  ( int size )                            = 0;
 
 
     Fill_zero                  _zero_;
+    Event_base*                _event;
     string                     _content_type;
     string                     _header;
-    int                        _header_read_pointer;
-    int                        _chunk_index;
+    int                        _chunk_index;                // 0: Header
+    uint                       _chunk_size;
+    uint                       _chunk_offset;               // Bereits gelesene Bytes
+    bool                       _chunk_eof;
+    bool                       _eof;
 };
 
 //-----------------------------------------------------------------------------String_http_response
 
 struct String_http_response : Http_response
 {
-                                String_http_response        ( const string& text )                  : _zero_(this+1), _text(text) {}
+                                String_http_response        ( const string& text, string content_type );
 
+
+  protected:
     bool                        next_chunk_is_ready         ()                                      { return true; }
-    bool                        next_chunk                  ()                                      { return _chunk_index++ == 1; }
-    int                         chunk_size                  ()                                      { return _text.length(); }
-    string                      read                        ( int size );
+    uint                        get_next_chunk_size         ();
+    string                      read_chunk                  ( int size );
 
 
     Fill_zero                  _zero_;
     string                     _text;
-    int                        _read_pointer;
 };
 
 //--------------------------------------------------------------------------------Log_http_response
 
 struct Log_http_response : Http_response
 {
-                                Log_http_response           ( Prefix_log* );
+                                Log_http_response           ( Prefix_log*, string content_type );
+                               ~Log_http_response           ();
 
-    bool                        next_chunk_is_ready         ()                                      { return true; }
-    bool                        next_chunk                  ();
-    int                         chunk_size                  ();
-    string                      read                        ( int size );
+    void                    set_event                       ( Event_base* );
+
+
+  protected:
+    bool                        next_chunk_is_ready         ();
+    uint                        get_next_chunk_size         ();
+    string                      read_chunk                  ( int size );
 
 
     Fill_zero                  _zero_;
     ptr<Prefix_log>            _log;
-    z::File                    _file;
+    File                       _file;
+    bool                       _file_eof;
+    string                     _html_prefix;
+    string                     _html_suffix;
 };
 
 //-------------------------------------------------------------------------------------------------

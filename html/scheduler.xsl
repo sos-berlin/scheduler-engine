@@ -143,7 +143,7 @@
                     
                     <xsl:if test="ERROR">
                         <tr class="job">
-                            <td colspan="99" class="error">
+                            <td colspan="99" class="job_error">
                                 <xsl:apply-templates select="ERROR"/>
                             </td>
                         </tr>
@@ -415,7 +415,7 @@
                 <td><span class="label">error:</span></td>
                 <xsl:choose>
                     <xsl:when test="ERROR">
-                        <td class="error">
+                        <td class="job_error">
                             <xsl:apply-templates select="ERROR"/>
                         </td>
                     </xsl:when>
@@ -714,7 +714,7 @@
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ERROR-->
 
     <xsl:template match="ERROR">
-        <span class="error">
+        <span class="job_error">
             <xsl:value-of select="@time"/><br/>
             <xsl:value-of select="@text"/>
             <br/>

@@ -1,4 +1,4 @@
-/* $Id: scheduler.css,v 1.5 2004/07/20 19:43:03 jz Exp $ */
+/* $Id: scheduler.css,v 1.6 2004/07/21 20:40:09 jz Exp $ */
 
 h1           { font-size: 24pt; font-weight: bold; margin-bottom: 4ex;  }
 h2           { font-size: 12pt; font-weight: bold; margin-top: 10ex; }
@@ -11,9 +11,7 @@ p            { font-size: 10pt; margin-top: 2ex; margin-bottom: 0  }
 div          { font-size: 10pt; }
 span         { font-size: 10pt; }
 li           { font-size: 10pt; }
-pre          { font-family: Lucida Console, monospace; font-size: 9pt; margin-left: 5mm; line-height: 1.2em; }
-.indent      { margin-left: 5mm; }
-.mono        { font-family: Lucida Console, monospace; font-size: 9pt }
+/*pre          { font-family: Lucida Console, monospace; font-size: 9pt; line-height: 1.2em; }*/
 
 
 .small       { font-family: Sans-Serif; font-size: 8pt }
@@ -29,11 +27,18 @@ pre          { font-family: Lucida Console, monospace; font-size: 9pt; margin-le
 .job                 { font-family: Sans-Serif; font-size: 10pt; background-color: #00BFFF }
 .job_list            { font-family: Sans-Serif; font-size: 10pt; background-color: #00BFFF }
 .job_list_hover      { font-family: Sans-Serif; font-size: 10pt; background-color: #00BFFF; text-decoration: underline }
+.job_error           { color: darkred }
+
 .task                { font-family: Sans-Serif; font-size: 10pt; background-color: #90EE90 }
 .task_list           { font-family: Sans-Serif; font-size: 10pt; background-color: #90EE90 }
 .task_list_hover     { font-family: Sans-Serif; font-size: 10pt; background-color: #90EE90; text-decoration: underline }
+
 .order               { font-family: Sans-Serif; font-size: 10pt; background-color: #FFFFA0 }
 .order_list          { font-family: Sans-Serif; font-size:  8pt; background-color: #FFFFA0 }
-.milliseconds        { font-family: Sans-Serif; font-size:  8pt }
+
+/*.milliseconds        { font-family: Sans-Serif; font-size:  8pt }*/
 /*.waiting_for_process { font-style: italic }*/
-.error               { color: darkred }
+
+
+/* Fürs Protokoll */
+.log                 { font-family: Lucida Console, monospace; font-size: 9pt; line-height: 1.2em; }
