@@ -1,4 +1,4 @@
-// $Id: spooler_module_remote_server.cxx,v 1.20 2003/08/27 19:26:37 jz Exp $
+// $Id: spooler_module_remote_server.cxx,v 1.21 2003/08/27 22:18:50 jz Exp $
 /*
     Hier sind implementiert
 
@@ -40,15 +40,14 @@ Remote_module_instance_server::~Remote_module_instance_server()
         close();
     }
     catch( exception& ) {}
-
-    _module_instance = NULL;
 }
 
 //-------------------------------------------------------------Remote_module_instance_server::close
 
 void Remote_module_instance_server::close()
 {
-    if( _module_instance )  _module_instance->close();
+    if( _module_instance )  _module_instance->close(), _module_instance = NULL;;
+
     Com_module_instance_base::close();
 }
 
@@ -207,8 +206,8 @@ STDMETHODIMP Com_remote_module_instance_server::construct( SAFEARRAY* safearray 
         }
 
         _server._module_instance = _server._module->create_instance();
-        _server._module_instance->init();
-        _server._module_instance->_spooler_exit_called = true;            // Der Client wird spooler_exit() explizit aufrufen, um den Fehler zu bekommen.
+      //_server._module_instance->init();
+      //_server._module_instance->_spooler_exit_called = true;            // Der Client wird spooler_exit() explizit aufrufen, um den Fehler zu bekommen.
     }
     catch( const exception& x ) { hr = com_set_error( x, "Remote_module_instance_server::construct" ); }
 
@@ -224,9 +223,6 @@ STDMETHODIMP Com_remote_module_instance_server::add_obj( IDispatch* object, BSTR
     try
     {
         _server._module_instance->add_obj( object, string_from_bstr(name) );
-
-        //object->AddRef(); int count = object->Release();
-        //fprintf( stderr, "add_obj %08X ref=%d\n", (int)(void*)object, count );
     }
     catch( const exception& x ) { hr = com_set_error( x, "Remote_module_instance_server::add_obj" ); }
 
@@ -278,14 +274,11 @@ STDMETHODIMP Com_remote_module_instance_server::begin( SAFEARRAY* objects_safear
         Locked_safearray objects ( objects_safearray );
         Locked_safearray names   ( names_safearray );
 
-      //Module_instance::Object_list object_list;
-
         for( int i = 0; i < objects.count(); i++ )  
         {
             VARIANT* o = &objects[i];
             if( o->vt != VT_DISPATCH )  return DISP_E_BADVARTYPE;
             _server._module_instance->_object_list.push_back( Module_instance::Object_list_entry( V_DISPATCH(o), string_from_variant( names[i]) ) );
-          //_server._module_instance->add_obj( V_DISPATCH(o), string_from_variant( names[i] ) );
         }
 
         _server._module_instance->begin__start();
@@ -307,7 +300,6 @@ STDMETHODIMP Com_remote_module_instance_server::end( VARIANT_BOOL succeeded, VAR
     try
     {
         _server._module_instance->end__start( succeeded != 0 );
-
         _server._module_instance->end__end();
     }
     catch( const exception& x ) { hr = com_set_error( x, "Remote_module_instance_server::end" ); }
