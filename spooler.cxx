@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.329 2004/04/05 08:49:45 jz Exp $
+// $Id: spooler.cxx,v 1.330 2004/04/07 10:16:11 jz Exp $
 /*
     Hier sind implementiert
 
@@ -1800,7 +1800,6 @@ void Spooler::run()
                     {
                         something_done |= (*p)->async_continue();
 
-                      //_next_time = min( _next_time, Time( localtime_from_gmtime( (*p)->async_next_gmtime() ) ) );
                         Time next_time = Time( localtime_from_gmtime( (*p)->async_next_gmtime() ) );
                         if( next_time < _next_time )
                         {
