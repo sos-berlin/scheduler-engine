@@ -1,4 +1,4 @@
-// $Id: spooler_log.cxx,v 1.87 2004/01/13 06:58:15 jz Exp $
+// $Id: spooler_log.cxx,v 1.88 2004/02/03 14:40:44 jz Exp $
 
 #include "spooler.h"
 #include "spooler_mail.h"
@@ -671,9 +671,9 @@ void Prefix_log::send( int reason )
             //LOG( "now >= _last_send + _collect_within:  " << (now >= _last_send + _collect_within) << "\n" );
             //LOG( "now >= _first_send + _collect_max  :  " << (now >= _first_send + _collect_max) << "\n" );
 
-            if( reason == -1  &&  _mail_on_error              // Fehler?
-             || now >= _last_send + _collect_within - 0.001   // Nicht mehr sammeln?  (ohne -0.001 liefert der Ausdruck manchmal false).
-             || now >= _first_send + _collect_max - 0.001 )   // Lange genug gesammelt?
+          //if( reason == -1  &&  _mail_on_error                 // Fehler?
+          // || now >= _last_send  + _collect_within - 0.001     // Nicht mehr sammeln?  (ohne -0.001 liefert der Ausdruck manchmal false).
+          // || now >= _first_send + _collect_max    - 0.001 )   // Lange genug gesammelt?
             {
                 // Wenn die Protokolle in einer eMail gesammelt verschickt werden, wirken 
                 // mail_on_error==false oder mail_on_process==false nicht wie gewünscht,
