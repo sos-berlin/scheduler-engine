@@ -1,8 +1,10 @@
-// $Id: spooler_mail.cxx,v 1.10 2002/11/24 15:33:00 jz Exp $
+// $Id: spooler_mail.cxx,v 1.11 2002/11/25 23:36:21 jz Exp $
 
 
 #include "spooler.h"
 #include "spooler_mail.h"
+
+#ifdef Z_WINDOWS
 
 namespace sos {
 namespace spooler {
@@ -371,3 +373,4 @@ STDMETHODIMP Com_mail::dequeue( int* result )
 } //namespace spooler
 } //namespace sos
 
+#endif

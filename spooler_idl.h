@@ -1,4 +1,4 @@
-// $Id: spooler_idl.h,v 1.8 2002/11/25 08:59:23 jz Exp $
+// $Id: spooler_idl.h,v 1.9 2002/11/25 23:36:20 jz Exp $
 
 
 /*  Ersatz für spooler.odl für Systeme ohne COM. 
@@ -264,7 +264,9 @@ struct Ilog : IDispatch
     virtual HRESULT         error                   ( BSTR line ) = 0;
     virtual HRESULT         log                     ( Log_level, BSTR line ) = 0;
 
+#ifdef Z_WINDOWS
     virtual HRESULT     get_mail                    ( Imail** mail ) = 0;
+#endif
 
     virtual HRESULT     put_mail_on_error           ( VARIANT_BOOL mail_on_error ) = 0;
     virtual HRESULT     get_mail_on_error           ( VARIANT_BOOL* mail_on_error ) = 0;

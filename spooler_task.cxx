@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.125 2002/11/24 15:33:02 jz Exp $
+// $Id: spooler_task.cxx,v 1.126 2002/11/25 23:36:22 jz Exp $
 /*
     Hier sind implementiert
 
@@ -1850,32 +1850,34 @@ void Task::cmd_end()
 
 //----------------------------------------------------------------------Task::wait_until_terminated
 // Anderer Thread
+#ifdef SPOOLER_USE_THREADS
 
 bool Task::wait_until_terminated( double wait_time )
 {
-    Thread_id my_thread_id = current_thread_id();
-    if( my_thread_id == _job->_thread->_thread_id )  throw_xc( "SPOOLER-125" );     // Deadlock
+        Thread_id my_thread_id = current_thread_id();
+        if( my_thread_id == _job->_thread->_thread_id )  throw_xc( "SPOOLER-125" );     // Deadlock
 
-    Spooler_thread* calling_thread = _spooler->thread_by_thread_id( my_thread_id );
-    if( calling_thread &&  !calling_thread->_free_threading  &&  !_job->_thread->_free_threading )  throw_xc( "SPOOLER-131" );
+        Spooler_thread* calling_thread = _spooler->thread_by_thread_id( my_thread_id );
+        if( calling_thread &&  !calling_thread->_free_threading  &&  !_job->_thread->_free_threading )  throw_xc( "SPOOLER-131" );
 
-    Event event ( obj_name() + " wait_until_terminated" );
-    //int   i = 0;
+        Event event ( obj_name() + " wait_until_terminated" );
+        //int   i = 0;
     
-    THREAD_LOCK( _terminated_events_lock ) 
-    {
-        //i = _terminated_events.size();
-        _terminated_events.push_back( &event );
-    }
+        THREAD_LOCK( _terminated_events_lock ) 
+        {
+            //i = _terminated_events.size();
+            _terminated_events.push_back( &event );
+        }
 
-    bool result = event.wait( wait_time );
+        bool result = event.wait( wait_time );
 
-    { THREAD_LOCK( _terminated_events_lock )  _terminated_events.pop_back(); }
-  //{ THREAD_LOCK( _terminated_events_lock )  _terminated_events.erase( &_terminated_events[i] ); }
+        { THREAD_LOCK( _terminated_events_lock )  _terminated_events.pop_back(); }
+      //{ THREAD_LOCK( _terminated_events_lock )  _terminated_events.erase( &_terminated_events[i] ); }
 
-    return result;
+        return result;
 }
 
+#endif
 //----------------------------------------------------------------------------------Task::set_cause
 
 void Task::set_cause( Start_cause cause )

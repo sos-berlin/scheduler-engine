@@ -1,4 +1,4 @@
-// $Id: spooler_com.cxx,v 1.72 2002/11/25 10:04:25 jz Exp $
+// $Id: spooler_com.cxx,v 1.73 2002/11/25 23:36:19 jz Exp $
 /*
     Hier sind implementiert
 
@@ -46,8 +46,11 @@ DESCRIBE_CLASS( &spooler_typelib, Com_order_queue   , order_queue   , CLSID_orde
 
 //-----------------------------------------------------------------------------IID_Ihostware_dynobj
 
-extern "C" const GUID IID_Ihostware_dynobj = { 0x9F716A02, 0xD1F0, 0x11CF, { 0x86, 0x9D, 0x44, 0x45, 0x53, 0x54, 0x00, 0x00 } };
-//DEFINE_GUID( IID_Ihostware_dynobj, 0x9F716A02, 0xD1F0, 0x11CF, 0x86, 0x9D, 0x44, 0x45, 0x53, 0x54, 0x00, 0x00 );
+#ifdef Z_WINDOWS
+    extern "C" const GUID IID_Ihostware_dynobj = { 0x9F716A02, 0xD1F0, 0x11CF, { 0x86, 0x9D, 0x44, 0x45, 0x53, 0x54, 0x00, 0x00 } };
+#else
+    DEFINE_GUID( IID_Ihostware_dynobj, 0x9F716A02, 0xD1F0, 0x11CF, 0x86, 0x9D, 0x44, 0x45, 0x53, 0x54, 0x00, 0x00 );
+#endif
 
 //--------------------------------------------------------------------------------time_from_variant
 
@@ -82,6 +85,19 @@ static ptr<spooler_com::Iorder> order_from_order_or_payload( Spooler* spooler, c
     return iorder;
 }
 
+//------------------------------------------------------------------------------Com_error::_methods
+#ifdef Z_COM
+
+const Com_method Com_error::_methods[] =
+{ 
+    { "get_java_class_name" , (Com_method_ptr)&Com_error::get_java_class_name, 0, 0 },
+    { "get_is_error"        , (Com_method_ptr)&Com_error::get_is_error       , 0, 0 },
+    { "get_code"            , (Com_method_ptr)&Com_error::get_code           , 0, 0 }, 
+    { "get_text"            , (Com_method_ptr)&Com_error::get_text           , 0, 0 }, 
+    { NULL }
+};
+
+#endif
 //-----------------------------------------------------------------------------Com_error::Com_error
 
 Com_error::Com_error( const Xc_copy& x )
@@ -106,14 +122,14 @@ STDMETHODIMP Com_error::QueryInterface( const IID& iid, void** result )
 }
 
 //-------------------------------------------------------------------------Com_error::GetIDsOfNames
-#ifndef SYSTEM_HAS_COM
+#if 0 //ndef SYSTEM_HAS_COM
 
-static const Com_method com_error_methods[] =
+const Com_method com_error_methods[] =
 { 
-    { L"get_java_class_name" , 0, 0, },
-    { L"get_is_error"        , 0, 0, },
-    { L"get_code"            , 0, 0, }, 
-    { L"get_text"            , 0, 0, }, 
+    { "get_java_class_name" , (Com_method_ptr)&Com_error::get_java_class_name, 0, 0 },
+    { "get_is_error"        , (Com_method_ptr)&Com_error::get_is_error       , 0, 0 },
+    { "get_code"            , (Com_method_ptr)&Com_error::get_code           , 0, 0 }, 
+    { "get_text"            , (Com_method_ptr)&Com_error::get_text           , 0, 0 }, 
     { NULL }
 };
 
@@ -122,18 +138,19 @@ HRESULT Com_error::GetIDsOfNames( REFIID iid, LPOLESTR* rgszNames, UINT cNames, 
     return com_get_dispid( com_error_methods, iid, rgszNames, cNames, lcid, rgDispId );
 }
 
-//--------------------------------------------------------------------Com_error::Invoke
+//--------------------------------------------------------------------------------Com_error::Invoke
 
 HRESULT Com_error::Invoke( DISPID dispid, REFIID iid, LCID lcid, WORD flags, DISPPARAMS* dispparams, VARIANT* result, EXCEPINFO* excepinfo, UINT* )
 {
+    return com_invoke( this, com_error_methods, dispid, iid, lcid, flags, dispparams, result, excepinfo );
+/*
     HRESULT hr;
     vector<Variant> args;
+    bool called = false;
+   
+    hr = com_prepare_args_for_invoke( this, com_error_methods, dispid, iid, lcid, flags, dispparams, result, excepinfo, &args, &called );
 
-    memset( excepinfo, 0, sizeof *excepinfo );
-    VariantInit( result );
-    
-    hr = com_prepare_args_for_invoke( &args, com_error_methods, dispid, iid, lcid, flags, dispparams );
-    if( SUCCEEDED(hr) )
+    if( !called )
     {
         switch( dispid )
         {
@@ -148,6 +165,7 @@ HRESULT Com_error::Invoke( DISPID dispid, REFIID iid, LCID lcid, WORD flags, DIS
     if( FAILED(hr) )  get_error_info( hr, excepinfo );
 
     return hr;
+*/
 }
 
 #endif
@@ -209,6 +227,15 @@ STDMETHODIMP Com_error::get_text( BSTR* text_bstr )
     return hr;
 }
 
+//---------------------------------------------------------------------------Com_variable::_methods
+#ifdef Z_COM
+
+const Com_method Com_variable::_methods[] =
+{ 
+    { NULL }
+};
+
+#endif
 //-----------------------------------------------------------------------Com_variable::Com_variable
 
 Com_variable::Com_variable( const BSTR name, const VARIANT& value )
@@ -251,6 +278,15 @@ STDMETHODIMP Com_variable::Clone( Ivariable** result )
     return hr;
 }
 
+//-----------------------------------------------------------------------Com_variable_set::_methods
+#ifdef Z_COM
+
+const Com_method Com_variable_set::_methods[] =
+{ 
+    { NULL }
+};
+
+#endif
 //---------------------------------------------------------------Com_variable_set::Com_variable_set
 
 Com_variable_set::Com_variable_set()
@@ -499,7 +535,16 @@ STDMETHODIMP Com_variable_set::get__NewEnum( IUnknown** iunknown )
     return NOERROR;
 }
 
-//-------------------------------------------------Com_variable_set_enumerator::Com_variable_set_enumerator
+//------------------------------------------------------------Com_variable_set_enumerator::_methods
+#ifdef Z_COM
+
+const Com_method Com_variable_set_enumerator::_methods[] =
+{ 
+    { NULL }
+};
+
+#endif
+//-----------------------------------------Com_variable_set_enumerator::Com_variable_set_enumerator
 
 Com_variable_set_enumerator::Com_variable_set_enumerator()
 :
@@ -558,7 +603,7 @@ STDMETHODIMP Com_variable_set_enumerator::Next( unsigned long celt, VARIANT* res
     return i < celt? S_FALSE : S_OK;
 }
 
-//--------------------------------------------------------------------Com_variable_set_enumerator::Skip
+//----------------------------------------------------------------Com_variable_set_enumerator::Skip
 
 STDMETHODIMP Com_variable_set_enumerator::Skip( unsigned long celt )
 {
@@ -567,7 +612,7 @@ STDMETHODIMP Com_variable_set_enumerator::Skip( unsigned long celt )
     return celt? S_FALSE : S_OK;
 }
 
-//-------------------------------------------------------------------Com_variable_set_enumerator::Reset
+//---------------------------------------------------------------Com_variable_set_enumerator::Reset
 
 STDMETHODIMP Com_variable_set_enumerator::Reset()
 {
@@ -582,6 +627,15 @@ STDMETHODIMP Com_variable_set_enumerator::Clone( IEnumVARIANT** ppenum )
     return ERROR;
 }
 
+//--------------------------------------------------------------------------------Com_log::_methods
+#ifdef Z_COM
+
+const Com_method Com_log::_methods[] =
+{ 
+    { NULL }
+};
+
+#endif
 //---------------------------------------------------------------------------------Com_log::Com_log
 
 Com_log::Com_log( Prefix_log* log )
@@ -646,6 +700,7 @@ STDMETHODIMP Com_log::log( Log_level level, BSTR line )
 
 STDMETHODIMP Com_log::get_mail( Imail** mail )
 { 
+#ifdef Z_WINDOWS
     HRESULT hr = NOERROR;
 
     THREAD_LOCK( _lock )
@@ -660,6 +715,9 @@ STDMETHODIMP Com_log::get_mail( Imail** mail )
     catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Log::mail" ); }
 
     return hr;
+#else
+    return E_FAIL;
+#endif
 }
 
 //-----------------------------------------------------------------------Com_log::put_mail_on_error
@@ -947,6 +1005,15 @@ STDMETHODIMP Com_log::get_collect_max( double* result )
     return hr;
 }
 
+//-------------------------------------------------------------------------Com_object_set::_methods
+#ifdef Z_COM
+
+const Com_method Com_object_set::_methods[] =
+{ 
+    { NULL }
+};
+
+#endif
 //-------------------------------------------------------------------Com_object_set::Com_object_set
 
 Com_object_set::Com_object_set( Object_set* object_set )
@@ -985,6 +1052,15 @@ STDMETHODIMP Com_object_set::get_high_level( int* result )
     return NOERROR;
 }
 
+//--------------------------------------------------------------------------------Com_job::_methods
+#ifdef Z_COM
+
+const Com_method Com_job::_methods[] =
+{ 
+    { NULL }
+};
+
+#endif
 //---------------------------------------------------------------------------------Com_job::Com_job
 
 Com_job::Com_job( Job* job )
@@ -1238,6 +1314,15 @@ STDMETHODIMP Com_job::get_order_queue( Iorder_queue** result )
     return hr;
 }
 
+//-------------------------------------------------------------------------------Com_task::_methods
+#ifdef Z_COM
+
+const Com_method Com_task::_methods[] =
+{ 
+    { NULL }
+};
+
+#endif
 //-------------------------------------------------------------------------------Com_task::Com_task
 
 Com_task::Com_task( Task* task )
@@ -1381,18 +1466,26 @@ STDMETHODIMP Com_task::get_params( Ivariable_set** result )
 
 STDMETHODIMP Com_task::wait_until_terminated( double wait_time, VARIANT_BOOL* ok )
 {
-    HRESULT hr = NOERROR;
+#   ifdef SPOOLER_USE_THREADS
 
-    THREAD_LOCK( _lock )
-    try
-    {
-        if( _task )  *ok = _task->wait_until_terminated( wait_time );
-               else  *ok = true;
-    }
-    catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Task.wait_until_terminated" ); }
-    catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Task.wait_until_terminated" ); }
+        HRESULT hr = NOERROR;
 
-    return hr;
+        THREAD_LOCK( _lock )
+        try
+        {
+            if( _task )  *ok = _task->wait_until_terminated( wait_time );
+                   else  *ok = true;
+        }
+        catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Task.wait_until_terminated" ); }
+        catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Task.wait_until_terminated" ); }
+
+        return hr;
+
+#   else
+
+        return E_NOTIMPL;
+
+#   endif
 }
 
 //------------------------------------------------------------------------------------Com_task::end
@@ -1573,6 +1666,15 @@ STDMETHODIMP Com_task::get_order( Iorder** result )
     return hr;
 }
 
+//-----------------------------------------------------------------------------Com_thread::_methods
+#ifdef Z_COM
+
+const Com_method Com_thread::_methods[] =
+{ 
+    { NULL }
+};
+
+#endif
 //---------------------------------------------------------------------------Com_thread::Com_thread
 
 Com_thread::Com_thread( Spooler_thread* thread )
@@ -1659,6 +1761,15 @@ STDMETHODIMP Com_thread::get_name( BSTR* result )
     return NOERROR;
 }
 
+//----------------------------------------------------------------------------Com_spooler::_methods
+#ifdef Z_COM
+
+const Com_method Com_spooler::_methods[] =
+{ 
+    { NULL }
+};
+
+#endif
 //-------------------------------------------------------------------------Com_spooler::Com_spooler
 
 Com_spooler::Com_spooler( Spooler* spooler )
@@ -1954,6 +2065,15 @@ STDMETHODIMP Com_spooler::get_is_service( VARIANT_BOOL* result )
     return hr;
 }
 
+//----------------------------------------------------------------------------Com_context::_methods
+#ifdef Z_COM
+
+const Com_method Com_context::_methods[] =
+{ 
+    { NULL }
+};
+
+#endif
 //-------------------------------------------------------------------------Com_context::Com_context
 
 Com_context::Com_context()
@@ -1962,6 +2082,15 @@ Com_context::Com_context()
 {
 }
 
+//--------------------------------------------------------------------------Com_job_chain::_methods
+#ifdef Z_COM
+
+const Com_method Com_job_chain::_methods[] =
+{ 
+    { NULL }
+};
+
+#endif
 //---------------------------------------------------------------------Com_job_chain::Com_job_chain
 
 Com_job_chain::Com_job_chain( Job_chain* job_chain )
@@ -2207,6 +2336,15 @@ STDMETHODIMP Com_job_chain::get_node( VARIANT* state, Ijob_chain_node** result )
     return hr;
 }
 
+//---------------------------------------------------------------------Com_job_chain_node::_methods
+#ifdef Z_COM
+
+const Com_method Com_job_chain_node::_methods[] =
+{ 
+    { NULL }
+};
+
+#endif
 //-----------------------------------------------------------Com_job_chain_node::Com_job_chain_node
 
 Com_job_chain_node::Com_job_chain_node()
@@ -2277,6 +2415,15 @@ STDMETHODIMP Com_job_chain_node::get_job( Ijob** result )
     return S_OK;
 }
 
+//------------------------------------------------------------------------------Com_order::_methods
+#ifdef Z_COM
+
+const Com_method Com_order::_methods[] =
+{ 
+    { NULL }
+};
+
+#endif
 //-----------------------------------------------------------------------------Com_order::Com_order
 
 Com_order::Com_order( Order* order )
@@ -2331,7 +2478,7 @@ STDMETHODIMP Com_order::get_id( VARIANT* result )
     {
         if( !_order )  return E_POINTER;
 
-        hr = VariantCopy( result, &_order->id() );
+        return _order->id().CopyTo( result );
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Order.id" ); }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Order.id" ); }
@@ -2545,7 +2692,7 @@ STDMETHODIMP Com_order::get_state( VARIANT* result )
     {
         if( !_order )  return E_POINTER;
 
-        hr = VariantCopy( result, &_order->state() );
+        return _order->state().CopyTo( result );
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Order.state" ); }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Order.state" ); }
@@ -2668,7 +2815,7 @@ STDMETHODIMP Com_order::get_payload( VARIANT* result )
     {
         if( !_order )  return E_POINTER;
 
-        hr = VariantCopy( result, &_order->payload() );
+        hr = _order->payload().CopyTo( result );
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Order.payload" ); }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Order.payload" ); }
@@ -2747,6 +2894,15 @@ STDMETHODIMP Com_order::add_to_job_chain( Ijob_chain* ijob_chain )
     return hr;
 }
 */
+//-----------------------------------------------------------------------Com_order_queue::_methods
+#ifdef Z_COM
+
+const Com_method Com_order_queue::_methods[] =
+{ 
+    { NULL }
+};
+
+#endif
 //-----------------------------------------------------------------Com_order_queue::Com_order_queue
 
 Com_order_queue::Com_order_queue()

@@ -1,4 +1,4 @@
-// $Id: spooler_module_java.cxx,v 1.22 2002/11/25 08:57:27 jz Exp $
+// $Id: spooler_module_java.cxx,v 1.23 2002/11/25 23:36:22 jz Exp $
 /*
     Hier sind implementiert
 
@@ -355,7 +355,7 @@ JNIEXPORT jobject JNICALL Java_sos_spooler_Idispatch_com_1call( JNIEnv* jenv, jc
     try
     {
         HRESULT     hr;
-        IDispatch*  idispatch = (IDispatch*)jidispatch;
+        IDispatch*  idispatch = (IDispatch*)(size_t)jidispatch;
         Bstr        name_bstr;
         DWORD       context = 0;
         DISPID      dispid = 0;
@@ -440,7 +440,7 @@ JNIEXPORT jobject JNICALL Java_sos_spooler_Idispatch_com_1call( JNIEnv* jenv, jc
                 jfieldID field_id = jenv->GetFieldID( cls, "_idispatch", "J" );
                 if( field_id )
                 {
-                    dispparams[i] = (IDispatch*)jenv->GetLongField( jparam, field_id );
+                    dispparams[i] = (IDispatch*)(size_t)jenv->GetLongField( jparam, field_id );
                 }
             }
             else
@@ -969,7 +969,7 @@ Java_idispatch::Java_idispatch( Spooler* sp, IDispatch* idispatch, const string&
 
     jmethodID constructor_id = jenv.get_method_id( subclass, "<init>", "(J)V" );
 
-    jobject jo = jenv->NewObject( subclass, constructor_id, (jlong)(IDispatch*)idispatch );
+    jobject jo = jenv->NewObject( subclass, constructor_id, (jlong)(size_t)idispatch );
     if( !jo )  _spooler->_java_vm.throw_java( 0, "NewObject", _class_name );
 
     assign( jo );

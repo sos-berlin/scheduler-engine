@@ -1,4 +1,4 @@
-// $Id: spooler_wait.cxx,v 1.43 2002/11/25 08:59:24 jz Exp $
+// $Id: spooler_wait.cxx,v 1.44 2002/11/25 23:36:24 jz Exp $
 /*
     Hier sind implementiert
 
@@ -289,16 +289,18 @@ void Wait_handles::remove_handle( HANDLE handle, Event* event )
 
 #endif
 //-----------------------------------------------------------------------------Wait_handles::remove
-#ifdef Z_WINDOWS
 
 void Wait_handles::remove( Event* event )
 {
+#ifdef Z_WINDOWS
     if( !event )  return;
 
     remove_handle( event->handle(), event );
+#endif
 }
 
 //-------------------------------------------------------------------------------Wait_handles::wait
+#ifdef Z_WINDOWS
 
 int Wait_handles::wait( double wait_time )
 {

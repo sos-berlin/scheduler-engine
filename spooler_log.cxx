@@ -1,4 +1,4 @@
-// $Id: spooler_log.cxx,v 1.49 2002/11/24 15:33:00 jz Exp $
+// $Id: spooler_log.cxx,v 1.50 2002/11/25 23:36:21 jz Exp $
 
 #include "spooler.h"
 #include "spooler_mail.h"
@@ -148,6 +148,8 @@ void Log::open_new()
 
 void Log::log( Log_level level, const string& prefix, const string& line )
 {
+    if( this == NULL )  return;
+
     if( level < _spooler->_log_level )  return;
     log2( level, prefix, line );
 }
@@ -156,6 +158,8 @@ void Log::log( Log_level level, const string& prefix, const string& line )
 
 void Log::log2( Log_level level, const string& prefix, const string& line, Prefix_log* extra_log )
 {
+    if( this == NULL )  return;
+
     if( _file == -1 )  return;
 
     THREAD_LOCK( _semaphore )
@@ -386,6 +390,7 @@ void Prefix_log::write( const char* text, int len )
 }
 
 //--------------------------------------------------------------------------------Prefix_log::imail
+#ifdef Z_WINDOWS
 
 Com_mail* Prefix_log::imail()
 {
@@ -425,22 +430,26 @@ Com_mail* Prefix_log::imail()
     return _mail;
 }
 
+#endif
 //----------------------------------------------------------------------Prefix_log::set_mail_header
 
 void Prefix_log::set_mail_header()
 {
+#ifdef Z_WINDOWS
     HRESULT hr = NOERROR;
 
     if( _from != "-" )  hr = _mail->put_from( Bstr( _from ) );    if( FAILED(hr) ) throw_ole( hr, "spooler::Mail::from", _from.c_str() );
                         hr = _mail->put_to  ( Bstr( _to   ) );    if( FAILED(hr) ) throw_ole( hr, "spooler::Mail::to"  , _to.c_str() );
     if( _cc   != "-" )  hr = _mail->put_cc  ( Bstr( _cc   ) );    if( FAILED(hr) ) throw_ole( hr, "spooler::Mail::cc"  , _cc.c_str() );
     if( _bcc  != "-" )  hr = _mail->put_bcc ( Bstr( _bcc  ) );    if( FAILED(hr) ) throw_ole( hr, "spooler::Mail::bcc" , _bcc.c_str() );
+#endif
 }
 
 //-------------------------------------------------------------------Prefix_log::set_mail_from_name
 
 void Prefix_log::set_mail_from_name( const string& from_name )
 {
+#ifdef Z_WINDOWS
     HRESULT hr;
 
     if( _mail )
@@ -458,12 +467,14 @@ void Prefix_log::set_mail_from_name( const string& from_name )
     {
         _from_name = from_name;
     }
+#endif
 }
 
 //---------------------------------------------------------------------Prefix_log::set_mail_subject
 
 void Prefix_log::set_mail_subject( const string& subject, bool overwrite )
 {
+#ifdef Z_WINDOWS
     HRESULT hr;
 
     if( _mail )
@@ -483,12 +494,14 @@ void Prefix_log::set_mail_subject( const string& subject, bool overwrite )
         if( !_subject.empty()  &&  !overwrite )  return;
         _subject = subject;
     }
+#endif
 }
 
 //------------------------------------------------------------------------Prefix_log::set_mail_body
 
 void Prefix_log::set_mail_body( const string& body, bool overwrite )
 {
+#ifdef Z_WINDOWS
     HRESULT hr;
 
     if( _mail )
@@ -508,12 +521,14 @@ void Prefix_log::set_mail_body( const string& body, bool overwrite )
         if( !_body.empty()  &&  !overwrite )  return;
         _body = body;
     }
+#endif
 }
 
 //---------------------------------------------------------------------------------Prefix_log::send
 
 void Prefix_log::send( int reason )
 {
+#ifdef Z_WINDOWS
     // reason == -2  =>  Gelegentlicher Aufruf, um Fristen zu prüfen und ggfs. eMail zu versenden
     // reason == -1  =>  Job mit Fehler beendet
     // reason >=  0  =>  Anzahl spooler_process()
@@ -558,12 +573,14 @@ void Prefix_log::send( int reason )
     }
  
     _last_send = Time::now();
+#endif
 }
 
 //--------------------------------------------------------------------------Prefix_log::send_really
 
 void Prefix_log::send_really()
 {
+#ifdef Z_WINDOWS
     int ok;
 
     imail()->add_file( Bstr(_filename), NULL, Bstr(L"plain/text"), Bstr(_spooler->_mail_encoding) );
@@ -582,6 +599,7 @@ void Prefix_log::send_really()
         warn( "eMail konnte nicht versendet werden" );
 
     _mail = NULL;
+#endif
 }
 
 //----------------------------------------------------------------------------------Prefix_log::log

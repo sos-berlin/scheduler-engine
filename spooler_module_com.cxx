@@ -1,4 +1,4 @@
-// $Id: spooler_module_com.cxx,v 1.7 2002/11/25 08:59:24 jz Exp $
+// $Id: spooler_module_com.cxx,v 1.8 2002/11/25 23:36:22 jz Exp $
 /*
     Hier sind implementiert
 
@@ -34,16 +34,6 @@ bool check_result( const Variant& vt )
     return v.bVal != 0;
 }
 
-//--------------------------------------------------------Com_module_instance::~Com_module_instance
-
-Com_module_instance::~Com_module_instance()
-{
-    try {
-        close();
-    }
-    catch( const Xc& ) {}
-}
-
 //-------------------------------------------------------------------------Com_module_instance_base::init
 
 void Com_module_instance_base::init()
@@ -59,20 +49,6 @@ void Com_module_instance_base::close()
 
     _idispatch = NULL;
     _loaded = false;
-}
-
-//------------------------------------------------------------------------Com_module_instance::load
-#ifdef Z_WINDOWS
-
-void Com_module_instance::load()
-{
-    if( name_exists( "spooler_set_context" ) )
-    {
-        Variant com_context_vt = +_com_context;
-        com_call( _idispatch, "spooler_set_context", &com_context_vt );
-    }
-
-    _loaded = true;
 }
 
 //------------------------------------------------------------Com_module_instance_base::name_exists
@@ -109,6 +85,17 @@ Variant Com_module_instance_base::property_get( const string& name )
     return com_property_get( _idispatch, name );
 }
 */
+//--------------------------------------------------------Com_module_instance::~Com_module_instance
+#ifdef Z_WINDOWS
+
+Com_module_instance::~Com_module_instance()
+{
+    try {
+        close();
+    }
+    catch( const Xc& ) {}
+}
+
 //------------------------------------------------------------------------Com_module_instance::init
 
 void Com_module_instance::init()
@@ -145,6 +132,19 @@ void Com_module_instance::init()
         hr = _idispatch.CoCreateInstance( clsid );
         if( FAILED(hr) )  throw_ole( hr, "CoCreateInstance", _module->_com_class_name.c_str() );
     }
+}
+
+//------------------------------------------------------------------------Com_module_instance::load
+
+void Com_module_instance::load()
+{
+    if( name_exists( "spooler_set_context" ) )
+    {
+        Variant com_context_vt = +_com_context;
+        com_call( _idispatch, "spooler_set_context", &com_context_vt );
+    }
+
+    _loaded = true;
 }
 
 //-----------------------------------------------------------------------Com_module_instance::close

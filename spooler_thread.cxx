@@ -1,4 +1,4 @@
-// $Id: spooler_thread.cxx,v 1.57 2002/11/24 16:06:34 jz Exp $
+// $Id: spooler_thread.cxx,v 1.58 2002/11/25 23:36:23 jz Exp $
 /*
     Hier sind implementiert
 
@@ -605,6 +605,7 @@ bool Spooler_thread::process()
 }
 
 //-----------------------------------------------------------------------Spooler_thread::run_thread
+#ifdef SPOOLER_USE_THREADS
 
 int Spooler_thread::run_thread()
 {
@@ -662,6 +663,7 @@ int Spooler_thread::run_thread()
     return ret;
 }
 
+#endif
 //-----------------------------------------------------------------------Spooler_thread::run_thread
 /*
 int Spooler_thread::run_thread()

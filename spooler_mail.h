@@ -1,7 +1,9 @@
-// $Id: spooler_mail.h,v 1.10 2002/11/24 15:33:00 jz Exp $
+// $Id: spooler_mail.h,v 1.11 2002/11/25 23:36:22 jz Exp $
 
 #ifndef __SPOOLER_MAIL_H
 #define __SPOOLER_MAIL_H
+
+#ifdef Z_WINDOWS
 
 #include <map>
 
@@ -74,7 +76,10 @@ struct Com_mail : spooler_com::Imail, Sos_ole_object
   private:
     Fill_zero                  _zero_;
     Spooler*                   _spooler;
+
+#ifdef Z_WINDOWS
     Sos_ptr<Mail_message>      _msg;
+#endif
 
     Bstr                       _subject;
     Bstr                       _from;
@@ -87,4 +92,5 @@ struct Com_mail : spooler_com::Imail, Sos_ole_object
 } //namespace sos
 
 
+#endif
 #endif

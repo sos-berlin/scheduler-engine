@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.3 2002/11/25 08:57:23 jz Exp $
+# $Id: Makefile,v 1.4 2002/11/25 23:36:19 jz Exp $
 
 ifndef PROD_DIR
 prod_dir = ..
@@ -18,7 +18,6 @@ objects = \
  spooler_history.o\
  spooler_log.o\
  spooler_mail.o\
- spooler_mail_jmail.o\
  spooler_module.o\
  spooler_module_com.o\
  spooler_module_java.o\
@@ -70,7 +69,7 @@ libspooler.a: $(java_headers) $(objects)
 
 
 $(BIN_DIR)/spooler: spooler.o libspooler.a ../kram/$(O_DIR)/soswnmai.o $(foreach p,$(DEP_PRODUCTS),$(PROD_DIR)/$(p)/$(O_DIR)/lib$(p).a) $(PERL_DIR)/libperl.a
-	-$(CCPP) $(DEBUG) -static $(LINK_FLAGS) -Xlinker -Map -Xlinker $(BIN_DIR)/spooler.map  $^ $(VERBOSE) $(CFLAGS) $(INCLUDES) $(TEMPLATES) $(LIBPATH) $(SOS_LIBS) $(SOS_LIBS) $(ORACLE_LIBS) $(RW_LIBS) $(NET_LIBS) $(C_LIBS) $(LIBS) -o $@
+	-$(CCPP) $(DEBUG) -static $(LINK_FLAGS) -Xlinker -Map -Xlinker $(BIN_DIR)/spooler.map  $^ $(VERBOSE) $(CFLAGS) $(INCLUDES) $(TEMPLATES) $(LIBPATH) $(SOS_LIBS) $(SOS_LIBS) -lxml2 -lz -ldl $(C_LIBS) $(LIBS) $(LIBS) -o $@
 	echo ^G
 
 
