@@ -3,6 +3,7 @@
 // $Revision$
 // $Rev$
 // $LastChangedRevision$
+// $Date$
 
 package sos.spooler;
 
