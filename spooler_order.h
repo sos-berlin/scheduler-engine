@@ -1,4 +1,4 @@
-// $Id: spooler_order.h,v 1.5 2002/09/18 18:37:45 jz Exp $
+// $Id: spooler_order.h,v 1.6 2002/09/19 10:15:58 jz Exp $
 
 #ifndef __SPOOLER_ORDER_H
 #define __SPOOLER_ORDER_H
@@ -58,6 +58,7 @@ struct Order : Com_order
 
 
     void                        add_to_order_queue      ( Order_queue* );
+    void                        add_to_job              ( const string& job_name );
 
     // Auftrag in einer Jobkette:
     void                        add_to_job_chain        ( Job_chain* );

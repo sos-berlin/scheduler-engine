@@ -1,4 +1,4 @@
-// $Id: spooler_command.cxx,v 1.57 2002/09/11 10:05:14 jz Exp $
+// $Id: spooler_command.cxx,v 1.58 2002/09/19 10:15:58 jz Exp $
 /*
     Hier ist implementiert
 
@@ -296,6 +296,45 @@ xml::Element_ptr Command_processor::execute_add_jobs( const xml::Element_ptr& ad
     return _answer->createElement( "ok" );
 }
 
+//-------------------------------------------------------------Command_processor::execute_add_order
+
+xml::Element_ptr Command_processor::execute_add_order( const xml::Element_ptr& add_order_element )
+{
+    if( _security_level < Security::seclev_all )  throw_xc( "SPOOLER-121" );
+
+    string         priority       = as_string( add_order_element->getAttribute( "priority"  ) );
+    string         id             = as_string( add_order_element->getAttribute( "id"        ) );
+    string         title          = as_string( add_order_element->getAttribute( "title"     ) );
+    string         job_name       = as_string( add_order_element->getAttribute( "job"       ) );
+    string         job_chain_name = as_string( add_order_element->getAttribute( "job_chain" ) );
+    string         state_name     = as_string( add_order_element->getAttribute( "state"     ) );
+
+    ptr<Order> order = new Order( _spooler );
+
+    if( priority != ""   )  order->set_priority( as_int(priority) );
+    if( id != ""         )  order->set_id( id.c_str() );
+                            order->set_title( title );
+    if( state_name != "" )  order->set_state( state_name.c_str() );
+
+
+    DOM_FOR_ALL_ELEMENTS( add_order_element, e )  
+    {
+        if( e->tagName == "params" )  
+        { 
+            CComPtr<Com_variable_set> pars = new Com_variable_set;
+            pars->set_xml( e );  
+            order->set_payload( CComVariant( (IDispatch*)pars ) );
+            break; 
+        }
+    }
+
+
+    if( job_name != "" )  order->add_to_job( job_name );
+                    else  order->add_to_job_chain( _spooler->job_chain( job_chain_name ) );
+
+    return _answer->createElement( "ok" );
+}
+
 //---------------------------------------------------------------Command_processor::execute_command
 
 xml::Element_ptr Command_processor::execute_command( const xml::Element_ptr& element )
@@ -317,6 +356,8 @@ xml::Element_ptr Command_processor::execute_command( const xml::Element_ptr& ele
     if( element->tagName == "config"            )  return execute_config( element );
     else
     if( element->tagName == "add_jobs"          )  return execute_add_jobs( element );
+    else
+    if( element->tagName == "add_order"         )  return execute_add_order( element );     // in spooler_order.cxx
     else
     {
         throw_xc( "SPOOLER-105", as_string( element->tagName ) ); return NULL;

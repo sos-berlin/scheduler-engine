@@ -1,6 +1,10 @@
-// $Id: spooler_order.cxx,v 1.7 2002/09/18 18:37:45 jz Exp $
+// $Id: spooler_order.cxx,v 1.8 2002/09/19 10:15:58 jz Exp $
 /*
     Hier sind implementiert
+
+    Spooler::add_job_chain
+    Spooler::job_chain
+    Command_processor::execute_add_order
 
     Job_chain
     Order
@@ -377,10 +381,25 @@ Com_job* Order::com_job()
 
 //------------------------------------------------------------------------Order::add_to_order_queue
 
-void Order::add_to_order_queue( Order_queue* order_queue )
+void Order::add_to_job( const string& job_name )
 {
     THREAD_LOCK( _lock )
     {
+        ptr<Order_queue> order_queue = _spooler->get_job( job_name )->order_queue();
+        if( !order_queue )  throw_xc( "SPOOLER-147", job_name );
+        add_to_order_queue( order_queue );
+    }
+}
+
+//------------------------------------------------------------------------Order::add_to_order_queue
+
+void Order::add_to_order_queue( Order_queue* order_queue )
+{
+    if( !order_queue )  throw_xc( "SPOOLER-147", "?" );
+
+    THREAD_LOCK( _lock )
+    {
+
         _moved = true;
 
         if( _id.vt == VT_EMPTY )  set_default_id();
