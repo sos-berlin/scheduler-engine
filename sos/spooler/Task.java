@@ -10,7 +10,7 @@ package sos.spooler;
  * Implementiert wird eine Task durch {@link Job_impl}.
  * 
  * @author Joacim Zschimmer
- * @version $Revision: 1.15 $
+ * @version $Revision$
  */
 
 public class Task extends Idispatch
@@ -226,5 +226,12 @@ public class Task extends Idispatch
      * 
      * @see #stderr_text()
      */
-    public String          stderr_text          ()                                  { return (String)        com_call( "<stderr_text"                    ); }
+    public String           stderr_text         ()                                  { return (String)       com_call( "<stderr_text"                    ); }
+    
+    
+    public Subprocess       create_subprocess   ()                                  { return (Subprocess)   com_call( "create_subprocess" ); }
+
+    public Subprocess       create_subprocess   ( String command_line )             { return (Subprocess)   com_call( "create_subprocess", command_line ); }
+
+    public Subprocess       create_subprocess   ( String filename_and_arguments[] ) { return (Subprocess)   com_call( "create_subprocess", filename_and_arguments ); }
 }

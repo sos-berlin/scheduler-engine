@@ -13,7 +13,7 @@ package sos.spooler;
  * 
  * 
  * @author Joacim Zschimmer
- * @version $Revision: 1.13 $
+ * @version $Revision$
  */
 
 public class Job extends Idispatch

@@ -12,7 +12,7 @@ package sos.spooler;
  * @see Job_chain#node(String)
  * @see Order#job_chain_node()
  * @author Joacim Zschimmer
- * @version $Revision: 1.6 $
+ * @version $Revision$
  */
 
 public class Job_chain_node extends Idispatch

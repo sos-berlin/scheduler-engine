@@ -22,7 +22,7 @@ package sos.spooler;
  * @see Task#params()
  * @see Spooler#create_variable_set()
  * @author Joacim Zschimmer
- * @version $Revision: 1.9 $
+ * @version $Revision$
  */
 
 public class Variable_set extends Idispatch

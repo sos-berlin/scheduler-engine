@@ -33,7 +33,7 @@ package sos.spooler;
  
  *
  * @author Joacim Zschimmer, Zschimmer GmbH
- * @version $Revision: 1.8 $
+ * @version $Revision$
  */
 
 public class Job_impl

@@ -5,7 +5,7 @@ package sos.spooler;
 /**
  * Fehlercode und -text.
  * @author Joacim Zschimmer, Zschimmer GmbH
- * @version $Revision: 1.5 $
+ * @version $Revision$
  */
 
 public class Error extends Idispatch

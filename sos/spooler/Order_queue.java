@@ -19,7 +19,7 @@ package sos.spooler;
  * @see Task#order() 
  * 
  * @author Joacim Zschimmer
- * @version $Revision: 1.6 $
+ * @version $Revision$
  */
 
 public class Order_queue extends Idispatch

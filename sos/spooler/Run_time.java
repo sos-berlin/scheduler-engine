@@ -1,4 +1,4 @@
-// $Id: Order.java 3481 2005-03-24 10:00:11Z jz $
+// $Id$
 
 package sos.spooler;
 
@@ -7,7 +7,7 @@ package sos.spooler;
  * @see Order#run_time()
  *
  * @author Joacim Zschimmer
- * @version $Revision: 1.5 $
+ * @version $Revision$
  */
 
 public class Run_time  extends Idispatch

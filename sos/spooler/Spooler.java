@@ -5,7 +5,7 @@ package sos.spooler;
 /** Das allgemeine Scheduler-Objekt.
  * 
  * @author Joacim Zschimmer, Zschimmer GmbH
- * @version $Revision: 1.12 $
+ * @version $Revision$
  */
 
 public class Spooler extends Idispatch

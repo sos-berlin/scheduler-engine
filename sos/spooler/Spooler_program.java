@@ -4,7 +4,7 @@ package sos.spooler;
 
 /**
  * @author Joacim Zschimmer, Zschimmer GmbH
- * @version $Revision: 1.4 $
+ * @version $Revision$
  */
 
 public class Spooler_program

@@ -1,10 +1,4 @@
 // $Id$
-// $Author$
-// $Revision$
-// $Rev$
-// $LastChangedRevision$
-// $Date$
-
 
 package sos.spooler;
 

@@ -31,7 +31,7 @@ package sos.spooler;
  * @see Task#order() 
  *
  * @author Joacim Zschimmer
- * @version $Revision: 1.5 $
+ * @version $Revision$
  */
 
 public class Order extends Idispatch
