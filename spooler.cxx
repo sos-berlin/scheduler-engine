@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.306 2003/12/10 11:30:08 jz Exp $
+// $Id: spooler.cxx,v 1.307 2003/12/10 17:26:24 jz Exp $
 /*
     Hier sind implementiert
 
@@ -1947,7 +1947,7 @@ void Spooler::abort_immediately( bool restart )
                 TerminateProcess( _process_handles[i], exit_code );
 #            else
                 LOG( "kill(" << _process_handles[i] << ",SIGKILL)\n" );
-                kill( _process_handle[i], SIGKILL );
+                kill( _process_handles[i], SIGKILL );
 #           endif
         }
     }
@@ -1968,7 +1968,7 @@ void Spooler::abort_immediately( bool restart )
         _exit( exit_code );
 #    else
         LOG( "kill( _spooler->_pid, SIGKILL );\n" );
-        kill( _spooler->_pid, SIGKILL );
+        kill( _pid, SIGKILL );
         _exit( exit_code );
 #   endif
 }

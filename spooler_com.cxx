@@ -1,4 +1,4 @@
-// $Id: spooler_com.cxx,v 1.125 2003/12/09 21:01:12 jz Exp $
+// $Id: spooler_com.cxx,v 1.126 2003/12/10 17:26:25 jz Exp $
 /*
     Hier sind implementiert
 
@@ -2251,8 +2251,8 @@ const Com_method Com_spooler::_methods[] =
     { DISPATCH_PROPERTYGET, 19, "directory"                 , (Com_method_ptr)&Com_spooler::get_directory       , VT_BSTR      },
     { DISPATCH_METHOD     , 20, "job_chain_exists"          , (Com_method_ptr)&Com_spooler::job_chain_exists    , VT_BOOL       , { VT_BSTR } },
     { DISPATCH_PROPERTYGET, 21, "hostname"                  , (Com_method_ptr)&Com_spooler::get_hostname        , VT_BSTR      },
-    STDMETHODIMP            abort_immediately               ();
-    STDMETHODIMP            abort_immediately_and_restart   ();
+    { DISPATCH_METHOD     , 22, "abort_immediately"         , (Com_method_ptr)&Com_spooler::abort_immediately   , VT_BSTR      },
+    { DISPATCH_METHOD     , 23, "abort_immediately_and_restart", (Com_method_ptr)&Com_spooler::abort_immediately_and_restart, VT_BSTR },
     {}
 };
 
