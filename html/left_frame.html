@@ -1,4 +1,4 @@
-<!-- $Id: left_frame.html,v 1.6 2004/08/13 09:53:10 jz Exp $ -->
+<!-- $Id: left_frame.html,v 1.7 2004/08/20 10:41:20 jz Exp $ -->
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <html>
 
@@ -31,8 +31,8 @@
 <!--script defer="true" type="text/javascript" src="translation_de.js"></script-->
 <script defer="true" type="text/javascript" src="popup_menu.js"></script>
 
-<script type="text/javascript" for="window" event="onload"  > do_onload();   </script>
-<script type="text/javascript" for="window" event="onunload"> do_onunload(); </script>
+<script defer="true" type="text/javascript" for="window" event="onload"  > do_onload();   </script>
+<script defer="true" type="text/javascript" for="window" event="onunload"> do_onunload(); </script>
 
 
 <script defer="true" language="javascript"><!--
@@ -84,7 +84,7 @@ function do_onload()
         init_translation_table( _translation_table );
         
         // Auch für großgeschriebene Wörter:
-        for( word in _translation_table )  _translation_table[ word.substring.substring( 0, 1 ).toUpper() + word.substring( 1 );
+        for( word in _translation_table )  _translation_table[ word.substring.substring( 0, 1 ).toUpper() + word.substring( 1 ) ];
     }
     
     _scheduler = new Scheduler();

@@ -1,5 +1,5 @@
 /* Javadoc style sheet */
-/* $Id: javadoc.css,v 1.1 2004/07/25 11:25:57 jz Exp $ */
+/* $Id: javadoc.css,v 1.2 2004/08/20 10:41:20 jz Exp $ */
 
 /* Define colors, fonts and other style attributes here to override the defaults  */
 
@@ -24,3 +24,4 @@ td           { font-size: 10pt; }
 p            { font-size: 10pt; margin-top: 2ex; margin-bottom: 0 }
 
 code         { font-size: 10pt; }
+pre          { margin-top: 0; }
