@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.62 2001/03/05 11:31:54 jz Exp $
+// $Id: spooler.cxx,v 1.63 2001/03/15 16:59:18 jz Exp $
 /*
     Hier sind implementiert
 
@@ -474,41 +474,53 @@ void Spooler::cmd_terminate_and_restart()
 
 int Spooler::launch( int argc, char** argv )
 {
-    if( !SOS_LICENCE( licence_spooler ) )  throw_xc( "SOS-1000", "Spooler" );
+    int rc;
 
-    _argc = argc;
-    _argv = argv;
-
-    SetThreadPriority( GetCurrentThread(), THREAD_PRIORITY_ABOVE_NORMAL );
-
-    _event.set_name( "Spooler" );
-    _event.add_to( &_wait_handles );
-
-    _communication.init();  // Für Windows
-
-    do
+    try
     {
-        if( _state_cmd != sc_load_config )  load();
-    
-        THREAD_LOCK( _lock )  
+        if( !SOS_LICENCE( licence_spooler ) )  throw_xc( "SOS-1000", "Spooler" );
+
+        _argc = argc;
+        _argv = argv;
+
+        SetThreadPriority( GetCurrentThread(), THREAD_PRIORITY_ABOVE_NORMAL );
+
+        _event.set_name( "Spooler" );
+        _event.add_to( &_wait_handles );
+
+        _communication.init();  // Für Windows
+
+        do
         {
-            if( _config_element == NULL )  throw_xc( "SPOOLER-116", _spooler_id );
+            if( _state_cmd != sc_load_config )  load();
     
-            load_config( _config_element );
+            THREAD_LOCK( _lock )  
+            {
+                if( _config_element == NULL )  throw_xc( "SPOOLER-116", _spooler_id );
+    
+                load_config( _config_element );
         
-            _config_element = NULL;
-            _config_document = NULL;
-        }
+                _config_element = NULL;
+                _config_document = NULL;
+            }
 
-        start();
-        run();
-        stop();
+            start();
+            run();
+            stop();
 
-    } while( _state_cmd == sc_reload || _state_cmd == sc_load_config );
+        } while( _state_cmd == sc_reload || _state_cmd == sc_load_config );
 
-    _log.msg( "Spooler ordentlich beendet." );
+        _log.msg( "Spooler ordentlich beendet." );
 
-    return 0;
+        rc = 0;
+    }
+    catch( const Xc& x )
+    {
+        SHOW_ERR( "Fehler " << x );
+        rc = 9999;
+    }
+
+    return rc;
 }
 
 //------------------------------------------------------------------------------------start_process

@@ -1,4 +1,4 @@
-// $Id: spooler.h,v 1.55 2001/03/05 11:31:55 jz Exp $
+// $Id: spooler.h,v 1.56 2001/03/15 16:59:18 jz Exp $
 
 #ifndef __SPOOLER_H
 #define __SPOOLER_H
@@ -14,6 +14,8 @@
     {
         typedef IXMLDOMElement          Element;
         typedef IXMLDOMElementPtr       Element_ptr;
+        typedef IXMLDOMTextPtr          Text_ptr;
+        typedef IXMLDOMCDATASectionPtr  Cdata_section_ptr;
         typedef IXMLDOMNode             Node;
         typedef IXMLDOMNodePtr          Node_ptr;
         typedef IXMLDOMNodeList         NodeList;

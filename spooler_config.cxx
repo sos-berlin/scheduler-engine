@@ -1,4 +1,4 @@
-// $Id: spooler_config.cxx,v 1.15 2001/02/21 10:57:36 jz Exp $
+// $Id: spooler_config.cxx,v 1.16 2001/03/15 16:59:19 jz Exp $
 
 //#include <precomp.h>
 
@@ -8,6 +8,7 @@
 
 #include "../kram/sos.h"
 #include "spooler.h"
+#include "../file/anyfile.h"
 
 
 namespace sos {
@@ -232,7 +233,35 @@ void Run_time::set_xml( const xml::Element_ptr& element )
 void Script::set_xml( const xml::Element_ptr& element )
 {
     _language = as_string( element->getAttribute( "language" ) );
-    _text = as_string( element->text );
+
+    for( xml::Node_ptr n = element->firstChild; n; n = n->nextSibling )
+    {
+        switch( n->GetnodeType() )
+        {
+            case xml::NODE_CDATA_SECTION:
+            {
+                xml::Cdata_section_ptr c = n;
+                _text += as_string( c->data );
+                break;
+            }
+
+            case xml::NODE_TEXT:
+            {
+                xml::Text_ptr t = n;
+                _text += as_string( t->data );
+                break;
+            }
+
+            case xml::NODE_ELEMENT:
+            {
+                xml::Element_ptr e = n;
+                _text += file_as_string( as_string( e->getAttribute( "file" ) ) );
+                break;
+            }
+
+            default: ;
+        }
+    }
     
     string use_engine = as_string( element->getAttribute( "use_engine" ) );
     
@@ -380,23 +409,27 @@ void Spooler::load_config( const xml::Element_ptr& config_element )
     if( empty( _spooler_param ) )  _spooler_param = as_string( config_element->getAttribute( "param"        ) );
 
 
-    for( xml::Element_ptr e = config_element->firstChild; e; e = e->nextSibling )
+    try
     {
-        if( e->tagName == "security" )
+        for( xml::Element_ptr e = config_element->firstChild; e; e = e->nextSibling )
         {
-            _security.set_xml( e );
-        }
-        else
-        if( e->tagName == "object_set_classes" )
-        {
-            load_object_set_classes_from_xml( &_object_set_class_list, e );
-        }
-        else
-        if( e->tagName == "threads" ) 
-        {
-            load_threads_from_xml( &_thread_list, e );
+            if( e->tagName == "security" )
+            {
+                _security.set_xml( e );
+            }
+            else
+            if( e->tagName == "object_set_classes" )
+            {
+                load_object_set_classes_from_xml( &_object_set_class_list, e );
+            }
+            else
+            if( e->tagName == "threads" ) 
+            {
+                load_threads_from_xml( &_thread_list, e );
+            }
         }
     }
+    catch( const _com_error& com_error ) { throw_com_error(com_error);  }
 }
 
 //-------------------------------------------------------------------------------------------------

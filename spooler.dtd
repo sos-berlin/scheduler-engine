@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- $Id: spooler.dtd,v 1.21 2001/02/21 15:16:22 jz Exp $   Joacim Zschimmer,  (C) 2000 SOS GmbH Berlin  -->
+<!-- $Id: spooler.dtd,v 1.22 2001/03/15 16:59:18 jz Exp $   Joacim Zschimmer,  (C) 2000 SOS GmbH Berlin  -->
 
 
 <!ELEMENT spooler               ( config+ | command | answer )>
@@ -39,11 +39,14 @@
 <!ATTLIST level_decl            level               CDATA #REQUIRED>    <!-- Stufennummer, in der Objektemengeklasse eindeutig -->
 <!ATTLIST level_decl            name                CDATA #REQUIRED>    <!-- Name der Stufe, in der Objektemengeklasse eindeutig -->
 
-<!ELEMENT script                ( #PCDATA )>
+<!ELEMENT script                ( #PCDATA | include )*>
 <!ATTLIST script                language            CDATA 'VBScript'>   <!-- Z.B. "VBScript", "JavaScript", "PerlScript" -->
 <!ATTLIST script                use_engine          (task|job) 'task'>  <!-- use_engine="task"  : Jeder Task eine Scripting Engine -->
                                                                         <!-- use_engine="job"   : Allen Tasks dieses Jobs eine Scripting Engine -->
                                                                         <!--[use_engine="global": Globale Scripting Engine des Spoolers verwenden]-->
+
+<!ELEMENT include               EMPTY>
+<!ATTLIST include               file                CDATA #REQUIRED>
 
 <!ELEMENT threads               ( thread* )>
 
