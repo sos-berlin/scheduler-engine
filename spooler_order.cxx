@@ -1,4 +1,4 @@
-// $Id: spooler_order.cxx,v 1.52 2003/11/30 10:35:38 jz Exp $
+// $Id: spooler_order.cxx,v 1.53 2003/11/30 11:09:56 jz Exp $
 /*
     Hier sind implementiert
 
@@ -662,7 +662,7 @@ Time Order_queue::next_time()
 {
     THREAD_LOCK( _lock )
     {
-        if( !_queue.empty() )  return 0;
+        if( !_queue.empty() )  return latter_day;
 
         if( !_setback_queue.empty() )  return (*_setback_queue.begin())->_setback;
     }
