@@ -1,4 +1,4 @@
-// $Id: spooler_job.cxx,v 1.42 2003/10/22 23:01:00 jz Exp $
+// $Id: spooler_job.cxx,v 1.43 2003/10/24 20:59:03 jz Exp $
 /*
     Hier sind implementiert
 
@@ -58,6 +58,7 @@ Job::Job( Spooler* spooler )
     _default_params = new Com_variable_set;
     _task_timeout = latter_day;
     _idle_timeout = latter_day;
+    _max_tasks    = 1;
 }
 
 //----------------------------------------------------------------------------------------Job::~Job
@@ -81,7 +82,7 @@ void Job::set_dom( const xml::Element_ptr& element, const Time& xml_mod_time )
         _title            = element.     getAttribute( "title"      , _title      );
         _log_append       = element.bool_getAttribute( "log_append" , _log_append );
         order             = element.bool_getAttribute( "order"      );
-        _max_tasks        = element.uint_getAttribute( "tasks"      , 1 );
+        _max_tasks        = element.uint_getAttribute( "tasks"      , _max_tasks );
         string t          = element.     getAttribute( "timeout"    );
         if( t != "" )  
         {
