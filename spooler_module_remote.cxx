@@ -1,4 +1,4 @@
-// $Id: spooler_module_remote.cxx,v 1.30 2003/08/31 19:51:29 jz Exp $
+// $Id: spooler_module_remote.cxx,v 1.31 2003/08/31 22:32:42 jz Exp $
 /*
     Hier sind implementiert
 
@@ -101,6 +101,15 @@ void Remote_module_instance_proxy::close()
     }
 
     Com_module_instance_base::close();
+}
+
+//---------------------------------------------------------------Remote_module_instance_proxy::kill
+
+bool Remote_module_instance_proxy::kill()
+{
+    if( !_remote_instance )  return false;
+
+    return _remote_instance->kill_process();        // Wenn noch andere Modulinstanzen (Tasks) im Prozess laufen sollten, sind die auch weg.
 }
 
 //------------------------------------------------------------Remote_module_instance_proxy::add_obj

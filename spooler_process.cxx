@@ -1,4 +1,4 @@
-// $Id: spooler_process.cxx,v 1.6 2003/08/31 19:51:29 jz Exp $
+// $Id: spooler_process.cxx,v 1.7 2003/08/31 22:32:42 jz Exp $
 
 #include "spooler.h"
 
@@ -213,16 +213,6 @@ bool Process::async_continue()
     return _connection->async_continue();
 }
 
-//---------------------------------------------------------------------------------Process::set_dom
-/*
-void Process::set_dom( const xml::Element_ptr& process_element, const Time& xml_mod_time )
-{
-    _name    = process_element.     getAttribute( "name"       );
-    _timeout = process_element.uint_getAttribute( "timeout", 0 );
-
-    if( _timeout == 0 )  _timeout = INT_MAX;
-}
-*/
 //-------------------------------------------------------------------------------------Process::dom
 
 xml::Element_ptr Process::dom( const xml::Document_ptr& document, Show_what show )

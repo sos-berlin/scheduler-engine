@@ -1,4 +1,4 @@
-// $Id: spooler_job.h,v 1.4 2003/08/25 20:41:26 jz Exp $
+// $Id: spooler_job.h,v 1.5 2003/08/31 22:32:42 jz Exp $
 
 #ifndef __SPOOLER_JOB_H
 #define __SPOOLER_JOB_H
@@ -302,6 +302,7 @@ struct Job : Sos_self_deleting
     Time                       _next_time;                  // Für Spooler_thread::wait(): Um diese Zeit soll Job::do_something() gerufen werden.
     Time                       _next_single_start;
     Time                       _repeat;                     // spooler_task.repeat
+    Time                       _task_time_out;              // Frist für einen Schritt einer Task
     int                        _priority;
     bool                       _temporary;                  // Job nach einem Lauf entfernen
     bool                       _start_once;                 // <run_time start_once="">, wird false nach Start

@@ -1,4 +1,4 @@
-// $Id: spooler_time.h,v 1.19 2003/07/29 11:20:49 jz Exp $
+// $Id: spooler_time.h,v 1.20 2003/08/31 22:32:42 jz Exp $
 
 #ifndef __SPOOLER_TIME_H
 #define __SPOOLER_TIME_H
@@ -313,6 +313,10 @@ struct Run_time
     Ultimo_set                 _ultimo_set;                 // 0: Letzter Tag, -1: Vorletzter Tag
     Holiday_set                _holiday_set;
 };
+
+//-------------------------------------------------------------------------------------------------
+
+Time                            time_from_string            ( const string& );
 
 //-------------------------------------------------------------------------------------------------
 

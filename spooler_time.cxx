@@ -1,4 +1,4 @@
-// $Id: spooler_time.cxx,v 1.41 2003/07/29 11:20:49 jz Exp $
+// $Id: spooler_time.cxx,v 1.42 2003/08/31 22:32:42 jz Exp $
 /*
     Hier sind implementiert
 
@@ -33,6 +33,20 @@ namespace time {
 
     
 Period empty_period;
+
+//---------------------------------------------------------------------------------time_from_string
+
+Time time_from_string( const string& str )
+{
+    if( str.find( ':' ) != string::npos )
+    {
+        Sos_optional_date_time dt;
+        dt.set_time( str );
+        return dt.time_as_double();
+    }
+    else
+        return as_double( str );
+}
 
 //---------------------------------------------------------------------------------Time::operator =
 

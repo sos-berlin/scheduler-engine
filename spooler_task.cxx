@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.182 2003/08/31 19:51:29 jz Exp $
+// $Id: spooler_task.cxx,v 1.183 2003/08/31 22:32:42 jz Exp $
 /*
     Hier sind implementiert
 
@@ -179,7 +179,7 @@ Task::Task( Job* job )
     _job(job),
     _log(job->_spooler),
     _history(&job->_history,this),
-    _time_out(INT_MAX)
+    _time_out(job->_task_time_out)
   //_success(true)
 {
     _let_run = _job->_period.let_run();
@@ -494,9 +494,21 @@ bool Task::do_something()
 {
     //Z_DEBUG_ONLY( _log.debug9( "do_something() state=" + state_name() ); )
 
-    if( _operation )
-        if( !_operation->async_finished() )  return false;
+    if( _operation &&  !_operation->async_finished() )  
+    {
+        if( _time_out < latter_day  &&  Time::now() > _last_operation_time + _time_out )
+        {
+            _log.error( "Task wird nach nach Zeitablauf abgebrochen" );
+            bool killed = do_kill();
+            _killed = killed;
+            if( !killed ) _log.warn( "Task konnte nicht abgebrochen werden" );
+            return killed;
+        }
 
+        return false;
+    }
+
+    bool had_operation  = _operation != NULL;
     bool something_done = false;
 
 
@@ -750,6 +762,9 @@ bool Task::do_something()
                 if( !_operation  &&  _state < s_end )  set_state( s_end );
             }
 
+            
+            if( !_operation  &&  _killed )  set_state( s_ended );
+
 
             switch( _state )
             {
@@ -769,6 +784,7 @@ bool Task::do_something()
             }
         }
 
+        if( _operation && !had_operation )  _last_operation_time = now;
 
         THREAD_LOCK( _lock )
         {
@@ -1174,6 +1190,15 @@ bool Object_set_task::do_step__end()
     return _object_set->step( _job->_output_level );
 }
 */
+//--------------------------------------------------------------------------Job_module_task::do_kill
+
+bool Job_module_task::do_kill()
+{
+    if( !_module_instance )  return false;
+
+    return _module_instance->kill();
+}
+
 //-------------------------------------------------------------------------Job_module_task::do_load
 
 void Job_module_task::do_load()
@@ -1379,16 +1404,17 @@ bool Process_task::do_begin__end()
 
 //----------------------------------------------------------------------------Process_task::do_kill
 
-void Process_task::do_kill()
+bool Process_task::do_kill()
 {
-    if( _process_handle )
-    {
-        _log.warn( "Prozess wird abgebrochen" );
+    if( !_process_handle )  return false;
 
-        LOG( "TerminateProcess(" <<  _process_handle << ",999)\n" );
-        BOOL ok = TerminateProcess( _process_handle, 999 );
-        if( !ok )  throw_mswin_error( "TerminateProcess" );
-    }
+    _log.warn( "Prozess wird abgebrochen" );
+
+    LOG( "TerminateProcess(" <<  _process_handle << ",999)\n" );
+    BOOL ok = TerminateProcess( _process_handle, 999 );
+    if( !ok )  throw_mswin_error( "TerminateProcess" );
+
+    return true;
 }
 
 //------------------------------------------------------------------------Process_task::do_end__end
@@ -1581,7 +1607,7 @@ bool Process_task::do_begin__end()
 
 //----------------------------------------------------------------------------Process_task::do_kill
 
-void Process_task::do_kill()
+bool Process_task::do_kill()
 {
     if( _process_handle._pid )
     {

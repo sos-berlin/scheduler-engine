@@ -1,4 +1,4 @@
-// $Id: spooler_job.cxx,v 1.11 2003/08/30 15:39:11 jz Exp $
+// $Id: spooler_job.cxx,v 1.12 2003/08/31 22:32:42 jz Exp $
 /*
     Hier sind implementiert
 
@@ -61,6 +61,9 @@
 namespace sos {
 namespace spooler {
 
+
+const int max_task_time_out = 7*24*3600;
+
 //---------------------------------------------------------------------------------start_cause_name
 
 string start_cause_name( Start_cause cause )
@@ -96,6 +99,7 @@ Job::Job( Spooler* spooler )
     _next_time = latter_day;
     _priority  = 1;
     _default_params = new Com_variable_set;
+    _task_time_out = latter_day;
 }
 
 //----------------------------------------------------------------------------------------Job::~Job
@@ -119,7 +123,12 @@ void Job::set_dom( const xml::Element_ptr& element, const Time& xml_mod_time )
         _title            = element.     getAttribute( "title"      , _title      );
         _log_append       = element.bool_getAttribute( "log_append" , _log_append );
         order             = element.bool_getAttribute( "order"      );
-        
+        string t          = element.     getAttribute( "timeout"    );
+        if( t != "" )  
+        {
+            _task_time_out = time::time_from_string( t );
+            if( _task_time_out > max_task_time_out )  _task_time_out = max_task_time_out;   // Begrenzen, damit's beim Addieren mit now() keinen Überlauf gibt
+        }
 
         if( order )
         {

@@ -1,4 +1,4 @@
-// $Id: spooler_task.h,v 1.113 2003/08/31 19:51:29 jz Exp $
+// $Id: spooler_task.h,v 1.114 2003/08/31 22:32:42 jz Exp $
 
 #ifndef __SPOOLER_TASK_H
 #define __SPOOLER_TASK_H
@@ -128,7 +128,7 @@ struct Task : Sos_self_deleting
 
     virtual void                do_close                    ()                                      {}
     virtual void                do_load                     ()                                      {}
-    virtual void                do_kill                     ()                                      {}
+    virtual bool                do_kill                     ()                                      { return false; }
     virtual Async_operation*    do_begin__start             ()                                      { return &dummy_sync_operation; }
     virtual bool                do_begin__end               () = 0;
     virtual Async_operation*    do_end__start               ()                                      { return &dummy_sync_operation; }
@@ -178,9 +178,11 @@ struct Task : Sos_self_deleting
     Time                       _start_at;                   // Zu diesem Zeitpunkt (oder danach) starten
     Time                       _running_since;
     Time                       _last_process_start_time;
+    Time                       _last_operation_time;
     Time                       _next_spooler_process;
     Time                       _next_time;
     Time                       _time_out;                   // Frist für eine Operation (oder INT_MAX)
+    bool                       _killed;                     // Task abgebrochen (nach do_kill/timeout)
 
     ptr<Async_operation>       _operation;
   //bool                       _in_operation;               // .._end() aufrufen, auch wenn _operation == NULL (das ist dann eine synchrone Operation)
@@ -257,6 +259,7 @@ struct Job_module_task : Module_task
 {
                                 Job_module_task             ( Job* j )                              : Module_task(j) {}
 
+    virtual bool                do_kill                     ();
     virtual void                do_load                     ();
   //virtual void                do_close                    ();
     virtual Async_operation*    do_begin__start             ();
@@ -302,7 +305,7 @@ struct Process_task : Task      // Job ist irgendein Prozess (z.B. durch ein She
                                 Process_task                ( Job* j );
 
     virtual void                do_close                    ();
-    virtual void                do_kill                     ();
+    virtual bool                do_kill                     ();
   //virtual void                do_begin__start             ();
     virtual bool                do_begin__end               ();
   //virtual void                do_end__start               ();

@@ -1,4 +1,4 @@
-// $Id: spooler_com.cxx,v 1.103 2003/08/25 20:41:26 jz Exp $
+// $Id: spooler_com.cxx,v 1.104 2003/08/31 22:32:42 jz Exp $
 /*
     Hier sind implementiert
 
@@ -56,16 +56,7 @@ DESCRIBE_CLASS( &spooler_typelib, Com_order_queue   , order_queue   , CLSID_orde
 
 Time time_from_variant( const VARIANT& vt )
 {
-    string  str = variant_as_string( vt );
-
-    if( str.find( ':' ) != string::npos )
-    {
-        Sos_optional_date_time dt;
-        dt.set_time( str );
-        return dt.time_as_double();
-    }
-    else
-        return as_double( str );
+    return time::time_from_string( variant_as_string( vt ) );
 }
 
 //----------------------------------------------------------------------order_from_order_or_payload

@@ -1,4 +1,4 @@
-// $Id: spooler_module_remote.h,v 1.15 2003/08/31 10:04:33 jz Exp $
+// $Id: spooler_module_remote.h,v 1.16 2003/08/31 22:32:42 jz Exp $
 
 #ifndef __SPOOLER_MODULE_REMOTE_H
 #define __SPOOLER_MODULE_REMOTE_H
@@ -62,6 +62,7 @@ struct Remote_module_instance_proxy : Com_module_instance_base
     void                        init                        ();
     void                        load                        ();
     void                        close                       ();
+    bool                        kill                        ();
   
     void                        add_obj                     ( const ptr<IDispatch>&, const string& name );
     bool                        name_exists                 ( const string& name );
