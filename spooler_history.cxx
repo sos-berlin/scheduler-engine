@@ -1,7 +1,8 @@
-// $Id: spooler_history.cxx,v 1.40 2003/04/04 11:31:50 jz Exp $
+// $Id: spooler_history.cxx,v 1.41 2003/05/05 15:39:55 jz Exp $
 
 #include "spooler.h"
 #include "../zschimmer/z_com.h"
+#include "../kram/sleep.h"
 
 using namespace zschimmer;
 
@@ -124,87 +125,90 @@ Spooler_db::Spooler_db( Spooler* spooler )
 
 //---------------------------------------------------------------------------------Spooler_db::open
 
-void Spooler_db::open( const string& db_name, bool need_db )
+void Spooler_db::open( const string& db_name )
 {
-    string my_db_name = db_name;
-
-    _db_name = db_name;
-    
-    if( _db_name != "" )
+    Z_MUTEX( _lock )
     {
-        if( _db_name.find(' ') == string::npos  &&  _db_name.find( ':', 1 ) == string::npos )
+        string my_db_name = db_name;
+
+        _db_name = db_name;
+    
+        if( _db_name != "" )
         {
-            if( !is_absolute_filename( _db_name  )  &&  (_spooler->log_directory() + " ")[0] == '*' ) 
+            if( _db_name.find(' ') == string::npos  &&  _db_name.find( ':', 1 ) == string::npos )
             {
-                if( need_db )  throw_xc( "SPOOLER-142", _db_name );
-                return;
+                if( !is_absolute_filename( _db_name  )  &&  (_spooler->log_directory() + " ")[0] == '*' ) 
+                {
+                    if( _spooler->_need_db )  throw_xc( "SPOOLER-142", _db_name );
+                    return;
+                }
+
+                  _db_name = "odbc "         + make_absolute_filename( _spooler->log_directory(),   _db_name );
+                my_db_name = "odbc -create " + make_absolute_filename( _spooler->log_directory(), my_db_name );
             }
 
-              _db_name = "odbc "         + make_absolute_filename( _spooler->log_directory(),   _db_name );
-            my_db_name = "odbc -create " + make_absolute_filename( _spooler->log_directory(), my_db_name );
-        }
+            if( _db_name.substr(0,5) == "odbc " 
+             || _db_name.substr(0,5) == "jdbc ")   _db_name = _db_name.substr(0,5) + " -id=spooler " +   _db_name.substr(5),
+                                                 my_db_name = _db_name.substr(0,5) + " -id=spooler " + my_db_name.substr(5);
 
-        if( _db_name.substr(0,5) == "odbc " 
-         || _db_name.substr(0,5) == "jdbc ")   _db_name = _db_name.substr(0,5) + " -id=spooler " +   _db_name.substr(5),
-                                             my_db_name = _db_name.substr(0,5) + " -id=spooler " + my_db_name.substr(5);
+            try
+            {
+                string stmt;
 
-        try
-        {
-            string stmt;
+                _spooler->_log.info( "Datenbank wird geöffnet: " + my_db_name );
 
-            _spooler->_log.info( "Datenbank wird geöffnet: " + my_db_name );
+                _db.open( "-in -out " + my_db_name );   // -create
 
-            _db.open( "-in -out " + my_db_name );   // -create
+                _db_name += " ";
 
-            _db_name += " ";
-
-            create_table_when_needed( _spooler->_variables_tablename, 
-                                      "\"NAME\" char(100) not null,"
-                                      "\"WERT\" char(250),"  
-                                      "primary key ( \"name\" )" );
+                create_table_when_needed( _spooler->_variables_tablename, 
+                                          "\"NAME\" char(100) not null,"
+                                          "\"WERT\" char(250),"  
+                                          "primary key ( \"name\" )" );
 
 
-            vector<string> create_extra = vector_map( sql_quoted_name, vector_split( " *, *", _spooler->_history_columns ) );
-            for( int i = 0; i < create_extra.size(); i++ )  create_extra[i] += " char(250),";
+                vector<string> create_extra = vector_map( sql_quoted_name, vector_split( " *, *", _spooler->_history_columns ) );
+                for( int i = 0; i < create_extra.size(); i++ )  create_extra[i] += " char(250),";
 
-            create_table_when_needed( _spooler->_history_tablename, 
-                                      "\"ID\"          integer not null,"
-                                      "\"SPOOLER_ID\"  char(100),"
-                                      "\"JOB_NAME\"    char(100) not null,"
-                                      "\"START_TIME\"  datetime not null,"
-                                      "\"END_TIME\"    datetime,"
-                                      "\"CAUSE\"       char(50),"
-                                      "\"STEPS\"       integer,"
-                                      "\"ERROR\"       bit,"
-                                      "\"ERROR_CODE\"  char(50),"
-                                      "\"ERROR_TEXT\"  char(250),"
-                                      "\"PARAMETERS\"  clob,"
-                                      "\"LOG\"         blob," 
-                                      + join( "", create_extra ) 
-                                      + "primary key( \"ID\" )" );
+                create_table_when_needed( _spooler->_history_tablename, 
+                                          "\"ID\"          integer not null,"
+                                          "\"SPOOLER_ID\"  char(100),"
+                                          "\"JOB_NAME\"    char(100) not null,"
+                                          "\"START_TIME\"  datetime not null,"
+                                          "\"END_TIME\"    datetime,"
+                                          "\"CAUSE\"       char(50),"
+                                          "\"STEPS\"       integer,"
+                                          "\"ERROR\"       bit,"
+                                          "\"ERROR_CODE\"  char(50),"
+                                          "\"ERROR_TEXT\"  char(250),"
+                                          "\"PARAMETERS\"  clob,"
+                                          "\"LOG\"         blob," 
+                                          + join( "", create_extra ) 
+                                          + "primary key( \"ID\" )" );
 
-            stmt = "UPDATE " + uquoted(_spooler->_variables_tablename) + " set \"WERT\" = \"WERT\"+1 where \"NAME\"='spooler_job_id'";
-            _job_id_update.prepare( _db_name + stmt );
+              //stmt = "UPDATE " + uquoted(_spooler->_variables_tablename) + " set \"WERT\" = \"WERT\"+1 where \"NAME\"='spooler_job_id'";
+              //_job_id_update.prepare( _db_name + stmt );
 
 
-            stmt = "SELECT \"WERT\" from " + _spooler->_variables_tablename + " where \"NAME\"='spooler_job_id'";
-            _job_id_select.prepare( "-in " + _db_name + stmt );
+                stmt = "SELECT \"WERT\" from " + _spooler->_variables_tablename + " where \"NAME\"='spooler_job_id'";
+                _job_id_select.prepare( "-in " + _db_name + stmt );
 
-            _job_id_select.execute();
-            if( _job_id_select.eof() )  execute( "INSERT into " + uquoted(_spooler->_variables_tablename) + " (\"NAME\",\"WERT\") values ('spooler_job_id','0')" );
-            _job_id_select.close( close_cursor );
-            commit();
+                _job_id_select.execute();
+                if( _job_id_select.eof() )  execute( "INSERT into " + uquoted(_spooler->_variables_tablename) + " (\"NAME\",\"WERT\") values ('spooler_job_id','0')" );
+                _job_id_select.close( close_cursor );
+                commit();
 
-            //stmt = "UPDATE " + _spooler->_history_tablename + " set \"end\"=?, steps=?, \"error\"=?, error_code=?, error_text=?  where \"id\"=?";
-            //_history_update.prepare( _db_name + stmt );       //            1        2            3             4             5               6
-            //_history_update_params.resize( 1+6 );
-            //for( int i = 1; i <= 6; i++ )  _history_update.bind_parameter( i, &_history_update_params[i] );
-        }
-        catch( const exception& x )  
-        { 
-            if( need_db )  throw;
+                //stmt = "UPDATE " + _spooler->_history_tablename + " set \"end\"=?, steps=?, \"error\"=?, error_code=?, error_text=?  where \"id\"=?";
+                //_history_update.prepare( _db_name + stmt );       //            1        2            3             4             5               6
+                //_history_update_params.resize( 1+6 );
+                //for( int i = 1; i <= 6; i++ )  _history_update.bind_parameter( i, &_history_update_params[i] );
+            }
+            catch( const exception& x )  
+            { 
+                if( _spooler->_need_db )  throw;
             
-            _spooler->_log.warn( string("FEHLER BEIM ÖFFNEN DER HISTORIENDATENBANK: ") + x.what() ); 
+                _spooler->_log.warn( string("FEHLER BEIM ÖFFNEN DER HISTORIENDATENBANK: ") + x.what() ); 
+            }
         }
     }
 }
@@ -213,10 +217,15 @@ void Spooler_db::open( const string& db_name, bool need_db )
 
 void Spooler_db::close()
 {
-    _history_table.close();
+    Z_MUTEX( _lock )
+    {
+        _job_id_select.close();
+      //_history_update.close();
+        _history_table.close();
 
-    _db.close();
-    _db.destroy();
+        _db.close();
+        _db.destroy();
+    }
 }
 
 //-------------------------------------------------------------------Spooler_db::open_history_table
@@ -265,6 +274,67 @@ int Spooler_db::get_id()
 {
     int id;
 
+    while(1)
+    {
+        try
+        {
+            id = get_id_();
+
+#ifdef _DEBUG
+   static a = 3;
+   if( --a == 0 ) throw_xc( "TEST" );
+#endif
+            break;
+        }
+        catch( const exception& x )
+        {
+            _spooler->log().error( string("FEHLER BEIM ZUGRIFF AUF DATENBANK: ") + x.what() );
+            _spooler->log().info( "Datenbank wird geschlossen" );
+
+            Z_MUTEX( _lock )
+            {
+              //try
+              //{
+                    close();
+              //}
+              //catch( const xception& x ) { _log->warn(" FEHLER BEIM SCHLIESSEN DER DATENBANK: " + x.what() ); }
+
+                while(1)
+                {
+                    try
+                    {
+                        open( _spooler->_db_name );
+                        break;
+                    }
+                    catch( const exception& x )
+                    {
+                        _spooler->log().warn( x.what() );
+                        if( _spooler->_need_db )
+                        {
+                            sos_sleep( 30 );
+                            continue;
+                        }
+                    }
+                }
+
+                if( !_db.opened() )
+                {
+                    _spooler->log().info( "Historie wird von Datenbank auf Dateien umgeschaltet" );
+                    open( "" );     // Umschalten auf dateibasierte Historie
+                }
+            }
+        }
+    }
+
+    return id;
+}
+
+//------------------------------------------------------------------------------Spooler_db::get_id_
+// Wird von den Threads gerufen
+
+int Spooler_db::get_id_()
+{
+    int id;
 
     Transaction ta = this;
     {
@@ -283,13 +353,15 @@ int Spooler_db::get_id()
             id = sel.get_record().as_int(0);
 
             LOG( "Spooler_db::get_id() = " << id << '\n' );
+
+            _next_free_job_id = id + 1;
         }
         else
         {
             id = ++_next_free_job_id;
         }
+        ta.commit();
     }
-    ta.commit();
 
     return id;
 }
@@ -389,7 +461,7 @@ Job_history::~Job_history()
     {
         close();
     }
-    catch( const exception& ) {}
+    catch( const exception& x ) { _job->_log.warn( string("FEHLER BEIM SCHLIESSEN DER JOB-HISTORIE: ") + x.what() ); }
 }
 
 //--------------------------------------------------------------------------------Job_history::open
@@ -402,15 +474,15 @@ void Job_history::open()
 
     try
     {
-        Transaction ta = +_spooler->_db;
+        _filename   = read_profile_string            ( _spooler->_factory_ini, section, "history_file" );
+        _history_yes= read_profile_bool              ( _spooler->_factory_ini, section, "history"           , _spooler->_history_yes );
+        _on_process = read_profile_history_on_process( _spooler->_factory_ini, section, "history_on_process", _spooler->_history_on_process );
+
+        if( !_history_yes )  return;
+
+        if( _spooler->_db->opened()  &&  _filename == "" )
         {
-            _filename   = read_profile_string            ( _spooler->_factory_ini, section, "history_file" );
-            _history_yes= read_profile_bool              ( _spooler->_factory_ini, section, "history"           , _spooler->_history_yes );
-            _on_process = read_profile_history_on_process( _spooler->_factory_ini, section, "history_on_process", _spooler->_history_on_process );
-
-            if( !_history_yes )  return;
-
-            if( _spooler->_db->opened()  &&  _filename == "" )
+            Transaction ta = +_spooler->_db;
             {
                 _with_log = read_profile_with_log( _spooler->_factory_ini, section, "history_with_log", _spooler->_history_with_log );
 
@@ -433,43 +505,43 @@ void Job_history::open()
                     }
                     _extra_record.construct( extra_type );
                 }
-
-                _use_db = true;
             }
-            else
-            {
-                string         extra_columns = read_profile_string ( _spooler->_factory_ini, section, "history_columns", _spooler->_history_columns );
-                Archive_switch arc           = read_profile_archive( _spooler->_factory_ini, section, "history_archive", _spooler->_history_archive );
+            ta.commit();
 
-                _type_string = history_column_names;
-
-                _extra_record.construct( make_record_type( extra_columns ) );
-
-                if( extra_columns != "" )  _type_string += "," + extra_columns;
-
-                _extra_names = vector_split( ", *", replace_regex( extra_columns, ":[^,]+", "" ) );
-
-                if( _filename == "" )
-                {
-                    _filename = "history";
-                    if( !_spooler->id().empty() )  _filename += "." + _spooler->id();
-                    _filename += ".job." + _job_name + ".txt";
-                }
-                _filename = make_absolute_filename( _spooler->log_directory(), _filename );
-                if( _filename[0] == '*' )  return;      // log_dir = *stderr
-
-                if( arc )  archive( arc, _filename );  
-
-                _file.open( _filename, O_BINARY | O_RDWR | O_CREAT | O_TRUNC, 0600 );
-                _file.print( replace_regex( _type_string, "(:[^,]+)?,", "\t" ) + SYSTEM_NL );
-
-                _job->_log.debug( "Neue Historiendatei eröffnet: " +  _filename );
-                _use_file = true;
-            }
-
-             //record.type()->field_descr_ptr("error_text")->type_ptr()->field_size()
+            _use_db = true;
         }
-        ta.commit();
+        else
+        {
+            string         extra_columns = read_profile_string ( _spooler->_factory_ini, section, "history_columns", _spooler->_history_columns );
+            Archive_switch arc           = read_profile_archive( _spooler->_factory_ini, section, "history_archive", _spooler->_history_archive );
+
+            _type_string = history_column_names;
+
+            _extra_record.construct( make_record_type( extra_columns ) );
+
+            if( extra_columns != "" )  _type_string += "," + extra_columns;
+
+            _extra_names = vector_split( ", *", replace_regex( extra_columns, ":[^,]+", "" ) );
+
+            if( _filename == "" )
+            {
+                _filename = "history";
+                if( !_spooler->id().empty() )  _filename += "." + _spooler->id();
+                _filename += ".job." + _job_name + ".txt";
+            }
+            _filename = make_absolute_filename( _spooler->log_directory(), _filename );
+            if( _filename[0] == '*' )  return;      // log_dir = *stderr
+
+            if( arc )  archive( arc, _filename );  
+
+            _file.open( _filename, O_BINARY | O_RDWR | O_CREAT | O_TRUNC, 0600 );
+            _file.print( replace_regex( _type_string, "(:[^,]+)?,", "\t" ) + SYSTEM_NL );
+
+            _job->_log.debug( "Neue Historiendatei eröffnet: " +  _filename );
+            _use_file = true;
+        }
+
+         //record.type()->field_descr_ptr("error_text")->type_ptr()->field_size()
     }
     catch( const exception& x )  
     { 
@@ -484,6 +556,10 @@ void Job_history::close()
 {
     try
     {
+        _use_db = false;
+        _use_file = false;
+        _task_id = 0;
+
         _file.close();
     }
     catch( const exception& x )  
@@ -552,6 +628,21 @@ void Job_history::write( bool start )
 
     string start_time = !start || _job->_task->_running_since? _job->_task->_running_since.as_string(Time::without_ms)
                                                              : Time::now().as_string(Time::without_ms);
+
+    if( _use_db )
+    {
+        if( !_spooler->_db->opened() )       // Datenbank ist (wegen eines Fehlers) geschlossen worden?
+        {
+            close();
+            open();
+            
+            if( !start )  
+            {
+                _spooler->log().info( "Historiensatz wird wegen vorausgegangen Datenbankfehlers nicht geschrieben" );
+                return;
+            }
+        }
+    }
 
     if( _use_db )
     {

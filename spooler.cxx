@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.200 2003/04/28 12:44:42 jz Exp $
+// $Id: spooler.cxx,v 1.201 2003/05/05 15:39:55 jz Exp $
 /*
     Hier sind implementiert
 
@@ -976,7 +976,7 @@ void Spooler::start()
 
 
     _db = SOS_NEW( Spooler_db( this ) );
-    _db->open( _db_name, _need_db );
+    _db->open( _db_name );
     _db->spooler_start();
 
     set_ctrl_c_handler( false );

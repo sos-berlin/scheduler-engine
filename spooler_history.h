@@ -1,4 +1,4 @@
-// $Id: spooler_history.h,v 1.14 2003/03/31 17:12:55 jz Exp $
+// $Id: spooler_history.h,v 1.15 2003/05/05 15:39:55 jz Exp $
 
 #ifndef __SPOOLER_HISTORY_H
 #define __SPOOLER_HISTORY_H
@@ -27,11 +27,12 @@ struct Spooler_db : Sos_self_deleting
 {
                                 Spooler_db              ( Spooler* );
 
-    void                        open                    ( const string& db_name, bool need_db );
+    void                        open                    ( const string& db_name );
     void                        close                   ();
     void                        open_history_table      ();
     bool                        opened                  ()                                          { return _db.opened(); }
     int                         get_id                  ();
+    int                         get_id_                 ();
     void                        execute                 ( const string& stmt );
     void                        commit                  ();
     void                        rollback                ();
@@ -52,11 +53,11 @@ struct Spooler_db : Sos_self_deleting
 
     string                     _db_name;
     Any_file                   _db;
-    Any_file                   _job_id_update;
+  //Any_file                   _job_id_update;
     Any_file                   _job_id_select;
     int                        _next_free_job_id;
     Any_file                   _history_table;
-    Any_file                   _history_update;
+  //Any_file                   _history_update;
     vector<Dyn_obj>            _history_update_params;
     int                        _id;
 };
