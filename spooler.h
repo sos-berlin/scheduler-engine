@@ -1,4 +1,4 @@
-// $Id: spooler.h,v 1.129 2003/03/31 17:12:55 jz Exp $
+// $Id: spooler.h,v 1.130 2003/04/14 09:03:34 jz Exp $
 
 #ifndef __SPOOLER_H
 #define __SPOOLER_H
@@ -162,7 +162,7 @@ struct Spooler
     string                      state_name                  () const                            { return state_name( _state ); }
     static string               state_name                  ( State );
     bool                        free_threading_default      () const                            { return _free_threading_default; }
-    Log&                        log                         ()                                  { return _log; }
+    Prefix_log&                 log                         ()                                  { return _log; }
     const string&               log_directory               () const                            { return _log_directory; }                      
     Time                        start_time                  () const                            { return _spooler_start_time; }
     Security::Level             security_level              ( const Host& );
@@ -243,8 +243,8 @@ struct Spooler
     char**                     _argv;
 
   public:
-    Log                        _log;
-    Prefix_log                 _prefix_log;
+    Log                        _base_log;
+    Prefix_log                 _log;
     int                        _pid;
     bool                       _is_service;                 // NT-Dienst
     bool                       _debug;

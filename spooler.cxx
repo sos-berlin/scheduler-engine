@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.197 2003/04/13 17:54:37 jz Exp $
+// $Id: spooler.cxx,v 1.198 2003/04/14 09:03:34 jz Exp $
 /*
     Hier sind implementiert
 
@@ -27,6 +27,7 @@
 #include "../kram/sleep.h"
 #include "../kram/log.h"
 #include "../file/anyfile.h"
+#include "../file/stdfile.h"    // make_path
 #include "../kram/licence.h"
 #include "../kram/sos_mail.h"
 #include "../kram/sos_java.h"
@@ -262,10 +263,10 @@ Spooler::Spooler()
     _zero_(this+1), 
     _security(this),
     _communication(this), 
-    _prefix_log(1),
-    _wait_handles(this,&_prefix_log),
-    _log(this),
-    _module(this,&_prefix_log),
+    _base_log(this),
+    _log(1),
+    _wait_handles(this,&_log),
+    _module(this,&_log),
     _log_level( log_info ),
     _factory_ini( default_factory_ini ),
 
@@ -287,7 +288,7 @@ Spooler::Spooler()
     _priority_max = 1000;       // Ein Wert > 1, denn 1 ist die voreingestelle Priorität der Jobs
             
 
-    _com_log     = new Com_log( &_prefix_log );
+    _com_log     = new Com_log( &_log );
     _com_spooler = new Com_spooler( this );
     _variables   = new Com_variable_set();
 
@@ -386,7 +387,7 @@ void Spooler::wait_until_threads_stopped( Time until )
 
 #   ifdef Z_WINDOWS
 
-        Wait_handles wait_handles ( this, &_prefix_log );
+        Wait_handles wait_handles ( this, &_log );
 
         Thread_list::iterator it = _thread_list.begin();
         while( it != _thread_list.end() )
@@ -871,6 +872,7 @@ void Spooler::load_arg()
 
         _java_work_dir = temp_dir() + Z_DIR_SEPARATOR "java";
         _java_vm->prepend_class_path( _java_work_dir );
+        make_path( _java_work_dir );  // Verzeichnis muss beim Start von Java vorhanden sein, damit Java es in classpath berücksichtigt.
     }
     catch( const Sos_option_error& )
     {
@@ -917,10 +919,10 @@ void Spooler::load()
         f.close();
     }
 
-    _prefix_log.init( this );
+    _log.init( this );
 
     char hostname[200];  // Nach _communication.init() und nach _prefix_log.init()!
-    if( gethostname( hostname, sizeof hostname ) == SOCKET_ERROR )  hostname[0] = '\0',  _prefix_log.warn( string("gethostname(): ") + strerror( errno ) );
+    if( gethostname( hostname, sizeof hostname ) == SOCKET_ERROR )  hostname[0] = '\0',  _log.warn( string("gethostname(): ") + strerror( errno ) );
     _hostname = hostname;
 
     Command_processor cp ( this );
@@ -951,8 +953,9 @@ void Spooler::start()
     _log_collect_within = read_profile_uint  ( _factory_ini, "spooler", "log_collect_within", 0 );
     _log_collect_max    = read_profile_uint  ( _factory_ini, "spooler", "log_collect_max"   , 900 );
 
-    _log.set_directory( _log_directory );
-    _log.open_new();
+    _base_log.set_directory( _log_directory );
+    _base_log.open_new();
+    
     _log.info( string( "Spooler (" VER_PRODUCTVERSION_STR ) + ") startet mit " + _config_filename );
 
 
@@ -1056,7 +1059,7 @@ void Spooler::stop()
     //_java_vm.close();  Erneutes _java.init() stürzt ab, deshalb lassen wird Java stehen und schließen es erst am Schluss
 
     if( _state_cmd == sc_terminate_and_restart 
-     || _state_cmd == sc_let_run_terminate_and_restart )  spooler_restart( &_log, _is_service );
+     || _state_cmd == sc_let_run_terminate_and_restart )  spooler_restart( &_base_log, _is_service );
 
     _db->spooler_stop();
     _db->close();

@@ -1,4 +1,4 @@
-// $Id: spooler_log.cxx,v 1.62 2003/04/04 07:30:10 jz Exp $
+// $Id: spooler_log.cxx,v 1.63 2003/04/14 09:03:35 jz Exp $
 
 #include "spooler.h"
 #include "spooler_mail.h"
@@ -210,7 +210,7 @@ Prefix_log::Prefix_log( Spooler* spooler, const string& prefix )
 :
     _zero_(this+1),
     _spooler(spooler),
-    _log(&spooler->_log),
+    _log(&spooler->_base_log),
     _prefix(prefix),
     _file(-1)
 {
@@ -229,8 +229,8 @@ Prefix_log::~Prefix_log()
 void Prefix_log::init( Spooler* spooler, const string& prefix )
 {
     _spooler = spooler;
-    _log = &spooler->_log;
-    _prefix = prefix;
+    _log     = &spooler->_base_log;
+    _prefix  = prefix;
 
     _log_level = _spooler->_log_level;
 }

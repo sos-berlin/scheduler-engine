@@ -1,4 +1,4 @@
-// $Id: spooler_module_java.cxx,v 1.50 2003/04/09 10:46:38 jz Exp $
+// $Id: spooler_module_java.cxx,v 1.51 2003/04/14 09:03:35 jz Exp $
 /*
     Hier sind implementiert
 
@@ -239,7 +239,7 @@ JNIEXPORT jobject JNICALL Java_sos_spooler_Idispatch_com_1call( JNIEnv* jenv, jc
 
 void Spooler::init_java_vm()
 {
-    _java_vm->set_log( &_prefix_log );
+    _java_vm->set_log( &_log );
 
     _java_vm->start();
 
