@@ -1,4 +1,4 @@
-// $Id: spooler_com.h,v 1.66 2003/02/04 08:57:31 jz Exp $
+// $Id: spooler_com.h,v 1.67 2003/02/18 21:38:09 jz Exp $
 
 #ifndef __SPOOLER_COM_H
 #define __SPOOLER_COM_H
@@ -396,7 +396,6 @@ struct Com_spooler : spooler_com::Ispooler,
     STDMETHODIMP            get_job_chain                   ( BSTR, spooler_com::Ijob_chain** );
     STDMETHODIMP                create_order                ( spooler_com::Iorder** );
     STDMETHODIMP            get_is_service                  ( VARIANT_BOOL* );
-    STDMETHODIMP                terminate_and_restart       ();
 
   protected:
     Thread_semaphore           _lock;

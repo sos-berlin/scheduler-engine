@@ -1,4 +1,4 @@
-// $Id: spooler_config.cxx,v 1.56 2003/02/18 17:36:14 jz Exp $
+// $Id: spooler_config.cxx,v 1.57 2003/02/18 21:38:10 jz Exp $
 
 //#include <precomp.h>
 
@@ -287,6 +287,8 @@ void Spooler::load_threads_from_xml( const xml::Element_ptr& element, const Time
                 {
                     thread = Z_NEW( Spooler_thread( this ) );
                     _thread_list.push_back( thread );
+
+                    if( !thread->_free_threading )  _spooler_thread_list.push_back( thread );
                 }
 
                 thread->set_dom( e, xml_mod_time );
@@ -323,8 +325,7 @@ void Spooler::load_config( const xml::Element_ptr& config_element, const Time& x
         _udp_port      = as_int( config_element.getAttribute( "udp_port"     , as_string( _udp_port )     ) );
         _priority_max  = as_int( config_element.getAttribute( "priority_max" , as_string( _priority_max ) ) );
 
-        if( _java_vm._config_class_path != "" )  _java_vm._config_class_path += Z_PATH_SEPARATOR;
-        _java_vm._config_class_path += config_element.getAttribute( "java_class_path" );
+        _java_vm._config_class_path = config_element.getAttribute( "java_class_path" );
 
         string log_dir =   config_element.getAttribute( "log_dir" );
 

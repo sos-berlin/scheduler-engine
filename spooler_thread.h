@@ -1,4 +1,4 @@
-// $Id: spooler_thread.h,v 1.39 2003/02/04 08:57:32 jz Exp $
+// $Id: spooler_thread.h,v 1.40 2003/02/18 21:38:10 jz Exp $
 
 #ifndef __SPOOLER_THREAD_H
 #define __SPOOLER_THREAD_H
@@ -96,7 +96,6 @@ struct Spooler_thread : zschimmer::Thread
     int                        _nothing_done_count;
     int                        _nothing_done_max;
 
-    bool                       _closed;
     bool                       _terminated;
 
   private:

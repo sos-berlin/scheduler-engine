@@ -1,4 +1,4 @@
-// $Id: spooler.odl,v 1.54 2003/02/04 08:57:30 jz Exp $
+// $Id: spooler.odl,v 1.55 2003/02/18 21:38:09 jz Exp $
 
 // Anweisung: midl /nologo /error all /out $(OutDir) $(InputPath)
 
@@ -396,8 +396,6 @@ library spooler
 
         [propget]
         HRESULT                 is_service              ( [out,retval] VARIANT_BOOL* result );
-
-        HRESULT                 terminate_and_restart   ();
     }
 
     [

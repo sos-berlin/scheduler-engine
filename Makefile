@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.14 2003/02/12 18:31:11 jz Exp $
+# $Id: Makefile,v 1.15 2003/02/18 21:38:08 jz Exp $
 
 ifndef PROD_DIR
 prod_dir = ..
@@ -75,10 +75,8 @@ $(objects): $(patsubst %, sos/spooler/%.h, Idispatch)
 
 
 ifeq ($(OS),HP-UX)
-#LIBS += /opt/java1.4/jre/lib/PA_RISC2.0/hotspot/libjvm.sl
-#LIBS += /opt/java1.4/jre/lib/PA_RISC2.0/libjava.sl
 # Die folgende Pfad muss bei Programmaufruf gueltig sein, also auf der Produktionsmaschine!
-LIBS += -Wl,+b,/opt/java1.3/jre/lib/PA_RISC2.0:/opt/java1.3/jre/lib/PA_RISC2.0/classic
+LIBS += -Wl,+b,/opt/java1.3/jre/lib/PA_RISC2.0:/opt/java1.3/jre/lib/PA_RISC2.0/server
 endif
 
 

@@ -1,4 +1,4 @@
-// $Id: spooler_thread.cxx,v 1.72 2003/02/04 08:57:32 jz Exp $
+// $Id: spooler_thread.cxx,v 1.73 2003/02/18 21:38:10 jz Exp $
 /*
     Hier sind implementiert
 
@@ -175,8 +175,6 @@ void Spooler_thread::close1()
 
 
         if( current_thread_id() != _spooler->thread_id() )  _spooler->_java_vm.detach_thread();
-
-        _closed = true;
     }
     catch( const exception&  x ) { _log.error( x.what() ); }
     catch( const _com_error& x ) { _log.error( as_string( x.Description() ) ); }
