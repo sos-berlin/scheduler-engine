@@ -1,4 +1,4 @@
-// $Id: spooler_thread.cxx,v 1.63 2002/11/29 16:10:56 jz Exp $
+// $Id: spooler_thread.cxx,v 1.64 2002/11/29 20:48:09 jz Exp $
 /*
     Hier sind implementiert
 
@@ -461,11 +461,11 @@ void Spooler_thread::wait()
  
             if( _spooler->_debug )  
             {
-                if( _wait_handles.wait(0) == -1 )  _log.debug( msg ), wait_until( _next_start_time );     // Debug-Ausgabe der Wartezeit nur, wenn kein Ergebnis vorliegt
+                if( _wait_handles.wait(0) == -1 )  _log.debug( msg ), _wait_handles.wait_until( _next_start_time );     // Debug-Ausgabe der Wartezeit nur, wenn kein Ergebnis vorliegt
             }
             else
             {
-                wait_until( _next_start_time );
+                _wait_handles.wait_until( _next_start_time );
             }
 
 #        else
@@ -485,46 +485,6 @@ void Spooler_thread::wait()
     }
 
     { THREAD_LOCK( _lock )  _next_start_time = 0; }
-}
-
-#endif
-//-----------------------------------------------------------------------Spooler_thread::wait_until
-#ifdef Z_WINDOWS
-
-int Spooler_thread::wait_until( Time until )
-{
-    timeb tm1, tm2;
-    ftime( &tm1 );
-
-    while(1)
-    {
-        Time now       = Time::now();
-        Time today2    = now.midnight() + 2*3600;           // Heute 2:00 Uhr (für Sommerzeitbeginn: Uhr springt von 2 Uhr auf 3 Uhr)
-        Time tomorrow2 = now.midnight() + 2*3600 + 24*3600;
-        Time today3    = now.midnight() + 3*3600;           // Heute 3:00 Uhr (für Winterzeitbeginn: Uhr springt von 3 Uhr auf 2 Uhr)
-        int  ret       = -1;
-
-        if( now < today2  &&  until >= today2 )     ret = _wait_handles.wait_until( today2 + 0.01 );
-        else
-        if( now < today3  &&  until >= today3 )     ret = _wait_handles.wait_until( today3 + 0.01 );
-        else 
-        if( until >= tomorrow2 )                    ret = _wait_handles.wait_until( tomorrow2 + 0.01 );
-        else
-            break;
-
-        if( ret != -1 )  return ret;
-
-        ftime( &tm2 );
-        if( tm1.dstflag != tm2.dstflag )  
-            _log.info( tm2.dstflag? "Sommerzeit" : "Winterzeit" );
-        else {
-#           ifdef _DEBUG
-                _log.debug9( "Keine Sommerzeitumschaltung" );
-#           endif
-        }
-    }
-
-    return _wait_handles.wait_until(  until );
 }
 
 #endif

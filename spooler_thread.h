@@ -1,4 +1,4 @@
-// $Id: spooler_thread.h,v 1.32 2002/11/27 09:39:13 jz Exp $
+// $Id: spooler_thread.h,v 1.33 2002/11/29 20:48:09 jz Exp $
 
 #ifndef __SPOOLER_THREAD_H
 #define __SPOOLER_THREAD_H
@@ -39,7 +39,6 @@ struct Spooler_thread : Sos_self_deleting
     bool                        step                        ();
     bool                        do_something                ( Job* );
     void                        wait                        ();
-    int                         wait_until                  ( Time );
 
   //Time                        next_start_time             ();
     Job*                        get_next_job_to_start       ();
