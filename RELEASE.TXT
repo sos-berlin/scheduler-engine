@@ -62,3 +62,4 @@ Neue Eigenschaft spooler.ini_path liefert die Option -ini=.
 
 Keine CPU-Last mehr, wenn Browser http://.../show_log? schlieﬂt.
 
+Scheduler priorisiert bei Task-Fehler nicht mehr eigenen Subject und Body der eMail-Nachricht.
