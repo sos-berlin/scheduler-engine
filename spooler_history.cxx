@@ -1,4 +1,4 @@
-// $Id: spooler_history.cxx,v 1.30 2002/11/24 15:12:48 jz Exp $
+// $Id: spooler_history.cxx,v 1.31 2002/12/10 12:38:23 jz Exp $
 
 #include "spooler.h"
 #include "../zschimmer/z_com.h"
@@ -819,7 +819,7 @@ xml::Element_ptr Job_history::read_tail( const xml::Document_ptr& doc, int id, i
                             xml::Document_ptr par_doc; // = msxml::Document_ptr( __uuidof(msxml::DOMDocument30), NULL );
                             par_doc.create();
                             par_doc.load_xml( param_xml );
-                            history_entry.appendChild( par_doc.documentElement() );
+                            if( par_doc.documentElement() )  history_entry.appendChild( par_doc.documentElement() );
                         }
                         catch( const exception&  x ) { _spooler->_log.warn( string("Historie: ") + x.what() ); }
                         catch( const _com_error& x ) { _spooler->_log.warn( string("Historie: ") + w_as_string(x.Description() )) ; }

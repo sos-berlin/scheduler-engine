@@ -1,4 +1,4 @@
-// $Id: spooler_command.cxx,v 1.74 2002/12/01 08:57:45 jz Exp $
+// $Id: spooler_command.cxx,v 1.75 2002/12/10 12:38:23 jz Exp $
 /*
     Hier ist implementiert
 
@@ -544,6 +544,9 @@ void Command_processor::execute_2( const string& xml_text, const Time& xml_mod_t
                 text += ", code="   + as_hex_string( error->errorCode );
                 text += ", line="   + as_string( error->line );
                 text += ", column=" + as_string( error->linepos );
+#            else
+                text = command_doc.error_text();
+                _spooler->_log.error( text );       // Log ist möglicherweise noch nicht geöffnet
 #           endif
 
             throw_xc( "XML-ERROR", text );

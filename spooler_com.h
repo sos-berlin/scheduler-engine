@@ -1,4 +1,4 @@
-// $Id: spooler_com.h,v 1.64 2002/11/30 15:58:30 jz Exp $
+// $Id: spooler_com.h,v 1.65 2002/12/10 12:38:22 jz Exp $
 
 #ifndef __SPOOLER_COM_H
 #define __SPOOLER_COM_H
@@ -122,11 +122,8 @@ struct Com_variable_set: spooler_com::Ivariable_set,
 
     STDMETHODIMP            get_java_class_name             ( BSTR* result )                        { return string_to_bstr( "sos.spooler.Variable_set", result ); }
 
-#   ifdef Z_WINDOWS
-        STDMETHODIMP            get_dom                     ( msxml::IXMLDOMDocument** );
-#   endif
-
-    void                        set_dom                     ( const xml::Element_ptr& );
+    STDMETHODIMP            get_dom                         ( msxml::IXMLDOMDocument** );
+    void                    set_dom                         ( const xml::Element_ptr& );
 
     xml::Document_ptr           dom                         ();
 

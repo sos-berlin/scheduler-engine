@@ -1,4 +1,4 @@
-// $Id: spooler.h,v 1.119 2002/12/10 08:07:16 jz Exp $
+// $Id: spooler.h,v 1.120 2002/12/10 12:38:21 jz Exp $
 
 #ifndef __SPOOLER_H
 #define __SPOOLER_H
@@ -18,6 +18,12 @@
 #ifdef SPOOLER_USE_MSXML
 #   include "../zschimmer/xml_msxml.h"
     using namespace zschimmer::xml_msxml;
+#else
+#   ifdef Z_WINDOWS
+#       include "../zschimmer/xml_msxml.h"              // Wir brauchen IXMLDOMDocument (wird von spooler.odl in Variable_set::get_dom() verlangt)
+#   else
+        namespace msxml { struct IXMLDOMDocument; }     // Dummy
+#   endif
 #endif
 
 #ifdef SPOOLER_USE_LIBXML2

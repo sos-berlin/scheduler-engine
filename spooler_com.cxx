@@ -1,4 +1,4 @@
-// $Id: spooler_com.cxx,v 1.85 2002/12/08 20:27:25 jz Exp $
+// $Id: spooler_com.cxx,v 1.86 2002/12/10 12:38:21 jz Exp $
 /*
     Hier sind implementiert
 
@@ -245,7 +245,7 @@ const Com_method Com_variable_set::_methods[] =
     { DISPATCH_PROPERTYPUT, 0, "var"                , (Com_method_ptr)&Com_variable_set::put_var        , VT_EMPTY      , { VT_BSTR, VT_BYREF|VT_VARIANT } },
     { DISPATCH_PROPERTYGET, 0, "var"                , (Com_method_ptr)&Com_variable_set::get_var        , VT_VARIANT    , { VT_BSTR } },
     { DISPATCH_PROPERTYGET, 2, "count"              , (Com_method_ptr)&Com_variable_set::get_count      , VT_I4         },
-  //{ DISPATCH_PROPERTYGET, 3, "dom"                , (Com_method_ptr)&Com_variable_set::get_dom        , VT_DISPATCH   },
+    { DISPATCH_PROPERTYGET, 3, "dom"                , (Com_method_ptr)&Com_variable_set::get_dom        , VT_DISPATCH   },
     { DISPATCH_PROPERTYGET, 4, "Clone"              , (Com_method_ptr)&Com_variable_set::Clone          , VT_DISPATCH   },
     { DISPATCH_PROPERTYGET, 5, "merge"              , (Com_method_ptr)&Com_variable_set::Clone          , VT_EMPTY      , { VT_DISPATCH } },
     { DISPATCH_PROPERTYGET, DISPID_NEWENUM, "_NewEnum", (Com_method_ptr)&Com_variable_set::get__NewEnum , VT_DISPATCH   },
@@ -378,7 +378,6 @@ STDMETHODIMP Com_variable_set::get_count( int* result )
 }
 
 //------------------------------------------------------------------------Com_variable_set::get_dom
-#ifdef Z_WINDOWS
 
 STDMETHODIMP Com_variable_set::get_dom( msxml::IXMLDOMDocument** doc )  
 { 
@@ -401,16 +400,15 @@ STDMETHODIMP Com_variable_set::get_dom( msxml::IXMLDOMDocument** doc )
 #   endif
 }
 
-#endif
 //------------------------------------------------------------------------Com_variable_set::get_dom
 
 xml::Document_ptr Com_variable_set::dom()
 {
-    xml::Document_ptr result;
+    xml::Document_ptr doc;
     
     THREAD_LOCK( _lock )
     {
-        xml::Document_ptr doc; // = msxml::Document_ptr( __uuidof(spooler_com::DOMDocument30), NULL );
+        //xml::Document_ptr doc; // = msxml::Document_ptr( __uuidof(spooler_com::DOMDocument30), NULL );
         doc.create();
         doc.appendChild( doc.createProcessingInstruction( "xml", "version=\"1.0\" encoding=\"iso-8859-1\"" ) );
 
@@ -436,7 +434,7 @@ xml::Document_ptr Com_variable_set::dom()
         }
     }
 
-    return result.detach();
+    return doc.detach();
 }
 
 //--------------------------------------------------------------------------Com_variable_set::Clone
