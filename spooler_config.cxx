@@ -1,4 +1,4 @@
-// $Id: spooler_config.cxx,v 1.28 2002/03/05 17:10:00 jz Exp $
+// $Id: spooler_config.cxx,v 1.29 2002/03/05 20:49:37 jz Exp $
 
 //#include <precomp.h>
 
@@ -369,7 +369,12 @@ void Job::set_xml( const xml::Element_ptr& element )
 
     for( xml::Element_ptr e = element->firstChild; e; e = e->nextSibling )
     {
-        if( e->tagName == "description" )  _description = text_from_xml_with_include( e, _spooler->include_path() );
+        if( e->tagName == "description" )  
+        {
+            try { _description = text_from_xml_with_include( e, _spooler->include_path() ); }
+            catch( const Xc& x         ) { _spooler->_log.error( x.what() );  _description = x.what(); }
+            catch( const _com_error& x ) { string d = bstr_as_string(x.Description()); _spooler->_log.error(d);  _description = d; }
+        }
         else
         if( e->tagName == "object_set"  )  _object_set_descr = SOS_NEW( Object_set_descr( e ) );
         else

@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.59 2002/03/05 17:10:01 jz Exp $
+// $Id: spooler_task.cxx,v 1.60 2002/03/05 20:49:37 jz Exp $
 /*
     Hier sind implementiert
 
@@ -250,6 +250,8 @@ void Job::close()
     if( _com_job  )  _com_job->close(),         _com_job  = NULL;
     if( _com_task )  _com_task->set_task(NULL), _com_task = NULL;
     if( _com_log  )  _com_log->close(),         _com_log  = NULL;
+
+    _task_queue.clear();
 }
 
 //--------------------------------------------------------------------------------Job::close_engine
@@ -339,13 +341,20 @@ void Job::select_period( Time now )
 {
     if( now > _period.end() )
     {
-        _period = _run_time.next_period(now);
-        _log.debug( "Nächste Periode beginnt " + _period.begin().as_string() );
+        _period = _run_time.next_period(now);  _log.debug( "Nächste Periode beginnt " + _period.begin().as_string() );
+       
+        _next_start_time = _period.has_start()? max( now, _period.begin() ) 
+                                              : latter_day;
 
-        _next_start_time = _period.is_single_start() || _period.repeat() != latter_day? max( now, _period.begin() ) 
-                                                                                      : latter_day;
-        if( _next_start_time != latter_day )  _log.debug( "Nächster Start " + _next_start_time.as_string() );
-        _next_time = min( _next_start_time, _period.begin() );
+        if( _next_start_time != latter_day )  
+        {
+            _log.debug( "Nächster Start " + _next_start_time.as_string() );
+            _next_time = _next_start_time;
+        }
+        else
+        {
+            _next_time = min( _next_start_time, _period.begin() );
+        }
     }
     else
     if( _next_time == latter_day 
@@ -379,11 +388,7 @@ void Job::set_next_start_time( Time now )
 
     if( _next_start_time == latter_day ) 
     {
-        //Time new_time = _period.is_single_start()? now : max( now, _period.end() );
-
         select_period( max( now, _period.end() ) );
-        // _next_time ist jetzt _period.begin()
-        //_next_time = max( _next_start_time, _run_time.next_period(_period) );
     }
 
     if( _next_start_time != latter_day )  _log.debug( "Nächste Wiederholung: " + _next_start_time.as_string() );
@@ -434,7 +439,7 @@ Sos_ptr<Task> Job::create_task( const CComPtr<spooler_com::Ivariable_set>& param
 bool Job::dequeue_task( Time now )
 {
     if( _state == s_read_error )  return false;
-    if( _task_queue.empty() )  return false;
+    if( _task_queue.empty() )     return false;
 
     THREAD_LOCK( _lock )
     {
@@ -442,9 +447,10 @@ bool Job::dequeue_task( Time now )
         if( !is_in_period(now) )  
             for( ; it != _task_queue.end(); it++ )  if( (*it)->_start_at  &&  (*it)->_start_at <= now )  break;
 
+        if( it == _task_queue.end() )  return false;
+
         _task = *it;
         it = _task_queue.erase( it );
-        //_next_start_at = it == _task_queue.end()? latter_day : (*it)->_start_at;
 
         _error = NULL;
         _close_engine = false;
@@ -670,7 +676,8 @@ void Job::finish()
 
     try
     {
-        if( _log.mail_on_success()  ||  _log.mail_on_error() && has_error() )  _log.send();
+        if( _log.mail_on_success() && !has_error()  
+        ||  _log.mail_on_error()   &&  has_error() )  _log.send();
     }
     catch( const Xc& x         ) { set_error(x); }
     catch( const exception& x  ) { set_error(x); }
@@ -1166,8 +1173,22 @@ xml::Element_ptr Job::xml( xml::Document_ptr document, bool show_all )
 
         if( _state_cmd )  job_element->setAttribute( "cmd", as_dom_string( state_cmd_name() ) );
 
-        if( _state == s_pending  &&  _next_start_time != latter_day )
-            job_element->setAttribute( "next_start_time", as_dom_string( _next_start_time.as_string() ) );
+        if( _state == s_pending )
+        {
+            // Versuchen, nächste Startzeit herauszubekommen
+            Period p    = _period;  
+            int    i    = 100;      // Anzahl Perioden, die wir probieren
+            Time   next;
+            if( _next_start_time != latter_day )  next = _next_start_time;
+                                            else  p = _run_time.next_period( p.end() ),  next = p.begin();
+            while( i-- ) {          
+                if( p.has_start() )  break;
+                p = _run_time.next_period( p.end() );
+                next = p.begin();
+            }
+
+            if( i > 0  &&  next != latter_day )  job_element->setAttribute( "next_start_time", as_dom_string( next.as_string() ) );
+        }
 
         if( _task )
       //THREAD_LOCK( _task->_lock )

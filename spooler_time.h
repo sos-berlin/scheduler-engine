@@ -1,4 +1,4 @@
-// $Id: spooler_time.h,v 1.6 2002/03/05 17:10:02 jz Exp $
+// $Id: spooler_time.h,v 1.7 2002/03/05 20:49:38 jz Exp $
 
 #ifndef __SPOOLER_TIME_H
 #define __SPOOLER_TIME_H
@@ -77,6 +77,7 @@ struct Period
     void                        init                        ()                              { _begin=_end=_repeat=latter_day; }
 
     bool                        empty                       () const                        { return _begin == latter_day; }
+    bool                        has_start                   () const                        { return is_single_start() || repeat() != latter_day; }
     Time                        next_try                    ( Time );
     Period                      operator +                  ( const Time& t ) const         { Period p = *this; p._begin += t; p._end += t; return p; }
     friend Period               operator +                  ( const Time& t, const Period& p ) { return p+t; }
