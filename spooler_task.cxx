@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.27 2001/02/16 18:23:12 jz Exp $
+// $Id: spooler_task.cxx,v 1.28 2001/02/18 16:14:37 jz Exp $
 /*
     Hier sind implementiert
 
@@ -181,8 +181,9 @@ void Job::close()
     close_engine();
 
     // COM-Objekte entkoppeln, falls noch jemand eine Referenz darauf hat:
-    if( _com_job )  _com_job->close();
-    if( _com_log )  _com_log->close();
+    if( _com_job  )  _com_job->close(),         _com_job  = NULL;
+    if( _com_task )  _com_task->set_task(NULL), _com_task = NULL;
+    if( _com_log  )  _com_log->close(),         _com_log  = NULL;
 }
 
 //--------------------------------------------------------------------------------Job::close_engine
@@ -219,9 +220,9 @@ void Job::close_task()
 
 void Job::init()
 {
-    _log.set_prefix( "Job " + _name );
+    set_state( s_none );
 
-    set_state( s_pending );
+    _log.set_prefix( "Job " + _name );
 
     _script_ptr = _object_set_descr? &_object_set_descr->_class->_script
                                    : &_script;
@@ -235,6 +236,8 @@ void Job::init()
     _com_job  = new Com_job( this );
     _com_log  = new Com_log( &_log );
     _com_task = new Com_task();
+
+    set_state( s_pending );
 }
 
 //---------------------------------------------------------------------------------Job::create_task
@@ -325,6 +328,8 @@ bool Job::load()
 
 void Job::end()
 {
+    if( !_state )  return;
+
     if( _state == s_suspended )  set_state( s_running );
     if( _state & ( s_running | s_running_process ) )  if( _task )  _task->end();
     
@@ -380,6 +385,8 @@ void Job::set_next_start_time( Time now )
 
 bool Job::do_something()
 {
+    if( !_state )  return false;
+
     bool something_done = false;
     bool ok = true;
 
@@ -453,13 +460,13 @@ bool Job::do_something()
         if( _state != s_stopped  &&  has_error()  &&  _repeat == 0 )  stop(), something_done = true;
     }
 
+
     if( _state == s_ended ) 
     {
         close_task();
-        set_next_start_time();
-        set_state( _next_start_time == latter_day? s_stopped : s_pending );
+        if( _temporary && _repeat == 0 )  set_state( s_stopped ); // _temporary && s_stopped ==> spooler_thread.cxx entfernt den Job
+                                    else  set_next_start_time(), set_state( _next_start_time == latter_day? s_stopped : s_pending );
         something_done = true;
-
     }
 
     return something_done;
@@ -692,7 +699,7 @@ Task::~Task()
 
 void Task::close()
 {
-    _job->_com_task->set_task( NULL );
+    if( _job->_com_task )  _job->_com_task->set_task( NULL );
 
     do_close();
 

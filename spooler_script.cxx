@@ -1,4 +1,4 @@
-// $Id: spooler_script.cxx,v 1.5 2001/02/12 09:46:11 jz Exp $
+// $Id: spooler_script.cxx,v 1.6 2001/02/18 16:14:37 jz Exp $
 /*
     Hier sind implementiert
 
@@ -20,6 +20,7 @@ namespace spooler {
 bool check_result( const CComVariant& vt )
 {
     if( vt.vt == VT_EMPTY    )  return true;                       // Keine Rückgabe? True, also weiter machen
+    if( vt.vt == VT_NULL     )  return false;                      // NULL? False
     if( vt.vt == VT_DISPATCH )  return vt.pdispVal != NULL;        // Nothing => False, also Ende
     if( vt.vt == VT_BOOL     )  return vt.bVal != NULL;            // Nothing => False, also Ende
 

@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.54 2001/02/16 20:19:48 jz Exp $
+// $Id: spooler.cxx,v 1.55 2001/02/18 16:14:37 jz Exp $
 /*
     Hier sind implementiert
 
@@ -100,10 +100,34 @@ void Spooler::signal_threads( const string& signal_name )
     FOR_EACH( Thread_list, _thread_list, it )  (*it)->signal( signal_name );
 }
 
+//------------------------------------------------------------------------------Spooler::get_thread
+// Anderer Thread
+
+Thread* Spooler::get_thread( const string& thread_name )
+{
+    THREAD_LOCK( _lock )
+    {
+        FOR_EACH( Thread_list, _thread_list, it )  if( (*it)->name() == thread_name )  return *it;
+    }
+
+    throw_xc( "SPOOLER-128", thread_name );
+    return NULL;
+}
+
 //---------------------------------------------------------------------------------Spooler::get_job
 // Anderer Thread
 
 Job* Spooler::get_job( const string& job_name )
+{
+    Job* job = get_job_or_null( job_name );
+    if( !job )  throw_xc( "SPOOLER-108", job_name );
+    return job;
+}
+
+//-------------------------------------------------------------------------Spooler::get_job_or_null
+// Anderer Thread
+
+Job* Spooler::get_job_or_null( const string& job_name )
 {
     THREAD_LOCK( _lock )
     {
@@ -114,7 +138,6 @@ Job* Spooler::get_job( const string& job_name )
         }
     }
 
-    throw_xc( "SPOOLER-108", job_name );
     return NULL;
 }
 
@@ -340,21 +363,26 @@ int Spooler::launch( int argc, char** argv )
 
     do
     {
-        if( _state_cmd != sc_load_config )  load();
-        
-        THREAD_LOCK( _lock )  
+        THREAD_LOCK( _command_lock )  
         {
-            if( _config_element == NULL )  throw_xc( "SPOOLER-116", _spooler_id );
+            if( _state_cmd != sc_load_config )  load();
         
-            load_config( _config_element );
+            THREAD_LOCK( _lock )  
+            {
+                if( _config_element == NULL )  throw_xc( "SPOOLER-116", _spooler_id );
+        
+                load_config( _config_element );
             
-            _config_element = NULL;
-            _config_document = NULL;
+                _config_element = NULL;
+                _config_document = NULL;
+            }
+
+            start();
         }
 
-        start();
         run();
-        stop();
+
+        { THREAD_LOCK( _command_lock )  stop(); }
 
     } while( _state_cmd == sc_reload || _state_cmd == sc_load_config );
 
@@ -609,12 +637,7 @@ int sos_main( int argc, char** argv )
     }
     else
     {
-        { 
-            spooler::Handle h = _beginthread( spooler::delete_new_spooler, 50000, NULL );
-            // Handle nicht sofort verwerfen, sonst kann der Dienst mit Fehler 6 "Invalid Handle" nicht gestartet werden.
-            // Vielleicht dann, wenn der Handle geschlossen wird, bevor der Thread angelaufen ist.
-            SetThreadPriority( h, THREAD_PRIORITY_HIGHEST );  // Thread beginnen, bevor Handle geschlossen wird. 
-        }
+        _beginthread( spooler::delete_new_spooler, 50000, NULL );
 
       //if( !is_service_set )  is_service = spooler::service_is_started(id);
 

@@ -1,4 +1,4 @@
-// $Id: spooler_command.cxx,v 1.29 2001/02/16 18:23:12 jz Exp $
+// $Id: spooler_command.cxx,v 1.30 2001/02/18 16:14:37 jz Exp $
 /*
     Hier ist implementiert
 
@@ -109,18 +109,6 @@ xml::Element_ptr Command_processor::execute_show_state()
     return state_element;
 }
 
-//-----------------------------------------------------------Command_processor::execute_show_config
-/*
-xml::Element_ptr Command_processor::execute_show_config()
-{
-    if( _security_level < Security::seclev_info )  throw_xc( "SPOOLER-121" );
-
-    xml::Element_ptr config_element = _answer->createElement( "config" );
-    xml::Element_ptr run_
- 
-    return config_element;
-}
-*/
 //--------------------------------------------------------Command_processor::execute_modify_spooler
 
 xml::Element_ptr Command_processor::execute_modify_spooler( const xml::Element_ptr& element )
@@ -209,6 +197,18 @@ xml::Element_ptr Command_processor::execute_config( const xml::Element_ptr& conf
     return _answer->createElement( "ok" );
 }
 
+//--------------------------------------------------------------Command_processor::execute_add_jobs
+
+xml::Element_ptr Command_processor::execute_add_jobs( const xml::Element_ptr& add_jobs_element )
+{
+    if( _security_level < Security::seclev_all )  throw_xc( "SPOOLER-121" );
+
+    Sos_ptr<Thread> thread = _spooler->get_thread( as_string( add_jobs_element->getAttribute( "thread" ) ) );
+    thread->cmd_add_jobs( add_jobs_element );
+
+    return _answer->createElement( "ok" );
+}
+
 //---------------------------------------------------------------Command_processor::execute_command
 
 xml::Element_ptr Command_processor::execute_command( const xml::Element_ptr& element )
@@ -222,6 +222,8 @@ xml::Element_ptr Command_processor::execute_command( const xml::Element_ptr& ele
     if( element->tagName == "signal_object"     )  return execute_signal_object( element );
     else
     if( element->tagName == "config"            )  return execute_config( element );
+    else
+    if( element->tagName == "add_jobs"          )  return execute_add_jobs( element );
     else
     {
         throw_xc( "SPOOLER-105", as_string( element->tagName ) ); return NULL;
@@ -256,6 +258,7 @@ string Command_processor::execute( const string& xml_text )
 
 void Command_processor::execute_2( const string& xml_text )
 {
+    THREAD_LOCK( _spooler->_command_lock )
     try 
     {
         _answer = xml::Document_ptr( __uuidof(xml::DOMDocument30), NULL );
@@ -284,8 +287,12 @@ void Command_processor::execute_2( const string& xml_text )
 
             throw_xc( "XML-ERROR", text );
         }
+/*
+        xml::DocumentType_ptr doctype = command_doc->doctype;
+        if( doctype )  command_doc->removeChild( doctype );
 
-
+        doctype = command_doc->createDoc
+*/
         xml::Element_ptr e = command_doc->documentElement;
 
         if( e->tagName == "spooler" )  e = e->firstChild;

@@ -1,4 +1,4 @@
-// $Id: spooler_thread.cxx,v 1.8 2001/02/16 18:23:12 jz Exp $
+// $Id: spooler_thread.cxx,v 1.9 2001/02/18 16:14:38 jz Exp $
 /*
     Hier sind implementiert
 
@@ -47,7 +47,7 @@ void Thread::init()
     _event.add_to( &_wait_handles );
 }
 
-//-----------------------------------------------------------Command_processor::execute_show_thread
+//--------------------------------------------------------------------------------------Thread::xml
 
 xml::Element_ptr Thread::xml( xml::Document_ptr document )
 {
@@ -76,6 +76,38 @@ xml::Element_ptr Thread::xml( xml::Document_ptr document )
     }
 
     return thread_element;
+}
+
+//---------------------------------------------------------------------------------Spooler::add_job
+
+void Thread::add_job( const Sos_ptr<Job>& job )
+{
+    Job* j = _spooler->get_job_or_null( job->name() );
+    if( j )  throw_xc( "SPOOLER-130", j->name(), j->thread()->name() );
+
+    _job_list.push_back( job );
+}
+
+//-----------------------------------------------------------------------Thread::load_jobs_from_xml
+
+void Thread::load_jobs_from_xml( const xml::Element_ptr& element, bool init )
+{
+    for( xml::Element_ptr e = element->firstChild; e; e = e->nextSibling )
+    {
+        if( e->tagName == "job" ) 
+        {
+            string spooler_id = as_string( e->getAttribute( "spooler_id" ) );
+            if( spooler_id.empty()  ||  spooler_id == _spooler->_spooler_id )
+            {
+                Sos_ptr<Job> job = SOS_NEW( Job( this ) );
+                job->set_xml( e );
+
+                if( init )  job->init();
+
+                add_job( job );
+            }
+        }
+    }
 }
 
 //------------------------------------------------------------------------------------Thread::close
@@ -230,6 +262,33 @@ void Thread::wait()
     //tzset();
 }
 
+//------------------------------------------------------------------------------Thread::do_add_jobs
+
+void Thread::do_add_jobs()
+{
+    try
+    {
+        load_jobs_from_xml( _add_jobs_element, true );
+    }
+    catch( const Xc& x         ) { _log.error( x.what() ); }
+    catch( const _com_error& x ) { _log.error( as_string( x.Description() ) ); }
+
+    _add_jobs_element = NULL;  
+    _add_jobs_document = NULL;
+}
+
+//--------------------------------------------------------------------Thread::remove_temporary_jobs
+
+void Thread::remove_temporary_jobs()
+{
+    FOR_EACH( Job_list, _job_list, it )  if( (*it)->should_removed() )  THREAD_LOCK( _lock )  
+    {
+        (*it)->_log.msg( "Temporärer Job wird entfernt" );
+        (*it)->close(); 
+        it = _job_list.erase( it );
+    }
+}
+
 //-------------------------------------------------------------------------------Thread::run_thread
 
 int Thread::run_thread()
@@ -256,10 +315,14 @@ int Thread::run_thread()
                 else 
                 if( ++nothing_done_count > nothing_done_max )  _log.warn( "Nichts getan" ), sos_sleep(1);  // Warten, um bei Wiederholung zu bremsen
 
+                remove_temporary_jobs();
+
                 if( _running_tasks_count == 0 )  wait();
             }
 
             _event.reset();
+
+            THREAD_LOCK( _lock )  if( _add_jobs_element )  do_add_jobs();
         }
 
         close();
@@ -367,11 +430,27 @@ Job* Thread::get_job_or_null( const string& job_name )
         FOR_EACH( Job_list, _job_list, it )
         {
             Job* job = *it;
-            if( job->_name == job_name )  return job;
+            if( job->_state  &&  job->_name == job_name )  return job;
         }
     }
 
     return NULL;
+}
+
+//-----------------------------------------------------------------------------Thread::cmd_add_jobs
+// Anderer Thread
+
+void Thread::cmd_add_jobs( const xml::Element_ptr& element )
+{
+    THREAD_LOCK( _lock )
+    {
+        if( _add_jobs_element )  throw_xc( "SPOOLER-129", _name );
+
+        _add_jobs_element  = element;
+        _add_jobs_document = element->ownerDocument;
+    }
+
+    signal();
 }
 
 //-------------------------------------------------------------------------------------------------

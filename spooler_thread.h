@@ -1,4 +1,4 @@
-// $Id: spooler_thread.h,v 1.5 2001/02/12 15:41:39 jz Exp $
+// $Id: spooler_thread.h,v 1.6 2001/02/18 16:14:38 jz Exp $
 
 #ifndef __SPOOLER_THREAD_H
 #define __SPOOLER_THREAD_H
@@ -15,19 +15,16 @@ struct Thread : Sos_self_deleting
 
     void                        set_xml                     ( const xml::Element_ptr& );
     xml::Element_ptr            xml                         ( xml::Document_ptr );
-    void                        load_jobs_from_xml          ( Job_list*, const xml::Element_ptr& );
+    void                        load_jobs_from_xml          ( const xml::Element_ptr&, bool init = false );
+    void                        add_job                     ( const Sos_ptr<Job>& );
     
     bool                        empty                       () const                        { return _job_list.empty(); }
+    const string&               name                        () const                        { return _name; }
 
     void                        init                        ();
     void                        close                       ();
     void                        start_thread                ();
   //void                        stop_thread                 ();
-    void                        wait_until_thread_stopped   ( Time until );
-    void                        interrupt_scripts           ();
-    Job*                        get_job_or_null             ( const string& job_name );
-    void                        signal_object               ( const string& object_set_class_name, const Level& );
-    void                        signal                      ( const string& signal_name = "" )  { _event.signal(signal_name); }
 
     int                         run_thread                  ();
     void                        start                       ();
@@ -35,6 +32,16 @@ struct Thread : Sos_self_deleting
     bool                        step                        ();
     void                        wait                        ();
 
+    void                        do_add_jobs                 ();
+    void                        remove_temporary_jobs       ();
+
+    // Für andere Threads:
+    void                        signal_object               ( const string& object_set_class_name, const Level& );
+    void                        signal                      ( const string& signal_name = "" )  { _event.signal(signal_name); }
+    Job*                        get_job_or_null             ( const string& job_name );
+    void                        wait_until_thread_stopped   ( Time until );
+    void                        interrupt_scripts           ();
+    void                        cmd_add_jobs                ( const xml::Element_ptr& );
 
 
     Fill_zero                  _zero_;
@@ -52,6 +59,10 @@ struct Thread : Sos_self_deleting
     Time                       _next_start_time;
     int                        _running_tasks_count;        // Wenn 0, dann warten
   //bool                       _stop;
+
+
+    xml::Element_ptr           _add_jobs_element;           // Kommando <add_jobs>
+    xml::Document_ptr          _add_jobs_document;
 
                                                             // Statistik
     int                        _step_count;                 // Seit Spooler-Start ausgeführte Schritte

@@ -1,4 +1,4 @@
-// $Id: spooler.h,v 1.49 2001/02/16 18:23:12 jz Exp $
+// $Id: spooler.h,v 1.50 2001/02/18 16:14:37 jz Exp $
 
 #ifndef __SPOOLER_H
 #define __SPOOLER_H
@@ -10,15 +10,17 @@
 
 #   import <msxml3.dll> rename_namespace("xml")
 
-    namespace xml {
-        typedef IXMLDOMElement     Element;
-        typedef IXMLDOMElementPtr  Element_ptr;
-        typedef IXMLDOMNode        Node;
-        typedef IXMLDOMNodePtr     Node_ptr;
-        typedef IXMLDOMNodeList    NodeList;
-        typedef IXMLDOMNodeListPtr NodeList_ptr;
-        typedef IXMLDOMDocument    Document;
-        typedef IXMLDOMDocumentPtr Document_ptr;
+    namespace xml 
+    {
+        typedef IXMLDOMElement          Element;
+        typedef IXMLDOMElementPtr       Element_ptr;
+        typedef IXMLDOMNode             Node;
+        typedef IXMLDOMNodePtr          Node_ptr;
+        typedef IXMLDOMNodeList         NodeList;
+        typedef IXMLDOMNodeListPtr      NodeList_ptr;
+        typedef IXMLDOMDocument         Document;
+        typedef IXMLDOMDocumentPtr      Document_ptr;
+        typedef IXMLDOMDocumentTypePtr  DocumentType_ptr;
     }
 
 #endif
@@ -58,8 +60,8 @@ namespace sos {
 #include "spooler_thread.h"
 #include "spooler_service.h"
 
-#define FOR_EACH( TYPE, CONTAINER, ITERATOR )  for( TYPE::iterator ITERATOR = CONTAINER.begin(); ITERATOR != CONTAINER.end(); ITERATOR++ )
-#define FOR_EACH_CONST( TYPE, CONTAINER, ITERATOR )  for( TYPE::const_iterator ITERATOR = CONTAINER.begin(); ITERATOR != CONTAINER.end(); ITERATOR++ )
+#define FOR_EACH(       TYPE, CONTAINER, ITERATOR )  for( TYPE::iterator       ITERATOR = (CONTAINER).begin(); (ITERATOR) != (CONTAINER).end(); (ITERATOR)++ )
+#define FOR_EACH_CONST( TYPE, CONTAINER, ITERATOR )  for( TYPE::const_iterator ITERATOR = (CONTAINER).begin(); (ITERATOR) != (CONTAINER).end(); (ITERATOR)++ )
 
 namespace sos {
 
@@ -123,7 +125,9 @@ struct Spooler
     void                        set_state_changed_handler   ( State_changed_handler h )         { _state_changed_handler = h; }
 
     // Für andere Threads:
+    Thread*                     get_thread                  ( const string& thread_name );
     Job*                        get_job                     ( const string& job_name );
+    Job*                        get_job_or_null             ( const string& job_name );
     void                        signal_object               ( const string& object_set_class_name, const Level& );
     void                        cmd_reload                  ();
     void                        cmd_pause                   ()                                  { _state_cmd = sc_pause; signal( "pause" ); }
@@ -195,8 +199,9 @@ struct Spooler
 
     Wait_handles               _wait_handles;
     Event                      _event;                      
-                                                            // <config> wird vom Haupt-Thread ausgeführt
+
     Thread_semaphore           _lock;
+    Thread_semaphore           _command_lock;               // Synchronisation mit Spooler_command
 };
 
 //-------------------------------------------------------------------------------------------------

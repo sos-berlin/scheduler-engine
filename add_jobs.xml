@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!-- $Id -->
+
+<!DOCTYPE spooler SYSTEM "s:\prod\spooler\spooler.dtd">
+
+<spooler>
+    <command>
+        <add_jobs thread="Eins">
+            <job name="temp" temporary="yes">
+                <script language="JScript"><![CDATA[
+                    spooler_log( "Hier ist der temporäre Job" );
+	        ]]></script>
+            <run_time begin="now"/>
+            </job>
+        </add_jobs>
+    </command>
+</spooler>

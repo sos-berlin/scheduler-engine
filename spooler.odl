@@ -1,4 +1,4 @@
-// $Id: spooler.odl,v 1.10 2001/02/14 22:06:55 jz Exp $
+// $Id: spooler.odl,v 1.11 2001/02/18 16:14:37 jz Exp $
 
 // Anweisung: midl /nologo /error all /out $(OutDir) $(InputPath)
 
@@ -236,6 +236,7 @@ library spooler
     ]
     interface Ilog : IDispatch
     {
+        [id(0)]
         HRESULT                 msg                     ( [in] BSTR name );
         HRESULT                 warn                    ( [in] BSTR name );
         HRESULT                 error                   ( [in] BSTR name );

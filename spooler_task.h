@@ -1,4 +1,4 @@
-// $Id: spooler_task.h,v 1.11 2001/02/12 09:46:11 jz Exp $
+// $Id: spooler_task.h,v 1.12 2001/02/18 16:14:38 jz Exp $
 
 #ifndef __SPOOLER_TASK_H
 #define __SPOOLER_TASK_H
@@ -101,9 +101,9 @@ struct Job : Sos_self_deleting
     {
         s_none,
         s_stopped,              // Gestoppt (z.B. wegen Fehler)
-        s_loaded,               // Skript geladen (mit spooler_init), aber nicht gestartet (spooler_open)
         s_pending,              // Warten auf Start
         s_task_created,
+        s_loaded,               // Skript geladen (mit spooler_init), aber nicht gestartet (spooler_open)
         s_running,              // Läuft
         s_running_process,      // Läuft in einem externen Prozess, auf dessen Ende nur gewartet wird
         s_suspended,            // Angehalten
@@ -155,6 +155,7 @@ struct Job : Sos_self_deleting
     void                        stop                        ();
     void                        set_next_start_time         ( Time now = Time::now() );
     bool                        do_something                ();
+    bool                        should_removed              ()                          { return _temporary && _state == s_stopped; }
 
     void                        set_repeat                  ( double seconds )          { _repeat = seconds; }
 
@@ -203,6 +204,7 @@ struct Job : Sos_self_deleting
     string                     _process_param;              // Parameter für das Programm
     Run_time                   _run_time;
     int                        _priority;
+    bool                       _temporary;                  // Job nach einem Lauf entfernen
 
     Script*                    _script_ptr;
     Script_instance            _script_instance;            // Für use_engine="job"
@@ -223,6 +225,8 @@ struct Job : Sos_self_deleting
     bool                       _load_error;                 // Fehler beim Laden oder spooler_init()
     Sos_ptr<Task>              _task;                       // Es kann nur eine Task geben. Zirkel: _task->_job == this
 };
+
+//------------------------------------------------------------------------------------------Job_list
 
 typedef list< Sos_ptr<Job> >    Job_list;
 
