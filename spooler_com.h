@@ -1,4 +1,4 @@
-// $Id: spooler_com.h,v 1.19 2002/03/02 23:17:06 jz Exp $
+// $Id: spooler_com.h,v 1.20 2002/03/03 11:55:17 jz Exp $
 
 #ifndef __SPOOLER_COM_H
 #define __SPOOLER_COM_H
@@ -115,9 +115,13 @@ struct Com_log : spooler_com::Ilog, Sos_ole_object
   //STDMETHODIMP                fatal                       ( BSTR );
     STDMETHODIMP                log                         ( spooler_com::Log_level, BSTR line );
 
-    STDMETHODIMP            get_mail                        ( Imail** );
-    STDMETHODIMP                mail_on_error               ( VARIANT_BOOL );
-    STDMETHODIMP                mail_on_success             ( VARIANT_BOOL );
+    STDMETHODIMP            get_mail                        ( spooler_com::Imail** );
+
+    STDMETHODIMP            put_mail_on_error               ( VARIANT_BOOL );
+    STDMETHODIMP            get_mail_on_error               ( VARIANT_BOOL* );
+    
+    STDMETHODIMP            put_mail_on_success             ( VARIANT_BOOL );
+    STDMETHODIMP            get_mail_on_success             ( VARIANT_BOOL* );
 
 
     Fill_zero                  _zero_;
@@ -251,7 +255,7 @@ struct Com_spooler : spooler_com::Ispooler, Sos_ole_object
     Spooler*                   _spooler;                    // Es gibt nur einen Com_spooler
 };
 
-
+//-------------------------------------------------------------------------------------------------
 
 } //namespace spooler
 } //namespace sos

@@ -1,4 +1,4 @@
-// $Id: spooler_com.cxx,v 1.23 2002/03/02 23:17:06 jz Exp $
+// $Id: spooler_com.cxx,v 1.24 2002/03/03 11:55:17 jz Exp $
 /*
     Hier sind implementiert
 
@@ -174,10 +174,102 @@ STDMETHODIMP Com_log::log( Log_level level, BSTR line )
     {
         if( !_log )  return E_POINTER;
 
-        if( _log )  _log->log( level, bstr_as_string( line ) ); 
+        _log->log( level, bstr_as_string( line ) ); 
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Log::log" ); }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Log::log" ); }
+
+    return hr;
+}
+
+//-------------------------------------------------------------------------------------Com_log::log
+
+STDMETHODIMP Com_log::get_mail( spooler_com::Imail** mail )
+{ 
+    HRESULT hr = NOERROR;
+
+    try 
+    {
+        if( !_log )  return E_POINTER;
+
+        *mail = _log->mail();
+        if( *mail )  (*mail)->AddRef();
+    }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Log::mail" ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Log::mail" ); }
+
+    return hr;
+}
+
+//-----------------------------------------------------------------------Com_log::put_mail_on_error
+
+STDMETHODIMP Com_log::put_mail_on_error( VARIANT_BOOL b )
+{
+    HRESULT hr = NOERROR;
+
+    try 
+    {
+        if( !_log )  return E_POINTER;
+
+        _log->set_mail_on_error( b != 0 );
+    }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Log::mail_on_error" ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Log::mail_on_error" ); }
+
+    return hr;
+}
+
+//-----------------------------------------------------------------------Com_log::get_mail_on_error
+
+STDMETHODIMP Com_log::get_mail_on_error( VARIANT_BOOL* b )
+{
+    HRESULT hr = NOERROR;
+
+    try 
+    {
+        if( !_log )  return E_POINTER;
+
+        *b = _log->mail_on_error();
+    }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Log::mail_on_error" ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Log::mail_on_error" ); }
+
+    return hr;
+}
+
+    
+//----------------------------------------------------------------------Com_log::put_mail_on_success
+
+STDMETHODIMP Com_log::put_mail_on_success( VARIANT_BOOL b )
+{
+    HRESULT hr = NOERROR;
+
+    try 
+    {
+        if( !_log )  return E_POINTER;
+
+        _log->set_mail_on_success( b != 0 );
+    }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Log::mail_on_success" ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Log::mail_on_success" ); }
+
+    return hr;
+}
+
+//---------------------------------------------------------------------Com_log::get_mail_on_success
+
+STDMETHODIMP Com_log::get_mail_on_success( VARIANT_BOOL* b )
+{
+    HRESULT hr = NOERROR;
+
+    try 
+    {
+        if( !_log )  return E_POINTER;
+
+        *b = _log->mail_on_success();
+    }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Log::mail_on_success" ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Log::mail_on_success" ); }
 
     return hr;
 }

@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.54 2002/03/02 20:15:02 jz Exp $
+// $Id: spooler_task.cxx,v 1.55 2002/03/03 11:55:17 jz Exp $
 /*
     Hier sind implementiert
 
@@ -294,6 +294,8 @@ void Job::init()
     _state = s_none;
 
     _log.set_prefix( obj_name() );
+    _log.set_profile_section( "Job " + _name );
+
     _event.set_name( obj_name() );
     _event.add_to( &_thread->_wait_handles );
 
@@ -1149,7 +1151,7 @@ bool Task::start()
     {
         if( !_spooler->log_directory().empty()  &&  _spooler->log_directory()[0] != '*' )
         {
-            _job->_log.open( _spooler->log_directory() + "/spooler.job." + _job->_name );
+            _job->_log.open( _spooler->log_directory() + "/spooler.job." + _job->_name + ".log" );
         }
 
         bool ok = do_start();
@@ -1193,6 +1195,7 @@ void Task::on_error_on_success()
         if( !_on_error_called )
         {
             _on_error_called = true;
+
             try
             {
                 do_on_error();
@@ -1210,6 +1213,13 @@ void Task::on_error_on_success()
         catch( const Xc& x        ) { _job->set_error(x); }
         catch( const exception& x ) { _job->set_error(x); }
     }
+
+    try
+    {
+        if( _job->_log.mail_on_success()  ||  _job->_log.mail_on_error() && _job->has_error() )  _job->_log.send();
+    }
+    catch( const Xc& x        ) { _job->set_error(x); }
+    catch( const exception& x ) { _job->set_error(x); }
 }
 
 //----------------------------------------------------------------------------------------Task::step

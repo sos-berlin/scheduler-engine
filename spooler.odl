@@ -1,4 +1,4 @@
-// $Id: spooler.odl,v 1.20 2002/03/02 23:17:06 jz Exp $
+// $Id: spooler.odl,v 1.21 2002/03/03 11:55:17 jz Exp $
 
 // Anweisung: midl /nologo /error all /out $(OutDir) $(InputPath)
 
@@ -347,6 +347,9 @@ library spooler
     ]
     interface Imail : IDispatch
     {
+        [hidden]
+        void                    init                    ();
+
         [propput]
         HRESULT                 to                      ( [in] BSTR receipient );
 
@@ -363,30 +366,39 @@ library spooler
       //HRESULT                 reply_to                ( [in] BSTR receipient );
 
         [propput]
-        HRESULT                 cc                      ( [in] BSTR receipient );
+        HRESULT                 cc                      ( [in] BSTR receipients );
 
         [propget]
-        HRESULT                 cc                      ( [out,retval] BSTR receipient );
+        HRESULT                 cc                      ( [out,retval] BSTR* receipients );
 
         [propput]
-        HRESULT                 bcc                     ( [in] BSTR receipient );
+        HRESULT                 bcc                     ( [in] BSTR receipients );
 
         [propget]
-        HRESULT                 bcc                     ( [out,retval] BSTR receipient );
+        HRESULT                 bcc                     ( [out,retval] BSTR* receipients );
 
         [propput]
         HRESULT                 subject                 ( [in] BSTR subject );
 
         [propget]
-        HRESULT                 subject                 ( [out,retval] BSTR subject );
+        HRESULT                 subject                 ( [out,retval] BSTR* subject );
 
         [propput]
         HRESULT                 body                    ( [in] BSTR body );
 
         [propget]
-        HRESULT                 body                    ( [out,retval] BSTR body );
+        HRESULT                 body                    ( [out,retval] BSTR* body );
 
-        HRESULT                 add_file                ( [in] BSTR filename );
+        HRESULT                 add_file                ( [in] BSTR filename, [in,defaultvalue("")] BSTR content_type );
+
+        [propput]
+        HRESULT                 smtp_server             ( [in] BSTR smtp_server );
+
+        [propget]
+        HRESULT                 smtp_server             ( [out,retval] BSTR* smtp_server );
+
+        [hidden]
+        void                    send                    ();
     }
 
     [

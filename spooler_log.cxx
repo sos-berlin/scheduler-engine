@@ -1,9 +1,14 @@
-// $Id: spooler_log.cxx,v 1.20 2002/03/02 23:17:06 jz Exp $
+// $Id: spooler_log.cxx,v 1.21 2002/03/03 11:55:17 jz Exp $
 
 #include "../kram/sos.h"
 #include "spooler.h"
+#include "spooler_mail_jmail.h"
 
 #include "../kram/sosdate.h"
+#include "../kram/olestd.h"
+#include "../kram/com.h"
+#include "../kram/com_server.h"
+#include "../kram/sosprof.h"
 
 #include <stdio.h>
 #include <sys/stat.h>               // S_IREAD, stat()
@@ -180,6 +185,74 @@ void Prefix_log::close()
 
         ::close( _file ),  _file = -1;
     }
+}
+
+//---------------------------------------------------------------------------------Prefix_log::mail
+
+spooler_com::Imail* Prefix_log::mail()
+{
+    if( !_mail )
+    {
+        CComPtr<Com_mail> mail = new Com_mail;
+        mail->init();
+
+        _mail = mail;   // Nur bei fehlerfreiem init() speichern
+
+        string subject = "Protokoll für " + _prefix;
+        CComBSTR subject_bstr = SysAllocString_string( subject );
+        _mail->put_subject( subject_bstr );
+
+        _mail->put_body( subject_bstr );
+
+        bool ok = read_mail_profile( _section );
+        if( !ok )  read_mail_profile( "spooler" );
+
+    }
+
+    return _mail;
+}
+
+//--------------------------------------------------------------------Prefix_log::read_mail_profile
+
+bool Prefix_log::read_mail_profile( const string& section )
+{
+    HRESULT hr;
+
+    string to      = read_profile_string( "", section.c_str(), "mail_log_to"     , "" );
+    string cc      = read_profile_string( "", section.c_str(), "mail_log_cc"     , "" );
+    string bcc     = read_profile_string( "", section.c_str(), "mail_log_bcc"    , "" );
+    string from    = read_profile_string( "", section.c_str(), "mail_log_from"   , "" );
+    string subject = read_profile_string( "", section.c_str(), "mail_log_subject", "" );
+
+    if( to.empty() && cc.empty() && bcc.empty() && from.empty() && subject.empty() )
+    {
+        return false;
+    }
+    else
+    {
+        hr = _mail->put_to  ( SysAllocString_string(to) );     if( FAILED(hr) ) throw_ole( hr, "spooler::Mail::to"  , to.c_str() );
+        hr = _mail->put_cc  ( SysAllocString_string(cc) );     if( FAILED(hr) ) throw_ole( hr, "spooler::Mail::cc"  , cc.c_str() );
+        hr = _mail->put_bcc ( SysAllocString_string(bcc) );    if( FAILED(hr) ) throw_ole( hr, "spooler::Mail::bcc" , bcc.c_str() );
+        hr = _mail->put_from( SysAllocString_string(to) );     if( FAILED(hr) ) throw_ole( hr, "spooler::Mail::from", from.c_str() );
+
+        if( !subject.empty() )
+        {
+            hr = _mail->put_subject( SysAllocString_string(to) );     if( FAILED(hr) ) throw_ole( hr, "spooler::Mail::subject", to.c_str() );
+        }
+
+        return true;
+    }
+}
+
+//---------------------------------------------------------------------------------Prefix_log::send
+
+void Prefix_log::send()
+{
+    close();
+
+    if( !_file_added )   mail()->add_file( CComBSTR( _filename.c_str() ), L"plain/text" ),  _file_added = true;
+
+    mail()->send();
 }
 
 //---------------------------------------------------------------------------------Prefix_log::open

@@ -126,6 +126,11 @@ SOURCE=.\spooler_log.cxx
 # End Source File
 # Begin Source File
 
+SOURCE=.\spooler_mail_jmail.cxx
+# ADD CPP /YX"spooler.h"
+# End Source File
+# Begin Source File
+
 SOURCE=.\spooler_script.cxx
 # ADD CPP /YX"spooler.h"
 # End Source File
@@ -147,6 +152,7 @@ SOURCE=.\spooler_task.cxx
 # Begin Source File
 
 SOURCE=.\spooler_thread.cxx
+# ADD CPP /YX"spooler.h"
 # End Source File
 # Begin Source File
 
@@ -214,6 +220,10 @@ SOURCE=.\spooler_communication.h
 # Begin Source File
 
 SOURCE=.\spooler_log.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\spooler_mail_jmail.h
 # End Source File
 # Begin Source File
 
