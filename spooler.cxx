@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.316 2004/01/07 14:44:47 jz Exp $
+// $Id: spooler.cxx,v 1.317 2004/01/08 08:55:02 jz Exp $
 /*
     Hier sind implementiert
 
@@ -1836,49 +1836,50 @@ void Spooler::run()
         }
 */
 
-        if( !something_done  &&  _next_time > 0  &&  _state_cmd == sc_none )
+        if( !something_done  &&  _next_time > 0  &&  _state_cmd == sc_none  &&  _next_time > Time::now() )
         {
-            Time now = Time::now();
-            if( _next_time > now )
-            {
-//_next_time = min( _next_time, now + 10.0 );      // Wartezeit vorsichtshalber begrenzen
+            //_next_time = min( _next_time, now + 10.0 );      // Wartezeit vorsichtshalber begrenzen
 
-                Wait_handles wait_handles ( this, &_log );
-                
-                if( _single_thread )  wait_handles += _single_thread->_wait_handles;
+            Wait_handles wait_handles ( this, &_log );
+            
+            if( _single_thread )  wait_handles += _single_thread->_wait_handles;
 
-#               ifdef SYSTEM_WIN
-                    FOR_EACH( Process_class_list, _process_class_list, pc )
+#           ifdef SYSTEM_WIN
+                FOR_EACH( Process_class_list, _process_class_list, pc )
+                {
+                    FOR_EACH( Process_list, (*pc)->_process_list, p )
                     {
-                        FOR_EACH( Process_list, (*pc)->_process_list, p )
-                        {
-                            object_server::Connection_to_own_server* server = dynamic_cast<object_server::Connection_to_own_server*>( +(*p)->_connection );
-                            if( server  &&  server->_process_handle )  wait_handles.add_handle( server->_process_handle );        // Signalisiert Prozessende
-                        }
+                        object_server::Connection_to_own_server* server = dynamic_cast<object_server::Connection_to_own_server*>( +(*p)->_connection );
+                        if( server  &&  server->_process_handle )  wait_handles.add_handle( server->_process_handle );        // Signalisiert Prozessende
                     }
-
-                    // Events für spooler_communication.cxx
-                    vector<z::Event*> events;
-                    _connection_manager->get_events( &events );
-                    FOR_EACH( vector<z::Event*>, events, e )  wait_handles.add( *e );
-#               endif
-
-
-                wait_handles += _wait_handles;
-
-                _wait_counter++;
-
-                if( log_wait )  
-                {
-                    if( !wait_handles.wait(0) )  { LOG( msg << "\n" ); wait_handles.wait_until( _next_time ); }    // Debug-Ausgabe der Wartezeit nur, wenn kein Ergebnis vorliegt
-                }
-                else
-                {
-                    wait_handles.wait_until( _next_time );
                 }
 
-                wait_handles.clear();
+                // Events für spooler_communication.cxx
+                vector<z::Event*> events;
+                _connection_manager->get_events( &events );
+                FOR_EACH( vector<z::Event*>, events, e )  wait_handles.add( *e );
+#           endif
+
+
+            wait_handles += _wait_handles;
+
+            _wait_counter++;
+
+            if( log_wait )  
+            {
+                if( !wait_handles.wait(0) )  { LOG( msg << "\n" ); wait_handles.wait_until( _next_time ); }    // Debug-Ausgabe der Wartezeit nur, wenn kein Ergebnis vorliegt
             }
+            else
+            {
+                wait_handles.wait_until( _next_time );
+            }
+
+            wait_handles.clear();
+        }
+        else
+        {
+            // spooler_communication.cxx:
+            _connection_manager->wait( 0.0 );       // select() rufen, damit die Signale der Kommunikations-Sockets gesetzt werden.
         }
 
         _next_time = 0;
