@@ -1,4 +1,4 @@
-// $Id: spooler_order.cxx,v 1.64 2004/06/01 14:19:45 jz Exp $
+// $Id: spooler_order.cxx,v 1.65 2004/06/01 15:27:49 jz Exp $
 /*
     Hier sind implementiert
 
@@ -512,7 +512,7 @@ void Order_queue::add_order( Order* order )
 */
             Queue::iterator ins       = _queue.end();
             bool            ins_set   = false;
-            bool            was_empty = !has_order( Time::now() );  //_queue.empty();
+            bool            wake_up   = !order->_task  &&  !has_order( Time::now() );  //_queue.empty();
             bool            id_found  = false;
 
             _has_users_id |= order->_is_users_id;
@@ -548,7 +548,7 @@ void Order_queue::add_order( Order* order )
 
             order->_in_job_queue = true;
 
-            if( was_empty )  _job->signal( "Order" );
+            if( wake_up )  _job->signal( "Order" );
         }
     }
 }
@@ -1182,8 +1182,6 @@ void Order::postprocessing( bool success )
         }
 
         postprocessing2();
-
-        _moved = false;
     }
 }
 
@@ -1194,7 +1192,6 @@ void Order::processing_error()
     THREAD_LOCK( _lock )
     {
         _task = NULL;
-        _moved = false;
 
         postprocessing2();
     }
@@ -1204,6 +1201,17 @@ void Order::processing_error()
 
 void Order::postprocessing2()
 {
+    Job* job = this->job();
+
+    if( _moved  &&  job  &&  !order_queue()->has_order( Time::now() ) )
+    {
+        job->signal( "Order (delayed set_state)" );
+    }
+
+    _moved = false;
+
+
+
     if( finished() ) 
     {
         _end_time = Time::now();
