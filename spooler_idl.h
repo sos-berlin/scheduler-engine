@@ -1,4 +1,4 @@
-// $Id: spooler_idl.h,v 1.23 2003/09/30 21:54:35 jz Exp $
+// $Id: spooler_idl.h,v 1.24 2003/10/10 09:59:51 jz Exp $
 
 
 /*  Ersatz für spooler.odl für Systeme ohne COM. 
@@ -251,6 +251,7 @@ struct Ispooler : IDispatch
     virtual HRESULT     get_job_chain               ( BSTR name, Ijob_chain** result ) = 0;
     virtual HRESULT         create_order            ( Iorder** result ) = 0;
     virtual HRESULT     get_is_service              ( VARIANT_BOOL* result ) = 0;
+    virtual HRESULT     get_directory               ( BSTR* ) = 0;
 };
 
 //------------------------------------------------------------------------------------------Log

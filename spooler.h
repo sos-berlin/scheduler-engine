@@ -1,4 +1,4 @@
-// $Id: spooler.h,v 1.161 2003/10/03 13:14:02 jz Exp $
+// $Id: spooler.h,v 1.162 2003/10/10 09:59:50 jz Exp $
 
 #ifndef __SPOOLER_H
 #define __SPOOLER_H
@@ -180,6 +180,7 @@ struct Spooler
     Security::Level             security_level              ( const Host& );
     const time::Holiday_set&    holidays                    () const                            { return _holiday_set; }
     bool                        is_service                  () const                            { return _is_service; }
+    string                      directory                   () const                            { return _directory; }
 
     xml::Element_ptr            threads_as_xml              ( const xml::Document_ptr&, Show_what );
 
@@ -337,7 +338,8 @@ struct Spooler
     Sos_ptr<Spooler_db>        _db;
     bool                       _need_db;
 
-    bool                       _has_java;                   // Es gibt ein Java-Skript
+    bool                       _has_java;                   // Es gibt ein Java-Modul. Java muss also gestartet werden
+    bool                       _has_java_source;            // Es gibt Java-Quell-Code. Wir brauchen ein Arbeitsverzeichnis.
     ptr<java::Vm>              _java_vm;
   //string                     _java_work_dir;              // Zum Compilieren, für .class
     string                     _config_java_class_path;     // <config java_class_path="">
@@ -424,6 +426,8 @@ struct Spooler
     State                      _state;
     State_cmd                  _state_cmd;
     State_cmd                  _shutdown_cmd;               // run() beenden, also alle Tasks beenden!
+
+    string                     _directory;
 };
 
 //-------------------------------------------------------------------------------------------------

@@ -1,4 +1,4 @@
-// $Id: spooler_module.cxx,v 1.50 2003/10/08 11:45:06 jz Exp $
+// $Id: spooler_module.cxx,v 1.51 2003/10/10 09:59:51 jz Exp $
 /*
     Hier sind implementiert
 
@@ -36,10 +36,6 @@ Source_part::Source_part( int linenr, const string& text, const Time& mod_time )
     _text(text), 
     _modification_time(mod_time) 
 {
-    // _text ist leer?
-    int i;
-    for( i = 0; i < _text.length(); i++ )  if( !isspace( (unsigned char)_text[i] ) )  break;
-    if( i == _text.length() )  _text.erase();
 }
 
 //----------------------------------------------------------------xml::Element_ptr Source_part::dom
@@ -103,7 +99,13 @@ void Source_with_parts::assign_dom( const xml::Element_ptr& source_element )
 
 void Source_with_parts::add( int linenr, const string& text, const Time& mod_time )
 { 
-    _parts.push_back( Source_part( linenr, text, mod_time ) );
+    // text ist nicht leer?
+    int i;
+    for( i = 0; i < text.length(); i++ )  if( !isspace( (unsigned char)text[i] ) )  break;
+    if( i < text.length() )
+    {
+        _parts.push_back( Source_part( linenr, text, mod_time ) );
+    }
 
     if( mod_time  &&  _max_modification_time < mod_time )   _max_modification_time = mod_time;
 }
@@ -152,8 +154,8 @@ void Module::set_dom_source_only( const xml::Element_ptr& element, const Time& x
 
 void Module::set_source_only( const Source_with_parts& source )
 {
-    _source = source;
     _compiled = false;
+    _source = source;
 
     switch( _kind )
     {
@@ -161,6 +163,7 @@ void Module::set_source_only( const Source_with_parts& source )
             break;
 
         case kind_java:
+            if( !_source.empty()  &&  _spooler )  _spooler->_has_java_source = true;
             //if( !_source.empty() )  throw_xc( "SCHEDULER-167" );
             break;
 
@@ -242,7 +245,7 @@ ptr<Module_instance> Module::create_instance()
     {
         case kind_java:              
         {
-            //if( !_spooler->_java_vm->running() )  throw_xc( "SCHEDULER-177" );
+            if( _spooler )  if( !_spooler->_java_vm  ||  !_spooler->_java_vm->running() )  throw_xc( "SCHEDULER-177" );
 
             _java_vm = get_java_vm();
             ptr<Java_module_instance> p = Z_NEW( Java_module_instance( _java_vm, this ) );
@@ -274,23 +277,6 @@ ptr<Module_instance> Module::create_instance()
     }
 }
 
-//----------------------------------------------------------------Module_instance::In_call::In_call
-/*
-Module_instance::In_call::In_call( Job* job, const string& name ) 
-: 
-    _job(job),
-    _name(name),
-    _result_set(false)
-{ 
-    int pos = name.find( '(' );
-    string my_name = pos == string::npos? name : name.substr( 0, pos );
-    
-    _job->set_in_call( my_name ); 
-    LOG( *job << '.' << my_name << "() begin\n" );
-
-    Z_WINDOWS_ONLY( _ASSERTE( _CrtCheckMemory( ) ); )
-}
-*/
 //----------------------------------------------------------------Module_instance::In_call::In_call
 
 Module_instance::In_call::In_call( Module_instance* module_instance, const string& name, const string& extra ) 
@@ -364,14 +350,11 @@ void Module_instance::init()
 
 void Module_instance::set_in_call( In_call* in_call, const string& extra )
 {
-    //THREAD_LOCK( _lock )
-    {
-        _in_call = in_call;
+    _in_call = in_call;
 
-        if( in_call  &&  _spooler  &&  _spooler->_debug )
-        {
-            _log.debug( in_call->_name + "()  " + extra );
-        }
+    if( in_call  &&  _spooler  &&  _spooler->_debug )
+    {
+        _log.debug( in_call->_name + "()  " + extra );
     }
 }
 
@@ -403,11 +386,6 @@ void Module_instance::detach_task()
 
 void Module_instance::add_obj( const ptr<IDispatch>& object, const string& name )
 {
-/*
-    if( name == "spooler_task" )  _com_task->set_task( object );
-    else
-    if( name == "spooler_log"  )  _com_log ->set_log ( object );
-*/
 }
 
 //------------------------------------------------------------------Module_instance::call_if_exists
@@ -422,20 +400,6 @@ Variant Module_instance::call_if_exists( const string& name )
 
 void Module_instance::close()
 {
-/*
-    if( !_spooler_exit_called  &&  callable() )     // _spooler_exit_called wird auch von Remote_module_instance_server gesetzt.
-    {
-        try
-        {
-            _spooler_exit_called = true;
-            call_if_exists( "spooler_exit()V" );
-        }
-        catch( const exception& x ) 
-        { 
-            _log.error( x.what() ); 
-        }
-    }
-*/
     if( _com_log  )  _com_log ->set_log ( NULL );
     if( _com_task )  _com_task->set_task( NULL );
 }
@@ -483,57 +447,11 @@ void Module_instance::end__end()
 {
     if( !loaded() )  return;
 
-    //try
+    if( _spooler_open_called  &&  !_spooler_close_called )
     {
-        if( _spooler_open_called  &&  !_spooler_close_called )
-        {
-            _spooler_close_called = true;
-            call_if_exists( spooler_close_name );
-        }
+        _spooler_close_called = true;
+        call_if_exists( spooler_close_name );
     }
-/*
-    catch( const exception x )
-    {
-        success = false;
-
-        if( _task )  _task->set_error( x );
-        else
-        if( _task_idispatch )  com_call( _idispatch, "set_error", ... );
-    }
-
-
-    if( success )
-    {
-        // spooler_on_success() wird nicht gerufen, wenn spooler_init() false lieferte
-
-        try 
-        {
-            call_if_exists( spooler_on_success_name );
-        }
-        catch( const exception& x ) { _com_task->log_error( string(spooler_on_error_name) + ": " + x.what() ); }
-    }
-    else
-    {
-        try 
-        {
-            call_if_exists( spooler_on_success_name );
-        }
-        catch( const exception& x ) { _com_task->log_error( string(spooler_on_error_name) + ": " + x.what() ); }
-    }
-*/
-/*
-    if( _close_instance_at_end )        // Z.Z. immer true
-    {
-        if( _spooler_init_called  &&  !_spooler_exit_called )
-        {
-            _spooler_exit_called = true;
-            call_if_exists( spooler_exit_name );
-        }
-
-        close();
-        _com_task = new Com_task();
-    }
-*/
 }
 
 //---------------------------------------------------------------------Module_instance::step__start

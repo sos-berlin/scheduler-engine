@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.273 2003/10/08 18:07:19 jz Exp $
+// $Id: spooler.cxx,v 1.274 2003/10/10 09:59:50 jz Exp $
 /*
     Hier sind implementiert
 
@@ -99,7 +99,7 @@ static void send_error_email( const string& subject, const string& body )
         string bcc  = read_profile_string( default_factory_ini, "spooler", "log_mail_bcc"    );
         string smtp = read_profile_string( default_factory_ini, "spooler", "smtp"            );
 
-        Sos_ptr<mail::Message> msg = mail::create_message(); // spooler_ptr->_java_vm );
+        Sos_ptr<mail::Message> msg = mail::create_message();
 
         if( from != "" )  msg->set_from( from );
         if( to   != "" )  msg->set_to  ( to   );
@@ -1200,9 +1200,12 @@ void Spooler::load_arg()
     _log_collect_max    = read_profile_uint  ( _factory_ini, "spooler", "log_collect_max"   , 900 );
 
 
-  //_java_vm->set_filename      ( subst_env( read_profile_string( _factory_ini, "java"   , "vm"         , _java_vm->filename()       ) ) );
-    _java_vm->prepend_class_path( subst_env( read_profile_string( _factory_ini, "java"   , "class_path" ) ) );
-  //_java_vm->set_javac_filename( subst_env( read_profile_string( _factory_ini, "java"   , "javac"      , _java_vm->javac_filename() ) ) );
+    if( !_java_vm->running() )
+    {
+      //_java_vm->set_filename      ( subst_env( read_profile_string( _factory_ini, "java"   , "vm"         , _java_vm->filename()       ) ) );
+        _java_vm->prepend_class_path( subst_env( read_profile_string( _factory_ini, "java"   , "class_path" ) ) );
+      //_java_vm->set_javac_filename( subst_env( read_profile_string( _factory_ini, "java"   , "javac"      , _java_vm->javac_filename() ) ) );
+    }
 
 
     try
@@ -1247,6 +1250,15 @@ void Spooler::load_arg()
                 throw_sos_option_error( opt );
         }
 
+        if( _directory.empty() )    // Nur beim ersten Mal setzen!
+        {
+            char dir [ 1024 + 2 ];
+            char* ok = getcwd( dir, sizeof dir - 1 );
+            if( !ok )  throw_errno( errno, "getcwd" );
+            strcat( dir, Z_DIR_SEPARATOR );
+            _directory = dir;
+        }
+
         _temp_dir = subst_env( read_profile_string( _factory_ini, "spooler", "tmp", get_temp_path() + Z_DIR_SEPARATOR "scheduler" ) );
         _temp_dir = replace_regex( _temp_dir, "[\\/]+", Z_DIR_SEPARATOR );
         _temp_dir = replace_regex( _temp_dir, "\\" Z_DIR_SEPARATOR "$", "" );
@@ -1259,10 +1271,6 @@ void Spooler::load_arg()
 
         if( _log_level <= log_debug_spooler )  _debug = true;
         if( _config_filename.empty() )  throw_xc( "SCHEDULER-115" );
-
-        string java_work_dir = temp_dir() + Z_DIR_SEPARATOR "java";
-        _java_vm->set_work_dir( java_work_dir );
-        _java_vm->prepend_class_path( java_work_dir );
 
     }
     catch( const Sos_option_error& )
@@ -1298,7 +1306,7 @@ void Spooler::load()
     tzset();
 
     _security.clear();             
-    _java_vm = get_java_vm( false );  //Z_NEW( java::Vm( false ) );
+    _java_vm = get_java_vm( false );
 
     load_arg();
 
@@ -1346,8 +1354,17 @@ void Spooler::start()
         try
         {
             _java_vm->set_log( &_log );
+
+            if( _has_java_source )
+            {
+                string java_work_dir = temp_dir() + Z_DIR_SEPARATOR "java";
+                _java_vm->set_work_dir( java_work_dir );
+                _java_vm->prepend_class_path( java_work_dir );
+            }
+
             _java_vm->prepend_class_path( _config_java_class_path );        // Nicht so gut hier. Bei jedem Reload wird der Pfad verlängert. Aber Reload lässt Java sowieso nicht neu starten.
             _java_vm->set_options( _config_java_options );
+
             Java_module_instance::init_java_vm( _java_vm );
         }
         catch( const exception& x )
@@ -1836,8 +1853,6 @@ int Spooler::launch( int argc, char** argv, const string& parameter_line )
     } while( _state_cmd == sc_reload || _state_cmd == sc_load_config );
 
 
-    //_java_vm->close();
-
     _log.info( "Scheduler ordentlich beendet." );
 
     if( _pid_filename != "" )  unlink( _pid_filename.c_str() );
@@ -1855,7 +1870,7 @@ void Spooler::send_error_email( const string& subject, const string& body )
 {
     try
     {
-        Sos_ptr<mail::Message> msg = mail::create_message(); // spooler_ptr->_java_vm );
+        Sos_ptr<mail::Message> msg = mail::create_message();
 
         if( _log_mail_from != ""  &&  _log_mail_from != "-" )  msg->set_from( _log_mail_from );
         if( _log_mail_to   != ""  &&  _log_mail_to   != "-" )  msg->set_to  ( _log_mail_to   );

@@ -1,4 +1,4 @@
-// $Id: spooler_com.cxx,v 1.113 2003/10/08 11:45:05 jz Exp $
+// $Id: spooler_com.cxx,v 1.114 2003/10/10 09:59:50 jz Exp $
 /*
     Hier sind implementiert
 
@@ -2021,7 +2021,8 @@ const Com_method Com_spooler::_methods[] =
     { DISPATCH_PROPERTYGET, 15, "job_chain"                 , (Com_method_ptr)&Com_spooler::get_job_chain       , VT_DISPATCH  , { VT_BSTR } },
     { DISPATCH_METHOD     , 16, "create_order"              , (Com_method_ptr)&Com_spooler::create_order        , VT_DISPATCH  },
     { DISPATCH_PROPERTYGET, 17, "is_service"                , (Com_method_ptr)&Com_spooler::get_is_service      , VT_BOOL      },
-    { DISPATCH_PROPERTYGET, 17, "java_class_name"           , (Com_method_ptr)&Com_spooler::get_java_class_name , VT_BSTR },
+    { DISPATCH_PROPERTYGET, 18, "java_class_name"           , (Com_method_ptr)&Com_spooler::get_java_class_name , VT_BSTR      },
+    { DISPATCH_PROPERTYGET, 19, "directory"                 , (Com_method_ptr)&Com_spooler::get_directory       , VT_BSTR      },
     {}
 };
 
@@ -2316,6 +2317,22 @@ STDMETHODIMP Com_spooler::get_is_service( VARIANT_BOOL* result )
         if( !_spooler )  return E_POINTER;
 
         *result = _spooler->is_service();
+    }
+
+    return hr;
+}
+
+//---------------------------------------------------------------------------spooler::get_directory
+
+STDMETHODIMP Com_spooler::get_directory( BSTR* result )
+{
+    HRESULT hr = NOERROR;
+
+    THREAD_LOCK( _lock )
+    {
+        if( !_spooler )  return E_POINTER;
+
+        hr = string_to_bstr( _spooler->directory(), result );
     }
 
     return hr;

@@ -4,7 +4,7 @@ package sos.spooler;
 
 /**
  * @author Joacim Zschimmer, Zschimmer GmbH
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 
 public class Spooler extends Idispatch
@@ -29,4 +29,5 @@ public class Spooler extends Idispatch
     public Job_chain        job_chain           ( String name )                     { return (Job_chain)    com_call( "<job_chain", name                ); }
     public Order            create_order        ()                                  { return (Order)        com_call( "create_order"                    ); }
     public boolean          is_service          ()                                  { return        boolean_com_call( "<is_service"                     ); }
+    public String           directory           ()                                  { return (String)       com_call( "<directory"                      ); }
 }

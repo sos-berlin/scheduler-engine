@@ -1,4 +1,4 @@
-// $Id: spooler_module.h,v 1.46 2003/10/08 11:45:06 jz Exp $
+// $Id: spooler_module.h,v 1.47 2003/10/10 09:59:51 jz Exp $
 
 #ifndef __SPOOLER_MODULE_H
 #define __SPOOLER_MODULE_H
@@ -36,6 +36,7 @@ struct Source_part
 
                                 operator string             () const                                { return _text; }
     xml::Element_ptr            dom                         ( const xml::Document_ptr& ) const;
+  //bool                        empty                       ()                                      { return _text.empty(); }
 
 
     int                        _linenr;
