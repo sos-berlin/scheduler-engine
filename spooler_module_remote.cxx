@@ -1,4 +1,4 @@
-// $Id: spooler_module_remote.cxx,v 1.48 2003/11/11 18:48:04 jz Exp $
+// $Id: spooler_module_remote.cxx,v 1.49 2003/11/12 20:46:58 jz Exp $
 /*
     Hier sind implementiert
 
@@ -234,9 +234,15 @@ bool Remote_module_instance_proxy::begin__end()
 */
 
     //?if( !_remote_instance )
-        operation->async_check_error();  // Wenn create_instance() fehlgeschlagen ist
+    //  operation->async_check_error();  // Wenn create_instance() fehlgeschlagen ist
 
-    return check_result( _remote_instance->call__end() );
+    bool result = false;
+    
+    if( _remote_instance )  check_result( _remote_instance->call__end() );   // call__end() vor der Fehlerprüfung rufen, sonst werden untere Operationen nicht beendet. 12.11.03
+
+    operation->async_check_error();  // Wenn create_instance() fehlgeschlagen ist
+
+    return result;
 }
 
 //---------------------------------------------------------Remote_module_instance_proxy::end__start
