@@ -34,7 +34,7 @@
 				UsePrecompiledHeader="2"
 				PrecompiledHeaderThrough="spooler.h"
 				PrecompiledHeaderFile=".\Release/spooler.pch"
-				AssemblerOutput="2"
+				AssemblerOutput="0"
 				AssemblerListingLocation=".\Release/"
 				ObjectFile=".\Release/"
 				ProgramDataBaseFileName=".\Release/"
@@ -108,7 +108,7 @@ cd &quot;$(OutDir)&quot; &amp;&amp; jar cf &quot;$(TargetDir)sos.spooler.jar&quo
 				AssemblerListingLocation=".\Debug/"
 				ObjectFile=".\Debug/"
 				ProgramDataBaseFileName=".\Debug/"
-				BrowseInformation="1"
+				BrowseInformation="0"
 				WarningLevel="3"
 				SuppressStartupBanner="TRUE"
 				DebugInformationFormat="3"/>

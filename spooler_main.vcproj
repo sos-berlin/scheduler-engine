@@ -25,6 +25,7 @@
 				RuntimeLibrary="3"
 				RuntimeTypeInfo="TRUE"
 				UsePrecompiledHeader="0"
+				BrowseInformation="0"
 				WarningLevel="3"
 				DebugInformationFormat="4"/>
 			<Tool
@@ -69,6 +70,7 @@
 				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
 				RuntimeLibrary="4"
 				UsePrecompiledHeader="0"
+				AssemblerOutput="0"
 				WarningLevel="3"
 				DebugInformationFormat="3"/>
 			<Tool
