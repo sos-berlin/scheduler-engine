@@ -1,4 +1,4 @@
-// $Id: spooler_module_remote.cxx,v 1.36 2003/09/23 14:01:08 jz Exp $
+// $Id: spooler_module_remote.cxx,v 1.37 2003/09/24 14:41:00 jz Exp $
 /*
     Hier sind implementiert
 
@@ -31,39 +31,6 @@ void Remote_module_instance_proxy::init()
     Module_instance::init();
 
     if( _module->_reuse != Module::reuse_task )  throw_xc( "SPOOLER-192" );         // Problem u.a.: synchrones Release(), wenn Job gestoppt wird
-
-/*
-    Parameters parameters;
-    parameters.push_back( Parameter( "param", "-object-server" ) );
-    parameters.push_back( Parameter( "param", "-title=" + quoted_string( _title ) ) );
-
-    if( !log_filename().empty() )
-    parameters.push_back( Parameter( "param", "-log=" + quoted_string( "+" + log_filename() ) ) );
-
-    hr = com_create_instance_in_separate_process( spooler_com::CLSID_Remote_module_instance_server, NULL, 0, 
-                                                  spooler_com::IID_Iremote_module_instance_server, (void**)&_remote_instance,
-                                                  &_pid, parameters );
-    if( FAILED(hr) )  throw_ole( hr, "com_create_instance_in_separate_process" );
-
-    Variant params ( Variant::vt_array, 8 );
-
-    {
-        Locked_safearray params_array = V_ARRAY( &params );
-
-        params_array[0] = "language="        + _module->_language;
-        params_array[1] = "com_class="       + _module->_com_class_name;
-        params_array[2] = "filename="        + _module->_filename;
-        params_array[3] = "java_class="      + _module->_java_class_name;
-        params_array[4] = "java_class_path=" + _module->_spooler->_java_vm->class_path();
-        params_array[5] = "java_work_dir="   + _module->_spooler->_java_vm->work_dir();
-        params_array[6] = "recompile="       + as_string(_module->_recompile);
-        params_array[7] = "script="          + _module->_source.dom_doc().xml();
-    }
-
-    _remote_instance->call( "construct", params );
-
-    _idispatch = _remote_instance;
-*/
 }
 
 //---------------------------------------------------------------Remote_module_instance_proxy::load
