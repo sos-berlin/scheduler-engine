@@ -1,4 +1,4 @@
-// $Id: spooler_thread.cxx,v 1.30 2002/04/11 13:31:00 jz Exp $
+// $Id: spooler_thread.cxx,v 1.31 2002/04/23 07:00:22 jz Exp $
 /*
     Hier sind implementiert
 
@@ -110,13 +110,13 @@ void Thread::load_jobs_from_xml( const xml::Element_ptr& element, bool init )
         if( e->tagName == "job" ) 
         {
             string spooler_id = as_string( e->getAttribute( "spooler_id" ) );
-            if( spooler_id.empty()  ||  spooler_id == _spooler->id() )
+
+            if( _spooler->_manual? as_string(e->getAttribute(L"name")) == _spooler->_job_name 
+                                 : spooler_id.empty() || spooler_id == _spooler->id() )
             {
                 Sos_ptr<Job> job = SOS_NEW( Job( this ) );
                 job->set_xml( e );
-
                 if( init )  job->init();
-
                 add_job( job );
             }
         }
@@ -441,6 +441,7 @@ int Thread::run_thread()
                 if( _running_tasks_count == 0 )
                 {
                     if( _spooler->state() == Spooler::s_stopping_let_run  &&  !any_tasks_there() )  break;
+                    if( _spooler->_manual )  break;   // Task ist fertig, also Thread beenden
 
                     wait();
                 }
@@ -492,8 +493,11 @@ void Thread::signal_object( const string& object_set_class_name, const Level& le
 static uint __stdcall thread( void* param )
 {
     Ole_initialize ole;
-    
-    uint ret = ((Thread*)param)->run_thread();
+    Thread*        thread = (Thread*)param;
+    uint           ret;
+
+    ret = thread->run_thread();
+
     //_endthreadex( ret );
 
     return ret;

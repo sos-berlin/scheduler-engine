@@ -1,4 +1,4 @@
-// $Id: spooler_time.h,v 1.9 2002/04/04 17:18:39 jz Exp $
+// $Id: spooler_time.h,v 1.10 2002/04/23 07:00:22 jz Exp $
 
 #ifndef __SPOOLER_TIME_H
 #define __SPOOLER_TIME_H
@@ -255,6 +255,7 @@ struct Run_time
     void                        check                       ();                              
 
     bool                        once                        ()                      { return _once; }
+    void                    set_once                        ( bool b = true )       { _once = b; }
     Period                      first_period                ()                      { return first_period( Time::now() ); }
     Period                      first_period                ( Time );
     Period                      next_period                 ()                      { return next_period( Time::now() ); }

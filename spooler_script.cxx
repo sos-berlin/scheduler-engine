@@ -1,4 +1,4 @@
-// $Id: spooler_script.cxx,v 1.9 2002/03/05 17:10:01 jz Exp $
+// $Id: spooler_script.cxx,v 1.10 2002/04/23 07:00:21 jz Exp $
 /*
     Hier sind implementiert
 
@@ -37,7 +37,7 @@ bool check_result( const CComVariant& vt )
 void Script::set_xml( const xml::Element_ptr& element, const string& include_path )
 {
     _language = as_string( element->getAttribute( L"language" ) );
-    _text     = text_from_xml_with_include( element, include_path );
+    _source   = text_from_xml_with_include( element, include_path );
 
     string use_engine = as_string( element->getAttribute( L"use_engine" ) );
     
@@ -77,7 +77,10 @@ void Script_instance::load( const Script& script )
     HRESULT hr = _script_site->_script->SetScriptState( SCRIPTSTATE_INITIALIZED );
     if( FAILED( hr ) )  throw_ole( hr, "IActiveScript::SetScriptState", "SCRIPTSTATE_INITIALIZED" );
 
-    _script_site->parse( script._text );
+    Z_FOR_EACH_CONST( Source_with_parts::Parts, script._source._parts, it )
+    {
+        _script_site->parse( it->_text, it->_linenr );
+    }
 
     _loaded = true;
 }

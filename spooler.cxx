@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.96 2002/04/18 20:08:56 jz Exp $
+// $Id: spooler.cxx,v 1.97 2002/04/23 07:00:21 jz Exp $
 /*
     Hier sind implementiert
 
@@ -247,7 +247,7 @@ void Spooler::wait_until_threads_stopped( Time until )
     while( it != _thread_list.end() )
     {
         if( (*it)->_thread_handle.handle() )  wait_handles.add_handle( (*it)->_thread_handle.handle() ),  it++;
-                   else THREAD_LOCK( _lock )  it = _thread_list.erase( it );
+                                        else  THREAD_LOCK( _lock )  it = _thread_list.erase( it );
     }
 
     int c = 0;
@@ -385,9 +385,9 @@ void Spooler::set_state( State state )
 
     if( _state == state )  return;
 
+    _state = state;
     _log.info( state_name() );
 
-    _state = state;
     if( _state_changed_handler )  (*_state_changed_handler)( this, NULL );
 }
 
@@ -464,9 +464,15 @@ void Spooler::load_arg()
             if( opt.with_value( "param"            ) )  _spooler_param = opt.value(),  _spooler_param_as_option_set = true;
             else
             if( opt.with_value( "log-level"        ) )  log_level = opt.value();
+#ifdef _DEBUG  // Nicht von SOS beauftragt
+            else
+            if( opt.with_value( "job"              ) )  _job_name = opt.value();
+#endif
             else
                 throw_sos_option_error( opt );
         }
+
+        _manual = !_job_name.empty();
 
         _log_level = make_log_level( log_level );
 
@@ -541,7 +547,7 @@ void Spooler::start()
     _db.open( _db_name );
     _db.spooler_start();
 
-    _communication.start_or_rebind();
+    if( !_manual )  _communication.start_or_rebind();
 
     _state_cmd = sc_none;
     set_state( s_starting );
@@ -562,7 +568,7 @@ void Spooler::start()
         if( !ok )  throw_xc( "SPOOLER-127" );
     }
 
-    FOR_EACH( Thread_list, _thread_list, it )  (*it)->start_thread();
+    FOR_EACH( Thread_list, _thread_list, it )  if( !(*it)->empty() )  (*it)->start_thread();
 }
 
 //------------------------------------------------------------------------------------Spooler::stop
@@ -613,10 +619,10 @@ void Spooler::run()
     while(1)
     {
         // Threads ohne Jobs und nach Fehler gestorbene Threads entfernen:
-        FOR_EACH( Thread_list, _thread_list, it )  if( (*it)->empty() )  THREAD_LOCK( _lock )  it = _thread_list.erase(it);
-        if( _thread_list.empty() )  { _log.error( "Kein Thread vorhanden. Spooler wird beendet." ); break; }
-
-        _event.reset();
+        //FOR_EACH( Thread_list, _thread_list, it )  if( (*it)->empty() )  THREAD_LOCK( _lock )  it = _thread_list.erase(it);
+        bool valid_thread = false;
+        FOR_EACH( Thread_list, _thread_list, it )  valid_thread |= !(*it)->empty();
+        if( !valid_thread )  { _log.error( "Kein Thread vorhanden. Spooler wird beendet." ); break; }
 
         if( _state_cmd == sc_pause                 )  set_state( s_paused  ), signal_threads( "pause" );
         if( _state_cmd == sc_continue              )  set_state( s_running ), signal_threads( "continue" );
@@ -628,6 +634,7 @@ void Spooler::run()
         _state_cmd = sc_none;
 
         _wait_handles.wait_until( latter_day );
+        _event.reset();
     }
 }
 

@@ -1,4 +1,4 @@
-// $Id: spooler_thread.h,v 1.16 2002/04/06 20:07:41 jz Exp $
+// $Id: spooler_thread.h,v 1.17 2002/04/23 07:00:22 jz Exp $
 
 #ifndef __SPOOLER_THREAD_H
 #define __SPOOLER_THREAD_H
@@ -29,6 +29,7 @@ struct Thread : Sos_self_deleting
     void                        start_thread                ();
 
     int                         run_thread                  ();
+    bool                        running                     ()                              { DWORD rc; return GetExitCodeThread(_thread_handle,&rc)? rc == STILL_ACTIVE : false; }
     void                        start                       ();
     void                        stop_jobs                   ();
     bool                        step                        ();

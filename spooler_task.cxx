@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.88 2002/04/17 21:37:18 jz Exp $
+// $Id: spooler_task.cxx,v 1.89 2002/04/23 07:00:22 jz Exp $
 /*
     Hier sind implementiert
 
@@ -762,7 +762,7 @@ void Job::finish()
         //if( _log.mail_on_success() && !has_error()  
         //||  _log.mail_on_error()   &&  has_error() )  _log.send();
 
-        _log.send( has_error()? -1 : _last_task_step_count );
+        if( !_spooler->_manual )  _log.send( has_error()? -1 : _last_task_step_count );
         clear_mail();
 
         //_log.close();

@@ -1,4 +1,4 @@
-// $Id: spooler.h,v 1.80 2002/04/12 08:16:45 jz Exp $
+// $Id: spooler.h,v 1.81 2002/04/23 07:00:21 jz Exp $
 
 #ifndef __SPOOLER_H
 #define __SPOOLER_H
@@ -86,7 +86,9 @@ string                          extension_of_path           ( const string& );
 namespace spooler {
 
 
-string                          text_from_xml_with_include  ( const xml::Element_ptr&, const string& include_path );
+//-------------------------------------------------------------------------------------------------
+
+Source_with_parts               text_from_xml_with_include  ( const xml::Element_ptr&, const string& include_path );
 int                             read_profile_mail_on_process( const string& profile, const string& section, const string& entry, int deflt );
 int                             read_profile_history_on_process( const string& prof, const string& section, const string& entry, int deflt );
 Archive_switch                  read_profile_archive        ( const string& profile, const string& section, const string& entry, Archive_switch deflt );
@@ -244,6 +246,9 @@ struct Spooler
 
     string                     _db_name;
     Spooler_db                 _db;
+
+    bool                       _manual;
+    string                     _job_name;                   // Bei manuellem Betrieb
 
   private:
     string                     _config_filename;            // -config=

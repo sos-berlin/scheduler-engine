@@ -1,4 +1,4 @@
-// $Id: spooler_script.h,v 1.8 2002/03/02 15:22:44 jz Exp $
+// $Id: spooler_script.h,v 1.9 2002/04/23 07:00:22 jz Exp $
 
 #ifndef __SPOOLER_SCRIPT_H
 #define __SPOOLER_SCRIPT_H
@@ -7,6 +7,36 @@ namespace sos {
 namespace spooler {
 
 bool                            check_result                ( const CComVariant& vt );
+
+//--------------------------------------------------------------------------------------Source_part
+
+struct Source_part
+{
+                                Source_part                 ( int linenr, const string& text )      : _linenr(linenr), _text(text) {}
+
+                                operator string             () const                                { return _text; }
+
+    int                        _linenr;
+    string                     _text;
+};
+
+//inline string&                  operator +=                 ( string& a, const Source_part& b )     { return a += b._text; }
+
+//-----------------------------------------------------------------------------Source_with_includes
+
+struct Source_with_parts
+{
+    void                        add                         ( int linenr, const string& text )      { _parts.push_back( Source_part( linenr, text ) ); }
+    bool                        empty                       ()                                      { return _parts.empty(); }
+    void                        clear                       ()                                      { _parts.clear(); }
+
+    string                      text                        () const                                { return zschimmer::join( SYSTEM_NL, _parts ); }
+                                operator string             () const                                { return text(); }
+
+    typedef list<Source_part>   Parts;
+
+    Parts                      _parts;
+};
 
 //-------------------------------------------------------------------------------------------Script
 
@@ -24,12 +54,12 @@ struct Script
 
     void                        set_xml                     ( const xml::Element_ptr&, const string& include_path );
 
-    bool                        empty                       () const                        { return _text.empty(); }
-    void                        clear                       ()                              { _language="", _text=""; }
+    bool                        empty                       ()                              { return _source.empty(); }
+    void                        clear                       ()                              { _language="", _source.clear(); }
 
     Spooler*                   _spooler;
     string                     _language;
-    string                     _text;
+    Source_with_parts          _source;
     Reuse                      _reuse;
 };
 

@@ -1,4 +1,4 @@
-// $Id: spooler_config.cxx,v 1.34 2002/04/07 19:52:58 jz Exp $
+// $Id: spooler_config.cxx,v 1.35 2002/04/23 07:00:21 jz Exp $
 
 //#include <precomp.h>
 
@@ -9,6 +9,8 @@
 #include "../kram/sos.h"
 #include "spooler.h"
 #include "../file/anyfile.h"
+
+#include <algorithm>
 
 
 namespace sos {
@@ -65,31 +67,41 @@ string optional_single_element_as_text( const xml::Element_ptr& element, const s
 
 //-----------------------------------------------------------------------text_from_xml_with_include
 
-string text_from_xml_with_include( const xml::Element_ptr& element, const string& include_path )
+Source_with_parts text_from_xml_with_include( const xml::Element_ptr& element, const string& include_path )
 {
+    Source_with_parts result;
     string text;
     string inc = include_path;
+    int    linenr_base = 0;
 
     if( !inc.empty() )  { char c = inc[inc.length()-1];  if( c != '/'  &&  c != '\\' )  inc += "/"; }
 
 
     for( xml::Node_ptr n = element->firstChild; n; n = n->nextSibling )
     {
+        string text;
+
         switch( n->GetnodeType() )
         {
             case xml::NODE_CDATA_SECTION:
             {
                 xml::Cdata_section_ptr c = n;
-                text += as_string( c->data );
-                break;
+                text = as_string( c->data );
+                goto TEXT;
             }
 
             case xml::NODE_TEXT:
             {
                 xml::Text_ptr t = n;
-                text += as_string( t->data );
-                break;
+                text = as_string( t->data );
+                goto TEXT;
+
             }
+
+            TEXT:
+                result.add( linenr_base, text );
+                linenr_base += count_if( text.begin(), text.end(), bind2nd( equal_to<char>(), '\n' ) );
+                break;
 
             case xml::NODE_ELEMENT:     // <include file="..."/>
             {
@@ -107,7 +119,7 @@ string text_from_xml_with_include( const xml::Element_ptr& element, const string
                     }
                 }
                      
-                text += file_as_string( filename );
+                result.add( 0, file_as_string( filename ) );
                 break;
             }
 
@@ -115,7 +127,7 @@ string text_from_xml_with_include( const xml::Element_ptr& element, const string
         }
     }
 
-    return text;
+    return result;
 }
 
 //--------------------------------------------------------------------------------Security::set_xml
@@ -390,10 +402,14 @@ void Job::set_xml( const xml::Element_ptr& element )
                                                _process_param        = as_string( e->getAttribute( L"param" ) ),
                                                _process_log_filename = as_string( e->getAttribute( L"log_file" ) );
             else
-            if( e->tagName == "run_time"    )  _run_time.set_xml( e ),  run_time_set = true;
+            if( e->tagName == "run_time"  &&  !_spooler->_manual )  _run_time.set_xml( e ),  run_time_set = true;
         }
 
-        if( !run_time_set )  _run_time.set_xml( element->ownerDocument->createElement( L"run_time" ) );
+        if( !run_time_set )
+        {
+            _run_time.set_xml( element->ownerDocument->createElement( L"run_time" ) );
+            if( _spooler->_manual )  _run_time.set_once();
+        }
 
         if( _object_set_descr )  _object_set_descr->_class = _spooler->get_object_set_class( _object_set_descr->_class_name );
     }

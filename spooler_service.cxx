@@ -1,4 +1,4 @@
-// $Id: spooler_service.cxx,v 1.18 2002/04/18 20:08:56 jz Exp $
+// $Id: spooler_service.cxx,v 1.19 2002/04/23 07:00:22 jz Exp $
 /*
     Hier sind implementiert
 
@@ -127,6 +127,8 @@ void install_service( const string& service_name, const string& service_display,
     if( command_line.find(" ") != string::npos )  command_line = quoted_string( command_line, '"', '"' );
     if( !params.empty() )  command_line += " " + params;
 
+    LOG( "CreateService(,\"" << service_name << "\", \"" << service_display << "\",,SERVICE_WIN32_OWN_PROCESS,SERVICE_DEMAND_START,"
+                        "SERVICE_ERROR_NORMAL,\"" << command_line << "\",,,,)\n" );
     SC_HANDLE service_handle = CreateService( 
                                     manager_handle,            // SCManager database 
                                     service_name.c_str(),      // name of service 
@@ -149,10 +151,9 @@ void install_service( const string& service_name, const string& service_display,
     GetVersionEx( &v );
     if( v.dwMajorVersion >= 5 )     // Windows 2000?
     {
-        //string descr = service_description;
-        //if( !params.empty() )  descr += " " + params;
         SERVICE_DESCRIPTION d;
         d.lpDescription = (char*)service_description.c_str();
+        LOG( "ChangeServiceConfig2(,SERVICE_CONFIG_DESCRIPTION,\"" << service_description << "\")\n" );
         ChangeServiceConfig2( service_handle, SERVICE_CONFIG_DESCRIPTION, &d );
     }
 
@@ -169,6 +170,8 @@ void remove_service( const string& service_name )
 
     SC_HANDLE manager_handle = OpenSCManager( NULL, SERVICES_ACTIVE_DATABASE, SC_MANAGER_CREATE_SERVICE );
     if( !manager_handle )  throw_mswin_error( "OpenSCManager" );
+
+    LOG( "DeleteService(\"" << service_name << "\")\n" );
 
     SC_HANDLE service_handle = OpenService( manager_handle, service_name.c_str(), DELETE );
     if( !service_handle )  throw_mswin_error( "OpenService" );
