@@ -60,6 +60,7 @@ cd &quot;$(OutDir)&quot; &amp;&amp; jar cfm &quot;$(TargetDir)sos.spooler.jar&qu
 				MapFileName="../bin/spooler.map"
 				SubSystem="1"
 				OptimizeReferences="2"
+				OptimizeForWindows98="1"
 				TargetMachine="1"/>
 			<Tool
 				Name="VCMIDLTool"
@@ -132,6 +133,7 @@ cd &quot;$(OutDir)&quot; &amp;&amp; jar cfm &quot;$(TargetDir)sos.spooler.jar&qu
 				GenerateDebugInformation="TRUE"
 				ProgramDatabaseFile="../bind/spooler.pdb"
 				SubSystem="1"
+				OptimizeForWindows98="1"
 				ImportLibrary="$(targetdir)spooler.lib"
 				TargetMachine="1"/>
 			<Tool
