@@ -1,4 +1,4 @@
-// $Id: spooler_module_remote_server.cxx,v 1.24 2003/09/01 16:11:42 jz Exp $
+// $Id: spooler_module_remote_server.cxx,v 1.25 2003/09/01 17:00:52 jz Exp $
 /*
     Hier sind implementiert
 
@@ -197,6 +197,7 @@ STDMETHODIMP Com_remote_module_instance_server::construct( SAFEARRAY* safearray 
         if( _server._module->_kind == Module::kind_java )
         {
             _server._module->_java_vm = get_java_vm( false );
+
             if( !_server._module->_java_vm->running() )
             {
                 //java_vm->set_log( &_log );
@@ -208,6 +209,7 @@ STDMETHODIMP Com_remote_module_instance_server::construct( SAFEARRAY* safearray 
             }
             else
             {
+                LOG( "Com_remote_module_instance_server::construct: Die Java Virtual Machine läuft bereits.\n" );
                 // Parameter für Java können nicht übernommen werden.
             }
         }

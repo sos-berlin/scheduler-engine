@@ -1,4 +1,4 @@
-// $Id: spooler_job.cxx,v 1.14 2003/09/01 15:15:37 jz Exp $
+// $Id: spooler_job.cxx,v 1.15 2003/09/01 17:00:52 jz Exp $
 /*
     Hier sind implementiert
 
@@ -986,7 +986,7 @@ bool Job::do_something()
 
     if( !something_done  &&  _next_time <= Time::now() )    // Sicherheitsnadel
     {
-        LOG( obj_name() << ".do_something()  Nichts getan\n" );
+        LOG( obj_name() << ".do_something()  Nichts getan, calculate_next_time()\n" );
         calculate_next_time();
     }
 

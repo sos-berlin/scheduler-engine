@@ -1,4 +1,4 @@
-// $Id: spooler_process.cxx,v 1.9 2003/09/01 15:15:37 jz Exp $
+// $Id: spooler_process.cxx,v 1.10 2003/09/01 17:00:52 jz Exp $
 
 #include "spooler.h"
 
@@ -282,6 +282,7 @@ Process* Process_class::start_process()
         process = Z_NEW( Process( _spooler ) );        
 
         process->start();
+        process->set_temporary( true );      // Zunächst nach der Task beenden. (Problem mit Java, 1.9.03)
 
         _spooler->_log.debug( "Prozess pid=" + as_string( process->pid() ) + " gestartet" );
 
