@@ -1,4 +1,4 @@
-// $Id: spooler_order.cxx,v 1.2 2002/09/13 10:52:25 jz Exp $
+// $Id: spooler_order.cxx,v 1.3 2002/09/13 12:23:40 jz Exp $
 /*
     Hier sind implementiert
 
@@ -246,17 +246,20 @@ void Order_queue::add_order( Order* order )
     {
         Queue::iterator ins = _queue.end();
 
+        bool was_empty = _queue.empty();
+
         for( Queue::iterator it = _queue.begin(); it != _queue.end(); it++ )
         {
             Order* o = *it;
             if( ins == _queue.end()  &&  order->priority() > o->priority() )  ins = it; 
-            if( o->id() == order->id() )  throw_xc( "SPOOLER-153", error_string_from_variant( order->id() ), _job->name() );
+            
+            if( o->id() == order->id() )  
+            {
+                _log->debug( "Auftrag mit gleicher Id wird ersetzt: " + order->obj_name() ); //throw_xc( "SPOOLER-153", error_string_from_variant( order->id() ), _job->name() );
+                _queue.remove( *it );
+                break;
+            }
         }
-
-        bool was_empty = _queue.empty();
-
-        if( ins != _queue.end() )  _log->info( "ADD_ORDER " + order->obj_name() + " vor " + (*ins)->obj_name() );
-                             else  _log->info( "ADD_ORDER " + order->obj_name() );
 
         _queue.insert( ins, order );
 
