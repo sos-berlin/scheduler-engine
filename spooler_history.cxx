@@ -1,4 +1,4 @@
-// $Id: spooler_history.cxx,v 1.57 2003/10/08 11:45:05 jz Exp $
+// $Id: spooler_history.cxx,v 1.58 2003/10/14 09:15:18 jz Exp $
 
 #include "spooler.h"
 #include "../zschimmer/z_com.h"
@@ -542,6 +542,7 @@ void Spooler_db::insert_order( Order* order )
             
             insert.set_table_name( _spooler->_orders_tablename );
             
+            insert[ "ordering"   ] = get_order_ordering( &ta );
             insert[ "job_chain"  ] = order->job_chain()->name();
             insert[ "id"         ] = order->id().as_string();
             insert[ "spooler_id" ] = _spooler->id_for_db();
@@ -550,7 +551,6 @@ void Spooler_db::insert_order( Order* order )
             insert[ "state_text" ] = order->state_text()                , order->_state_text_modified = false;
             insert[ "priority"   ] = order->priority()                  , order->_priority_modified   = false;
             insert[ "payload"    ] = order->payload().as_string()       , order->_payload_modified    = false;
-            insert[ "ordering"   ] = get_order_ordering( &ta );
             insert.set_datetime( "created_time", order->_created.as_string(Time::without_ms) );
             insert.set_datetime( "mod_time", Time::now().as_string(Time::without_ms) );
 

@@ -1,4 +1,4 @@
-// $Id: spooler_com.cxx,v 1.115 2003/10/13 23:04:55 jz Exp $
+// $Id: spooler_com.cxx,v 1.116 2003/10/14 09:15:18 jz Exp $
 /*
     Hier sind implementiert
 
@@ -240,8 +240,8 @@ const Com_method Com_variable_set::_methods[] =
 { 
    // _flags         , dispid, _name                , _method                                           , _result_type  , _types        , _default_arg_count
     { DISPATCH_METHOD     , 1, "set_var"            , (Com_method_ptr)&Com_variable_set::set_var        , VT_EMPTY      , { VT_BSTR, VT_BYREF|VT_VARIANT } },
-    { DISPATCH_PROPERTYPUT, 0, "value"              , (Com_method_ptr)&Com_variable_set::put_var        , VT_EMPTY      , { VT_BYREF|VT_VARIANT, VT_BYREF|VT_VARIANT }, 1 },
-    { DISPATCH_PROPERTYGET, 0, "value"              , (Com_method_ptr)&Com_variable_set::get_var        , VT_VARIANT    , { VT_BYREF|VT_VARIANT                      }, 1 },
+    { DISPATCH_PROPERTYPUT, 0, "value"              , (Com_method_ptr)&Com_variable_set::put_value      , VT_EMPTY      , { VT_BYREF|VT_VARIANT, VT_BYREF|VT_VARIANT }, 1 },
+    { DISPATCH_PROPERTYGET, 0, "value"              , (Com_method_ptr)&Com_variable_set::get_value      , VT_VARIANT    , { VT_BYREF|VT_VARIANT                      }, 1 },
     { DISPATCH_PROPERTYPUT, 8, "var"                , (Com_method_ptr)&Com_variable_set::put_var        , VT_EMPTY      , { VT_BSTR, VT_BYREF|VT_VARIANT } },
     { DISPATCH_PROPERTYGET, 8, "var"                , (Com_method_ptr)&Com_variable_set::get_var        , VT_VARIANT    , { VT_BSTR } },
     { DISPATCH_PROPERTYGET, 2, "count"              , (Com_method_ptr)&Com_variable_set::get_count      , VT_I4         },
