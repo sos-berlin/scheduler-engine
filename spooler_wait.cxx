@@ -1,4 +1,4 @@
-// $Id: spooler_wait.cxx,v 1.12 2001/02/12 09:46:11 jz Exp $
+// $Id: spooler_wait.cxx,v 1.13 2001/02/12 15:41:39 jz Exp $
 /*
     Hier sind implementiert
 
@@ -101,6 +101,7 @@ void Event::remove_from( Wait_handles* w )
 
 bool Event::wait( double wait_time )
 {
+/*
     THREAD_LOCK( _lock )
     {
         bool signaled = _signaled;
@@ -109,22 +110,24 @@ bool Event::wait( double wait_time )
 
         _waiting = true;
     }
-
+*/
     bool result = wait_for_event( handle(), wait_time );
 
-    _waiting = false;
+//  _waiting = false;
 
     return result;
 }
 
 //------------------------------------------------------------------------------------Event::signal
 
-void Event::signal()
+void Event::signal( const string& name )
 {
     THREAD_LOCK( _lock )
     {
-        if( _waiting )  { SetEvent( _handle );  return; }
-
+        _signal_name = name;
+//      if( _waiting )  
+            { SetEvent( _handle );  return; }
+/*
         if( !_signaled )
         {
             FOR_EACH( vector<Wait_handles*>, _wait_handles, it )
@@ -138,6 +141,7 @@ void Event::signal()
                 }
             }
         }
+*/
     }
 }
 
@@ -168,6 +172,15 @@ bool Event::signaled_then_reset()
     }
 
     return signaled;
+}
+
+//---------------------------------------------------------------------------------Event::as_string
+
+string Event::as_string() const
+{ 
+    string result = "Ereignis " + _name; 
+    if( !_signal_name.empty() )  result += " (" + _signal_name + ")";
+    return result;
 }
 
 //----------------------------------------------------------------------Wait_handles::~Wait_handles
@@ -227,12 +240,13 @@ void Wait_handles::wait( double wait_time )
 
 void Wait_handles::wait_until( Time until )
 {
+/*
     THREAD_LOCK( _lock )
     {
         FOR_EACH( vector<Event*>, _events, it)  if( (*it)->signaled() ) { _log->msg( "Ereignis " + (*it)->name() ); return; }
         _waiting = true;
     }
-
+*/
     bool again = false;
 
     while(1)
@@ -242,7 +256,7 @@ void Wait_handles::wait_until( Time until )
         int    t = ceil( min( (double)sleep_time_ms, wait_time * 1000.0 ) );
 
         if( t <= 0 )  break;
-        if( again )  _log->msg( "Noch " + as_string(wait_time) + "s warten ..." );
+        if( again )  _log->msg( "Noch " + sos::as_string(wait_time) + "s warten ..." );
 
         //_log->msg( "WaitForMultipleObjects " + as_string(t) + "ms" );
         DWORD ret = MsgWaitForMultipleObjects( _handles.size(), &_handles[0], FALSE, t, QS_ALLINPUT ); 
@@ -251,7 +265,7 @@ void Wait_handles::wait_until( Time until )
 
         if( ret >= WAIT_OBJECT_0  &&  ret < WAIT_OBJECT_0 + _handles.size() )
         {
-            _waiting = false;
+            //_waiting = false;
 
             //while(1)
             {
@@ -279,13 +293,34 @@ void Wait_handles::wait_until( Time until )
 }
 
 #endif
+
+//--------------------------------------------------------------------------Wait_handles::as_string
+
+string Wait_handles::as_string() const
+{
+    string result;
+
+    if( _events.empty() )
+    {
+        return "nichts";
+    }
+    else
+    {
+        FOR_EACH_CONST( vector<Event*>, _events, it )  
+        {
+            if( !result.empty() )  result += ", ";
+            result += (*it)->as_string();
+        }
+
+        return "{" + result + "}";
+    }
+}
+
 //---------------------------------------------------------------Directory_watcher::watch_directory
 
 void Directory_watcher::watch_directory( const string& directory )
 {
     close();
-
-    set_name( "start_when_directory_changed(\"" + directory + "\")" );
 
     _handle = FindFirstChangeNotification( directory.c_str(), FALSE, FILE_NOTIFY_CHANGE_FILE_NAME );
     if( _handle == INVALID_HANDLE_VALUE )  _handle = NULL, throw_mswin_error( "FindFirstChangeNotification" );

@@ -1,4 +1,4 @@
-// $Id: spooler_thread.cxx,v 1.5 2001/02/12 09:46:11 jz Exp $
+// $Id: spooler_thread.cxx,v 1.6 2001/02/12 15:41:39 jz Exp $
 /*
     Hier sind implementiert
 
@@ -136,7 +136,7 @@ bool Thread::step()
     {
         FOR_EACH( Job_list, _job_list, it )
         {
-            if( _event.signaled_then_reset() )  break;
+            if( _event.signaled_then_reset() )  return true;
             Job* job = *it;
             if( job->priority() >= _spooler->_priority_max )  something_done |= job->do_something();
         }
@@ -149,7 +149,7 @@ bool Thread::step()
     {
         FOR_EACH( Job_list, _job_list, it )
         {
-            if( _event.signaled_then_reset() )  break;
+            if( _event.signaled_then_reset() )  return true;
             Job* job = *it;
             for( int i = 0; i < job->priority(); i++ )  something_done |= job->do_something();
         }
@@ -162,7 +162,7 @@ bool Thread::step()
     {
         FOR_EACH( Job_list, _job_list, it )
         {
-            if( _event.signaled_then_reset() )  break;
+            if( _event.signaled_then_reset() )  return true;
             Job* job = *it;
             if( job->priority() == 0 )  job->do_something();
         }
@@ -176,26 +176,38 @@ bool Thread::step()
 void Thread::wait()
 {
     //tzset();
-    Job* next_job = NULL;
+    string msg;
 
     THREAD_LOCK( _lock )
     {
         _next_start_time = latter_day;
-        Time wait_time = latter_day;
 
-        FOR_EACH( Job_list, _job_list, it )
+        if( _spooler->_state == Spooler::s_paused )
         {
-            Job* job = *it;
-            if( job->_state == Job::s_pending ) 
+            msg = "Angehalten";
+        }
+        else
+        {
+            Job* next_job = NULL;
+
+            Time wait_time = latter_day;
+
+            FOR_EACH( Job_list, _job_list, it )
             {
-                if( _next_start_time > (*it)->_next_start_time )  next_job = *it, _next_start_time = next_job->_next_start_time;
+                Job* job = *it;
+                if( job->_state == Job::s_pending ) 
+                {
+                    if( _next_start_time > (*it)->_next_start_time )  next_job = *it, _next_start_time = next_job->_next_start_time;
+                }
             }
+
+            if( next_job )  msg = "Nächster Start " + _next_start_time.as_string() + " Job " + next_job->name();
+                      else  msg = "Kein Job zu starten";
         }
     }
 
-    if( next_job )  next_job->_log.msg( "Nächster Start " + _next_start_time.as_string() );
-              else  _log.msg( "Kein Job zu starten" );
-
+    //if( !_wait_handles.empty() )  msg += " oder " + _wait_handles.as_string();
+    _log.msg( msg );
 
 
 #   ifdef SYSTEM_WIN
@@ -230,28 +242,30 @@ int Thread::run_thread()
     {
         start();
 
-        while( !_stop )
+        while( _spooler->_state != Spooler::s_stopped )
         {
-            if( _running_tasks_count == 0 )  wait();
-
-            THREAD_LOCK( _spooler->_pause_lock );
-        
-            if( _spooler->_state == Spooler::s_running ) 
+            if( _spooler->_state == Spooler::s_paused )
             {
-                if( _stop )  break;
-
+                wait();
+            }
+            else
+            {
                 bool something_done = step();
-
+            
                 if( something_done )  nothing_done_count = 0;
                 else 
                 if( ++nothing_done_count > nothing_done_max )  _log.warn( "Nichts getan" ), sos_sleep(1);  // Warten, um bei Wiederholung zu bremsen
+
+                if( _running_tasks_count == 0 )  wait();
             }
+
+            _event.reset();
         }
 
         close();
     
         _log.msg( "Thread 0x" + as_hex_string( (int)_thread_id ) + " beendet sich" );
-        _spooler->signal();
+        _spooler->signal( "thread terminating" );
 
         ret = 0;
     }
@@ -263,7 +277,7 @@ int Thread::run_thread()
     {
         _log.error( "Thread wird wegen des Fehlers beendet" );
         close();
-        _spooler->signal();
+        _spooler->signal( "thread error" );
     }
     
     return ret;
@@ -298,7 +312,7 @@ void Thread::start_thread()
 }
 
 //------------------------------------------------------------------------------Thread::stop_thread
-
+/*
 void Thread::stop_thread()
 {
     if( _thread_handle )    // Thread überhaupt schon gestartet?
@@ -308,7 +322,7 @@ void Thread::stop_thread()
         signal();
     }
 }
-
+*/
 //------------------------------------------------------------------------Thread::interrupt_scripts
 
 void Thread::interrupt_scripts()

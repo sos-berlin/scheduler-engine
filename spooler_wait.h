@@ -1,4 +1,4 @@
-// $Id: spooler_wait.h,v 1.11 2001/02/10 11:38:07 jz Exp $
+// $Id: spooler_wait.h,v 1.12 2001/02/12 15:41:39 jz Exp $
 
 #ifndef __SPOOLER_WAIT_H
 #define __SPOOLER_WAIT_H
@@ -29,14 +29,14 @@ struct Event : Handle
 
     bool                        wait                        ( double wait_time );
     void                        set_signal                  ();
-    void                        signal                      ();
+    void                        signal                      ( const string& signal_name = "" );
   //virtual                     signal_event                ()                                  {}
     bool                        signaled                    () const                            { return _signaled; }
     bool                        signaled_then_reset         ();
-    void                        reset                       ()                                  { _signaled = false; }
+    void                        reset                       ()                                  { _signaled = false; _signal_name = ""; }
 
     string                      name                        () const                            { return _name; }
-    string                      as_string                   () const                            { return "Ereignis " + _name; }
+    string                      as_string                   () const;
     friend ostream&             operator <<                 ( ostream& s, const Event& w )      { return s << w.as_string(); }
 
 
@@ -46,10 +46,11 @@ struct Event : Handle
 
 
     Fill_zero                  _zero_;
-    string                     _name;
+    string                     _name;                       
+    string                     _signal_name;
     bool                       _signaled;
     Thread_semaphore           _lock;
-    bool                       _waiting;
+  //bool                       _waiting;
     vector<Wait_handles*>      _wait_handles;
 };
 
@@ -67,6 +68,10 @@ struct Wait_handles
     void                        remove                      ( Event* );
     void                        wait_until                  ( Time );
     void                        wait                        ( double time );
+    bool                        empty                       () const                        { return _events.empty(); }
+
+    string                      as_string                   () const;
+    friend ostream&             operator <<                 ( ostream& s, const Wait_handles& w ) { return s << w.as_string(); }
 
 
   protected:
@@ -80,7 +85,7 @@ struct Wait_handles
 
   public:
     Thread_semaphore           _lock;
-    bool                       _waiting;
+  //bool                       _waiting;
 };
 
 //--------------------------------------------------------------------------------Directory_watcher

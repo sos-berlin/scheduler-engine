@@ -1,4 +1,4 @@
-// $Id: spooler.h,v 1.46 2001/02/08 11:21:14 jz Exp $
+// $Id: spooler.h,v 1.47 2001/02/12 15:41:38 jz Exp $
 
 #ifndef __SPOOLER_H
 #define __SPOOLER_H
@@ -122,7 +122,7 @@ struct Spooler
     Job*                        get_job                     ( const string& job_name );
     void                        signal_object               ( const string& object_set_class_name, const Level& );
     void                        cmd_reload                  ();
-    void                        cmd_pause                   ()                                  { _state_cmd = sc_pause; signal(); }
+    void                        cmd_pause                   ()                                  { _state_cmd = sc_pause; signal( "pause" ); }
     void                        cmd_continue                ();
     void                        cmd_stop                    ();
     void                        cmd_terminate               ();
@@ -143,15 +143,16 @@ struct Spooler
 
     void                        start                       ();
     void                        stop                        ();
-    void                        stop_threads                ();
+    void                        signal_threads              ( const string& signal_name = "" );
+    void                        wait_until_threads_stopped  ();
     void                        reload                      ();
     void                        run                         ();
     void                        restart                     ();
 
-    void                        single_thread_step          ();
+  //void                        single_thread_step          ();
     void                        wait                        ();
 
-    void                        signal                      ()                                  { _event.signal(); }
+    void                        signal                      ( const string& signal_name = "" )  { _event.signal( signal_name ); }
 
 
     Fill_zero                  _zero_;
@@ -193,7 +194,6 @@ struct Spooler
     Event                      _event;                      
                                                             // <config> wird vom Haupt-Thread ausgeführt
     Thread_semaphore           _lock;
-    Thread_semaphore           _pause_lock;                 // Wenn _state == s_paused
 };
 
 

@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.24 2001/02/12 09:46:11 jz Exp $
+// $Id: spooler_task.cxx,v 1.25 2001/02/12 15:41:38 jz Exp $
 /*
     Hier sind implementiert
 
@@ -273,7 +273,7 @@ void Job::start_without_lock( const CComPtr<spooler_com::Ivariable_set>& params 
     create_task();
 
     _task->_let_run = true;
-    _thread->signal();
+    _thread->signal( "start job" );
 }
 
 //----------------------------------------------------------------Job::start_when_directory_changed
@@ -285,6 +285,9 @@ void Job::start_when_directory_changed( const string& directory_name )
 #   ifdef SYSTEM_WIN
 
         _directory_watcher.watch_directory( directory_name );
+        _directory_watcher.set_name( "job(\"" + _name + "\").start_when_directory_changed(\"" + directory_name + "\")" );
+
+
         _directory_watcher.add_to( &_thread->_wait_handles );
 
 #    else
@@ -377,25 +380,28 @@ void Job::set_next_start_time( Time now )
 
 bool Job::do_something()
 {
+    bool something_done = false;
     bool ok = true;
 
     if( _state_cmd )
     {
         switch( _state_cmd )
         {
-            case sc_stop:       stop(); 
+            case sc_stop:       if( _state != s_stopped )  stop(), something_done = true;
                                 break;
 
-            case sc_unstop:     if( _state == s_stopped )  set_state( s_pending );
+            case sc_unstop:     if( _state == s_stopped )  set_state( s_pending ), something_done = true;
                                 break;
 
-            case sc_start:      break;
-
-            case sc_suspend:    if( _state == s_running )  set_state( s_suspended );
+            case sc_end:        if( _state == s_running )  end(), something_done = true;
                                 break;
 
-            case sc_continue:   if( _state == s_suspended ) set_state( s_running );
+            case sc_suspend:    if( _state == s_running )  set_state( s_suspended ), something_done = true;
                                 break;
+
+            case sc_continue:   if( _state == s_suspended )  set_state( s_running ), something_done = true;
+                                break;
+
             default: ;
         }
 
@@ -403,8 +409,8 @@ bool Job::do_something()
     }
 
 
-    if( _state == s_stopped   )  return false;
-    if( _state == s_suspended )  return false;
+    if( _state == s_stopped   )  return something_done;
+    if( _state == s_suspended )  return something_done;
 
     if( _state == s_pending )
     {
@@ -412,6 +418,7 @@ bool Job::do_something()
 
         if( _directory_watcher.signaled() )  _directory_watcher.watch_again();
         THREAD_LOCK( _lock )  create_task();
+        something_done = true;
     }
 
     bool do_a_step = false;
@@ -420,6 +427,7 @@ bool Job::do_something()
     {
         ok = _task->start();
         if( ok )  do_a_step = true;
+        something_done = true;
     }
 
     if( ok && !has_error() )
@@ -435,14 +443,14 @@ bool Job::do_something()
                 call_step = _task->_let_run || _period.is_in_time(now);  // Gilt schon die nächste Periode?
             }
 
-            if( call_step )   ok = _task->step();
+            if( call_step )   ok = _task->step(), something_done = true;
         }
     }
 
     if( !ok || has_error() )
     {
-        end();
-        if( has_error()  &&  _repeat == 0 )  stop();     // Job nur stoppen, wenn spooler_task.repeat nicht gesetzt
+        if( _state == s_running )  end(), something_done = true;
+        if( _state != s_stopped  &&  has_error()  &&  _repeat == 0 )  stop(), something_done = true;
     }
 
     if( _state == s_ended ) 
@@ -450,9 +458,11 @@ bool Job::do_something()
         close_task();
         set_next_start_time();
         set_state( _next_start_time == latter_day? s_stopped : s_pending );
+        something_done = true;
+
     }
 
-    return true;
+    return something_done;
 }
 
 //-----------------------------------------------------------------------------------Job::set_error
@@ -542,7 +552,7 @@ void Job::set_state_cmd( State_cmd cmd )
     
     _state_cmd = cmd;
 
-    _thread->signal();
+    _thread->signal( state_cmd_name(cmd) );
 }
 
 //----------------------------------------------------------------------------------Job::state_name
@@ -687,7 +697,7 @@ void Task::close()
     do_close();
 
     // Alle, die mit wait_until_terminated() auf diese Task warten, wecken:
-    THREAD_LOCK( _terminated_events_lock )  FOR_EACH( vector<Event*>, _terminated_events, it )  (*it)->signal();
+    THREAD_LOCK( _terminated_events_lock )  FOR_EACH( vector<Event*>, _terminated_events, it )  (*it)->signal( "close task" );
 }
 
 //--------------------------------------------------------------------------------------Task::start

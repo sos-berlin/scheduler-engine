@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- $Id: spooler.dtd,v 1.15 2001/02/10 11:38:06 jz Exp $   Joacim Zschimmer,  (C) 2000 SOS GmbH Berlin  -->
+<!-- $Id: spooler.dtd,v 1.16 2001/02/12 15:41:38 jz Exp $   Joacim Zschimmer,  (C) 2000 SOS GmbH Berlin  -->
 
 
 <!ELEMENT spooler               ( config+ | command | answer )>
@@ -58,9 +58,6 @@
 <!ATTLIST job                   priority            CDATA '1'>          <!-- Höhere Zahl ist höhere Priorität -->
 <!ATTLIST job                   output_level        CDATA #IMPLIED>     <!-- Stufennummer. Auf diese Stufe werden die Objekte der Objektemenge gesetzt -->
 <!ATTLIST job                   spooler_id          CDATA ''>           <!-- "": Job läuft auf jedem Spooler, sonst nur Spooler mit derselben Spooler-Id -->
-<!--ATTLIST job                   rerun               (yes|no) 'no' >     <! Laufenden Job bei Abbruch und Neustart des Spoolers erneut starten -->
-<!--ATTLIST job                   stop_after_error    (yes|no) 'yes'>     <! Nach einem Fehler diesen Job nie wieder starten -->
-<!--ATTLIST job                   start_after_spooler (yes|no) 'no' >     <! Den Job auch nach verspätetem Start des Spoolers starten -->
 
 
 <!ELEMENT object_set            ( levels? )>
@@ -72,7 +69,7 @@
 
 <!ELEMENT process               EMPTY>
 <!ATTLIST process               file                CDATA #REQUIRED>
-<!ATTLIST process               param               CDATA ''>
+<!--ATTLIST process               param               CDATA ''-->
 
 <!-- wenn der DLL-Aufruf implementiert ist:
 <!ELEMENT module                EMPTY>

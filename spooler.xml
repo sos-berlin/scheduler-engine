@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 
-<!-- $Id: spooler.xml,v 1.30 2001/02/12 09:46:10 jz Exp $   (C) 2001 SOS GmbH Berlin -->
+<!-- $Id: spooler.xml,v 1.31 2001/02/12 15:41:38 jz Exp $   (C) 2001 SOS GmbH Berlin -->
 
 <!DOCTYPE spooler SYSTEM "spooler.dtd">
 
@@ -72,7 +72,6 @@ class Object_set_class
         dim file
         dim i
         
-spooler_job.start_when_directory_changed dir_name
         spooler_log.msg "spooler_open: [" & spooler_task.object_set.low_level & "," & spooler_task.object_set.high_level & "], spooler.param=" & spooler.param
 
         set files=fso.getFolder(dir_name).Files
@@ -300,36 +299,7 @@ spooler_log.msg "Spooler-Skript geladen."
                         <levels low="100" high="200"/>
                     </object_set>
 
-                    <run_time begin  = "00:00" 
-                              end    = "24:00" 
-                              repeat = "60">
-<!--
-                        <date date="2001-01-02"/>
-                        <date date="2001-01-09"/>
-
-                        <weekdays>
-                            <day day="1"/>
-                            <day day="2"/>
-                            <day day="5"/>
-                        </weekdays>
-
-                        <monthdays>
-                            <day day="2"/>
-                            <day day="3"/>
-                        </monthdays>
-
-                        <ultimos>
-                            <day day="0"/>
-                        </ultimos>
-
-                        <holiday date="2001-05-01"/>
-                        <holiday date="2001-12-24"/>
-                        <holiday date="2001-12-25"/>
-                        <holiday date="2001-12-26"/>
-                        <holiday date="2001-12-31"/>
-                        <holiday date="2002-01-01"/>
--->
-                    </run_time>
+                    <run_time repeat = "60"/>
 
                 </job>
 
@@ -433,7 +403,7 @@ sub spooler_exit()
 
                     ]]></script>
             
-                    <run_time repeat="1"/>
+                    <run_time repeat="7"/>
 
                 </job>
 

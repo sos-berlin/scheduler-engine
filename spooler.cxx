@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.50 2001/02/12 09:46:10 jz Exp $
+// $Id: spooler.cxx,v 1.51 2001/02/12 15:41:38 jz Exp $
 /*
     Hier sind implementiert
 
@@ -59,7 +59,7 @@ Spooler::Spooler()
 
 Spooler::~Spooler() 
 {
-    stop_threads();
+    wait_until_threads_stopped();
 
     _thread_list.clear();
     _object_set_class_list.clear();
@@ -75,15 +75,20 @@ Spooler::~Spooler()
     if( _com_log     )  _com_log->close();
 }
 
-//----------------------------------------------------------------------------Spooler::stop_threads
+//--------------------------------------------------------------Spooler::wait_until_threads_stopped
 
-void Spooler::stop_threads()
+void Spooler::wait_until_threads_stopped()
 {
-    { FOR_EACH( Thread_list, _thread_list, it )  (*it)->stop_thread(); }
-
     Time until = Time::now() + 10;
 
     { FOR_EACH( Thread_list, _thread_list, it )  (*it)->wait_until_thread_stopped( until ); }
+}
+
+//--------------------------------------------------------------------------Spooler::signal_threads
+
+void Spooler::signal_threads( const string& signal_name )
+{
+    FOR_EACH( Thread_list, _thread_list, it )  (*it)->signal( signal_name );
 }
 
 //---------------------------------------------------------------------------------Spooler::get_job
@@ -212,7 +217,8 @@ void Spooler::stop()
 
     _log.msg( "Spooler::stop" );
 
-    stop_threads();
+    signal_threads();
+    wait_until_threads_stopped();
 
     _object_set_class_list.clear();
     _thread_list.clear();
@@ -234,16 +240,15 @@ void Spooler::run()
 
         _event.reset();
 
-        if( _state_cmd == sc_pause                 )  set_state( s_paused ); 
-        if( _state_cmd == sc_continue              )  set_state( s_running );
+        if( _state_cmd == sc_pause                 )  set_state( s_paused ), signal_threads();
+        if( _state_cmd == sc_continue              )  set_state( s_running ),  signal_threads();
         if( _state_cmd == sc_load_config           )  break;
         if( _state_cmd == sc_reload                )  break;
         if( _state_cmd == sc_terminate             )  break;
         if( _state_cmd == sc_terminate_and_restart )  break;
         _state_cmd = sc_none;
 
-        if( _state == s_paused )  THREAD_LOCK( _pause_lock )  _wait_handles.wait_until( latter_day );
-                            else  _wait_handles.wait_until( latter_day );
+        _wait_handles.wait_until( latter_day );
     }
 }
 
@@ -258,7 +263,7 @@ void Spooler::cmd_load_config( const xml::Element_ptr& config )
         _state_cmd=sc_load_config; 
     }
 
-    signal(); 
+    signal( "load_config" ); 
 }
 
 //----------------------------------------------------------------------------Spooler::cmd_continue
@@ -266,7 +271,7 @@ void Spooler::cmd_load_config( const xml::Element_ptr& config )
 void Spooler::cmd_continue()
 { 
     if( _state == s_paused )  _state_cmd = sc_continue; 
-    signal(); 
+    signal( "continue" ); 
 }
 
 //------------------------------------------------------------------------------Spooler::cmd_reload
@@ -274,7 +279,7 @@ void Spooler::cmd_continue()
 void Spooler::cmd_reload()
 {
     _state_cmd = sc_reload;
-    signal();
+    signal( "reload" );
 }
 
 //--------------------------------------------------------------------------------Spooler::cmd_stop
@@ -282,7 +287,7 @@ void Spooler::cmd_reload()
 void Spooler::cmd_stop()
 {
     _state_cmd = sc_stop;
-    signal();
+    signal( "stop" );
 }
 
 //---------------------------------------------------------------------------Spooler::cmd_terminate
@@ -292,7 +297,7 @@ void Spooler::cmd_terminate()
     _log.msg( "Spooler::cmd_terminate" );
 
     _state_cmd = sc_terminate;
-    signal();
+    signal( "terminate" );
 }
 
 //---------------------------------------------------------------Spooler::cmd_terminate_and_restart
@@ -304,7 +309,7 @@ void Spooler::cmd_terminate_and_restart()
     if( _is_service )  throw_xc( "SPOOLER-114" );
 
     _state_cmd = sc_terminate_and_restart;
-    signal();
+    signal( "terminate_and_restart" );
 }
 
 //----------------------------------------------------------------------------------Spooler::launch
