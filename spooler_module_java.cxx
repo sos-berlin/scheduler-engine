@@ -1,4 +1,4 @@
-// $Id: spooler_module_java.cxx,v 1.78 2004/02/23 07:52:07 jz Exp $
+// $Id: spooler_module_java.cxx,v 1.79 2004/10/11 09:00:06 jz Exp $
 /*
     Hier sind implementiert
 
@@ -12,6 +12,7 @@
 
 #include "../kram/sos_java.h"
 #include "../zschimmer/java.h"
+#include "../zschimmer/system_command.h"
 
 #ifdef _DEBUG
 #   include "Debug/sos/spooler/Idispatch.h"
