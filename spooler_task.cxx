@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.66 2002/03/18 10:11:39 jz Exp $
+// $Id: spooler_task.cxx,v 1.67 2002/03/19 18:56:28 jz Exp $
 /*
     Hier sind implementiert
 
@@ -414,6 +414,10 @@ void Job::set_next_time( Time now )
     {
         _next_time = _period.end();
     }
+
+    // Gesammelte eMail senden`, wenn collected_max erreicht:
+    Time log_time = _log.collect_end();
+    if( log_time > now  &&  _next_time > log_time )  _next_time = log_time;
 }
 
 //-------------------------------------------------------------------------Job::set_next_start_time
@@ -924,7 +928,7 @@ bool Job::do_something()
 
     bool something_done = false;
     bool ok             = true;
-
+    bool do_a_step      = false;
 
     something_done = execute_state_cmd();
 
@@ -933,13 +937,11 @@ bool Job::do_something()
     if( _state == s_pending )  task_to_start();
 
     // Wenn nichts zu tun ist, dann raus. Der Job soll nicht wegen eines alten Fehlers nachträglich gestoppt werden (s.u.)
-    if( _state == s_pending    )  return something_done;    
-    if( _state == s_suspended  )  return something_done;
-    if( _state == s_stopped    )  return something_done;
-    if( _state == s_read_error )  return something_done;
+    if( _state == s_pending    )  goto ENDE;
+    if( _state == s_suspended  )  goto ENDE;
+    if( _state == s_stopped    )  goto ENDE;
+    if( _state == s_read_error )  goto ENDE;
 
-
-    bool do_a_step = false;
 
     if( _state == s_start_task )    // SPOOLER_INIT, SPOOLER_OPEN
     {
@@ -952,7 +954,7 @@ bool Job::do_something()
         if( _state == s_read_error )
         {
             close_task();
-            return something_done;
+            goto ENDE;
         }
     }
 
@@ -1015,7 +1017,24 @@ bool Job::do_something()
         something_done = true;
     }
 
+
+ENDE:
+    send_collected_log();
+
     return something_done;
+}
+
+//---------------------------------------------------------------------------Job::set_mail_defaults
+
+void Job::send_collected_log()
+{
+    try
+    {
+        _log.send( +2 );
+    }
+    catch( const Xc& x         ) { _spooler->_log.error(x.what()); }
+    catch( const exception&  x ) { _spooler->_log.error(x.what()); }
+    catch( const _com_error& x ) { _spooler->_log.error(bstr_as_string(x.Description())); }
 }
 
 //---------------------------------------------------------------------------Job::set_mail_defaults
@@ -1487,6 +1506,8 @@ void Task::on_error_on_success()
 {
     if( _job->has_error() )
     {
+        // spooler_on_error() wird auch gerufen, wenn spooler_init() einen Fehler hatte
+
         if( !_on_error_called )
         {
             _on_error_called = true;
@@ -1500,7 +1521,10 @@ void Task::on_error_on_success()
         }
     }
     else
+    if( _opened )   
     {
+        // spooler_on_success() wird nicht gerufen, wenn spooler_init() false lieferte
+
         try
         {
             do_on_success();
@@ -1586,7 +1610,7 @@ void Script_task::do_on_success()
     }
 }
 
-//-----------------------------------------------------------------Script_task::on_error_on_success
+//-------------------------------------------------------------------------Script_task::do_on_error
 
 void Script_task::do_on_error()
 {

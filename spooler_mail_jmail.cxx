@@ -1,4 +1,4 @@
-// $Id: spooler_mail_jmail.cxx,v 1.4 2002/03/14 17:26:50 jz Exp $
+// $Id: spooler_mail_jmail.cxx,v 1.5 2002/03/19 18:56:28 jz Exp $
 
 
 #include "../kram/sos.h"
@@ -121,6 +121,8 @@ void Com_mail::init()
     {
         hr = _msg.CreateInstance( __uuidof( jmail::Message ), NULL );
         if( FAILED(hr) )  throw_ole( hr, "CoCreateInstance", "jmail::Message" );
+
+        _msg->Encoding = "quoted-printable";  // Für Anhänge
     }
 }
 
@@ -142,7 +144,8 @@ void Com_mail::add_to_recipients( BSTR recipients, char recipient_type )
 
         switch( recipient_type )
         {
-            case 0: _msg->AddRecipient   ( addr_bstr, name_bstr, empty_bstr );  break;
+            case 0: _spooler->_prefix_log.debug9( "jmail.AddRecipient(\"" + addr._addr + "\",\"" + addr._name + "\")" );  // Uwe Risse hat hier ein Problem: "To:" wird umgebrochen.
+                    _msg->AddRecipient   ( addr_bstr, name_bstr, empty_bstr );  break;
             case 1: _msg->AddRecipientCC ( addr_bstr, name_bstr, empty_bstr );  break;
             case 2: _msg->AddRecipientBCC( addr_bstr,            empty_bstr );  break;
         };

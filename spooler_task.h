@@ -1,4 +1,4 @@
-// $Id: spooler_task.h,v 1.37 2002/03/18 10:11:40 jz Exp $
+// $Id: spooler_task.h,v 1.38 2002/03/19 18:56:28 jz Exp $
 
 #ifndef __SPOOLER_TASK_H
 #define __SPOOLER_TASK_H
@@ -209,6 +209,7 @@ struct Job : Sos_self_deleting
     bool                        do_something                ();
     bool                        should_removed              ()                          { return _temporary && _state == s_stopped; }
     void                        set_mail_defaults           ();
+    void                        send_collected_log          ();
 
     void                        set_repeat                  ( double seconds )          { _log.debug( "repeat=" + as_string(seconds) );  _repeat = seconds; }
 

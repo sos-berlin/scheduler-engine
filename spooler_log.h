@@ -1,4 +1,4 @@
-// $Id: spooler_log.h,v 1.12 2002/03/18 10:11:39 jz Exp $
+// $Id: spooler_log.h,v 1.13 2002/03/19 18:56:28 jz Exp $
 
 #ifndef __SPOOLER_LOG_H
 #define __SPOOLER_LOG_H
@@ -65,6 +65,7 @@ struct Prefix_log
     void                        init                        ( Spooler*, const string& prefix = empty_string );
     void                        open                        ();
     void                        close                       ();
+    void                        close2                      ();
 
     void                    set_append                      ( bool b )                          { _append = b; }
     void                    set_filename                    ( const string& );
@@ -81,6 +82,7 @@ struct Prefix_log
     Time                        collect_within              ()                                  { return _collect_within; }
     void                    set_collect_max                 ( Time time )                       { _collect_max = time; }
     Time                        collect_max                 ()                                  { return _collect_max; }
+    Time                        collect_end                 ()                                  { return _first_send? _first_send + _collect_max : 0; }
 
     void                    set_prefix                      ( const string& prefix )            { _prefix = prefix; }
     void                    set_profile_section             ( const string& section )           { _section = section; }
@@ -119,6 +121,7 @@ struct Prefix_log
     void                    set_mail_body                   ( const string&, bool overwrite = false );
 
     void                        send                        ( int reason );
+    void                        send_really                 ();
 
     friend struct               Log;
 

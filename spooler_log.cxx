@@ -1,4 +1,4 @@
-// $Id: spooler_log.cxx,v 1.29 2002/03/18 10:11:39 jz Exp $
+// $Id: spooler_log.cxx,v 1.30 2002/03/19 18:56:27 jz Exp $
 
 #include "../kram/sos.h"
 #include "spooler.h"
@@ -203,8 +203,7 @@ void Log::log2( Log_level level, const string& prefix, const string& line, Prefi
 Prefix_log::Prefix_log( int )
 :
     _zero_(this+1),
-    _file(-1),
-    _collect_max(900)       // Protokolle max. eine Viertelstunde sammeln
+    _file(-1)
 {
 }
 
@@ -262,16 +261,25 @@ void Prefix_log::open()
     reset_highest_level();
     _highest_msg = "";
     
-    if( _file != -1 )  throw_xc( "SPOOLER-134", _filename );
+    if( _file != -1 )  return; //throw_xc( "SPOOLER-134", _filename );
 
     if( !_filename.empty() )
     {
+        _mail_on_error   = _spooler->_mail_on_error;
+        _mail_on_process = _spooler->_mail_on_process;
+        _mail_on_success = _spooler->_mail_on_success;
+        _subject         = _spooler->_log_mail_subject;
+        _collect_within  = _spooler->_log_collect_within;
+        _collect_max     = _spooler->_log_collect_max;
+
         if( !_section.empty() ) 
         {
             _log_level       = make_log_level( read_profile_string( "factory.ini", _section.c_str(), "log_level", as_string(_log_level) ) );
-            _mail_on_error   = read_profile_bool  ( "factory.ini", _section.c_str(), "mail_on_error"   , _spooler->_mail_on_error );
-            _mail_on_success = read_profile_bool  ( "factory.ini", _section.c_str(), "mail_on_success" , _spooler->_mail_on_success );
-            _subject         = read_profile_string( "factory.ini", _section.c_str(), "log_mail_subject", _spooler->_log_mail_subject );
+            _mail_on_error   = read_profile_bool  ( "factory.ini", _section.c_str(), "mail_on_error"     , _mail_on_error );
+            _mail_on_success = read_profile_bool  ( "factory.ini", _section.c_str(), "mail_on_success"   , _mail_on_success );
+            _subject         = read_profile_string( "factory.ini", _section.c_str(), "log_mail_subject"  , _subject );
+            _collect_within  = (double)read_profile_uint  ( "factory.ini", _section.c_str(), "log_collect_within", _collect_within );
+            _collect_max     = (double)read_profile_uint  ( "factory.ini", _section.c_str(), "log_collect_max"   , _collect_max );
         }
 
 
@@ -289,9 +297,27 @@ void Prefix_log::open()
     }
 }
 
-//----------------------------------------------------------------------------------Prefix_log::log
+//--------------------------------------------------------------------------------Prefix_log::close
 
 void Prefix_log::close()
+{
+    if( _file != -1 )  
+    {
+        close2();
+
+        try
+        {
+            send_really();
+        }
+        catch( const Xc& x         ) { _spooler->_log.error(x.what()); }
+        catch( const exception&  x ) { _spooler->_log.error(x.what()); }
+        catch( const _com_error& x ) { _spooler->_log.error(bstr_as_string(x.Description())); }
+    }
+}
+
+//-------------------------------------------------------------------------------Prefix_log::close2
+
+void Prefix_log::close2()
 {
     if( _file != -1 )  
     {
@@ -353,7 +379,7 @@ spooler_com::Imail* Prefix_log::mail()
         if( !_body     .empty() )  set_mail_body     ( _body ),       _body      = "";
 
         CComBSTR jobname_bstr = _jobname.c_str();
-        _mail->add_header_field( L"X-SOS-Spooler-Job", jobname_bstr );
+        _mail->add_header_field( CComBSTR("X-SOS-Spooler-Job"), jobname_bstr );
     }
 
     return _mail;
@@ -469,7 +495,13 @@ void Prefix_log::send( int reason )
     // reason == +1  =>  Job ohne Fehler mit ersten spooler_process() return true beendet,
     // reason == +2  =>  Gelegentlicher Aufruf, um Fristen zu prüfen und ggfs. eMail zu versenden
 
-    if( _file != -1 )       // Nur senden, wenn die Log-Datei beschrieben worden ist
+    if( _file == -1 )       // Nur senden, wenn die Log-Datei beschrieben worden ist
+    {
+        _first_send = 0;
+        _last_send = 0;
+        _mail = NULL;
+    }
+    else
     {
         bool mail_it =  reason == -1  &&  _mail_on_error
                      || reason ==  0  &&  _mail_on_success
@@ -477,28 +509,40 @@ void Prefix_log::send( int reason )
 
         Time now = Time::now();
 
-        if( _first_send == 0 )  _first_send = now;
-
-        if( reason > 0  ||  now < _last_send + _collect_within  ||  now > _first_send + _collect_max )
+        if( _first_send == 0  &&  !mail_it )
         {
-            // Wenn die Protokolle in einer eMail gesammelt verschickt werden, wirken 
-            // mail_on_error==false oder mail_on_process==false nicht wie gewünscht,
-            // denn diese Bedingung wird erst festgestellt, wenn das Protokoll bereits geschrieben ist.
-
-            close();
-
-            mail()->add_file( CComBSTR( _filename.c_str() ), L"plain/text" );
-            mail()->send();
-
-            _last_send = now;
-            _first_send = 0;
+            close2();    // Protokoll nicht senden
+            _mail = NULL;
         }
         else
-        if( !mail_it )  close();
+        {
+            if( _last_send  == 0 )  _last_send  = now;
+            if( _first_send == 0 )  _first_send = now;
 
-        _last_send = now;
+            if( reason < 0                              // Fehler?
+             || now >= _last_send + _collect_within     // Nicht mehr sammeln?
+             || now >= _first_send + _collect_max )     // Lange genug gesammelt?
+            {
+                // Wenn die Protokolle in einer eMail gesammelt verschickt werden, wirken 
+                // mail_on_error==false oder mail_on_process==false nicht wie gewünscht,
+                // denn diese Bedingung wird erst festgestellt, wenn das Protokoll bereits geschrieben ist.
+
+                close2();
+                send_really();
+
+                _last_send = now;
+                _first_send = 0;
+            }
+        }
     }
+}
 
+//--------------------------------------------------------------------------Prefix_log::send_really
+
+void Prefix_log::send_really()
+{
+    mail()->add_file( CComBSTR( _filename.c_str() ), CComBSTR("plain/text") );
+    mail()->send();
     _mail = NULL;
 }
 
