@@ -1,4 +1,4 @@
-// $Id: spooler_module_java.cxx,v 1.28 2002/12/09 22:53:25 jz Exp $
+// $Id: spooler_module_java.cxx,v 1.29 2002/12/10 08:07:16 jz Exp $
 /*
     Hier sind implementiert
 
@@ -645,6 +645,11 @@ void Java_vm::init()
 
     LOG( "JNI_CreateJavaVM()\n" );
     ret = JNI_CreateJavaVM( &_vm, &_thread_data->_env._jenv, &_vm_args );
+
+    LOG( "setlocale(LC_ALL,\"C\")\n" );
+    const char* java_locale = setlocale( LC_ALL, "C" );
+    if( strcmp( java_locale, "C" ) != 0 )  LOG( "Javas locale war " << java_locale << "\n" );
+
     if( ret < 0 )  throw_java( ret, "JNI_CreateJavaVM", module_filename );
 
     JNIEnv* jenv = env();
