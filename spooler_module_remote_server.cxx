@@ -1,4 +1,4 @@
-// $Id: spooler_module_remote_server.cxx,v 1.5 2003/05/31 16:20:51 jz Exp $
+// $Id: spooler_module_remote_server.cxx,v 1.6 2003/05/31 16:33:24 jz Exp $
 /*
     Hier sind implementiert
 
@@ -20,26 +20,11 @@ extern Typelib_descr spooler_typelib;
 
 DESCRIBE_CLASS( &spooler_typelib, Remote_module_instance_server, remote_module_instance_server, CLSID_Remote_module_instance_server, "Spooler.Remote_module_instance_server", "1.0" )
 
-//---------------------------------------------------Remote_module_instance_server::create_instance
-
-HRESULT Remote_module_instance_server::create_instance( const IID& iid, ptr<IUnknown>* result )
-{
-    if( iid == IID_Iremote_module_instance_server )
-    {
-        ptr<Iremote_module_instance_server> instance = new Remote_module_instance_server;
-        *result = (spooler_com::Iremote_module_instance_server*)instance;
-        return S_OK;
-    }
-
-    return E_NOINTERFACE;
-}
-
 //-------------------------------------Remote_module_instance_server::Remote_module_instance_server
 
 Remote_module_instance_server::Remote_module_instance_server()
 :
     Com_module_instance_base( Z_NEW( Module( NULL, NULL ) ) ),
-    Sos_ole_object( remote_module_instance_server_class_ptr, (Iremote_module_instance_server*)this ),
     _zero_(this+1)
 {
 }
@@ -57,9 +42,63 @@ Remote_module_instance_server::~Remote_module_instance_server()
     _module_instance = NULL;
 }
 
-//----------------------------------------------------Remote_module_instance_server::QueryInterface
+//---------------------------------------------------Remote_module_instance_server::load_implicitly
 
-STDMETHODIMP Remote_module_instance_server::QueryInterface( const IID& iid, void** result )
+void Remote_module_instance_server::load_implicitly()
+{
+    if( !_loaded_and_started )
+    {
+        _module_instance->load();
+        _module_instance->start();
+        _loaded_and_started = true;
+    }
+}
+
+//----------------------------------------------------------Remote_module_instance_server::_methods
+#ifdef Z_COM
+
+const Com_method Remote_module_instance_server::_methods[] =
+{ 
+   // _flags              , _name             , _method                                                     , _result_type  , _types        , _default_arg_count
+    { DISPATCH_METHOD     , 1, "construct"    , (Com_method_ptr)&Remote_module_instance_server::construct   , VT_EMPTY      , { VT_ARRAY|VT_VARIANT } },
+    { DISPATCH_METHOD     , 2, "add_obj"      , (Com_method_ptr)&Remote_module_instance_server::add_obj     , VT_EMPTY      , { VT_DISPATCH, VT_BSTR } },
+    { DISPATCH_METHOD     , 3, "name_exists"  , (Com_method_ptr)&Remote_module_instance_server::name_exists , VT_BOOL       , { VT_BSTR } },
+    { DISPATCH_METHOD     , 4, "call"         , (Com_method_ptr)&Remote_module_instance_server::call        , VT_VARIANT    , { VT_BSTR } },
+    {}
+};
+
+#endif
+//-----------------------------------------------Com_remote_module_instance_server::create_instance
+
+HRESULT Com_remote_module_instance_server::create_instance( const IID& iid, ptr<IUnknown>* result )
+{
+    if( iid == IID_Iremote_module_instance_server )
+    {
+        ptr<Iremote_module_instance_server> instance = new Com_remote_module_instance_server;
+        *result = +instance;
+        return S_OK;
+    }
+
+    return E_NOINTERFACE;
+}
+
+//-----------------------------Com_remote_module_instance_server::Com_remote_module_instance_server
+
+Com_remote_module_instance_server::Com_remote_module_instance_server()
+:
+    Sos_ole_object( remote_module_instance_server_class_ptr, (Iremote_module_instance_server*)this )
+{
+}
+
+//----------------------------Com_remote_module_instance_server::~Com_remote_module_instance_server
+
+Com_remote_module_instance_server::~Com_remote_module_instance_server()
+{
+}
+
+//------------------------------------------------Com_remote_module_instance_server::QueryInterface
+
+STDMETHODIMP Com_remote_module_instance_server::QueryInterface( const IID& iid, void** result )
 {
     if( iid == IID_IUnknown )
     {
@@ -82,27 +121,13 @@ STDMETHODIMP Remote_module_instance_server::QueryInterface( const IID& iid, void
     }
     else
     {
-        return Object::QueryInterface( iid, result );
+        return E_NOINTERFACE;
     }
 }
 
-//----------------------------------------------------------Remote_module_instance_server::_methods
-#ifdef Z_COM
+//-----------------------------------------------------Com_remote_module_instance_server::construct
 
-const Com_method Remote_module_instance_server::_methods[] =
-{ 
-   // _flags              , _name             , _method                                                     , _result_type  , _types        , _default_arg_count
-    { DISPATCH_METHOD     , 1, "construct"    , (Com_method_ptr)&Remote_module_instance_server::construct   , VT_EMPTY      , { VT_ARRAY|VT_VARIANT } },
-    { DISPATCH_METHOD     , 2, "add_obj"      , (Com_method_ptr)&Remote_module_instance_server::add_obj     , VT_EMPTY      , { VT_DISPATCH, VT_BSTR } },
-    { DISPATCH_METHOD     , 3, "name_exists"  , (Com_method_ptr)&Remote_module_instance_server::name_exists , VT_BOOL       , { VT_BSTR } },
-    { DISPATCH_METHOD     , 4, "call"         , (Com_method_ptr)&Remote_module_instance_server::call        , VT_VARIANT    , { VT_BSTR } },
-    {}
-};
-
-#endif
-//---------------------------------------------------------Remote_module_instance_server::construct
-
-STDMETHODIMP Remote_module_instance_server::construct( SAFEARRAY* safearray )
+STDMETHODIMP Com_remote_module_instance_server::construct( SAFEARRAY* safearray )
 {
     HRESULT hr = NOERROR;
 
@@ -118,85 +143,72 @@ STDMETHODIMP Remote_module_instance_server::construct( SAFEARRAY* safearray )
             if( !value )  throw_xc( "_spooler_construct" );
             value++;
 
-            if( olestring_begins_with( V_BSTR( &params[i] ), "language="   ) )  _module->_language        = string_from_ole( value );
+            if( olestring_begins_with( V_BSTR( &params[i] ), "language="   ) )  _server._module->_language        = string_from_ole( value );
             else                                                                         
-            if( olestring_begins_with( V_BSTR( &params[i] ), "com_class="  ) )  _module->_com_class_name  = string_from_ole( value );
+            if( olestring_begins_with( V_BSTR( &params[i] ), "com_class="  ) )  _server._module->_com_class_name  = string_from_ole( value );
             else                                                                         
-            if( olestring_begins_with( V_BSTR( &params[i] ), "filename="   ) )  _module->_filename        = string_from_ole( value );
+            if( olestring_begins_with( V_BSTR( &params[i] ), "filename="   ) )  _server._module->_filename        = string_from_ole( value );
             else
-            if( olestring_begins_with( V_BSTR( &params[i] ), "java_class=" ) )  _module->_java_class_name = string_from_ole( value );
+            if( olestring_begins_with( V_BSTR( &params[i] ), "java_class=" ) )  _server._module->_java_class_name = string_from_ole( value );
             else
-            if( olestring_begins_with( V_BSTR( &params[i] ), "recompile="  ) )  _module->_recompile       = value[0] == '1';
+            if( olestring_begins_with( V_BSTR( &params[i] ), "recompile="  ) )  _server._module->_recompile       = value[0] == '1';
             else
-            if( olestring_begins_with( V_BSTR( &params[i] ), "script="     ) )  _module->_source          = string_from_ole( value );
+            if( olestring_begins_with( V_BSTR( &params[i] ), "script="     ) )  _server._module->_source          = string_from_ole( value );
             else
                 throw_xc( "server::construct" );
         }
 
-        _module->init();
-        _module->set_source_only( _module->_source );
-        _module_instance = _module->create_instance();
-        _module_instance->init();
+        _server._module->init();
+        _server._module->set_source_only( _server._module->_source );
+        _server._module_instance = _server._module->create_instance();
+        _server._module_instance->init();
     }
     catch( const exception& x ) { hr = com_set_error( x, "Remote_module_instance_server::construct" ); }
 
     return hr;
 }
 
-//-----------------------------------------------------------Remote_module_instance_server::add_obj
+//-------------------------------------------------------Com_remote_module_instance_server::add_obj
 
-STDMETHODIMP Remote_module_instance_server::add_obj( IDispatch* object, BSTR name )
+STDMETHODIMP Com_remote_module_instance_server::add_obj( IDispatch* object, BSTR name )
 {
     HRESULT hr = NOERROR;
 
     try
     {
-        _module_instance->add_obj( object, string_from_bstr(name) );
+        _server._module_instance->add_obj( object, string_from_bstr(name) );
     }
     catch( const exception& x ) { hr = com_set_error( x, "Remote_module_instance_server::add_obj" ); }
 
     return hr;
 }
 
+//---------------------------------------------------Com_remote_module_instance_server::name_exists
 
-//---------------------------------------------------Remote_module_instance_server::load_implicitly
-
-void Remote_module_instance_server::load_implicitly()
-{
-    if( !_loaded_and_started )
-    {
-        _module_instance->load();
-        _module_instance->start();
-        _loaded_and_started = true;
-    }
-}
-
-//-------------------------------------------------------Remote_module_instance_server::name_exists
-
-STDMETHODIMP Remote_module_instance_server::name_exists( BSTR name, VARIANT_BOOL* result )
+STDMETHODIMP Com_remote_module_instance_server::name_exists( BSTR name, VARIANT_BOOL* result )
 {
     HRESULT hr = NOERROR;
 
     try
     {
-        load_implicitly();
-        *result = _module_instance->name_exists( string_from_bstr(name) );
+        _server.load_implicitly();
+        *result = _server._module_instance->name_exists( string_from_bstr(name) );
     }
     catch( const exception& x ) { hr = com_set_error( x, "Remote_module_instance_server::name_exists" ); }
 
     return hr;
 }
 
-//--------------------------------------------------------------Remote_module_instance_server::call
+//----------------------------------------------------------Com_remote_module_instance_server::call
 
-STDMETHODIMP Remote_module_instance_server::call( BSTR name, VARIANT* result )
+STDMETHODIMP Com_remote_module_instance_server::call( BSTR name, VARIANT* result )
 {
     HRESULT hr = NOERROR;
 
     try
     {
-        load_implicitly();
-        _module_instance->call( string_from_bstr(name) ).CopyTo( result );
+        _server.load_implicitly();
+        _server._module_instance->call( string_from_bstr(name) ).CopyTo( result );
     }
     catch( const exception& x ) { hr = com_set_error( x, "Remote_module_instance_server::call" ); }
 

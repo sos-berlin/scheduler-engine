@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.208 2003/05/31 16:20:50 jz Exp $
+// $Id: spooler.cxx,v 1.209 2003/05/31 16:33:24 jz Exp $
 /*
     Hier sind implementiert
 
@@ -1580,7 +1580,7 @@ int object_server( int argc, char** argv )
 {
     zschimmer::com::object_server::Server server;
 
-    server.register_class( spooler_com::CLSID_Remote_module_instance_server, Remote_module_instance_server::create_instance );
+    server.register_class( spooler_com::CLSID_Remote_module_instance_server, Com_remote_module_instance_server::create_instance );
 
     return server.main( argc, argv, true );
 }
