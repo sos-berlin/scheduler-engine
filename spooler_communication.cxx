@@ -1,4 +1,4 @@
-// $Id: spooler_communication.cxx,v 1.45 2002/12/04 19:48:08 jz Exp $
+// $Id: spooler_communication.cxx,v 1.46 2002/12/05 15:52:32 jz Exp $
 /*
     Hier sind implementiert
 
@@ -13,16 +13,17 @@
 #include "../kram/sleep.h"
 
 
-#ifdef SYSTEM_WIN
-    const int ENOTSOCK = 10038;
-#endif
-
 using namespace std;
 
 namespace sos {
 namespace spooler {
 
 const int wait_for_port_available = 15;   // Soviele Sekunden warten, bis TCP- oder UDP-Port frei wird
+
+#ifdef Z_WINDOWS
+    const int ENOTSOCK = 10038;
+    const int EADDRINUSE = WSAEADDRINUSE;
+#endif
 
 //---------------------------------------------------------------------------------------get_errno
 
