@@ -1,4 +1,4 @@
-// $Id: spooler_job.cxx,v 1.52 2003/12/31 11:05:47 jz Exp $
+// $Id: spooler_job.cxx,v 1.53 2004/01/04 07:04:42 jz Exp $
 /*
     Hier sind implementiert
 
@@ -45,6 +45,14 @@ string start_cause_name( Start_cause cause )
     }
 }
 
+//----------------------------------------------------------------------Job::Delay_after_error::set
+/*
+void Job::Delay_after_error::set( int error_steps, const Time& delay )
+{
+    Map::iterator last = _map.rbegin();
+    _map[ error_steps ] = delay;
+}
+*/
 //-----------------------------------------------------------------------------------------Job::Job
 
 Job::Job( Spooler* spooler )
@@ -919,7 +927,10 @@ Sos_ptr<Task> Job::task_to_start()
             {
                 if( _start_once )              cause = cause_period_once,  _start_once = false,     log_line += "Task startet wegen <run_time once=\"yes\">\n";
                 else
-                if( now >= _next_start_time )  cause = cause_period_repeat,                         log_line += "Task startet, weil Job-Startzeit erreicht: " + _next_start_time.as_string();
+                if( now >= _next_start_time )  
+                    if( _delay_until && now >= _delay_until )
+                                               cause = cause_delay_after_error,                     log_line += "Task startet wegen delay_after_error\n";
+                                          else cause = cause_period_repeat,                         log_line += "Task startet, weil Job-Startzeit erreicht: " + _next_start_time.as_string();
 
 
 #ifdef Z_UNIX

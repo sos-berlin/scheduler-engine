@@ -1,4 +1,4 @@
-// $Id: spooler.odl,v 1.71 2003/12/09 21:01:12 jz Exp $
+// $Id: spooler.odl,v 1.72 2004/01/04 07:04:42 jz Exp $
 
 // Anweisung: midl /nologo /error all /out $(OutDir) $(InputPath)
 
@@ -280,6 +280,8 @@ library spooler
 
         [propput]
         HRESULT                 max_order_setbacks          ( [in] int setback_count );
+
+        HRESULT                 clear_delay_after_error     ();
     }
 
     [

@@ -1,4 +1,4 @@
-// $Id: spooler_com.h,v 1.86 2003/12/09 21:01:12 jz Exp $
+// $Id: spooler_com.h,v 1.87 2004/01/04 07:04:42 jz Exp $
 
 #ifndef __SPOOLER_COM_H
 #define __SPOOLER_COM_H
@@ -367,6 +367,7 @@ struct Com_job : spooler_com::Ijob,
     STDMETHODIMP                get_order_queue             ( spooler_com::Iorder_queue** );
     STDMETHODIMP                put_delay_order_after_setback( int setback_number, VARIANT* time );
     STDMETHODIMP                put_max_order_setbacks      ( int );
+    STDMETHODIMP                clear_delay_after_error     ();
 
 
   private:

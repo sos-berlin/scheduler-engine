@@ -1,4 +1,4 @@
-// $Id: spooler_job.h,v 1.17 2003/12/31 11:05:47 jz Exp $
+// $Id: spooler_job.h,v 1.18 2004/01/04 07:04:42 jz Exp $
 
 #ifndef __SPOOLER_JOB_H
 #define __SPOOLER_JOB_H
@@ -149,6 +149,23 @@ struct Job : Sos_self_deleting
     };
 
 
+/*
+    struct Delay_after_error
+    {
+                              //Delay_after_error           ()                                      : _max_errors_then_stop(0) {}
+
+        bool                    empty                       ()                                      { return _map.empty(); }
+        void                    set                         ( int error_steps, const Time& delay );
+        void                    set_stop                    ( int error_steps )                     { set( error_steps, latter_day ); }
+        void                    clear                       ()                                      { _map.clear(); }
+
+        typedef map< int, Time >  Map;
+        Map                    _map;
+
+      //int                    _max_errors_then_stop;       // Bei dieser Fehlerzahl soll der Job gestoppt werden (und nicht mehr verzögert)
+    };
+*/
+
 
     typedef list< Sos_ptr<Task> >               Task_queue;
     typedef list< Sos_ptr<Task> >               Task_list;
@@ -178,8 +195,10 @@ struct Job : Sos_self_deleting
     string                      jobname_as_filename         ();
     string                      profile_section             ();
     bool                        temporary                   () const                                { return _temporary; }
-    void                        set_delay_after_error       ( int error_steps, Time delay )         { _log.debug9( "delay_after_error["        +as_string(error_steps)+"]="+delay.as_string() ); _delay_after_error        [error_steps] = delay; }
-    void                        set_delay_order_after_setback( int setbacks, Time delay )           { _log.debug9( "delay_order_after_setback["+as_string(setbacks  )+"]="+delay.as_string() ); _delay_order_after_setback[setbacks   ] = delay; }
+    void                        set_delay_after_error       ( int error_steps, Time delay )         { _log.debug9( "delay_after_error["        +as_string(error_steps)+"]="+delay.as_string() ); _delay_after_error[ error_steps ] = delay; }
+    void                        set_stop_after_error        ( int error_steps )                     { _log.debug9( "delay_after_error["        +as_string(error_steps)+"]=\"STOP\""           ); _delay_after_error[ error_steps ] = latter_day; }
+    void                        clear_delay_after_error     ()                                      { _log.debug9( "clear_delay_after_error()" ); _delay_after_error.clear(); }
+    void                        set_delay_order_after_setback( int setbacks, Time delay )           { _log.debug9( "delay_order_after_setback["+as_string(setbacks   )+"]="+delay.as_string() ); _delay_order_after_setback[setbacks   ] = delay; }
     Time                        get_delay_order_after_setback( int setback_count );
     void                        set_max_order_setbacks      ( int n )                               { _log.debug9( "max_order_setbacks"+as_string(n) ); _max_order_setbacks = n; }
     int                         max_order_setbacks          () const                                { return _max_order_setbacks; }

@@ -1,4 +1,4 @@
-// $Id: spooler_com.cxx,v 1.129 2003/12/23 11:13:38 jz Exp $
+// $Id: spooler_com.cxx,v 1.130 2004/01/04 07:04:42 jz Exp $
 /*
     Hier sind implementiert
 
@@ -1461,6 +1461,7 @@ const Com_method Com_job::_methods[] =
     { DISPATCH_PROPERTYGET, 12, "java_class_name"               , (Com_method_ptr)&Com_job::get_java_class_name         , VT_BSTR },
     { DISPATCH_PROPERTYPUT, 13, "delay_order_after_setback"     , (Com_method_ptr)&Com_job::put_delay_order_after_setback,VT_EMPTY      , { VT_I4, VT_BYREF|VT_VARIANT } },
     { DISPATCH_PROPERTYPUT, 14, "max_order_setbacks"            , (Com_method_ptr)&Com_job::put_max_order_setbacks      , VT_EMPTY      , { VT_I4 } },
+    { DISPATCH_METHOD     , 15, "clear_delay_after_error"       , (Com_method_ptr)&Com_job::clear_delay_after_error     , VT_EMPTY      },
     {}
 };
 
@@ -1690,10 +1691,36 @@ STDMETHODIMP Com_job::put_delay_after_error( int error_steps, VARIANT* time )
     {
         if( !_job )  throw_xc( "SCHEDULER-122" );
 
-        _job->set_delay_after_error( error_steps, time_from_variant(*time) );
+        if( time->vt == VT_BSTR  &&  stricmp( string_from_variant( *time ).c_str(), "stop" ) == 0 )
+        {
+            _job->set_stop_after_error( error_steps );
+        }
+        else
+        {
+            _job->set_delay_after_error( error_steps, time_from_variant(*time) );
+        }
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Job.delay_after_error" ); }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Job.delay_after_error" ); }
+
+    return hr;
+}
+
+//-----------------------------------------------------------------Com_job::clear_delay_after_error
+
+STDMETHODIMP Com_job::clear_delay_after_error()
+{
+    HRESULT hr = NOERROR;
+
+    THREAD_LOCK( _lock )
+    try
+    {
+        if( !_job )  throw_xc( "SCHEDULER-122" );
+
+        _job->clear_delay_after_error();
+    }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Job.clear_delay_after_error" ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Job.clear_delay_after_error" ); }
 
     return hr;
 }

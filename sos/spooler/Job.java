@@ -1,10 +1,10 @@
-// $Id: Job.java,v 1.4 2003/06/08 10:00:51 jz Exp $
+// $Id: Job.java,v 1.5 2004/01/04 07:04:42 jz Exp $
 
 package sos.spooler;
 
 /**
  * @author Joacim Zschimmer, Zschimmer GmbH
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 
 public class Job extends Idispatch
@@ -27,4 +27,5 @@ public class Job extends Idispatch
     public void         set_delay_after_error   ( int error_steps, double seconds ) {                     com_call( ">delay_after_error", new Integer(error_steps), new Double(seconds)   ); }
     public void         set_delay_after_error   ( int error_steps, String hhmm_ss ) {                     com_call( ">delay_after_error", new Integer(error_steps), hhmm_ss   ); }
     public Order_queue      order_queue         ()                                  { return (Order_queue)com_call( "<order_queue"                  ); }
+    public void             clear_delay_after_error()                               {                     com_call( "clear_delay_after_error"       ); }
 }

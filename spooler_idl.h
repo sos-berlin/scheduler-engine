@@ -1,4 +1,4 @@
-// $Id: spooler_idl.h,v 1.27 2003/12/09 21:01:12 jz Exp $
+// $Id: spooler_idl.h,v 1.28 2004/01/04 07:04:42 jz Exp $
 
 
 /*  Ersatz für spooler.odl für Systeme ohne COM. 
@@ -175,6 +175,7 @@ struct Ijob : IDispatch
     virtual HRESULT     get_order_queue                 ( Iorder_queue** result ) = 0;
     virtual HRESULT     put_delay_order_after_setback   ( int, VARIANT* time ) = 0;
     virtual HRESULT     put_max_order_setbacks          ( int ) = 0; 
+    virtual HRESULT         clear_delay_after_error     () = 0;
 };
 
 //-----------------------------------------------------------------------------------------Task
