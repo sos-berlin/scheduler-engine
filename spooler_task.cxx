@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.72 2002/03/21 19:04:31 jz Exp $
+// $Id: spooler_task.cxx,v 1.73 2002/03/22 09:05:39 jz Exp $
 /*
     Hier sind implementiert
 
@@ -1401,6 +1401,7 @@ Task::Task( Spooler* spooler, const Sos_ptr<Job>& job )
 }
 
 //---------------------------------------------------------------------------------------Task::Task
+// Kann von anderem Thread gerufen werden, wenn der noch eine COM-Referenz hat
 
 Task::~Task()    
 {
@@ -1408,15 +1409,29 @@ Task::~Task()
 }
 
 //--------------------------------------------------------------------------------------Task::close
+// Kann von anderem Thread gerufen werden, wenn der noch eine COM-Referenz hat
 
 void Task::close()
 {
-    if( _job->_com_task )  THREAD_LOCK( _job->_lock )  _job->_com_task->set_task( NULL );
+    if( _closed )  return;
+    
+    {
+        THREAD_LOCK( _job->_lock )  
+            if( _job->_com_task )  
+                if( _job->_com_task->task() == this )      // spooler_task?
+                    _job->_com_task->set_task(NULL);
+    }
 
     do_close();
 
     // Alle, die mit wait_until_terminated() auf diese Task warten, wecken:
-    THREAD_LOCK( _terminated_events_lock )  FOR_EACH( vector<Event*>, _terminated_events, it )  (*it)->signal( "close task" );
+    THREAD_LOCK( _terminated_events_lock )  
+    {
+        FOR_EACH( vector<Event*>, _terminated_events, it )  (*it)->signal( "close task" );
+        _terminated_events.clear();
+    }
+
+    _closed = true;
 }
 
 //-------------------------------------------------------------------------------Task::set_start_at
@@ -1629,11 +1644,12 @@ void Script_task::do_on_error()
 }
 
 //------------------------------------------------------------------------Object_set_task::do_close
+// Kann von anderem Thread gerufen werden, wenn der noch eine COM-Referenz hat
 
 void Object_set_task::do_close()
 {
     // COM-Objekte entkoppeln, falls noch jemand eine Referenz darauf hat:
-    if( _com_object_set )  _com_object_set->close();
+    if( _com_object_set )  _com_object_set->clear();
 }
 
 //-------------------------------------------------------------------------Object_set_task::do_load

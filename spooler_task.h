@@ -1,4 +1,4 @@
-// $Id: spooler_task.h,v 1.39 2002/03/20 10:30:13 jz Exp $
+// $Id: spooler_task.h,v 1.40 2002/03/22 09:05:40 jz Exp $
 
 #ifndef __SPOOLER_TASK_H
 #define __SPOOLER_TASK_H
@@ -301,7 +301,7 @@ struct Job : Sos_self_deleting
 
     CComPtr<Com_job>           _com_job;
     CComPtr<Com_log>           _com_log;
-    CComPtr<Com_task>          _com_task;                   // Objekt bleibt, Inhalt wechselt über die Tasks hinweg
+    CComPtr<Com_task>          _com_task;                   // Objekt bleibt, Inhalt wechselt über die Tasks hinweg (für use_engine="job")
     Xc_copy                    _error;
     bool                       _close_engine;               // Bei einem Fehler in spooler_init()
     Sos_ptr<Task>              _task;                       // Es kann nur eine Task geben. Zirkel: _task->_job == this
@@ -362,6 +362,7 @@ struct Task : Sos_self_deleting
     bool                       _let_run;                    // Task zuende laufen lassen, nicht bei _job._period.end() beenden
     bool                       _opened;
     bool                       _on_error_called;
+    bool                       _closed;
 
     Time                       _enqueue_time;
     Time                       _start_at;                   // Zu diesem Zeitpunkt (oder danach) starten

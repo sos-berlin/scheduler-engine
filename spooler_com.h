@@ -1,4 +1,4 @@
-// $Id: spooler_com.h,v 1.26 2002/03/18 10:11:39 jz Exp $
+// $Id: spooler_com.h,v 1.27 2002/03/22 09:05:39 jz Exp $
 
 #ifndef __SPOOLER_COM_H
 #define __SPOOLER_COM_H
@@ -165,7 +165,7 @@ struct Com_object_set : spooler_com::Iobject_set, Sos_ole_object
 
     USE_SOS_OLE_OBJECT
 
-    void                        close                       ()                              { _object_set = NULL; }
+    void                        clear                       ()                                      { _object_set = NULL; }
 
     STDMETHODIMP                get_low_level               ( int* );
     STDMETHODIMP                get_high_level              ( int* );
@@ -215,6 +215,7 @@ struct Com_task : spooler_com::Itask, Sos_ole_object
     USE_SOS_OLE_OBJECT
 
     void                        set_task                    ( Task* );
+    Task*                       task                        () const                                { return _task; }
 
     STDMETHODIMP                get_object_set              ( spooler_com::Iobject_set** );
     STDMETHODIMP                put_error                   ( VARIANT* error_text );
@@ -223,8 +224,8 @@ struct Com_task : spooler_com::Itask, Sos_ole_object
     STDMETHODIMP                get_params                  ( spooler_com::Ivariable_set** );
     STDMETHODIMP                wait_until_terminated       ( double wait_time, VARIANT_BOOL* ok );
     STDMETHODIMP                end                         ();
-    STDMETHODIMP                put_result                  ( VARIANT* value );             //{ return _result.Copy(value); }
-    STDMETHODIMP                get_result                  ( VARIANT* value );             //{ VariantInit(value); return VariantCopy(value,&_result); }
+    STDMETHODIMP                put_result                  ( VARIANT* value );
+    STDMETHODIMP                get_result                  ( VARIANT* value );
     STDMETHODIMP                put_repeat                  ( double seconds );
 
   private:
