@@ -1,4 +1,4 @@
-// $Id: spooler_job.cxx,v 1.19 2003/09/02 13:04:29 jz Exp $
+// $Id: spooler_job.cxx,v 1.20 2003/09/02 13:57:14 jz Exp $
 /*
     Hier sind implementiert
 
@@ -123,6 +123,7 @@ void Job::set_dom( const xml::Element_ptr& element, const Time& xml_mod_time )
         _title            = element.     getAttribute( "title"      , _title      );
         _log_append       = element.bool_getAttribute( "log_append" , _log_append );
         order             = element.bool_getAttribute( "order"      );
+        _max_tasks        = element.uint_getAttribute( "tasks"      , 1 );
         string t          = element.     getAttribute( "timeout"    );
         if( t != "" )  
         {
@@ -903,7 +904,7 @@ Sos_ptr<Task> Job::task_to_start()
   //if( _state == s_pending )
     {
         task = dequeue_task( now );
-        if( task )  task->_cause = task->_start_at? cause_queue_at : cause_queue;
+        if( task )  cause = task->_start_at? cause_queue_at : cause_queue;
             
         if( _state == s_pending && now >= _next_single_start )  cause = cause_period_single;     
                                                           else  select_period(now);
