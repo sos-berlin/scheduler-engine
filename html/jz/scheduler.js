@@ -1,4 +1,4 @@
-// $Id: scheduler.js,v 1.5 2004/12/05 11:26:11 jz Exp $
+// $Id: scheduler.js,v 1.6 2004/12/08 12:35:06 jz Exp $
 
 //----------------------------------------------------------------------------------------------var
 
@@ -552,7 +552,7 @@ function popup_menu__show_log__onclick( show_log_command, window_name )
 
 //--------------------------------------------------------------------------scheduler_menu__onclick
 
-function scheduler_menu__onclick()
+function scheduler_menu__onclick( x, y )
 {
     var popup_builder = new Popup_menu_builder();
 
@@ -574,12 +574,12 @@ function scheduler_menu__onclick()
     popup_builder.add_command ( "Abort immediately"              , command( "abort_immediately"             ) );
     popup_builder.add_command ( "Abort immediately and restart"  , command( "abort_immediately_and_restart" ) );
 
-    _popup_menu = popup_builder.show_popup_menu();
+    _popup_menu = popup_builder.show_popup_menu( x, y );
 }
 
 //--------------------------------------------------------------------------------job_menu__onclick
 
-function job_menu__onclick( job_name )
+function job_menu__onclick( x, y, job_name )
 {
     var popup_builder = new Popup_menu_builder();
 
@@ -607,12 +607,12 @@ function job_menu__onclick( job_name )
     popup_builder.add_command ( "Suspend tasks" , "<modify_job job='" + job_name + "' cmd='suspend' />" );
     popup_builder.add_command ( "Continue tasks", "<modify_job job='" + job_name + "' cmd='continue'/>" );
 
-    _popup_menu = popup_builder.show_popup_menu();
+    _popup_menu = popup_builder.show_popup_menu( x, y );
 }
 
 //-------------------------------------------------------------------------------task_menu__onclick
 
-function task_menu__onclick( task_id )
+function task_menu__onclick( x, y, task_id )
 {
     var popup_builder = new Popup_menu_builder();
 
@@ -621,33 +621,19 @@ function task_menu__onclick( task_id )
     popup_builder.add_command ( "End"             , "<kill_task job='" + _job_name + "' id='" + task_id + "'/>" );
     popup_builder.add_command ( "Kill immediately", "<kill_task job='" + _job_name + "' id='" + task_id + "' immediately='yes'/>" );
 
-    _popup_menu = popup_builder.show_popup_menu();
-}
-
-//-------------------------------------------------------------------------------task_menu__onclick
-
-function task_menu__onclick( task_id )
-{
-    var popup_builder = new Popup_menu_builder();
-
-    popup_builder.add_show_log( "Show log"        , "show_log?task=" + task_id, "show_log_task_" + task_id );
-    popup_builder.add_bar();
-    popup_builder.add_command ( "End"             , "<kill_task job='" + _job_name + "' id='" + task_id + "'/>" );
-    popup_builder.add_command ( "Kill immediately", "<kill_task job='" + _job_name + "' id='" + task_id + "' immediately='yes'/>" );
-
-    _popup_menu = popup_builder.show_popup_menu();
+    _popup_menu = popup_builder.show_popup_menu( x, y );
 }
 
 //------------------------------------------------------------------------------order_menu__onclick
 
-function order_menu__onclick( job_chain_name, order_id )
+function order_menu__onclick( x, y, job_chain_name, order_id )
 {
     var popup_builder = new Popup_menu_builder();
 
     popup_builder.add_show_log( "Show log"        , "show_log?job_chain=" + job_chain_name +
                                                             "&order=" + order_id, "show_log_order_" + job_chain_name + "__" + order_id );
 
-    _popup_menu = popup_builder.show_popup_menu();
+    _popup_menu = popup_builder.show_popup_menu( x, y );
 }
 
 //-------------------------------------------------------------------------------string_from_object
@@ -695,6 +681,35 @@ function scheduler_init()
 {
     Popup_menu_builder.prototype.add_command  = Popup_menu_builder__add_command;
     Popup_menu_builder.prototype.add_show_log = Popup_menu_builder__add_show_log;
+}
+
+//-----------------------------------------------------------------------------document.onmousemove
+
+if( typeof window.event == "undefined" )
+{
+    document.captureEvents( Event.MOUSEMOVE );
+
+    document.onmousemove = function onmousemove( e )
+    {
+        _mouse_x = e.pageX; 
+        _mouse_y = e.pageY; 
+    }
+}
+
+//------------------------------------------------------------------------------------------mouse_x
+
+function mouse_x()
+{ 
+    return typeof window.event != "undefined"? document.body.scrollLeft + event.clientX
+                                             : _mouse_x;
+}
+
+//------------------------------------------------------------------------------------------mouse_y
+
+function mouse_y()
+{ 
+    return typeof window.event != "undefined"? document.body.scrollTop  + event.clientY
+                                             : _mouse_y;
 }
 
 //-------------------------------------------------------------------------------string_from_object

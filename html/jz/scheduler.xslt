@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding="utf-8"?>
-<!-- $Id: scheduler.xslt,v 1.7 2004/12/05 11:26:11 jz Exp $ -->
+<!-- $Id: scheduler.xslt,v 1.8 2004/12/08 12:35:06 jz Exp $ -->
 <xsl:stylesheet xmlns:xsl   = "http://www.w3.org/1999/XSL/Transform" 
                 xmlns:msxsl = "urn:schemas-microsoft-com:xslt"
                 version     = "1.0">
@@ -95,13 +95,13 @@
         <xsl:param name="title"/>
         <xsl:param name="class"/>
 
-        <td style="margin-bottom: 0pt; padding: 1ex 0pt 0pt 5pt">
+        <td style="margin-bottom: 0pt; padding: 1ex 0pt 1px 5pt">
         <!--    onmouseover="this.className='hover'"
             onmouseout ="this.className=''"-->
 
             <xsl:element name="span">
                 <xsl:attribute name="onclick">call_error_checked( show_card, '<xsl:value-of select="$name"/>' )</xsl:attribute>
-                <xsl:attribute name="style"  >cursor: pointer; padding: 1pt 4pt 4pt 4pt</xsl:attribute>
+                <xsl:attribute name="style"  >cursor: pointer; padding: 1pt 4pt 2px 4pt</xsl:attribute>
                 <xsl:attribute name="class"><xsl:value-of select="$class"/></xsl:attribute>
                 <xsl:element name="span">
                     <xsl:if test="/spooler/@my_show_card=$name ">
@@ -163,7 +163,7 @@
                     <a href="/doc/index.xml" target="documentation" class="small">Doku</a>&#160;
                     
                     <xsl:call-template name="command_menu">
-                        <xsl:with-param name="onclick" select="'scheduler_menu__onclick()'"/>
+                        <xsl:with-param name="onclick" select="'scheduler_menu__onclick( mouse_x() - 100, mouse_y() - 1 )'"/>
                     </xsl:call-template>
                 </td>
             </tr>
@@ -738,7 +738,7 @@
                 
                 <td>
                     <xsl:call-template name="command_menu">
-                        <xsl:with-param name="onclick" select="concat( 'order_menu__onclick(&quot;', @job_chain, '&quot;, &quot;', @id, '&quot;)' )"/>
+                        <xsl:with-param name="onclick" select="concat( 'order_menu__onclick( mouse_x() - 20, mouse_y() - 1, &quot;', @job_chain, '&quot;, &quot;', @id, '&quot;)' )"/>
                     </xsl:call-template>
                 </td>
                 
@@ -944,7 +944,7 @@
                             
                             <td align="right" style="padding-right: 0pt">
                                 <xsl:call-template name="command_menu">
-                                    <xsl:with-param name="onclick" select="concat( 'job_menu__onclick(&quot;', @job, '&quot;)' )"/>
+                                    <xsl:with-param name="onclick" select="concat( 'job_menu__onclick(  mouse_x() - 90, mouse_y() - 1, &quot;', @job, '&quot;)' )"/>
                                 </xsl:call-template>
                             </td>
                         </tr>
@@ -1099,7 +1099,7 @@
                             <xsl:if test="@id">
                                 <td align="right" valign="top" style="padding-right: 0pt">
                                     <xsl:call-template name="command_menu">
-                                        <xsl:with-param name="onclick" select="concat( 'task_menu__onclick(', @id, ')' )"/>
+                                        <xsl:with-param name="onclick" select="concat( 'task_menu__onclick(  mouse_x() - 70, mouse_y() - 1, ', @id, ')' )"/>
                                     </xsl:call-template>
                                 </td>
                             </xsl:if>
@@ -1264,7 +1264,7 @@
                             
                             <td align="right">
                                 <xsl:call-template name="command_menu">
-                                    <xsl:with-param name="onclick" select="concat( 'order_menu__onclick(&quot;', @job_chain, '&quot;, &quot;', @id, '&quot;)' )"/>
+                                    <xsl:with-param name="onclick" select="concat( 'order_menu__onclick( mouse_x() - 70, mouse_y() - 1, &quot;', @job_chain, '&quot;, &quot;', @id, '&quot;)' )"/>
                                 </xsl:call-template>
                             </td>
                         </xsl:element>

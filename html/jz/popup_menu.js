@@ -1,8 +1,7 @@
-// $Id: popup_menu.js,v 1.4 2004/12/03 18:39:00 jz Exp $
+// $Id: popup_menu.js,v 1.5 2004/12/08 12:35:06 jz Exp $
 
 var __current_popup_menu;
 
-//-------------------------------------------------------------------------------------------------
 //---------------------------------------------------------------------------------------Popup_menu
 
 function Popup_menu()
@@ -110,11 +109,11 @@ Popup_menu_builder.prototype.html = function()
 {
     if( !this._finished )
     {
-        if( window.createPopup == undefined )       // Solange das Popupmenü nicht durch einen Klick woandershin verschwindet (wie beim Internet Explorer)
-        {
-            this.add_bar();
-            this.add_entry( "(close menu)", "__current_popup_menu.close()" );
-        }
+        //if( window.createPopup == undefined )       // Solange das Popupmenü nicht durch einen Klick woandershin verschwindet (wie beim Internet Explorer)
+        //{
+        //    this.add_bar();
+        //    this.add_entry( "(close menu)", "__current_popup_menu.close()" );
+        //}
     
         this._html_array.push( "<tr><td style='background-color: menu; line-height: 3pt'>&#160;</td></tr>" );
         this._html_array.push( "</table>" );
@@ -136,9 +135,10 @@ Popup_menu_builder.prototype.create_popup_menu = function()
         {
             var body = document.getElementsByTagName( "body" )[ 0 ];
             div = body.ownerDocument.createElement( "div" );
-            div.setAttribute( "id"   , "__popup_menu__" );
-            div.setAttribute( "style", "visibility: hidden" );
-          //div.setAttribute( "onblur", "alert(1);__current_popup_menu.close()" );
+            div.setAttribute( "id"         , "__popup_menu__" );
+            div.setAttribute( "style"      , "visibility: hidden" );
+            div.setAttribute( "onmouseout" , "__current_popup_menu._close_timer = setTimeout( '__current_popup_menu.close()' , 200 )" );
+            div.setAttribute( "onmouseover", "clearTimeout( __current_popup_menu._close_timer )" );          
             body.appendChild( div );
         }
         
@@ -158,7 +158,7 @@ Popup_menu_builder.prototype.create_popup_menu = function()
 
 //---------------------------------------------------------------Popup_menu_builder.show_popup_menu
 
-Popup_menu_builder.prototype.show_popup_menu = function()
+Popup_menu_builder.prototype.show_popup_menu = function( x, y )
 {
     this.create_popup_menu();
     
@@ -168,8 +168,11 @@ Popup_menu_builder.prototype.show_popup_menu = function()
     {
         var div = document.getElementById( "__popup_menu__" );
 
-        div.style.left       = "0px";
-        div.style.top        = "0px";
+        if( x == undefined )  x = 0, y = 0;
+
+
+        div.style.left       = x + "px";
+        div.style.top        = y + "px";
         div.style.width      = "10px";
         div.style.position   = "absolute";
         div.style.zIndex     = 999;

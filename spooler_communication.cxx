@@ -1,4 +1,4 @@
-// $Id: spooler_communication.cxx,v 1.100 2004/12/03 18:38:59 jz Exp $
+// $Id: spooler_communication.cxx,v 1.101 2004/12/08 12:35:06 jz Exp $
 /*
     Hier sind implementiert
 
@@ -652,8 +652,8 @@ bool Communication::Channel::async_continue_( bool wait )
     }
     catch( const Xc& x ) 
     { 
-        if( strcmp( x.code(), "SOCKET-53" ) == 0                                 // ECONNABORT, Firefox trennt sich so
-         || strcmp( x.code(), "SOCKET-54" ) == 0 )  _log.warn( x.what() );       // ECONNRESET, Internet Explorer trennt sich so
+        if( strcmp( x.code(), "SOCKET-53" ) == 0                                  // ECONNABORT, Firefox trennt sich so
+         || strcmp( x.code(), "SOCKET-54" ) == 0 )  _log.debug( x.what() );       // ECONNRESET, Internet Explorer trennt sich so
                                               else  _log.error( x.what() );  
 
         _communication->remove_channel( this );  
