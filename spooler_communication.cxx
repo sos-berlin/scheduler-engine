@@ -1,4 +1,4 @@
-// $Id: spooler_communication.cxx,v 1.9 2001/01/13 10:45:52 jz Exp $
+// $Id: spooler_communication.cxx,v 1.10 2001/01/13 18:41:19 jz Exp $
 
 //#include <precomp.h>
 
@@ -248,6 +248,13 @@ Communication::Communication( Spooler* spooler )
 
 Communication::~Communication()
 {
+    close();
+}
+
+//-----------------------------------------------------------------------------Communication::close
+
+void Communication::close()
+{
     {
         Thread_semaphore::Guard guard = &_semaphore;
 
@@ -261,7 +268,7 @@ Communication::~Communication()
     if( _thread ) 
     {
         WaitForSingleObject( _thread, 1000 );
-        CloseHandle( _thread );
+        _thread.close();
     }
 }
 
@@ -408,8 +415,6 @@ bool Communication::handle_socket( Channel* channel )
 
 int Communication::run()
 {
-    start();
-
     while(1) 
     {
         {
@@ -519,6 +524,8 @@ static ulong __stdcall thread( void* param )
 void Communication::start_thread()
 {
     DWORD thread_id;
+
+    start();    // Ports öffnen
 
     _thread = CreateThread( NULL,                        // no security attributes 
                             0,                           // use default stack size  

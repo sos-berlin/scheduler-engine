@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 
-<!-- $Id: spooler_config.xml,v 1.22 2001/01/13 10:45:52 jz Exp $   (C) 2000 SOS GmbH Berlin -->
+<!-- $Id: spooler_config.xml,v 1.23 2001/01/13 18:41:19 jz Exp $   (C) 2000 SOS GmbH Berlin -->
 
 <!DOCTYPE spooler_config SYSTEM "spooler_config.dtd">
 
@@ -8,15 +8,18 @@
 
     <script language="VBScript"><![CDATA[
 
-dim spooler_param
+dim global
 
 class Global_class
     function method()
-        method="Ich bin von der globalen Methode" & ", spooler_param=" & spooler_param
+        method="Ich bin von der globalen Methode" & ", spooler.param=" & spooler.param
     end function
 end class
 
-set global = new Global_class 
+sub spooler_init
+    set global = new Global_class 
+    spooler_log.msg "spooler_init des Spooler-Skripts ausgeführt"
+end sub
 
 spooler_log.msg "Spooler-Skript geladen."   
 
@@ -35,7 +38,6 @@ spooler_log.msg "Spooler-Skript geladen."
             <script use_engine="job"><![CDATA[
 
 dir_name = "c:\tmp\spooler"
-dim spooler_param
 set fso = createobject( "Scripting.FileSystemObject" )
 script_index = 0
 
@@ -71,7 +73,9 @@ class Object_set_class
         dim file
         dim i
         
-        spooler_log.msg "spooler_param=" & spooler_param
+        spooler_log.msg "spooler.param=" & spooler.param
+        spooler_log.msg "spooler_task.object_set.low_level=" & spooler_task.object_set.low_level
+        spooler_log.msg "spooler_task.object_set.high_level=" & spooler_task.object_set.high_level
 
         set files=fso.getFolder(dir_name).Files
         
@@ -112,16 +116,15 @@ class Object_set_class
     end function
 
     
-
-    public spooler_low_level      '<levels low=... >
-    public spooler_high_level     '<levels high=... >
-    public spooler_param          '-object-set-param=...
-
     private file_array
     private index
 
 end class
 
+
+sub spooler_init
+    spooler_task.wake_when_directory_changed dir_name
+end sub
 
 
 function spooler_make_object_set
@@ -141,7 +144,7 @@ end function
                 <level_decl level="3" name="Stufe 3"/>
             </level_decls>
 
-            <script language="PerlScript" use_engine="job"><![CDATA[
+            <script language="PerlScript" use_engine="task"><![CDATA[
 
 use diagnostics;
 use Win32::OLE;
@@ -195,6 +198,7 @@ $spooler_log->msg( "*Job Perl" );
     sub spooler_open
     {
         my $self = shift;
+        $main::spooler_log->msg( "spooler_open [" . $self->{spooler_low_level} . "," . $self->{spooler_high_level} . ")" );
     }
 
 
@@ -239,8 +243,6 @@ sub spooler_make_object_set()
 
 my $object_set_class;
 my $object;
-my $spooler_low_level;
-my $spooler_high_level;
 
 sub spooler_dont_use_objects() 
 { 
@@ -248,10 +250,15 @@ sub spooler_dont_use_objects()
     return; 
 }
 
+sub spooler_init()
+{
+    return;
+}
+
 sub spooler_open()
 {
-    $object_set_class->{spooler_low_level} = $spooler_low_level;
-    $object_set_class->{spooler_high_level} = $spooler_high_level;
+    $object_set_class->{spooler_low_level} = $spooler_task->object_set->{low_level};
+    $object_set_class->{spooler_high_level} = $spooler_task->object_set->{high_level};
     $object_set_class->spooler_open();
     return; 
 }
@@ -302,15 +309,15 @@ sub spooler_process()
 
             <run_time begin        = "07:11:55" 
                       end          = "24:00" 
-                      retry_period = "9">
-
+                      retry_period = "60">
+<!--
                 <date date="2001-01-02"/>
                 <date date="2001-01-09"/>
 
                 <weekdays>
                     <day day="1"/>
                     <day day="2"/>
-                    <day day="5"/>
+                    <day day="6"/>
                 </weekdays>
 
                 <monthdays>
@@ -328,7 +335,7 @@ sub spooler_process()
                 <holiday date="2001-12-26"/>
                 <holiday date="2001-12-31"/>
                 <holiday date="2002-01-01"/>
-
+-->
             </run_time>
 
         </job>
@@ -343,9 +350,12 @@ spooler_log.msg "*Job einfach"
 
 index = 1
 
+sub spooler_init()
+end sub
+
 function step()
     spooler_log.msg "*Job einfach: step " & index
-    spooler_log.msg "*Job einfach: step " & spooler_script.global.method()
+    spooler_log.msg "*Job einfach: step " & spooler.script.global.method()
     index = index + 1
     if index > 3 then step=false: exit function
     step = true
@@ -353,7 +363,7 @@ end function
 
             ]]></script>
 
-            <run_time retry_period="10"/>
+            <run_time retry_period="9"/>
 
         </job>
 

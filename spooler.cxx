@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.25 2001/01/13 10:45:51 jz Exp $
+// $Id: spooler.cxx,v 1.26 2001/01/13 18:41:18 jz Exp $
 
 
 /*
@@ -28,8 +28,6 @@ namespace sos {
 extern const Bool _dll = false;
 
 namespace spooler {
-
-using namespace std;
 
 //---------------------------------------------------------------------------------------------now
 
@@ -186,20 +184,20 @@ void Object_set::open()
     {
         _dispatch = _script_instance._script_site->_dispatch;
     }
-
+/*
     if( !_use_objects && stricmp( _script_instance._script->_language.c_str(), "PerlScript" ) == 0 )
     {
-        _script_instance._script_site->parse( "$spooler_low_level="  + as_string( _object_set_descr->_level_interval._low_level ) + ";" );
-        _script_instance._script_site->parse( "$spooler_high_level=" + as_string( _object_set_descr->_level_interval._high_level ) + ";" );
-        _script_instance._script_site->parse( "$spooler_param="      + quoted_string( _spooler->_spooler_param, '\'', '\\' ) + ";" );
+      //_script_instance._script_site->parse( "$spooler_low_level="  + as_string( _object_set_descr->_level_interval._low_level ) + ";" );
+      //_script_instance._script_site->parse( "$spooler_high_level=" + as_string( _object_set_descr->_level_interval._high_level ) + ";" );
+      //_script_instance._script_site->parse( "$spooler_param="      + quoted_string( _spooler->_spooler_param, '\'', '\\' ) + ";" );
     }
     else
     {
         com_property_put( _dispatch, "spooler_low_level" , _object_set_descr->_level_interval._low_level );
         com_property_put( _dispatch, "spooler_high_level", _object_set_descr->_level_interval._high_level );
-        com_property_put( _dispatch, "spooler_param"     , _spooler->_spooler_param.c_str() );
+      //com_property_put( _dispatch, "spooler_param"     , _spooler->_spooler_param.c_str() );
     }
-
+*/
     com_call( _dispatch, "spooler_open" );
 }
 
@@ -394,16 +392,23 @@ Task::Task( Spooler* spooler, const Sos_ptr<Job>& job )
     set_new_start_time();
     _state = s_pending;
     _priority = _job->_priority;
+
+    _com_log  = new Com_log( this );
+    _com_task = new Com_task( this );
 }
 
 //-----------------------------------------------------------------------------------------Task::Task
 
 Task::~Task()    
 {
-    _log.msg( "~Task " );
-
     if( _script_instance )  _script_instance->close();
-    if( _com_log )  _com_log->close();
+
+    // COM-Objekte entkoppeln, falls noch jemand eine Referenz darauf hat:
+    if( _com_object_set  )  _com_object_set->close();
+    if( _com_task        )  _com_task->close();
+    if( _com_log         )  _com_log->close();
+
+    if( _directory_watcher )  _spooler->_wait_handles.remove( _directory_watcher._handle );
 }
 
 //--------------------------------------------------------------------------Task::set_new_start_time
@@ -470,13 +475,15 @@ void Task::prepare_script()
         _script_instance = s;
         _script_instance->init();
 
-        if( !_spooler->_script_instance._script->empty() )  
-            _script_instance->add_obj( _spooler->_script_instance.dispatch(), "spooler_script" );
+      //if( !_spooler->_script_instance._script->empty() )  
+      //    _script_instance->add_obj( _spooler->_script_instance.dispatch(), "spooler_script" );
 
-        if( !_com_log )  _com_log = new Com_log( this );
-        _script_instance->add_obj( (IDispatch*)_com_log, "spooler_log" );
-    
+        _script_instance->add_obj( (IDispatch*)_com_log              , "spooler_log"  );
+        _script_instance->add_obj( (IDispatch*)_spooler->_com_spooler, "spooler"      );
+        _script_instance->add_obj( (IDispatch*)_com_task             , "spooler_task" );
+
         _script_instance->load();
+        if( _script_instance->name_exists( "spooler_init" ) )  _script_instance->call( "spooler_init" );
     }
 }
 
@@ -496,6 +503,7 @@ bool Task::start()
             if( !_object_set  ||  _script_instance->_script->_reuse == Script::reuse_task ) 
             {
                 _object_set = SOS_NEW( Object_set( _spooler, this, _job->_object_set_descr ) );
+                _com_object_set = new Com_object_set( _object_set );
             }
         }
 
@@ -521,8 +529,11 @@ bool Task::start()
 
 void Task::end()
 {
+    if( _state == s_ending )  return;   // end() schon einmal gerufen und dabei abgebrochen?
     if( _state == s_suspended )  _state = s_running;
     if( _state != s_running )  return;
+
+    _state = s_ending;
 
     _log.msg( "end" );
 
@@ -630,23 +641,23 @@ bool Task::do_something()
     {
         case s_stopped:     break;
 
-        case s_pending:     if( now() >= _next_start_time )
+        case s_pending:     if( _directory_watcher._signaled || now() >= _next_start_time )
                             {
                                 ok = start();  if(!ok) break;
 
                                 ok = step();
-                                if( !ok )  end();
+                                if( !ok )  { end(); break; }
 
-                                something_done = ok;
+                                something_done = true;
                             }
                             break;
 
-        case s_running:     if( _run_until_end | _job->_run_time.should_run_now() )
+        case s_running:     if( _run_until_end | _directory_watcher._signaled | _job->_run_time.should_run_now() )
                             {
                                 ok = step();
-                                if( !ok )  end();
+                                if( !ok )  { end(); break; }
 
-                                something_done = ok;
+                                something_done = true;
                             }
                             else
                             {
@@ -658,6 +669,8 @@ bool Task::do_something()
 
         default:            ;
     }
+
+    if( _directory_watcher._signaled ) _directory_watcher.watch_again();
 
     return something_done;
 }
@@ -781,6 +794,22 @@ string Task::state_cmd_name( Task::State_cmd cmd )
     }
 }
 
+//----------------------------------------------------------------Task::wake_when_directory_changed 
+
+void Task::wake_when_directory_changed( const string& directory_name )
+{
+#   ifdef SYSTEM_WIN
+
+        _directory_watcher.watch_directory( directory_name );
+        _spooler->_wait_handles.add( _directory_watcher._handle, this );
+
+#    else
+
+        throw_xc( "SPOOLER-112", "wake_when_directory_changed" );
+
+#   endif
+}
+
 //---------------------------------------------------------------------------------Spooler::Spooler
 
 Spooler::Spooler() 
@@ -791,13 +820,24 @@ Spooler::Spooler()
     _command_processor(this), 
     _log(this)
 {
+    _com_log     = new Com_log( &_log );
+    _com_spooler = new Com_spooler( this );
 }
 
 //--------------------------------------------------------------------------------Spooler::~Spooler
 
 Spooler::~Spooler() 
 {
-    if( _com_log )  _com_log->close();
+    _task_list.clear();
+    _job_list.clear();
+    _object_set_class_list.clear();
+
+    _script_instance.close();
+    _communication.close();
+
+    // COM-Objekte entkoppeln, falls noch jemand eine Referenz darauf hat:
+    if( _com_spooler )  _com_spooler->close();
+    if( _com_log     )  _com_log->close();
 }
 
 //--------------------------------------------------------------------------------Spooler::load_arg
@@ -847,21 +887,26 @@ void Spooler::load()
 
 void Spooler::start()
 {
-    _state = s_starting;
-
     _log.set_directory( _log_directory );
     _log.open_new();
+
+    if( _state_cmd == sc_reload )  _communication.rebind();
+                             else  _communication.start_thread();
+    _state_cmd = sc_none;
+
+    _state = s_starting;
     _log.msg( "Spooler::start" );
 
     if( !_script_instance._script->empty() )
     {
         _script_instance.init();
 
-        if( !_com_log )  _com_log = new Com_log( &_log );
+        _script_instance.add_obj( (IDispatch*)_com_spooler, "spooler" );
         _script_instance.add_obj( (IDispatch*)_com_log, "spooler_log" );
 
-        _script_instance.optional_property_put( "spooler_param", _spooler_param.c_str() );
         _script_instance.load();
+      //_script_instance.optional_property_put( "spooler_param", _spooler_param.c_str() );
+        if( _script_instance.name_exists( "spooler_init" ) )  _script_instance.call( "spooler_init" );
     }
     
 
@@ -989,12 +1034,20 @@ void Spooler::wait()
             if( next_task )  next_task->_log.msg( "Nächster Start " + Sos_optional_date_time( _next_start_time ).as_string() );
                        else  _log.msg( "Kein Job zu starten" );
 
-            while( _sleeping  &&  wait_time > 0 )
-            {
-                double sleep_time = 1.0;
-                sos_sleep( min( sleep_time, wait_time ) );
-                wait_time -= sleep_time;
-            }
+#           ifdef SYSTEM_WIN
+
+                _wait_handles.wait( wait_time );
+ 
+#            else
+
+                while( _sleeping  &&  wait_time > 0 )
+                {
+                    double sleep_time = 1.0;
+                    sos_sleep( min( sleep_time, wait_time ) );
+                    wait_time -= sleep_time;
+                }
+
+#           endif
 
             _sleeping = false;
         }
@@ -1074,6 +1127,21 @@ void Spooler::cmd_terminate_and_restart()
     cmd_wake();
 }
 
+//--------------------------------------------------------------------------------Spooler::cmd_wake
+
+void Spooler::cmd_wake()
+{
+#   ifdef SYSTEM_WIN
+
+        SetEvent( _command_arrived_event );
+
+#    else
+
+        _sleeping = false;
+
+#   endif
+}
+
 //----------------------------------------------------------------------------------Spooler::launch
 
 int Spooler::launch( int argc, char** argv )
@@ -1081,14 +1149,15 @@ int Spooler::launch( int argc, char** argv )
     _argc = argc;
     _argv = argv;
 
+#   ifdef SYSTEM_WIN
+        _command_arrived_event = CreateEvent( NULL, FALSE, FALSE, NULL );
+        if( !_command_arrived_event )  throw_mswin_error( "CreateEvent" );
+        _wait_handles.add( _command_arrived_event );
+#   endif
+
     do
     {
         load();
-
-        if( _state_cmd == sc_reload )  _communication.rebind();
-                                 else  _communication.start_thread();
-
-        _state_cmd = sc_none;
 
         start();
 

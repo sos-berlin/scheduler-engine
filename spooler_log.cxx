@@ -1,4 +1,4 @@
-// $Id: spooler_log.cxx,v 1.5 2001/01/13 10:45:52 jz Exp $
+// $Id: spooler_log.cxx,v 1.6 2001/01/13 18:41:19 jz Exp $
 
 #include "../kram/sos.h"
 #include "../kram/sosdate.h"
@@ -6,11 +6,6 @@
 
 namespace sos {
 namespace spooler {
-
-//-------------------------------------------------------------------------------Typbibliothek
-
-Typelib_descr   spooler_typelib ( LIBID_spooler, "Spooler", "1.0" );
-DESCRIBE_CLASS( &spooler_typelib, Com_log, spooler_log, CLSID_Spooler_log, "Spooler.Log", "1.0", 0 );
 
 //-----------------------------------------------------------------------------------------Log::Log
 
@@ -84,7 +79,7 @@ void Log::open_new( )
 
 //-----------------------------------------------------------------------------------------Log::log
 
-void Log::log( Kind kind, const string& prefix, const string& line )
+void Log::log( Log_kind kind, const string& prefix, const string& line )
 {
     Thread_semaphore::Guard guard = &_semaphore;
     char buffer[100];
@@ -95,9 +90,9 @@ void Log::log( Kind kind, const string& prefix, const string& line )
 
     switch( kind )
     {
-        case k_msg  : strcat( buffer, " msg   " );  break;
-        case k_warn : strcat( buffer, " WARN  " );  break;
-        case k_error: strcat( buffer, " ERROR " );  break;
+        case log_msg  : strcat( buffer, " msg   " );  break;
+        case log_warn : strcat( buffer, " WARN  " );  break;
+        case log_error: strcat( buffer, " ERROR " );  break;
         default: ;
     }
 
@@ -120,65 +115,11 @@ Task_log::Task_log( Log* log, Task* task )
 
 //------------------------------------------------------------------------------------Task_log::log
 
-void Task_log::log( Log::Kind kind, const string& line )
+void Task_log::log( Log_kind kind, const string& line )
 {
     _log->log( kind, _prefix, line );
 }
 
-//---------------------------------------------------------------------------------Com_log::Com_log
-#ifdef SYSTEM_WIN
-
-Com_log::Com_log( Log* log )
-:
-    Sos_ole_object( spooler_log_class_ptr, this, NULL ),
-    _zero_(this+1),
-    _log(log)
-{ 
-}
-
-#endif
-//---------------------------------------------------------------------------------Com_log::Com_log
-#ifdef SYSTEM_WIN
-
-Com_log::Com_log( Task* task )
-:
-    Sos_ole_object( spooler_log_class_ptr, this, NULL ),
-    _zero_(this+1),
-    _task(task)
-{ 
-}
-
-#endif
-//---------------------------------------------------------------------------------Com_log::Com_log
-#ifdef SYSTEM_WIN
-/*
-Com_log::~Com_log()
-{ 
-}
-*/
-#endif
-//-------------------------------------------------------------------------------------Com_log::log
-#ifdef SYSTEM_WIN
-
-STDMETHODIMP Com_log::log( Log::Kind kind, BSTR line )
-{ 
-    HRESULT hr = NOERROR;
-
-    try 
-    {
-        if( _task )  _task->_log.log( kind, bstr_as_string( line ) ); 
-        else
-        if( _log )  _log->log( kind, empty_string, bstr_as_string( line ) ); 
-        else
-            hr = E_POINTER;
-    }
-    catch( const Xc&   x )  { hr = _set_excepinfo(x); }
-    catch( const xmsg& x )  { hr = _set_excepinfo(x); }
-
-    return hr;
-}
-
-#endif
 //-------------------------------------------------------------------------------------------------
 
 } //namespace spooler

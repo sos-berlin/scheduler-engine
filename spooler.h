@@ -1,9 +1,10 @@
-// $Id: spooler.h,v 1.24 2001/01/13 10:45:51 jz Exp $
+// $Id: spooler.h,v 1.25 2001/01/13 18:41:18 jz Exp $
 
 #ifndef __SPOOLER_H
+#define __SPOOLER_H
 
-#include "../kram/olestd.h"
 #include "../kram/sysxcept.h"
+
 
 #ifdef SYSTEM_WIN
 #   import <msxml3.dll> rename_namespace("xml")
@@ -19,19 +20,7 @@
         typedef IXMLDOMDocumentPtr Document_ptr;
     }
 
-#   include "../kram/olestd.h"
-#   include "../kram/sosscrpt.h"
-
-#   include <atlbase.h>
-//    extern CComModule& _Module;
-//#   include <atlcom.h>
-
-#   if defined _DEBUG
-#       import "debug/spooler.tlb"   no_namespace raw_interfaces_only named_guids
-#    else
-#       import "release/spooler.tlb" no_namespace raw_interfaces_only named_guids
-#   endif
-
+#   include "spooler_com.h"
 #endif
 
 #include <stdio.h>
@@ -44,6 +33,8 @@
 #include "../kram/sosdate.h"
 #include "../kram/sossock1.h"
 #include "../kram/thread_semaphore.h"
+
+#include "spooler_wait.h"
 
 #define FOR_EACH( TYPE, CONTAINER, ITERATOR )  for( TYPE::iterator ITERATOR = CONTAINER.begin(); ITERATOR != CONTAINER.end(); ITERATOR++ )
 
@@ -72,6 +63,31 @@ Time                            now();
 
 const Time                      latter_day                  = INT_MAX;
 
+
+enum Log_kind { log_msg, log_warn, log_error };
+
+
+
+
+//-------------------------------------------------------------------------------------------Handle
+
+struct Handle
+{
+#   ifdef SYSTEM_WIN
+                                Handle                      ( HANDLE h = NULL )             : _handle(h) {}
+                               ~Handle                      ()                              { close(); }
+
+        void                    operator =                  ( HANDLE h )                    { close(); _handle = h; }
+                                operator HANDLE             () const                        { return _handle; }
+                                operator !                  () const                        { return _handle == 0; }
+        HANDLE*                 operator &                  ()                              { return &_handle; }
+
+        void                    close                       ()                              { if(_handle) { CloseHandle(_handle); _handle=0; } }
+
+        HANDLE                 _handle;
+#   endif
+};
+
 //--------------------------------------------------------------------------------------------Mutex
 
 template<typename T>
@@ -80,11 +96,11 @@ struct Mutex
     typedef sos::Thread_semaphore::Guard Guard;
 
 
-                                Mutex                   ( const T& t = T() )    : _value(t) {}
+                                Mutex                       ( const T& t = T() )    : _value(t) {}
 
-    Mutex&                      operator =              ( const T& t )          { Guard g = &_semaphore; _value = t; return *this; }
-                                operator T              ()                      { Guard g = &_semaphore; T v = _value; return v; }
-    T                           read_and_reset          ()                      { Guard g = &_semaphore; T v = _value; _value = T(); return v; }
+    Mutex&                      operator =                  ( const T& t )          { Guard g = &_semaphore; _value = t; return *this; }
+                                operator T                  ()                      { Guard g = &_semaphore; T v = _value; return v; }
+    T                           read_and_reset              ()                      { Guard g = &_semaphore; T v = _value; _value = T(); return v; }
 
     sos::Thread_semaphore      _semaphore;
     T                          _value;
@@ -94,19 +110,17 @@ struct Mutex
 
 struct Log
 {
-    enum Kind { k_msg, k_warn, k_error };
-
                                 Log                         ( Spooler* );
                                ~Log                         ();
 
     void                        set_directory               ( const string& );
     void                        open_new                    ();
 
-    void                        msg                         ( const string& line )              { log( k_msg, "", line ); }
-    void                        warn                        ( const string& line )              { log( k_warn, "", line ); }
-    void                        error                       ( const string& line )              { log( k_error, "", line ); }
+    void                        msg                         ( const string& line )              { log( log_msg, "", line ); }
+    void                        warn                        ( const string& line )              { log( log_warn, "", line ); }
+    void                        error                       ( const string& line )              { log( log_error, "", line ); }
 
-    void                        log                         ( Kind log, const string& prefix, const string& );
+    void                        log                         ( Log_kind log, const string& prefix, const string& );
     
     string                      filename                    () const                            { return _filename; }
 
@@ -127,42 +141,16 @@ struct Task_log
 {
                                 Task_log                    ( Log*, Task* = NULL );
 
-    void                        msg                         ( const string& line )              { log( Log::k_msg, line ); }
-    void                        warn                        ( const string& line )              { log( Log::k_warn, line ); }
-    void                        error                       ( const string& line )              { log( Log::k_error, line ); }
-    void                        log                         ( Log::Kind log, const string& );
+    void                        msg                         ( const string& line )              { log( log_msg, line ); }
+    void                        warn                        ( const string& line )              { log( log_warn, line ); }
+    void                        error                       ( const string& line )              { log( log_error, line ); }
+    void                        log                         ( Log_kind log, const string& );
 
     Log*                       _log;
     Task*                      _task;
     string                     _prefix;
 };
 
-//------------------------------------------------------------------------------------------Com_log
-#ifdef SYSTEM_WIN
-
-struct Com_log : Ispooler_log, Sos_ole_object               
-{
-                                Com_log                     ( Log* = NULL );             
-                                Com_log                     ( Task* );             
-                             //~Com_log                     ();
-
-    USE_SOS_OLE_OBJECT
-
-    void                        close                       ()                                  { _log = NULL; _task = NULL; }        
-
-    STDMETHODIMP                msg                         ( BSTR line )                       { return log( Log::k_msg, line ); }
-    STDMETHODIMP                warn                        ( BSTR line )                       { return log( Log::k_msg, line ); }
-    STDMETHODIMP                error                       ( BSTR line )                       { return log( Log::k_msg, line ); }
-    STDMETHODIMP                log                         ( Log::Kind kind, BSTR line );
-
-
-  protected:
-    Fill_zero                  _zero_;
-    Log*                       _log;
-    Task*                      _task;
-};
-
-#endif
 //-------------------------------------------------------------------------------------------Script
 
 struct Script
@@ -194,7 +182,7 @@ struct Script_instance
 
     void                        init                        ();
     void                        load                        ();
-    const CComPtr<IDispatch>&   dispatch                    () const                        { return _script_site->dispatch(); }
+    IDispatch*                  dispatch                    () const                        { return _script_site? _script_site->dispatch() : NULL; }
     void                        add_obj                     ( const CComPtr<IDispatch>&, const string& name );
     void                        close                       ();
     CComVariant                 call                        ( const char* name );
@@ -236,7 +224,7 @@ struct Level_interval
 
     void                        operator =                  ( const xml::Element_ptr& );
 
-    bool                        is_in_interval              ( Level level )         { return level >= _low_level && level < _high_level; }
+    bool                        is_in_interval              ( Level level )                 { return level >= _low_level && level < _high_level; }
 
     Level                      _low_level;
     Level                      _high_level;
@@ -401,6 +389,7 @@ struct Task : Sos_self_deleting
         s_pending,              // Warten auf Start
         s_running,              // Läuft
         s_suspended,            // Angehalten
+        s_ending,               // end()
         s__max
     };
 
@@ -428,6 +417,8 @@ struct Task : Sos_self_deleting
 
     bool                        do_something                ();
 
+  //void                        wake                        ()                          { _wake = true; }   // Ein neues Objekt ist da, vielleicht.
+
     void                        set_state                   ( State );
     void                        set_state_cmd               ( State_cmd );
 
@@ -446,6 +437,8 @@ struct Task : Sos_self_deleting
     void                        error                       ( const exception& );
 
     void                        set_new_start_time          ();
+
+    void                        wake_when_directory_changed ( const string& directory_name );
 
 
     Fill_zero                  _zero_;
@@ -468,8 +461,11 @@ struct Task : Sos_self_deleting
 
     Sos_ptr<Object_set>        _object_set;
     Time                       _next_start_time;            // Zeitpunkt des nächsten Startversuchs, nachdem Objektemenge leer war
+    Directory_watcher          _directory_watcher;
     Task_log                   _log;
     CComPtr<Com_log>           _com_log;
+    CComPtr<Com_object_set>    _com_object_set;
+    CComPtr<Com_task>          _com_task;
 };
 
 typedef list< Sos_ptr<Task> >   Task_list;
@@ -556,6 +552,7 @@ struct Communication
                                ~Communication               ();
 
     void                        start_thread                ();
+    void                        close                       ();
     void                        rebind                      ()                                      { bind(); }
     int                         go                          ();
 
@@ -579,7 +576,7 @@ struct Communication
     int                        _udp_port;
     bool                       _rebound;
 
-    HANDLE                     _thread;
+    Handle                     _thread;
 };
 
 //--------------------------------------------------------------------------------Command_processor
@@ -655,40 +652,51 @@ struct Spooler
     void                        cmd_stop                    ();
     void                        cmd_terminate               ();
     void                        cmd_terminate_and_restart   ();
-    void                        cmd_wake                    ()                                  { _sleeping = false; }
+    void                        cmd_wake                    ();
 
     void                        step                        ();
     void                        start_jobs                  ();
 
     Fill_zero                  _zero_;
+    
+    int                        _argc;
+    char**                     _argv;
+    string                     _spooler_id;
+    string                     _spooler_param;              // Parameter für Skripten
+    string                     _config_filename;
+    int                        _tcp_port;
+    int                        _udp_port;
+    int                        _priority_max;
+    string                     _log_directory;
+    string                     _log_filename;
+
+
+    Thread_semaphore           _semaphore;
+    volatile bool              _sleeping;                   // Besser: sleep mit Signal unterbrechen
+    Wait_handles               _wait_handles;               // Vor _task_list!
+    Handle                     _command_arrived_event;
+
+    Log                        _log;
     Script                     _script;
     Script_instance            _script_instance;
     Object_set_class_list      _object_set_class_list;
     Job_list                   _job_list;
+
     Task_list                  _task_list;
-    int                        _running_jobs_count;
     Communication              _communication;
     Command_processor          _command_processor;
+
+    CComPtr<Com_spooler>       _com_spooler;
+    CComPtr<Com_log>           _com_log;
+
     Time                       _spooler_start_time;
-    Thread_semaphore           _semaphore;
-    volatile bool              _sleeping;                    // Besser: sleep mit Signal unterbrechen
     Time                       _next_start_time;
     State                      _state;
     State_cmd                  _state_cmd;
+
+    int                        _running_jobs_count;
     int                        _step_count;
     int                        _task_count;
-    int                        _tcp_port;
-    int                        _udp_port;
-    int                        _priority_max;
-    string                     _config_filename;
-    string                     _log_filename;
-    string                     _spooler_id;
-    string                     _log_directory;
-    Log                        _log;
-    string                     _spooler_param;              // Parameter für Skripten
-    int                        _argc;
-    char**                     _argv;
-    CComPtr<Com_log>           _com_log;
 };
 
 

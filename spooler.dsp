@@ -53,7 +53,7 @@ LINK32=link.exe
 # ADD LINK32 delayimp.lib ../misc/lib/libctleasy.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:console /map:"../bin/spooler.map" /machine:I386 /out:"../bin/spooler.exe" /delayload:winspool.drv /delayload:wsock32.dll /delayload:ole32.dll /delayload:oleaut32.dll /delayload:libctleasy.dll
 # SUBTRACT LINK32 /pdb:none
 # Begin Custom Build - gzip
-InputPath=\sos\prod\bin\spooler.exe
+InputPath=\prod\bin\spooler.exe
 SOURCE="$(InputPath)"
 
 "$(InputPath).gz" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
@@ -114,22 +114,7 @@ SOURCE=.\spooler.cxx
 # End Source File
 # Begin Source File
 
-SOURCE=.\spooler.odl
-
-!IF  "$(CFG)" == "spooler - Win32 Release"
-
-# PROP Exclude_From_Build 1
-
-!ELSEIF  "$(CFG)" == "spooler - Win32 Debug"
-
-# PROP Exclude_From_Build 1
-
-!ENDIF 
-
-# End Source File
-# Begin Source File
-
-SOURCE=.\spooler.rc
+SOURCE=.\spooler_com.cxx
 # End Source File
 # Begin Source File
 
@@ -150,6 +135,10 @@ SOURCE=.\spooler_service.cxx
 # End Source File
 # Begin Source File
 
+SOURCE=.\spooler_wait.cxx
+# End Source File
+# Begin Source File
+
 SOURCE=.\spooler_xml.cxx
 # End Source File
 # End Group
@@ -162,12 +151,53 @@ SOURCE=.\spooler.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\spooler.odl
+
+!IF  "$(CFG)" == "spooler - Win32 Release"
+
+# Begin Custom Build - mktyplib /nologo $(InputPath) /tlb $(OutDir)/spooler.tlb
+OutDir=.\Release
+InputPath=.\spooler.odl
+
+"$(OutDir)/spooler.tlb" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	mktyplib /nologo $(InputPath) /tlb $(OutDir)/spooler.tlb
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "spooler - Win32 Debug"
+
+# Begin Custom Build - mktyplib /nologo $(InputPath) /tlb $(OutDir)/spooler.tlb
+OutDir=.\Debug
+InputPath=.\spooler.odl
+
+"$(OutDir)/spooler.tlb" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	mktyplib /nologo $(InputPath) /tlb $(OutDir)/spooler.tlb
+
+# End Custom Build
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
+SOURCE=.\spooler_com.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\spooler_version.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\spooler_wait.h
 # End Source File
 # End Group
 # Begin Group "Ressourcendateien"
 
 # PROP Default_Filter "ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe"
+# Begin Source File
+
+SOURCE=.\spooler.rc
+# End Source File
 # End Group
 # Begin Group "XML"
 

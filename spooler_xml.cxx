@@ -1,4 +1,4 @@
-// $Id: spooler_xml.cxx,v 1.14 2001/01/13 10:45:52 jz Exp $
+// $Id: spooler_xml.cxx,v 1.15 2001/01/13 18:41:19 jz Exp $
 
 //#include <precomp.h>
 
@@ -242,19 +242,19 @@ Job::Job( const xml::Element_ptr& element )
 
 //--------------------------------------------------------Spooler::load_object_set_classes_from_xml
 
-void Spooler::load_object_set_classes_from_xml( Object_set_class_list* list, const xml::Element_ptr& element )
+void Spooler::load_object_set_classes_from_xml( Object_set_class_list* liste, const xml::Element_ptr& element )
 {
     xml::Element_ptr e = element->firstChild;
     while( e )
     {
-        if( e->tagName == "object_set_class" )  list->push_back( SOS_NEW( Object_set_class( e ) ) );
+        if( e->tagName == "object_set_class" )  liste->push_back( SOS_NEW( Object_set_class( e ) ) );
         e = e->nextSibling;
     }
 }
 
 //----------------------------------------------------------------------Spooler::load_jobs_from_xml
 
-void Spooler::load_jobs_from_xml( Job_list* list, const xml::Element_ptr& element )
+void Spooler::load_jobs_from_xml( Job_list* liste, const xml::Element_ptr& element )
 {
     xml::Element_ptr e = element->firstChild;
     while( e )
@@ -277,7 +277,7 @@ void Spooler::load_jobs_from_xml( Job_list* list, const xml::Element_ptr& elemen
                     job->_object_set_descr->_class = *it;
                 }
 
-                list->push_back( job );
+                liste->push_back( job );
             }
         }
 
