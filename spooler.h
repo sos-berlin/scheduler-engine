@@ -1,8 +1,9 @@
-// $Id: spooler.h,v 1.7 2001/01/04 18:17:26 jz Exp $
+// $Id: spooler.h,v 1.8 2001/01/05 20:31:22 jz Exp $
 
 #ifndef __SPOOLER_H
 
 #include "../kram/olestd.h"
+#include "../kram/sysxcept.h"
 
 #ifdef SYSTEM_WIN
 #   import <msxml3.dll> rename_namespace("xml")
@@ -173,19 +174,24 @@ struct Ultimo_set : Day_set
     Time                        next_date                   ( Time );               // Mitternacht des nächsten gesetzten Tages
 };
 
-//---------------------------------------------------------------------------------------Start_time
+//----------------------------------------------------------------------------------------Run_time
 
-struct Start_time
+struct Run_time
 {
-                                Start_time                  ()                      : _zero_(this+1) {}
-                                Start_time                  ( xml::Element_ptr );
+                                Run_time                    ()                      : _zero_(this+1) {}
+                                Run_time                    ( xml::Element_ptr );
 
+    void                        check                       ();                              
     Time                        next                        ()                      { return next( now() ); }
     Time                        next                        ( Time );
 
 
     Fill_zero                  _zero_;
-    int                        _time_of_day;                // Sekunden seit Mitternacht
+    
+    Time                       _retry_period;
+
+    int                        _begin_time_of_day;          // Sekunden seit Mitternacht
+    int                        _end_time_of_day;            // Sekunden seit Mitternacht
 
     set<time_t>                _date_set;
     Weekday_set                _weekday_set;
@@ -193,10 +199,10 @@ struct Start_time
     Ultimo_set                 _ultimo_set;                 // 0: Letzter Tag, -1: Vorletzter Tag
     set<time_t>                _holiday_set;
 
-    Time                       _duration;
-    Time                       _period;
+  //Time                       _duration;
 
     Time                       _next_start_time;
+    Time                       _next_end_time;
 };
 
 //---------------------------------------------------------------------------------------------Job
@@ -211,7 +217,7 @@ struct Job : Sos_self_deleting
     string                     _name;
     Object_set_descr           _object_set_descr;
     Level                      _output_level;
-    Start_time                 _start_time;
+    Run_time                   _run_time;
     bool                       _stop_at_end_of_duration;
     bool                       _continual;
     bool                       _stop_after_error;
@@ -232,6 +238,11 @@ struct Task : Sos_self_deleting
     void                        end                         ();
     bool                        step                        ();
 
+    void                        start_error                 ( const string& );
+    void                        end_error                   ( const string& );
+    void                        step_error                  ( const string& );
+    void                        error                       ( const string& );
+
     void                        set_new_start_time          ();
 
 
@@ -243,9 +254,11 @@ struct Task : Sos_self_deleting
     int                        _running_priority;
     int                        _step_count;
 
+    Time                       _error_time;
+    string                     _error_text;
+
     Sos_ptr<Object_set>        _object_set;
     Time                       _next_start_time;            // Zeitpunkt des nächsten Startversuchs, nachdem Objektemenge leer war
-    Time                       _next_end_time;              // + _start_time._duration
 };
 
 typedef list< Sos_ptr<Task> >   Task_list;
@@ -303,14 +316,13 @@ struct Spooler
     void                        run                         ();
     void                        wait                        ();
 
-    bool                        step                        ();
+    void                        step                        ();
     void                        start_jobs                  ();
 
     Fill_zero                  _zero_;
     Object_set_class_list      _object_set_class_list;
     Job_list                   _job_list;
     Task_list                  _task_list;
-    Time                       _try_start_job_period;
     int                        _running_jobs_count;
     Communication_channel      _comm_channel;
     Command_processor          _command_processor;

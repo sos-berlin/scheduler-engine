@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.7 2001/01/04 18:17:26 jz Exp $
+// $Id: spooler.cxx,v 1.8 2001/01/05 20:31:22 jz Exp $
 
 
 
@@ -152,18 +152,25 @@ Time Ultimo_set::next_date( Time tim )
     return latter_day;
 }
 
-//---------------------------------------------------------------------------------Start_time::next
+//---------------------------------------------------------------------------------Run_time::check
 
-Time Start_time::next( Time tim_par )
+void Run_time::check()
+{
+    if( _begin_time_of_day > _end_time_of_day )  throw_xc( "SPOOLER-104" );
+}
+
+//----------------------------------------------------------------------------------Run_time::next
+
+Time Run_time::next( Time tim_par )
 {
     // Bei der Umschaltung von Winter- auf Sommerzeit fehlt eine Stunde!
 
     Time tim = tim_par;
 
     time_t time_only = (time_t)tim % (24*60*60);
-    if( time_only > (time_t)_time_of_day + _duration )  tim += 24*60*60 ;
+    if( time_only > _end_time_of_day )  tim += 24*60*60;
 
-    tim -= time_only;  //( tim + 24*60*60-1 ) / (24*60*60) * 24*60*60;
+    tim -= time_only;
 
 
     Time next;
@@ -186,16 +193,12 @@ Time Start_time::next( Time tim_par )
         tim += (24*60*60);
     }
 
-    _next_start_time = next + _time_of_day;
+    _next_start_time = next + _begin_time_of_day;
+    _next_end_time = _next_start_time + ( _end_time_of_day - _begin_time_of_day );
 
-    if( _period )
+    if( _next_start_time < tim_par )
     {
-        _next_start_time += int( tim - _next_start_time ) / (int)_period * _period;
-        if( _next_start_time < tim )  tim += _period;
-    }
-    else
-    {
-        if( _next_start_time + _duration < tim )  _next_start_time = latter_day;
+        _next_start_time += int( (tim_par-_next_start_time) / _retry_period + _retry_period - 0.01 ) * _retry_period;
     }
 
     return _next_start_time;
@@ -216,8 +219,39 @@ Task::Task( Spooler* spooler, const Sos_ptr<Job>& descr )
 
 void Task::set_new_start_time()
 {
-    _next_start_time = _job->_start_time.next();
-    _next_end_time   = _next_start_time + _job->_start_time._duration;
+    _next_start_time = _job->_run_time.next();
+}
+
+//---------------------------------------------------------------------------------------Task::error
+
+void Task::error( const string& error_text )
+{
+    _error_time = now();
+    _error_text = error_text;
+
+    _running = false;
+    _object_set = NULL;
+}
+
+//---------------------------------------------------------------------------------Task::start_error
+
+void Task::start_error( const string& error_text )
+{
+    error( error_text );
+}
+
+//-----------------------------------------------------------------------------------Task::end_error
+
+void Task::end_error( const string& error_text )
+{
+    error( error_text );
+}
+
+//----------------------------------------------------------------------------------Task::step_error
+
+void Task::step_error( const string& error_text )
+{
+    error( error_text );
 }
 
 //---------------------------------------------------------------------------------------Task::start
@@ -225,12 +259,17 @@ void Task::set_new_start_time()
 void Task::start()
 {
     _running_since = now();
-
     _object_set = SOS_NEW( Object_set( &_job->_object_set_descr ) );
-    _object_set->open();
 
-    _next_start_time = max( _next_start_time + _spooler->_try_start_job_period, now() );
-    if( now() >= _next_end_time )  set_new_start_time();
+    try 
+    {
+        _object_set->open();
+    }
+    catch( const Xc& x        ) { start_error( x.what() ); }
+    catch( const exception& x ) { start_error( x.what() ); }
+
+    _next_start_time = max( _next_start_time + _job->_run_time._retry_period, now() );
+    if( now() >= _job->_run_time._next_end_time )  set_new_start_time();
 
     _running = true;
 }
@@ -239,7 +278,12 @@ void Task::start()
 
 void Task::end()
 {
-    _object_set->close();
+    try
+    {
+        _object_set->close();
+    }
+    catch( const Xc& x        ) { end_error( x.what() ); }
+    catch( const exception& x ) { end_error( x.what() ); }
 
     _running = false;
 }
@@ -248,24 +292,29 @@ void Task::end()
 
 bool Task::step()
 {
-    Spooler_object object = _object_set->get();
+    Spooler_object object;
 
-    if( object.is_null() )  return false;
-    
-    object.process( _job->_output_level );
+    try 
+    {
+        Spooler_object object = _object_set->get();
 
-    _step_count++;
+        if( object.is_null() )  return false;
+
+        object.process( _job->_output_level );
+
+        _step_count++;
+    }
+    catch( const Xc& x        ) { step_error( x.what() ); }
+    catch( const exception& x ) { step_error( x.what() ); }
 
     return true;
 }
 
 //------------------------------------------------------------------------------------Spooler::step
 
-bool Spooler::step()
+void Spooler::step()
 {
     Thread_semaphore::Guard guard = &_semaphore;
-
-    bool something_done = false;
 
     FOR_EACH( Task_list, _task_list, it )
     {
@@ -278,25 +327,14 @@ bool Spooler::step()
                 task->start();
 
                 _running_jobs_count++;
-                something_done = true;
             }
         }
         else
         {
             bool ok = task->step();
-            if( ok ) 
-            {
-                something_done = true;
-            }
-            else
-            {
-                task->end();
-                _running_jobs_count--;
-            }
+            if( !ok )   task->end(),  _running_jobs_count--;
         }
     }
-
-    return something_done;
 }
 
 //------------------------------------------------------------------------------------Spooler::load
@@ -304,8 +342,6 @@ bool Spooler::step()
 void Spooler::load()
 {
     tzset();
-
-    _try_start_job_period = 10;
 
     {
         Thread_semaphore::Guard guard = &_semaphore;

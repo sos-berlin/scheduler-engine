@@ -1,4 +1,4 @@
-// $Id: spooler_command.cxx,v 1.1 2001/01/04 18:17:26 jz Exp $
+// $Id: spooler_command.cxx,v 1.2 2001/01/05 20:31:22 jz Exp $
 
 #include "../kram/sos.h"
 #include "../kram/sleep.h"
@@ -13,7 +13,7 @@ namespace spooler {
 using namespace std;
 
 //--------------------------------------------------------------------------dom_append_text_element
-
+/*
 void dom_append_text_element( xml::Element_ptr element, const char* element_name, const string& text )
 {
     xml::Document_ptr doc       = element->ownerDocument;
@@ -22,7 +22,7 @@ void dom_append_text_element( xml::Element_ptr element, const char* element_name
 
     e->appendChild( text_node );
 }
-
+*/
 //------------------------------------------------------------Command_processor::execute_show_tasks
 
 xml::Element_ptr Command_processor::execute_show_tasks()
@@ -34,13 +34,14 @@ xml::Element_ptr Command_processor::execute_show_tasks()
         Task* task = *it;
         xml::Element_ptr task_element = _answer->createElement( "task" );
 
-        dom_append_text_element( task_element, "job.name", task->_job->_name );
+        task_element->setAttribute( "job", as_dom_string( task->_job->_name ) );
 
         if( task->_running_since )
-            dom_append_text_element( task_element, "task.running_since", Sos_optional_date_time( task->_running_since ).as_string() );
+            task_element->setAttribute( "task.running_since", as_dom_string( Sos_optional_date_time( task->_running_since ).as_string() ) );
 
-        dom_append_text_element( task_element, "task.next_start_time", Sos_optional_date_time( task->_next_start_time ).as_string() );
-        dom_append_text_element( task_element, "task.steps", as_string( task->_step_count ) );
+        task_element->setAttribute( "next_start_time", as_dom_string( Sos_optional_date_time( task->_next_start_time ).as_string() ) );
+        task_element->setAttribute( "steps", as_dom_string( as_string( task->_step_count ) ) );
+
         tasks->appendChild( task_element );
     }
 
@@ -51,14 +52,14 @@ xml::Element_ptr Command_processor::execute_show_tasks()
 
 xml::Element_ptr Command_processor::execute_show_state()
 {
-    xml::Element_ptr state = _answer->createElement( "state" );
+    xml::Element_ptr state_element = _answer->createElement( "state" );
  
-    dom_append_text_element( state, "state_time", Sos_optional_date_time::now().as_string() );
-    dom_append_text_element( state, "spooler_start_time", Sos_optional_date_time( _spooler->_spooler_start_time ).as_string() );
+    state_element->setAttribute( "time", as_dom_string( Sos_optional_date_time::now().as_string() ) );
+    state_element->setAttribute( "spooler_running_since", as_dom_string( Sos_optional_date_time( _spooler->_spooler_start_time ).as_string() ) );
     
-    state->appendChild( execute_show_tasks() );
+    state_element->appendChild( execute_show_tasks() );
 
-    return state;
+    return state_element;
 }
 
 //---------------------------------------------------------------Command_processor::execute_command

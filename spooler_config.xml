@@ -1,29 +1,21 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 
-<!-- $Id: spooler_config.xml,v 1.6 2001/01/04 18:17:26 jz Exp $   (C) 2000 SOS GmbH Berlin -->
+<!-- $Id: spooler_config.xml,v 1.7 2001/01/05 20:31:22 jz Exp $   (C) 2000 SOS GmbH Berlin -->
 
-<!DOCTYPE spooler.config SYSTEM "spooler_config.dtd">
+<!DOCTYPE spooler_config SYSTEM "spooler_config.dtd">
 
-<spooler.config>
-
-    <try_start_job_period>5</try_start_job_period>
+<spooler_config>
 
     <object_set_classes>
+
         <object_set_class name="Dokumente">
+
             <level_decls>
-                <level_decl>
-                    <level>100</level>
-                    <level_description>Beauftragt</level_description>
-                </level_decl>
-                <level_decl>
-                    <level>200</level>
-                    <level_description>Aufbereitet</level_description>
-                </level_decl>
-                <level_decl>
-                    <level>300</level>
-                    <level_description>Gedruckt</level_description>
-                </level_decl>
+                <level_decl level="100" name="Beauftragt"/>
+                <level_decl level="200" name="Aufbereitet"/>
+                <level_decl level="300" name="Gedruckt"/>
             </level_decls>
+
             <script><![CDATA[
 
 dir_name = "c:\tmp\spooler"
@@ -122,76 +114,56 @@ function spooler_make_object_set
 end function
 
             ]]></script>
+
         </object_set_class>
+
     </object_set_classes>
 
     <jobs>
-        <job name="Aufbereiten">
-            <object_set>
-                <object_set_class.name>Dokumente</object_set_class.name>
-                <job.levels>
-                    <low_level><level>100</level></low_level>
-                    <high_level><level>200</level></high_level>
-                </job.levels>
+
+        <job name           = "Aufbereiten" 
+             priority       = "50" 
+             output_level   = "200" 
+             spooler        = "Hans"
+             rerun          = "no">
+
+            <object_set class="Dokumente">
+                <levels low="100" high="200"/>
             </object_set>
-            <job.output_level><level>200</level></job.output_level>
-            <job.start_time>
-                <time>17:11:55</time>
-                <date>2001-01-02</date>
-                <date>2001-01-09</date>
+
+            <run_time retry_period="5">
+
+                <time_of_day begin="17:11:55" end="21:00:00"/>
+
+                <date date="2001-01-02"/>
+                <date date="2001-01-09"/>
+
                 <weekdays>
-                    <day>1</day>
-                    <day>2</day>
-                    <day>3</day>
+                    <day day="1"/>
+                    <day day="2"/>
+                    <day day="5"/>
                 </weekdays>
+
                 <monthdays>
-                    <day>2</day>
-                    <day>3</day>
+                    <day day="2"/>
+                    <day day="3"/>
                 </monthdays>
+
                 <ultimos>
-                    <day>0</day>
-                    <day>1</day>
+                    <day day="0"/>
                 </ultimos>
-                <holiday>2001-01-03</holiday>
-                <duration>3600</duration>
-                <period>86400</period>
-            </job.start_time>
+
+                <holiday date="2001-05-01"/>
+                <holiday date="2001-12-24"/>
+                <holiday date="2001-12-25"/>
+                <holiday date="2001-12-26"/>
+                <holiday date="2001-12-31"/>
+                <holiday date="2002-01-01"/>
+
+            </run_time>
+
         </job>
-<!--
-        <job name="Test">
-            <object_set>
-                <object_set_class.name>Test</object_set_class.name>
-                <job.levels>
-                    <low_level><level>100</level></low_level>
-                    <high_level><level>200</level></high_level>
-                </job.levels>
-            </object_set>
-            <job.output_level><level>200</level></job.output_level>
-            <job.start_time>
-                <time>17:11:55</time>
-                <date>2001-01-02</date>
-                <date>2001-01-09</date>
-                <weekdays>
-                    <day>1</day>
-                    <day>2</day>
-                    <day>3</day>
-                    <day>4</day>
-                    <day>5</day>
-                </weekdays>
-                <monthdays>
-                    <day>2</day>
-                    <day>3</day>
-                </monthdays>
-                <ultimos>
-                    <day>0</day>
-                    <day>1</day>
-                </ultimos>
-                <holiday>2001-01-03</holiday>
-                <duration>86400</duration>
-                <period>86400</period>
-            </job.start_time>
-        </job>
--->
+
     </jobs>
 
-</spooler.config>
+</spooler_config>

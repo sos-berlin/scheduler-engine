@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- $Id: spooler_config.dtd,v 1.6 2001/01/04 18:17:26 jz Exp $   (C) 2000 SOS GmbH Berlin 
+<!-- $Id: spooler_config.dtd,v 1.7 2001/01/05 20:31:22 jz Exp $   (C) 2000 SOS GmbH Berlin 
 
      Konfiguration für den Spooler. 
      
@@ -8,116 +8,99 @@
 
 <!-- KONFIGURATION DES SPOOLERS -->
 
-<!ELEMENT spooler.config        ( try_start_job_period?, object_set_classes, jobs? ) >
+<!ELEMENT spooler_config        ( object_set_classes, jobs? )>
+<!ATTLIST spooler_config        log_file CDATA #IMPLIED>
 
 
-<!ELEMENT try_start_job_period  ( #PCDATA ) >   <!-- Sekunden -->
-<!-- Periode, nach der ein Job erneut gestartet wird, um zu prüfen, ob die Objektemenge nicht leer ist -->
+<!ELEMENT object_set_classes    ( object_set_class+ )>
 
-
-<!ELEMENT object_set_classes    ( object_set_class+ ) >
-
-<!ELEMENT object_set_class      ( level_decls?, script? ) >
+<!ELEMENT object_set_class      ( level_decls?, script? )>
 <!ATTLIST object_set_class      name CDATA #REQUIRED >
 
-<!ELEMENT level_decls           ( level_decl+ ) >
+<!ELEMENT level_decls           ( level_decl+ )>
 
-<!ELEMENT level_decl            ( level, level_description ) >
+<!ELEMENT level_decl            EMPTY>
+<!ATTLIST level_decl            level CDATA #REQUIRED>
+<!ATTLIST level_decl            name  CDATA #REQUIRED>
 
-<!ELEMENT level                 ( #PCDATA ) >
-
-<!ELEMENT level_description     ( #PCDATA ) >
-
-<!ELEMENT script                ( #PCDATA ) >
-<!ATTLIST script                language CDATA "VBScript" >
+<!ELEMENT script                ( #PCDATA )>
+<!ATTLIST script                language CDATA "VBScript">
 
 
 
-<!ELEMENT jobs                  ( job+ ) >
+<!ELEMENT jobs                  ( job+ )>
 
 <!ELEMENT job                   ( object_set, 
-                                  job.output_level, 
-                                  job.priority?, 
-                                  job.start_time?, 
+                                  run_time?, 
                                   job.stop_after_error?, 
                                   job.rerun?, 
-                                  job.start_after_spooler? ) >
-<!ATTLIST job                   name CDATA #REQUIRED >
+                                  job.start_after_spooler? )>
+<!ATTLIST job                   name                CDATA #REQUIRED>
+<!ATTLIST job                   priority            CDATA #IMPLIED>
+<!ATTLIST job                   output_level        CDATA #IMPLIED>
+<!ATTLIST job                   spooler             CDATA #IMPLIED>
+<!ATTLIST job                   rerun               (yes|no) "no" >     <!-- Laufenden Job bei Abbruch und Neustart des Spoolers erneut starten -->
+<!ATTLIST job                   stop_after_error    (yes|no) "yes">     <!-- Nach einem Fehler diesen Job nie wieder starten -->
+<!ATTLIST job                   start_after_spooler (yes|no) "no" >     <!-- Den Job auch nach verspäteten Start des Spoolers starten -->
 
-<!ELEMENT object_set            ( object_set_class.name, job.levels? ) >
 
-<!ELEMENT object_set_class.name ( #PCDATA ) >
+<!ELEMENT object_set            ( levels? )>
+<!ATTLIST object_set            class CDATA #REQUIRED>
 
-<!ELEMENT job.output_level      ( level ) >
+<!ELEMENT levels                EMPTY>          
+<!ATTLIST levels                low     CDATA #REQUIRED>                <!-- low <= level < high -->
+<!ATTLIST levels                high    CDATA #REQUIRED>
 
-<!ELEMENT job.levels            ( low_level, high_level ) >     <!-- low_level <= level < high_level -->
+<!ELEMENT job.priority          ( #PCDATA )>
 
-<!ELEMENT low_level             ( level ) >
+<!ELEMENT run_time              ( time_of_day, date*, weekdays?, monthdays?, ultimos?, holiday* )>
+<!ATTLIST run_time              retry_period        CDATA "5">          <!-- Periode, nach der ein Job erneut gestartet wird, 
+                                                                             um zu prüfen, ob die Objektemenge nicht leer ist -->
 
-<!ELEMENT high_level            ( level ) >  
+<!ELEMENT time_of_day           EMPTY>                                  <!-- HH:MM:SS -->
+<!ATTLIST time_of_day           begin CDATA #REQUIRED>                  <!-- HH:MM:SS -->
+<!ATTLIST time_of_day           end   CDATA #REQUIRED>                  <!-- HH:MM:SS -->
 
-<!ELEMENT job.priority          ( #PCDATA ) >
+<!ELEMENT date                  EMPTY>
+<!ATTLIST date                  date  CDATA #IMPLIED>                   <!-- yyyy-mm-dd -->
 
-<!ELEMENT job.start_time        ( time, date*, weekdays?, monthdays?, ultimos?, holiday*, duration?, period? ) >
+<!ELEMENT weekdays              ( day+ )>                               <!-- 0: Sonntag, 6: Sonnabend -->
+<!ELEMENT monthdays             ( day+ )>                               <!-- 1 bis 31 -->
+<!ELEMENT ultimos               ( day+ )>                               <!-- 0 bis 30 Tage vor Ultimo -->
+<!ELEMENT holiday               EMPTY>                              
+<!ATTLIST holiday               date  CDATA #REQUIRED>                  <!-- yyyy-mm-dd, an diesem Tag den Job nicht starten -->
 
-<!ELEMENT time                  ( #PCDATA ) >   <!-- HH:MM:SS -->
+<!ELEMENT day                   EMPTY>                                  <!-- Erweiterbar um time* -->
+<!ATTLIST day                   day CDATA #REQUIRED>
 
-<!ELEMENT date                  ( #PCDATA ) >   <!-- yyyy-mm-dd -->
-
-<!ELEMENT weekdays              ( day+ ) >      <!-- 0: Sonntag, 6: Sonnabend -->
-<!ELEMENT monthdays             ( day+ ) >      <!-- 1 bis 31 -->
-<!ELEMENT ultimos               ( day+ ) >      <!-- 0 bis 30 Tage vor Ultimo -->
-<!ELEMENT holiday               ( #PCDATA ) >   <!-- yyyy-mm-dd, an diesem Tag den Job nicht starten -->
-<!ELEMENT day                   ( #PCDATA ) >
-
-<!ELEMENT duration              ( #PCDATA ) >   <!-- Laufzeit des Jobs ab Startzeit -->
-
-<!ELEMENT period                ( #PCDATA ) >
-
-<!ELEMENT stop_after_error      EMPTY >         <!-- Nach einem Fehler diesen Job nie wieder starten -->
-
-<!ELEMENT rerun                 EMPTY >         <!-- Nach Abbruch des Spoolers diesen Job ggf. erneut starten -->
-                                  
-<!ELEMENT start_after_spooler   EMPTY >         <!-- Den Job auch nach verspäteten Start des Spoolers starten -->
 
 
 
 
 <!-- KOMMANDOS -->
 
-<!ELEMENT spooler.command       ( show_state ) >
+<!ELEMENT spooler.command       ( show_state )>
 
-<!ELEMENT show_state            EMPTY >
+<!ELEMENT show_state            EMPTY>
 
 
 
 
 <!-- ANTWORTEN AUF DIE KOMMANDOS -->
 
-<!ELEMENT spooler.answer        ( state | COMMAND_ERROR ) >
+<!ELEMENT spooler.answer        ( state | COMMAND_ERROR )>
 
-<!ELEMENT state                 ( state_time, spooler_start_time, spooler_log_filename, tasks ) >
+<!ELEMENT state                 ( tasks )>
+<!ATTLIST state                 time                CDATA #REQUIRED>    <!-- yyyy-mm-dd HH:MM:SS -->
+<!ATTLIST state                 running_since       CDATA #REQUIRED>    <!-- yyyy-mm-dd HH:MM:SS -->
+<!ATTLIST state                 log_file            CDATA #IMPLIED>
 
-<!ELEMENT state_time            ( #PCDATA ) >   <!-- yyyy-mm-dd HH:MM:SS -->
+<!ELEMENT tasks                 ( task+ )>
 
-<!ELEMENT spooler_start_time    ( #PCDATA ) >   <!-- yyyy-mm-dd HH:MM:SS -->
+<!ELEMENT task                  EMPTY>
+<!ATTLIST task                  job                 CDATA #REQUIRED>    <!-- yyyy-mm-dd HH:MM:SS -->
+<!ATTLIST task                  steps               CDATA #IMPLIED>     <!-- Anzahl der bisher ausgeführten Jobschritte -->
+<!ATTLIST task                  running_since       CDATA #IMPLIED>     <!-- yyyy-mm-dd HH:MM:SS -->
+<!ATTLIST task                  next_start_time     CDATA #REQUIRED>    <!-- yyyy-mm-dd HH:MM:SS -->
 
-<!ELEMENT spooler_log_filename  ( #PCDATA ) >
-
-<!ELEMENT tasks                 ( task+ ) >
-
-<!ELEMENT task                  ( job.name, 
-                                  task.running_since, 
-                                  task.next_start_time,
-                                  task.steps ) >
-
-<!ELEMENT job.name              ( #PCDATA ) >
-
-<!ELEMENT task.steps            ( #PCDATA ) >   <!-- Anzahl der bisher ausgeführten Jobschritte -->
-
-<!ELEMENT task.running_since    ( #PCDATA ) >   <!-- yyyy-mm-dd HH:MM:SS -->
-
-<!ELEMENT task.next_start_time  ( #PCDATA ) >   <!-- yyyy-mm-dd HH:MM:SS -->
-
-
-<!ELEMENT COMMAND_ERROR         ( #PCDATA ) >
+<!ELEMENT COMMAND_ERROR         ( #PCDATA )>
