@@ -1,4 +1,4 @@
-<!-- $Id: left_frame.html,v 1.9 2004/11/30 22:01:43 jz Exp $ -->
+<!-- $Id: left_frame.html,v 1.10 2004/12/01 13:27:51 jz Exp $ -->
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <html>
 
@@ -27,6 +27,7 @@
 <span id="stylesheet_output"></span>
 
 <script defer="true" type="text/javascript" src="scheduler.js" ></script>
+<script defer="true" type="text/javascript" src="browser_dependencies.js"></script>
 <!--script defer="true" type="text/javascript" src="translation_de.js"></script-->
 <script defer="true" type="text/javascript" src="popup_menu.js"></script>
 
@@ -162,7 +163,7 @@ function update_jobs_frame()
         what = "job_chain_orders";
         max_orders = window.parent.details_frame._job_chain_element? 9999 : _max_orders;
     }
-    
+
     _response = _scheduler.execute( "<show_state what='" + what + "' max_orders='" + max_orders + "'/>" );
     modify_response( _response );
     var scheduler_id = _response.selectSingleNode( "spooler/answer/state" ).getAttribute( "id" );
