@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="scheduler.xsl" type="text/xsl"?>
 
-<!--$Id: order.xml,v 1.5 2004/12/10 11:20:38 jz Exp $-->
+<!--$Id: order.xml,v 1.6 2004/12/28 11:40:02 jz Exp $-->
 
 <description 
     title               = "Aufträge" 
     base_dir            = ""
     author              = "$Author: jz $"
-    date                = "$Date: 2004/12/10 11:20:38 $"
+    date                = "$Date: 2004/12/28 11:40:02 $"
 >
 
 
@@ -27,7 +27,10 @@
     Und er kann noch eine Nutzlast und einen lesbaren Titel tragen.
 </p>
 <p>    
-    Siehe die Klasse <scheduler_method class="Order"/>.<br/>
+    Siehe die Klasse <scheduler_method class="Order"/>. Hier gibt es auch ein Beispiel.
+</p>
+<p>    
+    Aufträge können auch per TCP mit dem Kommando <scheduler_element name="add_order"/> übergeben werden.
 </p>
 
 <h2>Jobketten</h2>    
@@ -56,6 +59,15 @@
     <scheduler_method class="Job_impl" method="spooler_process"/> aufruft.
     <code>spooler_process()</code> endet mit <code>true</code> oder <code>false</code>, 
     was über die nächste Stelle in der Jobkette entscheidet (s. <scheduler_method class="Job_chain"/>).
+</p>
+
+<h2>Erkennung doppelter Aufträge</h2>
+<p>
+    Wenn ein Auftrag hinzugefügt wird, prüft der Scheduler, ob ein Auftrag mit derselben <code>id</code> 
+    schon eingetragen ist (nur, wenn <code>id</code> gesetzt ist).
+    Hat die Auftragswarteschlange oder die Jobkette bereits einen Auftrag mit derselben <code>id</code>,
+    dann wird er ersetzt. 
+    Wenn der neue Auftrag eine andere Priorität hat, wird diese vom Scheduler berücksichtigt.
 </p>
 
 <h2>Priorität</h2>

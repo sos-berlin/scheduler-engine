@@ -1,4 +1,4 @@
-// $Id: Task.java,v 1.14 2004/10/10 17:43:49 jz Exp $
+// $Id: Task.java,v 1.15 2004/12/28 11:40:02 jz Exp $
 
 package sos.spooler;
 
@@ -10,7 +10,7 @@ package sos.spooler;
  * Implementiert wird eine Task durch {@link Job_impl}.
  * 
  * @author Joacim Zschimmer
- * @version $Revision: 1.14 $
+ * @version $Revision: 1.15 $
  */
 
 public class Task extends Idispatch
@@ -60,6 +60,9 @@ public class Task extends Idispatch
      * Diese Methode gehört eigentlich in die Klasse Job. Sieht hat nichts mit der gerade laufenden Task zu tun.
      * <p>
      * Wenn nach Ablauf der angegebenen Zeit keine Task des Jobs läuft, startet der Scheduler eine Task.
+     * <p>
+     * Die Einstellung wirkt nicht, wenn der Job einen Fehler geliefert hat und
+     * {@link sos.spooler.Job#set_delay_after_error(int,double)} aufgerufen worden ist.
      *  
      * @param seconds
      */

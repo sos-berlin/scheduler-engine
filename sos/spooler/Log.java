@@ -1,4 +1,4 @@
-// $Id: Log.java,v 1.10 2004/11/14 10:30:34 jz Exp $
+// $Id: Log.java,v 1.11 2004/12/28 11:40:02 jz Exp $
 
 package sos.spooler;
 
@@ -7,7 +7,7 @@ package sos.spooler;
  * @see Job_impl#spooler_log
  * @see Spooler#log()
  * @author Joacim Zschimmer
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  */
 
 public class Log extends Idispatch
@@ -118,7 +118,7 @@ public class Log extends Idispatch
     
     /** Mindestgewicht der Log-Ausgaben setzen.
      * 
-     * @param level Gewicht, dass eine Log-Ausgabe haben muss, um im Protokoll zu erscheinen.
+     * @param level Gewicht, das eine Log-Ausgabe haben muss, um im Protokoll zu erscheinen.
      * @see #level()
      */
     public void             set_level                   ( int level )                               {                   com_call( ">level", level           ); }

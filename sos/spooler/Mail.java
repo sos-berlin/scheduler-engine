@@ -1,4 +1,4 @@
-// $Id: Mail.java,v 1.8 2004/09/13 09:46:00 jz Exp $
+// $Id: Mail.java,v 1.9 2004/12/28 11:40:02 jz Exp $
 
 package sos.spooler;
 
@@ -393,7 +393,7 @@ public class Mail extends Idispatch
 
     
     
-    /** Versendet die Nachrichten aus dem Verzeichnes der noch nicht versendeten Nachrichten.
+    /** Versendet die Nachrichten aus dem Verzeichnis der noch nicht versendeten Nachrichten.
      * 
      * <p><br/><b>Beispiel</b>
      * <pre>

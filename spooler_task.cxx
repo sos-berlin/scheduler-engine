@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.273 2004/12/20 08:57:29 jz Exp $
+// $Id: spooler_task.cxx,v 1.274 2004/12/28 11:40:02 jz Exp $
 /*
     Hier sind implementiert
 
@@ -1785,6 +1785,7 @@ void Process_task::close_handle()
 }
 
 //------------------------------------------------------Process_task::variable_set_from_environment
+#ifdef Z_WINDOWS
 
 ptr<Com_variable_set> Process_task::variable_set_from_environment()
 {
@@ -1798,6 +1799,7 @@ ptr<Com_variable_set> Process_task::variable_set_from_environment()
     return result;
 }
 
+#endif
 //----------------------------------------------------------------------Process_task::do_close__end
 
 void Process_task::do_close__end()
@@ -2099,7 +2101,7 @@ bool Process_task::do_begin__end()
 
             Z_FOR_EACH( Com_variable_set::Map, _job->_process_environment->_map, m )
             {
-#               ifdef Z_HPUX
+#               if defined Z_HPUX || defined Z_SOLARIS
                     string e = string_from_bstr ( m->first ) + "=" + m->second->_value.as_string();
                     putenv( strdup( e.c_str() ) );
 #                else

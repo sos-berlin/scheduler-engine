@@ -1,4 +1,4 @@
-// $Id: Job_impl.java,v 1.7 2004/07/13 11:28:06 jz Exp $
+// $Id: Job_impl.java,v 1.8 2004/12/28 11:40:02 jz Exp $
 
 package sos.spooler;
 
@@ -17,10 +17,23 @@ package sos.spooler;
  *     spooler_exit()
  * </pre>
  * 
- * Keine dieser Methoden muss implementiert werden. In der Regel wird wenigstens spooler_process() implementiert.
+ * <p>
+ *      Keine dieser Methoden muss implementiert werden. In der Regel wird wenigstens spooler_process() implementiert.
+ * </p>
+ * <p>
+ *  Ein Fehler beim Ausführen des Job-Skripts während des Ladens oder in spooler_init() führt zum Aufruf von spooler_on_error(). Der Job wird gestoppt. spooler_exit() wird gerufen (obwohl spooler_init() nicht gerufen worden ist!) und die Scripting Engine wird geschlossen.
+ * </p>
+ * <p>
+ *  spooler_on_error() muss also auch mit Fehlern umgehen, die beim Laden oder in spooler_init() auftreten. 
+ * </p>
+ * <p>
+ *  spooler_exit() wird gerufen, auch wenn spooler_init() nicht gerufen worden ist.
+ * </p>
+
+ 
  *
  * @author Joacim Zschimmer, Zschimmer GmbH
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 
 public class Job_impl

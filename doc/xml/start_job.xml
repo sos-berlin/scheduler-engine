@@ -2,7 +2,7 @@
 <!--DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"-->
 <?xml-stylesheet href="../scheduler.xsl" type="text/xsl"?>
 
-<!--$Id: start_job.xml,v 1.8 2004/12/10 11:20:39 jz Exp $-->
+<!--$Id: start_job.xml,v 1.9 2004/12/28 11:40:02 jz Exp $-->
 
 <xml_element name     = "start_job" 
              title    = "Eine Task starten"
@@ -10,7 +10,7 @@
              base_dir = "../"
              parent_page = "../xml_commands.xml"
              author   = "$Author: jz $"
-             date     = "$Date: 2004/12/10 11:20:39 $">
+             date     = "$Date: 2004/12/28 11:40:02 $">
 
 
     <description>
@@ -43,14 +43,19 @@
             </description>
         </xml_attribute>
 
-        <xml_attribute name="at" type="yyyy-mm-dd hh:mm:ss">
+        <xml_attribute name="at" type="yyyy-mm-dd hh:mm:ss | now | repeat">
             <description>
                 <p>
                     Zeitpunkt, zu dem die Task gestartet werden soll.
                     <scheduler_element name="run_time"/> ist außer Kraft.
                 </p>
                 <p>
-                    Statt eines Zeitpunkts kann auch <code>"now"</code> angeben werden.
+                    Statt eines Zeitpunkts kann auch <code>at="now"</code> angeben werden, um den Job sofort zu starten. 
+                    <code>"now"</code> ist voreingestellt.
+                </p>
+                <p>
+                    <code>at="period"</code> lässt den Job erst Starten, wenn die <scheduler_element name="run_time"/> dies zulässt
+                    (also in der laufenden oder der nächsten Periode).
                 </p>
             </description>
         </xml_attribute>

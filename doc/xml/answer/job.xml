@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="../../scheduler.xsl" type="text/xsl"?>
 
-<!--$Id: job.xml,v 1.6 2004/12/10 11:20:39 jz Exp $-->
+<!--$Id: job.xml,v 1.7 2004/12/28 11:40:02 jz Exp $-->
 
 <xml_element name          = "job" 
              title         = "Job"
@@ -10,7 +10,7 @@
              base_dir      = "../../"
              parent_page   = "../../xml_commands.xml"
              author        = "$Author: jz $"
-             date          = "$Date: 2004/12/10 11:20:39 $">
+             date          = "$Date: 2004/12/28 11:40:02 $">
 
     <xml_parent_elements>
         <xml_parent_element name="jobs"/>
@@ -41,6 +41,7 @@
         </xml_attribute>
         
         <xml_attribute name="all_steps"  type="zahl" title="Zahl der Jobschritte aller Tasks"/>
+        <xml_attribute name="all_tasks"  type="zahl" title="Zahl aller bisher gestarteten Tasks"/>
         <xml_attribute name="state_text" type="text" title="Eigenschaft Job.state_text">
             <description>
                 <p>
@@ -68,7 +69,10 @@
             </description>
         </xml_attribute>
 
-        <xml_attribute name="next_start_time" type="yyyy-mm-dd hh:mm:ss.mmm" title="Voraussichtliche nächste Startzeit"/>
+        <xml_attribute name="next_start_time" type="yyyy-mm-dd hh:mm:ss.mmm" title="Voraussichtliche nächste Startzeit">
+            Zur Ermittlung der nächsten Startzeit prüft der Scheduler die nächsten hundert Perioden, 
+            bis er eine Periode mit <code>single_start</code> oder <code>repeat</code> erreicht.
+        </xml_attribute>
 
         <xml_attribute name="has_description" type="yes" title="yes, wenn der Job eine &lt;description&gt; hat"/>
     </xml_attributes>

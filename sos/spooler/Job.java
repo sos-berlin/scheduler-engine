@@ -1,4 +1,4 @@
-// $Id: Job.java,v 1.12 2004/09/09 10:16:40 jz Exp $
+// $Id: Job.java,v 1.13 2004/12/28 11:40:02 jz Exp $
 
 // §1685
 
@@ -13,7 +13,7 @@ package sos.spooler;
  * 
  * 
  * @author Joacim Zschimmer
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.13 $
  */
 
 public class Job extends Idispatch
@@ -253,6 +253,10 @@ public class Job extends Idispatch
     
     /** Wie {@link #set_delay_after_error(int,double)}, "HH:MM:SS" und "STOP" können angegeben werden.
      * 
+     * <p>
+     * Normalerweise stoppt der Scheduler einen Job, der einen Fehler liefert. 
+     * Mit diesem Aufruf können Sie einstellen, dass der Job nicht gestoppt, sondern eine Zeit verzögert werden soll,
+     * bevor er neu startet.
      * <p>
      * Die Verzögerung kann als String "HH:MM:SS" oder "HH:MM:SS" (Stunde, Minute, Sekunde) eingestellt werden.
      * <p>

@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="scheduler.xsl" type="text/xsl"?>
 
-<!--$Id: factory_ini_spooler.xml,v 1.8 2004/12/10 11:20:38 jz Exp $-->
+<!--$Id: factory_ini_spooler.xml,v 1.9 2004/12/28 11:40:02 jz Exp $-->
 
 <ini_section
     name     = "spooler"
     file     = "factory.ini"
     base_dir = ""
     author   = "$Author: jz $"
-    date     = "$Date: 2004/12/10 11:20:38 $"
+    date     = "$Date: 2004/12/28 11:40:02 $"
 >
 
     <ini_entries>
@@ -45,6 +45,7 @@
         <ini_entry setting="log_mail_to" />
         <ini_entry setting="log_mail_cc" />
         <ini_entry setting="log_mail_bcc" />
+        <ini_entry setting="mail_encoding" />
         <ini_entry setting="mail_on_error" />
         <ini_entry setting="mail_on_process" />
         <ini_entry setting="mail_on_success" />

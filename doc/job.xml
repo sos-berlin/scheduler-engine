@@ -1,14 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="scheduler.xsl" type="text/xsl"?>
 
-<!--$Id: job.xml,v 1.6 2004/12/10 11:20:38 jz Exp $-->
+<!--$Id: job.xml,v 1.7 2004/12/28 11:40:02 jz Exp $-->
 
 <description 
     title    = "Was ist ein Job?" 
     base_dir = ""
     author   = "$Author: jz $"
-    date     = "$Date: 2004/12/10 11:20:38 $"
+    date     = "$Date: 2004/12/28 11:40:02 $"
 >
+    <scheduler_keyword keyword="Job"/>
+    
     Ein Job wird definiert in der XML-Konfiguration mit <b><scheduler_element name="job"/></b>.
     Hier werden der Programmcode, die Laufzeit und andere Dinge angegeben.
     
@@ -82,16 +84,67 @@
         In der Konfiguration können Sie mit <scheduler_element name="run_time"/> einstellen, dass eine Task einmal oder periodisch gestartet werden soll.
     </p>
     <p>
-        Das Kommando <scheduler_element name="start_job"/> startet eine Task.
-    </p>
-    <p>
-        Wenn die <a href="directory_watch.xml">Verzeichnisüberwachung</a>
-        aktiv ist und das überwachte Verzeichnis sich ändert, startet der Scheduler eine Task.
-    </p>
-    <p>
-        Wenn der Job auftragsgesteuert ist und ein Auftrag vorliegt, startet der Scheduler eine Task.
+        Das Kommando <scheduler_element name="start_job"/> startet eine Task,
+        ebenso <scheduler_method class="Job" method="start"/>.
     </p>
 
+
+    <p>&#160;</p>
+    
+    <p>
+        Eine Task wird automatisch gestartet, wenn noch keine Task läuft und eine der folgenden Bedingungen gilt.
+    </p>
+    <ul>
+        <li>
+            Zu Beginn einer <scheduler_element name="period"/>, wenn in ihr <code>repeat=</code> oder <code>single_start=</code> angegeben ist.
+        </li>
+        <li>
+            Wenn ein vorangehender Lauf 
+            <scheduler_method class="Task" property="repeat" access="write" java_signature="double"/>
+            gesetzt hat und die Zeit erreicht ist.
+        </li>
+        <li>
+            Wenn ein vorangehender Lauf fehlerhaft war und 
+            <scheduler_method class="Job" property="delay_after_error" access="write" java_signature="int, double"/>
+            abgelaufen ist.
+        </li>
+        <li>
+            Wenn das mit
+            <scheduler_element name="period" attribute="repeat"/> 
+            angegebene Intervall nach dem Ende der zuletzt gelaufenen Task abgelaufen ist.
+        </li>
+        <li>
+            Wenn die <a href="directory_watch.xml">Verzeichnisüberwachung</a>
+            aktiv ist und das überwachte Verzeichnis geändert worden ist.
+        </li>
+    </ul>
+    
+    <p>
+        Außerdem startet eine Task
+    </p>
+    <ul>
+        <li>
+            wenn ein Auftrag für den Job vorliegt, und noch nicht soviele Tasks laufen, wie mit
+            <scheduler_element name="job" attribute="tasks"/> zugelassen.
+        </li>
+    </ul>
+
+    <p>
+        Eine Task läuft aber nur an, wenn sie eine Startzeit (<code>at</code>) hat oder
+    </p>
+    <ul>
+        <li>
+            der Job nicht gestoppt ist, 
+        </li>
+        <li>
+            es eine Periode für die aktuelle Zeit gibt, 
+        </li>
+        <li>
+            und die Verzögerung nach Fehler 
+            (<scheduler_method class="Job" property="delay_after_error" access="write" java_signature="int, double"/>) 
+            nicht wirkt. 
+        </li>
+    </ul>
 
     <!--
     <h2>Den Job zeigen</h2>
