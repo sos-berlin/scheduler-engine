@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.56 2002/03/03 16:59:41 jz Exp $
+// $Id: spooler_task.cxx,v 1.57 2002/03/04 11:41:46 jz Exp $
 /*
     Hier sind implementiert
 
@@ -299,9 +299,6 @@ void Job::init()
     _event.set_name( obj_name() );
     _event.add_to( &_thread->_wait_handles );
 
-    _period          = _run_time.next_period( Time::now() );
-    _next_start_time = _period.begin();
-
     _com_job  = new Com_job( this );
     _com_log  = new Com_log( &_log );
     _com_task = new Com_task();
@@ -312,6 +309,23 @@ void Job::init()
 
     _script_ptr = _object_set_descr? &_object_set_descr->_class->_script
                                    : &_script;
+
+
+    if( !_spooler->log_directory().empty()  &&  _spooler->log_directory()[0] != '*' )
+    {
+        _log.set_filename( _spooler->log_directory() + "/spooler.job." + _name + ".log" );      // Jobprotokoll
+    }
+
+    init2();
+}
+
+//----------------------------------------------------------------------------------------Job::init
+// Bei <add_jobs> von einem anderen Thread gerufen.
+
+void Job::init2()
+{
+    _period          = _run_time.next_period( Time::now() );
+    _next_start_time = _period.begin();
 }
 
 //---------------------------------------------------------------------------------Job::create_task
@@ -535,6 +549,9 @@ void Job::end()
 {
     if( !_state )  return;
 
+    set_mail_defaults();      // Vor spooler_on_error() bzw. spooler_on_success(); eMail wird in finish() verschickt
+
+
     if( _state == s_suspended )  set_state( s_running );
     
     if( _state == s_starting
@@ -542,6 +559,7 @@ void Job::end()
      || _state == s_running_process )  if( _task )  _task->end();
     
     close_task();
+
     if( _state != s_stopped )  set_state( s_ended );
 }
 
@@ -569,6 +587,21 @@ void Job::stop()
     // Kein Signal mehr soll kommen, wenn Job gestoppt:
     //_event.close();
     clear_when_directory_changed();
+}
+
+//--------------------------------------------------------------------------------------Job::finish
+
+void Job::finish()
+{
+    // eMail versenden
+
+    try
+    {
+        if( _log.mail_on_success()  ||  _log.mail_on_error() && has_error() )  _log.send();
+    }
+    catch( const Xc& x         ) { set_error(x); }
+    catch( const exception& x  ) { set_error(x); }
+    catch( const _com_error& x ) { set_error(x); }
 }
 
 //----------------------------------------------------------------------------Job::interrupt_script
@@ -626,7 +659,7 @@ bool Job::do_something()
                 case sc_unstop:     if( _state == s_stopped )  set_state( s_pending ), something_done = true;
                                     break;
 
-                case sc_end:        if( _state == s_running )  end(), something_done = true;
+                case sc_end:        if( _state == s_running )  end(), finish(), something_done = true;
                                     break;
 
                 case sc_suspend:    if( _state == s_running )  set_state( s_suspended ), something_done = true;
@@ -653,6 +686,7 @@ bool Job::do_something()
         read_script();
 
         set_state( s_pending );
+        init2();
         
         something_done = true;
     }
@@ -724,6 +758,8 @@ bool Job::do_something()
     {
         _event.reset();
 
+        _log.open();           // Jobprotokoll, nur wirksam, wenn set_filename() gerufen, s. Job::init().
+
         ok = _task->start();
         if( ok )  do_a_step = true;
         something_done = true;
@@ -770,6 +806,8 @@ bool Job::do_something()
          || _state == s_running_process )  end(), something_done = true;
 
         if( _state != s_stopped  &&  has_error()  &&  _repeat == 0 )  stop(), something_done = true;
+
+        finish();
     }
 
 
@@ -794,6 +832,30 @@ bool Job::do_something()
     }
 
     return something_done;
+}
+
+//---------------------------------------------------------------------------Job::set_mail_defaults
+
+void Job::set_mail_defaults()
+{
+    bool is_error = has_error();
+
+    _log.set_mail_from_name( "Job " + _name );
+
+    string body = Sos_optional_date_time::now().as_string() + "\n\nJob " + _name + "  " + _title + "\n\n";
+
+    if( !is_error )
+    {
+        _log.set_mail_subject( "Job " + _name + " gelungen" );
+    }
+    else
+    {
+        _log.set_mail_subject( string("FEHLER ") + _error->what(), is_error );
+    
+        body += string(_error->what()) + "\n\n";
+    }
+
+    _log.set_mail_body( body + "Das Jobprotokoll liegt dieser Nachricht bei.", is_error );
 }
 
 //--------------------------------------------------------------------------------Job::set_error_xc
@@ -1047,9 +1109,10 @@ xml::Element_ptr Job::xml( xml::Document_ptr document, bool show_all )
 
     THREAD_LOCK( _lock )
     {
-        job_element->setAttribute( "job"     , as_dom_string( _name ) );
-        job_element->setAttribute( "state"   , as_dom_string( state_name() ) );
-        job_element->setAttribute( "title"   , as_dom_string( _title ) );
+        job_element->setAttribute( "job"      , as_dom_string( _name ) );
+        job_element->setAttribute( "state"    , as_dom_string( state_name() ) );
+        job_element->setAttribute( "title"    , as_dom_string( _title ) );
+        job_element->setAttribute( "job_steps", as_dom_string( _step_count ) );
 
         if( !_in_call.empty() )  job_element->setAttribute( "calling", as_dom_string( _in_call ) );
 
@@ -1135,8 +1198,6 @@ void Task::close()
 
     do_close();
 
-    _job->_log.close();
-
     // Alle, die mit wait_until_terminated() auf diese Task warten, wecken:
     THREAD_LOCK( _terminated_events_lock )  FOR_EACH( vector<Event*>, _terminated_events, it )  (*it)->signal( "close task" );
 }
@@ -1165,11 +1226,6 @@ bool Task::start()
 
     try 
     {
-        if( !_spooler->log_directory().empty()  &&  _spooler->log_directory()[0] != '*' )
-        {
-            _job->_log.open( _spooler->log_directory() + "/spooler.job." + _job->_name + ".log" );
-        }
-
         bool ok = do_start();
         if( !ok || _job->has_error() )  return false;
         _opened = true;
@@ -1229,14 +1285,6 @@ void Task::on_error_on_success()
         catch( const Xc& x        ) { _job->set_error(x); }
         catch( const exception& x ) { _job->set_error(x); }
     }
-
-    try
-    {
-        if( _job->_log.mail_on_success()  ||  _job->_log.mail_on_error() && _job->has_error() )  _job->_log.send();
-    }
-    catch( const Xc& x         ) { _job->set_error(x); }
-    catch( const exception& x  ) { _job->set_error(x); }
-    catch( const _com_error& x ) { _job->set_error(x); }
 }
 
 //----------------------------------------------------------------------------------------Task::step
@@ -1250,6 +1298,7 @@ bool Task::step()
         result = do_step();
 
         _job->_thread->_step_count++;
+        _job->_step_count++;
         _step_count++;
     }
     catch( const Xc& x        ) { _job->set_error(x); return false; }

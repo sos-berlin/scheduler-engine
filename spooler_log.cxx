@@ -1,4 +1,4 @@
-// $Id: spooler_log.cxx,v 1.22 2002/03/03 16:59:41 jz Exp $
+// $Id: spooler_log.cxx,v 1.23 2002/03/04 11:41:46 jz Exp $
 
 #include "../kram/sos.h"
 #include "spooler.h"
@@ -70,11 +70,7 @@ void Log::write( Prefix_log* extra_log, const char* text, int len, bool log )
         int ret = ::write( _file, text, len );
         if( ret != len )  throw_errno( errno, "write", _filename.c_str() );
 
-        if( extra_log  &&  extra_log->_file != -1 )
-        {
-            int ret = ::write( extra_log->_file, text, len );
-            if( ret != len )  throw_errno( errno, "write", extra_log->_filename.c_str() );
-        }
+        if( extra_log )  extra_log->write( text, len );
     }
 }
 
@@ -142,7 +138,9 @@ void Log::log( Log_level level, const string& prefix, const string& line, Prefix
     int begin = 0;
     while( begin < line.length() )
     {
-        int nl = line.find( '\n', begin );  if( nl == string::npos )  nl = line.length();
+        int next = line.find( '\n', begin );  
+        if( next == string::npos )  next = line.length(); 
+                              else  next++;
 
         write( extra_log, buffer1, strlen(buffer1), false );           // Zeit
         
@@ -150,8 +148,8 @@ void Log::log( Log_level level, const string& prefix, const string& line, Prefix
 
         if( !prefix.empty() )  write( NULL, "(" + prefix + ") " );     // (Job ...)
 
-        write( extra_log, line.c_str() + begin, nl - begin );          // Text
-        begin = nl + 1;
+        write( extra_log, line.c_str() + begin, next - begin );        // Text
+        begin = next;
     }
 
     if( line.length() == 0 || line[line.length()-1] != '\n' )  write( extra_log, "\n", 1 );
@@ -176,6 +174,39 @@ Prefix_log::~Prefix_log()
     close();
 }
 
+//-------------------------------------------------------------------------Prefix_log::set_filename
+
+void Prefix_log::set_filename( const string& filename )
+{
+    if( _file != -1 )  throw_xc( "spooler_log::filename" );
+
+    _filename = filename;
+}
+
+//---------------------------------------------------------------------------------Prefix_log::open
+
+void Prefix_log::open()
+{
+    if( _file != -1 )  throw_xc( "SPOOLER-134", _filename );
+
+    _mail_on_error   = read_profile_bool( "factory.ini", _section.c_str(), "mail_on_error"  , _spooler->_mail_on_error );
+    _mail_on_success = read_profile_bool( "factory.ini", _section.c_str(), "mail_on_success", _spooler->_mail_on_success );
+
+    _subject = read_profile_string( "factory.ini", _section.c_str(), "log_mail_subject", _spooler->_log_mail_subject );
+
+    LOG( "\nopen " << _filename << '\n' );
+    _file = ::open( _filename.c_str(), O_CREAT | ( _append? 0 : O_TRUNC ) | O_WRONLY, 0666 );
+    if( _file == -1 )  throw_errno( errno, _filename.c_str() );
+
+    if( !_log_buffer.empty() )
+    {
+        write( _log_buffer.c_str(), _log_buffer.length() );
+        _log_buffer = "";
+    }
+
+    log( log_info, "\nProtokoll beginnt in " + _filename );
+}
+
 //----------------------------------------------------------------------------------Prefix_log::log
 
 void Prefix_log::close()
@@ -188,10 +219,29 @@ void Prefix_log::close()
     }
 }
 
+//--------------------------------------------------------------------------------Prefix_log::write
+
+void Prefix_log::write( const char* text, int len )
+{
+    if( len == 0 )  return;
+
+    if( _file == -1 )
+    {
+        _log_buffer.append( text, len );
+    }
+    else
+    {
+        int ret = ::write( _file, text, len );
+        if( ret != len )  throw_errno( errno, "write", _filename.c_str() );
+    }
+}
+
 //---------------------------------------------------------------------------------Prefix_log::mail
 
 spooler_com::Imail* Prefix_log::mail()
 {
+    HRESULT hr;
+
     if( !_mail )
     {
         CComPtr<Com_mail> mail = new Com_mail;
@@ -199,53 +249,120 @@ spooler_com::Imail* Prefix_log::mail()
 
         _mail = mail;   // Nur bei fehlerfreiem init() speichern
 
-        string subject = "Protokoll für " + _prefix;
-        CComBSTR subject_bstr = SysAllocString_string( subject );
-        _mail->put_subject( subject_bstr );
+        if( !_smtp_server_read ) {
+            _smtp_server = read_profile_string( "factory.ini", _section.c_str(), "smtp_server", _spooler->_smtp_server );
+            _smtp_server_read = true;
+        }
+        hr = _mail->put_smtp_server( SysAllocString_string(_smtp_server) );     if( FAILED(hr) ) throw_ole( hr, "spooler::Mail::smtp_server", _smtp_server.c_str() );
 
-        _mail->put_body( subject_bstr );
+        set_mail_header();
 
-        bool ok = read_mail_profile( _section );
-        if( !ok )  read_mail_profile( "spooler" );
-
-        string smtp_server = read_profile_string( "factory.ini", section.c_str(), "smtp_server", _spooler->_smtp_server );
-
-        _mail_on_error   = read_profile_bool( "factory.ini", _section.c_str(), "mail_on_error"  , _spooler->_mail_on_error );
-        _mail_on_success = read_profile_bool( "factory.ini", _section.c_str(), "mail_on_success", _spooler->_mail_on_success );
+        // Vorbesetzungen von spooler_task.cxx:
+        if( !_from_name.empty() )  set_mail_from_name( _from_name ),  _from_name = "";   
+        if( !_subject  .empty() )  set_mail_subject  ( _subject ),    _subject   = "";
+        if( !_body     .empty() )  set_mail_body     ( _body ),       _body      = "";
     }
 
     return _mail;
 }
 
-//--------------------------------------------------------------------Prefix_log::read_mail_profile
+//----------------------------------------------------------------------Prefix_log::set_mail_header
 
-bool Prefix_log::read_mail_profile( const string& section )
+void Prefix_log::set_mail_header()
 {
     HRESULT hr;
 
-    string from    = read_profile_string( "factory.ini", section.c_str(), "mail_log_from"   , "" );
-    string to      = read_profile_string( "factory.ini", section.c_str(), "mail_log_to"     , "" );
-    string cc      = read_profile_string( "factory.ini", section.c_str(), "mail_log_cc"     , "" );
-    string bcc     = read_profile_string( "factory.ini", section.c_str(), "mail_log_bcc"    , "" );
-    string subject = read_profile_string( "factory.ini", section.c_str(), "mail_log_subject", "" );
+  //if( _subject.empty() )  _subject = "Protokoll für " + _prefix;
+  //if( _body   .empty() )  _body = _subject;
 
-    if( to.empty() && cc.empty() && bcc.empty() && from.empty() && subject.empty() )
+    string from    = read_profile_string( "factory.ini", _section.c_str(), "log_mail_from"   , _spooler->_log_mail_from );
+    string to      = read_profile_string( "factory.ini", _section.c_str(), "log_mail_to"     );
+    string cc      = read_profile_string( "factory.ini", _section.c_str(), "log_mail_cc"     , "" );
+    string bcc     = read_profile_string( "factory.ini", _section.c_str(), "log_mail_bcc"    , "" );
+
+    if( to.empty() && cc.empty() && bcc.empty() )
+    {       
+        to  = _spooler->_log_mail_to;
+        cc  = _spooler->_log_mail_cc;
+        bcc = _spooler->_log_mail_bcc;
+    }
+
+    hr = _mail->put_from( SysAllocString_string(from) );   if( FAILED(hr) ) throw_ole( hr, "spooler::Mail::from", from.c_str() );
+    hr = _mail->put_to  ( SysAllocString_string(to) );     if( FAILED(hr) ) throw_ole( hr, "spooler::Mail::to"  , to.c_str() );
+    hr = _mail->put_cc  ( SysAllocString_string(cc) );     if( FAILED(hr) ) throw_ole( hr, "spooler::Mail::cc"  , cc.c_str() );
+    hr = _mail->put_bcc ( SysAllocString_string(bcc) );    if( FAILED(hr) ) throw_ole( hr, "spooler::Mail::bcc" , bcc.c_str() );
+}
+
+//-------------------------------------------------------------------Prefix_log::set_mail_from_name
+
+void Prefix_log::set_mail_from_name( const string& from_name )
+{
+    HRESULT hr;
+
+    if( _mail )
     {
-        return false;
+        CComBSTR old_from;
+        hr = _mail->get_from( &old_from );                              if( FAILED(hr) ) throw_ole( hr, "spooler::Mail::from" );
+        if( !wcschr( old_from, '<' )  &&  wcschr( old_from, '@' ) )
+        {
+            string from = from_name + " <" + bstr_as_string(old_from) + ">";
+            CComBSTR from_bstr = from.c_str();
+            hr = _mail->put_from( from_bstr );                          if( FAILED(hr) ) throw_ole( hr, "spooler::Mail::from", from.c_str() );
+        }
     }
     else
     {
-        hr = _mail->put_from( SysAllocString_string(to) );     if( FAILED(hr) ) throw_ole( hr, "spooler::Mail::from", from.c_str() );
-        hr = _mail->put_to  ( SysAllocString_string(to) );     if( FAILED(hr) ) throw_ole( hr, "spooler::Mail::to"  , to.c_str() );
-        hr = _mail->put_cc  ( SysAllocString_string(cc) );     if( FAILED(hr) ) throw_ole( hr, "spooler::Mail::cc"  , cc.c_str() );
-        hr = _mail->put_bcc ( SysAllocString_string(bcc) );    if( FAILED(hr) ) throw_ole( hr, "spooler::Mail::bcc" , bcc.c_str() );
+        _from_name = from_name;
+    }
+}
 
-        if( !subject.empty() )
+//---------------------------------------------------------------------Prefix_log::set_mail_subject
+
+void Prefix_log::set_mail_subject( const string& subject, bool overwrite )
+{
+    HRESULT hr;
+
+    if( _mail )
+    {
+        if( !overwrite )
         {
-            hr = _mail->put_subject( SysAllocString_string(to) );     if( FAILED(hr) ) throw_ole( hr, "spooler::Mail::subject", to.c_str() );
+            CComBSTR subject_bstr;
+            hr = _mail->get_subject( &subject_bstr );     if( FAILED(hr) ) throw_ole( hr, "spooler::Mail::subject" );
+
+            if( SysStringLen(subject_bstr) > 0 )  return;
         }
 
-        return true;
+        hr = _mail->put_subject( SysAllocString_string(subject) );     if( FAILED(hr) ) throw_ole( hr, "spooler::Mail::subject", subject.c_str() );
+    }
+    else
+    {
+        if( !_subject.empty()  &&  !overwrite )  return;
+        _subject = subject;
+    }
+}
+
+//------------------------------------------------------------------------Prefix_log::set_mail_body
+
+void Prefix_log::set_mail_body( const string& body, bool overwrite )
+{
+    HRESULT hr;
+
+    if( _mail )
+    {
+        if( !overwrite )
+        {
+            CComBSTR body_bstr;
+            hr = _mail->get_body( &body_bstr );     if( FAILED(hr) ) throw_ole( hr, "spooler::Mail::body" );
+
+            if( SysStringLen(body_bstr) > 0 )  return;
+        }
+
+        hr = _mail->put_body( SysAllocString_string(body) );     if( FAILED(hr) ) throw_ole( hr, "spooler::Mail::body", body.c_str() );
+    }
+    else
+    {
+        if( !_body.empty()  &&  !overwrite )  return;
+        _body = body;
     }
 }
 
@@ -256,26 +373,10 @@ void Prefix_log::send()
     if( _file != -1 )       // Nur senden, wenn die Log-Datei beschrieben worden ist
     {
         close();
-
-        if( !_file_added )   mail()->add_file( CComBSTR( _filename.c_str() ), L"plain/text" ),  _file_added = true;
-
+        mail()->add_file( CComBSTR( _filename.c_str() ), L"plain/text" );
         mail()->send();
+        _mail = NULL;
     }
-}
-
-//---------------------------------------------------------------------------------Prefix_log::open
-
-void Prefix_log::open( const string& filename )
-{
-    if( _file != -1 )  throw_xc( "SPOOLER-134", _filename );
-
-    _filename = filename;
-
-    LOG( "\nopen " << _filename << '\n' );
-    _file = ::open( _filename.c_str(), O_CREAT | ( _append? 0 : O_TRUNC ) | O_WRONLY, 0666 );
-    if( _file == -1 )  throw_errno( errno, _filename.c_str() );
-
-    log( log_info, "Protokoll beginnt in " + _filename );
 }
 
 //----------------------------------------------------------------------------------Prefix_log::log

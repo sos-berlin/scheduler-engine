@@ -1,4 +1,4 @@
-// $Id: spooler_log.h,v 1.7 2002/03/03 16:59:41 jz Exp $
+// $Id: spooler_log.h,v 1.8 2002/03/04 11:41:46 jz Exp $
 
 #ifndef __SPOOLER_LOG_H
 #define __SPOOLER_LOG_H
@@ -58,10 +58,12 @@ struct Prefix_log
                                 Prefix_log                  ( Spooler*, const string& prefix = empty_string );
                                ~Prefix_log                  ();
 
+    void                        open                        ();
     void                        close                       ();
 
-    void                        open                        ( const string& filename );
+    void                        set_filename                ( const string& );
     const string&               filename                    () const                            { return _filename; }
+
     void                        set_prefix                  ( const string& prefix )            { _prefix = prefix; }
     void                        set_profile_section         ( const string& section )           { _section = section; }
 
@@ -80,13 +82,19 @@ struct Prefix_log
 
     spooler_com::Imail*         mail                        ();
 
+    // Defaults setzen, ohne eMail-Objekt anzulegen:
+    void                        set_mail_from_name          ( const string& );
+    void                        set_mail_subject            ( const string&, bool overwrite = false );
+    void                        set_mail_body               ( const string&, bool overwrite = false );
+
     void                        send                        ();
 
     friend struct               Log;
 
   protected:
 
-    bool                        read_mail_profile           ( const string& section );
+    void                        write                       ( const char*, int );
+    void                        set_mail_header             ();
 
 
     Fill_zero                  _zero_;
@@ -103,7 +111,14 @@ struct Prefix_log
     bool                       _mail_on_success;
     CComPtr<spooler_com::Imail> _mail;
     string                     _mail_section;               // Name des Abschnitts in factory.ini für eMail-Einstellungen
-    bool                       _file_added;
+
+    string                     _smtp_server;                // Aus factory.ini [Job ...]
+    bool                       _smtp_server_read;
+    string                     _from_name;
+    string                     _subject;
+    string                     _body;
+
+    string                     _log_buffer;                 // Für Jobprotokollausgaben bis open(), also vor dem Jobstart
 };
 
 //-------------------------------------------------------------------------------------------------

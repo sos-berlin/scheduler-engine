@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.79 2002/03/03 16:59:41 jz Exp $
+// $Id: spooler.cxx,v 1.80 2002/03/04 11:41:45 jz Exp $
 /*
     Hier sind implementiert
 
@@ -116,6 +116,11 @@ Spooler::Spooler()
     _mail_on_success = read_profile_bool  ( "factory.ini", "spooler", "mail_on_success", _mail_on_success );
     _smtp_server     = read_profile_string( "factory.ini", "spooler", "smtp_server"    , _smtp_server );
 
+    _log_mail_from    = read_profile_string( "factory.ini", "spooler", "log_mail_from"   );
+    _log_mail_to      = read_profile_string( "factory.ini", "spooler", "log_mail_to"     );
+    _log_mail_cc      = read_profile_string( "factory.ini", "spooler", "log_mail_cc"     );
+    _log_mail_bcc     = read_profile_string( "factory.ini", "spooler", "log_mail_bcc"    );
+    _log_mail_subject = read_profile_string( "factory.ini", "spooler", "log_mail_subject");
 }
 
 //--------------------------------------------------------------------------------Spooler::~Spooler
@@ -353,11 +358,13 @@ void Spooler::load_arg()
 
     _spooler_id       = read_profile_string( "factory.ini", "spooler", "id" );
     _config_filename  = read_profile_string( "factory.ini", "spooler", "config" );
-    _log_directory    = read_profile_string( "factory.ini", "spooler", "log-dir" );        _log_directory_as_option_set = !_log_directory.empty();
-    _include_path     = read_profile_string( "factory.ini", "spooler", "include-path" );   _include_path_as_option_set = !_include_path.empty();
+    _log_directory    = read_profile_string( "factory.ini", "spooler", "log-dir" );       // veraltet
+    _log_directory    = read_profile_string( "factory.ini", "spooler", "log_dir", _log_directory );        _log_directory_as_option_set = !_log_directory.empty();
+    _include_path     = read_profile_string( "factory.ini", "spooler", "include-path" );  // veraltet
+    _include_path     = read_profile_string( "factory.ini", "spooler", "include_path", _include_path );    _include_path_as_option_set = !_include_path.empty();
     _spooler_param    = read_profile_string( "factory.ini", "spooler", "param" );          _spooler_param_as_option_set = !_spooler_param.empty();
   //_debug            = read_profile_bool  ( "factory.ini", "spooler", "debug", _debug );  if( _debug )  log_level = "debug9";
-    log_level         = read_profile_string( "factory.ini", "spooler", "log-level", log_level );   
+    log_level         = read_profile_string( "factory.ini", "spooler", "log_level", log_level );   
 
 
     try

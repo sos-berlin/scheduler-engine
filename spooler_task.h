@@ -1,4 +1,4 @@
-// $Id: spooler_task.h,v 1.29 2002/03/03 16:59:42 jz Exp $
+// $Id: spooler_task.h,v 1.30 2002/03/04 11:41:46 jz Exp $
 
 #ifndef __SPOOLER_TASK_H
 #define __SPOOLER_TASK_H
@@ -164,6 +164,7 @@ struct Job : Sos_self_deleting
     xml::Element_ptr            xml                         ( xml::Document_ptr, bool show_all );
 
     void                        init                        ();
+    void                        init2                       ();
 
     const string&               name                        () const                    { return _name; }
     State_cmd                   state_cmd                   () const                    { return _state_cmd; }
@@ -193,9 +194,11 @@ struct Job : Sos_self_deleting
     bool                        load                        ();
     void                        end                         ();
     void                        stop                        ();
+    void                        finish                      ();
     void                        set_next_start_time         ( Time now = Time::now() );
     bool                        do_something                ();
     bool                        should_removed              ()                          { return _temporary && _state == s_stopped; }
+    void                        set_mail_defaults           ();
 
     void                        set_repeat                  ( double seconds )          { _repeat = seconds; }
 
@@ -259,6 +262,7 @@ struct Job : Sos_self_deleting
     Script*                    _script_ptr;
     Script_instance            _script_instance;            // Für use_engine="job"
 
+    int                        _step_count;                 // Anzahl spooler_process() dieses Jobs
     bool                       _has_spooler_process;
     Directory_watcher_list     _directory_watcher_list;
     Event                      _event;                      // Zum Starten des Jobs
