@@ -1,4 +1,4 @@
-// $Id: spooler_com.cxx,v 1.91 2003/03/15 18:06:37 jz Exp $
+// $Id: spooler_com.cxx,v 1.92 2003/03/27 11:51:05 jz Exp $
 /*
     Hier sind implementiert
 
@@ -434,7 +434,7 @@ xml::Document_ptr Com_variable_set::dom()
         }
     }
 
-    return doc.detach();
+    return doc; //doc.detach();
 }
 
 //--------------------------------------------------------------------------Com_variable_set::Clone
