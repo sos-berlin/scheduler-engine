@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.225 2003/12/09 20:44:45 jz Exp $
+// $Id: spooler_task.cxx,v 1.226 2003/12/10 19:25:08 jz Exp $
 /*
     Hier sind implementiert
 
@@ -967,7 +967,7 @@ bool Task::do_something()
 
             something_done = true;
 
-            sos_sleep( 5 );  // Bremsen, falls sich der Fehler wiederholt
+            //sos_sleep( 5 );  // Bremsen, falls sich der Fehler wiederholt
         }
     }
 
