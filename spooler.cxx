@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.58 2001/02/21 15:16:21 jz Exp $
+// $Id: spooler.cxx,v 1.59 2001/02/21 18:49:48 jz Exp $
 /*
     Hier sind implementiert
 
@@ -248,6 +248,8 @@ void Spooler::set_state( State state )
 {
     if( _state == state )  return;
 
+    _log.msg( state_name() );
+
     _state = state;
     if( _state_changed_handler )  (*_state_changed_handler)( this, NULL );
 }
@@ -482,8 +484,6 @@ int Spooler::launch( int argc, char** argv )
         stop();
 
     } while( _state_cmd == sc_reload || _state_cmd == sc_load_config );
-
-    Script_site::clear();
 
     _log.msg( "Spooler ordentlich beendet." );
 
