@@ -1,4 +1,4 @@
-// $Id: spooler_communication.cxx,v 1.95 2004/07/27 09:06:52 jz Exp $
+// $Id: spooler_communication.cxx,v 1.96 2004/10/07 21:34:48 jz Exp $
 /*
     Hier sind implementiert
 
@@ -199,7 +199,7 @@ bool Xml_end_finder::is_complete( const char* p, int len )
                 {
                     if( *p == '/' )  _in_end_tag = true;               // "</"
                     else
-                    if( !isalpha(*p) )  _in_special_tag = true;
+                    if( !isalpha( (Byte)*p ) )  _in_special_tag = true;
                     _at_start_tag = false;
                 }
                 else
