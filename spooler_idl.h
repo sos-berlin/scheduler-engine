@@ -574,7 +574,7 @@ struct Isubprocess : IDispatch
     virtual HRESULT     get_Ignore_error            ( VARIANT_BOOL* )                               = 0;
     virtual HRESULT     put_Ignore_signal           ( VARIANT_BOOL )                                = 0;
     virtual HRESULT     get_Ignore_signal           ( VARIANT_BOOL* )                               = 0;
-    virtual HRESULT         Wait                    ( VARIANT*, VARIANT_BOOL* )                     = 0;
+    virtual HRESULT         Wait_for_termination    ( VARIANT*, VARIANT_BOOL* )                     = 0;
     virtual HRESULT         Kill                    ( int signal )                                  = 0;
 };
 

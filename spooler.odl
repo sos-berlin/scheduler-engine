@@ -1183,7 +1183,7 @@ library Spooler
         [propput]
         HRESULT                 Timeout                 ( [in] double seconds );
 
-        HRESULT                 Wait                    ( [in,optional] VARIANT* seconds, [out,retval] VARIANT_BOOL* );       // seconds: VT_DOUBLE oder VT_INT
+        HRESULT                 Wait_for_termination    ( [in,optional] VARIANT* seconds, [out,retval] VARIANT_BOOL* );       // seconds: VT_DOUBLE oder VT_INT
 
         HRESULT                 Kill                    ( [in,defaultvalue(0)] int signal );
     };

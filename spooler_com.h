@@ -790,7 +790,7 @@ struct Com_subprocess : spooler_com::Isubprocess,
     STDMETHODIMP            get_Ignore_error            ( VARIANT_BOOL* );
     STDMETHODIMP            put_Ignore_signal           ( VARIANT_BOOL );
     STDMETHODIMP            get_Ignore_signal           ( VARIANT_BOOL* );
-    STDMETHODIMP                Wait                    ( VARIANT*, VARIANT_BOOL* );
+    STDMETHODIMP                Wait_for_termination    ( VARIANT*, VARIANT_BOOL* );
     STDMETHODIMP                Kill                    ( int signal );
 
   private:

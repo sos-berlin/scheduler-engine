@@ -52,7 +52,7 @@ const Com_method Subprocess::_methods[] =
     COM_PROPERTY_PUT( Subprocess, 12, Ignore_signal ,             0, { VT_BSTR } ),
     COM_PROPERTY_GET( Subprocess, 12, Ignore_signal , VT_BOOL   , 0, { VT_BOOL } ),
     COM_PROPERTY_PUT( Subprocess, 13, Timeout       ,             0, { VT_R8 } ),
-    COM_METHOD      ( Subprocess, 14, Wait          , VT_BOOL   , 1, { VT_BYREF|VT_VARIANT } ),
+    COM_METHOD      ( Subprocess, 14, Wait_for_termination, VT_BOOL   , 1, { VT_BYREF|VT_VARIANT } ),
     COM_METHOD      ( Subprocess, 15, Kill          , VT_EMPTY  , 0, { VT_INT  } ),
     {}
 };
@@ -154,9 +154,9 @@ STDMETHODIMP Subprocess::Start( VARIANT* program_and_parameters )
     return hr;
 }
 
-//---------------------------------------------------------------------------------Subprocess::Wait
+//-----------------------------------------------------------------Subprocess::Wait_for_termination
 
-STDMETHODIMP Subprocess::Wait( VARIANT* seconds, VARIANT_BOOL* result )
+STDMETHODIMP Subprocess::Wait_for_termination( VARIANT* seconds, VARIANT_BOOL* result )
 { 
     HRESULT hr = S_OK;
 

@@ -57,11 +57,11 @@ public class Subprocess  extends Idispatch
 
     /** Wartet aufs Ende des Subprocesses. 
         @return true, wenn der Subprozess geendet hat */
-    public boolean          wait                ( double seconds )                  { return boolean_com_call( "wait", new Double( seconds ) ); }
+    public boolean          wait_for_termination( double seconds )                  { return boolean_com_call( "wait_for_termination", new Double( seconds ) ); }
 
 
     /** Wartet aufs Ende des Subprocesses. */
-  //public void             wait                ()                                  {                com_call( "wait" ); }
+    public void             wait_for_termination()                                  {                com_call( "wait_for_termination" ); }
 
 
     /** Bricht den Subprocess ab. 
