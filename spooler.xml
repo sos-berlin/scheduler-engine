@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 
-<!-- $Id: spooler.xml,v 1.10 2001/01/21 11:26:06 jz Exp $   (C) 2000 SOS GmbH Berlin -->
+<!-- $Id: spooler.xml,v 1.11 2001/01/21 16:59:05 jz Exp $   (C) 2000 SOS GmbH Berlin -->
 
 <!DOCTYPE spooler SYSTEM "spooler.dtd">
 
@@ -239,6 +239,7 @@ $script_index = 1;
 
 sub spooler_open()
 {
+    $spooler_log->msg( "high_level=" . $spooler_task->object_set->high_level );
     $object_set_class = spooler_make_object_set();
     $object_set_class->spooler_open();
     return; 
@@ -353,12 +354,27 @@ end function
             <script language="VBScript" use_engine="task"><![CDATA[
 
 spooler_log.msg "*Job single"
+spooler.job("Aufbereiten").start
 
             ]]></script>
 
-            <!-- <run_time single_start="15:58"/> -->
+            <run_time single_start="15:31:40"/>
 
         </job>
+
+
+        <job name="perl">
+            <script language="PerlScript" use_engine="task"><![CDATA[
+
+$spooler_log->msg( "*Job perl" );
+$spooler->job("Aufbereiten")->start();
+
+            ]]></script>
+            
+            <run_time/>
+
+        </job>
+
     </jobs>
 
 </config>

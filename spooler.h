@@ -1,4 +1,4 @@
-// $Id: spooler.h,v 1.32 2001/01/21 11:26:06 jz Exp $
+// $Id: spooler.h,v 1.33 2001/01/21 16:59:05 jz Exp $
 
 #ifndef __SPOOLER_H
 #define __SPOOLER_H
@@ -144,6 +144,9 @@ struct Time
     bool                        operator >                  ( int t )                       { return _time >  t; }
 
                                 operator double             ()                              { return _time; }
+
+    string                      as_string                   () const;                        
+    ostream&                    operator <<                 ( ostream& s )                  { s << as_string(); return s; }
 
     static Time                 now                         ();
 

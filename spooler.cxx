@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.35 2001/01/21 11:26:06 jz Exp $
+// $Id: spooler.cxx,v 1.36 2001/01/21 16:59:05 jz Exp $
 /*
     Hier sind implementiert
 
@@ -384,7 +384,7 @@ void Spooler::wait()
     Time wait_time = _next_start_time - Time::now();
     if( wait_time > 0 ) 
     {
-        if( next_task )  next_task->_log.msg( "Nächster Start " + Sos_optional_date_time( _next_start_time ).as_string() );
+        if( next_task )  next_task->_log.msg( "Nächster Start " + _next_start_time.as_string() );
                    else  _log.msg( "Kein Job zu starten" );
 
         _sleeping = true;

@@ -1,4 +1,4 @@
-// $Id: spooler_log.cxx,v 1.9 2001/01/20 23:39:16 jz Exp $
+// $Id: spooler_log.cxx,v 1.10 2001/01/21 16:59:06 jz Exp $
 
 #include "../kram/sos.h"
 #include "spooler.h"
@@ -90,9 +90,8 @@ void Log::log( Log_kind kind, const string& prefix, const string& line )
     Thread_semaphore::Guard guard = &_semaphore;
     char buffer[100];
 
-    Time nw = Time::now();
-    Sos_optional_date_time time = nw;
-    sprintf( buffer, "%s.%03d", time.as_string().c_str(), int( Big_int(nw * 1000) % 1000 ) );
+    string now = Time::now().as_string();
+    strcpy( buffer, now.c_str() );
 
     switch( kind )
     {

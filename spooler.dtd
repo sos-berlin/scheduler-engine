@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- $Id: spooler.dtd,v 1.4 2001/01/20 23:39:15 jz Exp $   Joacim Zschimmer,  (C) 2000 SOS GmbH Berlin  -->
+<!-- $Id: spooler.dtd,v 1.5 2001/01/21 16:59:05 jz Exp $   Joacim Zschimmer,  (C) 2000 SOS GmbH Berlin  -->
 
 
 <!ELEMENT spooler               ( config+ | command | answer )>
@@ -57,12 +57,12 @@
 
 
 <!ELEMENT run_time              ( time_of_day?, date*, weekdays?, monthdays?, ultimos?, holiday* )>
-<!ATTLIST run_time              retry_period        CDATA '5'>          <!-- Periode, nach der ein Job erneut gestartet wird, 
-                                                                             um zu prüfen, ob die Objektemenge nicht leer ist -->
+<!ATTLIST run_time              single_start        CDATA #IMPLIED>     <!-- Statt begin: Task wird nur einmal um diese Zeit gestartet --> 
 <!ATTLIST run_time              begin               CDATA '00:00:00'>   <!-- HH:MM:SS, Tageszeit, ab der der Job laufen soll -->
 <!ATTLIST run_time              end                 CDATA '24:00:00'>   <!-- HH:MM:SS, Tageszeit, bis zu der der Job laufen soll -->
 <!ATTLIST run_time              let_run             (yes|no) 'no'>      <!-- Task zuende laufen lassen, auch wenn Endezeit überschritten ist -->
-<!ATTLIST run_time              single_start        CDATA #IMPLIED>     <!-- Statt begin: Task wird nur einmal um diese Zeit gestartet --> 
+<!ATTLIST run_time              retry_period        CDATA '5'>          <!-- Periode, nach der ein Job erneut gestartet wird, 
+                                                                             um zu prüfen, ob die Objektemenge nicht leer ist -->
 
 <!ELEMENT date                  EMPTY>                                  <!-- Ein bestimmter Tag, an dem der Job laufen soll -->
 <!ATTLIST date                  date                CDATA #IMPLIED>     <!-- yyyy-mm-dd -->

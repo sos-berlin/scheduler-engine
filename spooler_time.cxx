@@ -1,4 +1,4 @@
-// $Id: spooler_time.cxx,v 1.2 2001/01/20 23:39:16 jz Exp $
+// $Id: spooler_time.cxx,v 1.3 2001/01/21 16:59:06 jz Exp $
 /*
     Hier sind implementiert
 
@@ -28,6 +28,16 @@ namespace spooler {
 void Time::operator = ( const Sos_optional_date_time& dt )
 {
     _time = dt.hour() * 60*60 + dt.minute() * 60 + dt.second();
+}
+
+//---------------------------------------------------------------------------------Time::as_string
+
+string Time::as_string() const
+{
+    char buff [30];
+    int blen = sprintf( buff, "%0.3lf", _time );
+
+    return Sos_optional_date_time( uint(_time) ).as_string() + ( buff + (blen-4) );
 }
 
 //---------------------------------------------------------------------------------------Time::now

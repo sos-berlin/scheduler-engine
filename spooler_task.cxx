@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.4 2001/01/21 11:26:06 jz Exp $
+// $Id: spooler_task.cxx,v 1.5 2001/01/21 16:59:06 jz Exp $
 /*
     Hier sind implementiert
 
@@ -142,6 +142,8 @@ bool Object_set::step( Level result_level )
     {
         Spooler_object object = get();
         if( object.is_null() )  return false;
+
+        if( _task->_error )  return false;       // spooler_task.error() gerufen?
 
         object.process( result_level );
         return true;
@@ -313,8 +315,8 @@ bool Task::start()
         else
             script = &_job->_script;
 
-        if( script->_reuse == Script::reuse_job )  _script_instance_ptr = &_job->_script_instance, _use_task_engine = true;
-                                             else  _script_instance_ptr = &_script_instance;
+        if( script->_reuse == Script::reuse_job )  _script_instance_ptr = &_job->_script_instance;
+                                             else  _script_instance_ptr = &_script_instance, _use_task_engine = true;
 
         if( !_script_instance_ptr->loaded() )
         {
@@ -326,8 +328,13 @@ bool Task::start()
             _script_instance_ptr->add_obj( (IDispatch*)_job->_com_current_task, "spooler_task" );
 
             _script_instance_ptr->load( *script );
+            if( _error )  return false;
 
-            if( _script_instance_ptr->name_exists( spooler_init_name ) )  _script_instance_ptr->call( spooler_init_name );
+            if( _script_instance_ptr->name_exists( spooler_init_name ) ) 
+            {
+                _script_instance_ptr->call( spooler_init_name );
+                if( _error )  return false;
+            }
         }
 
         if( _job->_object_set_descr )  _object_set->open();
@@ -335,8 +342,6 @@ bool Task::start()
         if( _script_instance_ptr->name_exists( spooler_open_name ) )  _script_instance_ptr->call( spooler_open_name );
 
         _opened = true;
-
-        _step_count = 0;
     }
     catch( const Xc& x        ) { start_error(x); return false; }
     catch( const exception& x ) { error(x); return false; }
@@ -379,6 +384,7 @@ void Task::end()
     _next_start_time = now + _job->_run_time._retry_period;
     if( now >= _job->_run_time._next_end_time )  set_new_start_time();
 
+    _step_count = 0;
     _state = s_pending;
     _spooler->_running_jobs_count--;
 }
@@ -387,6 +393,8 @@ void Task::end()
 
 void Task::stop()
 {
+    if( _state == s_stopped )  return;
+
     _log.msg( "stop" );
 
     if( _opened )  end();
@@ -401,9 +409,10 @@ void Task::stop()
 
     if( _directory_watcher )  _spooler->_wait_handles.remove( _directory_watcher._handle );
 
+    _state = s_stopped;
     _object_set = NULL;
     _script_instance_ptr = NULL;
-    _state = s_stopped;
+    _step_count = 0;
 }
 
 //----------------------------------------------------------------------------------------Task::step
