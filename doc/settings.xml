@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="scheduler.xslt" type="text/xsl"?>
 
-<!--$Id: settings.xml,v 1.10 2004/09/08 19:23:23 jz Exp $-->
+<!--$Id: settings.xml,v 1.11 2004/09/09 21:45:05 jz Exp $-->
 
 <!-- Einige Einstellungen können an mehreren Stellen vorgenommen werden:
      - Konfigurationsdatei
@@ -16,7 +16,7 @@
     base_dir    = ""
     title       = "Einstellungen"
     author      = "$Author: jz $"
-    date        = "$Date: 2004/09/08 19:23:23 $"
+    date        = "$Date: 2004/09/09 21:45:05 $"
 >
 
     <setting setting        = "log_dir" 
@@ -68,7 +68,7 @@
         <description>
             <p>
                 Der Scheduler wählt nur die Elemente der XML-Konfiguration aus,
-                deren Attribut <code>spooler_id=</code> leer ist oder denselben Wert
+                deren Attribut <code>spooler_id</code> leer ist oder denselben Wert
                 wie in dieser Einstellung enthält.
             </p>
             <p>
@@ -188,7 +188,7 @@
     <setting setting = "db_variables_table" 
              type    = "name"
              initial = "SCHEDULER_VARIABLES"
-             title   = "Name der Datenbanktabelle für die Variablen">
+             title   = "Name der Datenbanktabelle für die interne Variablen des Schedulers">
         <description>
             <p>
             </p>
@@ -201,7 +201,9 @@
              title   = "Zusätzliche Spalten in der Historie">
         <description>
             <p>
-                Eine Task kann mit der Methode Task.set_history_field() die hier angegebenen Felder der Datenbanktabelle für die Task-Historie setzen.
+                Eine Task kann mit der Methode 
+                <scheduler_method class="Task" method="set_history_field" java_signature="java.lang.String, java.lang.String"/>
+                ja die hier angegebenen Felder der Datenbanktabelle für die Task-Historie setzen.
             </p>
         </description>
     </setting>
@@ -212,6 +214,9 @@
              title   = "Historie schreiben?">
         <description>
             <p>
+                Gibt ein, ob eine Task-Historie geschrieben werden soll. 
+                Der Scheduler schreibt dann für jede Task einen Satz in die Datenbank, oder, wenn der Scheduler ohne Datenbank arbeitet,
+                in eine Datei im mit <scheduler_option name="log-dir"/> angegebenen Verzeichnis.
             </p>
         </description>
     </setting>
@@ -222,6 +227,10 @@
              title   = "Dateiname der Historie (für datenbanklosen Betrieb)">
         <description>
             <p>
+                Der Scheduler nimmt einen eigenen Namen, wenn diese Option fehlt. 
+                Die Option <scheduler_option name="log-dir"/> muss gesetzt sein oder der Scheduler schreibt die Datei nicht.
+                In diese Datei wird, wenn der <code>history=yes</code> gesetzt ist und der Scheduler keine Datenbank verwendet,
+                für jede gelaufende Task ein Satz geschrieben.
             </p>
         </description>
     </setting>
@@ -233,6 +242,12 @@
              title  = "Nach spooler_process() Historiensatz schreiben?">
         <description>
             <p>
+                Bei <code>history_on_process=yes</code> oder <code>=1</code> schreibt der Scheduler beim Start der Task
+                einen Satz in die Historie (wenn eine geführt wird).
+            </p>
+            <p>
+                Wenn eine Zahl angegeben ist, schreibt der Scheduler erst vor dem 
+                soundsovielten Aufruf von <code>spooler_process()</code> einen Satz in die Historie.
             </p>
         </description>
     </setting>
@@ -244,6 +259,8 @@
              title   = "Historiendateien archivieren?">
         <description>
             <p>
+                Wenn die Historie in einer Datei (also nicht in einer Datenbank) geführt wird,
+                kann der Scheduler die Historien des letzten Scheduler-Laufs archivieren und mit gzip komprimieren.
             </p>
         </description>
     </setting>
@@ -255,6 +272,12 @@
              title   = "Protokoll in die Historie schreiben?">
         <description>
             <p>
+                Der Scheduler kann auch das Task-Protokoll in die Historie (in der Datenbank) schreiben,
+                auch mit gzip komprimiert (prüfen Sie, ob Ihre Datenbank das dann binär gespeicherte Protokoll wieder hergibt!).
+                <br/>
+            </p>
+            <p>
+                Siehe Kommando <scheduler_element name="show_task" attribute="what" value="log"/>.
             </p>
         </description>
     </setting>
@@ -265,6 +288,7 @@
              title   = "Aufträge in die Historie schreiben?">
         <description>
             <p>
+                Für die Aufträge gibt es eine eigene Historie.
             </p>
         </description>
     </setting>
@@ -276,6 +300,11 @@
              title   = "Auftragsprotokolle in die Historie schreiben?">
         <description>
             <p>
+                Der Scheduler kann das Auftragsprotokoll in die Datenbank schreiben,
+                auch mit gzip komprimiert (prüfen Sie, ob Ihre Datenbank das dann binär gespeicherte Protokoll wieder hergibt!).
+            </p>
+            <p>
+                Siehe Kommando <scheduler_element name="show_order" attribute="what" value="log"/>.
             </p>
         </description>
     </setting>
@@ -437,7 +466,7 @@ db  = jdbc -wait=15 -class=com.mysql.jdbc.Driver jdbc:mysql://localhost/factory:
             </p>
             <p>
                 Um diese eMails später zu verschicken, muss ein Job geschrieben werden, der die 
-                Methode spooler_log.mail().dequeue() aufruft.
+                Methode <scheduler_method class="Mail" method="dequeue"/> aufruft.
             </p>
         </description>
     </setting>

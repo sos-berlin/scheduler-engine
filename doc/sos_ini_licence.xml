@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet href="scheduler.xslt" type="text/xsl"?>
+
+<!--$Id: sos_ini_licence.xml,v 1.1 2004/09/09 21:45:24 jz Exp $-->
+
+<ini_section 
+    file     = "sos.ini"
+    name     = "licence"
+    title    = ""
+    base_dir = ""
+    author   = "$Author: jz $"
+    date     = "$Date: 2004/09/09 21:45:24 $">
+
+    <ini_entries>
+        <ini_entry setting="key1" type="licence_key" title="Lizenzschlüssel">
+            <description>
+                <p>
+                    Wenn Sie mehrere Lizenzschlüssel haben, können sie weitere unter <code>key2=</code>, <code>key3=</code> usw. eintragen.
+                    Achten Sie darauf, dass die Nummerierung lückenlos ist.
+                </p>
+            </description>
+        </ini_entry>
+
+
+    </ini_entries>
+    
+    <description>
+        <p>
+            Der Scheduler verlangt einen Lizenzschlüssel, der hier eingetragen werden kann.
+        </p>
+    </description>
+</ini_section>

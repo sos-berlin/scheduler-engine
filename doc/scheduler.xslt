@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding="utf-8"?>
-<!-- $Id: scheduler.xslt,v 1.29 2004/09/09 19:02:42 jz Exp $ -->
+<!-- $Id: scheduler.xslt,v 1.30 2004/09/09 21:45:05 jz Exp $ -->
 
 <!--
     Änderungswünsche:
@@ -950,69 +950,67 @@
             <col valign="baseline"/>
             <col valign="baseline" style="padding-left: 4ex"/>
             
-            <!--
-            <xsl:for-each select="ini_section">
-            -->
+            <tr>
+                <td>
+                    <p class="ini_section">
+                        <!--xsl:element name="a">
+                            <xsl:attribute name="href">#section_<xsl:value-of select="@name"/></xsl:attribute>
+                        </xsl:element-->
+                        
+                        <xsl:element name="a">
+                            <xsl:if test="$href">
+                                <xsl:attribute name="href"><xsl:value-of select="$href"/></xsl:attribute>
+                            </xsl:if>
+                            
+                            <b>
+                                <code>
+                                    [<xsl:value-of select="@name"/>
+                                    <xsl:if test="@variable_suffix">
+                                        <i>&#160;<xsl:value-of select="@variable_suffix"/></i>
+                                    </xsl:if>
+                                    <xsl:text>]</xsl:text>
+                                </code>
+                            </b>
+                        </xsl:element>
+                    </p>
+                </td>
+                <td>
+                    <span class="title">
+                        <xsl:value-of select="@title"/>
+                    </span>
+                </td>
+            </tr>
+            
+            <tr>
+                <td colspan="3">
+                    <xsl:apply-templates mode="description" select="description"/>
+                    <p>&#160;</p>
+                </td>
+            </tr>
+
+            <xsl:for-each select="ini_entries/ini_entry">
+                <xsl:sort select="@name | @setting"/>
+                
+                <xsl:variable name="setting" select="document( 'settings.xml' )/settings/setting[ @setting = current()/@setting ]"/>
+
                 <tr>
                     <td>
-                        <p class="ini_section">
-                            <!--xsl:element name="a">
-                                <xsl:attribute name="href">#section_<xsl:value-of select="@name"/></xsl:attribute>
-                            </xsl:element-->
-                            
-                            <xsl:element name="a">
-                                <xsl:if test="$href">
-                                    <xsl:attribute name="href"><xsl:value-of select="$href"/></xsl:attribute>
-                                </xsl:if>
-                                
-                                <b>
-                                    <code>
-                                        [<xsl:value-of select="@name"/>
-                                        <xsl:if test="@variable_suffix">
-                                            <i>&#160;<xsl:value-of select="@variable_suffix"/></i>
-                                        </xsl:if>
-                                        <xsl:text>]</xsl:text>
-                                    </code>
-                                </b>
-                            </xsl:element>
-                        </p>
+                        <xsl:element name="a">
+                            <xsl:attribute name="class">silent</xsl:attribute>
+                            <xsl:attribute name="href"><xsl:value-of select="$href"/>#setting_<xsl:value-of select="@setting"/></xsl:attribute>
+                            <code><xsl:value-of select="@name | @setting"/></code>
+                        </xsl:element>
+                    </td>
+                    <td>
+                        <code>= </code><span class="type"><xsl:value-of select="@type | $setting/@type"/></span>
                     </td>
                     <td>
                         <span class="title">
-                            <xsl:value-of select="@title"/>
+                            <xsl:value-of select="@title | $setting/@title"/>
                         </span>
                     </td>
                 </tr>
-                
-                <tr>
-                    <td colspan="3">
-                        <xsl:apply-templates mode="description" select="description"/>
-                        <p>&#160;</p>
-                    </td>
-                </tr>
-
-                <xsl:for-each select="ini_entries/ini_entry">
-                    <xsl:variable name="setting" select="document( 'settings.xml' )/settings/setting[ @setting = current()/@setting ]"/>
-    
-                    <tr>
-                        <td>
-                            <xsl:element name="a">
-                                <xsl:attribute name="class">silent</xsl:attribute>
-                                <xsl:attribute name="href"><xsl:value-of select="$href"/>#setting_<xsl:value-of select="@setting"/></xsl:attribute>
-                                <code><xsl:value-of select="@name | @setting"/></code>
-                            </xsl:element>
-                        </td>
-                        <td>
-                            <code>= </code><span class="type"><xsl:value-of select="@type | $setting/@type"/></span>
-                        </td>
-                        <td>
-                            <span class="title">
-                                <xsl:value-of select="@title | $setting/@title"/>
-                            </span>
-                        </td>
-                    </tr>
-                </xsl:for-each>
-            <!--</xsl:for-each>-->
+            </xsl:for-each>
         </table>
         <p>&#160;</p>
     
@@ -1066,7 +1064,7 @@
         </p>
 
         <xsl:for-each select="ini_entries/ini_entry">
-            <xsl:sort select="@name | @setting"/>
+            <!--xsl:sort select="@name | @setting"/-->
             
             <p class="ini_entry">
                 <xsl:variable name="setting" select="document( 'settings.xml' )/settings/setting[ @setting = current()/@setting ]"/>
@@ -1181,6 +1179,9 @@
                     </xsl:call-template>
                 </td>
                 <td align="right">
+                    <p style="font-size: 8pt; margin-top: 0">
+                        Software- und Organisations-Service GmbH
+                    </p>
                 </td>
             </tr>
         </table>
@@ -1223,12 +1224,12 @@
         <xsl:param name="parent_page"/>
 
         <p style="font-size: 8pt; margin-top: 0">
-            Scheduler 
+            Scheduler&#160;
             <xsl:if test="not( /*/@suppress_browse_bar='yes' )">
                 <xsl:element name="a">
                     <xsl:attribute name="class">silent</xsl:attribute>
                     <xsl:attribute name="href"><xsl:value-of select="concat( $base_dir, $start_page )"/></xsl:attribute>
-                    <xsl:text>Startseite</xsl:text>
+                    <xsl:text>Erste Seite</xsl:text>
                 </xsl:element>
                 
                 <xsl:if test="$parent_page">

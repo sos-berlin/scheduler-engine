@@ -1,96 +1,170 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="scheduler.xslt" type="text/xsl"?>
 
-<!--$Id: index.xml,v 1.14 2004/09/09 19:02:42 jz Exp $-->
+<!--$Id: index.xml,v 1.15 2004/09/09 21:45:05 jz Exp $-->
 
 <description 
-    title               = "Startseite" 
+    title               = "Der Scheduler" 
     base_dir            = ""
     suppress_browse_bar = "yes"
     author              = "$Author: jz $"
-    date                = "$Date: 2004/09/09 19:02:42 $"
+    date                = "$Date: 2004/09/09 21:45:05 $"
 >
 
-<h3><a href="job.xml">Was ist ein Job?</a></h3>
+<p>
+    Der Scheduler startet Jobs und überwacht sie.
+    Der Start kann zeitgesteuert, durch Änderung eines Verzeichnisses, durch einen Auftrag oder durch ein Kommando erfolgen.
+    Der Scheduler kennt Aufträge, die durch Jobketten geschleust werden.
+</p>
+<p>
+    Er läuft auf Windows, Linux, Solaris und HP-UX.
+</p>
+
+<p>
+    Hier sind wichtige Teile des Schedulers beschrieben.
+</p>
+
+<p style="margin-top: 2ex">&#160;</p>
+
+
+<hr size="1"/>
+<h2 style="margin-top: 2ex">Einstellungen und Datenbank</h2>
+<dl>
+    <dt><b><a href="command_line.xml">Kommandozeile</a></b></dt>
+    <dd>
+        <p>
+            Die Optionen an der Kommandozeile haben Vorrang vor den Einstellungen 
+            in der Datei <code>factory.ini</code> und der XML-Konfiguration.
+        </p>
+    </dd>
+
+    <dt><b><a href="sos_ini.xml">Datei sos.ini</a></b></dt>
+    <dd>
+        <p>
+            Hier können einige Einstellungen vorgenommen werden,
+            die auch andere Produkte als den <span class="sos_name">Scheduler</span> betreffen.
+        </p>
+    </dd>
+
+    <dt><b><a href="factory_ini.xml">Datei factory.ini</a></b></dt>
+    <dd>
+        <p>
+            Die Einstellungen in der Datei <code>factory.ini</code> haben Vorrang 
+            vor den Einstellungen in der XML-Konfiguration (leere Einträge "<code>eintrag=</code>" gelten als nicht vorhanden).
+        </p>
+    </dd>
+
+    <dt><b><a href="konfiguration.xml">XML-Konfiguration</a></b></dt>
+    <dd>
+        <p>
+            Die XML-Konfiguration enthält die Beschreibungen der Jobs, deren Startzeiten usw.
+        </p>
+    </dd>
+
+    <dt><b><a href="datenbank.xml">Datenbank</a></b></dt>
+    <dd>
+        <p>
+            Der Scheduler kann seine Task- und Auftragswarteschlangen in einer Datenbank halten.
+            Und er kann eine Historie in die Datenbank schreiben.
+        </p>
+    </dd>
+</dl>
+
+
+<hr size="1"/>
+<h2 style="margin-top: 2ex">Jobs</h2>    
+<dl>
+    <dt><b><a href="job.xml">Was ist ein Job?</a></b></dt>
+    <dd>
+        Zu einem Job gehören der Programm-Code, die Laufzeit und weitere Dinge.
+    </dd>
+        
+    <dt><b><a href="javadoc/index.html">Java-Schnittstelle</a></b></dt>
+    <dd>
+        Die Dokumentation der Java-Klassen (Package <code>sos.spooler</code>), auf die ein Job Zugriff hat.
+        Sie gilt entsprechend auch für die COM- und Perl-Schnittstellen, 
+        wenn Sie Ihren Job in einer anderen Sprache implementieren.
+    </dd>
+</dl>
+
+
+<hr size="1"/>
+<h2 style="margin-top: 2ex">Auftragssteuerung</h2>
+<dl>
+    <dt><b><a href="order.xml">Aufträge und Jobketten</a></b></dt>
+    <dd>
+        Der Scheduler kann Aufträge durch Jobketten schleusen.
+    </dd>
+</dl>
+
+
+
+
+<hr size="1"/>
+<h2 style="margin-top: 2ex">Bedienung</h2>
+
+<dl>
+    <dt><b>Bedienung über HTTP</b></dt>
+    <dd>
+        Der Scheduler verfügt über einen HTTP-Server und stellt HTML-Seiten zu seiner Bedienung bereit.
+        Sie können den Scheduler über einen Browser (zurzeit nur Microsoft Internet Explorer 6)
+        steuern. Geben Sie z.B. die Adresse <code>http://localhost:4444</code> ein.
+        <code>localhost</code> kann auch ein anderer Rechnername sein,
+        und <code>4444</code> ist die konfigurierte TCP-Portnummer des Schedulers.
+    </dd>
+
+
+    <dt><b>Bedienung über telnet</b></dt>
+    <dd>
+        Die XML-Kommandos können auch über einen telnet-Client eingegeben werden.
+        Aufruf: <code>telnet localhost 4444</code>.
+    </dd>
+
+
+    <dt><b><a href="xml_commands.xml">XML-Kommandos</a></b></dt>
+    <dd>
+        Über TCP und UDP nimmt der Scheduler Kommandos in XML entgegen.
+    </dd>
+</dl>
+
+<hr size="1"/>
+<h2 style="margin-top: 2ex">Protokolle</h2>
+<dl>
+    <dt><b><a href="protokolle.xml">Protokolle</a></b></dt>
+    <dd>
+        Es gibt ein Hauptprotokoll und Job-, Task- und Auftragsprotokolle. Und das <code>scheduler.log</code>.
+    </dd>
     
-<h3><a href="command_line.xml">Kommandozeile</a></h3>
-<p>
-    Die Optionen an der Kommandozeile haben Vorrang vor den Einstellungen 
-    in der Datei <code>factory.ini</code> und der XML-Konfiguration.
-</p>
+    <dt><b><a href="email.xml">eMail-Versand</a></b></dt>
+    <dd>
+        Task-Protokolle und besondere Meldungen kann der Scheduler per eMail verschicken.
+    </dd>
+</dl>
 
 
-<h3>Datei <a href="sos_ini.xml">sos.ini</a></h3>
-<p>
-    Hier können einige Einstellungen vorgenommen werden,
-    die auch andere Produkte als den <span class="sos_name">Scheduler</span> betreffen.
-</p>
 
+<hr size="1"/>
+<h2 style="margin-top: 2ex">Ältere Dokumentation</h2>
 
-<h3>Datei <a href="factory_ini.xml">factory.ini</a></h3>
-<p>
-    Die Einstellungen in der Datei <code>factory.ini</code> haben Vorrang 
-    vor den Einstellungen in der XML-Konfiguration (leere Einträge "<code>eintrag=</code>" gelten als nicht vorhanden).
-</p>
-
-
-<h3><a href="konfiguration.xml">XML-Konfiguration</a></h3>
-<p>
-    Die XML-Konfiguration enthält die Beschreibungen der Jobs und alles was dazu gehört.
-</p>
-
-
-<h3><a href="datenbank.xml">Datenbank</a></h3>
-
-<h3><a href="order.xml">Aufträge</a></h3>
-
-
-<h3><a href="javadoc/index.html">Java-Schnittstelle</a></h3>
-<p>
-    Die Dokumentation der Java-Klassen (Package <code>sos.spooler</code>) gilt auch für die COM- und Perl-Schnittstellen.
-</p>
-
-
-<h3>Bedienung über HTTP</h3>
-<p>
-    Der Scheduler verfügt über einen HTTP-Server und stellt HTML-Seiten zu seiner Bedienung bereit.
-    Sie können den Scheduler über einen Browser (zurzeit nur Microsoft Internet Explorer 6)
-    steuern. Geben Sie z.B. die Adresse <code>http://localhost:4444</code> ein.
-    <code>localhost</code> kann auch ein anderer Rechnername sein,
-    und <code>4444</code> ist die konfigurierte TCP-Portnummer des Schedulers.
-</p>
-
-
-<h3>Bedienung über telnet</h3>
-<p>
-    Die XML-Kommandos können auch über einen telnet-Client eingegeben werden.
-    Aufruf: <code>telnet localhost 4444</code>.
-</p>
-
-
-<h3><a href="xml_commands.xml">XML-Kommandos</a></h3>
-<p>
-    Über TCP und UDP nimmt der Scheduler Kommandos in XML entgegen.
-</p>
-
-<h3><a href="protokolle.xml">Protokolle</a></h3>
-<h3><a href="email.xml">eMail-Versand</a></h3>
-
-
-<h2>Ältere Dokumentation</h2>
-<p><a href="old/order/index.html">Aufträge</a>&#160;</p>
-
-<p><a href="old/spooler_1.1.html">Spooler 1.1</a></p>
-<p><a href="old/spooler_history.html">Spooler History</a></p>
-<p><a href="old/spooler_dienst.html">Spooler als Dienst</a></p>
-<p><a href="old/spooler_job_com.html">Spooler-Skripte als COM-Klassen implementieren</a></p>
-<p><a href="old/spooler_java.html">Spooler-Jobs als Java-Klassen</a></p>
-
-
-<h2>Vorschläge</h2>
-
-<p><a href="old/spooler_externe_programme.html">Externe Programme im Spooler</a></p>
-<p><a href="old/spooler_verteilt.html">Verteilter Spooler</a></p>
-<p><a href="old/spooler_handbetrieb.html">Spooler im Handbetrieb</a></p>
+<table cellspacing="0" cellpadding="0">
+    <tr>
+        <td valign="baseline">
+            <a href="old/order/index.html">Aufträge</a><br/>
+            <a href="old/spooler_1.1.html">Spooler 1.1</a><br/>
+            <a href="old/spooler_history.html">Spooler History</a><br/>
+            <a href="old/spooler_dienst.html">Spooler als Dienst</a><br/>
+            <a href="old/spooler_job_com.html">Spooler-Skripte als COM-Klassen implementieren</a><br/>
+            <a href="old/spooler_java.html">Spooler-Jobs als Java-Klassen</a>
+        </td>
+        <td valign="baseline" style="padding-left: 4em">
+            <p><b>Vorschläge:</b></p>
+            <p>
+                <a href="old/spooler_externe_programme.html">Externe Programme im Spooler</a><br/>
+                <a href="old/spooler_verteilt.html">Verteilter Spooler</a><br/>
+                <a href="old/spooler_handbetrieb.html">Spooler im Handbetrieb</a>
+            </p>
+        </td>
+    </tr>
+</table>
 
 </description>

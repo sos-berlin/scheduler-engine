@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="scheduler.xslt" type="text/xsl"?>
 
-<!--$Id: job.xml,v 1.3 2004/09/09 10:14:34 jz Exp $-->
+<!--$Id: job.xml,v 1.4 2004/09/09 21:45:05 jz Exp $-->
 
 <description 
     title    = "Was ist ein Job?" 
     base_dir = ""
     author   = "$Author: jz $"
-    date     = "$Date: 2004/09/09 10:14:34 $"
+    date     = "$Date: 2004/09/09 21:45:05 $"
 >
-    Ein Job wird definiert in der XML-Konfiguration mit <scheduler_element name="job"/>.
+    Ein Job wird definiert in der XML-Konfiguration mit <b><scheduler_element name="job"/></b>.
     Hier werden der Programmcode, die Laufzeit und andere Dinge angegeben.
     
 
@@ -102,6 +102,19 @@
     -->
 
 
-    <h2><a href="directory_watch.xml">Verzeichnisüberwachung</a></h2>
+    <h2>Verzeichnisüberwachung</h2>
+    <p>
+        Der Scheduler einen Job starten, wenn sich in einem Dateiverzeichnis etwas tut.
+        Näheres im Kapitel <a href="directory_watch.xml">Verzeichnisüberwachung</a>.
+    </p>
+    
+    
+    
+    <h2>Implementierung</h2>
+    <p>
+        Ein Job in Java eine Implementierung der abstrakten Oberklasse
+        <a href="javadoc/sos/spooler/Job_impl.html">sos.spooler.Job_impl</a>.
+    </p>
+
                 
 </description>
