@@ -1,4 +1,4 @@
-// $Id: spooler_com.cxx,v 1.121 2003/11/30 01:34:07 jz Exp $
+// $Id: spooler_com.cxx,v 1.122 2003/11/30 10:35:37 jz Exp $
 /*
     Hier sind implementiert
 
@@ -3384,7 +3384,7 @@ STDMETHODIMP Com_order_queue::add_order( VARIANT* order_or_payload, Iorder** res
     catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Order_queue.add_order" ); }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Order_queue.add_order" ); }
 
-    LOG( "Com_order_queue::add_order  hr=" << (void*)hr << "\n" );
+    //LOG( "Com_order_queue::add_order  hr=" << (void*)hr << "\n" );
 
     return hr;
 }

@@ -1,4 +1,4 @@
-// $Id: spooler_module.cxx,v 1.55 2003/11/17 09:21:59 jz Exp $
+// $Id: spooler_module.cxx,v 1.56 2003/11/30 10:35:38 jz Exp $
 /*
     Hier sind implementiert
 
@@ -293,7 +293,7 @@ Module_instance::In_call::In_call( Module_instance* module_instance, const strin
         _name = pos == string::npos? name : name.substr( 0, pos );
 
         _module_instance->set_in_call( this, extra ); 
-        LOG( *_module_instance << '.' << _name << "() begin\n" );
+        LOG2( "scheduler.call", *_module_instance << '.' << _name << "() begin\n" );
 
         Z_WINDOWS_ONLY( _ASSERTE( _CrtCheckMemory() ); )
     }
@@ -307,6 +307,7 @@ Module_instance::In_call::~In_call()
     {
         _module_instance->set_in_call( NULL ); 
 
+        if( log_category_is_set( "scheduler.call" ) )
         {
             Log_ptr log;
 

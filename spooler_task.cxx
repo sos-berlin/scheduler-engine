@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.218 2003/11/12 10:33:26 jz Exp $
+// $Id: spooler_task.cxx,v 1.219 2003/11/30 10:35:38 jz Exp $
 /*
     Hier sind implementiert
 
@@ -966,7 +966,7 @@ bool Task::do_something()
         }
         else
         {
-            Z_DEBUG_ONLY( LOG( obj_name() << ".do_something()  Nichts getan. state=" << state_name() << ", _next_time war " << next_time_at_begin << "\n" ); )
+            LOG2( "scheduler.nothing_done", obj_name() << ".do_something()  Nichts getan. state=" << state_name() << ", _next_time war " << next_time_at_begin << "\n" );
         }
     }
 

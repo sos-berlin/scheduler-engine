@@ -1,4 +1,4 @@
-// $Id: spooler_dll.cxx,v 1.1 2003/09/04 15:56:11 jz Exp $
+// $Id: spooler_dll.cxx,v 1.2 2003/11/30 10:35:38 jz Exp $
 
 #include "spooler.h"
 
@@ -49,8 +49,18 @@ extern "C" void __declspec(dllexport) WINAPI/*CALLBACK*/ spooler( HWND window, H
 
 //-------------------------------------------------------------------------------------------------
 
+namespace sos 
+{
+    extern int sos_main0( int argc, char** argv );
+}
+
+
 extern "C" int __declspec(dllexport) spooler_program( int argc, char** argv )
 {
-    return sos::spooler_main( argc, argv, "" );
+    return sos::sos_main0( argc, argv );
+    //sos::_argc = argc;
+    //sos::_argv = argv;
+
+    //return sos::spooler_main( argc, argv, "" );
 }
 

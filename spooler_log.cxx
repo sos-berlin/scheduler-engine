@@ -1,4 +1,4 @@
-// $Id: spooler_log.cxx,v 1.82 2003/11/25 12:07:51 jz Exp $
+// $Id: spooler_log.cxx,v 1.83 2003/11/30 10:35:38 jz Exp $
 
 #include "spooler.h"
 #include "spooler_mail.h"
@@ -125,10 +125,10 @@ void Log::open_new()
             if( !_spooler->id().empty() )  filename += "." + _spooler->id();
             filename += ".log";
 
-            LOG( "\nopen(\"" << filename << "\")\n" );
+            LOG2( "scheduler.log", "\nopen(\"" << filename << "\")\n" );
             _file = open( filename.c_str(), O_CREAT | O_TRUNC | O_WRONLY | O_NOINHERIT, 0666 );
             if( _file == -1 )  throw_errno( errno, filename.c_str() );
-            LOG( "open() => " << _file << "\n" );
+            LOG2( "scheduler.log", "open() => " << _file << "\n" );
 
             _filename = filename;
         }
@@ -303,7 +303,7 @@ Prefix_log::~Prefix_log()
         {
             if( _file != -1 ) { LOG( "extra close("<<_file<<")\n" ); ::close( _file ), _file = -1; }    // Manchmal ist Datei bei unlink gesperrt: ERRNO-13. Warum?
 
-            LOG( "unlink " << _filename << "\n" );
+            LOG2( "scheduler.log", "unlink " << _filename << "\n" );
             int ret = unlink( _filename.c_str() );
             if( ret == -1 )  throw_errno( errno, "unlink", _filename.c_str() );
         }
@@ -409,7 +409,7 @@ void Prefix_log::open()
 
     if( !_filename.empty() )
     {
-        LOG( "\nopen " << _filename << '\n' );
+        LOG2( "scheduler.log", "\nopen " << _filename << '\n' );
         _file = ::open( _filename.c_str(), O_CREAT | ( _append? O_APPEND : O_TRUNC ) | O_WRONLY | O_NOINHERIT, 0666 );
         if( _file == -1 )  throw_errno( errno, _filename.c_str(), "Protokolldatei" );
 

@@ -1,4 +1,4 @@
-// $Id: spooler_process.cxx,v 1.22 2003/11/11 18:48:04 jz Exp $
+// $Id: spooler_process.cxx,v 1.23 2003/11/30 10:35:38 jz Exp $
 
 #include "spooler.h"
 
@@ -67,7 +67,7 @@ void Process::start()
         parameters.push_back( Parameter( "param", "-task-id=" + as_string( _task_id ) ) );
 
         if( !log_filename().empty() )
-        parameters.push_back( Parameter( "param", "-log=" + /*quoted_string*/( "+" + log_filename() ) ) );   // -log="+xxx" funktioniert in Linux nicht, die Anführungszeichen kommen in log.cxx an
+        parameters.push_back( Parameter( "param", "-log=" + /*quoted_string*/( log_categories_as_string() + " >+" + log_filename() ) ) );   // -log="+xxx" funktioniert in Linux nicht, die Anführungszeichen kommen in log.cxx an
 
         parameters.push_back( Parameter( "program", _spooler->_my_program_filename ) );
 

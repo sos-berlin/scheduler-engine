@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.293 2003/11/30 01:34:07 jz Exp $
+// $Id: spooler.cxx,v 1.294 2003/11/30 10:35:37 jz Exp $
 /*
     Hier sind implementiert
 
@@ -6,6 +6,15 @@
     Spooler
     spooler_main()
     sos_main()
+
+
+    Log-Kategorien:
+
+    scheduler.call                  Beginn und Ende der Job-Methoden (spooler_process() etc.)
+    scheduler.log                   Logs (Task-Log etc., open, unlink)
+    scheduler.order                 payload = 
+    scheduler.nothing_done
+    scheduler.wait                  Warteaufrufe 
 */
 
 #include "spooler.h"
@@ -47,8 +56,8 @@
 #endif
 */
 
-char** _argv = NULL;
-int    _argc = 0;
+//char** _argv = NULL;
+//int    _argc = 0;
 
 
 using namespace std;
@@ -237,7 +246,7 @@ With_log_switch read_profile_with_log( const string& profile, const string& sect
 
 static void set_ctrl_c_handler( bool on )
 {
-    LOG( "set_ctrl_c_handler(" << on << ")\n" );
+    //LOG( "set_ctrl_c_handler(" << on << ")\n" );
 
 #   ifdef Z_WINDOWS
 
@@ -297,6 +306,8 @@ Spooler::Spooler()
     _log_mail_bcc  ("-"),
     _mail_queue_dir("-")
 {
+    set_log_category_default( "scheduler.call", true );   // Aufrufe von spooler_process() etc. protokollieren (Beginn und Ende)
+
     if( spooler_ptr )  throw_xc( "spooler_ptr" );
     spooler_ptr = this;
 
@@ -2189,8 +2200,9 @@ int spooler_main( int argc, char** argv, const string& parameter_line )
 {
     LOG( "Scheduler " VER_PRODUCTVERSION_STR "\n" );
 
-    int  ret        = 99;
-    bool is_service = false;
+    int  ret                = 99;
+    bool is_service         = false;
+    bool is_object_server   = false;
 
 #   ifdef Z_WINDOWS
         SetErrorMode( SEM_FAILCRITICALERRORS | SEM_NOOPENFILEERRORBOX );    // Das System soll sich Messageboxen verkneifen (außer beim Absturz)
@@ -2200,7 +2212,6 @@ int spooler_main( int argc, char** argv, const string& parameter_line )
     {
         bool    do_install_service = false;
         bool    do_remove_service  = false;
-        bool    is_object_server   = false;
         bool    is_service_set     = false;
         string  id;
         string  service_name, service_display;
@@ -2273,12 +2284,12 @@ int spooler_main( int argc, char** argv, const string& parameter_line )
         if( log_filename.empty() )  log_filename = subst_env( read_profile_string( factory_ini, "spooler", "log" ) );
         if( !log_filename.empty() )  log_start( log_filename );
 /*
-        if( z::log_categories.is_set( "scheduler.cat" ) )
+        if( log_category_is_set( "scheduler.cat" ) )
         {
             int n = 1000000;
-            LOG( n << " mal log_category.is_set( \"scheduler.cat\" ) ...\n" );
+            LOG( n << " mal log_category_is_set( \"scheduler.cat\" ) ...\n" );
             const char* cat = "scheduler.cat";
-            for( int i = 0; i < n; i++ )  z::log_categories.is_set( cat );
+            for( int i = 0; i < n; i++ )  log_category_is_set( cat );
             LOG( "... fertig\n" );
         }
 */
@@ -2370,7 +2381,7 @@ int spooler_main( int argc, char** argv, const string& parameter_line )
     }
 
 
-    LOG( "Programm wird beendet\n" );
+    if( !is_object_server )  LOG( "Programm wird beendet\n" );
 
     return ret;
 }
@@ -2379,8 +2390,8 @@ int spooler_main( int argc, char** argv, const string& parameter_line )
 
 int sos_main( int argc, char** argv )
 {
-    ::_argc = argc;
-    ::_argv = argv;
+    _argc = argc;
+    _argv = argv;
 
     return sos::spooler_main( argc, argv, "" );
 }

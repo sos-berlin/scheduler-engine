@@ -1,4 +1,4 @@
-// $Id: spooler_wait.cxx,v 1.86 2003/11/30 01:34:07 jz Exp $
+// $Id: spooler_wait.cxx,v 1.87 2003/11/30 10:35:38 jz Exp $
 /*
     Hier sind implementiert
 
@@ -400,7 +400,8 @@ bool Wait_handles::wait_until_2( Time until )
     {
         Time now = Time::now();
 
-        if( _log->log_level() <= log_debug9  &&  until > now )   LOG( "wait_until " << until.as_string() << " " << as_string() << "\n" );
+      //if( _log->log_level() <= log_debug9  &&  until > now )   LOG( "wait_until " << until.as_string() << " " << as_string() << "\n" );
+        if( until > now )   LOG2( "scheduler.wait", "wait_until " << until.as_string() << " " << as_string() << "\n" );
 
         ptr<Wait> wait = _spooler->_connection_manager->create_wait();
 
