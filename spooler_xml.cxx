@@ -1,4 +1,4 @@
-// $Id: spooler_xml.cxx,v 1.1 2001/01/02 10:49:02 jz Exp $
+// $Id: spooler_xml.cxx,v 1.2 2001/01/02 12:50:25 jz Exp $
 
 //#include <precomp.h>
 
@@ -73,11 +73,11 @@ Level_interval::Level_interval( xml::Element_ptr element )
 {
 }
 
-//---------------------------------------------------------------------------Object_set::Object_set
+//----------------------------------------------------------------Object_set_descr::Object_set_descr
 
-Object_set::Object_set( xml::Element_ptr element )
+Object_set_descr::Object_set_descr( xml::Element_ptr element )
 : 
-    _object_set_class_name( single_element( element, "object_set_class.name" )->text ),
+    _class_name( single_element( element, "object_set_class.name" )->text ),
     _level_interval( single_element( element, "levels" ) )
 {
 }
@@ -88,7 +88,7 @@ Job::Job( xml::Element_ptr element )
 : 
     _zero_(this+1)
 {
-    _object_set = single_element( element, "object_set" );
+    _object_set_descr = single_element( element, "object_set" );
     _output_level = as_int( single_element( element, "output_level" )->text );
 }
 
@@ -124,11 +124,11 @@ void Spooler::load_jobs_from_xml( Job_list* list, xml::Element_ptr element )
 
                 for( Object_set_class_list::iterator it = _object_set_class_list.begin(); it != _object_set_class_list.end(); it++ )
                 {
-                    if( (*it)->_name == job->_object_set._object_set_class_name )  break;
+                    if( (*it)->_name == job->_object_set_descr._class_name )  break;
                 }
-                if( it == _object_set_class_list.end() )  throw_xc( "SPOOLER-101", job->_object_set._object_set_class_name );
+                if( it == _object_set_class_list.end() )  throw_xc( "SPOOLER-101", job->_object_set_descr._class_name );
 
-                job->_object_set._object_set_class = *it;
+                job->_object_set_descr._class = *it;
 
                 list->push_back( job );
             }

@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 
-<!-- $Id: spooler_config.dtd,v 1.1 2001/01/02 10:49:02 jz Exp $   (C) 2000 SOS GmbH Berlin -->
+<!-- $Id: spooler_config.dtd,v 1.2 2001/01/02 12:50:24 jz Exp $   (C) 2000 SOS GmbH Berlin -->
 
 <!ELEMENT spooler_config        ( object_set_classes, jobs ) >
+
+
 
 <!ELEMENT object_set_classes    ( object_set_class+ ) >
 
@@ -19,6 +21,7 @@
 
 <!ELEMENT script                ( #PCDATA ) >
 <!ATTLIST script                language CDATA "VBScript" >
+
 
 
 <!ELEMENT jobs                  ( job+ ) >

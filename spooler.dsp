@@ -97,10 +97,6 @@ SOURCE=.\spooler.cxx
 # End Source File
 # Begin Source File
 
-SOURCE=.\spooler_scripting.cxx
-# End Source File
-# Begin Source File
-
 SOURCE=.\spooler_xml.cxx
 # End Source File
 # End Group

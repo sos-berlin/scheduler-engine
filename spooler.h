@@ -1,4 +1,4 @@
-// $Id: spooler.h,v 1.1 2001/01/02 10:49:02 jz Exp $
+// $Id: spooler.h,v 1.2 2001/01/02 12:50:24 jz Exp $
 
 #ifndef __SPOOLER_H
 
@@ -78,15 +78,15 @@ struct Level_interval
     Level                      _high_level;
 };
 
-//---------------------------------------------------------------------------------------Object_set
+//---------------------------------------------------------------------------------Object_set_descr
 
-struct Object_set : Sos_self_deleting
+struct Object_set_descr : Sos_self_deleting
 {
-                                Object_set                  ()                      {}
-                                Object_set                  ( xml::Element_ptr );
+                                Object_set_descr            ()                      {}
+                                Object_set_descr            ( xml::Element_ptr );
 
-    string                     _object_set_class_name;
-    Sos_ptr<Object_set_class>  _object_set_class;
+    string                     _class_name;
+    Sos_ptr<Object_set_class>  _class;
     Level_interval             _level_interval;
 };
 
@@ -105,7 +105,7 @@ struct Job_descr : Sos_self_deleting
 
     Fill_zero                  _zero_;
     string                     _name;
-    Object_set                 _object_set;
+    Object_set_descr           _object_set_descr;
     Level                      _output_level;
   //Start_time                 _start_time;
   //Duration                   _duration;
@@ -137,6 +137,7 @@ struct Job : Job_descr
     int                        _running_priority;
 
     CComPtr<Script_site>       _script_site;
+    CComPtr<IDispatch>         _object_set;
 };
 
 typedef list< Sos_ptr<Job> >    Job_list;

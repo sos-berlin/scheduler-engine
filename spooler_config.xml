@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 
-<!-- $Id: spooler_config.xml,v 1.1 2001/01/02 10:49:02 jz Exp $   (C) 2000 SOS GmbH Berlin -->
+<!-- $Id: spooler_config.xml,v 1.2 2001/01/02 12:50:25 jz Exp $   (C) 2000 SOS GmbH Berlin -->
 
 <!DOCTYPE spooler_config SYSTEM "spooler_config.dtd">
 
@@ -22,66 +22,104 @@
                     <level_description>Gedruckt</level_description>
                 </level_decl>
             </level_decls>
-            <script>
+            <script><![CDATA[
+
+dir_name = "c:\tmp\spooler"
+set fso = createobject( "Scripting.FileSystemObject" )
+
+set log_file = createobject( "hostware.file" )
+log_file.open "-out /dev/stderr"
+
+sub log( text )
+    log_file.put_line text
+end sub
+
 
 class Testobjekt
-    sub construct( record )
-        level = 0
-        inhalt = record.a
+
+    sub construct( file_par )
+        dim lev
+        set file = file_par
+        lev = mid( file.name, instr( file.name & "-", "-" ) + 1 )
+        lev = left( lev, instr( lev & ".", "." ) - 1 )
+        level = lev
     end sub
 
-    sub process( level )
-        inhalt = inhalt &amp; " (" &amp; level &amp; ")"
-        storage.put_line inhalt
+
+    sub process( new_level )
+        log "process " & level & " ==> " & new_level 
+        'file.name = new_level & ".object"
+        file.move dir_name & "\" & new_level & "\" & file.name
+        level = new_level
     end sub
 
-    dim level
-    dim inhalt
-    dim storage
+
+    public level
+
+    private file
+
 end class
 
 
 class Object_set_class
+
+    sub spooler_open()
+        dim files
+        dim file
+        dim i
+        
+        set files=fso.getFolder(dir_name).Files
+        
+        file_array = Array
+        i = 1
+        for each file in files
+            redim preserve file_array(i)
+            set file_array(i) = file
+            i = i + 1
+        next 
+
+        index = 1
+    end sub
+
+
+    sub spooler_close()
+    end sub
+
+
+    function spooler_get()
+        if spooler_eof then exit function
+
+        dim object
+        set object = new Testobjekt
+        object.construct file_array(index)
+        log "index=" & index & ", level=" & object.level
+        index = index + 1
+
+        set spooler_get = object
+    end function
+
+
     property get spooler_eof()
-        eof=file.eof
+        spooler_eof = index > ubound(file_array)
     end property
+
+
+    public low_level
+    public high_level
+
+    private file_array
+    private index
 end class
 
-dim file
-dim storage
-set object_set = new Object_set_class
 
 
-sub spooler_open()
-    set file = createobject( "hostware.file" )
-    file.open "-in -type=(a:text(50)) tab | inline eins zwei drei"
-
-    set storage = createobject( "hostware.file" )
-    storage.open "-out c:\tmp\1.txt"
-end sub
-
-
-sub spooler_close()
-    file.close
-    set file=nothing
-end sub
-
-
-function spooler_get()
-    if file.eof then exit function
-
-    set result = new Testobjekt
-    result.construct file.get()
-    set result.storage = storage
-
-    set spooler_get = result
-end function
 
 function spooler_make_object_set
-    set spooler_make_object_set = new Object_set_class
+    set object_set = new Object_set_class
+    set spooler_make_object_set = object_set
 end function
 
-            </script>
+            ]]></script>
         </object_set_class>
     </object_set_classes>
 
@@ -94,7 +132,7 @@ end function
                     <high_level><level>200</level></high_level>
                 </levels>
             </object_set>
-            <output_level><level>100</level></output_level>
+            <output_level><level>200</level></output_level>
         </job>
     </jobs>
 

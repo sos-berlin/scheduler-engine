@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.1 2001/01/02 10:49:02 jz Exp $
+// $Id: spooler.cxx,v 1.2 2001/01/02 12:50:24 jz Exp $
 
 //#include <precomp.h>
 
@@ -14,51 +14,21 @@ extern const Bool _dll = false;
 
 namespace spooler {
 
-/*  ABLAUF
-    
-    Konfiguration über SAX laden
-    dispatch()
-
-    
-    dispatch() =
-        Laufenden Job anhand Priorisierung auswählen, step() (also get() und process())
-
-        Neuer Job:
-            Nächsten nicht laufenden Job auswählen
-            Skript der Objektemengeklasse laden und Parameter (Stufenintervall) setzen
-            Objektemenge nicht leer (!eof)? Neuer Job!
-
-
-
-    
-
-
-    - Über alle Jobs:
-        - 
-        - 
-        - process_all() vorhanden?
-            - process_all() rufen
-          else
-            - open()
-            - eof()? Job nicht starten
-            - Schleife: get(), process()
-            - finish() wenn vorhanden
-            - close()
-
-    
-*/
-
 //---------------------------------------------------------------------------------------Job::start
 
 void Job::start()
 {
     _script_site = new Script_site;
-    _script_site->_engine_name = _object_set._object_set_class->_script_language;
+    _script_site->_engine_name = _object_set_descr._class->_script_language;
     _script_site->init_engine();
 
-    _script_site->parse( _object_set._object_set_class->_script );
+    _script_site->parse( _object_set_descr._class->_script );
 
-    _script_site->call( "spooler_open" );
+    CComVariant object_set_vt = _script_site->call( "spooler_make_object_set()" );
+    if( object_set_vt.vt != VT_DISPATCH )  throw_xc( "SPOOLER-103", _object_set_descr._class_name );
+    _object_set = object_set_vt.pdispVal;
+
+    com_invoke( _object_set, "spooler_open()" );
 
     _running = true;
 }
@@ -67,7 +37,8 @@ void Job::start()
 
 void Job::end()
 {
-    _script_site->call( "spooler_close" );
+    com_invoke( _object_set, "spooler_close()" );
+
     _script_site->close_engine();
     _script_site = NULL;
     _running = false;
@@ -77,13 +48,24 @@ void Job::end()
 
 bool Job::step()
 {
-    CComVariant result = _script_site->call( "spooler_get" );
+    CComVariant object;
 
-    if( result.vt == VT_EMPTY )  return false;
-    if( result.vt != VT_DISPATCH )  throw_xc( "SPOOLER-102", _object_set._object_set_class_name );
-    if( result.pdispVal == NULL )  return false;
+    while(1)
+    {
+        object = com_invoke( _object_set, "spooler_get()" );
+
+        if( object.vt == VT_EMPTY )  return false;
+        if( object.vt != VT_DISPATCH )  throw_xc( "SPOOLER-102", _object_set_descr._class_name );
+        if( object.pdispVal == NULL )  return false;
+
+        // Level im gültigen Bereich?
+        CComVariant level = com_invoke( object.pdispVal, "level" );
+        level.ChangeType( VT_INT );
+        if( level.intVal >= _object_set_descr._level_interval._low_level 
+         && level.intVal < _object_set_descr._level_interval._high_level )  break;
+    }
     
-    com_invoke( result.pdispVal, "process", _output_level );
+    com_invoke( object.pdispVal, "process()", _output_level );
 
     return true;
 }
