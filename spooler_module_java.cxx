@@ -1,4 +1,4 @@
-// $Id: spooler_module_java.cxx,v 1.24 2002/11/26 23:35:46 jz Exp $
+// $Id: spooler_module_java.cxx,v 1.25 2002/11/29 08:23:28 jz Exp $
 /*
     Hier sind implementiert
 
@@ -134,6 +134,11 @@ static jobject jobject_from_variant( JNIEnv* jenv, const VARIANT& v )
         case VT_EMPTY:
             return jenv->NewString( NULL, 0 );       // Für Job_chain_node.next_state, .error_state ("" wird zu VT_EMPTY)
 
+        case VT_ERROR:
+            if( v.scode == DISP_E_PARAMNOTFOUND ) return jenv->NewString( NULL, 0 );       // Für Job_chain_node.next_state, .error_state ("" wird zu VT_EMPTY)
+
+            throw_com( v.scode, "Variant VT_ERROR" );
+
       //case VT_NULL: 
       //    return NULL;    //?
 
@@ -187,9 +192,6 @@ static jobject jobject_from_variant( JNIEnv* jenv, const VARIANT& v )
 
       //case VT_CY: 
       //case VT_DATE:       
-
-        case VT_ERROR:
-            throw_com( v.scode, "Variant VT_ERROR" );
 
         case VT_BOOL:
         {
