@@ -1,4 +1,4 @@
-// $Id: spooler_log.cxx,v 1.73 2003/10/08 11:45:05 jz Exp $
+// $Id: spooler_log.cxx,v 1.74 2003/10/10 11:19:06 jz Exp $
 
 #include "spooler.h"
 #include "spooler_mail.h"
@@ -88,7 +88,7 @@ Log::~Log()
 
 void Log::set_directory( const string& directory )         
 {
-    if( directory.empty() )  _directory = get_temp_path();
+    if( directory.empty() )  _directory = z::get_temp_path();
                        else  _directory = directory;
 
     if( _directory.length() > 0  &&  ( _directory[_directory.length()-1] == '/'  ||  _directory[_directory.length()-1] == '\\' ) ) 

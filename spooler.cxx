@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.274 2003/10/10 09:59:50 jz Exp $
+// $Id: spooler.cxx,v 1.275 2003/10/10 11:19:06 jz Exp $
 /*
     Hier sind implementiert
 
@@ -1227,7 +1227,7 @@ void Spooler::load_arg()
             if( opt.with_value( "config"           )
              || opt.param(1)                         )  _config_filename = opt.value();
             else
-            if( opt.with_value( "cd"               ) )  { string dir = opt.value(); if( chdir( dir.c_str() ) )  throw_errno( errno, "chdir", dir.c_str() ); }
+            if( opt.with_value( "cd"               ) )  { string dir = opt.value(); if( chdir( dir.c_str() ) )  throw_errno( errno, "chdir", dir.c_str() ); } //_directory = dir; }
             else
             if( opt.with_value( "id"               ) )  _spooler_id = opt.value();
             else
@@ -1258,8 +1258,12 @@ void Spooler::load_arg()
             strcat( dir, Z_DIR_SEPARATOR );
             _directory = dir;
         }
+        else
+        {
+            //if( *_directory.rbegin() != '/'  &&  *_directory.rbegin() != '\\' )  _directory += Z_DIR_SEPARATOR;
+        }
 
-        _temp_dir = subst_env( read_profile_string( _factory_ini, "spooler", "tmp", get_temp_path() + Z_DIR_SEPARATOR "scheduler" ) );
+        _temp_dir = subst_env( read_profile_string( _factory_ini, "spooler", "tmp", z::get_temp_path() + Z_DIR_SEPARATOR "scheduler" ) );
         _temp_dir = replace_regex( _temp_dir, "[\\/]+", Z_DIR_SEPARATOR );
         _temp_dir = replace_regex( _temp_dir, "\\" Z_DIR_SEPARATOR "$", "" );
         if( _spooler_id != "" )  _temp_dir += Z_DIR_SEPARATOR + _spooler_id;
