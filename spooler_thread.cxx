@@ -1,4 +1,4 @@
-// $Id: spooler_thread.cxx,v 1.43 2002/10/04 06:36:14 jz Exp $
+// $Id: spooler_thread.cxx,v 1.44 2002/10/14 15:01:28 jz Exp $
 /*
     Hier sind implementiert
 
@@ -232,11 +232,14 @@ bool Thread::step()
         FOR_EACH_JOB( it )
         {
             Job* job = *it;
-            if( job->priority() >= _spooler->priority_max() )
+            if( !job->order_controlled() )
             {
-                if( _event.signaled_then_reset() )  return true;
-                something_done |= do_something( job );
-                if( !something_done )  break;
+                if( job->priority() >= _spooler->priority_max() )
+                {
+                    if( _event.signaled_then_reset() )  return true;
+                    something_done |= do_something( job );
+                    if( !something_done )  break;
+                }
             }
         }
     }
@@ -257,23 +260,20 @@ bool Thread::step()
         }
 
 
-        FOR_EACH( vector<Job*>, _prioritized_order_job_array, it )
+        bool stepped = false;
+        do
         {
-            Job* job = *it;
-
-            if( !job->order_controlled() )
+            FOR_EACH( vector<Job*>, _prioritized_order_job_array, it )
             {
-                bool stepped = false;
+                Job* job = *it;
 
-                do  // Job solange ausführen, bis er nichts mehr tut
-                {
-                    if( _event.signaled_then_reset() )  return true;
-                    stepped = do_something( job );
-                    something_done |= stepped;
-                } 
-                while( stepped  );
-            }
+                if( _event.signaled_then_reset() )  return true;
+                stepped = do_something( job );
+                something_done |= stepped;
+                if( stepped )  break;
+            } 
         }
+        while( stepped  );
     }
 
 

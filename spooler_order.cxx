@@ -1,4 +1,4 @@
-// $Id: spooler_order.cxx,v 1.15 2002/10/04 06:36:13 jz Exp $
+// $Id: spooler_order.cxx,v 1.16 2002/10/14 15:01:27 jz Exp $
 /*
     Hier sind implementiert
 
@@ -164,7 +164,11 @@ void Job_chain::add_job( Job* job, const Order::State& state, const Order::State
 
     THREAD_LOCK( _lock )
     {
-        if( node_from_state_or_null( node->_state ) )  throw_xc( "SPOOLER-150", error_string_from_variant(node->_state), name() );
+        if( node_from_state_or_null( node->_state ) )  
+        {
+            if( !job  &&  next_state.vt == VT_ERROR  &&  error_state.vt == VT_ERROR )  return;     // job_chain.add_end_state() darf mehrfach gerufen werden.
+            throw_xc( "SPOOLER-150", error_string_from_variant(node->_state), name() );
+        }
 
         _chain.push_back( node );
 

@@ -1,4 +1,4 @@
-// $Id: spooler_service.cxx,v 1.28 2002/09/11 10:05:15 jz Exp $
+// $Id: spooler_service.cxx,v 1.29 2002/10/14 15:01:28 jz Exp $
 /*
     Hier sind implementiert
 
@@ -616,6 +616,8 @@ int spooler_service( const string& service_name, int argc, char** argv )
         BOOL ok = StartServiceCtrlDispatcher( ste );
         if( !ok )  throw_mswin_error( "StartServiceCtrlDispatcher" );      // Z.B. nach 15s: MSWIN-00000427  Der Dienstprozess konnte keine Verbindung zum Dienstcontroller herstellen.
 
+        LOG( "StartServiceCtrlDispatcher() OK\n" );
+
         THREAD_LOCK( ServiceMain_lock ) {}      // Warten, bis Thread ServiceMain sich beendet hat, erst dann diesen Mainthread beenden (sonst wird ~Sos_static zu früh gerufen)
 
         spooler_service_name = "";
@@ -626,6 +628,7 @@ int spooler_service( const string& service_name, int argc, char** argv )
         return 1;                                                                               
     }
 
+    LOG( "spooler_service() fertig\n" );
     return 0;
 }
 

@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.116 2002/10/04 06:36:12 jz Exp $
+// $Id: spooler.cxx,v 1.117 2002/10/14 15:01:27 jz Exp $
 /*
     Hier sind implementiert
 
@@ -244,10 +244,6 @@ Spooler::Spooler()
     _udp_port = 4444;
     _priority_max = 1000;       // Ein Wert > 1, denn 1 ist die voreingestelle Priorität der Jobs
             
-
-    char hostname[200];
-    if( gethostname( hostname, sizeof hostname ) == SOCKET_ERROR )  hostname[0] = '\0';
-    _hostname = hostname;
 
     _com_log     = new Com_log( &_prefix_log );
     _com_spooler = new Com_spooler( this );
@@ -611,6 +607,10 @@ void Spooler::load()
     load_arg();
 
     _prefix_log.init( this );
+
+    char hostname[200];  // Nach _communication.init() und nach _prefix_log.init()!
+    if( gethostname( hostname, sizeof hostname ) == SOCKET_ERROR )  hostname[0] = '\0',  _prefix_log.warn( string("gethostname(): ") + strerror( errno ) );
+    _hostname = hostname;
 
     Command_processor cp ( this );
     cp._source_filename = _config_filename;
