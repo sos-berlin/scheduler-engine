@@ -1,4 +1,4 @@
-// $Id: spooler_script.cxx,v 1.12 2002/06/29 09:49:37 jz Exp $
+// $Id: spooler_script.cxx,v 1.13 2002/06/29 17:26:42 jz Exp $
 /*
     Hier sind implementiert
 
@@ -58,6 +58,8 @@ void Script::set_xml( const xml::Element_ptr& element, const string& include_pat
      || use_engine == "task" )  _reuse = reuse_task;
     else
     if( use_engine == "job"  )  _reuse = reuse_job;
+
+    _set = true;
 }
 
 //----------------------------------------------------------------Script_instance::~Script_instance
@@ -76,6 +78,8 @@ void Script_instance::init( Script* script )
 {
     _script = script;
 
+    if( !_script->set() )  throw_xc( "SPOOLER-146" );
+
     if( _script->_language != "" )
     {
         _script_site = new Script_site;
@@ -93,6 +97,7 @@ void Script_instance::init( Script* script )
         {
             if( !_module )
             {
+                _log->debug( "LoadLibrary " + _script->_filename );
                 _module = LoadLibrary( _script->_filename.c_str() );
                 if( !_module )  throw_mswin_error( "LoadLibrary", _script->_filename.c_str() );   
             }
@@ -104,7 +109,8 @@ void Script_instance::init( Script* script )
 
             CComPtr<IClassFactory> class_factory;
 
-            _DllGetClassObject( &clsid, (IID*)&IID_IClassFactory, (void**)&class_factory );
+            hr = _DllGetClassObject( &clsid, (IID*)&IID_IClassFactory, (void**)&class_factory );
+            if( FAILED(hr) )  throw_ole( hr, (_script->_filename + "::DllGetClassObject").c_str(), _script->_com_class_name.c_str() );
 
             hr = class_factory->CreateInstance( NULL, IID_IDispatch, (void**)&_idispatch );
             if( FAILED(hr) )  throw_ole( hr, "CreateInstance", _script->_com_class_name.c_str() );
@@ -126,23 +132,27 @@ void Script_instance::init( Script* script )
 
 void Script_instance::add_obj( const CComPtr<IDispatch>& object, const string& name )
 {
-    if( name == "spooler_log"    )  _com_context->_log     = (CComQIPtr<spooler_com::Ilog>)    object;
-    else
-    if( name == "spooler"        )  _com_context->_spooler = (CComQIPtr<spooler_com::Ispooler>)object;
-    else
-    if( name == "spooler_thread" )  _com_context->_thread  = (CComQIPtr<spooler_com::Ithread>) object;
-    else
-    if( name == "spooler_job"    )  _com_context->_job     = (CComQIPtr<spooler_com::Ijob>)    object;
-    else
-    if( name == "spooler_task"   )  _com_context->_task    = (CComQIPtr<spooler_com::Itask>)   object;
-    else
-        throw_xc( "Script_instance::add_obj", name.c_str() );
-/*
-    CComBSTR name_bstr;
-    name_bstr.Attach( SysAllocString_string( name ) );
+    if( _script_site )
+    {
+        CComBSTR name_bstr;
+        name_bstr.Attach( SysAllocString_string( name ) );
 
-    _script_site->add_obj( object, name_bstr );
-*/
+        _script_site->add_obj( object, name_bstr );
+    }
+    else
+    {
+        if( name == "spooler_log"    )  _com_context->_log     = (CComQIPtr<spooler_com::Ilog>)    object;
+        else
+        if( name == "spooler"        )  _com_context->_spooler = (CComQIPtr<spooler_com::Ispooler>)object;
+        else
+        if( name == "spooler_thread" )  _com_context->_thread  = (CComQIPtr<spooler_com::Ithread>) object;
+        else
+        if( name == "spooler_job"    )  _com_context->_job     = (CComQIPtr<spooler_com::Ijob>)    object;
+        else
+        if( name == "spooler_task"   )  _com_context->_task    = (CComQIPtr<spooler_com::Itask>)   object;
+        else
+            throw_xc( "Script_instance::add_obj", name.c_str() );
+    }
 }
 
 //----------------------------------------------------------------------------Script_instance::load
@@ -211,7 +221,12 @@ void Script_instance::close()
         _script_site = NULL;
     }
 
-    if( _module )  FreeLibrary( _module ),  _module = NULL;
+    if( _module ) 
+    {
+        _log->debug( "FreeLibrary " + _script->_filename );
+        FreeLibrary( _module );
+        _module = NULL;
+    }
 
     _loaded = false;
 }

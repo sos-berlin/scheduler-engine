@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.109 2002/06/29 09:49:37 jz Exp $
+// $Id: spooler.cxx,v 1.110 2002/06/29 17:26:41 jz Exp $
 /*
     Hier sind implementiert
 
@@ -647,7 +647,7 @@ void Spooler::start()
 
     _spooler_start_time = Time::now();
 
-    if( !_script.empty() )
+    if( _script.set() )
     {
         _script_instance.init( &_script );
 

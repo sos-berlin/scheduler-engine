@@ -1,4 +1,4 @@
-// $Id: spooler_thread.cxx,v 1.37 2002/06/29 09:49:38 jz Exp $
+// $Id: spooler_thread.cxx,v 1.38 2002/06/29 17:26:42 jz Exp $
 /*
     Hier sind implementiert
 
@@ -154,7 +154,7 @@ void Thread::close()
 
 void Thread::start()
 {
-    if( !_script.empty() )
+    if( _script.set() )
     {
         _script_instance.init( &_script );
 

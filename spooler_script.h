@@ -1,4 +1,4 @@
-// $Id: spooler_script.h,v 1.10 2002/06/29 09:49:38 jz Exp $
+// $Id: spooler_script.h,v 1.11 2002/06/29 17:26:42 jz Exp $
 
 #ifndef __SPOOLER_SCRIPT_H
 #define __SPOOLER_SCRIPT_H
@@ -54,10 +54,11 @@ struct Script
 
     void                        set_xml                     ( const xml::Element_ptr&, const string& include_path );
 
-    bool                        empty                       ()                              { return _source.empty(); }
+    bool                        set                         ()                              { return _set; }
     void                        clear                       ()                              { _language="", _source.clear(); }
 
     Spooler*                   _spooler;
+    bool                       _set;
     string                     _com_class_name;             // com_class=
     string                     _filename;                   // filename=
     string                     _language;                   // language=
