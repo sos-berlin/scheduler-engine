@@ -1,4 +1,4 @@
-// $Id: spooler_history.h,v 1.13 2002/12/03 23:07:16 jz Exp $
+// $Id: spooler_history.h,v 1.14 2003/03/31 17:12:55 jz Exp $
 
 #ifndef __SPOOLER_HISTORY_H
 #define __SPOOLER_HISTORY_H
@@ -23,7 +23,7 @@ typedef Archive_switch With_log_switch;
 
 //---------------------------------------------------------------------------------------Spooler_db
 
-struct Spooler_db
+struct Spooler_db : Sos_self_deleting
 {
                                 Spooler_db              ( Spooler* );
 

@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.190 2003/03/31 13:45:36 jz Exp $
+// $Id: spooler.cxx,v 1.191 2003/03/31 17:12:54 jz Exp $
 /*
     Hier sind implementiert
 
@@ -265,7 +265,6 @@ Spooler::Spooler()
     _log(this),
     _module(this,&_prefix_log),
     _log_level( log_info ),
-    _db(this),
     _factory_ini( default_factory_ini ),
 
     _smtp_server   ("-"),   // Für spooler_log.cxx: Nicht setzen, damit Default aus sos.ini erhalten bleibt
@@ -975,8 +974,9 @@ void Spooler::start()
     }
 
 
-    _db.open( _db_name, _need_db );
-    _db.spooler_start();
+    _db = SOS_NEW( Spooler_db( this ) );
+    _db->open( _db_name, _need_db );
+    _db->spooler_start();
 
 
     _spooler_start_time = Time::now();
@@ -1057,8 +1057,9 @@ void Spooler::stop()
     if( _state_cmd == sc_terminate_and_restart 
      || _state_cmd == sc_let_run_terminate_and_restart )  spooler_restart( &_log, _is_service );
 
-    _db.spooler_stop();
-    _db.close();
+    _db->spooler_stop();
+    _db->close();
+    _db = NULL;
 
     set_state( s_stopped );     
     // Der Dienst ist hier beendet

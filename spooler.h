@@ -1,4 +1,4 @@
-// $Id: spooler.h,v 1.128 2003/03/26 14:03:30 jz Exp $
+// $Id: spooler.h,v 1.129 2003/03/31 17:12:55 jz Exp $
 
 #ifndef __SPOOLER_H
 #define __SPOOLER_H
@@ -284,7 +284,7 @@ struct Spooler
     Thread_semaphore           _serialize_lock;             // Wenn die Threads nicht nebenläufig sein sollen
 
     string                     _db_name;
-    Spooler_db                 _db;
+    Sos_ptr<Spooler_db>        _db;
     bool                       _need_db;
 
     bool                       _has_java;                   // Es gibt ein Java-Skript
