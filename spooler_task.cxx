@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.159 2003/06/25 16:03:45 jz Exp $
+// $Id: spooler_task.cxx,v 1.160 2003/07/07 09:49:05 jz Exp $
 /*
     Hier sind implementiert
 
@@ -455,7 +455,6 @@ void Job::close_engine2()
         //_log.debug3( "close scripting engine engine" );
         if( _module_instance )  _module_instance->close();
     }
-    catch( const Xc& x        ) { set_error(x); }
     catch( const exception& x ) { set_error(x); }
 }
 
@@ -561,14 +560,18 @@ bool Job::dequeue_task( Time now )
 
         if( it == _task_queue.end() )  return false;
 
-        _task = *it;
+        _tasks.push_back( *it );
         it = _task_queue.erase( it );
 
         reset_error();
-        _close_engine = false;
         _repeat = 0;
 
-        _com_task->set_task( _task );
+        if( _module._reuse == Module::reuse_job )  
+        {
+            _close_engine = false;
+            _com_task->set_task( _task );
+        }
+
         set_state( s_start_task );
     }
 
@@ -635,7 +638,6 @@ bool Job::read_script()
     {
         _module.set_dom_source_only( _module_xml_element, _module_xml_mod_time, include_path() );
     }
-    catch( const Xc& x        ) { set_error(x);  _close_engine = true;  set_state( s_read_error );  return false; }
     catch( const exception& x ) { set_error(x);  _close_engine = true;  set_state( s_read_error );  return false; }
 
     return true;
@@ -1009,54 +1011,47 @@ void Job::task_to_start()
     bool dequeued = false;
     Start_cause cause = cause_none;
 
-    if( _spooler->state() != Spooler::s_stopping_let_run )  
+    if( _spooler->state() == Spooler::s_stopping_let_run )  return;
+
+    if( _state == s_pending )
     {
-        if( _state == s_pending )
+        dequeued = dequeue_task(now);
+        if( dequeued )  _task->_cause = _task->_start_at? cause_queue_at : cause_queue;
+            
+        if( now >= _next_single_start )  cause = cause_period_single;     
+                                   else  select_period(now);
+
+        if( cause                      // Auf weitere Anlässe prüfen und diese protokollieren
+            || is_in_period(now) )
         {
-            dequeued = dequeue_task(now);
-            if( dequeued )  _task->_cause = _task->_start_at? cause_queue_at : cause_queue;
-             
-            if( now >= _next_single_start )  
-                cause = cause_period_single;     
-            else 
-                select_period(now);
-
-            if( cause                      // Auf weitere Anlässe prüfen und diese protokollieren
-             || is_in_period(now) )
+            THREAD_LOCK( _lock )
             {
-                THREAD_LOCK( _lock )
+                if( _start_once )              cause = cause_period_once,  _start_once = false,     _log.debug( "Task startet wegen <run_time once=\"yes\">" );
+                                                                            
+                if( now >= _next_start_time )  cause = cause_period_repeat,                         _log.debug( "Task startet, weil Job-Startzeit erreicht: " + _next_start_time.as_string() );
+
+                for( Directory_watcher_list::iterator it = _directory_watcher_list.begin(); it != _directory_watcher_list.end(); it++ )
                 {
-                    if( _start_once )              cause = cause_period_once,  _start_once = false,     _log.debug( "Task startet wegen <run_time once=\"yes\">" );
-                                                                              
-                  //if( _event.signaled() )        cause = cause_signal,                                _log.debug( "Task startet wegen " + _event.as_string() );
-                                                                                      
-                    if( now >= _next_start_time )  cause = cause_period_repeat,                         _log.debug( "Task startet, weil Job-Startzeit erreicht: " + _next_start_time.as_string() );
+                    if( (*it)->signaled_then_reset() )
+                    {
+                        cause = cause_directory;
+                        _log.debug( "Task startet wegen eines Ereignisses für Verzeichnis " + (*it)->directory() );
+                        if( !(*it)->valid() )  it = _directory_watcher_list.erase( it );  // Folge eines Fehlers, s. Directory_watcher::set_signal
+                    }
+                }
 
-                    for( Directory_watcher_list::iterator it = _directory_watcher_list.begin(); it != _directory_watcher_list.end(); it++ )
-                    {
-                        if( (*it)->signaled_then_reset() )
-                        {
-                            cause = cause_directory;
-                            _log.debug( "Task startet wegen eines Ereignisses für Verzeichnis " + (*it)->directory() );
-                            if( !(*it)->valid() )  it = _directory_watcher_list.erase( it );  // Folge eines Fehlers, s. Directory_watcher::set_signal
-                        }
-                    }
-
-                    //if( !cause  &&  _order_queue  &&  !_order_queue->empty() )  cause = cause_order,               _log.debug( "Task startet wegen Auftrags" );
-                    if( !cause  &&  _order_queue )
-                    {
-                        ptr<Order> order = _order_queue->first_order( now );
-                        if( order )                 cause = cause_order,                                _log.debug( "Task startet wegen Auftrag " + order->obj_name() );
-                    }
-                                                                                      
-                    if( !dequeued && cause )
-                    {
-                        create_task( NULL, "", now );
-                        dequeue_task( now );
-                        _task->_cause = cause;
-                        _task->_let_run |= ( cause == cause_period_single );
-                        //if( order )  _task->_order = order, order->set_task( _task );
-                    }
+                if( !cause && _order_queue )
+                {
+                    ptr<Order> order = _order_queue->first_order( now );
+                    if( order )                 cause = cause_order,                                _log.debug( "Task startet wegen Auftrag " + order->obj_name() );
+                }
+                                                                                    
+                if( !dequeued && cause )
+                {
+                    create_task( NULL, "", now );
+                    dequeue_task( now );
+                    _task->_cause = cause;
+                    _task->_let_run |= ( cause == cause_period_single );
                 }
             }
         }
@@ -1104,8 +1099,6 @@ bool Job::do_something()
 
     if( _state == s_start_task )                                                                // SPOOLER_INIT, SPOOLER_OPEN
     {
-        //_event.reset();
-
         ok = _task->start();
         if( ok )  do_a_step = true;
         something_done = true;

@@ -1,4 +1,4 @@
-// $Id: spooler_task.h,v 1.94 2003/06/25 16:03:45 jz Exp $
+// $Id: spooler_task.h,v 1.95 2003/07/07 09:49:05 jz Exp $
 
 #ifndef __SPOOLER_TASK_H
 #define __SPOOLER_TASK_H
@@ -45,26 +45,6 @@ struct Object_set_class : Sos_self_deleting
 };
 
 typedef list< Sos_ptr<Object_set_class> >  Object_set_class_list;
-
-//--------------------------------------------------------------------------------------Start_cause
-
-enum Start_cause
-{
-    cause_none                  = 0,    // Kein Start
-    cause_period_once           = 1,    // <run_time once="yes">
-    cause_period_single         = 2,    // <run_time single_start="yes">
-    cause_period_repeat         = 3,    // <run_time repeat="..">
-    cause_job_repeat            = 4,    // spooler_job.repeat = ..
-    cause_queue                 = 5,    // <start_job at="">
-    cause_queue_at              = 6,    // <start_job at="..">
-    cause_directory             = 7,    // start_when_directory_changed
-    cause_signal                = 8,
-    cause_delay_after_error     = 9,
-    cause_order                 = 10,
-    cause_wake                  = 11    // sc_wake
-};
-
-string                          start_cause_name            ( Start_cause );
 
 //-----------------------------------------------------------------------------------Spooler_object
 
@@ -116,6 +96,26 @@ struct Object_set : Sos_self_deleting
     Object_set_class*          _class;
     ptr<IDispatch>             _idispatch;                  // Zeiger auf ein Object_set des Skripts
 };
+
+//--------------------------------------------------------------------------------------Start_cause
+
+enum Start_cause
+{
+    cause_none                  = 0,    // Kein Start
+    cause_period_once           = 1,    // <run_time once="yes">
+    cause_period_single         = 2,    // <run_time single_start="yes">
+    cause_period_repeat         = 3,    // <run_time repeat="..">
+    cause_job_repeat            = 4,    // spooler_job.repeat = ..
+    cause_queue                 = 5,    // <start_job at="">
+    cause_queue_at              = 6,    // <start_job at="..">
+    cause_directory             = 7,    // start_when_directory_changed
+    cause_signal                = 8,
+    cause_delay_after_error     = 9,
+    cause_order                 = 10,
+    cause_wake                  = 11    // sc_wake
+};
+
+string                          start_cause_name            ( Start_cause );
 
 //----------------------------------------------------------------------------------------------Job
 
@@ -172,6 +172,7 @@ struct Job : Sos_self_deleting
 
 
     typedef list< Sos_ptr<Task> >               Task_queue;
+    typedef list< Sos_ptr<Task> >               Task_list;
     typedef list< ptr<Directory_watcher> >      Directory_watcher_list;
     typedef map< int, Time >                    Delay_after_error;
     typedef map< int, Time >                    Delay_order_after_setback;
@@ -179,7 +180,7 @@ struct Job : Sos_self_deleting
                                 Job                         ( Spooler_thread* );
                                ~Job                         (); 
 
-    void                        set_dom                     ( const xml::Element_ptr&, const Time& mod_time );
+    void                    set_dom                         ( const xml::Element_ptr&, const Time& mod_time );
     xml::Element_ptr            dom                         ( const xml::Document_ptr&, Show_what, Job_chain* = NULL );
 
     void                        init0                       ();                         // Wird vor Spooler-Skript gerufen
@@ -217,7 +218,6 @@ struct Job : Sos_self_deleting
     void                        start_when_directory_changed( const string& directory_name, const string& filename_pattern );
     void                        clear_when_directory_changed();
     void                        signal                      ( const string& signal_name = "" )  { _next_time = 0;  if( _event )  _event->signal( signal_name ); }
-  //void                        wake                        ()                                  { set_state_cmd( sc_wake ); }
     void                        interrupt_script            ();
     void                        select_period               ( Time = Time::now() );
     bool                        is_in_period                ( Time = Time::now() );
@@ -228,7 +228,7 @@ struct Job : Sos_self_deleting
     Sos_ptr<Task>               create_task                 ( const ptr<spooler_com::Ivariable_set>& params, const string& task_name, Time = latter_day );
     bool                        dequeue_task                ( Time now = Time::now() );
     void                        remove_from_task_queue      ( Task* );
-    void                        close_task                  ();
+  //void                        close_task                  ();
     bool                        read_script                 ();
     bool                        load                        ();
     void                        end                         ();
@@ -258,7 +258,7 @@ struct Job : Sos_self_deleting
     void                        set_error                   ( const _com_error& );
     Xc_copy                     error                       ()                          { Xc_copy result; THREAD_LOCK( _lock )  result = _error;  return result; }
     bool                        has_error                   ()                          { return !!_error; }  //|| _log.highest_level() >= log_error; }
-    void                        reset_error                 ()                          { _error = NULL;  _log.reset_highest_level(); }
+    void                        reset_error                 ()                          { THREAD_LOCK( _lock )  _error = NULL,  _log.reset_highest_level(); }
 
     void                        set_state                   ( State );
     void                        set_state_cmd               ( State_cmd );
@@ -349,7 +349,7 @@ struct Job : Sos_self_deleting
     ptr<Com_variable_set>      _default_params;
     ptr<Com_job>               _com_job;
     ptr<Com_log>               _com_log;
-    ptr<Com_task>              _com_task;                   // Objekt bleibt, Inhalt wechselt über die Tasks hinweg (für use_engine="job"), weil Objekt spooler_task bei use_engine="job" in der Scripting Engine bleibt (kann nicht ausgetauscht werden)
+    ptr<Com_task>              _com_task;                   // Nur für _max_tasks=1. Objekt bleibt, Inhalt wechselt über die Tasks hinweg (für use_engine="job"), weil Objekt spooler_task bei use_engine="job" in der Scripting Engine bleibt (kann nicht ausgetauscht werden)
 
 
     Module                     _module;                     // Job hat ein eigenes Skript
@@ -359,13 +359,15 @@ struct Job : Sos_self_deleting
     xml::Element_ptr           _module_xml_element;         // <script> aus <config>
     Time                       _module_xml_mod_time;
     Module*                    _module_ptr;
-    ptr<Module_instance>       _module_instance;            // Für use_engine="job"
+  //ptr<Module_instance>       _module_instance;            // Für use_engine="job"
 
     Sos_ptr<Object_set_descr>  _object_set_descr;           // Job nutzt eine Objektemengeklasse
     Level                      _output_level;
     
     Task_queue                 _task_queue;                 // Warteschlange der nächsten zu startenden Tasks
-    Sos_ptr<Task>              _task;                       // Es kann nur eine Task geben. Zirkel: _task->_job == this
+  //Sos_ptr<Task>              _task;                       // Es kann nur eine Task geben. Zirkel: _task->_job == this
+    Task_list                  _running_tasks;
+    int                        _max_tasks;                  // Max. Anzahl gleichzeitig laufender Tasks. _running_tasks.size() <= _max_tasks!
 
     Job_history                _history;
 
@@ -407,7 +409,6 @@ struct Task : Sos_self_deleting
 
 
     bool                        wait_until_terminated       ( double wait_time = latter_day );
-  //void                        set_start_at                ( Time );
     void                        set_delay_spooler_process   ( Time t )                      { _job->_log.debug("delay_spooler_process=" + t.as_string() ); _next_spooler_process = Time::now() + t; }
 
     Job*                        job                         ()                              { return _job; }
@@ -437,6 +438,7 @@ struct Task : Sos_self_deleting
     int                        _id;
     Spooler*                   _spooler;
     Sos_ptr<Job>               _job;                        // Zirkel!
+    ptr<Com_task>              _com_task;                   // S.a. Job::_com_tasks (dies wird benutzt bei use_engine="job", was nur bei _max_tasks=1 möglich ist)
 
     Thread_semaphore           _terminated_events_lock;
     vector<Event*>             _terminated_events;
@@ -454,14 +456,12 @@ struct Task : Sos_self_deleting
     Time                       _start_at;                   // Zu diesem Zeitpunkt (oder danach) starten
     Time                       _running_since;
     Time                       _last_process_start_time;
-  //Time                       _time;                       // Zeitpunkt dieser Operation (spooler_process etc.)
 
     ptr<Com_variable_set>      _params;
     Variant                    _result;
     string                     _name;
     Time                       _next_spooler_process;
     bool                       _close_engine;               // Nach Task-Ende Scripting Engine schließen (für use_engine="job")
-  //Xc_copy                    _error;
     ptr<Order>                 _order;
 
 };
@@ -559,26 +559,6 @@ struct Process_task : Task      // Job ist irgendein Prozess (z.B. durch ein She
 #   endif
 };
 
-//--------------------------------------------------------------------------------------Script_task
-/*
-// in spooler_task_remote.cxx
-
-struct Remote_task : Task       // Task läuft in einem eigenen Prozess (in einem Object_server)
-{
-                                Remote_task                 ( Spooler* sp, const Sos_ptr<Job>& j ) : Task(sp,j) {}
-                               ~Remote_task                 ();
-
-    virtual bool                loaded                      ();
-    virtual bool                do_load                     ();
-    bool                        do_start                    ();
-    void                        do_end                      ();
-    bool                        do_step                     ();
-    void                        do_on_success               ();
-    void                        do_on_error                 ();
-
-    IDispatch                  _remote_task;
-};
-*/
 //-------------------------------------------------------------------------------------------------
 
 } //namespace spooler
