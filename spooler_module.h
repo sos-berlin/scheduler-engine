@@ -1,4 +1,4 @@
-// $Id: spooler_module.h,v 1.22 2003/06/02 09:21:36 jz Exp $
+// $Id: spooler_module.h,v 1.23 2003/06/05 12:48:54 jz Exp $
 
 #ifndef __SPOOLER_MODULE_H
 #define __SPOOLER_MODULE_H
@@ -24,6 +24,8 @@ struct Source_part
                                 Source_part                 ( int linenr, const string& text, const Time& mod_time )      : _linenr(linenr), _text(text), _modification_time(mod_time) {}
 
                                 operator string             () const                                { return _text; }
+    xml::Element_ptr            dom                         ( const xml::Document_ptr& ) const;
+
 
     int                        _linenr;
     string                     _text;
@@ -36,6 +38,7 @@ struct Source_with_parts
 {
                                 Source_with_parts           ()                                      {}
                                 Source_with_parts           ( const string& text )                  { assign( text); }
+                                Source_with_parts           ( const xml::Element_ptr& dom )         { assign_dom(dom); }
 
     void                        add                         ( int linenr, const string& text, const Time& mod_time );
     bool                        empty                       ()                                      { return _parts.empty(); }
@@ -44,8 +47,16 @@ struct Source_with_parts
     string                      text                        () const                                { return zschimmer::join( SYSTEM_NL, _parts ); }
                                 operator string             () const                                { return text(); }
 
+    xml::Document_ptr           dom_doc                     () const;
+    xml::Element_ptr            dom                         ( const xml::Document_ptr& ) const;
+
     Source_with_parts&          operator =                  ( const string& text )                  { assign( text );  return *this; }
     void                        assign                      ( const string& text )                  { clear(); add( 1, text, Time(0) ); }
+
+    Source_with_parts&          operator =                  ( const xml::Element_ptr& dom )         { assign_dom( dom );  return *this; }
+
+    void                        assign_dom                  ( const xml::Element_ptr& dom );
+
 
     typedef list<Source_part>   Parts;
 

@@ -1,4 +1,4 @@
-// $Id: spooler_module_remote.cxx,v 1.10 2003/06/02 10:45:10 jz Exp $
+// $Id: spooler_module_remote.cxx,v 1.11 2003/06/05 12:48:54 jz Exp $
 /*
     Hier sind implementiert
 
@@ -44,7 +44,7 @@ void Remote_module_instance_proxy::init()
         params_array[4] = "java_class_path=" + _module->_spooler->_java_vm->class_path();
         params_array[5] = "java_work_dir="   + _module->_spooler->_java_vm->work_dir();
         params_array[6] = "recompile="       + as_string(_module->_recompile);
-        params_array[7] = "script="          + _module->_source.text();
+        params_array[7] = "script="          + _module->_source.dom_doc().xml();
     }
 
     _remote_instance->call( "construct", params );

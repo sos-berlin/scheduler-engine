@@ -1,4 +1,4 @@
-// $Id: spooler_module.cxx,v 1.20 2003/06/02 09:21:36 jz Exp $
+// $Id: spooler_module.cxx,v 1.21 2003/06/05 12:48:54 jz Exp $
 /*
     Hier sind implementiert
 
@@ -15,6 +15,64 @@ using namespace std;
 
 namespace sos {
 namespace spooler {
+
+
+//----------------------------------------------------------------xml::Element_ptr Source_part::dom
+
+xml::Element_ptr Source_part::dom( const xml::Document_ptr& doc ) const
+{
+    xml::Element_ptr part_element = doc.createElement( "part_element" );
+
+    part_element.setAttribute( "linenr", as_string( _linenr ) );
+    part_element.setAttribute( "modtime", _modification_time.as_string() );
+    part_element.appendChild( doc.createTextNode( _text ) );
+
+    return part_element;
+}
+
+//---------------------------------------------------------xml::Document_ptr Source_with_parts::dom
+
+xml::Element_ptr Source_with_parts::dom( const xml::Document_ptr& doc ) const
+{
+    xml::Element_ptr source_element = doc.createElement( "source" ); 
+
+    Z_FOR_EACH_CONST( Parts, _parts, part )
+    {
+        xml::Element_ptr part_element = part->dom(doc);
+        source_element.appendChild( part_element );
+    }
+
+    return source_element;
+}
+
+//---------------------------------------------------------xml::Document_ptr Source_with_parts::dom
+
+xml::Document_ptr Source_with_parts::dom_doc() const
+{
+    xml::Document_ptr doc;
+
+    doc.create();
+    doc.appendChild( doc.createProcessingInstruction( "xml", "version=\"1.0\" encoding=\"iso-8859-1\"" ) );
+    doc.appendChild( dom(doc) );
+
+    return doc;
+}
+
+//--------------------------------------------------------------------Source_with_parts::assign_dom
+// Für spooler_module_remote_server.cxx
+
+void Source_with_parts::assign_dom( const xml::Element_ptr& source_element )
+{
+    clear();
+
+    if( !source_element.nodeName_is( "source" ) )  throw_xc( "Source_with_parts", "dom" );
+
+    DOM_FOR_EACH_ELEMENT( source_element, part )
+    {
+        Sos_optional_date_time dt = part.getAttribute( "modtime" );
+        add( part.int_getAttribute( "linenr", 1 ), part.getTextContent(), dt.time_as_double() );
+    }
+}
 
 //---------------------------------------------------------------------------Source_with_parts::add
 

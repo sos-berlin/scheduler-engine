@@ -1,4 +1,4 @@
-// $Id: spooler_module_remote_server.cxx,v 1.16 2003/06/04 10:02:08 jz Exp $
+// $Id: spooler_module_remote_server.cxx,v 1.17 2003/06/05 12:48:54 jz Exp $
 /*
     Hier sind implementiert
 
@@ -175,7 +175,7 @@ STDMETHODIMP Com_remote_module_instance_server::construct( SAFEARRAY* safearray 
             else
             if( key_word == "recompile"       )  _server._module->_recompile       = value[0] == '1';
             else
-            if( key_word == "script"          )  _server._module->_source          = value;
+            if( key_word == "script"          )  _server._module->_source          = xml::Document_ptr( value ).documentElement();
             else
             if( key_word == "java_class_path" )  java_class_path                   = value;
             else
@@ -222,7 +222,7 @@ STDMETHODIMP Com_remote_module_instance_server::add_obj( IDispatch* object, BSTR
     {
         _server._module_instance->add_obj( object, string_from_bstr(name) );
 
-        object->AddRef(); int count = object->Release();
+        //object->AddRef(); int count = object->Release();
         //fprintf( stderr, "add_obj %08X ref=%d\n", (int)(void*)object, count );
     }
     catch( const exception& x ) { hr = com_set_error( x, "Remote_module_instance_server::add_obj" ); }

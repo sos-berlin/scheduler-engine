@@ -1,4 +1,4 @@
-// $Id: spooler_module_com.cxx,v 1.16 2003/06/04 10:02:08 jz Exp $
+// $Id: spooler_module_com.cxx,v 1.17 2003/06/05 12:48:54 jz Exp $
 /*
     Hier sind implementiert
 
@@ -99,6 +99,8 @@ Com_module_instance::~Com_module_instance()
 
 void Com_module_instance::init()
 {
+    if( _idispatch )  throw_xc( "Com_module_instance::init" );
+
     Com_module_instance_base::init();
 
     HRESULT hr;
