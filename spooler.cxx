@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.289 2003/11/14 19:37:57 jz Exp $
+// $Id: spooler.cxx,v 1.290 2003/11/17 09:21:59 jz Exp $
 /*
     Hier sind implementiert
 
@@ -1323,6 +1323,7 @@ void Spooler::load()
     _security.clear();             
     _java_vm = get_java_vm( false );
 
+
     load_arg();
 
     if( _pid_filename != ""  &&  !_pid_file.opened() )
@@ -2265,71 +2266,73 @@ int spooler_main( int argc, char** argv, const string& parameter_line )
 
         if( is_object_server )
         {
-            return spooler::object_server( argc, argv );
+            ret = spooler::object_server( argc, argv );
         }
+        else
+        {
 
-
-#       ifdef Z_WINDOWS
-            if( service_name != "" ) 
-            {
-                if( service_display == "" )  service_display = service_name;
-            }
-            else
-            {
-                service_name = spooler::make_service_name(id);
-                if( service_display == "" )  service_display = spooler::make_service_display(id);
-            }
-#       endif
-
-#       ifdef Z_WINDOWS
-
-            if( !renew_spooler.empty() )  
-            { 
-                spooler::spooler_renew( service_name, renew_spooler, renew_service, command_line ); 
-                ret = 0;
-            }
-            else
-            if( do_remove_service | do_install_service )
-            {
-                if( do_remove_service  )  spooler::remove_service( service_name );
-                if( do_install_service ) 
+#           ifdef Z_WINDOWS
+                if( service_name != "" ) 
                 {
-                    //if( !is_service )  command_line = "-service " + command_line;
-                    command_line = "-service=" + service_name + " " + command_line;
-                    dependencies += '\0';
-                    spooler::install_service( service_name, service_display, service_description, dependencies, command_line );
-                }
-                ret = 0;
-            }
-            else
-            {
-                _beginthread( spooler::delete_new_spooler, 50000, NULL );
-
-              //if( !is_service_set )  is_service = spooler::service_is_started(service_name);
-
-                if( is_service )
-                {
-                    ret = spooler::spooler_service( service_name, argc, argv );   
+                    if( service_display == "" )  service_display = service_name;
                 }
                 else
                 {
-                    ret = spooler::spooler_main( argc, argv, parameter_line );
+                    service_name = spooler::make_service_name(id);
+                    if( service_display == "" )  service_display = spooler::make_service_display(id);
                 }
-            }
+#           endif
 
-#        else
+#           ifdef Z_WINDOWS
 
-            if( is_service )
-            {
-                spooler::is_daemon = true;
+                if( !renew_spooler.empty() )  
+                { 
+                    spooler::spooler_renew( service_name, renew_spooler, renew_service, command_line ); 
+                    ret = 0;
+                }
+                else
+                if( do_remove_service | do_install_service )
+                {
+                    if( do_remove_service  )  spooler::remove_service( service_name );
+                    if( do_install_service ) 
+                    {
+                        //if( !is_service )  command_line = "-service " + command_line;
+                        command_line = "-service=" + service_name + " " + command_line;
+                        dependencies += '\0';
+                        spooler::install_service( service_name, service_display, service_description, dependencies, command_line );
+                    }
+                    ret = 0;
+                }
+                else
+                {
+                    _beginthread( spooler::delete_new_spooler, 50000, NULL );
 
-                LOG( "Scheduler wird Daemon. Pid wechselt\n");
-                spooler::be_daemon();
-            }
+                //if( !is_service_set )  is_service = spooler::service_is_started(service_name);
 
-            ret = spooler::spooler_main( argc, argv, command_line );
+                    if( is_service )
+                    {
+                        ret = spooler::spooler_service( service_name, argc, argv );   
+                    }
+                    else
+                    {
+                        ret = spooler::spooler_main( argc, argv, parameter_line );
+                    }
+                }
 
-#       endif
+#            else
+
+                if( is_service )
+                {
+                    spooler::is_daemon = true;
+
+                    LOG( "Scheduler wird Daemon. Pid wechselt\n");
+                    spooler::be_daemon();
+                }
+
+                ret = spooler::spooler_main( argc, argv, command_line );
+
+#           endif
+        }
     }
     catch( const exception& x )
     {
@@ -2347,8 +2350,6 @@ int spooler_main( int argc, char** argv, const string& parameter_line )
         ret = 1;
     }
 
-
-    get_java_vm(false)->set_destroy_vm( false );   //  Nicht DestroyJavaVM() rufen, denn das hängt manchmal
 
     LOG( "Programm wird beendet\n" );
 

@@ -1,4 +1,4 @@
-// $Id: spooler_module.cxx,v 1.54 2003/10/28 22:04:27 jz Exp $
+// $Id: spooler_module.cxx,v 1.55 2003/11/17 09:21:59 jz Exp $
 /*
     Hier sind implementiert
 
@@ -248,6 +248,7 @@ ptr<Module_instance> Module::create_instance()
             if( _spooler )  if( !_spooler->_java_vm  ||  !_spooler->_java_vm->running() )  throw_xc( "SCHEDULER-177" );
 
             _java_vm = get_java_vm();
+            _java_vm->set_destroy_vm( false );   //  Nicht DestroyJavaVM() rufen, denn das hängt manchmal
             ptr<Java_module_instance> p = Z_NEW( Java_module_instance( _java_vm, this ) );
             return +p;
         }
