@@ -1,4 +1,4 @@
-// $Id: Variable_set.java,v 1.5 2003/04/01 10:29:39 jz Exp $
+// $Id: Variable_set.java,v 1.6 2004/06/11 11:13:56 jz Exp $
 
 package sos.spooler;
 
@@ -6,7 +6,7 @@ package sos.spooler;
  * Variablenmenge.
  *
  * @author Joacim Zschimmer, Zschimmer GmbH
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 
 public class Variable_set extends Idispatch
@@ -43,8 +43,8 @@ public class Variable_set extends Idispatch
     public void         set_xml                 ( String xml_text )                 {                       com_call( ">xml", xml_text          ); }
 
 
-    /** Liefert die Variablenmenge als XML-Dokument, wie in {@link #set_xml()} beschrieben.
-      * Das XML-Dokument kann {@link #set_xml()} übergeben werden.
+    /** Liefert die Variablenmenge als XML-Dokument, wie in {@link #set_xml(String)} beschrieben.
+      * Das XML-Dokument kann {@link #set_xml(String)} übergeben werden.
       */
 
     public String           xml                 ()                                  { return (String)       com_call( "<xml"                    ); }
