@@ -1,9 +1,22 @@
 SCHEDULER
 
-$Id: RELEASE.TXT,v 1.1 2004/09/23 08:31:40 jz Exp $
+$Id: RELEASE.TXT,v 1.2 2004/11/08 13:39:13 jz Exp $
 
 
 ------------------------------------------------
 VERSION 2.0.88  2004-09-23
 
 DTD für <add_order> korrigiert.
+
+
+------------------------------------------------
+VERSION 2.0.93  2004-10-08
+
+Neue Eigenschaften, die die DB-Tabellennamen liefern:
+
+spooler.db_variables_table_name()
+spooler.db_tasks_table_name()
+spooler.db_orders_table_name()
+spooler.db_history_table_name()
+spooler.db_order_history_table_name()
+

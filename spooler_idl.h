@@ -1,4 +1,4 @@
-// $Id: spooler_idl.h,v 1.32 2004/10/10 16:49:20 jz Exp $
+// $Id: spooler_idl.h,v 1.33 2004/11/08 13:39:13 jz Exp $
 
 
 /*  Ersatz für spooler.odl für Systeme ohne COM. 
@@ -263,6 +263,11 @@ struct Ispooler : IDispatch
     virtual HRESULT     get_Hostname                ( BSTR* ) = 0;
     virtual HRESULT         Abort_immediately       () = 0;
     virtual HRESULT         Abort_immediately_and_restart() = 0;
+    virtual HRESULT         get_Db_variables_table_name     ( BSTR* ) = 0;
+    virtual HRESULT         get_Db_tasks_table_name         ( BSTR* ) = 0;
+    virtual HRESULT         get_Db_orders_table_name        ( BSTR* ) = 0;
+    virtual HRESULT         get_Db_history_table_name       ( BSTR* ) = 0;
+    virtual HRESULT         get_Db_order_history_table_name ( BSTR* ) = 0;
 };
 
 //------------------------------------------------------------------------------------------Log

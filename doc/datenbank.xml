@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="scheduler.xslt" type="text/xsl"?>
 
-<!--$Id: datenbank.xml,v 1.5 2004/09/10 09:29:35 jz Exp $-->
+<!--$Id: datenbank.xml,v 1.6 2004/11/08 13:39:13 jz Exp $-->
 
 <description 
     title               = "Datenbank" 
     base_dir            = ""
     author              = "$Author: jz $"
-    date                = "$Date: 2004/09/10 09:29:35 $"
+    date                = "$Date: 2004/11/08 13:39:13 $"
 >
 
 <scheduler_keyword keyword="Datenbank"/>
@@ -93,6 +93,25 @@
         <scheduler_ini_entry file="factory.ini" section="spooler" entry="history_on_process"/><br/>
     </dd>
 </dl>
+
+
+<h2>Programmschnittstelle</h2>
+<dl>
+    <dt>Das Objekt spooler stellt die Tabellennamen bereit</dt>
+    <dd>
+        <scheduler_method class="Spooler" method="db_variables_table_name"/><br/>
+        <scheduler_method class="Spooler" method="db_tasks_table_name"/><br/>
+        <scheduler_method class="Spooler" method="db_orders_table_name"/><br/>
+        <scheduler_method class="Spooler" method="db_history_table_name"/><br/>
+        <scheduler_method class="Spooler" method="db_order_history_table_name"/><br/>
+    </dd>
+    
+    <dt>Eigene Felder der Historie beschreiben (<scheduler_ini_entry file="factory.ini" section="job" entry="history_columns"/>)</dt>
+    <dd>
+        <scheduler_method class="Task" method="set_history_field" java_signature="java.lang.String, java.lang.String"/>
+    </dd>
+</dl>
+
 
 
 <h2>Kommandos</h2>

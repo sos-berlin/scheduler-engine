@@ -1,4 +1,4 @@
-// $Id: spooler_com.cxx,v 1.161 2004/10/19 16:08:47 jz Exp $
+// $Id: spooler_com.cxx,v 1.162 2004/11/08 13:39:13 jz Exp $
 /*
     Hier sind implementiert
 
@@ -2352,6 +2352,11 @@ const Com_method Com_spooler::_methods[] =
     { DISPATCH_PROPERTYGET, 21, "hostname"                  , (Com_method_ptr)&Com_spooler::get_Hostname        , VT_BSTR      },
     { DISPATCH_METHOD     , 22, "abort_immediately"         , (Com_method_ptr)&Com_spooler::Abort_immediately   , VT_BSTR      },
     { DISPATCH_METHOD     , 23, "abort_immediately_and_restart", (Com_method_ptr)&Com_spooler::Abort_immediately_and_restart, VT_BSTR },
+    { DISPATCH_PROPERTYGET, 24, "Db_variables_table_name"   , (Com_method_ptr)&Com_spooler::get_Db_variables_table_name, VT_BSTR      },
+    { DISPATCH_PROPERTYGET, 25, "Db_tasks_table_name"       , (Com_method_ptr)&Com_spooler::get_Db_tasks_table_name    , VT_BSTR      },
+    { DISPATCH_PROPERTYGET, 26, "Db_orders_table_name"      , (Com_method_ptr)&Com_spooler::get_Db_orders_table_name   , VT_BSTR      },
+    { DISPATCH_PROPERTYGET, 27, "Db_history_table_name"     , (Com_method_ptr)&Com_spooler::get_Db_history_table_name  , VT_BSTR      },
+    { DISPATCH_PROPERTYGET, 28, "Db_order_history_table_name", (Com_method_ptr)&Com_spooler::get_Db_order_history_table_name, VT_BSTR      },
     {}
 };
 
@@ -2714,16 +2719,76 @@ STDMETHODIMP Com_spooler::Job_chain_exists( BSTR name, VARIANT_BOOL* result )
 
 STDMETHODIMP Com_spooler::Abort_immediately()
 {
-    _spooler->abort_immediately();
-    return S_OK;
+    HRESULT hr = S_OK;
+
+    if( !_spooler )  return E_POINTER;
+
+    try
+    {
+        _spooler->abort_immediately();
+    }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
+
+    return hr;
 }
 
 //-------------------------------------------------------Com_spooler::abort_immediately_and_restart
 
 STDMETHODIMP Com_spooler::Abort_immediately_and_restart()
 {
-    _spooler->abort_immediately( true );
-    return S_OK;
+    HRESULT hr = S_OK;
+
+    if( !_spooler )  return E_POINTER;
+
+    try
+    {
+        _spooler->abort_immediately( true );
+    }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
+
+    return hr;
+}
+
+//---------------------------------------------------------Com_spooler::get_Db_variables_table_name
+
+STDMETHODIMP Com_spooler::get_Db_variables_table_name( BSTR* result )                    
+{ 
+    if( !_spooler )  return E_POINTER;
+    return String_to_bstr( _spooler->_variables_tablename, result ); 
+}
+
+//-------------------------------------------------------------Com_spooler::get_Db_tasks_table_name
+
+STDMETHODIMP Com_spooler::get_Db_tasks_table_name( BSTR* result )
+{ 
+    if( !_spooler )  return E_POINTER;
+    return String_to_bstr( _spooler->_tasks_tablename, result ); 
+}
+
+//------------------------------------------------------------Com_spooler::get_Db_orders_table_name
+
+STDMETHODIMP Com_spooler::get_Db_orders_table_name( BSTR* result )                    
+{ 
+    if( !_spooler )  return E_POINTER;
+    return String_to_bstr( _spooler->_orders_tablename, result ); 
+}
+
+//-----------------------------------------------------------Com_spooler::get_Db_history_table_name
+
+STDMETHODIMP Com_spooler::get_Db_history_table_name( BSTR* result )                    
+{ 
+    if( !_spooler )  return E_POINTER;
+    return String_to_bstr( _spooler->_job_history_tablename, result ); 
+}
+
+//-----------------------------------------------------Com_spooler::get_Db_order_history_table_name
+
+STDMETHODIMP Com_spooler::get_Db_order_history_table_name( BSTR* result )                    
+{ 
+    if( !_spooler )  return E_POINTER;
+    return String_to_bstr( _spooler->_order_history_tablename, result ); 
 }
 
 //----------------------------------------------------------------------------Com_context::_methods

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="scheduler.xslt" type="text/xsl"?>
 
-<!--$Id: settings.xml,v 1.15 2004/10/21 21:13:56 jz Exp $-->
+<!--$Id: settings.xml,v 1.16 2004/11/08 13:39:13 jz Exp $-->
 
 <!-- Einige Einstellungen können an mehreren Stellen vorgenommen werden:
      - Konfigurationsdatei
@@ -16,7 +16,7 @@
     base_dir    = ""
     title       = "Einstellungen"
     author      = "$Author: jz $"
-    date        = "$Date: 2004/10/21 21:13:56 $"
+    date        = "$Date: 2004/11/08 13:39:13 $"
 >
 
     <setting setting        = "scheduler_log" 
@@ -185,6 +185,9 @@ log = scheduler.wait com_server.* >scheduler.log
         <description>
             <p>
             </p>
+            <p>
+                Siehe auch <scheduler_method class="Spooler" method="db_tasks_table_name"/>
+            </p>
         </description>
     </setting>
 
@@ -195,6 +198,9 @@ log = scheduler.wait com_server.* >scheduler.log
              title   = "Name der Datenbanktabelle für die Historie">
         <description>
             <p>
+            </p>
+            <p>
+                Siehe auch <scheduler_method class="Spooler" method="db_history_table_name"/>
             </p>
         </description>
     </setting>
@@ -207,6 +213,9 @@ log = scheduler.wait com_server.* >scheduler.log
         <description>
             <p>
             </p>
+            <p>
+                Siehe auch <scheduler_method class="Spooler" method="db_order_history_table_name"/>
+            </p>
         </description>
     </setting>
 
@@ -217,6 +226,9 @@ log = scheduler.wait com_server.* >scheduler.log
              title   = "Name der Datenbanktabelle für die Aufträge">
         <description>
             <p>
+            </p>
+            <p>
+                Siehe auch <scheduler_method class="Spooler" method="db_orders_table_name"/>
             </p>
         </description>
     </setting>
@@ -229,6 +241,9 @@ log = scheduler.wait com_server.* >scheduler.log
         <description>
             <p>
                 Hier hält der Scheduler z.B. die nächste freie Task-Id.
+            </p>
+            <p>
+                Siehe auch <scheduler_method class="Spooler" method="db_variables_table_name"/>
             </p>
         </description>
     </setting>

@@ -1,4 +1,4 @@
-// $Id: spooler.odl,v 1.79 2004/10/10 16:49:20 jz Exp $
+// $Id: spooler.odl,v 1.80 2004/11/08 13:39:13 jz Exp $
 
 // Anweisung: midl /nologo /error all /out $(OutDir) $(InputPath)
 
@@ -478,6 +478,21 @@ library Spooler
         HRESULT                 Abort_immediately       ();
 
         HRESULT                 Abort_immediately_and_restart();
+
+        [propget,helpstring("Name der Datenbanktabelle für die internen Variablen des Schedulers")]
+        HRESULT                 Db_variables_table_name ( [out,retval] BSTR* );
+
+        [propget,helpstring("Name der Datenbanktabelle für die Tasks")]
+        HRESULT                 Db_tasks_table_name     ( [out,retval] BSTR* );
+
+        [propget,helpstring("Name der Datenbanktabelle für die Aufträge")]
+        HRESULT                 Db_orders_table_name    ( [out,retval] BSTR* );
+
+        [propget,helpstring("Name der Datenbanktabelle für die Historie")]
+        HRESULT                 Db_history_table_name   ( [out,retval] BSTR* );
+
+        [propget,helpstring("Name der Datenbanktabelle für die Auftragshistorie")]
+        HRESULT                 Db_order_history_table_name( [out,retval] BSTR* );
     }
 
     [

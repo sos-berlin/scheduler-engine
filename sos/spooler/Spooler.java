@@ -1,11 +1,11 @@
-// $Id: Spooler.java,v 1.11 2004/08/29 09:27:27 jz Exp $
+// $Id: Spooler.java,v 1.12 2004/11/08 13:39:13 jz Exp $
 
 package sos.spooler;
 
 /** Das allgemeine Scheduler-Objekt.
  * 
  * @author Joacim Zschimmer, Zschimmer GmbH
- * @version $Revision: 1.11 $
+ * @version $Revision: 1.12 $
  */
 
 public class Spooler extends Idispatch
@@ -22,7 +22,7 @@ public class Spooler extends Idispatch
      * Wenn die Kommandozeilenoption -cd= benutzt worden ist, ist es das damit angegebene Verzeichnis. */
     public String           directory           ()                                  { return (String)       com_call( "<directory"                      ); }
     
-    /** @return Liefert die Einstellung include_path (Kommandozeilen-Option <code>-include=</code). */
+    /** @return Liefert die Einstellung include_path (Kommandozeilen-Option <code>-include=</code>). */
     public String           include_path        ()                                  { return (String)       com_call( "<include_path"                   ); }
     
     /** @return Wert der Kommandozeilenoption -log-dir= beim Start des Schedulers. 
@@ -94,4 +94,19 @@ public class Spooler extends Idispatch
     /** Bricht den Scheduler augenblicklich ab. Kein Job hat Gelegenheit, darauf zu reagieren.
      * Anschließend wird der Scheduler erneut mit den gleichen Kommandozeilenparametern gestartet*/
     public void             abort_immediately_and_restart()                         {                       com_call( "abort_immediately_and_restart"   ); }
+    
+    /** Name der Datenbanktabelle für die internen Variablen des Schedulers */
+    public String           db_variables_table_name  ()                             { return (String)       com_call( "<db_variables_table_name" ); }
+
+    /** Name der Datenbanktabelle für die Tasks */
+    public String           db_tasks_table_name      ()                             { return (String)       com_call( "<db_tasks_table_name" ); }
+
+    /** Name der Datenbanktabelle für die Aufträge */
+    public String           db_orders_table_name     ()                             { return (String)       com_call( "<db_orders_table_name" ); }
+
+    /** Name der Datenbanktabelle für die Historie */
+    public String           db_history_table_name    ()                             { return (String)       com_call( "<db_history_table_name" ); }
+
+    /** Name der Datenbanktabelle für die Auftragshistorie */
+    public String           db_order_history_table_name()                           { return (String)       com_call( "<db_order_history_table_name" ); }
 }

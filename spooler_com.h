@@ -1,4 +1,4 @@
-// $Id: spooler_com.h,v 1.101 2004/10/10 19:37:42 jz Exp $
+// $Id: spooler_com.h,v 1.102 2004/11/08 13:39:13 jz Exp $
 
 #ifndef __SPOOLER_COM_H
 #define __SPOOLER_COM_H
@@ -497,6 +497,11 @@ struct Com_spooler : spooler_com::Ispooler,
     STDMETHODIMP            get_Hostname                    ( BSTR* );
     STDMETHODIMP                Abort_immediately           ();
     STDMETHODIMP                Abort_immediately_and_restart();
+    STDMETHODIMP            get_Db_variables_table_name     ( BSTR* );
+    STDMETHODIMP            get_Db_tasks_table_name         ( BSTR* );
+    STDMETHODIMP            get_Db_orders_table_name        ( BSTR* );
+    STDMETHODIMP            get_Db_history_table_name       ( BSTR* );
+    STDMETHODIMP            get_Db_order_history_table_name ( BSTR* );
 
   protected:
     Thread_semaphore           _lock;
