@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.139 2002/11/25 08:59:20 jz Exp $
+// $Id: spooler.cxx,v 1.140 2002/11/25 10:04:24 jz Exp $
 /*
     Hier sind implementiert
 
@@ -46,7 +46,7 @@ const double wait_step_for_thread_termination2           = 600.0;       // 2. Nö
 //const double wait_for_thread_termination_after_interrupt = 1.0;
 
 
-bool                            spooler_is_running      = false;
+//bool                            spooler_is_running      = false;
 bool                            ctrl_c_pressed          = false;
 static Spooler*                 spooler                 = NULL;
 
@@ -943,7 +943,7 @@ int Spooler::launch( int argc, char** argv )
         SetThreadPriority( GetCurrentThread(), THREAD_PRIORITY_ABOVE_NORMAL );
 #   endif
 
-    spooler_is_running = true;
+    //spooler_is_running = true;
 
     _event.set_name( "Spooler" );
     _event.add_to( &_wait_handles );
@@ -977,7 +977,7 @@ int Spooler::launch( int argc, char** argv )
 
     rc = 0;
 
-    spooler_is_running = false;
+    //spooler_is_running = false;
     return rc;
 }
 

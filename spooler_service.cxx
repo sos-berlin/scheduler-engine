@@ -1,4 +1,4 @@
-// $Id: spooler_service.cxx,v 1.31 2002/11/14 11:10:36 jz Exp $
+// $Id: spooler_service.cxx,v 1.32 2002/11/25 10:04:25 jz Exp $
 /*
     Hier sind implementiert
 
@@ -59,6 +59,7 @@ struct Service_handle
 
 static bool                     terminate_immediately       = false;
 static bool                     service_stop                = false;                        // STOP-Kommando von der Dienstesteuerung (und nicht von TCP-Schnittstelle)
+static Thread_id                self_destruction_thread_id;
 
 static Spooler*                 spooler_ptr;                // Wird auch beim Zwangsbeenden auf NULL gesetzt
 SERVICE_STATUS_HANDLE           service_status_handle;
@@ -76,6 +77,7 @@ int                             current_state;
 
 //-------------------------------------------------------------------------------------------------
 
+static void                     start_self_destruction      ();
 static uint __stdcall           pending_watchdog_thread     ( void* );
 
 //-----------------------------------------------------------------------------Service_thread_param
@@ -290,7 +292,7 @@ static void set_service_status( int spooler_error, int state = 0 )
     THREAD_LOCK( set_service_lock )
     {
         DWORD stop_pending = service_stop? SERVICE_STOP_PENDING    // Nur, wenn Dienstesteuerung den Spooler beendet 
-                                         : SERVICE_RUNNING;        // Wenn Spooler über TCP beendet wird, soll der Diensteknopt "beenden" frei bleiben. Deshalb paused.
+                                         : SERVICE_RUNNING;        // Wenn Spooler über TCP beendet wird, soll der Diensteknopf "beenden" frei bleiben. Deshalb paused.
 
         service_status.dwServiceType                = SERVICE_WIN32_OWN_PROCESS;
 
@@ -349,52 +351,59 @@ static void set_service_status( int spooler_error, int state = 0 )
     }
 
     if( service_status.dwCurrentState == SERVICE_STOPPED )
+    {
         service_status_handle = NULL;  // Sonst beim nächsten Mal: Fehler MSWIN-00000006  Das Handle ist ungültig. [SetServiceStatus] [SERVICE_STOPPED]
+        start_self_destruction();
+    }
 }
 
 //--------------------------------------------------------------------------pending_watchdog_thread
 
 static uint __stdcall pending_watchdog_thread( void* )
 {
+    LOG( "pending_watchdog_thread (Überwachung des Zustands SERVICE_START_PENDING) startet\n" );
+
     int wait_until = elapsed_msec() + pending_timeout*1000;
 
     int state = current_state;
 
-    if( state != SERVICE_START_PENDING )   return 0;
-
-
-    while(1)
+    if( state == SERVICE_START_PENDING )
     {
-        int wait_time = wait_until - elapsed_msec();
-        if( wait_time <= 0 )  break;
-
-        int ret = WaitForSingleObject( pending_watchdog_signal, wait_time );
-        if( ret != WAIT_TIMEOUT )  break;
-    }
-
-    THREAD_LOCK( set_service_lock )
-    {
-        if( current_state == state )   
+        while(1)
         {
-            LOG( "Weil der Dienst zu lange im Zustand " + state_name(state) + " ist, wird der Dienst-Zustand geändert\n" );
-            pending_timed_out = true;
-            set_service_status( 0, current_state );
+            int wait_time = wait_until - elapsed_msec();
+            if( wait_time <= 0 )  break;
+
+            int ret = WaitForSingleObject( pending_watchdog_signal, wait_time );
+            if( ret != WAIT_TIMEOUT )  break;
         }
 
-        pending_watchdog_signal.close();
+        THREAD_LOCK( set_service_lock )
+        {
+            if( current_state == state )   
+            {
+                LOG( "Weil der Dienst zu lange im Zustand " + state_name(state) + " ist, wird der Dienst-Zustand geändert\n" );
+                pending_timed_out = true;
+                set_service_status( 0, current_state );
+            }
+
+            pending_watchdog_signal.close();
+        }
     }
 
-#   ifdef _DEBUG
-        LOG( "pending_watchdog_thread endet\n" );
-#   endif
+    LOG( "pending_watchdog_thread endet\n" );
 
     return 0;
 }
 
-//--------------------------------------------------------------------------------------kill_thread
+//--------------------------------------------------------------------------self_destruction_thread
 
-static uint __stdcall kill_thread( void* param )
+static uint __stdcall self_destruction_thread( void* param )
 {
+    SetThreadPriority( GetCurrentThread(), THREAD_PRIORITY_HIGHEST );
+
+    LOG( "Selbstzerstörung in " << stop_timeout << " Sekunden (ohne weitere Ankündigung) ...\n" );
+/*
     double timeout = stop_timeout;
 
     while( timeout > 0 )
@@ -402,27 +411,77 @@ static uint __stdcall kill_thread( void* param )
         double wait = 0.1;
         sos_sleep( wait );
 
-        if( !spooler_is_running )  return 0;
+        if( !spooler_is_running )  break;
 
         timeout -= wait;
     }
 
-    LOG( "Weil der Spooler nicht zum Ende kommt, wird jetzt der Prozess sofort beendet\n" );
-    terminate_immediately = true;
-    BOOL ok = TerminateThread( thread_handle, 999 );
+    if( spooler_is_running )
+*/
+    sos_sleep( stop_timeout );      // exit() sollte diesen Thread abbrechen. 25.11.2002
+    {
+        terminate_immediately = true;
 
-    if( ok )  sos_sleep( 3 );
+/*      Lieber kein Log, denn das hat eine Sempahore.
+        try 
+        { 
+            LOG( "... Selbstzerstörung. Weil der Spooler nicht zum Ende kommt, wird der Prozess jetzt abgebrochen\n" ); 
 
-    LOG( "TerminateProcess()\n" ); 
-    TerminateProcess(GetCurrentProcess(),1);
+            //BOOL ok = TerminateThread( thread_handle, 999 );
+            //if( ok )  sos_sleep( 3 );
+            LOG( "TerminateProcess()\n" ); 
+        } 
+        catch( ... ) {}
+*/
+        TerminateProcess( GetCurrentProcess(), 1 );
+    }
+
+    self_destruction_thread_id = 0;
     return 0;
+}
+
+//---------------------------------------------------------------------------start_self_destruction
+
+static void start_self_destruction()
+{
+    if( !self_destruction_thread_id )  
+    {
+        _beginthreadex( NULL, 0, self_destruction_thread, NULL, 0, &self_destruction_thread_id );
+
+/* Erst ab Windows 2000:
+        HANDLE h = OpenThread( THREAD_QUERY_INFORMATION, false, self_destruction_thread_id  );
+        SetThreadPriority( h, THREAD_PRIORITY_HIGHEST );
+        SwitchToThread();
+        CloseThread( h );
+*/
+    }
+}
+
+//----------------------------------------------------------------------string_from_handler_control
+
+string string_from_handler_control( DWORD c )
+{
+    switch( c )
+    {
+        case SERVICE_CONTROL_STOP:              return "SERVICE_CONTROL_STOP";
+        case SERVICE_CONTROL_PAUSE:             return "SERVICE_CONTROL_PAUSE";
+        case SERVICE_CONTROL_CONTINUE:          return "SERVICE_CONTROL_CONTINUE";
+        case SERVICE_CONTROL_INTERROGATE:       return "SERVICE_CONTROL_INTERROGATE";
+        case SERVICE_CONTROL_SHUTDOWN:          return "SERVICE_CONTROL_SHUTDOWN";
+        case SERVICE_CONTROL_PARAMCHANGE:       return "SERVICE_CONTROL_PARAMCHANGE";
+        case SERVICE_CONTROL_NETBINDADD:        return "SERVICE_CONTROL_NETBINDADD";
+        case SERVICE_CONTROL_NETBINDREMOVE:     return "SERVICE_CONTROL_NETBINDREMOVE";
+        case SERVICE_CONTROL_NETBINDENABLE:     return "SERVICE_CONTROL_NETBINDENABLE";
+        case SERVICE_CONTROL_NETBINDDISABLE:    return "SERVICE_CONTROL_NETBINDDISABLE";
+        default:                                return "SERVICE_CONTROL_" + as_string( c );
+    }
 }
 
 //------------------------------------------------------------------------------------------Handler
 
 static void __stdcall Handler( DWORD dwControl )
 {
-    LOGI( "Service Handler(" << dwControl << ")\n" )
+    LOGI( "\nService Handler(" << string_from_handler_control(dwControl) << ")\n" )
 
     if( spooler_ptr )
     {
@@ -430,14 +489,12 @@ static void __stdcall Handler( DWORD dwControl )
         {
             case SERVICE_CONTROL_STOP:              // Requests the service to stop.  
             {
+                start_self_destruction();
+
                 pending_timed_out = false;
                 service_stop = true;
                 spooler_ptr->cmd_terminate();
                 set_service_status( 0, SERVICE_STOP_PENDING );
-
-                Thread_id thread_id;
-
-                _beginthreadex( NULL, 0, kill_thread, NULL, 0, &thread_id );
 
                 break;
             }
@@ -458,6 +515,7 @@ static void __stdcall Handler( DWORD dwControl )
                 break;
 
             case SERVICE_CONTROL_SHUTDOWN:          // Requests the service to perform cleanup tasks, because the system is shutting down. 
+                start_self_destruction();
                 spooler_ptr->cmd_stop();
                 break;
 
@@ -513,13 +571,14 @@ static uint __stdcall service_thread( void* param )
         }
         catch( const Xc& x )
         {
+            start_self_destruction();
+
             set_service_status( 0, SERVICE_PAUSED );     // Das schaltet die Diensteknöpfe frei, falls der Spooler beim eMail-Versand hängt.
             event_log( x.what(), p->_argc, p->_argv );
           //set_service_status( 2 );
             spooler._log.error( x.what() );
             spooler_ptr = NULL;
             ret = 99;
-          //throw;
         }
 
         spooler_ptr = NULL;
@@ -575,7 +634,7 @@ static void __stdcall ServiceMain( DWORD argc, char** argv )
                     break;
             }
 
-            if( terminate_immediately )  { LOG( "TerminateProcess()\n" ); TerminateProcess(GetCurrentProcess(),1); }
+            if( terminate_immediately )  { LOG( "TerminateProcess()\n" ); TerminateProcess( GetCurrentProcess(), 1 ); }   // Gesetzt vom self_destruction_thread
 
             TerminateThread( thread_handle, 999 );   // Sollte nicht nötig sein. Nützt auch nicht, weil Destruktoren nicht gerufen werden und Komnunikations-Thread vielleicht noch läuft.
         

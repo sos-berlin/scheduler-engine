@@ -1,4 +1,4 @@
-// $Id: spooler_com.cxx,v 1.71 2002/11/25 08:59:21 jz Exp $
+// $Id: spooler_com.cxx,v 1.72 2002/11/25 10:04:25 jz Exp $
 /*
     Hier sind implementiert
 
@@ -46,8 +46,8 @@ DESCRIBE_CLASS( &spooler_typelib, Com_order_queue   , order_queue   , CLSID_orde
 
 //-----------------------------------------------------------------------------IID_Ihostware_dynobj
 
-//extern "C" const GUID IID_Ihostware_dynobj = { 0x9F716A02, 0xD1F0, 0x11CF, { 0x86, 0x9D, 0x44, 0x45, 0x53, 0x54, 0x00, 0x00 } };
-DEFINE_GUID( IID_Ihostware_dynobj, 0x9F716A02, 0xD1F0, 0x11CF, 0x86, 0x9D, 0x44, 0x45, 0x53, 0x54, 0x00, 0x00 );
+extern "C" const GUID IID_Ihostware_dynobj = { 0x9F716A02, 0xD1F0, 0x11CF, { 0x86, 0x9D, 0x44, 0x45, 0x53, 0x54, 0x00, 0x00 } };
+//DEFINE_GUID( IID_Ihostware_dynobj, 0x9F716A02, 0xD1F0, 0x11CF, 0x86, 0x9D, 0x44, 0x45, 0x53, 0x54, 0x00, 0x00 );
 
 //--------------------------------------------------------------------------------time_from_variant
 
