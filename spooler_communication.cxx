@@ -1,4 +1,4 @@
-// $Id: spooler_communication.cxx,v 1.75 2004/01/07 08:57:51 jz Exp $
+// $Id: spooler_communication.cxx,v 1.76 2004/01/07 11:19:48 jz Exp $
 /*
     Hier sind implementiert
 
@@ -25,6 +25,7 @@ const int wait_for_port_available = 60;   // Soviele Sekunden warten, bis TCP- o
     const int EWOULDBLOCK = 10035;
     const int ENOTSOCK   = 10038;
     const int EADDRINUSE = WSAEADDRINUSE;
+    const int ENOBUFS    = WSAENOBUFS;
     const int STDIN_FILENO  = (int)GetStdHandle( STD_INPUT_HANDLE );//0;
     const int STDOUT_FILENO = (int)GetStdHandle( STD_OUTPUT_HANDLE );//1;
 #   define ioctl    ioctlsocket
@@ -363,6 +364,16 @@ bool Communication::Channel::do_accept( SOCKET listen_socket )
         int ret = ioctlsocket( _read_socket, FIONBIO, &on );
         if( ret == SOCKET_ERROR )  throw_sos_socket_error( "ioctl(FIONBIO)" );
 
+
+        int s = sizeof _socket_send_buffer_size;
+        ret = getsockopt( _write_socket, SOL_SOCKET, SO_SNDBUF, (char*)&_socket_send_buffer_size, &s );
+        if( ret == SOCKET_ERROR  ||  _socket_send_buffer_size <= 0 ) 
+        {
+            LOG( "getsockopt(,,SO_SNDBUF)  errno=" << get_errno() << "\n" );
+            _socket_send_buffer_size = 1024;
+        }
+
+
         _host = peer_addr.sin_addr;
         _log.set_prefix( "TCP-Verbindung mit " + _host.as_string() );
 
@@ -424,8 +435,9 @@ bool Communication::Channel::do_recv()
 
     if( len <= 0 ) {
         if( len == 0 )  { _eof = true;  return true; }
-        if( get_errno() == EWOULDBLOCK )  return false; 
-        throw_sos_socket_error( "recv" ); 
+        int err = get_errno();
+        if( err == EWOULDBLOCK )  return false; 
+        throw_sos_socket_error( err, "recv" ); 
     }
 
     something_done = true;
@@ -457,32 +469,53 @@ bool Communication::Channel::do_recv()
 bool Communication::Channel::do_send()
 {
     bool something_done = false;
-    int  len            = 0;
 
     if( _send_is_complete )  _send_progress = 0, _send_is_complete = false;     // Am Anfang
 
     int count = _text.length() - _send_progress;
     if( count > 0 )
     {
-        LOG2( "socket.send", "send/write(" << _write_socket << "," << count << " bytes)\n" );
-        len = _write_socket == STDOUT_FILENO? write ( _write_socket, _text.c_str() + _send_progress, count )
-                                            : ::send( _write_socket, _text.c_str() + _send_progress, count, 0 );
-        if( len < 0 ) 
+        int c   = min( _socket_send_buffer_size, count );
+        int err = 0;
+
+        while( _send_progress < _text.length() )
         {
-            if( get_errno() == EWOULDBLOCK ) 
+      //do
+      //{
+            LOG2( "socket.send", "send/write(" << _write_socket << "," << c << " bytes)\n" );
+            int len = _write_socket == STDOUT_FILENO? write ( _write_socket, _text.c_str() + _send_progress, c )
+                                                    : ::send( _write_socket, _text.c_str() + _send_progress, c, 0 );
+            if( len < 0 ) 
             {
-                _socket_manager->set_fd( Socket_manager::write_fd, _write_socket );
-                return false;
+                err = get_errno();
+                if( err == EWOULDBLOCK )  break;
+              //{
+              //    _socket_manager->set_fd( Socket_manager::write_fd, _write_socket );
+              //    return false;
+              //}
+              //else
+              //if( err == ENOBUFS  &&  c > 1000 )      // Windows XP meldet bei c==34MB ENOBUFS. 
+              //{
+              //    c /= 2;
+              //}
+                else
+                    throw_sos_socket_error( err, "send" );
             }
-            throw_sos_socket_error( "send" );
+            else 
+                _send_progress += len;
+      //}
+      //while( err == ENOBUFS );
         }
 
         something_done = true;
     }
 
-    _send_progress += len;
 
-    if( _send_progress == _text.length() )
+    if( _send_progress < _text.length() )
+    {
+        _socket_manager->set_fd( Socket_manager::write_fd, _write_socket );
+    }
+    else
     {
         _send_is_complete = true;
         _text = "";
@@ -506,6 +539,7 @@ bool Communication::Channel::async_continue_( bool wait )
         }
 
         //if( socket_read_signaled() )
+        if( _send_is_complete )
         {
             something_done |= do_recv();
 

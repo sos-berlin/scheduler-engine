@@ -1,4 +1,4 @@
-// $Id: spooler_module.cxx,v 1.57 2003/12/09 19:37:52 jz Exp $
+// $Id: spooler_module.cxx,v 1.58 2004/01/07 11:19:48 jz Exp $
 /*
     Hier sind implementiert
 
@@ -493,6 +493,8 @@ Async_operation* Module_instance::call__start( const string& method )
 
 bool Module_instance::call__end()
 {
+    if( _call_method == spooler_exit_name  &&  !loaded() )  return true;
+
     if( _call_method == spooler_on_success_name   
      || _call_method == spooler_on_error_name )
     {

@@ -1,4 +1,4 @@
-// $Id: spooler_history.cxx,v 1.81 2004/01/07 08:57:51 jz Exp $
+// $Id: spooler_history.cxx,v 1.82 2004/01/07 11:19:48 jz Exp $
 
 #include "spooler.h"
 #include "../zschimmer/z_com.h"
@@ -1346,78 +1346,90 @@ void Task_history::write( bool start )
 
     if( _job_history->_use_db )
     {
-        Transaction ta ( +_spooler->_db );
+        while(1)
         {
-            if( start )
+            try
             {
-                Record record = _spooler->_db->_history_table.create_record();
-
-                record.set_field( "id"             , _task->_id );
-                record.set_field( "spooler_id"     , _spooler->id_for_db() );
-                record.set_field( "job_name"       , _task->job()->name() );
-                record.set_field( "start_time"     , start_time );
-                record.set_field( "cause"          , start_cause_name( _task->_cause ) );
-
-                if( !parameters.empty()  &&  parameters.length() < blob_field_size )  record.set_field( "parameters", parameters ), parameters = "";
-
-                _spooler->_db->_history_table.insert( record );
-
-                if( !parameters.empty() )
+                Transaction ta ( +_spooler->_db );
                 {
-                    Any_file blob;
-                    blob.open( "-out " + _spooler->_db->db_name() + " -table=" + _spooler->_job_history_tablename + " -blob='parameters' where \"ID\"=" + as_string( _task->_id ) );
-                    blob.put( parameters );
-                    blob.close();
-                }
-            }
-            else
-            {
-/*
-                _spooler->_db->_history_update_params[1] = Time::now().as_string(Time::without_ms);
-                _spooler->_db->_history_update_params[2] = _task->_step_count;
-                _spooler->_db->_history_update_params[3] = _job->has_error()? 1 : 0;
-                _spooler->_db->_history_update_params[4] = _job->_error.code();
-                _spooler->_db->_history_update_params[5] = _job->_error.what().substr( 0, 250 );
-                _spooler->_db->_history_update_params[6] = _task->_id;
-                _spooler->_db->_history_update.execute();
-*/
-                string stmt = "UPDATE " + uquoted(_spooler->_job_history_tablename) + " set ";
-                stmt +=   "\"START_TIME\"={ts'" + start_time + "'}";
-                stmt += ", \"END_TIME\"={ts'" + Time::now().as_string(Time::without_ms) + "'}";
-                stmt += ", \"STEPS\"=" + as_string( _task->_step_count );
-                stmt += ", \"ERROR\"=" + as_string( _task->has_error() );
-                if( !_task->_error.code().empty() ) stmt += ", \"ERROR_CODE\"=" + sql_quoted( _task->_error.code() );
-                if( !_task->_error.what().empty() ) stmt += ", \"ERROR_TEXT\"=" + sql_quoted( _task->_error.what().substr( 0, 250 ) );
-
-                for( int i = 0; i < _extra_record.type()->field_count(); i++ )
-                {
-                    if( !_extra_record.null(i) )
+                    if( start )
                     {
-                        string s = _extra_record.as_string(i);
-                        if( !is_numeric( _extra_record.type()->field_descr_ptr(i)->type_ptr()->info()->_std_type ) )  s = sql_quoted(s);
-                        stmt += ", " + sql_quoted_name( _job_history->_extra_names[i] ) + "=" + s;
+                        Record record = _spooler->_db->_history_table.create_record();
+
+                        record.set_field( "id"             , _task->_id );
+                        record.set_field( "spooler_id"     , _spooler->id_for_db() );
+                        record.set_field( "job_name"       , _task->job()->name() );
+                        record.set_field( "start_time"     , start_time );
+                        record.set_field( "cause"          , start_cause_name( _task->_cause ) );
+
+                        if( !parameters.empty()  &&  parameters.length() < blob_field_size )  record.set_field( "parameters", parameters ), parameters = "";
+
+                        _spooler->_db->_history_table.insert( record );
+
+                        if( !parameters.empty() )
+                        {
+                            Any_file blob;
+                            blob.open( "-out " + _spooler->_db->db_name() + " -table=" + _spooler->_job_history_tablename + " -blob='parameters' where \"ID\"=" + as_string( _task->_id ) );
+                            blob.put( parameters );
+                            blob.close();
+                        }
+                    }
+                    else
+                    {
+        /*
+                        _spooler->_db->_history_update_params[1] = Time::now().as_string(Time::without_ms);
+                        _spooler->_db->_history_update_params[2] = _task->_step_count;
+                        _spooler->_db->_history_update_params[3] = _job->has_error()? 1 : 0;
+                        _spooler->_db->_history_update_params[4] = _job->_error.code();
+                        _spooler->_db->_history_update_params[5] = _job->_error.what().substr( 0, 250 );
+                        _spooler->_db->_history_update_params[6] = _task->_id;
+                        _spooler->_db->_history_update.execute();
+        */
+                        string stmt = "UPDATE " + uquoted(_spooler->_job_history_tablename) + " set ";
+                        stmt +=   "\"START_TIME\"={ts'" + start_time + "'}";
+                        stmt += ", \"END_TIME\"={ts'" + Time::now().as_string(Time::without_ms) + "'}";
+                        stmt += ", \"STEPS\"=" + as_string( _task->_step_count );
+                        stmt += ", \"ERROR\"=" + as_string( _task->has_error() );
+                        if( !_task->_error.code().empty() ) stmt += ", \"ERROR_CODE\"=" + sql_quoted( _task->_error.code() );
+                        if( !_task->_error.what().empty() ) stmt += ", \"ERROR_TEXT\"=" + sql_quoted( _task->_error.what().substr( 0, 249 ) );    // Für MySQL 249 statt 250. jz 7.1.04
+
+                        for( int i = 0; i < _extra_record.type()->field_count(); i++ )
+                        {
+                            if( !_extra_record.null(i) )
+                            {
+                                string s = _extra_record.as_string(i);
+                                if( !is_numeric( _extra_record.type()->field_descr_ptr(i)->type_ptr()->info()->_std_type ) )  s = sql_quoted(s);
+                                stmt += ", " + sql_quoted_name( _job_history->_extra_names[i] ) + "=" + s;
+                            }
+                        }
+
+
+                        stmt += " where id=" + as_string( _task->_id );
+                        _spooler->_db->execute( stmt );
+
+
+                        // Task-Protokoll
+                        string log_filename = _task->_log.filename();
+                        if( _job_history->_with_log  &&  !log_filename.empty()  &&  log_filename[0] != '*' )
+                        {
+                            try {
+                                string blob_filename = _spooler->_db->db_name() + " -table=" + _spooler->_job_history_tablename + " -blob='log' where \"ID\"=" + as_string( _task->_id );
+                                if( _job_history->_with_log == arc_gzip )  blob_filename = GZIP + blob_filename;
+                                copy_file( "file -b " + log_filename, blob_filename );
+                            }
+                            catch( const exception& x ) { _task->_log.warn( string("Historie: ") + x.what() ); }
+                        }
                     }
                 }
 
-
-                stmt += " where id=" + as_string( _task->_id );
-                _spooler->_db->execute( stmt );
-
-
-                // Task-Protokoll
-                string log_filename = _task->_log.filename();
-                if( _job_history->_with_log  &&  !log_filename.empty()  &&  log_filename[0] != '*' )
-                {
-                    try {
-                        string blob_filename = _spooler->_db->db_name() + " -table=" + _spooler->_job_history_tablename + " -blob='log' where \"ID\"=" + as_string( _task->_id );
-                        if( _job_history->_with_log == arc_gzip )  blob_filename = GZIP + blob_filename;
-                        copy_file( "file -b " + log_filename, blob_filename );
-                    }
-                    catch( const exception& x ) { _task->_log.warn( string("Historie: ") + x.what() ); }
-                }
+                ta.commit();
+                break;
+            }
+            catch( const exception& x )
+            {
+                _spooler->_db->try_reopen_after_error( x );
             }
         }
-        ta.commit();
     }
 
     if( _job_history->_use_file )

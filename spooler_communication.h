@@ -1,4 +1,4 @@
-// $Id: spooler_communication.h,v 1.20 2004/01/07 08:57:51 jz Exp $
+// $Id: spooler_communication.h,v 1.21 2004/01/07 11:19:48 jz Exp $
 
 #ifndef __SPOOLER_COMMUNICATION_H
 #define __SPOOLER_COMMUNICATION_H
@@ -158,6 +158,7 @@ struct Communication //: zschimmer::Thread
 
         Xml_end_finder         _xml_end_finder;
 
+        int                    _socket_send_buffer_size;
         bool                   _send_is_complete;
         int                    _send_progress;
         Prefix_log             _log;
