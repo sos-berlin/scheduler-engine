@@ -539,6 +539,11 @@ int Spooler_db::get_id_( const string& variable_name, Transaction* outer_transac
             _id_counters[ variable_name ] = id + 1;
         }
         else
+        if( _waiting )
+        {
+            throw_xc( "SCHEDULER-184" );
+        }
+        else
         {
             id = InterlockedIncrement( &_id_counters[ variable_name ] );
         }

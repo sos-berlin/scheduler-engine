@@ -66,7 +66,7 @@ Scheduler priorisiert bei Task-Fehler nicht mehr eigenen Subject und Body der eM
 
 
 ------------------------------------------------
-VERSION 2.0.107
+VERSION 2.0.107  2005-01-27
 
 HTML-Bedienung (http://localhost:4444/jz) überarbeitet: 
 Wenn im rechten Frame ein Job gezeigt wird, kann zwischen Task-Warteschlange, Task-Historie 
