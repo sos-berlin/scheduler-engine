@@ -1,4 +1,4 @@
-// $Id: spooler_module.cxx,v 1.40 2003/09/01 15:15:37 jz Exp $
+// $Id: spooler_module.cxx,v 1.41 2003/09/02 15:46:26 jz Exp $
 /*
     Hier sind implementiert
 
@@ -118,7 +118,8 @@ void Module::set_dom_without_source( const xml::Element_ptr& element )
     if( use_engine == ""
      || use_engine == "task" )  _reuse = reuse_task;
     else
-    if( use_engine == "job"  )  _reuse = reuse_job;
+        throw_xc( "SPOOLER-196", use_engine );
+  //if( use_engine == "job"  )  _reuse = reuse_job;
 
     init();
 }
@@ -168,6 +169,8 @@ void Module::set_source_only( const Source_with_parts& source )
 
 void Module::init()
 {
+    if( _dont_remote )  _separate_process = false, _use_process_class = false, _process_class_name = "";
+
     if( _separate_process )
     {
         if( _process_class_name != "" )  throw_xc( "SPOOLER-194" );
@@ -177,7 +180,7 @@ void Module::init()
     if( _use_process_class )  _spooler->process_class( _process_class_name );     // Fehler, wenn der Name nicht bekannt ist.
 
 
-    if( _separate_process  ||  _use_process_class )
+    if( _separate_process  ||  _use_process_class ) 
     {
         _kind = kind_remote;
     }

@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.243 2003/09/02 13:04:29 jz Exp $
+// $Id: spooler.cxx,v 1.244 2003/09/02 15:46:25 jz Exp $
 /*
     Hier sind implementiert
 
@@ -325,6 +325,8 @@ Spooler::Spooler()
 
 
     set_ctrl_c_handler( true );
+
+    _module._dont_remote = true;
 }
 
 //--------------------------------------------------------------------------------Spooler::~Spooler
@@ -1374,7 +1376,7 @@ void Spooler::start()
     if( _module.set() )
     {
         _module_instance = _module.create_instance();
-        _module_instance->_title = "Spooler-script";
+        _module_instance->_title = "Spooler-Script";
         _module_instance->init();
 
         _module_instance->add_obj( (IDispatch*)_com_spooler, "spooler"     );

@@ -1,4 +1,4 @@
-// $Id: spooler_module.h,v 1.40 2003/08/31 22:32:42 jz Exp $
+// $Id: spooler_module.h,v 1.41 2003/09/02 15:46:26 jz Exp $
 
 #ifndef __SPOOLER_MODULE_H
 #define __SPOOLER_MODULE_H
@@ -145,6 +145,8 @@ struct Module : Object
     jclass                     _java_class;
     typedef map<string,jmethodID>  Method_map;
     Method_map                 _method_map;
+
+    bool                       _dont_remote;
 
     Fill_end                   _end_;
 };
