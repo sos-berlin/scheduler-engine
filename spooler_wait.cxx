@@ -1,4 +1,4 @@
-// $Id: spooler_wait.cxx,v 1.73 2003/09/05 11:16:19 jz Exp $
+// $Id: spooler_wait.cxx,v 1.74 2003/09/21 17:58:20 jz Exp $
 /*
     Hier sind implementiert
 
@@ -270,8 +270,6 @@ int Wait_handles::wait( double wait_time )
 
 int Wait_handles::wait_until( Time until )
 {
-    //timeb tm1, tm2;
-    //ftime( &tm1 );
     time_t t;
     tm     tm1, tm2;
 

@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.249 2003/09/05 14:36:29 jz Exp $
+// $Id: spooler.cxx,v 1.250 2003/09/21 17:58:20 jz Exp $
 /*
     Hier sind implementiert
 
@@ -1488,27 +1488,57 @@ void Spooler::nichts_getan( Spooler_thread* thread, int anzahl )
     //sos_sleep( min( 30, 1 << anzahl ) );
 }
 
+//-----------------------------------------------------------------------Spooler::execute_state_cmd
+
+bool Spooler::execute_state_cmd()
+{
+    bool continue_spooler = true;
+
+    if( _state_cmd == sc_pause                         )  if( _state == s_running )  set_state( s_paused  ), signal_threads( "pause" );
+    if( _state_cmd == sc_continue                      )  if( _state == s_paused  )  set_state( s_running ), signal_threads( "continue" );
+
+    if( _state_cmd == sc_load_config  
+        || _state_cmd == sc_reload       
+        || _state_cmd == sc_terminate             
+        || _state_cmd == sc_terminate_and_restart 
+        || _state_cmd == sc_let_run_terminate_and_restart )
+    {
+        if( _state_cmd != _shutdown_cmd )
+        {
+            set_state( _state_cmd == sc_let_run_terminate_and_restart? s_stopping_let_run : s_stopping );
+            if( _state == s_stopping )  FOR_EACH( Thread_list, _thread_list, t )  (*t)->cmd_shutdown();
+            continue_spooler = false;
+        }
+
+        _shutdown_cmd = _state_cmd;
+    }
+
+    _state_cmd = sc_none;
+
+    return continue_spooler;
+}
+
 //-------------------------------------------------------------------------------------Spooler::run
 
 void Spooler::run()
 {
-    assert( current_thread_id() == _thread_id );
-
     set_state( s_running );
 
     Spooler_thread* single_thread        = _max_threads == 1? new_thread( false ) : NULL;
 
-    int             nothing_done_count = 0;
-    int             nothing_done_max   = _job_list.size() * 2 + 3;
+    int             nothing_done_count   = 0;
+    int             nothing_done_max     = _job_list.size() * 2 + 3;
     int             nichts_getan_zaehler = 0;
 
-    Time            throttle_time       = Time::now();
-    int             throttle_loop_count = 0;
+    Time            throttle_time        = Time::now();
+    int             throttle_loop_count  = 0;
 
 
 
     while(1)
     {
+        bool something_done = false;
+
         _event.reset();
 
         // Threads ohne Jobs und nach Fehler gestorbene Threads entfernen:
@@ -1521,30 +1551,13 @@ void Spooler::run()
             if( !valid_thread )  { _log.info( "Kein Thread vorhanden. Spooler wird beendet." ); break; }
         }
 
-        if( _state_cmd == sc_pause                         )  if( _state == s_running )  set_state( s_paused  ), signal_threads( "pause" );
-        if( _state_cmd == sc_continue                      )  if( _state == s_paused  )  set_state( s_running ), signal_threads( "continue" );
 
-        if( _state_cmd == sc_load_config  
-         || _state_cmd == sc_reload       
-         || _state_cmd == sc_terminate             
-         || _state_cmd == sc_terminate_and_restart 
-         || _state_cmd == sc_let_run_terminate_and_restart )
-        {
-            if( _state_cmd != _shutdown_cmd )
-            {
-                set_state( _state_cmd == sc_let_run_terminate_and_restart? s_stopping_let_run : s_stopping );
-                if( _state == s_stopping )  FOR_EACH( Thread_list, _thread_list, t )  (*t)->cmd_shutdown();
-                if( !single_thread || !single_thread->has_tasks() )  break;
-            }
+        bool continue_spooler = execute_state_cmd();
+        if( !continue_spooler )  if( !single_thread || !single_thread->has_tasks() )  break;
 
-            _shutdown_cmd = _state_cmd;
-        }
-
-        _state_cmd = sc_none;
 
         if( _state == Spooler::s_paused )
         {
-            //_wait_handles.wait_until( latter_day );
             _event.wait();
             if( _state_cmd != sc_none )  continue;
         }
@@ -1553,177 +1566,112 @@ void Spooler::run()
         _next_time = latter_day;
         _next_job  = NULL;
 
-/*
-        if( _thread_list.size() == 1 )
+        if( single_thread )
         {
-            Spooler_thread* thread = *_thread_list.begin();
-            
-            //if( thread->_next_start_time <= now  ||  thread->_wait_handles.signaled() )
-            {
-                thread->process();
-            }
+            FOR_EACH( Process_class_list, _process_class_list, pc )
+                FOR_EACH( Process_list, (*pc)->_process_list, p )  
+                    something_done |= (*p)->async_continue();
 
-            //thread->_log.debug9( "_next_start_time=" + thread->_next_start_time.as_string() );
-            //if( thread->_next_job  &&  _next_time > thread->_next_start_time )  _next_time = thread->_next_start_time, _next_job = thread->_next_job;
-
-
-            //int running_tasks_count = 0;
-            //FOR_EACH( Spooler_thread_list, _spooler_thread_list, it2 )  running_tasks_count += (*it2)->_running_tasks_count;
-
-            //LOG( "spooler: running_tasks_count=" << running_tasks_count  << " _state_cmd=" << (int)_state_cmd << " ctrl_c_pressed=" << ctrl_c_pressed << " _next_time=" << _next_time << "\n" );
-            if( thread->_running_tasks_count == 0  &&  _state_cmd == sc_none  &&  !ctrl_c_pressed )
-            {
-                get_next_job_to_start();
-                //thread->_log.debug9( "_next_start_time=" + thread->_next_start_time.as_string() );
-                if( thread->_next_job  &&  _next_time > thread->_next_start_time )  _next_time = thread->_next_start_time, _next_job = thread->_next_job;
-
-                Time now = Time::now();
-
-                if( _next_time > now )
-                {
-                    string msg;
-                    
-                    Wait_handles wait_handles = _wait_handles;
-                    wait_handles += thread->_wait_handles;
-
-                    if( _debug )  
-                    {
-                        msg = _next_job? "Warten bis " + _next_time.as_string() + " für Job " + _next_job->name() 
-                                       : "Kein Job zu starten";
-
-                        if( wait_handles.wait(0) == -1 )  _log.debug( msg ), wait_handles.wait_until( _next_time );
-                    }
-                    else
-                        wait_handles.wait_until( _next_time );
-
-                    wait_handles.clear();
-                }
-            }
+            //LOG( "spooler.cxx: something_done=" << something_done << "    process_list \n" );
         }
+
+
+        FOR_EACH_JOB( j )
+        {
+            Job* job = *j;
+            something_done |= job->do_something();
+            //LOG( "spooler.cxx: something_done=" ); 
+            //LOG( something_done << "  " << job->obj_name() << "\n" );
+        }
+
+
+        string       msg = "Warten"; //"Kein Job und keine Task aktiv";
+        Wait_handles wait_handles ( this, &_log );
+        _next_time = latter_day;
+
+
+        if( single_thread )
+        {
+            something_done |= single_thread->process();
+
+            //LOG( "spooler.cxx: something_done=" << something_done << "   single_thread->process()\n" );
+
+            if( single_thread->is_ready_for_termination() )  break;
+
+            wait_handles += single_thread->_wait_handles;
+            Task* task = single_thread->get_next_task();
+            if( task ) 
+            {
+                _next_time = task->next_time();
+                if( _debug )  if( task )  msg = "Warten bis " + _next_time.as_string() + " für Task " + task->name();
+                                    //else  msg = "Keine Task aktiv";
+            }
+
+            nothing_done_max += single_thread->task_count() * 3 + 3;    // Statt der Prozesse zählen wir die Tasks einmal mehr
+        }
+
+
+        wait_handles += _wait_handles;
+
+        Job* job = get_next_job_to_start();
+
+        if( job  &&  _next_time > job->next_time() )  
+        {
+            _next_time = job->next_time();
+            msg = "Warten bis " + _next_time.as_string() + " für Job " + job->name();
+        }
+
+
+
+        if( something_done )  nothing_done_count = 0,  nichts_getan_zaehler = 0;
         else
-*/
+        if( ++nothing_done_count > nothing_done_max )
         {
-          //while(1)
+            nichts_getan( single_thread, ++nichts_getan_zaehler );
+            // geht nicht: _next_time = max( _next_time, Time::now() + min( 30.0, double( 1 << min( 5+2, nichts_getan_zaehler ) ) / 4 ) );    // Bremsen, mit 1/4s anfangen bis 30s
+            _next_time = Time::now() + 0.5;
+            //LOG( "Spooler _next_time nach 'nichts getan' = " << _next_time.as_string() << "\n" );
+            something_done = false;  // Damit wait_until() gerufen wird.
+        }
+
+
+        int ___SPOOLER_IST_GEDROSSELT______SPOOLER_IST_GEDROSSELT______SPOOLER_IST_GEDROSSELT___;
+        if( ++throttle_loop_count > 1000 )
+        {
+#           ifndef Z_WINDOWS
+                LOG( "Spooler wird gedrosselt... something_done=" << something_done << " _next_time=" << _next_time.as_string() << "\n\n" );
+                sos_sleep(0.1);                             // Erstmal alle 20 Durchläufe bremsen!
+#           endif
+
+            if( Time::now() < throttle_time + 0.1 )
             {
-                bool something_done = false;
+                LOG( "Spooler wird gedrosselt... something_done=" << something_done << " _next_time=" << _next_time.as_string() << "\n\n" );
+                sos_sleep(0.1);                         // Bei mehr als 1000 Schritten in 100ms
+            }
 
-                if( single_thread )
-                {
-                    FOR_EACH( Process_class_list, _process_class_list, pc )  
-                        FOR_EACH( Process_list, (*pc)->_process_list, p )  
-                            something_done |= (*p)->async_continue();
+            throttle_loop_count = 0;
+            throttle_time = Time::now();
+        }
 
-                    //LOG( "spooler.cxx: something_done=" << something_done << "    process_list \n" );
-                }
-
-
-              //do
-                {
-                    FOR_EACH_JOB( j )
-                    {
-                        Job* job = *j;
-                        something_done |= job->do_something();
-                        //LOG( "spooler.cxx: something_done=" ); 
-                        //LOG( something_done << "  " << job->obj_name() << "\n" );
-                    }
-
-                    if( something_done )  nothing_done_count = 1;
-                                    else  nothing_done_count++;
-                }
-              //while( something_done );
-
-
-                string       msg = "Warten"; //"Kein Job und keine Task aktiv";
-                Wait_handles wait_handles ( this, &_log );
-                _next_time = latter_day;
-
-
-                if( single_thread )
-                {
-                    something_done |= single_thread->process();
-
-                    //LOG( "spooler.cxx: something_done=" << something_done << "   single_thread->process()\n" );
-
-                    if( single_thread->is_ready_for_termination() )  break;
-
-                    wait_handles += single_thread->_wait_handles;
-                    Task* task = single_thread->get_next_task();
-                    if( task ) 
-                    {
-                        _next_time = task->next_time();
-                        if( _debug )  if( task )  msg = "Warten bis " + _next_time.as_string() + " für Task " + task->name();
-                                          //else  msg = "Keine Task aktiv";
-                    }
-
-                    nothing_done_max += single_thread->task_count() * 3 + 3;    // Statt der Prozesse zählen wir die Tasks einmal mehr
-                }
-
-
-                wait_handles += _wait_handles;
-
-                Job* job = get_next_job_to_start();
-
-                if( job  &&  _next_time > job->next_time() )  
-                {
-                    _next_time = job->next_time();
-                    msg = "Warten bis " + _next_time.as_string() + " für Job " + job->name();
-                }
-
-
-
-                if( something_done )  nothing_done_count = 0,  nichts_getan_zaehler = 0;
-                else
-                if( ++nothing_done_count > nothing_done_max )
-                {
-                    nichts_getan( single_thread, ++nichts_getan_zaehler );
-                    // geht nicht: _next_time = max( _next_time, Time::now() + min( 30.0, double( 1 << min( 5+2, nichts_getan_zaehler ) ) / 4 ) );    // Bremsen, mit 1/4s anfangen bis 30s
-                    _next_time = Time::now() + 0.5;
-                    //LOG( "Spooler _next_time nach 'nichts getan' = " << _next_time.as_string() << "\n" );
-                    something_done = false;  // Damit wait_until() gerufen wird.
-                }
-
-
-                int ___SPOOLER_IST_GEDROSSELT______SPOOLER_IST_GEDROSSELT______SPOOLER_IST_GEDROSSELT___;
-                if( ++throttle_loop_count > 20 )
-                {
-#                   ifndef Z_WINDOWS
-                        LOG( "Spooler wird gedrosselt... something_done=" << something_done + " _next_time=" + _next_time.as_string() + "\n\n" );
-                        sos_sleep(0.1);                             // Erstmal alle 20 Durchläufe bremsen!
-#                   endif
-
-                    if( Time::now() < throttle_time + 0.02 )
-                    {
-                        LOG( "Spooler wird gedrosselt... something_done=" << something_done + " _next_time=" + _next_time.as_string() + "\n\n" );
-                        sos_sleep(0.4);                         // Bei mehr als 20 Schritten in 20ms
-                    }
-
-                    throttle_loop_count = 0;
-                    throttle_time = Time::now();
-                }
-
-                if( !something_done  &&  _next_time > 0 )
-                {
-                    Time now = Time::now();
-                    if( _next_time > now )
-                    {
+        if( !something_done  &&  _next_time > 0 )
+        {
+            Time now = Time::now();
+            if( _next_time > now )
+            {
 _next_time = min( _next_time, now + 10.0 );      // Wartezeit vorsichtshalber begrenzen
-                        if( _debug )  
-                        {
-                            if( wait_handles.wait(0) == -1 )  _log.debug9( msg ), wait_handles.wait_until( _next_time );     // Debug-Ausgabe der Wartezeit nur, wenn kein Ergebnis vorliegt
-                        }
-                        else
-                        {
-                            wait_handles.wait_until( _next_time );
-                        }
-                    }
+                if( _debug )  
+                {
+                    if( wait_handles.wait(0) == -1 )  _log.debug9( msg ), wait_handles.wait_until( _next_time );     // Debug-Ausgabe der Wartezeit nur, wenn kein Ergebnis vorliegt
                 }
-
-                _next_time = 0;
-                wait_handles.clear();
+                else
+                {
+                    wait_handles.wait_until( _next_time );
+                }
             }
         }
 
-        //_event.reset();
+        _next_time = 0;
+        wait_handles.clear();
 
         if( ctrl_c_pressed )
         {

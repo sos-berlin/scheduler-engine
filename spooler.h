@@ -1,4 +1,4 @@
-// $Id: spooler.h,v 1.156 2003/09/05 11:16:19 jz Exp $
+// $Id: spooler.h,v 1.157 2003/09/21 17:58:20 jz Exp $
 
 #ifndef __SPOOLER_H
 #define __SPOOLER_H
@@ -207,6 +207,7 @@ struct Spooler
     void                        cmd_terminate_and_restart   ();
     void                        cmd_let_run_terminate_and_restart();
     void                        cmd_load_config             ( const xml::Element_ptr&, const Time& xml_mod_time, const string& source_filename );
+    bool                        execute_state_cmd           ();
 
     Job*                        get_job                     ( const string& job_name );
     Job*                        get_job_or_null             ( const string& job_name );
@@ -239,7 +240,6 @@ struct Spooler
     void                        wait                        ();
 
     void                        signal                      ( const string& signal_name )       { _log.debug9( "Signal \"" + signal_name + "\"" ); _event.signal( signal_name ); }
-  //void                        signal                      ( const string& signal_name  )      { THREAD_LOCK( _lock )  ..., if(_event) _event->signal(signal_name), _next_start_time = 0, _next_job = NULL; }
     void                        async_signal                ( const char* signal_name = "" )    { _event.async_signal( signal_name ); }
     bool                        signaled                    ()                                  { return _event.signaled(); }
 

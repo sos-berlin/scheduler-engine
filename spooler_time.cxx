@@ -1,4 +1,4 @@
-// $Id: spooler_time.cxx,v 1.44 2003/09/04 15:53:08 jz Exp $
+// $Id: spooler_time.cxx,v 1.45 2003/09/21 17:58:20 jz Exp $
 /*
     Hier sind implementiert
 
@@ -33,6 +33,8 @@ namespace time {
 
 extern const int                       latter_day_int              = INT_MAX;
 extern const Time                      latter_day                  = latter_day_int;
+static const char                      last_day_name[]             = "ragnarök";
+
 Period empty_period;
 
 //---------------------------------------------------------------------------------time_from_string
@@ -74,7 +76,7 @@ void Time::set( double t )
 
 #   if defined Z_DEBUG && defined Z_WINDOWS
         if( _time == 0 )  _time_as_string.clear();   // Für static empty_period sollte in gcc as_string() nicht gerufen werden! (Sonst Absturz)
-                    else  _time_as_string = _time == latter_day_int? "LATTER_DAY" 
+                    else  _time_as_string = _time == latter_day_int? last_day_name 
                                                                    : as_string();
 #   endif                                                           
 }
@@ -90,24 +92,31 @@ void Time::set_datetime( const string& t )
 
 string Time::as_string( With_ms with ) const
 {
-    char        buff [30];
-
-    //char* old_locale = setlocale( LC_NUMERIC, "C" );
-
-    const char* bruch = with == with_ms? buff + sprintf( buff, "%0.3lf", _time ) - 4
-                                       : "";
-
-    //setlocale( LC_NUMERIC, old_locale );
-
-    if( _time < 100*(24*60*60) )
+    if( _time == latter_day_int )
     {
-        char hhmmss [30];
-        sprintf( hhmmss, "%02d:%02d:%02d", (int)(_time/(60*60)), (int)(_time/60) % 60, (int)_time % 60 );
-        return sos::as_string(hhmmss) + bruch;
+        return last_day_name;
     }
     else
     {
-        return Sos_optional_date_time( uint(_time) ).as_string() + bruch;
+        char        buff [30];
+
+        //char* old_locale = setlocale( LC_NUMERIC, "C" );
+
+        const char* bruch = with == with_ms? buff + sprintf( buff, "%0.3lf", _time ) - 4
+                                        : "";
+
+        //setlocale( LC_NUMERIC, old_locale );
+
+        if( _time < 100*(24*60*60) )
+        {
+            char hhmmss [30];
+            sprintf( hhmmss, "%02d:%02d:%02d", (int)(_time/(60*60)), (int)(_time/60) % 60, (int)_time % 60 );
+            return sos::as_string(hhmmss) + bruch;
+        }
+        else
+        {
+            return Sos_optional_date_time( uint(_time) ).as_string() + bruch;
+        }
     }
 }
 
