@@ -1,4 +1,4 @@
-// $Id: spooler_history.cxx,v 1.89 2004/02/02 10:03:48 jz Exp $
+// $Id: spooler_history.cxx,v 1.90 2004/02/03 10:59:36 jz Exp $
 
 #include "spooler.h"
 #include "../zschimmer/z_com.h"
@@ -395,7 +395,7 @@ void Spooler_db::try_reopen_after_error( const exception& x )
         if( !_email_sent_after_db_error )
         {
             string body = "Dies ist das " + as_string(_error_count) + ". Problem mit der Datenbank.";
-            body += "\n(" + warn_msg + ")";
+            if( !_spooler->_wait_endless_for_db_open )  body += "\n(" + warn_msg + ")";
             body += "\ndb=" + _spooler->_db_name + "\r\n\r\n" + x.what() + "\r\n\r\nDer Scheduler versucht, die Datenbank erneut zu oeffnen.";
             if( !_spooler->_need_db )  body += "\r\nWenn das nicht geht, schreibt der Scheduler die Historie in Textdateien.";
             _spooler->send_error_email( string("FEHLER BEIM ZUGRIFF AUF DATENBANK: ") + x.what(), body );
