@@ -1871,7 +1871,7 @@ const char file_jz_translation_de_js[] =
 
 const char file_jz_scheduler_xslt[] = 
     "<?xml version='1.0' encoding=\"utf-8\"?>\n"
-    "<!-- $Id: scheduler.xslt 3349 2005-02-02 14:58:57Z jz $ -->\n"
+    "<!-- $Id: scheduler.xslt 3353 2005-02-07 13:15:08Z jz $ -->\n"
     "<xsl:stylesheet xmlns:xsl   = \"http://www.w3.org/1999/XSL/Transform\"\n"
     "xmlns:msxsl = \"urn:schemas-microsoft-com:xslt\"\n"
     "version     = \"1.0\">\n"
