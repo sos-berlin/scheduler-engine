@@ -1,4 +1,4 @@
-// $Id: spooler_com.cxx,v 1.24 2002/03/03 11:55:17 jz Exp $
+// $Id: spooler_com.cxx,v 1.25 2002/03/04 22:28:35 jz Exp $
 /*
     Hier sind implementiert
 
@@ -274,6 +274,60 @@ STDMETHODIMP Com_log::get_mail_on_success( VARIANT_BOOL* b )
     return hr;
 }
 
+//-------------------------------------------------------------------------------Com_log::log_level
+
+STDMETHODIMP Com_log::put_Log_level( int level )
+{
+    HRESULT hr = NOERROR;
+
+    try 
+    {
+        if( !_log )  return E_POINTER;
+
+        _log->set_log_level( level );
+    }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Log::log_level" ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Log::log_level" ); }
+
+    return hr;
+}
+
+//-------------------------------------------------------------------------------Com_log::log_level
+
+STDMETHODIMP Com_log::get_Log_level( int* level )
+{
+    HRESULT hr = NOERROR;
+
+    try 
+    {
+        if( !_log )  return E_POINTER;
+
+        *level = _log->log_level();
+    }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Log::log_level" ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Log::log_level" ); }
+
+    return hr;
+}
+
+//----------------------------------------------------------------------------Com_log::log_filename
+
+STDMETHODIMP Com_log::get_filename( BSTR* filename_bstr )
+{
+    HRESULT hr = NOERROR;
+
+    try 
+    {
+        if( !_log )  return E_POINTER;
+
+        *filename_bstr = SysAllocString_string( _log->filename() );
+    }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Log::filename" ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Log::filename" ); }
+
+    return hr;
+}
+
 //-------------------------------------------------------------------Com_object_set::Com_object_set
 
 Com_object_set::Com_object_set( Object_set* object_set )
@@ -465,6 +519,25 @@ STDMETHODIMP Com_job::get_name( BSTR* result )
 
     *result = SysAllocString_string( _job->_name );
     return NOERROR;
+}
+
+//--------------------------------------------------------------------------Com_job::put_state_text
+
+STDMETHODIMP Com_job::put_state_text( BSTR text )
+{
+    HRESULT hr = NOERROR;
+
+    try
+    {
+        if( !_job )  throw_xc( "SPOOLER-122" );
+        if( GetCurrentThreadId() != _job->thread()->_thread_id )  return E_ACCESSDENIED;
+
+        _job->set_state_text( bstr_as_string( text ) );
+    }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Job.state_text" ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Job.state_text" ); }
+
+    return hr;
 }
 
 //-------------------------------------------------------------------------------Com_task::Com_task
@@ -824,7 +897,7 @@ STDMETHODIMP Com_spooler::get_param( BSTR* param_bstr )
 }
 
 //-----------------------------------------------------------------------------Com_spooler::get_Log
-/*
+
 STDMETHODIMP Com_spooler::get_script( IDispatch** script_object )
 {
     if( !_spooler )  return E_POINTER;
@@ -835,7 +908,7 @@ STDMETHODIMP Com_spooler::get_script( IDispatch** script_object )
     return NOERROR;
 
 }
-*/
+
 //-----------------------------------------------------------------------------Com_spooler::get_job
 
 STDMETHODIMP Com_spooler::get_job( BSTR job_name, Ijob** com_job )
@@ -881,6 +954,15 @@ STDMETHODIMP Com_spooler::get_include_path( BSTR* result )
 {
     if( !_spooler )  return E_POINTER;
     THREAD_LOCK( _spooler->_lock )  *result = SysAllocString_string( _spooler->_include_path );
+    return NOERROR;
+}
+
+//-------------------------------------------------------------------------Com_spooler::get_log_dir
+
+STDMETHODIMP Com_spooler::get_log_dir( BSTR* result )
+{
+    if( !_spooler )  return E_POINTER;
+    THREAD_LOCK( _spooler->_lock )  *result = SysAllocString_string( _spooler->_log_directory );
     return NOERROR;
 }
 

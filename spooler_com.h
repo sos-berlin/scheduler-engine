@@ -1,4 +1,4 @@
-// $Id: spooler_com.h,v 1.20 2002/03/03 11:55:17 jz Exp $
+// $Id: spooler_com.h,v 1.21 2002/03/04 22:28:36 jz Exp $
 
 #ifndef __SPOOLER_COM_H
 #define __SPOOLER_COM_H
@@ -123,6 +123,10 @@ struct Com_log : spooler_com::Ilog, Sos_ole_object
     STDMETHODIMP            put_mail_on_success             ( VARIANT_BOOL );
     STDMETHODIMP            get_mail_on_success             ( VARIANT_BOOL* );
 
+    STDMETHODIMP            put_Log_level                   ( int );
+    STDMETHODIMP            get_Log_level                   ( int* );
+
+    STDMETHODIMP            get_filename                    ( BSTR* );
 
     Fill_zero                  _zero_;
     Prefix_log*                _log;
@@ -170,6 +174,7 @@ struct Com_job : spooler_com::Ijob, Sos_ole_object
   //STDMETHODIMP                put_include_path            ( BSTR );
     STDMETHODIMP                get_include_path            ( BSTR* );
     STDMETHODIMP                get_name                    ( BSTR* );
+    STDMETHODIMP                put_state_text              ( BSTR );
 
     Job*                       _job;                        // Es gibt nur einen Com_job pro Job
 };
@@ -245,11 +250,12 @@ struct Com_spooler : spooler_com::Ispooler, Sos_ole_object
     STDMETHODIMP                get_log                     ( spooler_com::Ilog** );
     STDMETHODIMP                get_param                   ( BSTR* );
     STDMETHODIMP                get_id                      ( BSTR* );
-  //STDMETHODIMP                get_script                  ( IDispatch** );
+    STDMETHODIMP                get_script                  ( IDispatch** );
     STDMETHODIMP                get_job                     ( BSTR job_name, spooler_com::Ijob** );
     STDMETHODIMP                create_variable_set         ( spooler_com::Ivariable_set** );
   //STDMETHODIMP                put_include_path            ( BSTR );
     STDMETHODIMP                get_include_path            ( BSTR* );
+    STDMETHODIMP                get_log_dir                 ( BSTR* );
 
   protected:
     Spooler*                   _spooler;                    // Es gibt nur einen Com_spooler

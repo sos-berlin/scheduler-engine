@@ -1,4 +1,4 @@
-// $Id: spooler_log.cxx,v 1.23 2002/03/04 11:41:46 jz Exp $
+// $Id: spooler_log.cxx,v 1.24 2002/03/04 22:28:36 jz Exp $
 
 #include "../kram/sos.h"
 #include "spooler.h"
@@ -187,6 +187,12 @@ void Prefix_log::set_filename( const string& filename )
 
 void Prefix_log::open()
 {
+    _highest_level = -999;
+    _highest_msg = "";
+    
+    _log_level = _spooler->_log_level;
+    _log_level = read_profile_int( "factory.ini", _section.c_str(), "log_level", _log_level );
+
     if( _file != -1 )  throw_xc( "SPOOLER-134", _filename );
 
     _mail_on_error   = read_profile_bool( "factory.ini", _section.c_str(), "mail_on_error"  , _spooler->_mail_on_error );
@@ -386,6 +392,9 @@ void Prefix_log::log( Log_level level, const string& line )
     //if( _file == -1  &&  !_filename.empty() )
     //{
     //}
+
+    if( _highest_level < level )  _highest_level = level, _highest_msg = line;
+    if( level < _log_level )  return;
 
     _log->log( level, _prefix, line, this );
 }

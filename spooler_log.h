@@ -1,4 +1,4 @@
-// $Id: spooler_log.h,v 1.8 2002/03/04 11:41:46 jz Exp $
+// $Id: spooler_log.h,v 1.9 2002/03/04 22:28:36 jz Exp $
 
 #ifndef __SPOOLER_LOG_H
 #define __SPOOLER_LOG_H
@@ -61,8 +61,13 @@ struct Prefix_log
     void                        open                        ();
     void                        close                       ();
 
+    void                        set_append                  ( bool b )                          { _append = b; }
     void                        set_filename                ( const string& );
     const string&               filename                    () const                            { return _filename; }
+    void                        set_log_level               ( int level )                       { _log_level = level; }
+    int                         log_level                   ()                                  { return _log_level; }
+    int                         highest_level               () const                            { return _highest_level; }
+    string                      highest_msg                 () const                            { return _highest_msg; }
 
     void                        set_prefix                  ( const string& prefix )            { _prefix = prefix; }
     void                        set_profile_section         ( const string& section )           { _section = section; }
@@ -102,6 +107,9 @@ struct Prefix_log
     Log*                       _log;
     string                     _prefix;
     string                     _section;
+    int                        _log_level;                  // Ab diesem Level protokollieren, sonst nicht
+    int                        _highest_level;
+    string                     _highest_msg;
 
     string                     _filename;                   // Name einer zusätzlichen Log-Datei (für die Tasks)
     bool                       _append;                     // Datei zum Fortschreiben öffnen

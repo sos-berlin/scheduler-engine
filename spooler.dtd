@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- $Id: spooler.dtd,v 1.30 2002/03/02 19:22:54 jz Exp $   Joacim Zschimmer,  (C) 2000 SOS GmbH Berlin  -->
+<!-- $Id: spooler.dtd,v 1.31 2002/03/04 22:28:35 jz Exp $   Joacim Zschimmer,  (C) 2000 SOS GmbH Berlin  -->
 
 
 <!ELEMENT spooler               ( config+ | command | answer )>
@@ -69,6 +69,7 @@
 <!ATTLIST job                   output_level        CDATA #IMPLIED>     <!-- Stufennummer. Auf diese Stufe werden die Objekte der Objektemenge gesetzt -->
 <!ATTLIST job                   spooler_id          CDATA ''>           <!-- "": Job läuft auf jedem Spooler, sonst nur Spooler mit derselben Spooler-Id -->
 <!ATTLIST job                   title               CDATA ''>           <!-- Bezeichnung des Jobs -->
+<!ATTLIST job                   log_append          (yes|no) 'no'>      <!-- Jobprotokoll fortschreiben, nicht überschreiben -->
 
 <!ELEMENT description           ( #PCDATA )>                            <!-- Beschreibung des Jobs -->
 

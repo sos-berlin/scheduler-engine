@@ -1,4 +1,4 @@
-// $Id: spooler_task.h,v 1.30 2002/03/04 11:41:46 jz Exp $
+// $Id: spooler_task.h,v 1.31 2002/03/04 22:28:37 jz Exp $
 
 #ifndef __SPOOLER_TASK_H
 #define __SPOOLER_TASK_H
@@ -174,6 +174,7 @@ struct Job : Sos_self_deleting
     Thread*                     thread                      () const                    { return _thread; }
     string                      job_state                   ();
     string                      include_path                () const;
+    string                      jobname_as_filename         ();
     void                        set_in_call                 ( const string& name );
 
     void                        close                       ();
@@ -185,6 +186,7 @@ struct Job : Sos_self_deleting
     void                        clear_when_directory_changed();
     void                        wake                        ()                          { _event.signal( "wake" ); }
     void                        interrupt_script            ();
+    bool                        is_in_period                ( Time = Time::now() );
 
     Sos_ptr<Task>               create_task                 ( const CComPtr<spooler_com::Ivariable_set>& params, const string& task_name );
     bool                        dequeue_task                ();
@@ -207,7 +209,7 @@ struct Job : Sos_self_deleting
     void                        set_error                   ( const exception& );
     void                        set_error                   ( const _com_error& );
     Xc_copy                     error                       ()                          { THREAD_LOCK( _lock )  return _error; }
-    bool                        has_error                   ()                          { return !!_error; }
+    bool                        has_error                   ()                          { return !!_error || _log.highest_level() >= log_error; }
 
     void                        set_state                   ( State );
     void                        set_state_cmd               ( State_cmd );
@@ -219,6 +221,8 @@ struct Job : Sos_self_deleting
     string                      state_cmd_name              ()                          { return state_cmd_name( _state_cmd ); }
     static string               state_cmd_name              ( State_cmd );
     static State_cmd            as_state_cmd                ( const string& );
+
+    void                        set_state_text              ( const string& text )      { _state_text = text; }
 
     CComPtr<Com_job>&           com_job                     ()                          { return _com_job; }
     void                        signal_object               ( const string& object_set_class_name, const Level& );
@@ -246,6 +250,8 @@ struct Job : Sos_self_deleting
 
 
     Prefix_log                 _log;
+    bool                       _log_append;                 // Jobprotokoll fortschreiben <job log_append=(yes|no)>
+
     Sos_ptr<Object_set_descr>  _object_set_descr;           // Job nutzt eine Objektemengeklasse
     Level                      _output_level;
     Script                     _script;                     // Job hat ein eigenes Skript
@@ -257,12 +263,13 @@ struct Job : Sos_self_deleting
     bool                       _temporary;                  // Job nach einem Lauf entfernen
     string                     _title;
     string                     _description;
+    string                     _state_text;                 // spooler_job.state_text = "..."
 
     xml::Element_ptr           _script_xml_element;         // <script> aus <config>
     Script*                    _script_ptr;
     Script_instance            _script_instance;            // Für use_engine="job"
 
-    int                        _step_count;                 // Anzahl spooler_process() dieses Jobs
+    int                        _step_count;                 // Anzahl spooler_process() der letzten Task
     bool                       _has_spooler_process;
     Directory_watcher_list     _directory_watcher_list;
     Event                      _event;                      // Zum Starten des Jobs

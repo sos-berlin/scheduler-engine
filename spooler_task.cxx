@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.57 2002/03/04 11:41:46 jz Exp $
+// $Id: spooler_task.cxx,v 1.58 2002/03/04 22:28:37 jz Exp $
 /*
     Hier sind implementiert
 
@@ -313,7 +313,8 @@ void Job::init()
 
     if( !_spooler->log_directory().empty()  &&  _spooler->log_directory()[0] != '*' )
     {
-        _log.set_filename( _spooler->log_directory() + "/spooler.job." + _name + ".log" );      // Jobprotokoll
+        _log.set_append( _log_append );
+        _log.set_filename( _spooler->log_directory() + "/job." + jobname_as_filename() + ".log" );      // Jobprotokoll
     }
 
     init2();
@@ -326,6 +327,23 @@ void Job::init2()
 {
     _period          = _run_time.next_period( Time::now() );
     _next_start_time = _period.begin();
+}
+
+//-------------------------------------------------------------------------Job::jobname_as_filename
+
+string Job::jobname_as_filename()
+{
+    string filename = _name;
+
+    for( int i = 0; i < filename.length(); i++ )
+    {
+        if( strchr( "\x00\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0A\x0B\x0C\x0D\x0E\x0F"
+                    "\x10\x11\x12\x13\x14\x15\x16\x17\x18\x19\x1A\x1B\x1C\x1D\x1E\x1F"
+                    "<>:\"/\\|",
+                    filename[i] ) )  filename[i] = '_';
+    }
+
+    return filename;
 }
 
 //---------------------------------------------------------------------------------Job::create_task
@@ -709,14 +727,8 @@ bool Job::do_something()
                 for( Directory_watcher_list::iterator it = _directory_watcher_list.begin(); it != _directory_watcher_list.end(); it++ )
                 {
                     if( (*it)->signaled_then_reset() )
-                  //if( (*it)->signaled() )
                     {
                         ok = true;
-
-                      //try {
-                      //    (*it)->watch_again();
-                      //}
-                      //catch( const Xc& x ) { _log.error( "Überwachung des Verzeichnisses " + (*it)->directory() + ": " + x.what() ); }
 
                         if( _spooler->_debug )  _log.debug( "Task startet wegen eines Ereignisses für Verzeichnis " + (*it)->directory() );
 
@@ -850,9 +862,10 @@ void Job::set_mail_defaults()
     }
     else
     {
-        _log.set_mail_subject( string("FEHLER ") + _error->what(), is_error );
+        string errmsg = _error? _error->what() : _log.highest_msg();
+        _log.set_mail_subject( string("FEHLER ") + errmsg, is_error );
     
-        body += string(_error->what()) + "\n\n";
+        body += errmsg + "\n\n";
     }
 
     _log.set_mail_body( body + "Das Jobprotokoll liegt dieser Nachricht bei.", is_error );
@@ -1109,10 +1122,14 @@ xml::Element_ptr Job::xml( xml::Document_ptr document, bool show_all )
 
     THREAD_LOCK( _lock )
     {
-        job_element->setAttribute( "job"      , as_dom_string( _name ) );
-        job_element->setAttribute( "state"    , as_dom_string( state_name() ) );
-        job_element->setAttribute( "title"    , as_dom_string( _title ) );
-        job_element->setAttribute( "job_steps", as_dom_string( _step_count ) );
+        job_element->setAttribute( "job"       , as_dom_string( _name ) );
+        job_element->setAttribute( "state"     , as_dom_string( state_name() ) );
+        job_element->setAttribute( "title"     , as_dom_string( _title ) );
+        job_element->setAttribute( "steps"     , as_dom_string( _step_count ) );
+        job_element->setAttribute( "state_text", as_dom_string( _state_text ) );
+        job_element->setAttribute( "lof_file"  , as_dom_string( _log.filename() ) );
+        
+
 
         if( !_in_call.empty() )  job_element->setAttribute( "calling", as_dom_string( _in_call ) );
 
@@ -1125,7 +1142,7 @@ xml::Element_ptr Job::xml( xml::Document_ptr document, bool show_all )
       //THREAD_LOCK( _task->_lock )
         {
             job_element->setAttribute( "running_since", as_dom_string( _task->_running_since.as_string() ) );
-            job_element->setAttribute( "steps"        , as_dom_string( as_string( _task->_step_count ) ) );
+            //job_element->setAttribute( "steps"        , as_dom_string( as_string( _task->_step_count ) ) );
         }
         
 
@@ -1221,6 +1238,7 @@ bool Task::start()
 
         _error = _job->_error = NULL;
         _job->_thread->_task_count++;
+        _job->_step_count = 0;
         _running_since = Time::now();
     }
 

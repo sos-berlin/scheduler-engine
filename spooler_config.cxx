@@ -1,4 +1,4 @@
-// $Id: spooler_config.cxx,v 1.26 2002/03/02 15:22:44 jz Exp $
+// $Id: spooler_config.cxx,v 1.27 2002/03/04 22:28:36 jz Exp $
 
 //#include <precomp.h>
 
@@ -298,6 +298,7 @@ void Job::set_xml( const xml::Element_ptr& element )
     _temporary        = as_bool  ( element->getAttribute( L"temporary" ) );
     _priority         = as_int   ( element->getAttribute( L"priority" ) );
     _title            = as_string( element->getAttribute( L"title" ) );
+    _log_append       = as_bool  ( element->getAttribute( L"log_append" ) );
 
     string text;
 
