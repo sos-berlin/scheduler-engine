@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 
-<!-- $Id: spooler_config.xml,v 1.18 2001/01/11 21:39:42 jz Exp $   (C) 2000 SOS GmbH Berlin -->
+<!-- $Id: spooler_config.xml,v 1.19 2001/01/12 12:20:55 jz Exp $   (C) 2000 SOS GmbH Berlin -->
 
 <!DOCTYPE spooler_config SYSTEM "spooler_config.dtd">
 
-<spooler_config tcp_port="4444">
+<spooler_config tcp_port="4444" log_dir="c:\tmp">
 
     <script language="VBScript"><![CDATA[
 
@@ -28,7 +28,7 @@ set global = new Global_class
                 <level_decl level="300" name="Gedruckt"/>
             </level_decls>
 
-            <script use_engine="task"><![CDATA[
+            <script use_engine="job"><![CDATA[
 
 dir_name = "c:\tmp\spooler"
 set fso = createobject( "Scripting.FileSystemObject" )
@@ -134,7 +134,7 @@ end function
                 <level_decl level="3" name="Stufe 3"/>
             </level_decls>
 
-            <script language="PerlScript"><![CDATA[
+            <script language="PerlScript" use_engine="job"><![CDATA[
 
 use diagnostics;
 use Win32::OLE;
@@ -148,7 +148,7 @@ $log->msg( "*Job Perl" );
 
     sub construct
     {
-        $main::log->msg( "Testobjekt::construct\n" );
+        $main::log->msg( "Testobjekt::construct" );
         my $self = {};
         bless( $self );
         $self->{name} = shift;
@@ -230,10 +230,16 @@ sub spooler_make_object_set()
 
 # Folgender prozeduraler Code, weil PerlScript kein IDispatch, also kein Objekt liefern kann:
 
-my $object_set_class = spooler_make_object_set();
+my $object_set_class;
 my $object;
+my $spooler_low_level;
+my $spooler_high_level;
 
-sub spooler_dont_use_objects() { 1; }
+sub spooler_dont_use_objects() 
+{ 
+    $object_set_class = spooler_make_object_set();
+    return; 
+}
 
 sub spooler_open()
 {
@@ -275,9 +281,9 @@ sub spooler_process()
     <jobs>
 
         <job name           = "Aufbereiten" 
-             priority       = "50" 
+             priority       = "2" 
              output_level   = "200" 
-             spooler_id     = "vb"
+             spooler_id     = ""
              rerun          = "no">
 
             <object_set class="Dokumente">
@@ -294,7 +300,7 @@ sub spooler_process()
                 <weekdays>
                     <day day="1"/>
                     <day day="2"/>
-                    <day day="4"/>
+                    <day day="5"/>
                 </weekdays>
 
                 <monthdays>
@@ -319,9 +325,9 @@ sub spooler_process()
 
 
 
-        <job name="einfach" spooler_id="vb">
+        <job name="einfach" priority="3" spooler_id="">
 
-            <script language="VBScript" use_engine="task"><![CDATA[
+            <script language="VBScript" use_engine="job"><![CDATA[
 
 log.msg "*Job einfach"
 
@@ -343,6 +349,7 @@ end function
 
         <job name           = "Perlset" 
              output_level   = "200"
+             priority       = "1"
              spooler_id     = "perl">
 
             <object_set class="Perl">

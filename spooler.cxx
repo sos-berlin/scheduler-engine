@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.22 2001/01/11 21:39:42 jz Exp $
+// $Id: spooler.cxx,v 1.23 2001/01/12 12:20:55 jz Exp $
 
 
 /*
@@ -81,8 +81,11 @@ void Script_instance::load()
 
 void Script_instance::close()
 {
-    _script_site->close_engine();
-    _script_site = NULL;
+    if( _script_site )
+    {
+        _script_site->close_engine();
+        _script_site = NULL;
+    }
 }
 
 //----------------------------------------------------------------------------Script_instance::call
@@ -148,13 +151,13 @@ void Object_set::open()
 {
     CComVariant object_set_vt;
 
-    try
+    if( _script_instance.name_exists( "spooler_dont_use_objects" ) )
     {
-        CComVariant v = _script_instance.call( "spooler_dont_use_objects" );
-        v.ChangeType( VT_BOOL );
-        _use_objects = V_BOOL( &v ) == 0;
+        _use_objects = false;
+        _script_instance.call( "spooler_dont_use_objects" );
     }
-    catch( const Xc& ) { _use_objects = true; }
+    else
+        _use_objects = true;
 
 
     if( _use_objects )
@@ -296,20 +299,16 @@ Time Monthday_set::next_date( Time tim )
 
 Time Ultimo_set::next_date( Time tim )
 {
-/*
-    int         day_no = tim / (24*60*60);
-    struct tm*  tm = localtime(tim);
-    Sos_date    date;
-
-    date.assign_date( 1900 + tm->tm_year, 1 + tm->tm_mon, tm->tm_mday );
+    int                     day_no = tim / (24*60*60);
+    Sos_date                date   = Sos_optional_date_time( tim );
 
     for( int i = 0; i < 31; i++ )
     {
-        if( _days[ date.day() ] )  return day_no * (24*60*60);
+        if( _days[ last_day_of_month( date ) - date.day() ] )  return day_no * (24*60*60);
         day_no++;
         date.add_days(1);
     }
-*/
+
     return latter_day;
 }
 
@@ -380,6 +379,7 @@ Task::Task( Spooler* spooler, const Sos_ptr<Job>& job )
 {
     set_new_start_time();
     _state = s_pending;
+    _priority = _job->_priority;
 }
 
 //--------------------------------------------------------------------------Task::set_new_start_time
@@ -391,14 +391,23 @@ void Task::set_new_start_time()
 
 //---------------------------------------------------------------------------------------Task::error
 
-void Task::error( const Xc& x)
+void Task::error( const Xc& x )
 {
     _log.error( x.what() );
 
     _error = x;
-    _state_cmd = sc_stop;
+    //_state_cmd = sc_stop;
+    stop();
 
-    _object_set = NULL;
+    //_object_set = NULL;
+}
+
+//---------------------------------------------------------------------------------------Task::error
+
+void Task::error( const exception& x )
+{
+    Xc xc ( "SOS-2000", x.what(), exception_name(x) );
+    error( xc );
 }
 
 //---------------------------------------------------------------------------------Task::start_error
@@ -474,7 +483,8 @@ bool Task::start()
         _next_start_time = max( _next_start_time + _job->_run_time._retry_period, now() );
         if( now() >= _job->_run_time._next_end_time )  set_new_start_time();
     }
-    catch( const Xc& x ) { start_error(x); return false; }
+    catch( const Xc& x        ) { start_error(x); return false; }
+    catch( const exception& x ) { error(x); return false; }
 
     _state = s_running;
     _run_until_end = false;
@@ -501,7 +511,8 @@ void Task::end()
             _script_instance->close();
         }
     }
-    catch( const Xc& x ) { end_error(x); }
+    catch( const Xc& x        ) { end_error(x); }
+    catch( const exception& x ) { error(x); }
 
     _state = s_pending;
     _spooler->_running_jobs_count--;
@@ -517,7 +528,8 @@ void Task::stop()
     {
         if( _script_instance )  _script_instance->close();
     }
-    catch( const Xc& x ) { end_error(x); }
+    catch( const Xc& x        ) { end_error(x); }
+    catch( const exception& x ) { error(x); }
 
     _state = s_stopped;
 }
@@ -552,14 +564,16 @@ bool Task::step()
         _step_count++;
     }
     catch( const Xc& x ) { step_error(x); return false; }
+    catch( const exception& x ) { error(x); }
 
     return result;
 }
 
 //---------------------------------------------------------------------------------------Task::step
 
-void Task::do_something()
+bool Task::do_something()
 {
+    bool something_done = false;
     bool ok;
 
 
@@ -596,6 +610,8 @@ void Task::do_something()
 
                                 ok = step();
                                 if( !ok )  end();
+
+                                something_done = ok;
                             }
                             break;
 
@@ -603,6 +619,8 @@ void Task::do_something()
                             {
                                 ok = step();
                                 if( !ok )  end();
+
+                                something_done = ok;
                             }
                             else
                             {
@@ -614,6 +632,8 @@ void Task::do_something()
 
         default:            ;
     }
+
+    return something_done;
 }
 
 //----------------------------------------------------------------------------------Task::set_state
@@ -804,13 +824,51 @@ void Spooler::stop()
 
 void Spooler::step()
 {
-    Thread_semaphore::Guard guard = &_semaphore;
 
-    FOR_EACH( Task_list, _task_list, it )
+  //int  pri_sum = 0;
+    bool something_done = false;
+
+  //FOR_EACH( Task_list, _task_list, it )  pri_sum += (*it)->task_priority;
+
+
+    // Erst die Tasks mit höchster Priorität. Die haben absoluten Vorrang:
+
     {
-        Task* task = *it;
+        Thread_semaphore::Guard guard = &_semaphore;
 
-        task->do_something();
+        FOR_EACH( Task_list, _task_list, it )
+        {
+            Task* task = *it;
+            if( task->_priority >= _priority_max )  something_done |= task->do_something();
+        }
+    }
+
+
+    // Wenn keine Task höchste Priorität hat, dann die Tasks relativ zu ihrer Priorität, außer Priorität 0:
+
+    if( !something_done )
+    {
+        Thread_semaphore::Guard guard = &_semaphore;
+
+        FOR_EACH( Task_list, _task_list, it )
+        {
+            Task* task = *it;
+            for( int i = 0; i < task->_priority; i++ )  something_done |= task->do_something();
+        }
+    }
+
+
+    // Wenn immer noch keine Task ausgeführt worden ist, dann die Tasks mit Priorität 0 nehmen:
+
+    if( !something_done )
+    {
+        Thread_semaphore::Guard guard = &_semaphore;
+
+        FOR_EACH( Task_list, _task_list, it )
+        {
+            Task* task = *it;
+            if( task->_priority == 0 )  task->do_something();
+        }
     }
 }
 

@@ -1,4 +1,4 @@
-// $Id: spooler_xml.cxx,v 1.11 2001/01/11 21:39:43 jz Exp $
+// $Id: spooler_xml.cxx,v 1.12 2001/01/12 12:20:55 jz Exp $
 
 //#include <precomp.h>
 
@@ -71,7 +71,7 @@ void Script::operator = ( const xml::Element_ptr& element )
     
     if( use_engine == "task"   )  _reuse = reuse_task;
     if( use_engine == "job"    )  _reuse = reuse_job;
-    if( use_engine == "global" )  _reuse = reuse_global;
+  //if( use_engine == "global" )  _reuse = reuse_global;
 
 /*
     xml::Element_ptr text_element = element->firstChild;
@@ -220,7 +220,8 @@ Job::Job( const xml::Element_ptr& element )
     _zero_(this+1),
     _name           ( as_string( element->getAttribute( "name" ) ) ),
     _run_time       ( default_single_element( element, "run_time" ) ),
-    _rerun          ( as_bool( as_string( element->getAttribute( "rerun" ) ) ) )
+    _rerun          ( as_bool( as_string( element->getAttribute( "rerun" ) ) ) ),
+    _priority       ( as_int( element->getAttribute( "priority" ) ) )
 {
     string text;
 
@@ -313,6 +314,7 @@ void Spooler::load_xml()
         if( _tcp_port == 0 )           _tcp_port      = as_int   ( spooler_config->getAttribute( "tcp_port" ) );
         if( _udp_port == 0 )           _udp_port      = as_int   ( spooler_config->getAttribute( "udp_port" ) );
         if( empty( _log_directory ) )  _log_directory = as_string( spooler_config->getAttribute( "log_dir"  ) );
+                                       _priority_max  = as_int   ( spooler_config->getAttribute( "priority_max" ) );
 
 
         xml::Element_ptr e = spooler_config->firstChild;

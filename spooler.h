@@ -1,4 +1,4 @@
-// $Id: spooler.h,v 1.21 2001/01/11 21:39:42 jz Exp $
+// $Id: spooler.h,v 1.22 2001/01/12 12:20:55 jz Exp $
 
 #ifndef __SPOOLER_H
 
@@ -194,6 +194,7 @@ struct Script_instance
     CComVariant                 call                        ( const char* name );
     CComVariant                 call                        ( const char* name, int param );
     CComVariant                 property_get                ( const char* name );
+    bool                        name_exists                 ( const string& name )          { return _script_site->name_exists(name); }
 
     Script*                    _script;
     CComPtr<Script_site>       _script_site;
@@ -416,7 +417,7 @@ struct Task : Sos_self_deleting
     void                        stop                        ();
     bool                        step                        ();
 
-    void                        do_something                ();
+    bool                        do_something                ();
 
     void                        set_state                   ( State );
     void                        set_state_cmd               ( State_cmd );
@@ -433,6 +434,7 @@ struct Task : Sos_self_deleting
     void                        end_error                   ( const Xc& );
     void                        step_error                  ( const Xc& );
     void                        error                       ( const Xc& );
+    void                        error                       ( const exception& );
 
     void                        set_new_start_time          ();
 
@@ -443,7 +445,8 @@ struct Task : Sos_self_deleting
     Script_instance            _job_script_instance;
     Script_instance*           _script_instance;
     
-    int                        _running_priority;
+    int                        _priority;
+    double                     _cpu_time;
     int                        _step_count;
 
     bool                       _run_until_end;              // Nach Kommando sc_start: Task zuende laufen lassen, nicht bei _next_end_time beenden
@@ -664,6 +667,7 @@ struct Spooler
     int                        _task_count;
     int                        _tcp_port;
     int                        _udp_port;
+    int                        _priority_max;
     string                     _config_filename;
     string                     _log_filename;
     string                     _spooler_id;

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- $Id: spooler_config.dtd,v 1.16 2001/01/11 21:39:42 jz Exp $   Joacim Zschimmer,  (C) 2000 SOS GmbH Berlin  -->
+<!-- $Id: spooler_config.dtd,v 1.17 2001/01/12 12:20:55 jz Exp $   Joacim Zschimmer,  (C) 2000 SOS GmbH Berlin  -->
 
 <!--     
 
@@ -14,6 +14,7 @@
 <!ATTLIST spooler_config        log_dir             CDATA #IMPLIED>
 <!ATTLIST spooler_config        tcp_port            CDATA "4444">       <!-- Für TCP-Kommandoschnittstelle -->
 <!ATTLIST spooler_config        udp_port            CDATA "4444">       <!-- Für UDP-Kommandoschnittstelle -->
+<!ATTLIST spooler_config        priority_max        CDATA "1000">       <!-- Höchste Priorität. Gibt absoluten Vorrang -->
 
 
 <!ELEMENT object_set_classes    ( object_set_class+ )>
@@ -38,7 +39,7 @@
 
 <!ELEMENT job                   ( ( object_set | script ), run_time? )>
 <!ATTLIST job                   name                CDATA #REQUIRED>    <!-- Eindeutiger Name -->
-<!ATTLIST job                   priority            CDATA #IMPLIED>     <!-- Höhere Zahl ist höhere Priorität -->
+<!ATTLIST job                   priority            CDATA "1">          <!-- Höhere Zahl ist höhere Priorität -->
 <!ATTLIST job                   output_level        CDATA #IMPLIED>     <!-- Stufennummer. Auf diese Stufe werden die Objekte der Objektemenge gesetzt -->
 <!ATTLIST job                   spooler_id          CDATA ''>           <!-- "": Job läuft auf jedem Spooler, sonst nur Spooler mit derselben Spooler-Id -->
 <!ATTLIST job                   rerun               (yes|no) "no" >     <!-- Laufenden Job bei Abbruch und Neustart des Spoolers erneut starten -->
