@@ -1,4 +1,4 @@
-// $Id: spooler_log.cxx,v 1.50 2002/11/25 23:36:21 jz Exp $
+// $Id: spooler_log.cxx,v 1.51 2002/11/30 15:58:30 jz Exp $
 
 #include "spooler.h"
 #include "spooler_mail.h"
@@ -540,7 +540,8 @@ void Prefix_log::send( int reason )
     }
     else
     {
-        bool mail_it =  reason == -1  &&  _mail_on_error
+        bool mail_it =  _mail_it
+                     || reason == -1  &&  _mail_on_error
                      || reason ==  0  &&  _mail_on_success
                      || reason  >  0  &&  ( _mail_on_success || _mail_on_process && reason >= _mail_on_process );
 

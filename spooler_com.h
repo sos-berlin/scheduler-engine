@@ -1,4 +1,4 @@
-// $Id: spooler_com.h,v 1.63 2002/11/26 23:53:07 jz Exp $
+// $Id: spooler_com.h,v 1.64 2002/11/30 15:58:30 jz Exp $
 
 #ifndef __SPOOLER_COM_H
 #define __SPOOLER_COM_H
@@ -229,6 +229,8 @@ struct Com_log : spooler_com::Ilog,
 
     STDMETHODIMP            put_collect_max                 ( VARIANT* );
     STDMETHODIMP            get_collect_max                 ( double* );
+
+    STDMETHODIMP            put_mail_it                     ( VARIANT_BOOL );
 
   private:
     Fill_zero                  _zero_;

@@ -1,4 +1,4 @@
-// $Id: spooler.odl,v 1.52 2002/11/22 08:34:10 jz Exp $
+// $Id: spooler.odl,v 1.53 2002/11/30 15:58:30 jz Exp $
 
 // Anweisung: midl /nologo /error all /out $(OutDir) $(InputPath)
 
@@ -506,6 +506,9 @@ library spooler
 
         [propget]
         HRESULT                 collect_max             ( [out,retval] double* time );
+
+        [propput]
+        HRESULT                 mail_it                 ( [in] VARIANT_BOOL mail_it );
     }
 
     [

@@ -1,4 +1,4 @@
-// $Id: spooler_log.h,v 1.23 2002/11/25 23:36:21 jz Exp $
+// $Id: spooler_log.h,v 1.24 2002/11/30 15:58:31 jz Exp $
 
 #ifndef __SPOOLER_LOG_H
 #define __SPOOLER_LOG_H
@@ -115,6 +115,8 @@ struct Prefix_log
     void                    set_mail_on_process             ( int level )                       { _mail_on_process = level; }
     int                         mail_on_process             ()                                  { return _mail_on_process; }
 
+    void                    set_mail_it                     ( bool b )                          { _mail_it = b; }
+
 #ifdef Z_WINDOWS
     Com_mail*                   imail                       ();
 #endif
@@ -153,6 +155,7 @@ struct Prefix_log
     bool                       _mail_on_error;
     bool                       _mail_on_success;
     int                        _mail_on_process;
+    bool                       _mail_it;
 #ifdef Z_WINDOWS
     ptr<Com_mail>              _mail;
 #endif

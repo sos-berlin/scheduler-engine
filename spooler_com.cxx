@@ -1,4 +1,4 @@
-// $Id: spooler_com.cxx,v 1.79 2002/11/29 16:10:54 jz Exp $
+// $Id: spooler_com.cxx,v 1.80 2002/11/30 15:58:30 jz Exp $
 /*
     Hier sind implementiert
 
@@ -633,6 +633,7 @@ const Com_method Com_log::_methods[] =
     { DISPATCH_PROPERTYGET, 21, "collect_within"       , (Com_method_ptr)&Com_log::get_collect_within      , VT_R8         },
     { DISPATCH_PROPERTYPUT, 22, "collect_max"          , (Com_method_ptr)&Com_log::put_collect_max         , VT_EMPTY      , { VT_BYREF|VT_VARIANT } },
     { DISPATCH_PROPERTYGET, 22, "collect_max"          , (Com_method_ptr)&Com_log::get_collect_max         , VT_R8         },
+    { DISPATCH_PROPERTYPUT, 23, "mail_it"              , (Com_method_ptr)&Com_log::put_mail_it             , VT_EMPTY      , { VT_BOOL } },
     {}
 };
 
@@ -1002,6 +1003,25 @@ STDMETHODIMP Com_log::get_collect_max( double* result )
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Log::collect_max" ); }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Log::collect_max" ); }
+
+    return hr;
+}
+
+//-----------------------------------------------------------------------------Com_log::put_mail_it
+
+STDMETHODIMP Com_log::put_mail_it( VARIANT_BOOL b )
+{
+    HRESULT hr = NOERROR;
+
+    THREAD_LOCK( _lock )
+    try 
+    {
+        if( !_log )  return E_POINTER;
+
+        _log->set_mail_it( b != 0 );
+    }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Log::mail_it" ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Log::mail_it" ); }
 
     return hr;
 }
