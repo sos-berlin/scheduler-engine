@@ -1,4 +1,4 @@
-// $Id: spooler_module_java.cxx,v 1.69 2003/10/11 11:40:00 jz Exp $
+// $Id: spooler_module_java.cxx,v 1.70 2003/10/15 17:33:30 jz Exp $
 /*
     Hier sind implementiert
 
@@ -48,43 +48,6 @@ const static JNINativeMethod native_methods[] =
 
 zschimmer::Thread_data<Java_thread_data> thread_data;
 
-//-------------------------------------------------------------------------------set_java_exception
-
-static void set_java_exception( JNIEnv* jenv, const char* what )
-{
-    const char* exception_class_name = "java/lang/RuntimeException";
-    jclass exception_class = jenv->FindClass( exception_class_name  );
-
-    if( exception_class )  
-    {
-        int err = jenv->ThrowNew( exception_class, what ); 
-        jenv->DeleteLocalRef( exception_class );
-
-        if( err == 0 )  return;
-    }
-
-    string w = what + string(" --- JNI.FindClass() liefert nicht Klasse ") + exception_class_name;
-
-    if( jenv->ExceptionCheck() )  jenv->ExceptionDescribe();      // schreibt nach stderr
-
-    jenv->FatalError( w.c_str() );
-}
-
-//-------------------------------------------------------------------------------set_java_exception
-
-static void set_java_exception( JNIEnv* jenv, const exception& x )
-{
-    set_java_exception( jenv, x.what() );
-}
-
-//-------------------------------------------------------------------------------set_java_exception
-
-static void set_java_exception( JNIEnv* jenv, const _com_error& x ) 
-{
-    string what = string_from_ole( x.Description() );
-    set_java_exception( jenv, what.c_str() );
-}
-
 //-----------------------------------------------------------------------------jobject_from_variant
 
 static jobject jobject_from_variant( JNIEnv* jenv, const VARIANT& v )
@@ -130,10 +93,12 @@ static jobject jobject_from_variant( JNIEnv* jenv, const VARIANT& v )
 //--------------------------------------------------------------Java sos.spooler.Idispatch.com_call
 
 extern "C"
-JNIEXPORT jobject JNICALL Java_sos_spooler_Idispatch_com_1call( JNIEnv* jenv, jclass, jlong jidispatch, jstring jname, jobjectArray jparams )
+JNIEXPORT jobject JNICALL Java_sos_spooler_Idispatch_com_1call( JNIEnv* jenv, jclass cls, jlong jidispatch, jstring jname, jobjectArray jparams )
 {
     try
     {
+        return spooler::jobject_from_variant( jenv, variant_java_com_call( jenv, cls, jidispatch, jname, jparams ) );
+/*
         HRESULT     hr;
         IDispatch*  idispatch = (IDispatch*)(size_t)jidispatch;
         Bstr        name_bstr;
@@ -242,6 +207,7 @@ JNIEXPORT jobject JNICALL Java_sos_spooler_Idispatch_com_1call( JNIEnv* jenv, jc
         if( FAILED(hr) )  throw_ole_excepinfo( hr, &excepinfo, "Invoke", string_from_bstr(name_bstr).c_str() );
 
         return spooler::jobject_from_variant( jenv, result );
+*/
     }
     catch( const exception&  x ) { set_java_exception( jenv, x ); }
     catch( const _com_error& x ) { set_java_exception( jenv, x ); }
