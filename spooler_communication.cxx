@@ -1,4 +1,4 @@
-// $Id: spooler_communication.cxx,v 1.92 2004/07/26 17:55:09 jz Exp $
+// $Id: spooler_communication.cxx,v 1.93 2004/07/26 18:08:35 jz Exp $
 /*
     Hier sind implementiert
 
@@ -623,13 +623,11 @@ bool Communication::Channel::async_continue_( bool wait )
         while( _http_response  &&  _send_is_complete )
         {
             _text = _http_response->read( 32768 );  // Die Größe ist nur eine Empfehlung
-Z_LOG( "read() => " << _text.length() << "\n" );
 
             if( _text.length() == 0 )               // Zurzeit keine Daten da? Dann warten wir auf ein Signal in _socket_event (von spooler_log.cxx)
             {
                 if( _http_response->eof() )         // Oder ist es eof?
                 {
-Z_LOG( "EOF\n" );
                     if( _http_response->close_connection_at_eof() )  _eof = true;   // Wir tun so, als ob der Client EOF geliefert hat. Das führt zum Schließen der Verbindung.
                     _http_response = NULL;
                 }
@@ -642,7 +640,7 @@ Z_LOG( "EOF\n" );
             something_done |= do_send();
         }
 
-        if( _eof  &&  _send_is_complete  &&  !_http_response )  { Z_LOG( "REMOVE_CHANNEL\n" ); _communication->remove_channel( this );  return true; }
+        if( _eof  &&  _send_is_complete  &&  !_http_response )  { _communication->remove_channel( this );  return true; }
     }
     catch( const Xc& x ) 
     { 

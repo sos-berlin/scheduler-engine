@@ -1,4 +1,4 @@
-// $Id: spooler_http.h,v 1.6 2004/07/26 17:55:09 jz Exp $
+// $Id: spooler_http.h,v 1.7 2004/07/26 18:08:35 jz Exp $
 
 #ifndef __SPOOLER_HTTP_H
 #define __SPOOLER_HTTP_H
@@ -15,7 +15,7 @@ struct Http_request : Object
 
     bool                        has_parameter               ( const string& name ) const            { return _parameters.find( name ) != _parameters.end(); }
     string                      parameter                   ( const string& name ) const;
-    bool                        is_http_1_1                 ();
+    bool                        is_http_1_1                 () const;
 
     Fill_zero                  _zero_;
     string                     _http_cmd;
@@ -88,7 +88,7 @@ struct Chunk_reader : Object
 
 struct Http_response : Object
 {
-                                Http_response               ( Http_request*, Chunk_reader*, const string& content_type );
+                                Http_response               ( const Http_request*, Chunk_reader*, const string& content_type );
 
   //bool                        is_http_1_1                 ()                                      { return _http_1_1; }
     bool                        close_connection_at_eof     ()                                      { return _close_connection_at_eof; }

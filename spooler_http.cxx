@@ -1,4 +1,4 @@
-// $Id: spooler_http.cxx,v 1.9 2004/07/26 17:55:09 jz Exp $
+// $Id: spooler_http.cxx,v 1.10 2004/07/26 18:08:35 jz Exp $
 /*
     Hier sind implementiert
 
@@ -200,14 +200,14 @@ string Http_request::parameter( const string& name ) const
 
 //--------------------------------------------------------------------Http_request::keep_connection
 
-bool Http_request::is_http_1_1()
+bool Http_request::is_http_1_1() const
 {
     return _protocol == "HTTP/1.1";
 }
 
 //---------------------------------------------------------------------Http_response::Http_response
 
-Http_response::Http_response( Http_request* http_request, Chunk_reader* chunk_reader, const string& content_type )
+Http_response::Http_response( const Http_request* http_request, Chunk_reader* chunk_reader, const string& content_type )
 : 
     _zero_(this+1), 
     _chunk_reader( chunk_reader ),
@@ -305,8 +305,6 @@ string Http_response::read( int recommended_size )
 
 string Http_response::start_new_chunk( int recommended_size )
 {
-    Z_LOG( __FUNCTION__ << "\n" );
-
     if( !_chunk_reader->next_chunk_is_ready() )  return "";
 
     _chunk_index++;
@@ -317,7 +315,7 @@ string Http_response::start_new_chunk( int recommended_size )
     
     if( _chunked )  result = as_hex_string( (int)_chunk_size ) + "\r\n";
     
-    Z_LOG( __FUNCTION__ << "  chunk_size=" << _chunk_size << "\n" );
+    //Z_LOG( __FUNCTION__ << "  chunk_size=" << _chunk_size << "\n" );
 
     if( _chunk_size > 0 )
     {
