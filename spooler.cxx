@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.291 2003/11/25 12:07:51 jz Exp $
+// $Id: spooler.cxx,v 1.292 2003/11/27 19:59:42 jz Exp $
 /*
     Hier sind implementiert
 
@@ -299,6 +299,8 @@ Spooler::Spooler()
 {
     if( spooler_ptr )  throw_xc( "spooler_ptr" );
     spooler_ptr = this;
+
+    if( !SOS_LICENCE( licence_scheduler ) )  throw_xc( "SOS-1000", "Scheduler" );       // Früh prüfen, damit der Fehler auch auftritt, wenn die sos.ini fehlt.
 
   //Z_GNU_ONLY( time::empty_period = Period() );
 
@@ -1850,8 +1852,6 @@ int Spooler::launch( int argc, char** argv, const string& parameter_line )
     _parameter_line = parameter_line;
 
 
-    if( !SOS_LICENCE( licence_scheduler ) )  throw_xc( "SOS-1000", "Scheduler" );
-
     tzset();
 
     _thread_id = current_thread_id();
@@ -2214,7 +2214,9 @@ int spooler_main( int argc, char** argv, const string& parameter_line )
 
         for( Sos_option_iterator opt ( argc, argv, parameter_line ); !opt.end(); opt.next() )
         {
-          //if( opt.flag      ( "renew-spooler"    ) )  renew_spooler = program_filename();
+            if( opt.with_value( "sos.ini"          ) )  ;  //schon in sos_main0() geschehen.  set_sos_ini_filename( opt.value() );
+            else
+            //if( opt.flag      ( "renew-spooler"    ) )  renew_spooler = program_filename();
           //else
             if( opt.with_value( "renew-spooler"    ) )  renew_spooler = opt.value();
             else
