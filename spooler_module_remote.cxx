@@ -1,4 +1,4 @@
-// $Id: spooler_module_remote.cxx,v 1.38 2003/09/26 11:31:18 jz Exp $
+// $Id: spooler_module_remote.cxx,v 1.39 2003/09/27 15:32:10 jz Exp $
 /*
     Hier sind implementiert
 
@@ -331,6 +331,13 @@ bool Remote_module_instance_proxy::try_to_get_process()
 
     if( !_process->started() )
     {
+        //if( !_server_hostname.empty() )
+        if( getenv( "SPOOLER_SERVER" ) )
+        {
+            //_process->set_server( _server_hostname, _server_port );
+            _process->set_server( getenv( "SPOOLER_SERVER" ), 9000 );
+        }
+
         _process->set_job_name( _job_name );
         _process->set_task_id ( _task_id  );
         _process->start();

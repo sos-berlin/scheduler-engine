@@ -1,4 +1,4 @@
-// $Id: spooler_process.cxx,v 1.13 2003/09/23 14:01:08 jz Exp $
+// $Id: spooler_process.cxx,v 1.14 2003/09/27 15:32:11 jz Exp $
 
 #include "spooler.h"
 
@@ -36,23 +36,34 @@ void Process::start()
 {
     if( started() )  throw_xc( "Process::start" );
 
-    Parameters parameters;
 
-    parameters.push_back( Parameter( "param", "-O" ) );
+    if( _server_hostname.empty() )
+    {
+        Parameters parameters;
 
-    if( !_job_name.empty() )
-    parameters.push_back( Parameter( "param", "-job=" + quoted_string( _job_name ) ) );
+        parameters.push_back( Parameter( "param", "-O" ) );
 
-    if( _task_id )
-    parameters.push_back( Parameter( "param", "-task-id=" + as_string( _task_id ) ) );
+        if( !_job_name.empty() )
+        parameters.push_back( Parameter( "param", "-job=" + quoted_string( _job_name ) ) );
 
-    if( !log_filename().empty() )
-    parameters.push_back( Parameter( "param", "-log=" + /*quoted_string*/( "+" + log_filename() ) ) );   // -log="+xxx" funktioniert in Linux nicht, die Anführungszeichen kommen in log.cxx an
+        if( _task_id )
+        parameters.push_back( Parameter( "param", "-task-id=" + as_string( _task_id ) ) );
 
-    parameters.push_back( Parameter( "program", _spooler->_my_program_filename ) );
+        if( !log_filename().empty() )
+        parameters.push_back( Parameter( "param", "-log=" + /*quoted_string*/( "+" + log_filename() ) ) );   // -log="+xxx" funktioniert in Linux nicht, die Anführungszeichen kommen in log.cxx an
+
+        parameters.push_back( Parameter( "program", _spooler->_my_program_filename ) );
 
 
-    _connection = start_process( parameters );
+        _connection = start_process( parameters );
+    }
+    else
+    {
+        _connection = Z_NEW( Connection );
+        _connection->connect( _server_hostname, _server_port );
+        _connection->set_async();
+    }
+
     _connection->set_event( &_spooler->_event );
     _session  = Z_NEW( Session( _connection ) );
     _session->set_connection_has_only_this_session();
