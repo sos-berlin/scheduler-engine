@@ -1,4 +1,4 @@
-// $Id: spooler_time.cxx,v 1.55 2004/03/29 02:13:50 jz Exp $
+// $Id: spooler_time.cxx,v 1.56 2004/06/01 06:32:38 jz Exp $
 /*
     Hier sind implementiert
 
@@ -360,7 +360,7 @@ Period Weekday_set::next_period( Time tim, With_single_start single_start )
     int  day_nr      = tim.day_nr();
     int  weekday     = ( day_nr + 4 ) % 7;
     
-    for( int i = weekday; i < weekday+7; i++ )
+    for( int i = weekday; i <= weekday+7; i++ )
     {
         const Period& period = _days[ i % 7 ].next_period( time_of_day, single_start );
         if( !period.empty() )  return day_nr*(24*60*60) + period;

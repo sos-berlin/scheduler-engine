@@ -1,4 +1,4 @@
-// $Id: spooler_job.cxx,v 1.79 2004/05/31 16:16:02 jz Exp $
+// $Id: spooler_job.cxx,v 1.80 2004/06/01 06:32:38 jz Exp $
 // §851: Weitere Log-Ausgaben zum Scheduler-Start eingebaut
 /*
     Hier sind implementiert
@@ -1540,21 +1540,23 @@ xml::Element_ptr Job::dom( const xml::Document_ptr& document, Show_what show, Jo
             Period p             = _period;  
             int    i             = 100;      // Anzahl Perioden, die wir probieren
             Time   next          = _next_start_time;
-            Time   now           = Time::now();
-            Time   next_at_start = _task_queue.next_at_start_time( now );
+            Time   time          = Time::now();
+            Time   next_at_start = _task_queue.next_at_start_time( time );
             
             if( next == latter_day )
             {
                 //p = _run_time.next_period( p.end() );
                 next = p.begin();
+                if( p.end() != latter_day )  time = p.end();
 
                 while( i-- ) {          
                     if( p.has_start()  ||  _task_queue.has_task_waiting_for_period() )  break;
-                    p = _run_time.next_period( p.end() );
+                    p = _run_time.next_period( time, time::wss_next_period_or_single_start );
                     next = p.begin();
                     if( next == latter_day        )  break;
                     if( next > next_at_start      )  break;
                     if( next > _next_single_start )  break;
+                    time = p.end();
                 }
                 
                 if( i < 0 )  next = latter_day;
@@ -1564,7 +1566,6 @@ xml::Element_ptr Job::dom( const xml::Document_ptr& document, Show_what show, Jo
             if( next > next_at_start      )  next = next_at_start;
             if( next < latter_day )  job_element.setAttribute( "next_start_time", next.as_string() );
         }
-
 
         dom_append_nl( job_element );
         xml::Element_ptr tasks_element = document.createElement( "tasks" );
