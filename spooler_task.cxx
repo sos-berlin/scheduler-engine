@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.144 2003/04/09 15:14:39 jz Exp $
+// $Id: spooler_task.cxx,v 1.145 2003/04/13 17:54:37 jz Exp $
 /*
     Hier sind implementiert
 
@@ -2212,7 +2212,7 @@ void Process_event::close()
         int ret = waitpid( _pid, &status, WNOHANG | WUNTRACED );    // WUNTRACED: "which means to also return for children which are stopped, and whose status has not been reported."
 
         if( log_ptr )  if( ret == -1 )  *log_ptr << "ERRNO-" << errno << "  " << strerror(errno) << endl;
-                 else  *log_ptr << endl;
+                                  else  *log_ptr << endl;
 
         _pid = 0;
     }
@@ -2231,7 +2231,15 @@ bool Process_event::wait( double seconds )
       //if( log_ptr )  *log_ptr << "waitpid(" << _pid << ")  ";
 
         int ret = waitpid( _pid, &status, WNOHANG | WUNTRACED );    // WUNTRACED: "which means to also return for children which are stopped, and whose status has not been reported."
-        if( ret == -1 )  { int pid = _pid; _pid = 0; throw_errno( errno, "waitpid", as_string(pid).c_str() ); }
+        if( ret == -1 )  
+        { 
+            LOG( "waitpid(" << _pid << ") ==> ERRNO-" << errno << "  " << strerror(errno) << "\n" );
+            //int pid = _pid; 
+            _pid = 0; 
+            //throw_errno( errno, "waitpid", as_string(pid).c_str() ); 
+            set_signal();
+            return true;
+        }
 
         if( ret == _pid )
         {
@@ -2300,6 +2308,11 @@ bool Process_task::do_start()
         string_args.push_back( string_from_variant( vt ) );
     }
 
+
+#   ifndef SYSTEM_WINDOWS
+        LOG( "signal(SIGCHLD,SIG_DFL)\n" );
+        signal( SIGCHLD, SIG_DFL );                 // Java verändert das Signal-Verhalten, so dass waitpid() ohne diesen Aufruf versagte.
+#   endif
 
     if( log_ptr )  *log_ptr << "fork()  ";
     int pid = fork();

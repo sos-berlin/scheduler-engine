@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.196 2003/04/09 10:48:37 jz Exp $
+// $Id: spooler.cxx,v 1.197 2003/04/13 17:54:37 jz Exp $
 /*
     Hier sind implementiert
 
@@ -467,7 +467,7 @@ void Spooler::wait_until_threads_stopped( Time until )
             FOR_EACH( Thread_list, threads, it )  
             {
                 Spooler_thread* thread = *it;
-                if( !thread->thread_is_running() ) 
+                if( thread->_terminated )
                 {
                     _log.debug( "Thread " + thread->name() + " sollte gleich beendet sein ..." );
                     thread->thread_wait_for_termination();
