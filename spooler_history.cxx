@@ -1,4 +1,4 @@
-// $Id: spooler_history.cxx,v 1.90 2004/02/03 10:59:36 jz Exp $
+// $Id: spooler_history.cxx,v 1.91 2004/02/09 23:03:48 jz Exp $
 
 #include "spooler.h"
 #include "../zschimmer/z_com.h"
@@ -1383,7 +1383,7 @@ void Task_history::write( bool start )
                         if( !parameters.empty() )
                         {
                             Any_file blob;
-                            blob.open( "-out " + _spooler->_db->db_name() + " -table=" + _spooler->_job_history_tablename + " -blob='parameters' where \"ID\"=" + as_string( _task->_id ) );
+                            blob.open( "-out " + _spooler->_db->db_name() + " -table=" + _spooler->_job_history_tablename + " -clob=parameters where \"ID\"=" + as_string( _task->_id ) );
                             blob.put( parameters );
                             blob.close();
                         }

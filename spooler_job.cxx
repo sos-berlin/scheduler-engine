@@ -1,4 +1,4 @@
-// $Id: spooler_job.cxx,v 1.59 2004/01/31 18:26:30 jz Exp $
+// $Id: spooler_job.cxx,v 1.60 2004/02/09 23:03:48 jz Exp $
 /*
     Hier sind implementiert
 
@@ -400,7 +400,7 @@ void Job::load_tasks_from_db()
 
         //if( !record.null( "parlen" )  &&  record.as_int( "parlen" ) > 0 )
         {
-            string parameters_xml = file_as_string( _spooler->_db->db_name() + " -table=" + _spooler->_tasks_tablename + " -blob='parameters'"
+            string parameters_xml = file_as_string( _spooler->_db->db_name() + " -table=" + _spooler->_tasks_tablename + " -clob='parameters'"
                                                                                " where \"TASK_ID\"=" + as_string( task_id ) );
             if( !parameters_xml.empty() )  parameters->set_xml( parameters_xml );
         }
