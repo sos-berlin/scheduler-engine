@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.238 2004/02/19 17:17:33 jz Exp $
+// $Id: spooler_task.cxx,v 1.239 2004/03/07 19:22:20 jz Exp $
 /*
     Hier sind implementiert
 
@@ -476,7 +476,8 @@ void Task::set_state( State new_state )
             case s_running_waiting_for_order:
             {
                 _next_time  = _job->order_queue()->next_time();
-                _idle_since = Time::now();
+
+                if( _state != s_running_waiting_for_order )  _idle_since = Time::now();
 
                 if( _job->_idle_timeout != latter_day )
                 {
@@ -822,7 +823,7 @@ bool Task::do_something()
                         else
                         if( _job->_idle_timeout != latter_day )
                         {
-                            if( now > _idle_since + _job->_idle_timeout )  
+                            if( now >= _idle_since + _job->_idle_timeout )  
                             {
                                 _log.debug9( "idle_timeout ist abgelaufen, Task beendet sich" );
                                 _end = true;
