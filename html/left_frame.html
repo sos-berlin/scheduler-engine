@@ -1,4 +1,4 @@
-<!-- $Id: left_frame.html,v 1.5 2004/08/12 09:04:45 jz Exp $ -->
+<!-- $Id: left_frame.html,v 1.6 2004/08/13 09:53:10 jz Exp $ -->
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <html>
 
@@ -18,7 +18,7 @@
 
 <p style="margin-bottom: 10pt; margin-top: 0; padding-top: 0; padding-bottom: 3pt">
     <input id="update_periodically_checkbox" type="checkbox" onclick="update_periodically_checkbox__onclick()" NAME="update_periodically_checkbox"/>
-    <label for="update_periodically_checkbox">Update periodically</label>
+    <label for="update_periodically_checkbox"><span class="translate">Update periodically</span></label>
     &#160; &#160;
     <input id="update_button" type="button" value="Update" onclick="update__onclick()" NAME="update_button"/>
 </p>
@@ -28,6 +28,7 @@
 <xml id="stylesheet" src="scheduler.xslt"></xml>
 
 <script defer="true" type="text/javascript" src="scheduler.js" ></script>
+<!--script defer="true" type="text/javascript" src="translation_de.js"></script-->
 <script defer="true" type="text/javascript" src="popup_menu.js"></script>
 
 <script type="text/javascript" for="window" event="onload"  > do_onload();   </script>
@@ -42,6 +43,7 @@ var _max_orders = 10;
 //----------------------------------------------------------------------------------------------var
 
 var _stylesheet;
+var _translation_table;
 var _response;
 var _timer;
 var _scheduler;
@@ -75,6 +77,15 @@ function do_onload()
 
 
     window.parent.document.title = "Scheduler " + document.location.host;
+    
+    if( typeof init_translation_table != "undefined" )
+    {
+        _translation_table = new Object();
+        init_translation_table( _translation_table );
+        
+        // Auch für großgeschriebene Wörter:
+        for( word in _translation_table )  _translation_table[ word.substring.substring( 0, 1 ).toUpper() + word.substring( 1 );
+    }
     
     _scheduler = new Scheduler();
     repeat_update( document.all.update_periodically_checkbox.checked, true );
@@ -169,7 +180,22 @@ function update_jobs_frame()
     var scheduler_id = _response.selectSingleNode( "spooler/answer/state" ).getAttribute( "id" );
     document.title = "Scheduler " + ( scheduler_id? " id=" + scheduler_id : "" );
     
-    document.all.stylesheet.innerHTML = _response.transformNode( _stylesheet );;
+    document.all.stylesheet.innerHTML = _response.transformNode( _stylesheet );
+    // document.all.stylesheet ist jetzt nicht mehr das Stylesheet, sondern das Ergebnis.
+
+    if( _translation_table )
+    {    
+        var span_elements = document.body.all.tags( "span" );
+        for( var i = 0; i < span_elements.length; i++ )
+        {
+            var span_element = span_elements[i];
+            if( span_element.getAttribute( "className" ) == "translate" )
+            {
+                var translation = _translation_table[ span_element.innerText ];
+                if( translation )  span_element.innerText = translation, spanElement.removeAttribute( "className" );
+            }
+        }
+    }
 }
 
 //-------------------------------------------------------------------------------------------update

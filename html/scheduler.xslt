@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding="utf-8"?>
-<!-- $Id: scheduler.xslt,v 1.3 2004/08/12 09:04:45 jz Exp $ -->
+<!-- $Id: scheduler.xslt,v 1.4 2004/08/13 09:53:10 jz Exp $ -->
 <xsl:stylesheet xmlns:xsl   = "http://www.w3.org/1999/XSL/Transform" 
                 xmlns:msxsl = "urn:schemas-microsoft-com:xslt"
                 xmlns:my    = "http://sos-berlin.com/scheduler/mynamespace"
@@ -7,6 +7,8 @@
 
     <xsl:variable name="now" select="string( /spooler/answer/@time )"/>
     <xsl:variable name="datetime_column_width" select="100"/>    <!-- 250 für langes Format, toLocaleDateString() -->
+    
+    <xsl:variable name="text_Job_chains" select="'Job chains'"/>
     
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Gesamtsicht-->
     <!-- Für Antwort auf <show_state> -->
@@ -78,7 +80,9 @@
                     <xsl:attribute name="class"><xsl:value-of select="$class"/></xsl:attribute>
                     <xsl:attribute name="style">font-weight: bold;</xsl:attribute>
                 </xsl:if>
-                <xsl:value-of select="$title"/>
+                <span class="translate">
+                    <xsl:value-of select="$title"/>
+                </span>
             </xsl:element>
         </xsl:element>        
     </xsl:template>    
@@ -944,7 +948,7 @@
             </tr>
                 
             <tr>
-                <td><span class="label">next start time:</span></td>
+                <td><span class="label">next start:</span></td>
                 <td>
                     <xsl:value-of select="my:format_datetime_with_diff( string( @next_start_time), $now, true )"  disable-output-escaping="yes"/>
                 </td>
