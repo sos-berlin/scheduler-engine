@@ -1,4 +1,4 @@
-// $Id: spooler_job.cxx,v 1.76 2004/05/12 09:26:34 jz Exp $
+// $Id: spooler_job.cxx,v 1.77 2004/05/12 10:31:03 jz Exp $
 // §851: Weitere Log-Ausgaben zum Scheduler-Start eingebaut
 /*
     Hier sind implementiert
@@ -360,7 +360,6 @@ Sos_ptr<Task> Job::create_task( const ptr<spooler_com::Ivariable_set>& params, c
   //else                             
                                        task = SOS_NEW( Job_module_task( this ) );
 
-    Time now = Time::now();
     task->_id           = id;
 
     _default_params->Clone( (spooler_com::Ivariable_set**)task->_params.pp() );
@@ -1055,11 +1054,9 @@ void Job::remove_waiting_job_from_process_list()
 
 void Job::check_for_changed_directory( const Time& now )
 {
-    LOG(__FUNCTION__<<"  _directory_watcher_next_time=" << _directory_watcher_next_time << ", now=" << now << "\n" );
 #   ifdef Z_UNIX
         if( now < _directory_watcher_next_time )  return;
 #   endif
-    LOG(__FUNCTION__<<" ok\n");
 
 
     //LOG2( "joacim", "Job::task_to_start(): Verzeichnisüberwachung _directory_watcher_next_time=" << _directory_watcher_next_time << ", now=" << now << "\n" );
