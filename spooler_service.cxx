@@ -1,4 +1,4 @@
-// $Id: spooler_service.cxx,v 1.43 2003/10/08 11:45:06 jz Exp $
+// $Id: spooler_service.cxx,v 1.44 2003/10/08 18:07:19 jz Exp $
 /*
     Hier sind implementiert
 
@@ -27,8 +27,8 @@ using namespace zschimmer::windows;
 
 //--------------------------------------------------------------------------------------------const
 
-static const char               std_service_name[]          = "DocumentFactory_Spooler";    // Windows 2000 Service
-static const char               std_service_display_name[]  = "DocumentFactory Spooler";    // Gezeigter Name
+static const char               std_service_name[]          = "sos_scheduler";    // Windows 2000 Service
+static const char               std_service_display_name[]  = "SOS Scheduler";    // Gezeigter Name
 //static const char             service_description[]       = "Hintergrund-Jobs der Document Factory";
 static const int                stop_timeout                = 30;
 static const int                pending_timeout             = 60;

@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.272 2003/10/08 11:45:05 jz Exp $
+// $Id: spooler.cxx,v 1.273 2003/10/08 18:07:19 jz Exp $
 /*
     Hier sind implementiert
 
@@ -2148,7 +2148,7 @@ int spooler_main( int argc, char** argv, const string& parameter_line )
         bool    is_service_set     = false;
         string  id;
         string  service_name, service_display;
-        string  service_description = "Hintergrund-Jobs der Document Factory";
+        string  service_description = "Job scheduler for process automation";
         string  renew_spooler;
         string  command_line;
         bool    renew_service = false;
