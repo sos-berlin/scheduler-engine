@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.61 2001/03/02 16:12:24 jz Exp $
+// $Id: spooler.cxx,v 1.62 2001/03/05 11:31:54 jz Exp $
 /*
     Hier sind implementiert
 
@@ -60,7 +60,7 @@ Spooler::Spooler()
     _security(this),
     _communication(this), 
     _prefix_log(&_log),
-    _wait_handles(&_prefix_log),
+    _wait_handles(this,&_prefix_log),
     _log(this)
 {
     _com_log     = new Com_log( &_prefix_log );
@@ -126,7 +126,7 @@ xml::Element_ptr Spooler::threads_as_xml( xml::Document_ptr document )
 
 void Spooler::wait_until_threads_stopped( Time until )
 {
-    Wait_handles wait_handles ( &_prefix_log );
+    Wait_handles wait_handles ( this, &_prefix_log );
 
     FOR_EACH( Thread_list, _thread_list, it )  wait_handles.add_handle( (*it)->_thread_handle.handle() );
 
@@ -278,6 +278,7 @@ void Spooler::load_arg()
     _config_filename  = read_profile_string( "factory.ini", "spooler", "config" );
     _log_directory    = read_profile_string( "factory.ini", "spooler", "log-dir" );
     _spooler_param    = read_profile_string( "factory.ini", "spooler", "param" );
+    _debug            = read_profile_bool  ( "factory.ini", "spooler", "debug", _debug );
 
     try
     {
@@ -294,6 +295,8 @@ void Spooler::load_arg()
             if( opt.with_value( "id"               ) )  _spooler_id = opt.value();
             else
             if( opt.with_value( "param"            ) )  _spooler_param = opt.value();
+            else
+            if( opt.flag      ( "debug"            ) )  _debug = opt.set();
             else
                 throw_sos_option_error( opt );
         }
@@ -345,7 +348,7 @@ void Spooler::start()
 
     _state_cmd = sc_none;
     set_state( s_starting );
-    _log.msg( "Spooler::start" );
+    //_log.msg( "Spooler::start" );
 
     _spooler_start_time = Time::now();
 
@@ -358,7 +361,7 @@ void Spooler::stop()
 {
     set_state( s_stopping );
 
-    _log.msg( "Spooler::stop" );
+    //_log.msg( "Spooler::stop" );
 
     signal_threads( "stop" );
     wait_until_threads_stopped( Time::now() + wait_for_thread_termination );
@@ -449,7 +452,7 @@ void Spooler::cmd_stop()
 
 void Spooler::cmd_terminate()
 {
-    _log.msg( "Spooler::cmd_terminate" );
+    //_log.msg( "Spooler::cmd_terminate" );
 
     _state_cmd = sc_terminate;
     signal( "terminate" );
@@ -459,7 +462,7 @@ void Spooler::cmd_terminate()
 
 void Spooler::cmd_terminate_and_restart()
 {
-    _log.msg( "Spooler::cmd_terminate_and_restart" );
+    //_log.msg( "Spooler::cmd_terminate_and_restart" );
 
     //if( _is_service )  throw_xc( "SPOOLER-114" );
 

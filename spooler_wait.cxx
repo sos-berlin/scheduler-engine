@@ -1,4 +1,4 @@
-// $Id: spooler_wait.cxx,v 1.15 2001/02/21 10:22:00 jz Exp $
+// $Id: spooler_wait.cxx,v 1.16 2001/03/05 11:31:55 jz Exp $
 /*
     Hier sind implementiert
 
@@ -292,7 +292,7 @@ int Wait_handles::wait_until( Time until )
                 if( event )
                 {
                     event->set_signal();
-                    _log->msg( event->as_string() );
+                    if( _spooler->_debug )  _log->msg( event->as_string() );
                 }
               //DWORD ret = WaitForMultipleObjects( _handles.size(), &_handles[0], FALSE, 0 ); 
               //if( ret == WAIT_TIMEOUT )  break;

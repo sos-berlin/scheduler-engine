@@ -1,4 +1,4 @@
-// $Id: spooler_thread.cxx,v 1.12 2001/02/21 10:57:36 jz Exp $
+// $Id: spooler_thread.cxx,v 1.13 2001/03/05 11:31:55 jz Exp $
 /*
     Hier sind implementiert
 
@@ -23,7 +23,7 @@ Thread::Thread( Spooler* spooler )
     _zero_(this+1),
     _spooler(spooler),
     _log(&spooler->_log),
-    _wait_handles(&_log),
+    _wait_handles(_spooler,&_log),
     _script_instance(&_log)
 {
     _com_thread = new Com_thread( this );
@@ -264,7 +264,7 @@ void Thread::wait()
     }
 
     //if( !_wait_handles.empty() )  msg += " oder " + _wait_handles.as_string();
-    _log.msg( msg );
+    if( _spooler->_debug )  _log.msg( msg );
 
 
 #   ifdef SYSTEM_WIN
@@ -312,7 +312,7 @@ void Thread::remove_temporary_jobs()
         {
             if( (*it)->should_removed() )    
             {
-                (*it)->_log.msg( "Temporärer Job wird entfernt" );
+                if( _spooler->_debug )  (*it)->_log.msg( "Temporärer Job wird entfernt" );
                 (*it)->close(); 
                 it = _job_list.erase( it );
             }
@@ -357,8 +357,8 @@ int Thread::run_thread()
         stop_jobs();
         close();
     
-        _log.msg( "Thread 0x" + as_hex_string( (int)_thread_id ) + " beendet sich" );
-        _spooler->signal( "thread terminating" );
+        //_log.msg( "Thread 0x" + as_hex_string( (int)_thread_id ) + " beendet sich" );
+        _spooler->signal( "Thread " + _name + " beendet sich" );
 
         ret = 0;
     }

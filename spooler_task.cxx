@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.33 2001/02/21 15:16:22 jz Exp $
+// $Id: spooler_task.cxx,v 1.34 2001/03/05 11:31:55 jz Exp $
 /*
     Hier sind implementiert
 
@@ -320,7 +320,7 @@ void Job::start_without_lock( const CComPtr<spooler_com::Ivariable_set>& params 
 
 void Job::start_when_directory_changed( const string& directory_name )
 {
-    _log.msg( "start_when_directory_changed " + directory_name + "\"" );
+    if( _spooler->_debug )  _log.msg( "start_when_directory_changed " + directory_name + "\"" );
 
 #   ifdef SYSTEM_WIN
 
@@ -573,12 +573,9 @@ void Job::set_state( State new_state )
 
     _state = new_state;
 
-    switch( new_state )
-    {
-        case s_starting : 
-        case s_ending   : 
-        default: _log.msg( state_name() );  break;
-    }
+    if( _spooler->_debug 
+     || new_state == s_starting
+     || new_state == s_ending   ) _log.msg( state_name() ); 
 }
 
 //-----------------------------------------------------------------------------------Job::set_state
@@ -661,7 +658,7 @@ void Job::set_in_call( const string& name )
     THREAD_LOCK( _lock )
     {
         _in_call = name;
-        if( !name.empty() )  _log.msg( name + "()" );
+        if( _spooler->_debug  &&  !name.empty() )  _log.msg( name + "()" );
     }
 }
 
