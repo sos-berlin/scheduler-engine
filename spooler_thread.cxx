@@ -1,4 +1,4 @@
-// $Id: spooler_thread.cxx,v 1.53 2002/11/20 11:03:11 jz Exp $
+// $Id: spooler_thread.cxx,v 1.54 2002/11/22 17:23:55 jz Exp $
 /*
     Hier sind implementiert
 
@@ -105,7 +105,7 @@ void Thread::add_job( const Sos_ptr<Job>& job )
 
 //-----------------------------------------------------------------------Thread::load_jobs_from_xml
 
-void Thread::load_jobs_from_xml( const xml::Element_ptr& element, bool init )
+void Thread::load_jobs_from_xml( const xml::Element_ptr& element, const Time& xml_mod_time, bool init )
 {
     DOM_FOR_EACH_ELEMENT( element, e )
     {
@@ -120,13 +120,13 @@ void Thread::load_jobs_from_xml( const xml::Element_ptr& element, bool init )
                 Sos_ptr<Job> job = get_job_or_null( job_name );
                 if( job )
                 {
-                    job->set_dom( e );
+                    job->set_dom( e, xml_mod_time );
                     if( init )  job->init0(),  job->init();
                 }
                 else
                 {
                     job = SOS_NEW( Job( this ) );
-                    job->set_dom( e );
+                    job->set_dom( e, xml_mod_time );
                     if( init )  job->init0(),  job->init();
                     add_job( job );
                 }

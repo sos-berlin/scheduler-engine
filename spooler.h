@@ -1,4 +1,4 @@
-// $Id: spooler.h,v 1.102 2002/11/21 14:25:06 jz Exp $
+// $Id: spooler.h,v 1.103 2002/11/22 17:23:51 jz Exp $
 
 #ifndef __SPOOLER_H
 #define __SPOOLER_H
@@ -33,7 +33,6 @@
 #ifdef Z_WINDOWS
 #   include <process.h>    // _beginthreadex()
 #   include "../zschimmer/z_windows.h"
-    using namespace zschimmer::windows;
 #endif
         
 #include <set>
@@ -94,7 +93,7 @@ namespace spooler {
 
 //-------------------------------------------------------------------------------------------------
 
-Source_with_parts               text_from_xml_with_include  ( const xml::Element_ptr&, const string& include_path );
+Source_with_parts               text_from_xml_with_include  ( const xml::Element_ptr&, const Time& xml_mod_time, const string& include_path );
 int                             read_profile_mail_on_process( const string& profile, const string& section, const string& entry, int deflt );
 int                             read_profile_history_on_process( const string& prof, const string& section, const string& entry, int deflt );
 Archive_switch                  read_profile_archive        ( const string& profile, const string& section, const string& entry, Archive_switch deflt );
@@ -179,7 +178,7 @@ struct Spooler
     void                        cmd_terminate               ();
     void                        cmd_terminate_and_restart   ();
     void                        cmd_let_run_terminate_and_restart();
-    void                        cmd_load_config             ( const xml::Element_ptr&, const string& source_filename );
+    void                        cmd_load_config             ( const xml::Element_ptr&, const Time& xml_mod_time, const string& source_filename );
 
     // Order
     long                        get_free_order_id           ()                                  { return InterlockedIncrement( &_next_free_order_id ); }
@@ -193,10 +192,10 @@ struct Spooler
 
     void                        load_arg                    ();
     void                        load                        ();
-    void                        load_config                 ( const xml::Element_ptr& config, const string& source_filename );
+    void                        load_config                 ( const xml::Element_ptr& config, const Time& xml_mod_time, const string& source_filename );
 
-    void                        load_object_set_classes_from_xml( Object_set_class_list*, const xml::Element_ptr& );
-    void                        load_threads_from_xml       ( const xml::Element_ptr& );
+    void                        load_object_set_classes_from_xml( Object_set_class_list*, const xml::Element_ptr&, const Time& xml_mod_time );
+    void                        load_threads_from_xml       ( const xml::Element_ptr&, const Time& xml_mod_time );
 
     void                        set_state                   ( State );
 
@@ -290,6 +289,7 @@ struct Spooler
 
     xml::Element_ptr           _config_element_to_load;     // Für cmd_load_config()
     xml::Document_ptr          _config_document_to_load;    // Für cmd_load_config(), das Dokument zu _config_element_to_load
+    Time                       _config_element_mod_time;    // Modification time
     string                     _config_source_filename;     // Für cmd_load_config(), der Dateiname der Quelle
 
     xml::Element_ptr           _config_element;             // Die gerade geladene Konfiguration (und Job hat einen Verweis auf <job>)

@@ -1,4 +1,4 @@
-// $Id: spooler_config.cxx,v 1.48 2002/11/13 21:31:23 jz Exp $
+// $Id: spooler_config.cxx,v 1.49 2002/11/22 17:23:52 jz Exp $
 
 //#include <precomp.h>
 
@@ -8,7 +8,6 @@
 
 #include "spooler.h"
 #include "../file/anyfile.h"
-
 #include "../zschimmer/z_com.h"
 
 using namespace zschimmer::com;
@@ -84,7 +83,7 @@ string optional_single_element_as_text( const xml::Element_ptr& element, const s
 
 //-----------------------------------------------------------------------text_from_xml_with_include
 
-Source_with_parts text_from_xml_with_include( const xml::Element_ptr& element, const string& include_path )
+Source_with_parts text_from_xml_with_include( const xml::Element_ptr& element, const Time& mod_time, const string& include_path )
 {
     Source_with_parts result;
     string text;
@@ -116,7 +115,7 @@ Source_with_parts text_from_xml_with_include( const xml::Element_ptr& element, c
             }
 
             TEXT:
-                result.add( linenr_base, text );
+                result.add( linenr_base, text, mod_time );
                 linenr_base += count_if( text.begin(), text.end(), bind2nd( equal_to<char>(), '\n' ) );
                 break;
 
@@ -135,8 +134,8 @@ Source_with_parts text_from_xml_with_include( const xml::Element_ptr& element, c
                         filename = inc + filename;
                     }
                 }
-                     
-                result.add( 0, file_as_string( filename ) );
+
+                result.add( 0, string_from_file( filename ), modification_time_of_file( filename ) );
                 break;
             }
 
@@ -179,7 +178,7 @@ void Security::set_dom( const xml::Element_ptr& security_element )
 
 //------------------------------------------------------------------------Object_set_class::set_dom
 
-void Object_set_class::set_dom( const xml::Element_ptr& element )
+void Object_set_class::set_dom( const xml::Element_ptr& element, const Time& xml_mod_time )
 {
     _name = element.getAttribute( "name" );
 
@@ -190,7 +189,7 @@ void Object_set_class::set_dom( const xml::Element_ptr& element )
     {
         if( e.nodeName_is( "script" ) )
         {
-            _module.set_dom( e, _spooler->include_path() );
+            _module.set_dom( e, xml_mod_time, _spooler->include_path() );
         }
         else
         if( e.nodeName_is( "level_decls" ) )
@@ -227,17 +226,17 @@ void Object_set_descr::set_dom( const xml::Element_ptr& element )
 
 //--------------------------------------------------------Spooler::load_object_set_classes_from_xml
 
-void Spooler::load_object_set_classes_from_xml( Object_set_class_list* liste, const xml::Element_ptr& element )
+void Spooler::load_object_set_classes_from_xml( Object_set_class_list* liste, const xml::Element_ptr& element, const Time& xml_mod_time )
 {
     DOM_FOR_EACH_ELEMENT( element, e )
     {
-        if( e.nodeName_is( "object_set_class" ) )  liste->push_back( SOS_NEW( Object_set_class( this, &_prefix_log, e ) ) );
+        if( e.nodeName_is( "object_set_class" ) )  liste->push_back( SOS_NEW( Object_set_class( this, &_prefix_log, e, xml_mod_time ) ) );
     }
 }
 
 //----------------------------------------------------------------------------------Thread::set_dom
 
-void Thread::set_dom( const xml::Element_ptr& element )
+void Thread::set_dom( const xml::Element_ptr& element, const Time& xml_mod_time )
 {
     string str;
 
@@ -263,15 +262,15 @@ void Thread::set_dom( const xml::Element_ptr& element )
 
     DOM_FOR_EACH_ELEMENT( element, e )
     {
-        if( e.nodeName_is( "script" ) )  _module.set_dom( e, include_path() );
+        if( e.nodeName_is( "script" ) )  _module.set_dom( e, xml_mod_time, include_path() );
         else
-        if( e.nodeName_is( "jobs"   ) )  load_jobs_from_xml( e );
+        if( e.nodeName_is( "jobs"   ) )  load_jobs_from_xml( e, xml_mod_time );
     }
 }
 
 //-------------------------------------------------------------------Spooler::load_threads_from_xml
 
-void Spooler::load_threads_from_xml( const xml::Element_ptr& element )
+void Spooler::load_threads_from_xml( const xml::Element_ptr& element, const Time& xml_mod_time )
 {
     DOM_FOR_EACH_ELEMENT( element, e )
     {
@@ -288,7 +287,7 @@ void Spooler::load_threads_from_xml( const xml::Element_ptr& element )
                     _thread_list.push_back( thread );
                 }
 
-                thread->set_dom( e );
+                thread->set_dom( e, xml_mod_time );
             }
         }
     }
@@ -296,7 +295,7 @@ void Spooler::load_threads_from_xml( const xml::Element_ptr& element )
 
 //-----------------------------------------------------------------------------Spooler::load_config
 
-void Spooler::load_config( const xml::Element_ptr& config_element, const string& source_filename )
+void Spooler::load_config( const xml::Element_ptr& config_element, const Time& xml_mod_time, const string& source_filename )
 {
     _config_element  = NULL;
     _config_document = NULL;
@@ -311,8 +310,7 @@ void Spooler::load_config( const xml::Element_ptr& config_element, const string&
                 
                 Command_processor cp ( this );
                 cp._load_config_immediately = true;
-                cp._source_filename = make_absolute_filename( directory_of_path( source_filename ), config_filename );
-                cp.execute_2( file_as_string( cp._source_filename ) );
+                cp.execute_file( make_absolute_filename( directory_of_path( source_filename ), config_filename ) );
             }
         }}
 
@@ -344,7 +342,7 @@ void Spooler::load_config( const xml::Element_ptr& config_element, const string&
             if( e.nodeName_is( "object_set_classes" ) )
             {
                 _object_set_class_list.clear();
-                load_object_set_classes_from_xml( &_object_set_class_list, e );
+                load_object_set_classes_from_xml( &_object_set_class_list, e, xml_mod_time );
             }
             else
             if( e.nodeName_is( "holidays" ) )
@@ -371,12 +369,12 @@ void Spooler::load_config( const xml::Element_ptr& config_element, const string&
             else
             if( e.nodeName_is( "script" ) )
             {
-                _module.set_dom( e, include_path() );
+                _module.set_dom( e, xml_mod_time, include_path() );
             }
             else
             if( e.nodeName_is( "threads" ) )
             {
-                load_threads_from_xml( e );
+                load_threads_from_xml( e, xml_mod_time );
             }
         }
     }

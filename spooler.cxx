@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.132 2002/11/22 08:34:10 jz Exp $
+// $Id: spooler.cxx,v 1.133 2002/11/22 17:23:50 jz Exp $
 /*
     Hier sind implementiert
 
@@ -139,8 +139,8 @@ static string thread_info_text( HANDLE h )
     if( ok )
     {
         sprintf( buffer, ", user_time=%-0.10g, kernel_time=%-0.10g", 
-                 (double)int64_from_filetime( user_time   ) / 1E7,
-                 (double)int64_from_filetime( kernel_time ) / 1E7 );
+                 (double)windows::int64_from_filetime( user_time   ) / 1E7,
+                 (double)windows::int64_from_filetime( kernel_time ) / 1E7 );
 
         result += buffer;
     }
@@ -628,8 +628,7 @@ void Spooler::load()
     _hostname = hostname;
 
     Command_processor cp ( this );
-    cp._source_filename = _config_filename;
-    cp.execute_2( file_as_string( _config_filename ) );
+    cp.execute_file( _config_filename );
 }
 
 //-----------------------------------------------------------------------------------Spooler::start
@@ -783,12 +782,13 @@ void Spooler::run()
 //-------------------------------------------------------------------------Spooler::cmd_load_config
 // Anderer Thread
 
-void Spooler::cmd_load_config( const xml::Element_ptr& config, const string& source_filename )  
+void Spooler::cmd_load_config( const xml::Element_ptr& config, const Time& xml_mod_time, const string& source_filename )  
 { 
     THREAD_LOCK( _lock )  
     {
         _config_document_to_load = config.ownerDocument(); 
         _config_element_to_load  = config;
+        _config_element_mod_time = xml_mod_time;
         _config_source_filename  = source_filename;
         _state_cmd = sc_load_config; 
     }
@@ -887,7 +887,7 @@ int Spooler::launch( int argc, char** argv )
         {
             if( _config_element_to_load == NULL )  throw_xc( "SPOOLER-116", _spooler_id );
 
-            load_config( _config_element_to_load, _config_source_filename );
+            load_config( _config_element_to_load, _config_element_mod_time, _config_source_filename );
     
             _config_element_to_load = NULL;
             _config_document_to_load = NULL;

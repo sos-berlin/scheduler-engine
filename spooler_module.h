@@ -1,4 +1,4 @@
-// $Id: spooler_module.h,v 1.7 2002/11/22 14:10:13 jz Exp $
+// $Id: spooler_module.h,v 1.8 2002/11/22 17:23:53 jz Exp $
 
 #ifndef __SPOOLER_MODULE_H
 #define __SPOOLER_MODULE_H
@@ -21,19 +21,20 @@ struct Module_instance;
 
 struct Source_part
 {
-                                Source_part                 ( int linenr, const string& text )      : _linenr(linenr), _text(text) {}
+                                Source_part                 ( int linenr, const string& text, const Time& mod_time )      : _linenr(linenr), _text(text), _modification_time(mod_time) {}
 
                                 operator string             () const                                { return _text; }
 
     int                        _linenr;
     string                     _text;
+    Time                       _modification_time;
 };
 
 //-----------------------------------------------------------------------------Source_with_includes
 
 struct Source_with_parts
 {
-    void                        add                         ( int linenr, const string& text )      { _parts.push_back( Source_part( linenr, text ) ); }
+    void                        add                         ( int linenr, const string& text, const Time& mod_time );
     bool                        empty                       ()                                      { return _parts.empty(); }
     void                        clear                       ()                                      { _parts.clear(); }
 
@@ -43,6 +44,7 @@ struct Source_with_parts
     typedef list<Source_part>   Parts;
 
     Parts                      _parts;
+    Time                       _max_modification_time;
 };
 
 //-------------------------------------------------------------------------------------------Module
@@ -66,12 +68,12 @@ struct Module
     };
 
                                 Module                      ( Spooler* sp, Prefix_log* log )         : _spooler(sp), _log(log) {}
-    explicit                    Module                      ( Spooler* sp, const xml::Element_ptr& e, const string& include_path )  : _spooler(sp) { set_dom(e,include_path); }
+    explicit                    Module                      ( Spooler* sp, const xml::Element_ptr& e, const Time& xml_mod_time, const string& include_path )  : _spooler(sp) { set_dom(e,xml_mod_time,include_path); }
                                ~Module                      ()                                      {}
 
-    void                        set_dom                     ( const xml::Element_ptr& e, const string& include_path )  { set_dom_without_source(e); set_dom_source_only(e,include_path); }
+    void                        set_dom                     ( const xml::Element_ptr& e, const Time& xml_mod_time, const string& include_path )  { set_dom_without_source(e); set_dom_source_only(e,xml_mod_time,include_path); }
     void                        set_dom_without_source      ( const xml::Element_ptr& );
-    void                        set_dom_source_only         ( const xml::Element_ptr&, const string& include_path );
+    void                        set_dom_source_only         ( const xml::Element_ptr&, const Time& xml_mod_time, const string& include_path );
 
     ptr<Module_instance>        create_instance             ();
 
@@ -80,7 +82,7 @@ struct Module
 
     Kind                        kind                        () const                                { return _kind; }
 
-    void                        make_java_class             ();                                     // in spooler_module_java.cxx
+    void                        make_java_class             ( bool force = false );                 // in spooler_module_java.cxx
     jmethodID                   java_method_id              ( const string& name );                 // in spooler_module_java.cxx
 
     Spooler*                   _spooler;

@@ -1,4 +1,4 @@
-// $Id: spooler_module_java.cxx,v 1.15 2002/11/22 14:10:13 jz Exp $
+// $Id: spooler_module_java.cxx,v 1.16 2002/11/22 17:23:53 jz Exp $
 /*
     Hier sind implementiert
 
@@ -8,12 +8,15 @@
 */
 
 #include "spooler.h"
+#include "../file/stdfile.h"    // make_path
 
 #ifdef _DEBUG
 #   include "Debug/Idispatch.h"
 #else
 #   include "Release/Idispatch.h"
 #endif
+
+#include <sys/stat.h>
 
 using namespace std;
 
@@ -562,7 +565,7 @@ void Java_vm::init()
 #   endif
 
   //if( _vm_args.classpath       )  complete_class_path = string(_vm_args.classpath) + Z_PATH_SEPARATOR;
-    if( _work_class_path != ""   )  _complete_class_path += _work_class_path + Z_PATH_SEPARATOR;
+    if( _work_class_dir != ""    )  _complete_class_path += _work_class_dir + Z_PATH_SEPARATOR;
     if( _ini_class_path != ""    )  _complete_class_path += _ini_class_path + Z_PATH_SEPARATOR;
     if( _config_class_path != "" )  _complete_class_path += _config_class_path + Z_PATH_SEPARATOR;
     _complete_class_path = replace_regex( _complete_class_path, Z_PATH_SEPARATOR "$", "" );
@@ -716,7 +719,7 @@ void Java_vm::throw_java( int return_value, const string& text1, const string& t
     JNIEnv* env = _thread_data->_env;
     if( env )
     {
-        jthrowable x = env->ExceptionCheck();
+        jthrowable x = env->ExceptionOccurred();
         if( x )
         {
             env->ExceptionClear();
@@ -793,10 +796,10 @@ jclass Java_env::get_object_class( jobject o )
     return result;
 }
 
-//-------------------------------------------------------------------------------Module::make_class
+//--------------------------------------------------------------------------Module::make_java_class
 // Quellcode compilieren
 
-void Module::make_class()
+void Module::make_java_class( bool force )
 {
     // package voranstellen?:  package spooler.job.jobname
     // Klassennamen erkennen
@@ -808,19 +811,26 @@ void Module::make_class()
     // findclass( klassenname )
     // fertig.
 
-    string filename = _spooler->_java_vm->_work_class_dir + "/" + replace_regex( _java_class_name, ".", "/" );
+    string filename = _spooler->_java_vm._work_class_dir + "/" + replace_regex( _java_class_name, "\\.", "/" );
+    string class_filename = filename + ".class";
 
-    make_path( directory_of_path( filename ) );
 
-    File source_file ( filename, "w" );
-    source_file.print( _source );
-    source_file.close();
+    struct stat s;
+    int err = ::stat( class_filename.c_str(), &s );
+    if( force || err || _source._max_modification_time > (Time)s.st_mtime )
+    {
+        string java_filename = filename + ".java";
 
-    string cmd = "javac -verbose -Xdepend -O -classpath " + _spooler->_java_vm->_complete_class_path + ' ' + filename + ".java" );
-    _log->info( cmd );
+        make_path( directory_of_path( java_filename ) );
 
-    System_command().execute( cmd );
+        File source_file ( java_filename, "w" );
+        source_file.print( _source );
+        source_file.close();
 
+        string cmd = "javac -verbose -O -classpath " + _spooler->_java_vm._complete_class_path + ' ' + java_filename;
+        _log->info( cmd );
+        System_command().execute( cmd );
+    }
 }
 
 //--------------------------------------------------------------------------Module::java_method_id
@@ -971,15 +981,18 @@ void Java_module_instance::init()
 
     if( !_module->_java_class )
     {
-        if( _module->_source.empty() )
+        string class_name = replace_regex( _module->_java_class_name, "\\.", "/" );
+
+        if( !_module->_source.empty() )
         {
-            string class_name = replace_regex( _module->_java_class_name, "\\.", "/" );
-            _module->_java_class = _env->find_class( class_name.c_str() );
+            _module->make_java_class();     // Java-Klasse ggfs. übersetzen
+
+            _module->_java_class = _env->_jenv->FindClass( class_name.c_str() );
+
+            if( !_module->_java_class )  _module->make_java_class( true );       // force=true, Mod_time nicht berücksichtigen und auf jeden Fall kompilieren
         }
-        else
-        {
-            make_class();
-        }
+
+        _module->_java_class = _env->find_class( class_name.c_str() );
     }
 
 

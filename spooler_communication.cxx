@@ -1,4 +1,4 @@
-// $Id: spooler_communication.cxx,v 1.33 2002/11/13 21:20:47 jz Exp $
+// $Id: spooler_communication.cxx,v 1.34 2002/11/22 17:23:52 jz Exp $
 /*
     Hier sind implementiert
 
@@ -536,7 +536,7 @@ bool Communication::handle_socket( Channel* channel )
             string cmd = channel->_text;
             channel->recv_clear();
             channel->_log.info( "Kommando " + cmd );
-            channel->_text = cp.execute( cmd );
+            channel->_text = cp.execute( cmd, Time::now() );
             if( cp._error )  channel->_log.error( cp._error->what() );
             ok = channel->do_send();
         if( !ok )  return false;
@@ -621,7 +621,7 @@ int Communication::run()
                         cp.set_host( &host );
                         string cmd ( buffer, len );
                         _spooler->log().info( "UDP-Nachricht von " + host.as_string() + ": " + cmd );
-                        cp.execute( cmd );
+                        cp.execute( cmd, Time::now() );
                     }
                 }
             }

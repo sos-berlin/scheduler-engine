@@ -1,4 +1,4 @@
-// $Id: spooler_module.cxx,v 1.4 2002/11/22 14:06:26 jz Exp $
+// $Id: spooler_module.cxx,v 1.5 2002/11/22 17:23:53 jz Exp $
 /*
     Hier sind implementiert
 
@@ -14,6 +14,15 @@ using namespace std;
 
 namespace sos {
 namespace spooler {
+
+//---------------------------------------------------------------------------Source_with_parts::add
+
+void Source_with_parts::add( int linenr, const string& text, const Time& mod_time )
+{ 
+    _parts.push_back( Source_part( linenr, text, mod_time ) );
+
+    if( mod_time  &&  _max_modification_time < mod_time )   _max_modification_time = mod_time;
+}
 
 //----------------------------------------------------------------------------------Module::set_dom
 
@@ -62,9 +71,9 @@ void Module::set_dom_without_source( const xml::Element_ptr& element )
 
 //----------------------------------------------------------------------------------Module::set_dom
 
-void Module::set_dom_source_only( const xml::Element_ptr& element, const string& include_path )
+void Module::set_dom_source_only( const xml::Element_ptr& element, const Time& xml_mod_time, const string& include_path )
 {
-    _source = text_from_xml_with_include( element, include_path );
+    _source = text_from_xml_with_include( element, xml_mod_time, include_path );
 
     switch( _kind )
     {

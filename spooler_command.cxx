@@ -1,4 +1,4 @@
-// $Id: spooler_command.cxx,v 1.64 2002/11/13 12:53:59 jz Exp $
+// $Id: spooler_command.cxx,v 1.65 2002/11/22 17:23:51 jz Exp $
 /*
     Hier ist implementiert
 
@@ -12,7 +12,6 @@
 
 
 // Für temporäre Datei:
-
 #include <sys/stat.h>               // S_IREAD, stat()
 #include <fcntl.h>                  // O_RDONLY
 
@@ -28,6 +27,7 @@
 
 #include <sys/types.h>
 #include <sys/timeb.h>
+#include <sys/stat.h>
 
 
 namespace sos {
@@ -83,7 +83,7 @@ void append_error_element( const xml::Element_ptr& element, const Xc_copy& x )
 
 //----------------------------------------------------------------Command_processor::execute_config
 
-xml::Element_ptr Command_processor::execute_config( const xml::Element_ptr& config_element )
+xml::Element_ptr Command_processor::execute_config( const xml::Element_ptr& config_element, const Time& xml_mod_time )
 {
     if( _security_level < Security::seclev_all )  throw_xc( "SPOOLER-121" );
 
@@ -92,8 +92,8 @@ xml::Element_ptr Command_processor::execute_config( const xml::Element_ptr& conf
     string spooler_id = config_element.getAttribute( "spooler_id" );
     if( spooler_id.empty()  ||  spooler_id == _spooler->id()  ||  _spooler->_manual )
     {
-        if( _load_config_immediately )  _spooler->load_config( config_element, _source_filename );
-                                  else  _spooler->cmd_load_config( config_element, _source_filename );
+        if( _load_config_immediately )  _spooler->load_config( config_element, xml_mod_time, _source_filename );
+                                  else  _spooler->cmd_load_config( config_element, xml_mod_time, _source_filename );
     }
 
     return _answer.createElement( "ok" );
@@ -388,7 +388,7 @@ xml::Element_ptr Command_processor::execute_modify_order( const xml::Element_ptr
 
 //---------------------------------------------------------------Command_processor::execute_command
 
-xml::Element_ptr Command_processor::execute_command( const xml::Element_ptr& element )
+xml::Element_ptr Command_processor::execute_command( const xml::Element_ptr& element, const Time& xml_mod_time )
 {
     string what = element.getAttribute( "what" );
 
@@ -434,7 +434,7 @@ xml::Element_ptr Command_processor::execute_command( const xml::Element_ptr& ele
     else
     if( element.nodeName_is( "signal_object"    ) )  return execute_signal_object( element );
     else
-    if( element.nodeName_is( "config"           ) )  return execute_config( element );
+    if( element.nodeName_is( "config"           ) )  return execute_config( element, xml_mod_time );
     else
     if( element.nodeName_is( "show_job_chains"  ) )  return execute_show_job_chains( element, show );
     else
@@ -463,12 +463,12 @@ string xml_as_string( const xml::Document_ptr& document )
 
 //------------------------------------------------------------------------Command_processor::execute
 
-string Command_processor::execute( const string& xml_text )
+string Command_processor::execute( const string& xml_text, const Time& xml_mod_time )
 {
     try 
     {
         _error = NULL;
-        execute_2( xml_text );
+        execute_2( xml_text, xml_mod_time );
     }
     catch( const Xc& x )
     {
@@ -486,9 +486,18 @@ string Command_processor::execute( const string& xml_text )
     return xml_as_string( _answer );
 }
 
+//------------------------------------------------------------------Command_processor::execute_file
+
+void Command_processor::execute_file( const string& filename )
+{
+    _source_filename = filename;
+
+    execute_2( string_from_file( filename ), modification_time_of_file( filename ) );
+}
+
 //----------------------------------------------------------------------Command_processor::execute_2
 
-void Command_processor::execute_2( const string& xml_text )
+void Command_processor::execute_2( const string& xml_text, const Time& xml_mod_time )
 {
     try 
     {
@@ -544,12 +553,12 @@ void Command_processor::execute_2( const string& xml_text )
                 {
                     //xml::Node_ptr node = node_list.item(i);
 
-                    answer_element.appendChild( execute_command( node ) );
+                    answer_element.appendChild( execute_command( node, xml_mod_time ) );
                 }
             }
             else
             {
-                answer_element.appendChild( execute_command( e ) );
+                answer_element.appendChild( execute_command( e, xml_mod_time ) );
             }
         }
     }

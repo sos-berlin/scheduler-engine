@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.122 2002/11/18 21:01:46 jz Exp $
+// $Id: spooler_task.cxx,v 1.123 2002/11/22 17:23:53 jz Exp $
 /*
     Hier sind implementiert
 
@@ -268,7 +268,7 @@ Job::~Job()
 
 //-------------------------------------------------------------------------------------Job::set_dom
 
-void Job::set_dom( const xml::Element_ptr& element )
+void Job::set_dom( const xml::Element_ptr& element, const Time& xml_mod_time )
 {
     THREAD_LOCK( _lock )
     {
@@ -304,7 +304,7 @@ void Job::set_dom( const xml::Element_ptr& element )
         {
             if( e.nodeName_is( "description" ) )
             {
-                try { _description = text_from_xml_with_include( e, _spooler->include_path() ); }
+                try { _description = text_from_xml_with_include( e, xml_mod_time, _spooler->include_path() ); }
                 catch( const Xc& x         ) { _spooler->_log.error( x.what() );  _description = x.what(); }
                 catch( const _com_error& x ) { string d = bstr_as_string(x.Description()); _spooler->_log.error(d);  _description = d; }
             }
@@ -317,6 +317,7 @@ void Job::set_dom( const xml::Element_ptr& element )
             {
                 _module.set_dom_without_source( e );
                 _module_xml_element   = e;
+                _module_xml_mod_time  = xml_mod_time;
                 _process_filename     = "";
                 _process_param        = "";
                 _process_log_filename = "";
@@ -616,7 +617,7 @@ bool Job::read_script()
 {
     try
     {
-        _module.set_dom_source_only( _module_xml_element, include_path() );
+        _module.set_dom_source_only( _module_xml_element, _module_xml_mod_time, include_path() );
     }
     catch( const Xc& x        ) { set_error(x);  _close_engine = true;  set_state( s_read_error );  return false; }
     catch( const exception& x ) { set_error(x);  _close_engine = true;  set_state( s_read_error );  return false; }

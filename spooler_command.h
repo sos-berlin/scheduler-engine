@@ -1,4 +1,4 @@
-// $Id: spooler_command.h,v 1.14 2002/10/02 12:54:38 jz Exp $
+// $Id: spooler_command.h,v 1.15 2002/11/22 17:23:52 jz Exp $
 
 #ifndef __SPOOLER_COMMAND_H
 #define __SPOOLER_COMMAND_H
@@ -34,10 +34,11 @@ struct Command_processor
 {
                                 Command_processor           ( Spooler* spooler )                    : _zero_(this+1),_spooler(spooler),_host(NULL) {}
 
-    string                      execute                     ( const string& xml_text );
-    void                        execute_2                   ( const string& xml_text );
-    xml::Element_ptr            execute_command             ( const xml::Element_ptr& );
-    xml::Element_ptr            execute_config              ( const xml::Element_ptr& );
+    void                        execute_file                ( const string& xml_filename );
+    string                      execute                     ( const string& xml_text, const Time& xml_mod_time );
+    void                        execute_2                   ( const string& xml_text, const Time& xml_mod_time );
+    xml::Element_ptr            execute_command             ( const xml::Element_ptr&, const Time& xml_mod_time );
+    xml::Element_ptr            execute_config              ( const xml::Element_ptr&, const Time& xml_mod_time );
 
     xml::Element_ptr            execute_show_state          ( const xml::Element_ptr&, Show_what );
     xml::Element_ptr            execute_show_history        ( const xml::Element_ptr&, Show_what );

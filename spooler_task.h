@@ -1,4 +1,4 @@
-// $Id: spooler_task.h,v 1.71 2002/11/14 12:16:41 jz Exp $
+// $Id: spooler_task.h,v 1.72 2002/11/22 17:23:54 jz Exp $
 
 #ifndef __SPOOLER_TASK_H
 #define __SPOOLER_TASK_H
@@ -30,9 +30,9 @@ struct Level_interval
 struct Object_set_class : Sos_self_deleting
 {
                                 Object_set_class            ( Spooler* sp, Prefix_log* log )        : _spooler(sp), _module(sp,log) {}
-    explicit                    Object_set_class            ( Spooler* sp,  Prefix_log* log, const xml::Element_ptr& e )  : _spooler(sp), _module(sp,log) { set_dom( e ); }
+    explicit                    Object_set_class            ( Spooler* sp,  Prefix_log* log, const xml::Element_ptr& e, const Time& xml_mod_time )  : _spooler(sp), _module(sp,log) { set_dom( e, xml_mod_time ); }
 
-    void                        set_dom                     ( const xml::Element_ptr& );
+    void                        set_dom                     ( const xml::Element_ptr&, const Time& xml_mod_time );
 
     Spooler*                   _spooler;
     string                     _name;
@@ -177,7 +177,7 @@ struct Job : Sos_self_deleting
                                 Job                         ( Thread* );
                                ~Job                         (); 
 
-    void                        set_dom                     ( const xml::Element_ptr& );
+    void                        set_dom                     ( const xml::Element_ptr&, const Time& mod_time );
     xml::Element_ptr            dom                         ( const xml::Document_ptr&, Show_what, Job_chain* = NULL );
 
     void                        init0                       ();                         // Wird vor Spooler-Skript gerufen
@@ -323,6 +323,7 @@ struct Job : Sos_self_deleting
     ptr<Com_variable_set>      _default_params;
 
     xml::Element_ptr           _module_xml_element;         // <script> aus <config>
+    Time                       _module_xml_mod_time;
     Module*                    _module_ptr;
     ptr<Module_instance>       _module_instance;            // Für use_engine="job"
 
