@@ -1,4 +1,4 @@
-// $Id: spooler_time.cxx,v 1.14 2002/05/19 09:59:25 jz Exp $
+// $Id: spooler_time.cxx,v 1.15 2002/06/16 14:22:14 jz Exp $
 /*
     Hier sind implementiert
 
@@ -78,6 +78,63 @@ Time Time::now()
 #   endif
 }
 
+//------------------------------------------------------------------------------Period::set_default
+
+void Period::set_default()
+{
+    _begin  = "00:00:00";
+    _end    = "24:00:00";
+    _repeat = latter_day;
+}
+
+//----------------------------------------------------------------------------------Period::set_xml
+
+void Period::set_xml( const xml::Element_ptr& element, const Period* deflt )
+{
+    Sos_optional_date_time dt;
+
+    if( deflt )  *this = *deflt;
+
+    string let_run = as_string( element->getAttribute( L"let_run" ) );
+    if( !let_run.empty() )  _let_run = as_bool( let_run );
+
+    string single_start = as_string( element->getAttribute( L"single_start" ) );
+    if( !single_start.empty() ) 
+    {
+        dt.set_time( single_start );
+        _begin = dt;
+        _repeat = latter_day;
+        _single_start = true;
+        _let_run = true;
+        _end = _begin;
+    }
+    else
+    {
+        string begin = as_string( variant_default( element->getAttribute( L"begin" ), "00:00:00" ) );
+        if( !begin.empty() )  dt.set_time( begin ), _begin = dt;
+
+        string repeat = as_string( element->getAttribute( L"repeat" ) );
+        if( !repeat.empty() )
+        {
+            if( repeat.find( ':' ) != string::npos )
+            {
+                Sos_optional_date_time dt;
+                dt.set_time( repeat );
+                _repeat = dt.time_as_double();
+            }
+            else
+                _repeat = as_double( repeat );
+        }
+
+        if( _repeat == 0 )  _repeat = latter_day;
+    }
+
+    string end = as_string( variant_default( element->getAttribute( L"end" ), "24:00:00" ) );
+    if( !end.empty() )  dt.set_time( end ), _end = dt;
+
+    check();
+}
+
 //------------------------------------------------------------------------------------Period::check
 
 void Period::check() const
@@ -133,6 +190,35 @@ void Period::print( ostream& s ) const
                    else  s << " repeat=" << _repeat;
     if( _let_run )  s << " let_run";
     s << ")";
+}
+
+//-------------------------------------------------------------------------------------Day::set_xml
+
+void Day::set_xml( const xml::Element_ptr& element, const Day* default_day, const Period* default_period )
+{
+    if( default_day )  _period_set = default_day->_period_set;
+
+  //Period my_default_period ( element, default_period );
+    bool   first = true;
+
+    DOM_FOR_ALL_ELEMENTS( element, e )
+    {
+        if( first )  first = false, _period_set.clear();
+        _period_set.insert( Period( e, default_period ) );
+    }
+
+  //if( _period_set.empty() )  _period_set.insert( my_default_period );
+}
+
+//---------------------------------------------------------------------------------Day::set_default
+
+void Day::set_default()
+{
+    Period period;
+    period.set_default();
+
+    _period_set.clear();
+    _period_set.insert( period );
 }
 
 //------------------------------------------------------------------------------------Day::has_time
@@ -273,7 +359,7 @@ Period Date_set::next_period( Time tim, With_single_start single_start )
 
 //---------------------------------------------------------------------------------Date_set::print
 
-void  Date_set::print( ostream& s ) const
+void Date_set::print( ostream& s ) const
 {
     s << "Date_set(";
 
@@ -283,6 +369,108 @@ void  Date_set::print( ostream& s ) const
     }
 
     s << ")";
+}
+
+//---------------------------------------------------------------------------------Day_set::set_xml
+
+void Day_set::set_xml( const xml::Element_ptr& element, const Day* default_day, const Period* default_period )
+{
+    //Period my_default_period ( element, default_period );
+
+    DOM_FOR_ALL_ELEMENTS( element, e )
+    {
+        if( e->tagName == "day" )
+        {
+            Day my_default_day ( e, default_day, default_period );
+
+            int day = int_from_variant( e->getAttribute( L"day" ) );
+            if( (uint)day >= NO_OF(_days) )  throw_xc( "SPOOLER-INVALID-DAY", day );
+            _days[day].set_xml( e, &my_default_day, default_period );
+        }
+    }
+}
+
+//----------------------------------------------------------------------------Run_time::set_default
+
+void Run_time::set_default()
+{
+
+}
+
+//-----------------------------------------------------------------------Run_time::set_default_days
+
+void Run_time::set_default_days()
+{
+    Day default_day;
+
+    default_day.set_default();
+
+    for( int i = 0; i < 7; i++ )  _weekday_set._days[i] = default_day;
+}
+
+//--------------------------------------------------------------------------------Run_time::set_xml
+
+void Run_time::set_xml( const xml::Element_ptr& element )
+{
+    Sos_optional_date_time  dt;
+    Period                  default_period;
+    Day                     default_day;
+    bool                    period_seen = false;
+    
+
+    _set = true;
+    _once = as_bool( variant_default( element->getAttribute( L"once" ), _once ) );
+
+    default_period.set_xml( element, NULL );
+    default_day = default_period;
+
+    bool a_day_set = false;
+
+
+    DOM_FOR_ALL_ELEMENTS( element, e )
+    {
+        if( e->tagName == "period" )
+        {
+            if( !period_seen )  period_seen = true, default_day = Day();
+            default_day.add( Period( e, &default_period ) );
+        }
+        else
+        if( e->tagName == "date" )
+        {
+            a_day_set = true;
+            dt.assign( as_string( e->getAttribute( L"date" ) ) );
+            Date date;
+            date._day_nr = dt.as_time_t() / (24*60*60);
+            date._day.set_xml( e, &default_day, &default_period );
+            _date_set._date_set.insert( date );
+        }
+        else
+        if( e->tagName == "weekdays" )
+        {
+            a_day_set = true;
+            _weekday_set.set_xml( e, &default_day, &default_period );
+        }
+        else
+        if( e->tagName == "monthdays" )
+        {
+            a_day_set = true;
+            _monthday_set.set_xml( e, &default_day, &default_period );
+        }
+        else
+        if( e->tagName == "ultimos" )
+        {
+            a_day_set = true;
+            _ultimo_set.set_xml( e, &default_day, &default_period );
+        }
+        else
+        if( e->tagName == "holiday" )
+        {
+            dt.assign( as_string( e->getAttribute( L"date" ) ) );
+            _holiday_set.insert( dt.as_time_t() );
+        }
+    }
+
+    if( !a_day_set )  set_default_days();
 }
 
 //---------------------------------------------------------------------------Run_time::first_period

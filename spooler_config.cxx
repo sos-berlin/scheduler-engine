@@ -1,4 +1,4 @@
-// $Id: spooler_config.cxx,v 1.39 2002/06/14 18:23:38 jz Exp $
+// $Id: spooler_config.cxx,v 1.40 2002/06/16 14:22:13 jz Exp $
 
 //#include <precomp.h>
 
@@ -165,158 +165,6 @@ void Security::set_xml( const xml::Element_ptr& security_element )
     }
 }
 
-//----------------------------------------------------------------------------------Period::set_xml
-namespace time {
-
-void Period::set_xml( const xml::Element_ptr& element, const Period* deflt )
-{
-    Sos_optional_date_time dt;
-
-    if( deflt )  *this = *deflt;
-
-    string let_run = as_string( element->getAttribute( L"let_run" ) );
-    if( !let_run.empty() )  _let_run = as_bool( let_run );
-
-    string single_start = as_string( element->getAttribute( L"single_start" ) );
-    if( !single_start.empty() ) 
-    {
-        dt.set_time( single_start );
-        _begin = dt;
-        _repeat = latter_day;
-        _single_start = true;
-        _let_run = true;
-        _end = _begin;
-    }
-    else
-    {
-        string begin = as_string( variant_default( element->getAttribute( L"begin" ), "00:00:00" ) );
-        if( !begin.empty() )  dt.set_time( begin ), _begin = dt;
-
-        string repeat = as_string( element->getAttribute( L"repeat" ) );
-        if( !repeat.empty() )
-        {
-            if( repeat.find( ':' ) != string::npos )
-            {
-                Sos_optional_date_time dt;
-                dt.set_time( repeat );
-                _repeat = dt.time_as_double();
-            }
-            else
-                _repeat = as_double( repeat );
-        }
-
-        if( _repeat == 0 )  _repeat = latter_day;
-    }
-
-    string end = as_string( variant_default( element->getAttribute( L"end" ), "24:00:00" ) );
-    if( !end.empty() )  dt.set_time( end ), _end = dt;
-
-    check();
-}
-
-//-------------------------------------------------------------------------------------Day::set_xml
-
-void Day::set_xml( const xml::Element_ptr& element, const Day* default_day, const Period* default_period )
-{
-    if( default_day )  _period_set = default_day->_period_set;
-
-  //Period my_default_period ( element, default_period );
-    bool   first = true;
-
-    DOM_FOR_ALL_ELEMENTS( element, e )
-    {
-        if( first )  first = false, _period_set.clear();
-        _period_set.insert( Period( e, default_period ) );
-    }
-
-  //if( _period_set.empty() )  _period_set.insert( my_default_period );
-}
-
-//---------------------------------------------------------------------------------Day_set::set_xml
-
-void Day_set::set_xml( const xml::Element_ptr& element, const Day* default_day, const Period* default_period )
-{
-    //Period my_default_period ( element, default_period );
-
-    DOM_FOR_ALL_ELEMENTS( element, e )
-    {
-        if( e->tagName == "day" )
-        {
-            Day my_default_day ( e, default_day, default_period );
-
-            int day = int_from_variant( e->getAttribute( L"day" ) );
-            if( (uint)day >= NO_OF(_days) )  throw_xc( "SPOOLER-INVALID-DAY", day );
-            _days[day].set_xml( e, &my_default_day, default_period );
-        }
-    }
-}
-
-//--------------------------------------------------------------------------------Run_time::set_xml
-
-void Run_time::set_xml( const xml::Element_ptr& element )
-{
-    Sos_optional_date_time  dt;
-    Period                  default_period;
-    Day                     default_day;
-    bool                    period_seen = false;
-    
-
-    _once = as_bool( variant_default( element->getAttribute( L"once" ), _once ) );
-
-    default_period.set_xml( element, NULL );
-    default_day = default_period;
-
-    bool a_day_set = false;
-
-
-    DOM_FOR_ALL_ELEMENTS( element, e )
-    {
-        if( e->tagName == "period" )
-        {
-            if( !period_seen )  period_seen = true, default_day = Day();
-            default_day.add( Period( e, &default_period ) );
-        }
-        else
-        if( e->tagName == "date" )
-        {
-            a_day_set = true;
-            dt.assign( as_string( e->getAttribute( L"date" ) ) );
-            Date date;
-            date._day_nr = dt.as_time_t() / (24*60*60);
-            date._day.set_xml( e, &default_day, &default_period );
-            _date_set._date_set.insert( date );
-        }
-        else
-        if( e->tagName == "weekdays" )
-        {
-            a_day_set = true;
-            _weekday_set.set_xml( e, &default_day, &default_period );
-        }
-        else
-        if( e->tagName == "monthdays" )
-        {
-            a_day_set = true;
-            _monthday_set.set_xml( e, &default_day, &default_period );
-        }
-        else
-        if( e->tagName == "ultimos" )
-        {
-            a_day_set = true;
-            _ultimo_set.set_xml( e, &default_day, &default_period );
-        }
-        else
-        if( e->tagName == "holiday" )
-        {
-            dt.assign( as_string( e->getAttribute( L"date" ) ) );
-            _holiday_set.insert( dt.as_time_t() );
-        }
-    }
-
-    if( !a_day_set )  for( int i = 0; i < 7; i++ )  _weekday_set._days[i] = default_day;
-}
-
-} //namespace time
-
 //------------------------------------------------------------------------Object_set_class::set_xml
 
 void Object_set_class::set_xml( const xml::Element_ptr& element )
@@ -363,64 +211,6 @@ void Object_set_descr::set_xml( const xml::Element_ptr& element )
 { 
     _class_name     = as_string( element->getAttribute( L"class" ) );
     _level_interval.set_xml( single_element( element, "levels" ) );
-}
-
-//-------------------------------------------------------------------------------------Job::set_xml
-
-void Job::set_xml( const xml::Element_ptr& element )
-{
-    THREAD_LOCK( _lock )
-    {
-        bool run_time_set = false;
-
-        _name             = as_string       ( element->getAttribute( L"name" ) );
-      //_rerun            = as_bool         ( element->getAttribute( L"rerun" ) ) ),
-      //_stop_after_error = as_bool         ( element->getAttribute( L"stop_after_errorn ) );
-        _temporary        = as_bool         ( variant_default( element->getAttribute( L"temporary"  ), _temporary  ) );
-        _priority         = int_from_variant( variant_default( element->getAttribute( L"priority"   ), _priority   ) );
-        _title            = as_string       ( variant_default( element->getAttribute( L"title"      ), _title      ) );
-        _log_append       = as_bool         ( variant_default( element->getAttribute( L"log_append" ), _log_append ) );
-
-        string text;
-
-        text = as_string( element->getAttribute( L"output_level" ) );
-        if( !text.empty() )  _output_level = as_int( text );
-
-        //for( time::Holiday_set::iterator it = _spooler->_run_time._holidays.begin(); it != _spooler->_run_time._holidays.end(); it++ )
-        //    _run_time._holidays.insert( *it );
-        _run_time.set_holidays( _spooler->holidays() );
-
-        DOM_FOR_ALL_ELEMENTS( element, e )
-        {
-            if( e->tagName == "description" )  
-            {
-                try { _description = text_from_xml_with_include( e, _spooler->include_path() ); }
-                catch( const Xc& x         ) { _spooler->_log.error( x.what() );  _description = x.what(); }
-                catch( const _com_error& x ) { string d = bstr_as_string(x.Description()); _spooler->_log.error(d);  _description = d; }
-            }
-            else
-            if( e->tagName == "object_set"  )  _object_set_descr = SOS_NEW( Object_set_descr( e ) );
-            else
-            if( e->tagName == "script"      )  _script_xml_element = e,
-                                               _process_filename = "",
-                                               _process_param    = "",
-                                               _process_log_filename = "";
-            else
-            if( e->tagName == "process"     )  _process_filename     = as_string( e->getAttribute( L"file" ) ),
-                                               _process_param        = as_string( e->getAttribute( L"param" ) ),
-                                               _process_log_filename = as_string( e->getAttribute( L"log_file" ) );
-            else
-            if( e->tagName == "run_time"  &&  !_spooler->_manual )  _run_time.set_xml( e ),  run_time_set = true;
-        }
-
-        if( !run_time_set )
-        {
-            _run_time.set_xml( element->ownerDocument->createElement( L"run_time" ) );
-            if( _spooler->_manual )  _run_time.set_once();
-        }
-
-        if( _object_set_descr )  _object_set_descr->_class = _spooler->get_object_set_class( _object_set_descr->_class_name );
-    }
 }
 
 //--------------------------------------------------------Spooler::load_object_set_classes_from_xml
@@ -498,24 +288,32 @@ void Spooler::load_config( const xml::Element_ptr& config_element )
     _config_element  = NULL;
     _config_document = NULL;
 
-    _config_document = config_element->ownerDocument; 
-    _config_element  = config_element;
-
-
-    _tcp_port      = int_from_variant( variant_default( config_element->getAttribute( L"tcp_port"     ), _tcp_port     ) );
-    _udp_port      = int_from_variant( variant_default( config_element->getAttribute( L"udp_port"     ), _udp_port     ) );
-    _priority_max  = int_from_variant( variant_default( config_element->getAttribute( L"priority_max" ), _priority_max ) );
-
-    string log_dir =        as_string( config_element->getAttribute( L"log_dir"      ) );
-
-    if( !_log_directory_as_option_set && log_dir != "" )  _log_directory = log_dir;
-    if( !_spooler_param_as_option_set )  _spooler_param = as_string( variant_default( config_element->getAttribute( L"param"        ), _spooler_param ) );
-    if( !_include_path_as_option_set  )  _include_path  = as_string( variant_default( config_element->getAttribute( L"include_path" ), _include_path  ) );
-
-    _free_threading_default = as_bool( as_string( variant_default( config_element->getAttribute( L"free_threading" ), _free_threading_default ) ) );
-
     try
     {
+        DOM_FOR_ALL_ELEMENTS( config_element, e )
+        {
+            if( e->tagName == "base" )
+            {
+                string config_filename = as_string( e->getAttribute( "base" ) );
+
+            }
+        }
+
+        _config_document = config_element->ownerDocument; 
+        _config_element  = config_element;
+
+        _tcp_port      = int_from_variant( variant_default( config_element->getAttribute( L"tcp_port"     ), _tcp_port     ) );
+        _udp_port      = int_from_variant( variant_default( config_element->getAttribute( L"udp_port"     ), _udp_port     ) );
+        _priority_max  = int_from_variant( variant_default( config_element->getAttribute( L"priority_max" ), _priority_max ) );
+
+        string log_dir =        as_string( config_element->getAttribute( L"log_dir"      ) );
+
+        if( !_log_directory_as_option_set && log_dir != "" )  _log_directory = log_dir;
+        if( !_spooler_param_as_option_set )  _spooler_param = as_string( variant_default( config_element->getAttribute( L"param"        ), _spooler_param ) );
+        if( !_include_path_as_option_set  )  _include_path  = as_string( variant_default( config_element->getAttribute( L"include_path" ), _include_path  ) );
+
+        _free_threading_default = as_bool( as_string( variant_default( config_element->getAttribute( L"free_threading" ), _free_threading_default ) ) );
+
         DOM_FOR_ALL_ELEMENTS( config_element, e )
         {
             if( e->tagName == "security" )

@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.103 2002/06/14 18:23:37 jz Exp $
+// $Id: spooler.cxx,v 1.104 2002/06/16 14:22:12 jz Exp $
 /*
     Hier sind implementiert
 
@@ -376,12 +376,22 @@ void Spooler::signal_threads( const string& signal_name )
 
 Thread* Spooler::get_thread( const string& thread_name )
 {
+    Thread* thread = get_thread_or_null( thread_name );
+    if( !thread )  throw_xc( "SPOOLER-128", thread_name );
+
+    return thread;
+}
+
+//----------------------------------------------------------------------Spooler::get_thread_or_null
+// Anderer Thread
+
+Thread* Spooler::get_thread_or_null( const string& thread_name )
+{
     THREAD_LOCK( _lock )
     {
         FOR_EACH( Thread_list, _thread_list, it )  if( stricmp( (*it)->name(), thread_name ) == 0 )  return *it;
     }
 
-    throw_xc( "SPOOLER-128", thread_name );
     return NULL;
 }
 

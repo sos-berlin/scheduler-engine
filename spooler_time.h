@@ -1,4 +1,4 @@
-// $Id: spooler_time.h,v 1.11 2002/05/19 09:59:25 jz Exp $
+// $Id: spooler_time.h,v 1.12 2002/06/16 14:22:14 jz Exp $
 
 #ifndef __SPOOLER_TIME_H
 #define __SPOOLER_TIME_H
@@ -98,6 +98,7 @@ struct Period
     Period                      operator +                  ( const Time& t ) const                 { Period p = *this; p._begin += t; p._end += t; return p; }
     friend Period               operator +                  ( const Time& t, const Period& p )      { return p+t; }
 
+    void                        set_default                 ();
     void                        set_xml                     ( const xml::Element_ptr&, const Period* deflt );
 
     bool                        operator <                  ( const Period& t ) const               { return _begin < t._begin; }  //für set<>
@@ -140,6 +141,7 @@ struct Day
                                 Day                         ( const xml::Element_ptr& e, const Day* deflt, const Period* p )   { set_xml( e, deflt, p ); }
 
     void                        set_xml                     ( const xml::Element_ptr&, const Day* deflt, const Period* );
+    void                        set_default                 ();
 
                                 operator bool               () const                                { return !_period_set.empty(); }
 
@@ -263,17 +265,24 @@ struct Run_time
 
     void                        check                       ();                              
 
+    bool                        set                         () const                                { return _set; }
+
+    void                        set_holidays                ( const Holiday_set& h )                { _holiday_set = h; }
+    void                        set_default                 ();
+    void                        set_default_days            ();
+
     bool                        once                        ()                                      { return _once; }
     void                    set_once                        ( bool b = true )                       { _once = b; }
+
     Period                      first_period                ()                                      { return first_period( Time::now() ); }
     Period                      first_period                ( Time );
+
     Period                      next_period                 ( With_single_start single_start = wss_next_period )      { return next_period( Time::now(), single_start ); }
     Period                      next_period                 ( Time, With_single_start single_start = wss_next_period );
+
     bool                        period_follows              ( Time time )                           { return next_period(time).begin() != latter_day; }
 
     Time                        next_single_start           ( Time time )                           { return next_period(time,wss_next_single_start).begin(); }
-
-    void                        set_holidays                ( const Holiday_set& h )                { _holiday_set = h; }
 
     void                        print                       ( ostream& ) const;
     friend ostream&             operator <<                 ( ostream& s, const Run_time& o )       { o.print(s); return s; }
@@ -286,6 +295,7 @@ struct Run_time
 
     Fill_zero                  _zero_;
 
+    bool                       _set;
     bool                       _once;
     Date_set                   _date_set;
     Weekday_set                _weekday_set;

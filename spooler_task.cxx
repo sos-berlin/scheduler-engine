@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.95 2002/06/14 18:23:38 jz Exp $
+// $Id: spooler_task.cxx,v 1.96 2002/06/16 14:22:13 jz Exp $
 /*
     Hier sind implementiert
 
@@ -259,6 +259,63 @@ Job::Job( Thread* thread )
 Job::~Job()
 {
     close();
+}
+
+//-------------------------------------------------------------------------------------Job::set_xml
+
+void Job::set_xml( const xml::Element_ptr& element )
+{
+    THREAD_LOCK( _lock )
+    {
+        _name             = as_string       ( element->getAttribute( L"name" ) );
+      //_rerun            = as_bool         ( element->getAttribute( L"rerun" ) ) ),
+      //_stop_after_error = as_bool         ( element->getAttribute( L"stop_after_errorn ) );
+        _temporary        = as_bool         ( variant_default( element->getAttribute( L"temporary"  ), _temporary  ) );
+        _priority         = int_from_variant( variant_default( element->getAttribute( L"priority"   ), _priority   ) );
+        _title            = as_string       ( variant_default( element->getAttribute( L"title"      ), _title      ) );
+        _log_append       = as_bool         ( variant_default( element->getAttribute( L"log_append" ), _log_append ) );
+
+        string text;
+
+        text = as_string( element->getAttribute( L"output_level" ) );
+        if( !text.empty() )  _output_level = as_int( text );
+
+        //for( time::Holiday_set::iterator it = _spooler->_run_time._holidays.begin(); it != _spooler->_run_time._holidays.end(); it++ )
+        //    _run_time._holidays.insert( *it );
+        _run_time.set_holidays( _spooler->holidays() );
+
+        DOM_FOR_ALL_ELEMENTS( element, e )
+        {
+            if( e->tagName == "description" )  
+            {
+                try { _description = text_from_xml_with_include( e, _spooler->include_path() ); }
+                catch( const Xc& x         ) { _spooler->_log.error( x.what() );  _description = x.what(); }
+                catch( const _com_error& x ) { string d = bstr_as_string(x.Description()); _spooler->_log.error(d);  _description = d; }
+            }
+            else
+            if( e->tagName == "object_set"  )  _object_set_descr = SOS_NEW( Object_set_descr( e ) );
+            else
+            if( e->tagName == "script"      )  _script_xml_element   = e,
+                                               _process_filename     = "",
+                                               _process_param        = "",
+                                               _process_log_filename = "";
+            else
+            if( e->tagName == "process"     )  _script_xml_element   = NULL,
+                                               _process_filename     = as_string( e->getAttribute( L"file" ) ),
+                                               _process_param        = as_string( e->getAttribute( L"param" ) ),
+                                               _process_log_filename = as_string( e->getAttribute( L"log_file" ) );
+            else
+            if( e->tagName == "run_time"  &&  !_spooler->_manual )  _run_time = Run_time(), _run_time.set_xml( e );
+        }
+
+        if( !_run_time.set() )
+        {
+            _run_time.set_default();
+            if( _spooler->_manual )  _run_time.set_once();
+        }
+
+        if( _object_set_descr )  _object_set_descr->_class = _spooler->get_object_set_class( _object_set_descr->_class_name );
+    }
 }
 
 //----------------------------------------------------------------------------------------Job::init
