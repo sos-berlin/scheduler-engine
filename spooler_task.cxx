@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.213 2003/10/30 11:58:07 jz Exp $
+// $Id: spooler_task.cxx,v 1.214 2003/10/30 13:19:12 jz Exp $
 /*
     Hier sind implementiert
 
@@ -1237,8 +1237,8 @@ void Module_task::do_close__end()
         int exit_code = _module_instance->exit_code();
         if( exit_code != 0 )  _log.warn( "Exit code = 0x" + printf_string( "%X", exit_code ) );
 
-        _log.log_file( _module_instance->stdout_filename() );
-        _log.log_file( _module_instance->stderr_filename() );
+        _log.log_file( _module_instance->stdout_filename(), "stdout:" );
+        _log.log_file( _module_instance->stderr_filename(), "stderr:" );
 
       //if( _job->_module_ptr->_reuse == Module::reuse_job )  _job->release_module_instance( _module_instance );
 

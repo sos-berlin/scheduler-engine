@@ -1,4 +1,4 @@
-// $Id: spooler_module_remote.cxx,v 1.45 2003/10/30 11:58:07 jz Exp $
+// $Id: spooler_module_remote.cxx,v 1.46 2003/10/30 13:19:12 jz Exp $
 /*
     Hier sind implementiert
 
@@ -230,7 +230,7 @@ bool Remote_module_instance_proxy::begin__end()
 
 Async_operation* Remote_module_instance_proxy::end__start( bool success )
 {
-    if( !_remote_instance )  return NULL;
+    if( !_remote_instance )  return &dummy_sync_operation; //NULL;
 
     _end_success = success;
   //_operation = +Z_NEW( Operation( this, c_end ) );

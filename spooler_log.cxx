@@ -1,4 +1,4 @@
-// $Id: spooler_log.cxx,v 1.78 2003/10/19 11:41:01 jz Exp $
+// $Id: spooler_log.cxx,v 1.79 2003/10/30 13:19:12 jz Exp $
 
 #include "spooler.h"
 #include "spooler_mail.h"
@@ -227,14 +227,21 @@ void Log::log2( Log_level level, const string& prefix, const string& line, Prefi
 
 //-----------------------------------------------------------------------------Prefix_log::log_file
 
-void Prefix_log::log_file( const string& filename )
+void Prefix_log::log_file( const string& filename, const string& title )
 {
     if( !filename.empty() ) 
     {
         try
         {
+            bool title_printed = false;
+
             Any_file file ( "-in -seq " + filename );
-            while( !file.eof() )  info( file.get_string() );
+            while( !file.eof() ) 
+            {
+                if( !title_printed && !title.empty() )  info( title );
+                title_printed = true;
+                info( file.get_string() );
+            }
         }
         catch( const Xc& x ) 
         { 
