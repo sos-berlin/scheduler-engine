@@ -1,4 +1,4 @@
-// $Id: spooler_history.cxx,v 1.76 2003/12/22 13:44:43 jz Exp $
+// $Id: spooler_history.cxx,v 1.77 2003/12/23 11:22:13 jz Exp $
 
 #include "spooler.h"
 #include "../zschimmer/z_com.h"
@@ -773,6 +773,8 @@ void Spooler_db::write_order_history( Order* order, Transaction* outer_transacti
                     insert[ "state_text" ] = order->state_text();
                     insert[ "spooler_id" ] = _spooler->id_for_db();
                     insert.set_datetime( "start_time", order->start_time().as_string(Time::without_ms) );
+
+                    if( order->end_time() )
                     insert.set_datetime( "end_time"  , order->end_time().as_string(Time::without_ms) );
 
                     execute( insert );
