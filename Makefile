@@ -54,7 +54,7 @@ include $(PROD_DIR)/make/standard.makefile
 
 all:: $(BIN_DIR)/scheduler
 all:: $(BIN_DIR)/sos.spooler.jar
-all:: DOC
+all:: documentation
 
 #%.class: %.java
 #	@mkdir -p $(dir $@)
@@ -94,6 +94,6 @@ $(BIN_DIR)/scheduler: spooler.o $(objects) ../kram/$(O_DIR)/soswnmai.o $(foreach
 
 
 
-DOC:
+documention:
 	( cd ../doc  &&  perl ../scheduler_keyword_to_xml.pl *.xml xml/*.xml xml/answer/*.xml )
 	ant -f ../javadoc.xml
