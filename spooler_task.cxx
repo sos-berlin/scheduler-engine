@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.187 2003/09/01 15:16:18 jz Exp $
+// $Id: spooler_task.cxx,v 1.188 2003/09/02 06:09:22 jz Exp $
 /*
     Hier sind implementiert
 
@@ -754,7 +754,6 @@ bool Task::do_something()
                     Time log_time = _log.collect_end();
                     if( log_time > Time::now()  &&  _next_time > log_time )  set_next_time( log_time );
 
-                    something_done = true;
                     break;
                 }
 

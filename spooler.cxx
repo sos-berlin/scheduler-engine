@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.238 2003/09/02 05:29:15 jz Exp $
+// $Id: spooler.cxx,v 1.239 2003/09/02 06:09:22 jz Exp $
 /*
     Hier sind implementiert
 
@@ -1326,9 +1326,6 @@ void Spooler::start()
     _log.info( string( "Spooler (" VER_PRODUCTVERSION_STR ) + ") startet mit " + _config_filename );
 
 
-    if( !_manual )  _communication.start_or_rebind();
-
-
     if( _has_java ) 
     {
         try
@@ -1349,6 +1346,11 @@ void Spooler::start()
     _db = SOS_NEW( Spooler_db( this ) );
     _db->open( _db_name );
     _db->spooler_start();
+
+
+    // Thread _communication nach Java starten (auch implizit durch _db). Java muss laufen, wenn der Thread startet! (Damit attach_thread() greift)
+    if( !_manual )  _communication.start_or_rebind();
+
 
     set_ctrl_c_handler( false );
     set_ctrl_c_handler( true );       // Falls Java (über Dateityp jdbc) gestartet worden ist und den Signal-Handler verändert hat

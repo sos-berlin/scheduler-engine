@@ -1,4 +1,4 @@
-// $Id: spooler_module_remote.cxx,v 1.32 2003/09/01 07:35:20 jz Exp $
+// $Id: spooler_module_remote.cxx,v 1.33 2003/09/02 06:09:22 jz Exp $
 /*
     Hier sind implementiert
 
@@ -286,7 +286,8 @@ bool Remote_module_instance_proxy::call__end()
 
 Async_operation* Remote_module_instance_proxy::release__start()
 {
-    _operation = _remote_instance->release__start();
+    if( _remote_instance )  _operation = _remote_instance->release__start();
+                      else  _operation = &dummy_sync_operation;
 
     return _operation;
 }
@@ -297,8 +298,15 @@ void Remote_module_instance_proxy::release__end()
 {
     if( !_operation->async_finished() )  throw_xc( "SPOOLER-191", "release__end", _operation->async_state_text() );
 
-    _operation = NULL;
-    _remote_instance->release__end();
+    if( _operation == &dummy_sync_operation )
+    {
+        _operation = NULL;
+    }
+    else
+    {
+        _operation = NULL;
+        _remote_instance->release__end();
+    }
 }
 
 //-----------------------------------------------Remote_module_instance_proxy::Operation::~Operation
