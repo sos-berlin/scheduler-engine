@@ -68,7 +68,7 @@ Async_operation* Remote_module_instance_proxy::close__start()
         }
         catch( exception& x )
         {
-            LOG( "Fehler ignoriert: " << x << "\n" );       // Z.B. ERRNO-32 Broken pipe
+            LOG( "Fehler wird ignoriert: " << x.what() << "\n" );       // Z.B. ERRNO-32 Broken pipe
         }
 
         _remote_instance = NULL;
