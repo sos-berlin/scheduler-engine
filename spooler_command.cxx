@@ -1,4 +1,4 @@
-// $Id: spooler_command.cxx,v 1.76 2002/12/11 08:50:35 jz Exp $
+// $Id: spooler_command.cxx,v 1.77 2003/03/04 09:06:12 jz Exp $
 /*
     Hier ist implementiert
 
@@ -23,6 +23,7 @@
 #else
 #   include <stdio.h>               // fileno
 #   include <unistd.h>              // read(), write(), close()
+#   include <signal.h>              // kill()
 #endif
 
 #include <sys/types.h>
@@ -161,9 +162,9 @@ xml::Element_ptr Command_processor::execute_show_history( const xml::Element_ptr
     return job->read_history( _answer, id, next, show );
 }
 
-//--------------------------------------------------------------------------------abort_immediately
+//-------------------------------------------------------------Command_processor::abort_immediately
 
-static void abort_immediately( int exit_code = 1 )
+void Command_processor::abort_immediately( int exit_code )
 {
 #   ifdef Z_WINDOWS
 
@@ -171,6 +172,7 @@ static void abort_immediately( int exit_code = 1 )
 
 #    else
 
+        kill( 0, SIGKILL );   // signal is sent to every process in the process group of the current process.
         _exit( exit_code );
 
 #   endif
