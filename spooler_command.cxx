@@ -1,4 +1,4 @@
-// $Id: spooler_command.cxx,v 1.108 2004/03/15 21:43:45 jz Exp $
+// $Id: spooler_command.cxx,v 1.109 2004/03/26 18:09:08 jz Exp $
 /*
     Hier ist implementiert
 
@@ -190,6 +190,23 @@ xml::Element_ptr Command_processor::execute_show_state( const xml::Element_ptr& 
     state_element.appendChild( execute_show_jobs( show ) );
   //state_element.appendChild( execute_show_threads( show ) );
     state_element.appendChild( execute_show_process_classes( show ) );
+
+    {
+        xml::Element_ptr subprocesses_element = _answer.createElement( "subprocesses" );
+        for( int i = 0; i < NO_OF( _spooler->_pids ); i++ )
+        {
+            int pid = _spooler->_pids[ i ];
+            if( pid )
+            {
+                xml::Element_ptr subprocess_element = _answer.createElement( "subprocess" );
+                subprocess_element.setAttribute( "pid", pid );
+
+                subprocesses_element.appendChild( subprocess_element );
+            }
+        }
+        
+        state_element.appendChild( subprocesses_element );
+    }
 
     return state_element;
 }

@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.242 2004/03/26 16:15:32 jz Exp $
+// $Id: spooler_task.cxx,v 1.243 2004/03/26 18:09:08 jz Exp $
 /*
     Hier sind implementiert
 
@@ -326,6 +326,31 @@ xml::Element_ptr Task::dom( const xml::Document_ptr& document, Show_what show )
 
         if( _order )  dom_append_nl( task_element ),  task_element.appendChild( _order->dom( document, show ) );
         if( _error )  dom_append_nl( task_element ),  append_error_element( task_element, _error );
+        
+        if( !_subprocesses.empty() )
+        {
+            xml::Element_ptr subprocesses_element = document.createElement( "subprocesses" );
+            FOR_EACH_CONST( Subprocesses, _subprocesses, it )  
+            {
+                const Subprocess* p = it->second;
+
+                if( p )
+                {
+                    xml::Element_ptr subprocess_element = document.createElement( "subprocess" );
+                    subprocess_element.setAttribute( "pid", p->_pid );
+
+                    if( p->_timeout != latter_day )
+                    subprocess_element.setAttribute( "timeout_at", p->_timeout.as_string() );
+
+                    if( p->_killed )
+                    subprocess_element.setAttribute( "killed", "yes" );
+
+                    subprocesses_element.appendChild( subprocess_element );
+                }
+            }
+            
+            task_element.appendChild( subprocesses_element );
+        }
 
         if( show & show_log )  dom_append_text_element( task_element, "log", _log.as_string() );
     }
@@ -649,7 +674,7 @@ void Task::add_pid( int pid, const Time& timeout_period )
         _log.debug9( S() << "add_pid(" << pid << ")  Frist endet " << timeout );
     }
 
-    _subprocesses.insert( Subprocesses::value_type( pid, Z_NEW( Subprocess( this, pid, timeout ) ) ) );  
+    _subprocesses[ pid ] = Z_NEW( Subprocess( this, pid, timeout ) );  
 
     set_subprocess_timeout();
 }
