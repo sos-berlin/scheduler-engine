@@ -1,4 +1,4 @@
-// $Id: spooler_job.cxx,v 1.90 2004/07/24 11:36:42 jz Exp $
+// $Id: spooler_job.cxx,v 1.91 2004/08/26 20:39:36 jz Exp $
 // §851: Weitere Log-Ausgaben zum Scheduler-Start eingebaut
 /*
     Hier sind implementiert
@@ -92,7 +92,7 @@ void Job::set_dom( const xml::Element_ptr& element, const Time& xml_mod_time )
             if( _task_timeout > max_task_time_out )  _task_timeout = max_task_time_out;   // Begrenzen, damit's beim Addieren mit now() keinen Überlauf gibt
         }
 
-        t                   = element.     getAttribute( "idle_timeout"    );
+        t           = element.     getAttribute( "idle_timeout"    );
         if( t != "" )  
         {
             _idle_timeout = time::time_from_string( t );

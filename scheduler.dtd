@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- $Id: scheduler.dtd,v 1.1 2004/08/25 22:21:12 jz Exp $   Joacim Zschimmer,  (C) 2000 SOS GmbH Berlin  -->
+<!-- $Id: scheduler.dtd,v 1.2 2004/08/26 20:39:36 jz Exp $   Joacim Zschimmer,  (C) 2000 SOS GmbH Berlin  -->
 
 
 <!ELEMENT spooler               ( config+ | command | answer )>
@@ -61,6 +61,7 @@
 <!ATTLIST script                filename            CDATA #IMPLIED>     <!-- Falls die COM-Klasse in einer bestimmten DLL liegt -->
 <!ATTLIST script                java_class          CDATA #IMPLIED>     <!-- Für eine Java-Klasse -->
 <!ATTLIST script                recompile           CDATA #IMPLIED>     <!-- "yes": immer übersetzen. "no": Nur übersetzen, wenn Quelle neuer -->
+<!ATTLIST script                process_class       CDATA #IMPLIED>     <!--  -->
 
 
 
@@ -94,6 +95,7 @@
 <!ATTLIST job                   tasks               CDATA #IMPLIED>     <!-- Anzahl Tasks für diesen Job -->
 <!ATTLIST job                   timeout             CDATA #IMPLIED>     <!--  -->
 <!ATTLIST job                   idle_timeout        CDATA #IMPLIED>     <!--  -->
+<!ATTLIST job                   process_class       CDATA #IMPLIED>     <!--  -->
 
 
 <!ELEMENT description           ( #PCDATA | include )*>                 <!-- Beschreibung des Jobs -->
