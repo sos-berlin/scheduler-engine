@@ -1,4 +1,4 @@
-// $Id: scheduler.js,v 1.1 2004/12/02 13:36:08 jz Exp $
+// $Id: scheduler.js,v 1.2 2004/12/02 18:10:45 jz Exp $
 
 //----------------------------------------------------------------------------------------------var
 
@@ -13,6 +13,26 @@ var opera    = 0;   // Opera
 //--------------------------------------------------------------------------------------------const
 
 var NODE_ELEMENT = 1;
+
+// Fehlercodes von xmlhttp:
+var DE_E_INVALID_URL               = 0x800C0002 - 0xFFFFFFFF;
+var DE_E_NO_SESSION                = 0x800C0003 - 0xFFFFFFFF;
+var DE_E_CANNOT_CONNECT            = 0x800C0004 - 0xFFFFFFFF;
+var DE_E_RESOURCE_NOT_FOUND        = 0x800C0005 - 0xFFFFFFFF;
+var DE_E_OBJECT_NOT_FOUND          = 0x800C0006 - 0xFFFFFFFF;
+var DE_E_DATA_NOT_AVAILABLE        = 0x800C0007 - 0xFFFFFFFF;
+var DE_E_DOWNLOAD_FAILURE          = 0x800C0008 - 0xFFFFFFFF;
+var DE_E_AUTHENTICATION_REQUIRED   = 0x800C0009 - 0xFFFFFFFF;
+var DE_E_NO_VALID_MEDIA            = 0x800C000A - 0xFFFFFFFF;
+var DE_E_CONNECTION_TIMEOUT        = 0x800C000B - 0xFFFFFFFF;
+var DE_E_INVALID_REQUEST           = 0x800C000C - 0xFFFFFFFF;
+var DE_E_UNKNOWN_PROTOCOL          = 0x800C000D - 0xFFFFFFFF;
+var DE_E_SECURITY_PROBLEM          = 0x800C000E - 0xFFFFFFFF;
+var DE_E_CANNOT_LOAD_DATA          = 0x800C000F - 0xFFFFFFFF;
+var DE_E_CANNOT_INSTANTIATE_OBJECT = 0x800C0010 - 0xFFFFFFFF;
+var DE_E_REDIRECT_FAILED           = 0x800C0014 - 0xFFFFFFFF;
+var DE_E_REDIRECT_TO_DIR           = 0x800C0015 - 0xFFFFFFFF;
+var DE_E_CANNOT_LOCK_REQUEST       = 0x800C0016 - 0xFFFFFFFF;
 
 //------------------------------------------------------------------------------------check_browser
 
@@ -266,6 +286,22 @@ Scheduler.prototype.call_http = function( text, debug_text )
     {
         this._xml_http.send( text );
     }
+    catch( x )
+    {
+        if(1)
+        //if( x.number == DE_E_CANNOT_CONNECT
+        // || x.number == DE_E_DATA_NOT_AVAILABLE
+        // || x.number == DE_E_RESOURCE_NOT_FOUND )
+        {
+            throw new Error( x.number, "No connection to Scheduler\n" + 
+                             ( x.number? "0x" + hex_string( x.number, 8 ) + ": " : "" ) + x.message );
+        }
+        else
+        {
+            throw x;
+            //alert( "Error 0x" + hex_string( x.number, 8 ) + ": " + x.message );
+        }
+    }
     finally
     {
         window.status = status;
@@ -312,6 +348,20 @@ Scheduler.prototype.modify_datetime_for_xslt = function( response )
     this.add_datetime_attributes_for_xslt( response, now, "idle_since"            );
     this.add_datetime_attributes_for_xslt( response, now, "enqueued"              );
     this.add_datetime_attributes_for_xslt( response, now, "created"               );
+}
+
+//--------------------------------------------------------------------Scheduler.call_error_checked 
+
+Scheduler.prototype.call_error_checked = function( method_name, arg1, arg2, arg3, arg4, arg5 )
+{
+    try
+    {
+        this[ method_name ]( arg1, arg2, arg3, arg4, arg5 );
+    }
+    catch( x )
+    {
+        return handle_exception( x );
+    }
 }
 
 //---------------------------------------------------------------------------------------Stylesheet
@@ -475,6 +525,48 @@ function Scheduler_html_configuration( url )
     if( !ok )  throw new Error( "Fehler in der Konfiguration " + url + ": " + this._dom.parseError.reason );
 }
 */
+//-------------------------------------------------------------------------------call_error_checked
+
+function call_error_checked( f, arg1, arg2, arg3, arg4, arg5 )
+{
+    try
+    {
+        f( arg1, arg2, arg3, arg4, arg5 );
+    }
+    catch( x )
+    {
+        return handle_exception( x );
+    }
+}
+
+//--------------------------------------------------------------handle_exception
+
+function handle_exception( x )
+{    
+    var msg = "";
+    var error = new Error();
+    
+    if( typeof x == "object" )
+    {
+        if( x.number )  msg += "0x" + hex_string( x.number, 8 ) + "  ";
+        msg += xml_encode( x.message );
+        error.number = x.number;
+    }
+    else
+        msg = x;
+        
+    var e = document.getElementById( "error_message" );
+    if( e )
+    {
+        e.innerHTML = xml_encode( msg ).replace( "\n", "<br/>" ).replace( "  ", "\xA0 " ); // + "<p>&#160;</p>";
+    }
+    else
+        alert( msg );
+        
+    error.message = msg;
+    return error;            
+}
+
 //----------------------------------------------------------------------------------update__onclick
 
 function update__onclick()
@@ -534,26 +626,12 @@ function popup_menu__execute( xml_command )
 {
     _popup.hide();
     
-    try
-    {
-        _scheduler.execute( xml_command );
-        window.parent.left_frame.update();
-    }
-    catch( x )
-    {
-        if( x.number + 0xFFFFFFFF == 0x800C0007 )
-        {
-            alert( "Scheduler connection closed" );
-        }
-        else
-        {
-            throw x;
-            //alert( "Error 0x" + hex_string( x.number, 8 ) + ": " + x.message );
-        }
-    }
+    var error = _scheduler.call_error_checked( "execute", xml_command );
+   
+    if( !error )  window.parent.left_frame.update();
 }
 
-//-----------------------------------------------------------------------Popup_menu_builder.add_show_log
+//------------------------------------------------------------------Popup_menu_builder.add_show_log
 // Erweiterung von Popup_menu_builder, s. popup_builder.js
 
 function Popup_menu_builder__add_show_log( html, show_log_command, window_name, is_active )
@@ -755,23 +833,3 @@ function string_from_object( object )
 
 //-------------------------------------------------------------------------------------------------
 
-/* Fehlercodes von xmlhttp:
-#define DE_E_INVALID_URL               0x800C0002
-#define DE_E_NO_SESSION                0x800C0003
-#define DE_E_CANNOT_CONNECT            0x800C0004
-#define DE_E_RESOURCE_NOT_FOUND        0x800C0005
-#define DE_E_OBJECT_NOT_FOUND          0x800C0006
-#define DE_E_DATA_NOT_AVAILABLE        0x800C0007
-#define DE_E_DOWNLOAD_FAILURE          0x800C0008
-#define DE_E_AUTHENTICATION_REQUIRED   0x800C0009
-#define DE_E_NO_VALID_MEDIA            0x800C000A
-#define DE_E_CONNECTION_TIMEOUT        0x800C000B
-#define DE_E_INVALID_REQUEST           0x800C000C
-#define DE_E_UNKNOWN_PROTOCOL          0x800C000D
-#define DE_E_SECURITY_PROBLEM          0x800C000E
-#define DE_E_CANNOT_LOAD_DATA          0x800C000F
-#define DE_E_CANNOT_INSTANTIATE_OBJECT 0x800C0010
-#define DE_E_REDIRECT_FAILED           0x800C0014
-#define DE_E_REDIRECT_TO_DIR           0x800C0015
-#define DE_E_CANNOT_LOCK_REQUEST       0x800C0016
-*/

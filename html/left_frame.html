@@ -1,4 +1,4 @@
-<!-- $Id: left_frame.html,v 1.12 2004/12/02 13:36:08 jz Exp $ -->
+<!-- $Id: left_frame.html,v 1.13 2004/12/02 18:10:45 jz Exp $ -->
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <html>
 
@@ -49,6 +49,7 @@ var _show_card = "jobs";
 //var _show_process_classes = false;
 var _checkbox_states = new Object();
 var _saved_frameset_cols;
+var update_seconds           = 5;
 
 _checkbox_states[ "show_order_jobs_checkbox" ] = true;
 //var _update_periodically = false;
@@ -106,36 +107,32 @@ function repeat_update( repeat, call_update )
     reset_error();
     if( _timer != undefined )  window.clearTimeout( _timer ),  _timer = undefined;
     
-    //try
+    try
     {
         if( call_update )
         {
-            parent.top_frame.document.getElementById( "update_periodically_checkbox" ).checked = false;     
+            if( document.getElementById( "update_periodically_checkbox" ) )
+                document.getElementById( "update_periodically_checkbox" ).checked = false;     
             update();
         }
     }
-    if(0)//catch( x )
+    catch( x )
     {   
         repeat = false;
-        var msg = "";
-        
+
         if( typeof x == "object" )
         {
-            if( x.number + 0xFFFFFFFF == 0x800C0004 )  repeat = true,  msg = "Connection to Scheduler lost<br/>";
-            msg += "0x" + hex_string( x.number, 8 ) + "&#160; " + xml_encode( x.message );
-            msg += "<p> </p>";
+            if( x.number == DE_E_CANNOT_CONNECT 
+             || x.number == DE_E_RESOURCE_NOT_FOUND )  repeat = true;       // Nur ie liefert diese Fehlercodes in x.number
         }
-        else
-            msg = xml_encode( x );
-            
-        document.getElementById( "error_message" ).innerHTML = msg;
+        
+        handle_exception( x );
     }    
 
-    if( repeat )
-    {
-        parent.top_frame.document.getElementById( "update_periodically_checkbox" ).checked = true;
-        set_update_timer();
-    }
+    var checkbox = document.getElementById( "update_periodically_checkbox" )
+    if( checkbox )  checkbox.checked = repeat;  // Im Fehlerfall ausschalten
+
+    if( repeat )  set_update_timer();
 }
 
 //---------------------------------------------------------------------------------set_update_timer
@@ -143,7 +140,7 @@ function repeat_update( repeat, call_update )
 function set_update_timer()
 {
     if( _timer != undefined )  window.clearTimeout( _timer ),  _timer = undefined;
-    _timer = window.setTimeout( "repeat_update(true,true)", 5000, "JavaScript" );
+    _timer = window.setTimeout( "repeat_update(true,true)", update_seconds * 1000, "JavaScript" );
 }
 
 //--------------------------------------------------------------------------------update_jobs_frame
@@ -231,8 +228,9 @@ function modify_response( response )
         restore_checkbox_state( response, "show_job_chain_jobs_checkbox" );
         restore_checkbox_state( response, "show_job_chain_orders_checkbox" );
 
-        spooler_element.setAttribute( "my_max_orders", _max_orders );
-        spooler_element.setAttribute( "my_show_card" , _show_card );
+        spooler_element.setAttribute( "my_max_orders"    , _max_orders );
+        spooler_element.setAttribute( "my_show_card"     , _show_card );
+        spooler_element.setAttribute( "my_update_seconds", update_seconds );
     }
 }
 
