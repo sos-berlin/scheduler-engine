@@ -1,5 +1,5 @@
 #! /usr/bin/perl -W
-# $Id: scheduler_keyword_to_xml.pl,v 1.7 2004/11/15 08:58:20 jz Exp $
+# $Id: scheduler_keyword_to_xml.pl,v 1.8 2004/11/30 22:02:28 jz Exp $
 
 
 my $script_name     = "scheduler_keyword_to_xml.pl";
@@ -98,7 +98,7 @@ sub read_file
     if( $root_element eq "ini_section" )
     { 
         my $section = $name;
-        $file_title = "Datei $file, Abschnitt [$section]"  if $file_title = "XXX";
+        $file_title = "Datei $file, Abschnitt [$section]"  if $file_title eq "XXX";
         
         my $xml_line = "<register_entry register_file='$filename#' register_title='$file_title'  register_keyword='$section' type='definition'/>\n";
         add_keyword_reference( $section, "<code>[$section]</code>", $xml_line );

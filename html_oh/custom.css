@@ -1,0 +1,134 @@
+/*  $Id: custom.css,v 1.1 2004/11/30 21:59:46 jz Exp $ 
+
+    STYLESHEET FÜR DEN SCHEDULER
+
+
+    In der custom.css (im selben Verzeichnis) können Sie eigene Einstellungen vornehmen.
+*/
+
+
+body                    { font-family: Arial,Sans-Serif; font-size: 10px; margin-top: 10px; margin-left: 16px; margin-right: 0px; margin-bottom: 0px;
+                          scrollbar-3dlight-color:#D9DEE3; scrollbar-arrow-color:#808080; scrollbar-darkshadow-color:#808080; 
+                          scrollbar-face-color:#D9DEE3; scrollbar-highlight-color:#ffffff; scrollbar-shadow-color:#D9DEE3;
+                          scrollbar-track-color:#F2F4F7;}
+body.top                {}                         
+body.left               { margin-top: 0px; }                         
+body.right              { margin-top: 0px; }                         
+th                      { font-size: 12px; }
+td                      { font-size: 12px; }
+td.status_text          { font-size: 10px; color: #009933; }
+.spoolerTableText       { font-family: Arial,Sans-Serif; font-size: 10px; color:#4444; }  //Dokus
+p                       { font-size: 12px; margin-top: 2ex; margin-bottom: 0; padding-left: 3px; padding-right: 3px; } 
+p.card_selector         { font-size: 12px; margin: 0px; padding:0px; white-space:nowrap; }
+label                   { font-size: 12px; }
+col                     { padding-bottom: 1px; padding-left: 3px; padding-right: 2px; }
+caption                 { font-size: 12px; padding-bottom: 5px; padding-left: 3px; padding-right: 2px; padding-top: 2px; margin-top: 2px; margin-bottom: 2px; }
+
+
+.small                  { font-size: 8pt }
+.label                  { font-size: 8pt; white-space: nowrap }
+
+/* Kommando-Menu */
+.menu                   { cursor: hand; text-decoration:none; width:40px; font-weight: normal; font-size: 11px; text-align:center; border:2px outset #FFFFFF; }
+
+/* (automatisches) Update */
+TABLE.update            { background-color:#D9DEE3; border:2px outset #FFFFFF; vertical-align:top; width="100%"; padding-bottom:2px; margin:0px; }
+INPUT.update_button     { cursor: hand; text-decoration:none; height:20px; font-weight: normal; font-size: 11px; vertical-align:middle; text-align:center; background-color:#D9DEE3; border:2px outset #FFFFFF; }
+INPUT.hide_button       { cursor: hand; text-decoration:none; height:18px; font-weight: normal; font-size: 11px; vertical-align:middle; text-align:center; background-color:#D9DEE3; border:2px outset #FFFFFF; }
+
+/* Job-Description */
+div.description         {}
+
+th.head1, td.head1      { border-bottom:1px solid #C0C0C0; }
+th.head , td.head       { border-bottom:1px solid #C0C0C0; border-left:1px solid #C0C0C0; }
+
+td.after_head_space     { margin-top: 0px; margin-bottom: 0px; line-height: 6px; }
+td.before_head_space    { margin-top: 0px; margin-bottom: 0px; line-height: 8px; }
+td.after_body_space     { margin-top: 0px; margin-bottom: 0px; line-height: 6px; }
+p.after_update_space    { margin-top: 0px; margin-bottom: 0px; line-height: 6px; }
+
+
+/* Allgemeiner Scheduler-Zustand */
+.scheduler              { background-color: #D9DEE3; border:2px outset #FFFFFF; color:#444444; }
+TABLE.scheduler         { font-size: 12px; background-color: #D9DEE3; border:2px outset #FFFFFF; border-top:0px; margin:0px; padding:0px; color:#444444; }
+SPAN.scheduler_caption  { font-size: 16px; font-weight: bold; background-color: #D9DEE3; color:#800040; }
+CAPTION.scheduler       { font-size: 16px; font-weight: bold; background-color: #D9DEE3; color:#800040; border:2px outset #FFFFFF; border-bottom:0px; }
+
+/* Registerkarte Jobs */
+.job                    { font-size: 12px; background-color: #D9DEE3; }
+TABLE.job               { font-size: 12px; background-color: #D9DEE3; border:2px outset #FFFFFF; border-top:0px; margin:0px; padding:0px; color:#444444; }
+SPAN.job_card           { cursor: hand; font-size: 16px; font-weight: bold; background-color: #D9DEE3; color:#800040; width:144px; height:30px; border:2px outset #FFFFFF; border-bottom:1px solid #D9DEE3; text-decoration:none; text-align:center; vertical-align:middle; white-space:nowrap; } 
+SPAN.job_card_inactive  { cursor: hand; font-size: 15px; font-weight: bold; background-color: #F2F4F7; color:#808080; width:144px; height:24px; border:2px outset #FFFFFF; border-bottom:1px solid #F2F4F7; text-decoration:none; text-align:center; vertical-align:bottom; white-space:nowrap; } 
+SPAN.job_caption        { font-size: 16px; font-weight: bold; background-color: #D9DEE3; color:#800040; }
+TABLE.job_card_selector { background-color: #D9DEE3; border-left:2px outset #FFFFFF; border-right:2px outset #FFFFFF; margin:0px; padding:0px; }
+TD.job_card_selector1   { width:144px; line-height: 0px; } 
+TD.job_card_selector2   { width:144px; line-height: 0px; border-top:2px outset #FFFFFF; }
+TD.job_card_selector3   { width:144px; line-height: 0px; border-top:2px outset #FFFFFF; }
+TD.job_card_selector4   { line-height: 0px; border-top:2px outset #FFFFFF; }
+TD.hr_job               { line-height: 4px; border-top:1px dotted #C0C0C0;  }
+CAPTION.job             { font-size: 16px; font-weight: bold; background-color: #D9DEE3; border:2px outset #FFFFFF; border-bottom:0px; }
+.job_error              { color: darkred }
+
+/* Registerkarte Job_Chains und Detailansicht Job_chain */                        
+.job_chain                    { font-size: 12px; background-color: #D9DEE3; }
+TABLE.job_chain               { font-size: 12px; background-color: #D9DEE3; border:2px outset #FFFFFF; border-top:0px; margin:0px; padding:0px; color:#444444; }
+SPAN.job_chain_card           { cursor: hand; font-size: 16px; font-weight: bold; background-color: #D9DEE3; color:#800040; width:144px; height:30px; border:2px outset #FFFFFF; border-bottom:1px solid #D9DEE3; text-decoration:none; text-align:center; vertical-align:middle; white-space:nowrap; } 
+SPAN.job_chain_card_inactive  { cursor: hand; font-size: 15px; font-weight: bold; background-color: #F2F4F7; color:#808080; width:144px; height:24px; border:2px outset #FFFFFF; border-bottom:1px solid #F2F4F7; text-decoration:none; text-align:center; vertical-align:bottom; white-space:nowrap; } 
+SPAN.job_chain_caption        { font-size: 16px; font-weight: bold; background-color: #D9DEE3; color:#800040; }
+TABLE.job_chain_card_selector { background-color: #D9DEE3; border-left:2px outset #FFFFFF; border-right:2px outset #FFFFFF; margin:0px; padding:0px; }
+TD.job_chain_card_selector1   { width:144px; line-height: 0px; border-top:2px outset #FFFFFF; }
+TD.job_chain_card_selector2   { width:144px; line-height: 0px; } 
+TD.job_chain_card_selector3   { width:144px; line-height: 0px; border-top:2px outset #FFFFFF; }
+TD.job_chain_card_selector4   { line-height: 0px; border-top:2px outset #FFFFFF; }
+HR.job_chain                  { height:1px; border:1px solid #C0C0C0; }
+CAPTION.job_chain             { font-size: 16px; font-weight: bold; background-color: #D9DEE3; border:2px outset #FFFFFF; border-bottom:0px; }
+
+/* Registerkarte Process_Class */
+.process_class                    { font-size: 12px; background-color: #D9DEE3; }
+TABLE.process_class               { font-size: 12px; background-color: #D9DEE3; border:2px outset #FFFFFF; border-top:0px; margin:0px; padding:0px; color:#444444; }
+SPAN.process_class_card           { cursor: hand; font-size: 16px; font-weight: bold; background-color: #D9DEE3; color:#800040; width:144px; height:30px; border:2px outset #FFFFFF; border-bottom:1px solid #D9DEE3; text-decoration:none; text-align:center; vertical-align:middle; white-space:nowrap; } 
+SPAN.process_class_card_inactive  { cursor: hand; font-size: 15px; font-weight: bold; background-color: #F2F4F7; color:#808080; width:144px; height:24px; border:2px outset #FFFFFF; border-bottom:1px solid #F2F4F7; text-decoration:none; text-align:center; vertical-align:bottom; white-space:nowrap; } 
+TABLE.process_class_card_selector { background-color: #D9DEE3; border-left:2px outset #FFFFFF; border-right:2px outset #FFFFFF; margin:0px; padding:0px; }
+TD.process_class_card_selector1   { width:144px; line-height: 0px; border-top:2px outset #FFFFFF; }
+TD.process_class_card_selector2   { width:144px; line-height: 0px; } 
+TD.process_class_card_selector3   { width:144px; line-height: 0px; border-top:2px outset #FFFFFF; }
+TD.process_class_card_selector4   { line-height: 0px; border-top:2px outset #FFFFFF; }
+
+/* Detailansicht Task */
+.task                   { font-size: 12px; background-color: #D9DEE3; color:#009933; }
+Table.task              { font-size: 12px; background-color: #D9DEE3; color:#009933; border:2px outset #FFFFFF; border-top:0px; margin:0px; padding:0px; color:#444444; }
+.task_hover             { font-size: 12px; background-color: #F2F4F7; text-decoration: none }
+CAPTION.task            { font-size: 16px; font-weight: bold; background-color: #D9DEE3; color:#800040; border:2px outset #FFFFFF; border-bottom:0px; }
+SPAN.task_caption       { font-size: 16px; font-weight: bold; background-color: #D9DEE3; color:#800040; }
+
+/* Detailansicht Order-Queue */                      
+.order                    { font-size: 12px; background-color: #D9DEE3; color:#444444; }
+Table.order               { font-size: 12px; background-color: #D9DEE3; color:#444444; border:2px outset #FFFFFF; border-top:0px; margin:0px; padding:0px; color:#444444; }
+CAPTION.order             { font-size: 16px; font-weight: bold; background-color: #D9DEE3; border:2px outset #FFFFFF; border-bottom:0px; }
+SPAN.order_caption        { font-size: 16px; font-weight: bold; background-color: #D9DEE3; color:#800040; }
+
+/* Anklickbar */
+.hover                  { text-decoration: none; color:#000000; background-color:#F2F4F7; }
+
+
+/* Fürs Protokoll */
+body.log                { margin-left: 0; padding-left: 0 }
+pre.log                 { font-family: Lucida Console, monospace; font-size: 9pt; line-height: 1.1em; margin-left: 2px; padding-left: 0 }
+
+.log_error              { color: Red; }
+.log_warn               { color: tomato; }
+.log_info               { color: black; }
+.log_debug              { color: darkgreen; }
+.log_debug2             { color: #408040; }
+.log_debug3             { color: #808080; }
+.log_debug4             { color: #8080FF; }
+.log_debug5             { color: #8080FF; }
+.log_debug6             { color: #8080FF; }
+.log_debug7             { color: #8080FF; }
+.log_debug8             { color: #8080FF; }
+.log_debug9             { color: #a0a0a0; }  
+
+A:hover       								{ color: #FFA500; text-decoration: none; font-size: 12px; }
+A:visited     								{ color: #000066; text-decoration: none; font-size: 12px; }
+A:active      								{ color: #FF6347; text-decoration: none; font-size: 12px; }
+A:link        								{ color: #000066; text-decoration: none; font-size: 12px; }

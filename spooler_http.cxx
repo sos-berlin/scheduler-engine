@@ -1,4 +1,4 @@
-// $Id: spooler_http.cxx,v 1.16 2004/09/25 08:38:48 jz Exp $
+// $Id: spooler_http.cxx,v 1.17 2004/11/30 22:02:28 jz Exp $
 /*
     Hier sind implementiert
 
@@ -7,6 +7,9 @@
     Http_response
     Log_chunk_reader
     Html_chunk_reader
+
+    Notdürftige Implementierung von HTTP 1.1
+    Siehe http://www.w3.org/Protocols/rfc2616/rfc2616.html
 */
 
 
@@ -57,7 +60,13 @@ void Http_parser::add_text( const char* text, int len )
 
     if( _reading_body  &&  _text.length() >= _body_start + _content_length )
     {
-        if( _text.length() > _body_start + _content_length  )  throw_xc( "SPOOLER-HTTP too much data" );
+        int rest = _text.length() - ( _body_start + _content_length );
+        if( rest > 0 )  
+        {
+            if( rest == 2  &&  string_ends_with( _text, "\r\n" ) )  {}  // Okay für Firefox
+                                                              else  throw_xc( "SPOOLER-HTTP toomuchdata" );
+        }
+
         _http_request->_body.assign( _text.data() + _body_start, _content_length ); 
     }
 }
@@ -66,7 +75,7 @@ void Http_parser::add_text( const char* text, int len )
 
 bool Http_parser::is_complete()
 {
-    return _text.length() == _body_start + _content_length;
+    return _text.length() >= _body_start + _content_length;  // >=, weil Firefox noch ein \r\n anhängt
 }
 
 //------------------------------------------------------------------------Http_parser::parse_header
@@ -207,15 +216,15 @@ bool Http_request::is_http_1_1() const
 
 //---------------------------------------------------------------------Http_response::Http_response
 
-Http_response::Http_response( const Http_request* http_request, Chunk_reader* chunk_reader, const string& content_type )
+Http_response::Http_response( Http_request* http_request, Chunk_reader* chunk_reader, const string& content_type )
 : 
     _zero_(this+1), 
     _chunk_reader( chunk_reader ),
     _chunked( http_request->is_http_1_1() ),
-    _close_connection_at_eof( !http_request->is_http_1_1() )
+    _close_connection_at_eof( !http_request->is_http_1_1() ),
+    _http_request(http_request)
 { 
     set_content_type(content_type); 
-    finish();
 }
 
 //----------------------------------------------------------------------------Http_response::finish
@@ -237,13 +246,29 @@ void Http_response::finish()
     
     time_text[24] = '\0';
 
-    if( _chunked )  _header = "HTTP/1.1 200 OK\r\n";
-              else  _header = "HTTP/1.0 200 OK\r\n";
+    if( _chunked )  _header = "HTTP/1.1 ";
+              else  _header = "HTTP/1.0 ";
+
+    if( _status_code )
+    {
+        _header += as_string( _status_code );
+        _header += " ";
+
+        for( int i = 0; i < _status_text.length(); i++ )  if( (uint)_status_text[i] < ' ' )  _status_text[i] = ' ';
+        _header += _status_text;
+    }
+    else
+    {
+        _header += "200 OK\r\n";
+    }
 
     _header += "Content-Type: "  + _content_type + "\r\n"
                "Date: " + string(time_text) + " GMT\r\n"
-               "Server: Scheduler " + string(VER_PRODUCTVERSION_STR) + "\r\n"
-               "Cache-Control: no-cache\r\n";
+               "Server: Scheduler " + string(VER_PRODUCTVERSION_STR) + "\r\n";
+
+    //if( _http_request->_header[ "cache-control" ] == "no-cache" )
+        _header += "Cache-Control: no-cache\r\n";   // Sonst bleibt z.B. die scheduler.xslt im Browser kleben und ein Wechsel der Datei wirkt nicht.
+                                                    // Gut wäre eine Frist, z.B. 10s
 
     if( _chunked                 )  _header += "Transfer-Encoding: chunked\r\n";
     if( _close_connection_at_eof )  _header += "Connection: close\r\n";
@@ -251,6 +276,7 @@ void Http_response::finish()
     _header += "\r\n";
 
     _chunk_size = _header.length();
+    _finished = true;
 }
 
 //-------------------------------------------------------------------------------Http_response::eof
@@ -264,6 +290,9 @@ bool Http_response::eof()
 
 string Http_response::read( int recommended_size )                           
 {
+    if( !_finished )  finish();
+
+
     string result;
 
     if( _eof )  return result;

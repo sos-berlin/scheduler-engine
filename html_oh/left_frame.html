@@ -1,4 +1,4 @@
-<!-- $Id: left_frame.html,v 1.9 2004/11/30 22:01:43 jz Exp $ -->
+<!-- $Id: left_frame.html,v 1.1 2004/11/30 21:59:46 jz Exp $ -->
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <html>
 
@@ -14,15 +14,15 @@
     </style>
 </head>
 
-<body>
-
+<body class="left">
+<!--
 <p style="margin-bottom: 10pt; margin-top: 0; padding-top: 0; padding-bottom: 3pt">
     <input id="update_periodically_checkbox" type="checkbox" onclick="update_periodically_checkbox__onclick()" NAME="update_periodically_checkbox"/>
     <label for="update_periodically_checkbox"><span class="translate">Update periodically</span></label>
     &#160; &#160;
-    <input id="update_button" type="button" value="Update" onclick="update__onclick()" NAME="update_button"/>
+    <input id="update_button" class="button" type="button" value="Update" onclick="update__onclick()" NAME="update_button"/>    
 </p>
-
+//-->
 <span id="error_message" style="font-weight: bold; color: red"></span>
 <span id="stylesheet_output"></span>
 
@@ -37,12 +37,6 @@ var _max_orders = 10;
 
 //----------------------------------------------------------------------------------------------var
 
-// Die Variablen enthalten die Versionnummer (numerisch, z.B. 5.5) des Browsers, oder 0.
-var ie       = 0;   // Microsoft Internet Explorer
-var netscape = 0;   // Netscape
-var firefox  = 0;   // Mozilla Firefox
-var opera    = 0;   // Opera
-
 var _stylesheet;
 var _translation_table;
 var _response;
@@ -53,6 +47,7 @@ var _show_card = "jobs";
 //var _show_job_chains      = false;
 //var _show_process_classes = false;
 var _checkbox_states = new Object();
+var _saved_frameset_cols;
 
 _checkbox_states[ "show_order_jobs_checkbox" ] = true;
 //var _update_periodically = false;
@@ -75,7 +70,7 @@ function do_onload()
     }
     
     _scheduler = new Scheduler();
-    repeat_update( document.getElementById( "update_periodically_checkbox" ).checked, true );
+    repeat_update( parent.top_frame.document.getElementById( "update_periodically_checkbox" ).checked, true );
     scheduler_init();
 }
 
@@ -91,8 +86,8 @@ function do_onunload()
 function update_periodically_checkbox__onclick()
 {
     reset_error();
-    repeat_update( document.getElementById( "update_periodically_checkbox" ).checked, 
-                   document.getElementById( "update_periodically_checkbox" ).checked );
+    repeat_update( parent.top_frame.document.getElementById( "update_periodically_checkbox" ).checked, 
+                   parent.top_frame.document.getElementById( "update_periodically_checkbox" ).checked );
 }
 
 //--------------------------------------------------------------------------------------reset_error
@@ -114,7 +109,7 @@ function repeat_update( repeat, call_update )
     {
         if( call_update )
         {
-            document.getElementById( "update_periodically_checkbox" ).checked = false;     
+            parent.top_frame.document.getElementById( "update_periodically_checkbox" ).checked = false;     
             update();
         }
     }
@@ -137,7 +132,7 @@ function repeat_update( repeat, call_update )
 
     if( repeat )
     {
-        document.getElementById( "update_periodically_checkbox" ).checked = true;
+        parent.top_frame.document.getElementById( "update_periodically_checkbox" ).checked = true;
         set_update_timer();
     }
 }
@@ -191,7 +186,7 @@ function update()
 {
     reset_error();
     update_jobs_frame();
-
+    
     if( window.parent.details_frame.document.readyState == "complete" )
     {
         window.parent.details_frame.update();
@@ -277,14 +272,14 @@ function show_card( what )
         {
             window.parent.details_frame.clear();
             
-            //_saved_frameset_cols = window.parent.left_and_right_frameset.cols; 
-            //window.parent.left_and_right_frameset.cols = "100%, 0%";
+            _saved_frameset_cols = window.parent.left_and_right_frameset.cols; 
+            window.parent.left_and_right_frameset.cols = "100%, 0%";
         }
-        //else
-        //if( _saved_frameset_cols != undefined )
+        else
+        if( _saved_frameset_cols != undefined )
         {
-            //window.parent.left_and_right_frameset.cols = _saved_frameset_cols;
-            //_saved_frameset_cols = undefined;
+            window.parent.left_and_right_frameset.cols = _saved_frameset_cols;
+            _saved_frameset_cols = undefined;
         }
     
         _show_card = what;

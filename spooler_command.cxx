@@ -1,4 +1,4 @@
-// $Id: spooler_command.cxx,v 1.142 2004/10/22 09:33:23 jz Exp $
+// $Id: spooler_command.cxx,v 1.143 2004/11/30 22:02:28 jz Exp $
 /*
     Hier ist implementiert
 
@@ -324,7 +324,7 @@ xml::Element_ptr Command_processor::execute_modify_spooler( const xml::Element_p
 
 //-------------------------------------------------------------Command_processor::execute_terminate
 
-xml::Element_ptr Command_processor::execute_terminate( const xml::Element_ptr& element )
+xml::Element_ptr Command_processor::execute_terminate( const xml::Element_ptr& )
 {
     if( _security_level < Security::seclev_all )  throw_xc( "SCHEDULER-121" );
 
@@ -687,11 +687,13 @@ string xml_as_string( const xml::Document_ptr& document, bool indent )
 
 //-------------------------------------------------------------------Command_processor::execute_http
 
-ptr<Http_response> Command_processor::execute_http( const Http_request* http_request )
+ptr<Http_response> Command_processor::execute_http( Http_request* http_request )
 {
     string  path                    = http_request->_path;
     string  response_body;
     string  response_content_type;
+    int     http_status_code        = 0;
+    string  error_text;
 
     try
     {
@@ -699,21 +701,27 @@ ptr<Http_response> Command_processor::execute_http( const Http_request* http_req
 
         if( http_request->_http_cmd == "GET" )
         {
-            if( path == "/" )  path = "index.html";
+            if( path == "/" )  path = "/index.html";
 
-            string extension = extension_of_path( path );
-            if( extension == "html"  
-             || extension == "htm"  )  response_content_type = "text/html";
-            else
-            if( extension == "xsl"  )  response_content_type = "text/xsl";
-            else
-            if( extension == "xslt" )  response_content_type = "text/xslt";
-            else
-            if( extension == "js"   )  response_content_type = "text/javascript";
-            else
-            if( extension == "css"  )  response_content_type = "text/css";
+            string extension;
 
-            if( response_content_type != "" )
+            if( !string_begins_with( path, "<" )  &&  !string_begins_with( path, "/<" ) )
+            {
+                extension = extension_of_path( path );
+             
+                if( extension == "html"  
+                 || extension == "htm"  )  response_content_type = "text/html";
+                else
+                if( extension == "xsl"  )  response_content_type = "text/xsl";
+                else
+                if( extension == "xslt" )  response_content_type = "text/xslt";
+                else
+                if( extension == "js"   )  response_content_type = "text/javascript";
+                else
+                if( extension == "css"  )  response_content_type = "text/css";
+            }
+
+            if( extension  != "" )
             {
                 if( _spooler->_html_directory.empty() )  throw_xc( "SCHEDULER-212" );
                 if( path.find( ".." ) != string::npos )  throw_xc( "SCHEDULER-214" );
@@ -766,10 +774,30 @@ ptr<Http_response> Command_processor::execute_http( const Http_request* http_req
     catch( const exception& x )
     {
         _spooler->log().error( "Fehler beim HTTP-Aufruf " + http_request->_http_cmd + " " + path + ": " + x.what() );
-        response_body = "<html><head><title>Scheduler</title></head><body>Die Seite kann nicht bereitgestellt werden. Siehe Scheduler-Protokoll</body></html>";
+
+        http_status_code = 404;
+        error_text = x.what();
+/*
+        response_body = "<html><head><title>Scheduler</title></head><body>";
+        
+        for( int i = 0; i < error_text.length(); i++ )
+        {
+            switch( char c = error_text[ i ] )
+            {
+                case '<' : response_body += "&lt;";   break;
+                case '&' : response_body += "&amp;";  break;
+                case '\r': break;
+                case '\n': response_body += "<br/>";  break;
+                default  : response_body += c;
+            }
+        }
+        
+        response_body += "<br/><p>Siehe auch das Hauptprotokoll des Schedulers</p></body></html>";
+*/
     }
 
     ptr<Http_response> response = Z_NEW( Http_response( http_request, Z_NEW( String_chunk_reader( response_body ) ), response_content_type ) );
+    if( http_status_code )  response->set_status( http_status_code, error_text );
     return +response;
 /*
     time_t      t;

@@ -1,4 +1,4 @@
-// $Id: spooler_http.h,v 1.11 2004/07/27 09:06:52 jz Exp $
+// $Id: spooler_http.h,v 1.12 2004/11/30 22:02:28 jz Exp $
 
 #ifndef __SPOOLER_HTTP_H
 #define __SPOOLER_HTTP_H
@@ -183,7 +183,7 @@ struct Html_chunk_reader : Chunk_reader_filter
 
 struct Http_response : Object
 {
-                                Http_response               ( const Http_request*, Chunk_reader*, const string& content_type );
+                                Http_response               ( Http_request*, Chunk_reader*, const string& content_type );
     
     void                        recommend_block_size        ( int size )                            { _chunk_reader->recommend_block_size( size ); }
     int                         recommended_block_size      () const                                { return _chunk_reader->_recommended_block_size; }
@@ -195,6 +195,7 @@ struct Http_response : Object
 
     string                      content_type                ()                                      { return _content_type; }
     void                    set_content_type                ( string value )                        { _content_type = value; }
+    void                    set_status                      ( int code, const string& text )        { _status_code = code; _status_text = text; }
     void                        finish                      ();
 
     bool                        eof                         ();
@@ -206,16 +207,20 @@ struct Http_response : Object
 
 
     Fill_zero                  _zero_;
+    ptr<Http_request>          _http_request;
     bool                       _chunked;
     bool                       _close_connection_at_eof;
     ptr<Chunk_reader>          _chunk_reader;
     string                     _content_type;
+    int                        _status_code;
+    string                     _status_text;
     string                     _header;
     int                        _chunk_index;                // 0: Header
     uint                       _chunk_size;
     uint                       _chunk_offset;               // Bereits gelesene Bytes
     bool                       _chunk_eof;
     bool                       _eof;
+    bool                       _finished;
 };
 
 //-------------------------------------------------------------------------------------------------

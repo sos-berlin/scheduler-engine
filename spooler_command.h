@@ -1,4 +1,4 @@
-// $Id: spooler_command.h,v 1.33 2004/09/06 07:53:27 jz Exp $
+// $Id: spooler_command.h,v 1.34 2004/11/30 22:02:28 jz Exp $
 
 #ifndef __SPOOLER_COMMAND_H
 #define __SPOOLER_COMMAND_H
@@ -56,7 +56,7 @@ struct Command_processor
                                ~Command_processor           ();
 
     void                        execute_file                ( const string& xml_filename );
-    ptr<Http_response>          execute_http                ( const Http_request* );
+    ptr<Http_response>          execute_http                ( Http_request* );
     string                      execute                     ( const string& xml_text, const Time& xml_mod_time, bool indent = false );
     void                        execute_2                   ( const string& xml_text, const Time& xml_mod_time );
     xml::Element_ptr            execute_command             ( const xml::Element_ptr&, const Time& xml_mod_time );
