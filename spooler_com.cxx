@@ -1,4 +1,4 @@
-// $Id: spooler_com.cxx,v 1.31 2002/03/18 10:11:39 jz Exp $
+// $Id: spooler_com.cxx,v 1.32 2002/03/20 11:07:48 jz Exp $
 /*
     Hier sind implementiert
 
@@ -39,13 +39,15 @@ DESCRIBE_CLASS( &spooler_typelib, Com_spooler     , spooler     , spooler_com::C
 Time time_from_variant( const VARIANT& vt )
 {
     string  str = variant_as_string( vt );
-    char*   p   = NULL;
-    double  d   = strtod( str.c_str(), &p );
-    
-    while( isspace(*p) )  p++;
-    
-    if( *p == '\0' )  return d;   // strtod() hat geklappt?
-                else  return Sos_optional_date_time(str);
+
+    if( str.find( ':' ) != string::npos )
+    {
+        Sos_optional_date_time dt;
+        dt.set_time( str );
+        return dt.time_as_double();
+    }
+    else
+        return as_double( str );
 }
 
 //-----------------------------------------------------------------------------Com_error::Com_error
