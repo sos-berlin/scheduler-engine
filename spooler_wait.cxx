@@ -1,4 +1,4 @@
-// $Id: spooler_wait.cxx,v 1.30 2002/03/20 08:49:03 jz Exp $
+// $Id: spooler_wait.cxx,v 1.31 2002/03/20 10:30:13 jz Exp $
 /*
     Hier sind implementiert
 
@@ -101,20 +101,26 @@ void Event::close_handle()
 
 void Event::add_to( Wait_handles* w )                 
 { 
-    _wait_handles.push_back(w); 
-    w->add( this );
+    THREAD_LOCK( _lock )
+    {
+        _wait_handles.push_back(w); 
+        w->add( this );
+    }
 }
 
 //-------------------------------------------------------------------------------Event::remove_from
 
 void Event::remove_from( Wait_handles* w )
 {
-    FOR_EACH( vector<Wait_handles*>, _wait_handles, it ) 
+    THREAD_LOCK( _lock )
     {
-        if( *it == w )  _wait_handles.erase( it );
-    }
+        FOR_EACH( vector<Wait_handles*>, _wait_handles, it ) 
+        {
+            if( *it == w )  _wait_handles.erase( it );
+        }
 
-    w->remove( this );
+        w->remove( this );
+    }
 }
 
 //--------------------------------------------------------------------------------------Event::wait
@@ -200,9 +206,12 @@ Wait_handles::~Wait_handles()
 
 void Wait_handles::close()
 {
-    FOR_EACH( vector<Event*>, _events, it )  
+    THREAD_LOCK( _lock )
     {
-        if( *it )  _log->warn( "Wait_handles wird vor " + (*it)->as_string() + " geschlossen" );
+        FOR_EACH( vector<Event*>, _events, it )  
+        {
+            if( *it )  _log->warn( "Wait_handles wird vor " + (*it)->as_string() + " geschlossen" );
+        }
     }
 }
 
@@ -210,16 +219,22 @@ void Wait_handles::close()
 
 void Wait_handles::add( Event* event )
 {
-    _handles.push_back( event->handle() );
-    _events.push_back( event );
+    THREAD_LOCK( _lock )
+    {
+        _handles.push_back( event->handle() );
+        _events.push_back( event );
+    }
 }
 
 //-------------------------------------------------------------------------Wait_handles::add_handle
 
 void Wait_handles::add_handle( HANDLE handle )
 {
-    _handles.push_back( handle );
-    _events.push_back( NULL );
+    THREAD_LOCK( _lock )
+    {
+        _handles.push_back( handle );
+        _events.push_back( NULL );
+    }
 }
 
 //-----------------------------------------------------------------------------Wait_handles::remove
@@ -235,22 +250,25 @@ void Wait_handles::remove( Event* event )
 
 void Wait_handles::remove_handle( HANDLE handle, Event* event )
 {
-    vector<HANDLE>::iterator it = _handles.begin();
-
-    while( it != _handles.end() )
+    THREAD_LOCK( _lock )
     {
-        if( *it == handle )  break;
-        it++;
-    }
+        vector<HANDLE>::iterator it = _handles.begin();
 
-    if( it == _handles.end() ) {
-        if( event )  _log->error( "Wait_handles::remove(" + event->as_string() + ") fehlt" );     // Keine Exception. Das wäre nicht gut in einem Destruktor
-               else  _log->error( "Wait_handles::remove() fehlt" );
-        return;
-    }
+        while( it != _handles.end() )
+        {
+            if( *it == handle )  break;
+            it++;
+        }
 
-    _events.erase( _events.begin() + ( it - _handles.begin() ) );
-    _handles.erase( it );
+        if( it == _handles.end() ) {
+            if( event )  _log->error( "Wait_handles::remove(" + event->as_string() + ") fehlt" );     // Keine Exception. Das wäre nicht gut in einem Destruktor
+                   else  _log->error( "Wait_handles::remove() fehlt" );
+            return;
+        }
+
+        _events.erase( _events.begin() + ( it - _handles.begin() ) );
+        _handles.erase( it );
+    }
 }
 
 //-------------------------------------------------------------------------------Wait_handles::wait
@@ -264,7 +282,8 @@ int Wait_handles::wait( double wait_time )
 
 int Wait_handles::wait_until( Time until )
 {
-    bool again = false;
+    bool    again   = false;
+    HANDLE* handles = NULL;
 
     while(1)
     {
@@ -278,35 +297,46 @@ int Wait_handles::wait_until( Time until )
             _log->info( "Noch " + sos::as_string(wait_time) + "s warten ..." );
         }
 
-#       ifdef DEBUG
+        THREAD_LOCK( _lock )
         {
-            string msg = "WaitForMultipleObjects " + sos::as_string(t/1000.0) + "s  ";
-            for( int i = 0; i < _handles.size(); i++ )
+#           ifdef DEBUG
             {
-                if( i > 0 )  msg += ", ";
-                msg += _events[i]->as_string();
-                msg += " (0x" + as_hex_string( (int)_handles[i] ) + ")";
+                string msg = "WaitForMultipleObjects " + sos::as_string(t/1000.0) + "s  ";
+                for( int i = 0; i < _handles.size(); i++ )
+                {
+                    if( i > 0 )  msg += ", ";
+                    if( _events[i] )  msg += _events[i]->as_string() + " (0x" + as_hex_string( (int)_handles[i] ) + ")";
+                               else   msg += "NULL";
+                }
+                _log->debug9( msg );
             }
-            _log->debug9( msg );
-        }
-#       endif
+#           endif
 
-        DWORD ret = MsgWaitForMultipleObjects( _handles.size(), &_handles[0], FALSE, t, QS_ALLINPUT ); 
+            handles = new HANDLE [ _handles.size()+1 ];
+            for( int i = 0; i < _handles.size(); i++ )  handles[i] = _handles[i];
+        }
+
+        DWORD ret = MsgWaitForMultipleObjects( _handles.size(), handles, FALSE, t, QS_ALLINPUT ); 
+        
+        delete [] handles;  handles = NULL;
 
         if( ret == WAIT_FAILED )  throw_mswin_error( "WaitForMultipleObjects" );
 
         if( ret >= WAIT_OBJECT_0  &&  ret < WAIT_OBJECT_0 + _handles.size() )
         {
-            int    index = ret - WAIT_OBJECT_0;
-            Event* event = _events[ index ];
-            
-            if( event )
+            THREAD_LOCK( _lock )
             {
-                event->set_signal();
-                if( _spooler->_debug )  _log->debug( event->as_string() );
-            }
+                int    index = ret - WAIT_OBJECT_0;
+                Event* event = _events[ index ];
+            
+                if( event )
+                {
+                    event->set_signal();
+                    if( _spooler->_debug )  _log->debug( event->as_string() );
+                }
 
-            return index;
+                return index;
+            }
         }
         else
         if( ret == WAIT_OBJECT_0 + _handles.size() )
@@ -325,24 +355,29 @@ int Wait_handles::wait_until( Time until )
 
 //--------------------------------------------------------------------------Wait_handles::as_string
 
-string Wait_handles::as_string() const
+string Wait_handles::as_string() 
 {
     string result;
 
-    if( _events.empty() )
+    THREAD_LOCK( _lock )
     {
-        return "nichts";
-    }
-    else
-    {
-        FOR_EACH_CONST( vector<Event*>, _events, it )  
+        if( _events.empty() )
         {
-            if( !result.empty() )  result += ", ";
-            result += (*it)->as_string();
+            result = "nichts";
         }
+        else
+        {
+            FOR_EACH_CONST( vector<Event*>, _events, it )  
+            {
+                if( !result.empty() )  result += ", ";
+                result += (*it)->as_string();
+            }
 
-        return "{" + result + "}";
+            result = "{" + result + "}";
+        }
     }
+
+    return result;
 }
 
 //---------------------------------------------------------------------------------Directory_reader

@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.68 2002/03/20 08:49:02 jz Exp $
+// $Id: spooler_task.cxx,v 1.69 2002/03/20 10:30:12 jz Exp $
 /*
     Hier sind implementiert
 
@@ -801,7 +801,7 @@ void Job::finish()
         //if( _log.mail_on_success() && !has_error()  
         //||  _log.mail_on_error()   &&  has_error() )  _log.send();
 
-        _log.send( has_error()? -1 : _task && _task->_process_ok? +1 : 0 );
+        _log.send( has_error()? -1 : _process_ok? +1 : 0 );
 
         //_log.close();
     }
@@ -1029,7 +1029,7 @@ bool Job::do_something()
 
 
 ENDE:
-    send_collected_log();
+    if( _state != s_running  &&  _state != s_running_process  &&  _state != s_suspended )  send_collected_log();
 
     return something_done;
 }
@@ -1055,7 +1055,10 @@ void Job::set_mail_defaults()
 
     _log.set_mail_from_name( "Job " + _name );
 
-    string body = Sos_optional_date_time::now().as_string() + "\n\nJob " + _name + "  " + _title + "\n\n";
+    char hostname[200];
+    if( gethostname( hostname, sizeof hostname ) == SOCKET_ERROR )  hostname[0] = '\0';
+    string body = Sos_optional_date_time::now().as_string() + "\n\nJob " + _name + "  " + _title + "\n"
+                  "Spooler -id=" + _spooler->id() + "  host=" + hostname + "\n\n";
 
     if( !is_error )
     {
@@ -1449,6 +1452,7 @@ bool Task::start()
 
             _job->_thread->_task_count++;
             _job->_step_count = 0;
+            _job->_process_ok = false;
             _running_since = Time::now();
         }
 
@@ -1557,7 +1561,7 @@ bool Task::step()
         _job->_thread->_step_count++;
         _job->_step_count++;
         _step_count++;
-        _process_ok |= result;
+        _job->_process_ok |= result;
     }
     catch( const Xc& x        ) { _job->set_error(x); return false; }
     catch( const exception& x ) { _job->set_error(x); return false; }

@@ -1,4 +1,4 @@
-// $Id: spooler_log.cxx,v 1.31 2002/03/20 08:49:02 jz Exp $
+// $Id: spooler_log.cxx,v 1.32 2002/03/20 10:30:12 jz Exp $
 
 #include "../kram/sos.h"
 #include "spooler.h"
@@ -500,7 +500,6 @@ void Prefix_log::send( int reason )
     if( _file == -1 )       // Nur senden, wenn die Log-Datei beschrieben worden ist
     {
         _first_send = 0;
-        _last_send = 0;
         _mail = NULL;
     }
     else
@@ -518,8 +517,8 @@ void Prefix_log::send( int reason )
         }
         else
         {
-            if( _last_send  == 0 )  _last_send  = now;
-            if( _first_send == 0 )  _first_send = now;
+            if( _last_send  == 0  ||  _last_send  > now )  _last_send  = now;
+            if( _first_send == 0  ||  _first_send > now )  _first_send = now;
 
             if( reason < 0                              // Fehler?
              || now >= _last_send + _collect_within     // Nicht mehr sammeln?
@@ -532,11 +531,12 @@ void Prefix_log::send( int reason )
                 close2();
                 send_really();
 
-                _last_send = now;
                 _first_send = 0;
             }
         }
     }
+ 
+    _last_send = Time::now();
 }
 
 //--------------------------------------------------------------------------Prefix_log::send_really

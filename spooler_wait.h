@@ -1,4 +1,4 @@
-// $Id: spooler_wait.h,v 1.20 2002/03/18 10:11:40 jz Exp $
+// $Id: spooler_wait.h,v 1.21 2002/03/20 10:30:13 jz Exp $
 
 #ifndef __SPOOLER_WAIT_H
 #define __SPOOLER_WAIT_H
@@ -76,8 +76,8 @@ struct Wait_handles
     int                         wait                        ( double time );
     bool                        empty                       () const                        { return _events.empty(); }
 
-    string                      as_string                   () const;
-    friend ostream&             operator <<                 ( ostream& s, const Wait_handles& w ) { return s << w.as_string(); }
+    string                      as_string                   ();
+    friend ostream&             operator <<                 ( ostream& s, Wait_handles& w ) { return s << w.as_string(); }
 
 
   protected:

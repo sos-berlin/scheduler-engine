@@ -1,4 +1,4 @@
-// $Id: spooler_task.h,v 1.38 2002/03/19 18:56:28 jz Exp $
+// $Id: spooler_task.h,v 1.39 2002/03/20 10:30:13 jz Exp $
 
 #ifndef __SPOOLER_TASK_H
 #define __SPOOLER_TASK_H
@@ -284,6 +284,7 @@ struct Job : Sos_self_deleting
     Script_instance            _script_instance;            // Für use_engine="job"
 
     int                        _step_count;                 // Anzahl spooler_process() der letzten Task
+    bool                       _process_ok;                 // Einmal spooler_process() mit return true gerufen.
     bool                       _has_spooler_process;
     Directory_watcher_list     _directory_watcher_list;
     Event                      _event;                      // Zum Starten des Jobs
@@ -357,7 +358,6 @@ struct Task : Sos_self_deleting
     
     double                     _cpu_time;
     int                        _step_count;
-    bool                       _process_ok;                 // Einmal spooler_process() mit return true gerufen.
 
     bool                       _let_run;                    // Task zuende laufen lassen, nicht bei _job._period.end() beenden
     bool                       _opened;

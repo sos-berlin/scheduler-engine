@@ -126,8 +126,7 @@ SOURCE=.\spooler_log.cxx
 # End Source File
 # Begin Source File
 
-SOURCE=.\spooler_mail_jmail.cxx
-# ADD CPP /YX"spooler.h"
+SOURCE=.\spooler_mail.cxx
 # End Source File
 # Begin Source File
 
@@ -223,7 +222,7 @@ SOURCE=.\spooler_log.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\spooler_mail_jmail.h
+SOURCE=.\spooler_mail.h
 # End Source File
 # Begin Source File
 
