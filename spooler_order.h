@@ -1,4 +1,4 @@
-// $Id: spooler_order.h,v 1.10 2002/10/02 12:54:38 jz Exp $
+// $Id: spooler_order.h,v 1.11 2002/10/03 07:57:06 jz Exp $
 
 #ifndef __SPOOLER_ORDER_H
 #define __SPOOLER_ORDER_H
@@ -22,9 +22,11 @@ struct Order : Com_order
     typedef Variant             Id;
 
     
-                                Order                   ( Spooler* spooler )                        : _zero_(this+1), _spooler(spooler), Com_order(this) {}
+                                Order                   ( Spooler* spooler )                        : _zero_(this+1), _spooler(spooler), Com_order(this) { init(); }
                                 Order                   ( Spooler* spooler, const VARIANT& );
                                ~Order                   ();
+
+    void                        init                    ();
 
 
     void                    set_id                      ( const Variant& );
@@ -89,13 +91,17 @@ struct Order : Com_order
     State                      _state;
     wstring                    _state_text;
     string                     _title;
-    Payload                    _payload;
     Job_chain*                 _job_chain;              
     Job_chain_node*            _job_chain_node;         // Nächster Stelle, falls in einer Jobkette
-    bool                       _in_job_queue;           // Auftrag ist in _job_chain_node->_job->order_queue() eingehängt
-    bool                       _in_process;             // Auftrag wird gerade von spooler_process() verarbeitet 
-    bool                       _moved;                  // true, wenn Job state oder job geändert hat. Dann nicht automatisch in Jobkette weitersetzen
     Order_queue*               _order_queue;            // Auftrag ist in einer Auftragsliste, aber nicht in einer Jobkette. _job_chain == NULL, _job_chain_node == NULL!
+    Payload                    _payload;
+
+    Time                       _created;
+
+    bool                       _in_job_queue;           // Auftrag ist in _job_chain_node->_job->order_queue() eingehängt
+  //bool                       _in_process;             // Auftrag wird gerade von spooler_process() verarbeitet 
+    Task*                      _task;                   // Auftrag wird gerade von dieser Task in spooler_process() verarbeitet 
+    bool                       _moved;                  // true, wenn Job state oder job geändert hat. Dann nicht automatisch in Jobkette weitersetzen
 };
 
 //-----------------------------------------------------------------------------------Job_chain_node
@@ -192,7 +198,8 @@ struct Order_queue : Com_order_queue
     void                        remove_order            ( Order* );
     int                         length                  () const                                    { return _queue.size(); }
     bool                        empty                   () const                                    { return _queue.empty(); }
-    ptr<Order>                  get_order_for_processing();
+    ptr<Order>                  get_order_for_processing( Task* );
+    void                        update_priorities       ();
     ptr<Order>                  order_or_null           ( const Order::Id& );
     Job*                        job                     () const                                    { return _job; }
     xml::Element_ptr            xml                     ( xml::Document_ptr, Show_what );
@@ -210,6 +217,7 @@ struct Order_queue : Com_order_queue
     typedef list< ptr<Order> >  Queue;
     Queue                      _queue;
 
+    int                        _lowest_priority;        // Zur Optimierung
     int                        _highest_priority;       // Zur Optimierung
     bool                       _has_users_id;           // D.h. id auf Eindeutigkeit prüfen. Bei selbst generierten Ids überflüssig. Zur Optimierung.
 

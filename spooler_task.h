@@ -1,4 +1,4 @@
-// $Id: spooler_task.h,v 1.64 2002/10/02 05:47:30 jz Exp $
+// $Id: spooler_task.h,v 1.65 2002/10/03 07:57:07 jz Exp $
 
 #ifndef __SPOOLER_TASK_H
 #define __SPOOLER_TASK_H
@@ -380,6 +380,7 @@ struct Task : Sos_self_deleting
     void                        set_close_engine            ( bool b )                      { _close_engine = b; }
     bool                        has_parameters              ();
     xml::Document_ptr           parameters_as_dom           ();
+    Time                        last_process_start_time     ()                              { return _last_process_start_time; }
 
 
     bool                        wait_until_terminated       ( double wait_time = latter_day );
@@ -426,6 +427,7 @@ struct Task : Sos_self_deleting
     Time                       _enqueue_time;
     Time                       _start_at;                   // Zu diesem Zeitpunkt (oder danach) starten
     Time                       _running_since;
+    Time                       _last_process_start_time;
 
     ptr<spooler_com::Ivariable_set> _params;
     Variant                    _result;

@@ -1,4 +1,4 @@
-// $Id: spooler_order.cxx,v 1.12 2002/10/02 12:54:38 jz Exp $
+// $Id: spooler_order.cxx,v 1.13 2002/10/03 07:57:06 jz Exp $
 /*
     Hier sind implementiert
 
@@ -347,10 +347,8 @@ void Order_queue::add_order( Order* order )
 */
         _has_users_id |= order->_is_users_id;
 
-        if( _has_users_id  ||  order->priority() > _highest_priority )            // Optimierung
+        if( _has_users_id  ||  order->priority() > _lowest_priority  &&  order->priority() <= _highest_priority )     // Optimierung
         {
-            _highest_priority = max( _highest_priority, order->priority() );
-
             for( Queue::iterator it = _queue.begin(); it != _queue.end(); it++ )
             {
                 Order* o = *it;
@@ -371,8 +369,12 @@ void Order_queue::add_order( Order* order )
             }
         }
 
-        if( ins_set )  _queue.insert( ins, order );
-                 else  _queue.push_back( order );
+        if( ins_set )                                 _queue.insert( ins, order );
+        else  
+        if( order->priority() > _highest_priority )   _queue.push_front( order );
+                                                else  _queue.push_back( order );
+
+        update_priorities();
 
         order->_in_job_queue = true;
 
@@ -394,9 +396,46 @@ void Order_queue::remove_order( Order* order )
 
         _queue.erase( it );
       //_id_map.erase( order->_id );
+        update_priorities();
 
         order->_in_job_queue = false;
     }
+}
+
+//-------------------------------------------------------------------Order_queue::update_priorities
+
+void Order_queue::update_priorities()
+{
+    if( !_queue.empty() )
+    {
+        _highest_priority = _queue.front()->priority();
+        _lowest_priority  = _queue.back()->priority();
+    }
+}
+
+//------------------------------------------------------------Order_queue::get_order_for_processing
+
+ptr<Order> Order_queue::get_order_for_processing( Task* task )
+{
+    // Die Order_queue gehört genau einem Job. Der Job kann zur selben Zeit nur einen Schritt ausführen.
+    // Deshalb kann nur der erste Auftrag in Verarbeitung sein.
+
+    ptr<Order> result;
+
+    THREAD_LOCK( _lock )
+    {
+        if( !_queue.empty() )
+        {
+            result = _queue.front();
+
+            if( result->_task )  throw_xc( "Order_queue::get_order_for_processing" );   // Darf nicht passieren
+            
+            result->_task = task;
+            result->_moved = false;
+        }   
+    }
+
+    return result;
 }
 
 //-----------------------------------------------------------------------Order_queue::order_or_null
@@ -411,40 +450,23 @@ ptr<Order> Order_queue::order_or_null( const Order::Id& id )
     return NULL;
 }
 
-//------------------------------------------------------------Order_queue::get_order_for_processing
-
-ptr<Order> Order_queue::get_order_for_processing()
-{
-    // Die Order_queue gehört genau einem Job. Der Job kann zur selben Zeit nur einen Schritt ausführen.
-    // Deshalb kann nur der erste Auftrag in Verarbeitung sein.
-
-    ptr<Order> result;
-
-    THREAD_LOCK( _lock )
-    {
-        if( !_queue.empty() )
-        {
-            result = _queue.front();
-
-            if( result->_in_process )  throw_xc( "Order_queue::get_order_for_processing" );   // Darf nicht passieren
-            
-            result->_in_process = true;
-            result->_moved = false;
-        }   
-    }
-
-    return result;
-}
-
 //-------------------------------------------------------------------------------------Order::Order
 
 Order::Order( Spooler* spooler, const VARIANT& payload )
 : 
+    Com_order(this),
     _zero_(this+1), 
     _spooler(spooler),
-    _payload(payload),
-     Com_order(this)
+    _payload(payload)
 {
+    init();
+}
+
+//--------------------------------------------------------------------------------------Order::init
+
+void Order::init()
+{
+    _created = Time::now();
 }
 
 //------------------------------------------------------------------------------------Order::~Order
@@ -468,14 +490,16 @@ xml::Element_ptr Order::xml( xml::Document_ptr document, Show_what show )
         if( _job_chain )  
         element->setAttribute( "job_chain" , _job_chain->name().c_str() );
 
-        if( _job_chain_node )
-        element->setAttribute( "job"       , _job_chain_node->_job->name().c_str() );
+        Job* job = this->job();
+        if( job )
+        element->setAttribute( "job"       , job->name().c_str() );
 
-        if( _order_queue )
-        element->setAttribute( "job"       , _order_queue->job()->name().c_str() );
+        if( _task )
+        element->setAttribute( "in_process_since", as_dom_string( _task->last_process_start_time().as_string() ) );
 
         element->setAttribute( "state_text", _state_text.c_str() );
         element->setAttribute( "priority"  , as_dom_string( _priority ) );
+        element->setAttribute( "created"   , as_dom_string( _created.as_string() ) );
     }
 
     return element;
@@ -575,7 +599,7 @@ void Order::set_priority( Priority priority )
         {
             _priority = priority; 
 
-            if( _in_job_queue  &&  !_in_process )  
+            if( _in_job_queue  &&  !_task )   // Nicht gerade in Verarbeitung?
             {
                 ptr<Order> hold_me = this;
                 order_queue()->remove_order( this );
@@ -685,7 +709,7 @@ void Order::move_to_node( Job_chain_node* node )
         if( !_job_chain )  throw_xc( "SPOOLER-157", obj_name() );
 
         _moved = true;
-        _in_process = false;
+        _task = NULL;
 
         if( _job_chain_node && _in_job_queue )  _job_chain_node->_job->order_queue()->remove_order( this );
 
@@ -702,7 +726,7 @@ void Order::postprocessing( bool success, Prefix_log* log )
 {
     THREAD_LOCK( _lock )
     {
-        _in_process = false;
+        _task = NULL;
 
         if( !_moved )
         {
@@ -744,7 +768,7 @@ void Order::processing_error()
 {
     THREAD_LOCK( _lock )
     {
-        _in_process = false;
+        _task = NULL;
         _moved = false;
     }
 }

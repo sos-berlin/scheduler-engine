@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.111 2002/10/02 12:54:38 jz Exp $
+// $Id: spooler_task.cxx,v 1.112 2002/10/03 07:57:07 jz Exp $
 /*
     Hier sind implementiert
 
@@ -1061,86 +1061,90 @@ bool Job::do_something()
     }
 
 
-    if( _state == s_running_delayed  &&  Time::now() >= _task->_next_spooler_process )
     {
-        _task->_next_spooler_process = 0;
-        set_state( s_running );
-    }
+        Time now = Time::now();
 
-    if( _state == s_running_waiting_for_order )
-    {
-        if( !_order_queue->empty() )  set_state( s_running );                       // Auftrag da? Dann Task weiterlaufen lassen (Ende der Run_time wird noch geprüft)
-                                else  ok &= _period.is_in_time( Time::now() );      // Run_time abgelaufen? Dann Task beenden
-    }
-
-    if( ( _state == s_running || _state == s_running_process )  &&  ok  &&  !has_error() )      // SPOOLER_PROCESS
-    {
-        Time now;
-        bool call_step = do_a_step | _task->_let_run;
-        if( !call_step )  now = Time::now(), call_step = _period.is_in_time( now );
-        if( !call_step )   // Period abgelaufen?
+        if( _state == s_running_delayed  &&  now >= _task->_next_spooler_process )
         {
-            call_step = _task->_let_run  ||  ( select_period(now), is_in_period(now) );
+            _task->_next_spooler_process = 0;
+            set_state( s_running );
         }
 
-        if( call_step ) 
+        if( _state == s_running_waiting_for_order )
         {
-            ok = _task->step(); 
-            something_done = true;
+            if( !_order_queue->empty() )  set_state( s_running );            // Auftrag da? Dann Task weiterlaufen lassen (Ende der Run_time wird noch geprüft)
+                                    else  ok &= _period.is_in_time( now );   // Run_time abgelaufen? Dann Task beenden
         }
-        else
+
+        if( ( _state == s_running || _state == s_running_process )  &&  ok  &&  !has_error() )      // SPOOLER_PROCESS
         {
-            ok = false;
-            _log( "Laufzeitperiode ist abgelaufen, Task wird beendet" );
+            bool call_step = do_a_step | _task->_let_run;
+            if( !call_step )  call_step = _period.is_in_time( now );
+            if( !call_step )   // Period abgelaufen?
+            {
+                call_step = _task->_let_run  ||  ( select_period(now), is_in_period(now) );
+            }
+
+            if( call_step ) 
+            {
+                _task->_last_process_start_time = now;
+                ok = _task->step(); 
+                something_done = true;
+            }
+            else
+            {
+                ok = false;
+                _log( "Laufzeitperiode ist abgelaufen, Task wird beendet" );
+            }
         }
-    }
 
 
-    if( !ok || has_error() )                                                                    // SPOOLER_CLOSE
-    {                                                                                           // SPOOLER_ON_SUCCESS, SPOOLER_ON_ERROR
-        if( has_error() )  _history.start();
+        if( !ok || has_error() )                                                                    // SPOOLER_CLOSE
+        {                                                                                           // SPOOLER_ON_SUCCESS, SPOOLER_ON_ERROR
+            if( has_error() )  _history.start();
 
-        if( _state == s_start_task
-         || _state == s_starting        // Bei Fehler in spooler_init()
-         || _state == s_running 
-         || _state == s_running_delayed
-         || _state == s_running_waiting_for_order
-         || _state == s_running_process )  end(), something_done = true;
+            if( _state == s_start_task
+             || _state == s_starting        // Bei Fehler in spooler_init()
+             || _state == s_running 
+             || _state == s_running_delayed
+             || _state == s_running_waiting_for_order
+             || _state == s_running_process )  end(), something_done = true;
 
-        if( _state != s_stopped  &&  has_error()  &&  _repeat == 0  &&  _delay_after_error.empty() )  stop(), something_done = true;
+            if( _state != s_stopped  &&  has_error()  &&  _repeat == 0  &&  _delay_after_error.empty() )  stop(), something_done = true;
 
-        finish();
-    }
-
-
-    if( _state == s_running  &&  _task->_next_spooler_process )
-    {
-        _next_time = _task->_next_spooler_process;
-        set_state( s_running_delayed );
-    }
-
-
-    if( _state == s_running  &&  _order_queue  &&  _order_queue->empty() )
-    {
-        set_state( Job::s_running_waiting_for_order );  
-        _next_time = _period.end();     // Thread am Ende der Run_time wecken, damit Task beendet werden kann
-    }
-
-
-    if( _state == s_ended )                                                                     // TASK BEENDET
-    {
-        if( _temporary && _repeat == 0 )  
-        {
-            stop();   // _temporary && s_stopped ==> spooler_thread.cxx entfernt den Job
             finish();
         }
-        else
+
+
+        if( _state == s_running  &&  _task->_next_spooler_process )
         {
-            set_next_start_time();
-            set_state( s_pending );
+            _next_time = _task->_next_spooler_process;
+            set_state( s_running_delayed );
         }
 
-        something_done = true;
+
+        if( _state == s_running  &&  _order_queue  &&  _order_queue->empty() )
+        {
+            set_state( Job::s_running_waiting_for_order );  
+            _next_time = _period.end();     // Thread am Ende der Run_time wecken, damit Task beendet werden kann
+        }
+
+
+        if( _state == s_ended )                                                                     // TASK BEENDET
+        {
+            if( _temporary && _repeat == 0 )  
+            {
+                stop();   // _temporary && s_stopped ==> spooler_thread.cxx entfernt den Job
+                finish();
+            }
+            else
+            {
+                set_next_start_time();
+                set_state( s_pending );
+            }
+
+            something_done = true;
+        }
     }
 
 
@@ -1490,9 +1494,13 @@ xml::Element_ptr Job::xml( xml::Document_ptr document, Show_what show )
 
         if( _task )
         {
-            job_element->setAttribute( "running_since", as_dom_string( _task->_running_since.as_string() ) );
-            job_element->setAttribute( "steps"        , as_dom_string( as_string( _task->_step_count ) ) );
-            job_element->setAttribute( "id"           , as_dom_string( as_string( _task->_id) ) );
+            job_element->setAttribute( "running_since"   , as_dom_string( _task->_running_since.as_string() ) );
+
+            if( _state == Job::s_running  &&  _task->_last_process_start_time )
+            job_element->setAttribute( "in_process_since", as_dom_string( _task->_last_process_start_time.as_string() ) );
+
+            job_element->setAttribute( "steps"           , as_dom_string( as_string( _task->_step_count ) ) );
+            job_element->setAttribute( "id"              , as_dom_string( as_string( _task->_id) ) );
         }
 
         if( show & show_description )  dom_append_text_element( job_element, "description", _description );
@@ -1518,14 +1526,9 @@ xml::Element_ptr Job::xml( xml::Document_ptr document, Show_what show )
             job_element->appendChild( queue_element );
         }
 
-        if( _order_queue )  
-        {
-            dom_append_nl( job_element );
-            job_element->appendChild( _order_queue->xml( document, show ) );
-            dom_append_nl( job_element );
-        }
-
-        if( _error )  append_error_element( job_element, _error );
+        if( _task  &&  _task->_order )  dom_append_nl( job_element ),  job_element->appendChild( _task->_order->xml( document, show ) );
+        if( _order_queue             )  dom_append_nl( job_element ),  job_element->appendChild( _order_queue->xml( document, show ) );
+        if( _error                   )  dom_append_nl( job_element ),  append_error_element( job_element, _error );
     }
 
     return job_element;
@@ -1757,15 +1760,13 @@ bool Task::step()
 {
     bool result;
 
-
     try 
     {
         if( _job->_order_queue )
         {
-            _order = _job->_order_queue->get_order_for_processing();
+            _order = _job->_order_queue->get_order_for_processing( this );
             if( !_order )  return true;
         }
-
 
         result = do_step();
 
