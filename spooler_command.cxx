@@ -1,4 +1,4 @@
-// $Id: spooler_command.cxx,v 1.118 2004/07/18 20:01:20 jz Exp $
+// $Id: spooler_command.cxx,v 1.119 2004/07/19 10:47:05 jz Exp $
 /*
     Hier ist implementiert
 
@@ -688,14 +688,20 @@ string Command_processor::execute_http( const Http_request& http_request )
 
             string extension = extension_of_path( path );
             if( extension == "html"  
-             || extension == "htm" )  response_content_type = "text/html";
+             || extension == "htm"  )  response_content_type = "text/html";
             else
-            if( extension == "js"  )  response_content_type = "text/javascript";
+            if( extension == "xsl"  )  response_content_type = "text/xsl";
+            else
+            if( extension == "js"   )  response_content_type = "text/javascript";
+            else
+            if( extension == "css"  )  response_content_type = "text/css";
 
             if( response_content_type != "" )
             {
                 if( _spooler->_html_directory.empty() )  throw_xc( "SCHEDULER-212" );
-                response_body = file_as_string( _spooler->_html_directory + "/" + path );
+                if( path.find( ".." ) != string::npos )  throw_xc( "SCHEDULER-214" );
+                if( path.find( ":" )  != string::npos )  throw_xc( "SCHEDULER-214" );
+                response_body = zschimmer::string_from_file( _spooler->_html_directory + "/" + path );
             }
             else
             if( path.length() > 0 )

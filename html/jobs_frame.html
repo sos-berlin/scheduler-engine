@@ -1,4 +1,4 @@
-<!-- $Id: jobs_frame.html,v 1.3 2004/07/18 20:01:20 jz Exp $ -->
+<!-- $Id: jobs_frame.html,v 1.4 2004/07/19 10:47:05 jz Exp $ -->
 <html>
 
 <head>
@@ -8,21 +8,7 @@
     <title>Scheduler</title>
 
     <style type="text/css">
-        h1           { font-size: 24pt; font-weight: bold; margin-bottom: 4ex;  }
-        h2           { font-size: 12pt; font-weight: bold; margin-top: 10ex; }
-        h3           { font-size: 10pt; font-weight: bold; margin-top: 6ex }
-        .zwischentitel { font-weight: bold; margin-top: 6ex }
-        body         { font-size: 10pt; }
-        th           { font-size: 10pt; }
-        td           { font-size: 10pt; }
-        p            { font-size: 10pt; margin-top: 2ex; margin-bottom: 0  }
-        div          { font-size: 10pt; }
-        span         { font-size: 10pt; }
-        li           { font-size: 10pt; }
-        pre          { font-family: Lucida Console, monospace; font-size: 9pt; margin-left: 5mm; line-height: 1.2em; }
-        .indent      { margin-left: 5mm; }
-        .mono        { font-family: Lucida Console, monospace; font-size: 9pt }
-        .small       { font-family: Sans-Serif; font-size: 8pt }
+        @import "scheduler.css";
     </style>
 </head>
 
@@ -31,7 +17,7 @@
 <p>
     <input id="show_tasks_checkbox" type="checkbox" onclick="show_tasks_checkbox__onclick()" checked="true" NAME="show_tasks_checkbox"/>
     <label for="show_tasks_checkbox">Show running tasks</label>
-    <br/>
+    &#160; &#160;
     <input id="update_periodically_checkbox" type="checkbox" onclick="update_periodically_checkbox__onclick()" NAME="update_periodically_checkbox"/>
     <label for="update_periodically_checkbox">Update periodically</label>
     &#160; &#160;
@@ -40,195 +26,7 @@
 
 <hr size="1"/>
 
-<xml id="stylesheet">
-    <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0">
-        <xsl:template match="/spooler/answer">
-            <p>
-                <xsl:value-of select="state/@time"/>
-            </p>
-            <p>&#160;</p>
-
-            <table cellpadding="0" cellspacing="0">
-                <col valign="top" align="left"  width="150" style="padding-right: 2ex; padding-bottom: 1px"/>
-                <col valign="top" align="left"  width="250" style="padding-right: 2ex"/>  
-                <col valign="top" align="right" width=" 70" style="padding-right: 2ex"/>
-                <col valign="top" align="left"  width="200" style="padding-right: 2ex"/>
-                
-                <thead>
-                    <tr>
-                        <th>Job</th>
-                        <th>State</th>
-                        <th>Steps</th>
-                        <th>Order</th>
-                    </tr>
-                    <tr>
-                        <td colspan="99">
-                            <hr size="1"/>
-                        </td>
-                    </tr>
-                </thead>
-                
-                <tbody>
-                    <xsl:for-each select="state/jobs/job">
-                        <xsl:element name="tr">
-                            <xsl:attribute name="id"         >scheduler_tr_job_<xsl:value-of select="@job"/></xsl:attribute>
-                            <xsl:attribute name="style"      >cursor: hand; color: blue</xsl:attribute>
-                            <xsl:attribute name="onmouseover">
-                                this.style.backgroundColor="yellow";
-                                scheduler_tr_job_<xsl:value-of select="@job"/>__2.style.backgroundColor="yellow"
-                            </xsl:attribute>
-                            <xsl:attribute name="onmouseout" >
-                                this.style.backgroundColor="window"
-                                scheduler_tr_job_<xsl:value-of select="@job"/>__2.style.backgroundColor="window"
-                            </xsl:attribute>
-                            <xsl:attribute name="onclick">show_job_details('<xsl:value-of select="@job"/>')</xsl:attribute>
-                            <td colspan="99">
-                                <b><xsl:value-of select="@job"/></b>
-                                &#160;
-                                <xsl:value-of select="@title"/>
-                                <xsl:if test="@state_text!=''">
-                                    <xsl:text> &#160; - </xsl:text>
-                                    <i><xsl:value-of select="@state_text"/></i>
-                                </xsl:if>
-                            </td>
-                        </xsl:element>
-                        
-                        <xsl:element name="tr">
-                            <xsl:attribute name="id">scheduler_tr_job_<xsl:value-of select="@job"/>__2</xsl:attribute>
-                            <xsl:attribute name="style"      >cursor: hand; color: blue</xsl:attribute>
-                            <xsl:attribute name="onmouseover">
-                                this.style.backgroundColor="yellow";
-                                scheduler_tr_job_<xsl:value-of select="@job"/>.style.backgroundColor="yellow"
-                            </xsl:attribute>
-                            <xsl:attribute name="onmouseout" >
-                                this.style.backgroundColor="window"
-                                scheduler_tr_job_<xsl:value-of select="@job"/>.style.backgroundColor="window"
-                            </xsl:attribute>
-                            <xsl:attribute name="onclick">show_job_details('<xsl:value-of select="@job"/>')</xsl:attribute>
-                            <td>
-                            </td>
-                            <td>
-                                <xsl:value-of select="@state"/>
-                                <xsl:if test="@waiting_for_process='yes'">
-                                    <xsl:text> </xsl:text>(waiting for process)
-                                </xsl:if>
-                            </td>
-                            <td align="right">
-                                <xsl:value-of select="@all_steps"/>
-                                </td>
-                            <td>
-                                <xsl:choose>
-                                    <xsl:when test="@order!='yes'">
-                                        (no order job)
-                                    </xsl:when>
-                                    <xsl:when test="order_queue/@length!=''">
-                                        <xsl:value-of select="order_queue/@length"/> orders to process
-                                    </xsl:when>
-                                </xsl:choose>
-                            </td>
-                        </xsl:element>
-
-                        <xsl:if test="/spooler/@my_show_tasks='yes' and tasks/task">
-                            <tr>
-                                <td>
-                                </td>
-                                <td colspan="99">
-                                    <xsl:apply-templates select="tasks"/>
-                                </td>
-                            </tr>
-                        </xsl:if>
-                        
-                        <tr>
-                            <td colspan="99">
-                                <hr size="1"/>
-                            </td>
-                        </tr>
-                    </xsl:for-each>
-                </tbody>
-            </table>
-        </xsl:template>
-
-        <xsl:template match="tasks">
-            <xsl:for-each select="task">
-                <xsl:element name="tr">
-                    <xsl:choose>
-                        <xsl:when test=" not( @id ) ">
-                            <xsl:attribute name="style">color: green</xsl:attribute>
-                            <td>&#160; &#160; . </td>
-                        </xsl:when>
-                        <xsl:otherwise>
-                            <xsl:attribute name="style"      >cursor: hand; color: green</xsl:attribute>
-                            <xsl:attribute name="onmouseover">this.style.backgroundColor="yellow"</xsl:attribute>
-                            <xsl:attribute name="onmouseout" >this.style.backgroundColor="window"</xsl:attribute>
-                            <xsl:attribute name="onclick">show_task_details( '<xsl:value-of select="../../@job"/>', <xsl:value-of select="@id"/> )</xsl:attribute>
-                            
-                            <td>
-                                &#160; &#160;
-                                <span>
-                                    Task <xsl:value-of select="@id"/>
-                                </span>
-                                <xsl:if test="@name!=''">
-                                    &#160; <xsl:value-of select="@name"/>
-                                </xsl:if>
-                            </td>
-                            <td>
-                                <xsl:value-of select="@state"/>
-                            </td>
-                            <td>
-                                <xsl:value-of select="@steps"/>
-                            </td>
-                            <td>
-                                <xsl:if test="order">
-                                    <xsl:value-of select="order/@id"/>
-                                    <xsl:if test="order/@title != ''">
-                                        &#160;
-                                        <i><xsl:value-of select="order/@title"/></i>
-                                    </xsl:if>
-                                </xsl:if>
-                            </td>
-        <!--                            
-                            <td align="right">
-                                <xsl:choose>
-                                    <xsl:when test="@running_since">
-                                        started <xsl:value-of select="@start_at"/>
-                                    </xsl:when>
-                                    <xsl:when test="@start_at">
-                                        start at <xsl:value-of select="@start_at"/>
-                                    </xsl:when>
-                                    <xsl:when test="@enqueued">
-                                        enqueued <xsl:value-of select="@enqueued"/>
-                                    </xsl:when>
-                                    </xsl:choose>
-                            </td>
-                            <td>
-                                <xsl:value-of select="@cause"/>
-                            </td>
-                            <td>
-                                <xsl:value-of select="@idle_since"/>
-                            </td>
-                            <td>
-                                <xsl:value-of select="@running_since"/>
-                            </td>
-                            <td>
-                                <xsl:value-of select="@enqueued"/>
-                            </td>
-                            <td>
-                                <xsl:value-of select="@in_process_since"/>
-                            </td>
-                            <td>
-                                <xsl:value-of select="@calling"/>
-                            </td>
-                            <td>
-                                <xsl:value-of select="@pid"/>
-                            </td>
-        -->                            
-                        </xsl:otherwise>
-                    </xsl:choose>
-                </xsl:element>
-            </xsl:for-each>
-        </xsl:template>
-        
-    </xsl:stylesheet>
+<xml id="stylesheet" src="scheduler.xsl">
 </xml>
 
 <script defer="true" type="text/javascript" src="scheduler.js"></script>
