@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.172 2003/08/25 20:41:27 jz Exp $
+// $Id: spooler_task.cxx,v 1.173 2003/08/27 10:22:58 jz Exp $
 /*
     Hier sind implementiert
 
@@ -205,6 +205,15 @@ void Task::close()
 {
     if( _closed )  return;
     
+
+    if( _operation )
+    {
+        // Was machen wir jetzt?
+        // _operation->kill()?
+        LOG( *this << " _operation ist nicht NULL\n" );
+        _operation = NULL;
+    }
+
     if( _order )  remove_order_after_error();
 
     _history.end();
@@ -464,9 +473,19 @@ void Task::set_next_time( const Time& next_time )
 
 bool Task::do_something()
 {
-    Z_DEBUG_ONLY( _log.debug9( "do_something() state=" + state_name() ); )
+    //Z_DEBUG_ONLY( _log.debug9( "do_something() state=" + state_name() ); )
+
+    if( _operation  &&  !_operation->async_finished() )  return false;
 
     bool something_done = false;
+
+/*
+    if( _processing )
+    {
+        _module_instance->process();
+        if( !_module_instance
+    }
+*/
 
 
     try
@@ -475,7 +494,6 @@ bool Task::do_something()
         //if( _state == s_suspended  )  goto ENDE;
         //if( _state == s_running_process  &&  !((Process_task*)+this)->signaled() )  goto ENDE;
         //if( _state == s_ended      )  goto ENDE;
-
 
         Time now = Time::now();
 
@@ -517,7 +535,7 @@ bool Task::do_something()
             {
                 case s_start_task:
                 {
-                    begin__start();
+                    _operation = begin__start();
 
                   //if( has_error() )  break;
 
@@ -531,6 +549,7 @@ bool Task::do_something()
                 case s_starting:
                 {
                     ok = do_begin__end();
+                    _operation = NULL;
 
                     if( !ok || has_error() )  break;
 
@@ -565,7 +584,7 @@ bool Task::do_something()
 
                             _last_process_start_time = now;
 
-                            do_step__start();
+                            _operation = do_step__start();
 
                             _in_step = true;
                             something_done = true;
@@ -574,6 +593,7 @@ bool Task::do_something()
                     else
                     {
                         ok = step__end();
+                        _operation = NULL;
 
                         _in_step = false;
                         if( !ok || has_error() )  set_state( s_end );
@@ -612,7 +632,7 @@ bool Task::do_something()
 
                     if( _opened )
                     {
-                        do_end__start();
+                        _operation = do_end__start();
 
                         set_state( s_ending );
                     }
@@ -628,8 +648,10 @@ bool Task::do_something()
                 case s_ending:
                 {
                     do_end__end();
+                    _operation = NULL;
 
                     set_state( s_ended );
+                    loop = true;
                     something_done = true;
                     break;
                 }
@@ -713,7 +735,7 @@ bool Task::do_something()
 
 //------------------------------------------------------------------------------------Task::prepare
 
-void Task::begin__start()
+Async_operation* Task::begin__start()
 {
   //try 
     {
@@ -733,7 +755,7 @@ void Task::begin__start()
         do_load();
         //if( has_error() )  return false;
 
-        do_begin__start();
+        return do_begin__start();
     }
   //catch( const exception& x ) { set_error( x ); }
 
@@ -1091,12 +1113,12 @@ void Job_module_task::do_load()
 
 //------------------------------------------------------------------Job_module_task::do_begin_start
 
-void Job_module_task::do_begin__start()
+Async_operation* Job_module_task::do_begin__start()
 {
     //ok = load_module_instance();
     //if( !ok || has_error() )  return false;
 
-    _module_instance->begin__start();
+    return _module_instance->begin__start();
 }
 
 //-------------------------------------------------------------------Job_module_task::do_begin__end
@@ -1112,9 +1134,9 @@ bool Job_module_task::do_begin__end()
 
 //-------------------------------------------------------------------Job_module_task::do_end__start
 
-void Job_module_task::do_end__start()
+Async_operation* Job_module_task::do_end__start()
 {
-    _module_instance->end__start( _success );
+    return _module_instance->end__start( _success );
 }
 
 //---------------------------------------------------------------------Job_module_task::do_end__end
@@ -1126,9 +1148,9 @@ void Job_module_task::do_end__end()
 
 //------------------------------------------------------------------Job_module_task::do_step__start
 
-void Job_module_task::do_step__start()
+Async_operation* Job_module_task::do_step__start()
 {
-    _module_instance->step__start();
+    return _module_instance->step__start();
 }
 
 //--------------------------------------------------------------------Job_module_task::do_step__end
@@ -1439,7 +1461,7 @@ void Process_task::do_kill()
     }
 }
 
-//---------------------------------------------------------------------------Process_task::do_end__end
+//------------------------------------------------------------------------Process_task::do_end__end
 
 void Process_task::do_end__end()
 {

@@ -1,4 +1,4 @@
-// $Id: spooler_module_remote.cxx,v 1.17 2003/08/25 20:41:26 jz Exp $
+// $Id: spooler_module_remote.cxx,v 1.18 2003/08/27 10:22:58 jz Exp $
 /*
     Hier sind implementiert
 
@@ -26,13 +26,17 @@ Remote_module_instance_proxy::~Remote_module_instance_proxy()
 
 void Remote_module_instance_proxy::init()
 {
-    HRESULT hr;
+    //HRESULT hr;
 
     Module_instance::init();
 
+/*
     Parameters parameters;
     parameters.push_back( Parameter( "param", "-object-server" ) );
     parameters.push_back( Parameter( "param", "-title=" + quoted_string( _title ) ) );
+
+    if( !log_filename().empty() )
+    parameters.push_back( Parameter( "param", "-log=" + quoted_string( "+" + log_filename() ) ) );
 
     hr = com_create_instance_in_separate_process( spooler_com::CLSID_Remote_module_instance_server, NULL, 0, 
                                                   spooler_com::IID_Iremote_module_instance_server, (void**)&_remote_instance,
@@ -57,6 +61,7 @@ void Remote_module_instance_proxy::init()
     _remote_instance->call( "construct", params );
 
     _idispatch = _remote_instance;
+*/
 }
 
 //---------------------------------------------------------------Remote_module_instance_proxy::load
@@ -101,34 +106,36 @@ Variant Remote_module_instance_proxy::call( const string& name )
 }
 
 //-------------------------------------------------------Remote_module_instance_proxy::begin__start
-/*
-void Remote_module_instance_proxy::begin__start( const Object_list& object_list )
-{
-    _object_list = object_list;
-}
-*/
-//-------------------------------------------------------Remote_module_instance_proxy::begin__start
 
-void Remote_module_instance_proxy::begin__start()
+Async_operation* Remote_module_instance_proxy::begin__start()
 {
     _error = NULL;
 
     Module_instance::init();
-
+/*
     Parameters parameters;
     parameters.push_back( Parameter( "param", "-object-server" ) );
     parameters.push_back( Parameter( "param", "-title=" + quoted_string( _title ) ) );
 
+    if( !log_filename().empty() )
+    parameters.push_back( Parameter( "param", "-log=" + quoted_string( "+" + log_filename() ) ) );
+*/
     if( !_session )
     {
-        _session  = Z_NEW( Session( start_process( parameters ) ) );
+        //_session  = Z_NEW( Session( start_process( parameters ) ) );
+        _process = _spooler->new_process( true );     // temporary = true: Prozess schließen, wenn er nicht mehr gebraucht wird
+        _session = _process->session();        
     }
 
     _multi_qi.allocate( 1 );
     _multi_qi.set_iid( 0, spooler_com::IID_Iremote_module_instance_server );
     
-    _session->create_instance__start( spooler_com::CLSID_Remote_module_instance_server, NULL, 0, NULL, 1, _multi_qi );
+    _operation = _session->create_instance__start( spooler_com::CLSID_Remote_module_instance_server, NULL, 0, NULL, 1, _multi_qi );
+    _operation->set_async_parent( this );
+
     _call_state = c_create_instance;
+
+    return this;
 }
 
 //---------------------------------------------------------Remote_module_instance_proxy::begin__end
@@ -136,17 +143,21 @@ void Remote_module_instance_proxy::begin__start()
 bool Remote_module_instance_proxy::begin__end()
 {
     if( _error )  throw *_error;
-    if( _call_state != c_call_begin )  throw_xc( "begin__end" );
+    _operation->async_check_error();
+
+    if( _call_state != c_begin )  throw_xc( "SPOOLER-191", "begin__end", (int)_call_state );
 
     return check_result( _remote_instance->call__end() );
 }
 
 //---------------------------------------------------------Remote_module_instance_proxy::end__start
 
-void Remote_module_instance_proxy::end__start( bool success )
+Async_operation* Remote_module_instance_proxy::end__start( bool success )
 {
     _error = NULL;
-    _remote_instance->call__start( "end", success );
+    _operation = _remote_instance->call__start( "end", success );
+    
+    return _operation;
 }
 
 //-----------------------------------------------------------Remote_module_instance_proxy::end__end
@@ -154,15 +165,23 @@ void Remote_module_instance_proxy::end__start( bool success )
 void Remote_module_instance_proxy::end__end()
 {
     if( _error )  throw *_error;
+    _operation->async_check_error();
+
+  //if( _call_state != c_finished )  throw_xc( "SPOOLER-191", "end__end", (int)_call_state );
+
     _remote_instance->call__end();
+
+    _operation->async_check_error();
 }
 
 //--------------------------------------------------------Remote_module_instance_proxy::step__start
 
-void Remote_module_instance_proxy::step__start()
+Async_operation* Remote_module_instance_proxy::step__start()
 {
     _error = NULL;
     _remote_instance->call__start( "step" );
+
+    return _operation;
 }
 
 //----------------------------------------------------------Remote_module_instance_proxy::step__end
@@ -170,79 +189,92 @@ void Remote_module_instance_proxy::step__start()
 bool Remote_module_instance_proxy::step__end()
 {
     if( _error )  throw *_error;
+    _operation->async_check_error();
+
+  //if( _call_state != c_finished )  throw_xc( "SPOOLER-191", "step__end", (int)_call_state );
+
     return check_result( _remote_instance->call__end() );
 }
 
-//-------------------------------------------------Remote_module_instance_proxy::operation_finished
+//-------------------------------------------------Remote_module_instance_proxy::async_finished
 
-bool Remote_module_instance_proxy::operation_finished()
+bool Remote_module_instance_proxy::async_finished()
 { 
     return _call_state == c_finished  ||  _error;
 }
 
-//------------------------------------------------------------Remote_module_instance_proxy::process
+//-------------------------------------------------Remote_module_instance_proxy::async_continue
 
-void Remote_module_instance_proxy::process( bool wait )
+void Remote_module_instance_proxy::async_continue( bool wait )
 { 
     if( _error )  return;
 
-    try
+  //try
     {
-        if( wait )  _session->current_operation()->wait();
-        else  
-        if( !_session->current_operation()->is_finished() )  return;
-
-        if( _session->current_operation()->has_error() )  return;
-
-        switch( _call_state )
+        bool loop = true;
+        while( loop )
         {
-            case c_create_instance:
+            loop = false;
+
+            if( wait )  _operation->async_finish();
+            else  
+            if( !_operation->async_finished() )  return;
+
+            if( _operation->async_has_error() )  return;
+
+            switch( _call_state )
             {
-                HRESULT hr = _session->create_instance__end( 1, _multi_qi );
-                if( FAILED(hr) )  throw_com( hr, "create_instance" );
-
-                _remote_instance = dynamic_cast<object_server::Proxy*>( _multi_qi[0].pItf );
-                _idispatch = _remote_instance;
-                _multi_qi.clear();
-
-
-                Variant objects ( Variant::vt_array, _object_list.size() );
-                Variant names   ( Variant::vt_array, _object_list.size() );
-
+                case c_create_instance:
                 {
-                    Locked_safearray objects_array = V_ARRAY( &objects );
-                    Locked_safearray names_array   = V_ARRAY( &names   );
+                    HRESULT hr = _session->create_instance__end( 1, _multi_qi );
+                    if( FAILED(hr) )  throw_com( hr, "create_instance" );
 
-                    int i = 0;
-                    FOR_EACH_CONST( Object_list, _object_list, o )
+                    _remote_instance = dynamic_cast<object_server::Proxy*>( _multi_qi[0].pItf );
+                    _idispatch = _remote_instance;
+                    _multi_qi.clear();
+
+
+                    Variant objects ( Variant::vt_array, _object_list.size() );
+                    Variant names   ( Variant::vt_array, _object_list.size() );
+
                     {
-                        objects_array[i] = o->_object;
-                        names_array[i]   = o->_name;
-                        i++;
+                        Locked_safearray objects_array = V_ARRAY( &objects );
+                        Locked_safearray names_array   = V_ARRAY( &names   );
+
+                        int i = 0;
+                        FOR_EACH_CONST( Object_list, _object_list, o )
+                        {
+                            objects_array[i] = o->_object;
+                            names_array[i]   = o->_name;
+                            i++;
+                        }
+
+                        _object_list.clear();
                     }
+
+                    _operation = _remote_instance->call__start( "begin", objects, names );
+                    _operation->set_async_parent( this );
+
+                    _call_state = c_begin;
+                    loop = true;
+                    break;
                 }
 
-                _object_list.clear();
+                case c_begin:
+                {
+                    _call_state = c_finished;
+                    break;
+                }
 
-                _remote_instance->call__start( "begin", objects, names );
-                _call_state = c_call_begin;
-                break;
+                default:
+                    throw_xc( "Remote_module_instance_proxy::process" );
             }
-
-            case c_call_begin:
-            {
-                _call_state = c_finished;
-                break;
-            }
-
-            default:
-                throw_xc( "Remote_module_instance_proxy::process" );
         }
     }
-    catch( const exception& x )
-    {
-        _error = x;
-    }
+  //catch( const exception& x )
+  //{
+  //    _error = x;
+  //}
 }
 
 //-------------------------------------------------------------------------------------------------

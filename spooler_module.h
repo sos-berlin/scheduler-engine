@@ -1,4 +1,4 @@
-// $Id: spooler_module.h,v 1.33 2003/08/25 20:41:26 jz Exp $
+// $Id: spooler_module.h,v 1.34 2003/08/27 10:22:58 jz Exp $
 
 #ifndef __SPOOLER_MODULE_H
 #define __SPOOLER_MODULE_H
@@ -97,8 +97,8 @@ struct Module : Object
 
     Z_GNU_ONLY(                 Module                      (); )
 
-                                Module                      ( Spooler* sp, Prefix_log* log )        : _zero_(this+1), _spooler(sp), _log(log) {}
-    explicit                    Module                      ( Spooler* sp, const xml::Element_ptr& e, const Time& xml_mod_time, const string& include_path )  : _zero_(this+1), _spooler(sp) { set_dom(e,xml_mod_time,include_path); }
+                                Module                      ( Spooler* sp, Prefix_log* log )        : _zero_(_end_), _spooler(sp), _log(log) {}
+    explicit                    Module                      ( Spooler* sp, const xml::Element_ptr& e, const Time& xml_mod_time, const string& include_path )  : _zero_(_end_), _spooler(sp) { set_dom(e,xml_mod_time,include_path); }
                                ~Module                      ()                                      {}
 
     void                        set_dom                     ( const xml::Element_ptr& e, const Time& xml_mod_time, const string& include_path )  { set_dom_without_source(e); set_dom_source_only(e,xml_mod_time,include_path); }
@@ -142,24 +142,23 @@ struct Module : Object
     jclass                     _java_class;
     typedef map<string,jmethodID>  Method_map;
     Method_map                 _method_map;
+
+    Fill_end                   _end_;
 };
 
 //----------------------------------------------------------------------------------Module_instance
 // Oberklasse
 
-struct Module_instance : Object 
+struct Module_instance : virtual Object 
 {
     struct In_call
     {
                                 In_call                     ( Module_instance* module_instance, const string& name, const string& extra = "" );
-                              //In_call                     ( Job* job  , const string& name );
                                ~In_call                     ();
 
         void                    set_result                  ( bool result )                         { _result = result; _result_set = true; }
         const string&           name                        ()                                      { return _name; }
 
-      //Job*                   _job;
-      //Task*                  _task;
         Module_instance*       _module_instance;
         Log_indent             _log_indent;
         string                 _name;                       // Fürs Log
@@ -206,13 +205,13 @@ struct Module_instance : Object
     virtual bool                callable                    ()                                      = 0;
     int                         pid                         ()                                      { return _pid; }        // 0, wenn kein Prozess
 
-    virtual void                begin__start                (); // const Object_list& );
+    virtual Async_operation*    begin__start                (); // const Object_list& );
     virtual bool                begin__end                  ();
 
-    virtual void                end__start                  ( bool success = true );
+    virtual Async_operation*    end__start                  ( bool success = true );
     virtual void                end__end                    ();
 
-    virtual void                step__start                 ();
+    virtual Async_operation*    step__start                 ();
     virtual bool                step__end                   ();
 
     virtual bool                operation_finished          ()                                      { return true; }
@@ -220,7 +219,9 @@ struct Module_instance : Object
 
 
     Fill_zero                  _zero_;
+
     string                     _title;                      // Wird lokalem Objectserver als -title=... übergeben, für die Prozessliste (ps)
+    Spooler*                   _spooler;
     Delegated_log              _log;
     ptr<Module>                _module;
     int                        _pid;                        // Wird von Remote_module_instance_proxy gesetzt
@@ -237,6 +238,8 @@ struct Module_instance : Object
 
     ptr<Com_task>              _com_task;                   // spooler_task
     ptr<Com_log>               _com_log;                    // spooler_log
+
+    Fill_end                   _end_;
 };
 
 //------------------------------------------------------------------------------Com_module_instance

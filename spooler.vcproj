@@ -406,6 +406,9 @@ cd &quot;$(OutDir)&quot; &amp;&amp; jar cf &quot;$(TargetDir)sos.spooler.jar&quo
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\spooler_process.cxx">
+			</File>
+			<File
 				RelativePath="spooler_security.cxx">
 				<FileConfiguration
 					Name="Release|Win32">
@@ -578,6 +581,9 @@ cd &quot;$(OutDir)&quot; &amp;&amp; jar cf &quot;$(TargetDir)sos.spooler.jar&quo
 				RelativePath="spooler_order.h">
 			</File>
 			<File
+				RelativePath=".\spooler_process.h">
+			</File>
+			<File
 				RelativePath="spooler_security.h">
 			</File>
 			<File
@@ -591,9 +597,6 @@ cd &quot;$(OutDir)&quot; &amp;&amp; jar cf &quot;$(TargetDir)sos.spooler.jar&quo
 			</File>
 			<File
 				RelativePath="spooler_time.h">
-			</File>
-			<File
-				RelativePath="spooler_version.h">
 			</File>
 			<File
 				RelativePath="spooler_wait.h">
@@ -929,6 +932,9 @@ javah -force -o &quot;$(OutDir)\sos\spooler\$(InputName).h&quot; -classpath &quo
 "
 						Outputs="$(OutDir)/sos/spooler/$(InputName).class;$(OutDir)/sos/spooler/$(InputName).h"/>
 				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="spooler_version.h">
 			</File>
 			<File
 				RelativePath="sos\spooler\Task.java">

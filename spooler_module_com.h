@@ -1,4 +1,4 @@
-// $Id: spooler_module_com.h,v 1.8 2003/05/31 21:50:51 jz Exp $
+// $Id: spooler_module_com.h,v 1.9 2003/08/27 10:22:58 jz Exp $
 
 #ifndef __SPOOLER_MODULE_COM_H
 #define __SPOOLER_MODULE_COM_H
@@ -15,7 +15,7 @@ bool                            check_result                ( const Variant& vt 
 
 struct Com_module_instance_base : Module_instance
 {
-                                Com_module_instance_base    ( Module* module )                      : Module_instance(module), _zero_(this+1) {}
+                                Com_module_instance_base    ( Module* module )                      : Module_instance(module) {}
 
     void                        init                        ();
     IDispatch*                  dispatch                    () const                                { return _idispatch; }
@@ -28,7 +28,7 @@ struct Com_module_instance_base : Module_instance
     bool                        callable                    ()                                      { return _idispatch != NULL; }
 
 
-    Fill_zero                  _zero_;
+  //Fill_zero                  _zero_;
     ptr<IDispatch>             _idispatch;
 };
 
@@ -38,7 +38,7 @@ struct Com_module_instance_base : Module_instance
 
 struct Com_module_instance : Com_module_instance_base
 {
-                                Com_module_instance         ( Module* module )                      : Com_module_instance_base(module), _zero_(this+1) {}
+                                Com_module_instance         ( Module* module )                      : Com_module_instance_base(module), _zero_(_end_) {}
                                ~Com_module_instance         ();
 
     void                        init                        ();
@@ -52,6 +52,8 @@ struct Com_module_instance : Com_module_instance_base
 
     HMODULE                    _com_module;                 // Für _module->_filename != ""
     DllGetClassObject_func     _DllGetClassObject;          // Für _module->_filename != ""
+
+    Fill_end                   _end_;
 };
 
 #endif
@@ -60,7 +62,7 @@ struct Com_module_instance : Com_module_instance_base
 
 struct Scripting_engine_module_instance : Com_module_instance_base
 {
-                                Scripting_engine_module_instance( Module* script )                  : Com_module_instance_base(script), _zero_(this+1) {}
+                                Scripting_engine_module_instance( Module* script )                  : Com_module_instance_base(script) {}
                                ~Scripting_engine_module_instance();
 
     void                        close                       ();
@@ -72,7 +74,7 @@ struct Scripting_engine_module_instance : Com_module_instance_base
     Variant                     call                        ( const string& name, int param );
 
 
-    Fill_zero                  _zero_;
+  //Fill_zero                  _zero_;
     ptr<Script_site>           _script_site;
 };
 

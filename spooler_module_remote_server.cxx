@@ -1,4 +1,4 @@
-// $Id: spooler_module_remote_server.cxx,v 1.18 2003/08/25 20:41:27 jz Exp $
+// $Id: spooler_module_remote_server.cxx,v 1.19 2003/08/27 10:22:58 jz Exp $
 /*
     Hier sind implementiert
 
@@ -27,7 +27,7 @@ DESCRIBE_CLASS( &spooler_typelib, Remote_module_instance_server, remote_module_i
 Remote_module_instance_server::Remote_module_instance_server()
 :
     Com_module_instance_base( Z_NEW( Module( NULL, NULL ) ) ),
-    _zero_(this+1)
+    _zero_(_end_)
 {
 }
 

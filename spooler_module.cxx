@@ -1,4 +1,4 @@
-// $Id: spooler_module.cxx,v 1.31 2003/08/25 20:41:26 jz Exp $
+// $Id: spooler_module.cxx,v 1.32 2003/08/27 10:22:58 jz Exp $
 /*
     Hier sind implementiert
 
@@ -309,7 +309,7 @@ Module_instance::In_call::~In_call()
 
 Module_instance::Module_instance( Module* module )
 : 
-    _zero_(this+1), 
+    _zero_(&_end_), 
     _module(module),
     _log(module?module->_log:NULL) 
 {
@@ -324,6 +324,8 @@ Module_instance::Module_instance( Module* module )
 
 void Module_instance::init()
 {
+    _spooler = _module->_spooler;
+
     if( !_module->set() )  throw_xc( "SPOOLER-146" );
 }
 
@@ -335,7 +337,7 @@ void Module_instance::set_in_call( In_call* in_call, const string& extra )
     {
         _in_call = in_call;
 
-        if( in_call  &&  _module->_spooler->_debug )  
+        if( in_call  &&  _spooler->_debug )  
         {
             _log.debug( in_call->_name + "()  " + extra );
         }
@@ -422,8 +424,9 @@ void Module_instance::close()
 
 //--------------------------------------------------------------------Module_instance::begin__start
 
-void Module_instance::begin__start()  // const Object_list& object_list )
+Async_operation* Module_instance::begin__start()  // const Object_list& object_list )
 {
+    return NULL;
 }
 
 //----------------------------------------------------------------------Module_instance::begin__end
@@ -447,8 +450,9 @@ bool Module_instance::begin__end()
 
 //----------------------------------------------------------------------Module_instance::end__start
 
-void Module_instance::end__start( bool success )
+Async_operation* Module_instance::end__start( bool success )
 {
+    return NULL;
 }
 
 //------------------------------------------------------------------------Module_instance::end__end
@@ -502,8 +506,9 @@ void Module_instance::end__end()
 
 //---------------------------------------------------------------------Module_instance::step__start
 
-void Module_instance::step__start()
+Async_operation* Module_instance::step__start()
 {
+    return NULL;
 }
 
 //-----------------------------------------------------------------------Module_instance::step__end

@@ -1,4 +1,4 @@
-// $Id: spooler_module_java.h,v 1.23 2003/06/02 09:21:37 jz Exp $
+// $Id: spooler_module_java.h,v 1.24 2003/08/27 10:22:58 jz Exp $
 
 #ifndef __SPOOLER_MODULE_JAVA_H
 #define __SPOOLER_MODULE_JAVA_H
@@ -113,6 +113,8 @@ struct Java_module_instance : Module_instance, java::Has_vm
 
     typedef list< ptr<Java_idispatch> >  Added_objects;
     Added_objects              _added_jobjects;
+
+    Fill_end                   _end_;
 };
 
 //-------------------------------------------------------------------------------------------------

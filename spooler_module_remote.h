@@ -1,4 +1,4 @@
-// $Id: spooler_module_remote.h,v 1.6 2003/08/25 20:41:26 jz Exp $
+// $Id: spooler_module_remote.h,v 1.7 2003/08/27 10:22:58 jz Exp $
 
 #ifndef __SPOOLER_MODULE_REMOTE_H
 #define __SPOOLER_MODULE_REMOTE_H
@@ -10,18 +10,21 @@ namespace spooler {
 
 //---------------------------------------------------------------------Remote_module_instance_proxy
 
-struct Remote_module_instance_proxy : Com_module_instance_base
+struct Remote_module_instance_proxy : Com_module_instance_base, 
+                                      Async_operation
 {
     enum Call_state
     {
         c_null,
         c_create_instance,
-        c_call_begin,
+        c_begin,
+      //c_end,
+      //c_step,        
         c_finished
     };
 
 
-                                Remote_module_instance_proxy( Module* module )                      : Com_module_instance_base(module), _zero_(this+1) {}
+                                Remote_module_instance_proxy( Module* module )                      : Com_module_instance_base(module), _zero_(_end_) {}
                                ~Remote_module_instance_proxy();
 
     void                        init                        ();
@@ -32,27 +35,31 @@ struct Remote_module_instance_proxy : Com_module_instance_base
     bool                        name_exists                 ( const string& name );
     Variant                     call                        ( const string& name );
 
-    virtual void                begin__start                ();
-  //virtual void                begin__start                ( const Object_list& );
+    virtual Async_operation*    begin__start                ();
     virtual bool                begin__end                  ();
 
-    virtual void                end__start                  ( bool success );
+    virtual Async_operation*    end__start                  ( bool success );
     virtual void                end__end                    ();
 
-    virtual void                step__start                 ();
+    virtual Async_operation*    step__start                 ();
     virtual bool                step__end                   ();
 
-    virtual bool                operation_finished          ();
-    virtual void                process                     ( bool wait = false );
+    virtual bool                async_finished              ();
+    virtual void                async_continue              ( bool wait = false );
+    virtual bool                async_has_error             ()                                      { return _error || ( _operation? _operation->async_has_error() : false ); }
+    virtual void                async_check_error           ()                                      { if( _error )  throw *_error; else if( _operation )  _operation->async_check_error(); }
 
     Fill_zero                  _zero_;
 
+    ptr<Process>                   _process;
     ptr<object_server::Session>    _session;
     ptr<object_server::Proxy>      _remote_instance;
-  //ptr<object_server::Operation>  _operation;
+    ptr<Async_operation>           _operation;
     Call_state                     _call_state;
     Multi_qi                       _multi_qi;
     Xc_copy                        _error;
+
+    Fill_end                   _end_;
 };
 
 //-------------------------------------------------------------------------------------------------

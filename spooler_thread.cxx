@@ -1,4 +1,4 @@
-// $Id: spooler_thread.cxx,v 1.95 2003/08/25 20:41:27 jz Exp $
+// $Id: spooler_thread.cxx,v 1.96 2003/08/27 10:22:59 jz Exp $
 /*
     Hier sind implementiert
 
@@ -308,8 +308,7 @@ bool Spooler_thread::do_something( Task* task )
 
     bool ok = task->do_something();
     
-    _task_ended |=    task->state() == Task::s_ended 
-                   || task->state() == Task::s_closed;
+    _task_closed |=    task->state() == Task::s_closed;
 
     _current_task = NULL;
 
@@ -320,14 +319,13 @@ bool Spooler_thread::do_something( Task* task )
 
 void Spooler_thread::remove_ended_tasks()
 {
-    if( _task_ended )
+    if( _task_closed )
     {
         Task_list::iterator t = _task_list.begin();
         while( t != _task_list.end() )
         {
             Task* task = *t;
-            if( task->state() == Task::s_ended
-             || task->state() == Task::s_closed )
+            if( task->state() == Task::s_closed )
             {
                 task->job()->remove_running_task( task );
                 t = _task_list.erase( t );
@@ -337,7 +335,7 @@ void Spooler_thread::remove_ended_tasks()
             t++;
         }
 
-        _task_ended = false;
+        _task_closed = false;
     }
 }
 
@@ -360,9 +358,11 @@ bool Spooler_thread::step()
             if( job->priority() >= _spooler->priority_max() )
             {
                 if( _my_event.signaled_then_reset() )  return true;
-                if( _event->signaled() )  return true;      // Das ist _event oder _spooler->_event
-                if( _spooler->signaled() )  return true;
+                if( _event  ->signaled()            )  return true;      // Das ist _event oder _spooler->_event
+                if( _spooler->signaled()            )  return true;
+
                 something_done |= do_something( task );
+
                 if( !something_done )  break;
             }
         }
@@ -400,8 +400,10 @@ bool Spooler_thread::step()
                     if( task->job() == job )
                     {
                         if( _my_event.signaled_then_reset() )  return true;
-                        if( _event->signaled() )  return true;      // Das ist _event oder _spooler->_event
+                        if( _event  ->signaled()            )  return true;      // Das ist _event oder _spooler->_event
+
                         stepped = do_something( task );
+
                         something_done |= stepped;
                         if( stepped )  break;
                     }
@@ -429,8 +431,10 @@ bool Spooler_thread::step()
                 for( int i = 0; i < job->priority(); i++ )
                 {
                     if( _my_event.signaled_then_reset() )  return true;
-                    if( _event->signaled() )  return true;      // Das ist _my_event oder _spooler->_event
+                    if( _event  ->signaled()            )  return true;      // Das ist _my_event oder _spooler->_event
+
                     something_done |= do_something( task );
+
                     if( !something_done )  break;
                 }
             }
@@ -452,7 +456,8 @@ bool Spooler_thread::step()
             if( !job->order_controlled() ) // ||  job->queue_filled() )     // queue_filled() bei Order-Job, falls der (unsinnigerweise?) explizit gestartet worden ist.
             {
                 if( _my_event.signaled_then_reset() )  return true;
-                if( _event->signaled() )  return true;      // Das ist _my_event oder _spooler->_event
+                if( _event  ->signaled()            )  return true;      // Das ist _my_event oder _spooler->_event
+
                 if( job->priority() == 0 )  something_done |= do_something( task );
             }
         }
@@ -463,123 +468,6 @@ bool Spooler_thread::step()
 
     return something_done;
 }
-
-//-----------------------------------------------------------------------------Spooler_thread::step
-/*
-bool Spooler_thread::step()
-{
-    bool something_done = false;
-
-    // Erst die Tasks mit höchster Priorität. Die haben absoluten Vorrang:
-
-
-    FOR_EACH_JOB( it )
-    {
-        Job* job = *it;
-        if( !job->order_controlled() )
-        {
-            if( job->priority() >= _spooler->priority_max() )
-            {
-                if( _my_event.signaled_then_reset() )  return true;
-                if( _event->signaled() )  return true;      // Das ist _event oder _spooler->_event
-                if( _spooler->signaled() )  return true;
-                something_done |= do_something( job );
-                if( !something_done )  break;
-            }
-        }
-    }
-
-
-
-    // Jetzt sehen wir zu, dass die Jobs, die hinten in einer Jobkette stehen, ihre Aufträge los werden.
-    // Damit sollen die fortgeschrittenen Aufträge vorrangig bearbeitet werden, um sie so schnell wie
-    // möglich abzuschließen.
-
-    if( !something_done )
-    {
-        Time t = _spooler->job_chain_time();
-        if( _prioritized_order_job_array_time != t )        // Ist eine neue Jobkette hinzugekommen?
-        {
-            build_prioritized_order_job_array();
-            _prioritized_order_job_array_time = t;
-        }
-
-
-        bool stepped = false;
-        do
-        {
-            FOR_EACH( vector<Job*>, _prioritized_order_job_array, it )
-            {
-                Job* job = *it;
-
-                if( _my_event.signaled_then_reset() )  return true;
-                if( _event->signaled() )  return true;      // Das ist _event oder _spooler->_event
-                //jz 23.2.2003 if( _spooler->signaled() )  return true;
-                stepped = do_something( job );
-                something_done |= stepped;
-                if( stepped )  break;
-            } 
-        }
-        while( stepped );
-    }
-
-
-    // Wenn keine Task höchste Priorität hat, dann die Tasks relativ zu ihrer Priorität, außer Priorität 0:
-
-    if( !something_done )
-    {
-        FOR_EACH_JOB( it )
-        {
-            Job* job = *it;
-
-            if( !job->order_controlled() ) // ||  job->queue_filled() )     // queue_filled() bei Order-Job, falls der (unsinnigerweise?) explizit gestartet worden ist.
-            {
-                for( int i = 0; i < job->priority(); i++ )
-                {
-                    if( _my_event.signaled_then_reset() )  return true;
-                    if( _event->signaled() )  return true;      // Das ist _my_event oder _spooler->_event
-                    //jz 23.2.2003 if( _spooler->signaled() )  return true;
-                    something_done |= do_something( job );
-                    if( !something_done )  break;
-                }
-            }
-        }
-    }
-
-
-
-    // Wenn immer noch keine Task ausgeführt worden ist, dann die Tasks mit Priorität 0 nehmen:
-
-    if( !something_done )
-    {
-        FOR_EACH_JOB( it )
-        {
-            Job* job = *it;
-
-            if( !job->order_controlled() ) // ||  job->queue_filled() )     // queue_filled() bei Order-Job, falls der (unsinnigerweise?) explizit gestartet worden ist.
-            {
-                if( _my_event.signaled_then_reset() )  return true;
-                if( _event->signaled() )  return true;      // Das ist _my_event oder _spooler->_event
-                //jz 23.2.2003 if( _spooler->signaled() )  return true;
-                if( job->priority() == 0 )  do_something( job );
-            }
-        }
-    }
-
-    return something_done;
-}
-*/
-//------------------------------------------------------------------Spooler_thread::next_start_time
-/*
-Time Spooler_thread::next_start_time()
-{
-    Job* next_job = next_job_to_start();
-    
-    _next_start_time  = next_job? next_job->_next_time : latter_day;
-
-    return _next_start_time;
-}
-*/
 
 //---------------------------------------------------------------------Spooler_thread::nichts_getan
 

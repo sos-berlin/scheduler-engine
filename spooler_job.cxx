@@ -1,4 +1,4 @@
-// $Id: spooler_job.cxx,v 1.5 2003/08/25 20:41:26 jz Exp $
+// $Id: spooler_job.cxx,v 1.6 2003/08/27 10:22:58 jz Exp $
 /*
     Hier sind implementiert
 
@@ -941,7 +941,7 @@ Sos_ptr<Task> Job::task_to_start()
 
 bool Job::do_something()
 {
-    Z_DEBUG_ONLY( _log.debug9( "do_something() state=" + state_name() ); )
+  //Z_DEBUG_ONLY( _log.debug9( "do_something() state=" + state_name() ); )
 
     if( !_state )  return false;
 

@@ -1,4 +1,4 @@
-// $Id: spooler_task.h,v 1.105 2003/08/25 21:44:05 jz Exp $
+// $Id: spooler_task.h,v 1.106 2003/08/27 10:22:59 jz Exp $
 
 #ifndef __SPOOLER_TASK_H
 #define __SPOOLER_TASK_H
@@ -75,7 +75,7 @@ struct Task : Sos_self_deleting
 
     bool                        prepare                     ();
     void                        finish                      ();
-    void                        begin__start                ();
+    Async_operation*            begin__start                ();
   //bool                        begin__end                  ();
   //void                        end__start                  ();
   //bool                        end__end                    ();
@@ -124,11 +124,11 @@ struct Task : Sos_self_deleting
     virtual void                do_close                    ()                                      {}
     virtual void                do_load                     ()                                      {}
     virtual void                do_kill                     ()                                      {}
-    virtual void                do_begin__start             ()                                      {}
+    virtual Async_operation*    do_begin__start             ()                                      { return NULL; }
     virtual bool                do_begin__end               () = 0;
-    virtual void                do_end__start               ()                                      {}
+    virtual Async_operation*    do_end__start               ()                                      { return NULL; }
     virtual void                do_end__end                 () = 0;
-    virtual void                do_step__start              ()                                      {}
+    virtual Async_operation*    do_step__start              ()                                      { return NULL; }
     virtual bool                do_step__end                () = 0;
 /*
     virtual bool                loaded                      ()                                      { return true; }
@@ -172,6 +172,7 @@ struct Task : Sos_self_deleting
     Time                       _next_spooler_process;
     Time                       _next_time;
 
+    ptr<Async_operation>       _operation;
     ptr<Com_variable_set>      _params;
     Variant                    _result;
     string                     _name;
@@ -180,6 +181,7 @@ struct Task : Sos_self_deleting
     ptr<Order>                 _order;
     State                      _state;
     bool                       _in_step;                    // Für s_running: step() wird gerade ausgeführt, step__end() muss noch gerufen werden
+    bool                       _processing;                 // In asynchroner Ausführung (zwischen xxx__begin() und xxx__end())
     Call_state                 _call_state;
     Xc_copy                    _error;
     bool                       _success;                    // true, wenn spooler_on_success() gerufen werden soll,
@@ -245,11 +247,11 @@ struct Job_module_task : Module_task
 
     virtual void                do_load                     ();
   //virtual void                do_close                    ();
-    virtual void                do_begin__start             ();
+    virtual Async_operation*    do_begin__start             ();
     virtual bool                do_begin__end               ();
-    virtual void                do_end__start               ();
+    virtual Async_operation*    do_end__start               ();
     virtual void                do_end__end                 ();
-    virtual void                do_step__start              ();
+    virtual Async_operation*    do_step__start              ();
     virtual bool                do_step__end                ();
 /*
   //virtual bool                loaded                      ();

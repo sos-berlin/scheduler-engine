@@ -1,4 +1,4 @@
-// $Id: spooler_thread.h,v 1.46 2003/08/25 20:41:27 jz Exp $
+// $Id: spooler_thread.h,v 1.47 2003/08/27 10:22:59 jz Exp $
 
 #ifndef __SPOOLER_THREAD_H
 #define __SPOOLER_THREAD_H
@@ -101,10 +101,13 @@ struct Spooler_thread : zschimmer::Thread
 
   //Job_list                   _job_list;
     Task_list                  _task_list;
-    bool                       _task_ended;
+    bool                       _task_closed;
 
     vector<Job*>               _prioritized_order_job_array;        // Jobs am Ende einer Jobkette priorisieren
     Time                       _prioritized_order_job_array_time;
+
+    typedef list<object_server::Session*>   Session_list;
+    Session_list               _session_list;
 
  //?Task*                      _next_task;
     Time                       _next_time;

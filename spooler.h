@@ -1,4 +1,4 @@
-// $Id: spooler.h,v 1.145 2003/08/25 20:41:26 jz Exp $
+// $Id: spooler.h,v 1.146 2003/08/27 10:22:58 jz Exp $
 
 #ifndef __SPOOLER_H
 #define __SPOOLER_H
@@ -88,14 +88,15 @@ namespace sos {
 #include "spooler_module.h"
 #include "spooler_module_com.h"
 #include "spooler_module_java.h"
-#include "spooler_module_remote.h"
-#include "spooler_module_remote_server.h"
 #include "spooler_history.h"
 #include "spooler_order.h"
 #include "spooler_job.h"
 #include "spooler_task.h"
+#include "spooler_process.h"
 #include "spooler_thread.h"
 #include "spooler_service.h"
+#include "spooler_module_remote.h"
+#include "spooler_module_remote_server.h"
 
 
 //-------------------------------------------------------------------------------------------------
@@ -244,6 +245,8 @@ struct Spooler
   //void                        single_thread_step          ();
     void                        wait                        ();
 
+    Process*                    new_process                 ( bool temporary = false );
+
     void                        signal                      ( const string& signal_name = "" )  { _log.info( "Signal \"" + signal_name + "\"" ); _event.signal( signal_name ); }
   //void                        signal                      ( const string& signal_name = "" )  { THREAD_LOCK( _lock )  ..., if(_event) _event->signal(signal_name), _next_start_time = 0, _next_job = NULL; }
     void                        async_signal                ( const char* signal_name = "" )    { _event.async_signal( signal_name ); }
@@ -370,7 +373,7 @@ struct Spooler
     Module                     _module;                     // <script>
     ptr<Module_instance>       _module_instance;
 
-    typedef list< ptr<object_server::Connection> >  Process_list;
+    typedef list< ptr<Process> >  Process_list;
     Process_list               _process_list;
 
     Job*                       _next_job;
@@ -379,6 +382,7 @@ struct Spooler
 
     Thread_list                _thread_list;                // Alle Threads
     int                        _max_threads;
+
 
   //typedef list< Spooler_thread* >  Spooler_thread_list;
   //Spooler_thread_list         _spooler_thread_list;        // Nur Threads mit _free_threading=no, die also keine richtigen Threads sind und im Spooler-Thread laufen

@@ -1,4 +1,4 @@
-// $Id: spooler_module_java.cxx,v 1.58 2003/08/25 20:41:26 jz Exp $
+// $Id: spooler_module_java.cxx,v 1.59 2003/08/27 10:22:58 jz Exp $
 /*
     Hier sind implementiert
 
@@ -507,7 +507,7 @@ Java_module_instance::Java_module_instance( Vm* vm, Module* module )
 : 
     Module_instance(module),
     Has_vm(vm),
-    _zero_(this+1), 
+    _zero_(_end_), 
   //_jobject(_module->_spooler->_java_vm) 
     _jobject( _java_vm ) 
 {

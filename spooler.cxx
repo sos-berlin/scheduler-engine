@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.225 2003/08/25 20:41:26 jz Exp $
+// $Id: spooler.cxx,v 1.226 2003/08/27 10:22:57 jz Exp $
 /*
     Hier sind implementiert
 
@@ -988,6 +988,21 @@ bool Spooler::run_single_thread()
     return something_done;
 }
 */
+
+//-----------------------------------------------------------------------------Spooler::new_process
+
+Process* Spooler::new_process( bool temporary )
+{
+    ptr<Process> process = Z_NEW( Process( this ) );
+
+    process->set_temporary( temporary );
+    process->start();
+
+    _process_list.push_back( process );
+
+    return process;
+}
+
 //--------------------------------------------------------------------------------Spooler::send_cmd
 
 void Spooler::send_cmd()
@@ -1491,7 +1506,14 @@ void Spooler::run()
 
                 if( single_thread )
                 {
+                    FOR_EACH( Process_list, _process_list, p )
+                    {
+                        Process* process = *p;
+                        process->async_continue();
+                    }
+
                     single_thread->process();
+
                     wait_handles += single_thread->_wait_handles;
                     Task* task = single_thread->get_next_task();
                     if( task ) 
@@ -2034,6 +2056,11 @@ int sos_main( int argc, char** argv )
 
         if( send_cmd != "" )  is_service = false;
 
+        //Z_DEBUG_ONLY( MessageBox( 0, "spooler", "spooler -object-server", 0 ) );
+
+        if( log_filename.empty() )  log_filename = read_profile_string( factory_ini, "spooler", "log" );
+        if( !log_filename.empty() )  log_start( log_filename );
+
 
         if( is_object_server )
         {
@@ -2052,9 +2079,6 @@ int sos_main( int argc, char** argv )
                 if( service_display == "" )  service_display = spooler::make_service_display(id);
             }
 #       endif
-
-        if( log_filename.empty() )  log_filename = read_profile_string( factory_ini, "spooler", "log" );
-        if( !log_filename.empty() )  log_start( log_filename );
 
 #       ifdef Z_WINDOWS
 
