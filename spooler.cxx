@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.193 2003/04/02 18:03:32 jz Exp $
+// $Id: spooler.cxx,v 1.194 2003/04/03 11:37:10 jz Exp $
 /*
     Hier sind implementiert
 
@@ -976,6 +976,9 @@ void Spooler::start()
     _db = SOS_NEW( Spooler_db( this ) );
     _db->open( _db_name, _need_db );
     _db->spooler_start();
+
+    set_ctrl_c_handler( false );
+    set_ctrl_c_handler( true );       // Falls Java (über Dateityp jdbc) gestartet worden ist und den Signal-Handler verändert hat
 
 
     _spooler_start_time = Time::now();
