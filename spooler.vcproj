@@ -29,6 +29,7 @@
 				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
 				StringPooling="TRUE"
 				RuntimeLibrary="0"
+				BufferSecurityCheck="FALSE"
 				EnableFunctionLevelLinking="TRUE"
 				RuntimeTypeInfo="TRUE"
 				UsePrecompiledHeader="2"
@@ -57,6 +58,7 @@ cd &quot;$(OutDir)&quot; &amp;&amp; jar cfm &quot;$(TargetDir)sos.spooler.jar&qu
 				GenerateMapFile="TRUE"
 				MapFileName="../bin/spooler.map"
 				SubSystem="1"
+				OptimizeReferences="2"
 				TargetMachine="1"/>
 			<Tool
 				Name="VCMIDLTool"
@@ -96,10 +98,10 @@ cd &quot;$(OutDir)&quot; &amp;&amp; jar cfm &quot;$(TargetDir)sos.spooler.jar&qu
 				Optimization="0"
 				OptimizeForProcessor="3"
 				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE"
-				StringPooling="TRUE"
 				MinimalRebuild="TRUE"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
+				BufferSecurityCheck="TRUE"
 				EnableFunctionLevelLinking="TRUE"
 				RuntimeTypeInfo="TRUE"
 				UsePrecompiledHeader="2"
