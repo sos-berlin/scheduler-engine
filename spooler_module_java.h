@@ -1,4 +1,4 @@
-// $Id: spooler_module_java.h,v 1.12 2002/11/26 11:38:09 jz Exp $
+// $Id: spooler_module_java.h,v 1.13 2002/11/26 11:40:19 jz Exp $
 
 #ifndef __SPOOLER_MODULE_JAVA_H
 #define __SPOOLER_MODULE_JAVA_H
