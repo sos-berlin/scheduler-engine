@@ -1,10 +1,10 @@
-// $Id: Task.java,v 1.5 2004/03/23 20:22:17 jz Exp $
+// $Id: Task.java,v 1.6 2004/03/26 16:15:32 jz Exp $
 
 package sos.spooler;
 
 /**
  * @author Joacim Zschimmer, Zschimmer GmbH
- * @version $Revision: 1.5 $
+ * @version $Revision: 1.6 $
  */
 
 public class Task extends Idispatch
@@ -47,6 +47,7 @@ public class Task extends Idispatch
     public String           changed_directories ()                                  { return (String)       com_call( "<changed_directories"            ); }
 
     public void             add_pid             ( int pid )                         {                       com_call( "add_pid", pid                    ); }
+    public void             add_pid             ( int pid, double timeout_seconds ) {                       com_call( "add_pid", new Integer(pid), new Double(timeout_seconds) ); }
 
     public void             remove_pid          ( int pid )                         {                       com_call( "remove_pid", pid                 ); }
 }

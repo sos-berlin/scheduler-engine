@@ -1,4 +1,4 @@
-// $Id: spooler_com.h,v 1.97 2004/03/23 20:22:17 jz Exp $
+// $Id: spooler_com.h,v 1.98 2004/03/26 16:15:32 jz Exp $
 
 #ifndef __SPOOLER_COM_H
 #define __SPOOLER_COM_H
@@ -417,7 +417,7 @@ struct Com_task : spooler_com::Itask,
     STDMETHODIMP                put_close_engine            ( VARIANT_BOOL );
     STDMETHODIMP                get_order                   ( spooler_com::Iorder** );
     STDMETHODIMP                get_changed_directories     ( BSTR* );
-    STDMETHODIMP                add_pid                     ( int );
+    STDMETHODIMP                add_pid                     ( int, VARIANT* );
     STDMETHODIMP                remove_pid                  ( int );
 
   private:

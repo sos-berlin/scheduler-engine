@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.241 2004/03/23 20:30:29 jz Exp $
+// $Id: spooler_task.cxx,v 1.242 2004/03/26 16:15:32 jz Exp $
 /*
     Hier sind implementiert
 
@@ -212,6 +212,8 @@ Task::Task( Job* job )
     _log.set_task( this );
     _log.inherit_settings( _job->_log );
 
+    set_subprocess_timeout();
+
     Z_DEBUG_ONLY( _job_name = job->name(); )
 }
 
@@ -234,7 +236,7 @@ void Task::close()
 {
     if( !_closed ) 
     {
-        FOR_EACH( Pids, _pids, p )  _spooler->unregister_pid( *p );
+        FOR_EACH( Subprocesses, _subprocesses, p )  p->second->close();
 
         if( _operation )
         {
@@ -493,34 +495,37 @@ void Task::set_state( State new_state )
                 _next_time = 0;
         }
 
+
         if( _next_time && !_let_run )  _next_time = min( _next_time, _job->_period.end() ); // Am Ende der Run_time wecken, damit die Task beendet werden kann
 
-
-        if( new_state == _state )  return;
-
-        if( new_state == s_running  ||  new_state == s_starting )  _job->increment_running_tasks(),  _thread->increment_running_tasks();
-        if( _state    == s_running  ||  _state    == s_starting )  _job->decrement_running_tasks(),  _thread->decrement_running_tasks();
-
-        if( new_state != s_running_delayed )  _next_spooler_process = 0;
-
-        _state = new_state;
-
-
-        Log_level log_level = new_state == s_starting || new_state == s_closed? log_info : log_debug9;
-        if( log_level >= log_info || _spooler->_debug )
-        {
-            string msg = "state=" + state_name();
-            if( _next_time )  msg += " (" + _next_time.as_string() + ")";
-            if( new_state == s_starting  &&  _start_at )  msg += " (at=" + _start_at.as_string() + ")";
-          //if( new_state == s_starting  &&  _thread->_free_threading )  msg += ", dem Thread " + _thread->name() + " zugeordnet";
-            if( new_state == s_starting  &&  _module_instance && _module_instance->pid() )  msg += ", pid=" + as_string( _module_instance->pid() );
-
-            _log.log( log_level, msg );
-        }
-
         if( _end )  _next_time = 0;   // Falls vor set_state() cmd_end() gerufen worden ist. Damit _end ausgeführt wird.
-        if( is_idle()  &&  _job->_module._process_class )  _job->_module._process_class->notify_a_process_is_idle();
-      //if( is_idle()  &&  _job->_module._process_class  &&  _job->_module._process_class->need_process() )  cmd_nice_end();
+
+        if( new_state != _state ) 
+        {
+            if( new_state == s_running  ||  new_state == s_starting )  _job->increment_running_tasks(),  _thread->increment_running_tasks();
+            if( _state    == s_running  ||  _state    == s_starting )  _job->decrement_running_tasks(),  _thread->decrement_running_tasks();
+
+            if( new_state != s_running_delayed )  _next_spooler_process = 0;
+
+            _state = new_state;
+
+
+            if( is_idle()  &&  _job->_module._process_class )  _job->_module._process_class->notify_a_process_is_idle();
+        //if( is_idle()  &&  _job->_module._process_class  &&  _job->_module._process_class->need_process() )  cmd_nice_end();
+
+
+            Log_level log_level = new_state == s_starting || new_state == s_closed? log_info : log_debug9;
+            if( log_level >= log_info || _spooler->_debug )
+            {
+                string msg = "state=" + state_name();
+                if( _next_time )  msg += " (" + _next_time.as_string() + ")";
+                if( new_state == s_starting  &&  _start_at )  msg += " (at=" + _start_at.as_string() + ")";
+            //if( new_state == s_starting  &&  _thread->_free_threading )  msg += ", dem Thread " + _thread->name() + " zugeordnet";
+                if( new_state == s_starting  &&  _module_instance && _module_instance->pid() )  msg += ", pid=" + as_string( _module_instance->pid() );
+
+                _log.log( log_level, msg );
+            }
+        }
     }
 }
 
@@ -602,23 +607,130 @@ void Task::set_next_time( const Time& next_time )
 
 Time Task::next_time()
 { 
-    return _operation? _timeout == latter_day? latter_day
-                                             : Time( _last_operation_time + _timeout )     // _timeout sollte nicht zu groß sein
-                     : _next_time;
+    Time result;
+    
+    if( _operation )
+    {
+        result = _timeout == latter_day? latter_day
+                                       : Time( _last_operation_time + _timeout );    // _timeout sollte nicht zu groß sein
+    }
+    else
+    {
+        result = _next_time;
+    }
+
+    if( result > _subprocess_timeout )  result = _subprocess_timeout;
+
+    return result;
 }
 
 //------------------------------------------------------------------------------Task::check_timeout
 
-bool Task::check_timeout()
+bool Task::check_timeout( const Time& now )
 {
-    if( _timeout < latter_day  &&  Time::now() > _last_operation_time + _timeout  &&  !_kill_tried )
+    if( _timeout < latter_day  &&  now > _last_operation_time + _timeout  &&  !_kill_tried )
     {
         _log.error( "Task wird nach nach Zeitablauf abgebrochen" );
-
         return try_kill();
     }
 
     return false;
+}
+
+//------------------------------------------------------------------------------------Task::add_pid
+
+void Task::add_pid( int pid, const Time& timeout_period )
+{ 
+    Time timeout = latter_day;
+    
+    if( timeout_period != latter_day )
+    {
+        timeout = Time::now() + timeout_period;
+        _log.debug9( S() << "add_pid(" << pid << ")  Frist endet " << timeout );
+    }
+
+    _subprocesses.insert( Subprocesses::value_type( pid, Z_NEW( Subprocess( this, pid, timeout ) ) ) );  
+
+    set_subprocess_timeout();
+}
+
+//---------------------------------------------------------------------------------Task::remove_pid
+
+void Task::remove_pid( int pid )
+{ 
+    _subprocesses.erase( pid );  
+
+    set_subprocess_timeout();
+}
+
+//---------------------------------------------------------------------Task::Subprocess::Subprocess
+
+Task::Subprocess::Subprocess( Task* task, int pid, const Time& timeout )
+: 
+    _spooler(task->_spooler),
+    _task(task),
+    _pid(pid), 
+    _timeout(timeout), 
+    _killed(false) 
+{
+    _spooler->register_pid( pid );
+}
+
+//--------------------------------------------------------------------------Task::Subprocess::close
+
+void Task::Subprocess::close()
+{
+    if( _spooler )  
+    {
+        _spooler->unregister_pid( _pid );
+        _spooler = NULL;
+    }
+}
+
+//-----------------------------------------------------------------------Task::Subprocess::try_kill
+                                
+void Task::Subprocess::try_kill()
+{ 
+    if( !_killed )
+    {
+        bool ok = try_kill_process_immediately( _pid );
+
+        _task->_log.warn( S() << "Subprozess " << _pid << ( ok? " abgebrochen" : " lässt sich nicht abbrechen" ) );
+
+        _killed = true; 
+        _timeout = latter_day; 
+
+        close();
+    }
+}
+
+//---------------------------------------------------------------------Task::set_subprocess_timeout
+
+void Task::set_subprocess_timeout()
+{
+    _subprocess_timeout = latter_day;
+    FOR_EACH( Subprocesses, _subprocesses, p )  if( _subprocess_timeout > p->second->_timeout )  _subprocess_timeout = p->second->_timeout;
+
+    //if( _subprocess_timeout > _next_time )  set_next_time( _subprocess_timeout );
+}
+
+//-------------------------------------------------------------------Task::check_subprocess_timeout
+
+bool Task::check_subprocess_timeout( const Time& now )
+{
+    bool something_done = false; 
+
+    if( _subprocess_timeout < now )
+    {
+        FOR_EACH( Subprocesses, _subprocesses, p )  
+        {
+            if( p->second->_timeout < now )  p->second->try_kill(),  something_done = true;
+        }
+
+        set_subprocess_timeout();
+    }
+
+    return something_done;
 }
 
 //-----------------------------------------------------------------------------------Task::try_kill
@@ -631,7 +743,7 @@ bool Task::try_kill()
     {
         _killed = do_kill();
 
-        FOR_EACH( Pids, _pids, p )  try_kill_process_immediately( *p );
+        FOR_EACH( Subprocesses, _subprocesses, p )  p->second->try_kill();
 
         if( !_killed ) _log.warn( "Task konnte nicht abgebrochen werden" );
     }
@@ -640,27 +752,16 @@ bool Task::try_kill()
     return _killed;
 }
 
-//------------------------------------------------------------------------------------Task::add_pid
-
-void Task::add_pid( int pid )
-{ 
-    _pids.insert( pid );  
-    _spooler->register_pid( pid ); 
-}
-
-//---------------------------------------------------------------------------------Task::remove_pid
-
-void Task::remove_pid( int pid )
-{ 
-    _pids.erase ( pid );  
-    _spooler->unregister_pid( pid ); 
-}
-
 //-------------------------------------------------------------------------------Task::do_something
 
 bool Task::do_something()
 {
     //Z_DEBUG_ONLY( _log.debug9( "do_something() state=" + state_name() ); )
+
+    bool had_operation      = _operation != NULL;
+    bool something_done     = false;
+    Time now                = Time::now();
+    Time next_time_at_begin = _next_time;
 
     _signaled = false;
 
@@ -670,368 +771,366 @@ bool Task::do_something()
         return try_kill();
     }
 
+    something_done |= check_subprocess_timeout( now );
+
     if( _operation &&  !_operation->async_finished() )  
     {
-        return check_timeout();
+        something_done |= check_timeout( now );
     }
-
-    bool had_operation      = _operation != NULL;
-    bool something_done     = false;
-    Time now                = Time::now();
-    Time next_time_at_begin = _next_time;
-
-
-    // Periode endet?
-    if( !_operation )
+    else
     {
-        if( _state == s_running 
-         || _state == s_running_process 
-         || _state == s_running_delayed  
-         || _state == s_running_waiting_for_order )      
+        // Periode endet?
+        if( !_operation )
         {
-            bool let_run = _let_run  ||  _job->_period.is_in_time( now )  ||  ( _job->select_period(now), _job->is_in_period(now) );
-
-            if( !let_run ) 
+            if( _state == s_running 
+             || _state == s_running_process 
+             || _state == s_running_delayed  
+             || _state == s_running_waiting_for_order )      
             {
-                _log( "Laufzeitperiode ist abgelaufen, Task wird beendet" );
-                set_state( s_ending );
+                bool let_run = _let_run  ||  _job->_period.is_in_time( now )  ||  ( _job->select_period(now), _job->is_in_period(now) );
+
+                if( !let_run ) 
+                {
+                    _log( "Laufzeitperiode ist abgelaufen, Task wird beendet" );
+                    set_state( s_ending );
+                }
             }
         }
-    }
 
 
-    int error_count = 0;
+        int error_count = 0;
 
-    bool loop = true;
-    while( loop )
-    {
-        try
+        bool loop = true;
+        while( loop )
         {
             try
             {
-                loop = false;
-                bool ok = true;
-
-                if( !_operation )
+                try
                 {
-                    if( _module_instance && !_module_instance_async_error ) 
+                    loop = false;
+                    bool ok = true;
+
+                    if( !_operation )
                     {
-                        try 
-                        { 
-                            _module_instance->check_connection_error(); 
-                        }  
-                        catch( exception& x )
-                        { 
-                            _module_instance_async_error = true;  
-                            throw_xc( "SCHEDULER-202", x.what() );
+                        if( _module_instance && !_module_instance_async_error ) 
+                        {
+                            try 
+                            { 
+                                _module_instance->check_connection_error(); 
+                            }  
+                            catch( exception& x )
+                            { 
+                                _module_instance_async_error = true;  
+                                throw_xc( "SCHEDULER-202", x.what() );
+                            }
+                        }
+
+                        if( _state < s_ending  &&  _end )      // Task beenden?
+                        {
+                            if( !loaded() )         set_state( s_ended );
+                            else
+                            if( !_begin_called )    set_state( s_release );
+                            else
+                                                    set_state( s_ending );
+                        }
+
+                        // Historie beginnen?
+                        if( _state == s_starting 
+                         || _state == s_running 
+                         || _state == s_running_delayed 
+                         || _state == s_running_waiting_for_order 
+                         || _state == s_running_process           )
+                        {
+                            if( _step_count == _job->_history.min_steps() )  _history.start();
                         }
                     }
 
-                    if( _state < s_ending  &&  _end )      // Task beenden?
+
+                    switch( _state )
                     {
-                        if( !loaded() )         set_state( s_ended );
-                        else
-                        if( !_begin_called )    set_state( s_release );
-                        else
-                                                set_state( s_ending );
-                    }
-
-                    // Historie beginnen?
-                    if( _state == s_starting 
-                     || _state == s_running 
-                     || _state == s_running_delayed 
-                     || _state == s_running_waiting_for_order 
-                     || _state == s_running_process           )
-                    {
-                        if( _step_count == _job->_history.min_steps() )  _history.start();
-                    }
-                }
-
-
-                switch( _state )
-                {
-                    case s_loading:
-                    {
-                        load();
-
-                    case s_waiting_for_process:
-                        bool ok = !_module_instance || _module_instance->try_to_get_process();
-                        if( ok )  something_done = true, set_state( s_starting ), loop = true;
-                            else  set_state( s_waiting_for_process );
-                        break;
-                    }
-
-
-                    case s_starting:
-                    {
-                        _begin_called = true;
-
-                        if( !_operation )
+                        case s_loading:
                         {
-                            _operation = begin__start();
-                        }
-                        else
-                        {
-                            ok = operation__end(); 
-                            if( _state != s_running_process )  set_state( ok? s_running : s_ending );
-                            loop = true;
+                            load();
+
+                        case s_waiting_for_process:
+                            bool ok = !_module_instance || _module_instance->try_to_get_process();
+                            if( ok )  something_done = true, set_state( s_starting ), loop = true;
+                                else  set_state( s_waiting_for_process );
+                            break;
                         }
 
-                        something_done = true;
 
-                        break;
-                    }
-
-
-                    case s_running_process:
-                        if( ((Process_task*)this)->signaled() )
+                        case s_starting:
                         {
-                            _log( "signaled!" );
-                            set_state( s_ending );
-                            loop = true;
-                        }
-                        break;
+                            _begin_called = true;
 
-
-                    case s_running:
-                    {
-                        if( !_operation )
-                        {
-                            if( _next_spooler_process )
+                            if( !_operation )
                             {
-                                set_state( s_running_delayed );
+                                _operation = begin__start();
                             }
                             else
                             {
-                                if( _job->order_queue() )
+                                ok = operation__end(); 
+                                if( _state != s_running_process )  set_state( ok? s_running : s_ending );
+                                loop = true;
+                            }
+
+                            something_done = true;
+
+                            break;
+                        }
+
+
+                        case s_running_process:
+                            if( ((Process_task*)this)->signaled() )
+                            {
+                                _log( "signaled!" );
+                                set_state( s_ending );
+                                loop = true;
+                            }
+                            break;
+
+
+                        case s_running:
+                        {
+                            if( !_operation )
+                            {
+                                if( _next_spooler_process )
                                 {
-                                    if( !take_order( now ) )
+                                    set_state( s_running_delayed );
+                                }
+                                else
+                                {
+                                    if( _job->order_queue() )
                                     {
-                                        set_state( s_running_waiting_for_order );
-                                        break;
+                                        if( !take_order( now ) )
+                                        {
+                                            set_state( s_running_waiting_for_order );
+                                            break;
+                                        }
+
+                                        _log.set_order_log( &_order->_log );
                                     }
 
-                                    _log.set_order_log( &_order->_log );
+                                    _last_process_start_time = now;
+
+                                    _operation = do_step__start();
+
+                                    something_done = true;
                                 }
-
-                                _last_process_start_time = now;
-
-                                _operation = do_step__start();
-
-                                something_done = true;
-                            }
-                        }
-                        else
-                        {
-                            ok = step__end();
-                            _operation = NULL;
-
-                            if( !ok || has_error() )  set_state( s_ending ), loop = true;
-                            something_done = true;
-                        }
-
-                        break;
-                    }
-
-
-                    case s_running_waiting_for_order:
-                    {
-                        if( take_order( now ) )
-                        {
-                            set_state( s_running );     // Auftrag da? Dann Task weiterlaufen lassen (Ende der Run_time wird noch geprüft)
-                            loop = true;                // _order wird in step__end() wieder abgeräumt
-                        }
-                        else
-                        if( _job->_idle_timeout != latter_day )
-                        {
-                            if( now >= _idle_since + _job->_idle_timeout )  
-                            {
-                                _log.debug9( "idle_timeout ist abgelaufen, Task beendet sich" );
-                                _end = true;
-                                loop = true;
-                            }
-                        }
-                        break;
-                    }
-
-
-                    case s_running_delayed:  
-                    {
-                        if( now >= _next_spooler_process )
-                        {
-                            _next_spooler_process = 0;
-                            set_state( s_running ), loop = true;
-                        }
-                     
-                        break;
-                    }
-
-
-                    case s_ending:
-                    {
-                        if( !_operation )
-                        {
-                            THREAD_LOCK( _lock ) { if( !_ending_since )  _ending_since = now; }    // Wird auch von cmd_end() gesetzt
-
-                            if( has_error() )  _history.start();
-
-                            if( _begin_called )
-                            {
-                                _operation = do_end__start();
-                                //set_state( s_ending );
                             }
                             else
                             {
-                                set_state( s_exit );
+                                ok = step__end();
+                                _operation = NULL;
+
+                                if( !ok || has_error() )  set_state( s_ending ), loop = true;
+                                something_done = true;
+                            }
+
+                            break;
+                        }
+
+
+                        case s_running_waiting_for_order:
+                        {
+                            if( take_order( now ) )
+                            {
+                                set_state( s_running );     // Auftrag da? Dann Task weiterlaufen lassen (Ende der Run_time wird noch geprüft)
+                                loop = true;                // _order wird in step__end() wieder abgeräumt
+                            }
+                            else
+                            if( _job->_idle_timeout != latter_day )
+                            {
+                                if( now >= _idle_since + _job->_idle_timeout )  
+                                {
+                                    _log.debug9( "idle_timeout ist abgelaufen, Task beendet sich" );
+                                    _end = true;
+                                    loop = true;
+                                }
+                            }
+                            break;
+                        }
+
+
+                        case s_running_delayed:  
+                        {
+                            if( now >= _next_spooler_process )
+                            {
+                                _next_spooler_process = 0;
+                                set_state( s_running ), loop = true;
+                            }
+                         
+                            break;
+                        }
+
+
+                        case s_ending:
+                        {
+                            if( !_operation )
+                            {
+                                THREAD_LOCK( _lock ) { if( !_ending_since )  _ending_since = now; }    // Wird auch von cmd_end() gesetzt
+
+                                if( has_error() )  _history.start();
+
+                                if( _begin_called )
+                                {
+                                    _operation = do_end__start();
+                                    //set_state( s_ending );
+                                }
+                                else
+                                {
+                                    set_state( s_exit );
+                                    loop = true;
+                                }
+                            }
+                            else
+                            {
+                                operation__end();
+
+                                set_state( loaded()? has_error()? s_on_error 
+                                                                : s_on_success 
+                                                : s_release );
+
+                                set_mail_defaults();
+
                                 loop = true;
                             }
+
+                            something_done = true;
+
+                            break;
                         }
-                        else
+
+
+                        case s_on_success:
                         {
-                            operation__end();
+                            if( !_operation )  _operation = do_call__start( spooler_on_success_name );
+                                        else  operation__end(), set_state( s_exit ), loop = true;
 
-                            set_state( loaded()? has_error()? s_on_error 
-                                                            : s_on_success 
-                                               : s_release );
-
-                            set_mail_defaults();
-
-                            loop = true;
+                            something_done = true;
+                            break;
                         }
 
-                        something_done = true;
 
-                        break;
-                    }
-
-
-                    case s_on_success:
-                    {
-                        if( !_operation )  _operation = do_call__start( spooler_on_success_name );
-                                     else  operation__end(), set_state( s_exit ), loop = true;
-
-                        something_done = true;
-                        break;
-                    }
-
-
-                    case s_on_error:
-                    {
-                        if( !_operation )  _operation = do_call__start( spooler_on_error_name );
-                                     else  operation__end(), set_state( s_exit ), loop = true;
-
-                        something_done = true;
-                        break;
-                    }
-
-
-                    case s_exit:
-                    {
-                        if( _job->_module._reuse == Module::reuse_task )
+                        case s_on_error:
                         {
-                            if( !_operation )  _operation = do_call__start( spooler_exit_name );
-                                         else  operation__end(), set_state( s_release ), loop = true;
-                        }
-                        else
-                        {
-                            set_state( s_release );
-                            loop = true;
+                            if( !_operation )  _operation = do_call__start( spooler_on_error_name );
+                                        else  operation__end(), set_state( s_exit ), loop = true;
+
+                            something_done = true;
+                            break;
                         }
 
-                        something_done = true;
-                        break;
+
+                        case s_exit:
+                        {
+                            if( _job->_module._reuse == Module::reuse_task )
+                            {
+                                if( !_operation )  _operation = do_call__start( spooler_exit_name );
+                                            else  operation__end(), set_state( s_release ), loop = true;
+                            }
+                            else
+                            {
+                                set_state( s_release );
+                                loop = true;
+                            }
+
+                            something_done = true;
+                            break;
+                        }
+
+
+                        case s_release:
+                        {
+                            if( !_operation )  _operation = do_release__start();
+                                        else  operation__end(), set_state( s_ended ), loop = true;
+
+                            something_done = true;
+                            break;
+                        }
+
+
+                        case s_ended:
+                        {
+                            if( !_operation )  
+                            {
+                                _operation = do_close__start();
+                            }
+                            else
+                            {
+                                operation__end();
+                                finish();
+
+                                // Gesammelte eMail senden, wenn collected_max erreicht:
+                                //Time log_time = _log.collect_end();
+                                //if( log_time > Time::now()  &&  _next_time > log_time )  set_next_time( log_time );
+
+                                set_state( s_closed );
+						        something_done = true;
+                                loop = true;
+                            }
+
+                            break;
+                        }
+
+
+                        case s_suspended:
+                            break;
+
+                        case s_closed:
+                            break;
+
+                        case s_none:
+                        case s__max:
+                            throw_xc( "state=none?" );
                     }
 
 
-                    case s_release:
+                    if( !_operation )
                     {
-                        if( !_operation )  _operation = do_release__start();
-                                     else  operation__end(), set_state( s_ended ), loop = true;
-
-                        something_done = true;
-                        break;
-                    }
-
-
-                    case s_ended:
-                    {
-                        if( !_operation )  
+                        if( !ok || has_error() )  
                         {
-                            _operation = do_close__start();
-                        }
-                        else
-                        {
-                            operation__end();
-                            finish();
-
-                            // Gesammelte eMail senden, wenn collected_max erreicht:
-                            //Time log_time = _log.collect_end();
-                            //if( log_time > Time::now()  &&  _next_time > log_time )  set_next_time( log_time );
-
-                            set_state( s_closed );
-						    something_done = true;
-                            loop = true;
+                            if( _state < s_ending )  set_state( s_ending ), loop = true;
                         }
 
-                        break;
+                    
+                        if( _killed  &&  _state < s_ended )  set_state( s_ended ), loop = true;
                     }
-
-
-                    case s_suspended:
-                        break;
-
-                    case s_closed:
-                        break;
-
-                    case s_none:
-                    case s__max:
-                        throw_xc( "state=none?" );
                 }
+                catch( _com_error& x )  { throw_com_error( x ); }
+            }
+        //catch( Stop_scheduler_exception& ) { throw; }
+            catch( const exception& x )
+            {
+                if( error_count == 0 )  set_error( x );
+                                else  _log.error( x.what() );
 
-
-                if( !_operation )
+                if( error_count == 0  &&  _state < s_ending )
                 {
-                    if( !ok || has_error() )  
-                    {
-                        if( _state < s_ending )  set_state( s_ending ), loop = true;
-                    }
-
-                
-                    if( _killed  &&  _state < s_ended )  set_state( s_ended ), loop = true;
+                    _end = true;
+                    loop = true;
                 }
+                else
+                if( error_count <= 1 )
+                {
+                    loop = false;
+                    finish();
+                    set_state( s_closed );
+                }
+                else
+                    throw x;    // Fehlerschleife, Scheduler beenden. Sollte nicht passieren.
+
+                error_count++;
+
+                something_done = true;
+
+                //sos_sleep( 5 );  // Bremsen, falls sich der Fehler wiederholt
             }
-            catch( _com_error& x )  { throw_com_error( x ); }
         }
-      //catch( Stop_scheduler_exception& ) { throw; }
-        catch( const exception& x )
-        {
-            if( error_count == 0 )  set_error( x );
-                              else  _log.error( x.what() );
 
-            if( error_count == 0  &&  _state < s_ending )
-            {
-                _end = true;
-                loop = true;
-            }
-            else
-            if( error_count <= 1 )
-            {
-                loop = false;
-                finish();
-                set_state( s_closed );
-            }
-            else
-                throw x;    // Fehlerschleife, Scheduler beenden. Sollte nicht passieren.
-
-            error_count++;
-
-            something_done = true;
-
-            //sos_sleep( 5 );  // Bremsen, falls sich der Fehler wiederholt
-        }
+        if( _operation && !had_operation )  _last_operation_time = now;    // Für _timeout
     }
-
-    if( _operation && !had_operation )  _last_operation_time = now;    // Für _timeout
 
   //if( _next_time && !_let_run )  set_next_time( min( _next_time, _job->_period.end() ) );                      // Am Ende der Run_time wecken, damit die Task beendet werden kann
 
