@@ -1,4 +1,4 @@
-// $Id: spooler_module_remote_server.cxx,v 1.3 2003/05/31 10:01:13 jz Exp $
+// $Id: spooler_module_remote_server.cxx,v 1.4 2003/05/31 14:24:25 jz Exp $
 /*
     Hier sind implementiert
 
@@ -50,7 +50,7 @@ Remote_module_instance_server::~Remote_module_instance_server()
 {
     try
     {
-        _module_instance->close();
+        if( _module_instance )  _module_instance->close();
     }
     catch( exception& ) {}
 
