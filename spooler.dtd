@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- $Id: spooler.dtd,v 1.34 2002/04/06 20:07:38 jz Exp $   Joacim Zschimmer,  (C) 2000 SOS GmbH Berlin  -->
+<!-- $Id: spooler.dtd,v 1.35 2002/04/09 08:25:50 jz Exp $   Joacim Zschimmer,  (C) 2000 SOS GmbH Berlin  -->
 
 
 <!ELEMENT spooler               ( config+ | command | answer )>
@@ -84,6 +84,7 @@
 <!ELEMENT process               EMPTY>
 <!ATTLIST process               file                CDATA #REQUIRED>
 <!ATTLIST process               param               CDATA ''>
+<!ATTLIST process               log_file            CDATA ''>
 
 <!-- wenn der DLL-Aufruf implementiert ist:
 <!ELEMENT module                EMPTY>
