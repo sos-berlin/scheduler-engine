@@ -1,4 +1,4 @@
-<!-- $Id: jobs_frame.html,v 1.7 2004/07/19 23:13:37 jz Exp $ -->
+<!-- $Id: jobs_frame.html,v 1.8 2004/07/20 11:41:01 jz Exp $ -->
 <html>
 
 <head>
@@ -96,23 +96,38 @@ function repeat_update( repeat, call_update )
         document.all.update_periodically_checkbox.checked = checked;
     }
     
-    if( repeat )  _timer = window.setTimeout( "repeat_update(true,true)", 5000, "JavaScript" );
+    if( repeat )  set_update_timer();
+}
+
+//---------------------------------------------------------------------------------set_update_timer
+
+function set_update_timer()
+{
+    if( _timer != undefined )  window.clearTimeout( _timer ),  _timer = undefined;
+    _timer = window.setTimeout( "repeat_update(true,true)", 5000, "JavaScript" );
+}
+
+//--------------------------------------------------------------------------------update_jobs_frame
+
+function update_jobs_frame()
+{
+    _response = scheduler.execute( "<show_state what='all'/>" );
+    modify_response( _response );
+    document.all.stylesheet.innerHTML = _response.transformNode( _stylesheet );;
 }
 
 //-------------------------------------------------------------------------------------------update
 
 function update()
 {
-    _response = scheduler.execute( "<show_state what='all'/>" );
-
-    modify_response( _response );
-    
-    document.all.stylesheet.innerHTML = _response.transformNode( _stylesheet );;
+    update_jobs_frame();
 
     if( window.parent.details_frame.document.readyState == "complete" )
     {
         window.parent.details_frame.update();
     }
+    
+    if( _timer != undefined )  set_update_timer();
 }
 
 //----------------------------------------------------------------------------------modify_response
@@ -152,7 +167,7 @@ function show_task_details( job_name, task_id )
     var job_element  = _response.selectSingleNode( ".//job[@job='" + job_name + "']" );
     var task_element = _response.selectSingleNode( ".//task[@id=" + task_id + "]" );
 
-    update();
+    update_jobs_frame();
     window.parent.details_frame.show_task_details( job_element, task_element );
 }
 
@@ -162,7 +177,7 @@ function show_job_details( job_name )
 {
     var job_element  = _response.selectSingleNode( ".//job[@job='" + job_name + "']" );
 
-    update();
+    update_jobs_frame();
     window.parent.details_frame.show_job_details( job_element );
 }
 

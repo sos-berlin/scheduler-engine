@@ -38,21 +38,21 @@
 
         <table cellpadding="0" cellspacing="0">
             <col class="column1" valign="baseline"  width=" 90"/>
-            <col class="column"  valign="baseline"  width="110"/>  
+            <!--col class="column"  valign="baseline"  width="110"/-->  
             <col class="column"  valign="baseline"  width=" 50"  align="right"/>  
             <col class="column"  valign="baseline"  width=" 30"  align="right"/>
-            <col class="column"  valign="baseline"  width="200"/>
+            <col class="column"  valign="baseline"  width=" 70"/>
+            <col class="column"  valign="baseline"  width="130"/>
             
             <thead class="job">
                 <tr>
                     <td>Job</td>
-                    <td>State</td>
                     <td>Time</td>
                     <td>Steps</td>
-                    <td>Order</td>
+                    <td colspan="2">State,&#160;Order</td>
                 </tr>
                 <tr>
-                    <td colspan="99" height="9">
+                    <td colspan="99">
                         <hr style="color: black" size="1"/>
                     </td>
                 </tr>
@@ -106,19 +106,19 @@
                         </td>
                         
                         <td>
-                            <xsl:value-of select="@state"/>
-                        </td>
-                        
-                        <td>
                         </td>
                         
                         <td align="right">
                             <xsl:value-of select="@all_steps"/>
                         </td>
                         
+                        <td>
+                            <xsl:value-of select="@state"/>
+                        </td>
+                        
                         <xsl:choose>
                             <xsl:when test="@order='yes'">
-                                <td class="order">
+                                <td>
                                     <xsl:value-of select="order_queue/@length"/> orders to process
                                 </td>
                             </xsl:when>
@@ -166,7 +166,7 @@
                 <xsl:attribute name="class">task</xsl:attribute>
                 <xsl:choose>
                     <xsl:when test=" not( @id ) ">
-                        <td colspan="4">
+                        <td colspan="3">
                             <span style="margin-left: 2ex">
                                 <xsl:choose>
                                     <xsl:when test="../../@waiting_for_process='yes'">
@@ -181,11 +181,11 @@
                         
                         <xsl:choose>
                             <xsl:when test="../../@order='yes'">
-                                <td class="order">
+                                <td colspan="2" class="order">
                                 </td>
                             </xsl:when>
                             <xsl:otherwise>
-                                <td>
+                                <td colspan="2">
                                 </td>
                             </xsl:otherwise>
                         </xsl:choose>
@@ -206,7 +206,7 @@
                                 </xsl:if>
                             </b>
                         </td>
-                        
+<!--                        
                         <td>
                             <xsl:choose>
                                 <xsl:when test="@state='running_waiting_for_order'">
@@ -217,7 +217,7 @@
                                 </xsl:otherwise>
                             </xsl:choose>
                         </td>
-                        
+-->                        
                         <td>
                             <xsl:if test="@running_since!=''">
                                 <xsl:text> &#160;</xsl:text>
@@ -231,9 +231,14 @@
                             <xsl:value-of select="@steps"/>
                         </td>
                         
+                        
                         <xsl:choose>
                             <xsl:when test="../../@order='yes'">
-                                <td class="order">
+                                <td colspan="2" class="order">
+                                    <xsl:if test="@state!='running'">
+                                        <xsl:value-of select="@state"/>
+                                        <xsl:text> </xsl:text>
+                                    </xsl:if>
                                     <xsl:if test="order">
                                         <b>
                                             <xsl:value-of select="order/@id"/>
@@ -243,9 +248,9 @@
                                             </xsl:if>
                                         </b>
                                     </xsl:if>
-                                    <xsl:if test="@state='running_waiting_for_order'">
+                                    <!--xsl:if test="@state='running_waiting_for_order'">
                                         waiting for order
-                                    </xsl:if>
+                                    </xsl:if-->
                                     <xsl:if test="@in_process_since!=''">
                                         <xsl:text> &#160;</xsl:text>
                                         <span class="small">
@@ -255,7 +260,9 @@
                                 </td>
                             </xsl:when>
                             <xsl:otherwise>
-                                <td>
+                                <td colspan="2">
+                                    <xsl:value-of select="@state"/>
+                                    <xsl:text> </xsl:text>
                                     <xsl:if test="@in_process_since!=''">
                                         <span class="small">
                                             (<xsl:value-of select="my:datetime_diff( string( @in_process_since ), $now, 0 )"  disable-output-escaping="yes"/>)
