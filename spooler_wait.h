@@ -1,4 +1,4 @@
-// $Id: spooler_wait.h,v 1.43 2003/10/03 13:14:02 jz Exp $
+// $Id: spooler_wait.h,v 1.44 2003/10/04 17:02:12 jz Exp $
 
 #ifndef __SPOOLER_WAIT_H
 #define __SPOOLER_WAIT_H
@@ -108,7 +108,7 @@ struct Directory_watcher : Event
     void                        watch_directory             ( const string& directory, const string& filename_pattern = "" );
     void                        renew                       ();
     bool                        has_changed                 ();
-    bool                        has_changed_2               ();
+    bool                        has_changed_2               ( bool throw_error = false );
     bool                        match                       ();
 
 #ifndef Z_WINDOWS    

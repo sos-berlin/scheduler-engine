@@ -1,4 +1,4 @@
-// $Id: spooler_wait.cxx,v 1.79 2003/10/03 13:14:02 jz Exp $
+// $Id: spooler_wait.cxx,v 1.80 2003/10/04 17:02:12 jz Exp $
 /*
     Hier sind implementiert
 
@@ -585,7 +585,7 @@ void Directory_watcher::watch_directory( const string& directory, const string& 
 
 #    else
 
-        has_changed_2();    // Verzeichnisinhalt merken
+        has_changed_2( true );    // Verzeichnisinhalt merken
 
 #   endif
 }
@@ -595,7 +595,7 @@ void Directory_watcher::watch_directory( const string& directory, const string& 
 
 void Directory_watcher::renew()
 {
-    has_changed_2();
+    has_changed_2( true );
 }
 
 #endif
@@ -610,7 +610,7 @@ bool Directory_watcher::has_changed()
 
 //-----------------------------------------------------------------Directory_watcher::has_changed_2
 
-bool Directory_watcher::has_changed_2()
+bool Directory_watcher::has_changed_2( bool throw_error )
 {
 #   ifdef Z_WINDOWS
 
@@ -656,6 +656,8 @@ bool Directory_watcher::has_changed_2()
         catch( const exception& x ) 
         {
             // S.a. set_signaled() für Windows
+
+            if( throw_error )  throw;
 
             _log->error( "Überwachung des Verzeichnisses " + _directory + " wird nach Fehler beendet: " + x.what() ); 
             _directory = "";   // Damit erneutes start_when_directory_changed() diese (tote) Überwachung nicht erkennt.
