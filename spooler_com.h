@@ -1,4 +1,4 @@
-// $Id: spooler_com.h,v 1.14 2001/07/04 14:49:46 jz Exp $
+// $Id: spooler_com.h,v 1.15 2001/07/16 16:39:35 jz Exp $
 
 #ifndef __SPOOLER_COM_H
 #define __SPOOLER_COM_H
@@ -65,6 +65,7 @@ struct Com_variable_set: spooler_com::Ivariable_set, Sos_ole_object
 
     USE_SOS_OLE_OBJECT
 
+    void                        set_xml                     ( const xml::Element_ptr& );
     STDMETHODIMP                set_var                     ( BSTR name, VARIANT* value)            { return put_var( name, value ); }
     STDMETHODIMP                put_var                     ( BSTR, VARIANT* );
     STDMETHODIMP                get_var                     ( BSTR, VARIANT* );

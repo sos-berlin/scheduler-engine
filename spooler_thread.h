@@ -1,4 +1,4 @@
-// $Id: spooler_thread.h,v 1.11 2001/07/16 08:51:33 jz Exp $
+// $Id: spooler_thread.h,v 1.12 2001/07/16 16:39:36 jz Exp $
 
 #ifndef __SPOOLER_THREAD_H
 #define __SPOOLER_THREAD_H
@@ -45,7 +45,7 @@ struct Thread : Sos_self_deleting
   //void                        interrupt_scripts           ();
     void                        cmd_add_jobs                ( const xml::Element_ptr& );
 
-    virtual void               _obj_print                   ( ostream* s ) const            { *s << "Thread " << _name; }
+    virtual string             _obj_name                    () const                        { return "Thread" + _name; }
 
 
     Fill_zero                  _zero_;

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- $Id: spooler.dtd,v 1.25 2001/07/16 08:51:31 jz Exp $   Joacim Zschimmer,  (C) 2000 SOS GmbH Berlin  -->
+<!-- $Id: spooler.dtd,v 1.26 2001/07/16 16:39:35 jz Exp $   Joacim Zschimmer,  (C) 2000 SOS GmbH Berlin  -->
 
 
 <!ELEMENT spooler               ( config+ | command | answer )>
@@ -149,13 +149,26 @@
                                                                         <!-- cmd="continue" -> state="running" -->
                                                                         <!-- Antwort: <tasks> -->
 
+<!ELEMENT start_job             ( params? )>
+<!ATTLIST start_job             job                 CDATA #REQUIRED>
+<!ATTLIST start_job             name                CDATA #IMPLIED>     <!-- Name für diese Task -->
+<!ATTLIST start_job             after               CDATA #IMPLIED>     <!-- Erst nach so vielen Sekunden starten -->
+<!ATTLIST start_job             at                  CDATA #IMPLIED>     <!-- Oder genau zu diesem Zeitpunkt (mit Datum!) starten -->
+
+<!ELEMENT params                ( param* )>                             <!-- Parameter für cmd="start" -->
+
+<!ELEMENT param                 EMPTY>
+<!ATTLIST param                 name                CDATA #REQUIRED>    <!-- Name des Parameters -->
+<!ATTLIST param                 value               CDATA #REQUIRED>    <!-- Wert des Parameters -->
+
+
 <!ELEMENT add_jobs              ( job+ )>
 <!ATTLIST add_jobs              thread              CDATA #REQUIRED>
                                                                         <!-- Antwort: <ok> -->
 
 <!ELEMENT signal_object         EMPTY>                                  <!-- Gibt Spooler Bescheid, dass ein neues Objekt da ist -->
-<!ATTLIST signal_object         class CDATA #REQUIRED>                  <!-- Objektemengeklasse des Objekts -->
-<!ATTLIST signal_object         level CDATA #REQUIRED>                  <!-- Stufennummer -->
+<!ATTLIST signal_object         class               CDATA #REQUIRED>    <!-- Objektemengeklasse des Objekts -->
+<!ATTLIST signal_object         level               CDATA #REQUIRED>    <!-- Stufennummer -->
                                                                         <!-- Antwort: <tasks> -->
 
 

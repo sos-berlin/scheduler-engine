@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.43 2001/07/16 08:51:32 jz Exp $
+// $Id: spooler_task.cxx,v 1.44 2001/07/16 16:39:36 jz Exp $
 /*
     Hier sind implementiert
 
@@ -269,8 +269,8 @@ void Job::init()
 {
     _state = s_none;
 
-    _log.set_prefix( "Job " + _name );
-    _event.set_name( "Job " + _name );
+    _log.set_prefix( obj_name() );
+    _event.set_name( obj_name() );
     _event.add_to( &_thread->_wait_handles );
 
     _script_ptr = _object_set_descr? &_object_set_descr->_class->_script
@@ -352,7 +352,7 @@ void Job::remove_from_task_queue( Task* task )
     {
         if( +*it == task )  
         {
-            _log.msg( "Task " + (*it)->_name + " aus der Warteschlange entfernt" );
+            _log.msg( task->obj_name() + " aus der Warteschlange entfernt" );
             it = _task_queue.erase( it );
         }
         else
@@ -1044,7 +1044,7 @@ void Task::cmd_end()
         //THREAD_LOCK( _lock )
         {
             if( +job->_task == this )  job->set_state_cmd( Job::sc_end );
-                                 else  job->remove_from_task_queue( job->_task );
+                                 else  job->remove_from_task_queue( this );
         }
     }
 }
@@ -1060,7 +1060,7 @@ bool Task::wait_until_terminated( double wait_time )
     Thread* calling_thread = _spooler->thread_by_thread_id( my_thread_id );
     if( calling_thread &&  !calling_thread->_free_threading  &&  !_job->_thread->_free_threading )  throw_xc( "SPOOLER-131" );
 
-    Event event ( "Task " + _job->_name + " wait_until_terminated" );
+    Event event ( obj_name() + " wait_until_terminated" );
     int   i = 0;
     
     THREAD_LOCK( _terminated_events_lock ) 

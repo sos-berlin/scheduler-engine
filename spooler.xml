@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 
-<!-- $Id: spooler.xml,v 1.45 2001/07/16 08:51:32 jz Exp $   (C) 2001 SOS GmbH Berlin -->
+<!-- $Id: spooler.xml,v 1.46 2001/07/16 16:39:35 jz Exp $   (C) 2001 SOS GmbH Berlin -->
 
 <!DOCTYPE spooler SYSTEM "s:\prod\spooler\spooler.dtd">
 
@@ -366,7 +366,7 @@ end function
                 <job name="single" spooler_id="">
                     <script language="VBScript" use_engine="task"><![CDATA[
 
-spooler_log.msg "*Job single"
+spooler_log.msg "*Job single   par1=" + spooler_task.params.var("par1") + " par2=" + spooler_task.params.var("par2")
 
 set params = spooler.create_variable_set()
 params.var("param1")="heinz"

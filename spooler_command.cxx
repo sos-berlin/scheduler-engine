@@ -1,4 +1,4 @@
-// $Id: spooler_command.cxx,v 1.34 2001/07/11 08:53:24 jz Exp $
+// $Id: spooler_command.cxx,v 1.35 2001/07/16 16:39:35 jz Exp $
 /*
     Hier ist implementiert
 
@@ -160,13 +160,42 @@ xml::Element_ptr Command_processor::execute_modify_job( const xml::Element_ptr& 
                                          : Job::as_state_cmd( cmd_name );
 
     xml::Element_ptr jobs_element = _answer->createElement( "jobs" );
-    bool found = false;
 
     Job* job = _spooler->get_job( job_name );
 
     if( cmd )  job->set_state_cmd( cmd );
     
     return jobs_element;
+}
+
+//-------------------------------------------------------------Command_processor::execute_start_job
+
+xml::Element_ptr Command_processor::execute_start_job( const xml::Element_ptr& element )
+{
+    if( _security_level < Security::seclev_all )  throw_xc( "SPOOLER-121" );
+
+    string job_name     = as_string( element->getAttribute( "job"   ) );
+    string task_name    = as_string( element->getAttribute( "name"  ) );
+    string after_str    = as_string( element->getAttribute( "after" ) );
+    string at_str       = as_string( element->getAttribute( "at"    ) );
+
+    Time start_at;
+
+    if( !after_str.empty() )  start_at = Time::now() + as_int( after_str );
+    
+    if( !at_str.empty()    )  start_at = (Sos_optional_date_time) at_str;
+
+    CComPtr<Com_variable_set> pars = new Com_variable_set;
+
+    for( xml::Element_ptr e = element->firstChild; e; e = e->nextSibling )
+    {
+        if( e->tagName == "params" )  { pars->set_xml( e );  break; }
+    }
+
+    Sos_ptr<Task> task = _spooler->get_job( job_name )->start_without_lock( CComPtr<spooler_com::Ivariable_set>(pars), task_name );
+    task->set_start_at( start_at );
+
+    return _answer->createElement( "ok" );
 }
 
 //---------------------------------------------------------Command_processor::execute_signal_object
@@ -223,6 +252,8 @@ xml::Element_ptr Command_processor::execute_command( const xml::Element_ptr& ele
     if( element->tagName == "modify_spooler"    )  return execute_modify_spooler( element );
     else
     if( element->tagName == "modify_job"        )  return execute_modify_job( element );
+    else
+    if( element->tagName == "start_job"         )  return execute_start_job( element );
     else
     if( element->tagName == "signal_object"     )  return execute_signal_object( element );
     else

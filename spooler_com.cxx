@@ -1,4 +1,4 @@
-// $Id: spooler_com.cxx,v 1.18 2001/07/11 08:53:24 jz Exp $
+// $Id: spooler_com.cxx,v 1.19 2001/07/16 16:39:35 jz Exp $
 /*
     Hier sind implementiert
 
@@ -90,6 +90,26 @@ Com_variable_set::Com_variable_set()
 :
     Sos_ole_object( variable_set_class_ptr, this )
 {
+}
+
+//------------------------------------------------------------------------Com_variable_set::set_xml
+
+void Com_variable_set::set_xml( const xml::Element_ptr& params )
+{
+    HRESULT hr;
+
+    for( xml::Element_ptr e = params->firstChild; e; e = e->nextSibling )
+    {
+        if( e->tagName == "param" ) 
+        {
+            CComVariant name  = e->getAttribute( "name" );
+            hr = name.ChangeType( VT_BSTR );                    if( FAILED(hr) )  throw_ole( hr, "ChangeType" );
+
+            CComVariant value = e->getAttribute( "value" );
+
+            hr = put_var( name.bstrVal, &value );               if( FAILED(hr) )  throw_ole( hr, "Ivariable_set::put_var" );
+        }
+    }
 }
 
 //------------------------------------------------------------------------Com_variable_set::put_var

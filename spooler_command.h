@@ -1,4 +1,4 @@
-// $Id: spooler_command.h,v 1.4 2001/02/18 16:14:37 jz Exp $
+// $Id: spooler_command.h,v 1.5 2001/07/16 16:39:36 jz Exp $
 
 #ifndef __SPOOLER_COMMAND_H
 #define __SPOOLER_COMMAND_H
@@ -24,6 +24,7 @@ struct Command_processor
     xml::Element_ptr            execute_show_threads        ();
     xml::Element_ptr            execute_show_job            ( Job* );
     xml::Element_ptr            execute_modify_job          ( const xml::Element_ptr& );
+    xml::Element_ptr            execute_start_job           ( const xml::Element_ptr& );
     xml::Element_ptr            execute_modify_spooler      ( const xml::Element_ptr& );
     xml::Element_ptr            execute_signal_object       ( const xml::Element_ptr& );
 
