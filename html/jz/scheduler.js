@@ -1,4 +1,4 @@
-// $Id: scheduler.js,v 1.6 2004/12/08 12:35:06 jz Exp $
+// $Id: scheduler.js,v 1.7 2004/12/09 11:15:58 jz Exp $
 
 //----------------------------------------------------------------------------------------------var
 
@@ -429,7 +429,7 @@ function handle_exception( x )
         error.message = msg;
     }
 
-    var e = document.getElementById( "error_message" );
+    var e = window.parent.left_frame.document.getElementById( "error_message" );
     if( e )
     {
         e.innerHTML = xml_encode( msg ).replace( "\n", "<br/>" ).replace( "  ", "\xA0 " ); // + "<p>&#160;</p>";
@@ -446,7 +446,7 @@ function handle_exception( x )
 
 function reset_error()
 {
-    var e = document.getElementById( "error_message" );
+    var e = window.parent.left_frame.document.getElementById( "error_message" );
     if( e )
     {
         e.innerHTML = "";
@@ -542,7 +542,7 @@ function popup_menu__show_log__onclick( show_log_command, window_name )
                  ", left=0"  +
                  ", top="    +  Math.floor( window.screen.availHeight * 0.8 );
 
-    var log_window = window.open( "http://" + document.location.host + "/" + show_log_command, window_name, features, true );
+    var log_window = window.open( document.location.href.replace( /\/[^\/]*$/, "/" ) + show_log_command, window_name, features, true );
     log_window.focus();
 
     if( _scheduler )  _scheduler._log_window = log_window;
@@ -579,7 +579,7 @@ function scheduler_menu__onclick( x, y )
 
 //--------------------------------------------------------------------------------job_menu__onclick
 
-function job_menu__onclick( x, y, job_name )
+function job_menu__onclick( job_name, x, y )
 {
     var popup_builder = new Popup_menu_builder();
 
@@ -612,7 +612,7 @@ function job_menu__onclick( x, y, job_name )
 
 //-------------------------------------------------------------------------------task_menu__onclick
 
-function task_menu__onclick( x, y, task_id )
+function task_menu__onclick( task_id, x, y )
 {
     var popup_builder = new Popup_menu_builder();
 
@@ -626,7 +626,7 @@ function task_menu__onclick( x, y, task_id )
 
 //------------------------------------------------------------------------------order_menu__onclick
 
-function order_menu__onclick( x, y, job_chain_name, order_id )
+function order_menu__onclick( job_chain_name, order_id, x, y )
 {
     var popup_builder = new Popup_menu_builder();
 
@@ -681,35 +681,6 @@ function scheduler_init()
 {
     Popup_menu_builder.prototype.add_command  = Popup_menu_builder__add_command;
     Popup_menu_builder.prototype.add_show_log = Popup_menu_builder__add_show_log;
-}
-
-//-----------------------------------------------------------------------------document.onmousemove
-
-if( typeof window.event == "undefined" )
-{
-    document.captureEvents( Event.MOUSEMOVE );
-
-    document.onmousemove = function onmousemove( e )
-    {
-        _mouse_x = e.pageX; 
-        _mouse_y = e.pageY; 
-    }
-}
-
-//------------------------------------------------------------------------------------------mouse_x
-
-function mouse_x()
-{ 
-    return typeof window.event != "undefined"? document.body.scrollLeft + event.clientX
-                                             : _mouse_x;
-}
-
-//------------------------------------------------------------------------------------------mouse_y
-
-function mouse_y()
-{ 
-    return typeof window.event != "undefined"? document.body.scrollTop  + event.clientY
-                                             : _mouse_y;
 }
 
 //-------------------------------------------------------------------------------string_from_object

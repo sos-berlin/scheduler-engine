@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding="utf-8"?>
-<!-- $Id: scheduler.xslt,v 1.8 2004/12/08 12:35:06 jz Exp $ -->
+<!-- $Id: scheduler.xslt,v 1.9 2004/12/09 11:15:58 jz Exp $ -->
 <xsl:stylesheet xmlns:xsl   = "http://www.w3.org/1999/XSL/Transform" 
                 xmlns:msxsl = "urn:schemas-microsoft-com:xslt"
                 version     = "1.0">
@@ -738,7 +738,7 @@
                 
                 <td>
                     <xsl:call-template name="command_menu">
-                        <xsl:with-param name="onclick" select="concat( 'order_menu__onclick( mouse_x() - 20, mouse_y() - 1, &quot;', @job_chain, '&quot;, &quot;', @id, '&quot;)' )"/>
+                        <xsl:with-param name="onclick" select="concat( 'order_menu__onclick( &quot;', @job_chain, '&quot;, &quot;', @id, '&quot;, mouse_x() - 20, mouse_y() - 1 )' )"/>
                     </xsl:call-template>
                 </td>
                 
@@ -944,7 +944,7 @@
                             
                             <td align="right" style="padding-right: 0pt">
                                 <xsl:call-template name="command_menu">
-                                    <xsl:with-param name="onclick" select="concat( 'job_menu__onclick(  mouse_x() - 90, mouse_y() - 1, &quot;', @job, '&quot;)' )"/>
+                                    <xsl:with-param name="onclick" select="concat( 'job_menu__onclick(  &quot;', @job, '&quot;, mouse_x() - 90, mouse_y() - 1 )' )"/>
                                 </xsl:call-template>
                             </td>
                         </tr>
@@ -1099,7 +1099,7 @@
                             <xsl:if test="@id">
                                 <td align="right" valign="top" style="padding-right: 0pt">
                                     <xsl:call-template name="command_menu">
-                                        <xsl:with-param name="onclick" select="concat( 'task_menu__onclick(  mouse_x() - 70, mouse_y() - 1, ', @id, ')' )"/>
+                                        <xsl:with-param name="onclick" select="concat( 'task_menu__onclick(  ', @id, ', mouse_x() - 70, mouse_y() - 1 )' )"/>
                                     </xsl:call-template>
                                 </td>
                             </xsl:if>
@@ -1264,7 +1264,7 @@
                             
                             <td align="right">
                                 <xsl:call-template name="command_menu">
-                                    <xsl:with-param name="onclick" select="concat( 'order_menu__onclick( mouse_x() - 70, mouse_y() - 1, &quot;', @job_chain, '&quot;, &quot;', @id, '&quot;)' )"/>
+                                    <xsl:with-param name="onclick" select="concat( 'order_menu__onclick( &quot;', @job_chain, '&quot;, &quot;', @id, '&quot;, mouse_x() - 70, mouse_y() - 1 )' )"/>
                                 </xsl:call-template>
                             </td>
                         </xsl:element>

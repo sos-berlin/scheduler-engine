@@ -1,4 +1,4 @@
-// $Id: spooler_http.cxx,v 1.20 2004/12/03 18:39:00 jz Exp $
+// $Id: spooler_http.cxx,v 1.21 2004/12/09 11:15:57 jz Exp $
 /*
     Hier sind implementiert
 
@@ -83,6 +83,14 @@ bool Http_parser::is_complete()
 
 void Http_parser::parse_header()
 {
+    /*if( z::Log_ptr log = "http" )
+    {
+        int end = _text.find( '\n' );
+        if( end == string::npos )  end = _text.length();   // Vorsichtshalber
+                             else  end++;
+        log << string( _text, end );
+    }*/
+
     _next_char = _text.c_str();
 
     _http_request->_http_cmd = eat_word();
@@ -485,16 +493,7 @@ Html_chunk_reader::Html_chunk_reader( Chunk_reader* chunk_reader, const string& 
                             "--></script>\n"
 
                             "<script type='text/javascript' src='show_log.js'></script>\n"
-/*
-                            // Wirkt nicht. Wenn der Scheduler abbricht (abort_immediately), löscht ie6 das Fenster 
-                            // und zeigt stattdessen eine unsinnige Fehlermeldung.
-                            "<script type='text/javascript' for='window' event='onerror'><!--\n"   
-                                //"document.write( '<br/><br/>(load error)' );\n"
-                                "return true;\n"
-                            "--></script>\n"
-*/
-                            // onsize wirkt auch nicht. Soll die jeweils letzten Zeilen zeigen.
-                            //"<pre class='log' onresize='alert(1);event.srcElement.scrollBy(0,999999999)'>\n";
+
                             "<pre class='log'>\n\n";
 
     _html_suffix =          "\n</pre>\n"

@@ -1,6 +1,37 @@
-// $Id: popup_menu.js,v 1.5 2004/12/08 12:35:06 jz Exp $
+// $Id: popup_menu.js,v 1.6 2004/12/09 11:15:58 jz Exp $
+
+// document.onmousemove wird gesetzt!
 
 var __current_popup_menu;
+
+//-----------------------------------------------------------------------------document.onmousemove
+
+if( typeof window.event == "undefined" )
+{
+    document.captureEvents( Event.MOUSEMOVE );
+
+    document.onmousemove = function onmousemove( e )
+    {
+        _mouse_x = e.pageX; 
+        _mouse_y = e.pageY; 
+    }
+}
+
+//------------------------------------------------------------------------------------------mouse_x
+
+function mouse_x()
+{ 
+    return typeof window.event != "undefined"? document.body.scrollLeft + event.clientX
+                                             : _mouse_x;
+}
+
+//------------------------------------------------------------------------------------------mouse_y
+
+function mouse_y()
+{ 
+    return typeof window.event != "undefined"? document.body.scrollTop  + event.clientY
+                                             : _mouse_y;
+}
 
 //---------------------------------------------------------------------------------------Popup_menu
 

@@ -1,4 +1,4 @@
-// $Id: spooler_command.cxx,v 1.147 2004/12/03 22:02:55 jz Exp $
+// $Id: spooler_command.cxx,v 1.148 2004/12/09 11:15:57 jz Exp $
 /*
     Hier ist implementiert
 
@@ -694,10 +694,14 @@ ptr<Http_response> Command_processor::execute_http( Http_request* http_request )
     string  response_content_type;
     int     http_status_code        = 0;
     string  error_text;
+    string  show_log_request        = "/show_log?";
 
     try
     {
         if( _security_level < Security::seclev_info )  throw_xc( "SCHEDULER-121" );
+
+        if( path.find( ".." ) != string::npos )  throw_xc( "SCHEDULER-214" );
+        if( path.find( ":" )  != string::npos )  throw_xc( "SCHEDULER-214" );
 
         if( http_request->_http_cmd == "GET" )
         {
@@ -714,7 +718,7 @@ ptr<Http_response> Command_processor::execute_http( Http_request* http_request )
                 response_content_type = "text/xml";
             }
             else
-            if( string_begins_with( path, "/show_log?" ) )
+            if( string_ends_with( path, show_log_request ) )
             {
                 ptr<Prefix_log> log;
 
@@ -732,8 +736,6 @@ ptr<Http_response> Command_processor::execute_http( Http_request* http_request )
             else
             {
                 if( _spooler->_html_directory.empty() )  throw_xc( "SCHEDULER-212" );
-                if( path.find( ".." ) != string::npos )  throw_xc( "SCHEDULER-214" );
-                if( path.find( ":" )  != string::npos )  throw_xc( "SCHEDULER-214" );
                 if( !string_begins_with( path, "/" ) )  path = "/" + path;
 
                 if( filename_of_path( path ).find( '.' ) == string::npos )      // Kein Punkt: Es muss ein Verzeichnis sein!
@@ -805,7 +807,7 @@ ptr<Http_response> Command_processor::execute_http( Http_request* http_request )
     }
     catch( const exception& x )
     {
-        _spooler->log().warn( "Fehler beim HTTP-Aufruf " + http_request->_http_cmd + " " + path + ": " + x.what() );
+        _spooler->log().debug( "Fehler beim HTTP-Aufruf " + http_request->_http_cmd + " " + path + ": " + x.what() );
 
         http_status_code = 404;
         error_text = x.what();

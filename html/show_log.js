@@ -1,4 +1,4 @@
-// $Id: show_log.js,v 1.3 2004/12/02 13:36:08 jz Exp $
+// $Id: show_log.js,v 1.4 2004/12/09 11:15:57 jz Exp $
 
 // Javascript-Code für HTTP Show log des Schedulers.
 // Der Scheduler liefert über HTTP die Ausgaben eines Protokolls bis dieses geschlossen wird.
@@ -104,7 +104,7 @@ function modify_title()
     else
     if( document.readyState == "complete" )     title_state = "(terminated)";
 
-    document.title = document.title.replace( / *(\(.*\))|$/, " " + title_state );
+    if( title_state )  document.title = document.title.replace( / *(\(.*\))|$/, " " + title_state );
 }
 
 //---------------------------------------------------------------------document__onreadystatechange
