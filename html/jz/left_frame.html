@@ -1,4 +1,4 @@
-<!-- $Id: left_frame.html,v 1.1 2004/12/02 13:36:08 jz Exp $ -->
+<!-- $Id: left_frame.html,v 1.2 2004/12/02 15:23:16 jz Exp $ -->
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <html>
 
@@ -16,14 +16,6 @@
 
 <body>
 
-<p style="margin-bottom: 10pt; margin-top: 0; padding-top: 0; padding-bottom: 3pt">
-    <input id="update_periodically_checkbox" type="checkbox" onclick="update_periodically_checkbox__onclick()" NAME="update_periodically_checkbox"/>
-    <label for="update_periodically_checkbox"><span class="translate">Update periodically</span></label>
-    &#160; &#160;
-    <input id="update_button" type="button" value="Update" onclick="update__onclick()" NAME="update_button"/>
-</p>
-
-<span id="error_message" style="font-weight: bold; color: red"></span>
 <span id="stylesheet_output"></span>
 
 <script defer="true" type="text/javascript" src="scheduler.js" ></script>
@@ -54,6 +46,7 @@ var _show_card = "jobs";
 //var _show_job_chains      = false;
 //var _show_process_classes = false;
 var _checkbox_states = new Object();
+var update_seconds           = 5;
 
 _checkbox_states[ "show_order_jobs_checkbox" ] = true;
 //var _update_periodically = false;
@@ -76,6 +69,7 @@ function do_onload()
     }
     
     _scheduler = new Scheduler();
+    repeat_update( false, true );
     repeat_update( document.getElementById( "update_periodically_checkbox" ).checked, true );
     scheduler_init();
 }
@@ -100,7 +94,7 @@ function update_periodically_checkbox__onclick()
 
 function reset_error()
 {
-    document.getElementById( "error_message" ).innerHTML = "";
+    if( document.getElementById( "error_message" ) )  document.getElementById( "error_message" ).innerHTML = "";
     window.status = "";
 }
 
@@ -115,7 +109,8 @@ function repeat_update( repeat, call_update )
     {
         if( call_update )
         {
-            document.getElementById( "update_periodically_checkbox" ).checked = false;     
+            if( document.getElementById( "update_periodically_checkbox" ) )
+                document.getElementById( "update_periodically_checkbox" ).checked = false;     
             update();
         }
     }
@@ -148,7 +143,7 @@ function repeat_update( repeat, call_update )
 function set_update_timer()
 {
     if( _timer != undefined )  window.clearTimeout( _timer ),  _timer = undefined;
-    _timer = window.setTimeout( "repeat_update(true,true)", 5000, "JavaScript" );
+    _timer = window.setTimeout( "repeat_update(true,true)", update_seconds * 1000, "JavaScript" );
 }
 
 //--------------------------------------------------------------------------------update_jobs_frame
@@ -239,6 +234,7 @@ function modify_response( response )
 
         spooler_element.setAttribute( "my_max_orders", _max_orders );
         spooler_element.setAttribute( "my_show_card" , _show_card );
+        spooler_element.setAttribute( "my_update_seconds", update_seconds );
     }
 }
 

@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding="utf-8"?>
-<!-- $Id: scheduler.xslt,v 1.1 2004/12/02 13:36:08 jz Exp $ -->
+<!-- $Id: scheduler.xslt,v 1.2 2004/12/02 15:23:16 jz Exp $ -->
 <xsl:stylesheet xmlns:xsl   = "http://www.w3.org/1999/XSL/Transform" 
                 xmlns:msxsl = "urn:schemas-microsoft-com:xslt"
                 version     = "1.0">
@@ -13,37 +13,60 @@
     <!-- Für Antwort auf <show_state> -->
 
     <xsl:template match="/spooler/answer">
+
+        <p style="margin-top: 0px; margin-bottom: 1ex">
+            <xsl:element name="span">
+                <xsl:attribute name="title">Version  <xsl:value-of select="state/@version"/>&#10;pid=<xsl:value-of select="state/@pid"/></xsl:attribute>
+                <b>Scheduler</b>
+            </xsl:element>
+            
+            <xsl:if test="state/@id!=''">
+                <xsl:text>&#160;</xsl:text>
+                <b><span style="white-space: nowrap">-id=<xsl:value-of select="state/@id"/></span></b>
+                &#160; 
+            </xsl:if>
+        </p>
         
-        <xsl:call-template name="scheduler_info"/>
+        <table cellspacing="0" cellpadding="0">
+            <tr>
+                <td valign="center" style="padding-left: 0px">
+                    <xsl:call-template name="scheduler_info"/>
+                </td>
+                <td valign="center">
+                    <xsl:call-template name="update_button"/>
+                </td>
+            </tr>
+        </table>        
+
+        <span id="error_message" style="font-weight: bold; color: red"> </span>
+        <span style="font-weight: normal; color: black"> </span>    <!-- Für Firefox -->
         
 
         <!-- Jobs, Jobketten oder Prozessklassen zeigen? -->
         
-        <p style="margin-bottom: 2ex; margin-top: 3ex">
-        
-            <xsl:call-template name="card_selector">
-                <xsl:with-param name="name"  select="'jobs'"/>
-                <xsl:with-param name="title" select="'Jobs'"/>
-                <xsl:with-param name="class" select="'job'"/>
-            </xsl:call-template>
-            &#160;
-
-            <xsl:if test="state/job_chains/job_chain">
+        <table cellpadding="0" cellspacing="0" style="margin-top: 1ex">
+            <tr>
                 <xsl:call-template name="card_selector">
-                    <xsl:with-param name="name"  select="'job_chains'"/>
-                    <xsl:with-param name="title" select="'Job chains'"/>
-                    <xsl:with-param name="class" select="'job_chain'"/>
+                    <xsl:with-param name="name"  select="'jobs'"/>
+                    <xsl:with-param name="title" select="'Jobs'"/>
+                    <xsl:with-param name="class" select="'job'"/>
                 </xsl:call-template>
-                &#160;
-            </xsl:if>
 
-            <xsl:call-template name="card_selector">
-                <xsl:with-param name="name"  select="'process_classes'"/>
-                <xsl:with-param name="title" select="'Process classes'"/>
-                <xsl:with-param name="class" select="'process_class'"/>
-            </xsl:call-template>
-            
-        </p>
+                <xsl:if test="state/job_chains/job_chain">
+                    <xsl:call-template name="card_selector">
+                        <xsl:with-param name="name"  select="'job_chains'"/>
+                        <xsl:with-param name="title" select="'Job chains'"/>
+                        <xsl:with-param name="class" select="'job_chain'"/>
+                    </xsl:call-template>
+                </xsl:if>
+
+                <xsl:call-template name="card_selector">
+                    <xsl:with-param name="name"  select="'process_classes'"/>
+                    <xsl:with-param name="title" select="'Process classes'"/>
+                    <xsl:with-param name="class" select="'process_class'"/>
+                </xsl:call-template>
+            </tr>
+        </table>
 
 
         <xsl:if test="/spooler/@my_show_card='jobs'">
@@ -68,22 +91,33 @@
         <xsl:param name="title"/>
         <xsl:param name="class"/>
 
-        <xsl:element name="span">
-            <xsl:attribute name="style"       >cursor: pointer; text-decoration: underline       </xsl:attribute>
-            <xsl:attribute name="onmouseover" >this.className='hover'                         </xsl:attribute>
-            <xsl:attribute name="onmouseout"  >this.className=''                              </xsl:attribute>
-            <xsl:attribute name="onclick"     >show_card( '<xsl:value-of select="$name"/>' )  </xsl:attribute>
-                
-            <xsl:element name="span">
-                <xsl:if test="/spooler/@my_show_card=$name ">
-                    <xsl:attribute name="class"><xsl:value-of select="$class"/></xsl:attribute>
-                    <xsl:attribute name="style">font-weight: bold;</xsl:attribute>
-                </xsl:if>
-                <span class="translate">
-                    <xsl:value-of select="$title"/>
-                </span>
+        <td style="margin-bottom: 0px; padding-bottom: 0px; padding-left: 0px; cursor: pointer"
+            onmouseover="this.className='hover'"
+            onmouseout ="this.className=''">
+                    
+            <xsl:element name="p">
+                <xsl:attribute name="onclick">show_card( '<xsl:value-of select="$name"/>' )  </xsl:attribute>
+                <xsl:attribute name="style"  >padding: 1pt 2pt 4pt 2pt</xsl:attribute>
+                <xsl:attribute name="class"><xsl:value-of select="$class"/></xsl:attribute>
+                <xsl:element name="span">
+                    <xsl:if test="/spooler/@my_show_card=$name ">
+                        <xsl:attribute name="style">font-weight: bold</xsl:attribute>
+                    </xsl:if>
+                    <span class="translate">
+                        <xsl:value-of select="$title"/>
+                    </span>
+                </xsl:element>
             </xsl:element>
-        </xsl:element>        
+        </td>
+    </xsl:template>    
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~card_top-->
+    <!-- Jede Karte hat etwas Abstand zum Card selector -->
+
+    <xsl:template name="card_top">
+        <tr>
+            <td colspan="99">&#160;</td>
+        </tr>
     </xsl:template>    
     
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Scheduler-Info-->
@@ -91,42 +125,37 @@
 
     <xsl:template name="scheduler_info">
         <table cellpadding="0" cellspacing="0" class="scheduler">
+            <!--
             <tr>
-                <td valign="baseline" align="left" style="padding-right: 3ex">
+                <td valign="baseline" align="left" style="padding-right: 1ex">
                     <span style="margin-top: 2px; margin-bottom: 2pt">
                     
-                        <xsl:element name="span">
-                            <xsl:attribute name="title">Version  <xsl:value-of select="state/@version"/>&#10;pid=<xsl:value-of select="state/@pid"/></xsl:attribute>
-                            <b>Scheduler</b>
-                        </xsl:element>
-                        
-                        <!--xsl:text>&#160;</xsl:text>
-                        <span style="font-size: 8pt; white-space: nowrap">(<xsl:value-of select="state/@version"/>)</span-->
     
-                        <xsl:if test="state/@id!=''">
-                            <xsl:text>&#160; -id=</xsl:text>
-                            <b style="white-space: nowrap"><xsl:value-of select="state/@id"/></b>
-                        </xsl:if>
-
-                      
-                        <xsl:text>&#160; </xsl:text>
-                        <xsl:value-of select="state/@state"/>    
                     </span>
                 </td>
 
                 <td valign="baseline" align="right" style="padding-left: 0">
                     <span style="margin-top: 2px; margin-bottom: 2px">
-                        <span class="small">
-                            <xsl:value-of select="state/@time__xslt_datetime"  disable-output-escaping="yes"/>
-                            <xsl:text> (</xsl:text>
-                                <xsl:value-of select="state/@spooler_running_since__xslt_datetime_diff"  disable-output-escaping="yes"/>
-                            <xsl:text>)</xsl:text>
-                        </span>
                         <xsl:text> </xsl:text>
                     </span>
                 </td>
 
-                <td valign="baseline" align="right">
+            </tr>
+            -->
+            
+            <tr>
+                <td colspan="2">
+                    <span>
+                        <xsl:value-of select="state/@time__xslt_datetime"  disable-output-escaping="yes"/>
+                        <xsl:text> (</xsl:text>
+                            <xsl:value-of select="state/@spooler_running_since__xslt_datetime_diff"  disable-output-escaping="yes"/>
+                        <xsl:text>)</xsl:text>
+                    </span>
+                    &#160; &#160; 
+                    <xsl:value-of select="state/@state"/>    
+                </td>
+
+                <td valign="top" align="right">
                     <xsl:call-template name="command_menu">
                         <xsl:with-param name="onclick" select="'scheduler_menu__onclick()'"/>
                     </xsl:call-template>
@@ -134,7 +163,7 @@
             </tr>
 
             <tr>
-                <td colspan="3">
+                <td colspan="3" style="padding-top: 1pt">
                     <xsl:value-of select="count( state/jobs/job [ @state='running' ] )" /> jobs running,
                     <span style="white-space: nowrap">
                         <xsl:value-of select="count( state/jobs/job [ @state='stopped' ] )" /> stopped,
@@ -155,7 +184,19 @@
             </tr>
         </table>
     </xsl:template>
+
         
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~update_button-->
+
+    <xsl:template name="update_button">
+        <p style="margin-top: 0px; white-space: nowrap">
+            <input id="update_button" type="button" value="Update" onclick="update__onclick()" NAME="update_button"/>
+            <br/>
+            <input id="update_periodically_checkbox" type="checkbox" onclick="update_periodically_checkbox__onclick()" NAME="update_periodically_checkbox"/>
+            <label for="update_periodically_checkbox"><span class="translate">every </span><xsl:value-of select="/*/@my_update_seconds"/>s</label>
+        </p>
+    </xsl:template>
+            
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Jobs-->
 
     <xsl:template match="jobs">
@@ -167,6 +208,7 @@
             <col valign="baseline"/>
             
             <thead>
+                <xsl:call-template name="card_top"/>
                 <tr>
                     <td colspan="4" align="left" class="job">
                         <!--b>Jobs</b>
@@ -465,6 +507,7 @@
             <col valign="baseline"  width="10" align="right"/>
             
             <thead class="job_chain">
+                <xsl:call-template name="card_top"/>
                 <tr>
                     <td colspan="99" align="left" class="job_chain">
                         <!--
@@ -818,6 +861,7 @@
             <col valign="baseline"  width="*"/>
             
             <thead>
+                <xsl:call-template name="card_top"/>
                 <tr style="">
                     <td class="head1" style="padding-left: 2ex">Pid </td>
                     <td class="head">Task</td>
