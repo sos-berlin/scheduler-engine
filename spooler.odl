@@ -1,4 +1,4 @@
-// $Id: spooler.odl,v 1.44 2002/09/14 16:23:07 jz Exp $
+// $Id: spooler.odl,v 1.45 2002/09/18 18:37:45 jz Exp $
 
 // Anweisung: midl /nologo /error all /out $(OutDir) $(InputPath)
 
@@ -733,17 +733,6 @@ library spooler
         HRESULT                 payload                 ( [out,retval] VARIANT* result );
 
         HRESULT                 payload_is_type         ( [in] BSTR typenam, [out,retval] VARIANT_BOOL* result );
-
-        [propput]
-        HRESULT                 risses_fruits           ( [in] VARIANT* value );
-
-        [propputref]
-        HRESULT                 risses_fruits           ( [in] IUnknown* value );
-
-        [propget]
-        HRESULT                 risses_fruits           ( [out,retval] VARIANT* result );
-
-        HRESULT                 risses_fruits_is_type   ( [in] BSTR typenam, [out,retval] VARIANT_BOOL* result );
     }
 
     [

@@ -1,4 +1,4 @@
-// $Id: spooler_com.h,v 1.43 2002/09/14 16:23:07 jz Exp $
+// $Id: spooler_com.h,v 1.44 2002/09/18 18:37:45 jz Exp $
 
 #ifndef __SPOOLER_COM_H
 #define __SPOOLER_COM_H
@@ -434,13 +434,6 @@ struct Com_order : spooler_com::Iorder, Sos_ole_object
     STDMETHODIMP            get_payload                 ( VARIANT* );
     
     STDMETHODIMP                payload_is_type         ( BSTR, VARIANT_BOOL* );
-    
-    STDMETHODIMP            put_risses_fruits           ( VARIANT* value )                          { return put_payload(value); }
-    STDMETHODIMP         putref_risses_fruits           ( IUnknown* value )                         { return putref_payload(value); }
-    STDMETHODIMP            get_risses_fruits           ( VARIANT* result )                         { return get_payload(result); }
-    
-    STDMETHODIMP                risses_fruits_is_type   ( BSTR typname, VARIANT_BOOL* result )      { return payload_is_type(typname,result); }
-
 
   private:
     Fill_zero                  _zero_;

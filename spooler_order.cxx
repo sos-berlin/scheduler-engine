@@ -1,4 +1,4 @@
-// $Id: spooler_order.cxx,v 1.6 2002/09/18 16:52:38 jz Exp $
+// $Id: spooler_order.cxx,v 1.7 2002/09/18 18:37:45 jz Exp $
 /*
     Hier sind implementiert
 
@@ -18,13 +18,12 @@ namespace spooler {
 
 void Spooler::add_job_chain( Job_chain* job_chain )
 {
-    string lname = lcase( job_chain->name() );
-
     THREAD_LOCK( _job_chain_lock )
     {
-        if( _job_chain_map.find( lname ) != _job_chain_map.end() )  throw_xc( "SPOOLER-160", lname );
+        job_chain->finish();   // Jobkette prüfen und in Ordnung bringen
 
-        job_chain->finish();
+        string lname = lcase( job_chain->name() );
+        if( _job_chain_map.find( lname ) != _job_chain_map.end() )  throw_xc( "SPOOLER-160", lname );
 
         _job_chain_map[lname] = job_chain;
     }
@@ -56,7 +55,6 @@ Job_chain::Job_chain( Spooler* spooler )
     Com_job_chain( this ),
     _zero_(this+1),
     _spooler(spooler)
-  //_com_job_chain( new Com_job_chain(this) ),
 {
 }
 
@@ -64,19 +62,8 @@ Job_chain::Job_chain( Spooler* spooler )
 
 Job_chain::~Job_chain()
 {
-    //if( _com_job_chain )  _com_job_chain->close();
 }
 
-//---------------------------------------------------------------------------------Job_chain::close
-/*
-void Job_chain::close()
-{
-    THREAD_LOCK( _lock )
-    {
-        if( _com_job_chain )  _com_job_chain->close(), _com_job_chain = NULL;
-    }
-}
-*/
 //-------------------------------------------------------------------------------Job_chain::add_job
 
 void Job_chain::add_job( Job* job, const Variant& state, const Variant& next_state, const Variant& error_state )
@@ -90,57 +77,47 @@ void Job_chain::add_job( Job* job, const Variant& state, const Variant& next_sta
     node->_job   = job;
     node->_state = state;
 
-    //if( node->_state.vt == VT_EMPTY || node->_state.vt == VT_ERROR )  node->_state = combstr_from_string( job->name() );
     if( node->_state.vt == VT_ERROR )  node->_state = combstr_from_string( job->name() );
 
-    node->_next_state  = next_state;   //if( node->_next_state.vt  == VT_ERROR )  node->_next_state.vt  = VT_EMPTY;
-    node->_error_state = error_state;  //if( node->_error_state.vt == VT_ERROR )  node->_error_state.vt = VT_EMPTY;
+    node->_next_state  = next_state;
+    node->_error_state = error_state;
 
-    if( node_from_state_or_null( node->_state ) )  throw_xc( "SPOOLER-150", error_string_from_variant(node->_state), name() );
+    THREAD_LOCK( _lock )
+    {
+        if( node_from_state_or_null( node->_state ) )  throw_xc( "SPOOLER-150", error_string_from_variant(node->_state), name() );
 
-    _chain.push_back( node );
-    //_map[ node->_state ] = node;
+        _chain.push_back( node );
+    }
 }
 
 //--------------------------------------------------------------------------------Job_chain::finish
 
 void Job_chain::finish()
 {
-    if( _finished )  return;
-
-    if( !_chain.empty() )
+    THREAD_LOCK( _lock )
     {
-        Job_chain_node* n = *_chain.rbegin();
-        VARIANT error; VariantInit( &error );  error.vt = VT_ERROR;
-        if( n->_job  &&  n->_next_state.vt == VT_ERROR )  add_job( NULL, "<END_STATE>", error, error );    // Endzustand fehlt? Dann hinzufügen
+        if( _finished )  return;
+
+        if( !_chain.empty() )
+        {
+            Job_chain_node* n = *_chain.rbegin();
+            VARIANT error; VariantInit( &error );  error.vt = VT_ERROR;
+            if( n->_job  &&  n->_next_state.vt == VT_ERROR )  add_job( NULL, "<END_STATE>", error, error );    // Endzustand fehlt? Dann hinzufügen
+        }
+
+        for( Chain::iterator it = _chain.begin(); it != _chain.end(); it++ )
+        {
+            Job_chain_node* n = *it;
+            Chain::iterator next = it;  next++;
+
+            if( n->_next_state.vt == VT_ERROR  &&  next != _chain.end() )  n->_next_state = (*next)->_state;
+
+            if( n->_next_state.vt  != VT_ERROR )  n->_next_node  = node_from_state( n->_next_state );
+            if( n->_error_state.vt != VT_ERROR )  n->_error_node = node_from_state( n->_error_state );
+        }
+
+        _finished = true;
     }
-
-    for( Chain::iterator it = _chain.begin(); it != _chain.end(); it++ )
-    {
-        Job_chain_node* n = *it;
-        Chain::iterator next = it;  next++;
-
-        if( n->_next_state.vt == VT_ERROR  &&  next != _chain.end() )  n->_next_state = (*next)->_state;
-
-        if( n->_next_state.vt != VT_ERROR )  n->_next_node  = node_from_state( n->_next_state );
-        if( n->_error_state.vt != VT_ERROR )  n->_error_node = node_from_state( n->_error_state );
-/*
-        Map::iterator next_it  = _map.find( n->_next_state  );
-        Map::iterator error_it = _map.find( n->_error_state );
-
-        if( next_it != _map.end() )
-            n->_next_node = next_it->second;
-        else
-        if( n->_next_state.vt  != VT_ERROR )  throw_xc( "SPOOLER-149", error_string_from_variant(n->_next_state), name() );
-
-        if( error_it != _map.end() )
-            n->_error_node = error_it->second;
-        else
-        if( n->_error_state.vt != VT_ERROR )  throw_xc( "SPOOLER-149", error_string_from_variant(n->_error_state), name() );
-*/
-    }
-
-    _finished = true;
 }
 
 //-------------------------------------------------------------------------Job_chain::node_from_job
@@ -154,10 +131,9 @@ Job_chain_node* Job_chain::node_from_job( Job* job )
             Job_chain_node* n = *it;
             if( n->_job == job )  return n;
         }
-
-        throw_xc( "SPOOLER-152", job->name(), name() );
     }
 
+    throw_xc( "SPOOLER-152", job->name(), name() );
     return NULL;
 }
 
@@ -184,70 +160,8 @@ Job_chain_node* Job_chain::node_from_state_or_null( const State& state )
     }
 
     return NULL;
-/*
-    Map::iterator it = _map.find( state );
-    if( it == _map.end() )  throw_xc( "SPOOLER-149", error_string_from_variant(state), name() );
-
-    return it->second;
-*/
 }
 
-//-----------------------------------------------------------------------------Job_chain::add_order
-/*
-Order* Job_chain::add_order( VARIANT* order_or_payload, VARIANT* job_or_state )
-{
-    //HRESULT hr;
-
-    CComPtr<spooler_com::Iorder> iorder;
-
-/*
-    if( order_or_payload->vt == VT_DISPATCH  ||  order_or_payload->vt == VT_UNKNOWN )
-    {
-        hr = V_UNKNOWN(order_or_payload)->QueryInterface( spooler_com::IID_Iorder, (void**)&iorder );
-        if( FAILED(hr) )  iorder = NULL;
-    }
-* /
-
-    if( !iorder )
-    {
-        ptr<Order> order = Z_NEW( Order( _spooler, *order_or_payload ) );
-        iorder = order->com_order();
-    }
-
-    dynamic_cast<Com_order*>( &*iorder )->add_to_job_chain( this );  //, job_or_state );
-    
-    // Einstieg nur über Order, damit Semaphoren stets in derselben Reihenfolge gesperrt werden.
-}
-
-*/
-//-----------------------------------------------------------------------------Job_chain::add_order
-/*
-void Job_chain::add_order( Order* order )
-{
-    if( !_finished )  throw_xc( "SPOOLER-151" );
-
-    if( !_chain.empty() )
-    {
-        Job_chain_node* node = *_chain.begin();
-
-        node->_job->order_queue()->add_order( this );
-
-        _job_chain      = job_chain;
-        _job_chain_node = node;
-    }
-}
-*/
-//-----------------------------------------------------------------------------Job_chain::add_order
-/*
-ptr<Order> Job_chain::add_order( const Order::Payload& payload )
-{
-    ptr<Order> order = Z_NEW( Order( _spooler, payload ) );
-
-    add_order( order );
-
-    return order;
-}
-*/
 //-------------------------------------------------------------------------Order_queue::Order_queue
 
 Order_queue::Order_queue( Job* job, Prefix_log* log )
@@ -298,15 +212,6 @@ void Order_queue::add_order( Order* order )
     }
 }
 
-//---------------------------------------------------------------------------Order_queue::add_order
-/*
-Order* Order_queue::add_order( const Variant& payload )
-{
-    ptr<Order> order = Z_NEW( Order(_spooler) );
-    order->set_payload( payload );
-    return add_order( order );
-}
-*/
 //------------------------------------------------------------------------Order_queue::remove_order
 
 void Order_queue::remove_order( Order* order )
@@ -353,7 +258,6 @@ Order::Order( Spooler* spooler, const VARIANT& payload )
     _zero_(this+1), 
     _spooler(spooler),
     _payload(payload),
-  //_com_order( new Com_order(this) )
      Com_order(this)
 {
 }
@@ -362,26 +266,7 @@ Order::Order( Spooler* spooler, const VARIANT& payload )
 
 Order::~Order()
 {
-    //if( _com_order )  _com_order->close();
 }
-
-//-----------------------------------------------------------------------------------Order::set_job
-/*
-void Order::set_job( spooler_com::Ijob* ijob )
-{
-    THREAD_LOCK( _lock )
-    {
-        Job* job = NULL;
-
-        if( ijob )
-        {
-            job = dynamic_cast<Com_job*>( ijob )->_job;
-        }
-
-        set_job( job );
-    }
-}
-*/
 
 //---------------------------------------------------------------------------Order::set_job_by_name
 
@@ -396,10 +281,22 @@ void Order::set_id( const Variant& id )
 { 
     THREAD_LOCK(_lock)
     {
-        if( _job_chain )  throw_xc( "SPOOLER-159" );
-      //if( _job )  throw_xc( "SPOOLER-159" );
+        if( _job_chain  ||  _order_queue )  throw_xc( "SPOOLER-159" );
 
         _id = id; 
+    }
+}
+
+//----------------------------------------------------------------------------Order::set_default_id
+
+void Order::set_default_id()
+{ 
+    THREAD_LOCK( _lock )
+    {
+        if( _id.vt == VT_EMPTY )
+        {
+            set_id( _spooler->get_free_order_id() );  
+        }
     }
 }
 
@@ -478,14 +375,6 @@ Com_job* Order::com_job()
     return result;
 }
 
-//-------------------------------------------------------------------------Job_chain::com_job_chain
-/*
-CComPtr<Com_job_chain> Order::com_job_chain()
-{ 
-    THREAD_LOCK_RETURN( _lock, CComPtr<Com_job_chain>, _job_chain? _job_chain->com_job_chain() : NULL ); 
-}
-*/
-
 //------------------------------------------------------------------------Order::add_to_order_queue
 
 void Order::add_to_order_queue( Order_queue* order_queue )
@@ -493,6 +382,8 @@ void Order::add_to_order_queue( Order_queue* order_queue )
     THREAD_LOCK( _lock )
     {
         _moved = true;
+
+        if( _id.vt == VT_EMPTY )  set_default_id();
 
         if( _job_chain )  remove_from_job_chain();
 
@@ -525,22 +416,9 @@ void Order::add_to_job_chain( Job_chain* job_chain )
 
     THREAD_LOCK( _lock )
     {
+        if( _id.vt == VT_EMPTY )  set_default_id(); 
+
         if( _job_chain )  remove_from_job_chain();
-        else
-        if( _id.vt == VT_EMPTY )  set_id( _spooler->get_free_order_id() );  //set_id( variant_from_string( "spooler_id." + as_string( _spooler->get_free_order_id() ) ) );
-
-/*
-        CComPtr<spooler_com::Ijob> job;
-
-        if( job_or_state.vt == VT_DISPATCH  ||  job_or_state.vt == VT_UNKNOWN )
-        {
-            hr = V_UNKNOWN(job_or_state)->QueryInterface( spooler_com::IID_Ijob, (void**)&job );
-            if( FAILED(hr) )  job = NULL;
-        }
-
-        if( job )
-*/
-
 
         if( !job_chain->_chain.empty() )
         {
@@ -573,28 +451,6 @@ void Order::move_to_node( Job_chain_node* node )
         if( node->_job )  node->_job->order_queue()->add_order( this );
     }
 }
-
-//-------------------------------------------------------------------------------Order::move_to_job
-/*
-void Order::move_to_job( Job* job )
-{
-    THREAD_LOCK( _lock )
-    {
-        if( _job )  _job->order_queue()->remove_order( this );
-        _job = NULL;
-
-        if( job  )   job->order_queue()->add_order( this );
-        _job = job;
-    }
-}
-*/
-//---------------------------------------------------------------------------Order::set_job_by_name
-/*
-void Order::set_job_by_name( const string& jobname )
-{
-    set_job( _spooler->get_job( jobname ) );
-}
-*/
 
 //----------------------------------------------------------------------------Order::postprocessing
 

@@ -1,4 +1,4 @@
-// $Id: spooler_order.h,v 1.4 2002/09/18 16:52:38 jz Exp $
+// $Id: spooler_order.h,v 1.5 2002/09/18 18:37:45 jz Exp $
 
 #ifndef __SPOOLER_ORDER_H
 #define __SPOOLER_ORDER_H
@@ -29,6 +29,7 @@ struct Order : Com_order
 
     void                    set_id                      ( const Variant& );
     Id                          id                      ()                                          { THREAD_LOCK_RETURN( _lock, Variant, _id ); }
+    void                    set_default_id              ();
 
     void                    set_title                   ( const string& title )                     { THREAD_LOCK(_lock)  _title = title; }
     string&                     title                   ()                                          { THREAD_LOCK_RETURN( _lock, string, _title ); }
@@ -53,9 +54,7 @@ struct Order : Com_order
     void                    set_payload                 ( const VARIANT& payload )                  { THREAD_LOCK( _lock )  _payload = payload; }
     Payload                     payload                 ()                                          { THREAD_LOCK_RETURN( _lock, Variant, _payload ); }
 
-  //Com_order*                  com_order               ()                                          { THREAD_LOCK_RETURN( _lock, Com_order*, _com_order ); }
     Com_job*                    com_job                 ();
-  //CComPtr<spooler_com::Ijob_chain> com_job_chain      ();
 
 
     void                        add_to_order_queue      ( Order_queue* );
@@ -134,8 +133,6 @@ struct Job_chain : Com_job_chain
 
     Order*                      add_order               ( VARIANT* order_or_payload, VARIANT* job_or_state );
 
-  //Com_job_chain*              com_job_chain           ()                                          { THREAD_LOCK_RETURN( _lock, Com_job_chain*, _com_job_chain ); }
-
 
     Fill_zero                  _zero_;
     Spooler*                   _spooler;
@@ -145,13 +142,9 @@ struct Job_chain : Com_job_chain
     Thread_semaphore           _lock;
     string                     _name;
     bool                       _finished;               // add_job() gesperrt, add_order() frei
-  //CComPtr<Com_job_chain>     _com_job_chain;
 
     typedef list< ptr<Job_chain_node> >  Chain;
     Chain                      _chain;
-
-  //typedef map< State, Job_chain_node* >  Map;
-  //Map                        _map;
 };
 
 //--------------------------------------------------------------------------------Internal_priority
@@ -196,7 +189,6 @@ struct Order_queue : Com_order_queue
     CComPtr<Com_order_queue>   _com_order_queue;
     typedef list< ptr<Order> >  Queue;
     Queue                      _queue;
-  //map< Id, ptr<Order> >      _id_order_map;
 };
 
 //-------------------------------------------------------------------------------------------------
