@@ -1,4 +1,4 @@
-// $Id: spooler_mail.h,v 1.13 2003/03/19 21:19:04 jz Exp $
+// $Id: spooler_mail.h,v 1.14 2003/03/21 11:22:56 jz Exp $
 
 #ifndef __SPOOLER_MAIL_H
 #define __SPOOLER_MAIL_H
@@ -24,7 +24,7 @@ struct Com_mail : spooler_com::Imail,
                   spooler_com::Ihas_java_class_name, 
                   Sos_ole_object               
 {
-    void*                       operator new                ( uint size )                           { return sos_alloc( size, "spooler.Mail" ); }
+    void*                       operator new                ( size_t size )                         { return sos_alloc( size, "spooler.Mail" ); }
     void                        operator delete             ( void* ptr )                           { sos_free( ptr ); }
 
 
