@@ -1,4 +1,4 @@
-// $Id: spooler_thread.cxx,v 1.101 2003/09/01 07:35:21 jz Exp $
+// $Id: spooler_thread.cxx,v 1.102 2003/09/02 05:29:15 jz Exp $
 /*
     Hier sind implementiert
 
@@ -320,7 +320,7 @@ bool Spooler_thread::do_something( Task* task )
 
     bool ok = task->do_something();
     
-    _task_closed |=    task->state() == Task::s_closed;
+    _task_closed |= task->state() == Task::s_closed;
 
     _current_task = NULL;
 

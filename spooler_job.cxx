@@ -1,4 +1,4 @@
-// $Id: spooler_job.cxx,v 1.15 2003/09/01 17:00:52 jz Exp $
+// $Id: spooler_job.cxx,v 1.16 2003/09/02 05:29:15 jz Exp $
 /*
     Hier sind implementiert
 
@@ -481,6 +481,8 @@ void Job::remove_running_task( Task* task )
                 }
             }
         }
+
+        set_next_start_time( Time::now() );
     }
 }
 
@@ -785,56 +787,61 @@ void Job::set_next_start_time( Time now )
 {
     string msg;
 
+    _next_start_time = latter_day;
+
 
     // Zunächst nächste Startzeit innerhalb der aktuellen Period bestimmen:
 
-    if( _delay_until )
+    if( _state == s_stopped && _delay_until )
     {
         _next_start_time = _period.next_try( _delay_until );
         if( _spooler->_debug )  msg = "Wiederholung wegen delay_after_error: " + _next_start_time.as_string();
     }
     else
-    if( _repeat > 0 )       // spooler_task.repeat
+    if( _state == s_pending )
     {
-        _next_start_time = _period.next_try( now + _repeat );
-        if( _spooler->_debug )  msg = "Wiederholung wegen spooler_job.repeat=" + as_string(_repeat) + ": " + _next_start_time.as_string();
-        _repeat = 0;
-    }
-    else
-    {
-        _next_start_time = _period.next_try( now + _period.repeat() );
-        if( _spooler->_debug && _next_start_time != latter_day )  msg = "Nächste Wiederholung wegen <period repeat=\"" + as_string((double)_period._repeat) + "\">: " + _next_start_time.as_string();
-
-        _next_single_start = _run_time.next_single_start( now );
-        if( _spooler->_debug && _next_single_start < _next_start_time )  msg = "Nächster single_start " + _next_single_start.as_string();
-    }
-
-
-    // Liegt die Startzeit hinter der aktuellen Periode?
-
-    if( _next_start_time > _period.end()  ||  _next_start_time == latter_day ) 
-    {
-        if( now < _period.begin() )     // Nächste Periode hat noch nicht begonnen?
+        if( _repeat > 0 )       // spooler_task.repeat
         {
-            _next_start_time = _period.begin();
-            if( _spooler->_debug )  msg = "Nächster Start zu Beginn der Periode: " + _next_start_time.as_string();
+            _next_start_time = _period.next_try( now + _repeat );
+            if( _spooler->_debug )  msg = "Wiederholung wegen spooler_job.repeat=" + as_string(_repeat) + ": " + _next_start_time.as_string();
+            _repeat = 0;
         }
-        else  
-        if( now >= _period.end() )
+        else
         {
-            select_period( now );
+            _next_start_time = _period.next_try( now + _period.repeat() );
+            if( _spooler->_debug && _next_start_time != latter_day )  msg = "Nächste Wiederholung wegen <period repeat=\"" + as_string((double)_period._repeat) + "\">: " + _next_start_time.as_string();
 
-            if( _period.has_start() )
+            _next_single_start = _run_time.next_single_start( now );
+            if( _spooler->_debug && _next_single_start < _next_start_time )  msg = "Nächster single_start " + _next_single_start.as_string();
+        }
+
+
+        // Liegt die Startzeit hinter der aktuellen Periode?
+
+        if( _next_start_time > _period.end()  ||  _next_start_time == latter_day ) 
+        {
+            if( now < _period.begin() )     // Nächste Periode hat noch nicht begonnen?
             {
-                _next_start_time = max( now, _period.begin() );
-                //_log.debug( "Nächster Start " + _next_start_time.as_string() );
+                _next_start_time = _period.begin();
+                if( _spooler->_debug )  msg = "Nächster Start zu Beginn der Periode: " + _next_start_time.as_string();
             }
-            else
-                _next_start_time = latter_day;
-        }
-    }
+            else  
+            if( now >= _period.end() )
+            {
+                select_period( now );
 
-    if( !msg.empty() )  _log.debug( msg );
+                if( _period.has_start() )
+                {
+                    _next_start_time = max( now, _period.begin() );
+                    //_log.debug( "Nächster Start " + _next_start_time.as_string() );
+                }
+                else
+                    _next_start_time = latter_day;
+            }
+        }
+
+        if( !msg.empty() )  _log.debug( msg );
+    }
 
     calculate_next_time( now );
 }
@@ -980,15 +987,19 @@ bool Job::do_something()
             _running_tasks.push_back( task );
             set_state( s_running );
 
+            set_next_start_time();
+
             task->attach_to_a_thread();
         }
     }
 
-    if( !something_done  &&  _next_time <= Time::now() )    // Sicherheitsnadel
+#ifdef Z_DEBUG
+    if( !something_done ) // &&  _next_time <= Time::now() )    // Sicherheitsnadel
     {
-        LOG( obj_name() << ".do_something()  Nichts getan, calculate_next_time()\n" );
-        calculate_next_time();
+        LOG( obj_name() << ".do_something()  Nichts getan, _next_time=" << _next_time << ", _next_start_time\n" );
+        //calculate_next_time();
     }
+#endif
 
     return something_done;
 }

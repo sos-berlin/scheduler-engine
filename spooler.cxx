@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.237 2003/09/01 17:00:52 jz Exp $
+// $Id: spooler.cxx,v 1.238 2003/09/02 05:29:15 jz Exp $
 /*
     Hier sind implementiert
 
@@ -1599,6 +1599,8 @@ void Spooler::run()
                     {
                         Job* job = *j;
                         something_done |= job->do_something();
+                        LOG( "spooler.cxx: something_done=" ); 
+                        LOG( something_done << "  " << job->obj_name() << "\n" );
                     }
 
                     if( something_done )  nothing_done_count = 1;
@@ -1617,7 +1619,11 @@ void Spooler::run()
                         FOR_EACH( Process_list, (*pc)->_process_list, p )  
                             something_done |= (*p)->async_continue();
 
+                    LOG( "spooler.cxx: something_done=" << something_done << "    process_list \n" );
+
                     something_done |= single_thread->process();
+
+                    LOG( "spooler.cxx: something_done=" << something_done << "   single_thread->process()\n" );
 
                     if( single_thread->is_ready_for_termination() )  break;
 
