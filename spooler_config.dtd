@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+
+<!-- $Id: spooler_config.dtd,v 1.1 2001/01/02 10:49:02 jz Exp $   (C) 2000 SOS GmbH Berlin -->
+
+<!ELEMENT spooler_config        ( object_set_classes, jobs ) >
+
+<!ELEMENT object_set_classes    ( object_set_class+ ) >
+
+<!ELEMENT object_set_class      ( level_decls?, script? ) >
+<!ATTLIST object_set_class      name CDATA #REQUIRED >
+
+<!ELEMENT level_decls           ( level_decl+ ) >
+
+<!ELEMENT level_decl            ( level, level_description ) >
+
+<!ELEMENT level                 ( #PCDATA ) >
+
+<!ELEMENT level_description     ( #PCDATA ) >
+
+<!ELEMENT script                ( #PCDATA ) >
+<!ATTLIST script                language CDATA "VBScript" >
+
+
+<!ELEMENT jobs                  ( job+ ) >
+
+<!ELEMENT job                   ( object_set, output_level, job_attrs? ) >
+<!ATTLIST job                   name CDATA #REQUIRED >
+
+<!ELEMENT object_set            ( object_set_class.name, levels? ) >
+
+<!ELEMENT object_set_class.name ( #PCDATA ) >
+
+<!ELEMENT output_level          ( level ) >
+
+<!ELEMENT levels                ( low_level, high_level ) >
+
+<!ELEMENT low_level             ( level ) >
+
+<!ELEMENT high_level            ( level ) >
+
+<!ELEMENT job_attrs             ( priority, start_time?, duration?, period?, stop_after_error?, rerun?, start_after_spooler? ) >
+
+<!ELEMENT priority              ( #PCDATA ) >
+
+<!ELEMENT start_time            ( #PCDATA ) >
+
+<!ELEMENT duration              ( #PCDATA ) >
+
+<!ELEMENT period                ( #PCDATA ) >
+
+<!ELEMENT stop_after_error      EMPTY >
+
+<!ELEMENT rerun                 EMPTY >
+                                  
+<!ELEMENT start_after_spooler   EMPTY >
+
