@@ -1,4 +1,4 @@
-// $Id: spooler_wait.cxx,v 1.77 2003/10/02 21:40:00 jz Exp $
+// $Id: spooler_wait.cxx,v 1.78 2003/10/02 22:52:50 jz Exp $
 /*
     Hier sind implementiert
 
@@ -184,7 +184,7 @@ Wait_handles& Wait_handles::operator += ( Wait_handles& o )
 
 //--------------------------------------------------------------------------------Wait_handles::add
 
-void Wait_handles::add( z::Event_base* event )
+void Wait_handles::add( z::Event* event )
 {
     THREAD_LOCK( _lock )
     {
@@ -225,7 +225,7 @@ void Wait_handles::remove_handle( HANDLE handle, z::Event_base* event )
 #endif
 //-----------------------------------------------------------------------------Wait_handles::remove
 
-void Wait_handles::remove( z::Event_base* event )
+void Wait_handles::remove( z::Event* event )
 {
     if( !event )  return;
 
@@ -405,15 +405,13 @@ int Wait_handles::wait_until_2( Time until )
 
         for( int i = _events.size() - 1; i >= 0; i-- )  
         {
-            Event* e = dynamic_cast<Event*>( _events[i] );
-            if( e )
-            {
-                wait->add( e );
-            }
+            //Event* e = dynamic_cast<Event*>( _events[i] );
+            //if( e )  wait->add( e );
+            if( _events[i] )  wait->add( _events[i] );
         }
 
-      //return wait->wait( min( directory_watcher_interval, (double)( until - Time::now() ) ) );
         return wait->wait( (double)( until - Time::now() ) );
+      //return wait->wait( min( directory_watcher_interval, (double)( until - Time::now() ) ) );
 
 
 /*
