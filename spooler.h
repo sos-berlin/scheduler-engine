@@ -1,4 +1,4 @@
-// $Id: spooler.h,v 1.26 2001/01/13 22:26:18 jz Exp $
+// $Id: spooler.h,v 1.27 2001/01/13 22:34:56 jz Exp $
 
 #ifndef __SPOOLER_H
 #define __SPOOLER_H
@@ -371,7 +371,7 @@ struct Job : Sos_self_deleting
     bool                       _stop_at_end_of_duration;
     bool                       _continual;
     bool                       _stop_after_error;
-    bool                       _rerun;
+  //bool                       _rerun;
     bool                       _start_after_spooler;
     int                        _priority;
 };

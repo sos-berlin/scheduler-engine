@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!-- $Id: spooler.dtd,v 1.1 2001/01/13 22:35:16 jz Exp $   Joacim Zschimmer,  (C) 2000 SOS GmbH Berlin  -->
+
+
+<!ELEMENT spooler               ( config+ | command )>
+
+
+
+<!-- KONFIGURATION DES SPOOLERS - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
+<!ELEMENT config                ( script?, object_set_classes?, jobs? )>
+<!ATTLIST config                spooler_id          CDATA ''>           <!-- Diese Konfiguration ist nur für einen Spooler mit dieser Kennung -->
+<!ATTLIST config                log_dir             CDATA #IMPLIED>
+<!ATTLIST config                tcp_port            CDATA '4444'>       <!-- Für TCP-Kommandoschnittstelle -->
+<!ATTLIST config                udp_port            CDATA '4444'>       <!-- Für UDP-Kommandoschnittstelle -->
+<!ATTLIST config                priority_max        CDATA '1000'>       <!-- Höchste Priorität. Gibt absoluten Vorrang -->
+<!ATTLIST config                spooler_param       CDATA ''>           <!-- Wird der Eigenschaft spooler_param jedem Skript übergeben -->
+
+
+<!ELEMENT object_set_classes    ( object_set_class+ )>
+
+<!ELEMENT object_set_class      ( level_decls?, script? )>
+<!ATTLIST object_set_class      name                CDATA #REQUIRED>
+
+<!ELEMENT level_decls           ( level_decl+ )>
+
+<!ELEMENT level_decl            EMPTY>
+<!ATTLIST level_decl            level               CDATA #REQUIRED>    <!-- Stufennummer, in der Objektemengeklasse eindeutig -->
+<!ATTLIST level_decl            name                CDATA #REQUIRED>    <!-- Name der Stufe, in der Objektemengeklasse eindeutig -->
+
+<!ELEMENT script                ( #PCDATA )>
+<!ATTLIST script                language            CDATA 'VBScript'>   <!-- Z.B. "VBScript", "JavaScript", "PerlScript" -->
+<!ATTLIST script                use_engine          (task|job) 'task'>  <!-- use_engine="task"  : Jeder Task eine Scripting Engine -->
+                                                                        <!-- use_engine="job"   : Allen Tasks dieses Jobs eine Scripting Engine -->
+                                                                        <!--[use_engine="global": Globale Scripting Engine des Spoolers verwenden]-->
+
+
+<!ELEMENT jobs                  ( job+ )>
+
+<!ELEMENT job                   ( ( object_set | script ), run_time? )>
+<!ATTLIST job                   name                CDATA #REQUIRED>    <!-- Eindeutiger Name -->
+<!ATTLIST job                   priority            CDATA '1'>          <!-- Höhere Zahl ist höhere Priorität -->
+<!ATTLIST job                   output_level        CDATA #IMPLIED>     <!-- Stufennummer. Auf diese Stufe werden die Objekte der Objektemenge gesetzt -->
+<!ATTLIST job                   spooler_id          CDATA ''>           <!-- "": Job läuft auf jedem Spooler, sonst nur Spooler mit derselben Spooler-Id -->
+<!--ATTLIST job                   rerun               (yes|no) 'no' >     <! Laufenden Job bei Abbruch und Neustart des Spoolers erneut starten -->
+<!ATTLIST job                   stop_after_error    (yes|no) 'yes'>     <!-- Nach einem Fehler diesen Job nie wieder starten -->
+<!ATTLIST job                   start_after_spooler (yes|no) 'no' >     <!-- Den Job auch nach verspätetem Start des Spoolers starten -->
+
+
+<!ELEMENT object_set            ( levels? )>
+<!ATTLIST object_set            class CDATA #REQUIRED>
+
+<!ELEMENT levels                EMPTY>          
+<!ATTLIST levels                low                 CDATA #REQUIRED>    <!-- low <= level < high -->
+<!ATTLIST levels                high                CDATA #REQUIRED>
+
+
+<!ELEMENT run_time              ( time_of_day?, date*, weekdays?, monthdays?, ultimos?, holiday* )>
+<!ATTLIST run_time              retry_period        CDATA '5'>          <!-- Periode, nach der ein Job erneut gestartet wird, 
+                                                                             um zu prüfen, ob die Objektemenge nicht leer ist -->
+<!ATTLIST run_time              begin               CDATA '00:00:00'>   <!-- HH:MM:SS, Tageszeit, ab der der Job laufen soll -->
+<!ATTLIST run_time              end                 CDATA '24:00:00'>   <!-- HH:MM:SS, Tageszeit, bis zu der der Job laufen soll -->
+
+<!ELEMENT date                  EMPTY>                                  <!-- Ein bestimmter Tag, an dem der Job laufen soll -->
+<!ATTLIST date                  date                CDATA #IMPLIED>     <!-- yyyy-mm-dd -->
+
+<!ELEMENT weekdays              ( day+ )>                               <!-- 0: Sonntag, 6: Sonnabend -->
+
+<!ELEMENT monthdays             ( day+ )>                               <!-- 1 bis 31 -->
+
+<!ELEMENT ultimos               ( day+ )>                               <!-- 0 bis 30 Tage vor Ultimo -->
+
+<!ELEMENT holiday               EMPTY>                              
+<!ATTLIST holiday               date                CDATA #REQUIRED>    <!-- yyyy-mm-dd, an diesem Tag den Job nicht starten -->
+
+<!ELEMENT day                   EMPTY>
+<!ATTLIST day                   day                 CDATA #REQUIRED>
+
+
+
+
+
+<!-- KOMMANDOS  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
+<!ELEMENT command               ( show_state | modify_spooler | signal_object )>
+
+<!ELEMENT show_state            EMPTY>                                  <!-- Liefert den Zustand des Spoolers -->
+                                                                        <!-- Antwort: <state> -->
+
+<!ELEMENT modify_spooler        EMPTY>
+<!ATTLIST modify_spooler        cmd                 ( reload
+                                                    | stop
+                                                    | terminate
+                                                    | terminate_and_restart
+                                                    | abort_immediately     ) #IMPLIED>
+<!ATTLIST modify_spooler        suspended           (yes|no) #IMPLIED>
+                                                                        <!-- Antwort: <ok> -->
+
+<!ELEMENT modify_job            EMPTY>
+<!ATTLIST modify_job            job                 CDATA #REQUIRED>
+<!ATTLIST modify_job            cmd                 (stop|unstop|start|end|suspend|continue) #IMPLIED>
+                                                                        <!-- cmd="stop"     -> state="stopped" -->
+                                                                        <!-- cmd="unstop"   -> state="pending" -->
+                                                                        <!-- cmd="start"    -> state="running" -->
+                                                                        <!-- cmd="end"      -> state="pending" -->
+                                                                        <!-- cmd="suspend"  -> state="suspended" -->
+                                                                        <!-- cmd="continue" -> state="running" -->
+                                                                        <!-- Antwort: <tasks> -->
+
+<!ELEMENT signal_object         EMPTY>                                  <!-- Gibt Spooler Bescheid, dass ein neues Objekt da ist -->
+<!ATTLIST signal_object         class CDATA #REQUIRED>                  <!-- Objektemengeklasse des Objekts -->
+<!ATTLIST signal_object         level CDATA #REQUIRED>                  <!-- Stufennummer -->
+                                                                        <!-- Antwort: <tasks> -->
+
+
+
+
+<!-- ANTWORTEN AUF DIE KOMMANDOS  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
+<!ELEMENT answer                ( state | task | ERROR )>
+
+<!ELEMENT state                 ( tasks )>
+<!ATTLIST state                 time                CDATA #REQUIRED>    <!-- yyyy-mm-dd HH:MM:SS -->
+<!ATTLIST state                 running_since       CDATA #IMPLIED>     <!-- yyyy-mm-dd HH:MM:SS -->
+<!ATTLIST state                 log_file            CDATA #IMPLIED>
+<!ATTLIST state                 sleeping_until      CDATA #REQUIRED>    <!-- yyyy-mm-dd HH:MM:SS -->
+<!ATTLIST state                 tasks               CDATA #IMPLIED>     <!-- Zahl seit Spooler-Start gestarteter Tasks -->
+<!ATTLIST state                 steps               CDATA #IMPLIED>     <!-- Zahl seit Spooler-Start erfolgreich ausgeführter Schritte -->
+<!ATTLIST state                 cpu_time            CDATA #IMPLIED>     <!-- 9.999 -->
+
+<!ELEMENT tasks                 ( task+ )>
+
+<!ELEMENT task                  ( ERROR? )>
+<!ATTLIST task                  job                 CDATA #REQUIRED>    <!-- Jobname -->
+<!ATTLIST task                  state               (stopped|pending|running|suspended) #REQUIRED>
+                                                                        <!-- state="stopped"  : Keine Task wird mehr gestartet -->
+                                                                        <!-- state="pending"  : Task wartet auf nächsten  -->
+                                                                        <!-- state="running"  : Task läuft -->
+                                                                        <!-- state="suspended": Task vorübergehend angehalten -->
+<!ATTLIST task                  steps               CDATA #IMPLIED>     <!-- Anzahl der bisher ausgeführten Jobschritte -->
+<!ATTLIST task                  running_since       CDATA #IMPLIED>     <!-- yyyy-mm-dd HH:MM:SS -->
+<!ATTLIST task                  next_start_time     CDATA #REQUIRED>    <!-- yyyy-mm-dd HH:MM:SS -->
+
+<!ELEMENT ok                    EMPTY>
+
+<!ELEMENT ERROR                 EMPTY>
+<!ATTLIST state                 time                CDATA #REQUIRED>    <!-- yyyy-mm-dd HH:MM:SS -->
+<!ATTLIST ERROR                 class               CDATA #IMPLIED>     <!-- "EOF" -->
+<!ATTLIST ERROR                 code                CDATA #REQUIRED>    <!-- "SOS-1234" -->
+<!ATTLIST ERROR                 text                CDATA #REQUIRED>    <!-- Fehlertext mit Fehlercode -->
+<!ATTLIST ERROR                 source              CDATA #IMPLIED>     <!-- Dateiname -->
+<!ATTLIST ERROR                 line                CDATA #IMPLIED>     <!-- Zeilennummer, beginned mit 1 -->
+<!ATTLIST ERROR                 col                 CDATA #IMPLIED>     <!-- Spaltennummer, beginned mit 1 -->

@@ -1,4 +1,4 @@
-// $Id: spooler_xml.cxx,v 1.16 2001/01/13 22:26:18 jz Exp $
+// $Id: spooler_xml.cxx,v 1.17 2001/01/13 22:34:56 jz Exp $
 
 //#include <precomp.h>
 
@@ -220,7 +220,7 @@ Job::Job( const xml::Element_ptr& element )
     _zero_(this+1),
     _name           ( as_string( element->getAttribute( "name" ) ) ),
     _run_time       ( default_single_element( element, "run_time" ) ),
-    _rerun          ( as_bool( as_string( element->getAttribute( "rerun" ) ) ) ),
+  //_rerun          ( as_bool( as_string( element->getAttribute( "rerun" ) ) ) ),
     _priority       ( as_int( element->getAttribute( "priority" ) ) )
 {
     string text;

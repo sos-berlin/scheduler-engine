@@ -1,0 +1,383 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+
+<!-- $Id: spooler.xml,v 1.1 2001/01/13 22:35:16 jz Exp $   (C) 2000 SOS GmbH Berlin -->
+
+<!DOCTYPE spooler SYSTEM "spooler.dtd">
+
+<spooler>
+<config tcp_port="4444" log_dir="c:\tmp">
+
+    <script language="VBScript"><![CDATA[
+
+dim global
+
+class Global_class
+    function method()
+        method="Ich bin von der globalen Methode" & ", spooler.param=" & spooler.param
+    end function
+end class
+
+sub spooler_init
+    set global = new Global_class 
+    spooler_log.msg "spooler_init des Spooler-Skripts ausgeführt"
+end sub
+
+spooler_log.msg "Spooler-Skript geladen."   
+
+    ]]></script>
+
+    <object_set_classes>
+
+        <object_set_class name="Dokumente">
+
+            <level_decls>
+                <level_decl level="100" name="Beauftragt"/>
+                <level_decl level="200" name="Aufbereitet"/>
+                <level_decl level="300" name="Gedruckt"/>
+            </level_decls>
+
+            <script use_engine="job"><![CDATA[
+
+dir_name = "c:\tmp\spooler"
+set fso = createobject( "Scripting.FileSystemObject" )
+script_index = 0
+
+class Testobjekt
+
+    sub construct( file_par )
+        dim lev
+        set file = file_par
+        lev = mid( file.name, instr( file.name & "-", "-" ) + 1 )
+        lev = left( lev, instr( lev & ".", "." ) - 1 )
+        level = lev
+    end sub
+
+
+    sub process( new_level )
+        spooler_log.msg "process " & level & " ==> " & new_level 
+        spooler_log.msg "file(" & file.path & ").move " & dir_name & "\" & new_level & "\" & file.name
+        file.move dir_name & "\" & new_level & "\" & file.name
+        level = new_level
+    end sub
+
+
+    public  level
+    private file
+
+end class
+
+
+
+class Object_set_class
+
+    sub spooler_open()
+        dim files
+        dim file
+        dim i
+        
+        spooler_log.msg "spooler_open: [" & spooler_task.object_set.low_level & "," & spooler_task.object_set.high_level & "], spooler.param=" & spooler.param
+
+        set files=fso.getFolder(dir_name).Files
+        
+        file_array = Array
+        i = 1
+        for each file in files
+            redim preserve file_array(i)
+            set file_array(i) = file
+            i = i + 1
+        next 
+
+        index = 1
+    end sub
+
+
+    sub spooler_close()
+        dim dummy
+        dummy = 0
+    end sub
+
+
+    function spooler_get()
+        if spooler_eof() then exit function
+
+        dim object
+        set object = new Testobjekt
+        object.construct file_array(index)
+        spooler_log.msg "index=" & index & ", level=" & object.level & ", script_index=" & script_index
+        index = index + 1
+        script_index = script_index + 1
+
+        set spooler_get = object
+    end function
+
+
+    function spooler_eof()
+        spooler_eof = index > ubound(file_array)
+    end function
+
+    
+    private file_array
+    private index
+
+end class
+
+
+sub spooler_init
+    spooler_task.wake_when_directory_changed dir_name
+end sub
+
+
+function spooler_make_object_set
+    set spooler_make_object_set = new Object_set_class
+end function
+
+            ]]></script>
+
+        </object_set_class>
+
+
+        <object_set_class name="Perl">
+
+            <level_decls>
+                <level_decl level="1" name="Stufe 1"/>
+                <level_decl level="2" name="Stufe 2"/>
+                <level_decl level="3" name="Stufe 3"/>
+            </level_decls>
+
+            <script language="PerlScript" use_engine="task"><![CDATA[
+
+use diagnostics;
+use Win32::OLE;
+
+#$spooler_log->msg( "*Job Perl" );
+
+
+{
+    package Testobjekt;
+
+
+    sub construct
+    {
+        #$main::spooler_log->msg( "Testobjekt::construct" );
+        my $self = {};
+        bless( $self );
+        $self->{name} = shift;
+        $self->{level} = 100;
+        return $self;
+    }
+
+
+    sub process
+    {
+        my $self = shift;
+        my $new_level = shift;  # Wie holt man den Parameter? Joacim
+        #$main::spooler_log->msg( "process " . $self->{name} . ", " . $self->{level} . " ==> $new_level" );
+        $self->{level} = $new_level;
+    }
+}
+
+
+
+{
+    package Object_set_class;
+
+
+    sub construct
+    {
+        my $self = {};
+        bless( $self );
+
+        $self->{index} = 1;
+        $self->{low_level} = 0;
+        $self->{high_level} = 0;
+
+        return $self;
+    }
+
+
+    sub spooler_open
+    {
+        my $self = shift;
+        $main::spooler_log->msg( "spooler_open [" . $self->{spooler_low_level} . "," . $self->{spooler_high_level} . ")" );
+    }
+
+
+    sub spooler_close
+    {
+    }
+
+
+    sub spooler_get
+    {
+        my $self = shift;
+
+        if( $self->spooler_eof() )  { return; }
+
+        my $object = Testobjekt::construct( $self->{index} );
+        $main::spooler_log->msg( "index=" . $self->{index} . ", level=" . $object->{level} );
+        $self->{index}++;
+
+        return $object;
+    }
+
+
+    sub spooler_eof
+    {
+        my $self = shift;
+        if( $self->{index} > 3 ) { return 1; }
+        return 0;
+    }
+}
+
+
+
+sub spooler_make_object_set()
+{
+    my $object_set_class = construct Object_set_class;
+    return $object_set_class;
+}
+
+
+
+# Folgender prozeduraler Code, weil PerlScript kein IDispatch, also kein Objekt liefern kann:
+
+my $object_set_class;
+my $object;
+
+sub spooler_dont_use_objects() 
+{ 
+    $object_set_class = spooler_make_object_set();
+    return; 
+}
+
+sub spooler_init()
+{
+    return;
+}
+
+sub spooler_open()
+{
+    $object_set_class->{spooler_low_level} = $spooler_task->object_set->{low_level};
+    $object_set_class->{spooler_high_level} = $spooler_task->object_set->{high_level};
+    $object_set_class->spooler_open();
+    return; 
+}
+
+sub spooler_close()
+{
+    $object_set_class->spooler_open();
+    return; 
+}
+
+sub spooler_get()
+{
+    $object = $object_set_class->spooler_get();
+    return; 
+}
+
+sub spooler_eof()
+{
+    return $object_set_class->spooler_eof();
+}
+
+sub spooler_process()
+{
+    my $new_level = shift;
+    $object->process( $new_level );
+    return; 
+}
+
+
+            ]]></script>
+
+        </object_set_class>
+
+    </object_set_classes>
+
+
+    <jobs>
+
+        <job name           = "Aufbereiten" 
+             priority       = "2" 
+             output_level   = "200" 
+             spooler_id     = "">
+
+            <object_set class="Dokumente">
+                <levels low="100" high="200"/>
+            </object_set>
+
+            <run_time begin        = "07:11:55" 
+                      end          = "24:00" 
+                      retry_period = "60">
+<!--
+                <date date="2001-01-02"/>
+                <date date="2001-01-09"/>
+
+                <weekdays>
+                    <day day="1"/>
+                    <day day="2"/>
+                    <day day="6"/>
+                </weekdays>
+
+                <monthdays>
+                    <day day="2"/>
+                    <day day="3"/>
+                </monthdays>
+
+                <ultimos>
+                    <day day="0"/>
+                </ultimos>
+
+                <holiday date="2001-05-01"/>
+                <holiday date="2001-12-24"/>
+                <holiday date="2001-12-25"/>
+                <holiday date="2001-12-26"/>
+                <holiday date="2001-12-31"/>
+                <holiday date="2002-01-01"/>
+-->
+            </run_time>
+
+        </job>
+
+
+
+        <job name="einfach" priority="3" spooler_id="">
+
+            <script language="VBScript" use_engine="job"><![CDATA[
+
+'spooler_log.msg "*Job einfach"
+
+index = 1
+
+sub spooler_init()
+end sub
+
+function step()
+    spooler_log.msg "*Job einfach: step " & index & ", param=" & spooler.script.global.method()
+    index = index + 1
+    if index > 3 then step=false: exit function
+    step = true
+end function
+
+            ]]></script>
+
+            <run_time retry_period="9"/>
+
+        </job>
+
+
+        <job name           = "Perlset" 
+             output_level   = "200"
+             priority       = "1"
+             spooler_id     = "perl">
+
+            <object_set class="Perl">
+                <levels low="1" high="3"/>
+            </object_set>
+
+        </job>
+
+    </jobs>
+
+</config>
+</spooler>
