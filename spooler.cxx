@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.338 2004/07/01 07:41:20 jz Exp $
+// $Id: spooler.cxx,v 1.339 2004/07/01 12:17:47 jz Exp $
 // §851: Weitere Log-Ausgaben zum Scheduler-Start eingebaut
 // §1479
 
@@ -2435,6 +2435,10 @@ void __cdecl delete_new_spooler( void* )
 int spooler_main( int argc, char** argv, const string& parameter_line )
 {
     int ret;
+
+//#   if defined _DEBUG  && defined __GNUC__
+//        mtrace();   // Memory leak detectiopn
+//#   endif
 
     Ole_initialize ole;
     Spooler my_spooler;

@@ -1,9 +1,9 @@
-// $Id: spooler_version.h,v 1.225 2004/06/03 15:40:59 jz Exp $
+// $Id: spooler_version.h,v 1.226 2004/07/01 12:17:47 jz Exp $
 
 #define VER_FILEDESC_STR        "Scheduler\0"
 
-#define VER_PRODUCTVERSION       2,0,73
-#define VER_PRODUCTVERSION_STR  "2.0.73, 2004-06-03\0"
+#define VER_PRODUCTVERSION       2,0,74
+#define VER_PRODUCTVERSION_STR  "2.0.74, 2004-07-01\0"
 
 #define VER_NAME_STR            "Scheduler\0"
 #define VER_FILENAME_STR        "scheduler.exe\0"
