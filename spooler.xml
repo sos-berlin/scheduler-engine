@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 
-<!-- $Id: spooler.xml,v 1.48 2001/07/25 19:43:35 jz Exp $   (C) 2001 SOS GmbH Berlin -->
+<!-- $Id: spooler.xml,v 1.49 2001/08/20 08:32:57 jz Exp $   (C) 2001 SOS GmbH Berlin -->
 
 <!DOCTYPE spooler SYSTEM "s:\prod\spooler\spooler.dtd">
 
@@ -35,6 +35,8 @@ spooler_log.msg "param1=" & spooler_task.params.var("param1")
 dir_name = "c:\tmp\spooler"
 
 spooler_job.start_when_directory_changed dir_name
+spooler_job.start_when_directory_changed dir_name & "2"
+spooler_job.clear_when_directory_changed
 
 set fso = createobject( "Scripting.FileSystemObject" )
 script_index = 0
@@ -295,7 +297,7 @@ spooler_log.msg "Spooler-Skript geladen."
                 <job name           = "Aufbereiten" 
                      priority       = "2" 
                      output_level   = "200" 
-                     spooler_id     = "x">
+                     spooler_id     = "">
 
                     <object_set class="Dokumente">
                         <levels low="100" high="200"/>

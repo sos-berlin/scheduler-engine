@@ -1,4 +1,4 @@
-// $Id: spooler_common.h,v 1.9 2001/07/05 16:31:03 jz Exp $
+// $Id: spooler_common.h,v 1.10 2001/08/20 08:32:57 jz Exp $
 
 #ifndef __SPOOLER_COMMON_H
 #define __SPOOLER_COMMON_H
@@ -29,7 +29,7 @@ typedef DWORD                   Process_id;
 
 //-------------------------------------------------------------------------------------------Handle
 
-struct Handle
+struct Handle : Sos_self_deleting
 {
 #   ifdef SYSTEM_WIN
                                 Handle                      ( HANDLE h = NULL )             : _handle(h) {}
