@@ -1,4 +1,4 @@
-// $Id: spooler_order.cxx,v 1.61 2004/05/27 13:12:03 jz Exp $
+// $Id: spooler_order.cxx,v 1.62 2004/05/28 09:50:35 jz Exp $
 /*
     Hier sind implementiert
 
@@ -1137,7 +1137,7 @@ void Order::postprocessing( bool success )
             {
                 if( _job_chain_node->_job )  
                 {
-                    if( _job_chain_node->_job->order_queue() )  _log.warn( "Job " + _job_chain_node->_job->obj_name() + " ohne Auftragswarteschlange (§1495)" );  // Problem §1495  
+                    if( !_job_chain_node->_job->order_queue() )  _log.warn( "Job " + _job_chain_node->_job->obj_name() + " ohne Auftragswarteschlange (§1495)" );  // Problem §1495  
                     else  _job_chain_node->_job->order_queue()->remove_order( this );
                 }
 
