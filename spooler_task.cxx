@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.26 2001/02/14 22:06:56 jz Exp $
+// $Id: spooler_task.cxx,v 1.27 2001/02/16 18:23:12 jz Exp $
 /*
     Hier sind implementiert
 
@@ -449,7 +449,7 @@ bool Job::do_something()
 
     if( !ok || has_error() )
     {
-        if( _state == s_running )  end(), something_done = true;
+        if( _state == s_running || _state == s_running_process )  end(), something_done = true;
         if( _state != s_stopped  &&  has_error()  &&  _repeat == 0 )  stop(), something_done = true;
     }
 

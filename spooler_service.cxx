@@ -1,4 +1,4 @@
-// $Id: spooler_service.cxx,v 1.10 2001/02/14 22:06:56 jz Exp $
+// $Id: spooler_service.cxx,v 1.11 2001/02/16 18:23:12 jz Exp $
 /*
     Hier sind implementiert
 
@@ -30,6 +30,28 @@ namespace spooler {
 static const char               std_service_name[]          = "DocumentFactory_Spooler";    // Windows 2000 Service
 static const char               std_service_display_name[]  = "DocumentFactory Spooler";    // Gezeigter Name
 static const char               service_description[]       = "Hintergrund-Jobs der Document Factory";
+
+//-----------------------------------------------------------------------------------Service_handle
+
+struct Service_handle
+{
+                                Service_handle              ( SC_HANDLE h = NULL )          : _handle(h) {}
+                               ~Service_handle              ()                              { close(); }
+
+        void                    operator =                  ( SC_HANDLE h )                 { set_handle( h ); }
+                                operator HANDLE             () const                        { return _handle; }
+                                operator !                  () const                        { return _handle == 0; }
+
+        void                    set_handle                  ( SC_HANDLE h )                 { close(); _handle = h; }
+        SC_HANDLE               handle                      () const                        { return _handle; }
+        void                    close                       ()                              { if(_handle) { CloseServiceHandle(_handle); _handle=NULL; } }
+
+        SC_HANDLE              _handle;
+
+  private:
+                                Service_handle              ( const Service_handle& );      // Nicht implementiert
+    void                        operator =                  ( const Service_handle& );      // Nicht implementiert
+};
 
 //-------------------------------------------------------------------------------------------static
 
@@ -166,16 +188,16 @@ void remove_service( const string& id )
     CloseServiceHandle( manager_handle );
 } 
 
-//-------------------------------------------------------------------------------service_is_started
+//------------------------------------------------------------------------------------service_state
 
-bool service_is_started( const string& id )
+DWORD service_state( const string& id )
 {
     OSVERSIONINFO v;  memset( &v, 0, sizeof v ); v.dwOSVersionInfoSize = sizeof v;
     GetVersionEx( &v );
     if( v.dwPlatformId != VER_PLATFORM_WIN32_NT )  return false;
 
 
-    bool      is_started     = false;
+    DWORD     result         = 0;
     SC_HANDLE manager_handle = 0;
     SC_HANDLE service_handle = 0;
 
@@ -205,7 +227,7 @@ bool service_is_started( const string& id )
             throw_mswin_error( "OpenService" );
         }
 
-        if( status.dwCurrentState == SERVICE_START_PENDING )  is_started = true;
+        result = status.dwCurrentState;
 
       ENDE:
         CloseServiceHandle( service_handle ),  service_handle = 0; 
@@ -217,47 +239,31 @@ bool service_is_started( const string& id )
         CloseServiceHandle( manager_handle );
     }
 
-    return is_started;
+    return result;
 }
 
-//----------------------------------------------------------------------------------restart_service
-/*
-static void restart_service( DWORD argc, char** argv )
+//------------------------------------------------------------------------------------service_start
+
+void service_start( const string& id )
 {
-    SC_HANDLE manager_handle = 0;
-    SC_HANDLE service_handle = 0;
-    BOOL ok;
+    BOOL            ok;
+    Service_handle  manager_handle;
+    Service_handle  service_handle;
+    string          my_service_name = service_name(id);
 
-    manager_handle = OpenSCManager( NULL, SERVICES_ACTIVE_DATABASE, SC_MANAGER_CREATE_SERVICE );
-    if( !manager_handle )  goto ENDE;
-
-    service_handle = OpenService(manager_handle, std_service_name, SERVICE_QUERY_STATUS );
-    if( !service_handle )  goto ENDE;
-
-    ok = StartService( service_handle, argc, (const char**)argv );
-
-    Kann nicht gestartet werden, solange der Dienst noch läuft. Müsste verzögert gestartet werden, vielleicht von einem anderen Prozess.
-
-  ENDE:
-    CloseServiceHandle( service_handle ); 
-    CloseServiceHandle( manager_handle );
+    manager_handle = OpenSCManager( NULL, SERVICES_ACTIVE_DATABASE, SC_MANAGER_CREATE_SERVICE );    if( !manager_handle )  throw_mswin_error( "OpenSCManager" );
+    service_handle = OpenService( manager_handle, my_service_name.c_str(), SERVICE_START );         if( !service_handle )  throw_mswin_error( "OpenService" );
+    ok = StartService( service_handle, 0, NULL );                                                   if( !ok )  throw_mswin_error( "StartService" );
 }
-*/
+
 //----------------------------------------------------------------------------------service_handler
 
 static void set_service_status( int spooler_error = 0 )
 {
     if( !service_status_handle )  return;
-  //if( !spooler_ptr && spooler_error == 0 )  spooler_error = 1;
-/*
-    if( spooler_ptr  
-     && spooler_ptr->_state == Spooler::s_stopped 
-     && spooler_ptr->_state_cmd == Spooler::sc_terminate_and_restart )
-    {
-        restart_service( spooler_ptr->_argc, spooler_ptr->_argv );
-    }
-*/
+
     SERVICE_STATUS service_status;
+
 
     service_status.dwServiceType                = SERVICE_WIN32_OWN_PROCESS;
 
@@ -267,7 +273,7 @@ static void set_service_status( int spooler_error = 0 )
                                                 : spooler_ptr->state() == Spooler::s_stopping? SERVICE_STOP_PENDING
                                                 : spooler_ptr->state() == Spooler::s_running ? SERVICE_RUNNING
                                                 : spooler_ptr->state() == Spooler::s_paused  ? SERVICE_PAUSED
-                                                                                            : SERVICE_START_PENDING; 
+                                                                                             : SERVICE_START_PENDING; 
 
     service_status.dwControlsAccepted           = SERVICE_ACCEPT_STOP 
                                                 | SERVICE_ACCEPT_PAUSE_CONTINUE 
@@ -436,7 +442,7 @@ int spooler_service( const string& id, int argc, char** argv )
     process_argv = argv;
 
     try 
-    {
+    {                          
         spooler_service_name = service_name(id);
         SERVICE_TABLE_ENTRY ste[2];
 
@@ -445,7 +451,7 @@ int spooler_service( const string& id, int argc, char** argv )
         ste[0].lpServiceName = (char*)spooler_service_name.c_str();
         ste[0].lpServiceProc = ServiceMain;
 
-        LOGI( "StartServiceCtrlDispatcher()\n" );
+        LOGI( "StartServiceCtrlDispatcher(" << ste[0].lpServiceName << ")\n" );
 
         BOOL ok = StartServiceCtrlDispatcher( ste );
         if( !ok )  throw_mswin_error( "StartServiceCtrlDispatcher" );      // Z.B. nach 15s: MSWIN-00000427  Der Dienstprozess konnte keine Verbindung zum Dienstcontroller herstellen.
@@ -455,7 +461,7 @@ int spooler_service( const string& id, int argc, char** argv )
     catch( const Xc& x )
     {
         event_log( x.what() );
-        return 1;
+        return 1;                                                                               
     }
 
     return 0;

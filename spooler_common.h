@@ -1,4 +1,4 @@
-// $Id: spooler_common.h,v 1.6 2001/02/10 11:38:07 jz Exp $
+// $Id: spooler_common.h,v 1.7 2001/02/16 18:23:12 jz Exp $
 
 #ifndef __SPOOLER_COMMON_H
 #define __SPOOLER_COMMON_H
@@ -6,6 +6,11 @@
 namespace sos {
 namespace spooler {
 
+#ifdef SYSTEM_WIN
+#   define DIR_SEP "\\"
+# else
+#   define DIR_SEP "/"
+#endif
 
 
 typedef uint                    Thread_id;                  // _beginthreadex()
@@ -17,10 +22,11 @@ struct Handle
 {
 #   ifdef SYSTEM_WIN
                                 Handle                      ( HANDLE h = NULL )             : _handle(h) {}
+                                Handle                      ( ulong h )                     : _handle((HANDLE)h) {}     // für _beginthread()
                                ~Handle                      ()                              { close(); }
 
         void                    operator =                  ( HANDLE h )                    { set_handle( h ); }
-        void                    operator =                  ( ulong h )                     { set_handle( (HANDLE)h ); }   // für _beginthreadex()
+        void                    operator =                  ( ulong h )                     { set_handle( (HANDLE)h ); }   // für _beginthread()
                                 operator HANDLE             () const                        { return _handle; }
                                 operator !                  () const                        { return _handle == 0; }
       //HANDLE*                 operator &                  ()                              { return &_handle; }

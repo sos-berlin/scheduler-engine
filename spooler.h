@@ -1,4 +1,4 @@
-// $Id: spooler.h,v 1.48 2001/02/14 22:06:55 jz Exp $
+// $Id: spooler.h,v 1.49 2001/02/16 18:23:12 jz Exp $
 
 #ifndef __SPOOLER_H
 #define __SPOOLER_H
@@ -69,6 +69,10 @@ typedef _bstr_t                 Dom_string;
 template<typename T>
 inline Dom_string               as_dom_string               ( const T& t )                          { return as_bstr_t( t ); }
 
+string                          program_filename            ();
+string                          directory_of_path           ( const string& );
+string                          basename_of_path            ( const string& );
+string                          extension_of_path           ( const string& );
 
 namespace spooler {
 
@@ -147,7 +151,6 @@ struct Spooler
     void                        wait_until_threads_stopped  ();
     void                        reload                      ();
     void                        run                         ();
-    void                        restart                     ();
 
   //void                        single_thread_step          ();
     void                        wait                        ();
@@ -198,7 +201,7 @@ struct Spooler
 
 //-------------------------------------------------------------------------------------------------
 
-void                            spooler_restart             ();
+void                            spooler_restart             ( bool is_service );
 
 //-------------------------------------------------------------------------------------------------
 

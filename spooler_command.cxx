@@ -1,4 +1,4 @@
-// $Id: spooler_command.cxx,v 1.28 2001/02/14 22:06:56 jz Exp $
+// $Id: spooler_command.cxx,v 1.29 2001/02/16 18:23:12 jz Exp $
 /*
     Hier ist implementiert
 
@@ -144,7 +144,7 @@ xml::Element_ptr Command_processor::execute_modify_spooler( const xml::Element_p
         else
         if( cmd == "abort_immediately"     )  _exit(1);
         else
-        if( cmd == "abort_immediately_and_restart" )  try{ spooler_restart(); }catch(...){}, _exit(1);
+        if( cmd == "abort_immediately_and_restart" )  { try{ spooler_restart( _spooler->_is_service ); }catch(...){}; _exit(1); }
         else
       //if( cmd == "new_log"               )  _spooler->cmd_new_log();
       //else

@@ -1,4 +1,4 @@
-// $Id: spooler_thread.cxx,v 1.7 2001/02/14 22:06:56 jz Exp $
+// $Id: spooler_thread.cxx,v 1.8 2001/02/16 18:23:12 jz Exp $
 /*
     Hier sind implementiert
 
@@ -347,7 +347,7 @@ void Thread::wait_until_thread_stopped( Time until )
 //          _log.msg( "Skripten werden unterbrochen ..." );
             
 //          try { 
-                interrupt_scripts(); 
+//              interrupt_scripts(); 
 //          } 
 //          catch( const Xc& x) { _log.error(x.what()); }
 

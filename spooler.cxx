@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.52 2001/02/14 22:06:54 jz Exp $
+// $Id: spooler.cxx,v 1.53 2001/02/16 18:23:11 jz Exp $
 /*
     Hier sind implementiert
 
@@ -11,6 +11,10 @@
 #include "../kram/sos.h"
 #include "spooler.h"
 
+#include <time.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+
 #include "../kram/sosprof.h"
 #include "../kram/sosopt.h"
 #include "../kram/sleep.h"
@@ -21,6 +25,11 @@
 #   include <sys/types.h>
 #   include <sys/timeb.h>
 //#endif
+
+
+const string new_suffix = "~new";           // Suffix für den neuen Spooler, der den bisherigen beim Neustart ersetzen soll
+const double renew_wait_interval = 0.1;
+const double renew_wait_time     = 30;      // Wartezeit für Brückenspooler, bis der alte Spooler beendet ist und der neue gestartet werden kann.
 
 
 
@@ -222,7 +231,9 @@ void Spooler::stop()
 
     _object_set_class_list.clear();
     _thread_list.clear();
-    
+
+    if( _state_cmd == sc_terminate_and_restart )  spooler_restart( _is_service );
+   
     set_state( s_stopped );     
     // Der Dienst ist hier beendet
 }
@@ -307,7 +318,7 @@ void Spooler::cmd_terminate_and_restart()
 {
     _log.msg( "Spooler::cmd_terminate_and_restart" );
 
-    if( _is_service )  throw_xc( "SPOOLER-114" );
+    //if( _is_service )  throw_xc( "SPOOLER-114" );
 
     _state_cmd = sc_terminate_and_restart;
     signal( "terminate_and_restart" );
@@ -351,52 +362,169 @@ int Spooler::launch( int argc, char** argv )
 
     _log.msg( "Spooler ordentlich beendet." );
 
-    return _state_cmd == sc_terminate_and_restart? 1 : 0;
+    return 0;
+}
+
+//------------------------------------------------------------------------------------start_process
+
+static void start_process( const string& command_line )
+{
+    LOG( "start process(\"" << command_line << "\")\n" );
+
+    PROCESS_INFORMATION process_info; 
+    STARTUPINFO         startup_info; 
+    BOOL                ok;
+    Sos_limited_text<MAX_PATH> my_command_line = command_line;
+
+    memset( &process_info, 0, sizeof process_info );
+
+    memset( &startup_info, 0, sizeof startup_info );
+    startup_info.cb = sizeof startup_info; 
+
+    ok = CreateProcess( NULL,                       // application name
+                        (char*)c_str(my_command_line),     // command line 
+                        NULL,                       // process security attributes 
+                        NULL,                       // primary thread security attributes 
+                        FALSE,                      // handles are inherited?
+                        0,                          // creation flags 
+                        NULL,                       // use parent's environment 
+                        NULL,                       // use parent's current directory 
+                        &startup_info,              // STARTUPINFO pointer 
+                        &process_info );            // receives PROCESS_INFORMATION 
+
+    if( !ok )  throw_mswin_error("CreateProcess");
+
+    CloseHandle( process_info.hThread );
+    CloseHandle( process_info.hProcess );
+}
+
+//----------------------------------------------------------------------------make_new_spooler_path
+
+static string make_new_spooler_path( const string& this_spooler )
+{
+    return directory_of_path(this_spooler) + DIR_SEP + basename_of_path( this_spooler ) + new_suffix + ".exe";
 }
 
 //----------------------------------------------------------------------------------spooler_restart
 
-void spooler_restart()
+void spooler_restart( bool is_service )
 {
-#   ifdef SYSTEM_WIN
+    string this_spooler = program_filename();
+    string command_line = GetCommandLine();
+    string new_spooler  = make_new_spooler_path( this_spooler );
 
-        PROCESS_INFORMATION process_info; 
-        STARTUPINFO         startup_info; 
-        BOOL                ok;
+    if( GetFileAttributes( new_spooler.c_str() ) != -1 )      // spooler~new.exe vorhanden?
+    {
+        // Programmdateinamen aus command_line ersetzen
+        int pos;
+        if( command_line.length() == 0 )  throw_xc( "SPOOLER-COMMANDLINE" );
+        if( command_line[0] == '"' ) {
+            pos = command_line.find( 1, '"' );  if( pos == string::npos )  throw_xc( "SPOOLER-COMMANDLINE" );
+            pos++;                
+        } else {
+            pos = command_line.find( ' ' );  if( pos == string::npos )  throw_xc( "SPOOLER-COMMANDLINE" );
+        }
 
-        memset( &process_info, 0, sizeof process_info );
+        command_line = new_spooler + command_line.substr(pos);
+                     //+ " -renew-spooler=" + quoted_string(this_spooler);
+    }
+    else
+    {
+        //command_line += " -renew-spooler";
+    }
 
-        memset( &startup_info, 0, sizeof startup_info );
-        startup_info.cb = sizeof startup_info; 
+    if( is_service )  command_line += " -renew-service";
 
-        ok = CreateProcess( NULL,                       // application name
-                            GetCommandLine(),           // command line 
-                            NULL,                       // process security attributes 
-                            NULL,                       // primary thread security attributes 
-                            FALSE,                      // handles are inherited?
-                            0,                          // creation flags 
-                            NULL,                       // use parent's environment 
-                            NULL,                       // use parent's current directory 
-                            &startup_info,              // STARTUPINFO pointer 
-                            &process_info );            // receives PROCESS_INFORMATION 
-
-        if( !ok )  throw_mswin_error("CreateProcess");
-
-        CloseHandle( process_info.hThread );
-        CloseHandle( process_info.hProcess );
-
-#    else
-
-        //fork();
-        //spawn();
-
-#   endif
+    start_process( command_line + " -renew-spooler=" + quoted_string(this_spooler,'"','"') );
 }
+
+//------------------------------------------------------------------------------------spooler_renew
+
+static void spooler_renew( const string& id, const string& renew_spooler, bool is_service, const string& command_line )
+{
+    string this_spooler = program_filename();
+    BOOL   copy_ok      = true;
+    double t            = renew_wait_time;
+
+    if( is_service ) 
+    {
+        for( t; t > 0; t -= renew_wait_interval )  
+        {
+            if( spooler::service_state(id) != SERVICE_STOP_PENDING )  break;
+            sos_sleep( renew_wait_interval );
+        }
+
+        if( spooler::service_state(id) != SERVICE_STOPPED )  return;
+    }
+
+    if( renew_spooler != this_spooler )
+    {
+        for( t; t > 0; t -= renew_wait_interval )  
+        {
+            LOG( "CopyFile " << this_spooler << ", " << renew_spooler << '\n' );
+
+            copy_ok = CopyFile( this_spooler.c_str(), renew_spooler.c_str(), FALSE );
+            if( copy_ok )  break;
+
+            LOG( "CopyFile error=" << GetLastError() << '\n' );
+
+            if( GetLastError() != ERROR_SHARING_VIOLATION )  return;
+            sos_sleep( renew_wait_interval );
+        }
+    }
+
+    if( is_service )  spooler::service_start( id );
+                else  start_process( quoted_string(renew_spooler,'"','"') + " " + command_line );
+}
+
+//----------------------------------------------------------------------------------------full_path
+
+static string full_path( const string& path )
+{
+    Sos_limited_text<MAX_PATH> full;
+
+    char* p = _fullpath( full.char_ptr(), path.c_str(), full.size() );
+    if( !p )  throw_xc( "fullpath", path );
+
+    return full.char_ptr();
+}
+
+//-------------------------------------------------------------------------------delete_new_spooler
+
+void delete_new_spooler( void* )
+{
+    string          this_spooler   = program_filename();
+    string          basename       = basename_of_path( this_spooler );
+    string          copied_spooler = make_new_spooler_path( this_spooler );
+    struct _stat    ths;
+    struct _stat    cop;
+    int             err;
+
+    if( full_path( this_spooler ) == full_path( copied_spooler ) )  return;
+
+    err = _stat( this_spooler  .c_str(), &ths );  if(err)  return;
+    err = _stat( copied_spooler.c_str(), &cop );  if(err)  return;
+
+    if( ths.st_size == cop.st_size  &&  ths.st_mtime == cop.st_mtime )  // spooler.exe == spooler~new.exe?
+    {
+        for( double t = renew_wait_time; t > 0; t -= renew_wait_interval )  
+        {
+            LOG( "unlink " << copied_spooler << '\n' );
+
+            int ret = _unlink( copied_spooler.c_str() );
+            if( ret == 0  || errno != EACCES ) break;
+            LOG( "errno=" << errno << ' ' << strerror(errno) << '\n' );
+            sos_sleep( renew_wait_interval );
+        }
+    }
+}
+
 //-------------------------------------------------------------------------------------spooler_main
 
 int spooler_main( int argc, char** argv )
 {
     int ret;
+    bool is_service = false;
 
     {
 #       ifdef SYSTEM_WIN
@@ -406,9 +534,9 @@ int spooler_main( int argc, char** argv )
         spooler::Spooler spooler;
 
         ret = spooler.launch( argc, argv );
+        
+        is_service = spooler._is_service;
     }
-
-    if( ret == 1 )  spooler_restart();
 
     return 0;
 }
@@ -428,22 +556,42 @@ int sos_main( int argc, char** argv )
     bool    do_install_service = false;
     bool    do_remove_service = false;
     string  id;
+    string  renew_spooler;
+    string  renew_command_line;
+    bool    renew_service = false;
 
     for( Sos_option_iterator opt ( argc, argv ); !opt.end(); opt.next() )
     {
-        if( opt.flag      ( "service"          ) )  is_service = opt.set(), is_service_set = true;
+      //if( opt.flag      ( "renew-spooler"    ) )  renew_spooler = program_filename();
+      //else
+        if( opt.with_value( "renew-spooler"    ) )  renew_spooler = opt.value();
         else
-        if( opt.flag      ( "install-service"  ) )  do_install_service = opt.set();
+        if( opt.flag      ( "renew-service"    ) )  renew_service = opt.set();
         else
-        if( opt.flag      ( "remove-service"   ) )  do_remove_service = opt.set();
-        else
-        if( opt.with_value( "id"               ) )  id = opt.value();
-        else
-        if( opt.with_value( "log"              ) )  log_filename = opt.value();
+        {
+            if( opt.flag      ( "service"          ) )  is_service = opt.set(), is_service_set = true;
+            else
+            if( opt.flag      ( "install-service"  ) )  do_install_service = opt.set();
+            else
+            if( opt.flag      ( "remove-service"   ) )  do_remove_service = opt.set();
+            else
+            if( opt.with_value( "id"               ) )  id = opt.value();
+            else
+            if( opt.with_value( "log"              ) )  log_filename = opt.value();
+
+            if( !renew_command_line.empty() )  renew_command_line += " ";
+            renew_command_line += opt.complete_parameter( '"', '"' );
+        }
     }
 
     if( !log_filename.empty() )  log_start( log_filename );
 
+    if( !renew_spooler.empty() )  
+    { 
+        spooler::spooler_renew( id, renew_spooler, renew_service, renew_command_line ); 
+        ret = 0;
+    }
+    else
     if( do_remove_service | do_install_service )
     {
         if( do_remove_service  )  spooler::remove_service( id );
@@ -452,6 +600,8 @@ int sos_main( int argc, char** argv )
     }
     else
     {
+        { spooler::Handle h = _beginthread( spooler::delete_new_spooler, 0, NULL ); }
+
         if( !is_service_set )  is_service = spooler::service_is_started(id);
 
         if( is_service )

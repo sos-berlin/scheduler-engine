@@ -1,4 +1,4 @@
-// $Id: spooler_wait.cxx,v 1.13 2001/02/12 15:41:39 jz Exp $
+// $Id: spooler_wait.cxx,v 1.14 2001/02/16 18:23:12 jz Exp $
 /*
     Hier sind implementiert
 
@@ -52,11 +52,10 @@ bool wait_for_event( HANDLE handle, double wait_time )
 
 Event::Event( const string& name )  
 : 
-    Handle(NULL), 
     _zero_(this+1),
     _name(name) 
 {
-    _handle = CreateEvent( NULL, FALSE, FALSE, name.c_str() );
+    _handle = CreateEvent( NULL, FALSE, FALSE, NULL );
     if( !_handle )  throw_mswin_error( "CreateEvent", name.c_str() );
 }
 
