@@ -1,4 +1,4 @@
-// $Id: spooler.odl,v 1.23 2002/03/05 17:10:00 jz Exp $
+// $Id: spooler.odl,v 1.24 2002/03/05 18:09:51 jz Exp $
 
 // Anweisung: midl /nologo /error all /out $(OutDir) $(InputPath)
 
@@ -336,10 +336,10 @@ library spooler
         HRESULT                 mail_on_success         ( [out,retval] VARIANT_BOOL* mail_on_success );
 
         [propput]
-        HRESULT                 log_level               ( [in] int level );
+        HRESULT                 level                   ( [in] int level );
 
         [propget]
-        HRESULT                 log_level               ( [out,retval] int* level );
+        HRESULT                 level                   ( [out,retval] int* level );
 
         [propget]
         HRESULT                 filename                ( [out,retval] BSTR* filename );

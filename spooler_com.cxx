@@ -1,4 +1,4 @@
-// $Id: spooler_com.cxx,v 1.25 2002/03/04 22:28:35 jz Exp $
+// $Id: spooler_com.cxx,v 1.26 2002/03/05 18:09:51 jz Exp $
 /*
     Hier sind implementiert
 
@@ -274,9 +274,9 @@ STDMETHODIMP Com_log::get_mail_on_success( VARIANT_BOOL* b )
     return hr;
 }
 
-//-------------------------------------------------------------------------------Com_log::log_level
+//-----------------------------------------------------------------------------------Com_log::level
 
-STDMETHODIMP Com_log::put_Log_level( int level )
+STDMETHODIMP Com_log::put_level( int level )
 {
     HRESULT hr = NOERROR;
 
@@ -292,9 +292,9 @@ STDMETHODIMP Com_log::put_Log_level( int level )
     return hr;
 }
 
-//-------------------------------------------------------------------------------Com_log::log_level
+//-----------------------------------------------------------------------------------Com_log::level
 
-STDMETHODIMP Com_log::get_Log_level( int* level )
+STDMETHODIMP Com_log::get_level( int* level )
 {
     HRESULT hr = NOERROR;
 
@@ -896,17 +896,15 @@ STDMETHODIMP Com_spooler::get_param( BSTR* param_bstr )
     return NOERROR;
 }
 
-//-----------------------------------------------------------------------------Com_spooler::get_Log
+//---------------------------------------------------------------------------Com_spooler::get_script
 
 STDMETHODIMP Com_spooler::get_script( IDispatch** script_object )
 {
     if( !_spooler )  return E_POINTER;
-    return E_POINTER;
 
     *script_object = _spooler->_script_instance.dispatch();
     if( *script_object )  (*script_object)->AddRef();
     return NOERROR;
-
 }
 
 //-----------------------------------------------------------------------------Com_spooler::get_job
