@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.169 2003/08/14 11:01:14 jz Exp $
+// $Id: spooler_task.cxx,v 1.170 2003/08/15 19:13:33 jz Exp $
 /*
     Hier sind implementiert
 
@@ -239,13 +239,16 @@ xml::Element_ptr Task::dom( const xml::Document_ptr& document, Show_what show )
 
     THREAD_LOCK( _lock )
     {
+        task_element.setAttribute( "id"              , _id );
+        task_element.setAttribute( "state"           , state_name() );
+        task_element.setAttribute( "name"            , _name );
+
         task_element.setAttribute( "running_since"   , _running_since.as_string() );
 
         if( _state == s_running  &&  _last_process_start_time )
         task_element.setAttribute( "in_process_since", _last_process_start_time.as_string() );
 
         task_element.setAttribute( "steps"           , _step_count );
-        task_element.setAttribute( "id"              , _id );
 
         if( !_in_call.empty() )  
         task_element.setAttribute( "calling"         , _in_call );
@@ -272,17 +275,17 @@ xml::Element_ptr Task::dom( const xml::Document_ptr& document, Show_what show )
 
 void Task::enter_thread( Spooler_thread* thread )
 { 
-    set_state( s_start_task );
-
     _thread = thread;  
     thread->add_task( this ); 
+
+    set_state( s_start_task );
 }
 
 //-------------------------------------------------------------------------------Task::leave_thread
 
 void Task::leave_thread()
 { 
-    _thread->remove_task( this );  
+    // Thread entfernt Task die Task, wenn er die Schleife über die _task_list beendet hat. _thread->remove_task( this );  
     _thread = NULL; 
 }
 
@@ -375,10 +378,8 @@ void Task::set_state( State new_state, const Time& next_time )
     {
         if( new_state == _state  &&  next_time == _next_time )  return;
 
-        if( new_state == s_running )  _job->increment_running_tasks(),  _thread->increment_running_tasks();
-        if( _state    == s_running )  _job->decrement_running_tasks(),  _thread->decrement_running_tasks();
-      //if( new_state == s_running  ||  new_state == s_start_task )  InterlockedIncrement( &_job->_running_tasks_count ),  InterlockedIncrement( &_job->_thread->_running_tasks_count );
-      //if( _state    == s_running  ||  _state    == s_start_task )  InterlockedDecrement( &_job->_running_tasks_count ),  InterlockedDecrement( &_job->_thread->_running_tasks_count );
+        if( new_state == s_running  ||  new_state == s_start_task )  _job->increment_running_tasks(),  _thread->increment_running_tasks();
+        if( _state    == s_running  ||  _state    == s_start_task )  _job->decrement_running_tasks(),  _thread->decrement_running_tasks();
 
         if( new_state != s_running_delayed )  _next_spooler_process = 0;
 
@@ -478,6 +479,7 @@ bool Task::do_something()
     // Wenn nichts zu tun ist, dann raus. Der Job soll nicht wegen eines alten Fehlers nachträglich gestoppt werden (s.u.)
     if( _state == s_suspended  )  goto ENDE;
     if( _state == s_running_process  &&  !((Process_task*)+this)->signaled() )  goto ENDE;
+    if( _state == s_ended      )  goto ENDE;
 
 
     // HISTORIE und _end

@@ -1,4 +1,4 @@
-// $Id: spooler_job.cxx,v 1.2 2003/08/14 11:01:14 jz Exp $
+// $Id: spooler_job.cxx,v 1.3 2003/08/15 19:13:33 jz Exp $
 /*
     Hier sind implementiert
 
@@ -1211,9 +1211,11 @@ xml::Element_ptr Job::dom( const xml::Document_ptr& document, Show_what show, Jo
         }
 
 
+        dom_append_nl( job_element );
         xml::Element_ptr tasks_element = document.createElement( "tasks" );
         Z_FOR_EACH( Task_list, _running_tasks, t )  tasks_element.appendChild( (*t)->dom( document, show ) ), dom_append_nl( tasks_element );
         job_element.appendChild( tasks_element );
+      //dom_append_nl( job_element );
 
 
         if( show & show_description )  dom_append_text_element( job_element, "description", _description );

@@ -1,4 +1,4 @@
-// $Id: spooler_command.cxx,v 1.87 2003/08/11 19:33:11 jz Exp $
+// $Id: spooler_command.cxx,v 1.88 2003/08/15 19:13:33 jz Exp $
 /*
     Hier ist implementiert
 
@@ -48,7 +48,7 @@ void dom_append_text_element( const xml::Element_ptr& element, const char* eleme
 
 void dom_append_nl( const xml::Element_ptr& element )
 {
-    element.appendChild( element.ownerDocument().createTextNode( "\n" ) );
+    //indent ersetzt diese Newlines.    element.appendChild( element.ownerDocument().createTextNode( "\n" ) );
 }
 
 //-----------------------------------------------------------------------------create_error_element
@@ -507,11 +507,11 @@ xml::Element_ptr Command_processor::execute_command( const xml::Element_ptr& ele
 
 //------------------------------------------------------------------------------------xml_as_string
 
-string xml_as_string( const xml::Document_ptr& document )
+string xml_as_string( const xml::Document_ptr& document, bool indent )
 {
     try 
     {
-        return document.xml();
+        return document.xml( indent );
     }
     catch( const exception&  ) { return "<?xml version=\"1.0\"?><ERROR/>"; }
     catch( const _com_error& ) { return "<?xml version=\"1.0\"?><ERROR/>"; }
@@ -519,11 +519,15 @@ string xml_as_string( const xml::Document_ptr& document )
 
 //------------------------------------------------------------------------Command_processor::execute
 
-string Command_processor::execute( const string& xml_text, const Time& xml_mod_time )
+string Command_processor::execute( const string& xml_text_par, const Time& xml_mod_time, bool indent )
 {
     try 
     {
         _error = NULL;
+
+        string xml_text = xml_text_par;
+        if( strchr( xml_text.c_str(), '<' ) == NULL )  xml_text = "<" + xml_text + "/>";
+
         execute_2( xml_text, xml_mod_time );
     }
     catch( const Xc& x )
@@ -539,7 +543,7 @@ string Command_processor::execute( const string& xml_text, const Time& xml_mod_t
 
   //return _answer.xml;  //Bei save wird die encoding belassen. Eigenschaft xml verwendet stets unicode, was wir nicht wollen.
     
-    return xml_as_string( _answer );
+    return xml_as_string( _answer, indent );
 }
 
 //------------------------------------------------------------------Command_processor::execute_file

@@ -1,4 +1,4 @@
-// $Id: spooler_communication.h,v 1.13 2003/03/01 10:38:44 jz Exp $
+// $Id: spooler_communication.h,v 1.14 2003/08/15 19:13:33 jz Exp $
 
 #ifndef __SPOOLER_COMMUNICATION_H
 #define __SPOOLER_COMMUNICATION_H
@@ -145,6 +145,7 @@ struct Communication : zschimmer::Thread
 
         string                 _text;
 
+        bool                   _indent;                     // XML-Antwort einrücken
         bool                   _receive_at_start;
         bool                   _receive_is_complete;
         bool                   _eof;

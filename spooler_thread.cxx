@@ -1,4 +1,4 @@
-// $Id: spooler_thread.cxx,v 1.92 2003/08/14 11:01:14 jz Exp $
+// $Id: spooler_thread.cxx,v 1.93 2003/08/15 19:13:33 jz Exp $
 /*
     Hier sind implementiert
 
@@ -22,7 +22,7 @@ Spooler_thread::Spooler_thread( Spooler* spooler )
     _zero_(this+1),
     _spooler(spooler),
     _log(spooler),
-    _wait_handles(_spooler,&_log)
+    _wait_handles(spooler,&_log)
   //_module(spooler,&_log)
 {
     Z_WINDOWS_ONLY( _thread_priority = THREAD_PRIORITY_NORMAL; )
@@ -280,14 +280,36 @@ bool Spooler_thread::do_something( Task* task )
     return ok;
 }
 
+//---------------------------------------------------------------Spooler_thread::remove_ended_tasks
+
+void Spooler_thread::remove_ended_tasks()
+{
+    if( _task_ended )
+    {
+        Task_list::iterator t = _task_list.begin();
+        while( t != _task_list.end() )
+        {
+            Task* task = *t;
+            if( task->state() == Task::s_ended )
+            {
+                task->job()->remove_running_task( task );
+                t = _task_list.erase( t );
+                continue;
+            }
+
+            t++;
+        }
+
+        _task_ended = false;
+    }
+}
+
 //-----------------------------------------------------------------------------Spooler_thread::step
 
 bool Spooler_thread::step()
 {
     bool something_done = false;
 
-
-    _task_ended = false;
 
     // Erst die Tasks mit höchster Priorität. Die haben absoluten Vorrang:
 
@@ -308,6 +330,8 @@ bool Spooler_thread::step()
             }
         }
     }
+
+    remove_ended_tasks();
 
 
 
@@ -346,6 +370,7 @@ bool Spooler_thread::step()
                     }
                 }
 
+                remove_ended_tasks();
                 if( stepped )  break;
             } 
         }
@@ -373,6 +398,8 @@ bool Spooler_thread::step()
                 }
             }
         }
+
+        remove_ended_tasks();
     }
 
 
@@ -392,27 +419,8 @@ bool Spooler_thread::step()
                 if( job->priority() == 0 )  something_done |= do_something( task );
             }
         }
-    }
 
-
-
-    if( _task_ended )
-    {
-        Task_list::iterator t = _task_list.begin();
-        while( t != _task_list.end() )
-        {
-            Task* task = *t;
-            if( task->state() == Task::s_ended )
-            {
-                task->job()->remove_running_task( task );
-                t = _task_list.erase( t );
-                continue;
-            }
-
-            t++;
-        }
-
-        _task_ended = false;
+        remove_ended_tasks();
     }
 
 

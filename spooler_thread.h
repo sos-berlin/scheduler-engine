@@ -1,4 +1,4 @@
-// $Id: spooler_thread.h,v 1.43 2003/08/11 19:33:11 jz Exp $
+// $Id: spooler_thread.h,v 1.44 2003/08/15 19:13:33 jz Exp $
 
 #ifndef __SPOOLER_THREAD_H
 #define __SPOOLER_THREAD_H
@@ -16,13 +16,11 @@ struct Spooler_thread : zschimmer::Thread
 
     void                        set_dom                     ( const xml::Element_ptr&, const Time& xml_mod_time );
     xml::Element_ptr            dom                         ( const xml::Document_ptr&, Show_what );
-    void                        build_prioritized_order_job_array();
     
     const string&               name                        () const                                { return _name; }
   //Job*                        current_job                 () const                                { return _current_job; }
   //string                      include_path                () const                                { return _include_path; }
-    bool                        any_tasks_there             ();
-    bool                        has_java                    ();
+  //bool                        any_tasks_there             ();
 
     void                        init                        ();
     void                        close1                      ();                                     // Wird vom Thread beim Beenden selbst gerufen
@@ -35,12 +33,9 @@ struct Spooler_thread : zschimmer::Thread
     bool                        process                     ();                                     // Einen Schritt im (Pseudo-)Thread ausführen
     void                        start                       ( Event* destination );
   //void                        stop_jobs                   ();
-    bool                        step                        ();
-    bool                        do_something                ( Task* );
-    void                        wait                        ();
 
-    void                        add_task                    ( Task* task )                          { _task_list.push_back( task ); }
-    void                        remove_task                 ( Task* this_task )                     { FOR_EACH_TASK( t, task )  if( task == this_task )  { _task_list.erase(t);  break; } }
+    void                        add_task                    ( Task* task )                          { _task_list.push_back( task );  signal( task->obj_name() ); }
+  //void                        remove_task                 ( Task* this_task )                     { FOR_EACH_TASK( t, task )  if( task == this_task )  { _task_list.erase(t);  break; } }
 
     void                        increment_running_tasks     ()                                      { InterlockedIncrement( &_running_tasks_count ); }
     void                        decrement_running_tasks     ()                                      { InterlockedDecrement( &_running_tasks_count ); }
@@ -56,7 +51,6 @@ struct Spooler_thread : zschimmer::Thread
     void                        signal                      ( const string& signal_name = "" )      { THREAD_LOCK( _lock )  if(_event) _event->signal(signal_name); }
   //Job*                        get_job_or_null             ( const string& job_name );
   //void                        interrupt_scripts           ();
-    void                        nichts_getan                ( double wait_time );
 
     virtual string             _obj_name                    () const                                { return "Thread" + _name; }
 
@@ -67,7 +61,13 @@ struct Spooler_thread : zschimmer::Thread
     Task*                      _current_task;               // Task, die gerade einen Schritt tut
 
   private:
+    bool                        step                        ();
+    bool                        do_something                ( Task* );
+    void                        wait                        ();
     Task*                       get_next_task_to_run        ();
+    void                        remove_ended_tasks          ();
+    void                        nichts_getan                ( double wait_time );
+    void                        build_prioritized_order_job_array();
 
 
 

@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.222 2003/08/12 14:59:45 jz Exp $
+// $Id: spooler.cxx,v 1.223 2003/08/15 19:13:33 jz Exp $
 /*
     Hier sind implementiert
 
@@ -1410,7 +1410,7 @@ void Spooler::run()
         {
             int  nothing_done_count = 0;
 
-            while(1)
+          //while(1)
             {
                 bool something_done = false;
 

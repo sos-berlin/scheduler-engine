@@ -1,4 +1,4 @@
-// $Id: spooler_command.h,v 1.19 2003/08/11 19:33:11 jz Exp $
+// $Id: spooler_command.h,v 1.20 2003/08/15 19:13:33 jz Exp $
 
 #ifndef __SPOOLER_COMMAND_H
 #define __SPOOLER_COMMAND_H
@@ -26,7 +26,7 @@ enum Show_what
 void                            dom_append_text_element     ( const xml::Element_ptr& element, const char* element_name, const string& text );
 void                            append_error_element        ( const xml::Element_ptr&, const Xc_copy& );
 void                            dom_append_nl               ( const xml::Element_ptr& );
-string                          xml_as_string               ( const xml::Document_ptr& );
+string                          xml_as_string               ( const xml::Document_ptr&, bool indent = false );
 
 //--------------------------------------------------------------------------------Command_processor
 
@@ -35,7 +35,7 @@ struct Command_processor
                                 Command_processor           ( Spooler* spooler )                    : _zero_(this+1),_spooler(spooler),_host(NULL) {}
 
     void                        execute_file                ( const string& xml_filename );
-    string                      execute                     ( const string& xml_text, const Time& xml_mod_time );
+    string                      execute                     ( const string& xml_text, const Time& xml_mod_time, bool indent = false );
     void                        execute_2                   ( const string& xml_text, const Time& xml_mod_time );
     xml::Element_ptr            execute_command             ( const xml::Element_ptr&, const Time& xml_mod_time );
     xml::Element_ptr            execute_config              ( const xml::Element_ptr&, const Time& xml_mod_time );

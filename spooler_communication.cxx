@@ -1,4 +1,4 @@
-// $Id: spooler_communication.cxx,v 1.56 2003/07/29 11:20:48 jz Exp $
+// $Id: spooler_communication.cxx,v 1.57 2003/08/15 19:13:33 jz Exp $
 /*
     Hier sind implementiert
 
@@ -339,6 +339,8 @@ bool Communication::Channel::do_recv()
 
         _receive_is_complete = _xml_end_finder.is_complete( p, len );
 
+        if( len >= 2  &&  buffer[len-2] == '\r' )  _indent = true;      // CR LF am Ende lässt Antwort einrücken. CR LF soll nur bei telnet-Eingabe kommen.
+      //if( len >= 1  &&  buffer[len-1] == '\n' )  _indent = true;      // LF am Ende lässt Antwort einrücken. LF soll nur bei telnet-Eingabe kommen.
         _text.append( p, len );
     }
     catch( const Xc& x ) { _log.error(x.what()); return false; }
@@ -604,7 +606,7 @@ bool Communication::handle_socket( Channel* channel )
             string cmd = channel->_text;
             channel->recv_clear();
             channel->_log.info( "Kommando " + cmd );
-            channel->_text = cp.execute( cmd, Time::now() );
+            channel->_text = cp.execute( cmd, Time::now(), channel->_indent );
             if( cp._error )  channel->_log.error( cp._error->what() );
             ok = channel->do_send();
             if( !ok )  return false;
