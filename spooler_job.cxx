@@ -1,4 +1,4 @@
-// $Id: spooler_job.cxx,v 1.37 2003/10/10 12:45:39 jz Exp $
+// $Id: spooler_job.cxx,v 1.38 2003/10/18 21:23:17 jz Exp $
 /*
     Hier sind implementiert
 
@@ -360,9 +360,9 @@ void Job::enqueue_task( const Sos_ptr<Task>& task )
     }
 }
 
-//--------------------------------------------------------------------------------Job::dequeue_task
+//-------------------------------------------------------------------------Job::get_task_from_queue
 
-Sos_ptr<Task> Job::dequeue_task( Time now )
+Sos_ptr<Task> Job::get_task_from_queue( Time now )
 {
     Sos_ptr<Task> task;
 
@@ -385,7 +385,7 @@ Sos_ptr<Task> Job::dequeue_task( Time now )
 
             if( it == _task_queue.end() )  return NULL;
 
-            _task_queue.erase( it );
+            //_task_queue.erase( it );
         }
     }
 
@@ -394,7 +394,7 @@ Sos_ptr<Task> Job::dequeue_task( Time now )
 
 //----------------------------------------------------------------------Job::remove_from_task_queue
 
-void Job::remove_from_task_queue( Task* task )
+void Job::remove_from_task_queue( Task* task, Log_level log_level )
 {
     THREAD_LOCK( _lock )
     {
@@ -402,7 +402,7 @@ void Job::remove_from_task_queue( Task* task )
         {
             if( +*it == task )  
             {
-                _log( task->obj_name() + " aus der Warteschlange entfernt" );
+                if( log_level > log_none )  _log.log( log_level, task->obj_name() + " aus der Warteschlange entfernt" );
                 _task_queue.erase( it );
                 break;
             }
@@ -739,51 +739,6 @@ void Job::set_next_start_time( Time now, bool repeat )
                 }
             }
         }
-/*
-        else
-        {
-        }
-
-        if( !_period.is_in_time( next_start_time ) )
-        {
-            next_start_time = latter_day;
-
-
-
-            // Liegt die Startzeit hinter der aktuellen Periode?
-
-            //if( next_start_time >= _period.end() ) 
-            if( next_start_time == latter_day )
-            {
-                if( _period.is_in_time( now ) ) 
-                {
-                    next_start_time = now;
-                }
-                else
-                if( now < _period.begin() )     // N‰chste Periode hat noch nicht begonnen?
-                {
-                    next_start_time = _period.begin();
-                    if( _spooler->_debug )  msg = "N‰chster Start zu Beginn der Periode: " + next_start_time.as_string();
-                }
-/ *
-                else  
-                if( now >= _period.end() )
-                {
-                    select_period( now );
-
-                    if( _period.has_start() )
-                    {
-                        next_start_time = max( now, _period.begin() );
-                        //_log.debug( "N‰chster Start " + next_start_time.as_string() );
-                    }
-                    else
-                        next_start_time = latter_day;
-                }
-            }
-
-        }
-*/
-
     }
     else
     {
@@ -812,41 +767,61 @@ void Job::calculate_next_time( Time now )
     {
         Time next_time = latter_day;
 
-        if( _state == s_pending  
-         || _state == s_running  &&  _running_tasks.size() < _max_tasks )
+        if( !_waiting_for_process )
         {
-            bool in_period = is_in_period(now);
+            if( _state == s_pending  
+            || _state == s_running  &&  _running_tasks.size() < _max_tasks )
+            {
+                bool in_period = is_in_period(now);
 
-            if( _start_once && in_period ) 
-            {
-                next_time = now;
-            }
-            else
-            {
-                // Minimum von _start_at f¸r _next_time ber¸cksichtigen
-                Task_queue::iterator it = _task_queue.begin();  
-                while( it != _task_queue.end() )
+                if( _start_once && in_period ) 
                 {
-                    if( (*it)->_start_at )  break;   // Startzeit angegeben?
-                    if( in_period        )  break;   // Ohne Startzeit und Periode ist aktiv?
-                    it++;
+                    next_time = now;
                 }
-
-                if( it != _task_queue.end()  &&  next_time > (*it)->_start_at )  next_time = (*it)->_start_at;
-
-                //if( _state != s_stopping  &&  _spooler->state() != Spooler::s_stopping_let_run )
+                else
                 {
+                    // Minimum von _start_at f¸r _next_time ber¸cksichtigen
+                    Task_queue::iterator it = _task_queue.begin();  
+                    while( it != _task_queue.end() )
+                    {
+                        if( (*it)->_start_at )  break;   // Startzeit angegeben?
+                        if( in_period        )  break;   // Ohne Startzeit und Periode ist aktiv?
+                        it++;
+                    }
+
+                    if( it != _task_queue.end()  &&  next_time > (*it)->_start_at )  next_time = (*it)->_start_at;
+
                     if( next_time > _next_start_time   )  next_time = _next_start_time;
-                  //if( next_time > _period.end()      )  next_time = _period.end();          // Das ist, wenn die Periode weder repeat noch single_start hat, also keinen automatischen Start
                     if( next_time > _next_single_start )  next_time = _next_single_start;
                 }
             }
         }
-
+         
         if( next_time > _period.end() )  next_time = _period.end();          // Das ist, wenn die Periode weder repeat noch single_start hat, also keinen automatischen Start
 
         _next_time = next_time;
     }
+}
+
+//-------------------------------------------------------------------Job::notify_a_process_is_idle
+
+void Job::notify_a_process_is_idle()
+{
+    _waiting_for_process_try_again = true;
+    signal( "A process is idle" );
+}
+
+//--------------------------------------------------------Job::remove_waiting_job_from_process_list
+
+void Job::remove_waiting_job_from_process_list()
+{
+    if( _waiting_for_process )
+    {
+        _waiting_for_process = false;
+        _module._process_class->remove_waiting_job( this );
+    }
+
+    _waiting_for_process_try_again = false;
 }
 
 //-------------------------------------------------------------------------------Job::task_to_start
@@ -859,8 +834,10 @@ Sos_ptr<Task> Job::task_to_start()
     Time            now   = Time::now();
     Start_cause     cause = cause_none;
     Sos_ptr<Task>   task  = NULL;
+    ptr<Order>      order;
+    string          log_line;
 
-    task = dequeue_task( now );
+    task = get_task_from_queue( now );
     if( task )  cause = task->_start_at? cause_queue_at : cause_queue;
         
     if( _state == s_pending && now >= _next_single_start )  cause = cause_period_single;     
@@ -873,9 +850,9 @@ Sos_ptr<Task> Job::task_to_start()
         {
             if( _state == s_pending )
             {
-                if( _start_once )              cause = cause_period_once,  _start_once = false,     _log.debug( "Task startet wegen <run_time once=\"yes\">" );
+                if( _start_once )              cause = cause_period_once,  _start_once = false,     log_line += "Task startet wegen <run_time once=\"yes\">\n";
                 else
-                if( now >= _next_start_time )  cause = cause_period_repeat,                         _log.debug( "Task startet, weil Job-Startzeit erreicht: " + _next_start_time.as_string() );
+                if( now >= _next_start_time )  cause = cause_period_repeat,                         log_line += "Task startet, weil Job-Startzeit erreicht: " + _next_start_time.as_string();
                                                                         
                 Directory_watcher_list::iterator it = _directory_watcher_list.begin();
                 while( it != _directory_watcher_list.end() )
@@ -883,7 +860,7 @@ Sos_ptr<Task> Job::task_to_start()
                     if( (*it)->signaled_then_reset() )
                     {
                         cause = cause_directory;
-                        _log.debug( "Task startet wegen eines Ereignisses f¸r Verzeichnis " + (*it)->directory() );
+                        log_line += "Task startet wegen eines Ereignisses f¸r Verzeichnis " + (*it)->directory();
                         
                         if( !(*it)->valid() )
                         {
@@ -896,25 +873,90 @@ Sos_ptr<Task> Job::task_to_start()
                 }
             }
 
-            if( !cause && _order_queue )
+            if( !cause  &&  _order_queue )
             {
-                ptr<Order> order = _order_queue->first_order( now );
-                if( order )                cause = cause_order,                                     _log.debug( "Task startet wegen Auftrag " + order->obj_name() );
-            }
-                                                                                
-            if( !task && cause )
-            {
-                task = create_task( NULL, "", now );
+                order = _order_queue->first_order( now );
+                if( order )
+                {
+                    bool there_is_another_task_ready = false;
+                    FOR_EACH( Task_list, _running_tasks, t )
+                        if( (*t)->state() == Task::s_running_waiting_for_order 
+                         || (*t)->state() == Task::s_suspended                 )  { there_is_another_task_ready = true; break; }
 
-                task->_cause = cause;
-                task->_let_run |= ( cause == cause_period_single );
+                    if( there_is_another_task_ready )  order = NULL;  // Soll sich doch die bereits laufende Task um den Auftrag k¸mmern!
+                }
             }
         }
     }
 
-    if( task && now >= _next_single_start )  _next_single_start = latter_day;  // Vorsichtshalber, 26.9.03
 
-    return task;
+    if( cause || order )     // Es soll also eine Task gestartet werden.
+    {
+        // Ist denn ein Prozess verf¸gbar?
+
+        if( _module._process_class  &&  !_module._process_class->process_available( this ) )
+        {
+            if( !_waiting_for_process  ||  _waiting_for_process_try_again )
+            {
+                if( !_waiting_for_process )
+                {
+                    _module._process_class->enqueue_waiting_job( this );
+                    _waiting_for_process = true;
+                }
+
+                _spooler->try_to_free_process( this, _module._process_class, now );
+                _waiting_for_process_try_again = false;
+            }
+
+            cause = cause_none;   // Wir kˆnnen die Task nicht starten, denn kein Prozess ist verf¸gbar
+            order = NULL;
+        }
+        else
+        {
+            remove_waiting_job_from_process_list();
+        }
+
+        if( order )
+        {
+            order = order_queue()->get_order_for_processing( now );  // Jetzt aus der Warteschlange nehmen und nicht verlieren!
+            if( order )
+            {
+                cause = cause_order;
+                log_line += "Task startet wegen Auftrag " + order->obj_name();
+            }
+        }
+
+        if( cause )
+        {
+            if( !log_line.empty() )  _log.debug( log_line );
+
+            if( task )
+            {
+                remove_from_task_queue( task, log_none );
+            }
+            else
+            {
+                task = create_task( NULL, "", now );
+
+                task->set_order( order );
+                task->_cause = cause;
+                task->_let_run |= ( cause == cause_period_single );
+            }
+
+            if( now >= _next_single_start )  _next_single_start = latter_day;  // Vorsichtshalber, 26.9.03
+        }
+    }
+    else
+    {
+        if( _waiting_for_process )                 
+        {
+            bool notify = _waiting_for_process_try_again;
+            remove_waiting_job_from_process_list();
+            if( notify )  _module._process_class->notify_a_process_is_idle();       // Diese Job braucht den Prozess nicht mehr. Also n‰chsten Job benachrichtigen
+        }
+    }
+
+    return cause? task : NULL;
 }
 
 //--------------------------------------------------------------------------------Job::do_something
@@ -942,27 +984,31 @@ bool Job::do_something()
         if( _state == s_pending 
          || _state == s_running  &&  _running_tasks.size() < _max_tasks )
         {
-            Sos_ptr<Task> task = task_to_start();
-            if( task )
+            //if( !_waiting_for_process  ||  _module._process_class->process_available( this ) )
             {
-                THREAD_LOCK( _lock )
+                Sos_ptr<Task> task = task_to_start();
+                if( task )
                 {
-                    _log.open();           // Jobprotokoll, nur wirksam, wenn set_filename() gerufen, s. Job::init().
+                    THREAD_LOCK( _lock )
+                    {
+                        _log.open();           // Jobprotokoll, nur wirksam, wenn set_filename() gerufen, s. Job::init().
 
-                    reset_error();
-                    _repeat = 0;
-                    _delay_until = 0;
+                        reset_error();
+                        _repeat = 0;
+                        _delay_until = 0;
 
-                    _running_tasks.push_back( task );
-                    set_state( s_running );
+                        _running_tasks.push_back( task );
+                        set_state( s_running );
 
-                    _next_start_time = latter_day;
-                    calculate_next_time();
+                        _next_start_time = latter_day;
+                        calculate_next_time();
 
-                    task->attach_to_a_thread();
+                        task->attach_to_a_thread();
+                        task->do_something();           // Damit die Task den Prozess startet und die Prozessklasse davon weiﬂ
+                    }
+
+                    something_done = true;
                 }
-
-                something_done = true;
             }
         }
     }
@@ -975,7 +1021,7 @@ bool Job::do_something()
         if( _next_time <= now )
         {
             LOG( obj_name() << ".do_something()  Nichts getan. state=" << state_name() << ", _next_time= " << _next_time << ", wird verzˆgert\n" );
-            _next_time = Time::now() + 0.1;
+            _next_time = Time::now() + 1;
         }
         else
         {
@@ -1006,6 +1052,11 @@ void Job::set_state( State new_state )
             if( new_state == s_stopping
              || new_state == s_stopped  )  _log.info( "state=" + state_name() ); 
                                      else  _log.debug9( "state=" + state_name() );
+        }
+
+        if( _waiting_for_process  &&  ( _state != s_pending  ||  _state != s_running ) )
+        {
+            remove_waiting_job_from_process_list();
         }
     }
 }
@@ -1174,6 +1225,9 @@ xml::Element_ptr Job::dom( const xml::Document_ptr& document, Show_what show, Jo
     {
         job_element.setAttribute( "job"       , _name                   );
         job_element.setAttribute( "state"     , state_name()            );
+
+        if( _waiting_for_process )
+        job_element.setAttribute( "waiting_for_process", _waiting_for_process? "yes" : "no" );
 
         if( !_title.empty() )
         job_element.setAttribute( "title"     , _title                  );

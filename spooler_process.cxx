@@ -1,4 +1,4 @@
-// $Id: spooler_process.cxx,v 1.16 2003/10/02 21:40:00 jz Exp $
+// $Id: spooler_process.cxx,v 1.17 2003/10/18 21:23:17 jz Exp $
 
 #include "spooler.h"
 
@@ -149,7 +149,13 @@ void Process_class::remove_process( Process* process )
     {
         FOR_EACH( Process_list, _process_list, p )
         {
-            if( *p == process )  { process->_process_class = NULL; _process_list.erase( p ); return; }
+            if( *p == process )  
+            { 
+                process->_process_class = NULL; 
+                _process_list.erase( p ); 
+                //notify_a_process_is_idle();
+                return; 
+            }
         }
     }
 
@@ -207,6 +213,57 @@ Process* Process_class::select_process_if_available()
     return process;
 }
 
+//-----------------------------------------------------------------Process_class::process_available
+
+bool Process_class::process_available( Job* for_job )
+{ 
+    if( _process_list.size() >= _max_processes )  return false;
+
+    if( _waiting_jobs.empty() )  return true;
+
+    // Warten Jobs auf einen freien Prozess? 
+    // Dann liefern wir nur true, wenn dieser Job der erste in der Warteschlange ist.
+    return *_waiting_jobs.rbegin() == for_job;
+
+    //FOR_EACH( Job_list, _waiting_jobs, j )  if( *j == job )  return true;
+}
+
+//---------------------------------------------------------------Process_class::enqueue_waiting_job
+
+void Process_class::enqueue_waiting_job( Job* job )
+{
+    _waiting_jobs.push_back( job );
+    _spooler->_log.debug9( job->obj_name() + " ist für einen verfügbaren Prozess vorgemerkt" );
+}
+
+//----------------------------------------------------------------Process_class::remove_waiting_job
+
+void Process_class::remove_waiting_job( Job* job )
+{
+    _waiting_jobs.remove( job );
+}
+
+//----------------------------------------------------------------------Process_class::need_process
+
+bool Process_class::need_process()
+{ 
+/*
+    for( Job_list::iterator j = _waiting_jobs.begin(); j != _waiting_jobs.end(); )
+    {
+        if( !(*j)->_waiting_for_process )  _waiting_jobs.erase( j );   // Hat sich erledigt
+                                     else  j++;
+    }
+*/
+    return !_waiting_jobs.empty(); 
+}
+
+//----------------------------------------------------------Process_class::notity_a_process_is_idle
+
+void Process_class::notify_a_process_is_idle()
+{
+    if( !_waiting_jobs.empty() )  (*_waiting_jobs.begin())->notify_a_process_is_idle();
+}
+
 //---------------------------------------------------------------------------Process_class::set_dom
 
 void Process_class::set_dom( const xml::Element_ptr& e )
@@ -232,6 +289,19 @@ xml::Element_ptr Process_class::dom( const xml::Document_ptr& document, Show_wha
         element.appendChild( processes_element );
 
         FOR_EACH( Process_list, _process_list, it )  processes_element.appendChild( (*it)->dom( document, show ) );
+
+        if( !_waiting_jobs.empty() )
+        {
+            xml::Element_ptr waiting_jobs_element = document.createElement( "waiting_jobs" );
+            element.appendChild( waiting_jobs_element );
+
+            FOR_EACH( Job_list, _waiting_jobs, j )  //waiting_jobs_element.appendChild( (*j)->dom( document, show_standard ) );
+            {
+                xml::Element_ptr job_element = document.createElement( "job" );
+                job_element.setAttribute( "job", (*j)->name() );
+                waiting_jobs_element.appendChild( job_element );
+            }
+        }
     }
 
     return element;

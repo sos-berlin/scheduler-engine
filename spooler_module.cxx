@@ -1,4 +1,4 @@
-// $Id: spooler_module.cxx,v 1.52 2003/10/10 12:45:39 jz Exp $
+// $Id: spooler_module.cxx,v 1.53 2003/10/18 21:23:17 jz Exp $
 /*
     Hier sind implementiert
 
@@ -198,7 +198,7 @@ void Module::init()
         //_process_class_name = temporary_process_class_name;
     }
 
-    if( _use_process_class )  _spooler->process_class( _process_class_name );     // Fehler, wenn der Name nicht bekannt ist.
+    if( _use_process_class )  _process_class = _spooler->process_class( _process_class_name );     // Fehler, wenn der Name nicht bekannt ist.
 
 
 # ifdef Z_WINDOWS

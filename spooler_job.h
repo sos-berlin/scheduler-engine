@@ -1,4 +1,4 @@
-// $Id: spooler_job.h,v 1.9 2003/09/27 15:01:57 jz Exp $
+// $Id: spooler_job.h,v 1.10 2003/10/18 21:23:17 jz Exp $
 
 #ifndef __SPOOLER_JOB_H
 #define __SPOOLER_JOB_H
@@ -197,10 +197,10 @@ struct Job : Sos_self_deleting
 
     Sos_ptr<Task>               create_task                 ( const ptr<spooler_com::Ivariable_set>& params, const string& task_name, Time = latter_day );
     void                        enqueue_task                ( const Sos_ptr<Task>& );
-    Sos_ptr<Task>               dequeue_task                ( Time now );
+    Sos_ptr<Task>               get_task_from_queue         ( Time now );
     void                        run_task                    ( const Sos_ptr<Task>&  );
 
-    void                        remove_from_task_queue      ( Task* );
+    void                        remove_from_task_queue      ( Task*, Log_level );
     void                        remove_running_task         ( Task* );
   //void                        close_task                  ();
     bool                        read_script                 ();
@@ -241,6 +241,8 @@ struct Job : Sos_self_deleting
     void                        reset_error                 ()                                      { THREAD_LOCK( _lock )  _error = NULL,  _log.reset_highest_level(); }
 
     void                        signal                      ( const string& signal_name );
+    void                        notify_a_process_is_idle    ();                                     // Vielleicht wird bald ein Prozess frei?
+    void                        remove_waiting_job_from_process_list();
 
     ptr<Com_job>&               com_job                     ()                                      { return _com_job; }
     void                        signal_object               ( const string& object_set_class_name, const Level& );
@@ -279,6 +281,8 @@ struct Job : Sos_self_deleting
     Thread_semaphore           _lock;
     Spooler*                   _spooler;
     Prefix_log                 _log;
+    bool                       _waiting_for_process;        // Task kann nicht gestartet werden, weil kein Prozess in der Prozessklasse verfügbar ist
+    bool                       _waiting_for_process_try_again;  
 
   protected:
     friend struct               Job_history;

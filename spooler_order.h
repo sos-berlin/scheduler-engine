@@ -1,4 +1,4 @@
-// $Id: spooler_order.h,v 1.25 2003/10/13 23:04:55 jz Exp $
+// $Id: spooler_order.h,v 1.26 2003/10/18 21:23:17 jz Exp $
 
 #ifndef __SPOOLER_ORDER_H
 #define __SPOOLER_ORDER_H
@@ -31,6 +31,7 @@ struct Order : Com_order
                                ~Order                   ();
 
     void                        init                    ();
+    void                        attach_task             ( Task* );
     void                        open_log                ();
     void                        close                   ();
 
@@ -244,7 +245,7 @@ struct Order_queue : Com_order_queue
     bool                        empty                   ()                                          { return _queue.empty(); }
     Order*                      first_order             ( const Time& now );
     bool                        has_order               ( const Time& now )                         { return first_order(now) != NULL; }
-    ptr<Order>                  get_order_for_processing( const Time& now, Task* );
+    ptr<Order>                  get_order_for_processing( const Time& now );
     Time                        next_time               ();
     void                        update_priorities       ();
     ptr<Order>                  order_or_null           ( const Order::Id& );

@@ -1,4 +1,4 @@
-// $Id: spooler_task.h,v 1.122 2003/09/30 14:08:13 jz Exp $
+// $Id: spooler_task.h,v 1.123 2003/10/18 21:23:17 jz Exp $
 
 #ifndef __SPOOLER_TASK_H
 #define __SPOOLER_TASK_H
@@ -14,17 +14,19 @@ struct Task : Sos_self_deleting
     enum State
     {
         s_none,
+
         s_loading,
         s_waiting_for_process,  // Prozess aus Prozessklasse wählen, evtl. warten, bis ein Prozess verfügbar ist.
-      //s_start_task,           // Task aus der Warteschlange genommen, muss noch gestartet werden. 
         s_starting,             // load, spooler_init, spooler_open
+                                // Bis hier gilt Task::starting() == true
         s_running,              // Läuft (wenn _in_step, dann in step__start() und step__end() muss gerufen werden)
         s_running_delayed,      // spooler_task.delay_spooler_process gesetzt
         s_running_waiting_for_order,
         s_running_process,      // Läuft in einem externen Prozess, auf dessen Ende nur gewartet wird
+
         s_suspended,            // Angehalten
-      //s_end,                  // Task soll beendet werden
-        s_ending,               // spooler_close
+                                // Ab hier gilt Task::ending() == true
+        s_ending,               // spooler_close,  
         s_on_success,           // spooler_on_success
         s_on_error,             // spooler_on_error
         s_exit,                 // spooler_exit
@@ -49,7 +51,8 @@ struct Task : Sos_self_deleting
 
     int                         id                          ()                                      { return _id; }
 
-    void                        cmd_end                     ()                                      { _end = true; signal( "end" ); }
+    void                        cmd_end                     ();
+    void                        cmd_nice_end                ( Job* for_job = NULL );
 
     void                        close                       ();
     xml::Element_ptr            dom                         ( const xml::Document_ptr&, Show_what );
@@ -67,13 +70,19 @@ struct Task : Sos_self_deleting
     string                      state_name                  ()                                      { return state_name( state() ); }
     static string               state_name                  ( State );
     State                       state                       ()                                      { return _state; }
-  //string                      state                       ();
+    bool                        starting                    ()                                      { return _state > s_none  &&  _state <= s_starting; }
+    bool                        ending                      ()                                      { return _end  ||  _state >= s_ending; }
+    bool                        is_idle                     ()                                      { return _state == s_running_waiting_for_order  &&  !_end; }
 
     Time                        last_process_start_time     ()                                      { THREAD_LOCK_RETURN( _lock, Time, _last_process_start_time ); }
+    Time                        ending_since                ()                                      { THREAD_LOCK_RETURN( _lock, Time, _ending_since ); }
 
     void                        signal                      ( const string& signal_name );
     bool                        has_error                   ()                                      { return _error != NULL; }
     void                    set_error_xc_only               ( const Xc& );
+
+    void                    set_order                       ( Order* );
+    Order*                      take_order                  ( const Time& now );
 
   protected:
     void                        remove_order_after_error    ();
@@ -178,11 +187,13 @@ struct Task : Sos_self_deleting
     bool                       _begin_called;
     bool                       _end;
     bool                       _closed;
+    bool                       _signaled;
 
 
     Time                       _enqueue_time;
     Time                       _start_at;                   // Zu diesem Zeitpunkt (oder danach) starten
     Time                       _running_since;
+    Time                       _ending_since;
     Time                       _last_process_start_time;
     Time                       _last_operation_time;
     Time                       _next_spooler_process;
@@ -192,17 +203,12 @@ struct Task : Sos_self_deleting
     bool                       _kill_tried;
 
     ptr<Async_operation>       _operation;
-  //bool                       _in_operation;               // .._end() aufrufen, auch wenn _operation == NULL (das ist dann eine synchrone Operation)
     ptr<Com_variable_set>      _params;
     Variant                    _result;
     string                     _name;
-  //bool                       _close_engine;               // Bei einem Fehler in spooler_init()
-  //bool                       _close_engine;               // Nach Task-Ende Scripting Engine schließen (für use_engine="job")
     ptr<Order>                 _order;
     Call_state                 _call_state;
     Xc_copy                    _error;
-  //bool                       _success;                    // true, wenn spooler_on_success() gerufen werden soll,
-                                                            // false, wenn spooler_on_error() gerufen werden soll
 
     ptr<Module_instance>       _module_instance;            // Nur für Module_task. Hier, damit wir nicht immer wieder casten müssen.
 };

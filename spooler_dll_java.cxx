@@ -1,4 +1,4 @@
-// $Id: spooler_dll_java.cxx,v 1.1 2003/09/04 15:56:11 jz Exp $
+// $Id: spooler_dll_java.cxx,v 1.2 2003/10/18 21:23:17 jz Exp $
 
 #include "spooler.h"
 #include "../zschimmer/java.h"
@@ -51,6 +51,36 @@ JNIEXPORT void JNICALL Java_sos_spooler_Spooler_1program_construct( JNIEnv* jenv
     }
     catch( const exception&  ) {} //set_java_exception( jenv, x ); }
     catch( const _com_error& ) {} //set_java_exception( jenv, x ); }
+}
+
+//--------------------------------------------------------sos.spooler.Spooler_program.construct_argv
+
+JNIEXPORT void JNICALL Java_sos_spooler_Spooler_1program_construct_argv( JNIEnv* jenv, jobject jo, jobjectArray jparams )
+{
+    char** argv = NULL;
+    int    argc = 0;
+
+    try
+    {
+        int count = jenv->GetArrayLength( jparams );
+
+        argv = new char*[ count ];
+
+        for( int i = 0; i < count; i++ )
+        {
+            jobject jparam = jenv->GetObjectArrayElement( jparams, i );
+            string arg = string_from_jstring( jenv, (jstring)jparam );
+            argv[i] = new char[ arg.length() + 1 ];
+            strcpy( argv[i], arg.c_str() );
+        }
+
+        int ret = sos::spooler_main( argc, argv, "" );
+    }
+    catch( const exception&  ) {} //set_java_exception( jenv, x ); }
+    catch( const _com_error& ) {} //set_java_exception( jenv, x ); }
+
+    for( int i = 0; i < argc; i++ )  delete argv[i];
+    delete[] argv;
 }
 
 //-------------------------------------------------------------------------------------------------

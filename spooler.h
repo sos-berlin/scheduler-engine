@@ -1,4 +1,4 @@
-// $Id: spooler.h,v 1.164 2003/10/16 09:44:25 jz Exp $
+// $Id: spooler.h,v 1.165 2003/10/18 21:23:17 jz Exp $
 
 #ifndef __SPOOLER_H
 #define __SPOOLER_H
@@ -74,6 +74,7 @@ namespace sos {
         struct Job_chain;
         struct Order_queue;
         struct Order;
+        struct Process_class;
     }
 }
 
@@ -277,6 +278,8 @@ struct Spooler
     void                        init_process_classes        ();
     Process_class*              temporary_process_class     ()                                  { return *_process_class_list.begin(); }
     bool                        has_process_classes         ()                                  { return _process_class_list.size() > 1; }   // Die erste ist nur für temporäre Prozesse
+    bool                        try_to_free_process         ( Job* for_job, Process_class*, const Time& now );
+
 
 
   private:
@@ -410,6 +413,7 @@ struct Spooler
 
     Thread_list                _thread_list;                // Alle Threads
     int                        _max_threads;
+    Spooler_thread*            _single_thread;              // Es gibt nur einen Thread! Threads sind eigentlich ein Überbleibsel aus alter Zeit
 
 
   //typedef list< Spooler_thread* >  Spooler_thread_list;

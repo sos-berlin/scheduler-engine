@@ -1,4 +1,4 @@
-// $Id: spooler_order.cxx,v 1.45 2003/10/16 09:44:25 jz Exp $
+// $Id: spooler_order.cxx,v 1.46 2003/10/18 21:23:17 jz Exp $
 /*
     Hier sind implementiert
 
@@ -625,7 +625,7 @@ Order* Order_queue::first_order( const Time& now )
 
 //------------------------------------------------------------Order_queue::get_order_for_processing
 
-ptr<Order> Order_queue::get_order_for_processing( const Time& now, Task* task )
+ptr<Order> Order_queue::get_order_for_processing( const Time& now )
 {
     // Die Order_queue gehört genau einem Job. Der Job kann zur selben Zeit nur einen Schritt ausführen.
     // Deshalb kann nur der erste Auftrag in Verarbeitung sein.
@@ -634,21 +634,13 @@ ptr<Order> Order_queue::get_order_for_processing( const Time& now, Task* task )
 
     THREAD_LOCK( _lock )
     {
-        order = first_order(now);
+        order = first_order( now );
 
         if( order )
         {
-          //if( order->_task )  throw_xc( "Order_queue::get_order_for_processing" );   // Darf nicht passieren
-            
-            order->_task = task;
+            order->_start_time = now;
             order->_setback = 0;
             order->_moved = false;
-
-            if( !order->_start_time )  
-            {
-                order->_start_time = Time::now();
-                order->open_log();
-            }
         }   
     }
 
@@ -742,6 +734,14 @@ void Order::init()
 {
     _log.set_prefix( "Order" );
     _created = Time::now();
+}
+
+//-------------------------------------------------------------------------------Order::attach_task
+
+void Order::attach_task( Task* task )
+{
+    _task = task;
+    open_log();
 }
 
 //----------------------------------------------------------------------------------Order::open_log

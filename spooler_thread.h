@@ -1,4 +1,4 @@
-// $Id: spooler_thread.h,v 1.51 2003/09/02 16:28:30 jz Exp $
+// $Id: spooler_thread.h,v 1.52 2003/10/18 21:23:18 jz Exp $
 
 #ifndef __SPOOLER_THREAD_H
 #define __SPOOLER_THREAD_H
@@ -53,6 +53,7 @@ struct Spooler_thread : zschimmer::Thread
   //Time                        next_time                   ()                                      { THREAD_LOCK_RETURN( _lock, Time, _next_time ); }
 
  //?bool                        finished                    ();
+    bool                        try_to_free_process         ( Job*, Process_class*, const Time& now );
 
     // Für andere Threads:
     bool                        is_ready_for_termination    ();

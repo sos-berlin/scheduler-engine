@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.278 2003/10/14 12:08:40 jz Exp $
+// $Id: spooler.cxx,v 1.279 2003/10/18 21:23:17 jz Exp $
 /*
     Hier sind implementiert
 
@@ -572,6 +572,13 @@ void Spooler::init_process_classes()
 {
     //while( _process_list.size() < _process_count_max )  new_process();
 
+}
+
+//---------------------------------------------------------------------Spooler::try_to_free_process
+
+bool Spooler::try_to_free_process( Job* for_job, Process_class* process_class, const Time& now )
+{
+    return _single_thread->try_to_free_process( for_job, process_class, now );
 }
 
 //--------------------------------------------------------------Spooler::wait_until_threads_stopped
@@ -1562,8 +1569,8 @@ void Spooler::run()
         _xml_cmd = "";
     }
 
+    _single_thread = _max_threads == 1? new_thread( false ) : NULL;
 
-    Spooler_thread* single_thread        = _max_threads == 1? new_thread( false ) : NULL;
 
     int             nothing_done_count   = 0;
     int             nothing_done_max     = _job_list.size() * 2 + 3;
@@ -1592,9 +1599,9 @@ void Spooler::run()
 
 
         //bool continue_spooler = execute_state_cmd();
-        //if( !continue_spooler )  if( !single_thread || !single_thread->has_tasks() )  break;
+        //if( !continue_spooler )  if( !_single_thread || !_single_thread->has_tasks() )  break;
         execute_state_cmd();
-        if( _shutdown_cmd )  if( !single_thread  ||  !single_thread->has_tasks() )  break;
+        if( _shutdown_cmd )  if( !_single_thread  ||  !_single_thread->has_tasks() )  break;
 
 
         if( _state == Spooler::s_paused )
@@ -1607,7 +1614,7 @@ void Spooler::run()
         _next_time = latter_day;
         _next_job  = NULL;
 
-        if( single_thread )
+        if( _single_thread )
         {
             FOR_EACH( Process_class_list, _process_class_list, pc )
                 FOR_EACH( Process_list, (*pc)->_process_list, p )  
@@ -1616,7 +1623,7 @@ void Spooler::run()
             //LOG( "spooler.cxx: something_done=" << something_done << "    process_list \n" );
         }
 
-
+/*      Wird von _single_thread->process() erledigt, denn dort wird die Jobkettenpriorität berücksichtigt!
         FOR_EACH_JOB( j )
         {
             Job* job = *j;
@@ -1624,7 +1631,7 @@ void Spooler::run()
             //LOG( "spooler.cxx: something_done=" ); 
             //LOG( something_done << "  " << job->obj_name() << "\n" );
         }
-
+*/
 
         string       msg;
         Wait_handles wait_handles ( this, &_log );
@@ -1635,16 +1642,16 @@ void Spooler::run()
         _next_time = latter_day;
 
 
-        if( single_thread )
+        if( _single_thread )
         {
-            something_done |= single_thread->process();
+            something_done |= _single_thread->process();
 
-            //LOG( "spooler.cxx: something_done=" << something_done << "   single_thread->process()\n" );
+            //LOG( "spooler.cxx: something_done=" << something_done << "   _single_thread->process()\n" );
 
-            if( single_thread->is_ready_for_termination() )  break;
+            if( _single_thread->is_ready_for_termination() )  break;
 
-            wait_handles += single_thread->_wait_handles;
-            Task* task = single_thread->get_next_task();
+            wait_handles += _single_thread->_wait_handles;
+            Task* task = _single_thread->get_next_task();
             if( task ) 
             {
                 _next_time = task->next_time();
@@ -1652,7 +1659,7 @@ void Spooler::run()
                                     //else  msg = "Keine Task aktiv";
             }
 
-            nothing_done_max += single_thread->task_count() * 3 + 3;    // Statt der Prozesse zählen wir die Tasks einmal mehr
+            nothing_done_max += _single_thread->task_count() * 3 + 3;    // Statt der Prozesse zählen wir die Tasks einmal mehr
         }
 
 
@@ -1672,7 +1679,7 @@ void Spooler::run()
         else
         if( ++nothing_done_count > nothing_done_max )
         {
-            nichts_getan( single_thread, ++nichts_getan_zaehler );
+            nichts_getan( _single_thread, ++nichts_getan_zaehler );
             // geht nicht: _next_time = max( _next_time, Time::now() + min( 30.0, double( 1 << min( 5+2, nichts_getan_zaehler ) ) / 4 ) );    // Bremsen, mit 1/4s anfangen bis 30s
             _next_time = Time::now() + 0.5;
             //LOG( "Spooler _next_time nach 'nichts getan' = " << _next_time.as_string() << "\n" );

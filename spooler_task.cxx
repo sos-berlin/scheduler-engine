@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.206 2003/10/11 11:40:00 jz Exp $
+// $Id: spooler_task.cxx,v 1.207 2003/10/18 21:23:17 jz Exp $
 /*
     Hier sind implementiert
 
@@ -221,24 +221,13 @@ void Task::close()
         if( _order )  remove_order_after_error();
 
         _history.end();
-    /*
-        try
-        {
-            do_kill();
-        }
-        catch( const exception& x ) { _log.warn( x.what() ); }
-    */
+
         try
         {
             do_close();
         }
         catch( const exception& x ) { _log.error( string("close: ") + x.what() ); }
-    /*
-        THREAD_LOCK( _job->_lock )  
-            if( _job->_com_task )  
-                if( _job->_com_task->task() == this )      // spooler_task?
-                    _job->_com_task->set_task(NULL);
-    */
+
 
         // Alle, die mit wait_until_terminated() auf diese Task warten, wecken:
         THREAD_LOCK( _terminated_events_lock )  
@@ -315,6 +304,29 @@ void Task::enter_thread( Spooler_thread* thread )
 
         thread->add_task( this );       // Jetzt kann der Thread die Task schon starten!
     }
+}
+
+//------------------------------------------------------------------------------------Task::cmd_end
+
+void Task::cmd_end()
+{ 
+    THREAD_LOCK( _lock ) 
+    { 
+        _end = true; 
+        if( !_ending_since )  _ending_since = Time::now(); 
+        signal( "end" ); 
+    } 
+}
+
+//-------------------------------------------------------------------------------Task::cmd_nice_end
+
+void Task::cmd_nice_end( Job* for_job )
+{
+    //if( for_job )  
+        _log.debug( "Task wird dem Job " + for_job->name() + " zugunsten beendet" );
+    //         else  _log.debug( "Task wird einem anderen Job zugunsten beendet" );
+
+    cmd_end();
 }
 
 //-------------------------------------------------------------------------------Task::leave_thread
@@ -411,7 +423,6 @@ void Task::set_state( State new_state )
         if( _next_time && !_let_run )  _next_time = min( _next_time, _job->_period.end() ); // Am Ende der Run_time wecken, damit die Task beendet werden kann
 
 
-      //if( new_state == _state  &&  next_time == _next_time )  return;
         if( new_state == _state )  return;
 
         if( new_state == s_running  ||  new_state == s_starting )  _job->increment_running_tasks(),  _thread->increment_running_tasks();
@@ -420,7 +431,6 @@ void Task::set_state( State new_state )
         if( new_state != s_running_delayed )  _next_spooler_process = 0;
 
         _state = new_state;
-      //_next_time = next_time;
 
 
         Log_level log_level = new_state == s_starting || new_state == s_closed? log_info : log_debug9;
@@ -434,6 +444,10 @@ void Task::set_state( State new_state )
 
             _log.log( log_level, msg );
         }
+
+        if( _end )  _next_time = 0;   // Falls vor set_state() cmd_end() gerufen worden ist. Damit _end ausgeführt wird.
+        if( is_idle()  &&  _job->_module._process_class )  _job->_module._process_class->notify_a_process_is_idle();
+      //if( is_idle()  &&  _job->_module._process_class  &&  _job->_module._process_class->need_process() )  cmd_nice_end();
     }
 }
 
@@ -469,6 +483,7 @@ string Task::state_name( State state )
 
 void Task::signal( const string& signal_name )
 { 
+    _signaled = true;
     set_next_time( 0 );
 
     _thread->signal( signal_name ); 
@@ -510,9 +525,7 @@ void Task::set_next_time( const Time& next_time )
 
 Time Task::next_time()
 { 
-    return //_state == s_waiting_for_process   ? latter_day :
-           //_state == s_waiting_for_order     ? latter_day :
-           _operation? _timeout == latter_day? latter_day
+    return _operation? _timeout == latter_day? latter_day
                                              : Time( _last_operation_time + _timeout )     // _timeout sollte nicht zu groß sein
                      : _next_time;
 }
@@ -545,6 +558,8 @@ bool Task::check_timeout()
 bool Task::do_something()
 {
     //Z_DEBUG_ONLY( _log.debug9( "do_something() state=" + state_name() ); )
+
+    _signaled = false;
 
     if( _operation &&  !_operation->async_finished() )  
     {
@@ -655,9 +670,7 @@ bool Task::do_something()
                         {
                             if( _job->order_queue() )
                             {
-                                if( !_order )  THREAD_LOCK( _lock )  _order = _job->order_queue()->get_order_for_processing( now, this );
-
-                                if( !_order )
+                                if( !take_order( now ) )
                                 {
                                     set_state( s_running_waiting_for_order );
                                     break;
@@ -688,9 +701,8 @@ bool Task::do_something()
 
                 case s_running_waiting_for_order:
                 {
-                    if( !_order )  THREAD_LOCK( _lock )  _order = _job->order_queue()->get_order_for_processing( now, this );
-                    if( _order )  set_state( s_running ), loop = true;  // Auftrag da? Dann Task weiterlaufen lassen (Ende der Run_time wird noch geprüft)
-                                                                        // _order wird in step__end() wieder abgeräumt
+                    if( take_order( now ) )  set_state( s_running ), loop = true;  // Auftrag da? Dann Task weiterlaufen lassen (Ende der Run_time wird noch geprüft)
+                                                                                   // _order wird in step__end() wieder abgeräumt
                     break;
                 }
 
@@ -711,6 +723,8 @@ bool Task::do_something()
                 {
                     if( !_operation )
                     {
+                        THREAD_LOCK( _lock ) { if( !_ending_since )  _ending_since = now; }    // Wird auch von cmd_end() gesetzt
+
                         if( has_error() )  _history.start(); //,  _success = false;
 
                         if( _begin_called )
@@ -862,7 +876,7 @@ bool Task::do_something()
     }
 
 
-    if( !something_done  &&  _next_time <= now )    // Obwohl _next_time erreicht, ist nichts getan?
+    if( !something_done  &&  _next_time <= now  &&  !_signaled )    // Obwohl _next_time erreicht, ist nichts getan?
     {
         set_state( state() );  // _next_time neu setzen
 
@@ -908,64 +922,9 @@ void Task::load()
 
 Async_operation* Task::begin__start()
 {
-  //try 
-    {
-        return do_begin__start();
-    }
-  //catch( const exception& x ) { set_error( x ); }
-
-    //return ok  &&  !has_error()  ||  _job->_state == Job::s_read_error;
+    return do_begin__start();
 }
 
-//---------------------------------------------------------------------------------Task::step__start
-/*
-void Task::step__start()
-{
-  //bool result;
-
-  //try 
-    {
-        if( _job->order_queue() )
-        {
-            if( !_order )  _order = _job->order_queue()->get_order_for_processing( Time::now(), this );
-            if( !_order )  return;
-
-            _log.set_order_log( &_order->_log );
-        }
-
-        do_step__start();
-    }
-  //catch( const exception& x ) { set_error(x); result = false; }
-
-  //return result;
-}
-*/
-//---------------------------------------------------------------------------------Task::begin__end
-/*
-bool Task::begin__end()
-{
-    bool result;
-
-    try 
-    {
-        result = do_begin__end();
-    }
-    catch( const exception& x ) { set_error(x);  result = false; }
-
-    return result;
-}
-*/
-//-----------------------------------------------------------------------------------Task::end__end
-/*
-void Task::end__end()
-{
-    try 
-    {
-        do_end__end();
-    }
-    catch( const exception& x ) { set_error(x); }
-}
-*/
 //-----------------------------------------------------------------------------------Task::step__end
 
 bool Task::step__end()
@@ -1026,6 +985,25 @@ bool Task::operation__end()
     _operation = NULL;
 
     return result;
+}
+
+//---------------------------------------------------------------------------------Task::set_order
+
+void Task::set_order( Order* order )
+{                                  
+    // Wird von Job gerufen, wenn Task wegen neuen Auftrags startet
+
+    _order = order;
+    if( _order )  _order->attach_task( this );  // Auftrag war schon bereitgestellt
+}
+
+//---------------------------------------------------------------------------------Task::take_order
+
+Order* Task::take_order( const Time& now )
+{
+    if( !_order )  THREAD_LOCK( _lock )  set_order( _job->order_queue()->get_order_for_processing( now ) );
+
+    return _order;
 }
 
 //-------------------------------------------------------------------Task::remove_order_after_error

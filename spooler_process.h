@@ -1,4 +1,4 @@
-// $Id: spooler_process.h,v 1.12 2003/09/28 09:30:49 jz Exp $
+// $Id: spooler_process.h,v 1.13 2003/10/18 21:23:17 jz Exp $
 
 #ifndef __SPOOLER_PROCESS_H
 #define __SPOOLER_PROCESS_H
@@ -56,7 +56,6 @@ struct Process : zschimmer::Object
     Time                       _running_since;
     bool                       _temporary;                  // Löschen, wenn kein Module_instance mehr läuft
     long                       _module_instance_count;
-  //int                        _timeout;                    // Max. Dauer einer Operation
     Process_class*             _process_class;
 };
 
@@ -78,6 +77,12 @@ struct Process_class : zschimmer::Object
 
     Process*                    new_process                 ();
     Process*                    select_process_if_available ();                                     // Startet bei Bedarf. Bei _max_processes: return NULL
+    bool                        process_available           ( Job* for_job );
+    void                        enqueue_waiting_job         ( Job* );
+    void                        remove_waiting_job          ( Job* );
+    bool                        need_process                ();
+    void                        notify_a_process_is_idle    ();
+  //Job*                        first_waiting_job           ()                                      { return _waiting_jobs.begin(); }
 
     void                    set_dom                         ( const xml::Element_ptr& );
     xml::Element_ptr            dom                         ( const xml::Document_ptr&, Show_what );
@@ -89,6 +94,7 @@ struct Process_class : zschimmer::Object
     int                        _max_processes;
     Spooler*                   _spooler;
     Process_list               _process_list;
+    Job_list                   _waiting_jobs;
 };
 
 //-------------------------------------------------------------------------------Process_class_list

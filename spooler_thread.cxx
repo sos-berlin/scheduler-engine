@@ -1,4 +1,4 @@
-// $Id: spooler_thread.cxx,v 1.105 2003/10/08 11:45:06 jz Exp $
+// $Id: spooler_thread.cxx,v 1.106 2003/10/18 21:23:17 jz Exp $
 /*
     Hier sind implementiert
 
@@ -398,39 +398,69 @@ bool Spooler_thread::step()
         }
 
 
-        bool stepped;
-        do
+        // ERSTMAL DIE ORDER-JOBS
+
+        FOR_EACH( vector<Job*>, _prioritized_order_job_array, j )
         {
-            stepped = false;
-
-            FOR_EACH( vector<Job*>, _prioritized_order_job_array, it )
-            {
-                Job* job = *it;
-
-                FOR_EACH_TASK( it, task )
-                {
-                    if( task->job() == job )
-                    {
-                        if( _my_event.signaled_then_reset() )  return true;
-                        if( _event  ->signaled()            )  return true;      // Das ist _event oder _spooler->_event
-
-                        stepped = do_something( task );
-
-                        something_done |= stepped;
-                        if( stepped )  break;
-                    }
-                }
-
-                remove_ended_tasks();
-                if( stepped )  break;
-            } 
+            something_done = (*j)->do_something();
+            if( something_done )  break;
         }
-        while( stepped );
+
+
+        // DANN DIE TASKS
+
+        if( !something_done )
+        {
+            bool stepped;
+            do
+            {
+                stepped = false;
+
+                FOR_EACH( vector<Job*>, _prioritized_order_job_array, it )
+                {
+                    Job* job = *it;
+
+                    FOR_EACH_TASK( it, task )
+                    {
+                        if( task->job() == job )
+                        {
+                            if( _my_event.signaled_then_reset() )  return true;
+                            if( _event  ->signaled()            )  return true;      // Das ist _event oder _spooler->_event
+
+                            stepped = do_something( task );
+
+                            something_done |= stepped;
+                            if( stepped )  break;
+                        }
+                    }
+
+                    remove_ended_tasks();
+                    if( stepped )  break;
+                } 
+            }
+            while( stepped );
+        }
     }
 
 
 
+
     // Wenn keine Task höchste Priorität hat, dann die Tasks relativ zu ihrer Priorität, außer Priorität 0:
+
+    // ERSTMAL DIE NICHT-ORDER-JOBS
+
+    if( !something_done )
+    {
+        for( Job_list::iterator j = _spooler->_job_list.begin(); j != _spooler->_job_list.end(); j++ )
+        {
+            if( !(*j)->order_controlled() )  
+            {
+                something_done = (*j)->do_something();
+                if( something_done )  break;
+            }
+        }
+    }
+
 
     if( !something_done )
     {
@@ -791,6 +821,53 @@ void Spooler_thread::wait_until_thread_stopped( Time until )
     }
 }
 */
+
+//--------------------------------------------------------------Spooler_thread::try_to_free_process
+
+bool Spooler_thread::try_to_free_process( Job* for_job, Process_class* process_class, const Time& now )
+{
+/*
+    Z_FOR_EACH_REVERSE( vector<Job*>, _prioritized_order_job_array, it )
+    {
+        Job* job = *it;
+        if( job->_module._process_class == process_class )
+        {
+            FOR_EACH_TASK( it, task )
+            {
+                if( task->job() == job )
+                {
+                    if( task->ending() )
+                    {
+                        if( task->ending_since() + 60 >= now )  return;   // Task beendet sich (seit weniger als eine Minute)
+                        _spooler->_log.warn( task->obj_name() + " beendet sich jetzt schon eine Minute. Wir versuchen eine andere Task zu beenden" );
+                    }
+                }
+            }
+        }
+    }
+*/
+    Z_FOR_EACH_REVERSE( vector<Job*>, _prioritized_order_job_array, it )
+    {
+        Job* job = *it;
+        if( job->_module._process_class == process_class )
+        {
+            FOR_EACH_TASK( it, task )
+            {
+                if( task->job() == job )
+                {
+                    if( task->is_idle() )
+                    {
+                        task->cmd_nice_end( for_job );
+                        return true;
+                    }
+                }
+            }
+        }
+    }
+
+    return false;
+}
+
 //-------------------------------------------------------------------------------------------------
 
 } //namespace spoooler
