@@ -1,4 +1,4 @@
-// $Id: spooler_log.cxx,v 1.61 2003/03/26 22:42:24 jz Exp $
+// $Id: spooler_log.cxx,v 1.62 2003/04/04 07:30:10 jz Exp $
 
 #include "spooler.h"
 #include "spooler_mail.h"
@@ -583,33 +583,16 @@ void Prefix_log::send_really()
     _mail = NULL;
 }
 
-//----------------------------------------------------------------------------------Prefix_log::log
-/*
-void Prefix_log::log( Log_level level, const string& line )
-{
-    //if( _file == -1  &&  !_filename.empty() )
-    //{
-    //}
-
-    if( level == log_error  &&  _job  &&  !_job->has_error() )  _job->set_error_xc_only( Xc( "SPOOLER-140", line.c_str() ) );
-
-    if( _highest_level < level )  _highest_level = level, _highest_msg = line;
-    if( level < _log_level )  return;
-
-
-    string prefix = _prefix;
-    _log->log2( level, _job && _job->current_task()? "Task " + as_string(_job->current_task()->id()) + " " + _job->name() : _prefix, line, this );
-}
-*/
 //---------------------------------------------------------------------------------Prefix_log::log2
 
-void Prefix_log::log2( Log_level level, const string& prefix, const string& line, Has_log* log )
+void Prefix_log::log2( Log_level level, const string& prefix, const string& line_par, Has_log* log )
 {
+    string line = remove_password( line_par );
+
     if( level == log_error  &&  _job  &&  !_job->has_error() )  _job->set_error_xc_only( Xc( "SPOOLER-140", line.c_str() ) );
 
     if( _highest_level < level )  _highest_level = level, _highest_msg = line;
     if( level < _log_level )  return;
-
 
     _log->log2( level, _job && _job->current_task()? "Task " + as_string(_job->current_task()->id()) + " " + _job->name() : _prefix, line, this );
 }
