@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding="utf-8"?>
-<!-- $Id: scheduler.xslt,v 1.43 2004/11/14 10:30:34 jz Exp $ -->
+<!-- $Id: scheduler.xslt,v 1.44 2004/11/15 08:58:20 jz Exp $ -->
 
 <!--
     Änderungswünsche:
@@ -754,7 +754,7 @@
         <p>
             <table cellspacing="0" cellpadding="0">
                 <col valign="baseline"/>
-                <col valign="baseline" style="padding-top: 2pt; padding-left: 2ex"/>
+                <col valign="baseline" style="padding-top: 0pt; padding-left: 2ex"/>
 
                 <xsl:for-each select="register_keyword">
                     <!--xsl:sort select="@keyword"/   Nicht hier sortieren, sonst funktioniert preceding-sibling:self nicht. -->
@@ -852,34 +852,38 @@
     
     <xsl:template match="register_entry">
 
-        <xsl:element name="a">
-            <xsl:choose>
-                <xsl:when test="contains( @register_file, '#' )">
-                    <xsl:attribute name="href"><xsl:value-of select="@register_file"/></xsl:attribute>
-                </xsl:when>
-                <xsl:otherwise>
-                    <xsl:attribute name="href"><xsl:value-of select="concat( @register_file, '#keyword__', @register_keyword )"/></xsl:attribute>
-                </xsl:otherwise>
-            </xsl:choose>
-            
-            <xsl:apply-templates select="." mode="register_title"/>
-        </xsl:element>
-
+        <span style="white-space: nowrap">
+            <xsl:element name="a">
+                <xsl:choose>
+                    <xsl:when test="contains( @register_file, '#' )">
+                        <xsl:attribute name="href"><xsl:value-of select="@register_file"/></xsl:attribute>
+                    </xsl:when>
+                    <xsl:otherwise>
+                        <xsl:attribute name="href"><xsl:value-of select="concat( @register_file, '#keyword__', @register_keyword )"/></xsl:attribute>
+                    </xsl:otherwise>
+                </xsl:choose>
+                
+                <xsl:apply-templates select="." mode="register_title"/>
+            </xsl:element>
+        </span>
+        
     </xsl:template>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~register_ini_entry-->
     
     <xsl:template match="register_ini_entry">
 
-        <xsl:value-of select="@file"/>
-        <xsl:text> [</xsl:text>
-        <xsl:value-of select="@section"/>
-        <xsl:text>]:&#160;</xsl:text>
+        <span style="white-space: nowrap">
+            <xsl:value-of select="@file"/>
+            <xsl:text> [</xsl:text>
+            <xsl:value-of select="@section"/>
+            <xsl:text>]:&#160;</xsl:text>
 
-        <xsl:element name="a">
-            <xsl:attribute name="href"><xsl:value-of select="concat( @register_file, '#use_entry__', @file, '__', @section, '__', @entry )"/></xsl:attribute>
-            <xsl:apply-templates select="." mode="register_title"/>
-        </xsl:element>
+            <xsl:element name="a">
+                <xsl:attribute name="href"><xsl:value-of select="concat( @register_file, '#use_entry__', @file, '__', @section, '__', @entry )"/></xsl:attribute>
+                <xsl:apply-templates select="." mode="register_title"/>
+            </xsl:element>
+        </span>
         
     </xsl:template>
 

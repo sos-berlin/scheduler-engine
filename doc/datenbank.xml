@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet href="scheduler.xslt" type="text/xsl"?>
 
-<!--$Id: datenbank.xml,v 1.6 2004/11/08 13:39:13 jz Exp $-->
+<!--$Id: datenbank.xml,v 1.7 2004/11/15 08:58:20 jz Exp $-->
 
 <description 
     title               = "Datenbank" 
     base_dir            = ""
     author              = "$Author: jz $"
-    date                = "$Date: 2004/11/08 13:39:13 $"
+    date                = "$Date: 2004/11/15 08:58:20 $"
 >
 
 <scheduler_keyword keyword="Datenbank"/>
@@ -56,7 +56,7 @@
         <scheduler_ini_entry file="factory.ini" section="spooler" entry="max_db_errors"/><br/>
     </dd>
         
-    <scheduler_keyword keyword="Tabelle (Datenbank)"/>
+    <!--scheduler_keyword keyword="Tabelle (Datenbank)"/-->
     <dt>Die Namen der Tabellen</dt>
     <dd>
         <scheduler_ini_entry file="factory.ini" section="spooler" entry="db_variables_table"/><br/>

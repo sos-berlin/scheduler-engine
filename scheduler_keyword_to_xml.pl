@@ -1,5 +1,5 @@
 #! /usr/bin/perl -W
-# $Id: scheduler_keyword_to_xml.pl,v 1.6 2004/11/14 10:30:34 jz Exp $
+# $Id: scheduler_keyword_to_xml.pl,v 1.7 2004/11/15 08:58:20 jz Exp $
 
 
 my $script_name     = "scheduler_keyword_to_xml.pl";
@@ -60,6 +60,7 @@ sub read_file
 {
     my $filename     = shift;
     my $file_title   = "XXX";
+    my $file         = "";
     my $head_title   = "";
     my $root_element = "";
     my $name         = "";
@@ -70,12 +71,13 @@ sub read_file
     
     while( <FILE> )
     {
-        if( $root_element eq ""     &&  /\<([^?! \/\>]+)/ )         { $root_element = $1; }
+        if( $root_element eq ""     &&  /<([^?! \n\/>]+)/ )         { $root_element = $1; }
         if( $name         eq ""     &&  / name *= *"(.*)"/ )        { $name = $1; }
         if( $category     eq ""     &&  / category *= *"(.*)"/ )    { $category = $1; }
         if( $file_title   eq "XXX"  &&  / title *= *"(.*)"/ )       { $file_title = $1; }
         if( $head_title   eq ""     &&  / head_title *= *"(.*)"/ )  { $head_title = $1; }
-        if( $root_element  &&  /[^?-]>/ )  { last; }
+        if( $file         eq ""     &&  / file *= *"(.*)"/ )        { $file = $1; }
+        if( $root_element  &&  /(^|[^?-])>/ )  { last; }
     }
 
     if( $file_title eq "XXX"  &&  $head_title )  { $file_title = $head_title; }
@@ -92,6 +94,15 @@ sub read_file
         add_keyword_reference( $keyword, "<code>&lt;$keyword&gt;</code>", $xml_line );
     }
     #if( $root_element eq "xml_element" )  { $file_title = "XML-Element $file_title" }
+
+    if( $root_element eq "ini_section" )
+    { 
+        my $section = $name;
+        $file_title = "Datei $file, Abschnitt [$section]"  if $file_title = "XXX";
+        
+        my $xml_line = "<register_entry register_file='$filename#' register_title='$file_title'  register_keyword='$section' type='definition'/>\n";
+        add_keyword_reference( $section, "<code>[$section]</code>", $xml_line );
+    }
         
 
     while( <FILE> )
@@ -138,6 +149,17 @@ sub read_file
                 add_keyword_reference( $a_name, "<code>-$a_name=</code>", $xml_line );
             }
         }
+
+        if( $root_element eq "ini_section" )
+        {
+            if( my $element = get_element( "ini_entry" ) )
+            { 
+                my $a_name   = get_attribute( $element, "name" );
+                   $a_name   = get_attribute( $element, "setting" )  unless $a_name;
+                my $xml_line = "<register_entry register_file='$filename#entry_$a_name' register_title='$file_title'  register_keyword='$a_name' type='definition'/>\n";
+                add_keyword_reference( $a_name, "<code>$a_name=</code>", $xml_line );
+            }
+        }
     }
     
     close( FILE );
@@ -149,7 +171,7 @@ sub add_keyword_reference
     my $keyword         = shift;
     my $keyword_display = shift;
     my $xml_line        = shift;
-    
+
     push( @{$keyword_references{"$keyword\t$keyword_display"}}, $xml_line );  # s. Perl Cookbook Seite 140 (5.7)
 }
 
@@ -172,5 +194,5 @@ sub get_attribute
         return $2? $2 : $3;
     }
     
-    return "$element";
+    return "";
 }
