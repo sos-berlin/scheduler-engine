@@ -1,4 +1,4 @@
-// $Id: spooler_job.cxx,v 1.65 2004/03/23 20:22:17 jz Exp $
+// $Id: spooler_job.cxx,v 1.66 2004/03/23 22:41:41 jz Exp $
 /*
     Hier sind implementiert
 
@@ -1610,7 +1610,7 @@ void Job::kill_task( int id, bool immediately )
 {
     THREAD_LOCK( _lock )
     {
-        Task* task = NULL;
+        //Task* task = NULL;
 
         Z_FOR_EACH( Task_list, _running_tasks, t )
         {
