@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.226 2003/08/27 10:22:57 jz Exp $
+// $Id: spooler.cxx,v 1.227 2003/08/27 20:40:32 jz Exp $
 /*
     Hier sind implementiert
 
@@ -1003,6 +1003,18 @@ Process* Spooler::new_process( bool temporary )
     return process;
 }
 
+//--------------------------------------------------------------------------Spooler::remove_process
+
+void Spooler::remove_process( Process* process )
+{
+    FOR_EACH( Process_list, _process_list, p )
+    {
+        if( *p == process )  { _process_list.erase( p ); return; }
+    }
+
+    throw_xc( "Spooler::remove_process" );
+}
+
 //--------------------------------------------------------------------------------Spooler::send_cmd
 
 void Spooler::send_cmd()
@@ -1363,6 +1375,7 @@ void Spooler::stop()
     _object_set_class_list.clear();
   //_spooler_thread_list.clear();
     _thread_list.clear();
+    _process_list.clear();
     _job_list.clear();
 
     if( _module_instance )  _module_instance->close();

@@ -1,4 +1,4 @@
-// $Id: spooler.h,v 1.146 2003/08/27 10:22:58 jz Exp $
+// $Id: spooler.h,v 1.147 2003/08/27 20:40:32 jz Exp $
 
 #ifndef __SPOOLER_H
 #define __SPOOLER_H
@@ -246,6 +246,7 @@ struct Spooler
     void                        wait                        ();
 
     Process*                    new_process                 ( bool temporary = false );
+    void                        remove_process              ( Process* );
 
     void                        signal                      ( const string& signal_name = "" )  { _log.info( "Signal \"" + signal_name + "\"" ); _event.signal( signal_name ); }
   //void                        signal                      ( const string& signal_name = "" )  { THREAD_LOCK( _lock )  ..., if(_event) _event->signal(signal_name), _next_start_time = 0, _next_job = NULL; }

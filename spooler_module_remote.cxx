@@ -1,4 +1,4 @@
-// $Id: spooler_module_remote.cxx,v 1.20 2003/08/27 19:26:37 jz Exp $
+// $Id: spooler_module_remote.cxx,v 1.21 2003/08/27 20:40:32 jz Exp $
 /*
     Hier sind implementiert
 
@@ -80,6 +80,12 @@ void Remote_module_instance_proxy::close()
     if( _remote_instance )  _remote_instance->close(), _remote_instance = NULL;
     _idispatch = NULL;
 
+    if( _process )
+    {
+        _process->remove_module_instance( this );
+        _process = NULL;
+    }
+
     Com_module_instance_base::close();
 }
 
@@ -124,6 +130,7 @@ Async_operation* Remote_module_instance_proxy::begin__start()
     {
         //_session  = Z_NEW( Session( start_process( parameters ) ) );
         _process = _spooler->new_process( true );     // temporary = true: Prozess schließen, wenn er nicht mehr gebraucht wird
+        _process->add_module_instance( this );
         _session = _process->session();        
     }
 

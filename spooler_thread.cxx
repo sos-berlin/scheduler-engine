@@ -1,4 +1,4 @@
-// $Id: spooler_thread.cxx,v 1.97 2003/08/27 17:44:49 jz Exp $
+// $Id: spooler_thread.cxx,v 1.98 2003/08/27 20:40:32 jz Exp $
 /*
     Hier sind implementiert
 
@@ -44,6 +44,7 @@ Spooler_thread::~Spooler_thread()
     
     _my_event.close();
     _wait_handles.close();
+    _task_list.clear();
 }
 
 //-----------------------------------------------------------------------------Spooler_thread::init
