@@ -1,4 +1,4 @@
-// $Id: spooler_http.h,v 1.4 2004/07/22 12:10:00 jz Exp $
+// $Id: spooler_http.h,v 1.5 2004/07/26 12:09:58 jz Exp $
 
 #ifndef __SPOOLER_HTTP_H
 #define __SPOOLER_HTTP_H
@@ -54,13 +54,42 @@ struct Http_parser : Object
     Http_request* const        _http_request;
 };
 
+//-------------------------------------------------------------------------------------Chunk_reader
+/*
+    Verwendung:
+
+    while(1)
+    {
+        while( !next_chunk_is_ready() )  wait();
+
+        int size = get_next_chunk_size();
+        if( size == 0 )  break;  // EOF
+        read_chunk()  bis genau size Bytes gelesen
+    }
+*/
+
+struct Chunk_reader : Object
+{
+                                Chunk_reader                ()                                      : _zero_(this+1) {}
+
+    virtual void            set_event                       ( Event_base* )                         {}
+
+
+    virtual bool                next_chunk_is_ready         ()                                      = 0;
+    virtual int                 get_next_chunk_size         ( int recommended_size )                = 0;
+    virtual string              read_chunk                  ( int size )                            = 0;
+
+
+    Fill_zero                  _zero_;
+};
+
 //------------------------------------------------------------------------------------Http_response
 
 struct Http_response : Object
 {
-                                Http_response               ()                                      : _zero_(this+1) {}
+                                Http_response               ( Chunk_reader*, const string& content_type );
 
-    virtual void            set_event                       ( Event_base* )                         {}
+    void                    set_event                       ( Event_base* event )                   { _chunk_reader->set_event( event ); }
 
     string                      content_type                ()                                      { return _content_type; }
     void                    set_content_type                ( string value )                        { _content_type = value; }
@@ -69,16 +98,13 @@ struct Http_response : Object
     bool                        eof                         ();
     string                      read                        ( int recommended_size );
 
-  protected:
-    string                      start_new_chunk             ();
 
-    virtual bool                next_chunk_is_ready         ()                                      = 0;
-    virtual uint                get_next_chunk_size         ()                                      = 0;
-    virtual string              read_chunk                  ( int size )                            = 0;
+  protected:
+    string                      start_new_chunk             ( int recommended_size );
 
 
     Fill_zero                  _zero_;
-    Event_base*                _event;
+    ptr<Chunk_reader>          _chunk_reader;
     string                     _content_type;
     string                     _header;
     int                        _chunk_index;                // 0: Header
@@ -88,45 +114,83 @@ struct Http_response : Object
     bool                       _eof;
 };
 
-//-----------------------------------------------------------------------------String_http_response
+//-----------------------------------------------------------------------------String_chunk_reader
 
-struct String_http_response : Http_response
+struct String_chunk_reader : Chunk_reader
 {
-                                String_http_response        ( const string& text, string content_type );
-
+                                String_chunk_reader         ( const string& text ) : _zero_(this+1), _text(text) {}
 
   protected:
     bool                        next_chunk_is_ready         ()                                      { return true; }
-    uint                        get_next_chunk_size         ();
+    int                         get_next_chunk_size         ( int recommended_size );
     string                      read_chunk                  ( int size );
 
 
     Fill_zero                  _zero_;
     string                     _text;
+    bool                       _get_next_chunk_size_called;
+    uint                       _offset;                     // Bereits gelesene Bytes
 };
 
-//--------------------------------------------------------------------------------Log_http_response
+//--------------------------------------------------------------------------------Log_chunk_reader
 
-struct Log_http_response : Http_response
+struct Log_chunk_reader : Chunk_reader
 {
-                                Log_http_response           ( Prefix_log*, string content_type );
-                               ~Log_http_response           ();
+                                Log_chunk_reader           ( Prefix_log* );
+                               ~Log_chunk_reader           ();
 
     void                    set_event                       ( Event_base* );
 
 
   protected:
     bool                        next_chunk_is_ready         ();
-    uint                        get_next_chunk_size         ();
+    int                         get_next_chunk_size         ( int recommended_size );
     string                      read_chunk                  ( int size );
 
 
     Fill_zero                  _zero_;
     ptr<Prefix_log>            _log;
+    Event_base*                _event;
     File                       _file;
     bool                       _file_eof;
+};
+
+//------------------------------------------------------------------------------Chunk_reader_filter
+
+struct Chunk_reader_filter : Chunk_reader
+{
+                                Chunk_reader_filter         ( Chunk_reader* r )                     : _chunk_reader(r) {}
+
+    void                        set_event                   ( Event_base* event )                   { _chunk_reader->set_event( event ); }
+
+    ptr<Chunk_reader>          _chunk_reader;
+};
+
+//------------------------------------------------------------------------Html_chunk_reader
+// Konvertiert Text nach HTML
+
+struct Html_chunk_reader : Chunk_reader_filter
+{
+    enum State { reading_prefix, reading_text, reading_suffix, reading_finished };
+
+
+                                Html_chunk_reader           ( Chunk_reader*, const string& title );
+                               ~Html_chunk_reader           ();
+
+
+  protected:
+    bool                        next_chunk_is_ready         ();
+    int                         get_next_chunk_size         ( int recommended_size );
+    string                      read_chunk                  ( int size );
+
+
+    Fill_zero                  _zero_;
+    State                      _state;
     string                     _html_prefix;
     string                     _html_suffix;
+    int                        _available_net_chunk_size;
+    string                     _chunk;
+    bool                       _chunk_filled;
 };
 
 //-------------------------------------------------------------------------------------------------

@@ -1,4 +1,4 @@
-<!-- $Id: jobs_frame.html,v 1.26 2004/07/25 08:57:20 jz Exp $ -->
+<!-- $Id: jobs_frame.html,v 1.27 2004/07/26 12:09:59 jz Exp $ -->
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <html>
 
@@ -29,7 +29,8 @@
 <script defer="true" type="text/javascript" src="scheduler.js"    ></script>
 <script defer="true" type="text/javascript" src="popup_menu.js"></script>
 
-<script type="text/javascript" for="window" event="onload"> do_onload(); </script>
+<script type="text/javascript" for="window" event="onload"  > do_onload();   </script>
+<script type="text/javascript" for="window" event="onunload"> do_onunload(); </script>
 
 
 <script defer="true" language="javascript"><!--
@@ -63,6 +64,13 @@ function do_onload()
     _scheduler = new Scheduler();
     repeat_update( document.all.update_periodically_checkbox.checked, true );
     scheduler_init();
+}
+
+//-----------------------------------------------------------------------------------------onunload
+
+function do_onunload()
+{
+    if( _scheduler )  _scheduler.close();
 }
 
 //------------------------------------------------------------update_periodically_checkbox__onclick

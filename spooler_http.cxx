@@ -1,15 +1,18 @@
-// $Id: spooler_http.cxx,v 1.7 2004/07/26 08:24:40 jz Exp $
+// $Id: spooler_http.cxx,v 1.8 2004/07/26 12:09:58 jz Exp $
 /*
     Hier sind implementiert
 
-    Xml_end_finder
-    Communication::Channer
-    Communication
+    Http_parser
+    Http_request
+    Http_response
+    Log_chunk_reader
+    Html_chunk_reader
 */
 
 
 #include "spooler.h"
 #include "spooler_version.h"
+
 
 using namespace std;
 
@@ -195,6 +198,17 @@ string Http_parser::eat_path()
     return path;
 }
 
+//---------------------------------------------------------------------Http_response::Http_response
+
+Http_response::Http_response( Chunk_reader* chunk_reader, const string& content_type )
+: 
+    _zero_(this+1), 
+    _chunk_reader( chunk_reader ) 
+{ 
+    set_content_type(content_type); 
+    finish();
+}
+
 //----------------------------------------------------------------------------Http_response::finish
 
 void Http_response::finish()
@@ -248,7 +262,7 @@ string Http_response::read( int recommended_size )
             return _header;
         }
 
-        return start_new_chunk();
+        return start_new_chunk( recommended_size );
     }
     else
     {
@@ -256,7 +270,7 @@ string Http_response::read( int recommended_size )
 
         if( _chunk_offset < _chunk_size )
         {
-            result = read_chunk( min( recommended_size, (int)( _chunk_size - _chunk_offset ) ) );
+            result = _chunk_reader->read_chunk( min( recommended_size, (int)( _chunk_size - _chunk_offset ) ) );
             _chunk_offset += result.length();
         }
 
@@ -268,7 +282,7 @@ string Http_response::read( int recommended_size )
 
         if( _chunk_offset == _chunk_size ) 
         {
-            result.append( start_new_chunk() );
+            result.append( start_new_chunk( recommended_size ) );
         }
 
         return result;
@@ -277,13 +291,13 @@ string Http_response::read( int recommended_size )
 
 //-------------------------------------------------------------------Http_response::start_new_chunk
 
-string Http_response::start_new_chunk()
+string Http_response::start_new_chunk( int recommended_size )
 {
-    if( !next_chunk_is_ready() )  return "";
+    if( !_chunk_reader->next_chunk_is_ready() )  return "";
 
     _chunk_index++;
     _chunk_offset = 0;
-    _chunk_size   = get_next_chunk_size();
+    _chunk_size   = _chunk_reader->get_next_chunk_size( recommended_size );
 
     string result = as_hex_string( (int)_chunk_size ) + "\r\n";
     
@@ -300,92 +314,55 @@ string Http_response::start_new_chunk()
     return result;
 }
 
-//--------------------------------------------------------tring_http_response::String_http_response
+//---------------------------------------------------------String_chunk_reader::get_next_chunk_size
 
-String_http_response::String_http_response( const string& text, string content_type )
-: 
-    _zero_(this+1), 
-    _text(text) 
-{ 
-    set_content_type( content_type ); 
-    finish();
-}
-
-//--------------------------------------------------------String_http_response::get_next_chunk_size
-
-uint String_http_response::get_next_chunk_size()
+int String_chunk_reader::get_next_chunk_size( int recommended_size )
 {
-    return _chunk_index == 1? _text.length() : 0;
+    if( _get_next_chunk_size_called )  return 0;
+    _get_next_chunk_size_called = true;
+
+    return _text.length();
 }
 
-//-----------------------------------------------------------------------String_http_response::read
+//------------------------------------------------------------------------String_chunk_reader::read
 
-string String_http_response::read_chunk( int recommended_size )
+string String_chunk_reader::read_chunk( int recommended_size )
 { 
     int length = min( recommended_size, (int)_text.length() );
-    return _text.substr( _chunk_offset, length ); 
+
+    int offset = _offset;
+    _offset += length;
+
+    return _text.substr( offset, length ); 
 }
 
-//-------------------------------------------------------------Log_http_response::Log_http_response
+//-------------------------------------------------------------Log_chunk_reader::Log_chunk_reader
 
-Log_http_response::Log_http_response( Prefix_log* log, string content_type )
+Log_chunk_reader::Log_chunk_reader( Prefix_log* log )
 : 
     _zero_(this+1), 
     _log(log) 
 {
-    set_content_type( content_type );
-    finish();
-
-    _html_prefix = "<html>\n" 
-                        "<head>\n" 
-                            "<style type='text/css'>\n"
-                                "@import 'scheduler.css';\n"
-                                "pre { font-family: Lucida Console, monospace; font-size: 10pt }\n"
-                            "</style>\n"
-                            "<title>Scheduler log</title>\n"
-                        "</head>\n" 
-                        "<body>\n" 
-
-                            "<script type='text/javascript'><!--\n"   
-                                "var title=" + quoted_string( _log->title() ) + ";\n"
-                            "--></script>\n"
-
-                            "<script type='text/javascript' src='show_log.js'></script>\n"
-/*
-                            // Wirkt nicht. Wenn der Scheduler abbricht (abort_immediately), löscht ie6 das Fenster 
-                            // und zeigt stattdessen eine unsinnige Fehlermeldung.
-                            "<script type='text/javascript' for='window' event='onerror'><!--\n"   
-                                //"document.write( '<br/><br/>(load error)' );\n"
-                                "return true;\n"
-                            "--></script>\n"
-*/
-                            // onsize wirkt auch nicht. Soll die jeweils letzten Zeilen zeigen.
-                            //"<pre class='log' onresize='alert(1);event.srcElement.scrollBy(0,999999999)'>\n";
-                            "<pre class='log'>\n";
-
-    _html_suffix =          "</pre>\n"
-                        "</body>\n"
-                    "</html>\n";
 }
 
-//------------------------------------------------------------Log_http_response::~Log_http_response
+//------------------------------------------------------------Log_chunk_reader::~Log_chunk_reader
 
-Log_http_response::~Log_http_response()
+Log_chunk_reader::~Log_chunk_reader()
 {
     if( _event )  _log->remove_event( _event );
 }
 
-//---------------------------------------------------------------------Log_http_response::set_event
+//---------------------------------------------------------------------Log_chunk_reader::set_event
 
-void Log_http_response::set_event( Event_base* event )
+void Log_chunk_reader::set_event( Event_base* event )
 {
     _event = event;
     _log->add_event( _event );
 }
 
-//-----------------------------------------------------------Log_http_response::next_chunk_is_ready
+//-----------------------------------------------------------Log_chunk_reader::next_chunk_is_ready
 
-bool Log_http_response::next_chunk_is_ready()
+bool Log_chunk_reader::next_chunk_is_ready()
 { 
     if( !_file.opened() )
     {
@@ -406,49 +383,177 @@ bool Log_http_response::next_chunk_is_ready()
     return true;
 }
 
-//-----------------------------------------------------------Log_http_response::get_next_chunk_size
+//-----------------------------------------------------------Log_chunk_reader::get_next_chunk_size
 
-uint Log_http_response::get_next_chunk_size()
+int Log_chunk_reader::get_next_chunk_size( int recommended_size )
 {
-    if( _html_prefix.length() > 0 )  return _html_prefix.length();
-
     if( _file.opened()  &&  !_file_eof )
     {
         uint64 size = _file.length() - _file.tell();
-        if( size > 0 )  return size < INT_MAX? (uint)size : INT_MAX;
+        if( size > 0 )  return size < recommended_size? (int)size : recommended_size;
     }
 
-    if( _html_suffix.length() > 0 )  return _html_suffix.length();
-
-    return 0;    // eof
+    return 0;  // eof
 }
 
-//--------------------------------------------------------------------Log_http_response::read_chunk
+//--------------------------------------------------------------------Log_chunk_reader::read_chunk
 
-string Log_http_response::read_chunk( int recommended_size )
+string Log_chunk_reader::read_chunk( int recommended_size )
 { 
-    string result;
+    //string result;
 
-    if( _html_prefix != "" )
-    {
-        result = _html_prefix;
-        _html_prefix = "";
-    }
-    else
-    if( _file.opened()  &&  !_file_eof )
+    //if( _file.opened()  &&  !_file_eof )
     {
         return _file.read_string( recommended_size );
     }
-    else
-    if( _html_suffix != "" )
-    {
-        result = _html_suffix;
-        _html_suffix = "";
-    }
-    else
-        throw_xc( __FUNCTION__ );
+    //else
+    //    throw_xc( __FUNCTION__ );
 
-    return result;
+    //return result;
+}
+
+//-------------------------------------------------------------Html_chunk_reader::Html_chunk_reader
+
+Html_chunk_reader::Html_chunk_reader( Chunk_reader* chunk_reader, const string& title )
+: 
+    Chunk_reader_filter(chunk_reader),
+    _zero_(this+1), 
+    _state(reading_prefix)
+{
+    _html_prefix = "<html>\n" 
+                        "<head>\n" 
+                            "<style type='text/css'>\n"
+                                "@import 'scheduler.css';\n"
+                                "pre { font-family: Lucida Console, monospace; font-size: 10pt }\n"
+                            "</style>\n"
+                            "<title>Scheduler log</title>\n"
+                        "</head>\n" 
+                        "<body class='log'>\n" 
+
+                            "<script type='text/javascript'><!--\n"   
+                                "var title=" + quoted_string( title ) + ";\n"
+                            "--></script>\n"
+
+                            "<script type='text/javascript' src='show_log.js'></script>\n"
+/*
+                            // Wirkt nicht. Wenn der Scheduler abbricht (abort_immediately), löscht ie6 das Fenster 
+                            // und zeigt stattdessen eine unsinnige Fehlermeldung.
+                            "<script type='text/javascript' for='window' event='onerror'><!--\n"   
+                                //"document.write( '<br/><br/>(load error)' );\n"
+                                "return true;\n"
+                            "--></script>\n"
+*/
+                            // onsize wirkt auch nicht. Soll die jeweils letzten Zeilen zeigen.
+                            //"<pre class='log' onresize='alert(1);event.srcElement.scrollBy(0,999999999)'>\n";
+                            "<pre class='log'>\n";
+
+    _html_suffix =          "</pre>\n"
+                        "</body>\n"
+                    "</html>\n";
+}
+
+//------------------------------------------------------------Html_chunk_reader::~Html_chunk_reader
+
+Html_chunk_reader::~Html_chunk_reader()
+{
+}
+
+//---------------------------------------------------Html_chunk_reader::next_chunk_is_ready
+
+bool Html_chunk_reader::next_chunk_is_ready()
+{ 
+    switch( _state )
+    {
+        case reading_prefix:  return true;
+        case reading_text:    return _chunk_reader->next_chunk_is_ready();
+        case reading_suffix:  return true;
+        default:              return true;
+    }
+}
+
+//---------------------------------------------------Html_chunk_reader::get_next_chunk_size
+
+int Html_chunk_reader::get_next_chunk_size( int recommended_size )
+{
+    if( _state == reading_prefix )  return _html_prefix.length();
+
+
+    if( _state == reading_text )
+    {
+        if( !_chunk_filled )
+        {
+            if( _available_net_chunk_size == 0 )
+            {
+                _available_net_chunk_size = _chunk_reader->get_next_chunk_size( recommended_size );
+            }
+
+            string text = _chunk_reader->read_chunk( _available_net_chunk_size );
+
+            _available_net_chunk_size -= text.length();
+
+            _chunk = "";
+            _chunk.reserve( text.length() * 2 );
+
+            const char* text_data = text.data();
+
+            for( int i = 0; i < text.length(); i++ )
+            {
+                int  begin = i;
+                char c     = text_data[i];
+                while( i < text.length()  &&  c != '<'  &&  c != '>'  &&  c != '&' )  c = text_data[ ++i ];
+                
+                _chunk.append( text.data() + begin, i - begin );
+                if( i == text.length() )  break;
+
+                switch( c )
+                {
+                    case '<': _chunk += "&lt;";   break;
+                    case '>': _chunk += "&gt;";   break;
+                    case '&': _chunk += "&amp;";  break;
+                    default : _chunk += c;
+                }
+            }
+
+            _chunk_filled = true;
+        }
+
+        if( _chunk.length() > 0 )  return _chunk.length();
+                             else  _state = reading_suffix;
+    }
+
+
+    if( _state == reading_suffix )  return _html_suffix.length();
+
+    return 0;  // eof
+}
+
+//--------------------------------------------------------------------Html_chunk_reader::read_chunk
+
+string Html_chunk_reader::read_chunk( int recommended_size )
+{ 
+    switch( _state )
+    {
+        case reading_prefix:
+        {
+            _state = reading_text;
+            return _html_prefix;
+        }
+
+        case reading_text:
+        {
+            assert( _chunk_filled );
+            _chunk_filled = false;
+            return _chunk;
+        }
+
+        case reading_suffix:
+        {
+            _state = reading_finished;
+            return _html_suffix;
+        }
+
+        default: throw_xc( __FUNCTION__ );
+    }
 }
 
 //-------------------------------------------------------------------------------------------------

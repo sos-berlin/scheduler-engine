@@ -1,4 +1,4 @@
-// $Id: spooler_command.cxx,v 1.131 2004/07/25 11:31:17 jz Exp $
+// $Id: spooler_command.cxx,v 1.132 2004/07/26 12:09:58 jz Exp $
 /*
     Hier ist implementiert
 
@@ -732,7 +732,7 @@ ptr<Http_response> Command_processor::execute_http( const Http_request& http_req
                 else
                                                              log = &_spooler->_log;
 
-                ptr<Log_http_response> response = Z_NEW( Log_http_response( log, "text/html" ) );
+                ptr<Http_response> response = Z_NEW( Http_response( Z_NEW( Html_chunk_reader( Z_NEW( Log_chunk_reader( log ) ), log->title() ) ), "text/html" ) );
                 return +response;
             }
             else
@@ -768,7 +768,7 @@ ptr<Http_response> Command_processor::execute_http( const Http_request& http_req
         response_body = "<html><head><title>Scheduler</title></head><body>Die Seite kann nicht bereitgestellt werden. Siehe Scheduler-Protokoll</body></html>";
     }
 
-    ptr<String_http_response> response = Z_NEW( String_http_response( response_body, response_content_type ) );
+    ptr<Http_response> response = Z_NEW( Http_response( Z_NEW( String_chunk_reader( response_body ) ), response_content_type ) );
     return +response;
 /*
     time_t      t;

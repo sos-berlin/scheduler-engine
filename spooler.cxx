@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.348 2004/07/25 08:57:20 jz Exp $
+// $Id: spooler.cxx,v 1.349 2004/07/26 12:09:58 jz Exp $
 // §851: Weitere Log-Ausgaben zum Scheduler-Start eingebaut
 // §1479
 
@@ -2099,6 +2099,8 @@ void Spooler::cmd_let_run_terminate_and_restart()
 
 void Spooler::abort_immediately( bool restart )
 {
+    // So schnell wie möglich abbrechen!
+
     int exit_code = 99;
 
 
@@ -2110,7 +2112,12 @@ void Spooler::abort_immediately( bool restart )
         try{ spooler_restart( NULL, is_service() ); } catch(...) {}
     }
 
-    try{ _log.close(); } catch(...){}
+    try
+    { 
+        _log.close(); 
+        _communication.close();   // Damit offene HTTP-Logs ordentlich schließen (denn sonst ersetzt ie6 das Log durch eine Fehlermeldung)
+    } 
+    catch( ... ) {}
 
 
     // Point of no return

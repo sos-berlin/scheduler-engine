@@ -1,4 +1,4 @@
-// $Id: scheduler.js,v 1.11 2004/07/24 17:13:40 jz Exp $
+// $Id: scheduler.js,v 1.12 2004/07/26 12:09:59 jz Exp $
 
 //----------------------------------------------------------------------------------------Scheduler
 // public
@@ -7,6 +7,7 @@ function Scheduler()
 {
     this._url           = "http://" + document.location.host + "/";
     this._xml_http      = new ActiveXObject( "Msxml2.XMLHTTP" );
+    this._log_window    = undefined;
     
     //this._configuration = new Scheduler_html_configuration( this._url + "config.xml" );
 }
@@ -18,6 +19,8 @@ Scheduler.prototype.close = function()
 {
     //this._configuration = null;
     this._xml_http = null;
+    
+    if( this._log_window )  this._log_window.close(),  this._log_window = undefined;
 }
 
 //--------------------------------------------------------------------------------Scheduler.execute
@@ -281,10 +284,20 @@ function Popup_menu_builder__add_show_log( html, show_log_command, window_name, 
 
 function popup_menu__show_log__onclick( show_log_command, window_name )
 {
-    window_name = window_name.replace( /[~a-zA-Z0-9]/g, "_" );
+    //window_name = window_name.replace( /[~a-zA-Z0-9]/g, "_" );
+    window_name = "show_log";  // Nur ein Fenster. ie6 will nicht mehrere Logs gleichzeitig lesen, nur nacheinander
+
+    var features = "menubar=no, toolbar=no, location=no, directories=no, scrollbars=yes, resizable=yes, status=no";
+    features +=   " width="  + ( window.screen.availWidth - 11 ) +
+                 ", height=" + ( Math.floor( window.screen.availHeight * 0.2 ) - 32 ) +
+                 ", left=0"  +
+                 ", top="    +  Math.floor( window.screen.availHeight * 0.8 );
     
-    var log_window = window.open( "http://" + document.location.host + "/" + show_log_command, window_name, "menubar=no, toolbar=no, location=no, directories=no, scrollbars=yes, resizable=yes, status=no", true );
+    var log_window = window.open( "http://" + document.location.host + "/" + show_log_command, window_name, features, true );
     log_window.focus();
+    
+    if( _scheduler )  _scheduler._log_window = log_window;
+    
     _popup.hide();
 }
 
@@ -322,12 +335,17 @@ function job_menu__onclick( job_name )
     var popup_builder = new Popup_menu_builder();
 
     var job_element = //document.all._job_element != undefined?
-                        _job_element                                                                                  // Rechter Rahmen
+                        _job_element  // _job_element in task_frame.html (detail_frame)                                                                                  // Rechter Rahmen
                       //: _response.selectSingleNode( "spooler/answer/state/jobs/job [ @job = '" + job_name + "' ]" );  // Linker Rahmen
     
     var state = job_element.getAttribute( "state" );
     
-    popup_builder.add_show_log( "Show log"      , "show_log&job=" + job_name, "show_log_job_" + job_name );
+    popup_builder.add_show_log( "Show log"        , "show_log&job=" + job_name, "show_log_job_" + job_name );
+    
+    var description_element = job_element.selectSingleNode( "description" );
+    var is_active = description_element? description_element.text != "" : false;
+    popup_builder.add_entry   ( "Show description", "parent.show_job_description()", is_active );
+    
     popup_builder.add_bar();
     popup_builder.add_command ( "Start task now", "parent.task_menu__start_task_now__onclick('" + job_name + "')" );
     popup_builder.add_command ( "Stop"          , "<modify_job job='" + job_name + "' cmd='stop'    />", state != "stopped"  &&  state != "stopping" );
@@ -341,6 +359,26 @@ function job_menu__onclick( job_name )
     popup_builder.add_command ( "Continue tasks", "<modify_job job='" + job_name + "' cmd='continue'/>" );
     
     _popup = popup_builder.show_popup();
+}
+
+//-----------------------------------------------------------------------------show_job_description
+
+function show_job_description()
+{
+    var job_element = //document.all._job_element != undefined?
+                        _job_element  // _job_element in task_frame.html (detail_frame)                                                                                  // Rechter Rahmen
+                      //: _response.selectSingleNode( "spooler/answer/state/jobs/job [ @job = '" + job_name + "' ]" );  // Linker Rahmen
+                      
+    //var log_window = window.open( "http://" + document.location.host + "/" + show_log_command, window_name, features, true );
+    var popup = window.createPopup();
+    popup.document.body.innerHTML = job_element.selectSingleNode( "description" ).text;
+
+    //popup.show( 0, 0, 0, 0 );
+    var width  = document.body.clientWidth;
+    var height = document.body.clientHeight;
+    popup.hide();
+    popup.document.body.className = "job";
+    popup.show( this.document.body.offsetLeft, this.document.body.offsetTop, width, height, this.document.body );
 }
 
 //-------------------------------------------------------------------------------task_menu__onclick

@@ -34,20 +34,22 @@
             </span>
             &#160;
             
-            <span style="cursor: hand" 
-                  onmouseover="this.className='hover' "
-                  onmouseout ="this.className='' "
-                  onclick    ="show_card( 'job_chains' )">
-                  
-                <xsl:element name="span">
-                    <xsl:if test="/spooler/@my_show_card='job_chains'">
-                        <xsl:attribute name="class">job_chain</xsl:attribute>
-                        <xsl:attribute name="style">font-weight: bold;</xsl:attribute>
-                    </xsl:if>
-                    Job chains
-                </xsl:element>
-            </span>
-            &#160;
+            <xsl:if test="state/job_chains/job_chain">
+                <span style="cursor: hand" 
+                    onmouseover="this.className='hover' "
+                    onmouseout ="this.className='' "
+                    onclick    ="show_card( 'job_chains' )">
+                      
+                    <xsl:element name="span">
+                        <xsl:if test="/spooler/@my_show_card='job_chains'">
+                            <xsl:attribute name="class">job_chain</xsl:attribute>
+                            <xsl:attribute name="style">font-weight: bold;</xsl:attribute>
+                        </xsl:if>
+                        Job chains
+                    </xsl:element>
+                </span>
+                &#160;
+            </xsl:if>
             
             <span style="cursor: hand" 
                   onmouseover="this.className='hover' "
@@ -866,7 +868,7 @@
 
             
             <tr><td>&#160;</td></tr>
-                
+<!--                
             <tr>
                 <td><span class="label">description:</span></td>
                 <td>
@@ -875,7 +877,7 @@
                     </div>
                 </td>
             </tr>
-                
+-->                
             <tr>
                 <td><span class="label">state:</span></td>
                 <td>

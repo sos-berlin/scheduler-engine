@@ -1,4 +1,4 @@
-// $Id: spooler_communication.cxx,v 1.89 2004/07/23 10:45:36 jz Exp $
+// $Id: spooler_communication.cxx,v 1.90 2004/07/26 12:09:58 jz Exp $
 /*
     Hier sind implementiert
 
@@ -683,7 +683,16 @@ void Communication::close( double wait_time )
 {
     //THREAD_LOCK( _semaphore )
     {
-        Z_FOR_EACH( Channel_list, _channel_list, c )  (*c)->terminate();
+        Channel_list::iterator c = _channel_list.begin();
+        while( c != _channel_list.end() )
+        {
+            Channel* channel = *c;
+            c++;
+            channel->terminate();    // Kann Channel aus _channel_list entfernen.
+        }
+
+        //c = _channel_list.begin();
+        //while( c != _channel_list.end() )  remove_channel( *c );
 
         _channel_list.clear();
 
@@ -712,8 +721,9 @@ void Communication::remove_channel( Channel* channel )
     {
         if( *it == channel )  
         {
-            (*it)->do_close(); 
+            ptr<Channel> c = *it;
             _channel_list.erase( it ); 
+            c->do_close(); 
             break;
         }
     }

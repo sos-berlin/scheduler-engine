@@ -1,4 +1,4 @@
-// $Id: spooler_log.cxx,v 1.93 2004/07/21 20:40:09 jz Exp $
+// $Id: spooler_log.cxx,v 1.94 2004/07/26 12:09:58 jz Exp $
 
 #include "spooler.h"
 #include "spooler_mail.h"
@@ -226,6 +226,12 @@ void Log::log2( Log_level level, const string& prefix, const string& line_, Pref
         if( line.length() == 0 || line[line.length()-1] != '\n' )  write( extra_log, order_log, "\n", 1 );
 
         LOG( _log_line );  _log_line = "";
+
+        
+        if( extra_log )  extra_log->signal_events();
+        if( order_log )  order_log->signal_events();
+
+        if( this == &_spooler->_base_log )  _spooler->_log.signal_events();   // Nicht schön, aber es gibt sowieso nur ein Log.
     }
 }
 
@@ -738,8 +744,6 @@ void Prefix_log::log2( Log_level level, const string& prefix, const string& line
     if( level == log_error )  _last_error_line = line;
 
     _log->log2( level, _task? "Task " + _job->name() + " " + sos::as_string(_task->id()) : _prefix, line, this, _order_log );
-
-    signal_events();
 }
 
 //----------------------------------------------------------------------------Prefix_log::add_event

@@ -1,4 +1,4 @@
-/* $Id: scheduler.css,v 1.14 2004/07/24 20:27:47 jz Exp $ */
+/* $Id: scheduler.css,v 1.15 2004/07/26 12:09:59 jz Exp $ */
 
 body         { font-family: Sans-Serif; font-size: 10pt; margin-top: 5pt; }
 th           { font-size: 10pt; }
@@ -20,12 +20,6 @@ th.head , td.head       { border-bottom: 1 solid black; border-left: 1 solid bla
 
 td.after_head_space     { margin-top: 0; margin-bottom: 0pt; line-height: 4pt; }
 
-/* 1. Spalte * /
-.column1                { padding-bottom: 1pt; padding-left: 3pt; padding-right: 2pt }
-
-/* Andere Spalten * /
-.column                 { padding-bottom: 1pt; padding-left: 3pt; padding-right: 2pt; }
-*/
 
 /* Allgemeiner Scheduler-Zustand */
 .scheduler              { background-color: #F0F0F0 }
@@ -47,4 +41,6 @@ td.after_head_space     { margin-top: 0; margin-bottom: 0pt; line-height: 4pt; }
 
 
 /* Fürs Protokoll */
-.log                    { font-family: Lucida Console, monospace; font-size: 9pt; line-height: 1.2em; }
+body.log                { margin-left: 0; padding-left: 0 }
+pre.log                 { font-family: Lucida Console, monospace; font-size: 9pt; line-height: 1.1em; margin-left: 2px; padding-left: 0 }
+
