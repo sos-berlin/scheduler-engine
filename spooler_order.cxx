@@ -1,4 +1,4 @@
-// $Id: spooler_order.cxx,v 1.38 2003/09/24 14:06:10 jz Exp $
+// $Id: spooler_order.cxx,v 1.39 2003/09/24 21:51:57 jz Exp $
 /*
     Hier sind implementiert
 
@@ -740,6 +740,7 @@ void Order::open_log()
     if( _job_chain && _spooler->_order_history_with_log && !string_begins_with( _spooler->log_directory(), "*" ) )
     {
         _log.set_filename( _spooler->log_directory() + "/order." + _job_chain->name() + "." + _id.as_string() + ".log" );      // Jobprotokoll
+        _log.set_remove_after_close( true );
         _log.open();
     }
 }
@@ -748,6 +749,7 @@ void Order::open_log()
 
 void Order::close()
 {
+/*
     if( !_log.filename().empty() )
     {
         try
@@ -759,6 +761,7 @@ void Order::close()
             _spooler->_log.warn( "FEHLER BEIM LÖSCHEN DER DATEI " + _log.filename() + ": " + x.what() );
         }
     }
+*/
 
     remove_from_job_chain();
 }
@@ -1202,7 +1205,9 @@ string Order::obj_name()
 
     THREAD_LOCK( _lock )
     {
-        result = string_from_variant(_id) + rtrim( "  " + _title );
+        if( _job_chain )  result = _job_chain->name() + " ";
+
+        result += string_from_variant(_id) + rtrim( "  " + _title );
 
         if( _setback )
             if( _setback == latter_day )  result += ", setback (Maximum erreicht)";

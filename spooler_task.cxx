@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.195 2003/09/23 15:57:16 jz Exp $
+// $Id: spooler_task.cxx,v 1.196 2003/09/24 21:51:57 jz Exp $
 /*
     Hier sind implementiert
 
@@ -816,12 +816,13 @@ bool Task::do_something()
         if( _next_time && !_let_run )  set_next_time( min( _next_time, _job->_period.end() ) );                      // Am Ende der Run_time wecken, damit die Task beendet werden kann
 
 
-  //ENDE:
+/*
         if( _state != s_running  
          && _state != s_running_delayed
          && _state != s_running_waiting_for_order
          && _state != s_running_process  
          && _state != s_suspended                 )  send_collected_log();
+*/
     }
     catch( const exception& x )
     {
@@ -841,6 +842,7 @@ void Task::load()
     if( !_spooler->log_directory().empty()  &&  _spooler->log_directory()[0] != '*' )
     {
         _log.set_filename( _spooler->log_directory() + "/task." + _job->jobname_as_filename() + "." + as_string(_id) + ".log" );      // Task-Protokoll
+        _log.set_remove_after_close( true );
         _log.open();                // Jobprotokoll. Nur wirksam, wenn set_filename() gerufen
     }
 

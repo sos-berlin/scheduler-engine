@@ -1,4 +1,4 @@
-// $Id: spooler_log.cxx,v 1.68 2003/08/25 20:41:26 jz Exp $
+// $Id: spooler_log.cxx,v 1.69 2003/09/24 21:51:57 jz Exp $
 
 #include "spooler.h"
 #include "spooler_mail.h"
@@ -347,8 +347,20 @@ void Prefix_log::close()
                 send_really();
             }
         }
-        catch( const exception&  x ) { _spooler->_log.error(x.what()); }
-        catch( const _com_error& x ) { _spooler->_log.error(bstr_as_string(x.Description())); }
+        catch( const exception&  x ) { _spooler->_log.error(x.what());                         _remove_after_close = false; }
+        catch( const _com_error& x ) { _spooler->_log.error(bstr_as_string(x.Description()));  _remove_after_close = false; }
+    }
+
+    if( _remove_after_close )
+    {
+        _remove_after_close = false;
+
+        try
+        {
+            int ret = unlink( _filename.c_str() );
+            if( ret == -1 )  throw_errno( errno, "unlink", _filename.c_str() );
+        }
+        catch( const exception&  x ) { _spooler->_log.error( string("FEHLER BEIM LÖSCHEN DER PROTOKOLLDATEI ") + x.what() ); }
     }
 }
 
@@ -360,7 +372,14 @@ void Prefix_log::close2()
     {
         log( log_info, "Protokoll endet in " + _filename );
 
-        ::close( _file ),  _file = -1;
+        try
+        {
+            int ret = ::close( _file );
+            if( ret == -1 )  throw_errno( errno, "close", _filename.c_str() );
+        }
+        catch( const exception& x ) { _spooler->_log.error( string("FEHLER BEIM LÖSCHEN DER PROTOKOLLDATEI ") + x.what() ); }
+
+        _file = -1;
 
         if( !_new_filename.empty() )
         {

@@ -1,4 +1,4 @@
-// $Id: spooler_log.h,v 1.35 2003/09/01 15:15:37 jz Exp $
+// $Id: spooler_log.h,v 1.36 2003/09/24 21:51:57 jz Exp $
 
 #ifndef __SPOOLER_LOG_H
 #define __SPOOLER_LOG_H
@@ -63,6 +63,7 @@ struct Prefix_log : Has_log
     void                    set_append                      ( bool b )                          { _append = b; }
     void                    set_filename                    ( const string& );
     string                      filename                    () const                            { return _filename; }
+    void                    set_remove_after_close          ( bool b )                          { _remove_after_close = b; }
     void                    set_new_filename                ( const string& );
     string                      new_filename                ()                                  { return _new_filename; }
     void                    set_log_level                   ( int level )                       { _log_level = level; }
@@ -172,6 +173,8 @@ struct Prefix_log : Has_log
     string                     _body;
 
     string                     _log_buffer;                 // Für Jobprotokollausgaben bis open(), also vor dem Jobstart
+
+    bool                       _remove_after_close;
 };
 
 //-------------------------------------------------------------------------------------------------
