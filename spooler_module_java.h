@@ -1,4 +1,4 @@
-// $Id: spooler_module_java.h,v 1.5 2002/11/08 18:56:35 jz Exp $
+// $Id: spooler_module_java.h,v 1.6 2002/11/08 20:11:23 jz Exp $
 
 #ifndef __SPOOLER_MODULE_JAVA_H
 #define __SPOOLER_MODULE_JAVA_H
@@ -115,6 +115,8 @@ struct Java_object : Object, Non_cloneable
 {
                                 Java_object                 ( Spooler*, jobject = NULL );
                                ~Java_object                 ();
+
+    STDMETHODIMP                QueryInterface              ( const IID&, void** );
 
     void                        operator =                  ( jobject jo )                          { assign( jo ); }
                                 operator jobject            ()                                      { return _jobject; }

@@ -1,4 +1,4 @@
-// $Id: spooler_module_java.cxx,v 1.7 2002/11/08 18:56:35 jz Exp $
+// $Id: spooler_module_java.cxx,v 1.8 2002/11/08 20:11:23 jz Exp $
 /*
     Hier sind implementiert
 
@@ -401,6 +401,7 @@ JNIEXPORT jobject JNICALL Java_sos_spooler_Idispatch_com_1call( JNIEnv* jenv, jc
                 dispparams[i].attach_bstr( NULL );
                 jstring_to_bstr( jenv, (jstring)jparam, &dispparams[i].bstrVal );
             }
+            else
             if( cls = jenv->FindClass( "sos/spooler/Idispatch" ), !cls )  return NULL;
             else
             if( jenv->IsInstanceOf( jparam, cls ) )
@@ -410,6 +411,12 @@ JNIEXPORT jobject JNICALL Java_sos_spooler_Idispatch_com_1call( JNIEnv* jenv, jc
                 {
                     dispparams[i] = (IDispatch*)jenv->GetLongField( jparam, field_id );
                 }
+            }
+            else
+            {
+                ptr<Java_object> o = Z_NEW( Java_object( java_vm->_spooler, jparam ) );
+                o->set_global();
+                dispparams[i] = o;
             }
         }
 
@@ -777,6 +784,20 @@ Java_object::Java_object( Spooler* spooler, jobject jo )
 Java_object::~Java_object()
 {
     assign( NULL );
+}
+
+//----------------------------------------------------------------------Java_object::QueryInterface
+
+STDMETHODIMP Java_object::QueryInterface( const IID& iid , void** result )
+{
+    if( iid == spooler_com::IID_Ihas_java_class_name )
+    {
+        AddRef();
+        *result = (spooler_com::Ihas_java_class_name*)this;
+        return S_OK;
+    }
+
+    return Object::QueryInterface( iid, result );
 }
 
 //------------------------------------------------------------------------------Java_object::assign
