@@ -1,4 +1,4 @@
-// $Id: spooler_module_java.cxx,v 1.52 2003/05/29 20:17:21 jz Exp $
+// $Id: spooler_module_java.cxx,v 1.53 2003/05/31 10:01:13 jz Exp $
 /*
     Hier sind implementiert
 
@@ -586,13 +586,21 @@ void Java_module_instance::load()
 
 //-----------------------------------------------------------------------Java_module_instance::call
 
-Variant Java_module_instance::call( const string& name )
+Variant Java_module_instance::call( const string& name_par )
 {
     Env e = env();
     Java_idispatch_stack_frame stack_frame;
+    bool is_optional;
+    string name = name_par;
+
+    if( name[0] == '?' )  is_optional = true,  name.erase( (int)0 );
 
     jmethodID method_id = _module->java_method_id( name );
-    if( !method_id )  throw_xc( "SPOOLER-174", name, _module->_java_class_name.c_str() );
+    if( !method_id )  
+    {
+        if( is_optional )  return Variant();
+        throw_xc( "SPOOLER-174", name, _module->_java_class_name.c_str() );
+    }
 
     Variant result;
 

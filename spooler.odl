@@ -1,4 +1,4 @@
-// $Id: spooler.odl,v 1.57 2003/03/31 11:32:52 jz Exp $
+// $Id: spooler.odl,v 1.58 2003/05/31 10:01:13 jz Exp $
 
 // Anweisung: midl /nologo /error all /out $(OutDir) $(InputPath)
 
@@ -824,6 +824,29 @@ library spooler
     {
         interface Ilog;
         interface Ihas_java_class_name;
+    }
+
+    //----------------------------------------------------------------Remote_module_instance_server
+
+    [
+        uuid       ( 3E6BF40F-E23A-457b-BF28-797B3451AED3 ),
+        odl,
+        dual
+    ]
+    interface Iremote_module_instance_server : IDispatch
+    {
+        HRESULT                 construct               ( [in] SAFEARRAY(VARIANT) parameters );
+        HRESULT                 add_obj                 ( [in] IDispatch*, [in] BSTR name );
+        HRESULT                 name_exists             ( [in] BSTR name, [out,retval] VARIANT_BOOL* result );
+        HRESULT                 call                    ( [in] BSTR name, [out,retval] VARIANT* result );
+    };
+
+    [
+        uuid       ( 0628C299-0AA2-4546-BBE7-38EBC2952834 )
+    ]
+    coclass Remote_module_instance_server
+    {
+        interface IRemote_module_instance_server;
     }
 
 };

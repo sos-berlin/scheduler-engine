@@ -1,4 +1,4 @@
-// $Id: spooler_module_remote_server.h,v 1.2 2003/05/29 20:17:21 jz Exp $
+// $Id: spooler_module_remote_server.h,v 1.3 2003/05/31 10:01:13 jz Exp $
 
 #ifndef __SPOOLER_MODULE_REMOTE_SERVER_H
 #define __SPOOLER_MODULE_REMOTE_SERVER_H
@@ -8,25 +8,44 @@
 namespace sos {
 namespace spooler {
 
-//-------------------------------------------------------------------------------------------------
-
-Z_DEFINE_GUID( CLSID_Remote_module_instance_server, 0x0628c299, 0x0aa2, 0x4546, 0xbb, 0xe7, 0x38, 0xeb, 0xc2, 0x95, 0x28, 0x34 );   // {0628C299-0AA2-4546-BBE7-38EBC2952834}
-Z_DEFINE_GUID(   IID_Remote_module_instance_server, 0x3e6bf40f, 0xe23a, 0x457b, 0xbf, 0x28, 0x79, 0x7b, 0x34, 0x51, 0xae, 0xd3 );   // {3E6BF40F-E23A-457b-BF28-797B3451AED3}
-
 //--------------------------------------------------------------------Remote_module_instance_server
 
-struct Remote_module_instance_server : Com_module_instance_base
+struct Remote_module_instance_server : spooler_com::Iremote_module_instance_server,
+                                       Sos_ole_object,
+                                       Com_module_instance_base
+
 {
-                                Remote_module_instance_server()                                 : Com_module_instance_base(NULL), _zero_(this+1) {}
+                Sos_ole_object::operator new;
+                Sos_ole_object::operator delete;
+
+
+                                Remote_module_instance_server();
                                ~Remote_module_instance_server();
 
-    static HRESULT              create_instance             ( const CLSID&, IUnknown** );
+    static HRESULT              create_instance             ( const IID&, ptr<IUnknown>* );
 
-    STDMETHODIMP               _spooler_construct           ( SAFEARRAY* );
-    STDMETHODIMP               _spooler_add_obj             ( IDispatch*, BSTR name );
+    STDMETHODIMP                QueryInterface              ( const IID&, void** );
+    USE_SOS_OLE_OBJECT_WITHOUT_QI
+/*
+    STDMETHODIMP_(ulong)        AddRef                      ()                                      { return Object::AddRef(); }
+    STDMETHODIMP_(ulong)        Release                     ()                                      { return Object::Release(); }
+    STDMETHODIMP                GetTypeInfoCount            ( UINT* result )                        { *result = 0; return E_FAIL; }
+    STDMETHODIMP                GetTypeInfo                 ( UINT, LCID, ITypeInfo** )             { return E_FAIL; }
+    STDMETHODIMP                GetIDsOfNames               ( REFIID, OLECHAR**, UINT, LCID, DISPID* );
+    STDMETHODIMP                Invoke                      ( DISPID, REFIID, LCID, WORD, DISPPARAMS*, VARIANT*, EXCEPINFO*, UINT* );
+*/
+
+    STDMETHODIMP                construct                   ( SAFEARRAY* );
+    STDMETHODIMP                add_obj                     ( IDispatch*, BSTR name );
+    STDMETHODIMP                name_exists                 ( BSTR name, VARIANT_BOOL* result );
+    STDMETHODIMP                call                        ( BSTR name, VARIANT* result );
+
+    void                        load_implicitly             ();
 
 
     Fill_zero                  _zero_;
+    ptr<Module_instance>       _module_instance;
+    bool                       _loaded_and_started;
 };
 
 //-------------------------------------------------------------------------------------------------

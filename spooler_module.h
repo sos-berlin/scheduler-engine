@@ -1,4 +1,4 @@
-// $Id: spooler_module.h,v 1.18 2003/05/29 20:17:21 jz Exp $
+// $Id: spooler_module.h,v 1.19 2003/05/31 10:01:13 jz Exp $
 
 #ifndef __SPOOLER_MODULE_H
 #define __SPOOLER_MODULE_H
@@ -34,12 +34,18 @@ struct Source_part
 
 struct Source_with_parts
 {
+                                Source_with_parts           ()                                      {}
+                                Source_with_parts           ( const string& text )                  { assign( text); }
+
     void                        add                         ( int linenr, const string& text, const Time& mod_time );
     bool                        empty                       ()                                      { return _parts.empty(); }
     void                        clear                       ()                                      { _parts.clear(); }
 
     string                      text                        () const                                { return zschimmer::join( SYSTEM_NL, _parts ); }
                                 operator string             () const                                { return text(); }
+
+    Source_with_parts&          operator =                  ( const string& text )                  { assign( text );  return *this; }
+    void                        assign                      ( const string& text )                  { clear(); add( 1, text, Time(0) ); }
 
     typedef list<Source_part>   Parts;
 
@@ -49,7 +55,7 @@ struct Source_with_parts
 
 //-------------------------------------------------------------------------------------------Module
 
-struct Module
+struct Module : Object
 {
     enum Reuse
     {
@@ -68,13 +74,15 @@ struct Module
         kind_remote
     };
 
-                                Module                      ( Spooler* sp, Prefix_log* log )         : _spooler(sp), _log(log) {}
-    explicit                    Module                      ( Spooler* sp, const xml::Element_ptr& e, const Time& xml_mod_time, const string& include_path )  : _spooler(sp) { set_dom(e,xml_mod_time,include_path); }
+                                Module                      ( Spooler* sp, Prefix_log* log )        : _zero_(this+1), _spooler(sp), _log(log) {}
+    explicit                    Module                      ( Spooler* sp, const xml::Element_ptr& e, const Time& xml_mod_time, const string& include_path )  : _zero_(this+1), _spooler(sp) { set_dom(e,xml_mod_time,include_path); }
                                ~Module                      ()                                      {}
 
     void                        set_dom                     ( const xml::Element_ptr& e, const Time& xml_mod_time, const string& include_path )  { set_dom_without_source(e); set_dom_source_only(e,xml_mod_time,include_path); }
     void                        set_dom_without_source      ( const xml::Element_ptr& );
     void                        set_dom_source_only         ( const xml::Element_ptr&, const Time& xml_mod_time, const string& include_path );
+    void                        set_source_only             ( const Source_with_parts& );
+    void                        init                        ();
 
 
     ptr<Module_instance>        create_instance             ();
@@ -87,6 +95,8 @@ struct Module
     bool                        make_java_class             ( bool force = false );                 // in spooler_module_java.cxx
     jmethodID                   java_method_id              ( const string& name );                 // in spooler_module_java.cxx
 
+
+    Fill_zero                  _zero_;
     Spooler*                   _spooler;
     Prefix_log*                _log;
     bool                       _set;
@@ -122,7 +132,7 @@ struct Module
 struct Module_instance : Object 
 {
     Z_GNU_ONLY(                 Module_instance             ();  )                                  // Für gcc 3.2. Nicht implementiert.
-                                Module_instance             ( Module* module )                      : _zero_(this+1), _module(module), _log(module->_log) {}
+                                Module_instance             ( Module* module )                      : _zero_(this+1), _module(module), _log(module?module->_log:NULL) {}
     virtual                    ~Module_instance             ()                                      {}      // Für gcc 3.2
 
     virtual void                close                       ()                                      = 0;
@@ -141,7 +151,7 @@ struct Module_instance : Object
 
     Fill_zero                  _zero_;
     Prefix_log*                _log;
-    Module*                    _module;
+    ptr<Module>                _module;
 
     ptr<Com_context>           _com_context;
     ptr<IDispatch>             _idispatch;

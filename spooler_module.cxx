@@ -1,4 +1,4 @@
-// $Id: spooler_module.cxx,v 1.17 2003/05/29 20:17:21 jz Exp $
+// $Id: spooler_module.cxx,v 1.18 2003/05/31 10:01:13 jz Exp $
 /*
     Hier sind implementiert
 
@@ -31,50 +31,14 @@ void Module::set_dom_without_source( const xml::Element_ptr& element )
 {
     _source.clear();  //clear();
 
-    _language       = element.getAttribute( "language"  );
-    _com_class_name = element.getAttribute( "com_class" );
-    _filename       = element.getAttribute( "filename"  );
-
-    _java_class_name  = element.getAttribute( "java_class" );
+    _language         = element.getAttribute     ( "language"  );
+    _com_class_name   = element.getAttribute     ( "com_class" );
+    _filename         = element.getAttribute     ( "filename"  );
+    _java_class_name  = element.getAttribute     ( "java_class" );
     _recompile        = element.bool_getAttribute( "recompile" );
     _separate_process = element.bool_getAttribute( "separate_process" );
 
-    if( _separate_process )
-    {
-        _kind = kind_remote;
-    }
-    else
-    {
-#     ifdef Z_WINDOWS
-        if( _com_class_name != "" )
-        {
-            _kind = kind_com;
-        
-            if( _language        != "" )  throw_xc( "SPOOLER-145" );
-            if( _java_class_name != "" )  throw_xc( "SPOOLER-168" );
-        }
-        else
-#     endif
-
-        if( _java_class_name != ""  ||  lcase(_language) == "java" )
-        {
-            _kind = kind_java;
-     
-            if( _language == "" )  _language = "Java";
-
-            if( lcase(_language) != "java" )  throw_xc( "SPOOLER-166" );
-            if( _com_class_name  != ""     )  throw_xc( "SPOOLER-168" );
-
-            _spooler->_has_java = true;
-        }
-        else
-        {
-            _kind = kind_scripting_engine;
-             if( _language == "" )  _language = SPOOLER_DEFAULT_LANGUAGE;
-        }
-    }
-
-    string use_engine = element.getAttribute( "use_engine" );
+    string use_engine = element.getAttribute     ( "use_engine" );
     
     if( use_engine == ""
      || use_engine == "task" )  _reuse = reuse_task;
@@ -82,11 +46,18 @@ void Module::set_dom_without_source( const xml::Element_ptr& element )
     if( use_engine == "job"  )  _reuse = reuse_job;
 }
 
-//----------------------------------------------------------------------------------Module::set_dom
+//----------------------------------------------------------------------Module::set_dom_source_only
 
 void Module::set_dom_source_only( const xml::Element_ptr& element, const Time& xml_mod_time, const string& include_path )
 {
-    _source = text_from_xml_with_include( element, xml_mod_time, include_path );
+    set_source_only( text_from_xml_with_include( element, xml_mod_time, include_path ) );
+}
+
+//--------------------------------------------------------------------------Module::set_source_only
+
+void Module::set_source_only( const Source_with_parts& source )
+{
+    _source = source;
 
     switch( _kind )
     {
@@ -114,6 +85,46 @@ void Module::set_dom_source_only( const xml::Element_ptr& element, const Time& x
     clear_java();
 
     _set = true;
+}
+
+//-------------------------------------------------------------------------------------Module::init
+
+void Module::init()
+{
+    if( _separate_process )
+    {
+        _kind = kind_remote;
+    }
+    else
+    {
+#     ifdef Z_WINDOWS
+        if( _com_class_name != "" )
+        {
+            _kind = kind_com;
+        
+            if( _language        != "" )  throw_xc( "SPOOLER-145" );
+            if( _java_class_name != "" )  throw_xc( "SPOOLER-168" );
+        }
+        else
+#     endif
+
+        if( _java_class_name != ""  ||  lcase(_language) == "java" )
+        {
+            _kind = kind_java;
+     
+            if( _language == "" )  _language = "Java";
+
+            if( lcase(_language) != "java" )  throw_xc( "SPOOLER-166" );
+            if( _com_class_name  != ""     )  throw_xc( "SPOOLER-168" );
+
+            if( _spooler )  _spooler->_has_java = true;
+        }
+        else
+        {
+            _kind = kind_scripting_engine;
+             if( _language == "" )  _language = SPOOLER_DEFAULT_LANGUAGE;
+        }
+    }
 }
 
 //--------------------------------------------------------------------------Module::create_instance
@@ -199,7 +210,7 @@ void Module_instance::close()
         }
         catch( const Xc& x ) 
         { 
-            _log->error( x.what() ); 
+            if( _log )  _log->error( x.what() ); 
         }
     }
 

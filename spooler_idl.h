@@ -1,4 +1,4 @@
-// $Id: spooler_idl.h,v 1.12 2003/03/15 18:06:37 jz Exp $
+// $Id: spooler_idl.h,v 1.13 2003/05/31 10:01:13 jz Exp $
 
 
 /*  Ersatz für spooler.odl für Systeme ohne COM. 
@@ -456,6 +456,17 @@ struct Iorder : IDispatch
     virtual HRESULT     get_payload                 ( VARIANT* result ) = 0;
 
     virtual HRESULT         payload_is_type         ( BSTR name, VARIANT_BOOL* result ) = 0;
+};
+
+//--------------------------------------------------------------------Remote_module_instance_server
+
+DEFINE_GUID( CLSID_Remote_module_instance_server, 0x0628c299, 0x0aa2, 0x4546, 0xbb, 0xe7, 0x38, 0xeb, 0xc2, 0x95, 0x28, 0x34 );   // {0628C299-0AA2-4546-BBE7-38EBC2952834}
+DEFINE_GUID(   IID_Remote_module_instance_server, 0x3e6bf40f, 0xe23a, 0x457b, 0xbf, 0x28, 0x79, 0x7b, 0x34, 0x51, 0xae, 0xd3 );   // {3E6BF40F-E23A-457b-BF28-797B3451AED3}
+
+struct Iremote_module_instance_server : IDispatch
+{
+    HRESULT            _spooler_construct           ( SAFEARRAY* parameters ) = 0;
+    HRESULT            _spooler_add_obj             ( IDispatch*, BSTR name ) = 0;
 };
 
 //-------------------------------------------------------------------------------------------------

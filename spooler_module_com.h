@@ -1,4 +1,4 @@
-// $Id: spooler_module_com.h,v 1.6 2002/12/04 17:30:21 jz Exp $
+// $Id: spooler_module_com.h,v 1.7 2003/05/31 10:01:13 jz Exp $
 
 #ifndef __SPOOLER_MODULE_COM_H
 #define __SPOOLER_MODULE_COM_H
@@ -15,7 +15,7 @@ bool                            check_result                ( const Variant& vt 
 
 struct Com_module_instance_base : Module_instance
 {
-                                Com_module_instance_base    ( Module* script )                      : Module_instance(script), _zero_(this+1) {}
+                                Com_module_instance_base    ( Module* module )                      : Module_instance(module), _zero_(this+1) {}
 
     void                        init                        ();
     IDispatch*                  dispatch                    () const                                { return _idispatch; }
@@ -38,7 +38,7 @@ struct Com_module_instance_base : Module_instance
 
 struct Com_module_instance : Com_module_instance_base
 {
-                                Com_module_instance         ( Module* script )                      : Com_module_instance_base(script), _zero_(this+1) {}
+                                Com_module_instance         ( Module* module )                      : Com_module_instance_base(module), _zero_(this+1) {}
                                ~Com_module_instance         ();
 
     void                        init                        ();

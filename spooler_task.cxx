@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.148 2003/05/23 06:40:28 jz Exp $
+// $Id: spooler_task.cxx,v 1.149 2003/05/31 10:01:13 jz Exp $
 /*
     Hier sind implementiert
 
@@ -324,6 +324,7 @@ void Job::set_dom( const xml::Element_ptr& element, const Time& xml_mod_time )
             if( e.nodeName_is( "script"     ) )  
             {
                 _module.set_dom_without_source( e );
+                _module.init();
                 _module_xml_document  = e.ownerDocument();
                 _module_xml_element   = e;
                 _module_xml_mod_time  = xml_mod_time;

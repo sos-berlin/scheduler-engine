@@ -1,4 +1,4 @@
-// $Id: spooler_module_remote.cxx,v 1.2 2003/05/29 20:17:21 jz Exp $
+// $Id: spooler_module_remote.cxx,v 1.3 2003/05/31 10:01:13 jz Exp $
 /*
     Hier sind implementiert
 
@@ -29,13 +29,10 @@ void Remote_module_instance_proxy::init()
 {
     HRESULT hr;
 
-    hr = com_create_instance_in_separate_process( CLSID_Remote_module_instance_server, NULL, 0, IID_Remote_module_instance_server, (void**)&_remote_instance );
+    hr = com_create_instance_in_separate_process( spooler_com::CLSID_Remote_module_instance_server, NULL, 0, spooler_com::IID_Iremote_module_instance_server, (void**)&_remote_instance );
     if( FAILED(hr) )  throw_ole( hr, "com_create_instance_in_separate_process" );
 
-    _idispatch = _remote_instance;
-
-
-    Variant params ( Variant::vt_array, 5 );
+    Variant params ( Variant::vt_array, 6 );
 
     {
         Locked_safearray params_array = V_ARRAY( &params );
@@ -48,14 +45,16 @@ void Remote_module_instance_proxy::init()
         params_array[5] = "script="     + _module->_source.text();
     }
 
-    _remote_instance->call( "_spooler_construct", params );
+    _remote_instance->call( "construct", params );
+
+    _idispatch = _remote_instance;
 }
 
 //---------------------------------------------------------------Remote_module_instance_proxy::load
 
 void Remote_module_instance_proxy::load()
 {
-    _remote_instance->call( "_spooler_load" );
+    //_remote_instance->call( "load" );
 }
 
 //--------------------------------------------------------------Remote_module_instance_proxy::close
@@ -76,21 +75,21 @@ IDispatch* Remote_module_instance_proxy::dispatch() const
 
 void Remote_module_instance_proxy::add_obj( const ptr<IDispatch>& object, const string& name )
 {
-    _remote_instance->call( "_spooler_add_obj", +object, name );
+    _remote_instance->call( "add_obj", +object, name );
 }
 
 //--------------------------------------------------------Remote_module_instance_proxy::name_exists
 
 bool Remote_module_instance_proxy::name_exists( const string& name )
 {
-    return true;
+    return int_from_variant( _remote_instance->call( "name_exists", name ) ) != 0;
 }
 
 //---------------------------------------------------------------Remote_module_instance_proxy::call
 
 Variant Remote_module_instance_proxy::call( const string& name )
 {
-    return _remote_instance->call( "?" + name );     // "?": Methode ist optional. Wenn es sie nicht gibt, kommt VT_EMPTY zurück
+    return _remote_instance->call( "call", "?" + name );     // "?": Methode ist optional. Wenn es sie nicht gibt, kommt VT_EMPTY zurück
 }
 
 //-------------------------------------------------------------------------------------------------
