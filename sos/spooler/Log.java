@@ -1,4 +1,4 @@
-// $Id: Log.java,v 1.3 2002/11/14 12:34:50 jz Exp $
+// $Id: Log.java,v 1.4 2003/02/25 20:33:49 jz Exp $
 
 package sos.spooler;
 
@@ -15,7 +15,7 @@ public class Log extends Idispatch
 
     public void                 log                     ( int level, String line )                  { com_call( "log"   , new Integer(level), line ); }
     public void                 error                   ( String line )                             { com_call( "error" , line ); }
-    public void                 warn                    ( String line )                             { com_call( "warn  ", line ); }
+    public void                 warn                    ( String line )                             { com_call( "warn"  , line ); }
     public void                 info                    ( String line )                             { com_call( "info"  , line ); }
     public void                 debug                   ( String line )                             { com_call( "debug" , line ); }
     public void                 debug1                  ( String line )                             { com_call( "debug1", line ); }

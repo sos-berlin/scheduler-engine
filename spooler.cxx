@@ -1,4 +1,4 @@
-// $Id: spooler.cxx,v 1.173 2003/02/24 18:57:34 jz Exp $
+// $Id: spooler.cxx,v 1.174 2003/02/25 20:33:47 jz Exp $
 /*
     Hier sind implementiert
 
@@ -58,7 +58,7 @@ const double wait_step_for_thread_termination2           = 600.0;       // 2. Nö
 static bool                     is_daemon               = false;
 //static int                      daemon_starter_pid;
 //bool                          spooler_is_running      = false;
-       bool                     ctrl_c_pressed          = false;
+       int                      ctrl_c_pressed          = 0;
 static Spooler*                 spooler                 = NULL;
 
 
@@ -184,7 +184,7 @@ With_log_switch read_profile_with_log( const string& profile, const string& sect
     {
         if( dwCtrlType == CTRL_C_EVENT  &&  !ctrl_c_pressed )
         {
-            ctrl_c_pressed = true;
+            ctrl_c_pressed++;
             //Kein Systemaufruf hier! (Aber bei Ctrl-C riskieren wir einen Absturz. Ich will diese Meldung sehen.)
             fprintf( stderr, "Spooler wird wegen Ctrl-C beendet ...\n" );
             spooler->async_signal( "Ctrl+C" );
@@ -202,7 +202,7 @@ With_log_switch read_profile_with_log( const string& profile, const string& sect
 
         //if( !ctrl_c_pressed )
         //{
-            ctrl_c_pressed = true;
+            ctrl_c_pressed++;
             //Kein Systemaufruf hier! (Aber bei Ctrl-C riskieren wir einen Absturz. Ich will diese Meldung sehen.)
             if( !is_daemon )  fprintf( stderr, "Spooler wird wegen kill -%d beendet ...\n", sig );
 
@@ -405,7 +405,7 @@ void Spooler::wait_until_threads_stopped( Time until )
 
             int index = wait_handles.wait_until( until_step );
 
-            if( ctrl_c_pressed )  set_state( s_stopping ),  signal_threads( "ctrl_c" );
+            if( ctrl_c_pressed >= 2 )  set_state( s_stopping ),  signal_threads( "ctrl_c" );
             _event.reset();
 
             if( index >= 0 ) 
@@ -461,7 +461,7 @@ void Spooler::wait_until_threads_stopped( Time until )
                 Time now = Time::now();
                 if( now > until_step )  break;
                 _event.wait( min( 1.0, (double)( until_step - now ) ) );
-                if( ctrl_c_pressed )  set_state( s_stopping ),  signal_threads( "ctrl_c" );
+                if( ctrl_c_pressed >= 2 )  set_state( s_stopping ),  signal_threads( "ctrl_c" );
                 _event.reset();
             }
 

@@ -1,4 +1,4 @@
-// $Id: spooler_time.cxx,v 1.35 2003/02/24 18:57:35 jz Exp $
+// $Id: spooler_time.cxx,v 1.36 2003/02/25 20:33:48 jz Exp $
 /*
     Hier sind implementiert
 
@@ -92,11 +92,17 @@ Time Time::now()
         return timegm( &local_tm ) + (double)tv.tv_usec / 1e6;
 
 #   elif defined SYSTEM_HPUX
-        timeval  tv;
-        struct timezone tz;
 
-        gettimeofday( &tv, &tz );
-        return (double)tv.tv_sec + (double)tv.tv_usec / (double)1e9 - timezone - ( daylight? _dstbias : 0 );  // dsttime ist im Winter gesetzt? Das ist doch falsch.   - ( tz.tz_dsttime? _dstbias : 0 );
+        timeval  tv;
+        tm       local_tm;
+
+        gettimeofday( &tv, NULL );
+        localtime_r( &tv.tv_sec, &local_tm );
+
+        return (double)tv.tv_sec + (double)tv.tv_usec / (double)1e9 - timezone - ( local_tm.tm_isdst? _dstbias : 0 ); 
+
+        //gettimeofday( &tv, &tz );
+        //return (double)tv.tv_sec + (double)tv.tv_usec / (double)1e9 - timezone - ( daylight? _dstbias : 0 );  // dsttime ist im Winter gesetzt? Das ist doch falsch.   - ( tz.tz_dsttime?_dstbias : 0 );
 
 #   else
 
