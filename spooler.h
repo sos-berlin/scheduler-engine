@@ -69,6 +69,7 @@ using namespace zschimmer::com;
 namespace sos {
     namespace spooler {
         using namespace std;
+        struct Communication;
         struct Spooler;
         struct Spooler_thread;
         struct Job;
@@ -89,8 +90,8 @@ namespace sos {
 #include "spooler_mail.h"
 #include "spooler_log.h"
 #include "spooler_wait.h"
-#include "spooler_http.h"
 #include "spooler_communication.h"
+#include "spooler_http.h"
 #include "spooler_security.h"
 #include "spooler_command.h"
 #include "spooler_module.h"

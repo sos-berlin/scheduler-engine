@@ -29,7 +29,6 @@ namespace spooler {
 
 //inline bool operator < ( const in_addr& a, const in_addr& b )  { return a.s_addr < b.s_addr; }  // Für map<>
 
-
 //---------------------------------------------------------------------------------------------Host
 
 struct Host
@@ -80,56 +79,18 @@ struct Named_host : Host
     string                     _name;
 };
 
-//-----------------------------------------------------------------------------------Xml_end_finder
-
-const int xml_end_finder_token_count = 2;
-
-struct Xml_end_finder
-{
-    // Findet das Ende eines XML-Dokuments
-
-    enum Tok { cdata_tok, comment_tok };
-
-
-    struct Tok_entry
-    {
-                                Tok_entry                   ()                          : _index(0),_active(false) {}
-
-        void                    reset                       ()                          { _index = 0; _active = false; }
-        bool                    step_begin                  ( char );
-        void                    step_end                    ( char );
-
-        int                    _index;
-        bool                   _active;
-        const char*            _begin;
-        const char*            _end;
-    };
-
-
-                                Xml_end_finder              ();
-
-    bool                        is_complete                 ( const char* p, int length );
-
-    Fill_zero                  _zero_;
-
-    int                        _open_elements;              // Anzahl der offenen Elemente (ohne <?..?> und <!..>)
-    bool                       _at_start_tag;               // Letztes Zeichen war '<'
-    bool                       _in_special_tag;             // <?, <!
-    bool                       _in_tag;                 
-    bool                       _in_end_tag;             
-    bool                       _xml_is_complete;
-    char                       _last_char;
-    Tok_entry                  _tok [xml_end_finder_token_count];
-};
-
 //------------------------------------------------------------------------------------Communication
 
 struct Communication //: zschimmer::Thread
-{                                                 
+{       
+    struct Processor_channel;
+    struct Processor;
+
+
     struct Channel : zschimmer::Socket_operation
     {
                                 Channel                     ( Communication* );
-                               ~Channel                     ();
+                            ~Channel                     ();
 
         void                    terminate                   ();
 
@@ -150,24 +111,18 @@ struct Communication //: zschimmer::Thread
         Communication*         _communication;
         Named_host             _host;
 
-        string                 _text;
-
-        bool                   _indent;                     // XML-Antwort einrücken
+        bool                   _responding;
         bool                   _receive_at_start;
-        bool                   _is_http;
-        bool                   _receive_is_complete;
         bool                   _eof;
 
-        Xml_end_finder         _xml_end_finder;
-        ptr<Http_parser>       _http_parser;
-        ptr<Http_request>      _http_request;
-        ptr<Http_response>     _http_response;
-
         int                    _socket_send_buffer_size;
-        bool                   _send_is_complete;
+        string                 _send_data;
         int                    _send_progress;
         bool                   _dont_receive;               // Bei terminate() ist Empfang gesperrt
         Prefix_log             _log;
+
+        ptr<Processor_channel>  _processor_channel;
+        ptr<Processor>          _processor;
     };
 
 
@@ -196,6 +151,74 @@ struct Communication //: zschimmer::Thread
         Communication*         _communication;
     };
 
+
+    struct Processor : Object
+    {
+                                Processor                   ( Processor_channel* pc )               : _zero_(this+1), _channel(pc->_channel), _spooler(pc->_spooler), _processor_channel(pc) {}
+
+
+        void                    set_host                    ( Host* host )                          { _host = host; }
+
+        virtual void            put_request_part            ( const char*, int length )             = 0;
+        virtual bool            request_is_complete         ()                                      = 0;
+
+        virtual void            process                     ()                                      = 0;
+
+        virtual bool            response_is_complete        ()                                      = 0;
+        virtual string          get_response_part           ()                                      = 0;
+        virtual bool            should_close_connection     ()                                      { return false; }
+
+
+        Fill_zero              _zero_;
+        Spooler*               _spooler;
+        Channel*               _channel;
+        Processor_channel*     _processor_channel;
+        Host*                  _host;
+    };
+
+
+
+    struct Processor_channel : Object
+    {
+                                Processor_channel           ( Channel* ch )                        : _spooler(ch->_spooler), _channel(ch) {}
+
+
+        virtual ptr<Processor>  processor                   ()                                      = 0;
+
+
+        Spooler*               _spooler;
+        Channel*               _channel;
+    };
+
+
+    /*  
+        Ablauf:
+
+
+        accept();
+        ptr<Processor_channel> processor_channel;
+
+        while(1)
+        {
+            ptr<Processor> processor = processor_channel->processor();
+
+            while(1)
+            {
+                recv( &data, length );
+                processor->put_request_part( data, length );
+                if( processor->request_is_complete() )  break;
+            }
+
+            processor->process();
+
+            while( !processor->response_is_complete() )  send( processor->get_response_part() );
+
+            if( processor->should_close_connection() )  break;
+        }
+    */
+
+
+
     typedef list< ptr<Channel> >  Channel_list;
 
 
@@ -219,8 +242,11 @@ struct Communication //: zschimmer::Thread
     int                         bind_socket                 ( SOCKET, struct sockaddr_in* );
   //void                       _fd_set                      ( SOCKET, fd_set* );
 
+  public:
     Fill_zero                  _zero_;
     Spooler*                   _spooler;
+
+  private:
     Listen_socket              _listen_socket;
     Udp_socket                 _udp_socket;
     Channel_list               _channel_list;

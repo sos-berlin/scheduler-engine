@@ -11,6 +11,11 @@ namespace spooler {
 
 const int                       recommended_chunk_size = 32768;
 
+//-------------------------------------------------------------------------------------------------
+
+struct Http_processor_channel;
+struct Http_processor;
+
 //-------------------------------------------------------------------------------------Http_request
 
 struct Http_request : Object
@@ -227,6 +232,40 @@ struct Http_response : Object
     bool                       _chunk_eof;
     bool                       _eof;
     bool                       _finished;
+};
+
+//-----------------------------------------------------------------------------------Http_processor
+
+struct Http_processor : Communication::Processor
+{
+                                Http_processor              ( Http_processor_channel* );
+
+
+    void                        put_request_part            ( const char* data, int length )        { _http_parser->add_text( data, length ); }
+    bool                        request_is_complete         ()                                      { return !_http_parser  ||  _http_parser->is_complete(); }
+
+    void                        process                     ();
+
+    bool                        response_is_complete        ();
+    string                      get_response_part           ();
+    bool                        should_close_connection     ();
+
+
+    Fill_zero                  _zero_;
+  //Channel*                   _channel;
+    ptr<Http_request>          _http_request;
+    ptr<Http_parser>           _http_parser;
+    ptr<Http_response>         _http_response;
+};
+
+//---------------------------------------------------------------------------Http_processor_channel
+
+struct Http_processor_channel : Communication::Processor_channel
+{
+                                Http_processor_channel      ( Communication::Channel* ch )          : Communication::Processor_channel( ch ) {}
+
+    ptr<Communication::Processor> processor                 ()                                      { ptr<Http_processor> result = Z_NEW( Http_processor( this ) ); 
+                                                                                                      return +result; }
 };
 
 //-------------------------------------------------------------------------------------------------

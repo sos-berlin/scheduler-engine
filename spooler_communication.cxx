@@ -2,7 +2,6 @@
 /*
     Hier sind implementiert
 
-    Xml_end_finder
     Communication::Channer
     Communication
 */
@@ -11,7 +10,7 @@
 #include "spooler.h"
 #include "../kram/sleep.h"
 #include "../kram/sos_java.h"
-
+#include "../zschimmer/xml_end_finder.h"
 
 using namespace std;
 
@@ -39,6 +38,88 @@ const int wait_for_port_available = 60;   // Soviele Sekunden warten, bis TCP- o
 #ifndef INADDR_NONE
 #   define INADDR_NONE (-1)
 #endif
+
+//-------------------------------------------------------------------------------------------------
+
+struct Xml_processor_channel;
+
+//------------------------------------------------------------------------------------Xml_processor
+
+struct Xml_processor : Communication::Processor
+{
+                                Xml_processor               ( Xml_processor_channel* );
+
+  //void                        new_request                 ();
+    void                        put_request_part            ( const char*, int length );
+    bool                        request_is_complete         ()                                      { return _request_is_complete; }
+
+    void                        process                     ();
+
+    bool                        response_is_complete        ()                                      { return true; }
+    string                      get_response_part           ()                                      { string result = _response;  _response = "";  return result; }
+
+    Fill_zero                  _zero_;
+    Xml_processor_channel*     _processor_channel;
+    bool                       _request_is_complete;
+    Xml_end_finder             _xml_end_finder;
+    string                     _request;
+    string                     _response;
+};
+
+//------------------------------------------------------------------------------Xml_processor_channel
+
+struct Xml_processor_channel : Communication::Processor_channel
+{
+                                Xml_processor_channel         ( Communication::Channel* channel )   : Communication::Processor_channel( channel ) {}
+
+
+    ptr<Communication::Processor> processor                   ()                                    { ptr<Xml_processor> result = Z_NEW( Xml_processor( this ) ); 
+                                                                                                      return +result; }
+
+    bool                       _indent;
+};
+
+//---------------------------------------------------------------------Xml_processor::Xml_processor
+
+Xml_processor::Xml_processor( Xml_processor_channel* processor_class )
+: 
+    _zero_(this+1), 
+    Processor( processor_class ),
+    _processor_channel( processor_class )
+{
+}
+
+//------------------------------------------------------------Xml_processor::put_request_part
+
+void Xml_processor::put_request_part( const char* data, int length )
+{
+    _request_is_complete = _xml_end_finder.is_complete( data, length );
+
+    if( length >= 2  &&  data[ length - 2 ] == '\r' )
+    {
+        _processor_channel->_indent = true;      // CR LF am Ende lässt Antwort einrücken. CR LF soll nur bei telnet-Eingabe kommen.
+    }
+
+    _request.append( data, length );
+}
+
+//----------------------------------------------------------------Xml_processor::process
+
+void Xml_processor::process()
+{
+    Command_processor command_processor ( _spooler );
+
+    if( _host )  command_processor.set_host( _host );
+
+    if( string_begins_with( _request, " " ) )  _request = ltrim( _request );
+
+    _channel->_log.info( "Kommando " + _request );
+    _response = command_processor.execute( _request, Time::now(), _processor_channel->_indent );
+
+    if( _processor_channel->_indent )  _response = replace_regex( _response, "\n", "\r\n" );      // Für Windows-telnet
+
+    if( command_processor._error )  _channel->_log.error( command_processor._error->what() );
+}
 
 //---------------------------------------------------------------------------------------socket_errno
 /*
@@ -135,119 +216,6 @@ void Named_host::set_name()
     _name = h->h_name;
 }
 
-//-------------------------------------------------------------------Xml_end_finder::Xml_end_finder
-
-Xml_end_finder::Xml_end_finder()
-: 
-    _zero_(this+1) 
-{
-    _tok[cdata_tok  ]._begin = "<![CDATA[";
-    _tok[cdata_tok  ]._end   = "]]>";
-    _tok[comment_tok]._begin = "<!--";
-    _tok[comment_tok]._end   = "-->";
-}
-
-//-----------------------------------------------------------------------Xml_end_finder::step_begin
-
-bool Xml_end_finder::Tok_entry::step_begin( char c )      
-{ 
-    if( c == _begin[_index] )
-    {
-        _index++; 
-    
-        if( _begin[_index] == '\0' ) 
-        {
-            _index = 0; 
-            _active = true;
-            return true;
-        }
-    }
-    else  
-    {
-        _index = 0; 
-    }
-
-    return false;
-}
-
-//--------------------------------------------------------------Xml_end_finder::Tok_entry::step_end
-
-void Xml_end_finder::Tok_entry::step_end( char c )      
-{ 
-    if( c == _end[_index] )
-    {
-        _index++; 
-        if( _end[_index] == '\0' )  _index = 0, _active = false;
-    }
-    else  
-        _index = 0; 
-}
-
-//----------------------------------------------------------------------Xml_end_finder::is_complete
-
-bool Xml_end_finder::is_complete( const char* p, int len )
-{
-    const char* p0 = p;
-    while( p < p0+len )
-    {
-        if( *p != '\0' ) 
-        {
-            if( _tok[cdata_tok  ]._active )  _tok[cdata_tok  ].step_end( *p );
-            else
-            if( _tok[comment_tok]._active )  _tok[comment_tok].step_end( *p );
-            else
-            if( _in_tag )
-            {
-                if( _at_start_tag ) 
-                {
-                    if( *p == '/' )  _in_end_tag = true;               // "</"
-                    else
-                    if( !isalpha( (Byte)*p ) )  _in_special_tag = true;
-                    _at_start_tag = false;
-                }
-                else
-                if( *p == '>' ) 
-                {
-                    _in_tag = false;
-                    
-                    if( _in_end_tag ) 
-                    {
-                        _open_elements--;
-                        if( _open_elements == 0 )  { _xml_is_complete = true; break; }
-                    }
-                    else
-                    if( !_in_special_tag )
-                    {
-                        if( _last_char != '/' )  _open_elements++;
-                        else 
-                        if( _open_elements == 0 )  { _xml_is_complete = true; break; }     // Das Dokument ist nur ein leeres XML-Element
-                    }
-                    
-                    _in_special_tag = false;
-                }
-            }
-            else
-            {
-                bool in_something = false;
-                in_something |= _tok[cdata_tok  ].step_begin( *p );    
-                in_something |= _tok[comment_tok].step_begin( *p );
-
-                if( in_something )  _at_start_tag = false, _in_tag = false, _in_special_tag = false;
-                else
-                if( *p == '<' )  _in_tag = true, _at_start_tag = true;
-                else
-              //if( _open_elements == 0  &&  !isspace( (Byte)*p ) )  { _xml_is_complete = true; break; }  // Das ist ein Fehler
-                if( _open_elements == 0  &&  p[0] == '\n' )  { _xml_is_complete = true; break; }  // Kein XML? Dann nehmen wir \n als Ende
-            }
-        }
-
-        _last_char = *p;
-        p++;
-    }
-
-    return _xml_is_complete;
-}
-
 //----------------------------------------------------Communication::Listen_socket::async_continue_
 
 bool Communication::Listen_socket::async_continue_( bool wait )
@@ -304,11 +272,11 @@ bool Communication::Udp_socket::async_continue_( bool wait )
             }
             else
             {
-                Command_processor cp ( _spooler );
-                cp.set_host( &host );
+                Command_processor command_processor ( _spooler );
+                command_processor.set_host( &host );
                 string cmd ( buffer, len );
                 _spooler->log().info( "UDP-Nachricht von " + host.as_string() + ": " + cmd );
-                cp.execute( cmd, Time::now() );
+                command_processor.execute( cmd, Time::now() );
             }
             
             something_done = true;
@@ -327,10 +295,10 @@ Communication::Channel::Channel( Communication* communication )
     _zero_(this+1),
     _spooler(communication->_spooler),
     _communication(communication),
-    _send_is_complete( true ),
     _log(_spooler)
 {
-    recv_clear();
+    _receive_at_start = true;
+    //recv_clear();
 }
 
 //-----------------------------------------------------------------Communication::Channel::~Channel
@@ -349,7 +317,7 @@ Communication::Channel::~Channel()
     _write_socket = SOCKET_ERROR;
 }
 
-//-----------------------------------------------------------------ommunication::Channel::terminate
+//----------------------------------------------------------------Communication::Channel::terminate
 
 void Communication::Channel::terminate()
 {
@@ -363,33 +331,14 @@ bool Communication::Channel::do_accept( SOCKET listen_socket )
 {
     try
     {
-/*
-        struct sockaddr_in peer_addr;
-        sockaddrlen_t      peer_addr_len = sizeof peer_addr;
-
-        Z_LOG2( "socket.accept", "accept(" << listen_socket << ")\n" );
-        _read_socket = accept( listen_socket, (struct sockaddr*)&peer_addr, &peer_addr_len );
-        if( _read_socket == SOCKET_ERROR )  
-        {
-            int err = socket_errno();
-            Z_LOG2( "socket.accept","  errno=" << err << "\n" );
-            if( err == EWOULDBLOCK )  return false;
-            throw_sos_socket_error( err, "accept" );
-        }
-
-        _write_socket = _read_socket;
-*/
         bool ok = this->accept( listen_socket );
         if( !ok )  return false;        // EWOULDBLOCK
 
         set_linger( _read_socket );
-
-        unsigned long on = 1;
-        int ret = ioctlsocket( _read_socket, FIONBIO, &on );
-        if( ret == SOCKET_ERROR )  throw_sos_socket_error( "ioctl(FIONBIO)" );
+        call_ioctl( FIONBIO, 1 );
 
         sockaddrlen_t s = sizeof _socket_send_buffer_size ;
-        ret = getsockopt( _write_socket, SOL_SOCKET, SO_SNDBUF, (char*)&_socket_send_buffer_size , &s );
+        int ret = getsockopt( _write_socket, SOL_SOCKET, SO_SNDBUF, (char*)&_socket_send_buffer_size , &s );
         if( ret == SOCKET_ERROR  ||  _socket_send_buffer_size <= 0 ) 
         {
             LOG( "getsockopt(,,SO_SNDBUF)  errno=" << socket_errno() << "\n" );
@@ -403,7 +352,7 @@ bool Communication::Channel::do_accept( SOCKET listen_socket )
 
         if( _spooler->security_level( _host ) <= Security::seclev_signal )
         {
-            _log.info( "TCP-Verbindung nicht zugelassen" );
+            _log.warn( "TCP-Verbindung nicht zugelassen" );
             do_close();
             return false;
         }
@@ -437,16 +386,11 @@ void Communication::Channel::do_close()
 }
 
 //---------------------------------------------------------------Communication::Channel::recv_clear
-
+/*
 void Communication::Channel::recv_clear()
 {
-    _receive_at_start    = true; 
-    _receive_is_complete = false;
-    _text = "";
-    _xml_end_finder = Xml_end_finder();
-    _http_response  = NULL;
 }
-
+*/
 //------------------------------------------------------------------Communication::Channel::do_recv
 
 bool Communication::Channel::do_recv()
@@ -479,32 +423,26 @@ bool Communication::Channel::do_recv()
 
         _receive_at_start = false;
 
-        if( string_begins_with( buffer, "GET /" )  ||  string_begins_with( buffer, "POST /" ) )     // Muss vollständig im ersten Datenblock enthalten sein!
+        if( !_processor_channel )
         {
-            _is_http = true;
-            _http_request = Z_NEW( Http_request );
-            _http_parser  = Z_NEW( Http_parser( _http_request ) );
+            if( string_begins_with( buffer, "GET /" )  ||  string_begins_with( buffer, "POST /" ) )     // Muss vollständig im ersten Datenblock enthalten sein!
+            {
+                _processor_channel = Z_NEW( Http_processor_channel( this ) );
+            }
+            else
+            {
+                _processor_channel = Z_NEW( Xml_processor_channel( this ) );
+            }
         }
-        else
-        {
-            while( p < buffer+len  &&  isspace( (Byte)*p ) )  p++;      // Blanks am Anfang nicht beachten
-            len -= p - buffer;
-        }
+
+        _processor = _processor_channel->processor();
     }
+
+    if( _read_socket != STDIN_FILENO )  _processor->set_host( &_host );
 
     if( len > 0 )
     {
-        if( _is_http )
-        {
-            _http_parser->add_text( p, len );
-            _receive_is_complete = _http_parser->is_complete();
-        }
-        else
-        {
-            _receive_is_complete = _xml_end_finder.is_complete( p, len );
-            if( len >= 2  &&  p[len-2] == '\r' )  _indent = true;      // CR LF am Ende lässt Antwort einrücken. CR LF soll nur bei telnet-Eingabe kommen.
-            _text.append( p, len );
-        }
+        _processor->put_request_part( p, len );
     }
 
     return something_done;
@@ -516,11 +454,9 @@ bool Communication::Channel::do_send()
 {
     bool something_done = false;
 
-    //if( _send_is_complete )  _send_progress = 0, _send_is_complete = false;     // Am Anfang
-
     while(1)
     {
-        int count = _text.length() - _send_progress; 
+        int count = _send_data.length() - _send_progress; 
         if( count <= 0 )  break;
 
         int c   = min( _socket_send_buffer_size, count );
@@ -528,8 +464,8 @@ bool Communication::Channel::do_send()
 
       //do
       //{
-            int len = _write_socket == STDOUT_FILENO? write ( _write_socket, _text.data() + _send_progress, c )
-                                                    : ::send( _write_socket, _text.data() + _send_progress, c, 0 );
+            int len = _write_socket == STDOUT_FILENO? write ( _write_socket, _send_data.data() + _send_progress, c )
+                                                    : ::send( _write_socket, _send_data.data() + _send_progress, c, 0 );
             err = len < 0? socket_errno() : 0;
             Z_LOG2( "socket.send", "send/write(" << _write_socket << "," << c << " bytes) ==> " << len << "  errno=" << err << "\n" );
             if( len == 0 )  break;   // Vorsichtshalber
@@ -557,14 +493,14 @@ bool Communication::Channel::do_send()
     }
 
 
-    if( _send_progress < _text.length() )
+    if( _send_progress < _send_data.length() )
     {
         _socket_manager->set_fd( Socket_manager::write_fd, _write_socket );
     }
     else
     {
-        _send_is_complete = true;
-        _text = "";
+        _send_data = "";
+        _send_progress = 0;
         _socket_manager->clear_fd( Socket_manager::write_fd, _write_socket );
     }
 
@@ -579,76 +515,47 @@ bool Communication::Channel::async_continue_( bool wait )
 
     try
     {
-        //if( socket_write_signaled() ) 
-        if( !_send_is_complete )
+        while( !_responding  &&  !_dont_receive )
         {
-            something_done |= do_send();
-        }
+            bool ok = do_recv();
+            if( !ok )  break;
 
-        //if( socket_read_signaled() )
-        if( _send_is_complete )
-        {
-            if( !_dont_receive )  something_done |= do_recv();
+            something_done = true;
 
-            if( _receive_is_complete ) 
+            if( _eof )  break;
+
+            if( _processor  &&  _processor->request_is_complete() ) 
             {
-                Command_processor cp ( _spooler );
-                
-                if( _read_socket != STDIN_FILENO )  cp.set_host( &_host );
-
-
-                if( _is_http )
-                {
-                    Z_LOG2( "scheduler.http", "HTTP: " << _http_parser->_text << "\n" );
-                    recv_clear();
-
-                    _http_response = cp.execute_http( _http_request );
-                    _http_response->set_event( &_socket_event );
-                    _http_response->recommend_block_size( 32768 );
-
-                    _http_parser  = NULL;
-                    _http_request = NULL;
-                }
-                else
-                {
-                    string cmd = _text;
-                    recv_clear();
-
-                    _log.info( "Kommando " + cmd );
-                    _text = cp.execute( cmd, Time::now(), _indent );
-                    
-                    if( _indent )  _text = replace_regex( _text, "\n", "\r\n" );      // Für Windows-telnet
-
-                    if( cp._error )  _log.error( cp._error->what() );
-
-                    _send_progress = 0;
-                    _send_is_complete = false;
-                    something_done |= do_send();
-                }
+                _processor->process();
+                _responding = true;
             }
         }
 
-        while( _http_response  &&  _send_is_complete )
+
+        if( _responding )
         {
-            _text = _http_response->read( _http_response->recommended_block_size() );
-
-            if( _text.length() == 0 )               // Zurzeit keine Daten da? Dann warten wir auf ein Signal in _socket_event (von spooler_log.cxx)
+            while(1)
             {
-                if( _http_response->eof() )         // Oder ist es eof?
-                {
-                    if( _http_response->close_connection_at_eof() )  _eof = true;   // Wir tun so, als ob der Client EOF geliefert hat. Das führt zum Schließen der Verbindung.
-                    _http_response = NULL;
-                }
+                if( _send_data == "" )  _send_data = _processor->get_response_part();
+                if( _send_data == "" )  break;      // Zurzeit keine Daten da? Dann warten wir auf ein Signal in _socket_event (von spooler_log.cxx)
 
-                break;
+                bool ok = do_send();
+                if( !ok )  break;
+
+                something_done = true;
             }
 
-            _send_progress = 0;
-            _send_is_complete = false;
-            something_done |= do_send();
+            if( _processor->response_is_complete() )   // Oder ist die Antwort fertig?
+            {
+                if( _processor->should_close_connection() )  _eof = true;   // Wir tun so, als ob der Client EOF geliefert hat. Das führt zum Schließen der Verbindung.
+
+                _processor        = NULL;
+                _responding       = false;
+                _receive_at_start = true; 
+            }
         }
 
-      //if( _eof  &&  _send_is_complete  &&  _http_response )  
+
         if( _eof )
         { 
             // Bei _eof sofort handeln! Nämlich Verbindung schließen. 
@@ -656,7 +563,7 @@ bool Communication::Channel::async_continue_( bool wait )
             // Andere Lösung: Socket aus read-Menge des select() herausnehmen.
 
             // _http_response kann bei einem Log endlos sein. Also kein Kriterium, das Schließen zu verzögern.
-            if( _http_response )  Z_LOG2( "scheduler.http", "Browser schließt Verbindung bevor HTTP-Response fertig gesendet werden konnte\n" );
+            //if( _http_response )  Z_LOG2( "scheduler.http", "Browser schließt Verbindung bevor HTTP-Response fertig gesendet werden konnte\n" );
             _communication->remove_channel( this );  
             return true; 
         }
@@ -686,7 +593,7 @@ Communication::Communication( Spooler* spooler )
 {
 }
 
-//--------------------------------------------------Communication::Channel::~Communication::Channel
+//--------------------------------------------------------------------Communication::~Communication
 
 Communication::~Communication()
 {

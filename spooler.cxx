@@ -44,6 +44,7 @@
 #include "../kram/sos_mail.h"
 #include "../kram/sos_java.h"
 #include "../zschimmer/com_remote.h"
+#include "../zschimmer/xml_end_finder.h"
 
 /*
 #ifdef Z_WINDOWS

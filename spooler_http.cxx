@@ -666,6 +666,58 @@ string Html_chunk_reader::read_from_chunk( int recommended_size )
     return _chunk;
 }
 
+//-------------------------------------------------------------------Http_processor::Http_processor
+
+Http_processor::Http_processor( Http_processor_channel* pc )
+: 
+    Communication::Processor( pc ), 
+    _zero_(this+1) 
+{
+    _http_request = Z_NEW( Http_request() );
+    _http_parser  = Z_NEW( Http_parser( _http_request ) );
+}
+
+//--------------------------------------------------------------------------Http_processor::process
+
+void Http_processor::process()
+{
+    Z_LOG2( "scheduler.http", "HTTP: " << _http_parser->_text << "\n" );
+    
+
+    Command_processor command_processor ( _spooler );
+
+    command_processor.set_host( _host );
+
+    _http_response = command_processor.execute_http( _http_request );
+
+    _http_response->set_event( &_channel->_socket_event );
+    _http_response->recommend_block_size( 32768 );
+
+    _http_parser  = NULL;
+    _http_request = NULL;
+}
+
+//----------------------------------------------------------------------Http_processor::get_response
+
+string Http_processor::get_response_part()
+{ 
+    return _http_response->read( _http_response->recommended_block_size() );
+}
+
+//--------------------------------------------------------------Http_processor::response_is_complete
+
+bool Http_processor::response_is_complete()
+{ 
+    return !_http_response || _http_response->eof(); 
+}
+
+//----------------------------------------------------------Http_processor::should_close_connection
+
+bool Http_processor::should_close_connection()
+{ 
+    return _http_response  &&  _http_response->close_connection_at_eof(); 
+}
+
 //-------------------------------------------------------------------------------------------------
 
 } //namespace spooler
