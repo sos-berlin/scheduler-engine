@@ -1,4 +1,4 @@
-// $Id: spooler_module_remote.cxx,v 1.54 2004/01/14 19:19:32 jz Exp $
+// $Id: spooler_module_remote.cxx,v 1.55 2004/04/14 14:16:52 jz Exp $
 /*
     Hier sind implementiert
 
@@ -33,13 +33,13 @@ Remote_module_instance_proxy::~Remote_module_instance_proxy()
 void Remote_module_instance_proxy::init()
 {
     //HRESULT hr;
-
+/*
     if( getenv( "SPOOLER_SERVER" ) )
     {
         _server_hostname = getenv( "SPOOLER_SERVER" );
         _server_port     = 9000;
     }
-
+*/
     Module_instance::init();
 
     if( _module->_reuse != Module::reuse_task )  throw_xc( "SCHEDULER-192" );         // Problem u.a.: synchrones Release(), wenn Job gestoppt wird

@@ -1,4 +1,4 @@
-// $Id: spooler_task.cxx,v 1.250 2004/04/06 10:23:42 jz Exp $
+// $Id: spooler_task.cxx,v 1.251 2004/04/14 14:16:52 jz Exp $
 /*
     Hier sind implementiert
 
@@ -1129,7 +1129,7 @@ bool Task::do_something()
             catch( const exception& x )
             {
                 if( error_count == 0 )  set_error( x );
-                                else  _log.error( x.what() );
+                                 else  _log.error( x.what() );
 
                 if( error_count == 0  &&  _state < s_ending )
                 {
@@ -1620,6 +1620,10 @@ void Job_module_task::do_load()
   //module_instance->_com_task->set_task( this );
   //module_instance->_com_log->set_log( &_log );
 
+
+    _module_instance = module_instance;
+    _module_instance->attach_task( this, &_log );
+
     if( !module_instance->loaded() )
     {
         module_instance->init();
@@ -1633,10 +1637,6 @@ void Job_module_task::do_load()
         module_instance->load();
         module_instance->start();
     }
-
-    _module_instance = module_instance;
-
-    _module_instance->attach_task( this, &_log );
 }
 
 //------------------------------------------------------------------Job_module_task::do_begin_start
