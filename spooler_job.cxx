@@ -1,4 +1,4 @@
-// $Id: spooler_job.cxx,v 1.38 2003/10/18 21:23:17 jz Exp $
+// $Id: spooler_job.cxx,v 1.39 2003/10/19 09:44:49 jz Exp $
 /*
     Hier sind implementiert
 
@@ -670,7 +670,7 @@ bool Job::is_in_period( Time now )
 
 void Job::set_next_start_time( Time now, bool repeat )
 {
-    select_period();
+    select_period( now );
 
     Time   next_start_time = latter_day;  //_next_start_time;
     string msg;
@@ -747,8 +747,8 @@ void Job::set_next_start_time( Time now, bool repeat )
 
     if( _spooler->_debug )
     {
-        if( !msg.empty() )  _log.debug( msg );
         if( _next_single_start < next_start_time )  msg = "Nächster single_start " + _next_single_start.as_string();
+        if( !msg.empty() )  _log.debug( msg );
     }
 
     THREAD_LOCK( _lock )
@@ -904,8 +904,8 @@ Sos_ptr<Task> Job::task_to_start()
                     _waiting_for_process = true;
                 }
 
-                _spooler->try_to_free_process( this, _module._process_class, now );
                 _waiting_for_process_try_again = false;
+                _spooler->try_to_free_process( this, _module._process_class, now );     // Beendet eine Task in s_running_waiting_for_order
             }
 
             cause = cause_none;   // Wir können die Task nicht starten, denn kein Prozess ist verfügbar
@@ -919,12 +919,14 @@ Sos_ptr<Task> Job::task_to_start()
         if( order )
         {
             order = order_queue()->get_order_for_processing( now );  // Jetzt aus der Warteschlange nehmen und nicht verlieren!
-            if( order )
+            if( order )  // Ist der Auftrag noch da? (Muss bei Ein-Thread-Betrieb immer da sein!)
             {
                 cause = cause_order;
                 log_line += "Task startet wegen Auftrag " + order->obj_name();
             }
         }
+
+        // order jetzt nicht verlieren! Der Auftrag hängt allein in der Variablen order!
 
         if( cause )
         {
@@ -948,11 +950,13 @@ Sos_ptr<Task> Job::task_to_start()
     }
     else
     {
+        // Keine Task zu starten
+
         if( _waiting_for_process )                 
         {
-            bool notify = _waiting_for_process_try_again;
+            bool notify = _waiting_for_process_try_again;                           // Sind wir mit notify_a_process_is_idle() benachrichtigt worden?
             remove_waiting_job_from_process_list();
-            if( notify )  _module._process_class->notify_a_process_is_idle();       // Diese Job braucht den Prozess nicht mehr. Also nächsten Job benachrichtigen
+            if( notify )  _module._process_class->notify_a_process_is_idle();       // Dieser Job braucht den Prozess nicht mehr. Also nächsten Job benachrichtigen!
         }
     }
 
@@ -984,7 +988,7 @@ bool Job::do_something()
         if( _state == s_pending 
          || _state == s_running  &&  _running_tasks.size() < _max_tasks )
         {
-            //if( !_waiting_for_process  ||  _module._process_class->process_available( this ) )
+            if( !_waiting_for_process  ||  _waiting_for_process_try_again  ||  _module._process_class->process_available( this ) )    // Optimierung
             {
                 Sos_ptr<Task> task = task_to_start();
                 if( task )

@@ -1,4 +1,4 @@
-// $Id: spooler_time.cxx,v 1.51 2003/10/08 11:45:06 jz Exp $
+// $Id: spooler_time.cxx,v 1.52 2003/10/19 09:44:50 jz Exp $
 /*
     Hier sind implementiert
 
@@ -238,8 +238,9 @@ bool Period::is_comming( Time time_of_day, With_single_start single_start ) cons
     }
 
     if( single_start & wss_next_single_start )
-    {
-        if( _single_start  &&  time_of_day < _begin )  return true;
+    {                                        
+        if( _single_start  &&  time_of_day <= _begin )  return true;
+                                        // ^ Falls _begin == 00:00 und time_of_day == 00:00 (Beginn des nächsten Tags)
     }
 
     return false;
@@ -582,8 +583,8 @@ Period Run_time::first_period( Time tim_par )
 
 Period Run_time::next_period( Time tim_par, With_single_start single_start )
 {
-    Time tim = tim_par;
-    Period next;
+    Time    tim = tim_par;
+    Period  next;
  
     while(1)
     {
@@ -594,7 +595,7 @@ Period Run_time::next_period( Time tim_par, With_single_start single_start )
         next = min( next, _monthday_set.next_period( tim, single_start ) );
         next = min( next, _ultimo_set  .next_period( tim, single_start ) );
 
-        if( _holiday_set.find( (uint)next.begin().midnight() ) == _holiday_set.end() )  break;
+        if( _holiday_set.find( (uint)next.begin().midnight() ) == _holiday_set.end() )  break;  // Gefundener Zeitpunkt ist kein Feiertag? Dann ok!
 
         tim = next.begin().midnight() + 24*60*60;   // Feiertag? Dann nächsten Tag probieren
     }

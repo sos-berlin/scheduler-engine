@@ -1,4 +1,4 @@
-// $Id: spooler_thread.cxx,v 1.106 2003/10/18 21:23:17 jz Exp $
+// $Id: spooler_thread.cxx,v 1.107 2003/10/19 09:44:49 jz Exp $
 /*
     Hier sind implementiert
 
@@ -826,7 +826,11 @@ void Spooler_thread::wait_until_thread_stopped( Time until )
 
 bool Spooler_thread::try_to_free_process( Job* for_job, Process_class* process_class, const Time& now )
 {
-/*
+/*  Was passiert, wenn ein zweiter Job try_to_free_process() rufen?
+    Der beendet doch keine zweite Task, weil die vom ersten Job beendete findet!
+    Die Task müsste markiert werden. 
+    Aber das wird zu komplizert, wir lassen das erstmal.
+
     Z_FOR_EACH_REVERSE( vector<Job*>, _prioritized_order_job_array, it )
     {
         Job* job = *it;

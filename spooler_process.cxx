@@ -1,4 +1,4 @@
-// $Id: spooler_process.cxx,v 1.17 2003/10/18 21:23:17 jz Exp $
+// $Id: spooler_process.cxx,v 1.18 2003/10/19 09:44:49 jz Exp $
 
 #include "spooler.h"
 
@@ -153,7 +153,6 @@ void Process_class::remove_process( Process* process )
             { 
                 process->_process_class = NULL; 
                 _process_list.erase( p ); 
-                //notify_a_process_is_idle();
                 return; 
             }
         }
