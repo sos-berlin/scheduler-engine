@@ -99,6 +99,7 @@ namespace sos {
 #include "spooler_module_java.h"
 #include "spooler_history.h"
 #include "spooler_order.h"
+#include "spooler_remote.h"
 #include "spooler_job.h"
 #include "spooler_subprocess.h"
 #include "spooler_task.h"

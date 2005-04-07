@@ -61,33 +61,74 @@
 
 */
 
-//-------------------------------------------------------------------------------------------------
+namespace sos {
+namespace spooler {
 
-const int   buffer_size = 10000;
-/*
-//---------------------------------------------------------------Object_processor::Object_processor
+Object_server_processor_channel::Object_server_processor_channel( Communication::Channel* ch )
+: 
+    Communication::Processor_channel( ch )
+{
+    //_session = Z_NEW( object_server::Session );
+}
 
-Object_processor::Object_processor( Object_processor_channel* ch )
+//-------------------------------------------------Object_server_processor::Object_server_processor
+
+Object_server_processor::Object_server_processor( Object_server_processor_channel* ch )
 :
     Communication::Processor(ch),
-    _processor_channel(ch)
+    _zero_(this+1),
+    _processor_channel(ch),
+    _input_message( ch->_session ),
+    _input_message_builder( &_input_message ),
+    _output_message( ch->_session )
 {
-    _buffer.reserve( buffer_size );
 }
 
-//---------------------------------------------------------------Object_processor::put_request_part
+//--------------------------------------------------------Object_server_processor::put_request_part
 
-void Object_processor::put_request_part( const char* data, int length )
+void Object_server_processor::put_request_part( const char* data, int length )
 { 
-    _buffer.append( data, length ); 
+    _input_message_builder.add_data( (const Byte*)data, length );
 }
 
-//------------------------------------------------------------Object_processor::request_is_complete
+//-----------------------------------------------------Object_server_processor::request_is_complete
 
-bool Object_processor::request_is_complete()
+bool Object_server_processor::request_is_complete()
 { 
-    return !_http_parser  ||  _http_parser->is_complete(); 
+    return _input_message.is_complete();
+}
+
+//-----------------------------------------------------------------Object_server_processor::process
+
+void Object_server_processor::process()
+{
+    _processor_channel->_session->execute( &_input_message, &_output_message );
+}
+
+//----------------------------------------------------Object_server_processor::response_is_complete
+
+bool Object_server_processor::response_is_complete()
+{
+    return true;
+}
+
+//-------------------------------------------------------Object_server_processor::get_response_part
+
+string Object_server_processor::get_response_part()
+{
+    string result = _output_message._data;
+    _output_message._data = "";
+    return result;
+}
+
+//-------------------------------------------------Object_server_processor::should_close_connection
+
+bool Object_server_processor::should_close_connection()
+{
+    return false;
 }
 
 //-------------------------------------------------------------------------------------------------
-*/
+
+} //namespace spooler
+} //namespace sos

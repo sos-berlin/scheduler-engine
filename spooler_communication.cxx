@@ -49,7 +49,6 @@ struct Xml_processor : Communication::Processor
 {
                                 Xml_processor               ( Xml_processor_channel* );
 
-  //void                        new_request                 ();
     void                        put_request_part            ( const char*, int length );
     bool                        request_is_complete         ()                                      { return _request_is_complete; }
 
@@ -425,6 +424,11 @@ bool Communication::Channel::do_recv()
 
         if( !_processor_channel )
         {
+            if( buffer[ 0 ] == '\0' )   // Das erste von vier Längenbytes ist bei der ersten Nachricht auf jeden Fall 0
+            {
+                _processor_channel = Z_NEW( Object_server_processor_channel( this ) );
+            }
+            else
             if( string_begins_with( buffer, "GET /" )  ||  string_begins_with( buffer, "POST /" ) )     // Muss vollständig im ersten Datenblock enthalten sein!
             {
                 _processor_channel = Z_NEW( Http_processor_channel( this ) );
