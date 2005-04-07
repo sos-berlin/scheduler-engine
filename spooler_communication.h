@@ -81,7 +81,7 @@ struct Named_host : Host
 
 //------------------------------------------------------------------------------------Communication
 
-struct Communication //: zschimmer::Thread
+struct Communication
 {       
     struct Processor_channel;
     struct Processor;
@@ -90,7 +90,7 @@ struct Communication //: zschimmer::Thread
     struct Channel : zschimmer::Socket_operation
     {
                                 Channel                     ( Communication* );
-                            ~Channel                     ();
+                               ~Channel                     ();
 
         void                    terminate                   ();
 
@@ -121,8 +121,8 @@ struct Communication //: zschimmer::Thread
         bool                   _dont_receive;               // Bei terminate() ist Empfang gesperrt
         Prefix_log             _log;
 
-        ptr<Processor_channel>  _processor_channel;
-        ptr<Processor>          _processor;
+        ptr<Processor_channel> _processor_channel;
+        ptr<Processor>         _processor;
     };
 
 
