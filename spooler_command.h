@@ -61,7 +61,7 @@ string                          xml_as_string               ( const xml::Documen
 
 struct Command_processor
 {
-                                Command_processor           ( Spooler* );
+                                Command_processor           ( Spooler*, Communication::Processor* cp = NULL );
                                ~Command_processor           ();
 
     void                        execute_file                ( const string& xml_filename );
@@ -92,14 +92,17 @@ struct Command_processor
     xml::Element_ptr            execute_show_order          ( const xml::Element_ptr&, const Show_what& );
     xml::Element_ptr            execute_add_order           ( const xml::Element_ptr& );
     xml::Element_ptr            execute_modify_order        ( const xml::Element_ptr& );
+    xml::Element_ptr            execute_register_remote_scheduler( const xml::Element_ptr& );
 
     void                        get_id_and_next             ( const xml::Element_ptr& element, int* id, int* next );
 
     void                        set_host                    ( Host* );
+    void                        set_communication_processor ( Communication::Processor* p )         { _communication_processor = p; }
     void                        abort_immediately           ( int exit_code = 1 );
 
     Fill_zero                  _zero_;
     Spooler*                   _spooler;
+    Communication::Processor*  _communication_processor;
     bool                       _load_config_immediately;
     xml::Document_ptr          _answer;
     Xc_copy                    _error;

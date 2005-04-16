@@ -17,14 +17,8 @@ struct Security
         seclev_info,
         seclev_all
     };
-/*
-    struct Host_entry
-    {
-        Host                   _host;
-        Level                  _level;
-    };
-*/
-    typedef map<Host,Level>     Host_map;
+
+    typedef map<Ip_address,Level>  Host_map;
 
 
                                 Security                    ( Spooler* spooler ) : _spooler(spooler) {}

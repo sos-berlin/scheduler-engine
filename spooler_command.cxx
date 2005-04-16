@@ -91,10 +91,11 @@ void append_error_element( const xml::Element_ptr& element, const Xc_copy& x )
 
 //-------------------------------------------------------------Command_processor::Command_processor
 
-Command_processor::Command_processor( Spooler* spooler )
+Command_processor::Command_processor( Spooler* spooler, Communication::Processor* cp )
 : 
     _zero_(this+1),
-    _spooler(spooler)
+    _spooler(spooler),
+    _communication_processor( cp ) 
 {
     set_host( NULL );
     _spooler->_executing_command = true;
@@ -220,6 +221,8 @@ xml::Element_ptr Command_processor::execute_show_state( const xml::Element_ptr& 
         
         state_element.appendChild( subprocesses_element );
     }
+
+    state_element.appendChild( _spooler->_remote_scheduler_register.dom( _answer, show ) );
 
     return state_element;
 }
@@ -632,6 +635,46 @@ xml::Element_ptr Command_processor::execute_modify_order( const xml::Element_ptr
     return _answer.createElement( "ok" );
 }
 
+//---------------------------------------------Command_processor::execute_register_remote_scheduler
+
+xml::Element_ptr Command_processor::execute_register_remote_scheduler( const xml::Element_ptr& register_scheduler_element )
+{
+    if( !_communication_processor )  throw_xc( "SCHEDULER-222" );
+    if( !_host                    )  throw_xc( "SCHEDULER-222" );
+
+    Xml_processor* xml_processor = dynamic_cast<Xml_processor*>( _communication_processor );
+    if( !xml_processor )  throw_xc( "SCHEDULER-222" );
+
+    if( _security_level < Security::seclev_all )  throw_xc( "SCHEDULER-121" );
+
+    Host_and_port host_and_port ( *_host, register_scheduler_element.int_getAttribute( "tcp_port" ) );
+
+    ptr<Remote_scheduler> remote_scheduler = _spooler->_remote_scheduler_register.get_or_null( host_and_port );
+
+    if( !remote_scheduler )  remote_scheduler = Z_NEW( Remote_scheduler );
+
+    remote_scheduler->_host_and_port = host_and_port;
+
+    if( register_scheduler_element.bool_getAttribute( "logoff", false ) )
+    {
+        remote_scheduler->_logged_on = false;
+    }
+    else
+    {
+        remote_scheduler->_logged_on    = true;
+        remote_scheduler->_is_connected = true;
+        remote_scheduler->_scheduler_id = register_scheduler_element.getAttribute( "scheduler_id" );
+        remote_scheduler->_version      = register_scheduler_element.getAttribute( "version" );
+        remote_scheduler->_connected_at = Time::now();
+    }
+
+    
+    xml_processor->_processor_channel->_remote_scheduler = remote_scheduler;        // Remote_scheduler mit TCP-Verbindung verknüpfen
+    _spooler->_remote_scheduler_register.add( remote_scheduler );
+    
+    return _answer.createElement( "ok" );
+}
+
 //---------------------------------------------------------------Command_processor::execute_command
 
 xml::Element_ptr Command_processor::execute_command( const xml::Element_ptr& element, const Time& xml_mod_time )
@@ -714,6 +757,8 @@ xml::Element_ptr Command_processor::execute_command( const xml::Element_ptr& ele
     if( element.nodeName_is( "modify_order"     ) )  return execute_modify_order( element );
   //else
   //if( element.nodeName_is( "show_order_history" ) )  return execute_show_order_history( element, show );
+    else
+    if( element.nodeName_is( "register_remote_scheduler" ) )  return execute_register_remote_scheduler( element );
     else
     {
         throw_xc( "SCHEDULER-105", element.nodeName() ); return xml::Element_ptr();

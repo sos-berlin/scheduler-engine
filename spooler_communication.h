@@ -4,6 +4,8 @@
 #define __SPOOLER_COMMUNICATION_H
 
 #include "../zschimmer/z_sockets.h"
+#include "../zschimmer/xml_end_finder.h"
+
 /*
 #ifdef __GNUC__
 #   include <errno.h>
@@ -26,58 +28,11 @@
 namespace sos {
 namespace spooler {
 
+//-------------------------------------------------------------------------------------------------
+
+struct Xml_processor_channel;
 
 //inline bool operator < ( const in_addr& a, const in_addr& b )  { return a.s_addr < b.s_addr; }  // Für map<>
-
-//---------------------------------------------------------------------------------------------Host
-
-struct Host
-{
-                                Host                        ()                              { _ip.s_addr = 0; }
-                                Host                        ( const in_addr& ip )           { set_ip(ip.s_addr); }
-                                Host                        ( uint32 ip )                   { set_ip(ip); }
-
-    void                        operator =                  ( const in_addr& ip )           { set_ip(ip.s_addr); }
-                                operator in_addr            () const                        { return _ip; }
-
-    bool                        operator ==                 ( const Host& h ) const         { return _ip.s_addr == h._ip.s_addr; }
-    bool                        operator !=                 ( const Host& h ) const         { return _ip.s_addr != h._ip.s_addr; }
-    bool                        operator <                  ( const Host& h ) const         { return _ip.s_addr <  h._ip.s_addr; }  // Für map<>
-
-    uint32                      netmask                     () const;                       // Network byte order
-    Host                        net                         () const;
-
-    virtual string              as_string                   ()                              { return inet_ntoa( _ip ); }    // In Unix nicht thread-sicher?
-    virtual ostream&            operator <<                 ( ostream& s )                  { s << inet_ntoa( _ip ); return s; }    // In Unix nicht thread-sicher?
-
-    void                        set_ip                      ( uint32 ip )                   { _ip.s_addr = ip; set_name(); }
-    virtual void                set_name                    ()                              {}
-
-    static set<Host>            get_host_set_by_name        ( const string& name );
-
-  protected:
-    in_addr                    _ip;                         // IP-Nummer. Muss vielleicht für IPv6 angepasst werden?
-};
-
-//---------------------------------------------------------------------------------------Named_host
-
-struct Named_host : Host
-{
-                                Named_host                  ()                              {}
-                                Named_host                  ( const in_addr& ip )           { set_ip(ip.s_addr); }
-                                Named_host                  ( uint32 ip )                   { set_ip(ip); }
-    virtual                    ~Named_host                  ()                              {}                      // gcc 3.2 zuliebe
-
-    void                        operator =                  ( const in_addr& ip )           { set_ip(ip.s_addr); }
-
-    void                        set_name                    ();
-    
-    string                      as_string                   ()                              { return _name + " " + Host::as_string(); }
-    ostream&                    operator <<                 ( ostream& s )                  { s <<  _name << " " + Host::as_string(); return s; }
-
-  protected:
-    string                     _name;
-};
 
 //------------------------------------------------------------------------------------Communication
 
@@ -87,11 +42,12 @@ struct Communication
     struct Processor;
 
 
-    struct Channel : zschimmer::Socket_operation
+    struct Channel : zschimmer::Buffered_socket_operation
     {
                                 Channel                     ( Communication* );
                                ~Channel                     ();
 
+        void                    remove_me                   ();
         void                    terminate                   ();
 
         bool                    do_accept                   ( SOCKET listen_socket );
@@ -109,15 +65,14 @@ struct Communication
         Fill_zero              _zero_;
         Spooler*               _spooler;
         Communication*         _communication;
-        Named_host             _host;
+        Host                   _host;
 
         bool                   _responding;
         bool                   _receive_at_start;
-        bool                   _eof;
 
         int                    _socket_send_buffer_size;
-        string                 _send_data;
-        int                    _send_progress;
+      //string                 _send_data;
+      //int                    _send_progress;
         bool                   _dont_receive;               // Bei terminate() ist Empfang gesperrt
         Prefix_log             _log;
 
@@ -184,6 +139,8 @@ struct Communication
 
 
         virtual ptr<Processor>  processor                   ()                                      = 0;
+        virtual void            connection_lost_event       ()                                      {}
+
 
 
         Spooler*               _spooler;
@@ -262,9 +219,48 @@ struct Communication
     bool                       _started;
 };
 
+//------------------------------------------------------------------------------------Xml_processor
+
+struct Xml_processor : Communication::Processor
+{
+                                Xml_processor               ( Xml_processor_channel* );
+
+    void                        put_request_part            ( const char*, int length );
+    bool                        request_is_complete         ()                                      { return _request_is_complete; }
+
+    void                        process                     ();
+
+    bool                        response_is_complete        ()                                      { return true; }
+    string                      get_response_part           ()                                      { string result = _response;  _response = "";  return result; }
+
+    Fill_zero                  _zero_;
+    Xml_processor_channel*     _processor_channel;
+    bool                       _request_is_complete;
+    Xml_end_finder             _xml_end_finder;
+    string                     _request;
+    string                     _response;
+};
+
+//------------------------------------------------------------------------------Xml_processor_channel
+
+struct Xml_processor_channel : Communication::Processor_channel
+{
+                                Xml_processor_channel       ( Communication::Channel* channel )     : Communication::Processor_channel( channel ) {}
+
+
+    ptr<Communication::Processor> processor                 ()                                      { ptr<Xml_processor> result = Z_NEW( Xml_processor( this ) ); 
+                                                                                                      return +result; }
+
+    virtual void                connection_lost_event       ();
+
+
+    bool                       _indent;
+    ptr<Remote_scheduler>      _remote_scheduler;
+};
+
 //-------------------------------------------------------------------------------------------------
 
-inline bool is_communication_operation( Socket_operation* op )
+inline bool is_communication_operation( Async_operation* op )
 {
     // Diese Socket_operations werden in spooler_history.cxx fortgesetzt, wenn auf die DB gewartet wird.
 

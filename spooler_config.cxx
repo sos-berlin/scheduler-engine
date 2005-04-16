@@ -160,10 +160,10 @@ void Security::set_dom( const xml::Element_ptr& security_element )
         if( e.nodeName_is( "allowed_host" ) )
         {
             string    hostname = e.getAttribute( "host" );
-            set<Host> host_set;
+            set<Ip_address> host_set;
 
             try {
-                host_set = Host::get_host_set_by_name( hostname );
+                host_set = Ip_address::get_host_set_by_name( hostname );
             }
             catch( const Xc& x )
             {
@@ -171,7 +171,7 @@ void Security::set_dom( const xml::Element_ptr& security_element )
                 if( !ignore_unknown_hosts )  throw;
             }
             
-            FOR_EACH( set<Host>, host_set, h )
+            FOR_EACH( set<Ip_address>, host_set, h )
             {
                 _host_map[ *h ] = as_level( e.getAttribute( "level" ) );
             }
@@ -372,6 +372,9 @@ void Spooler::load_config( const xml::Element_ptr& config_element, const Time& x
         if( !_include_path_as_option_set  )  _include_path  = config_element.getAttribute( "include_path" , _include_path  );
 
       //_free_threading_default = config_element.bool_getAttribute( "free_threading", _free_threading_default );
+
+        string host_and_port = config_element.getAttribute( "main_scheduler" );
+        if( host_and_port != "" )  _main_scheduler_connection = Z_NEW( Xml_client_connection( this, host_and_port ) );
 
         DOM_FOR_EACH_ELEMENT( config_element, e )
         {

@@ -1502,7 +1502,7 @@ void Task_history::write( bool start )
         append_tabbed( _task->_error.what() );
         append_tabbed( parameters );
 
-        if( !start )
+        if( !start  &&  _extra_record.type() )
         {
             for( int i = 0; i < _extra_record.type()->field_count(); i++ )
             {

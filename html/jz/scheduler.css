@@ -48,6 +48,8 @@ td.after_head_space     { margin-top: 0; margin-bottom: 0pt; line-height: 4pt; }
 
 .process_class          { background-color: #F0F0F0 }
 
+.scheduler_register     { background-color: #F0F0F0 }
+
 /* Anklickbar */
 .hover                  { text-decoration: underline }
 

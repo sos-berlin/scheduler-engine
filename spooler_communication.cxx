@@ -10,7 +10,6 @@
 #include "spooler.h"
 #include "../kram/sleep.h"
 #include "../kram/sos_java.h"
-#include "../zschimmer/xml_end_finder.h"
 
 using namespace std;
 
@@ -25,8 +24,6 @@ const int wait_for_port_available = 60;   // Soviele Sekunden warten, bis TCP- o
     const int ENOTSOCK      = 10038;
     const int EADDRINUSE    = WSAEADDRINUSE;
     const int ENOBUFS       = WSAENOBUFS;
-    const int STDIN_FILENO  = (int)GetStdHandle( STD_INPUT_HANDLE );//0;
-    const int STDOUT_FILENO = (int)GetStdHandle( STD_OUTPUT_HANDLE );//1;
 #   define ioctl    ioctlsocket
 #   define isatty   _isatty
 #else
@@ -39,44 +36,15 @@ const int wait_for_port_available = 60;   // Soviele Sekunden warten, bis TCP- o
 #   define INADDR_NONE (-1)
 #endif
 
-//-------------------------------------------------------------------------------------------------
+//-----------------------------------------------------Xml_processor_channel::connection_lost_event
 
-struct Xml_processor_channel;
-
-//------------------------------------------------------------------------------------Xml_processor
-
-struct Xml_processor : Communication::Processor
+void Xml_processor_channel::connection_lost_event()
 {
-                                Xml_processor               ( Xml_processor_channel* );
-
-    void                        put_request_part            ( const char*, int length );
-    bool                        request_is_complete         ()                                      { return _request_is_complete; }
-
-    void                        process                     ();
-
-    bool                        response_is_complete        ()                                      { return true; }
-    string                      get_response_part           ()                                      { string result = _response;  _response = "";  return result; }
-
-    Fill_zero                  _zero_;
-    Xml_processor_channel*     _processor_channel;
-    bool                       _request_is_complete;
-    Xml_end_finder             _xml_end_finder;
-    string                     _request;
-    string                     _response;
-};
-
-//------------------------------------------------------------------------------Xml_processor_channel
-
-struct Xml_processor_channel : Communication::Processor_channel
-{
-                                Xml_processor_channel         ( Communication::Channel* channel )   : Communication::Processor_channel( channel ) {}
-
-
-    ptr<Communication::Processor> processor                   ()                                    { ptr<Xml_processor> result = Z_NEW( Xml_processor( this ) ); 
-                                                                                                      return +result; }
-
-    bool                       _indent;
-};
+    if( _remote_scheduler )
+    {
+        _remote_scheduler->connection_lost_event();
+    }
+}
 
 //---------------------------------------------------------------------Xml_processor::Xml_processor
 
@@ -88,7 +56,7 @@ Xml_processor::Xml_processor( Xml_processor_channel* processor_class )
 {
 }
 
-//------------------------------------------------------------Xml_processor::put_request_part
+//------------------------------------------------------------------Xml_processor::put_request_part
 
 void Xml_processor::put_request_part( const char* data, int length )
 {
@@ -102,13 +70,14 @@ void Xml_processor::put_request_part( const char* data, int length )
     _request.append( data, length );
 }
 
-//----------------------------------------------------------------Xml_processor::process
+//---------------------------------------------------------------------------Xml_processor::process
 
 void Xml_processor::process()
 {
     Command_processor command_processor ( _spooler );
 
-    if( _host )  command_processor.set_host( _host );
+    command_processor.set_communication_processor( this );
+    command_processor.set_host( _host );
 
     if( string_begins_with( _request, " " ) )  _request = ltrim( _request );
 
@@ -120,17 +89,6 @@ void Xml_processor::process()
     if( command_processor._error )  _channel->_log.error( command_processor._error->what() );
 }
 
-//---------------------------------------------------------------------------------------socket_errno
-/*
-int socket_errno() 
-{
-#   ifdef SYSTEM_WIN
-        return WSAGetLastError();
-#    else
-        return errno;
-#   endif
-}
-*/
 //---------------------------------------------------------------------------------------set_linger
 
 static void set_linger( SOCKET socket )
@@ -141,78 +99,6 @@ static void set_linger( SOCKET socket )
     l.l_linger = 5;  // Sekunden
 
     setsockopt( socket, SOL_SOCKET, SO_LINGER, (const char*)&l, sizeof l );
-}
-
-//-------------------------------------------------------------------------------------is_ip_number
-/*
-bool is_ip_number( const string& host_addr )
-{
-    const Byte* p = host_addr.c_str();
-
-    while( isdigit( *p )  ||  *p == '.' )  p++;
-
-    return *p == '\0';
-}
-*/
-
-//------------------------------------------------------------------------------------Host::netmask
-
-uint32 Host::netmask() const
-{ 
-    uint32 net_nr = ntohl(_ip.s_addr);
-    uint32 netmask_nr;
-    
-    // In Linux macht das inet_netof()
-    if( ( net_nr >> 24 ) >= 192 )  netmask_nr = 0xFFFFFF00;
-    else
-    if( ( net_nr >> 24 ) >= 128 )  netmask_nr = 0xFFFF0000;
-    else
-    if(   net_nr         >  0   )  netmask_nr = 0xFF000000;
-    else
-                                   netmask_nr = 0x00000000;
-
-    return htonl(netmask_nr);
-}
-
-//----------------------------------------------------------------------------------------Host::net
-
-Host Host::net() const
-{
-    return Host( _ip.s_addr & netmask() );
-}
-
-//-----------------------------------------------------------------------Host::get_host_set_by_name
-
-set<Host> Host::get_host_set_by_name( const string& name )
-{
-    set<Host> host_set;
-
-    uint32 ip = inet_addr( name.c_str() );
-
-    if( ip != INADDR_NONE )
-    {
-        host_set.insert( ip );
-    }
-    else
-    {
-        LOG( "gethostbyname " << name << '\n' );
-        hostent* h = gethostbyname( name.c_str() );     // In Unix nicht thread-sicher?
-        if( !h )  throw_sos_socket_error("gethostbyname", name.c_str() );
-        uint32** p = (uint32**)h->h_addr_list;
-        while( *p )  host_set.insert( **p ), p++;
-    }        
-
-    return host_set;
-}
-
-//-----------------------------------------------------------------------------Named_host::set_name
-
-void Named_host::set_name()
-{
-    hostent* h = gethostbyaddr( (char*)&_ip, sizeof _ip, AF_INET );
-    if( !h )  return; //{ string n=as_string(); throw_sos_socket_error("gethostbyaddr", n.c_str() ); }
-
-    _name = h->h_name;
 }
 
 //----------------------------------------------------Communication::Listen_socket::async_continue_
@@ -264,7 +150,7 @@ bool Communication::Udp_socket::async_continue_( bool wait )
         int len = recvfrom( _read_socket, buffer, sizeof buffer, 0, (sockaddr*)&addr, &addr_len );
         if( len > 0 ) 
         {
-            Named_host host = addr.sin_addr;
+            Host host = addr.sin_addr;
             if( _spooler->security_level( host ) < Security::seclev_signal )
             {
                 _spooler->log().error( "UDP-Nachricht von " + host.as_string() + " nicht zugelassen." );
@@ -316,6 +202,15 @@ Communication::Channel::~Channel()
     _write_socket = SOCKET_ERROR;
 }
 
+//----------------------------------------------------------------Communication::Channel::remove_me
+
+void Communication::Channel::remove_me()
+{
+    if( _processor_channel )  _processor_channel->connection_lost_event();
+
+    _communication->remove_channel( this );
+}
+
 //----------------------------------------------------------------Communication::Channel::terminate
 
 void Communication::Channel::terminate()
@@ -336,14 +231,7 @@ bool Communication::Channel::do_accept( SOCKET listen_socket )
         set_linger( _read_socket );
         call_ioctl( FIONBIO, 1 );
 
-        sockaddrlen_t s = sizeof _socket_send_buffer_size ;
-        int ret = getsockopt( _write_socket, SOL_SOCKET, SO_SNDBUF, (char*)&_socket_send_buffer_size , &s );
-        if( ret == SOCKET_ERROR  ||  _socket_send_buffer_size <= 0 ) 
-        {
-            LOG( "getsockopt(,,SO_SNDBUF)  errno=" << socket_errno() << "\n" );
-            _socket_send_buffer_size = 1024;
-        }
-
+        set_buffer_size();
 
         _host = _peer_addr.sin_addr;
         _log.set_prefix( "TCP-Verbindung mit " + _host.as_string() );
@@ -361,7 +249,7 @@ bool Communication::Channel::do_accept( SOCKET listen_socket )
         _log.info( "TCP-Verbindung angenommen" );
 
     }
-    catch( const Xc& x ) { _log.error(x.what()); return false; }
+    catch( const exception& x ) { _log.error(x.what()); return false; }
 
     return true;
 }
@@ -384,12 +272,6 @@ void Communication::Channel::do_close()
     _write_socket = SOCKET_ERROR;
 }
 
-//---------------------------------------------------------------Communication::Channel::recv_clear
-/*
-void Communication::Channel::recv_clear()
-{
-}
-*/
 //------------------------------------------------------------------Communication::Channel::do_recv
 
 bool Communication::Channel::do_recv()
@@ -398,62 +280,59 @@ bool Communication::Channel::do_recv()
 
     char buffer [ 4096 ];
 
-    Z_LOG2( "socket.recv", "recv/read(" << _read_socket << ")\n" );
-    int len = _read_socket == STDIN_FILENO? read( _read_socket, buffer, sizeof buffer )
-                                          : recv( _read_socket, buffer, sizeof buffer, 0 );
-
-    if( len <= 0 ) {
-        if( len == 0 )  { _eof = true;  return true; }
-        int err = socket_errno();
-        if( err == EWOULDBLOCK )  return false; 
-        throw_sos_socket_error( err, "recv" ); 
-    }
-
-    something_done = true;
-
-    const char* p = buffer;
-
-    if( _receive_at_start ) 
+    int len = call_recv( buffer, sizeof buffer );
+    if( len == 0 )  
     {
-        if( len == 1  &&  buffer[0] == '\x04' )  { _eof = true; return true; }      // Einzelnes Ctrl-D beendet Sitzung
+        something_done = _eof;
+    }
+    else
+    {
+        something_done = true;
 
-        if( len == 1  &&  buffer[0] == '\n'   
-         || len == 2  &&  buffer[0] == '\r'  &&  buffer[1] == '\n' )  { _spooler->signal( "do_something!" );  _spooler->_last_time_enter_pressed = Time::now().as_time_t(); return true; }
+        const char* p = buffer;
 
-        _receive_at_start = false;
-
-        if( !_processor_channel )
+        if( _receive_at_start ) 
         {
-            if( buffer[ 0 ] == '\0' )   // Das erste von vier Längenbytes ist bei der ersten Nachricht auf jeden Fall 0
+            if( len == 1  &&  buffer[0] == '\x04' )  { _eof = true; return true; }      // Einzelnes Ctrl-D beendet Sitzung
+
+            if( len == 1  &&  buffer[0] == '\n'   
+             || len == 2  &&  buffer[0] == '\r'  &&  buffer[1] == '\n' )  { _spooler->signal( "do_something!" );  _spooler->_last_time_enter_pressed = Time::now().as_time_t(); return true; }
+
+            _receive_at_start = false;
+
+            if( !_processor_channel )
             {
-                _processor_channel = Z_NEW( Object_server_processor_channel( this ) );
+                //if( buffer[ 0 ] == '\0' )   // Das erste von vier Längenbytes ist bei der ersten Nachricht auf jeden Fall 0
+                //{
+                //    _processor_channel = Z_NEW( Object_server_processor_channel( this ) );
+                //}
+                //else
+                if( string_begins_with( buffer, "GET /" )  ||  string_begins_with( buffer, "POST /" ) )     // Muss vollständig im ersten Datenblock enthalten sein!
+                {
+                    _processor_channel = Z_NEW( Http_processor_channel( this ) );
+                }
+                else
+                {
+                    _processor_channel = Z_NEW( Xml_processor_channel( this ) );
+                }
             }
-            else
-            if( string_begins_with( buffer, "GET /" )  ||  string_begins_with( buffer, "POST /" ) )     // Muss vollständig im ersten Datenblock enthalten sein!
-            {
-                _processor_channel = Z_NEW( Http_processor_channel( this ) );
-            }
-            else
-            {
-                _processor_channel = Z_NEW( Xml_processor_channel( this ) );
-            }
+
+            _processor = _processor_channel->processor();
         }
 
-        _processor = _processor_channel->processor();
-    }
+        if( _read_socket != STDIN_FILENO )  _processor->set_host( &_host );
 
-    if( _read_socket != STDIN_FILENO )  _processor->set_host( &_host );
-
-    if( len > 0 )
-    {
-        _processor->put_request_part( p, len );
+        if( len > 0 )
+        {
+            _processor->put_request_part( p, len );
+        }
     }
 
     return something_done;
 }
 
 //------------------------------------------------------------------Communication::Channel::do_send
-
+/*
 bool Communication::Channel::do_send()
 {
     bool something_done = false;
@@ -510,7 +389,7 @@ bool Communication::Channel::do_send()
 
     return something_done;
 }
-
+*/
 //----------------------------------------------------------Communication::Channel::async_continue_
 
 bool Communication::Channel::async_continue_( bool wait )
@@ -538,18 +417,20 @@ bool Communication::Channel::async_continue_( bool wait )
 
         if( _responding )
         {
-            while(1)
-            {
-                if( _send_data == "" )  _send_data = _processor->get_response_part();
-                if( _send_data == "" )  break;      // Zurzeit keine Daten da? Dann warten wir auf ein Signal in _socket_event (von spooler_log.cxx)
+            if( state() == s_sending )  something_done |= send__continue();
 
-                bool ok = do_send();
-                if( !ok )  break;
+            while( state() == s_stand_by )
+            {
+                string data = _processor->get_response_part();
+                if( data == "" )  break;
 
                 something_done = true;
-            }
 
-            if( _processor->response_is_complete() )   // Oder ist die Antwort fertig?
+                send__start( data );
+            }
+                
+
+            if( state() == s_stand_by  &&  _processor->response_is_complete() )
             {
                 if( _processor->should_close_connection() )  _eof = true;   // Wir tun so, als ob der Client EOF geliefert hat. Das führt zum Schließen der Verbindung.
 
@@ -568,17 +449,19 @@ bool Communication::Channel::async_continue_( bool wait )
 
             // _http_response kann bei einem Log endlos sein. Also kein Kriterium, das Schließen zu verzögern.
             //if( _http_response )  Z_LOG2( "scheduler.http", "Browser schließt Verbindung bevor HTTP-Response fertig gesendet werden konnte\n" );
-            _communication->remove_channel( this );  
+            remove_me();
             return true; 
         }
     }
-    catch( const Xc& x ) 
+    catch( const exception& x ) 
     { 
-        if( strcmp( x.code(), "SOCKET-53" ) == 0                                  // ECONNABORT, Firefox trennt sich so
-         || strcmp( x.code(), "SOCKET-54" ) == 0 )  _log.debug( x.what() );       // ECONNRESET, Internet Explorer trennt sich so
-                                              else  _log.error( x.what() );  
+        if( string_begins_with( x.what(), "ERRNO-53 "      ) == 0                                  // ECONNABORT, Firefox trennt sich so
+         || string_begins_with( x.what(), "WINSOCK-10053 " ) == 0                                  // ECONNABORT, Firefox trennt sich so
+         || string_begins_with( x.what(), "WINSOCK-54 "    ) == 0                                  // ECONNRESET, Internet Explorer trennt sich so
+         || string_begins_with( x.what(), "WINSOCK-10054 " ) == 0 )  _log.debug( x.what() );       // ECONNRESET, Internet Explorer trennt sich so
+                                                           else  _log.error( x.what() );  
 
-        _communication->remove_channel( this );  
+        remove_me();
         return true; 
     }
 
@@ -977,7 +860,7 @@ int Communication::run()
                     int len = recvfrom( _udp_socket, buffer, sizeof buffer, 0, (sockaddr*)&addr, &addr_len );
                     if( len > 0 ) 
                     {
-                        Named_host host = addr.sin_addr;
+                        Host host = addr.sin_addr;
                         if( _spooler->security_level( host ) < Security::seclev_signal )
                         {
                             _spooler->log().error( "UDP-Nachricht von " + host.as_string() + " nicht zugelassen." );

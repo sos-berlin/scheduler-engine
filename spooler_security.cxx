@@ -14,13 +14,13 @@ Security::Level Security::level( const in_addr& host )
     it = _host_map.find( host );
     if( it != _host_map.end() )  return it->second;
     
-    Host net = Host(host).net();
+    Ip_address net = Ip_address(host).net();
     if( net != host )
     {
         it = _host_map.find( net );
         if( it != _host_map.end() )  return it->second;
 
-        it = _host_map.find( Host( 0 ) );                 // host="0.0.0.0" gilt für alle übrigen Hosts
+        it = _host_map.find( Ip_address( 0 ) );                 // host="0.0.0.0" gilt für alle übrigen Hosts
         if( it != _host_map.end() )  return it->second;
     }
     

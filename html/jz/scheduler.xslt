@@ -1,5 +1,6 @@
 <?xml version='1.0' encoding="utf-8"?>
 <!-- $Id$ -->
+
 <xsl:stylesheet xmlns:xsl   = "http://www.w3.org/1999/XSL/Transform"
                 xmlns:msxsl = "urn:schemas-microsoft-com:xslt"
                 version     = "1.0">
@@ -66,6 +67,14 @@
                     <xsl:with-param name="title" select="'Process classes'"/>
                     <xsl:with-param name="class" select="'process_class'"/>
                 </xsl:apply-templates>
+
+                <xsl:if test="/spooler/remote_schedulers/remote_scheduler">
+                    <xsl:apply-templates mode="card_selector" select="/spooler">
+                        <xsl:with-param name="name"  select="'remote_schedulers'"/>
+                        <xsl:with-param name="title" select="'Remote Schedulers'"/>
+                        <xsl:with-param name="class" select="'remote_schedulers'"/>
+                    </xsl:apply-templates>
+                </xsl:if>
             </tr>
         </table>
 
@@ -80,6 +89,10 @@
 
         <xsl:if test="/spooler/@my_show_card='process_classes'">
             <xsl:apply-templates select="state/process_classes"/>
+        </xsl:if>
+
+        <xsl:if test="/spooler/@my_show_card='remote_schedulers'">
+            <xsl:apply-templates select="state/remote_schedulers"/>
         </xsl:if>
 
     </xsl:template>
@@ -982,6 +995,52 @@
                 </xsl:for-each>
             </tbody>
         </table>
+    </xsl:template>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~remote_schedulers-->
+
+    <xsl:template match="remote_schedulers">
+        <table cellpadding="0" cellspacing="0" width="100%" class="remote_schedulers">
+            <col valign="baseline"  width="100"/>
+
+            <thead>
+                <xsl:call-template name="card_top"/>
+
+                <tr>
+                    <td style="head1">Host</td>
+                    <td style="head">IP</td>
+                    <td style="head">Port</td>
+                    <td style="head">Id</td>
+                    <td style="head">Version</td>
+                    <td style="head">Connected</td>
+                    <td style="head">Disconnected</td>
+                </tr>            
+
+                <tr>
+                    <td colspan="99" class="after_head_space">&#160;</td>
+                </tr>
+            </thead>
+
+            <tbody>
+                <xsl:for-each select="remote_scheduler">
+                    <tr>
+                        <td><xsl:value-of select="@hostname"/></td>
+                        <td><xsl:value-of select="@ip"/></td>
+                        <td><xsl:value-of select="@tcp_port"/></td>
+                        <td><xsl:value-of select="@scheduler_id"/></td>
+                        <td><xsl:value-of select="@version"/></td>
+                        <td><xsl:value-of select="@connected_at"/></td>
+                        <td>
+                            <xsl:if test="@connected='no'">
+                                <xsl:value-of select="@disconnected_at"/>
+                            </xsl:if>
+                        </td>
+                    </tr>
+                </xsl:for-each>
+            </tbody>
+            
+        </table>
+            
     </xsl:template>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Detailsicht eines Jobs-->

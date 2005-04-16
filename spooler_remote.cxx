@@ -64,6 +64,238 @@
 namespace sos {
 namespace spooler {
 
+//--------------------------------------------------------------------------------------------const
+    
+const int main_scheduler_retry_time = 15;
+
+//---------------------------------------------------------------------Xml_client_connection::start
+/*    
+void Xml_client_connection::start( ,const Host_and_port& host_and_port )
+{
+    call_connect( host_and_port );
+};
+*/
+
+//------------------------------------------------------ml_client_connection::Xml_client_connection
+    
+Xml_client_connection::Xml_client_connection( Spooler* sp, const Host_and_port& host_and_port )
+: 
+    _zero_(this+1), 
+    _spooler(sp),
+    _host_and_port(host_and_port)
+{
+    //set_async_child( &_socket_operation );
+}
+
+//----------------------------------------------------Xml_client_connection::~Xml_client_connection
+
+Xml_client_connection::~Xml_client_connection()
+{
+    _socket_operation.remove_from_socket_manager();
+}
+
+//-----------------------------------------------------Xml_client_connection::add_to_socket_manager
+
+void Xml_client_connection::add_to_socket_manager( Socket_manager* manager )
+{
+    _socket_operation.add_to_socket_manager( manager );
+
+    set_async_manager( manager );
+    set_async_next_gmtime( 0 );     // Sofort starten!
+}
+
+//---------------------------------------------------------Xml_client_connection::async_state_text_
+
+string Xml_client_connection::async_state_text_()
+{
+    switch( _state )
+    {
+        case s_initial:     return "intial";
+        case s_connecting:  return "connecting";
+        case s_stand_by:    return "stand_by";
+        case s_sending:     return "sending";
+        case s_waiting:     return "waiting_for_response";
+        case s_receiving:   return "receiving";
+        default:            return "state=" + as_int( _state );
+    }
+}
+
+//-----------------------------------------------------------Xml_client_connection::async_continue_
+    
+bool Xml_client_connection::async_continue_( bool wait )
+{
+    bool something_done = false;
+
+    try
+    {
+        if( !_socket_operation.async_finished() )  return false;
+        _socket_operation.async_check_error();
+
+        //if( !_socket_operation.async_signaled() )
+        {
+        }
+
+        switch( _state )
+        {
+            case s_initial:
+                if( async_next_gmtime() > ::time(NULL) )  return false;
+                set_async_next_gmtime( double_time_max );
+
+                _socket_operation.connect__start( _host_and_port );
+                _state = s_connecting;
+                something_done = true;
+                break;
+
+            case s_connecting:
+            {
+                if( !_socket_operation.async_finished() )  break;
+
+                S xml;
+                xml << "<register_remote_scheduler";
+                xml << " scheduler_id='" << _spooler->_spooler_id  << "'";
+                xml << " tcp_port='"     << _spooler->_tcp_port    << "'";
+                xml << " version='"      << _spooler->_version     << "'";
+                xml << "/>";
+
+                _socket_operation.send__start( xml );
+                _state = s_sending;
+                //break;
+            }
+
+            case s_sending:
+                if( !_socket_operation.async_finished() )  break;
+                
+                _state = s_waiting;
+                //break;
+
+            case s_waiting:
+                _recv_data = "";
+
+            case s_receiving:
+            {
+                //char buffer [ 4096 ];
+
+                _socket_operation.recv__continue();
+                //int length = _socket_operation.recv__continue(); // buffer, sizeof buffer );
+                //if( length > 0 )
+                string data = _socket_operation.recv_data();
+                if( data.length() == 0 )  break;
+
+                _state = s_receiving;
+                something_done = true;
+
+                //_recv_data.append( buffer, length );
+                _socket_operation.recv_clear();
+                _recv_data.append( data );
+                
+
+                if( !_xml_end_finder.is_complete( data.data(), data.length() ) )  break;
+
+                //_spooler->_log.info( "ANTWORT: " + _recv_data );
+
+                xml::Document_ptr response_document;
+                response_document.create();
+
+                response_document.load_xml( _recv_data );
+                _recv_data = "";
+
+                DOM_FOR_EACH_ELEMENT( response_document.documentElement(), e1 )
+                    if( e1.nodeName_is( "answer" ) )
+                        DOM_FOR_EACH_ELEMENT( e1, e2 )
+                            if( e2.nodeName_is( "ERROR" ) )  throw_xc( "SCHEDULER-223", e2.getAttribute( "text" ) );
+
+                _spooler->_log.info( S() << "Dieser Scheduler ist beim Haupt-Scheduler " << _host_and_port << " registriert" );
+                _state = s_stand_by;
+                break;
+            }
+
+            default: ;
+        }
+    }
+    catch( exception& x )
+    {
+        _spooler->_log.warn( string( "Verbindung zum Haupt-Scheduler: " ) + x.what() );
+
+        try
+        {
+            _socket_operation.close();
+        }
+        catch( exception& ) {}
+
+        _socket_operation.async_reset_error();
+
+        _state = s_initial;
+        set_async_next_gmtime( ::time(NULL) + main_scheduler_retry_time );
+        something_done = true;
+    }
+
+    return something_done;
+}
+
+//-----------------------------------------------------------Remote_scheduler_register::get_or_null
+
+Remote_scheduler* Remote_scheduler_register::get_or_null( const Host_and_port& hp )
+{
+    Map::iterator it = _map.find( hp );
+    return it != _map.end()? it->second : NULL;
+}
+
+//-------------------------------------------------------------------Remote_scheduler_register::add
+
+void Remote_scheduler_register::add( Remote_scheduler* remote_scheduler )
+{
+    _map[ remote_scheduler->_host_and_port ] = remote_scheduler;
+}
+
+//-------------------------------------------------------------------Remote_scheduler_register::dom
+
+xml::Element_ptr Remote_scheduler_register::dom( const xml::Document_ptr& document, const Show_what& show )
+{
+    xml::Element_ptr result = document.createElement( "remote_schedulers" );
+
+    Z_FOR_EACH( Map, _map, s )
+    {
+        result.appendChild( s->second->dom( document, show ) );
+    }
+
+    return result;
+}
+
+//----------------------------------------------------------------------------Remote_scheduler::dom
+
+xml::Element_ptr Remote_scheduler::dom( const xml::Document_ptr& document, const Show_what& show )
+{
+    xml::Element_ptr result = document.createElement( "remote_scheduler" );
+
+    result.setAttribute         ( "ip"              , _host_and_port._host.ip_string() );
+    result.setAttribute_optional( "hostname"        , _host_and_port._host.name() );
+    result.setAttribute         ( "tcp_port"        , _host_and_port._port );
+    result.setAttribute_optional( "scheduler_id"    , _scheduler_id );
+    result.setAttribute         ( "version"         , _version );
+
+  //result.setAttribute         ( "logged_on"       , _logged_on? "yes" : "no" );
+
+    result.setAttribute         ( "connected"       , _is_connected? "yes" : "no" );
+
+    if( _connected_at )
+    result.setAttribute         ( "connected_at"    , _connected_at.as_string() );
+
+    if( _disconnected_at )
+    result.setAttribute         ( "disconnected_at" , _disconnected_at.as_string() );
+
+    return result;
+}
+
+//----------------------------------------------------------Remote_scheduler::connection_lost_event
+  
+void Remote_scheduler::connection_lost_event()
+{
+    _disconnected_at = Time::now();
+    _is_connected = false;
+}
+
+//----------------------------------bject_server_processor_channel::Object_server_processor_channel
+/*
 Object_server_processor_channel::Object_server_processor_channel( Communication::Channel* ch )
 : 
     Communication::Processor_channel( ch )
@@ -127,7 +359,7 @@ bool Object_server_processor::should_close_connection()
 {
     return false;
 }
-
+*/
 //-------------------------------------------------------------------------------------------------
 
 } //namespace spooler

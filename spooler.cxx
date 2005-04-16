@@ -332,6 +332,7 @@ static void be_daemon()
 Spooler::Spooler() 
 : 
     _zero_(this+1), 
+    _version(VER_PRODUCTVERSION_STR),
     _security(this),
     _communication(this), 
     _base_log(this),
@@ -340,7 +341,6 @@ Spooler::Spooler()
     _module(this,&_log),
     _log_level( log_info ),
     _factory_ini( default_factory_ini ),
-
     _smtp_server   ("-"),   // Für spooler_log.cxx: Nicht setzen, damit Default aus sos.ini erhalten bleibt
     _log_mail_from ("-"),
     _log_mail_cc   ("-"),
@@ -425,7 +425,7 @@ Spooler::~Spooler()
 //--------------------------------------------------------------------------Spooler::security_level
 // Anderer Thread
 
-Security::Level Spooler::security_level( const Host& host )
+Security::Level Spooler::security_level( const Ip_address& host )
 {
     Security::Level result = Security::seclev_none;
 
@@ -1333,6 +1333,12 @@ void Spooler::send_cmd()
     closesocket( sock );
 }
 
+//---------------------------------------------------------------Spooler::connect_to_main_scheduler
+/*
+void Spooler::connect_to_main_scheduler()
+{
+}
+*/
 //--------------------------------------------------------------------------------Spooler::load_arg
 
 void Spooler::load_arg()
@@ -1576,7 +1582,7 @@ void Spooler::start()
     _base_log.set_directory( _log_directory );
     _base_log.open_new();
     
-    _log.info( string( "Scheduler " VER_PRODUCTVERSION_STR ) + " startet mit " + _config_filename + ", pid=" + as_string( getpid() ) );
+    _log.info( "Scheduler " + _version + " startet mit " + _config_filename + ", pid=" + as_string( getpid() ) );
     _spooler_start_time = Time::now();
 
     FOR_EACH_JOB( job )  (*job)->init0();
@@ -1661,6 +1667,12 @@ void Spooler::start()
 
     start_jobs();
 
+
+    if( _main_scheduler_connection )  
+    {
+        _main_scheduler_connection->add_to_socket_manager( _connection_manager );
+        //_main_scheduler_connection->start();
+    }
     
 /*
     if( _is_service || is_daemon )
@@ -1867,49 +1879,24 @@ void Spooler::run()
         string msg = "Warten";
 
 
-        if( _single_thread )
+        if( _state != Spooler::s_paused )
         {
-            if( _state != Spooler::s_paused )
+            FOR_EACH( Process_class_list, _process_class_list, pc )
             {
-                FOR_EACH( Process_class_list, _process_class_list, pc )
+                FOR_EACH( Process_list, (*pc)->_process_list, p )
                 {
-                    FOR_EACH( Process_list, (*pc)->_process_list, p )
-                    {
-                        something_done |= (*p)->async_continue();
-                    }
+                    something_done |= (*p)->async_continue();
                 }
             }
-
-            // spooler_communication.cxx:
-            something_done |= _connection_manager->async_continue();
-
-/*
-#           ifdef Z_DEBUG
-                Time earliest = Time::now(); // + 0.1;
-                if( _next_time < earliest ) 
-                {
-                    static bool logged = false;
-                    if( !logged )  LOG( "spooler.cxx: async_next_gmtime() von " << _next_time << " nach " << earliest << " korrigiert\n" ); 
-                    logged = true;
-
-                    _next_time = earliest;
-                }
-#           endif
-*/
-            //LOG( "spooler.cxx: something_done=" << something_done << "    process_list \n" );
         }
 
-/*      Wird von _single_thread->process() erledigt, denn dort wird die Jobkettenpriorität berücksichtigt!
-        FOR_EACH_JOB( j )
+
+        something_done |= _connection_manager->async_continue();        // spooler_communication.cxx:
+
+        if( _main_scheduler_connection )
         {
-            Job* job = *j;
-            something_done |= job->do_something();
-            //LOG( "spooler.cxx: something_done=" ); 
-            //LOG( something_done << "  " << job->obj_name() << "\n" );
+            something_done |= _main_scheduler_connection->async_continue();     // spooler_remote.cxx
         }
-*/
-
-        //_next_time = latter_day;
 
 
         if( _state != Spooler::s_paused )
@@ -2013,11 +2000,25 @@ void Spooler::run()
                     }
                 }
             }
-                                                                                            
+            
+
             // Events für spooler_communication.cxx
             vector<System_event*> events;
             _connection_manager->get_events( &events );
             FOR_EACH( vector<System_event*>, events, e )  wait_handles.add( *e );
+
+
+            if( ptr<Async_operation> operation = _connection_manager->async_next_operation() )
+            {
+                Time next_time = Time( localtime_from_gmtime( operation->async_next_gmtime() ) );
+                //Z_LOG( **p << "->async_next_gmtime() => " << next_time << "\n" );
+                if( next_time < _next_time )
+                {
+                    _next_time = next_time;
+                    if( log_wait )  msg = S() << "Warten bis " << _next_time << " für " + operation->async_state_text();
+                }
+            }
+
 
             wait_handles += _wait_handles;
             if( !wait_handles.signaled() )

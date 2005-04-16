@@ -78,6 +78,7 @@ namespace sos {
         struct Order_queue;
         struct Order;
         struct Process_class;
+        struct Remote_scheduler;
         struct Show_what;
         struct Subprocess;
         struct Subprocess_register;
@@ -121,11 +122,11 @@ extern const char               dtd_string[];
 
 
 #ifdef Z_WINDOWS
-    const int                   max_processes               = 50;       // Summe aller Handles darf MAXIMUM_WAIT_OBJECTS-1=63 nicht überschreiten
-    const int                   max_communication_channels  = 8;        // Summe aller Handles darf MAXIMUM_WAIT_OBJECTS-1=63 nicht überschreiten
+    const int                   max_processes               =    50;    // Summe aller Handles darf MAXIMUM_WAIT_OBJECTS-1=63 nicht überschreiten
+    const int                   max_communication_channels  =     8;    // Summe aller Handles darf MAXIMUM_WAIT_OBJECTS-1=63 nicht überschreiten
 #else
-    const int                   max_processes               = 1000;     // kein Limit (HP-UX erlaubt 64 aktive fork())
-    const int                   max_communication_channels  = 1000;     // kein Limit 
+    const int                   max_processes               =  1000;    // kein Limit (HP-UX erlaubt 64 aktive fork())
+    const int                   max_communication_channels  = 10000;    // kein Limit 
 #endif
 
 //-------------------------------------------------------------------------------------------------
@@ -198,7 +199,7 @@ struct Spooler
     Prefix_log&                 log                         ()                                  { return _log; }
     const string&               log_directory               () const                            { return _log_directory; }                      
     Time                        start_time                  () const                            { return _spooler_start_time; }
-    Security::Level             security_level              ( const Host& );
+    Security::Level             security_level              ( const Ip_address& );
     const time::Holiday_set&    holidays                    () const                            { return _holiday_set; }
     bool                        is_service                  () const                            { return _is_service; }
     string                      directory                   () const                            { return _directory; }
@@ -250,6 +251,7 @@ struct Spooler
     void                        load_threads_from_xml       ( const xml::Element_ptr&, const Time& xml_mod_time );
 
     void                        set_state                   ( State );
+  //void                        connect_to_main_scheduler   ();
 
     void                        start                       ();
     void                        stop                        ();
@@ -322,6 +324,7 @@ struct Spooler
 
   public:
     Thread_semaphore           _lock;                       // Command_processor::execute_show_state() sperrt auch, für Zugriff auf _db.
+    string                     _version;
     Log                        _base_log;
     Prefix_log                 _log;
     int                        _pid;
@@ -443,6 +446,9 @@ struct Spooler
     Security                   _security;                   // <security>
     Object_set_class_list      _object_set_class_list;      // <object_set_classes>
     Communication              _communication;              // TCP und UDP (ein Thread)
+
+    Remote_scheduler_register  _remote_scheduler_register;
+    ptr<Xml_client_connection> _main_scheduler_connection;
 
     Module                     _module;                     // <script>
     ptr<Module_instance>       _module_instance;

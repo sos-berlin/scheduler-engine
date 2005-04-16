@@ -5,10 +5,86 @@ namespace spooler {
 
 //-------------------------------------------------------------------------------------------------
 
-struct Object_server_processor_channel;
+//struct Object_server_processor_channel;
+
+//----------------------------------------------------------------------------Xml_client_connection
+
+struct Xml_client_connection : Async_operation
+{
+    enum State
+    {
+        s_initial,
+        s_connecting,
+        s_stand_by,
+        s_sending,
+        s_waiting,
+        s_receiving
+    };
+
+
+                                Xml_client_connection       ( Spooler*, const Host_and_port& );
+                               ~Xml_client_connection       ();
+
+                                
+    void                        add_to_socket_manager       ( Socket_manager* );
+
+
+  protected:
+    string                      async_state_text_           ();
+    bool                        async_continue_             ( bool wait );
+    bool                        async_finished_             ()                                      { return _state == s_initial  
+                                                                                                          || _state == s_stand_by; }
+    bool                        async_signaled_             ()                                      { return _socket_operation.async_signaled(); }
+
+  private:
+    Fill_zero                  _zero_;
+    Spooler*                   _spooler;
+    Host_and_port              _host_and_port;
+    State                      _state;
+    Buffered_socket_operation  _socket_operation;
+    Xml_end_finder             _xml_end_finder;
+    string                     _recv_data;
+};
+
+//------------------------------------------------------------------------Main_scheduler_connection
+// Verbindung zum Main Scheduler
+/*
+struct Main_scheduler_connection : Async_operation
+{
+    enum State
+    {
+        s_initial,
+        s_connecting,
+        s_stand_by,
+                                Main_scheduler_connection( Spooler*, const Host_and_port& );
+
+
+  protected:
+    string                      async_state_text_           ();
+    bool                        async_continue_             ( bool wait );
+    bool                        async_finished_             ()                                      { return _state == s_initial  
+
+  private:
+    Fill_zero                  _zero_;
+    Spooler*                   _spooler;
+    Xml_client_connection      _xml_client_connection;
+};
+*/
+//-----------------------------------------------------------------------------Xml_client_operation
+/*
+struct Xml_client_operation : Operation
+{
+    Xml_client_operation( Xml_client_connection* conn ) : _connection( conn ) {}
+
+    ptr<Xml_client_connection> _connection;
+};
+*/
+//-------------------------------------------------------------------------------------------------
+
+
 
 //--------------------------------------------------------------------------Object_server_processor
-
+/*
 struct Object_server_processor : Communication::Processor
 {
                                 Object_server_processor     ( Object_server_processor_channel* );
@@ -25,7 +101,7 @@ struct Object_server_processor : Communication::Processor
 
 
     Fill_zero                          _zero_;
-    Object_server_processor_channel*   _processor_channel;
+    Object_server_processor_channel*      _processor_channel;
     object_server::Input_message          _input_message;
     object_server::Input_message::Builder _input_message_builder;
     object_server::Output_message         _output_message;
@@ -42,34 +118,44 @@ struct Object_server_processor_channel : Communication::Processor_channel
 
     ptr<object_server::Session> _session;
 };
-
+*/
 //-----------------------------------------------------------------------------------Remote_scheduler
 
-struct Remote_scheduler
+struct Remote_scheduler : zschimmer::Object
 {
-    Host                       _host;
-    int                        _tcp_port;
+                                Remote_scheduler            ()                                      : _zero_(this+1){}
+
+    void                        connection_lost_event       ();
+    xml::Element_ptr            dom                         ( const xml::Document_ptr& document, const Show_what& show );
+
+
+    Fill_zero                  _zero_;
+    Host_and_port              _host_and_port;
     string                     _scheduler_id;
     string                     _version;
     Time                       _connected_at;
     Time                       _disconnected_at;
-    bool                       _logged_run;
-    bool                       _connection_lost;
+    bool                       _logged_on;
+    bool                       _is_connected;
 
-    ptr<object_server::Proxy>  _scheduler_proxy;
+  //ptr<object_server::Proxy>  _scheduler_proxy;
 };
 
 //-------------------------------------------------------------------------------------------------
 
-struct Remote_scheduler_register : Async_operation
+struct Remote_scheduler_register
 {
-
-    virtual bool                async_continue_         ( bool wait );
-    virtual bool                async_finished_         ()                                          { return false; }
-    virtual string              async_state_text_       ();
+                                Remote_scheduler_register   ()                                      : _zero_(this+1){}
 
 
-    ptr<object_server::Server> _server;
+    void                        add                         ( Remote_scheduler* );
+    Remote_scheduler*           get_or_null                 ( const Host_and_port& );
+    xml::Element_ptr            dom                         ( const xml::Document_ptr& document, const Show_what& show );
+
+
+    Fill_zero                  _zero_;
+    typedef map< Host_and_port, ptr<Remote_scheduler> >   Map;
+    Map                                                  _map;
 };
 
 //-------------------------------------------------------------------------------------------------
