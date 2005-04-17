@@ -192,7 +192,8 @@ function show_card( what )
 {
     if( what != _show_card )
     {
-        if( what == "process_classes" )
+        if( what == "process_classes" 
+         || what == "remote_schedulers" )
         {
             window.parent.details_frame.hide();
             //window.parent.details_frame.clear();

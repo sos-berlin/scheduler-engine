@@ -1695,7 +1695,7 @@ void Spooler::start()
 
 //------------------------------------------------------------------------------------Spooler::stop
 
-void Spooler::stop()
+void Spooler::stop( const exception* x )
 {
     assert( current_thread_id() == _thread_id );
 
@@ -1740,6 +1740,11 @@ void Spooler::stop()
     }
 
     //_java_vm.close();  Erneutes _java.init() stürzt ab, deshalb lassen wird Java stehen und schließen es erst am Schluss
+
+    if( _main_scheduler_connection )
+    {
+        //_main_scheduler_connection->logoff( x );
+    }
 
     _communication.close( 5 );      // 5 Sekunden aufs Ende warten. Vor Restart, damit offene Verbindungen nicht vererbt werden.
 
@@ -2234,9 +2239,9 @@ int Spooler::launch( int argc, char** argv, const string& parameter_line )
         {
             run();
         }
-        catch( exception& )
+        catch( exception& x )
         {
-            try { stop(); } catch( exception& x ) { _log.error( x.what() ); }
+            try { stop( &x ); } catch( exception& x ) { _log.error( x.what() ); }
             throw;
         }
 

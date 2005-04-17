@@ -68,11 +68,11 @@
                     <xsl:with-param name="class" select="'process_class'"/>
                 </xsl:apply-templates>
 
-                <xsl:if test="/spooler/remote_schedulers/remote_scheduler">
+                <xsl:if test="state/remote_schedulers/remote_scheduler">
                     <xsl:apply-templates mode="card_selector" select="/spooler">
                         <xsl:with-param name="name"  select="'remote_schedulers'"/>
-                        <xsl:with-param name="title" select="'Remote Schedulers'"/>
-                        <xsl:with-param name="class" select="'remote_schedulers'"/>
+                        <xsl:with-param name="title" select="'Remote schedulers'"/>
+                        <xsl:with-param name="class" select="'remote_scheduler'"/>
                     </xsl:apply-templates>
                 </xsl:if>
             </tr>
@@ -1000,21 +1000,27 @@
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~remote_schedulers-->
 
     <xsl:template match="remote_schedulers">
-        <table cellpadding="0" cellspacing="0" width="100%" class="remote_schedulers">
-            <col valign="baseline"  width="100"/>
+        <table cellpadding="0" cellspacing="0" width="100%" class="remote_scheduler">
+            <col valign="baseline" />
+            <col valign="baseline" />
+            <col valign="baseline" />
+            <col valign="baseline" />
+            <col valign="baseline" />
+            <col valign="baseline" />
+            <col valign="baseline" />
 
             <thead>
                 <xsl:call-template name="card_top"/>
 
                 <tr>
-                    <td style="head1">Host</td>
-                    <td style="head">IP</td>
-                    <td style="head">Port</td>
-                    <td style="head">Id</td>
-                    <td style="head">Version</td>
-                    <td style="head">Connected</td>
-                    <td style="head">Disconnected</td>
-                </tr>            
+                    <td class="head1">IP</td>
+                    <td class="head">Host</td>
+                    <td class="head">Port</td>
+                    <td class="head">Id</td>
+                    <td class="head">Connected</td>
+                    <td class="head">Disconnected</td>
+                    <td class="head">Version</td>
+                </tr>
 
                 <tr>
                     <td colspan="99" class="after_head_space">&#160;</td>
@@ -1023,19 +1029,28 @@
 
             <tbody>
                 <xsl:for-each select="remote_scheduler">
-                    <tr>
-                        <td><xsl:value-of select="@hostname"/></td>
+                    <xsl:element name="tr">
+                        <xsl:variable name="url" select="concat( 'http://', @hostname, ':', @tcp_port, '/' )" />
+                        <xsl:attribute name="style">cursor: pointer</xsl:attribute>
+                        <xsl:attribute name="title"><xsl:value-of select="$url"/></xsl:attribute>
+                        <xsl:attribute name="onclick">
+                            window.open( "<xsl:value-of select="$url"/>", "<xsl:value-of select="translate( $url, ':/.-', '____' )" />" )
+                        </xsl:attribute>
+                        <xsl:attribute name="onmouseover">this.original_class_name = this.className;  this.className='remote_scheduler_hover'</xsl:attribute>
+                        <xsl:attribute name="onmouseout" >this.className=this.original_class_name </xsl:attribute>
+                           
                         <td><xsl:value-of select="@ip"/></td>
+                        <td><xsl:value-of select="@hostname"/></td>
                         <td><xsl:value-of select="@tcp_port"/></td>
                         <td><xsl:value-of select="@scheduler_id"/></td>
-                        <td><xsl:value-of select="@version"/></td>
                         <td><xsl:value-of select="@connected_at"/></td>
-                        <td>
+                        <td style="color: red">
                             <xsl:if test="@connected='no'">
                                 <xsl:value-of select="@disconnected_at"/>
                             </xsl:if>
                         </td>
-                    </tr>
+                        <td><xsl:value-of select="@version"/></td>
+                    </xsl:element>
                 </xsl:for-each>
             </tbody>
             

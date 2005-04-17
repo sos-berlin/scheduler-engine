@@ -125,7 +125,8 @@ struct Remote_scheduler : zschimmer::Object
 {
                                 Remote_scheduler            ()                                      : _zero_(this+1){}
 
-    void                        connection_lost_event       ();
+    void                        connection_lost_event       ( const exception* );
+    void                    set_dom                         ( const xml::Element_ptr& );
     xml::Element_ptr            dom                         ( const xml::Document_ptr& document, const Show_what& show );
 
 
@@ -137,6 +138,7 @@ struct Remote_scheduler : zschimmer::Object
     Time                       _disconnected_at;
     bool                       _logged_on;
     bool                       _is_connected;
+    Xc_copy                    _error;
 
   //ptr<object_server::Proxy>  _scheduler_proxy;
 };

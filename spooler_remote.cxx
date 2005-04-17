@@ -261,6 +261,32 @@ xml::Element_ptr Remote_scheduler_register::dom( const xml::Document_ptr& docume
     return result;
 }
 
+//------------------------------------------------------------------------Remote_scheduler::set_dom
+
+void Remote_scheduler::set_dom( const xml::Element_ptr& register_scheduler_element )
+{
+    if( register_scheduler_element.bool_getAttribute( "logoff", false ) )
+    {
+        _logged_on = false;
+    }
+    else
+    {
+        _logged_on    = true;
+        _is_connected = true;
+        _scheduler_id = register_scheduler_element.getAttribute( "scheduler_id" );
+        _version      = register_scheduler_element.getAttribute( "version" );
+        _connected_at = Time::now();
+    }
+
+
+    _error = NULL;
+
+    DOM_FOR_EACH_ELEMENT( register_scheduler_element, e )
+    {
+        if( e.nodeName_is( "ERROR" ) )  _error = xc_from_dom_error( e );
+    }
+}
+
 //----------------------------------------------------------------------------Remote_scheduler::dom
 
 xml::Element_ptr Remote_scheduler::dom( const xml::Document_ptr& document, const Show_what& show )
@@ -283,15 +309,20 @@ xml::Element_ptr Remote_scheduler::dom( const xml::Document_ptr& document, const
     if( _disconnected_at )
     result.setAttribute         ( "disconnected_at" , _disconnected_at.as_string() );
 
+    if( _error )
+    append_error_element( result, _error );
+
     return result;
 }
 
 //----------------------------------------------------------Remote_scheduler::connection_lost_event
   
-void Remote_scheduler::connection_lost_event()
+void Remote_scheduler::connection_lost_event( const exception* x )
 {
     _disconnected_at = Time::now();
     _is_connected = false;
+
+    if( _logged_on )  _error = x;
 }
 
 //----------------------------------bject_server_processor_channel::Object_server_processor_channel

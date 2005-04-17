@@ -89,6 +89,18 @@ void append_error_element( const xml::Element_ptr& element, const Xc_copy& x )
     element.appendChild( create_error_element( element.ownerDocument(), x, (time_t)Time::now() ) );
 }
 
+//--------------------------------------------------------------------------------xc_from_dom_error
+
+Xc_copy xc_from_dom_error( const xml::Element_ptr& element )
+{
+    Xc x ( "" );
+
+    x.set_code( element.getAttribute( "code" ).c_str() );
+    x.set_what( element.getAttribute( "text" ) );
+
+    return x;
+}
+
 //-------------------------------------------------------------Command_processor::Command_processor
 
 Command_processor::Command_processor( Spooler* spooler, Communication::Processor* cp )
@@ -654,20 +666,7 @@ xml::Element_ptr Command_processor::execute_register_remote_scheduler( const xml
     if( !remote_scheduler )  remote_scheduler = Z_NEW( Remote_scheduler );
 
     remote_scheduler->_host_and_port = host_and_port;
-
-    if( register_scheduler_element.bool_getAttribute( "logoff", false ) )
-    {
-        remote_scheduler->_logged_on = false;
-    }
-    else
-    {
-        remote_scheduler->_logged_on    = true;
-        remote_scheduler->_is_connected = true;
-        remote_scheduler->_scheduler_id = register_scheduler_element.getAttribute( "scheduler_id" );
-        remote_scheduler->_version      = register_scheduler_element.getAttribute( "version" );
-        remote_scheduler->_connected_at = Time::now();
-    }
-
+    remote_scheduler->set_dom( register_scheduler_element );
     
     xml_processor->_processor_channel->_remote_scheduler = remote_scheduler;        // Remote_scheduler mit TCP-Verbindung verknüpfen
     _spooler->_remote_scheduler_register.add( remote_scheduler );

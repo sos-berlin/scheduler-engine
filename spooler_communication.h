@@ -47,7 +47,7 @@ struct Communication
                                 Channel                     ( Communication* );
                                ~Channel                     ();
 
-        void                    remove_me                   ();
+        void                    remove_me                   ( const exception* = NULL );
         void                    terminate                   ();
 
         bool                    do_accept                   ( SOCKET listen_socket );
@@ -135,11 +135,11 @@ struct Communication
 
     struct Processor_channel : Object
     {
-                                Processor_channel           ( Channel* ch )                        : _spooler(ch->_spooler), _channel(ch) {}
+                                Processor_channel           ( Channel* ch )                         : _spooler(ch->_spooler), _channel(ch) {}
 
 
         virtual ptr<Processor>  processor                   ()                                      = 0;
-        virtual void            connection_lost_event       ()                                      {}
+        virtual void            connection_lost_event       ( const exception* )                    {}
 
 
 
@@ -251,7 +251,7 @@ struct Xml_processor_channel : Communication::Processor_channel
     ptr<Communication::Processor> processor                 ()                                      { ptr<Xml_processor> result = Z_NEW( Xml_processor( this ) ); 
                                                                                                       return +result; }
 
-    virtual void                connection_lost_event       ();
+    virtual void                connection_lost_event       ( const exception* );
 
 
     bool                       _indent;

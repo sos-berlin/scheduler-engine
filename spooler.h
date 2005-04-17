@@ -254,7 +254,7 @@ struct Spooler
   //void                        connect_to_main_scheduler   ();
 
     void                        start                       ();
-    void                        stop                        ();
+    void                        stop                        ( const exception* = NULL );
     void                        signal_threads              ( const string& signal_name );
     void                        wait_until_threads_stopped  ( Time until );
     void                        reload                      ();

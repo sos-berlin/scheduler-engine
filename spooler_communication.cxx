@@ -38,11 +38,11 @@ const int wait_for_port_available = 60;   // Soviele Sekunden warten, bis TCP- o
 
 //-----------------------------------------------------Xml_processor_channel::connection_lost_event
 
-void Xml_processor_channel::connection_lost_event()
+void Xml_processor_channel::connection_lost_event( const exception* x )
 {
     if( _remote_scheduler )
     {
-        _remote_scheduler->connection_lost_event();
+        _remote_scheduler->connection_lost_event( x );
     }
 }
 
@@ -204,9 +204,9 @@ Communication::Channel::~Channel()
 
 //----------------------------------------------------------------Communication::Channel::remove_me
 
-void Communication::Channel::remove_me()
+void Communication::Channel::remove_me( const exception* x )
 {
-    if( _processor_channel )  _processor_channel->connection_lost_event();
+    if( _processor_channel )  _processor_channel->connection_lost_event( x );
 
     _communication->remove_channel( this );
 }
@@ -457,11 +457,11 @@ bool Communication::Channel::async_continue_( bool wait )
     { 
         if( string_begins_with( x.what(), "ERRNO-53 "      ) == 0                                  // ECONNABORT, Firefox trennt sich so
          || string_begins_with( x.what(), "WINSOCK-10053 " ) == 0                                  // ECONNABORT, Firefox trennt sich so
-         || string_begins_with( x.what(), "WINSOCK-54 "    ) == 0                                  // ECONNRESET, Internet Explorer trennt sich so
+         || string_begins_with( x.what(), "ERRNO-54 "      ) == 0                                  // ECONNRESET, Internet Explorer trennt sich so
          || string_begins_with( x.what(), "WINSOCK-10054 " ) == 0 )  _log.debug( x.what() );       // ECONNRESET, Internet Explorer trennt sich so
-                                                           else  _log.error( x.what() );  
+                                                               else  _log.error( x.what() );  
 
-        remove_me();
+        remove_me( &x );
         return true; 
     }
 

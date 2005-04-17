@@ -342,7 +342,7 @@ const char dtd_string[] =
 "\n"
 "\n"
 "\n"
-"<!ELEMENT register_remote_scheduler  EMPTY>\n"
+"<!ELEMENT register_remote_scheduler  ( ERROR? ) >\n"
 "<!ATTLIST register_remote_scheduler  version        CDATA #IMPLIED>\n"
 "<!ATTLIST register_remote_scheduler  scheduler_id   CDATA #IMPLIED>\n"
 "<!ATTLIST register_remote_scheduler  tcp_port       CDATA #IMPLIED>\n"
