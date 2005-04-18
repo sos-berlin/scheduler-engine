@@ -66,7 +66,7 @@ namespace spooler {
 
 //--------------------------------------------------------------------------------------------const
     
-const int main_scheduler_retry_time = 15;
+const int main_scheduler_retry_time = 60;
 
 //---------------------------------------------------------------------Xml_client_connection::start
 /*    

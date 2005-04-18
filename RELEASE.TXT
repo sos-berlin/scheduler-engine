@@ -121,3 +121,10 @@ VERSION 2.0.116  2005-04-06
 <monthdays>: 1..31
 <ultimos>: 0..30
 <weekdays>: 0..6, aber 7 wird zu 0 (Sonntag)
+
+Neue Optionen an der Kommandozeile: -port= -tcp-port= -udp-port=
+
+<config main_scheduler="host:port">
+
+
+
