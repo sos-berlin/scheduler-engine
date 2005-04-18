@@ -68,7 +68,7 @@
                     <xsl:with-param name="class" select="'process_class'"/>
                 </xsl:apply-templates>
 
-                <xsl:if test="state/remote_schedulers/remote_scheduler">
+                <xsl:if test="state/remote_schedulers/[ @count > 0 ]">
                     <xsl:apply-templates mode="card_selector" select="/spooler">
                         <xsl:with-param name="name"  select="'remote_schedulers'"/>
                         <xsl:with-param name="title" select="'Remote schedulers'"/>
@@ -1011,10 +1011,17 @@
 
             <thead>
                 <xsl:call-template name="card_top"/>
+                
+                <tr>
+                    <td colspan="99">
+                        <xsl:value-of select="@count" /> schedulers,
+                        <xsl:value-of select="@connected" /> connected
+                    </td>
+                </tr>
 
                 <tr>
                     <td class="head1">IP</td>
-                    <td class="head">Host</td>
+                    <td class="head">Hostname</td>
                     <td class="head">Port</td>
                     <td class="head">Id</td>
                     <td class="head">Connected</td>

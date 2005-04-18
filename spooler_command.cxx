@@ -172,7 +172,7 @@ xml::Element_ptr Command_processor::execute_show_state( const xml::Element_ptr& 
     if( _security_level < Security::seclev_info )  throw_xc( "SCHEDULER-121" );
 
     Show_what show = show_;
-    if( show & show_all_ )  show |= Show_what_enum( show_task_queue | show_description );
+    if( show & show_all_ )  show |= Show_what_enum( show_task_queue | show_description | show_remote_schedulers );
 
     xml::Element_ptr state_element = _answer.createElement( "state" );
  

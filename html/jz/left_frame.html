@@ -146,9 +146,13 @@ function update_jobs_frame()
         what = "job_chain_orders";
         max_orders = window.parent.details_frame._job_chain_element? 9999 : _max_orders;
     }
+    
+    if( _show_card == "remote_schedulers" )  what += " remote_schedulers";
 
     _response = _scheduler.execute( "<show_state what='" + what + "' max_orders='" + max_orders + "'/>" );
+    
     modify_response( _response );
+    
     var scheduler_id = _response.selectSingleNode( "spooler/answer/state" ).getAttribute( "id" );
     document.title = "Scheduler " + ( scheduler_id? " id=" + scheduler_id : "" );
     

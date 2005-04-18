@@ -253,10 +253,21 @@ xml::Element_ptr Remote_scheduler_register::dom( const xml::Document_ptr& docume
 {
     xml::Element_ptr result = document.createElement( "remote_schedulers" );
 
+    int n = 0;
+    int connected_count = 0;
+
     Z_FOR_EACH( Map, _map, s )
     {
-        result.appendChild( s->second->dom( document, show ) );
+        Remote_scheduler* remote_scheduler = s->second;
+
+        n++;
+        if( remote_scheduler->_is_connected )  connected_count++;
+
+        if( show & show_remote_schedulers )  result.appendChild( remote_scheduler->dom( document, show ) );
     }
+
+    result.setAttribute( "count"    , n );
+    result.setAttribute( "connected", connected_count );
 
     return result;
 }

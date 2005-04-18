@@ -24,9 +24,10 @@ enum Show_what_enum
     show_log                = 0x20,
     show_task_history       = 0x40,
     show_order_history      = 0x80,
+    show_remote_schedulers  = 0x100,
 
-    show_all_               = 0x80,
-    show_all                = 0xFF      // Alle Flags und show_all_ (Bei <show_state> ist z.B. show_orders nicht in show_all enthalten)
+    show_all_               = 0x8000,
+    show_all                = 0xFFFF    // Alle Flags und show_all_ (Bei <show_state> ist z.B. show_orders nicht in show_all enthalten)
 };
 
 inline Show_what_enum operator | ( Show_what_enum a, Show_what_enum b )  { return (Show_what_enum)( (int)a | (int)b ); } 
