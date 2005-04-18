@@ -72,6 +72,12 @@
                         (<scheduler_element name="task_history" directory="xml/answer/"/>).
                     </dd>
                     
+                    <dt><code>remote_schedulers</code></dt>
+                    <dd>
+                        Liefert auch die registrierten Scheduler
+                        (<scheduler_element name="remote_schedulers" directory="xml/answer/"/>).
+                    </dd>
+                    
                     <dt><code>standard</code></dt>
                     <dd>
                         Wie <code>what=""</code> (keine Auswahl).

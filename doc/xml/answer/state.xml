@@ -175,6 +175,7 @@
         <xml_child_element name="job_chains"/>
         <xml_child_element name="process_classes"/>
         <xml_child_element name="subprocesses"/>
+        <xml_child_element name="remote_schedulers"/>
     </xml_child_elements>
 
     <description>

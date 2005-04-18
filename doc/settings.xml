@@ -117,6 +117,7 @@ log = scheduler.wait com_server.* >scheduler.log
             </p>
         </description>
     </setting>
+
     
     <setting setting= "spooler_id" 
              type   = "scheduler_id">
@@ -133,6 +134,39 @@ log = scheduler.wait com_server.* >scheduler.log
                 <code>spooler_id=""</code>
                 aus.
 -->                
+            </p>
+        </description>
+    </setting>
+    
+
+    <setting setting= "port" 
+             type   = "number"
+             title  = "TCP- und UDP-Port zur Steuerung des Schedulers">
+
+        <description>
+            <p>
+            </p>
+        </description>
+    </setting>
+    
+
+    <setting setting= "tcp_port" 
+             type   = "number"
+             title  = "TCP-Port zur Steuerung des Schedulers">
+
+        <description>
+            <p>
+            </p>
+        </description>
+    </setting>
+    
+
+    <setting setting= "udp_port" 
+             type   = "number"
+             title  = "UDP-Port zur Steuerung des Schedulers">
+
+        <description>
+            <p>
             </p>
         </description>
     </setting>

@@ -84,6 +84,7 @@ scheduler hallo_welt.xml
 
 &lt;<a class="silent" href="xml/spooler.xml">spooler</a>>
     &lt;<a class="silent" href="xml/config.xml">config</a> spooler_id      = ""
+            main_scheduler  = "hostname:4444"
             tcp_port        = "4444"
             udp_port        = "4444"
             param           = "…"

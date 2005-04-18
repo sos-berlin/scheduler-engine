@@ -15,7 +15,23 @@
         <xml_parent_element name="spooler"/>
     </xml_parent_elements>
 
+    
     <xml_attributes>
+    
+        <xml_attribute name="main_scheduler" type="host:port">
+            <description>
+                <p>
+                    Ein Haupt-Scheduler, bei dem sich dieser Scheduler an- und abmelden soll.
+                    Das geschieht asynchron und Fehler beeinträchtigen nicht den Betrieb.
+                </p>
+                <p>
+                    Version 2.0.116: Wenn der Haupt-Scheduler unter Windows läuft, 
+                    sollten nicht mehr als vier Scheduler sich bei ihn anmelden.
+                </p>
+            </description>
+        </xml_attribute>
+        
+
         <xml_attribute name="spooler_id" type="spooler_id">
             <!-- Diese Beschreibung wird auch von anderen Elementen verwendet. Also allgemein halten! -->
             <description>
@@ -24,6 +40,7 @@
                 oder wenn beim Scheduler-Start der Parameter <code>-id=</code> nicht angegeben worden ist.
             </description>
         </xml_attribute>
+
         
         <xml_attribute name="tcp_port" type="zahl" initial="4444" title="Für Kommandos per TCP und HTTP">
             <description>
@@ -45,6 +62,7 @@
                 <pre>&lt;config tcp_port="4444"></pre>
             </example>
         </xml_attribute>
+
         
         <xml_attribute name="udp_port" type="zahl" initial="4444" title="Für Kommandos per UDP">
             <description>

@@ -58,6 +58,9 @@
         <command_option name="log-level"    setting="log_level"/>
         <command_option name="param"        setting="param"/>
         <command_option name="include-path" setting="include_path"/>
+        <command_option name="port"         setting="port"/>
+        <command_option name="tcp-port"     setting="tcp_port"/>
+        <command_option name="udp-port"     setting="udp_port"/>
 
         <command_option name="show-dtd" title="schreibt die DTD nach stdout">
             <description>
