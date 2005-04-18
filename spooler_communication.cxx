@@ -36,6 +36,15 @@ const int wait_for_port_available = 60;   // Soviele Sekunden warten, bis TCP- o
 #   define INADDR_NONE (-1)
 #endif
 
+//-----------------------------------------------------Xml_processor_channel::Xml_processor_channel
+
+Xml_processor_channel::Xml_processor_channel( Communication::Channel* channel )
+: 
+    Communication::Processor_channel( channel ) 
+{
+    _indent = channel->_read_socket == STDIN_FILENO;
+}
+
 //-----------------------------------------------------Xml_processor_channel::connection_lost_event
 
 void Xml_processor_channel::connection_lost_event( const exception* x )
@@ -233,11 +242,11 @@ bool Communication::Channel::do_accept( SOCKET listen_socket )
 
         set_buffer_size();
 
-        _host = _peer_addr.sin_addr;
-        _log.set_prefix( "TCP-Verbindung mit " + _host.as_string() );
+      //_host = _peer_addr.sin_addr;
+        _log.set_prefix( "TCP-Verbindung mit " + _peer_host_and_port._host.as_string() );
 
 
-        if( _spooler->security_level( _host ) <= Security::seclev_signal )
+        if( _spooler->security_level( _peer_host_and_port._host ) <= Security::seclev_signal )
         {
             _log.warn( "TCP-Verbindung nicht zugelassen" );
             do_close();
@@ -320,7 +329,7 @@ bool Communication::Channel::do_recv()
             _processor = _processor_channel->processor();
         }
 
-        if( _read_socket != STDIN_FILENO )  _processor->set_host( &_host );
+        if( _read_socket != STDIN_FILENO )  _processor->set_host( &_peer_host_and_port._host );
 
         if( len > 0 )
         {
@@ -455,9 +464,9 @@ bool Communication::Channel::async_continue_( bool wait )
     }
     catch( const exception& x ) 
     { 
-        if( string_begins_with( x.what(), "ERRNO-53 "      ) == 0                                  // ECONNABORT, Firefox trennt sich so
-         || string_begins_with( x.what(), "WINSOCK-10053 " ) == 0                                  // ECONNABORT, Firefox trennt sich so
-         || string_begins_with( x.what(), "ERRNO-54 "      ) == 0                                  // ECONNRESET, Internet Explorer trennt sich so
+        if( string_begins_with( x.what(), "ERRNO-103 "     ) == 0                                  // ECONNABORTED, Firefox trennt sich so
+         || string_begins_with( x.what(), "WINSOCK-10053 " ) == 0                                  // ECONNABORTED, Firefox trennt sich so
+         || string_begins_with( x.what(), "ERRNO-104 "     ) == 0                                  // ECONNRESET, Internet Explorer trennt sich so
          || string_begins_with( x.what(), "WINSOCK-10054 " ) == 0 )  _log.debug( x.what() );       // ECONNRESET, Internet Explorer trennt sich so
                                                                else  _log.error( x.what() );  
 
@@ -711,7 +720,6 @@ void Communication::bind()
         
                 new_channel->_read_socket  = STDIN_FILENO;
                 new_channel->_write_socket = STDOUT_FILENO;
-                new_channel->_indent = true;
                 new_channel->_socket_send_buffer_size = 1024;
 
                 new_channel->add_to_socket_manager( _spooler->_connection_manager );

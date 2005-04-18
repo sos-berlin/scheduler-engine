@@ -65,7 +65,7 @@ struct Communication
         Fill_zero              _zero_;
         Spooler*               _spooler;
         Communication*         _communication;
-        Host                   _host;
+      //Host                   _host;
 
         bool                   _responding;
         bool                   _receive_at_start;
@@ -245,7 +245,7 @@ struct Xml_processor : Communication::Processor
 
 struct Xml_processor_channel : Communication::Processor_channel
 {
-                                Xml_processor_channel       ( Communication::Channel* channel )     : Communication::Processor_channel( channel ) {}
+                                Xml_processor_channel       ( Communication::Channel* );
 
 
     ptr<Communication::Processor> processor                 ()                                      { ptr<Xml_processor> result = Z_NEW( Xml_processor( this ) ); 
