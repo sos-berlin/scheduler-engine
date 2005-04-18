@@ -352,8 +352,12 @@ void Spooler::load_config( const xml::Element_ptr& config_element, const Time& x
         _config_document = config_element.ownerDocument();
         _config_element = config_element;
 
+        if( !_tcp_port_as_option_set )
         _tcp_port      = config_element.int_getAttribute( "tcp_port"     , _tcp_port     );
+
+        if( !_udp_port_as_option_set )
         _udp_port      = config_element.int_getAttribute( "udp_port"     , _udp_port     );
+
         _priority_max  = config_element.int_getAttribute( "priority_max" , _priority_max );
 
 #     ifdef _DEBUG

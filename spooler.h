@@ -428,7 +428,9 @@ struct Spooler
     bool                       _spooler_param_as_option_set;// -param= als Option gesetzt, überschreibt Angabe in spooler.xml
     int                        _priority_max;               // <config priority_max=...>
     int                        _tcp_port;                   // <config tcp=...>
+    bool                       _tcp_port_as_option_set;
     int                        _udp_port;                   // <config udp=...>
+    bool                       _udp_port_as_option_set;
   //bool                       _free_threading_default;
     time::Holiday_set          _holiday_set;                // Feiertage für alle Jobs
 

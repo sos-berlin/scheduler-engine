@@ -691,6 +691,8 @@ xml::Element_ptr Command_processor::execute_command( const xml::Element_ptr& ele
     const char* p = what.c_str();  // Bsp: "all"  "orders,description"  "task_queue,orders,description,"
     while( *p )
     {
+        while( *p == ' ' )  p++;
+
         if( string_equals_prefix_then_skip( &p, "all"              ) )  show |= show_all_;
         else
         if( string_equals_prefix_then_skip( &p, "task_queue"       ) )  show |= show_task_queue;
@@ -709,12 +711,17 @@ xml::Element_ptr Command_processor::execute_command( const xml::Element_ptr& ele
         else
         if( string_equals_prefix_then_skip( &p, "order_history"    ) )  show |= show_order_history;
         else
+        if( string_equals_prefix_then_skip( &p, "remote_schedulers") )  show |= show_remote_schedulers;
+        else
         if( string_equals_prefix_then_skip( &p, "standard"         ) )  ;
         else
             throw_xc( "SCHEDULER-164", what );
 
+        if( *p != ','  &&  *p != ' '  &&  *p != '\0' )  throw_xc( "SCHEDULER-164", what );
+
+        while( *p == ' '  ||  *p == ',' )  p++;
+
         if( *p == 0 )  break;
-        if( *p != ',' )  throw_xc( "SCHEDULER-164", what );
         p++;
     }
 

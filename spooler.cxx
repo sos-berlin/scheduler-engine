@@ -1465,6 +1465,12 @@ void Spooler::load_arg()
             else
             if( opt.with_value( "cmd"              ) )  _xml_cmd = opt.value();
             else
+            if( opt.with_value( "port"             ) )  _tcp_port = _udp_port = opt.as_int(),  _tcp_port_as_option_set = _udp_port_as_option_set = true;
+            else
+            if( opt.with_value( "tcp-port"         ) )  _tcp_port = opt.as_int(),  _tcp_port_as_option_set = true;
+            else
+            if( opt.with_value( "udp-port"         ) )  _udp_port = opt.as_int(),  _udp_port_as_option_set = true;
+            else
                 throw_sos_option_error( opt );
         }
 

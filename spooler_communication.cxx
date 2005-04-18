@@ -125,7 +125,7 @@ bool Communication::Listen_socket::async_continue_( bool wait )
         {
             if( _communication->_channel_list.size() >= max_communication_channels )
             {
-                LOG( "Mehr als " << max_communication_channels << " Kommunikationskanäle. Verbindung abgelehnt.\n" );
+                _spooler->_log.error( S() << "Mehr als " << max_communication_channels << " Kommunikationskanäle. Verbindung abgelehnt.\n" );
             }
             else
             {

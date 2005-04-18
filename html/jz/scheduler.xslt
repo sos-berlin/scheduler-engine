@@ -68,7 +68,7 @@
                     <xsl:with-param name="class" select="'process_class'"/>
                 </xsl:apply-templates>
 
-                <xsl:if test="state/remote_schedulers/[ @count > 0 ]">
+                <xsl:if test="state/remote_schedulers[ @count > 0 ]">
                     <xsl:apply-templates mode="card_selector" select="/spooler">
                         <xsl:with-param name="name"  select="'remote_schedulers'"/>
                         <xsl:with-param name="title" select="'Remote schedulers'"/>
