@@ -66,7 +66,7 @@ namespace spooler {
 
 //--------------------------------------------------------------------------------------------const
     
-const int main_scheduler_retry_time = 15;
+const int main_scheduler_retry_time = 60;
 
 //---------------------------------------------------------------------Xml_client_connection::start
 /*    
@@ -82,8 +82,10 @@ Xml_client_connection::Xml_client_connection( Spooler* sp, const Host_and_port& 
 : 
     _zero_(this+1), 
     _spooler(sp),
+    _log( sp->_log ),
     _host_and_port(host_and_port)
 {
+    _log.set_prefix( S() << "Hauptscheduler " + _host_and_port );
     //set_async_child( &_socket_operation );
 }
 
@@ -200,7 +202,7 @@ bool Xml_client_connection::async_continue_( bool wait )
 
                 _state = s_stand_by;
 
-                //_spooler->_log.info( "ANTWORT: " + _recv_data );
+                //_log.info( "ANTWORT: " + _recv_data );
 
                 xml::Document_ptr response_document;
                 response_document.create();
@@ -213,7 +215,7 @@ bool Xml_client_connection::async_continue_( bool wait )
                         DOM_FOR_EACH_ELEMENT( e1, e2 )
                             if( e2.nodeName_is( "ERROR" ) )  throw_xc( "SCHEDULER-223", e2.getAttribute( "text" ) );
 
-                _spooler->_log.info( S() << "Dieser Scheduler ist beim Haupt-Scheduler " << _host_and_port << " registriert" );
+                _log.info( S() << "Scheduler ist registriert" );
                 break;
             }
 
@@ -222,7 +224,7 @@ bool Xml_client_connection::async_continue_( bool wait )
     }
     catch( exception& x )
     {
-        _spooler->_log.warn( string( "Verbindung zum Haupt-Scheduler: " ) + x.what() );
+        _log.warn( x.what() );
 
         if( _socket_operation )
         {

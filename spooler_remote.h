@@ -39,6 +39,7 @@ struct Xml_client_connection : Async_operation
   private:
     Fill_zero                  _zero_;
     Spooler*                   _spooler;
+    Prefix_log                 _log;
     Host_and_port              _host_and_port;
     State                      _state;
     Socket_manager*            _socket_manager;
