@@ -586,12 +586,12 @@ int Communication::bind_socket( SOCKET socket, struct sockaddr_in* sa )
     int ret;
     int true_ = 1;
 
-    /*
-    LOG( "setsockopt(" << socket << ",SOL_SOCKET,SO_REUSEADDR,1)  " );
-    ret = setsockopt( socket, SOL_SOCKET, SO_REUSEADDR, (const char*)&true_, sizeof true_ );
-    LOG( "ret=" << ret );  if( ret == SOCKET_ERROR )  LOG( "errno=" << errno << "  "  << strerror(errno) );
-    LOG( "\n" );
-    */
+#   ifdef Z_UNIX
+        LOG( "setsockopt(" << socket << ",SOL_SOCKET,SO_REUSEADDR,1)  " );
+        ret = setsockopt( socket, SOL_SOCKET, SO_REUSEADDR, (const char*)&true_, sizeof true_ );
+        LOG( "ret=" << ret );  if( ret == SOCKET_ERROR )  LOG( "errno=" << errno << "  "  << strerror(errno) );
+        LOG( "\n" );
+#   endif
 
     ret = ::bind( socket, (struct sockaddr*)sa, sizeof (struct sockaddr_in) );
 
