@@ -48,8 +48,8 @@ td.after_head_space     { margin-top: 0; margin-bottom: 0pt; line-height: 4pt; }
 
 .process_class          { background-color: #F0F0F0 }
 
-.remote_scheduler               { background-color: #ffff80 }
-.remote_scheduler_hover         { background-color: #ffffc0 }
+.remote_scheduler               { background-color: #ffffa0 }
+.remote_scheduler_hover         { background-color: #ffffd0 }
 
 /* Anklickbar */
 .hover                  { text-decoration: underline }

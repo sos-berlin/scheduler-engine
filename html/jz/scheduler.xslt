@@ -1037,7 +1037,8 @@
             <tbody>
                 <xsl:for-each select="remote_scheduler">
                     <xsl:element name="tr">
-                        <xsl:variable name="url" select="concat( 'http://', @hostname, ':', @tcp_port, '/' )" />
+                        <xsl:variable name="url" select="concat( 'http://', @hostname, ':', @tcp_port, /*/@my_url_path_base )" />
+                        
                         <xsl:attribute name="style">cursor: pointer</xsl:attribute>
                         <xsl:attribute name="title"><xsl:value-of select="$url"/></xsl:attribute>
                         <xsl:attribute name="onclick">
@@ -1050,10 +1051,10 @@
                         <td><xsl:value-of select="@hostname"/></td>
                         <td><xsl:value-of select="@tcp_port"/></td>
                         <td><xsl:value-of select="@scheduler_id"/></td>
-                        <td><xsl:value-of select="@connected_at"/></td>
+                        <td><xsl:value-of select="@connected_at__xslt_date_or_time_with_diff"/></td>
                         <td style="color: red">
                             <xsl:if test="@connected='no'">
-                                <xsl:value-of select="@disconnected_at"/>
+                                <xsl:value-of select="@disconnected_at__xslt_date_or_time_with_diff"/>
                             </xsl:if>
                         </td>
                         <td><xsl:value-of select="@version"/></td>

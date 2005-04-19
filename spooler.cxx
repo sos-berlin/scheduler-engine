@@ -431,7 +431,7 @@ Security::Level Spooler::security_level( const Ip_address& host )
 
     THREAD_LOCK( _lock )
     {
-        result = _security.level( host );
+        result = _security.level( host.as_in_addr() );
     }
 
     return result;

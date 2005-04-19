@@ -66,7 +66,7 @@ namespace spooler {
 
 //--------------------------------------------------------------------------------------------const
     
-const int main_scheduler_retry_time = 60;
+const int main_scheduler_retry_time = 15;
 
 //---------------------------------------------------------------------Xml_client_connection::start
 /*    
@@ -91,14 +91,14 @@ Xml_client_connection::Xml_client_connection( Spooler* sp, const Host_and_port& 
 
 Xml_client_connection::~Xml_client_connection()
 {
-    _socket_operation.remove_from_socket_manager();
+    _socket_operation = NULL;
 }
 
 //-----------------------------------------------------Xml_client_connection::add_to_socket_manager
 
 void Xml_client_connection::add_to_socket_manager( Socket_manager* manager )
 {
-    _socket_operation.add_to_socket_manager( manager );
+    _socket_manager = manager;
 
     set_async_manager( manager );
     set_async_next_gmtime( 0 );     // Sofort starten!
@@ -128,12 +128,18 @@ bool Xml_client_connection::async_continue_( bool wait )
 
     try
     {
-        if( !_socket_operation.async_finished() )  return false;
-        _socket_operation.async_check_error();
+        if( _socket_operation )
+        {
+            if( !_socket_operation->async_finished() )  return false;
+            _socket_operation->async_check_error();
 
-        //if( !_socket_operation.async_signaled() )
+            if( _socket_operation->_eof )  throw_xc( "SCHEDULER-224" );
+        }
+
+        //if( !_socket_operation->async_signaled() )
         {
         }
+
 
         switch( _state )
         {
@@ -141,14 +147,18 @@ bool Xml_client_connection::async_continue_( bool wait )
                 if( async_next_gmtime() > ::time(NULL) )  return false;
                 set_async_next_gmtime( double_time_max );
 
-                _socket_operation.connect__start( _host_and_port );
+                _socket_operation = Z_NEW( Buffered_socket_operation( _socket_manager ) );
+
+                _socket_operation->connect__start( _host_and_port );
+                _socket_operation->set_keepalive( true );
+
                 _state = s_connecting;
                 something_done = true;
                 break;
 
             case s_connecting:
             {
-                if( !_socket_operation.async_finished() )  break;
+                if( !_socket_operation->async_finished() )  break;
 
                 S xml;
                 xml << "<register_remote_scheduler";
@@ -157,13 +167,13 @@ bool Xml_client_connection::async_continue_( bool wait )
                 xml << " version='"      << _spooler->_version     << "'";
                 xml << "/>";
 
-                _socket_operation.send__start( xml );
+                _socket_operation->send__start( xml );
                 _state = s_sending;
                 //break;
             }
 
             case s_sending:
-                if( !_socket_operation.async_finished() )  break;
+                if( !_socket_operation->async_finished() )  break;
                 
                 _state = s_waiting;
                 //break;
@@ -173,23 +183,22 @@ bool Xml_client_connection::async_continue_( bool wait )
 
             case s_receiving:
             {
-                //char buffer [ 4096 ];
+                _socket_operation->recv__continue();
+                if( _socket_operation->_eof )  throw_xc( "SCHEDULER-224" );
 
-                _socket_operation.recv__continue();
-                //int length = _socket_operation.recv__continue(); // buffer, sizeof buffer );
-                //if( length > 0 )
-                string data = _socket_operation.recv_data();
+                string data = _socket_operation->recv_data();
                 if( data.length() == 0 )  break;
 
                 _state = s_receiving;
                 something_done = true;
 
-                //_recv_data.append( buffer, length );
-                _socket_operation.recv_clear();
+                _socket_operation->recv_clear();
                 _recv_data.append( data );
                 
 
                 if( !_xml_end_finder.is_complete( data.data(), data.length() ) )  break;
+
+                _state = s_stand_by;
 
                 //_spooler->_log.info( "ANTWORT: " + _recv_data );
 
@@ -205,7 +214,6 @@ bool Xml_client_connection::async_continue_( bool wait )
                             if( e2.nodeName_is( "ERROR" ) )  throw_xc( "SCHEDULER-223", e2.getAttribute( "text" ) );
 
                 _spooler->_log.info( S() << "Dieser Scheduler ist beim Haupt-Scheduler " << _host_and_port << " registriert" );
-                _state = s_stand_by;
                 break;
             }
 
@@ -216,13 +224,16 @@ bool Xml_client_connection::async_continue_( bool wait )
     {
         _spooler->_log.warn( string( "Verbindung zum Haupt-Scheduler: " ) + x.what() );
 
-        try
+        if( _socket_operation )
         {
-            _socket_operation.close();
-        }
-        catch( exception& ) {}
+            try
+            {
+                _socket_operation->close();
+            }
+            catch( exception& ) {}
 
-        _socket_operation.async_reset_error();
+            _socket_operation->async_reset_error();
+        }
 
         _state = s_initial;
         set_async_next_gmtime( ::time(NULL) + main_scheduler_retry_time );

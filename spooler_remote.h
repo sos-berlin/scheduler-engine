@@ -34,14 +34,15 @@ struct Xml_client_connection : Async_operation
     bool                        async_continue_             ( bool wait );
     bool                        async_finished_             ()                                      { return _state == s_initial  
                                                                                                           || _state == s_stand_by; }
-    bool                        async_signaled_             ()                                      { return _socket_operation.async_signaled(); }
+    bool                        async_signaled_             ()                                      { return _socket_operation && _socket_operation->async_signaled(); }
 
   private:
     Fill_zero                  _zero_;
     Spooler*                   _spooler;
     Host_and_port              _host_and_port;
     State                      _state;
-    Buffered_socket_operation  _socket_operation;
+    Socket_manager*            _socket_manager;
+    ptr<Buffered_socket_operation>  _socket_operation;
     Xml_end_finder             _xml_end_finder;
     string                     _recv_data;
 };
