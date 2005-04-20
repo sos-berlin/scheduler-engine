@@ -200,6 +200,13 @@ xml::Element_ptr Command_processor::execute_show_state( const xml::Element_ptr& 
         }
     }
 
+    if( _spooler->_waiting_errno )
+    {
+        state_element.setAttribute( "waiting_errno"         , _spooler->_waiting_errno );
+        state_element.setAttribute( "waiting_errno_text"    , strerror( _spooler->_waiting_errno ) );
+        state_element.setAttribute( "waiting_errno_filename", _spooler->_waiting_errno_filename );
+    }
+
     double cpu_time = get_cpu_time();
     char buffer [30];
     sprintf( buffer, "%-.3lf", cpu_time ); 
@@ -693,6 +700,8 @@ xml::Element_ptr Command_processor::execute_command( const xml::Element_ptr& ele
     {
         while( *p == ' ' )  p++;
 
+        if( string_equals_prefix_then_skip( &p, "all!"             ) )  show |= show_all;
+        else
         if( string_equals_prefix_then_skip( &p, "all"              ) )  show |= show_all_;
         else
         if( string_equals_prefix_then_skip( &p, "task_queue"       ) )  show |= show_task_queue;
@@ -722,7 +731,6 @@ xml::Element_ptr Command_processor::execute_command( const xml::Element_ptr& ele
         while( *p == ' '  ||  *p == ',' )  p++;
 
         if( *p == 0 )  break;
-        p++;
     }
 
     if( element.nodeName_is( "show_state"       ) 

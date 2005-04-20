@@ -42,6 +42,21 @@
         </xml_attribute>
 
         
+        <xml_attribute name="port" type="zahl" initial="4444" title="Für Kommandos per TCP, HTTP und UDP">
+            <description>
+                <p>
+                    Fasst die Attribute 
+                    <a href="#attribute_tcp_port"><code>tcp_port</code></a> 
+                    und 
+                    <a href="#attribute_udp_port"><code>udp_port</code></a> 
+                </p>
+            </description>
+            <example>
+                <pre>&lt;config port="4444"></pre>
+            </example>
+        </xml_attribute>
+
+        
         <xml_attribute name="tcp_port" type="zahl" initial="4444" title="Für Kommandos per TCP und HTTP">
             <description>
                 <p>

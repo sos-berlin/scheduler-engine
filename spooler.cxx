@@ -1107,7 +1107,12 @@ void Spooler::set_state( State state )
     if( _state == state )  return;
 
     _state = state;
-    _log.info( state_name() );
+
+    try
+    {
+        _log.info( state_name() );      // Nach _state = s_stopping aufrufen, damit's nicht blockiert!
+    }
+    catch( exception& ) {}      // ENOSPC bei s_stopping ignorieren wir
 
     if( _state_changed_handler )  (*_state_changed_handler)( this, NULL );
 }
@@ -1701,7 +1706,7 @@ void Spooler::start()
 
 //------------------------------------------------------------------------------------Spooler::stop
 
-void Spooler::stop( const exception* x )
+void Spooler::stop( const exception* )
 {
     assert( current_thread_id() == _thread_id );
 
@@ -1801,8 +1806,17 @@ bool Spooler::execute_state_cmd()
 
     if( _state_cmd )
     {
-        if( _state_cmd == sc_pause                         )  if( _state == s_running )  set_state( s_paused  ), signal_threads( "pause" );
-        if( _state_cmd == sc_continue                      )  if( _state == s_paused  )  set_state( s_running ), signal_threads( "continue" );
+        if( _state_cmd == sc_pause )  
+        {
+            if( _state == s_running )  set_state( s_paused  ), signal_threads( "pause" );
+        }
+
+        if( _state_cmd == sc_continue )
+        {
+            if( _state == s_paused  )  set_state( s_running ), signal_threads( "continue" );
+
+            if( _waiting_errno )  _waiting_errno_continue = true;
+        }
 
         if( _state_cmd == sc_load_config  
          || _state_cmd == sc_reload       
@@ -2243,11 +2257,40 @@ int Spooler::launch( int argc, char** argv, const string& parameter_line )
 
         try
         {
+            throw_xc( "FEHLER");
             run();
         }
         catch( exception& x )
         {
-            try { stop( &x ); } catch( exception& x ) { _log.error( x.what() ); }
+            set_state( s_stopping );        // Wichtig, damit _log wegen _waiting_errno nicht blockiert!
+
+            try
+            {
+                _log.error( "" );
+                _log.error( x.what() );
+                _log.error( "SCHEDULER WIRD BEENDET" );
+            }
+            catch( exception& ) {}
+
+            try 
+            { 
+                try
+                {
+                    Command_processor cp ( this );
+                    bool indent = true;
+                    string xml = cp.execute( "<show_state what='task_queue orders remote_schedulers' />", Time::now(), indent );
+                    try
+                    {
+                        _log.info( xml );  // Blockiert bei ENOSPC nicht werden _state == s_stopping
+                    }
+                    catch( exception& ) { Z_LOG( "\n\n" << xml << "\n\n" ); }
+                } 
+                catch( exception& ) {}
+
+                stop( &x ); 
+            } 
+            catch( exception& x ) { _log.error( x.what() ); }
+
             throw;
         }
 

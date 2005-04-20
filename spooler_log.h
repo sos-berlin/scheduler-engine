@@ -39,6 +39,7 @@ struct Log
     string                     _directory;
     string                     _filename;
     int                        _file;
+    int                        _err_no;
     Thread_semaphore           _semaphore;
     string                     _log_line;
 };
@@ -172,6 +173,7 @@ struct Prefix_log : Object, Has_log
     string                     _new_filename;               // nach close() umbenennen
     bool                       _append;                     // Datei zum Fortschreiben öffnen
     int                        _file;                       // File handle
+    int                        _err_no;
     bool                       _started;                    // open() gerufen
     bool                       _closed;
 

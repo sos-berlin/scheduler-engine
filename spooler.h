@@ -382,6 +382,10 @@ struct Spooler
     bool                       _wait_endless_for_db_open;
     int                        _max_db_errors;              // Nach so vielen Fehlen im Scheduler-Leben DB abschalten (wie need_db)
 
+    int                        _waiting_errno;              // Scheduler unterbrochen wegen errno (spooler_log.cxx)
+    string                     _waiting_errno_filename;
+    bool                       _waiting_errno_continue;     // Nach Fehler fortsetzen
+
     bool                       _has_java;                   // Es gibt ein Java-Modul. Java muss also gestartet werden
     bool                       _has_java_source;            // Es gibt Java-Quell-Code. Wir brauchen ein Arbeitsverzeichnis.
     ptr<java::Vm>              _java_vm;

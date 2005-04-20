@@ -31,9 +31,46 @@
 namespace sos {
 namespace spooler {
 
+//------------------------------------------------------------------------------------is_stop_errno
+    
+static bool is_stop_errno( Spooler* spooler, int err_no )
+{
+    if( spooler->state() == Spooler::s_starting )  return false;
+    if( spooler->state() == Spooler::s_stopping )  return false;
+    if( spooler->state() == Spooler::s_stopped  )  return false;
+
+    if( err_no == ENOSPC )  return true;
+
+    return false;
+}
+
+//-----------------------------------------------------------------------------------------io_error
+    
+static void io_error( Spooler* spooler, const string& filename )
+{
+    try
+    {
+        spooler->_waiting_errno          = errno;
+        spooler->_waiting_errno_filename = filename;
+        spooler->_waiting_errno_continue = false;
+
+        while( !spooler->_waiting_errno_continue )
+        {
+            int wait_seconds = 1;
+            spooler->_connection_manager->async_continue_selected( is_communication_operation, wait_seconds );   // Kann ins scheduler.log schreiben!
+        }
+
+        spooler->_waiting_errno = 0;
+    }
+    catch( exception& )
+    {
+        spooler->_waiting_errno = 0;
+    }
+}
+
 //-----------------------------------------------------------------------------------------my_write
 
-static int my_write( int file, const char* text, int len )
+static int my_write( Spooler* spooler, const string& filename, int file, const char* text, int len )
 {
     int         ret = 0;
     const char* t   = text;
@@ -41,6 +78,18 @@ static int my_write( int file, const char* text, int len )
     while( t < text + len )   // Solange write() etwas schreiben kann
     {
         ret = ::write( file, t, text + len - t );
+
+        if( ret < 0 )
+        {
+            int err = errno;
+
+            if( is_stop_errno( spooler, errno ) ) 
+            {
+                io_error( spooler, filename );
+                continue;
+            }
+        }
+
         if( ret <= 0 )  break;
         t += ret;
         if( t < text + len )  sos_sleep( 0.001 );
@@ -140,14 +189,21 @@ void Log::open_new()
 
 void Log::write( Prefix_log* extra_log, Prefix_log* order_log, const char* text, int len, bool log )
 {
+    if( _err_no )  return;       // Falls nach einer Exception noch was ins Log geschrieben wird, ignorieren wir das.
+
+
     if( len > 0  &&  text[len-1] == '\r' )  len--;
 
     if( len > 0 )
     {
         if( log && log_ptr )  _log_line.append( text, len );
 
-        int ret = my_write( _file, text, len );
-        if( ret != len )  throw_errno( errno, "write", _filename.c_str() );
+        int ret = my_write( _spooler, _filename, _file, text, len );
+        if( ret != len )  
+        {
+            _err_no = errno;
+            throw_errno( errno, "write", _filename.c_str() );
+        }
 
         if( extra_log )  extra_log->write( text, len );
         if( order_log )  order_log->write( text, len );
@@ -478,8 +534,15 @@ void Prefix_log::open()
     if( !_filename.empty() )
     {
         Z_LOG2( "scheduler.log", "\nopen " << _filename << '\n' );
-        _file = ::open( _filename.c_str(), O_CREAT | ( _append? O_APPEND : O_TRUNC ) | O_WRONLY | O_NOINHERIT, 0666 );
-        if( _file == -1 )  throw_errno( errno, _filename.c_str(), "Protokolldatei" );
+
+        while(1)
+        {
+            _file = ::open( _filename.c_str(), O_CREAT | ( _append? O_APPEND : O_TRUNC ) | O_WRONLY | O_NOINHERIT, 0666 );
+            if( _file != -1 )  break;
+            
+            if( !is_stop_errno( _spooler, errno ) ) throw_errno( errno, _filename.c_str(), "Protokolldatei" );
+            io_error( _spooler, _filename );
+        }
 
         if( !_log_buffer.empty() )
         {
@@ -557,6 +620,9 @@ void Prefix_log::close2()
 
 void Prefix_log::write( const char* text, int len )
 {
+    if( _err_no )  return;       // Falls nach einer Exception noch was ins Log geschrieben wird, ignorieren wir das.
+
+
     if( len == 0 )  return;
 
     if( _file == -1 )
@@ -568,8 +634,12 @@ void Prefix_log::write( const char* text, int len )
     }
     else
     {
-        int ret = my_write( _file, text, len );
-        if( ret != len )  throw_errno( errno, "write", _filename.c_str() );
+        int ret = my_write( _spooler, _filename, _file, text, len );
+        if( ret != len )
+        {
+            _err_no = errno;
+            throw_errno( errno, "write", _filename.c_str() );
+        }
     }
 }
 
