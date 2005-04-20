@@ -1047,7 +1047,7 @@ bool Task::do_something()
                             {
                                 THREAD_LOCK_DUMMY( _lock ) { if( !_ending_since )  _ending_since = now; }    // Wird auch von cmd_end() gesetzt
 
-                                if( has_error() )  _history.start();
+                                if( has_error()  ||  _log->highest_level() >= log_error )  _history.start();
 
                                 if( _begin_called )
                                 {
@@ -1305,7 +1305,6 @@ void Task::load()
     }
 
     do_load();
-    //if( has_error() )  return false;
 }
 
 //---------------------------------------------------------------------------------Task::begin_start
@@ -1487,7 +1486,7 @@ void Task::finish()
         if( !_spooler->_manual )
         {
             set_mail_defaults();
-            _log->send( has_error()? -1 : _step_count );
+            _log->send( has_error() || _log->highest_level() >= log_error? -1 : _step_count );
         }
 
         clear_mail();

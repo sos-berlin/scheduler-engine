@@ -115,7 +115,7 @@ spooler_task.order.remove_from_job_chain();
 
 
 ------------------------------------------------
-VERSION 2.0.116  2005-04-06
+VERSION 2.0.116  2005-04-19
 
 <day day="...">: Die Tagesnummer wird jetzt strenger geprüft.
 <monthdays>: 1..31
@@ -127,4 +127,10 @@ Neue Optionen an der Kommandozeile: -port= -tcp-port= -udp-port=
 <config main_scheduler="host:port">
 
 
+------------------------------------------------
+VERSION 2.0.117  2005-04-20
+
+<config port="...">  setzt tcp_port und udp_port.
+
+spooler_log.error() führt jetzt zum eMail-Versand bei mail_on_error=true.
 
