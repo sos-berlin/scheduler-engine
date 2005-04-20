@@ -2257,7 +2257,6 @@ int Spooler::launch( int argc, char** argv, const string& parameter_line )
 
         try
         {
-            throw_xc( "FEHLER");
             run();
         }
         catch( exception& x )
