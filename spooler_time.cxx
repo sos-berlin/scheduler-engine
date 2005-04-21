@@ -91,7 +91,7 @@ void Time::set( double t )
 
 #   if defined Z_DEBUG && defined Z_WINDOWS
         if( _time == 0 )  _time_as_string.clear();   // Für static empty_period sollte in gcc as_string() nicht gerufen werden! (Sonst Absturz)
-                    else  _time_as_string = _time == latter_day_int? last_day_name  :
+                    else  _time_as_string = _time == latter_day_int? last_day_name 
                                                                    : as_string();
 #   endif                                                           
 }
