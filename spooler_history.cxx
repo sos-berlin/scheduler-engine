@@ -233,6 +233,8 @@ void Spooler_db::open2( const string& db_name )
                                           "\"MOD_TIME\"    datetime,"
                                           "\"ORDERING\"    integer not null,"           // Um die Reihenfolge zu erhalten
                                           "\"PAYLOAD\"     clob,"
+                                          "\"RUN_TIME\"    clob,"
+                                          "\"INITIAL_STATE\" char(100),"
                                           "primary key( \"JOB_CHAIN\", \"ID\" )" );
 
                 create_table_when_needed( _spooler->_order_history_tablename, 
@@ -656,17 +658,22 @@ void Spooler_db::insert_order( Order* order )
                     
                     insert.set_table_name( _spooler->_orders_tablename );
                     
-                    insert[ "ordering"   ] = get_order_ordering( &ta );
-                    insert[ "job_chain"  ] = order->job_chain()->name();
-                    insert[ "id"         ] = order->id().as_string();
-                    insert[ "spooler_id" ] = _spooler->id_for_db();
-                    insert[ "title"      ] = order->title()                     , order->_title_modified      = false;
-                    insert[ "state"      ] = order->state().as_string();
-                    insert[ "state_text" ] = order->state_text()                , order->_state_text_modified = false;
-                    insert[ "priority"   ] = order->priority()                  , order->_priority_modified   = false;
-                    insert[ "payload"    ] = order->payload().as_string()       , order->_payload_modified    = false;
+                    insert[ "ordering"      ] = get_order_ordering( &ta );
+                    insert[ "job_chain"     ] = order->job_chain()->name();
+                    insert[ "id"            ] = order->id().as_string();
+                    insert[ "spooler_id"    ] = _spooler->id_for_db();
+                    insert[ "title"         ] = order->title()                     , order->_title_modified      = false;
+                    insert[ "state"         ] = order->state().as_string();
+                    insert[ "state_text"    ] = order->state_text()                , order->_state_text_modified = false;
+                    insert[ "priority"      ] = order->priority()                  , order->_priority_modified   = false;
+                    insert[ "payload"       ] = order->payload().as_string()       , order->_payload_modified    = false;
                     insert.set_datetime( "created_time", order->_created.as_string(Time::without_ms) );
                     insert.set_datetime( "mod_time", Time::now().as_string(Time::without_ms) );
+
+                    if( order->run_time() )
+                    insert[ "run_time"      ] = order->run_time()->xml();         //, order->_run_time_modified    = false;
+
+                    insert[ "initial_state" ] = order->initial_state().as_string();
 
                     execute( insert );
                     ta.commit();
@@ -735,6 +742,11 @@ void Spooler_db::update_order( Order* order )
                         if( order->_title_modified      )  update[ "title"      ] = order->title()              ,  order->_title_modified      = false;
                         if( order->_state_text_modified )  update[ "state_text" ] = order->state_text()         ,  order->_state_text_modified = false;
                         if( order->_payload_modified    )  update[ "payload"    ] = order->payload().as_string(),  order->_payload_modified    = false;
+
+                        if( order->run_time() )  update[ "run_time" ] = order->run_time()->xml();
+                                           else  update[ "run_time" ].set_direct( "null" );
+
+                        update[ "initial_state" ] = order->initial_state().as_string();
 
                         update.set_datetime( "mod_time", Time::now().as_string(Time::without_ms) );
 

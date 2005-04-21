@@ -65,6 +65,8 @@ struct Order : Com_order,
     void                    set_state2                  ( const State&, bool is_error_state = false );
     State                       state                   ()                                          { THREAD_LOCK_RETURN( _lock, State, _state ); }
     bool                        state_is_equal          ( const State& state )                      { THREAD_LOCK_RETURN( _lock, bool, _state == state ); }
+    State                       initial_state           ()                                          { THREAD_LOCK_RETURN( _lock, State, _initial_state ); }
+
 
     void                    set_state_text              ( const string& state_text )                { THREAD_LOCK( _lock )  _state_text = state_text,  _state_text_modified = true; }
     string                      state_text              ()                                          { THREAD_LOCK_RETURN( _lock, string, _state_text ); }

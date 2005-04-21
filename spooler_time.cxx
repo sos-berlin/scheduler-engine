@@ -562,6 +562,8 @@ void Run_time::set_default_days()
 
 void Run_time::set_xml( const string& xml )
 { 
+    _xml = xml;
+
     set_dom( _spooler->_dtd.validate_xml( xml ).documentElement() );
 }
 

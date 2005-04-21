@@ -238,7 +238,7 @@ void Job_chain::load_orders_from_database()
         Transaction ta ( _spooler->_db );
 
         Any_file sel ( "-in " + _spooler->_db->db_name() + "-max-length=32K "
-                    " select \"ID\", \"PRIORITY\", \"STATE\", \"STATE_TEXT\", \"TITLE\", \"CREATED_TIME\", \"PAYLOAD\""
+                    " select \"ID\", \"PRIORITY\", \"STATE\", \"STATE_TEXT\", \"TITLE\", \"CREATED_TIME\", \"PAYLOAD\", \"RUN_TIME\", \"INITIAL_STATE\""
                     " from " + sql::uquoted_name( _spooler->_orders_tablename ) +
                     " where \"SPOOLER_ID\"=" + sql::quoted(_spooler->id_for_db()) + 
                     " and \"JOB_CHAIN\"=" + sql::quoted(_name) +
@@ -815,6 +815,11 @@ Order::Order( Spooler* spooler, const Record& record )
                                 else  _payload = payload_string;
     }
 
+    string run_time_xml = record.as_string( "run_time" );
+    if( run_time_xml != "" )  set_run_time( xml::Document_ptr( run_time_xml ).documentElement() );
+
+    _initial_state = record.as_string( "initial_state" );
+
     _created.set_datetime( record.as_string( "created_time" ) );
 }
 
@@ -833,7 +838,6 @@ void Order::init()
     _created = Time::now();
 
     set_run_time( NULL );
-    _run_time->set_modified_event_handler( this );
 }
 
 //-------------------------------------------------------------------------------Order::attach_task
@@ -1289,10 +1293,12 @@ void Order::postprocessing( bool success )
                 else 
                 {
                   //_period_once = false;
-
+                    
                     Time next_start = next_start_time();
                     if( next_start != latter_day )
                     {
+                        _log->info( S() << "Kein weiterer Job in der Jobkette, der Auftrag wird mit state=" << _initial_state << " wiederholt am " << next_start );
+
                         try
                         {
                             set_state( _initial_state, next_start );
@@ -1302,8 +1308,8 @@ void Order::postprocessing( bool success )
                             _log->error( S() << "Fehler beim Setzen des Initialzustands nach Wiederholung wegen <run_time>:\n" << x );
                         }
                     }
-                    
-                    if( finished() )  _log->debug( "Kein weiterer Job in der Jobkette, der Auftrag ist erledigt" );
+                    else
+                        _log->info( "Kein weiterer Job in der Jobkette, der Auftrag ist erledigt" );
                 }
             }
             else
@@ -1450,6 +1456,12 @@ Time Order::next_start_time( bool first_call )
       //if( result == latter_day  &&  ( first_call || _period._repeat != latter_day ) )  result = _period.begin();
 
         if( result < now )  result = 0;
+
+        if( first_call )
+        {
+            if( result == latter_day )  _log->warn( S() << "Die <run_time> des Auftrags hat keine nächste Startzeit" );
+            else _log->info( S() << "Auftrag wird gestartet am " << result );
+        }
     }
 
     return result;
@@ -1476,6 +1488,8 @@ void Order::modified_event()
 void Order::set_run_time( const xml::Element_ptr& e )
 {
     _run_time = Z_NEW( Run_time( _spooler, Run_time::application_order ) );
+    _run_time->set_modified_event_handler( this );
+
     if( e )  _run_time->set_dom( e );
 }
 

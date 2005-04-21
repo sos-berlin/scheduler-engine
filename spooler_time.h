@@ -93,11 +93,13 @@ struct Time
 
     static Time                 now                         ();
 
-    double                     _time;                       // wie time_t: Anzahl Sekunden seit 1.1.1970 oder seit Mitternacht
+
 
 #   if defined Z_DEBUG && defined Z_WINDOWS                 // Time in statischer Variablen führt mit gcc 3.3 zum Absturz in string::string
         string                 _time_as_string;
 #   endif    
+
+    double                     _time;                       // wie time_t: Anzahl Sekunden seit 1.1.1970 oder seit Mitternacht
 };      
 
 extern const int                latter_day_int;
@@ -140,9 +142,9 @@ struct Period
 
 //private:
     Fill_zero                  _zero_;
-    Time                       _repeat;
     Time                       _begin;                      // Sekunden seit Mitternacht
     Time                       _end;                        // Sekunden seit Mitternacht
+    Time                       _repeat;
     bool                       _single_start;
     bool                       _let_run;                    // Task zuende laufen lassen, nicht bei _next_end_time beenden
 };
@@ -304,7 +306,9 @@ struct Run_time : idispatch_implementation< Run_time, spooler_com::Irun_time >,
     void                    set_modified_event_handler      ( Modified_event_handler* m )           { _modified_event_handler = m; }
 
     void                    set_xml                         ( const string& );
-    void                    set_dom                         ( const xml::Element_ptr& );
+    string                      xml                         ()                                      { return _xml; }
+
+    void                    set_dom                         ( const xml::Element_ptr& );            // Setzt nicht _xml!
 
     void                        check                       ();                              
 
@@ -347,6 +351,7 @@ struct Run_time : idispatch_implementation< Run_time, spooler_com::Irun_time >,
     Monthday_set               _monthday_set;
     Ultimo_set                 _ultimo_set;                 // 0: Letzter Tag, -1: Vorletzter Tag
     Holiday_set                _holiday_set;
+    string                     _xml;
 };
 
 //-------------------------------------------------------------------------------------------------
