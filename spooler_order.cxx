@@ -1297,7 +1297,7 @@ void Order::postprocessing( bool success )
                     Time next_start = next_start_time();
                     if( next_start != latter_day )
                     {
-                        _log->info( S() << "Kein weiterer Job in der Jobkette, der Auftrag wird mit state=" << _initial_state << " wiederholt am " << next_start );
+                        _log->info( S() << "Kein weiterer Job in der Jobkette, der Auftrag wird mit state=" << _initial_state << " wiederholt um " << next_start );
 
                         try
                         {
@@ -1457,10 +1457,10 @@ Time Order::next_start_time( bool first_call )
 
         if( result < now )  result = 0;
 
-        if( first_call )
+        if( first_call  &&  result > 0 )
         {
-            if( result == latter_day )  _log->warn( S() << "Die <run_time> des Auftrags hat keine nächste Startzeit" );
-            else _log->info( S() << "Auftrag wird gestartet am " << result );
+            if( result == latter_day )  _log->warn( "Die <run_time> des Auftrags hat keine nächste Startzeit" );
+                                  else  _log->info( S() << "Auftrag wird gestartet um " << result );
         }
     }
 

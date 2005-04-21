@@ -146,7 +146,7 @@ struct Order : Com_order,
     bool                       _moved;                  // true, wenn Job state oder job geändert hat. Dann nicht automatisch in Jobkette weitersetzen
     ptr<Run_time>              _run_time;
     Period                     _period;                 // Bei _run_time.set(): Aktuelle oder nächste Periode
-    bool                       _period_once;
+  //bool                       _period_once;
     Time                       _setback;                // Bis wann der Auftrag zurückgestellt ist
     int                        _setback_count;
     bool                       _is_in_database;
