@@ -13,9 +13,11 @@ namespace time {
 
 enum With_single_start
 {
-    wss_next_period                 = 0x01,
+    wss_next_period                 = 0x01,                 // Nächste <period> mit end vor einem Zeitpunkt, begin ist egal
     wss_next_single_start           = 0x02,
-    wss_next_period_or_single_start = 0x03
+    wss_next_period_or_single_start = 0x03,
+    wss_next_begin                  = 0x04,                 // Nächste <period> mit begin ab einem Zeitpunkt
+    wss_next_begin_or_single_start  = 0x05
 };
 
 //---------------------------------------------------------------------------------------------Time

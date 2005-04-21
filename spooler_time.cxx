@@ -85,6 +85,9 @@ void Time::set( double t )
 { 
     _time = round(t); 
 
+    if( _time > latter_day_int )  _time = latter_day_int;
+
+
 #   if defined Z_DEBUG && defined Z_WINDOWS
         if( _time == 0 )  _time_as_string.clear();   // Für static empty_period sollte in gcc as_string() nicht gerufen werden! (Sonst Absturz)
                     else  _time_as_string = _time == latter_day_int? last_day_name 
@@ -248,6 +251,12 @@ bool Period::is_comming( Time time_of_day, With_single_start single_start ) cons
                                          // ^-- Falls time_of_day == previous_period.end(), sonst Schleife!
     }
 
+    if( single_start & wss_next_begin )
+    {                                        
+        if( !_single_start  &&  time_of_day <= _begin )  return true;
+                                         // ^ Falls _begin == 00:00 und time_of_day == 00:00 (Beginn des nächsten Tags)
+    }
+
     if( single_start & wss_next_single_start )
     {                                        
         if( _single_start  &&  time_of_day <= _begin )  return true;
@@ -375,7 +384,7 @@ Period Weekday_set::next_period( Time tim, With_single_start single_start )
     
     for( int i = weekday; i <= weekday+7; i++ )
     {
-        const Period& period = _days[ i % 7 ].next_period( time_of_day, single_start );
+        Period period = _days[ i % 7 ].next_period( time_of_day, single_start );
         if( !period.empty() )  return day_nr*(24*60*60) + period;
         day_nr++;
         time_of_day = 0;
@@ -658,7 +667,8 @@ Period Run_time::next_period( Time tim_par, With_single_start single_start )
     Time    tim = tim_par;
     Period  next;
  
-    while(1)
+    //while(1)
+    for( int i = 0; i < 366; i++ )
     {
         next = Period();
 
@@ -667,7 +677,8 @@ Period Run_time::next_period( Time tim_par, With_single_start single_start )
         next = min( next, _monthday_set.next_period( tim, single_start ) );
         next = min( next, _ultimo_set  .next_period( tim, single_start ) );
 
-        if( _holiday_set.find( (uint)next.begin().midnight() ) == _holiday_set.end() )  break;  // Gefundener Zeitpunkt ist kein Feiertag? Dann ok!
+        if( next.begin() != latter_day  
+         && _holiday_set.find( (uint)next.begin().midnight() ) == _holiday_set.end() )  break;  // Gefundener Zeitpunkt ist kein Feiertag? Dann ok!
 
         tim = next.begin().midnight() + 24*60*60;   // Feiertag? Dann nächsten Tag probieren
     }
