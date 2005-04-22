@@ -259,7 +259,7 @@ bool Period::is_comming( Time time_of_day, With_single_start single_start ) cons
     else
         result = false;
 
-    Z_LOG2( "joacim", *this << ".is_coming(" << time_of_day << ',' << (int)single_start << ") ==> " << result << "\n" );
+    //Z_LOG2( "joacim", *this << ".is_coming(" << time_of_day << ',' << (int)single_start << ") ==> " << result << "\n" );
 
     return result;
 }
@@ -668,7 +668,7 @@ Period Run_time::next_period( Time tim_par, With_single_start single_start )
     Period  next;
  
     //while(1)
-    for( int i = 0; i < 366; i++ )
+    while( tim + 366*24*60*60 < tim_par )
     {
         next = Period();
 
@@ -677,8 +677,7 @@ Period Run_time::next_period( Time tim_par, With_single_start single_start )
         next = min( next, _monthday_set.next_period( tim, single_start ) );
         next = min( next, _ultimo_set  .next_period( tim, single_start ) );
 
-        if( next.begin() != latter_day  
-         && _holiday_set.find( (uint)next.begin().midnight() ) == _holiday_set.end() )  break;  // Gefundener Zeitpunkt ist kein Feiertag? Dann ok!
+        if( _holiday_set.find( (uint)next.begin().midnight() ) == _holiday_set.end() )  break;  // Gefundener Zeitpunkt ist kein Feiertag? Dann ok!
 
         tim = next.begin().midnight() + 24*60*60;   // Feiertag? Dann nächsten Tag probieren
     }

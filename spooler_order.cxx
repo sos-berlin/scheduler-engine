@@ -1506,8 +1506,8 @@ string Order::obj_name()
         result += debug_string_from_variant(_id) + rtrim( "  " + _title );
 
         if( _setback )
-            if( _setback == latter_day )  result += ", setback (Maximum erreicht)";
-                                    else  result += ", setback=" + _setback.as_string();
+            if( _setback == latter_day )  result += ", keine Startzeit mehr";
+                                    else  result += ", at=" + _setback.as_string();
       //else
       //if( _priority )  result += ", pri=" + as_string( _priority );
     }
