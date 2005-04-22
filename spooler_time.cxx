@@ -668,7 +668,7 @@ Period Run_time::next_period( Time tim_par, With_single_start single_start )
     Period  next;
  
     //while(1)
-    while( tim + 366*24*60*60 < tim_par )
+    while( tim < tim_par + 366*24*60*60 )
     {
         next = Period();
 
