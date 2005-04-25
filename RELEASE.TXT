@@ -134,3 +134,11 @@ VERSION 2.0.117  2005-04-20
 
 spooler_log.error() führt jetzt zum eMail-Versand bei mail_on_error=true.
 
+
+------------------------------------------------
+VERSION 2.0.119  2005-04-25
+
+Scheduler wartet, wenn Protokoll wegen Plattenplatzmangels nicht fortgeschrieben werden kann.
+
+<state waiting_errno="..." waiting_errno_text="..." waiting_errno_filename"...">
+
