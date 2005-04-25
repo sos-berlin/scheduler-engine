@@ -92,6 +92,10 @@
 
 <h2>Plattenplatzmangel</h2>
 <p>
+    Wenn nicht genug Plattenplatz beim Öffnen einer Protokolldatei vorhanden ist, gibt es einen Fehler.
+    Wenn das Hauptprotokoll nicht geöffnet werden kann, bricht der Scheduler ab.
+</p>
+<p>
     Wenn nicht genug Plattenplatz vorhanden ist, um ein Protokoll fortzuschreiben, 
     hält der Scheduler an.
     Er reagiert auf über TCP, UDP oder HTTP übergebene Kommandos.
@@ -101,6 +105,9 @@
 </p>
 <p>
     Wenn wieder Plattenplatz bereit steht, können Sie den Scheduler fortsetzen mit <code>&lt;modify_scheduler cmd="continue"/></code>.
+</p>
+<p>
+    Die Datei <code>scheduler.log</code> ist von diesem Verfahren nicht betroffen. Fehler werden hier ignoriert.
 </p>
 
 
