@@ -1806,17 +1806,8 @@ bool Spooler::execute_state_cmd()
 
     if( _state_cmd )
     {
-        if( _state_cmd == sc_pause )  
-        {
-            if( _state == s_running )  set_state( s_paused  ), signal_threads( "pause" );
-        }
-
-        if( _state_cmd == sc_continue )
-        {
-            if( _state == s_paused  )  set_state( s_running ), signal_threads( "continue" );
-
-            if( _waiting_errno )  _waiting_errno_continue = true;
-        }
+        if( _state_cmd == sc_pause )     if( _state == s_running )  set_state( s_paused  ), signal_threads( "pause" );
+        if( _state_cmd == sc_continue )  if( _state == s_paused  )  set_state( s_running ), signal_threads( "continue" );
 
         if( _state_cmd == sc_load_config  
          || _state_cmd == sc_reload       
@@ -2114,6 +2105,9 @@ void Spooler::cmd_load_config( const xml::Element_ptr& config, const Time& xml_m
 void Spooler::cmd_continue()
 { 
     if( _state == s_paused )  _state_cmd = sc_continue; 
+    
+    if( _waiting_errno )  _waiting_errno_continue = true;       // Siehe spooler_log.cxx: Warten bei ENOSPC
+
     signal( "continue" ); 
 }
 

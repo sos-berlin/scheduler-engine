@@ -29,6 +29,7 @@
                     </xsl:if>
                 </td>
             </tr>
+            
             <tr>
                 <td valign="middle" style="padding-left: 0px">
                     <xsl:call-template name="scheduler_info"/>
@@ -37,6 +38,7 @@
                     <xsl:call-template name="update_button"/>
                 </td>
             </tr>
+            
         </table>
 
         <p id="error_message" class="small" style="margin-top: 0px; color: red"> </p>
@@ -211,7 +213,7 @@
 
             <xsl:if test="state/@db_waiting='yes'">
                 <tr>
-                    <td colspan="99" style="color: red">
+                    <td colspan="99" style="color: red; font-weight: bold">
                         &#160;<br/>
                         Scheduler wartet auf die Datenbank ...<br/>
                         <xsl:value-of select="state/@db_error"/>
@@ -219,6 +221,16 @@
                 </tr>
             </xsl:if>
 
+            <xsl:if test="state/@waiting_errno">
+                <tr>
+                    <td colspan="99" style="color: red; font-weight: bold">
+                        Scheduler wartet wegen Dateifehlers:<br/>
+                        <xsl:value-of select="state/@waiting_errno_text"/><br/>
+                        <xsl:value-of select="state/@waiting_errno_filename"/>
+                    </td>
+                </tr>
+            </xsl:if>
+        
         </table>
     </xsl:template>
 
@@ -1453,7 +1465,7 @@
 
                     <td align="right" valign="top" style="padding-right: 0pt">
                         <xsl:call-template name="command_menu">
-                            <xsl:with-param name="onclick" select="concat( 'history_task_menu__onclick(  ', @id, ', mouse_x() - 70, mouse_y() - 1 )' )"/>
+                            <xsl:with-param name="onclick" select="concat( 'history_task_menu__onclick( ', @task, ', mouse_x() - 70, mouse_y() - 1 )' )"/>
                         </xsl:call-template>
                     </td>
                 </tr>
@@ -1771,6 +1783,7 @@
 
     <xsl:template name="command_menu">
         <xsl:param name="onclick"/>
+        
         <xsl:element name="span">
             <xsl:attribute name="class">
                 small

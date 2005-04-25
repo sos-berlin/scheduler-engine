@@ -142,6 +142,24 @@
             </description>
         </xml_attribute>
 
+        <xml_attribute name="waiting_errno" type="number" title="Fehler beim Scheiben eines Protokolls (Platte voll)">
+            <description>
+                <p>
+                    Wenn dieses Attribut gesetzt ist, steht der Scheduduler still und reagiert nur noch auf
+                    Kommandos über TCP, UDP und HTTP.
+                </p>
+                <p>
+                    Der Scheduler kann mit
+                    <a href="../modify_spooler.xml"><code>&lt;modify_spooler cmd="continue"/></code></a>
+                    fortgesetzt werden.
+                </p>
+            </description>
+        </xml_attribute>
+
+        <xml_attribute name="waiting_errno_text" type="text" title="Fehlertext zum Attribut waiting_errno"/>
+
+        <xml_attribute name="waiting_errno_filename" type="filename" title="Name der Datei, bei der der Fehler aufgetreten ist"/>
+
         <xml_attribute name="loop" type="zahl" title="Interner Wert: Anzahl der Server-Zyklen">
             <description>
                 <p>

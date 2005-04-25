@@ -54,6 +54,8 @@ static void io_error( Spooler* spooler, const string& filename )
         spooler->_waiting_errno_filename = filename;
         spooler->_waiting_errno_continue = false;
 
+        Z_LOG( "\n*** SCHEDULER HÄLT WEGEN PLATTENPLATZMANGEL AN. " << filename << ", " << strerror( spooler->_waiting_errno ) << "\n\n" );
+
         while( !spooler->_waiting_errno_continue )
         {
             int wait_seconds = 1;
@@ -72,6 +74,9 @@ static void io_error( Spooler* spooler, const string& filename )
 
 static int my_write( Spooler* spooler, const string& filename, int file, const char* text, int len )
 {
+    if( spooler->_waiting_errno )  return len;  // Im Fehlerzustand io_error()? Dann schreiben wir nix (kann in spooler_communication.cxx passieren)
+
+
     int         ret = 0;
     const char* t   = text;
    

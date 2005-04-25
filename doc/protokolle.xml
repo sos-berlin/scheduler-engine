@@ -90,6 +90,20 @@
 </p>
 
 
+<h2>Plattenplatzmangel</h2>
+<p>
+    Wenn nicht genug Plattenplatz vorhanden ist, um ein Protokoll fortzuschreiben, 
+    hält der Scheduler an.
+    Er reagiert auf über TCP, UDP oder HTTP übergebene Kommandos.
+</p>
+<p>
+    Das Kommando <a href="xml/modify_spooler.xml"><code>&lt;modify_spooler></code></a> wirkt nur eingeschränkt.
+</p>
+<p>
+    Wenn wieder Plattenplatz bereit steht, können Sie den Scheduler fortsetzen mit <code>&lt;modify_scheduler cmd="continue"/></code>.
+</p>
+
+
 <scheduler_keyword keyword="Datenbank"/>
 
 <h2>Ablage in den Datenbank</h2>

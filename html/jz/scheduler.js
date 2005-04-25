@@ -664,20 +664,21 @@ function scheduler_menu__onclick( x, y )
 {
     var popup_builder = new Popup_menu_builder();
 
-    var state = _response.selectSingleNode( "spooler/answer/state" ).getAttribute( "state" );
+    var state         = _response.selectSingleNode( "spooler/answer/state" ).getAttribute( "state" );
+    var waiting_errno = _response.selectSingleNode( "spooler/answer/state" ).getAttribute( "waiting_errno" );
 
     var command = function( cmd ) { return "<modify_spooler cmd='" + cmd + "'/>"; }
 
     popup_builder.add_show_log( "Show log"                       , "show_log?", "show_log" );
     popup_builder.add_bar();
   //popup_builder.add_command ( "Stop"                           , command( "stop" ), state != "stopped"  &&  state != "stopping"  &&  state != "stopping_let_run" );
-    popup_builder.add_command ( "Pause"                          , command( "pause"                         ), state != "paused" );
-    popup_builder.add_command ( "Continue"                       , command( "continue"                      ), state == "paused" );
+    popup_builder.add_command ( "Pause"                          , command( "pause"                         ) , state != "paused" && !waiting_errno );
+    popup_builder.add_command ( "Continue"                       , command( "continue"                      ) , state == "paused" || waiting_errno );
     popup_builder.add_bar();
   //popup_builder.add_command ( "Reload"                         , command( "reload"                        ), state != "stopped"  &&  state != "stopping" );
-    popup_builder.add_command ( "Terminate"                      , command( "terminate"                     ) );
-    popup_builder.add_command ( "Terminate and restart"          , command( "terminate_and_restart"         ) );
-    popup_builder.add_command ( "Let run, terminate and restart" , command( "let_run_terminate_and_restart" ) );
+    popup_builder.add_command ( "Terminate"                      , command( "terminate"                     ), !waiting_errno );
+    popup_builder.add_command ( "Terminate and restart"          , command( "terminate_and_restart"         ), !waiting_errno );
+    popup_builder.add_command ( "Let run, terminate and restart" , command( "let_run_terminate_and_restart" ), !waiting_errno );
     popup_builder.add_bar();
     popup_builder.add_command ( "Abort immediately"              , command( "abort_immediately"             ) );
     popup_builder.add_command ( "Abort immediately and restart"  , command( "abort_immediately_and_restart" ) );

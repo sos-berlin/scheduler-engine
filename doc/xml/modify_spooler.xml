@@ -15,6 +15,16 @@
 
     <description>
         <p>
+            Wenn der Scheduler wegen Plattenplatzmangel für ein Protokoll angehalten hat
+            (<code><a href="answer/state.xml#attribute_waiting_errno">&lt;state waiting_errno="..."/></a></code>),
+            werden die Subkommandos 
+            <code>pause</code>, 
+            <code>reload</code>, 
+            <code>terminate</code>,
+            <code>terminate_and_restart</code>,
+            <code>let_run_terminate_and_restart</code>
+            nicht sofort ausgeführt.
+            Dagegen wirken <code>continue</code>, <code>abort_immediately</code> und <code>abort_immediately_and_restart</code> sofort.
         </p>
     </description>
 
@@ -34,14 +44,16 @@
                     
                     <dt><code>cmd="continue"</code></dt>
                     <dd>
-                        Hebt <code>cmd="pause"</code> auf.
+                        Hebt <code>cmd="pause"</code> auf.<br/>
+                        Oder setzt den Scheduler fort, wenn er wegen Platzmangels für die Protokolldateien angehalten hat 
+                        (<a href="answer/state.xml#attribute_waiting_errno">siehe hier</a>).
                     </dd>
-                    
+<!--                    
                     <dt><code>cmd="stop"</code></dt>
                     <dd>
                         ?
                     </dd>
-                    
+-->                    
                     <dt><code>cmd="reload"</code></dt>
                     <dd>
                         Lädt die Skripte der Jobs neu.
