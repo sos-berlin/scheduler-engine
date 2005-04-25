@@ -203,7 +203,7 @@ xml::Element_ptr Command_processor::execute_show_state( const xml::Element_ptr& 
     if( _spooler->_waiting_errno )
     {
         state_element.setAttribute( "waiting_errno"         , _spooler->_waiting_errno );
-        state_element.setAttribute( "waiting_errno_text"    , S() << "ERRNO-" << _spooler->_waiting_errno << "  " << strerror( _spooler->_waiting_errno ) );
+        state_element.setAttribute( "waiting_errno_text"    , "ERRNO-" + as_string( _spooler->_waiting_errno ) + "  " + strerror( _spooler->_waiting_errno ) );
         state_element.setAttribute( "waiting_errno_filename", _spooler->_waiting_errno_filename );
     }
 
