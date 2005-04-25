@@ -54,7 +54,16 @@ static void io_error( Spooler* spooler, const string& filename )
         spooler->_waiting_errno_filename = filename;
         spooler->_waiting_errno_continue = false;
 
-        Z_LOG( "\n*** SCHEDULER HÄLT WEGEN PLATTENPLATZMANGEL AN. " << filename << ", " << strerror( spooler->_waiting_errno ) << "\n\n" );
+        string error_text = S() << "ERRNO-" << errno << "  " << strerror( spooler->_waiting_errno  );
+
+        Z_LOG( "\n*** SCHEDULER HÄLT WEGEN PLATTENPLATZMANGEL AN. " << error_text << ", Datei " << filename << "\n\n" );
+
+        spooler->send_error_email( "SCHEDULER ANGEHALTEN.  " + error_text,
+                                   "Scheduler wegen Plattenplatzmangel angehalten.\n\n" +
+                                   error_text + "\n"
+                                   "Datei " + filename + "\n\n"
+                                   "Wenn wieder genug Platz vorhanden ist, können Sie den Scheduler fortsetzen mit\n\n" 
+                                   "<modify_spooler cmd=\"continue\"/>" );
 
         while( !spooler->_waiting_errno_continue )
         {
