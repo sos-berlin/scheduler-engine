@@ -122,11 +122,11 @@ extern const char               dtd_string[];
 
 
 #ifdef Z_WINDOWS
-    const int                   max_processes               =    50;    // Summe aller Handles darf MAXIMUM_WAIT_OBJECTS-1=63 nicht überschreiten
-    const int                   max_communication_channels  =     8;    // Summe aller Handles darf MAXIMUM_WAIT_OBJECTS-1=63 nicht überschreiten
+    const int                   max_processes               =    30;    // Summe aller Handles darf MAXIMUM_WAIT_OBJECTS-1=63 nicht überschreiten
+    const int                   max_communication_channels  =    28;    // Summe aller Handles darf MAXIMUM_WAIT_OBJECTS-1=63 nicht überschreiten
 #else
-    const int                   max_processes               =  1000;    // kein Limit (HP-UX erlaubt 64 aktive fork())
-    const int                   max_communication_channels  = 10000;    // kein Limit 
+    const int                   max_processes               =   200;    // kein Limit (HP-UX erlaubt 64 aktive fork())
+    const int                   max_communication_channels  =   800;    // Limit ist FD_SETSIZE
 #endif
 
 //-------------------------------------------------------------------------------------------------
