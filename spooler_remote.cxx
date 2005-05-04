@@ -260,9 +260,9 @@ void Remote_scheduler_register::add( Remote_scheduler* remote_scheduler )
     _map[ remote_scheduler->_host_and_port ] = remote_scheduler;
 }
 
-//-------------------------------------------------------------------Remote_scheduler_register::dom
+//-----------------------------------------------------------Remote_scheduler_register::dom_element
 
-xml::Element_ptr Remote_scheduler_register::dom( const xml::Document_ptr& document, const Show_what& show )
+xml::Element_ptr Remote_scheduler_register::dom_element( const xml::Document_ptr& document, const Show_what& show )
 {
     xml::Element_ptr result = document.createElement( "remote_schedulers" );
 
@@ -276,7 +276,7 @@ xml::Element_ptr Remote_scheduler_register::dom( const xml::Document_ptr& docume
         n++;
         if( remote_scheduler->_is_connected )  connected_count++;
 
-        if( show & show_remote_schedulers )  result.appendChild( remote_scheduler->dom( document, show ) );
+        if( show & show_remote_schedulers )  result.appendChild( remote_scheduler->dom_element( document, show ) );
     }
 
     result.setAttribute( "count"    , n );
@@ -311,9 +311,9 @@ void Remote_scheduler::set_dom( const xml::Element_ptr& register_scheduler_eleme
     }
 }
 
-//----------------------------------------------------------------------------Remote_scheduler::dom
+//--------------------------------------------------------------------Remote_scheduler::dom_element
 
-xml::Element_ptr Remote_scheduler::dom( const xml::Document_ptr& document, const Show_what& show )
+xml::Element_ptr Remote_scheduler::dom_element( const xml::Document_ptr& document, const Show_what& show )
 {
     xml::Element_ptr result = document.createElement( "remote_scheduler" );
 

@@ -101,7 +101,7 @@ struct Task : Sos_self_deleting
     void                        cmd_nice_end                ( Job* for_job = NULL );
 
     void                        close                       ();
-    xml::Element_ptr            dom                         ( const xml::Document_ptr&, const Show_what& );
+    xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& );
 
     State                       state                       () const                                { return _state; }
     void                        attach_to_a_thread          ();

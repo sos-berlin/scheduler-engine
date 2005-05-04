@@ -671,7 +671,7 @@ void Spooler_db::insert_order( Order* order )
                     insert.set_datetime( "mod_time", Time::now().as_string(Time::without_ms) );
 
                     if( order->run_time() )
-                    insert[ "run_time"      ] = order->run_time()->xml();         //, order->_run_time_modified    = false;
+                    insert[ "run_time"      ] = order->run_time()->dom_document().xml();     //, order->_run_time_modified    = false;
 
                     insert[ "initial_state" ] = order->initial_state().as_string();
 
@@ -743,7 +743,7 @@ void Spooler_db::update_order( Order* order )
                         if( order->_state_text_modified )  update[ "state_text" ] = order->state_text()         ,  order->_state_text_modified = false;
                         if( order->_payload_modified    )  update[ "payload"    ] = order->payload().as_string(),  order->_payload_modified    = false;
 
-                        if( order->run_time() )  update[ "run_time" ] = order->run_time()->xml();
+                        if( order->run_time() )  update[ "run_time" ] = order->run_time()->dom_document().xml();
                                            else  update[ "run_time" ].set_direct( "null" );
 
                         update[ "initial_state" ] = order->initial_state().as_string();
@@ -949,7 +949,7 @@ xml::Element_ptr Job_chain::read_history( const xml::Document_ptr& doc, int id, 
 }
 */
 //----------------------------------------------------------------------------Spooler_db::read_task
-// Die XML-Struktur ist wie Task::dom(), nicht wie Job_history::read_tail()
+// Die XML-Struktur ist wie Task::dom_element(), nicht wie Job_history::read_tail()
 
 xml::Element_ptr Spooler_db::read_task( const xml::Document_ptr& doc, int task_id, const Show_what& show )
 {
@@ -970,7 +970,7 @@ xml::Element_ptr Spooler_db::read_task( const xml::Document_ptr& doc, int task_i
             Record record = sel.get_record();
 
 
-            // s.a. Task::dom() zum Aufbau des XML-Elements <task>
+            // s.a. Task::dom_element() zum Aufbau des XML-Elements <task>
             task_element.setAttribute( "id"              , task_id );
             //task_element.setAttribute( "state"           , state_name() );
 
@@ -981,8 +981,8 @@ xml::Element_ptr Spooler_db::read_task( const xml::Document_ptr& doc, int task_i
 
             //if( _running_since )
             //task_element.setAttribute( "running_since"   , _running_since.as_string() );
-            task_element.setAttribute( "start_time"      , record.as_string( "START_TIME" ) );      // Gibt es nicht in Task::dom()
-            task_element.setAttribute( "end_time"        , record.as_string( "END_TIME" ) );        // Gibt es nicht in Task::dom()
+            task_element.setAttribute( "start_time"      , record.as_string( "START_TIME" ) );      // Gibt es nicht in Task::dom_element()
+            task_element.setAttribute( "end_time"        , record.as_string( "END_TIME" ) );        // Gibt es nicht in Task::dom_element()
 
             //if( _idle_since )
             //task_element.setAttribute( "idle_since"      , _idle_since.as_string() );

@@ -36,7 +36,7 @@ struct Source_part
     Source_part                 ( int linenr, const string& text, const Time& mod_time );
 
                                 operator string             () const                                { return _text; }
-    xml::Element_ptr            dom                         ( const xml::Document_ptr& ) const;
+    xml::Element_ptr            dom_element                 ( const xml::Document_ptr& ) const;
   //bool                        empty                       ()                                      { return _text.empty(); }
 
 
@@ -60,8 +60,8 @@ struct Source_with_parts
     string                      text                        () const                                { return zschimmer::join( SYSTEM_NL, _parts ); }
                                 operator string             () const                                { return text(); }
 
-    xml::Document_ptr           dom_doc                     () const;
-    xml::Element_ptr            dom                         ( const xml::Document_ptr& ) const;
+    xml::Document_ptr           dom_document                () const;
+    xml::Element_ptr            dom_element                 ( const xml::Document_ptr& ) const;
 
     Source_with_parts&          operator =                  ( const string& text )                  { assign( text );  return *this; }
     void                        assign                      ( const string& text )                  { clear(); add( 1, text, Time(0) ); }

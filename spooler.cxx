@@ -444,7 +444,7 @@ xml::Element_ptr Spooler::jobs_as_xml( const xml::Document_ptr& document, const 
     xml::Element_ptr jobs_element = document.createElement( "jobs" );
     dom_append_nl( jobs_element );
 
-    THREAD_LOCK( _lock )  FOR_EACH( Job_list, _job_list, it )  jobs_element.appendChild( (*it)->dom( document, show ) ), dom_append_nl( jobs_element );
+    THREAD_LOCK( _lock )  FOR_EACH( Job_list, _job_list, it )  jobs_element.appendChild( (*it)->dom_element( document, show ) ), dom_append_nl( jobs_element );
 
     return jobs_element;
 }
@@ -571,7 +571,7 @@ xml::Element_ptr Spooler::threads_as_xml( const xml::Document_ptr& document, con
     {
         FOR_EACH( Thread_list, _thread_list, it )
         {
-            threads.appendChild( (*it)->dom( document, show ) );
+            threads.appendChild( (*it)->dom_element( document, show ) );
             dom_append_nl( threads );
         }
     }
@@ -620,7 +620,7 @@ xml::Element_ptr Spooler::process_classes_as_dom( const xml::Document_ptr& docum
 
     FOR_EACH( Process_class_list, _process_class_list, it )
     {
-        if( (*it)->_module_use_count > 0 )  element.appendChild( (*it)->dom( document, show ) );
+        if( (*it)->_module_use_count > 0 )  element.appendChild( (*it)->dom_element( document, show ) );
     }
 
     return element;

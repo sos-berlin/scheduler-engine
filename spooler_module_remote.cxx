@@ -530,7 +530,7 @@ bool Remote_module_instance_proxy::continue_async_operation( Operation* operatio
                 }
 
                 params_array[6] = "recompile="       + as_string( _module->_recompile && !_module->_compiled );
-                params_array[7] = "script="          + _module->_source.dom_doc().xml();
+                params_array[7] = "script="          + _module->_source.dom_document().xml();
                 params_array[8] = "job="             + _job_name;
                 params_array[9] = "task_id="         + as_string( _task_id );
             }

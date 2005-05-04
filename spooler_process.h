@@ -47,7 +47,7 @@ struct Process : zschimmer::Object
     string                      stdout_filename             ();
 
     void                    set_dom                         ( const xml::Element_ptr&, const Time& xml_mod_time );
-    xml::Element_ptr            dom                         ( const xml::Document_ptr&, const Show_what& );
+    xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& );
 
     
 //private:
@@ -98,7 +98,7 @@ struct Process_class : zschimmer::Object
   //Job*                        first_waiting_job           ()                                      { return _waiting_jobs.begin(); }
 
     void                    set_dom                         ( const xml::Element_ptr& );
-    xml::Element_ptr            dom                         ( const xml::Document_ptr&, const Show_what& );
+    xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& );
 
 
     Fill_zero                  _zero_;

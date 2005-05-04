@@ -162,9 +162,9 @@ string Process::stderr_filename()
     return c? c->stderr_filename() : "";
 }
 
-//-------------------------------------------------------------------------------------Process::dom
+//-----------------------------------------------------------------------------Process::dom_element
 
-xml::Element_ptr Process::dom( const xml::Document_ptr& document, const Show_what& )
+xml::Element_ptr Process::dom_element( const xml::Document_ptr& document, const Show_what& )
 {
     xml::Element_ptr process_element = document.createElement( "process" );
 
@@ -358,7 +358,7 @@ void Process_class::set_dom( const xml::Element_ptr& e )
 //----------------------------------------------------------------------------------Spooler::as_dom
 // Anderer Thread
 
-xml::Element_ptr Process_class::dom( const xml::Document_ptr& document, const Show_what& show )
+xml::Element_ptr Process_class::dom_element( const xml::Document_ptr& document, const Show_what& show )
 {
     xml::Element_ptr element = document.createElement( "process_class" );
         
@@ -371,14 +371,14 @@ xml::Element_ptr Process_class::dom( const xml::Document_ptr& document, const Sh
         xml::Element_ptr processes_element = document.createElement( "processes" );
         element.appendChild( processes_element );
 
-        FOR_EACH( Process_list, _process_list, it )  processes_element.appendChild( (*it)->dom( document, show ) );
+        FOR_EACH( Process_list, _process_list, it )  processes_element.appendChild( (*it)->dom_element( document, show ) );
 
         if( !_waiting_jobs.empty() )
         {
             xml::Element_ptr waiting_jobs_element = document.createElement( "waiting_jobs" );
             element.appendChild( waiting_jobs_element );
 
-            FOR_EACH( Job_list, _waiting_jobs, j )  //waiting_jobs_element.appendChild( (*j)->dom( document, show_standard ) );
+            FOR_EACH( Job_list, _waiting_jobs, j )  //waiting_jobs_element.appendChild( (*j)->dom_element( document, show_standard ) );
             {
                 xml::Element_ptr job_element = document.createElement( "job" );
                 job_element.setAttribute( "job", (*j)->name() );

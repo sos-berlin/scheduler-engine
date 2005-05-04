@@ -316,9 +316,9 @@ ptr<object_server::Reference_with_properties> Prefix_log::get_reference_with_pro
     return ref;
 }
 */
-//----------------------------------------------------------------------------------Prefix_log::dom
+//--------------------------------------------------------------------------Prefix_log::dom_element
 
-xml::Element_ptr Prefix_log::dom( const xml::Document_ptr& document, const Show_what& show )
+xml::Element_ptr Prefix_log::dom_element( const xml::Document_ptr& document, const Show_what& show )
 {
     xml::Element_ptr log_element = document.createElement( "log" );
 

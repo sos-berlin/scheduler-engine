@@ -196,11 +196,12 @@ void Period::set_dom( const xml::Element_ptr& element, const Period* deflt )
     if( !single_start.empty() ) 
     {
         dt.set_time( single_start );
-        _begin = dt;
-        _repeat = latter_day;
+
+        _begin        = dt;
+        _end          = dt;
+        _repeat       = latter_day;
         _single_start = true;
-        _let_run = true;
-        _end = _begin;
+        _let_run      = true;
     }
     else
     {
@@ -520,6 +521,9 @@ Run_time::Run_time( Spooler* spooler, Application a )
     {
         _once = true;
     }
+
+    _dom.create();
+    _dom.appendChild( _dom.createElement( "run_time" ) );       // <run_time/>
 }
 
 //-------------------------------------------------------------------------Run_time::QueryInterface
@@ -560,7 +564,7 @@ void Run_time::set_default_days()
 
 void Run_time::set_xml( const string& xml )
 { 
-    _xml = xml;
+    //_xml = xml;
 
     set_dom( _spooler->_dtd.validate_xml( xml ).documentElement() );
 }
@@ -577,6 +581,9 @@ void Run_time::set_dom( const xml::Element_ptr& element )
     Day                     default_day;
     bool                    period_seen = false;
     
+
+    _dom.create();
+    _dom.appendChild( _dom.clone( element ) );
 
     _set = true;
     
@@ -651,6 +658,30 @@ void Run_time::set_dom( const xml::Element_ptr& element )
 
 
     if( _modified_event_handler )  _modified_event_handler->modified_event();
+}
+
+//----------------------------------------------------------------------------Run_time::dom_element
+
+xml::Element_ptr Run_time::dom_element( const xml::Document_ptr& document ) const
+{
+    return document.clone( _dom.documentElement() );
+
+/*
+    xml::Element_ptr run_time_element = document.createElement( "run_time" );
+    return run_time_element;
+*/
+}
+
+//---------------------------------------------------------------------------Run_time::dom_document
+
+xml::Document_ptr Run_time::dom_document() const
+{
+    xml::Document_ptr document;
+    
+    document.create();
+    document.appendChild( dom_element( document ) );
+
+    return document;
 }
 
 //---------------------------------------------------------------------------Run_time::first_period

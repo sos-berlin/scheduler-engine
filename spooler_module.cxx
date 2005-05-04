@@ -40,9 +40,9 @@ Source_part::Source_part( int linenr, const string& text, const Time& mod_time )
 {
 }
 
-//----------------------------------------------------------------xml::Element_ptr Source_part::dom
+//--------------------------------------------------------xml::Element_ptr Source_part::dom_element
 
-xml::Element_ptr Source_part::dom( const xml::Document_ptr& doc ) const
+xml::Element_ptr Source_part::dom_element( const xml::Document_ptr& doc ) const
 {
     xml::Element_ptr part_element = doc.createElement( "part_element" );
 
@@ -53,30 +53,30 @@ xml::Element_ptr Source_part::dom( const xml::Document_ptr& doc ) const
     return part_element;
 }
 
-//---------------------------------------------------------xml::Document_ptr Source_with_parts::dom
+//-------------------------------------------------xml::Document_ptr Source_with_parts::dom_element
 
-xml::Element_ptr Source_with_parts::dom( const xml::Document_ptr& doc ) const
+xml::Element_ptr Source_with_parts::dom_element( const xml::Document_ptr& doc ) const
 {
     xml::Element_ptr source_element = doc.createElement( "source" ); 
 
     Z_FOR_EACH_CONST( Parts, _parts, part )
     {
-        xml::Element_ptr part_element = part->dom(doc);
+        xml::Element_ptr part_element = part->dom_element(doc);
         source_element.appendChild( part_element );
     }
 
     return source_element;
 }
 
-//---------------------------------------------------------xml::Document_ptr Source_with_parts::dom
+//------------------------------------------------xml::Document_ptr Source_with_parts::dom_document
 
-xml::Document_ptr Source_with_parts::dom_doc() const
+xml::Document_ptr Source_with_parts::dom_document() const
 {
     xml::Document_ptr doc;
 
     doc.create();
     doc.appendChild( doc.createProcessingInstruction( "xml", "version=\"1.0\" encoding=\"iso-8859-1\"" ) );
-    doc.appendChild( dom(doc) );
+    doc.appendChild( dom_element(doc) );
 
     return doc;
 }

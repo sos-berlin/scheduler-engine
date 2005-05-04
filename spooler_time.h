@@ -306,9 +306,11 @@ struct Run_time : idispatch_implementation< Run_time, spooler_com::Irun_time >,
     void                    set_modified_event_handler      ( Modified_event_handler* m )           { _modified_event_handler = m; }
 
     void                    set_xml                         ( const string& );
-    string                      xml                         ()                                      { return _xml; }
+  //string                      xml                         ()                                      { return _xml; }
 
     void                    set_dom                         ( const xml::Element_ptr& );            // Setzt nicht _xml!
+    xml::Element_ptr            dom_element                 ( const xml::Document_ptr& ) const;
+    xml::Document_ptr           dom_document                () const;
 
     void                        check                       ();                              
 
@@ -351,7 +353,8 @@ struct Run_time : idispatch_implementation< Run_time, spooler_com::Irun_time >,
     Monthday_set               _monthday_set;
     Ultimo_set                 _ultimo_set;                 // 0: Letzter Tag, -1: Vorletzter Tag
     Holiday_set                _holiday_set;
-    string                     _xml;
+  //string                     _xml;
+    xml::Document_ptr          _dom;
 };
 
 //-------------------------------------------------------------------------------------------------

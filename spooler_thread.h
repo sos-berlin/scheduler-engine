@@ -17,7 +17,7 @@ struct Spooler_thread : zschimmer::Thread
                                ~Spooler_thread              ();
 
   //void                        set_dom                     ( const xml::Element_ptr&, const Time& xml_mod_time );
-    xml::Element_ptr            dom                         ( const xml::Document_ptr&, const Show_what& );
+    xml::Element_ptr            dom_element                 ( const xml::Document_ptr&, const Show_what& );
     
     const string&               name                        () const                                { return _name; }
     void                    set_name                        ( const string& name )                  { _name = name; set_thread_name( _name ); _log.set_prefix( _obj_name() ); }

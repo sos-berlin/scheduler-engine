@@ -129,7 +129,7 @@ struct Remote_scheduler : zschimmer::Object
 
     void                        connection_lost_event       ( const exception* );
     void                    set_dom                         ( const xml::Element_ptr& );
-    xml::Element_ptr            dom                         ( const xml::Document_ptr& document, const Show_what& show );
+    xml::Element_ptr            dom_element                 ( const xml::Document_ptr& document, const Show_what& show );
 
 
     Fill_zero                  _zero_;
@@ -154,7 +154,7 @@ struct Remote_scheduler_register
 
     void                        add                         ( Remote_scheduler* );
     Remote_scheduler*           get_or_null                 ( const Host_and_port& );
-    xml::Element_ptr            dom                         ( const xml::Document_ptr& document, const Show_what& show );
+    xml::Element_ptr            dom_element                 ( const xml::Document_ptr& document, const Show_what& show );
 
 
     Fill_zero                  _zero_;

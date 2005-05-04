@@ -277,10 +277,10 @@ void Task::close()
     set_state( s_closed );
 }
 
-//----------------------------------------------------------------------------------------Task::dom
+//----------------------------------------------------------------------------------------Task::dom_element
 // s.a. Spooler_command::execute_show_task() zum Aufbau des XML-Elements <task>
 
-xml::Element_ptr Task::dom( const xml::Document_ptr& document, const Show_what& show )
+xml::Element_ptr Task::dom_element( const xml::Document_ptr& document, const Show_what& show )
 {
     xml::Element_ptr task_element = document.createElement( "task" );
 
@@ -329,7 +329,7 @@ xml::Element_ptr Task::dom( const xml::Document_ptr& document, const Show_what& 
             }
         }
 
-        if( _order )  dom_append_nl( task_element ),  task_element.appendChild( _order->dom( document, show ) );
+        if( _order )  dom_append_nl( task_element ),  task_element.appendChild( _order->dom_element( document, show ) );
         if( _error )  dom_append_nl( task_element ),  append_error_element( task_element, _error );
         
         if( !_registered_pids.empty() )
@@ -370,7 +370,7 @@ xml::Element_ptr Task::dom( const xml::Document_ptr& document, const Show_what& 
         }
 
         //if( show & show_log )  dom_append_text_element( task_element, "log", _log->as_string() );
-        task_element.appendChild( _log->dom( document, show ) );
+        task_element.appendChild( _log->dom_element( document, show ) );
     }
 
     return task_element;

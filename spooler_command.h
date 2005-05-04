@@ -25,6 +25,7 @@ enum Show_what_enum
     show_task_history       = 0x40,
     show_order_history      = 0x80,
     show_remote_schedulers  = 0x100,
+    show_run_time           = 0x200,
 
     show_all_               = 0x8000,
     show_all                = 0xFFFF    // Alle Flags und show_all_ (Bei <show_state> ist z.B. show_orders nicht in show_all enthalten)

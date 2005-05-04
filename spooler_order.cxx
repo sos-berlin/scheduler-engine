@@ -93,7 +93,7 @@ xml::Element_ptr Spooler::xml_from_job_chains( const xml::Document_ptr& document
         FOR_EACH( Job_chain_map, _job_chain_map, it )
         {
             Job_chain* job_chain = it->second;
-            job_chains_element.appendChild( job_chain->dom( document, show ) );
+            job_chains_element.appendChild( job_chain->dom_element( document, show ) );
         }
     }
 
@@ -102,7 +102,7 @@ xml::Element_ptr Spooler::xml_from_job_chains( const xml::Document_ptr& document
 
 //-------------------------------------------------------------xml::Element_ptr Job_chain_node::xml
 
-xml::Element_ptr Job_chain_node::dom( const xml::Document_ptr& document, const Show_what& show, Job_chain* job_chain )
+xml::Element_ptr Job_chain_node::dom_element( const xml::Document_ptr& document, const Show_what& show, Job_chain* job_chain )
 {
     xml::Element_ptr element = document.createElement( "job_chain_node" );
 
@@ -118,7 +118,7 @@ xml::Element_ptr Job_chain_node::dom( const xml::Document_ptr& document, const S
             //if( show & show_orders )  
             {
                 dom_append_nl( element );
-                element.appendChild( _job->dom( document, show, job_chain ) );
+                element.appendChild( _job->dom_element( document, show, job_chain ) );
                 dom_append_nl( element );
             }
         }
@@ -153,9 +153,9 @@ Job_chain::~Job_chain()
 {
 }
 
-//------------------------------------------------------------------xml::Element_ptr Job_chain::dom
+//----------------------------------------------------------xml::Element_ptr Job_chain::dom_element
 
-xml::Element_ptr Job_chain::dom( const xml::Document_ptr& document, const Show_what& show )
+xml::Element_ptr Job_chain::dom_element( const xml::Document_ptr& document, const Show_what& show )
 {
     Show_what modified_show = show;
     if( modified_show | show_job_chain_orders )  modified_show |= show_orders;
@@ -173,7 +173,7 @@ xml::Element_ptr Job_chain::dom( const xml::Document_ptr& document, const Show_w
             FOR_EACH( Chain, _chain, it )
             {
                 Job_chain_node* node = *it;
-                element.appendChild( node->dom( document, modified_show, this ) );
+                element.appendChild( node->dom_element( document, modified_show, this ) );
             }
         }
 
@@ -199,7 +199,7 @@ xml::Element_ptr Job_chain::dom( const xml::Document_ptr& document, const Show_w
                     order->set_state_text( record.as_string( "state_text" ) );
                     order->set_title     ( record.as_string( "title"      ) );
 
-                    order_history_element.appendChild( order->dom( document, show ) );
+                    order_history_element.appendChild( order->dom_element( document, show ) );
                 }
             }
             catch( exception& x )
@@ -483,9 +483,9 @@ Order_queue::~Order_queue()
 {
 }
 
-//---------------------------------------------------------------------------------Order_queue::dom
+//-------------------------------------------------------------------------Order_queue::dom_element
 
-xml::Element_ptr Order_queue::dom( const xml::Document_ptr& document, const Show_what& show, Job_chain* which_job_chain )
+xml::Element_ptr Order_queue::dom_element( const xml::Document_ptr& document, const Show_what& show, Job_chain* which_job_chain )
 {
     xml::Element_ptr element = document.createElement( "order_queue" );
 
@@ -508,7 +508,7 @@ xml::Element_ptr Order_queue::dom( const xml::Document_ptr& document, const Show
                     if( !which_job_chain  ||  order->job_chain() == which_job_chain )
                     {
                         dom_append_nl( element );
-                        element.appendChild( order->dom( document, show ) );
+                        element.appendChild( order->dom_element( document, show ) );
                         if( --limit == 0 )  break;
                     }
                 }
@@ -884,9 +884,9 @@ void Order::close()
     remove_from_job_chain();
 }
 
-//---------------------------------------------------------------------------------------Order::dom
+//-------------------------------------------------------------------------------Order::dom_element
 
-xml::Element_ptr Order::dom( const xml::Document_ptr& document, const Show_what& show, const string* log )
+xml::Element_ptr Order::dom_element( const xml::Document_ptr& document, const Show_what& show, const string* log )
 {
     xml::Element_ptr element = document.createElement( "order" );
 
@@ -930,6 +930,8 @@ xml::Element_ptr Order::dom( const xml::Document_ptr& document, const Show_what&
         if( _setback )
         element.setAttribute( "setback"   , _setback.as_string() );
 
+
+        if( show & show_run_time )  element.appendChild( _run_time->dom_element( document ) );
 
         if( show & show_log )
         {

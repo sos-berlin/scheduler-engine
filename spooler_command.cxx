@@ -241,7 +241,7 @@ xml::Element_ptr Command_processor::execute_show_state( const xml::Element_ptr& 
         state_element.appendChild( subprocesses_element );
     }
 
-    state_element.appendChild( _spooler->_remote_scheduler_register.dom( _answer, show ) );
+    state_element.appendChild( _spooler->_remote_scheduler_register.dom_element( _answer, show ) );
 
     return state_element;
 }
@@ -370,7 +370,7 @@ xml::Element_ptr Command_processor::execute_show_job( const xml::Element_ptr& el
     Show_what show = show_;
     if( show & show_all_ )  show |= show_description | show_task_queue | show_orders;
 
-    return _spooler->get_job( element.getAttribute( "job" ) ) -> dom( _answer, show );
+    return _spooler->get_job( element.getAttribute( "job" ) ) -> dom_element( _answer, show );
 }
 
 //------------------------------------------------------------Command_processor::execute_modify_job
@@ -385,13 +385,18 @@ xml::Element_ptr Command_processor::execute_modify_job( const xml::Element_ptr& 
     Job::State_cmd cmd = cmd_name.empty()? Job::sc_none 
                                          : Job::as_state_cmd( cmd_name );
 
-    xml::Element_ptr jobs_element = _answer.createElement( "jobs" );
-
     Job* job = _spooler->get_job( job_name );
+
+
+    DOM_FOR_EACH_ELEMENT( element, e )
+    {
+        if( e.nodeName_is( "run_time" ) )  { job->set_run_time( e );  break; }
+    }
+
 
     if( cmd )  job->set_state_cmd( cmd );
     
-    return jobs_element;
+    return _answer.createElement( "ok" );
 }
 
 //-------------------------------------------------------------Command_processor::execute_show_task
@@ -405,7 +410,7 @@ xml::Element_ptr Command_processor::execute_show_task( const xml::Element_ptr& e
     Sos_ptr<Task> task = _spooler->get_task_or_null( task_id );
     if( task )
     {
-        return task->dom( _answer, show );
+        return task->dom_element( _answer, show );
     }
     else
     {
@@ -522,7 +527,7 @@ xml::Element_ptr Command_processor::execute_show_job_chain( const xml::Element_p
 
     string job_chain_name = show_job_chain_element.getAttribute( "job_chain" );
 
-    return _spooler->job_chain( job_chain_name )->dom( _answer, show );
+    return _spooler->job_chain( job_chain_name )->dom_element( _answer, show );
 }
 
 //------------------------------------------------------------Command_processor::execute_show_order
@@ -543,7 +548,7 @@ xml::Element_ptr Command_processor::execute_show_order( const xml::Element_ptr& 
 
     if( order )
     {
-        return order->dom( _answer, show );
+        return order->dom_element( _answer, show );
     }
     else
     {
@@ -585,7 +590,7 @@ xml::Element_ptr Command_processor::execute_show_order( const xml::Element_ptr& 
         string log = file_as_string( GZIP_AUTO + _spooler->_db->db_name() + " -table=" + sql::uquoted_name( _spooler->_order_history_tablename ) + " -blob=\"LOG\"" 
                                      " where \"HISTORY_ID\"=" + history_id );
 
-        return order->dom( _answer, show, &log );
+        return order->dom_element( _answer, show, &log );
     }
 
 
@@ -721,6 +726,8 @@ xml::Element_ptr Command_processor::execute_command( const xml::Element_ptr& ele
         if( string_equals_prefix_then_skip( &p, "order_history"    ) )  show |= show_order_history;
         else
         if( string_equals_prefix_then_skip( &p, "remote_schedulers") )  show |= show_remote_schedulers;
+        else
+        if( string_equals_prefix_then_skip( &p, "run_time"         ) )  show |= show_run_time;
         else
         if( string_equals_prefix_then_skip( &p, "standard"         ) )  ;
         else

@@ -98,7 +98,7 @@ struct Order : Com_order,
     void                        postprocessing          ( bool success );                           // Verarbeitung nach spooler_process()
     void                        processing_error        ();
 
-    xml::Element_ptr            dom                     ( const xml::Document_ptr&, const Show_what&, const string* log = NULL );
+    xml::Element_ptr            dom_element             ( const xml::Document_ptr&, const Show_what&, const string* log = NULL );
     void                    set_run_time                ( const xml::Element_ptr& );
     void                        before_modify_event     ();
     void                        modified_event          ();
@@ -158,7 +158,7 @@ struct Job_chain_node : Com_job_chain_node
 {
                                 Job_chain_node          ()                                          : _zero_(this+1) {}
 
-    xml::Element_ptr            dom                     ( const xml::Document_ptr&, const Show_what&, Job_chain* );
+    xml::Element_ptr            dom_element             ( const xml::Document_ptr&, const Show_what&, Job_chain* );
     int                         order_count             ( Job_chain* = NULL );
 
 
@@ -216,7 +216,7 @@ struct Job_chain : Com_job_chain
 
     int                         order_count             ();
 
-    xml::Element_ptr            dom                     ( const xml::Document_ptr&, const Show_what& );
+    xml::Element_ptr            dom_element             ( const xml::Document_ptr&, const Show_what& );
 
 
     Fill_zero                  _zero_;
@@ -273,7 +273,7 @@ struct Order_queue : Com_order_queue
     void                        update_priorities       ();
     ptr<Order>                  order_or_null           ( const Order::Id& );
     Job*                        job                     () const                                    { return _job; }
-    xml::Element_ptr            dom                     ( const xml::Document_ptr&, const Show_what& , Job_chain* );
+    xml::Element_ptr            dom_element             ( const xml::Document_ptr&, const Show_what& , Job_chain* );
 
 
     Fill_zero                  _zero_;

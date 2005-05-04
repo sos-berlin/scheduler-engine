@@ -190,12 +190,13 @@ struct Job : Sos_self_deleting
                                ~Job                         (); 
 
     void                    set_dom                         ( const xml::Element_ptr&, const Time& mod_time );
-    xml::Element_ptr            dom                         ( const xml::Document_ptr&, const Show_what&, Job_chain* = NULL );
+    xml::Element_ptr            dom_element                         ( const xml::Document_ptr&, const Show_what&, Job_chain* = NULL );
 
     void                        init0                       ();                                     // Wird vor Spooler-Skript gerufen
     void                        init                        ();                                     // Wird nach Spooler-Skript gerufen, ruft auch init2()
     void                        init2                       ();                                     // Wird nach reread() gerufen
     void                        init_run_time               ();
+    void                        set_run_time                ( const xml::Element_ptr& );
 
     const string&               name                        () const                                { return _name; }
     State_cmd                   state_cmd                   () const                                { return _state_cmd; }

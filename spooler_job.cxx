@@ -85,7 +85,7 @@ void Job::set_dom( const xml::Element_ptr& element, const Time& xml_mod_time )
     {
         bool order;
 
-        _name       = element.     getAttribute( "name"         );
+        _name       = element.     getAttribute( "name"         , _name       );
         _temporary  = element.bool_getAttribute( "temporary"    , _temporary  );
         _priority   = element. int_getAttribute( "priority"     , _priority   );
         _title      = element.     getAttribute( "title"        , _title      );
@@ -177,9 +177,7 @@ void Job::set_dom( const xml::Element_ptr& element, const Time& xml_mod_time )
                 }
             }
             else
-            if( e.nodeName_is( "run_time" ) &&  !_spooler->_manual )  init_run_time(), 
-                                                                      _run_time->set_holidays( _spooler->holidays() ), 
-                                                                      _run_time->set_dom( e );
+            if( e.nodeName_is( "run_time" ) &&  !_spooler->_manual )  set_run_time( e );
         }
 
         if( !_run_time->set() )   _run_time->set_default();
@@ -252,16 +250,7 @@ void Job::init()
 
 void Job::init2()
 {
-    _start_once    = _run_time->once();
     _delay_until   = 0;
-    _period._begin = 0;
-    _period._end   = 0;
-    _next_single_start = latter_day;
-
-    Time now = Time::now();
-
-    //select_period( now );
-    set_next_start_time( now );
 }
 
 //-------------------------------------------------------------------------------Job::init_run_time
@@ -269,6 +258,22 @@ void Job::init2()
 void Job::init_run_time()
 {
     _run_time = Z_NEW( Run_time( _spooler, Run_time::application_job ) );
+}
+
+//--------------------------------------------------------------------------------Job::set_run_time
+
+void Job::set_run_time( const xml::Element_ptr& element )
+{
+    init_run_time();
+    _run_time->set_holidays( _spooler->holidays() ), 
+    _run_time->set_dom( element );
+
+    _start_once    = _run_time->once();
+    _period._begin = 0;
+    _period._end   = 0;
+    _next_single_start = latter_day;
+
+    set_next_start_time( Time::now() );
 }
 
 //---------------------------------------------------------------------------------------Job::close
@@ -1570,10 +1575,10 @@ Time Job::get_delay_order_after_setback( int setback_count )
     return delay;
 }
 
-//-----------------------------------------------------------------------------------------Job::dom
+//---------------------------------------------------------------------------------Job::dom_element
 // Anderer Thread
 
-xml::Element_ptr Job::dom( const xml::Document_ptr& document, const Show_what& show, Job_chain* which_job_chain )
+xml::Element_ptr Job::dom_element( const xml::Document_ptr& document, const Show_what& show, Job_chain* which_job_chain )
 {
     xml::Element_ptr job_element = document.createElement( "job" );
 
@@ -1641,10 +1646,12 @@ xml::Element_ptr Job::dom( const xml::Document_ptr& document, const Show_what& s
             if( next < latter_day )  job_element.setAttribute( "next_start_time", next.as_string() );
         }
 
+        if( show & show_run_time )  job_element.appendChild( _run_time->dom_element( document ) );
+
         dom_append_nl( job_element );
         xml::Element_ptr tasks_element = document.createElement( "tasks" );
         tasks_element.setAttribute( "count", (int)_running_tasks.size() );
-        Z_FOR_EACH( Task_list, _running_tasks, t )  tasks_element.appendChild( (*t)->dom( document, show ) ), dom_append_nl( tasks_element );
+        Z_FOR_EACH( Task_list, _running_tasks, t )  tasks_element.appendChild( (*t)->dom_element( document, show ) ), dom_append_nl( tasks_element );
         job_element.appendChild( tasks_element );
       //dom_append_nl( job_element );
 
@@ -1688,12 +1695,12 @@ xml::Element_ptr Job::dom( const xml::Document_ptr& document, const Show_what& s
             Show_what modified_show = show;
             if( modified_show | show_job_orders )  modified_show |= show_orders;
 
-            job_element.appendChild( _order_queue->dom( document, modified_show, which_job_chain ) );
+            job_element.appendChild( _order_queue->dom_element( document, modified_show, which_job_chain ) );
         }
 
         if( _error       )  append_error_element( job_element, _error );
 
-        job_element.appendChild( _log->dom( document, show ) );
+        job_element.appendChild( _log->dom_element( document, show ) );
     }
 
     return job_element;

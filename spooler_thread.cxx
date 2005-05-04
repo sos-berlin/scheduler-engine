@@ -62,9 +62,9 @@ void Spooler_thread::init()
 
 }
 
-//------------------------------------------------------------------------------Spooler_thread::dom
+//----------------------------------------------------------------------Spooler_thread::dom_element
 
-xml::Element_ptr Spooler_thread::dom( const xml::Document_ptr& document, const Show_what& )
+xml::Element_ptr Spooler_thread::dom_element( const xml::Document_ptr& document, const Show_what& )
 {
     xml::Element_ptr thread_element = document.createElement( "thread" );
 
