@@ -154,3 +154,4 @@ Korrektur: Subprozesse liefern wieder stdout
 
 spooler.log.start_new_file()
 
+Windows: Anzahl der Prozesse auf 30 begrenzt, TCP-Verbindungen auf 16 erhöht.
