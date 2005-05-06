@@ -95,8 +95,6 @@ static int my_write( Spooler* spooler, const string& filename, int file, const c
 
         if( ret < 0 )
         {
-            int err = errno;
-
             if( is_stop_errno( spooler, errno ) ) 
             {
                 io_error( spooler, filename );
