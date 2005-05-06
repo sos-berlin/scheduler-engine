@@ -429,6 +429,7 @@ void Log_chunk_reader::set_event( Event_base* event )
 
 bool Log_chunk_reader::next_chunk_is_ready()
 { 
+OPEN:
     if( !_file.opened() )
     {
         if( !_log->started() )  return false;       // Wenn Log noch nicht gestartet worden ist (z.B. Order in der Warteschlange), dann gibt's noch keine Datei
@@ -442,6 +443,13 @@ bool Log_chunk_reader::next_chunk_is_ready()
         {
             _file_eof = true;
             return true;
+        }
+        else
+        if( _log->filename() != _file.filename() )  // Dateiname gewechselt (Log.start_new_file)? Dann beenden wir das Protokoll
+        {
+            _file.close();
+            _html_insertion = "<hr size='1'/>";
+            goto OPEN;
         }
         else
             return false;
@@ -468,6 +476,15 @@ int Log_chunk_reader::get_next_chunk_size()
 string Log_chunk_reader::read_from_chunk( int recommended_size )
 { 
     return _file.read_string( recommended_size );
+}
+
+//-----------------------------------------------------------------Log_chunk_reader::html_insertion
+
+string Log_chunk_reader::html_insertion()
+{ 
+    string result = _html_insertion;
+    _html_insertion = "";
+    return result;
 }
 
 //-------------------------------------------------------------Html_chunk_reader::Html_chunk_reader
@@ -550,6 +567,8 @@ bool Html_chunk_reader::try_fill_chunk()
 
             _available_net_chunk_size = _chunk_reader->get_next_chunk_size();
         }
+
+        _chunk.append( _chunk_reader->html_insertion() );   // Z.B. <hr/>
 
         string text = _chunk_reader->read_from_chunk( _available_net_chunk_size );
         if( text == "" )  return true;  // Fertig, bei _chunk_length() == 0: eof        return _chunk.length() > 0;

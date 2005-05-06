@@ -281,6 +281,8 @@ struct Com_log : spooler_com::Ilog,
 
     STDMETHODIMP            put_Mail_on_warning             ( VARIANT_BOOL );
     STDMETHODIMP            get_Mail_on_warning             ( VARIANT_BOOL* );
+
+    STDMETHODIMP                Start_new_file              ();
     
   private:
     Fill_zero                  _zero_;

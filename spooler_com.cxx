@@ -875,6 +875,7 @@ const Com_method Com_log::_methods[] =
     { DISPATCH_PROPERTYGET, 26, "last"                 , (Com_method_ptr)&Com_log::get_Last                , VT_BSTR       , { VT_BYREF|VT_VARIANT } },
     { DISPATCH_PROPERTYPUT, 27, "mail_on_warning"      , (Com_method_ptr)&Com_log::put_Mail_on_warning     , VT_EMPTY      , { VT_BOOL } },
     { DISPATCH_PROPERTYGET, 27, "mail_on_warning"      , (Com_method_ptr)&Com_log::get_Mail_on_warning     , VT_BOOL       },
+    { DISPATCH_METHOD     , 28, "Start_new_file"       , (Com_method_ptr)&Com_log::Start_new_file          , VT_EMPTY      },
     {}
 };
 
@@ -1362,6 +1363,25 @@ STDMETHODIMP Com_log::get_Last( VARIANT* level, BSTR* result )
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Log::last_error_line" ); }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Log::last_error_line" ); }
+
+    return hr;
+}
+
+//--------------------------------------------------------------------------Com_log::Start_new_file
+
+STDMETHODIMP Com_log::Start_new_file()
+{
+    HRESULT hr = NOERROR;
+
+    THREAD_LOCK( _lock )
+    try 
+    {
+        if( !_log )  return E_POINTER;
+
+        _log->start_new_file();
+    }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
 
     return hr;
 }

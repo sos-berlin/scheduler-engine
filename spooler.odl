@@ -1029,6 +1029,8 @@ library Spooler
 
         [propget]
         HRESULT                 Mail_on_warning         ( [out,retval] VARIANT_BOOL* );
+
+        HRESULT                 Start_new_file          ();
     }
 
     [

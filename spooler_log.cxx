@@ -166,7 +166,10 @@ void Log::open_new()
 {
     Z_MUTEX( _semaphore )
     {
-        if( _file != -1  &&  _file != fileno(stderr) )  ::close( _file ),  _file = -1;
+        int    old_file     = _file;
+        string old_filename = _filename;
+
+        _file     = -1;
         _filename = "";
 
         if( _directory == "*stderr" )
@@ -196,7 +199,30 @@ void Log::open_new()
 
             _filename = filename;
         }
+
+        if( old_file != -1  &&  old_file != fileno(stderr) )
+        {
+            string line = "\nDas Protokoll wird fortgeführt in " + _filename + "\n";
+            ::write( old_file, line.c_str(), line.length() );
+            ::close( old_file );
+        }
     }
+}
+
+//------------------------------------------------------------------------------Log::start_new_file
+
+void Log::start_new_file()
+{
+    string old_filename = _filename;
+    info( "start_new_file(): Die Protokolldatei wird geschlossen" );
+
+    string old_log_filename = log_filename();
+    log_stop();
+    log_start( old_log_filename );
+
+    open_new();
+
+    info( "start_new_file(): Vorhergehende Protokolldatei ist " + old_filename );
 }
 
 //---------------------------------------------------------------------------------------Log::write
@@ -302,110 +328,6 @@ void Log::log2( Log_level level, const string& prefix, const string& line_, Pref
         if( order_log )  order_log->signal_events();
 
         if( this == &_spooler->_base_log )  _spooler->_log.signal_events();   // Nicht schön, aber es gibt sowieso nur ein Log.
-    }
-}
-
-//-------------------------------------------------------Prefix_log::get_reference_with_properties
-/*
-ptr<object_server::Reference_with_properties> Prefix_log::get_reference_with_properties()
-{
-    ptr<object_server::Reference_with_properties> ref = Z_NEW( object_server::Reference_with_properties( "Log_proxy", NULL ) );  // IDispatch* wird von Com_log eingesetzt.
-
-    ref->add_property( "log_level", _log->log_level() );
-
-    return ref;
-}
-*/
-//--------------------------------------------------------------------------Prefix_log::dom_element
-
-xml::Element_ptr Prefix_log::dom_element( const xml::Document_ptr& document, const Show_what& show )
-{
-    xml::Element_ptr log_element = document.createElement( "log" );
-
-    if( _log_level     >= log_min   )  log_element.setAttribute( "level"          , name_of_log_level( (Log_level)_log_level ) );
-    if( _highest_level >= log_min   )  log_element.setAttribute( "highest_level"  , name_of_log_level( (Log_level)_highest_level ) );
-    if( last( log_error ) != ""     )  log_element.setAttribute( "last_error"     , last( log_error ) );
-    if( last( log_warn  ) != ""     )  log_element.setAttribute( "last_warning"   , last( log_warn ) );
-    if( last( log_info  ) != ""     )  log_element.setAttribute( "last_info"      , last( log_info ) );
-
-    if( _mail_on_error              )  log_element.setAttribute( "mail_on_error"  , "yes" );
-    if( _mail_on_warning            )  log_element.setAttribute( "mail_on_warning", "yes" );
-    if( _mail_on_success            )  log_element.setAttribute( "mail_on_success", "yes" );
-    if( _mail_on_process            )  log_element.setAttribute( "mail_on_process", _mail_on_process );
-
-
-    string smtp_server = _smtp_server == "-"? "" : _smtp_server;
-    string from        = _from        == "-"? "" : _from;
-    string to          = _to          == "-"? "" : _to;
-    string cc          = _cc          == "-"? "" : _cc;
-    string bcc         = _bcc         == "-"? "" : _bcc;
-    string subject     = _subject     == "-"? "" : _subject;
-
-    if( _mail )
-    {
-        HRESULT hr;
-        Bstr bstr;
-        hr = _mail->get_Smtp   ( &bstr );  if( !FAILED(hr) )  smtp_server = string_from_bstr( bstr );
-        hr = _mail->get_From   ( &bstr );  if( !FAILED(hr) )  from        = string_from_bstr( bstr );
-        hr = _mail->get_To     ( &bstr );  if( !FAILED(hr) )  to          = string_from_bstr( bstr );
-        hr = _mail->get_Cc     ( &bstr );  if( !FAILED(hr) )  cc          = string_from_bstr( bstr );
-        hr = _mail->get_Bcc    ( &bstr );  if( !FAILED(hr) )  bcc         = string_from_bstr( bstr );
-        hr = _mail->get_Subject( &bstr );  if( !FAILED(hr) )  subject     = string_from_bstr( bstr );
-    }
-
-    if( smtp_server != "" )  log_element.setAttribute( "smtp"        , smtp_server );
-    if( from        != "" )  log_element.setAttribute( "mail_from"   , from );
-    if( to          != "" )  log_element.setAttribute( "mail_to"     , to );
-    if( cc          != "" )  log_element.setAttribute( "mail_cc"     , cc );
-    if( bcc         != "" )  log_element.setAttribute( "mail_bcc"    , bcc );
-    if( subject     != "" )  log_element.setAttribute( "mail_subject", subject );
-
-
-    if( show & show_log )
-    {
-        log_element.appendChild( document.createTextNode( as_string() ) );
-    }
-
-
-    return log_element;
-}
-
-//-----------------------------------------------------------------------------Prefix_log::log_file
-
-void Prefix_log::log_file( const string& filename, const string& title )
-{
-    if( !filename.empty() ) 
-    {
-        try
-        {
-            bool title_printed = false;
-
-            Any_file file ( "-in -seq " + filename );
-            while( !file.eof() ) 
-            {
-                if( !title_printed && !title.empty() )  info( title );
-                title_printed = true;
-                info( file.get_string() );
-            }
-        }
-        catch( const Xc& x ) 
-        { 
-            warn( filename + ": " + x.what() ); 
-        }
-    }
-}
-
-//----------------------------------------------------------------------------Prefix_log::as_string
-
-string Prefix_log::as_string()
-{
-    if( opened() )
-    {
-        return string_from_file( filename() );
-    }
-    else
-    {
-        return _log_buffer;
     }
 }
 
@@ -709,6 +631,20 @@ void Prefix_log::set_mail_header()
     if( _bcc  != "-" )  hr = _mail->put_Bcc ( Bstr( _bcc  ) );    if( FAILED(hr) ) throw_ole( hr, "spooler::Mail::bcc" , _bcc.c_str() );
 }
 
+//-----------------------------------------------------------------------Prefix_log::start_new_file
+
+void Prefix_log::start_new_file()
+{
+    if( _prefix != "" 
+     || _file != -1 
+     || _order_log )
+    {
+        throw_xc( "SCHEDULER-225" );
+    }
+
+    _log->start_new_file();
+}
+
 //-------------------------------------------------------------------Prefix_log::set_mail_from_name
 
 void Prefix_log::set_mail_from_name( const string& from_name, bool overwrite )
@@ -916,6 +852,110 @@ void Prefix_log::signal_events()
     Z_FOR_EACH( list<Event_base*>, _events, e )
     {
         (*e)->signal( "Log" );
+    }
+}
+
+//-------------------------------------------------------Prefix_log::get_reference_with_properties
+/*
+ptr<object_server::Reference_with_properties> Prefix_log::get_reference_with_properties()
+{
+    ptr<object_server::Reference_with_properties> ref = Z_NEW( object_server::Reference_with_properties( "Log_proxy", NULL ) );  // IDispatch* wird von Com_log eingesetzt.
+
+    ref->add_property( "log_level", _log->log_level() );
+
+    return ref;
+}
+*/
+//--------------------------------------------------------------------------Prefix_log::dom_element
+
+xml::Element_ptr Prefix_log::dom_element( const xml::Document_ptr& document, const Show_what& show )
+{
+    xml::Element_ptr log_element = document.createElement( "log" );
+
+    if( _log_level     >= log_min   )  log_element.setAttribute( "level"          , name_of_log_level( (Log_level)_log_level ) );
+    if( _highest_level >= log_min   )  log_element.setAttribute( "highest_level"  , name_of_log_level( (Log_level)_highest_level ) );
+    if( last( log_error ) != ""     )  log_element.setAttribute( "last_error"     , last( log_error ) );
+    if( last( log_warn  ) != ""     )  log_element.setAttribute( "last_warning"   , last( log_warn ) );
+    if( last( log_info  ) != ""     )  log_element.setAttribute( "last_info"      , last( log_info ) );
+
+    if( _mail_on_error              )  log_element.setAttribute( "mail_on_error"  , "yes" );
+    if( _mail_on_warning            )  log_element.setAttribute( "mail_on_warning", "yes" );
+    if( _mail_on_success            )  log_element.setAttribute( "mail_on_success", "yes" );
+    if( _mail_on_process            )  log_element.setAttribute( "mail_on_process", _mail_on_process );
+
+
+    string smtp_server = _smtp_server == "-"? "" : _smtp_server;
+    string from        = _from        == "-"? "" : _from;
+    string to          = _to          == "-"? "" : _to;
+    string cc          = _cc          == "-"? "" : _cc;
+    string bcc         = _bcc         == "-"? "" : _bcc;
+    string subject     = _subject     == "-"? "" : _subject;
+
+    if( _mail )
+    {
+        HRESULT hr;
+        Bstr bstr;
+        hr = _mail->get_Smtp   ( &bstr );  if( !FAILED(hr) )  smtp_server = string_from_bstr( bstr );
+        hr = _mail->get_From   ( &bstr );  if( !FAILED(hr) )  from        = string_from_bstr( bstr );
+        hr = _mail->get_To     ( &bstr );  if( !FAILED(hr) )  to          = string_from_bstr( bstr );
+        hr = _mail->get_Cc     ( &bstr );  if( !FAILED(hr) )  cc          = string_from_bstr( bstr );
+        hr = _mail->get_Bcc    ( &bstr );  if( !FAILED(hr) )  bcc         = string_from_bstr( bstr );
+        hr = _mail->get_Subject( &bstr );  if( !FAILED(hr) )  subject     = string_from_bstr( bstr );
+    }
+
+    if( smtp_server != "" )  log_element.setAttribute( "smtp"        , smtp_server );
+    if( from        != "" )  log_element.setAttribute( "mail_from"   , from );
+    if( to          != "" )  log_element.setAttribute( "mail_to"     , to );
+    if( cc          != "" )  log_element.setAttribute( "mail_cc"     , cc );
+    if( bcc         != "" )  log_element.setAttribute( "mail_bcc"    , bcc );
+    if( subject     != "" )  log_element.setAttribute( "mail_subject", subject );
+
+
+    if( show & show_log )
+    {
+        log_element.appendChild( document.createTextNode( as_string() ) );
+    }
+
+
+    return log_element;
+}
+
+//-----------------------------------------------------------------------------Prefix_log::log_file
+
+void Prefix_log::log_file( const string& filename, const string& title )
+{
+    if( !filename.empty() ) 
+    {
+        try
+        {
+            bool title_printed = false;
+
+            Any_file file ( "-in -seq " + filename );
+            while( !file.eof() ) 
+            {
+                if( !title_printed && !title.empty() )  info( title );
+                title_printed = true;
+                info( file.get_string() );
+            }
+        }
+        catch( const Xc& x ) 
+        { 
+            warn( filename + ": " + x.what() ); 
+        }
+    }
+}
+
+//----------------------------------------------------------------------------Prefix_log::as_string
+
+string Prefix_log::as_string()
+{
+    if( opened() )
+    {
+        return string_from_file( filename() );
+    }
+    else
+    {
+        return _log_buffer;
     }
 }
 

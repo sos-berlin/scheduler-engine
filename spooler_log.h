@@ -28,6 +28,7 @@ struct Log
     
     string                      filename                    () const                            { return _filename; }
     int                         fd                          ()                                  { return _file; }
+    void                        start_new_file              ();
 
   protected:
     void                        write                       ( Prefix_log* extra, Prefix_log* order, const char*, int len, bool log = true );
@@ -72,6 +73,7 @@ struct Prefix_log : Object, Has_log
     void                    set_remove_after_close          ( bool b )                          { _remove_after_close = b; }
     void                    set_new_filename                ( const string& );
     string                      new_filename                ()                                  { return _new_filename; }
+    void                        start_new_file              ();
     void                    set_log_level                   ( int level )                       { _log_level = level; }
     int                         log_level                   ()                                  { return _log_level; }
     void                        reset_highest_level         ()                                  { _highest_level = -999; }

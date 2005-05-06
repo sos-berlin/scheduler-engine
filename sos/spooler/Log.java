@@ -204,6 +204,7 @@ public class Log extends Idispatch
      * Oder einen Leerstring. */
     public String               last_error_line         ()                                          { return (String)   com_call( "<last_error_line"        ); }
 
+
     /** Liefert die Letzte Ausgabe des angegebenen Levels.
      * Oder einen Leerstring.
      *
@@ -211,10 +212,15 @@ public class Log extends Idispatch
      */
     public String               last                    ( String level )                            { return (String)   com_call( "<last", level            ); }
 
+
     /** Liefert die Letzte Ausgabe des angegebenen Levels.
      * Oder einen Leerstring.
      *
      * @param level 2 für error bis -9 für debug9
      */
     public String               last                    ( int level )                               { return (String)   com_call( "<last", level            ); }
+    
+    
+    /** Nur fürs Hauptprotokoll: Schließt das bisherige und beginnt ein neues Protokoll. */
+    public void                 start_new_file          ()                                          {                   com_call( "start_new_file"          ); }
 }

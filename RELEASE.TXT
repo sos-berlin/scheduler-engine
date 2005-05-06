@@ -142,3 +142,15 @@ Scheduler wartet, wenn Protokoll wegen Plattenplatzmangels nicht fortgeschrieben
 
 <state waiting_errno="..." waiting_errno_text="..." waiting_errno_filename"...">
 
+
+------------------------------------------------
+VERSION 2.0.120  2005-05-06
+
+Korrektur: Subprozesse liefern wieder stdout
+
+<modify_job> <run_time> </modify_job>  ersetzt die <run_time> eines Jobs.
+
+<show_job what="run_time" />
+
+spooler.log.start_new_file()
+

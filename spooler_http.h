@@ -92,6 +92,7 @@ struct Chunk_reader : Object
     virtual bool                next_chunk_is_ready         ()                                      = 0;
     virtual int                 get_next_chunk_size         ()                                      = 0;
     virtual string              read_from_chunk             ( int size )                            = 0;
+    virtual string              html_insertion              ()                                      { return ""; }      // Irgendeine HTML-Einfügung, z.B. <hr/>
 
 
     Fill_zero                  _zero_;
@@ -130,6 +131,7 @@ struct Log_chunk_reader : Chunk_reader
     bool                        next_chunk_is_ready         ();
     int                         get_next_chunk_size         ();
     string                      read_from_chunk             ( int size );
+    virtual string              html_insertion              ();
 
 
     Fill_zero                  _zero_;
@@ -137,6 +139,7 @@ struct Log_chunk_reader : Chunk_reader
     Event_base*                _event;
     File                       _file;
     bool                       _file_eof;
+    string                     _html_insertion;
 };
 
 //------------------------------------------------------------------------------Chunk_reader_filter
