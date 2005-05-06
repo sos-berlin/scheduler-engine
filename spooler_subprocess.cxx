@@ -93,7 +93,11 @@ void Subprocess::close()
 
 void Subprocess::deregister()
 {
-    if( _registered )  _subprocess_register->remove( this );
+    if( _registered )
+    {
+        Update_register_entry();
+        _subprocess_register->remove( this );
+    }
 }
 
 //--------------------------------------------------------------------------------Subprocess::Start
@@ -165,22 +169,36 @@ STDMETHODIMP Subprocess::Wait_for_termination( VARIANT* seconds, VARIANT_BOOL* r
 
         if( variant_is_missing( *seconds ) )
         {
-            _process.wait();
+            wait_for_termination();
             ok = true;
         }
         else
         {
-            ok = _process.wait( double_from_variant( *seconds ) );
+            ok = wait_for_termination( double_from_variant( *seconds ) );
         }
 
         *result = ok? VARIANT_TRUE : VARIANT_FALSE;
-
-        if( ok )  deregister();
-
     }
     catch( const exception&  x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
 
     return hr;
+}
+
+//-----------------------------------------------------------------Subprocess::wait_for_termination
+
+void Subprocess::wait_for_termination()
+{ 
+    _process.wait();
+    deregister();
+}
+
+//-----------------------------------------------------------------Subprocess::wait_for_termination
+
+bool Subprocess::wait_for_termination( double seconds )
+{ 
+    bool terminated = _process.wait( seconds );
+    if( terminated )  deregister();
+    return terminated;
 }
 
 //---------------------------------------------------------------------Subprocess::put_Ignore_error
@@ -231,16 +249,28 @@ HRESULT Subprocess::Update_register_entry()
     
     try
     {
-        vector<Variant> variant_array;
+        if( !_process.terminated() )
+        {
+            vector<Variant> variant_array;
 
-        // Rückwärts!
-        variant_array.push_back( _process.command_line() );
-        variant_array.push_back( ignore_signal() );
-        variant_array.push_back( ignore_error() );
-        variant_array.push_back( (int)( _timeout + 0.999 ) );
-        variant_array.push_back( _process.pid() );
+            // Rückwärts!
+            variant_array.push_back( _process.command_line() );
+            variant_array.push_back( ignore_signal() );
+            variant_array.push_back( ignore_error() );
+            variant_array.push_back( (int)( _timeout + 0.999 ) );
+            variant_array.push_back( _process.pid() );
 
-        com_invoke( DISPATCH_METHOD, _task, "Add_subprocess", &variant_array );
+            com_invoke( DISPATCH_METHOD, _task, "Add_subprocess", &variant_array );
+        }
+        else
+        {
+            vector<Variant> variant_array;
+
+            // Rückwärts!
+            variant_array.push_back( _process.pid() );
+
+            com_invoke( DISPATCH_METHOD, _task, "Remove_pid", &variant_array );
+        }
     }
     catch( const exception&  x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
     
@@ -319,14 +349,17 @@ void Subprocess_register::remove( Subprocess* subprocess )
 
 void Subprocess_register::wait()
 {
-    Subprocess* error_subprocess = NULL;
+    Subprocess* error_subprocess  = NULL;
     Subprocess* signal_subprocess = NULL;
 
-    Z_FOR_EACH( Subprocess_map, _subprocess_map, s )
+
+    Subprocess_map copy = _subprocess_map;
+
+    Z_FOR_EACH( Subprocess_map, copy, s )
     {
         Subprocess* subprocess = s->second;
 
-        subprocess->_process.wait();
+        subprocess->wait_for_termination();
 
         if( !subprocess->ignore_error()   &&  subprocess->_process.exit_code()          )  error_subprocess = subprocess;
         if( !subprocess->ignore_signal()  &&  subprocess->_process.termination_signal() )  signal_subprocess = subprocess;
@@ -339,7 +372,7 @@ void Subprocess_register::wait()
 
         Xc x ( signal_subprocess? "SCHEDULER-219" : "SCHEDULER-218" );
         x.insert( signal_subprocess? signal_subprocess->_process.termination_signal()
-                                      : error_subprocess->_process.exit_code()           );
+                                   : error_subprocess->_process.exit_code()           );
 
         x.insert( p->_process.pid() );
         x.insert( p->_process.command_line() );

@@ -228,7 +228,7 @@ void Job::init()
         _history.open();
 
         _module_ptr = _object_set_descr? &_object_set_descr->_class->_module
-                                    : &_module;
+                                       : &_module;
 
         if( !_spooler->log_directory().empty()  &&  _spooler->log_directory()[0] != '*' )
         {

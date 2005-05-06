@@ -1460,16 +1460,18 @@ void Task_history::write( bool start )
                         if( !_task->_error.code().empty() ) stmt += ", \"ERROR_CODE\"=" + sql_quoted( _task->_error.code() );
                         if( !_task->_error.what().empty() ) stmt += ", \"ERROR_TEXT\"=" + sql_quoted( _task->_error.what().substr( 0, 249 ) );    // Für MySQL 249 statt 250. jz 7.1.04
 
-                        for( int i = 0; i < _extra_record.type()->field_count(); i++ )
+                        if( _extra_record.type() )
                         {
-                            if( !_extra_record.null(i) )
+                            for( int i = 0; i < _extra_record.type()->field_count(); i++ )
                             {
-                                string s = _extra_record.as_string(i);
-                                if( !is_numeric( _extra_record.type()->field_descr_ptr(i)->type_ptr()->info()->_std_type ) )  s = sql_quoted(s);
-                                stmt += ", " + sql_quoted_name( _job_history->_extra_names[i] ) + "=" + s;
+                                if( !_extra_record.null(i) )
+                                {
+                                    string s = _extra_record.as_string(i);
+                                    if( !is_numeric( _extra_record.type()->field_descr_ptr(i)->type_ptr()->info()->_std_type ) )  s = sql_quoted(s);
+                                    stmt += ", " + sql_quoted_name( _job_history->_extra_names[i] ) + "=" + s;
+                                }
                             }
                         }
-
 
                         stmt += " where id=" + as_string( _task->_id );
                         _spooler->_db->execute( stmt );

@@ -760,9 +760,15 @@ void Task::Registered_pid::try_kill()
 { 
     if( !_killed )
     {
-        bool ok = try_kill_process_immediately( _pid );
-
-        _task->_log->warn( S() << "Subprozess " << _pid << ( ok? " abgebrochen" : " lässt sich nicht abbrechen" ) );
+        try
+        {
+            kill_process_immediately( _pid );
+            _task->_log->warn( S() << "Subprozess " << _pid << " abgebrochen" );
+        }
+        catch( exception& x )
+        {
+            _task->_log->warn( S() << "Subprozess " << _pid << " lässt sich nicht abbrechen: " << x );
+        }
 
         _killed = true; 
         _timeout_at = latter_day; 
@@ -796,7 +802,7 @@ bool Task::check_subprocess_timeout( const Time& now )
 
             if( subprocess->_timeout_at < now ) 
             {
-                _log->warn( S() << "Subprozess " << subprocess->_pid << " wird abgebrochen, weil dessen Frist überschritten ist" );
+                _log->warn( S() << "Subprozess " << subprocess->_pid << " wird abgebrochen, weil seine Frist überschritten ist" );
                 subprocess->try_kill();
                 something_done = true;
             }

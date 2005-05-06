@@ -61,6 +61,15 @@
         <command_option name="port"         setting="port"/>
         <command_option name="tcp-port"     setting="tcp_port"/>
         <command_option name="udp-port"     setting="udp_port"/>
+        
+        <command_option name="reuse-port" title="TCP- und UDP-Port wiederverwenden">
+            <description>
+                <p>
+                    Ruft <code>setsockopt(socket,SOL_SOCKET,SO_REUSEADDR,true)</code>.
+                </p>
+            </description>
+        </command_option>
+
 
         <command_option name="show-dtd" title="schreibt die DTD nach stdout">
             <description>

@@ -283,7 +283,7 @@ struct Spooler
     void                        cmd_job                     ( const xml::Element_ptr& );
   //void                        do_add_jobs                 ();
     void                        remove_temporary_jobs       ();
-    void                        start_jobs                  ();
+    void                        init_jobs                   ();
     void                        close_jobs                  ();
 
     // Order
@@ -320,7 +320,7 @@ struct Spooler
     int                        _argc;
     char**                     _argv;
     string                     _parameter_line;
-    bool                       _jobs_started;
+    bool                       _jobs_initialized;
 
   public:
     Thread_semaphore           _lock;                       // Command_processor::execute_show_state() sperrt auch, für Zugriff auf _db.
@@ -435,6 +435,7 @@ struct Spooler
     bool                       _tcp_port_as_option_set;
     int                        _udp_port;                   // <config udp=...>
     bool                       _udp_port_as_option_set;
+    bool                       _reuse_port;
   //bool                       _free_threading_default;
     time::Holiday_set          _holiday_set;                // Feiertage für alle Jobs
 

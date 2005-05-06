@@ -11,7 +11,7 @@
 >
 
 <scheduler_keyword keyword="Subprozess"/>
-<scheduler_keyword keyword="start_process()"/>
+<scheduler_keyword keyword="start_subprocess()"/>
 
 <p>
     Eine Task kann irgendwelche Programme in Subprozessen laufen lassen.
@@ -25,9 +25,9 @@ var my_process = spooler.start_subprocess( "kommandozeile mit parametern" );
 spooler_log.info( "pid=" + my_process.pid() );
 </pre>
 
-
-
-
+<p>
+    Siehe <scheduler_method class="Task" method="create_subprocess"/>
+</p>
 
 
 </description>

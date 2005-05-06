@@ -47,6 +47,8 @@ struct Subprocess : idispatch_implementation< Subprocess, spooler_com::Isubproce
     STDMETHODIMP            get_Priority_class              ( BSTR* result )                        { return E_NOTIMPL; }
 #endif
 
+    STDMETHODIMP            put_With_console_window         ( VARIANT_BOOL b )                      { _process.set_with_console_window( b != 0 );  return S_OK; }
+
   //STDMETHODIMP                Raise_priority              ( int diff, VARIANT_BOOL* result )      { Z_COM_IMPLEMENT( *result = _process.raise_priority( diff )? VARIANT_TRUE : VARIANT_FALSE ); }
   //STDMETHODIMP                Lower_priority              ( int diff, VARIANT_BOOL* result )      { return Raise_priority( -diff, result ); }
 
@@ -70,6 +72,8 @@ struct Subprocess : idispatch_implementation< Subprocess, spooler_com::Isubproce
     void                        deregister                  ();
     bool                        ignore_error                () const                                { return _ignore_error; }
     bool                        ignore_signal               () const                                { return _ignore_signal; }
+    void                        wait_for_termination        ();
+    bool                        wait_for_termination        ( double timeout );
 
   private:
     friend struct               Subprocess_register;

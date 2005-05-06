@@ -485,7 +485,7 @@ void Spooler::load_job_from_xml( const xml::Element_ptr& e, const Time& xml_mod_
             if( init )
             {
                 job->init0();
-                if( _jobs_started )  job->init();   // Falls Job im Startskript über execute_xml() hingefügt wird: jetzt noch kein init()!
+                if( _jobs_initialized )  job->init();   // Falls Job im Startskript über execute_xml() hingefügt wird: jetzt noch kein init()!
             }
 
             add_job( job );
@@ -1133,12 +1133,12 @@ string Spooler::state_name( State state )
     }
 }
 
-//------------------------------------------------------------------------------Spooler::start_jobs
+//-------------------------------------------------------------------------------Spooler::init_jobs
 
-void Spooler::start_jobs()
+void Spooler::init_jobs()
 {
     FOR_EACH_JOB( job )  (*job)->init();
-    _jobs_started = true;
+    _jobs_initialized = true;
 }
 
 //-------------------------------------------------------------------------------Spooler::stop_jobs
@@ -1472,6 +1472,8 @@ void Spooler::load_arg()
             else
             if( opt.with_value( "port"             ) )  _tcp_port = _udp_port = opt.as_int(),  _tcp_port_as_option_set = _udp_port_as_option_set = true;
             else
+            if( opt.flag      ( "reuse-port"       ) )  _reuse_port = opt.set();
+            else
             if( opt.with_value( "tcp-port"         ) )  _tcp_port = opt.as_int(),  _tcp_port_as_option_set = true;
             else
             if( opt.with_value( "udp-port"         ) )  _udp_port = opt.as_int(),  _udp_port_as_option_set = true;
@@ -1653,6 +1655,12 @@ void Spooler::start()
     }
 
 
+  //init_process_classes();
+  //start_threads();
+
+    init_jobs();
+
+
     if( _module.set() )
     {
         LOGI( "Startskript wird geladen und gestartet\n" );
@@ -1672,11 +1680,6 @@ void Spooler::start()
 
         LOG( "Startskript ist gelaufen\n" );
     }
-
-  //init_process_classes();
-  //start_threads();
-
-    start_jobs();
 
 
     if( _main_scheduler_connection )  

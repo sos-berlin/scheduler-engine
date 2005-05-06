@@ -586,12 +586,13 @@ int Communication::bind_socket( SOCKET socket, struct sockaddr_in* sa )
     int ret;
     int true_ = 1;
 
-/*  War für Suse 8 nötig:
+    if( _spooler->_reuse_port )     // War für Suse 8 nötig. Und für Windows XP, wenn Scheduler zuvor abgestürzt ist (mit Debugger), denn dann bleibt der Port ewig blockiert
+    {
         LOG( "setsockopt(" << socket << ",SOL_SOCKET,SO_REUSEADDR,1)  " );
         ret = setsockopt( socket, SOL_SOCKET, SO_REUSEADDR, (const char*)&true_, sizeof true_ );
         LOG( "ret=" << ret );  if( ret == SOCKET_ERROR )  LOG( "errno=" << errno << "  "  << strerror(errno) );
         LOG( "\n" );
-*/
+    }
 
     ret = ::bind( socket, (struct sockaddr*)sa, sizeof (struct sockaddr_in) );
 
