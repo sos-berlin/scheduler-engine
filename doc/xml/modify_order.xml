@@ -19,7 +19,7 @@
     </description>
 
     <xml_attributes>
-        <xml_attribute name="job_chain" type="state">
+        <xml_attribute name="job_chain" type="name">
             <description>
                 <p>
                 </p>
@@ -31,7 +31,6 @@
             <description>
                 <p>
                     Die Kennung des Auftrags (alphanumerisch).
-                    (<i>Das Attribut sollte nicht <code>id</code> heißen, das Wort ist in XML reserviert.</i>)
                 </p>
             </description>
         </xml_attribute>

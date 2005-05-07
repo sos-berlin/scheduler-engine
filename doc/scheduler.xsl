@@ -1664,7 +1664,7 @@
                         Zuletzt geändert von
                         <xsl:variable name="name" select="substring-before( substring-after( /*/@author, 'Author: ' ), ' $' )"/>
                         <xsl:choose>
-                            <xsl:when test="$name = 'jz'">J. Zschimmer</xsl:when>
+                            <xsl:when test="$name = 'jz'">Joacim Zschimmer</xsl:when>
                             <xsl:otherwise><xsl:value-of select="$name"/></xsl:otherwise>
                         </xsl:choose>,
                         <!--xsl:variable name="name" select="document('standards.xml')/standards/authors/author[ @author = current()/@author ]/@full_name"/>
