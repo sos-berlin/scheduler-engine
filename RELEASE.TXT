@@ -163,3 +163,9 @@ VERSION 2.0.121  2005-05-07
 <remove_order job_chain="..." order=".." />
 
 
+------------------------------------------------
+VERSION 2.0.122  2005-05-11
+
+Wenn der DB-Tabelle scheduler_order die Spalten initial_state und run_time fehlen, 
+versucht der Scheduler sie automatisch mit "alter table" hinzuzufügen.
+

@@ -233,9 +233,28 @@ void Spooler_db::open2( const string& db_name )
                                           "\"MOD_TIME\"    datetime,"
                                           "\"ORDERING\"    integer not null,"           // Um die Reihenfolge zu erhalten
                                           "\"PAYLOAD\"     clob,"
+                                          "\"INITIAL_STATE\" char(100),"               
                                           "\"RUN_TIME\"    clob,"
-                                          "\"INITIAL_STATE\" char(100),"
                                           "primary key( \"JOB_CHAIN\", \"ID\" )" );
+
+
+                try
+                {
+                    Transaction ta ( this );
+                    Any_file select ( "-in " + _db_name + " SELECT \"INITIAL_STATE\" from " + uquoted(_spooler->_orders_tablename) + " where 1=0" );
+                }
+                catch( exception& x )
+                {
+                    Transaction ta ( this );
+                    _spooler->_log.warn( x.what() );
+                    _spooler->_log.info( "Tabelle " + _spooler->_orders_tablename + " wird um die Spalten INITIAL_STATE und RUN_TIME erweitert" );
+                    
+                    _db.put( "ALTER TABLE " + uquoted(_spooler->_orders_tablename) + 
+                             " add \"INITIAL_STATE\" char(100)," 
+                                  "\"RUN_TIME\" clob" );
+                    ta.commit();
+                }
+
 
                 create_table_when_needed( _spooler->_order_history_tablename, 
                                           "\"HISTORY_ID\"  integer not null,"           // Primärschlüssel

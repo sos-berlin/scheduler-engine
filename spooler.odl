@@ -1155,8 +1155,8 @@ library Spooler
 
       //HRESULT                 Lower_priority          ( [in] int, [out,retval] VARIANT_BOOL* );
 
-        [propput]
-        HRESULT                 With_console_window     ( [in] VARIANT_BOOL );
+      //[propput]
+      //HRESULT                 With_console_window     ( [in] VARIANT_BOOL );
 
         [propget]
         HRESULT                 Pid                     ( [out,retval] int* );
