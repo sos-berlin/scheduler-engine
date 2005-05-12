@@ -250,8 +250,8 @@ void Spooler_db::open2( const string& db_name )
                     _spooler->_log.info( "Tabelle " + _spooler->_orders_tablename + " wird um die Spalten INITIAL_STATE und RUN_TIME erweitert" );
                     
                     _db.put( "ALTER TABLE " + uquoted(_spooler->_orders_tablename) + 
-                             " add \"INITIAL_STATE\" char(100)," 
-                                  "\"RUN_TIME\" clob" );
+                             " add ( \"INITIAL_STATE\" char(100)," 
+                                     "\"RUN_TIME\" clob )" );
                     ta.commit();
                 }
 
