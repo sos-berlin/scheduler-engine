@@ -278,27 +278,30 @@ HRESULT Subprocess::Update_register_entry()
     
     try
     {
-        if( !_process.terminated() )
+        if( _process.started() )
         {
-            vector<Variant> variant_array;
+            if( !_process.terminated() )
+            {
+                vector<Variant> variant_array;
 
-            // Rückwärts!
-            variant_array.push_back( _process.command_line() );
-            variant_array.push_back( ignore_signal() );
-            variant_array.push_back( ignore_error() );
-            variant_array.push_back( (int)( _timeout + 0.999 ) );
-            variant_array.push_back( _process.pid() );
+                // Rückwärts!
+                variant_array.push_back( _process.command_line() );
+                variant_array.push_back( ignore_signal() );
+                variant_array.push_back( ignore_error() );
+                variant_array.push_back( (int)( _timeout + 0.999 ) );
+                variant_array.push_back( _process.pid() );
 
-            com_invoke( DISPATCH_METHOD, _task, "Add_subprocess", &variant_array );
-        }
-        else
-        {
-            vector<Variant> variant_array;
+                com_invoke( DISPATCH_METHOD, _task, "Add_subprocess", &variant_array );
+            }
+            else
+            {
+                vector<Variant> variant_array;
 
-            // Rückwärts!
-            variant_array.push_back( _process.pid() );
+                // Rückwärts!
+                variant_array.push_back( _process.pid() );
 
-            com_invoke( DISPATCH_METHOD, _task, "Remove_pid", &variant_array );
+                com_invoke( DISPATCH_METHOD, _task, "Remove_pid", &variant_array );
+            }
         }
     }
     catch( const exception&  x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
