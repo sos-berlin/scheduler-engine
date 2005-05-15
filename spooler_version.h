@@ -4,8 +4,8 @@
 
 #define VER_FILEDESC_STR        "Scheduler"
 
-#define VER_PRODUCTVERSION       2,0,122,VER_REVISION
-#define VER_PRODUCTVERSION_STR  "2.0.122." VER_PRODUCTVERSION_TAIL
+#define VER_PRODUCTVERSION       2,0,123,VER_REVISION
+#define VER_PRODUCTVERSION_STR  "2.0.123." VER_PRODUCTVERSION_TAIL
 
 #define VER_NAME_STR            "Scheduler"
 #define VER_FILENAME_STR        "scheduler.exe"

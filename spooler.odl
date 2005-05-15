@@ -967,6 +967,8 @@ library Spooler
 
         HRESULT                 Log                     ( [in] enum Log_level, [in] BSTR line );
 
+        HRESULT                 Log_file                ( [in] BSTR path );
+
         [propget]
         HRESULT                 Mail                    ( [out,retval] Imail** mail );
 
@@ -1167,8 +1169,14 @@ library Spooler
         [propget]
         HRESULT                 Exit_code               ( [out,retval] int* );
 
+      //[propput]
+      //HRESULT                 Stdout_path             ( [in] BSTR );
+
       //[propget]
       //HRESULT                 Stdout_path             ( [out,retval] BSTR* );
+
+      //[propput]
+      //HRESULT                 Stderr_path             ( [in] BSTR );
 
       //[propget]
       //HRESULT                 Stderr_path             ( [out,retval] BSTR* );
@@ -1191,6 +1199,9 @@ library Spooler
         HRESULT                 Wait_for_termination    ( [in,optional] VARIANT* seconds, [out,retval] VARIANT_BOOL* );       // seconds: VT_DOUBLE oder VT_INT
 
         HRESULT                 Kill                    ( [in,defaultvalue(0)] int signal );
+
+        [propput]
+        HRESULT                 Environment             ( [in] BSTR Name, [in] BSTR Value );
     };
 
     [

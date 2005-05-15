@@ -169,3 +169,10 @@ VERSION 2.0.122  2005-05-11
 Wenn der DB-Tabelle scheduler_order die Spalten initial_state und run_time fehlen, 
 versucht der Scheduler sie automatisch mit "alter table" hinzuzufügen.
 
+
+------------------------------------------------
+VERSION 2.0.123  2005-05
+
+Defaults für tcp_port und udp_port ist 0, das heißt kein Port.
+Wenn der Scheduler per TCP ansprechbar sein soll, muss jetzt tcp_port oder port gesetzt werden.
+

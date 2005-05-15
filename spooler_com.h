@@ -247,6 +247,7 @@ struct Com_log : spooler_com::Ilog,
     STDMETHODIMP                Error                       ( BSTR );
   //STDMETHODIMP                Fatal                       ( BSTR );
     STDMETHODIMP                Log                         ( spooler_com::Log_level, BSTR line );
+    STDMETHODIMP                Log_file                    ( BSTR path );
 
     STDMETHODIMP            get_Mail                        ( spooler_com::Imail** );
 

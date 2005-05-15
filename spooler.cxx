@@ -354,8 +354,8 @@ Spooler::Spooler()
 
     _pid = getpid();
 
-    _tcp_port = 4444;
-    _udp_port = 4444;
+    _tcp_port = 0;
+    _udp_port = 0;
     _priority_max = 1000;       // Ein Wert > 1, denn 1 ist die voreingestelle Priorität der Jobs
             
     _max_threads = 1;

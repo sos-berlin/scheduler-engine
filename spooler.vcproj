@@ -195,6 +195,101 @@ cd $(ProjectDir)
 			<Tool
 				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
 		</Configuration>
+		<Configuration
+			Name="Release-DLL|Win32"
+			OutputDirectory="$(ConfigurationName)"
+			IntermediateDirectory="$(ConfigurationName)"
+			ConfigurationType="1"
+			UseOfMFC="0"
+			ATLMinimizesCRunTimeLibraryUsage="FALSE"
+			CharacterSet="2"
+			WholeProgramOptimization="FALSE">
+			<Tool
+				Name="VCCLCompilerTool"
+				Optimization="4"
+				GlobalOptimizations="TRUE"
+				InlineFunctionExpansion="1"
+				EnableIntrinsicFunctions="TRUE"
+				FavorSizeOrSpeed="1"
+				OptimizeForProcessor="3"
+				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
+				StringPooling="TRUE"
+				RuntimeLibrary="2"
+				BufferSecurityCheck="TRUE"
+				EnableFunctionLevelLinking="TRUE"
+				ForceConformanceInForLoopScope="TRUE"
+				RuntimeTypeInfo="TRUE"
+				UsePrecompiledHeader="2"
+				PrecompiledHeaderThrough="spooler.h"
+				PrecompiledHeaderFile=".\Release/spooler.pch"
+				AssemblerOutput="2"
+				AssemblerListingLocation="$(IntDir)/"
+				ObjectFile="$(IntDir)/"
+				ProgramDataBaseFileName="$(IntDir)/vc70.pdb"
+				BrowseInformation="0"
+				WarningLevel="3"
+				SuppressStartupBanner="TRUE"
+				DebugInformationFormat="2"/>
+			<Tool
+				Name="VCCustomBuildTool"
+				CommandLine="echo perl ../scheduler_keyword_to_xml.pl *.xml xml/*.xml xml/answer/*.xml
+cd doc &amp;&amp; bash -c &quot;perl ../scheduler_keyword_to_xml.pl *.xml xml/*.xml xml/answer/*.xml&quot;
+cd $(ProjectDir)
+
+echo jar cvfm &quot;$(TargetDir)sos.spooler.jar&quot; ../java_manifest sos/spooler/*.class
+cd $(IntDir) &amp;&amp; pwd &amp;&amp; jar cvfm &quot;$(TargetDir)sos.spooler.jar&quot; ../java_manifest sos/spooler/*.class
+
+echo ant -f ../javadoc.xml
+ant -f ../javadoc.xml
+"
+				AdditionalDependencies="html/jz/browser_dependencies.js;html/jz/details_frame.html;html/jz/index.html;html/jz/left_frame.html;html/jz/popup_menu.js;html/jz/scheduler.css;html/jz/scheduler.xslt;html/jz/show_log.js;html/jz/translation.js"
+				Outputs="$(TargetDir)sos.spooler.jar"/>
+			<Tool
+				Name="VCLinkerTool"
+				AdditionalDependencies="../misc/lib/libctleasy.lib delayimp.lib ws2_32.lib version.lib odbc32.lib odbccp32.lib"
+				OutputFile="$(OutDir)/scheduler.exe"
+				LinkIncremental="1"
+				SuppressStartupBanner="TRUE"
+				DelayLoadDLLs="winspool.drv;ws2_32.dll;ole32.dll;oleaut32.dll;advapi32.dll;odbc32.dll;libctleasy.dll"
+				GenerateDebugInformation="TRUE"
+				ProgramDatabaseFile="$(TargetDir)/pdb/$(TargetName).pdb"
+				GenerateMapFile="TRUE"
+				MapFileName="$(TargetDir)/pdb/$(TargetName).map"
+				MapExports="TRUE"
+				MapLines="TRUE"
+				SubSystem="1"
+				OptimizeReferences="2"
+				OptimizeForWindows98="1"
+				ImportLibrary="$(OutDir)/scheduler.lib"
+				TargetMachine="1"/>
+			<Tool
+				Name="VCMIDLTool"
+				TypeLibraryName=".\Release/spooler.tlb"
+				HeaderFileName=""/>
+			<Tool
+				Name="VCPostBuildEventTool"/>
+			<Tool
+				Name="VCPreBuildEventTool"
+				CommandLine="cd html &amp;&amp; perl ../../make/files_to_c++.pl  -trim jz/*.html jz/*.js jz/*.xslt jz/*.css &gt;../spooler_http_files.cxx
+cd $(ProjectDir)
+"/>
+			<Tool
+				Name="VCPreLinkEventTool"/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="NDEBUG"
+				Culture="1031"/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"/>
+			<Tool
+				Name="VCWebDeploymentTool"/>
+			<Tool
+				Name="VCManagedWrapperGeneratorTool"/>
+			<Tool
+				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
+		</Configuration>
 	</Configurations>
 	<References>
 	</References>
@@ -221,6 +316,13 @@ cd $(ProjectDir)
 						PrecompiledHeaderThrough="spooler.h"
 						BrowseInformation="1"/>
 				</FileConfiguration>
+				<FileConfiguration
+					Name="Release-DLL|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						PreprocessorDefinitions=""
+						PrecompiledHeaderThrough="spooler.h"/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="spooler_com.cxx">
@@ -240,6 +342,13 @@ cd $(ProjectDir)
 						BasicRuntimeChecks="3"
 						PrecompiledHeaderThrough="spooler.h"
 						BrowseInformation="1"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release-DLL|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						PreprocessorDefinitions=""
+						PrecompiledHeaderThrough="spooler.h"/>
 				</FileConfiguration>
 			</File>
 			<File
@@ -261,6 +370,13 @@ cd $(ProjectDir)
 						PrecompiledHeaderThrough="spooler.h"
 						BrowseInformation="1"/>
 				</FileConfiguration>
+				<FileConfiguration
+					Name="Release-DLL|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						PreprocessorDefinitions=""
+						PrecompiledHeaderThrough="spooler.h"/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="spooler_communication.cxx">
@@ -281,6 +397,13 @@ cd $(ProjectDir)
 						PrecompiledHeaderThrough="spooler.h"
 						BrowseInformation="1"/>
 				</FileConfiguration>
+				<FileConfiguration
+					Name="Release-DLL|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						PreprocessorDefinitions=""
+						PrecompiledHeaderThrough="spooler.h"/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="spooler_config.cxx">
@@ -300,6 +423,13 @@ cd $(ProjectDir)
 						BasicRuntimeChecks="3"
 						PrecompiledHeaderThrough="spooler.h"
 						BrowseInformation="1"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release-DLL|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						PreprocessorDefinitions=""
+						PrecompiledHeaderThrough="spooler.h"/>
 				</FileConfiguration>
 			</File>
 			<File
@@ -330,6 +460,13 @@ cd $(ProjectDir)
 						PrecompiledHeaderThrough="spooler.h"
 						BrowseInformation="1"/>
 				</FileConfiguration>
+				<FileConfiguration
+					Name="Release-DLL|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						PreprocessorDefinitions=""
+						PrecompiledHeaderThrough="spooler.h"/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\spooler_http.cxx">
@@ -356,6 +493,13 @@ cd $(ProjectDir)
 						PrecompiledHeaderThrough="spooler.h"
 						BrowseInformation="1"/>
 				</FileConfiguration>
+				<FileConfiguration
+					Name="Release-DLL|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						PreprocessorDefinitions=""
+						PrecompiledHeaderThrough="spooler.h"/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="spooler_mail.cxx">
@@ -375,6 +519,13 @@ cd $(ProjectDir)
 						BasicRuntimeChecks="3"
 						PrecompiledHeaderThrough="spooler.h"
 						BrowseInformation="1"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release-DLL|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						PreprocessorDefinitions=""
+						PrecompiledHeaderThrough="spooler.h"/>
 				</FileConfiguration>
 			</File>
 			<File
@@ -456,6 +607,13 @@ cd $(ProjectDir)
 						PrecompiledHeaderThrough="spooler.h"
 						BrowseInformation="1"/>
 				</FileConfiguration>
+				<FileConfiguration
+					Name="Release-DLL|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						PreprocessorDefinitions=""
+						PrecompiledHeaderThrough="spooler.h"/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\spooler_process.cxx">
@@ -482,6 +640,13 @@ cd $(ProjectDir)
 						PrecompiledHeaderThrough="spooler.h"
 						BrowseInformation="1"/>
 				</FileConfiguration>
+				<FileConfiguration
+					Name="Release-DLL|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						PreprocessorDefinitions=""
+						PrecompiledHeaderThrough="spooler.h"/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="spooler_service.cxx">
@@ -501,6 +666,13 @@ cd $(ProjectDir)
 						BasicRuntimeChecks="3"
 						PrecompiledHeaderThrough="spooler.h"
 						BrowseInformation="1"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release-DLL|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						PreprocessorDefinitions=""
+						PrecompiledHeaderThrough="spooler.h"/>
 				</FileConfiguration>
 			</File>
 			<File
@@ -525,6 +697,13 @@ cd $(ProjectDir)
 						PrecompiledHeaderThrough="spooler.h"
 						BrowseInformation="1"/>
 				</FileConfiguration>
+				<FileConfiguration
+					Name="Release-DLL|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						PreprocessorDefinitions=""
+						PrecompiledHeaderThrough="spooler.h"/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="spooler_thread.cxx">
@@ -544,6 +723,13 @@ cd $(ProjectDir)
 						BasicRuntimeChecks="3"
 						PrecompiledHeaderThrough="spooler.h"
 						BrowseInformation="1"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release-DLL|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						PreprocessorDefinitions=""
+						PrecompiledHeaderThrough="spooler.h"/>
 				</FileConfiguration>
 			</File>
 			<File
@@ -565,6 +751,13 @@ cd $(ProjectDir)
 						PrecompiledHeaderThrough="spooler.h"
 						BrowseInformation="1"/>
 				</FileConfiguration>
+				<FileConfiguration
+					Name="Release-DLL|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						PreprocessorDefinitions=""
+						PrecompiledHeaderThrough="spooler.h"/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="spooler_wait.cxx">
@@ -584,6 +777,13 @@ cd $(ProjectDir)
 						BasicRuntimeChecks="3"
 						PrecompiledHeaderThrough="spooler.h"
 						BrowseInformation="1"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release-DLL|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						PreprocessorDefinitions=""
+						PrecompiledHeaderThrough="spooler.h"/>
 				</FileConfiguration>
 			</File>
 		</Filter>
@@ -688,6 +888,13 @@ cd $(ProjectDir)
 						PreprocessorDefinitions="/D_DEBUG"
 						AdditionalIncludeDirectories="$(OUTDIR)"/>
 				</FileConfiguration>
+				<FileConfiguration
+					Name="Release-DLL|Win32">
+					<Tool
+						Name="VCResourceCompilerTool"
+						PreprocessorDefinitions=""
+						AdditionalIncludeDirectories="$(OUTDIR)"/>
+				</FileConfiguration>
 			</File>
 		</Filter>
 		<Filter
@@ -757,6 +964,20 @@ javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quo
 						AdditionalDependencies="$(IntDir)/sos/spooler/IDispatch.class"
 						Outputs="$(IntDir)/sos/spooler/$(InputName).class;$(IntDir)/sos/spooler/$(InputName).h"/>
 				</FileConfiguration>
+				<FileConfiguration
+					Name="Release-DLL|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description=""
+						CommandLine="echo javac -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;
+javac -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;
+
+echo javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)
+javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)
+"
+						AdditionalDependencies="$(IntDir)/sos/spooler/IDispatch.class"
+						Outputs="$(IntDir)/sos/spooler/$(InputName).class;$(IntDir)/sos/spooler/$(InputName).h"/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="sos\spooler\Idispatch.java">
@@ -776,6 +997,20 @@ javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quo
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Debug|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description=""
+						CommandLine="echo javac -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;
+javac -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;
+
+echo javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)
+javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)
+"
+						AdditionalDependencies="$(IntDir)/sos/spooler/IDispatch.class"
+						Outputs="$(IntDir)/sos/spooler/$(InputName).class;$(IntDir)/sos/spooler/$(InputName).h"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release-DLL|Win32">
 					<Tool
 						Name="VCCustomBuildTool"
 						Description=""
@@ -819,6 +1054,20 @@ javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quo
 						AdditionalDependencies="$(IntDir)/sos/spooler/IDispatch.class"
 						Outputs="$(IntDir)/sos/spooler/$(InputName).class;$(IntDir)/sos/spooler/$(InputName).h"/>
 				</FileConfiguration>
+				<FileConfiguration
+					Name="Release-DLL|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description=""
+						CommandLine="echo javac -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;
+javac -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;
+
+echo javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)
+javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)
+"
+						AdditionalDependencies="$(IntDir)/sos/spooler/IDispatch.class"
+						Outputs="$(IntDir)/sos/spooler/$(InputName).class;$(IntDir)/sos/spooler/$(InputName).h"/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="sos\spooler\Job_chain.java">
@@ -838,6 +1087,20 @@ javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quo
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Debug|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description=""
+						CommandLine="echo javac -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;
+javac -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;
+
+echo javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)
+javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)
+"
+						AdditionalDependencies="$(IntDir)/sos/spooler/IDispatch.class"
+						Outputs="$(IntDir)/sos/spooler/$(InputName).class;$(IntDir)/sos/spooler/$(InputName).h"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release-DLL|Win32">
 					<Tool
 						Name="VCCustomBuildTool"
 						Description=""
@@ -881,6 +1144,20 @@ javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quo
 						AdditionalDependencies="$(IntDir)/sos/spooler/IDispatch.class"
 						Outputs="$(IntDir)/sos/spooler/$(InputName).class;$(IntDir)/sos/spooler/$(InputName).h"/>
 				</FileConfiguration>
+				<FileConfiguration
+					Name="Release-DLL|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description=""
+						CommandLine="echo javac -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;
+javac -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;
+
+echo javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)
+javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)
+"
+						AdditionalDependencies="$(IntDir)/sos/spooler/IDispatch.class"
+						Outputs="$(IntDir)/sos/spooler/$(InputName).class;$(IntDir)/sos/spooler/$(InputName).h"/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="sos\spooler\Job_impl.java">
@@ -900,6 +1177,20 @@ javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quo
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Debug|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description=""
+						CommandLine="echo javac -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;
+javac -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;
+
+echo javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)
+javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)
+"
+						AdditionalDependencies="$(IntDir)/sos/spooler/IDispatch.class"
+						Outputs="$(IntDir)/sos/spooler/$(InputName).class;$(IntDir)/sos/spooler/$(InputName).h"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release-DLL|Win32">
 					<Tool
 						Name="VCCustomBuildTool"
 						Description=""
@@ -943,6 +1234,20 @@ javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quo
 						AdditionalDependencies="$(IntDir)/sos/spooler/IDispatch.class"
 						Outputs="$(IntDir)/sos/spooler/$(InputName).class;$(IntDir)/sos/spooler/$(InputName).h"/>
 				</FileConfiguration>
+				<FileConfiguration
+					Name="Release-DLL|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description=""
+						CommandLine="echo javac -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;
+javac -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;
+
+echo javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)
+javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)
+"
+						AdditionalDependencies="$(IntDir)/sos/spooler/IDispatch.class"
+						Outputs="$(IntDir)/sos/spooler/$(InputName).class;$(IntDir)/sos/spooler/$(InputName).h"/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="sos\spooler\Mail.java">
@@ -962,6 +1267,20 @@ javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quo
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Debug|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description=""
+						CommandLine="echo javac -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;
+javac -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;
+
+echo javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)
+javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)
+"
+						AdditionalDependencies="$(IntDir)/sos/spooler/IDispatch.class"
+						Outputs="$(IntDir)/sos/spooler/$(InputName).class;$(IntDir)/sos/spooler/$(InputName).h"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release-DLL|Win32">
 					<Tool
 						Name="VCCustomBuildTool"
 						Description=""
@@ -1005,6 +1324,20 @@ javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quo
 						AdditionalDependencies="$(IntDir)/sos/spooler/IDispatch.class"
 						Outputs="$(IntDir)/sos/spooler/$(InputName).class;$(IntDir)/sos/spooler/$(InputName).h"/>
 				</FileConfiguration>
+				<FileConfiguration
+					Name="Release-DLL|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description=""
+						CommandLine="echo javac -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;
+javac -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;
+
+echo javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)
+javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)
+"
+						AdditionalDependencies="$(IntDir)/sos/spooler/IDispatch.class"
+						Outputs="$(IntDir)/sos/spooler/$(InputName).class;$(IntDir)/sos/spooler/$(InputName).h"/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="sos\spooler\Order_queue.java">
@@ -1024,6 +1357,20 @@ javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quo
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Debug|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description=""
+						CommandLine="echo javac -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;
+javac -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;
+
+echo javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)
+javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)
+"
+						AdditionalDependencies="$(IntDir)/sos/spooler/IDispatch.class"
+						Outputs="$(IntDir)/sos/spooler/$(InputName).class;$(IntDir)/sos/spooler/$(InputName).h"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release-DLL|Win32">
 					<Tool
 						Name="VCCustomBuildTool"
 						Description=""
@@ -1067,6 +1414,20 @@ javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quo
 						AdditionalDependencies="$(IntDir)/sos/spooler/IDispatch.class"
 						Outputs="$(IntDir)/sos/spooler/$(InputName).class;$(IntDir)/sos/spooler/$(InputName).h"/>
 				</FileConfiguration>
+				<FileConfiguration
+					Name="Release-DLL|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description=""
+						CommandLine="echo javac -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;
+javac -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;
+
+echo javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)
+javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)
+"
+						AdditionalDependencies="$(IntDir)/sos/spooler/IDispatch.class"
+						Outputs="$(IntDir)/sos/spooler/$(InputName).class;$(IntDir)/sos/spooler/$(InputName).h"/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="sos\spooler\Spooler.java">
@@ -1086,6 +1447,20 @@ javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quo
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Debug|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description=""
+						CommandLine="echo javac -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;
+javac -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;
+
+echo javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)
+javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)
+"
+						AdditionalDependencies="$(IntDir)/sos/spooler/IDispatch.class"
+						Outputs="$(IntDir)/sos/spooler/$(InputName).class;$(IntDir)/sos/spooler/$(InputName).h"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release-DLL|Win32">
 					<Tool
 						Name="VCCustomBuildTool"
 						Description=""
@@ -1129,6 +1504,20 @@ javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quo
 						AdditionalDependencies="$(IntDir)/sos/spooler/IDispatch.class"
 						Outputs="$(IntDir)/sos/spooler/$(InputName).class;$(IntDir)/sos/spooler/$(InputName).h"/>
 				</FileConfiguration>
+				<FileConfiguration
+					Name="Release-DLL|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description=""
+						CommandLine="echo javac -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;
+javac -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;
+
+echo javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)
+javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)
+"
+						AdditionalDependencies="$(IntDir)/sos/spooler/IDispatch.class"
+						Outputs="$(IntDir)/sos/spooler/$(InputName).class;$(IntDir)/sos/spooler/$(InputName).h"/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\sos\spooler\Subprocess.java">
@@ -1148,6 +1537,20 @@ javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quo
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Debug|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description=""
+						CommandLine="echo javac -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;
+javac -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;
+
+echo javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)
+javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)
+"
+						AdditionalDependencies="$(IntDir)/sos/spooler/IDispatch.class"
+						Outputs="$(IntDir)/sos/spooler/$(InputName).class;$(IntDir)/sos/spooler/$(InputName).h"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release-DLL|Win32">
 					<Tool
 						Name="VCCustomBuildTool"
 						Description=""
@@ -1191,6 +1594,20 @@ javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quo
 						AdditionalDependencies="$(IntDir)/sos/spooler/IDispatch.class"
 						Outputs="$(IntDir)/sos/spooler/$(InputName).class;$(IntDir)/sos/spooler/$(InputName).h"/>
 				</FileConfiguration>
+				<FileConfiguration
+					Name="Release-DLL|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description=""
+						CommandLine="echo javac -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;
+javac -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;
+
+echo javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)
+javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)
+"
+						AdditionalDependencies="$(IntDir)/sos/spooler/IDispatch.class"
+						Outputs="$(IntDir)/sos/spooler/$(InputName).class;$(IntDir)/sos/spooler/$(InputName).h"/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="sos\spooler\Variable_set.java">
@@ -1210,6 +1627,20 @@ javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quo
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Debug|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description=""
+						CommandLine="echo javac -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;
+javac -d &quot;$(IntDir)&quot; -sourcepath $(ProjectDir) -classpath &quot;$(IntDir)&quot; &quot;$(InputPath)&quot;
+
+echo javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)
+javah -force -o &quot;$(IntDir)\sos\spooler\$(InputName).h&quot; -classpath &quot;$(IntDir)&quot; sos.spooler.$(InputName)
+"
+						AdditionalDependencies="$(IntDir)/sos/spooler/IDispatch.class"
+						Outputs="$(IntDir)/sos/spooler/$(InputName).class;$(IntDir)/sos/spooler/$(InputName).h"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release-DLL|Win32">
 					<Tool
 						Name="VCCustomBuildTool"
 						Description=""

@@ -876,6 +876,7 @@ const Com_method Com_log::_methods[] =
     { DISPATCH_PROPERTYPUT, 27, "mail_on_warning"      , (Com_method_ptr)&Com_log::put_Mail_on_warning     , VT_EMPTY      , { VT_BOOL } },
     { DISPATCH_PROPERTYGET, 27, "mail_on_warning"      , (Com_method_ptr)&Com_log::get_Mail_on_warning     , VT_BOOL       },
     { DISPATCH_METHOD     , 28, "Start_new_file"       , (Com_method_ptr)&Com_log::Start_new_file          , VT_EMPTY      },
+    { DISPATCH_METHOD     , 29, "Log_file"             , (Com_method_ptr)&Com_log::Log_file                , VT_EMPTY      , { VT_BSTR } },
     {}
 };
 
@@ -964,6 +965,25 @@ STDMETHODIMP Com_log::Log( spooler_com::Log_level level, BSTR line )
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Log::log" ); }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Log::log" ); }
+
+    return hr;
+}
+
+//--------------------------------------------------------------------------------Com_log::Log_file
+
+STDMETHODIMP Com_log::Log_file( BSTR path )
+{ 
+    HRESULT hr = NOERROR;
+
+    THREAD_LOCK( _lock )
+    try 
+    {
+        if( !_log )  return E_POINTER;
+
+        _log->log_file( bstr_as_string( path ) ); 
+    }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
 
     return hr;
 }
@@ -2445,9 +2465,11 @@ STDMETHODIMP Com_task::get_Priority_class( BSTR* result )
 
 const Com_method Com_task_proxy::_methods[] =
 { 
-    COM_METHOD      ( Com_task_proxy, 20, Create_subprocess     , VT_DISPATCH , 1, { VT_BYREF|VT_VARIANT } ),
-    COM_PROPERTY_PUT( Com_task_proxy, 22, Priority_class        ,               0, { VT_BYREF|VT_VARIANT } ),
-    COM_PROPERTY_GET( Com_task_proxy, 22, Priority_class        , VT_BSTR     , 0, {} ),
+#if defined COM_METHOD
+    COM_METHOD      ( Com_task_proxy, 20, Create_subprocess     , VT_DISPATCH , 1, VT_BYREF|VT_VARIANT ),
+    COM_PROPERTY_PUT( Com_task_proxy, 22, Priority_class        ,               0, VT_BYREF|VT_VARIANT ),
+    COM_PROPERTY_GET( Com_task_proxy, 22, Priority_class        , VT_BSTR     , 0 ),
+#endif
     {}
 };
 

@@ -55,8 +55,11 @@ struct Subprocess : idispatch_implementation< Subprocess, spooler_com::Isubproce
     STDMETHODIMP            get_Pid                         ( int* result )                         { return _process.get_Pid( result ); }
     STDMETHODIMP            get_Terminated                  ( VARIANT_BOOL* result )                { return _process.get_Terminated( result ); }
     STDMETHODIMP            get_Exit_code                   ( int* result )                         { return _process.get_Exit_code( result ); }
-  //STDMETHODIMP            get_Stdout_path                 ( BSTR* )                               { return E_NOTIMPL; }
-  //STDMETHODIMP            get_Stderr_path                 ( BSTR* )                               { return E_NOTIMPL; }
+    STDMETHODIMP            put_Stdout_path                 ( BSTR path )                           { _process.set_stdout_path( string_from_bstr( path ) );  return S_OK; }
+    STDMETHODIMP            get_Stdout_path                 ( BSTR* result )                        { return String_to_bstr( _process.stdout_path(), result ); }
+    STDMETHODIMP            put_Stderr_path                 ( BSTR path )                           { _process.set_stderr_path( string_from_bstr( path ) );  return S_OK; }
+    STDMETHODIMP            get_Stderr_path                 ( BSTR* result )                        { return String_to_bstr( _process.stderr_path(), result ); }
+    STDMETHODIMP            put_Environment                 ( BSTR, BSTR );
     STDMETHODIMP            put_Ignore_error                ( VARIANT_BOOL );
     STDMETHODIMP            get_Ignore_error                ( VARIANT_BOOL* );
     STDMETHODIMP            put_Ignore_signal               ( VARIANT_BOOL );
@@ -86,6 +89,7 @@ struct Subprocess : idispatch_implementation< Subprocess, spooler_com::Isubproce
     bool                       _ignore_error;
     bool                       _ignore_signal;
     double                     _timeout;
+    ptr<Com_variable_set>      _environment;
 };
 
 //------------------------------------------------------------------------------Subprocess_register

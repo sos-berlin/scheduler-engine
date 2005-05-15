@@ -36,23 +36,28 @@ Subprocess::Class_descriptor    Subprocess::class_descriptor ( &typelib, "Spoole
 
 const Com_method Subprocess::_methods[] =
 { 
-    COM_PROPERTY_GET( Subprocess,  1, Java_class_name, VT_BSTR   , 0, {}          ),
-    COM_METHOD      ( Subprocess,  2, Close          , VT_EMPTY  , 0, {}          ),
-    COM_METHOD      ( Subprocess,  3, Start          , VT_EMPTY  , 0, { VT_BYREF|VT_VARIANT }  ),
-  //COM_PROPERTY_PUT( Subprocess,  4, Priority       ,             0, { VT_BYREF|VT_VARIANT }  ),
-  //COM_PROPERTY_GET( Subprocess,  4, Priority       , VT_VARIANT, 0, {}          ),
-    COM_PROPERTY_GET( Subprocess,  6, Pid            , VT_INT    , 0, {}          ),
-    COM_PROPERTY_GET( Subprocess,  7, Terminated     , VT_BOOL   , 0, {}          ),
-    COM_PROPERTY_GET( Subprocess,  8, Exit_code      , VT_INT    , 0, {}          ),
-  //COM_PROPERTY_GET( Subprocess,  9, Stdout_path    , VT_BSTR   , 0, {}          ),
-  //COM_PROPERTY_GET( Subprocess, 10, Stderr_path    , VT_BSTR   , 0, {}          ),
-    COM_PROPERTY_PUT( Subprocess, 11, Ignore_error   ,             0, { VT_BOOL } ),
-    COM_PROPERTY_GET( Subprocess, 11, Ignore_error   , VT_BOOL   , 0, {}          ),
-    COM_PROPERTY_PUT( Subprocess, 12, Ignore_signal  ,             0, { VT_BSTR } ),
-    COM_PROPERTY_GET( Subprocess, 12, Ignore_signal  , VT_BOOL   , 0, { VT_BOOL } ),
-    COM_PROPERTY_PUT( Subprocess, 13, Timeout        ,             0, { VT_R8 } ),
-    COM_METHOD      ( Subprocess, 14, Wait_for_termination, VT_BOOL   , 1, { VT_BYREF|VT_VARIANT } ),
-    COM_METHOD      ( Subprocess, 15, Kill           , VT_EMPTY  , 0, { VT_INT  } ),
+#ifdef COM_METHOD
+    COM_PROPERTY_GET( Subprocess,  1, Java_class_name, VT_BSTR    , 0 ),
+    COM_METHOD      ( Subprocess,  2, Close          , VT_EMPTY   , 0 ),
+    COM_METHOD      ( Subprocess,  3, Start          , VT_EMPTY   , 0, VT_BYREF|VT_VARIANT  ),
+  //COM_PROPERTY_PUT( Subprocess,  4, Priority       ,              0, VT_BYREF|VT_VARIANT }  ),
+  //COM_PROPERTY_GET( Subprocess,  4, Priority       , VT_VARIANT , 0 ),
+    COM_PROPERTY_GET( Subprocess,  6, Pid            , VT_INT     , 0 ),
+    COM_PROPERTY_GET( Subprocess,  7, Terminated     , VT_BOOL    , 0 ),
+    COM_PROPERTY_GET( Subprocess,  8, Exit_code      , VT_INT     , 0 ),
+  //COM_PROPERTY_PUT( Subprocess,  9, Stdout_path    ,              0, VT_BSTR ),
+  //COM_PROPERTY_GET( Subprocess,  9, Stdout_path    , VT_BSTR    , 0 ),
+  //COM_PROPERTY_PUT( Subprocess, 10, Stderr_path    ,              0, VT_BSTR ),
+  //COM_PROPERTY_GET( Subprocess, 10, Stderr_path    , VT_BSTR    , 0 ),
+    COM_PROPERTY_PUT( Subprocess, 11, Ignore_error   ,              0, VT_BOOL ),
+    COM_PROPERTY_GET( Subprocess, 11, Ignore_error   , VT_BOOL    , 0 ),
+    COM_PROPERTY_PUT( Subprocess, 12, Ignore_signal  ,              0, VT_BSTR ),
+    COM_PROPERTY_GET( Subprocess, 12, Ignore_signal  , VT_BOOL    , 0 ),
+    COM_PROPERTY_PUT( Subprocess, 13, Timeout        ,              0, VT_R8 ),
+    COM_METHOD      ( Subprocess, 14, Wait_for_termination, VT_BOOL   , 1, VT_BYREF|VT_VARIANT ),
+    COM_METHOD      ( Subprocess, 15, Kill           , VT_EMPTY   , 0, VT_INT  ),
+    COM_PROPERTY_PUT( Subprocess, 16, Environment    ,            , 0, VT_BSTR, VT_BSTR ),
+#endif
     {}
 };
 
@@ -98,6 +103,21 @@ void Subprocess::deregister()
         Update_register_entry();
         _subprocess_register->remove( this );
     }
+}
+
+//----------------------------------------------------------------------Subprocess::put_Environment
+
+STDMETHODIMP Subprocess::put_Environment( BSTR name_bstr, BSTR value_bstr )
+{
+    HRESULT hr = S_OK;
+
+    try
+    {
+        _process.set_environment_entry( string_from_bstr( name_bstr ), string_from_bstr( value_bstr ) );
+    }
+    catch( exception& x ) { Set_excepinfo( x, __FUNCTION__ ); }
+    
+    return hr;
 }
 
 //--------------------------------------------------------------------------------Subprocess::Start
