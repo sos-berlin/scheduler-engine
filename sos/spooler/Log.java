@@ -71,6 +71,14 @@ public class Log extends Idispatch
      * @param level Gewicht von -9 (debug9) bis 2 (error).
      */
     public void                 log                     ( int level, String line )                  { com_call( "log"   , new Integer(level), line ); }
+    
+    
+    /** Protokolliert den Inhalt der Datei. */
+    public void                 log_file                ( String path )                             {                   com_call( "log_file", path          ); }
+
+    
+    /** Protokolliert den Inhalt der Datei. */
+    public void                 log_file                ( java.io.File file )                       {                   com_call( "log_file", file.toString() ); }
 
     
     /** Liefert das Mail-Objekt. */
@@ -173,6 +181,10 @@ public class Log extends Idispatch
     public String               new_filename            ()                                          { return (String)   com_call( "<new_filename"           ); }
 
 
+    /** Nur fürs Hauptprotokoll: Schließt das bisherige und beginnt ein neues Protokoll. */
+    public void                 start_new_file          ()                                          {                   com_call( "start_new_file"          ); }
+
+    
     /** @deprecated */
     public void             set_collect_within          ( double time )                             {                   com_call( ">collect_within", time   ); }
 
@@ -219,8 +231,4 @@ public class Log extends Idispatch
      * @param level 2 für error bis -9 für debug9
      */
     public String               last                    ( int level )                               { return (String)   com_call( "<last", level            ); }
-    
-    
-    /** Nur fürs Hauptprotokoll: Schließt das bisherige und beginnt ein neues Protokoll. */
-    public void                 start_new_file          ()                                          {                   com_call( "start_new_file"          ); }
 }

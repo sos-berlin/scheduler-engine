@@ -55,6 +55,9 @@ public class Subprocess  extends Idispatch
     public void         set_timeout             ( double seconds )                  {                com_call( ">timeout", seconds ); }
 
 
+    public void         set_environment         ( String entry_name, String value ) {                com_call( ">environment", entry_name, value ); }
+    
+
     /** Wartet aufs Ende des Subprocesses. 
         @return true, wenn der Subprozess geendet hat */
     public boolean          wait_for_termination( double seconds )                  { return boolean_com_call( "wait_for_termination", new Double( seconds ) ); }
