@@ -505,7 +505,7 @@ void Day_set::set_dom( const xml::Element_ptr& element, const Day* default_day, 
 const Com_method Run_time::_methods[] =
 { 
 #ifdef COM_METHOD
-    COM_PROPERTY_PUT( Run_time, 1, Xml, 0, { VT_BSTR } ),
+    COM_PROPERTY_PUT( Run_time, 1, Xml, 0, VT_BSTR ),
 #endif
     {}
 };

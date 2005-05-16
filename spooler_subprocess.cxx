@@ -56,7 +56,7 @@ const Com_method Subprocess::_methods[] =
     COM_PROPERTY_PUT( Subprocess, 13, Timeout        ,              0, VT_R8 ),
     COM_METHOD      ( Subprocess, 14, Wait_for_termination, VT_BOOL   , 1, VT_BYREF|VT_VARIANT ),
     COM_METHOD      ( Subprocess, 15, Kill           , VT_EMPTY   , 0, VT_INT  ),
-    COM_PROPERTY_PUT( Subprocess, 16, Environment    ,            , 0, VT_BSTR, VT_BSTR ),
+    COM_PROPERTY_PUT( Subprocess, 16, Environment    ,              0, VT_BSTR, VT_BSTR ),
 #endif
     {}
 };
