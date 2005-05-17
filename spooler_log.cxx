@@ -926,8 +926,23 @@ void Prefix_log::log_file( const string& filename, const string& title )
     {
         try
         {
-            bool title_printed = false;
+            Mapped_file file            ( filename, "rS" );        // read sequential
+            const char* p             = (const char*)file.map();
+            const char* p_end         = p + file.map_length();
 
+            if( file.map_length() > 0 )  info( title == ""? filename + ":" 
+                                                          : title );
+
+            while( p < p_end )
+            {
+                const char* q = (const char*)memchr( p, '\n', p_end - p );
+                if( !q )  q = p_end;
+
+                info( "    " + string( p, q - p ) );
+                p = q + 1;
+            }
+
+            /*
             Any_file file ( "-in -seq " + filename );
             while( !file.eof() ) 
             {
@@ -935,8 +950,9 @@ void Prefix_log::log_file( const string& filename, const string& title )
                 title_printed = true;
                 info( file.get_string() );
             }
+            */
         }
-        catch( const Xc& x ) 
+        catch( exception& x ) 
         { 
             warn( filename + ": " + x.what() ); 
         }
