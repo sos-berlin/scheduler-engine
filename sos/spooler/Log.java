@@ -73,11 +73,14 @@ public class Log extends Idispatch
     public void                 log                     ( int level, String line )                  { com_call( "log"   , new Integer(level), line ); }
     
     
-    /** Protokolliert den Inhalt der Datei. */
+    /** Protokolliert den Inhalt der Datei. 
+      * Ein Fehler beim Zugriff auf die Datei wird als Warnung protokolliert.
+      */
     public void                 log_file                ( String path )                             {                   com_call( "log_file", path          ); }
 
     
-    /** Protokolliert den Inhalt der Datei. */
+    /** Protokolliert den Inhalt der Datei.
+      * @see #log_file(String) */
     public void                 log_file                ( java.io.File file )                       {                   com_call( "log_file", file.toString() ); }
 
     

@@ -34,8 +34,8 @@ public class Subprocess  extends Idispatch
 
 
     /** Wenn ignore_error nicht gesetzt ist und der Subprozess mit exit_code != 0 endet, 
-        dann stoppt der Job mit Fehler. 
-        */
+      * dann stoppt der Job mit Fehler. 
+      */
     public void         set_ignore_error        ( boolean b )                       {                com_call( ">ignore_error", b ); }
 
 
@@ -55,6 +55,8 @@ public class Subprocess  extends Idispatch
     public void         set_timeout             ( double seconds )                  {                com_call( ">timeout", seconds ); }
 
 
+    /** Setzt eine Umgebungsvariable für den Prozess.
+      * Vor start() aufzurufen. */
     public void         set_environment         ( String entry_name, String value ) {                com_call( ">environment", entry_name, value ); }
     
 
@@ -68,8 +70,8 @@ public class Subprocess  extends Idispatch
 
 
     /** Bricht den Subprocess ab. 
-        @param signal Nur unter Unix: Das Signal für kill(), 0 wird als 9 (SIGKILL, sofortiges Ende) interpretiert. 
-        */
+      * @param signal Nur unter Unix: Das Signal für kill(), 0 wird als 9 (SIGKILL, sofortiges Ende) interpretiert. 
+      */
     public void             kill                ( int signal )                      {                com_call( "kill", signal ); }
 
 

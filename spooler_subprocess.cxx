@@ -113,6 +113,7 @@ STDMETHODIMP Subprocess::put_Environment( BSTR name_bstr, BSTR value_bstr )
 
     try
     {
+        _process.assert_not_started();
         _process.set_environment_entry( string_from_bstr( name_bstr ), string_from_bstr( value_bstr ) );
     }
     catch( exception& x ) { Set_excepinfo( x, __FUNCTION__ ); }
