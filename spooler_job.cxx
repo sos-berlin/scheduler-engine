@@ -251,6 +251,7 @@ void Job::init()
 void Job::init2()
 {
     _delay_until   = 0;
+    set_next_start_time( Time::now() );
 }
 
 //-------------------------------------------------------------------------------Job::init_run_time
@@ -273,7 +274,7 @@ void Job::set_run_time( const xml::Element_ptr& element )
     _period._end   = 0;
     _next_single_start = latter_day;
 
-    set_next_start_time( Time::now() );
+    if( _state != s_none )  set_next_start_time( Time::now() );
 }
 
 //---------------------------------------------------------------------------------------Job::close

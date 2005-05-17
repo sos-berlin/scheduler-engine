@@ -932,6 +932,7 @@ bool Task::do_something()
                         case s_loading:
                         {
                             load();
+                            something_done = true;
 
                         case s_waiting_for_process:
                             bool ok = !_module_instance || _module_instance->try_to_get_process();
@@ -1243,6 +1244,24 @@ bool Task::do_something()
         }
 
         if( _operation && !had_operation )  _last_operation_time = now;    // Für _timeout
+
+        if( !something_done  &&  _next_time <= now  &&  !_signaled )    // Obwohl _next_time erreicht, ist nichts getan?
+        {
+            // Das kann bei s_running_waiting_for_order passieren, wenn zunächst ein Auftrag da ist (=> _next_time = 0),
+            // der dann aber von einer anderen Task genommen wird. Dann ist der Auftrag weg und something_done == false.
+
+            set_state( state() );  // _next_time neu setzen
+
+            if( _next_time <= now )
+            {
+                LOG( obj_name() << ".do_something()  Nichts getan. state=" << state_name() << ", _next_time=" << _next_time << ", wird verzögert\n" );
+                _next_time = Time::now() + 0.1;
+            }
+            else
+            {
+                Z_LOG2( "scheduler.nothing_done", obj_name() << ".do_something()  Nichts getan. state=" << state_name() << ", _next_time war " << next_time_at_begin << "\n" );
+            }
+        }
     }
 
   //if( _next_time && !_let_run )  set_next_time( min( _next_time, _job->_period.end() ) );                      // Am Ende der Run_time wecken, damit die Task beendet werden kann
@@ -1254,24 +1273,6 @@ bool Task::do_something()
      && _state != s_running_process  
      && _state != s_suspended                 )  send_collected_log();
 */
-
-    if( !something_done  &&  _next_time <= now  &&  !_signaled )    // Obwohl _next_time erreicht, ist nichts getan?
-    {
-        // Das kann bei s_running_waiting_for_order passieren, wenn zunächst ein Auftrag da ist (=> _next_time = 0),
-        // der dann aber von einer anderen Task genommen wird. Dann ist der Auftrag weg und something_done == false.
-
-        set_state( state() );  // _next_time neu setzen
-
-        if( _next_time <= now )
-        {
-            LOG( obj_name() << ".do_something()  Nichts getan. state=" << state_name() << ", _next_time=" << _next_time << ", wird verzögert\n" );
-            _next_time = Time::now() + 0.1;
-        }
-        else
-        {
-            Z_LOG2( "scheduler.nothing_done", obj_name() << ".do_something()  Nichts getan. state=" << state_name() << ", _next_time war " << next_time_at_begin << "\n" );
-        }
-    }
 
 
     return something_done;

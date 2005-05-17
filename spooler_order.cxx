@@ -735,8 +735,10 @@ Time Order_queue::next_time()
 {
     THREAD_LOCK( _lock )
     {
-        if( !_queue.empty() )  return 0;    //2004-02-25: latter_day;
+        Order* o = first_order( 0 );
+        if( o )  return o->_setback;
 
+        //if( !_queue.empty() )  return 0;    //2004-02-25: latter_day;
         if( !_setback_queue.empty() )  return (*_setback_queue.begin())->_setback;
     }
 

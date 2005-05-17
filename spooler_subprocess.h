@@ -65,6 +65,7 @@ struct Subprocess : idispatch_implementation< Subprocess, spooler_com::Isubproce
     STDMETHODIMP            put_Ignore_signal               ( VARIANT_BOOL );
     STDMETHODIMP            get_Ignore_signal               ( VARIANT_BOOL* );
     STDMETHODIMP            put_Timeout                     ( double );
+    STDMETHODIMP            put_Show_window                 ( VARIANT* );
     STDMETHODIMP                Wait_for_termination        ( VARIANT* seconds, VARIANT_BOOL* );
     STDMETHODIMP                Kill                        ( int signal )                          { return _process.Kill( signal ); }
 

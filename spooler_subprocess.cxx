@@ -57,6 +57,7 @@ const Com_method Subprocess::_methods[] =
     COM_METHOD      ( Subprocess, 14, Wait_for_termination, VT_BOOL   , 1, VT_BYREF|VT_VARIANT ),
     COM_METHOD      ( Subprocess, 15, Kill           , VT_EMPTY   , 0, VT_INT  ),
     COM_PROPERTY_PUT( Subprocess, 16, Environment    ,              0, VT_BSTR, VT_BSTR ),
+  //COM_PROPERTY_PUT( Subprocess, 17, Show_window    ,              0, VT_BYREF|VT_VARIANT ),
 #endif
     {}
 };
@@ -269,6 +270,33 @@ STDMETHODIMP Subprocess::put_Timeout( double timeout )
 {
     _timeout = timeout;
     return Update_register_entry();
+}
+
+//----------------------------------------------------------------------Subprocess::put_Show_window
+
+STDMETHODIMP Subprocess::put_Show_window( VARIANT* value )
+{
+#ifdef Z_WINDOWS
+
+    HRESULT hr = S_OK;
+    
+    try
+    {
+        if( variant_is_numeric( *value ) )  _process._startup_info.wShowWindow = int_from_variant( *value );
+        else
+        if( value->vt == VT_BSTR )          _process._startup_info.wShowWindow = windows::show_window_value( string_from_variant( *value ) );
+        else
+            hr = DISP_E_TYPEMISMATCH;
+    }
+    catch( const exception&  x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
+    
+    return hr;
+
+#else
+
+    return E_NOTIMPL;
+
+# endif
 }
 
 //----------------------------------------------------------------Subprocess::Update_register_entry
