@@ -1171,7 +1171,7 @@ STDMETHODIMP Com_log::put_Level( int level )
     {
         if( !_log )  return E_POINTER;
 
-        _log->set_log_level( level );
+        _log->set_log_level( (zschimmer::Log_level)level );
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Log::log_level" ); }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Log::log_level" ); }

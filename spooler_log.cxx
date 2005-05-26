@@ -392,6 +392,9 @@ void Prefix_log::init( Spooler* spooler, const string& prefix )
     _smtp_server     = _spooler->_smtp_server;
     _queue_dir       = _spooler->_mail_queue_dir;
     _from            = _spooler->_log_mail_from;
+    _to              = _spooler->_log_mail_to;
+    _cc              = _spooler->_log_mail_cc;
+    _bcc             = _spooler->_log_mail_bcc;
 }
 
 //------------------------------------------------------------------Prefix_log::set_profile_section
@@ -603,15 +606,14 @@ Com_mail* Prefix_log::imail()
         set_mail_header();
 
         // Vorbesetzungen von spooler_task.cxx:
-        if( !_from_name.empty() )  set_mail_from_name( _from_name ),  _from_name = "";   
+        if( !_from_name.empty() )  set_mail_from_name( _from_name, true ),  _from_name = "";   
         if( !_subject  .empty() )  set_mail_subject  ( _subject ),    _subject   = "";
         if( !_body     .empty() )  set_mail_body     ( _body ),       _body      = "";
 
-        if( _job )
-        {
-            Bstr jobname_bstr = _job->name();
-            _mail->Add_header_field( Bstr(L"X-SOS-Spooler-Job"), jobname_bstr );
-        }
+
+        Bstr jobname_bstr;
+        if( _job )  jobname_bstr = _job->name();
+        _mail->Add_header_field( Bstr(L"X-SOS-Spooler-Job"), jobname_bstr );
     }
 
     return _mail;
@@ -663,7 +665,7 @@ void Prefix_log::set_mail_from_name( const string& from_name, bool overwrite )
         hr = _mail->get_From( &old_from._bstr );                        if( FAILED(hr) ) throw_ole( hr, "spooler::Mail::from" );
         if( !wcschr( old_from, '<' )  &&  wcschr( old_from, '@' ) )
         {
-            string from = from_name + " <" + bstr_as_string(old_from) + ">";
+            string from = '"' + from_name + "\" <" + bstr_as_string(old_from) + ">";
             Bstr from_bstr = from;
             hr = _mail->put_From( from_bstr );                          if( FAILED(hr) ) throw_ole( hr, "spooler::Mail::from", from.c_str() );
         }
@@ -734,7 +736,7 @@ void Prefix_log::send( int reason )
     // reason == -1  =>  Job mit Fehler beendet
     // reason >=  0  =>  Anzahl spooler_process()
 
-    if( _file == -1 )       // Nur senden, wenn die Log-Datei beschrieben worden ist
+    if( _file == -1  &&  ( !_log || _log->filename() == "" ) )       // Nur senden, wenn die Log-Datei beschrieben worden ist
     {
         //Z_LOG2( "joacim", "Prefix_log::send()  _file == -1\n" );
         _first_send = 0;
@@ -791,7 +793,7 @@ void Prefix_log::send_really()
 {
     int ok;
 
-    imail()->Add_file( Bstr(_filename), NULL, Bstr(L"text/plain"), Bstr(_spooler->_mail_encoding) );
+    imail()->Add_file( Bstr( filename() ), NULL, Bstr(L"text/plain"), Bstr(_spooler->_mail_encoding) );
 
     ok = imail()->send();
 

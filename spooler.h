@@ -185,7 +185,8 @@ struct Spooler
     // Aufrufe für andere Threads:
     Thread_id                   thread_id                   () const                            { return _thread_id; }
     const string&               id                          () const                            { return _spooler_id; }
-    const string                id_for_db                   () const                            { return _spooler_id.empty()? "-" : _spooler_id; }
+    string                      id_for_db                   () const                            { return _spooler_id.empty()? "-" : _spooler_id; }
+    string                      name                        () const;                           // "Scheduler -id=... host:port"
     const string&               param                       () const                            { return _spooler_param; }
     int                         udp_port                    () const                            { return _udp_port; }
     int                         tcp_port                    () const                            { return _tcp_port; }
@@ -331,7 +332,7 @@ struct Spooler
     string                     _my_program_filename;
     bool                       _is_service;                 // NT-Dienst
     bool                       _debug;
-    int                        _log_level;
+    Log_level                  _log_level;
     bool                       _mail_on_warning;            // Für Job-Protokolle
     bool                       _mail_on_error;              // Für Job-Protokolle
     int                        _mail_on_process;            // Für Job-Protokolle

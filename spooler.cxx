@@ -422,6 +422,22 @@ Spooler::~Spooler()
     if( _com_log     )  _com_log->set_log( NULL );
 }
 
+//------------------------------------------------------------------------------------Spooler::name
+
+string Spooler::name() const
+{
+    S result;
+    
+    result << "Scheduler";
+
+    result << " " <<  _hostname;
+    if( _tcp_port )  result << ":" << _tcp_port;
+
+    if( _spooler_id != "" )  result << " -id=" << _spooler_id;
+
+    return result;
+}
+
 //--------------------------------------------------------------------------Spooler::security_level
 // Anderer Thread
 
@@ -1675,7 +1691,25 @@ void Spooler::start()
         _module_instance->load();
         _module_instance->start();
 
+
         bool ok = check_result( _module_instance->call_if_exists( spooler_init_name ) );
+
+        if( _log.highest_level() >= log_warn  &&  _log.mail_to() != ""  &&  _log.mail_from() != "" )
+        {
+            string subject = name_of_log_level( _log.highest_level() ) + ": " + _log.highest_msg();
+            S      body;
+
+            body << Sos_optional_date_time::now().as_string() << "  " << name() << "\n\n";
+            body << "Scheduler started with ";
+            body << ( _log.highest_level() == log_warn? "warning" : "error" ) << ":\n\n";
+            body << subject << "\n\n";
+
+            _log.set_mail_from_name( name(), true );
+            _log.set_mail_subject( subject );
+            _log.set_mail_body( body );
+            _log.send( -1 );
+        }
+
         if( !ok )  throw_xc( "SCHEDULER-183" );
 
         LOG( "Startskript ist gelaufen\n" );
