@@ -52,20 +52,24 @@ static void io_error( Spooler* spooler, const string& filename )
     {
         spooler->_waiting_errno          = errno;
         spooler->_waiting_errno_filename = filename;
-        spooler->_waiting_errno_continue = false;
+      //spooler->_waiting_errno_continue = false;
+        spooler->set_state( Spooler::s_paused );
 
         string error_text = S() << "ERRNO-" << errno << "  " << strerror( spooler->_waiting_errno  );
 
-        Z_LOG( "\n*** SCHEDULER HÄLT WEGEN PLATTENPLATZMANGEL AN. " << error_text << ", Datei " << filename << "\n\n" );
+        Z_LOGI( "\n*** SCHEDULER HÄLT WEGEN PLATTENPLATZMANGEL AN. " << error_text << ", Datei " << filename << "\n\n" );
 
-        spooler->send_error_email( "SCHEDULER ANGEHALTEN.  " + error_text,
-                                   "Scheduler wegen Plattenplatzmangel angehalten.\n\n" +
+        spooler->send_error_email( "SCHEDULER SUSPENDED:  " + error_text,
+                                   "Scheduler is suspended due to not enough space.\n"
+                                   "\n" + 
                                    error_text + "\n"
-                                   "Datei " + filename + "\n\n"
-                                   "Wenn wieder genug Platz vorhanden ist, können Sie den Scheduler fortsetzen mit\n\n" 
-                                   "<modify_spooler cmd=\"continue\"/>" );
+                                   "File " + filename + "\n"
+                                   "\n"
+                                   "You can continue the Scheduler as soon as there is enough space.\n"
+                                   "Use this XML-command: <modify_spooler cmd=\"continue\"/>" );
 
-        while( !spooler->_waiting_errno_continue )
+        //while( !spooler->_waiting_errno_continue )
+        while( spooler->_state_cmd != Spooler::sc_continue )
         {
             int wait_seconds = 1;
             spooler->_connection_manager->async_continue_selected( is_communication_operation, wait_seconds );   // Kann ins scheduler.log schreiben!

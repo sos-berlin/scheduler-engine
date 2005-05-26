@@ -1696,18 +1696,22 @@ void Spooler::start()
 
         if( _log.highest_level() >= log_warn  &&  _log.mail_to() != ""  &&  _log.mail_from() != "" )
         {
-            string subject = name_of_log_level( _log.highest_level() ) + ": " + _log.highest_msg();
-            S      body;
+            try
+            {
+                string subject = name_of_log_level( _log.highest_level() ) + ": " + _log.highest_msg();
+                S      body;
 
-            body << Sos_optional_date_time::now().as_string() << "  " << name() << "\n\n";
-            body << "Scheduler started with ";
-            body << ( _log.highest_level() == log_warn? "warning" : "error" ) << ":\n\n";
-            body << subject << "\n\n";
+                body << Sos_optional_date_time::now().as_string() << "  " << name() << "\n\n";
+                body << "Scheduler started with ";
+                body << ( _log.highest_level() == log_warn? "warning" : "error" ) << ":\n\n";
+                body << subject << "\n\n";
 
-            _log.set_mail_from_name( name(), true );
-            _log.set_mail_subject( subject );
-            _log.set_mail_body( body );
-            _log.send( -1 );
+                _log.set_mail_from_name( name(), true );
+                _log.set_mail_subject( subject );
+                _log.set_mail_body( body );
+                _log.send( -1 );
+            }
+            catch( exception& x )  { _log.warn( S() << "Fehler beim eMail-Versand: " << x.what() ); }
         }
 
         if( !ok )  throw_xc( "SCHEDULER-183" );
@@ -2143,7 +2147,7 @@ void Spooler::cmd_continue()
 { 
     if( _state == s_paused )  _state_cmd = sc_continue; 
     
-    if( _waiting_errno )  _waiting_errno_continue = true;       // Siehe spooler_log.cxx: Warten bei ENOSPC
+    //if( _waiting_errno )  _waiting_errno_continue = true;       // Siehe spooler_log.cxx: Warten bei ENOSPC
 
     signal( "continue" ); 
 }
@@ -2351,6 +2355,9 @@ void Spooler::send_error_email( const string& subject, const string& text )
         Sos_ptr<mail::Message> msg = mail::create_message();
 
         if( _log_mail_from != ""  &&  _log_mail_from != "-" )  msg->set_from( _log_mail_from );
+        
+        msg->set_from_name( name() );
+
         if( _log_mail_to   != ""  &&  _log_mail_to   != "-" )  msg->set_to  ( _log_mail_to   );
         if( _log_mail_cc   != ""  &&  _log_mail_cc   != "-" )  msg->set_cc  ( _log_mail_cc   );
         if( _log_mail_bcc  != ""  &&  _log_mail_bcc  != "-" )  msg->set_bcc ( _log_mail_bcc  );
@@ -2358,7 +2365,7 @@ void Spooler::send_error_email( const string& subject, const string& text )
 
         msg->add_header_field( "X-SOS-Spooler", "" );
         msg->set_subject( remove_password( subject ) );
-        msg->set_body( remove_password( text ) );
+        msg->set_body( Time::now().as_string() + "  " + name() + "\n\n" + remove_password( text ) );
         msg->send(); 
     }
     catch( const exception& x ) 
