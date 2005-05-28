@@ -778,6 +778,8 @@ library Spooler
 
         HRESULT                 Add_order               ( [in] VARIANT* order_or_payload, [out,retval] Iorder** Order );
 
+        HRESULT                 Try_add_order           ( [in] Iorder* order, [out,retval] VARIANT_BOOL* Ok );  // Für Joacim, 2005-05-28
+
         [propget]
         HRESULT                 Node                    ( [in] VARIANT* State, [out,retval] Ijob_chain_node** Result );
 

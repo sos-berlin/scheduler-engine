@@ -3177,6 +3177,7 @@ const Com_method Com_job_chain::_methods[] =
     { DISPATCH_PROPERTYPUT,  9, "store_orders_in_database"  , (Com_method_ptr)&Com_job_chain::put_Store_orders_in_database, VT_EMPTY, { VT_BOOL } },
     { DISPATCH_PROPERTYGET,  9, "store_orders_in_database"  , (Com_method_ptr)&Com_job_chain::get_Store_orders_in_database, VT_BOOL },
     { DISPATCH_METHOD     , 10, "remove_all_pending_orders" , (Com_method_ptr)&Com_job_chain::Remove_all_pending_orders   , VT_INT  },
+    { DISPATCH_METHOD     , 11, "Try_add_order"             , (Com_method_ptr)&Com_job_chain::Try_add_order      , VT_BOOL       , { VT_DISPATCH } },
     {}
 };
 
@@ -3370,14 +3371,46 @@ STDMETHODIMP Com_job_chain::Add_order( VARIANT* order_or_payload, spooler_com::I
         ptr<spooler_com::Iorder> iorder = order_from_order_or_payload( _job_chain->_spooler, *order_or_payload );
         if( !iorder )  return E_POINTER;
 
+        Order* order = dynamic_cast<Order*>( &*iorder );
+        if( !order )  return E_INVALIDARG;
+
         // Einstieg nur über Order, damit Semaphoren stets in derselben Reihenfolge gesperrt werden.
-        dynamic_cast<Order*>( &*iorder )->add_to_job_chain( dynamic_cast<Job_chain*>( this ) );  
+        order->add_to_job_chain( dynamic_cast<Job_chain*>( this ) );  
 
         *result = iorder;
         (*result)->AddRef();
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Job_chain.add_order" ); }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Job_chain.add_order" ); }
+
+    //LOG( "Job_chain.add_order  hr=" << (void*)hr << "\n" );
+
+    return hr;
+}
+
+//---------------------------------------------------------------------Com_job_chain::Try_add_order
+
+STDMETHODIMP Com_job_chain::Try_add_order( Iorder* iorder, VARIANT_BOOL* result )
+{
+    HRESULT hr = NOERROR;
+
+    //LOGI( "Job_chain.add_order\n" );
+
+    THREAD_LOCK( _lock )
+    try
+    {
+        if( !_job_chain )  return E_POINTER;
+        if( !_job_chain->finished() )  throw_xc( "SCHEDULER-151" );
+        if( !iorder )  return E_POINTER;
+
+        Order* order = dynamic_cast<Order*>( &*iorder );
+        if( !order )  return E_INVALIDARG;
+
+        // Einstieg nur über Order, damit Semaphoren stets in derselben Reihenfolge gesperrt werden.
+        *result = order->try_add_to_job_chain( dynamic_cast<Job_chain*>( this ) )? VARIANT_FALSE : VARIANT_TRUE;  
+    }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
+    catch( const _com_error& x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
 
     //LOG( "Job_chain.add_order  hr=" << (void*)hr << "\n" );
 

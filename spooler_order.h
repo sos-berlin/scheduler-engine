@@ -93,6 +93,7 @@ struct Order : Com_order,
 
     // Auftrag in einer Jobkette:
     void                        add_to_job_chain        ( Job_chain* );
+    bool                        try_add_to_job_chain    ( Job_chain* );
     void                        remove_from_job_chain   ();
     void                        move_to_node            ( Job_chain_node* );
     void                        postprocessing          ( bool success );                           // Verarbeitung nach spooler_process()
@@ -211,6 +212,7 @@ struct Job_chain : Com_job_chain
     ptr<Order>                  order                   ( const Order::Id& id );
     ptr<Order>                  order_or_null           ( const Order::Id& id );
 
+    bool                        has_order_id            ( const Order::Id& );
     void                        register_order          ( Order* );                                 // Um doppelte Auftragskennungen zu entdecken: Fehler SCHEDULER-186
     void                        unregister_order        ( Order* );
 

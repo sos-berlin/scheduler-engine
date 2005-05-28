@@ -23,7 +23,7 @@ namespace spooler {
 
 void Spooler::add_job_chain( Job_chain* job_chain )
 {
-    THREAD_LOCK( _job_chain_lock )
+    //THREAD_LOCK( _job_chain_lock )
     {
         job_chain->finish();   // Jobkette prüfen und in Ordnung bringen
 
@@ -60,7 +60,7 @@ Job_chain* Spooler::job_chain_or_null( const string& name )
 {
     Job_chain* result = NULL;
 
-    THREAD_LOCK( _job_chain_lock )
+    //THREAD_LOCK( _job_chain_lock )
     {
         string lname = lcase( name );
     
@@ -88,7 +88,7 @@ xml::Element_ptr Spooler::xml_from_job_chains( const xml::Document_ptr& document
 {
     xml::Element_ptr job_chains_element = document.createElement( "job_chains" );
 
-    THREAD_LOCK( _job_chain_lock )
+    //THREAD_LOCK( _job_chain_lock )
     {
         FOR_EACH( Job_chain_map, _job_chain_map, it )
         {
@@ -163,7 +163,7 @@ xml::Element_ptr Job_chain::dom_element( const xml::Document_ptr& document, cons
 
     xml::Element_ptr element = document.createElement( "job_chain" );
 
-    THREAD_LOCK( _lock )
+    //THREAD_LOCK( _lock )
     {
         element.setAttribute( "name"  , _name );
         element.setAttribute( "orders", order_count() );
@@ -303,7 +303,7 @@ void Job_chain::add_job( Job* job, const Order::State& state, const Order::State
     // Bis finish() bleibt nicht angegebener Zustand als VT_ERROR/is_error (fehlender Parameter) stehen.
     // finish() unterscheidet dann die nicht angegebenen Zustände von VT_ERROR und setzt Defaults oder VT_EMPTY.
 
-    THREAD_LOCK( _lock )
+    //THREAD_LOCK( _lock )
     {
         if( node_from_state_or_null( node->_state ) )  
         {
@@ -321,7 +321,7 @@ void Job_chain::add_job( Job* job, const Order::State& state, const Order::State
 
 void Job_chain::finish()
 {
-    THREAD_LOCK( _lock )
+    //THREAD_LOCK( _lock )
     {
         if( _finished )  return;
 
@@ -352,7 +352,7 @@ void Job_chain::finish()
 
 Job_chain_node* Job_chain::node_from_job( Job* job )
 {
-    THREAD_LOCK( _lock )
+    //THREAD_LOCK( _lock )
     {
         for( Chain::iterator it = _chain.begin(); it != _chain.end(); it++ )
         {
@@ -378,7 +378,7 @@ Job_chain_node* Job_chain::node_from_state( const State& state )
 
 Job_chain_node* Job_chain::node_from_state_or_null( const State& state )
 {
-    THREAD_LOCK( _lock )
+    //THREAD_LOCK( _lock )
     {
         for( Chain::iterator it = _chain.begin(); it != _chain.end(); it++ )
         {
@@ -405,7 +405,7 @@ ptr<Order> Job_chain::order( const Order::Id& id )
 
 ptr<Order> Job_chain::order_or_null( const Order::Id& id )
 {
-    THREAD_LOCK( _lock )
+    //THREAD_LOCK( _lock )
     {
         for( Chain::iterator it = _chain.begin(); it != _chain.end(); it++ )
         {
@@ -428,7 +428,7 @@ int Job_chain::order_count()
     int       result = 0;
     set<Job*> jobs;             // Jobs können (theoretisch) doppelt vorkommen, sollen aber nicht doppelt gezählt werden.
 
-    THREAD_LOCK( _lock )
+    //THREAD_LOCK( _lock )
     {
         for( Chain::iterator it = _chain.begin(); it != _chain.end(); it++ )
         {
@@ -440,11 +440,20 @@ int Job_chain::order_count()
     return result;
 }
 
+//--------------------------------------------------------------------------Job_chain::has_order_id
+
+bool Job_chain::has_order_id( const Order::Id& order_id )
+{
+    string id_string = string_from_variant( order_id );
+    Order_map::iterator it = _order_map.find( id_string );
+    return it != _order_map.end();
+}
+
 //------------------------------------------------------------------------Job_chain::register_order
 
 void Job_chain::register_order( Order* order )
 {
-    THREAD_LOCK( _lock )
+    //THREAD_LOCK( _lock )
     {
         string id_string = string_from_variant( order->id() );
         Order_map::iterator it = _order_map.find( id_string );
@@ -1182,11 +1191,21 @@ void Order::remove_from_job_chain()
 
 void Order::add_to_job_chain( Job_chain* job_chain )
 {
+    bool ok = try_add_to_job_chain( job_chain );
+    if( !ok )  throw_xc( "SCHEDULER-186", obj_name(), _job_chain->name() );
+}
+
+//--------------------------------------------------------------------------Order::add_to_job_chain
+
+bool Order::try_add_to_job_chain( Job_chain* job_chain )
+{
+    if( job_chain->has_order_id( id() ) )  return false;
+
     if( !job_chain->finished() )  throw_xc( "SCHEDULER-151" );
 
     ptr<Order> me = this;   // Halten
 
-    THREAD_LOCK( _lock )
+    //THREAD_LOCK( _lock )
     {
         if( _id.vt == VT_EMPTY )  set_default_id();
         _id_locked = true;
@@ -1218,13 +1237,15 @@ void Order::add_to_job_chain( Job_chain* job_chain )
             _is_in_database = true;
         }
     }
+
+    return true;
 }
 
 //------------------------------------------------------------------------------Order::move_to_node
 
 void Order::move_to_node( Job_chain_node* node )
 {
-    THREAD_LOCK( _lock )
+    //THREAD_LOCK( _lock )
     {
         if( !_job_chain )  throw_xc( "SCHEDULER-157", obj_name() );
 
@@ -1245,7 +1266,7 @@ void Order::move_to_node( Job_chain_node* node )
 
 void Order::postprocessing( bool success )
 {
-    THREAD_LOCK( _lock )
+    //THREAD_LOCK( _lock )
     {
         bool force_error_state = false;
         
@@ -1331,7 +1352,7 @@ void Order::postprocessing( bool success )
 
 void Order::processing_error()
 {
-    THREAD_LOCK( _lock )
+    //THREAD_LOCK( _lock )
     {
         _task = NULL;
 
@@ -1369,7 +1390,7 @@ void Order::postprocessing2()
 
 void Order::setback_()
 {
-    THREAD_LOCK( _lock )
+    //THREAD_LOCK( _lock )
     {
         if( !_task      )  throw_xc( "SCHEDULER-187" );
         if( _moved      )  throw_xc( "SCHEDULER-188", obj_name() );
@@ -1403,7 +1424,7 @@ void Order::setback_()
 
 void Order::set_at( const Time& time )
 {
-    THREAD_LOCK( _lock )
+    //THREAD_LOCK( _lock )
     {
         if( _task       )  throw_xc( "SCHEDULER-217", obj_name(), _task->obj_name() );
         if( _moved      )  throw_xc( "SCHEDULER-188", obj_name() );
@@ -1503,7 +1524,7 @@ string Order::obj_name()
 { 
     string result;
 
-    THREAD_LOCK( _lock )
+    //THREAD_LOCK( _lock )
     {
         if( _job_chain )  result = _job_chain->name() + " ";
 
