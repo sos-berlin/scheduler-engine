@@ -60,12 +60,12 @@ static void io_error( Spooler* spooler, const string& filename )
         Z_LOGI( "\n*** SCHEDULER HÄLT WEGEN PLATTENPLATZMANGEL AN. " << error_text << ", Datei " << filename << "\n\n" );
 
         spooler->send_error_email( "SCHEDULER SUSPENDED:  " + error_text,
-                                   "Scheduler is suspended due to not enough space.\n"
+                                   "Job Scheduler is suspended due to disk space shortage.\n"
                                    "\n" + 
                                    error_text + "\n"
                                    "File " + filename + "\n"
                                    "\n"
-                                   "You can continue the Scheduler as soon as there is enough space.\n"
+                                   "You can continue the Job Scheduler as soon as there is enough disk space.\n"
                                    "Use this XML-command: <modify_spooler cmd=\"continue\"/>" );
 
         //while( !spooler->_waiting_errno_continue )

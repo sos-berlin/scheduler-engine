@@ -177,6 +177,11 @@ void Job::set_dom( const xml::Element_ptr& element, const Time& xml_mod_time )
                 }
             }
             else
+            if( e.nodeName_is( "start_when_directory_changed" ) )
+            {
+                start_when_directory_changed( e.getAttribute( "directory" ), e.getAttribute( "regex" ) );
+            }
+            else
             if( e.nodeName_is( "run_time" ) &&  !_spooler->_manual )  set_run_time( e );
         }
 
@@ -1050,6 +1055,9 @@ void Job::set_next_start_time( Time now, bool repeat )
 
 void Job::calculate_next_time( Time now )
 {
+    if( _state == s_none )  return;
+
+
     THREAD_LOCK_DUMMY( _lock )
     {
         Time next_time = latter_day;
