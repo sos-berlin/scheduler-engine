@@ -50,7 +50,10 @@ Job::Job( Spooler* spooler )
     _lock( "Job" )
 {
     init_run_time();
+
     _log            = Z_NEW( Prefix_log( spooler ) );
+    _log->set_job( this );
+
     _next_time      = latter_day;
     _directory_watcher_next_time = latter_day;
     _priority       = 1;
@@ -86,6 +89,8 @@ void Job::set_dom( const xml::Element_ptr& element, const Time& xml_mod_time )
         bool order;
 
         _name       = element.     getAttribute( "name"         , _name       );
+        set_log();
+
         _temporary  = element.bool_getAttribute( "temporary"    , _temporary  );
         _priority   = element. int_getAttribute( "priority"     , _priority   );
         _title      = element.     getAttribute( "title"        , _title      );
@@ -203,11 +208,6 @@ void Job::init0()
 
     _state = s_none;
 
-    _log->set_prefix( "Job  " + _name );       // Zwei Blanks, damit die Länge mit "Task " übereinstimmt
-    _log->set_profile_section( profile_section() );
-    _log->set_job( this );
-    _log->set_title( obj_name() );
-
     _com_job  = new Com_job( this );
   //_com_log  = new Com_log( &_log );
 
@@ -219,6 +219,15 @@ void Job::init0()
     set_state( s_pending );
     
     _init0_called = true;
+}
+
+//-------------------------------------------------------------------------------------Job::set_log
+
+void Job::set_log()
+{
+    _log->set_prefix( "Job  " + _name );       // Zwei Blanks, damit die Länge mit "Task " übereinstimmt
+    _log->set_profile_section( profile_section() );
+    _log->set_title( obj_name() );
 }
 
 //----------------------------------------------------------------------------------------Job::init
@@ -910,7 +919,7 @@ void Job::start_when_directory_changed( const string& directory_name, const stri
         ptr<Directory_watcher> dw = Z_NEW( Directory_watcher( _log ) );
 
         dw->watch_directory( directory_name, filename_pattern );
-        dw->set_name( "job(\"" + _name + "\").start_when_directory_changed(\"" + directory_name + "\")" );
+        dw->set_name( "job(\"" + _name + "\").start_when_directory_changed(\"" + directory_name + "\",\"" + filename_pattern + "\")" );
         _directory_watcher_list.push_back( dw );
         dw->add_to( &_spooler->_wait_handles );
 

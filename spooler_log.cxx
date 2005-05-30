@@ -123,6 +123,8 @@ static int my_write( Spooler* spooler, const string& filename, int file, const c
             ret = ::write( file, t, text + len - t );
             if( ret != text + len - t  &&  file != fileno(stderr) )  return -1;  // Nur bei stderr ignorieren wir den Fehler
         }
+
+        throw_errno( err, "write", filename.c_str() );
     }
 
     return len;
@@ -240,11 +242,14 @@ void Log::write( Prefix_log* extra_log, Prefix_log* order_log, const char* text,
     {
         if( log && log_ptr )  _log_line.append( text, len );
 
-        int ret = my_write( _spooler, _filename, _file, text, len );
-        if( ret != len )  
+        if( _file != -1 )
         {
-            _err_no = errno;
-            throw_errno( errno, "write", _filename.c_str() );
+            int ret = my_write( _spooler, _filename, _file, text, len );
+            if( ret != len )  
+            {
+                _err_no = errno;
+                throw_errno( errno, "write", _filename.c_str() );
+            }
         }
 
         if( extra_log )  extra_log->write( text, len );
@@ -280,7 +285,7 @@ void Log::log2( Log_level level, const string& prefix, const string& line_, Pref
 {
     if( this == NULL )  return;
 
-    if( _file == -1 )  return;
+    //if( _file == -1 )  return;
 
     string line = line_;
     for( int i = line.find( '\r' ); i != string::npos; i = line.find( '\r', i+1 ) )  line[i] = ' ';     // Windows scheint sonst doppelte Zeilenwechsel zu schreiben. jz 25.11.03
@@ -568,7 +573,7 @@ void Prefix_log::write( const char* text, int len )
 
     if( _file == -1 )
     {
-        if( !_filename.empty() )                // Datei wird noch geöffnet?
+        //if( !_filename.empty() )                // Datei wird noch geöffnet?
         {
             _log_buffer.append( text, len );
         }
@@ -829,7 +834,7 @@ void Prefix_log::log2( Log_level level, const string& prefix, const string& line
     //if( level == log_error )  _last_error_line = line;
     _last[ level ] = line;
 
-    _log->log2( level, _task? "Task " + _job->name() + " " + sos::as_string(_task->id()) : _prefix, line, this, _order_log );
+    if( _log )  _log->log2( level, _task? "Task " + _job->name() + " " + sos::as_string(_task->id()) : _prefix, line, this, _order_log );
 }
 
 //----------------------------------------------------------------------------Prefix_log::add_event
