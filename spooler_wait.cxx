@@ -736,7 +736,7 @@ void Directory_watcher::set_signaled()
         try
         {
             if( _filename_pattern.empty()  ||  match() )  Event::set_signaled();
-                                                    else  Event::set_signaled( false );
+                                                    else  Event::set_signaled( false );    // Signal von _event zurücknehmen
 
             BOOL ok = FindNextChangeNotification( _handle );
             if( !ok )  throw_mswin_error( "FindNextChangeNotification" );
