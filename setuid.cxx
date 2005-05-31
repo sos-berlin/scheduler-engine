@@ -26,8 +26,8 @@ int main( int argc, char** argv )
 
 
 
-    const char* login_name = getlogin();
-    if( !login_name )  { fprintf( stderr, "getlogin() returns errno=%d %s\n", errno, strerror( errno ) ); return 255; }
+    //const char* login_name = getlogin();
+    //if( !login_name )  { fprintf( stderr, "getlogin() returns errno=%d %s\n", errno, strerror( errno ) ); return 255; }
 
 
     // Effektive Userid zurücksetzen, damit wir Zugriff aufs Verzeichnis von setuid haben.
@@ -44,11 +44,11 @@ int main( int argc, char** argv )
 
     // chmod-Bits des Verzeichnisses von setuid prüfen: Darf für group und others nicht lesbar, beschreibbar oder ausführbar sein.
 
-    string directory = string( argv[0], strrchr( argv[0], '/' ) - argv[0] ) + "/.";
+    string directory = string( argv[0], strrchr( argv[0], '/' ) - argv[0] ) + "/";
     err = stat( directory.c_str(), &directory_stat );
     if( err )  { fprintf( stderr, "stat(\"%s\") returns errno=%d %s\n", directory.c_str(), errno, strerror( errno ) );  return 255; }
     if( directory_stat.st_mode & 077 ) { fprintf( stderr, "Do chmod go-rwx %s\n", directory.c_str() );  return 255; }
-    if( directory_stat.st_uid != getuid() )  { fprintf( stderr, "Do chown %s %s\n", login_name, directory.c_str() );  return 255; }
+    if( directory_stat.st_uid != getuid() )  { fprintf( stderr, "Do chown %d %s\n", getuid(), directory.c_str() );  return 255; }
 
 
     // argv[1] wird argv[0], also das zu startende Programm.

@@ -160,7 +160,7 @@ void Job::set_dom( const xml::Element_ptr& element, const Time& xml_mod_time )
                 _module_xml_document  = NULL;
                 _module_xml_element   = NULL;
 
-                _process_filename     = e.     getAttribute( "file"         , _process_filename      );
+                _process_filename     = subst_env( e.     getAttribute( "file"         , _process_filename      ) );
                 _process_param        = e.     getAttribute( "param"        , _process_param         );
                 _process_log_filename = e.     getAttribute( "log_file"     , _process_log_filename  );
                 _process_ignore_error = e.bool_getAttribute( "ignore_error" , _process_ignore_error  );
