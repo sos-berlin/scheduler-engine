@@ -57,6 +57,7 @@ include $(PROD_DIR)/make/standard.makefile
 
 all:: $(BIN_DIR)/scheduler
 all:: $(BIN_DIR)/sos.spooler.jar
+all:: $(BIN_DIR)/setuid
 all:: documentation
 
 #%.class: %.java
@@ -93,6 +94,10 @@ endif
 
 $(BIN_DIR)/scheduler: spooler.o $(objects) ../kram/$(O_DIR)/soswnmai.o $(foreach p,$(DEP_PRODUCTS),$(PROD_DIR)/$(p)/$(O_DIR)/lib$(p).a)
 	-$(CCPP) $(DEBUG) $(LINK_FLAGS) $^ $(LIBPATH) $(SOS_LIBS) $(LIBS) -o $@
+	chmod a+rx $@
+
+$(BIN_DIR)/setuid: setuid.o 
+	-$(CCPP) $(DEBUG) $(LINK_FLAGS) $^ $(LIBPATH) $(SOS_LIBS) $(LIBS) -o $@  -s
 	chmod a+rx $@
 
 
