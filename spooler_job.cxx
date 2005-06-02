@@ -161,8 +161,8 @@ void Job::set_dom( const xml::Element_ptr& element, const Time& xml_mod_time )
                 _module_xml_element   = NULL;
 
                 _process_filename     = subst_env( e.     getAttribute( "file"         , _process_filename      ) );
-                _process_param        = e.     getAttribute( "param"        , _process_param         );
-                _process_log_filename = e.     getAttribute( "log_file"     , _process_log_filename  );
+                _process_param        = subst_env( e.     getAttribute( "param"        , _process_param         ) );
+                _process_log_filename = subst_env( e.     getAttribute( "log_file"     , _process_log_filename  ) );
                 _process_ignore_error = e.bool_getAttribute( "ignore_error" , _process_ignore_error  );
                 _process_ignore_signal= e.bool_getAttribute( "ignore_signal", _process_ignore_signal );
 
@@ -184,7 +184,7 @@ void Job::set_dom( const xml::Element_ptr& element, const Time& xml_mod_time )
             else
             if( e.nodeName_is( "start_when_directory_changed" ) )
             {
-                start_when_directory_changed( e.getAttribute( "directory" ), e.getAttribute( "regex" ) );
+                _start_when_directory_changed_list.push_back( pair<string,string>( subst_env( e.getAttribute( "directory" ) ), e.getAttribute( "regex" ) ) );
             }
             else
             if( e.nodeName_is( "run_time" ) &&  !_spooler->_manual )  set_run_time( e );
@@ -250,6 +250,7 @@ void Job::init()
             _log->set_filename( _spooler->log_directory() + "/job." + jobname_as_filename() + ".log" );      // Jobprotokoll
         }
 
+        _log->open();
 
         if( _spooler->_db->opened() )  load_tasks_from_db();
 
@@ -266,6 +267,23 @@ void Job::init2()
 {
     _delay_until   = 0;
     set_next_start_time( Time::now() );
+
+
+    for( Start_when_directory_changed_list::iterator it = _start_when_directory_changed_list.begin(); 
+         it != _start_when_directory_changed_list.end();
+         it = _start_when_directory_changed_list.erase( it ) )
+    {
+        try
+        {
+            start_when_directory_changed( it->first, it->second );
+        }
+        catch( exception& x )
+        {
+            _error = x;
+            _log->error( string( "<start_when_directory_changed>  " ) + x.what() );
+            set_state( s_stopped );
+        }
+    }
 }
 
 //-------------------------------------------------------------------------------Job::init_run_time
@@ -549,6 +567,8 @@ void Job::Task_queue::enqueue_task( const Sos_ptr<Task>& task )
     Queue::iterator it = _queue.begin();  // _queue nach _start_at geordnet halten
     while( it != _queue.end()  &&  (*it)->_start_at <= task->_start_at )  it++;
     _queue.insert( it, task );
+
+    _job->_log->info( S() << "Task " << task->id() << " in Warteschlange eingereiht" );
 }
 
 //-------------------------------------------------------------Job::Task_queue::remove_task_from_db
@@ -1362,6 +1382,8 @@ bool Job::do_something()
                                 calculate_next_time();
 
                                 task->attach_to_a_thread();
+                                _log->info( S() << "Task " << task->id() << " gestartet" );
+
                                 task->do_something();           // Damit die Task den Prozess startet und die Prozessklasse davon weiﬂ
                             }
 

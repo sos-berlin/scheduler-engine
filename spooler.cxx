@@ -1554,6 +1554,9 @@ void Spooler::load()
 {
     assert( current_thread_id() == _thread_id );
 
+    _log.init( this );
+    _log.set_title( "Main log" );
+
     set_state( s_starting );
     //_log ist noch nicht geöffnet   _log.info( "Spooler::load " + _config_filename );
 
@@ -1574,11 +1577,8 @@ void Spooler::load()
         _pid_file.print( as_string( getpid() ) );
         _pid_file.print( "\n" );
         _pid_file.flush();
-        //f.close();
     }
 
-    _log.init( this );
-    _log.set_title( "Main log" );
     _log.open();
 
     char hostname[200];  // Nach _communication.init() und nach _prefix_log.init()!

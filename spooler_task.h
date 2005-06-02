@@ -415,6 +415,7 @@ struct Process_task : Task      // Job ist irgendein Prozess (z.B. durch ein She
 
     File                       _stdout_file;
     File                       _stderr_file;
+    bool                       _stdout_logged;
 
 #   ifdef Z_WINDOWS
         Process_id             _process_id;

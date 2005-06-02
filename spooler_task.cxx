@@ -1930,8 +1930,12 @@ void Process_task::do_close__end()
     _stdout_file.close();
     _stderr_file.close();
 
-    _log->log_file( _stdout_file.filename(), "stdout:" );
-    _log->log_file( _stderr_file.filename(), "stderr:" );
+    if( !_stdout_logged )
+    {
+        _log->log_file( _stdout_file.filename(), "stdout:" );
+        _log->log_file( _stderr_file.filename(), "stderr:" );
+        _stdout_logged = true;
+    }
 }
 
 //----------------------------------------------------------------------Process_task::do_begin__end
@@ -2160,23 +2164,29 @@ bool Process_task::do_begin__end()
 
     vector<string> string_args;
 
-    string_args.push_back( _job->_process_filename );   // argv[0]
-    if( _job->_process_param != "" )  string_args.push_back( _job->_process_param );
-
-    for( int i = 1;; i++ )
+    if( _job->_process_param != "" )
     {
-        string nr = as_string(i);
-        Variant vt;
-        HRESULT hr;
-
-        hr = _params->get_Var( Bstr(nr), &vt );
-        if( FAILED(hr) )  throw_ole( hr, "Variable_set.var", nr.c_str() );
-
-        if( vt.vt == VT_EMPTY )  break;
-
-        string_args.push_back( string_from_variant( vt ) );
+        string_args = argv_from_command_line( job->_process_param );
+        string_args.insert( string.begin(), _job->_process_filename );   // argv[0]
     }
+    else
+    {
+        string_args.push_back( _job->_process_filename );   // argv[0]
 
+        for( int i = 1;; i++ )
+        {
+            string nr = as_string(i);
+            Variant vt;
+            HRESULT hr;
+
+            hr = _params->get_Var( Bstr(nr), &vt );
+            if( FAILED(hr) )  throw_ole( hr, "Variable_set.var", nr.c_str() );
+
+            if( vt.vt == VT_EMPTY )  break;
+
+            string_args.push_back( string_from_variant( vt ) );
+        }
+    }
 
     _stdout_file.open_temporary( File::open_unlink_later | File::open_inheritable );
     _stderr_file.open_temporary( File::open_unlink_later | File::open_inheritable );

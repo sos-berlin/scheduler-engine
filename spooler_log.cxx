@@ -802,7 +802,10 @@ void Prefix_log::send_really()
 {
     int ok;
 
-    imail()->Add_file( Bstr( filename() ), NULL, Bstr(L"text/plain"), Bstr(_spooler->_mail_encoding) );
+    if( filename() != "*stderr" )
+    {
+        imail()->Add_file( Bstr( filename() ), NULL, Bstr(L"text/plain"), Bstr(_spooler->_mail_encoding) );
+    }
 
     ok = imail()->send();
 

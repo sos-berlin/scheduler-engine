@@ -399,6 +399,9 @@ struct Job : Sos_self_deleting
 
     Delay_order_after_setback  _delay_order_after_setback;
     int                        _max_order_setbacks;
+
+    typedef list< pair<string,string> > Start_when_directory_changed_list;  
+    Start_when_directory_changed_list  _start_when_directory_changed_list;      // Für <start_when_directory_changed>
 };
 
 //------------------------------------------------------------------------------------------Job_list
