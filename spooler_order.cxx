@@ -1192,7 +1192,7 @@ void Order::remove_from_job_chain()
 void Order::add_to_job_chain( Job_chain* job_chain )
 {
     bool ok = try_add_to_job_chain( job_chain );
-    if( !ok )  throw_xc( "SCHEDULER-186", obj_name(), _job_chain->name() );
+    if( !ok )  throw_xc( "SCHEDULER-186", obj_name(), job_chain->name() );
 }
 
 //--------------------------------------------------------------------------Order::add_to_job_chain

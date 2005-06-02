@@ -532,7 +532,9 @@ Run_time::Run_time( Spooler* spooler, Application a )
 
 STDMETHODIMP Run_time::QueryInterface( const IID& iid, void** result )
 {
+    Z_IMPLEMENT_QUERY_INTERFACE( this, iid, spooler_com::Irun_time           , result );
     Z_IMPLEMENT_QUERY_INTERFACE( this, iid, spooler_com::Ihas_java_class_name, result );
+    Z_IMPLEMENT_QUERY_INTERFACE( this, iid, IDispatch                        , result );
 
     return Idispatch_implementation::QueryInterface( iid, result );
 }
