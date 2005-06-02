@@ -97,7 +97,7 @@ $(BIN_DIR)/scheduler: spooler.o $(objects) ../kram/$(O_DIR)/soswnmai.o $(foreach
 	chmod a+rx $@
 
 $(BIN_DIR)/setuid: setuid.o 
-	-$(CCPP) $(DEBUG) $(LINK_FLAGS) $^ $(LIBPATH) $(SOS_LIBS) $(LIBS) -o $@  -s
+	-$(CC) $(DEBUG) $(LINK_FLAGS) $^ $(LIBPATH)  -o $@  -s
 	chmod a+rx $@
 
 
