@@ -2166,8 +2166,8 @@ bool Process_task::do_begin__end()
 
     if( _job->_process_param != "" )
     {
-        string_args = argv_from_command_line( job->_process_param );
-        string_args.insert( string.begin(), _job->_process_filename );   // argv[0]
+        string_args = posix::argv_from_command_line( _job->_process_param );
+        string_args.insert( string_args.begin(), _job->_process_filename );   // argv[0]
     }
     else
     {
