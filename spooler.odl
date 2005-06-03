@@ -922,6 +922,9 @@ library Spooler
         HRESULT                 Run_time                ( [out,retval] Irun_time** );
 
         HRESULT                 Remove_from_job_chain   ();
+
+        [propget]
+        HRESULT                 String_next_start_time  ( [out,retval] BSTR* );
     }
 
     [

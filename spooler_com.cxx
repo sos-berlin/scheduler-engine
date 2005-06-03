@@ -3620,6 +3620,7 @@ const Com_method Com_order::_methods[] =
     { DISPATCH_PROPERTYGET, 14, "at"                        , (Com_method_ptr)&Com_order::get_At                , VT_DATE       },
     { DISPATCH_PROPERTYGET, 15, "Run_time"                  , (Com_method_ptr)&Com_order::get_Run_time          , VT_DISPATCH   },
     { DISPATCH_METHOD     , 16, "remove_from_job_chain"     , (Com_method_ptr)&Com_order::Remove_from_job_chain , VT_EMPTY      },
+    { DISPATCH_PROPERTYGET, 17, "String_next_start_time"    , (Com_method_ptr)&Com_order::get_String_next_start_time, VT_BSTR   },
     {}
 };
 
@@ -4122,7 +4123,7 @@ STDMETHODIMP Com_order::get_At( DATE* result )
     {
         if( !_order )  return E_POINTER;
 
-        *result = (double)_order->at().as_time_t() / ( 24*3600 );
+        *result = _order->at().as_local_com_date();
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
@@ -4162,6 +4163,24 @@ STDMETHODIMP Com_order::Remove_from_job_chain()
         if( !_order )  return E_POINTER;
 
         _order->remove_from_job_chain();  
+    }
+    catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
+
+    return hr;
+}
+
+//------------------------------------------------------------Com_order::get_String_next_start_time
+
+STDMETHODIMP Com_order::get_String_next_start_time( BSTR* result )
+{
+    HRESULT hr = NOERROR;
+
+    THREAD_LOCK( _lock )
+    try
+    {
+        if( !_order )  return E_POINTER;
+
+        hr = String_to_bstr( _order->at().as_string(), result );
     }
     catch( const exception&  x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
 

@@ -34,6 +34,9 @@ package sos.spooler;
  * @version $Revision$
  */
 
+import java.util.Date;
+
+
 public class Order extends Idispatch
 {
     private                 Order               ( long idispatch )                  { super(idispatch); }
@@ -175,5 +178,15 @@ public class Order extends Idispatch
      */
     public Run_time         run_time            ()                                  { return (Run_time) com_call( "<run_time"           ); }
 
+    
     public void             remove_from_job_chain()                                 {                   com_call( "remove_from_job_chain" ); }
+    
+
+  //(Konvertierung nach Date macht Probleme wegen Sommerzeit)
+  //public Date             at                  ()                                  { return (Date)     com_call( "<at"                 ); }
+
+
+
+    /** Liefert "yyyy-mm-dd HH:MM:SS.MMM" oder "now" oder "never" */
+    public String           string_next_start_time()                                { return (String)   com_call( "<string_next_start_time" ); }
 }

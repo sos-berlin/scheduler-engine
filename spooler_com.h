@@ -738,6 +738,8 @@ struct Com_order : spooler_com::Iorder,
 
     STDMETHODIMP                Remove_from_job_chain   ();
 
+    STDMETHODIMP            get_String_next_start_time  ( BSTR* );
+
   private:
     Fill_zero                  _zero_;
     Thread_semaphore           _lock;

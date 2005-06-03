@@ -86,6 +86,7 @@ struct Time
     Time                        midnight                    () const                        { return day_nr() * 24*60*60; }
     int                         day_nr                      () const                        { return uint(_time) / (24*60*60); }
     time_t                      as_time_t                   () const                        { return (time_t)( _time + 0.0001 ); }
+    DATE                        as_local_com_date           () const                        { return com_date_from_seconds_since_1970( round( _time ) ); }
 
     string                      as_string                   ( With_ms = with_ms ) const;                        
     void                        print                       ( ostream& s ) const            { s << as_string(); }
