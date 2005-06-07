@@ -1461,6 +1461,10 @@ void Spooler::load_arg()
             else
             if( opt.with_value( "pid-file"         ) )  _pid_filename = opt.value();
             else
+            if( opt.flag      ( "kill"             ) )  ;
+            else
+            if( opt.with_value( "kill"             ) )  ;
+            else
             if( opt.with_value( "ini"              ) )  ;   //
             else
             if( opt.with_value( "config"           )
@@ -2251,6 +2255,14 @@ void Spooler::abort_immediately( bool restart )
     catch( ... ) {}
 
 
+    try
+    {
+        _pid_file.~File();
+    } 
+    catch( ... ) {}
+
+
+
     // Point of no return
 
 #   ifdef Z_WINDOWS
@@ -2667,9 +2679,13 @@ int spooler_main( int argc, char** argv, const string& parameter_line )
 {
     LOG( "Scheduler " VER_PRODUCTVERSION_STR "\n" );
 
-    int  ret                = 99;
-    bool is_service         = false;
-    bool is_object_server   = false;
+    int     ret                = 0;
+    bool    is_service         = false;
+    bool    is_object_server   = false;
+    bool    kill_pid_file      = false;
+    int     kill_pid           = 0;
+    string  pid_filename;
+
 
 #   ifdef Z_WINDOWS
         SetErrorMode( SEM_FAILCRITICALERRORS | SEM_NOOPENFILEERRORBOX );    // Das System soll sich Messageboxen verkneifen (außer beim Absturz)
@@ -2681,6 +2697,8 @@ int spooler_main( int argc, char** argv, const string& parameter_line )
 
     try
     {
+        bool    need_call_scheduler = true;
+        bool    call_scheduler     = false;
         bool    do_install_service = false;
         bool    do_remove_service  = false;
         bool    is_service_set     = false;
@@ -2699,77 +2717,85 @@ int spooler_main( int argc, char** argv, const string& parameter_line )
         {
             //if( opt.flag      ( "renew-spooler"    ) )  renew_spooler = program_filename();
           //else
-            if( opt.flag      ( "show-dtd"         ) )  { fprintf( stdout, "%s", spooler::dtd_string );  return 0; }
+            if( opt.flag      ( "show-dtd"         ) )  fprintf( stdout, "%s", spooler::dtd_string );
             else
             if( opt.with_value( "renew-spooler"    ) )  renew_spooler = opt.value();
             else
             if( opt.with_value( "renew-spooler"    ) )  renew_spooler = opt.value();
             else
-            if( opt.with_value( "send-cmd"         ) )  send_cmd = opt.value();
+            if( opt.with_value( "send-cmd"         ) )  call_scheduler = true,  send_cmd = opt.value();
             else
-          //if( opt.with_value( "execute-job"      ) )  is_object_server = true;       // Parameter ist nur für den Befehl ps
             if( opt.flag      ( 'O', "object-server" ) )  is_object_server = true;
             else
             if( opt.with_value( "title"            ) )  ;                               // Damit der Aufrufer einen Kommentar für ps übergeben kann (für -object-server)
             else
             if( opt.flag      ( "V"                ) )  fprintf( stderr, "Scheduler %s\n", VER_PRODUCTVERSION_STR );
             else
+            if( opt.flag      ( "kill"             ) )  kill_pid_file = true;
+            else
+            if( opt.with_value( "kill"             ) )  kill_pid = opt.as_int();
+            else
+            if( opt.with_value( "pid-file"         ) )  pid_filename = opt.value();
+            else
+            if( opt.flag      ( "install-service"  ) )  do_install_service = opt.set();
+            else
+            if( opt.with_value( "install-service"  ) )  do_install_service = true, service_name = opt.value();
+            else
+            if( opt.flag      ( "remove-service"   ) )  do_remove_service = opt.set();
+            else
+            if( opt.with_value( "remove-service"   ) )  do_remove_service = true, service_name = opt.value();
+            else
+            if( opt.flag      ( "renew-service"    ) )  renew_service = opt.set();
+            else
+            if( opt.with_value( "renew-service"    ) )  renew_service = true, service_name = opt.value();
+            else
+            if( opt.with_value( "service-name"     ) )  service_name = opt.value();
+            else
+            if( opt.with_value( "service-display"  ) )  service_display = opt.value();
+            else
+            if( opt.with_value( "service-descr"    ) )  service_description = opt.value();
+            else
+            if( opt.flag      ( "service"          ) )  is_service = opt.set(), is_service_set = true;
+            else
+            if( opt.with_value( "service"          ) )  is_service = true, is_service_set = true, service_name = opt.value();
+            else
+            if( opt.with_value( "need-service"     ) )  dependencies += opt.value(), dependencies += '\0';
+            else
             {
-                if( opt.flag      ( "install-service"  ) )  do_install_service = opt.set();
+                if( opt.with_value( "sos.ini"          ) )  ;  //schon in sos_main0() geschehen.  set_sos_ini_filename( opt.value() );
                 else
-                if( opt.with_value( "install-service"  ) )  do_install_service = true, service_name = opt.value();
+                if( opt.with_value( "id"               ) )  id = opt.value();
                 else
-                if( opt.flag      ( "remove-service"   ) )  do_remove_service = opt.set();
+                if( opt.with_value( "ini"              ) )  factory_ini = opt.value(), spooler::error_settings.read( factory_ini );
                 else
-                if( opt.with_value( "remove-service"   ) )  do_remove_service = true, service_name = opt.value();
+                if( opt.with_value( "log"              ) )  log_filename = opt.value();
                 else
-                if( opt.flag      ( "renew-service"    ) )  renew_service = opt.set();
-                else
-                if( opt.with_value( "renew-service"    ) )  renew_service = true, service_name = opt.value();
-                else
-                if( opt.with_value( "service-name"     ) )  service_name = opt.value();
-                else
-                if( opt.with_value( "service-display"  ) )  service_display = opt.value();
-                else
-                if( opt.with_value( "service-descr"    ) )  service_description = opt.value();
-                else
-                if( opt.flag      ( "service"          ) )  is_service = opt.set(), is_service_set = true;
-                else
-                if( opt.with_value( "service"          ) )  is_service = true, is_service_set = true, service_name = opt.value();
-                else
-                if( opt.with_value( "need-service"     ) )  dependencies += opt.value(), dependencies += '\0';
-                else
-                {
-                    if( opt.with_value( "sos.ini"          ) )  ;  //schon in sos_main0() geschehen.  set_sos_ini_filename( opt.value() );
-                    else
-                    if( opt.with_value( "id"               ) )  id = opt.value();
-                    else
-                    if( opt.with_value( "ini"              ) )  factory_ini = opt.value(), spooler::error_settings.read( factory_ini );
-                    else
-                    if( opt.with_value( "log"              ) )  log_filename = opt.value();
+                    call_scheduler = true;
 
-                    if( !command_line.empty() )  command_line += " ";
-                    command_line += opt.complete_parameter( '"', '"' );
-                }
+                if( !command_line.empty() )  command_line += " ";
+                command_line += opt.complete_parameter( '"', '"' );
             }
         }
 
         if( send_cmd != "" )  is_service = false;
 
-        //Z_DEBUG_ONLY( MessageBox( 0, "spooler", "spooler -object-server", 0 ) );
-
         if( log_filename.empty() )  log_filename = subst_env( read_profile_string( factory_ini, "spooler", "log" ) );
         if( !log_filename.empty() )  log_start( log_filename );
-/*
-        if( log_category_is_set( "scheduler.cat" ) )
+
+
+        if( kill_pid )
         {
-            int n = 1000000;
-            LOG( n << " mal log_category_is_set( \"scheduler.cat\" ) ...\n" );
-            const char* cat = "scheduler.cat";
-            for( int i = 0; i < n; i++ )  log_category_is_set( cat );
-            LOG( "... fertig\n" );
+            kill_process_immediately( kill_pid );
+            need_call_scheduler = false;
         }
-*/
+
+        if( kill_pid_file )
+        {
+            int pid = as_int( replace_regex( string_from_file( pid_filename ), "[\r\n]", "" ) ); 
+            kill_process_immediately( pid, true );   // kill_childs = true
+            need_call_scheduler = false;
+        }            
+
 
         if( is_object_server )
         {
@@ -2796,7 +2822,6 @@ int spooler_main( int argc, char** argv, const string& parameter_line )
                 if( !renew_spooler.empty() )  
                 { 
                     spooler::spooler_renew( service_name, renew_spooler, renew_service, command_line ); 
-                    ret = 0;
                 }
                 else
                 if( do_remove_service | do_install_service )
@@ -2809,9 +2834,9 @@ int spooler_main( int argc, char** argv, const string& parameter_line )
                         dependencies += '\0';
                         spooler::install_service( service_name, service_display, service_description, dependencies, command_line );
                     }
-                    ret = 0;
                 }
                 else
+                if( call_scheduler || need_call_scheduler )
                 {
                     _beginthread( spooler::delete_new_spooler, 50000, NULL );
 
@@ -2836,8 +2861,11 @@ int spooler_main( int argc, char** argv, const string& parameter_line )
                     LOG( "Scheduler wird Daemon. Pid wechselt\n");
                     spooler::be_daemon();
                 }
-
-                ret = spooler::spooler_main( argc, argv, command_line );
+                else
+                if( call_scheduler || need_call_scheduler )
+                {
+                    ret = spooler::spooler_main( argc, argv, command_line );
+                }
 
 #           endif
         }
