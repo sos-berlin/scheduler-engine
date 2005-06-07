@@ -267,8 +267,13 @@ void Job::init2()
 {
     _delay_until   = 0;
     set_next_start_time( Time::now() );
+    init_start_when_directory_changed( s_stopped );
+}
 
+//-----------------------------------------------------------Job::init_start_when_directory_changed
 
+void Job::init_start_when_directory_changed( State error_state )
+{
     for( Start_when_directory_changed_list::iterator it = _start_when_directory_changed_list.begin(); 
          it != _start_when_directory_changed_list.end();
          it = _start_when_directory_changed_list.erase( it ) )
@@ -280,8 +285,8 @@ void Job::init2()
         catch( exception& x )
         {
             _error = x;
-            _log->error( string( "<start_when_directory_changed>  " ) + x.what() );
-            set_state( s_stopped );
+            _log->log( error_state? log_error : log_warn, string( "<start_when_directory_changed>  " ) + x.what() );
+            if( error_state )  set_state( error_state );
         }
     }
 }
@@ -1380,6 +1385,7 @@ bool Job::do_something()
 
                                 _next_start_time = latter_day;
                                 calculate_next_time();
+                                init_start_when_directory_changed();    // Fehler werden ignoriert
 
                                 task->attach_to_a_thread();
                                 _log->info( S() << "Task " << task->id() << " gestartet" );

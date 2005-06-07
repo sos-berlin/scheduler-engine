@@ -1528,20 +1528,47 @@ void Spooler::load_arg()
 
         if( _html_directory == "" )  _html_directory = directory_of_path( _config_filename ) + "/html";
     }
-    catch( const Sos_option_error& )
+    catch( exception& )
     {
         if( !_is_service )
         {
-            cerr << "usage: " << _argv[0] << "\n"
+            cerr << "\n"
+                    "usage: " << _argv[0] << "\n"
+                    "       [-config=]XMLFILE\n"
+                    "\n"
+                    "       -V\n"
+                    "       -show-dtd\n"
+                    "\n"
                     "       -cd=PATH\n"
-                    "       -config=XMLFILE\n"
-                    "       -service-\n"
-                    "       -log=HOSTWARELOGFILENAME\n"
+                    "       -log=HOSTWARELOGFILE\n"
                     "       -log-dir=DIRECTORY|*stderr\n"
+                    "       -log-level=error|warn|info|debug|debug1|...|debug9\n"
                     "       -id=ID\n"
                     "       -param=PARAM\n"
+                    "       -cmd=\"<xml_command/>\"\n"
                     "       -include-path=PATH\n"
-                    "       -log-level=error|warn|info|debug|debug1|...|debug9\n";
+                    "       -ini=FILE\n"
+                    "       -sos.ini=FILE\n"
+                    "\n"
+                    "       -port=N\n"
+                    "       -tcp-port=N\n"
+                    "       -udp-port=N\n"
+                    "       -reuse-port\n"
+                    "\n"
+                    "       -send-cmd=\"<xml_command/>\"\n"
+                    "\n"
+                    "       -pid-file=FILE\n"
+                    "       -service\n"
+#               ifdef Z_WINDOWS
+                    "       -install-service[=NAME]\n"
+                    "       -remove-service[=NAME]\n"
+                    "       -renew-service[=NAME]\n"
+                    "       -service-name=NAME\n"
+                    "       -service-display=STRING\n"
+                    "       -install-descr=STRING\n"
+                    "       -need-service=SERVICE\n"
+#               endif
+                    "\n";
         }
 
         throw;
