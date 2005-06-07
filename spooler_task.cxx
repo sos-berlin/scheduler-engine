@@ -250,7 +250,7 @@ void Task::close()
             _operation = NULL;
         }
 
-        if( _order )  _order->close();//remove_order_after_error();
+        if( _order )  _order->close();  //remove_order_after_error();
 
         try
         {
@@ -1219,6 +1219,12 @@ bool Task::do_something()
             {
                 if( error_count == 0 )  set_error( x );
                                  else  _log->error( x.what() );
+
+                try
+                {
+                    remove_order_after_error();
+                }
+                catch( exception& x ) { _log->error( x.what() ); }
 
                 if( error_count == 0  &&  _state < s_ending )
                 {

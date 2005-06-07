@@ -176,3 +176,21 @@ VERSION 2.0.123  2005-05
 Defaults für tcp_port und udp_port ist 0, das heißt kein Port.
 Wenn der Scheduler per TCP ansprechbar sein soll, muss jetzt tcp_port oder port gesetzt werden.
 
+
+------------------------------------------------
+VERSION 2.0.128  2005-06-07
+
+Neue Eigenschaft Order.string_next_start_time
+
+Neues XML-Attribut <order next_start_time="...">
+
+Neues XML-Element <start_when_directory_changed directory="..." regex="..."/> 
+(vor <run_time>).
+
+scheduler -kill -pid-file=...
+scheduler -kill=1234
+
+<modify_spooler cmd="abort_immediately"> entfernt pidfile
+
+Exception in spooler_init() oder spooler_open() eines Auftragsjobs lässt Auftrag stehen.
+
