@@ -276,7 +276,7 @@ void Job::init_start_when_directory_changed( State error_state )
 {
     for( Start_when_directory_changed_list::iterator it = _start_when_directory_changed_list.begin(); 
          it != _start_when_directory_changed_list.end();
-         it = _start_when_directory_changed_list.erase( it ) )
+         it++ ) //it = _start_when_directory_changed_list.erase( it ) )
     {
         try
         {
@@ -1385,7 +1385,7 @@ bool Job::do_something()
 
                                 _next_start_time = latter_day;
                                 calculate_next_time();
-                                init_start_when_directory_changed();    // Fehler werden ignoriert
+                                init_start_when_directory_changed( s_stopping );  // Bei Fehler: Job stoppen, aber Task noch laufen lassen
 
                                 task->attach_to_a_thread();
                                 _log->info( S() << "Task " << task->id() << " gestartet" );
