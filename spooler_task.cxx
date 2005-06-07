@@ -1220,6 +1220,7 @@ bool Task::do_something()
                 if( error_count == 0 )  set_error( x );
                                  else  _log->error( x.what() );
 
+
                 try
                 {
                     remove_order_after_error();
