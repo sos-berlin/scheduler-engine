@@ -49,6 +49,8 @@ public class Job_impl
       * (z.B. um eine Datenbank-Verbindung aufzubauen).
       * 
       * @return false beendet die Task. Der Scheduler setzt mit spooler_exit() fort.
+      * Wenn die Task einen Auftrag verarbeiten soll, wird die Task mit Fehler beendet,
+      * was den Job stoppt (wenn nicht {@link Job#set_delay_after_error(int,double)} gesetzt ist).
       */
     
     public boolean  spooler_init        ()      throws Exception  { return true; }
