@@ -66,6 +66,11 @@
                         (<scheduler_element name="log" directory="xml/answer/"/>).
                     </dd>
                     
+                    <dt><code>run_time</code></dt>
+                    <dd>
+                        Liefert auch das Element <code><a href="answer/run_time.xml">&lt;run_time></a></code>.
+                    </dd>
+                    
                     <dt><code>task_history</code></dt>
                     <dd>
                         Liefert auch die Task-Historie

@@ -113,10 +113,22 @@
             </description>
         </xml_attribute>
         
+        <xml_attribute name="next_start_time" type="yyyy-mm-dd hh:mm:ss.mmm" title="Nächster Startzeitpunkt">
+            <description>
+                <p>
+                    Wenn das Attribut fehlt, wird der Auftrag so bald wie möglich ausgeführt.
+                    <!--
+                    Siehe <scheduler_method class="Job" property="delay_order_after_setback" java_signature="int,int" access="write"/>.
+                    -->
+                </p>
+            </description>
+        </xml_attribute>
+        
     </xml_attributes>
     
     <xml_child_elements>
         <xml_child_element name="log"/>
+        <xml_child_element name="run_time"/>
     </xml_child_elements>
 
     <description>

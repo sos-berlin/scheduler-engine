@@ -4,7 +4,7 @@
 <!--$Id$-->
 
 <xml_element name     = "run_time" 
-             title    = "Laufzeiten des Jobs"
+             title    = "Laufzeiten"
              category = "Konfiguration"
              base_dir = "../"
              parent_page = "../konfiguration.xml"

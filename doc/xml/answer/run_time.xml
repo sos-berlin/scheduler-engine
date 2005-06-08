@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet href="../../scheduler.xsl" type="text/xsl"?>
+
+<!--$Id: param.xml 3623 2005-04-20 06:53:16Z jz $-->
+
+<xml_element name          = "run_time" 
+             title         = "Laufzeiten"
+             category      = "Antwort"
+             sub_directory = "answer/"
+             base_dir      = "../../"
+             parent_page   = "../../xml_commands.xml"
+             author        = "$Author: jz $"
+             date          = "$Date: 2005-04-20 08:53:16 +0200 (Mi, 20 Apr 2005) $">
+
+    <xml_parent_elements>
+        <xml_parent_element name="job"/>
+        <xml_parent_element name="order"/>
+    </xml_parent_elements>
+    
+    <description>
+        <p>
+            <code>&lt;run_time></code> wird gezeigt, 
+            wenn im Kommando <code>&lt;show_…></code> das Attribut <code>what="run_time"</code> gesetzt ist.
+        </p>
+        <p>
+            <b>Siehe <code>&lt;<a class="silent" href="../run_time.xml">run_time</a>></code></b>.
+        </p>
+    </description>
+        
+</xml_element>

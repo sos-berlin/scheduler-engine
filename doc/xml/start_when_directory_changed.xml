@@ -22,7 +22,8 @@
             <description>
                 <p>
                     Eine Änderung des Verzeichnisses (Datei wird hinzugefügt oder gelöscht)
-                    führt zum Start des Jobs.
+                    führt zum Start einer Task.
+                    Ebenso, wenn das Verzeichnis entfernt wird.
                 </p>
             </description>
         </xml_attribute>
@@ -43,6 +44,11 @@
             <code>&lt;start_when_directory_changed directory="<i>directory</i>" regex="<i>regex</i>"/></code>
             wirkt wie der programmierte Aufruf<br/>
             <code>start_when_directory_changed( "<i>directory</i>", "<i>regex</i>" )</code>.
+        </p>
+        <p>
+            Wenn das Verzeichnis nach dem Start des Schedulers entfernt wird, also nicht mehr überwacht werden kann,
+            startet eine Task, während der Job gestoppt wird. 
+            Weitere Tasks werden nicht gestartet (weil der Job gestoppt ist).
         </p>
         <p>
             Siehe <scheduler_method class="Job" method="start_when_directory_changed" java_signature="java.lang.String, java.lang.String"/>.

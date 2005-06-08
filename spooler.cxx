@@ -1562,6 +1562,7 @@ void Spooler::load_arg()
                     "       -send-cmd=\"<xml_command/>\"\n"
                     "\n"
                     "       -pid-file=FILE\n"
+                    "       -kill[=PID]\n"
                     "       -service\n"
 #               ifdef Z_WINDOWS
                     "       -install-service[=NAME]\n"

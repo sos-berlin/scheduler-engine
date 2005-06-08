@@ -194,3 +194,13 @@ scheduler -kill=1234
 
 Exception in spooler_init() oder spooler_open() eines Auftragsjobs lässt Auftrag stehen.
 
+
+------------------------------------------------
+VERSION 2.0.129  2005-06-08
+
+return false in spooler_init() oder spooler_open() wird als Fehler gewertet, 
+wenn die Task einen Auftrag verarbeiten soll.
+
+Der Job stoppt dann, wenn nicht delay_after_error gesetzt ist.
+
+Der Auftrag bleibt vor dem Job stehen.

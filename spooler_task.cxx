@@ -250,7 +250,7 @@ void Task::close()
             _operation = NULL;
         }
 
-        if( _order )  _order->close();  //remove_order_after_error();
+        if( _order )  _order->close();  //remove_order_after_error(); Nicht rufen! Der Auftrag bleibt stehen und der Job startet wieder und wieder.
 
         try
         {
@@ -1448,6 +1448,12 @@ void Task::remove_order_after_error()
 
 void Task::finish()
 {
+    if( _order )    // Auftrag nicht verarbeitet? spooler_init() oder spooler_open() lieferte false
+    {
+        if( !has_error() )  set_error( Xc( "SCHEDULER-226" ) );
+        remove_order_after_error();  // Nur rufen, wenn der Job stoppt oder verzögert wird! (has_error() == true) Sonst wird der Job wieder und wieder gestartet.
+    }
+
     if( has_error()  &&  _job->repeat() == 0  &&  _job->_delay_after_error.empty() )
     {
         _job->stop( false );
