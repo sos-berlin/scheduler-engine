@@ -573,6 +573,12 @@ library Spooler
         HRESULT                 Ini_path                ( [out,retval] BSTR* );
 
         HRESULT                 Execute_xml             ( [in] BSTR, [out,retval] BSTR* );
+
+        [propget]
+        HRESULT                 Tcp_port                ( [out,retval] int* );
+
+        [propget]
+        HRESULT                 Udp_port                ( [out,retval] int* );
     }
 
     [

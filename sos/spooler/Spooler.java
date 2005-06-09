@@ -115,4 +115,8 @@ public class Spooler extends Idispatch
 
     /** XML-Kommando ausführen */
     public String           execute_xml( String xml )                               { return (String)       com_call( "execute_xml", xml ); }
+
+    public int              tcp_port()                                              { return            int_com_call( "<tcp_port" ); }
+
+    public int              udp_port()                                              { return            int_com_call( "<udp_port" ); }
 }

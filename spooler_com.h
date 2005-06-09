@@ -568,6 +568,8 @@ struct Com_spooler : spooler_com::Ispooler,
     STDMETHODIMP            get_Db_order_history_table_name ( BSTR* );
     STDMETHODIMP            get_Ini_path                    ( BSTR* );
     STDMETHODIMP                Execute_xml                 ( BSTR, BSTR* );
+    STDMETHODIMP            get_Tcp_port                    ( int* );
+    STDMETHODIMP            get_Udp_port                    ( int* );
 
 
     void                        close                       ()                                      { THREAD_LOCK(_lock)  _spooler = NULL; }

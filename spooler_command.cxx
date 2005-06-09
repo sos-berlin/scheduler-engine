@@ -186,6 +186,12 @@ xml::Element_ptr Command_processor::execute_show_state( const xml::Element_ptr& 
     state_element.setAttribute( "pid"                  , _spooler->_pid );
     state_element.setAttribute( "config_file"          , _spooler->_config_filename );
 
+    if( _spooler->_tcp_port )
+    state_element.setAttribute( "tcp_port"             , _spooler->_tcp_port );
+
+    if( _spooler->_udp_port )
+    state_element.setAttribute( "udp_port"             , _spooler->_udp_port );
+
     if( _spooler->_db )
     {
         THREAD_LOCK( _spooler->_lock )

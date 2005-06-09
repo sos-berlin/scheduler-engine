@@ -2659,6 +2659,8 @@ const Com_method Com_spooler::_methods[] =
     { DISPATCH_PROPERTYGET, 28, "Db_order_history_table_name", (Com_method_ptr)&Com_spooler::get_Db_order_history_table_name, VT_BSTR      },
     { DISPATCH_PROPERTYGET, 29, "Ini_path"                  , (Com_method_ptr)&Com_spooler::get_Ini_path         , VT_BSTR      },
     { DISPATCH_METHOD     , 30, "Execute_xml"               , (Com_method_ptr)&Com_spooler::Execute_xml          , VT_BSTR     , { VT_BSTR } },
+    { DISPATCH_PROPERTYGET, 31, "Tcp_port"                  , (Com_method_ptr)&Com_spooler::get_Tcp_port         , VT_EMPTY    , { VT_INT } },
+    { DISPATCH_PROPERTYGET, 32, "Udp_port"                  , (Com_method_ptr)&Com_spooler::get_Udp_port         , VT_EMPTY    , { VT_INT } },
     {}
 };
 
@@ -3119,6 +3121,26 @@ STDMETHODIMP Com_spooler::Execute_xml( BSTR xml, BSTR* result )
     catch( const _com_error& x )  { hr = _set_excepinfo( x, __FUNCTION__ ); }
 
     return hr;
+}
+
+//------------------------------------------------------------------------Com_spooler::get_Tcp_port
+
+STDMETHODIMP Com_spooler::get_Tcp_port( int* result )
+{
+    if( !_spooler )  return E_POINTER;
+    *result = _spooler->_tcp_port;
+
+    return S_OK;
+}
+
+//------------------------------------------------------------------------Com_spooler::get_Udp_port
+
+STDMETHODIMP Com_spooler::get_Udp_port( int* result )
+{
+    if( !_spooler )  return E_POINTER;
+    *result = _spooler->_udp_port;
+
+    return S_OK;
 }
 
 //----------------------------------------------------------------------------Com_context::_methods
