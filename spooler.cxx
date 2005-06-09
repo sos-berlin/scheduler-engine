@@ -2699,10 +2699,10 @@ int spooler_main( int argc, char** argv, const string& parameter_line )
     try
     {
         bool    need_call_scheduler = true;
-        bool    call_scheduler     = false;
-        bool    do_install_service = false;
-        bool    do_remove_service  = false;
-        bool    is_service_set     = false;
+        bool    call_scheduler      = false;
+        bool    do_install_service  = false;
+        bool    do_remove_service   = false;
+        bool    is_service_set      = false;
         string  id;
         string  service_name, service_display;
         string  service_description = "Job scheduler for process automation";
@@ -2718,7 +2718,7 @@ int spooler_main( int argc, char** argv, const string& parameter_line )
         {
             //if( opt.flag      ( "renew-spooler"    ) )  renew_spooler = program_filename();
           //else
-            if( opt.flag      ( "show-dtd"         ) )  fprintf( stdout, "%s", spooler::dtd_string );
+            if( opt.flag      ( "show-dtd"         ) )  { if( opt.set() )  fprintf( stdout, "%s", spooler::dtd_string ); }
             else
             if( opt.with_value( "renew-spooler"    ) )  renew_spooler = opt.value();
             else
@@ -2756,9 +2756,9 @@ int spooler_main( int argc, char** argv, const string& parameter_line )
             else
             if( opt.with_value( "service-descr"    ) )  service_description = opt.value();
             else
-            if( opt.flag      ( "service"          ) )  is_service = opt.set(), is_service_set = true;
+            if( opt.flag      ( "service"          ) )  call_scheduler = true, is_service = opt.set(), is_service_set = true;
             else
-            if( opt.with_value( "service"          ) )  is_service = true, is_service_set = true, service_name = opt.value();
+            if( opt.with_value( "service"          ) )  call_scheduler = true, is_service = true, is_service_set = true, service_name = opt.value();
             else
             if( opt.with_value( "need-service"     ) )  dependencies += opt.value(), dependencies += '\0';
             else
@@ -2855,16 +2855,16 @@ int spooler_main( int argc, char** argv, const string& parameter_line )
 
 #            else
 
-                if( is_service )
-                {
-                    spooler::is_daemon = true;
-
-                    LOG( "Scheduler wird Daemon. Pid wechselt\n");
-                    spooler::be_daemon();
-                }
-                else
                 if( call_scheduler || need_call_scheduler )
                 {
+                    if( is_service )
+                    {
+                        spooler::is_daemon = true;
+
+                        LOG( "Scheduler wird Daemon. Pid wechselt\n");
+                        spooler::be_daemon();
+                    }
+
                     ret = spooler::spooler_main( argc, argv, command_line );
                 }
 

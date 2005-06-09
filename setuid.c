@@ -32,8 +32,8 @@ int main( int argc, char** argv )
 
 
     // Effektive User-Id und Group-Id zurücksetzen, damit wir Zugriff aufs Verzeichnis von setuid haben.
-    seteuid( getuid() );
-    setegid( getgid() );
+    setresuid( -1, getuid(), -1 );
+    setresgid( -1, getgid(), -1 );
 
 
     // chmod-Bits von setuid prüfen: Darf für group und others nicht kopierbar oder beschreibbar sein.
