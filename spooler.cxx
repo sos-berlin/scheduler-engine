@@ -2718,7 +2718,7 @@ int spooler_main( int argc, char** argv, const string& parameter_line )
         {
             //if( opt.flag      ( "renew-spooler"    ) )  renew_spooler = program_filename();
           //else
-            if( opt.flag      ( "show-dtd"         ) )  { if( opt.set() )  fprintf( stdout, "%s", spooler::dtd_string ); }
+            if( opt.flag      ( "show-dtd"         ) )  { if( opt.set() )  need_call_scheduler = false, fprintf( stdout, "%s", spooler::dtd_string ); }
             else
             if( opt.with_value( "renew-spooler"    ) )  renew_spooler = opt.value();
             else
