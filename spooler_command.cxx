@@ -37,11 +37,11 @@ namespace spooler {
 using namespace std;
 
 //-------------------------------------------------------------------------------------------------
-#ifdef Z_DEBUG
+//#ifdef Z_DEBUG
 
 #   include "spooler_http_files.cxx"     // Generiert mit:  cd html && perl ../make/files_to_cxx.pl jz/*.html jz/*.js jz/*.xslt jz/*.css
 
-#endif
+//#endif
 //--------------------------------------------------------------------------dom_append_text_element
 
 void dom_append_text_element( const xml::Element_ptr& element, const char* element_name, const string& text )
