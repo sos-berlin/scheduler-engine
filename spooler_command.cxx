@@ -1036,15 +1036,15 @@ ptr<Http_response> Command_processor::execute_http( Http_request* http_request )
                 }
                 catch( exception& )
                 {                                                        
-#                   ifdef Z_DEBUG
+//#                   ifdef Z_DEBUG
                         string fn = filename.substr( 1 );    // '/' abschneiden
                         const Inline_files* f;
                         for( f = inline_files; f->filename &&  f->filename != fn; f++ );
                         if( !f->filename )  throw;
                         response_body.assign( f->content, f->length );
-#                    else
+//#                    else
                         throw;
-#                   endif
+//#                   endif
                 }
             }
         }
