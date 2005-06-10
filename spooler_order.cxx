@@ -170,7 +170,7 @@ Job_chain::~Job_chain()
 xml::Element_ptr Job_chain::dom_element( const xml::Document_ptr& document, const Show_what& show )
 {
     Show_what modified_show = show;
-    if( modified_show | show_job_chain_orders )  modified_show |= show_orders;
+    if( modified_show & show_job_chain_orders )  modified_show |= show_orders;
 
 
     xml::Element_ptr element = document.createElement( "job_chain" );
