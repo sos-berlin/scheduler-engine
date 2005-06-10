@@ -56,7 +56,7 @@
                     <xsl:with-param name="class" select="'job'"/>
                 </xsl:apply-templates>
 
-                <xsl:if test="state/job_chains/job_chain">
+                <xsl:if test="state/job_chains/@count > 0">
                     <xsl:apply-templates mode="card_selector" select="/spooler">
                         <xsl:with-param name="name"  select="'job_chains'"/>
                         <xsl:with-param name="title" select="'Job chains'"/>

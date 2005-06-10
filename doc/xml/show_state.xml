@@ -42,10 +42,22 @@
                         (<scheduler_element name="queued_tasks" directory="xml/answer/"/>).
                     </dd>
                     
+                    <dt><code>job_chains</code></dt>
+                    <dd>
+                        Liefert auch die Jobketten
+                        (<scheduler_element name="job_chains" directory="xml/answer/"/>).
+                    </dd>
+                    
                     <dt><code>job_chain_orders</code></dt>
                     <dd>
                         Liefert auch die Aufträge in einer Jobkette
                         (<scheduler_element name="order_queue" directory="xml/answer/"/>).
+                    </dd>
+                    
+                    <dt><code>job_chain_jobs</code></dt>
+                    <dd>
+                        Liefert auch die Jobs in einer Jobkette
+                        (<scheduler_element name="job" directory="xml/answer/"/>).
                     </dd>
                     
                     <dt><code>job_orders</code></dt>

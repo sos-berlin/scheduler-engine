@@ -228,7 +228,7 @@ xml::Element_ptr Command_processor::execute_show_state( const xml::Element_ptr& 
     state_element.appendChild( execute_show_jobs( show ) );
   //state_element.appendChild( execute_show_threads( show ) );
     state_element.appendChild( execute_show_process_classes( show ) );
-    state_element.appendChild( execute_show_job_chains( element, show ) );
+    state_element.appendChild( _spooler->xml_from_job_chains( _answer, show ) );
 
     {
         xml::Element_ptr subprocesses_element = _answer.createElement( "subprocesses" );
@@ -519,7 +519,7 @@ xml::Element_ptr Command_processor::execute_show_job_chains( const xml::Element_
     Show_what show = show_;
     if( show & show_all_ )  show |= show | show_description | show_orders;
 
-    return _spooler->xml_from_job_chains( _answer, show );
+    return _spooler->xml_from_job_chains( _answer, show | show_job_chains | show_job_chain_jobs );
 }
 
 //--------------------------------------------------------Command_processor::execute_show_job_chain
@@ -736,6 +736,8 @@ xml::Element_ptr Command_processor::execute_command( const xml::Element_ptr& ele
         else
         if( string_equals_prefix_then_skip( &p, "orders"           ) )  show |= show_orders;
         else
+        if( string_equals_prefix_then_skip( &p, "job_chains"       ) )  show |= show_job_chains;
+        else
         if( string_equals_prefix_then_skip( &p, "job_chain_orders" ) )  show |= show_job_chain_orders;
         else
         if( string_equals_prefix_then_skip( &p, "job_orders"       ) )  show |= show_job_orders;
@@ -751,6 +753,8 @@ xml::Element_ptr Command_processor::execute_command( const xml::Element_ptr& ele
         if( string_equals_prefix_then_skip( &p, "remote_schedulers") )  show |= show_remote_schedulers;
         else
         if( string_equals_prefix_then_skip( &p, "run_time"         ) )  show |= show_run_time;
+        else
+        if( string_equals_prefix_then_skip( &p, "job_chain_jobs"   ) )  show |= show_job_chain_jobs;
         else
         if( string_equals_prefix_then_skip( &p, "standard"         ) )  ;
         else

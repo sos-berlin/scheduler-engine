@@ -475,6 +475,7 @@ const char file_jz_left_frame_html[] =
     "}\n"
     "\n"
     "if( _show_card == \"remote_schedulers\" )  what += \" remote_schedulers\";\n"
+    "if( _show_card == \"job_chains\"        )  what += \" show_chains\";\n"
     "\n"
     "_response = _scheduler.execute( \"<show_state what='\" + what + \"' max_orders='\" + max_orders + \"'/>\" );\n"
     "\n"

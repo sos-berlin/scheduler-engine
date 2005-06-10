@@ -88,7 +88,9 @@ xml::Element_ptr Spooler::xml_from_job_chains( const xml::Document_ptr& document
 {
     xml::Element_ptr job_chains_element = document.createElement( "job_chains" );
 
-    //THREAD_LOCK( _job_chain_lock )
+    job_chains_element.setAttribute( "count", (int)_job_chain_map.size() );
+
+    if( show & ( show_job_chains | show_job_chain_jobs | show_job_chain_orders ) )
     {
         FOR_EACH( Job_chain_map, _job_chain_map, it )
         {
@@ -115,11 +117,21 @@ xml::Element_ptr Job_chain_node::dom_element( const xml::Document_ptr& document,
         {
             element.setAttribute( "job", _job->name() );
 
-            //if( show & show_orders )  
+            if( show & show_job_chain_jobs )
             {
                 dom_append_nl( element );
                 element.appendChild( _job->dom_element( document, show, job_chain ) );
                 dom_append_nl( element );
+            }
+            else
+            if( show & show_job_chain_orders )
+            {
+                // Nur Aufträge im Job zeigen, sonst nichts vom Job (der wird bereits von <show_state> in <jobs> gezeigt)
+                xml::Element_ptr job_element = document.createElement( "job" );
+                job_element.setAttribute( "name", _job->name() );
+
+                element.appendChild( job_element );
+                job_element.appendChild( _job->order_queue()->dom_element( document, show | show_orders, job_chain ) );
             }
         }
 
@@ -336,7 +348,7 @@ void Job_chain::finish()
             Job_chain_node* n = *it;
             Chain::iterator next = it;  next++;
 
-            if( n->_next_state.is_error()  &&  next != _chain.end() )  n->_next_state = (*next)->_state;
+            if( n->_next_state.is_error()  &&  next != _chain.end()  &&  n->_job )  n->_next_state = (*next)->_state;
 
             if( !n->_next_state.is_error() )  n->_next_node  = node_from_state( n->_next_state );
                                         else  n->_next_state = empty_variant;
