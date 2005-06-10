@@ -1043,7 +1043,7 @@ ptr<Http_response> Command_processor::execute_http( Http_request* http_request )
                         if( !f->filename )  throw;
                         response_body.assign( f->content, f->length );
 //#                    else
-                        throw;
+//                      throw;
 //#                   endif
                 }
             }
