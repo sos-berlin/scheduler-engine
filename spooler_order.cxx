@@ -918,6 +918,9 @@ xml::Element_ptr Order::dom_element( const xml::Document_ptr& document, const Sh
         element.setAttribute( "order"     , debug_string_from_variant( _id ) );
         element.setAttribute( "id"        , debug_string_from_variant( _id ) );     // veraltet
 
+        if( _setback )
+        element.setAttribute( "next_start_time", _setback.as_string() );
+
         if( _title != "" )
         element.setAttribute( "title"     , _title );
 
@@ -952,7 +955,6 @@ xml::Element_ptr Order::dom_element( const xml::Document_ptr& document, const Sh
 
         if( _setback )
         element.setAttribute( "setback"   , _setback.as_string() ),
-        element.setAttribute( "next_start_time", _setback.as_string() );
 
 
         if( show & show_run_time )  element.appendChild( _run_time->dom_element( document ) );

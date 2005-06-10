@@ -1739,7 +1739,7 @@ xml::Element_ptr Job::dom_element( const xml::Document_ptr& document, const Show
         if( _order_queue )
         {
             Show_what modified_show = show;
-            if( modified_show | show_job_orders )  modified_show |= show_orders;
+            if( modified_show & show_job_orders )  modified_show |= show_orders;
 
             job_element.appendChild( _order_queue->dom_element( document, modified_show, which_job_chain ) );
         }
