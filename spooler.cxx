@@ -1338,7 +1338,7 @@ void Spooler::send_cmd()
 
     while(1)
     {
-        char buffer [100];
+        char buffer [2000];
 
         int ret = recv( sock, buffer, sizeof buffer, 0 );
         if( ret == 0 )  break;
