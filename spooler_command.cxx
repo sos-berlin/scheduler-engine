@@ -167,7 +167,7 @@ xml::Element_ptr Command_processor::execute_show_process_classes( const Show_wha
 
 //------------------------------------------------------------Command_processor::execute_show_state
 
-xml::Element_ptr Command_processor::execute_show_state( const xml::Element_ptr& element, const Show_what& show_ )
+xml::Element_ptr Command_processor::execute_show_state( const xml::Element_ptr&, const Show_what& show_ )
 {
     if( _security_level < Security::seclev_info )  throw_xc( "SCHEDULER-121" );
 

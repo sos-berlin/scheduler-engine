@@ -954,7 +954,7 @@ xml::Element_ptr Order::dom_element( const xml::Document_ptr& document, const Sh
         element.setAttribute( "log_file"  , _log->filename() );
 
         if( _setback )
-        element.setAttribute( "setback"   , _setback.as_string() ),
+        element.setAttribute( "setback"   , _setback.as_string() );
 
 
         if( show & show_run_time )  element.appendChild( _run_time->dom_element( document ) );
