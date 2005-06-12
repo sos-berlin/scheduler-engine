@@ -199,6 +199,8 @@ xml::Element_ptr Job_chain::dom_element( const xml::Document_ptr& document, cons
                 Any_file sel ( "-in " + _spooler->_db->db_name() + "-max-length=32K  "
                                "select %limit(20) \"ORDER_ID\" as \"ID\", \"START_TIME\", \"TITLE\", \"STATE\", \"STATE_TEXT\""
                                " from " + sql::uquoted_name( _spooler->_order_history_tablename ) +
+                               " where \"JOB_CHAIN\"=" + sql::quoted( _name ) +
+                                 " and \"SPOOLER_ID\"=" + sql::quoted( _spooler->id_for_db() ) +
                                " order by \"HISTORY_ID\" desc" );
 
                 while( !sel.eof() )

@@ -525,8 +525,8 @@ function modify_response( response )
         spooler_element.setAttribute( "my_max_orders"    , window.parent.left_frame._max_orders    );
         spooler_element.setAttribute( "my_show_card"     , window.parent.left_frame._show_card     );
         spooler_element.setAttribute( "my_update_seconds", window.parent.left_frame.update_seconds );
-        spooler_element.setAttribute( "my_url_base"      , document.location.href.replace( /\/[^/]*$/, "/" ) );   // Alles bis zum letzten Schräger
-        spooler_element.setAttribute( "my_url_path_base" , document.location.pathname.replace( /\/[^/]*$/, "/" ) );   // Pfad bis zum letzten Schräger
+        spooler_element.setAttribute( "my_url_base"      , document.location.href    .replace( /\/[^\/]*$/, "/" ) );   // Alles bis zum letzten Schräger
+        spooler_element.setAttribute( "my_url_path_base" , document.location.pathname.replace( /\/[^\/]*$/, "/" ) );   // Pfad bis zum letzten Schräger
     }
 }
 

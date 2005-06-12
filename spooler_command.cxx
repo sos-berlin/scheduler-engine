@@ -517,7 +517,8 @@ xml::Element_ptr Command_processor::execute_show_job_chains( const xml::Element_
     if( _security_level < Security::seclev_info )  throw_xc( "SCHEDULER-121" );
 
     Show_what show = show_;
-    if( show & show_all_ )  show |= show | show_description | show_orders;
+    if( show & show_all_   )  show |= show | show_description | show_orders;
+    if( show & show_orders )  show |= show_job_chain_orders;
 
     return _spooler->xml_from_job_chains( _answer, show | show_job_chains | show_job_chain_jobs );
 }
@@ -529,7 +530,8 @@ xml::Element_ptr Command_processor::execute_show_job_chain( const xml::Element_p
     if( _security_level < Security::seclev_info )  throw_xc( "SCHEDULER-121" );
 
     Show_what show = show_;
-    if( show & show_all_ )  show |= show | show_description | show_orders;
+    if( show & show_all_   )  show |= show | show_description | show_orders;
+    if( show & show_orders )  show |= show_job_chain_orders;
 
     string job_chain_name = show_job_chain_element.getAttribute( "job_chain" );
 

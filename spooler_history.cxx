@@ -1234,6 +1234,8 @@ xml::Element_ptr Job_history::read_tail( const xml::Document_ptr& doc, int id, i
                     //string prefix = ( next < 0? "-in -seq head -" : "-in -seq tail -reverse -" ) + as_string(max(1,abs(next))) + " | ";
                         string prefix = "-in -seq head -" + as_string(max(1,abs(next))) + " | ";
                         string clause = " where \"JOB_NAME\"=" + sql_quoted(_job_name);
+
+                        clause += " and \"SPOOLER_ID\"=" + sql_quoted( _spooler->id_for_db() );
                         
                         if( id != -1 )
                         {
