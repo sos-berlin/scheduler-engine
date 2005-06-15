@@ -167,7 +167,7 @@ struct Spooler
     enum State_cmd
     {
         sc_none,
-        sc_stop,                // s_running | s_paused -> s_stopped
+      //sc_stop,                // s_running | s_paused -> s_stopped
         sc_terminate,           // s_running | s_paused -> s_stopped, exit()
         sc_terminate_and_restart,
         sc_let_run_terminate_and_restart,
@@ -226,7 +226,7 @@ struct Spooler
     void                        cmd_reload                  ();
     void                        cmd_pause                   ()                                  { _state_cmd = sc_pause; signal( "pause" ); }
     void                        cmd_continue                ();
-    void                        cmd_stop                    ();
+  //void                        cmd_stop                    ();
     void                        cmd_terminate               ();
     void                        cmd_terminate_and_restart   ();
     void                        cmd_let_run_terminate_and_restart();
@@ -234,7 +234,7 @@ struct Spooler
     void                        abort_immediately           ( bool restart = false );
 
     void                        cmd_load_config             ( const xml::Element_ptr&, const Time& xml_mod_time, const string& source_filename );
-    bool                        execute_state_cmd           ();
+    void                        execute_state_cmd           ();
 
     Job*                        get_job                     ( const string& job_name );
     Job*                        get_job_or_null             ( const string& job_name );

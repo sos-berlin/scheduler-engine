@@ -185,6 +185,7 @@ xml::Element_ptr Command_processor::execute_show_state( const xml::Element_ptr&,
     state_element.setAttribute( "version"              , VER_PRODUCTVERSION_STR );
     state_element.setAttribute( "pid"                  , _spooler->_pid );
     state_element.setAttribute( "config_file"          , _spooler->_config_filename );
+    state_element.setAttribute( "host"                 , _spooler->_hostname );
 
     if( _spooler->_tcp_port )
     state_element.setAttribute( "tcp_port"             , _spooler->_tcp_port );
@@ -326,7 +327,7 @@ void Command_processor::abort_immediately( int exit_code )
 
 xml::Element_ptr Command_processor::execute_modify_spooler( const xml::Element_ptr& element )
 {
-    if( _security_level < Security::seclev_all )  throw_xc( "SCHEDULER-121" );
+    if( _security_level < Security::seclev_no_add )  throw_xc( "SCHEDULER-121" );
 
     string cmd = element.getAttribute( "cmd" );
   //if( !cmd.empty() )
@@ -335,8 +336,8 @@ xml::Element_ptr Command_processor::execute_modify_spooler( const xml::Element_p
         else
         if( cmd == "continue"              )  _spooler->cmd_continue();
         else
-        if( cmd == "stop"                  )  _spooler->cmd_stop();
-        else
+      //if( cmd == "stop"                  )  _spooler->cmd_stop();
+      //else
         if( cmd == "reload"                )  _spooler->cmd_reload();
         else
         if( cmd == "terminate"             )  _spooler->cmd_terminate();
@@ -361,7 +362,7 @@ xml::Element_ptr Command_processor::execute_modify_spooler( const xml::Element_p
 
 xml::Element_ptr Command_processor::execute_terminate( const xml::Element_ptr& )
 {
-    if( _security_level < Security::seclev_all )  throw_xc( "SCHEDULER-121" );
+    if( _security_level < Security::seclev_no_add )  throw_xc( "SCHEDULER-121" );
 
     _spooler->cmd_terminate();
     
@@ -383,7 +384,7 @@ xml::Element_ptr Command_processor::execute_show_job( const xml::Element_ptr& el
 
 xml::Element_ptr Command_processor::execute_modify_job( const xml::Element_ptr& element )
 {
-    if( _security_level < Security::seclev_all )  throw_xc( "SCHEDULER-121" );
+    if( _security_level < Security::seclev_no_add )  throw_xc( "SCHEDULER-121" );
 
     string job_name = element.getAttribute( "job" );
     string cmd_name = element.getAttribute( "cmd" );
@@ -428,7 +429,7 @@ xml::Element_ptr Command_processor::execute_show_task( const xml::Element_ptr& e
 
 xml::Element_ptr Command_processor::execute_kill_task( const xml::Element_ptr& element )
 {
-    if( _security_level < Security::seclev_all )  throw_xc( "SCHEDULER-121" );
+    if( _security_level < Security::seclev_no_add )  throw_xc( "SCHEDULER-121" );
 
     int    id          = element. int_getAttribute( "id" );
     string job_name    = element.     getAttribute( "job" );              // Hilfsweise
@@ -444,7 +445,7 @@ xml::Element_ptr Command_processor::execute_kill_task( const xml::Element_ptr& e
 
 xml::Element_ptr Command_processor::execute_start_job( const xml::Element_ptr& element )
 {
-    if( _security_level < Security::seclev_all )  throw_xc( "SCHEDULER-121" );
+    if( _security_level < Security::seclev_no_add )  throw_xc( "SCHEDULER-121" );
 
     string job_name        = element.getAttribute( "job"   );
     string task_name       = element.getAttribute( "name"  );
@@ -653,7 +654,7 @@ xml::Element_ptr Command_processor::execute_add_order( const xml::Element_ptr& a
 
 xml::Element_ptr Command_processor::execute_modify_order( const xml::Element_ptr& modify_order_element )
 {
-    if( _security_level < Security::seclev_all )  throw_xc( "SCHEDULER-121" );
+    if( _security_level < Security::seclev_no_add )  throw_xc( "SCHEDULER-121" );
 
     string    job_chain_name = modify_order_element.getAttribute( "job_chain" );
     Order::Id id             = modify_order_element.getAttribute( "order"     );
@@ -671,7 +672,7 @@ xml::Element_ptr Command_processor::execute_modify_order( const xml::Element_ptr
 
 xml::Element_ptr Command_processor::execute_remove_order( const xml::Element_ptr& modify_order_element )
 {
-    if( _security_level < Security::seclev_all )  throw_xc( "SCHEDULER-121" );
+    if( _security_level < Security::seclev_no_add )  throw_xc( "SCHEDULER-121" );
 
     string    job_chain_name = modify_order_element.getAttribute( "job_chain" );
     Order::Id id             = modify_order_element.getAttribute( "order"     );
@@ -694,7 +695,7 @@ xml::Element_ptr Command_processor::execute_register_remote_scheduler( const xml
     Xml_processor* xml_processor = dynamic_cast<Xml_processor*>( _communication_processor );
     if( !xml_processor )  throw_xc( "SCHEDULER-222" );
 
-    if( _security_level < Security::seclev_all )  throw_xc( "SCHEDULER-121" );
+    if( _security_level < Security::seclev_no_add )  throw_xc( "SCHEDULER-121" );
 
     Host_and_port host_and_port ( *_host, register_scheduler_element.int_getAttribute( "tcp_port" ) );
 

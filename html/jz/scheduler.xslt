@@ -168,7 +168,7 @@
                         <xsl:text>)</xsl:text>
                     </span>
                     &#160; &#160;
-                    <xsl:value-of select="state/@state"/>
+                    <xsl:apply-templates select="state/@state"/>
                 </td>
 
                 <td valign="top" align="right">
@@ -253,6 +253,21 @@
 
             <label for="update_periodically_checkbox"><span class="translate">every </span><xsl:value-of select="/*/@my_update_seconds"/>s</label>
         </p>
+    </xsl:template>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~state/@state-->
+
+    <xsl:template match="state/@state">
+        <xsl:choose>
+            <xsl:when test=".='running'">
+                <xsl:value-of select="."/>
+            </xsl:when>
+            <xsl:otherwise>
+                <span class="scheduler_error">
+                    <xsl:value-of select="."/>
+                </span>
+            </xsl:otherwise>
+        </xsl:choose>
     </xsl:template>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Jobs-->
@@ -362,7 +377,7 @@
                         <xsl:attribute name="onclick">call_error_checked( show_job_details, '<xsl:value-of select="@job"/>' )</xsl:attribute>
 
                         <td colspan="2">
-                            <xsl:value-of select="@state"/>
+                            <xsl:apply-templates select="@state"/>
                             <xsl:if test="not( /spooler/@show_tasks_checkbox ) and tasks/@count>0">
                                 <xsl:text>, </xsl:text>
                                 <span style="white-space: nowrap">
@@ -735,7 +750,7 @@
                                 </td>
 
                                 <td>
-                                    <xsl:value-of select="job/@state"></xsl:value-of>
+                                    <xsl:apply-templates select="job/@state"/>
                                     <xsl:if test="job/tasks/@count>0">
                                         <xsl:text>, </xsl:text>
                                         <xsl:value-of select="job/tasks/@count"></xsl:value-of>
@@ -1125,7 +1140,8 @@
             <tr>
                 <td><span class="label">state:</span></td>
                 <td colspan="99">
-                    <xsl:value-of select="@state"/>
+                    <xsl:apply-templates select="@state"/>
+
                     <!--xsl:if test="@waiting_for_process='yes'">
                         <xsl:text>,</xsl:text>
                         <span class="waiting_for_process"> waiting for process!</span>
@@ -1247,6 +1263,21 @@
         <xsl:apply-templates select="order_queue" mode="list"/>
         -->
 
+    </xsl:template>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~job/@state-->
+
+    <xsl:template match="job/@state">
+        <xsl:choose>
+            <xsl:when test=".='pending' or .='running'">
+                <xsl:value-of select="."/>
+            </xsl:when>
+            <xsl:otherwise>
+                <span class="job_error">
+                    <xsl:value-of select="."/>
+                </span>
+            </xsl:otherwise>
+        </xsl:choose>
     </xsl:template>
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Detailsicht einer Task-->

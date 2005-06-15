@@ -876,7 +876,7 @@ bool Job::execute_state_cmd()
                                  || task->_state == Task::s_running_delayed
                                  || task->_state == Task::s_running_waiting_for_order )  task->set_state( Task::s_running );
                             }
-                            set_state( s_running );
+                            set_state( _running_tasks.size() > 0? s_running : s_pending );
                             something_done = true;
                         }
                     }

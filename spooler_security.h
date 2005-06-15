@@ -15,6 +15,7 @@ struct Security
         seclev_none,
         seclev_signal,
         seclev_info,
+        seclev_no_add,
         seclev_all
     };
 

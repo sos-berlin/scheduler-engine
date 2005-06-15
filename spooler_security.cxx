@@ -34,6 +34,7 @@ Security::Level Security::as_level( const string& name )
     if( name == "none"   )  return seclev_none;
     if( name == "signal" )  return seclev_signal;
     if( name == "info"   )  return seclev_info;
+    if( name == "no_add" )  return seclev_no_add;
     if( name == "all"    )  return seclev_all;
 
     throw_xc( "SCHEDULER-119", name ); return seclev_none;

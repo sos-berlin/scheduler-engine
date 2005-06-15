@@ -523,7 +523,8 @@ static void __stdcall Handler( DWORD dwControl )
                 break;
 
             case SERVICE_CONTROL_SHUTDOWN:          // Requests the service to perform cleanup tasks, because the system is shutting down. 
-                spooler_ptr->cmd_stop();
+                pending_timed_out = false;
+                spooler_ptr->cmd_terminate();
                 break;
 
             case SERVICE_CONTROL_PARAMCHANGE:       // Windows 2000: Notifies the service that service-specific startup parameters have changed. The service should reread its startup parameters. 
@@ -562,6 +563,8 @@ static uint __stdcall service_thread( void* param )
     Service_thread_param* p   = (Service_thread_param*)param;
     int                   ret = 0;
 
+
+    while(1)
     {
         Spooler spooler;
 
@@ -574,6 +577,9 @@ static uint __stdcall service_thread( void* param )
             LOG( "Scheduler launch\n" );
 
             ret = spooler_ptr->launch( p->_argc, p->_argv, "" );
+
+            if( spooler._shutdown_cmd == Spooler::sc_reload 
+             || spooler._shutdown_cmd == Spooler::sc_load_config )  continue;        // Dasselbe in spooler.cxx, spooler_main()!
         }
         catch( const exception& x )
         {
@@ -583,9 +589,11 @@ static uint __stdcall service_thread( void* param )
             event_log( x.what(), p->_argc, p->_argv, &spooler );
           //set_service_status( 2 );
             spooler._log.error( x.what() );
-            spooler_ptr = NULL;
             ret = 99;
         }
+
+        spooler_ptr = NULL;
+        break;
     }
 
     set_service_status( 0 );       // Das beendet den Prozess wegen spooler_ptr == NULL  ==>  SERVICE_STOPPED

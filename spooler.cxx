@@ -1873,10 +1873,8 @@ void Spooler::nichts_getan( Spooler_thread* thread, int anzahl )
 
 //-----------------------------------------------------------------------Spooler::execute_state_cmd
 
-bool Spooler::execute_state_cmd()
+void Spooler::execute_state_cmd()
 {
-    bool continue_spooler = true;
-
     if( _state_cmd )
     {
         if( _state_cmd == sc_pause )     if( _state == s_running )  set_state( s_paused  ), signal_threads( "pause" );
@@ -1892,7 +1890,6 @@ bool Spooler::execute_state_cmd()
             {
                 set_state( _state_cmd == sc_let_run_terminate_and_restart? s_stopping_let_run : s_stopping );
                 if( _state == s_stopping )  FOR_EACH( Thread_list, _thread_list, t )  (*t)->cmd_shutdown();
-                continue_spooler = false;
             }
 
             _shutdown_cmd = _state_cmd;
@@ -1900,8 +1897,6 @@ bool Spooler::execute_state_cmd()
 
         _state_cmd = sc_none;
     }
-
-    return continue_spooler;
 }
 
 //-------------------------------------------------------------------------------------Spooler::run
@@ -1949,8 +1944,6 @@ void Spooler::run()
         }
 
 
-        //bool continue_spooler = execute_state_cmd();
-        //if( !continue_spooler )  if( !_single_thread || !_single_thread->has_tasks() )  break;
         execute_state_cmd();
         if( _shutdown_cmd )  if( !_single_thread  ||  !_single_thread->has_tasks() )  break;
 
@@ -2195,13 +2188,13 @@ void Spooler::cmd_reload()
 
 //--------------------------------------------------------------------------------Spooler::cmd_stop
 // Anderer Thread
-
+/*
 void Spooler::cmd_stop()
 {
     _state_cmd = sc_stop;
     signal( "stop" );
 }
-
+*/
 //---------------------------------------------------------------------------Spooler::cmd_terminate
 // Anderer Thread
 
@@ -2306,7 +2299,7 @@ int Spooler::launch( int argc, char** argv, const string& parameter_line )
     _communication.init();  // Für Windows
     //_communication.bind();  // Falls der Port belegt ist, gibt's hier einen Abbruch
 
-    do
+    //do
     {
         if( _state_cmd != sc_load_config )  load();
 
@@ -2355,7 +2348,7 @@ int Spooler::launch( int argc, char** argv, const string& parameter_line )
                     string xml = cp.execute( "<show_state what='task_queue orders remote_schedulers' />", Time::now(), indent );
                     try
                     {
-                        _log.info( xml );  // Blockiert bei ENOSPC nicht werden _state == s_stopping
+                        _log.info( xml );  // Blockiert bei ENOSPC nicht wegen _state == s_stopping
                     }
                     catch( exception& ) { Z_LOG( "\n\n" << xml << "\n\n" ); }
                 } 
@@ -2370,7 +2363,7 @@ int Spooler::launch( int argc, char** argv, const string& parameter_line )
 
         stop();
 
-    } while( _state_cmd == sc_reload || _state_cmd == sc_load_config );
+    }// while( _shutdown_cmd == sc_reload  ||  _shutdown_cmd == sc_load_config );
 
 
     _log.info( "Scheduler ordentlich beendet." );
@@ -2637,20 +2630,29 @@ int spooler_main( int argc, char** argv, const string& parameter_line )
 //        mtrace();   // Memory leak detectiopn
 //#   endif
 
-    Ole_initialize ole;
-    Spooler my_spooler;
+    Ole_initialize  ole;
 
-    my_spooler._is_service = spooler::is_daemon;
+    while(1)
+    {
+        Spooler my_spooler;
 
-    try
-    {
-        ret = my_spooler.launch( argc, argv, parameter_line );
-    }
-    catch( const exception& x )
-    {
-        SHOW_ERR( "Fehler " << x.what() );     // Fehlermeldung vor ~Spooler ausgeben
-        if( my_spooler.is_service() )  send_error_email( x.what(), argc, argv, parameter_line, &my_spooler );
-        ret = 1;
+        try
+        {
+            my_spooler._is_service = spooler::is_daemon;
+
+            ret = my_spooler.launch( argc, argv, parameter_line );
+
+            if( my_spooler._shutdown_cmd == Spooler::sc_reload 
+             || my_spooler._shutdown_cmd == Spooler::sc_load_config )  continue;        // Dasselbe in spooler_service.cxx!
+        }
+        catch( const exception& x )
+        {
+            SHOW_ERR( "Fehler " << x.what() );     // Fehlermeldung vor ~Spooler ausgeben
+            if( my_spooler.is_service() )  send_error_email( x.what(), argc, argv, parameter_line, &my_spooler );
+            ret = 1;
+        }
+
+        break;
     }
 
     return ret;
