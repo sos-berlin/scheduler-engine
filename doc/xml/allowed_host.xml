@@ -45,6 +45,9 @@
                 <p>level="info"</p>
                 <p class="list_text">Der Rechner darf Kommandos ausführen, die Informationen liefern,
                 aber den Zustand des Schedulers nicht ändern.</p>
+                <p>level="no_add"</p>
+                <p class="list_text">Der Rechner hat vollen Zugriff, 
+                nur <scheduler_element name="add_jobs"/>, <scheduler_element name="job"/> und <scheduler_element name="add_order"/> sind gesperrt.</p>
                 <p>level="all"</p>
                 <p class="list_text">Der Rechner hat vollen Zugriff.</p>
             </description>

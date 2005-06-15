@@ -72,7 +72,7 @@ const char dtd_string[] =
 "\n"
 "<!ELEMENT allowed_host          EMPTY>\n"
 "<!ATTLIST allowed_host          host                CDATA #REQUIRED>\n"
-"<!ATTLIST allowed_host          level               (none|signal|info|all) #REQUIRED>\n"
+"<!ATTLIST allowed_host          level               (none|signal|info|no_add|all) #REQUIRED>\n"
 "                                                                        <!-- level='none'     Nichts zugelassen (das ist default) -->\n"
 "                                                                        <!-- level='signal'   <signal-object> zugelassen, nur UDP -->\n"
 "                                                                        <!-- level='info'     <show_state> zugelassen -->\n"
