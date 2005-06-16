@@ -3560,7 +3560,7 @@ const char file_jz_scheduler_xslt[] =
     "<xsl:template match=\"ERROR\">\n"
     "<xsl:if test=\"@time != ''\">\n"
     "<xsl:value-of select=\"@time\"/>\n"
-    "<br/>\n"
+    "<xsl:text> &#160; </xsl:text>\n"
     "</xsl:if>\n"
     "\n"
     "<xsl:value-of select=\"@text\"/>\n"

@@ -600,6 +600,8 @@ int Communication::bind_socket( SOCKET socket, struct sockaddr_in* sa, const str
 
     if( ret == SOCKET_ERROR  &&  socket_errno() == EADDRINUSE )
     {
+        int my_errno = errno;  // Nur für Unix
+
         _spooler->_log.warn( tcp_or_udp + "-Port " + as_string( ntohs( sa->sin_port ) ) + " ist blockiert. Wir probieren es " + as_string(wait_for_port_available) + " Sekunden" );
 
         for( int i = 1; i <= wait_for_port_available; i++ )
@@ -610,13 +612,16 @@ int Communication::bind_socket( SOCKET socket, struct sockaddr_in* sa, const str
             sos_sleep(1);
         
             ret = ::bind( socket, (struct sockaddr*)sa, sizeof (struct sockaddr_in) );
+            my_errno = errno;
             if( ret != SOCKET_ERROR ) break;
             if( socket_errno() != EADDRINUSE )  break;
 
             if( print_dots )  fputc( i % 10 == 0? '0' + i / 10 % 10 : '.', stderr );
         }
 
-        if( print_dots )  { int e = errno; fputc( '\n', stderr ); errno = e; }
+        if( print_dots )  fputc( '\n', stderr );
+
+        errno = my_errno;   // Nur für Unix
     }
 
     return ret;
@@ -643,7 +648,7 @@ void Communication::bind()
             if( _spooler->udp_port() != 0 )
             {
                 _udp_socket._read_socket = socket( AF_INET, SOCK_DGRAM, 0 );
-                if( _udp_socket._read_socket == SOCKET_ERROR )  throw_sos_socket_error( "socket" );
+                if( _udp_socket._read_socket == SOCKET_ERROR )  throw_socket( socket_errno(), "socket" );
 
                 set_linger( _udp_socket._read_socket );
                 
@@ -652,10 +657,10 @@ void Communication::bind()
                 sa.sin_addr.s_addr = 0; // INADDR_ANY
 
                 ret = bind_socket( _udp_socket._read_socket, &sa, "UDP" );
-                if( ret == SOCKET_ERROR )  throw_sos_socket_error( "udp-bind ", as_string(_spooler->udp_port()).c_str() );
+                if( ret == SOCKET_ERROR )  throw_socket( socket_errno(), "udp-bind ", as_string(_spooler->udp_port()).c_str() );
 
                 ret = ioctlsocket( _udp_socket._read_socket, FIONBIO, &on );
-                if( ret == SOCKET_ERROR )  throw_sos_socket_error( "ioctl(FIONBIO)" );
+                if( ret == SOCKET_ERROR )  throw_socket( socket_errno(), "ioctl(FIONBIO)" );
 
                 _udp_port = _spooler->udp_port();
                 _rebound = true;
@@ -685,7 +690,7 @@ void Communication::bind()
                 _listen_socket.set_event_name( S() << "TCP listen(" << _spooler->tcp_port() << ")" );
 
                 _listen_socket._read_socket = socket( AF_INET, SOCK_STREAM, 0 );
-                if( _listen_socket._read_socket == SOCKET_ERROR )  throw_sos_socket_error( "socket" );
+                if( _listen_socket._read_socket == SOCKET_ERROR )  throw_socket( socket_errno(), "socket" );
 
                 set_linger( _listen_socket._read_socket );
                 
@@ -694,14 +699,14 @@ void Communication::bind()
                 sa.sin_addr.s_addr = 0; // INADDR_ANY
 
                 ret = bind_socket( _listen_socket._read_socket, &sa, "TCP" );
-                if( ret == SOCKET_ERROR )  throw_sos_socket_error( "tcp-bind", as_string(_spooler->tcp_port()).c_str() );
+                if( ret == SOCKET_ERROR )  throw_socket( socket_errno(), "tcp-bind", as_string(_spooler->tcp_port()).c_str() );
 
                 Z_LOG2( "socket.listen", "listen()\n" );
                 ret = listen( _listen_socket._read_socket, 5 );
-                if( ret == SOCKET_ERROR )  throw_errno( socket_errno(), "listen" );
+                if( ret == SOCKET_ERROR )  throw_socket( socket_errno(), "listen" );
 
                 ret = ioctlsocket( _listen_socket._read_socket, FIONBIO, &on );
-                if( ret == SOCKET_ERROR )  throw_sos_socket_error( "ioctl(FIONBIO)" );
+                if( ret == SOCKET_ERROR )  throw_socket( socket_errno(), "ioctl(FIONBIO)" );
 
                 _tcp_port = _spooler->tcp_port();
                 _rebound = true;
@@ -747,7 +752,7 @@ void Communication::init()
 #   ifdef SYSTEM_WIN
         WSADATA wsa_data;
         int ret = WSAStartup( 0x0101, &wsa_data );
-        if( ret )  throw_sos_socket_error( ret, "WSAStartup" );
+        if( ret )  throw_socket( ret, "WSAStartup" );
 #   endif
 
     _initialized = true;
