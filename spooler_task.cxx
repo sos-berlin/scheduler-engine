@@ -2223,8 +2223,8 @@ bool Process_task::do_begin__end()
             int n = sysconf( _SC_OPEN_MAX );
             for( int i = 3; i < n; i++ )  ::close(i);
             //::close( STDIN_FILENO );
-            int new_stdin = open( "/dev/null", O_RDONLY );
-            if( new_stdin != -1  &&  new_stdin != STDIN_FILENO )  dup2( new_stdin, STDIN_FILENO ),  close( new_stdin );
+            int new_stdin = ::open( "/dev/null", O_RDONLY );
+            if( new_stdin != -1  &&  new_stdin != STDIN_FILENO )  dup2( new_stdin, STDIN_FILENO ),  ::close( new_stdin );
 
             // Arguments 
 

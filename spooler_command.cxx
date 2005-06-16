@@ -86,7 +86,7 @@ xml::Element_ptr create_error_element( const xml::Document_ptr& document, const 
 
 void append_error_element( const xml::Element_ptr& element, const Xc_copy& x )
 {
-    element.appendChild( create_error_element( element.ownerDocument(), x, (time_t)Time::now() ) );
+    element.appendChild( create_error_element( element.ownerDocument(), x, x.time() ) );
 }
 
 //--------------------------------------------------------------------------------xc_from_dom_error

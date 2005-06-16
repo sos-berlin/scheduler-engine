@@ -314,6 +314,13 @@ static void be_daemon()
 
                  LOG( "setsid()\n" );
                  setsid(); 
+
+                 if( isatty( fileno(stdin) ) ) 
+                 {
+                     FILE* f = freopen( "/dev/null", "r", stdin );
+                     if( !f )  throw_errno( errno, "/dev/null" );
+                 }
+
                  break;
 
         case -1: throw_errno( errno, "fork" );

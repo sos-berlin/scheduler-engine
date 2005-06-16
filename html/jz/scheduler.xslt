@@ -1641,7 +1641,7 @@
     <xsl:template match="ERROR">
         <xsl:if test="@time != ''">
             <xsl:value-of select="@time"/>
-            <br/>
+            <xsl:text> &#160; </xsl:text>
         </xsl:if>
 
         <xsl:value-of select="@text"/>

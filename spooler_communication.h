@@ -196,7 +196,7 @@ struct Communication
   private:
   //int                         run                         ();
   //bool                        handle_socket               ( Channel* );
-    int                         bind_socket                 ( SOCKET, struct sockaddr_in* );
+    int                         bind_socket                 ( SOCKET, struct sockaddr_in*, const string& tcp_or_udp );
   //void                       _fd_set                      ( SOCKET, fd_set* );
 
   public:

@@ -581,7 +581,7 @@ bool Communication::main_thread_exists()
 */
 //-----------------------------------------------------------------------Communication::bind_socket
 
-int Communication::bind_socket( SOCKET socket, struct sockaddr_in* sa )
+int Communication::bind_socket( SOCKET socket, struct sockaddr_in* sa, const string& tcp_or_udp )
 {
     int ret;
     int true_ = 1;
@@ -594,15 +594,17 @@ int Communication::bind_socket( SOCKET socket, struct sockaddr_in* sa )
         LOG( "\n" );
     }
 
+    bool print_dots = isatty( fileno(stderr) ) && isatty( fileno(stdin) );
+
     ret = ::bind( socket, (struct sockaddr*)sa, sizeof (struct sockaddr_in) );
 
     if( ret == SOCKET_ERROR  &&  socket_errno() == EADDRINUSE )
     {
-        _spooler->_log.warn( "Port " + as_string( ntohs( sa->sin_port ) ) + " ist blockiert. Wir probieren es " + as_string(wait_for_port_available) + " Sekunden" );
+        _spooler->_log.warn( tcp_or_udp + "-Port " + as_string( ntohs( sa->sin_port ) ) + " ist blockiert. Wir probieren es " + as_string(wait_for_port_available) + " Sekunden" );
 
         for( int i = 1; i <= wait_for_port_available; i++ )
         {
-            if( ctrl_c_pressed || _spooler->state() == Spooler::s_stopping || _spooler->state() == Spooler::s_stopped )  return EINTR;
+            if( ctrl_c_pressed || _spooler->state() == Spooler::s_stopping || _spooler->state() == Spooler::s_stopped )  { errno = EINTR; return SOCKET_ERROR; }
             //if( !main_thread_exists() )  return EINTR;  //?  Thread bleibt sonst hängen, wenn Java sich bei Ctrl-C sofort verabschiedet. Java lässt SIGINT zu, dieser Thread aber nicht.
 
             sos_sleep(1);
@@ -611,10 +613,10 @@ int Communication::bind_socket( SOCKET socket, struct sockaddr_in* sa )
             if( ret != SOCKET_ERROR ) break;
             if( socket_errno() != EADDRINUSE )  break;
 
-            if( isatty( fileno(stderr) ) && isatty( fileno(stdin) ))  fputc( i % 10 == 0? '0' + i / 10 % 10 : '.', stderr );
+            if( print_dots )  fputc( i % 10 == 0? '0' + i / 10 % 10 : '.', stderr );
         }
 
-        if( isatty( fileno(stderr) ) )  fputc( '\n', stderr );
+        if( print_dots )  { int e = errno; fputc( '\n', stderr ); errno = e; }
     }
 
     return ret;
@@ -649,7 +651,7 @@ void Communication::bind()
                 sa.sin_family      = AF_INET;
                 sa.sin_addr.s_addr = 0; // INADDR_ANY
 
-                ret = bind_socket( _udp_socket._read_socket, &sa );
+                ret = bind_socket( _udp_socket._read_socket, &sa, "UDP" );
                 if( ret == SOCKET_ERROR )  throw_sos_socket_error( "udp-bind ", as_string(_spooler->udp_port()).c_str() );
 
                 ret = ioctlsocket( _udp_socket._read_socket, FIONBIO, &on );
@@ -691,7 +693,7 @@ void Communication::bind()
                 sa.sin_family      = AF_INET;
                 sa.sin_addr.s_addr = 0; // INADDR_ANY
 
-                ret = bind_socket( _listen_socket._read_socket, &sa );
+                ret = bind_socket( _listen_socket._read_socket, &sa, "TCP" );
                 if( ret == SOCKET_ERROR )  throw_sos_socket_error( "tcp-bind", as_string(_spooler->tcp_port()).c_str() );
 
                 Z_LOG2( "socket.listen", "listen()\n" );
