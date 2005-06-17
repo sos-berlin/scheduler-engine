@@ -707,10 +707,10 @@ function job_menu__onclick( job_name, x, y )
 
     popup_builder.add_bar();
     popup_builder.add_command ( "Start task now", "<start_job job='" + job_name + "'/>" );
+    popup_builder.add_command ( "Start at &lt;runtime&gt;", "<modify_job job='" + job_name + "' cmd='start'   />" );
     popup_builder.add_command ( "Stop"          , "<modify_job job='" + job_name + "' cmd='stop'    />", state != "stopped"  &&  state != "stopping" );
     popup_builder.add_command ( "Unstop"        , "<modify_job job='" + job_name + "' cmd='unstop'  />", state == "stopped"  ||  state == "stopping" );
 //  popup_builder.add_command ( "Wake"          , "<modify_job job='" + job_name + "' cmd='wake'    />" );
-    popup_builder.add_command ( "Start at &lt;runtime&gt;", "<modify_job job='" + job_name + "' cmd='start'   />" );
     popup_builder.add_command ( "Reread"        , "<modify_job job='" + job_name + "' cmd='reread'  />" );
     popup_builder.add_bar();
     popup_builder.add_command ( "End tasks"     , "<modify_job job='" + job_name + "' cmd='end'     />" );
@@ -753,6 +753,7 @@ function order_menu__onclick( job_chain_name, order_id, x, y )
 
     popup_builder.add_show_log( "Show log"        , "show_log?job_chain=" + job_chain_name +
                                                             "&order=" + order_id, "show_log_order_" + job_chain_name + "__" + order_id );
+    popup_builder.add_command ( "Remove"          , "<remove_order job_chain='" + job_chain_name + "' order='" + order_id + "' />" );
 
     _popup_menu = popup_builder.show_popup_menu( x, y );
 }

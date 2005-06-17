@@ -19,6 +19,7 @@ caption                 { font-size: 10pt; padding-bottom: 5pt; padding-left: 3p
 
 .small                  { font-size: 8pt }
 .label                  { font-size: 8pt; white-space: nowrap }
+.mono                   { font-family: Lucida Console; }
 
 /* Job-Description */
 div.description         {}

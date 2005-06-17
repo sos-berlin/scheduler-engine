@@ -1443,6 +1443,22 @@
 
             <xsl:apply-templates mode="trs_from_log_attributes" select="log"/>
 
+            <xsl:if test="subprocesses/subprocess">
+                <xsl:for-each select="subprocesses/subprocess">
+                    <tr class="process_class">
+                        <td>
+                            <span class="label">
+                                pid <xsl:value-of select="@pid" />
+                            </span>
+                        </td>
+                        <td colspan="99">
+                            <span>
+                                <xsl:value-of select="@title"/>
+                            </span>
+                        </td>
+                    </tr>
+                </xsl:for-each>
+            </xsl:if>
         </table>
     </xsl:template>
 
@@ -1738,7 +1754,7 @@
                 <td>
                     <span class="label">mail subject: </span>
                 </td>
-                <td colspan="99">
+                <td>
                     <xsl:value-of select="@mail_subject"/>
                 </td>
             </tr>
@@ -1749,7 +1765,7 @@
                 <td>
                     <span class="label">last error: </span>
                 </td>
-                <td colspan="99">
+                <td>
                     <xsl:value-of select="@last_error"/>
                 </td>
             </tr>
@@ -1760,7 +1776,7 @@
                 <td>
                     <span class="label">last warning: </span>
                 </td>
-                <td colspan="99">
+                <td>
                     <xsl:value-of select="@last_warning"/>
                 </td>
             </tr>
@@ -1771,7 +1787,7 @@
                 <td>
                     <span class="label">last info: </span>
                 </td>
-                <td colspan="99">
+                <td>
                     <xsl:value-of select="@last_info"/>
                 </td>
             </tr>
