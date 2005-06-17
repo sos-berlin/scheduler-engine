@@ -525,6 +525,7 @@ static void __stdcall Handler( DWORD dwControl )
             case SERVICE_CONTROL_SHUTDOWN:          // Requests the service to perform cleanup tasks, because the system is shutting down. 
                 pending_timed_out = false;
                 spooler_ptr->cmd_terminate();
+                set_service_status( 0, SERVICE_STOP_PENDING );
                 break;
 
             case SERVICE_CONTROL_PARAMCHANGE:       // Windows 2000: Notifies the service that service-specific startup parameters have changed. The service should reread its startup parameters. 

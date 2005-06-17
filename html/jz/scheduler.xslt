@@ -16,17 +16,22 @@
 
         <table cellspacing="0" cellpadding="0">
             <tr>
-                <td style="margin-top: 0px; margin-bottom: 1ex">
-                    <xsl:element name="span">
-                        <xsl:attribute name="title">Version  <xsl:value-of select="state/@version"/>&#10;pid=<xsl:value-of select="state/@pid"/>&#10;db=<xsl:value-of select="state/@db"/></xsl:attribute>
-                        <b>Scheduler</b>
-                    </xsl:element>
+                <td style="margin-top: 0px; padding-bottom: 2pt">
+                    <b>
+                        <xsl:element name="span">
+                            <xsl:attribute name="style">cursor: default;</xsl:attribute>
+                            <xsl:attribute name="title">Version  <xsl:value-of select="state/@version"/>&#10;pid=<xsl:value-of select="state/@pid"/>&#10;db=<xsl:value-of select="state/@db"/></xsl:attribute>
+                            Scheduler
 
-                    <xsl:if test="state/@id!=''">
-                        <xsl:text>&#160;</xsl:text>
-                        <b><span style="white-space: nowrap">-id=<xsl:value-of select="state/@id"/></span></b>
-                        &#160;
-                    </xsl:if>
+                        <xsl:value-of select="state/@host" />:<xsl:value-of select="state/@tcp_port" />
+                        
+                        <xsl:if test="state/@id!=''">
+                            <xsl:text>&#160;</xsl:text>
+                            <span style="white-space: nowrap">-id=<xsl:value-of select="state/@id"/></span>
+                            &#160;
+                        </xsl:if>
+                    </xsl:element>
+                    </b>
                 </td>
             </tr>
             
@@ -192,22 +197,30 @@
 
             <tr>
                 <td colspan="3" style="padding-top: 1pt">
-                    <xsl:value-of select="count( state/jobs/job [ @state='running' ] )" /> jobs running,
-                    <span style="white-space: nowrap">
-                        <xsl:value-of select="count( state/jobs/job [ @state='stopped' ] )" /> stopped,
-                    </span>
-                    <xsl:text> </xsl:text>
-                    <span style="white-space: nowrap">
-                        <xsl:value-of select="count( state/jobs/job [ @waiting_for_process='yes' ] )" /> need process,
-                    </span>
-                    <xsl:text> </xsl:text>
-                    <span style="white-space: nowrap">
-                        <xsl:value-of select="count( state/jobs/job/tasks/task[ @id ] )" /> tasks,
-                    </span>
-                    <xsl:text> </xsl:text>
-                    <span style="white-space: nowrap">
-                        <xsl:value-of select="sum( state/jobs/job/order_queue/@length )" /> orders
-                    </span>
+                    <xsl:call-template name="bold_counter">
+                        <xsl:with-param name="counter" select="count( state/jobs/job [ @state='running' ] )" />
+                        <xsl:with-param name="suffix" select="'jobs running'" />
+                    </xsl:call-template>,
+
+                    <xsl:call-template name="bold_counter">
+                        <xsl:with-param name="counter" select="count( state/jobs/job [ @state='stopped' ] )" />
+                        <xsl:with-param name="suffix" select="'stopped'" />
+                    </xsl:call-template>,
+
+                    <xsl:call-template name="bold_counter">
+                        <xsl:with-param name="counter" select="count( state/jobs/job [ @waiting_for_process='yes' ] )" />
+                        <xsl:with-param name="suffix" select="'need process'" />
+                    </xsl:call-template>,
+
+                    <xsl:call-template name="bold_counter">
+                        <xsl:with-param name="counter" select="count( state/jobs/job/tasks/task[ @id ] )" />
+                        <xsl:with-param name="suffix" select="'tasks'" />
+                    </xsl:call-template>,
+
+                    <xsl:call-template name="bold_counter">
+                        <xsl:with-param name="counter" select="sum( state/jobs/job/order_queue/@length )" />
+                        <xsl:with-param name="suffix" select="'orders'" />
+                    </xsl:call-template>
                 </td>
             </tr>
 
@@ -234,6 +247,25 @@
         </table>
     </xsl:template>
 
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~bold_counter-->
+
+    <xsl:template name="bold_counter">
+        <xsl:param name="counter"/>
+        <xsl:param name="suffix"/>
+        
+        <xsl:element name="span">
+            <xsl:attribute name="style">
+                white-space: nowrap;
+                <xsl:if test="$counter &gt; 0">
+                    font-weight: bold;
+                </xsl:if>
+            </xsl:attribute>
+            
+            <xsl:value-of select="$counter"/>
+            <xsl:text> </xsl:text>
+            <xsl:value-of select="$suffix"/>
+        </xsl:element>
+    </xsl:template>    
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~update_button-->
 
@@ -328,7 +360,7 @@
                     <xsl:element name="tr">
                         <xsl:attribute name="id"         >scheduler_tr_job_<xsl:value-of select="@job"/></xsl:attribute>
                         <xsl:attribute name="class"      >job</xsl:attribute>
-                        <xsl:attribute name="style"      >cursor: default; padding-top: 5pt</xsl:attribute>
+                        <xsl:attribute name="style"      >cursor: default; padding-top: 1pt</xsl:attribute>
                         <xsl:attribute name="onmouseover">
                             this.className =
                             document.getElementById( "scheduler_tr_job_<xsl:value-of select="@job"/>__2" ).className = "job_hover";
@@ -415,6 +447,12 @@
                     <xsl:if test="/spooler/@show_tasks_checkbox and tasks/task">
                         <xsl:apply-templates select="tasks" mode="job_list"/>
                     </xsl:if>
+                    
+                    <tr>
+                        <td colspan="99" style="border-bottom: 1 solid #00b0ff; line-height: 3pt">
+                            &#160;
+                        </td>
+                    </tr>
 
                 </xsl:for-each>
             </tbody>
