@@ -31,7 +31,7 @@
 -->    
 <pre>
 
-&lt;?xml version="1.0" encoding="iso-8859-1"?><!--&lt;!DOCTYPE spooler SYSTEM "http://zsch.de/sos/scheduler/scheduler.dtd">-->
+&lt;?xml version="1.0"?>
 &lt;spooler>
     &lt;config>
         &lt;process_classes/>
@@ -66,6 +66,17 @@ scheduler hallo_welt.xml
 
 <p>
     Sie können den Scheduler mit Ctrl-C abbbrechen.
+</p>
+
+
+
+<h2>Codierung der XML-Konfiguration</h2>
+<p>
+    <code>&lt;?xml encoding="UTF-8"?></code>&#160; und<br/>
+    <code>&lt;?xml encoding="ISO-8859-1"?></code>&#160; sind möglich.<br/>
+</p>                                                        
+<p>
+    Der Scheduler verarbeitet nur 8bit-Zeichen (ISO-8859-1).
 </p>
 
 

@@ -668,10 +668,6 @@
                     <xsl:with-param name="title"       select="$title"/>
                 </xsl:call-template>
                 
-                <!--p>
-                    Fehlt ein Stichwort? Weitere Stichwörter können bei mir beantragt werden: <a href="mailto:j@zsch.de?subject=Bitte ein neues Stichwort fuer den Scheduler: xxx">j@zsch.de</a>.
-                </p-->
-                
                 <xsl:call-template name="complete_register"/>
 <!--                
                 <p>
