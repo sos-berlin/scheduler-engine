@@ -786,6 +786,9 @@ cd $(ProjectDir)
 						PrecompiledHeaderThrough="spooler.h"/>
 				</FileConfiguration>
 			</File>
+			<File
+				RelativePath=".\spooler_xslt_stylesheet.cxx">
+			</File>
 		</Filter>
 		<Filter
 			Name="Header-Dateien"

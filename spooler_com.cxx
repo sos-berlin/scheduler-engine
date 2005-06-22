@@ -14,6 +14,7 @@
 #include "../zschimmer/z_com.h"
 #include "../zschimmer/com_server.h"
 
+
 #ifdef Z_WINDOWS
 #   include <process.h>                    // getpid()
 #endif
@@ -2661,6 +2662,7 @@ const Com_method Com_spooler::_methods[] =
     { DISPATCH_METHOD     , 30, "Execute_xml"               , (Com_method_ptr)&Com_spooler::Execute_xml          , VT_BSTR      , { VT_BSTR } },
     { DISPATCH_PROPERTYGET, 31, "Tcp_port"                  , (Com_method_ptr)&Com_spooler::get_Tcp_port         , VT_INT       },
     { DISPATCH_PROPERTYGET, 32, "Udp_port"                  , (Com_method_ptr)&Com_spooler::get_Udp_port         , VT_INT       },
+    { DISPATCH_METHOD     , 33, "Create_xslt_stylesheet"    , (Com_method_ptr)&Com_spooler::Create_xslt_stylesheet, VT_DISPATCH, { VT_BSTR } },
     {}
 };
 
@@ -3141,6 +3143,25 @@ STDMETHODIMP Com_spooler::get_Udp_port( int* result )
     *result = _spooler->_udp_port;
 
     return S_OK;
+}
+
+//--------------------------------------------------------------Com_spooler::Create_xslt_stylesheet
+
+HRESULT Com_spooler::Create_xslt_stylesheet( BSTR xml_or_filename, Ixslt_stylesheet** result )
+{
+    HRESULT                   hr         = S_OK;
+    ptr<xml::Xslt_stylesheet> stylesheet = Z_NEW( xml::Xslt_stylesheet );
+
+    stylesheet->set_java_class_name( "sos.spooler.Xslt_stylesheet" );
+
+    if( SysStringLen( xml_or_filename ) > 0 )
+    {
+        hr = stylesheet->Load( xml_or_filename );
+    }
+
+    *result = stylesheet.take();
+
+    return hr;
 }
 
 //----------------------------------------------------------------------------Com_context::_methods

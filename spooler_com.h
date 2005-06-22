@@ -570,6 +570,7 @@ struct Com_spooler : spooler_com::Ispooler,
     STDMETHODIMP                Execute_xml                 ( BSTR, BSTR* );
     STDMETHODIMP            get_Tcp_port                    ( int* );
     STDMETHODIMP            get_Udp_port                    ( int* );
+    STDMETHODIMP                Create_xslt_stylesheet      ( BSTR, spooler_com::Ixslt_stylesheet** );
 
 
     void                        close                       ()                                      { THREAD_LOCK(_lock)  _spooler = NULL; }

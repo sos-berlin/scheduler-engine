@@ -14,6 +14,7 @@ library Spooler
     importlib("msxml3.dll");
 
     import "../zschimmer/java.odl";
+    import "../zschimmer/xslt_stylesheet.odl";
 
     interface Ivariable_set;
     interface Ilog;
@@ -24,6 +25,7 @@ library Spooler
     interface Iorder_queue;
     interface Iorder;
     interface Isubprocess;
+  //interface Ixslt_stylesheet;
 
     //------------------------------------------------------------------------------------Log_level
 
@@ -579,6 +581,8 @@ library Spooler
 
         [propget]
         HRESULT                 Udp_port                ( [out,retval] int* );
+
+        HRESULT                 Create_xslt_stylesheet  ( [in,defaultvalue("")] BSTR Xml_or_filename, [out,retval] Ixslt_stylesheet** );
     }
 
     [
@@ -1227,6 +1231,36 @@ library Spooler
         interface Ihas_java_class_name;
     }
 
+    //-----------------------------------------------------------------------------Ixslt_stylesheet
+    /*
+    [
+        uuid       ( feee47ac-6c1b-11d8-8103-000476ee8afb ),
+        odl,
+        dual
+    ]
+    interface Ixslt_stylesheet : IDispatch
+    {
+        [propget]
+        HRESULT                 Java_class_name         ( [out,retval] BSTR* );                 // Damit java_class_name über IDispatch, statt über Ihas_java_class_name gerufen werden kann
+                                                                                                // Für den Objectserver
+
+
+        HRESULT                 Load                    ( [in] BSTR Xml_or_filename );
+
+        HRESULT                 Transform_xml           ( [in] BSTR Xml_or_filename, [out,retval] BSTR* );
+
+        HRESULT                 Transform_xml_to_file   ( [in] BSTR Xml_or_filename, [in] BSTR filename, [out,retval] BSTR* );
+    };
+
+    [
+        uuid       ( feee47ad-6c1b-11d8-8103-000476ee8afb )
+    ]
+    coclass Xslt_stylesheeet
+    {
+        interface Ixslt_stylesheet;
+        interface Ihas_java_class_name;
+    }
+    */
 };
 
 //-------------------------------------------------------------------------------------------------

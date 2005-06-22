@@ -29,6 +29,7 @@
 
 #ifdef SPOOLER_USE_LIBXML2
 #   include "../zschimmer/xml_libxml2.h"
+#   include "../zschimmer/xslt_libxslt.h"
     using namespace zschimmer::xml_libxml2;
 #endif
 
@@ -109,7 +110,7 @@ namespace sos {
 #include "spooler_service.h"
 #include "spooler_module_remote.h"
 #include "spooler_module_remote_server.h"
-
+#include "spooler_xslt_stylesheet.h"
 
 //-------------------------------------------------------------------------------------------------
 
