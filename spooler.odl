@@ -14,7 +14,7 @@ library Spooler
     importlib("msxml3.dll");
 
     import "../zschimmer/java.odl";
-    import "../zschimmer/xslt_stylesheet.odl";
+  //import "../zschimmer/xslt_stylesheet.odl";
 
     interface Ivariable_set;
     interface Ilog;
@@ -25,7 +25,7 @@ library Spooler
     interface Iorder_queue;
     interface Iorder;
     interface Isubprocess;
-  //interface Ixslt_stylesheet;
+    interface Ixslt_stylesheet;
 
     //------------------------------------------------------------------------------------Log_level
 
@@ -1232,7 +1232,7 @@ library Spooler
     }
 
     //-----------------------------------------------------------------------------Ixslt_stylesheet
-    /*
+    
     [
         uuid       ( feee47ac-6c1b-11d8-8103-000476ee8afb ),
         odl,
@@ -1243,15 +1243,18 @@ library Spooler
         [propget]
         HRESULT                 Java_class_name         ( [out,retval] BSTR* );                 // Damit java_class_name über IDispatch, statt über Ihas_java_class_name gerufen werden kann
                                                                                                 // Für den Objectserver
+        HRESULT                 Close                   ();
 
+        HRESULT                 Load_xml                ( [in] BSTR Xml );
 
-        HRESULT                 Load                    ( [in] BSTR Xml_or_filename );
+        HRESULT                 Load_file               ( [in] BSTR Filename );
 
-        HRESULT                 Transform_xml           ( [in] BSTR Xml_or_filename, [out,retval] BSTR* );
+        HRESULT                 Transform_xml           ( [in] BSTR Xml, [out,retval] BSTR* );
 
-        HRESULT                 Transform_xml_to_file   ( [in] BSTR Xml_or_filename, [in] BSTR filename, [out,retval] BSTR* );
+      //HRESULT                 Transform_file          ( [in] BSTR input_filename, [in] BSTR output_filename );
     };
 
+    /*
     [
         uuid       ( feee47ad-6c1b-11d8-8103-000476ee8afb )
     ]
@@ -1260,14 +1263,13 @@ library Spooler
         interface Ixslt_stylesheet;
         interface Ihas_java_class_name;
     }
-    */
+    */    
 };
 
 //-------------------------------------------------------------------------------------------------
 /*
 Ein paar freie GUIDs:
 
-feee47ac-6c1b-11d8-8103-000476ee8afb
 feee47ad-6c1b-11d8-8103-000476ee8afb
 feee47ae-6c1b-11d8-8103-000476ee8afb
 feee47af-6c1b-11d8-8103-000476ee8afb

@@ -3147,20 +3147,13 @@ STDMETHODIMP Com_spooler::get_Udp_port( int* result )
 
 //--------------------------------------------------------------Com_spooler::Create_xslt_stylesheet
 
-HRESULT Com_spooler::Create_xslt_stylesheet( BSTR xml_or_filename, Ixslt_stylesheet** result )
+HRESULT Com_spooler::Create_xslt_stylesheet( BSTR xml_or_filename_bstr, Ixslt_stylesheet** result )
 {
-    HRESULT                   hr         = S_OK;
-    ptr<xml::Xslt_stylesheet> stylesheet = Z_NEW( xml::Xslt_stylesheet );
-
-    stylesheet->set_java_class_name( "sos.spooler.Xslt_stylesheet" );
-
-    if( SysStringLen( xml_or_filename ) > 0 )
-    {
-        hr = stylesheet->Load( xml_or_filename );
-    }
-
+    HRESULT               hr         = S_OK;
+    ptr<Xslt_stylesheet>  stylesheet = SysStringLen( xml_or_filename_bstr ) == 0? Z_NEW( Xslt_stylesheet )
+                                                                                : Z_NEW( Xslt_stylesheet( xml_or_filename_bstr ) );
+    
     *result = stylesheet.take();
-
     return hr;
 }
 
