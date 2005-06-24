@@ -36,6 +36,10 @@
 </p>
 -->
 
+<p style="text-align: right">
+    <a href="CHANGES.xml">→Änderungsprotokoll</a>
+</p>
+
 <h2>Einstellungen und Datenbank</h2>
 <dl>
     <a href="konfiguration.xml">

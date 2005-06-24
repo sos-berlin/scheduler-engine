@@ -1,0 +1,89 @@
+<?xml version='1.0'?>
+<!-- $Id: scheduler.xsl 3721 2005-06-21 14:41:04Z jz $ -->
+
+<xsl:stylesheet xmlns:xsl = "http://www.w3.org/1999/XSL/Transform" 
+                version   = "1.0">
+
+    <xsl:include href="scheduler.xsl" />
+    <!--xsl:output doctype-public="-//W3C//DTD HTML 4.01//EN" />  <!- -"http://www.w3.org/TR/html4/strict.dtd"-->
+    
+    
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~changes-->
+    
+    <xsl:template match="changes">
+    
+        <xsl:variable name="title" select="@title"/>
+
+        <html>
+            <xsl:call-template name="html_head">
+                <xsl:with-param name="title" select="$title"/>
+            </xsl:call-template>
+
+            
+            <body>
+                <xsl:call-template name="body_start">
+                    <xsl:with-param name="title"       select="$title"/>
+                    <xsl:with-param name="parent_page" select="@parent_page"/>
+                </xsl:call-template>
+
+                <xsl:apply-templates select="change">
+                    <xsl:sort select="@subversion_revision" data-type="number" order="descending"/>
+                </xsl:apply-templates>                    
+                
+                <xsl:call-template name="bottom">
+                    <xsl:with-param name="parent_page" select="@parent_page"/>
+                </xsl:call-template>
+            </body>
+        </html>
+    
+    </xsl:template>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~change-->
+    
+    <xsl:template match="change">
+
+        <table>
+            <tbody>
+                <tr>
+                    <td valign="top">
+                        <span style="font-weight: bold">
+                            <xsl:value-of select="@version"/>.<xsl:value-of select="@subversion_revision"/>&#160;
+                        </span>
+                    </td>
+                    <td valign="top" style="padding-left: 1ex">
+                        <span style="font-weight: bold">
+                            <xsl:value-of select="@date"/>
+                        </span>
+                    </td>
+                    <td valign="top" align="left" style="padding-left: 2ex">
+                        <xsl:apply-templates select="revision"/>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    
+    </xsl:template>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~revision-->
+    
+    <xsl:template match="revision">
+
+        <xsl:element name="p">
+            <xsl:if test="@type='correction'">
+                <xsl:attribute name="style">color: green</xsl:attribute>
+            </xsl:if>
+            
+            <b><xsl:value-of select="@title"/></b>
+        </xsl:element>
+        
+        <xsl:if test="description">
+            <p style="margin-top: 1ex">&#160;</p>
+            <xsl:apply-templates select="description"/>
+            <p style="margin-top: 2ex">&#160;</p>
+        </xsl:if>
+    
+    </xsl:template>
+
+    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+    
+</xsl:stylesheet>

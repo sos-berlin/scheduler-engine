@@ -207,6 +207,14 @@ Der Auftrag bleibt vor dem Job stehen.
 
 
 ------------------------------------------------
-VERSION 2.0.130  2005-06-08
+VERSION 2.0.130  2005-06-24
 
 Fehlendes <run_time/> wird wieder wie leeres <run_time/> interpretiert.
+
+
+------------------------------------------------
+VERSION 2.0.131  2005-06-24
+
+**************************************************************************
+*** Änderungen sind ab jetzt in scheduler/doc/CHANGES.xml dokumentiert ***
+**************************************************************************

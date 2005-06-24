@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet href="changes.xsl" type="text/xsl"?>
+
+<!--$Id: factory_ini.xml 3623 2005-04-20 06:53:16Z jz $-->
+
+<changes title="Änderungsprotokoll">
+
+    <scheduler_keyword keyword="Änderungsprotokoll"/>
+    <scheduler_keyword keyword="Change log"/>
+
+    <change date="2005-06-24" version="2.0.130" subversion_revision="3742">
+        <revision type="correction" title="Fehlendes &lt;run_time&gt; wird wieder wie leeres &lt;run_time/&gt; interpretiert"/>
+    </change>
+
+    <change date="2005-06-08" version="2.0.129" subversion_revision="3696">
+        <revision type="modification" title="Auftragsjob stoppt bei return false in spooler_init() oder spooler_open()">
+            <description>
+                <p>
+                    Ein Auftragsjob, der 
+                    <code>false</code> in 
+                    <scheduler_method class="Job_impl" method="spooler_init"/>
+                    oder 
+                    <scheduler_method class="Job_impl" method="spooler_open"/>
+                    liefert,
+                    wird mit Fehlermeldung gestoppt.
+                </p>
+                <p>
+                    Das Stoppen kann mit 
+                    <scheduler_method class="Job" property="delay_after_error" java_signature="int, double" access="write"/> 
+                    verhindert werden.
+                </p>
+                <p>
+                    Der Auftrag bleibt in der Auftragswarteschlange des Jobs 
+                    und wird beim nächsten erfolgreichen Start des Jobs verarbeitet.
+                </p>
+            </description>
+        </revision>
+    </change>
+
+</changes>
