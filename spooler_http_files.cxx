@@ -3262,7 +3262,7 @@ const char file_jz_scheduler_xslt[] =
     "<b>\n"
     "<xsl:value-of select=\"@id\"/>\n"
     "</b>\n"
-    "\x00" "</xsl:otherwise>\n"
+    "</xsl:otherwise>\n"
     "</xsl:choose>\n"
     "\n"
     "<xsl:if test=\"@name!=''\">\n"

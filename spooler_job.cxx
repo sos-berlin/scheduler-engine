@@ -190,7 +190,7 @@ void Job::set_dom( const xml::Element_ptr& element, const Time& xml_mod_time )
             if( e.nodeName_is( "run_time" ) &&  !_spooler->_manual )  set_run_time( e );
         }
 
-        if( !_run_time->set() )   _run_time->set_default();
+        if( !_run_time->set() )  _run_time->set_default();
         if( _spooler->_manual )  init_run_time(),  _run_time->set_default_days(),  _run_time->set_once();
 
         if( _object_set_descr )  _object_set_descr->_class = _spooler->get_object_set_class( _object_set_descr->_class_name );
@@ -215,6 +215,8 @@ void Job::init0()
     if( _module.set() )  _module.init();
 
     _next_start_time = latter_day;
+    _period._begin = 0;
+    _period._end   = 0;
 
     set_state( s_pending );
     

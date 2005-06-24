@@ -204,3 +204,9 @@ wenn die Task einen Auftrag verarbeiten soll.
 Der Job stoppt dann, wenn nicht delay_after_error gesetzt ist.
 
 Der Auftrag bleibt vor dem Job stehen.
+
+
+------------------------------------------------
+VERSION 2.0.130  2005-06-08
+
+Fehlendes <run_time/> wird wieder wie leeres <run_time/> interpretiert.
