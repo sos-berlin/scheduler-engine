@@ -578,6 +578,20 @@ struct Isubprocess : IDispatch
     virtual HRESULT         Kill                    ( int signal )                                  = 0;
 };
 
+//--------------------------------------------------------------------------------Ixslt_stylesheet 
+
+DEFINE_GUID(   IID_Ixslt_stylesheet, 0xfeee47ac, 0x6c1b, 0x11d8, 0x81, 0x03, 0x00, 0x04, 0x76, 0xee, 0x8a, 0xfb );   // {feee47ac-6c1b-11d8-8103-000476ee8afb}
+
+struct Ixslt_stylesheet : IDispatch
+{
+    virtual HRESULT     get_Java_class_name         ( BSTR* )                                       = 0;        // Damit java_class_name über IDispatch, statt über Ihas_java_class_name gerufen werden kann
+    virtual HRESULT         Close                   ()                                              = 0;
+    virtual HRESULT         Load_xml                ( BSTR Xml )                                    = 0;
+    virtual HRESULT         Load_file               ( BSTR Filename )                               = 0;
+    virtual HRESULT         Transform_xml           ( BSTR Xml, BSTR* )                             = 0;
+    //virtual HRESULT       Transform_file          ( BSTR input_filename, STR output_filename )    = 0;
+};
+
 //-------------------------------------------------------------------------------------------------
 
 } //namespace spooler_com

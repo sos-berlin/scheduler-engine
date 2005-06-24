@@ -17,10 +17,11 @@ const Com_method Xslt_stylesheet::_methods[] =
 { 
 #ifdef COM_METHOD
     COM_PROPERTY_GET( Xslt_stylesheet,  1, Java_class_name       , VT_BSTR    , 0 ),
-    COM_METHOD      ( Xslt_stylesheet,  2, Close                 , VT_EMPTY   ),
-    COM_METHOD      ( Xslt_stylesheet,  3, Load                  , VT_EMPTY   , 0, VT_BSTR ),
-    COM_METHOD      ( Xslt_stylesheet,  4, Transform_xml         , VT_EMPTY   , 0, VT_BSTR  ),
-    COM_METHOD      ( Xslt_stylesheet,  5, Transform_xml_to_file , VT_EMPTY   , 0, VT_BSTR, VT_BSTR  ),
+    COM_METHOD      ( Xslt_stylesheet,  2, Close                 , VT_EMPTY   , 0 ),
+    COM_METHOD      ( Xslt_stylesheet,  3, Load_xml              , VT_EMPTY   , 0, VT_BSTR ),
+    COM_METHOD      ( Xslt_stylesheet,  4, Load_file             , VT_EMPTY   , 0, VT_BSTR ),
+    COM_METHOD      ( Xslt_stylesheet,  5, Transform_xml         , VT_BSTR    , 0, VT_BSTR  ),
+  //COM_METHOD      ( Xslt_stylesheet,  6, Transform_xml_to_file , VT_EMPTY   , 0, VT_BSTR, VT_BSTR  ),
 #endif
     {}
 };

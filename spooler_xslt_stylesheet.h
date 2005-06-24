@@ -43,12 +43,6 @@ struct Xslt_stylesheet : idispatch_implementation< Xslt_stylesheet, spooler_com:
   //STDMETHODIMP                Transform_xml_to_file       ( BSTR xml, BSTR filename )             { return xml::Xslt_stylesheet::Transform_xml_to_file( xml, filename ); }
 
 
-    bool                        is_xml                      ( const string& );
-    void                        close                       ();
-    void                        load                        ( const string& );
-    string                      Transform_xml               ( const string& );
-    void                        Transform_xml_to_file       ( const string& xml, const string& filename );
-
   private:
     Fill_zero                  _zero_;
 };
