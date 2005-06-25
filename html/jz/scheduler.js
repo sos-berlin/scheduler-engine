@@ -328,7 +328,12 @@ function xslt_format_datetime_with_diff( datetime, now, show_plus )
 {
     var date = date_from_datetime( datetime );
     var result = xslt_format_datetime( datetime );
-    if( result && now )  result += " \xA0(" + xslt_format_datetime_diff( date, now, show_plus ) + ")";
+    
+    if( result && now )
+    {
+        var diff = xslt_format_datetime_diff( date, now, show_plus );
+        if( diff )  result += " \xA0(" + diff + ")";
+    }
 
     return result;
 }
@@ -339,7 +344,11 @@ function xslt_format_date_or_time_with_diff( datetime, now )
 {
     var date = date_from_datetime( datetime );
     var result = xslt_format_date_or_time( datetime );
-    if( result && now )  result += " \xA0(" + xslt_format_datetime_diff( date, now ) + ")";
+    if( result && now )
+    {
+        var diff = xslt_format_datetime_diff( date, now )
+        if( diff )  result += " \xA0(" + diff + ")";
+    }
 
     return result;
 }
@@ -392,7 +401,7 @@ function xslt_format_datetime_diff( datetime_earlier, datetime_later, show_plus 
 
 function date_from_datetime( datetime )
 {
-    if( !datetime )  return null;
+    if( !datetime || datetime == "never" || datetime == "now" )  return null;
 
     var date = new Date( 1*datetime.substr( 0, 4 ),
                          1*datetime.substr( 5, 2 ) - 1,
