@@ -629,7 +629,7 @@
 
         <table cellpadding="0" cellspacing="0">
             <col valign="baseline"  width=" 50"/>
-            <col valign="baseline"  width="100"/>
+            <col valign="baseline"  width="150"/>
             <col valign="baseline"  width="120"/>
             <col valign="baseline"  width="40" align="right"/>
             <col valign="baseline"  width="10" align="right"/>
@@ -722,19 +722,6 @@
                         <xsl:element name="tr">
                             <xsl:attribute name="style">
                                 cursor: default;
-<!--
-                                <xsl:choose>
-                                    <xsl:when test="/spooler/@show_job_chain_orders_checkbox">
-                                        padding-top: 0pt;
-                                    </xsl:when>
-                                    <xsl:when test="/spooler/@show_job_chain_jobs_checkbox">
-                                        padding-top: 0pt;
-                                    </xsl:when>
-                                    <xsl:otherwise>
-                                        padding-top: 0;
-                                    </xsl:otherwise>
-                                </xsl:choose>
--->
                             </xsl:attribute>
                             <xsl:attribute name="onmouseover">
                                 this.className = "job_chain_hover";
@@ -750,7 +737,9 @@
                                 <b><xsl:value-of select="@name"/></b>
                             </td>
                             <td>
-                                <xsl:value-of select="@orders"/>
+                                <xsl:call-template name="bold_counter">
+                                    <xsl:with-param name="counter" select="@orders" />
+                                </xsl:call-template>
                             </td>
                             <td></td>
                         </xsl:element>
@@ -774,6 +763,9 @@
                                     </xsl:attribute>
                                 </xsl:if>
 
+                                <xsl:variable name="job_name" select="@job"/>
+                                <xsl:variable name="job" select="/spooler/answer/state/jobs/job[@job=$job_name]"/>
+
                                 <xsl:if test="not( $single )">
                                     <xsl:attribute name="style">
                                         cursor: default;
@@ -790,10 +782,8 @@
                                     <xsl:attribute name="onclick">call_error_checked( show_job_details, '<xsl:value-of select="@job"/>' )</xsl:attribute>
                                 </xsl:if>
 
-                                <td>
-                                    <span style="margin-left: 2ex">
-                                        <xsl:value-of select="@state"/>
-                                    </span>
+                                <td style="margin-left: 2ex">
+                                    <xsl:value-of select="@state"/>
                                 </td>
 
                                 <td>
@@ -801,16 +791,20 @@
                                 </td>
 
                                 <td>
-                                    <xsl:apply-templates select="job/@state"/>
-                                    <xsl:if test="job/tasks/@count>0">
+                                    <xsl:apply-templates select="$job/@state"/>
+                                    <xsl:if test="$job/tasks/@count>0">
                                         <xsl:text>, </xsl:text>
-                                        <xsl:value-of select="job/tasks/@count"></xsl:value-of>
-                                        tasks
+                                        <xsl:call-template name="bold_counter">
+                                            <xsl:with-param name="counter" select="count( $job [ @state='running' ] )" />
+                                            <xsl:with-param name="suffix" select="'tasks'" />
+                                        </xsl:call-template>
                                     </xsl:if>
                                 </td>
 
                                 <td>
-                                    <xsl:value-of select="@orders"/>
+                                    <xsl:call-template name="bold_counter">
+                                        <xsl:with-param name="counter" select="@orders" />
+                                    </xsl:call-template>
                                 </td>
 
                                 <td></td>
@@ -827,6 +821,58 @@
                         </xsl:for-each>
                     </xsl:if>
                 </xsl:for-each>
+                
+                
+                <!-- Nichtauftragsjobs zeigen -->
+                
+                <xsl:if test="/spooler/@show_job_chain_jobs_checkbox and not( $single ) and /spooler/answer/state/jobs/job [ not( @order='yes' ) ]">
+                    <tr style="padding-top: 2ex">
+                        <td colspan="99">&#160;</td>
+                    </tr>
+                    <tr>
+                        <td colspan="99" style="border-top: solid 1px gray">
+                            no-order jobs:
+                        </td>
+                    </tr>
+                    <xsl:for-each select="/spooler/answer/state/jobs/job [ not( @order='yes' ) ]">
+                        <xsl:element name="tr">
+                            <xsl:attribute name="style">
+                                cursor: default;
+                            </xsl:attribute>
+                            <xsl:attribute name="onmouseover">
+                                this.className = "job";
+                                this.style.cursor = "hand";
+                            </xsl:attribute>
+                            <xsl:attribute name="onmouseout" >
+                                this.className = "job_chain";
+                                this.style.cursor = "default";
+                            </xsl:attribute>
+                            <xsl:attribute name="onclick">call_error_checked( show_job_details, '<xsl:value-of select="@job"/>' )</xsl:attribute>
+                            
+                            <xsl:variable name="job_name" select="@job"/>
+                            <xsl:variable name="job" select="/spooler/answer/state/jobs/job[@job=$job_name]"/>
+                            
+                            <td></td>
+                            <td>
+                                <xsl:value-of select="@job"/>
+                            </td>
+                            <td>
+                                <xsl:apply-templates select="$job/@state"/>
+                                <xsl:if test="$job/tasks/@count>0">
+                                    <xsl:text>, </xsl:text>
+                                    <xsl:if test="$job/tasks/@count>0">
+                                        <xsl:text>, </xsl:text>
+                                        <xsl:call-template name="bold_counter">
+                                            <xsl:with-param name="counter" select="count( $job [ @state='running' ] )" />
+                                            <xsl:with-param name="suffix" select="'tasks'" />
+                                        </xsl:call-template>
+                                    </xsl:if>
+                                </xsl:if>
+                            </td>
+                            <td colspan="99"></td>
+                        </xsl:element>
+                    </xsl:for-each>
+                </xsl:if>
             </tbody>
         </table>
         
