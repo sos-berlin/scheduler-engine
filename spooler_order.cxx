@@ -127,9 +127,8 @@ xml::Element_ptr Job_chain_node::dom_element( const xml::Document_ptr& document,
             if( show & show_job_chain_orders )
             {
                 // Nur Aufträge im Job zeigen, sonst nichts vom Job (der wird bereits von <show_state> in <jobs> gezeigt)
-                xml::Element_ptr job_element = _job->dom_element( document, show | show_job_short, job_chain ) 
-              //xml::Element_ptr job_element = document.createElement( "job" );
-              //job_element.setAttribute( "name", _job->name() );
+                xml::Element_ptr job_element = document.createElement( "job" );
+                job_element.setAttribute( "name", _job->name() );
 
                 element.appendChild( job_element );
                 job_element.appendChild( _job->order_queue()->dom_element( document, show | show_orders, job_chain ) );

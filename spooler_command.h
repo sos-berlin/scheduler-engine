@@ -28,7 +28,6 @@ enum Show_what_enum
     show_run_time           = 0x200,
     show_job_chains         = 0x400,
     show_job_chain_jobs     = 0x800,
-    show_short_job          = 0x1000,   // <job> nur kurz
 
     show_all_               = 0x8000,
     show_all                = 0xFFFF    // Alle Flags und show_all_ (Bei <show_state> ist z.B. show_orders nicht in show_all enthalten)
