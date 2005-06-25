@@ -514,7 +514,11 @@ xml::Element_ptr Order_queue::dom_element( const xml::Document_ptr& document, co
 
     THREAD_LOCK( _lock )
     {
-        element.setAttribute( "length", order_count( which_job_chain ) );
+        int queue_length = order_count( which_job_chain );
+        element.setAttribute( "length", queue_length );
+
+        //if( Time next = next_time() )
+        element.setAttribute( "next_start_time", next_time().as_string() );
 
         if( show & show_orders )
         {

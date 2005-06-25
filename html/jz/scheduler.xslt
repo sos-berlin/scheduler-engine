@@ -347,7 +347,12 @@
                     <td class="head1">Job </td>
                     <td class="head"> Time </td>
                     <td class="head"> Steps </td>
-                    <td class="head"> Order etc.</td>
+                    <td class="head">
+                        Next start 
+                        <xsl:if test="/spooler/@show_order_jobs_checkbox">
+                            / Orders
+                        </xsl:if>
+                    </td>
                 </tr>
                 <tr>
                     <td colspan="99" class="after_head_space">&#160;</td>
@@ -425,11 +430,19 @@
                         <xsl:choose>
                             <xsl:when test="@order='yes'">
                                 <td class="order">
-                                    <xsl:value-of select="order_queue/@length"/> orders to process
+                                    <xsl:if test="order_queue/@next_start_time">
+                                        <xsl:value-of select="order_queue/@next_start_time__xslt_date_or_time_with_diff"/>
+                                        &#160;
+                                    </xsl:if>
+                                    <xsl:call-template name="bold_counter">
+                                        <xsl:with-param name="counter" select="order_queue/@length" />
+                                        <xsl:with-param name="suffix"  select="'orders'" />
+                                    </xsl:call-template>
                                 </td>
                             </xsl:when>
                             <xsl:otherwise>
                                 <td>
+                                    <xsl:value-of select="@next_start_time__xslt_date_or_time_with_diff"/>
                                 </td>
                             </xsl:otherwise>
                         </xsl:choose>
@@ -471,24 +484,24 @@
                             <span style="margin-left: 2ex">
                                 <xsl:choose>
                                     <xsl:when test="../../@waiting_for_process='yes'">
-                                        Needs process
+                                        <span class="task_error">Needs process!</span>
                                     </xsl:when>
                                     <xsl:otherwise>
-                                        <xsl:choose>
+                                        <!--<xsl:choose>
                                             <xsl:when test="../../@next_start_time">
                                                 Next start
                                             </xsl:when>
-                                            <xsl:otherwise>
-                                                ∙
+                                            <xsl:otherwise>-->
+                                                ∙<!--
                                             </xsl:otherwise>
-                                        </xsl:choose>
+                                        </xsl:choose>-->
                                     </xsl:otherwise>
                                 </xsl:choose>
                             </span>
                         </td>
 
                         <td align="right">
-                            <xsl:value-of select="../../@next_start_time__xslt_datetime_diff"  disable-output-escaping="yes"/>
+                            <!--<xsl:value-of select="../../@next_start_time__xslt_datetime_diff"  disable-output-escaping="yes"/>-->
                         </td>
 
                         <td></td>
@@ -898,101 +911,6 @@
             </tr>
         </xsl:if>
     </xsl:template>
-
-    <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Task (in Job chain list)-->
-
-    <!-- Hier ist einiges von <xsl:template match="tasks" mode="job_list"> kopiert.
-         Die gleichen Teile sollten mit <call-template> ausgelagert werden.
-
-    <xsl:template match="task" mode="job_chain_list">
-        <xsl:element name="tr">
-            <xsl:attribute name="class">task</xsl:attribute>
-            <xsl:choose>
-                <xsl:when test=" not( @id ) ">
-                    <td colspan="2">
-                        <span style="margin-left: 2ex">
-                            <xsl:choose>
-                                <xsl:when test="../../@waiting_for_process='yes'">
-                                    Need process
-                                </xsl:when>
-                                <xsl:otherwise>
-                                    <xsl:choose>
-                                        <xsl:when test="../../@next_start_time">
-                                            Next start
-                                        </xsl:when>
-                                        <xsl:otherwise>
-                                            .
-                                        </xsl:otherwise>
-                                    </xsl:choose>
-                                </xsl:otherwise>
-                            </xsl:choose>
-                        </span>
-                    </td>
-
-                    <td>
-                        <xsl:if test="../../@next_start_time">
-                            <xsl:value-of select="my:datetime_diff( string( ../../@next_start_time), $now )"  disable-output-escaping="yes"/>
-                        </xsl:if>
-                    </td>
-
-                    <td></td>
-
-                    <xsl:choose>
-                        <xsl:when test="../../@order='yes'">
-                            <td colspan="2" class="order">
-                            </td>
-                        </xsl:when>
-                        <xsl:otherwise>
-                            <td colspan="2">
-                            </td>
-                        </xsl:otherwise>
-                    </xsl:choose>
-                </xsl:when>
-                <xsl:otherwise>
-                    <xsl:attribute name="style"      >cursor: pointer</xsl:attribute>
-                    <xsl:attribute name="onmouseover">this.className='task_list_hover'</xsl:attribute>
-                    <xsl:attribute name="onmouseout" >this.className='task_list'</xsl:attribute>
-                    <xsl:attribute name="onclick">show_task_details( '<xsl:value-of select="../../@job"/>', <xsl:value-of select="@id"/> )</xsl:attribute>
-
-                    <td></td>
-
-                    <td>
-                        <span style="margin-left: 2ex">
-                            Task&#160;<xsl:value-of select="@id"/>
-                        </span>
-                        <xsl:if test="@name!=''">
-                            &#160; <xsl:value-of select="@name"/>
-                        </xsl:if>
-                    </td>
-
-                    <td></td>
-
-                    <td class="order">
-                        <xsl:if test="@state!='running'">
-                            <xsl:value-of select="@state"/>
-                            <xsl:text> </xsl:text>
-                        </xsl:if>
-                        <xsl:if test="order">
-                            <b>
-                                <xsl:value-of select="order/@id"/>
-                                <xsl:if test="order/@title != ''">
-                                    &#160;
-                                    <xsl:value-of select="order/@title"/>
-                                </xsl:if>
-                            </b>
-                        </xsl:if>
-                        <xsl:if test="@in_process_since!=''">
-                            <xsl:text> &#160;</xsl:text>
-                            <span class="small">
-                                (<xsl:value-of select="my:datetime_diff( string( @in_process_since ), $now, 0 )"  disable-output-escaping="yes"/>)
-                            </span>
-                        </xsl:if>
-                    </td>
-                </xsl:otherwise>
-            </xsl:choose>
-        </xsl:element>
-    </xsl:template>
-    -->
 
     <!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~process_classes-->
 

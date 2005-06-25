@@ -8,6 +8,10 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
+    <change date="2005-06-25" version="2.0.131" subversion_revision="3743">
+        <revision type="new" title="&lt;order_queue&gt; liefert Attribut next_start_time"/>
+    </change>
+
     <change date="2005-06-24" version="2.0.130" subversion_revision="3742">
         <revision type="correction" title="Fehlendes &lt;run_time&gt; wird wieder wie leeres &lt;run_time/&gt; interpretiert"/>
     </change>
