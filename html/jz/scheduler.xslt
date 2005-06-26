@@ -1361,7 +1361,7 @@
             <col valign="baseline" align="left"  />
 
             <tr>
-                <td colspan="99" class="task">
+                <td colspan="2" class="task">
                     <table cellpadding="0" cellspacing="0" width="100%">
                         <tr>
                             <td style="padding-left: 0px">
@@ -1422,7 +1422,7 @@
             <xsl:if test="order or ../../@order='yes'">
                 <tr>
                     <td><span class="label">order:</span></td>
-                    <td class="order">
+                    <td class="order" colspan="99">
                         <xsl:choose>
                             <xsl:when test="order">
                                 <b>
