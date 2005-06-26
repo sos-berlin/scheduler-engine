@@ -22,8 +22,8 @@ struct Xslt_stylesheet : idispatch_implementation< Xslt_stylesheet, spooler_com:
 
 
                                 Xslt_stylesheet             ();
-                                Xslt_stylesheet             ( const string& xml_or_filename );
-                                Xslt_stylesheet             ( const BSTR xml_or_filename );
+                              //Xslt_stylesheet             ( const string& xml_or_filename );
+                              //Xslt_stylesheet             ( const BSTR xml_or_filename );
                                ~Xslt_stylesheet             ();
 
     STDMETHODIMP_(ULONG)        AddRef                      ()                                      { return Idispatch_implementation::AddRef(); }
@@ -36,11 +36,11 @@ struct Xslt_stylesheet : idispatch_implementation< Xslt_stylesheet, spooler_com:
 
 
     // interface Ixslt_stylesheet
-    STDMETHODIMP                Close                       ()                                      { return xml::Xslt_stylesheet::Close(); }
-    STDMETHODIMP                Load_xml                    ( BSTR xml )                            { return xml::Xslt_stylesheet::Load_xml( xml ); }
-    STDMETHODIMP                Load_file                   ( BSTR filename )                       { return xml::Xslt_stylesheet::Load_file( filename ); }
-    STDMETHODIMP                Transform_xml               ( BSTR xml, BSTR* result )              { return xml::Xslt_stylesheet::Transform_xml( xml, result ); }
-  //STDMETHODIMP                Transform_xml_to_file       ( BSTR xml, BSTR filename )             { return xml::Xslt_stylesheet::Transform_xml_to_file( xml, filename ); }
+    STDMETHODIMP                Close                       ();
+    STDMETHODIMP                Load_xml                    ( BSTR, spooler_com::Ixslt_stylesheet** );
+    STDMETHODIMP                Load_file                   ( BSTR, Ixslt_stylesheet** );
+    STDMETHODIMP                Transform_xml               ( BSTR, BSTR* );
+  //STDMETHODIMP                Transform_xml_to_file       ( BSTR, BSTR );
 
 
   private:

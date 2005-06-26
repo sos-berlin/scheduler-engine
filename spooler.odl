@@ -582,7 +582,7 @@ library Spooler
         [propget]
         HRESULT                 Udp_port                ( [out,retval] int* );
 
-        HRESULT                 Create_xslt_stylesheet  ( [in,defaultvalue("")] BSTR Xml_or_filename, [out,retval] Ixslt_stylesheet** );
+        HRESULT                 Create_xslt_stylesheet  ( [out,retval] Ixslt_stylesheet** );
     }
 
     [
@@ -1245,9 +1245,9 @@ library Spooler
                                                                                                 // Für den Objectserver
         HRESULT                 Close                   ();
 
-        HRESULT                 Load_xml                ( [in] BSTR Xml );
+        HRESULT                 Load_xml                ( [in] BSTR Xml, Ixslt_stylesheet** );
 
-        HRESULT                 Load_file               ( [in] BSTR Filename );
+        HRESULT                 Load_file               ( [in] BSTR Filename, Ixslt_stylesheet** );
 
         HRESULT                 Transform_xml           ( [in] BSTR Xml, [out,retval] BSTR* );
 

@@ -442,6 +442,9 @@ cd $(ProjectDir)
 				RelativePath=".\spooler_dtd.cxx">
 			</File>
 			<File
+				RelativePath=".\spooler_event.cxx">
+			</File>
+			<File
 				RelativePath="spooler_history.cxx">
 				<FileConfiguration
 					Name="Release|Win32">
@@ -810,6 +813,9 @@ cd $(ProjectDir)
 			</File>
 			<File
 				RelativePath="spooler_communication.h">
+			</File>
+			<File
+				RelativePath=".\spooler_event.h">
 			</File>
 			<File
 				RelativePath="spooler_history.h">

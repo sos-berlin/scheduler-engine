@@ -292,6 +292,8 @@ struct Ispooler : IDispatch
     virtual HRESULT     get_Db_order_history_table_name ( BSTR* )                               = 0;
     virtual HRESULT     get_Ini_path                    ( BSTR* )                               = 0;
     virtual HRESULT         Execute_xml                 ( BSTR, BSTR* )                         = 0;
+    virtual HRESULT         Create_xslt_stylesheet      ( Ixslt_stylesheet** )                  = 0;
+
 };
 
 //------------------------------------------------------------------------------------------Log
@@ -586,8 +588,8 @@ struct Ixslt_stylesheet : IDispatch
 {
     virtual HRESULT     get_Java_class_name         ( BSTR* )                                       = 0;        // Damit java_class_name über IDispatch, statt über Ihas_java_class_name gerufen werden kann
     virtual HRESULT         Close                   ()                                              = 0;
-    virtual HRESULT         Load_xml                ( BSTR Xml )                                    = 0;
-    virtual HRESULT         Load_file               ( BSTR Filename )                               = 0;
+    virtual HRESULT         Load_xml                ( BSTR Xml, Ixslt_stylesheet** )                = 0;
+    virtual HRESULT         Load_file               ( BSTR Filename, Ixslt_stylesheet** )           = 0;
     virtual HRESULT         Transform_xml           ( BSTR Xml, BSTR* )                             = 0;
     //virtual HRESULT       Transform_file          ( BSTR input_filename, STR output_filename )    = 0;
 };

@@ -566,6 +566,18 @@ void Task::set_state( State new_state )
 
                 _log->log( log_level, msg );
             }
+
+/*
+            if( _state == s_closed )
+            {
+                try
+                {
+                    Task_state_event event ( Scheduler_event::evt_task_state, _log->highest_level(), this );
+                    event.send_mail();
+                }
+                catch( exception& x ) {}
+            }
+*/
         }
     }
 }
@@ -1236,7 +1248,13 @@ bool Task::do_something()
                 if( error_count <= 1 )
                 {
                     loop = false;
-                    finish();
+
+                    try
+                    {
+                        finish();
+                    }
+                    catch( exception& x ) { _log->error( x.what() ); }
+
                     set_state( s_closed );
                 }
                 else
@@ -1500,7 +1518,6 @@ void Task::finish()
 
 
     // eMail versenden
-
     try
     {
         if( !_spooler->_manual )

@@ -41,14 +41,15 @@ var _translation_table;
 var _response;
 var _timer;
 var _scheduler;
-var _show_card = "jobs";
+var _show_card = "job_chains";
 //var _show_jobs            = true;
 //var _show_job_chains      = false;
 //var _show_process_classes = false;
 var _checkbox_states = new Object();
 var update_seconds           = 5;
 
-_checkbox_states[ "show_order_jobs_checkbox" ] = true;
+_checkbox_states[ "show_order_jobs_checkbox"     ] = true;
+_checkbox_states[ "show_job_chain_jobs_checkbox" ] = true;
 //var _update_periodically = false;
 
 //-------------------------------------------------------------------------------------------onload
@@ -233,11 +234,28 @@ function show_task_details( job_name, task_id )
 
 //---------------------------------------------------------------------------------show_job_details
 
-function show_job_details( job_name )
+function show_job_details( job_name, job_chain_name )
 {
     var job_element  = _response.selectSingleNode( ".//job[@job='" + job_name + "']" );
 
-    window.parent.details_frame.show_job_details( job_element );
+    /*
+    if( job_chain_name )    // <task> und <order> mit job_chain != job_chain_name löschen
+    {
+        var alien_nodes = job_element.selectNodes( "tasks/task                   [ order/@job_chain != '" + job_chain_name + "' ] | " +
+                                                   "tasks/task/order_queue/order [ @job_chain != '" + job_chain_name + "' ] " );
+        if( alien_nodes )
+        {
+            for( var i = alien_nodes.length - 1; i >= 0; i-- )
+            {
+                var alien_node = alien_nodes[i];
+                alert(alien_node.xml);
+                alien_node.parentNode.removeChild( alien_node );
+            }
+        }
+    }
+    */
+
+    window.parent.details_frame.show_job_details( job_element, job_chain_name );
     update_jobs_frame();
 }
 

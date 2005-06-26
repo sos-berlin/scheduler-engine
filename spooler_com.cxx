@@ -2662,7 +2662,7 @@ const Com_method Com_spooler::_methods[] =
     { DISPATCH_METHOD     , 30, "Execute_xml"               , (Com_method_ptr)&Com_spooler::Execute_xml          , VT_BSTR      , { VT_BSTR } },
     { DISPATCH_PROPERTYGET, 31, "Tcp_port"                  , (Com_method_ptr)&Com_spooler::get_Tcp_port         , VT_INT       },
     { DISPATCH_PROPERTYGET, 32, "Udp_port"                  , (Com_method_ptr)&Com_spooler::get_Udp_port         , VT_INT       },
-    { DISPATCH_METHOD     , 33, "Create_xslt_stylesheet"    , (Com_method_ptr)&Com_spooler::Create_xslt_stylesheet, VT_DISPATCH, { VT_BSTR } },
+    { DISPATCH_METHOD     , 33, "Create_xslt_stylesheet"    , (Com_method_ptr)&Com_spooler::Create_xslt_stylesheet, VT_DISPATCH },
     {}
 };
 
@@ -3147,11 +3147,10 @@ STDMETHODIMP Com_spooler::get_Udp_port( int* result )
 
 //--------------------------------------------------------------Com_spooler::Create_xslt_stylesheet
 
-HRESULT Com_spooler::Create_xslt_stylesheet( BSTR xml_or_filename_bstr, Ixslt_stylesheet** result )
+HRESULT Com_spooler::Create_xslt_stylesheet( Ixslt_stylesheet** result )
 {
     HRESULT               hr         = S_OK;
-    ptr<Xslt_stylesheet>  stylesheet = SysStringLen( xml_or_filename_bstr ) == 0? Z_NEW( Xslt_stylesheet )
-                                                                                : Z_NEW( Xslt_stylesheet( xml_or_filename_bstr ) );
+    ptr<Xslt_stylesheet>  stylesheet = Z_NEW( Xslt_stylesheet );
     
     *result = stylesheet.take();
     return hr;

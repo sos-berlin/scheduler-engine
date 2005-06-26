@@ -19,10 +19,18 @@
     </description>
 
     <xml_attributes>
-        <xml_attribute name="job" type="job_name">
+        <xml_attribute name="job" type="name">
             <description>
                 <p>
                     Der Jobname.
+                </p>
+            </description>
+        </xml_attribute>
+
+        <xml_attribute name="job_chain" type="name">
+            <description>
+                <p>
+                    Aufträge, die nicht in dieser Jobkette stehen, und Tasks, die solche Aufträge verarbeiten, werden nicht geliefert.
                 </p>
             </description>
         </xml_attribute>

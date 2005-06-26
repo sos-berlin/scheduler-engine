@@ -32,14 +32,6 @@
     </tr>
 </table>
 
-<!--p>
-    <b>
-        <span id="job_name"></span>
-        &#160;
-        <span id="job_title"></span>
-    </b>
-<p>&#160;</p>
-</p-->
 
 
 <span id="stylesheet_output"></span>
@@ -58,6 +50,7 @@ var _stylesheet;
 var _timer;
 var _job_element;
 var _job_name;
+var _job_chain_name;
 var _task_id;
 var _job_chain_element;
 var _description_popup;
@@ -73,6 +66,7 @@ function init()
     _job_name          = undefined;
     _task_id           = undefined;
     _job_chain_element = undefined;
+    _job_chain_name    = "";
 
     if( !_scheduler )
     {
@@ -154,12 +148,13 @@ function show_task_details( job_element, task_element )
 
 //---------------------------------------------------------------------------------show_job_details
 
-function show_job_details( job_element )
+function show_job_details( job_element, job_chain_name )
 {
     init();
- 
+    
     _job_element = job_element;   
     _job_name    = job_element.getAttribute( "job" )
+    _job_chain_name = job_chain_name? job_chain_name : "";
     
     _show_card = job_element.getAttribute( "order" ) == "yes"? "order_queue" : "task_queue";
     
@@ -237,7 +232,7 @@ function update( force )
                    _show_card == "order_queue" ? "orders" 
                                                : "";
         
-        var response = _scheduler.execute( "<show_job job='" + _job_name + "' what='" + what + "' max_task_history='10'/>" );
+        var response = _scheduler.execute( "<show_job job='" + _job_name + "' job_chain='" + _job_chain_name + "' what='" + what + "' max_task_history='10'/>" );
         _job_element = response.selectSingleNode( "spooler/answer/job" );
 
         _job_element.setAttribute( "my_show_card", _show_card );

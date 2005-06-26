@@ -377,7 +377,12 @@ xml::Element_ptr Command_processor::execute_show_job( const xml::Element_ptr& el
     Show_what show = show_;
     if( show & show_all_ )  show |= show_description | show_task_queue | show_orders;
 
-    return _spooler->get_job( element.getAttribute( "job" ) ) -> dom_element( _answer, show );
+    Job_chain*  job_chain      = NULL;
+    string      job_chain_name = element.getAttribute( "job_chain" );
+    
+    if( job_chain_name != "" )  job_chain = _spooler->job_chain( job_chain_name );
+    
+    return _spooler->get_job( element.getAttribute( "job" ) ) -> dom_element( _answer, show, job_chain );
 }
 
 //------------------------------------------------------------Command_processor::execute_modify_job

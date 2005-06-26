@@ -318,7 +318,19 @@ function xslt_format_date_or_time( datetime )
     }
     else
     {
-        return datetime.substr( 0, 10 );
+        var tomorrow = new Date( now );
+        tomorrow.setDate( tomorrow.getDate() + 1 );
+        
+        if(    1*datetime.substr( 0, 4 ) == tomorrow.getYear()
+            && 1*datetime.substr( 5, 2 ) == tomorrow.getMonth() + 1
+            && 1*datetime.substr( 8, 2 ) == tomorrow.getDate()  )
+        {
+            return "tomorrow";
+        }
+        else    
+        {
+            return datetime.substr( 0, 10 );
+        }
     }
 }
 
@@ -385,11 +397,11 @@ function xslt_format_datetime_diff( datetime_earlier, datetime_later, show_plus 
         result += "s";
     }
     else
-    if( abs <    60*60 )  result = Math.floor( abs / (       60 ) ) + "m";
+    if( abs <=    99*60 )  result = Math.floor( abs / (       60 ) ) + "m";
     else
-    if( abs < 24*60*60 )  result = Math.floor( abs / (    60*60 ) ) + "h";
+    if( abs <= 48*60*60 )  result = Math.floor( abs / (    60*60 ) ) + "h";
     else
-                          result = Math.floor( abs / ( 24*60*60 ) ) + "d";
+                           result = Math.floor( abs / ( 24*60*60 ) ) + "d";
 
     return diff < 0             ? "-" + result :
            show_plus && diff > 0? "+" + result

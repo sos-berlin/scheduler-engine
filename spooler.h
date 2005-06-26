@@ -111,6 +111,7 @@ namespace sos {
 #include "spooler_module_remote.h"
 #include "spooler_module_remote_server.h"
 #include "spooler_xslt_stylesheet.h"
+#include "spooler_event.h"
 
 //-------------------------------------------------------------------------------------------------
 

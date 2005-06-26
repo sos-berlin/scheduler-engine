@@ -269,6 +269,7 @@ const char dtd_string[] =
 "\n"
 "<!ELEMENT show_job              EMPTY>\n"
 "<!ATTLIST show_job              job                 CDATA #REQUIRED>\n"
+"<!ATTLIST show_job              job_chain           CDATA #IMPLIED>\n"
 "<!ATTLIST show_job              what                CDATA #IMPLIED>\n"                    
 "<!ATTLIST show_job              max_orders          CDATA #IMPLIED>\n"                    
 "<!ATTLIST show_job              max_task_history    CDATA #IMPLIED>\n"                    
