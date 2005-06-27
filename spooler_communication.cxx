@@ -95,6 +95,8 @@ void Xml_processor::process()
 
     if( _processor_channel->_indent )  _response = replace_regex( _response, "\n", "\r\n" );      // Für Windows-telnet
 
+    _response += '\0';  // Null-Byte terminiert die XML-Antwort
+
     if( command_processor._error )  _channel->_log.error( command_processor._error->what() );
 }
 
