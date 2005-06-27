@@ -24,6 +24,15 @@ struct Com_mail : spooler_com::Imail,
                   spooler_com::Ihas_java_class_name, 
                   Sos_ole_object               
 {
+    struct File
+    {
+        string                 _real_filename;
+        string                 _mail_filename;
+        string                 _content_type;
+        string                 _encoding;
+    };
+
+
     void*                       operator new                ( size_t size )                         { return sos_alloc( size, "spooler.Mail" ); }
     void                        operator delete             ( void* ptr )                           { sos_free( ptr ); }
 
@@ -74,8 +83,8 @@ struct Com_mail : spooler_com::Imail,
 
     STDMETHODIMP            get_Dequeue_log                 ( BSTR* result )                        { return String_to_bstr( _msg->dequeue_log(), result ); }
 
+    xml::Element_ptr            dom_element                 ( xml::Document_ptr& dom );
     int                         auto_dequeue                ()                                      { return _msg->auto_dequeue(); }
-
     int                         send                        ();
 
   private:
@@ -84,11 +93,14 @@ struct Com_mail : spooler_com::Imail,
 
     Sos_ptr<mail::Message>     _msg;
 
+    Bstr                       _smtp;
     Bstr                       _subject;
     Bstr                       _from;
     Bstr                       _to;
     Bstr                       _cc;
     Bstr                       _bcc;
+    Bstr                       _body;
+    list<File>                 _files;
 };
 
 } //namespace spooler

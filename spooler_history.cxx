@@ -357,7 +357,7 @@ void Spooler_db::create_table_when_needed( const string& tablename, const string
     try
     {
         Any_file select;
-        select.open( "-in " + _db_name + " SELECT count(*) from " + uquoted(tablename) );
+        select.open( "-in " + _db_name + " SELECT count(*) from " + uquoted(tablename) + " where 1=0" );
         select.get_record();
         select.close();
         // ok
