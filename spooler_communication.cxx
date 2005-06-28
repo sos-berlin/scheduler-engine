@@ -164,14 +164,14 @@ bool Communication::Udp_socket::async_continue_( bool wait )
             Host host = addr.sin_addr;
             if( _spooler->security_level( host ) < Security::seclev_signal )
             {
-                _spooler->log().error( "UDP-Nachricht von " + host.as_string() + " nicht zugelassen." );
+                _spooler->log()->error( "UDP-Nachricht von " + host.as_string() + " nicht zugelassen." );
             }
             else
             {
                 Command_processor command_processor ( _spooler );
                 command_processor.set_host( &host );
                 string cmd ( buffer, len );
-                _spooler->log().info( "UDP-Nachricht von " + host.as_string() + ": " + cmd );
+                _spooler->log()->info( "UDP-Nachricht von " + host.as_string() + ": " + cmd );
                 command_processor.execute( cmd, Time::now() );
             }
             
@@ -669,7 +669,7 @@ void Communication::bind()
 
                 _udp_socket.set_event_name( S() << "UDP:" << ntohs( sa.sin_port ) );
 
-                _spooler->log().info( "Scheduler erwartet Kommandos über UDP-Port " + sos::as_string(_udp_port) );
+                _spooler->log()->info( "Scheduler erwartet Kommandos über UDP-Port " + sos::as_string(_udp_port) );
             }
         }
 
@@ -713,7 +713,7 @@ void Communication::bind()
                 _tcp_port = _spooler->tcp_port();
                 _rebound = true;
 
-                _spooler->log().info( "Scheduler erwartet Kommandos über TCP-Port " + sos::as_string(_tcp_port) );
+                _spooler->log()->info( "Scheduler erwartet Kommandos über TCP-Port " + sos::as_string(_tcp_port) );
             }
         }
 
@@ -883,14 +883,14 @@ int Communication::run()
                         Host host = addr.sin_addr;
                         if( _spooler->security_level( host ) < Security::seclev_signal )
                         {
-                            _spooler->log().error( "UDP-Nachricht von " + host.as_string() + " nicht zugelassen." );
+                            _spooler->log()->error( "UDP-Nachricht von " + host.as_string() + " nicht zugelassen." );
                         }
                         else
                         {
                             Command_processor cp = _spooler;
                             cp.set_host( &host );
                             string cmd ( buffer, len );
-                            _spooler->log().info( "UDP-Nachricht von " + host.as_string() + ": " + cmd );
+                            _spooler->log()->info( "UDP-Nachricht von " + host.as_string() + ": " + cmd );
                             cp.execute( cmd, Time::now() );
                         }
                     }
@@ -958,7 +958,7 @@ int Communication::thread_main()
     }
     catch( const Xc& x )
     {
-        _spooler->log().error( string("Communication::thread: ") + x.what() );
+        _spooler->log()->error( string("Communication::thread: ") + x.what() );
         result = 1;
     }
 

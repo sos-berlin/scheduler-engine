@@ -83,6 +83,7 @@ namespace sos {
         struct Show_what;
         struct Subprocess;
         struct Subprocess_register;
+        struct Xslt_stylesheet;
     }
 }
 
@@ -152,7 +153,7 @@ typedef map<Thread_id,Spooler_thread*>      Thread_id_map;
 
 //------------------------------------------------------------------------------------------Spooler
 
-struct Spooler
+struct Spooler : Scheduler_object
 {
     enum State
     {
@@ -199,7 +200,7 @@ struct Spooler
     string                      state_name                  () const                            { return state_name( _state ); }
     static string               state_name                  ( State );
   //bool                        free_threading_default      () const                            { return _free_threading_default; }
-    Prefix_log&                 log                         ()                                  { return _log; }
+    Prefix_log*                 log                         ()                                  { return &_log; }
     const string&               log_directory               () const                            { return _log_directory; }                      
     Time                        start_time                  () const                            { return _spooler_start_time; }
     Security::Level             security_level              ( const Ip_address& );
@@ -253,6 +254,7 @@ struct Spooler
     void                        load_object_set_classes_from_xml( Object_set_class_list*, const xml::Element_ptr&, const Time& xml_mod_time );
     void                        load_threads_from_xml       ( const xml::Element_ptr&, const Time& xml_mod_time );
 
+    xml::Element_ptr            state_dom_element           ( const xml::Document_ptr&, const Show_what& = show_standard );
     void                        set_state                   ( State );
   //void                        connect_to_main_scheduler   ();
 
@@ -292,11 +294,11 @@ struct Spooler
     // Order
     void                        load_jobs_from_xml          ( const xml::Element_ptr&, const Time& xml_mod_time, bool init = false );
     void                        load_job_from_xml           ( const xml::Element_ptr&, const Time& xml_mod_time, bool init = false );
-    xml::Element_ptr            jobs_as_xml                 ( const xml::Document_ptr&, const Show_what& );
+    xml::Element_ptr            jobs_dom_element            ( const xml::Document_ptr&, const Show_what& );
     void                        add_job_chain               ( Job_chain* );
     Job_chain*                  job_chain                   ( const string& name );
     Job_chain*                  job_chain_or_null           ( const string& name );
-    xml::Element_ptr            xml_from_job_chains         ( const xml::Document_ptr&, const Show_what& );
+    xml::Element_ptr            job_chains_dom_element      ( const xml::Document_ptr&, const Show_what& );
     void                        set_job_chain_time          ( const Time& t )                   { THREAD_LOCK( _job_chain_lock )  _job_chain_time = t; }
     Time                        job_chain_time              ()                                  { THREAD_LOCK_RETURN( _job_chain_lock, Time, _job_chain_time ); }
 
@@ -305,7 +307,7 @@ struct Spooler
     void                        add_process_class           ( Process_class* );
     Process_class*              process_class_or_null       ( const string& name );
     Process_class*              process_class               ( const string& name );
-    xml::Element_ptr            process_classes_as_dom      ( const xml::Document_ptr&, const Show_what& );
+    xml::Element_ptr            process_classes_dom_element ( const xml::Document_ptr&, const Show_what& );
     Process*                    new_temporary_process       ();
     void                        init_process_classes        ();
     Process_class*              temporary_process_class     ()                                  { return *_process_class_list.begin(); }

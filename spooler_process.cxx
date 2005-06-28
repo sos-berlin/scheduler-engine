@@ -180,7 +180,8 @@ xml::Element_ptr Process::dom_element( const xml::Document_ptr& document, const 
         process_element.setAttribute( "job"              , _job_name );
 
         if( _task_id )
-        process_element.setAttribute( "task_id"          , _task_id );
+        process_element.setAttribute( "task"             , _task_id ),
+        process_element.setAttribute( "task_id"          , _task_id );          // VERALTET!
 
         if( _connection )
         {

@@ -82,9 +82,9 @@ Job_chain* Spooler::job_chain( const string& name )
     return result;
 }
 
-//----------------------------------------------------xml::Element_ptr Spooler::xml_from_job_chains
+//------------------------------------------------------------------Spooler::job_chains_dom_element
 
-xml::Element_ptr Spooler::xml_from_job_chains( const xml::Document_ptr& document, const Show_what& show )
+xml::Element_ptr Spooler::job_chains_dom_element( const xml::Document_ptr& document, const Show_what& show )
 {
     xml::Element_ptr job_chains_element = document.createElement( "job_chains" );
 

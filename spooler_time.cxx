@@ -135,6 +135,16 @@ string Time::as_string( With_ms with ) const
     }
 }
 
+//----------------------------------------------------------------------------------Time::xml_value
+
+string Time::xml_value( With_ms with ) const
+{
+    string str = as_string( with );
+    assert( str[10] == ' ' );
+    str[10] = 'T';                      // yyyy-mm-ddThh:mm:ss.mmm
+    return str;
+}
+
 //---------------------------------------------------------------------------------------Time::now
 
 Time Time::now()

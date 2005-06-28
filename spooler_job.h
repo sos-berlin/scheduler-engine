@@ -100,7 +100,7 @@ struct Object_set : Sos_self_deleting
 
 //----------------------------------------------------------------------------------------------Job
 
-struct Job : Sos_self_deleting
+struct Job : Scheduler_object
 {
     enum State
     {
@@ -304,6 +304,7 @@ struct Job : Sos_self_deleting
     void                        count_task                  ()                                      { InterlockedIncrement( &_tasks_count ); }
     void                        count_step                  ()                                      { InterlockedIncrement( &_step_count ); }
 
+    Prefix_log*                 log                         ()                                      { return _log; }
     virtual string             _obj_name                    () const                                { return "Job " + _name; }
 
 
@@ -320,7 +321,6 @@ struct Job : Sos_self_deleting
     Fill_zero                  _zero_;
     string                     _name;
     Thread_semaphore           _lock;
-    Spooler*                   _spooler;
     ptr<Prefix_log>            _log;
     bool                       _waiting_for_process;        // Task kann nicht gestartet werden, weil kein Prozess in der Prozessklasse verfügbar ist
     bool                       _waiting_for_process_try_again;  

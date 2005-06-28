@@ -144,7 +144,7 @@ xml::Element_ptr Command_processor::execute_show_jobs( const Show_what& show )
 {
     if( _security_level < Security::seclev_info )  throw_xc( "SCHEDULER-121" );
 
-    return _spooler->jobs_as_xml( _answer, show );
+    return _spooler->jobs_dom_element( _answer, show );
 }
 
 //----------------------------------------------------------Command_processor::execute_show_threads
@@ -162,7 +162,7 @@ xml::Element_ptr Command_processor::execute_show_process_classes( const Show_wha
 {
     if( _security_level < Security::seclev_info )  throw_xc( "SCHEDULER-121" );
 
-    return _spooler->process_classes_as_dom( _answer, show );
+    return _spooler->process_classes_dom_element( _answer, show );
 }
 
 //------------------------------------------------------------Command_processor::execute_show_state
@@ -174,83 +174,8 @@ xml::Element_ptr Command_processor::execute_show_state( const xml::Element_ptr&,
     Show_what show = show_;
     if( show & show_all_ )  show |= Show_what_enum( show_task_queue | show_description | show_remote_schedulers );
 
-    xml::Element_ptr state_element = _answer.createElement( "state" );
- 
-    state_element.setAttribute( "time"                 , Sos_optional_date_time::now().as_string() );   // Veraltet (<answer> hat time).
-    state_element.setAttribute( "id"                   , _spooler->id() );
-    state_element.setAttribute( "spooler_id"           , _spooler->id() );
-    state_element.setAttribute( "spooler_running_since", Sos_optional_date_time( (time_t)_spooler->start_time() ).as_string() );
-    state_element.setAttribute( "state"                , _spooler->state_name() );
-    state_element.setAttribute( "log_file"             , _spooler->_base_log.filename() );
-    state_element.setAttribute( "version"              , VER_PRODUCTVERSION_STR );
-    state_element.setAttribute( "pid"                  , _spooler->_pid );
-    state_element.setAttribute( "config_file"          , _spooler->_config_filename );
-    state_element.setAttribute( "host"                 , _spooler->_hostname );
 
-    if( _spooler->_tcp_port )
-    state_element.setAttribute( "tcp_port"             , _spooler->_tcp_port );
-
-    if( _spooler->_udp_port )
-    state_element.setAttribute( "udp_port"             , _spooler->_udp_port );
-
-    if( _spooler->_db )
-    {
-        THREAD_LOCK( _spooler->_lock )
-        {
-            state_element.setAttribute( "db"                   , trim( remove_password( _spooler->_db->db_name() ) ) );
-
-            if( _spooler->_db->is_waiting() )
-                state_element.setAttribute( "db_waiting", "yes" );
-
-            if( _spooler->_db->error() != "" )
-                state_element.setAttribute( "db_error", trim( _spooler->_db->error() ) );
-        }
-    }
-
-    if( _spooler->_waiting_errno )
-    {
-        state_element.setAttribute( "waiting_errno"         , _spooler->_waiting_errno );
-        state_element.setAttribute( "waiting_errno_text"    , "ERRNO-" + as_string( _spooler->_waiting_errno ) + "  " + strerror( _spooler->_waiting_errno ) );
-        state_element.setAttribute( "waiting_errno_filename", _spooler->_waiting_errno_filename );
-    }
-
-    double cpu_time = get_cpu_time();
-    char buffer [30];
-    sprintf( buffer, "%-.3lf", cpu_time ); 
-#   ifdef Z_WINDOWS
-        state_element.setAttribute( "cpu_time"             , buffer );
-#   else
-        LOG( "Command_processor::execute_show_state() cpu_time=" << cpu_time << "\n" );
-#   endif
-
-    state_element.setAttribute( "loop"                 , _spooler->_loop_counter );
-    state_element.setAttribute( "waits"                , _spooler->_wait_counter );
-
-    state_element.appendChild( execute_show_jobs( show ) );
-  //state_element.appendChild( execute_show_threads( show ) );
-    state_element.appendChild( execute_show_process_classes( show ) );
-    state_element.appendChild( _spooler->xml_from_job_chains( _answer, show ) );
-
-    {
-        xml::Element_ptr subprocesses_element = _answer.createElement( "subprocesses" );
-        for( int i = 0; i < NO_OF( _spooler->_pids ); i++ )
-        {
-            int pid = _spooler->_pids[ i ];
-            if( pid )
-            {
-                xml::Element_ptr subprocess_element = _answer.createElement( "subprocess" );
-                subprocess_element.setAttribute( "pid", pid );
-
-                subprocesses_element.appendChild( subprocess_element );
-            }
-        }
-        
-        state_element.appendChild( subprocesses_element );
-    }
-
-    state_element.appendChild( _spooler->_remote_scheduler_register.dom_element( _answer, show ) );
-
-    return state_element;
+    return _spooler->state_dom_element( _answer, show );
 }
 
 //---------------------------------------------------------------Command_processor::get_id_and_prev
@@ -526,7 +451,7 @@ xml::Element_ptr Command_processor::execute_show_job_chains( const xml::Element_
     if( show & show_all_   )  show |= show | show_description | show_orders;
     if( show & show_orders )  show |= show_job_chain_orders;
 
-    return _spooler->xml_from_job_chains( _answer, show | show_job_chains | show_job_chain_jobs );
+    return _spooler->job_chains_dom_element( _answer, show | show_job_chains | show_job_chain_jobs );
 }
 
 //--------------------------------------------------------Command_processor::execute_show_job_chain
@@ -1072,7 +997,7 @@ ptr<Http_response> Command_processor::execute_http( Http_request* http_request )
     }
     catch( const exception& x )
     {
-        _spooler->log().debug( "Fehler beim HTTP-Aufruf " + http_request->_http_cmd + " " + path + ": " + x.what() );
+        _spooler->log()->debug( "Fehler beim HTTP-Aufruf " + http_request->_http_cmd + " " + path + ": " + x.what() );
 
         http_status_code = 404;
         error_text = x.what();

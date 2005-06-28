@@ -338,6 +338,7 @@ static void be_daemon()
 
 Spooler::Spooler() 
 : 
+    Scheduler_object( this, Scheduler_object::type_scheduler ),
     _zero_(this+1), 
     _version(VER_PRODUCTVERSION_STR),
     _security(this),
@@ -460,9 +461,92 @@ Security::Level Spooler::security_level( const Ip_address& host )
     return result;
 }
 
-//-----------------------------------------------------------------------------Spooler::jobs_as_xml
+//-----------------------------------------------------------------------Spooler::state_dom_element
 
-xml::Element_ptr Spooler::jobs_as_xml( const xml::Document_ptr& document, const Show_what& show )
+xml::Element_ptr Spooler::state_dom_element( const xml::Document_ptr& dom, const Show_what& show )
+{
+    xml::Element_ptr state_element = dom.createElement( "state" );
+ 
+    state_element.setAttribute( "time"                 , Sos_optional_date_time::now().as_string() );   // Veraltet (<answer> hat time).
+    state_element.setAttribute( "id"                   , _spooler->id() );
+    state_element.setAttribute( "spooler_id"           , _spooler->id() );
+    state_element.setAttribute( "spooler_running_since", Sos_optional_date_time( (time_t)_spooler->start_time() ).as_string() );
+    state_element.setAttribute( "state"                , _spooler->state_name() );
+    state_element.setAttribute( "log_file"             , _spooler->_base_log.filename() );
+    state_element.setAttribute( "version"              , VER_PRODUCTVERSION_STR );
+    state_element.setAttribute( "pid"                  , _spooler->_pid );
+    state_element.setAttribute( "config_file"          , _spooler->_config_filename );
+    state_element.setAttribute( "host"                 , _spooler->_hostname );
+
+    if( _spooler->_tcp_port )
+    state_element.setAttribute( "tcp_port"             , _spooler->_tcp_port );
+
+    if( _spooler->_udp_port )
+    state_element.setAttribute( "udp_port"             , _spooler->_udp_port );
+
+    if( _spooler->_db )
+    {
+        THREAD_LOCK( _spooler->_lock )
+        {
+            state_element.setAttribute( "db"                   , trim( remove_password( _spooler->_db->db_name() ) ) );
+
+            if( _spooler->_db->is_waiting() )
+                state_element.setAttribute( "db_waiting", "yes" );
+
+            if( _spooler->_db->error() != "" )
+                state_element.setAttribute( "db_error", trim( _spooler->_db->error() ) );
+        }
+    }
+
+    if( _spooler->_waiting_errno )
+    {
+        state_element.setAttribute( "waiting_errno"         , _spooler->_waiting_errno );
+        state_element.setAttribute( "waiting_errno_text"    , "ERRNO-" + as_string( _spooler->_waiting_errno ) + "  " + strerror( _spooler->_waiting_errno ) );
+        state_element.setAttribute( "waiting_errno_filename", _spooler->_waiting_errno_filename );
+    }
+
+    double cpu_time = get_cpu_time();
+    char buffer [30];
+    sprintf( buffer, "%-.3lf", cpu_time ); 
+#   ifdef Z_WINDOWS
+        state_element.setAttribute( "cpu_time"             , buffer );
+#   else
+        LOG( "Command_processor::execute_show_state() cpu_time=" << cpu_time << "\n" );
+#   endif
+
+    state_element.setAttribute( "loop"                 , _spooler->_loop_counter );
+    state_element.setAttribute( "waits"                , _spooler->_wait_counter );
+
+    state_element.appendChild( jobs_dom_element( dom, show ) );
+  //state_element.appendChild( execute_show_threads( show ) );
+    state_element.appendChild( process_classes_dom_element( dom, show ) );
+    state_element.appendChild( job_chains_dom_element( dom, show ) );
+
+    {
+        xml::Element_ptr subprocesses_element = dom.createElement( "subprocesses" );
+        for( int i = 0; i < NO_OF( _spooler->_pids ); i++ )
+        {
+            int pid = _spooler->_pids[ i ];
+            if( pid )
+            {
+                xml::Element_ptr subprocess_element = dom.createElement( "subprocess" );
+                subprocess_element.setAttribute( "pid", pid );
+
+                subprocesses_element.appendChild( subprocess_element );
+            }
+        }
+        
+        state_element.appendChild( subprocesses_element );
+    }
+
+    state_element.appendChild( _spooler->_remote_scheduler_register.dom_element( dom, show ) );
+
+    return state_element;
+}
+
+//------------------------------------------------------------------------Spooler::jobs_dom_element
+
+xml::Element_ptr Spooler::jobs_dom_element( const xml::Document_ptr& document, const Show_what& show )
 {
     xml::Element_ptr jobs_element = document.createElement( "jobs" );
     dom_append_nl( jobs_element );
@@ -634,10 +718,9 @@ void Spooler::load_process_classes_from_dom( const xml::Element_ptr& element, co
     }
 }
 
-//------------------------------------------------------------------Spooler::process_classes_as_dom
-// Anderer Thread
+//-------------------------------------------------------------Spooler::process_classes_dom_element
 
-xml::Element_ptr Spooler::process_classes_as_dom( const xml::Document_ptr& document, const Show_what& show )
+xml::Element_ptr Spooler::process_classes_dom_element( const xml::Document_ptr& document, const Show_what& show )
 {
     xml::Element_ptr element = document.createElement( "process_classes" );
 

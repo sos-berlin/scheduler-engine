@@ -379,6 +379,9 @@ cd $(ProjectDir)
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\spooler_common.cxx">
+			</File>
+			<File
 				RelativePath="spooler_communication.cxx">
 				<FileConfiguration
 					Name="Release|Win32">

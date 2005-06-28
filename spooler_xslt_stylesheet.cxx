@@ -20,8 +20,7 @@ const Com_method Xslt_stylesheet::_methods[] =
     COM_METHOD      ( Xslt_stylesheet,  2, Close                 , VT_EMPTY   , 0 ),
     COM_METHOD      ( Xslt_stylesheet,  3, Load_xml              , VT_DISPATCH, 0, VT_BSTR ),
     COM_METHOD      ( Xslt_stylesheet,  4, Load_file             , VT_DISPATCH, 0, VT_BSTR ),
-    COM_METHOD      ( Xslt_stylesheet,  5, Transform_xml         , VT_BSTR    , 0, VT_BSTR  ),
-  //COM_METHOD      ( Xslt_stylesheet,  6, Transform_xml_to_file , VT_EMPTY   , 0, VT_BSTR, VT_BSTR  ),
+    COM_METHOD      ( Xslt_stylesheet,  5, Apply_xml             , VT_BSTR    , 0, VT_BSTR  ),
 #endif
     {}
 };
@@ -123,9 +122,9 @@ STDMETHODIMP Xslt_stylesheet::Load_file( BSTR filename_bstr, Ixslt_stylesheet** 
     return hr;
 }
 
-//-------------------------------------------------------------------Xslt_stylesheet::Transform_xml
+//-----------------------------------------------------------------------Xslt_stylesheet::Apply_xml
 
-STDMETHODIMP Xslt_stylesheet::Transform_xml( BSTR xml_or_file_bstr, BSTR* result )
+STDMETHODIMP Xslt_stylesheet::Apply_xml( BSTR xml_or_file_bstr, BSTR* result )
 {
     HRESULT hr = S_OK;
 

@@ -386,9 +386,9 @@ void Spooler_db::try_reopen_after_error( const exception& x, bool wait_endless )
 
     THREAD_LOCK( _error_lock )  _error = x.what();
 
-    _spooler->log().error( string("FEHLER BEIM ZUGRIFF AUF DATENBANK: ") + x.what() );
+    _spooler->log()->error( string("FEHLER BEIM ZUGRIFF AUF DATENBANK: ") + x.what() );
 
-    _spooler->log().info( "Datenbank wird geschlossen" );
+    _spooler->log()->info( "Datenbank wird geschlossen" );
     try
     {
         close();
@@ -435,7 +435,7 @@ void Spooler_db::try_reopen_after_error( const exception& x, bool wait_endless )
                 catch( const exception& x )
                 {
                     THREAD_LOCK( _error_lock )  _error = x.what();
-                    _spooler->log().warn( x.what() );
+                    _spooler->log()->warn( x.what() );
 
                     if( !_spooler->_need_db )  break;
                     
@@ -446,7 +446,7 @@ void Spooler_db::try_reopen_after_error( const exception& x, bool wait_endless )
                         break;
                     }
 
-                    _spooler->log().warn( "Eine Minute warten bevor Datenbank erneut geöffnet wird ..." );
+                    _spooler->log()->warn( "Eine Minute warten bevor Datenbank erneut geöffnet wird ..." );
                     //sos_sleep( 60 );
                     _spooler->_connection_manager->async_continue_selected( is_communication_operation, 60 );
                 }
@@ -456,7 +456,7 @@ void Spooler_db::try_reopen_after_error( const exception& x, bool wait_endless )
 
     if( too_much_errors )
     {
-        _spooler->log().warn( warn_msg );
+        _spooler->log()->warn( warn_msg );
         
         if( _spooler->_need_db ) 
         {
@@ -478,7 +478,7 @@ void Spooler_db::try_reopen_after_error( const exception& x, bool wait_endless )
 
     if( !_db.opened() )
     {
-        _spooler->log().info( "Historie wird von Datenbank auf Dateien umgeschaltet" );
+        _spooler->log()->info( "Historie wird von Datenbank auf Dateien umgeschaltet" );
         open2( "" );     // Umschalten auf dateibasierte Historie
     }
 
@@ -512,7 +512,7 @@ int Spooler_db::get_id( const string& variable_name, Transaction* outer_transact
     }
     catch( const exception& x ) 
     { 
-        _spooler->log().error( string("FEHLER BEIM LESEN DER NÄCHSTEN ID: ") + x.what() ); 
+        _spooler->log()->error( string("FEHLER BEIM LESEN DER NÄCHSTEN ID: ") + x.what() ); 
         throw;
     }
 
@@ -709,7 +709,7 @@ void Spooler_db::insert_order( Order* order )
     }
     catch( const exception& x ) 
     { 
-        _spooler->log().error( "FEHLER BEIM EINFÜGEN IN DIE TABELLE " + _spooler->_orders_tablename + ": " + x.what() ); 
+        _spooler->log()->error( "FEHLER BEIM EINFÜGEN IN DIE TABELLE " + _spooler->_orders_tablename + ": " + x.what() ); 
         throw;
     }
 }
@@ -789,7 +789,7 @@ void Spooler_db::update_order( Order* order )
     }
     catch( const exception& x ) 
     { 
-        _spooler->log().error( "FEHLER BEIM UPDATE DER TABELLE " + _spooler->_orders_tablename + ": " + x.what() ); 
+        _spooler->log()->error( "FEHLER BEIM UPDATE DER TABELLE " + _spooler->_orders_tablename + ": " + x.what() ); 
         throw;
     }
 }
@@ -863,7 +863,7 @@ void Spooler_db::write_order_history( Order* order, Transaction* outer_transacti
     }
     catch( const exception& x ) 
     { 
-        _spooler->log().error( string("FEHLER BEIM SCHREIBEN DER ORDER-HISTORIE: ") + x.what() ); 
+        _spooler->log()->error( string("FEHLER BEIM SCHREIBEN DER ORDER-HISTORIE: ") + x.what() ); 
         throw;
     }
 }
@@ -1426,7 +1426,7 @@ void Task_history::write( bool start )
             
             if( !start )  
             {
-                _spooler->log().info( "Historiensatz wird wegen vorausgegangen Datenbankfehlers nicht geschrieben" );
+                _spooler->log()->info( "Historiensatz wird wegen vorausgegangen Datenbankfehlers nicht geschrieben" );
                 return;
             }
         }

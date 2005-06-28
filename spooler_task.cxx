@@ -198,8 +198,8 @@ string start_cause_name( Start_cause cause )
 
 Task::Task( Job* job )    
 : 
+    Scheduler_object( job->_spooler, Scheduler_object::type_task ),
     _zero_(this+1), 
-    _spooler(job->_spooler), 
     _job(job),
     _history(&job->_history,this),
     _timeout(job->_task_timeout),

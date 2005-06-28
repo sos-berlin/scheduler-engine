@@ -14,7 +14,7 @@ namespace spooler {
 //----------------------------------------------------------------------------------Xslt_stylesheet
 
 struct Xslt_stylesheet : idispatch_implementation< Xslt_stylesheet, spooler_com::Ixslt_stylesheet >, 
-                         xml::Xslt_stylesheet_ptr,
+                         xml::Xslt_stylesheet,
                          spooler_com::Ihas_java_class_name
 {
     static Class_descriptor        class_descriptor;
@@ -39,7 +39,7 @@ struct Xslt_stylesheet : idispatch_implementation< Xslt_stylesheet, spooler_com:
     STDMETHODIMP                Close                       ();
     STDMETHODIMP                Load_xml                    ( BSTR, spooler_com::Ixslt_stylesheet** );
     STDMETHODIMP                Load_file                   ( BSTR, Ixslt_stylesheet** );
-    STDMETHODIMP                Transform_xml               ( BSTR, BSTR* );
+    STDMETHODIMP                Apply_xml                   ( BSTR, BSTR* );
   //STDMETHODIMP                Transform_xml_to_file       ( BSTR, BSTR );
 
 

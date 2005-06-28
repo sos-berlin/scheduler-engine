@@ -1249,9 +1249,9 @@ library Spooler
 
         HRESULT                 Load_file               ( [in] BSTR Filename, Ixslt_stylesheet** );
 
-        HRESULT                 Transform_xml           ( [in] BSTR Xml, [out,retval] BSTR* );
+        HRESULT                 Apply_xml               ( [in] BSTR Xml, [out,retval] BSTR* );
 
-      //HRESULT                 Transform_file          ( [in] BSTR input_filename, [in] BSTR output_filename );
+      //HRESULT                 Apply_file              ( [in] BSTR input_filename, [in] BSTR output_filename );
     };
 
     /*

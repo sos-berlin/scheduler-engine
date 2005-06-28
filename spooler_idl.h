@@ -590,8 +590,8 @@ struct Ixslt_stylesheet : IDispatch
     virtual HRESULT         Close                   ()                                              = 0;
     virtual HRESULT         Load_xml                ( BSTR Xml, Ixslt_stylesheet** )                = 0;
     virtual HRESULT         Load_file               ( BSTR Filename, Ixslt_stylesheet** )           = 0;
-    virtual HRESULT         Transform_xml           ( BSTR Xml, BSTR* )                             = 0;
-    //virtual HRESULT       Transform_file          ( BSTR input_filename, STR output_filename )    = 0;
+    virtual HRESULT         Apply_xml               ( BSTR Xml, BSTR* )                             = 0;
+    //virtual HRESULT       Apply_file              ( BSTR input_filename, STR output_filename )    = 0;
 };
 
 //-------------------------------------------------------------------------------------------------

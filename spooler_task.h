@@ -29,7 +29,7 @@ string                          start_cause_name            ( Start_cause );
 
 //----------------------------------------------------------------------------------------------Task
 
-struct Task : Sos_self_deleting
+struct Task : Scheduler_object
 {
     enum State
     {
@@ -231,7 +231,6 @@ struct Task : Sos_self_deleting
     Job*                       _job;
     Thread_semaphore           _lock;
     ptr<Prefix_log>            _log;
-    Spooler*                   _spooler;
     Spooler_thread*            _thread;
     Task_history               _history;
  
