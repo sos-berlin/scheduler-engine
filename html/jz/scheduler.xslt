@@ -821,7 +821,7 @@
                                         <xsl:when test="$job/tasks/@count>0">
                                             <xsl:text>, </xsl:text>
                                             <xsl:call-template name="bold_counter">
-                                                <xsl:with-param name="counter" select="count( /spooler/answer/state/jobs/job[@job=$job_name]/tasks/task[ order/@job_chain=$job_chain_name ] )" />
+                                                <xsl:with-param name="counter" select="count( $job/tasks/task[ order/@job_chain=$job_chain_name ] )" />
                                                 <xsl:with-param name="suffix" select="'tasks'" />
                                             </xsl:call-template>
                                         </xsl:when>

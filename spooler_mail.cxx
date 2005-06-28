@@ -85,7 +85,7 @@ void Com_mail::init()
 
 //----------------------------------------------------------------------------Com_mail::dom_element
 
-xml::Element_ptr Com_mail::dom_element( xml::Document_ptr& dom )
+xml::Element_ptr Com_mail::dom_element( const xml::Document_ptr& dom )
 {
     xml::Element_ptr mail_element = dom.createElement( "mail" );
 
@@ -115,34 +115,100 @@ xml::Element_ptr Com_mail::dom_element( xml::Document_ptr& dom )
 }
 
 //--------------------------------------------------------------------------------Com_mail::set_dom
-/*
+
 void Com_mail::set_dom( const xml::Element_ptr& mail_element )
 {
-    putSubject( mail_element.getAttribute( "subject" ) );
-    _from    = mail_element.getAttribute( "from"    );
-    _to      = mail_element.getAttribute( "to"      );
-    _cc      = mail_element.getAttribute( "cc"      );
-    _bcc     = mail_element.getAttribute( "bcc"     );
-    _smtp    = mail_element.getAttribute( "smtp"    );
-
-    xml::Element_ptr body_element = mail_element.append_new_element( "body" );
-    
-    body_element.append_new_text_element( "text", _body );
+    set_subject( mail_element.getAttribute( "subject" ) );
+    set_from   ( mail_element.getAttribute( "from"    ) );
+    set_to     ( mail_element.getAttribute( "to"      ) );
+    set_cc     ( mail_element.getAttribute( "cc"      ) );
+    set_bcc    ( mail_element.getAttribute( "bcc"     ) );
+    set_smtp   ( mail_element.getAttribute( "smtp"    ) );
 
 
-    Z_FOR_EACH( list<File>, _files, f )
+    xml::Xpath_nodes file_elements = mail_element.select_nodes( "body/file" );
+    for( int i = 0; i < file_elements.count(); i++ )
     {
-        xml::Element_ptr file_element = body_element.append_new_element( "file" );
+        xml::Element_ptr file_element = file_elements[ i ];
 
-        file_element.getAttribute( "path"         , f->_real_filename );
-        file_element.getAttribute( "mail_filename", f->_mail_filename );
-        file_element.getAttribute( "content_type" , f->_content_type  );
-        file_element.getAttribute( "encoding"     , f->_encoding      );
+        add_file( file_element.getAttribute( "path" ),
+                  file_element.getAttribute( "mail_filename" ),
+                  file_element.getAttribute( "content_type"  ),
+                  file_element.getAttribute( "encoding"      ) );
     }
-
 }
-*/
-//---------------------------------------------------------------------------------Com_mail::put_to
+
+//----------------------------------------------------------------------------Com_mail::set_subject
+
+void Com_mail::set_subject( const string& subject )
+{
+    _msg->set_subject( subject );
+    _subject = subject;
+}
+
+//-------------------------------------------------------------------------------Com_mail::set_from
+
+void Com_mail::set_from( const string& from )
+{
+    _msg->set_from( from );
+    _from = _msg->from();
+}
+
+//---------------------------------------------------------------------------------Com_mail::set_to
+
+void Com_mail::set_to( const string& to )
+{
+    _msg->set_to( to );
+    _to = _msg->to();
+}
+
+//---------------------------------------------------------------------------------Com_mail::set_cc
+
+void Com_mail::set_cc( const string& cc )
+{
+    _msg->set_cc( cc );
+    _cc = _msg->cc();
+}
+
+//--------------------------------------------------------------------------------Com_mail::set_bcc
+
+void Com_mail::set_bcc( const string& bcc )
+{
+    _msg->set_bcc( bcc );
+    _bcc = _msg->bcc();
+}
+
+//-------------------------------------------------------------------------------Com_mail::set_body
+
+void Com_mail::set_body( const string& body )
+{
+    _msg->set_body( body );
+    _body = body;
+}
+
+//-------------------------------------------------------------------------------Com_mail::set_smtp
+
+void Com_mail::set_smtp( const string& smtp )
+{
+    _smtp = smtp;
+    _msg->set_smtp( smtp );
+}
+
+//-------------------------------------------------------------------------------Com_mail::add_file
+
+void Com_mail::add_file( const string& real_filename, const string& mail_filename, const string& content_type, const string& encoding )
+{
+    _msg->add_file( real_filename, mail_filename, content_type, encoding );
+
+    File file;
+    file._real_filename = real_filename;
+    file._mail_filename = mail_filename;
+    file._content_type  = content_type;
+    file._encoding      = encoding;
+    _files.push_back( file );
+}
+
+//---------------------------------------------------------------------------------Com_mail::put_To
 
 STDMETHODIMP Com_mail::put_To( BSTR to )
 {
@@ -152,8 +218,7 @@ STDMETHODIMP Com_mail::put_To( BSTR to )
 
     try
     {
-        _msg->set_to( bstr_as_string(to) );
-        _to = _msg->to();
+        set_to( string_from_bstr(to) );
     }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Mail.to" ); }
     catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Mail.to" ); }
@@ -161,7 +226,7 @@ STDMETHODIMP Com_mail::put_To( BSTR to )
     return hr;
 }
 
-//---------------------------------------------------------------------------------Com_mail::put_cc
+//---------------------------------------------------------------------------------Com_mail::put_Cc
 
 STDMETHODIMP Com_mail::put_Cc( BSTR cc )
 {
@@ -171,8 +236,7 @@ STDMETHODIMP Com_mail::put_Cc( BSTR cc )
 
     try
     {
-        _msg->set_cc( bstr_as_string(cc) );
-        _cc = _msg->cc().c_str();
+        set_cc( string_from_bstr( cc ) );
     }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Mail.cc" ); }
     catch( const exception & x )  { hr = _set_excepinfo( x, "Spooler.Mail.cc" ); }
@@ -180,7 +244,7 @@ STDMETHODIMP Com_mail::put_Cc( BSTR cc )
     return hr;
 }
 
-//--------------------------------------------------------------------------------Com_mail::put_bcc
+//--------------------------------------------------------------------------------Com_mail::put_Bcc
 
 STDMETHODIMP Com_mail::put_Bcc( BSTR bcc )
 {
@@ -190,8 +254,7 @@ STDMETHODIMP Com_mail::put_Bcc( BSTR bcc )
 
     try
     {
-        _msg->set_bcc( bstr_as_string(bcc) );
-        _bcc = _msg->bcc().c_str();
+        set_bcc( bstr_as_string(bcc) );
     }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Mail.bcc" ); }
     catch( const exception & x )  { hr = _set_excepinfo( x, "Spooler.Mail.bcc" ); }
@@ -199,7 +262,7 @@ STDMETHODIMP Com_mail::put_Bcc( BSTR bcc )
     return hr;
 }
 
-//-------------------------------------------------------------------------------Com_mail::put_from
+//-------------------------------------------------------------------------------Com_mail::put_From
 
 STDMETHODIMP Com_mail::put_From( BSTR from )
 {
@@ -209,8 +272,7 @@ STDMETHODIMP Com_mail::put_From( BSTR from )
 
     try
     {
-        _msg->set_from( bstr_as_string(from) );
-        _from = _msg->from().c_str();
+        set_from( bstr_as_string(from) );
     }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Mail.from" ); }
     catch( const exception & x )  { hr = _set_excepinfo( x, "Spooler.Mail.from" ); }
@@ -228,7 +290,7 @@ STDMETHODIMP Com_mail::get_From( BSTR* result )
 
     try
     {
-        *result = SysAllocString_string( _msg->from() );
+        hr = String_to_bstr( _msg->from(), result );
     }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Mail.from" ); }
     catch( const exception & x )  { hr = _set_excepinfo( x, "Spooler.Mail.from" ); }
@@ -246,8 +308,7 @@ STDMETHODIMP Com_mail::put_Subject( BSTR subject )
 
     try
     {
-        _msg->set_subject( bstr_as_string( subject ) );
-        _subject = subject;
+        set_subject( bstr_as_string( subject ) );
     }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Mail.subject" ); }
     catch( const exception & x )  { hr = _set_excepinfo( x, "Spooler.Mail.subject" ); }
@@ -265,7 +326,7 @@ STDMETHODIMP Com_mail::get_Subject( BSTR* result )
 
     try
     {
-        *result = SysAllocString_string( _msg->subject() );
+        hr = String_to_bstr( _msg->subject(), result );
     }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Mail.subject" ); }
     catch( const exception& x )  { hr = _set_excepinfo( x, "Spooler.Mail.subject" ); }
@@ -283,8 +344,7 @@ STDMETHODIMP Com_mail::put_Body( BSTR body )
 
     try
     {
-        _msg->set_body( bstr_as_string( body ) );
-        _body = body;
+        set_body( bstr_as_string( body ) );
     }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Mail.body" ); }
     catch( const exception&  x )  { hr = _set_excepinfo( x, "Spooler.Mail.body" ); }
@@ -320,14 +380,7 @@ STDMETHODIMP Com_mail::Add_file( BSTR real_filename, BSTR mail_filename, BSTR co
 
     try
     {
-        _msg->add_file( bstr_as_string(real_filename), bstr_as_string(mail_filename), bstr_as_string(content_type), bstr_as_string(encoding) );
-
-        File file;
-            file._real_filename = string_from_bstr( real_filename );
-            file._mail_filename = string_from_bstr( mail_filename );
-            file._content_type  = string_from_bstr( content_type );
-            file._encoding      = string_from_bstr( encoding );
-        _files.push_back( file );
+        add_file( bstr_as_string(real_filename), bstr_as_string(mail_filename), bstr_as_string(content_type), bstr_as_string(encoding) );
     }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Mail.add_file" ); }
     catch( const exception & x )  { hr = _set_excepinfo( x, "Spooler.Mail.add_file" ); }
@@ -363,8 +416,7 @@ STDMETHODIMP Com_mail::put_Smtp( BSTR smtp )
 
     try
     {
-        _smtp = smtp;
-        _msg->set_smtp( bstr_as_string(smtp) );
+        set_smtp( bstr_as_string(smtp) );
     }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Mail.smtp" ); }
     catch( const exception & x )  { hr = _set_excepinfo( x, "Spooler.Mail.smtp" ); }

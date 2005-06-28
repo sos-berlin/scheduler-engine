@@ -51,13 +51,13 @@ struct Com_mail : spooler_com::Imail,
     STDMETHODIMP_(char*)  const_java_class_name             ()                                      { return (char*)"sos.spooler.Mail"; }
 
     STDMETHODIMP            put_To                          ( BSTR );
-    STDMETHODIMP            get_To                          ( BSTR* to )                            { return _to.CopyTo( to ); }
+    STDMETHODIMP            get_To                          ( BSTR* result )                        { return String_to_bstr( _to, result ); }
 
     STDMETHODIMP            put_Cc                          ( BSTR );
-    STDMETHODIMP            get_Cc                          ( BSTR* cc )                            { return _cc.CopyTo( cc ); }
+    STDMETHODIMP            get_Cc                          ( BSTR* result )                        { return String_to_bstr( _cc, result ); }
 
     STDMETHODIMP            put_Bcc                         ( BSTR );
-    STDMETHODIMP            get_Bcc                         ( BSTR* bcc )                           { return _bcc.CopyTo( bcc ); }
+    STDMETHODIMP            get_Bcc                         ( BSTR* result )                        { return String_to_bstr( _bcc, result ); }
 
     STDMETHODIMP            put_From                        ( BSTR );
     STDMETHODIMP            get_From                        ( BSTR* );
@@ -83,7 +83,18 @@ struct Com_mail : spooler_com::Imail,
 
     STDMETHODIMP            get_Dequeue_log                 ( BSTR* result )                        { return String_to_bstr( _msg->dequeue_log(), result ); }
 
-    xml::Element_ptr            dom_element                 ( xml::Document_ptr& dom );
+    xml::Element_ptr            dom_element                 ( const xml::Document_ptr& dom );
+    void                    set_dom                         ( const xml::Element_ptr& );
+
+    void                    set_subject                     ( const string& );
+    void                    set_from                        ( const string& );
+    void                    set_to                          ( const string& );
+    void                    set_cc                          ( const string& );
+    void                    set_bcc                         ( const string& );
+    void                    set_body                        ( const string& );
+    void                    set_smtp                        ( const string& );
+    void                        add_file                    ( const string& real_filename, const string& mail_filename, const string& content_type, const string& encoding );
+
     int                         auto_dequeue                ()                                      { return _msg->auto_dequeue(); }
     int                         send                        ();
 
@@ -93,13 +104,13 @@ struct Com_mail : spooler_com::Imail,
 
     Sos_ptr<mail::Message>     _msg;
 
-    Bstr                       _smtp;
-    Bstr                       _subject;
-    Bstr                       _from;
-    Bstr                       _to;
-    Bstr                       _cc;
-    Bstr                       _bcc;
-    Bstr                       _body;
+    string                     _smtp;
+    string                     _subject;
+    string                     _from;
+    string                     _to;
+    string                     _cc;
+    string                     _bcc;
+    string                     _body;
     list<File>                 _files;
 };
 

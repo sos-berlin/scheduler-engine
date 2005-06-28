@@ -2775,7 +2775,7 @@ const char file_jz_scheduler_xslt[] =
     "<xsl:when test=\"$job/tasks/@count>0\">\n"
     "<xsl:text>, </xsl:text>\n"
     "<xsl:call-template name=\"bold_counter\">\n"
-    "<xsl:with-param name=\"counter\" select=\"count( /spooler/answer/state/jobs/job[@job=$job_name]/tasks/task[ order/@job_chain=$job_chain_name ] )\" />\n"
+    "<xsl:with-param name=\"counter\" select=\"count( $job/tasks/task[ order/@job_chain=$job_chain_name ] )\" />\n"
     "<xsl:with-param name=\"suffix\" select=\"'tasks'\" />\n"
     "</xsl:call-template>\n"
     "</xsl:when>\n"
