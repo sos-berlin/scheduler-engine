@@ -31,7 +31,7 @@ struct Modified_event_handler
 
 //---------------------------------------------------------------------------------Scheduler_object
 
-struct Scheduler_object : Sos_self_deleting
+struct Scheduler_object : Object
 {
     enum Type_code
     {
@@ -51,12 +51,15 @@ struct Scheduler_object : Sos_self_deleting
 
 
     Type_code                   scheduler_type_code         () const                                { return _scheduler_object_type_code; }
-    virtual Xslt_stylesheet     mail_xslt_stylesheet        ();
+    void                    set_mail_xslt_stylesheet_path   ( const string& path )                  { _mail_xslt_stylesheet.release();  _mail_xslt_stylesheet_path = path; }
+    virtual ptr<Xslt_stylesheet> mail_xslt_stylesheet       ();
     virtual Prefix_log*         log                         ()                                      = 0;
 
 
     Spooler*                   _spooler;
     Type_code                  _scheduler_object_type_code;
+    ptr<Xslt_stylesheet>       _mail_xslt_stylesheet;
+    string                     _mail_xslt_stylesheet_path;
 };
 
 //-------------------------------------------------------------------------------------------------

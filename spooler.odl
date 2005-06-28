@@ -705,6 +705,15 @@ library Spooler
 
         [propget]
         HRESULT                 Dequeue_log             ( [out,retval] BSTR* Text );
+
+        [propput]
+        HRESULT                 Xslt_stylesheet_path    ( [in] BSTR );
+
+        [propget]
+        HRESULT                 Xslt_stylesheet_path    ( [out,retval] BSTR* );
+
+        [propget]
+        HRESULT                 Xslt_stylesheet         ( [out,retval] Ixslt_stylesheet** );
     }
 
     [

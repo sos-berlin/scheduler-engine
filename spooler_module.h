@@ -35,7 +35,7 @@ struct Source_part
 {
     Source_part                 ( int linenr, const string& text, const Time& mod_time );
 
-                                operator string             () const                                { return _text; }
+                                operator const string&      () const                                { return _text; }
     xml::Element_ptr            dom_element                 ( const xml::Document_ptr& ) const;
   //bool                        empty                       ()                                      { return _text.empty(); }
 

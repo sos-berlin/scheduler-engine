@@ -149,7 +149,7 @@ struct Job : Scheduler_object
 
     struct Task_queue
     {
-        typedef list< Sos_ptr<Task> >   Queue;
+        typedef list< ptr<Task> >       Queue;
         typedef Queue::iterator         iterator;
 
         enum Why_remove
@@ -168,7 +168,7 @@ struct Job : Scheduler_object
         iterator                begin                       ()                                      { return _queue.begin(); }
         iterator                end                         ()                                      { return _queue.end(); }
 
-        void                    enqueue_task                ( const Sos_ptr<Task>& );
+        void                    enqueue_task                ( const ptr<Task>& );
         bool                    remove_task                 ( int task_id, Why_remove );
         void                    remove_task_from_db         ( int task_id );
         bool                    has_task_waiting_for_period ();
@@ -181,7 +181,7 @@ struct Job : Scheduler_object
     };
 
 
-    typedef list< Sos_ptr<Task> >               Task_list;
+    typedef list< ptr<Task> >                   Task_list;
     typedef list< ptr<Directory_watcher> >      Directory_watcher_list;
     typedef map< int, Time >                    Delay_after_error;
     typedef map< int, Time >                    Delay_order_after_setback;
@@ -224,7 +224,7 @@ struct Job : Scheduler_object
 
     void                        close                       ();
 
-    Sos_ptr<Task>               start                       ( const ptr<spooler_com::Ivariable_set>& params, const string& task_name, Time = 0, bool log = false );
+    ptr<Task>                   start                       ( const ptr<spooler_com::Ivariable_set>& params, const string& task_name, Time = 0, bool log = false );
   //Sos_ptr<Task>               start_without_lock          ( const ptr<spooler_com::Ivariable_set>& params, const string& task_name, Time = 0, bool log = false );
     void                        start_when_directory_changed( const string& directory_name, const string& filename_pattern );
     void                        clear_when_directory_changed();
@@ -234,10 +234,10 @@ struct Job : Scheduler_object
     bool                        is_in_period                ( Time = Time::now() );
     bool                        queue_filled                ()                                      { return !_task_queue.empty(); }
 
-    Sos_ptr<Task>               create_task                 ( const ptr<spooler_com::Ivariable_set>& params, const string& task_name, const Time& = latter_day );
-    Sos_ptr<Task>               create_task                 ( const ptr<spooler_com::Ivariable_set>& params, const string& task_name, const Time&, int id );
-    Sos_ptr<Task>               get_task_from_queue         ( Time now );
-    void                        run_task                    ( const Sos_ptr<Task>&  );
+    ptr<Task>                   create_task                 ( const ptr<spooler_com::Ivariable_set>& params, const string& task_name, const Time& = latter_day );
+    ptr<Task>                   create_task                 ( const ptr<spooler_com::Ivariable_set>& params, const string& task_name, const Time&, int id );
+    ptr<Task>                   get_task_from_queue         ( Time now );
+    void                        run_task                    ( const ptr<Task>&  );
 
   //void                        remove_from_task_queue      ( Task*, Log_level );
     void                        remove_running_task         ( Task* );
@@ -253,7 +253,7 @@ struct Job : Scheduler_object
 
     bool                        execute_state_cmd           ();
     void                        reread                      ();
-    Sos_ptr<Task>               task_to_start               ();
+    ptr<Task>                   task_to_start               ();
     bool                        do_something                ();
     bool                        should_removed              ()                                      { return _temporary && _state == s_stopped; }
 
@@ -305,7 +305,7 @@ struct Job : Scheduler_object
     void                        count_step                  ()                                      { InterlockedIncrement( &_step_count ); }
 
     Prefix_log*                 log                         ()                                      { return _log; }
-    virtual string             _obj_name                    () const                                { return "Job " + _name; }
+    virtual string              obj_name                    () const                                { return "Job " + _name; }
 
 
     friend struct               Object_set;
@@ -407,7 +407,7 @@ struct Job : Scheduler_object
 
 //------------------------------------------------------------------------------------------Job_list
 
-typedef list< Sos_ptr<Job> >    Job_list;
+typedef list< ptr<Job> >    Job_list;
 
 #define FOR_EACH_JOB( ITERATOR )  FOR_EACH( Job_list, _job_list, ITERATOR )
 

@@ -113,6 +113,8 @@ void Job::set_dom( const xml::Element_ptr& element, const Time& xml_mod_time )
             if( _idle_timeout > max_task_time_out )  _idle_timeout = max_task_time_out;   // Begrenzen, damit's beim Addieren mit now() keinen Überlauf gibt
         }
 
+        set_mail_xslt_stylesheet_path( element.getAttribute( "mail_xslt_stylesheet" ) );
+
         if( order )
         {
             if( _temporary )  throw_xc( "SCHEDULER-155" );
@@ -441,15 +443,15 @@ void Job::signal( const string& signal_name )
 // Wird auch vom Kommunikations-Thread für <start_job> gerufen!
 // create_task() nicht mit gesperrten _lock rufen, denn get_id() in DB blockieren!
 
-Sos_ptr<Task> Job::create_task( const ptr<spooler_com::Ivariable_set>& params, const string& name, const Time& start_at, int id )
+ptr<Task> Job::create_task( const ptr<spooler_com::Ivariable_set>& params, const string& name, const Time& start_at, int id )
 {
-    Sos_ptr<Task> task;
+    ptr<Task> task;
 
-    if( !_process_filename.empty() )   task = SOS_NEW( Process_task   ( this ) );
+    if( !_process_filename.empty() )   task = Z_NEW( Process_task   ( this ) );
     else
-  //if( _object_set_descr          )   task = SOS_NEW( Object_set_task( this ) );
+  //if( _object_set_descr          )   task = Z_NEW( Object_set_task( this ) );
   //else                             
-                                       task = SOS_NEW( Job_module_task( this ) );
+                                       task = Z_NEW( Job_module_task( this ) );
 
     task->_id           = id;
 
@@ -466,7 +468,7 @@ Sos_ptr<Task> Job::create_task( const ptr<spooler_com::Ivariable_set>& params, c
 // Wird auch vom Kommunikations-Thread für <start_job> gerufen!
 // create_task() nicht mit gesperrten _lock rufen, denn get_id() in DB blockieren!
 
-Sos_ptr<Task> Job::create_task( const ptr<spooler_com::Ivariable_set>& params, const string& name, const Time& start_at )
+ptr<Task> Job::create_task( const ptr<spooler_com::Ivariable_set>& params, const string& name, const Time& start_at )
 {
     return create_task( params, name, start_at, _spooler->_db->get_task_id() );
 }
@@ -506,7 +508,7 @@ void Job::load_tasks_from_db()
         _log->info( "Zu startende Task aus Datenbank geladen: id=" + as_string(task_id) + " start_at=" + start_at.as_string() );
 
 
-        Sos_ptr<Task> task = create_task( +parameters, "", start_at, task_id );
+        ptr<Task> task = create_task( +parameters, "", start_at, task_id );
         
         task->_is_in_db     = true;
         task->_let_run      = true;
@@ -523,7 +525,7 @@ void Job::load_tasks_from_db()
 
 //--------------------------------------------------------------------Job::Task_queue::enqueue_task
 
-void Job::Task_queue::enqueue_task( const Sos_ptr<Task>& task )
+void Job::Task_queue::enqueue_task( const ptr<Task>& task )
 {
     if( !task->_enqueue_time )  task->_enqueue_time = Time::now();
 
@@ -657,9 +659,9 @@ Time Job::Task_queue::next_at_start_time( Time now )
 
 //-------------------------------------------------------------------------Job::get_task_from_queue
 
-Sos_ptr<Task> Job::get_task_from_queue( Time now )
+ptr<Task> Job::get_task_from_queue( Time now )
 {
-    Sos_ptr<Task> task;
+    ptr<Task> task;
 
     if( _state == s_read_error )  return NULL;
     if( _state == s_error      )  return NULL;
@@ -720,7 +722,7 @@ void Job::remove_running_task( Task* task )
 
 //---------------------------------------------------------------------------------------Job::start
 /*
-Sos_ptr<Task> Job::start( const ptr<spooler_com::Ivariable_set>& params, const string& task_name, Time start_at, bool log )
+ptr<Task> Job::start( const ptr<spooler_com::Ivariable_set>& params, const string& task_name, Time start_at, bool log )
 {
     Sos_ptr<Task> result;
     THREAD_LOCK_DUMMY( _lock )  result = start_without_lock( params, task_name, start_at, log );
@@ -730,7 +732,7 @@ Sos_ptr<Task> Job::start( const ptr<spooler_com::Ivariable_set>& params, const s
 //---------------------------------------------------------------------------------------Job::start
 // start() und create_task() nicht mit gesperrten _lock rufen, denn get_id() in DB blockieren!
 
-Sos_ptr<Task> Job::start( const ptr<spooler_com::Ivariable_set>& params, const string& task_name, Time start_at, bool log )
+ptr<Task> Job::start( const ptr<spooler_com::Ivariable_set>& params, const string& task_name, Time start_at, bool log )
 {
     Time now = Time::now();
 
@@ -753,7 +755,7 @@ Sos_ptr<Task> Job::start( const ptr<spooler_com::Ivariable_set>& params, const s
         if( !start_at  &&  !_run_time->period_follows( now ) )   throw_xc( "SCHEDULER-143" );
     }
 
-    Sos_ptr<Task> task = create_task( params, task_name, start_at );
+    ptr<Task> task = create_task( params, task_name, start_at );
     task->_let_run = true;
 
     _task_queue.enqueue_task( task );
@@ -896,7 +898,7 @@ bool Job::execute_state_cmd()
                         set_state( s_pending );
 
                         Time now = Time::now();
-                        Sos_ptr<Task> task = create_task( NULL, "", 0 );      // create_task() nicht mit gesperrten _lock rufen, denn get_id() in DB blockieren.
+                        ptr<Task> task = create_task( NULL, "", 0 );      // create_task() nicht mit gesperrten _lock rufen, denn get_id() in DB blockieren.
                         
                         task->_cause = cause_wake;
                         task->_let_run = true;
@@ -1202,14 +1204,14 @@ void Job::check_for_changed_directory( const Time& now )
 
 //-------------------------------------------------------------------------------Job::task_to_start
 
-Sos_ptr<Task> Job::task_to_start()
+ptr<Task> Job::task_to_start()
 {
     if( _spooler->state() == Spooler::s_stopping
      || _spooler->state() == Spooler::s_stopping_let_run )  return NULL;
 
     Time            now   = Time::now();
     Start_cause     cause = cause_none;
-    Sos_ptr<Task>   task  = NULL;
+    ptr<Task>       task  = NULL;
     ptr<Order>      order;
     string          changed_directories;
     string          log_line;
@@ -1371,7 +1373,7 @@ bool Job::do_something()
                 {
                     if( !_waiting_for_process  ||  _waiting_for_process_try_again  ||  _module._process_class->process_available( this ) )    // Optimierung
                     {
-                        Sos_ptr<Task> task = task_to_start();
+                        ptr<Task> task = task_to_start();
                         if( task )
                         {
                             THREAD_LOCK_DUMMY( _lock )

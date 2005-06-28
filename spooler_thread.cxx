@@ -227,9 +227,9 @@ void Spooler_thread::build_prioritized_order_job_array()
 
 //-----------------------------------------------------------------Spooler_thread::get_task_or_null
 
-Sos_ptr<Task> Spooler_thread::get_task_or_null( int task_id )
+ptr<Task> Spooler_thread::get_task_or_null( int task_id )
 {
-    Sos_ptr<Task> result = NULL;
+    ptr<Task> result = NULL;
 
     THREAD_LOCK( _lock )
     {

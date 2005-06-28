@@ -37,7 +37,7 @@ struct Transaction;
 
 //---------------------------------------------------------------------------------------Spooler_db
 
-struct Spooler_db : Sos_self_deleting
+struct Spooler_db : Object
 {
                                 Spooler_db              ( Spooler* );
 

@@ -42,7 +42,7 @@
 				AssemblerListingLocation="$(IntDir)/"
 				ObjectFile="$(IntDir)/"
 				ProgramDataBaseFileName="$(IntDir)/vc70.pdb"
-				BrowseInformation="0"
+				BrowseInformation="1"
 				WarningLevel="3"
 				SuppressStartupBanner="TRUE"
 				DebugInformationFormat="2"/>
@@ -313,8 +313,7 @@ cd $(ProjectDir)
 						Optimization="0"
 						PreprocessorDefinitions=""
 						BasicRuntimeChecks="3"
-						PrecompiledHeaderThrough="spooler.h"
-						BrowseInformation="1"/>
+						PrecompiledHeaderThrough="spooler.h"/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Release-DLL|Win32">
@@ -340,8 +339,7 @@ cd $(ProjectDir)
 						Optimization="0"
 						PreprocessorDefinitions=""
 						BasicRuntimeChecks="3"
-						PrecompiledHeaderThrough="spooler.h"
-						BrowseInformation="1"/>
+						PrecompiledHeaderThrough="spooler.h"/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Release-DLL|Win32">
@@ -367,8 +365,7 @@ cd $(ProjectDir)
 						Optimization="0"
 						PreprocessorDefinitions=""
 						BasicRuntimeChecks="3"
-						PrecompiledHeaderThrough="spooler.h"
-						BrowseInformation="1"/>
+						PrecompiledHeaderThrough="spooler.h"/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Release-DLL|Win32">
@@ -397,8 +394,7 @@ cd $(ProjectDir)
 						Optimization="0"
 						PreprocessorDefinitions=""
 						BasicRuntimeChecks="3"
-						PrecompiledHeaderThrough="spooler.h"
-						BrowseInformation="1"/>
+						PrecompiledHeaderThrough="spooler.h"/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Release-DLL|Win32">
@@ -424,8 +420,7 @@ cd $(ProjectDir)
 						Optimization="0"
 						PreprocessorDefinitions=""
 						BasicRuntimeChecks="3"
-						PrecompiledHeaderThrough="spooler.h"
-						BrowseInformation="1"/>
+						PrecompiledHeaderThrough="spooler.h"/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Release-DLL|Win32">
@@ -463,8 +458,7 @@ cd $(ProjectDir)
 						Optimization="0"
 						PreprocessorDefinitions=""
 						BasicRuntimeChecks="3"
-						PrecompiledHeaderThrough="spooler.h"
-						BrowseInformation="1"/>
+						PrecompiledHeaderThrough="spooler.h"/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Release-DLL|Win32">
@@ -496,8 +490,7 @@ cd $(ProjectDir)
 						Optimization="0"
 						PreprocessorDefinitions=""
 						BasicRuntimeChecks="3"
-						PrecompiledHeaderThrough="spooler.h"
-						BrowseInformation="1"/>
+						PrecompiledHeaderThrough="spooler.h"/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Release-DLL|Win32">
@@ -523,8 +516,7 @@ cd $(ProjectDir)
 						Optimization="0"
 						PreprocessorDefinitions=""
 						BasicRuntimeChecks="3"
-						PrecompiledHeaderThrough="spooler.h"
-						BrowseInformation="1"/>
+						PrecompiledHeaderThrough="spooler.h"/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Release-DLL|Win32">
@@ -542,8 +534,7 @@ cd $(ProjectDir)
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						PreprocessorDefinitions=""
-						BasicRuntimeChecks="3"
-						BrowseInformation="1"/>
+						BasicRuntimeChecks="3"/>
 				</FileConfiguration>
 			</File>
 			<File
@@ -554,8 +545,7 @@ cd $(ProjectDir)
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						PreprocessorDefinitions=""
-						BasicRuntimeChecks="3"
-						BrowseInformation="1"/>
+						BasicRuntimeChecks="3"/>
 				</FileConfiguration>
 			</File>
 			<File
@@ -566,8 +556,7 @@ cd $(ProjectDir)
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						PreprocessorDefinitions=""
-						BasicRuntimeChecks="3"
-						BrowseInformation="1"/>
+						BasicRuntimeChecks="3"/>
 				</FileConfiguration>
 			</File>
 			<File
@@ -578,8 +567,7 @@ cd $(ProjectDir)
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						PreprocessorDefinitions=""
-						BasicRuntimeChecks="3"
-						BrowseInformation="1"/>
+						BasicRuntimeChecks="3"/>
 				</FileConfiguration>
 			</File>
 			<File
@@ -590,8 +578,7 @@ cd $(ProjectDir)
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						PreprocessorDefinitions=""
-						BasicRuntimeChecks="3"
-						BrowseInformation="1"/>
+						BasicRuntimeChecks="3"/>
 				</FileConfiguration>
 			</File>
 			<File
@@ -610,8 +597,7 @@ cd $(ProjectDir)
 						Optimization="0"
 						PreprocessorDefinitions=""
 						BasicRuntimeChecks="3"
-						PrecompiledHeaderThrough="spooler.h"
-						BrowseInformation="1"/>
+						PrecompiledHeaderThrough="spooler.h"/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Release-DLL|Win32">
@@ -643,8 +629,7 @@ cd $(ProjectDir)
 						Optimization="0"
 						PreprocessorDefinitions=""
 						BasicRuntimeChecks="3"
-						PrecompiledHeaderThrough="spooler.h"
-						BrowseInformation="1"/>
+						PrecompiledHeaderThrough="spooler.h"/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Release-DLL|Win32">
@@ -670,8 +655,7 @@ cd $(ProjectDir)
 						Optimization="0"
 						PreprocessorDefinitions=""
 						BasicRuntimeChecks="3"
-						PrecompiledHeaderThrough="spooler.h"
-						BrowseInformation="1"/>
+						PrecompiledHeaderThrough="spooler.h"/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Release-DLL|Win32">
@@ -700,8 +684,7 @@ cd $(ProjectDir)
 						Optimization="0"
 						PreprocessorDefinitions=""
 						BasicRuntimeChecks="3"
-						PrecompiledHeaderThrough="spooler.h"
-						BrowseInformation="1"/>
+						PrecompiledHeaderThrough="spooler.h"/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Release-DLL|Win32">
@@ -727,8 +710,7 @@ cd $(ProjectDir)
 						Optimization="0"
 						PreprocessorDefinitions=""
 						BasicRuntimeChecks="3"
-						PrecompiledHeaderThrough="spooler.h"
-						BrowseInformation="1"/>
+						PrecompiledHeaderThrough="spooler.h"/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Release-DLL|Win32">
@@ -754,8 +736,7 @@ cd $(ProjectDir)
 						Optimization="0"
 						PreprocessorDefinitions=""
 						BasicRuntimeChecks="3"
-						PrecompiledHeaderThrough="spooler.h"
-						BrowseInformation="1"/>
+						PrecompiledHeaderThrough="spooler.h"/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Release-DLL|Win32">
@@ -781,8 +762,7 @@ cd $(ProjectDir)
 						Optimization="0"
 						PreprocessorDefinitions=""
 						BasicRuntimeChecks="3"
-						PrecompiledHeaderThrough="spooler.h"
-						BrowseInformation="1"/>
+						PrecompiledHeaderThrough="spooler.h"/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Release-DLL|Win32">

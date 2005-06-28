@@ -422,6 +422,11 @@ struct Imail : IDispatch
 
     virtual HRESULT         Dequeue                 ( int* count ) = 0;
     virtual HRESULT     get_Dequeue_log             ( BSTR* ) = 0;
+
+    virtual HRESULT     put_Xslt_stylesheet_path    ( BSTR ) = 0;
+    virtual HRESULT     get_Xslt_stylesheet_path    ( BSTR* ) = 0;
+
+    virtual HRESULT     get_Xslt_stylesheet         ( spooler_com::Ixslt_stylesheet** );
 };
 
 //--------------------------------------------------------------------------------Job_chain_node

@@ -42,7 +42,7 @@ struct Spooler_thread : zschimmer::Thread
   //void                        remove_task                 ( Task* this_task )                     { FOR_EACH_TASK( t, task )  if( task == this_task )  { _task_list.erase(t);  break; } }
     int                         task_count                  ( Job* = NULL );
 
-    Sos_ptr<Task>               get_task_or_null            ( int task_id );
+    ptr<Task>                   get_task_or_null            ( int task_id );
     Task*                       get_next_task               ();
 
     void                        increment_running_tasks     ()                                      { InterlockedIncrement( &_running_tasks_count ); }

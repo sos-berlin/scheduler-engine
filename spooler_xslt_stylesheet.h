@@ -26,6 +26,7 @@ struct Xslt_stylesheet : idispatch_implementation< Xslt_stylesheet, spooler_com:
                               //Xslt_stylesheet             ( const BSTR xml_or_filename );
                                ~Xslt_stylesheet             ();
 
+
     STDMETHODIMP_(ULONG)        AddRef                      ()                                      { return Idispatch_implementation::AddRef(); }
     STDMETHODIMP_(ULONG)        Release                     ()                                      { return Idispatch_implementation::Release(); }
     STDMETHODIMP                QueryInterface              ( const IID&, void** );

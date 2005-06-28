@@ -567,17 +567,20 @@ void Task::set_state( State new_state )
                 _log->log( log_level, msg );
             }
 
-/*
+
             if( _state == s_closed )
             {
                 try
                 {
-                    Task_state_event event ( Scheduler_event::evt_task_state, _log->highest_level(), this );
+                    set_mail_defaults();
+                    //_log->send( has_error() || _log->highest_level() >= log_error? -1 : _step_count );
+
+                    Scheduler_event event ( Scheduler_event::evt_task_state, _log->highest_level(), this );
+                    event.set_mail( _log->imail() );
                     event.send_mail();
                 }
                 catch( exception& x ) {}
             }
-*/
         }
     }
 }
@@ -1518,6 +1521,7 @@ void Task::finish()
 
 
     // eMail versenden
+    /*
     try
     {
         if( !_spooler->_manual )
@@ -1530,6 +1534,7 @@ void Task::finish()
     }
     catch( const exception& x  ) { _log->warn( x.what() ); }
     catch( const _com_error& x ) { _log->warn( bstr_as_string(x.Description()) ); }  
+    */
 }
 
 //----------------------------------------------------------------------Task::wait_until_terminated

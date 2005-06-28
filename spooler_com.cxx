@@ -1682,7 +1682,7 @@ STDMETHODIMP Com_job::Start( VARIANT* params, Itask** itask )
     {
         if( !_job )  return E_POINTER;
 
-        Sos_ptr<Task>       task;
+        ptr<Task>           task;
 
         ptr<Ivariable_set>  pars;
         Time                start_at = 0; 

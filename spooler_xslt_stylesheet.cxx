@@ -79,7 +79,7 @@ STDMETHODIMP Xslt_stylesheet::Close()
 
     try
     {
-        close();
+        release();
     }
     catch( exception& x )  { hr = Set_excepinfo( x, __FUNCTION__ ); }
 

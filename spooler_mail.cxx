@@ -89,16 +89,16 @@ xml::Element_ptr Com_mail::dom_element( const xml::Document_ptr& dom )
 {
     xml::Element_ptr mail_element = dom.createElement( "mail" );
 
-    mail_element.setAttribute_optional( "subject", _subject );
     mail_element.setAttribute_optional( "from"   , _from    );
     mail_element.setAttribute_optional( "to"     , _to      );
     mail_element.setAttribute_optional( "cc"     , _cc      );
     mail_element.setAttribute_optional( "bcc"    , _bcc     );
     mail_element.setAttribute_optional( "smtp"   , _smtp    );
 
+    mail_element.append_new_text_element( "subject", _subject );
+
     xml::Element_ptr body_element = mail_element.append_new_element( "body" );
-    
-    body_element.append_new_text_element( "text", _body );
+    body_element.append_new_text_element( "text"   , _body    );
 
 
     Z_FOR_EACH( list<File>, _files, f )
@@ -118,12 +118,17 @@ xml::Element_ptr Com_mail::dom_element( const xml::Document_ptr& dom )
 
 void Com_mail::set_dom( const xml::Element_ptr& mail_element )
 {
-    set_subject( mail_element.getAttribute( "subject" ) );
+    if( !mail_element )  throw_xc( "Com_mail::set_dom", "NULL pointer" );
+
+    init();
+
     set_from   ( mail_element.getAttribute( "from"    ) );
     set_to     ( mail_element.getAttribute( "to"      ) );
     set_cc     ( mail_element.getAttribute( "cc"      ) );
     set_bcc    ( mail_element.getAttribute( "bcc"     ) );
     set_smtp   ( mail_element.getAttribute( "smtp"    ) );
+
+    set_subject( xml::Element_ptr( mail_element.select_node( "subject" ) ).text() );
 
 
     xml::Xpath_nodes file_elements = mail_element.select_nodes( "body/file" );
@@ -496,6 +501,23 @@ STDMETHODIMP Com_mail::Add_header_field( BSTR field_name, BSTR value )
     return hr;
 }
 
+//--------------------------------------------------------------------Com_mail::get_Xslt_stylesheet
+
+STDMETHODIMP Com_mail::get_Xslt_stylesheet( Ixslt_stylesheet** result )
+{
+    HRESULT hr = NOERROR;
+
+    try 
+    {
+        *result = NULL;
+        ptr<Xslt_stylesheet> stylesheet = xslt_stylesheet();
+        if( stylesheet )  *result = stylesheet.copy();
+    }
+    catch( const exception & x )  { hr = _set_excepinfo( x, "Spooler.Mail.add_header_field" ); }
+
+    return hr;
+}
+
 //-----------------------------------------------------------------------------------Com_mail::send
 
 int Com_mail::send()
@@ -505,6 +527,21 @@ int Com_mail::send()
     _spooler->_log.debug( "email " + _msg->to() + ": " + _msg->subject() );
 
     return _msg->send();
+}
+
+//------------------------------------------------------------------------Com_mail::xslt_stylesheet
+
+ptr<Xslt_stylesheet> Com_mail::xslt_stylesheet()
+{
+    if( !_xslt_stylesheet  &&  _xslt_stylesheet_path != "" )
+    {
+        ptr<Xslt_stylesheet> stylesheet = Z_NEW( Xslt_stylesheet );
+        stylesheet->load_file( _xslt_stylesheet_path );
+        
+        _xslt_stylesheet = stylesheet;
+    }
+
+    return _xslt_stylesheet;
 }
 
 //--------------------------------------------------------------------------------Com_mail::dequeue

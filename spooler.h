@@ -88,6 +88,7 @@ namespace sos {
 }
 
 #include "spooler_com.h"
+#include "spooler_xslt_stylesheet.h"
 #include "spooler_common.h"
 #include "spooler_time.h"
 #include "spooler_mail.h"
@@ -111,7 +112,6 @@ namespace sos {
 #include "spooler_service.h"
 #include "spooler_module_remote.h"
 #include "spooler_module_remote_server.h"
-#include "spooler_xslt_stylesheet.h"
 #include "spooler_event.h"
 
 //-------------------------------------------------------------------------------------------------
@@ -242,8 +242,8 @@ struct Spooler : Scheduler_object
     Job*                        get_job                     ( const string& job_name );
     Job*                        get_job_or_null             ( const string& job_name );
     Job*                        get_next_job_to_start       ();
-    Sos_ptr<Task>               get_task                    ( int task_id );
-    Sos_ptr<Task>               get_task_or_null            ( int task_id );
+    ptr<Task>                   get_task                    ( int task_id );
+    ptr<Task>                   get_task_or_null            ( int task_id );
 
     friend struct               Com_spooler;
 
@@ -283,7 +283,7 @@ struct Spooler : Scheduler_object
     void                        send_cmd                    ();
 
     // Jobs
-    void                        add_job                     ( const Sos_ptr<Job>& );
+    void                        add_job                     ( const ptr<Job>& );
     void                        cmd_add_jobs                ( const xml::Element_ptr& );
     void                        cmd_job                     ( const xml::Element_ptr& );
   //void                        do_add_jobs                 ();
@@ -382,7 +382,7 @@ struct Spooler : Scheduler_object
     Thread_semaphore           _serialize_lock;             // Wenn die Threads nicht nebenläufig sein sollen
 
     string                     _db_name;
-    Sos_ptr<Spooler_db>        _db;
+    ptr<Spooler_db>            _db;
     bool                       _need_db;                    // Wenn DB sich nicht öffnen lässt, ohne DB arbeiten und Historie ggfs. in Dateien schreiben
     bool                       _wait_endless_for_db_open;
     int                        _max_db_errors;              // Nach so vielen Fehlen im Scheduler-Leben DB abschalten (wie need_db)

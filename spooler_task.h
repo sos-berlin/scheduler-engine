@@ -111,8 +111,8 @@ struct Task : Scheduler_object
     Prefix_log*                 log                         ()                                      { return _log; }
     Time                        next_time                   ();
     Spooler_thread*             thread                      ()                                      { return _thread; }
-    string                      name                        () const                                { return _obj_name(); }
-    virtual string             _obj_name                    () const                                { return "Task " + _job->name() + " " + as_string(_id) ; }
+    string                      name                        () const                                { return obj_name(); }
+    virtual string              obj_name                    () const                                { return "Task " + _job->name() + " " + as_string(_id) ; }
 
     string                      state_name                  ()                                      { return state_name( state() ); }
     static string               state_name                  ( State );
@@ -283,7 +283,7 @@ struct Task : Scheduler_object
 
 //----------------------------------------------------------------------------------------Task_list
 
-typedef list< Sos_ptr<Task> >   Task_list;
+typedef list< ptr<Task> >   Task_list;
 
 #define FOR_EACH_TASK( ITERATOR, TASK )  FOR_EACH( Task_list, _task_list, ITERATOR )  if( Task* TASK = *ITERATOR )
 

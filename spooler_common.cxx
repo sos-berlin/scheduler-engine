@@ -24,9 +24,25 @@ string Scheduler_object::name_of_type_code( Scheduler_object::Type_code type_cod
 
 //-----------------------------------------------------------Scheduler_object::mail_xslt_stylesheet
     
-Xslt_stylesheet Scheduler_object::mail_xslt_stylesheet()
+ptr<Xslt_stylesheet> Scheduler_object::mail_xslt_stylesheet()
 { 
-    return Xslt_stylesheet(); 
+    if( !_mail_xslt_stylesheet )
+    {
+        if( _mail_xslt_stylesheet_path != "" )
+        {
+            ptr<Xslt_stylesheet> stylesheet = Z_NEW( Xslt_stylesheet );
+            stylesheet->load_file( _mail_xslt_stylesheet_path );
+            
+            _mail_xslt_stylesheet = stylesheet;
+        }
+        else
+        if( this != _spooler )
+        {
+            _mail_xslt_stylesheet = _spooler->mail_xslt_stylesheet();
+        }
+    }
+
+    return _mail_xslt_stylesheet; 
 }
 
 //-------------------------------------------------------------------------------------------------

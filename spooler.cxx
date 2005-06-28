@@ -579,7 +579,7 @@ void Spooler::load_job_from_xml( const xml::Element_ptr& e, const Time& xml_mod_
                : spooler_id.empty() || spooler_id == id() )
     {
         string job_name = e.getAttribute("name");
-        Sos_ptr<Job> job = get_job_or_null( job_name );
+        ptr<Job> job = get_job_or_null( job_name );
         if( job )
         {
             job->set_dom( e, xml_mod_time );
@@ -587,7 +587,7 @@ void Spooler::load_job_from_xml( const xml::Element_ptr& e, const Time& xml_mod_
         }
         else
         {
-            job = SOS_NEW( Job( this ) );
+            job = Z_NEW( Job( this ) );
             job->set_dom( e, xml_mod_time );
             if( init )
             {
@@ -1040,7 +1040,7 @@ Object_set_class* Spooler::get_object_set_class_or_null( const string& name )
 
 //---------------------------------------------------------------------------------Spooler::add_job
 
-void Spooler::add_job( const Sos_ptr<Job>& job )
+void Spooler::add_job( const ptr<Job>& job )
 {
     THREAD_LOCK( _lock )
     {
@@ -1123,9 +1123,9 @@ Job* Spooler::get_next_job_to_start()
 //--------------------------------------------------------------------------------Spooler::get_task
 // Anderer Thread
 
-Sos_ptr<Task> Spooler::get_task( int task_id )
+ptr<Task> Spooler::get_task( int task_id )
 {
-    Sos_ptr<Task> task = get_task_or_null( task_id );
+    ptr<Task> task = get_task_or_null( task_id );
     if( !task )  throw_xc( "SCHEDULER-215", task_id );
     return task;
 }
@@ -1133,7 +1133,7 @@ Sos_ptr<Task> Spooler::get_task( int task_id )
 //------------------------------------------------------------------------Spooler::get_task_or_null
 // Anderer Thread
 
-Sos_ptr<Task> Spooler::get_task_or_null( int task_id )
+ptr<Task> Spooler::get_task_or_null( int task_id )
 {
     if( !_single_thread )  return NULL;
     return _single_thread->get_task_or_null( task_id );
@@ -1768,7 +1768,7 @@ void Spooler::start()
     {
         if( _need_db  && _db_name.empty() )  throw_xc( "SCHEDULER-205" );
 
-        _db = SOS_NEW( Spooler_db( this ) );
+        _db = Z_NEW( Spooler_db( this ) );
         _db->open( _db_name );
     }
 

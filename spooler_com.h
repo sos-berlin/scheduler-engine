@@ -462,7 +462,7 @@ struct Com_task : spooler_com::Itask,
 
   private:
     Thread_semaphore           _lock;
-    Sos_ptr<Task>              _task;
+    ptr<Task>                  _task;
 };
 
 //-----------------------------------------------------------------------------------Com_task_proxy

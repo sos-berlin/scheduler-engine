@@ -83,6 +83,11 @@ struct Com_mail : spooler_com::Imail,
 
     STDMETHODIMP            get_Dequeue_log                 ( BSTR* result )                        { return String_to_bstr( _msg->dequeue_log(), result ); }
 
+    STDMETHODIMP            put_Xslt_stylesheet_path        ( BSTR path )                           { _xslt_stylesheet.release(); return Bstr_to_string( path, &_xslt_stylesheet_path ); }
+    STDMETHODIMP            get_Xslt_stylesheet_path        ( BSTR* result )                        { return String_to_bstr( _xslt_stylesheet_path, result ); }
+    STDMETHODIMP            get_Xslt_stylesheet             ( spooler_com::Ixslt_stylesheet** );
+
+
     xml::Element_ptr            dom_element                 ( const xml::Document_ptr& dom );
     void                    set_dom                         ( const xml::Element_ptr& );
 
@@ -97,6 +102,7 @@ struct Com_mail : spooler_com::Imail,
 
     int                         auto_dequeue                ()                                      { return _msg->auto_dequeue(); }
     int                         send                        ();
+    ptr<Xslt_stylesheet>        xslt_stylesheet             ();
 
   private:
     Fill_zero                  _zero_;
@@ -112,6 +118,9 @@ struct Com_mail : spooler_com::Imail,
     string                     _bcc;
     string                     _body;
     list<File>                 _files;
+
+    string                     _xslt_stylesheet_path;
+    ptr<Xslt_stylesheet>       _xslt_stylesheet;
 };
 
 } //namespace spooler

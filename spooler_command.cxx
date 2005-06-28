@@ -211,7 +211,7 @@ xml::Element_ptr Command_processor::execute_show_history( const xml::Element_ptr
     int id, next;
     get_id_and_next( element, &id, &next );
     
-    Sos_ptr<Job> job = _spooler->get_job( job_name );
+    ptr<Job> job = _spooler->get_job( job_name );
 
     return job->read_history( _answer, id, next, show );
 }
@@ -344,7 +344,7 @@ xml::Element_ptr Command_processor::execute_show_task( const xml::Element_ptr& e
 
     int task_id = element.int_getAttribute( "id" );
 
-    Sos_ptr<Task> task = _spooler->get_task_or_null( task_id );
+    ptr<Task> task = _spooler->get_task_or_null( task_id );
     if( task )
     {
         return task->dom_element( _answer, show );
@@ -397,7 +397,7 @@ xml::Element_ptr Command_processor::execute_start_job( const xml::Element_ptr& e
         if( e.nodeName_is( "params" ) )  { pars->set_dom( e );  break; }
     }
 
-    Sos_ptr<Task> task = _spooler->get_job( job_name )->start( ptr<spooler_com::Ivariable_set>(pars), task_name, start_at, true );
+    ptr<Task> task = _spooler->get_job( job_name )->start( ptr<spooler_com::Ivariable_set>(pars), task_name, start_at, true );
 
     return _answer.createElement( "ok" );
 }
@@ -806,8 +806,8 @@ ptr<Http_response> Command_processor::execute_http( Http_request* http_request )
                     else
                     if( http_request->has_parameter( "task"  ) )
                     {
-                        int           task_id = as_int( http_request->parameter( "task" ) );
-                        Sos_ptr<Task> task    = _spooler->get_task_or_null( task_id );
+                        int       task_id = as_int( http_request->parameter( "task" ) );
+                        ptr<Task> task    = _spooler->get_task_or_null( task_id );
 
                         if( task )
                             log = task->log();
