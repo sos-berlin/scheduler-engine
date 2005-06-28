@@ -7,10 +7,12 @@ DEP_PRODUCTS = kram file fs zschimmer
 objects = \
  spooler.o\
  spooler_com.o\
+ spooler_common.o\
  spooler_command.o\
  spooler_communication.o\
  spooler_config.o\
  spooler_dtd.o\
+ spooler_event.o\
  spooler_history.o\
  spooler_http.o\
  spooler_job.o\
