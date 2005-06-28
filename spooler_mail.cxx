@@ -88,14 +88,26 @@ void Com_mail::init()
 xml::Element_ptr Com_mail::dom_element( const xml::Document_ptr& dom )
 {
     xml::Element_ptr mail_element = dom.createElement( "mail" );
+  //mail_element.setAttribute_optional( "smtp"   , _smtp    );
 
-    mail_element.setAttribute_optional( "from"   , _from    );
-    mail_element.setAttribute_optional( "to"     , _to      );
-    mail_element.setAttribute_optional( "cc"     , _cc      );
-    mail_element.setAttribute_optional( "bcc"    , _bcc     );
-    mail_element.setAttribute_optional( "smtp"   , _smtp    );
+    xml::Element_ptr header_element = mail_element.append_new_element( "header" );
 
-    mail_element.append_new_text_element( "subject", _subject );
+    
+    header_element.setAttribute_optional( "from"   , _from    );
+    header_element.setAttribute_optional( "to"     , _to      );
+    header_element.setAttribute_optional( "cc"     , _cc      );
+    header_element.setAttribute_optional( "bcc"    , _bcc     );
+  //header_element.setAttribute_optional( "subject", _subject );
+
+    header_element.append_new_text_element( "subject", _subject );
+
+    Z_FOR_EACH( Header_fields, _header_fields, h )
+    {
+        xml::Element_ptr field_element = header_element.append_new_element( "field" );
+        field_element.setAttribute         ( "name" , h->first  );
+        field_element.setAttribute_optional( "value", h->second );
+    }
+
 
     xml::Element_ptr body_element = mail_element.append_new_element( "body" );
     body_element.append_new_text_element( "text"   , _body    );
@@ -122,14 +134,27 @@ void Com_mail::set_dom( const xml::Element_ptr& mail_element )
 
     init();
 
-    set_from   ( mail_element.getAttribute( "from"    ) );
-    set_to     ( mail_element.getAttribute( "to"      ) );
-    set_cc     ( mail_element.getAttribute( "cc"      ) );
-    set_bcc    ( mail_element.getAttribute( "bcc"     ) );
-    set_smtp   ( mail_element.getAttribute( "smtp"    ) );
+    xml::Element_ptr header_element = mail_element.select_node_strict( "header" );
 
-    set_subject( xml::Element_ptr( mail_element.select_node( "subject" ) ).text() );
+    set_from   ( header_element.getAttribute( "from"    ) );
+    set_to     ( header_element.getAttribute( "to"      ) );
+    set_cc     ( header_element.getAttribute( "cc"      ) );
+    set_bcc    ( header_element.getAttribute( "bcc"     ) );
+  //set_smtp   ( header_element.getAttribute( "smtp"    ) );
+  //set_subject( header_element.getAttribute( "subject" ) );
+    set_subject( xml::Element_ptr( header_element.select_node( "subject" ) ).text() );
 
+    xml::Xpath_nodes field_elements = mail_element.select_nodes( "header/field" );
+    for( int i = 0; i < field_elements.count(); i++ )
+    {
+        xml::Element_ptr field_element = field_elements[ i ];
+
+        add_header_field( field_element.getAttribute( "name" ),
+                          field_element.getAttribute( "value" ) );
+    }
+
+
+    set_body( xml::Element_ptr( mail_element.select_node( "body/text" ) ).text() );
 
     xml::Xpath_nodes file_elements = mail_element.select_nodes( "body/file" );
     for( int i = 0; i < file_elements.count(); i++ )
@@ -197,6 +222,14 @@ void Com_mail::set_smtp( const string& smtp )
 {
     _smtp = smtp;
     _msg->set_smtp( smtp );
+}
+
+//-----------------------------------------------------------------------Com_mail::add_header_field
+
+void Com_mail::add_header_field( const string& name, const string& value )
+{
+    _msg->add_header_field( name, value );
+    _header_fields.push_back( pair<string,string>( name, value ) );
 }
 
 //-------------------------------------------------------------------------------Com_mail::add_file
@@ -493,7 +526,7 @@ STDMETHODIMP Com_mail::Add_header_field( BSTR field_name, BSTR value )
 
     try 
     {
-        _msg->add_header_field( bstr_as_string(field_name), bstr_as_string(value) );
+        add_header_field( bstr_as_string(field_name), bstr_as_string(value) );
     }
     catch( const _com_error& x )  { hr = _set_excepinfo( x, "Spooler.Mail.add_header_field" ); }
     catch( const exception & x )  { hr = _set_excepinfo( x, "Spooler.Mail.add_header_field" ); }

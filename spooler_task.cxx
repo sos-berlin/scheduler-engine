@@ -579,7 +579,7 @@ void Task::set_state( State new_state )
                     event.set_mail( _log->imail() );
                     event.send_mail();
                 }
-                catch( exception& x ) {}
+                catch( exception& x ) { _log->error( S() << "Fehler beim eMail-Versand: " << x ); }
             }
         }
     }

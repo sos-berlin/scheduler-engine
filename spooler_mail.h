@@ -98,7 +98,10 @@ struct Com_mail : spooler_com::Imail,
     void                    set_bcc                         ( const string& );
     void                    set_body                        ( const string& );
     void                    set_smtp                        ( const string& );
+    string                      smtp                        ()                                      { return _smtp; }
+    void                        add_header_field            ( const string& name, const string& value );
     void                        add_file                    ( const string& real_filename, const string& mail_filename, const string& content_type, const string& encoding );
+
 
     int                         auto_dequeue                ()                                      { return _msg->auto_dequeue(); }
     int                         send                        ();
@@ -118,6 +121,9 @@ struct Com_mail : spooler_com::Imail,
     string                     _bcc;
     string                     _body;
     list<File>                 _files;
+
+    typedef list< pair<string,string> >  Header_fields;
+    Header_fields              _header_fields;
 
     string                     _xslt_stylesheet_path;
     ptr<Xslt_stylesheet>       _xslt_stylesheet;

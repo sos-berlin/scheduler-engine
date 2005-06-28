@@ -125,9 +125,9 @@ xml::Document_ptr Scheduler_event::mail_dom( const xml::Document_ptr& event_dom_
     }    
 
 
-    Z_LOG( mail_dom.xml() );
+    Z_LOG( mail_dom.xml( true ) );
 
-    if( !mail_dom  ||  mail_dom.select_nodes( "/mail/@*" ).count() == 0 )        // Kein <mail> oder <mail> ohne Attribute?
+    if( !mail_dom  ||  mail_dom.select_nodes( "/mail/header" ).count() == 0 )        // Kein <mail><header>?
     {
         try
         {
@@ -157,6 +157,8 @@ int Scheduler_event::send_mail( const xml::Document_ptr& mail_dom_ )
     if( mail_dom )
     {
         Com_mail mail ( _spooler );
+        mail.init();
+        if( _mail->smtp() != "" )  mail.set_smtp( _mail->smtp() );
         mail.set_dom( mail_dom.select_node( "/mail" ) );
         return mail.send();
     }
