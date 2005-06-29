@@ -174,6 +174,7 @@ void send_error_email( const exception& x, int argc, char** argv, const string& 
     {
         Scheduler_event scheduler_event ( Scheduler_event::evt_scheduler_fatal_error, log_error, spooler );
         scheduler_event.set_error( x );
+        scheduler_event.set_scheduler_terminates( true );
         scheduler_event.set_subject( subject );
         scheduler_event.set_body( body );
         scheduler_event.send_mail();

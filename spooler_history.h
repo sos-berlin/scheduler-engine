@@ -37,7 +37,7 @@ struct Transaction;
 
 //---------------------------------------------------------------------------------------Spooler_db
 
-struct Spooler_db : Object
+struct Spooler_db : Object, Scheduler_object
 {
                                 Spooler_db              ( Spooler* );
 
@@ -51,6 +51,7 @@ struct Spooler_db : Object
     void                        spooler_start           ();
     void                        spooler_stop            ();
 
+    Prefix_log*                 log                     ()                                          { return _log; }
     int                         get_task_id             ()                                          { return get_id( "spooler_job_id" ); }
     int                         get_order_id            ( Transaction* ta = NULL )                  { return get_id( "spooler_order_id", ta ); }
     int                         get_order_ordering      ( Transaction* ta = NULL )                  { return get_id( "spooler_order_ordering", ta ); }
@@ -71,7 +72,6 @@ struct Spooler_db : Object
     Fill_zero                  _zero_;
     Thread_semaphore           _lock;
     Thread_semaphore           _error_lock;
-    Spooler*                   _spooler;
     z::sql::Database_descriptor _db_descr;
   private:
     friend struct Spooler;
@@ -99,6 +99,7 @@ struct Spooler_db : Object
     bool                       _email_sent_after_db_error;
     int                        _error_count;
     bool                       _waiting;
+    ptr<Prefix_log>            _log;
 };
 
 //--------------------------------------------------------------------------------------Transaction

@@ -32,6 +32,7 @@ struct Scheduler_event
 
     void                    set_mail                        ( Com_mail* mail )                      { _mail = mail; }
     Com_mail*                   mail                        ();
+    void                    set_scheduler_terminates        ( bool b )                              { _scheduler_terminates = b; }
     void                    set_error                       ( const Xc_copy& x )                    { _error = x; }
     void                    set_log_path                    ( const string& path )                  { _log_path = path; }
     void                    set_subject                     ( const string& subject )               { _subject = remove_password( subject ); }
@@ -44,6 +45,7 @@ struct Scheduler_event
     Spooler*                   _spooler;
     Event_code                 _event_code;
     Log_level                  _severity;
+    bool                       _scheduler_terminates;
     Scheduler_object*          _object;
     ptr<IUnknown>              _object_iunknown;            // Hält das Objekt (IUnknown ist die gemeinsame eindeutige Oberklasse)
     string                     _log_path;

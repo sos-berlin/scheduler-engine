@@ -133,11 +133,12 @@ void Transaction::rollback()
 
 Spooler_db::Spooler_db( Spooler* spooler )
 :
+    Scheduler_object( spooler, spooler, Scheduler_object::type_database ),
     _zero_(this+1),
-    _spooler(spooler),
     _lock("Spooler_db"),
     _db_descr( z::sql::flag_uppercase_names | z::sql::flag_quote_names )
 {
+    _log = Z_NEW( Prefix_log( this, "Database" ) );
 }
 
 //---------------------------------------------------------------------------------Spooler_db::open
@@ -190,7 +191,7 @@ void Spooler_db::open2( const string& db_name )
             {
                 string stmt;
 
-                _spooler->_log.info( "Datenbank wird geöffnet: " + my_db_name );
+                _log->info( "Datenbank wird geöffnet: " + my_db_name );
 
                 _db.open( "-in -out " + my_db_name );   // -create
 
@@ -246,8 +247,8 @@ void Spooler_db::open2( const string& db_name )
                 catch( exception& x )
                 {
                     Transaction ta ( this );
-                    _spooler->_log.warn( x.what() );
-                    _spooler->_log.info( "Tabelle " + _spooler->_orders_tablename + " wird um die Spalten INITIAL_STATE und RUN_TIME erweitert" );
+                    _log->warn( x.what() );
+                    _log->info( "Tabelle " + _spooler->_orders_tablename + " wird um die Spalten INITIAL_STATE und RUN_TIME erweitert" );
                     
                     _db.put( "ALTER TABLE " + uquoted(_spooler->_orders_tablename) + 
                              " add ( \"INITIAL_STATE\" char(100)," 
@@ -303,7 +304,7 @@ void Spooler_db::open2( const string& db_name )
 
                 if( _spooler->_need_db )  throw;
             
-                _spooler->_log.warn( string("FEHLER BEIM ÖFFNEN DER HISTORIENDATENBANK: ") + x.what() ); 
+                _log->warn( string("FEHLER BEIM ÖFFNEN DER HISTORIENDATENBANK: ") + x.what() ); 
             }
         }
     }
@@ -327,7 +328,7 @@ void Spooler_db::close()
         {
             _db.close();  // odbc.cxx und jdbc.cxx unterdrücken selbst Fehler.
         }
-        catch( const exception& x ) { _spooler->_log.warn( S() << "FEHLER BEIM SCHLIESSEN DER DATENBANK: " << x ); }
+        catch( const exception& x ) { _log->warn( S() << "FEHLER BEIM SCHLIESSEN DER DATENBANK: " << x ); }
 
         _db.destroy();
     }
@@ -364,8 +365,8 @@ void Spooler_db::create_table_when_needed( const string& tablename, const string
     }
     catch( const exception& x )
     {
-        _spooler->_log.warn( x.what() );
-        _spooler->_log.info( "Tabelle " + tablename + " wird eingerichtet" );
+        _log->warn( x.what() );
+        _log->info( "Tabelle " + tablename + " wird eingerichtet" );
         _db.put( "CREATE TABLE " + uquoted(tablename) + " (" + fields + ") " );
     }
 
@@ -393,7 +394,7 @@ void Spooler_db::try_reopen_after_error( const exception& x, bool wait_endless )
     {
         close();
     }
-    catch( const exception& x ) { _spooler->_log.warn( string("FEHLER BEIM SCHLIESSEN DER DATENBANK: ") + x.what() ); }
+    catch( const exception& x ) { _log->warn( string("FEHLER BEIM SCHLIESSEN DER DATENBANK: ") + x.what() ); }
 
 
     while( !_db.opened()  &&  !too_much_errors )
@@ -416,7 +417,7 @@ void Spooler_db::try_reopen_after_error( const exception& x, bool wait_endless )
             body += "\ndb=" + _spooler->_db_name + "\r\n\r\n" + x.what() + "\r\n\r\nDer Scheduler versucht, die Datenbank erneut zu oeffnen.";
             if( !_spooler->_need_db )  body += "\r\nWenn das nicht geht, schreibt der Scheduler die Historie in Textdateien.";
 
-            Scheduler_event scheduler_event ( Scheduler_event::evt_database_error, log_warn, _spooler );
+            Scheduler_event scheduler_event ( Scheduler_event::evt_database_error, log_warn, this );
             scheduler_event.set_error( x );
             scheduler_event.set_subject( S() << "FEHLER BEIM ZUGRIFF AUF DATENBANK: " << x.what() );
             scheduler_event.set_body( body );
@@ -468,11 +469,12 @@ void Spooler_db::try_reopen_after_error( const exception& x, bool wait_endless )
         if( _spooler->_need_db ) 
         {
             string msg = string("SCHEDULER WIRD BEENDET WEGEN FEHLERS BEIM ZUGRIFF AUF DATENBANK: ") + x.what();
-            _spooler->_log.error( msg );
+            _log->error( msg );
             string body = "db=" + _spooler->_db_name + "\r\n\r\n" + x.what() + "\r\n\r\n" + warn_msg;
 
-            Scheduler_event scheduler_event ( Scheduler_event::evt_database_error, log_warn, _spooler );
+            Scheduler_event scheduler_event ( Scheduler_event::evt_database_error, log_error, this );
             scheduler_event.set_error( x );
+            scheduler_event.set_scheduler_terminates( true );
             scheduler_event.set_subject( msg );
             scheduler_event.set_body( body );
             scheduler_event.send_mail();
@@ -485,7 +487,7 @@ void Spooler_db::try_reopen_after_error( const exception& x, bool wait_endless )
         {
             string body = "Wegen need_db=no\n" "db=" + _spooler->_db_name + "\r\n\r\n" + x.what() + "\r\n\r\n" + warn_msg;
             
-            Scheduler_event scheduler_event ( Scheduler_event::evt_database_error, log_warn, _spooler );
+            Scheduler_event scheduler_event ( Scheduler_event::evt_database_error, log_warn, this );
             scheduler_event.set_error( x );
             scheduler_event.set_subject( string("SCHEDULER ARBEITET NACH FEHLERN OHNE DATENBANK: ") + x.what() );
             scheduler_event.set_body( body );
@@ -647,7 +649,7 @@ void Spooler_db::spooler_start()
         }
         //catch( const exception& x )  
         //{ 
-        //    _spooler->_log.warn( string("FEHLER BEIM SCHREIBEN DER HISTORIE: ") + x.what() ); 
+        //    _log->warn( string("FEHLER BEIM SCHREIBEN DER HISTORIE: ") + x.what() ); 
         //}
     }
 }
@@ -669,7 +671,7 @@ void Spooler_db::spooler_stop()
         }
         catch( const exception& x )  
         { 
-            _spooler->_log.warn( string("FEHLER BEIM SCHREIBEN DER HISTORIE: ") + x.what() ); 
+            _log->warn( string("FEHLER BEIM SCHREIBEN DER HISTORIE: ") + x.what() ); 
         }
     }
 }
@@ -864,7 +866,7 @@ void Spooler_db::write_order_history( Order* order, Transaction* outer_transacti
                         }
                         catch( const exception& x ) 
                         { 
-                            _spooler->_log.warn( "FEHLER BEIM SCHREIBEN DES LOGS IN DIE TABELLE " + _spooler->_order_history_tablename + ": " + x.what() ); 
+                            _log->warn( "FEHLER BEIM SCHREIBEN DES LOGS IN DIE TABELLE " + _spooler->_order_history_tablename + ": " + x.what() ); 
                         }
                     }
                 }
@@ -970,7 +972,7 @@ xml::Element_ptr Job_chain::read_history( const xml::Document_ptr& doc, int id, 
                         string log = file_as_string( GZIP_AUTO + _spooler->_db->_db_name + "-table=" + _spooler->_job_history_tablename + " -blob=log where \"ID\"=" + as_string(id), "" );
                         if( !log.empty() ) dom_append_text_element( history_entry, "log", log );
                     }
-                    catch( const exception&  x ) { _spooler->_log.warn( string("Historie: ") + x.what() ); }
+                    catch( const exception&  x ) { _log->warn( string("Historie: ") + x.what() ); }
                 }
 
                 history_element.appendChild( history_entry );
@@ -1050,7 +1052,7 @@ xml::Element_ptr Spooler_db::read_task( const xml::Document_ptr& doc, int task_i
                                                 " where \"ID\"=" + as_string(task_id) );
                     dom_append_text_element( task_element, "log", log );
                 }
-                catch( const exception& x ) { _spooler->_log.warn( "FEHLER BEIM LESEN DES LOGS FÜR TASK " + as_string(task_id) + " AUS DER DATENBANK: " + x.what() ); }
+                catch( const exception& x ) { _log->warn( "FEHLER BEIM LESEN DES LOGS FÜR TASK " + as_string(task_id) + " AUS DER DATENBANK: " + x.what() ); }
             }
         }
     }
@@ -1347,8 +1349,8 @@ xml::Element_ptr Job_history::read_tail( const xml::Document_ptr& doc, int id, i
                                 par_doc.load_xml( param_xml );
                                 if( par_doc.documentElement() )  history_entry.appendChild( par_doc.documentElement() );
                             }
-                            catch( const exception&  x ) { _spooler->_log.warn( string("Historie: ") + x.what() ); }
-                            catch( const _com_error& x ) { _spooler->_log.warn( string("Historie: ") + w_as_string(x.Description() )) ; }
+                            catch( const exception&  x ) { _log->warn( string("Historie: ") + x.what() ); }
+                            catch( const _com_error& x ) { _log->warn( string("Historie: ") + w_as_string(x.Description() )) ; }
                         }
 #endif
                         if( with_log )
@@ -1358,7 +1360,7 @@ xml::Element_ptr Job_history::read_tail( const xml::Document_ptr& doc, int id, i
                                 string log = file_as_string( GZIP_AUTO + _spooler->_db->_db_name + "-table=" + _spooler->_job_history_tablename + " -blob=log where \"ID\"=" + as_string(id), "" );
                                 if( !log.empty() ) dom_append_text_element( history_entry, "log", log );
                             }
-                            catch( const exception&  x ) { _spooler->_log.warn( string("Historie: ") + x.what() ); }
+                            catch( const exception&  x ) { _job->_log->warn( string("Historie: ") + x.what() ); }
                         }
 
                         history_element.appendChild( history_entry );

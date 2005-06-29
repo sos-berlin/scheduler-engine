@@ -119,4 +119,20 @@ public class Spooler extends Idispatch
     public int              tcp_port()                                              { return            int_com_call( "<tcp_port" ); }
 
     public int              udp_port()                                              { return            int_com_call( "<udp_port" ); }
+    
+    public Xslt_stylesheet  create_xslt_stylesheet()                                { return (Xslt_stylesheet)com_call( "Create_xslt_stylesheet" ); }
+    
+    /** Dasselbe wie create_xslt_stylesheet().load_file( java.io.File ).
+      * Steht nur in Java zur Verfügung.
+      */
+    public Xslt_stylesheet  create_xslt_stylesheet( java.io.File file )             { Xslt_stylesheet stylesheet = (Xslt_stylesheet)com_call( "Create_xslt_stylesheet" );
+                                                                                      stylesheet.load_file( file );
+                                                                                      return stylesheet; }
+    
+    /** Dasselbe wie create_xslt_stylesheet().load_xml( String ).
+      * Steht nur in Java zur Verfügung.
+      */
+    public Xslt_stylesheet  create_xslt_stylesheet( String xml )                    { Xslt_stylesheet stylesheet = (Xslt_stylesheet)com_call( "Create_xslt_stylesheet" );
+                                                                                      stylesheet.load_xml( xml );
+                                                                                      return stylesheet; }
 }

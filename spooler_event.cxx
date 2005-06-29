@@ -54,6 +54,10 @@ xml::Document_ptr Scheduler_event::dom()
     scheduler_event_element.setAttribute( "event"       , name_of_event_code( _event_code ) );
     scheduler_event_element.setAttribute( "severity"    , name_of_log_level( _severity ) );
     scheduler_event_element.setAttribute( "severity_value", (int)_severity );
+
+    if( _scheduler_terminates )
+    scheduler_event_element.setAttribute( "scheduler_terminates", _scheduler_terminates? "yes" : "no" );
+
     scheduler_event_element.setAttribute( "object_type" , Scheduler_object::name_of_type_code( _object->scheduler_type_code() ) );
     scheduler_event_element.setAttribute( "log_file"    , _log_path );
 
@@ -207,18 +211,19 @@ int Scheduler_event::send_mail( const xml::Document_ptr& mail_dom_ )
 
         // MAIL SENDEN
 
+        ptr<Com_mail> mail = _mail;
+
         if( mail_dom.has_node( "/mail/header" ) )
         {
-            Com_mail mail ( _spooler );
-            mail.init();
-            if( _mail->smtp() != "" )  mail.set_smtp( _mail->smtp() );
-            mail.set_dom( mail_dom.select_node( "/mail" ) );
-            return mail.send();
+            mail = new Com_mail( _spooler );
+            mail->init();
+            if( _mail  &&  _mail->smtp() != "" )  mail->set_smtp( _mail->smtp() );
+            mail->set_dom( mail_dom.select_node( "/mail" ) );
         }
-        else
-        if( _mail )
+
+        if( mail )
         {
-            return _mail->send();
+            return mail->send();
         }
     }
     catch( exception& x )

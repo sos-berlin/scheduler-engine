@@ -40,7 +40,8 @@ struct Scheduler_object
         type_job,
         type_task,
         type_order,
-        type_job_chain
+        type_job_chain,
+        type_database
     };
 
 
