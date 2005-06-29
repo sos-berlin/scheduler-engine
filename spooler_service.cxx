@@ -105,7 +105,7 @@ string make_service_display( const string& id )
 
 //----------------------------------------------------------------------------------------event_log
 
-static void event_log( const exception& x, int argc, char** argv, Spooler* = NULL )
+static void event_log( const exception& x, int argc, char** argv, Spooler* spooler = NULL )
 {
     string msg = "*** SOS SCHEDULER *** " + string( x.what() );
 
@@ -125,7 +125,7 @@ static void event_log( const exception& x, int argc, char** argv, Spooler* = NUL
 
     DeregisterEventSource( h ); 
 
-    send_error_email( x, argc, argv, "" );
+    send_error_email( x, argc, argv, "", spooler );
 
     fprintf( stderr, "%s\n", msg.c_str() );
 }

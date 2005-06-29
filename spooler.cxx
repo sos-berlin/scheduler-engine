@@ -2487,7 +2487,7 @@ int Spooler::launch( int argc, char** argv, const string& parameter_line )
 }
 
 //------------------------------------------------------------------------Spooler::send_error_email
-
+/*
 void Spooler::send_error_email( const string& subject, const string& text )
 {
     try
@@ -2517,7 +2517,7 @@ void Spooler::send_error_email( const string& subject, const string& text )
         _log.warn( "Fehler beim eMail-Versand: " + string(x.what()) );
     }
 }
-
+*/
 //------------------------------------------------------------------------------------start_process
 #ifdef Z_WINDOWS
 

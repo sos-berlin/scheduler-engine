@@ -279,7 +279,7 @@ struct Spooler : Object,
     bool                        signaled                    ()                                  { return _event.signaled(); }
 
     Spooler_thread*             thread_by_thread_id         ( Thread_id );
-    void                        send_error_email            ( const string& subject, const string& body );
+  //void                        send_error_email            ( const string& subject, const string& body );
 
     void                        send_cmd                    ();
 
