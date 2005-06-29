@@ -92,6 +92,7 @@ namespace sos {
 #include "spooler_common.h"
 #include "spooler_time.h"
 #include "spooler_mail.h"
+#include "spooler_event.h"
 #include "spooler_log.h"
 #include "spooler_wait.h"
 #include "spooler_communication.h"
@@ -112,7 +113,6 @@ namespace sos {
 #include "spooler_service.h"
 #include "spooler_module_remote.h"
 #include "spooler_module_remote_server.h"
-#include "spooler_event.h"
 
 //-------------------------------------------------------------------------------------------------
 
@@ -153,7 +153,8 @@ typedef map<Thread_id,Spooler_thread*>      Thread_id_map;
 
 //------------------------------------------------------------------------------------------Spooler
 
-struct Spooler : Scheduler_object
+struct Spooler : Object,
+                 Scheduler_object
 {
     enum State
     {

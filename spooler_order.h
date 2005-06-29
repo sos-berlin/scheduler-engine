@@ -14,7 +14,8 @@ struct Order;
 
 //--------------------------------------------------------------------------------------------Order
 
-struct Order : Com_order, 
+struct Order : Com_order,
+               Scheduler_object,
                Modified_event_handler
 {
     Fill_zero                  _zero_;    
@@ -36,7 +37,7 @@ struct Order : Com_order,
     void                        open_log                ();
     void                        close                   ();
 
-    Prefix_log&                 log                     ()                                          { return *_log; }
+    Prefix_log*                 log                     ()                                          { return _log; }
     
     void                    set_id                      ( const Variant& );
     Id                          id                      ()                                          { THREAD_LOCK_RETURN( _lock, Variant, _id ); }

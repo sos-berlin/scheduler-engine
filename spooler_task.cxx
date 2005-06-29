@@ -198,7 +198,7 @@ string start_cause_name( Start_cause cause )
 
 Task::Task( Job* job )    
 : 
-    Scheduler_object( job->_spooler, Scheduler_object::type_task ),
+    Scheduler_object( job->_spooler, this, Scheduler_object::type_task ),
     _zero_(this+1), 
     _job(job),
     _history(&job->_history,this),
@@ -206,7 +206,7 @@ Task::Task( Job* job )
     _lock("Task")
   //_success(true)
 {
-    _log = Z_NEW( Prefix_log( job->_spooler ) );
+    _log = Z_NEW( Prefix_log( this ) );
 
     _let_run = _job->_period.let_run();
 
@@ -567,7 +567,7 @@ void Task::set_state( State new_state )
                 _log->log( log_level, msg );
             }
 
-
+/*
             if( _state == s_closed )
             {
                 try
@@ -581,6 +581,7 @@ void Task::set_state( State new_state )
                 }
                 catch( exception& x ) { _log->error( S() << "Fehler beim eMail-Versand: " << x ); }
             }
+*/
         }
     }
 }
@@ -1521,20 +1522,19 @@ void Task::finish()
 
 
     // eMail versenden
-    /*
+
     try
     {
         if( !_spooler->_manual )
         {
             set_mail_defaults();
-            _log->send( has_error() || _log->highest_level() >= log_error? -1 : _step_count );
+            _log->send( has_error() || _log->highest_level() >= log_error? -1 : _step_count, Scheduler_event::evt_task_ended );
         }
 
         clear_mail();
     }
     catch( const exception& x  ) { _log->warn( x.what() ); }
     catch( const _com_error& x ) { _log->warn( bstr_as_string(x.Description()) ); }  
-    */
 }
 
 //----------------------------------------------------------------------Task::wait_until_terminated
@@ -1565,7 +1565,7 @@ void Task::send_collected_log()
 {
     try
     {
-        _log->send( -2 );
+        _log->send( -2, Scheduler_event::evt_task_ended );
     }
     catch( const exception&  x ) { _spooler->_log.error( x.what() ); }
     catch( const _com_error& x ) { _spooler->_log.error( bstr_as_string(x.Description()) ); }

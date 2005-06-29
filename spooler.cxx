@@ -338,7 +338,7 @@ static void be_daemon()
 
 Spooler::Spooler() 
 : 
-    Scheduler_object( this, Scheduler_object::type_scheduler ),
+    Scheduler_object( this, this, Scheduler_object::type_scheduler ),
     _zero_(this+1), 
     _version(VER_PRODUCTVERSION_STR),
     _security(this),
@@ -1831,7 +1831,7 @@ void Spooler::start()
                 _log.set_mail_from_name( name(), true );
                 _log.set_mail_subject( subject );
                 _log.set_mail_body( body );
-                _log.send( -1 );
+                _log.send( -1, Scheduler_event::evt_scheduler_started );
             }
             catch( exception& x )  { _log.warn( S() << "Fehler beim eMail-Versand: " << x.what() ); }
         }

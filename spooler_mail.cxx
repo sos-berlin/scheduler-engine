@@ -97,9 +97,8 @@ xml::Element_ptr Com_mail::dom_element( const xml::Document_ptr& dom )
     header_element.setAttribute_optional( "to"     , _to      );
     header_element.setAttribute_optional( "cc"     , _cc      );
     header_element.setAttribute_optional( "bcc"    , _bcc     );
-  //header_element.setAttribute_optional( "subject", _subject );
-
-    header_element.append_new_text_element( "subject", _subject );
+    header_element.setAttribute_optional( "subject", _subject );
+  //header_element.append_new_text_element( "subject", _subject );
 
     Z_FOR_EACH( Header_fields, _header_fields, h )
     {
@@ -141,8 +140,8 @@ void Com_mail::set_dom( const xml::Element_ptr& mail_element )
     set_cc     ( header_element.getAttribute( "cc"      ) );
     set_bcc    ( header_element.getAttribute( "bcc"     ) );
   //set_smtp   ( header_element.getAttribute( "smtp"    ) );
-  //set_subject( header_element.getAttribute( "subject" ) );
-    set_subject( xml::Element_ptr( header_element.select_node( "subject" ) ).text() );
+    set_subject( header_element.getAttribute( "subject" ) );
+  //set_subject( xml::Element_ptr( header_element.select_node( "subject" ) ).text() );
 
     xml::Xpath_nodes field_elements = mail_element.select_nodes( "header/field" );
     for( int i = 0; i < field_elements.count(); i++ )

@@ -349,15 +349,16 @@ Prefix_log::Prefix_log( int )
 
 //---------------------------------------------------------------------------Prefix_log::Prefix_log
 
-Prefix_log::Prefix_log( Spooler* spooler, const string& prefix )
+Prefix_log::Prefix_log( Scheduler_object* o, const string& prefix )
 :
     _zero_(this+1),
-    _spooler(spooler),
-    _log(&spooler->_base_log),
+    _object(o),
+    _spooler(o->_spooler),
+    _log(&o->_spooler->_base_log),
     _prefix(prefix),
     _file(-1)
 {
-    init( spooler, prefix );
+    init( o, prefix );
 }
 
 //--------------------------------------------------------------------------Prefix_log::~Prefix_log
@@ -384,10 +385,11 @@ Prefix_log::~Prefix_log()
 
 //---------------------------------------------------------------------------------Prefix_log::init
 
-void Prefix_log::init( Spooler* spooler, const string& prefix )
+void Prefix_log::init( Scheduler_object* o, const string& prefix )
 {
-    _spooler = spooler;
-    _log     = &spooler->_base_log;
+    _object  = o;
+    _spooler = o->_spooler;
+    _log     = &o->_spooler->_base_log;
     _prefix  = prefix;
 
     _log_level       = _spooler->_log_level;
@@ -518,7 +520,8 @@ void Prefix_log::close()
         {
             if( !_subject.empty()  ||  !_body.empty() )     // 20.11.2002
             {
-                send_really();
+                send_really( _object->scheduler_type_code() == Scheduler_object::type_task? Scheduler_event::evt_task_ended 
+                                                                                          : Scheduler_event::evt_unknown );
             }
         }
         catch( const exception&  x ) { _spooler->_log.error(x.what());                         _remove_after_close = false; }
@@ -738,7 +741,7 @@ void Prefix_log::set_mail_body( const string& body, bool overwrite )
 
 //---------------------------------------------------------------------------------Prefix_log::send
 
-void Prefix_log::send( int reason )
+void Prefix_log::send( int reason, Scheduler_event::Event_code event_code )
 {
     //Z_LOG2( "joacim", "Prefix_log::send()\n" );
     // reason == -2  =>  Gelegentlicher Aufruf, um Fristen zu prüfen und ggfs. eMail zu versenden
@@ -786,7 +789,7 @@ void Prefix_log::send( int reason )
 
                 close2();
                 //Z_LOG2( "joacim", "Prefix_log::send_really()\n" );
-                send_really();
+                send_really( event_code );
 
                 _first_send = 0;
             }
@@ -798,7 +801,7 @@ void Prefix_log::send( int reason )
 
 //--------------------------------------------------------------------------Prefix_log::send_really
 
-void Prefix_log::send_really()
+void Prefix_log::send_really( Scheduler_event::Event_code event_code )
 {
     int ok;
 
@@ -807,7 +810,14 @@ void Prefix_log::send_really()
         imail()->Add_file( Bstr( filename() ), NULL, Bstr(L"text/plain"), Bstr(_spooler->_mail_encoding) );
     }
 
-    ok = imail()->send();
+    //ok = imail()->send();
+
+    {
+        Scheduler_event event ( event_code, highest_level(), _object );
+        event.set_mail( imail() );
+        ok = event.send_mail();
+    }
+
 
     if( ok )
     {

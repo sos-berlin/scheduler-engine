@@ -29,7 +29,8 @@ string                          start_cause_name            ( Start_cause );
 
 //----------------------------------------------------------------------------------------------Task
 
-struct Task : Scheduler_object
+struct Task : Object, 
+              Scheduler_object
 {
     enum State
     {

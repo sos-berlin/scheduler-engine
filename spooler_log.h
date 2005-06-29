@@ -52,10 +52,10 @@ struct Prefix_log : Object, Has_log
     Fill_zero _zero_;
 
                                 Prefix_log                  ( int );                            // Für Spooler
-                                Prefix_log                  ( Spooler*, const string& prefix = empty_string );
+                                Prefix_log                  ( Scheduler_object*, const string& prefix = empty_string );
                                ~Prefix_log                  ();
 
-    void                        init                        ( Spooler*, const string& prefix = empty_string );
+    void                        init                        ( Scheduler_object*, const string& prefix = empty_string );
     void                        open                        ();
     void                        close                       ();
     void                        close2                      ();
@@ -144,10 +144,8 @@ struct Prefix_log : Object, Has_log
     string                      mail_to                     () const                            { return _to; }
     string                      mail_from                   () const                            { return _from; }
 
-    void                        send                        ( int reason );
-    void                        send_really                 ();
-
-
+    void                        send                        ( int reason, Scheduler_event::Event_code );
+    void                        send_really                 ( Scheduler_event::Event_code );
 
 
   protected:
@@ -158,10 +156,11 @@ struct Prefix_log : Object, Has_log
     friend struct               Log;
 
 
+    Scheduler_object*          _object;
     Spooler*                   _spooler;
-    Log*                       _log;
     Job*                       _job;
     Task*                      _task;
+    Log*                       _log;
     Prefix_log*                _order_log;
     string                     _prefix;
     string                     _section;

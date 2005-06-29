@@ -14,7 +14,9 @@ struct Scheduler_event
     enum Event_code
     {
         evt_none,
-        evt_task_state,
+        evt_unknown,
+        evt_scheduler_started,
+        evt_task_ended,
         evt_disk_full,
         evt_database_error,
         evt_task_start_error,
@@ -36,18 +38,12 @@ struct Scheduler_event
     Spooler*                   _spooler;
     Event_code                 _event_code;
     Log_level                  _severity;
-    ptr<Scheduler_object>      _object;
+    Scheduler_object*          _object;
+    ptr<IUnknown>              _object_iunknown;            // Hält das Objekt (IUnknown ist die gemeinsame eindeutige Oberklasse)
     Xc_copy                    _error;
     ptr<Com_mail>              _mail;                       
 };
 
-//-------------------------------------------------------------------------------------------------
-/*
-struct Task_state_event : Scheduler_event
-{
-                                Task_state_event            ( Event_code, Log_level severity, Task* );
-};
-*/
 //-------------------------------------------------------------------------------------------------
 
 } //namespace spooler

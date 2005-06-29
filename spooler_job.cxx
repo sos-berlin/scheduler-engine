@@ -42,7 +42,7 @@ void Job::Delay_after_error::set( int error_steps, const Time& delay )
 
 Job::Job( Spooler* spooler )
 : 
-    Scheduler_object( spooler, Scheduler_object::type_job ),
+    Scheduler_object( spooler, this, Scheduler_object::type_job ),
     _zero_(this+1),
     _module(spooler,_log),
     _task_queue(this),
@@ -51,7 +51,7 @@ Job::Job( Spooler* spooler )
 {
     init_run_time();
 
-    _log            = Z_NEW( Prefix_log( spooler ) );
+    _log            = Z_NEW( Prefix_log( this ) );
     _log->set_job( this );
 
     _next_time      = latter_day;

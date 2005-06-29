@@ -833,7 +833,7 @@ void Spooler_db::write_order_history( Order* order, Transaction* outer_transacti
 
 
                     // Auftragsprotokoll
-                    string log_filename = order->log().filename();
+                    string log_filename = order->log()->filename();
 
                     if( _spooler->_order_history_with_log  &&  !log_filename.empty()  &&  log_filename[0] != '*' )
                     {

@@ -14,7 +14,9 @@ string Scheduler_event::name_of_event_code( Event_code event_code )
     switch( event_code )
     {
         case evt_none:              return "none";
-        case evt_task_state:        return "task_state";
+        case evt_unknown:           return "unknown";
+        case evt_scheduler_started: return "scheduler_started";
+        case evt_task_ended:        return "task_ended";
         case evt_disk_full:         return "disk_full";
         case evt_database_error:    return "database_error";
         case evt_task_start_error:  return "task_start_error";
@@ -29,8 +31,10 @@ Scheduler_event::Scheduler_event( Event_code event_code, Log_level severity, Sch
     _event_code(event_code),
     _severity(severity),
     _object(object),
+    _object_iunknown( object->_my_iunknown ),
     _spooler(object->_spooler)
 {
+    assert( _object_iunknown );
 }
 
 //-----------------------------------------------------------------------Scheduler_event::send_mail
@@ -45,9 +49,10 @@ xml::Document_ptr Scheduler_event::dom()
     xml::Element_ptr scheduler_event_element = event_dom.createElement( "scheduler_event" );
     event_dom.appendChild( scheduler_event_element  );
 
-    scheduler_event_element.setAttribute( "time"    , Time::now().xml_value() );
-    scheduler_event_element.setAttribute( "event"   , name_of_event_code( _event_code ) );
-    scheduler_event_element.setAttribute( "severity", name_of_log_level( _severity ) );
+    scheduler_event_element.setAttribute( "time"        , Time::now().xml_value() );
+    scheduler_event_element.setAttribute( "event"       , name_of_event_code( _event_code ) );
+    scheduler_event_element.setAttribute( "severity"    , name_of_log_level( _severity ) );
+    scheduler_event_element.setAttribute( "object_type" , Scheduler_object::name_of_type_code( _object->scheduler_type_code() ) );
 
     switch( _object->scheduler_type_code() )
     {
@@ -125,9 +130,9 @@ xml::Document_ptr Scheduler_event::mail_dom( const xml::Document_ptr& event_dom_
     }    
 
 
-    Z_LOG( mail_dom.xml( true ) );
-
-    if( !mail_dom  ||  mail_dom.select_nodes( "/mail/header" ).count() == 0 )        // Kein <mail><header>?
+    Z_LOG2( "joacim", mail_dom.xml( true ) );
+/*
+    if( !mail_dom  ||  !mail_dom.has_node( "/mail/header" ) )
     {
         try
         {
@@ -142,6 +147,12 @@ xml::Document_ptr Scheduler_event::mail_dom( const xml::Document_ptr& event_dom_
             _object->log()->warn( S() << "Internes XSLT-Stylesheet: " << x );
         }
     }
+*/
+    if( !mail_dom.has_node( "/mail/header" ) )
+    {
+        mail_dom.create();
+        mail_dom.appendChild( event_dom.select_node( "/scheduler_event/mail" ).cloneNode(true) );
+    }
 
     return mail_dom;
 }
@@ -154,13 +165,18 @@ int Scheduler_event::send_mail( const xml::Document_ptr& mail_dom_ )
 
     // MAIL SENDEN
 
-    if( mail_dom )
+    if( mail_dom.has_node( "/mail/header" ) )
     {
         Com_mail mail ( _spooler );
         mail.init();
         if( _mail->smtp() != "" )  mail.set_smtp( _mail->smtp() );
         mail.set_dom( mail_dom.select_node( "/mail" ) );
         return mail.send();
+    }
+    else
+    if( _mail )
+    {
+        return _mail->send();
     }
 
     return 0; //?

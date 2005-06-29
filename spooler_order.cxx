@@ -789,9 +789,9 @@ ptr<Order> Order_queue::order_or_null( const Order::Id& id )
 
 Order::Order( Spooler* spooler )
 : 
-    _zero_(this+1), 
-    _spooler(spooler), 
     Com_order(this),     
+    Scheduler_object( spooler, static_cast<IDispatch*>( this ), type_order ), 
+    _zero_(this+1), 
     _lock("Order") 
 { 
     init(); 
@@ -801,9 +801,9 @@ Order::Order( Spooler* spooler )
 
 Order::Order( Spooler* spooler, const VARIANT& payload )
 : 
+    Scheduler_object( spooler, static_cast<IDispatch*>( this ), type_order ), 
     Com_order(this),
     _zero_(this+1), 
-    _spooler(spooler),
     _lock("Order"),
     _payload(payload)
 {
@@ -815,6 +815,7 @@ Order::Order( Spooler* spooler, const VARIANT& payload )
 Order::Order( Spooler* spooler, const Record& record )
 : 
     Com_order(this),
+    Scheduler_object( spooler, static_cast<IDispatch*>( this ), type_order ), 
     _zero_(this+1), 
     _spooler(spooler),
     _lock("Order")
@@ -862,7 +863,7 @@ Order::~Order()
 
 void Order::init()
 {
-    _log = Z_NEW( Prefix_log( _spooler ) );
+    _log = Z_NEW( Prefix_log( this ) );
     _log->set_prefix( "Order" );
     _created = Time::now();
 

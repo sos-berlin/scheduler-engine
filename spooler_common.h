@@ -31,7 +31,7 @@ struct Modified_event_handler
 
 //---------------------------------------------------------------------------------Scheduler_object
 
-struct Scheduler_object : Object
+struct Scheduler_object
 {
     enum Type_code
     {
@@ -47,7 +47,7 @@ struct Scheduler_object : Object
     static string               name_of_type_code           ( Type_code );
 
 
-                                Scheduler_object            ( Spooler* sp, Type_code code )         : _spooler(sp), _scheduler_object_type_code(code) {}
+                                Scheduler_object            ( Spooler* sp, IUnknown* me, Type_code code )         : _spooler(sp), _my_iunknown(me), _scheduler_object_type_code(code) {}
 
 
     Type_code                   scheduler_type_code         () const                                { return _scheduler_object_type_code; }
@@ -57,11 +57,24 @@ struct Scheduler_object : Object
 
 
     Spooler*                   _spooler;
+    IUnknown*                  _my_iunknown;
     Type_code                  _scheduler_object_type_code;
     ptr<Xslt_stylesheet>       _mail_xslt_stylesheet;
     string                     _mail_xslt_stylesheet_path;
 };
 
+//-------------------------------------------------------------------------------scheduler_object<>
+/*
+template< class BASE_CLASS >
+struct scheduler_object : BASE_CLASS, Scheduler_object_base
+{
+                                scheduler_object            ( Spooler* sp, Type_code code )         : Scheduler_object_base( sp, code ) {}
+};
+
+//---------------------------------------------------------------------------------Scheduler_object
+
+typedef scheduler_object< Object >  Scheduler_object;       // Standard-Fall
+*/
 //-------------------------------------------------------------------------------------------------
 
 } //namespace spooler

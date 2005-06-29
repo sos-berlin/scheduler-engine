@@ -100,7 +100,8 @@ struct Object_set : Sos_self_deleting
 
 //----------------------------------------------------------------------------------------------Job
 
-struct Job : Scheduler_object
+struct Job : Object,
+             Scheduler_object
 {
     enum State
     {
