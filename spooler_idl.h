@@ -32,6 +32,7 @@ struct Ijob_chain;
 struct Iorder_queue;
 struct Iorder;
 struct Isubprocess;
+struct Ixslt_stylesheet;
 
 //------------------------------------------------------------------------------------Log_level
 // S.a. zschimmer/log.h (muss kompatibel sein!)
@@ -426,7 +427,7 @@ struct Imail : IDispatch
     virtual HRESULT     put_Xslt_stylesheet_path    ( BSTR ) = 0;
     virtual HRESULT     get_Xslt_stylesheet_path    ( BSTR* ) = 0;
 
-    virtual HRESULT     get_Xslt_stylesheet         ( spooler_com::Ixslt_stylesheet** );
+    virtual HRESULT     get_Xslt_stylesheet         ( spooler_com::Ixslt_stylesheet** ) = 0;
 };
 
 //--------------------------------------------------------------------------------Job_chain_node

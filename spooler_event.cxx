@@ -223,7 +223,7 @@ int Scheduler_event::send_mail( const xml::Document_ptr& mail_dom_ )
     }
     catch( exception& x )
     {
-        Z_LOG( __FUNCTION__ ": " << x.what() );
+        Z_LOG( __FUNCTION__ << ": " << x.what() );
         _spooler->log()->warn( "Fehler beim eMail-Versand: " + string( x.what() ) );
     }
 

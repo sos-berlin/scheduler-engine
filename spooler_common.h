@@ -48,6 +48,7 @@ struct Scheduler_object
 
 
                                 Scheduler_object            ( Spooler* sp, IUnknown* me, Type_code code )         : _spooler(sp), _my_iunknown(me), _scheduler_object_type_code(code) {}
+    virtual                    ~Scheduler_object            ()                                      {}    // Für gcc
 
 
     Type_code                   scheduler_type_code         () const                                { return _scheduler_object_type_code; }

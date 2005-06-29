@@ -386,7 +386,7 @@ void Spooler::load_config( const xml::Element_ptr& config_element, const Time& x
         string host_and_port = config_element.getAttribute( "main_scheduler" );
         if( host_and_port != "" )  _main_scheduler_connection = Z_NEW( Xml_client_connection( this, host_and_port ) );
 
-        set_mail_xslt_stylesheet_path( config_element.getAttribute( "mail_xslt_stylesheet" ) );
+        set_mail_xslt_stylesheet_path( subst_env( config_element.getAttribute( "mail_xslt_stylesheet" ) ) );
 
         DOM_FOR_EACH_ELEMENT( config_element, e )
         {
