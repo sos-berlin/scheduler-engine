@@ -30,6 +30,7 @@ struct Scheduler_event
 
     void                    set_mail                        ( Com_mail* mail )                      { _mail = mail; }
     void                    set_error                       ( const Xc_copy& x )                    { _error = x; }
+    void                    set_log_path                    ( const string& path )                  { _log_path = path; }
 
     xml::Document_ptr           dom                         ();
     xml::Document_ptr           mail_dom                    ( const xml::Document_ptr& event = xml::Document_ptr() );  // Default: dom()
@@ -40,6 +41,7 @@ struct Scheduler_event
     Log_level                  _severity;
     Scheduler_object*          _object;
     ptr<IUnknown>              _object_iunknown;            // Hält das Objekt (IUnknown ist die gemeinsame eindeutige Oberklasse)
+    string                     _log_path;
     Xc_copy                    _error;
     ptr<Com_mail>              _mail;                       
 };

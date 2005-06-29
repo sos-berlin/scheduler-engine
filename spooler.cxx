@@ -1828,10 +1828,12 @@ void Spooler::start()
                 body << ( _log.highest_level() == log_warn? "warning" : "error" ) << ":\n\n";
                 body << subject << "\n\n";
 
+                Scheduler_event scheduler_event ( Scheduler_event::evt_scheduler_started, _log.highest_level(), this );
+                scheduler_event.set_error( Xc( "SCHEDULER-227", _log.last( _log.highest_level() ).c_str() ) );
                 _log.set_mail_from_name( name(), true );
                 _log.set_mail_subject( subject );
                 _log.set_mail_body( body );
-                _log.send( -1, Scheduler_event::evt_scheduler_started );
+                _log.send( -1, &scheduler_event );
             }
             catch( exception& x )  { _log.warn( S() << "Fehler beim eMail-Versand: " << x.what() ); }
         }

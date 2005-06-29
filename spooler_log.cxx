@@ -520,8 +520,10 @@ void Prefix_log::close()
         {
             if( !_subject.empty()  ||  !_body.empty() )     // 20.11.2002
             {
-                send_really( _object->scheduler_type_code() == Scheduler_object::type_task? Scheduler_event::evt_task_ended 
-                                                                                          : Scheduler_event::evt_unknown );
+                Scheduler_event::Event_code event_code = _object->scheduler_type_code() == Scheduler_object::type_task? Scheduler_event::evt_task_ended 
+                                                                                                                      : Scheduler_event::evt_unknown;
+                Scheduler_event scheduler_event ( event_code, highest_level(), _object );
+                send_really( &scheduler_event );
             }
         }
         catch( const exception&  x ) { _spooler->_log.error(x.what());                         _remove_after_close = false; }
@@ -741,7 +743,7 @@ void Prefix_log::set_mail_body( const string& body, bool overwrite )
 
 //---------------------------------------------------------------------------------Prefix_log::send
 
-void Prefix_log::send( int reason, Scheduler_event::Event_code event_code )
+void Prefix_log::send( int reason, Scheduler_event* scheduler_event )
 {
     //Z_LOG2( "joacim", "Prefix_log::send()\n" );
     // reason == -2  =>  Gelegentlicher Aufruf, um Fristen zu prüfen und ggfs. eMail zu versenden
@@ -789,7 +791,7 @@ void Prefix_log::send( int reason, Scheduler_event::Event_code event_code )
 
                 close2();
                 //Z_LOG2( "joacim", "Prefix_log::send_really()\n" );
-                send_really( event_code );
+                send_really( scheduler_event );
 
                 _first_send = 0;
             }
@@ -801,22 +803,24 @@ void Prefix_log::send( int reason, Scheduler_event::Event_code event_code )
 
 //--------------------------------------------------------------------------Prefix_log::send_really
 
-void Prefix_log::send_really( Scheduler_event::Event_code event_code )
+void Prefix_log::send_really( Scheduler_event* scheduler_event )
 {
     int ok;
 
     if( filename() != "*stderr" )
     {
         imail()->Add_file( Bstr( filename() ), NULL, Bstr(L"text/plain"), Bstr(_spooler->_mail_encoding) );
+
+        if( scheduler_event )  scheduler_event->set_log_path( filename() );
     }
 
-    //ok = imail()->send();
-
+    if( scheduler_event )
     {
-        Scheduler_event event ( event_code, highest_level(), _object );
-        event.set_mail( imail() );
-        ok = event.send_mail();
+        scheduler_event->set_mail( imail() );
+        ok = scheduler_event->send_mail();
     }
+    else
+        ok = imail()->send();
 
 
     if( ok )

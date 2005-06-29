@@ -52,7 +52,9 @@ xml::Document_ptr Scheduler_event::dom()
     scheduler_event_element.setAttribute( "time"        , Time::now().xml_value() );
     scheduler_event_element.setAttribute( "event"       , name_of_event_code( _event_code ) );
     scheduler_event_element.setAttribute( "severity"    , name_of_log_level( _severity ) );
+    scheduler_event_element.setAttribute( "severity_value", (int)_severity );
     scheduler_event_element.setAttribute( "object_type" , Scheduler_object::name_of_type_code( _object->scheduler_type_code() ) );
+    scheduler_event_element.setAttribute( "log_file"    , _log_path );
 
     switch( _object->scheduler_type_code() )
     {
@@ -93,6 +95,8 @@ xml::Document_ptr Scheduler_event::dom()
         scheduler_event_element.appendChild( _mail->dom_element( event_dom ) );
     }
 
+    Z_LOG2( "joacim", event_dom.xml( true ) );
+
     return event_dom;
 }
 
@@ -130,7 +134,6 @@ xml::Document_ptr Scheduler_event::mail_dom( const xml::Document_ptr& event_dom_
     }    
 
 
-    Z_LOG2( "joacim", mail_dom.xml( true ) );
 /*
     if( !mail_dom  ||  !mail_dom.has_node( "/mail/header" ) )
     {
@@ -148,6 +151,8 @@ xml::Document_ptr Scheduler_event::mail_dom( const xml::Document_ptr& event_dom_
         }
     }
 */
+    Z_LOG2( "joacim", mail_dom.xml( true ) );
+
     if( !mail_dom.has_node( "/mail/header" ) )
     {
         mail_dom.create();

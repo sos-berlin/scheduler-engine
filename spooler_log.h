@@ -144,8 +144,8 @@ struct Prefix_log : Object, Has_log
     string                      mail_to                     () const                            { return _to; }
     string                      mail_from                   () const                            { return _from; }
 
-    void                        send                        ( int reason, Scheduler_event::Event_code );
-    void                        send_really                 ( Scheduler_event::Event_code );
+    void                        send                        ( int reason, Scheduler_event*e );
+    void                        send_really                 ( Scheduler_event* );
 
 
   protected:

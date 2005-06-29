@@ -1522,19 +1522,69 @@ void Task::finish()
 
 
     // eMail versenden
+    {
+        Scheduler_event event ( Scheduler_event::evt_task_ended, _log->highest_level(), this );
+        if( _error )  event.set_error( _error );
+        trigger_event( &event );
+    }
+}
 
+//------------------------------------------------------------------------------Task::trigger_event
+
+void Task::trigger_event( Scheduler_event* scheduler_event )
+{
     try
     {
+        bool is_error = has_error();
+
+        _log->set_mail_from_name( _job->profile_section() );
+
+        string body = Sos_optional_date_time::now().as_string() + "\n\nJob " + _job->name() + "  " + _job->title() + "\n";
+        body += "Task-Id " + as_string(id()) + ", " + as_string(_step_count) + " Schritte\n";
+        body += "Scheduler -id=" + _spooler->id() + "  host=" + _spooler->_hostname + "\n\n";
+
+        if( !is_error )
+        {
+            string subject = obj_name();
+
+            if( _log->highest_level() == log_warn )
+            {
+                subject += " mit Warnung beendet";
+                body += _log->highest_msg() + "\n\n";
+            }
+            else
+            {
+                subject += " gelungen";
+            }
+
+            _log->set_mail_subject( subject );
+        }
+        else
+        {
+            string errmsg = _error? _error->what() : _log->highest_msg();
+            _log->set_mail_subject( string("FEHLER ") + errmsg );   //, is_error );
+        
+            body += errmsg + "\n\n";
+        }
+
+        _log->set_mail_body( body + "Das Jobprotokoll liegt dieser Nachricht bei." );   //, is_error );
+
+        Scheduler_event event ( Scheduler_event::evt_task_ended, _log->highest_level(), this );
+        if( _error )  event.set_error( _error );
+        _log->send( has_error() || _log->highest_level() >= log_error? -1 : _step_count, &event );
+
+        /*
         if( !_spooler->_manual )
         {
             set_mail_defaults();
-            _log->send( has_error() || _log->highest_level() >= log_error? -1 : _step_count, Scheduler_event::evt_task_ended );
+            _log->send( has_error() || _log->highest_level() >= log_error? -1 : _step_count, &event );
         }
-
+        */
         clear_mail();
     }
     catch( const exception& x  ) { _log->warn( x.what() ); }
     catch( const _com_error& x ) { _log->warn( bstr_as_string(x.Description()) ); }  
+
 }
 
 //----------------------------------------------------------------------Task::wait_until_terminated
@@ -1565,14 +1615,15 @@ void Task::send_collected_log()
 {
     try
     {
-        _log->send( -2, Scheduler_event::evt_task_ended );
+        Scheduler_event scheduler_event ( Scheduler_event::evt_task_ended, _log->highest_level(), this );
+        _log->send( -2, &scheduler_event );
     }
     catch( const exception&  x ) { _spooler->_log.error( x.what() ); }
     catch( const _com_error& x ) { _spooler->_log.error( bstr_as_string(x.Description()) ); }
 }
 
 //--------------------------------------------------------------------------Task::set_mail_defaults
-
+/*
 void Task::set_mail_defaults()
 {
     bool is_error = has_error();
@@ -1609,7 +1660,7 @@ void Task::set_mail_defaults()
 
     _log->set_mail_body( body + "Das Jobprotokoll liegt dieser Nachricht bei." );   //, is_error );
 }
-
+*/
 //---------------------------------------------------------------------------------Task::clear_mail
 
 void Task::clear_mail()

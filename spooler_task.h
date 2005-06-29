@@ -156,6 +156,7 @@ struct Task : Object,
 
     void                        set_mail_defaults           ();
     void                        clear_mail                  ();
+    void                        trigger_event               ( Scheduler_event* );
     void                        send_collected_log          ();
 
     void                        set_cause                   ( Start_cause );
