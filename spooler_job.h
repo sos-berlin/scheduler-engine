@@ -280,7 +280,7 @@ struct Job : Object,
     void                        set_error_xc_only           ( const Xc& );
     void                        set_error                   ( const exception& );
     void                        reset_error                 ()                                      { THREAD_LOCK( _lock )  _error = NULL,  _log->reset_highest_level(); }
-    void                        set_job_error               ( const string& what );
+    void                        set_job_error               ( const exception& );
 
     void                        signal                      ( const string& signal_name );
     void                        notify_a_process_is_idle    ();                                     // Vielleicht wird bald ein Prozess frei?

@@ -16,6 +16,8 @@ struct Scheduler_event
         evt_none,
         evt_unknown,
         evt_scheduler_started,
+        evt_scheduler_fatal_error,
+        evt_job_error,
         evt_task_ended,
         evt_disk_full,
         evt_database_error,
@@ -29,8 +31,11 @@ struct Scheduler_event
                                 Scheduler_event             ( Event_code, Log_level severity, Scheduler_object* );
 
     void                    set_mail                        ( Com_mail* mail )                      { _mail = mail; }
+    Com_mail*                   mail                        ();
     void                    set_error                       ( const Xc_copy& x )                    { _error = x; }
     void                    set_log_path                    ( const string& path )                  { _log_path = path; }
+    void                    set_subject                     ( const string& subject )               { _subject = remove_password( subject ); }
+    void                    set_body                        ( const string& body )                  { _body    = remove_password( body    ); }
 
     xml::Document_ptr           dom                         ();
     xml::Document_ptr           mail_dom                    ( const xml::Document_ptr& event = xml::Document_ptr() );  // Default: dom()
@@ -44,6 +49,8 @@ struct Scheduler_event
     string                     _log_path;
     Xc_copy                    _error;
     ptr<Com_mail>              _mail;                       
+    string                     _subject;
+    string                     _body;
 };
 
 //-------------------------------------------------------------------------------------------------

@@ -55,10 +55,24 @@ static void io_error( Spooler* spooler, const string& filename )
       //spooler->_waiting_errno_continue = false;
         spooler->set_state( Spooler::s_paused );
 
-        string error_text = S() << "ERRNO-" << errno << "  " << strerror( spooler->_waiting_errno  );
+        string error_code = "ERRNO-" + as_string( spooler->_waiting_errno );
+        zschimmer::Xc x ( error_code.c_str(), filename.c_str() );
+      //string error_text = S() << "ERRNO-" << spooler->_waiting_errno << "  " << strerror( spooler->_waiting_errno );
 
-        Z_LOGI( "\n*** SCHEDULER HÄLT WEGEN PLATTENPLATZMANGEL AN. " << error_text << ", Datei " << filename << "\n\n" );
+        Z_LOGI( "\n*** SCHEDULER HÄLT WEGEN PLATTENPLATZMANGEL AN. " << x.what() << ", Datei " << filename << "\n\n" );
 
+        Scheduler_event scheduler_event ( Scheduler_event::evt_disk_full, log_warn, spooler );
+        scheduler_event.set_error( x );
+        scheduler_event.set_subject( "SCHEDULER SUSPENDED:  " + string( x.what() ) );
+        scheduler_event.set_body( "Job Scheduler is suspended due to disk space shortage.\n"
+                                  "\n" + 
+                                  string( x.what() ) + "\n"
+                                  "File " + filename + "\n"
+                                  "\n"
+                                  "You can continue the Job Scheduler as soon as there is enough disk space.\n"
+                                  "Use this XML-command: <modify_spooler cmd=\"continue\"/>" );
+        scheduler_event.send_mail();
+/*
         spooler->send_error_email( "SCHEDULER SUSPENDED:  " + error_text,
                                    "Job Scheduler is suspended due to disk space shortage.\n"
                                    "\n" + 
@@ -67,6 +81,7 @@ static void io_error( Spooler* spooler, const string& filename )
                                    "\n"
                                    "You can continue the Job Scheduler as soon as there is enough disk space.\n"
                                    "Use this XML-command: <modify_spooler cmd=\"continue\"/>" );
+*/
 
         //while( !spooler->_waiting_errno_continue )
         while( spooler->_state_cmd != Spooler::sc_continue )
@@ -839,8 +854,35 @@ void Prefix_log::send_really( Scheduler_event* scheduler_event )
 
 //---------------------------------------------------------------------------------Prefix_log::log2
 
+struct Prefix_log_deny_recursion
+{
+    Prefix_log_deny_recursion( Prefix_log* l )
+    : 
+        _prefix_log( l ) 
+    { 
+        _prefix_log->_in_log = true; 
+    }
+
+    ~Prefix_log_deny_recursion()
+    { 
+        _prefix_log->_in_log = false; 
+    }
+
+    Prefix_log* const  _prefix_log;
+};
+
+
 void Prefix_log::log2( Log_level level, const string& prefix, const string& line_par, Has_log* log )
 {
+    if( _in_log )
+    {
+        Z_LOG( "Rekursiv: " << line_par );
+        return;
+    }
+
+    Prefix_log_deny_recursion deny_recursion ( this );
+
+
     string line = remove_password( line_par );
 
     if( level == log_error  &&  _task  &&  !_task->has_error() )  _task->set_error_xc_only( Xc( "SCHEDULER-140", line.c_str() ) );

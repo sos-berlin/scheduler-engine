@@ -183,6 +183,14 @@ void Com_mail::set_from( const string& from )
     _from = _msg->from();
 }
 
+//--------------------------------------------------------------------------Com_mail::set_from_name
+
+void Com_mail::set_from_name( const string& from_name )
+{
+    _msg->set_from_name( from_name );
+    _from = _msg->from();
+}
+
 //---------------------------------------------------------------------------------Com_mail::set_to
 
 void Com_mail::set_to( const string& to )

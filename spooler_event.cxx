@@ -16,6 +16,7 @@ string Scheduler_event::name_of_event_code( Event_code event_code )
         case evt_none:              return "none";
         case evt_unknown:           return "unknown";
         case evt_scheduler_started: return "scheduler_started";
+        case evt_job_error:         return "job_error";
         case evt_task_ended:        return "task_ended";
         case evt_disk_full:         return "disk_full";
         case evt_database_error:    return "database_error";
@@ -162,26 +163,68 @@ xml::Document_ptr Scheduler_event::mail_dom( const xml::Document_ptr& event_dom_
     return mail_dom;
 }
 
+//----------------------------------------------------------------------------Scheduler_event::mail
+
+Com_mail* Scheduler_event::mail()
+{
+    if( !_mail )
+    {
+        _mail = new Com_mail( _spooler );
+        _mail->init();
+    }
+
+    return _mail;
+}
+
 //-----------------------------------------------------------------------Scheduler_event::send_mail
 
 int Scheduler_event::send_mail( const xml::Document_ptr& mail_dom_ )
 {
-    xml::Document_ptr mail_dom = mail_dom_? mail_dom_ : this->mail_dom();
-
-    // MAIL SENDEN
-
-    if( mail_dom.has_node( "/mail/header" ) )
+    try
     {
-        Com_mail mail ( _spooler );
-        mail.init();
-        if( _mail->smtp() != "" )  mail.set_smtp( _mail->smtp() );
-        mail.set_dom( mail_dom.select_node( "/mail" ) );
-        return mail.send();
+        if( !_mail )
+        {
+            if( _subject != "" )  mail()->set_subject( _subject );
+            if( _body    != "" )  mail()->set_body( _subject );
+
+            if( _mail )
+            {
+                if( _spooler->_log_mail_from != ""  &&  _spooler->_log_mail_from != "-" )  _mail->set_from( _spooler->_log_mail_from );
+                
+                _mail->set_from_name( _spooler->name() );
+
+                if( _spooler->_log_mail_to   != ""  &&  _spooler->_log_mail_to   != "-" )  _mail->set_to  ( _spooler->_log_mail_to   );
+                if( _spooler->_log_mail_cc   != ""  &&  _spooler->_log_mail_cc   != "-" )  _mail->set_cc  ( _spooler->_log_mail_cc   );
+                if( _spooler->_log_mail_bcc  != ""  &&  _spooler->_log_mail_bcc  != "-" )  _mail->set_bcc ( _spooler->_log_mail_bcc  );
+                if( _spooler->_smtp_server   != ""  &&  _spooler->_smtp_server   != "-" )  _mail->set_smtp( _spooler->_smtp_server   );
+
+                _mail->add_header_field( "X-SOS-Spooler", "" );
+            }
+        }
+
+
+        xml::Document_ptr mail_dom = mail_dom_? mail_dom_ : this->mail_dom();
+
+        // MAIL SENDEN
+
+        if( mail_dom.has_node( "/mail/header" ) )
+        {
+            Com_mail mail ( _spooler );
+            mail.init();
+            if( _mail->smtp() != "" )  mail.set_smtp( _mail->smtp() );
+            mail.set_dom( mail_dom.select_node( "/mail" ) );
+            return mail.send();
+        }
+        else
+        if( _mail )
+        {
+            return _mail->send();
+        }
     }
-    else
-    if( _mail )
+    catch( exception& x )
     {
-        return _mail->send();
+        Z_LOG( __FUNCTION__ ": " << x.what() );
+        _spooler->log()->warn( "Fehler beim eMail-Versand: " + string( x.what() ) );
     }
 
     return 0; //?

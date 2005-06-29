@@ -220,8 +220,6 @@ void Job::init0()
     _period._begin = 0;
     _period._end   = 0;
 
-    set_state( s_pending );
-    
     _init0_called = true;
 }
 
@@ -269,6 +267,8 @@ void Job::init()
 
 void Job::init2()
 {
+    set_state( s_pending );
+    
     _delay_until   = 0;
     set_next_start_time( Time::now() );
     init_start_when_directory_changed( s_stopped );
@@ -1422,20 +1422,29 @@ bool Job::do_something()
         catch( const _com_error& x )  { throw_com_error( x ); }
     }
   //catch( Stop_scheduler_exception& ) { throw; }
-    catch( const exception&  x ) { set_error( x );  set_job_error( x.what() );  sos_sleep(5); }     // Bremsen, falls sich der Fehler sofort wiederholt
+    catch( const exception&  x ) { set_error( x );  set_job_error( x );  sos_sleep(5); }     // Bremsen, falls sich der Fehler sofort wiederholt
 
     return something_done;
 }
 
 //-------------------------------------------------------------------------------Job::set_job_error
 
-void Job::set_job_error( const string& what )
+void Job::set_job_error( const exception& x )
 {
     set_state( s_error );
 
-    _spooler->send_error_email( what, "Scheduler: Der Job " + _name + " ist nach dem Fehler\n" +
-                                      what + "\n"
-                                      "in den Fehlerzustand versetzt worden. Keine Task wird mehr gestartet." );
+    S body;
+    body << "Scheduler: Der Job " << _name << " ist nach dem Fehler\n" <<
+            x.what() << "\n"
+            "in den Fehlerzustand versetzt worden. Keine Task wird mehr gestartet.";
+
+    Scheduler_event scheduler_event ( Scheduler_event::evt_job_error, log_error, this );
+    scheduler_event.set_error( x );
+    scheduler_event.set_subject( x.what() );
+    scheduler_event.set_body( body );
+    scheduler_event.send_mail();
+
+    //_spooler->send_error_email( what, body );
 }
 
 //-----------------------------------------------------------------------------------Job::set_state
@@ -1632,16 +1641,17 @@ xml::Element_ptr Job::dom_element( const xml::Document_ptr& document, const Show
 {
     xml::Element_ptr job_element = document.createElement( "job" );
 
-    THREAD_LOCK_DUMMY( _lock )
-    {
-        job_element.setAttribute( "job"       , _name                   );
-        job_element.setAttribute( "state"     , state_name()            );
+    job_element.setAttribute( "job"       , _name                   );
+    job_element.setAttribute( "state"     , state_name()            );
 
+    if( !_title.empty() )
+    job_element.setAttribute( "title"     , _title                  );
+
+
+    if( _state != s_none )
+    {
         if( _waiting_for_process )
         job_element.setAttribute( "waiting_for_process", _waiting_for_process? "yes" : "no" );
-
-        if( !_title.empty() )
-        job_element.setAttribute( "title"     , _title                  );
 
         job_element.setAttribute( "all_steps" , _step_count             );
 

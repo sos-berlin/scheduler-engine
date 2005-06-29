@@ -93,6 +93,7 @@ struct Com_mail : spooler_com::Imail,
 
     void                    set_subject                     ( const string& );
     void                    set_from                        ( const string& );
+    void                    set_from_name                   ( const string& );
     void                    set_to                          ( const string& );
     void                    set_cc                          ( const string& );
     void                    set_bcc                         ( const string& );

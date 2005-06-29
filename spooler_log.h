@@ -148,6 +148,9 @@ struct Prefix_log : Object, Has_log
     void                        send_really                 ( Scheduler_event* );
 
 
+
+    bool                       _in_log;                     // log2() ist aktiv, Rekursion vermeiden!
+
   protected:
 
     void                        write                       ( const char*, int );
