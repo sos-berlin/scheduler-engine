@@ -152,7 +152,7 @@ static void send_error_email( const string& subject, const string& text )
 
 //---------------------------------------------------------------------------------send_error_email
 
-void send_error_email( const string& error_text, int argc, char** argv, const string& parameter_line, Spooler* spooler )
+void send_error_email( const exception& x, int argc, char** argv, const string& parameter_line, Spooler* spooler )
 {
 
     string body = "Der Scheduler konnte nicht gestartet werden.\n"
@@ -166,12 +166,21 @@ void send_error_email( const string& error_text, int argc, char** argv, const st
 
     body += "\n\n\n"
             "Fehlermeldung:\n";
-    body += error_text;
+    body += x.what();
 
-    string subject = "FEHLER BEI SCHEDULER-START: " + error_text;
+    string subject = "FEHLER BEI SCHEDULER-START: " + string( x.what() );
 
-    if( spooler )  spooler->send_error_email( subject, body );
-             else           send_error_email( subject, body );
+    if( spooler )
+    {
+        Scheduler_event scheduler_event ( Scheduler_event::evt_scheduler_fatal_error, log_error, spooler );
+        scheduler_event.set_error( x );
+        scheduler_event.set_subject( subject );
+        scheduler_event.set_body( body );
+        scheduler_event.send_mail();
+        //spooler->send_error_email( subject, body );
+    }
+    else           
+        send_error_email( subject, body );
 }
 
 //---------------------------------------------------------------------read_profile_mail_on_process
@@ -477,8 +486,12 @@ xml::Element_ptr Spooler::state_dom_element( const xml::Document_ptr& dom, const
     state_element.setAttribute( "pid"                  , _pid );
     state_element.setAttribute( "config_file"          , _config_filename );
     state_element.setAttribute( "host"                 , _hostname );
-    state_element.setAttribute( "need_db"              , _need_db );
-    state_element.setAttribute( "wait_endless_for_db"  , _wait_endless_for_db_open );
+
+    if( _need_db )
+    state_element.setAttribute( "need_db"              , _need_db? "yes" : "no" );
+
+    if( _wait_endless_for_db_open )
+    state_element.setAttribute( "wait_endless_for_db"  , _wait_endless_for_db_open? "yes" : "no" );
 
     if( _tcp_port )
     state_element.setAttribute( "tcp_port"             , _tcp_port );
@@ -2746,7 +2759,7 @@ int spooler_main( int argc, char** argv, const string& parameter_line )
         catch( const exception& x )
         {
             SHOW_ERR( "Fehler " << x.what() );     // Fehlermeldung vor ~Spooler ausgeben
-            if( my_spooler.is_service() )  send_error_email( x.what(), argc, argv, parameter_line, &my_spooler );
+            if( my_spooler.is_service() )  send_error_email( x, argc, argv, parameter_line, &my_spooler );
             ret = 1;
         }
 
@@ -2974,7 +2987,7 @@ int spooler_main( int argc, char** argv, const string& parameter_line )
     catch( const exception& x )
     {
         LOG( x.what() << "\n" );
-        if( is_service )  spooler::send_error_email( x.what(), argc, argv, parameter_line );
+        if( is_service )  spooler::send_error_email( x, argc, argv, parameter_line );
         cerr << x << "\n";
         ret = 1;
     }
@@ -2982,7 +2995,7 @@ int spooler_main( int argc, char** argv, const string& parameter_line )
     {
         string what = string_from_ole( x.Description() );
         LOG( what << "\n" );
-        if( is_service )  spooler::send_error_email( what, argc, argv, parameter_line );
+        if( is_service )  spooler::send_error_email( zschimmer::Xc( x ), argc, argv, parameter_line );
         cerr << what << "\n";
         ret = 1;
     }

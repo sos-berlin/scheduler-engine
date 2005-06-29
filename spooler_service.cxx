@@ -105,9 +105,9 @@ string make_service_display( const string& id )
 
 //----------------------------------------------------------------------------------------event_log
 
-static void event_log( const string& msg_par, int argc, char** argv, Spooler* = NULL )
+static void event_log( const exception& x, int argc, char** argv, Spooler* = NULL )
 {
-    string msg = "*** SOS SCHEDULER *** " + msg_par;
+    string msg = "*** SOS SCHEDULER *** " + string( x.what() );
 
     HANDLE h = RegisterEventSource( NULL, "Application" );
     const char* m = msg.c_str();
@@ -125,7 +125,7 @@ static void event_log( const string& msg_par, int argc, char** argv, Spooler* = 
 
     DeregisterEventSource( h ); 
 
-    send_error_email( msg_par, argc, argv, "" );
+    send_error_email( x, argc, argv, "" );
 
     fprintf( stderr, "%s\n", msg.c_str() );
 }
@@ -587,7 +587,7 @@ static uint __stdcall service_thread( void* param )
             start_self_destruction();
 
             set_service_status( 0, SERVICE_PAUSED );     // Das schaltet die Diensteknöpfe frei, falls der Spooler beim eMail-Versand hängt.
-            event_log( x.what(), p->_argc, p->_argv, &spooler );
+            event_log( x, p->_argc, p->_argv, &spooler );
           //set_service_status( 2 );
             spooler._log.error( x.what() );
             ret = 99;
@@ -652,7 +652,7 @@ static void __stdcall ServiceMain( DWORD argc, char** argv )
         
             LOG( "ServiceMain ok\n" );
         }
-        catch( const exception& x ) { event_log( x.what(), argc, argv ); }
+        catch( const exception& x ) { event_log( x, argc, argv ); }
     }
 }
 
@@ -688,7 +688,7 @@ int spooler_service( const string& service_name, int argc, char** argv )
     }
     catch( const exception& x )
     {
-        event_log( x.what(), argc, argv );
+        event_log( x, argc, argv );
         return 1;                                                                               
     }
 

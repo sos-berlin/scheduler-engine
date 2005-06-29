@@ -503,7 +503,7 @@ struct Spooler : Object,
 //-------------------------------------------------------------------------------------------------
 
 void                            spooler_restart             ( Log* log, bool is_service );
-void                            send_error_email            ( const string& error_text, int argc, char** argv, const string& parameter_line, Spooler* spooler = NULL );
+void                            send_error_email            ( const exception&, int argc, char** argv, const string& parameter_line, Spooler* spooler = NULL );
 //void                          send_error_email            ( const string& subject, const string& body );
 
 //extern bool                     spooler_is_running;

@@ -1254,9 +1254,9 @@ library Spooler
                                                                                                 // Für den Objectserver
         HRESULT                 Close                   ();
 
-        HRESULT                 Load_xml                ( [in] BSTR Xml, Ixslt_stylesheet** );
+        HRESULT                 Load_xml                ( [in] BSTR Xml, [out,retval] Ixslt_stylesheet** );
 
-        HRESULT                 Load_file               ( [in] BSTR Filename, Ixslt_stylesheet** );
+        HRESULT                 Load_file               ( [in] BSTR Filename, [out,retval] Ixslt_stylesheet** );
 
         HRESULT                 Apply_xml               ( [in] BSTR Xml, [out,retval] BSTR* );
 
