@@ -7,6 +7,8 @@
 namespace sos {
 namespace spooler {
 
+const string mail_xpath = "( /mail | /scheduler_event/mail )";
+
 //-------------------------------------------------------------------------------------------------
 
 string Scheduler_event::name_of_event_code( Event_code event_code )
@@ -29,6 +31,7 @@ string Scheduler_event::name_of_event_code( Event_code event_code )
 
 Scheduler_event::Scheduler_event( Event_code event_code, Log_level severity, Scheduler_object* object )
 :
+    _zero_(this+1),
     _event_code(event_code),
     _severity(severity),
     _object(object),
@@ -100,7 +103,7 @@ xml::Document_ptr Scheduler_event::dom()
         scheduler_event_element.appendChild( _mail->dom_element( event_dom ) );
     }
 
-    Z_LOG2( "joacim", event_dom.xml( true ) );
+    //Z_LOG2( "joacim", event_dom.xml( true ) );
 
     return event_dom;
 }
@@ -156,12 +159,15 @@ xml::Document_ptr Scheduler_event::mail_dom( const xml::Document_ptr& event_dom_
         }
     }
 */
-    Z_LOG2( "joacim", mail_dom.xml( true ) );
+    //Z_LOG2( "joacim", mail_dom.xml( true ) );
 
-    if( !mail_dom.has_node( "/mail/header" ) )
+    if( !mail_dom.has_node( mail_xpath ) )
     {
-        mail_dom.create();
-        mail_dom.appendChild( event_dom.select_node( "/scheduler_event/mail" ).cloneNode(true) );
+        if( xml::Element_ptr mail_element = event_dom.select_node( mail_xpath ) )
+        {
+            mail_dom.create();
+            mail_dom.appendChild( mail_element.cloneNode(true) );
+        }
     }
 
     return mail_dom;
@@ -207,18 +213,44 @@ int Scheduler_event::send_mail( const xml::Document_ptr& mail_dom_ )
         }
 
 
-        xml::Document_ptr mail_dom = mail_dom_? mail_dom_ : this->mail_dom();
+        xml::Document_ptr mail_dom  = mail_dom_;
+        xml::Document_ptr event_dom;
+
+        if( !mail_dom )
+        {
+            event_dom = this->dom();
+            mail_dom = this->mail_dom( event_dom );
+        }
+
 
         // MAIL SENDEN
 
         ptr<Com_mail> mail = _mail;
 
-        if( mail_dom.has_node( "/mail/header" ) )
+        if( xml::Element_ptr mail_element = mail_dom? mail_dom.select_node( mail_xpath ) : NULL )
         {
             mail = new Com_mail( _spooler );
             mail->init();
             if( _mail  &&  _mail->smtp() != "" )  mail->set_smtp( _mail->smtp() );
-            mail->set_dom( mail_dom.select_node( "/mail" ) );
+            mail->set_dom( mail_element );
+        }
+
+        if( mail_dom  &&  mail_dom.documentElement()  &&  mail_dom.documentElement().bool_getAttribute( "attach_xml" ) )
+        {
+            if( event_dom )
+            mail->add_attachment( event_dom.xml(true), "event.xml", "text/xml", "quoted-printable" );
+
+            mail->add_attachment( mail_dom .xml(true), "mail.xml", "text/xml", "quoted-printable" );
+            /*
+            {
+                zschimmer::File mail_xml_file;
+                mail_xml_file.open_temporary();
+                mail_xml_file.print( mail_dom.xml(true) );
+                mail_xml_file.close();
+
+                mail->add_file( xml_file.filename(), "mail.xml", "text/xml", "quoted-printable" );
+            }
+            */
         }
 
         if( mail )

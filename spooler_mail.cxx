@@ -88,6 +88,7 @@ void Com_mail::init()
 xml::Element_ptr Com_mail::dom_element( const xml::Document_ptr& dom )
 {
     xml::Element_ptr mail_element = dom.createElement( "mail" );
+    mail_element.setAttribute( "test", 123 );
   //mail_element.setAttribute_optional( "smtp"   , _smtp    );
 
     xml::Element_ptr header_element = mail_element.append_new_element( "header" );
@@ -251,6 +252,23 @@ void Com_mail::add_file( const string& real_filename, const string& mail_filenam
     file._content_type  = content_type;
     file._encoding      = encoding;
     _files.push_back( file );
+}
+
+//-------------------------------------------------------------------------Com_mail::add_attachment
+
+void Com_mail::add_attachment( const string& data, const string& mail_filename, const string& content_type, const string& encoding )
+{
+    _msg->add_attachment( data, mail_filename, content_type, encoding );
+
+    /* Nur zum Debuggen benutzt, brauchen wir nicht in XML
+
+    File file;
+    file._real_filename = real_filename;
+    file._mail_filename = mail_filename;
+    file._content_type  = content_type;
+    file._encoding      = encoding;
+    _files.push_back( file );
+    */
 }
 
 //---------------------------------------------------------------------------------Com_mail::put_To

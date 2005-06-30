@@ -102,6 +102,7 @@ struct Com_mail : spooler_com::Imail,
     string                      smtp                        ()                                      { return _smtp; }
     void                        add_header_field            ( const string& name, const string& value );
     void                        add_file                    ( const string& real_filename, const string& mail_filename, const string& content_type, const string& encoding );
+    void                        add_attachment              ( const string& data         , const string& mail_filename, const string& content_type, const string& encoding );
 
 
     int                         auto_dequeue                ()                                      { return _msg->auto_dequeue(); }
