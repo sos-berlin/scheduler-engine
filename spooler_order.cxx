@@ -197,7 +197,7 @@ xml::Element_ptr Job_chain::dom_element( const xml::Document_ptr& document, cons
             try
             {
                 Any_file sel ( "-in " + _spooler->_db->db_name() + "-max-length=32K  "
-                               "select %limit(20) \"ORDER_ID\" as \"ID\", \"START_TIME\", \"TITLE\", \"STATE\", \"STATE_TEXT\""
+                               "select %limit(20) \"ORDER_ID\" as \"ID\", \"JOB_CHAIN\", \"START_TIME\", \"TITLE\", \"STATE\", \"STATE_TEXT\""
                                " from " + sql::uquoted_name( _spooler->_order_history_tablename ) +
                                " where \"JOB_CHAIN\"=" + sql::quoted( _name ) +
                                  " and \"SPOOLER_ID\"=" + sql::quoted( _spooler->id_for_db() ) +
@@ -213,7 +213,10 @@ xml::Element_ptr Job_chain::dom_element( const xml::Document_ptr& document, cons
                     order->set_state_text( record.as_string( "state_text" ) );
                     order->set_title     ( record.as_string( "title"      ) );
 
-                    order_history_element.appendChild( order->dom_element( document, show ) );
+                    xml::Element_ptr order_element = order->dom_element( document, show );
+                    order_element.setAttribute_optional( "job_chain", record.as_string( "job_chain"  ) );
+
+                    order_history_element.appendChild( order_element );
                 }
             }
             catch( exception& x )
