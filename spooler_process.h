@@ -65,7 +65,7 @@ struct Process : zschimmer::Object
     int                        _termination_signal;
     Time                       _running_since;
     bool                       _temporary;                  // Löschen, wenn kein Module_instance mehr läuft
-    long                       _module_instance_count;
+    long32                     _module_instance_count;
     Module_instance*           _module_instance;
     Process_class*             _process_class;
 };

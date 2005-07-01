@@ -117,10 +117,10 @@ struct Spooler_thread : zschimmer::Thread
  //?Task*                      _next_task;
     Time                       _next_time;
 
-    long                       _running_tasks_count;        // Wenn 0, dann warten
+    long32                     _running_tasks_count;        // Wenn 0, dann warten
                                                             // Statistik
-    long                       _step_count;                 // Seit Spooler-Start ausgeführte Schritte
-    long                       _task_count;                 // Seit Spooler-Start gestartetet Tasks
+    long32                     _step_count;                 // Seit Spooler-Start ausgeführte Schritte
+    long32                     _task_count;                 // Seit Spooler-Start gestartetet Tasks
 
   //int                        _nothing_done_count;
   //int                        _nothing_done_max;

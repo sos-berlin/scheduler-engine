@@ -193,8 +193,8 @@ struct Com_variable_set_enumerator : spooler_com::Ivariable_set_enumerator, Sos_
 
                                 Com_variable_set_enumerator();
 
-    STDMETHODIMP                Next                    ( unsigned long celt, VARIANT* rgvar, unsigned long* pceltFetched );
-    STDMETHODIMP                Skip                    ( unsigned long celt );
+    STDMETHODIMP                Next                    ( ulong32 celt, VARIANT* rgvar, ulong32* pceltFetched );
+    STDMETHODIMP                Skip                    ( ulong32 celt );
     STDMETHODIMP                Reset                   ();
     STDMETHODIMP                Clone                   ( IEnumVARIANT** ppenum );
 

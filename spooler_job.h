@@ -340,8 +340,8 @@ struct Job : Object,
     bool                       _process_ignore_signal;
     ptr<Com_variable_set>      _process_environment;
 
-    long                       _tasks_count;                // Anzahl gestarteter Tasks seit Spooler-Start
-    long                       _step_count;                 // Anzahl spooler_process() aller Tasks
+    long32                     _tasks_count;                // Anzahl gestarteter Tasks seit Spooler-Start
+    long32                     _step_count;                 // Anzahl spooler_process() aller Tasks
 
     bool                       _init0_called;
     bool                       _init_called;
@@ -364,7 +364,7 @@ struct Job : Object,
     ptr<Run_time>              _run_time;
     Period                     _period;                     // Derzeitige oder nächste Period
     Delay_after_error          _delay_after_error;
-    long                       _error_steps;                // Zahl aufeinanderfolgender Fehler
+    long32                     _error_steps;                // Zahl aufeinanderfolgender Fehler
 
     Directory_watcher_list     _directory_watcher_list;
     Time                       _directory_watcher_next_time;
@@ -391,7 +391,7 @@ struct Job : Object,
     
     Task_queue                 _task_queue;                 // Warteschlange der nächsten zu startenden Tasks
     Task_list                  _running_tasks;              // Alle laufenden Tasks (auch die gestarteten, aber wartenden, z.B. s_running_waiting_for_order)
-    long                       _running_tasks_count;        // Anzahl der Tasks, die tatsächlich laufen (und nicht gerade warten)
+    long32                     _running_tasks_count;        // Anzahl der Tasks, die tatsächlich laufen (und nicht gerade warten)
     int                        _max_tasks;                  // Max. Anzahl gleichzeitig laufender Tasks. _running_tasks.size() <= _max_tasks!
 
     Job_history                _history;

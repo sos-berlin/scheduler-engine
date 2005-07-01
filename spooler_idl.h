@@ -136,8 +136,8 @@ struct Ivariable_set_enumerator : IEnumVARIANT
 { 
     DEFINE_UUIDOF( Ivariable_set_enumerator )
 
-    virtual HRESULT         Next                    ( unsigned long celt, VARIANT* rgvar, unsigned long* pceltFetched ) = 0;
-    virtual HRESULT         Skip                    ( unsigned long celt )                      = 0;
+    virtual HRESULT         Next                    ( unsigned int celt, VARIANT* rgvar, unsigned int* pceltFetched ) = 0;
+    virtual HRESULT         Skip                    ( unsigned int celt )                       = 0;
     virtual HRESULT         Reset                   ()                                          = 0;
     virtual HRESULT         Clone                   ( IEnumVARIANT** ppenum )                   = 0;
 };

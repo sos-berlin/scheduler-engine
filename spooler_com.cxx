@@ -785,7 +785,7 @@ void Com_variable_set_enumerator::initialize( Com_variable_set* v )
 
 //----------------------------------------------------------------Com_variable_set_enumerator::Next
 
-STDMETHODIMP Com_variable_set_enumerator::Next( unsigned long celt, VARIANT* result, unsigned long* pceltFetched )
+STDMETHODIMP Com_variable_set_enumerator::Next( ulong32 celt, VARIANT* result, ulong32* pceltFetched )
 {
     int i = 0;
 
@@ -813,7 +813,7 @@ STDMETHODIMP Com_variable_set_enumerator::Next( unsigned long celt, VARIANT* res
 
 //----------------------------------------------------------------Com_variable_set_enumerator::Skip
 
-STDMETHODIMP Com_variable_set_enumerator::Skip( unsigned long celt )
+STDMETHODIMP Com_variable_set_enumerator::Skip( ulong32 celt )
 {
     while( celt &&  _iterator != _variable_set->_map.end() )  _iterator++;
 

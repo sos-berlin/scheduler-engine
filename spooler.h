@@ -488,7 +488,7 @@ struct Spooler : Object,
     typedef map< string, ptr<Job_chain> >  Job_chain_map;
     Job_chain_map              _job_chain_map;
     Time                       _job_chain_time;             // Zeitstempel der letzten Änderung (letzter Aufruf von Spooler::add_job_chain()), 
-    long                       _next_free_order_id;
+    long32                     _next_free_order_id;
 
     Thread_id                  _thread_id;                  // Haupt-Thread
     Time                       _spooler_start_time;

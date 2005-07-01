@@ -91,7 +91,7 @@ struct Spooler_db : Object, Scheduler_object
     string                     _error;
   //Any_file                   _job_id_update;
   //Any_file                   _job_id_select;
-    map<string,long>           _id_counters;
+    map<string,long32>         _id_counters;
     Any_file                   _history_table;
   //Any_file                   _history_update;
     vector<Dyn_obj>            _history_update_params;
