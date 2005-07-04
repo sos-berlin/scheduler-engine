@@ -119,7 +119,6 @@ struct Order : Com_order,
 
 
     Thread_semaphore           _lock;
-    Spooler*                   _spooler;
 
     Id                         _id;
     bool                       _id_locked;              // Einmal gesperrt, immer gesperrt

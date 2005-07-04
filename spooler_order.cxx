@@ -820,7 +820,6 @@ Order::Order( Spooler* spooler, const Record& record )
     Com_order(this),
     Scheduler_object( spooler, static_cast<IDispatch*>( this ), type_order ), 
     _zero_(this+1), 
-    _spooler(spooler),
     _lock("Order")
 {
 
