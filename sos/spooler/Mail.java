@@ -429,4 +429,35 @@ public class Mail extends Idispatch
      * @return Protokoll (mehrzeilig).
      */
     public String       dequeue_log         ()                                              { return (String)   com_call( "<dequeue_log"            ); }
+    
+    
+    /** XSLT-Stylesheet für eMail-Aufbereitung setzen.
+     * 
+     * <p><br/><b>Beispiel</b>
+     * <pre>
+     *     spooler_log.mail().set_xslt_stylesheet_path( "c:/stylesheets/mail.xslt" );
+     * </pre>
+     *
+     * <p><br/><b>Beispiel in JavaScript</b>
+     * <pre>
+     *     spooler_log.mail.xslt_stylesheet_path = "c:/stylesheets/mail.xslt";
+     * </pre>
+     *
+     * @see #set_xslt_stylesheet_path(String)
+     */
+    public void         set_xslt_stylesheet_path( String path )                             {                   com_call( ">xslt_stylesheet_path", path ); }
+
+
+
+    /** XSLT-Stylesheet für eMail-Aufbereitung setzen.
+     * @see #set_xslt_stylesheet_path(String)
+     */
+    public void         set_xslt_stylesheet_path( java.io.File file )                       {                   com_call( ">xslt_stylesheet_path", file.toString() ); }
+
+
+
+    /** XSLT-Stylesheet für eMail-Aufbereitung.
+     * @see #xslt_stylesheet_path(String)
+     */
+    public String       xslt_stylesheet_path()                                              { return (String)   com_call( "<xslt_stylesheet_path"   ); }
 }

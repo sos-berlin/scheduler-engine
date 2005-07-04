@@ -8,6 +8,29 @@
     <scheduler_keyword keyword="Änderungsprotokoll"/>
     <scheduler_keyword keyword="Change log"/>
 
+    <change date="2005-07-04" version="2.0.133" subversion_revision="3786">
+        <revision type="new" title="XSLT-Stylesheets für eMails">
+            <description>
+                <p>
+                    <scheduler_method class="Mail" property="xslt_stylesheet_path" java_signature="java.lang.String" access="write"/> 
+                    setzt das XSLT-Stylesheet für eMails.
+                </p>
+                <example>
+                    
+                </example>
+            </description>
+        </revision>
+
+        <revision type="new" title="Neue Klasse Xslt_stylesheet">
+            <description>
+                <p>
+                    <scheduler_method class="Spooler" method="create_xslt_stylesheet" /> 
+                    liefert ein <scheduler_method class="Xslt_stylesheet" />.
+                </p>
+            </description>
+        </revision>
+    </change>
+
     <change date="2005-06-25" version="2.0.132" subversion_revision="3743">
         <revision type="new" title="&lt;order_queue&gt; liefert Attribut next_start_time"/>
     </change>
