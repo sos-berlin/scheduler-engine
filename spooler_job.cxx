@@ -897,7 +897,6 @@ bool Job::execute_state_cmd()
                     {
                         set_state( s_pending );
 
-                        Time now = Time::now();
                         ptr<Task> task = create_task( NULL, "", 0 );      // create_task() nicht mit gesperrten _lock rufen, denn get_id() in DB blockieren.
                         
                         task->_cause = cause_wake;
