@@ -17,6 +17,10 @@
             <br/>
             Weiteres siehe <scheduler_element name="params" />.
         </p>
+        <p>
+            Definiert einen Parameter mit dem gegebenen Name und Wert über die Klasse <scheduler_method class="Task"/> können Jobs
+            auf die Parameter zugreifen.
+        </p>
     </description>
 
     <xml_parent_elements>
@@ -25,14 +29,8 @@
     </xml_parent_elements>
 
     <xml_attributes>
-        <xml_attribute name="name"/>
-        
-        <xml_attribute name="value">
-            <description>
-                <p>
-                </p>
-            </description>
-        </xml_attribute>
+        <xml_attribute name="name" title="Eindeutiger Name"/>
+        <xml_attribute name="value"/>
     </xml_attributes>
         
     
