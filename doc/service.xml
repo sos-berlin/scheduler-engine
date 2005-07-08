@@ -53,9 +53,9 @@ sind, werden beim Start des Dienst dem Spooler übergeben (v.a. <font class="mon
 <p class="indent">Stellt den (internen) Dienstnamen ein für <font class="mono"> -remove-service</font>
 oder <font class="mono">-install-service</font>.</p>
 
-<p class="indent">Voreinstellung ist <font class="mono">DocumentFactory_Spooler</font>. Wenn die Option
+<p class="indent">Voreinstellung ist <font class="mono">sos_scheduler</font>. Wenn die Option
 <font class="mono">
--id=</font> angegeben ist: <font class="mono"> DocumentFactory_Spooler_</font><i>id</i></p>
+-id=</font> angegeben ist: <font class="mono">SOS Scheduler</font><i>id</i></p>
 
 <p><br/>
 <font class="mono">

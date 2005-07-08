@@ -11,6 +11,14 @@
              author   = "$Author$"
              date     = "$Date$">
 
+    <description>
+        <p>
+            Gibt einen Parameterwert an. 
+            <br/>
+            Weiteres siehe <scheduler_element name="params" />.
+        </p>
+    </description>
+
     <xml_parent_elements>
         <xml_parent_element name="params">
         </xml_parent_element>        

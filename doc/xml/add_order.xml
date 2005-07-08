@@ -7,7 +7,7 @@
 <xml_element name     = "add_order" 
              parent_page = "../xml_commands.xml"
              category = "Kommando"
-             title    = ""
+             title    = "Auftrag hinzufügen"
              base_dir = "../"
              author   = "$Author$"
              date     = "$Date$">
@@ -38,7 +38,7 @@
             <description>
                 <p>
                     Die Kennung des Auftrags (alphanumerisch).
-                    (<i>Das Attribut sollte nicht <code>id</code> heißen, das Wort ist in XML reserviert.</i>)
+                    <scheduler_comment>(<i>Das Attribut sollte nicht <code>id</code> heißen, das Wort ist in XML reserviert.</i>)</scheduler_comment>
                 </p>
             </description>
         </xml_attribute>

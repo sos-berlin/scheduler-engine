@@ -922,8 +922,10 @@ ptr<Http_response> Command_processor::execute_http( Http_request* http_request )
                         // Ohne diesen Mechanismus würde http://localhost:6310/details.html, also das Oberverzeichnis gelesen
 
                         ptr<Http_response> response = Z_NEW( Http_response( http_request, Z_NEW( String_chunk_reader( "" ) ), "" ) );
+
+                        path += "/";
                         response->set_status( 301, "Slash appended" );
-                        response->set_header_field( "Location", "http://" + http_request->header_field( "host" ) + path + "/" );
+                        response->set_header_field( "Location", "http://" + http_request->header_field( "host" ) + path );
                         return +response;
                     }
 

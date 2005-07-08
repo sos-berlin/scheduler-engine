@@ -12,7 +12,7 @@
     <scheduler_keyword keyword="Job"/>
     
     Ein Job wird definiert in der XML-Konfiguration mit <b><scheduler_element name="job"/></b>.
-    Hier werden der Programmcode, die Laufzeit und andere Dinge angegeben.
+    Hier werden u.a. der Programmcode und die Laufzeit bestimmt.
     
 
     <h2>Zustand eines Jobs</h2>

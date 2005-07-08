@@ -1,0 +1,46 @@
+Microsoft Visual Studio Solution File, Format Version 8.00
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "scheduler_add_order", "scheduler_add_order.vcproj", "{0819E974-DE97-42C2-BA44-210E476C11F1}"
+	ProjectSection(ProjectDependencies) = postProject
+		{D6D1DC41-D89A-44C4-9B77-79C77F69B6AB} = {D6D1DC41-D89A-44C4-9B77-79C77F69B6AB}
+		{6AC91B67-95A5-43E4-8D91-D1CEF5A7961A} = {6AC91B67-95A5-43E4-8D91-D1CEF5A7961A}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "zschimmer", "..\zschimmer\zschimmer.vcproj", "{D6D1DC41-D89A-44C4-9B77-79C77F69B6AB}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "regexp", "..\3rd_party\regexp\regexp.vcproj", "{6AC91B67-95A5-43E4-8D91-D1CEF5A7961A}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfiguration) = preSolution
+		Debug = Debug
+		Release = Release
+		Release-DLL = Release-DLL
+	EndGlobalSection
+	GlobalSection(ProjectConfiguration) = postSolution
+		{0819E974-DE97-42C2-BA44-210E476C11F1}.Debug.ActiveCfg = Debug|Win32
+		{0819E974-DE97-42C2-BA44-210E476C11F1}.Debug.Build.0 = Debug|Win32
+		{0819E974-DE97-42C2-BA44-210E476C11F1}.Release.ActiveCfg = Release|Win32
+		{0819E974-DE97-42C2-BA44-210E476C11F1}.Release.Build.0 = Release|Win32
+		{0819E974-DE97-42C2-BA44-210E476C11F1}.Release-DLL.ActiveCfg = Release-DLL|Win32
+		{0819E974-DE97-42C2-BA44-210E476C11F1}.Release-DLL.Build.0 = Release-DLL|Win32
+		{D6D1DC41-D89A-44C4-9B77-79C77F69B6AB}.Debug.ActiveCfg = Debug|Win32
+		{D6D1DC41-D89A-44C4-9B77-79C77F69B6AB}.Debug.Build.0 = Debug|Win32
+		{D6D1DC41-D89A-44C4-9B77-79C77F69B6AB}.Release.ActiveCfg = Release|Win32
+		{D6D1DC41-D89A-44C4-9B77-79C77F69B6AB}.Release.Build.0 = Release|Win32
+		{D6D1DC41-D89A-44C4-9B77-79C77F69B6AB}.Release-DLL.ActiveCfg = Release-DLL|Win32
+		{D6D1DC41-D89A-44C4-9B77-79C77F69B6AB}.Release-DLL.Build.0 = Release-DLL|Win32
+		{6AC91B67-95A5-43E4-8D91-D1CEF5A7961A}.Debug.ActiveCfg = Debug|Win32
+		{6AC91B67-95A5-43E4-8D91-D1CEF5A7961A}.Debug.Build.0 = Debug|Win32
+		{6AC91B67-95A5-43E4-8D91-D1CEF5A7961A}.Release.ActiveCfg = Release|Win32
+		{6AC91B67-95A5-43E4-8D91-D1CEF5A7961A}.Release.Build.0 = Release|Win32
+		{6AC91B67-95A5-43E4-8D91-D1CEF5A7961A}.Release-DLL.ActiveCfg = Release-DLL|Win32
+		{6AC91B67-95A5-43E4-8D91-D1CEF5A7961A}.Release-DLL.Build.0 = Release-DLL|Win32
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+	EndGlobalSection
+	GlobalSection(ExtensibilityAddIns) = postSolution
+	EndGlobalSection
+EndGlobal

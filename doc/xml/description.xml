@@ -27,7 +27,8 @@
         <p>
             Eine Beschreibung des Jobs, die in der HTML-Oberfläche gezeigt wird.
             Der Text sollte in HTML codiert sein 
-            (das ist wegen der strikten DTD nur möglich, wenn Sie <code>&lt;[CDATA[</code>...<code>]]&gt;</code> oder <code>&lt;include></code> verwenden).
+            (das ist wegen der strikten DTD des Schedulers nur möglich, 
+            wenn Sie <code>&lt;[CDATA[</code>...<code>]]&gt;</code> oder <code>&lt;include></code> verwenden).
         </p>
     </description>
     

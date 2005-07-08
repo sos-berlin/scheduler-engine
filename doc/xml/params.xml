@@ -12,8 +12,8 @@
              date     = "$Date$">
 
     <xml_parent_elements>
-        <xml_parent_element name="job">
-        </xml_parent_element>        
+        <xml_parent_element name="job" />
+        <xml_parent_element name="add_order" />
     </xml_parent_elements>
 
         
@@ -30,7 +30,10 @@
             Die Parameter können zur Laufzeit überschrieben und erweitert werden.
         </p>
         <p>
-            Die Methode <code>Task.param()</code> stellt dem Job die Parameterwerte bereit.
+            Job-Parameter können mit der Methode <scheduler_method class="Task" method="params" /> abgerufen werden.
+        </p>
+        <p>
+            Parameter eines Auftrags können mit der Methode <scheduler_method class="Order" method="payload" /> abgerufen werden.
         </p>
     </description>
         

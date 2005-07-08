@@ -104,8 +104,8 @@
     
     <description>
         <p>
-            Manche Log-Ausgaben (seit 2004) sind einer Kategorie zugeordnet. 
-            Diese Log-Ausgaben können Sie an- oder ausgeschalten.
+            Viele Ausgaben in die Logdatei (<code>scheduler.log</code>) sind einer Kategorie zugeordnet, 
+            mit der die Ausgaben an- oder ausgeschaltet werden können.
         </p>
         <p>
             Die Log-Kategorien geben Sie vor dem Dateinamen an, wobei dem Dateinamen ein Größerzeichen (>) vorangestellt sein muss.
@@ -116,7 +116,7 @@
             Die besondere Kategorie <code>all</code> wählt alle Kategorien aus, außer die, die explizit angegeben werden müssen.
         </p>
         <p>
-            Die Kategorien sind hierarchich organisiert.
+            Die Kategorien sind hierarchisch organisiert.
             Sie können eine Kategorie mit all deren Unterkategorien auswählen, indem Sie dem Namen ein "<code>.*</code>" anhängen. 
             Beispiel: <code>scheduler.*</code>.
         </p>

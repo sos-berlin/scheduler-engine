@@ -159,7 +159,13 @@ public class Order extends Idispatch
 
     
     
-    /** Liefert den mit set_payload() eingestellten Wert. */
+    /** Liefert den mit set_payload() eingestellten Wert. 
+      * Das kann ein {@link Variable_set} sein: 
+      * <pre>
+      *     Variable_set variable_set = (Variable_set)spooler_task.payload();
+      *     String       value        = variable_set.var( "einparameter" );
+      * </pre>
+    */
     public Object           payload             ()                                  { return            com_call( "<payload"            ); }
     
     

@@ -226,7 +226,7 @@ const char dtd_string[] =
 "\n"
 "<!ELEMENT add_order             ( params?, run_time? )>\n"
 "<!ATTLIST add_order             job_chain           CDATA #REQUIRED>\n"
-"<!ATTLIST add_order             id                  CDATA #REQUIRED>\n"
+"<!ATTLIST add_order             id                  CDATA #IMPLIED>\n"
 "<!ATTLIST add_order             priority            CDATA #IMPLIED>\n"
 "<!ATTLIST add_order             title               CDATA #IMPLIED>\n"
 "<!ATTLIST add_order             state               CDATA #IMPLIED>\n"
