@@ -457,7 +457,7 @@ public class Mail extends Idispatch
 
 
     /** XSLT-Stylesheet für eMail-Aufbereitung.
-     * @see #xslt_stylesheet_path(String)
+     * @see #set_xslt_stylesheet_path(String)
      */
     public String       xslt_stylesheet_path()                                              { return (String)   com_call( "<xslt_stylesheet_path"   ); }
 }
