@@ -170,7 +170,6 @@ struct Buffered_writer : Writer
         _writer(writer), 
         _buffer_size(byte_count)
     {
-        _buffer.reserve( _buffer_size );
     }
 
 
@@ -183,9 +182,12 @@ struct Buffered_writer : Writer
         catch( exception& x ) { Z_LOG( "~Buffered_writer: " << x << '\n' ); }
     }
 
+
     void write( const string& text )
     {
-        size_t length = min( text.length(), _buffer_size - _buffer.length() );
+        if( _buffer.capacity() < _buffer_size )  _buffer.reserve( _buffer_size );
+
+        size_t length = std::min( text.length(), _buffer_size - _buffer.length() );
         _buffer.append( text.data(), length );
 
         if( _buffer.length() == _buffer_size )  flush();
@@ -193,7 +195,7 @@ struct Buffered_writer : Writer
         int position = length;
         while( position < (int)text.length() )
         {
-            int length = min( text.length() - position, _buffer_size - _buffer.length() );
+            int length = std::min( text.length() - position, _buffer_size - _buffer.length() );
             _buffer.append( text.data() + position, length );
             position += length;
             if( _buffer.length() == _buffer_size )  flush();
@@ -203,11 +205,10 @@ struct Buffered_writer : Writer
 
     void flush()
     {
-        if( _buffer_length > 0 )  
+        if( _buffer.length() > 0 )  
         {
             _writer->write( _buffer );
             _buffer.erase();
-            _buffer.reserve( _buffer_size );
         }
     }
 
@@ -215,7 +216,6 @@ struct Buffered_writer : Writer
     ptr<Writer>         _writer;
     string              _buffer;
     size_t              _buffer_size;
-    size_t              _buffer_length;
 };
 
 
@@ -224,6 +224,7 @@ struct Socket_stream : Buffered_socket_operation, Input_stream, Output_stream
 {
     void connect_tcp( const string& address )
     {
+        set_blocking( true );
         connect__start( address );
         async_finish();
     }
@@ -291,6 +292,7 @@ int main( int argc, char** argv )
         Socket_manager socket_manager;      // Für WSAStartup
         Socket_stream socket_stream;
 
+        socket_stream.add_to_socket_manager( &socket_manager );
         socket_stream.connect_tcp( scheduler_address );
         
         

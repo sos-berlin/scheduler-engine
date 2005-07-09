@@ -104,6 +104,10 @@ $(BIN_DIR)/setuid: setuid.o
 	-$(CC) $(DEBUG) $(LINK_FLAGS) $^ $(LIBPATH)  -o $@  -s
 	chmod a+rx $@
 
+$(BIN_DIR)/scheduler_add_order: scheduler_add_order.o  $(PROD_DIR)/zschimmer/$(O_DIR)/libzschimmer.a
+	-$(CCPP) $(DEBUG) $(LINK_FLAGS) $^ $(LIBPATH) $(LIBS) -o $@ 
+	chmod a+rx $@
+
 
 
 documention:
