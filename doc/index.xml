@@ -38,8 +38,10 @@
 
 <p style="text-align: right">
     <a href="CHANGES.xml">→Änderungsprotokoll</a>
+    <!--
     <br/>
     <a href="proposals/index.xml">→Vorschläge zur weiteren Entwicklung</a>
+    -->
 </p>
 
 <h2>Einstellungen und Datenbank</h2>
